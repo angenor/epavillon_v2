@@ -1,0 +1,75 @@
+{
+  "title": "Composants de base",
+  "description": "Chaque composant est montré avec tous ses états côte à côte : repos, survol, focus clavier, actif, désactivé, chargement. C'est le seul moyen de vérifier qu'un état désactivé reste lisible et qu'un bouton qui travaille ne change pas de largeur.",
+  "buttons": {
+    "title": "Boutons",
+    "note": "Une page ne porte qu'UN bouton principal. Le secondaire borde, le discret sert les barres d'outils, le lien ne s'emploie que lorsqu'une action doit se fondre dans une phrase. « Danger » est réservé à ce qui détruit ou refuse — jamais à « enregistrer ». Cliquer sur « Enregistrer » ci-dessous déclenche un vrai état de chargement.",
+    "rest": "Enregistrer",
+    "withIcon": "Ajouter",
+    "trailing": "Étape suivante",
+    "loading": "Enregistrer",
+    "disabled": "Indisponible",
+    "compact": "Compact",
+    "regular": "Taille courante",
+    "large": "Grande taille",
+    "pressed": "Filtres actifs",
+    "block": "Téléverser un document"
+  },
+  "badges": {
+    "title": "Pastilles",
+    "note": "Cinq intentions, pas une de plus, et chacune correspond à une nature d'information. Une pastille grise n'est pas un échec de conception : c'est le cas ordinaire. La version en aplat est réservée à ce qui doit se voir depuis l'autre bout de l'écran.",
+    "withIcon": "Dossier retenu",
+    "small": "Compacte",
+    "dotNote": "Les trois pastilles colorées portent une THÉMATIQUE venue de la base. Leur couleur est saisie au back-office et rien ne garantit son contraste : elle est donc rendue en point, jamais en fond de texte. Le libellé, lui, garde les jetons du thème et reste lisible en clair comme en sombre.",
+    "intents": {
+      "neutral": "Brouillon",
+      "info": "En évaluation",
+      "success": "Retenue",
+      "warning": "Correction demandée",
+      "danger": "Écartée"
+    }
+  },
+  "chips": {
+    "title": "Jetons de filtre",
+    "note": "Une pastille informe, un jeton agit : il dit quel filtre est appliqué et comment l'enlever. Les deux premiers portent une thématique venue de la base, les deux suivants une valeur d'énumération traduite — les deux sortes de libellés cohabitent, et c'est exactement le piège à ne pas confondre.",
+    "facetTheme": "Thématique",
+    "facetFormat": "Format",
+    "facetStatus": "État",
+    "facetEvent": "Événement",
+    "disabled": "Filtre indisponible",
+    "reset": "Rétablir les filtres",
+    "fixedNote": "Le jeton « Événement » n'a pas de croix : il matérialise le périmètre d'administration, qui ne se retire pas. Un filtre imposé doit rester visible sans laisser croire qu'on peut s'en défaire."
+  },
+  "alerts": {
+    "title": "Alertes",
+    "note": "Trois signaux pour une même information : une icône de forme distincte, une couleur, un titre. Une alerte reconnaissable à sa seule couleur est perdue pour une personne daltonienne et invisible à l'impression. Les alertes de RÉSULTAT sont annoncées dès leur apparition ; celles de contexte n'interrompent rien.",
+    "info": {
+      "title": "L'appel à propositions ferme dans trois jours",
+      "body": "La date limite est fixée au 30 juin 2027 à 23:59, heure de Belém. Les dossiers en brouillon ne sont pas transmis au comité."
+    },
+    "success": {
+      "title": "Dossier déposé",
+      "body": "Le dossier COP31-00147 a été transmis au comité de sélection. Un accusé de réception a été envoyé à l'adresse de contact."
+    },
+    "warning": {
+      "title": "Deux évaluations manquantes",
+      "body": "Ce dossier a reçu 2 évaluations sur les 4 attendues. La décision ne peut pas être arrêtée tant que le compte n'est pas atteint.",
+      "action": "Relancer le comité"
+    },
+    "danger": {
+      "title": "Le créneau demandé chevauche une séance déjà programmée",
+      "body": "Le pavillon ne dispose que d'un seul stand : deux activités ne peuvent pas s'y tenir en même temps. Le chevauchement n'est pas bloqué — l'équipe arbitre — mais il doit être réglé avant la publication du programme."
+    },
+    "compact": "Les champs marqués d'un astérisque sont obligatoires."
+  },
+  "cards": {
+    "title": "Cartes",
+    "note": "La hiérarchie passe par le trait et le blanc, pas par l'ombre. Le lien enveloppe le TITRE et non la carte entière : une carte-lien intégrale rend le texte impossible à sélectionner et produit un nom accessible démesuré. La zone de clic, elle, couvre bien toute la carte.",
+    "eyebrow": "Proposition",
+    "eyebrowSelected": "Sélectionnée",
+    "body": "Un atelier de deux heures réunissant les points focaux nationaux de six pays autour des mécanismes de financement.",
+    "selected": "L'état sélectionné sert le planificateur de créneaux et les écrans de comparaison.",
+    "sunkenTitle": "Encart secondaire",
+    "sunken": "La carte en retrait porte un contenu d'appoint : rappel de règle, aide contextuelle, résumé d'un filtre actif."
+  }
+}

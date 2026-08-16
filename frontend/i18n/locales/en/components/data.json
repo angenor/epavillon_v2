@@ -1,0 +1,21 @@
+{
+  "table": {
+    "sortAsc": "Sort ascending",
+    "sortDesc": "Sort descending"
+  },
+  "tabs": {
+    "label": "Tabs"
+  },
+  "stepper": {
+    "position": "Step {current} of {total}",
+    "done": "completed step",
+    "current": "current step",
+    "upcoming": "upcoming step",
+    "error": "step needing changes",
+    "skipped": "step not applicable"
+  },
+  "pagination": {
+    "label": "Pagination",
+    "goTo": "Go to page {page}"
+  }
+}

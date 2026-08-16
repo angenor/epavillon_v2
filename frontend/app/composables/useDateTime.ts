@@ -97,9 +97,53 @@ export function useDateTime() {
       return t('common.datetime.dateRange', { start: from, end: to })
     },
 
+    /**
+     * « 14:30 — 16:00 (heure de Belém, UTC−3) » — la forme COMPLÈTE, celle qui
+     * fait foi pour un créneau de programmation.
+     *
+     * Elle porte le décalage en plus du nom du lieu, et c'est délibéré : un
+     * visiteur qui ne connaît pas Belém n'apprend rien de « heure de Belém »,
+     * alors que « UTC−3 » lui permet de calculer. Les deux ensemble servent les
+     * deux publics. C'est le format retenu pour `UiZonedTime` et `UiSessionCard`.
+     */
+    timeRangeFull: (
+      start: DateInput | null | undefined,
+      end: DateInput | null | undefined,
+      timeZone: TimeZoneName,
+      zoneLabel?: string,
+    ) => {
+      const parts = timeRangeParts(start, end, { ...base(timeZone), zoneLabel })
+      if (!parts) return ''
+      const zone = t('common.datetime.zoneOf', { zone: parts.zone })
+      const offset = t('common.datetime.zoneOffsetShort', {
+        offset: timeZoneOffsetShort({ ...base(timeZone), at: start ?? undefined }),
+      })
+      if (!parts.end) {
+        return t('common.datetime.timeFull', { time: parts.start, zone, offset })
+      }
+      const startLabel = parts.sameDay
+        ? parts.start
+        : t('common.datetime.dayAndTime', { date: parts.startDate, time: parts.start })
+      const endLabel = parts.sameDay
+        ? parts.end
+        : t('common.datetime.dayAndTime', { date: parts.endDate ?? '', time: parts.end })
+      return t('common.datetime.timeRangeFull', {
+        start: startLabel,
+        end: endLabel,
+        zone,
+        offset,
+      })
+    },
+
     /** « UTC-03:00 » — mention technique, pour les infobulles et les exports. */
     zoneOffset: (timeZone: TimeZoneName, at?: DateInput) =>
       t('common.datetime.zoneOffset', { offset: timeZoneOffset({ ...base(timeZone), at }) }),
+
+    /** « UTC−3 » — la forme courte, celle des libellés de créneau. */
+    zoneOffsetShort: (timeZone: TimeZoneName, at?: DateInput) =>
+      t('common.datetime.zoneOffsetShort', {
+        offset: timeZoneOffsetShort({ ...base(timeZone), at }),
+      }),
 
     /** « heure de Belém » — le suffixe seul, quand l'heure est déjà affichée. */
     zoneLabel: (timeZone: TimeZoneName, zoneLabel?: string) =>

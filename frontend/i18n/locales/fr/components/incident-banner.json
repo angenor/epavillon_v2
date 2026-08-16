@@ -1,0 +1,18 @@
+{
+  "severity": {
+    "info": "Information",
+    "warning": "Avertissement",
+    "error": "Incident",
+    "critical": "Incident majeur"
+  },
+  "scope": {
+    "global": "Toute la plateforme",
+    "event": "Cet événement",
+    "event_day": "Cette journée",
+    "session": "Cette activité",
+    "organization": "Cette organisation"
+  },
+  "action": "En savoir plus",
+  "dismiss": "Masquer ce message",
+  "until": "Message affiché jusqu'au {date}"
+}

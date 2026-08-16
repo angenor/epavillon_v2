@@ -1,0 +1,58 @@
+{
+  "title": "Navigation et surcouches",
+  "description": "Onglets, frise d'étapes, fil d'Ariane, menu d'actions, modale et tiroir. Tous sont navigables au clavier, et c'est là que se joue leur qualité : ce sont les composants pour lesquels aucun élément natif ne fournit le comportement attendu.",
+  "tabs": {
+    "title": "Onglets",
+    "note": "Plusieurs vues d'un même objet, pas une navigation entre pages : si chaque volet mérite son adresse — et c'est le cas dès qu'on veut pouvoir l'envoyer par courriel —, ce sont des liens qu'il faut. Les flèches déplacent le focus, Entrée active : l'activation automatique déclencherait un chargement à chaque pression de flèche.",
+    "active": "Volet affiché : {tab}",
+    "proposal": "Dossier",
+    "reviews": "Évaluations",
+    "exchanges": "Échanges",
+    "history": "Historique",
+    "sessions": "Séances programmées"
+  },
+  "steps": {
+    "title": "Frise d'étapes",
+    "note": "Le formulaire de soumission compte sept étapes. La frise doit dire où l'on en est, combien il en reste, et lesquelles sont en défaut : une étape franchie puis invalidée par une correction demandée doit se voir depuis n'importe quelle autre, sinon le dossier repart avec le même défaut. L'état passe par la forme autant que par la couleur.",
+    "label": "Étapes du dépôt",
+    "organization": "Organisation",
+    "activity": "Activité",
+    "themes": "Thématiques",
+    "speakers": "Intervenants",
+    "schedule": "Créneau souhaité",
+    "documents": "Documents",
+    "review": "Relecture et envoi"
+  },
+  "breadcrumb": {
+    "title": "Fil d'Ariane",
+    "note": "Il n'invente rien : chaque page déclare le sien. Mieux vaut aucun fil qu'un fil déduit de l'URL, qui afficherait un identifiant technique en guise de maillon. Deux sortes de libellés y cohabitent — une clé de traduction pour l'interface, un texte déjà résolu pour ce qui vient de la base."
+  },
+  "overlays": {
+    "title": "Modale, tiroir, menu d'actions",
+    "note": "La modale interrompt, le tiroir accompagne : le second sert le détail d'une ligne qu'on est en train de parcourir, le premier la décision à prendre avant toute autre chose. Les deux s'appuient sur l'élément natif — couche supérieure du navigateur, piégeage du focus et fermeture par Échap, sans une ligne de clavier à écrire.",
+    "openModal": "Ouvrir une modale de confirmation",
+    "openDrawer": "Ouvrir le tiroir de détail",
+    "modalTitle": "Écarter le dossier COP31-00147 ?",
+    "modalDescription": "L'organisation sera notifiée de la décision et du motif.",
+    "modalBody": "Le dossier passera à l'état « écartée ». La décision est tracée avec son auteur et son motif, et reste consultable dans l'historique du dossier.",
+    "modalWarning": "Un motif est obligatoire : la base refuse la transition sans lui.",
+    "modalConfirm": "Écarter le dossier",
+    "drawerTitle": "Aperçu du dossier",
+    "drawerDescription": "Le détail sans quitter la liste.",
+    "drawerField1": "Organisation porteuse",
+    "drawerField2": "Numéro de dossier",
+    "drawerField3": "État",
+    "drawerAction": "Ouvrir la fiche complète"
+  },
+  "menu": {
+    "label": "Actions sur ce dossier",
+    "locked": "Fusionner (droit manquant)",
+    "selected": "Dernière action choisie : {action}"
+  },
+  "bars": {
+    "title": "Barres de navigation",
+    "note": "Les deux barres ne sont pas rendues dans un cadre de démonstration : elles sont sous vos yeux. Les dupliquer ici donnerait deux en-têtes empilés et deux régions de navigation dans le document.",
+    "navbar": "La barre principale est en haut de cette page : entrées, sélecteur de langue, bascule de thème, menu replié sous 1024 px.",
+    "sidenav": "La navigation latérale est celle du back-office. Elle porte le sélecteur de périmètre d'administration, qui filtre toutes les listes de la section."
+  }
+}

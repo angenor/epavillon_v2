@@ -1,0 +1,21 @@
+{
+  "table": {
+    "sortAsc": "Trier par ordre croissant",
+    "sortDesc": "Trier par ordre décroissant"
+  },
+  "tabs": {
+    "label": "Onglets"
+  },
+  "stepper": {
+    "position": "Étape {current} sur {total}",
+    "done": "étape franchie",
+    "current": "étape en cours",
+    "upcoming": "étape à venir",
+    "error": "étape à corriger",
+    "skipped": "étape non concernée"
+  },
+  "pagination": {
+    "label": "Pagination",
+    "goTo": "Aller à la page {page}"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "title": "Composants métier",
+  "description": "Les deux composants les plus vus de la plateforme : la carte de séance et la frise d'avancement d'un dossier. Ils sont rendus sur les vraies données de la COP31, avec les titres, les organisations, les salles et les jauges de la base.",
+  "status": {
+    "draft": "Brouillon",
+    "submitted": "Déposée",
+    "under_review": "En évaluation",
+    "changes_requested": "Correction demandée",
+    "accepted": "Retenue",
+    "rejected": "Écartée",
+    "withdrawn": "Retirée",
+    "cancelled": "Annulée"
+  },
+  "cards": {
+    "title": "Carte de séance — les six états",
+    "note": "Les données simulées se tiennent toutes en novembre 2027 : l'état temporel y vaut « à venir » partout, ce qui est exact mais ne démontre rien. Ces six cartes reprennent six vraies séances et n'en forcent QUE l'état temporel. Le sixième état, « en direct », n'en est pas un : il vient de la diffusion, pas du temps, et une seule carte de toute la plateforme peut le porter.",
+    "cancelledReason": "Report du vol de la délégation ; la séance sera reprogrammée sur un créneau du 18 novembre.",
+    "noData": "Aucune séance publiée pour cette édition."
+  },
+  "compact": {
+    "title": "Version dense",
+    "note": "La même carte en version resserrée : vue liste, colonne de planificateur, résultats de recherche. Le créneau y perd son décalage horaire parce que la page qui l'accueille le rappelle déjà en tête — c'est la seule circonstance où l'on peut s'en dispenser."
+  },
+  "timeline": {
+    "title": "Frise d'avancement d'un dossier",
+    "note": "C'est l'écran que regarde une organisation qui attend une réponse. Il doit répondre à trois questions sans qu'elle ait à écrire à l'IFDD : où en est mon dossier, depuis quand, et qu'attend-on de moi. Le chemin n'est pas toujours linéaire — les trois parcours ci-dessous se rencontrent tous les trois en pratique.",
+    "pathAccepted": "Parcours nominal",
+    "pathChanges": "Correction demandée",
+    "pathWithdrawn": "Dossier retiré",
+    "decision": "Décision",
+    "reviewDetail": "{count} évaluations attendues, réparties entre les membres du comité.",
+    "acceptedDetail": "Retenue pour un créneau de 90 minutes, salle à confirmer.",
+    "changesDetail": "La liste des intervenants est incomplète : deux d'entre eux n'ont pas confirmé leur participation.",
+    "withdrawnDetail": "Retiré par l'organisation : le financement du déplacement n'a pas été obtenu."
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "title": "Données",
+  "description": "Le tableau du back-office sur douze vraies lignes de la vue des propositions, avec son tri, son menu d'actions et sa pagination. Un tableau de démonstration à trois lignes ne prouve rien : ni la densité, ni l'alignement des nombres, ni ce que devient une colonne de titres longs.",
+  "knockedOut": "Éliminé",
+  "table": {
+    "title": "Liste des propositions",
+    "note": "Densité assumée : ces gens lisent des documents de négociation, un tableau bien composé ne les rebute pas. Le tri est contrôlé par l'écran, jamais par le tableau — trier dans le composant produirait un classement faux dès que les données sont paginées côté serveur. Sous 640 px, les colonnes secondaires disparaissent : le corps de page ne défile jamais horizontalement.",
+    "caption": "Propositions déposées pour la COP31, avec leur avancement d'évaluation"
+  },
+  "columns": {
+    "reference": "Dossier",
+    "title": "Titre",
+    "organization": "Organisation",
+    "status": "État",
+    "score": "Note",
+    "reviews": "Évaluations",
+    "rank": "Rang",
+    "actions": "Actions"
+  },
+  "menu": {
+    "label": "Actions sur le dossier {reference}",
+    "open": "Ouvrir le dossier",
+    "review": "Saisir une évaluation",
+    "export": "Exporter en PDF",
+    "reject": "Écarter le dossier"
+  },
+  "pagination": {
+    "title": "Pagination",
+    "note": "Le décompte total vient avant les numéros : c'est lui qui dit si le filtre a bien mordu. La fenêtre glissante évite vingt cibles de tabulation entre la liste et le pied de page ; sous 640 px, seuls « précédent » et « suivant » subsistent."
+  },
+  "empty": {
+    "title": "Tableau sans résultat",
+    "note": "Un tableau vide parce qu'un filtre ne ramène rien ne propose JAMAIS de créer quelque chose : il propose d'élargir la recherche. Confondre les deux, c'est fabriquer des doublons — le défaut le plus coûteux de l'ancienne plateforme.",
+    "caption": "Propositions correspondant aux filtres actifs",
+    "stateTitle": "Aucun dossier ne correspond à ces filtres",
+    "stateDescription": "Quarante dossiers existent pour cette édition. Élargissez la recherche ou retirez un filtre.",
+    "stateAction": "Retirer tous les filtres"
+  }
+}

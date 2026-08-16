@@ -1,0 +1,18 @@
+{
+  "severity": {
+    "info": "Information",
+    "warning": "Warning",
+    "error": "Incident",
+    "critical": "Major incident"
+  },
+  "scope": {
+    "global": "Whole platform",
+    "event": "This event",
+    "event_day": "This day",
+    "session": "This activity",
+    "organization": "This organization"
+  },
+  "action": "Learn more",
+  "dismiss": "Dismiss this message",
+  "until": "Shown until {date}"
+}

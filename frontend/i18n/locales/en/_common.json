@@ -41,12 +41,15 @@
     "error": {
       "title": "Something went wrong",
       "description": "The content could not be loaded. Please try again shortly.",
-      "action": "Try again"
+      "action": "Try again",
+      "requestId": "Incident reference: {id}"
     },
     "forbidden": {
       "title": "Access denied",
       "description": "Your account does not have the rights required to view this page.",
-      "action": "Back to home"
+      "action": "Back to home",
+      "scope": "Required right: {scope}",
+      "contact": "To request this access, contact {contact}."
     },
     "notFound": {
       "title": "Page not found",
@@ -89,9 +92,12 @@
     "relativeSoon": "Soon",
     "timeRange": "{start} — {end}",
     "timeRangeWithZone": "{start} — {end}, {zone} time",
+    "timeRangeFull": "{start} — {end} ({zone}, {offset})",
+    "timeFull": "{time} ({zone}, {offset})",
     "timeWithZone": "{time}, {zone} time",
     "zoneOf": "{zone} time",
-    "zoneOffset": "UTC{offset}"
+    "zoneOffset": "UTC{offset}",
+    "zoneOffsetShort": "UTC{offset}"
   },
   "file": {
     "maxSize": "Maximum size: {size}",

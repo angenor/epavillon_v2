@@ -1,0 +1,68 @@
+{
+  "title": "Cross-cutting patterns",
+  "description": "What runs through every screen and nobody thinks to handle. These patterns only appear when something goes wrong — so never during development, where everything works.",
+  "states": {
+    "title": "The four screen states",
+    "note": "They are components in their own right, not special cases. A screen that skips them ships with a blank page instead of loading, a mute void instead of a result, a frozen screen instead of an error, and an empty list instead of an access refusal.",
+    "loading": "Loading",
+    "empty": "Empty",
+    "error": "Error",
+    "forbidden": "Access denied",
+    "emptyTitle": "No proposal submitted",
+    "emptyDescription": "Your organization has not submitted a proposal for this edition yet. The call closes on 30 June.",
+    "emptyAction": "Submit a proposal",
+    "forbiddenScope": "COP31 administrator",
+    "forbiddenNote": "“No data” and “no rights” are two different situations, and confusing them costs hours. It is the confusion fixed in the model's scope function, which now returns full values rather than nulls: an authorisation filter must never go silent instead of filtering. The data layer raises an access error for exactly that reason, and this screen is its visible translation."
+  },
+  "datetime": {
+    "title": "A date with its time zone",
+    "note": "The project rule admits no exception: every displayed date carries its time zone. The offset appears alongside the place name, and that is deliberate — a COP gathers people from forty countries, “Belém time” means nothing to someone who does not know Belém, whereas the offset can be worked out from anywhere.",
+    "overnight": "Crosses midnight",
+    "otherZone": "Another zone",
+    "real": "Real session",
+    "rule": "Instants are stored as timestamps with time zone, and the reference zone lives beside them, on the edition and on the session. Conversion happens at DISPLAY time, never on write. Formatting without an explicit zone would show the visitor's machine time — which is wrong for almost everyone."
+  },
+  "incidents": {
+    "title": "Incident banner",
+    "note": "The model declares FOUR severity levels, in deliberately ascending order so that the most serious comes first. The function that serves them already walks the hierarchy — session, day, edition, lead organization, plus global — and the interface has no scope filter to reimplement.",
+    "rulesTitle": "Rules of use",
+    "rules": {
+      "r1": "The two lower levels are dismissible when the incident allows it; the two upper ones never are, whatever the database says. A major incident that can be waved away with one click is an incident that will not be read.",
+      "r2": "The text comes from the DATABASE and resolves like any multilingual data. It does not go through the translation files: it is a message written by an administrator, not an interface label.",
+      "r3": "Only the three most serious levels are announced immediately to screen readers. An information banner present on load must not interrupt reading in progress.",
+      "r4": "The most serious level is distinguished by a thick left rule, not by a fifth colour: the palette has only four state families, and inventing one for the occasion would make it unreadable."
+    },
+    "samples": {
+      "info": {
+        "title": "Scheduled maintenance on Sunday",
+        "message": "The platform will be unavailable on Sunday 14 November from 02:00 to 04:00, Belém time, for a technical update. Proposals being drafted are preserved."
+      },
+      "warning": {
+        "title": "Streaming disrupted",
+        "message": "The live stream has been cutting out intermittently since 10:15. The technical team is on it; the session is being recorded and the replay will be published."
+      },
+      "error": {
+        "title": "Registrations temporarily unavailable",
+        "message": "The registration service is not responding. Registrations already recorded are preserved; new requests are not being taken for now."
+      },
+      "critical": {
+        "title": "15 November suspended",
+        "message": "Access to the pavilion is closed by decision of site security. All activities for the day are suspended until further notice; the organizations concerned are being contacted individually."
+      }
+    }
+  },
+  "live": {
+    "title": "The “live” badge",
+    "note": "Three signals, as for any information carried by colour: a pulsing dot, the word itself, and a sentence for screen readers. The dot alone would be invisible in greyscale, and red alone indistinguishable from a cancellation.",
+    "current": "Session currently declared live: {id}",
+    "none": "No session is declared live.",
+    "warningTitle": "The rule is not held by discipline",
+    "warning": "One live stream at a time, across all events: one technical team, one feed. If each card decided on its own from its status, two cards would blink as soon as one session stayed marked “live” past its end time — a perfectly ordinary case, nobody closes a session to the second. The component therefore queries a shared registry and renders nothing for other sessions.",
+    "rules": {
+      "r1": "Only one session on the whole platform may carry the badge at any moment.",
+      "r2": "The badge is not inferred from the clock: a session in progress is not necessarily being streamed.",
+      "r3": "Nor is it inferred from the database status alone: the shared registry decides.",
+      "r4": "In the model, the guarantee applies to the broadcast channel, bookable like a resource. If two editions each open their own, two simultaneous streams become possible again in the database — that point is awaiting arbitration. The interface has already decided."
+    }
+  }
+}

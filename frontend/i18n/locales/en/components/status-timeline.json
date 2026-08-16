@@ -1,0 +1,12 @@
+{
+  "label": "Proposal progress",
+  "pending": "Pending",
+  "by": "by {actor}",
+  "state": {
+    "done": "completed step",
+    "current": "current step",
+    "upcoming": "upcoming step",
+    "error": "changes requested",
+    "skipped": "step not applicable"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "state": {
+    "upcoming": "Upcoming",
+    "ongoing": "In progress",
+    "past": "Finished",
+    "postponed": "Postponed",
+    "cancelled": "Cancelled"
+  },
+  "format": {
+    "online": "Online",
+    "in_person": "On site",
+    "hybrid": "Hybrid"
+  },
+  "streamed": "Streamed online",
+  "cancelledReason": "Reason for cancellation",
+  "capacity": {
+    "label": "Seats taken",
+    "ratio": "{registered} / {capacity} registered",
+    "registered": "{count} registered | {count} registered | {count} registered",
+    "remaining": "{count} seat left | {count} seat left | {count} seats left",
+    "full": "Full",
+    "waitlist": "Waiting list open",
+    "waitlistCount": "{count} person on the waiting list | {count} person on the waiting list | {count} people on the waiting list"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "title": "Domain components",
+  "description": "The two most-seen components of the platform: the session card and the proposal progress timeline. They are rendered on real COP31 data, with the titles, organizations, rooms and capacities from the database.",
+  "status": {
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "under_review": "Under review",
+    "changes_requested": "Changes requested",
+    "accepted": "Accepted",
+    "rejected": "Rejected",
+    "withdrawn": "Withdrawn",
+    "cancelled": "Cancelled"
+  },
+  "cards": {
+    "title": "Session card — the six states",
+    "note": "The mock data all sits in November 2027: the temporal state reads “upcoming” everywhere, which is accurate but demonstrates nothing. These six cards use six real sessions and force ONLY their temporal state. The sixth state, “live”, is not one of them: it comes from broadcasting, not from time, and only one card on the whole platform may carry it.",
+    "cancelledReason": "The delegation's flight was postponed; the session will be rescheduled into a slot on 18 November.",
+    "noData": "No published session for this edition."
+  },
+  "compact": {
+    "title": "Dense version",
+    "note": "The same card, tightened: list view, planner column, search results. The slot loses its offset here because the surrounding page already states the time zone in its header — the only circumstance where it may be dropped."
+  },
+  "timeline": {
+    "title": "Proposal progress timeline",
+    "note": "This is the screen an organization waiting for an answer looks at. It must answer three questions without them having to write to IFDD: where is my proposal, since when, and what is expected of me. The path is not always linear — all three routes below occur in practice.",
+    "pathAccepted": "Nominal path",
+    "pathChanges": "Changes requested",
+    "pathWithdrawn": "Proposal withdrawn",
+    "decision": "Decision",
+    "reviewDetail": "{count} reviews expected, shared among the committee members.",
+    "acceptedDetail": "Accepted for a 90-minute slot, room to be confirmed.",
+    "changesDetail": "The speaker list is incomplete: two of them have not confirmed their participation.",
+    "withdrawnDetail": "Withdrawn by the organization: travel funding was not secured."
+  }
+}

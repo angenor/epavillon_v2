@@ -1,0 +1,25 @@
+{
+  "state": {
+    "upcoming": "À venir",
+    "ongoing": "En cours",
+    "past": "Terminée",
+    "postponed": "Reportée",
+    "cancelled": "Annulée"
+  },
+  "format": {
+    "online": "En ligne",
+    "in_person": "Sur place",
+    "hybrid": "Hybride"
+  },
+  "streamed": "Diffusée en ligne",
+  "cancelledReason": "Motif d'annulation",
+  "capacity": {
+    "label": "Places occupées",
+    "ratio": "{registered} / {capacity} inscrits",
+    "registered": "{count} inscrit | {count} inscrit | {count} inscrits",
+    "remaining": "{count} place restante | {count} place restante | {count} places restantes",
+    "full": "Complet",
+    "waitlist": "Liste d'attente ouverte",
+    "waitlistCount": "{count} personne en liste d'attente | {count} personne en liste d'attente | {count} personnes en liste d'attente"
+  }
+}

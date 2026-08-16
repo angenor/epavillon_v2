@@ -1,0 +1,15 @@
+{
+  "required": "required",
+  "optional": "optional",
+  "readonly": "Read-only",
+  "errorPrefix": "Error:",
+  "counter": "{count} / {max}",
+  "counterExceeded": "{count} / {max} — {over} characters over",
+  "switch": {
+    "on": "On",
+    "off": "Off"
+  },
+  "date": {
+    "timezoneHint": "Time entered in the event's time zone ({zone})."
+  }
+}

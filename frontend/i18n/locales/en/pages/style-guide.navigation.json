@@ -1,0 +1,58 @@
+{
+  "title": "Navigation and overlays",
+  "description": "Tabs, stepper, breadcrumb, action menu, modal and drawer. All are keyboard-navigable, and that is where their quality is decided: these are the components for which no native element provides the expected behaviour.",
+  "tabs": {
+    "title": "Tabs",
+    "note": "Several views of one object, not navigation between pages: if each panel deserves its own address — and it does as soon as you want to send it by email — links are what you need. Arrows move focus, Enter activates: automatic activation would trigger a load on every arrow press.",
+    "active": "Panel shown: {tab}",
+    "proposal": "Proposal",
+    "reviews": "Reviews",
+    "exchanges": "Discussion",
+    "history": "History",
+    "sessions": "Scheduled sessions"
+  },
+  "steps": {
+    "title": "Stepper",
+    "note": "The submission form has seven steps. The stepper must say where you are, how many remain, and which are in default: a step completed then invalidated by a change request must be visible from any other, otherwise the proposal goes back with the same flaw. State is carried by shape as much as by colour.",
+    "label": "Submission steps",
+    "organization": "Organization",
+    "activity": "Activity",
+    "themes": "Themes",
+    "speakers": "Speakers",
+    "schedule": "Preferred slot",
+    "documents": "Documents",
+    "review": "Review and submit"
+  },
+  "breadcrumb": {
+    "title": "Breadcrumb",
+    "note": "It invents nothing: each page declares its own. No breadcrumb is better than one derived from the URL, which would show a technical identifier as a link. Two kinds of label live side by side — a translation key for the interface, already-resolved text for what comes from the database."
+  },
+  "overlays": {
+    "title": "Modal, drawer, action menu",
+    "note": "The modal interrupts, the drawer accompanies: the latter serves the detail of a row you are browsing, the former a decision to be taken before anything else. Both build on the native element — the browser's top layer, focus trapping and Escape-to-close, without a line of keyboard code.",
+    "openModal": "Open a confirmation modal",
+    "openDrawer": "Open the detail drawer",
+    "modalTitle": "Reject proposal COP31-00147?",
+    "modalDescription": "The organization will be notified of the decision and its reason.",
+    "modalBody": "The proposal will move to the “rejected” state. The decision is recorded with its author and reason, and remains visible in the proposal history.",
+    "modalWarning": "A reason is required: the database refuses the transition without one.",
+    "modalConfirm": "Reject the proposal",
+    "drawerTitle": "Proposal preview",
+    "drawerDescription": "The detail without leaving the list.",
+    "drawerField1": "Lead organization",
+    "drawerField2": "Proposal number",
+    "drawerField3": "Status",
+    "drawerAction": "Open the full record"
+  },
+  "menu": {
+    "label": "Actions on this proposal",
+    "locked": "Merge (right missing)",
+    "selected": "Last action chosen: {action}"
+  },
+  "bars": {
+    "title": "Navigation bars",
+    "note": "The two bars are not rendered in a demonstration frame: they are in front of you. Duplicating them here would stack two headers and put two navigation landmarks in the document.",
+    "navbar": "The main bar is at the top of this page: entries, language switch, theme toggle, menu collapsed below 1024 px.",
+    "sidenav": "The side navigation is the back office's. It carries the administration scope selector, which filters every list in that section."
+  }
+}

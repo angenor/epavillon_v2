@@ -111,6 +111,31 @@ export function timeZoneOffset(
 }
 
 /**
+ * Décalage COMPACT, à la façon dont on l'écrit dans une programmation :
+ * « −3 », « +1 », « +5:30 ». Les minutes ne sont conservées que lorsqu'elles ne
+ * sont pas nulles — la moitié des fuseaux du monde ne tombe pas sur l'heure
+ * pleine, et « UTC+5 » serait faux pour l'Inde.
+ *
+ * Le signe est le SIGNE MOINS typographique (U+2212), pas un trait d'union :
+ * « UTC−3 » et non « UTC-3 ». C'est la forme attendue dans les libellés de
+ * créneau, où le trait d'union sert déjà à séparer les heures.
+ */
+export function timeZoneOffsetShort(
+  options: ZonedFormatOptions & { at?: DateInput },
+): string {
+  const offset = timeZoneOffset(options) // « -03:00 », « +05:30 »
+  const match = offset.match(/^([+-])(\d{2}):(\d{2})$/)
+  if (!match) return offset
+
+  const [, sign, hours, minutes] = match as unknown as [string, string, string, string]
+  const signGlyph = sign === '-' ? '−' : '+'
+  const hourValue = Number.parseInt(hours, 10)
+  return minutes === '00'
+    ? `${signGlyph}${hourValue}`
+    : `${signGlyph}${hourValue}:${minutes}`
+}
+
+/**
  * Libellé de fuseau lisible, dérivé de l'identifiant IANA : `America/Belem`
  * devient « Belem ». C'est un repli : quand le lieu est connu (le nom de la
  * ville hôte de l'édition), lui préférer ce nom-là.

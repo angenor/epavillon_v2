@@ -1,0 +1,68 @@
+{
+  "title": "Motifs transversaux",
+  "description": "Ce qui traverse tous les écrans et que personne ne pense à traiter. Ces motifs n'apparaissent que lorsque quelque chose ne va pas — donc jamais pendant le développement, où tout va bien.",
+  "states": {
+    "title": "Les quatre états d'écran",
+    "note": "Ce sont des composants de plein droit, pas des cas particuliers. Un écran qui ne les traite pas passe en production avec une page blanche à la place du chargement, un vide muet à la place d'un résultat, un écran figé à la place d'une erreur, et une liste vide à la place d'un refus d'accès.",
+    "loading": "Chargement",
+    "empty": "Vide",
+    "error": "Erreur",
+    "forbidden": "Accès refusé",
+    "emptyTitle": "Aucun dossier déposé",
+    "emptyDescription": "Votre organisation n'a pas encore déposé de proposition pour cette édition. L'appel ferme le 30 juin.",
+    "emptyAction": "Déposer une proposition",
+    "forbiddenScope": "administrateur de la COP31",
+    "forbiddenNote": "« Aucune donnée » et « aucun droit » sont deux situations différentes, et les confondre coûte des heures. C'est la confusion que corrige la fonction de périmètre du modèle, qui renvoie désormais des valeurs pleines plutôt que des valeurs nulles : un filtre d'habilitation ne doit jamais se taire au lieu de filtrer. La couche d'accès lève une erreur d'accès pour cette raison précise, et cet écran en est la traduction visible."
+  },
+  "datetime": {
+    "title": "Une date avec son fuseau",
+    "note": "La règle du projet ne souffre aucune exception : toute date affichée porte son fuseau. Le décalage figure en plus du nom du lieu, et c'est délibéré — une COP réunit des gens de quarante pays, « heure de Belém » ne dit rien à qui ne connaît pas Belém, tandis que le décalage se calcule de partout.",
+    "overnight": "Franchit minuit",
+    "otherZone": "Autre fuseau",
+    "real": "Séance réelle",
+    "rule": "Les instants sont stockés en horodatage avec fuseau, et le fuseau de référence vit à côté, sur l'édition et sur la séance. La conversion se fait à L'AFFICHAGE, jamais à l'écriture. Un formatage sans fuseau explicite afficherait l'heure de la machine du visiteur — ce qui est faux pour presque tout le monde."
+  },
+  "incidents": {
+    "title": "Bandeau d'incident",
+    "note": "Le modèle déclare QUATRE niveaux de gravité, dans un ordre volontairement croissant pour que le plus grave remonte en premier. La fonction qui les sert remonte déjà la hiérarchie — séance, journée, édition, organisation porteuse, plus le global — et l'interface n'a aucun filtre de portée à réimplémenter.",
+    "rulesTitle": "Règles d'usage",
+    "rules": {
+      "r1": "Les deux premiers niveaux sont refermables si l'incident le permet ; les deux derniers ne le sont jamais, quoi qu'en dise la base. Un incident majeur qu'on chasse d'un clic est un incident qui ne sera pas lu.",
+      "r2": "Le texte vient de la BASE et se résout comme toute donnée multilingue. Il ne passe pas par les fichiers de traduction : c'est un message saisi par un administrateur, pas un libellé d'interface.",
+      "r3": "Seuls les trois niveaux les plus graves sont annoncés d'emblée aux lecteurs d'écran. Un bandeau d'information présent au chargement ne doit pas interrompre la lecture en cours.",
+      "r4": "Le niveau le plus grave se distingue par un trait de gauche épais, pas par une cinquième couleur : la palette n'a que quatre familles d'état, et en inventer une pour l'occasion la rendrait illisible."
+    },
+    "samples": {
+      "info": {
+        "title": "Maintenance programmée dimanche",
+        "message": "La plateforme sera indisponible dimanche 14 novembre de 02:00 à 04:00, heure de Belém, pour une mise à jour technique. Les dossiers en cours de rédaction sont conservés."
+      },
+      "warning": {
+        "title": "Diffusion perturbée",
+        "message": "La diffusion en direct connaît des coupures intermittentes depuis 10:15. L'équipe technique intervient ; la séance est enregistrée et le rattrapage sera publié."
+      },
+      "error": {
+        "title": "Inscriptions momentanément indisponibles",
+        "message": "Le service d'inscription ne répond plus. Les inscriptions déjà enregistrées sont conservées ; les nouvelles demandes ne sont pas prises en compte pour l'instant."
+      },
+      "critical": {
+        "title": "Journée du 15 novembre suspendue",
+        "message": "L'accès au pavillon est fermé sur décision de la sécurité du site. Toutes les activités de la journée sont suspendues jusqu'à nouvel ordre ; les organisations concernées sont contactées individuellement."
+      }
+    }
+  },
+  "live": {
+    "title": "La pastille « en direct »",
+    "note": "Trois signaux, comme pour toute information portée par la couleur : un point qui pulse, le mot lui-même, et une phrase pour les lecteurs d'écran. Le point seul serait invisible en niveaux de gris, et le rouge seul indistinguable d'une annulation.",
+    "current": "Séance actuellement déclarée en direct : {id}",
+    "none": "Aucune séance n'est déclarée en direct.",
+    "warningTitle": "La règle ne se tient pas par discipline",
+    "warning": "Un seul direct à la fois, tous événements confondus : une seule équipe technique, un seul flux. Si chaque carte décidait seule d'afficher son repère à partir de son statut, deux cartes clignoteraient dès qu'une séance resterait marquée « en direct » après son heure de fin — cas parfaitement banal, personne ne ferme une séance à la seconde près. Le composant interroge donc un registre partagé et ne rend rien pour les autres séances.",
+    "rules": {
+      "r1": "Une seule séance de toute la plateforme peut porter le repère à un instant donné.",
+      "r2": "Le repère ne se déduit pas de l'heure : une séance en cours n'est pas nécessairement diffusée.",
+      "r3": "Il ne se déduit pas non plus du seul statut en base : c'est le registre partagé qui tranche.",
+      "r4": "Côté modèle, la garantie porte sur le canal de diffusion, réservable comme une ressource. Si deux éditions ouvrent chacune le leur, deux directs simultanés redeviennent possibles en base — le point est en arbitrage. L'interface, elle, tranche déjà."
+    }
+  }
+}

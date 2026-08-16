@@ -1,0 +1,25 @@
+{
+  "eyebrow": "Design reference",
+  "title": "Style guide",
+  "intro": "The platform's components, actually rendered, with all their states and on real COP31 data.",
+  "authority": "This page is authoritative: it serves as the reference throughout development and as a visual regression test. A component that is not here does not exist yet; a component whose rendering changes here has changed everywhere.",
+  "nav": {
+    "label": "Guide contents",
+    "tokens": "Tokens",
+    "base": "Base components",
+    "forms": "Forms",
+    "data": "Data",
+    "navigation": "Navigation",
+    "business": "Domain components",
+    "patterns": "Cross-cutting patterns"
+  },
+  "themeHint": {
+    "title": "Switch theme while reading",
+    "body": "The toggle in the header changes the theme of this page as it does the whole platform. The contrast ratios below are recomputed on every switch, from the values actually applied: that is where you see whether a shade drops below the threshold in dark mode."
+  },
+  "dataError": "The demonstration data could not be loaded. The guide cannot render domain components without it.",
+  "noEvent": {
+    "title": "Reference edition not found",
+    "description": "The guide relies on the “{slug}” edition. It was not found in the accessible data."
+  }
+}

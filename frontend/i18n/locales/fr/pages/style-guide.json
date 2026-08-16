@@ -1,0 +1,25 @@
+{
+  "eyebrow": "Référence de conception",
+  "title": "Guide de style",
+  "intro": "Les composants de la plateforme, rendus réellement, avec tous leurs états et sur les données de la COP31.",
+  "authority": "Cette page fait foi : elle sert de référence pendant tout le développement et de test de non-régression visuelle. Un composant qui ne figure pas ici n'existe pas encore ; un composant dont le rendu change ici a changé partout.",
+  "nav": {
+    "label": "Sommaire du guide",
+    "tokens": "Jetons",
+    "base": "Composants de base",
+    "forms": "Formulaires",
+    "data": "Données",
+    "navigation": "Navigation",
+    "business": "Composants métier",
+    "patterns": "Motifs transversaux"
+  },
+  "themeHint": {
+    "title": "Basculer le thème pendant la lecture",
+    "body": "La bascule de l'en-tête change le thème de cette page comme de toute la plateforme. Les rapports de contraste ci-dessous sont recalculés à chaque bascule, sur les valeurs réellement appliquées : c'est là qu'on voit si une nuance passe sous le seuil en thème sombre."
+  },
+  "dataError": "Les données de démonstration n'ont pas pu être chargées. Le guide ne peut pas rendre les composants métier sans elles.",
+  "noEvent": {
+    "title": "Édition de référence introuvable",
+    "description": "Le guide s'appuie sur l'édition « {slug} ». Elle n'a pas été trouvée dans les données accessibles."
+  }
+}

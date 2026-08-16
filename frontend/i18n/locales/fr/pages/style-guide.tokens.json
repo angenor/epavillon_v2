@@ -1,0 +1,49 @@
+{
+  "title": "Jetons de design",
+  "description": "Deux niveaux, à ne jamais mélanger. Les couleurs de MARQUE portent le nom de la charte et ne sont jamais redéfinies, pas même en thème sombre. Les jetons de RÔLE portent un nom d'usage, référencent la marque, et sont les seuls qu'un composant a le droit d'appeler.",
+  "brand": {
+    "title": "Palette de marque",
+    "note": "Les couleurs de charte sont des couleurs d'impression, pas des couleurs d'interface : le cyan officiel plafonne à 2,91:1 sur blanc, très loin des 4,5:1 exigés en texte. Chaque échelle conserve la teinte et fait varier la luminosité pour offrir, à chaque usage, une nuance qui passe le contraste.",
+    "legend": "Le rapport indiqué est celui de la nuance contre le fond de page ACTIF, calculé à l'affichage. Le losange marque le palier où vit la couleur officielle de la charte.",
+    "charterMark": "Couleur officielle de la charte",
+    "cyan": "Cyan IFDD",
+    "rouge": "Rouge IFDD",
+    "jaune": "Jaune IFDD",
+    "vert": "Vert IFDD",
+    "violet": "Violet IFDD",
+    "bleu": "Bleu riche IFDD",
+    "gris": "Gris IFDD"
+  },
+  "roles": {
+    "title": "Jetons de rôle",
+    "note": "Un composant appelle « accent », jamais « cyan ». C'est ce qui permet au thème sombre de redéfinir les rôles sans jamais toucher aux couleurs officielles. Le rapport affiché est celui du jeton contre le fond de page actif.",
+    "surfaces": "Surfaces",
+    "text": "Texte",
+    "borders": "Bordures et focus",
+    "accent": "Accent",
+    "states": "États"
+  },
+  "type": {
+    "title": "Échelle typographique",
+    "note": "Sept niveaux, pas un de plus. Au-delà, la hiérarchie se lit moins bien, pas mieux. Les titres portent la police de titrage de la charte ; ni celle-ci ni la police de texte ne sont fournies en fichier dans le dépôt, les replis système font donc foi pour l'instant.",
+    "sample": "Financer l'adaptation côtière",
+    "usage3xl": "Titre de page",
+    "usage2xl": "Titre de section",
+    "usageXl": "Titre de bloc",
+    "usageLg": "Chapô, texte de mise en avant",
+    "usageBase": "Corps de texte",
+    "usageSm": "Métadonnées, libellés de champ",
+    "usageXs": "Mentions légales, unités de tableau"
+  },
+  "spacing": {
+    "title": "Espacements, rayons, ombres",
+    "note": "Base de 4 px. Beaucoup de blanc entre les blocs, peu à l'intérieur des blocs : c'est ce qui donne une densité lisible plutôt qu'une page aérée et vide."
+  },
+  "radius": {
+    "title": "Rayons"
+  },
+  "shadow": {
+    "title": "Ombres",
+    "note": "Très discrètes, et c'est délibéré : la hiérarchie passe par le trait et le blanc. L'ombre la plus marquée est réservée aux surfaces flottantes — modales et menus."
+  }
+}

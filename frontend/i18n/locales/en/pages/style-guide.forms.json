@@ -1,0 +1,71 @@
+{
+  "title": "Forms",
+  "description": "Seven states are required of every field: empty, filled, focused, error with message, contextual help, disabled, read-only. They are shown together, and that is the whole point — a disabled field and a read-only field look alike until you compare them.",
+  "placeholder": "Your organization's name",
+  "hintText": "The full name, as it appears on your official documents.",
+  "errorText": "This email address is incomplete.",
+  "readonlyHint": "The proposal number is assigned on creation and cannot be changed. It remains copyable.",
+  "states": {
+    "title": "The seven states of a field",
+    "note": "“Disabled” and “read-only” do not do the same thing: a disabled field leaves the tab order and its value is not submitted; a read-only field stays focusable, copyable and submitted. Confusing them means preventing someone from copying a proposal number.",
+    "empty": "Empty",
+    "filled": "Filled",
+    "hint": "With contextual help",
+    "error": "In error",
+    "disabled": "Disabled",
+    "readonly": "Read-only",
+    "focusNote": "Keyboard focus cannot be shown in a picture: tab through the fields above. The ring is the one used across the platform, defined once — one ring per component means as many ways to become invisible on a given background."
+  },
+  "variants": {
+    "title": "Sizes and variants",
+    "note": "Field heights match button heights: a field and its action button line up without adjustment.",
+    "small": "Compact",
+    "large": "Large size",
+    "withIcon": "With icon",
+    "number": "Room capacity",
+    "numberHint": "Number of seats. Leave empty if the room has no declared limit."
+  },
+  "textarea": {
+    "title": "Text area",
+    "note": "The counter appears as soon as a limit exists, not only once it is exceeded: writing 900 characters to have 400 refused on submit is the best way to lose a proposal. Typing is never cut off at the limit — stopping mid-word makes people think their keyboard is broken.",
+    "summary": "Activity summary",
+    "summaryHint": "This summary appears in the public programme.",
+    "autoGrow": "Height follows the content",
+    "autoGrowPlaceholder": "Type several lines to watch the area grow, up to sixteen lines."
+  },
+  "choices": {
+    "title": "Lists and choices",
+    "note": "The dropdown builds on the native control: system picker on mobile, keyboard support for free, never clipped by a container's overflow. Radio buttons are compared at a glance — three to five options, no more. A switch flips a setting that takes effect immediately; if a save button follows, it should have been a checkbox.",
+    "selectEmpty": "Participation format",
+    "selectFilled": "Selected format",
+    "selectReadonly": "Format (read-only)",
+    "selectError": "Format required",
+    "selectErrorText": "Choose a participation format.",
+    "selectPlaceholder": "Choose a format",
+    "radio": "Participation format",
+    "radioHint": "A hybrid activity needs both a room AND a broadcast channel.",
+    "checkChecked": "I confirm that the speakers have agreed to take part",
+    "checkWithHint": "Receive reminders before each session",
+    "checkHint": "One email 24 hours before, another one hour before.",
+    "checkPartial": "All proposals on this page",
+    "checkDisabled": "Option imposed by the call for proposals",
+    "checkError": "I accept the participation terms",
+    "checkErrorText": "You must accept the terms to submit a proposal.",
+    "switchOn": "Stream this activity live",
+    "switchHint": "Only one live stream can run at a time on the platform.",
+    "switchOff": "Open the waiting list",
+    "switchLoading": "Publish to the programme",
+    "switchDisabled": "Save the session (unavailable)"
+  },
+  "dates": {
+    "title": "Dates and times",
+    "note": "The native control opens the system calendar: localised, keyboard-navigable, usable with a thumb. But it knows nothing of time zones — it returns wall-clock time, without offset. The event's time zone therefore stays visible INSIDE the field: whoever types 14:30 must know that means 14:30 in Belém, not at home.",
+    "dateOnly": "Activity date",
+    "dateTime": "Slot start",
+    "bounds": "Bounded to the edition's days, 9 to 20 November 2027."
+  },
+  "search": {
+    "label": "Search for an organization",
+    "hint": "Type at least two letters. The search covers every name on record: the full name and the acronym alone return the same record."
+  }
+}

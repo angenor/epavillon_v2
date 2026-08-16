@@ -1,0 +1,75 @@
+{
+  "title": "Base components",
+  "description": "Every component is shown with all its states side by side: rest, hover, keyboard focus, active, disabled, loading. That is the only way to check that a disabled state stays readable and that a working button does not change width.",
+  "buttons": {
+    "title": "Buttons",
+    "note": "A page carries only ONE primary button. The secondary frames it, the ghost serves toolbars, the link form is only for an action that must sit inside a sentence. “Danger” is reserved for what destroys or refuses — never for “save”. Clicking “Save” below triggers a real loading state.",
+    "rest": "Save",
+    "withIcon": "Add",
+    "trailing": "Next step",
+    "loading": "Save",
+    "disabled": "Unavailable",
+    "compact": "Compact",
+    "regular": "Regular size",
+    "large": "Large size",
+    "pressed": "Filters active",
+    "block": "Upload a document"
+  },
+  "badges": {
+    "title": "Badges",
+    "note": "Five intents, not one more, each matching a kind of information. A grey badge is not a design failure: it is the ordinary case. The solid version is reserved for what must be visible from across the room.",
+    "withIcon": "Proposal accepted",
+    "small": "Compact",
+    "dotNote": "The three coloured badges carry a THEME from the database. Its colour is entered in the back office and nothing guarantees its contrast: it is therefore rendered as a dot, never as a text background. The label keeps the theme tokens and stays readable in both light and dark.",
+    "intents": {
+      "neutral": "Draft",
+      "info": "Under review",
+      "success": "Accepted",
+      "warning": "Changes requested",
+      "danger": "Rejected"
+    }
+  },
+  "chips": {
+    "title": "Filter chips",
+    "note": "A badge informs, a chip acts: it states which filter is applied and how to remove it. The first two carry a theme from the database, the next two a translated enumeration value — both kinds of label live side by side, and that is exactly the trap not to fall into.",
+    "facetTheme": "Theme",
+    "facetFormat": "Format",
+    "facetStatus": "Status",
+    "facetEvent": "Event",
+    "disabled": "Filter unavailable",
+    "reset": "Restore filters",
+    "fixedNote": "The “Event” chip has no cross: it materialises the administration scope, which cannot be removed. An imposed filter must stay visible without suggesting it can be dropped."
+  },
+  "alerts": {
+    "title": "Alerts",
+    "note": "Three signals for one piece of information: a distinctly shaped icon, a colour, a title. An alert recognisable by colour alone is lost on a colour-blind reader and invisible in print. RESULT alerts are announced as soon as they appear; context alerts interrupt nothing.",
+    "info": {
+      "title": "The call for proposals closes in three days",
+      "body": "The deadline is 30 June 2027 at 23:59, Belém time. Draft proposals are not forwarded to the committee."
+    },
+    "success": {
+      "title": "Proposal submitted",
+      "body": "Proposal COP31-00147 has been forwarded to the selection committee. A receipt has been sent to the contact address."
+    },
+    "warning": {
+      "title": "Two reviews missing",
+      "body": "This proposal has received 2 of the 4 expected reviews. No decision can be settled until the count is met.",
+      "action": "Remind the committee"
+    },
+    "danger": {
+      "title": "The requested slot overlaps a scheduled session",
+      "body": "The pavilion has a single stand: two activities cannot be held there at the same time. The overlap is not blocked — the team arbitrates — but it must be resolved before the programme is published."
+    },
+    "compact": "Fields marked with an asterisk are required."
+  },
+  "cards": {
+    "title": "Cards",
+    "note": "Hierarchy comes from the rule and the whitespace, not from shadow. The link wraps the TITLE rather than the whole card: a fully linked card makes text impossible to select and produces an unwieldy accessible name. The click target, however, does cover the whole card.",
+    "eyebrow": "Proposal",
+    "eyebrowSelected": "Selected",
+    "body": "A two-hour workshop bringing together national focal points from six countries around financing mechanisms.",
+    "selected": "The selected state serves the slot planner and comparison screens.",
+    "sunkenTitle": "Secondary panel",
+    "sunken": "The sunken card carries supporting content: a rule reminder, contextual help, a summary of the active filter."
+  }
+}

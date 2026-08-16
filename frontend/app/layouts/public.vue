@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import type { NavItem } from '~/types/navigation'
-import type { LocaleCode } from '~/types/shared'
-import type { ThemeChoice } from '~/stores/preferences'
 
 /**
  * Layout public — barre de navigation, sélecteur de langue, bascule de thème,
@@ -11,13 +9,16 @@ import type { ThemeChoice } from '~/stores/preferences'
  * prompts A1 à A5. Les modules affichant « En cours de maintenance »
  * (Publications, Négociations, Formations, Outils) n'ont volontairement aucune
  * entrée ici tant que `platform.feature_flags` ne les ouvre pas.
+ *
+ * A0.4 — la barre, le sélecteur de langue et la bascule de thème sont désormais
+ * des composants d'interface (`UiNavBar`, `UiLocaleSwitch`, `UiThemeToggle`).
+ * Le layout ne garde que ce qui lui appartient : la LISTE des entrées, l'état du
+ * menu mobile, et le pied de page.
  */
 
-const { t, locale, locales } = useI18n()
+const { t } = useI18n()
 const localePath = useLocalePath()
-const switchLocalePath = useSwitchLocalePath()
 const route = useRoute()
-const preferences = usePreferencesStore()
 
 const mainNav: NavItem[] = [
   { labelKey: 'nav.main.home', to: '/' },
@@ -54,32 +55,20 @@ const footerSections: { labelKey: string; items: NavItem[] }[] = [
   },
 ]
 
-const themeChoices: { value: ThemeChoice; labelKey: string }[] = [
-  { value: 'system', labelKey: 'nav.theme.system' },
-  { value: 'light', labelKey: 'nav.theme.light' },
-  { value: 'dark', labelKey: 'nav.theme.dark' },
-]
-
-const availableLocales = computed(() =>
-  (unref(locales) as Array<{ code: LocaleCode; name?: string }>).map((entry) => ({
-    code: entry.code,
-    name: entry.name ?? entry.code,
-  })),
-)
-
+// Le menu mobile appartient au layout : c'est lui qui connaît la route et peut
+// donc le refermer à chaque navigation.
 const isMobileNavOpen = ref(false)
 watch(() => route.fullPath, () => (isMobileNavOpen.value = false))
 
-const isCurrent = (to: string) => route.path === localePath(to)
 const currentYear = new Date().getFullYear()
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-surface text-text">
+  <div class="flex min-h-screen flex-col bg-surface text-text">
     <a class="skip-link" href="#contenu-principal">{{ t('common.a11y.skipToContent') }}</a>
 
-    <header class="sticky top-0 z-30 border-b border-border bg-surface-raised">
-      <div class="mx-auto flex w-full max-w-[1280px] items-center gap-4 px-4 py-3 sm:px-6">
+    <UiNavBar v-model:open="isMobileNavOpen" :items="mainNav" :label="t('nav.main.home')">
+      <template #brand>
         <NuxtLink :to="localePath('/')" class="flex shrink-0 items-center gap-3 no-underline">
           <img
             src="/logos/ifdd-horizontal-gris.svg"
@@ -99,172 +88,29 @@ const currentYear = new Date().getFullYear()
             <span class="block font-display text-lg leading-tight text-text">{{ t('nav.site.name') }}</span>
           </span>
         </NuxtLink>
+      </template>
 
-        <nav
-          class="ml-auto hidden items-center gap-1 lg:flex"
-          :aria-label="t('nav.main.home')"
-        >
-          <NuxtLink
-            v-for="item in mainNav"
-            :key="item.to"
-            :to="localePath(item.to)"
-            class="rounded-md px-3 py-2 text-sm no-underline text-text-muted hover:bg-surface-hover hover:text-text"
-            :class="isCurrent(item.to) ? 'text-accent font-semibold' : ''"
-            :aria-current="isCurrent(item.to) ? 'page' : undefined"
-          >
-            {{ t(item.labelKey) }}
-          </NuxtLink>
-        </nav>
-
-        <div class="ml-auto flex items-center gap-2 lg:ml-0">
-          <!-- Sélecteur de langue -->
-          <nav class="hidden items-center rounded-md border border-border sm:flex" :aria-label="t('nav.language.label')">
-            <NuxtLink
-              v-for="entry in availableLocales"
-              :key="entry.code"
-              :to="switchLocalePath(entry.code)"
-              class="px-2.5 py-1.5 text-xs font-semibold uppercase no-underline first:rounded-l-md last:rounded-r-md"
-              :class="
-                entry.code === locale
-                  ? 'bg-accent-surface text-accent'
-                  : 'text-text-subtle hover:bg-surface-hover hover:text-text'
-              "
-              :aria-current="entry.code === locale ? 'true' : undefined"
-              :lang="entry.code"
-            >
-              {{ entry.code }}
-            </NuxtLink>
-          </nav>
-
-          <!-- Bascule de thème -->
-          <div
-            class="flex items-center rounded-md border border-border"
-            role="group"
-            :aria-label="t('nav.theme.label')"
-          >
-            <button
-              v-for="choice in themeChoices"
-              :key="choice.value"
-              type="button"
-              class="px-2.5 py-1.5 text-xs first:rounded-l-md last:rounded-r-md"
-              :class="
-                preferences.theme === choice.value
-                  ? 'bg-accent-surface text-accent'
-                  : 'text-text-subtle hover:bg-surface-hover hover:text-text'
-              "
-              :aria-pressed="preferences.theme === choice.value"
-              :title="t(choice.labelKey)"
-              @click="preferences.setTheme(choice.value)"
-            >
-              <span class="sr-only">{{ t(choice.labelKey) }}</span>
-              <svg
-                v-if="choice.value === 'light'"
-                class="size-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.7"
-                aria-hidden="true"
-              >
-                <circle cx="12" cy="12" r="4.2" />
-                <path
-                  d="M12 2.6v2.2M12 19.2v2.2M4.2 12H2M22 12h-2.2M6.3 6.3 4.8 4.8M19.2 19.2l-1.5-1.5M17.7 6.3l1.5-1.5M4.8 19.2l1.5-1.5"
-                  stroke-linecap="round"
-                />
-              </svg>
-              <svg
-                v-else-if="choice.value === 'dark'"
-                class="size-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.7"
-                aria-hidden="true"
-              >
-                <path d="M20 14.2A8.4 8.4 0 0 1 9.8 4a8.4 8.4 0 1 0 10.2 10.2Z" stroke-linejoin="round" />
-              </svg>
-              <svg
-                v-else
-                class="size-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.7"
-                aria-hidden="true"
-              >
-                <rect x="3" y="4.5" width="18" height="12" rx="1.5" />
-                <path d="M8.5 20h7M12 16.5V20" stroke-linecap="round" />
-              </svg>
-            </button>
-          </div>
-
-          <NuxtLink
-            :to="localePath('/connexion')"
-            class="hidden rounded-md border border-border px-3 py-2 text-sm no-underline text-text hover:bg-surface-hover sm:inline-block"
-          >
-            {{ t('nav.account.login') }}
-          </NuxtLink>
-
-          <button
-            type="button"
-            class="rounded-md border border-border p-2 text-text lg:hidden"
-            :aria-expanded="isMobileNavOpen"
-            aria-controls="navigation-mobile"
-            @click="isMobileNavOpen = !isMobileNavOpen"
-          >
-            <span class="sr-only">
-              {{ isMobileNavOpen ? t('common.a11y.closeMenu') : t('common.a11y.openMenu') }}
-            </span>
-            <svg
-              class="size-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.8"
-              aria-hidden="true"
-            >
-              <path v-if="!isMobileNavOpen" d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round" />
-              <path v-else d="M6 6l12 12M18 6 6 18" stroke-linecap="round" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <nav
-        v-if="isMobileNavOpen"
-        id="navigation-mobile"
-        class="border-t border-border-subtle bg-surface-raised px-4 py-2 lg:hidden"
-        :aria-label="t('nav.main.home')"
-      >
+      <template #actions>
+        <UiLocaleSwitch class="hidden sm:flex" />
+        <UiThemeToggle />
         <NuxtLink
-          v-for="item in mainNav"
-          :key="item.to"
-          :to="localePath(item.to)"
-          class="block rounded-md px-3 py-2.5 text-sm no-underline text-text-muted hover:bg-surface-hover hover:text-text"
-          :class="isCurrent(item.to) ? 'text-accent font-semibold' : ''"
-          :aria-current="isCurrent(item.to) ? 'page' : undefined"
+          :to="localePath('/connexion')"
+          class="hidden rounded-md border border-border px-3 py-2 text-sm text-text no-underline transition-colors hover:bg-surface-hover sm:inline-block"
         >
-          {{ t(item.labelKey) }}
+          {{ t('nav.account.login') }}
         </NuxtLink>
-        <div class="mt-2 flex items-center gap-2 border-t border-border-subtle pt-2 sm:hidden">
-          <NuxtLink
-            v-for="entry in availableLocales"
-            :key="entry.code"
-            :to="switchLocalePath(entry.code)"
-            class="rounded-md border border-border px-3 py-2 text-xs font-semibold uppercase no-underline text-text-subtle"
-            :lang="entry.code"
-          >
-            {{ entry.code }}
-          </NuxtLink>
-          <NuxtLink
-            :to="localePath('/connexion')"
-            class="ml-auto rounded-md border border-border px-3 py-2 text-sm no-underline text-text"
-          >
-            {{ t('nav.account.login') }}
-          </NuxtLink>
-        </div>
-      </nav>
-    </header>
+      </template>
+
+      <template #mobile-footer>
+        <UiLocaleSwitch class="sm:hidden" />
+        <NuxtLink
+          :to="localePath('/connexion')"
+          class="ml-auto rounded-md border border-border px-3 py-2 text-sm text-text no-underline"
+        >
+          {{ t('nav.account.login') }}
+        </NuxtLink>
+      </template>
+    </UiNavBar>
 
     <main id="contenu-principal" class="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 sm:px-6 sm:py-10">
       <slot />
@@ -291,14 +137,14 @@ const currentYear = new Date().getFullYear()
         </div>
 
         <div v-for="section in footerSections" :key="section.labelKey">
-          <h2 class="font-display text-sm uppercase tracking-wide text-text-subtle">
+          <h2 class="font-display text-sm tracking-wide text-text-subtle uppercase">
             {{ t(section.labelKey) }}
           </h2>
           <ul class="mt-3 space-y-2">
             <li v-for="item in section.items" :key="item.to">
               <NuxtLink
                 :to="localePath(item.to)"
-                class="text-sm no-underline text-text-muted hover:text-text"
+                class="text-sm text-text-muted no-underline hover:text-text"
               >
                 {{ t(item.labelKey) }}
               </NuxtLink>

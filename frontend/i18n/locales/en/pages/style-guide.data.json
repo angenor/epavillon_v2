@@ -1,0 +1,39 @@
+{
+  "title": "Data",
+  "description": "The back-office table on twelve real rows of the proposals view, with its sorting, action menu and pagination. A three-row demonstration table proves nothing: neither the density, nor the alignment of numbers, nor what becomes of a column of long titles.",
+  "knockedOut": "Knocked out",
+  "table": {
+    "title": "Proposal list",
+    "note": "Density is deliberate: these people read negotiation documents, a well-composed table does not put them off. Sorting is controlled by the screen, never by the table — sorting inside the component would produce a wrong ranking as soon as data is paginated server-side. Below 640 px, secondary columns disappear: the page body never scrolls horizontally.",
+    "caption": "Proposals submitted for COP31, with their review progress"
+  },
+  "columns": {
+    "reference": "Reference",
+    "title": "Title",
+    "organization": "Organization",
+    "status": "Status",
+    "score": "Score",
+    "reviews": "Reviews",
+    "rank": "Rank",
+    "actions": "Actions"
+  },
+  "menu": {
+    "label": "Actions on proposal {reference}",
+    "open": "Open the proposal",
+    "review": "Enter a review",
+    "export": "Export as PDF",
+    "reject": "Reject the proposal"
+  },
+  "pagination": {
+    "title": "Pagination",
+    "note": "The total count comes before the page numbers: it is what tells you whether the filter bit. The sliding window avoids twenty tab stops between the list and the footer; below 640 px, only “previous” and “next” remain."
+  },
+  "empty": {
+    "title": "Table with no results",
+    "note": "A table left empty because a filter returns nothing NEVER offers to create something: it offers to widen the search. Confusing the two is how duplicates are manufactured — the costliest flaw of the previous platform.",
+    "caption": "Proposals matching the active filters",
+    "stateTitle": "No proposal matches these filters",
+    "stateDescription": "Forty proposals exist for this edition. Widen the search or remove a filter.",
+    "stateAction": "Remove all filters"
+  }
+}

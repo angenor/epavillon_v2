@@ -1,0 +1,49 @@
+{
+  "title": "Design tokens",
+  "description": "Two levels, never to be mixed. BRAND colours carry the name from the visual identity and are never redefined, not even in dark mode. ROLE tokens carry a usage name, reference the brand, and are the only ones a component may call.",
+  "brand": {
+    "title": "Brand palette",
+    "note": "The identity colours are print colours, not interface colours: the official cyan tops out at 2.91:1 on white, far from the 4.5:1 required for body text. Each scale keeps the hue and varies lightness so that every use has a shade that passes contrast.",
+    "legend": "The ratio shown is that of the shade against the ACTIVE page background, computed on render. The diamond marks the step where the official identity colour lives.",
+    "charterMark": "Official identity colour",
+    "cyan": "IFDD cyan",
+    "rouge": "IFDD red",
+    "jaune": "IFDD yellow",
+    "vert": "IFDD green",
+    "violet": "IFDD purple",
+    "bleu": "IFDD rich blue",
+    "gris": "IFDD grey"
+  },
+  "roles": {
+    "title": "Role tokens",
+    "note": "A component calls “accent”, never “cyan”. That is what lets dark mode redefine roles without ever touching the official colours. The ratio shown is that of the token against the active page background.",
+    "surfaces": "Surfaces",
+    "text": "Text",
+    "borders": "Borders and focus",
+    "accent": "Accent",
+    "states": "States"
+  },
+  "type": {
+    "title": "Type scale",
+    "note": "Seven levels, not one more. Beyond that, hierarchy reads worse, not better. Headings use the identity's display typeface; neither it nor the body typeface ships as a font file in this repository, so system fallbacks are what you see for now.",
+    "sample": "Financing coastal adaptation",
+    "usage3xl": "Page title",
+    "usage2xl": "Section title",
+    "usageXl": "Block title",
+    "usageLg": "Standfirst, highlighted text",
+    "usageBase": "Body text",
+    "usageSm": "Metadata, field labels",
+    "usageXs": "Legal notices, table units"
+  },
+  "spacing": {
+    "title": "Spacing, radii, shadows",
+    "note": "4 px base. Plenty of whitespace between blocks, little inside them: that is what produces readable density rather than an airy, empty page."
+  },
+  "radius": {
+    "title": "Radii"
+  },
+  "shadow": {
+    "title": "Shadows",
+    "note": "Deliberately faint: hierarchy comes from the rule and the whitespace. The strongest shadow is reserved for floating surfaces — modals and menus."
+  }
+}

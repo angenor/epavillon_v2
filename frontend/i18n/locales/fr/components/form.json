@@ -1,0 +1,15 @@
+{
+  "required": "obligatoire",
+  "optional": "facultatif",
+  "readonly": "Lecture seule",
+  "errorPrefix": "Erreur :",
+  "counter": "{count} / {max}",
+  "counterExceeded": "{count} / {max} — {over} caractères de trop",
+  "switch": {
+    "on": "Activé",
+    "off": "Désactivé"
+  },
+  "date": {
+    "timezoneHint": "Heure saisie dans le fuseau de l'événement ({zone})."
+  }
+}

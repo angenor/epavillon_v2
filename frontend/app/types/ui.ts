@@ -1,0 +1,185 @@
+/**
+ * Vocabulaire des composants d'interface — `app/components/ui/`.
+ *
+ * Ces types ne décrivent AUCUNE table : ils nomment les variantes, les tailles
+ * et les structures de données que les composants attendent en propriété. Ils
+ * vivent à part des types du modèle (`types/reference.ts`, `types/programme/…`)
+ * pour que la frontière reste nette — un composant d'interface ne connaît pas le
+ * schéma, il reçoit ce qu'on lui donne.
+ *
+ * RÈGLE : aucun libellé ici. Une option de `Select`, une colonne de `Table`, une
+ * étape de `Stepper` portent soit une clé i18n (`labelKey`) pour un libellé
+ * d'interface, soit un libellé déjà résolu (`label`) quand il vient de la base.
+ * Les deux ne se confondent pas — c'est le piège exact de la v1.
+ */
+
+import type { I18nText } from './shared'
+
+// ---------------------------------------------------------------------------
+// Vocabulaire commun
+// ---------------------------------------------------------------------------
+
+/**
+ * Intention d'un composant coloré. La couleur DISTINGUE un état, elle ne décore
+ * pas : `neutral` est le défaut, et les quatre autres ne s'emploient que quand
+ * l'information qu'ils portent est réellement de cette nature.
+ */
+export type Intent = 'neutral' | 'info' | 'success' | 'warning' | 'danger'
+
+/** Variantes de bouton, dans l'ordre décroissant de poids visuel. */
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'link'
+
+/** Trois tailles suffisent : `sm` est la version compacte des barres d'outils. */
+export type Size = 'sm' | 'md' | 'lg'
+
+/** Sens d'un tri de colonne ; `null` = colonne non triée. */
+export type SortDirection = 'asc' | 'desc' | null
+
+// ---------------------------------------------------------------------------
+// Champs de formulaire
+// ---------------------------------------------------------------------------
+
+/**
+ * Propriétés communes à tout champ. `FormField` les consomme pour composer le
+ * libellé, l'aide contextuelle et le message d'erreur autour du contrôle.
+ *
+ * `readonly` et `disabled` ne sont pas la même chose et ne se rendent pas de la
+ * même façon : un champ désactivé est hors du parcours (sa valeur ne part pas),
+ * un champ en lecture seule reste focalisable, copiable et soumis.
+ */
+export interface FieldProps {
+  /** Identifiant HTML ; généré si absent. */
+  id?: string
+  /** Libellé d'interface, déjà traduit par l'appelant. */
+  label?: string
+  /** Aide contextuelle affichée sous le champ, avant toute erreur. */
+  hint?: string
+  /** Message d'erreur. Sa seule présence bascule le champ en état d'erreur. */
+  error?: string
+  required?: boolean
+  disabled?: boolean
+  readonly?: boolean
+  /** Le champ occupe-t-il toute la largeur disponible ? */
+  block?: boolean
+  /**
+   * Libellé lisible des seuls lecteurs d'écran — barre de recherche d'en-tête,
+   * champ de cellule. Le libellé reste OBLIGATOIRE : le masquer est une
+   * décision de mise en page, jamais une dispense.
+   */
+  hideLabel?: boolean
+}
+
+/** Option d'un `Select` ou d'un groupe de `Radio`. */
+export interface SelectOption {
+  value: string
+  /** Libellé prêt à l'affichage — traduit par l'appelant, ou résolu depuis la base. */
+  label: string
+  /** Précision affichée en second rang (pays d'une organisation, code d'une salle). */
+  description?: string
+  disabled?: boolean
+}
+
+// ---------------------------------------------------------------------------
+// Tableau
+// ---------------------------------------------------------------------------
+
+/**
+ * Colonne de `Table`. La densité est assumée : un tableau de back-office affiche
+ * douze lignes lisibles plutôt que six aérées.
+ */
+export interface TableColumn {
+  /** Clé de la colonne ; sert aussi de nom de créneau (`cell-<key>`). */
+  key: string
+  /** En-tête, déjà traduit. */
+  label: string
+  /** Alignement du contenu. Les nombres s'alignent à droite, toujours. */
+  align?: 'start' | 'end' | 'center'
+  /** La colonne peut-elle être triée par l'utilisateur ? */
+  sortable?: boolean
+  /** Largeur CSS explicite (`12rem`, `10%`) ; sinon la colonne s'ajuste. */
+  width?: string
+  /**
+   * Colonne masquée sous 640 px. La règle du projet interdit le défilement
+   * horizontal du corps de page : sur mobile, on retire des colonnes plutôt que
+   * de laisser filer le tableau.
+   */
+  hideOnMobile?: boolean
+  /** Chiffres alignés en colonne — nombres, notes, montants. */
+  numeric?: boolean
+}
+
+// ---------------------------------------------------------------------------
+// Navigation
+// ---------------------------------------------------------------------------
+
+/** Onglet de `Tabs`. */
+export interface TabItem {
+  value: string
+  label: string
+  /** Compteur affiché à droite du libellé (« Propositions 40 »). */
+  count?: number
+  disabled?: boolean
+}
+
+/** État d'une étape de `Stepper`. */
+export type StepState = 'done' | 'current' | 'upcoming' | 'error' | 'skipped'
+
+/** Étape de `Stepper` — parcours en plusieurs écrans (formulaire de soumission). */
+export interface StepItem {
+  value: string
+  label: string
+  /** Précision d'une ligne sous le libellé. */
+  description?: string
+  state?: StepState
+  /** L'étape est-elle atteignable par clic ? Une étape à venir ne l'est pas. */
+  disabled?: boolean
+}
+
+/** Entrée d'un `ContextMenu`. */
+export interface MenuItem {
+  value: string
+  label: string
+  /** Nom d'icône de `UiIcon`. */
+  icon?: string
+  /** Action destructrice : rendue en rouge, séparée du reste. */
+  destructive?: boolean
+  disabled?: boolean
+  /** Trait de séparation AVANT cette entrée. */
+  separatorBefore?: boolean
+}
+
+// ---------------------------------------------------------------------------
+// Composants métier
+// ---------------------------------------------------------------------------
+
+/**
+ * Pastille thématique d'une session — un terme de `reference.taxonomy_terms`.
+ *
+ * La couleur vient de la BASE (`taxonomy_terms.color_hex`) : c'est une donnée,
+ * pas un jeton de design. Elle sert de repère de teinte, jamais de fond de
+ * texte — voir `UiBadge`, qui la rend en point coloré pour garantir le contraste
+ * dans les deux thèmes.
+ */
+export interface ThemeBadge {
+  code: string
+  label: I18nText | string
+  color?: string | null
+}
+
+/**
+ * Étape de `StatusTimeline` — frise d'avancement d'un dossier.
+ * Les dates sont des instants ISO ; la frise les affiche dans le fuseau qu'on
+ * lui donne, comme toute date de la plateforme.
+ */
+export interface TimelineStep {
+  /** Statut du modèle (`programme.proposal_status`) ou clé libre. */
+  value: string
+  label: string
+  /** Instant de franchissement ; `null` tant que l'étape n'est pas atteinte. */
+  at?: string | null
+  /** Auteur de l'étape, quand il est connu et utile (« par Awa Diop »). */
+  actor?: string | null
+  /** Précision : motif de refus, nature de la demande de correction. */
+  detail?: string | null
+  state?: StepState
+}

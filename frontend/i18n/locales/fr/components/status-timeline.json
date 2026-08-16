@@ -1,0 +1,12 @@
+{
+  "label": "Avancement du dossier",
+  "pending": "En attente",
+  "by": "par {actor}",
+  "state": {
+    "done": "étape franchie",
+    "current": "étape en cours",
+    "upcoming": "étape à venir",
+    "error": "correction demandée",
+    "skipped": "étape non concernée"
+  }
+}

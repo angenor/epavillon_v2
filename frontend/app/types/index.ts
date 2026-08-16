@@ -21,14 +21,18 @@
  *   programme/review.ts        070_programme_proposals.sql § 5
  *   programme/session.ts       075_programme_sessions.sql § 1, 2, 7
  *   programme/registration.ts  075_programme_sessions.sql § 3, 4, 5
+ *   live.ts                    080_live.sql § 5 — les messages d'incident seuls
  *   views.ts                   les deux vues consommées telles quelles
  *
  * Modules hors du jalon en cours — Publications, Négociations, Formations,
- * Outils, Direct, Engagement, Analytique — : leurs types viendront avec leurs
- * écrans, dans leur propre fichier.
+ * Outils, Engagement, Analytique — : leurs types viendront avec leurs écrans,
+ * dans leur propre fichier. Du module Direct, seule la part réellement consommée
+ * par le jalon est couverte : le bandeau d'incident, motif transverse de toute
+ * la plateforme (voir l'en-tête de `live.ts`).
  *
- * `navigation.ts` n'est PAS ré-exporté : il ne décrit pas le modèle et porte une
- * augmentation de `PageMeta` que les layouts importent directement.
+ * `navigation.ts` et `ui.ts` ne sont PAS ré-exportés : ils ne décrivent pas le
+ * modèle. Le premier porte une augmentation de `PageMeta` que les layouts
+ * importent directement, le second le vocabulaire des composants d'interface.
  */
 
 export type * from './shared'
@@ -47,4 +51,5 @@ export type * from './programme/review'
 export type * from './programme/session'
 export type * from './programme/registration'
 
+export type * from './live'
 export type * from './views'

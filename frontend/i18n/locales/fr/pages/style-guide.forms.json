@@ -1,0 +1,71 @@
+{
+  "title": "Formulaires",
+  "description": "Sept états sont exigés de chaque champ : vide, rempli, focus, erreur avec message, aide contextuelle, désactivé, lecture seule. Ils sont montrés ensemble, et c'est tout l'intérêt — un champ désactivé et un champ en lecture seule se ressemblent tant qu'on ne les compare pas.",
+  "placeholder": "Nom de votre organisation",
+  "hintText": "Le nom complet, tel qu'il figure sur vos documents officiels.",
+  "errorText": "Cette adresse électronique est incomplète.",
+  "readonlyHint": "Le numéro de dossier est attribué à la création et ne se modifie pas. Il reste copiable.",
+  "states": {
+    "title": "Les sept états d'un champ",
+    "note": "« Désactivé » et « lecture seule » ne font pas la même chose : un champ désactivé sort du parcours de tabulation et sa valeur n'est pas soumise ; un champ en lecture seule reste focalisable, copiable et soumis. Les confondre, c'est empêcher de copier un numéro de dossier.",
+    "empty": "Vide",
+    "filled": "Rempli",
+    "hint": "Avec aide contextuelle",
+    "error": "En erreur",
+    "disabled": "Désactivé",
+    "readonly": "Lecture seule",
+    "focusNote": "Le focus clavier ne se montre pas dans une image : tabulez dans les champs ci-dessus. L'anneau est celui de toute la plateforme, défini une seule fois — un anneau par composant, ce sont autant de façons de ne plus se voir sur un fond donné."
+  },
+  "variants": {
+    "title": "Tailles et variantes",
+    "note": "Les hauteurs de champ sont accordées à celles des boutons : un champ et son bouton d'action s'alignent sans réglage.",
+    "small": "Compact",
+    "large": "Grande taille",
+    "withIcon": "Avec icône",
+    "number": "Jauge de la salle",
+    "numberHint": "Nombre de places. Laisser vide si la salle n'a pas de limite déclarée."
+  },
+  "textarea": {
+    "title": "Zone de texte",
+    "note": "Le compteur apparaît dès qu'une limite existe, pas seulement quand elle est dépassée : rédiger 900 signes pour en voir 400 refusés à l'envoi est le meilleur moyen de perdre un dossier. La saisie n'est jamais coupée à la limite — couper la frappe à mi-mot fait croire à un clavier cassé.",
+    "summary": "Résumé de l'activité",
+    "summaryHint": "Ce résumé apparaît dans la programmation publique.",
+    "autoGrow": "Hauteur suivant le contenu",
+    "autoGrowPlaceholder": "Tapez plusieurs lignes pour voir la zone grandir, jusqu'à seize lignes."
+  },
+  "choices": {
+    "title": "Listes et choix",
+    "note": "La liste déroulante s'appuie sur le contrôle natif : sélecteur du système sur mobile, clavier gratuit, jamais coupée par le débordement d'un conteneur. Les boutons radio se comparent d'un coup d'œil — trois à cinq options, pas davantage. Un interrupteur bascule un réglage qui prend effet immédiatement ; s'il faut ensuite enregistrer, c'est une case qu'il fallait.",
+    "selectEmpty": "Format de participation",
+    "selectFilled": "Format retenu",
+    "selectReadonly": "Format (lecture seule)",
+    "selectError": "Format obligatoire",
+    "selectErrorText": "Choisissez un format de participation.",
+    "selectPlaceholder": "Choisir un format",
+    "radio": "Format de participation",
+    "radioHint": "Une activité hybride demande une salle ET un canal de diffusion.",
+    "checkChecked": "Je confirme que les intervenants ont donné leur accord",
+    "checkWithHint": "Recevoir les rappels avant chaque séance",
+    "checkHint": "Un courriel 24 heures avant, puis un autre une heure avant.",
+    "checkPartial": "Toutes les propositions de la page",
+    "checkDisabled": "Option imposée par l'appel à propositions",
+    "checkError": "J'accepte les conditions de participation",
+    "checkErrorText": "Vous devez accepter les conditions pour déposer un dossier.",
+    "switchOn": "Diffuser cette activité en direct",
+    "switchHint": "Un seul direct est possible à la fois sur la plateforme.",
+    "switchOff": "Ouvrir la liste d'attente",
+    "switchLoading": "Publier dans la programmation",
+    "switchDisabled": "Enregistrer la séance (indisponible)"
+  },
+  "dates": {
+    "title": "Dates et heures",
+    "note": "Le contrôle natif ouvre le calendrier du système : localisé, navigable au clavier, utilisable au doigt. Mais il ne connaît pas les fuseaux — il rend une heure de mur, sans décalage. Le fuseau de l'événement reste donc visible DANS le champ : la personne qui saisit 14:30 doit savoir que c'est 14:30 à Belém, pas chez elle.",
+    "dateOnly": "Date de l'activité",
+    "dateTime": "Début du créneau",
+    "bounds": "Bornes fixées aux jours de l'édition, du 9 au 20 novembre 2027."
+  },
+  "search": {
+    "label": "Rechercher une organisation",
+    "hint": "Tapez au moins deux lettres. La recherche porte sur toutes les dénominations : le nom complet comme le sigle seul ramènent la même fiche."
+  }
+}

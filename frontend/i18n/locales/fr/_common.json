@@ -41,12 +41,15 @@
     "error": {
       "title": "Une erreur est survenue",
       "description": "Le contenu n'a pas pu être chargé. Réessayez dans un instant.",
-      "action": "Réessayer"
+      "action": "Réessayer",
+      "requestId": "Référence de l'incident : {id}"
     },
     "forbidden": {
       "title": "Accès refusé",
       "description": "Votre compte ne dispose pas des droits nécessaires pour consulter cette page.",
-      "action": "Retour à l'accueil"
+      "action": "Retour à l'accueil",
+      "scope": "Droit nécessaire : {scope}",
+      "contact": "Pour obtenir cet accès, s'adresser à {contact}."
     },
     "notFound": {
       "title": "Page introuvable",
@@ -89,9 +92,12 @@
     "relativeSoon": "Bientôt",
     "timeRange": "{start} — {end}",
     "timeRangeWithZone": "{start} — {end}, heure de {zone}",
+    "timeRangeFull": "{start} — {end} ({zone}, {offset})",
+    "timeFull": "{time} ({zone}, {offset})",
     "timeWithZone": "{time}, heure de {zone}",
     "zoneOf": "heure de {zone}",
-    "zoneOffset": "UTC{offset}"
+    "zoneOffset": "UTC{offset}",
+    "zoneOffsetShort": "UTC{offset}"
   },
   "file": {
     "maxSize": "Taille maximale : {size}",
