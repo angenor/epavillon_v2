@@ -237,8 +237,15 @@ CREATE TABLE negotiation.meetings (
         CHECK (status = 'draft' OR format = 'online' OR venue_label IS NOT NULL),
     CONSTRAINT ck_meetings_cancellation
         CHECK (status <> 'cancelled' OR cancellation_reason IS NOT NULL),
-    -- Une même salle Zoom ne peut pas héberger deux réunions qui se chevauchent :
-    -- le conflit est refusé par la base, pas détecté après coup par un humain.
+    -- Une même salle Zoom ne peut pas héberger deux réunions qui se chevauchent.
+    --
+    -- Ce blocage est volontaire et ne contredit pas la règle du module
+    -- `programme`, où les chevauchements de créneaux sont signalés et jamais
+    -- refusés. La différence tient à la nature de l'obstacle : là-bas, une
+    -- collision d'horaires appelle un arbitrage humain, que l'équipe résout en
+    -- déplaçant ses blocs ; ici, c'est une impossibilité du fournisseur — une
+    -- réunion Zoom donnée n'accueille pas deux sessions à la fois, et l'écrire
+    -- en base ne produirait qu'un lien de connexion inutilisable.
     CONSTRAINT ex_meetings_live_room_overlap EXCLUDE USING gist (
         live_meeting_id WITH =,
         tstzrange(start_at, end_at, '[)') WITH &&

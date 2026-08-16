@@ -2,7 +2,17 @@
 
 Un seul prompt, à coller tel quel dans Claude Design. Il produit le **guide de style** : la page de référence qui fixe les jetons de design, la typographie, les composants et leurs états.
 
-Ce guide n'est pas un livrable décoratif — c'est le contrat visuel que Claude Code appliquera ensuite à chaque page. Une fois validé, il devient un fichier `frontend/app/assets/css/design-tokens.css` et un composant `pages/style-guide.vue` conservé dans le projet.
+Ce guide n'est pas un livrable décoratif — c'est le contrat visuel que Claude Code appliquera ensuite à chaque page.
+
+**Trois fichiers distincts, à ne pas confondre.** L'artefact produit ici est une *référence visuelle* figée ; il ne devient jamais du code tel quel.
+
+| Fichier | Nature | Qui le produit |
+|---|---|---|
+| `docs/style-guide/index.html` | l'artefact de ce prompt : page HTML autonome, CSS écrit à la main. **Référence visuelle**, conservée hors du code applicatif | ce prompt, dans Claude Design |
+| `frontend/app/assets/css/design-tokens.css` | les jetons extraits du bloc `<pre>` de cette page | le prompt A0.1 |
+| `frontend/app/pages/style-guide.vue` | le guide **vivant**, monté sur les composants Vue réels et servant de test de non-régression | le prompt A0.4 |
+
+L'artefact HTML et la page Vue ne sont donc **pas le même fichier** : le premier est l'arbitre, le second l'implémentation. Voir [PROMPTS_DEVELOPPEMENT.md](PROMPTS_DEVELOPPEMENT.md), prompts A0.1 et A0.4.
 
 ---
 
@@ -14,8 +24,18 @@ unique qui montre tous les jetons de design, tous les composants et tous leurs
 états. Ce n'est pas une maquette d'écran : c'est le référentiel qui servira à
 construire toutes les pages ensuite.
 
-Réponds en français. Produis un artefact HTML autonome avec TailwindCSS
-(tout en ligne, aucune ressource externe).
+Réponds en français. Produis un artefact HTML VRAIMENT autonome : un seul
+fichier, ouvrable hors ligne, sans aucune ressource externe — ni CDN, ni police
+distante, ni feuille de style liée, ni script tiers.
+
+Le CSS est écrit À LA MAIN dans une unique balise `<style>`, en variables CSS
+natives. N'utilise NI TailwindCSS NI aucun autre framework : ce guide est un
+artefact de CONCEPTION, pas du code de production. Deux raisons, et elles sont
+décisives : Tailwind v4 suppose une étape de compilation (le CDN disponible est
+resté en syntaxe v3, il produirait un guide faux), et des jetons noyés dans des
+classes utilitaires ne s'extraient pas. La transposition en classes Tailwind v4
+se fera plus tard, côté projet, au prompt A0.4 — à partir des variables que tu
+auras définies ici.
 
 === LE PRODUIT ===
 ePavillon est la plateforme numérique de l'IFDD (Institut de la Francophonie
@@ -30,7 +50,9 @@ centrale, d'Europe, du Maghreb, d'Haïti, du Vietnam, du Liban, du Canada.
 Beaucoup consultent depuis un mobile, sur une connexion irrégulière.
 
 === CHARTE GRAPHIQUE IFDD (officielle, à respecter strictement) ===
-Source : Charte_graphique_Ifdd_couleurs.ai, 1er septembre 2023.
+Source de vérité : docs/CHARTE_GRAPHIQUE.md, dérivé du nuancier officiel
+Charte_graphique_Ifdd_couleurs.ai du 1er septembre 2023. Ces valeurs ne se
+négocient pas et ne se « corrigent » pas.
 
 Couleurs principales
   cyan    #00A1E4
@@ -74,12 +96,30 @@ construire à partir d'elles un système utilisable, en respectant ces règles :
    bordures, séparateurs, texte secondaire. Construis-en une échelle complète.
 4. Thème sombre : ce n'est pas un inversement. Le vert #8FBF2F et le jaune
    #FFD500 deviennent agressifs sur fond noir — désature ou assombris.
-   Définis la palette claire sur `:root`, redéfinis-la sous
+   Définis les rôles du thème clair sur `:root`, redéfinis-les sous
    `@media (prefers-color-scheme: dark)` gardé par
    `:root:not([data-theme="light"])` ET sous `:root[data-theme="dark"]`.
-5. Tous les jetons sont des variables CSS nommées en clair
-   (`--color-surface`, `--color-text-muted`, `--space-4`, `--radius-md`…),
-   pas des valeurs en dur répétées.
+   Seuls les rôles changent d'un thème à l'autre : les jetons de marque du
+   point 5 sont déclarés une fois et ne bougent jamais.
+5. DEUX NIVEAUX DE JETONS, à ne jamais mélanger. Les couleurs de MARQUE gardent
+   le nom de la charte (`--ifdd-cyan`, `--ifdd-vert`, `--ifdd-gris-pale`…)
+   parce qu'elles sont non négociables et doivent rester traçables jusqu'au
+   document officiel de l'IFDD ; les jetons SÉMANTIQUES d'interface portent, eux,
+   un nom de rôle (`--color-surface`, `--color-text`, `--color-border`,
+   `--color-success`…) et RÉFÉRENCENT les couleurs de marque ou leurs nuances
+   dérivées, sans jamais redéclarer une valeur hexadécimale. C'est exactement ce
+   qui permet au thème sombre de redéfinir les rôles sans toucher à la marque :
+
+     :root                    { --ifdd-cyan: #00A1E4; }             /* marque, jamais redéfinie */
+     :root                    { --color-accent: var(--ifdd-cyan-700); }  /* rôle, thème clair */
+     :root[data-theme="dark"] { --color-accent: var(--ifdd-cyan-300); }  /* rôle, thème sombre */
+
+   Un composant n'appelle donc jamais `--ifdd-cyan` directement : il appelle
+   `--color-accent`. Les nuances dérivées du point 1 restent du côté marque et
+   se nomment `--ifdd-cyan-50` … `--ifdd-cyan-900`.
+   Même exigence pour les jetons non colorés — `--space-4`, `--radius-md`,
+   `--shadow-sm`, `--font-size-lg`… : des variables nommées en clair, jamais une
+   valeur en dur répétée.
 
 === TON ET DIRECTION ARTISTIQUE ===
 Institutionnel et sérieux, mais vivant. Ni tableau de bord SaaS générique, ni
@@ -105,6 +145,14 @@ l'énergie de la programmation.
 
 === CONTENU DU GUIDE (dans cet ordre) ===
 
+Ce catalogue est celui de la RÉFÉRENCE VISUELLE : il montre volontairement plus
+de composants que le socle de code n'en crée au départ — fil d'Ariane, menu
+contextuel, champ de recherche et barre de navigation en font partie. La liste
+qui fait foi pour le CODE est celle du prompt A0.4 de
+docs/PROMPTS_DEVELOPPEMENT.md, puisque c'est elle qui devient
+frontend/app/components/ui/. Montre tout ici ; l'implémentation suivra au rythme
+des écrans qui en ont besoin.
+
 1. JETONS
    - Palette complète : chaque nuance avec son nom de variable, sa valeur
      hexadécimale, et son rapport de contraste calculé sur fond clair et sur
@@ -117,8 +165,9 @@ l'énergie de la programmation.
 2. COMPOSANTS DE BASE, chacun avec TOUS ses états
    (repos, survol, focus clavier, actif, désactivé, chargement)
    - Boutons : principal, secondaire, discret, danger, avec icône, taille
-     normale et compacte. Rappel : en Tailwind v4 les boutons n'ont pas
-     `cursor-pointer` par défaut, ajoute-le.
+     normale et compacte. Rappel : un `<button>` n'a pas `cursor: pointer` par
+     défaut, déclare-le explicitement — le portage en Tailwind v4 aura la même
+     obligation.
    - Champs de formulaire : texte, zone de texte, liste déroulante, recherche,
      case à cocher, bouton radio, interrupteur, sélecteur de date.
      Montre les états : vide, rempli, focus, erreur avec message, aide
@@ -159,7 +208,11 @@ l'énergie de la programmation.
    composer une pastille thématique, quelle largeur maximale pour un paragraphe.
 
 === CONTRAINTES TECHNIQUES ===
-- TailwindCSS v4 : pas de `bg-opacity-*`, utiliser `bg-cyan/50`.
+- CSS écrit à la main dans une seule balise `<style>` : variables CSS natives,
+  flexbox et grid, aucune classe utilitaire, aucun framework. C'est ce qui rend
+  l'artefact réellement autonome et ses jetons extractibles d'un seul copier.
+- Transparences en `color-mix()` ou en `rgb(… / .5)`, jamais une couleur
+  semi-transparente écrite en dur.
 - Responsive réel : le guide doit tenir à 375 px. Les blocs larges défilent dans
   leur propre conteneur `overflow-x: auto` ; le corps de page ne défile jamais
   horizontalement.
@@ -182,9 +235,14 @@ Pertes et préjudices · Finance climatique · Genre · Agriculture et alimentat
 Biodiversité · Désertification.
 
 === LIVRABLE ===
-Une page HTML unique, autonome, avec un sommaire ancré permettant de naviguer
-entre les sections. À la fin de la page, un bloc `<pre>` contenant toutes les
-variables CSS définies, prêt à être copié dans un fichier de jetons.
+Une page HTML unique et autonome — un seul fichier, qui doit s'ouvrir tel quel
+dans un navigateur hors ligne — avec un sommaire ancré permettant de naviguer
+entre les sections. À la fin de la page, un bloc `<pre>` contenant TOUTES les
+variables CSS définies, dans cet ordre : d'abord les jetons de marque
+`--ifdd-*` et leurs nuances dérivées, ensuite les jetons sémantiques
+`--color-*` / `--space-*` / `--radius-*`, puis leurs redéfinitions pour le
+thème sombre. Ce bloc est destiné à être copié tel quel dans un fichier de
+jetons.
 
 Avant de coder, écris en cinq lignes les décisions que tu prends sur les
 nuances dérivées et sur le thème sombre, et pourquoi.
@@ -195,14 +253,17 @@ nuances dérivées et sur le thème sombre, et pourquoi.
 ## Après génération
 
 1. **Vérifier les contrastes annoncés.** Claude calcule les rapports, mais recoupez au moins le cyan et le vert sur fond blanc — ce sont les deux pièges de cette charte.
-2. **Récupérer le bloc de variables CSS** en fin de page → `frontend/app/assets/css/design-tokens.css`.
-3. **Conserver la page** dans le projet comme `pages/style-guide.vue`. Elle sert de référence pendant tout le développement et de test de non-régression visuelle.
-4. **La citer dans chaque prompt de page** adressé ensuite à Claude Code : voir [PROMPTS_DEVELOPPEMENT.md](PROMPTS_DEVELOPPEMENT.md).
+2. **Conserver la page HTML comme référence visuelle**, hors du code applicatif — `docs/style-guide/index.html`. Elle est figée : c'est le contrat visuel, pas un composant. On ne la « fait pas évoluer », on la régénère.
+3. **Récupérer le bloc de variables CSS** en fin de page → `frontend/app/assets/css/design-tokens.css`, au prompt A0.1. Jetons de marque `--ifdd-*` puis jetons sémantiques `--color-*`, dans cet ordre.
+4. **Ne pas la confondre avec `frontend/app/pages/style-guide.vue`.** Cette page-là est créée par le prompt A0.4, en Vue, à partir des composants réels de `components/ui/` : c'est le guide vivant et le test de non-régression visuelle. Quand les deux divergent, l'artefact HTML tranche — sauf décision consignée dans `PROGRESSION.md`.
+5. **Citer les deux dans chaque prompt de page** adressé ensuite à Claude Code : voir [PROMPTS_DEVELOPPEMENT.md](PROMPTS_DEVELOPPEMENT.md).
 
 ## Prompts de reprise
 
 | Situation | Prompt |
 |-----------|--------|
+| Tailwind revenu par la fenêtre | « La page charge un script ou une feuille Tailwind : elle n'est plus autonome et ses jetons ne sont plus extractibles. Refais-la en CSS écrit à la main, variables CSS natives, une seule balise `<style>`, aucune ressource externe. » |
+| Jetons de marque et de rôle mélangés | « Des composants appellent `--ifdd-cyan` directement, ou des jetons `--color-*` redéclarent une valeur hexadécimale. Sépare les deux niveaux : la marque porte les valeurs, les rôles ne portent que des `var()`, et seuls les rôles sont redéfinis en thème sombre. » |
 | Palette dérivée bancale | « Les nuances dérivées du vert #8FBF2F tirent vers le kaki. Reprends l'échelle en conservant la teinte et en jouant sur la saturation et la luminosité. » |
 | Contrastes optimistes | « Recalcule les rapports de contraste et marque en rouge toute combinaison sous 4,5:1 pour du texte courant et sous 3:1 pour du texte large. » |
 | Thème sombre inversé | « Le thème sombre est un simple inversement. Reprends-le : le vert et le jaune de la charte sont agressifs sur fond noir, désature-les ; les surfaces doivent être des gris chauds dérivés du #231F20, pas du noir pur. » |

@@ -52,11 +52,13 @@ epavillon_v2/
 
 ## Le modèle de données
 
-`docs/database/` contient 18 fichiers SQL numérotés dans leur ordre de dépendance : **149 tables, 12 vues, 7 vues matérialisées, 145 fonctions, 14 schémas**. La chaîne complète est validée sur PostgreSQL 17 avec pgvector, le seed est rejouable, et les 167 clés étrangères inter-modules respectent la convention de nommage qui rend chaque module extractible.
+`docs/database/` contient 18 fichiers SQL numérotés dans leur ordre de dépendance, 14 143 lignes au total. Relevé le 16 août 2026 sur une base chargée : **15 schémas, 142 tables** (hors partitions filles), **14 vues, 7 vues matérialisées, 153 fonctions**. La chaîne complète passe sur PostgreSQL 17 avec pgvector, le seed est rejouable, et les **167 clés étrangères inter-modules** respectent toutes la convention de nommage qui rend chaque module extractible.
+
+Ce sont des chiffres mesurés à une date, pas des constantes : ils bougent à chaque modification du modèle. La requête qui les recompte est donnée dans [docs/README.md](docs/README.md) § « Le modèle de données » — la lancer plutôt que recopier ceux-ci.
 
 Ces fichiers **font autorité**. Aucun nom de champ ne se devine : on lit le fichier concerné, repéré via [docs/MODELE_INDEX.md](docs/MODELE_INDEX.md). Chaque table est commentée en français directement en base.
 
-Une bonne part des invariants métier est portée par le SGBD plutôt que par le code — index uniques, triggers, machines à états en données — parce que la leçon principale de la v1 est qu'une règle appliquée seulement par l'interface n'est pas appliquée. Avec une nuance assumée : tout ce qui est vrai n'a pas vocation à être bloqué. Les chevauchements de créneaux sont détectés et affichés, jamais refusés.
+Une bonne part des invariants métier est portée par le SGBD plutôt que par le code — index uniques, triggers, machines à états en données — parce que la leçon principale de la v1 est qu'une règle appliquée seulement par l'interface n'est pas appliquée. Avec une nuance assumée : tout ce qui est vrai n'a pas vocation à être bloqué — l'énoncé de référence est la règle métier n°2 de [CLAUDE.md](CLAUDE.md).
 
 ---
 
@@ -74,5 +76,6 @@ Les prompts sont dans [docs/PROMPTS_DEVELOPPEMENT.md](docs/PROMPTS_DEVELOPPEMENT
 
 Ce qui permet de **lancer l'appel à propositions de la COP31** : authentification, organisations, événements, appel, soumission, espace organisation, back-office.
 
-Les modules Publications, Négociations, Formations, Outils et Messagerie existent dans le modèle de données mais leur interface affiche « En cours de maintenance », commandée par un drapeau dans `platform.feature_flags`. Ils s'ouvriront un par un, sans redéploiement de l'ensemble.
-# epavillon_v2
+Les modules Publications, Négociations, Formations et Outils existent dans le modèle de données mais leur interface affiche « En cours de maintenance ». La messagerie directe n'est pas un module de ce rang : ses tables vivent dans `engagement`.
+
+L'affichage est commandé par `platform.feature_flags`, que `900_seed.sql` ne sème qu'en partie : `publications.enabled`, `tools.surveys` et `tools.ai_assistant` existent, `negotiation.channels` ne couvre que les canaux d'échange, et **Formations comme messagerie n'ont pas encore de drapeau — ils restent à créer**. Une fois ceux-ci en place, les modules s'ouvrent un par un, sans redéploiement de l'ensemble.

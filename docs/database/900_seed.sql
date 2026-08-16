@@ -44,14 +44,26 @@ ON CONFLICT (key) DO NOTHING;
 --
 -- Tout ce qui est en réflexion dans le cadrage démarre désactivé : le code peut
 -- être livré sans être exposé, et l'ouverture se fait sans redéploiement.
+--
+-- Deux natures de drapeaux, à ne pas confondre :
+--   `<module>.enabled` ferme l'interface d'un module entier — c'est lui que le
+--   routage lit pour servir la page « En cours de maintenance » sans toucher
+--   aux pages elles-mêmes ;
+--   les drapeaux plus fins (`negotiation.channels`, `tools.ai_assistant`…)
+--   commandent une fonctionnalité À L'INTÉRIEUR d'un module déjà ouvert. Ils ne
+--   peuvent pas tenir lieu de drapeau de module.
 -- -----------------------------------------------------------------------------
 INSERT INTO platform.feature_flags (key, description, is_enabled, rollout_percent) VALUES
     ('publications.enabled',        'Espace Publications ouvert aux organisations.', false, 0),
-    ('negotiation.channels',        'Canaux d''échange temps réel de l''espace Négociations.', false, 0),
-    ('tools.ai_assistant',          'Assistant IA et recherche documentaire (RAG).', false, 0),
-    ('tools.surveys',               'Outil de sondages.', false, 0),
-    ('calendar.external_sync',      'Synchronisation Google Agenda / Apple Calendar (phase 2).', false, 0),
-    ('newsletter.campaigns',        'Campagnes d''infolettre (hors périmètre phase 1).', false, 0),
+    ('negotiation.enabled',         'Espace Négociations, réservé aux négociateurs.', false, 0),
+    ('negotiation.channels',        'Canaux d''échange temps réel, à l''intérieur de l''espace Négociations.', false, 0),
+    ('training.enabled',            'Espace Formations : catalogue, chapitres, quiz, attestations.', false, 0),
+    ('messaging.enabled',           'Messagerie directe et mise en relation entre membres (tables du module engagement).', false, 0),
+    ('tools.enabled',               'Espace Outils.', false, 0),
+    ('tools.ai_assistant',          'Assistant IA et recherche documentaire (RAG), à l''intérieur des Outils.', false, 0),
+    ('tools.surveys',               'Outil de sondages, à l''intérieur des Outils.', false, 0),
+    ('calendar.external_sync',      'Synchronisation Google Agenda / Apple Calendar (phase ultérieure).', false, 0),
+    ('newsletter.campaigns',        'Campagnes d''infolettre (hors périmètre du jalon 1).', false, 0),
     ('programme.waitlist',          'Liste d''attente sur les sessions à jauge limitée.', true, 100),
     ('org.auto_join_by_domain',     'Rattachement automatique à une organisation par domaine de courriel vérifié.', true, 100)
 ON CONFLICT (key) DO NOTHING;

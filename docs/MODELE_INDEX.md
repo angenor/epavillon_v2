@@ -1,6 +1,6 @@
 # Index du modèle de données — quoi lire pour quoi
 
-Ce fichier existe pour une raison précise : **une session Claude Code n'a pas la mémoire de la précédente**. Plutôt que de recharger tout le modèle à chaque fois — plus de onze mille lignes de SQL — on lit ici quels fichiers concernent la tâche du jour, et on ne lit que ceux-là.
+Ce fichier existe pour une raison précise : **une session Claude Code n'a pas la mémoire de la précédente**. Plutôt que de recharger tout le modèle à chaque fois — 14 143 lignes de SQL réparties sur 18 fichiers — on lit ici quels fichiers concernent la tâche du jour, et on ne lit que ceux-là.
 
 Chaque fichier SQL porte sa propre documentation : en-tête expliquant les décisions de conception, `COMMENT ON` sur les tables et colonnes non évidentes. Les lire suffit ; il n'est pas nécessaire de consulter le cadrage pour coder.
 
@@ -68,28 +68,7 @@ Trois vues répondent à des écrans entiers en une requête. Les utiliser plut�
 
 ## Ordre de chargement des fichiers
 
-Numérotés dans leur ordre de dépendance. **Ne pas les réordonner.**
-
-```
-000 bootstrap     extensions, schémas, domaines, fonctions utilitaires
-010 platform      audit, outbox, jobs, réglages, drapeaux
-020 reference     pays, locales, taxonomies
-030 identity      personnes, comptes, RBAC, RGPD
-040 organizations organisations, dénominations, fusion
-050 media         objets S3, variantes, quotas
-060 events        séries, éditions, salles, appels, critères
-070 programme_proposals   propositions, évaluation
-075 programme_sessions    sessions, planning, inscriptions
-080 live          visio, diffusion, incidents
-090 publications  articles, quotas éditoriaux
-100 negotiations  espaces, documents, canaux
-110 engagement    notifications, courriels, rappels
-120 tools         sondages, IA
-125 training      formations, chapitres, quiz, attestations
-130 analytics     vues matérialisées
-900 seed          données d'amorçage (idempotent)
-910 migration_v1  reprise des données de l'ancienne plateforme
-```
+Les 18 fichiers sont numérotés dans leur ordre de dépendance. **Ne pas les réordonner.** Le catalogue détaillé — numéro, schéma, contenu de chacun — est le tableau « Ordre d'exécution » de [README.md](README.md) ; il n'est pas repris ici, ce document répondant à la question « quoi lire pour quoi » et non « que contient chaque fichier ».
 
 ---
 

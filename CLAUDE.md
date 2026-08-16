@@ -43,7 +43,7 @@ Si le modèle paraît insuffisant pour une fonctionnalité, **on modifie le SQL 
 | Le guide de style vivant | `frontend/app/pages/style-guide.vue` |
 | Ce que demandait le commanditaire, dans ses mots | [docs/historique/](docs/historique/) |
 
-**Ne charge pas tout.** `CADRAGE.md` fait plusieurs centaines de lignes et les 18 fichiers SQL en font plus de onze mille : lis la section ou le fichier dont tu as besoin, pas l'ensemble.
+**Ne charge pas tout.** `CADRAGE.md` fait plusieurs centaines de lignes et les 18 fichiers SQL en totalisent 14 143 : lis la section ou le fichier dont tu as besoin, pas l'ensemble.
 
 ---
 
@@ -53,7 +53,7 @@ Elles sont détaillées dans le cadrage, mais on les oublie vite et chacune a d�
 
 1. **Une organisation, plusieurs dénominations.** Chercher « IFDD » ou « Institut de la Francophonie pour le développement durable » doit ramener la même fiche. C'est le défaut n°1 de la v1.
 2. **Les chevauchements de créneaux ne sont jamais bloqués.** Les organisations proposent librement, l'équipe arbitre par glisser-déposer. On détecte et on affiche ; on ne refuse pas. Seule la publication du programme est conditionnée.
-3. **Un seul stand.** Deux activités d'une même édition ne peuvent pas se tenir en même temps. En revanche deux **événements** distincts peuvent tourner en parallèle.
+3. **Un seul stand.** Deux activités d'une même édition ne peuvent **matériellement** pas se tenir en même temps : il n'y a qu'un lieu. C'est un fait du terrain, pas une contrainte à coder — le système **signale** un tel chevauchement comme conflit de gravité haute, sans jamais l'empêcher (voir la règle n°2). En revanche deux **événements** distincts peuvent tourner en parallèle.
 4. **Un seul direct à la fois**, tous événements confondus : une seule équipe technique, un seul flux.
 5. **Un seul appel à propositions par édition** — zéro s'il n'y a pas de pavillon.
 6. **Plusieurs organisations peuvent co-organiser** une activité : un porteur principal, des co-organisateurs, des partenaires, des soutiens.
@@ -79,8 +79,10 @@ Elles sont détaillées dans le cadrage, mais on les oublie vite et chacune a d�
 
 Traductions, types et données simulées grossissent avec le projet et deviendraient vite impossibles à charger en contexte.
 
-> **Garde-fou : aucun fichier du dépôt ne dépasse 1000 lignes.**
+> **Garde-fou : aucun fichier de code applicatif — `frontend/` et `backend/` — ne dépasse 1000 lignes.**
 > Ce n'est pas une cible mais une limite haute — au-delà, le fichier devient coûteux à charger et pénible à modifier. L'organisation reste le découpage par écran ou par entité, qui produit naturellement des fichiers bien plus courts.
+>
+> **`docs/database/` en est exclu.** Un fichier SQL de module est un tout cohérent qui porte sa propre documentation ; quatre d'entre eux dépassent légitimement les mille lignes. Les découper les rendrait moins lisibles, pas plus.
 
 **L'unité de découpage est l'ÉCRAN, pas le domaine.**
 
@@ -149,7 +151,7 @@ Pour modifier un écran, on ouvre **son** fichier de traduction, **ses** types, 
 Tu peux lancer autant de sous-agents que tu le juges utile. Le contexte d'une session est la ressource rare de ce projet : déléguer permet d'explorer large sans le saturer.
 
 **Cas où c'est le bon réflexe :**
-- Lire plusieurs fichiers SQL volumineux pour en extraire ce qui concerne la tâche — le sous-agent rend la conclusion, pas les onze mille lignes.
+- Lire plusieurs fichiers SQL volumineux pour en extraire ce qui concerne la tâche — le sous-agent rend la conclusion, pas les quatorze mille lignes.
 - Construire des écrans indépendants qui ne partagent que les composants d'interface.
 - Relire ou auditer un large périmètre : cohérence de la documentation, conformité du modèle, revue de code.
 - Vérifier une hypothèse coûteuse (charger le schéma dans une base jetable, chercher une occurrence dans tout le dépôt) pendant que le travail principal continue.
@@ -232,4 +234,6 @@ Interfaces locales : Mailpit `http://localhost:8025` (courriels capturés) · Ja
 
 Le jalon en cours ne contient que ce qui permet de **lancer l'appel à propositions de la COP31** : authentification, organisations, événements, appel, soumission, espace organisation, back-office.
 
-Les modules Publications, Négociations, Formations, Outils et Messagerie **existent dans le modèle de données** mais leur interface affiche « En cours de maintenance », commandée par un drapeau dans `platform.feature_flags`. Ne pas les développer sans instruction explicite.
+Les modules Publications, Négociations, Formations et Outils **existent dans le modèle de données** mais leur interface affiche « En cours de maintenance ». La messagerie directe n'est pas un module de ce rang : ni schéma, ni crate — ses tables vivent dans `engagement`.
+
+L'affichage est commandé par `platform.feature_flags`, que `900_seed.sql` ne sème qu'en partie : `publications.enabled`, `tools.surveys` et `tools.ai_assistant` existent ; `negotiation.channels` ne couvre que les canaux d'échange, pas l'espace Négociations entier. **Formations et messagerie n'ont aucun drapeau semé — ils sont à créer** avant de pouvoir piloter ces surfaces. Ne pas développer ces modules sans instruction explicite.

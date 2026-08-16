@@ -259,9 +259,12 @@ COMMENT ON COLUMN event.programme_tracks.starts_on IS
 -- 4. Lieux et salles
 --
 -- Absents de la v1 : le pavillon francophone n'existait nulle part en base, et
--- les conflits de créneaux se réglaient à l'œil dans le calendrier. Les salles
--- introduites ici sont ce qui permet, dans 070, de confier au SGBD la garantie
--- de non-chevauchement (contrainte d'exclusion GiST).
+-- les conflits de créneaux se réglaient à l'œil dans le calendrier — faute de
+-- salle en base, personne ne pouvait seulement les NOMMER. Les salles
+-- introduites ici donnent au conflit un sujet identifiable : `detect_conflicts()`
+-- (075) peut dire « salle Baobab, réservée deux fois » au lieu d'un vague
+-- « deux sessions à 14 h ». Nommer n'est pas interdire : le chevauchement reste
+-- parfaitement écrivable, il est signalé à l'équipe, pas refusé par le SGBD.
 -- -----------------------------------------------------------------------------
 CREATE TABLE event.venues (
     id          uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
@@ -282,8 +285,10 @@ CREATE TABLE event.rooms (
     name          platform.i18n_text NOT NULL,
     code          text        NOT NULL,
     capacity      smallint    CHECK (capacity IS NULL OR capacity > 0),
-    -- Salle virtuelle : plusieurs sessions peuvent s'y tenir simultanément, la
-    -- contrainte de non-chevauchement ne s'y applique donc pas.
+    -- Salle virtuelle : plusieurs sessions peuvent légitimement s'y tenir en
+    -- même temps. `detect_conflicts()` écarte donc ces salles de la détection
+    -- des doubles réservations — sans quoi elle noierait les vrais conflits
+    -- sous des signalements que personne n'a à arbitrer.
     is_virtual    boolean     NOT NULL DEFAULT false,
     has_streaming boolean     NOT NULL DEFAULT false,
     equipment     text[]      NOT NULL DEFAULT '{}',
@@ -295,7 +300,7 @@ CREATE TABLE event.rooms (
 CREATE INDEX ix_rooms_venue ON event.rooms (venue_id);
 
 COMMENT ON COLUMN event.rooms.is_virtual IS
-    'Une salle virtuelle accepte des sessions simultanées ; la contrainte d''exclusion horaire ne s''y applique pas.';
+    'Une salle virtuelle accepte des sessions simultanées : programme.detect_conflicts() ne signale pas de double réservation dessus.';
 
 -- -----------------------------------------------------------------------------
 -- 4 bis. Canaux de diffusion
@@ -304,9 +309,14 @@ COMMENT ON COLUMN event.rooms.is_virtual IS
 -- Une seule équipe technique, un seul flux, un seul lecteur sur la page d'accueil.
 --
 -- Le canal de diffusion est donc modélisé comme une RESSOURCE RÉSERVABLE, au
--- même titre qu'une salle : deux sessions diffusées ne peuvent pas l'occuper sur
--- des créneaux qui se recouvrent (voir ex_sessions_no_broadcast_overlap dans
--- 075). Ce n'est pas une contrainte codée en dur sur l'événement : si l'IFDD
+-- même titre qu'une salle : deux sessions diffusées qui l'occupent sur des
+-- créneaux qui se recouvrent sont remontées par `programme.detect_conflicts()`
+-- (075) avec la gravité « blocking », et `programme.publication_readiness()`
+-- interdit de publier le programme tant que le conflit n'est pas arbitré. À
+-- l'écriture, rien n'est refusé : l'équipe doit pouvoir poser deux directs au
+-- même moment le temps d'en décaler un. Le seul verrou dur se situe plus tard,
+-- au moment du direct lui-même, dans live.streams (080).
+-- Ce n'est pas une contrainte codée en dur sur l'événement : si l'IFDD
 -- ouvre un second canal — une chaîne dédiée à une journée thématique, une
 -- diffusion en langue étrangère — il suffit d'ajouter une ligne, et les deux
 -- flux peuvent alors coexister sans aucune migration.

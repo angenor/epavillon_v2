@@ -14,7 +14,7 @@ Conséquence pratique : **aucun prompt n'est « à exécuter une seule fois »**
 
 ## Le préambule
 
-À coller en tête de **chaque** prompt de ce fichier, sans exception.
+À coller en tête de **chaque** prompt de ce fichier, sans exception. Le marqueur `[PRÉAMBULE]` qui ouvre chaque bloc indique l'endroit exact où il se substitue — il n'y a aucun bloc sans marqueur. Dans les prompts Spec Kit de la phase B, il vient **juste après** la ligne `/speckit.xxx`, qui doit rester la toute première du message.
 
 ```
 Lis d'abord CLAUDE.md et docs/PROGRESSION.md.
@@ -36,6 +36,79 @@ dis-le et passe à la suite.
 
 # PHASE A — Le front sur données simulées
 
+## A0.0 — Initialisation du dépôt
+
+La toute première action du projet, avant même le socle du front. Elle produit ce sur quoi tout le reste s'appuie : les services locaux, le portail de vérification, les fichiers d'ignorance et les variables d'environnement.
+
+**Pourquoi elle ne peut pas attendre la phase B** : SQLx vérifie ses requêtes **à la compilation, en interrogeant une base réelle**. Sans `DATABASE_URL` valide pointant sur une base où le schéma de `docs/database/` est chargé, `cargo build` échoue avant d'avoir écrit la première ligne d'API. Aucun prompt B n'est jouable tant que celui-ci n'est pas passé.
+
+```
+[PRÉAMBULE]
+
+Initialise le dépôt. Ce prompt ne produit aucun code applicatif : ni page, ni
+composant, ni crate. Uniquement l'outillage.
+
+1. ops/docker-compose.dev.yml et ops/garage.toml
+   Le contenu exact est donné dans docs/ENVIRONNEMENT_LOCAL.md : va l'y lire et
+   reprends-le, ne l'improvise pas. Cinq services — PostgreSQL 17 + pgvector
+   (avec docs/database/ monté en lecture seule sur /docker-entrypoint-initdb.d,
+   les 18 fichiers s'exécutant dans l'ordre alphabétique), Valkey, Jaeger,
+   Mailpit, Garage.
+
+2. Makefile
+   Les cibles `check`, `check-db`, `check-front`, `check-back` sont décrites dans
+   docs/ENVIRONNEMENT_LOCAL.md. Deux points à ne pas manquer :
+   - `check-db` commence par un `down -v` : il DÉTRUIT le volume PostgreSQL et
+     toutes les données saisies à la main. Dis-le en toutes lettres, en
+     commentaire dans le Makefile et dans ce que la cible affiche avant d'agir.
+   - Les deux compteurs — clés étrangères inter-modules non conformes, travaux
+     de rafraîchissement en échec — doivent FAIRE ÉCHOUER la cible quand ils ne
+     valent pas 0, pas seulement s'afficher. Un contrôle qu'un humain doit lire
+     n'est pas un contrôle.
+
+3. .gitignore
+   Le contenu est également dans docs/ENVIRONNEMENT_LOCAL.md. Deux exigences :
+   - docs/database/ est du CODE SOURCE, jamais exclu. Une règle `*.sql` trop
+     large mettrait tout le modèle de données hors du dépôt — c'est arrivé sur
+     l'ancien projet. N'exclus que les sauvegardes : *.dump, backup*, dumps/.
+   - `.DS_Store` doit y figurer, et quatre fichiers .DS_Store sont DÉJÀ
+     versionnés sous docs/logos-IFDD-OIF/. Retire-les de l'index
+     (`git rm --cached`) dans le même geste, sinon la règle ne servira à rien.
+
+4. .env.example versionné, .env ignoré. Au minimum :
+
+       DATABASE_URL=postgres://postgres:dev@localhost:5432/epavillon
+       NUXT_PUBLIC_API_BASE=http://localhost:8080
+       S3_ENDPOINT=http://localhost:3900
+       S3_REGION=garage
+       S3_BUCKET=epavillon-dev
+       SMTP_URL=smtp://localhost:1025
+       OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
+
+   DATABASE_URL n'est pas une variable de confort : SQLx vérifie ses requêtes à
+   la COMPILATION en interrogeant la base. Sans elle, `cargo build` échoue.
+   NUXT_PUBLIC_API_BASE est la variable que frontend/app/composables/useApi.ts
+   lira pour basculer des mocks vers l'API réelle (B7) ; elle est déclarée dès
+   maintenant, inutilisée jusque-là.
+
+5. Vérifie, ne suppose pas :
+   - `docker compose -f ops/docker-compose.dev.yml up -d`, puis attends que le
+     conteneur PostgreSQL soit sain.
+   - Le schéma se charge INTÉGRALEMENT : relis `docker compose logs postgres`.
+     Une erreur d'initialisation n'empêche pas le conteneur de démarrer, elle
+     laisse simplement une base incomplète — c'est le piège classique.
+   - Les schémas attendus sont présents, et
+     `SELECT count(*) FROM platform.cross_module_fk_report WHERE NOT is_compliant;`
+     renvoie 0.
+   - Mailpit répond sur http://localhost:8025, Jaeger sur http://localhost:16686.
+   - Garage démarre mais refuse toute écriture tant que sa disposition n'est pas
+     assignée et le bucket créé : fais-le, et note la procédure exacte dans
+     docs/ENVIRONNEMENT_LOCAL.md, qui ne la donne pas encore.
+
+Consigne dans docs/PROGRESSION.md ce qui a été vérifié, et tout écart entre ce
+que docs/ENVIRONNEMENT_LOCAL.md décrit et ce qui a réellement démarré.
+```
+
 ## A0.1 — Socle du projet
 
 ```
@@ -44,10 +117,22 @@ dis-le et passe à la suite.
 Crée le socle du frontend dans frontend/.
 
 - Nuxt 4, TypeScript strict, TailwindCSS v4, Pinia, @nuxtjs/i18n (fr par défaut, en).
-- app/assets/css/design-tokens.css : les jetons issus du guide de style produit
-  avec Claude Design. Si le guide n'a pas encore été produit, dérive une palette
-  provisoire depuis docs/CHARTE_GRAPHIQUE.md et signale-le clairement en tête du
-  fichier — elle sera remplacée.
+- EMPLACEMENTS, à poser une fois pour toutes : en Nuxt 4 le `srcDir` vaut `app/`,
+  donc TOUT le code applicatif vit sous `frontend/app/` — `app/types/`,
+  `app/mocks/`, `app/components/`, `app/composables/`, `app/utils/`,
+  `app/pages/`, `app/assets/`. Seul `frontend/i18n/` reste HORS de `app/` :
+  c'est la convention du module @nuxtjs/i18n. Un fichier placé hors de `app/`
+  n'est pas auto-importé, et l'erreur ne se voit qu'à l'exécution.
+- frontend/app/assets/css/design-tokens.css : les jetons EXTRAITS de l'artefact
+  produit par Claude Design, `docs/style-guide/index.html` — son bloc final
+  contient toutes les variables CSS, prêtes à être reprises. Respecte la
+  séparation qu'il pose : les couleurs de marque gardent leur nom de charte
+  (`--ifdd-cyan`…) et portent les valeurs ; les jetons sémantiques portent un
+  nom de rôle (`--color-surface`, `--color-text`…) et référencent la marque par
+  `var()`. C'est ce qui permet au thème sombre de redéfinir les rôles sans
+  toucher aux couleurs officielles.
+  Si l'artefact n'a pas encore été produit, dérive une palette provisoire depuis
+  docs/CHARTE_GRAPHIQUE.md et signale-le en tête du fichier — elle sera remplacée.
 - Thème clair et sombre : palette claire sur `:root`, redéfinie sous
   `@media (prefers-color-scheme: dark)` gardé par `:root:not([data-theme="light"])`
   ET sous `:root[data-theme="dark"]`.
@@ -59,7 +144,7 @@ Crée le socle du frontend dans frontend/.
   libellés dans un seul fichier seraient déjà pénibles à parcourir, alors qu'un
   fichier par étape se lit d'un coup d'œil.
 
-      i18n/locales/fr/
+      frontend/i18n/locales/fr/
       ├── _common.json      actions, états, formats — partagé
       ├── _validation.json  messages de validation
       ├── _nav.json         navigation, pied de page
@@ -71,7 +156,7 @@ Crée le socle du frontend dans frontend/.
       │                     admin.proposal.review.json
       └── components/       un fichier par composant réutilisable porteur de
                             texte : session-card.json, status-timeline.json
-      i18n/locales/en/…     la même arborescence
+      frontend/i18n/locales/en/…  la même arborescence
 
   RÈGLE DE NOMMAGE : **la clé racine est le nom du fichier**, sans son préfixe
   `_` ni son dossier. `proposal.form.step-speakers.title` vit dans
@@ -79,7 +164,7 @@ Crée le socle du frontend dans frontend/.
   ouvrir un seul petit fichier, sans chercher.
 
   DÉCLARATION : n'énumère pas quarante fichiers dans `nuxt.config.ts`. Crée un
-  point d'entrée par locale — `i18n/locales/fr.ts` — qui agrège l'arborescence
+  point d'entrée par locale — `frontend/i18n/locales/fr.ts` — qui agrège l'arborescence
   avec `import.meta.glob('./fr/**/*.json', { eager: true })` et fusionne les
   objets. Ajouter un écran ne demandera alors aucune modification de
   configuration. Vérifie que la fusion fonctionne en mode `lazy`.
@@ -87,7 +172,7 @@ Crée le socle du frontend dans frontend/.
   À ce stade, ne remplis que `_common.json`, `_validation.json` et `_nav.json`.
   Les dossiers `pages/` et `components/` restent vides : chaque écran créera son
   propre fichier.
-- Utilitaires dans app/utils/ : résolution d'un texte multilingue avec repli sur
+- Utilitaires dans frontend/app/utils/ : résolution d'un texte multilingue avec repli sur
   le français, formatage d'une date AVEC son fuseau, formatage d'une plage horaire.
 - Configuration de la connexion à l'API par variable d'environnement, non
   utilisée pour l'instant.
@@ -105,11 +190,11 @@ Crée les types TypeScript dérivés LITTÉRALEMENT du schéma SQL — mêmes no
 champs, même nullabilité.
 
 **UN FICHIER PAR GROUPE D'ENTITÉS, jamais un fichier unique.** Le modèle compte
-149 tables : un `domain.ts` monolithique serait impossible à charger en
+142 tables : un `domain.ts` monolithique serait impossible à charger en
 contexte, et chaque écran n'a besoin que d'une poignée de types. `event` et
 `programme` comptent assez de tables pour mériter leur propre sous-dossier.
 
-    frontend/types/
+    frontend/app/types/
     ├── index.ts        ne fait que ré-exporter — aucune définition
     ├── shared.ts       I18nText, alias d'identifiants, types utilitaires
     ├── reference.ts    pays, locales, taxonomies
@@ -151,7 +236,7 @@ ils se trancheront un par un.
 ```
 [PRÉAMBULE]
 
-Crée frontend/mocks/ : des données simulées réalistes et cohérentes entre elles.
+Crée frontend/app/mocks/ : des données simulées réalistes et cohérentes entre elles.
 Les identifiants doivent se répondre d'un fichier à l'autre — une proposition
 pointe vers une organisation qui existe, une session vers une proposition qui
 existe.
@@ -160,7 +245,7 @@ existe.
 40 propositions et 60 inscriptions écrites à la main représentent plusieurs
 milliers de lignes, et un écran n'en consulte qu'une partie.
 
-    frontend/mocks/
+    frontend/app/mocks/
     ├── index.ts          ré-exporte tout — aucune donnée
     ├── ids.ts            les identifiants partagés, DÉCLARÉS UNE SEULE FOIS
     │                     et importés par les autres fichiers ; c'est ce qui
@@ -198,9 +283,10 @@ climat (« Financer l'adaptation côtière en Afrique de l'Ouest », pas
 « Activité 1 »). Pas de génération aléatoire : elles seront lues cent fois et
 serviront de référence visuelle pendant tout le développement.
 
-Crée aussi composables/useApi.ts : la couche d'accès unique, qui lit aujourd'hui
-les mocks et basculera vers l'API réelle par variable d'environnement. Aucune
-page ne doit jamais importer un mock directement.
+Crée aussi frontend/app/composables/useApi.ts : la couche d'accès unique, qui lit
+aujourd'hui les mocks et basculera vers l'API réelle par variable
+d'environnement (NUXT_PUBLIC_API_BASE, déclarée en A0.0). Aucune page ne doit
+jamais importer un mock directement.
 ```
 
 ## A0.4 — Composants d'interface
@@ -224,29 +310,39 @@ particulièrement :
 - StatusTimeline : frise d'avancement d'un dossier (brouillon → déposé → en
   évaluation → décision), chaque étape portant sa date.
 
-Puis app/pages/style-guide.vue qui les montre tous, avec leurs états, sur des
+Puis frontend/app/pages/style-guide.vue qui les montre tous, avec leurs états, sur des
 données réalistes — 12 lignes de tableau, 6 cartes, pas un exemplaire de chaque.
-Cette page reste dans le projet : c'est la référence pendant tout le
-développement et le test de non-régression visuelle.
+
+Cette page est le guide de style VIVANT : elle rend les composants réels du
+projet, contrairement à `docs/style-guide/index.html` qui est l'artefact figé
+produit par Claude Design. Construis-la EN T'APPUYANT sur cet artefact — mêmes
+composants, mêmes états, même vocabulaire visuel — puis c'est elle qui fait foi
+pour le code. En cas de divergence ultérieure, l'artefact est la référence
+d'intention, la page Vue la réalité du projet.
+
+Elle reste dans le dépôt : c'est la référence pendant tout le développement et
+le test de non-régression visuelle.
 ```
 
 ---
 
 ## A1 à A14 — Les écrans
 
-Chaque prompt reçoit le préambule, plus ce rappel :
+Chaque prompt porte le préambule — il est marqué `[PRÉAMBULE]` en tête de chaque bloc ci-dessous — **plus** ce rappel commun. Le rappel **complète** le préambule et ne s'y substitue jamais : le préambule dit quoi lire et quoi consigner, le rappel dit à quoi le résultat doit ressembler. Les deux sont obligatoires.
 
-> *Respecte les types de `types/`, les composants de `components/ui/`, les jetons de `design-tokens.css` et la page `style-guide.vue`. Passe par `composables/useApi.ts`. Thème clair et sombre. Responsive à partir de 375 px. Les quatre états : chargement, vide, erreur, accès refusé.*
+> *Respecte les types de `frontend/app/types/`, les composants de `frontend/app/components/ui/`, les jetons de `frontend/app/assets/css/design-tokens.css` et la page `frontend/app/pages/style-guide.vue`. Passe par `frontend/app/composables/useApi.ts`. Thème clair et sombre. Responsive à partir de 375 px. Les quatre états : chargement, vide, erreur, accès refusé.*
 >
-> *Traductions : crée un fichier PAR ÉCRAN dans `i18n/locales/fr/pages/` et son équivalent anglais, nommé comme le chemin de la page aplati par des points. La clé racine est le nom du fichier. N'ouvre aucun autre fichier de traduction, hormis `_common.json` si tu as besoin d'une chaîne partagée. Si un fichier devient long, scinde-le par section d'écran.*
+> *Traductions : crée un fichier PAR ÉCRAN dans `frontend/i18n/locales/fr/pages/` et son équivalent anglais, nommé comme le chemin de la page aplati par des points. La clé racine est le nom du fichier. N'ouvre aucun autre fichier de traduction, hormis `_common.json` si tu as besoin d'une chaîne partagée. Si un fichier devient long, scinde-le par section d'écran.*
 >
-> *Types et mocks : n'ouvre que les fichiers correspondant aux entités de cet écran, repérés depuis `docs/MODELE_INDEX.md`.*
+> *Types et mocks : n'ouvre que les fichiers de `frontend/app/types/` et `frontend/app/mocks/` correspondant aux entités de cet écran, repérés depuis `docs/MODELE_INDEX.md`.*
 
 ---
 
 **A1 — Authentification**
 
 ```
+[PRÉAMBULE]
+
 Pages d'authentification : connexion, création de compte, vérification
 d'adresse, mot de passe oublié, réinitialisation.
 
@@ -267,6 +363,8 @@ Détails qui comptent :
 **A2 — Rattachement à une organisation**
 
 ```
+[PRÉAMBULE]
+
 Écran de rattachement à une organisation, présenté après la création de compte
 et accessible depuis le profil.
 
@@ -298,6 +396,8 @@ avertissement avant création.
 **A3 — Page publique de l'événement**
 
 ```
+[PRÉAMBULE]
+
 Page publique d'une édition (COP31 Climat, Belém).
 
 Répond à quatre questions dans l'ordre : de quoi s'agit-il, quelles sont les
@@ -310,8 +410,25 @@ Répond à quatre questions dans l'ordre : de quoi s'agit-il, quelles sont les
 - Frise des jalons : ouverture de l'appel, clôture, annonce des résultats,
   tenue de l'événement.
 - Les journées spéciales, avec leur couleur et leur description.
-- Section « Programmation » : présente, indiquant que le programme sera publié
-  après sélection.
+- Section « Programmation », en DEUX VUES commutables sur les mêmes données :
+  · VUE GRILLE — liste dense, filtrable par jour, thématique, format, salle,
+    lisible sur mobile ;
+  · VUE CALENDRIER — les créneaux placés dans le temps, jour par jour, en
+    réutilisant vue-cal comme le planificateur A9, en lecture seule.
+  Les deux vues partagent filtres et sélection : basculer de l'une à l'autre ne
+  fait rien perdre. Tant que le programme n'est pas publié, la section reste
+  présente et annonce qu'il le sera après sélection.
+  - COULEURS SELON L'ÉTAT de l'activité — à venir, en cours, en direct, terminée,
+    reportée, annulée — plus la couleur de la journée spéciale quand l'activité
+    en fait partie. Légende visible sans survol, et un repère qui ne repose pas
+    uniquement sur la couleur.
+  - SÉLECTEUR D'ANNÉE : la programmation des éditions PRÉCÉDENTES reste
+    consultable depuis la même page. Changer d'année recharge le programme
+    correspondant, sans quitter le contexte ni ouvrir un autre écran.
+  - Section « AUTRES » : les activités hors COP — webinaires et cycles organisés
+    directement par l'IFDD — se consultent au même endroit, dans leur propre
+    entrée. Elles n'appartiennent à aucune édition de COP ; elles ne doivent pas
+    pour autant disparaître de la programmation publique.
 - Les critères d'évaluation, publiés : une organisation doit savoir sur quoi
   elle sera jugée.
 ```
@@ -319,6 +436,8 @@ Répond à quatre questions dans l'ordre : de quoi s'agit-il, quelles sont les
 **A4 — Formulaire de soumission**
 
 ```
+[PRÉAMBULE]
+
 Formulaire de soumission d'une proposition d'activité — le formulaire le plus
 long et le plus déterminant de la plateforme. Une organisation qui abandonne ici
 ne participe pas à la COP. Il est rempli par des agents qui ne sont pas des
@@ -356,6 +475,8 @@ Montre l'étape 1 avec un co-organisateur ajouté, et l'étape 4.
 **A5 — Espace organisation**
 
 ```
+[PRÉAMBULE]
+
 Espace personnel d'une organisation : suivi de ses dossiers.
 
 Répond en un coup d'œil à : où en est chacun de mes dossiers, et qu'est-ce qui
@@ -367,7 +488,10 @@ attend une action de ma part ?
 - Les commentaires du comité partagés avec le soumissionnaire s'affichent en fil
   de discussion, avec réponse et marquage « résolu ».
 - Un dossier accepté montre ses sessions programmées, leur créneau, le nombre
-  d'inscrits.
+  d'inscrits, et le CALENDRIER DE SES RAPPELS. Les rappels avant activité sont
+  QUATRE, CUMULÉS — 2 jours, 1 jour, 1 heure et 30 minutes avant le début. Les
+  quatre partent, ce n'est pas un choix parmi quatre. L'écran distingue ceux
+  déjà envoyés de ceux à venir, chacun horodaté dans le fuseau de l'édition.
 - Onglet « Historique » : toutes les modifications du dossier, champ par champ,
   avec auteur et date. L'ancienne plateforme ne le permettait pas.
 - Section « Membres de l'organisation », avec invitation par adresse.
@@ -377,6 +501,8 @@ attend une action de ma part ?
 **A6 — Tableau de bord du back-office**
 
 ```
+[PRÉAMBULE]
+
 Page d'accueil du back-office, pour l'équipe de l'IFDD dans les semaines qui
 précèdent une COP.
 
@@ -406,6 +532,8 @@ directe sur la courbe.
 **A7 — Liste des propositions**
 
 ```
+[PRÉAMBULE]
+
 Liste des propositions reçues, back-office.
 
 Tableau dense — les 40 lignes des mocks, pas 5. Colonnes : numéro de dossier,
@@ -426,6 +554,8 @@ date de dépôt.
 **A8 — Fiche d'évaluation d'une proposition**
 
 ```
+[PRÉAMBULE]
+
 Fiche d'évaluation d'une proposition, back-office. C'est ici qu'un membre du
 comité décide. Tout doit se faire sans quitter la page.
 
@@ -461,12 +591,18 @@ note, je ne vois pas celles des autres.
 **A9 — Planificateur de créneaux**
 
 ```
+[PRÉAMBULE]
+
 Planificateur de la programmation, back-office. L'équipe place les activités
 retenues dans les salles, sur les jours de l'édition.
 
 Panneau latéral gauche : les activités retenues non encore placées, filtrables
 et triables par note. Zone principale : calendrier salle × heure, glisser-déposer.
-Utilise vue-cal ou un équivalent.
+
+Le calendrier s'appuie sur la bibliothèque `vue-cal`. Ce n'est PAS un choix
+laissé ouvert ni un « ou équivalent » : c'est la bibliothèque nommée par le
+commanditaire, et c'est sur elle qu'il attend l'arbitrage des créneaux par
+glisser-déposer.
 
 RÈGLE CENTRALE, à respecter absolument : les chevauchements NE SONT PAS BLOQUÉS.
 Les organisations ont proposé leurs créneaux sans se coordonner ; c'est l'équipe
@@ -502,6 +638,8 @@ sélection en deux temps.
 **A10 — Gestion des événements**
 
 ```
+[PRÉAMBULE]
+
 Écrans de gestion des événements, back-office.
 
 1. Liste des éditions : titre, série, année, dates, lieu, statut, nombre de
@@ -525,6 +663,8 @@ sélection en deux temps.
 **A11 — Organisations et fusion des doublons**
 
 ```
+[PRÉAMBULE]
+
 Gestion des organisations, back-office, avec l'outil de fusion.
 
 1. LISTE : nom, sigle, pays, type, membres, propositions déposées et acceptées,
@@ -556,6 +696,8 @@ Gestion des organisations, back-office, avec l'outil de fusion.
 **A12 — Utilisateurs et rôles**
 
 ```
+[PRÉAMBULE]
+
 Gestion des utilisateurs et des rôles, back-office.
 
 Liste : nom, adresse, organisation, pays, rôles avec leur portée, dernière
@@ -582,6 +724,8 @@ révocations, et un écran montrant les permissions effectives d'une personne
 **A13 — Messages d'incident**
 
 ```
+[PRÉAMBULE]
+
 Gestion des messages d'incident, back-office.
 
 Il arrive qu'une activité déborde sur la suivante, qu'un intervenant soit en
@@ -607,6 +751,8 @@ en cours, qui pré-remplit le formulaire.
 **A14 — Modules en attente**
 
 ```
+[PRÉAMBULE]
+
 Page « En cours de maintenance » pour les modules hors périmètre : Publications,
 Négociations, Formations, Outils, Messagerie, Annuaire.
 
@@ -629,6 +775,8 @@ Une fois le front stabilisé sur les mocks, les écarts sont connus et le contra
 ```
 /speckit.constitution
 
+[PRÉAMBULE]
+
 Projet : ePavillon v2, API Rust + Actix Web pour l'IFDD.
 Lis CLAUDE.md : les principes qui suivent en découlent et ne doivent pas le
 contredire.
@@ -637,18 +785,40 @@ Principes non négociables :
 1. docs/database/ est la source de vérité. Aucune table, aucune colonne n'est
    créée sans y être ajoutée d'abord.
 2. Tout le Rust vit dans backend/, workspace Cargo — symétrique de frontend/.
+   Emplacements imposés, à ne pas réinventer :
+
+       backend/crates/kernel/         contexte de requête, erreurs, i18n,
+                                      accès base, bus d'événements
+       backend/crates/contracts/      contrats d'événements partagés entre
+                                      modules — la seule chose qu'ils échangent
+       backend/crates/api/            binaire HTTP Actix Web · cargo run -p api
+       backend/crates/worker/         travaux différés et relais d'outbox ·
+                                      cargo run -p worker
+       backend/crates/modules/<nom>/  un crate par module métier
+
    Un module = un schéma PostgreSQL = un crate dans backend/crates/modules/.
-   Un crate de module ne dépend jamais d'un autre crate de module : uniquement
-   de `kernel` et des contrats d'événements.
+   Un crate de module ne dépend JAMAIS d'un autre crate de module : uniquement
+   de `kernel` et de `contracts`. `api` et `worker` dépendent des modules ;
+   l'inverse n'existe pas.
 3. Toute clé étrangère traversant deux schémas métier est nommée `xmod_fk_*`.
    `SELECT * FROM platform.cross_module_fk_report WHERE NOT is_compliant`
    doit rester vide.
-4. Les effets de bord inter-modules passent par platform.outbox_events, dans la
-   même transaction que le changement d'état. Jamais d'appel direct.
+4. Les effets de bord inter-modules passent par `platform.emit_event()`, appelée
+   dans la MÊME TRANSACTION que le changement d'état ; c'est elle qui écrit dans
+   `platform.outbox_events`, relayée ensuite par le worker. On appelle la
+   fonction, on n'insère jamais dans la table à la main. Jamais d'appel direct
+   d'un module à un autre.
 5. L'autorisation se teste par PERMISSION (identity.has_permission), jamais par
-   nom de rôle, et toujours avec sa portée. Toute liste du back-office est
-   filtrée par identity.administered_events : un administrateur d'événement ne
-   doit atteindre aucune donnée d'une autre édition, y compris en forgeant une URL.
+   nom de rôle, et toujours avec sa portée. Toute liste du back-office est bornée
+   au périmètre d'administration de l'appelant. Attention :
+   `identity.administered_events` est une FONCTION qui retourne une table, pas
+   une vue — on l'APPELLE avec l'identifiant de la personne, on ne la joint pas :
+
+       SELECT is_global, event_ids FROM identity.administered_events($1)
+
+   puis on filtre par `is_global OR event_id = ANY(event_ids)`. `is_global` vrai
+   signifie « tous les événements ». Un administrateur d'événement ne doit
+   atteindre aucune donnée d'une autre édition, y compris en forgeant une URL.
 6. SQLx avec vérification à la compilation. Pas d'ORM.
 7. Toute écriture positionne app.actor_id et app.request_id en début de
    transaction — c'est ce qui alimente l'audit et l'historique.
@@ -662,6 +832,8 @@ Principes non négociables :
 ## B1 à B6 — Les modules
 
 Un module = un cycle complet : `/speckit.specify` → `/speckit.clarify` → `/speckit.plan` → `/speckit.tasks` → `/speckit.implement`.
+
+Le modèle de prompt qui suit est à instancier **une fois par module** : six modules, six cycles, six sessions. Chacune reçoit le préambule au même endroit — juste après la ligne `/speckit.specify`.
 
 Ordre imposé par les dépendances :
 
@@ -679,22 +851,26 @@ Ordre imposé par les dépendances :
 ```
 /speckit.specify
 
+[PRÉAMBULE]
+
 Module <NOM> de l'API ePavillon v2 (Rust + Actix Web + SQLx).
 
-Lis CLAUDE.md et docs/PROGRESSION.md. Repère dans docs/MODELE_INDEX.md les
-fichiers SQL de ce module et lis-les intégralement : le schéma existe déjà, il
-fait autorité. Ne propose aucune modification sans la justifier explicitement.
+Le schéma SQL de ce module existe déjà et fait autorité : ne propose aucune
+modification sans la justifier explicitement.
 
 Le front existe et consomme des données simulées : lis les fichiers de
-frontend/types/ et frontend/mocks/ correspondant à CE module uniquement.
-Le contrat d'API doit servir CE front, sans
-renégociation des noms de champs. Les écarts déjà consignés dans PROGRESSION.md
-sont à traiter, pas à contourner.
+frontend/app/types/ et frontend/app/mocks/ correspondant à CE module uniquement.
+Le contrat d'API doit servir CE front, sans renégociation des noms de champs.
+Les écarts déjà consignés dans PROGRESSION.md sont à traiter, pas à contourner.
 
 Fonctionnalités attendues : <contenu du tableau ci-dessus>
 
 Livrable : un crate backend/crates/modules/<nom> exposant domaine, dépôts,
-service et routes, plus la documentation OpenAPI générée.
+service et routes, plus la documentation OpenAPI générée. Il ne dépend que de
+backend/crates/kernel et backend/crates/contracts — jamais d'un autre crate de
+module. Ses routes sont montées par backend/crates/api, ses travaux différés
+par backend/crates/worker ; ces quatre crates existent depuis B1, ne les
+réinvente pas.
 ```
 
 ## B7 — Raccordement du front
@@ -705,13 +881,14 @@ service et routes, plus la documentation OpenAPI générée.
 Bascule le frontend des données simulées vers l'API réelle.
 
 - Génère le client TypeScript depuis l'OpenAPI de backend/ (`openapi-typescript`)
-  dans frontend/types/api.ts.
-- Compare-le aux types de frontend/types/ et LISTE LES ÉCARTS avant de modifier
-  quoi que ce soit. Chaque écart est soit un défaut du front, soit un défaut de
-  l'API : tranche l'un après l'autre, ne les masque pas par des conversions.
-- Fais basculer composables/useApi.ts sur l'API réelle, pilotée par variable
-  d'environnement. Les mocks restent en place : ils servent aux tests et au
-  développement hors ligne.
+  dans frontend/app/types/api.ts.
+- Compare-le aux types de frontend/app/types/ et LISTE LES ÉCARTS avant de
+  modifier quoi que ce soit. Chaque écart est soit un défaut du front, soit un
+  défaut de l'API : tranche l'un après l'autre, ne les masque pas par des
+  conversions.
+- Fais basculer frontend/app/composables/useApi.ts sur l'API réelle, pilotée par
+  NUXT_PUBLIC_API_BASE. Les mocks de frontend/app/mocks/ restent en place : ils
+  servent aux tests et au développement hors ligne.
 - Gestion des erreurs : messages français, reconnexion sur expiration de jeton,
   mode dégradé si l'API est injoignable.
 ```
@@ -721,7 +898,7 @@ Bascule le frontend des données simulées vers l'API réelle.
 ## Ordre d'exécution
 
 ```
-  A0.1 socle ─ A0.2 types ─ A0.3 mocks ─ A0.4 composants
+  A0.0 dépôt ─ A0.1 socle ─ A0.2 types ─ A0.3 mocks ─ A0.4 composants
    │
    ├── A1 authentification ─── A2 rattachement organisation
    │                                   │
@@ -742,15 +919,18 @@ Bascule le frontend des données simulées vers l'API réelle.
   B7 raccordement
 ```
 
-Les deux écrans à traiter en premier après le socle, parce qu'ils portent les décisions dont tout le reste hérite : **A2** — la qualité du référentiel d'organisations se joue là — et **A8**, l'écran le plus dense ; s'il tient, les autres tiennent.
+**Ordre d'exécution et écrans structurants sont deux choses différentes.** Le diagramme ci-dessus donne l'ordre imposé par les **dépendances** : A0.0 avant tout le reste, le socle A0.0 → A0.4 avant le premier écran, A1 avant A2, A6-A7 avant A8, A8 avant A9. Il ne se discute pas — un écran construit avant ce dont il hérite est à refaire.
+
+Les écrans les plus **structurants** sont **A2** et **A8** : ce sont ceux dont les décisions engagent tous les autres. La qualité du référentiel d'organisations se joue en A2, et sa recherche est réutilisée telle quelle par A4 et A11 ; A8 est l'écran le plus dense de la plateforme — s'il tient, les autres tiennent. Ce n'est pas une invitation à les avancer dans le diagramme : ils arrivent à leur rang. Ce que cela change, c'est le **soin** qu'on leur accorde et le fait que leurs choix d'interface font jurisprudence pour la suite. Quand le temps manque, c'est là qu'on le prend.
 
 ## Avant de passer en phase B
 
+- [ ] L'environnement d'**A0.0** tient : les services démarrent, le schéma de `docs/database/` se charge intégralement sur une base neuve, et `DATABASE_URL` pointe dessus. Sans cela, SQLx ne compile pas et aucun prompt de la phase B n'est jouable.
 - [ ] Toutes les pages du jalon existent et fonctionnent sur les mocks.
 - [ ] Les écarts consignés dans `PROGRESSION.md` sont tranchés — dans le SQL si le modèle a tort, dans le front sinon.
 - [ ] Les quatre états sont traités partout : chargement, vide, erreur, accès refusé.
 - [ ] Le thème sombre tient sur chaque page.
 - [ ] Rien n'est en dur : aucune chaîne hors i18n, aucune couleur hors jetons, aucune route de journée spéciale écrite en clair.
-- [ ] Aucun fichier du dépôt ne dépasse 1000 lignes — `find frontend backend -type f \( -name '*.ts' -o -name '*.vue' -o -name '*.json' -o -name '*.rs' \) | xargs wc -l | sort -rn | head` le vérifie en une commande.
+- [ ] Aucun fichier de **code applicatif** ne dépasse 1000 lignes — `find frontend backend -type f \( -name '*.ts' -o -name '*.vue' -o -name '*.json' -o -name '*.rs' \) | xargs wc -l | sort -rn | head` le vérifie en une commande. La règle ne vise que `frontend/` et `backend/` : `docs/database/` est le modèle de données, et quatre de ses fichiers SQL dépassent 1000 lignes en toute légitimité.
 - [ ] Aucun libellé venant de la base (thématique, catégorie, type d'organisation) n'a été recopié dans un fichier i18n.
-- [ ] Le parcours complet est jouable sur les mocks : créer un compte, rejoindre une organisation sans créer de doublon, soumettre une proposition à plusieurs organisations, la noter, la retenir, la programmer, publier le programme, s'y inscrire.
+- [ ] Le parcours complet est jouable sur les mocks : créer un compte, rejoindre une organisation sans créer de doublon, soumettre une proposition au nom de plusieurs organisations, la noter, la retenir, la programmer, publier le programme, s'y inscrire.

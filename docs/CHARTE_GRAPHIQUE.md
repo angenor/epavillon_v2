@@ -3,7 +3,11 @@
 > Contenu extrait du fichier `Charte_graphique_Ifdd_couleurs.ai`
 > (Adobe Illustrator 27.6 / Windows — bibliothèque de nuances, 1er septembre 2023)
 
-**Remarque importante :** ce fichier est une **bibliothèque de nuanciers** (`illustrator:Type = Swatches`). Il ne contient aucun texte rédactionnel ni logo dessiné — uniquement la définition des couleurs de la charte. Tout son contenu utile est donc la palette ci-dessous.
+**Ce document est la source de vérité des couleurs et des polices d'ePavillon.** Aucune valeur ne s'invente ni ne se « corrige » ailleurs : le guide de style, `design-tokens.css` et chaque écran en dérivent. Une couleur qui n'est pas ici n'existe pas dans la plateforme.
+
+**Une réserve, à connaître avant toute impression :** les six couleurs principales sont définies en **CMJN**, seul référentiel officiel. Les valeurs HEX et RVB de ce document sont des **conversions approximatives** (profil Coated FOGRA39 → sRGB) faites pour l'écran. Elles conviennent au web ; elles doivent être **validées auprès du service communication de l'IFDD** avant tout tirage papier, signalétique ou goodies.
+
+Le fichier source est une **bibliothèque de nuanciers** : il ne contient ni texte rédactionnel ni logo dessiné. Tout son contenu utile est la palette ci-dessous.
 
 ---
 
@@ -43,7 +47,6 @@ Ces six couleurs sont définies en **CMJN comme tons directs**. Les valeurs CMJN
 |---|---|---|---|---|---|---|
 | White | `#FFFFFF` | 255, 255, 255 | 0 | 0 | 0 | 0 |
 | Black | `#231F20` | 35, 31, 32 | 69,8 | 67,4 | 63,9 | 73,9 |
-| [Registration] | — | 0, 0, 0 | 74,97 | 67,92 | 67,05 | 90,15 |
 
 ---
 
@@ -74,6 +77,8 @@ Neutres       blanc #FFFFFF · noir #231F20
 
 ### Variables CSS prêtes à l'emploi
 
+Ce sont les jetons de **marque** : ils portent les valeurs et ne sont jamais redéfinis, pas même en thème sombre. Les jetons **sémantiques** d'interface (`--color-surface`, `--color-text`, `--color-success`…) les référencent par `var()` — voir [PROMPT_STYLE_GUIDE.md](PROMPT_STYLE_GUIDE.md), point 5 du prompt.
+
 ```css
 :root {
   /* Couleurs principales */
@@ -103,30 +108,9 @@ Neutres       blanc #FFFFFF · noir #231F20
 
 ---
 
-## 7. Informations techniques du fichier
+## 7. Provenance
 
-| Champ | Valeur |
-|---|---|
-| Titre | Charte_graphique_Ifdd_couleurs |
-| Fichier source d'origine | Logos_OIF-IFDD_variantes.ai |
-| Auteur | Vanessa Cardoso |
-| Logiciel | Adobe Illustrator 27.6 (Windows) — format AI 14.0 |
-| Type de document | Bibliothèque de nuances (Swatches) |
-| Profil de départ | Print (impression) |
-| Mode colorimétrique | CMJN |
-| Date de création / modification | 1er septembre 2023, 11 h 32 (UTC−4) |
-| Format de page | 612 × 588 pt |
-| Police intégrée | Myriad Pro Regular (uniquement pour le message d'avertissement d'Illustrator) |
-| Transparence / surimpression visibles | Non / Non |
-
-> Le fichier a été enregistré **sans contenu compatible PDF** : ouvert dans une application autre qu'Illustrator, il n'affiche qu'un message d'avertissement d'Adobe et non les nuances. Pour le rendre lisible ailleurs, il faut le ré-enregistrer depuis Illustrator avec l'option « Créer un fichier compatible PDF » activée.
-
-### Annexe — plans de travail hérités du fichier source
-
-Le document dont provient ce nuancier (`Logos_OIF-IFDD_variantes.ai`) comportait les plans de travail suivants ; leurs noms subsistent dans les métadonnées, mais les tracés correspondants ne sont pas présents dans ce fichier :
-
-1. Logos_OIF-IFDD-Superposes
-2. Logo_IFDD-LongHorizontal
-3. Logo_IFDD-Court
-4. Logo_IFDD_avec_Slogan
-5. Logos_OIF-IFDD-Juxtaposes-Horizontaux
+- **Fichier source** : `Charte_graphique_Ifdd_couleurs.ai` — bibliothèque de nuances, non versionnée dans ce dépôt.
+- **Auteur** : Vanessa Cardoso, IFDD.
+- **Date** : 1er septembre 2023.
+- **Mode colorimétrique** : CMJN (profil d'impression) — d'où la réserve sur les conversions HEX énoncée en tête de document.

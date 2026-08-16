@@ -127,7 +127,7 @@ C'est le module central, celui qui porte la valeur de la plateforme.
 **Ce que la v2 ajoute :**
 
 - une **série** distincte de l'**édition** : la COP29, la COP30 et la COP31 sont trois éditions du même rendez-vous, ce qui rend les comparaisons pluriannuelles immédiates ;
-- un **appel à propositions** comme entité de plein droit : un événement peut en avoir zéro (COP sans pavillon, où l'IFDD envoie seulement un représentant), un, ou plusieurs (une journée thématique ouvre sa propre fenêtre) ;
+- un **appel à propositions** comme entité de plein droit : une édition en ouvre un au plus, ou aucun lorsque l'IFDD ne tient pas de pavillon et se contente d'envoyer un représentant ;
 - une **grille d'évaluation**, avec critères pondérés et critères éliminatoires, et une **évaluation en aveugle** optionnelle qui empêche l'effet d'ancrage entre membres du comité ;
 - une **séparation proposition / session programmée**, qui permet à une proposition d'engendrer plusieurs sessions (cycles de webinaires) et à l'IFDD de programmer directement une activité sans passer par un appel ;
 - la **co-organisation**, absente de la v1 ;
@@ -195,7 +195,7 @@ Tableau de bord (inscriptions par jour, entonnoir des propositions, taux de part
 Concrètement :
 
 - **Un seul déploiement** en phase 1 : un binaire d'API, un binaire de workers, une base de données. L'exploitation reste simple, le débogage aussi, les transactions restent atomiques.
-- **Des frontières explicites et vérifiées** : chaque module possède son schéma. Toute clé étrangère traversant deux schémas métier doit porter le préfixe `xmod_fk_`. Une vue (`platform.cross_module_fk_report`) contrôle cette règle et **le contrôle est branché en test d'intégration** : une frontière violée fait échouer la CI, elle n'est pas découverte le jour de l'extraction.
+- **Des frontières explicites et vérifiées** : chaque module possède son schéma. Toute clé étrangère traversant deux schémas métier doit porter le préfixe `xmod_fk_`. Une vue (`platform.cross_module_fk_report`) contrôle cette règle et **le contrôle est branché dans la vérification locale** — le `make check` décrit au §5.2, où cette vue doit rester vide de toute ligne non conforme. Une frontière violée arrête donc le travail avant le commit qui l'introduit ; elle n'est pas découverte le jour de l'extraction.
 - **Une communication par événements dès le premier jour** : les modules ne s'appellent pas directement pour leurs effets de bord. Ils publient des événements de domaine dans un *outbox* transactionnel ; un relais les distribue. Aujourd'hui à des gestionnaires en processus, demain à un bus, sans toucher au code métier.
 - **Une extraction outillée** : `platform.generate_module_decoupling_script('tool')` produit les instructions de découplage d'un module. L'extraction devient une opération planifiée, pas un chantier de fouille.
 
@@ -209,7 +209,7 @@ Concrètement :
 | Accès aux données | **SQLx** (requêtes vérifiées à la compilation) | Une requête invalide ne compile pas. Compte tenu de la richesse du schéma, c'est le filet de sécurité déterminant. Pas d'ORM : le SQL reste lisible et optimisable. |
 | Base de données | **PostgreSQL 17+** | Contraintes d'exclusion, partitionnement natif, JSONB indexable, recherche plein texte, `pgvector`. La base porte les invariants métier. |
 | Stockage objet | **Garage** (API S3), auto-hébergé | Compatible S3 : la migration vers un fournisseur cloud ne changera qu'un point d'accès, puisque la base ne stocke jamais d'URL absolue. |
-| Cache et sessions | **Valkey** (Redis) | Uniquement lorsque la mesure le justifie. Pas en phase 1. |
+| Cache et sessions | **Valkey** (Redis) | Présent dans l'environnement local dès le départ, pour ne pas avoir à l'ajouter dans l'urgence. Il n'est mis à contribution que lorsque la mesure le justifie : aucun cache posé par précaution. |
 | File de travaux | **PostgreSQL** (`SELECT … FOR UPDATE SKIP LOCKED`) | Aucun courtier à exploiter tant que la charge ne l'exige pas. La table `platform.jobs` est déjà structurée pour migrer vers NATS. |
 | Recherche | **PostgreSQL** (`tsvector` + `pg_trgm`) | Un moteur dédié (Meilisearch) n'est justifié qu'au-delà de quelques centaines de milliers de documents. |
 | Observabilité | **OpenTelemetry** → Jaeger en local, Grafana / Loki / Tempo en production | Traces distribuées dès le monolithe : le jour de l'extraction, l'instrumentation est déjà en place. |
@@ -307,6 +307,18 @@ Il faut cependant énoncer le coût honnêtement : **écrire un CRUD en Rust pre
 2. **Ne pas réécrire ce qui n'apporte rien.** Les tableaux de bord et écrans de consultation peuvent s'appuyer sur des vues SQL exposées telles quelles, plutôt que sur des services complets.
 3. **Accepter une exception assumée.** Si un module se révèle trop coûteux à écrire en Rust — typiquement le module Outils, exploratoire par nature — il peut être développé dans une autre technologie **précisément parce qu'il est conçu pour être extractible**. C'est un bénéfice concret de l'architecture, pas un contournement.
 
+### 5.7 Méthode de développement : le front d'abord, sur données simulées
+
+L'ordre de construction n'est pas laissé à l'appréciation de chaque session. Il est celui que le porteur du projet a éprouvé sur ses développements précédents, et il tient en trois temps.
+
+**D'abord le front, sur des données simulées calquées sur le modèle.** Chaque écran est construit contre des jeux de données écrits à la main qui reprennent exactement les noms de tables, de colonnes et de types de `docs/database/`. L'intérêt n'est pas d'économiser l'API : c'est que tout écart entre ce que le modèle prévoit et ce que l'interface réclame — une donnée qui manque, un libellé qui n'existe nulle part, une jointure qu'aucune clé ne permet — apparaît à l'écran immédiatement, et se corrige tant qu'il ne coûte encore rien. L'ordre de correction ne change pas pour autant : si le modèle se révèle insuffisant, on modifie le SQL d'abord, puis les données simulées, puis l'écran. Jamais l'inverse.
+
+**Ensuite l'API, spécifiée à partir de ce que le front consomme.** Le contrat n'est pas inventé en amont : il se déduit de ce qui est réellement affiché. Il est rédigé module par module avec GitHub Spec Kit — constitution, spécification, clarification, plan, tâches, mise en œuvre — dans l'ordre imposé par les dépendances entre modules.
+
+**Enfin le raccordement, écart par écart.** Le client TypeScript est généré depuis la description OpenAPI de l'API, puis comparé aux types du front. Chaque divergence est tranchée explicitement — c'est soit un défaut du front, soit un défaut de l'API — et aucune n'est masquée par une conversion de circonstance. Les données simulées restent en place : elles servent aux tests et au développement hors ligne.
+
+Le détail — l'ordre des écrans, les prompts eux-mêmes et le découpage des modules d'API — vit dans [`PROMPTS_DEVELOPPEMENT.md`](PROMPTS_DEVELOPPEMENT.md).
+
 ---
 
 ## 6. Décisions d'architecture
@@ -315,7 +327,7 @@ Format court : décision, contexte, conséquence.
 
 ### ADR-01 — Un schéma PostgreSQL par module
 
-**Décision.** Treize schémas : `platform`, `reference`, `identity`, `org`, `event`, `programme`, `live`, `publication`, `negotiation`, `engagement`, `media`, `tool`, `analytics`.
+**Décision.** Quinze schémas : `platform`, `reference`, `identity`, `org`, `event`, `programme`, `live`, `publication`, `negotiation`, `engagement`, `media`, `tool`, `training`, `analytics`, et `legacy` — ce dernier temporaire, zone de transit de la reprise des données de la v1 (§9), qui disparaît une fois la bascule réconciliée.
 **Contexte.** L'alternative — une base par module dès le départ — interdirait les transactions inter-modules et imposerait une complexité opérationnelle sans contrepartie à ce stade.
 **Conséquence.** Frontières lisibles, extraction préparée, transactions atomiques conservées. Impose une discipline de nommage des FK inter-modules, contrôlée automatiquement.
 
@@ -381,9 +393,10 @@ Format court : décision, contexte, conséquence.
 
 ### ADR-12 — Partitionnement mensuel des tables à forte volumétrie
 
-**Décision.** `platform.audit_log`, `engagement.email_messages` et `negotiation.channel_messages` sont partitionnées par mois.
+**Décision.** `platform.audit_log`, `engagement.email_messages`, `negotiation.channel_messages` et `analytics.page_views` sont partitionnées par mois.
 **Contexte.** Ce sont les tables dont la croissance est linéaire et sans fin.
 **Conséquence.** La purge réglementaire devient un `DROP PARTITION`. Contrepartie : la clé primaire doit inclure la colonne de partitionnement, et les clés étrangères entrantes sont contraintes — d'où l'absence de FK vers ces tables.
+
 ### ADR-13 — Les conflits de créneaux sont signalés, pas bloqués
 
 **Décision.** Aucune contrainte d'exclusion sur les créneaux. `programme.detect_conflicts()` recense les chevauchements avec leur gravité ; `programme.publication_readiness()` conditionne la publication.
@@ -528,7 +541,7 @@ Publications avec quotas, Négociations avec canaux d'échange, tableaux de bord
 | Indicateur | Situation v1 | Cible v2 |
 |------------|--------------|----------|
 | Organisations en double dans le référentiel | Non mesuré, non corrigeable | Zéro homonyme actif ; toute fusion réalisable |
-| Temps d'arbitrage des créneaux d'une COP | Plusieurs jours, manuel | Conflits durs impossibles, conflits souples signalés automatiquement |
+| Temps d'arbitrage des créneaux d'une COP | Plusieurs jours, à l'œil dans le calendrier | Tout chevauchement détecté et affiché en continu, classé « bloquant » ou « avertissement » ; jamais refusé à la saisie, et aucun chevauchement bloquant restant au contrôle de publication |
 | Délai d'ajout d'une question au formulaire d'inscription | Migration + déploiement | Immédiat, depuis le back-office |
 | Traçabilité des décisions du comité | Absente | 100 % des décisions avec auteur, date, motif et grille |
 | Notifications ou courriels perdus | Non mesuré | Zéro perte ; taux de rebond suivi |
@@ -539,9 +552,22 @@ Publications avec quotas, Négociations avec canaux d'échange, tableaux de bord
 
 ## 13. Documents liés
 
-- [`README.md`](README.md) — index du dossier et ordre d'exécution des fichiers SQL
-- [`database/`](database/) — modèle de données complet, un fichier par module
-- [`historique/note-intention.md`](historique/note-intention.md) — note d'intention initiale du porteur du projet
+Le présent document fixe le cap et les décisions ; il ne se lit pas seul. Le reste du dossier se répartit ainsi.
+
+- [`../CLAUDE.md`](../CLAUDE.md) — les conventions de code, les huit règles métier et la liste des interdits ; c'est le fichier chargé au démarrage de chaque session de développement.
+- [`../README.md`](../README.md) — la présentation du dépôt et les trois premières choses à faire pour démarrer.
+- [`README.md`](README.md) — la vue d'ensemble du modèle de données : ce qu'il corrige de la v1, comment il est organisé, ce qu'il garantit lui-même, et l'ordre d'exécution des fichiers SQL.
+- [`MODELE_INDEX.md`](MODELE_INDEX.md) — quels fichiers SQL lire pour l'écran ou la tâche du jour, afin de ne jamais avoir à charger le modèle entier.
+- [`PROGRESSION.md`](PROGRESSION.md) — l'état d'avancement, les écarts constatés entre le modèle et l'interface, et les décisions prises en cours de route. Il se lit en arrivant et se met à jour en partant : c'est la mémoire du projet entre deux sessions.
+- [`PROMPTS_DEVELOPPEMENT.md`](PROMPTS_DEVELOPPEMENT.md) — les prompts de construction, écran par écran puis module d'API par module d'API, dans l'ordre imposé par les dépendances. C'est la mise en œuvre détaillée de la méthode exposée au §5.7.
+- [`PROMPT_STYLE_GUIDE.md`](PROMPT_STYLE_GUIDE.md) — le prompt unique qui produit le guide de style, c'est-à-dire le contrat visuel appliqué ensuite à toutes les pages.
+- [`ENVIRONNEMENT_LOCAL.md`](ENVIRONNEMENT_LOCAL.md) — les services locaux (PostgreSQL, Valkey, Jaeger, Mailpit, Garage), leur configuration, et les vérifications réunies dans le `Makefile`.
+- [`CHARTE_GRAPHIQUE.md`](CHARTE_GRAPHIQUE.md) — les couleurs et polices officielles de l'IFDD, dont sont dérivés les jetons de design du frontend.
+- [`database/`](database/) — le modèle de données lui-même, un fichier SQL par module. C'est la source de vérité : aucun nom de table, de colonne ou de type ne se devine ailleurs.
+- [`historique/note-intention.md`](historique/note-intention.md) — la note d'intention initiale du porteur du projet : les modules attendus, le cycle métier des COP, l'espace d'administration, la nouvelle pile.
+- [`historique/retours-cadrage.md`](historique/retours-cadrage.md) — ses retours sur une première version de ce cadrage. Ce sont eux qui ont retourné cinq décisions structurantes — co-organisation, chevauchements non bloqués, appel unique par édition, administrateur à périmètre limité, direct unique — et qui énoncent sa méthode de travail.
+
+**En cas de contradiction, `historique/` fait référence.** Ces deux fichiers portent la parole du commanditaire dans ses mots. Si le présent document, ou n'importe quel autre du dossier, les contredit, c'est le document qui a tort : il doit être corrigé, pas contourné.
 
 ---
 
@@ -549,7 +575,7 @@ Publications avec quotas, Négociations avec canaux d'échange, tableaux de bord
 
 Ces points ne bloquent pas le démarrage mais doivent être arbitrés avant les phases concernées.
 
-1. **Messagerie directe et mise en relation** — présentes en v1 (`messages`, `connections`, `appointments`), leur usage réel reste à vérifier. Le schéma les prévoit ; l'effort d'interface est conséquent et ne concourt pas à l'échéance de l'appel à propositions.
+1. **Messagerie directe et mise en relation** — présentes en v1 (`messages`, `connections`, `appointments`), leur usage réel reste à vérifier. La v2 les accueille dans le schéma `engagement` — `conversations`, `conversation_participants`, `direct_messages`, `connection_requests` et `blocks` — mais l'effort d'interface est conséquent et ne concourt pas à l'échéance de l'appel à propositions. Les rendez-vous de la v1 ne sont en revanche **pas repris** : aucune table ne leur correspond dans le modèle v2, et les reconduire serait une décision à part entière, à prendre au vu de leur usage constaté.
 2. **Libellé « QCD »** — le besoin exprimé mentionne des quiz « QCM/QCD ». Le modèle traite les deux cas connus (choix unique et choix multiples) ; le sens exact de QCD reste à confirmer auprès de l'IFDD.
 3. **Statut OIF des pays** — le champ `oif_status` doit être renseigné depuis la liste officielle publiée par l'OIF. Cette liste évolue à chaque Sommet et ne peut pas être devinée ; une source de référence doit être désignée.
 4. **Politique de conservation** — durées de conservation à fixer par catégorie de données (journal d'audit, courriels, inscriptions, messages de canaux), en lien avec le registre RGPD.

@@ -1,7 +1,7 @@
 -- =============================================================================
 -- ePavillon v2 — 075_programme_sessions.sql
--- Module Programmation, partie 2 : sessions programmées, planification sans
--- chevauchement, inscriptions, présence, questions du public, comptes rendus.
+-- Module Programmation, partie 2 : sessions programmées, détection des conflits
+-- de créneaux, inscriptions, présence, questions du public, comptes rendus.
 --
 -- Dépend de : 000, 010, 020, 030, 040, 050, 060, 070
 --
@@ -72,16 +72,19 @@ CREATE TABLE programme.sessions (
 
     starts_at        timestamptz NOT NULL,
     ends_at          timestamptz NOT NULL,
-    -- Intervalle dérivé : support de la contrainte d'exclusion et des requêtes
-    -- de calendrier (« que se passe-t-il entre 14 h et 16 h ? »).
+    -- Intervalle dérivé : support de la détection des chevauchements (opérateur
+    -- && dans detect_conflicts()) et des requêtes de calendrier (« que se
+    -- passe-t-il entre 14 h et 16 h ? »).
     time_range       tstzrange   GENERATED ALWAYS AS (tstzrange(starts_at, ends_at, '[)')) STORED,
     timezone         platform.timezone_name NOT NULL,
 
     room_id          uuid        CONSTRAINT xmod_fk_sessions_room
                                  REFERENCES event.rooms(id) ON DELETE SET NULL,
     -- Alimentée depuis event.rooms.is_virtual : une salle virtuelle accepte des
-    -- sessions simultanées, une salle physique non. Dénormalisée car le prédicat
-    -- d'une contrainte d'exclusion ne peut pas interroger une autre table.
+    -- sessions simultanées, une salle physique non. Dénormalisée pour que le
+    -- calendrier du back-office sache colorer un chevauchement sans joindre
+    -- event.rooms à chaque bloc affiché. Purement indicative : elle ne bloque
+    -- aucune écriture, l'arbitrage passe par detect_conflicts().
     enforce_room_exclusivity boolean NOT NULL DEFAULT true,
     location_note    platform.i18n_text,
 
@@ -182,8 +185,8 @@ BEGIN
     -- Une session diffusée occupe le canal par défaut de son événement, à
     -- défaut le canal général de la plateforme. Sans cette affectation
     -- automatique, une session marquée « diffusée » sans canal échapperait à la
-    -- contrainte de non-chevauchement : la règle serait respectée par ceux qui
-    -- la connaissent et contournée par distraction.
+    -- détection des conflits de diffusion : le contrôle serait effectif pour
+    -- ceux qui connaissent la règle et contourné par distraction.
     IF NEW.is_streamed AND NEW.broadcast_channel_id IS NULL THEN
         SELECT c.id INTO NEW.broadcast_channel_id
         FROM event.broadcast_channels c

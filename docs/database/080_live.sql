@@ -591,10 +591,14 @@ CREATE UNIQUE INDEX ux_streams_single_live_per_locale
     WHERE session_id IS NOT NULL AND kind = 'live' AND status = 'live' AND locale IS NOT NULL;
 
 -- RÈGLE MÉTIER : l'IFDD ne diffuse jamais deux activités en direct en même
--- temps. La planification l'empêche déjà en amont
--- (programme.ex_sessions_no_broadcast_overlap) ; ce second verrou couvre le
--- moment du direct lui-même — une session qui déborde, un flux lancé à la main
--- pendant qu'un autre tourne encore. Un canal ne porte qu'un direct à la fois.
+-- temps. En amont, la planification ne fait que SIGNALER le problème :
+-- `programme.detect_conflicts()` remonte les diffusions qui se chevauchent avec
+-- la gravité « blocking », et `programme.publication_readiness()` refuse de
+-- laisser publier le programme tant qu'elles subsistent — mais rien n'empêche
+-- de les écrire, parce que l'équipe doit pouvoir réorganiser librement.
+-- D'où ce verrou-ci, le seul qui soit dur : il couvre le moment du direct
+-- lui-même — une session qui déborde, un flux lancé à la main pendant qu'un
+-- autre tourne encore. Un canal ne porte qu'un direct à la fois.
 ALTER TABLE live.streams
     ADD COLUMN broadcast_channel_id uuid CONSTRAINT xmod_fk_streams_broadcast_channel
         REFERENCES event.broadcast_channels(id) ON DELETE SET NULL;

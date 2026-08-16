@@ -2,18 +2,46 @@
 
 Ce document explique ce que le modèle corrige de la version précédente, comment il est organisé, et ce qu'il garantit lui-même. Pour **construire**, ce n'est pas ici qu'il faut commencer :
 
-| Vous cherchez | Allez voir |
-|---------------|------------|
-| Conventions, règles métier, interdits | [`../CLAUDE.md`](../CLAUDE.md) |
-| Quel fichier SQL lire pour la tâche du jour | [MODELE_INDEX.md](MODELE_INDEX.md) |
-| Où en est le projet | [PROGRESSION.md](PROGRESSION.md) |
-| Le prompt de l'écran ou du module à construire | [PROMPTS_DEVELOPPEMENT.md](PROMPTS_DEVELOPPEMENT.md) |
-| Pourquoi le modèle est fait ainsi, les 14 décisions d'architecture | [CADRAGE.md](CADRAGE.md) |
-| Couleurs et polices officielles | [CHARTE_GRAPHIQUE.md](CHARTE_GRAPHIQUE.md) |
-| Le guide de style à produire avec Claude Design | [PROMPT_STYLE_GUIDE.md](PROMPT_STYLE_GUIDE.md) |
-| Ce que demandait le commanditaire, dans ses mots | [historique/](historique/) |
+> **Où trouver quoi** — le tableau d'orientation complet (conventions, règles métier, prompts, cadrage, charte, historique du commanditaire) vit dans [`../CLAUDE.md`](../CLAUDE.md) et n'est pas repris ici.
+> Pour savoir quel fichier SQL lire pour la tâche du jour, aller directement à [MODELE_INDEX.md](MODELE_INDEX.md).
 
-Le modèle lui-même vit dans **[database/](database/)** : 18 fichiers SQL, **149 tables, 12 vues, 7 vues matérialisées, 145 fonctions, 167 clés étrangères inter-modules toutes conformes**. Chaîne validée sur PostgreSQL 17 + pgvector.
+Le modèle lui-même vit dans **[database/](database/)** : 18 fichiers SQL, 14 143 lignes, chaîne validée sur PostgreSQL 17 + pgvector.
+
+**Relevé du 16 août 2026, sur une base réellement chargée.** C'est un constat de mesure, pas une constante du projet :
+
+| Schémas | Tables | Vues | Vues matérialisées | Fonctions | FK inter-modules |
+|---------|--------|------|--------------------|-----------|------------------|
+| 15 | 142 | 14 | 7 | 153 | 167, aucune non conforme |
+
+Les tables sont comptées hors partitions filles. Ces chiffres bougent dès qu'un fichier SQL change : **les recompter plutôt que les recopier**.
+
+```sql
+-- Recomptage du modèle, sur la base locale chargée (voir ENVIRONNEMENT_LOCAL.md)
+WITH s AS (
+    SELECT oid, nspname FROM pg_namespace
+    WHERE nspname IN ('platform','reference','identity','org','media','event',
+                      'programme','live','publication','negotiation','engagement',
+                      'tool','training','analytics','legacy')
+)
+SELECT (SELECT count(*) FROM s)                                                AS schemas,
+       (SELECT count(*) FROM pg_class c JOIN s ON s.oid = c.relnamespace
+          WHERE c.relkind IN ('r','p') AND NOT c.relispartition)               AS tables,
+       (SELECT count(*) FROM pg_class c JOIN s ON s.oid = c.relnamespace
+          WHERE c.relkind = 'v')                                               AS vues,
+       (SELECT count(*) FROM pg_class c JOIN s ON s.oid = c.relnamespace
+          WHERE c.relkind = 'm')                                               AS vues_materialisees,
+       (SELECT count(*) FROM pg_proc p JOIN s ON s.oid = p.pronamespace
+          WHERE p.prokind = 'f')                                               AS fonctions,
+       (SELECT count(*) FROM platform.cross_module_fk_report
+          WHERE is_cross_module)                                               AS fk_inter_modules,
+       (SELECT count(*) FROM platform.cross_module_fk_report
+          WHERE NOT is_compliant)                                              AS fk_non_conformes;
+```
+
+```bash
+# Volume du modèle
+wc -l docs/database/*.sql | tail -1
+```
 
 ---
 
@@ -37,7 +65,7 @@ La v1 fonctionne, mais elle a été construite sous contrainte et porte une dett
 | Notification ou courriel perdu sur panne réseau | Effets de bord déclenchés hors transaction | `platform.outbox_events` : l'état et son annonce commitent ensemble ou pas du tout |
 | Note libre sur 20, décision injustifiable | Aucune grille de critères | `event.review_criteria` pondérés et éliminatoires · `programme.review_scores` par critère · évaluation en aveugle |
 | « Révisionniste » valait pour toutes les COP | 8 rôles globaux dans un ENUM | RBAC scopé : `global` / `organization` / `event` / `negotiation_space` |
-| Journées thématiques codées dans le routeur Vue | `/programmations/2025/journee-jeunesse` en dur | `event.event_days` administrables |
+| Journées thématiques codées dans le routeur Vue | `/programmations/2025/journee-jeunesse` en dur | `event.programme_tracks` administrables, composées à la main après sélection via `programme.session_tracks` — à ne pas confondre avec `event.event_days`, qui n'est que le calendrier de l'édition |
 | Aucune traçabilité des décisions | Pas de journal d'audit | `platform.audit_log` partitionné + `programme.proposal_transitions` |
 | Aucune conformité RGPD | Absente du modèle | Consentements horodatés, demandes d'export et d'effacement, `identity.anonymize_person()` |
 | Pré-rendu Puppeteer à chaque nouvelle activité | SPA Vue sans rendu serveur | Nuxt en rendu serveur : plus aucun redéploiement pour publier une page |
@@ -58,36 +86,47 @@ Un module = un schéma PostgreSQL = un crate Rust = une frontière de service po
                                           │  (FK libres vers le noyau)
         ┌─────────────┬─────────────┬─────┴───────┬─────────────┬─────────────┐
         ▼             ▼             ▼             ▼             ▼             ▼
-   ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌─────────┐
-   │identity │   │   org   │   │  media  │   │  event  │   │engagement│  │  tool   │
-   │personnes│◄──┤  fiches │   │ Garage  │   │ séries  │   │ courriels│  │sondages │
-   │ RBAC    │   │ fusion  │   │ variantes│  │ appels  │   │ rappels  │  │ IA/RAG  │
-   └─────────┘   └─────────┘   └─────────┘   └────┬────┘   └─────────┘   └─────────┘
+   ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌─────────┐  ┌──────────┐  ┌─────────┐
+   │identity │   │   org   │   │  media  │   │  event  │  │engagement│  │  tool   │
+   │personnes│◄──┤  fiches │   │ Garage  │   │ séries  │  │ courriels│  │sondages │
+   │  RBAC   │   │ fusion  │   │variantes│   │ appels  │  │ rappels  │  │ IA/RAG  │
+   └─────────┘   └─────────┘   └─────────┘   └────┬────┘  └──────────┘  └─────────┘
                                                   │                        détachable
-                                                  ▼                        par design
-                                          ┌───────────────┐
-                                          │   programme   │
-                                          │ propositions  │
-                                          │ revue · notes │
-                                          │ sessions      │
-                                          │ inscriptions  │
-                                          └───────┬───────┘
-                                                  │
-                              ┌───────────────────┼───────────────────┐
-                              ▼                   ▼                   ▼
-                        ┌─────────┐        ┌─────────────┐     ┌───────────┐
-                        │  live   │        │ publication │     │negotiation│
-                        │ Zoom    │        │  articles   │     │  espaces  │
-                        │ YouTube │        │  quotas     │     │  canaux   │
-                        │incidents│        │             │     │ documents │
-                        └─────────┘        └─────────────┘     └───────────┘
+                                    ┌─────────────┴─────────────┐          par design
+                                    ▼                           ▼
+                            ┌───────────────┐           ┌───────────────┐
+                            │   programme   │           │   training    │
+                            │ propositions  │           │ formations    │
+                            │ revue · notes │           │ chapitres     │
+                            │ sessions      │           │ quiz          │
+                            │ inscriptions  │           │ attestations  │
+                            └───────┬───────┘           └───────────────┘
+                                    │
+                  ┌─────────────────┼─────────────────┐
+                  ▼                 ▼                 ▼
+             ┌─────────┐     ┌─────────────┐    ┌───────────┐
+             │  live   │     │ publication │    │negotiation│
+             │ Zoom    │     │  articles   │    │  espaces  │
+             │ YouTube │     │  quotas     │    │  canaux   │
+             │incidents│     │             │    │ documents │
+             └─────────┘     └─────────────┘    └───────────┘
 
                           ┌───────────────────────────────┐
                           │  analytics — lecture seule    │
                           │  aucune FK sortante           │
                           │  déportable sur un réplica    │
                           └───────────────────────────────┘
+
+                          ┌───────────────────────────────┐
+                          │  legacy — zone de transit     │
+                          │  reprise des données v1       │
+                          │  supprimé après la bascule    │
+                          └───────────────────────────────┘
 ```
+
+`training` est un module de plein droit, pas une annexe : `125_training.sql` est le plus gros fichier du modèle (1 829 lignes) et le commanditaire le veut au produit minimum viable. Il se rattache à `event` et `live` pour les formations tenues pendant un événement ou en visioconférence, et emprunte `identity`, `org`, `media` et `reference` comme tous les autres.
+
+`legacy` n'est pas un module métier mais la zone de transit de la reprise v1 (`910_migration_v1.sql`) : chargement brut, résolution des doublons, puis écriture vers les schémas v2. Le schéma est supprimé une fois la bascule validée.
 
 **La règle qui tient l'ensemble** : toute clé étrangère traversant deux schémas métier porte le préfixe `xmod_fk_`. La vue `platform.cross_module_fk_report` vérifie cette convention, et `platform.generate_module_decoupling_script('<module>')` produit les instructions de découplage le jour où un module part en service autonome.
 
@@ -107,9 +146,9 @@ Les fichiers sont numérotés dans leur ordre de dépendance. **Ne pas les réor
 | 030 | [`030_identity.sql`](database/030_identity.sql) | `identity` | Personnes, comptes et authentification, sessions, RBAC scopé, profils négociateurs, RGPD |
 | 040 | [`040_organizations.sql`](database/040_organizations.sql) | `org` | Organisations, dénominations, domaines, adhésions, détection et fusion des doublons |
 | 050 | [`050_media.sql`](database/050_media.sql) | `media` | Objets S3, variantes, rattachements contrôlés, quotas de stockage, détection des orphelins |
-| 060 | [`060_events.sql`](database/060_events.sql) | `event` | Séries, éditions, journées thématiques, lieux et salles, appels à propositions, grilles d'évaluation |
+| 060 | [`060_events.sql`](database/060_events.sql) | `event` | Séries, éditions, calendrier (`event_days`) et journées spéciales (`programme_tracks`), lieux et salles, appels à propositions, grilles d'évaluation |
 | 070 | [`070_programme_proposals.sql`](database/070_programme_proposals.sql) | `programme` | Propositions, machine à états, intervenants, documents, revues et notes, échanges |
-| 075 | [`075_programme_sessions.sql`](database/075_programme_sessions.sql) | `programme` | Sessions programmées, non-chevauchement, formulaires d'inscription, inscriptions, questions du public |
+| 075 | [`075_programme_sessions.sql`](database/075_programme_sessions.sql) | `programme` | Sessions programmées, détection des conflits, formulaires d'inscription, inscriptions, questions du public |
 | 080 | [`080_live.sql`](database/080_live.sql) | `live` | Réunions visio agnostiques, synchronisation des inscrits, webhooks, diffusions, incidents |
 | 090 | [`090_publications.sql`](database/090_publications.sql) | `publication` | Articles, quotas éditoriaux et de stockage appliqués par la base, révisions, modération |
 | 100 | [`100_negotiations.sql`](database/100_negotiations.sql) | `negotiation` | Espaces, réunions unifiées, documents d'aide, canaux d'échange partitionnés |
@@ -140,7 +179,7 @@ SELECT * FROM analytics.v_operational_health;
 
 Ces contrôles, plus la compilation du front et de l'API, sont à passer avant tout commit important — une migration qui ne passe pas sur une base vierge se découvre autrement au déploiement, au pire moment.
 
-L'ensemble a été chargé et vérifié sur PostgreSQL 17 avec pgvector : les 18 fichiers passent sous `ON_ERROR_STOP=1`, le seed est rejouable, les 167 clés étrangères inter-modules sont conformes, et un scénario fonctionnel de bout en bout confirme le comportement annoncé — rapprochement et fusion d'organisations, refus des transitions d'état interdites, co-organisation, détection des conflits de créneaux sans blocage, refus d'une inscription incomplète, bascule en liste d'attente, portée d'administration limitée à un événement, émission des événements de domaine.
+L'ensemble a été chargé et vérifié sur PostgreSQL 17 avec pgvector le 16 août 2026 : les 18 fichiers passent sous `ON_ERROR_STOP=1`, le seed est rejouable, les 167 clés étrangères inter-modules relevées ce jour-là étaient toutes conformes — le compte se refait avec la requête donnée en tête de document, il ne se recopie pas —, et un scénario fonctionnel de bout en bout confirme le comportement annoncé — rapprochement et fusion d'organisations, refus des transitions d'état interdites, co-organisation, détection des conflits de créneaux sans blocage, refus d'une inscription incomplète, bascule en liste d'attente, portée d'administration limitée à un événement, émission des événements de domaine.
 
 En production, ces fichiers sont la **source de référence**. Ils sont découpés en migrations incrémentales (SQLx / refinery) au moment de l'implémentation, et chaque application est tracée dans `platform.schema_migrations`.
 
@@ -170,7 +209,7 @@ En production, ces fichiers sont la **source de référence**. Ils sont découp�
 
 La leçon principale tirée de la v1 : **une règle appliquée seulement par l'interface n'est pas appliquée**. Les invariants suivants sont portés par le SGBD et valent pour tous les chemins d'écriture — API, import massif, script d'administration, correction en console.
 
-Avec une nuance : **tout ce qui est vrai n'a pas vocation à être bloqué**. Les chevauchements de créneaux sont détectés et affichés, jamais refusés — l'équipe compose son programme par déplacements successifs, et une base qui refuse l'écriture pousse à contourner l'outil. Le seul contrôle bloquant se situe à la publication.
+Avec une nuance : **tout ce qui est vrai n'a pas vocation à être bloqué** — l'énoncé de référence est la règle métier n°2 de [`../CLAUDE.md`](../CLAUDE.md), à laquelle il faut se reporter avant d'implémenter quoi que ce soit sur les créneaux.
 
 | Invariant | Mécanisme |
 |-----------|-----------|
@@ -198,7 +237,7 @@ Avec une nuance : **tout ce qui est vrai n'a pas vocation à être bloqué**. Le
 ## Ordre de lecture recommandé
 
 1. **[CADRAGE.md](CADRAGE.md) §2** — le constat sur la v1. C'est ce qui justifie tout le reste.
-2. **[CADRAGE.md](CADRAGE.md) §6** — les douze décisions d'architecture, en format court.
+2. **[CADRAGE.md](CADRAGE.md) §6** — les quatorze décisions d'architecture, en format court.
 3. **[`040_organizations.sql`](database/040_organizations.sql)** — la réponse détaillée au problème n°1, avec ses quatre verrous.
 4. **[`070_programme_proposals.sql`](database/070_programme_proposals.sql)** et **[`075_programme_sessions.sql`](database/075_programme_sessions.sql)** — le cœur métier.
 5. **[`910_migration_v1.sql`](database/910_migration_v1.sql)** — la stratégie de reprise, et pourquoi la résolution des doublons doit précéder l'écriture.
@@ -207,10 +246,12 @@ Avec une nuance : **tout ce qui est vrai n'a pas vocation à être bloqué**. Le
 
 ## Par où commencer à construire
 
-1. **[PROMPTS_DEVELOPPEMENT.md](PROMPTS_DEVELOPPEMENT.md) §2** — monter l'environnement local.
+1. **[PROMPTS_DEVELOPPEMENT.md](PROMPTS_DEVELOPPEMENT.md), prompt A0.0**, puis **[ENVIRONNEMENT_LOCAL.md](ENVIRONNEMENT_LOCAL.md)** — initialiser le dépôt (`ops/`, `Makefile`, `.gitignore`), puis monter l'environnement local : Postgres avec le schéma chargé, Valkey, Garage, Mailpit, Jaeger.
 2. **[PROMPT_STYLE_GUIDE.md](PROMPT_STYLE_GUIDE.md)** — produire le guide de style avec Claude Design, en récupérer les jetons CSS.
-3. **[PROMPTS_DEVELOPPEMENT.md](PROMPTS_DEVELOPPEMENT.md) A0** — le socle front, les types dérivés du modèle et les données simulées. C'est ce prompt qui fait le pont entre le SQL et l'interface : les écarts entre les deux apparaissent immédiatement à l'écran.
-4. Puis les pages, en commençant par **A2** (rattachement d'organisation) et **A8** (fiche d'évaluation) — les deux écrans qui portent les décisions dont tout le reste hérite.
+3. **[PROMPTS_DEVELOPPEMENT.md](PROMPTS_DEVELOPPEMENT.md), prompts A0.1 à A0.4** — le socle front, les types dérivés du modèle et les données simulées. C'est cette série qui fait le pont entre le SQL et l'interface : les écarts entre les deux apparaissent immédiatement à l'écran.
+4. Puis les pages, **dans l'ordre du diagramme de dépendances** de [PROMPTS_DEVELOPPEMENT.md](PROMPTS_DEVELOPPEMENT.md) — A1 avant A2, A6 et A7 avant A8. Cet ordre ne se discute pas : chaque écran s'appuie sur le précédent.
+
+   Deux d'entre eux méritent plus de soin que leur rang ne le laisse croire : **A2** (rattachement d'organisation), où se joue la qualité du référentiel, et **A8** (fiche d'évaluation), le plus dense — s'il tient, les autres tiennent. C'est l'attention qu'on leur porte qui change, pas leur ordre.
 
 ## Points en attente d'arbitrage
 
