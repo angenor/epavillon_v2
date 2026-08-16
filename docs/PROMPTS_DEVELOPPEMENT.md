@@ -54,32 +54,39 @@ Crée le socle du frontend dans frontend/.
 - Deux layouts : `public` (barre de navigation, sélecteur de langue, bascule de
   thème, pied de page) et `admin` (navigation latérale, fil d'Ariane, sélecteur
   d'événement).
-- Traductions **découpées par domaine**, jamais un fichier unique :
+- Traductions découpées **PAR ÉCRAN**, jamais par grand domaine et encore moins
+  en un fichier unique. Aucun fichier ne doit dépasser 200 lignes : les
+  traductions du seul formulaire de soumission, avec ses sept étapes,
+  dépasseraient déjà cette limite.
 
-      i18n/locales/fr/common.json      actions, états, formats, messages génériques
-      i18n/locales/fr/validation.json  messages de validation de formulaire
-      i18n/locales/fr/auth.json
-      i18n/locales/fr/organization.json
-      i18n/locales/fr/event.json
-      i18n/locales/fr/proposal.json
-      i18n/locales/fr/programme.json
-      i18n/locales/fr/admin.json
-      i18n/locales/en/…               les mêmes fichiers
+      i18n/locales/fr/
+      ├── _common.json      actions, états, formats — partagé
+      ├── _validation.json  messages de validation
+      ├── _nav.json         navigation, pied de page
+      ├── pages/            un fichier par écran, nommé comme le chemin de la
+      │                     page, aplati par des points :
+      │                     auth.login.json
+      │                     organization.search.json
+      │                     proposal.form.step-speakers.json
+      │                     admin.proposal.review.json
+      └── components/       un fichier par composant réutilisable porteur de
+                            texte : session-card.json, status-timeline.json
+      i18n/locales/en/…     la même arborescence
 
-  Déclare-les dans `nuxt.config.ts` avec `lazy: true` et la propriété `files`
-  (tableau) de chaque locale.
+  RÈGLE DE NOMMAGE : **la clé racine est le nom du fichier**, sans son préfixe
+  `_` ni son dossier. `proposal.form.step-speakers.title` vit dans
+  `pages/proposal.form.step-speakers.json`, et nulle part ailleurs. On sait
+  ouvrir un seul petit fichier, sans chercher.
 
-  RÈGLE DE NOMMAGE : **le premier segment d'une clé est le nom de son fichier**.
-  `proposal.form.speakers.title` vit dans `proposal.json`, et nulle part
-  ailleurs. Ainsi on sait ouvrir un seul fichier pour trouver ou ajouter une
-  clé, au lieu de charger toutes les traductions du projet.
+  DÉCLARATION : n'énumère pas quarante fichiers dans `nuxt.config.ts`. Crée un
+  point d'entrée par locale — `i18n/locales/fr.ts` — qui agrège l'arborescence
+  avec `import.meta.glob('./fr/**/*.json', { eager: true })` et fusionne les
+  objets. Ajouter un écran ne demandera alors aucune modification de
+  configuration. Vérifie que la fusion fonctionne en mode `lazy`.
 
-  Quand un fichier dépasse environ 200 lignes, le scinder en sous-dossier
-  (`proposal/form.json`, `proposal/review.json`) et adapter les clés.
-
-  À ce stade, crée les fichiers avec la seule structure de `common.json` et
-  `validation.json` remplie ; les autres restent des objets vides que chaque
-  écran complétera.
+  À ce stade, ne remplis que `_common.json`, `_validation.json` et `_nav.json`.
+  Les dossiers `pages/` et `components/` restent vides : chaque écran créera son
+  propre fichier.
 - Utilitaires dans app/utils/ : résolution d'un texte multilingue avec repli sur
   le français, formatage d'une date AVEC son fuseau, formatage d'une plage horaire.
 - Configuration de la connexion à l'API par variable d'environnement, non
@@ -97,22 +104,26 @@ prompts suivants.
 Crée les types TypeScript dérivés LITTÉRALEMENT du schéma SQL — mêmes noms de
 champs, même nullabilité.
 
-**UN FICHIER PAR MODULE, jamais un fichier unique.** Le modèle compte 149
-tables : un `domain.ts` monolithique deviendrait impossible à charger en
-contexte, et chaque écran n'a besoin que d'une poignée de types.
+**UN FICHIER PAR GROUPE D'ENTITÉS, jamais un fichier unique.** Le modèle compte
+149 tables : un `domain.ts` monolithique serait impossible à charger en
+contexte, et chaque écran n'a besoin que d'une poignée de types. Aucun fichier
+ne doit dépasser 200 lignes — d'où le sous-découpage de `event` et `programme`,
+qui comptent trop de tables pour tenir dans un seul.
 
     frontend/types/
     ├── index.ts        ne fait que ré-exporter — aucune définition
-    ├── shared.ts       I18nText, types utilitaires, alias d'identifiants
+    ├── shared.ts       I18nText, alias d'identifiants, types utilitaires
     ├── reference.ts    pays, locales, taxonomies
     ├── identity.ts     personnes, comptes, rôles, permissions
-    ├── org.ts          organisations, dénominations, adhésions
-    ├── event.ts        séries, éditions, journées, salles, appels, critères
-    ├── programme.ts    propositions, évaluations, sessions, inscriptions
+    ├── org.ts          organisations, dénominations, domaines, adhésions
+    ├── event/
+    │   ├── series.ts · edition.ts · call.ts · venue.ts
+    ├── programme/
+    │   ├── proposal.ts · review.ts · session.ts · registration.ts
     └── views.ts        types des vues SQL consommées telles quelles
 
-Le nom du fichier reprend celui du schéma PostgreSQL : on sait immédiatement
-lequel ouvrir depuis docs/MODELE_INDEX.md.
+Le nom du fichier reprend celui du schéma ou de l'entité PostgreSQL : on sait
+immédiatement lequel ouvrir depuis docs/MODELE_INDEX.md.
 
 Couvre le périmètre du jalon en cours (voir CLAUDE.md). Les autres modules
 attendront leur propre fichier.
@@ -146,17 +157,25 @@ Les identifiants doivent se répondre d'un fichier à l'autre — une propositio
 pointe vers une organisation qui existe, une session vers une proposition qui
 existe.
 
-**UN FICHIER PAR DOMAINE**, nommé comme les fichiers de types, jamais un fichier
-unique : 40 propositions et 60 inscriptions écrites à la main représentent
-plusieurs milliers de lignes, et un écran n'en consulte qu'une partie.
+**UN FICHIER PAR ENTITÉ, découpé plus finement dès que le volume l'impose.**
+40 propositions et 60 inscriptions écrites à la main représentent plusieurs
+milliers de lignes ; aucun fichier ne doit dépasser 200 lignes, et un écran n'en
+consulte qu'une partie.
 
     frontend/mocks/
     ├── index.ts          ré-exporte tout — aucune donnée
     ├── ids.ts            les identifiants partagés, DÉCLARÉS UNE SEULE FOIS
     │                     et importés par les autres fichiers ; c'est ce qui
     │                     garantit la cohérence entre eux
-    ├── reference.ts · identity.ts · org.ts · event.ts
-    ├── proposals.ts · sessions.ts · registrations.ts
+    ├── reference.ts · people.ts · org.ts
+    ├── event.ts · calls.ts · criteria.ts · tracks.ts · rooms.ts
+    ├── proposals/        drafts.ts · submitted.ts · reviewed.ts · accepted.ts
+    ├── reviews.ts
+    └── sessions.ts · registrations.ts
+
+Le découpage des propositions par statut n'est pas arbitraire : il correspond à
+ce que les écrans consultent réellement — l'espace organisation lit les
+brouillons, la fiche d'évaluation lit celles en cours de revue.
 
 Contenu attendu :
 
@@ -221,7 +240,9 @@ Chaque prompt reçoit le préambule, plus ce rappel :
 
 > *Respecte les types de `types/`, les composants de `components/ui/`, les jetons de `design-tokens.css` et la page `style-guide.vue`. Passe par `composables/useApi.ts`. Thème clair et sombre. Responsive à partir de 375 px. Les quatre états : chargement, vide, erreur, accès refusé.*
 >
-> *Traductions : n'ouvre que le fichier de domaine concerné (`i18n/locales/fr/<domaine>.json` et son équivalent anglais), plus `common.json` si nécessaire. Le premier segment de chaque clé est le nom de son fichier. Ne crée jamais de clé dans un fichier qui ne correspond pas à son préfixe, et n'ouvre pas les autres fichiers de traduction.*
+> *Traductions : crée un fichier PAR ÉCRAN dans `i18n/locales/fr/pages/` et son équivalent anglais, nommé comme le chemin de la page aplati par des points. La clé racine est le nom du fichier. N'ouvre aucun autre fichier de traduction, hormis `_common.json` si tu as besoin d'une chaîne partagée. Si un fichier dépasse 200 lignes, scinde-le par section d'écran.*
+>
+> *Types et mocks : n'ouvre que les fichiers correspondant aux entités de cet écran, repérés depuis `docs/MODELE_INDEX.md`.*
 
 ---
 
@@ -731,4 +752,6 @@ Les deux écrans à traiter en premier après le socle, parce qu'ils portent les
 - [ ] Les quatre états sont traités partout : chargement, vide, erreur, accès refusé.
 - [ ] Le thème sombre tient sur chaque page.
 - [ ] Rien n'est en dur : aucune chaîne hors i18n, aucune couleur hors jetons, aucune route de journée spéciale écrite en clair.
+- [ ] Aucun fichier de traduction, de type ou de mock ne dépasse 200 lignes — `find frontend/i18n frontend/types frontend/mocks -type f | xargs wc -l | sort -rn | head` le vérifie en une commande.
+- [ ] Aucun libellé venant de la base (thématique, catégorie, type d'organisation) n'a été recopié dans un fichier i18n.
 - [ ] Le parcours complet est jouable sur les mocks : créer un compte, rejoindre une organisation sans créer de doublon, soumettre une proposition à plusieurs organisations, la noter, la retenir, la programmer, publier le programme, s'y inscrire.

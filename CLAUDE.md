@@ -77,17 +77,70 @@ Elles sont détaillées dans le cadrage, mais on les oublie vite et chacune a d�
 
 ### Découpage des fichiers transverses
 
-Trois familles de fichiers grossissent avec le projet et deviendraient vite intenables à charger en contexte. Elles sont **découpées par domaine**, jamais monolithiques :
+Traductions, types et données simulées grossissent avec le projet et deviendraient vite impossibles à charger en contexte.
 
-| Famille | Emplacement | Règle |
-|---------|-------------|-------|
-| Traductions | `i18n/locales/<locale>/<domaine>.json` | Le **premier segment de la clé est le nom du fichier** : `proposal.form.speakers.title` vit dans `proposal.json`, et nulle part ailleurs |
-| Types | `types/<schéma>.ts` | Un fichier par schéma PostgreSQL — `org.ts`, `event.ts`, `programme.ts`… `index.ts` ne fait que ré-exporter |
-| Données simulées | `mocks/<domaine>.ts` | Même découpage que les types ; les identifiants partagés vivent dans `mocks/ids.ts`, déclarés une seule fois |
+> **Règle de taille : aucun de ces fichiers ne dépasse 200 lignes.**
+> Au-delà, on scinde. Un découpage par grand domaine ne suffit pas — les traductions du seul formulaire de soumission, avec ses sept étapes, dépasseraient à elles seules cette limite.
 
-Conséquence directe sur la façon de travailler : **n'ouvre que le fichier du domaine concerné**, plus `common.json` pour les traductions génériques. Ne charge jamais l'ensemble des traductions, des types ou des mocks pour modifier un écran.
+**L'unité de découpage est l'ÉCRAN, pas le domaine.**
 
-Quand un fichier de traduction dépasse environ 200 lignes, le scinder en sous-dossier (`proposal/form.json`, `proposal/review.json`) et adapter les clés en conséquence.
+#### Traductions
+
+L'arborescence miroite celle des pages. Le nom de fichier est le chemin de la page, aplati par des points :
+
+```
+i18n/locales/fr/
+├── _common.json                          actions, états, formats — partagé
+├── _validation.json                      messages de validation
+├── _nav.json                             navigation, pied de page
+├── pages/
+│   ├── auth.login.json
+│   ├── auth.register.json
+│   ├── organization.search.json
+│   ├── proposal.form.step-organizations.json
+│   ├── proposal.form.step-speakers.json
+│   ├── admin.proposal.list.json
+│   ├── admin.proposal.review.json
+│   └── …
+└── components/
+    ├── session-card.json
+    └── …
+```
+
+**La clé racine est le nom du fichier**, sans le préfixe `_` ni le dossier : `proposal.form.step-speakers.title` vit dans `pages/proposal.form.step-speakers.json`, et nulle part ailleurs. On sait ouvrir un seul fichier, sans chercher.
+
+Pour éviter d'énumérer quarante fichiers dans `nuxt.config.ts`, chaque locale a un point d'entrée unique (`i18n/locales/fr.ts`) qui agrège l'arborescence par `import.meta.glob`. Ajouter un fichier ne demande alors aucune modification de configuration.
+
+#### Types
+
+Un fichier par **groupe d'entités**, pas par schéma : `programme` en compte une vingtaine, ce qui dépasserait la limite.
+
+```
+types/
+├── index.ts              ré-exporte seulement
+├── shared.ts             I18nText, alias d'identifiants
+├── reference.ts · identity.ts · org.ts
+├── event/                series.ts · edition.ts · call.ts · venue.ts
+├── programme/            proposal.ts · review.ts · session.ts · registration.ts
+└── views.ts
+```
+
+#### Données simulées
+
+Même découpage, plus fin encore quand le volume l'impose — 40 propositions écrites à la main ne tiennent pas dans un fichier.
+
+```
+mocks/
+├── index.ts              ré-exporte seulement
+├── ids.ts                identifiants partagés, déclarés UNE SEULE FOIS
+├── org.ts · people.ts · event.ts · calls.ts
+├── proposals/            drafts.ts · submitted.ts · reviewed.ts · accepted.ts
+└── sessions.ts · registrations.ts
+```
+
+#### Ce que cela change concrètement
+
+Pour modifier un écran, on ouvre **son** fichier de traduction, **ses** types, **ses** mocks. Jamais l'ensemble. Si tu te surprends à charger plus de trois fichiers de traduction pour une seule page, le découpage est à revoir — signale-le dans `docs/PROGRESSION.md`.
 
 ### Deux sortes de textes multilingues — ne pas les confondre
 
