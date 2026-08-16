@@ -1,0 +1,34 @@
+# Garage — stockage objet compatible S3, configuration de DÉVELOPPEMENT.
+#
+# Nœud unique, aucune réplication. En production : au moins trois nœuds et
+# replication_factor = 3.
+#
+# Un nœud neuf REFUSE toute écriture tant que son layout n'est pas assigné :
+# voir `make garage-init` et docs/ENVIRONNEMENT_LOCAL.md § « Initialisation de Garage ».
+
+metadata_dir = "/var/lib/garage/meta"
+data_dir     = "/var/lib/garage/data"
+db_engine    = "sqlite"
+
+replication_factor = 1
+
+rpc_bind_addr   = "[::]:3901"
+rpc_public_addr = "127.0.0.1:3901"
+# Remplacer par une valeur propre à la machine : openssl rand -hex 32
+rpc_secret      = "0000000000000000000000000000000000000000000000000000000000000001"
+
+[s3_api]
+s3_region     = "garage"
+api_bind_addr = "[::]:3900"
+root_domain   = ".s3.garage.localhost"
+
+[s3_web]
+bind_addr   = "[::]:3902"
+root_domain = ".web.garage.localhost"
+index       = "index.html"
+
+[admin]
+api_bind_addr = "[::]:3903"
+# Sans jeton, l'API d'administration refuse tous les appels.
+# Remplacer par une valeur propre à la machine : openssl rand -base64 32
+admin_token = "dev-admin-token-a-remplacer"

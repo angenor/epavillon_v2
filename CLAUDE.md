@@ -229,7 +229,7 @@ La règle qui tranche : *si un administrateur peut le modifier depuis le back-of
 
 ## Commandes
 
-L'environnement local (Postgres avec le schéma chargé, Valkey, Jaeger, Mailpit, Garage) est décrit dans [docs/ENVIRONNEMENT_LOCAL.md](docs/ENVIRONNEMENT_LOCAL.md) — les fichiers `ops/docker-compose.dev.yml` et `Makefile` sont à créer au moment d'initialiser le projet.
+L'environnement local (Postgres avec le schéma chargé, Valkey, Jaeger, Mailpit, Garage) est décrit dans [docs/ENVIRONNEMENT_LOCAL.md](docs/ENVIRONNEMENT_LOCAL.md). Les fichiers `ops/docker-compose.dev.yml`, `ops/garage.toml`, `Makefile` et `.env.example` existent depuis le 16/08 ; sur une machine neuve, `cp .env.example .env && make up && make garage-init` suffit.
 
 ```bash
 docker compose -f ops/docker-compose.dev.yml up -d     # services locaux

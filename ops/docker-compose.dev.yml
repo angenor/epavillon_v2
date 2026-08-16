@@ -1,0 +1,73 @@
+# Environnement de développement local — ePavillon v2
+#
+# Cinq services, aucun n'est destiné à la production :
+#   postgres  base de données ; le schéma se charge AU PREMIER DÉMARRAGE seulement
+#   valkey    cache et sessions
+#   jaeger    collecteur et visualisation des traces OpenTelemetry
+#   mailpit   capture les courriels sans jamais en envoyer
+#   garage    stockage objet compatible S3 ; refuse toute écriture avant `make garage-init`
+#
+# Documentation : docs/ENVIRONNEMENT_LOCAL.md
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: epavillon-postgres
+    environment:
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: epavillon
+    ports: ["${POSTGRES_PORT:-5432}:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Les 18 fichiers SQL sont exécutés dans l'ordre alphabétique au premier
+      # démarrage — la numérotation 000 → 910 fait le travail.
+      - ../docs/database:/docker-entrypoint-initdb.d:ro
+    # pg_stat_statements est créé par 000_bootstrap.sql, mais l'extension reste
+    # inexploitable tant que sa bibliothèque n'est pas préchargée au démarrage.
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d epavillon"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    container_name: epavillon-valkey
+    ports: ["${VALKEY_PORT:-6379}:6379"]
+    command: valkey-server --save 60 1
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.60
+    container_name: epavillon-jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "${JAEGER_UI_PORT:-16686}:16686"   # interface web
+      - "${OTLP_GRPC_PORT:-4317}:4317"     # OTLP gRPC
+      - "${OTLP_HTTP_PORT:-4318}:4318"     # OTLP HTTP
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: epavillon-mailpit
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025"    # interface web
+      - "${SMTP_PORT:-1025}:1025"          # SMTP
+
+  garage:
+    image: dxflrs/garage:v1.0.1
+    container_name: epavillon-garage
+    ports:
+      - "${S3_PORT:-3900}:3900"            # API S3
+      - "${GARAGE_RPC_PORT:-3901}:3901"    # RPC — indispensable à `garage status` et au layout
+      - "${GARAGE_WEB_PORT:-3902}:3902"    # accès web aux objets publics
+      - "${GARAGE_ADMIN_PORT:-3903}:3903"  # API d'administration
+    volumes:
+      - garage-meta:/var/lib/garage/meta
+      - garage-data:/var/lib/garage/data
+      - ./garage.toml:/etc/garage.toml:ro
+
+volumes:
+  pgdata:
+  garage-meta:
+  garage-data:

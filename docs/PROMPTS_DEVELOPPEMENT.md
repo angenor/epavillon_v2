@@ -45,7 +45,7 @@ La toute première action du projet, avant même le socle du front. Elle produit
 ```
 [PRÉAMBULE]
 
-Initialise le dépôt. Ce prompt ne produit aucun code applicatif : ni page, ni
+Initialise le dépôt si ce n'est pas déjà fait. Ce prompt ne produit aucun code applicatif : ni page, ni
 composant, ni crate. Uniquement l'outillage.
 
 1. ops/docker-compose.dev.yml et ops/garage.toml

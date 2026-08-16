@@ -4,7 +4,7 @@
 
 Le contexte d'une session se perd ; le dépôt reste. Toute session commence par lire ce fichier et se termine par le mettre à jour. Une session qui ne le fait pas oblige la suivante à tout redécouvrir.
 
-**Dernière mise à jour** : 16 août 2026 — audit de la documentation et corrections.
+**Dernière mise à jour** : 16 août 2026 — environnement local monté et vérifié.
 
 ---
 
@@ -14,9 +14,26 @@ Le contexte d'une session se perd ; le dépôt reste. Toute session commence par
 |---------|------|
 | Modèle de données | ✅ Complet et validé — 18 fichiers, 142 tables, chargement vérifié sur PostgreSQL 17 + pgvector |
 | Cadrage et décisions | ✅ Complet — 14 ADR, périmètre du jalon arrêté. Audité le 16/08, corrigé |
-| Environnement local | ⬜ À monter — voir [ENVIRONNEMENT_LOCAL.md](ENVIRONNEMENT_LOCAL.md), les fichiers `ops/` et `Makefile` restent à créer |
+| Environnement local | ✅ Monté et vérifié le 16/08 — `ops/docker-compose.dev.yml`, `ops/garage.toml`, `Makefile`, `.gitignore`, `.env.example`. Cinq services démarrés, schéma chargé, `make check` au vert |
 | Front | ⬜ Rien de commencé |
 | API | ⬜ Rien de commencé |
+
+### Ce qui a été vérifié le 16/08, et comment
+
+| Contrôle | Résultat |
+|---|---|
+| `docker compose up -d` — cinq services | Démarrés ; images `pgvector/pgvector:pg17`, `valkey:8-alpine`, `jaeger:1.60`, `mailpit:latest`, `garage:v1.0.1` |
+| Chargement intégral du schéma | `docker compose logs postgres` : **zéro `ERROR:` / `FATAL:` / `PANIC:`** hors messages bénins du healthcheck. Les deux `NOTICE` attendus de `900_seed.sql` sont présents, dont « Frontières de modules conformes » |
+| Schémas attendus | 15 présents (`legacy` compris) ; **142 tables** hors partitions — le compte annoncé, à condition de compter les tables partitionnées parentes |
+| Extensions | `pgcrypto`, `citext`, `pg_trgm`, `unaccent`, `btree_gist`, `vector`, `pg_stat_statements` ; `shared_preload_libraries = pg_stat_statements` effectif |
+| `cross_module_fk_report WHERE NOT is_compliant` | **0** |
+| `analytics.refresh_all(true)` | 7 vues matérialisées rafraîchies, **0 échec** dans `refresh_log` |
+| Le portail échoue-t-il vraiment ? | Testé : ligne d'échec factice insérée dans `refresh_log` → `make check-db-safe` sort en **code 2**. Ligne retirée ensuite |
+| `make check` de bout en bout | Vert, code de sortie 0 (`down -v` → rechargement complet → assertions) |
+| Mailpit | Interface HTTP 200 ; courriel envoyé sur `localhost:1025` et **capturé** (1 message, sujet correct) |
+| Jaeger | Interface HTTP 200 ; ports OTLP 4317/4318 publiés |
+| Valkey | `PING` → `PONG` |
+| Garage | Layout assigné, bucket `epavillon` créé, clé `epavillon-dev` en lecture/écriture. **Écriture réelle prouvée** : `PUT` puis `GET` d'un objet signé SigV4 → 200 / 200 |
 
 ---
 
@@ -26,6 +43,7 @@ Une ligne par session. La plus récente en haut. Court : ce qui a été fait, ce
 
 | Date | Session | Fait | À suivre |
 |------|---------|------|----------|
+| 2026-08-16 | Environnement local | `ops/docker-compose.dev.yml`, `ops/garage.toml`, `Makefile`, `.gitignore`, `.env.example` créés ; quatre `.DS_Store` retirés de l'index ; les cinq services démarrés et vérifiés un par un ; Garage initialisé et écriture S3 prouvée ; `ENVIRONNEMENT_LOCAL.md` synchronisé avec les fichiers réels | Prompt A0.1 — socle Nuxt, Tailwind, i18n, jetons de design |
 | 2026-08-16 | Audit documentaire | Revue des 10 fichiers Markdown ([AUDIT_DOCUMENTATION.md](AUDIT_DOCUMENTATION.md)). Restauration de `docs/historique/`, correction des vestiges de décisions retournées, recomptage du modèle, préambule ajouté à tous les prompts | Trancher les arbitrages listés plus bas, puis monter l'environnement local |
 | 2026-08-16 | Mise en place | Dossier de projet créé, documentation réorganisée, `CLAUDE.md` et index du modèle écrits | Monter l'environnement local, puis produire le guide de style |
 
@@ -98,6 +116,22 @@ Toute modification d'un fichier de `docs/database/` se note ici. C'est ce qui pe
 |-------|----|----------|
 | — | — | — |
 
+### Écarts entre `ENVIRONNEMENT_LOCAL.md` et ce qui a réellement démarré
+
+Relevés le 16/08 en montant l'environnement. Tous corrigés dans le document et dans les fichiers.
+
+| Ce que décrivait le document | Ce qui s'est passé | Correction retenue |
+|---|---|---|
+| `check-db: … up -d && sleep 12` | Le healthcheck `pg_isready` passe au vert **en 2 s**, alors que les 18 fichiers SQL sont encore en cours d'exécution : pendant l'initialisation, le serveur temporaire écoute déjà la socket locale. Un `sleep` fixe est un pari sur la vitesse de la machine | Cible `wait-db` : conteneur sain **et** `legacy.id_map` présente — le dernier objet du dernier fichier chargé |
+| Rien sur les journaux d'initialisation | Une erreur de chargement laisse une base incomplète sans arrêter le conteneur — le piège annoncé. Aucune assertion ne le couvrait | Cible `assert-init-logs`, intégrée à `check-db` |
+| — | Le healthcheck déclenché pendant l'arrêt du serveur temporaire laisse un `FATAL: the database system is shutting down` **bénin** qui faisait échouer à tort l'assertion précédente | `shutting down` et `starting up` explicitement écartés du filtre |
+| Ports fixes `5432`, `3900`, `3903`… | Occupés sur la machine de développement par deux autres projets (`uafricas_postgres`, `kaya-objets`) | Chaque port publié devient `${VAR:-défaut}` ; la liste est en fin de `.env.example`, les valeurs par défaut sont inchangées |
+| — | `docker compose` lit le `.env` du dossier du fichier compose (`ops/`), pas celui de la racine : les ports auraient été ignorés en silence | Le `Makefile` passe `--env-file .env` quand ce fichier existe |
+| « [Garage] demande une initialisation manuelle », procédure donnée en quatre commandes | La procédure **était déjà écrite** dans le document, contrairement à ce qu'annonçait la consigne de session. Ce qui manquait : son automatisation et deux pièges | Cible `make garage-init` ; le document renvoie vers elle |
+| `garage layout apply --version 1` | Rejouer la commande avec un numéro erroné donne `Invalid new layout version` — et l'identifiant du nœud **change à chaque `down -v`** | La cible lit « Current cluster layout version » et ajoute 1 ; elle relève le nœud elle-même |
+| `check-front: cd frontend && …` | `frontend/` et `backend/` n'existent pas encore : `make check` échouait sur une absence de dossier, pas sur un défaut | Les deux cibles annoncent l'absence et rendent la main sans échouer |
+| `.env.example` : `S3_BUCKET=epavillon`, `SMTP_HOST`/`SMTP_PORT` | La consigne de session demandait `S3_BUCKET=epavillon-dev` et un `SMTP_URL` unique | Le document a été suivi : `epavillon` est le nom que crée `garage bucket create`, et deux façons de configurer le SMTP auraient été une ambiguïté de plus. `epavillon-dev` reste le nom de la **clé** d'accès |
+
 ---
 
 ## Décisions prises en cours de route
@@ -116,6 +150,9 @@ Ce qui n'était pas dans le cadrage initial et qu'il a fallu trancher. **Quand u
 | 08-16 | **Traductions, types et mocks découpés par écran**, pas par domaine | Un fichier par domaine reste trop volumineux : le seul formulaire de soumission compte sept étapes |
 | 08-16 | **Pas d'intégration continue, mais trois vérifications locales** dans un `Makefile` | Développeur seul et pressé : une chaîne complète est du temps pris sur la livraison |
 | 08-16 | **Les quiz de formation ne réutilisent pas le module `tool`** | `tool` est conçu pour être extrait ; un quiz de formation est indissociable de la progression et de l'attestation |
+| 08-16 | **Les ports publiés sont paramétrables par `.env`**, valeurs par défaut inchangées | Trois d'entre eux étaient déjà pris par d'autres projets de la machine ; arrêter les conteneurs d'un autre projet pour faire tourner celui-ci n'est pas une option acceptable |
+| 08-16 | **Ce sont les fichiers qui font foi, plus le document** — `ENVIRONNEMENT_LOCAL.md` ne recopie plus intégralement le `Makefile` | Deux copies d'un même contenu divergent toujours ; le document garde ce qu'un fichier ne dit pas : les intentions et les pièges |
+| 08-16 | **La vérification de Garage passe par une écriture réelle**, pas par `bucket info` | Un nœud sans layout répond à l'API S3 et affiche un bucket correct tout en refusant chaque dépôt : seul un `PUT` distingue les deux situations |
 
 ---
 
