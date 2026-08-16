@@ -73,6 +73,13 @@ const PATHS: Record<string, string> = {
   document: 'M6 3.5h7l5 5v12a.8.8 0 0 1-.8.8H6a.8.8 0 0 1-.8-.8V4.3a.8.8 0 0 1 .8-.8ZM13 3.5V9h5M8.5 13.5h7M8.5 17h4.5',
   broadcast: 'M12 13.6a1.6 1.6 0 1 0 0-3.2 1.6 1.6 0 0 0 0 3.2ZM8.4 8.4a5 5 0 0 0 0 7.2M15.6 8.4a5 5 0 0 1 0 7.2M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8',
   monitor: 'M3.5 5h17a.8.8 0 0 1 .8.8v9.4a.8.8 0 0 1-.8.8h-17a.8.8 0 0 1-.8-.8V5.8A.8.8 0 0 1 3.5 5ZM8.5 20h7M12 16v4',
+  // Caméra : diffusion, rejoindre un direct, revoir un enregistrement. À ne pas
+  // confondre avec `broadcast`, qui figure le SIGNAL, pas l'appareil.
+  video: 'M3.8 6.5h10.4a.8.8 0 0 1 .8.8v9.4a.8.8 0 0 1-.8.8H3.8a.8.8 0 0 1-.8-.8V7.3a.8.8 0 0 1 .8-.8ZM15 10.6l5-2.8v8.4l-5-2.8',
+  home: 'M4 10.5 12 4l8 6.5V19a.8.8 0 0 1-.8.8h-4.4v-6h-5.6v6H4.8A.8.8 0 0 1 4 19v-8.5Z',
+  grid: 'M4.5 4.5h5.5v5.5H4.5ZM14 4.5h5.5v5.5H14ZM4.5 14h5.5v5.5H4.5ZM14 14h5.5v5.5H14Z',
+  chart: 'M4 20V4M4 20h16M8 16.5V11M12.5 16.5V7M17 16.5v-3.5',
+  inbox: 'M4 12.5 6.2 5.3a.8.8 0 0 1 .8-.6h10a.8.8 0 0 1 .8.6L20 12.5v6.2a.8.8 0 0 1-.8.8H4.8a.8.8 0 0 1-.8-.8v-6.2ZM4 12.5h4l1.2 2.4h5.6L16 12.5h4',
 
   // — Thème d'affichage
   sun: 'M12 16.2a4.2 4.2 0 1 0 0-8.4 4.2 4.2 0 0 0 0 8.4ZM12 2.6v2.2M12 19.2v2.2M4.2 12H2M22 12h-2.2M6.3 6.3 4.8 4.8M19.2 19.2l-1.5-1.5M17.7 6.3l1.5-1.5M4.8 19.2l1.5-1.5',

@@ -7,6 +7,7 @@
     "current": "étape en cours",
     "upcoming": "étape à venir",
     "error": "correction demandée",
-    "skipped": "étape non concernée"
+    "skipped": "étape non concernée",
+    "refused": "dossier non retenu"
   }
 }

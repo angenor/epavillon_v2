@@ -14,6 +14,21 @@ import type { ButtonVariant, Size } from '~/types/ui'
  * lorsqu'une action doit se fondre dans une phrase. `danger` est réservé à ce
  * qui détruit ou refuse : la couleur distingue, elle ne décore pas.
  *
+ * LE SECONDAIRE EST UN CONTOUR ACCENT, pas un bouton neutre. Un contour gris se
+ * lit comme un bouton désactivé et laisse le primaire seul en piste ; le contour
+ * cyan pose une vraie seconde action, subordonnée sans être éteinte.
+ *
+ * TROIS PALIERS SUR LES APLATS : repos, survol, enfoncé. Deux suffiraient à voir
+ * que le bouton réagit, mais le troisième est ce qui accuse réception du clic
+ * sur une liaison lente — celle d'une salle de conférence. Chaque palier est un
+ * JETON : une valeur calculée à la volée (un `brightness` par exemple) échappe au
+ * thème sombre et au contrôle de contraste.
+ *
+ * TAILLES — 44 px pour `md` et `lg` (`--target-min`), le minimum d'une cible
+ * visée au doigt. `sm` descend à 40 px (`--target-compact`) et se réserve aux
+ * barres d'outils denses sur écran large : LA TAILLE COMPACTE N'EST JAMAIS
+ * L'ACTION PRINCIPALE D'UN ÉCRAN MOBILE.
+ *
  * FOCUS — l'anneau est celui de `main.css`, commun à toute la plateforme. Il
  * n'est pas redéfini ici : un anneau par composant, ce sont autant de façons de
  * ne plus se voir sur un fond donné.
@@ -46,9 +61,9 @@ interface Props {
   label?: string
   disabled?: boolean
   /**
-   * Le bouton travaille : tourniquet à la place de l'icône, `aria-busy`, et
-   * clics ignorés. La largeur ne bouge pas — un bouton qui rétrécit pendant
-   * qu'il travaille déplace tout ce qui l'entoure.
+   * Le bouton travaille : tourniquet AJOUTÉ au libellé, `aria-busy`, et clics
+   * ignorés. Le libellé reste lisible — « Envoi… » sans texte n'est plus un
+   * bouton, c'est une énigme.
    */
   loading?: boolean
   /** Pleine largeur — formulaires en colonne, écrans étroits. */
@@ -76,71 +91,93 @@ const tag = computed(() => {
 /**
  * Base commune : la mise en page, la transition et le tracé. Aucune couleur —
  * elles arrivent par la variante, toutes en jetons de rôle.
+ *
+ * GRAISSE 700 sur le libellé : tout le vocabulaire d'action de la plateforme est
+ * en gras, et un bouton dont le texte pèse le même poids que le paragraphe
+ * voisin ne se repère plus en balayant la page.
+ *
+ * DÉSACTIVÉ UNIFORME — une opacité et un curseur, les mêmes pour les cinq
+ * variantes. Substituer des couleurs variante par variante, comme on le faisait,
+ * produit cinq gris différents dont aucun ne dit « désactivé » : l'affaiblissement
+ * de l'ensemble le dit mieux, et sans multiplier les cas à vérifier au contraste.
+ * Le clic est déjà neutralisé par le gestionnaire ; on ne coupe donc PAS les
+ * événements de pointeur, sans quoi `cursor-not-allowed` ne s'afficherait jamais.
  */
 const BASE =
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border font-medium ' +
-  'no-underline transition-colors duration-150 select-none ' +
-  'disabled:cursor-not-allowed aria-disabled:cursor-not-allowed'
+  'inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap ' +
+  'rounded-md border-(length:--border-thin) border-solid font-bold leading-tight ' +
+  'no-underline select-none transition-colors duration-(--duration-fast) ' +
+  'disabled:cursor-not-allowed disabled:opacity-[.45] ' +
+  'aria-disabled:cursor-not-allowed aria-disabled:opacity-[.45]'
 
 const VARIANTS: Record<ButtonVariant, string> = {
   // Aplat cyan. `--color-accent-solid` tient 4,23:1 face au blanc en thème clair,
   // et le thème sombre bascule sur le cyan de charte avec un texte sombre.
   primary:
     'border-transparent bg-accent-solid text-accent-contrast ' +
-    'hover:bg-accent-solid-hover active:bg-accent-hover ' +
-    'disabled:bg-border disabled:text-text-subtle aria-disabled:bg-border aria-disabled:text-text-subtle',
+    'hover:bg-accent-solid-hover active:bg-accent-active',
 
-  // Contour franc : lisible sans peser autant que l'aplat.
+  // Contour ACCENT — la seconde action de la page, subordonnée et lisible.
+  // L'enfoncé teinte un peu plus le fond que le survol : `color-mix` sur le
+  // jeton de rôle, jamais sur une couleur de marque, pour suivre les deux thèmes.
   secondary:
-    'border-border-strong bg-surface-raised text-text ' +
-    'hover:bg-surface-hover hover:border-text-subtle active:bg-surface-sunken ' +
-    'disabled:bg-surface disabled:text-text-subtle disabled:border-border ' +
-    'aria-disabled:bg-surface aria-disabled:text-text-subtle aria-disabled:border-border',
+    'border-accent bg-transparent text-accent ' +
+    'hover:bg-accent-surface active:bg-[color-mix(in_srgb,var(--color-accent)_18%,transparent)]',
 
   // Sans contour au repos : réservé aux barres d'outils, où dix boutons bordés
   // deviendraient un grillage.
   ghost:
-    'border-transparent bg-transparent text-text-muted ' +
-    'hover:bg-surface-hover hover:text-text active:bg-surface-sunken ' +
-    'disabled:text-text-subtle disabled:hover:bg-transparent ' +
-    'aria-disabled:text-text-subtle aria-disabled:hover:bg-transparent',
+    'border-transparent bg-transparent text-text-secondary ' +
+    'hover:bg-surface-sunken hover:text-text active:bg-neutral-surface',
 
   // Détruire, refuser, retirer. Jamais « enregistrer ».
+  // Trois paliers, comme l'accent — et pris aux jetons, pas calculés : le rouge
+  // fonce au survol en thème clair, s'éclaircit en thème sombre où l'aplat porte
+  // du texte sombre. Un `brightness()` aurait fait l'inverse dans l'un des deux.
   danger:
     'border-transparent bg-danger-solid text-danger-contrast ' +
-    'hover:brightness-95 active:brightness-90 ' +
-    'disabled:bg-border disabled:text-text-subtle aria-disabled:bg-border aria-disabled:text-text-subtle',
+    'hover:bg-danger-solid-hover active:bg-danger-solid-active',
 
   // Action qui se fond dans une phrase. Souligné au survol, comme un lien.
   link:
     'border-transparent bg-transparent px-0! text-text-link underline-offset-4 ' +
-    'hover:underline hover:text-text-link-hover active:text-text-link-hover ' +
-    'disabled:text-text-subtle disabled:no-underline aria-disabled:text-text-subtle',
+    'hover:underline hover:text-text-link-hover active:text-text-link-hover',
 }
 
-/** Hauteurs de frappe : 32 / 38 / 44 px. La plus petite reste cliquable au doigt
- *  dans une barre d'outils dense, la moyenne est le défaut des formulaires. */
+/**
+ * Hauteur MINIMALE et non fixe : un libellé long qui se replie sur deux lignes
+ * doit faire grandir le bouton, pas déborder de son cadre.
+ */
 const SIZES: Record<Size, string> = {
-  sm: 'h-8 px-3 text-sm',
-  md: 'h-[2.375rem] px-4 text-sm',
-  lg: 'h-11 px-5 text-base',
+  sm: 'min-h-(--target-compact) px-4 py-1 text-sm',
+  md: 'min-h-(--target-min) px-5 py-2 text-sm',
+  lg: 'min-h-(--target-min) px-6 py-2.5 text-base',
 }
 
-/** Version carrée pour les boutons réduits à leur icône. */
+/** Version carrée pour les boutons réduits à leur icône : la cible reste pleine. */
 const ICON_ONLY_SIZES: Record<Size, string> = {
-  sm: 'h-8 w-8 p-0',
-  md: 'h-[2.375rem] w-[2.375rem] p-0',
-  lg: 'h-11 w-11 p-0',
+  sm: 'min-h-(--target-compact) w-(--target-compact) p-0',
+  md: 'min-h-(--target-min) w-(--target-min) p-0',
+  lg: 'min-h-(--target-min) w-(--target-min) p-0',
 }
+
+/**
+ * `pressed` marque l'option retenue d'un groupe (bascule de vue, barre d'outils)
+ * et REMPLACE la variante au lieu de s'y ajouter. Superposées, les deux jeux de
+ * classes visent les mêmes propriétés, et ce n'est pas l'ordre d'écriture qui
+ * tranche mais l'ordre alphabétique de la feuille générée : `bg-transparent`
+ * l'emportait sur `bg-surface-selected` et l'option retenue restait invisible.
+ * Le traitement est celui de la surface sélectionnée du reste de l'interface —
+ * on ne réinvente pas un signal pour les boutons.
+ */
+const PRESSED =
+  'border-accent-border bg-surface-selected text-accent hover:bg-accent-surface'
 
 const classes = computed(() => [
   BASE,
-  VARIANTS[props.variant],
+  props.pressed ? PRESSED : VARIANTS[props.variant],
   props.iconOnly ? ICON_ONLY_SIZES[props.size] : SIZES[props.size],
   props.block ? 'w-full' : '',
-  // `pressed` marque l'option retenue d'un groupe : même traitement que la
-  // surface sélectionnée du reste de l'interface, pour ne pas inventer un signal.
-  props.pressed ? 'bg-surface-selected text-accent border-accent-border' : '',
 ])
 
 /** Taille d'icône accordée au corps de texte du bouton. */
@@ -165,12 +202,14 @@ const iconSize = computed(() => (props.size === 'lg' ? '1.15em' : '1.05em'))
     :title="props.iconOnly ? props.label : undefined"
     @click="(event: MouseEvent) => (isInert ? event.preventDefault() : $emit('click', event))"
   >
-    <!-- Le tourniquet REMPLACE l'icône : la largeur du bouton ne change pas
-         quand il se met à travailler. -->
+    <!-- Le tourniquet s'ajoute au libellé, qui ne disparaît jamais. Quand le
+         bouton porte déjà une icône, il en prend la place : la largeur ne bouge
+         donc pas d'un pixel, et rien de ce qui entoure le bouton ne se déplace
+         au moment précis où l'on vient de cliquer dessus. -->
     <UiSpinner v-if="props.loading" :size="iconSize" />
     <UiIcon v-else-if="props.icon" :name="props.icon" :size="iconSize" />
 
-    <span v-if="!props.iconOnly" :class="props.loading && !props.icon ? 'opacity-90' : ''">
+    <span v-if="!props.iconOnly">
       <slot>{{ props.label }}</slot>
     </span>
 

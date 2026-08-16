@@ -22,6 +22,7 @@ import type {
   OrganizationId,
   PersonId,
   TaxonomyTermCode,
+  Url,
   Uuid,
 } from './shared'
 
@@ -131,6 +132,37 @@ export type AssetSources = Record<
   string,
   { url: string; width: number | null; height: number | null; bytes: Int8 | null }
 >
+
+/**
+ * Retour de `media.attached_image(schéma, table, id, rôle)` — `050_media.sql` § 4.
+ * Une image rattachée, prête à l'affichage : c'est ce que les VUES exposent, et
+ * ce qu'un composant d'image reçoit. Jamais un identifiant d'objet à résoudre.
+ *
+ * `url` porte TOUJOURS l'original. La génération des variantes est asynchrone :
+ * entre le téléversement et le passage du worker, `sources` est vide alors que
+ * l'image est parfaitement valide. Un composant qui n'afficherait que `sources`
+ * laisserait donc un trou pendant ce délai.
+ *
+ * `alt_text` N'EST PAS NULLABLE, contrairement à `Asset.alt_text`. La différence
+ * est voulue et vient du modèle : `ck_assets_alt_text_required` interdit à une
+ * image d'atteindre l'état `ready` sans texte alternatif, et seul `ready` est
+ * servi. Toute image que l'API peut rendre en a donc forcément un — pas de repli
+ * sur une chaîne vide, pas de repli sur le nom de fichier. C'est une DONNÉE
+ * multilingue, résolue par `resolveI18nText()`, jamais une clé de traduction.
+ */
+export interface AttachedImage {
+  asset_id: AssetId
+  /** URL absolue de l'original, composée en base par `media.object_url()`. */
+  url: Url
+  width: number | null
+  height: number | null
+  /** Surcharge du rattachement d'abord, texte de l'objet ensuite — résolu en base. */
+  alt_text: I18nText
+  caption: I18nText | null
+  credit: string | null
+  /** Variantes prêtes. Objet vide tant que le worker n'a rien produit. */
+  sources: AssetSources
+}
 
 // ---------------------------------------------------------------------------
 // Rattachements

@@ -23,6 +23,12 @@
  *
  * LE CONTRÔLE RÉEL EST CÔTÉ API. Cet écran sert l'ergonomie, pas la sécurité :
  * un refus qui ne repose que sur le front n'est pas un refus.
+ *
+ * IL EST EN AVERTISSEMENT, PAS EN NEUTRE. Le gris disait « rien ici », ce qui
+ * est exactement la confusion décrite plus haut. Le jaune dit « quelque chose
+ * vous attend » : une accréditation à demander, un périmètre à faire ouvrir. Et
+ * il n'est pas rouge — un droit manquant n'est pas une panne, et rien n'est
+ * cassé ; le rouge appellerait un « réessayer » qui n'aboutira jamais.
  */
 
 interface Props {
@@ -45,16 +51,16 @@ const localePath = useLocalePath()
 
 <template>
   <div
-    class="flex flex-col items-center rounded-lg border border-border bg-surface-sunken text-center"
+    class="flex flex-col items-center rounded-lg border border-warning-border bg-surface text-center"
     :class="props.compact ? 'px-4 py-6' : 'px-6 py-12'"
   >
-    <UiIcon name="lock" :size="props.compact ? '1.5rem' : '2rem'" class="text-text-muted" />
+    <UiIcon name="lock" :size="props.compact ? '1.5rem' : '2.75rem'" class="text-warning" />
 
     <p class="mt-3 font-display" :class="props.compact ? 'text-base' : 'text-xl'">
       {{ props.title ?? t('common.states.forbidden.title') }}
     </p>
 
-    <p class="mt-1.5 max-w-prose text-sm text-text-muted">
+    <p class="mt-1.5 max-w-(--measure) text-sm text-text-secondary">
       {{ props.description ?? t('common.states.forbidden.description') }}
     </p>
 

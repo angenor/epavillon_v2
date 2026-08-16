@@ -442,6 +442,65 @@ CREATE TRIGGER tg_attachments_validate
     BEFORE INSERT OR UPDATE ON media.attachments
     FOR EACH ROW EXECUTE FUNCTION media.tg_validate_attachment();
 
+
+-- Image rattachée à une entité pour un rôle donné, prête pour l'affichage.
+--
+-- POURQUOI UNE FONCTION PLUTÔT QU'UNE JOINTURE PAR VUE. Le rattachement est
+-- polymorphe : sans elle, chaque vue qui veut montrer une vignette réécrit la
+-- même jointure latérale, la même composition d'URL et le même ordre de repli du
+-- texte alternatif. Trois écritures, trois occasions de diverger — et la
+-- première divergence est silencieuse, puisqu'une image manquante ressemble à
+-- une entité sans image.
+--
+-- CE QU'ELLE REND, et pourquoi chaque champ y est :
+--   url      l'ORIGINAL, toujours. La génération des variantes est asynchrone
+--            (platform.jobs) : entre le téléversement et le passage du worker,
+--            `sources` est vide alors que l'image est parfaitement valide. Sans
+--            ce champ, la carte resterait vide pendant ce délai.
+--   sources  les variantes prêtes, pour un <picture>. Objet vide tant que le
+--            worker n'a rien produit.
+--   alt_text la surcharge du rattachement d'abord, le texte de l'objet ensuite.
+--            La déduplication fait qu'un même fichier sert plusieurs fiches : le
+--            texte pertinent n'y est pas le même.
+--
+-- Ne rend que ce qui est réellement servable : objet `ready` et non supprimé.
+-- Un objet en quarantaine ou en cours de traitement est traité comme absent.
+-- Renvoie NULL si l'entité n'a pas d'image, et NULL si p_owner_id est nul — ce
+-- qui permet d'enchaîner les replis par COALESCE sans garde préalable.
+CREATE OR REPLACE FUNCTION media.attached_image(
+    p_owner_schema text,
+    p_owner_table  text,
+    p_owner_id     uuid,
+    p_role         media.attachment_role DEFAULT 'cover'
+)
+RETURNS jsonb
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT jsonb_build_object(
+               'asset_id', a.id,
+               'url',      media.object_url(a.bucket, a.object_key),
+               'width',    a.width,
+               'height',   a.height,
+               'alt_text', COALESCE(t.alt_text_override, a.alt_text),
+               'caption',  a.caption,
+               'credit',   a.credit,
+               'sources',  media.asset_sources(a.id))
+    FROM media.attachments t
+    JOIN media.assets a ON a.id = t.asset_id
+    WHERE t.owner_schema = p_owner_schema
+      AND t.owner_table  = p_owner_table
+      AND t.owner_id     = p_owner_id
+      AND t.role         = p_role
+      AND a.deleted_at IS NULL
+      AND a.status = 'ready'
+    ORDER BY t.sort_order, t.created_at
+    LIMIT 1;
+$$;
+
+COMMENT ON FUNCTION media.attached_image(text, text, uuid, media.attachment_role) IS
+    'Image rattachée à une entité pour un rôle, prête à l''affichage : URL de l''original, variantes disponibles, texte alternatif résolu. NULL si aucune image servable.';
+
 -- -----------------------------------------------------------------------------
 -- 5. Quotas de stockage
 --

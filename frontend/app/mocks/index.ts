@@ -64,6 +64,7 @@ export {
   sessionOrganizations,
 } from './sessions'
 
+export { coverAssets, coverAttachments, attachedImage } from './covers'
 export { registrationForms, registrationFormFields } from './registration-form'
 export { registrations } from './registrations'
 export { publicSchedule, proposalDashboard } from './views'

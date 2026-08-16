@@ -23,9 +23,13 @@ INSERT INTO platform.settings (key, value, description, is_secret) VALUES
      'URL publique de référence, utilisée pour composer les liens des courriels.', false),
     ('platform.default_locale', '"fr"', 'Locale par défaut du frontend et des courriels.', false),
     ('platform.default_timezone', '"America/Montreal"', 'Fuseau par défaut du back-office (siège de l''IFDD).', false),
-    ('media.public_base_url', '"https://cdn.epavillonclimatique.francophonie.org"',
-     'Point d''accès public du stockage objet. Changer cette valeur suffit à basculer de fournisseur : aucune URL n''est stockée en base.', false),
-    ('media.default_bucket', '"epavillon-public"', 'Bucket Garage/S3 par défaut des téléversements publics.', false),
+    -- `media.public_base_url` et `media.default_bucket` NE SONT PAS SEMÉS ICI.
+    -- Ils l'étaient, avec d'autres valeurs que celles de 050_media.sql § 8 — et
+    -- comme ce fichier est chargé après, son `ON CONFLICT DO NOTHING` les
+    -- écartait en silence. Les valeurs actives ont toujours été celles de 050 ;
+    -- ces deux lignes ne servaient qu'à faire croire le contraire à qui lit le
+    -- fichier de semis pour connaître la configuration. Le module média déclare
+    -- ses propres réglages, comme il déclare ses propres rôles d'attachement.
     ('email.from_address', '"no-reply@epavillonclimatique.francophonie.org"', 'Expéditeur des courriels transactionnels.', false),
     ('email.reply_to', '"epavillon@francophonie.org"', 'Adresse de réponse.', false),
     ('registration.reminder_offsets', '["2 days","1 day","1 hour","30 minutes"]',

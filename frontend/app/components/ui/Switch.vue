@@ -15,6 +15,16 @@
  * l'interrupteur reste dans son ancienne position, non basculable, jusqu'à la
  * réponse. Le faire glisser tout de suite puis revenir en arrière sur erreur est
  * la pire des deux solutions.
+ *
+ * PISTE 44 × 26, CURSEUR 18 BORDÉ. Ces trois nombres tiennent ensemble : le
+ * curseur laisse 4 px de piste tout autour, ce qui rend la position lisible d'un
+ * coup d'œil, et sa course de 18 px est assez longue pour que le mouvement se
+ * voie. Le curseur porte un trait, sans quoi il disparaît dans la piste éteinte,
+ * qui est claire elle aussi.
+ *
+ * DURÉE `--duration-base` et non `--duration-fast` : la bascule est le seul
+ * mouvement de l'interface qu'il faut SUIVRE DE L'ŒIL — c'est lui qui dit dans
+ * quel sens le réglage vient de partir. Un survol, lui, doit paraître instantané.
  */
 
 interface Props {
@@ -48,19 +58,24 @@ function onChange(event: Event): void {
 
 <template>
   <div
-    class="flex items-start gap-3"
+    class="flex min-h-(--target-min) max-w-(--measure) items-center gap-3"
     :class="props.labelPosition === 'start' ? 'flex-row-reverse justify-end' : ''"
   >
-    <span class="relative inline-flex shrink-0 items-center">
+    <!-- Comme pour les cases, l'opacité du désactivé enveloppe piste ET curseur :
+         un curseur resté opaque sur une piste éteinte se lirait comme une
+         troisième position. -->
+    <span
+      class="relative inline-flex shrink-0 items-center"
+      :class="props.disabled ? 'opacity-[.45]' : ''"
+    >
       <input
         :id="fieldId"
         type="checkbox"
         role="switch"
-        class="peer h-6 w-11 cursor-pointer appearance-none rounded-full border border-border-strong bg-surface-sunken transition-colors
+        class="peer h-6.5 w-11 cursor-pointer appearance-none rounded-full border-(length:--border-thin) border-solid border-border-strong bg-neutral-surface transition-colors duration-(--duration-base)
                checked:border-accent-solid checked:bg-accent-solid
-               hover:border-text-subtle checked:hover:bg-accent-solid-hover
-               disabled:cursor-not-allowed disabled:border-border disabled:bg-surface-sunken
-               disabled:checked:bg-border"
+               hover:border-accent checked:hover:bg-accent-solid-hover
+               disabled:cursor-not-allowed"
         :checked="props.modelValue"
         :disabled="isLocked"
         :aria-describedby="props.hint ? hintId : undefined"
@@ -68,9 +83,11 @@ function onChange(event: Event): void {
         @change="onChange"
       >
       <!-- Le curseur. `pointer-events-none` : c'est la case dessous qui reçoit
-           le clic, sans quoi le glissement du curseur avalerait l'événement. -->
+           le clic, sans quoi le glissement du curseur avalerait l'événement.
+           Le trait tombe une fois la piste allumée : sur l'aplat accent, le
+           curseur clair se détache tout seul. -->
       <span
-        class="pointer-events-none absolute left-0.5 flex size-5 items-center justify-center rounded-full bg-surface-raised shadow-xs transition-transform duration-150 peer-checked:translate-x-5"
+        class="pointer-events-none absolute top-1 left-1 flex size-4.5 items-center justify-center rounded-full border-(length:--border-thin) border-solid border-border-strong bg-surface-raised shadow-xs transition-transform duration-(--duration-base) peer-checked:translate-x-4.5 peer-checked:border-transparent"
         aria-hidden="true"
       >
         <UiSpinner v-if="props.loading" size="0.8rem" class="text-text-muted" />
@@ -81,7 +98,7 @@ function onChange(event: Event): void {
       v-if="props.label || $slots.default"
       :for="fieldId"
       class="text-sm leading-snug"
-      :class="isLocked ? 'cursor-not-allowed text-text-subtle' : 'cursor-pointer text-text'"
+      :class="isLocked ? 'cursor-not-allowed text-text-muted' : 'cursor-pointer text-text'"
     >
       <slot>{{ props.label }}</slot>
       <span :id="hintId" v-if="props.hint" class="mt-0.5 block text-sm text-text-subtle">

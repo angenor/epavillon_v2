@@ -14,6 +14,16 @@ import type { SelectOption } from '~/types/ui'
  *
  * Le clavier est celui du natif : flèches pour parcourir le groupe, tabulation
  * pour en sortir. Rien n'est réimplémenté.
+ *
+ * LE RADIO COCHÉ EST UN APLAT ACCENT AVEC PASTILLE CLAIRE, pas un anneau épais.
+ * L'anneau — un trait de 6 px qui mange le centre du cercle — donne un contrôle
+ * dont l'état ne se lit qu'à la couleur, et qui se confond de loin avec un
+ * bouton désactivé. L'aplat plus pastille reprend la forme du bouton radio que
+ * tout le monde connaît, et reste lisible en niveaux de gris.
+ *
+ * CIBLE DE 44 px, CONTRÔLE DE 20, TRAIT DE 2 : mêmes valeurs que `UiCheckbox`.
+ * Deux contrôles voisins dans un même formulaire qui ne s'alignent pas au pixel
+ * près donnent l'impression d'un formulaire monté à la va-vite.
  */
 
 interface Props {
@@ -59,37 +69,59 @@ function select(option: SelectOption): void {
     :aria-required="props.required ? true : undefined"
     :disabled="props.disabled"
   >
-    <legend v-if="props.label" class="mb-2 text-sm font-medium" :class="props.disabled ? 'text-text-subtle' : 'text-text'">
+    <!-- Même graisse que le libellé d'un champ : le titre du groupe EST le
+         libellé de la question posée, il ne pèse pas moins. -->
+    <legend
+      v-if="props.label"
+      class="mb-1 max-w-(--measure) text-sm font-bold"
+      :class="props.disabled ? 'text-text-subtle' : 'text-text'"
+    >
       {{ props.label }}
       <span v-if="props.required" class="ml-0.5 text-danger" aria-hidden="true">*</span>
       <span v-if="props.required" class="sr-only"> — {{ t('form.required') }}</span>
     </legend>
 
-    <div :class="props.inline ? 'flex flex-wrap gap-x-6 gap-y-2.5' : 'space-y-2.5'">
-      <div v-for="option in props.options" :key="option.value" class="flex items-start gap-2.5">
-        <input
-          :id="`${groupName}-${option.value}`"
-          type="radio"
-          :name="groupName"
-          :value="option.value"
-          :checked="props.modelValue === option.value"
-          :disabled="props.disabled || option.disabled"
-          class="peer mt-0.5 size-4.5 shrink-0 cursor-pointer appearance-none rounded-full border border-border-strong bg-surface-raised transition-colors
-                 checked:border-6 checked:border-accent-solid
-                 hover:border-text-subtle
-                 disabled:cursor-not-allowed disabled:border-border disabled:bg-surface-sunken
-                 disabled:checked:border-border"
-          :class="props.error ? 'border-danger' : ''"
-          :aria-readonly="props.readonly ? 'true' : undefined"
-          @change="select(option)"
+    <div :class="props.inline ? 'flex flex-wrap gap-x-6' : ''">
+      <div
+        v-for="option in props.options"
+        :key="option.value"
+        class="flex min-h-(--target-min) max-w-(--measure) items-start gap-3 py-2"
+      >
+        <!-- Comme pour la case à cocher, l'opacité du désactivé est portée par
+             l'enveloppe : le cercle et sa pastille s'éteignent d'un seul geste. -->
+        <span
+          class="relative mt-0.5 flex size-5 shrink-0 items-center"
+          :class="props.disabled || option.disabled ? 'opacity-[.45]' : ''"
         >
+          <input
+            :id="`${groupName}-${option.value}`"
+            type="radio"
+            :name="groupName"
+            :value="option.value"
+            :checked="props.modelValue === option.value"
+            :disabled="props.disabled || option.disabled"
+            class="peer size-5 shrink-0 cursor-pointer appearance-none rounded-full border-(length:--border-medium) border-solid bg-surface-raised transition-colors duration-(--duration-fast)
+                   checked:border-accent-solid checked:bg-accent-solid
+                   hover:border-accent
+                   disabled:cursor-not-allowed"
+            :class="props.error ? 'border-danger' : 'border-border-strong'"
+            :aria-readonly="props.readonly ? 'true' : undefined"
+            @change="select(option)"
+          >
+          <!-- La pastille intérieure : 8 px de clair au centre de l'aplat. -->
+          <span
+            class="pointer-events-none absolute inset-0 grid place-items-center opacity-0 peer-checked:opacity-100"
+          >
+            <span class="size-2 rounded-full bg-accent-contrast" />
+          </span>
+        </span>
 
         <label
           :for="`${groupName}-${option.value}`"
           class="text-sm leading-snug"
           :class="[
             props.disabled || option.disabled || props.readonly
-              ? 'cursor-default text-text-subtle'
+              ? 'cursor-default text-text-muted'
               : 'cursor-pointer text-text',
           ]"
         >
@@ -101,8 +133,15 @@ function select(option: SelectOption): void {
       </div>
     </div>
 
-    <p v-if="props.hint" :id="hintId" class="mt-2 text-sm text-text-subtle">{{ props.hint }}</p>
-    <p v-if="props.error" :id="errorId" role="alert" class="mt-2 text-sm font-medium text-danger">
+    <p v-if="props.hint" :id="hintId" class="mt-2 max-w-(--measure) text-sm text-text-muted">
+      {{ props.hint }}
+    </p>
+    <p
+      v-if="props.error"
+      :id="errorId"
+      role="alert"
+      class="mt-2 max-w-(--measure) text-sm font-bold text-danger"
+    >
       <span class="sr-only">{{ t('form.errorPrefix') }} </span>{{ props.error }}
     </p>
   </fieldset>

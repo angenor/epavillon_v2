@@ -1,7 +1,9 @@
 {
   "table": {
     "sortAsc": "Trier par ordre croissant",
-    "sortDesc": "Trier par ordre décroissant"
+    "sortDesc": "Trier par ordre décroissant",
+    "selectAll": "Sélectionner toutes les lignes affichées",
+    "selectRow": "Sélectionner la ligne {label}"
   },
   "tabs": {
     "label": "Onglets"
@@ -12,7 +14,16 @@
     "current": "étape en cours",
     "upcoming": "étape à venir",
     "error": "étape à corriger",
-    "skipped": "étape non concernée"
+    "skipped": "étape non concernée",
+    "short": {
+      "done": "Terminée",
+      "current": "En cours",
+      "upcoming": "À remplir",
+      "error": "À corriger",
+      "skipped": "Non concernée",
+      "refused": "Non retenue"
+    },
+    "refused": "étape non retenue"
   },
   "pagination": {
     "label": "Pagination",

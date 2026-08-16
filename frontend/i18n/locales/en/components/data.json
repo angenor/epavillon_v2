@@ -1,7 +1,9 @@
 {
   "table": {
     "sortAsc": "Sort ascending",
-    "sortDesc": "Sort descending"
+    "sortDesc": "Sort descending",
+    "selectAll": "Select all visible rows",
+    "selectRow": "Select row {label}"
   },
   "tabs": {
     "label": "Tabs"
@@ -12,7 +14,16 @@
     "current": "current step",
     "upcoming": "upcoming step",
     "error": "step needing changes",
-    "skipped": "step not applicable"
+    "skipped": "step not applicable",
+    "short": {
+      "done": "Done",
+      "current": "In progress",
+      "upcoming": "To fill in",
+      "error": "Needs changes",
+      "skipped": "Not applicable",
+      "refused": "Not selected"
+    },
+    "refused": "step not selected"
   },
   "pagination": {
     "label": "Pagination",

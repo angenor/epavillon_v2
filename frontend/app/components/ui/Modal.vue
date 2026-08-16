@@ -10,6 +10,13 @@ import type { Size } from '~/types/ui'
  * Échap sans écouteur de clavier. Une modale reconstruite en `<div>` demande de
  * réécrire les trois, et la troisième manque toujours.
  *
+ * ELLE NE CONTIENT JAMAIS DE FORMULAIRE LONG — règle du guide. Le dialogue sert
+ * la décision irréversible et la saisie de deux champs ; au-delà, c'est le
+ * panneau latéral (`UiDrawer`) ou une page dédiée qu'il faut. Un formulaire long
+ * dans une modale ne se sauvegarde pas en brouillon, ne s'envoie pas par
+ * courriel, ne survit pas à un rafraîchissement, et pousse la moitié de ses
+ * champs sous le pli sur un écran de portable.
+ *
  * FERMETURE PAR LE FOND : proposée par défaut, désactivable. Un formulaire à
  * moitié rempli ne doit pas disparaître sur un clic maladroit — c'est le cas
  * `dismissible: false`, où seuls le bouton et Échap ferment.
@@ -20,6 +27,11 @@ import type { Size } from '~/types/ui'
  * DÉFILEMENT : le corps défile, l'en-tête et le pied restent. Sur écran étroit,
  * la modale occupe presque tout l'écran — une boîte centrée de 400 px sur un
  * téléphone de 375 px n'a pas de sens.
+ *
+ * RAYON PLAFONNÉ À 8 px (`--radius-lg`) : « coins légèrement arrondis, 6 à 8 px »
+ * est une décision de direction artistique, et une surface flottante n'y échappe
+ * pas — c'est même là qu'un rayon plus large ferait basculer l'ensemble du côté
+ * du tableau de bord générique que le projet écarte.
  */
 
 interface Props {
@@ -88,7 +100,7 @@ onBeforeUnmount(() => {
     ref="dialog"
     :aria-labelledby="titleId"
     :aria-describedby="props.description ? descriptionId : undefined"
-    class="ui-modal m-auto w-[calc(100vw-2rem)] rounded-xl border border-border bg-surface-overlay p-0 text-text shadow-lg backdrop:bg-black/50"
+    class="ui-modal m-auto w-[calc(100vw-2rem)] rounded-lg border border-border bg-surface-overlay p-0 text-text shadow-lg backdrop:bg-black/50"
     :class="WIDTHS[props.size]"
     @click="onBackdropClick"
     @cancel.prevent="props.dismissible ? close() : undefined"

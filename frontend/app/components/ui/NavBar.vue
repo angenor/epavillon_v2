@@ -12,6 +12,12 @@ import type { NavItem } from '~/types/navigation'
  * PAGE COURANTE : marquée par `aria-current="page"` ET par un traitement visuel.
  * L'un sans l'autre laisse la moitié des visiteurs sans repère.
  *
+ * CE TRAITEMENT EST UN FILET DE 3 px, PAS UN APLAT — règle du guide. Un aplat
+ * derrière l'entrée courante la ferait passer pour un bouton, dans une barre où
+ * tout le reste est un lien ; et il entre en concurrence avec le survol, qui,
+ * lui, teinte bien le fond. La graisse seule ne suffit pas : elle se compare mal
+ * de loin, et disparaît pour qui lit avec une police de substitution.
+ *
  * MENU MOBILE : replié sous 1024 px, ouvert par un bouton qui déclare ce qu'il
  * contrôle (`aria-controls`, `aria-expanded`). Le menu se referme à chaque
  * changement de route — c'est au layout de le dire, il connaît la route.
@@ -48,11 +54,11 @@ const isCurrent = (to: string): boolean => route.path === localePath(to)
           v-for="item in props.items"
           :key="item.to"
           :to="localePath(item.to)"
-          class="rounded-md px-3 py-2 text-sm no-underline transition-colors"
+          class="inline-flex min-h-(--target-min) items-center rounded-md px-3 text-sm font-semibold no-underline transition-colors duration-(--duration-fast)"
           :class="
             isCurrent(item.to)
-              ? 'font-semibold text-accent'
-              : 'text-text-muted hover:bg-surface-hover hover:text-text'
+              ? 'rounded-b-none text-accent shadow-[inset_0_-3px_0_var(--color-accent)]'
+              : 'text-text-secondary hover:bg-surface-hover hover:text-text'
           "
           :aria-current="isCurrent(item.to) ? 'page' : undefined"
         >
@@ -84,15 +90,18 @@ const isCurrent = (to: string): boolean => route.path === localePath(to)
       class="border-t border-border-subtle bg-surface-raised px-4 py-2 lg:hidden"
       :aria-label="props.label"
     >
+      <!-- Menu empilé : le même filet de 3 px, mais posé au bord d'attaque de
+           l'entrée. Sous une liste verticale, un filet inférieur se lirait comme
+           un séparateur entre deux entrées, pas comme un repère de position. -->
       <NuxtLink
         v-for="item in props.items"
         :key="item.to"
         :to="localePath(item.to)"
-        class="block rounded-md px-3 py-2.5 text-sm no-underline transition-colors"
+        class="flex min-h-(--target-min) items-center rounded-md px-3 text-sm font-semibold no-underline transition-colors duration-(--duration-fast)"
         :class="
           isCurrent(item.to)
-            ? 'font-semibold text-accent'
-            : 'text-text-muted hover:bg-surface-hover hover:text-text'
+            ? 'text-accent shadow-[inset_3px_0_0_var(--color-accent)]'
+            : 'text-text-secondary hover:bg-surface-hover hover:text-text'
         "
         :aria-current="isCurrent(item.to) ? 'page' : undefined"
       >

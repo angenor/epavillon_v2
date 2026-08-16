@@ -26,6 +26,7 @@ import { rooms } from './rooms'
 import { entityTerms, taxonomyTerms } from './reference'
 import { allProposals, proposalComments, proposalSpeakers } from './proposals'
 import { allSessions, sessionTracks } from './sessions'
+import { attachedImage } from './covers'
 import { registrations } from './registrations'
 import { reviewAssignments } from './reviews'
 
@@ -71,6 +72,7 @@ export function publicSchedule(): PublicScheduleRow[] {
         id: s.id,
         event_id: s.event_id,
         event_day_id: s.event_day_id,
+        proposal_id: s.proposal_id,
         slug: s.slug,
         title: s.title,
         summary: s.summary,
@@ -88,6 +90,12 @@ export function publicSchedule(): PublicScheduleRow[] {
         broadcast_channel_id: s.broadcast_channel_id,
         capacity: s.capacity,
         tracks,
+        // Reproduit le `COALESCE` de la vue : couverture de la séance, à défaut
+        // celle de la proposition d'origine. Le repli est la règle — l'image est
+        // jointe au DÉPÔT, et personne n'en téléverse une seconde après coup.
+        cover:
+          attachedImage('programme', 'sessions', s.id) ??
+          attachedImage('programme', 'proposals', s.proposal_id),
         temporal_state: temporalState(s, now),
         // Inscrits et présents, annulations exclues.
         registered_count: registrations.filter((r) => r.session_id === s.id && r.status !== 'cancelled').length,

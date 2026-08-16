@@ -7,6 +7,7 @@
     "current": "current step",
     "upcoming": "upcoming step",
     "error": "changes requested",
-    "skipped": "step not applicable"
+    "skipped": "step not applicable",
+    "refused": "proposal not selected"
   }
 }

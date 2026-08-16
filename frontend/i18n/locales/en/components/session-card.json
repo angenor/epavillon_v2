@@ -13,6 +13,10 @@
   },
   "streamed": "Streamed online",
   "cancelledReason": "Reason for cancellation",
+  "postponedReason": "Reason for postponement",
+  "themes": {
+    "more": "also {themes}"
+  },
   "capacity": {
     "label": "Seats taken",
     "ratio": "{registered} / {capacity} registered",

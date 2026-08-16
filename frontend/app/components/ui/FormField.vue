@@ -21,6 +21,16 @@
  * copiable et soumis avec le formulaire ; un champ désactivé sort du parcours de
  * tabulation et sa valeur ne part pas. Les confondre, c'est empêcher de copier
  * un numéro de dossier.
+ *
+ * L'ICÔNE DU MESSAGE D'ERREUR EST UN CERCLE BARRÉ, pas un triangle. Le guide de
+ * style réserve le triangle à l'AVERTISSEMENT — « attention à ceci » — quand le
+ * cercle barré dit « ceci est refusé ». Un formulaire qui bloque à l'envoi avec
+ * des triangles partout ne dit plus laquelle des deux choses il veut.
+ *
+ * LARGEUR DE LECTURE — libellé, aide et message sont plafonnés à `--measure`
+ * (68 caractères). Une aide contextuelle qui court sur toute la largeur d'un
+ * écran de bureau se relit deux fois ; c'est le même plafond que les paragraphes
+ * du reste de la plateforme, calibré sur le français.
  */
 
 interface Props {
@@ -81,7 +91,7 @@ defineSlots<{
     <div v-if="props.label" class="mb-1.5 flex items-baseline justify-between gap-3">
       <label
         :for="fieldId"
-        class="text-sm font-medium text-text"
+        class="max-w-(--measure) text-sm font-bold text-text"
         :class="[props.hideLabel ? 'sr-only' : '', props.disabled ? 'text-text-subtle' : '']"
       >
         {{ props.label }}
@@ -106,7 +116,7 @@ defineSlots<{
 
     <slot :control="control" />
 
-    <p v-if="props.hint" :id="hintId" class="mt-1.5 text-sm text-text-subtle">
+    <p v-if="props.hint" :id="hintId" class="mt-1.5 max-w-(--measure) text-sm text-text-muted">
       {{ props.hint }}
     </p>
 
@@ -116,9 +126,9 @@ defineSlots<{
       v-if="props.error"
       :id="errorId"
       role="alert"
-      class="mt-1.5 flex items-start gap-1.5 text-sm font-medium text-danger"
+      class="mt-1.5 flex max-w-(--measure) items-start gap-1.5 text-sm font-bold text-danger"
     >
-      <UiIcon name="warning" size="1.05em" class="mt-0.5" />
+      <UiIcon name="error" size="1.05em" class="mt-0.5" />
       <span><span class="sr-only">{{ t('form.errorPrefix') }} </span>{{ props.error }}</span>
     </p>
 

@@ -17,6 +17,11 @@
     "cancelledReason": "The delegation's flight was postponed; the session will be rescheduled into a slot on 18 November.",
     "noData": "No published session for this edition."
   },
+  "cover": {
+    "title": "The cover image",
+    "note": "It comes from `v_public_schedule.cover`, resolved in the database. Without an image the card stands whole: no grey band, no placeholder pictogram, no gradient — a visual invented to fill space costs room and teaches nothing. Alternative text is mandatory in the model: an image cannot be served without one.",
+    "fallback": "The database applies a fallback: the session's cover, failing that the one from the originating proposal. This is the rule, not a convenience — an organization attaches its image at submission, and nobody comes back to upload a second one once the proposal is accepted. Without it the programme would show no visual although the image already exists, one identifier away."
+  },
   "compact": {
     "title": "Dense version",
     "note": "The same card, tightened: list view, planner column, search results. The slot loses its offset here because the surrounding page already states the time zone in its header — the only circumstance where it may be dropped."

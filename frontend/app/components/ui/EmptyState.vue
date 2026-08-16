@@ -18,6 +18,12 @@
  *
  * Pas d'illustration : la direction artistique écarte les blobs et les formes
  * flottantes. Une icône en trait, un titre, une phrase, une action.
+ *
+ * BORDURE EN POINTILLÉS, ET ELLE EST FRANCHE (`--color-border-strong`). C'est le
+ * seul des quatre états d'écran qui garde le pointillé : il dit « emplacement
+ * réservé, rien encore », là où l'erreur et le refus posent un trait plein parce
+ * qu'ils constatent un fait. Un pointillé trop pâle donne l'impression d'un bloc
+ * inachevé plutôt que d'un contenant vide.
  */
 
 interface Props {
@@ -48,16 +54,18 @@ const icon = computed(() => props.icon ?? (props.filtered ? 'filter' : 'document
 
 <template>
   <div
-    class="flex flex-col items-center rounded-lg border border-dashed border-border text-center"
+    class="flex flex-col items-center rounded-lg border border-dashed border-border-strong bg-surface text-center"
     :class="props.compact ? 'px-4 py-6' : 'px-6 py-12'"
   >
-    <UiIcon :name="icon" :size="props.compact ? '1.5rem' : '2rem'" class="text-text-subtle" />
+    <!-- 44 px : le glyphe de tête est le repère qui porte l'état d'un coup d'œil
+         sur une page par ailleurs blanche. -->
+    <UiIcon :name="icon" :size="props.compact ? '1.5rem' : '2.75rem'" class="text-text-muted" />
 
     <p class="mt-3 font-display" :class="props.compact ? 'text-base' : 'text-xl'">
       {{ props.title ?? t('common.states.empty.title') }}
     </p>
 
-    <p class="mt-1.5 max-w-prose text-sm text-text-muted">
+    <p class="mt-1.5 max-w-(--measure) text-sm text-text-secondary">
       {{ props.description ?? t('common.states.empty.description') }}
     </p>
 

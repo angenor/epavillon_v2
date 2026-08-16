@@ -53,15 +53,18 @@ const counter = computed(() => {
     : t('form.counter', { count: length.value, max: props.maxlength })
 })
 
+/**
+ * Aucune classe n'est retirée de l'habillage commun : `fieldControlClasses` pose
+ * une hauteur MINIMALE, que les `rows` dépassent toujours. C'est ce qui permet à
+ * la zone de texte de partager exactement le trait, le halo de focus et les
+ * pointillés de lecture seule des champs sur une ligne.
+ */
 const classes = computed(() =>
   fieldControlClasses({
     hasError: Boolean(props.error) || exceeded.value,
     disabled: props.disabled,
     readonly: props.readonly,
-  }).map((entry) =>
-    // La hauteur d'un `textarea` vient de `rows`, pas d'une classe de hauteur.
-    entry.startsWith('h-') ? '' : entry,
-  ),
+  }),
 )
 
 /** Ajuste la hauteur au contenu, plafonnée à `maxRows` lignes. */
@@ -108,7 +111,7 @@ watch(() => props.modelValue, () => nextTick(grow))
         :required="props.required"
         :aria-describedby="control['aria-describedby']"
         :aria-invalid="control['aria-invalid']"
-        :class="[classes, 'py-2 leading-normal', props.autoGrow ? 'resize-none' : 'resize-y']"
+        :class="[classes, 'leading-normal', props.autoGrow ? 'resize-none' : 'resize-y']"
         @input="onInput"
         @blur="emit('blur', $event)"
       />

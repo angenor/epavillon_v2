@@ -17,6 +17,13 @@
  * réessayer une action qui échouera toujours est pire que de ne rien proposer.
  *
  * `role="alert"` : l'erreur remplace un contenu attendu, elle doit être annoncée.
+ *
+ * PAS DE FOND ROUGE. C'est le TRAIT qui porte l'alerte — bordure pleine en
+ * `--color-danger-border` sur fond de surface ordinaire. Un aplat rouge pâle
+ * derrière quatre lignes de texte, un bouton et une référence d'incident écrase
+ * ce qu'on demande justement de lire, et interdit d'y poser un second bloc (le
+ * détail technique) sans empiler deux teintes. Le rouge reste concentré sur le
+ * glyphe et le filet, là où il distingue sans gêner.
  */
 
 interface Props {
@@ -45,22 +52,22 @@ const canRetry = computed(() => Boolean(attrs.onRetry))
 <template>
   <div
     role="alert"
-    class="flex flex-col items-center rounded-lg border border-danger-border bg-danger-surface text-center"
+    class="flex flex-col items-center rounded-lg border border-danger-border bg-surface text-center"
     :class="props.compact ? 'px-4 py-6' : 'px-6 py-12'"
   >
-    <UiIcon name="error" :size="props.compact ? '1.5rem' : '2rem'" class="text-danger" />
+    <UiIcon name="error" :size="props.compact ? '1.5rem' : '2.75rem'" class="text-danger" />
 
     <p class="mt-3 font-display" :class="props.compact ? 'text-base' : 'text-xl'">
       {{ props.title ?? t('common.states.error.title') }}
     </p>
 
-    <p class="mt-1.5 max-w-prose text-sm text-text-muted">
+    <p class="mt-1.5 max-w-(--measure) text-sm text-text-secondary">
       {{ props.description ?? t('common.states.error.description') }}
     </p>
 
     <p
       v-if="props.detail"
-      class="mt-3 max-w-prose rounded-md border border-border bg-surface-raised px-3 py-2 text-left font-mono text-xs break-words text-text-muted"
+      class="mt-3 max-w-(--measure) rounded-md border border-border bg-surface-raised px-3 py-2 text-left font-mono text-xs break-words text-text-muted"
     >
       {{ props.detail }}
     </p>

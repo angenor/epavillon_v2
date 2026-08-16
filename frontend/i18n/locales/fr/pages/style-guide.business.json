@@ -17,6 +17,11 @@
     "cancelledReason": "Report du vol de la délégation ; la séance sera reprogrammée sur un créneau du 18 novembre.",
     "noData": "Aucune séance publiée pour cette édition."
   },
+  "cover": {
+    "title": "L'image de couverture",
+    "note": "Elle vient de `v_public_schedule.cover`, résolue en base. Sans image, la carte reste entière : ni bandeau gris, ni pictogramme de remplacement, ni dégradé — un visuel inventé pour remplir coûte de la place et n'apprend rien. Le texte alternatif est obligatoire côté modèle : une image ne peut pas être servie sans lui.",
+    "fallback": "La base applique un repli : couverture de la séance, à défaut celle de la proposition d'origine. C'est la règle et non une commodité — une organisation joint son image au dépôt, et personne ne revient en téléverser une seconde après l'acceptation du dossier. Sans ce repli, la programmation s'afficherait sans visuel alors que l'image existe déjà, à un identifiant près."
+  },
   "compact": {
     "title": "Version dense",
     "note": "La même carte en version resserrée : vue liste, colonne de planificateur, résultats de recherche. Le créneau y perd son décalage horaire parce que la page qui l'accueille le rappelle déjà en tête — c'est la seule circonstance où l'on peut s'en dispenser."

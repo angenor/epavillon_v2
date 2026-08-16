@@ -12,6 +12,12 @@
  * focalisables. Vingt boutons de page seraient vingt cibles de tabulation entre
  * la liste et le pied de page.
  *
+ * DES BOUTONS BORDÉS DE 40 px, ET UN APLAT PLEIN POUR LA PAGE COURANTE. Le fond
+ * pâle qui servait ici auparavant se lisait mal au milieu d'une rangée de
+ * chiffres : la page où l'on se trouve doit se repérer sans lecture. Les
+ * flèches partagent exactement le même habillage — trois formes différentes
+ * dans une barre de dix boutons donnent une barre qui bégaie.
+ *
  * SUR ÉCRAN ÉTROIT, seuls « précédent » et « suivant » restent, avec le
  * décompte. Les numéros de page sur 375 px produisent des cibles trop petites.
  *
@@ -37,6 +43,19 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+
+/**
+ * Habillage commun à toutes les cibles de la barre — flèches et numéros. Le
+ * garder en une seule constante est ce qui empêche les deux de diverger à la
+ * première retouche.
+ */
+const CONTROL
+  = 'inline-grid min-h-(--target-compact) min-w-(--target-compact) place-items-center'
+    + ' rounded-md border px-2 text-xs font-semibold tabular-nums transition-colors'
+    + ' duration-(--duration-fast) disabled:cursor-not-allowed disabled:opacity-40'
+
+const CONTROL_IDLE = 'border-border bg-surface-raised text-text-secondary hover:border-accent hover:text-accent'
+const CONTROL_CURRENT = 'border-accent-solid bg-accent-solid text-accent-contrast'
 
 const totalPages = computed(() => Math.max(1, Math.ceil(props.total / props.perPage)))
 const from = computed(() => (props.total === 0 ? 0 : (props.page - 1) * props.perPage + 1))
@@ -94,15 +113,15 @@ function go(page: number): void {
 
       <ul class="flex items-center gap-1">
         <li>
-          <UiButton
-            variant="ghost"
-            size="sm"
-            icon-only
-            icon="chevron-left"
-            :label="t('common.pagination.previous')"
+          <button
+            type="button"
+            :class="[CONTROL, CONTROL_IDLE]"
+            :aria-label="t('common.pagination.previous')"
             :disabled="props.disabled || props.page <= 1"
             @click="go(props.page - 1)"
-          />
+          >
+            <UiIcon name="chevron-left" size="0.875rem" :stroke-width="2.2" />
+          </button>
         </li>
 
         <li v-for="(entry, index) in pages" :key="entry ?? `gap-${index}`" class="hidden sm:block">
@@ -110,12 +129,7 @@ function go(page: number): void {
           <button
             v-else
             type="button"
-            class="min-w-8 rounded-md border px-2 py-1.5 font-mono text-sm tabular-nums transition-colors disabled:cursor-not-allowed"
-            :class="
-              entry === props.page
-                ? 'border-accent bg-surface-selected font-semibold text-accent'
-                : 'border-transparent text-text-muted hover:bg-surface-hover hover:text-text'
-            "
+            :class="[CONTROL, entry === props.page ? CONTROL_CURRENT : CONTROL_IDLE]"
             :aria-current="entry === props.page ? 'page' : undefined"
             :aria-label="t('data.pagination.goTo', { page: entry })"
             :disabled="props.disabled"
@@ -131,15 +145,15 @@ function go(page: number): void {
         </li>
 
         <li>
-          <UiButton
-            variant="ghost"
-            size="sm"
-            icon-only
-            icon="chevron-right"
-            :label="t('common.pagination.next')"
+          <button
+            type="button"
+            :class="[CONTROL, CONTROL_IDLE]"
+            :aria-label="t('common.pagination.next')"
             :disabled="props.disabled || props.page >= totalPages"
             @click="go(props.page + 1)"
-          />
+          >
+            <UiIcon name="chevron-right" size="0.875rem" :stroke-width="2.2" />
+          </button>
         </li>
       </ul>
     </div>

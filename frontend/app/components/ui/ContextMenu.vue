@@ -17,8 +17,22 @@ import type { MenuItem } from '~/types/ui'
  * MENU FERMÉ = MENU ABSENT DU DOM. Les entrées ne sont ni focalisables ni
  * lisibles quand il est refermé, sans avoir à jouer sur `tabindex`.
  *
- * ACTION DESTRUCTRICE : rendue en rouge et séparée du reste par un trait, jamais
- * collée à « Modifier ». C'est la seule protection réelle contre le clic de trop.
+ * ENTRÉES DE 44 px : c'est un menu qu'on vise au doigt depuis une tablette, au
+ * fond d'une salle de négociation, et 32 px y produisent une erreur sur deux.
+ *
+ * SURTITRE DE GROUPE (`groupLabel`) plutôt qu'un second niveau de menu : « douze
+ * actions » se parcourt mal, « trois groupes de quatre » se parcourt bien, et
+ * un sous-menu déroulant coûterait un second piège au focus pour rien.
+ *
+ * RACCOURCI CLAVIER (`shortcut`) poussé à droite, en `<kbd>` : il n'est pas
+ * décoratif, c'est ainsi qu'un utilisateur quotidien apprend à se passer du
+ * menu. Le composant l'AFFICHE ; c'est à l'écran de le brancher — un raccourci
+ * capté ici serait actif alors même que le menu est fermé.
+ *
+ * ACTION DESTRUCTRICE : rendue en rouge — LIBELLÉ ET ICÔNE — et séparée du
+ * reste par un trait. Teinter le seul libellé laissait un pictogramme gris
+ * devant un texte rouge, ce qui affaiblissait exactement le signal qui doit
+ * arrêter la main.
  */
 
 interface Props {
@@ -88,7 +102,7 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', onDocumentPoin
     <button
       ref="trigger"
       type="button"
-      class="inline-flex size-8 items-center justify-center rounded-md border border-transparent text-text-muted transition-colors hover:bg-surface-hover hover:text-text disabled:cursor-not-allowed disabled:text-text-subtle"
+      class="inline-flex size-8 items-center justify-center rounded-md border border-transparent text-text-muted transition-colors duration-(--duration-fast) hover:bg-surface-hover hover:text-text disabled:cursor-not-allowed disabled:text-text-subtle"
       :class="isOpen ? 'bg-surface-hover text-text' : ''"
       :disabled="props.disabled"
       :aria-expanded="isOpen"
@@ -106,7 +120,7 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', onDocumentPoin
       v-if="isOpen"
       role="menu"
       :aria-label="props.label"
-      class="absolute z-40 mt-1 min-w-56 rounded-lg border border-border bg-surface-overlay py-1 shadow-lg"
+      class="absolute z-40 mt-1 min-w-65 rounded-lg border border-border bg-surface-overlay p-2 shadow-md"
       :class="props.align === 'end' ? 'right-0' : 'left-0'"
       @keydown.down.prevent="move(1)"
       @keydown.up.prevent="move(-1)"
@@ -116,12 +130,21 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', onDocumentPoin
       @keydown.tab="close(false)"
     >
       <template v-for="(item, index) in props.items" :key="item.value">
-        <hr v-if="item.separatorBefore" class="my-1 border-border-subtle">
+        <hr v-if="item.separatorBefore" class="my-2 border-separator">
+        <!-- `role="presentation"` : le surtitre n'est pas une entrée de menu et
+             ne doit pas être compté comme telle par un lecteur d'écran. -->
+        <p
+          v-if="item.groupLabel"
+          role="presentation"
+          class="px-3 py-2 text-xs font-semibold tracking-caps text-text-secondary uppercase"
+        >
+          {{ item.groupLabel }}
+        </p>
         <button
           :ref="(element) => { if (element) itemRefs[index] = element as HTMLButtonElement }"
           type="button"
           role="menuitem"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors disabled:cursor-not-allowed disabled:text-text-subtle"
+          class="flex min-h-(--target-min) w-full items-center gap-3 rounded-md px-3 text-start text-sm transition-colors duration-(--duration-fast) disabled:cursor-not-allowed disabled:opacity-45"
           :class="
             item.destructive
               ? 'text-danger hover:bg-danger-surface'
@@ -131,8 +154,19 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', onDocumentPoin
           :tabindex="index === activeIndex ? 0 : -1"
           @click="select(item)"
         >
-          <UiIcon v-if="item.icon" :name="item.icon" size="1rem" class="shrink-0" />
+          <!-- L'icône d'une action ordinaire reste en second rang ; celle d'une
+               action destructrice hérite du rouge du libellé. -->
+          <UiIcon
+            v-if="item.icon"
+            :name="item.icon"
+            size="1rem"
+            class="shrink-0"
+            :class="item.destructive ? '' : 'text-text-secondary'"
+          />
           {{ item.label }}
+          <kbd v-if="item.shortcut" class="ms-auto font-mono text-xs font-normal text-text-muted">
+            {{ item.shortcut }}
+          </kbd>
         </button>
       </template>
     </div>

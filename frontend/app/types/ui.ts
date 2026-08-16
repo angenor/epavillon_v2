@@ -121,14 +121,26 @@ export interface TabItem {
   disabled?: boolean
 }
 
-/** État d'une étape de `Stepper`. */
-export type StepState = 'done' | 'current' | 'upcoming' | 'error' | 'skipped'
+/**
+ * État d'une étape de `Stepper` ou de `StatusTimeline`.
+ *
+ * `error` et `refused` ne disent PAS la même chose et ne se remplacent pas :
+ * une correction demandée attend une action du déposant et le dossier repartira ;
+ * un refus clôt le parcours. Les confondre ferait annoncer « à corriger » à
+ * quelqu'un dont le dossier a été écarté — c'est un lecteur d'écran qui
+ * l'entendrait, et personne ne s'en apercevrait à la relecture.
+ */
+export type StepState = 'done' | 'current' | 'upcoming' | 'error' | 'skipped' | 'refused'
 
 /** Étape de `Stepper` — parcours en plusieurs écrans (formulaire de soumission). */
 export interface StepItem {
   value: string
   label: string
-  /** Précision d'une ligne sous le libellé. */
+  /**
+   * Sous-libellé d'avancement, sur une ligne (« 2 intervenants sur 5 »). Absent,
+   * la barre affiche l'état de l'étape à sa place : une cellule ne reste jamais
+   * muette sous son titre.
+   */
   description?: string
   state?: StepState
   /** L'étape est-elle atteignable par clic ? Une étape à venir ne l'est pas. */
@@ -141,11 +153,24 @@ export interface MenuItem {
   label: string
   /** Nom d'icône de `UiIcon`. */
   icon?: string
-  /** Action destructrice : rendue en rouge, séparée du reste. */
+  /** Action destructrice : rendue en rouge — libellé ET icône —, séparée du reste. */
   destructive?: boolean
   disabled?: boolean
   /** Trait de séparation AVANT cette entrée. */
   separatorBefore?: boolean
+  /**
+   * Surtitre de groupe affiché AVANT cette entrée — « Activité », « Diffusion ».
+   * Déjà traduit par l'appelant, comme `label`. Il coiffe les entrées qui
+   * suivent jusqu'au surtitre suivant : c'est ce qui permet de ranger douze
+   * actions sans ouvrir un second niveau de menu.
+   */
+  groupLabel?: string
+  /**
+   * Raccourci clavier, tel qu'il doit s'AFFICHER (« Ctrl D »). Le menu ne le
+   * capte pas : un raccourci actif alors que le menu est fermé se branche sur
+   * l'écran, pas sur le composant qui l'annonce.
+   */
+  shortcut?: string
 }
 
 // ---------------------------------------------------------------------------

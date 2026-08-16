@@ -9,8 +9,19 @@
  * `<div role="checkbox">` aurait exigé de réécrire tout cela à la main, et l'un
  * des trois aurait fini par manquer.
  *
- * La zone cliquable englobe le libellé et l'aide : viser un carré de 16 px au
- * doigt n'est pas raisonnable.
+ * LA CIBLE FAIT 44 px DE HAUT, pas la taille du carré. Le contrôle visible en
+ * mesure 20 avec un trait de 2 px — assez pour se voir sans écraser le libellé —
+ * mais c'est toute la ligne, libellé compris, qui reçoit le clic. Viser un carré
+ * de 20 px au doigt, dans un train ou debout dans un couloir de conférence, n'est
+ * pas raisonnable.
+ *
+ * LE TRAIT DE CONTRÔLE EST À 2 px là où celui d'un champ de saisie est à 1 : un
+ * carré de 20 px bordé d'un cheveu disparaît, alors qu'un champ de 300 px de
+ * large se voit par sa seule étendue.
+ *
+ * LARGEUR PLAFONNÉE À `--measure` : un libellé de case porte souvent une phrase
+ * entière (« Désertification — indisponible pour cette conférence »), qui suit la
+ * même règle de lisibilité que les paragraphes.
  */
 
 interface Props {
@@ -57,19 +68,24 @@ function onChange(event: Event): void {
 </script>
 
 <template>
-  <div>
-    <div class="flex items-start gap-2.5">
-      <span class="relative flex items-center">
+  <div class="max-w-(--measure)">
+    <div class="flex min-h-(--target-min) items-start gap-3 py-2">
+      <!-- L'opacité du désactivé est portée par l'ENVELOPPE, pas par la case :
+           le carré et sa coche s'éteignent alors ensemble. Posée sur la seule
+           case, elle laisserait une coche à pleine intensité sur un carré pâle. -->
+      <span
+        class="relative mt-0.5 flex size-5 shrink-0 items-center"
+        :class="props.disabled ? 'opacity-[.45]' : ''"
+      >
         <input
           :id="fieldId"
           type="checkbox"
-          class="peer size-4.5 shrink-0 cursor-pointer appearance-none rounded-sm border border-border-strong bg-surface-raised transition-colors
+          class="peer size-5 shrink-0 cursor-pointer appearance-none rounded-sm border-(length:--border-medium) border-solid bg-surface-raised transition-colors duration-(--duration-fast)
                  checked:border-accent-solid checked:bg-accent-solid
                  indeterminate:border-accent-solid indeterminate:bg-accent-solid
-                 hover:border-text-subtle checked:hover:border-accent-solid-hover
-                 disabled:cursor-not-allowed disabled:border-border disabled:bg-surface-sunken
-                 disabled:checked:bg-border"
-          :class="props.error ? 'border-danger' : ''"
+                 hover:border-accent
+                 disabled:cursor-not-allowed"
+          :class="props.error ? 'border-danger' : 'border-border-strong'"
           :checked="props.modelValue"
           :indeterminate="props.indeterminate"
           :disabled="props.disabled"
@@ -82,21 +98,22 @@ function onChange(event: Event): void {
           @change="onChange"
         >
         <!-- Coche et trait d'indétermination : deux FORMES distinctes, pas deux
-             couleurs — l'état doit rester lisible en niveaux de gris. -->
-        <UiIcon
+             couleurs — l'état doit rester lisible en niveaux de gris. La marque
+             se superpose à la case en position absolue plutôt que d'être son
+             `::after` : une case `appearance-none` n'accepte pas d'enfant, et le
+             pseudo-élément échapperait au jeu d'icônes commun. -->
+        <span
           v-if="props.indeterminate"
-          name="minus"
-          class="pointer-events-none absolute left-0.5 text-accent-contrast peer-disabled:text-text-subtle"
-          size="0.95rem"
-          :stroke-width="2.6"
-        />
-        <UiIcon
+          class="pointer-events-none absolute inset-0 grid place-items-center text-accent-contrast"
+        >
+          <UiIcon name="minus" size="0.95rem" :stroke-width="2.6" />
+        </span>
+        <span
           v-else
-          name="check"
-          class="pointer-events-none absolute left-0.5 hidden text-accent-contrast peer-checked:block peer-disabled:text-text-subtle"
-          size="0.95rem"
-          :stroke-width="2.6"
-        />
+          class="pointer-events-none absolute inset-0 grid place-items-center text-accent-contrast opacity-0 peer-checked:opacity-100"
+        >
+          <UiIcon name="check" size="0.95rem" :stroke-width="2.6" />
+        </span>
       </span>
 
       <label
@@ -104,8 +121,7 @@ function onChange(event: Event): void {
         :for="fieldId"
         class="text-sm leading-snug"
         :class="[
-          isLocked ? 'cursor-default text-text-subtle' : 'cursor-pointer text-text',
-          props.readonly && !props.disabled ? 'text-text-muted' : '',
+          isLocked ? 'cursor-default text-text-muted' : 'cursor-pointer text-text',
         ]"
       >
         <slot>{{ props.label }}</slot>
@@ -117,7 +133,10 @@ function onChange(event: Event): void {
       </label>
     </div>
 
-    <p v-if="props.error" :id="errorId" role="alert" class="mt-1.5 pl-7 text-sm font-medium text-danger">
+    <!-- Aligné sous le LIBELLÉ, pas sous la case : 20 px de contrôle et 12 px
+         d'écart. Un message d'erreur qui commence à gauche de son libellé se lit
+         comme celui de la case précédente. -->
+    <p v-if="props.error" :id="errorId" role="alert" class="mt-1.5 pl-8 text-sm font-bold text-danger">
       <span class="sr-only">{{ t('form.errorPrefix') }} </span>{{ props.error }}
     </p>
   </div>

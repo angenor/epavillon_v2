@@ -13,11 +13,21 @@
  * remplacement, exactement ce qu'il devait éviter.
  *
  * ACCESSIBILITÉ : le squelette est décoratif (`aria-hidden`), et c'est le
- * conteneur qui porte `aria-busy="true"`. Annoncer douze squelettes reviendrait
- * à lire douze fois « chargement ».
+ * conteneur qui porte `aria-busy="true"` — `UiLoadingState` s'en charge.
+ * Annoncer douze squelettes reviendrait à lire douze fois « chargement ».
  *
- * L'animation est neutralisée par `prefers-reduced-motion` (voir `main.css`) ;
- * les blocs restent alors visibles, sans pulsation.
+ * UN BALAYAGE, PAS UNE PULSATION. Le bloc ne clignote pas : une bande claire le
+ * traverse. La différence n'est pas cosmétique — une pulsation d'opacité fait
+ * respirer TOUTE la page au même rythme, ce qui attire l'œil au lieu de le
+ * laisser lire, et rend illisible ce qui est déjà arrivé. Le balayage reste
+ * local au bloc et suggère un mouvement de remplissage.
+ *
+ * PAS DE BORDURE. Un squelette n'est pas un cadre vide en attente : c'est la
+ * silhouette du contenu. Une bordure lui donnerait un contour que le texte
+ * remplaçant n'aura pas, et la substitution se verrait.
+ *
+ * `prefers-reduced-motion` : plus d'animation du tout, le voile reste posé à
+ * 40 % sans transformation. Un balayage ralenti reste un mouvement.
  */
 
 interface Props {
@@ -77,18 +87,33 @@ const radius = computed(() => {
 
 <style scoped>
 .ui-skeleton {
-  background-color: var(--color-surface-sunken);
-  border: 1px solid var(--color-border-subtle);
-  animation: ui-skeleton-pulse 1.6s ease-in-out infinite;
+  background-color: var(--color-neutral-surface);
+  position: relative;
+  /* Le voile est translaté au-delà des deux bords : sans découpe, il déborderait
+     du bloc et balaierait ce qui l'entoure. */
+  overflow: hidden;
 }
 
-@keyframes ui-skeleton-pulse {
-  0%,
-  100% {
-    opacity: 1;
+.ui-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--color-surface) 55%, transparent);
+  transform: translateX(-100%);
+  animation: ui-skeleton-sweep 1.4s ease-in-out infinite;
+}
+
+@keyframes ui-skeleton-sweep {
+  to {
+    transform: translateX(100%);
   }
-  50% {
-    opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-skeleton::after {
+    animation: none;
+    opacity: 0.4;
+    transform: none;
   }
 }
 </style>

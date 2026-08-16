@@ -46,11 +46,19 @@ interface Props {
   format?: 'full' | 'short' | 'withDate'
   /** Icône d'horloge en tête. */
   icon?: boolean
+  /**
+   * Composition à deux niveaux : les bornes en police de titrage, le fuseau en
+   * texte secondaire plus petit. C'est le dessin du guide de style — il donne au
+   * créneau le poids qu'il mérite dans une programmation, où l'heure est ce
+   * qu'on cherche. Le rendu par défaut reste une seule ligne de texte courant,
+   * pour les contextes où le créneau n'est qu'une métadonnée parmi d'autres.
+   */
+  stacked?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), { format: 'full' })
 
-const { timeRange, timeRangeFull, date } = useDateTime()
+const { timeRange, timeRangeFull, date, zoneOffsetShort } = useDateTime()
 
 const range = computed(() =>
   props.format === 'short'
@@ -61,10 +69,23 @@ const range = computed(() =>
 const dayLabel = computed(() =>
   props.format === 'withDate' ? date(props.start, props.timezone) : '',
 )
+
+/** Composition à deux niveaux : les bornes seules d'un côté, le fuseau de l'autre. */
+const bounds = computed(() => timeRange(props.start, props.end, props.timezone, props.zoneLabel).split(',')[0] ?? '')
+const zoneSuffix = computed(
+  () => `${props.zoneLabel || timeZoneCityLabel(props.timezone)}, ${zoneOffsetShort(props.timezone, props.start)}`,
+)
 </script>
 
 <template>
-  <span class="inline-flex items-baseline gap-1.5">
+  <!-- Composition à deux niveaux : les bornes portent le poids, le fuseau suit. -->
+  <span v-if="props.stacked" class="inline-flex items-baseline gap-2 tabular-nums">
+    <UiIcon v-if="props.icon" name="clock" size="0.95em" class="self-center text-text-subtle" />
+    <time :datetime="props.start" class="font-display text-lg font-bold text-text">{{ bounds }}</time>
+    <span class="text-xs text-text-muted">{{ zoneSuffix }}</span>
+  </span>
+
+  <span v-else class="inline-flex items-baseline gap-1.5">
     <UiIcon v-if="props.icon" name="clock" size="0.95em" class="self-center text-text-subtle" />
     <span>
       <span v-if="dayLabel" class="font-medium">{{ dayLabel }} · </span>

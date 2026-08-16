@@ -80,6 +80,14 @@ watchEffect(() => {
  */
 const compactCards = computed(() => cards.value.filter((card) => card.state !== 'live').slice(0, 3))
 
+/**
+ * Deux séances réelles, l'une couverte et l'autre non. Aucune donnée n'est
+ * forcée ici : la démonstration ne vaut que si l'absence d'image est celle des
+ * données, et non une propriété mise à `null` pour l'occasion.
+ */
+const withCover = computed(() => props.sessions.find((session) => session.cover !== null) ?? null)
+const withoutCover = computed(() => props.sessions.find((session) => session.cover === null) ?? null)
+
 const themesOf = (session: PublicScheduleRow): ThemeBadge[] =>
   session.theme_codes.map((code) => props.themesByCode[code]).filter((theme) => theme !== undefined)
 
@@ -199,6 +207,39 @@ const withdrawnSteps = computed<TimelineStep[]>(() => [
           />
         </div>
       </div>
+    </StyleGuideDemo>
+
+    <!-- COUVERTURE : AVEC, SANS, ET LE REPLI -->
+    <StyleGuideDemo
+      :title="t('style-guide.business.cover.title')"
+      :note="t('style-guide.business.cover.note')"
+      surface
+    >
+      <div v-if="!props.loading" class="grid gap-4 md:grid-cols-2">
+        <div v-if="withCover">
+          <p class="mb-1.5 font-mono text-xs text-text-subtle">cover ≠ null</p>
+          <UiSessionCard
+            :session="withCover"
+            :themes="themesOf(withCover)"
+            :organization-country="countryOf(withCover)"
+            :zone-label="props.zoneLabel"
+          />
+        </div>
+        <div v-if="withoutCover">
+          <p class="mb-1.5 font-mono text-xs text-text-subtle">cover = null</p>
+          <UiSessionCard
+            :session="withoutCover"
+            :themes="themesOf(withoutCover)"
+            :organization-country="countryOf(withoutCover)"
+            :zone-label="props.zoneLabel"
+          />
+        </div>
+      </div>
+      <UiSkeletonLoader v-else height="14rem" />
+
+      <UiAlert intent="info" class="mt-4">
+        {{ t('style-guide.business.cover.fallback') }}
+      </UiAlert>
     </StyleGuideDemo>
 
     <!-- VERSION DENSE -->

@@ -29,6 +29,7 @@ import type {
   TimeZoneName,
 } from './shared'
 import type { ParticipationMode, TrackKind } from './event/edition'
+import type { AttachedImage } from './media'
 import type { SessionStatus } from './programme/session'
 import type { ProposalStatus } from './programme/proposal'
 
@@ -62,6 +63,8 @@ export interface PublicScheduleRow {
   id: SessionId
   event_id: EventId
   event_day_id: EventDayId | null
+  /** Dossier d'origine ; nul quand l'IFDD programme directement une activité. */
+  proposal_id: ProposalId | null
   slug: Slug
   title: I18nText
   summary: I18nText | null
@@ -83,6 +86,16 @@ export interface PublicScheduleRow {
   capacity: number | null
   /** Journées spéciales et fils thématiques, agrégés — pas de requête en plus. */
   tracks: ScheduleTrackBadge[]
+  /**
+   * Image de couverture, résolue EN BASE par `media.attached_image()` :
+   * celle de la séance, à défaut celle de la proposition d'origine.
+   *
+   * Le repli est la règle, pas une commodité — une organisation joint son image
+   * au DÉPÔT, et personne ne revient en téléverser une seconde après
+   * l'acceptation. `null` quand il n'y en a réellement aucune : la carte doit
+   * rester lisible sans image, et n'en invente jamais une de remplacement.
+   */
+  cover: AttachedImage | null
   temporal_state: TemporalState
   /** Inscrits et présents ; exclut les annulations. */
   registered_count: number

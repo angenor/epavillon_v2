@@ -29,6 +29,12 @@
       "danger": "Rejected"
     }
   },
+  "status": {
+    "title": "State badges, theme tags, counters",
+    "note": "The STATE badge does not look like the information badge: square, uppercase, preceded by a dot. That distinct shape is deliberate — in a dense programme the eye must separate at a glance what describes an activity from what says where it stands. Two colours are not obvious: “in progress” is YELLOW, because an activity under way calls for attention and is not a success; “postponed” is PURPLE, because a postponement has already been arbitrated and asks for nothing — confusing it with a warning drowns out what still needs handling.",
+    "themeNote": "Three theme tags at most, the rest fold away. The edition holds {total} in the database: past three on a card they stop informing — the reader retains “this activity is about everything”. Hidden themes remain announced to screen readers.",
+    "counterNote": "The accent tone is reserved for what awaits action; neutral is the default."
+  },
   "chips": {
     "title": "Filter chips",
     "note": "A badge informs, a chip acts: it states which filter is applied and how to remove it. The first two carry a theme from the database, the next two a translated enumeration value — both kinds of label live side by side, and that is exactly the trap not to fall into.",

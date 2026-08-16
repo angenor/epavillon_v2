@@ -191,6 +191,7 @@
 
   /* -- Texte -- */
   --color-text: var(--ifdd-gris-900); /* 16.83:1 — AA et AAA */
+  --color-text-secondary: var(--ifdd-gris-800); /* 11.71:1 — texte courant de second rang */
   --color-text-muted: var(--ifdd-gris-700); /*  7.44:1 — AA */
   --color-text-subtle: var(--ifdd-gris-600); /*  5.16:1 — AA, seuil bas : métadonnées uniquement */
   --color-text-inverse: var(--ifdd-gris-0); /* sur aplat accentué */
@@ -201,11 +202,13 @@
   --color-border: var(--ifdd-gris-300); /* trait de séparation ordinaire */
   --color-border-subtle: var(--ifdd-gris-200); /* trait à peine visible, listes denses */
   --color-border-strong: var(--ifdd-gris-500); /*  3.59:1 — contour de champ de saisie */
+  --color-separator: var(--ifdd-gris-200); /* filet INTÉRIEUR d'un bloc : rail, pied de carte */
   --color-focus: var(--ifdd-cyan-600); /*  4.23:1 — anneau de focus visible */
 
   /* -- Accent (cyan de marque) -- */
   --color-accent: var(--ifdd-cyan-700); /*  6.23:1 — texte et icônes accentués */
   --color-accent-hover: var(--ifdd-cyan-800);
+  --color-accent-active: var(--ifdd-cyan-900); /* troisième palier : bouton enfoncé */
   --color-accent-solid: var(--ifdd-cyan-600); /*  4.23:1 face au blanc — fond de bouton primaire */
   --color-accent-solid-hover: var(--ifdd-cyan-700);
   --color-accent-contrast: var(--ifdd-gris-0); /* texte posé sur --color-accent-solid */
@@ -227,6 +230,11 @@
 
   --color-danger: var(--ifdd-rouge-600); /*  5.97:1 — AA */
   --color-danger-solid: var(--ifdd-rouge-600);
+  /* Le bouton de danger est le seul aplat d'état qui se clique : il lui faut ses
+     trois paliers, comme à l'accent. Sans eux, le survol se règle au filtre
+     (`brightness`), c'est-à-dire par une valeur en dur. */
+  --color-danger-solid-hover: var(--ifdd-rouge-700);
+  --color-danger-solid-active: var(--ifdd-rouge-800);
   --color-danger-contrast: var(--ifdd-gris-0);
   --color-danger-surface: var(--ifdd-rouge-50);
   --color-danger-border: var(--ifdd-rouge-300);
@@ -237,6 +245,29 @@
   --color-info-surface: var(--ifdd-cyan-50);
   --color-info-border: var(--ifdd-cyan-200);
 
+  /* Neutre — ce qui est CLOS : activité terminée, dossier retiré, filtre inactif.
+     Distinct des surfaces : c'est un état, pas un fond. */
+  --color-neutral: var(--ifdd-gris-700); /*  7.44:1 — AA */
+  --color-neutral-solid: var(--ifdd-gris-700);
+  --color-neutral-contrast: var(--ifdd-gris-0);
+  --color-neutral-surface: var(--ifdd-gris-100);
+  --color-neutral-border: var(--ifdd-gris-300);
+
+  /* Report — VIOLET, et lui seul. La règle d'usage du guide sépare le report de
+     l'avertissement : une activité reportée n'appelle aucune action de l'équipe,
+     elle a déjà été arbitrée. Le jaune, lui, veut dire « à traiter ». */
+  --color-postponed: var(--ifdd-violet-700); /*  8.49:1 — AA, couleur de charte */
+  --color-postponed-surface: var(--ifdd-violet-50);
+  --color-postponed-border: var(--ifdd-violet-200);
+
+  /* Direct — rouge, RÉSERVÉ à la pastille « en direct ». Ce n'est pas le rouge
+     de l'erreur : il porte un aplat plein et une pulsation, et une seule
+     activité de toute la plateforme peut l'employer à un instant donné. */
+  --color-live: var(--ifdd-rouge-600); /*  5.97:1 — AA */
+  --color-live-contrast: var(--ifdd-gris-0);
+  --color-live-surface: var(--ifdd-rouge-50);
+  --color-live-border: var(--ifdd-rouge-300);
+
   /* -- Polices -- */
   --font-sans: var(--ifdd-police-1);
   --font-display: var(--ifdd-police-2);
@@ -246,7 +277,11 @@
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
-  --radius-xl: 12px; /* réservé aux surfaces flottantes (modales) */
+  /* 12 px — PLUS AUCUN COMPOSANT NE L'EMPLOIE. La direction artistique plafonne
+     à 8 px, et les modales, dernières à s'en servir, sont repassées à
+     `--radius-lg`. Conservé pour un usage exceptionnel qui devra se justifier,
+     pas comme le rayon des surfaces flottantes. */
+  --radius-xl: 12px;
   --radius-full: 9999px; /* puces et pastilles d'état */
 
   /* -- Ombres. Très discrètes : la hiérarchie passe par le trait et le blanc. -- */
@@ -254,6 +289,10 @@
   --shadow-sm: 0 1px 3px rgb(35 31 32 / 0.07), 0 1px 2px rgb(35 31 32 / 0.04);
   --shadow-md: 0 4px 10px rgb(35 31 32 / 0.07), 0 1px 3px rgb(35 31 32 / 0.05);
   --shadow-lg: 0 12px 28px rgb(35 31 32 / 0.10), 0 2px 6px rgb(35 31 32 / 0.05);
+  /* Halo de focus des CHAMPS, en plus de l'anneau global de `main.css` : sur un
+     champ, la bordure change déjà de couleur, et l'anneau seul se confond avec
+     elle. Le halo l'en détache. */
+  --shadow-focus: 0 0 0 3px color-mix(in srgb, var(--color-focus) 35%, transparent);
 
   /* -- Base d'espacement : 4 px. `p-4` vaut donc 16 px. -- */
   --spacing: 4px;
@@ -263,6 +302,30 @@
   --leading-snug: 1.35;
   --leading-normal: 1.55;
   --leading-relaxed: 1.7;
+
+  /* -- Épaisseurs de trait. Le trait porte l'état autant que la couleur : un
+        champ en erreur passe à 2 px, un onglet actif à 3 px. Sans ces trois
+        paliers, chaque composant réinvente son épaisseur. -- */
+  --border-thin: 1px;
+  --border-medium: 2px;
+  --border-thick: 3px;
+
+  /* -- Cibles tactiles. 44 px est le minimum d'une cible visée au doigt ; les
+        40 px compacts sont réservés aux barres d'outils sur écran large, jamais
+        à l'action principale d'un écran mobile. -- */
+  --target-min: 44px;
+  --target-compact: 40px;
+
+  /* -- Durées. Deux, pas davantage : une pour ce qui doit paraître instantané
+        (survol, focus), une pour ce qui doit se suivre de l'œil (panneau,
+        bascule). -- */
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+
+  /* -- Crénage. Négatif sur les titres, que la police de titrage rend trop
+        espacés en grande taille ; positif sur les capitales, illisibles serrées. -- */
+  --tracking-title: -0.015em;
+  --tracking-caps: 0.08em;
 }
 
 /* -----------------------------------------------------------------------------
@@ -295,6 +358,11 @@
   --font-size-xl: 1.375rem; /* 22 px — titre de bloc */
   --font-size-2xl: 1.75rem; /* 28 px — titre de section */
   --font-size-3xl: 2.25rem; /* 36 px — titre de page */
+
+  /* Largeur maximale d'un paragraphe : 68 caractères. Au-delà, l'œil perd la
+     ligne en revenant à gauche. Calibré sur le FRANÇAIS, plus long que l'anglais
+     d'environ 20 % — un gabarit dimensionné sur l'anglais déborderait. */
+  --measure: 68ch;
 }
 
 /* Pont vers les utilitaires Tailwind : `text-base`, `text-3xl`… s'appuient sur
@@ -332,6 +400,7 @@
     --color-surface-selected: var(--ifdd-cyan-900);
 
     --color-text: var(--ifdd-gris-100); /* 14.09:1 */
+    --color-text-secondary: var(--ifdd-gris-300); /*  8.60:1 */
     --color-text-muted: var(--ifdd-gris-300); /*  8.60:1 */
     --color-text-subtle: var(--ifdd-gris-400); /*  6.32:1 */
     --color-text-inverse: var(--ifdd-gris-900);
@@ -341,10 +410,12 @@
     --color-border: var(--ifdd-gris-700);
     --color-border-subtle: var(--ifdd-gris-800);
     --color-border-strong: var(--ifdd-gris-500); /*  4.54:1 */
+    --color-separator: var(--ifdd-gris-800);
     --color-focus: var(--ifdd-cyan-400); /*  7.04:1 */
 
     --color-accent: var(--ifdd-cyan-300); /*  8.66:1 */
     --color-accent-hover: var(--ifdd-cyan-200);
+    --color-accent-active: var(--ifdd-cyan-100);
     --color-accent-solid: var(--ifdd-cyan-500); /* le cyan de charte, qui porte du texte sombre à 5.60:1 */
     --color-accent-solid-hover: var(--ifdd-cyan-400);
     --color-accent-contrast: var(--ifdd-gris-950);
@@ -365,6 +436,10 @@
 
     --color-danger: var(--ifdd-rouge-300); /*  6.98:1 */
     --color-danger-solid: var(--ifdd-rouge-400); /*  5.13:1 face au texte sombre */
+    /* Sur fond noir l'aplat est clair : il s'éclaircit au survol, sinon le
+       contraste avec son texte sombre se dégraderait au lieu de s'affirmer. */
+    --color-danger-solid-hover: var(--ifdd-rouge-300);
+    --color-danger-solid-active: var(--ifdd-rouge-200);
     --color-danger-contrast: var(--ifdd-gris-950);
     --color-danger-surface: var(--ifdd-rouge-900);
     --color-danger-border: var(--ifdd-rouge-700);
@@ -374,6 +449,24 @@
     --color-info-contrast: var(--ifdd-gris-950);
     --color-info-surface: var(--ifdd-cyan-900);
     --color-info-border: var(--ifdd-cyan-700);
+
+    /* Le neutre s'éclaircit : sur fond noir, un gris 700 disparaît. */
+    --color-neutral: var(--ifdd-gris-300);
+    --color-neutral-solid: var(--ifdd-gris-300);
+    --color-neutral-contrast: var(--ifdd-noir);
+    --color-neutral-surface: var(--ifdd-gris-800);
+    --color-neutral-border: var(--ifdd-gris-600);
+
+    /* Le violet de charte est une couleur SOMBRE : sur fond noir il faut monter
+       de quatre paliers pour qu'il reste lisible. */
+    --color-postponed: var(--ifdd-violet-300); /*  6.91:1 */
+    --color-postponed-surface: var(--ifdd-violet-900);
+    --color-postponed-border: var(--ifdd-violet-700);
+
+    --color-live: var(--ifdd-rouge-400); /*  5.13:1 — porte du texte sombre */
+    --color-live-contrast: var(--ifdd-gris-950);
+    --color-live-surface: var(--ifdd-rouge-900);
+    --color-live-border: var(--ifdd-rouge-700);
 
     /* Sur fond sombre, une ombre portée ne se voit plus : on l'assombrit
        franchement et on s'appuie davantage sur les bordures. */
@@ -393,6 +486,7 @@
   --color-surface-selected: var(--ifdd-cyan-900);
 
   --color-text: var(--ifdd-gris-100);
+  --color-text-secondary: var(--ifdd-gris-300);
   --color-text-muted: var(--ifdd-gris-300);
   --color-text-subtle: var(--ifdd-gris-400);
   --color-text-inverse: var(--ifdd-gris-900);
@@ -402,10 +496,12 @@
   --color-border: var(--ifdd-gris-700);
   --color-border-subtle: var(--ifdd-gris-800);
   --color-border-strong: var(--ifdd-gris-500);
+  --color-separator: var(--ifdd-gris-800);
   --color-focus: var(--ifdd-cyan-400);
 
   --color-accent: var(--ifdd-cyan-300);
   --color-accent-hover: var(--ifdd-cyan-200);
+  --color-accent-active: var(--ifdd-cyan-100);
   --color-accent-solid: var(--ifdd-cyan-500);
   --color-accent-solid-hover: var(--ifdd-cyan-400);
   --color-accent-contrast: var(--ifdd-gris-950);
@@ -426,6 +522,8 @@
 
   --color-danger: var(--ifdd-rouge-300);
   --color-danger-solid: var(--ifdd-rouge-400);
+  --color-danger-solid-hover: var(--ifdd-rouge-300);
+  --color-danger-solid-active: var(--ifdd-rouge-200);
   --color-danger-contrast: var(--ifdd-gris-950);
   --color-danger-surface: var(--ifdd-rouge-900);
   --color-danger-border: var(--ifdd-rouge-700);
@@ -435,6 +533,21 @@
   --color-info-contrast: var(--ifdd-gris-950);
   --color-info-surface: var(--ifdd-cyan-900);
   --color-info-border: var(--ifdd-cyan-700);
+
+  --color-neutral: var(--ifdd-gris-300);
+  --color-neutral-solid: var(--ifdd-gris-300);
+  --color-neutral-contrast: var(--ifdd-noir);
+  --color-neutral-surface: var(--ifdd-gris-800);
+  --color-neutral-border: var(--ifdd-gris-600);
+
+  --color-postponed: var(--ifdd-violet-300);
+  --color-postponed-surface: var(--ifdd-violet-900);
+  --color-postponed-border: var(--ifdd-violet-700);
+
+  --color-live: var(--ifdd-rouge-400);
+  --color-live-contrast: var(--ifdd-gris-950);
+  --color-live-surface: var(--ifdd-rouge-900);
+  --color-live-border: var(--ifdd-rouge-700);
 
   --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.4);
   --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.5), 0 1px 2px rgb(0 0 0 / 0.3);

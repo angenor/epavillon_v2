@@ -13,6 +13,10 @@
   },
   "streamed": "Diffusée en ligne",
   "cancelledReason": "Motif d'annulation",
+  "postponedReason": "Motif du report",
+  "themes": {
+    "more": "et aussi {themes}"
+  },
   "capacity": {
     "label": "Places occupées",
     "ratio": "{registered} / {capacity} inscrits",

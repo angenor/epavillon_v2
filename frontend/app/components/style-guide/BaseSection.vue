@@ -44,6 +44,9 @@ const titleAt = (index: number): string => props.titles?.[index] ?? '—'
 const BUTTON_VARIANTS = ['primary', 'secondary', 'ghost', 'danger', 'link'] as const
 const INTENTS: Intent[] = ['neutral', 'info', 'success', 'warning', 'danger']
 
+/** Les cinq états de la vue, plus le direct — qui n'en est pas un. */
+const DISPLAY_STATES = ['upcoming', 'ongoing', 'live', 'past', 'postponed', 'cancelled'] as const
+
 /** Bascule de chargement : le bouton travaille trois secondes, comme en vrai. */
 const busyVariant = ref<string | null>(null)
 function simulateWork(variant: string): void {
@@ -162,6 +165,37 @@ const visibleFilters = computed(() => filters.value.filter((filter) => !removed.
           <UiBadge size="sm">{{ t('style-guide.base.badges.small') }}</UiBadge>
         </div>
         <p class="text-sm text-text-subtle">{{ t('style-guide.base.badges.dotNote') }}</p>
+      </div>
+    </StyleGuideDemo>
+
+    <!-- PASTILLES D'ÉTAT ET PASTILLES THÉMATIQUES -->
+    <StyleGuideDemo
+      :title="t('style-guide.base.status.title')"
+      :note="t('style-guide.base.status.note')"
+    >
+      <div class="space-y-4">
+        <div class="flex flex-wrap items-center gap-2">
+          <UiStatusBadge
+            v-for="state in DISPLAY_STATES"
+            :key="state"
+            :state="state"
+            :label="t(state === 'live' ? 'live-badge.label' : `session-card.state.${state}`)"
+          />
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <UiThemeTagList :themes="props.themes ?? []" :max="3" />
+        </div>
+        <p class="max-w-(--measure) text-sm text-text-subtle">
+          {{ t('style-guide.base.status.themeNote', { total: (props.themes ?? []).length }) }}
+        </p>
+
+        <div class="flex flex-wrap items-center gap-3 border-t border-separator pt-4">
+          <UiCounter :value="7" />
+          <UiCounter :value="12" tone="accent" />
+          <UiCounter :value="248" />
+          <span class="text-sm text-text-subtle">{{ t('style-guide.base.status.counterNote') }}</span>
+        </div>
       </div>
     </StyleGuideDemo>
 

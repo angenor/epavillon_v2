@@ -8,6 +8,13 @@
  * interrompt ; un tiroir accompagne. Pour une décision qui doit être prise avant
  * toute autre chose, c'est `UiModal` qu'il faut.
  *
+ * C'EST DONC ICI QUE VA LA SAISIE UN PEU LONGUE, jamais dans un dialogue : la
+ * règle du guide — « un dialogue ne contient jamais de formulaire long » — a
+ * pour contrepartie que le panneau, lui, l'accepte, parce qu'il est haut, qu'il
+ * défile, et qu'il laisse la liste visible pour comparer. Passé une dizaine de
+ * champs, c'est encore une page dédiée qu'il faut : elle a une adresse, donc un
+ * brouillon rechargeable.
+ *
  * Même socle technique que la modale : `<dialog>` natif, donc couche supérieure,
  * piégeage du focus et fermeture par Échap sans une ligne de clavier.
  *

@@ -690,6 +690,9 @@ SELECT
     s.id,
     s.event_id,
     s.event_day_id,
+    -- Exposé pour deux raisons : la page de détail renvoie au dossier d'origine,
+    -- et le repli de couverture ci-dessous en a besoin.
+    s.proposal_id,
     s.slug,
     s.title,
     s.summary,
@@ -717,6 +720,20 @@ SELECT
         JOIN event.programme_tracks t ON t.id = st.track_id
         WHERE st.session_id = s.id AND t.published_at IS NOT NULL
     ), '[]'::jsonb) AS tracks,
+    -- Couverture de la séance, à défaut celle de la proposition d'origine.
+    --
+    -- LE REPLI EST LA RÈGLE, pas une commodité : une organisation joint son
+    -- image au DÉPÔT, et personne ne revient en téléverser une seconde après
+    -- l'acceptation. Sans ce COALESCE, la programmation publique s'afficherait
+    -- sans visuel alors que l'image existe déjà en base, à un identifiant près.
+    -- Rendu par media.attached_image() plutôt que par une jointure écrite ici :
+    -- le rattachement est polymorphe, et trois vues qui le déroulent à la main
+    -- sont trois occasions de diverger. NULL quand il n'y a réellement aucune
+    -- image — la carte doit rester lisible sans elle.
+    COALESCE(
+        media.attached_image('programme', 'sessions',  s.id,          'cover'),
+        media.attached_image('programme', 'proposals', s.proposal_id, 'cover')
+    ) AS cover,
     -- État temporel dérivé : pilote la couleur du bloc dans le calendrier.
     CASE
         WHEN s.status = 'cancelled'          THEN 'cancelled'
@@ -956,6 +973,29 @@ INSERT INTO org.organization_references (ref_schema, ref_table, ref_column, stra
     ('programme', 'sessions',              'organization_id', 'reassign', '{}'),
     ('programme', 'registrations',         'organization_id', 'reassign', '{}'),
     ('programme', 'session_organizations', 'organization_id', 'reassign', '{session_id}')
+ON CONFLICT DO NOTHING;
+
+-- Rattachements média autorisés pour une séance programmée.
+--
+-- CE QUI MANQUAIT : `programme.proposals` déclarait son rôle `cover` depuis le
+-- début (050 § 8), mais `programme.sessions` n'en déclarait aucun. Le trigger
+-- de contrôle refusait donc toute image sur une séance — alors que c'est la
+-- séance, et non le dossier, que le public regarde dans la programmation.
+--
+-- POURQUOI UN RÔLE SUR LA SÉANCE PLUTÔT QUE LE SEUL RENVOI À LA PROPOSITION :
+-- l'image déposée au dépôt n'est pas toujours celle qu'on publie. Une
+-- organisation joint volontiers une photo de projet à son dossier ; l'IFDD
+-- publie parfois autre chose — un visuel de la journée spéciale, une photo de
+-- l'édition précédente, ou simplement une image mieux cadrée. Le rôle sur la
+-- séance permet ce remplacement SANS réécrire le dossier déposé, qui reste la
+-- pièce contractuelle. La vue calendrier (§ 6) applique le repli : couverture de
+-- la séance, à défaut celle de la proposition d'origine.
+--
+-- Pas de rôle `gallery` ici : les photos de compte rendu relèvent du bilan
+-- d'activité, hors du jalon en cours. À ajouter le jour où l'écran existe.
+INSERT INTO media.attachable_roles
+    (owner_schema, owner_table, role, label, is_multiple, allowed_mime_prefixes, max_byte_size) VALUES
+    ('programme', 'sessions', 'cover', '{"fr":"Image de couverture","en":"Cover image"}', false, '{image/*}', 10485760)
 ON CONFLICT DO NOTHING;
 
 -- Formulaire d'inscription minimal fourni par défaut.

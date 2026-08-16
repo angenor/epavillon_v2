@@ -133,7 +133,7 @@ const classes = computed(() =>
         <button
           v-if="hasValue && !props.disabled && !props.readonly"
           type="button"
-          class="absolute top-1/2 right-2 -translate-y-1/2 rounded-sm p-1 text-text-subtle transition-colors hover:text-text"
+          class="absolute top-1/2 right-2 flex size-8 -translate-y-1/2 cursor-pointer items-center justify-center rounded-sm text-text-subtle transition-colors duration-(--duration-fast) hover:bg-surface-hover hover:text-text"
           @click="clear"
         >
           <span class="sr-only">{{ t('common.search.clear') }}</span>

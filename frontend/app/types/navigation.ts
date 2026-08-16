@@ -7,6 +7,12 @@ export interface NavItem {
   to: string
   /** Fonctionnalité pilotée par `platform.feature_flags` ; masquée tant qu'elle est absente. */
   featureFlag?: string
+  /** Nom d'icône de `UiIcon`, pour la navigation latérale. Facultatif : une
+   *  section peut n'en porter aucune sans décaler ses libellés. */
+  icon?: string
+  /** Compteur poussé à droite de l'entrée — ce qui attend d'être traité. Il vient
+   *  toujours d'un décompte de l'API, jamais d'une valeur écrite en dur. */
+  count?: number
 }
 
 export interface NavSection {

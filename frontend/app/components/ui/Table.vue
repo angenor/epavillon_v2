@@ -11,11 +11,21 @@ import type { SortDirection, TableColumn } from '~/types/ui'
  * PAS DE DÉFILEMENT HORIZONTAL DU CORPS DE PAGE — règle du projet. Deux
  * dispositifs, complémentaires : `hideOnMobile` retire les colonnes secondaires
  * sous 640 px, et ce qui reste défile DANS le tableau, jamais dans la page.
+ * C'est pourquoi le cadre extérieur est en `overflow-hidden` (il porte le
+ * rayon, la barre d'outils et le filet) et que SEULE la zone du tableau défile :
+ * mettre le défilement sur le cadre emporterait la barre d'outils avec lui.
  *
  * TRI CONTRÔLÉ PAR L'APPELANT. Le composant n'ordonne rien : il émet `sort` et
  * affiche l'état qu'on lui donne. Trier ici produirait un classement faux dès
  * que les données sont paginées côté serveur — ce qui est le cas de la liste des
  * propositions.
+ *
+ * SÉLECTION PORTÉE PAR L'APPELANT, elle aussi (`v-model:selected`) : ce sont des
+ * CLÉS de lignes, pas des indices ni des objets. Conséquence voulue — une clé
+ * retenue sur la page 2 reste retenue quand on revient page 1, et « tout
+ * sélectionner » ne touche QUE les lignes visibles. Une case à cocher qui
+ * retiendrait silencieusement cent trente-sept dossiers dont douze seulement
+ * sont sous les yeux est un piège à action de masse.
  *
  * ÉTATS : chargement (lignes squelettes à la bonne forme, pas un tourniquet),
  * vide (créneau `empty`, ou `UiEmptyState` fourni par l'appelant). L'erreur et
@@ -24,6 +34,8 @@ import type { SortDirection, TableColumn } from '~/types/ui'
  *
  * ACCESSIBILITÉ : `<caption>` est obligatoire — c'est le nom du tableau pour les
  * lecteurs d'écran. `visuallyHiddenCaption` la masque à l'œil sans la retirer.
+ * Elle est en chasse fixe : elle porte un périmètre chiffré (« COP30, Belém, 10
+ * au 21 novembre »), pas une phrase, et l'alignement des chiffres se lit mieux.
  */
 
 interface Props {
@@ -47,22 +59,35 @@ interface Props {
   stickyHeader?: boolean
   /** Les lignes réagissent-elles au survol ? Faux pour un tableau non cliquable. */
   hoverable?: boolean
+  /** Colonne de cases à cocher en tête de rangée, plus la case « tout sélectionner ». */
+  selectable?: boolean
+  /** Clés des lignes retenues — `v-model:selected`. Voir l'en-tête sur la portée. */
+  selected?: string[]
 }
 
-const props = withDefaults(defineProps<Props>(), { loadingRows: 5, hoverable: true })
+const props = withDefaults(defineProps<Props>(), {
+  loadingRows: 5,
+  hoverable: true,
+  selected: () => [],
+})
 const emit = defineEmits<{
   /** Demande de tri : au parent d'ordonner et de renvoyer `sortKey`/`sortDirection`. */
   sort: [key: string, direction: Exclude<SortDirection, null>]
   rowClick: [row: T]
+  'update:selected': [keys: string[]]
 }>()
 
 /**
  * Créneaux typés. `cell-<clé>` reçoit la ligne COMPLÈTE et typée : c'est ce qui
  * permet d'écrire `row.title` dans un écran sans conversion, et au compilateur
  * de signaler une colonne renommée dans la vue SQL.
+ *
+ * `toolbar` est rendu DANS le cadre, au-dessus de l'en-tête : recherche, jetons
+ * de filtre actifs, export. Les poser au-dessus du cadre les détacherait
+ * visuellement du tableau qu'ils pilotent.
  */
 defineSlots<
-  { empty?: () => unknown } & {
+  { empty?: () => unknown; toolbar?: () => unknown } & {
     [K in `cell-${string}`]?: (props: { row: T; value: unknown }) => unknown
   }
 >()
@@ -98,106 +123,221 @@ const alignClass = (column: TableColumn): string => {
 }
 
 const cellPadding = computed(() => (props.dense ? 'px-3 py-2' : 'px-3 py-3'))
+
+// --- Sélection ---------------------------------------------------------------
+
+/** Clés des lignes AFFICHÉES ; la sélection, elle, peut en contenir d'autres. */
+const pageKeys = computed(() => props.rows.map((row) => String(row[props.rowKey])))
+const selectedKeys = computed(() => new Set(props.selected))
+
+const allPageSelected = computed(
+  () => pageKeys.value.length > 0 && pageKeys.value.every((key) => selectedKeys.value.has(key)),
+)
+/** Sélection partielle → case indéterminée, que `UiCheckbox` sait déjà rendre. */
+const somePageSelected = computed(
+  () => !allPageSelected.value && pageKeys.value.some((key) => selectedKeys.value.has(key)),
+)
+
+function isSelected(row: T): boolean {
+  return selectedKeys.value.has(String(row[props.rowKey]))
+}
+
+function toggleRow(row: T, checked: boolean): void {
+  const next = new Set(selectedKeys.value)
+  const key = String(row[props.rowKey])
+  if (checked) next.add(key)
+  else next.delete(key)
+  emit('update:selected', [...next])
+}
+
+/** N'agit QUE sur les lignes visibles — voir l'en-tête. */
+function toggleAll(checked: boolean): void {
+  const next = new Set(selectedKeys.value)
+  for (const key of pageKeys.value) {
+    if (checked) next.add(key)
+    else next.delete(key)
+  }
+  emit('update:selected', [...next])
+}
+
+/**
+ * « Sélectionner toutes les lignes AFFICHÉES » — le libellé dit ce que la case
+ * fait vraiment. Sur une liste paginée, cocher n'atteint jamais les 28 dossiers
+ * des pages suivantes, et un « tout sélectionner » qui laisserait croire le
+ * contraire ferait manquer une action de masse sans que personne s'en aperçoive.
+ */
+const selectAllLabel = computed(() => t('data.table.selectAll'))
+
+/** Colonnes réelles + la colonne de cases, pour les `colspan` des états. */
+const spanCount = computed(() => props.columns.length + (props.selectable ? 1 : 0))
 </script>
 
 <template>
-  <div class="overflow-x-auto rounded-lg border border-border bg-surface-raised">
-    <table class="w-full border-collapse text-sm" :aria-busy="props.loading ? 'true' : undefined">
-      <caption
-        class="px-3 py-2 text-left text-sm text-text-subtle"
-        :class="props.visuallyHiddenCaption ? 'sr-only' : ''"
-      >
-        {{ props.caption }}
-      </caption>
+  <div class="overflow-hidden rounded-lg border border-border bg-surface-raised">
+    <!-- Barre d'outils : recherche, jetons de filtre, export. Dans le cadre,
+         au-dessus de l'en-tête, séparée par un filet — elle appartient au
+         tableau, pas à la page. -->
+    <div
+      v-if="$slots.toolbar"
+      class="flex flex-wrap items-center gap-3 border-b border-separator px-4 py-3"
+    >
+      <slot name="toolbar" />
+    </div>
 
-      <thead
-        class="bg-surface-sunken text-xs tracking-wide text-text-muted uppercase"
-        :class="props.stickyHeader ? 'sticky top-0 z-10' : ''"
-      >
-        <tr>
-          <th
-            v-for="column in props.columns"
-            :key="column.key"
-            scope="col"
-            :style="column.width ? { width: column.width } : undefined"
-            :aria-sort="ariaSort(column)"
-            class="border-b border-border font-semibold"
-            :class="[cellPadding, alignClass(column), column.hideOnMobile ? 'hidden sm:table-cell' : '']"
-          >
-            <button
-              v-if="column.sortable"
-              type="button"
-              class="inline-flex items-center gap-1 rounded-sm text-inherit uppercase transition-colors hover:text-text"
-              @click="toggleSort(column)"
-            >
-              {{ column.label }}
-              <UiIcon
-                :name="props.sortKey === column.key && props.sortDirection === 'desc' ? 'sort-desc' : 'sort-asc'"
-                size="0.9rem"
-                :class="props.sortKey === column.key ? 'text-accent' : 'text-text-subtle'"
-              />
-              <span class="sr-only">
-                {{ props.sortKey === column.key && props.sortDirection === 'asc'
-                  ? t('data.table.sortDesc')
-                  : t('data.table.sortAsc') }}
-              </span>
-            </button>
-            <template v-else>{{ column.label }}</template>
-          </th>
-        </tr>
-      </thead>
-
-      <!-- Chargement : des lignes squelettes à la forme du tableau. Un tourniquet
-           centré n'annonce pas ce qui arrive et fait sauter la mise en page. -->
-      <tbody v-if="props.loading">
-        <tr v-for="index in props.loadingRows" :key="`skeleton-${index}`" class="border-b border-border-subtle last:border-0">
-          <td
-            v-for="column in props.columns"
-            :key="column.key"
-            :class="[cellPadding, column.hideOnMobile ? 'hidden sm:table-cell' : '']"
-          >
-            <UiSkeletonLoader :width="column.numeric ? '3rem' : '80%'" height="0.9rem" />
-          </td>
-        </tr>
-      </tbody>
-
-      <tbody v-else-if="props.rows.length === 0">
-        <tr>
-          <td :colspan="props.columns.length" class="px-3 py-10">
-            <slot name="empty">
-              <p class="text-center text-text-muted">{{ t('common.states.empty.title') }}</p>
-            </slot>
-          </td>
-        </tr>
-      </tbody>
-
-      <tbody v-else>
-        <tr
-          v-for="row in props.rows"
-          :key="String(row[props.rowKey])"
-          class="border-b border-border-subtle last:border-0"
-          :class="props.hoverable ? 'transition-colors hover:bg-surface-hover' : ''"
-          @click="emit('rowClick', row)"
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse text-sm" :aria-busy="props.loading ? 'true' : undefined">
+        <caption
+          class="caption-top px-4 pt-3 text-left font-mono text-xs text-text-muted"
+          :class="props.visuallyHiddenCaption ? 'sr-only' : ''"
         >
-          <td
-            v-for="column in props.columns"
-            :key="column.key"
+          {{ props.caption }}
+        </caption>
+
+        <!-- Filet de 2 px en `border-strong` : c'est LUI qui sépare l'en-tête du
+             corps, pas un aplat. Un trait franc tient la lecture sur douze lignes
+             denses là où un fond gris se confond avec les lignes survolées. -->
+        <thead
+          class="bg-surface-sunken text-xs text-text-muted uppercase"
+          :class="props.stickyHeader ? 'sticky top-0 z-10' : ''"
+        >
+          <tr>
+            <th
+              v-if="props.selectable"
+              scope="col"
+              class="ui-table-check w-8.5 border-b-(length:--border-medium) border-b-border-strong px-3 py-2"
+            >
+              <UiCheckbox
+                :model-value="allPageSelected"
+                :indeterminate="somePageSelected"
+                :label="selectAllLabel"
+                @update:model-value="toggleAll"
+              />
+            </th>
+
+            <th
+              v-for="column in props.columns"
+              :key="column.key"
+              scope="col"
+              :style="column.width ? { width: column.width } : undefined"
+              :aria-sort="ariaSort(column)"
+              class="border-b-(length:--border-medium) border-b-border-strong px-3 py-2 font-semibold tracking-caps whitespace-nowrap"
+              :class="[alignClass(column), column.hideOnMobile ? 'hidden sm:table-cell' : '']"
+            >
+              <button
+                v-if="column.sortable"
+                type="button"
+                class="inline-flex min-h-(--target-compact) cursor-pointer items-center gap-2 rounded-sm text-inherit uppercase transition-colors duration-(--duration-fast) hover:text-accent"
+                :class="props.sortKey === column.key ? 'text-accent' : ''"
+                @click="toggleSort(column)"
+              >
+                {{ column.label }}
+                <!-- Atténuée au repos : douze chevrons à pleine encre feraient
+                     une colonne de bruit. Seule la colonne triée s'affirme. -->
+                <UiIcon
+                  :name="props.sortKey === column.key && props.sortDirection === 'desc' ? 'sort-desc' : 'sort-asc'"
+                  size="0.75rem"
+                  :class="props.sortKey === column.key ? 'opacity-100' : 'opacity-40'"
+                />
+                <span class="sr-only">
+                  {{ props.sortKey === column.key && props.sortDirection === 'asc'
+                    ? t('data.table.sortDesc')
+                    : t('data.table.sortAsc') }}
+                </span>
+              </button>
+              <template v-else>{{ column.label }}</template>
+            </th>
+          </tr>
+        </thead>
+
+        <!-- Chargement : des lignes squelettes à la forme du tableau. Un tourniquet
+             centré n'annonce pas ce qui arrive et fait sauter la mise en page. -->
+        <tbody v-if="props.loading">
+          <tr v-for="index in props.loadingRows" :key="`skeleton-${index}`" class="border-b border-border-subtle last:border-0">
+            <td v-if="props.selectable" :class="cellPadding">
+              <UiSkeletonLoader width="1.125rem" height="1.125rem" rounded="var(--radius-sm)" />
+            </td>
+            <td
+              v-for="column in props.columns"
+              :key="column.key"
+              :class="[cellPadding, column.hideOnMobile ? 'hidden sm:table-cell' : '']"
+            >
+              <UiSkeletonLoader :width="column.numeric ? '3rem' : '80%'" height="0.9rem" />
+            </td>
+          </tr>
+        </tbody>
+
+        <tbody v-else-if="props.rows.length === 0">
+          <tr>
+            <td :colspan="spanCount" class="px-3 py-10">
+              <slot name="empty">
+                <p class="text-center text-text-muted">{{ t('common.states.empty.title') }}</p>
+              </slot>
+            </td>
+          </tr>
+        </tbody>
+
+        <tbody v-else>
+          <tr
+            v-for="row in props.rows"
+            :key="String(row[props.rowKey])"
+            class="border-b border-border-subtle last:border-0"
+            :aria-selected="props.selectable ? isSelected(row) : undefined"
             :class="[
-              cellPadding,
-              alignClass(column),
-              column.numeric ? 'font-mono tabular-nums' : '',
-              column.hideOnMobile ? 'hidden sm:table-cell' : '',
-              'align-top text-text',
+              props.hoverable ? 'transition-colors duration-(--duration-fast) hover:bg-surface-hover' : '',
+              // Après le survol dans l'ordre des classes : une ligne retenue le
+              // reste sous le pointeur, sinon la sélection clignote au passage.
+              isSelected(row) ? 'bg-accent-surface hover:bg-accent-surface' : '',
             ]"
+            @click="emit('rowClick', row)"
           >
-            <!-- Un créneau par colonne : `#cell-status`, `#cell-title`… Sans
-                 créneau, la valeur brute est affichée. -->
-            <slot :name="`cell-${column.key}`" :row="row" :value="cellValue(row, column.key)">
-              {{ cellValue(row, column.key) ?? '—' }}
-            </slot>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            <!-- `click.stop` : cocher une ligne n'est pas l'ouvrir. Sans lui,
+                 chaque case cochée déclencherait aussi la navigation. -->
+            <td v-if="props.selectable" class="ui-table-check" :class="cellPadding" @click.stop>
+              <UiCheckbox
+                :model-value="isSelected(row)"
+                :label="t('data.table.selectRow', { label: String(row[props.rowKey]) })"
+                @update:model-value="(checked: boolean) => toggleRow(row, checked)"
+              />
+            </td>
+
+            <td
+              v-for="column in props.columns"
+              :key="column.key"
+              :class="[
+                cellPadding,
+                alignClass(column),
+                column.numeric ? 'font-mono tabular-nums' : '',
+                column.hideOnMobile ? 'hidden sm:table-cell' : '',
+                'align-top text-text',
+              ]"
+            >
+              <!-- Un créneau par colonne : `#cell-status`, `#cell-title`… Sans
+                   créneau, la valeur brute est affichée. -->
+              <slot :name="`cell-${column.key}`" :row="row" :value="cellValue(row, column.key)">
+                {{ cellValue(row, column.key) ?? '—' }}
+              </slot>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
+
+<style scoped>
+/* La case d'une colonne de sélection n'a pas de libellé VISIBLE, mais elle en a
+   un : sans nom accessible, une colonne de cases est une colonne d'inconnues au
+   lecteur d'écran. On masque donc le libellé de `UiCheckbox` à l'œil sans le
+   retirer de l'arbre d'accessibilité. Le `position: absolute` est le point
+   important : il sort le libellé du flux, sinon la gouttière que le composant
+   réserve entre la case et son texte élargirait la colonne d'une dizaine de
+   pixels pour un libellé de largeur nulle. */
+.ui-table-check :deep(label) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+</style>

@@ -19,9 +19,23 @@ import type { TimeZoneName } from '~/types/shared'
  *
  * LE CHEMIN N'EST PAS TOUJOURS LINÉAIRE, et la frise doit le montrer :
  * · `error`   — correction demandée : le dossier est REVENU en arrière ;
- * · `skipped` — étape non concernée (un dossier retiré ne passe pas en décision).
+ * · `skipped` — étape non concernée (un dossier retiré ne passe pas en décision) ;
+ * · `refused` — refus : la demande n'est pas retenue.
  * Une frise qui n'afficherait que des étapes franchies mentirait sur la moitié
  * des dossiers.
+ *
+ * RÈGLE DU GUIDE, ET ELLE EST FERME : « un refus ne clôt jamais la frise sans
+ * motif écrit ni proposition de suite. » Un `refused` sans `detail` renvoie une
+ * organisation à un mur, sans savoir quoi corriger ni s'il existe une session
+ * ultérieure — c'est le message qui produit les courriels de réclamation que la
+ * frise devait éviter. Le composant ne peut pas inventer ce motif : il le SIGNALE
+ * en développement (`console.warn`) pour que l'écran fautif soit corrigé, et il
+ * réserve l'espace du détail dans tous les cas.
+ *
+ * LE CHEMIN PARCOURU EST VERT. Le trait qui DESCEND d'une étape franchie prend
+ * `--color-success-solid` ; celui qui mène à une étape à venir reste en
+ * pointillés gris. On lit d'un coup jusqu'où le dossier est allé, sans compter
+ * les pastilles.
  *
  * TOUTE DATE PORTE SON FUSEAU, ici comme ailleurs : `timezone` est obligatoire
  * dès qu'une étape a une date.
@@ -63,10 +77,13 @@ function stateOf(step: TimelineStep, index: number): StepState {
 }
 
 const MARKERS: Record<StepState, string> = {
-  done: 'border-success bg-success-surface text-success',
+  // Aplat vert plein, pas un contour : l'étape franchie est un fait acquis, elle
+  // doit se voir depuis l'autre bout de la frise.
+  done: 'border-success-solid bg-success-solid text-success-contrast',
   current: 'border-accent bg-accent-solid text-accent-contrast',
   upcoming: 'border-border bg-surface-raised text-text-subtle',
   error: 'border-danger bg-danger-surface text-danger',
+  refused: 'border-danger-solid bg-danger-solid text-danger-contrast',
   skipped: 'border-border border-dashed bg-surface-sunken text-text-subtle',
 }
 
@@ -75,6 +92,7 @@ const MARKER_ICONS: Record<StepState, string | null> = {
   current: null,
   upcoming: null,
   error: 'warning',
+  refused: 'close',
   skipped: 'minus',
 }
 
@@ -83,12 +101,34 @@ const STATE_LABELS: Record<StepState, string> = {
   current: 'status-timeline.state.current',
   upcoming: 'status-timeline.state.upcoming',
   error: 'status-timeline.state.error',
+  refused: 'status-timeline.state.refused',
   skipped: 'status-timeline.state.skipped',
+}
+
+function stateLabel(state: StepState): string {
+  return t(STATE_LABELS[state])
 }
 
 function dateOf(step: TimelineStep): string {
   if (!step.at || !props.timezone) return ''
   return dateTime(step.at, props.timezone)
+}
+
+/**
+ * Un refus muet est une faute d'écran, pas un cas de figure : on l'annonce au
+ * développement plutôt que de le laisser passer en production.
+ */
+if (import.meta.dev) {
+  watchEffect(() => {
+    props.steps.forEach((step, index) => {
+      if (stateOf(step, index) === 'refused' && !step.detail) {
+        console.warn(
+          `[UiStatusTimeline] L'étape « ${step.value} » est un refus sans « detail » : ` +
+            'un refus ne clôt jamais la frise sans motif écrit ni proposition de suite.',
+        )
+      }
+    })
+  })
 }
 </script>
 
@@ -111,30 +151,37 @@ function dateOf(step: TimelineStep): string {
             : 'pb-5 last:pb-0'
         "
       >
-        <!-- Trait de liaison, arrêté avant la dernière étape. En pointillés
-             lorsqu'il mène à une étape non franchie : le chemin reste à faire. -->
+        <!-- Trait de liaison, arrêté avant la dernière étape. Il appartient à
+             l'étape dont il DESCEND : vert plein quand celle-ci est franchie
+             (le chemin parcouru se colore), pointillés gris quand il mène à une
+             étape encore à venir, plein gris entre deux étapes hors parcours.
+             Le décalage de 0,8125 rem n'est pas arbitraire : la pastille fait
+             `size-7` (28 px), son axe tombe donc à 14 px, moins la moitié des
+             2 px du trait. Changer la taille de la pastille impose de le revoir. -->
         <span
           v-if="index < props.steps.length - 1"
           aria-hidden="true"
           class="absolute"
           :class="[
             props.orientation === 'horizontal'
-              ? 'top-9 bottom-0 left-[0.875rem] w-px sm:top-[0.875rem] sm:right-0 sm:bottom-auto sm:left-[calc(50%+1.5rem)] sm:h-px sm:w-auto'
-              : 'top-9 bottom-0 left-[0.875rem] w-px',
-            stateOf(props.steps[index + 1] as TimelineStep, index + 1) === 'upcoming'
-              ? 'border-l border-dashed border-border sm:border-t sm:border-l-0'
-              : 'bg-border',
+              ? 'top-9 bottom-0 left-3.25 w-(--border-medium) sm:top-3.5 sm:right-0 sm:bottom-auto sm:left-[calc(50%+1.5rem)] sm:h-(--border-medium) sm:w-auto'
+              : 'top-9 bottom-0 left-3.25 w-(--border-medium)',
+            stateOf(step, index) === 'done'
+              ? 'bg-success-solid'
+              : stateOf(props.steps[index + 1] as TimelineStep, index + 1) === 'upcoming'
+                ? 'border-l-(length:--border-medium) border-dashed border-border sm:border-t-(length:--border-medium) sm:border-l-0'
+                : 'bg-border',
           ]"
         />
 
         <span
-          class="relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full border-2 transition-colors"
+          class="relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full border-(length:--border-medium) transition-colors duration-(--duration-fast)"
           :class="MARKERS[stateOf(step, index)]"
         >
           <UiIcon
             v-if="MARKER_ICONS[stateOf(step, index)]"
             :name="MARKER_ICONS[stateOf(step, index)] as string"
-            size="0.9rem"
+            size="0.875rem"
             :stroke-width="2.4"
           />
           <span v-else class="size-2 rounded-full bg-current" aria-hidden="true" />
@@ -148,10 +195,11 @@ function dateOf(step: TimelineStep): string {
               stateOf(step, index) === 'upcoming' ? 'text-text-subtle' : '',
               stateOf(step, index) === 'skipped' ? 'text-text-subtle line-through' : '',
               stateOf(step, index) === 'error' ? 'font-semibold text-danger' : '',
+              stateOf(step, index) === 'refused' ? 'font-semibold text-danger' : '',
             ]"
           >
             {{ step.label }}
-            <span class="sr-only"> — {{ t(STATE_LABELS[stateOf(step, index)]) }}</span>
+            <span class="sr-only"> — {{ stateLabel(stateOf(step, index)) }}</span>
           </p>
 
           <!-- La date, dans le fuseau de l'édition. Sans date, l'étape est en
@@ -162,7 +210,18 @@ function dateOf(step: TimelineStep): string {
             <span v-if="step.actor"> · {{ t('status-timeline.by', { actor: step.actor }) }}</span>
           </p>
 
-          <p v-if="step.detail" class="mt-1.5 rounded-md border border-border-subtle bg-surface-sunken px-2.5 py-1.5 text-sm text-text-muted">
+          <!-- Le motif d'un refus est OBLIGATOIRE (voir l'en-tête) : le bloc est
+               donc bordé de rouge sur cet état, pour que son absence saute aux
+               yeux à la relecture d'un écran. -->
+          <p
+            v-if="step.detail"
+            class="mt-1.5 max-w-(--measure) rounded-md border px-2.5 py-1.5 text-sm"
+            :class="
+              stateOf(step, index) === 'refused'
+                ? 'border-danger-border bg-danger-surface text-text-secondary'
+                : 'border-border-subtle bg-surface-sunken text-text-muted'
+            "
+          >
             {{ step.detail }}
           </p>
         </div>

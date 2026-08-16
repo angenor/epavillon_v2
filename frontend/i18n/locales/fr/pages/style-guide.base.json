@@ -29,6 +29,12 @@
       "danger": "Écartée"
     }
   },
+  "status": {
+    "title": "Pastilles d'état, pastilles thématiques, compteurs",
+    "note": "La pastille d'ÉTAT ne ressemble pas à la pastille d'information : carrée, en capitales, précédée d'un point. Ce dessin distinct est délibéré — dans une programmation dense, l'œil doit séparer d'un coup ce qui décrit l'activité de ce qui dit où elle en est. Deux couleurs ne vont pas de soi : « en cours » est JAUNE, parce qu'une activité en cours appelle l'attention et n'est pas une réussite ; « reportée » est VIOLETTE, parce qu'un report a déjà été arbitré et ne demande plus rien — le confondre avec l'avertissement noie ce qui reste à traiter.",
+    "themeNote": "Trois pastilles thématiques au plus, les suivantes se replient. L'édition en compte {total} en base : au-delà de trois sur une carte, elles cessent d'informer — on retient « cette activité parle de tout ». Les thématiques masquées restent énoncées pour les lecteurs d'écran.",
+    "counterNote": "Le ton accentué est réservé à ce qui attend une action ; le neutre est le défaut."
+  },
   "chips": {
     "title": "Jetons de filtre",
     "note": "Une pastille informe, un jeton agit : il dit quel filtre est appliqué et comment l'enlever. Les deux premiers portent une thématique venue de la base, les deux suivants une valeur d'énumération traduite — les deux sortes de libellés cohabitent, et c'est exactement le piège à ne pas confondre.",
