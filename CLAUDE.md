@@ -75,6 +75,39 @@ Elles sont détaillées dans le cadrage, mais on les oublie vite et chacune a d�
 - Quatre états obligatoires par écran : chargement (squelettes), vide, erreur, accès refusé.
 - Responsive à partir de 375 px ; le corps de page ne défile jamais horizontalement.
 
+### Direction artistique
+
+Institutionnel et sérieux, mais vivant. Ni tableau de bord SaaS générique, ni site d'ONG militant. Références de posture : le site des Nations unies pour la rigueur, une revue scientifique en ligne pour la lisibilité, une billetterie de festival pour l'énergie de la programmation.
+
+**À faire**
+- Hiérarchie typographique forte : les titres portent le sens, pas les icônes.
+- Densité informationnelle assumée. Ces gens lisent des documents de négociation ; un tableau bien composé ne les rebute pas.
+- Beaucoup de blanc entre les blocs, peu à l'intérieur des blocs.
+- La couleur distingue des états et des thématiques ; elle ne décore pas.
+- Coins légèrement arrondis (6 à 8 px), ombres très discrètes ou bordures fines.
+
+**À éviter absolument**
+- Dégradés, effets de verre dépoli, néons, halos flous.
+- Illustrations 3D, blobs, formes organiques flottantes.
+- Emoji en guise d'icônes fonctionnelles.
+- Les tournures marketing (« Boostez », « Révolutionnez ») et le mot « Bienvenue ».
+
+### Deux niveaux de jetons de design, à ne jamais mélanger
+
+Les couleurs de **marque** gardent le nom de la charte (`--ifdd-cyan`, `--ifdd-vert`…) : elles sont non négociables et doivent rester traçables jusqu'au document officiel de l'IFDD. Elles portent les valeurs et ne sont **jamais** redéfinies, pas même en thème sombre.
+
+Les jetons **sémantiques** portent un nom de rôle (`--color-surface`, `--color-text`, `--color-border`, `--color-success`…) et référencent la marque par `var()`, sans jamais redéclarer une valeur hexadécimale :
+
+```css
+:root                    { --ifdd-cyan: #00A1E4; }              /* marque, jamais redéfinie */
+:root                    { --color-accent: var(--ifdd-cyan-700); }  /* rôle, thème clair */
+:root[data-theme="dark"] { --color-accent: var(--ifdd-cyan-300); }  /* rôle, thème sombre */
+```
+
+Un composant appelle `--color-accent`, jamais `--ifdd-cyan`. C'est ce qui permet au thème sombre de redéfinir les rôles sans toucher aux couleurs officielles.
+
+Deux conséquences pratiques : les couleurs de marque ne sont pas des couleurs d'interface — le cyan `#00A1E4` sur fond blanc **ne passe pas le contraste AA en texte**, d'où les nuances dérivées `--ifdd-cyan-50` … `--ifdd-cyan-900` ; et le thème sombre n'est pas un inversement — le vert et le jaune de la charte deviennent agressifs sur fond noir, il faut les désaturer.
+
 ### Découpage des fichiers transverses
 
 Traductions, types et données simulées grossissent avec le projet et deviendraient vite impossibles à charger en contexte.

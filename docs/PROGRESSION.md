@@ -15,7 +15,6 @@ Le contexte d'une session se perd ; le dépôt reste. Toute session commence par
 | Modèle de données | ✅ Complet et validé — 18 fichiers, 142 tables, chargement vérifié sur PostgreSQL 17 + pgvector |
 | Cadrage et décisions | ✅ Complet — 14 ADR, périmètre du jalon arrêté. Audité le 16/08, corrigé |
 | Environnement local | ⬜ À monter — voir [ENVIRONNEMENT_LOCAL.md](ENVIRONNEMENT_LOCAL.md), les fichiers `ops/` et `Makefile` restent à créer |
-| Guide de style | ⬜ À produire avec Claude Design (`docs/PROMPT_STYLE_GUIDE.md`) |
 | Front | ⬜ Rien de commencé |
 | API | ⬜ Rien de commencé |
 

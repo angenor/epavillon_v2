@@ -14,8 +14,7 @@ Cette version remplace une première plateforme en production depuis plusieurs a
 ## Démarrer
 
 1. Monter l'environnement local — [docs/ENVIRONNEMENT_LOCAL.md](docs/ENVIRONNEMENT_LOCAL.md)
-2. Produire le guide de style avec Claude Design — [docs/PROMPT_STYLE_GUIDE.md](docs/PROMPT_STYLE_GUIDE.md)
-3. Lancer les prompts de construction, dans l'ordre — [docs/PROMPTS_DEVELOPPEMENT.md](docs/PROMPTS_DEVELOPPEMENT.md)
+2. Lancer les prompts de construction, dans l'ordre — [docs/PROMPTS_DEVELOPPEMENT.md](docs/PROMPTS_DEVELOPPEMENT.md)
 
 Avant chaque session : lire [docs/PROGRESSION.md](docs/PROGRESSION.md). Après chaque session : le mettre à jour.
 
@@ -30,7 +29,6 @@ epavillon_v2/
 │   ├── PROGRESSION.md     La mémoire du projet entre deux sessions
 │   ├── MODELE_INDEX.md    Quels fichiers SQL lire pour quelle tâche
 │   ├── PROMPTS_DEVELOPPEMENT.md   Les prompts de construction, dans l'ordre
-│   ├── PROMPT_STYLE_GUIDE.md      Le prompt du guide de style
 │   ├── ENVIRONNEMENT_LOCAL.md     Services locaux, vérifications avant commit
 │   ├── CADRAGE.md         Constat sur la v1, architecture, 14 décisions d'architecture
 │   ├── CHARTE_GRAPHIQUE.md        Charte officielle IFDD — source des couleurs

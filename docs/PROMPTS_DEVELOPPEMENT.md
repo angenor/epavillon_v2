@@ -123,16 +123,23 @@ Crée le socle du frontend dans frontend/.
   `app/pages/`, `app/assets/`. Seul `frontend/i18n/` reste HORS de `app/` :
   c'est la convention du module @nuxtjs/i18n. Un fichier placé hors de `app/`
   n'est pas auto-importé, et l'erreur ne se voit qu'à l'exécution.
-- frontend/app/assets/css/design-tokens.css : les jetons EXTRAITS de l'artefact
-  produit par Claude Design, `docs/style-guide/index.html` — son bloc final
-  contient toutes les variables CSS, prêtes à être reprises. Respecte la
-  séparation qu'il pose : les couleurs de marque gardent leur nom de charte
-  (`--ifdd-cyan`…) et portent les valeurs ; les jetons sémantiques portent un
-  nom de rôle (`--color-surface`, `--color-text`…) et référencent la marque par
-  `var()`. C'est ce qui permet au thème sombre de redéfinir les rôles sans
-  toucher aux couleurs officielles.
-  Si l'artefact n'a pas encore été produit, dérive une palette provisoire depuis
-  docs/CHARTE_GRAPHIQUE.md et signale-le en tête du fichier — elle sera remplacée.
+- frontend/app/assets/css/design-tokens.css : le système de jetons, dérivé de
+  docs/CHARTE_GRAPHIQUE.md. Applique la séparation en deux niveaux décrite dans
+  CLAUDE.md — marque et rôles — et construis :
+    · les six couleurs de marque, déclarées une fois, jamais redéfinies ;
+    · une échelle de nuances dérivées par teinte (`--ifdd-cyan-50` … `-900`),
+      car les couleurs de charte ne sont pas des couleurs d'interface : le cyan
+      #00A1E4 sur fond blanc ne passe pas le contraste AA en texte ;
+    · une échelle complète de gris à partir de #565554 et #D9D8D6, qui portent
+      la structure — fonds, bordures, séparateurs, texte secondaire ;
+    · les jetons sémantiques (`--color-surface`, `--color-text`,
+      `--color-border`, `--color-success`, `--color-warning`, `--color-danger`,
+      `--color-info`…), qui référencent la marque par `var()` et sont les SEULS
+      appelés par les composants ;
+    · les jetons non colorés : `--space-*` (base 4 px), `--radius-*`,
+      `--shadow-*`, `--font-size-*`, avec au plus 7 niveaux typographiques.
+  Note en commentaire, pour chaque nuance, si elle passe le contraste AA en
+  texte — c'est ce qui évite les allers-retours plus tard.
 - Thème clair et sombre : palette claire sur `:root`, redéfinie sous
   `@media (prefers-color-scheme: dark)` gardé par `:root:not([data-theme="light"])`
   ET sous `:root[data-theme="dark"]`.
@@ -294,15 +301,25 @@ jamais importer un mock directement.
 ```
 [PRÉAMBULE]
 
-Crée frontend/app/components/ui/ : les composants du guide de style, chacun avec
-TOUS ses états (repos, survol, focus clavier, actif, désactivé, chargement).
+Crée frontend/app/components/ui/ : chaque composant avec TOUS ses états —
+repos, survol, focus clavier, actif, désactivé, chargement.
 
-Button, Input, Textarea, Select, Checkbox, Radio, Switch, DatePicker, Badge,
-Chip, Alert, Card, Table, Modal, Drawer, Tabs, Stepper, Pagination, EmptyState,
-SkeletonLoader, ErrorState, ForbiddenState.
+Respecte la direction artistique de CLAUDE.md : institutionnel et sérieux mais
+vivant, hiérarchie typographique forte, densité assumée, la couleur distingue
+des états et ne décore pas. Ni dégradés, ni verre dépoli, ni emoji fonctionnels.
 
-Deux composants métier, les plus utilisés de la plateforme, à soigner
-particulièrement :
+BASE
+Button (principal, secondaire, discret, danger, avec icône, compact),
+Input, Textarea, Select, SearchInput, Checkbox, Radio, Switch, DatePicker,
+Badge, Chip (filtre retirable), Alert (information, succès, avertissement,
+erreur), Card, Table, Modal, Drawer, ContextMenu, Tabs, Stepper, Breadcrumb,
+NavBar, SideNav, Pagination, EmptyState, SkeletonLoader, ErrorState,
+ForbiddenState.
+
+Les champs de formulaire montrent : vide, rempli, focus, erreur avec message,
+aide contextuelle, désactivé, lecture seule.
+
+MÉTIER — les deux plus utilisés de la plateforme, à soigner particulièrement :
 - SessionCard : créneau avec fuseau, titre, organisation avec pays, pastilles
   thématiques, format, salle, jauge, état temporel (à venir / en cours / en
   direct / terminé / reporté / annulé), pastille de journée spéciale.
@@ -310,18 +327,21 @@ particulièrement :
 - StatusTimeline : frise d'avancement d'un dossier (brouillon → déposé → en
   évaluation → décision), chaque étape portant sa date.
 
-Puis frontend/app/pages/style-guide.vue qui les montre tous, avec leurs états, sur des
-données réalistes — 12 lignes de tableau, 6 cartes, pas un exemplaire de chaque.
+Puis frontend/app/pages/style-guide.vue, qui les montre tous avec leurs états,
+sur des données réalistes — 12 lignes de tableau, 6 cartes, pas un exemplaire de
+chaque. Organise-la en sections ancrées : jetons (palette avec les rapports de
+contraste calculés, échelle typographique, espacements), composants de base,
+composants métier, puis les MOTIFS TRANSVERSAUX :
+  - les quatre états d'écran, traités comme des composants de plein droit et non
+    comme des cas particuliers — ce sont eux qu'on oublie et qui font mauvaise
+    impression en production ;
+  - l'affichage d'une date avec son fuseau : « 14:30 — 16:00 (heure de Belém, UTC−3) » ;
+  - le bandeau d'incident sur ses trois niveaux de gravité ;
+  - la pastille « en direct » et sa règle d'usage.
 
-Cette page est le guide de style VIVANT : elle rend les composants réels du
-projet, contrairement à `docs/style-guide/index.html` qui est l'artefact figé
-produit par Claude Design. Construis-la EN T'APPUYANT sur cet artefact — mêmes
-composants, mêmes états, même vocabulaire visuel — puis c'est elle qui fait foi
-pour le code. En cas de divergence ultérieure, l'artefact est la référence
-d'intention, la page Vue la réalité du projet.
-
-Elle reste dans le dépôt : c'est la référence pendant tout le développement et
-le test de non-régression visuelle.
+Cette page est le guide de style vivant du projet : elle rend les composants
+réels, sert de référence pendant tout le développement et de test de
+non-régression visuelle. Elle fait foi.
 ```
 
 ---

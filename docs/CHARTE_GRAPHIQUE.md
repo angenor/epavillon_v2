@@ -77,7 +77,7 @@ Neutres       blanc #FFFFFF · noir #231F20
 
 ### Variables CSS prêtes à l'emploi
 
-Ce sont les jetons de **marque** : ils portent les valeurs et ne sont jamais redéfinis, pas même en thème sombre. Les jetons **sémantiques** d'interface (`--color-surface`, `--color-text`, `--color-success`…) les référencent par `var()` — voir [PROMPT_STYLE_GUIDE.md](PROMPT_STYLE_GUIDE.md), point 5 du prompt.
+Ce sont les jetons de **marque** : ils portent les valeurs et ne sont jamais redéfinis, pas même en thème sombre. Les jetons **sémantiques** d'interface (`--color-surface`, `--color-text`, `--color-success`…) les référencent par `var()` — voir la section « Deux niveaux de jetons de design » de [`../CLAUDE.md`](../CLAUDE.md).
 
 ```css
 :root {

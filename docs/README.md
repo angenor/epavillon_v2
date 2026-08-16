@@ -247,9 +247,8 @@ Avec une nuance : **tout ce qui est vrai n'a pas vocation à être bloqué** —
 ## Par où commencer à construire
 
 1. **[PROMPTS_DEVELOPPEMENT.md](PROMPTS_DEVELOPPEMENT.md), prompt A0.0**, puis **[ENVIRONNEMENT_LOCAL.md](ENVIRONNEMENT_LOCAL.md)** — initialiser le dépôt (`ops/`, `Makefile`, `.gitignore`), puis monter l'environnement local : Postgres avec le schéma chargé, Valkey, Garage, Mailpit, Jaeger.
-2. **[PROMPT_STYLE_GUIDE.md](PROMPT_STYLE_GUIDE.md)** — produire le guide de style avec Claude Design, en récupérer les jetons CSS.
-3. **[PROMPTS_DEVELOPPEMENT.md](PROMPTS_DEVELOPPEMENT.md), prompts A0.1 à A0.4** — le socle front, les types dérivés du modèle et les données simulées. C'est cette série qui fait le pont entre le SQL et l'interface : les écarts entre les deux apparaissent immédiatement à l'écran.
-4. Puis les pages, **dans l'ordre du diagramme de dépendances** de [PROMPTS_DEVELOPPEMENT.md](PROMPTS_DEVELOPPEMENT.md) — A1 avant A2, A6 et A7 avant A8. Cet ordre ne se discute pas : chaque écran s'appuie sur le précédent.
+2. **[PROMPTS_DEVELOPPEMENT.md](PROMPTS_DEVELOPPEMENT.md), prompts A0.1 à A0.4** — le socle front, les types dérivés du modèle et les données simulées. C'est cette série qui fait le pont entre le SQL et l'interface : les écarts entre les deux apparaissent immédiatement à l'écran.
+3. Puis les pages, **dans l'ordre du diagramme de dépendances** de [PROMPTS_DEVELOPPEMENT.md](PROMPTS_DEVELOPPEMENT.md) — A1 avant A2, A6 et A7 avant A8. Cet ordre ne se discute pas : chaque écran s'appuie sur le précédent.
 
    Deux d'entre eux méritent plus de soin que leur rang ne le laisse croire : **A2** (rattachement d'organisation), où se joue la qualité du référentiel, et **A8** (fiche d'évaluation), le plus dense — s'il tient, les autres tiennent. C'est l'attention qu'on leur porte qui change, pas leur ordre.
 
