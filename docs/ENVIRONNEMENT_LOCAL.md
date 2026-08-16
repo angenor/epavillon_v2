@@ -139,7 +139,7 @@ check-front:
 	cd frontend && npm run typecheck && npm run build
 
 check-back:
-	cargo fmt --check && cargo clippy -- -D warnings && cargo test
+	cd backend && cargo fmt --check && cargo clippy -- -D warnings && cargo test
 ```
 
 Les deux compteurs de `check-db` doivent afficher **0**.

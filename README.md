@@ -39,9 +39,14 @@ epavillon_v2/
 │   ├── logos-IFDD-OIF/
 │   └── historique/        Ce que demandait le commanditaire, dans ses mots
 ├── ops/                   (à créer : docker-compose local, configuration Garage)
-├── frontend/              (créé par les prompts de la phase A)
-└── crates/                (créés par les prompts de la phase B)
+├── frontend/              application Nuxt        (créée par les prompts A)
+└── backend/               workspace Cargo         (créé par les prompts B)
+    ├── Cargo.toml
+    ├── crates/            kernel · contracts · modules/ · api · worker
+    └── migrations/
 ```
+
+`backend/` et `frontend/` sont symétriques : chacun porte son gestionnaire de dépendances et ses commandes.
 
 ---
 

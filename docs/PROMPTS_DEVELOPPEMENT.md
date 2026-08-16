@@ -55,9 +55,9 @@ Crée le socle du frontend dans frontend/.
   thème, pied de page) et `admin` (navigation latérale, fil d'Ariane, sélecteur
   d'événement).
 - Traductions découpées **PAR ÉCRAN**, jamais par grand domaine et encore moins
-  en un fichier unique. Aucun fichier ne doit dépasser 200 lignes : les
-  traductions du seul formulaire de soumission, avec ses sept étapes,
-  dépasseraient déjà cette limite.
+  en un fichier unique. Le formulaire de soumission compte sept étapes : leurs
+  libellés dans un seul fichier seraient déjà pénibles à parcourir, alors qu'un
+  fichier par étape se lit d'un coup d'œil.
 
       i18n/locales/fr/
       ├── _common.json      actions, états, formats — partagé
@@ -106,9 +106,8 @@ champs, même nullabilité.
 
 **UN FICHIER PAR GROUPE D'ENTITÉS, jamais un fichier unique.** Le modèle compte
 149 tables : un `domain.ts` monolithique serait impossible à charger en
-contexte, et chaque écran n'a besoin que d'une poignée de types. Aucun fichier
-ne doit dépasser 200 lignes — d'où le sous-découpage de `event` et `programme`,
-qui comptent trop de tables pour tenir dans un seul.
+contexte, et chaque écran n'a besoin que d'une poignée de types. `event` et
+`programme` comptent assez de tables pour mériter leur propre sous-dossier.
 
     frontend/types/
     ├── index.ts        ne fait que ré-exporter — aucune définition
@@ -159,8 +158,7 @@ existe.
 
 **UN FICHIER PAR ENTITÉ, découpé plus finement dès que le volume l'impose.**
 40 propositions et 60 inscriptions écrites à la main représentent plusieurs
-milliers de lignes ; aucun fichier ne doit dépasser 200 lignes, et un écran n'en
-consulte qu'une partie.
+milliers de lignes, et un écran n'en consulte qu'une partie.
 
     frontend/mocks/
     ├── index.ts          ré-exporte tout — aucune donnée
@@ -240,7 +238,7 @@ Chaque prompt reçoit le préambule, plus ce rappel :
 
 > *Respecte les types de `types/`, les composants de `components/ui/`, les jetons de `design-tokens.css` et la page `style-guide.vue`. Passe par `composables/useApi.ts`. Thème clair et sombre. Responsive à partir de 375 px. Les quatre états : chargement, vide, erreur, accès refusé.*
 >
-> *Traductions : crée un fichier PAR ÉCRAN dans `i18n/locales/fr/pages/` et son équivalent anglais, nommé comme le chemin de la page aplati par des points. La clé racine est le nom du fichier. N'ouvre aucun autre fichier de traduction, hormis `_common.json` si tu as besoin d'une chaîne partagée. Si un fichier dépasse 200 lignes, scinde-le par section d'écran.*
+> *Traductions : crée un fichier PAR ÉCRAN dans `i18n/locales/fr/pages/` et son équivalent anglais, nommé comme le chemin de la page aplati par des points. La clé racine est le nom du fichier. N'ouvre aucun autre fichier de traduction, hormis `_common.json` si tu as besoin d'une chaîne partagée. Si un fichier devient long, scinde-le par section d'écran.*
 >
 > *Types et mocks : n'ouvre que les fichiers correspondant aux entités de cet écran, repérés depuis `docs/MODELE_INDEX.md`.*
 
@@ -638,9 +636,10 @@ contredire.
 Principes non négociables :
 1. docs/database/ est la source de vérité. Aucune table, aucune colonne n'est
    créée sans y être ajoutée d'abord.
-2. Un module = un schéma PostgreSQL = un crate. Un crate de module ne dépend
-   jamais d'un autre crate de module : uniquement de `kernel` et des contrats
-   d'événements.
+2. Tout le Rust vit dans backend/, workspace Cargo — symétrique de frontend/.
+   Un module = un schéma PostgreSQL = un crate dans backend/crates/modules/.
+   Un crate de module ne dépend jamais d'un autre crate de module : uniquement
+   de `kernel` et des contrats d'événements.
 3. Toute clé étrangère traversant deux schémas métier est nommée `xmod_fk_*`.
    `SELECT * FROM platform.cross_module_fk_report WHERE NOT is_compliant`
    doit rester vide.
@@ -694,8 +693,8 @@ sont à traiter, pas à contourner.
 
 Fonctionnalités attendues : <contenu du tableau ci-dessus>
 
-Livrable : un crate crates/modules/<nom> exposant domaine, dépôts, service et
-routes, plus la documentation OpenAPI générée.
+Livrable : un crate backend/crates/modules/<nom> exposant domaine, dépôts,
+service et routes, plus la documentation OpenAPI générée.
 ```
 
 ## B7 — Raccordement du front
@@ -705,8 +704,8 @@ routes, plus la documentation OpenAPI générée.
 
 Bascule le frontend des données simulées vers l'API réelle.
 
-- Génère le client TypeScript depuis l'OpenAPI (`openapi-typescript`) dans
-  frontend/types/api.ts.
+- Génère le client TypeScript depuis l'OpenAPI de backend/ (`openapi-typescript`)
+  dans frontend/types/api.ts.
 - Compare-le aux types de frontend/types/ et LISTE LES ÉCARTS avant de modifier
   quoi que ce soit. Chaque écart est soit un défaut du front, soit un défaut de
   l'API : tranche l'un après l'autre, ne les masque pas par des conversions.
@@ -752,6 +751,6 @@ Les deux écrans à traiter en premier après le socle, parce qu'ils portent les
 - [ ] Les quatre états sont traités partout : chargement, vide, erreur, accès refusé.
 - [ ] Le thème sombre tient sur chaque page.
 - [ ] Rien n'est en dur : aucune chaîne hors i18n, aucune couleur hors jetons, aucune route de journée spéciale écrite en clair.
-- [ ] Aucun fichier de traduction, de type ou de mock ne dépasse 200 lignes — `find frontend/i18n frontend/types frontend/mocks -type f | xargs wc -l | sort -rn | head` le vérifie en une commande.
+- [ ] Aucun fichier du dépôt ne dépasse 1000 lignes — `find frontend backend -type f \( -name '*.ts' -o -name '*.vue' -o -name '*.json' -o -name '*.rs' \) | xargs wc -l | sort -rn | head` le vérifie en une commande.
 - [ ] Aucun libellé venant de la base (thématique, catégorie, type d'organisation) n'a été recopié dans un fichier i18n.
 - [ ] Le parcours complet est jouable sur les mocks : créer un compte, rejoindre une organisation sans créer de doublon, soumettre une proposition à plusieurs organisations, la noter, la retenir, la programmer, publier le programme, s'y inscrire.

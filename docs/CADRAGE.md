@@ -222,28 +222,34 @@ Concrètement :
 ### 5.3 Structure du code
 
 ```
-epavillon-v2/
-├── crates/
-│   ├── kernel/              # types partagés, erreurs, i18n, contexte de requête,
-│   │                        # traits de dépôt, bus d'événements
-│   ├── modules/
-│   │   ├── identity/        # ┐
-│   │   ├── organizations/   # │ un crate par module
-│   │   ├── events/          # │ chacun expose : domaine, dépôts, service,
-│   │   ├── programme/       # │ routes HTTP, événements publiés/consommés
-│   │   ├── live/            # │
-│   │   ├── publications/    # │ un crate ne dépend JAMAIS d'un autre crate
-│   │   ├── negotiations/    # │ de module : uniquement de `kernel` et des
-│   │   ├── engagement/      # │ contrats d'événements
-│   │   ├── media/           # │
-│   │   └── tools/           # ┘
-│   ├── contracts/           # schémas des événements de domaine, versionnés
-│   ├── api/                 # binaire : assemblage Actix Web, middlewares, OpenAPI
-│   └── worker/              # binaire : relais d'outbox, travaux différés, planificateur
-├── migrations/              # migrations SQLx, dérivées de docs/database/
-├── frontend/                # application Nuxt
-└── ops/                     # Docker Compose, sauvegardes, supervision
+epavillon_v2/
+├── backend/                   # workspace Cargo — tout le Rust vit ici
+│   ├── Cargo.toml             # définit le workspace
+│   ├── crates/
+│   │   ├── kernel/            # types partagés, erreurs, i18n, contexte de
+│   │   │                      # requête, traits de dépôt, bus d'événements
+│   │   ├── contracts/         # schémas des événements de domaine, versionnés
+│   │   ├── modules/
+│   │   │   ├── identity/      # ┐
+│   │   │   ├── organizations/ # │ un crate par module
+│   │   │   ├── events/        # │ chacun expose : domaine, dépôts, service,
+│   │   │   ├── programme/     # │ routes HTTP, événements publiés/consommés
+│   │   │   ├── live/          # │
+│   │   │   ├── publications/  # │ un crate ne dépend JAMAIS d'un autre crate
+│   │   │   ├── negotiations/  # │ de module : uniquement de `kernel` et des
+│   │   │   ├── engagement/    # │ contrats d'événements
+│   │   │   ├── media/         # │
+│   │   │   ├── training/      # │
+│   │   │   └── tools/         # ┘
+│   │   ├── api/               # binaire : Actix Web, middlewares, OpenAPI
+│   │   └── worker/            # binaire : relais d'outbox, travaux différés
+│   └── migrations/            # migrations SQLx, dérivées de docs/database/
+├── frontend/                  # application Nuxt
+├── docs/                      # cadrage, modèle de données, prompts, progression
+└── ops/                       # Docker Compose, sauvegardes, supervision
 ```
+
+`backend/` et `frontend/` sont **symétriques** : chacun porte son gestionnaire de dépendances, ses commandes et son cycle de vie. Le workspace Cargo vit dans `backend/`, pas à la racine — autrement le dépôt serait « un projet Rust contenant un frontend », ce qui ne reflète pas la réalité d'une application à deux moitiés.
 
 **La règle qui compte** : un crate de module ne dépend jamais d'un autre crate de module. Quand `programme` a besoin de savoir qu'une organisation est vérifiée, il passe par un trait déclaré dans `kernel` et implémenté par `organizations`. Le jour de l'extraction, on substitue une implémentation qui appelle le service distant — le code métier ne change pas.
 
@@ -373,6 +379,11 @@ Format court : décision, contexte, conséquence.
 **Contexte.** Le porteur du projet annonce l'intention de déployer les outils sous une adresse distincte.
 **Conséquence.** L'extraction ne demandera aucune modification de schéma. Contrepartie assumée : pas d'intégrité référentielle sur le contexte, et un travail de nettoyage à prévoir si un contexte est supprimé.
 
+### ADR-12 — Partitionnement mensuel des tables à forte volumétrie
+
+**Décision.** `platform.audit_log`, `engagement.email_messages` et `negotiation.channel_messages` sont partitionnées par mois.
+**Contexte.** Ce sont les tables dont la croissance est linéaire et sans fin.
+**Conséquence.** La purge réglementaire devient un `DROP PARTITION`. Contrepartie : la clé primaire doit inclure la colonne de partitionnement, et les clés étrangères entrantes sont contraintes — d'où l'absence de FK vers ces tables.
 ### ADR-13 — Les conflits de créneaux sont signalés, pas bloqués
 
 **Décision.** Aucune contrainte d'exclusion sur les créneaux. `programme.detect_conflicts()` recense les chevauchements avec leur gravité ; `programme.publication_readiness()` conditionne la publication.
@@ -385,11 +396,6 @@ Format court : décision, contexte, conséquence.
 **Contexte.** En v1, confier un webinaire à un responsable avait imposé une page d'administration séparée, développée dans l'urgence et en partie codée en dur, pour éviter qu'il n'accède au reste.
 **Conséquence.** Un seul code, un seul back-office, plus de page parallèle à maintenir. Contrepartie : le filtrage par périmètre devient un invariant de sécurité à vérifier systématiquement — il doit figurer dans la revue de sécurité préalable à la mise en production.
 
-### ADR-12 — Partitionnement mensuel des tables à forte volumétrie
-
-**Décision.** `platform.audit_log`, `engagement.email_messages` et `negotiation.channel_messages` sont partitionnées par mois.
-**Contexte.** Ce sont les tables dont la croissance est linéaire et sans fin.
-**Conséquence.** La purge réglementaire devient un `DROP PARTITION`. Contrepartie : la clé primaire doit inclure la colonne de partitionnement, et les clés étrangères entrantes sont contraintes — d'où l'absence de FK vers ces tables.
 
 ---
 

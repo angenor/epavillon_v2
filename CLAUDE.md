@@ -79,8 +79,8 @@ Elles sont détaillées dans le cadrage, mais on les oublie vite et chacune a d�
 
 Traductions, types et données simulées grossissent avec le projet et deviendraient vite impossibles à charger en contexte.
 
-> **Règle de taille : aucun de ces fichiers ne dépasse 200 lignes.**
-> Au-delà, on scinde. Un découpage par grand domaine ne suffit pas — les traductions du seul formulaire de soumission, avec ses sept étapes, dépasseraient à elles seules cette limite.
+> **Garde-fou : aucun fichier du dépôt ne dépasse 1000 lignes.**
+> Ce n'est pas une cible mais une limite haute — au-delà, le fichier devient coûteux à charger et pénible à modifier. L'organisation reste le découpage par écran ou par entité, qui produit naturellement des fichiers bien plus courts.
 
 **L'unité de découpage est l'ÉCRAN, pas le domaine.**
 
@@ -113,7 +113,7 @@ Pour éviter d'énumérer quarante fichiers dans `nuxt.config.ts`, chaque locale
 
 #### Types
 
-Un fichier par **groupe d'entités**, pas par schéma : `programme` en compte une vingtaine, ce qui dépasserait la limite.
+Un fichier par **groupe d'entités**, pas par schéma : `programme` compte une vingtaine de tables, bien trop pour un seul fichier lisible.
 
 ```
 types/
@@ -141,6 +141,25 @@ mocks/
 #### Ce que cela change concrètement
 
 Pour modifier un écran, on ouvre **son** fichier de traduction, **ses** types, **ses** mocks. Jamais l'ensemble. Si tu te surprends à charger plus de trois fichiers de traduction pour une seule page, le découpage est à revoir — signale-le dans `docs/PROGRESSION.md`.
+
+---
+
+## Sous-agents
+
+Tu peux lancer autant de sous-agents que tu le juges utile. Le contexte d'une session est la ressource rare de ce projet : déléguer permet d'explorer large sans le saturer.
+
+**Cas où c'est le bon réflexe :**
+- Lire plusieurs fichiers SQL volumineux pour en extraire ce qui concerne la tâche — le sous-agent rend la conclusion, pas les onze mille lignes.
+- Construire des écrans indépendants qui ne partagent que les composants d'interface.
+- Relire ou auditer un large périmètre : cohérence de la documentation, conformité du modèle, revue de code.
+- Vérifier une hypothèse coûteuse (charger le schéma dans une base jetable, chercher une occurrence dans tout le dépôt) pendant que le travail principal continue.
+
+**Cas où il vaut mieux s'en passer :**
+- Travail séquentiel dont chaque étape dépend de la précédente.
+- Écriture qui demande une continuité de style ou de vocabulaire — deux sous-agents produiront deux tons.
+- Modifications concurrentes sur les mêmes fichiers : donne à chacun un périmètre exclusif, sinon leurs écritures se marchent dessus.
+
+**Quand tu délègues :** donne au sous-agent le contexte dont il a besoin (il ne lit pas ce fichier automatiquement), un périmètre de fichiers explicite, et le format de réponse attendu. Relis ce qu'il renvoie plutôt que de le reprendre tel quel — c'est toi qui réponds de la cohérence de l'ensemble.
 
 ### Deux sortes de textes multilingues — ne pas les confondre
 
@@ -182,8 +201,11 @@ docker compose -f ops/docker-compose.dev.yml up -d     # services locaux
 docker compose -f ops/docker-compose.dev.yml down -v   # + up : base repartie de zéro
 make check                                             # avant tout commit important
 cd frontend && npm run dev                             # front
-cargo run -p api                                       # API
+cd backend  && cargo run -p api                        # API
+cd backend  && cargo run -p worker                     # travaux différés, relais d'outbox
 ```
+
+`backend/` et `frontend/` sont symétriques : chacun porte son gestionnaire de dépendances et ses commandes. Le workspace Cargo vit dans `backend/`, pas à la racine.
 
 Interfaces locales : Mailpit `http://localhost:8025` (courriels capturés) · Jaeger `http://localhost:16686` (traces).
 
