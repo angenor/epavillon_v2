@@ -30,13 +30,18 @@ export default defineNuxtConfig({
     typeCheck: false,
   },
 
-  // Connexion à l'API. Déclarée dès maintenant, inutilisée jusqu'au prompt B7 :
-  // les écrans du jalon travaillent sur des données simulées.
-  // Surchargeable par la variable d'environnement NUXT_PUBLIC_API_BASE, lue
-  // dans le `.env` de la racine du dépôt (voir le drapeau --dotenv des scripts npm).
+  // Connexion à l'API. VIDE PAR DÉFAUT, et c'est ce qui fait fonctionner le
+  // jalon : `useApi()` lit les données simulées tant que cette valeur est vide,
+  // et bascule vers l'API dès qu'elle ne l'est plus.
+  //
+  // Une valeur par défaut non vide contredisait cette bascule — l'API Rust
+  // n'existant pas avant le prompt B1, tous les chargements échouaient et
+  // chaque écran affichait son état d'erreur, sans que rien ne dise pourquoi.
+  // Surchargeable par NUXT_PUBLIC_API_BASE, lue dans le `.env` de la racine
+  // (voir le drapeau --dotenv des scripts npm). À renseigner au prompt B7.
   runtimeConfig: {
     public: {
-      apiBase: 'http://localhost:8080/api',
+      apiBase: '',
     },
   },
 

@@ -5,7 +5,7 @@
   "type": "module",
   "description": "ePavillon v2 — interface Nuxt 4 de la plateforme IFDD",
   "scripts": {
-    "dev": "nuxt dev --dotenv ../.env",
+    "dev": "nuxt dev --dotenv ../.env --host 127.0.0.1",
     "build": "nuxt build --dotenv ../.env",
     "preview": "nuxt preview --dotenv ../.env",
     "generate": "nuxt generate --dotenv ../.env",
