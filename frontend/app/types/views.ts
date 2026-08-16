@@ -110,9 +110,14 @@ export interface ProposalDashboardRow {
   organization_id: OrganizationId
   /** `org.organizations.legal_name`, déjà joint. */
   organization_name: string
-  /** Titre DÉJÀ RÉSOLU par `platform.t()` — chaîne, pas un `I18nText`. La vue
-   *  applique le repli français ; ne pas lui appliquer `resolveI18nText()`. */
-  title: string | null
+  /** Titre multilingue brut, du même type que `Proposal.title` et
+   *  `PublicScheduleRow.title` : à résoudre avec `resolveI18nText()`, comme
+   *  partout ailleurs. */
+  title: I18nText
+  /** Le même titre résolu en base par `platform.t()` (repli français). Réservé
+   *  au tri, au filtrage et à l'export ; l'affichage passe par `title`, sans
+   *  quoi la liste ne peut pas changer de langue sans requête. */
+  title_text: string | null
   status: ProposalStatus
   submitted_at: IsoDateTime | null
   weighted_score: Numeric | null

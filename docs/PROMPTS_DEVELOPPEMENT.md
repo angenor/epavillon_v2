@@ -839,6 +839,10 @@ Principes non négociables :
    puis on filtre par `is_global OR event_id = ANY(event_ids)`. `is_global` vrai
    signifie « tous les événements ». Un administrateur d'événement ne doit
    atteindre aucune donnée d'une autre édition, y compris en forgeant une URL.
+   Depuis le 16/08 la fonction ne renvoie JAMAIS de NULL : elle rend toujours
+   une ligne, et « aucun droit » s'écrit `(false, '{}')`. Les trois cas sont
+   donc distincts et doivent le rester dans le code — un périmètre vide donne un
+   refus d'accès explicite, jamais une liste vide.
 6. SQLx avec vérification à la compilation. Pas d'ORM.
 7. Toute écriture positionne app.actor_id et app.request_id en début de
    transaction — c'est ce qui alimente l'audit et l'historique.
@@ -891,6 +895,100 @@ backend/crates/kernel et backend/crates/contracts — jamais d'un autre crate de
 module. Ses routes sont montées par backend/crates/api, ses travaux différés
 par backend/crates/worker ; ces quatre crates existent depuis B1, ne les
 réinvente pas.
+```
+
+### Exigences imposées par les écarts du modèle
+
+Quatre des neuf écarts relevés en dérivant les types (`PROGRESSION.md`, 16/08) ne se corrigent **ni dans le SQL ni dans les types** : ce sont des obligations d'API. Elles sont écrites ici, dans le prompt du module qui les rencontrera, plutôt que dans un tableau que personne ne relit au moment utile.
+
+**À recopier dans le prompt du module concerné, juste après « Fonctionnalités attendues ».**
+
+#### B3 — Événements
+
+```
+Exigences issues des écarts du modèle :
+
+- Le sigle d'une édition (`event.events.acronym`) est FACULTATIF en base, et
+  doit le rester : les webinaires du cycle PACO n'en ont pas. Or il préfixe le
+  numéro de dossier des propositions ; à défaut, le trigger
+  `programme.tg_assign_reference_code()` retombe sur les huit premiers
+  caractères du slug, ce qui donne des numéros illisibles au téléphone —
+  vérifié en base : slug `cop31-test` → dossier « COP31-TE-00001 ».
+  La contrainte a donc sa place dans le service, pas dans le schéma : à la
+  création ou à la modification d'une édition AVEC pavillon (`has_pavilion`),
+  exiger un sigle (2 à 12 caractères, lettres, chiffres, tiret) et proposer une
+  valeur par défaut modifiable ; sans pavillon, l'accepter vide.
+  [ÉCART N°9 — sous réserve de l'arbitrage en attente, voir PROGRESSION.md]
+
+- Le périmètre d'administration borne AUSSI ce module : listes d'éditions, de
+  journées, de salles, de canaux de diffusion et d'appels. Voir le principe 5
+  de la constitution — la fonction ne renvoie plus de NULL, un périmètre vide
+  vaut refus d'accès et non liste vide.
+```
+
+#### B4 — Propositions
+
+```
+Exigences issues des écarts du modèle :
+
+- ÉCART N°4 — La machine à états est une DONNÉE que rien n'expose.
+  `programme.proposal_transitions_allowed` dit quelles transitions existent,
+  avec la permission requise, le droit du porteur (`allowed_for_owner`) et
+  l'obligation de motif (`requires_reason`) — mais aucune vue ne la joint à la
+  proposition. Expose donc les transitions autorisées POUR CETTE PROPOSITION ET
+  CETTE PERSONNE (GET /proposals/:id/transitions, ou champ `available_transitions`
+  de la fiche), en croisant la table avec `identity.has_permission()` et la
+  qualité de porteur, plutôt que de laisser le front réimplémenter le graphe :
+  c'est exactement ce que la mise en données voulait éviter. Chaque entrée
+  porte l'état cible et le fait qu'un motif soit exigé.
+  Le service ne réimplémente pas ces règles à l'écriture : il tente la
+  transition et traduit le `restrict_violation` du trigger en message français.
+
+- ÉCART N°3 — Les thématiques d'une proposition vivent HORS de la proposition,
+  dans `reference.entity_terms`, table polymorphe sans clé étrangère vers
+  `proposals`. Conséquence : le triplet (entity_schema, entity_table, entity_id)
+  est fixé par le SERVICE — littéralement ('programme', 'proposals', id) — et
+  n'est JAMAIS accepté depuis la requête ; un client ne transmet que des codes
+  de termes. Expose les thématiques comme un champ de la proposition
+  (`theme_codes`), lu par `reference.terms_of('programme','proposals',id,'activity_theme')`.
+  Vérifie que chaque terme reçu appartient bien à la taxonomie attendue, et
+  purge les liens à la suppression du dossier — aucune contrainte référentielle
+  ne le fera à ta place.
+
+- La vue `programme.v_proposal_dashboard` expose désormais DEUX colonnes de
+  titre : `title` (document multilingue brut, comme sur la table) et
+  `title_text` (résolu par `platform.t()`, réservé au tri, au filtrage et à
+  l'export). Conserve ces deux noms tels quels dans le contrat d'API : le front
+  résout `title` lui-même et change de langue sans requête.
+```
+
+#### B5 — Sessions
+
+```
+Exigences issues des écarts du modèle :
+
+- ÉCART N°7 — Trois colonnes de `programme.sessions` sont écrites par trigger
+  (`tg_sessions_derive_fields`) : `time_range` (colonne générée),
+  `enforce_room_exclusivity` (déduite de `event.rooms.is_virtual`) et
+  `broadcast_channel_id` (renseignée avec le canal par défaut dès que
+  `is_streamed` passe à vrai, remise à NULL sinon). Le contrat d'ÉCRITURE ne
+  les contient pas : si un client les envoie, réponds par une erreur nommant le
+  champ, plutôt que de les accepter en silence et de laisser le trigger écraser
+  la valeur sans avertissement. En lecture, elles sont renvoyées normalement.
+  `event_day_id` relève du même régime : déduite de `starts_at` quand elle
+  n'est pas fournie, elle reste néanmoins saisissable.
+
+- ÉCART N°6 — `programme.registrations.answers` est un `jsonb` libre dont les
+  clés sont les `code` de `registration_form_fields`. C'est une conséquence
+  VOULUE du formulaire configurable : ne l'« améliore » pas par une structure
+  figée, ni par une table annexe — c'est précisément ce que la v1 faisait, au
+  prix d'une migration par question posée. La validation est donc DYNAMIQUE,
+  contre le formulaire rattaché à la session : type de champ (`field_type`),
+  obligation, options (liste explicite ou taxonomie référencée) et règles de
+  `validation` (min, max, pattern). Le trigger `tg_validate_registration` ne
+  contrôle QUE la présence des réponses obligatoires, la clôture et la jauge :
+  tout le reste t'incombe. Traite `is_sensitive` — consentement requis et
+  exclusion des exports non anonymisés.
 ```
 
 ## B7 — Raccordement du front

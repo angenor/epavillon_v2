@@ -219,21 +219,24 @@ export interface EffectivePermission {
 /**
  * Retour de `identity.administered_events(person_id)` — `030_identity.sql` § 3.
  *
- * `is_global` vaut `true` pour un administrateur de la plateforme entière ;
- * `event_ids` liste les événements confiés nommément.
+ * La fonction agrège sans `GROUP BY` : elle renvoie TOUJOURS exactement une
+ * ligne, y compris pour une personne sans aucune attribution. Depuis la
+ * correction du 16/08, ses deux colonnes ne valent JAMAIS `null` — les trois
+ * cas se lisent donc sans ambiguïté :
  *
- * PIÈGE : la fonction agrège sans `GROUP BY`, donc elle renvoie TOUJOURS une
- * ligne. Sans aucune attribution, `is_global` vaut `null` et `event_ids` aussi.
- * Un garde qui teste `if (!scope.is_global)` traite alors « aucun droit » comme
- * « administrateur d'un événement » et affiche une liste vide au lieu d'un refus.
- * Les trois cas se distinguent explicitement.
+ *   { is_global: true,  event_ids: [] }      administrateur de la plateforme
+ *   { is_global: false, event_ids: [id…] }   administrateur des éditions listées
+ *   { is_global: false, event_ids: [] }      aucun droit → accès refusé
  *
- * TOUTE liste du back-office se filtre là-dessus, y compris quand l'utilisateur
- * forge une URL.
+ * Quand `is_global` vaut `true`, `event_ids` n'est plus signifiant : une
+ * attribution globale couvre toutes les éditions, présentes et à venir.
+ *
+ * TOUTE liste du back-office se filtre là-dessus — `is_global || event_ids.includes(id)` —
+ * y compris quand l'utilisateur forge une URL.
  */
 export interface AdministeredEvents {
-  is_global: boolean | null
-  event_ids: Uuid[] | null
+  is_global: boolean
+  event_ids: Uuid[]
 }
 
 // ---------------------------------------------------------------------------

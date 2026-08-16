@@ -705,7 +705,17 @@ SELECT
     p.call_id,
     p.organization_id,
     o.legal_name              AS organization_name,
-    platform.t(p.title)       AS title,
+    -- Le titre est exposé DEUX FOIS, sous deux noms distincts :
+    --   `title`      — le document multilingue brut, du même type que
+    --                  programme.proposals.title et programme.v_public_schedule.title,
+    --                  résolu à l'affichage par l'utilitaire du frontend ;
+    --   `title_text` — la résolution française de platform.t(), pour ce que le
+    --                  JSON ne sait pas faire : trier, filtrer et exporter en SQL.
+    -- Une version antérieure nommait `title` la valeur déjà résolue : le même nom
+    -- de champ portait alors un `text` ici et un `i18n_text` sur la table, et
+    -- resolveI18nText() appliqué dessus rendait une chaîne vide sans erreur.
+    p.title,
+    platform.t(p.title)       AS title_text,
     p.status,
     p.submitted_at,
     p.weighted_score,
@@ -729,6 +739,10 @@ WHERE p.deleted_at IS NULL;
 
 COMMENT ON VIEW programme.v_proposal_dashboard IS
     'Vue de pilotage du comité de sélection : avancement des revues, classement par événement, alertes.';
+COMMENT ON COLUMN programme.v_proposal_dashboard.title IS
+    'Titre multilingue brut, identique à programme.proposals.title. Un même nom de champ ne désigne jamais deux types.';
+COMMENT ON COLUMN programme.v_proposal_dashboard.title_text IS
+    'Titre résolu par platform.t() (repli français). Réservé au tri, au filtrage et à l''export SQL ; ne pas l''afficher à la place de title.';
 
 -- -----------------------------------------------------------------------------
 -- 7 bis. Historique des modifications d'une proposition

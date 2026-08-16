@@ -331,19 +331,40 @@ $$;
 COMMENT ON FUNCTION identity.has_permission IS
     'Test d''autorisation unique de la plateforme. Le code applicatif teste une permission, jamais un rôle.';
 
--- Périmètre d'administration d'une personne. Retourne NULL dans `event_ids`
--- quand la personne est administratrice globale — l'API interprète alors
--- « tous les événements ». Sert au filtrage systématique des listes du
--- back-office : un administrateur d'événement ne doit jamais voir, même par
--- accident d'URL, les propositions d'une autre édition.
+-- Périmètre d'administration d'une personne. Sert au filtrage systématique des
+-- listes du back-office : un administrateur d'événement ne doit jamais voir,
+-- même par accident d'URL, les propositions d'une autre édition.
+--
+-- La fonction agrège sans GROUP BY : elle renvoie TOUJOURS exactement une
+-- ligne, y compris pour une personne dépourvue de toute attribution. Ses deux
+-- colonnes sont donc renvoyées NON NULLES par construction, et le cas « aucun
+-- droit » s'écrit `is_global = false` et `event_ids = '{}'`.
+--
+-- Une version antérieure laissait les agrégats retourner NULL sur zéro ligne.
+-- Deux défauts en découlaient :
+--   - un garde de back-office testant `NOT is_global` confondait « aucun
+--     droit » et « administrateur d'un seul événement », et affichait une liste
+--     vide là où il fallait un refus d'accès ;
+--   - `event_id = ANY(NULL)` vaut NULL, donc le filtre canonique ne renvoyait
+--     rien SANS erreur — un contrôle d'accès qui échoue en silence.
+--
+-- Le filtre canonique, côté API comme en SQL :
+--     WHERE is_global OR event_id = ANY(event_ids)
+-- Quand `is_global` vaut vrai, `event_ids` n'est plus signifiant : une
+-- attribution globale couvre toutes les éditions, présentes et à venir.
 CREATE OR REPLACE FUNCTION identity.administered_events(p_person_id uuid)
 RETURNS TABLE (is_global boolean, event_ids uuid[])
 LANGUAGE sql
 STABLE
 AS $$
     SELECT
-        bool_or(ra.scope_type = 'global'),
-        array_remove(array_agg(ra.scope_id) FILTER (WHERE ra.scope_type = 'event'), NULL)
+        COALESCE(bool_or(ra.scope_type = 'global'), false),
+        -- DISTINCT : cumuler `admin` et `programmer` sur la même édition ne doit
+        -- pas la faire compter deux fois dans le périmètre.
+        COALESCE(
+            array_agg(DISTINCT ra.scope_id) FILTER (WHERE ra.scope_type = 'event'),
+            '{}'::uuid[]
+        )
     FROM identity.role_assignments ra
     JOIN identity.role_permissions rp ON rp.role_code = ra.role_code
     WHERE ra.person_id = p_person_id
@@ -354,7 +375,7 @@ AS $$
 $$;
 
 COMMENT ON FUNCTION identity.administered_events IS
-    'Périmètre d''administration : global, ou liste des événements confiés. Filtre obligatoire de toutes les listes du back-office.';
+    'Périmètre d''administration : global, ou liste des événements confiés. Renvoie toujours une ligne, jamais de NULL — aucun droit s''écrit (false, {}). Filtre obligatoire de toutes les listes du back-office.';
 
 -- Permissions effectives d'une personne : consommé par l'API pour composer le
 -- jeton d'accès, et par le back-office pour afficher/masquer les entrées de menu.
