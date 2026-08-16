@@ -1,0 +1,96 @@
+{
+  "site": {
+    "name": "ePavillon",
+    "owner": "Institute of the Francophonie for Sustainable Development",
+    "ownerShort": "IFDD",
+    "parent": "International Organisation of La Francophonie",
+    "parentShort": "OIF",
+    "tagline": "The digital pavilion of the Francophonie for sustainable development"
+  },
+  "main": {
+    "home": "Home",
+    "events": "Events",
+    "programme": "Programme",
+    "call": "Call for proposals",
+    "organizations": "Organisations",
+    "about": "About"
+  },
+  "account": {
+    "login": "Sign in",
+    "logout": "Sign out",
+    "myAccount": "My account",
+    "myOrganization": "My organisation",
+    "myProposals": "My proposals",
+    "register": "Create an account",
+    "menuLabel": "Account menu"
+  },
+  "admin": {
+    "title": "Back office",
+    "dashboard": "Dashboard",
+    "proposals": "Proposals",
+    "reviews": "Reviews",
+    "schedule": "Scheduling",
+    "events": "Events",
+    "organizations": "Organisations",
+    "users": "Users and roles",
+    "incidents": "Incident notices",
+    "settings": "Settings",
+    "sections": {
+      "programme": "Programme",
+      "referential": "Reference data",
+      "operations": "Operations"
+    },
+    "sidebar": {
+      "collapse": "Collapse navigation",
+      "expand": "Expand navigation",
+      "label": "Back-office navigation"
+    },
+    "eventScope": {
+      "label": "Event",
+      "placeholder": "Choose an event",
+      "allEvents": "All events",
+      "empty": "No event is open to your account.",
+      "restricted": "Your account administers a single event.",
+      "hint": "Lists in this section only show the selected event."
+    },
+    "backToSite": "Back to the public site"
+  },
+  "breadcrumb": {
+    "label": "Breadcrumb",
+    "home": "Home",
+    "current": "Current page"
+  },
+  "language": {
+    "label": "Language",
+    "select": "Choose a language",
+    "current": "Current language: {language}"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "toggle": "Switch theme",
+    "current": "Current theme: {theme}"
+  },
+  "footer": {
+    "about": "About ePavillon",
+    "accessibility": "Accessibility",
+    "contact": "Contact us",
+    "copyright": "© {year} Institute of the Francophonie for Sustainable Development",
+    "help": "Help",
+    "legal": "Legal notice",
+    "privacy": "Privacy policy",
+    "sections": {
+      "platform": "The platform",
+      "resources": "Resources",
+      "institution": "The institution"
+    },
+    "terms": "Terms of use"
+  },
+  "maintenance": {
+    "badge": "Under maintenance",
+    "title": "This area is under maintenance",
+    "description": "This part of the platform is not open yet. It will be in a future release."
+  }
+}

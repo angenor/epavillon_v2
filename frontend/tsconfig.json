@@ -1,0 +1,12 @@
+{
+  // Nuxt 4 génère quatre configurations distinctes dans .nuxt/ — application,
+  // serveur, code partagé et outillage. Ce fichier ne fait que les référencer :
+  // les options de compilation se règlent dans `typescript` de nuxt.config.ts.
+  "files": [],
+  "references": [
+    { "path": "./.nuxt/tsconfig.app.json" },
+    { "path": "./.nuxt/tsconfig.server.json" },
+    { "path": "./.nuxt/tsconfig.shared.json" },
+    { "path": "./.nuxt/tsconfig.node.json" }
+  ]
+}

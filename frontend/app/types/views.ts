@@ -1,0 +1,132 @@
+/**
+ * Vues SQL consommées TELLES QUELLES par l'interface.
+ *
+ * Ces vues répondent à un écran entier en une requête : les utiliser plutôt que
+ * de recomposer la jointure côté application, et surtout plutôt que de dériver
+ * ces types des tables sous-jacentes — les colonnes ont d'autres noms
+ * (`organization_name`, `room_name`) et portent des valeurs déjà calculées.
+ *
+ * Sources :
+ *   - `programme.v_public_schedule`    — `docs/database/075_programme_sessions.sql` § 6
+ *   - `programme.v_proposal_dashboard` — `docs/database/070_programme_proposals.sql` § 7
+ */
+
+import type {
+  BroadcastChannelId,
+  CallId,
+  ColorHex,
+  EventDayId,
+  EventId,
+  I18nText,
+  IsoDateTime,
+  Numeric,
+  OrganizationId,
+  ProposalId,
+  RoomId,
+  SessionId,
+  Slug,
+  TaxonomyTermCode,
+  TimeZoneName,
+} from './shared'
+import type { ParticipationMode, TrackKind } from './event/edition'
+import type { SessionStatus } from './programme/session'
+import type { ProposalStatus } from './programme/proposal'
+
+// ---------------------------------------------------------------------------
+// programme.v_public_schedule — la programmation publique
+// ---------------------------------------------------------------------------
+
+/**
+ * État temporel calculé EN BASE, à ne pas recalculer dans un composant : deux
+ * implémentations divergeraient sur les cas limites (session en cours, annulée,
+ * reportée).
+ */
+export type TemporalState = 'cancelled' | 'postponed' | 'upcoming' | 'ongoing' | 'past'
+
+/**
+ * Pastille de journée spéciale agrégée par la vue. Seuls les fils publiés
+ * apparaissent.
+ */
+export interface ScheduleTrackBadge {
+  slug: Slug
+  title: I18nText
+  color: ColorHex | null
+  kind: TrackKind
+}
+
+/**
+ * Ligne de `programme.v_public_schedule` — une ligne = un bloc du calendrier.
+ * La vue ne retient que les sessions dont `published_at` est renseigné.
+ */
+export interface PublicScheduleRow {
+  id: SessionId
+  event_id: EventId
+  event_day_id: EventDayId | null
+  slug: Slug
+  title: I18nText
+  summary: I18nText | null
+  starts_at: IsoDateTime
+  ends_at: IsoDateTime
+  /** Fuseau de la session : toute heure affichée le mentionne. */
+  timezone: TimeZoneName
+  format: ParticipationMode
+  status: SessionStatus
+  room_id: RoomId | null
+  /** `event.rooms.name`, déjà joint. */
+  room_name: I18nText | null
+  organization_id: OrganizationId | null
+  /** `org.organizations.legal_name`, déjà joint. */
+  organization_name: string | null
+  organization_acronym: string | null
+  is_streamed: boolean
+  broadcast_channel_id: BroadcastChannelId | null
+  capacity: number | null
+  /** Journées spéciales et fils thématiques, agrégés — pas de requête en plus. */
+  tracks: ScheduleTrackBadge[]
+  temporal_state: TemporalState
+  /** Inscrits et présents ; exclut les annulations. */
+  registered_count: number
+  /** Codes de la taxonomie `activity_theme`, via `reference.terms_of()`. */
+  theme_codes: TaxonomyTermCode[]
+}
+
+// ---------------------------------------------------------------------------
+// programme.v_proposal_dashboard — la liste des propositions du back-office
+// ---------------------------------------------------------------------------
+
+/**
+ * Ligne de `programme.v_proposal_dashboard` — avancement des revues, classement,
+ * alertes. La vue exclut les dossiers supprimés (`deleted_at`).
+ *
+ * RAPPEL : cette liste se filtre TOUJOURS par le périmètre d'administration de
+ * la personne connectée (`identity.administered_events()`), y compris quand
+ * l'utilisateur forge une URL.
+ */
+export interface ProposalDashboardRow {
+  id: ProposalId
+  reference_code: string
+  event_id: EventId
+  call_id: CallId | null
+  organization_id: OrganizationId
+  /** `org.organizations.legal_name`, déjà joint. */
+  organization_name: string
+  /** Titre DÉJÀ RÉSOLU par `platform.t()` — chaîne, pas un `I18nText`. La vue
+   *  applique le repli français ; ne pas lui appliquer `resolveI18nText()`. */
+  title: string | null
+  status: ProposalStatus
+  submitted_at: IsoDateTime | null
+  weighted_score: Numeric | null
+  average_score: Numeric | null
+  is_knocked_out: boolean
+  review_count: number
+  /** `event.calls_for_proposals.required_reviews` ; nul hors appel. */
+  required_reviews: number | null
+  /** `required_reviews - review_count`, plancher à zéro ; nul hors appel. */
+  reviews_missing: number | null
+  /** Révisionnistes affectés, déports exclus. */
+  assigned_reviewers: number
+  open_change_requests: number
+  speaker_count: number
+  /** Rang au sein de l'édition, par note pondérée décroissante. */
+  event_rank: number
+}

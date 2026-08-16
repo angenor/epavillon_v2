@@ -1,0 +1,96 @@
+{
+  "site": {
+    "name": "ePavillon",
+    "owner": "Institut de la Francophonie pour le développement durable",
+    "ownerShort": "IFDD",
+    "parent": "Organisation internationale de la Francophonie",
+    "parentShort": "OIF",
+    "tagline": "Le pavillon numérique de la Francophonie pour le développement durable"
+  },
+  "main": {
+    "home": "Accueil",
+    "events": "Événements",
+    "programme": "Programme",
+    "call": "Appel à propositions",
+    "organizations": "Organisations",
+    "about": "À propos"
+  },
+  "account": {
+    "login": "Se connecter",
+    "logout": "Se déconnecter",
+    "myAccount": "Mon compte",
+    "myOrganization": "Mon organisation",
+    "myProposals": "Mes propositions",
+    "register": "Créer un compte",
+    "menuLabel": "Menu du compte"
+  },
+  "admin": {
+    "title": "Back-office",
+    "dashboard": "Tableau de bord",
+    "proposals": "Propositions",
+    "reviews": "Évaluations",
+    "schedule": "Programmation",
+    "events": "Événements",
+    "organizations": "Organisations",
+    "users": "Utilisateurs et rôles",
+    "incidents": "Messages d'incident",
+    "settings": "Paramètres",
+    "sections": {
+      "programme": "Programmation",
+      "referential": "Référentiels",
+      "operations": "Exploitation"
+    },
+    "sidebar": {
+      "collapse": "Réduire la navigation",
+      "expand": "Déployer la navigation",
+      "label": "Navigation du back-office"
+    },
+    "eventScope": {
+      "label": "Événement",
+      "placeholder": "Choisir un événement",
+      "allEvents": "Tous les événements",
+      "empty": "Aucun événement n'est ouvert à votre compte.",
+      "restricted": "Votre compte n'administre qu'un seul événement.",
+      "hint": "Les listes de cette section ne montrent que l'événement sélectionné."
+    },
+    "backToSite": "Retour au site public"
+  },
+  "breadcrumb": {
+    "label": "Fil d'Ariane",
+    "home": "Accueil",
+    "current": "Page en cours"
+  },
+  "language": {
+    "label": "Langue",
+    "select": "Choisir la langue",
+    "current": "Langue actuelle : {language}"
+  },
+  "theme": {
+    "label": "Thème",
+    "light": "Clair",
+    "dark": "Sombre",
+    "system": "Système",
+    "toggle": "Changer de thème",
+    "current": "Thème actuel : {theme}"
+  },
+  "footer": {
+    "about": "À propos de l'ePavillon",
+    "accessibility": "Accessibilité",
+    "contact": "Nous écrire",
+    "copyright": "© {year} Institut de la Francophonie pour le développement durable",
+    "help": "Aide",
+    "legal": "Mentions légales",
+    "privacy": "Politique de confidentialité",
+    "sections": {
+      "platform": "La plateforme",
+      "resources": "Ressources",
+      "institution": "L'institution"
+    },
+    "terms": "Conditions d'utilisation"
+  },
+  "maintenance": {
+    "badge": "En cours de maintenance",
+    "title": "Cet espace est en cours de maintenance",
+    "description": "Cette partie de la plateforme n'est pas encore ouverte. Elle le sera dans une prochaine version."
+  }
+}

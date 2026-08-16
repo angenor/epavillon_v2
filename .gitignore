@@ -22,3 +22,7 @@ dumps/
 .vscode/
 coverage/
 ops/data/
+
+# Agrégation des traductions, régénérée à chaque démarrage par
+# frontend/modules/i18n-messages.ts — voir son en-tête.
+frontend/i18n/locales/.generated/

@@ -1,0 +1,39 @@
+{
+  "required": "Ce champ est obligatoire.",
+  "requiredNamed": "« {field} » est obligatoire.",
+  "email": "Saisissez une adresse électronique valide.",
+  "url": "Saisissez une adresse web complète, commençant par http:// ou https://.",
+  "phone": "Saisissez un numéro de téléphone valide, avec l'indicatif du pays.",
+  "minLength": "Ce champ doit contenir au moins {min} caractère. | Ce champ doit contenir au moins {min} caractère. | Ce champ doit contenir au moins {min} caractères.",
+  "maxLength": "Ce champ ne peut pas dépasser {max} caractère. | Ce champ ne peut pas dépasser {max} caractère. | Ce champ ne peut pas dépasser {max} caractères.",
+  "between": "La valeur doit être comprise entre {min} et {max}.",
+  "min": "La valeur minimale est {min}.",
+  "max": "La valeur maximale est {max}.",
+  "integer": "Saisissez un nombre entier.",
+  "number": "Saisissez un nombre.",
+  "pattern": "Le format attendu n'est pas respecté.",
+  "date": "Saisissez une date valide.",
+  "dateAfter": "La date doit être postérieure au {date}.",
+  "dateBefore": "La date doit être antérieure au {date}.",
+  "endAfterStart": "La fin doit être postérieure au début.",
+  "passwordTooWeak": "Le mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule et un chiffre.",
+  "passwordMismatch": "Les deux mots de passe ne correspondent pas.",
+  "fileTooLarge": "Ce fichier dépasse la taille maximale de {size}.",
+  "fileType": "Ce format de fichier n'est pas accepté. Formats acceptés : {types}.",
+  "selectAtLeastOne": "Sélectionnez au moins un élément.",
+  "selectAtMost": "Vous ne pouvez pas sélectionner plus de {max} élément. | Vous ne pouvez pas sélectionner plus de {max} élément. | Vous ne pouvez pas sélectionner plus de {max} éléments.",
+  "frenchRequired": "Le français est obligatoire : c'est la langue de référence de la plateforme.",
+  "alreadyExists": "Cette valeur existe déjà.",
+  "unchanged": "Aucune modification à enregistrer.",
+  "summary": {
+    "title": "Le formulaire comporte une erreur. | Le formulaire comporte une erreur. | Le formulaire comporte {count} erreurs.",
+    "description": "Corrigez les champs signalés avant de continuer.",
+    "goToField": "Aller au champ"
+  },
+  "server": {
+    "conflict": "Ces données ont été modifiées entre-temps. Rechargez la page avant d'enregistrer.",
+    "generic": "L'enregistrement a échoué. Réessayez dans un instant.",
+    "network": "Le serveur est injoignable. Vérifiez votre connexion.",
+    "unauthorized": "Votre session a expiré. Reconnectez-vous pour continuer."
+  }
+}

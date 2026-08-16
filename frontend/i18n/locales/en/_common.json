@@ -1,0 +1,108 @@
+{
+  "actions": {
+    "add": "Add",
+    "apply": "Apply",
+    "back": "Back",
+    "cancel": "Cancel",
+    "close": "Close",
+    "confirm": "Confirm",
+    "copy": "Copy",
+    "delete": "Delete",
+    "download": "Download",
+    "duplicate": "Duplicate",
+    "edit": "Edit",
+    "export": "Export",
+    "filter": "Filter",
+    "finish": "Finish",
+    "next": "Next",
+    "previous": "Previous",
+    "print": "Print",
+    "refresh": "Refresh",
+    "remove": "Remove",
+    "reset": "Reset",
+    "retry": "Try again",
+    "save": "Save",
+    "saveDraft": "Save draft",
+    "search": "Search",
+    "seeAll": "See all",
+    "seeMore": "See more",
+    "select": "Select",
+    "submit": "Submit",
+    "upload": "Upload"
+  },
+  "states": {
+    "loading": {
+      "label": "Loading"
+    },
+    "empty": {
+      "title": "No results",
+      "description": "There is nothing to show yet."
+    },
+    "error": {
+      "title": "Something went wrong",
+      "description": "The content could not be loaded. Please try again shortly.",
+      "action": "Try again"
+    },
+    "forbidden": {
+      "title": "Access denied",
+      "description": "Your account does not have the rights required to view this page.",
+      "action": "Back to home"
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "This address does not exist, or no longer exists.",
+      "action": "Back to home"
+    },
+    "offline": {
+      "title": "Connection lost",
+      "description": "Check your connection, then try again."
+    }
+  },
+  "labels": {
+    "all": "All",
+    "none": "None",
+    "no": "No",
+    "optional": "optional",
+    "required": "required",
+    "unknown": "Not provided",
+    "yes": "Yes"
+  },
+  "pagination": {
+    "next": "Next page",
+    "of": "of",
+    "page": "Page {current} of {total}",
+    "perPage": "Per page",
+    "previous": "Previous page",
+    "results": "{count} result | {count} result | {count} results",
+    "showing": "Showing {from} to {to} of {total}"
+  },
+  "search": {
+    "clear": "Clear search",
+    "noResults": "No results for “{query}”",
+    "placeholder": "Search…"
+  },
+  "datetime": {
+    "at": "at",
+    "dateRange": "{start} to {end}",
+    "day": "{date}",
+    "dayAndTime": "{date} at {time}",
+    "relativeSoon": "Soon",
+    "timeRange": "{start} — {end}",
+    "timeRangeWithZone": "{start} — {end}, {zone} time",
+    "timeWithZone": "{time}, {zone} time",
+    "zoneOf": "{zone} time",
+    "zoneOffset": "UTC{offset}"
+  },
+  "file": {
+    "maxSize": "Maximum size: {size}",
+    "selected": "{count} file selected | {count} file selected | {count} files selected",
+    "types": "Accepted formats: {types}"
+  },
+  "a11y": {
+    "closeMenu": "Close menu",
+    "externalLink": "Opens in a new tab",
+    "loading": "Loading",
+    "openMenu": "Open menu",
+    "skipToContent": "Skip to main content"
+  }
+}

@@ -1,0 +1,460 @@
+/* =============================================================================
+   ePavillon v2 — Jetons de design
+   Dérivé de docs/CHARTE_GRAPHIQUE.md, qui est la source de vérité des couleurs.
+
+   DEUX NIVEAUX, À NE JAMAIS MÉLANGER
+   ----------------------------------
+   1. MARQUE (`--ifdd-*`) — les valeurs officielles de l'IFDD et leurs nuances
+      dérivées. Déclarées une seule fois, JAMAIS redéfinies, pas même en thème
+      sombre. Un composant ne les appelle jamais directement.
+   2. RÔLE (`--color-*`, `--space-*`, `--radius-*`…) — ce que les composants
+      utilisent. Chaque rôle référence la marque par `var()` et ne redéclare
+      jamais une valeur hexadécimale. Le thème sombre ne redéfinit que des rôles.
+
+   POURQUOI DES NUANCES DÉRIVÉES
+   -----------------------------
+   Les couleurs de charte sont des couleurs d'impression, pas des couleurs
+   d'interface : le cyan #00A1E4 sur fond blanc plafonne à 2,91:1, très loin des
+   4,5:1 exigés par le WCAG AA en texte. Les échelles ci-dessous conservent la
+   teinte officielle et font varier la luminosité pour offrir, à chaque usage,
+   une nuance qui passe le contraste. La couleur de charte exacte figure toujours
+   dans son échelle, à son palier naturel (cyan 500, jaune 400, violet 700…).
+
+   MÉTHODE — les échelles sont calculées, pas estimées : conversion en OKLCH,
+   interpolation monotone de la luminosité entre les paliers, chroma relâchée
+   vers les extrémités, réduction jusqu'au gamut sRGB. Les ratios annotés sont
+   ceux du WCAG 2.1 ; ils sont donnés contre le fond clair (#FFFFFF) et contre le
+   fond sombre (#231F20, le noir de charte).
+   Lecture : « AA texte » = ≥ 4,5:1, utilisable pour du corps de texte ;
+   « AA grand texte / bordure » = ≥ 3:1, réservé aux titres ≥ 24 px, aux
+   bordures et aux icônes ; « — » = décoratif ou fond uniquement.
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   1. MARQUE — valeurs officielles, jamais redéfinies
+   ----------------------------------------------------------------------------- */
+:root {
+  /* Couleurs principales (tons directs CMJN de la charte) */
+  --ifdd-cyan: #00a1e4;
+  --ifdd-rouge: #e63132;
+  --ifdd-jaune: #ffd500;
+  --ifdd-vert: #8fbf2f;
+  --ifdd-violet: #732f85;
+  --ifdd-gris: #565554;
+
+  /* Complémentaires */
+  --ifdd-bleu-riche: #1d1a5b;
+  --ifdd-gris-pale: #d9d8d6;
+
+  /* Accents de charte — valeurs officielles, décoratives : aucune ne passe AA
+     en texte sur fond blanc (le violet accent atteint 4,26:1, ce qui reste en
+     deçà du seuil). Réserver aux aplats, illustrations et graphiques. */
+  --ifdd-cyan-accent: #8cd5f2; /* sur blanc  1.63:1 | sur #231F20 10.02:1 */
+  --ifdd-rouge-accent: #f28385; /* sur blanc  2.51:1 | sur #231F20  6.49:1 */
+  --ifdd-jaune-accent: #fff08c; /* sur blanc  1.16:1 | sur #231F20 14.05:1 */
+  --ifdd-vert-accent: #add476; /* sur blanc  1.69:1 | sur #231F20  9.67:1 */
+  --ifdd-violet-accent: #906cad; /* sur blanc  4.26:1 | sur #231F20  3.83:1 */
+
+  /* Neutres */
+  --ifdd-blanc: #ffffff;
+  --ifdd-noir: #231f20;
+
+  /* Polices de la charte. Helvetica pour le texte courant, NeueMaverick pour
+     les titres. Ni l'une ni l'autre n'est fournie en fichier dans ce dépôt :
+     les replis système sont donc la réalité tant que les fontes officielles
+     n'ont pas été obtenues auprès du service communication. */
+  --ifdd-police-1: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --ifdd-police-2: "NeueMaverick", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* -----------------------------------------------------------------------------
+   2. ÉCHELLES DÉRIVÉES — teinte de charte conservée, luminosité variable
+   ----------------------------------------------------------------------------- */
+:root {
+  /* cyan IFDD — #00A1E4 au palier 500 */
+  --ifdd-cyan-50: #eef8ff; /* sur blanc  1.08:1 —                        | sur #231F20 15.14:1 AA texte */
+  --ifdd-cyan-100: #c6e8ff; /* sur blanc  1.28:1 —                        | sur #231F20 12.72:1 AA texte */
+  --ifdd-cyan-200: #9cd8fe; /* sur blanc  1.54:1 —                        | sur #231F20 10.61:1 AA texte */
+  --ifdd-cyan-300: #71c6fa; /* sur blanc  1.88:1 —                        | sur #231F20  8.66:1 AA texte */
+  --ifdd-cyan-400: #4ab4ef; /* sur blanc  2.32:1 —                        | sur #231F20  7.04:1 AA texte */
+  --ifdd-cyan-500: #00a1e4; /* sur blanc  2.91:1 —                        | sur #231F20  5.60:1 AA texte   ← couleur de charte */
+  --ifdd-cyan-600: #0683ba; /* sur blanc  4.23:1 AA grand texte / bordure | sur #231F20  3.85:1 AA grand texte / bordure */
+  --ifdd-cyan-700: #0c6792; /* sur blanc  6.23:1 AA texte                 | sur #231F20  2.62:1 — */
+  --ifdd-cyan-800: #054b6d; /* sur blanc  9.40:1 AA texte                 | sur #231F20  1.73:1 — */
+  --ifdd-cyan-900: #00324a; /* sur blanc 13.50:1 AA texte                 | sur #231F20  1.21:1 — */
+
+  /* rouge IFDD — #E63132 au palier 500 */
+  --ifdd-rouge-50: #fff4f2; /* sur blanc  1.08:1 —                        | sur #231F20 15.12:1 AA texte */
+  --ifdd-rouge-100: #fed2cd; /* sur blanc  1.37:1 —                        | sur #231F20 11.89:1 AA texte */
+  --ifdd-rouge-200: #feafa6; /* sur blanc  1.77:1 —                        | sur #231F20  9.23:1 AA texte */
+  --ifdd-rouge-300: #fd887d; /* sur blanc  2.33:1 —                        | sur #231F20  6.98:1 AA texte */
+  --ifdd-rouge-400: #f65d55; /* sur blanc  3.17:1 AA grand texte / bordure | sur #231F20  5.13:1 AA texte */
+  --ifdd-rouge-500: #e63132; /* sur blanc  4.33:1 AA grand texte / bordure | sur #231F20  3.76:1 AA grand texte / bordure ← couleur de charte */
+  --ifdd-rouge-600: #c7101d; /* sur blanc  5.97:1 AA texte                 | sur #231F20  2.73:1 — */
+  --ifdd-rouge-700: #a10c16; /* sur blanc  8.14:1 AA texte                 | sur #231F20  2.00:1 — */
+  --ifdd-rouge-800: #7f030d; /* sur blanc 10.93:1 AA texte                 | sur #231F20  1.49:1 — */
+  --ifdd-rouge-900: #5b0308; /* sur blanc 14.37:1 AA texte                 | sur #231F20  1.13:1 — */
+
+  /* jaune IFDD — #FFD500 au palier 400. Le jaune est intrinsèquement clair :
+     aucune nuance en deçà de 600 ne peut porter du texte sur fond blanc. */
+  --ifdd-jaune-50: #fff7da; /* sur blanc  1.07:1 —                        | sur #231F20 15.19:1 AA texte */
+  --ifdd-jaune-100: #ffefb6; /* sur blanc  1.15:1 —                        | sur #231F20 14.18:1 AA texte */
+  --ifdd-jaune-200: #ffe78f; /* sur blanc  1.23:1 —                        | sur #231F20 13.26:1 AA texte */
+  --ifdd-jaune-300: #ffde62; /* sur blanc  1.32:1 —                        | sur #231F20 12.32:1 AA texte */
+  --ifdd-jaune-400: #ffd500; /* sur blanc  1.42:1 —                        | sur #231F20 11.46:1 AA texte   ← couleur de charte */
+  --ifdd-jaune-500: #d3b011; /* sur blanc  2.10:1 —                        | sur #231F20  7.75:1 AA texte */
+  --ifdd-jaune-600: #a98d08; /* sur blanc  3.23:1 AA grand texte / bordure | sur #231F20  5.05:1 AA texte */
+  --ifdd-jaune-700: #816b06; /* sur blanc  5.20:1 AA texte                 | sur #231F20  3.14:1 AA grand texte / bordure */
+  --ifdd-jaune-800: #5b4b03; /* sur blanc  8.56:1 AA texte                 | sur #231F20  1.90:1 — */
+  --ifdd-jaune-900: #382d01; /* sur blanc 13.60:1 AA texte                 | sur #231F20  1.20:1 — */
+
+  /* vert IFDD — #8FBF2F au palier 500 */
+  --ifdd-vert-50: #ecffd3; /* sur blanc  1.06:1 —                        | sur #231F20 15.38:1 AA texte */
+  --ifdd-vert-100: #d8f3b4; /* sur blanc  1.21:1 —                        | sur #231F20 13.51:1 AA texte */
+  --ifdd-vert-200: #c5e697; /* sur blanc  1.39:1 —                        | sur #231F20 11.75:1 AA texte */
+  --ifdd-vert-300: #b3d979; /* sur blanc  1.60:1 —                        | sur #231F20 10.18:1 AA texte */
+  --ifdd-vert-400: #a1cc58; /* sur blanc  1.86:1 —                        | sur #231F20  8.77:1 AA texte */
+  --ifdd-vert-500: #8fbf2f; /* sur blanc  2.17:1 —                        | sur #231F20  7.50:1 AA texte   ← couleur de charte */
+  --ifdd-vert-600: #709b07; /* sur blanc  3.29:1 AA grand texte / bordure | sur #231F20  4.95:1 AA texte */
+  --ifdd-vert-700: #557607; /* sur blanc  5.28:1 AA texte                 | sur #231F20  3.09:1 AA grand texte / bordure */
+  --ifdd-vert-800: #3c5404; /* sur blanc  8.53:1 AA texte                 | sur #231F20  1.91:1 — */
+  --ifdd-vert-900: #233400; /* sur blanc 13.44:1 AA texte                 | sur #231F20  1.21:1 — */
+
+  /* violet IFDD — #732F85 au palier 700 (la couleur de charte est sombre) */
+  --ifdd-violet-50: #fcf3ff; /* sur blanc  1.08:1 —                        | sur #231F20 15.06:1 AA texte */
+  --ifdd-violet-100: #f2cffc; /* sur blanc  1.39:1 —                        | sur #231F20 11.73:1 AA texte */
+  --ifdd-violet-200: #dcb4e7; /* sur blanc  1.79:1 —                        | sur #231F20  9.10:1 AA texte */
+  --ifdd-violet-300: #c699d3; /* sur blanc  2.36:1 —                        | sur #231F20  6.91:1 AA texte */
+  --ifdd-violet-400: #b17ec0; /* sur blanc  3.17:1 AA grand texte / bordure | sur #231F20  5.13:1 AA texte */
+  --ifdd-violet-500: #9c64ac; /* sur blanc  4.35:1 AA grand texte / bordure | sur #231F20  3.75:1 AA grand texte / bordure */
+  --ifdd-violet-600: #884a98; /* sur blanc  6.03:1 AA texte                 | sur #231F20  2.70:1 — */
+  --ifdd-violet-700: #732f85; /* sur blanc  8.49:1 AA texte                 | sur #231F20  1.92:1 —          ← couleur de charte */
+  --ifdd-violet-800: #5e1b6f; /* sur blanc 11.28:1 AA texte                 | sur #231F20  1.45:1 — */
+  --ifdd-violet-900: #490359; /* sur blanc 14.58:1 AA texte                 | sur #231F20  1.12:1 — */
+
+  /* bleu riche IFDD — #1D1A5B au palier 900 (couleur de fond institutionnelle) */
+  --ifdd-bleu-50: #f5f6ff; /* sur blanc  1.08:1 —                        | sur #231F20 15.14:1 AA texte */
+  --ifdd-bleu-100: #d4daff; /* sur blanc  1.38:1 —                        | sur #231F20 11.85:1 AA texte */
+  --ifdd-bleu-200: #bac1ea; /* sur blanc  1.76:1 —                        | sur #231F20  9.24:1 AA texte */
+  --ifdd-bleu-300: #a0a7d5; /* sur blanc  2.34:1 —                        | sur #231F20  6.97:1 AA texte */
+  --ifdd-bleu-400: #888fc0; /* sur blanc  3.12:1 AA grand texte / bordure | sur #231F20  5.23:1 AA texte */
+  --ifdd-bleu-500: #7077ab; /* sur blanc  4.27:1 AA grand texte / bordure | sur #231F20  3.82:1 AA grand texte / bordure */
+  --ifdd-bleu-600: #595f97; /* sur blanc  5.99:1 AA texte                 | sur #231F20  2.72:1 — */
+  --ifdd-bleu-700: #434883; /* sur blanc  8.42:1 AA texte                 | sur #231F20  1.94:1 — */
+  --ifdd-bleu-800: #2f316f; /* sur blanc 11.73:1 AA texte                 | sur #231F20  1.39:1 — */
+  --ifdd-bleu-900: #1d1a5b; /* sur blanc 15.54:1 AA texte                 | sur #231F20  1.05:1 —          ← couleur de charte */
+
+  /* gris — deux ancres de charte : #D9D8D6 au palier 200, #565554 au palier 700.
+     C'est cette échelle qui porte la structure : fonds, bordures, séparateurs,
+     texte secondaire. Elle est très légèrement chaude, comme les gris de charte. */
+  --ifdd-gris-0: #ffffff; /* sur blanc  1.00:1 —                        | sur #231F20 16.30:1 AA texte */
+  --ifdd-gris-50: #fbfaf8; /* sur blanc  1.04:1 —                        | sur #231F20 15.63:1 AA texte */
+  --ifdd-gris-100: #f0eeed; /* sur blanc  1.16:1 —                        | sur #231F20 14.09:1 AA texte */
+  --ifdd-gris-200: #d9d8d6; /* sur blanc  1.42:1 —                        | sur #231F20 11.44:1 AA texte   ← couleur de charte (gris pâle) */
+  --ifdd-gris-300: #bdbcbb; /* sur blanc  1.90:1 —                        | sur #231F20  8.60:1 AA texte */
+  --ifdd-gris-400: #a2a1a0; /* sur blanc  2.58:1 —                        | sur #231F20  6.32:1 AA texte */
+  --ifdd-gris-500: #888785; /* sur blanc  3.59:1 AA grand texte / bordure | sur #231F20  4.54:1 AA texte */
+  --ifdd-gris-600: #6e6d6c; /* sur blanc  5.16:1 AA texte                 | sur #231F20  3.16:1 AA grand texte / bordure */
+  --ifdd-gris-700: #565554; /* sur blanc  7.44:1 AA texte                 | sur #231F20  2.19:1 —          ← couleur de charte */
+  --ifdd-gris-800: #393836; /* sur blanc 11.71:1 AA texte                 | sur #231F20  1.39:1 — */
+  --ifdd-gris-900: #1e1d1c; /* sur blanc 16.83:1 AA texte                 | sur #231F20  1.03:1 — */
+  --ifdd-gris-950: #11100f; /* sur blanc 19.01:1 AA texte                 | sur #231F20  1.17:1 — */
+}
+
+/* -----------------------------------------------------------------------------
+   3. RÔLES — thème clair. Les SEULS jetons qu'un composant a le droit d'appeler.
+
+   Déclarés dans `@theme` afin que TailwindCSS v4 en dérive ses utilitaires.
+   `static` force l'émission de toutes les variables sur `:root`, y compris
+   celles qu'aucune classe n'utilise encore : les surcharges de thème ci-dessous
+   en dépendent.
+
+   NOMS DES UTILITAIRES — Tailwind préfixe la propriété et conserve le nom du
+   jeton, préfixe `--color-` retiré :
+     --color-surface        → bg-surface        border-surface
+     --color-surface-raised → bg-surface-raised
+     --color-text           → text-text
+     --color-text-muted     → text-text-muted
+     --color-border         → border-border
+     --color-accent         → text-accent  bg-accent  border-accent
+   Les répétitions (`text-text`, `border-border`) sont le prix d'un nom de rôle
+   explicite ; elles lèvent en contrepartie toute ambiguïté à la lecture.
+   ----------------------------------------------------------------------------- */
+@theme static {
+  /* -- Surfaces -- */
+  --color-surface: var(--ifdd-gris-50); /* fond de page */
+  --color-surface-raised: var(--ifdd-gris-0); /* cartes, panneaux, en-têtes */
+  --color-surface-sunken: var(--ifdd-gris-100); /* zones en retrait, en-têtes de tableau */
+  --color-surface-overlay: var(--ifdd-gris-0); /* modales, menus déroulants */
+  --color-surface-hover: var(--ifdd-gris-100);
+  --color-surface-selected: var(--ifdd-cyan-50);
+
+  /* -- Texte -- */
+  --color-text: var(--ifdd-gris-900); /* 16.83:1 — AA et AAA */
+  --color-text-muted: var(--ifdd-gris-700); /*  7.44:1 — AA */
+  --color-text-subtle: var(--ifdd-gris-600); /*  5.16:1 — AA, seuil bas : métadonnées uniquement */
+  --color-text-inverse: var(--ifdd-gris-0); /* sur aplat accentué */
+  --color-text-link: var(--ifdd-cyan-700); /*  6.23:1 — AA */
+  --color-text-link-hover: var(--ifdd-cyan-800);
+
+  /* -- Bordures et séparateurs -- */
+  --color-border: var(--ifdd-gris-300); /* trait de séparation ordinaire */
+  --color-border-subtle: var(--ifdd-gris-200); /* trait à peine visible, listes denses */
+  --color-border-strong: var(--ifdd-gris-500); /*  3.59:1 — contour de champ de saisie */
+  --color-focus: var(--ifdd-cyan-600); /*  4.23:1 — anneau de focus visible */
+
+  /* -- Accent (cyan de marque) -- */
+  --color-accent: var(--ifdd-cyan-700); /*  6.23:1 — texte et icônes accentués */
+  --color-accent-hover: var(--ifdd-cyan-800);
+  --color-accent-solid: var(--ifdd-cyan-600); /*  4.23:1 face au blanc — fond de bouton primaire */
+  --color-accent-solid-hover: var(--ifdd-cyan-700);
+  --color-accent-contrast: var(--ifdd-gris-0); /* texte posé sur --color-accent-solid */
+  --color-accent-surface: var(--ifdd-cyan-50); /* fond teinté, bandeau, puce */
+  --color-accent-border: var(--ifdd-cyan-200);
+
+  /* -- États. La couleur distingue, elle ne décore pas. -- */
+  --color-success: var(--ifdd-vert-700); /*  5.28:1 — AA */
+  --color-success-solid: var(--ifdd-vert-700); /* le vert de charte est trop clair pour porter du blanc */
+  --color-success-contrast: var(--ifdd-gris-0);
+  --color-success-surface: var(--ifdd-vert-50);
+  --color-success-border: var(--ifdd-vert-300);
+
+  --color-warning: var(--ifdd-jaune-700); /*  5.20:1 — AA */
+  --color-warning-solid: var(--ifdd-jaune-400); /* le jaune de charte, qui ne porte que du texte sombre */
+  --color-warning-contrast: var(--ifdd-gris-900); /* 11.84:1 sur le jaune de charte */
+  --color-warning-surface: var(--ifdd-jaune-50);
+  --color-warning-border: var(--ifdd-jaune-300);
+
+  --color-danger: var(--ifdd-rouge-600); /*  5.97:1 — AA */
+  --color-danger-solid: var(--ifdd-rouge-600);
+  --color-danger-contrast: var(--ifdd-gris-0);
+  --color-danger-surface: var(--ifdd-rouge-50);
+  --color-danger-border: var(--ifdd-rouge-300);
+
+  --color-info: var(--ifdd-cyan-700); /*  6.23:1 — AA */
+  --color-info-solid: var(--ifdd-cyan-600);
+  --color-info-contrast: var(--ifdd-gris-0);
+  --color-info-surface: var(--ifdd-cyan-50);
+  --color-info-border: var(--ifdd-cyan-200);
+
+  /* -- Polices -- */
+  --font-sans: var(--ifdd-police-1);
+  --font-display: var(--ifdd-police-2);
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", monospace;
+
+  /* -- Rayons. Coins légèrement arrondis, jamais plus de 8 px sur les blocs. -- */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px; /* réservé aux surfaces flottantes (modales) */
+  --radius-full: 9999px; /* puces et pastilles d'état */
+
+  /* -- Ombres. Très discrètes : la hiérarchie passe par le trait et le blanc. -- */
+  --shadow-xs: 0 1px 2px rgb(35 31 32 / 0.05);
+  --shadow-sm: 0 1px 3px rgb(35 31 32 / 0.07), 0 1px 2px rgb(35 31 32 / 0.04);
+  --shadow-md: 0 4px 10px rgb(35 31 32 / 0.07), 0 1px 3px rgb(35 31 32 / 0.05);
+  --shadow-lg: 0 12px 28px rgb(35 31 32 / 0.10), 0 2px 6px rgb(35 31 32 / 0.05);
+
+  /* -- Base d'espacement : 4 px. `p-4` vaut donc 16 px. -- */
+  --spacing: 4px;
+
+  /* -- Interlignes -- */
+  --leading-tight: 1.2;
+  --leading-snug: 1.35;
+  --leading-normal: 1.55;
+  --leading-relaxed: 1.7;
+}
+
+/* -----------------------------------------------------------------------------
+   4. JETONS NON COLORÉS nommés par la convention du projet.
+   `--space-*` et `--font-size-*` sont les noms attendus en CSS écrit à la main ;
+   le pont vers les utilitaires Tailwind est fait juste en dessous.
+   ----------------------------------------------------------------------------- */
+:root {
+  /* Espacements, base 4 px */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* Sept niveaux typographiques, pas un de plus. Au-delà, la hiérarchie se
+     lit moins bien, pas mieux. */
+  --font-size-xs: 0.75rem; /* 12 px — mentions légales, unités de tableau */
+  --font-size-sm: 0.875rem; /* 14 px — métadonnées, libellés de champ */
+  --font-size-base: 1rem; /* 16 px — corps de texte */
+  --font-size-lg: 1.125rem; /* 18 px — chapô, texte de mise en avant */
+  --font-size-xl: 1.375rem; /* 22 px — titre de bloc */
+  --font-size-2xl: 1.75rem; /* 28 px — titre de section */
+  --font-size-3xl: 2.25rem; /* 36 px — titre de page */
+}
+
+/* Pont vers les utilitaires Tailwind : `text-base`, `text-3xl`… s'appuient sur
+   les valeurs ci-dessus. `inline` évite de réémettre une seconde définition. */
+@theme inline {
+  --text-xs: var(--font-size-xs);
+  --text-sm: var(--font-size-sm);
+  --text-base: var(--font-size-base);
+  --text-lg: var(--font-size-lg);
+  --text-xl: var(--font-size-xl);
+  --text-2xl: var(--font-size-2xl);
+  --text-3xl: var(--font-size-3xl);
+}
+
+/* -----------------------------------------------------------------------------
+   5. THÈME SOMBRE — seuls des rôles sont redéfinis, jamais une couleur de marque.
+
+   Le thème sombre n'est pas une inversion : le vert et le jaune de charte
+   deviennent agressifs sur fond noir, on descend donc d'un ou deux paliers.
+   Le fond est le noir de charte #231F20, et non un noir pur.
+
+   Deux blocs identiques, et c'est voulu :
+   · la préférence système, neutralisée si l'utilisateur a explicitement choisi
+     le thème clair (`:root:not([data-theme="light"])`) ;
+   · le choix explicite du thème sombre (`:root[data-theme="dark"]`), qui doit
+     l'emporter même sur une préférence système claire.
+   ----------------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-surface: var(--ifdd-noir);
+    --color-surface-raised: var(--ifdd-gris-800);
+    --color-surface-sunken: var(--ifdd-gris-950);
+    --color-surface-overlay: var(--ifdd-gris-800);
+    --color-surface-hover: var(--ifdd-gris-800);
+    --color-surface-selected: var(--ifdd-cyan-900);
+
+    --color-text: var(--ifdd-gris-100); /* 14.09:1 */
+    --color-text-muted: var(--ifdd-gris-300); /*  8.60:1 */
+    --color-text-subtle: var(--ifdd-gris-400); /*  6.32:1 */
+    --color-text-inverse: var(--ifdd-gris-900);
+    --color-text-link: var(--ifdd-cyan-300); /*  8.66:1 */
+    --color-text-link-hover: var(--ifdd-cyan-200);
+
+    --color-border: var(--ifdd-gris-700);
+    --color-border-subtle: var(--ifdd-gris-800);
+    --color-border-strong: var(--ifdd-gris-500); /*  4.54:1 */
+    --color-focus: var(--ifdd-cyan-400); /*  7.04:1 */
+
+    --color-accent: var(--ifdd-cyan-300); /*  8.66:1 */
+    --color-accent-hover: var(--ifdd-cyan-200);
+    --color-accent-solid: var(--ifdd-cyan-500); /* le cyan de charte, qui porte du texte sombre à 5.60:1 */
+    --color-accent-solid-hover: var(--ifdd-cyan-400);
+    --color-accent-contrast: var(--ifdd-gris-950);
+    --color-accent-surface: var(--ifdd-cyan-900);
+    --color-accent-border: var(--ifdd-cyan-700);
+
+    --color-success: var(--ifdd-vert-400); /*  8.77:1 */
+    --color-success-solid: var(--ifdd-vert-500); /*  7.50:1 face au texte sombre */
+    --color-success-contrast: var(--ifdd-gris-950);
+    --color-success-surface: var(--ifdd-vert-900);
+    --color-success-border: var(--ifdd-vert-700);
+
+    --color-warning: var(--ifdd-jaune-300); /* 12.32:1 — le jaune de charte éblouit, on descend */
+    --color-warning-solid: var(--ifdd-jaune-400);
+    --color-warning-contrast: var(--ifdd-gris-950);
+    --color-warning-surface: var(--ifdd-jaune-900);
+    --color-warning-border: var(--ifdd-jaune-700);
+
+    --color-danger: var(--ifdd-rouge-300); /*  6.98:1 */
+    --color-danger-solid: var(--ifdd-rouge-400); /*  5.13:1 face au texte sombre */
+    --color-danger-contrast: var(--ifdd-gris-950);
+    --color-danger-surface: var(--ifdd-rouge-900);
+    --color-danger-border: var(--ifdd-rouge-700);
+
+    --color-info: var(--ifdd-cyan-300);
+    --color-info-solid: var(--ifdd-cyan-500);
+    --color-info-contrast: var(--ifdd-gris-950);
+    --color-info-surface: var(--ifdd-cyan-900);
+    --color-info-border: var(--ifdd-cyan-700);
+
+    /* Sur fond sombre, une ombre portée ne se voit plus : on l'assombrit
+       franchement et on s'appuie davantage sur les bordures. */
+    --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.40);
+    --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.50), 0 1px 2px rgb(0 0 0 / 0.30);
+    --shadow-md: 0 4px 10px rgb(0 0 0 / 0.50), 0 1px 3px rgb(0 0 0 / 0.35);
+    --shadow-lg: 0 12px 28px rgb(0 0 0 / 0.60), 0 2px 6px rgb(0 0 0 / 0.40);
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-surface: var(--ifdd-noir);
+  --color-surface-raised: var(--ifdd-gris-800);
+  --color-surface-sunken: var(--ifdd-gris-950);
+  --color-surface-overlay: var(--ifdd-gris-800);
+  --color-surface-hover: var(--ifdd-gris-800);
+  --color-surface-selected: var(--ifdd-cyan-900);
+
+  --color-text: var(--ifdd-gris-100);
+  --color-text-muted: var(--ifdd-gris-300);
+  --color-text-subtle: var(--ifdd-gris-400);
+  --color-text-inverse: var(--ifdd-gris-900);
+  --color-text-link: var(--ifdd-cyan-300);
+  --color-text-link-hover: var(--ifdd-cyan-200);
+
+  --color-border: var(--ifdd-gris-700);
+  --color-border-subtle: var(--ifdd-gris-800);
+  --color-border-strong: var(--ifdd-gris-500);
+  --color-focus: var(--ifdd-cyan-400);
+
+  --color-accent: var(--ifdd-cyan-300);
+  --color-accent-hover: var(--ifdd-cyan-200);
+  --color-accent-solid: var(--ifdd-cyan-500);
+  --color-accent-solid-hover: var(--ifdd-cyan-400);
+  --color-accent-contrast: var(--ifdd-gris-950);
+  --color-accent-surface: var(--ifdd-cyan-900);
+  --color-accent-border: var(--ifdd-cyan-700);
+
+  --color-success: var(--ifdd-vert-400);
+  --color-success-solid: var(--ifdd-vert-500);
+  --color-success-contrast: var(--ifdd-gris-950);
+  --color-success-surface: var(--ifdd-vert-900);
+  --color-success-border: var(--ifdd-vert-700);
+
+  --color-warning: var(--ifdd-jaune-300);
+  --color-warning-solid: var(--ifdd-jaune-400);
+  --color-warning-contrast: var(--ifdd-gris-950);
+  --color-warning-surface: var(--ifdd-jaune-900);
+  --color-warning-border: var(--ifdd-jaune-700);
+
+  --color-danger: var(--ifdd-rouge-300);
+  --color-danger-solid: var(--ifdd-rouge-400);
+  --color-danger-contrast: var(--ifdd-gris-950);
+  --color-danger-surface: var(--ifdd-rouge-900);
+  --color-danger-border: var(--ifdd-rouge-700);
+
+  --color-info: var(--ifdd-cyan-300);
+  --color-info-solid: var(--ifdd-cyan-500);
+  --color-info-contrast: var(--ifdd-gris-950);
+  --color-info-surface: var(--ifdd-cyan-900);
+  --color-info-border: var(--ifdd-cyan-700);
+
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.5), 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 10px rgb(0 0 0 / 0.5), 0 1px 3px rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 12px 28px rgb(0 0 0 / 0.6), 0 2px 6px rgb(0 0 0 / 0.4);
+}
+
+/* Indique au navigateur quelle palette est active : ascenseurs, champs de
+   formulaire natifs et barre de défilement suivent le thème. */
+:root {
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+}

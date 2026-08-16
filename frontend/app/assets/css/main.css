@@ -1,0 +1,128 @@
+/* =============================================================================
+   ePavillon v2 — feuille de style d'entrée.
+
+   Ce fichier ne contient AUCUNE valeur : il assemble TailwindCSS et les jetons,
+   puis pose les quelques règles de base qui valent pour toute la plateforme.
+   Toute couleur, tout espacement, toute taille vient de design-tokens.css.
+   ============================================================================= */
+
+@import "tailwindcss";
+@import "./design-tokens.css";
+
+/* Sources analysées pour la génération des utilitaires : tout le code
+   applicatif vit sous `app/`, deux niveaux au-dessus de ce fichier. */
+@source "../../";
+
+/* La variante `dark:` de Tailwind suit par défaut la seule préférence système.
+   On la redéfinit pour qu'elle applique exactement les deux gardes du thème :
+   la préférence système, sauf choix explicite du thème clair, et le choix
+   explicite du thème sombre.
+
+   À n'employer que là où les jetons ne suffisent pas — le remplacement d'une
+   image, typiquement le logo. Une couleur se règle par un rôle, jamais par
+   `dark:`. */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+  &:where(:root[data-theme="dark"] *) {
+    @slot;
+  }
+}
+
+@layer base {
+  html {
+    /* Le corps de page ne défile jamais horizontalement (règle de projet,
+       responsive à partir de 375 px). */
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-base);
+    line-height: var(--leading-normal);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Les titres portent le sens : hiérarchie typographique franche, police de
+     titrage de la charte. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    line-height: var(--leading-tight);
+    color: var(--color-text);
+    text-wrap: balance;
+  }
+
+  a {
+    color: var(--color-text-link);
+  }
+  a:hover {
+    color: var(--color-text-link-hover);
+  }
+
+  /* Un anneau de focus visible et unique pour tout le monde : c'est la
+     condition d'une navigation au clavier utilisable. */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Les boutons ont besoin de `cursor: pointer` explicite depuis Tailwind v4. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  hr {
+    border-color: var(--color-border-subtle);
+  }
+
+  ::selection {
+    background-color: var(--color-accent-surface);
+    color: var(--color-accent);
+  }
+}
+
+@layer components {
+  /* Lien d'évitement : premier élément focalisable de chaque page, invisible
+     tant qu'il n'a pas le focus. */
+  .skip-link {
+    position: absolute;
+    left: var(--space-4);
+    top: calc(-1 * var(--space-16));
+    z-index: 100;
+    padding: var(--space-2) var(--space-4);
+    background-color: var(--color-surface-raised);
+    color: var(--color-text);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    transition: top 150ms ease;
+  }
+  .skip-link:focus {
+    top: var(--space-4);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

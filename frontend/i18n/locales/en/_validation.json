@@ -1,0 +1,39 @@
+{
+  "required": "This field is required.",
+  "requiredNamed": "“{field}” is required.",
+  "email": "Enter a valid email address.",
+  "url": "Enter a full web address, starting with http:// or https://.",
+  "phone": "Enter a valid phone number, including the country code.",
+  "minLength": "This field must contain at least {min} character. | This field must contain at least {min} character. | This field must contain at least {min} characters.",
+  "maxLength": "This field cannot exceed {max} character. | This field cannot exceed {max} character. | This field cannot exceed {max} characters.",
+  "between": "The value must be between {min} and {max}.",
+  "min": "The minimum value is {min}.",
+  "max": "The maximum value is {max}.",
+  "integer": "Enter a whole number.",
+  "number": "Enter a number.",
+  "pattern": "This does not match the expected format.",
+  "date": "Enter a valid date.",
+  "dateAfter": "The date must be after {date}.",
+  "dateBefore": "The date must be before {date}.",
+  "endAfterStart": "The end must come after the start.",
+  "passwordTooWeak": "The password must be at least 12 characters long and include an uppercase letter, a lowercase letter and a digit.",
+  "passwordMismatch": "The two passwords do not match.",
+  "fileTooLarge": "This file exceeds the maximum size of {size}.",
+  "fileType": "This file format is not accepted. Accepted formats: {types}.",
+  "selectAtLeastOne": "Select at least one item.",
+  "selectAtMost": "You cannot select more than {max} item. | You cannot select more than {max} item. | You cannot select more than {max} items.",
+  "frenchRequired": "French is required: it is the platform's reference language.",
+  "alreadyExists": "This value already exists.",
+  "unchanged": "There is nothing to save.",
+  "summary": {
+    "title": "The form contains one error. | The form contains one error. | The form contains {count} errors.",
+    "description": "Fix the highlighted fields before continuing.",
+    "goToField": "Go to field"
+  },
+  "server": {
+    "conflict": "This data was changed in the meantime. Reload the page before saving.",
+    "generic": "Saving failed. Please try again shortly.",
+    "network": "The server is unreachable. Check your connection.",
+    "unauthorized": "Your session has expired. Sign in again to continue."
+  }
+}

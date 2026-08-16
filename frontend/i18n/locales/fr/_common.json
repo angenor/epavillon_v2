@@ -1,0 +1,108 @@
+{
+  "actions": {
+    "add": "Ajouter",
+    "apply": "Appliquer",
+    "back": "Retour",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "confirm": "Confirmer",
+    "copy": "Copier",
+    "delete": "Supprimer",
+    "download": "Télécharger",
+    "duplicate": "Dupliquer",
+    "edit": "Modifier",
+    "export": "Exporter",
+    "filter": "Filtrer",
+    "finish": "Terminer",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "print": "Imprimer",
+    "refresh": "Actualiser",
+    "remove": "Retirer",
+    "reset": "Réinitialiser",
+    "retry": "Réessayer",
+    "save": "Enregistrer",
+    "saveDraft": "Enregistrer le brouillon",
+    "search": "Rechercher",
+    "seeAll": "Tout voir",
+    "seeMore": "Voir plus",
+    "select": "Sélectionner",
+    "submit": "Soumettre",
+    "upload": "Téléverser"
+  },
+  "states": {
+    "loading": {
+      "label": "Chargement en cours"
+    },
+    "empty": {
+      "title": "Aucun résultat",
+      "description": "Rien à afficher pour l'instant."
+    },
+    "error": {
+      "title": "Une erreur est survenue",
+      "description": "Le contenu n'a pas pu être chargé. Réessayez dans un instant.",
+      "action": "Réessayer"
+    },
+    "forbidden": {
+      "title": "Accès refusé",
+      "description": "Votre compte ne dispose pas des droits nécessaires pour consulter cette page.",
+      "action": "Retour à l'accueil"
+    },
+    "notFound": {
+      "title": "Page introuvable",
+      "description": "L'adresse demandée n'existe pas ou n'existe plus.",
+      "action": "Retour à l'accueil"
+    },
+    "offline": {
+      "title": "Connexion perdue",
+      "description": "Vérifiez votre connexion, puis réessayez."
+    }
+  },
+  "labels": {
+    "all": "Tous",
+    "none": "Aucun",
+    "no": "Non",
+    "optional": "facultatif",
+    "required": "obligatoire",
+    "unknown": "Non renseigné",
+    "yes": "Oui"
+  },
+  "pagination": {
+    "next": "Page suivante",
+    "of": "sur",
+    "page": "Page {current} sur {total}",
+    "perPage": "Par page",
+    "previous": "Page précédente",
+    "results": "{count} résultat | {count} résultat | {count} résultats",
+    "showing": "Résultats {from} à {to} sur {total}"
+  },
+  "search": {
+    "clear": "Effacer la recherche",
+    "noResults": "Aucun résultat pour « {query} »",
+    "placeholder": "Rechercher…"
+  },
+  "datetime": {
+    "at": "à",
+    "dateRange": "du {start} au {end}",
+    "day": "{date}",
+    "dayAndTime": "{date} à {time}",
+    "relativeSoon": "Bientôt",
+    "timeRange": "{start} — {end}",
+    "timeRangeWithZone": "{start} — {end}, heure de {zone}",
+    "timeWithZone": "{time}, heure de {zone}",
+    "zoneOf": "heure de {zone}",
+    "zoneOffset": "UTC{offset}"
+  },
+  "file": {
+    "maxSize": "Taille maximale : {size}",
+    "selected": "{count} fichier sélectionné | {count} fichier sélectionné | {count} fichiers sélectionnés",
+    "types": "Formats acceptés : {types}"
+  },
+  "a11y": {
+    "closeMenu": "Fermer le menu",
+    "externalLink": "Ouvre dans un nouvel onglet",
+    "loading": "Chargement",
+    "openMenu": "Ouvrir le menu",
+    "skipToContent": "Aller au contenu principal"
+  }
+}
