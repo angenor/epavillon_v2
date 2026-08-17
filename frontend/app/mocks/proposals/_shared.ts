@@ -36,7 +36,8 @@ export interface ProposalDraftFields {
   objectives: I18nText
   presentation: I18nText
   outcomes?: I18nText | null
-  audience?: I18nText | null
+  /** Publics visés, un par entrée — `proposals.target_audiences`. */
+  audience?: I18nText[]
   format: ParticipationMode
   /** Code de la taxonomie `activity_category`. */
   category: string | null
@@ -84,7 +85,7 @@ export function proposal(fields: ProposalDraftFields): Proposal {
     objectives: fields.objectives,
     detailed_presentation: fields.presentation,
     expected_outcomes: fields.outcomes ?? null,
-    target_audience: fields.audience ?? null,
+    target_audiences: fields.audience ?? [],
     format: fields.format,
     activity_type_code: fields.category,
     language_codes: fields.languages ?? ['fr'],

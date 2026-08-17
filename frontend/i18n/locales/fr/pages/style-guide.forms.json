@@ -67,5 +67,11 @@
   "search": {
     "label": "Rechercher une organisation",
     "hint": "Tapez au moins deux lettres. La recherche porte sur toutes les dénominations : le nom complet comme le sigle seul ramènent la même fiche."
+  },
+  "richText": {
+    "title": "Texte riche",
+    "note": "Structure seulement — gras, italique, sous-titres, listes, citation. Ni police, ni taille, ni couleur : la mise en forme appartient à la charte, jamais à qui saisit. Le compteur porte sur le TEXTE, pas sur le balisage.",
+    "label": "Présentation détaillée",
+    "hint": "La même feuille de style habille la saisie et la lecture."
   }
 }

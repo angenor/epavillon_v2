@@ -198,6 +198,57 @@ export function wallClockInZone(value: DateInput | null | undefined, timeZone: T
   return `${value_of('year')}-${value_of('month')}-${value_of('day')} ${value_of('hour')}:${value_of('minute')}`
 }
 
+/**
+ * L'INVERSE de `wallClockInZone()` : une heure murale saisie dans un fuseau
+ * donné, rendue en instant ISO.
+ *
+ * Le formulaire de soumission (A4) saisit « le 12 novembre à 14:30 » et cette
+ * heure vaut À BELÉM, pas sur la machine du déposant : un agent qui remplit son
+ * dossier depuis Dakar propose bien 14:30 heure locale du pavillon. Sans cette
+ * conversion, `new Date('2027-11-12T14:30')` produirait un instant lu dans le
+ * fuseau du navigateur, et le créneau se déplacerait de trois heures entre la
+ * saisie et l'affichage — sans qu'aucune erreur ne soit levée.
+ *
+ * DEUX PASSES, et la seconde n'est pas une précaution de style : le décalage
+ * d'un fuseau dépend de l'instant qu'on y cherche, et l'instant dépend du
+ * décalage. On approche d'abord en lisant l'heure murale comme si elle était
+ * UTC, puis on corrige avec le décalage réellement en vigueur à cet instant-là.
+ * C'est ce qui rend juste une saisie faite la nuit d'un changement d'heure.
+ */
+export function instantFromWallClock(
+  wallClock: string | null | undefined,
+  timeZone: TimeZoneName,
+): IsoDateTime | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/.exec(wallClock ?? '')
+  if (!match) return null
+
+  const [, year, month, day, hour, minute] = match as unknown as [string, string, string, string, string, string]
+  const asIfUtc = Date.UTC(
+    Number(year),
+    Number(month) - 1,
+    Number(day),
+    Number(hour),
+    Number(minute),
+  )
+
+  const approximate = asIfUtc - zoneOffsetMs(asIfUtc, timeZone)
+  const corrected = asIfUtc - zoneOffsetMs(approximate, timeZone)
+  return new Date(corrected).toISOString()
+}
+
+/** Décalage du fuseau, en millisecondes, à l'instant donné. */
+function zoneOffsetMs(instant: number, timeZone: TimeZoneName): number {
+  const wall = wallClockInZone(instant, timeZone)
+  const match = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/.exec(wall)
+  if (!match) return 0
+
+  const [, year, month, day, hour, minute] = match as unknown as [string, string, string, string, string, string]
+  const asUtc = Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute))
+  // L'instant est tronqué à la minute par `wallClockInZone` : on compare donc
+  // deux valeurs tronquées, sans quoi les secondes fausseraient le décalage.
+  return asUtc - Math.floor(instant / 60_000) * 60_000
+}
+
 /** Morceaux d'une plage horaire, à assembler avec un gabarit i18n. */
 export interface TimeRangeParts {
   /** Heure de début, ex. « 14:30 ». */

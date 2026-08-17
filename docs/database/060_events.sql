@@ -383,7 +383,21 @@ CREATE TABLE event.calls_for_proposals (
     requires_verified_organization boolean NOT NULL DEFAULT false,
     min_speakers      smallint    NOT NULL DEFAULT 1,
     max_speakers      smallint    NOT NULL DEFAULT 10,
-    default_duration_minutes smallint NOT NULL DEFAULT 90,
+    -- Durée proposée par défaut, et bornes acceptées. Les trois valeurs sont des
+    -- règles de la CAMPAGNE, pas du dossier : le pavillon d'une COP tient des
+    -- séances d'une heure, un cycle de webinaires peut en vouloir de trois. La
+    -- colonne `programme.proposals.duration_minutes` garde sa borne large
+    -- (15 à 600) : c'est un garde-fou de données, pas une règle d'appel.
+    default_duration_minutes smallint NOT NULL DEFAULT 60,
+    min_duration_minutes smallint NOT NULL DEFAULT 45,
+    max_duration_minutes smallint NOT NULL DEFAULT 150,
+    -- Plage horaire d'accueil du pavillon, en heure LOCALE de l'événement
+    -- (`events.timezone`). Une proposition doit commencer après l'ouverture et
+    -- se terminer avant la fermeture — c'est la contrainte matérielle d'un stand
+    -- ouvert de 9 h à 17 h, que la v1 laissait découvrir au moment de la
+    -- planification, une fois les dossiers acceptés.
+    daily_start_time  time        NOT NULL DEFAULT '09:00',
+    daily_end_time    time        NOT NULL DEFAULT '17:00',
     allowed_formats   event.participation_mode[] NOT NULL DEFAULT '{online,in_person,hybrid}',
     -- Nombre de revues indépendantes exigé avant décision : matérialise la règle
     -- « au moins deux révisionnistes se prononcent ».
@@ -401,7 +415,14 @@ CREATE TABLE event.calls_for_proposals (
     CONSTRAINT ux_calls_code UNIQUE (event_id, code),
     CONSTRAINT ck_calls_window CHECK (closes_at > opens_at),
     CONSTRAINT ck_calls_extension CHECK (extended_until IS NULL OR extended_until > closes_at),
-    CONSTRAINT ck_calls_speakers CHECK (max_speakers >= min_speakers)
+    CONSTRAINT ck_calls_speakers CHECK (max_speakers >= min_speakers),
+    -- La durée par défaut doit être proposable : sans cette vérification, un
+    -- appel pourrait offrir d'office une durée que ses propres bornes refusent.
+    CONSTRAINT ck_calls_duration_bounds
+        CHECK (min_duration_minutes BETWEEN 15 AND 600
+               AND max_duration_minutes BETWEEN min_duration_minutes AND 600
+               AND default_duration_minutes BETWEEN min_duration_minutes AND max_duration_minutes),
+    CONSTRAINT ck_calls_daily_window CHECK (daily_end_time > daily_start_time)
 );
 
 -- CARDINALITÉ 0..1 : un événement n'ouvre qu'une seule campagne de soumission.
@@ -422,6 +443,12 @@ CREATE TRIGGER tg_calls_audit
     AFTER INSERT OR UPDATE OR DELETE ON event.calls_for_proposals
     FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
 
+COMMENT ON COLUMN event.calls_for_proposals.daily_start_time IS
+    'Heure d''ouverture du pavillon, en heure locale de l''événement. Une proposition ne peut pas commencer avant.';
+COMMENT ON COLUMN event.calls_for_proposals.daily_end_time IS
+    'Heure de fermeture, en heure locale de l''événement. Une proposition doit se TERMINER avant — début + durée comprise.';
+COMMENT ON COLUMN event.calls_for_proposals.min_duration_minutes IS
+    'Durée minimale acceptée pour une proposition de cet appel. Distincte du CHECK large de programme.proposals.duration_minutes, qui est un garde-fou de données.';
 COMMENT ON COLUMN event.calls_for_proposals.blind_review IS
     'Évaluation en aveugle : un révisionniste ne voit les notes des autres qu''après avoir soumis la sienne.';
 

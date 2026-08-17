@@ -1,0 +1,101 @@
+{
+  "title": "Intervenants",
+  "description": "Les personnes qui prennent la parole. Chacune recevra un courriel de confirmation avant la tenue de l'activité.",
+  "bounds": "Cet appel demande de {min} à {max} intervenants. Vous en avez déclaré {count}.",
+  "add": "Ajouter un intervenant",
+  "maxReached": "Vous avez atteint le maximum de {max} intervenants pour cet appel.",
+  "edit": "Modifier {speaker}",
+  "remove": "Retirer {speaker}",
+  "moveUp": "Remonter {speaker}",
+  "moveDown": "Descendre {speaker}",
+  "confirmationNotice": "Citer une personne l'engage : chacune recevra un courriel lui demandant de confirmer sa participation.",
+  "accountBadge": "Compte de la plateforme",
+
+  "empty": {
+    "title": "Aucun intervenant déclaré",
+    "description": "Ajoutez les personnes qui interviendront. Vous pourrez modifier la liste tant que le dossier n'est pas envoyé."
+  },
+
+  "dialog": {
+    "addTitle": "Ajouter un intervenant",
+    "editTitle": "Modifier l'intervenant",
+    "description": "L'adresse électronique sert à retrouver la personne si elle est déjà connue de la plateforme, et à lui envoyer sa demande de confirmation.",
+    "foundTitle": "Cette personne est déjà connue de la plateforme",
+    "foundWithAccount": "Elle a un compte : en la retenant, vous reprenez son profil tel qu'elle le tient à jour.",
+    "foundWithoutAccount": "Elle n'a pas encore de compte : vous pourrez corriger ses informations si elles ont changé.",
+    "useProfile": "Retenir ce profil",
+    "lockedTitle": "Profil de la plateforme retenu",
+    "lockedDescription": "L'identité de cette personne lui appartient : seul son titulaire, ou l'IFDD, peut la modifier. Sa fonction et son organisation pour CETTE activité restent à votre main, ainsi que son rôle. Vous pouvez aussi la retirer du dossier.",
+    "linkedTitle": "Personne déjà connue retenue",
+    "linkedDescription": "Elle est intervenue ailleurs sans avoir de compte : vous pouvez corriger ses informations. Une fois l'activité validée, elles ne seront plus modifiables depuis ce dossier.",
+    "detach": "Saisir une autre personne",
+    "unknownPerson": "Cette adresse est inconnue de la plateforme : la personne sera créée à l'enregistrement de votre dossier."
+  },
+
+  "fields": {
+    "email": {
+      "label": "Adresse électronique",
+      "hint": "Elle ne sera pas publiée. Elle sert à reconnaître la personne et à lui écrire."
+    },
+    "civility": { "label": "Civilité", "placeholder": "Choisir" },
+    "first_name": { "label": "Prénom" },
+    "last_name": { "label": "Nom" },
+    "job_title": {
+      "label": "Fonction",
+      "hint": "Telle qu'elle est au moment de l'activité : elle est conservée dans l'archive."
+    },
+    "organization": {
+      "label": "Organisation",
+      "hint": "Celle que la personne représente pour cette activité."
+    },
+    "role": {
+      "label": "Rôle dans l'activité",
+      "hint": "Il apparaîtra dans le programme."
+    },
+    "bio": {
+      "label": "Notice biographique",
+      "hint": "Quelques lignes, en français. Elle accompagne le nom sur la page publique de l'activité.",
+      "locked": "Cette notice appartient au profil de la personne : elle seule peut la modifier."
+    }
+  },
+
+  "civilities": {
+    "mme": "Mme",
+    "m": "M.",
+    "dr": "Dre / Dr",
+    "pr": "Pre / Pr",
+    "other": "Autre"
+  },
+
+  "roles": {
+    "speaker": { "label": "Intervenant", "hint": "Prend la parole sur le fond" },
+    "moderator": { "label": "Modérateur", "hint": "Conduit les échanges" },
+    "panelist": { "label": "Panéliste", "hint": "Participe à une table ronde" },
+    "keynote": { "label": "Grand témoin", "hint": "Intervention d'ouverture ou de clôture" },
+    "facilitator": { "label": "Facilitateur", "hint": "Anime un atelier participatif" },
+    "interpreter": { "label": "Interprète", "hint": "Assure l'interprétation" }
+  },
+
+  "photo": {
+    "label": "Photo",
+    "hint": "Portrait, format image, 5 Mo au plus. Elle est rattachée à la personne, pas à ce dossier : elle servira aussi à ses prochaines participations.",
+    "choose": "Choisir une photo",
+    "remove": "Retirer la photo",
+    "previewAlt": "Photo de {speaker}",
+    "locked": "La photo vient du profil de la personne : elle seule peut la remplacer.",
+    "typeError": "Ce fichier n'est pas une image.",
+    "sizeError": "La photo dépasse la taille maximale de {size}."
+  },
+
+  "errors": {
+    "tooFew": "Cet appel demande au moins {min} intervenant. | Cet appel demande au moins {min} intervenant. | Cet appel demande au moins {min} intervenants.",
+    "tooMany": "Cet appel accepte au plus {max} intervenant. | Cet appel accepte au plus {max} intervenant. | Cet appel accepte au plus {max} intervenants.",
+    "nameRequired": "Intervenant {position} : le prénom et le nom sont obligatoires.",
+    "emailInvalid": "{speaker} : l'adresse électronique est manquante ou mal formée.",
+    "emailDuplicate": "L'adresse {email} figure deux fois dans la liste.",
+    "civilityRequired": "{speaker} : la civilité est obligatoire.",
+    "jobTitleRequired": "{speaker} : la fonction est obligatoire.",
+    "organizationRequired": "{speaker} : l'organisation est obligatoire."
+  }
+
+}

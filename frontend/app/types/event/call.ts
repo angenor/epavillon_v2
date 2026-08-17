@@ -48,7 +48,17 @@ export interface CallForProposals {
   requires_verified_organization: boolean
   min_speakers: number
   max_speakers: number
+  /** Durée proposée d'office, et bornes acceptées par CETTE campagne. Le `CHECK`
+   *  large de `proposals.duration_minutes` (15 à 600) reste un garde-fou de
+   *  données : c'est ici que se dit ce qu'un pavillon accepte réellement. */
   default_duration_minutes: number
+  min_duration_minutes: number
+  max_duration_minutes: number
+  /** Plage d'accueil du pavillon, `HH:MM:SS`, en heure LOCALE de l'événement.
+   *  Une proposition commence après l'ouverture et se TERMINE avant la
+   *  fermeture — début plus durée comprise. */
+  daily_start_time: string
+  daily_end_time: string
   allowed_formats: ParticipationMode[]
   /** Nombre de revues indépendantes exigé avant décision. */
   required_reviews: number

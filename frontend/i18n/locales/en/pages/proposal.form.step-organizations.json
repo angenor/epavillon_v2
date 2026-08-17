@@ -1,0 +1,38 @@
+{
+  "lead": {
+    "title": "Lead organization",
+    "description": "It appears in the programme, answers for the commitments made and receives the committee's decision.",
+    "single": "You are submitting on behalf of this organization. To use another one, join it from your profile first.",
+    "field": "Submit on behalf of",
+    "fieldHint": "You belong to several organizations: choose the one leading this activity."
+  },
+  "co": {
+    "title": "Co-organizers, partners and supporters",
+    "description": "An activity may be run by several organizations. Add them here rather than in the presentation text: they will then be counted, filterable and credited in the programme.",
+    "roleLabel": "Role",
+    "remove": "Remove {organization}",
+    "pendingConfirmation": "The organization named here will be invited to confirm. Until it does, the co-organization shows as “pending”.",
+    "searchLabel": "Add an organization",
+    "searchHint": "Search by full name or by acronym: both return the same record.",
+    "searchPlaceholder": "Organization name or acronym",
+    "searchError": "The search did not complete.",
+    "members": "{count} registered member | {count} registered member | {count} registered members",
+    "verified": "Organization verified by IFDD",
+    "alreadyAdded": "Already added",
+    "emptyTitle": "No organization matches “{query}”",
+    "emptyDescription": "Check the spelling, or try the acronym. If the organization is not in the directory yet, it must first be created from the join screen."
+  },
+  "roles": {
+    "co_organizer": "Co-organizer",
+    "partner": "Partner",
+    "sponsor": "Supporter"
+  },
+  "roleHints": {
+    "co_organizer": "Takes part in designing and running the activity",
+    "partner": "Associated with the activity without leading it",
+    "sponsor": "Financial or institutional support"
+  },
+  "errors": {
+    "leadRequired": "Choose the organization you are submitting on behalf of."
+  }
+}

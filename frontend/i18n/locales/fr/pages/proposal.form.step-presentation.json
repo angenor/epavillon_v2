@@ -1,0 +1,44 @@
+{
+  "title": "Présentation de l'activité",
+  "description": "C'est ce texte que le comité lit, et c'est lui qui figurera au programme si l'activité est retenue.",
+  "frenchNotice": "Rédigez en français : c'est la langue de référence de la plateforme. L'IFDD assure la traduction des activités retenues.",
+  "fields": {
+    "title": {
+      "label": "Titre de l'activité",
+      "hint": "Court et explicite. Il sera repris tel quel dans le programme et sur les supports."
+    },
+    "summary": {
+      "label": "Résumé",
+      "hint": "Deux ou trois phrases. C'est ce qui s'affiche sur la carte de l'activité dans la programmation publique."
+    },
+    "objectives": {
+      "label": "Objectifs",
+      "hint": "Ce que l'activité cherche à obtenir. Le comité évalue la pertinence au regard des priorités de l'IFDD."
+    },
+    "detailed_presentation": {
+      "label": "Présentation détaillée",
+      "hint": "Le déroulé, la méthode, les questions traitées. C'est la pièce principale du dossier. Vous pouvez structurer le texte : sous-titres, listes, gras — la mise en page suit la charte de la plateforme."
+    },
+    "expected_outcomes": {
+      "label": "Résultats attendus",
+      "hint": "Ce qui reste après la séance : un document, un engagement, un réseau, une décision."
+    },
+    "target_audience": {
+      "label": "Publics visés",
+      "hint": "Ajoutez-les un par un : délégations, société civile, chercheurs, journalistes… Ils seront affichés séparément sur la page de l'activité.",
+      "placeholder": "Un public, puis Entrée",
+      "add": "Ajouter ce public",
+      "duplicate": "Ce public figure déjà dans la liste."
+    }
+  },
+  "errors": {
+    "titleRequired": "Le titre de l'activité est obligatoire.",
+    "objectivesRequired": "Les objectifs sont obligatoires.",
+    "detailed_presentationRequired": "La présentation détaillée est obligatoire."
+  },
+  "warnings": {
+    "summaryMissing": "Sans résumé, la carte de votre activité restera muette dans la programmation publique.",
+    "expected_outcomesMissing": "Les résultats attendus pèsent dans la note du comité : le critère « impact » porte dessus.",
+    "target_audienceMissing": "Préciser les publics visés aide le comité à situer l'activité et à composer les journées thématiques."
+  }
+}

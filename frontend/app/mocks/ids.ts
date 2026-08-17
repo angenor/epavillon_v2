@@ -414,6 +414,13 @@ export const PROPOSAL = {
   comptabiliteCarbone: uuid('7040', 40),
 } as const
 
+/**
+ * Dossier OUVERT PENDANT LA SESSION de démonstration, par le formulaire de
+ * soumission (A4). Réservé au-delà des quarante dossiers du jeu, pour qu'il n'en
+ * recouvre jamais un — même principe que `ORG_CREATED`.
+ */
+export const PROPOSAL_DRAFTED: Uuid = uuid('7040', 90)
+
 /** `programme.proposal_speakers`. */
 export const PROPOSAL_SPEAKER = (n: number): Uuid => uuid('7041', n)
 

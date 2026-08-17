@@ -1,0 +1,124 @@
+{
+  "title": "Submit an activity proposal",
+  "description": "Complete the steps in whichever order suits you. Your submission is saved automatically: you can leave and come back later.",
+  "submit": "Send the submission",
+
+  "steps": {
+    "label": "Submission steps",
+    "errorCount": "{count} item to fix | {count} item to fix | {count} items to fix",
+    "blocked": "Fix the item flagged on this step to continue. | Fix the item flagged on this step to continue. | Fix the {count} items flagged on this step to continue.",
+    "organizations": {
+      "label": "Organizations",
+      "hint": "Lead and co-organizers"
+    },
+    "presentation": {
+      "label": "Presentation",
+      "hint": "Title, objectives, content"
+    },
+    "classification": {
+      "label": "Themes",
+      "hint": "Category, format, languages"
+    },
+    "speakers": {
+      "label": "Speakers",
+      "hint": "Who will take the floor"
+    },
+    "schedule": {
+      "label": "Preferred slot",
+      "hint": "Date, duration, occurrences"
+    },
+    "documents": {
+      "label": "Documents",
+      "hint": "Presentation, concept note"
+    },
+    "review": {
+      "label": "Review",
+      "hint": "Check and send"
+    }
+  },
+
+  "autosave": {
+    "untouched": "No changes yet.",
+    "dirty": "Unsaved changes.",
+    "saving": "Saving…",
+    "savedAt": "Saved at {time}",
+    "error": "Saving failed. Your text is still on screen.",
+    "reference": "Submission number:"
+  },
+
+  "deadline": {
+    "label": "Call deadline",
+    "title": "Submission deadline",
+    "extendedFrom": "Deadline originally announced: {date}",
+    "expired": "The deadline has passed.",
+    "results": "Results announced on",
+    "reviews": "Assessment",
+    "reviewsValue": "{count} committee member will read the submission | {count} committee member will read the submission | {count} committee members will read the submission",
+    "guidelines": "Call guidelines",
+    "countdown": {
+      "days": "{count} day left | {count} day left | {count} days left",
+      "hours": "{count} hour left | {count} hour left | {count} hours left",
+      "minutes": "{count} minute left | {count} minute left | {count} minutes left"
+    }
+  },
+
+  "issues": {
+    "warningsTitle": "{count} item deserves your attention | {count} item deserves your attention | {count} items deserve your attention",
+    "warningsDescription": "These do not block submission, but a file that covers them is easier to assess."
+  },
+
+  "refusals": {
+    "closed": {
+      "title": "The call closed in the meantime",
+      "description": "Your submission remains saved as a draft. Contact IFDD if you believe this is a mistake."
+    },
+    "quota": {
+      "title": "Your organization has reached the cap",
+      "description": "This call accepts at most {max} submissions per organization. Yours remains saved as a draft."
+    }
+  },
+
+  "confirmation": {
+    "title": "Your submission has been received",
+    "description": "It was recorded for the {edition} edition.",
+    "reference": "Submission number",
+    "copy": "Copy the number",
+    "copied": "Number copied",
+    "copiedAnnouncement": "Submission number {code} was copied to the clipboard.",
+    "submittedAt": "Submitted on {datetime}",
+    "next": {
+      "title": "What happens next",
+      "acknowledgement": "An acknowledgement is sent to your account address, with the submission number.",
+      "review": "{count} selection committee member assesses the submission against the published criteria. | {count} selection committee member assesses the submission against the published criteria. | {count} selection committee members assess the submission against the published criteria.",
+      "results": "Results will be sent to you by email as soon as the assessment is complete.",
+      "resultsOn": "Results are announced on {date}.",
+      "changes": "The committee may request additions: you will then be notified and the submission will become editable again."
+    },
+    "actions": {
+      "followUp": "Track my submission",
+      "backToEvent": "Back to the event page"
+    }
+  },
+
+  "states": {
+    "loading": "Loading the submission form",
+    "contextError": "The form could not be loaded. Your draft, if any, is not lost.",
+    "signedOut": "Your session has expired. Sign in again to resume your submission.",
+    "signIn": "Sign in",
+    "noCall": {
+      "title": "No call for proposals is open",
+      "description": "There is no ongoing submission window. Calls are announced on each edition's page.",
+      "action": "See the editions"
+    },
+    "closed": {
+      "title": "Submissions are closed",
+      "description": "The call for proposals for {edition} no longer accepts submissions.",
+      "action": "See the event"
+    },
+    "quota": {
+      "title": "Your organization has reached the cap",
+      "description": "This call accepts at most {max} submissions per organization. Withdrawn and rejected files are not counted.",
+      "action": "See the event"
+    }
+  }
+}

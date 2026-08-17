@@ -45,9 +45,24 @@ interface Props {
   orientation?: 'horizontal' | 'vertical'
   /** Les étapes franchies sont-elles cliquables ? */
   navigable?: boolean
+  /**
+   * Les étapes À VENIR sont-elles atteignables elles aussi ?
+   *
+   * Faux par défaut : dans un parcours où chaque étape dépend de la précédente
+   * — un paiement, une confirmation —, sauter en avant n'a pas de sens. Vrai
+   * pour un DOSSIER, qui se remplit dans le désordre : on laisse les
+   * intervenants de côté parce qu'on attend une réponse, on va voir ce que
+   * demande l'étape des documents, et on revient. Interdire l'avance obligerait
+   * alors à saisir pour naviguer.
+   */
+  allowSkipAhead?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), { orientation: 'horizontal', navigable: true })
+const props = withDefaults(defineProps<Props>(), {
+  orientation: 'horizontal',
+  navigable: true,
+  allowSkipAhead: false,
+})
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
 const { t } = useI18n()
@@ -131,6 +146,7 @@ const SHORT_LABELS: Record<StepState, string> = {
 
 function isClickable(step: StepItem, index: number): boolean {
   if (!props.navigable || step.disabled) return false
+  if (props.allowSkipAhead) return true
   return index <= currentIndex.value || stateOf(step, index) === 'error'
 }
 
@@ -141,7 +157,14 @@ function select(step: StepItem, index: number): void {
 </script>
 
 <template>
-  <nav :aria-label="props.label">
+  <!-- `min-w-0` : sans lui, la largeur minimale AUTOMATIQUE de cette barre est
+       celle de ses sept cellules mises bout à bout, et un parent en grille ou en
+       flex s'élargit d'autant — c'est toute la page qui défile horizontalement,
+       pas la barre. Le débordement doit rester DANS la barre : c'est ce que
+       promet l'en-tête, et cela ne tient qu'à cette classe. Constaté à 375 px sur
+       le formulaire de soumission (A4), qui est le premier appelant à sept
+       étapes. -->
+  <nav :aria-label="props.label" class="min-w-0">
     <!-- Repère textuel : « Étape 3 sur 7 ». C'est ce qui reste quand la barre
          déborde de l'écran, et ce qu'annonce un lecteur d'écran. -->
     <p class="mb-3 text-sm text-text-subtle sm:sr-only">

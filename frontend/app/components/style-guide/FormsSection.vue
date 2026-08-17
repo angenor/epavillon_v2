@@ -27,6 +27,9 @@ const summary = ref(
   "Un atelier de deux heures réunissant les points focaux nationaux de six pays d'Afrique de l'Ouest autour des mécanismes de financement de l'adaptation côtière.",
 )
 const longText = ref('')
+const richText = ref(
+  '<p>La session confronte les <strong>mesures relevées</strong> aux prévisions des plans.</p><ul><li><p>Trois pays, six sites.</p></li></ul>',
+)
 
 const selectValue = ref('')
 const selectFilled = ref('hybrid')
@@ -163,6 +166,25 @@ function toggleSwitchWithWork(): void {
           :rows="2"
         />
       </div>
+    </StyleGuideDemo>
+
+    <!-- TEXTE RICHE -->
+    <StyleGuideDemo
+      :title="t('style-guide.forms.richText.title')"
+      :note="t('style-guide.forms.richText.note')"
+    >
+      <ClientOnly>
+        <UiRichText
+          v-model="richText"
+          :label="t('style-guide.forms.richText.label')"
+          :hint="t('style-guide.forms.richText.hint')"
+          :maxlength="600"
+          :rows="6"
+        />
+        <template #fallback>
+          <UiTextarea :label="t('style-guide.forms.richText.label')" :rows="6" readonly />
+        </template>
+      </ClientOnly>
     </StyleGuideDemo>
 
     <!-- LISTES ET CHOIX -->

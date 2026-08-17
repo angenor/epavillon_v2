@@ -1,0 +1,38 @@
+{
+  "lead": {
+    "title": "Organisation porteuse",
+    "description": "C'est elle qui figure au programme, répond des engagements pris et reçoit la décision du comité.",
+    "single": "Vous déposez au nom de cette organisation. Pour en changer, rattachez-vous à une autre depuis votre profil.",
+    "field": "Déposer au nom de",
+    "fieldHint": "Vous appartenez à plusieurs organisations : choisissez celle qui porte cette activité."
+  },
+  "co": {
+    "title": "Co-organisateurs, partenaires et soutiens",
+    "description": "Une activité peut être portée par plusieurs organisations. Ajoutez-les ici plutôt que dans le texte de présentation : elles seront alors comptées, filtrables et créditées au programme.",
+    "roleLabel": "Rôle",
+    "remove": "Retirer {organization}",
+    "pendingConfirmation": "L'organisation citée sera invitée à confirmer sa participation. Tant qu'elle ne l'a pas fait, la co-organisation s'affiche « en attente ».",
+    "searchLabel": "Ajouter une organisation",
+    "searchHint": "Cherchez par nom complet ou par sigle : les deux ramènent la même fiche.",
+    "searchPlaceholder": "Nom ou sigle de l'organisation",
+    "searchError": "La recherche n'a pas abouti.",
+    "members": "{count} membre inscrit | {count} membre inscrit | {count} membres inscrits",
+    "verified": "Organisation vérifiée par l'IFDD",
+    "alreadyAdded": "Déjà au dossier",
+    "emptyTitle": "Aucune organisation ne correspond à « {query} »",
+    "emptyDescription": "Vérifiez l'orthographe, ou essayez le sigle. Si l'organisation n'existe pas encore dans le référentiel, elle doit d'abord être créée depuis l'écran de rattachement."
+  },
+  "roles": {
+    "co_organizer": "Co-organisateur",
+    "partner": "Partenaire",
+    "sponsor": "Soutien"
+  },
+  "roleHints": {
+    "co_organizer": "Participe à la conception et à l'animation",
+    "partner": "Associé à l'activité sans la porter",
+    "sponsor": "Soutien financier ou institutionnel"
+  },
+  "errors": {
+    "leadRequired": "Choisissez l'organisation au nom de laquelle vous déposez."
+  }
+}

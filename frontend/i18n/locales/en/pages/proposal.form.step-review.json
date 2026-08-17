@@ -1,0 +1,38 @@
+{
+  "title": "Review before sending",
+  "description": "Here is your submission exactly as the committee will receive it. Each block takes you back to its step.",
+  "edit": "Edit",
+  "ready": "The submission is complete and can be sent.",
+  "noSpeakers": "No speaker has been declared.",
+  "noDocuments": "No document is attached.",
+  "publicDocument": "Public",
+  "fields": {
+    "lead": "Lead organization",
+    "coOrganizations": "Co-organizers",
+    "title": "Title",
+    "summary": "Summary",
+    "objectives": "Objectives",
+    "presentation": "Detailed presentation",
+    "outcomes": "Expected outcomes",
+    "audience": "Target audiences",
+    "themes": "Themes",
+    "category": "Category",
+    "format": "Format",
+    "languages": "Languages",
+    "country": "Country concerned",
+    "start": "Preferred start",
+    "duration": "Duration",
+    "sessions": "Occurrences requested",
+    "constraints": "Scheduling constraints"
+  },
+  "languages": {
+    "fr": "French",
+    "en": "English"
+  },
+  "next": {
+    "title": "What happens after sending",
+    "reviews": "{count} committee member will assess the submission against the published criteria. | {count} committee member will assess the submission against the published criteria. | {count} committee members will assess the submission against the published criteria.",
+    "editable": "The submission can no longer be edited once sent, unless the committee requests additions.",
+    "notification": "You will receive an acknowledgement carrying your submission number."
+  }
+}

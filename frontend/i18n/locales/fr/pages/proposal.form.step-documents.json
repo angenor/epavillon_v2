@@ -1,0 +1,28 @@
+{
+  "title": "Documents",
+  "description": "Présentation, note de cadrage, annexes. Tout ce qui aide le comité à juger le dossier, et rien qui s'y substitue : la présentation détaillée reste la pièce principale.",
+  "choose": "Choisir des fichiers",
+  "acceptedTypes": "PDF, Word, PowerPoint",
+  "remove": "Retirer {file}",
+  "pendingUpload": "Les fichiers partiront sur nos serveurs à l'envoi du dossier. Ils sont contrôlés — format, taille, analyse antivirus — avant d'être conservés.",
+  "empty": {
+    "title": "Aucun document joint",
+    "description": "Cette étape est facultative. Un dossier sans pièce jointe est parfaitement recevable."
+  },
+  "fields": {
+    "title": { "label": "Intitulé du document" },
+    "type": {
+      "label": "Type de document",
+      "placeholder": "Choisir un type"
+    },
+    "public": {
+      "label": "Rendre ce document public",
+      "hint": "S'affichera sur la page de l'activité une fois celle-ci retenue et publiée. Laissez fermé pour une pièce destinée au seul comité."
+    }
+  },
+  "errors": {
+    "titleRequired": "Donnez un intitulé au document « {file} ».",
+    "fileType": "Le fichier « {file} » n'est pas dans un format accepté.",
+    "fileTooLarge": "Le fichier « {file} » dépasse la taille maximale autorisée."
+  }
+}

@@ -123,6 +123,107 @@
   }
 }
 
+/* ---------------------------------------------------------------------------
+   TEXTE RICHE — la charte appliquée à un contenu qu'on n'a pas écrit.
+
+   UNE SEULE FEUILLE POUR LA SAISIE ET POUR LA LECTURE. `UiRichText` (l'éditeur)
+   et `UiRichContent` (le rendu) portent tous deux la classe `.rich-text` : deux
+   jeux de styles pour un même contenu, ce serait un texte qui change d'allure
+   entre le moment où on l'écrit et celui où il est publié.
+
+   AUCUNE COULEUR NI POLICE NE VIENT DU CONTENU. L'éditeur ne permet pas d'en
+   choisir, et ces règles imposent celles de la charte : un `<h3>` prend la
+   police de titrage et la couleur des titres, un lien prend la couleur de lien,
+   et tout cela suit le thème. Un texte peint en noir dans un traitement de
+   texte, collé ici, resterait noir sur fond noir en thème sombre — d'où la règle
+   `color: inherit` sur tout ce qui porterait un style en ligne.
+   --------------------------------------------------------------------------- */
+.rich-text {
+  color: var(--color-text-secondary);
+  max-width: var(--measure);
+  line-height: 1.65;
+}
+
+.rich-text [style] {
+  /* Ce qui arrive collé d'ailleurs perd sa peinture : seule la structure reste. */
+  color: inherit !important;
+  background-color: transparent !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+}
+
+.rich-text > * + * {
+  margin-top: var(--space-3);
+}
+
+.rich-text h3,
+.rich-text h4 {
+  font-family: var(--font-display);
+  color: var(--color-heading);
+  line-height: 1.3;
+  margin-top: var(--space-5);
+}
+
+.rich-text h3 {
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.rich-text h4 {
+  font-size: var(--text-base);
+  font-weight: 700;
+}
+
+.rich-text strong {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.rich-text ul,
+.rich-text ol {
+  padding-inline-start: var(--space-6);
+}
+
+.rich-text ul {
+  list-style: disc;
+}
+
+.rich-text ol {
+  list-style: decimal;
+}
+
+.rich-text li + li {
+  margin-top: var(--space-1);
+}
+
+.rich-text blockquote {
+  border-inline-start: var(--border-medium) solid var(--color-accent);
+  padding-inline-start: var(--space-4);
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.rich-text a {
+  color: var(--color-text-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.rich-text hr {
+  border: 0;
+  border-top: var(--border-thin) solid var(--color-border);
+}
+
+/* Invite de l'éditeur vierge : ProseMirror pose cette classe sur le paragraphe
+   vide, et sans elle le cadre paraît cassé plutôt que disponible. */
+.rich-text .is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--color-text-muted);
+  float: inline-start;
+  height: 0;
+  pointer-events: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

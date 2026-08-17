@@ -1,0 +1,50 @@
+{
+  "themes": {
+    "title": "Thématiques",
+    "description": "Elles servent aux filtres de la programmation publique et à la composition des journées thématiques. Choisissez celles que l'activité traite réellement.",
+    "selected": "{count} thématique retenue | {count} thématique retenue | {count} thématiques retenues",
+    "tooMany": "au-delà de {max}, les pastilles cessent d'informer et l'activité paraît généraliste",
+    "warningsMissing": "Sans thématique, votre activité n'apparaîtra dans aucun filtre du programme."
+  },
+  "category": {
+    "label": "Catégorie d'activité",
+    "hint": "La nature de ce que vous proposez.",
+    "placeholder": "Choisir une catégorie"
+  },
+  "format": {
+    "label": "Format de participation",
+    "hint": "Seuls les formats ouverts par cet appel sont proposés."
+  },
+  "formats": {
+    "in_person": {
+      "label": "En présentiel",
+      "hint": "Au pavillon, sans diffusion prévue"
+    },
+    "online": {
+      "label": "En ligne",
+      "hint": "Sans présence physique au pavillon"
+    },
+    "hybrid": {
+      "label": "Hybride",
+      "hint": "Au pavillon et diffusée en ligne"
+    }
+  },
+  "languages": {
+    "label": "Langues de l'activité",
+    "hint": "Le français est la langue de travail du pavillon ; une activité peut être conduite en plusieurs langues."
+  },
+  "country": {
+    "label": "Pays concerné",
+    "hint": "Quand l'activité porte sur un pays en particulier. À laisser vide pour une activité régionale ou internationale.",
+    "placeholder": "Choisir un pays"
+  },
+  "errors": {
+    "formatRequired": "Choisissez un format de participation.",
+    "formatNotAllowed": "Ce format n'est plus accepté par l'appel. Choisissez-en un autre.",
+    "languagesRequired": "Indiquez au moins une langue."
+  },
+  "warnings": {
+    "themesMissing": "Sans thématique, votre activité n'apparaîtra dans aucun filtre de la programmation publique.",
+    "categoryMissing": "La catégorie aide le comité à comparer des activités de même nature."
+  }
+}

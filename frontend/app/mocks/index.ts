@@ -25,6 +25,8 @@
  *   calls.ts             l'appel ouvert, les deux appels clos et le comité
  *   criteria.ts          les six critères pondérés, dont un éliminatoire
  *   proposals/           40 dossiers, découpés par statut
+ *   proposal-submission.ts  la numérotation, la recevabilité et les deux
+ *                        écritures du formulaire de dépôt (prompt A4)
  *   reviews.ts           les revues, leurs notes par critère et les affectations
  *   sessions/            44 séances : 30 pour la COP31, dont deux conflits
  *                        volontaires, et 14 pour les autres éditions
@@ -84,6 +86,15 @@ export {
   proposalComments,
   proposalTransitions,
 } from './proposals'
+
+export {
+  openCallForProposals,
+  proposalFormContext,
+  draftProposalOf,
+  saveProposalDraft,
+  submitProposal,
+  lookupSpeakerByEmail,
+} from './proposal-submission'
 
 export { reviews, reviewScores, reviewAssignments } from './reviews'
 

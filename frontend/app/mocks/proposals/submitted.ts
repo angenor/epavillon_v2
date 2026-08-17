@@ -39,9 +39,12 @@ export const submittedProposals = [
     outcomes: {
       fr: "Un cahier des charges reproductible pour les stations de recharge en berge et une estimation des économies de carburant par embarcation.",
     },
-    audience: {
-      fr: "Autorités portuaires, bailleurs, opérateurs de transport fluvial, collectivités riveraines.",
-    },
+    audience: [
+      { fr: "Autorités portuaires" },
+      { fr: "Bailleurs" },
+      { fr: "Opérateurs de transport fluvial" },
+      { fr: "Collectivités riveraines" },
+    ],
     format: 'in_person',
     category: 'field_project',
     country: COUNTRY.cd,
@@ -77,7 +80,12 @@ export const submittedProposals = [
     outcomes: {
       fr: "Mise en ligne de la base et engagement de quatre États à en corriger les données les concernant.",
     },
-    audience: { fr: "Négociateurs, points focaux CCNUCC, chercheurs, journalistes." },
+    audience: [
+      { fr: "Négociateurs" },
+      { fr: "Points focaux CCNUCC" },
+      { fr: "Chercheurs" },
+      { fr: "Journalistes" },
+    ],
     format: 'hybrid',
     category: 'results_sharing',
     languages: ['fr', 'en'],
@@ -107,7 +115,11 @@ export const submittedProposals = [
     presentation: {
       fr: "Les PME agroalimentaires représentent une part notable des consommations industrielles d'énergie au Maghreb et en Afrique de l'Ouest. Trois dispositifs les ciblent : lignes de crédit bancaires bonifiées, subvention à l'audit énergétique, tiers-financement par une société de services. La session compare les montants réellement décaissés, les délais et les taux de défaut.",
     },
-    audience: { fr: "Banques de développement, ministères de l'industrie, fédérations professionnelles." },
+    audience: [
+      { fr: "Banques de développement" },
+      { fr: "Ministères de l'industrie" },
+      { fr: "Fédérations professionnelles" },
+    ],
     format: 'online',
     category: 'best_practices',
     country: COUNTRY.fr,
@@ -139,7 +151,12 @@ export const submittedProposals = [
       fr: "Dans quatre estuaires d'Afrique de l'Ouest, les règles coutumières de prélèvement du bois de mangrove reposent sur des calendriers et des interdits de zone. Le suivi écologique conduit sur six ans montre que ces règles produisent des cycles de régénération comparables à ceux des aires protégées, à un coût de gestion très inférieur. La session propose d'en tirer les conséquences réglementaires.",
     },
     outcomes: { fr: "Une note de position adressée aux directions des eaux et forêts des quatre pays." },
-    audience: { fr: "Administrations forestières, ONG de conservation, chercheurs, organisations communautaires." },
+    audience: [
+      { fr: "Administrations forestières" },
+      { fr: "ONG de conservation" },
+      { fr: "Chercheurs" },
+      { fr: "Organisations communautaires" },
+    ],
     format: 'in_person',
     category: 'concertation',
     country: COUNTRY.sn,
@@ -172,7 +189,11 @@ export const submittedProposals = [
       fr: "Les projets d'hydrogène vert annoncés au Maghreb totalisent plusieurs gigawatts d'électrolyse. À production nominale, leurs besoins en eau déminéralisée entrent en concurrence directe avec l'irrigation et l'eau potable, dans des bassins déjà déficitaires. La session présente le bilan hydrique de trois projets et les conditions — dessalement adossé, réutilisation d'eaux usées traitées — auxquelles ils resteraient soutenables.",
     },
     outcomes: { fr: "Une grille d'analyse hydrique utilisable par les autorités qui instruisent ces projets." },
-    audience: { fr: "Ministères de l'énergie et de l'eau, développeurs de projets, agences de bassin." },
+    audience: [
+      { fr: "Ministères de l'énergie et de l'eau" },
+      { fr: "Développeurs de projets" },
+      { fr: "Agences de bassin" },
+    ],
     format: 'hybrid',
     category: 'results_sharing',
     languages: ['fr', 'en'],

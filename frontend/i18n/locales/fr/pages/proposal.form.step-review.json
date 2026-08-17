@@ -1,0 +1,38 @@
+{
+  "title": "Relecture avant envoi",
+  "description": "Voici l'intégralité de votre dossier tel que le comité le recevra. Chaque bloc ramène à son étape.",
+  "edit": "Modifier",
+  "ready": "Le dossier est complet et peut être envoyé.",
+  "noSpeakers": "Aucun intervenant n'a été déclaré.",
+  "noDocuments": "Aucun document n'est joint.",
+  "publicDocument": "Public",
+  "fields": {
+    "lead": "Organisation porteuse",
+    "coOrganizations": "Co-organisateurs",
+    "title": "Titre",
+    "summary": "Résumé",
+    "objectives": "Objectifs",
+    "presentation": "Présentation détaillée",
+    "outcomes": "Résultats attendus",
+    "audience": "Publics visés",
+    "themes": "Thématiques",
+    "category": "Catégorie",
+    "format": "Format",
+    "languages": "Langues",
+    "country": "Pays concerné",
+    "start": "Début souhaité",
+    "duration": "Durée",
+    "sessions": "Occurrences demandées",
+    "constraints": "Contraintes de calendrier"
+  },
+  "languages": {
+    "fr": "Français",
+    "en": "Anglais"
+  },
+  "next": {
+    "title": "Ce qui se passe après l'envoi",
+    "reviews": "{count} membre du comité évaluera le dossier sur les critères publiés. | {count} membre du comité évaluera le dossier sur les critères publiés. | {count} membres du comité évalueront le dossier sur les critères publiés.",
+    "editable": "Le dossier n'est plus modifiable une fois envoyé, sauf si le comité demande des compléments.",
+    "notification": "Vous recevrez un accusé de réception portant votre numéro de dossier."
+  }
+}

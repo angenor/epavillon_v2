@@ -1,0 +1,37 @@
+{
+  "title": "Créneau souhaité et durée",
+  "description": "Dites quand vous aimeriez tenir l'activité. Rien n'est réservé à ce stade.",
+  "notice": {
+    "title": "Indiquez vos préférences ; l'IFDD arbitrera le calendrier définitif.",
+    "body": "Ne vous souciez pas de ce que d'autres organisations ont demandé : les chevauchements sont normaux à ce stade et ne pénalisent aucun dossier. L'équipe compose le programme une fois les activités retenues, et vous communiquera l'horaire retenu."
+  },
+  "start": {
+    "label": "Début souhaité",
+    "hint": "Pendant l'événement, {range}. Le pavillon accueille de {open} à {close} : votre activité doit se terminer avant la fermeture."
+  },
+  "duration": {
+    "label": "Durée",
+    "hint": "Temps total, échanges avec la salle compris. De {min} à {max} minutes pour cet appel.",
+    "placeholder": "Choisir une durée",
+    "value": "{minutes} minutes",
+    "default": "durée habituelle du pavillon"
+  },
+  "sessions": {
+    "label": "Nombre d'occurrences",
+    "hint": "Laissez 1 pour une activité unique. Un cycle qui se répète en annonce plusieurs dès le dépôt."
+  },
+  "endsAt": "Fin prévue : {end}",
+  "constraints": {
+    "label": "Contraintes de calendrier",
+    "hint": "Jours ou heures à éviter, dépendance à un autre événement, disponibilité d'un intervenant."
+  },
+  "errors": {
+    "slotRequired": "Indiquez le créneau que vous souhaitez.",
+    "durationRequired": "Indiquez la durée de votre activité.",
+    "durationRange": "La durée doit être comprise entre {min} et {max} minutes.",
+    "outsideDailyWindow": "Le pavillon accueille de {open} à {close} : votre activité doit commencer après l'ouverture et se terminer avant la fermeture.",
+    "sessionsRange": "Le nombre d'occurrences doit être compris entre {min} et {max}.",
+    "outsideEdition": "Le créneau souhaité doit tomber pendant l'événement."
+  },
+  "warnings": {}
+}

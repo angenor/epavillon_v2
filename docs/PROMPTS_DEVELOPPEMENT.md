@@ -426,7 +426,7 @@ avertissement avant création.
 >
 > **La première action concernée est le dépôt d'une proposition (A4).** La liste s'allongera : chaque prompt qui ajoute une action de ce genre pose la garde et ajoute sa raison au fichier de traduction de l'écran A2 — jamais un test recopié dans la page. Une DEMANDE EN ATTENTE (`memberships.status = 'pending'`) ne passe pas : aucun référent n'a encore accepté, et laisser déposer reviendrait à promettre un dossier qui sera refusé. Rappel : ce middleware n'est pas un contrôle de sécurité, l'API refuse de toute façon sans adhésion active ni permission `org_member` ; il évite qu'un formulaire de sept étapes se remplisse pour rien.
 
-**A3 — Page publique de l'événement**(en cours)
+**A3 — Page publique de l'événement**
 
 ```
 [PRÉAMBULE]
@@ -466,7 +466,7 @@ Répond à quatre questions dans l'ordre : de quoi s'agit-il, quelles sont les
   elle sera jugée.
 ```
 
-**A4 — Formulaire de soumission**
+**A4 — Formulaire de soumission** (fait le 17/08)
 
 ```
 [PRÉAMBULE]

@@ -1,0 +1,37 @@
+{
+  "title": "Preferred slot and duration",
+  "description": "Tell us when you would like to hold the activity. Nothing is booked at this stage.",
+  "notice": {
+    "title": "State your preferences; IFDD will settle the final schedule.",
+    "body": "Do not worry about what other organizations have asked for: overlaps are expected at this stage and penalise no one. The team builds the programme once activities are selected, and will let you know the final time."
+  },
+  "start": {
+    "label": "Preferred start",
+    "hint": "During the event, {range}. The pavilion is open from {open} to {close}: your activity must end before closing time."
+  },
+  "duration": {
+    "label": "Duration",
+    "hint": "Total time, including discussion with the audience. Between {min} and {max} minutes for this call.",
+    "placeholder": "Choose a duration",
+    "value": "{minutes} minutes",
+    "default": "the pavilion's usual duration"
+  },
+  "sessions": {
+    "label": "Number of occurrences",
+    "hint": "Leave 1 for a single activity. A recurring series declares several from the outset."
+  },
+  "endsAt": "Expected end: {end}",
+  "constraints": {
+    "label": "Scheduling constraints",
+    "hint": "Days or times to avoid, dependency on another event, a speaker's availability."
+  },
+  "errors": {
+    "slotRequired": "State the slot you would like.",
+    "durationRequired": "State the duration of your activity.",
+    "durationRange": "The duration must be between {min} and {max} minutes.",
+    "outsideDailyWindow": "The pavilion is open from {open} to {close}: your activity must start after opening and end before closing.",
+    "sessionsRange": "The number of occurrences must be between {min} and {max}.",
+    "outsideEdition": "The preferred slot must fall during the event."
+  },
+  "warnings": {}
+}

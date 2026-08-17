@@ -1,0 +1,124 @@
+{
+  "title": "Déposer une proposition d'activité",
+  "description": "Remplissez les étapes dans l'ordre qui vous arrange. Votre dossier s'enregistre tout seul : vous pouvez le quitter et le reprendre plus tard.",
+  "submit": "Envoyer le dossier",
+
+  "steps": {
+    "label": "Étapes du dépôt",
+    "errorCount": "{count} point à corriger | {count} point à corriger | {count} points à corriger",
+    "blocked": "Corrigez le point signalé sur cette étape pour continuer. | Corrigez le point signalé sur cette étape pour continuer. | Corrigez les {count} points signalés sur cette étape pour continuer.",
+    "organizations": {
+      "label": "Organisations",
+      "hint": "Porteur et co-organisateurs"
+    },
+    "presentation": {
+      "label": "Présentation",
+      "hint": "Titre, objectifs, contenu"
+    },
+    "classification": {
+      "label": "Thématiques",
+      "hint": "Catégorie, format, langues"
+    },
+    "speakers": {
+      "label": "Intervenants",
+      "hint": "Qui prend la parole"
+    },
+    "schedule": {
+      "label": "Créneau souhaité",
+      "hint": "Date, durée, occurrences"
+    },
+    "documents": {
+      "label": "Documents",
+      "hint": "Présentation, note de cadrage"
+    },
+    "review": {
+      "label": "Relecture",
+      "hint": "Vérifier et envoyer"
+    }
+  },
+
+  "autosave": {
+    "untouched": "Aucune modification pour l'instant.",
+    "dirty": "Modifications non enregistrées.",
+    "saving": "Enregistrement…",
+    "savedAt": "Enregistré à {time}",
+    "error": "L'enregistrement a échoué. Votre saisie reste à l'écran.",
+    "reference": "Numéro de dossier :"
+  },
+
+  "deadline": {
+    "label": "Échéance de l'appel",
+    "title": "Date limite de dépôt",
+    "extendedFrom": "Échéance initialement annoncée : {date}",
+    "expired": "L'échéance est passée.",
+    "results": "Résultats annoncés le",
+    "reviews": "Évaluation",
+    "reviewsValue": "{count} membre du comité lira le dossier | {count} membre du comité lira le dossier | {count} membres du comité liront le dossier",
+    "guidelines": "Consignes de l'appel",
+    "countdown": {
+      "days": "{count} jour restant | {count} jour restant | {count} jours restants",
+      "hours": "{count} heure restante | {count} heure restante | {count} heures restantes",
+      "minutes": "{count} minute restante | {count} minute restante | {count} minutes restantes"
+    }
+  },
+
+  "issues": {
+    "warningsTitle": "{count} point mérite votre attention | {count} point mérite votre attention | {count} points méritent votre attention",
+    "warningsDescription": "Ces éléments n'empêchent pas l'envoi, mais un dossier qui les renseigne s'évalue mieux."
+  },
+
+  "refusals": {
+    "closed": {
+      "title": "L'appel s'est clos entre-temps",
+      "description": "Votre dossier reste enregistré en brouillon. Contactez l'IFDD si vous pensez qu'il s'agit d'une erreur."
+    },
+    "quota": {
+      "title": "Plafond atteint pour votre organisation",
+      "description": "Cet appel accepte au plus {max} dossiers par organisation. Le vôtre reste enregistré en brouillon."
+    }
+  },
+
+  "confirmation": {
+    "title": "Votre dossier est déposé",
+    "description": "Il a bien été reçu pour l'édition {edition}.",
+    "reference": "Numéro de dossier",
+    "copy": "Copier le numéro",
+    "copied": "Numéro copié",
+    "copiedAnnouncement": "Le numéro de dossier {code} a été copié dans le presse-papiers.",
+    "submittedAt": "Déposé le {datetime}",
+    "next": {
+      "title": "La suite des opérations",
+      "acknowledgement": "Un accusé de réception part à l'adresse de votre compte, avec le numéro de dossier.",
+      "review": "{count} membre du comité de sélection évalue le dossier sur les critères publiés. | {count} membre du comité de sélection évalue le dossier sur les critères publiés. | {count} membres du comité de sélection évaluent le dossier sur les critères publiés.",
+      "results": "Les résultats vous seront communiqués par courriel dès la fin de l'évaluation.",
+      "resultsOn": "Les résultats sont annoncés le {date}.",
+      "changes": "Le comité peut demander des compléments : vous recevrez alors un message et le dossier redeviendra modifiable."
+    },
+    "actions": {
+      "followUp": "Suivre mon dossier",
+      "backToEvent": "Retour à la page de l'événement"
+    }
+  },
+
+  "states": {
+    "loading": "Chargement du formulaire de dépôt",
+    "contextError": "Le formulaire n'a pas pu être chargé. Votre brouillon, s'il existe, n'est pas perdu.",
+    "signedOut": "Votre session a expiré. Reconnectez-vous pour reprendre votre dossier.",
+    "signIn": "Se connecter",
+    "noCall": {
+      "title": "Aucun appel à propositions n'est ouvert",
+      "description": "Il n'y a pas de dépôt en cours pour l'instant. Les appels sont annoncés sur la page de chaque édition.",
+      "action": "Voir les éditions"
+    },
+    "closed": {
+      "title": "Le dépôt est clos",
+      "description": "L'appel à propositions de l'édition {edition} n'accepte plus de dossier.",
+      "action": "Voir l'événement"
+    },
+    "quota": {
+      "title": "Votre organisation a atteint le plafond",
+      "description": "Cet appel accepte au plus {max} dossiers par organisation. Les dossiers retirés ou non retenus ne sont pas comptés.",
+      "action": "Voir l'événement"
+    }
+  }
+}

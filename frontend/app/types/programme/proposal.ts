@@ -100,9 +100,15 @@ export interface Proposal {
   slug: Slug
   summary: I18nText | null
   objectives: I18nText
+  /** HTML RESTREINT — gras, italique, listes, sous-titres, citations, liens.
+   *  Ni police ni couleur : la mise en forme appartient à la charte. L'API
+   *  assainit à l'écriture, une proposition étant rédigée par un tiers. */
   detailed_presentation: I18nText
   expected_outcomes: I18nText | null
-  target_audience: I18nText | null
+  /** Publics visés, UN PAR ENTRÉE. Une seule chaîne ne se réaffiche pas : elle
+   *  s'imprime telle quelle, ne se compte pas et se découpe à la virgule par
+   *  quiconque essaie. Le français reste exigé sur chaque entrée. */
+  target_audiences: I18nText[]
   format: ParticipationMode
   /** Code de la taxonomie `activity_category`. Les thématiques passent par
    *  `reference.entity_terms` (`'programme'`, `'proposals'`, id). */

@@ -1,0 +1,28 @@
+{
+  "title": "Documents",
+  "description": "Presentation, concept note, appendices. Anything that helps the committee judge the file, and nothing that replaces it: the detailed presentation remains the main part.",
+  "choose": "Choose files",
+  "acceptedTypes": "PDF, Word, PowerPoint",
+  "remove": "Remove {file}",
+  "pendingUpload": "Files will be sent to our servers when the submission is sent. They are checked — format, size, virus scan — before being kept.",
+  "empty": {
+    "title": "No document attached",
+    "description": "This step is optional. A submission without attachments is perfectly acceptable."
+  },
+  "fields": {
+    "title": { "label": "Document title" },
+    "type": {
+      "label": "Document type",
+      "placeholder": "Choose a type"
+    },
+    "public": {
+      "label": "Make this document public",
+      "hint": "It will appear on the activity page once the activity is selected and published. Leave off for a document meant for the committee only."
+    }
+  },
+  "errors": {
+    "titleRequired": "Give a title to the document “{file}”.",
+    "fileType": "The file “{file}” is not in an accepted format.",
+    "fileTooLarge": "The file “{file}” exceeds the maximum allowed size."
+  }
+}

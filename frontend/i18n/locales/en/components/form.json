@@ -11,5 +11,15 @@
   },
   "date": {
     "timezoneHint": "Time entered in the event's time zone ({zone})."
+  },
+  "richText": {
+    "toolbar": "Formatting",
+    "bold": "Bold",
+    "italic": "Italic",
+    "bulletList": "Bulleted list",
+    "orderedList": "Numbered list",
+    "blockquote": "Quote",
+    "heading": "Level {level} subheading",
+    "headingShort": "H{level}"
   }
 }

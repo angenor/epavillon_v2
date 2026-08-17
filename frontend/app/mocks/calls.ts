@@ -39,7 +39,16 @@ export const callsForProposals = [
     requires_verified_organization: false,
     min_speakers: 2,
     max_speakers: 6,
-    default_duration_minutes: 90,
+    // Le pavillon tient des séances d'une heure, jamais moins de trois quarts
+    // d'heure ni plus de deux heures et demie, et n'accueille que de 9 h à 17 h.
+    // Ces quatre valeurs sont des données de l'appel depuis le 17/08 : elles
+    // étaient auparavant absentes du modèle, donc invérifiables avant la
+    // planification — c'est-à-dire après l'acceptation du dossier.
+    default_duration_minutes: 60,
+    min_duration_minutes: 45,
+    max_duration_minutes: 150,
+    daily_start_time: '09:00:00',
+    daily_end_time: '17:00:00',
     allowed_formats: ['in_person', 'hybrid', 'online'],
     required_reviews: 3,
     // Évaluation à découvert : le commanditaire souhaite que les membres du
@@ -82,7 +91,11 @@ export const callsForProposals = [
     requires_verified_organization: false,
     min_speakers: 2,
     max_speakers: 6,
-    default_duration_minutes: 90,
+    default_duration_minutes: 60,
+    min_duration_minutes: 45,
+    max_duration_minutes: 150,
+    daily_start_time: '09:00:00',
+    daily_end_time: '17:00:00',
     allowed_formats: ['in_person', 'hybrid', 'online'],
     required_reviews: 3,
     blind_review: false,
@@ -112,7 +125,11 @@ export const callsForProposals = [
     requires_verified_organization: false,
     min_speakers: 2,
     max_speakers: 6,
-    default_duration_minutes: 90,
+    default_duration_minutes: 60,
+    min_duration_minutes: 45,
+    max_duration_minutes: 150,
+    daily_start_time: '09:00:00',
+    daily_end_time: '17:00:00',
     allowed_formats: ['in_person', 'hybrid'],
     required_reviews: 2,
     blind_review: true,

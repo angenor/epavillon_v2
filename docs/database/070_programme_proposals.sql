@@ -100,9 +100,21 @@ CREATE TABLE programme.proposals (
     slug              platform.slug NOT NULL,
     summary           platform.i18n_text,
     objectives        platform.i18n_text NOT NULL,
+    -- TEXTE RICHE : fragment HTML restreint (gras, italique, listes, sous-titres,
+    -- citations, liens), et non du texte brut. Le jeu de balises autorisé est
+    -- celui de l'éditeur du frontend ; l'API l'assainit à l'écriture — une
+    -- proposition est rédigée par un tiers, son contenu n'est jamais de
+    -- confiance. Ni police ni couleur ne sont saisissables : la mise en forme
+    -- appartient à la charte, pas au déposant.
     detailed_presentation platform.i18n_text NOT NULL,
     expected_outcomes platform.i18n_text,
-    target_audience   platform.i18n_text,
+    -- PUBLICS VISÉS, un par entrée. Une seule chaîne « Ministères, ONG,
+    -- journalistes » ne se réaffiche pas : elle s'imprime telle quelle, ne se
+    -- compte pas, ne se filtre pas, et se découpe à la virgule par quiconque
+    -- essaie — ce que la v1 faisait dans ses gabarits. Le tableau de
+    -- `platform.i18n_text` conserve l'exigence du français SUR CHAQUE ENTRÉE,
+    -- la contrainte du domaine s'appliquant élément par élément.
+    target_audiences  platform.i18n_text[] NOT NULL DEFAULT '{}',
 
     format            event.participation_mode NOT NULL,
     -- Type d'activité (side event, journée pays, autre) : code de la taxonomie
@@ -174,7 +186,11 @@ CREATE TRIGGER tg_proposals_audit
     FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
 
 COMMENT ON COLUMN programme.proposals.reference_code IS
-    'Numéro de dossier communiqué à l''organisation. Généré à la soumission, jamais réutilisé.';
+    'Numéro de dossier communiqué à l''organisation. Attribué à la CRÉATION de la ligne par tg_proposals_reference_code (BEFORE INSERT), donc dès le brouillon, et jamais réutilisé : le dossier porte le même numéro avant et après son dépôt.';
+COMMENT ON COLUMN programme.proposals.target_audiences IS
+    'Publics visés, une entrée par public. Tableau de textes multilingues : le français reste exigé sur chacun.';
+COMMENT ON COLUMN programme.proposals.detailed_presentation IS
+    'Présentation détaillée en HTML restreint (mise en forme structurelle seulement). Assainie par l''API à l''écriture ; la police et les couleurs viennent de la charte, jamais du contenu.';
 COMMENT ON COLUMN programme.proposals.requested_sessions IS
     'Nombre d''occurrences demandées. Un cycle de webinaires en déclare plusieurs dès le dépôt.';
 

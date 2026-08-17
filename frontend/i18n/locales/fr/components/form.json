@@ -11,5 +11,15 @@
   },
   "date": {
     "timezoneHint": "Heure saisie dans le fuseau de l'événement ({zone})."
+  },
+  "richText": {
+    "toolbar": "Mise en forme",
+    "bold": "Gras",
+    "italic": "Italique",
+    "bulletList": "Liste à puces",
+    "orderedList": "Liste numérotée",
+    "blockquote": "Citation",
+    "heading": "Sous-titre de niveau {level}",
+    "headingShort": "T{level}"
   }
 }

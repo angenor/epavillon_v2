@@ -1,0 +1,101 @@
+{
+  "title": "Speakers",
+  "description": "The people who will take the floor. Each of them will receive a confirmation email before the activity takes place.",
+  "bounds": "This call requires between {min} and {max} speakers. You have declared {count}.",
+  "add": "Add a speaker",
+  "maxReached": "You have reached the maximum of {max} speakers for this call.",
+  "edit": "Edit {speaker}",
+  "remove": "Remove {speaker}",
+  "moveUp": "Move {speaker} up",
+  "moveDown": "Move {speaker} down",
+  "confirmationNotice": "Naming someone commits them: each person will receive an email asking them to confirm their participation.",
+  "accountBadge": "Platform account",
+
+  "empty": {
+    "title": "No speaker declared",
+    "description": "Add the people who will take part. You can change the list until the submission is sent."
+  },
+
+  "dialog": {
+    "addTitle": "Add a speaker",
+    "editTitle": "Edit speaker",
+    "description": "The email address is used to find the person if they are already known to the platform, and to send their confirmation request.",
+    "foundTitle": "This person is already known to the platform",
+    "foundWithAccount": "They have an account: keeping this profile means using the details they maintain themselves.",
+    "foundWithoutAccount": "They do not have an account yet: you will be able to correct their details if anything has changed.",
+    "useProfile": "Use this profile",
+    "lockedTitle": "Platform profile selected",
+    "lockedDescription": "This person's identity belongs to them: only the account holder, or IFDD, can change it. Their position and organization FOR THIS ACTIVITY remain yours to set, as does their role. You can also remove them from the submission.",
+    "linkedTitle": "Known person selected",
+    "linkedDescription": "They have spoken elsewhere without holding an account: you can correct their details. Once the activity is approved, these will no longer be editable from this submission.",
+    "detach": "Enter another person",
+    "unknownPerson": "This address is unknown to the platform: the person will be created when your submission is saved."
+  },
+
+  "fields": {
+    "email": {
+      "label": "Email address",
+      "hint": "It will not be published. It identifies the person and lets us write to them."
+    },
+    "civility": { "label": "Title", "placeholder": "Choose" },
+    "first_name": { "label": "First name" },
+    "last_name": { "label": "Last name" },
+    "job_title": {
+      "label": "Position",
+      "hint": "As it stands at the time of the activity: it is kept in the archive."
+    },
+    "organization": {
+      "label": "Organization",
+      "hint": "The one the person represents for this activity."
+    },
+    "role": {
+      "label": "Role in the activity",
+      "hint": "It will appear in the programme."
+    },
+    "bio": {
+      "label": "Biographical note",
+      "hint": "A few lines, in French. It accompanies the name on the public activity page.",
+      "locked": "This note belongs to the person's profile: only they can change it."
+    }
+  },
+
+  "civilities": {
+    "mme": "Ms",
+    "m": "Mr",
+    "dr": "Dr",
+    "pr": "Prof.",
+    "other": "Other"
+  },
+
+  "roles": {
+    "speaker": { "label": "Speaker", "hint": "Speaks on substance" },
+    "moderator": { "label": "Moderator", "hint": "Runs the discussion" },
+    "panelist": { "label": "Panellist", "hint": "Takes part in a round table" },
+    "keynote": { "label": "Keynote", "hint": "Opening or closing address" },
+    "facilitator": { "label": "Facilitator", "hint": "Leads a participatory workshop" },
+    "interpreter": { "label": "Interpreter", "hint": "Provides interpretation" }
+  },
+
+  "photo": {
+    "label": "Photograph",
+    "hint": "Portrait, image format, 5 MB at most. It is attached to the person, not to this submission: it will serve their future participations too.",
+    "choose": "Choose a photograph",
+    "remove": "Remove the photograph",
+    "previewAlt": "Photograph of {speaker}",
+    "locked": "The photograph comes from the person's profile: only they can replace it.",
+    "typeError": "This file is not an image.",
+    "sizeError": "The photograph exceeds the maximum size of {size}."
+  },
+
+  "errors": {
+    "tooFew": "This call requires at least {min} speaker. | This call requires at least {min} speaker. | This call requires at least {min} speakers.",
+    "tooMany": "This call accepts at most {max} speaker. | This call accepts at most {max} speaker. | This call accepts at most {max} speakers.",
+    "nameRequired": "Speaker {position}: first name and last name are required.",
+    "emailInvalid": "{speaker}: the email address is missing or malformed.",
+    "emailDuplicate": "The address {email} appears twice in the list.",
+    "civilityRequired": "{speaker}: a title is required.",
+    "jobTitleRequired": "{speaker}: the position is required.",
+    "organizationRequired": "{speaker}: the organization is required."
+  }
+
+}

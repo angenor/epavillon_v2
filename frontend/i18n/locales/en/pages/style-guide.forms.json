@@ -67,5 +67,11 @@
   "search": {
     "label": "Search for an organization",
     "hint": "Type at least two letters. The search covers every name on record: the full name and the acronym alone return the same record."
+  },
+  "richText": {
+    "title": "Rich text",
+    "note": "Structure only — bold, italic, subheadings, lists, quote. No font, size or colour: formatting belongs to the style guide, never to whoever types. The counter measures TEXT, not markup.",
+    "label": "Detailed presentation",
+    "hint": "The same stylesheet dresses both editing and reading."
   }
 }

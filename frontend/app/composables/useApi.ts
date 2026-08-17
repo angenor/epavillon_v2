@@ -48,6 +48,12 @@ import type {
   JoinOrganizationResult,
   OrganizationSearchQuery,
 } from '~/types/organization-join'
+import type {
+  SaveDraftPayload,
+  SaveDraftResult,
+  SubmitProposalPayload,
+  SubmitProposalResult,
+} from '~/types/proposal-form'
 import type { Uuid } from '~/types/shared'
 
 /** Erreur d'accès, à traduire par l'écran « accès refusé ». */
@@ -455,6 +461,62 @@ export function useApi() {
         ),
       history: (id: Uuid) =>
         call(`/proposals/${id}/transitions`, (m) => m.proposalTransitions.filter((t) => t.proposal_id === id)),
+      /**
+       * OÙ L'ON DÉPOSE AUJOURD'HUI, et ce que l'organisation a déjà déposé.
+       *
+       * Le formulaire de soumission (A4) ne choisit pas son édition : il y en a
+       * au plus une dont l'appel est ouvert (`ux_calls_one_per_event` et
+       * `event.is_call_open()`). Ce contexte porte aussi le décompte du plafond
+       * `max_proposals_per_organization`, que le trigger de recevabilité
+       * appliquera de toute façon — l'écran doit pouvoir le dire AVANT sept
+       * étapes de saisie, pas après.
+       */
+      formContext: (personId: Uuid, organizationIds: Uuid[]) =>
+        call('/proposals/form-context', (m) => m.proposalFormContext(personId, organizationIds), {
+          organization_ids: organizationIds.join(','),
+        }),
+
+      /** Brouillon en cours de la personne, pour reprendre où elle s'est arrêtée. */
+      myDraft: (personId: Uuid) =>
+        call('/proposals/draft', (m) => m.draftProposalOf(personId)),
+
+      /**
+       * ENREGISTREMENT AUTOMATIQUE. Le premier appel CRÉE la ligne et rend son
+       * numéro de dossier — `tg_assign_reference_code` s'exécute à l'insertion,
+       * pas au dépôt. Les suivants ne font que dater.
+       */
+      saveDraft: (personId: Uuid, payload: SaveDraftPayload): Promise<SaveDraftResult> =>
+        send(
+          payload.proposal_id ? `/proposals/${payload.proposal_id}` : '/proposals',
+          payload,
+          (m) => m.saveProposalDraft(personId, payload),
+          payload.proposal_id ? 'PUT' : 'POST',
+        ),
+
+      /**
+       * DÉPÔT — la transition `draft → submitted`. Les deux refus possibles sont
+       * ceux de `tg_check_submission_eligibility()` : appel clos, plafond
+       * atteint. Ils ne sont pas des erreurs de réseau mais des réponses, et
+       * l'écran les rend comme telles.
+       */
+      submit: (personId: Uuid, payload: SubmitProposalPayload): Promise<SubmitProposalResult> =>
+        send(`/proposals/${payload.proposal_id}/submit`, payload, (m) =>
+          m.submitProposal(personId, payload),
+        ),
+
+      /**
+       * LA PERSONNE QUI PORTE CETTE ADRESSE, si la plateforme la connaît.
+       *
+       * Même intention que `organizations.similar()` : ne pas créer une seconde
+       * fiche pour quelqu'un qui existe déjà. La clé est l'adresse et rien
+       * d'autre — `people.primary_email` est la clé de rapprochement du modèle,
+       * et chercher par nom rapprocherait deux homonymes, ce qui est pire qu'un
+       * doublon. Aucun appel ne rend l'annuaire entier : une plateforme ne
+       * diffuse pas sa liste de contacts pour remplir un formulaire.
+       */
+      lookupSpeaker: (email: string) =>
+        call('/people/lookup', (m) => m.lookupSpeakerByEmail(email), { email }),
+
       themes: (id: Uuid) =>
         call(`/proposals/${id}/themes`, (m) => {
           const termIds = new Set(

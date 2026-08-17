@@ -161,7 +161,7 @@ useHead(() => ({
         :call="data.call"
         :edition="data.edition"
         criteria-href="#criteres"
-        :submit-to="localePath('/deposer-une-proposition')"
+        :submit-to="localePath('proposal-form')"
       />
 
       <EventSpecialDays

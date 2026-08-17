@@ -1,0 +1,44 @@
+{
+  "title": "Presenting the activity",
+  "description": "This is the text the committee reads, and the one that will appear in the programme if the activity is selected.",
+  "frenchNotice": "Write in French: it is the platform's reference language. IFDD handles the translation of selected activities.",
+  "fields": {
+    "title": {
+      "label": "Activity title",
+      "hint": "Short and explicit. It will be used as is in the programme and on printed material."
+    },
+    "summary": {
+      "label": "Summary",
+      "hint": "Two or three sentences. This is what appears on the activity card in the public programme."
+    },
+    "objectives": {
+      "label": "Objectives",
+      "hint": "What the activity seeks to achieve. The committee assesses relevance to IFDD's priorities."
+    },
+    "detailed_presentation": {
+      "label": "Detailed presentation",
+      "hint": "The run of show, the method, the questions addressed. This is the main part of the file. You may structure the text: subheadings, lists, bold — the layout follows the platform's style guide."
+    },
+    "expected_outcomes": {
+      "label": "Expected outcomes",
+      "hint": "What remains afterwards: a document, a commitment, a network, a decision."
+    },
+    "target_audience": {
+      "label": "Target audiences",
+      "hint": "Add them one at a time: delegations, civil society, researchers, journalists… They will be shown separately on the activity page.",
+      "placeholder": "One audience, then Enter",
+      "add": "Add this audience",
+      "duplicate": "This audience is already in the list."
+    }
+  },
+  "errors": {
+    "titleRequired": "The activity title is required.",
+    "objectivesRequired": "Objectives are required.",
+    "detailed_presentationRequired": "The detailed presentation is required."
+  },
+  "warnings": {
+    "summaryMissing": "Without a summary, your activity card will be silent in the public programme.",
+    "expected_outcomesMissing": "Expected outcomes weigh in the committee's score: the “impact” criterion is about them.",
+    "target_audienceMissing": "Stating the target audiences helps the committee place the activity and build thematic days."
+  }
+}
