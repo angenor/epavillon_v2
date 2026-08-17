@@ -192,7 +192,20 @@ export const PERSON = {
   compaore: uuid('7005', 23),
   lambert: uuid('7005', 24),
   ilboudo: uuid('7005', 25),
+  // Inscrite au prompt A1 : compte créé, adresse pas encore vérifiée.
+  nouvelInscrit: uuid('7005', 26),
 } as const
+
+/** `identity.accounts` — un compte mot de passe par personne connectée (A1). */
+export const ACCOUNT = (n: number): Uuid => uuid('7007', n)
+
+/**
+ * `identity.one_time_tokens` — vérification d'adresse et réinitialisation de mot
+ * de passe (prompt A1). Ces identifiants sont ceux des LIGNES ; le jeton porté
+ * par le lien du courriel est une chaîne à part, déclarée dans `mocks/auth.ts`,
+ * car la base n'en garde que l'empreinte.
+ */
+export const ONE_TIME_TOKEN = (n: number): Uuid => uuid('7008', n)
 
 /** `identity.role_assignments`. */
 export const ROLE_ASSIGNMENT = (n: number): Uuid => uuid('7006', n)

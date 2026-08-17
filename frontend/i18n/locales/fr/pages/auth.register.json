@@ -1,0 +1,29 @@
+{
+  "title": "Créer un compte",
+  "description": "Cinq informations suffisent. Vous compléterez votre profil ensuite.",
+  "fields": {
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "Adresse électronique",
+    "emailHint": "Elle servira d'identifiant et recevra le lien de vérification. Préférez votre adresse professionnelle.",
+    "country": "Pays",
+    "countryHint": "Le pays depuis lequel vous participez.",
+    "countryPlaceholder": "Choisir un pays",
+    "password": "Mot de passe",
+    "passwordHint": "Huit caractères au moins, dont une majuscule et une minuscule."
+  },
+  "legal": {
+    "text": "En créant un compte, vous acceptez les {terms} et la {privacy} de la plateforme.",
+    "terms": "conditions d'utilisation",
+    "privacy": "politique de confidentialité"
+  },
+  "nextStep": "Le rattachement à votre organisation est l'étape suivante : elle se fait après la vérification de votre adresse, et peut être reprise à tout moment depuis votre profil.",
+  "submit": "Créer mon compte",
+  "haveAccount": "Vous avez déjà un compte ?",
+  "signIn": "Se connecter",
+  "states": {
+    "referenceError": "La liste des pays n'a pas pu être chargée. Sans elle, le formulaire ne peut pas être rempli.",
+    "emptyTitle": "Liste des pays indisponible",
+    "emptyDescription": "Le référentiel des pays ne renvoie aucune entrée. La création de compte reprendra dès qu'il sera rétabli."
+  }
+}

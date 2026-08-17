@@ -41,13 +41,23 @@ function person(
     status_reason?: string | null
     suspended_until?: string | null
     is_directory_visible?: boolean
+    /**
+     * Adresse vérifiée ? Vrai par défaut. Passer `false` décrit un compte créé
+     * dont le lien de vérification n'a pas encore été suivi — l'état dans lequel
+     * se trouve toute personne entre l'inscription et son premier clic
+     * (prompt A1). Sans ce cas, la connexion d'un compte non vérifié ne serait
+     * jamais éprouvée.
+     */
+    email_verified?: boolean
     created_at: string
   },
 ): Person {
+  const isVerified = fields.email_verified ?? fields.status !== 'suspended'
+
   return {
     id,
     primary_email,
-    email_verified_at: fields.status === 'suspended' ? null : fields.created_at,
+    email_verified_at: isVerified ? fields.created_at : null,
     first_name,
     last_name,
     civility: fields.civility ?? null,
@@ -335,6 +345,22 @@ export const people = [
     timezone: 'Africa/Ouagadougou',
     organization: null,
     created_at: '2026-07-14T20:30:00Z',
+  }),
+  // Compte créé, adresse PAS ENCORE VÉRIFIÉE, aucune organisation : l'état exact
+  // dans lequel le prompt A1 laisse une personne au sortir de l'inscription, et
+  // celui que le prompt A2 reprendra pour le rattachement. Ajouté avec A1 —
+  // sans lui, ni l'écran de vérification ni la connexion d'un compte non vérifié
+  // n'auraient de donnée à montrer.
+  person(PERSON.nouvelInscrit, 'Aïcha', 'Traoré', 'aicha.traore@example.org', {
+    civility: 'mme',
+    job_title: 'Chargée de plaidoyer climat',
+    country_id: COUNTRY.ml,
+    city: 'Bamako',
+    timezone: 'Africa/Bamako',
+    organization: null,
+    email_verified: false,
+    is_directory_visible: false,
+    created_at: '2026-08-14T16:20:00Z',
   }),
 ] satisfies Person[]
 

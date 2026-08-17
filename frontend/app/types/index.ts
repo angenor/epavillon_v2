@@ -30,9 +30,11 @@
  * par le jalon est couverte : le bandeau d'incident, motif transverse de toute
  * la plateforme (voir l'en-tête de `live.ts`).
  *
- * `navigation.ts` et `ui.ts` ne sont PAS ré-exportés : ils ne décrivent pas le
- * modèle. Le premier porte une augmentation de `PageMeta` que les layouts
- * importent directement, le second le vocabulaire des composants d'interface.
+ * `navigation.ts`, `ui.ts` et `auth.ts` ne sont PAS ré-exportés : ils ne
+ * décrivent pas le modèle. Le premier porte une augmentation de `PageMeta` que
+ * les layouts importent directement, le deuxième le vocabulaire des composants
+ * d'interface, le troisième les contrats d'authentification échangés avec l'API
+ * (prompt A1) — requêtes et réponses, sans aucune table.
  */
 
 export type * from './shared'

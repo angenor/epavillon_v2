@@ -1,0 +1,31 @@
+{
+  "title": "Address verification",
+  "checking": "Checking the link",
+  "sent": {
+    "title": "Verify your address",
+    "description": "A verification link has been sent to {email}. Open it to activate your account.",
+    "checkSpam": "The email sometimes takes a few minutes to arrive. Remember to look in your junk folder.",
+    "resend": "Send the link again",
+    "resendIn": "Send the link again ({seconds} s)",
+    "resendHint": "A new link can be requested every 60 seconds. The previous one then stops working.",
+    "resent": "A new link has just been sent.",
+    "wrongAddress": "Wrong address?",
+    "startOver": "Start registration over"
+  },
+  "verified": {
+    "title": "Address verified",
+    "description": "The address {email} is confirmed. You can now sign in.",
+    "signIn": "Sign in"
+  },
+  "rejected": {
+    "invalid": "This verification link is not valid. Your email software may have broken it: open it from the message rather than copying it out.",
+    "expired": "This verification link has expired. Sign in to receive a new one.",
+    "already_used": "This address has already been verified. All that is left is to sign in.",
+    "action": "Go to sign-in"
+  },
+  "empty": {
+    "title": "No link to check",
+    "description": "This page confirms an address from the link received by email. Open that link from your mailbox.",
+    "action": "Go to sign-in"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "password": {
+    "show": "Show password",
+    "hide": "Hide password"
+  },
+  "strength": {
+    "label": "Password strength",
+    "requirements": {
+      "length": "At least {min} characters",
+      "uppercase": "One capital letter",
+      "lowercase": "One lowercase letter",
+      "special": "One special character",
+      "optionalSuffix": "(optional)"
+    },
+    "level": {
+      "empty": "No password entered",
+      "incomplete": "Requirements not met",
+      "weak": "Weak",
+      "fair": "Fair",
+      "good": "Good",
+      "strong": "Strong"
+    },
+    "advice": {
+      "lengthen": "A longer password protects better than a complicated one.",
+      "addVariety": "A digit or a punctuation mark would strengthen such a short password.",
+      "avoidCommon": "This password contains a very common word — it is in the first lists anyone tries.",
+      "avoidRepeat": "Avoid repeating the same character several times in a row.",
+      "avoidSequence": "Avoid runs of consecutive keys or letters."
+    }
+  },
+  "mfa": {
+    "title": "Two-step verification",
+    "notImplemented": "This account requires a verification code. The step is not open yet on this version of the platform: sign in with another account, or write to support.",
+    "codeLabel": "Verification code",
+    "codeHint": "Six digits, from your authenticator app.",
+    "back": "Back to sign-in"
+  },
+  "signedIn": {
+    "title": "You are already signed in",
+    "description": "This page is meant for people who are not signed in yet.",
+    "account": "Current account",
+    "continue": "Continue",
+    "signOut": "Sign out to switch account"
+  }
+}

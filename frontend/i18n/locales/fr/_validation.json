@@ -16,7 +16,7 @@
   "dateAfter": "La date doit être postérieure au {date}.",
   "dateBefore": "La date doit être antérieure au {date}.",
   "endAfterStart": "La fin doit être postérieure au début.",
-  "passwordTooWeak": "Le mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule et un chiffre.",
+  "passwordTooWeak": "Le mot de passe doit contenir au moins {min} caractères, dont une majuscule et une minuscule.",
   "passwordMismatch": "Les deux mots de passe ne correspondent pas.",
   "fileTooLarge": "Ce fichier dépasse la taille maximale de {size}.",
   "fileType": "Ce format de fichier n'est pas accepté. Formats acceptés : {types}.",

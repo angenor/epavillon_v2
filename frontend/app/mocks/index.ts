@@ -12,8 +12,10 @@
  *   reference.ts         pays, locales, taxonomies, rattachement aux thématiques
  *   org.ts               13 fiches d'organisation, dont DEUX EN DOUBLON
  *   memberships.ts       les adhésions, avec un cas en attente et un révoqué
- *   people.ts            25 personnes, leurs rôles, dont une administratrice
+ *   people.ts            26 personnes, leurs rôles, dont une administratrice
  *                        limitée à la seule COP31
+ *   auth.ts              les comptes, les jetons de courriel et la logique de
+ *                        connexion que l'API portera (prompt A1)
  *   event.ts             la série, l'édition COP31, ses douze jours
  *   rooms.ts             le pavillon, ses trois salles, son canal de diffusion
  *   tracks.ts            les deux journées spéciales
@@ -33,6 +35,17 @@ export { locales, countries, taxonomies, taxonomyTerms, entityTerms } from './re
 export { organizations, organizationNames, organizationDomains, duplicateCandidates } from './org'
 export { memberships } from './memberships'
 export { people, roleAssignments } from './people'
+
+export {
+  accounts,
+  oneTimeTokens,
+  DEMO_PASSWORD,
+  authenticate,
+  registerPerson,
+  verifyEmailToken,
+  checkPasswordResetToken,
+  resetPassword,
+} from './auth'
 export { eventSeries, events, eventDays } from './event'
 export { venues, rooms, broadcastChannels } from './rooms'
 export { programmeTracks } from './tracks'

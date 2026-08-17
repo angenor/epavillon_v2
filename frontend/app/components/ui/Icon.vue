@@ -80,6 +80,10 @@ const PATHS: Record<string, string> = {
   grid: 'M4.5 4.5h5.5v5.5H4.5ZM14 4.5h5.5v5.5H14ZM4.5 14h5.5v5.5H4.5ZM14 14h5.5v5.5H14Z',
   chart: 'M4 20V4M4 20h16M8 16.5V11M12.5 16.5V7M17 16.5v-3.5',
   inbox: 'M4 12.5 6.2 5.3a.8.8 0 0 1 .8-.6h10a.8.8 0 0 1 .8.6L20 12.5v6.2a.8.8 0 0 1-.8.8H4.8a.8.8 0 0 1-.8-.8v-6.2ZM4 12.5h4l1.2 2.4h5.6L16 12.5h4',
+  // Enveloppe : un courriel envoyé — vérification d'adresse, lien de
+  // réinitialisation. À ne pas confondre avec `inbox`, qui figure une CORBEILLE
+  // de travail à traiter, pas un message en transit.
+  mail: 'M4 6.5h16a.8.8 0 0 1 .8.8v9.4a.8.8 0 0 1-.8.8H4a.8.8 0 0 1-.8-.8V7.3a.8.8 0 0 1 .8-.8ZM3.5 7.6 12 13.2l8.5-5.6',
 
   // — Thème d'affichage
   sun: 'M12 16.2a4.2 4.2 0 1 0 0-8.4 4.2 4.2 0 0 0 0 8.4ZM12 2.6v2.2M12 19.2v2.2M4.2 12H2M22 12h-2.2M6.3 6.3 4.8 4.8M19.2 19.2l-1.5-1.5M17.7 6.3l1.5-1.5M4.8 19.2l1.5-1.5',
@@ -96,6 +100,11 @@ const PATHS: Record<string, string> = {
   upload: 'M12 15V4M7.5 8.5 12 4l4.5 4.5M4.5 19.5h15',
   refresh: 'M20 12a8 8 0 1 1-2.6-5.9M20 4v4.5h-4.5',
   eye: 'M12 5.5c4.4 0 8 3.3 9.2 6.5-1.2 3.2-4.8 6.5-9.2 6.5S4 15.2 2.8 12C4 8.8 7.6 5.5 12 5.5ZM12 14.8a2.8 2.8 0 1 0 0-5.6 2.8 2.8 0 0 0 0 5.6Z',
+  // Œil barré : masquer un mot de passe révélé. La barre traverse tout le
+  // glyphe — un œil « fermé » dessiné en trait fin se confond avec l'œil ouvert
+  // à 16 px, et le bouton devient impossible à lire d'un coup d'œil.
+  'eye-off':
+    'M6.5 6.7C4.7 8 3.5 9.9 2.8 12c1.2 3.2 4.8 6.5 9.2 6.5 1.4 0 2.7-.3 3.8-.9M9.9 9.9a2.8 2.8 0 0 0 3.9 3.9M10.2 5.7A9.9 9.9 0 0 1 12 5.5c4.4 0 8 3.3 9.2 6.5-.6 1.5-1.6 3-3 4.2M4 4l16 16',
   copy: 'M9 9.8a.8.8 0 0 1 .8-.8h9.4a.8.8 0 0 1 .8.8v9.4a.8.8 0 0 1-.8.8H9.8a.8.8 0 0 1-.8-.8V9.8ZM6 15H4.8a.8.8 0 0 1-.8-.8V4.8a.8.8 0 0 1 .8-.8h9.4a.8.8 0 0 1 .8.8V6',
   drag: 'M9 6.5h.01M15 6.5h.01M9 12h.01M15 12h.01M9 17.5h.01M15 17.5h.01',
   'sort-asc': 'M8 18V6M4.5 9.5 8 6l3.5 3.5M14 8h6M14 12h4.5M14 16h3',

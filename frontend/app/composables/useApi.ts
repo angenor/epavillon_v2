@@ -26,7 +26,18 @@
  * ne se voient jamais et finissent par ne plus être écrits.
  */
 
-import type { AdministeredEvents } from '~/types/identity'
+import type { AdministeredEvents, Person } from '~/types/identity'
+import type {
+  LoginPayload,
+  LoginResult,
+  PasswordResetRequestResult,
+  PasswordResetResult,
+  RegisterPayload,
+  RegisterResult,
+  ResendVerificationResult,
+  TokenCheckResult,
+  VerifyEmailResult,
+} from '~/types/auth'
 import type { Uuid } from '~/types/shared'
 
 /** Erreur d'accès, à traduire par l'écran « accès refusé ». */
@@ -45,7 +56,18 @@ const MOCK_LATENCY_MS = 120
 export function useApi() {
   const config = useRuntimeConfig()
   const baseURL = String(config.public.apiBase ?? '')
-  const { locale } = useI18n()
+  /**
+   * La locale vient de l'instance i18n de l'application, PAS de `useI18n()`.
+   *
+   * `useI18n()` exige d'être appelé au sommet d'un `setup` et lève sinon
+   * « Must be called at the top of a `setup` function ». Or ce composable est
+   * consommé depuis un store initialisé par un middleware de navigation
+   * (`stores/auth.ts`, chargé par `middleware/guest.ts`) : hors de tout
+   * composant. L'instance injectée, elle, est disponible partout où le contexte
+   * Nuxt l'est — et c'est la même.
+   */
+  const { $i18n } = useNuxtApp()
+  const locale = $i18n.locale
 
   const isConfigured = computed(() => baseURL.length > 0)
 
@@ -79,6 +101,40 @@ export function useApi() {
     return fromMocks(mocks)
   }
 
+  /**
+   * Une ÉCRITURE : même principe que `call`, mais avec un verbe et un corps.
+   *
+   * Déclarée à part plutôt qu'en option de `call` pour une raison de lecture :
+   * on voit d'un coup d'œil, dans ce fichier, ce qui interroge la plateforme et
+   * ce qui la modifie. Les données simulées étant en lecture seule, la « lecture
+   * simulée » d'une écriture calcule la RÉPONSE que l'API rendra — c'est
+   * exactement ce dont l'écran a besoin pour se comporter juste.
+   */
+  async function send<T>(
+    path: string,
+    body: object,
+    fromMocks: (m: Mocks) => T | Promise<T>,
+    method: 'POST' | 'PUT' | 'PATCH' | 'DELETE' = 'POST',
+  ): Promise<T> {
+    if (isConfigured.value) {
+      // `object` et non `Record<string, unknown>` : une INTERFACE n'a pas de
+      // signature d'index implicite, et `LoginPayload` serait refusé — le même
+      // écueil que la contrainte générique de `UiTable`. La conversion est sûre,
+      // un corps de requête étant toujours sérialisé en JSON.
+      return client<T>(path, { method, body: body as Record<string, unknown> })
+    }
+
+    const mocks = await import('~/mocks')
+    if (import.meta.client && MOCK_LATENCY_MS > 0) {
+      // Une écriture attend plus longtemps qu'une lecture : c'est pendant ce
+      // temps-là que le bouton doit se désactiver et afficher son témoin. Sans
+      // cette latence, l'état de chargement d'un formulaire ne se voit jamais et
+      // finit par ne plus être écrit.
+      await new Promise((resolve) => setTimeout(resolve, MOCK_LATENCY_MS * 3))
+    }
+    return fromMocks(mocks)
+  }
+
   /** Refuse l'accès à une édition hors périmètre, plutôt que de rendre une liste vide. */
   function assertEventInScope(eventId: Uuid, scope: AdministeredEvents): void {
     if (!scope.is_global && !scope.event_ids.includes(eventId)) {
@@ -94,6 +150,57 @@ export function useApi() {
     client,
     ForbiddenError,
     assertEventInScope,
+
+    // -----------------------------------------------------------------------
+    // Authentification (A1)
+    //
+    // Les cinq écrans d'authentification passent par ici, et par rien d'autre.
+    // Deux règles s'y jouent, l'une et l'autre invisibles depuis les pages :
+    //
+    //  · DISCRÉTION — `register` et `requestPasswordReset` rendent TOUJOURS la
+    //    même réponse, adresse connue ou non. Rien dans le contrat ne permet
+    //    d'écrire un écran bavard, même par inadvertance.
+    //  · SESSION — l'API pose un cookie `HttpOnly` que le navigateur renvoie
+    //    seul (`credentials: 'include'`, plus haut). Tant qu'elle n'existe pas,
+    //    le store d'authentification tient un cookie ordinaire et passe
+    //    l'identifiant à `session()` ; ce paramètre disparaîtra au prompt B7,
+    //    l'API lisant sa propre session.
+    // -----------------------------------------------------------------------
+    auth: {
+      login: (payload: LoginPayload): Promise<LoginResult> =>
+        send('/auth/login', payload, (m) => m.authenticate(payload)),
+
+      logout: (): Promise<{ status: 'signed_out' }> =>
+        send('/auth/logout', {}, () => ({ status: 'signed_out' as const })),
+
+      /** Personne connectée, ou `null` si la session n'existe plus. */
+      session: (personId: Uuid | null): Promise<Person | null> =>
+        call('/auth/me', (m) =>
+          personId === null ? null : (m.people.find((p) => p.id === personId) ?? null),
+        ),
+
+      register: (payload: RegisterPayload): Promise<RegisterResult> =>
+        send('/auth/register', payload, (m) => m.registerPerson(payload)),
+
+      /** Vérification de l'adresse depuis le lien reçu par courriel. */
+      verifyEmail: (token: string): Promise<VerifyEmailResult> =>
+        send('/auth/verify-email', { token }, (m) => m.verifyEmailToken(token)),
+
+      /** Renvoi du lien de vérification. Réponse invariable. */
+      resendVerification: (email: string): Promise<ResendVerificationResult> =>
+        send('/auth/verify-email/resend', { email }, () => ({ status: 'sent' as const })),
+
+      /** Demande de réinitialisation. Réponse invariable, compte existant ou non. */
+      requestPasswordReset: (email: string): Promise<PasswordResetRequestResult> =>
+        send('/auth/password-reset', { email }, () => ({ status: 'sent' as const })),
+
+      /** Contrôle du jeton AVANT d'afficher le formulaire de nouveau mot de passe. */
+      checkPasswordResetToken: (token: string): Promise<TokenCheckResult> =>
+        call('/auth/password-reset/check', (m) => m.checkPasswordResetToken(token), { token }),
+
+      resetPassword: (token: string, password: string): Promise<PasswordResetResult> =>
+        send('/auth/password-reset/confirm', { token, password }, (m) => m.resetPassword(token)),
+    },
 
     // -----------------------------------------------------------------------
     // Référentiel

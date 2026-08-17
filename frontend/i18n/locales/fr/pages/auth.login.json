@@ -1,0 +1,34 @@
+{
+  "title": "Se connecter",
+  "description": "Accédez à votre espace pour déposer une activité, suivre vos dossiers et gérer votre organisation.",
+  "fields": {
+    "email": "Adresse électronique",
+    "emailPlaceholder": "prenom.nom{'@'}organisation.org",
+    "password": "Mot de passe"
+  },
+  "forgotPassword": "Mot de passe oublié ?",
+  "rememberMe": "Rester connecté sur cet appareil",
+  "rememberMeHint": "À éviter sur un ordinateur partagé.",
+  "submit": "Se connecter",
+  "noAccount": "Vous n'avez pas encore de compte ?",
+  "createAccount": "Créer un compte",
+  "errors": {
+    "invalid": {
+      "title": "Connexion impossible",
+      "message": "L'adresse ou le mot de passe ne correspond pas. Vérifiez votre saisie, puis réessayez."
+    },
+    "locked": {
+      "title": "Compte temporairement verrouillé",
+      "message": "Après plusieurs tentatives infructueuses, l'accès est suspendu quelques minutes. Réessayez plus tard ou réinitialisez votre mot de passe."
+    },
+    "suspended": {
+      "title": "Compte suspendu",
+      "message": "L'accès à ce compte a été suspendu par l'administration de la plateforme. Écrivez à l'assistance pour connaître la marche à suivre."
+    },
+    "unverified": {
+      "title": "Adresse non vérifiée",
+      "message": "Votre adresse doit être vérifiée avant la première connexion. Le lien vous a été envoyé au moment de l'inscription.",
+      "action": "Renvoyer le lien de vérification"
+    }
+  }
+}

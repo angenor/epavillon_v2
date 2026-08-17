@@ -1,0 +1,31 @@
+{
+  "title": "Vérification de l'adresse",
+  "checking": "Vérification du lien en cours",
+  "sent": {
+    "title": "Vérifiez votre adresse",
+    "description": "Un lien de vérification a été envoyé à {email}. Ouvrez-le pour activer votre compte.",
+    "checkSpam": "Le courriel met parfois quelques minutes à arriver. Pensez à regarder dans les indésirables.",
+    "resend": "Renvoyer le lien",
+    "resendIn": "Renvoyer le lien ({seconds} s)",
+    "resendHint": "Un nouveau lien peut être demandé toutes les 60 secondes. Le lien précédent cesse alors de fonctionner.",
+    "resent": "Un nouveau lien vient d'être envoyé.",
+    "wrongAddress": "Ce n'est pas la bonne adresse ?",
+    "startOver": "Recommencer l'inscription"
+  },
+  "verified": {
+    "title": "Adresse vérifiée",
+    "description": "L'adresse {email} est confirmée. Vous pouvez maintenant vous connecter.",
+    "signIn": "Se connecter"
+  },
+  "rejected": {
+    "invalid": "Ce lien de vérification n'est pas valide. Il a peut-être été coupé par votre logiciel de messagerie : ouvrez-le depuis le courriel plutôt qu'en le recopiant.",
+    "expired": "Ce lien de vérification a expiré. Connectez-vous pour en recevoir un nouveau.",
+    "already_used": "Cette adresse a déjà été vérifiée. Il ne reste qu'à vous connecter.",
+    "action": "Aller à la connexion"
+  },
+  "empty": {
+    "title": "Aucun lien à vérifier",
+    "description": "Cette page confirme une adresse à partir du lien reçu par courriel. Ouvrez ce lien depuis votre boîte aux lettres.",
+    "action": "Aller à la connexion"
+  }
+}

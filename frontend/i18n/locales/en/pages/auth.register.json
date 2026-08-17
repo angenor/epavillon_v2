@@ -1,0 +1,29 @@
+{
+  "title": "Create an account",
+  "description": "Five details are enough. You will complete your profile afterwards.",
+  "fields": {
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email address",
+    "emailHint": "It will be your sign-in name and will receive the verification link. Your work address is preferable.",
+    "country": "Country",
+    "countryHint": "The country you are taking part from.",
+    "countryPlaceholder": "Choose a country",
+    "password": "Password",
+    "passwordHint": "At least eight characters, with one capital and one lowercase letter."
+  },
+  "legal": {
+    "text": "By creating an account, you accept the platform's {terms} and {privacy}.",
+    "terms": "terms of use",
+    "privacy": "privacy policy"
+  },
+  "nextStep": "Linking your organization is the next step: it comes after your address is verified, and can be resumed at any time from your profile.",
+  "submit": "Create my account",
+  "haveAccount": "Already have an account?",
+  "signIn": "Sign in",
+  "states": {
+    "referenceError": "The list of countries could not be loaded. Without it, the form cannot be completed.",
+    "emptyTitle": "Country list unavailable",
+    "emptyDescription": "The country reference data returns no entry. Account creation will resume once it is restored."
+  }
+}

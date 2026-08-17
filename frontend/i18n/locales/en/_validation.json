@@ -16,7 +16,7 @@
   "dateAfter": "The date must be after {date}.",
   "dateBefore": "The date must be before {date}.",
   "endAfterStart": "The end must come after the start.",
-  "passwordTooWeak": "The password must be at least 12 characters long and include an uppercase letter, a lowercase letter and a digit.",
+  "passwordTooWeak": "The password must be at least {min} characters long, with one capital and one lowercase letter.",
   "passwordMismatch": "The two passwords do not match.",
   "fileTooLarge": "This file exceeds the maximum size of {size}.",
   "fileType": "This file format is not accepted. Accepted formats: {types}.",

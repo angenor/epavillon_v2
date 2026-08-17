@@ -1,0 +1,45 @@
+{
+  "password": {
+    "show": "Afficher le mot de passe",
+    "hide": "Masquer le mot de passe"
+  },
+  "strength": {
+    "label": "Robustesse du mot de passe",
+    "requirements": {
+      "length": "{min} caractères au moins",
+      "uppercase": "Une majuscule",
+      "lowercase": "Une minuscule",
+      "special": "Un caractère spécial",
+      "optionalSuffix": "(facultatif)"
+    },
+    "level": {
+      "empty": "Aucun mot de passe saisi",
+      "incomplete": "Conditions non remplies",
+      "weak": "Faible",
+      "fair": "Moyen",
+      "good": "Bon",
+      "strong": "Solide"
+    },
+    "advice": {
+      "lengthen": "Un mot de passe plus long protège mieux qu'un mot de passe compliqué.",
+      "addVariety": "Un chiffre ou une ponctuation renforcerait un mot de passe aussi court.",
+      "avoidCommon": "Ce mot de passe contient un mot trop courant : il figure dans les premières listes essayées.",
+      "avoidRepeat": "Évitez de répéter le même caractère plusieurs fois de suite.",
+      "avoidSequence": "Évitez les suites de touches ou de lettres consécutives."
+    }
+  },
+  "mfa": {
+    "title": "Validation en deux étapes",
+    "notImplemented": "Ce compte demande un code de validation. L'étape n'est pas encore ouverte sur cette version de la plateforme : connectez-vous avec un autre compte ou écrivez à l'assistance.",
+    "codeLabel": "Code de validation",
+    "codeHint": "Six chiffres, fournis par votre application d'authentification.",
+    "back": "Revenir à la connexion"
+  },
+  "signedIn": {
+    "title": "Vous êtes déjà connecté",
+    "description": "Cette page s'adresse aux personnes qui ne sont pas encore connectées.",
+    "account": "Compte en cours",
+    "continue": "Continuer",
+    "signOut": "Se déconnecter pour changer de compte"
+  }
+}

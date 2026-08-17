@@ -100,7 +100,11 @@ defineSlots<{
              renseignent personne. Le mot complet plutôt qu'un astérisque nu. -->
         <span v-if="props.required" class="ml-0.5 text-danger" aria-hidden="true">*</span>
         <span v-if="props.required" class="sr-only"> — {{ t('form.required') }}</span>
-        <span v-else class="ml-1.5 text-xs font-normal text-text-subtle">
+        <!-- « facultatif » ne se dit QUE d'un champ qu'on peut remplir. Sur un
+             champ en lecture seule — le compte concerné rappelé sur l'écran de
+             réinitialisation, un numéro de dossier — la mention n'a pas de sens :
+             il n'y a rien à décider. -->
+        <span v-else-if="!props.readonly" class="ml-1.5 text-xs font-normal text-text-subtle">
           {{ t('form.optional') }}
         </span>
       </label>
