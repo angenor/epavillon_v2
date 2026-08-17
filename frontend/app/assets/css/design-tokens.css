@@ -150,11 +150,22 @@
   --ifdd-gris-0: #ffffff; /* sur blanc  1.00:1 —                        | sur #231F20 16.30:1 AA texte */
   --ifdd-gris-50: #fbfaf8; /* sur blanc  1.04:1 —                        | sur #231F20 15.63:1 AA texte */
   --ifdd-gris-100: #f0eeed; /* sur blanc  1.16:1 —                        | sur #231F20 14.09:1 AA texte */
+  /* DEMI-PALIER, ajouté le 17/08 avec l'assombrissement de la palette. Le fond
+     de page ayant pris `gris-100`, la surface en retrait devait descendre ; à
+     `gris-200` elle passait sous le seuil AA pour le texte discret. Ce palier
+     intermédiaire tient les deux. Il ne touche à AUCUNE couleur de charte —
+     seuls `gris-200` et `gris-700` en sont, le reste de la rampe est dérivé. */
+  --ifdd-gris-150: #e6e4e2; /* sur blanc  1.27:1 —                        | sur #231F20 12.85:1 AA texte */
   --ifdd-gris-200: #d9d8d6; /* sur blanc  1.42:1 —                        | sur #231F20 11.44:1 AA texte   ← couleur de charte (gris pâle) */
   --ifdd-gris-300: #bdbcbb; /* sur blanc  1.90:1 —                        | sur #231F20  8.60:1 AA texte */
   --ifdd-gris-400: #a2a1a0; /* sur blanc  2.58:1 —                        | sur #231F20  6.32:1 AA texte */
   --ifdd-gris-500: #888785; /* sur blanc  3.59:1 AA grand texte / bordure | sur #231F20  4.54:1 AA texte */
   --ifdd-gris-600: #6e6d6c; /* sur blanc  5.16:1 AA texte                 | sur #231F20  3.16:1 AA grand texte / bordure */
+  /* Second demi-palier du même chantier : `gris-600` ne passait plus AA sur le
+     nouveau fond de page (4,46:1). Descendre le texte discret à `gris-700`
+     l'aurait confondu avec le texte atténué, qui l'emploie déjà — la hiérarchie
+     à quatre niveaux du texte y aurait perdu un cran. */
+  --ifdd-gris-650: #5e5d5c; /* sur blanc  6.57:1 AA texte                 | sur #231F20  2.48:1 — */
   --ifdd-gris-700: #565554; /* sur blanc  7.44:1 AA texte                 | sur #231F20  2.19:1 —          ← couleur de charte */
   --ifdd-gris-800: #393836; /* sur blanc 11.71:1 AA texte                 | sur #231F20  1.39:1 — */
   --ifdd-gris-900: #1e1d1c; /* sur blanc 16.83:1 AA texte                 | sur #231F20  1.03:1 — */
@@ -182,35 +193,98 @@
    ----------------------------------------------------------------------------- */
 @theme static {
   /* -- Surfaces -- */
-  --color-surface: var(--ifdd-gris-50); /* fond de page */
+  /* LE FOND DE PAGE EST UN GRIS FRANC, PAS UN BLANC CASSÉ. Il était à
+     `gris-50` (#fbfaf8) : à un point de luminance du blanc des cartes, il ne
+     séparait rien et toute la page se lisait comme une seule nappe claire.
+     `gris-100` détache les surfaces posées dessus — c'est le rôle que joue le
+     `#F0F0F1` des en-têtes de section sur le site institutionnel de l'IFDD. */
+  --color-surface: var(--ifdd-gris-100); /* fond de page */
   --color-surface-raised: var(--ifdd-gris-0); /* cartes, panneaux, en-têtes */
-  --color-surface-sunken: var(--ifdd-gris-100); /* zones en retrait, en-têtes de tableau */
+  --color-surface-sunken: var(--ifdd-gris-150); /* zones en retrait, en-têtes de tableau */
   --color-surface-overlay: var(--ifdd-gris-0); /* modales, menus déroulants */
-  --color-surface-hover: var(--ifdd-gris-100);
+  /* Le survol DOIT se voir sur le fond de page comme sur une carte. Tant qu'il
+     valait `gris-100`, il était rigoureusement invisible sur la page (1,00:1)
+     depuis que celle-ci a pris la même valeur. */
+  --color-surface-hover: var(--ifdd-gris-200);
   --color-surface-selected: var(--ifdd-cyan-50);
+
+  /* -- Aplats institutionnels — LE BLEU RICHE DE LA CHARTE, ET LUI SEUL. -----
+     Relevé sur ifdd.francophonie.org : ce qui rend ce site « plus foncé » n'est
+     pas son fond de page, blanc à 43 %, mais l'alternance avec de très grands
+     aplats presque noirs — un indigo #1D1A4C qui couvre près d'un cinquième de
+     la hauteur de l'accueil, et qui sert AUSSI de couleur de titre.
+
+     Notre charte porte déjà cette couleur : `--ifdd-bleu-riche` (#1d1a5b), à
+     deux points de l'indigo institutionnel. Elle dormait dans le fichier sans
+     qu'aucun rôle la réclame. C'est elle qui donne la profondeur, et non un
+     assombrissement du cyan : le cyan de charte est clair et pleinement saturé
+     (luminance 0,297), l'aplat institutionnel est douze fois plus sombre.
+
+     CE N'EST PAS UNE SURFACE DE THÈME. Un aplat institutionnel reste foncé en
+     thème sombre comme en thème clair — c'est un bloc de mise en page, pas un
+     fond qui s'inverse. D'où des rôles distincts de `--color-surface-*`, et le
+     fait qu'ils ne bougent pas d'un thème à l'autre. */
+  --color-surface-inverse: var(--ifdd-bleu-900);
+  --color-surface-inverse-raised: var(--ifdd-bleu-800); /* nuance DANS un aplat */
+  --color-text-on-inverse: var(--ifdd-gris-0); /* 15.54:1 */
+  --color-text-on-inverse-muted: var(--ifdd-bleu-200); /*  8.83:1 sur bleu-900 */
+  --color-border-on-inverse: var(--ifdd-bleu-700);
+
+  /* Voile posé sur une photographie. Le site institutionnel en couvre TOUTES
+     ses images (22 % sur une vignette, 58 % sur le bandeau d'ouverture) : c'est
+     ce qui empêche une photo claire de trouer la page. Sans ce rôle, un
+     composant écrit `bg-black/50`, qui ne réagit à aucun thème. */
+  --color-scrim: var(--ifdd-noir);
+  /* Cerne d'une pastille dont la couleur vient de la BASE (thématique, journée
+     spéciale) : elle peut être claire ou foncée, le cerne la détache du fond
+     dans les deux cas. Remplace les `ring-black/10` qui disparaissaient en
+     thème sombre. */
+  --color-ring-contrast: var(--ifdd-noir);
 
   /* -- Texte -- */
   --color-text: var(--ifdd-gris-900); /* 16.83:1 — AA et AAA */
   --color-text-secondary: var(--ifdd-gris-800); /* 11.71:1 — texte courant de second rang */
   --color-text-muted: var(--ifdd-gris-700); /*  7.44:1 — AA */
-  --color-text-subtle: var(--ifdd-gris-600); /*  5.16:1 — AA, seuil bas : métadonnées uniquement */
+  --color-text-subtle: var(--ifdd-gris-650); /*  6.57:1 sur blanc, 5.68 sur le fond de page, 5.18 en retrait */
   --color-text-inverse: var(--ifdd-gris-0); /* sur aplat accentué */
-  --color-text-link: var(--ifdd-cyan-700); /*  6.23:1 — AA */
-  --color-text-link-hover: var(--ifdd-cyan-800);
+  --color-text-link: var(--ifdd-cyan-800); /*  9.40:1 — AA et AAA */
+  --color-text-link-hover: var(--ifdd-cyan-900);
+
+  /* LES TITRES SONT BLEU RICHE, PAS NOIRS. C'est le second levier du ton
+     institutionnel, et le moins coûteux : le site de l'IFDD pose son indigo sur
+     tous ses titres, ce qui installe la couleur jusque dans les zones blanches.
+     Un titre noir de plus ne dit rien ; un titre de marque signe la page.
+     Appliqué une seule fois, sur `h1`…`h6` dans `main.css` — toute règle
+     d'utilitaire posée par un composant l'emporte, ce qui laisse les titres
+     blancs sur les aplats foncés. */
+  --color-heading: var(--ifdd-bleu-900); /* 15.54:1 sur blanc */
 
   /* -- Bordures et séparateurs -- */
-  --color-border: var(--ifdd-gris-300); /* trait de séparation ordinaire */
-  --color-border-subtle: var(--ifdd-gris-200); /* trait à peine visible, listes denses */
-  --color-border-strong: var(--ifdd-gris-500); /*  3.59:1 — contour de champ de saisie */
-  --color-separator: var(--ifdd-gris-200); /* filet INTÉRIEUR d'un bloc : rail, pied de carte */
-  --color-focus: var(--ifdd-cyan-600); /*  4.23:1 — anneau de focus visible */
+  /* LES TRAITS DESSINENT LA STRUCTURE, ils ont donc été descendus d'un cran.
+     À `gris-300` sur un fond quasi blanc, la bordure d'une carte se devinait
+     plus qu'elle ne se voyait — et la direction artistique repose justement sur
+     « ombres très discrètes OU bordures fines », pas sur les deux à la fois. */
+  --color-border: var(--ifdd-gris-400); /* trait de séparation ordinaire */
+  --color-border-subtle: var(--ifdd-gris-300); /* trait à peine visible, listes denses */
+  --color-border-strong: var(--ifdd-gris-600); /*  5.16:1 — contour de champ de saisie */
+  --color-separator: var(--ifdd-gris-300); /* filet INTÉRIEUR d'un bloc : rail, pied de carte */
+  /* L'ANNEAU DE FOCUS EST UN ÉLÉMENT NON TEXTUEL (WCAG 1.4.11, seuil 3:1), et
+     il doit tenir ce seuil sur TOUTES les surfaces qu'il borde — y compris la
+     page d'authentification, entièrement en surface creuse. À `cyan-600` il n'y
+     était plus qu'à 2,97:1 : la navigation au clavier y perdait son repère. */
+  --color-focus: var(--ifdd-cyan-700); /*  6.23:1 sur blanc, 5.39 sur le fond de page, 4.91 en retrait */
 
   /* -- Accent (cyan de marque) -- */
-  --color-accent: var(--ifdd-cyan-700); /*  6.23:1 — texte et icônes accentués */
-  --color-accent-hover: var(--ifdd-cyan-800);
+  /* L'ACCENT DESCEND D'UN PALIER. Le cyan reste la couleur de l'information et
+     de l'action — la règle d'usage ne bouge pas — mais il était pris haut dans
+     la rampe, ce qui donnait des boutons et des liens clairs sur des surfaces
+     claires. Un cran plus bas, ils tiennent le même rôle avec plus d'assise, et
+     gagnent au passage le contraste AAA sur le texte. */
+  --color-accent: var(--ifdd-cyan-800); /*  9.40:1 — texte et icônes accentués */
+  --color-accent-hover: var(--ifdd-cyan-900);
   --color-accent-active: var(--ifdd-cyan-900); /* troisième palier : bouton enfoncé */
-  --color-accent-solid: var(--ifdd-cyan-600); /*  4.23:1 face au blanc — fond de bouton primaire */
-  --color-accent-solid-hover: var(--ifdd-cyan-700);
+  --color-accent-solid: var(--ifdd-cyan-700); /*  6.23:1 face au blanc — fond de bouton primaire */
+  --color-accent-solid-hover: var(--ifdd-cyan-800);
   --color-accent-contrast: var(--ifdd-gris-0); /* texte posé sur --color-accent-solid */
   --color-accent-surface: var(--ifdd-cyan-50); /* fond teinté, bandeau, puce */
   --color-accent-border: var(--ifdd-cyan-200);
@@ -222,7 +296,7 @@
   --color-success-surface: var(--ifdd-vert-50);
   --color-success-border: var(--ifdd-vert-300);
 
-  --color-warning: var(--ifdd-jaune-700); /*  5.20:1 — AA */
+  --color-warning: var(--ifdd-jaune-800); /*  8.56:1 sur blanc, 7.40 sur le fond de page — AA */
   --color-warning-solid: var(--ifdd-jaune-400); /* le jaune de charte, qui ne porte que du texte sombre */
   --color-warning-contrast: var(--ifdd-gris-900); /* 11.84:1 sur le jaune de charte */
   --color-warning-surface: var(--ifdd-jaune-50);
@@ -240,7 +314,7 @@
   --color-danger-border: var(--ifdd-rouge-300);
 
   --color-info: var(--ifdd-cyan-700); /*  6.23:1 — AA */
-  --color-info-solid: var(--ifdd-cyan-600);
+  --color-info-solid: var(--ifdd-cyan-700); /*  6.23:1 face au blanc qu'il porte — aligné sur --color-accent-solid */
   --color-info-contrast: var(--ifdd-gris-0);
   --color-info-surface: var(--ifdd-cyan-50);
   --color-info-border: var(--ifdd-cyan-200);
@@ -407,6 +481,14 @@
     --color-text-link: var(--ifdd-cyan-300); /*  8.66:1 */
     --color-text-link-hover: var(--ifdd-cyan-200);
 
+    /* Le bleu riche ne se lit plus sur fond noir (1.05:1) : le titre remonte la
+       rampe jusqu'à en garder la teinte sans perdre la lecture. Les APLATS
+       institutionnels, eux, ne bougent pas — voir leur commentaire au thème
+       clair : un aplat est un bloc de mise en page, pas une surface qui
+       s'inverse. */
+    --color-heading: var(--ifdd-bleu-200); /*  9.24:1 */
+    --color-ring-contrast: var(--ifdd-gris-0);
+
     --color-border: var(--ifdd-gris-700);
     --color-border-subtle: var(--ifdd-gris-800);
     --color-border-strong: var(--ifdd-gris-500); /*  4.54:1 */
@@ -492,6 +574,9 @@
   --color-text-inverse: var(--ifdd-gris-900);
   --color-text-link: var(--ifdd-cyan-300);
   --color-text-link-hover: var(--ifdd-cyan-200);
+
+  --color-heading: var(--ifdd-bleu-200);
+  --color-ring-contrast: var(--ifdd-gris-0);
 
   --color-border: var(--ifdd-gris-700);
   --color-border-subtle: var(--ifdd-gris-800);

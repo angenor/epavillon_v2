@@ -80,7 +80,7 @@ onBeforeUnmount(() => {
     ref="dialog"
     :aria-labelledby="titleId"
     :aria-describedby="props.description ? descriptionId : undefined"
-    class="ui-drawer m-0 h-dvh max-h-dvh w-full max-w-full border-border bg-surface-overlay p-0 text-text shadow-lg backdrop:bg-black/50"
+    class="ui-drawer m-0 h-dvh max-h-dvh w-full max-w-full border-border bg-surface-overlay p-0 text-text shadow-lg backdrop:bg-scrim/60"
     :class="props.side === 'right' ? 'ml-auto sm:border-l' : 'mr-auto sm:border-r'"
     :style="{
       '--drawer-width': props.width,

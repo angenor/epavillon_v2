@@ -66,7 +66,7 @@ const classes = computed(() => [
   <span :class="classes">
     <span
       v-if="props.dotColor"
-      class="size-2 shrink-0 rounded-full ring-1 ring-black/10"
+      class="size-2 shrink-0 rounded-full ring-1 ring-ring-contrast/10"
       :style="{ backgroundColor: props.dotColor }"
       aria-hidden="true"
     />

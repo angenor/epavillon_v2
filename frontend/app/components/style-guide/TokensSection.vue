@@ -182,7 +182,7 @@ const ratioLabel = (swatch: Swatch): string => formatRatio(swatch.ratio, locale.
               class="rounded-md border border-border-subtle p-1.5"
             >
               <div
-                class="h-8 w-full rounded-sm ring-1 ring-black/5"
+                class="h-8 w-full rounded-sm ring-1 ring-ring-contrast/5"
                 :style="{ backgroundColor: swatch.value }"
               />
               <p class="mt-1 font-mono text-[0.6875rem] leading-tight text-text-muted">
@@ -222,7 +222,7 @@ const ratioLabel = (swatch: Swatch): string => formatRatio(swatch.ratio, locale.
               class="flex items-center gap-2.5 rounded-md border border-border-subtle px-2.5 py-2"
             >
               <span
-                class="size-7 shrink-0 rounded-md ring-1 ring-black/10"
+                class="size-7 shrink-0 rounded-md ring-1 ring-ring-contrast/10"
                 :style="{ backgroundColor: swatch.value }"
               />
               <span class="min-w-0 flex-1">

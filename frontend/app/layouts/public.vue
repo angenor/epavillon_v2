@@ -190,35 +190,36 @@ const currentYear = new Date().getFullYear()
       <slot />
     </main>
 
-    <footer class="border-t border-border bg-surface-sunken">
+    <!-- LE PIED DE PAGE EST UN APLAT INSTITUTIONNEL. C'est le seul grand bloc
+         que porte CHAQUE page, donc le seul endroit où l'on peut poser le bleu
+         riche de la charte sans dépendre d'un écran particulier. Il ferme la
+         page sur la marque plutôt que sur un gris de plus, et il ne s'inverse
+         pas au thème sombre — un aplat est un bloc de mise en page.
+
+         Le logo n'a donc plus de variante : sur cet aplat, c'est le tracé blanc
+         qui vaut dans les deux thèmes. -->
+    <footer class="bg-surface-inverse text-text-on-inverse">
       <div class="mx-auto grid w-full max-w-[1280px] gap-8 px-4 py-10 sm:px-6 md:grid-cols-4">
         <div class="md:col-span-1">
           <img
-            src="/logos/oif-ifdd-gris.svg"
-            :alt="`${t('nav.site.parent')} — ${t('nav.site.owner')}`"
-            class="h-14 w-auto dark:hidden"
-            width="224"
-            height="56"
-          >
-          <img
             src="/logos/oif-ifdd-blanc.svg"
             :alt="`${t('nav.site.parent')} — ${t('nav.site.owner')}`"
-            class="hidden h-14 w-auto dark:block"
+            class="h-14 w-auto"
             width="224"
             height="56"
           >
-          <p class="mt-4 text-sm text-text-muted">{{ t('nav.site.tagline') }}</p>
+          <p class="mt-4 text-sm text-text-on-inverse-muted">{{ t('nav.site.tagline') }}</p>
         </div>
 
         <div v-for="section in footerSections" :key="section.labelKey">
-          <h2 class="font-display text-sm tracking-wide text-text-subtle uppercase">
+          <h2 class="font-display text-sm tracking-wide text-text-on-inverse uppercase">
             {{ t(section.labelKey) }}
           </h2>
           <ul class="mt-3 space-y-2">
             <li v-for="item in section.items" :key="item.to">
               <NuxtLink
                 :to="localePath(item.to)"
-                class="text-sm text-text-muted no-underline hover:text-text"
+                class="text-sm text-text-on-inverse-muted no-underline hover:text-text-on-inverse"
               >
                 {{ t(item.labelKey) }}
               </NuxtLink>
@@ -227,8 +228,8 @@ const currentYear = new Date().getFullYear()
         </div>
       </div>
 
-      <div class="border-t border-border-subtle">
-        <p class="mx-auto w-full max-w-[1280px] px-4 py-4 text-xs text-text-subtle sm:px-6">
+      <div class="border-t border-border-on-inverse bg-surface-inverse-raised">
+        <p class="mx-auto w-full max-w-[1280px] px-4 py-4 text-xs text-text-on-inverse-muted sm:px-6">
           {{ t('nav.footer.copyright', { year: currentYear }) }}
         </p>
       </div>
