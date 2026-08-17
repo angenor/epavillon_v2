@@ -8,9 +8,10 @@
     "tagline": "The digital pavilion of the Francophonie for sustainable development"
   },
   "main": {
+    "label": "Main navigation",
     "home": "Home",
     "events": "Events",
-    "programme": "Programme",
+    "programme": "Programmes",
     "call": "Call for proposals",
     "criteria": "Review criteria",
     "organizations": "Organisations",

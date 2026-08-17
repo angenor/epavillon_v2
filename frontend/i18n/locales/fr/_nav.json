@@ -8,9 +8,10 @@
     "tagline": "Le pavillon numérique de la Francophonie pour le développement durable"
   },
   "main": {
+    "label": "Navigation principale",
     "home": "Accueil",
     "events": "Événements",
-    "programme": "Programme",
+    "programme": "Programmations",
     "call": "Appel à propositions",
     "criteria": "Critères d'évaluation",
     "organizations": "Organisations",

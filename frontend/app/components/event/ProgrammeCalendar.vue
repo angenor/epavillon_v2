@@ -144,7 +144,7 @@ function onViewChange(view: { startDate?: Date }): void {
 <template>
   <div>
     <p class="mb-2 text-sm text-text-muted">
-      {{ t('event.public.programme.calendar.zoneNotice', {
+      {{ t('programme.calendar.zoneNotice', {
         zone: props.zoneLabel || props.timezone,
       }) }}
     </p>
@@ -177,7 +177,7 @@ function onViewChange(view: { startDate?: Date }): void {
       >
         <template #no-event>
           <p class="px-4 py-8 text-center text-sm text-text-muted">
-            {{ t('event.public.programme.calendar.noEvent') }}
+            {{ t('programme.calendar.noEvent') }}
           </p>
         </template>
 

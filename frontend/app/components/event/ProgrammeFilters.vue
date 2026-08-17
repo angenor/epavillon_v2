@@ -77,7 +77,7 @@ const hasFilters = computed(() => activeChips.value.length > 0)
       <UiSelect
         :model-value="props.modelValue.day ?? ''"
         :options="props.days"
-        :label="t('event.public.programme.filters.day')"
+        :label="t('programme.filters.day')"
         :disabled="!props.days.length"
         hide-optional
         @update:model-value="set('day', $event)"
@@ -85,7 +85,7 @@ const hasFilters = computed(() => activeChips.value.length > 0)
       <UiSelect
         :model-value="props.modelValue.theme ?? ''"
         :options="props.themes"
-        :label="t('event.public.programme.filters.theme')"
+        :label="t('programme.filters.theme')"
         :disabled="!props.themes.length"
         hide-optional
         @update:model-value="set('theme', $event)"
@@ -93,7 +93,7 @@ const hasFilters = computed(() => activeChips.value.length > 0)
       <UiSelect
         :model-value="props.modelValue.format ?? ''"
         :options="props.formats"
-        :label="t('event.public.programme.filters.format')"
+        :label="t('programme.filters.format')"
         :disabled="!props.formats.length"
         hide-optional
         @update:model-value="set('format', $event)"
@@ -101,7 +101,7 @@ const hasFilters = computed(() => activeChips.value.length > 0)
       <UiSelect
         :model-value="props.modelValue.room ?? ''"
         :options="props.rooms"
-        :label="t('event.public.programme.filters.room')"
+        :label="t('programme.filters.room')"
         :disabled="!props.rooms.length"
         hide-optional
         @update:model-value="set('room', $event)"
@@ -112,18 +112,18 @@ const hasFilters = computed(() => activeChips.value.length > 0)
       <p class="text-sm text-text-muted" aria-live="polite">
         {{
           hasFilters
-            ? t('event.public.programme.filters.filtered', {
+            ? t('programme.filters.filtered', {
                 count: props.resultCount,
                 total: props.totalCount,
               })
-            : t('event.public.programme.filters.total', { count: props.totalCount })
+            : t('programme.filters.total', { count: props.totalCount })
         }}
       </p>
 
       <UiChip
         v-for="chip in activeChips"
         :key="chip.key"
-        :facet="t(`event.public.programme.filters.${chip.key}`)"
+        :facet="t(`programme.filters.${chip.key}`)"
         :label="chip.label"
         @remove="set(chip.key, null)"
       />

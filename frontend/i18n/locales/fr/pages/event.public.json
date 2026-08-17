@@ -55,6 +55,14 @@
     "results": "Annonce des résultats",
     "event": "Tenue de l'événement"
   },
+  "programmeLink": {
+    "title": "Programmation",
+    "count": "{count} activité publiée | {count} activité publiée | {count} activités publiées",
+    "dayCount": "{count} jour | {count} jour | {count} jours",
+    "unpublished": "Le programme sera publié après la sélection des activités. Les programmations des éditions passées, elles, restent consultables.",
+    "see": "Voir la programmation",
+    "seePast": "Voir les programmations"
+  },
   "specialDays": {
     "title": "Journées spéciales",
     "description": "Des activités choisies par l'IFDD parmi celles qui ont été retenues, réunies autour d'un même sujet. Une journée spéciale n'occupe pas forcément la journée entière, et peut déborder sur le lendemain.",

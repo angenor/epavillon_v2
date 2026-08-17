@@ -12,7 +12,7 @@ import type { SessionDisplayState } from './StatusBadge.vue'
  * Recomposer tout cela ici produirait une seconde implémentation, qui
  * divergerait sur les cas limites — séance en cours, reportée, annulée.
  *
- * ── LA STRUCTURE : UN RAIL TEMPOREL, PUIS LE CONTENU ────────────────────────
+ * ── LA STRUCTURE : DEUX RAILS ENCADRENT LE CONTENU ──────────────────────────
  *
  * La colonne de gauche ne porte que la date, l'heure et le fuseau, sur fond en
  * retrait. C'est le dessin du guide de style de référence, et il est juste :
@@ -23,11 +23,25 @@ import type { SessionDisplayState } from './StatusBadge.vue'
  *
  * ── L'IMAGE DE COUVERTURE ───────────────────────────────────────────────────
  *
- * En bandeau supérieur, 16:9, pleine largeur au-dessus du rail. Elle vient de
- * `v_public_schedule.cover`, que la base résout ainsi : couverture de la séance,
- * à défaut celle de la proposition d'origine. Ce repli est la règle — une
- * organisation joint son image AU DÉPÔT, et personne ne revient en téléverser
- * une seconde après l'acceptation.
+ * EN COLONNE DE DROITE dès que la carte est large, en bandeau supérieur sinon.
+ *
+ * Elle a d'abord été un bandeau à toutes les largeurs, et c'était une faute
+ * d'échelle : dans la programmation, une carte occupe toute la largeur de la
+ * page — un bandeau 16:9 y mesurait près de sept cents pixels de haut, pour une
+ * illustration. Il repoussait sous la ligne de flottaison le titre, l'heure et
+ * l'organisation, c'est-à-dire tout ce qu'on vient chercher.
+ *
+ * LA COLONNE FAIT 20 REM et l'image la remplit sur toute la hauteur, sans jamais
+ * allonger la carte : le cadre y est en position absolue, la hauteur reste celle
+ * du contenu. Le cadrage visible n'est donc pas un format fixe — il suit cette
+ * hauteur. Viser un 16:9 exact demanderait 27 rem, la hauteur courante d'une
+ * carte multipliée par 16/9, et cette colonne-là prend trop de place au titre.
+ * La largeur se change ici, à un seul endroit.
+ *
+ * Elle vient de `v_public_schedule.cover`, que la base résout ainsi : couverture
+ * de la séance, à défaut celle de la proposition d'origine. Ce repli est la
+ * règle — une organisation joint son image AU DÉPÔT, et personne ne revient en
+ * téléverser une seconde après l'acceptation.
  *
  * SANS IMAGE, LA CARTE RESTE ENTIÈRE. Aucun bandeau gris, aucun pictogramme de
  * remplacement, aucun dégradé : le bloc disparaît, et la carte est exactement
@@ -150,8 +164,11 @@ const zoneShort = computed(
 </script>
 
 <template>
+  <!-- DEUX RAILS ENCADRENT LE CONTENU : le temps à gauche, l'image à droite.
+       La symétrie n'est pas décorative — elle donne à chacun une largeur fixe et
+       alignée d'une carte à l'autre, et laisse au titre tout ce qui reste. -->
   <article
-    class="relative overflow-hidden rounded-lg border bg-surface-raised transition-colors
+    class="@container relative overflow-hidden rounded-lg border bg-surface-raised transition-colors
            before:absolute before:inset-y-0 before:left-0 before:z-10 before:w-1 before:content-['']"
     :class="[
       STATE_EDGE[displayState],
@@ -162,20 +179,57 @@ const zoneShort = computed(
       isPast || isCancelled ? 'bg-surface-sunken' : 'shadow-xs',
     ]"
   >
-    <!-- 1. La couverture, quand il y en a une. Sinon rien : pas de bandeau gris. -->
-    <UiImage
-      v-if="showCover"
-      :image="props.session.cover"
-      ratio="16 / 9"
-      sizes="(min-width: 1024px) 33vw, 100vw"
-      class="border-b border-separator"
-    />
+    <!-- LES POINTS DE RUPTURE SONT CEUX DE LA CARTE, PAS DE LA FENÊTRE. Cette
+         carte se pose aussi bien pleine largeur dans la programmation que dans
+         une colonne de démonstration ou de planificateur : à `lg:` près, un
+         écran de 1440 px lui donnait trois colonnes même large de 591 px, et le
+         titre tombait sur trois lignes dans 219 px. `@container` fait dépendre la
+         disposition de la largeur reçue — la seule qui décide de ce qui tient. -->
+    <div
+      class="grid @lg:grid-cols-[132px_1fr]"
+      :class="showCover ? '@5xl:grid-cols-[132px_1fr_20rem]' : ''"
+    >
+      <!-- 1. LA COUVERTURE, quand il y en a une. Sinon rien : pas de bandeau gris,
+           pas de pictogramme de remplacement — la carte se referme sur deux
+           colonnes et reste exactement celle du guide de référence, qui n'en
+           montre aucune.
 
-    <div class="grid sm:grid-cols-[132px_1fr]">
+           ELLE RESTE EN TÊTE DU DOCUMENT et ne se déplace en colonne que par
+           `order` : un lecteur d'écran rencontre l'illustration puis l'heure et le
+           titre, dans le même ordre quelle que soit la disposition.
+
+           LA CARTE EST UNE GRILLE À TOUTES LES LARGEURS — une seule colonne quand
+           elle est étroite — et ce n'est pas un détail de mise en forme. `min-w-0`
+           sur la colonne de contenu ne neutralise la largeur minimale automatique
+           que d'un ÉLÉMENT DE GRILLE ; sur un bloc ordinaire il ne fait rien, et la
+           plus longue ligne du contenu redevient incompressible. Repasser la carte
+           en bloc la faisait déborder de l'écran d'un téléphone.
+
+           EN COLONNE, ELLE NE PORTE AUCUNE HAUTEUR PROPRE : le cadre y passe en
+           position absolue. C'est ce qui empêche la boucle — donner des
+           proportions à une image qui remplit la hauteur faisait dériver la
+           largeur de la hauteur, puis la hauteur de la largeur, et la carte
+           gonflait à près de six cents pixels. Ici la hauteur vient du CONTENU,
+           la largeur est celle de la colonne, et l'image se recadre entre les
+           deux par `object-fit: cover`.
+
+           `ratio="auto"` est délibéré : `UiImage` pose ses proportions en style
+           inline, qu'aucune classe utilitaire ne peut redéfinir. Les deux cas —
+           bandeau 16:9 en tête, cadre absolu en colonne — se décrivent donc sur
+           le cadre, seul endroit où ils peuvent varier avec la largeur. -->
+      <UiImage
+        v-if="showCover"
+        :image="props.session.cover"
+        ratio="auto"
+        sizes="(min-width: 1024px) 20rem, 100vw"
+        class="border-b border-separator @lg:col-span-2 @5xl:relative @5xl:order-last @5xl:col-span-1 @5xl:h-full @5xl:border-b-0 @5xl:border-l"
+        frame-class="aspect-[16/9] @5xl:absolute @5xl:inset-0 @5xl:aspect-auto @5xl:size-full"
+      />
+
       <!-- 2. LE RAIL TEMPOREL — la date, l'heure, le fuseau, et rien d'autre. -->
       <div
         class="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-separator bg-surface-sunken py-3 pr-4 pl-5
-               sm:flex-col sm:items-stretch sm:border-r sm:border-b-0 sm:p-4"
+               @lg:flex-col @lg:items-stretch @lg:border-r @lg:border-b-0 @lg:p-4"
       >
         <p class="font-display text-lg leading-tight font-bold text-text">{{ dayLabel }}</p>
         <p class="text-sm font-bold tabular-nums text-text" :class="isCancelled ? 'line-through' : ''">
@@ -297,7 +351,7 @@ const zoneShort = computed(
           </span>
           {{ props.cancelledReason }}
         </p>
-      </div>
+        </div>
     </div>
   </article>
 </template>

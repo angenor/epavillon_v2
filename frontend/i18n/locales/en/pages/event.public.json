@@ -55,6 +55,14 @@
     "results": "Results announced",
     "event": "Event takes place"
   },
+  "programmeLink": {
+    "title": "Programme",
+    "count": "{count} published activity | {count} published activity | {count} published activities",
+    "dayCount": "{count} day | {count} day | {count} days",
+    "unpublished": "The programme will be published once activities have been selected. Programmes of past editions remain available.",
+    "see": "See the programme",
+    "seePast": "See the programmes"
+  },
   "specialDays": {
     "title": "Special days",
     "description": "Activities chosen by IFDD among those selected, brought together around a single subject. A special day does not necessarily fill a whole day, and may run over into the next one.",

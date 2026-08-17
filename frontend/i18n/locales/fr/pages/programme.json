@@ -1,6 +1,6 @@
 {
-  "title": "Programmation",
-  "description": "Les activités publiées, en liste ou placées dans le temps. Les deux vues portent les mêmes données et partagent vos filtres.",
+  "title": "Programmations",
+  "description": "Les activités publiées, édition par édition, en liste ou placées dans le temps. Les deux vues portent les mêmes données et partagent vos filtres.",
   "loading": "Chargement du programme",
   "views": {
     "label": "Vue de la programmation",
@@ -11,9 +11,8 @@
     "label": "Choisir une édition",
     "conferences": "Conférences",
     "others": "Autres activités",
-    "viewingOther": "Vous consultez la programmation de {edition}",
-    "viewingOtherHint": "L'en-tête, l'appel à propositions et les critères restent ceux de l'édition en cours.",
-    "backToCurrent": "Revenir à {edition}"
+    "showing": "Programmation de {edition}",
+    "period": "Du {start} au {end}"
   },
   "filters": {
     "day": "Jour",
@@ -26,10 +25,6 @@
     "allRooms": "Toutes les salles",
     "total": "{count} activité | {count} activité | {count} activités",
     "filtered": "{count} activité sur {total} | {count} activité sur {total} | {count} activités sur {total}"
-  },
-  "legend": {
-    "title": "Légende",
-    "tracks": "Journées spéciales"
   },
   "grid": {
     "dayCount": "{count} activité | {count} activité | {count} activités",
@@ -51,10 +46,15 @@
   },
   "unpublished": {
     "title": "Programme à venir",
-    "description": "La programmation de cette édition sera publiée après la sélection des activités. Ses dates, elles, sont déjà connues."
+    "description": "La programmation de cette édition sera publiée après la sélection des activités. Ses dates, elles, sont déjà connues.",
+    "backToEvent": "Voir la page de l'événement"
   },
   "error": {
     "title": "Programme indisponible",
     "description": "La programmation de cette édition n'a pas pu être chargée."
+  },
+  "noEdition": {
+    "title": "Aucune programmation publiée",
+    "description": "Les programmes des conférences et des cycles de webinaires apparaîtront ici dès leur publication."
   }
 }

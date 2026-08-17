@@ -43,20 +43,26 @@ async function signOut(): Promise<void> {
 }
 
 /**
- * A3 — les entrées mènent désormais à des pages qui EXISTENT.
+ * A3 — les entrées mènent à des pages qui EXISTENT.
  *
  * `/evenements`, `/programme` et `/appel-a-propositions` étaient trois adresses
- * sans page : la barre les proposait, et elles répondaient 404. La programmation
- * et l'appel ne sont pas des écrans à part — ce sont deux sections de la page
- * publique de l'édition en cours, atteignables par leur ancre. L'accueil, lui,
- * redirige vers cette édition en conservant le fragment (voir `pages/index.vue`).
+ * sans page : la barre les proposait, et elles répondaient 404.
+ *
+ * PAS D'ENTRÉE « ACCUEIL » : le logo, à gauche, EST le lien d'accueil sur tous
+ * les sites, et l'accueil ne fait ici que rediriger vers l'édition en cours. La
+ * doubler d'une entrée de menu occupe la place d'une destination réelle.
+ *
+ * « PROGRAMMATIONS » AU PLURIEL, et c'est une page à part entière : elle porte
+ * les programmes de TOUTES les éditions, celui de la COP31 comme le cycle de
+ * webinaires PACO. L'appel à propositions, lui, reste une section de la page de
+ * l'édition en cours — il n'y en a qu'un par édition (règle métier n° 5), il n'a
+ * donc pas de liste à lui.
  *
  * La leçon vient du prompt A2 : un écran qui répond à toutes ses exigences peut
  * rester inatteignable, et cela ne se voit qu'en refaisant le chemin.
  */
 const mainNav: NavItem[] = [
-  { labelKey: 'nav.main.home', to: '/' },
-  { labelKey: 'nav.main.programme', to: '/#programmation' },
+  { labelKey: 'nav.main.programme', to: '/programmations' },
   { labelKey: 'nav.main.call', to: '/#appel-a-propositions' },
 ]
 
@@ -64,7 +70,7 @@ const footerSections: { labelKey: string; items: NavItem[] }[] = [
   {
     labelKey: 'nav.footer.sections.platform',
     items: [
-      { labelKey: 'nav.main.programme', to: '/#programmation' },
+      { labelKey: 'nav.main.programme', to: '/programmations' },
       { labelKey: 'nav.main.call', to: '/#appel-a-propositions' },
       { labelKey: 'nav.main.criteria', to: '/#criteres' },
     ],
@@ -100,7 +106,7 @@ const currentYear = new Date().getFullYear()
   <div class="flex min-h-screen flex-col bg-surface text-text">
     <a class="skip-link" href="#contenu-principal">{{ t('common.a11y.skipToContent') }}</a>
 
-    <UiNavBar v-model:open="isMobileNavOpen" :items="mainNav" :label="t('nav.main.home')">
+    <UiNavBar v-model:open="isMobileNavOpen" :items="mainNav" :label="t('nav.main.label')">
       <template #brand>
         <NuxtLink :to="localePath('/')" class="flex shrink-0 items-center gap-3 no-underline">
           <img

@@ -10,10 +10,23 @@ import type {
 import type { PublicScheduleRow } from '~/types/views'
 import type { SelectOption } from '~/types/ui'
 import type { IsoDate } from '~/types/shared'
+import type { LocationQueryRaw } from 'vue-router'
 
 /**
- * SECTION « PROGRAMMATION » — deux vues sur LES MÊMES DONNÉES, un sélecteur
- * d'année, et une entrée pour ce qui ne relève d'aucune COP.
+ * NAVIGATEUR DE PROGRAMMATION — le corps de la page `/programmations`.
+ *
+ * ── POURQUOI IL N'EST PLUS UNE SECTION DE LA PAGE D'ÉDITION ─────────────────
+ *
+ * Il l'a été, et c'était une faute de lecture : la page de la COP31 annonçait
+ * « Programmation », et le sélecteur d'année y proposait aussi la COP30 et les
+ * webinaires PACO. On lisait donc le programme du cycle PACO sous le titre de la
+ * COP31, sans que rien ne l'en avertisse assez fort. Un sélecteur d'édition n'a
+ * de sens que sur un écran DONT LE SUJET est l'édition choisie ; la page d'une
+ * édition, elle, ne porte plus qu'un lien vers ici.
+ *
+ * D'où la règle que cet écran s'impose : **l'édition consultée est nommée en
+ * titre**, au-dessus des filtres, avec ses dates et son lieu. On ne peut pas
+ * lire une activité sans avoir lu à quelle édition elle appartient.
  *
  * ── UN SEUL JEU DE DONNÉES, DEUX LECTURES ───────────────────────────────────
  *
@@ -23,13 +36,11 @@ import type { IsoDate } from '~/types/shared'
  * perdre. C'est l'exigence du prompt, et c'est aussi la seule façon d'éviter que
  * les deux vues finissent par ne plus dire la même chose.
  *
- * ── LE SÉLECTEUR D'ANNÉE ────────────────────────────────────────────────────
+ * ── LE SÉLECTEUR D'ÉDITION ──────────────────────────────────────────────────
  *
- * Changer d'année recharge le programme correspondant SANS quitter la page :
- * l'en-tête, l'appel et les critères restent ceux de l'édition consultée, et un
- * bandeau dit clairement qu'on lit une archive. Les programmes déjà chargés sont
- * gardés en mémoire : revenir en arrière est instantané, et l'API n'est
- * interrogée qu'une fois par édition.
+ * Changer d'édition recharge le programme correspondant SANS quitter la page.
+ * Les programmes déjà chargés sont gardés en mémoire : revenir en arrière est
+ * instantané, et l'API n'est interrogée qu'une fois par édition.
  *
  * ── « AUTRES » ──────────────────────────────────────────────────────────────
  *
@@ -40,15 +51,16 @@ import type { IsoDate } from '~/types/shared'
  *
  * ── QUAND LE PROGRAMME N'EST PAS PUBLIÉ ─────────────────────────────────────
  *
- * La section reste présente et l'annonce. La faire disparaître laisserait croire
- * que la page est incomplète, alors que l'information — « le programme sera
- * publié après la sélection » — est justement ce qu'on vient chercher.
+ * L'édition reste sélectionnable et l'écran l'annonce. La retirer de la liste
+ * laisserait croire qu'elle n'existe pas, alors que l'information — « le
+ * programme sera publié après la sélection » — est justement ce qu'on vient
+ * chercher.
  */
 
 interface Props {
-  /** Édition de la page. Le sélecteur peut en afficher une autre. */
+  /** Édition sélectionnée à l'arrivée, résolue par la page depuis l'URL. */
   edition: EventEdition
-  /** Programme de l'édition de la page, chargé par la page (rendu serveur). */
+  /** Programme de cette édition, chargé par la page (rendu serveur). */
   initial: ProgrammeData
   /** Éditions publiques, toutes séries confondues. */
   editions: EventEdition[]
@@ -63,6 +75,7 @@ const { date } = useDateTime()
 const api = useApi()
 const route = useRoute()
 const router = useRouter()
+const localePath = useLocalePath()
 
 // ---------------------------------------------------------------------------
 // Les éditions consultables
@@ -105,10 +118,8 @@ const editionById = computed(() => new Map(props.editions.map((edition) => [edit
 // Sélection courante et chargement
 // ---------------------------------------------------------------------------
 
-/** L'édition affichée dans la section. Elle démarre sur celle de la page. */
 const selectedId = ref(props.edition.id)
 const selectedEdition = computed(() => editionById.value.get(selectedId.value) ?? props.edition)
-const isArchive = computed(() => selectedId.value !== props.edition.id)
 
 /** Programmes déjà chargés — une édition n'est demandée qu'une fois. */
 const loaded = reactive(new Map<string, ProgrammeData>([[props.edition.id, props.initial]]))
@@ -156,39 +167,42 @@ async function select(eventId: string): Promise<void> {
 
 type ViewMode = 'grid' | 'calendar'
 
-const view = ref<ViewMode>('grid')
-const filters = ref<ProgrammeFilterState>({ day: null, theme: null, format: null, room: null })
+/**
+ * L'URL porte l'édition consultée, la vue active et le jour : un lien vers « le
+ * calendrier du 12 novembre » doit pouvoir se coller dans un courriel. Les
+ * autres filtres restent locaux — les inscrire tous produirait des adresses
+ * illisibles pour un gain douteux.
+ *
+ * Lu au `setup` et non au montage : `route.query` existe aussi côté serveur, et
+ * l'attendre ferait basculer la vue après un premier rendu.
+ */
+const view = ref<ViewMode>(route.query.vue === 'calendrier' ? 'calendar' : 'grid')
+const filters = ref<ProgrammeFilterState>({
+  day: typeof route.query.jour === 'string' ? route.query.jour : null,
+  theme: null,
+  format: null,
+  room: null,
+})
 const selectedSessionId = ref<string | null>(null)
 
 const selectedSession = computed(
   () => data.value.schedule.find((session) => session.id === selectedSessionId.value) ?? null,
 )
 
-/**
- * L'URL porte l'édition consultée et la vue active : un lien vers « le
- * calendrier du 12 novembre » doit pouvoir se coller dans un courriel. Les
- * filtres, eux, restent locaux — les inscrire tous produirait des adresses
- * illisibles pour un gain douteux.
- */
-onMounted(() => {
-  const programme = route.query.programme
-  const wanted = typeof programme === 'string' ? options.value.find((o) => o.slug === programme) : undefined
-  if (wanted && wanted.id !== selectedId.value) void select(wanted.id)
-  if (route.query.vue === 'calendrier') view.value = 'calendar'
-  const day = route.query.jour
-  if (typeof day === 'string') filters.value.day = day
-})
-
-watch([selectedId, view, () => filters.value.day], () => {
-  const query = { ...route.query }
-  if (selectedId.value === props.edition.id) delete query.programme
-  else query.programme = selectedEdition.value.slug
+function syncQuery(): void {
+  const query: LocationQueryRaw = { ...route.query, edition: selectedEdition.value.slug }
   if (view.value === 'calendar') query.vue = 'calendrier'
   else delete query.vue
   if (filters.value.day) query.jour = filters.value.day
   else delete query.jour
   void router.replace({ query })
-})
+}
+
+// Au montage aussi : entrer par la barre de navigation ouvre une édition par
+// défaut, et l'adresse doit la nommer pour être copiable. Jamais côté serveur —
+// une redirection au rendu ferait perdre le premier passage.
+onMounted(syncQuery)
+watch([selectedId, view, () => filters.value.day], syncQuery)
 
 // ---------------------------------------------------------------------------
 // Filtrage et regroupement
@@ -249,7 +263,7 @@ const allLabel = (key: string): SelectOption => ({ value: '', label: t(key) })
 const dayOptions = computed<SelectOption[]>(() => {
   const dates = [...new Set(data.value.schedule.map(dayOf))].sort()
   return [
-    allLabel('event.public.programme.filters.allDays'),
+    allLabel('programme.filters.allDays'),
     ...dates.map((value) => ({
       value,
       label: date(`${value}T12:00:00Z`, timezone.value),
@@ -267,7 +281,7 @@ const themeOptions = computed<SelectOption[]>(() => {
     }
   }
   return [
-    allLabel('event.public.programme.filters.allThemes'),
+    allLabel('programme.filters.allThemes'),
     ...[...seen.entries()]
       .map(([value, label]) => ({ value, label }))
       .sort((a, b) => a.label.localeCompare(b.label, locale.value)),
@@ -277,7 +291,7 @@ const themeOptions = computed<SelectOption[]>(() => {
 const formatOptions = computed<SelectOption[]>(() => {
   const present = [...new Set(data.value.schedule.map((session) => session.format))]
   return [
-    allLabel('event.public.programme.filters.allFormats'),
+    allLabel('programme.filters.allFormats'),
     ...present.map((value) => ({ value, label: t(`session-card.format.${value}`) })),
   ]
 })
@@ -290,20 +304,9 @@ const roomOptions = computed<SelectOption[]>(() => {
     }
   }
   return [
-    allLabel('event.public.programme.filters.allRooms'),
+    allLabel('programme.filters.allRooms'),
     ...[...seen.entries()].map(([value, label]) => ({ value, label })),
   ]
-})
-
-/** Journées spéciales représentées dans ce programme — pour la légende. */
-const legendTracks = computed(() => {
-  const seen = new Map<string, PublicScheduleRow['tracks'][number]>()
-  for (const session of data.value.schedule) {
-    for (const track of session.tracks) {
-      if (!seen.has(track.slug)) seen.set(track.slug, track)
-    }
-  }
-  return [...seen.values()]
 })
 
 // ---------------------------------------------------------------------------
@@ -323,38 +326,29 @@ function onCalendarDateChange(value: IsoDate): void {
 }
 
 const viewTabs = computed(() => [
-  { value: 'grid', label: t('event.public.programme.views.grid'), count: filtered.value.length },
-  { value: 'calendar', label: t('event.public.programme.views.calendar') },
+  { value: 'grid', label: t('programme.views.grid'), count: filtered.value.length },
+  { value: 'calendar', label: t('programme.views.calendar') },
 ])
 
 const isPublished = computed(() => selectedEdition.value.programme_published_at !== null)
+
+/** « Du 9 au 20 novembre 2027 », dans le fuseau de l'édition consultée. */
+const period = computed(() =>
+  t('programme.editions.period', {
+    start: date(selectedEdition.value.starts_at, timezone.value),
+    end: date(selectedEdition.value.ends_at, timezone.value),
+  }),
+)
 </script>
 
 <template>
-  <section id="programmation" class="scroll-mt-24" aria-labelledby="programmation-titre">
-    <div class="flex flex-wrap items-end justify-between gap-4">
-      <div>
-        <h2 id="programmation-titre" class="font-display text-xl">
-          {{ t('event.public.programme.title') }}
-        </h2>
-        <p class="mt-1 text-sm text-text-muted">{{ t('event.public.programme.description') }}</p>
-      </div>
-
-      <UiTabs
-        :model-value="view"
-        :items="viewTabs"
-        :label="t('event.public.programme.views.label')"
-        :panel-id="() => 'programmation-panneau'"
-        @update:model-value="view = $event === 'calendar' ? 'calendar' : 'grid'"
-      />
-    </div>
-
-    <!-- SÉLECTEUR D'ANNÉE. Les éditions passées d'abord, puis ce qui ne relève
+  <section aria-labelledby="programmation-titre">
+    <!-- SÉLECTEUR D'ÉDITION. Les conférences d'abord, puis ce qui ne relève
          d'aucune conférence : deux groupes nommés, jamais une liste mêlée. -->
-    <nav class="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3" :aria-label="t('event.public.programme.editions.label')">
+    <nav class="flex flex-wrap items-center gap-x-6 gap-y-3" :aria-label="t('programme.editions.label')">
       <div class="flex flex-wrap items-center gap-2">
         <span class="text-xs uppercase text-text-subtle" :style="{ letterSpacing: 'var(--tracking-caps)' }">
-          {{ t('event.public.programme.editions.conferences') }}
+          {{ t('programme.editions.conferences') }}
         </span>
         <UiButton
           v-for="option in conferences"
@@ -370,7 +364,7 @@ const isPublished = computed(() => selectedEdition.value.programme_published_at 
 
       <div v-if="others.length" class="flex flex-wrap items-center gap-2">
         <span class="text-xs uppercase text-text-subtle" :style="{ letterSpacing: 'var(--tracking-caps)' }">
-          {{ t('event.public.programme.editions.others') }}
+          {{ t('programme.editions.others') }}
         </span>
         <UiButton
           v-for="option in others"
@@ -384,74 +378,85 @@ const isPublished = computed(() => selectedEdition.value.programme_published_at 
       </div>
     </nav>
 
-    <!-- On lit une AUTRE édition que celle de la page : le dire, et proposer le
-         retour. Sans cela, l'en-tête et le programme se contrediraient en
-         silence. -->
-    <UiAlert
-      v-if="isArchive"
-      class="mt-4"
-      intent="info"
-      :title="t('event.public.programme.editions.viewingOther', { edition: tr(selectedEdition.title) })"
-    >
-      {{ t('event.public.programme.editions.viewingOtherHint') }}
-      <template #actions>
-        <UiButton
-          variant="secondary"
-          size="sm"
-          :label="t('event.public.programme.editions.backToCurrent', { edition: props.edition.acronym ?? tr(props.edition.title) })"
-          @click="select(props.edition.id)"
-        />
-      </template>
-    </UiAlert>
+    <!-- L'ÉDITION CONSULTÉE, NOMMÉE. C'est la correction du défaut qui a motivé
+         la sortie de cette section hors de la page d'édition : sans ce titre, on
+         lisait le programme du cycle PACO en croyant lire celui de la COP31. -->
+    <div class="mt-6 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
+      <div class="min-w-0">
+        <h2 id="programmation-titre" class="font-display text-2xl">
+          {{ t('programme.editions.showing', { edition: tr(selectedEdition.title) }) }}
+        </h2>
+        <p class="mt-1 text-sm text-text-muted">
+          <span class="tabular-nums">{{ period }}</span>
+          <span v-if="selectedEdition.city"> · {{ selectedEdition.city }}</span>
+        </p>
+      </div>
+
+      <UiTabs
+        v-if="isPublished"
+        :model-value="view"
+        :items="viewTabs"
+        :label="t('programme.views.label')"
+        :panel-id="() => 'programmation-panneau'"
+        @update:model-value="view = $event === 'calendar' ? 'calendar' : 'grid'"
+      />
+    </div>
 
     <UiErrorState
       v-if="failed"
-      class="mt-4"
+      class="mt-6"
       compact
-      :title="t('event.public.programme.error.title')"
-      :description="t('event.public.programme.error.description')"
+      :title="t('programme.error.title')"
+      :description="t('programme.error.description')"
       @retry="load(selectedId)"
     />
 
     <UiLoadingState
       v-else-if="loading"
-      class="mt-4"
+      class="mt-6"
       variant="card"
       :lines="3"
-      :label="t('event.public.programme.loading')"
+      :label="t('programme.loading')"
     />
 
     <template v-else>
-      <!-- Programme non publié : la section reste, et annonce. -->
+      <!-- Programme non publié : l'édition reste sélectionnée, et l'écran
+           renvoie vers sa page, où l'appel à propositions est encore ouvert. -->
       <UiEmptyState
         v-if="!isPublished"
-        class="mt-5"
+        class="mt-6"
         icon="calendar"
-        :title="t('event.public.programme.unpublished.title')"
-        :description="t('event.public.programme.unpublished.description')"
+        :title="t('programme.unpublished.title')"
+        :description="t('programme.unpublished.description')"
+        :action-label="t('programme.unpublished.backToEvent')"
+        :action-to="localePath(`/evenements/${selectedEdition.slug}`)"
       />
 
       <template v-else>
-        <div class="mt-5 flex flex-col gap-4">
-          <EventProgrammeFilters
-            v-model="filters"
-            :days="dayOptions"
-            :themes="themeOptions"
-            :formats="formatOptions"
-            :rooms="roomOptions"
-            :result-count="filtered.length"
-            :total-count="data.schedule.length"
-          />
+        <!-- PAS DE BANDEAU DE LÉGENDE. Il énumérait les six états et les journées
+             spéciales du programme, et chacun de ces repères est déjà porté par
+             la séance elle-même : `UiSessionCard` écrit son état en toutes
+             lettres et nomme ses journées spéciales avec leur pastille de
+             couleur, le bloc du calendrier fait de même. La règle
+             d'accessibilité — un repère qui ne repose pas uniquement sur la
+             couleur — reste donc tenue là où elle compte : sur l'activité. -->
+        <EventProgrammeFilters
+          v-model="filters"
+          class="mt-6"
+          :days="dayOptions"
+          :themes="themeOptions"
+          :formats="formatOptions"
+          :rooms="roomOptions"
+          :result-count="filtered.length"
+          :total-count="data.schedule.length"
+        />
 
-          <EventProgrammeLegend :tracks="legendTracks" />
-        </div>
-
-        <div id="programmation-panneau" class="mt-6" role="region" :aria-label="t('event.public.programme.title')">
+        <div id="programmation-panneau" class="mt-6" role="region" :aria-label="t('programme.title')">
           <UiEmptyState
             v-if="!filtered.length"
             filtered
-            :title="t('event.public.programme.empty.title')"
-            :description="t('event.public.programme.empty.description')"
+            :title="t('programme.empty.title')"
+            :description="t('programme.empty.description')"
             :action-label="t('common.actions.reset')"
             @action="filters = { day: null, theme: null, format: null, room: null }"
           />
@@ -482,7 +487,7 @@ const isPublished = computed(() => selectedEdition.value.programme_published_at 
               @update:selected-date="onCalendarDateChange"
             />
             <template #fallback>
-              <UiLoadingState variant="card" :lines="2" :label="t('event.public.programme.loading')" />
+              <UiLoadingState variant="card" :lines="2" :label="t('programme.loading')" />
             </template>
           </ClientOnly>
         </div>

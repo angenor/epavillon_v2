@@ -157,17 +157,26 @@ if (import.meta.dev) {
              l'étape dont il DESCEND : vert plein quand celle-ci est franchie
              (le chemin parcouru se colore), pointillés gris quand il mène à une
              étape encore à venir, plein gris entre deux étapes hors parcours.
-             Le décalage de 0,8125 rem n'est pas arbitraire : la pastille fait
-             `size-7` (28 px), son axe tombe donc à 14 px, moins la moitié des
-             2 px du trait. Changer la taille de la pastille impose de le revoir. -->
+
+             LA GÉOMÉTRIE SE DÉDUIT DE LA PASTILLE, ET D'ELLE SEULE. Elle fait
+             `size-7` (28 px) : son axe tombe à 14 px, moins la moitié des 2 px
+             du trait, d'où le 0,8125 rem transversal ; et elle occupe les 28
+             premiers pixels, d'où le 1,75 rem de départ. Le trait part donc au
+             ras de sa pastille et court jusqu'au bord de l'étape, où commence
+             celle qui suit : LES DEUX BOUTS TOUCHENT. Toute valeur choisie « à
+             l'œil » rouvre le défaut qu'on corrige ici — des traits flottant
+             entre deux pastilles, qui ne se rejoignaient ni en haut ni en bas.
+
+             En horizontal, cette géométrie ne vaut qu'à partir de `sm` : sous
+             cette largeur la frise retombe en colonne, donc sur le cas vertical. -->
         <span
           v-if="index < props.steps.length - 1"
           aria-hidden="true"
           class="absolute"
           :class="[
             props.orientation === 'horizontal'
-              ? 'top-9 bottom-0 left-3.25 w-(--border-medium) sm:top-3.5 sm:right-0 sm:bottom-auto sm:left-[calc(50%+1.5rem)] sm:h-(--border-medium) sm:w-auto'
-              : 'top-9 bottom-0 left-3.25 w-(--border-medium)',
+              ? 'top-7 bottom-0 left-3.25 w-(--border-medium) sm:top-3.25 sm:right-0 sm:bottom-auto sm:left-7 sm:h-(--border-medium) sm:w-auto'
+              : 'top-7 bottom-0 left-3.25 w-(--border-medium)',
             stateOf(step, index) === 'done'
               ? 'bg-success-solid'
               : stateOf(props.steps[index + 1] as TimelineStep, index + 1) === 'upcoming'

@@ -40,6 +40,12 @@ interface Props {
    * Proportions imposées au cadre, en notation CSS (`16 / 9`, `1 / 1`).
    * Le cadre est recadré par `object-fit: cover` : c'est la mise en page qui
    * décide du format, jamais le fichier téléversé.
+   *
+   * `'auto'` n'impose RIEN, et c'est le seul moyen d'obtenir des proportions qui
+   * changent avec la largeur : le ratio est posé en style *inline*, qu'aucune
+   * classe utilitaire ne peut redéfinir. Un appelant qui veut « 16:9 en bandeau,
+   * pleine hauteur en colonne » passe donc `ratio="auto"` et décrit les deux cas
+   * dans `frameClass`.
    */
   ratio?: string
   /** Chargement différé. Immédiat seulement pour ce qui est au-dessus de la ligne de flottaison. */
@@ -48,6 +54,13 @@ interface Props {
   sizes?: string
   /** Coins arrondis du cadre. */
   rounded?: string
+  /**
+   * Classes posées sur le CADRE — celui qui porte les proportions et le
+   * recadrage — et non sur la racine. Sans elles, un appelant ne peut pas
+   * atteindre l'élément qui décide de la hauteur de l'image, et l'en-tête est
+   * pourtant formel : c'est à lui de décider de la mise en page.
+   */
+  frameClass?: string
   /** Affiche la légende et le crédit sous l'image, dans un `<figure>`. */
   showCaption?: boolean
 }
@@ -87,8 +100,8 @@ const caption = computed(() => tr(props.image?.caption))
   >
     <div
       class="overflow-hidden bg-surface-sunken"
-      :class="props.rounded"
-      :style="{ aspectRatio: props.ratio }"
+      :class="[props.rounded, props.frameClass]"
+      :style="props.ratio === 'auto' ? undefined : { aspectRatio: props.ratio }"
     >
       <img
         :src="props.image.url"

@@ -53,7 +53,7 @@ const specialDays = computed(() => props.session.tracks.filter((track) => track.
     <dl class="grid gap-3 sm:grid-cols-2">
       <div>
         <dt class="text-xs uppercase text-text-subtle" :style="{ letterSpacing: 'var(--tracking-caps)' }">
-          {{ t('event.public.programme.detail.slot') }}
+          {{ t('programme.detail.slot') }}
         </dt>
         <dd class="mt-1">
           <p class="text-sm text-text">{{ date(props.session.starts_at, props.session.timezone) }}</p>
@@ -69,14 +69,14 @@ const specialDays = computed(() => props.session.tracks.filter((track) => track.
 
       <div v-if="props.session.room_name">
         <dt class="text-xs uppercase text-text-subtle" :style="{ letterSpacing: 'var(--tracking-caps)' }">
-          {{ t('event.public.programme.detail.room') }}
+          {{ t('programme.detail.room') }}
         </dt>
         <dd class="mt-1 text-sm text-text">{{ tr(props.session.room_name) }}</dd>
       </div>
 
       <div v-if="props.session.organization_name">
         <dt class="text-xs uppercase text-text-subtle" :style="{ letterSpacing: 'var(--tracking-caps)' }">
-          {{ t('event.public.programme.detail.organization') }}
+          {{ t('programme.detail.organization') }}
         </dt>
         <dd class="mt-1 text-sm text-text">
           {{ props.session.organization_name }}
@@ -91,7 +91,7 @@ const specialDays = computed(() => props.session.tracks.filter((track) => track.
 
       <div v-if="props.session.capacity !== null">
         <dt class="text-xs uppercase text-text-subtle" :style="{ letterSpacing: 'var(--tracking-caps)' }">
-          {{ t('event.public.programme.detail.capacity') }}
+          {{ t('programme.detail.capacity') }}
         </dt>
         <dd class="mt-1">
           <UiCapacityMeter

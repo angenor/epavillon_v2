@@ -1,6 +1,6 @@
 {
-  "title": "Programme",
-  "description": "Published activities, as a list or placed in time. Both views carry the same data and share your filters.",
+  "title": "Programmes",
+  "description": "Published activities, edition by edition, as a list or placed in time. Both views carry the same data and share your filters.",
   "loading": "Loading the programme",
   "views": {
     "label": "Programme view",
@@ -11,9 +11,8 @@
     "label": "Choose an edition",
     "conferences": "Conferences",
     "others": "Other activities",
-    "viewingOther": "You are viewing the programme of {edition}",
-    "viewingOtherHint": "The header, the call for proposals and the criteria remain those of the current edition.",
-    "backToCurrent": "Back to {edition}"
+    "showing": "Programme of {edition}",
+    "period": "From {start} to {end}"
   },
   "filters": {
     "day": "Day",
@@ -26,10 +25,6 @@
     "allRooms": "All rooms",
     "total": "{count} activity | {count} activity | {count} activities",
     "filtered": "{count} of {total} activity | {count} of {total} activity | {count} of {total} activities"
-  },
-  "legend": {
-    "title": "Key",
-    "tracks": "Special days"
   },
   "grid": {
     "dayCount": "{count} activity | {count} activity | {count} activities",
@@ -51,10 +46,15 @@
   },
   "unpublished": {
     "title": "Programme to come",
-    "description": "The programme for this edition will be published once activities have been selected. Its dates are already known."
+    "description": "The programme for this edition will be published once activities have been selected. Its dates are already known.",
+    "backToEvent": "See the event page"
   },
   "error": {
     "title": "Programme unavailable",
     "description": "The programme for this edition could not be loaded."
+  },
+  "noEdition": {
+    "title": "No programme published yet",
+    "description": "Conference and webinar-series programmes will appear here as soon as they are published."
   }
 }

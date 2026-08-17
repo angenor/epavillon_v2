@@ -17,9 +17,10 @@
  * récente. Le jour où la COP32 est annoncée, l'accueil la suit sans qu'on
  * touche au code.
  *
- * LE FRAGMENT EST CONSERVÉ : `/#programmation` doit atteindre la programmation
- * de l'édition en cours, sans quoi les entrées de la barre de navigation
- * mèneraient au haut de la page.
+ * LE FRAGMENT EST CONSERVÉ : `/#appel-a-propositions` doit atteindre l'encart
+ * d'appel de l'édition en cours, sans quoi l'entrée de la barre de navigation
+ * mènerait au haut de la page. La programmation, elle, a désormais sa propre
+ * adresse (`/programmations`) et ne passe plus par ici.
  */
 
 const api = useApi()

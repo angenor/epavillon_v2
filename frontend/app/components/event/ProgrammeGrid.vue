@@ -54,7 +54,7 @@ function dayLabel(day: ProgrammeDay): string {
           </span>
         </h3>
         <p class="text-xs text-text-subtle">
-          {{ t('event.public.programme.grid.dayCount', { count: day.sessions.length }, day.sessions.length) }}
+          {{ t('programme.grid.dayCount', { count: day.sessions.length }, day.sessions.length) }}
         </p>
       </div>
 
@@ -70,7 +70,7 @@ function dayLabel(day: ProgrammeDay): string {
               <UiButton
                 variant="secondary"
                 size="sm"
-                :label="t('event.public.programme.grid.details')"
+                :label="t('programme.grid.details')"
                 @click="emit('select', session)"
               />
             </template>
