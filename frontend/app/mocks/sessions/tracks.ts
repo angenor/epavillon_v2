@@ -83,4 +83,24 @@ export const sessionTracks = [
     added_by: PERSON.nkoDiop,
     added_at: '2026-08-04T11:08:00Z',
   },
+
+  // --- Édition passée : journée genre et climat (COP30, 18 novembre 2025) ---
+  // Une archive garde ses journées spéciales : c'est ce qui distingue le
+  // programme d'une édition d'une simple liste de séances.
+  {
+    session_id: SESSION.cop30Genre,
+    track_id: TRACK.genreEtClimat,
+    sort_order: 10,
+    is_highlight: true,
+    added_by: PERSON.nkoDiop,
+    added_at: '2025-10-02T10:00:00Z',
+  },
+  {
+    session_id: SESSION.cop30Finance,
+    track_id: TRACK.genreEtClimat,
+    sort_order: 20,
+    is_highlight: false,
+    added_by: PERSON.nkoDiop,
+    added_at: '2025-10-02T10:05:00Z',
+  },
 ] satisfies SessionTrack[]

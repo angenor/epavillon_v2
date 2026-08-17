@@ -202,6 +202,13 @@ export interface TimelineStep {
   label: string
   /** Instant de franchissement ; `null` tant que l'étape n'est pas atteinte. */
   at?: string | null
+  /**
+   * L'étape est datée au JOUR, pas à l'instant. C'est le cas des colonnes `date`
+   * du modèle — `calls_for_proposals.results_expected_at` : personne n'a saisi
+   * d'heure, et en afficher une (« à 09:00 », produite par la conversion de
+   * fuseau) inventerait une précision que la donnée n'a pas.
+   */
+  dateOnly?: boolean
   /** Auteur de l'étape, quand il est connu et utile (« par Awa Diop »). */
   actor?: string | null
   /** Précision : motif de refus, nature de la demande de correction. */

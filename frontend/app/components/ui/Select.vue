@@ -20,9 +20,20 @@ import type { FieldProps, SelectOption, Size } from '~/types/ui'
 interface Props extends FieldProps {
   modelValue?: string | null
   options: SelectOption[]
-  /** Option vide affichée en tête tant que rien n'est choisi. */
+  /**
+   * Option vide affichée en tête tant que rien n'est choisi. Elle est
+   * DÉSACTIVÉE : c'est une invite, pas une valeur. Une liste de FILTRE, où
+   * « tous » doit rester choisissable pour revenir en arrière, ne passe donc pas
+   * par ici — elle déclare une option explicite de valeur vide.
+   */
   placeholder?: string
   size?: Size
+  /**
+   * Masque la mention « facultatif ». Même motif que sur `UiSearchInput` : un
+   * filtre n'appartient à aucune soumission, il n'est ni obligatoire ni
+   * facultatif, et le dire ajoute un mot à chaque liste d'une barre de filtres.
+   */
+  hideOptional?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), { size: 'md' })
@@ -58,6 +69,7 @@ const isLocked = computed(() => props.disabled || props.readonly)
     :required="props.required"
     :disabled="props.disabled"
     :readonly="props.readonly"
+    :hide-optional="props.hideOptional"
   >
     <template #default="{ control }">
       <div class="relative">

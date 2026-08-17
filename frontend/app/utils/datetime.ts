@@ -170,6 +170,34 @@ export function dayKeyInZone(value: DateInput, timeZone: TimeZoneName): string {
   }).format(date)
 }
 
+/**
+ * Heure MURALE d'un instant dans un fuseau donné, au format `AAAA-MM-JJ HH:MM`.
+ *
+ * Elle sert aux bibliothèques de calendrier, qui raisonnent en heure locale sans
+ * fuseau : leur passer l'instant brut placerait le bloc à l'heure de la machine
+ * du visiteur — 14 h à Belém deviendrait 18 h pour qui consulte depuis Dakar,
+ * et la grille horaire du pavillon serait fausse. On convertit donc une fois,
+ * ici, vers le fuseau de l'ÉDITION, et le calendrier n'a plus qu'à afficher.
+ */
+export function wallClockInZone(value: DateInput | null | undefined, timeZone: TimeZoneName): string {
+  const date = toDate(value)
+  if (!date) return ''
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    timeZone,
+  }).formatToParts(date)
+
+  const value_of = (type: Intl.DateTimeFormatPartTypes): string =>
+    parts.find((part) => part.type === type)?.value ?? ''
+
+  return `${value_of('year')}-${value_of('month')}-${value_of('day')} ${value_of('hour')}:${value_of('minute')}`
+}
+
 /** Morceaux d'une plage horaire, à assembler avec un gabarit i18n. */
 export interface TimeRangeParts {
   /** Heure de début, ex. « 14:30 ». */

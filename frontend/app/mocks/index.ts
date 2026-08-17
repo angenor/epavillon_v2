@@ -18,14 +18,16 @@
  *                        limitée à la seule COP31
  *   auth.ts              les comptes, les jetons de courriel et la logique de
  *                        connexion que l'API portera (prompt A1)
- *   event.ts             la série, l'édition COP31, ses douze jours
- *   rooms.ts             le pavillon, ses trois salles, son canal de diffusion
- *   tracks.ts            les deux journées spéciales
- *   calls.ts             l'appel à propositions ouvert et son comité
+ *   event.ts             les deux séries et les quatre éditions : COP31 à venir,
+ *                        COP30 et COP29 passées, cycle de webinaires PACO
+ *   rooms.ts             les pavillons, leurs salles, leurs canaux de diffusion
+ *   tracks.ts            les trois journées spéciales
+ *   calls.ts             l'appel ouvert, les deux appels clos et le comité
  *   criteria.ts          les six critères pondérés, dont un éliminatoire
  *   proposals/           40 dossiers, découpés par statut
  *   reviews.ts           les revues, leurs notes par critère et les affectations
- *   sessions/            30 séances, dont deux conflits volontaires
+ *   sessions/            44 séances : 30 pour la COP31, dont deux conflits
+ *                        volontaires, et 14 pour les autres éditions
  *   registration-form.ts les formulaires d'inscription configurables
  *   registrations.ts     60 inscriptions, canaux d'acquisition variés
  *   views.ts             les deux vues du modèle, reconstituées
@@ -67,7 +69,7 @@ export { eventSeries, events, eventDays } from './event'
 export { venues, rooms, broadcastChannels } from './rooms'
 export { programmeTracks } from './tracks'
 export { callsForProposals, callReviewers } from './calls'
-export { reviewCriteria, maxWeightedScore } from './criteria'
+export { reviewCriteria, maxWeightedScore, maxWeightedScoreOf, seedDefaultCriteria } from './criteria'
 
 export {
   allProposals,
@@ -89,6 +91,7 @@ export {
   allSessions,
   publishedSessions,
   plannedSessions,
+  otherEditionSessions,
   sessionSpeakers,
   sessionTracks,
   sessionOrganizations,

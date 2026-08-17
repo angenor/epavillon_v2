@@ -60,7 +60,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), { orientation: 'vertical' })
 
 const { t } = useI18n()
-const { dateTime } = useDateTime()
+const { date, dateTime } = useDateTime()
 
 const currentIndex = computed(() => {
   if (props.current) return props.steps.findIndex((step) => step.value === props.current)
@@ -111,7 +111,9 @@ function stateLabel(state: StepState): string {
 
 function dateOf(step: TimelineStep): string {
   if (!step.at || !props.timezone) return ''
-  return dateTime(step.at, props.timezone)
+  // Une étape datée au jour n'affiche pas d'heure : celle qu'on lirait serait
+  // le produit d'une conversion de fuseau, pas une saisie.
+  return step.dateOnly ? date(step.at, props.timezone) : dateTime(step.at, props.timezone)
 }
 
 /**

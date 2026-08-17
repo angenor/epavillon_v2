@@ -1,0 +1,60 @@
+{
+  "title": "Programmation",
+  "description": "Les activités publiées, en liste ou placées dans le temps. Les deux vues portent les mêmes données et partagent vos filtres.",
+  "loading": "Chargement du programme",
+  "views": {
+    "label": "Vue de la programmation",
+    "grid": "Liste",
+    "calendar": "Calendrier"
+  },
+  "editions": {
+    "label": "Choisir une édition",
+    "conferences": "Conférences",
+    "others": "Autres activités",
+    "viewingOther": "Vous consultez la programmation de {edition}",
+    "viewingOtherHint": "L'en-tête, l'appel à propositions et les critères restent ceux de l'édition en cours.",
+    "backToCurrent": "Revenir à {edition}"
+  },
+  "filters": {
+    "day": "Jour",
+    "theme": "Thématique",
+    "format": "Format",
+    "room": "Salle",
+    "allDays": "Tous les jours",
+    "allThemes": "Toutes les thématiques",
+    "allFormats": "Tous les formats",
+    "allRooms": "Toutes les salles",
+    "total": "{count} activité | {count} activité | {count} activités",
+    "filtered": "{count} activité sur {total} | {count} activité sur {total} | {count} activités sur {total}"
+  },
+  "legend": {
+    "title": "Légende",
+    "tracks": "Journées spéciales"
+  },
+  "grid": {
+    "dayCount": "{count} activité | {count} activité | {count} activités",
+    "details": "Voir le détail"
+  },
+  "calendar": {
+    "zoneNotice": "Les créneaux sont affichés à l'heure de {zone}, celle de l'événement.",
+    "noEvent": "Aucune activité ce jour-là."
+  },
+  "detail": {
+    "slot": "Créneau",
+    "room": "Salle",
+    "organization": "Organisation",
+    "capacity": "Inscriptions"
+  },
+  "empty": {
+    "title": "Aucune activité ne correspond",
+    "description": "Retirez un filtre pour élargir la recherche."
+  },
+  "unpublished": {
+    "title": "Programme à venir",
+    "description": "La programmation de cette édition sera publiée après la sélection des activités. Ses dates, elles, sont déjà connues."
+  },
+  "error": {
+    "title": "Programme indisponible",
+    "description": "La programmation de cette édition n'a pas pu être chargée."
+  }
+}

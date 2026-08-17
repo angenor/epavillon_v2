@@ -56,6 +56,20 @@ export interface ScheduleTrackBadge {
 }
 
 /**
+ * Pastille thématique agrégée par la vue — `reference.term_badges()`.
+ *
+ * Libellé et couleur viennent de `reference.taxonomy_terms`, où un
+ * administrateur les modifie : ils ne sont NI dans un fichier i18n, NI dans une
+ * feuille de style. C'est la règle qui a manqué à la v1.
+ */
+export interface ScheduleThemeBadge {
+  code: TaxonomyTermCode
+  label: I18nText
+  color: ColorHex | null
+  icon: string | null
+}
+
+/**
  * Ligne de `programme.v_public_schedule` — une ligne = un bloc du calendrier.
  * La vue ne retient que les sessions dont `published_at` est renseigné.
  */
@@ -81,6 +95,10 @@ export interface PublicScheduleRow {
   /** `org.organizations.legal_name`, déjà joint. */
   organization_name: string | null
   organization_acronym: string | null
+  /** Code ISO 3166-1 alpha-2 du pays de l'organisation — stable, filtrable. */
+  organization_country_code: string | null
+  /** Nom du pays, multilingue : à résoudre comme tout `platform.i18n_text`. */
+  organization_country: I18nText | null
   is_streamed: boolean
   broadcast_channel_id: BroadcastChannelId | null
   capacity: number | null
@@ -99,8 +117,14 @@ export interface PublicScheduleRow {
   temporal_state: TemporalState
   /** Inscrits et présents ; exclut les annulations. */
   registered_count: number
-  /** Codes de la taxonomie `activity_theme`, via `reference.terms_of()`. */
+  /**
+   * Codes de la taxonomie `activity_theme`, via `reference.terms_of()`.
+   * POUR FILTRER : un tableau de codes se compare et s'indexe. L'AFFICHAGE passe
+   * par `themes`, qui porte le libellé et la couleur.
+   */
   theme_codes: TaxonomyTermCode[]
+  /** Thématiques prêtes à afficher — `reference.term_badges()`. */
+  themes: ScheduleThemeBadge[]
 }
 
 // ---------------------------------------------------------------------------

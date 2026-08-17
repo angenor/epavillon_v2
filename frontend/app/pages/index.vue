@@ -1,30 +1,60 @@
 <script setup lang="ts">
 /**
- * PAGE D'AMORÇAGE — provisoire.
+ * ACCUEIL — il conduit à l'édition en cours.
  *
- * Le prompt A0.1 ne demande aucune page : les écrans sont l'objet des prompts
- * suivants, et l'accueil public reviendra au prompt A3. Cette page existe pour
- * une raison technique : sans aucune route, Nuxt ne monte ni routeur, ni layout,
- * ni i18n d'URL — `npm run build` réussirait sans rien exercer, et `make check`
- * ne prouverait rien. Elle n'utilise que ce que le socle fournit et sera
- * REMPLACÉE, pas complétée.
+ * La page d'amorçage du prompt A0.1 annonçait qu'elle serait REMPLACÉE par
+ * l'écran A3, pas complétée : c'est fait ici.
+ *
+ * POURQUOI UNE REDIRECTION PLUTÔT QU'UNE PAGE DE PLUS. La page publique d'une
+ * édition (`/evenements/<slug>`) répond déjà aux quatre questions qu'un visiteur
+ * se pose, appel à propositions compris. En composer une seconde, presque
+ * identique, sur `/`, garantirait deux mises en page divergentes dans six mois.
+ * L'adresse canonique reste celle qui porte le slug : elle se partage, elle se
+ * cite, et elle survit au passage à l'édition suivante.
+ *
+ * L'ÉDITION EN COURS EST CHOISIE PAR LES DONNÉES, jamais par une constante :
+ * la première édition de conférence qui n'est pas terminée, à défaut la plus
+ * récente. Le jour où la COP32 est annoncée, l'accueil la suit sans qu'on
+ * touche au code.
+ *
+ * LE FRAGMENT EST CONSERVÉ : `/#programmation` doit atteindre la programmation
+ * de l'édition en cours, sans quoi les entrées de la barre de navigation
+ * mèneraient au haut de la page.
  */
-// Aucun `title` ici : le gabarit d'`app.vue` pose déjà le nom du site.
+
+const api = useApi()
+const route = useRoute()
+const localePath = useLocalePath()
 const { t } = useI18n()
+
+const { data: target } = await useAsyncData('home-current-edition', async () => {
+  const editions = await api.events.publicList()
+  if (!editions.length) return null
+
+  const now = Date.now()
+  // `publicList()` rend les éditions de la plus récente à la plus ancienne.
+  const upcoming = [...editions]
+    .filter((edition) => edition.has_pavilion && Date.parse(edition.ends_at) >= now)
+    .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
+
+  return (upcoming[0] ?? editions[0])?.slug ?? null
+})
+
+if (target.value) {
+  await navigateTo(
+    { path: localePath(`/evenements/${target.value}`), hash: route.hash, query: route.query },
+    { replace: true, redirectCode: 302 },
+  )
+}
 </script>
 
 <template>
-  <div class="max-w-2xl">
-    <p class="text-sm uppercase tracking-wide text-text-subtle">
-      {{ t('nav.site.ownerShort') }} · {{ t('nav.site.parentShort') }}
-    </p>
-    <h1 class="mt-2 text-3xl">{{ t('nav.site.name') }}</h1>
-    <p class="mt-3 text-lg text-text-muted">{{ t('nav.site.tagline') }}</p>
-
-    <p
-      class="mt-8 rounded-lg border border-border bg-surface-raised px-4 py-3 text-sm text-text-muted"
-    >
-      {{ t('nav.maintenance.description') }}
-    </p>
-  </div>
+  <!-- Rendu seulement si aucune édition n'est publique — une plateforme
+       fraîchement installée, ou toutes les éditions en brouillon. Une
+       redirection vers une page inexistante serait pire que cet écran. -->
+  <UiEmptyState
+    icon="calendar"
+    :title="t('event.public.noEdition.title')"
+    :description="t('event.public.noEdition.description')"
+  />
 </template>

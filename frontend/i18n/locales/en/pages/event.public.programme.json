@@ -1,0 +1,60 @@
+{
+  "title": "Programme",
+  "description": "Published activities, as a list or placed in time. Both views carry the same data and share your filters.",
+  "loading": "Loading the programme",
+  "views": {
+    "label": "Programme view",
+    "grid": "List",
+    "calendar": "Calendar"
+  },
+  "editions": {
+    "label": "Choose an edition",
+    "conferences": "Conferences",
+    "others": "Other activities",
+    "viewingOther": "You are viewing the programme of {edition}",
+    "viewingOtherHint": "The header, the call for proposals and the criteria remain those of the current edition.",
+    "backToCurrent": "Back to {edition}"
+  },
+  "filters": {
+    "day": "Day",
+    "theme": "Theme",
+    "format": "Format",
+    "room": "Room",
+    "allDays": "All days",
+    "allThemes": "All themes",
+    "allFormats": "All formats",
+    "allRooms": "All rooms",
+    "total": "{count} activity | {count} activity | {count} activities",
+    "filtered": "{count} of {total} activity | {count} of {total} activity | {count} of {total} activities"
+  },
+  "legend": {
+    "title": "Key",
+    "tracks": "Special days"
+  },
+  "grid": {
+    "dayCount": "{count} activity | {count} activity | {count} activities",
+    "details": "See details"
+  },
+  "calendar": {
+    "zoneNotice": "Times are shown in {zone} time, the event's own.",
+    "noEvent": "No activity on this day."
+  },
+  "detail": {
+    "slot": "Time slot",
+    "room": "Room",
+    "organization": "Organization",
+    "capacity": "Registrations"
+  },
+  "empty": {
+    "title": "No activity matches",
+    "description": "Remove a filter to widen the search."
+  },
+  "unpublished": {
+    "title": "Programme to come",
+    "description": "The programme for this edition will be published once activities have been selected. Its dates are already known."
+  },
+  "error": {
+    "title": "Programme unavailable",
+    "description": "The programme for this edition could not be loaded."
+  }
+}

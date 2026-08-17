@@ -42,20 +42,31 @@ async function signOut(): Promise<void> {
   await navigateTo(localePath('/'))
 }
 
+/**
+ * A3 — les entrées mènent désormais à des pages qui EXISTENT.
+ *
+ * `/evenements`, `/programme` et `/appel-a-propositions` étaient trois adresses
+ * sans page : la barre les proposait, et elles répondaient 404. La programmation
+ * et l'appel ne sont pas des écrans à part — ce sont deux sections de la page
+ * publique de l'édition en cours, atteignables par leur ancre. L'accueil, lui,
+ * redirige vers cette édition en conservant le fragment (voir `pages/index.vue`).
+ *
+ * La leçon vient du prompt A2 : un écran qui répond à toutes ses exigences peut
+ * rester inatteignable, et cela ne se voit qu'en refaisant le chemin.
+ */
 const mainNav: NavItem[] = [
   { labelKey: 'nav.main.home', to: '/' },
-  { labelKey: 'nav.main.events', to: '/evenements' },
-  { labelKey: 'nav.main.programme', to: '/programme' },
-  { labelKey: 'nav.main.call', to: '/appel-a-propositions' },
+  { labelKey: 'nav.main.programme', to: '/#programmation' },
+  { labelKey: 'nav.main.call', to: '/#appel-a-propositions' },
 ]
 
 const footerSections: { labelKey: string; items: NavItem[] }[] = [
   {
     labelKey: 'nav.footer.sections.platform',
     items: [
-      { labelKey: 'nav.main.events', to: '/evenements' },
-      { labelKey: 'nav.main.programme', to: '/programme' },
-      { labelKey: 'nav.main.call', to: '/appel-a-propositions' },
+      { labelKey: 'nav.main.programme', to: '/#programmation' },
+      { labelKey: 'nav.main.call', to: '/#appel-a-propositions' },
+      { labelKey: 'nav.main.criteria', to: '/#criteres' },
     ],
   },
   {

@@ -50,6 +50,8 @@ export const COUNTRY = {
   br: uuid('7010', 15),
   ne: uuid('7010', 16),
   td: uuid('7010', 17),
+  /** Hôte de la COP29 — hors espace francophone, ajouté au prompt A3. */
+  az: uuid('7010', 18),
 } as const
 
 /**
@@ -237,11 +239,33 @@ export const ROLE_ASSIGNMENT = (n: number): Uuid => uuid('7006', n)
 // Événement — 060_events.sql
 // ---------------------------------------------------------------------------
 
-/** `event.event_series` — série reprise de `900_seed.sql`. */
-export const SERIES = { copClimate: uuid('7020', 1) } as const
+/**
+ * `event.event_series` — la série des COP climat est reprise de `900_seed.sql`.
+ *
+ * Le cycle de webinaires PACO est ajouté au prompt A3 : les activités hors COP
+ * doivent rester consultables dans la programmation publique, et le modèle les
+ * porte comme n'importe quelle autre édition — une série de genre
+ * `webinar_series`, sans pavillon et donc sans appel à propositions.
+ */
+export const SERIES = {
+  copClimate: uuid('7020', 1),
+  paco: uuid('7020', 2),
+} as const
 
-/** `event.events`. */
-export const EVENT = { cop31: uuid('7021', 1) } as const
+/**
+ * `event.events`. Quatre éditions : celle qui vient (COP31), deux passées, et le
+ * cycle de webinaires en cours. Les éditions passées alimentent le sélecteur
+ * d'année de la page publique — la programmation d'une COP ne disparaît pas
+ * lorsqu'elle est terminée.
+ */
+export const EVENT = {
+  cop31: uuid('7021', 1),
+  cop30: uuid('7021', 2),
+  cop29: uuid('7021', 3),
+  paco2026: uuid('7021', 4),
+  /** Cycle suivant, ANNONCÉ mais sans programme publié — voir `event.ts`. */
+  paco2027: uuid('7021', 5),
+} as const
 
 /** `event.event_days` — clé : le quantième de novembre 2027. */
 export const EVENT_DAY = {
@@ -259,10 +283,21 @@ export const EVENT_DAY = {
   nov20: uuid('7022', 20),
 } as const
 
+/**
+ * Jours des éditions passées. Numérotés à partir de 200 (COP30) et 300 (COP29)
+ * pour ne jamais recouvrir les douze jours de la COP31 ci-dessus.
+ */
+export const EVENT_DAY_COP30 = (dayOfMonth: number): Uuid => uuid('7022', 200 + dayOfMonth)
+export const EVENT_DAY_COP29 = (dayOfMonth: number): Uuid => uuid('7022', 300 + dayOfMonth)
+
 /** `event.venues`. */
 export const VENUE = {
   pavillon: uuid('7023', 1),
   enLigne: uuid('7023', 2),
+  pavillonCop30: uuid('7023', 3),
+  pavillonCop29: uuid('7023', 4),
+  /** Le cycle PACO n'a aucun lieu physique : il se tient entièrement en ligne. */
+  pacoEnLigne: uuid('7023', 5),
 } as const
 
 /** `event.rooms` — la salle `atelier` est virtuelle : pas d'exclusivité. */
@@ -270,23 +305,42 @@ export const ROOM = {
   baobab: uuid('7024', 1),
   fromager: uuid('7024', 2),
   atelier: uuid('7024', 3),
+  cop30Principale: uuid('7024', 4),
+  cop29Principale: uuid('7024', 5),
+  pacoVisio: uuid('7024', 6),
 } as const
 
 /** `event.broadcast_channels`. */
-export const CHANNEL = { cop31: uuid('7025', 1) } as const
+export const CHANNEL = {
+  cop31: uuid('7025', 1),
+  cop30: uuid('7025', 2),
+  cop29: uuid('7025', 3),
+  paco: uuid('7025', 4),
+} as const
 
 /** `event.programme_tracks` — les journées spéciales. */
 export const TRACK = {
   financeDurable: uuid('7026', 1),
   jeunesseClimat: uuid('7026', 2),
+  /** Journée spéciale de l'édition passée : les archives en portent aussi. */
+  genreEtClimat: uuid('7026', 3),
 } as const
 
 // ---------------------------------------------------------------------------
 // Appel à propositions — 060_events.sql § 5 et 6
 // ---------------------------------------------------------------------------
 
-/** `event.calls_for_proposals` — un seul appel par édition. */
-export const CALL = { cop31: uuid('7030', 1) } as const
+/**
+ * `event.calls_for_proposals` — un seul appel par édition, jamais plusieurs
+ * (`ux_calls_one_per_event`). Le cycle PACO n'en a AUCUN : sans pavillon, pas
+ * d'appel à propositions — c'est la règle métier n° 5, et la cardinalité du
+ * modèle est bien 0..1.
+ */
+export const CALL = {
+  cop31: uuid('7030', 1),
+  cop30: uuid('7030', 2),
+  cop29: uuid('7030', 3),
+} as const
 
 /** `event.review_criteria` — codes de `event.seed_default_criteria()`. */
 export const CRITERION = {
@@ -297,6 +351,10 @@ export const CRITERION = {
   inclusiveness: uuid('7031', 5),
   feasibility: uuid('7031', 6),
 } as const
+
+/** Critères des appels passés : même grille, identifiants distincts. */
+export const CRITERION_PAST = (callIndex: number, n: number): Uuid =>
+  uuid('7031', 10 * callIndex + n)
 
 // ---------------------------------------------------------------------------
 // Propositions — 070_programme_proposals.sql
@@ -422,6 +480,24 @@ export const SESSION = {
   releveJeunesse2: uuid('7060', 28),
   ceremonieCloture: uuid('7060', 29),
   visiteTerrain: uuid('7060', 30),
+
+  // --- Éditions passées (prompt A3) — numérotées à partir de 40 -------------
+  cop30Ouverture: uuid('7060', 41),
+  cop30Adaptation: uuid('7060', 42),
+  cop30Finance: uuid('7060', 43),
+  cop30Genre: uuid('7060', 44),
+  cop30Cloture: uuid('7060', 45),
+  cop29Ouverture: uuid('7060', 51),
+  cop29Transparence: uuid('7060', 52),
+  cop29Jeunesse: uuid('7060', 53),
+  cop29Cloture: uuid('7060', 54),
+
+  // --- Hors COP : le cycle de webinaires PACO — à partir de 60 --------------
+  pacoNegociation: uuid('7060', 61),
+  pacoFinance: uuid('7060', 62),
+  pacoCdn: uuid('7060', 63),
+  pacoAdaptation: uuid('7060', 64),
+  pacoBilan: uuid('7060', 65),
 } as const
 
 /** `programme.session_speakers`. */

@@ -42,23 +42,29 @@ import type { SessionDisplayState } from './StatusBadge.vue'
  * métier n° 4 — un seul direct à la fois, tous événements confondus. La carte ne
  * décide donc jamais seule d'afficher ce repère.
  *
- * ── DEUX ÉCARTS DU MODÈLE, CONTOURNÉS ICI ───────────────────────────────────
+ * ── DEUX ÉCARTS DU MODÈLE, RÉGLÉS DANS LA VUE (17/08) ───────────────────────
  *
- * La vue ne joint pas le PAYS de l'organisation et n'expose que les CODES des
- * thématiques — sans leurs libellés ni leurs couleurs. Les deux arrivent donc en
- * propriétés séparées, résolues par l'appelant. Écarts consignés dans
- * `docs/PROGRESSION.md` ; ils se corrigent dans la vue, pas ici.
+ * La vue ne joignait pas le PAYS de l'organisation et n'exposait que les CODES
+ * des thématiques, sans libellé ni couleur : la carte les recevait alors en
+ * propriétés séparées, à charge pour chaque écran de les résoudre. Les deux
+ * colonnes ont été ajoutées à `v_public_schedule` avant l'écran A3 —
+ * `organization_country` et `themes` (`reference.term_badges()`). La carte les
+ * lit donc sur la ligne, comme tout le reste.
+ *
+ * Les deux propriétés de contournement subsistent, et seulement pour cela : un
+ * appelant qui doit FORCER une valeur — une démonstration, un jeu de données
+ * partiel. Elles ne servent plus à réparer la vue.
  */
 
 interface Props {
   /** Ligne de `programme.v_public_schedule`, consommée telle quelle. */
   session: PublicScheduleRow
   /**
-   * Thématiques résolues depuis `session.theme_codes` contre
-   * `reference.taxonomy_terms`. Libellé et couleur viennent de la BASE.
+   * Thématiques imposées par l'appelant. À défaut — le cas courant — celles que
+   * porte la ligne (`v_public_schedule.themes`), libellé et couleur compris.
    */
   themes?: ThemeBadge[]
-  /** Pays de l'organisation porteuse — absent de la vue, voir l'en-tête. */
+  /** Pays imposé par l'appelant ; à défaut `v_public_schedule.organization_country`. */
   organizationCountry?: string | null
   /** Nom du lieu pour le libellé de fuseau — « Belém ». */
   zoneLabel?: string
@@ -113,6 +119,22 @@ const FORMAT_ICONS: Record<PublicScheduleRow['format'], string> = {
 /** Journées spéciales et fils, déjà agrégés par la vue. */
 const specialDays = computed(() => props.session.tracks.filter((track) => track.kind === 'special_day'))
 const otherTracks = computed(() => props.session.tracks.filter((track) => track.kind !== 'special_day'))
+
+/** Thématiques : celles de la ligne, sauf si l'appelant en impose d'autres. */
+const themes = computed<ThemeBadge[]>(
+  () =>
+    props.themes ??
+    props.session.themes.map((theme) => ({
+      code: theme.code,
+      label: theme.label,
+      color: theme.color,
+    })),
+)
+
+/** Pays de l'organisation porteuse, résolu par la vue. */
+const country = computed(
+  () => props.organizationCountry ?? (props.session.organization_country ? tr(props.session.organization_country) : null),
+)
 
 const showCover = computed(() => Boolean(props.session.cover) && !props.hideCover && !props.compact)
 
@@ -199,14 +221,14 @@ const zoneShort = computed(
             <span v-if="props.session.organization_acronym" class="text-text-muted">
               ({{ props.session.organization_acronym }})
             </span>
-            <span v-if="props.organizationCountry" class="text-text-muted">
-              · {{ props.organizationCountry }}
+            <span v-if="country" class="text-text-muted">
+              · {{ country }}
             </span>
           </p>
         </div>
 
         <!-- 4. Thématiques et journées spéciales, plafonnées à trois. -->
-        <div v-if="specialDays.length || otherTracks.length || props.themes?.length" class="flex flex-wrap items-center gap-2">
+        <div v-if="specialDays.length || otherTracks.length || themes.length" class="flex flex-wrap items-center gap-2">
           <UiBadge
             v-for="track in specialDays"
             :key="track.slug"
@@ -219,7 +241,7 @@ const zoneShort = computed(
           <UiBadge v-for="track in otherTracks" :key="track.slug" size="sm" :dot-color="track.color">
             {{ tr(track.title) }}
           </UiBadge>
-          <UiThemeTagList :themes="props.themes ?? []" :max="3" size="sm" />
+          <UiThemeTagList :themes="themes" :max="3" size="sm" />
         </div>
 
         <!-- 5. Les faits pratiques, sur une ligne. -->

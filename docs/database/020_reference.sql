@@ -211,6 +211,53 @@ AS $$
       AND (p_taxonomy IS NULL OR t.taxonomy_code = p_taxonomy);
 $$;
 
+-- La même chose, PRÊTE À AFFICHER : code, libellé traduit, couleur, icône.
+--
+-- POURQUOI DEUX FONCTIONS PLUTÔT QU'UNE. `terms_of()` sert à FILTRER — un tableau
+-- de codes se compare avec les opérateurs de tableau (`&&`, `@>`) et s'indexe ;
+-- un jsonb ne le fait pas aussi bien. `term_badges()` sert à AFFICHER : une
+-- pastille thématique a besoin de son libellé et de sa couleur, tous deux en
+-- base et modifiables au back-office. Une vue qui n'exposerait que les codes
+-- obligerait chaque écran à recharger la taxonomie et à refaire la
+-- correspondance lui-même — c'est-à-dire à réécrire dans le frontend ce que la
+-- v1 y avait figé, défaut n° 1 de cette version.
+--
+-- Fonction plutôt que jointure latérale recopiée dans chaque vue, pour la même
+-- raison que `media.attached_image()` : le rattachement est polymorphe, et trois
+-- vues qui le déroulent à la main sont trois occasions de diverger.
+-- Rend '[]' — jamais NULL — quand l'entité ne porte aucun terme : la boucle
+-- d'affichage n'a alors aucune garde à écrire.
+CREATE OR REPLACE FUNCTION reference.term_badges(
+    p_schema text, p_table text, p_entity_id uuid, p_taxonomy text DEFAULT NULL
+)
+RETURNS jsonb
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT COALESCE(
+        jsonb_agg(
+            jsonb_build_object(
+                'code',  t.code,
+                'label', t.label,
+                'color', t.color_hex,
+                'icon',  t.icon
+            )
+            ORDER BY et.sort_order, t.sort_order
+        ),
+        '[]'::jsonb
+    )
+    FROM reference.entity_terms et
+    JOIN reference.taxonomy_terms t ON t.id = et.term_id
+    WHERE et.entity_schema = p_schema
+      AND et.entity_table = p_table
+      AND et.entity_id = p_entity_id
+      AND t.is_active
+      AND (p_taxonomy IS NULL OR t.taxonomy_code = p_taxonomy);
+$$;
+
+COMMENT ON FUNCTION reference.term_badges(text, text, uuid, text) IS
+    'Termes d''une entité prêts à afficher (code, libellé, couleur, icône). Pour filtrer, utiliser reference.terms_of().';
+
 -- -----------------------------------------------------------------------------
 -- 5. Amorçage des vocabulaires
 --

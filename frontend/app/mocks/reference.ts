@@ -357,6 +357,28 @@ export const countries = [
     created_at: '2026-01-12T09:00:00Z',
     updated_at: '2026-01-12T09:00:00Z',
   },
+  {
+    // Pays hôte de la COP29, ajouté au prompt A3 avec les éditions passées. Il
+    // n'appartient pas à l'espace francophone : une conférence des Parties se
+    // tient là où les Nations unies la placent, et le pavillon de la
+    // Francophonie s'y installe quand même.
+    id: COUNTRY.az,
+    iso2: 'AZ',
+    iso3: 'AZE',
+    numeric_code: '031',
+    name: { fr: 'Azerbaïdjan', en: 'Azerbaijan' },
+    official_name: null,
+    name_normalized: 'azerbaidjan',
+    region_code: 'asia-west',
+    continent: 'asia',
+    oif_status: 'none',
+    default_timezone: 'Asia/Baku',
+    calling_code: '+994',
+    flag_emoji: '🇦🇿',
+    is_active: true,
+    created_at: '2026-01-12T09:00:00Z',
+    updated_at: '2026-01-12T09:00:00Z',
+  },
 ] satisfies Country[]
 
 // ---------------------------------------------------------------------------
@@ -582,4 +604,18 @@ export const entityTerms = [
   ...themesOf('sessions', SESSION.accesFondsVert, [TERM.climateFinance]),
   ...themesOf('sessions', SESSION.chaleurHopitaux, [TERM.healthSolidarity]),
   ...themesOf('sessions', SESSION.pastoralisme, [TERM.sustainableLivestock]),
+
+  // Séances des autres éditions (prompt A3). Les archives portent leurs
+  // thématiques comme les autres : c'est par elles que se cherche « ce que la
+  // Francophonie a porté sur l'adaptation depuis trois ans ».
+  ...themesOf('sessions', SESSION.cop30Adaptation, [TERM.adaptation, TERM.waterFisheries]),
+  ...themesOf('sessions', SESSION.cop30Finance, [TERM.climateFinance]),
+  ...themesOf('sessions', SESSION.cop30Genre, [TERM.gender, TERM.climateFinance]),
+  ...themesOf('sessions', SESSION.cop29Transparence, [TERM.transparency]),
+  ...themesOf('sessions', SESSION.cop29Jeunesse, [TERM.climateAmbitionNdc, TERM.gender]),
+  ...themesOf('sessions', SESSION.pacoNegociation, [TERM.transparency]),
+  ...themesOf('sessions', SESSION.pacoFinance, [TERM.climateFinance]),
+  ...themesOf('sessions', SESSION.pacoCdn, [TERM.climateAmbitionNdc, TERM.mitigation]),
+  ...themesOf('sessions', SESSION.pacoAdaptation, [TERM.adaptation]),
+  ...themesOf('sessions', SESSION.pacoBilan, [TERM.climateAmbitionNdc]),
 ] satisfies EntityTerm[]

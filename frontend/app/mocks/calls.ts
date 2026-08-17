@@ -51,6 +51,76 @@ export const callsForProposals = [
     created_at: '2026-05-12T09:00:00Z',
     updated_at: '2026-08-24T16:30:00Z',
   },
+
+  // -------------------------------------------------------------------------
+  // Appels des éditions passées (prompt A3) — CLOS.
+  //
+  // L'encart d'appel de la page publique a trois états : à venir, ouvert, clos.
+  // Sans appel clos dans le jeu de données, le troisième n'était rendu nulle
+  // part. `status` vaut `published` : les résultats ont été annoncés, ce qui est
+  // l'état final d'un appel abouti — `closed` ne décrit que la fermeture du
+  // dépôt, avant l'évaluation.
+  // -------------------------------------------------------------------------
+  {
+    id: CALL.cop30,
+    event_id: EVENT.cop30,
+    code: 'cop30_activites',
+    title: {
+      fr: "Appel à propositions d'activités — Pavillon de la Francophonie, COP30",
+      en: 'Call for activity proposals — Francophonie Pavilion, COP30',
+    },
+    description: {
+      fr: "Appel clos. Cent-neuf dossiers reçus, soixante-douze activités retenues et programmées au pavillon de Belém.",
+      en: 'Closed call. One hundred and nine submissions received, seventy-two activities selected for the Belém pavilion.',
+    },
+    status: 'published',
+    opens_at: '2025-05-05T00:00:00-03:00',
+    closes_at: '2025-07-31T23:59:59-03:00',
+    extended_until: null,
+    results_expected_at: '2025-09-15',
+    max_proposals_per_organization: 4,
+    requires_verified_organization: false,
+    min_speakers: 2,
+    max_speakers: 6,
+    default_duration_minutes: 90,
+    allowed_formats: ['in_person', 'hybrid', 'online'],
+    required_reviews: 3,
+    blind_review: false,
+    guidelines_url: 'https://www.ifdd.francophonie.org/cop30/appel-a-propositions',
+    created_by: PERSON.bakayoko,
+    created_at: '2025-04-14T09:00:00Z',
+    updated_at: '2025-09-15T17:00:00Z',
+  },
+  {
+    id: CALL.cop29,
+    event_id: EVENT.cop29,
+    code: 'cop29_activites',
+    title: {
+      fr: "Appel à propositions d'activités — Pavillon de la Francophonie, COP29",
+      en: 'Call for activity proposals — Francophonie Pavilion, COP29',
+    },
+    description: {
+      fr: "Appel clos. Quatre-vingt-onze dossiers reçus, cinquante-huit activités retenues.",
+      en: 'Closed call. Ninety-one submissions received, fifty-eight activities selected.',
+    },
+    status: 'published',
+    opens_at: '2024-05-06T00:00:00+04:00',
+    closes_at: '2024-07-26T23:59:59+04:00',
+    extended_until: null,
+    results_expected_at: '2024-09-13',
+    max_proposals_per_organization: 3,
+    requires_verified_organization: false,
+    min_speakers: 2,
+    max_speakers: 6,
+    default_duration_minutes: 90,
+    allowed_formats: ['in_person', 'hybrid'],
+    required_reviews: 2,
+    blind_review: true,
+    guidelines_url: null,
+    created_by: PERSON.bakayoko,
+    created_at: '2024-04-15T09:00:00Z',
+    updated_at: '2024-09-13T17:00:00Z',
+  },
 ] satisfies CallForProposals[]
 
 // ---------------------------------------------------------------------------

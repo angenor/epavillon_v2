@@ -27,6 +27,7 @@
  */
 
 import type { AdministeredEvents, Person } from '~/types/identity'
+import type { EventStatus } from '~/types/event/edition'
 import type {
   LoginPayload,
   LoginResult,
@@ -347,6 +348,47 @@ export function useApi() {
         ),
       /** Page publique : aucun filtrage de périmètre, l'édition est publique. */
       bySlug: (slug: string) => call(`/events/${slug}`, (m) => m.events.find((e) => e.slug === slug) ?? null),
+
+      /**
+       * LES ÉDITIONS PUBLIQUES, toutes séries confondues — ce qui alimente le
+       * sélecteur d'année de la page publique (A3).
+       *
+       * Le critère est celui du modèle et non une convention d'écran : une
+       * édition est publique dès lors qu'elle n'est ni un brouillon ni annulée.
+       * Une édition annoncée dont le programme n'est pas encore publié en fait
+       * donc partie — sa page existe, elle annonce ses échéances, et c'est
+       * précisément là qu'on dépose un dossier.
+       */
+      publicList: () =>
+        call('/events/public', (m) => {
+          // Liste déclarée à part : écrite en ligne, elle serait comparée aux
+          // seuls statuts que portent les données simulées, et le compilateur
+          // refuserait un statut absent du jeu d'essai.
+          const hidden: EventStatus[] = ['draft', 'cancelled']
+          return m.events
+            .filter((e) => !hidden.includes(e.status))
+            .sort((a, b) => b.starts_at.localeCompare(a.starts_at))
+        }),
+
+      /**
+       * Les séries. La page publique s'en sert pour distinguer ce qui relève
+       * d'une COP de ce qui n'en relève pas (`webinar_series`, `standalone`) :
+       * la distinction est portée par `event.event_series.kind`, jamais par une
+       * liste de slugs recopiée dans un composant.
+       */
+      series: () => call('/event-series', (m) => m.eventSeries),
+
+      /**
+       * VISUEL DE L'ÉDITION — `media.attached_image('event','events',id,'banner')`.
+       *
+       * Un appel à part, et c'en est un de trop : `event.events` ne porte pas son
+       * image, le rattachement média étant polymorphe. La couverture d'une
+       * séance, elle, est résolue EN BASE par `v_public_schedule`. Obligation
+       * inscrite au prompt B3 : la réponse de `GET /events/:slug` embarque sa
+       * bannière résolue, et cet appel disparaît.
+       */
+      banner: (eventId: Uuid) =>
+        call(`/events/${eventId}/banner`, (m) => m.attachedImage('event', 'events', eventId, 'banner')),
       days: (eventId: Uuid) =>
         call(`/events/${eventId}/days`, (m) => m.eventDays.filter((d) => d.event_id === eventId)),
       tracks: (eventId: Uuid) =>

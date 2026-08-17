@@ -18,8 +18,15 @@
  * n'est pas passée.
  */
 
-import type { ProposalDashboardRow, PublicScheduleRow, ScheduleTrackBadge, TemporalState } from '~/types/views'
+import type {
+  ProposalDashboardRow,
+  PublicScheduleRow,
+  ScheduleThemeBadge,
+  ScheduleTrackBadge,
+  TemporalState,
+} from '~/types/views'
 import { callsForProposals } from './calls'
+import { countries } from './reference'
 import { organizations } from './org'
 import { programmeTracks } from './tracks'
 import { rooms } from './rooms'
@@ -31,6 +38,7 @@ import { registrations } from './registrations'
 import { reviewAssignments } from './reviews'
 
 const organizationById = new Map(organizations.map((o) => [o.id, o]))
+const countryById = new Map(countries.map((c) => [c.id, c]))
 const roomById = new Map(rooms.map((r) => [r.id, r]))
 const trackById = new Map(programmeTracks.map((t) => [t.id, t]))
 const termById = new Map(taxonomyTerms.map((t) => [t.id, t]))
@@ -55,7 +63,25 @@ export function publicSchedule(): PublicScheduleRow[] {
     .filter((s) => s.published_at !== null)
     .map((s) => {
       const organization = s.organization_id ? organizationById.get(s.organization_id) : undefined
+      const country = organization?.country_id ? countryById.get(organization.country_id) : undefined
       const room = s.room_id ? roomById.get(s.room_id) : undefined
+
+      /**
+       * `reference.term_badges()` rejouée : code, libellé et couleur, dans
+       * l'ordre de `entity_terms.sort_order` puis de celui du terme. Les termes
+       * inactifs sont écartés, comme en base.
+       */
+      const themes: ScheduleThemeBadge[] = entityTerms
+        .filter((link) => link.entity_table === 'sessions' && link.entity_id === s.id)
+        .map((link) => ({ link, term: termById.get(link.term_id) }))
+        .filter((pair) => pair.term !== undefined && pair.term.is_active && pair.term.taxonomy_code === 'activity_theme')
+        .sort((a, b) => a.link.sort_order - b.link.sort_order || a.term!.sort_order - b.term!.sort_order)
+        .map((pair) => ({
+          code: pair.term!.code,
+          label: pair.term!.label,
+          color: pair.term!.color_hex,
+          icon: pair.term!.icon,
+        }))
 
       const tracks: ScheduleTrackBadge[] = sessionTracks
         .filter((link) => link.session_id === s.id)
@@ -86,6 +112,8 @@ export function publicSchedule(): PublicScheduleRow[] {
         organization_id: s.organization_id,
         organization_name: organization?.legal_name ?? null,
         organization_acronym: organization?.acronym ?? null,
+        organization_country_code: country?.iso2 ?? null,
+        organization_country: country?.name ?? null,
         is_streamed: s.is_streamed,
         broadcast_channel_id: s.broadcast_channel_id,
         capacity: s.capacity,
@@ -99,10 +127,10 @@ export function publicSchedule(): PublicScheduleRow[] {
         temporal_state: temporalState(s, now),
         // Inscrits et présents, annulations exclues.
         registered_count: registrations.filter((r) => r.session_id === s.id && r.status !== 'cancelled').length,
-        theme_codes: entityTerms
-          .filter((t) => t.entity_table === 'sessions' && t.entity_id === s.id)
-          .map((t) => termById.get(t.term_id)?.code)
-          .filter((code): code is string => code !== undefined),
+        // Deux colonnes, deux usages : les codes filtrent, les pastilles
+        // s'affichent. Ne jamais reconstruire un libellé depuis un code.
+        theme_codes: themes.map((theme) => theme.code),
+        themes,
       }
     })
     .sort((a, b) => a.starts_at.localeCompare(b.starts_at))

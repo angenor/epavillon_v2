@@ -67,4 +67,32 @@ export const programmeTracks = [
     created_at: '2026-07-06T09:45:00Z',
     updated_at: '2026-08-03T14:00:00Z',
   },
+  {
+    // Journée spéciale d'une édition PASSÉE. Elle est ajoutée au prompt A3 pour
+    // une raison précise : le sélecteur d'année doit rendre l'archive avec ses
+    // couleurs et ses fils, pas une liste appauvrie. Un programme archivé qui
+    // perd ses journées spéciales perd ce que l'édition avait de particulier.
+    id: TRACK.genreEtClimat,
+    event_id: EVENT.cop30,
+    code: 'genre_et_climat',
+    slug: 'journee-genre-et-climat',
+    kind: 'special_day',
+    title: { fr: 'Journée genre et climat', en: 'Gender and climate day' },
+    subtitle: {
+      fr: 'Financer l’adaptation par et pour les femmes',
+      en: 'Financing adaptation by and for women',
+    },
+    description: {
+      fr: "Journée consacrée à la place des femmes dans les politiques climatiques francophones : accès aux financements, gouvernance locale, sécurité alimentaire.",
+      en: 'A day on the place of women in French-speaking climate policy: access to finance, local governance, food security.',
+    },
+    starts_on: '2025-11-18',
+    ends_on: '2025-11-18',
+    color_hex: '#8B3A62',
+    curated_by: PERSON.nkoDiop,
+    published_at: '2025-10-06T14:00:00Z',
+    sort_order: 10,
+    created_at: '2025-09-22T09:30:00Z',
+    updated_at: '2025-10-06T14:00:00Z',
+  },
 ] satisfies ProgrammeTrack[]

@@ -684,6 +684,13 @@ CREATE TABLE programme.session_question_votes (
 -- Alimente directement la vue calendrier du frontend (une ligne = un bloc), et
 -- la vue grille. Le calcul de l'état d'avancement est fait une fois, en base,
 -- plutôt que dans chaque composant.
+--
+-- RÈGLE DE CETTE VUE : elle répond à l'écran EN UNE REQUÊTE. Tout ce que la
+-- carte de séance affiche doit donc s'y trouver déjà joint et déjà résolu —
+-- salle, organisation et son pays, journées spéciales, thématiques avec leur
+-- libellé et leur couleur, image de couverture. Chaque colonne manquante coûte
+-- une requête par écran, ou un renoncement d'affichage ; les deux se sont
+-- produits (voir les écarts n° 14, 14 bis et 15 de docs/PROGRESSION.md).
 -- -----------------------------------------------------------------------------
 CREATE OR REPLACE VIEW programme.v_public_schedule AS
 SELECT
@@ -706,6 +713,17 @@ SELECT
     s.organization_id,
     o.legal_name          AS organization_name,
     o.acronym             AS organization_acronym,
+    -- PAYS DE L'ORGANISATION PORTEUSE. Sur une COP, il situe l'organisation
+    -- aussi sûrement que son nom : « Réseau ouest-africain… (Sénégal) » ne se
+    -- confond pas avec son homonyme canadien. Sans lui ici, chaque écran de
+    -- programmation devait charger org.organizations ET reference.countries pour
+    -- un seul mot — et la vue perdait sa raison d'être, répondre à un écran en
+    -- une requête.
+    -- Deux colonnes, deux usages : le code ISO est stable et sert au filtre et
+    -- au drapeau, le nom est multilingue et se résout à l'affichage comme tout
+    -- platform.i18n_text.
+    c.iso2                AS organization_country_code,
+    c.name                AS organization_country,
     s.is_streamed,
     s.broadcast_channel_id,
     s.capacity,
@@ -744,10 +762,20 @@ SELECT
     END AS temporal_state,
     (SELECT count(*) FROM programme.registrations rg
       WHERE rg.session_id = s.id AND rg.status IN ('registered', 'attended')) AS registered_count,
-    reference.terms_of('programme', 'sessions', s.id, 'activity_theme') AS theme_codes
+    -- Thématiques, DEUX FOIS et pour deux usages distincts :
+    --   · `theme_codes` pour FILTRER (opérateurs de tableau, indexables) ;
+    --   · `themes` pour AFFICHER — libellé traduit et couleur viennent de
+    --     reference.taxonomy_terms, où un administrateur les modifie.
+    -- N'exposer que les codes forçait chaque écran à recharger la taxonomie et à
+    -- refaire la correspondance : c'est ainsi que les libellés de thématiques
+    -- se sont retrouvés figés dans le frontend de la v1. La vue agrégeait déjà
+    -- complètement les fils de programmation ; l'asymétrie n'avait pas de raison.
+    reference.terms_of('programme', 'sessions', s.id, 'activity_theme') AS theme_codes,
+    reference.term_badges('programme', 'sessions', s.id, 'activity_theme') AS themes
 FROM programme.sessions s
-LEFT JOIN event.rooms r        ON r.id = s.room_id
-LEFT JOIN org.organizations o  ON o.id = s.organization_id
+LEFT JOIN event.rooms r          ON r.id = s.room_id
+LEFT JOIN org.organizations o    ON o.id = s.organization_id
+LEFT JOIN reference.countries c  ON c.id = o.country_id
 WHERE s.published_at IS NOT NULL;
 
 COMMENT ON VIEW programme.v_public_schedule IS

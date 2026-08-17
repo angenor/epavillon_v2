@@ -31,8 +31,9 @@
  */
 
 import type { Asset, AttachedImage, Attachment } from '~/types/media'
+import type { AttachmentRole } from '~/types/media'
 import type { I18nText, Uuid } from '~/types/shared'
-import { ASSET, ORG, PERSON, PROPOSAL, SESSION } from './ids'
+import { ASSET, EVENT, ORG, PERSON, PROPOSAL, SESSION } from './ids'
 
 /** Rattachements média : `media.attachments`, numérotés à part des objets. */
 const ATTACHMENT = (n: number): Uuid => `0198c1a0-0000-7044-8000-${String(n).padStart(12, '0')}`
@@ -45,6 +46,9 @@ interface CoverFields {
   owner: string
   organization: string
   createdAt: string
+  /** Dimensions du fichier. 16:9 par défaut — les bannières sont plus larges. */
+  width?: number
+  height?: number
 }
 
 /**
@@ -60,8 +64,8 @@ function cover_asset(n: number, fields: CoverFields): Asset {
     mime_type: 'image/svg+xml',
     byte_size: 4_200,
     original_filename: `${fields.slug}.svg`,
-    width: 1280,
-    height: 720,
+    width: fields.width ?? 1280,
+    height: fields.height ?? 720,
     duration_seconds: null,
     owner_person_id: fields.owner,
     owner_organization_id: fields.organization,
@@ -152,6 +156,51 @@ export const coverAssets: Asset[] = [
     organization: ORG.fhrc,
     createdAt: '2026-06-22T10:45:00Z',
   }),
+
+  // --- Bannières d'édition (rôle `banner`, prompt A3) -----------------------
+  // Le modèle déclare ce rôle pour `event.events` depuis l'origine
+  // (`media.attachable_roles`, 050 § 8) ; aucun écran ne l'avait encore
+  // consommé. Format large : une bannière n'a pas les proportions d'une
+  // couverture de carte, et l'en-tête de la page publique la recadre en 3:1.
+  cover_asset(201, {
+    slug: 'pavillon-cop31',
+    alt: {
+      fr: "Vue du pavillon de la Francophonie : estrade, écran de projection et rangées de sièges",
+      en: 'View of the Francophonie pavilion: stage, projection screen and rows of seats',
+    },
+    credit: 'IFDD',
+    owner: PERSON.nkoDiop,
+    organization: ORG.ifdd,
+    createdAt: '2026-07-28T09:00:00Z',
+    width: 1920,
+    height: 640,
+  }),
+  cover_asset(202, {
+    slug: 'pavillon-cop30',
+    alt: {
+      fr: "Salle du pavillon de la Francophonie pendant une séance plénière, à Belém",
+      en: 'Francophonie pavilion room during a plenary session in Belém',
+    },
+    credit: 'IFDD',
+    owner: PERSON.nkoDiop,
+    organization: ORG.ifdd,
+    createdAt: '2025-10-02T09:00:00Z',
+    width: 1920,
+    height: 640,
+  }),
+  cover_asset(203, {
+    slug: 'cycle-paco',
+    alt: {
+      fr: "Grille de vignettes de participants lors d'un webinaire du cycle PACO",
+      en: 'Grid of participant thumbnails during a PACO series webinar',
+    },
+    credit: 'IFDD',
+    owner: PERSON.tremblay,
+    organization: ORG.ifdd,
+    createdAt: '2026-01-16T09:00:00Z',
+    width: 1920,
+    height: 640,
+  }),
 ]
 
 /**
@@ -173,6 +222,13 @@ export const coverAttachments: Attachment[] = [
   // La séance « mangroves » est publiée avec un autre visuel que son dossier :
   // elle emprunte celui de la journée jeunesse, à laquelle elle est rattachée.
   attachment(7, 'programme', 'sessions', SESSION.mangroves, ASSET(105)),
+
+  // Bannières d'édition. Une édition sans bannière — la COP29 — est laissée
+  // volontairement : l'en-tête de la page publique doit rester entier sans
+  // visuel, comme la carte de séance.
+  attachment(8, 'event', 'events', EVENT.cop31, ASSET(201), 'banner'),
+  attachment(9, 'event', 'events', EVENT.cop30, ASSET(202), 'banner'),
+  attachment(10, 'event', 'events', EVENT.paco2026, ASSET(203), 'banner'),
 ]
 
 function attachment(
@@ -181,6 +237,7 @@ function attachment(
   ownerTable: string,
   ownerId: Uuid,
   assetId: Uuid,
+  role: AttachmentRole = 'cover',
 ): Attachment {
   return {
     id: ATTACHMENT(n),
@@ -188,7 +245,7 @@ function attachment(
     owner_table: ownerTable,
     owner_id: ownerId,
     asset_id: assetId,
-    role: 'cover',
+    role,
     sort_order: 0,
     alt_text_override: null,
     // Le trigger le pose : le rôle `cover` n'accepte qu'un objet.

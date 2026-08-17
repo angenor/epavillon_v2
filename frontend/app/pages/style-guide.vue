@@ -61,7 +61,12 @@ const { data, pending, error, refresh } = await useAsyncData('style-guide-data',
 /** Nom du lieu — le libellé de fuseau préféré à la ville déduite de l'IANA. */
 const zoneLabel = computed(() => data.value?.event.city ?? '')
 
-/** Thématiques indexées par code : la vue n'expose que `theme_codes`. */
+/**
+ * Thématiques indexées par code. La carte de séance n'en a plus besoin — la vue
+ * porte `themes`, libellé et couleur compris —, mais la démonstration des
+ * pastilles thématiques, elle, montre la taxonomie ENTIÈRE et non les seules
+ * thématiques présentes dans six séances.
+ */
 const themesByCode = computed<Record<string, ThemeBadge>>(() => {
   const entries = (data.value?.themeTerms ?? []).map((term) => [
     term.code,
@@ -72,22 +77,11 @@ const themesByCode = computed<Record<string, ThemeBadge>>(() => {
 
 const themeList = computed<ThemeBadge[]>(() => Object.values(themesByCode.value))
 
-/**
- * Pays de chaque organisation. `v_public_schedule` ne le joint pas — écart
- * consigné dans `docs/PROGRESSION.md` : la carte de programmation doit afficher
- * « organisation avec pays », la vue n'en donne que le nom et le sigle.
+/*
+ * Le pays de chaque organisation était recomposé ici, `v_public_schedule` ne le
+ * joignant pas. La vue expose `organization_country` depuis le 17/08 : la carte
+ * de séance le lit sur sa ligne, et cette recomposition a disparu avec l'écart.
  */
-const countryByOrganization = computed<Record<OrganizationId, string>>(() => {
-  const countryById = new Map((data.value?.countries ?? []).map((country) => [country.id, country]))
-  const entries = (data.value?.organizations ?? [])
-    .filter((organization) => organization.country_id !== null)
-    .map((organization) => {
-      const country = countryById.get(organization.country_id as string)
-      return [organization.id, country ? tr(country.name) : '']
-    })
-    .filter(([, name]) => name !== '')
-  return Object.fromEntries(entries)
-})
 
 /** Six séances pour les cartes, douze dossiers pour le tableau. */
 const sessions = computed(() => (data.value?.schedule ?? []).slice(0, 6))
@@ -169,8 +163,6 @@ useHead({ title: t('style-guide.title') })
 
       <StyleGuideBusinessSection
         :sessions="sessions"
-        :themes-by-code="themesByCode"
-        :country-by-organization="countryByOrganization"
         :zone-label="zoneLabel"
         :loading="pending"
       />

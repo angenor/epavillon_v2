@@ -1,0 +1,83 @@
+{
+  "loading": "Loading the event page",
+  "notFound": {
+    "title": "Edition not found",
+    "description": "No edition matches this address. It may have been withdrawn, or the address contains a typo."
+  },
+  "noEdition": {
+    "title": "No public edition yet",
+    "description": "Upcoming conferences and webinar series will appear here as soon as they are announced."
+  },
+  "hero": {
+    "dates": "Dates",
+    "place": "Location",
+    "mode": "Participation",
+    "pavilion": "Pavilion",
+    "pavilionHeld": "La Francophonie runs a pavilion here",
+    "status": {
+      "draft": "Draft",
+      "announced": "Announced",
+      "ongoing": "Under way",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "suspended": "Suspended"
+    }
+  },
+  "call": {
+    "phase": {
+      "upcoming": "Call opening soon",
+      "open": "Call open",
+      "closed": "Call closed"
+    },
+    "remaining": "Time left",
+    "countdown": {
+      "days": "{count} day | {count} day | {count} days",
+      "hours": "{count} hour | {count} hour | {count} hours",
+      "minutes": "{count} minute | {count} minute | {count} minutes"
+    },
+    "opensAt": "Submissions open",
+    "deadline": "Submission deadline",
+    "closedAt": "Submissions closed on",
+    "extendedFrom": "Extended; deadline originally announced: {date}",
+    "results": "Results announced",
+    "rules": "Conditions",
+    "rulesValue": "Up to {max} submissions per organization · {speakers} speakers · {duration} minutes per activity",
+    "submit": "Submit a proposal",
+    "seeCriteria": "See the review criteria",
+    "guidelines": "Submission guidelines",
+    "closedNote": "Submissions received are under review. Selected organizations are notified individually, and the programme is published as decisions are made."
+  },
+  "milestones": {
+    "title": "Key dates",
+    "description": "The four dates that shape this edition.",
+    "callOpens": "Call opens",
+    "callCloses": "Submissions close",
+    "results": "Results announced",
+    "event": "Event takes place"
+  },
+  "specialDays": {
+    "title": "Special days",
+    "description": "Activities chosen by IFDD among those selected, brought together around a single subject. A special day does not necessarily fill a whole day, and may run over into the next one.",
+    "indicative": "indicative dates",
+    "activityCount": "{count} activity | {count} activity | {count} activities"
+  },
+  "criteria": {
+    "title": "Review criteria",
+    "description": "Every submission is scored against these criteria, each with its own weight. They are published ahead of the deadline: an organization must know what it will be judged on.",
+    "caption": "Review grid, maximum score {total}",
+    "columns": {
+      "criterion": "Criterion",
+      "maxScore": "Max. score",
+      "weight": "Weight",
+      "total": "Max. points"
+    },
+    "knockout": "Knockout",
+    "knockoutNote": "A knockout criterion scored zero disqualifies the submission, whatever the overall average.",
+    "maxTotal": "Maximum achievable score: {total} points.",
+    "reviews": "{count} independent reviews per submission",
+    "empty": {
+      "title": "Grid not published",
+      "description": "The review criteria for this edition have not been published yet."
+    }
+  }
+}

@@ -22,12 +22,12 @@ import type { OrganizationId } from '~/types/shared'
  */
 
 interface Props {
-  /** Séances réelles de `v_public_schedule`, chargées par la page. */
+  /**
+   * Séances réelles de `v_public_schedule`, chargées par la page. La ligne se
+   * suffit : depuis le 17/08 elle porte aussi les thématiques résolues et le
+   * pays de l'organisation, que cette section devait auparavant recomposer.
+   */
   sessions: PublicScheduleRow[]
-  /** Thématiques indexées par code (`reference.taxonomy_terms`). */
-  themesByCode: Record<string, ThemeBadge>
-  /** Pays de chaque organisation — absent de la vue, voir l'écart consigné. */
-  countryByOrganization: Record<OrganizationId, string>
   /** Nom du lieu de l'édition, pour le libellé de fuseau. */
   zoneLabel: string
   loading?: boolean
@@ -88,11 +88,13 @@ const compactCards = computed(() => cards.value.filter((card) => card.state !== 
 const withCover = computed(() => props.sessions.find((session) => session.cover !== null) ?? null)
 const withoutCover = computed(() => props.sessions.find((session) => session.cover === null) ?? null)
 
-const themesOf = (session: PublicScheduleRow): ThemeBadge[] =>
-  session.theme_codes.map((code) => props.themesByCode[code]).filter((theme) => theme !== undefined)
-
-const countryOf = (session: PublicScheduleRow): string | null =>
-  session.organization_id ? (props.countryByOrganization[session.organization_id] ?? null) : null
+/*
+ * Les thématiques et le pays de l'organisation étaient résolus ICI, contre la
+ * taxonomie et la table des organisations, faute pour `v_public_schedule` de les
+ * exposer. La vue les porte depuis le 17/08 (`themes`, `organization_country`) :
+ * la carte les lit sur la ligne, et ces deux fonctions ont disparu avec l'écart
+ * qui les avait rendues nécessaires.
+ */
 
 // ---------------------------------------------------------------------------
 // Frise d'avancement — les quatre parcours qu'un dossier peut suivre
@@ -196,8 +198,6 @@ const withdrawnSteps = computed<TimelineStep[]>(() => [
           </p>
           <UiSessionCard
             :session="card.session"
-            :themes="themesOf(card.session)"
-            :organization-country="countryOf(card.session)"
             :zone-label="props.zoneLabel"
             :cancelled-reason="
               card.state === 'cancelled' ? t('style-guide.business.cards.cancelledReason') : null
@@ -220,8 +220,6 @@ const withdrawnSteps = computed<TimelineStep[]>(() => [
           <p class="mb-1.5 font-mono text-xs text-text-subtle">cover ≠ null</p>
           <UiSessionCard
             :session="withCover"
-            :themes="themesOf(withCover)"
-            :organization-country="countryOf(withCover)"
             :zone-label="props.zoneLabel"
           />
         </div>
@@ -229,8 +227,6 @@ const withdrawnSteps = computed<TimelineStep[]>(() => [
           <p class="mb-1.5 font-mono text-xs text-text-subtle">cover = null</p>
           <UiSessionCard
             :session="withoutCover"
-            :themes="themesOf(withoutCover)"
-            :organization-country="countryOf(withoutCover)"
             :zone-label="props.zoneLabel"
           />
         </div>
@@ -253,8 +249,6 @@ const withdrawnSteps = computed<TimelineStep[]>(() => [
           v-for="card in compactCards"
           :key="`compact-${card.state}`"
           :session="card.session"
-          :themes="themesOf(card.session)"
-          :organization-country="countryOf(card.session)"
           :zone-label="props.zoneLabel"
           compact
         />

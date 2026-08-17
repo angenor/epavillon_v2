@@ -52,7 +52,7 @@ Chaque fichier SQL porte sa propre documentation : en-tête expliquant les déci
 | Historique d'une entité | `010_platform.sql` | `platform.entity_history()` |
 | Activer / désactiver une fonctionnalité | `010_platform.sql` | `platform.feature_flags`, `is_feature_enabled()` |
 | Pays, langues, thématiques, catégories | `020_reference.sql` | `reference.countries`, `locales`, `taxonomies`, `taxonomy_terms` |
-| Rattacher une entité à des thématiques | `020_reference.sql` | `reference.entity_terms`, `terms_of()` |
+| Rattacher une entité à des thématiques | `020_reference.sql` | `reference.entity_terms` · `terms_of()` pour **filtrer** (codes), `term_badges()` pour **afficher** (libellé, couleur) |
 
 ---
 
@@ -60,7 +60,7 @@ Chaque fichier SQL porte sa propre documentation : en-tête expliquant les déci
 
 Trois vues répondent à des écrans entiers en une requête. Les utiliser plutôt que de recomposer la jointure à la main :
 
-- **`programme.v_public_schedule`** — la programmation publique, avec l'état temporel calculé (à venir / en cours / passé / annulé), le nom de la salle, l'organisation, les thématiques et les journées spéciales déjà agrégées.
+- **`programme.v_public_schedule`** — la programmation publique, avec l'état temporel calculé (à venir / en cours / passé / reporté / annulé), le nom de la salle, l'organisation **et son pays**, les thématiques **avec leur libellé et leur couleur**, les journées spéciales et l'image de couverture, toutes déjà résolues. Elle répond à l'écran **en une requête** : une colonne qui manque coûte une requête par écran, ou un renoncement d'affichage.
 - **`programme.v_proposal_dashboard`** — la liste des propositions du back-office : avancement des revues, revues manquantes, demandes de correction ouvertes, rang dans l'événement.
 - **`analytics.v_operational_health`** — l'état de santé du système : outbox en retard, travaux en échec, courriels en rebond, partitions manquantes.
 

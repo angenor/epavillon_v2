@@ -1,0 +1,83 @@
+{
+  "loading": "Chargement de la page de l'événement",
+  "notFound": {
+    "title": "Édition introuvable",
+    "description": "Aucune édition ne correspond à cette adresse. Elle a peut-être été retirée, ou l'adresse comporte une faute."
+  },
+  "noEdition": {
+    "title": "Aucune édition publique pour l'instant",
+    "description": "Les prochaines conférences et les cycles de webinaires apparaîtront ici dès leur annonce."
+  },
+  "hero": {
+    "dates": "Dates",
+    "place": "Lieu",
+    "mode": "Participation",
+    "pavilion": "Pavillon",
+    "pavilionHeld": "La Francophonie y tient un pavillon",
+    "status": {
+      "draft": "Brouillon",
+      "announced": "Annoncée",
+      "ongoing": "En cours",
+      "completed": "Terminée",
+      "cancelled": "Annulée",
+      "suspended": "Suspendue"
+    }
+  },
+  "call": {
+    "phase": {
+      "upcoming": "Appel à venir",
+      "open": "Appel ouvert",
+      "closed": "Appel clos"
+    },
+    "remaining": "Temps restant",
+    "countdown": {
+      "days": "{count} jour | {count} jour | {count} jours",
+      "hours": "{count} heure | {count} heure | {count} heures",
+      "minutes": "{count} minute | {count} minute | {count} minutes"
+    },
+    "opensAt": "Ouverture des dépôts",
+    "deadline": "Échéance de dépôt",
+    "closedAt": "Dépôts clos depuis le",
+    "extendedFrom": "Prolongé ; échéance annoncée à l'origine : {date}",
+    "results": "Annonce des résultats",
+    "rules": "Conditions",
+    "rulesValue": "{max} dossiers au plus par organisation · {speakers} intervenants · {duration} minutes par activité",
+    "submit": "Déposer une proposition",
+    "seeCriteria": "Voir les critères d'évaluation",
+    "guidelines": "Consignes de dépôt",
+    "closedNote": "Les dossiers reçus sont en cours d'examen. Les organisations retenues sont prévenues individuellement, et le programme est publié au fur et à mesure des décisions."
+  },
+  "milestones": {
+    "title": "Les échéances",
+    "description": "Les quatre dates qui rythment cette édition.",
+    "callOpens": "Ouverture de l'appel",
+    "callCloses": "Clôture des dépôts",
+    "results": "Annonce des résultats",
+    "event": "Tenue de l'événement"
+  },
+  "specialDays": {
+    "title": "Journées spéciales",
+    "description": "Des activités choisies par l'IFDD parmi celles qui ont été retenues, réunies autour d'un même sujet. Une journée spéciale n'occupe pas forcément la journée entière, et peut déborder sur le lendemain.",
+    "indicative": "dates indicatives",
+    "activityCount": "{count} activité rattachée | {count} activité rattachée | {count} activités rattachées"
+  },
+  "criteria": {
+    "title": "Critères d'évaluation",
+    "description": "Chaque dossier est noté sur ces critères, chacun avec sa pondération. Ils sont publiés avant l'échéance : une organisation doit savoir sur quoi elle sera jugée.",
+    "caption": "Grille d'évaluation, note maximale {total}",
+    "columns": {
+      "criterion": "Critère",
+      "maxScore": "Note max.",
+      "weight": "Pondération",
+      "total": "Points max."
+    },
+    "knockout": "Éliminatoire",
+    "knockoutNote": "Un critère éliminatoire noté zéro disqualifie le dossier, quelle que soit la moyenne générale.",
+    "maxTotal": "Note maximale atteignable : {total} points.",
+    "reviews": "{count} évaluations indépendantes par dossier",
+    "empty": {
+      "title": "Grille non publiée",
+      "description": "Les critères d'évaluation de cette édition ne sont pas encore publiés."
+    }
+  }
+}

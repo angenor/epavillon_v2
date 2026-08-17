@@ -1,8 +1,8 @@
 /**
- * Données simulées du schéma `event`, partie 1 — la série, l'édition, son
+ * Données simulées du schéma `event`, partie 1 — les séries, les éditions, leur
  * calendrier.
  *
- * L'ÉDITION SIMULÉE : COP31 Climat, Belém, du 9 au 20 novembre 2027, hybride,
+ * L'ÉDITION COURANTE : COP31 Climat, Belém, du 9 au 20 novembre 2027, hybride,
  * fuseau `America/Belem`, pavillon francophone tenu. Toute heure affichée porte
  * ce fuseau : « 14:30 — 16:00, heure de Belém ». Les horaires sont écrits avec
  * leur décalage (`-03:00`) pour que la conversion soit vérifiable à l'œil.
@@ -10,17 +10,32 @@
  * RÉSERVE, déjà consignée dans `docs/PROGRESSION.md` : la ville et l'année de
  * cette édition attendent confirmation du commanditaire — Belém a accueilli la
  * COP30. Ces valeurs sont celles du prompt A0.3 ; elles se changent ici, à un
- * seul endroit, le jour où l'arbitrage est rendu.
+ * seul endroit, le jour où l'arbitrage est rendu. Le prompt A3 ajoutant les
+ * éditions passées, la COP30 y figure à sa date et à son lieu RÉELS (Belém,
+ * novembre 2025) : la contradiction devient visible à l'écran, dans le sélecteur
+ * d'année, plutôt que d'attendre son tour dans un tableau de suivi.
  *
  * L'APPEL EST ENCORE OUVERT alors qu'une partie de la programmation est déjà
  * publiée. Ce n'est pas une incohérence : l'IFDD publie une première version du
  * programme dès les premières décisions et continue de recevoir des dossiers
  * pour les créneaux restants. Les écrans doivent tenir les deux à la fois.
+ *
+ * TROIS AUTRES ÉDITIONS, ajoutées au prompt A3 :
+ *   · COP30 (Belém, novembre 2025) et COP29 (Bakou, novembre 2024), terminées et
+ *     programmes publiés — le sélecteur d'année de la page publique les rend
+ *     consultables sans quitter l'écran ;
+ *   · le cycle de webinaires PACO 2026, qui N'APPARTIENT À AUCUNE COP. Sa série
+ *     est de genre `webinar_series`, l'édition ne tient pas de pavillon
+ *     (`has_pavilion = false`) et n'ouvre donc aucun appel à propositions. C'est
+ *     ce que la page publique présente sous « Autres activités » : elles ne
+ *     doivent pas disparaître de la programmation parce qu'elles ne relèvent pas
+ *     d'une conférence.
  */
 
 import type { EventDay, EventEdition } from '~/types/event/edition'
 import type { EventSeries } from '~/types/event/series'
-import { COUNTRY, EVENT, EVENT_DAY, PERSON, SERIES } from './ids'
+import type { IsoDate } from '~/types/shared'
+import { COUNTRY, EVENT, EVENT_DAY, EVENT_DAY_COP29, EVENT_DAY_COP30, PERSON, SERIES } from './ids'
 
 // ---------------------------------------------------------------------------
 // Série — reprise de `900_seed.sql`
@@ -42,6 +57,28 @@ export const eventSeries = [
     is_active: true,
     created_at: '2026-01-12T09:00:00Z',
     updated_at: '2026-01-12T09:00:00Z',
+  },
+  {
+    // Cycle périodique organisé par l'IFDD lui-même, sans conférence hôte. Le
+    // modèle prévoit ce genre depuis l'origine (`event.series_kind`) ; ce qui
+    // manquait, c'était une donnée pour l'éprouver.
+    id: SERIES.paco,
+    code: 'paco',
+    kind: 'webinar_series',
+    name: {
+      fr: 'PACO — Préparation à l’action climatique et aux ODD',
+      en: 'PACO — Climate action and SDG preparation series',
+    },
+    description: {
+      fr: "Cycle de webinaires de l'IFDD destiné aux négociateurs, aux points focaux nationaux et aux organisations de la société civile francophones. Il se tient toute l'année, indépendamment des conférences.",
+      en: 'IFDD webinar series for French-speaking negotiators, national focal points and civil society organizations, running year-round and independently of conferences.',
+    },
+    slug: 'paco',
+    track_code: 'climate',
+    organizer_organization_id: null,
+    is_active: true,
+    created_at: '2026-01-12T09:05:00Z',
+    updated_at: '2026-01-12T09:05:00Z',
   },
 ] satisfies EventSeries[]
 
@@ -88,6 +125,158 @@ export const events = [
     created_at: '2026-02-10T10:00:00Z',
     updated_at: '2026-08-03T14:00:00Z',
   },
+
+  // -------------------------------------------------------------------------
+  // Éditions passées — consultables depuis le sélecteur d'année de la page
+  // publique. `status: 'completed'`, programme publié : une COP terminée garde
+  // son programme en ligne, c'est la mémoire de ce que la Francophonie y a
+  // porté. L'appel à propositions, lui, est clos.
+  // -------------------------------------------------------------------------
+  {
+    id: EVENT.cop30,
+    series_id: SERIES.copClimate,
+    edition_label: 'COP30',
+    edition_year: 2025,
+    title: {
+      fr: 'COP30 — Conférence des Nations unies sur les changements climatiques',
+      en: 'COP30 — United Nations Climate Change Conference',
+    },
+    acronym: 'COP30',
+    slug: 'cop30-belem-2025',
+    description: {
+      fr: "Trentième Conférence des Parties à la CCNUCC, tenue à Belém. Le pavillon de la Francophonie y a accueilli soixante-douze activités en onze jours.",
+      en: 'Thirtieth Conference of the Parties to the UNFCCC, held in Belém. The Francophonie pavilion hosted seventy-two activities over eleven days.',
+    },
+    status: 'completed',
+    participation_mode: 'hybrid',
+    timezone: 'America/Belem',
+    starts_at: '2025-11-10T09:00:00-03:00',
+    ends_at: '2025-11-21T18:00:00-03:00',
+    country_id: COUNTRY.br,
+    city: 'Belém',
+    address: 'Parc du Hangar, avenida Doutor Freitas, Belém, Pará',
+    has_pavilion: true,
+    programme_published_at: '2025-10-06T14:00:00Z',
+    highlights: null,
+    created_by: PERSON.bakayoko,
+    created_at: '2025-03-11T10:00:00Z',
+    updated_at: '2025-11-24T09:00:00Z',
+  },
+  {
+    id: EVENT.cop29,
+    series_id: SERIES.copClimate,
+    edition_label: 'COP29',
+    edition_year: 2024,
+    title: {
+      fr: 'COP29 — Conférence des Nations unies sur les changements climatiques',
+      en: 'COP29 — United Nations Climate Change Conference',
+    },
+    acronym: 'COP29',
+    slug: 'cop29-bakou-2024',
+    description: {
+      fr: "Vingt-neuvième Conférence des Parties à la CCNUCC, tenue à Bakou. Édition consacrée au nouvel objectif collectif de financement.",
+      en: 'Twenty-ninth Conference of the Parties to the UNFCCC, held in Baku, focused on the new collective finance goal.',
+    },
+    status: 'completed',
+    participation_mode: 'hybrid',
+    // Fuseau différent de celui des autres éditions : c'est ce qui prouve que le
+    // fuseau est porté par l'ÉDITION et non par la plateforme.
+    timezone: 'Asia/Baku',
+    starts_at: '2024-11-11T09:00:00+04:00',
+    ends_at: '2024-11-22T18:00:00+04:00',
+    country_id: COUNTRY.az,
+    city: 'Bakou',
+    address: 'Stade olympique de Bakou, zone bleue',
+    has_pavilion: true,
+    programme_published_at: '2024-10-14T12:00:00Z',
+    highlights: null,
+    created_by: PERSON.bakayoko,
+    created_at: '2024-03-18T10:00:00Z',
+    updated_at: '2024-11-25T09:00:00Z',
+  },
+
+  // -------------------------------------------------------------------------
+  // Hors COP — le cycle de webinaires
+  //
+  // Aucun pavillon, donc aucun appel à propositions : l'IFDD programme
+  // directement (les séances ont `proposal_id` nul). Aucune ville non plus, le
+  // cycle étant entièrement en ligne — `ck_events_physical_location` ne l'exige
+  // que pour les éditions qui ne sont pas `online`.
+  // -------------------------------------------------------------------------
+  {
+    id: EVENT.paco2026,
+    series_id: SERIES.paco,
+    edition_label: 'PACO 2026',
+    edition_year: 2026,
+    title: {
+      fr: 'PACO 2026 — Cycle de webinaires de préparation',
+      en: 'PACO 2026 — Preparatory webinar series',
+    },
+    acronym: 'PACO26',
+    slug: 'paco-2026',
+    description: {
+      fr: "Cinq rendez-vous en ligne répartis sur l'année, ouverts à tous et sans frais : négociation, financement, contributions déterminées au niveau national, adaptation, puis bilan avant la conférence.",
+      en: 'Five free online sessions spread over the year: negotiation, finance, nationally determined contributions, adaptation, and a pre-conference review.',
+    },
+    status: 'ongoing',
+    participation_mode: 'online',
+    timezone: 'America/Toronto',
+    starts_at: '2026-02-12T13:00:00-05:00',
+    ends_at: '2026-12-10T15:00:00-05:00',
+    country_id: null,
+    city: null,
+    address: null,
+    has_pavilion: false,
+    programme_published_at: '2026-01-20T15:00:00Z',
+    highlights: {
+      fr: "Les webinaires sont enregistrés et rediffusés ; l'inscription reste ouverte jusqu'à la veille de chaque séance.",
+      en: 'Sessions are recorded and replayed; registration stays open until the day before each session.',
+    },
+    created_by: PERSON.tremblay,
+    created_at: '2025-12-08T14:00:00Z',
+    updated_at: '2026-06-15T10:00:00Z',
+  },
+  {
+    /*
+     * ÉDITION ANNONCÉE, PROGRAMME NON PUBLIÉ — et c'est sa raison d'être.
+     *
+     * La page publique doit tenir ce cas : « tant que le programme n'est pas
+     * publié, la section reste présente et annonce qu'il le sera après
+     * sélection ». Sans une édition dans cet état, cette branche de l'écran
+     * n'aurait aucune donnée et ne serait jamais vue. Le cycle suivant est
+     * annoncé — les dates de principe sont connues — mais ses webinaires ne sont
+     * pas encore arrêtés : `programme_published_at` est nul, et il n'existe
+     * aucune séance.
+     */
+    id: EVENT.paco2027,
+    series_id: SERIES.paco,
+    edition_label: 'PACO 2027',
+    edition_year: 2027,
+    title: {
+      fr: 'PACO 2027 — Cycle de webinaires de préparation',
+      en: 'PACO 2027 — Preparatory webinar series',
+    },
+    acronym: 'PACO27',
+    slug: 'paco-2027',
+    description: {
+      fr: "Le cycle reprend en février 2027. Les sujets et les dates des séances seront publiés à l'automne 2026.",
+      en: 'The series resumes in February 2027. Topics and dates will be published in autumn 2026.',
+    },
+    status: 'announced',
+    participation_mode: 'online',
+    timezone: 'America/Toronto',
+    starts_at: '2027-02-11T13:00:00-05:00',
+    ends_at: '2027-12-09T15:00:00-05:00',
+    country_id: null,
+    city: null,
+    address: null,
+    has_pavilion: false,
+    programme_published_at: null,
+    highlights: null,
+    created_by: PERSON.tremblay,
+    created_at: '2026-07-02T14:00:00Z',
+    updated_at: '2026-07-02T14:00:00Z',
+  },
 ] satisfies EventEdition[]
 
 // ---------------------------------------------------------------------------
@@ -118,6 +307,40 @@ function day(
     created_at: '2026-02-10T10:05:00Z',
     updated_at: '2026-02-10T10:05:00Z',
   }
+}
+
+/**
+ * Calendrier complet d'une édition passée : un jour par date, sans titre ni
+ * couleur. Écrit comme une boucle plutôt qu'à la main — douze lignes vides
+ * recopiées n'apprennent rien à qui lit ce fichier, et une date sautée y
+ * passerait inaperçue.
+ */
+function calendar(
+  eventId: string,
+  year: number,
+  month: number,
+  fromDay: number,
+  toDay: number,
+  id: (dayOfMonth: number) => string,
+): EventDay[] {
+  const days: EventDay[] = []
+  for (let d = fromDay; d <= toDay; d += 1) {
+    const day_date = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}` as IsoDate
+    days.push({
+      id: id(d),
+      event_id: eventId,
+      day_date,
+      title: null,
+      slug: null,
+      description: null,
+      is_featured: false,
+      color_hex: null,
+      sort_order: (d - fromDay + 1) * 10,
+      created_at: `${year}-0${month === 11 ? 3 : 1}-01T10:00:00Z`,
+      updated_at: `${year}-0${month === 11 ? 3 : 1}-01T10:00:00Z`,
+    })
+  }
+  return days
 }
 
 export const eventDays = [
@@ -168,4 +391,16 @@ export const eventDays = [
     is_featured: true,
     color_hex: '#0B6C9E',
   }),
+
+  // Calendriers des éditions passées : une ligne par jour, sans titre. Une COP
+  // archivée n'a plus besoin d'être commentée jour par jour, mais son calendrier
+  // reste complet — la vue grille regroupe par jour, et un jour sans séance doit
+  // pouvoir être constaté plutôt que deviné.
+  ...calendar(EVENT.cop30, 2025, 11, 10, 21, EVENT_DAY_COP30),
+  ...calendar(EVENT.cop29, 2024, 11, 11, 22, EVENT_DAY_COP29),
+
+  // Le cycle PACO n'a AUCUN jour de calendrier, et c'est juste : ses cinq
+  // webinaires sont dispersés sur l'année, ils ne composent pas une conférence.
+  // Leurs séances portent donc `event_day_id = null` — cas que la page publique
+  // doit tenir sans se rabattre sur un jour inventé.
 ] satisfies EventDay[]
