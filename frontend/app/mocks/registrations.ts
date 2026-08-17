@@ -1,5 +1,5 @@
 /**
- * Données simulées de `programme.registrations` — soixante inscriptions.
+ * Données simulées de `programme.registrations` — soixante-sept inscriptions.
  *
  * UNE SEULE COLONNE DE PERSONNE, quel que soit le profil : la personne existe
  * toujours dans `identity.people`, avec ou sans compte. C'est la fin de la
@@ -11,10 +11,13 @@
  * les décrire : c'est la conséquence assumée d'un formulaire configurable, pas
  * une lacune à corriger. La validation se fait contre le formulaire chargé.
  *
- * TROIS STATUTS SEULEMENT — inscrit, en liste d'attente, annulé. `attended` et
- * `no_show` supposent que la séance ait eu lieu ; l'édition simulée se tient en
- * novembre 2027. Les inventer ici produirait des taux de participation qui ne
- * veulent rien dire.
+ * TROIS STATUTS SUR LA COP31 — inscrit, en liste d'attente, annulé. `attended`
+ * et `no_show` supposent que la séance ait eu lieu, et cette édition se tient en
+ * novembre 2027 : les y inventer produirait des taux de participation qui ne
+ * veulent rien dire. Ils n'apparaissent que sur la SEULE séance du jeu qui se
+ * soit tenue — la restitution du ROAC à la COP30, en novembre 2025 —, ajoutée au
+ * prompt A5 : sans elle, l'espace organisation n'aurait ni présence constatée,
+ * ni rappel déjà parti à montrer.
  *
  * LA LISTE D'ATTENTE se vérifie sur l'atelier de négociation du 13 novembre,
  * huit places pour onze demandes : les positions se suivent, sans trou, et
@@ -88,6 +91,10 @@ interface RegistrationFields {
   createdAt: string
   cancelledAt?: string
   cancelledReason?: string
+  /** Premier clic sur « Rejoindre ». Écrit UNE SEULE FOIS : c'est ce qui donne
+   *  un taux de présence réel, et non déclaratif. */
+  joinedAt?: string
+  attendanceMinutes?: number
 }
 
 function reg(n: number, session_id: string, person_id: string, fields: RegistrationFields): Registration {
@@ -110,8 +117,8 @@ function reg(n: number, session_id: string, person_id: string, fields: Registrat
     },
     locale: fields.locale ?? 'fr',
     waitlist_position: status === 'waitlisted' ? (fields.waitlistPosition ?? null) : null,
-    joined_at: null,
-    attendance_minutes: null,
+    joined_at: fields.joinedAt ?? null,
+    attendance_minutes: fields.attendanceMinutes ?? null,
     certificate_asset_id: null,
     source: fields.source ?? 'web',
     cancelled_at: fields.cancelledAt ?? null,
@@ -246,4 +253,65 @@ export const registrations = [
   // --- Agroécologie (13 novembre) · 2 inscriptions -------------------------
   reg(59, SESSION.agroecologie, PERSON.kabore, { referral: 'word_of_mouth', createdAt: '2026-10-08T08:30:00Z' }),
   reg(60, SESSION.agroecologie, PERSON.ouedraogo, { referral: 'ifdd_website', createdAt: '2026-10-08T09:00:00Z' }),
+
+  // --- COP30 · Littoraux d'Afrique de l'Ouest (12 novembre 2025) -----------
+  //
+  // LA SEULE SÉANCE DU JEU QUI SE SOIT TENUE, et c'est pour cela que ces sept
+  // lignes existent : `attended` et `no_show` n'ont de sens qu'après coup, et
+  // sans elles l'espace organisation n'aurait aucun taux de présence à montrer,
+  // aucun rappel déjà parti, aucun compte rendu en retard. Les inventer sur la
+  // COP31 aurait daté de 2027 des faits observés — c'est le seul endroit où
+  // elles sont vraies.
+  reg(70, SESSION.cop30Adaptation, PERSON.zinsou, {
+    referral: 'ifdd_website',
+    status: 'attended',
+    createdAt: '2025-10-14T08:30:00Z',
+    joinedAt: '2025-11-12T16:58:00Z',
+    attendanceMinutes: 88,
+  }),
+  reg(71, SESSION.cop30Adaptation, PERSON.ngoBassong, {
+    referral: 'email_newsletter',
+    status: 'attended',
+    createdAt: '2025-10-15T10:10:00Z',
+    joinedAt: '2025-11-12T17:02:00Z',
+    attendanceMinutes: 84,
+  }),
+  reg(72, SESSION.cop30Adaptation, PERSON.elFassi, {
+    referral: 'ifdd_linkedin',
+    status: 'attended',
+    createdAt: '2025-10-16T09:25:00Z',
+    joinedAt: '2025-11-12T17:05:00Z',
+    attendanceMinutes: 79,
+  }),
+  reg(73, SESSION.cop30Adaptation, PERSON.josephPierre, {
+    referral: 'word_of_mouth',
+    status: 'attended',
+    createdAt: '2025-10-20T13:40:00Z',
+    joinedAt: '2025-11-12T17:14:00Z',
+    attendanceMinutes: 65,
+  }),
+  reg(74, SESSION.cop30Adaptation, PERSON.rakotomalala, {
+    referral: 'ifdd_facebook',
+    status: 'attended',
+    createdAt: '2025-10-22T06:15:00Z',
+    joinedAt: '2025-11-12T17:00:00Z',
+    attendanceMinutes: 90,
+  }),
+  // Inscrite, rappelée, absente : `no_show` n'est pas un défaut de la donnée,
+  // c'est ce qui distingue un taux de présence d'un compte d'inscrits.
+  reg(75, SESSION.cop30Adaptation, PERSON.koffi, {
+    referral: 'ifdd_x',
+    status: 'no_show',
+    createdAt: '2025-10-25T11:00:00Z',
+  }),
+  // Annulée AVANT la séance : elle sort du décompte des inscrits et n'a reçu
+  // aucun rappel postérieur à son annulation.
+  reg(76, SESSION.cop30Adaptation, PERSON.tranVanMinh, {
+    referral: 'ifdd_linkedin',
+    locale: 'en',
+    status: 'cancelled',
+    createdAt: '2025-10-28T04:20:00Z',
+    cancelledAt: '2025-11-06T03:10:00Z',
+    cancelledReason: 'Empêchement de dernière minute.',
+  }),
 ] satisfies Registration[]

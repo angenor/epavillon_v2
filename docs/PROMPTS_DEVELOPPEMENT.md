@@ -424,7 +424,7 @@ avertissement avant création.
 > })
 > ```
 >
-> **La première action concernée est le dépôt d'une proposition (A4).** La liste s'allongera : chaque prompt qui ajoute une action de ce genre pose la garde et ajoute sa raison au fichier de traduction de l'écran A2 — jamais un test recopié dans la page. Une DEMANDE EN ATTENTE (`memberships.status = 'pending'`) ne passe pas : aucun référent n'a encore accepté, et laisser déposer reviendrait à promettre un dossier qui sera refusé. Rappel : ce middleware n'est pas un contrôle de sécurité, l'API refuse de toute façon sans adhésion active ni permission `org_member` ; il évite qu'un formulaire de sept étapes se remplisse pour rien.
+> **La première action concernée est le dépôt d'une proposition (A4) ; la seconde est l'espace organisation lui-même (A5), qui reprend la raison `organization-space` écrite dès A2.** La liste s'allongera : chaque prompt qui ajoute une action de ce genre pose la garde et ajoute sa raison au fichier de traduction de l'écran A2 — jamais un test recopié dans la page. Une DEMANDE EN ATTENTE (`memberships.status = 'pending'`) ne passe pas : aucun référent n'a encore accepté, et laisser déposer reviendrait à promettre un dossier qui sera refusé. Rappel : ce middleware n'est pas un contrôle de sécurité, l'API refuse de toute façon sans adhésion active ni permission `org_member` ; il évite qu'un formulaire de sept étapes se remplisse pour rien.
 
 **A3 — Page publique de l'événement**
 
@@ -517,7 +517,7 @@ Exigences :
 Montre l'étape 1 avec un co-organisateur ajouté, et l'étape 4.
 ```
 
-**A5 — Espace organisation**
+**A5 — Espace organisation** (fait le 17/08)
 
 ```
 [PRÉAMBULE]
@@ -924,7 +924,7 @@ réinvente pas.
 
 ### Exigences imposées par les écarts du modèle
 
-Quatre des neuf écarts relevés en dérivant les types (`PROGRESSION.md`, 16/08) ne se corrigent **ni dans le SQL ni dans les types** : ce sont des obligations d'API. S'y ajoutent celles qu'ont fait apparaître les premiers écrans — authentification (n° 18 à 20, prompt B1) et rattachement à une organisation (n° 23 et 24, prompt B2). Elles sont écrites ici, dans le prompt du module qui les rencontrera, plutôt que dans un tableau que personne ne relit au moment utile.
+Quatre des neuf écarts relevés en dérivant les types (`PROGRESSION.md`, 16/08) ne se corrigent **ni dans le SQL ni dans les types** : ce sont des obligations d'API. S'y ajoutent celles qu'ont fait apparaître les écrans — authentification (n° 18 à 20, B1), rattachement à une organisation (n° 23, 24 et 33, B2), formulaire de soumission (n° 27 à 32, B4 et B6) et espace organisation (n° 34 à 37, B2, B4, B5 et B6). Elles sont écrites ici, dans le prompt du module qui les rencontrera, plutôt que dans un tableau que personne ne relit au moment utile.
 
 **À recopier dans le prompt du module concerné, juste après « Fonctionnalités attendues ».**
 
@@ -1001,6 +1001,29 @@ Exigences issues des écarts du modèle (relevées en écrivant l'écran A2) :
   la personne avant qu'elle maintienne sa création. Créer sans rien avoir vu et
   créer en connaissance de cause ne se traitent pas pareil en revue — le second
   cas mérite une relecture humaine, jamais un refus.
+
+- ÉCART N°33 (réglé dans le SQL le 17/08, à HONORER ici) — une adhésion
+  `pending` a deux origines OPPOSÉES, et `org.memberships` porte désormais la
+  direction : `invited_at` renseigné, l'organisation a INVITÉ et attend la
+  personne ; `invited_at` nul, la personne a DEMANDÉ et attend un référent. Deux
+  files, deux routes, deux autorisations :
+    · accepter ou refuser une DEMANDE est un geste de référent
+      (`role = 'manager'`), et il ne doit jamais pouvoir porter sur une
+      invitation — approuver sa propre invitation ferait entrer quelqu'un qui
+      n'a rien accepté ;
+    · accepter une INVITATION est un geste de l'invité, et il passe par le jeton
+      `identity.one_time_tokens` de finalité `invitation`.
+  Un refus RÉVOQUE l'adhésion (`status = 'revoked'`, `revoked_at`) au lieu de
+  supprimer la ligne : la v1 l'effaçait, et personne ne pouvait plus distinguer
+  une demande refusée d'une demande jamais faite.
+
+- L'invitation par adresse CRÉE la personne si l'adresse est inconnue —
+  `identity.people` existe sans compte, c'est ce que la séparation personne /
+  compte permet. Ne remplis ni `first_name` ni `last_name` depuis l'adresse : un
+  « a.diallo » déduit d'un courriel est un nom que plus personne ne corrigera.
+  Refuse la seconde invitation vers la même organisation (`ux_memberships`) par
+  une réponse explicite — « déjà invitée, relançable » — et non par l'erreur de
+  contrainte.
 ```
 
 #### B3 — Événements
@@ -1060,6 +1083,63 @@ Exigences issues des écarts du modèle :
   `title_text` (résolu par `platform.t()`, réservé au tri, au filtrage et à
   l'export). Conserve ces deux noms tels quels dans le contrat d'API : le front
   résout `title` lui-même et change de langue sans requête.
+
+- ÉCART N°8 (ouvert depuis le 16/08, tranché par l'écran A5) — il n'existe
+  AUCUNE vue « mes propositions », et il ne faut pas en créer une en recyclant
+  `v_proposal_dashboard` : celle-ci répond au COMITÉ — notes, rang dans
+  l'événement, revues manquantes, demandes ouvertes — et rien de tout cela ne
+  doit parvenir au soumissionnaire. L'espace organisation lit donc une
+  composition qui lui est propre : le dossier, son édition, son journal de
+  transitions, le compte de ses demandes de correction OUVERTES, et ses séances
+  programmées. Ce que l'organisation ne voit jamais : une note, un rang, le nom
+  d'un membre du comité, la liste nominative des inscrits à ses séances.
+
+- ÉCART N°35 — rien ne dit QUI peut marquer une demande de correction
+  « résolue » : `proposal_comments.resolved_at` et `resolved_by` sont une date
+  et une clé étrangère, sans règle. L'écran A5 a tranché — le soumissionnaire
+  pose la résolution, lui seul sachant qu'il a corrigé, et peut la retirer ; le
+  comité garde la main de son côté. Porte cette règle par permission, pas par
+  formulaire. À confirmer avec le commanditaire : une résolution posée par le
+  déposant vaut-elle CLÔTURE pour le comité, ou seulement déclaration ?
+
+- ÉCART N°37 — `programme.proposal_transitions` est écrit par trigger depuis la
+  création de la ligne, mais les dossiers REPRIS DE LA V1 n'en auront aucun. Un
+  journal vide fait mentir toute frise d'avancement : constaté sur les données
+  simulées, l'étape « en évaluation » s'affichait « non concernée », barrée, sur
+  des dossiers pourtant retenus. La reprise (`910_migration_v1.sql`) doit donc
+  semer les transitions DÉDUCTIBLES — `created_at` → `draft`, `submitted_at` →
+  `submitted`, `decided_at` → décision —, faute de quoi chaque écran refera la
+  déduction à sa façon.
+
+- Le fil d'échanges rendu au soumissionnaire est filtré sur
+  `visibility = 'submitter'`, à la SOURCE. Ne délègue pas ce filtre au client :
+  une note du comité qui sort de l'API est sortie, quoi qu'en fasse l'écran.
+
+- ÉCART N°38 (réglé dans le SQL le 17/08, à HONORER ici) — LE RENVOI D'UN
+  DOSSIER CORRIGÉ EST UNE ROUTE DISTINCTE DU DÉPÔT :
+  `POST /proposals/:id/resubmit` contre `POST /proposals/:id/submit`. Les
+  confondre réintroduirait par le contrat le contrôle qu'on vient de retirer du
+  trigger — le comité demande ses corrections APRÈS la clôture de l'appel, et un
+  contrôle de fenêtre indifférencié bloque définitivement le dossier qu'il vient
+  lui-même de réclamer. Le plafond `max_proposals_per_organization`, lui, reste
+  vérifié dans les deux cas : il compte des dossiers, pas des envois.
+
+- ÉCART N°39 — expose `GET /proposals/:id/draft` : le dossier RECOMPOSÉ sous la
+  forme que le formulaire attend (le commanditaire a tranché le 17/08 — « tant
+  que l'événement n'est pas terminé, il peut modifier »). Ce n'est pas un
+  `SELECT` : les textes multilingues sont ramenés à leur français, le créneau
+  redevient une HEURE MURALE dans le fuseau de l'ÉDITION — sans quoi 14:30 à
+  Belém se rouvre à 11:30 pour qui corrige depuis Dakar —, et chaque intervenant
+  porte son `has_account`, qui VERROUILLE son identité (écart n° 31). Une seule
+  implémentation : deux écrans qui la referaient divergeraient au premier champ
+  ajouté.
+
+- LA MODIFICATION D'UN DOSSIER RETENU NE TOUCHE PAS SA SÉANCE. Le modèle sépare
+  volontairement la proposition (pièce contractuelle déposée) de la session
+  (occurrence programmée, avec créneau, salle, inscrits et rappels) — décision
+  structurante n° 1 de ce fichier. Ne propage RIEN de l'une vers l'autre : la
+  reprise du titre ou de l'horaire au programme est un geste de l'IFDD, pas un
+  effet de bord d'une correction de forme.
 ```
 
 #### B5 — Sessions
@@ -1089,6 +1169,47 @@ Exigences issues des écarts du modèle :
   contrôle QUE la présence des réponses obligatoires, la clôture et la jauge :
   tout le reste t'incombe. Traite `is_sensitive` — consentement requis et
   exclusion des exports non anonymisés.
+
+- ÉCART N°36 — le DÉCOMPTE des inscrits doit être exposé séparément de la
+  LISTE. L'organisation qui anime une séance a besoin de savoir combien de
+  personnes viendront — pour la salle, les documents, l'interprétation — et
+  n'a aucun titre à connaître leur identité. La réponse qui décrit une séance à
+  son organisation porte donc trois nombres (inscriptions confirmées, liste
+  d'attente, jauge) et aucun nom ; la liste nominative reste derrière la
+  permission du back-office, comme aujourd'hui.
+```
+
+#### B6 — Média + Engagement
+
+```
+Exigences issues des écarts du modèle :
+
+- ÉCART N°34 — AUCUNE lecture ne récapitule les rappels d'une séance.
+  `engagement.scheduled_reminders` porte une ligne PAR DESTINATAIRE, par canal
+  et par décalage — une séance à quarante inscrits en compte cent soixante — et
+  `schedule_session_reminders()` ne rend qu'un nombre de créations. Expose donc
+  une lecture AGRÉGÉE : une ligne par (décalage, canal), avec l'état consolidé,
+  l'instant d'envoi et le NOMBRE de destinataires. Jamais la liste nominative :
+  les inscrits d'une séance ne sont pas les données de l'organisation qui
+  l'anime. Le contrat existe déjà côté front — `ReminderSlot`, dans
+  `types/organization-workspace.ts`.
+
+- LES QUATRE DÉCALAGES SONT CUMULÉS, ce n'est pas un choix parmi quatre :
+  `{2 days, 1 day, 1 hour, 30 minutes}` est le défaut de `reminder_rules.offsets`
+  et les quatre rappels partent. Une API qui laisserait choisir « le » rappel au
+  singulier contredirait la règle du commanditaire avant même le premier envoi.
+
+- La règle applicable à une séance est celle de la SÉANCE si elle existe, sinon
+  celle de son ÉDITION, sans cumul — c'est ce que fait la fonction SQL, et c'est
+  ce qui permet à l'administrateur de savoir ce qui va partir. Ne l'améliore pas
+  en fusionnant les deux jeux de décalages.
+
+- ÉCART N°32 (relevé au prompt A4) — ASSAINIS le HTML de
+  `programme.proposals.detailed_presentation` À L'ÉCRITURE, avec la liste
+  blanche de l'éditeur : gras, italique, h3/h4, listes, citation, lien,
+  séparateur. À l'écriture et non à la lecture : un contenu stocké propre se
+  rend partout, un contenu filtré à l'affichage doit l'être dans chaque écran,
+  chaque courriel et chaque export.
 ```
 
 ## B7 — Raccordement du front

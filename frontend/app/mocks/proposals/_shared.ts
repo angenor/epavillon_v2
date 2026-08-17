@@ -23,10 +23,26 @@ import type { Proposal, ProposalStatus } from '~/types/programme/proposal'
 import type { ParticipationMode } from '~/types/event/edition'
 import { CALL, EVENT } from '../ids'
 
+/** Sigle de l'édition, tel que `events.acronym` le porte. */
+const REFERENCE_PREFIX: Record<string, string> = {
+  [EVENT.cop31]: 'COP31',
+  [EVENT.cop30]: 'COP30',
+  [EVENT.cop29]: 'COP29',
+}
+
 export interface ProposalDraftFields {
   id: string
   /** Numéro de dossier : `COP31-00001` … `COP31-00040`. */
   ref: number
+  /**
+   * Édition visée. Par défaut la COP31 — les quarante dossiers du jeu —, mais
+   * une organisation fidèle en a déposé lors des éditions précédentes, et son
+   * espace personnel les montre. Le sigle du numéro de dossier en découle, comme
+   * en base : `tg_assign_reference_code` lit `events.acronym`.
+   */
+  event?: string
+  /** Appel de l'édition. `null` pour une proposition hors appel, créée par l'IFDD. */
+  call?: string | null
   organization: string
   submittedBy: string
   contact?: string | null
@@ -71,11 +87,16 @@ export function proposal(fields: ProposalDraftFields): Proposal {
     throw new Error(`Proposition ${fields.ref} : un dossier « ${fields.status} » doit porter submitted_at.`)
   }
 
+  const event_id = fields.event ?? EVENT.cop31
+  // Le sigle du numéro de dossier suit l'édition, comme le fait
+  // `tg_assign_reference_code` en lisant `events.acronym`.
+  const prefix = REFERENCE_PREFIX[event_id] ?? 'EPAV'
+
   return {
     id: fields.id,
-    reference_code: `COP31-${String(fields.ref).padStart(5, '0')}`,
-    call_id: CALL.cop31,
-    event_id: EVENT.cop31,
+    reference_code: `${prefix}-${String(fields.ref).padStart(5, '0')}`,
+    call_id: fields.call === undefined ? CALL.cop31 : fields.call,
+    event_id,
     organization_id: fields.organization,
     submitted_by: fields.submittedBy,
     contact_person_id: fields.contact ?? fields.submittedBy,

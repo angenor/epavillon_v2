@@ -55,6 +55,17 @@ interface Props {
   /** Étape courante — sa `value`. Sert quand les `state` ne sont pas tous fournis. */
   current?: string
   orientation?: 'vertical' | 'horizontal'
+  /**
+   * Masque les `detail` sans les retirer des étapes.
+   *
+   * À RÉSERVER À L'ORIENTATION HORIZONTALE, et pour une raison mesurée : un
+   * motif de décision fait deux lignes en vertical et six dans une colonne de
+   * frise horizontale, où il chevauche alors ses voisines. La frise résumée
+   * d'une liste dit OÙ en est le dossier ; le motif se lit sur sa fiche, où la
+   * place existe. Les étapes restent inchangées — la vérification du refus muet
+   * continue donc de s'appliquer.
+   */
+  hideDetails?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), { orientation: 'vertical' })
@@ -215,9 +226,15 @@ if (import.meta.dev) {
 
           <!-- La date, dans le fuseau de l'édition. Sans date, l'étape est en
                attente et le dit : un blanc laisserait croire à un oubli. -->
+          <!-- « En attente » qualifie ce qui n'est PAS ENCORE ARRIVÉ, et rien
+               d'autre. Une étape franchie dont la date n'est pas connue — le
+               journal ne remonte pas toujours à la première COP — n'est pas en
+               attente : elle n'affiche simplement pas d'heure. Écrire « en
+               attente » sous une étape verte est un contresens, et c'est
+               exactement ce qu'on lisait sur un dossier retenu. -->
           <p class="mt-0.5 text-xs text-text-subtle">
             <time v-if="step.at" :datetime="step.at" class="tabular-nums">{{ dateOf(step) }}</time>
-            <span v-else>{{ t('status-timeline.pending') }}</span>
+            <span v-else-if="stateOf(step, index) === 'upcoming'">{{ t('status-timeline.pending') }}</span>
             <span v-if="step.actor"> · {{ t('status-timeline.by', { actor: step.actor }) }}</span>
           </p>
 
@@ -225,7 +242,7 @@ if (import.meta.dev) {
                donc bordé de rouge sur cet état, pour que son absence saute aux
                yeux à la relecture d'un écran. -->
           <p
-            v-if="step.detail"
+            v-if="step.detail && !props.hideDetails"
             class="mt-1.5 max-w-(--measure) rounded-md border px-2.5 py-1.5 text-sm"
             :class="
               stateOf(step, index) === 'refused'

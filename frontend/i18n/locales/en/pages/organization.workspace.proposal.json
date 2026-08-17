@@ -1,0 +1,151 @@
+{
+  "breadcrumb": "My organization",
+  "title": "Submission {code}",
+  "notFound": {
+    "title": "Submission not found",
+    "description": "This submission does not exist, or it does not belong to the organization you are tracking.",
+    "action": "Back to my submissions"
+  },
+  "tabs": {
+    "label": "Submission views",
+    "tracking": "Progress",
+    "exchanges": "Messages",
+    "sessions": "Activities and reminders",
+    "history": "History"
+  },
+  "tracking": {
+    "timelineLabel": "Submission progress",
+    "summary": "Submission summary",
+    "edition": "Edition",
+    "format": "Format",
+    "formatValue": {
+      "online": "Online",
+      "in_person": "On site",
+      "hybrid": "Hybrid"
+    },
+    "duration": "Requested duration",
+    "durationValue": "{count} minutes",
+    "preferredSlot": "Preferred slot",
+    "requestedSessions": "Requested occurrences",
+    "languages": "Working languages",
+    "audiences": "Target audiences",
+    "organizations": "Associated organizations",
+    "role": {
+      "lead": "Lead organization",
+      "co_organizer": "Co-organizer",
+      "partner": "Partner",
+      "sponsor": "Sponsor"
+    },
+    "unconfirmed": "Has not confirmed yet",
+    "confirmCoorganization": "Confirm our participation",
+    "decision": {
+      "accepted": "Submission accepted",
+      "rejected": "Submission not selected",
+      "withdrawn": "Submission withdrawn",
+      "cancelled": "Submission cancelled",
+      "reason": "Reason given: {reason}",
+      "on": "Decided on {date}"
+    },
+    "editDraft": "Resume writing",
+    "edit": "Edit submission",
+    "editBlocked": {
+      "edition_over": "This edition is over: the submission can no longer be edited.",
+      "file_closed": "This submission is closed. To propose this activity again, start a new submission."
+    }
+  },
+  "exchanges": {
+    "title": "Messages from the committee",
+    "description": "Here are the messages the committee sends you, and your replies. The committee's internal notes are never shown to you.",
+    "empty": {
+      "title": "No messages yet",
+      "description": "The committee will write here if it needs a clarification. You will receive an email at that point."
+    },
+    "changeRequest": "Change request",
+    "openRequests": "One change request is still open | One change request is still open | {count} change requests are still open",
+    "resolved": "Resolved on {date}",
+    "markResolved": "Mark as resolved",
+    "unmarkResolved": "Reopen this point",
+    "reply": "Reply",
+    "replyPlaceholder": "Write your reply to the committee…",
+    "send": "Send reply",
+    "sending": "Sending",
+    "cancel": "Cancel",
+    "emptyReply": "Write your reply before sending it.",
+    "edited": "Edited",
+    "you": "You"
+  },
+  "sessions": {
+    "title": "Scheduled activities",
+    "description": "What the IFDD selected from your submission, with the confirmed slot and room.",
+    "empty": {
+      "title": "No activity scheduled yet",
+      "description": "Slots are set after acceptance, when the team assembles the programme. You will be notified as soon as a date is fixed."
+    },
+    "room": "Room",
+    "slot": "Slot",
+    "online": "Online",
+    "registered": "No attendee | 1 attendee | {count} attendees",
+    "waitlisted": "Nobody on the waiting list | 1 person on the waiting list | {count} people on the waiting list",
+    "capacity": "Capacity: {count} seats",
+    "attendance": "{count} people attended",
+    "reportMissing": "The report for this activity has not been submitted yet.",
+    "reminders": {
+      "title": "Reminder schedule",
+      "description": "Four reminders go out before the activity, and they are cumulative: every attendee receives all four. Times are given in {zone}.",
+      "offset": {
+        "days": "{count} day before | {count} day before | {count} days before",
+        "hours": "{count} hour before | {count} hour before | {count} hours before",
+        "minutes": "{count} minutes before"
+      },
+      "sent": "Sent",
+      "pending": "Upcoming",
+      "skipped": "Not sent",
+      "recipients": "No recipient | 1 recipient | {count} recipients",
+      "noRecipients": "No reminder will go out until someone registers.",
+      "channel": {
+        "email": "Email",
+        "in_app": "Notification",
+        "push": "Push notification"
+      }
+    }
+  },
+  "history": {
+    "title": "Change history",
+    "description": "Every change to the submission, field by field, with its author and date. Committee notes and recalculated values are excluded.",
+    "empty": {
+      "title": "No change recorded",
+      "description": "The history fills up from the first change made to the submission."
+    },
+    "created": "Submission created",
+    "changed": "Field changed: {field}",
+    "before": "Before",
+    "after": "After",
+    "emptyValue": "Not set",
+    "by": "by {actor}",
+    "unknownActor": "Unknown author",
+    "field": {
+      "title": "Title",
+      "summary": "Summary",
+      "objectives": "Objectives",
+      "detailed_presentation": "Detailed presentation",
+      "expected_outcomes": "Expected outcomes",
+      "target_audiences": "Target audiences",
+      "format": "Format",
+      "activity_type_code": "Activity type",
+      "language_codes": "Languages",
+      "country_id": "Country",
+      "preferred_start_at": "Preferred start",
+      "preferred_end_at": "Preferred end",
+      "duration_minutes": "Duration",
+      "requested_sessions": "Requested occurrences",
+      "scheduling_constraints": "Scheduling constraints",
+      "status": "Submission status",
+      "submitted_at": "Submission date",
+      "decided_at": "Decision date",
+      "decision_reason": "Decision reason",
+      "organization_id": "Lead organization",
+      "contact_person_id": "Contact person",
+      "slug": "Page address"
+    }
+  }
+}

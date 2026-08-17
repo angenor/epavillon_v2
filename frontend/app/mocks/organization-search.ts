@@ -231,8 +231,25 @@ function sessionName(organizationId: string, name: string, kind: OrganizationNam
 }
 
 /** Toutes les adhésions, celles du jeu et celles de la session. */
-function allMemberships(): Membership[] {
+export function allMemberships(): Membership[] {
   return [...memberships, ...sessionMemberships]
+}
+
+/**
+ * Empile une adhésion écrite ailleurs — l'invitation de l'espace organisation
+ * (A5), qui est une écriture sur la MÊME table.
+ *
+ * Le journal est ici et nulle part ailleurs : deux journaux, ce serait une
+ * invitation visible dans un écran et pas dans l'autre, alors que la base n'a
+ * qu'une table `org.memberships`.
+ */
+export function addSessionMembership(membership: Membership): void {
+  sessionMemberships.push(membership)
+}
+
+/** Rang de la prochaine adhésion de session, pour numéroter sans collision. */
+export function nextSessionMembershipIndex(): number {
+  return sessionMemberships.length
 }
 
 // ---------------------------------------------------------------------------
@@ -438,6 +455,11 @@ export function joinOrganization(personId: string, payload: JoinOrganizationPayl
     // principale. On reproduit la règle, on ne la réinvente pas.
     is_primary: auto && !membershipsOfPerson(personId).some((m) => m.status === 'active'),
     job_title: payload.job_title,
+    // DEMANDE et non invitation : c'est la personne qui vient vers
+    // l'organisation. La direction inverse — l'organisation qui invite — porte
+    // `invited_by` et `invited_at`, et se traite dans l'espace organisation.
+    invited_by: null,
+    invited_at: null,
     approved_by: null,
     approved_at: auto ? now : null,
     revoked_at: null,
@@ -535,6 +557,9 @@ export function createOrganization(personId: string, payload: CreateOrganization
     status: 'active',
     is_primary: !membershipsOfPerson(personId).some((m) => m.status === 'active'),
     job_title: payload.job_title,
+    // Personne ne l'a invitée : elle a créé la fiche.
+    invited_by: null,
+    invited_at: null,
     approved_by: personId,
     approved_at: now,
     revoked_at: null,

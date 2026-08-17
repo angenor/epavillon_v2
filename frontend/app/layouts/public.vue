@@ -37,6 +37,25 @@ const auth = useAuthStore()
  */
 void auth.ensureLoaded()
 
+/**
+ * OÙ MÈNE « MON ORGANISATION », ET POURQUOI CELA DÉPEND DE LA PERSONNE.
+ *
+ * Rattachée, elle va à son espace — ses dossiers, ce qui l'attend, ses membres.
+ * Pas encore rattachée, elle va à l'écran de rattachement : lui ouvrir un espace
+ * qui n'a ni dossier ni membre serait lui montrer une pièce vide et la laisser
+ * chercher la porte. Une demande EN ATTENTE ne suffit pas — aucun référent n'a
+ * accepté, et l'espace la refuserait.
+ *
+ * Le store est déjà chargé pour la garde `requires-organization` : cette lecture
+ * ne coûte aucun appel de plus.
+ */
+const memberships = useMembershipStore()
+void memberships.ensureLoaded()
+
+const myOrganizationTo = computed(() =>
+  localePath(memberships.hasActiveOrganization ? '/mon-organisation' : '/rattachement-organisation'),
+)
+
 async function signOut(): Promise<void> {
   await auth.signOut()
   await navigateTo(localePath('/'))
@@ -133,14 +152,13 @@ const currentYear = new Date().getFullYear()
         <UiLocaleSwitch class="hidden sm:flex" />
         <UiThemeToggle />
         <span v-if="auth.isAuthenticated && auth.person" class="hidden items-center gap-2 sm:flex">
-          <!-- Le rattachement à une organisation est ATTEINT une fois dans le
-               parcours d'inscription, et doit rester atteignable ensuite : on
-               change d'employeur, on rejoint une seconde structure, on suit une
-               demande en attente. Le prompt dit « accessible depuis le profil » ;
-               la page de profil n'existe pas encore (prompt A5), cette entrée
-               tient le rôle en attendant et disparaîtra avec elle. -->
+          <!-- « Mon organisation » : l'espace de suivi pour qui est rattaché,
+               l'écran de rattachement pour qui ne l'est pas encore. Une seule
+               entrée pour les deux — on change d'employeur, on rejoint une
+               seconde structure, on suit une demande en attente, et c'est
+               toujours par ici. -->
           <NuxtLink
-            :to="localePath('organization-join')"
+            :to="myOrganizationTo"
             class="text-sm text-text-secondary no-underline hover:text-text"
           >
             {{ t('nav.account.myOrganization') }}
@@ -163,7 +181,7 @@ const currentYear = new Date().getFullYear()
         <UiLocaleSwitch class="sm:hidden" />
         <NuxtLink
           v-if="auth.isAuthenticated"
-          :to="localePath('organization-join')"
+          :to="myOrganizationTo"
           class="text-sm text-text-secondary no-underline"
         >
           {{ t('nav.account.myOrganization') }}

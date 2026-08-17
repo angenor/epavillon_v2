@@ -143,6 +143,13 @@ export interface Membership {
   /** Attribué automatiquement à la première adhésion active de la personne. */
   is_primary: boolean
   job_title: string | null
+  /** UNE ADHÉSION « EN ATTENTE » A DEUX ORIGINES OPPOSÉES, et ces deux colonnes
+   *  portent la direction : renseignées, l'organisation a INVITÉ et c'est la
+   *  personne qui doit accepter ; nulles, la personne a DEMANDÉ et c'est un
+   *  référent qui doit trancher. Les confondre, c'est approuver une adhésion que
+   *  l'intéressé n'a jamais acceptée. */
+  invited_by: PersonId | null
+  invited_at: IsoDateTime | null
   approved_by: PersonId | null
   approved_at: IsoDateTime | null
   revoked_at: IsoDateTime | null

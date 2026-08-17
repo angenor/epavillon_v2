@@ -21,21 +21,24 @@
  *   programme/review.ts        070_programme_proposals.sql § 5
  *   programme/session.ts       075_programme_sessions.sql § 1, 2, 7
  *   programme/registration.ts  075_programme_sessions.sql § 3, 4, 5
+ *   engagement.ts              110_engagement.sql § 6 — les rappels seuls
  *   live.ts                    080_live.sql § 5 — les messages d'incident seuls
  *   views.ts                   les deux vues consommées telles quelles
  *
  * Modules hors du jalon en cours — Publications, Négociations, Formations,
- * Outils, Engagement, Analytique — : leurs types viendront avec leurs écrans,
- * dans leur propre fichier. Du module Direct, seule la part réellement consommée
- * par le jalon est couverte : le bandeau d'incident, motif transverse de toute
- * la plateforme (voir l'en-tête de `live.ts`).
+ * Outils, Analytique — : leurs types viendront avec leurs écrans, dans leur
+ * propre fichier. De deux modules, seule la part réellement consommée par le
+ * jalon est couverte : du Direct, le bandeau d'incident, motif transverse de
+ * toute la plateforme (voir l'en-tête de `live.ts`) ; de l'Engagement, le
+ * calendrier des rappels d'une séance, que l'espace organisation rend.
  *
- * `navigation.ts`, `ui.ts`, `auth.ts`, `organization-join.ts` et
- * `event-programme.ts` ne sont PAS ré-exportés : ils ne décrivent pas le modèle.
- * Le premier porte une augmentation de `PageMeta` que les layouts importent
- * directement, le deuxième le vocabulaire des composants d'interface, les trois
- * derniers les contrats d'un écran — authentification (A1), rattachement à une
- * organisation (A2), page publique d'une édition (A3) : requêtes, réponses et
+ * `navigation.ts`, `ui.ts`, `auth.ts`, `organization-join.ts`,
+ * `organization-workspace.ts`, `proposal-form.ts` et `event-programme.ts` ne
+ * sont PAS ré-exportés : ils ne décrivent pas le modèle. Le premier porte une
+ * augmentation de `PageMeta` que les layouts importent directement, le deuxième
+ * le vocabulaire des composants d'interface, les autres les contrats d'un écran
+ * — authentification (A1), rattachement (A2), page publique d'une édition (A3),
+ * formulaire de dépôt (A4), espace organisation (A5) : requêtes, réponses et
  * compositions, sans aucune table.
  */
 
@@ -55,5 +58,6 @@ export type * from './programme/review'
 export type * from './programme/session'
 export type * from './programme/registration'
 
+export type * from './engagement'
 export type * from './live'
 export type * from './views'

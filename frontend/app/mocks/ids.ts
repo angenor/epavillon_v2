@@ -210,7 +210,21 @@ export const PERSON = {
   // proposition « votre adresse appartient à … » — sans elle, cette branche de
   // l'écran de rattachement n'aurait aucune donnée.
   sy: uuid('7005', 27),
+  // Ajoutée au prompt A5 : INVITÉE par la référente du ROAC et n'ayant pas
+  // encore répondu. Sans elle, l'adhésion « en attente parce qu'on l'a invitée »
+  // — l'exact opposé de l'adhésion « en attente parce qu'elle a demandé » —
+  // n'aurait aucune donnée, et la section « Membres » n'aurait qu'un cas sur
+  // deux à montrer.
+  diallo: uuid('7005', 28),
 } as const
+
+/**
+ * Personne CRÉÉE PENDANT LA SESSION par une invitation adressée à une adresse
+ * inconnue (A5). Numérotée hors de la série des personnes du jeu — même
+ * principe que `ORG_CREATED` et `PROPOSAL_DRAFTED` : elle nomme une réponse
+ * rendue à l'écran, pas une ligne qu'on retrouverait dans `people`.
+ */
+export const PERSON_INVITED = (n: number): Uuid => uuid('7005', 900 + n)
 
 /**
  * `identity.accounts` — un compte mot de passe par personne connectée (A1).
@@ -412,6 +426,13 @@ export const PROPOSAL = {
   corridorsEcologiques: uuid('7040', 38),
   journalismeClimatique: uuid('7040', 39),
   comptabiliteCarbone: uuid('7040', 40),
+
+  // --- Éditions passées — à partir de 50 ------------------------------------
+  // Ajouté au prompt A5. L'espace organisation ne montre pas que la campagne en
+  // cours : une organisation fidèle relit ce qu'elle a tenu, et c'est le SEUL
+  // endroit du jeu où un dossier retenu a une séance DÉJÀ TENUE — donc des
+  // rappels déjà partis, des inscrits présents et un compte rendu attendu.
+  cop30Littoraux: uuid('7040', 50),
 } as const
 
 /**
@@ -523,5 +544,22 @@ export const REGISTRATION_FORM = {
 /** `programme.registration_form_fields`. */
 export const FORM_FIELD = (n: number): Uuid => uuid('7071', n)
 
-/** `programme.registrations` — soixante inscriptions. */
+/** `programme.registrations` — soixante-sept inscriptions. */
 export const REGISTRATION = (n: number): Uuid => uuid('7072', n)
+
+// ---------------------------------------------------------------------------
+// Rappels — 110_engagement.sql § 6
+// ---------------------------------------------------------------------------
+
+/**
+ * `engagement.reminder_rules`. UNE règle par édition, jamais plus : l'index
+ * unique partiel `ux_reminder_rules_event` l'impose, et c'est ce qui permet à
+ * l'administrateur de savoir ce qui va partir.
+ */
+export const REMINDER_RULE = {
+  cop31: uuid('7080', 1),
+  cop30: uuid('7080', 2),
+} as const
+
+/** `engagement.scheduled_reminders` — matérialisés à la lecture, voir `reminders.ts`. */
+export const SCHEDULED_REMINDER = (n: number): Uuid => uuid('7081', n)

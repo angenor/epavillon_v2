@@ -269,6 +269,17 @@ ON CONFLICT DO NOTHING;
 --
 -- La v1 posait une simple colonne `users.organization_id` : pas d'historique,
 -- pas de référent identifié, pas de possibilité d'appartenir à deux structures.
+--
+-- UNE ADHÉSION « EN ATTENTE » A DEUX ORIGINES OPPOSÉES, et les confondre coûte
+-- cher. Une personne qui DEMANDE à rejoindre attend qu'un référent l'accepte ;
+-- une personne qu'un référent INVITE attend, elle, d'accepter elle-même. Le
+-- statut `pending` ne dit pas laquelle des deux : d'où `invited_by` et
+-- `invited_at`, qui portent la DIRECTION de la demande. Sans eux, la file de
+-- modération d'un référent mêle ses propres invitations aux demandes qu'il a
+-- reçues, et il approuve une adhésion que l'intéressé n'a jamais acceptée.
+-- L'invitation elle-même voyage par `identity.one_time_tokens`, finalité
+-- `invitation` : la ligne d'adhésion dit qu'elle a été émise, le jeton dit
+-- comment elle s'honore.
 -- -----------------------------------------------------------------------------
 CREATE TYPE org.membership_role AS ENUM ('manager', 'member', 'contributor');
 CREATE TYPE org.membership_status AS ENUM ('pending', 'active', 'revoked');
@@ -286,13 +297,22 @@ CREATE TABLE org.memberships (
     -- à la première adhésion active (voir tg_memberships_default_primary).
     is_primary      boolean     NOT NULL DEFAULT false,
     job_title       text,
+    -- Adhésion ÉMISE PAR L'ORGANISATION, et non demandée par la personne : elle
+    -- attend alors que l'invité l'accepte, pas qu'un référent l'approuve.
+    invited_by      uuid        CONSTRAINT xmod_fk_memberships_inviter
+                                REFERENCES identity.people(id) ON DELETE SET NULL,
+    invited_at      timestamptz,
     approved_by     uuid        CONSTRAINT xmod_fk_memberships_approver
                                 REFERENCES identity.people(id) ON DELETE SET NULL,
     approved_at     timestamptz,
     revoked_at      timestamptz,
     created_at      timestamptz NOT NULL DEFAULT now(),
     updated_at      timestamptz NOT NULL DEFAULT now(),
-    CONSTRAINT ux_memberships UNIQUE (organization_id, person_id)
+    CONSTRAINT ux_memberships UNIQUE (organization_id, person_id),
+    -- Les deux colonnes de l'invitation vont ensemble : une date sans auteur ne
+    -- permet ni de relancer, ni de dire qui répond de l'invitation.
+    CONSTRAINT ck_memberships_invitation
+        CHECK ((invited_at IS NULL) = (invited_by IS NULL))
 );
 
 -- Une seule organisation principale par personne.
@@ -302,6 +322,20 @@ CREATE UNIQUE INDEX ux_memberships_primary
 
 CREATE INDEX ix_memberships_org    ON org.memberships (organization_id, status);
 CREATE INDEX ix_memberships_person ON org.memberships (person_id, status);
+
+-- Les deux files d'attente, distinguées par la DIRECTION de la demande :
+-- ce qu'un référent doit trancher, et ce qu'une personne doit accepter.
+CREATE INDEX ix_memberships_requests
+    ON org.memberships (organization_id, created_at DESC)
+    WHERE status = 'pending' AND invited_at IS NULL;
+CREATE INDEX ix_memberships_invitations
+    ON org.memberships (person_id, invited_at DESC)
+    WHERE status = 'pending' AND invited_at IS NOT NULL;
+
+COMMENT ON COLUMN org.memberships.invited_at IS
+    'Date d''émission de l''invitation par l''organisation. Nulle pour une DEMANDE spontanée : c''est ce qui distingue les deux sortes de « pending ».';
+COMMENT ON COLUMN org.memberships.invited_by IS
+    'Référent à l''origine de l''invitation. L''invitation elle-même voyage par identity.one_time_tokens, finalité « invitation ».';
 
 CREATE TRIGGER tg_memberships_updated_at
     BEFORE UPDATE ON org.memberships

@@ -11,11 +11,13 @@
 import type { Proposal } from '~/types/programme/proposal'
 import { acceptedProposals } from './accepted'
 import { draftProposals } from './drafts'
+import { pastEditionProposals } from './past-editions'
 import { reviewedProposals } from './reviewed'
 import { submittedProposals } from './submitted'
 
 export { acceptedProposals } from './accepted'
 export { draftProposals } from './drafts'
+export { pastEditionProposals } from './past-editions'
 export { reviewedProposals } from './reviewed'
 export { submittedProposals } from './submitted'
 export { proposalOrganizations } from './organizations'
@@ -23,10 +25,17 @@ export { proposalSpeakers } from './speakers'
 export { proposalAssets, proposalDocuments } from './documents'
 export { proposalComments, proposalTransitions } from './exchanges'
 
-/** Les quarante dossiers, dans l'ordre de leur numéro de dossier. */
+/**
+ * Les quarante et un dossiers, dans l'ordre de leur numéro — les quarante de la
+ * COP31, plus celui que le ROAC avait déposé pour la COP30.
+ *
+ * Le tri par `reference_code` place naturellement les éditions passées avant les
+ * dossiers en cours : `COP30-…` précède `COP31-…`.
+ */
 export const allProposals: Proposal[] = [
   ...acceptedProposals,
   ...reviewedProposals,
   ...submittedProposals,
   ...draftProposals,
+  ...pastEditionProposals,
 ].sort((a, b) => a.reference_code.localeCompare(b.reference_code))

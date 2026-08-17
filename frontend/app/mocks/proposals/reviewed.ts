@@ -254,6 +254,11 @@ export const reviewedProposals = [
     format: 'online',
     category: 'best_practices',
     country: COUNTRY.fr,
+    // Créneau et durée : un dossier DÉPOSÉ les porte forcément — l'écran de
+    // dépôt les exige depuis les retours du 17/08. Sans eux, ce dossier n'aurait
+    // jamais pu partir, et l'organisation ne pourrait pas le renvoyer corrigé.
+    preferredStart: '2027-11-16T11:00:00-03:00',
+    preferredEnd: '2027-11-16T12:00:00-03:00',
     duration: 60,
     status: 'changes_requested',
     submittedAt: '2026-07-18T09:00:00Z',

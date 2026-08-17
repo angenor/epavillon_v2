@@ -30,6 +30,14 @@ interface Props {
   edition: EventEdition
   /** Destination de l'espace organisation (A5), quand il existera. */
   organizationSpaceTo: string | null
+  /**
+   * Le dossier a été RENVOYÉ après correction, non déposé pour la première fois.
+   *
+   * Le distinguer n'est pas un raffinement : « Votre dossier est déposé » est
+   * faux pour un dossier qui l'était déjà depuis un mois, et ferait craindre un
+   * second dossier — alors que le numéro, lui, est bien le même.
+   */
+  resubmitted?: boolean
   eventTo: string
 }
 
@@ -76,10 +84,18 @@ onBeforeUnmount(() => {
         <UiIcon name="check-circle" size="2rem" :stroke-width="2" />
       </span>
       <h1 class="mt-4 font-display text-2xl leading-tight text-text sm:text-3xl">
-        {{ t('proposal.form.confirmation.title') }}
+        {{
+          props.resubmitted
+            ? t('proposal.form.confirmation.resubmittedTitle')
+            : t('proposal.form.confirmation.title')
+        }}
       </h1>
       <p class="mt-2 text-text-muted">
-        {{ t('proposal.form.confirmation.description', { edition: tr(props.edition.title) }) }}
+        {{
+          props.resubmitted
+            ? t('proposal.form.confirmation.resubmittedDescription')
+            : t('proposal.form.confirmation.description', { edition: tr(props.edition.title) })
+        }}
       </p>
     </header>
 

@@ -142,6 +142,13 @@ export const accounts = [
   passwordAccount(ACCOUNT(9), PERSON.sowFall),
   passwordAccount(ACCOUNT(10), PERSON.kabore),
   passwordAccount(ACCOUNT(11), PERSON.ilboudo),
+
+  // Référent de Verdéo Solutions, ajouté au prompt A5. Son organisation est la
+  // seule du jeu à porter les six états d'un dossier — brouillon, déposé,
+  // CORRECTIONS DEMANDÉES, refusé deux fois, annulé — et elle n'avait aucun
+  // compte : le cas central de l'espace organisation, « corriger un dossier que
+  // le comité renvoie », n'était donc atteignable par personne.
+  passwordAccount(ACCOUNT(13), PERSON.moreau),
 ] satisfies Account[]
 
 // ---------------------------------------------------------------------------

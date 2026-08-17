@@ -54,6 +54,15 @@ import type {
   SubmitProposalPayload,
   SubmitProposalResult,
 } from '~/types/proposal-form'
+import type {
+  DecideMembershipPayload,
+  InviteMemberPayload,
+  InviteMemberResult,
+  ProposalFile,
+  ReplyToCommentPayload,
+  ResolveCommentPayload,
+  WorkspaceOverview,
+} from '~/types/organization-workspace'
 import type { Uuid } from '~/types/shared'
 
 /** Erreur d'accès, à traduire par l'écran « accès refusé ». */
@@ -296,6 +305,36 @@ export function useApi() {
       membershipsOf: (personId: Uuid) =>
         call(`/people/${personId}/memberships`, (m) => m.membershipsOfPerson(personId)),
 
+      /**
+       * INVITATION D'UN MEMBRE PAR SON ADRESSE (A5).
+       *
+       * Trois écritures en base derrière un seul appel : la personne, créée si
+       * l'adresse est inconnue ; l'adhésion, née `pending` avec `invited_by` et
+       * `invited_at` ; le jeton à usage unique qui part par courriel. La
+       * DIRECTION portée par l'adhésion est ce qui distingue cette invitation
+       * d'une demande spontanée — sans elle, un référent approuverait sa propre
+       * invitation et donnerait une adhésion active à qui n'a rien accepté.
+       */
+      invite: (personId: Uuid, payload: InviteMemberPayload): Promise<InviteMemberResult> =>
+        send(`/organizations/${payload.organization_id}/invitations`, payload, (m) =>
+          m.inviteMember(personId, payload),
+        ),
+
+      /**
+       * DÉCISION D'UN RÉFÉRENT sur une DEMANDE d'adhésion — jamais sur une
+       * invitation, qui attend la personne et non l'organisation. Un refus
+       * révoque l'adhésion au lieu de l'effacer : la v1 supprimait la ligne, et
+       * plus personne ne pouvait distinguer une demande refusée d'une demande
+       * jamais faite.
+       */
+      decideMembership: (personId: Uuid, payload: DecideMembershipPayload) =>
+        send(
+          `/memberships/${payload.membership_id}/decision`,
+          payload,
+          (m) => m.decideMembership(personId, payload),
+          'PUT',
+        ),
+
       names: (id: Uuid) =>
         call(`/organizations/${id}/names`, (m) => m.organizationNames.filter((n) => n.organization_id === id)),
       domains: (id: Uuid) =>
@@ -481,6 +520,20 @@ export function useApi() {
         call('/proposals/draft', (m) => m.draftProposalOf(personId)),
 
       /**
+       * UN DOSSIER EXISTANT, RECOMPOSÉ EN BROUILLON — c'est ce qui permet de le
+       * MODIFIER (arbitrage du commanditaire du 17/08 : « tant que l'événement
+       * n'est pas terminé, il peut modifier »).
+       *
+       * La recomposition n'est pas un `SELECT` : le formulaire travaille sur une
+       * structure d'écran — français, heures murales, clés de liste — quand la
+       * base range la même chose dans cinq tables. Elle appartient donc à l'API
+       * (prompt B4), pas à la page : deux écrans qui la referaient chacun de
+       * leur côté divergeraient sur le premier champ ajouté.
+       */
+      forEdit: (proposalId: Uuid) =>
+        call(`/proposals/${proposalId}/draft`, (m) => m.editableProposal(proposalId)),
+
+      /**
        * ENREGISTREMENT AUTOMATIQUE. Le premier appel CRÉE la ligne et rend son
        * numéro de dossier — `tg_assign_reference_code` s'exécute à l'insertion,
        * pas au dépôt. Les suivants ne font que dater.
@@ -489,9 +542,27 @@ export function useApi() {
         send(
           payload.proposal_id ? `/proposals/${payload.proposal_id}` : '/proposals',
           payload,
-          (m) => m.saveProposalDraft(personId, payload),
+          // Un dossier DÉJÀ EN BASE se met à jour sans changer d'état : corriger
+          // n'est pas déposer, et un dossier en évaluation ne repart pas au
+          // comité parce qu'on a rectifié une faute de frappe.
+          (m) => m.saveExistingProposal(payload) ?? m.saveProposalDraft(personId, payload),
           payload.proposal_id ? 'PUT' : 'POST',
         ),
+
+      /**
+       * RENVOI AU COMITÉ d'un dossier corrigé — `changes_requested → submitted`.
+       *
+       * Distinct du dépôt : la fenêtre de l'appel ne s'y applique pas. Le comité
+       * demande ses corrections APRÈS la clôture, et le trigger de recevabilité
+       * les refusait toutes jusqu'à sa correction du 17/08 — laissant
+       * l'organisation devant un écran qui réclamait l'impossible.
+       */
+      resubmit: (payload: SaveDraftPayload): Promise<SubmitProposalResult> =>
+        send(`/proposals/${payload.proposal_id}/resubmit`, payload, (m) => {
+          const result = m.resubmitProposal(payload)
+          if (!result) throw new Error(`Dossier ${payload.proposal_id} introuvable.`)
+          return result
+        }),
 
       /**
        * DÉPÔT — la transition `draft → submitted`. Les deux refus possibles sont
@@ -516,6 +587,17 @@ export function useApi() {
        */
       lookupSpeaker: (email: string) =>
         call('/people/lookup', (m) => m.lookupSpeakerByEmail(email), { email }),
+
+      /**
+       * L'HISTORIQUE CHAMP PAR CHAMP — `programme.proposal_history()`.
+       *
+       * Sous-produit du journal d'audit, et non une table entretenue à la main :
+       * toute écriture y figure, y compris une correction faite en console. La
+       * v1 tenait une table `activity_modifications` alimentée par le code
+       * applicatif, qui ne couvrait que ce qui passait par le bon chemin.
+       */
+      fieldHistory: (id: Uuid) =>
+        call(`/proposals/${id}/history`, (m) => m.proposalHistory(id)),
 
       themes: (id: Uuid) =>
         call(`/proposals/${id}/themes`, (m) => {
@@ -595,6 +677,67 @@ export function useApi() {
           event_id: eventId,
         })
       },
+    },
+
+    // -----------------------------------------------------------------------
+    // Espace organisation (A5)
+    //
+    // TROIS LECTURES ET TROIS ÉCRITURES, et la ligne de partage est toujours la
+    // même : l'organisation voit CE QU'ELLE A DÉPOSÉ et ce qu'on attend d'elle,
+    // jamais ce que le comité s'écrit ni qui s'est inscrit à ses séances.
+    //
+    // AUCUNE VUE DU MODÈLE NE RÉPOND ICI. `v_proposal_dashboard` est faite pour
+    // le comité — notes, rang, revues manquantes —, et l'espace organisation
+    // n'en montrerait rien. Ces compositions appartiendront donc à l'API
+    // (prompt B4), pas à une vue SQL supplémentaire.
+    // -----------------------------------------------------------------------
+    workspace: {
+      /**
+       * TOUT L'ÉCRAN D'ACCUEIL EN UNE RÉPONSE : l'organisation, l'adhésion de la
+       * personne connectée, ses dossiers avec leur avancement, ses membres, ce
+       * qui attend une action, et l'appel en cours pour l'état vide.
+       *
+       * Rend `null` quand la personne n'a pas d'adhésion ACTIVE : l'écran refuse
+       * alors l'accès plutôt que d'afficher une page vide, qui laisserait croire
+       * à une organisation sans dossier.
+       */
+      overview: (organizationId: Uuid, personId: Uuid): Promise<WorkspaceOverview | null> =>
+        call(`/organizations/${organizationId}/workspace`, (m) =>
+          m.workspaceOverview(organizationId, personId),
+        ),
+
+      /** Le détail d'un dossier : suivi, fil partagé, historique. */
+      proposalFile: (proposalId: Uuid, organizationId: Uuid): Promise<ProposalFile | null> =>
+        call(`/proposals/${proposalId}/file`, (m) => m.proposalFile(proposalId, organizationId), {
+          organization_id: organizationId,
+        }),
+
+      /** Éditions auxquelles cette organisation a déposé, pour grouper la liste. */
+      editions: (organizationId: Uuid) =>
+        call(`/organizations/${organizationId}/editions`, (m) => m.workspaceEditions(organizationId)),
+
+      /**
+       * RÉPONSE À UNE DEMANDE DE CORRECTION. Toujours `submitter` : le fil
+       * partagé est le seul auquel l'organisation ait accès, et une réponse
+       * n'est jamais elle-même une demande de correction.
+       */
+      reply: (personId: Uuid, payload: ReplyToCommentPayload) =>
+        send(`/proposals/${payload.proposal_id}/comments`, payload, (m) =>
+          m.replyToComment(personId, payload),
+        ),
+
+      /**
+       * MARQUAGE « RÉSOLU », et son retrait. Le modèle porte `resolved_at` sans
+       * dire qui l'écrit : l'écran l'ouvre au soumissionnaire et le laisse
+       * revenir en arrière. Obligation d'API — c'est une règle d'autorisation.
+       */
+      resolve: (personId: Uuid, payload: ResolveCommentPayload) =>
+        send(
+          `/proposal-comments/${payload.comment_id}/resolution`,
+          payload,
+          (m) => m.resolveComment(personId, payload),
+          payload.resolved ? 'POST' : 'DELETE',
+        ),
     },
 
     // -----------------------------------------------------------------------

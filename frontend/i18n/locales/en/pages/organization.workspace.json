@@ -1,0 +1,123 @@
+{
+  "title": "My organization",
+  "subtitle": "Track your submissions and activities.",
+  "organizationPicker": {
+    "label": "Organization",
+    "hint": "You belong to several organizations: choose the one whose submissions you are tracking."
+  },
+  "membershipPending": {
+    "title": "Your membership has not been approved yet",
+    "description": "A contact at {organization} must approve your request. While it is pending, you cannot submit or track proposals on behalf of this organization.",
+    "action": "View my memberships"
+  },
+  "actions": {
+    "title": "What needs your attention",
+    "empty": {
+      "title": "Nothing is waiting for you",
+      "description": "None of your submissions requires action today. This list fills up as soon as something is expected from you."
+    },
+    "count": "No pending action | One pending action | {count} pending actions",
+    "dueOn": "Before {date}",
+    "kind": {
+      "changes_requested": {
+        "label": "Changes requested",
+        "detail": "One point to address | One point to address | {count} points to address"
+      },
+      "draft_before_deadline": {
+        "label": "Draft not submitted",
+        "detail": "This proposal has not been sent yet."
+      },
+      "coorganization_to_confirm": {
+        "label": "Co-organization to confirm",
+        "detail": "An organization has listed you on its proposal and is waiting for your agreement."
+      },
+      "membership_request": {
+        "label": "Membership request",
+        "detail": "This person is asking to join your organization."
+      },
+      "session_report_missing": {
+        "label": "Report expected",
+        "detail": "This activity has taken place and has no report yet."
+      }
+    }
+  },
+  "proposals": {
+    "title": "My submissions",
+    "count": "No submission | One submission | {count} submissions",
+    "openThis": "Track this submission",
+    "reference": "Submission {code}",
+    "changeRequests": "One point to fix | One point to fix | {count} points to fix",
+    "sessions": "One scheduled activity | One scheduled activity | {count} scheduled activities",
+    "registered": "No attendee | 1 attendee | {count} attendees",
+    "decision": "Decision: {reason}",
+    "timeline": {
+      "label": "Submission progress",
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "under_review": "Under review",
+      "changes_requested": "Changes requested",
+      "decision": "Decision",
+      "accepted": "Accepted",
+      "rejected": "Not selected",
+      "withdrawn": "Withdrawn",
+      "cancelled": "Cancelled",
+      "scheduled": "Scheduled"
+    },
+    "empty": {
+      "title": "You have not submitted anything yet",
+      "description": "Your proposals appear here from the first keystroke: a draft saves itself and carries its number before it is even sent."
+    }
+  },
+  "openCall": {
+    "eyebrow": "Open call for proposals",
+    "deadline": "Deadline: {date}",
+    "remaining": "{count} day left | {count} day left | {count} days left",
+    "lastDay": "Last day to submit",
+    "action": "Submit a proposal",
+    "criteria": "Read the review criteria",
+    "closed": {
+      "title": "No call is open at the moment",
+      "description": "The next call will be announced on the page of the edition concerned."
+    }
+  },
+  "members": {
+    "title": "Organization members",
+    "description": "The people who can submit and track proposals on behalf of {organization}.",
+    "count": "No member | One member | {count} members",
+    "role": {
+      "manager": "Contact",
+      "member": "Member",
+      "contributor": "Contributor"
+    },
+    "status": {
+      "invited": "Invitation sent on {date}",
+      "requested": "Request received on {date}",
+      "revoked": "Membership revoked",
+      "you": "You"
+    },
+    "accept": "Approve",
+    "decline": "Decline",
+    "remind": "Send a reminder",
+    "managerOnly": "Only a contact can invite a member or approve a request.",
+    "invite": {
+      "title": "Invite someone",
+      "description": "The invitation is sent by email. The person joins the organization once they accept it: there is nothing else for you to do.",
+      "email": "Email address",
+      "emailPlaceholder": "first.last{'@'}organization.org",
+      "role": "Role in the organization",
+      "jobTitle": "Job title",
+      "jobTitlePlaceholder": "Project officer, director…",
+      "submit": "Send the invitation",
+      "sending": "Sending",
+      "result": {
+        "invited": "Invitation sent to {email}.",
+        "already_member": "{email} is already part of your organization.",
+        "already_invited": "An invitation is already pending for {email}. You can send a reminder."
+      }
+    }
+  },
+  "editions": {
+    "current": "Current edition",
+    "past": "Previous editions"
+  }
+}

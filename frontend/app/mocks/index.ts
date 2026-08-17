@@ -24,14 +24,20 @@
  *   tracks.ts            les trois journées spéciales
  *   calls.ts             l'appel ouvert, les deux appels clos et le comité
  *   criteria.ts          les six critères pondérés, dont un éliminatoire
- *   proposals/           40 dossiers, découpés par statut
+ *   proposals/           41 dossiers, découpés par statut, plus l'historique
+ *                        champ par champ et le dossier d'une édition passée
  *   proposal-submission.ts  la numérotation, la recevabilité et les deux
  *                        écritures du formulaire de dépôt (prompt A4)
+ *   reminders.ts         la règle de rappel de chaque édition, et les quatre
+ *                        rappels cumulés d'une séance, dérivés comme en base
+ *   organization-workspace.ts  les compositions et les trois écritures de
+ *                        l'espace organisation (prompt A5)
  *   reviews.ts           les revues, leurs notes par critère et les affectations
  *   sessions/            44 séances : 30 pour la COP31, dont deux conflits
  *                        volontaires, et 14 pour les autres éditions
  *   registration-form.ts les formulaires d'inscription configurables
- *   registrations.ts     60 inscriptions, canaux d'acquisition variés
+ *   registrations.ts     67 inscriptions, canaux d'acquisition variés, dont
+ *                        sept sur la seule séance du jeu qui se soit tenue
  *   views.ts             les deux vues du modèle, reconstituées
  */
 
@@ -53,6 +59,7 @@ export {
   organizationForEmail,
   membershipOf,
   membershipsOfPerson,
+  allMemberships,
   joinOrganization,
   createOrganization,
 } from './organization-search'
@@ -77,6 +84,7 @@ export {
   allProposals,
   acceptedProposals,
   draftProposals,
+  pastEditionProposals,
   reviewedProposals,
   submittedProposals,
   proposalOrganizations,
@@ -107,6 +115,27 @@ export {
   sessionTracks,
   sessionOrganizations,
 } from './sessions'
+
+export { proposalHistories, proposalHistory } from './proposals/history'
+
+export {
+  editableProposal,
+  editedProposal,
+  saveExistingProposal,
+  resubmitProposal,
+} from './proposal-edit'
+
+export { reminderRules, sessionReminders, sessionReminderSchedule } from './reminders'
+
+export {
+  workspaceOverview,
+  workspaceEditions,
+  proposalFile,
+  inviteMember,
+  decideMembership,
+  replyToComment,
+  resolveComment,
+} from './organization-workspace'
 
 export { coverAssets, coverAttachments, attachedImage } from './covers'
 export { registrationForms, registrationFormFields } from './registration-form'

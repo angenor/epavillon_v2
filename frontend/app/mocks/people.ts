@@ -1,5 +1,5 @@
 /**
- * Données simulées du schéma `identity` — vingt-cinq personnes et leurs
+ * Données simulées du schéma `identity` — vingt-huit personnes et leurs
  * attributions de rôles.
  *
  * DEUX CAS À NE PAS PERDRE DE VUE, ce sont eux qui donnent sa valeur à ce jeu :
@@ -378,6 +378,23 @@ export const people = [
     timezone: 'Africa/Abidjan',
     organization: null,
     created_at: '2026-08-16T09:30:00Z',
+  }),
+  // INVITÉE PAR SON ORGANISATION, et pas encore inscrite : la fiche existe dans
+  // `identity.people` sans qu'aucun compte n'y soit rattaché — c'est
+  // précisément ce que la séparation personne / compte permet, et ce que la v1
+  // ne savait pas faire. Ajoutée avec le prompt A5 : une invitation par adresse
+  // crée la personne pour pouvoir créer l'adhésion, la clé étrangère de
+  // `org.memberships` l'exigeant.
+  person(PERSON.diallo, 'Aminata', 'Diallo', 'a.diallo@roac-afrique.org', {
+    civility: 'mme',
+    job_title: null,
+    country_id: COUNTRY.sn,
+    city: 'Saint-Louis',
+    timezone: 'Africa/Dakar',
+    organization: null,
+    email_verified: false,
+    is_directory_visible: false,
+    created_at: '2026-08-14T10:05:00Z',
   }),
 ] satisfies Person[]
 

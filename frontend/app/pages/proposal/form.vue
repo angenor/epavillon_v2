@@ -3,6 +3,7 @@ import type { CallForProposals } from '~/types/event/call'
 import type { EventEdition } from '~/types/event/edition'
 import type { Country, Locale, TaxonomyTerm } from '~/types/reference'
 import type { Organization } from '~/types/org'
+import type { ProposalStatus } from '~/types/programme/proposal'
 import type {
   ProposalDraft,
   ProposalFormStep,
@@ -59,13 +60,36 @@ definePageMeta({
 defineI18nRoute({ paths: { fr: '/deposer-une-proposition', en: '/submit-a-proposal' } })
 
 const { t, locale } = useI18n()
+const route = useRoute()
 const { tr } = useI18nText()
 const localePath = useLocalePath()
 const api = useApi()
 const auth = useAuthStore()
 const memberships = useMembershipStore()
 
-useHead(() => ({ title: t('proposal.form.title') }))
+/**
+ * MODIFICATION D'UN DOSSIER EXISTANT — `?dossier=<id>`.
+ *
+ * Le commanditaire a tranché le 17/08 : « tant que l'événement n'est pas
+ * terminé, il peut modifier ». Le même formulaire sert donc au dépôt et à la
+ * correction — un seul écran à maintenir, mêmes validations, même enregistrement
+ * automatique. Trois choses seulement changent, et elles sont toutes visibles :
+ * l'écran annonce le dossier qu'il corrige, l'appel n'a pas besoin d'être
+ * OUVERT, et le bouton final dit ce qu'il va faire.
+ */
+const editedProposalId = computed<string | null>(() => {
+  const asked = route.query.dossier
+  const value = Array.isArray(asked) ? asked[0] : asked
+  return value ? String(value) : null
+})
+
+const isEditing = computed(() => editedProposalId.value !== null)
+
+// Le titre de l'onglet suit ce que la page fait : corriger un dossier n'est pas
+// en déposer un, et deux onglets ouverts côte à côte doivent se distinguer.
+useHead(() => ({
+  title: editedProposalId.value ? t('proposal.form.edit.title') : t('proposal.form.title'),
+}))
 
 // ---------------------------------------------------------------------------
 // Le contexte : où l'on dépose, et avec quels référentiels
@@ -108,7 +132,16 @@ const {
 
     // L'ÉDITION N'EST PAS CHOISIE PAR L'ÉCRAN : il y a au plus un appel ouvert
     // à la fois (`ux_calls_one_per_event` + `event.is_call_open()`).
-    const formContext = await api.proposals.formContext(person.id, organizationIds)
+    //
+    // SAUF EN MODIFICATION : le dossier porte déjà son appel et son édition, et
+    // ce sont les SIENS qu'il faut charger. Prendre l'appel ouvert du jour
+    // rouvrirait un dossier de la COP30 avec les règles de la COP31 — bornes de
+    // durée, plage horaire, nombre d'intervenants : la validation se ferait
+    // contre une campagne qui n'est pas la sienne.
+    const edited = editedProposalId.value ? await api.proposals.forEdit(editedProposalId.value) : null
+    const formContext = edited
+      ? { call_id: edited.call_id, event_id: edited.event_id, counted_proposals: 0 }
+      : await api.proposals.formContext(person.id, organizationIds)
     if (!formContext.call_id || !formContext.event_id) return empty
 
     const [call, edition, themes, categories, documentTypes, locales, countries] =
@@ -137,7 +170,7 @@ const {
       countries,
     }
   },
-  { lazy: true, watch: [() => auth.person?.id] },
+  { lazy: true, watch: [() => auth.person?.id, editedProposalId] },
 )
 
 const isLoading = computed(
@@ -210,10 +243,38 @@ const {
  */
 const isDraftReady = ref(false)
 
+/** État du dossier en cours de modification — il commande le bouton d'envoi. */
+const editedStatus = ref<ProposalStatus | null>(null)
+/** Le dossier désigné existe-t-il et appartient-il bien à l'organisation ? */
+const editedNotFound = ref(false)
+
 watch(
   () => [context.value, auth.person?.id] as const,
   async ([ready, personId]) => {
     if (!ready?.call || !personId || isDraftReady.value) return
+
+    // MODIFICATION : le dossier désigné remplace le brouillon en cours. Il est
+    // recomposé par l'API — français, heures murales, intervenants verrouillés
+    // s'ils ont un compte —, jamais reconstitué ici.
+    if (editedProposalId.value) {
+      const existing = await api.proposals.forEdit(editedProposalId.value)
+      if (!existing) {
+        editedNotFound.value = true
+        isDraftReady.value = true
+        return
+      }
+      draft.value = existing.draft
+      editedStatus.value = existing.status
+      adoptDraft({
+        proposal_id: existing.proposal_id,
+        reference_code: existing.reference_code,
+        saved_at: existing.saved_at,
+      })
+      isDraftReady.value = true
+      await nextTick()
+      armAutosave()
+      return
+    }
 
     const existing = await api.proposals.myDraft(personId)
     const active = memberships.active
@@ -376,6 +437,20 @@ const isSubmitting = ref(false)
 const submitError = ref<Error | null>(null)
 const refusal = ref<Extract<SubmitProposalResult, { status: 'call_closed' | 'quota_reached' }> | null>(null)
 const outcome = ref<Extract<SubmitProposalResult, { status: 'submitted' }> | null>(null)
+/**
+ * Une correction ENREGISTRÉE sur un dossier qui ne repart pas au comité.
+ *
+ * Elle mérite sa propre confirmation : l'écran de dépôt annonce un numéro de
+ * dossier et la suite des opérations, ce qui n'a aucun sens ici — le dossier est
+ * déjà déposé, rien ne recommence. Sans ce retour, le bouton ne ferait
+ * apparemment rien, et l'on cliquerait deux fois.
+ */
+const savedNotice = ref(false)
+
+/** Ce que fera le bouton final — c'est aussi son libellé. */
+const submitKind = computed(() =>
+  editedStatus.value ? editOutcomeOf(editedStatus.value) : 'submit',
+)
 
 async function submit(): Promise<void> {
   hasTriedToSubmit.value = true
@@ -397,12 +472,31 @@ async function submit(): Promise<void> {
     // découvre pas le dossier au moment de la transition d'état.
     await saveNow()
 
-    const result = await api.proposals.submit(person.id, {
+    const payload = {
       proposal_id: proposalId.value ?? '',
       call_id: currentCall.id,
       event_id: currentCall.event_id,
       draft: draft.value,
-    })
+    }
+
+    // TROIS ISSUES SELON L'ÉTAT DE DÉPART, et une seule est un dépôt :
+    //  · brouillon             → dépôt (`draft → submitted`), soumis à la fenêtre ;
+    //  · corrections demandées → RENVOI au comité, que la fenêtre ne borne plus ;
+    //  · tout autre état       → l'enregistrement a suffi, il n'y a pas de
+    //    transition vers soi-même et le dossier n'a pas à repartir au comité
+    //    pour une correction de forme.
+    const outcomeKind = editedStatus.value ? editOutcomeOf(editedStatus.value) : 'submit'
+
+    if (outcomeKind === 'save_only') {
+      savedNotice.value = true
+      if (import.meta.client) window.scrollTo({ top: 0 })
+      return
+    }
+
+    const result =
+      outcomeKind === 'resubmit'
+        ? await api.proposals.resubmit(payload)
+        : await api.proposals.submit(person.id, payload)
 
     if (result.status === 'submitted') {
       outcome.value = result
@@ -432,8 +526,15 @@ const eventTo = computed(() =>
   edition.value ? localePath(`/evenements/${edition.value.slug}`) : localePath('/'),
 )
 
-/** L'espace organisation (A5) n'existe pas encore : on ne promet pas un lien mort. */
-const organizationSpaceTo = computed<string | null>(() => null)
+/**
+ * L'espace organisation existe depuis le prompt A5 : « Suivre mon dossier » mène
+ * désormais au dossier lui-même, et non à la liste. C'est la page qu'on vient
+ * d'ouvrir en déposant, et lui faire chercher son propre dossier dans une liste
+ * serait un pas de plus pour rien.
+ */
+const organizationSpaceTo = computed<string | null>(() =>
+  outcome.value ? localePath(`/mon-organisation/dossiers/${outcome.value.proposal_id}`) : null,
+)
 </script>
 
 <template>
@@ -475,6 +576,7 @@ const organizationSpaceTo = computed<string | null>(() => null)
       :edition="edition"
       :organization-space-to="organizationSpaceTo"
       :event-to="eventTo"
+      :resubmitted="submitKind === 'resubmit'"
     />
 
     <!-- VIDE — aucun appel n'est ouvert aujourd'hui. Ce n'est pas une erreur :
@@ -489,9 +591,24 @@ const organizationSpaceTo = computed<string | null>(() => null)
       :action-to="localePath('/')"
     />
 
-    <!-- APPEL CLOS — la page reste atteignable par lien ou par signet. -->
+    <!-- DOSSIER INTROUVABLE — l'identifiant est forgé, ou le dossier n'est pas
+         celui d'une organisation de cette personne. Mieux vaut le dire qu'ouvrir
+         un formulaire vide qui écraserait quelque chose. -->
     <UiEmptyState
-      v-else-if="!isOpen"
+      v-else-if="editedNotFound"
+      icon="document"
+      :title="t('proposal.form.edit.notFound.title')"
+      :description="t('proposal.form.edit.notFound.description')"
+      :action-label="t('proposal.form.edit.notFound.action')"
+      :action-to="localePath('/mon-organisation')"
+    />
+
+    <!-- APPEL CLOS — la page reste atteignable par lien ou par signet.
+         EN MODIFICATION, ce mur ne s'applique pas : le commanditaire a tranché
+         que l'on corrige tant que l'ÉVÉNEMENT n'est pas terminé, et le comité
+         demande justement ses corrections après la clôture de l'appel. -->
+    <UiEmptyState
+      v-else-if="!isOpen && !isEditing"
       icon="clock"
       :title="t('proposal.form.states.closed.title')"
       :description="t('proposal.form.states.closed.description', {
@@ -503,8 +620,10 @@ const organizationSpaceTo = computed<string | null>(() => null)
 
     <!-- PLAFOND ATTEINT — `max_proposals_per_organization`. Le dire ICI plutôt
          qu'après sept étapes de saisie. -->
+    <!-- Le plafond compte des DOSSIERS DÉPOSÉS : il ne s'oppose pas à la
+         correction de l'un d'eux, qui n'en ajoute aucun. -->
     <UiEmptyState
-      v-else-if="quotaReached"
+      v-else-if="quotaReached && !isEditing"
       icon="ban"
       :title="t('proposal.form.states.quota.title')"
       :description="t('proposal.form.states.quota.description', {
@@ -518,12 +637,43 @@ const organizationSpaceTo = computed<string | null>(() => null)
       <header>
         <p class="text-sm text-text-muted">{{ tr(edition.title) }}</p>
         <h1 class="mt-1 font-display text-2xl leading-tight text-text sm:text-3xl">
-          {{ t('proposal.form.title') }}
+          {{ isEditing ? t('proposal.form.edit.title') : t('proposal.form.title') }}
         </h1>
         <p class="mt-2 max-w-(--measure) text-text-muted">
-          {{ t('proposal.form.description') }}
+          {{ isEditing ? t('proposal.form.edit.description') : t('proposal.form.description') }}
         </p>
       </header>
+
+      <!-- ON DIT CE QU'ON MODIFIE, ET CE QUE CELA CHANGE. Deux avertissements
+           valent d'être portés ici plutôt que découverts après coup : un dossier
+           déjà déposé est relu par le comité, qui verra les modifications dans
+           l'historique ; et corriger un dossier RETENU ne déplace pas l'activité
+           déjà programmée — la séance porte son créneau, ses inscrits et ses
+           rappels, et le modèle la distingue volontairement du dossier. -->
+      <UiAlert
+        v-if="isEditing && referenceCode"
+        :intent="editedStatus === 'changes_requested' ? 'warning' : 'info'"
+        :title="t('proposal.form.edit.banner.title', { code: referenceCode })"
+        :message="
+          editedStatus === 'accepted'
+            ? t('proposal.form.edit.banner.accepted')
+            : editedStatus === 'changes_requested'
+              ? t('proposal.form.edit.banner.changesRequested')
+              : editedStatus === 'draft'
+                ? t('proposal.form.edit.banner.draft')
+                : t('proposal.form.edit.banner.underReview')
+        "
+      />
+
+      <!-- La correction a été enregistrée, et le dossier ne repart pas au
+           comité : le dire, sinon le bouton paraît sans effet. -->
+      <UiAlert
+        v-if="savedNotice"
+        intent="success"
+        live
+        :title="t('proposal.form.edit.saved.title')"
+        :message="t('proposal.form.edit.saved.description')"
+      />
 
       <!-- LA PROGRESSION, visible en permanence et librement navigable. -->
       <UiStepper
@@ -661,13 +811,16 @@ const organizationSpaceTo = computed<string | null>(() => null)
                 :label="t('common.actions.next')"
                 @click="nextStep()"
               />
+              <!-- LE BOUTON DIT CE QU'IL VA FAIRE : déposer, renvoyer au comité,
+                   ou seulement enregistrer. Un « Envoyer » unique laisserait
+                   craindre, sur un dossier en évaluation, de tout relancer. -->
               <UiButton
                 v-else
                 variant="primary"
                 size="lg"
                 icon="check"
                 :loading="isSubmitting"
-                :label="t('proposal.form.submit')"
+                :label="t(`proposal.form.edit.action.${submitKind}`)"
                 @click="submit()"
               />
             </div>

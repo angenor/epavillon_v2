@@ -4,11 +4,19 @@
  * Fichier séparé de `org.ts` pour une raison de volume : les adhésions
  * croissent avec le nombre de personnes, pas avec le nombre d'organisations.
  *
- * Trois situations sont représentées, parce que l'espace organisation (A5) et
+ * Quatre situations sont représentées, parce que l'espace organisation (A5) et
  * la modération des rattachements (A2) doivent les traiter toutes :
  *   - adhésion ACTIVE, approuvée par un référent ;
- *   - adhésion EN ATTENTE, qu'un référent doit accepter ou refuser ;
+ *   - DEMANDE en attente, qu'un référent doit accepter ou refuser ;
+ *   - INVITATION en attente, que la personne invitée doit accepter ;
  *   - adhésion RÉVOQUÉE, conservée pour l'historique.
+ *
+ * LES DEUX ATTENTES SONT L'INVERSE L'UNE DE L'AUTRE et le modèle les distingue
+ * depuis le 17/08 : `invited_at` renseigné, l'organisation a invité et attend la
+ * personne ; `invited_at` nul, la personne a demandé et attend un référent. Le
+ * même statut `pending` recouvrait les deux, et un référent aurait approuvé sa
+ * propre invitation — donnant une adhésion active à quelqu'un qui n'a rien
+ * accepté.
  *
  * `is_primary` est posé par la base à la première adhésion active : il désigne
  * le rattachement affiché à côté du nom de la personne.
@@ -25,7 +33,12 @@ function membership(
   role: Membership['role'],
   job_title: string | null,
   created_at: string,
-  options: Partial<Pick<Membership, 'status' | 'is_primary' | 'approved_by' | 'approved_at' | 'revoked_at'>> = {},
+  options: Partial<
+    Pick<
+      Membership,
+      'status' | 'is_primary' | 'approved_by' | 'approved_at' | 'revoked_at' | 'invited_by' | 'invited_at'
+    >
+  > = {},
 ): Membership {
   const status = options.status ?? 'active'
   return {
@@ -36,6 +49,8 @@ function membership(
     status,
     is_primary: options.is_primary ?? status === 'active',
     job_title,
+    invited_by: options.invited_by ?? null,
+    invited_at: options.invited_at ?? null,
     approved_by: options.approved_by ?? (status === 'pending' ? null : PERSON.adminPivot),
     approved_at: options.approved_at ?? (status === 'pending' ? null : created_at),
     revoked_at: options.revoked_at ?? null,
@@ -60,6 +75,24 @@ export const memberships = [
   }),
   membership(11, ORG.roac, PERSON.mbayeNdiaye, 'contributor', 'Chargé de projet littoral', '2026-03-02T10:40:00Z', {
     approved_by: PERSON.sowFall,
+  }),
+  // INVITATION ÉMISE PAR L'ORGANISATION, sans réponse à ce jour. C'est le cas
+  // symétrique de la demande d'adhésion de Karim Ilboudo (UJFC, plus bas) : même
+  // statut `pending`, direction inverse. La référente relance, elle n'approuve
+  // pas — l'invitée n'a pas encore dit oui.
+  membership(12, ORG.roac, PERSON.diallo, 'member', null, '2026-08-14T10:05:00Z', {
+    status: 'pending',
+    is_primary: false,
+    invited_by: PERSON.sowFall,
+    invited_at: '2026-08-14T10:05:00Z',
+  }),
+  // DEMANDE SPONTANÉE, en attente d'un référent : fin de mission chez Verdeo
+  // (adhésion révoquée plus bas), Céline Lambert demande à rejoindre le ROAC.
+  // Sans elle, la file de modération du référent n'aurait aucune donnée sur
+  // l'organisation de démonstration.
+  membership(13, ORG.roac, PERSON.lambert, 'member', 'Consultante littoral', '2026-08-12T15:40:00Z', {
+    status: 'pending',
+    is_primary: false,
   }),
 
   // OSED — la fiche complète

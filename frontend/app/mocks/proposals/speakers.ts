@@ -473,4 +473,30 @@ export const proposalSpeakers = [
     confirmedAt: null,
     sentAt: '2026-08-04T10:00:00Z',
   }),
+
+  // 25. Numérique responsable — dossier RENVOYÉ POUR CORRECTION.
+  //
+  // Ajouté au prompt A5, et pas pour faire nombre : un dossier `changes_requested`
+  // a forcément été DÉPOSÉ, donc il a satisfait la validation du dépôt — dont le
+  // minimum d'intervenants de l'appel (2). Sans eux, l'organisation ne pouvait
+  // pas renvoyer au comité un dossier que le comité lui réclamait : le jeu de
+  // données contredisait ses propres règles.
+  speaker(210, PROPOSAL.numeriqueResponsable, PERSON.moreau, 10, {
+    role: 'moderator',
+    job: 'Associé fondateur',
+    org: 'Verdéo Solutions',
+    organizationId: ORG.verdeo,
+    bio: {
+      fr: "Conduit les inventaires d'empreinte numérique des administrations depuis 2021.",
+    },
+    confirmedAt: '2026-07-16T14:00:00Z',
+    sentAt: '2026-07-14T09:00:00Z',
+  }),
+  speaker(211, PROPOSAL.numeriqueResponsable, PERSON.lambert, 20, {
+    job: 'Consultante',
+    org: 'Indépendante',
+    organizationId: null,
+    confirmedAt: null,
+    sentAt: '2026-07-14T09:00:00Z',
+  }),
 ] satisfies ProposalSpeaker[]

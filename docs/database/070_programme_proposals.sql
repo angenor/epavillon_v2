@@ -318,6 +318,16 @@ CREATE TRIGGER tg_proposals_log_initial_status
 
 -- Recevabilité : contrôle la fenêtre de l'appel et le plafond par organisation
 -- au moment du dépôt. En base, donc valable pour l'API comme pour un import.
+--
+-- LA FENÊTRE NE VAUT QUE POUR UN PREMIER DÉPÔT, et cette distinction n'est pas
+-- un confort : le comité demande ses corrections APRÈS la clôture — c'est même
+-- le cas normal, l'évaluation commençant quand l'appel se ferme. Un contrôle
+-- indifférencié refusait donc le renvoi d'un dossier que le comité venait
+-- lui-même de réclamer (`changes_requested -> submitted`), et l'organisation se
+-- retrouvait avec un dossier définitivement bloqué, un écran lui affichant
+-- « 1 point à corriger » et aucune issue. Le plafond, lui, reste vérifié dans
+-- les deux cas : il compte des dossiers, pas des envois — et il s'exclut
+-- lui-même par `p.id <> NEW.id`.
 CREATE OR REPLACE FUNCTION programme.tg_check_submission_eligibility()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -325,6 +335,7 @@ AS $$
 DECLARE
     v_call  event.calls_for_proposals%ROWTYPE;
     v_count integer;
+    v_is_first_submission boolean;
 BEGIN
     IF NEW.status <> 'submitted' OR (TG_OP = 'UPDATE' AND OLD.status = 'submitted') THEN
         RETURN NEW;
@@ -334,11 +345,17 @@ BEGIN
         RETURN NEW;  -- proposition hors appel, créée par l'IFDD
     END IF;
 
+    -- Premier dépôt : insertion, ou passage depuis le brouillon. Tout autre
+    -- chemin vers `submitted` est un RENVOI — aujourd'hui depuis
+    -- `changes_requested`, seul état que la machine autorise à y revenir.
+    v_is_first_submission := (TG_OP = 'INSERT') OR (OLD.status = 'draft');
+
     SELECT * INTO v_call FROM event.calls_for_proposals WHERE id = NEW.call_id;
 
-    IF v_call.status <> 'open'
-       OR now() < v_call.opens_at
-       OR now() > COALESCE(v_call.extended_until, v_call.closes_at) THEN
+    IF v_is_first_submission
+       AND (v_call.status <> 'open'
+            OR now() < v_call.opens_at
+            OR now() > COALESCE(v_call.extended_until, v_call.closes_at)) THEN
         RAISE EXCEPTION 'L''appel « % » n''accepte plus de soumission (échéance : %).',
             platform.t(v_call.title), COALESCE(v_call.extended_until, v_call.closes_at)
             USING ERRCODE = 'restrict_violation';

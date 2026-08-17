@@ -31,7 +31,7 @@
  */
 
 import type { Session } from '~/types/programme/session'
-import { EVENT, ORG, PERSON, REGISTRATION_FORM, ROOM, SESSION } from '../ids'
+import { EVENT, ORG, PERSON, PROPOSAL, REGISTRATION_FORM, ROOM, SESSION } from '../ids'
 import { session } from './_shared'
 
 // ---------------------------------------------------------------------------
@@ -70,7 +70,10 @@ const cop30 = [
   session({
     id: SESSION.cop30Adaptation,
     event: EVENT.cop30,
-    proposal: null,
+    // Séance issue d'un DOSSIER, comme elle l'a été en réalité : le lien
+    // manquait, et l'espace organisation ne pouvait pas remonter de la séance
+    // tenue jusqu'à la proposition déposée l'année précédente.
+    proposal: PROPOSAL.cop30Littoraux,
     organization: ORG.roac,
     title: {
       fr: "Littoraux d'Afrique de l'Ouest : trois ans de suivi",

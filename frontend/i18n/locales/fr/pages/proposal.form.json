@@ -2,7 +2,6 @@
   "title": "Déposer une proposition d'activité",
   "description": "Remplissez les étapes dans l'ordre qui vous arrange. Votre dossier s'enregistre tout seul : vous pouvez le quitter et le reprendre plus tard.",
   "submit": "Envoyer le dossier",
-
   "steps": {
     "label": "Étapes du dépôt",
     "errorCount": "{count} point à corriger | {count} point à corriger | {count} points à corriger",
@@ -36,7 +35,6 @@
       "hint": "Vérifier et envoyer"
     }
   },
-
   "autosave": {
     "untouched": "Aucune modification pour l'instant.",
     "dirty": "Modifications non enregistrées.",
@@ -45,7 +43,6 @@
     "error": "L'enregistrement a échoué. Votre saisie reste à l'écran.",
     "reference": "Numéro de dossier :"
   },
-
   "deadline": {
     "label": "Échéance de l'appel",
     "title": "Date limite de dépôt",
@@ -61,12 +58,10 @@
       "minutes": "{count} minute restante | {count} minute restante | {count} minutes restantes"
     }
   },
-
   "issues": {
     "warningsTitle": "{count} point mérite votre attention | {count} point mérite votre attention | {count} points méritent votre attention",
     "warningsDescription": "Ces éléments n'empêchent pas l'envoi, mais un dossier qui les renseigne s'évalue mieux."
   },
-
   "refusals": {
     "closed": {
       "title": "L'appel s'est clos entre-temps",
@@ -77,10 +72,11 @@
       "description": "Cet appel accepte au plus {max} dossiers par organisation. Le vôtre reste enregistré en brouillon."
     }
   },
-
   "confirmation": {
     "title": "Votre dossier est déposé",
     "description": "Il a bien été reçu pour l'édition {edition}.",
+    "resubmittedTitle": "Votre dossier est renvoyé au comité",
+    "resubmittedDescription": "Les corrections ont bien été reçues. Le dossier reprend son évaluation, avec le même numéro.",
     "reference": "Numéro de dossier",
     "copy": "Copier le numéro",
     "copied": "Numéro copié",
@@ -99,7 +95,6 @@
       "backToEvent": "Retour à la page de l'événement"
     }
   },
-
   "states": {
     "loading": "Chargement du formulaire de dépôt",
     "contextError": "Le formulaire n'a pas pu être chargé. Votre brouillon, s'il existe, n'est pas perdu.",
@@ -119,6 +114,31 @@
       "title": "Votre organisation a atteint le plafond",
       "description": "Cet appel accepte au plus {max} dossiers par organisation. Les dossiers retirés ou non retenus ne sont pas comptés.",
       "action": "Voir l'événement"
+    }
+  },
+  "edit": {
+    "title": "Modifier le dossier",
+    "description": "Les modifications s'enregistrent au fur et à mesure, comme au dépôt. Le numéro du dossier ne change pas.",
+    "action": {
+      "submit": "Envoyer le dossier",
+      "resubmit": "Renvoyer au comité",
+      "save_only": "Enregistrer les modifications"
+    },
+    "banner": {
+      "title": "Vous modifiez le dossier {code}",
+      "draft": "Ce dossier n'est pas encore déposé : il le sera quand vous l'enverrez.",
+      "changesRequested": "Le comité attend vos corrections. Une fois terminé, renvoyez-lui le dossier avec le bouton en bas de la dernière étape.",
+      "underReview": "Ce dossier est entre les mains du comité. Vos modifications sont enregistrées et lui sont visibles : il verra ce qui a changé dans l'historique du dossier.",
+      "accepted": "Ce dossier est retenu. Vos modifications portent sur le dossier, pas sur l'activité déjà programmée : son créneau, sa salle et ses inscriptions ne bougent pas. Prévenez le comité si la programmation doit changer."
+    },
+    "saved": {
+      "title": "Modifications enregistrées",
+      "description": "Le dossier est à jour. Il n'est pas renvoyé au comité : son état ne change pas."
+    },
+    "notFound": {
+      "title": "Dossier introuvable",
+      "description": "Ce dossier n'existe pas, ou il n'appartient pas à une organisation dont vous êtes membre.",
+      "action": "Revenir à mes dossiers"
     }
   }
 }

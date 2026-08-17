@@ -1,0 +1,151 @@
+{
+  "breadcrumb": "Mon organisation",
+  "title": "Dossier {code}",
+  "notFound": {
+    "title": "Dossier introuvable",
+    "description": "Ce dossier n'existe pas, ou il n'appartient pas à l'organisation dont vous suivez les activités.",
+    "action": "Revenir à mes dossiers"
+  },
+  "tabs": {
+    "label": "Vues du dossier",
+    "tracking": "Suivi",
+    "exchanges": "Échanges",
+    "sessions": "Activités et rappels",
+    "history": "Historique"
+  },
+  "tracking": {
+    "timelineLabel": "Avancement du dossier",
+    "summary": "Résumé du dossier",
+    "edition": "Édition",
+    "format": "Format",
+    "formatValue": {
+      "online": "En ligne",
+      "in_person": "Sur place",
+      "hybrid": "Hybride"
+    },
+    "duration": "Durée demandée",
+    "durationValue": "{count} minutes",
+    "preferredSlot": "Créneau souhaité",
+    "requestedSessions": "Occurrences demandées",
+    "languages": "Langues de travail",
+    "audiences": "Publics visés",
+    "organizations": "Organisations associées",
+    "role": {
+      "lead": "Porteur principal",
+      "co_organizer": "Co-organisateur",
+      "partner": "Partenaire",
+      "sponsor": "Soutien"
+    },
+    "unconfirmed": "N'a pas encore confirmé",
+    "confirmCoorganization": "Confirmer notre participation",
+    "decision": {
+      "accepted": "Dossier retenu",
+      "rejected": "Dossier non retenu",
+      "withdrawn": "Dossier retiré",
+      "cancelled": "Dossier annulé",
+      "reason": "Motif communiqué : {reason}",
+      "on": "Décision rendue le {date}"
+    },
+    "editDraft": "Reprendre la rédaction",
+    "edit": "Modifier le dossier",
+    "editBlocked": {
+      "edition_over": "Cette édition est terminée : le dossier ne se modifie plus.",
+      "file_closed": "Ce dossier est clos. Pour proposer à nouveau cette activité, déposez un nouveau dossier."
+    }
+  },
+  "exchanges": {
+    "title": "Échanges avec le comité",
+    "description": "Vous voyez ici les messages que le comité vous adresse, et vos réponses. Les notes internes au comité ne vous sont jamais montrées.",
+    "empty": {
+      "title": "Aucun échange pour l'instant",
+      "description": "Le comité vous écrira ici s'il a besoin d'une précision. Vous recevrez alors un courriel."
+    },
+    "changeRequest": "Demande de correction",
+    "openRequests": "Une demande de correction reste ouverte | Une demande de correction reste ouverte | {count} demandes de correction restent ouvertes",
+    "resolved": "Résolu le {date}",
+    "markResolved": "Marquer comme résolu",
+    "unmarkResolved": "Rouvrir ce point",
+    "reply": "Répondre",
+    "replyPlaceholder": "Écrivez votre réponse au comité…",
+    "send": "Envoyer la réponse",
+    "sending": "Envoi en cours",
+    "cancel": "Annuler",
+    "emptyReply": "Écrivez votre réponse avant de l'envoyer.",
+    "edited": "Modifié",
+    "you": "Vous"
+  },
+  "sessions": {
+    "title": "Activités programmées",
+    "description": "Ce que l'IFDD a retenu de votre dossier, avec le créneau et la salle arrêtés.",
+    "empty": {
+      "title": "Aucune activité programmée pour l'instant",
+      "description": "Les créneaux sont arrêtés après l'acceptation, quand l'équipe compose le programme. Vous serez prévenu dès qu'une date sera fixée."
+    },
+    "room": "Salle",
+    "slot": "Créneau",
+    "online": "En ligne",
+    "registered": "Aucun inscrit | 1 inscrit | {count} inscrits",
+    "waitlisted": "Aucune personne en liste d'attente | 1 personne en liste d'attente | {count} personnes en liste d'attente",
+    "capacity": "Jauge : {count} places",
+    "attendance": "{count} personnes présentes",
+    "reportMissing": "Le compte rendu de cette activité n'a pas encore été déposé.",
+    "reminders": {
+      "title": "Calendrier des rappels",
+      "description": "Quatre rappels partent avant l'activité, et ils sont cumulés : chaque inscrit les reçoit tous les quatre. Les heures sont celles de {zone}.",
+      "offset": {
+        "days": "{count} jour avant | {count} jour avant | {count} jours avant",
+        "hours": "{count} heure avant | {count} heure avant | {count} heures avant",
+        "minutes": "{count} minutes avant"
+      },
+      "sent": "Envoyé",
+      "pending": "À venir",
+      "skipped": "Non envoyé",
+      "recipients": "Aucun destinataire | 1 destinataire | {count} destinataires",
+      "noRecipients": "Aucun rappel ne partira tant que personne ne s'est inscrit.",
+      "channel": {
+        "email": "Courriel",
+        "in_app": "Notification",
+        "push": "Notification poussée"
+      }
+    }
+  },
+  "history": {
+    "title": "Historique des modifications",
+    "description": "Toutes les modifications du dossier, champ par champ, avec leur auteur et leur date. Les notes du comité et les valeurs recalculées n'y figurent pas.",
+    "empty": {
+      "title": "Aucune modification enregistrée",
+      "description": "L'historique se remplit dès la première modification du dossier."
+    },
+    "created": "Dossier créé",
+    "changed": "Champ modifié : {field}",
+    "before": "Avant",
+    "after": "Après",
+    "emptyValue": "Non renseigné",
+    "by": "par {actor}",
+    "unknownActor": "Auteur inconnu",
+    "field": {
+      "title": "Titre",
+      "summary": "Résumé",
+      "objectives": "Objectifs",
+      "detailed_presentation": "Présentation détaillée",
+      "expected_outcomes": "Résultats attendus",
+      "target_audiences": "Publics visés",
+      "format": "Format",
+      "activity_type_code": "Type d'activité",
+      "language_codes": "Langues",
+      "country_id": "Pays",
+      "preferred_start_at": "Début souhaité",
+      "preferred_end_at": "Fin souhaitée",
+      "duration_minutes": "Durée",
+      "requested_sessions": "Occurrences demandées",
+      "scheduling_constraints": "Contraintes de programmation",
+      "status": "État du dossier",
+      "submitted_at": "Date de dépôt",
+      "decided_at": "Date de décision",
+      "decision_reason": "Motif de la décision",
+      "organization_id": "Organisation porteuse",
+      "contact_person_id": "Personne à contacter",
+      "slug": "Adresse de la page"
+    }
+  }
+}

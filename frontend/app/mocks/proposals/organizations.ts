@@ -167,6 +167,22 @@ const partnerRows = [
     added_by: PERSON.duchesne,
     added_at: '2026-06-28T09:35:00Z',
   },
+
+  // 20. Budgets sensibles au genre — le ROAC est annoncé PARTENAIRE et ne l'a
+  //     pas confirmé. Ajouté au prompt A5 : une co-organisation annoncée ENGAGE
+  //     un tiers, et c'est à ce tiers que l'espace organisation doit dire qu'on
+  //     l'attend. Sans cette ligne, l'action « confirmer une co-organisation »
+  //     n'aurait aucune donnée du côté de celui qui doit répondre — les deux
+  //     lignes non confirmées du jeu se lisaient jusqu'ici depuis le porteur.
+  {
+    proposal_id: PROPOSAL.budgetsGenre,
+    organization_id: ORG.roac,
+    role: 'partner',
+    confirmed_at: null,
+    sort_order: 10,
+    added_by: PERSON.ngoBassong,
+    added_at: '2026-08-06T11:20:00Z',
+  },
 ] satisfies ProposalOrganization[]
 
 export const proposalOrganizations: ProposalOrganization[] = [...leadRows, ...partnerRows]

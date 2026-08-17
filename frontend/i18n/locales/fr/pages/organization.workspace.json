@@ -1,0 +1,123 @@
+{
+  "title": "Mon organisation",
+  "subtitle": "Le suivi de vos dossiers et de vos activités.",
+  "organizationPicker": {
+    "label": "Organisation",
+    "hint": "Vous appartenez à plusieurs organisations : choisissez celle dont vous suivez les dossiers."
+  },
+  "membershipPending": {
+    "title": "Votre rattachement n'est pas encore accepté",
+    "description": "Un référent de {organization} doit accepter votre demande. Tant qu'elle est en attente, vous ne pouvez ni déposer ni suivre de dossier au nom de cette organisation.",
+    "action": "Voir mes rattachements"
+  },
+  "actions": {
+    "title": "Ce qui attend une action de votre part",
+    "empty": {
+      "title": "Rien ne vous attend",
+      "description": "Aucun de vos dossiers ne demande d'intervention aujourd'hui. Cette liste se remplira dès qu'une réponse sera attendue de vous."
+    },
+    "count": "Aucune action en attente | Une action en attente | {count} actions en attente",
+    "dueOn": "Avant le {date}",
+    "kind": {
+      "changes_requested": {
+        "label": "Corrections demandées",
+        "detail": "Un point à traiter | Un point à traiter | {count} points à traiter"
+      },
+      "draft_before_deadline": {
+        "label": "Brouillon non déposé",
+        "detail": "Ce dossier n'est pas encore parti."
+      },
+      "coorganization_to_confirm": {
+        "label": "Co-organisation à confirmer",
+        "detail": "Une organisation vous a associée à son dossier et attend votre accord."
+      },
+      "membership_request": {
+        "label": "Demande de rattachement",
+        "detail": "Cette personne demande à rejoindre votre organisation."
+      },
+      "session_report_missing": {
+        "label": "Compte rendu attendu",
+        "detail": "Cette activité s'est tenue et n'a pas encore de compte rendu."
+      }
+    }
+  },
+  "proposals": {
+    "title": "Mes dossiers",
+    "count": "Aucun dossier | Un dossier | {count} dossiers",
+    "openThis": "Suivre ce dossier",
+    "reference": "Dossier {code}",
+    "changeRequests": "Un point à corriger | Un point à corriger | {count} points à corriger",
+    "sessions": "Une activité programmée | Une activité programmée | {count} activités programmées",
+    "registered": "Aucun inscrit | 1 inscrit | {count} inscrits",
+    "decision": "Décision : {reason}",
+    "timeline": {
+      "label": "Avancement du dossier",
+      "draft": "Brouillon",
+      "submitted": "Déposé",
+      "under_review": "En évaluation",
+      "changes_requested": "Corrections demandées",
+      "decision": "Décision",
+      "accepted": "Retenu",
+      "rejected": "Non retenu",
+      "withdrawn": "Retiré",
+      "cancelled": "Annulé",
+      "scheduled": "Programmé"
+    },
+    "empty": {
+      "title": "Vous n'avez déposé aucun dossier",
+      "description": "Vos propositions apparaîtront ici dès la première frappe : un dossier commencé s'enregistre tout seul et porte son numéro avant même d'être envoyé."
+    }
+  },
+  "openCall": {
+    "eyebrow": "Appel à propositions en cours",
+    "deadline": "Échéance : {date}",
+    "remaining": "Il reste {count} jour | Il reste {count} jour | Il reste {count} jours",
+    "lastDay": "Dernier jour pour déposer",
+    "action": "Déposer une proposition",
+    "criteria": "Consulter les critères d'évaluation",
+    "closed": {
+      "title": "Aucun appel n'est ouvert en ce moment",
+      "description": "Le prochain appel sera annoncé sur la page de l'édition concernée."
+    }
+  },
+  "members": {
+    "title": "Membres de l'organisation",
+    "description": "Les personnes qui peuvent déposer et suivre des dossiers au nom de {organization}.",
+    "count": "Aucun membre | Un membre | {count} membres",
+    "role": {
+      "manager": "Référent",
+      "member": "Membre",
+      "contributor": "Contributeur"
+    },
+    "status": {
+      "invited": "Invitation envoyée le {date}",
+      "requested": "Demande reçue le {date}",
+      "revoked": "Rattachement révoqué",
+      "you": "Vous"
+    },
+    "accept": "Accepter",
+    "decline": "Refuser",
+    "remind": "Relancer l'invitation",
+    "managerOnly": "Seul un référent peut inviter un membre ou accepter une demande.",
+    "invite": {
+      "title": "Inviter une personne",
+      "description": "L'invitation part par courriel. La personne rejoint l'organisation quand elle l'accepte : vous n'avez rien d'autre à faire.",
+      "email": "Adresse électronique",
+      "emailPlaceholder": "prenom.nom{'@'}organisation.org",
+      "role": "Rôle dans l'organisation",
+      "jobTitle": "Fonction",
+      "jobTitlePlaceholder": "Chargée de projet, directeur…",
+      "submit": "Envoyer l'invitation",
+      "sending": "Envoi en cours",
+      "result": {
+        "invited": "Invitation envoyée à {email}.",
+        "already_member": "{email} fait déjà partie de votre organisation.",
+        "already_invited": "Une invitation est déjà en attente pour {email}. Vous pouvez la relancer."
+      }
+    }
+  },
+  "editions": {
+    "current": "Édition en cours",
+    "past": "Éditions précédentes"
+  }
+}
