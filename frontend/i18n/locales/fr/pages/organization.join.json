@@ -1,0 +1,113 @@
+{
+  "title": "Votre organisation",
+  "description": "Cherchez l'organisation au nom de laquelle vous interviendrez. Tapez son nom complet ou son sigle : les deux mènent à la même fiche.",
+  "search": {
+    "label": "Nom ou sigle de l'organisation",
+    "placeholder": "Institut de la Francophonie, IFDD, ministère…",
+    "hint": "Deux lettres suffisent pour commencer.",
+    "idle": "Les résultats s'affichent dès la deuxième lettre saisie."
+  },
+  "results": {
+    "count": "Aucune organisation trouvée | Une organisation trouvée | {count} organisations trouvées",
+    "members": "Aucun membre inscrit | 1 membre inscrit | {count} membres inscrits",
+    "verified": "Vérifiée par l'IFDD",
+    "strongMatch": "C'est probablement la vôtre",
+    "foundUnder": "Trouvée sous : {name}",
+    "sharedDomain": "Cette organisation utilise le domaine de votre adresse électronique.",
+    "join": "Rejoindre",
+    "alreadyMember": "Vous en êtes membre",
+    "requestPending": "Demande en attente",
+    "noneMine": "Aucune de ces organisations n'est la vôtre ?"
+  },
+  "empty": {
+    "title": "Aucune organisation ne correspond à « {query} »",
+    "description": "Essayez le nom complet, ou seulement le sigle : la recherche interroge les deux, ainsi que les anciens noms. Si votre organisation n'est vraiment pas là, créez sa fiche.",
+    "create": "Créer une nouvelle organisation"
+  },
+  "domain": {
+    "title": "Votre adresse désigne une organisation",
+    "description": "Le domaine {domain} appartient à {organization}.",
+    "immediate": "Votre rattachement sera effectif immédiatement : ce domaine a été vérifié par l'organisation.",
+    "approval": "Un référent de l'organisation devra accepter votre demande.",
+    "actionImmediate": "Rejoindre cette organisation",
+    "actionRequest": "Demander à la rejoindre"
+  },
+  "current": {
+    "title": "Vos rattachements",
+    "primary": "Principale",
+    "active": "Rattachement actif",
+    "pending": "En attente",
+    "pendingHint": "Un référent de cette organisation doit accepter votre demande. Inutile de la renouveler.",
+    "roles": {
+      "manager": "Référent",
+      "member": "Membre",
+      "contributor": "Contributeur"
+    }
+  },
+  "confirm": {
+    "title": "Rejoindre {organization}",
+    "immediate": "Le domaine de votre adresse appartient à cette organisation : votre rattachement sera effectif immédiatement.",
+    "approval": "Votre demande sera transmise à un référent de l'organisation, qui l'acceptera ou la refusera.",
+    "jobTitle": "Votre fonction dans cette organisation",
+    "jobTitleHint": "Facultatif, mais c'est ce que lira la personne qui traitera votre demande.",
+    "submitImmediate": "Rejoindre",
+    "submitRequest": "Envoyer la demande"
+  },
+  "duplicate": {
+    "title": "Cette organisation existe peut-être déjà",
+    "description": "Comparez les deux fiches avant de continuer. Une organisation enregistrée deux fois ne peut plus être réunie sans intervention de l'IFDD, et ses activités se retrouvent séparées.",
+    "tableCaption": "Comparaison entre l'organisation que vous créez et celle qui existe déjà",
+    "attribute": "Information comparée",
+    "yours": "Ce que vous créez",
+    "existing": "Ce qui existe déjà",
+    "identical": "valeur identique",
+    "members": "Membres",
+    "joinExisting": "C'est la même : la rejoindre",
+    "createAnyway": "Ce n'est pas la même : créer quand même",
+    "back": "Modifier ma saisie",
+    "others": "Autres fiches proches"
+  },
+  "outcome": {
+    "joined": {
+      "title": "Vous êtes rattaché à {organization}",
+      "description": "Vous pouvez désormais déposer une proposition d'activité au nom de cette organisation."
+    },
+    "pending": {
+      "title": "Demande envoyée à {organization}",
+      "description": "Un référent de l'organisation doit l'accepter. Vous recevrez un courriel dès que ce sera fait."
+    },
+    "created": {
+      "title": "{organization} a été créée",
+      "description": "Vous en êtes le référent. L'IFDD vérifiera la fiche ; vous pouvez déjà travailler sans attendre cette vérification."
+    },
+    "continue": "Continuer",
+    "joinAnother": "Rejoindre une autre organisation",
+    "resume": "Reprendre où j'en étais"
+  },
+  "notices": {
+    "alreadyMember": "Vous êtes déjà membre de {organization}.",
+    "alreadyRequested": "Votre demande auprès de {organization} est déjà en attente.",
+    "nameTaken": "Une organisation porte déjà ce nom dans ce pays. La voici."
+  },
+  "states": {
+    "contextError": "Les organisations et les pays n'ont pas pu être chargés.",
+    "searchError": "La recherche n'a pas abouti.",
+    "signedOut": "Votre session a expiré. Reconnectez-vous pour rattacher votre compte à une organisation.",
+    "signIn": "Se connecter"
+  },
+  "required": {
+    "title": "Une organisation est nécessaire pour cette action",
+    "description": "Indiquez l'organisation au nom de laquelle vous agissez. Vous reprendrez ensuite là où vous en étiez.",
+    "generic": "L'action que vous avez demandée s'exerce au nom d'une organisation.",
+    "reasons": {
+      "proposal": "Une proposition d'activité est toujours déposée au nom d'une organisation : c'est elle qui figure au programme et qui répond de l'activité.",
+      "organization-space": "L'espace organisation rassemble les dossiers déposés par votre structure."
+    }
+  },
+  "skip": {
+    "description": "Vous n'avez pas d'organisation, ou vous préférez le faire plus tard ? Ce n'est pas obligatoire pour avoir un compte : vous pouvez suivre le programme et vous inscrire aux séances sans rattachement, et l'indiquer quand vous voudrez depuis votre profil.",
+    "action": "Je n'ai pas d'organisation pour l'instant",
+    "required": "Vous pouvez renoncer à cette action pour l'instant. Votre compte reste utilisable pour suivre le programme et vous inscrire aux séances ; vous pourrez revenir ici depuis votre profil.",
+    "giveUp": "Renoncer pour l'instant"
+  }
+}

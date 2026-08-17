@@ -380,7 +380,7 @@ Détails qui comptent :
   second facteur, sans les implémenter.
 ```
 
-**A2 — Rattachement à une organisation**
+**A2 — Rattachement à une organisation** (fait le 17/08)
 
 ```
 [PRÉAMBULE]
@@ -412,6 +412,19 @@ Comportement attendu :
 Montre les trois moments : recherche vide, résultats avec correspondance forte,
 avertissement avant création.
 ```
+
+> **RÈGLE TRANSVERSE, arrêtée par le commanditaire le 17/08 — le rattachement à une organisation n'est PAS obligatoire pour avoir un compte.** On s'inscrit pour suivre le programme et s'inscrire aux séances sans appartenir à quoi que ce soit ; l'écran A2 offre donc une sortie explicite (« Je n'ai pas d'organisation pour l'instant »), et le rattachement se fait plus tard depuis le profil.
+>
+> **En revanche, certaines ACTIONS s'exercent nécessairement au nom d'une organisation.** Pour celles-là, une étape intermédiaire s'insère automatiquement : la page se déclare gardée, et qui n'a pas de rattachement ACTIF est envoyé vers A2, avec de quoi revenir et de quoi comprendre.
+>
+> ```ts
+> definePageMeta({
+>   middleware: ['auth', 'requires-organization'],
+>   organizationReason: 'proposal',   // clé de `organization.join.required.reasons`
+> })
+> ```
+>
+> **La première action concernée est le dépôt d'une proposition (A4).** La liste s'allongera : chaque prompt qui ajoute une action de ce genre pose la garde et ajoute sa raison au fichier de traduction de l'écran A2 — jamais un test recopié dans la page. Une DEMANDE EN ATTENTE (`memberships.status = 'pending'`) ne passe pas : aucun référent n'a encore accepté, et laisser déposer reviendrait à promettre un dossier qui sera refusé. Rappel : ce middleware n'est pas un contrôle de sécurité, l'API refuse de toute façon sans adhésion active ni permission `org_member` ; il évite qu'un formulaire de sept étapes se remplisse pour rien.
 
 **A3 — Page publique de l'événement**
 
@@ -457,6 +470,18 @@ Répond à quatre questions dans l'ordre : de quoi s'agit-il, quelles sont les
 
 ```
 [PRÉAMBULE]
+
+La page se déclare gardée — une proposition se dépose au nom d'une organisation,
+et le rattachement n'est pas obligatoire pour avoir un compte :
+
+    definePageMeta({
+      middleware: ['auth', 'requires-organization'],
+      organizationReason: 'proposal',
+    })
+
+Qui n'a pas de rattachement ACTIF est envoyé vers l'écran A2, qui explique
+pourquoi et ramène ici une fois l'affaire réglée. Ne réimplémente pas ce test
+dans la page : il existe (`app/middleware/requires-organization.ts`, prompt A2).
 
 Formulaire de soumission d'une proposition d'activité — le formulaire le plus
 long et le plus déterminant de la plateforme. Une organisation qui abandonne ici
@@ -899,9 +924,84 @@ réinvente pas.
 
 ### Exigences imposées par les écarts du modèle
 
-Quatre des neuf écarts relevés en dérivant les types (`PROGRESSION.md`, 16/08) ne se corrigent **ni dans le SQL ni dans les types** : ce sont des obligations d'API. Elles sont écrites ici, dans le prompt du module qui les rencontrera, plutôt que dans un tableau que personne ne relit au moment utile.
+Quatre des neuf écarts relevés en dérivant les types (`PROGRESSION.md`, 16/08) ne se corrigent **ni dans le SQL ni dans les types** : ce sont des obligations d'API. S'y ajoutent celles qu'ont fait apparaître les premiers écrans — authentification (n° 18 à 20, prompt B1) et rattachement à une organisation (n° 23 et 24, prompt B2). Elles sont écrites ici, dans le prompt du module qui les rencontrera, plutôt que dans un tableau que personne ne relit au moment utile.
 
 **À recopier dans le prompt du module concerné, juste après « Fonctionnalités attendues ».**
+
+#### B1 — Socle + Identité
+
+```
+Exigences issues des écarts du modèle (relevées en écrivant les écrans A1) :
+
+- ÉCART N°18 — Le verrouillage a ses colonnes (`accounts.failed_attempts`,
+  `locked_until`) mais pas son seuil : rien ne dit au bout de combien d'échecs
+  on verrouille, ni pour combien de temps, ni qui remet le compteur à zéro. Ce
+  sont des réglages d'EXPLOITATION, pas des invariants de données : les mettre
+  en base les rendrait modifiables par migration seulement. Les déclarer dans la
+  configuration du service, et faire porter la durée par la réponse `locked`,
+  que l'écran sait déjà rendre. Les mocks retiennent 5 échecs et 12 minutes,
+  valeurs inventées qui n'engagent rien.
+
+- ÉCART N°19 — La durée de validité d'un jeton n'est écrite nulle part :
+  `one_time_tokens.expires_at` est NOT NULL sans valeur par défaut, chaque
+  appelant décide. Déclarer UNE durée PAR FINALITÉ (`token_purpose`), au même
+  endroit : la vérification d'adresse se suit dans la journée, la
+  réinitialisation de mot de passe dans l'heure. Sans cela, deux liens de
+  finalités différentes vivront des durées différentes sans que personne l'ait
+  décidé.
+
+- ÉCART N°20 — Rien n'exige qu'une adresse soit vérifiée pour se connecter :
+  `people.email_verified_at` est nullable et `person_status` ne connaît pas
+  d'état « en attente de vérification ». L'interface a tranché seule — mot de
+  passe correct ET adresse non vérifiée → connexion refusée, avec proposition de
+  renvoyer le lien. Confirmer cette règle dans l'API, qui seule peut la tenir.
+  Ne PAS ajouter un statut de personne pour cela : l'état est déjà porté par la
+  date, et deux sources pour un même fait divergent toujours.
+
+- L'ORDRE DES CONTRÔLES DE CONNEXION EST LA RÈGLE DE DISCRÉTION, et il est
+  imposé : mot de passe d'abord. Tant qu'il n'est pas juste, la seule réponse
+  possible est « adresse ou mot de passe incorrect », adresse inconnue ou non.
+  Verrouillage, suspension, adresse non vérifiée et second facteur ne se disent
+  qu'ENSUITE, à qui vient de prouver son identité. La création de compte et la
+  demande de réinitialisation rendent TOUJOURS la même réponse, compte existant
+  ou non : c'est le courriel envoyé qui diffère.
+```
+
+#### B2 — Organisations
+
+```
+Exigences issues des écarts du modèle (relevées en écrivant l'écran A2) :
+
+- ÉCART N°23 — `org.find_similar_organizations()` fait remonter les fiches qui
+  partagent le DOMAINE de l'adresse, quel que soit le nom cherché (bonus de 40
+  points, sans condition de ressemblance). C'est JUSTE pour le back-office, qui
+  cherche « tout ce qui pourrait être la même entité », et FAUX pour l'écran de
+  rattachement, où l'on répond à ce qui a été tapé. Ne pas modifier la fonction :
+  exposer DEUX routes de lecture distinctes, l'une pour la recherche d'un
+  utilisateur (résultats portant `name_similarity`), l'autre pour la revue des
+  doublons, et documenter la différence à l'endroit où elles sont déclarées.
+
+- ÉCART N°24 — Rien ne dit quel RÔLE prend une personne qui rejoint une
+  organisation : `org.memberships.role` a pour défaut `member` et aucune règle
+  n'attribue `manager`. L'interface a tranché seule : qui CRÉE une fiche en
+  devient `manager` (personne d'autre ne peut l'approuver, et quelqu'un doit
+  pouvoir accepter les adhésions suivantes), qui REJOINT reste `member`.
+  Confirmer cette règle dans le service, et traiter la question qui vient avec :
+  que devient une fiche dont l'unique référent part ?
+
+- L'adhésion créée par un rattachement AUTOMATIQUE est `active` ; toute autre
+  naît `pending` et attend un référent. La condition est portée par la base —
+  `organization_domains.auto_join` ET `verified_at` — et ne se réinvente pas
+  côté service : la lire, ne pas la deviner.
+
+- Une fiche créée depuis un formulaire public est `candidate`, jamais `active`.
+  C'est ce qui alimente la file de dédoublonnage du back-office.
+
+- La création accepte `acknowledged_match_ids` : les fiches proches AFFICHÉES à
+  la personne avant qu'elle maintienne sa création. Créer sans rien avoir vu et
+  créer en connaissance de cause ne se traitent pas pareil en revue — le second
+  cas mérite une relecture humaine, jamais un refus.
+```
 
 #### B3 — Événements
 

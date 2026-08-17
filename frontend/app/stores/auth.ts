@@ -144,6 +144,24 @@ export const useAuthStore = defineStore('auth', () => {
     pendingVerificationEmail.value = email
   }
 
+  /**
+   * Rattachement principal, après une adhésion ACTIVE (prompt A2).
+   *
+   * CE N'EST PAS L'ÉCRAN QUI DÉCIDE, il ne fait que refléter. En base, la
+   * primauté est posée par `org.tg_default_primary_membership` — première
+   * adhésion active de la personne — et recopiée dans `people.primary_organization_id`
+   * par `org.tg_sync_primary_organization`. On reproduit donc la même règle, et
+   * seulement elle : une seconde adhésion ne déplace pas la primauté.
+   *
+   * Sur données simulées, la mise à jour ne survit pas au rechargement de la
+   * page — rien n'est écrit, `session()` relit les mocks. C'est cohérent avec ce
+   * que fait déjà l'inscription, et c'est visible plutôt que caché.
+   */
+  function attachOrganization(organizationId: Uuid): void {
+    if (person.value === null || person.value.primary_organization_id !== null) return
+    person.value = { ...person.value, primary_organization_id: organizationId }
+  }
+
   return {
     person,
     isAuthenticated,
@@ -157,5 +175,6 @@ export const useAuthStore = defineStore('auth', () => {
     signOut,
     register,
     rememberVerificationTarget,
+    attachOrganization,
   }
 })

@@ -362,6 +362,23 @@ export const people = [
     is_directory_visible: false,
     created_at: '2026-08-14T16:20:00Z',
   }),
+  // Adresse VÉRIFIÉE, aucune organisation, et un domaine — `ujfc.org` — que
+  // porte une fiche vérifiée en rattachement automatique. Ajoutée avec le prompt
+  // A2 : c'est le seul compte du jeu qui puisse se connecter ET voir l'écran de
+  // rattachement proposer une organisation d'après son adresse. Aïcha Traoré,
+  // juste au-dessus, tient le cas inverse — une adresse générique qui ne révèle
+  // rien —, mais elle ne peut pas se connecter tant qu'elle n'a pas vérifié la
+  // sienne : les deux cas sont nécessaires, et ils ne tiennent pas dans une
+  // seule personne.
+  person(PERSON.sy, 'Fatoumata', 'Sy', 'fatoumata.sy@ujfc.org', {
+    civility: 'mme',
+    job_title: 'Coordonnatrice des campagnes jeunesse',
+    country_id: COUNTRY.ci,
+    city: 'Abidjan',
+    timezone: 'Africa/Abidjan',
+    organization: null,
+    created_at: '2026-08-16T09:30:00Z',
+  }),
 ] satisfies Person[]
 
 // ---------------------------------------------------------------------------

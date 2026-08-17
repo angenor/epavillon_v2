@@ -15,7 +15,8 @@
   "verified": {
     "title": "Address verified",
     "description": "The address {email} is confirmed. You can now sign in.",
-    "signIn": "Sign in"
+    "signIn": "Sign in",
+    "nextStep": "One step will remain: telling us which organization you will be representing."
   },
   "rejected": {
     "invalid": "This verification link is not valid. Your email software may have broken it: open it from the message rather than copying it out.",

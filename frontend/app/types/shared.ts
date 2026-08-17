@@ -42,7 +42,16 @@ export type LocaleCode = 'fr' | 'en'
  */
 export interface I18nText {
   fr: string
-  [locale: string]: string
+  /**
+   * `string | undefined` et non `string` : une locale ABSENTE est le cas normal
+   * — le français est la seule obligation de la base. La signature stricte
+   * refusait d'ailleurs toute donnée n'ayant qu'un français, l'inférence d'un
+   * tableau hétérogène produisant `{ fr: string; en?: undefined }` : les fiches
+   * de démonstration ne s'assignaient plus à leur propre type dès qu'on
+   * l'annotait. `resolveI18nText()` traite l'absence depuis toujours (`isFilled`),
+   * c'est le type qui promettait plus que la donnée. Corrigé au prompt A2.
+   */
+  [locale: string]: string | undefined
 }
 
 /**

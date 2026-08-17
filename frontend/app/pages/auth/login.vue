@@ -57,19 +57,11 @@ const fieldErrors = ref<{ email?: string; password?: string }>({})
 const isMfaStep = computed(() => outcome.value?.status === 'mfa_required')
 
 /**
- * Où revenir après la connexion. La valeur vient de l'URL, donc de
- * l'extérieur : seuls les chemins internes sont acceptés. Une valeur commençant
- * par `//` ou portant un schéma ouvrirait une redirection vers un autre site
- * depuis un lien qui a l'air d'être le nôtre.
+ * Où revenir après la connexion. La valeur vient de l'URL, donc de l'extérieur :
+ * la règle qui n'accepte que les chemins internes vit dans `utils/redirect.ts`,
+ * partagée avec l'écran de rattachement et sa garde.
  */
-const redirectTo = computed(() => {
-  const raw = route.query.redirect
-  const value = Array.isArray(raw) ? raw[0] : raw
-  if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//')) {
-    return localePath('/')
-  }
-  return value
-})
+const redirectTo = computed(() => internalRedirect(route.query.redirect, localePath('/')))
 
 function validate(): boolean {
   const errors: { email?: string; password?: string } = {}

@@ -1,0 +1,33 @@
+{
+  "title": "Créer une organisation",
+  "description": "La fiche sera vérifiée par l'IFDD. Vous en devenez le référent : c'est vous qui accepterez les collègues qui demanderont à la rejoindre.",
+  "fields": {
+    "legalName": "Nom légal",
+    "legalNameHint": "Le nom complet, tel qu'il figure sur vos documents officiels.",
+    "acronym": "Sigle",
+    "acronymHint": "S'il existe. Il servira à retrouver votre organisation.",
+    "type": "Type d'organisation",
+    "typePlaceholder": "Choisir un type",
+    "country": "Pays",
+    "countryPlaceholder": "Choisir un pays",
+    "city": "Ville",
+    "place": "Ville et pays",
+    "website": "Site web",
+    "websiteHint": "Le domaine de votre site aide à rapprocher votre fiche de celles qui existent déjà.",
+    "description": "Présentation",
+    "descriptionHint": "Quelques lignes sur les activités de l'organisation.",
+    "jobTitle": "Votre fonction",
+    "jobTitleHint": "Facultatif. Affichée à côté de votre nom dans l'espace de l'organisation."
+  },
+  "errors": {
+    "nameTooShort": "Saisissez le nom complet de l'organisation.",
+    "acronymLength": "Un sigle compte entre 2 et 32 caractères."
+  },
+  "probeWarning": {
+    "title": "Une organisation très proche existe déjà",
+    "description": "Vérifiez la liste ci-dessous avant de continuer : si l'une de ces fiches est la vôtre, rejoignez-la plutôt que d'en créer une seconde."
+  },
+  "probeResults": "Organisations déjà enregistrées qui ressemblent à votre saisie",
+  "submit": "Créer l'organisation",
+  "backToSearch": "Revenir à la recherche"
+}

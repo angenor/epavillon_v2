@@ -38,6 +38,15 @@ import type {
   TokenCheckResult,
   VerifyEmailResult,
 } from '~/types/auth'
+import type { SimilarOrganization } from '~/types/org'
+import type {
+  CreateOrganizationPayload,
+  CreateOrganizationResult,
+  EmailDomainMatch,
+  JoinOrganizationPayload,
+  JoinOrganizationResult,
+  OrganizationSearchQuery,
+} from '~/types/organization-join'
 import type { Uuid } from '~/types/shared'
 
 /** Erreur d'accès, à traduire par l'écran « accès refusé ». */
@@ -223,30 +232,62 @@ export function useApi() {
     // Organisations
     // -----------------------------------------------------------------------
     organizations: {
-      list: () => call('/organizations', (m) => m.organizations),
-      byId: (id: Uuid) => call(`/organizations/${id}`, (m) => m.organizations.find((o) => o.id === id) ?? null),
+      // Les deux lectures passent par les fonctions des mocks, et non par le
+      // tableau : c'est ce qui rend visible une fiche créée pendant la session
+      // de démonstration (voir l'en-tête de `mocks/organization-search.ts`).
+      list: () => call('/organizations', (m) => m.organizationsWithSession()),
+      byId: (id: Uuid) => call(`/organizations/${id}`, (m) => m.organizationById(id)),
 
       /**
-       * Recherche du formulaire de rattachement (A2). Cherche dans TOUTES les
-       * dénominations, pas seulement le nom légal : « IFDD » et « Institut de la
-       * Francophonie pour le développement durable » doivent ramener la même
-       * fiche. C'est le défaut n°1 de la v1.
+       * LA recherche d'organisation de la plateforme — `org.find_similar_organizations()`.
+       *
+       * Écrite pour le rattachement (A2), elle sert aussi le formulaire de
+       * soumission (A4, choix des co-organisateurs) et la fusion des doublons
+       * (A11). UNE SEULE recherche pour les trois : deux implémentations
+       * divergentes rapprocheraient les fiches dans un écran et pas dans l'autre,
+       * ce qui est précisément la façon dont naissent les doublons.
+       *
+       * Elle interroge TOUTES les dénominations — nom légal, sigle, traduction,
+       * ancien nom, faute de frappe connue — plus les domaines. « IFDD », « IEPF »
+       * et « Institut de la Francophonie… » ramènent la même fiche.
        */
-      search: (query: string) =>
-        call(
-          '/organizations/search',
-          (m) => {
-            const needle = query.trim().toLowerCase()
-            if (needle.length < 2) return []
-            const matched = new Set(
-              m.organizationNames
-                .filter((n) => n.name.toLowerCase().includes(needle))
-                .map((n) => n.organization_id),
-            )
-            return m.organizations.filter((o) => matched.has(o.id) || o.legal_name.toLowerCase().includes(needle))
-          },
-          { q: query },
+      similar: (query: OrganizationSearchQuery): Promise<SimilarOrganization[]> =>
+        call('/organizations/similar', (m) => m.findSimilarOrganizations(query), {
+          name: query.name,
+          country_id: query.country_id ?? undefined,
+          email: query.email ?? undefined,
+          website: query.website ?? undefined,
+          limit: query.limit,
+        }),
+
+      /**
+       * Ce que le domaine d'une adresse révèle — `organization_domains`. Rend
+       * `null` pour une messagerie grand public : deux ONG ne sont pas la même
+       * parce que leurs référents utilisent Gmail (`org.public_email_domains`).
+       */
+      byEmailDomain: (email: string): Promise<EmailDomainMatch | null> =>
+        call('/organizations/by-email-domain', (m) => m.organizationForEmail(email), { email }),
+
+      /**
+       * Demande de rattachement. L'issue dépend du DOMAINE de l'adresse, pas de
+       * la volonté de l'utilisateur : `joined` si le domaine est vérifié et
+       * marqué `auto_join`, `pending` partout ailleurs — un référent doit alors
+       * accepter.
+       *
+       * `personId` disparaîtra au prompt B7 : l'API lit sa propre session.
+       */
+      join: (personId: Uuid, payload: JoinOrganizationPayload): Promise<JoinOrganizationResult> =>
+        send(`/organizations/${payload.organization_id}/members`, payload, (m) =>
+          m.joinOrganization(personId, payload),
         ),
+
+      /** Création d'une fiche, en `candidate` : l'IFDD la regardera. */
+      create: (personId: Uuid, payload: CreateOrganizationPayload): Promise<CreateOrganizationResult> =>
+        send('/organizations', payload, (m) => m.createOrganization(personId, payload)),
+
+      /** Adhésions vivantes d'une personne — actives ou en attente d'un référent. */
+      membershipsOf: (personId: Uuid) =>
+        call(`/people/${personId}/memberships`, (m) => m.membershipsOfPerson(personId)),
 
       names: (id: Uuid) =>
         call(`/organizations/${id}/names`, (m) => m.organizationNames.filter((n) => n.organization_id === id)),

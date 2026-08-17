@@ -1,0 +1,113 @@
+{
+  "title": "Your organization",
+  "description": "Search for the organization you will be representing. Type its full name or its acronym: both lead to the same record.",
+  "search": {
+    "label": "Organization name or acronym",
+    "placeholder": "Institut de la Francophonie, IFDD, ministry…",
+    "hint": "Two letters are enough to start.",
+    "idle": "Results appear as soon as you type the second letter."
+  },
+  "results": {
+    "count": "No organization found | One organization found | {count} organizations found",
+    "members": "No registered member | 1 registered member | {count} registered members",
+    "verified": "Verified by IFDD",
+    "strongMatch": "This is most likely yours",
+    "foundUnder": "Found under: {name}",
+    "sharedDomain": "This organization uses the domain of your email address.",
+    "join": "Join",
+    "alreadyMember": "You are a member",
+    "requestPending": "Request pending",
+    "noneMine": "None of these is your organization?"
+  },
+  "empty": {
+    "title": "No organization matches “{query}”",
+    "description": "Try the full name, or the acronym alone: the search covers both, as well as former names. If your organization really is not listed, create its record.",
+    "create": "Create a new organization"
+  },
+  "domain": {
+    "title": "Your address points to an organization",
+    "description": "The domain {domain} belongs to {organization}.",
+    "immediate": "You will be attached immediately: this domain has been verified by the organization.",
+    "approval": "A contact person at the organization will need to approve your request.",
+    "actionImmediate": "Join this organization",
+    "actionRequest": "Request to join"
+  },
+  "current": {
+    "title": "Your affiliations",
+    "primary": "Primary",
+    "active": "Active affiliation",
+    "pending": "Pending",
+    "pendingHint": "A contact person at this organization must approve your request. There is no need to send it again.",
+    "roles": {
+      "manager": "Contact person",
+      "member": "Member",
+      "contributor": "Contributor"
+    }
+  },
+  "confirm": {
+    "title": "Join {organization}",
+    "immediate": "Your email domain belongs to this organization: you will be attached immediately.",
+    "approval": "Your request will be sent to a contact person at the organization, who will approve or decline it.",
+    "jobTitle": "Your role in this organization",
+    "jobTitleHint": "Optional, but this is what the person handling your request will read.",
+    "submitImmediate": "Join",
+    "submitRequest": "Send request"
+  },
+  "duplicate": {
+    "title": "This organization may already exist",
+    "description": "Compare both records before continuing. An organization registered twice cannot be merged again without IFDD's help, and its activities end up split between two records.",
+    "tableCaption": "Comparison between the organization you are creating and the one that already exists",
+    "attribute": "Compared information",
+    "yours": "What you are creating",
+    "existing": "What already exists",
+    "identical": "identical value",
+    "members": "Members",
+    "joinExisting": "Same organization: join it",
+    "createAnyway": "Different organization: create anyway",
+    "back": "Edit my entry",
+    "others": "Other close records"
+  },
+  "outcome": {
+    "joined": {
+      "title": "You are now attached to {organization}",
+      "description": "You can now submit an activity proposal on behalf of this organization."
+    },
+    "pending": {
+      "title": "Request sent to {organization}",
+      "description": "A contact person at the organization must approve it. You will receive an email as soon as they do."
+    },
+    "created": {
+      "title": "{organization} has been created",
+      "description": "You are its contact person. IFDD will review the record; you can start working without waiting for that review."
+    },
+    "continue": "Continue",
+    "joinAnother": "Join another organization",
+    "resume": "Resume where I left off"
+  },
+  "notices": {
+    "alreadyMember": "You are already a member of {organization}.",
+    "alreadyRequested": "Your request to {organization} is already pending.",
+    "nameTaken": "An organization already bears this name in this country. Here it is."
+  },
+  "states": {
+    "contextError": "Organizations and countries could not be loaded.",
+    "searchError": "The search did not complete.",
+    "signedOut": "Your session has expired. Sign in again to attach your account to an organization.",
+    "signIn": "Sign in"
+  },
+  "required": {
+    "title": "An organization is required for this action",
+    "description": "Tell us which organization you are acting for. You will then pick up where you left off.",
+    "generic": "The action you requested is carried out on behalf of an organization.",
+    "reasons": {
+      "proposal": "An activity proposal is always submitted on behalf of an organization: it appears in the programme and answers for the activity.",
+      "organization-space": "The organization workspace gathers the proposals submitted by your body."
+    }
+  },
+  "skip": {
+    "description": "No organization, or you would rather do this later? It is not required to hold an account: you can follow the programme and register for sessions without any affiliation, and add one whenever you like from your profile.",
+    "action": "I do not have an organization for now",
+    "required": "You can give up on this action for now. Your account still works to follow the programme and register for sessions; you can come back here from your profile.",
+    "giveUp": "Give up for now"
+  }
+}

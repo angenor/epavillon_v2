@@ -22,9 +22,12 @@
 --       le même index et retourne la même organisation.
 --
 --   V2. RECHERCHE MULTI-SIGNAUX AVANT CRÉATION (org.find_similar_organizations)
---       Trigramme sur toutes les dénominations normalisées, plus égalité de
---       domaine web/email, plus proximité géographique. Le formulaire n'affiche
---       plus « aucun résultat » parce que l'utilisateur a tapé le sigle.
+--       Trigramme, similarité de mot et préfixe sur toutes les dénominations
+--       normalisées, plus égalité de domaine web/email, plus proximité
+--       géographique. Le formulaire n'affiche plus « aucun résultat » parce que
+--       l'utilisateur a tapé le sigle — ni parce qu'il a tapé les huit premières
+--       lettres du nom complet, ce que le trigramme seul ne savait pas voir
+--       (voir le commentaire détaillé du § 5).
 --
 --   V3. IMPOSSIBILITÉ STRUCTURELLE DU DOUBLON EXACT (index uniques partiels)
 --       Deux organisations actives ne peuvent pas partager le même nom
@@ -363,12 +366,35 @@ ALTER TABLE identity.people
 --
 -- Appelée par le formulaire de création (frappe au clavier, debounce 300 ms) et
 -- par le back-office. Le score combine :
---   - similarité trigramme maximale sur TOUTES les dénominations (0-100)
+--   - similarité maximale sur TOUTES les dénominations (0-100)
 --   - bonus 40 si le domaine du site/email correspond à un domaine enregistré
 --   - bonus 10 si le pays correspond
 --   - bonus 25 en cas d'égalité exacte de sigle normalisé
 -- Un score >= 85 déclenche un blocage doux côté interface (« cette organisation
 -- existe déjà, souhaitez-vous la rejoindre ? ») plutôt qu'une simple suggestion.
+--
+-- TROIS FAÇONS DE RECONNAÎTRE UNE DÉNOMINATION, ET IL EN FAUT TROIS. La
+-- similarité trigramme seule — `%`, seuil 0,3 — compare deux chaînes ENTIÈRES et
+-- se normalise sur leur longueur : mesuré sur la base, `similarity('institut',
+-- 'institut de la francophonie pour le developpement durable')` vaut 0,17, sous
+-- le seuil. Autrement dit, quelqu'un qui tape le DÉBUT DU NOM COMPLET — le geste
+-- le plus naturel qui soit — n'obtenait AUCUN résultat, et l'écran lui proposait
+-- de créer la fiche qui existait déjà. C'est le défaut n°1 de la v1 reproduit par
+-- la fonction censée le corriger. S'ajoutent donc :
+--   - `word_similarity(q, nom)` (opérateur `<%`) : le terme est-il proche d'un ou
+--     plusieurs MOTS du nom ? « institut » ou « francophonie » y répondent ;
+--   - le PRÉFIXE littéral, qui couvre les deux ou trois premières lettres, en
+--     deçà de ce que les trigrammes savent mesurer.
+-- Ces deux signaux sont volontairement pondérés PLUS BAS qu'une correspondance
+-- sur le nom entier : reconnaître un fragment ne vaut pas reconnaître le nom, et
+-- ils ne doivent pas franchir seuls le seuil de 85 qui affirme « c'est la même ».
+--
+-- CE QUE LA FONCTION RENVOIE EST CE QU'IL FAUT POUR RECONNAÎTRE SA FICHE, et
+-- pas seulement pour la désigner : type, ville, sceau de vérification et nombre
+-- de membres déjà inscrits. Sans eux, l'écran de rattachement rechargerait une
+-- table entière à chaque frappe pour afficher « 4 membres » — ou renoncerait, et
+-- l'utilisateur trancherait entre deux fiches homonymes sans rien pour les
+-- distinguer.
 -- -----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION org.find_similar_organizations(
     p_name       text,
@@ -378,14 +404,18 @@ CREATE OR REPLACE FUNCTION org.find_similar_organizations(
     p_limit      integer DEFAULT 10
 )
 RETURNS TABLE (
-    organization_id   uuid,
-    legal_name        text,
-    acronym           text,
-    country_id        uuid,
-    status            org.organization_status,
-    matched_name      text,
-    score             numeric,
-    match_reasons     text[]
+    organization_id        uuid,
+    legal_name             text,
+    acronym                text,
+    organization_type_code text,
+    country_id             uuid,
+    city                   text,
+    status                 org.organization_status,
+    verified_at            timestamptz,
+    member_count           integer,
+    matched_name           text,
+    score                  numeric,
+    match_reasons          text[]
 )
 LANGUAGE sql
 STABLE
@@ -404,11 +434,28 @@ name_matches AS (
     SELECT
         n.organization_id,
         n.name AS matched_name,
-        max(similarity(n.name_normalized, i.q)) AS name_score
+        max(GREATEST(
+            -- Le nom entier, ou peu s'en faut.
+            similarity(n.name_normalized, i.q),
+            -- Un ou plusieurs mots du nom.
+            (word_similarity(i.q, n.name_normalized) * 0.6)::real,
+            -- Les premières lettres, en deçà de ce que mesurent les trigrammes.
+            CASE WHEN n.name_normalized LIKE i.q || '%' THEN 0.55::real ELSE 0::real END
+        )) AS name_score,
+        -- Départage deux dénominations d'égal score : à l'écran, « trouvée sous :
+        -- <faute d'orthographe connue> » décrédibilise un résultat par ailleurs
+        -- juste. Sans cet ordre, le choix revient à l'ordre physique des lignes.
+        min(CASE n.kind WHEN 'legal' THEN 1 WHEN 'acronym' THEN 2 WHEN 'short' THEN 3
+                        WHEN 'translation' THEN 4 WHEN 'former' THEN 5 ELSE 6 END
+            + CASE WHEN n.is_confirmed THEN 0 ELSE 10 END) AS name_rank
     FROM org.organization_names n
     CROSS JOIN input i
     WHERE i.q IS NOT NULL
-      AND n.name_normalized % i.q          -- opérateur trigramme, servi par l'index GIN
+      AND (
+            n.name_normalized % i.q            -- trigramme, servi par l'index GIN
+         OR i.q <% n.name_normalized           -- similarité de mot, même index
+         OR n.name_normalized LIKE i.q || '%'  -- préfixe
+      )
     GROUP BY n.organization_id, n.name
 ),
 domain_matches AS (
@@ -423,12 +470,12 @@ domain_matches AS (
 candidates AS (
     SELECT
         u.organization_id,
-        (array_agg(u.matched_name ORDER BY u.name_score DESC NULLS LAST))[1] AS matched_name,
+        (array_agg(u.matched_name ORDER BY u.name_score DESC NULLS LAST, u.name_rank))[1] AS matched_name,
         max(u.name_score) AS name_score
     FROM (
-        SELECT organization_id, matched_name, name_score FROM name_matches
+        SELECT organization_id, matched_name, name_score, name_rank FROM name_matches
         UNION ALL
-        SELECT organization_id, NULL::text, 0::real FROM domain_matches
+        SELECT organization_id, NULL::text, 0::real, 99 FROM domain_matches
     ) u
     GROUP BY u.organization_id
 )
@@ -436,8 +483,15 @@ SELECT
     o.id,
     o.legal_name,
     o.acronym,
+    o.organization_type_code,
     o.country_id,
+    o.city,
     o.status,
+    o.verified_at,
+    -- Membres DÉJÀ INSCRITS : c'est ce qui fait dire « c'est bien la mienne ».
+    -- Les adhésions en attente ne comptent pas — elles ne prouvent encore rien.
+    (SELECT count(*) FROM org.memberships m
+      WHERE m.organization_id = o.id AND m.status = 'active')::integer AS member_count,
     c.matched_name,
     round((
         COALESCE(c.name_score, 0) * 100

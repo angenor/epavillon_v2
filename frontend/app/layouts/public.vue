@@ -19,6 +19,28 @@ import type { NavItem } from '~/types/navigation'
 const { t } = useI18n()
 const localePath = useLocalePath()
 const route = useRoute()
+const auth = useAuthStore()
+
+/**
+ * La barre publique connaît la session depuis le prompt A2 : elle affichait
+ * « Se connecter » à quelqu'un qui venait de se connecter, sur le premier écran
+ * du parcours qui exige d'être connecté.
+ *
+ * SANS `await` : le layout enveloppe aussi des pages entièrement publiques, que
+ * rien ne doit retarder. La session se résout pendant l'affichage ; jusque-là,
+ * `isAuthenticated` est faux et la barre montre l'entrée de connexion — ce qui
+ * est vrai tant qu'on ne sait pas.
+ *
+ * Le nom n'est pas encore un lien : la page de profil n'existe pas (elle viendra
+ * avec l'espace organisation, prompt A5). Un lien vers une page absente serait
+ * pire que pas de lien.
+ */
+void auth.ensureLoaded()
+
+async function signOut(): Promise<void> {
+  await auth.signOut()
+  await navigateTo(localePath('/'))
+}
 
 const mainNav: NavItem[] = [
   { labelKey: 'nav.main.home', to: '/' },
@@ -93,7 +115,26 @@ const currentYear = new Date().getFullYear()
       <template #actions>
         <UiLocaleSwitch class="hidden sm:flex" />
         <UiThemeToggle />
+        <span v-if="auth.isAuthenticated && auth.person" class="hidden items-center gap-2 sm:flex">
+          <!-- Le rattachement à une organisation est ATTEINT une fois dans le
+               parcours d'inscription, et doit rester atteignable ensuite : on
+               change d'employeur, on rejoint une seconde structure, on suit une
+               demande en attente. Le prompt dit « accessible depuis le profil » ;
+               la page de profil n'existe pas encore (prompt A5), cette entrée
+               tient le rôle en attendant et disparaîtra avec elle. -->
+          <NuxtLink
+            :to="localePath('organization-join')"
+            class="text-sm text-text-secondary no-underline hover:text-text"
+          >
+            {{ t('nav.account.myOrganization') }}
+          </NuxtLink>
+          <span class="max-w-[16ch] truncate text-sm text-text-secondary">
+            {{ auth.person.display_name }}
+          </span>
+          <UiButton variant="secondary" size="sm" :label="t('nav.account.logout')" @click="signOut()" />
+        </span>
         <NuxtLink
+          v-else
           :to="localePath('/connexion')"
           class="hidden rounded-md border border-border px-3 py-2 text-sm text-text no-underline transition-colors hover:bg-surface-hover sm:inline-block"
         >
@@ -104,6 +145,22 @@ const currentYear = new Date().getFullYear()
       <template #mobile-footer>
         <UiLocaleSwitch class="sm:hidden" />
         <NuxtLink
+          v-if="auth.isAuthenticated"
+          :to="localePath('organization-join')"
+          class="text-sm text-text-secondary no-underline"
+        >
+          {{ t('nav.account.myOrganization') }}
+        </NuxtLink>
+        <UiButton
+          v-if="auth.isAuthenticated"
+          class="ml-auto"
+          variant="secondary"
+          size="sm"
+          :label="t('nav.account.logout')"
+          @click="signOut()"
+        />
+        <NuxtLink
+          v-else
           :to="localePath('/connexion')"
           class="ml-auto rounded-md border border-border px-3 py-2 text-sm text-text no-underline"
         >

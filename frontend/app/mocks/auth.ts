@@ -126,6 +126,15 @@ export const accounts = [
     updated_at: '2026-08-14T16:20:00Z',
   }),
 
+  // AUCUNE ORGANISATION, adresse vérifiée : le compte qui sert à éprouver
+  // l'écran de rattachement (A2). Ajouté avec lui.
+  passwordAccount(ACCOUNT(12), PERSON.sy, {
+    password_changed_at: '2026-08-16T09:30:00Z',
+    last_login_at: '2026-08-16T09:35:00Z',
+    created_at: '2026-08-16T09:30:00Z',
+    updated_at: '2026-08-16T09:35:00Z',
+  }),
+
   // Le reste de l'équipe et des référents d'organisation, sans particularité.
   passwordAccount(ACCOUNT(6), PERSON.tremblay),
   passwordAccount(ACCOUNT(7), PERSON.nkoDiop),

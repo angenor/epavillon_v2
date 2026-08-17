@@ -105,6 +105,7 @@ const classes = computed(() =>
     :disabled="props.disabled"
     :readonly="props.readonly"
     :hide-label="props.hideLabel"
+    hide-optional
   >
     <template #default="{ control }">
       <div class="relative">

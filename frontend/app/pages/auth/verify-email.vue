@@ -48,6 +48,25 @@ const token = computed(() => {
 
 const pendingEmail = computed(() => auth.pendingVerificationEmail)
 
+/**
+ * Où l'on va une fois l'adresse vérifiée : se connecter, PUIS le rattachement à
+ * une organisation.
+ *
+ * C'EST LA SUITE DU PARCOURS D'INSCRIPTION, PAS UN RACCOURCI. Le formulaire de
+ * création de compte ne demande volontairement rien sur l'organisation — c'est
+ * l'écran A2 qui s'en charge, et lui seul sait chercher avant de créer. Encore
+ * faut-il y ARRIVER : sans ce paramètre, la personne atterrissait sur l'accueil,
+ * sans organisation, sans rien qui le lui dise, et le premier dépôt de dossier
+ * butait dessus des semaines plus tard.
+ *
+ * Le mécanisme est celui du middleware `auth` — `?redirect=` —, déjà écrit et
+ * déjà validé côté page de connexion, qui refuse tout ce qui n'est pas un chemin
+ * interne. On n'en invente pas un second.
+ */
+const signInThenJoin = computed(
+  () => `${localePath('auth-login')}?redirect=${encodeURIComponent(localePath('organization-join'))}`,
+)
+
 // --- Mode 1 : le lien a été suivi -------------------------------------------
 
 const isVerifying = ref(false)
@@ -145,13 +164,16 @@ const resendLabel = computed(() =>
         :description="t('auth.verify-email.verified.description', { email: verification.email })"
       >
         <UiButton
-          :to="localePath('auth-login')"
+          :to="signInThenJoin"
           variant="primary"
           block
           size="lg"
           icon-trailing="arrow-right"
           :label="t('auth.verify-email.verified.signIn')"
         />
+        <p class="mt-3 text-center text-xs text-text-muted">
+          {{ t('auth.verify-email.verified.nextStep') }}
+        </p>
       </AuthCard>
 
       <AuthCard
@@ -165,7 +187,7 @@ const resendLabel = computed(() =>
              il ne reste qu'à se connecter. -->
         <UiButton
           v-if="rejection === 'already_used'"
-          :to="localePath('auth-login')"
+          :to="signInThenJoin"
           variant="primary"
           block
           size="lg"

@@ -160,14 +160,25 @@ export interface Membership {
  * Appelée par le formulaire de rattachement à chaque frappe (anti-rebond de
  * 300 ms). Un `score` supérieur ou égal à 85 justifie un blocage doux côté
  * interface — « cette organisation existe déjà, souhaitez-vous la rejoindre ? » —
- * jamais un refus.
+ * jamais un refus. Le seuil est nommé une seule fois, dans
+ * `types/organization-join.ts` (`STRONG_MATCH_SCORE`).
+ *
+ * La fonction renvoie de quoi RECONNAÎTRE une fiche, pas seulement la désigner :
+ * type, ville, sceau et nombre de membres inscrits viennent avec le résultat, à
+ * la place des requêtes que l'écran aurait dû faire à chaque frappe.
  */
 export interface SimilarOrganization {
   organization_id: OrganizationId
   legal_name: string
   acronym: string | null
+  organization_type_code: TaxonomyTermCode
   country_id: Uuid | null
+  city: string | null
   status: OrganizationStatus
+  /** Sceau de l'IFDD ; distinct du statut — une fiche active peut n'être pas vérifiée. */
+  verified_at: IsoDateTime | null
+  /** Adhésions ACTIVES seulement : une demande en attente ne prouve rien encore. */
+  member_count: number
   /** Dénomination qui a déclenché la correspondance : à montrer à l'utilisateur
    *  quand elle diffère du nom légal (« trouvée par son sigle »). */
   matched_name: string | null

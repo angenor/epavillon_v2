@@ -36,6 +36,14 @@ declare module '#app' {
      * Le layout n'invente rien : une page sans fil d'Ariane n'en affiche pas.
      */
     breadcrumb?: BreadcrumbItem[]
+    /**
+     * Pourquoi cette page exige un rattachement à une organisation — clé d'un
+     * message de `organization.join.required.reasons`, lue par le middleware
+     * `requires-organization`. Sans elle, l'étape intermédiaire s'affiche avec
+     * un bandeau générique : elle dit alors qu'une organisation est nécessaire,
+     * mais pas pour quoi faire, ce qui est le minimum utile et pas davantage.
+     */
+    organizationReason?: string
   }
 }
 

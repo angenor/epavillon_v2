@@ -48,6 +48,8 @@ interface Props {
   counterExceeded?: boolean
   /** Champ sans libellé visible (barre de recherche d'un en-tête, cellule de tableau). */
   hideLabel?: boolean
+  /** Champ hors soumission — recherche, filtre : « facultatif » n'y veut rien dire. */
+  hideOptional?: boolean
 }
 
 const props = defineProps<Props>()
@@ -104,7 +106,14 @@ defineSlots<{
              champ en lecture seule — le compte concerné rappelé sur l'écran de
              réinitialisation, un numéro de dossier — la mention n'a pas de sens :
              il n'y a rien à décider. -->
-        <span v-else-if="!props.readonly" class="ml-1.5 text-xs font-normal text-text-subtle">
+        <!-- Ni d'un champ qui n'appartient à aucune soumission : une barre de
+             recherche ne se « remplit » pas, elle interroge. Constaté sur
+             l'écran de rattachement (A2), dont le champ unique s'annonçait
+             « Nom ou sigle de l'organisation facultatif ». -->
+        <span
+          v-else-if="!props.readonly && !props.hideOptional"
+          class="ml-1.5 text-xs font-normal text-text-subtle"
+        >
           {{ t('form.optional') }}
         </span>
       </label>

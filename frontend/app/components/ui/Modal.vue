@@ -73,22 +73,32 @@ function onBackdropClick(event: MouseEvent): void {
   if (event.target === dialog.value) close()
 }
 
-watch(
-  () => props.open,
-  (isOpen) => {
-    const element = dialog.value
-    if (!element) return
-    if (isOpen && !element.open) {
-      element.showModal()
-      // Le corps de page ne défile pas derrière la modale.
-      document.documentElement.style.overflow = 'hidden'
-    } else if (!isOpen && element.open) {
-      element.close()
-      document.documentElement.style.overflow = ''
-    }
-  },
-  { flush: 'post' },
-)
+/** Aligne l'état réel du `<dialog>` sur la propriété. */
+function syncOpenState(): void {
+  const element = dialog.value
+  if (!element) return
+  if (props.open && !element.open) {
+    element.showModal()
+    // Le corps de page ne défile pas derrière la modale.
+    document.documentElement.style.overflow = 'hidden'
+  } else if (!props.open && element.open) {
+    element.close()
+    document.documentElement.style.overflow = ''
+  }
+}
+
+watch(() => props.open, syncOpenState, { flush: 'post' })
+
+/**
+ * AU MONTAGE AUSSI, et pas seulement au changement. Une modale montée DÉJÀ
+ * ouverte — `v-if="cible"` sur le composant, `open` posé dans le même geste que
+ * la cible — ne se serait jamais affichée : le watcher n'a rien vu changer. Le
+ * motif est naturel dès qu'un dialogue porte sur un élément choisi dans une
+ * liste ; il est apparu au premier usage réel (prompt A2, confirmation de
+ * rattachement), pas dans le guide de style, où toutes les modales sont montées
+ * fermées.
+ */
+onMounted(syncOpenState)
 
 onBeforeUnmount(() => {
   document.documentElement.style.overflow = ''

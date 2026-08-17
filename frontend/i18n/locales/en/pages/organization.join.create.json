@@ -1,0 +1,33 @@
+{
+  "title": "Create an organization",
+  "description": "The record will be reviewed by IFDD. You become its contact person: you will approve the colleagues who ask to join it.",
+  "fields": {
+    "legalName": "Legal name",
+    "legalNameHint": "The full name, as it appears on your official documents.",
+    "acronym": "Acronym",
+    "acronymHint": "If there is one. It will help others find your organization.",
+    "type": "Organization type",
+    "typePlaceholder": "Select a type",
+    "country": "Country",
+    "countryPlaceholder": "Select a country",
+    "city": "City",
+    "place": "City and country",
+    "website": "Website",
+    "websiteHint": "Your website domain helps match your record against existing ones.",
+    "description": "Overview",
+    "descriptionHint": "A few lines about what the organization does.",
+    "jobTitle": "Your role",
+    "jobTitleHint": "Optional. Shown next to your name in the organization's workspace."
+  },
+  "errors": {
+    "nameTooShort": "Enter the full name of the organization.",
+    "acronymLength": "An acronym is between 2 and 32 characters long."
+  },
+  "probeWarning": {
+    "title": "A very close organization already exists",
+    "description": "Check the list below before continuing: if one of these records is yours, join it instead of creating a second one."
+  },
+  "probeResults": "Registered organizations that resemble your entry",
+  "submit": "Create the organization",
+  "backToSearch": "Back to search"
+}

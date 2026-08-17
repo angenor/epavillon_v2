@@ -12,7 +12,9 @@
  *   reference.ts         pays, locales, taxonomies, rattachement aux thématiques
  *   org.ts               13 fiches d'organisation, dont DEUX EN DOUBLON
  *   memberships.ts       les adhésions, avec un cas en attente et un révoqué
- *   people.ts            26 personnes, leurs rôles, dont une administratrice
+ *   organization-search.ts  `find_similar_organizations()` rejouée, la lecture
+ *                        des domaines et les deux écritures de l'écran A2
+ *   people.ts            27 personnes, leurs rôles, dont une administratrice
  *                        limitée à la seule COP31
  *   auth.ts              les comptes, les jetons de courriel et la logique de
  *                        connexion que l'API portera (prompt A1)
@@ -35,6 +37,21 @@ export { locales, countries, taxonomies, taxonomyTerms, entityTerms } from './re
 export { organizations, organizationNames, organizationDomains, duplicateCandidates } from './org'
 export { memberships } from './memberships'
 export { people, roleAssignments } from './people'
+
+export {
+  publicEmailDomains,
+  normalizeLabel,
+  extractDomain,
+  activeMemberCount,
+  organizationsWithSession,
+  organizationById,
+  findSimilarOrganizations,
+  organizationForEmail,
+  membershipOf,
+  membershipsOfPerson,
+  joinOrganization,
+  createOrganization,
+} from './organization-search'
 
 export {
   accounts,

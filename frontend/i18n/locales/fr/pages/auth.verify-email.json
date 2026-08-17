@@ -15,7 +15,8 @@
   "verified": {
     "title": "Adresse vérifiée",
     "description": "L'adresse {email} est confirmée. Vous pouvez maintenant vous connecter.",
-    "signIn": "Se connecter"
+    "signIn": "Se connecter",
+    "nextStep": "Il vous restera une étape : indiquer l'organisation au nom de laquelle vous interviendrez."
   },
   "rejected": {
     "invalid": "Ce lien de vérification n'est pas valide. Il a peut-être été coupé par votre logiciel de messagerie : ouvrez-le depuis le courriel plutôt qu'en le recopiant.",

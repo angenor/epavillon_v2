@@ -137,6 +137,14 @@ export const ORG = {
   mvoi: uuid('7001', 13),
 } as const
 
+/**
+ * Fiche que l'API CRÉERAIT depuis l'écran de rattachement (A2). Les mocks sont
+ * en lecture seule : cet identifiant nomme la réponse rendue à l'écran, pas une
+ * ligne qu'on retrouverait dans `organizations`. Numéroté hors de la série des
+ * treize fiches pour qu'il n'en recouvre jamais une.
+ */
+export const ORG_CREATED: Uuid = uuid('7001', 90)
+
 /** `org.organization_names` — dénominations complémentaires. */
 export const ORG_NAME = (n: number): Uuid => uuid('7002', n)
 
@@ -194,10 +202,25 @@ export const PERSON = {
   ilboudo: uuid('7005', 25),
   // Inscrite au prompt A1 : compte créé, adresse pas encore vérifiée.
   nouvelInscrit: uuid('7005', 26),
+  // Ajoutée au prompt A2 : adresse vérifiée, AUCUNE organisation, et un domaine
+  // de messagerie qui appartient à une fiche vérifiée en rattachement
+  // automatique. C'est la seule personne du jeu qui puisse démontrer la
+  // proposition « votre adresse appartient à … » — sans elle, cette branche de
+  // l'écran de rattachement n'aurait aucune donnée.
+  sy: uuid('7005', 27),
 } as const
 
-/** `identity.accounts` — un compte mot de passe par personne connectée (A1). */
-export const ACCOUNT = (n: number): Uuid => uuid('7007', n)
+/**
+ * `identity.accounts` — un compte mot de passe par personne connectée (A1).
+ *
+ * Famille 7009 et non 7007 : cette dernière est celle de `DUPLICATE`, et
+ * `ACCOUNT(1)` valait donc exactement `DUPLICATE.osed`. Aucune donnée n'en était
+ * fausse — deux tables sans lien entre elles — mais l'en-tête de ce fichier
+ * promet qu'« un identifiant rencontré dans une console se retrouve ici par
+ * simple recherche », et une valeur qui désigne deux choses tenait mal cette
+ * promesse. Corrigé au prompt A2.
+ */
+export const ACCOUNT = (n: number): Uuid => uuid('7009', n)
 
 /**
  * `identity.one_time_tokens` — vérification d'adresse et réinitialisation de mot
