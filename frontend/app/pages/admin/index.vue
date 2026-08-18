@@ -16,8 +16,13 @@ import type { AdminDashboard } from '~/types/admin-dashboard'
  *     cassé. C'est la contrainte explicite du prompt, et c'est celle qu'on
  *     trahit le plus facilement — une zone rouge vide se lit comme une panne,
  *     une zone absente comme un écran incomplet.
- *  2. LES CHIFFRES : entonnoir, courbe des dépôts avec l'échéance marquée,
- *     courbe des inscriptions, répartitions par pays et par thématique.
+ *  2. LES CHIFFRES, en deux temps. D'abord SIX INDICATEURS DE TÊTE — où en
+ *     est-on : dépôts, jours avant la clôture, avancement du comité, sélectivité,
+ *     séances créées, inscriptions. Puis les graphiques — comment cela évolue :
+ *     entonnoir, courbe des dépôts avec l'échéance marquée, courbe des
+ *     inscriptions, répartitions par pays et par thématique. Un graphique ne
+ *     répond pas à « où en est-on », et c'est pourtant la question qu'on se pose
+ *     en ouvrant l'écran.
  *  3. LA SANTÉ OPÉRATIONNELLE, en bas : ce qui casse en silence.
  *
  * LES CHIFFRES DE LA ZONE 2 SONT MATÉRIALISÉS, PAS INSTANTANÉS. Ils viennent des
@@ -158,9 +163,23 @@ function total(points: { cumul: number }[]): number {
 
         <!-- ZONE 2 -->
         <section class="mt-12" aria-labelledby="admin-figures-title">
-          <h2 id="admin-figures-title" class="mb-5 text-xl font-semibold">
+          <h2 id="admin-figures-title" class="text-xl font-semibold">
             {{ t('admin.dashboard.figures.title') }}
           </h2>
+
+          <!-- DEUX SOUS-BLOCS, ET L'ORDRE EST LE SUJET : « où en est-on » avant
+               « comment cela évolue ». Six chiffres répondent d'un coup d'œil à la
+               première question ; les graphiques, qui demandent qu'on les lise,
+               répondent à la seconde. -->
+          <h3 class="mt-5 mb-3 text-sm font-semibold tracking-wide text-text-subtle uppercase">
+            {{ t('admin.dashboard.figures.kpiTitle') }}
+          </h3>
+
+          <AdminKeyFigures :kpis="figures?.kpis ?? []" :timezone="timezone" />
+
+          <h3 class="mt-10 mb-4 text-sm font-semibold tracking-wide text-text-subtle uppercase">
+            {{ t('admin.dashboard.figures.chartsTitle') }}
+          </h3>
 
           <!-- `items-start` : sans lui, une carte de courbe s'étire à la hauteur
                de la carte de répartitions voisine et laisse un grand vide sous son
@@ -179,7 +198,6 @@ function total(points: { cumul: number }[]): number {
                 :series-label="t('admin.dashboard.charts.submissions.series')"
                 :points="figures?.submissions ?? []"
                 :markers="submissionMarkers"
-                :timezone="timezone"
                 :total-label="
                   t('admin.dashboard.charts.submissions.total', total(figures?.submissions ?? []))
                 "
@@ -191,7 +209,6 @@ function total(points: { cumul: number }[]): number {
                 :title="t('admin.dashboard.charts.registrations.title')"
                 :series-label="t('admin.dashboard.charts.registrations.series')"
                 :points="figures?.registrations ?? []"
-                :timezone="timezone"
                 tone="postponed"
                 :total-label="
                   t(

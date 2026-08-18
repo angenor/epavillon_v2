@@ -1,40 +1,44 @@
 <script setup lang="ts">
+import type { ApexFormatterOpts, ApexOptions } from 'apexcharts'
 import type { TrendPoint } from '~/types/admin-dashboard'
-import type { IsoDateTime, TimeZoneName } from '~/types/shared'
+import type { IsoDateTime } from '~/types/shared'
+import type { ChartSeries, ChartTone } from '~/composables/useChartTheme'
 
 /**
- * COURBE SOBRE — une série, une couleur, sa légende posée sur la courbe.
+ * COURBE QUOTIDIENNE — des bâtons pour les jours, une ligne pour la tendance.
  *
- * DES BÂTONS, PAS UNE LIGNE, ET C'EST UN CHOIX DE VÉRITÉ. Une valeur QUOTIDIENNE
+ * DES BÂTONS, PAS UNE COURBE, ET C'EST UN CHOIX DE VÉRITÉ. Une valeur QUOTIDIENNE
  * est un compte, pas une grandeur continue : relier « 3 dépôts mardi » à
  * « 0 mercredi » par un segment dessine une pente qui n'a jamais existé, et sur
  * une série creuse — le cas ordinaire d'un appel à propositions — le tracé
  * devient un peigne dont on ne lit plus rien. Un bâton par jour ne prétend rien
- * entre deux jours, et l'effet de dernière minute s'y voit d'un coup d'œil.
+ * entre deux jours.
  *
- * CE QU'ELLE NE FAIT PAS, et c'est ce qui la rend lisible : pas de dégradé, pas
- * d'ombre portée, pas de troisième dimension, pas de boîte de légende posée à
- * côté. Le nom de la série est écrit AU BOUT DE LA SÉRIE, là où l'œil arrive :
- * une légende séparée oblige à faire l'aller-retour entre une pastille de
- * couleur et un tracé, ce qui n'a de sens qu'à partir de trois séries — et à
- * partir de trois séries, ce n'est plus un tableau de bord, c'est un rapport.
+ * LA TENDANCE EST UNE SECONDE SÉRIE, ET ELLE VIENT DE LA BASE. Les deux
+ * projections quotidiennes portent `moyenne_mobile_7j` : c'est elle qui répond à
+ * « est-ce que ça accélère », question à laquelle des bâtons seuls ne répondent
+ * pas. Elle n'est PAS recalculée ici — une seconde moyenne, calculée autrement,
+ * finirait par contredire celle qu'un export SQL rendrait. Elle est nulle sur les
+ * premiers jours, où la fenêtre de sept jours n'est pas pleine, et la ligne ne
+ * commence donc pas au bord du cadre : c'est exact, et c'est voulu.
  *
- * ELLE NE REBOUCHE AUCUN TROU. Les séries du modèle sont CONTINUES par
- * construction (`generate_series` dans `mv_daily_submissions` et
- * `mv_daily_registrations`), jours à zéro compris. Si un jour manque, c'est la
- * requête qui est en cause, et l'inventer ici masquerait le défaut.
+ * DEUX SÉRIES, DONC UNE LÉGENDE — mais écrite à la main, au-dessus du tracé, avec
+ * les jetons de la charte. Celle de la bibliothèque impose ses pastilles, ses
+ * tailles et ses gris ; deux formes aussi différentes qu'un bâton et une ligne se
+ * nomment en deux mots, sans boîte.
  *
- * LES REPÈRES VERTICAUX PORTENT LEUR LIBELLÉ, et ils ÉTENDENT L'AXE. « L'échéance
- * marquée » du prompt n'est pas un trait de plus : sans elle, l'effet de dernière
- * minute — 60 % des dépôts sur les 48 dernières heures, mesuré en v1 — se lit
- * comme un pic devant rien. Et comme l'échéance est le plus souvent DEVANT, le
- * cadre doit aller la chercher : voir `domain`.
+ * LES REPÈRES VERTICAUX ÉTENDENT L'AXE. « L'échéance marquée » n'est pas un trait
+ * de plus : sans elle, l'effet de dernière minute — 60 % des dépôts sur les 48
+ * dernières heures, mesuré en v1 — se lit comme un pic devant rien. Et comme
+ * l'échéance est le plus souvent DEVANT la fin de la série, le cadre doit aller la
+ * chercher : voir `domain`.
  *
- * DEUX PLANS SUPERPOSÉS, et c'est délibéré : le tracé est un SVG étiré
- * (`preserveAspectRatio="none"`), les textes sont du HTML posé par-dessus. Un
- * texte placé DANS un SVG étiré se déforme avec lui — lettres écrasées à 375 px,
- * étirées à 1400. Les traits, eux, gardent leur épaisseur par
- * `vector-effect: non-scaling-stroke`.
+ * LES JOURS SONT FORMATÉS EN UTC, PAS DANS LE FUSEAU DE L'ÉDITION, et c'est une
+ * correction. Les projections découpent leurs journées en UTC, explicitement (un
+ * agrégat ne change pas de valeur selon le fuseau qui le calcule) : `2026-06-30`
+ * y est une DATE CIVILE, pas un instant. La rendre dans le fuseau de Belém la
+ * reculerait d'un jour — le graphique dirait le 29 là où la base compte le 30.
+ * C'est la seule vue de la plateforme où le fuseau de l'édition n'a pas cours.
  */
 
 interface Marker {
@@ -47,12 +51,10 @@ interface Marker {
 interface Props {
   title: string
   points: TrendPoint[]
-  /** Nom de la série, écrit au bout de la courbe. */
+  /** Nom de la série de bâtons, écrit dans la légende. */
   seriesLabel: string
   /** Repères verticaux datés — ouverture de l'appel, échéance. */
   markers?: Marker[]
-  /** Fuseau d'affichage des dates d'axe : celui de l'édition. */
-  timezone: TimeZoneName
   /** Une couleur par série. `accent` pour la première, `postponed` pour la seconde. */
   tone?: 'accent' | 'postponed'
   /** Total affiché en tête — le cumul du dernier point, déjà calculé en base. */
@@ -62,18 +64,15 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), { tone: 'accent', markers: () => [] })
 
 const { t } = useI18n()
-const { date } = useDateTime()
+const { intlLocale } = useDateTime()
+const { palette, baseOptions, toneColor, fontFamily } = useChartTheme()
 
-/** Repère de dessin : les coordonnées SVG, étirées à la largeur disponible. */
-const W = 1000
-const H = 260
-const PAD_TOP = 12
-const PAD_BOTTOM = 18
+const HEIGHT = 232
+const DAY = 86_400_000
 
-const days = computed(() => props.points.map((point) => point.jour))
-
-/** Le maximum sert d'échelle ; un plancher à 1 évite la division par zéro. */
-const maxValue = computed(() => Math.max(1, ...props.points.map((point) => point.valeur)))
+const chartTone = computed<ChartTone>(() =>
+  props.tone === 'accent' ? 'accent' : 'postponed',
+)
 
 /** Minuit UTC du jour civil — les séries du modèle sont découpées en UTC. */
 function dayTime(day: string): number {
@@ -86,75 +85,171 @@ function dayTime(day: string): number {
  *
  * C'est ce qui permet de marquer une échéance ENCORE À VENIR : la série des
  * dépôts s'arrête aujourd'hui — une courbe ne se projette pas dans le futur —,
- * mais l'échéance, elle, est devant. Positionner les points par leur rang
- * placerait l'échéance au bord du cadre, c'est-à-dire aujourd'hui, ce qui est
- * faux. Le domaine couvre donc la série ET ses repères ; la courbe occupe la
- * part gauche du cadre, l'échéance se tient à sa place, et l'écart entre les
- * deux est précisément ce qu'on vient lire.
+ * mais l'échéance, elle, est devant. Laisser la bibliothèque cadrer sur les seules
+ * données rejetterait le repère hors du tracé, où elle ne le dessinerait pas.
  */
 const domain = computed(() => {
   const times = [
-    ...days.value.map(dayTime),
+    ...props.points.map((point) => dayTime(point.jour)),
     ...props.markers.map((marker) => dayTime(marker.at)),
-  ].filter((t) => Number.isFinite(t))
-  const start = Math.min(...times)
-  const end = Math.max(...times)
-  // Une série d'un seul jour, sans repère : le domaine serait de largeur nulle.
-  return { start, span: Math.max(end - start, 86_400_000) }
+  ].filter((time) => Number.isFinite(time))
+
+  if (times.length === 0) return { min: 0, max: DAY }
+  const min = Math.min(...times)
+  const max = Math.max(...times)
+  // Une série d'un seul jour, sans repère : le cadre serait de largeur nulle.
+  return { min: min - DAY / 2, max: Math.max(max, min + DAY) + DAY / 2 }
 })
 
-function ratioOf(day: string): number {
-  return (dayTime(day) - domain.value.start) / domain.value.span
-}
+const series = computed<ChartSeries[]>(() => [
+  {
+    name: props.seriesLabel,
+    type: 'bar',
+    data: props.points.map((point) => [dayTime(point.jour), point.valeur] as [number, number]),
+  },
+  {
+    name: t('admin.dashboard.charts.movingAverage'),
+    type: 'line',
+    data: props.points.map(
+      (point) => [dayTime(point.jour), point.moyenne_7j] as [number, number | null],
+    ),
+  },
+])
 
-function x(day: string): number {
-  return ratioOf(day) * W
-}
+const dayLabel = computed(
+  () =>
+    new Intl.DateTimeFormat(intlLocale.value, {
+      day: 'numeric',
+      month: 'short',
+      timeZone: 'UTC',
+    }),
+)
 
-function y(value: number): number {
-  const usable = H - PAD_TOP - PAD_BOTTOM
-  return H - PAD_BOTTOM - (value / maxValue.value) * usable
-}
+const fullDayLabel = computed(
+  () => new Intl.DateTimeFormat(intlLocale.value, { dateStyle: 'long', timeZone: 'UTC' }),
+)
+
+const integer = computed(() => new Intl.NumberFormat(intlLocale.value, { maximumFractionDigits: 0 }))
 
 /**
- * Largeur d'un bâton : la journée, ramenée au repère de dessin, moins un filet
- * de respiration. Plancher à un point et demi — sous cette largeur, un jour à
- * une seule unité disparaît, et c'est précisément le jour qu'on cherche.
+ * L'ÉCHELLE VERTICALE EST ENTIÈRE, ET C'EST À NOUS DE L'IMPOSER.
+ *
+ * On compte des dépôts : « 1,5 dépôt » n'existe pas. Laissée à
+ * `forceNiceScale` avec quatre graduations, la bibliothèque découpe un maximum de
+ * 3 en 0,75 — 1,5 — 2,25, que notre format arrondit à « 1, 2, 2 » : deux
+ * graduations portent le même nombre et la plus haute manque. Le pas est donc
+ * calculé ici pour que chaque graduation tombe sur un entier.
+ *
+ * Une série courte reçoit autant de graduations que d'unités (0, 1, 2, 3) ; au
+ * delà de cinq, quatre graduations d'un pas entier suffisent.
  */
-const barWidth = computed(() => Math.max((86_400_000 / domain.value.span) * W * 0.8, 1.5))
-
-/** Les bâtons, un par jour de la série. Aucun n'est dessiné pour un jour à zéro. */
-const bars = computed(() =>
-  props.points
-    .filter((point) => point.valeur > 0)
-    .map((point) => ({
-      key: point.jour,
-      x: x(point.jour) - barWidth.value / 2,
-      y: y(point.valeur),
-      height: H - PAD_BOTTOM - y(point.valeur),
-    })),
+const scale = computed(() => {
+  const peakValue = Math.max(
+    1,
+    ...props.points.map((point) => point.valeur),
+    ...props.points.map((point) => point.moyenne_7j ?? 0),
+  )
+  const rounded = Math.ceil(peakValue)
+  // Une graduation de respiration au-dessus du pic : cadré sur son maximum
+  // exact, le bâton le plus haut touche le bord du cadre et vient buter dans le
+  // libellé du repère d'échéance.
+  if (rounded <= 5) return { max: rounded + 1, ticks: rounded + 1 }
+  const step = Math.ceil(rounded / 4)
+  return { max: step * 4, ticks: 4 }
+})
+const oneDecimal = computed(
+  () => new Intl.NumberFormat(intlLocale.value, { maximumFractionDigits: 1 }),
 )
 
-const placedMarkers = computed(() =>
-  props.markers.map((marker) => ({
-    ...marker,
-    ratio: ratioOf(marker.at),
-    // Un libellé centré sur un repère collé au bord déborderait du cadre : les
-    // deux extrémités s'alignent donc sur l'intérieur.
-    align: ratioOf(marker.at) < 0.12 ? 'start' : ratioOf(marker.at) > 0.88 ? 'end' : 'center',
-  })),
-)
+const options = computed<ApexOptions>(() => {
+  const base = baseOptions()
+  const span = domain.value.max - domain.value.min
 
-/** Fin du domaine, qui n'est pas la fin de la série quand un repère la dépasse. */
-const domainEndDay = computed(() =>
-  new Date(domain.value.start + domain.value.span).toISOString().slice(0, 10),
-)
-
-/** Position de la légende : AU BOUT DE LA COURBE, pas au bord du cadre. */
-const seriesEndRatio = computed(() => ratioOf(days.value.at(-1) ?? ''))
-
-const fillClass = computed(() => (props.tone === 'accent' ? 'fill-accent' : 'fill-postponed'))
-const textClass = computed(() => (props.tone === 'accent' ? 'text-accent' : 'text-postponed'))
+  return {
+    ...base,
+    chart: { ...base.chart, type: 'line', stacked: false },
+    colors: [toneColor(chartTone.value), palette.value?.text ?? 'transparent'],
+    // Un bâton par jour, quelle que soit la largeur du cadre : c'est la journée
+    // qui donne la largeur, pas le nombre de points.
+    plotOptions: { bar: { columnWidth: '62%', borderRadius: 2, borderRadiusApplication: 'end' } },
+    stroke: { width: [0, 2.5], curve: 'smooth', lineCap: 'round' },
+    markers: { size: 0, hover: { size: 0 } },
+    xaxis: {
+      type: 'datetime',
+      min: domain.value.min,
+      max: domain.value.max,
+      tickAmount: span > 60 * DAY ? 6 : 4,
+      axisBorder: { show: true, color: palette.value?.border },
+      axisTicks: { show: false },
+      crosshairs: { show: false },
+      labels: {
+        rotate: 0,
+        hideOverlappingLabels: true,
+        style: { fontSize: '11px', fontFamily: fontFamily.value },
+        formatter: (_value: string, timestamp?: number) =>
+          dayLabel.value.format(new Date(timestamp ?? Number(_value))),
+      },
+    },
+    yaxis: {
+      min: 0,
+      max: scale.value.max,
+      tickAmount: scale.value.ticks,
+      labels: {
+        style: { fontSize: '11px', fontFamily: fontFamily.value },
+        formatter: (value: number) => integer.value.format(value),
+      },
+    },
+    tooltip: {
+      ...base.tooltip,
+      shared: true,
+      intersect: false,
+      x: { formatter: (value: number) => fullDayLabel.value.format(new Date(value)) },
+      y: {
+        formatter: (value: number | null, opts?: ApexFormatterOpts) =>
+          value === null
+            ? ''
+            : opts?.seriesIndex === 1
+              ? oneDecimal.value.format(value)
+              : integer.value.format(value),
+      },
+    },
+    /*
+     * LES REPÈRES, TRACÉS PAR LA BIBLIOTHÈQUE ET NON POSÉS PAR-DESSUS. C'est le
+     * gain le plus net de la bascule : le libellé se place, se mesure et
+     * s'esquive tout seul, là où deux plans superposés — un SVG étiré et du HTML
+     * absolu — demandaient de recalculer un alignement à chaque largeur d'écran.
+     */
+    annotations: {
+      xaxis: props.markers.map((marker) => {
+        const deadline = marker.kind === 'deadline'
+        const ratio = (dayTime(marker.at) - domain.value.min) / span
+        return {
+          x: dayTime(marker.at),
+          borderColor: deadline
+            ? (palette.value?.danger ?? 'transparent')
+            : (palette.value?.border ?? 'transparent'),
+          strokeDashArray: deadline ? 0 : 4,
+          label: {
+            text: marker.label,
+            position: 'top' as const,
+            orientation: 'horizontal' as const,
+            offsetY: -6,
+            // Un libellé centré sur un repère collé au bord déborderait du cadre.
+            textAnchor: ratio > 0.88 ? ('end' as const) : ratio < 0.12 ? ('start' as const) : ('middle' as const),
+            borderColor: 'transparent',
+            style: {
+              background: 'transparent',
+              color: deadline ? palette.value?.danger : palette.value?.textSubtle,
+              fontSize: '11px',
+              fontWeight: 600,
+              fontFamily: fontFamily.value,
+            },
+          },
+        }
+      }),
+    },
+  }
+})
 
 const lastPoint = computed(() => props.points.at(-1) ?? null)
 const peak = computed(() =>
@@ -165,113 +260,57 @@ const peak = computed(() =>
 )
 
 /**
- * Résumé lu par les lecteurs d'écran. Une courbe est une image : sans ce texte,
- * elle ne dit rien. On y met ce qu'un œil en retire — la période, le total, le
- * jour le plus haut.
+ * Résumé lu par les lecteurs d'écran. Un graphique est une image : sans ce texte,
+ * il ne dit rien. On y met ce qu'un œil en retire — la période, le total, le jour
+ * le plus haut.
  */
-const summary = computed(() =>
-  t('admin.dashboard.charts.summary', {
+const summary = computed(() => {
+  const first = props.points[0]
+  const last = props.points.at(-1)
+  return t('admin.dashboard.charts.summary', {
     series: props.seriesLabel,
-    from: date(days.value[0] ?? '', props.timezone),
-    to: date(days.value.at(-1) ?? '', props.timezone),
+    from: first ? fullDayLabel.value.format(new Date(dayTime(first.jour))) : '',
+    to: last ? fullDayLabel.value.format(new Date(dayTime(last.jour))) : '',
     total: lastPoint.value?.cumul ?? 0,
     peakValue: peak.value?.valeur ?? 0,
-    peakDay: date(peak.value?.jour ?? '', props.timezone),
-  }),
-)
+    peakDay: peak.value ? fullDayLabel.value.format(new Date(dayTime(peak.value.jour))) : '',
+  })
+})
 </script>
 
 <template>
   <figure class="min-w-0">
-    <figcaption class="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+    <figcaption class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
       <h3 class="text-base font-semibold text-text">{{ props.title }}</h3>
       <p v-if="props.totalLabel" class="text-sm tabular-nums text-text-secondary">
         {{ props.totalLabel }}
       </p>
     </figcaption>
 
-    <div v-if="props.points.length === 0" class="rounded-md border border-border-subtle bg-surface-sunken px-4 py-8 text-center text-sm text-text-muted">
+    <div
+      v-if="props.points.length === 0"
+      class="mt-3 rounded-md border border-border-subtle bg-surface-sunken px-4 py-8 text-center text-sm text-text-muted"
+    >
       {{ t('admin.dashboard.charts.noData') }}
     </div>
 
     <template v-else>
-      <div class="relative">
-        <svg
-          :viewBox="`0 0 ${W} ${H}`"
-          preserveAspectRatio="none"
-          class="h-48 w-full sm:h-56"
-          role="img"
-          :aria-label="summary"
-        >
-          <!-- Ligne de base seule : pas de grille. Sur une série quotidienne
-               dense, un quadrillage ajoute plus de traits que de lecture. -->
-          <line
-            :x1="0"
-            :y1="H - PAD_BOTTOM"
-            :x2="W"
-            :y2="H - PAD_BOTTOM"
-            class="stroke-border"
-            stroke-width="1"
-            vector-effect="non-scaling-stroke"
+      <!-- LÉGENDE ÉCRITE À LA MAIN : deux formes, deux mots, aucun cadre. -->
+      <ul class="mt-2 mb-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted">
+        <li class="flex items-center gap-1.5">
+          <span
+            class="h-2.5 w-2 rounded-sm"
+            :class="props.tone === 'accent' ? 'bg-accent-solid' : 'bg-postponed'"
           />
-
-          <line
-            v-for="marker in placedMarkers"
-            :key="marker.label"
-            :x1="marker.ratio * W"
-            :y1="0"
-            :x2="marker.ratio * W"
-            :y2="H - PAD_BOTTOM"
-            :class="marker.kind === 'deadline' ? 'stroke-danger' : 'stroke-border-strong'"
-            :stroke-dasharray="marker.kind === 'deadline' ? '0' : '4 4'"
-            stroke-width="1.5"
-            vector-effect="non-scaling-stroke"
-          />
-
-          <rect
-            v-for="bar in bars"
-            :key="bar.key"
-            :x="bar.x"
-            :y="bar.y"
-            :width="barWidth"
-            :height="bar.height"
-            :class="fillClass"
-          />
-        </svg>
-
-        <!-- Textes posés PAR-DESSUS le tracé étiré : ils gardent leur dessin. -->
-        <p
-          v-for="marker in placedMarkers"
-          :key="marker.label"
-          class="pointer-events-none absolute top-0 max-w-24 text-[0.6875rem] leading-tight font-semibold"
-          :class="[
-            marker.kind === 'deadline' ? 'text-danger' : 'text-text-subtle',
-            marker.align === 'center' ? '-translate-x-1/2 text-center' : '',
-            marker.align === 'end' ? '-translate-x-full text-right' : '',
-          ]"
-          :style="{ left: `${marker.ratio * 100}%` }"
-        >
-          {{ marker.label }}
-        </p>
-
-        <!-- LA LÉGENDE, POSÉE SUR LA COURBE, au bout, là où l'œil arrive. -->
-        <p
-          class="pointer-events-none absolute -top-1 text-xs font-semibold"
-          :class="[textClass, seriesEndRatio > 0.85 ? '-translate-x-full' : '']"
-          :style="{ left: `${Math.min(seriesEndRatio * 100, 100)}%` }"
-        >
           {{ props.seriesLabel }}
-        </p>
-      </div>
+        </li>
+        <li class="flex items-center gap-1.5">
+          <span class="h-0.5 w-4 rounded-full bg-text" />
+          {{ t('admin.dashboard.charts.movingAverage') }}
+        </li>
+      </ul>
 
-      <!-- Axe des dates : les deux bornes, et rien entre elles. Une graduation
-           complète sur cent jours produit un peigne illisible. -->
-      <div class="mt-1 flex justify-between text-xs tabular-nums text-text-subtle">
-        <span>{{ date(days[0] ?? '', props.timezone) }}</span>
-        <!-- La borne droite est celle du CADRE, pas celle de la série : quand
-             l'échéance est devant, c'est elle qui ferme l'axe. -->
-        <span>{{ date(domainEndDay, props.timezone) }}</span>
-      </div>
+      <UiChart type="line" :series="series" :options="options" :height="HEIGHT" :summary="summary" />
     </template>
   </figure>
 </template>

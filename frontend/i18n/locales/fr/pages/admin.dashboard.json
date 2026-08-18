@@ -43,7 +43,9 @@
     }
   },
   "figures": {
-    "title": "Les chiffres"
+    "title": "Les chiffres",
+    "kpiTitle": "Où en est-on",
+    "chartsTitle": "Évolutions et répartitions"
   },
   "funnel": {
     "title": "Entonnoir des propositions",
@@ -64,7 +66,8 @@
       "selectivity": "Taux d'acceptation",
       "yield": "Rendement de l'appel",
       "organizations": "Organisations"
-    }
+    },
+    "summary": "Entonnoir des propositions : {stages}."
   },
   "charts": {
     "noData": "Aucune donnée sur cette période.",
@@ -80,7 +83,8 @@
       "title": "Inscriptions aux activités par jour",
       "series": "Inscriptions",
       "total": "{count} inscription | {count} inscription | {count} inscriptions"
-    }
+    },
+    "movingAverage": "Moyenne sur 7 jours"
   },
   "breakdown": {
     "country": {
@@ -90,7 +94,8 @@
     "theme": {
       "title": "Par thématique",
       "note": "Un dossier peut en porter plusieurs : la somme dépasse le nombre de dossiers."
-    }
+    },
+    "summary": "Répartition — {title} : {count} parts. Les principales : {top}."
   },
   "health": {
     "title": "Santé opérationnelle",
@@ -119,6 +124,44 @@
       "visio_webhooks_en_echec": "Webhooks fournisseur non traités",
       "partitions_manquantes": "Partitions du mois prochain non créées",
       "analytique_perimee": "Minutes depuis le dernier rafraîchissement analytique"
+    }
+  },
+  "kpi": {
+    "submissions": {
+      "label": "Dossiers déposés",
+      "hint": "Dépôts effectifs, brouillons exclus."
+    },
+    "deadline": {
+      "label": "Clôture de l'appel",
+      "remaining": "jours restants | jour restant | jours restants",
+      "elapsed": "jours écoulés depuis la clôture | jour écoulé depuis la clôture | jours écoulés depuis la clôture",
+      "hint": "Échéance du {date}",
+      "noCall": "Cette édition ne porte aucun appel à propositions."
+    },
+    "review_progress": {
+      "label": "Avancement du comité",
+      "unit": "sur {count}",
+      "hint": "Revues rendues sur revues attendues, déports exclus.",
+      "none": "Aucune affectation de revue sur cette édition."
+    },
+    "acceptance_rate": {
+      "label": "Taux d'acceptation",
+      "hint": "Aucun dossier tranché | sur {count} dossier tranché | sur {count} dossiers tranchés",
+      "none": "Aucun dossier tranché à ce jour."
+    },
+    "scheduled": {
+      "label": "Séances créées",
+      "hint": "Issues des dossiers de cet appel, annulations exclues.",
+      "none": "Aucune séance créée pour cet appel."
+    },
+    "registrations": {
+      "label": "Inscriptions aux activités",
+      "hint": "Inscriptions non annulées, liste d'attente comprise."
+    },
+    "delta": {
+      "up": "+{value} sur sept jours",
+      "down": "−{value} sur sept jours",
+      "flat": "Stable sur sept jours"
     }
   }
 }

@@ -129,6 +129,16 @@ export interface TrendPoint {
   jour: IsoDate
   valeur: number
   cumul: number
+  /**
+   * MOYENNE MOBILE SUR SEPT JOURS — `moyenne_mobile_7j`, portée par les deux
+   * projections quotidiennes du modèle.
+   *
+   * Elle est NULLE sur les premiers jours de la série, où la fenêtre n'est pas
+   * complète, et le composant de courbe ne trace rien là : présenter la moyenne
+   * de trois jours comme une moyenne de sept ferait croire à un démarrage lent
+   * là où il n'y a qu'un début de série.
+   */
+  moyenne_7j: number | null
 }
 
 /**
@@ -151,6 +161,74 @@ export interface BreakdownSlice {
 }
 
 /**
+ * LES SIX INDICATEURS DE TÊTE — ce qu'on lit avant les graphiques.
+ *
+ * POURQUOI SIX CHIFFRES DEVANT TROIS GRAPHIQUES. Un graphique répond à « comment
+ * cela évolue » ; il ne répond pas à « où en est-on ». La courbe des dépôts ne
+ * dit pas combien de jours restent avant la clôture, l'entonnoir ne dit pas si le
+ * comité tient son rythme, et aucune répartition ne dit combien d'activités
+ * retenues attendent encore un créneau. Ce sont pourtant les trois questions
+ * qu'on se pose en ouvrant l'écran.
+ *
+ * CHAQUE INDICATEUR SE TRACE À UNE COLONNE DU MODÈLE, sans exception — dépôts et
+ * taux d'acceptation dans `mv_proposal_funnel`, avancement du comité dans
+ * `mv_reviewer_workload`, inscriptions dans `mv_daily_registrations`, échéance
+ * par `event.effective_deadline()`. Aucun n'est calculé à l'écran : un chiffre
+ * dérivé côté frontend finit par ne plus correspondre au graphique d'à côté.
+ *
+ * `null` N'EST PAS ZÉRO, et c'est la distinction qui coûte le plus cher ici. Un
+ * taux d'acceptation nul signifie qu'aucun dossier n'a été tranché ; affiché
+ * « 0 % », il ferait passer un comité qui n'a pas commencé pour un comité qui a
+ * tout refusé.
+ */
+export type DashboardKpiKey =
+  /** Dossiers déposés, variation sur sept jours, courbe courte. */
+  | 'submissions'
+  /** Jours restants avant l'échéance qui fait foi. Négatif quand elle est passée. */
+  | 'deadline'
+  /** Revues rendues sur revues attendues, retards à part. */
+  | 'review_progress'
+  /** Sélectivité du comité, sur les dossiers tranchés. */
+  | 'acceptance_rate'
+  /** Activités retenues déjà placées au calendrier — le reste attend un créneau. */
+  | 'scheduled'
+  /** Inscriptions aux activités, cumul et variation sur sept jours. */
+  | 'registrations'
+
+/**
+ * Couleur d'un indicateur — un ÉTAT, jamais une décoration.
+ *
+ * `warning` pour ce qui demande attention (une échéance qui approche, un comité
+ * en retard), `danger` pour ce qui est dépassé, `success` pour ce qui est fait.
+ * `neutral` est le cas ordinaire : la plupart des chiffres ne sont ni bons ni
+ * mauvais, et les colorer tous revient à n'en signaler aucun.
+ */
+export type DashboardKpiTone = 'neutral' | 'accent' | 'success' | 'warning' | 'danger'
+
+export interface DashboardKpi {
+  key: DashboardKpiKey
+  /** Valeur principale. Nulle quand la donnée n'existe pas — voir ci-dessus. */
+  value: number | null
+  /** Second membre d'un rapport (« 18 sur 24 »). Nul quand il n'y en a pas. */
+  out_of: number | null
+  /**
+   * Variation des sept derniers jours face aux sept précédents, en unités.
+   * Nulle quand la série est trop courte pour que la comparaison veuille dire
+   * quelque chose — une variation calculée sur quatre jours de série est un
+   * artefact, pas une tendance.
+   */
+  delta: number | null
+  /** Instant associé : l'échéance, pour la carte qui la décompte. */
+  at: IsoDateTime | null
+  /**
+   * Série courte de l'étincelle — vingt et un derniers jours de la projection
+   * quotidienne concernée. Vide quand l'indicateur n'est pas une série.
+   */
+  spark: number[]
+  tone: DashboardKpiTone
+}
+
+/**
  * LES CHIFFRES DE L'ÉDITION SÉLECTIONNÉE.
  *
  * `funnel` peut être nul : une édition sans appel ni dépôt n'a pas d'entonnoir,
@@ -158,6 +236,8 @@ export interface BreakdownSlice {
  * existence.
  */
 export interface DashboardFigures {
+  /** Les six indicateurs de tête, dans l'ordre où l'écran les pose. */
+  kpis: DashboardKpi[]
   /** `mv_proposal_funnel`, la ligne de l'appel de l'édition. */
   funnel: ProposalFunnelRow | null
   /** `mv_daily_submissions` — la courbe des dépôts. */

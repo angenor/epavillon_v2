@@ -26,8 +26,11 @@ import type {
   AdminDashboard,
   BreakdownSlice,
   DashboardFigures,
+  DashboardKpi,
   TrendPoint,
 } from '~/types/admin-dashboard'
+import type { ProposalFunnelRow } from '~/types/analytics'
+import type { Numeric } from '~/types/shared'
 import { allProposals } from './proposals'
 import { callsForProposals } from './calls'
 import { countries, entityTerms, taxonomyTerms } from './reference'
@@ -388,13 +391,196 @@ function byTheme(eventId: string): BreakdownSlice[] {
   return withShare(slices, deposes.length)
 }
 
-/** Une projection quotidienne, ramenée aux trois valeurs qu'une courbe affiche. */
-function toTrend<T extends { jour: string }>(
+/**
+ * Une projection quotidienne, ramenée aux quatre valeurs qu'une courbe affiche.
+ *
+ * LA MOYENNE MOBILE VIENT DE LA BASE, elle ne se recalcule pas ici. Les deux
+ * projections la portent (`moyenne_mobile_7j`), et une seconde moyenne calculée
+ * à l'écran finirait par ne plus correspondre à celle qu'un export SQL rendrait.
+ */
+function toTrend<T extends { jour: string; moyenne_mobile_7j: Numeric | null }>(
   rows: T[],
   valeur: (row: T) => number,
   cumul: (row: T) => number,
 ): TrendPoint[] {
-  return rows.map((row) => ({ jour: row.jour, valeur: valeur(row), cumul: cumul(row) }))
+  return rows.map((row) => ({
+    jour: row.jour,
+    valeur: valeur(row),
+    cumul: cumul(row),
+    moyenne_7j: row.moyenne_mobile_7j,
+  }))
+}
+
+// ---------------------------------------------------------------------------
+// Zone 2 — les six indicateurs de tête
+// ---------------------------------------------------------------------------
+
+/**
+ * VINGT ET UN JOURS D'ÉTINCELLE. Trois semaines se lisent dans une carte de la
+ * largeur d'une colonne ; cent jours y produisent un peigne dont on ne retire
+ * rien. La courbe complète est juste en dessous, avec son axe et ses repères —
+ * l'étincelle ne la remplace pas, elle dit seulement « ça monte » ou « ça
+ * retombe ».
+ */
+const SPARK_DAYS = 21
+
+/** Fenêtre de comparaison : les sept derniers jours face aux sept précédents. */
+const DELTA_DAYS = 7
+
+function spark(points: TrendPoint[]): number[] {
+  return points.slice(-SPARK_DAYS).map((point) => point.valeur)
+}
+
+/**
+ * VARIATION SUR SEPT JOURS, ET `null` QUAND LA SÉRIE EST TROP COURTE.
+ *
+ * Une variation demande deux semaines de série pour vouloir dire quelque chose.
+ * Calculée sur quatre jours, elle compare une semaine pleine à une semaine
+ * tronquée et affiche un effondrement qui n'a pas eu lieu — le genre de chiffre
+ * qu'on cite en réunion avant de découvrir qu'il ne mesurait rien.
+ */
+function weeklyDelta(points: TrendPoint[]): number | null {
+  if (points.length < DELTA_DAYS * 2) return null
+  const sum = (rows: TrendPoint[]) => rows.reduce((total, point) => total + point.valeur, 0)
+  return sum(points.slice(-DELTA_DAYS)) - sum(points.slice(-DELTA_DAYS * 2, -DELTA_DAYS))
+}
+
+/** Seuil de la carte d'échéance : une semaine, au-delà rien ne presse. */
+const DEADLINE_WARNING_DAYS = 7
+
+/**
+ * LES SIX CHIFFRES DE TÊTE, chacun tracé à une colonne du modèle.
+ *
+ * AUCUN N'EST INVENTÉ ICI, et c'est la contrainte qui a décidé de la liste :
+ * dépôts, sélectivité et séances issues des dossiers viennent de
+ * `mv_proposal_funnel`, l'avancement du comité de `mv_reviewer_workload`, les
+ * inscriptions de `mv_daily_registrations`, l'échéance de
+ * `event.effective_deadline()`. Les indicateurs qu'on aurait aimé y mettre —
+ * « activités restant à placer », qui demanderait de compter les séances sans
+ * salle — n'y sont pas : aucune projection ne les porte, et les calculer à
+ * l'écran donnerait un chiffre qui divergerait du planificateur.
+ *
+ * LA COULEUR DIT UN ÉTAT, jamais l'importance. La plupart de ces chiffres sont
+ * neutres : ils ne sont ni bons ni mauvais, ils situent. Colorer les six revient
+ * à n'en signaler aucun.
+ */
+function buildKpis(
+  eventId: string,
+  at: number,
+  funnel: ProposalFunnelRow | null,
+  submissions: TrendPoint[],
+  registrations: TrendPoint[],
+  deadline: string | null,
+  opensAt: string | null,
+): DashboardKpi[] {
+  const charge = reviewerWorkload(eventId, at)
+  const attendues = charge.reduce((total, row) => total + row.propositions_assignees, 0)
+  const rendues = charge.reduce((total, row) => total + row.revues_soumises, 0)
+  const enRetard = charge.reduce((total, row) => total + row.revues_en_retard, 0)
+
+  /**
+   * Jours entiers restants. Négatif ou nul quand l'échéance est derrière —
+   * l'écran le dit alors en toutes lettres plutôt que d'afficher « 0 jour », qui
+   * se lirait « aujourd'hui ».
+   */
+  const joursRestants =
+    deadline === null ? null : Math.ceil((Date.parse(deadline) - at) / 86_400_000)
+
+  /**
+   * DURÉE TOTALE DE LA FENÊTRE DE DÉPÔT, de l'ouverture à l'échéance qui fait
+   * foi. C'est elle qui donne son sens aux jours restants : « 44 jours » sur une
+   * fenêtre de deux mois n'est pas « 44 jours » sur une fenêtre de six.
+   */
+  const fenetre =
+    deadline === null || opensAt === null
+      ? null
+      : Math.max(1, Math.ceil((Date.parse(deadline) - Date.parse(opensAt)) / 86_400_000))
+
+  const seances = funnel?.sessions_programmees ?? null
+
+  return [
+    {
+      key: 'submissions',
+      value: funnel?.deposees ?? null,
+      out_of: null,
+      delta: weeklyDelta(submissions),
+      at: null,
+      spark: spark(submissions),
+      tone: 'neutral',
+    },
+    {
+      key: 'deadline',
+      value: joursRestants,
+      out_of: fenetre,
+      delta: null,
+      at: deadline,
+      spark: [],
+      // Une échéance PASSÉE n'est pas une alerte : c'est un fait acquis, et la
+      // laisser en rouge pendant les six mois qui suivent une COP apprend à
+      // l'équipe à ne plus regarder la couleur. Gris pour ce qui est clos.
+      tone:
+        joursRestants !== null && joursRestants > 0 && joursRestants <= DEADLINE_WARNING_DAYS
+          ? 'warning'
+          : 'neutral',
+    },
+    {
+      key: 'review_progress',
+      value: attendues === 0 ? null : rendues,
+      out_of: attendues === 0 ? null : attendues,
+      delta: null,
+      at: null,
+      spark: [],
+      tone:
+        enRetard > 0
+          ? 'danger'
+          : attendues > 0 && rendues >= attendues
+            ? 'success'
+            : 'neutral',
+    },
+    {
+      key: 'acceptance_rate',
+      // `null` quand aucun dossier n'a été tranché — et non zéro.
+      value: funnel?.taux_acceptation ?? null,
+      out_of: funnel?.decidees ?? null,
+      delta: null,
+      at: null,
+      spark: [],
+      tone: 'neutral',
+    },
+    /*
+     * SÉANCES CRÉÉES, SANS DÉNOMINATEUR — et l'absence de dénominateur est le
+     * fruit d'une vérification, pas d'un oubli.
+     *
+     * `sessions_programmees` compte les séances issues d'un dossier de l'appel,
+     * annulations exclues, QUEL QUE SOIT LE SORT DU DOSSIER : la vue joint les
+     * propositions sans filtrer sur « acceptée ». Les deux ensembles ne sont donc
+     * pas emboîtés, et le jeu de données le montre — 18 séances pour 16 dossiers
+     * retenus. Écrire « 18 sur 16 » affirmerait un rapport qui n'existe pas.
+     *
+     * Le chiffre qu'on aurait voulu — « combien de dossiers retenus attendent
+     * encore une séance », l'écart n° 57 du journal — demande de compter les
+     * dossiers acceptés sans séance. Aucune projection ne le porte ; il viendra
+     * avec elle, pas avec une soustraction fausse.
+     */
+    {
+      key: 'scheduled',
+      value: seances,
+      out_of: null,
+      delta: null,
+      at: null,
+      spark: [],
+      tone: 'neutral',
+    },
+    {
+      key: 'registrations',
+      value: registrations.at(-1)?.cumul ?? null,
+      out_of: null,
+      delta: weeklyDelta(registrations),
+      at: null,
+      spark: spark(registrations),
+      tone: 'neutral',
+    },
+  ]
 }
 
 function buildFigures(eventId: string, at: number): DashboardFigures {
@@ -406,20 +592,35 @@ function buildFigures(eventId: string, at: number): DashboardFigures {
   const submissions = dailySubmissions(eventId)
   const registrations = dailyRegistrations(eventId)
 
+  const submissionPoints = toTrend(
+    submissions,
+    (row) => row.soumissions,
+    (row) => row.soumissions_cumulees,
+  )
+  const registrationPoints = toTrend(
+    registrations,
+    (row) => row.inscriptions,
+    (row) => row.inscriptions_cumulees,
+  )
+  // `event.effective_deadline()` : la prolongation prime la clôture initiale.
+  const deadline = call ? effectiveDeadline(call) : null
+
   return {
+    // LES INDICATEURS EN PREMIER, comme à l'écran : ils répondent à « où en
+    // est-on », que ni les courbes ni les répartitions ne disent.
+    kpis: buildKpis(
+      eventId,
+      at,
+      funnel,
+      submissionPoints,
+      registrationPoints,
+      deadline,
+      call?.opens_at ?? null,
+    ),
     funnel,
-    submissions: toTrend(
-      submissions,
-      (row) => row.soumissions,
-      (row) => row.soumissions_cumulees,
-    ),
-    registrations: toTrend(
-      registrations,
-      (row) => row.inscriptions,
-      (row) => row.inscriptions_cumulees,
-    ),
-    // `event.effective_deadline()` : la prolongation prime la clôture initiale.
-    deadline: call ? effectiveDeadline(call) : null,
+    submissions: submissionPoints,
+    registrations: registrationPoints,
+    deadline,
     call_opens_at: call?.opens_at ?? null,
     by_country: byCountry(eventId),
     by_theme: byTheme(eventId),

@@ -43,7 +43,9 @@
     }
   },
   "figures": {
-    "title": "Figures"
+    "title": "Figures",
+    "kpiTitle": "Where things stand",
+    "chartsTitle": "Trends and breakdowns"
   },
   "funnel": {
     "title": "Proposal funnel",
@@ -64,7 +66,8 @@
       "selectivity": "Acceptance rate",
       "yield": "Call yield",
       "organizations": "Organisations"
-    }
+    },
+    "summary": "Proposal funnel: {stages}."
   },
   "charts": {
     "noData": "No data for this period.",
@@ -80,7 +83,8 @@
       "title": "Activity registrations per day",
       "series": "Registrations",
       "total": "{count} registration | {count} registration | {count} registrations"
-    }
+    },
+    "movingAverage": "7-day average"
   },
   "breakdown": {
     "country": {
@@ -90,7 +94,8 @@
     "theme": {
       "title": "By theme",
       "note": "A proposal may carry several: the total exceeds the number of proposals."
-    }
+    },
+    "summary": "{title} breakdown: {count} slices. Main ones: {top}."
   },
   "health": {
     "title": "Operational health",
@@ -119,6 +124,44 @@
       "visio_webhooks_en_echec": "Unprocessed provider webhooks",
       "partitions_manquantes": "Next month's partitions not created",
       "analytique_perimee": "Minutes since the last analytics refresh"
+    }
+  },
+  "kpi": {
+    "submissions": {
+      "label": "Proposals submitted",
+      "hint": "Actual submissions, drafts excluded."
+    },
+    "deadline": {
+      "label": "Call deadline",
+      "remaining": "days left | day left | days left",
+      "elapsed": "days since it closed | day since it closed | days since it closed",
+      "hint": "Deadline: {date}",
+      "noCall": "This edition carries no call for proposals."
+    },
+    "review_progress": {
+      "label": "Committee progress",
+      "unit": "of {count}",
+      "hint": "Reviews returned out of reviews expected, recusals excluded.",
+      "none": "No review assignment on this edition."
+    },
+    "acceptance_rate": {
+      "label": "Acceptance rate",
+      "hint": "No decided proposal | of {count} decided proposal | of {count} decided proposals",
+      "none": "No proposal decided yet."
+    },
+    "scheduled": {
+      "label": "Sessions created",
+      "hint": "Created from proposals of this call, cancellations excluded.",
+      "none": "No session created for this call."
+    },
+    "registrations": {
+      "label": "Activity registrations",
+      "hint": "Registrations not cancelled, waiting list included."
+    },
+    "delta": {
+      "up": "+{value} over seven days",
+      "down": "−{value} over seven days",
+      "flat": "Flat over seven days"
     }
   }
 }
