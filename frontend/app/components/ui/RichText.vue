@@ -53,6 +53,17 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
 const { t } = useI18n()
 
+/**
+ * L'IDENTIFIANT EST TENU ICI, ET NON LAISSÉ À `UiFormField`.
+ *
+ * Il doit être posé sur l'élément `contenteditable`, que ProseMirror crée au
+ * montage : il faut donc le connaître AVANT, ce que la portée du créneau de
+ * `UiFormField` ne permet pas. Le poser sur l'enveloppe — ce que faisait la
+ * version précédente — le mettait sur un `div` qui n'est pas la zone de saisie.
+ */
+const generatedId = useId()
+const fieldId = computed(() => props.id ?? `rich-text-${generatedId}`)
+
 const editor = shallowRef<Editor | null>(null)
 /** Longueur du TEXTE brut, tenue à jour par l'éditeur. */
 const textLength = ref(0)
@@ -116,7 +127,31 @@ onMounted(() => {
     ],
     editorProps: {
       attributes: {
-        class: 'outline-none',
+        /**
+         * LA CLASSE ET LES ESPACEMENTS VONT SUR L'ÉLÉMENT ÉDITABLE, PAS SUR SON
+         * ENVELOPPE — et cela répare deux défauts d'un coup.
+         *
+         *  1. LA ZONE CLIQUABLE. `EditorContent` rend une enveloppe qui contient
+         *     l'élément `contenteditable`. Porter la hauteur minimale sur
+         *     l'enveloppe laissait l'élément éditable à la hauteur de son
+         *     contenu : sur un champ de huit lignes vide, seule la PREMIÈRE
+         *     était cliquable, et cliquer dans le vide en dessous ne donnait pas
+         *     le focus. La hauteur et le rembourrage sont donc ici, sur ce que
+         *     l'on clique.
+         *
+         *  2. L'ESPACEMENT DES PARAGRAPHES. La règle `.rich-text > * + *` de
+         *     `main.css` vise les ENFANTS DIRECTS. Posée sur l'enveloppe, elle ne
+         *     rencontrait qu'un seul enfant — l'élément éditable — et ne
+         *     s'appliquait donc à aucun paragraphe : le texte s'écrivait serré
+         *     puis s'affichait aéré une fois publié. C'est exactement ce que
+         *     l'en-tête de `main.css` interdit — « un texte qui change d'allure
+         *     entre le moment où on l'écrit et celui où il est publié ».
+         */
+        class: 'rich-text px-3 py-2.5 outline-none',
+        id: fieldId.value,
+        // Un `contenteditable` n'est pas un contrôle de formulaire : `role` et
+        // `aria-multiline` sont ce qui le fait annoncer comme une zone de texte.
+        role: 'textbox',
         'aria-multiline': 'true',
       },
     },
@@ -148,6 +183,38 @@ watch(
   () => editor.value?.setEditable(!props.disabled && !props.readonly),
 )
 
+/**
+ * L'AIDE ET L'ERREUR, ANNONCÉES SUR LA ZONE DE SAISIE.
+ *
+ * `UiFormField` compose ses identifiants à partir de celui du champ ; on les
+ * recompose donc à l'identique et on les pose sur l'élément `contenteditable`.
+ * Ils ne peuvent pas passer par `editorProps`, figé au montage : une erreur
+ * apparaît APRÈS, à la validation. On écrit donc l'attribut sur le nœud, ce que
+ * ProseMirror laisse faire.
+ *
+ * Sans cela, le message « ce champ est obligatoire » s'affiche à l'écran et n'est
+ * annoncé à personne — c'est le seul champ du projet dans ce cas, parce que c'est
+ * le seul qui ne soit pas un contrôle de formulaire natif.
+ */
+watchEffect(() => {
+  const dom = editor.value?.view.dom
+  if (!dom) return
+
+  const described = [
+    props.hint ? `${fieldId.value}-hint` : null,
+    props.error ? `${fieldId.value}-error` : null,
+  ].filter(Boolean)
+
+  if (described.length > 0) dom.setAttribute('aria-describedby', described.join(' '))
+  else dom.removeAttribute('aria-describedby')
+
+  if (props.error) dom.setAttribute('aria-invalid', 'true')
+  else dom.removeAttribute('aria-invalid')
+
+  if (props.required) dom.setAttribute('aria-required', 'true')
+  else dom.removeAttribute('aria-required')
+})
+
 onBeforeUnmount(() => {
   editor.value?.destroy()
   editor.value = null
@@ -156,7 +223,7 @@ onBeforeUnmount(() => {
 
 <template>
   <UiFormField
-    :id="props.id"
+    :id="fieldId"
     :label="props.label"
     :hint="props.hint"
     :error="props.error"
@@ -166,7 +233,7 @@ onBeforeUnmount(() => {
     :counter="counter"
     :counter-exceeded="exceeded"
   >
-    <template #default="{ control }">
+    <template #default>
       <div
         class="rounded-md border bg-surface-raised"
         :class="[
@@ -225,14 +292,45 @@ onBeforeUnmount(() => {
         <!-- ZONE DE SAISIE. La classe `rich-text` porte la charte : c'est la
              MÊME que celle du rendu en lecture, définie une fois dans main.css.
              Deux jeux de styles pour un même contenu, c'est un texte qui change
-             d'allure entre la saisie et la publication. -->
+             d'allure entre la saisie et la publication.
+             Elle est posée sur l'élément ÉDITABLE (voir `editorProps` plus haut),
+             et non sur cette enveloppe : c'est ce qui rend toute la hauteur
+             cliquable et ce qui fait porter l'espacement aux paragraphes. -->
         <EditorContent
-          :id="control.id"
           :editor="editor ?? undefined"
-          class="rich-text px-3 py-2.5"
-          :style="{ minHeight: `${props.rows * 1.6}rem` }"
+          class="ui-rich-text-host"
+          :style="{ '--rich-text-min-height': `${props.rows * 1.65}rem` }"
         />
       </div>
     </template>
   </UiFormField>
 </template>
+
+<style scoped>
+/**
+ * L'enveloppe ne fait que transmettre : c'est l'élément éditable qui porte la
+ * hauteur, et donc la surface que l'on clique.
+ *
+ * `:deep()` est nécessaire — le `contenteditable` est créé par ProseMirror et ne
+ * traverse pas le compilateur de ce composant, il ne porte donc pas l'attribut de
+ * portée.
+ */
+.ui-rich-text-host :deep(.ProseMirror) {
+  min-height: var(--rich-text-min-height);
+}
+
+/**
+ * `max-width: var(--measure)` vient de `.rich-text`, et il a sa raison d'être en
+ * LECTURE : une ligne de texte trop longue se lit mal. En SAISIE, il laisserait
+ * une bande morte à droite du champ — visiblement dans le cadre, sans effet au
+ * clic. On rend donc la zone éditable pleine largeur et on garde la mesure sur
+ * les paragraphes eux-mêmes.
+ */
+.ui-rich-text-host :deep(.ProseMirror) {
+  max-width: none;
+}
+
+.ui-rich-text-host :deep(.ProseMirror) > * {
+  max-width: var(--measure);
+}
+</style>
