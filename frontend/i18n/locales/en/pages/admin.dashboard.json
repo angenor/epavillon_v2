@@ -1,0 +1,124 @@
+{
+  "title": "Dashboard",
+  "subtitle": "What needs attention, the edition's figures, and system status.",
+  "loading": "Loading dashboard",
+  "refreshedAt": "Figures as of {date}",
+  "forbidden": {
+    "scope": "administrator of an edition"
+  },
+  "empty": {
+    "title": "No edition selected",
+    "description": "Choose an edition at the top of the page to display its dashboard."
+  },
+  "actions": {
+    "title": "Needs action",
+    "total": "{count} item to handle | {count} item to handle | {count} items to handle",
+    "dueOn": "Due: {date}",
+    "more": "and {count} more | and {count} more | and {count} more",
+    "empty": {
+      "title": "Nothing is waiting on the team",
+      "description": "No overdue reviews, no duplicates to settle, no schedule overlaps and no published incident."
+    },
+    "kind": {
+      "proposals_unreviewed": {
+        "label": "{count} submitted proposal with no review | {count} submitted proposal with no review | {count} submitted proposals with no review",
+        "detail": "Submitted and never opened by the committee: some have no reviewer assigned yet."
+      },
+      "reviews_overdue": {
+        "label": "{count} overdue review | {count} overdue review | {count} overdue reviews",
+        "detail": "The assignment deadline has passed and the review has not been submitted."
+      },
+      "organization_duplicates": {
+        "label": "{count} organisation duplicate to settle | {count} organisation duplicate to settle | {count} organisation duplicates to settle",
+        "detail": "Two records likely describe the same organisation. Merge them or mark them distinct."
+      },
+      "schedule_conflicts": {
+        "label": "{count} schedule overlap | {count} schedule overlap | {count} schedule overlaps",
+        "detail": "Flagged, never blocked: arbitration happens in the scheduler."
+      },
+      "active_incidents": {
+        "label": "{count} published incident message | {count} published incident message | {count} published incident messages",
+        "detail": "Shown to the public until unpublished or until its display window closes."
+      }
+    }
+  },
+  "figures": {
+    "title": "Figures"
+  },
+  "funnel": {
+    "title": "Proposal funnel",
+    "noCall": "This edition has no call for proposals.",
+    "stage": {
+      "opened": "Proposals started",
+      "submitted": "Submitted",
+      "inReview": "Under review",
+      "decided": "Decided",
+      "accepted": "Accepted"
+    },
+    "exit": {
+      "drafts": "Drafts",
+      "withdrawn": "Withdrawn",
+      "rejected": "Rejected"
+    },
+    "rates": {
+      "selectivity": "Acceptance rate",
+      "yield": "Call yield",
+      "organizations": "Organisations"
+    }
+  },
+  "charts": {
+    "noData": "No data for this period.",
+    "callOpens": "Opening",
+    "deadline": "Deadline",
+    "summary": "Chart: {series}, from {from} to {to}. {total} in total. Highest day: {peakValue} on {peakDay}.",
+    "submissions": {
+      "title": "Submissions per day",
+      "series": "Submissions",
+      "total": "{count} submission | {count} submission | {count} submissions"
+    },
+    "registrations": {
+      "title": "Activity registrations per day",
+      "series": "Registrations",
+      "total": "{count} registration | {count} registration | {count} registrations"
+    }
+  },
+  "breakdown": {
+    "country": {
+      "title": "By country",
+      "note": "Country of the lead organisation, on submitted proposals."
+    },
+    "theme": {
+      "title": "By theme",
+      "note": "A proposal may carry several: the total exceeds the number of proposals."
+    }
+  },
+  "health": {
+    "title": "Operational health",
+    "subtitle": "Measured live, thresholds carried by the database",
+    "allClear": "All {count} indicators are below their warning threshold.",
+    "threshold": "threshold {value}",
+    "showHealthy": "Show the healthy indicator | Show the healthy indicator | Show the {count} healthy indicators",
+    "hideHealthy": "Hide healthy indicators",
+    "severity": {
+      "critique": "Critical",
+      "attention": "Warning",
+      "ok": "Normal"
+    },
+    "indicator": {
+      "outbox_non_publie": "Unpublished domain events",
+      "outbox_en_echec": "Outbox events failing repeatedly",
+      "travaux_file_morte": "Jobs in the dead-letter queue",
+      "travaux_en_retard": "Due jobs not picked up",
+      "travaux_bloques": "Jobs locked for over 15 minutes",
+      "rappels_en_retard": "Scheduled reminders not sent on time",
+      "emails_rebond_7j": "Bounced or flagged emails (7 days)",
+      "emails_en_echec": "Emails failing technically (7 days)",
+      "emails_en_attente": "Emails queued for over 15 minutes",
+      "visio_reunions_desynchronisees": "Meetings not synchronised with the provider",
+      "visio_inscriptions_desynchronisees": "Video registrations to catch up",
+      "visio_webhooks_en_echec": "Unprocessed provider webhooks",
+      "partitions_manquantes": "Next month's partitions not created",
+      "analytique_perimee": "Minutes since the last analytics refresh"
+    }
+  }
+}

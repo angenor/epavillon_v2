@@ -22,7 +22,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   const localePath = useLocalePath()
   return navigateTo({
-    path: localePath('/auth/login'),
+    // Le NOM de route, pas le chemin de fichier : la page de connexion déclare
+    // ses adresses par `defineI18nRoute` (`/connexion`, `/en/login`), et
+    // `localePath('/auth/login')` rendait alors ce chemin tel quel — une adresse
+    // qui n'existe pas. Corrigé le 17/08 en écrivant A6, dont la garde est la
+    // première à emprunter cette redirection depuis le back-office.
+    path: localePath('auth-login'),
     query: { redirect: to.fullPath },
   })
 })

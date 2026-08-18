@@ -543,7 +543,7 @@ attend une action de ma part ?
 - État vide soigné : aucune proposition, avec l'appel en cours mis en avant.
 ```
 
-**A6 — Tableau de bord du back-office**
+**A6 — Tableau de bord du back-office** (fait le 17/08)
 
 ```
 [PRÉAMBULE]

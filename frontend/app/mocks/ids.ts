@@ -563,3 +563,24 @@ export const REMINDER_RULE = {
 
 /** `engagement.scheduled_reminders` — matérialisés à la lecture, voir `reminders.ts`. */
 export const SCHEDULED_REMINDER = (n: number): Uuid => uuid('7081', n)
+
+// ---------------------------------------------------------------------------
+// Messages d'incident — 080_live.sql § 5
+// ---------------------------------------------------------------------------
+
+/**
+ * `live.incidents`. Le module Direct est hors jalon, mais le BANDEAU
+ * D'INCIDENT est un motif transverse : il s'affiche sur la programmation
+ * publique, sur la fiche d'une activité et dans le back-office. Ces quatre
+ * messages servent le tableau de bord (A6) et serviront l'écran A13.
+ */
+export const INCIDENT = {
+  /** Portée plateforme, actif : maintenance du dépôt de fichiers. */
+  maintenanceDepot: uuid('7090', 1),
+  /** Portée édition, actif : la prolongation de l'appel de la COP31. */
+  prolongationAppel: uuid('7090', 2),
+  /** Fenêtre d'affichage close : ne doit PAS remonter. */
+  incidentClos: uuid('7090', 3),
+  /** Jamais publié : rédigé, en attente de décision. */
+  brouillonNonPublie: uuid('7090', 4),
+} as const

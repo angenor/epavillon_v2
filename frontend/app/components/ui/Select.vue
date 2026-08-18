@@ -70,6 +70,7 @@ const isLocked = computed(() => props.disabled || props.readonly)
     :disabled="props.disabled"
     :readonly="props.readonly"
     :hide-optional="props.hideOptional"
+    :hide-label="props.hideLabel"
   >
     <template #default="{ control }">
       <div class="relative">

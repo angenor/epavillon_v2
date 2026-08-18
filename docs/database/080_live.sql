@@ -884,6 +884,86 @@ $$;
 COMMENT ON FUNCTION live.active_incidents(uuid, timestamptz) IS
     'Incidents à afficher maintenant pour une session, en remontant sa journée, son événement et son organisation porteuse.';
 
+-- Ce que le BACK-OFFICE doit voir pour une édition : tous les incidents actifs
+-- qui la concernent, quelle que soit leur portée.
+--
+-- SYMÉTRIQUE DE LA PRÉCÉDENTE, ET DANS L'AUTRE SENS. active_incidents(session)
+-- REMONTE la hiérarchie depuis une séance ; celle-ci la DESCEND depuis une
+-- édition : ses journées, ses séances, les organisations qui y portent une
+-- séance, plus les messages globaux. Sans elle, le tableau de bord (écran A6) et
+-- l'écran des messages d'incident (A13) recomposeraient chacun ce balayage, et
+-- le premier incident de portée `organization` oublié par l'un des deux
+-- passerait inaperçu là où il est publié.
+--
+-- L'incident GLOBAL est renvoyé pour toute édition : il s'affiche partout, et
+-- une équipe qui pilote une COP doit savoir qu'un bandeau de maintenance couvre
+-- son pavillon.
+CREATE OR REPLACE FUNCTION live.active_incidents_for_event(
+    p_event_id uuid,
+    p_at       timestamptz DEFAULT now()
+)
+RETURNS TABLE (
+    incident_id    uuid,
+    scope          live.incident_scope,
+    severity       live.incident_severity,
+    kind_code      text,
+    title          platform.i18n_text,
+    message        platform.i18n_text,
+    action_url     platform.url,
+    is_dismissible boolean,
+    display_from   timestamptz,
+    display_until  timestamptz,
+    -- La cible, résolue : le back-office affiche « Salle Amazonie » ou
+    -- « Atelier de négociation », pas un identifiant.
+    target_id      uuid,
+    target_label   text
+)
+LANGUAGE plpgsql
+STABLE
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT i.id, i.scope, i.severity, i.incident_kind_code, i.title, i.message,
+           i.action_url, i.is_dismissible, i.display_from, i.display_until,
+           COALESCE(i.session_id, i.event_day_id, i.organization_id, i.event_id) AS target_id,
+           COALESCE(platform.t(s.title),
+                    -- Une journée peut n'avoir aucun titre : sa date la désigne alors.
+                    COALESCE(platform.t(d.title), to_char(d.day_date, 'DD/MM/YYYY')),
+                    o.legal_name,
+                    platform.t(e.title)) AS target_label
+    FROM live.incidents i
+    LEFT JOIN programme.sessions s ON s.id = i.session_id
+    LEFT JOIN event.event_days   d ON d.id = i.event_day_id
+    LEFT JOIN org.organizations  o ON o.id = i.organization_id
+    LEFT JOIN event.events       e ON e.id = i.event_id
+    WHERE i.published_at IS NOT NULL
+      AND i.unpublished_at IS NULL
+      AND i.display_from <= p_at
+      AND (i.display_until IS NULL OR i.display_until > p_at)
+      AND (
+             i.scope = 'global'
+          OR (i.scope = 'event'     AND i.event_id = p_event_id)
+          OR (i.scope = 'event_day' AND EXISTS (
+                 SELECT 1 FROM event.event_days ed
+                  WHERE ed.id = i.event_day_id AND ed.event_id = p_event_id))
+          OR (i.scope = 'session'   AND EXISTS (
+                 SELECT 1 FROM programme.sessions ss
+                  WHERE ss.id = i.session_id AND ss.event_id = p_event_id))
+          -- Portée `organization` : l'incident ne concerne cette édition que si
+          -- l'organisation y anime effectivement une séance. Une ONG en panne de
+          -- visioconférence sur une autre COP n'a rien à faire ici.
+          OR (i.scope = 'organization' AND EXISTS (
+                 SELECT 1 FROM programme.sessions ss
+                  WHERE ss.organization_id = i.organization_id
+                    AND ss.event_id = p_event_id))
+         )
+    ORDER BY i.severity DESC, i.display_from DESC;
+END;
+$$;
+
+COMMENT ON FUNCTION live.active_incidents_for_event(uuid, timestamptz) IS
+    'Incidents actifs d''une édition, toutes portées confondues (globale, édition, journée, séance, organisation qui y anime). Symétrique descendante de active_incidents(session).';
+
 -- -----------------------------------------------------------------------------
 -- 7. Intégration inter-modules
 -- -----------------------------------------------------------------------------

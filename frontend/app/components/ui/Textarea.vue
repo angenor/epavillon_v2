@@ -96,6 +96,7 @@ watch(() => props.modelValue, () => nextTick(grow))
     :required="props.required"
     :disabled="props.disabled"
     :readonly="props.readonly"
+    :hide-label="props.hideLabel"
     :counter="counter"
     :counter-exceeded="exceeded"
   >

@@ -39,6 +39,9 @@
  *   registrations.ts     67 inscriptions, canaux d'acquisition variés, dont
  *                        sept sur la seule séance du jeu qui se soit tenue
  *   views.ts             les deux vues du modèle, reconstituées
+ *   incidents.ts         quatre messages d'incident, dont trois à ne PAS afficher
+ *   analytics.ts         les projections du module Analytique, reconstituées
+ *   admin-dashboard.ts   la composition du tableau de bord du back-office (A6)
  */
 
 export * from './ids'
@@ -142,3 +145,16 @@ export { registrationForms, registrationFormFields } from './registration-form'
 export { registrations } from './registrations'
 export { publicSchedule, proposalDashboard } from './views'
 export { detectConflicts, publicationReadiness } from './conflicts'
+export { incidents, activeIncidentsForEvent } from './incidents'
+
+export {
+  proposalFunnel,
+  dailySubmissions,
+  dailyRegistrations,
+  reviewerWorkload,
+  platformOverview,
+  operationalHealth,
+  lastAnalyticsRefresh,
+} from './analytics'
+
+export { adminDashboard } from './admin-dashboard'

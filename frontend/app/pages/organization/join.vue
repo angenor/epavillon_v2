@@ -480,7 +480,7 @@ const continueTo = computed(() => {
       :title="t('common.states.forbidden.title')"
       :description="t('organization.join.states.signedOut')"
       :action-label="t('organization.join.states.signIn')"
-      :action-to="localePath('/auth/login')"
+      :action-to="localePath('auth-login')"
     />
 
     <UiErrorState

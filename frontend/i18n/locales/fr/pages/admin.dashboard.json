@@ -1,0 +1,124 @@
+{
+  "title": "Tableau de bord",
+  "subtitle": "Ce qui attend l'équipe, les chiffres de l'édition et l'état du système.",
+  "loading": "Chargement du tableau de bord",
+  "refreshedAt": "Chiffres arrêtés au {date}",
+  "forbidden": {
+    "scope": "administrateur d'une édition"
+  },
+  "empty": {
+    "title": "Aucune édition sélectionnée",
+    "description": "Choisissez une édition en tête de page pour afficher son tableau de bord."
+  },
+  "actions": {
+    "title": "Ce qui demande une action",
+    "total": "{count} point à traiter | {count} point à traiter | {count} points à traiter",
+    "dueOn": "Échéance : {date}",
+    "more": "et {count} autre | et {count} autre | et {count} autres",
+    "empty": {
+      "title": "Rien n'attend l'équipe",
+      "description": "Aucune évaluation en retard, aucun doublon à trancher, aucun chevauchement de créneaux et aucun incident publié."
+    },
+    "kind": {
+      "proposals_unreviewed": {
+        "label": "{count} dossier déposé sans évaluation | {count} dossier déposé sans évaluation | {count} dossiers déposés sans évaluation",
+        "detail": "Déposés et jamais ouverts par le comité : certains n'ont encore aucun révisionniste affecté."
+      },
+      "reviews_overdue": {
+        "label": "{count} évaluation en retard | {count} évaluation en retard | {count} évaluations en retard",
+        "detail": "L'échéance d'affectation est dépassée, la revue n'est pas rendue."
+      },
+      "organization_duplicates": {
+        "label": "{count} doublon d'organisation à trancher | {count} doublon d'organisation à trancher | {count} doublons d'organisation à trancher",
+        "detail": "Deux fiches désignent probablement la même structure. Fusionner ou déclarer distinctes."
+      },
+      "schedule_conflicts": {
+        "label": "{count} chevauchement de créneaux | {count} chevauchement de créneaux | {count} chevauchements de créneaux",
+        "detail": "Signalés, jamais bloqués : l'arbitrage se fait au planificateur."
+      },
+      "active_incidents": {
+        "label": "{count} message d'incident publié | {count} message d'incident publié | {count} messages d'incident publiés",
+        "detail": "Affiché au public tant qu'il n'est pas dépublié ou que sa fenêtre n'est pas close."
+      }
+    }
+  },
+  "figures": {
+    "title": "Les chiffres"
+  },
+  "funnel": {
+    "title": "Entonnoir des propositions",
+    "noCall": "Cette édition ne porte aucun appel à propositions.",
+    "stage": {
+      "opened": "Dossiers ouverts",
+      "submitted": "Déposés",
+      "inReview": "En évaluation",
+      "decided": "Décidés",
+      "accepted": "Retenus"
+    },
+    "exit": {
+      "drafts": "Brouillons",
+      "withdrawn": "Retirés",
+      "rejected": "Écartés"
+    },
+    "rates": {
+      "selectivity": "Taux d'acceptation",
+      "yield": "Rendement de l'appel",
+      "organizations": "Organisations"
+    }
+  },
+  "charts": {
+    "noData": "Aucune donnée sur cette période.",
+    "callOpens": "Ouverture",
+    "deadline": "Échéance",
+    "summary": "Graphique : {series}, du {from} au {to}. {total} au total. Journée la plus forte : {peakValue} le {peakDay}.",
+    "submissions": {
+      "title": "Dépôts par jour",
+      "series": "Dépôts",
+      "total": "{count} dépôt | {count} dépôt | {count} dépôts"
+    },
+    "registrations": {
+      "title": "Inscriptions aux activités par jour",
+      "series": "Inscriptions",
+      "total": "{count} inscription | {count} inscription | {count} inscriptions"
+    }
+  },
+  "breakdown": {
+    "country": {
+      "title": "Par pays",
+      "note": "Pays de l'organisation porteuse, sur les dossiers déposés."
+    },
+    "theme": {
+      "title": "Par thématique",
+      "note": "Un dossier peut en porter plusieurs : la somme dépasse le nombre de dossiers."
+    }
+  },
+  "health": {
+    "title": "Santé opérationnelle",
+    "subtitle": "Mesuré à l'instant, seuils portés par la base",
+    "allClear": "Les {count} indicateurs sont sous leur seuil d'attention.",
+    "threshold": "seuil {value}",
+    "showHealthy": "Voir l'indicateur au vert | Voir l'indicateur au vert | Voir les {count} indicateurs au vert",
+    "hideHealthy": "Masquer les indicateurs au vert",
+    "severity": {
+      "critique": "Critique",
+      "attention": "Attention",
+      "ok": "Normal"
+    },
+    "indicator": {
+      "outbox_non_publie": "Événements de domaine non publiés",
+      "outbox_en_echec": "Événements d'outbox en échec répété",
+      "travaux_file_morte": "Travaux en file morte",
+      "travaux_en_retard": "Travaux échus non pris en charge",
+      "travaux_bloques": "Travaux verrouillés depuis plus de 15 minutes",
+      "rappels_en_retard": "Rappels programmés non envoyés à l'heure",
+      "emails_rebond_7j": "Courriels en rebond ou signalés (7 jours)",
+      "emails_en_echec": "Courriels en échec technique (7 jours)",
+      "emails_en_attente": "Courriels en file depuis plus de 15 minutes",
+      "visio_reunions_desynchronisees": "Réunions non synchronisées chez le fournisseur",
+      "visio_inscriptions_desynchronisees": "Inscriptions visio à rattraper",
+      "visio_webhooks_en_echec": "Webhooks fournisseur non traités",
+      "partitions_manquantes": "Partitions du mois prochain non créées",
+      "analytique_perimee": "Minutes depuis le dernier rafraîchissement analytique"
+    }
+  }
+}

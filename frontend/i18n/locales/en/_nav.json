@@ -52,7 +52,6 @@
       "placeholder": "Choose an event",
       "allEvents": "All events",
       "empty": "No event is open to your account.",
-      "restricted": "Your account administers a single event.",
       "hint": "Lists in this section only show the selected event."
     },
     "backToSite": "Back to the public site"

@@ -6,7 +6,7 @@ import type { NavSection } from '~/types/navigation'
  * d'événement.
  *
  * RÈGLE MÉTIER N° 8 : un administrateur peut n'avoir accès qu'à un seul
- * événement. Le sélecteur ci-dessous n'est pas un confort : il matérialise le
+ * événement. Le sélecteur d'édition n'est pas un confort : il matérialise le
  * périmètre d'administration qui filtre toutes les listes de cette section.
  * Le filtrage lui-même appartient à l'API — une URL forgée à la main ne doit
  * rien laisser filtrer de plus.
@@ -16,13 +16,19 @@ import type { NavSection } from '~/types/navigation'
  * `UiBreadcrumb`, `UiLocaleSwitch`, `UiThemeToggle`). Les trois pictogrammes de
  * thème étaient dupliqués depuis le layout public ; c'est cette duplication que
  * la note du prompt annonçait de résorber.
+ *
+ * A6 — LE SÉLECTEUR D'ÉVÉNEMENT A QUITTÉ LA NAVIGATION LATÉRALE pour la tête de
+ * page (`AdminEventScope`, posé juste au-dessus du contenu). Sur écran étroit, la
+ * navigation latérale est un tiroir qu'il faut ouvrir : le périmètre d'un écran
+ * ne peut pas être caché derrière un bouton, c'est le sujet de tout ce qu'on lit
+ * en dessous. Le layout le pose une fois pour tous les écrans du back-office,
+ * plutôt que chaque page à sa manière.
  */
 
 const { t } = useI18n()
 const localePath = useLocalePath()
 const route = useRoute()
 const adminScope = useAdminScopeStore()
-const { tr } = useI18nText()
 
 const sections: NavSection[] = [
   {
@@ -58,10 +64,10 @@ watch(() => route.fullPath, () => (isSidebarOpen.value = false))
 // Le layout n'en invente aucun : mieux vaut pas de fil qu'un fil faux.
 const breadcrumb = computed(() => route.meta.breadcrumb ?? [])
 
-const selectedEventId = computed({
-  get: () => adminScope.currentEventId ?? '',
-  set: (value: string) => adminScope.selectEvent(value === '' ? null : value),
-})
+// Le périmètre est chargé ICI, une fois pour tous les écrans du back-office :
+// le sélecteur en a besoin avant que la page ait fini de se rendre, et chaque
+// écran le rechargerait sinon pour son propre compte.
+await adminScope.ensureLoaded()
 </script>
 
 <template>
@@ -89,46 +95,6 @@ const selectedEventId = computed({
         <span class="font-display text-sm tracking-wide text-text-subtle uppercase">
           {{ t('nav.admin.title') }}
         </span>
-      </template>
-
-      <!-- Périmètre d'administration — règle métier n° 8. -->
-      <template #scope>
-        <label
-          for="admin-event-scope"
-          class="block text-xs font-semibold tracking-wide text-text-subtle uppercase"
-        >
-          {{ t('nav.admin.eventScope.label') }}
-        </label>
-
-        <p v-if="adminScope.isEmpty" class="mt-2 text-sm text-text-muted">
-          {{ t('nav.admin.eventScope.empty') }}
-        </p>
-
-        <p
-          v-else-if="adminScope.isRestricted"
-          class="mt-2 rounded-md border border-border-subtle bg-surface-sunken px-3 py-2 text-sm text-text"
-        >
-          {{ tr(adminScope.currentEvent?.title) }}
-          <span class="mt-1 block text-xs text-text-subtle">
-            {{ t('nav.admin.eventScope.restricted') }}
-          </span>
-        </p>
-
-        <select
-          v-else
-          id="admin-event-scope"
-          v-model="selectedEventId"
-          class="mt-2 w-full rounded-md border border-border-strong bg-surface-raised px-3 py-2 text-sm text-text"
-        >
-          <option value="">{{ t('nav.admin.eventScope.placeholder') }}</option>
-          <option v-for="event in adminScope.events" :key="event.id" :value="event.id">
-            {{ tr(event.title) }}
-          </option>
-        </select>
-
-        <p v-if="!adminScope.isEmpty" class="mt-2 text-xs text-text-subtle">
-          {{ t('nav.admin.eventScope.hint') }}
-        </p>
       </template>
 
       <template #footer>
@@ -166,6 +132,11 @@ const selectedEventId = computed({
         <UiLocaleSwitch class="hidden sm:flex" />
         <UiThemeToggle />
       </header>
+
+      <!-- LE PÉRIMÈTRE, EN TÊTE DE PAGE — règle métier n° 8. Un compte détaché
+           sur une seule édition n'y voit qu'un nom : pas de liste déroulante à
+           une entrée, rien qui laisse deviner qu'il en existe d'autres. -->
+      <AdminEventScope />
 
       <main id="contenu-admin" class="min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-8">
         <slot />

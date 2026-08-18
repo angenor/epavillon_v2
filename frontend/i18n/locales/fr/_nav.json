@@ -52,7 +52,6 @@
       "placeholder": "Choisir un événement",
       "allEvents": "Tous les événements",
       "empty": "Aucun événement n'est ouvert à votre compte.",
-      "restricted": "Votre compte n'administre qu'un seul événement.",
       "hint": "Les listes de cette section ne montrent que l'événement sélectionné."
     },
     "backToSite": "Retour au site public"

@@ -27,6 +27,16 @@
  * LES CANAUX D'ACQUISITION sont variés à dessein : c'est la donnée qui dit à
  * l'IFDD où porter son effort de communication, et elle vient de la taxonomie
  * `referral_source`, jamais d'une liste écrite dans le frontend.
+ *
+ * LES INSCRIPTIONS DE LA COP31 ONT ÉTÉ ANTIDATÉES DE TRENTE JOURS le 17/08, en
+ * écrivant le tableau de bord du back-office (A6). Elles couraient de septembre
+ * à octobre 2026, c'est-à-dire ENTIÈREMENT DANS LE FUTUR : la courbe des
+ * inscriptions par jour, qui s'arrête au jour présent comme la projection
+ * `mv_daily_registrations`, était donc vide alors que le jeu portait
+ * soixante-sept inscriptions. Elles partent désormais du 3 août 2026, JOUR DE
+ * PUBLICATION DU PROGRAMME (`sessions.published_at`) — on ne s'inscrit pas à une
+ * activité qui n'est pas annoncée. Les décomptes, les listes d'attente et les
+ * rappels sont inchangés : seules les dates de création ont bougé.
  */
 
 import type { Registration, RegistrationStatus, RegistrationSource } from '~/types/programme/registration'
@@ -134,125 +144,125 @@ function reg(n: number, session_id: string, person_id: string, fields: Registrat
 
 export const registrations = [
   // --- Financer l'adaptation côtière (10 novembre) · 12 inscriptions --------
-  reg(1, SESSION.adaptationCotiere, PERSON.zinsou, { referral: 'ifdd_website', createdAt: '2026-09-02T08:15:00Z' }),
-  reg(2, SESSION.adaptationCotiere, PERSON.ngoBassong, { referral: 'word_of_mouth', createdAt: '2026-09-02T14:40:00Z' }),
-  reg(3, SESSION.adaptationCotiere, PERSON.josephPierre, { referral: 'email_newsletter', createdAt: '2026-09-03T11:05:00Z' }),
-  reg(4, SESSION.adaptationCotiere, PERSON.elFassi, { referral: 'ifdd_linkedin', createdAt: '2026-09-03T16:20:00Z' }),
-  reg(5, SESSION.adaptationCotiere, PERSON.benAmor, { referral: 'ifdd_linkedin', createdAt: '2026-09-04T07:50:00Z' }),
+  reg(1, SESSION.adaptationCotiere, PERSON.zinsou, { referral: 'ifdd_website', createdAt: '2026-08-03T08:15:00Z' }),
+  reg(2, SESSION.adaptationCotiere, PERSON.ngoBassong, { referral: 'word_of_mouth', createdAt: '2026-08-03T14:40:00Z' }),
+  reg(3, SESSION.adaptationCotiere, PERSON.josephPierre, { referral: 'email_newsletter', createdAt: '2026-08-04T11:05:00Z' }),
+  reg(4, SESSION.adaptationCotiere, PERSON.elFassi, { referral: 'ifdd_linkedin', createdAt: '2026-08-04T16:20:00Z' }),
+  reg(5, SESSION.adaptationCotiere, PERSON.benAmor, { referral: 'ifdd_linkedin', createdAt: '2026-08-05T07:50:00Z' }),
   reg(6, SESSION.adaptationCotiere, PERSON.rakotomalala, {
     referral: 'ifdd_facebook',
-    createdAt: '2026-09-05T06:30:00Z',
+    createdAt: '2026-08-06T06:30:00Z',
     accessNeeds: "Prévoir une place assise proche de la scène pour la prise de vue.",
   }),
-  reg(7, SESSION.adaptationCotiere, PERSON.koffi, { referral: 'word_of_mouth', createdAt: '2026-09-05T10:10:00Z' }),
-  reg(8, SESSION.adaptationCotiere, PERSON.moreau, { referral: 'ifdd_x', locale: 'fr', createdAt: '2026-09-06T09:00:00Z' }),
-  reg(9, SESSION.adaptationCotiere, PERSON.tranVanMinh, { referral: 'email_newsletter', locale: 'en', createdAt: '2026-09-07T02:35:00Z' }),
-  reg(10, SESSION.adaptationCotiere, PERSON.gagnon, { referral: 'ifdd_website', createdAt: '2026-09-08T15:25:00Z' }),
+  reg(7, SESSION.adaptationCotiere, PERSON.koffi, { referral: 'word_of_mouth', createdAt: '2026-08-06T10:10:00Z' }),
+  reg(8, SESSION.adaptationCotiere, PERSON.moreau, { referral: 'ifdd_x', locale: 'fr', createdAt: '2026-08-07T09:00:00Z' }),
+  reg(9, SESSION.adaptationCotiere, PERSON.tranVanMinh, { referral: 'email_newsletter', locale: 'en', createdAt: '2026-08-08T02:35:00Z' }),
+  reg(10, SESSION.adaptationCotiere, PERSON.gagnon, { referral: 'ifdd_website', createdAt: '2026-08-09T15:25:00Z' }),
   reg(11, SESSION.adaptationCotiere, PERSON.ilboudo, {
     referral: 'ifdd_facebook',
-    createdAt: '2026-09-09T19:45:00Z',
+    createdAt: '2026-08-10T19:45:00Z',
     accessNeeds: "Participation en ligne : je n'ai pas d'accréditation zone bleue.",
   }),
   reg(12, SESSION.adaptationCotiere, PERSON.lambert, {
     // ANNULÉE : la personne est par ailleurs suspendue de la plateforme.
     referral: 'other',
     status: 'cancelled',
-    createdAt: '2026-09-10T12:00:00Z',
-    cancelledAt: '2026-09-18T08:30:00Z',
+    createdAt: '2026-08-11T12:00:00Z',
+    cancelledAt: '2026-08-19T08:30:00Z',
     cancelledReason: "Annulation à la demande de la personne.",
   }),
 
   // --- Alerte précoce (11 novembre) · 7 inscriptions -----------------------
-  reg(13, SESSION.alertePrecoce, PERSON.sowFall, { referral: 'word_of_mouth', createdAt: '2026-09-11T09:20:00Z' }),
-  reg(14, SESSION.alertePrecoce, PERSON.zinsou, { referral: 'ifdd_website', createdAt: '2026-09-11T13:40:00Z' }),
-  reg(15, SESSION.alertePrecoce, PERSON.mbayeNdiaye, { referral: 'word_of_mouth', createdAt: '2026-09-12T08:05:00Z' }),
-  reg(16, SESSION.alertePrecoce, PERSON.ilboudo, { referral: 'ifdd_facebook', createdAt: '2026-09-12T21:15:00Z' }),
-  reg(17, SESSION.alertePrecoce, PERSON.rakotomalala, { referral: 'ifdd_x', createdAt: '2026-09-14T06:50:00Z' }),
-  reg(18, SESSION.alertePrecoce, PERSON.ngoBassong, { referral: 'email_newsletter', createdAt: '2026-09-15T10:30:00Z' }),
+  reg(13, SESSION.alertePrecoce, PERSON.sowFall, { referral: 'word_of_mouth', createdAt: '2026-08-12T09:20:00Z' }),
+  reg(14, SESSION.alertePrecoce, PERSON.zinsou, { referral: 'ifdd_website', createdAt: '2026-08-12T13:40:00Z' }),
+  reg(15, SESSION.alertePrecoce, PERSON.mbayeNdiaye, { referral: 'word_of_mouth', createdAt: '2026-08-13T08:05:00Z' }),
+  reg(16, SESSION.alertePrecoce, PERSON.ilboudo, { referral: 'ifdd_facebook', createdAt: '2026-08-13T21:15:00Z' }),
+  reg(17, SESSION.alertePrecoce, PERSON.rakotomalala, { referral: 'ifdd_x', createdAt: '2026-08-15T06:50:00Z' }),
+  reg(18, SESSION.alertePrecoce, PERSON.ngoBassong, { referral: 'email_newsletter', createdAt: '2026-08-16T10:30:00Z' }),
   reg(19, SESSION.alertePrecoce, PERSON.tranVanMinh, {
     referral: 'ifdd_linkedin',
     locale: 'en',
     source: 'partner',
-    createdAt: '2026-09-16T03:10:00Z',
+    createdAt: '2026-08-17T03:10:00Z',
   }),
 
   // --- Mini-réseaux solaires (11 novembre) · 6 inscriptions ----------------
-  reg(20, SESSION.miniReseaux, PERSON.zinsou, { referral: 'ifdd_website', createdAt: '2026-09-17T09:00:00Z' }),
-  reg(21, SESSION.miniReseaux, PERSON.josephPierre, { referral: 'email_newsletter', createdAt: '2026-09-17T14:25:00Z' }),
-  reg(22, SESSION.miniReseaux, PERSON.compaore, { referral: 'word_of_mouth', createdAt: '2026-09-18T08:40:00Z' }),
-  reg(23, SESSION.miniReseaux, PERSON.ilboudo, { referral: 'ifdd_facebook', createdAt: '2026-09-18T20:05:00Z' }),
-  reg(24, SESSION.miniReseaux, PERSON.tranVanMinh, { referral: 'ifdd_linkedin', locale: 'en', createdAt: '2026-09-19T04:15:00Z' }),
-  reg(25, SESSION.miniReseaux, PERSON.moreau, { referral: 'other', source: 'admin', createdAt: '2026-09-20T11:35:00Z' }),
+  reg(20, SESSION.miniReseaux, PERSON.zinsou, { referral: 'ifdd_website', createdAt: '2026-08-18T09:00:00Z' }),
+  reg(21, SESSION.miniReseaux, PERSON.josephPierre, { referral: 'email_newsletter', createdAt: '2026-08-18T14:25:00Z' }),
+  reg(22, SESSION.miniReseaux, PERSON.compaore, { referral: 'word_of_mouth', createdAt: '2026-08-19T08:40:00Z' }),
+  reg(23, SESSION.miniReseaux, PERSON.ilboudo, { referral: 'ifdd_facebook', createdAt: '2026-08-19T20:05:00Z' }),
+  reg(24, SESSION.miniReseaux, PERSON.tranVanMinh, { referral: 'ifdd_linkedin', locale: 'en', createdAt: '2026-08-20T04:15:00Z' }),
+  reg(25, SESSION.miniReseaux, PERSON.moreau, { referral: 'other', source: 'admin', createdAt: '2026-08-21T11:35:00Z' }),
 
   // --- Pertes et préjudices (12 novembre) · 9 inscriptions -----------------
-  reg(26, SESSION.pertesPrejudices, PERSON.sowFall, { referral: 'word_of_mouth', createdAt: '2026-09-21T08:00:00Z' }),
-  reg(27, SESSION.pertesPrejudices, PERSON.ngoBassong, { referral: 'word_of_mouth', createdAt: '2026-09-21T09:30:00Z' }),
-  reg(28, SESSION.pertesPrejudices, PERSON.lemoine, { referral: 'ifdd_website', createdAt: '2026-09-21T15:45:00Z' }),
-  reg(29, SESSION.pertesPrejudices, PERSON.gagnon, { referral: 'ifdd_website', createdAt: '2026-09-22T10:20:00Z' }),
-  reg(30, SESSION.pertesPrejudices, PERSON.zinsou, { referral: 'email_newsletter', createdAt: '2026-09-22T13:55:00Z' }),
-  reg(31, SESSION.pertesPrejudices, PERSON.elFassi, { referral: 'ifdd_linkedin', createdAt: '2026-09-23T07:40:00Z' }),
-  reg(32, SESSION.pertesPrejudices, PERSON.rasoanaivo, { referral: 'ifdd_x', createdAt: '2026-09-24T05:25:00Z' }),
+  reg(26, SESSION.pertesPrejudices, PERSON.sowFall, { referral: 'word_of_mouth', createdAt: '2026-08-22T08:00:00Z' }),
+  reg(27, SESSION.pertesPrejudices, PERSON.ngoBassong, { referral: 'word_of_mouth', createdAt: '2026-08-22T09:30:00Z' }),
+  reg(28, SESSION.pertesPrejudices, PERSON.lemoine, { referral: 'ifdd_website', createdAt: '2026-08-22T15:45:00Z' }),
+  reg(29, SESSION.pertesPrejudices, PERSON.gagnon, { referral: 'ifdd_website', createdAt: '2026-08-23T10:20:00Z' }),
+  reg(30, SESSION.pertesPrejudices, PERSON.zinsou, { referral: 'email_newsletter', createdAt: '2026-08-23T13:55:00Z' }),
+  reg(31, SESSION.pertesPrejudices, PERSON.elFassi, { referral: 'ifdd_linkedin', createdAt: '2026-08-24T07:40:00Z' }),
+  reg(32, SESSION.pertesPrejudices, PERSON.rasoanaivo, { referral: 'ifdd_x', createdAt: '2026-08-25T05:25:00Z' }),
   reg(33, SESSION.pertesPrejudices, PERSON.koffi, {
     referral: 'ifdd_facebook',
-    createdAt: '2026-09-25T09:05:00Z',
+    createdAt: '2026-08-26T09:05:00Z',
     accessNeeds: "Interprétation vers l'anglais souhaitée pour deux membres de la délégation.",
   }),
-  reg(34, SESSION.pertesPrejudices, PERSON.ilboudo, { referral: 'word_of_mouth', createdAt: '2026-09-26T18:50:00Z' }),
+  reg(34, SESSION.pertesPrejudices, PERSON.ilboudo, { referral: 'word_of_mouth', createdAt: '2026-08-27T18:50:00Z' }),
 
   // --- Marchés carbone, article 6 (12 novembre) · 6 inscriptions -----------
-  reg(35, SESSION.article6, PERSON.duchesne, { referral: 'ifdd_website', source: 'admin', createdAt: '2026-09-27T08:10:00Z' }),
-  reg(36, SESSION.article6, PERSON.benAmor, { referral: 'ifdd_linkedin', createdAt: '2026-09-27T11:30:00Z' }),
-  reg(37, SESSION.article6, PERSON.zinsou, { referral: 'email_newsletter', createdAt: '2026-09-28T09:15:00Z' }),
-  reg(38, SESSION.article6, PERSON.moreau, { referral: 'ifdd_x', createdAt: '2026-09-28T16:40:00Z' }),
-  reg(39, SESSION.article6, PERSON.tranVanMinh, { referral: 'ifdd_linkedin', locale: 'en', createdAt: '2026-09-29T03:20:00Z' }),
-  reg(40, SESSION.article6, PERSON.rasoanaivo, { referral: 'other', createdAt: '2026-09-30T06:05:00Z' }),
+  reg(35, SESSION.article6, PERSON.duchesne, { referral: 'ifdd_website', source: 'admin', createdAt: '2026-08-28T08:10:00Z' }),
+  reg(36, SESSION.article6, PERSON.benAmor, { referral: 'ifdd_linkedin', createdAt: '2026-08-28T11:30:00Z' }),
+  reg(37, SESSION.article6, PERSON.zinsou, { referral: 'email_newsletter', createdAt: '2026-08-29T09:15:00Z' }),
+  reg(38, SESSION.article6, PERSON.moreau, { referral: 'ifdd_x', createdAt: '2026-08-29T16:40:00Z' }),
+  reg(39, SESSION.article6, PERSON.tranVanMinh, { referral: 'ifdd_linkedin', locale: 'en', createdAt: '2026-08-30T03:20:00Z' }),
+  reg(40, SESSION.article6, PERSON.rasoanaivo, { referral: 'other', createdAt: '2026-08-31T06:05:00Z' }),
 
   // --- Accès au Fonds vert (12 novembre) · 7 inscriptions ------------------
-  reg(41, SESSION.accesFondsVert, PERSON.josephPierre, { referral: 'word_of_mouth', createdAt: '2026-10-01T10:00:00Z' }),
-  reg(42, SESSION.accesFondsVert, PERSON.zinsou, { referral: 'ifdd_website', createdAt: '2026-10-01T12:25:00Z' }),
-  reg(43, SESSION.accesFondsVert, PERSON.sowFall, { referral: 'email_newsletter', createdAt: '2026-10-02T08:45:00Z' }),
-  reg(44, SESSION.accesFondsVert, PERSON.ngoBassong, { referral: 'email_newsletter', createdAt: '2026-10-02T14:10:00Z' }),
-  reg(45, SESSION.accesFondsVert, PERSON.elFassi, { referral: 'ifdd_linkedin', createdAt: '2026-10-03T09:35:00Z' }),
-  reg(46, SESSION.accesFondsVert, PERSON.gagnon, { referral: 'ifdd_website', locale: 'en', createdAt: '2026-10-04T15:50:00Z' }),
+  reg(41, SESSION.accesFondsVert, PERSON.josephPierre, { referral: 'word_of_mouth', createdAt: '2026-09-01T10:00:00Z' }),
+  reg(42, SESSION.accesFondsVert, PERSON.zinsou, { referral: 'ifdd_website', createdAt: '2026-09-01T12:25:00Z' }),
+  reg(43, SESSION.accesFondsVert, PERSON.sowFall, { referral: 'email_newsletter', createdAt: '2026-09-02T08:45:00Z' }),
+  reg(44, SESSION.accesFondsVert, PERSON.ngoBassong, { referral: 'email_newsletter', createdAt: '2026-09-02T14:10:00Z' }),
+  reg(45, SESSION.accesFondsVert, PERSON.elFassi, { referral: 'ifdd_linkedin', createdAt: '2026-09-03T09:35:00Z' }),
+  reg(46, SESSION.accesFondsVert, PERSON.gagnon, { referral: 'ifdd_website', locale: 'en', createdAt: '2026-09-04T15:50:00Z' }),
   reg(47, SESSION.accesFondsVert, PERSON.compaore, {
     referral: 'ifdd_facebook',
     source: 'import',
-    createdAt: '2026-10-05T07:20:00Z',
+    createdAt: '2026-09-05T07:20:00Z',
   }),
 
   // --- Atelier de négociation (13 novembre) · huit places, onze demandes ----
-  reg(48, SESSION.atelierNegociation1, PERSON.sowFall, { referral: 'ifdd_website', createdAt: '2026-10-06T08:00:00Z' }),
-  reg(49, SESSION.atelierNegociation1, PERSON.zinsou, { referral: 'ifdd_website', createdAt: '2026-10-06T08:12:00Z' }),
-  reg(50, SESSION.atelierNegociation1, PERSON.ngoBassong, { referral: 'email_newsletter', createdAt: '2026-10-06T08:40:00Z' }),
-  reg(51, SESSION.atelierNegociation1, PERSON.koffi, { referral: 'word_of_mouth', createdAt: '2026-10-06T09:05:00Z' }),
-  reg(52, SESSION.atelierNegociation1, PERSON.josephPierre, { referral: 'email_newsletter', createdAt: '2026-10-06T09:30:00Z' }),
-  reg(53, SESSION.atelierNegociation1, PERSON.elFassi, { referral: 'ifdd_linkedin', createdAt: '2026-10-06T10:15:00Z' }),
-  reg(54, SESSION.atelierNegociation1, PERSON.tranVanMinh, { referral: 'ifdd_linkedin', locale: 'en', createdAt: '2026-10-06T11:00:00Z' }),
-  reg(55, SESSION.atelierNegociation1, PERSON.compaore, { referral: 'word_of_mouth', createdAt: '2026-10-06T13:45:00Z' }),
+  reg(48, SESSION.atelierNegociation1, PERSON.sowFall, { referral: 'ifdd_website', createdAt: '2026-09-06T08:00:00Z' }),
+  reg(49, SESSION.atelierNegociation1, PERSON.zinsou, { referral: 'ifdd_website', createdAt: '2026-09-06T08:12:00Z' }),
+  reg(50, SESSION.atelierNegociation1, PERSON.ngoBassong, { referral: 'email_newsletter', createdAt: '2026-09-06T08:40:00Z' }),
+  reg(51, SESSION.atelierNegociation1, PERSON.koffi, { referral: 'word_of_mouth', createdAt: '2026-09-06T09:05:00Z' }),
+  reg(52, SESSION.atelierNegociation1, PERSON.josephPierre, { referral: 'email_newsletter', createdAt: '2026-09-06T09:30:00Z' }),
+  reg(53, SESSION.atelierNegociation1, PERSON.elFassi, { referral: 'ifdd_linkedin', createdAt: '2026-09-06T10:15:00Z' }),
+  reg(54, SESSION.atelierNegociation1, PERSON.tranVanMinh, { referral: 'ifdd_linkedin', locale: 'en', createdAt: '2026-09-06T11:00:00Z' }),
+  reg(55, SESSION.atelierNegociation1, PERSON.compaore, { referral: 'word_of_mouth', createdAt: '2026-09-06T13:45:00Z' }),
   // Les huit places sont prises : les demandes suivantes passent en attente,
   // avec des positions qui se suivent.
   reg(56, SESSION.atelierNegociation1, PERSON.ilboudo, {
     referral: 'ifdd_facebook',
     status: 'waitlisted',
     waitlistPosition: 1,
-    createdAt: '2026-10-06T18:20:00Z',
+    createdAt: '2026-09-06T18:20:00Z',
   }),
   reg(57, SESSION.atelierNegociation1, PERSON.rakotomalala, {
     referral: 'ifdd_x',
     status: 'waitlisted',
     waitlistPosition: 2,
-    createdAt: '2026-10-07T05:40:00Z',
+    createdAt: '2026-09-07T05:40:00Z',
   }),
   reg(58, SESSION.atelierNegociation1, PERSON.mbayeNdiaye, {
     referral: 'word_of_mouth',
     status: 'waitlisted',
     waitlistPosition: 3,
-    createdAt: '2026-10-07T09:10:00Z',
+    createdAt: '2026-09-07T09:10:00Z',
   }),
 
   // --- Agroécologie (13 novembre) · 2 inscriptions -------------------------
-  reg(59, SESSION.agroecologie, PERSON.kabore, { referral: 'word_of_mouth', createdAt: '2026-10-08T08:30:00Z' }),
-  reg(60, SESSION.agroecologie, PERSON.ouedraogo, { referral: 'ifdd_website', createdAt: '2026-10-08T09:00:00Z' }),
+  reg(59, SESSION.agroecologie, PERSON.kabore, { referral: 'word_of_mouth', createdAt: '2026-09-08T08:30:00Z' }),
+  reg(60, SESSION.agroecologie, PERSON.ouedraogo, { referral: 'ifdd_website', createdAt: '2026-09-08T09:00:00Z' }),
 
   // --- COP30 · Littoraux d'Afrique de l'Ouest (12 novembre 2025) -----------
   //

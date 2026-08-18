@@ -506,6 +506,107 @@ COMMENT ON MATERIALIZED VIEW analytics.mv_daily_submissions IS
     'Dépôts de propositions par jour et par événement, série continue de l''ouverture de l''appel à son échéance (ou à aujourd''hui).';
 
 -- -----------------------------------------------------------------------------
+-- 4 bis. Inscriptions aux activités, par jour et par événement
+--
+-- POURQUOI CETTE PROJECTION EXISTE, alors que mv_daily_signups compte déjà des
+-- « inscriptions par jour ». Les deux mots recouvrent deux faits sans rapport :
+-- mv_daily_signups compte des CRÉATIONS DE COMPTE sur la plateforme entière,
+-- mv_daily_registrations compte des INSCRIPTIONS À UNE ACTIVITÉ d'une édition
+-- donnée. Le tableau de bord du back-office (écran A6) a besoin du second — la
+-- question qu'on se pose dans les semaines qui précèdent une COP est « le public
+-- s'inscrit-il aux activités ? », pas « combien de comptes se sont créés ».
+--
+-- ET SURTOUT : mv_daily_signups N'EST PAS VENTILABLE PAR ÉVÉNEMENT. Un
+-- administrateur détaché sur une seule édition (règle du périmètre
+-- d'administration, identity.administered_events) ne peut donc rien en lire qui
+-- le concerne. Cette projection-ci porte event_id dans sa clé, ce qui la rend
+-- filtrable comme tout le reste du back-office.
+--
+-- Série CONTINUE, pour la même raison que les deux séries précédentes : un jour
+-- sans inscription est une information, pas une absence. La fenêtre court de la
+-- première inscription (ou de l'ouverture de l'appel, faute d'inscription) à la
+-- fin de l'édition, sans dépasser aujourd'hui — projeter une courbe dans le
+-- futur donnerait une longue traîne de zéros qui écrase la lecture du passé.
+-- -----------------------------------------------------------------------------
+CREATE MATERIALIZED VIEW analytics.mv_daily_registrations AS
+WITH inscriptions AS (
+    SELECT
+        s.event_id,
+        (r.created_at AT TIME ZONE 'UTC')::date AS jour,
+        r.status,
+        r.joined_at,
+        r.person_id
+    FROM programme.registrations r
+    JOIN programme.sessions s ON s.id = r.session_id
+),
+fenetres AS (
+    SELECT
+        e.id AS event_id,
+        COALESCE(min(i.jour), (e.starts_at AT TIME ZONE 'UTC')::date) AS debut,
+        LEAST(
+            GREATEST(
+                COALESCE(max(i.jour), (e.starts_at AT TIME ZONE 'UTC')::date),
+                (e.ends_at AT TIME ZONE 'UTC')::date
+            ),
+            CURRENT_DATE
+        ) AS fin
+    FROM event.events e
+    LEFT JOIN inscriptions i ON i.event_id = e.id
+    GROUP BY e.id, e.starts_at, e.ends_at
+),
+calendrier AS (
+    SELECT f.event_id, g::date AS jour
+    FROM fenetres f
+    CROSS JOIN LATERAL generate_series(
+        -- Borne de sécurité : deux ans de série au plus par événement, comme
+        -- pour les dépôts.
+        GREATEST(f.debut, f.fin - 730)::timestamp,
+        f.fin::timestamp,
+        interval '1 day'
+    ) AS g
+    WHERE f.debut IS NOT NULL AND f.fin IS NOT NULL AND f.fin >= f.debut
+),
+par_jour AS (
+    SELECT
+        i.event_id,
+        i.jour,
+        count(*) FILTER (WHERE i.status <> 'cancelled')      AS inscriptions,
+        count(*) FILTER (WHERE i.status = 'waitlisted')      AS liste_attente,
+        count(*) FILTER (WHERE i.status = 'cancelled')       AS annulations,
+        count(*) FILTER (WHERE i.joined_at IS NOT NULL)      AS presents,
+        count(DISTINCT i.person_id) FILTER (WHERE i.status <> 'cancelled') AS personnes_distinctes
+    FROM inscriptions i
+    GROUP BY i.event_id, i.jour
+)
+SELECT
+    cal.jour,
+    cal.event_id,
+    platform.t(e.title)                     AS evenement,
+    e.edition_year,
+    COALESCE(pj.inscriptions, 0)            AS inscriptions,
+    COALESCE(pj.liste_attente, 0)           AS liste_attente,
+    COALESCE(pj.annulations, 0)             AS annulations,
+    COALESCE(pj.presents, 0)                AS presents,
+    COALESCE(pj.personnes_distinctes, 0)    AS personnes_distinctes,
+    sum(COALESCE(pj.inscriptions, 0)) OVER (PARTITION BY cal.event_id ORDER BY cal.jour
+                                            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS inscriptions_cumulees,
+    round(avg(COALESCE(pj.inscriptions, 0)) OVER (PARTITION BY cal.event_id ORDER BY cal.jour
+                                                  ROWS BETWEEN 6 PRECEDING AND CURRENT ROW), 2) AS moyenne_mobile_7j
+FROM calendrier cal
+JOIN event.events e ON e.id = cal.event_id
+LEFT JOIN par_jour pj ON pj.event_id = cal.event_id AND pj.jour = cal.jour;
+
+CREATE UNIQUE INDEX ux_mv_daily_registrations ON analytics.mv_daily_registrations (jour, event_id);
+CREATE INDEX ix_mv_daily_registrations_event  ON analytics.mv_daily_registrations (event_id, jour DESC);
+
+COMMENT ON MATERIALIZED VIEW analytics.mv_daily_registrations IS
+    'Inscriptions aux activités par jour et par événement, série continue. À ne pas confondre avec mv_daily_signups, qui compte des créations de compte sur toute la plateforme.';
+COMMENT ON COLUMN analytics.mv_daily_registrations.inscriptions IS
+    'Inscriptions non annulées créées ce jour-là, liste d''attente comprise. Les annulations sont comptées à part, jamais soustraites.';
+COMMENT ON COLUMN analytics.mv_daily_registrations.personnes_distinctes IS
+    'Personnes distinctes inscrites ce jour-là : une même personne inscrite à trois activités le même jour ne compte qu''une fois.';
+
+-- -----------------------------------------------------------------------------
 -- 5. Fiche de performance des organisations
 --
 -- C'EST l'écran « liste des organisations » du back-office : « leurs activités,
@@ -1024,6 +1125,7 @@ DECLARE
         'mv_daily_signups',
         'mv_proposal_funnel',
         'mv_daily_submissions',
+        'mv_daily_registrations',
         'mv_organization_scorecard',
         'mv_session_attendance',
         'mv_reviewer_workload',

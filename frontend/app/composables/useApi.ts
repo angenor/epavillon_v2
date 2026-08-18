@@ -54,6 +54,7 @@ import type {
   SubmitProposalPayload,
   SubmitProposalResult,
 } from '~/types/proposal-form'
+import type { AdminDashboard } from '~/types/admin-dashboard'
 import type {
   DecideMembershipPayload,
   InviteMemberPayload,
@@ -738,6 +739,46 @@ export function useApi() {
           (m) => m.resolveComment(personId, payload),
           payload.resolved ? 'POST' : 'DELETE',
         ),
+    },
+
+    // -----------------------------------------------------------------------
+    // Back-office (A6)
+    //
+    // UNE COMPOSITION, PAS NEUF LECTURES. Le tableau de bord ouvre sur cinq
+    // familles d'alerte, trois projections analytiques, une vue de santé et les
+    // incidents actifs. Lues séparément, elles produisent neuf allers-retours au
+    // chargement d'une page consultée vingt fois par jour — et neuf instants de
+    // mesure différents dans un même écran, où l'entonnoir et la liste des
+    // dossiers finissent par ne plus dire la même chose.
+    //
+    // LE PÉRIMÈTRE EST VÉRIFIÉ AVANT L'APPEL, comme pour la liste des
+    // propositions et le planificateur : une édition hors périmètre REFUSE
+    // l'accès plutôt que de rendre un tableau de bord vide, qui se lirait comme
+    // « il ne se passe rien » au lieu de « ceci ne vous regarde pas ».
+    // -----------------------------------------------------------------------
+    admin: {
+      dashboard: (eventId: Uuid, scope: AdministeredEvents): Promise<AdminDashboard | null> => {
+        assertEventInScope(eventId, scope)
+        return call('/admin/dashboard', (m) => m.adminDashboard(eventId), { event_id: eventId })
+      },
+
+      /**
+       * SANTÉ OPÉRATIONNELLE SEULE — `analytics.v_operational_health`.
+       *
+       * Elle est DANS la composition ci-dessus, et disponible à part pour une
+       * seule raison : c'est la seule zone de l'écran qui se rafraîchit sans
+       * recharger le reste. Une file qui se vide se regarde en direct ; un
+       * entonnoir matérialisé, non.
+       *
+       * ELLE NE DÉPEND D'AUCUNE ÉDITION : elle mesure la plateforme. Ce qu'elle
+       * révèle — des courriels en rebond, un outbox en retard — ne dit rien
+       * d'une autre COP, et un administrateur détaché doit le voir : les rappels
+       * qui ne partent plus sont ceux de SES activités.
+       */
+      operationalHealth: () => call('/admin/health', (m) => m.operationalHealth()),
+
+      /** Compteurs temps réel de la plateforme — `analytics.v_platform_overview`. */
+      overview: () => call('/admin/overview', (m) => m.platformOverview()),
     },
 
     // -----------------------------------------------------------------------

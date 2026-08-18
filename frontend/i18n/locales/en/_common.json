@@ -70,6 +70,9 @@
     "unknown": "Not provided",
     "yes": "Yes"
   },
+  "formats": {
+    "percent": "{value}%"
+  },
   "pagination": {
     "next": "Next page",
     "of": "of",

@@ -69,6 +69,7 @@ const classes = computed(() =>
     :required="props.required"
     :disabled="props.disabled"
     :readonly="props.readonly"
+    :hide-label="props.hideLabel"
     :counter="counter"
     :counter-exceeded="Boolean(props.maxlength && length > props.maxlength)"
   >
