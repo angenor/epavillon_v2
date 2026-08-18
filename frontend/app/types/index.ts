@@ -37,14 +37,14 @@
  *
  * `navigation.ts`, `ui.ts`, `auth.ts`, `organization-join.ts`,
  * `organization-workspace.ts`, `proposal-form.ts`, `event-programme.ts`,
- * `admin-dashboard.ts` et `admin-proposals.ts` ne
+ * `admin-dashboard.ts`, `admin-proposals.ts` et `admin-review.ts` ne
  * sont PAS ré-exportés : ils ne décrivent pas le modèle. Le premier porte une
  * augmentation de `PageMeta` que les layouts importent directement, le deuxième
  * le vocabulaire des composants d'interface, les autres les contrats d'un écran
  * — authentification (A1), rattachement (A2), page publique d'une édition (A3),
  * formulaire de dépôt (A4), espace organisation (A5), tableau de bord du
- * back-office (A6), liste des propositions (A7) : requêtes, réponses et
- * compositions, sans aucune table.
+ * back-office (A6), liste des propositions (A7), fiche d'évaluation (A8) :
+ * requêtes, réponses et compositions, sans aucune table.
  */
 
 export type * from './shared'

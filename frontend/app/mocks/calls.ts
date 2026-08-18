@@ -51,10 +51,15 @@ export const callsForProposals = [
     daily_end_time: '17:00:00',
     allowed_formats: ['in_person', 'hybrid', 'online'],
     required_reviews: 3,
-    // Évaluation à découvert : le commanditaire souhaite que les membres du
-    // comité voient les notes des autres et la moyenne. Valeur par défaut encore
-    // en arbitrage, consignée dans `docs/PROGRESSION.md`.
-    blind_review: false,
+    // ÉVALUATION EN AVEUGLE — un membre du comité ne voit les notes de ses pairs
+    // qu'APRÈS avoir soumis la sienne. C'est la valeur par défaut du modèle
+    // (`060_events.sql` : `blind_review boolean NOT NULL DEFAULT true`) et ce que
+    // le prompt A8 demande de montrer. Elle était à `false` depuis le 17/08 pour
+    // un arbitrage du commanditaire ; la fiche d'évaluation gère les DEUX modes,
+    // et c'est celui-ci qui protège de l'effet d'ancrage. Bascule consignée dans
+    // `docs/PROGRESSION.md` : l'appel de la COP29 reste en aveugle, celui de la
+    // COP30 à découvert — les deux branches de l'écran ont donc des données.
+    blind_review: true,
     guidelines_url: 'https://www.ifdd.francophonie.org/cop31/appel-a-propositions',
     created_by: PERSON.bakayoko,
     created_at: '2026-05-12T09:00:00Z',

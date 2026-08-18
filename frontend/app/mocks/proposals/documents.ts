@@ -139,6 +139,42 @@ export const proposalAssets = [
     status: 'quarantined',
     verdict: 'infected',
   }),
+
+  // --- Ajoutés au prompt A8 -------------------------------------------------
+  // LES PIÈCES DES DOSSIERS EN COURS D'ÉVALUATION MANQUAIENT. Les sept objets
+  // ci-dessus se rattachent à des dossiers retenus, écartés ou en correction :
+  // la fiche d'évaluation, qui travaille sur les dossiers EN ÉVALUATION,
+  // n'affichait donc jamais un seul document consultable. Or c'est là que les
+  // pièces servent — un membre du comité note sur pièces, pas sur un résumé.
+  document_asset(8, {
+    key: '2026/07/budgets-genre/note-methodologique.pdf',
+    mime: 'application/pdf',
+    bytes: 736_512,
+    filename: 'Note méthodologique — marqueur genre.pdf',
+    owner: PERSON.ngoBassong,
+    organization: ORG.cofemac,
+    createdAt: '2026-07-24T09:10:00Z',
+  }),
+  document_asset(9, {
+    // INTERNE au dossier d'évaluation : la grille de dépouillement n'a pas
+    // vocation à paraître sur la page publique de l'activité.
+    key: '2026/07/budgets-genre/grille-depouillement.xlsx',
+    mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    bytes: 98_304,
+    filename: 'Grille de dépouillement budgétaire.xlsx',
+    owner: PERSON.ngoBassong,
+    organization: ORG.cofemac,
+    createdAt: '2026-07-24T09:14:00Z',
+  }),
+  document_asset(10, {
+    key: '2026/07/cartographie-cotonou/protocole-releve.pdf',
+    mime: 'application/pdf',
+    bytes: 1_204_887,
+    filename: 'Protocole de relevé communautaire.pdf',
+    owner: PERSON.zinsou,
+    organization: ORG.anteb,
+    createdAt: '2026-07-27T15:30:00Z',
+  }),
 ] satisfies Asset[]
 
 // ---------------------------------------------------------------------------
@@ -225,6 +261,44 @@ export const proposalDocuments = [
     is_public: false,
     uploaded_by: PERSON.koffi,
     uploaded_at: '2026-07-21T12:00:00Z',
+    sort_order: 10,
+  },
+
+  // --- Dossiers en cours d'évaluation (A8) ---------------------------------
+  {
+    id: PROPOSAL_DOCUMENT(8),
+    proposal_id: PROPOSAL.budgetsGenre,
+    asset_id: ASSET(8),
+    title: {
+      fr: 'Note méthodologique sur le marqueur genre',
+      en: 'Methodological note on the gender marker',
+    },
+    document_type_code: 'technical_note',
+    is_public: true,
+    uploaded_by: PERSON.ngoBassong,
+    uploaded_at: '2026-07-24T09:10:00Z',
+    sort_order: 10,
+  },
+  {
+    id: PROPOSAL_DOCUMENT(9),
+    proposal_id: PROPOSAL.budgetsGenre,
+    asset_id: ASSET(9),
+    title: { fr: 'Grille de dépouillement budgétaire' },
+    document_type_code: 'relevant_document',
+    is_public: false,
+    uploaded_by: PERSON.ngoBassong,
+    uploaded_at: '2026-07-24T09:14:00Z',
+    sort_order: 20,
+  },
+  {
+    id: PROPOSAL_DOCUMENT(10),
+    proposal_id: PROPOSAL.cartographieCotonou,
+    asset_id: ASSET(10),
+    title: { fr: 'Protocole de relevé communautaire' },
+    document_type_code: 'technical_note',
+    is_public: true,
+    uploaded_by: PERSON.zinsou,
+    uploaded_at: '2026-07-27T15:30:00Z',
     sort_order: 10,
   },
 ] satisfies ProposalDocument[]

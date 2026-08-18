@@ -48,6 +48,8 @@
  *   proposal-reads.ts    les accusés de lecture, par dossier et par personne
  *   admin-proposals.ts   la composition de la liste des propositions (A7) et
  *                        ses actions groupées
+ *   proposal-review.ts   la composition de la fiche d'évaluation (A8), le voile
+ *                        de l'évaluation en aveugle et ses quatre écritures
  */
 
 export * from './ids'
@@ -174,3 +176,12 @@ export {
   assignReviewer,
   changeProposalStatus,
 } from './admin-proposals'
+
+export {
+  reviewDesk,
+  organizationTrackRecord,
+  saveReview,
+  recuseFromProposal,
+  postProposalComment,
+  decideProposal,
+} from './proposal-review'

@@ -23,10 +23,14 @@
  * consulte, la fiche d'évaluation (A8) travaillant sur les dossiers en cours.
  * L'écart est consigné dans `docs/PROGRESSION.md`.
  *
- * ÉVALUATION À DÉCOUVERT : l'appel simulé pose `blind_review: false`, donc un
- * membre du comité voit les notes des autres. Le déport (`recused_at`) est
- * représenté : un révisionniste déclare un lien avec l'organisation porteuse et
- * se retire, ce qui doit se lire dans l'écran d'affectation.
+ * ÉVALUATION EN AVEUGLE : l'appel simulé pose `blind_review: true` depuis le
+ * 18/08, donc un membre du comité ne voit les notes de ses pairs qu'APRÈS avoir
+ * soumis la sienne — c'est ce que la fiche d'évaluation (A8) doit montrer, et ce
+ * que le modèle prend par défaut. Deux revues du jeu restent délibérément non
+ * soumises (`submitted_at: null`) : sans elles, le voile ne se verrait jamais.
+ * Le déport (`recused_at`) est représenté : un révisionniste déclare un lien
+ * avec l'organisation porteuse et se retire, ce qui se lit dans l'écran
+ * d'affectation comme dans la fiche.
  */
 
 import type { Review, ReviewAssignment, ReviewScore } from '~/types/programme/review'

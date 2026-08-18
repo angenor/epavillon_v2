@@ -419,9 +419,16 @@ export const proposalSpeakers = [
     confirmedAt: '2026-07-01T08:00:00Z',
     sentAt: '2026-06-28T09:00:00Z',
   }),
-  speaker(161, PROPOSAL.budgetsGenre, PERSON.duchesne, 20, {
+  // PAS UN MEMBRE DU COMITÉ. Ce panéliste était Marc Duchesne jusqu'au 18/08,
+  // c'est-à-dire quelqu'un qui NOTE ce dossier : la fiche d'évaluation (A8)
+  // affichait donc un évaluateur parmi les intervenants qu'il évalue. Le déport
+  // existe pour cela (`review_assignments.recused_at`), et le jeu de données ne
+  // doit pas normaliser le conflit d'intérêts qu'il est censé faire déclarer.
+  speaker(161, PROPOSAL.budgetsGenre, PERSON.tremblay, 20, {
     role: 'panelist',
-    job: 'Expert finance climatique',
+    // Fonction AU MOMENT de l'activité : le snapshot n'a pas à recopier le
+    // profil, c'est ce que la colonne permet.
+    job: 'Chargé de programme finance climatique',
     org: 'Institut de la Francophonie pour le développement durable',
     organizationId: ORG.ifdd,
     confirmedAt: null,

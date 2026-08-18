@@ -596,7 +596,7 @@ date de dépôt.
 - Indicateur discret des dossiers non encore consultés par l'utilisateur courant.
 ```
 
-**A8 — Fiche d'évaluation d'une proposition**
+**A8 — Fiche d'évaluation d'une proposition** (fait le 18/08)
 
 ```
 [PRÉAMBULE]

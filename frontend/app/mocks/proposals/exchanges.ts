@@ -174,6 +174,90 @@ export const proposalComments = [
     created_at: '2026-08-05T07:45:00Z',
   },
 
+  // --- Le dossier de la fiche d'évaluation (A8) : les trois visibilités -----
+  //
+  // COP31-00020 est le dossier sur lequel se règle l'écran d'évaluation : il est
+  // en cours de revue, co-organisé, porte un déport et une revue encore
+  // attendue. Il lui manquait ses échanges — sans eux, la distinction entre ce
+  // que le comité s'écrit et ce qui est adressé au déposant n'avait aucune
+  // donnée à montrer, alors qu'elle est le risque principal de cet écran.
+  {
+    id: PROPOSAL_COMMENT(12),
+    proposal_id: PROPOSAL.budgetsGenre,
+    parent_id: null,
+    author_id: PERSON.duchesne,
+    visibility: 'committee',
+    body: "Le sujet tient, mais les trois pays annoncés ne sont pas nommés et le calendrier budgétaire visé n'est pas décrit. Avant de demander une correction, vérifions si le guide annoncé existe déjà : s'il reste à écrire, la session promet un livrable qu'elle ne produira pas.",
+    is_change_request: false,
+    resolved_at: null,
+    resolved_by: null,
+    edited_at: null,
+    deleted_at: null,
+    created_at: '2026-08-04T10:20:00Z',
+  },
+  {
+    id: PROPOSAL_COMMENT(13),
+    proposal_id: PROPOSAL.budgetsGenre,
+    parent_id: PROPOSAL_COMMENT(12),
+    author_id: PERSON.rasoanaivo,
+    visibility: 'committee',
+    body: "Le guide existe en version de travail, je l'ai vu circuler en juin. Reste la question du second intervenant : sans quelqu'un d'une direction du budget, la session parlera de finances publiques sans les financiers.",
+    is_change_request: false,
+    resolved_at: null,
+    resolved_by: null,
+    edited_at: null,
+    deleted_at: null,
+    created_at: '2026-08-05T16:40:00Z',
+  },
+  {
+    // PARTAGÉ AVEC LE DÉPOSANT, et ce n'est pas une demande de correction : une
+    // précision peut se demander sans renvoyer le dossier, ce que la v1 ne
+    // savait pas faire — tout échange y rouvrait le dossier.
+    id: PROPOSAL_COMMENT(14),
+    proposal_id: PROPOSAL.budgetsGenre,
+    parent_id: null,
+    author_id: PERSON.perretAdmin,
+    visibility: 'submitter',
+    body: "Le comité examine votre dossier cette semaine. Pourriez-vous préciser si un représentant d'une direction du budget sera présent au panel ? Cette information n'appelle pas de nouveau dépôt : une réponse ici suffit.",
+    is_change_request: false,
+    resolved_at: null,
+    resolved_by: null,
+    edited_at: null,
+    deleted_at: null,
+    created_at: '2026-08-07T08:15:00Z',
+  },
+  {
+    id: PROPOSAL_COMMENT(15),
+    proposal_id: PROPOSAL.budgetsGenre,
+    parent_id: PROPOSAL_COMMENT(14),
+    author_id: PERSON.ngoBassong,
+    visibility: 'submitter',
+    body: "Oui : la directrice du budget du ministère des finances camerounais a confirmé sa venue par courriel le 2 août. Je joins la confirmation au dossier dès que l'accréditation est déposée.",
+    is_change_request: false,
+    resolved_at: null,
+    resolved_by: null,
+    edited_at: null,
+    deleted_at: null,
+    created_at: '2026-08-08T11:30:00Z',
+  },
+  {
+    // NOTE PERSONNELLE : visible de son seul auteur, y compris des autres
+    // membres du comité. Elle est ici pour que la fiche d'évaluation ait de quoi
+    // éprouver la troisième visibilité sur le dossier qu'elle montre.
+    id: PROPOSAL_COMMENT(16),
+    proposal_id: PROPOSAL.budgetsGenre,
+    parent_id: null,
+    author_id: PERSON.lemoine,
+    visibility: 'private',
+    body: "Reprendre la note méthodologique avant de noter : le marqueur genre y est décrit autrement que dans la présentation du dossier.",
+    is_change_request: false,
+    resolved_at: null,
+    resolved_by: null,
+    edited_at: null,
+    deleted_at: null,
+    created_at: '2026-08-09T07:05:00Z',
+  },
+
   // --- Commentaire supprimé, conservé en base ------------------------------
   {
     id: PROPOSAL_COMMENT(11),
@@ -280,6 +364,13 @@ export const proposalTransitions = [
     '2026-08-11T14:45:00Z',
     "Format incompatible avec les moyens du pavillon.",
   ),
+
+  // Dossier EN COURS D'ÉVALUATION — celui que montre la fiche d'évaluation (A8).
+  // Son journal s'arrête au passage en revue : c'est précisément l'état où une
+  // décision reste à prendre, et la frise de l'écran doit pouvoir le rendre.
+  transition(50, PROPOSAL.budgetsGenre, null, 'draft', PERSON.ngoBassong, '2026-06-24T11:00:00Z'),
+  transition(51, PROPOSAL.budgetsGenre, 'draft', 'submitted', PERSON.ngoBassong, '2026-07-02T09:30:00Z'),
+  transition(52, PROPOSAL.budgetsGenre, 'submitted', 'under_review', PERSON.bakayoko, '2026-07-27T10:00:00Z'),
 
   // Dossier en correction, encore ouvert.
   transition(40, PROPOSAL.ecolesResilientes, null, 'draft', PERSON.josephPierre, '2026-07-15T10:05:00Z'),

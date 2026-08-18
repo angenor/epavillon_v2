@@ -1,0 +1,292 @@
+{
+  "title": "Fiche d'évaluation",
+  "backToList": "Retour aux propositions",
+  "loading": "Chargement du dossier",
+  "forbidden": {
+    "scope": "Consulter et évaluer les propositions"
+  },
+  "notFound": {
+    "title": "Dossier introuvable",
+    "description": "Ce dossier n'existe pas, a été supprimé, ou n'appartient pas à votre périmètre d'administration.",
+    "action": "Revenir à la liste"
+  },
+  "status": {
+    "draft": "Brouillon",
+    "submitted": "Déposé",
+    "under_review": "En évaluation",
+    "changes_requested": "Corrections demandées",
+    "accepted": "Retenu",
+    "rejected": "Non retenu",
+    "withdrawn": "Retiré",
+    "cancelled": "Annulé"
+  },
+  "format": {
+    "in_person": "Sur place",
+    "online": "En ligne",
+    "hybrid": "Hybride"
+  },
+  "header": {
+    "committee": "Avancement du comité",
+    "progress": "{done} revues rendues sur {expected} attendues",
+    "progressNoTarget": "{count} revue rendue | {count} revue rendue | {count} revues rendues",
+    "score": "Note moyenne",
+    "noScore": "Pas encore noté",
+    "outOf20": "{score} / 20",
+    "rank": "Rang",
+    "rankValue": "{rank}ᵉ de l'édition",
+    "rankFirst": "1er de l'édition",
+    "noRank": "Sans classement",
+    "readBy": "Lu par un membre du comité | Lu par un membre du comité | Lu par {count} membres du comité",
+    "firstVisit": "Vous ouvrez ce dossier pour la première fois.",
+    "knockedOut": "Éliminé par un critère rédhibitoire",
+    "submittedAt": "Déposé le {date}",
+    "decidedAt": "Décidé le {date}",
+    "notSubmitted": "Jamais déposé",
+    "openInList": "Voir dans la liste"
+  },
+  "decision": {
+    "title": "Décision",
+    "hint": "Réservée aux personnes qui en ont le droit. La notation, elle, est ouverte à tout membre du comité affecté.",
+    "none": "Aucune décision n'est possible depuis l'état actuel du dossier.",
+    "forbidden": "Vous n'avez pas le droit de décider sur cette édition.",
+    "action": {
+      "under_review": "Passer en évaluation",
+      "changes_requested": "Demander des corrections",
+      "accepted": "Retenir",
+      "rejected": "Rejeter",
+      "cancelled": "Annuler",
+      "withdrawn": "Retirer",
+      "submitted": "Renvoyer au comité",
+      "draft": "Remettre en brouillon"
+    },
+    "confirm": {
+      "title": "{action} — {reference}",
+      "description": "Le dossier passe de « {from} » à « {to} ». L'organisation porteuse en est notifiée.",
+      "reason": "Motif",
+      "reasonHint": "Obligatoire pour cette transition : il est conservé dans l'historique du dossier et communiqué à l'organisation.",
+      "reasonOptionalHint": "Facultatif. S'il est renseigné, il est conservé dans l'historique et communiqué à l'organisation.",
+      "reasonRequired": "Cette transition exige un motif.",
+      "submit": "Confirmer"
+    },
+    "success": "Dossier passé à « {status} ».",
+    "notAllowed": "Cette transition n'est pas possible depuis l'état actuel du dossier.",
+    "reasonRequired": "Cette transition exige un motif.",
+    "error": "La décision n'a pas pu être enregistrée. Rien n'a été modifié."
+  },
+  "tabs": {
+    "dossier": "Dossier",
+    "history": "Historique des modifications"
+  },
+  "dossier": {
+    "summary": "Résumé",
+    "objectives": "Objectifs",
+    "presentation": "Présentation détaillée",
+    "outcomes": "Résultats attendus",
+    "audiences": "Publics visés",
+    "themes": "Thématiques",
+    "activityType": "Type d'activité",
+    "languages": "Langues de travail",
+    "country": "Pays concerné",
+    "slot": "Créneau souhaité",
+    "noSlot": "Aucun créneau souhaité n'a été indiqué.",
+    "duration": "{count} minutes",
+    "sessionsRequested": "Une occurrence demandée | Une occurrence demandée | {count} occurrences demandées",
+    "constraints": "Contraintes de programmation",
+    "submitter": "Déposé par",
+    "submittedBy": "Déposé par {name}",
+    "contact": "Contact du dossier : {name}",
+    "empty": "Non renseigné"
+  },
+  "organizations": {
+    "title": "Organisations",
+    "role": {
+      "lead": "Porteur principal",
+      "co_organizer": "Co-organisateur",
+      "partner": "Partenaire",
+      "sponsor": "Soutien"
+    },
+    "pending": "Co-organisation non confirmée",
+    "confirmedOn": "Confirmée le {date}",
+    "record": {
+      "title": "Historique de participation",
+      "submitted": "Aucun dossier déposé | Un dossier déposé | {count} dossiers déposés",
+      "accepted": "{count} retenu",
+      "rejected": "{count} écarté",
+      "editions": "sur une édition | sur une édition | sur {count} éditions",
+      "sessions": "Aucune activité tenue | Une activité tenue | {count} activités tenues",
+      "averageScore": "Note moyenne obtenue : {score} / 20",
+      "ratio": "Taux de sélection : {ratio} %",
+      "last": "Dernier dépôt : {date}",
+      "firstTime": "Première proposition de cette organisation à l'IFDD."
+    }
+  },
+  "speakers": {
+    "title": "Intervenants",
+    "empty": "Aucun intervenant n'est annoncé dans ce dossier.",
+    "role": {
+      "speaker": "Intervenant",
+      "moderator": "Modérateur",
+      "panelist": "Panéliste",
+      "keynote": "Grand témoin",
+      "facilitator": "Animateur",
+      "interpreter": "Interprète"
+    },
+    "confirmed": "Présence confirmée le {date}",
+    "invited": "Invitation envoyée le {date}, sans réponse",
+    "notInvited": "Invitation pas encore envoyée",
+    "questions": "Disponible pour les questions du public"
+  },
+  "documents": {
+    "title": "Documents",
+    "empty": "Aucune pièce n'est jointe à ce dossier.",
+    "internal": "Interne au dossier",
+    "public": "Publiable",
+    "quarantined": "Fichier mis en quarantaine par l'analyse antivirus : il n'est pas consultable.",
+    "unavailable": "Fichier indisponible",
+    "open": "Ouvrir {title}",
+    "uploadedAt": "Déposé le {date}",
+    "size": "{size} Mo"
+  },
+  "panel": {
+    "title": "Mon évaluation",
+    "description": "Vos notes ne sont visibles de personne tant que vous ne les avez pas déposées.",
+    "notAssigned": {
+      "title": "Ce dossier ne vous est pas confié",
+      "description": "Vous pouvez le lire et écrire au comité, mais la grille est réservée aux membres qui en sont chargés."
+    },
+    "cannotReview": {
+      "title": "Lecture seule",
+      "description": "Vous n'avez pas le droit de noter les propositions de cette édition."
+    },
+    "grid": "Grille d'évaluation",
+    "weight": "poids {weight}",
+    "max": "sur {max}",
+    "knockout": "Éliminatoire",
+    "knockoutHint": "Une note de zéro sur ce critère disqualifie le dossier, quelle que soit la moyenne.",
+    "knockoutWarning": "Note éliminatoire posée sur : {criteria}. En l'état, votre revue disqualifie ce dossier quelle que soit la moyenne.",
+    "criterionComment": "Commentaire sur ce critère",
+    "criterionCommentPlaceholder": "Ce qui justifie cette note…",
+    "addComment": "Commenter ce critère",
+    "notScored": "Non noté",
+    "total": "Total pondéré",
+    "totalValue": "{total} / {max}",
+    "outOf20": "Sur 20",
+    "missing": "Un critère reste à noter | Un critère reste à noter | {count} critères restent à noter",
+    "recommendation": "Recommandation",
+    "recommendationValue": {
+      "accept": "Retenir",
+      "accept_with_changes": "Retenir avec modifications",
+      "neutral": "Neutre",
+      "reject": "Rejeter"
+    },
+    "strengths": "Points forts",
+    "strengthsPlaceholder": "Ce qui plaide pour cette activité…",
+    "weaknesses": "Points faibles",
+    "weaknessesPlaceholder": "Ce qui manque, ce qui inquiète…",
+    "privateNote": "Note personnelle",
+    "privateNoteHint": "Visible de vous seul. Elle n'est ni communiquée au comité, ni au déposant.",
+    "save": "Enregistrer le brouillon",
+    "submit": "Déposer ma revue",
+    "resubmit": "Mettre à jour ma revue",
+    "submitHint": "Le dépôt rend votre revue visible du comité et lève l'évaluation en aveugle pour vous.",
+    "submitBlocked": "Notez tous les critères avant de déposer votre revue.",
+    "saved": "Brouillon enregistré à {time}.",
+    "submitted": "Revue déposée le {date}.",
+    "error": "Votre revue n'a pas pu être enregistrée. Rien n'a été perdu : réessayez.",
+    "unsaved": "Modifications non enregistrées"
+  },
+  "recusal": {
+    "action": "Me déporter de ce dossier",
+    "title": "Déclarer un lien et se déporter",
+    "description": "Vous déclarez un lien avec l'une des organisations de ce dossier et vous retirez de son évaluation. La déclaration est conservée : c'est elle qui atteste l'impartialité du comité.",
+    "reason": "Nature du lien",
+    "reasonHint": "Obligatoire. Une phrase suffit : appartenance, collaboration en cours, intérêt personnel.",
+    "reasonRequired": "Indiquez la nature du lien avant de vous déporter.",
+    "submit": "Me déporter",
+    "success": "Vous vous êtes déporté de ce dossier. Le comité en est informé.",
+    "done": "Vous vous êtes déporté de ce dossier le {date}.",
+    "doneReason": "Motif déclaré : {reason}",
+    "error": "Le déport n'a pas pu être enregistré."
+  },
+  "peers": {
+    "title": "Revues du comité",
+    "empty": "Aucune autre revue n'a encore été déposée.",
+    "blind": {
+      "title": "Évaluation en aveugle",
+      "description": "Cet appel se déroule en aveugle : vous verrez les notes de vos pairs dès que vous aurez déposé la vôtre. Cela évite que la première note pose le ton des suivantes.",
+      "count": "Aucune revue déposée pour l'instant | Une revue est déjà déposée | {count} revues sont déjà déposées"
+    },
+    "score": "{score} / 20",
+    "weighted": "{score} / {max} pondérés",
+    "submittedAt": "Déposée le {date}",
+    "strengths": "Points forts",
+    "weaknesses": "Points faibles",
+    "detail": "Voir le détail des notes",
+    "hideDetail": "Masquer le détail",
+    "noComment": "Sans commentaire"
+  },
+  "committee": {
+    "title": "Comité",
+    "state": {
+      "submitted": "Revue rendue",
+      "drafted": "Revue commencée",
+      "pending": "Revue attendue",
+      "overdue": "Revue en retard",
+      "recused": "Déporté"
+    },
+    "dueAt": "Échéance : {date}",
+    "noDue": "Sans échéance",
+    "recusedOn": "Déporté le {date}",
+    "missing": "Une revue manque encore | Une revue manque encore | {count} revues manquent encore",
+    "complete": "Toutes les revues attendues sont rendues.",
+    "empty": "Aucun membre du comité n'est affecté à ce dossier.",
+    "assign": "Affecter un membre du comité"
+  },
+  "comments": {
+    "title": "Échanges",
+    "description": "Deux fils sur un même dossier : ce que le comité s'écrit, et ce qui est adressé à l'organisation.",
+    "empty": "Aucun échange sur ce dossier.",
+    "visibility": {
+      "label": "Qui verra ce message ?",
+      "committee": {
+        "label": "Interne au comité",
+        "short": "Comité",
+        "hint": "Lu par les membres du comité et l'équipe de l'IFDD. L'organisation ne le voit pas."
+      },
+      "submitter": {
+        "label": "Partagé avec le soumissionnaire",
+        "short": "Partagé",
+        "hint": "Envoyé à l'organisation porteuse, qui en est notifiée. Un message lu ne se retire pas."
+      },
+      "private": {
+        "label": "Note personnelle",
+        "short": "Personnel",
+        "hint": "Visible de vous seul, y compris des autres membres du comité."
+      }
+    },
+    "compose": {
+      "label": "Écrire un message",
+      "placeholder": "Votre message…",
+      "changeRequest": "Demander une correction au déposant",
+      "changeRequestHint": "Le dossier restera signalé « correction attendue » tant que ce point n'est pas résolu. Une demande de correction est toujours partagée avec l'organisation.",
+      "send": "Envoyer",
+      "reply": "Répondre",
+      "cancel": "Annuler",
+      "empty": "Écrivez un message avant de l'envoyer."
+    },
+    "confirm": {
+      "title": "Ce message part chez l'organisation",
+      "description": "Il sera lu par {organization}, qui en sera notifiée par courriel. Un message envoyé ne se retire pas.",
+      "checkbox": "J'ai vérifié le destinataire de ce message.",
+      "submit": "Envoyer à l'organisation",
+      "back": "Revenir au message"
+    },
+    "changeRequest": "Demande de correction",
+    "resolved": "Résolue le {date}",
+    "unresolved": "En attente de correction",
+    "edited": "modifié",
+    "you": "Vous",
+    "sent": "Message envoyé.",
+    "error": "Le message n'a pas pu être envoyé."
+  }
+}

@@ -24,6 +24,14 @@
  * LATENCE SIMULÉE. En développement sur mocks, chaque appel attend brièvement :
  * sans cela, les états de chargement — squelettes, désactivation des boutons —
  * ne se voient jamais et finissent par ne plus être écrits.
+ *
+ * DÉCOUPAGE. Un écran dont les appels dépassent la centaine de lignes sort dans
+ * `composables/api/`, monté ici par une fabrique qui reçoit `call` et `send` —
+ * c'est le cas de la fiche d'évaluation (`review`). Rien ne change pour les
+ * pages : elles appellent toujours `useApi()`, et la bascule vers l'API réelle,
+ * la latence simulée et l'en-tête `Accept-Language` valent aussi là-bas. Ce
+ * découpage suit la règle du projet — par ÉCRAN — et tient ce fichier sous le
+ * garde-fou de mille lignes de `CLAUDE.md`.
  */
 
 import type { AdministeredEvents, EffectivePermission, Person } from '~/types/identity'
@@ -72,6 +80,7 @@ import type {
   WorkspaceOverview,
 } from '~/types/organization-workspace'
 import type { Uuid } from '~/types/shared'
+import { createProposalReviewApi } from './api/proposal-review'
 
 /** Erreur d'accès, à traduire par l'écran « accès refusé ». */
 export class ForbiddenError extends Error {
@@ -383,24 +392,32 @@ export function useApi() {
        * `identity.administered_events()` : périmètre d'administration d'une
        * personne. Renvoie TOUJOURS une valeur pleine — jamais `null` — de sorte
        * que « aucun droit » et « administrateur d'une édition » ne se confondent.
+       *
+       * LE CRITÈRE EST UNE PERMISSION, PAS UNE LISTE DE RÔLES, et c'est
+       * exactement ce que fait la fonction en base : elle joint
+       * `role_permissions` et retient les attributions qui portent
+       * `programme.proposal.read_all`. Cette lecture réimplémentait le périmètre
+       * avec `['super_admin', 'admin', 'programmer']` codés en dur — un test de
+       * rôle déguisé, contraire à la règle du projet, et surtout FAUX : le rôle
+       * `reviewer` détient `programme.proposal.read_all` sans figurer dans cette
+       * liste. Un membre du comité se voyait donc refuser l'accès à la fiche
+       * d'évaluation des dossiers qu'on lui avait confiés (constaté au prompt
+       * A8). Ajouter un rôle au catalogue suffit désormais ; ce fichier ne bouge
+       * plus.
        */
       administeredEvents: (personId: Uuid): Promise<AdministeredEvents> =>
         call(`/people/${personId}/administered-events`, (m) => {
-          const now = Date.now()
-          const active = m.roleAssignments.filter(
-            (r) =>
-              r.person_id === personId &&
-              r.revoked_at === null &&
-              (r.valid_until === null || Date.parse(r.valid_until) > now),
-          )
-          const adminRoles = ['super_admin', 'admin', 'programmer']
+          const scoped = m
+            .effectivePermissions(personId)
+            .filter((entry) => entry.permission_code === 'programme.proposal.read_all')
+
           return {
-            is_global: active.some((r) => adminRoles.includes(r.role_code) && r.scope_type === 'global'),
+            is_global: scoped.some((entry) => entry.scope_type === 'global'),
             event_ids: [
               ...new Set(
-                active
-                  .filter((r) => adminRoles.includes(r.role_code) && r.scope_type === 'event' && r.scope_id !== null)
-                  .map((r) => r.scope_id as Uuid),
+                scoped
+                  .filter((entry) => entry.scope_type === 'event' && entry.scope_id !== null)
+                  .map((entry) => entry.scope_id as Uuid),
               ),
             ],
           }
@@ -715,6 +732,20 @@ export function useApi() {
           m.reviewAssignments.filter((a) => a.reviewer_id === reviewerId && a.recused_at === null),
         ),
     },
+
+    // -----------------------------------------------------------------------
+    // Fiche d'évaluation (A8)
+    //
+    // Les cinq appels de l'écran où le comité décide — la composition du
+    // dossier, la notation, le déport, les échanges et la décision. Ils vivent
+    // dans `composables/api/proposal-review.ts` et sont montés ici : la page
+    // appelle `api.review.desk(…)`, elle n'importe rien d'autre.
+    //
+    // À DISTINGUER DE `reviews` CI-DESSUS, qui lit les tables une par une
+    // (revues d'un dossier, notes d'une revue, charge d'un membre). `review`
+    // compose l'ÉCRAN, voile de l'évaluation en aveugle compris.
+    // -----------------------------------------------------------------------
+    review: createProposalReviewApi({ call, send }),
 
     // -----------------------------------------------------------------------
     // Sessions

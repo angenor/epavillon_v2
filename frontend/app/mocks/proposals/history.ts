@@ -156,6 +156,46 @@ export const proposalHistories: Record<string, ProposalHistoryEntry[]> = {
     creation('2026-07-21T14:10:00Z', PERSON.moreau, 'Julien Moreau'),
   ],
 
+  // Dossier EN COURS D'ÉVALUATION — celui que la fiche d'évaluation (A8) montre.
+  // Ajouté au prompt A8 : l'onglet « Historique des modifications » du
+  // back-office ne peut pas se démontrer sur un dossier déjà décidé, et aucun
+  // des trois historiques écrits jusqu'ici ne portait sur un dossier que le
+  // comité est en train de lire. Ce qu'il raconte est ce qu'un membre du comité
+  // vient y chercher : le dossier a-t-il bougé depuis que je l'ai lu ?
+  [PROPOSAL.budgetsGenre]: [
+    // La dernière modification porte la date de `updated_at` du dossier : les
+    // deux se lisent côte à côte dans l'écran, et diverger ici passerait pour un
+    // historique incomplet.
+    change(
+      '2026-08-05T16:20:00Z',
+      PERSON.ngoBassong,
+      'Estelle Ngo Bassong',
+      'summary',
+      {
+        fr: "Un marqueur budgétaire ne suffit pas : encore faut-il que la direction du budget sache s'en servir.",
+      },
+      {
+        fr: "Un marqueur budgétaire ne suffit pas : encore faut-il que la direction du budget sache s'en servir.",
+        en: 'A budget marker is not enough: the budget department still has to know how to use it.',
+      },
+    ),
+    change('2026-07-27T10:00:00Z', PERSON.bakayoko, 'Aminata Bakayoko', 'status', 'submitted', 'under_review'),
+    change('2026-07-02T09:30:00Z', PERSON.ngoBassong, 'Estelle Ngo Bassong', 'status', 'draft', 'submitted'),
+    // Le créneau souhaité a reculé de trois jours pendant la rédaction : c'est
+    // exactement le genre d'arbitrage que la v1 perdait, ses dates proposées et
+    // retenues vivant dans la même colonne.
+    change(
+      '2026-06-30T14:12:00Z',
+      PERSON.ngoBassong,
+      'Estelle Ngo Bassong',
+      'preferred_start_at',
+      '2027-11-15T11:00:00-03:00',
+      '2027-11-12T14:00:00-03:00',
+    ),
+    change('2026-06-28T09:40:00Z', PERSON.ngoBassong, 'Estelle Ngo Bassong', 'format', 'in_person', 'hybrid'),
+    creation('2026-06-24T11:00:00Z', PERSON.ngoBassong, 'Estelle Ngo Bassong'),
+  ],
+
   // Dossier d'une édition passée : l'historique ne s'efface pas avec l'édition.
   [PROPOSAL.cop30Littoraux]: [
     change(

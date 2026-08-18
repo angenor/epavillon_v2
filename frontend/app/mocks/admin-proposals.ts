@@ -79,6 +79,25 @@ function allAssignments(): ReviewAssignment[] {
 }
 
 /**
+ * LE TAMPON EST PARTAGÉ AVEC LA FICHE D'ÉVALUATION (A8), et il doit l'être.
+ *
+ * Un dossier retenu depuis la fiche puis relu dans la liste doit y apparaître
+ * retenu ; un dossier confié depuis la liste doit apparaître dans le comité de
+ * la fiche. Deux tampons séparés donneraient deux vérités selon l'écran par
+ * lequel on passe — le défaut qu'on reproche à la v1, à l'échelle d'une visite.
+ * Ces deux accesseurs sont donc exportés : `mocks/proposal-review.ts` lit ici,
+ * et n'écrit un statut que par `changeProposalStatus()`.
+ */
+export function sessionProposalStatus(proposalId: Uuid): ProposalStatus | undefined {
+  return sessionStatuses.get(proposalId)
+}
+
+/** Affectations ajoutées pendant la visite, tous dossiers confondus. */
+export function sessionReviewAssignments(): ReviewAssignment[] {
+  return [...sessionAssignments]
+}
+
+/**
  * La vue, avec les écritures de session appliquées par-dessus.
  *
  * Le statut et les révisionnistes sont les deux seules colonnes qu'une action

@@ -1,0 +1,292 @@
+{
+  "title": "Review sheet",
+  "backToList": "Back to proposals",
+  "loading": "Loading the submission",
+  "forbidden": {
+    "scope": "Read and review proposals"
+  },
+  "notFound": {
+    "title": "Submission not found",
+    "description": "This submission does not exist, has been deleted, or falls outside your administration scope.",
+    "action": "Back to the list"
+  },
+  "status": {
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "under_review": "Under review",
+    "changes_requested": "Changes requested",
+    "accepted": "Accepted",
+    "rejected": "Rejected",
+    "withdrawn": "Withdrawn",
+    "cancelled": "Cancelled"
+  },
+  "format": {
+    "in_person": "In person",
+    "online": "Online",
+    "hybrid": "Hybrid"
+  },
+  "header": {
+    "committee": "Committee progress",
+    "progress": "{done} of {expected} reviews submitted",
+    "progressNoTarget": "{count} review submitted | {count} review submitted | {count} reviews submitted",
+    "score": "Average score",
+    "noScore": "Not scored yet",
+    "outOf20": "{score} / 20",
+    "rank": "Rank",
+    "rankValue": "{rank}th in this edition",
+    "rankFirst": "1st in this edition",
+    "noRank": "Unranked",
+    "readBy": "Read by one committee member | Read by one committee member | Read by {count} committee members",
+    "firstVisit": "You are opening this submission for the first time.",
+    "knockedOut": "Disqualified by a knockout criterion",
+    "submittedAt": "Submitted on {date}",
+    "decidedAt": "Decided on {date}",
+    "notSubmitted": "Never submitted",
+    "openInList": "Show in the list"
+  },
+  "decision": {
+    "title": "Decision",
+    "hint": "Restricted to those entitled to it. Scoring, on the other hand, is open to any assigned committee member.",
+    "none": "No decision is available from the current state of this submission.",
+    "forbidden": "You are not entitled to decide on this edition.",
+    "action": {
+      "under_review": "Move to review",
+      "changes_requested": "Request changes",
+      "accepted": "Accept",
+      "rejected": "Reject",
+      "cancelled": "Cancel",
+      "withdrawn": "Withdraw",
+      "submitted": "Send back to the committee",
+      "draft": "Return to draft"
+    },
+    "confirm": {
+      "title": "{action} — {reference}",
+      "description": "The submission moves from “{from}” to “{to}”. The lead organization is notified.",
+      "reason": "Reason",
+      "reasonHint": "Required for this transition: it is kept in the submission history and sent to the organization.",
+      "reasonOptionalHint": "Optional. If filled in, it is kept in the history and sent to the organization.",
+      "reasonRequired": "This transition requires a reason.",
+      "submit": "Confirm"
+    },
+    "success": "Submission moved to “{status}”.",
+    "notAllowed": "This transition is not available from the current state of the submission.",
+    "reasonRequired": "This transition requires a reason.",
+    "error": "The decision could not be saved. Nothing was changed."
+  },
+  "tabs": {
+    "dossier": "Submission",
+    "history": "Change history"
+  },
+  "dossier": {
+    "summary": "Summary",
+    "objectives": "Objectives",
+    "presentation": "Detailed presentation",
+    "outcomes": "Expected outcomes",
+    "audiences": "Target audiences",
+    "themes": "Themes",
+    "activityType": "Activity type",
+    "languages": "Working languages",
+    "country": "Country concerned",
+    "slot": "Preferred slot",
+    "noSlot": "No preferred slot was given.",
+    "duration": "{count} minutes",
+    "sessionsRequested": "One occurrence requested | One occurrence requested | {count} occurrences requested",
+    "constraints": "Scheduling constraints",
+    "submitter": "Submitted by",
+    "submittedBy": "Submitted by {name}",
+    "contact": "Submission contact: {name}",
+    "empty": "Not provided"
+  },
+  "organizations": {
+    "title": "Organizations",
+    "role": {
+      "lead": "Lead organization",
+      "co_organizer": "Co-organizer",
+      "partner": "Partner",
+      "sponsor": "Sponsor"
+    },
+    "pending": "Co-organization not confirmed",
+    "confirmedOn": "Confirmed on {date}",
+    "record": {
+      "title": "Participation record",
+      "submitted": "No submission | One submission | {count} submissions",
+      "accepted": "{count} accepted",
+      "rejected": "{count} rejected",
+      "editions": "across one edition | across one edition | across {count} editions",
+      "sessions": "No activity held | One activity held | {count} activities held",
+      "averageScore": "Average score obtained: {score} / 20",
+      "ratio": "Acceptance rate: {ratio}%",
+      "last": "Last submission: {date}",
+      "firstTime": "First proposal from this organization to IFDD."
+    }
+  },
+  "speakers": {
+    "title": "Speakers",
+    "empty": "No speaker is announced in this submission.",
+    "role": {
+      "speaker": "Speaker",
+      "moderator": "Moderator",
+      "panelist": "Panellist",
+      "keynote": "Keynote",
+      "facilitator": "Facilitator",
+      "interpreter": "Interpreter"
+    },
+    "confirmed": "Attendance confirmed on {date}",
+    "invited": "Invitation sent on {date}, no answer yet",
+    "notInvited": "Invitation not sent yet",
+    "questions": "Available for audience questions"
+  },
+  "documents": {
+    "title": "Documents",
+    "empty": "No file is attached to this submission.",
+    "internal": "Internal to the submission",
+    "public": "Publishable",
+    "quarantined": "File quarantined by the antivirus scan: it cannot be opened.",
+    "unavailable": "File unavailable",
+    "open": "Open {title}",
+    "uploadedAt": "Uploaded on {date}",
+    "size": "{size} MB"
+  },
+  "panel": {
+    "title": "My review",
+    "description": "Your scores are visible to no one until you submit them.",
+    "notAssigned": {
+      "title": "This submission is not assigned to you",
+      "description": "You may read it and write to the committee, but the grid is reserved for the members in charge of it."
+    },
+    "cannotReview": {
+      "title": "Read only",
+      "description": "You are not entitled to score proposals for this edition."
+    },
+    "grid": "Scoring grid",
+    "weight": "weight {weight}",
+    "max": "out of {max}",
+    "knockout": "Knockout",
+    "knockoutHint": "A score of zero on this criterion disqualifies the submission, whatever the average.",
+    "knockoutWarning": "Knockout score given on: {criteria}. As it stands, your review disqualifies this submission whatever the average.",
+    "criterionComment": "Comment on this criterion",
+    "criterionCommentPlaceholder": "What justifies this score…",
+    "addComment": "Comment on this criterion",
+    "notScored": "Not scored",
+    "total": "Weighted total",
+    "totalValue": "{total} / {max}",
+    "outOf20": "Out of 20",
+    "missing": "One criterion still to score | One criterion still to score | {count} criteria still to score",
+    "recommendation": "Recommendation",
+    "recommendationValue": {
+      "accept": "Accept",
+      "accept_with_changes": "Accept with changes",
+      "neutral": "Neutral",
+      "reject": "Reject"
+    },
+    "strengths": "Strengths",
+    "strengthsPlaceholder": "What speaks for this activity…",
+    "weaknesses": "Weaknesses",
+    "weaknessesPlaceholder": "What is missing, what is worrying…",
+    "privateNote": "Personal note",
+    "privateNoteHint": "Visible to you only. It is sent neither to the committee nor to the applicant.",
+    "save": "Save draft",
+    "submit": "Submit my review",
+    "resubmit": "Update my review",
+    "submitHint": "Submitting makes your review visible to the committee and lifts blind review for you.",
+    "submitBlocked": "Score every criterion before submitting your review.",
+    "saved": "Draft saved at {time}.",
+    "submitted": "Review submitted on {date}.",
+    "error": "Your review could not be saved. Nothing was lost: try again.",
+    "unsaved": "Unsaved changes"
+  },
+  "recusal": {
+    "action": "Recuse myself from this submission",
+    "title": "Declare a connection and recuse yourself",
+    "description": "You declare a connection with one of the organizations behind this submission and withdraw from its evaluation. The declaration is kept: it is what attests to the committee's impartiality.",
+    "reason": "Nature of the connection",
+    "reasonHint": "Required. One sentence is enough: membership, ongoing collaboration, personal interest.",
+    "reasonRequired": "State the nature of the connection before recusing yourself.",
+    "submit": "Recuse myself",
+    "success": "You have recused yourself from this submission. The committee is informed.",
+    "done": "You recused yourself from this submission on {date}.",
+    "doneReason": "Declared reason: {reason}",
+    "error": "The recusal could not be saved."
+  },
+  "peers": {
+    "title": "Committee reviews",
+    "empty": "No other review has been submitted yet.",
+    "blind": {
+      "title": "Blind review",
+      "description": "This call runs blind: you will see your peers' scores as soon as you submit yours. This prevents the first score from setting the tone for the others.",
+      "count": "No review submitted yet | One review has already been submitted | {count} reviews have already been submitted"
+    },
+    "score": "{score} / 20",
+    "weighted": "{score} / {max} weighted",
+    "submittedAt": "Submitted on {date}",
+    "strengths": "Strengths",
+    "weaknesses": "Weaknesses",
+    "detail": "Show the score detail",
+    "hideDetail": "Hide the detail",
+    "noComment": "No comment"
+  },
+  "committee": {
+    "title": "Committee",
+    "state": {
+      "submitted": "Review submitted",
+      "drafted": "Review started",
+      "pending": "Review expected",
+      "overdue": "Review overdue",
+      "recused": "Recused"
+    },
+    "dueAt": "Due: {date}",
+    "noDue": "No deadline",
+    "recusedOn": "Recused on {date}",
+    "missing": "One review is still missing | One review is still missing | {count} reviews are still missing",
+    "complete": "Every expected review has been submitted.",
+    "empty": "No committee member is assigned to this submission.",
+    "assign": "Assign a committee member"
+  },
+  "comments": {
+    "title": "Discussion",
+    "description": "Two threads on one submission: what the committee writes to itself, and what is addressed to the organization.",
+    "empty": "No message on this submission.",
+    "visibility": {
+      "label": "Who will see this message?",
+      "committee": {
+        "label": "Internal to the committee",
+        "short": "Committee",
+        "hint": "Read by committee members and the IFDD team. The organization does not see it."
+      },
+      "submitter": {
+        "label": "Shared with the applicant",
+        "short": "Shared",
+        "hint": "Sent to the lead organization, which is notified. A message that has been read cannot be taken back."
+      },
+      "private": {
+        "label": "Personal note",
+        "short": "Personal",
+        "hint": "Visible to you only, including from other committee members."
+      }
+    },
+    "compose": {
+      "label": "Write a message",
+      "placeholder": "Your message…",
+      "changeRequest": "Request a correction from the applicant",
+      "changeRequestHint": "The submission stays flagged “correction expected” until this point is resolved. A change request is always shared with the organization.",
+      "send": "Send",
+      "reply": "Reply",
+      "cancel": "Cancel",
+      "empty": "Write a message before sending it."
+    },
+    "confirm": {
+      "title": "This message goes to the organization",
+      "description": "It will be read by {organization}, which will be notified by email. A message that has been sent cannot be taken back.",
+      "checkbox": "I have checked who receives this message.",
+      "submit": "Send to the organization",
+      "back": "Back to the message"
+    },
+    "changeRequest": "Change request",
+    "resolved": "Resolved on {date}",
+    "unresolved": "Awaiting correction",
+    "edited": "edited",
+    "you": "You",
+    "sent": "Message sent.",
+    "error": "The message could not be sent."
+  }
+}
