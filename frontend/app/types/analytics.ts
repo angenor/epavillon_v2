@@ -20,13 +20,27 @@
  * traduit pas : renommer en chemin est le plus sûr moyen de ne plus savoir quelle
  * colonne on lit. Les libellés affichés, eux, viennent des fichiers i18n.
  *
- * CE FICHIER NE COUVRE PAS TOUT LE MODULE. `mv_organization_scorecard`,
+ * CE FICHIER NE COUVRE PAS TOUT LE MODULE. `mv_organization_scorecard` est
+ * arrivée au prompt A11, avec la liste des organisations qu'elle sert ;
  * `mv_session_attendance`, `mv_content_popularity` et `analytics.page_views`
- * viendront avec leurs écrans (A11, bilan de COP, mesure d'audience), comme
+ * viendront avec leurs écrans (bilan de COP, mesure d'audience), comme
  * `types/live.ts` ne couvre que les incidents.
  */
 
-import type { CallId, EventId, IsoDateTime, Numeric, PersonId, Uuid } from './shared'
+import type {
+  CallId,
+  CountryId,
+  EventId,
+  I18nText,
+  IsoDateTime,
+  Numeric,
+  OrganizationId,
+  PersonId,
+  Slug,
+  TaxonomyTermCode,
+  Uuid,
+} from './shared'
+import type { OrganizationStatus } from './org'
 
 // ---------------------------------------------------------------------------
 // analytics.v_platform_overview — les compteurs de la page d'accueil
@@ -301,4 +315,75 @@ export interface DailyRegistrationRow {
   personnes_distinctes: number
   inscriptions_cumulees: number
   moyenne_mobile_7j: Numeric | null
+}
+
+// ---------------------------------------------------------------------------
+// analytics.mv_organization_scorecard — la liste des organisations
+// ---------------------------------------------------------------------------
+
+/**
+ * Une ligne de `analytics.mv_organization_scorecard` — § 5, AJOUTÉE ICI AU
+ * PROMPT A11, comme l'annonçait l'en-tête de ce fichier.
+ *
+ * C'EST L'ÉCRAN « LISTE DES ORGANISATIONS » DU BACK-OFFICE, en une requête. Le
+ * commanditaire demandait « leurs activités, leurs membres, nombre d'activités
+ * validées, ratio » : la vue porte les quatre, plus le score de confiance et le
+ * sceau. En v1, la même page déclenchait une requête agrégée PAR LIGNE affichée.
+ *
+ * `ratio_acceptation` EST NUL, JAMAIS ZÉRO, quand l'organisation n'a rien
+ * déposé — le `COMMENT ON` de la colonne le dit sans détour : « un ratio de 0
+ * serait un contresens ». L'écran affiche donc un tiret, pas « 0 % », et le tri
+ * range ces fiches à part.
+ *
+ * LES FICHES FUSIONNÉES ET REJETÉES Y RESTENT, avec leur statut : la vue ne les
+ * écarte pas, c'est au back-office de les filtrer. L'historique d'une fiche
+ * absorbée doit rester consultable après une fusion.
+ */
+export interface OrganizationScorecard {
+  organization_id: OrganizationId
+  legal_name: string
+  acronym: string | null
+  slug: Slug
+  /** `org.organizations.status`, rendu en texte par la vue. */
+  statut: OrganizationStatus
+  /** Code de la taxonomie `organization_type`. */
+  organization_type_code: TaxonomyTermCode
+  country_id: CountryId | null
+  pays_iso3: string | null
+  pays_nom: I18nText | null
+  /** `reference.countries.oif_status`, `'none'` à défaut. */
+  statut_oif: string
+  est_verifiee: boolean
+  verified_at: IsoDateTime | null
+  /** `org.compute_trust_score()` — 0 à 100. Le tri de référence de cet écran. */
+  score_confiance: number
+  merged_into_id: OrganizationId | null
+
+  membres_actifs: number
+  membres_en_attente: number
+  referents: number
+
+  propositions_deposees: number
+  propositions_en_brouillon: number
+  propositions_acceptees: number
+  propositions_rejetees: number
+  propositions_retirees: number
+  evenements_couverts: number
+  note_moyenne_obtenue: Numeric | null
+  /** Acceptées / déposées. NUL — et non zéro — sans aucun dépôt. */
+  ratio_acceptation: Numeric | null
+
+  sessions_programmees: number
+  sessions_realisees: number
+  sessions_annulees: number
+  inscrits_a_ses_sessions: number
+  presents_a_ses_sessions: number
+
+  articles_publies: number
+  articles_en_moderation: number
+  octets_stockes: number
+
+  /** Dernier signe de vie, toutes natures confondues : le tri qui repère les fiches dormantes. */
+  derniere_activite: IsoDateTime | null
+  inscrite_le: IsoDateTime
 }

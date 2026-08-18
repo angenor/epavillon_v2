@@ -1,0 +1,158 @@
+{
+  "title": "Merge two organizations",
+  "subtitle": "One record absorbs the other. Nothing is deleted: the absorbed record stays available.",
+  "back": "Back to the queue",
+  "forbidden": {
+    "scope": "organization merging",
+    "description": "Merging moves affiliations across every edition. It requires a right valid platform-wide."
+  },
+  "notFound": {
+    "title": "Merge unavailable",
+    "description": "One of the two records does not exist, or has already been absorbed by another. A merged record cannot be merged twice.",
+    "action": "Back to the queue"
+  },
+  "picker": {
+    "title": "Pick the second record",
+    "description": "Search by name, acronym or former name — the same search as the affiliation form.",
+    "search": "Name, acronym, former name",
+    "matched": "Found as: {name}",
+    "select": "Compare with this record",
+    "empty": "No matching record."
+  },
+  "direction": {
+    "title": "Which absorbs which",
+    "absorbing": "Record kept",
+    "absorbed": "Record absorbed",
+    "absorbingHint": "It survives, keeps its address and receives everything below.",
+    "absorbedHint": "It becomes “merged” and stays available.",
+    "swap": "Swap direction",
+    "suggested": "Suggested direction: the verified record, or the higher scoring one, absorbs the other. The decision is yours."
+  },
+  "compare": {
+    "title": "Both records, field by field",
+    "description": "Differences are highlighted. For each diverging field, choose the value to keep.",
+    "identical": "Identical",
+    "onlyOn": "Filled on one side only: this value will be kept.",
+    "contested": "To decide",
+    "empty": "Not set",
+    "keep": "Keep",
+    "kept": "Value kept",
+    "unresolved": "{count} field left to decide | {count} field left to decide | {count} fields left to decide",
+    "resolved": "Every difference has been decided.",
+    "fields": {
+      "legal_name": "Legal name",
+      "acronym": "Acronym",
+      "slug": "Record address",
+      "organization_type_code": "Type",
+      "country_id": "Country",
+      "city": "City",
+      "description": "Description",
+      "website": "Website",
+      "contact_email": "Contact email",
+      "contact_phone": "Phone"
+    }
+  },
+  "transfer": {
+    "title": "What will be transferred",
+    "description": "Each module declares its affiliations; the merge walks through them one by one.",
+    "reassigned": "Transferred",
+    "deduped": "Dropped, already present",
+    "deleted": "Deleted",
+    "dedupedHint": "The record kept already holds these affiliations: duplicating them would fail the merge.",
+    "deletedHint": "These are settings belonging to the absorbed record, not activity data.",
+    "none": "Nothing to transfer for this record.",
+    "total": "{count} item moved in total | {count} item moved in total | {count} items moved in total",
+    "tables": {
+      "org": {
+        "organization_names": "Names",
+        "organization_domains": "Email domains",
+        "memberships": "Members"
+      },
+      "identity": {
+        "people": "Primary affiliations"
+      },
+      "media": {
+        "assets": "Media",
+        "storage_quotas": "Storage quota"
+      },
+      "event": {
+        "event_series": "Event series"
+      },
+      "programme": {
+        "proposals": "Submissions",
+        "proposal_speakers": "Submission speakers",
+        "proposal_organizations": "Submission co-organizers",
+        "sessions": "Scheduled activities",
+        "registrations": "Registrations",
+        "session_organizations": "Activity co-organizers"
+      },
+      "live": {
+        "incidents": "Incident messages"
+      },
+      "publication": {
+        "articles": "Articles",
+        "publishing_policies": "Publishing policies"
+      },
+      "training": {
+        "trainings": "Trainings",
+        "enrollments": "Training enrolments"
+      }
+    },
+    "names": {
+      "title": "Names brought over",
+      "description": "The record kept will answer to these names: a search on the former name will find the right record.",
+      "alreadyPresent": "Already known",
+      "unconfirmed": "Unconfirmed"
+    },
+    "domains": {
+      "title": "Domains brought over",
+      "verified": "Verified",
+      "unverified": "Not verified",
+      "alreadyPresent": "Already declared"
+    }
+  },
+  "warnings": {
+    "title": "Check before merging",
+    "source_is_verified": "“{name}” carries the IFDD seal and the record kept does not. The seal is not transferred: verify the record kept after the merge.",
+    "source_has_more_activity": "The absorbed record holds more submissions than the record kept ({source} against {target}). Check the direction of the merge.",
+    "source_has_verified_domain": "The absorbed record holds a verified domain. It will move to the record kept, which inherits automatic affiliation.",
+    "target_not_verified": "Neither record is verified. The merge changes nothing there: the record kept will still need verification.",
+    "different_countries": "The two records declare different countries. Two bodies of the same network are not the same organization.",
+    "different_types": "The two records declare different organization types."
+  },
+  "reversible": {
+    "title": "What the merge preserves",
+    "record": "The absorbed record stays available, marked “merged”.",
+    "urls": "Its former addresses keep working and lead to the record kept.",
+    "trace": "The merge is logged with its author, date and reason."
+  },
+  "reason": {
+    "label": "Reason for the merge",
+    "placeholder": "Record created twice by a colleague who could not find the existing one.",
+    "hint": "Required. It is written to the merge log.",
+    "required": "A reason is required."
+  },
+  "submit": "Merge both records",
+  "confirm": {
+    "title": "Confirm the merge",
+    "description": "“{source}” will be absorbed by “{target}”. To confirm, type the name of the absorbed record.",
+    "label": "Name of the absorbed record",
+    "hint": "Its acronym works too. Accents and case do not matter.",
+    "mismatch": "This name does not match the absorbed record.",
+    "confirm": "Merge",
+    "cancel": "Back to the comparison"
+  },
+  "result": {
+    "title": "Merge completed",
+    "description": "“{source}” has been absorbed by “{target}”.",
+    "rows": "{count} item moved | {count} item moved | {count} items moved",
+    "fields": "{count} field filled from the absorbed record | {count} field filled from the absorbed record | {count} fields filled from the absorbed record",
+    "openTarget": "Open the record kept",
+    "backToQueue": "Back to the queue"
+  },
+  "error": {
+    "mismatch": "The name you typed does not match the absorbed record. Nothing was merged.",
+    "alreadyMerged": "This record has been merged in the meantime. Reload the queue.",
+    "generic": "The merge did not complete. Nothing was changed."
+  }
+}

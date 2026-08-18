@@ -1,0 +1,84 @@
+{
+  "title": "Organizations",
+  "subtitle": "The organization directory, its activity and its trust score. The weakest records come first.",
+  "forbidden": {
+    "scope": "organization access"
+  },
+  "duplicates": {
+    "link": "Duplicate queue",
+    "pending": "{count} pair to review | {count} pair to review | {count} pairs to review",
+    "none": "No pending pair"
+  },
+  "scoped": {
+    "notice": "You only see organizations that submitted or ran an activity in the editions you administer."
+  },
+  "empty": {
+    "title": "No organization",
+    "description": "No organization falls within your administration scope."
+  },
+  "noResults": {
+    "title": "No matching organization",
+    "description": "Filters exclude all {total} records in scope.",
+    "action": "Clear filters"
+  },
+  "caption": "Organizations, sorted by {column}",
+  "columns": {
+    "legal_name": "Organization",
+    "country": "Country",
+    "type": "Type",
+    "membres_actifs": "Members",
+    "propositions_deposees": "Submitted",
+    "propositions_acceptees": "Accepted",
+    "ratio_acceptation": "Ratio",
+    "score_confiance": "Trust",
+    "derniere_activite": "Last activity"
+  },
+  "cell": {
+    "noCountry": "No country",
+    "noRatio": "—",
+    "noRatioHint": "No submission: the ratio would be meaningless.",
+    "verified": "Verified by IFDD",
+    "notVerified": "Not verified",
+    "duplicate": "Suspected duplicate",
+    "duplicateHint": "{count} pair awaiting review | {count} pair awaiting review | {count} pairs awaiting review",
+    "absorbed": "Absorbed {count} record | Absorbed {count} record | Absorbed {count} records",
+    "members": "{count} active member | {count} active member | {count} active members",
+    "pendingMembers": "{count} pending",
+    "never": "None"
+  },
+  "status": {
+    "candidate": "To review",
+    "active": "Active",
+    "merged": "Merged",
+    "archived": "Archived",
+    "rejected": "Rejected"
+  },
+  "trust": {
+    "label": "Trust score",
+    "low": "Record to review",
+    "value": "{score} out of 100",
+    "detail": "Seal, verified domain, completeness and active members"
+  },
+  "filters": {
+    "legend": "Filter organizations",
+    "search": "Name, acronym",
+    "countries": "Country",
+    "types": "Type",
+    "statuses": "Status",
+    "verified": "Seal",
+    "verifiedAny": "Any",
+    "verifiedYes": "Verified",
+    "verifiedNo": "Not verified",
+    "duplicate": "Duplicates",
+    "duplicateAny": "Any",
+    "duplicateYes": "Suspected duplicate",
+    "duplicateNo": "No duplicate",
+    "lowTrust": "Trust score below {threshold}",
+    "shown": "{shown} of {total} organizations",
+    "facet": "{name} ({count})"
+  },
+  "export": {
+    "action": "Export (CSV)",
+    "filename": "organizations"
+  }
+}

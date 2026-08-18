@@ -85,6 +85,7 @@ import type { Uuid } from '~/types/shared'
 import { createProposalReviewApi } from './api/proposal-review'
 import { createPlannerApi } from './api/planner'
 import { createAdminEventsApi } from './api/admin-events'
+import { createAdminOrganizationsApi } from './api/admin-organizations'
 
 /** Erreur d'accès, à traduire par l'écran « accès refusé ». */
 export class ForbiddenError extends Error {
@@ -823,6 +824,26 @@ export function useApi() {
     // chevauchement de créneaux, qui reste toujours écrivable.
     // -----------------------------------------------------------------------
     adminEvents: createAdminEventsApi({ call, send, assertEventInScope }),
+
+    // -----------------------------------------------------------------------
+    // Organisations et fusion des doublons (A11)
+    //
+    // Sorti dans `composables/api/admin-organizations.ts` — la liste et sa fiche
+    // de performance, la file des doublons présumés, l'aperçu et l'exécution
+    // d'une fusion, la fiche d'une organisation et ses trois écritures.
+    //
+    // À DISTINGUER D'`organizations` PLUS HAUT, qui porte la recherche ouverte à
+    // toute personne connectée — le rattachement (A2), le choix des
+    // co-organisateurs (A4). Ici, tout appartient au back-office.
+    //
+    // AUCUN `assertEventInScope` : une organisation n'appartient à aucune
+    // édition. La règle métier n° 8 s'y applique par l'autre bout — la liste est
+    // FILTRÉE sur les éditions administrées (`list(scope)`), et la fusion exige
+    // `org.organization.merge` sur la portée GLOBALE, ce que l'écran vérifie par
+    // permission. Il n'existe pas de fusion limitée à une COP : elle déplace des
+    // rattachements dans toutes les éditions à la fois.
+    // -----------------------------------------------------------------------
+    adminOrganizations: createAdminOrganizationsApi({ call, send }),
 
     // -----------------------------------------------------------------------
     // Espace organisation (A5)

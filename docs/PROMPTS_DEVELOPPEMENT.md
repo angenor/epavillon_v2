@@ -705,7 +705,7 @@ sélection en deux temps.
    - Comité de sélection : composition, plafond de charge par membre
 ```
 
-**A11 — Organisations et fusion des doublons**
+**A11 — Organisations et fusion des doublons**(en cours)
 
 ```
 [PRÉAMBULE]

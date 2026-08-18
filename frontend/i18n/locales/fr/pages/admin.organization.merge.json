@@ -1,0 +1,158 @@
+{
+  "title": "Fusionner deux organisations",
+  "subtitle": "Une fiche en absorbe une autre. Rien n'est supprimé : la fiche absorbée reste consultable.",
+  "back": "Retour à la file",
+  "forbidden": {
+    "scope": "fusion des organisations",
+    "description": "La fusion déplace des rattachements dans toutes les éditions. Elle demande un droit valable sur l'ensemble de la plateforme."
+  },
+  "notFound": {
+    "title": "Fusion impossible",
+    "description": "L'une des deux fiches n'existe pas, ou a déjà été absorbée par une autre. Une fiche fusionnée ne peut pas l'être une seconde fois.",
+    "action": "Retour à la file"
+  },
+  "picker": {
+    "title": "Choisir la seconde fiche",
+    "description": "Cherchez par nom, sigle ou ancienne dénomination — la même recherche que le formulaire de rattachement.",
+    "search": "Nom, sigle, ancien nom",
+    "matched": "Trouvée sous : {name}",
+    "select": "Comparer avec cette fiche",
+    "empty": "Aucune fiche ne correspond."
+  },
+  "direction": {
+    "title": "Qui absorbe qui",
+    "absorbing": "Fiche conservée",
+    "absorbed": "Fiche absorbée",
+    "absorbingHint": "Elle survit, garde son adresse et reçoit tout ce qui suit.",
+    "absorbedHint": "Elle passe en « fusionnée » et reste consultable.",
+    "swap": "Inverser le sens",
+    "suggested": "Sens proposé : la fiche vérifiée, ou la mieux notée, absorbe l'autre. À vous d'en décider."
+  },
+  "compare": {
+    "title": "Les deux fiches, champ par champ",
+    "description": "Les écarts sont mis en évidence. Pour chaque champ divergent, choisissez la valeur à conserver.",
+    "identical": "Identique",
+    "onlyOn": "Renseigné d'un seul côté : cette valeur sera conservée.",
+    "contested": "À trancher",
+    "empty": "Non renseigné",
+    "keep": "Conserver",
+    "kept": "Valeur retenue",
+    "unresolved": "{count} champ reste à trancher | {count} champ reste à trancher | {count} champs restent à trancher",
+    "resolved": "Tous les écarts sont tranchés.",
+    "fields": {
+      "legal_name": "Nom légal",
+      "acronym": "Sigle",
+      "slug": "Adresse de la fiche",
+      "organization_type_code": "Type",
+      "country_id": "Pays",
+      "city": "Ville",
+      "description": "Description",
+      "website": "Site web",
+      "contact_email": "Courriel de contact",
+      "contact_phone": "Téléphone"
+    }
+  },
+  "transfer": {
+    "title": "Ce qui sera transféré",
+    "description": "Chaque module déclare ses rattachements ; la fusion les parcourt un à un.",
+    "reassigned": "Transférés",
+    "deduped": "Supprimés, déjà présents",
+    "deleted": "Supprimés",
+    "dedupedHint": "La fiche conservée porte déjà ces rattachements : les doubler ferait échouer la fusion.",
+    "deletedHint": "Ce sont des réglages propres à la fiche absorbée, pas des données d'activité.",
+    "none": "Rien à transférer pour cette fiche.",
+    "total": "{count} élément déplacé au total | {count} élément déplacé au total | {count} éléments déplacés au total",
+    "tables": {
+      "org": {
+        "organization_names": "Dénominations",
+        "organization_domains": "Domaines de courriel",
+        "memberships": "Membres"
+      },
+      "identity": {
+        "people": "Rattachements principaux"
+      },
+      "media": {
+        "assets": "Médias",
+        "storage_quotas": "Quota de stockage"
+      },
+      "event": {
+        "event_series": "Séries d'événements"
+      },
+      "programme": {
+        "proposals": "Dossiers déposés",
+        "proposal_speakers": "Intervenants de dossiers",
+        "proposal_organizations": "Co-organisations de dossiers",
+        "sessions": "Activités programmées",
+        "registrations": "Inscriptions",
+        "session_organizations": "Co-organisations d'activités"
+      },
+      "live": {
+        "incidents": "Messages d'incident"
+      },
+      "publication": {
+        "articles": "Articles",
+        "publishing_policies": "Règles de publication"
+      },
+      "training": {
+        "trainings": "Formations",
+        "enrollments": "Inscriptions aux formations"
+      }
+    },
+    "names": {
+      "title": "Dénominations apportées",
+      "description": "La fiche conservée répondra désormais à ces noms : une recherche sur l'ancien nom trouvera la bonne fiche.",
+      "alreadyPresent": "Déjà connue",
+      "unconfirmed": "Non confirmée"
+    },
+    "domains": {
+      "title": "Domaines apportés",
+      "verified": "Vérifié",
+      "unverified": "Non vérifié",
+      "alreadyPresent": "Déjà déclaré"
+    }
+  },
+  "warnings": {
+    "title": "À vérifier avant de fusionner",
+    "source_is_verified": "« {name} » porte le sceau de l'IFDD et la fiche conservée ne l'a pas. Le sceau ne se transmet pas : vérifiez la fiche conservée après la fusion.",
+    "source_has_more_activity": "La fiche absorbée porte plus de dossiers que la fiche conservée ({source} contre {target}). Vérifiez le sens de la fusion.",
+    "source_has_verified_domain": "La fiche absorbée porte un domaine vérifié. Il passera à la fiche conservée, qui héritera du rattachement automatique.",
+    "target_not_verified": "Aucune des deux fiches n'est vérifiée. La fusion n'y change rien : la fiche conservée restera à vérifier.",
+    "different_countries": "Les deux fiches ne déclarent pas le même pays. Deux structures d'un même réseau ne sont pas la même organisation.",
+    "different_types": "Les deux fiches ne déclarent pas le même type d'organisation."
+  },
+  "reversible": {
+    "title": "Ce que la fusion préserve",
+    "record": "La fiche absorbée reste consultable, en statut « fusionnée ».",
+    "urls": "Ses anciennes adresses continuent de fonctionner et renvoient vers la fiche conservée.",
+    "trace": "La fusion est consignée avec son auteur, sa date et son motif."
+  },
+  "reason": {
+    "label": "Motif de la fusion",
+    "placeholder": "Fiche créée en double par une collaboratrice qui n'avait pas trouvé la fiche existante.",
+    "hint": "Obligatoire. Il est consigné au journal des fusions.",
+    "required": "Le motif est obligatoire."
+  },
+  "submit": "Fusionner les deux fiches",
+  "confirm": {
+    "title": "Confirmer la fusion",
+    "description": "« {source} » sera absorbée par « {target} ». Pour confirmer, saisissez le nom de la fiche absorbée.",
+    "label": "Nom de la fiche absorbée",
+    "hint": "Son sigle convient aussi. Les accents et la casse n'ont pas d'importance.",
+    "mismatch": "Ce nom ne correspond pas à la fiche absorbée.",
+    "confirm": "Fusionner",
+    "cancel": "Revenir à la comparaison"
+  },
+  "result": {
+    "title": "Fusion effectuée",
+    "description": "« {source} » a été absorbée par « {target} ».",
+    "rows": "{count} élément déplacé | {count} élément déplacé | {count} éléments déplacés",
+    "fields": "{count} champ complété depuis la fiche absorbée | {count} champ complété depuis la fiche absorbée | {count} champs complétés depuis la fiche absorbée",
+    "openTarget": "Ouvrir la fiche conservée",
+    "backToQueue": "Retour à la file"
+  },
+  "error": {
+    "mismatch": "Le nom saisi ne correspond pas à la fiche absorbée. Rien n'a été fusionné.",
+    "alreadyMerged": "Cette fiche a été fusionnée entre-temps. Rechargez la file.",
+    "generic": "La fusion n'a pas abouti. Rien n'a été modifié."
+  }
+}

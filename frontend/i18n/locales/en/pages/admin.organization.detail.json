@@ -1,0 +1,205 @@
+{
+  "back": "Back to organizations",
+  "forbidden": {
+    "scope": "organization access"
+  },
+  "notFound": {
+    "title": "Organization not found",
+    "description": "This record does not exist or has been deleted.",
+    "action": "Back to organizations"
+  },
+  "merged": {
+    "notice": "This record was absorbed by “{name}” on {date}. It stays available, and its former addresses keep working.",
+    "action": "Open the record kept"
+  },
+  "absorbed": {
+    "title": "Absorbed records",
+    "entry": "{name}, on {date}"
+  },
+  "header": {
+    "verified": "Verified by IFDD",
+    "verifiedBy": "Seal granted by {name}",
+    "notVerified": "Not verified",
+    "trust": "Trust {score}/100",
+    "createdBy": "Created by {name} on {date}",
+    "createdOn": "Created on {date}",
+    "noWebsite": "No website declared"
+  },
+  "actions": {
+    "verify": "Grant the verification seal",
+    "unverify": "Remove the seal",
+    "merge": "Merge with another record"
+  },
+  "duplicates": {
+    "title": "Suspected duplicates",
+    "description": "This record appears in {count} unsettled pair. | This record appears in {count} unsettled pair. | This record appears in {count} unsettled pairs.",
+    "with": "With “{name}”",
+    "action": "Review the merge"
+  },
+  "figures": {
+    "members": "Active members",
+    "proposals": "Submissions",
+    "accepted": "Accepted submissions",
+    "ratio": "Acceptance ratio",
+    "sessions": "Scheduled activities",
+    "events": "Editions covered",
+    "noRatio": "—"
+  },
+  "tabs": {
+    "names": "Names",
+    "domains": "Domains",
+    "members": "Members",
+    "activities": "Activities",
+    "history": "History"
+  },
+  "names": {
+    "title": "Names",
+    "description": "Every way of designating this organization. Each one is searched — this is what prevents a second record being created under the acronym.",
+    "caption": "Organization names",
+    "columns": {
+      "name": "Name",
+      "kind": "Kind",
+      "locale": "Language",
+      "confirmed": "Display",
+      "origin": "Origin"
+    },
+    "kind": {
+      "legal": "Legal name",
+      "acronym": "Acronym",
+      "short": "Short name",
+      "translation": "Translation",
+      "former": "Former name",
+      "misspelling": "Common misspelling"
+    },
+    "derived": "Follows the record",
+    "derivedHint": "The legal name and acronym are copied by the database: they change on the record itself.",
+    "confirmed": "Shown",
+    "unconfirmed": "Hidden",
+    "confirmedHint": "A hidden name still serves search; it simply is not displayed.",
+    "confirm": "Show",
+    "unconfirm": "Hide",
+    "empty": "No additional name."
+  },
+  "domains": {
+    "title": "Email domains",
+    "description": "The most reliable matching signal: two records sharing a verified domain are the same body. A verified domain affiliates new sign-ups automatically.",
+    "caption": "Organization email domains",
+    "columns": {
+      "domain": "Domain",
+      "verified": "Verification",
+      "autoJoin": "Automatic affiliation",
+      "shared": "Shared"
+    },
+    "verified": "Verified on {date}",
+    "unverified": "Not verified",
+    "method": {
+      "dns_txt": "DNS token",
+      "email_challenge": "Email challenge",
+      "manual": "Manual"
+    },
+    "autoJoinOn": "On",
+    "autoJoinOff": "Off",
+    "autoJoinHint": "Automatic affiliation requires a verified domain.",
+    "sharedWith": "Also declared by “{name}”",
+    "notShared": "—",
+    "verify": "Verify manually",
+    "unverify": "Remove verification",
+    "toggleAutoJoin": "Automatic affiliation",
+    "taken": "“{name}” already holds this verified domain. A verified domain belongs to one organization only — this is most likely a duplicate.",
+    "empty": "No domain declared."
+  },
+  "members": {
+    "title": "Members",
+    "description": "Affiliations of this organization, pending ones included.",
+    "caption": "Organization members",
+    "columns": {
+      "person": "Person",
+      "role": "Role",
+      "status": "Status",
+      "since": "Since"
+    },
+    "role": {
+      "manager": "Manager",
+      "member": "Member",
+      "contributor": "Contributor"
+    },
+    "status": {
+      "pending": "Pending",
+      "active": "Active",
+      "revoked": "Revoked"
+    },
+    "invited": "Invited on {date} — awaiting the person's answer",
+    "requested": "Requested on {date} — awaiting a manager",
+    "primary": "Primary affiliation",
+    "revokedOn": "Revoked on {date}",
+    "empty": "No member."
+  },
+  "activities": {
+    "title": "Activities",
+    "description": "Submissions and scheduled activities, in every role.",
+    "caption": "Organization activities",
+    "columns": {
+      "title": "Activity",
+      "event": "Edition",
+      "role": "Role",
+      "status": "Status",
+      "date": "Date"
+    },
+    "kind": {
+      "proposal": "Submission",
+      "session": "Activity"
+    },
+    "role": {
+      "lead": "Lead organizer",
+      "co_organizer": "Co-organizer",
+      "partner": "Partner",
+      "sponsor": "Sponsor"
+    },
+    "empty": "No submission or scheduled activity.",
+    "sessionStatus": {
+      "planned": "To schedule",
+      "scheduled": "Scheduled",
+      "live": "Live",
+      "completed": "Held",
+      "postponed": "Postponed",
+      "cancelled": "Cancelled"
+    }
+  },
+  "history": {
+    "title": "History",
+    "description": "Every change to the record, field by field. History comes from the database audit log, including fixes made outside the interface.",
+    "created": "Record created",
+    "changed": "{field} changed",
+    "by": "by {name}",
+    "system": "by the system",
+    "from": "Before",
+    "to": "After",
+    "emptyValue": "Not set",
+    "fields": {
+      "legal_name": "Legal name",
+      "acronym": "Acronym",
+      "slug": "Record address",
+      "organization_type_code": "Type",
+      "country_id": "Country",
+      "city": "City",
+      "description": "Description",
+      "website": "Website",
+      "contact_email": "Contact email",
+      "contact_phone": "Phone",
+      "status": "Status",
+      "verified_at": "Verification seal",
+      "trust_score": "Trust score",
+      "domainVerified": "Domain verification",
+      "nameConfirmed": "Name display"
+    },
+    "empty": "No change recorded."
+  },
+  "merges": {
+    "title": "Merges",
+    "entry": "“{source}” absorbed by “{target}”",
+    "by": "by {name}, on {date}",
+    "rows": "{count} item moved | {count} item moved | {count} items moved",
+    "reason": "Reason: {reason}"
+  },
+  "saved": "Change saved."
+}

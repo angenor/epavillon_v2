@@ -1,0 +1,76 @@
+{
+  "title": "Doublons présumés",
+  "subtitle": "Paires détectées automatiquement, la plus ressemblante d'abord. Rien n'est fusionné sans décision humaine.",
+  "back": "Retour aux organisations",
+  "forbidden": {
+    "scope": "fusion des organisations"
+  },
+  "empty": {
+    "title": "Aucun doublon présumé",
+    "description": "Le référentiel ne présente aucune paire suspecte. La détection tourne en continu : de nouvelles paires apparaîtront ici."
+  },
+  "pending": {
+    "title": "À trancher",
+    "count": "{count} paire | {count} paire | {count} paires"
+  },
+  "settled": {
+    "title": "Déjà tranchées",
+    "count": "{count} paire | {count} paire | {count} paires",
+    "hint": "Une décision se reprend : la paire écartée par erreur se retrouve ici.",
+    "reviewedBy": "Tranchée par {name}, le {date}",
+    "reviewedAnonymous": "Tranchée le {date}"
+  },
+  "decision": {
+    "merged": "Fusionnée",
+    "distinct": "Organisations distinctes",
+    "deferred": "Reportée"
+  },
+  "similarity": {
+    "label": "Similarité",
+    "value": "{score} %",
+    "strong": "Correspondance forte",
+    "moderate": "Ressemblance",
+    "weak": "Signal faible"
+  },
+  "reasons": {
+    "label": "Motifs de la suspicion",
+    "name_similarity": "Noms voisins",
+    "shared_domain": "Domaine de courriel partagé",
+    "same_country": "Même pays",
+    "acronym_match": "Sigle identique",
+    "nameSimilarityHint": "Les dénominations des deux fiches se recouvrent.",
+    "sharedDomainHint": "Les deux fiches déclarent {domain} : c'est le signal le plus fiable.",
+    "sameCountryHint": "Deux fiches d'un même pays. Seul, ce signal ne prouve rien.",
+    "acronymMatchHint": "Le sigle de l'une est le nom de l'autre — le défaut n° 1 de l'ancienne plateforme."
+  },
+  "side": {
+    "createdBy": "Créée par {name}, le {date}",
+    "createdOn": "Créée le {date}",
+    "verified": "Vérifiée",
+    "notVerified": "Non vérifiée",
+    "trust": "Confiance {score}/100",
+    "members": "{count} membre | {count} membre | {count} membres",
+    "proposals": "{count} dossier | {count} dossier | {count} dossiers",
+    "sessions": "{count} activité | {count} activité | {count} activités",
+    "domains": "Domaines",
+    "noDomain": "Aucun domaine déclaré",
+    "openRecord": "Ouvrir la fiche"
+  },
+  "actions": {
+    "merge": "Examiner la fusion",
+    "distinct": "Ce ne sont pas des doublons",
+    "defer": "Plus tard",
+    "reopen": "Remettre dans la file"
+  },
+  "distinctDialog": {
+    "title": "Retirer cette paire de la file",
+    "description": "« {left} » et « {right} » seront considérées comme deux organisations distinctes et ne seront plus proposées.",
+    "note": "Motif",
+    "notePlaceholder": "Deux structures différentes malgré des noms voisins.",
+    "noteHint": "Facultatif, mais la personne qui relira cette décision dans six mois vous en saura gré.",
+    "confirm": "Ce ne sont pas des doublons",
+    "success": "Paire retirée de la file."
+  },
+  "deferSuccess": "Paire reportée. Elle restera consultable dans les paires tranchées.",
+  "reopened": "Paire remise dans la file."
+}

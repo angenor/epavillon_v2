@@ -1,0 +1,84 @@
+{
+  "title": "Organisations",
+  "subtitle": "Le référentiel des organisations, leur activité et leur score de confiance. Les fiches les plus faibles se traitent en premier.",
+  "forbidden": {
+    "scope": "consultation des organisations"
+  },
+  "duplicates": {
+    "link": "File des doublons",
+    "pending": "{count} paire à trancher | {count} paire à trancher | {count} paires à trancher",
+    "none": "Aucune paire en attente"
+  },
+  "scoped": {
+    "notice": "Vous ne voyez que les organisations ayant déposé ou tenu une activité dans les éditions que vous administrez."
+  },
+  "empty": {
+    "title": "Aucune organisation",
+    "description": "Aucune organisation ne relève de votre périmètre d'administration."
+  },
+  "noResults": {
+    "title": "Aucune organisation ne correspond",
+    "description": "Les filtres écartent les {total} fiches du périmètre.",
+    "action": "Retirer les filtres"
+  },
+  "caption": "Organisations, triées par {column}",
+  "columns": {
+    "legal_name": "Organisation",
+    "country": "Pays",
+    "type": "Type",
+    "membres_actifs": "Membres",
+    "propositions_deposees": "Déposées",
+    "propositions_acceptees": "Acceptées",
+    "ratio_acceptation": "Ratio",
+    "score_confiance": "Confiance",
+    "derniere_activite": "Dernière activité"
+  },
+  "cell": {
+    "noCountry": "Pays non renseigné",
+    "noRatio": "—",
+    "noRatioHint": "Aucun dossier déposé : le ratio n'a pas de sens.",
+    "verified": "Vérifiée par l'IFDD",
+    "notVerified": "Non vérifiée",
+    "duplicate": "Doublon présumé",
+    "duplicateHint": "{count} paire en attente d'arbitrage | {count} paire en attente d'arbitrage | {count} paires en attente d'arbitrage",
+    "absorbed": "A absorbé {count} fiche | A absorbé {count} fiche | A absorbé {count} fiches",
+    "members": "{count} membre actif | {count} membre actif | {count} membres actifs",
+    "pendingMembers": "{count} en attente",
+    "never": "Aucune"
+  },
+  "status": {
+    "candidate": "À valider",
+    "active": "Active",
+    "merged": "Fusionnée",
+    "archived": "Archivée",
+    "rejected": "Refusée"
+  },
+  "trust": {
+    "label": "Score de confiance",
+    "low": "Fiche à regarder",
+    "value": "{score} sur 100",
+    "detail": "Sceau, domaine vérifié, complétude et membres actifs"
+  },
+  "filters": {
+    "legend": "Filtrer les organisations",
+    "search": "Nom, sigle",
+    "countries": "Pays",
+    "types": "Type",
+    "statuses": "Statut",
+    "verified": "Sceau",
+    "verifiedAny": "Sans importance",
+    "verifiedYes": "Vérifiée",
+    "verifiedNo": "Non vérifiée",
+    "duplicate": "Doublons",
+    "duplicateAny": "Sans importance",
+    "duplicateYes": "Doublon présumé",
+    "duplicateNo": "Sans doublon",
+    "lowTrust": "Score de confiance sous {threshold}",
+    "shown": "{shown} organisations sur {total}",
+    "facet": "{name} ({count})"
+  },
+  "export": {
+    "action": "Exporter (CSV)",
+    "filename": "organisations"
+  }
+}

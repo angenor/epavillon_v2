@@ -32,7 +32,7 @@ const isTruncated = computed(() => props.value > props.max)
 
 <template>
   <span
-    class="inline-flex h-[22px] min-w-[22px] items-center justify-center rounded-full px-1.5 font-mono text-xs font-bold tabular-nums"
+    class="relative inline-flex h-[22px] min-w-[22px] items-center justify-center rounded-full px-1.5 font-mono text-xs font-bold tabular-nums"
     :class="
       props.tone === 'accent'
         ? 'bg-accent-solid text-accent-contrast'

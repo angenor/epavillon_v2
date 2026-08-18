@@ -170,6 +170,17 @@ export const ORG_DOMAIN = (n: number): Uuid => uuid('7003', n)
 /** `org.memberships`. */
 export const MEMBERSHIP = (n: number): Uuid => uuid('7004', n)
 
+/**
+ * `org.merge_log` — les fusions consignées.
+ *
+ * Aucune ligne n'est écrite à la main : le jeu de données ne contient AUCUNE
+ * fusion passée, et c'est délibéré — la file des doublons (A11) doit s'ouvrir sur
+ * un référentiel où le travail reste à faire. Cette fabrique nomme les lignes que
+ * la fusion produit PENDANT une session de démonstration, à la façon de
+ * `mockUuid` : famille 7091, hors de tout ce que les jeux déclarent.
+ */
+export const MERGE_LOG = (n: number): Uuid => uuid('7091', n)
+
 /** `org.duplicate_candidates`. */
 export const DUPLICATE = {
   osed: uuid('7007', 1),

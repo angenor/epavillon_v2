@@ -603,7 +603,14 @@ CREATE TABLE org.organization_references (
 
 INSERT INTO org.organization_references (ref_schema, ref_table, ref_column, strategy, dedupe_on) VALUES
     ('org',      'organization_names',   'organization_id',         'reassign', '{}'),
-    ('org',      'organization_domains', 'organization_id',         'reassign', '{}'),
+    -- `dedupe_on = {domain}` : deux fiches en doublon déclarent presque toujours
+    -- LE MÊME domaine — c'est même le signal qui les a fait remonter (§ 3). Sans
+    -- ce dédoublonnage, la fusion laissait la fiche absorbante avec deux lignes
+    -- pour `osed-sahel.org`, l'une vérifiée et l'autre non : aucun index ne
+    -- l'interdit (ux_organization_domains_verified ne porte que sur les domaines
+    -- VÉRIFIÉS), et la fiche héritait donc d'un doublon interne au moment même où
+    -- l'on corrigeait un doublon d'organisation.
+    ('org',      'organization_domains', 'organization_id',         'reassign', '{domain}'),
     ('org',      'memberships',          'organization_id',         'reassign', '{person_id}'),
     ('identity', 'people',               'primary_organization_id', 'reassign', '{}')
 ON CONFLICT DO NOTHING;

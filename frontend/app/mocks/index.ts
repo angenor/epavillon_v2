@@ -53,6 +53,12 @@
  *   admin-planner.ts     la composition du planificateur de créneaux (A9) et ses
  *                        quatre écritures — dont AUCUNE ne refuse un
  *                        chevauchement
+ *   admin-organizations/ les organisations et la fusion des doublons (A11), en
+ *                        cinq fichiers — `session` le journal d'écritures et la
+ *                        redirection de fusion, `core` la fiche de performance
+ *                        et la liste, `duplicates` la file et le décompte de
+ *                        transfert lu dans le registre, `detail` la fiche,
+ *                        `writes` les cinq écritures
  *   admin-events/        la gestion des événements (A10), en trois fichiers —
  *                        `core` le socle, `detail` la composition des six
  *                        onglets, `writes` les quinze écritures et les
@@ -62,7 +68,13 @@
 export * from './ids'
 
 export { locales, countries, taxonomies, taxonomyTerms, entityTerms } from './reference'
-export { organizations, organizationNames, organizationDomains, duplicateCandidates } from './org'
+export {
+  organizations,
+  organizationNames,
+  organizationDomains,
+  organizationReferences,
+  duplicateCandidates,
+} from './org'
 export { memberships } from './memberships'
 export { people, roleAssignments } from './people'
 
@@ -221,3 +233,17 @@ export {
   defaultCriteriaGrid,
   saveCommittee,
 } from './admin-events'
+
+export {
+  organizationListScreen,
+  organizationScorecards,
+  duplicateQueue,
+  mergePreview,
+  pendingDuplicatesOf,
+  organizationDetail,
+  decideDuplicatePair,
+  mergeOrganizations,
+  setDomainVerification,
+  setNameConfirmation,
+  setOrganizationVerification,
+} from './admin-organizations'

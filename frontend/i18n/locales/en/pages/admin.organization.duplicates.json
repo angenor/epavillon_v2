@@ -1,0 +1,76 @@
+{
+  "title": "Suspected duplicates",
+  "subtitle": "Pairs detected automatically, the closest match first. Nothing is merged without a human decision.",
+  "back": "Back to organizations",
+  "forbidden": {
+    "scope": "organization merging"
+  },
+  "empty": {
+    "title": "No suspected duplicate",
+    "description": "The directory shows no suspicious pair. Detection runs continuously: new pairs will appear here."
+  },
+  "pending": {
+    "title": "To review",
+    "count": "{count} pair | {count} pair | {count} pairs"
+  },
+  "settled": {
+    "title": "Already settled",
+    "count": "{count} pair | {count} pair | {count} pairs",
+    "hint": "A decision can be revisited: a pair dismissed by mistake is found here.",
+    "reviewedBy": "Settled by {name} on {date}",
+    "reviewedAnonymous": "Settled on {date}"
+  },
+  "decision": {
+    "merged": "Merged",
+    "distinct": "Distinct organizations",
+    "deferred": "Deferred"
+  },
+  "similarity": {
+    "label": "Similarity",
+    "value": "{score}%",
+    "strong": "Strong match",
+    "moderate": "Resemblance",
+    "weak": "Weak signal"
+  },
+  "reasons": {
+    "label": "Grounds for suspicion",
+    "name_similarity": "Similar names",
+    "shared_domain": "Shared email domain",
+    "same_country": "Same country",
+    "acronym_match": "Identical acronym",
+    "nameSimilarityHint": "The names of both records overlap.",
+    "sharedDomainHint": "Both records declare {domain}: the most reliable signal.",
+    "sameCountryHint": "Two records from the same country. On its own, this proves nothing.",
+    "acronymMatchHint": "One record's acronym is the other's name — the first flaw of the old platform."
+  },
+  "side": {
+    "createdBy": "Created by {name} on {date}",
+    "createdOn": "Created on {date}",
+    "verified": "Verified",
+    "notVerified": "Not verified",
+    "trust": "Trust {score}/100",
+    "members": "{count} member | {count} member | {count} members",
+    "proposals": "{count} submission | {count} submission | {count} submissions",
+    "sessions": "{count} activity | {count} activity | {count} activities",
+    "domains": "Domains",
+    "noDomain": "No domain declared",
+    "openRecord": "Open record"
+  },
+  "actions": {
+    "merge": "Review the merge",
+    "distinct": "These are not duplicates",
+    "defer": "Later",
+    "reopen": "Return to the queue"
+  },
+  "distinctDialog": {
+    "title": "Remove this pair from the queue",
+    "description": "“{left}” and “{right}” will be treated as two distinct organizations and will no longer be suggested.",
+    "note": "Reason",
+    "notePlaceholder": "Two different bodies despite similar names.",
+    "noteHint": "Optional, but whoever reads this decision in six months will thank you.",
+    "confirm": "These are not duplicates",
+    "success": "Pair removed from the queue."
+  },
+  "deferSuccess": "Pair deferred. It remains available under settled pairs.",
+  "reopened": "Pair returned to the queue."
+}

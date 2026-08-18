@@ -1,0 +1,205 @@
+{
+  "back": "Retour aux organisations",
+  "forbidden": {
+    "scope": "consultation des organisations"
+  },
+  "notFound": {
+    "title": "Organisation introuvable",
+    "description": "Cette fiche n'existe pas ou a été supprimée.",
+    "action": "Retour aux organisations"
+  },
+  "merged": {
+    "notice": "Cette fiche a été absorbée par « {name} » le {date}. Elle reste consultable, et ses anciennes adresses continuent de fonctionner.",
+    "action": "Ouvrir la fiche conservée"
+  },
+  "absorbed": {
+    "title": "Fiches absorbées",
+    "entry": "{name}, le {date}"
+  },
+  "header": {
+    "verified": "Vérifiée par l'IFDD",
+    "verifiedBy": "Sceau posé par {name}",
+    "notVerified": "Non vérifiée",
+    "trust": "Confiance {score}/100",
+    "createdBy": "Créée par {name}, le {date}",
+    "createdOn": "Créée le {date}",
+    "noWebsite": "Aucun site déclaré"
+  },
+  "actions": {
+    "verify": "Poser le sceau de vérification",
+    "unverify": "Retirer le sceau",
+    "merge": "Fusionner avec une autre fiche"
+  },
+  "duplicates": {
+    "title": "Doublons présumés",
+    "description": "Cette fiche apparaît dans {count} paire non arbitrée. | Cette fiche apparaît dans {count} paire non arbitrée. | Cette fiche apparaît dans {count} paires non arbitrées.",
+    "with": "Avec « {name} »",
+    "action": "Examiner la fusion"
+  },
+  "figures": {
+    "members": "Membres actifs",
+    "proposals": "Dossiers déposés",
+    "accepted": "Dossiers acceptés",
+    "ratio": "Ratio d'acceptation",
+    "sessions": "Activités programmées",
+    "events": "Éditions couvertes",
+    "noRatio": "—"
+  },
+  "tabs": {
+    "names": "Dénominations",
+    "domains": "Domaines",
+    "members": "Membres",
+    "activities": "Activités",
+    "history": "Historique"
+  },
+  "names": {
+    "title": "Dénominations",
+    "description": "Toutes les manières de désigner cette organisation. Chacune est interrogée par la recherche — c'est ce qui évite qu'une seconde fiche soit créée sous le sigle.",
+    "caption": "Dénominations de l'organisation",
+    "columns": {
+      "name": "Dénomination",
+      "kind": "Nature",
+      "locale": "Langue",
+      "confirmed": "Affichage",
+      "origin": "Origine"
+    },
+    "kind": {
+      "legal": "Nom légal",
+      "acronym": "Sigle",
+      "short": "Nom court",
+      "translation": "Traduction",
+      "former": "Ancien nom",
+      "misspelling": "Faute fréquente"
+    },
+    "derived": "Suit la fiche",
+    "derivedHint": "Le nom légal et le sigle sont recopiés par la base : ils ne se modifient que sur la fiche.",
+    "confirmed": "Affichée",
+    "unconfirmed": "Masquée",
+    "confirmedHint": "Une dénomination masquée sert toujours la recherche ; elle ne s'affiche simplement pas.",
+    "confirm": "Afficher",
+    "unconfirm": "Masquer",
+    "empty": "Aucune dénomination complémentaire."
+  },
+  "domains": {
+    "title": "Domaines de courriel",
+    "description": "Le signal de rapprochement le plus fiable : deux fiches partageant un domaine vérifié sont la même maison. Un domaine vérifié rattache automatiquement les nouveaux inscrits.",
+    "caption": "Domaines de courriel de l'organisation",
+    "columns": {
+      "domain": "Domaine",
+      "verified": "Vérification",
+      "autoJoin": "Rattachement automatique",
+      "shared": "Partagé"
+    },
+    "verified": "Vérifié le {date}",
+    "unverified": "Non vérifié",
+    "method": {
+      "dns_txt": "Jeton DNS",
+      "email_challenge": "Défi par courriel",
+      "manual": "À la main"
+    },
+    "autoJoinOn": "Actif",
+    "autoJoinOff": "Inactif",
+    "autoJoinHint": "Un rattachement automatique exige un domaine vérifié.",
+    "sharedWith": "Aussi déclaré par « {name} »",
+    "notShared": "—",
+    "verify": "Vérifier à la main",
+    "unverify": "Retirer la vérification",
+    "toggleAutoJoin": "Rattachement automatique",
+    "taken": "« {name} » détient déjà ce domaine vérifié. Un domaine vérifié n'appartient qu'à une seule organisation — c'est probablement un doublon.",
+    "empty": "Aucun domaine déclaré."
+  },
+  "members": {
+    "title": "Membres",
+    "description": "Les adhésions de cette organisation, en attente comprises.",
+    "caption": "Membres de l'organisation",
+    "columns": {
+      "person": "Personne",
+      "role": "Rôle",
+      "status": "Statut",
+      "since": "Depuis"
+    },
+    "role": {
+      "manager": "Référent",
+      "member": "Membre",
+      "contributor": "Contributeur"
+    },
+    "status": {
+      "pending": "En attente",
+      "active": "Active",
+      "revoked": "Révoquée"
+    },
+    "invited": "Invitée le {date} — attend la réponse de la personne",
+    "requested": "Demande du {date} — attend un référent",
+    "primary": "Rattachement principal",
+    "revokedOn": "Révoquée le {date}",
+    "empty": "Aucun membre."
+  },
+  "activities": {
+    "title": "Activités",
+    "description": "Les dossiers déposés et les activités programmées, tous rôles confondus.",
+    "caption": "Activités de l'organisation",
+    "columns": {
+      "title": "Activité",
+      "event": "Édition",
+      "role": "Rôle",
+      "status": "Statut",
+      "date": "Date"
+    },
+    "kind": {
+      "proposal": "Dossier",
+      "session": "Activité"
+    },
+    "role": {
+      "lead": "Porteur principal",
+      "co_organizer": "Co-organisateur",
+      "partner": "Partenaire",
+      "sponsor": "Soutien"
+    },
+    "empty": "Aucune activité déposée ni programmée.",
+    "sessionStatus": {
+      "planned": "À placer",
+      "scheduled": "Programmée",
+      "live": "En direct",
+      "completed": "Tenue",
+      "postponed": "Reportée",
+      "cancelled": "Annulée"
+    }
+  },
+  "history": {
+    "title": "Historique",
+    "description": "Chaque modification de la fiche, champ par champ. L'historique est produit par le journal d'audit de la base, y compris pour les corrections faites hors de l'interface.",
+    "created": "Fiche créée",
+    "changed": "{field} modifié",
+    "by": "par {name}",
+    "system": "par le système",
+    "from": "Avant",
+    "to": "Après",
+    "emptyValue": "Non renseigné",
+    "fields": {
+      "legal_name": "Nom légal",
+      "acronym": "Sigle",
+      "slug": "Adresse de la fiche",
+      "organization_type_code": "Type",
+      "country_id": "Pays",
+      "city": "Ville",
+      "description": "Description",
+      "website": "Site web",
+      "contact_email": "Courriel de contact",
+      "contact_phone": "Téléphone",
+      "status": "Statut",
+      "verified_at": "Sceau de vérification",
+      "trust_score": "Score de confiance",
+      "domainVerified": "Vérification d'un domaine",
+      "nameConfirmed": "Affichage d'une dénomination"
+    },
+    "empty": "Aucune modification enregistrée."
+  },
+  "merges": {
+    "title": "Fusions",
+    "entry": "« {source} » absorbée par « {target} »",
+    "by": "par {name}, le {date}",
+    "rows": "{count} élément déplacé | {count} élément déplacé | {count} éléments déplacés",
+    "reason": "Motif : {reason}"
+  },
+  "saved": "Modification enregistrée."
+}

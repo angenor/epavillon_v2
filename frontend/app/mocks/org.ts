@@ -21,6 +21,7 @@ import type {
   Organization,
   OrganizationDomain,
   OrganizationName,
+  OrganizationReference,
 } from '~/types/org'
 import { COUNTRY, DUPLICATE, ORG, ORG_DOMAIN, ORG_NAME, PERSON } from './ids'
 
@@ -631,3 +632,50 @@ export const duplicateCandidates = [
     decision: 'distinct',
   },
 ] satisfies DuplicateCandidate[]
+
+// ---------------------------------------------------------------------------
+// Registre des références — `org.organization_references`
+//
+// CE N'EST PAS UNE DONNÉE DE DÉMONSTRATION : c'est le registre que chaque module
+// alimente lors de sa migration, recopié tel quel des huit fichiers SQL qui y
+// insèrent (040 § 6, 050 § 8, 060 § 7, 070, 075, 080, 090, 125). La fusion le
+// PARCOURT plutôt que d'énumérer des tables — d'où l'écran de fusion (A11), qui
+// chiffre son transfert ligne à ligne à partir de lui et n'aura rien à changer
+// le jour où un module de plus s'y déclare.
+//
+// `dedupe_on` porte les colonnes formant une unicité AVEC la colonne
+// d'organisation : les lignes en conflit côté source sont supprimées avant la
+// bascule, sans quoi l'unicité ferait échouer la fusion entière.
+// ---------------------------------------------------------------------------
+
+export const organizationReferences = [
+  // 040 § 6 — le module lui-même
+  { ref_schema: 'org', ref_table: 'organization_names', ref_column: 'organization_id', strategy: 'reassign', dedupe_on: [] },
+  // `{domain}` : deux fiches en doublon déclarent presque toujours le même
+  // domaine — c'est le signal qui les a fait remonter. Sans dédoublonnage, la
+  // fiche absorbante héritait de deux lignes pour `osed-sahel.org`.
+  { ref_schema: 'org', ref_table: 'organization_domains', ref_column: 'organization_id', strategy: 'reassign', dedupe_on: ['domain'] },
+  { ref_schema: 'org', ref_table: 'memberships', ref_column: 'organization_id', strategy: 'reassign', dedupe_on: ['person_id'] },
+  { ref_schema: 'identity', ref_table: 'people', ref_column: 'primary_organization_id', strategy: 'reassign', dedupe_on: [] },
+  // 050 § 8 — médias. Le quota est un RÉGLAGE, pas un patrimoine : il se supprime.
+  { ref_schema: 'media', ref_table: 'assets', ref_column: 'owner_organization_id', strategy: 'reassign', dedupe_on: [] },
+  { ref_schema: 'media', ref_table: 'storage_quotas', ref_column: 'organization_id', strategy: 'delete', dedupe_on: [] },
+  // 060 § 7 — séries d'événements
+  { ref_schema: 'event', ref_table: 'event_series', ref_column: 'organizer_organization_id', strategy: 'reassign', dedupe_on: [] },
+  // 070 — propositions
+  { ref_schema: 'programme', ref_table: 'proposals', ref_column: 'organization_id', strategy: 'reassign', dedupe_on: [] },
+  { ref_schema: 'programme', ref_table: 'proposal_speakers', ref_column: 'organization_id', strategy: 'reassign', dedupe_on: [] },
+  { ref_schema: 'programme', ref_table: 'proposal_organizations', ref_column: 'organization_id', strategy: 'reassign', dedupe_on: ['proposal_id'] },
+  // 075 — séances et inscriptions
+  { ref_schema: 'programme', ref_table: 'sessions', ref_column: 'organization_id', strategy: 'reassign', dedupe_on: [] },
+  { ref_schema: 'programme', ref_table: 'registrations', ref_column: 'organization_id', strategy: 'reassign', dedupe_on: [] },
+  { ref_schema: 'programme', ref_table: 'session_organizations', ref_column: 'organization_id', strategy: 'reassign', dedupe_on: ['session_id'] },
+  // 080 — messages d'incident
+  { ref_schema: 'live', ref_table: 'incidents', ref_column: 'organization_id', strategy: 'reassign', dedupe_on: [] },
+  // 090 — publications
+  { ref_schema: 'publication', ref_table: 'articles', ref_column: 'organization_id', strategy: 'reassign', dedupe_on: [] },
+  { ref_schema: 'publication', ref_table: 'publishing_policies', ref_column: 'organization_id', strategy: 'delete', dedupe_on: [] },
+  // 125 — formations
+  { ref_schema: 'training', ref_table: 'trainings', ref_column: 'organizer_organization_id', strategy: 'reassign', dedupe_on: [] },
+  { ref_schema: 'training', ref_table: 'enrollments', ref_column: 'organization_id', strategy: 'reassign', dedupe_on: [] },
+] satisfies OrganizationReference[]
