@@ -55,7 +55,7 @@ const personById = new Map(people.map((p) => [p.id, p]))
  * liste du back-office. Une seule fabrique, sinon les deux écrans finissent par
  * ne plus classer les thématiques dans le même ordre.
  */
-function termBadges(table: 'sessions' | 'proposals', entityId: string): ScheduleThemeBadge[] {
+export function termBadges(table: 'sessions' | 'proposals', entityId: string): ScheduleThemeBadge[] {
   return entityTerms
     .filter((link) => link.entity_table === table && link.entity_id === entityId)
     .map((link) => ({ link, term: termById.get(link.term_id) }))

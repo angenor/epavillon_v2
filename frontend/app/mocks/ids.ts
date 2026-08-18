@@ -314,10 +314,21 @@ export const VENUE = {
   pacoEnLigne: uuid('7023', 5),
 } as const
 
-/** `event.rooms` — la salle `atelier` est virtuelle : pas d'exclusivité. */
+/**
+ * `event.rooms`.
+ *
+ * UN SEUL STAND, DONC UNE SEULE SALLE PHYSIQUE PAR PAVILLON — règle métier n° 3
+ * du projet, confirmée par le commanditaire le 18/08 : « tout se passe dans la
+ * même salle ». Le jeu de données en déclarait deux (Baobab et Fromager), ce qui
+ * laissait croire à deux activités simultanées possibles au pavillon ; elles sont
+ * fusionnées en `stand`, qui garde l'identifiant de la première.
+ *
+ * La salle `atelier` est VIRTUELLE : elle n'occupe pas le stand, accepte les
+ * créneaux simultanés, et c'est ce qui distingue une contrainte matérielle d'une
+ * simple concomitance.
+ */
 export const ROOM = {
-  baobab: uuid('7024', 1),
-  fromager: uuid('7024', 2),
+  stand: uuid('7024', 1),
   atelier: uuid('7024', 3),
   cop30Principale: uuid('7024', 4),
   cop29Principale: uuid('7024', 5),

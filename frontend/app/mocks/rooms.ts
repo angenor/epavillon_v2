@@ -6,10 +6,14 @@
  * (A9) saurait dire « deux activités à 14 h » mais pas « la salle Baobab est
  * réservée deux fois ». Deux règles matérielles s'y lisent directement :
  *
- *   - UN SEUL STAND. Le pavillon ne compte que deux salles physiques ; deux
- *     activités ne peuvent pas s'y tenir au même moment dans la même salle. La
- *     salle « Atelier en ligne » est virtuelle : elle accepte les créneaux
- *     simultanés, `detect_conflicts()` n'y voit pas de double réservation.
+ *   - UN SEUL STAND, DONC UNE SEULE SALLE PHYSIQUE. Règle métier n° 3 du projet,
+ *     confirmée par le commanditaire le 18/08 : « tout se passe dans la même
+ *     salle ». Deux activités du pavillon ne peuvent donc PAS se tenir au même
+ *     moment — c'est un fait du terrain, que `detect_conflicts()` signale sans
+ *     jamais l'empêcher. Le jeu de données déclarait deux salles (Baobab et
+ *     Fromager), ce qui laissait croire le contraire ; elles n'en font plus
+ *     qu'une. La salle « Atelier en ligne » est virtuelle : elle n'occupe pas le
+ *     stand et accepte les créneaux simultanés.
  *   - UN SEUL DIRECT. Un unique canal de diffusion pour toute l'édition : deux
  *     sessions diffusées sur des créneaux qui se recouvrent sont remontées en
  *     gravité `blocking`. Le cas est délibérément présent dans `mocks/sessions/`.
@@ -82,28 +86,20 @@ export const venues = [
 
 export const rooms = [
   {
-    id: ROOM.baobab,
+    // LA SALLE DU STAND, et il n'y en a qu'une : le pavillon de la Francophonie
+    // est un espace unique, monté pour la durée de la COP. Deux activités ne
+    // peuvent pas s'y tenir en même temps, et le planificateur n'a donc aucune
+    // colonne à découper.
+    id: ROOM.stand,
     venue_id: VENUE.pavillon,
-    name: { fr: 'Salle Baobab', en: 'Baobab Room' },
-    code: 'baobab',
+    name: { fr: 'Stand du pavillon', en: 'Pavilion stand' },
+    code: 'stand',
     capacity: 80,
     is_virtual: false,
     has_streaming: true,
     equipment: ['projecteur', 'sonorisation', 'cabine d’interprétation', 'caméra fixe'],
     sort_order: 10,
     created_at: '2026-02-10T10:15:00Z',
-  },
-  {
-    id: ROOM.fromager,
-    venue_id: VENUE.pavillon,
-    name: { fr: 'Salle Fromager', en: 'Fromager Room' },
-    code: 'fromager',
-    capacity: 35,
-    is_virtual: false,
-    has_streaming: false,
-    equipment: ['écran', 'tableau blanc'],
-    sort_order: 20,
-    created_at: '2026-02-10T10:16:00Z',
   },
   {
     // Salle VIRTUELLE : deux sessions peuvent l'occuper en même temps sans que

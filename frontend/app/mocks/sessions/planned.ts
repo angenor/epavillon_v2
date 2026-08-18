@@ -7,6 +7,19 @@
  * de les rendre visibles. C'est la moitié du travail de l'écran : distinguer ce
  * qui est arrêté de ce qui ne l'est pas encore.
  *
+ * CINQ D'ENTRE ELLES N'ONT PAS DE SALLE (`room_id` nul), et c'est l'état normal
+ * d'une activité retenue mais pas encore installée : le dossier a été accepté,
+ * la séance existe avec le créneau souhaité par l'organisation, et l'équipe n'a
+ * pas encore décidé où elle se tiendrait. Ce sont ELLES que le planificateur
+ * (A9) présente dans son panneau « à placer », et qu'un glisser-déposer installe
+ * dans une salle. Sans ce cas dans les données, le panneau latéral de l'écran
+ * serait vide et son compteur afficherait zéro.
+ *
+ * Conséquences vérifiables ailleurs : `detect_conflicts()` ne leur oppose aucun
+ * conflit de stand — une séance sans salle n'occupe rien —, et
+ * `publication_readiness()` les réclame toutes les cinq, ce qui est exactement
+ * ce que le récapitulatif de publication doit montrer.
+ *
  * Deux cas limites à traiter :
  *   - `webinairePreparatoire` se tient AVANT l'édition, le 28 octobre : sa date
  *     ne correspond à aucun jour du calendrier, donc `event_day_id` reste nul.
@@ -63,7 +76,7 @@ export const plannedSessions = [
     format: 'hybrid',
     startsAt: '2027-11-17T09:30:00-03:00',
     endsAt: '2027-11-17T11:00:00-03:00',
-    room: ROOM.baobab,
+    room: ROOM.stand,
     registration: { required: true, capacity: 80, waitlist: true },
     createdBy: PERSON.nkoDiop,
     createdAt: '2026-08-04T11:00:00Z',
@@ -106,7 +119,9 @@ export const plannedSessions = [
     format: 'in_person',
     startsAt: '2027-11-17T14:00:00-03:00',
     endsAt: '2027-11-17T16:00:00-03:00',
-    room: ROOM.fromager,
+    // À PLACER : dossier retenu, créneau souhaité recopié, salle non encore
+    // attribuée. Le planificateur la présente dans son panneau latéral.
+    room: null,
     registration: { required: true, capacity: 20, waitlist: true, closesAt: '2027-11-15T18:00:00-03:00' },
     questions: false,
     createdBy: PERSON.tremblay,
@@ -127,7 +142,9 @@ export const plannedSessions = [
     format: 'in_person',
     startsAt: '2027-11-18T09:30:00-03:00',
     endsAt: '2027-11-18T11:00:00-03:00',
-    room: ROOM.baobab,
+    // À PLACER : dossier retenu, créneau souhaité recopié, salle non encore
+    // attribuée. Le planificateur la présente dans son panneau latéral.
+    room: null,
     registration: { required: true, capacity: 80, waitlist: true },
     createdBy: PERSON.nkoDiop,
     createdAt: '2026-08-04T11:15:00Z',
@@ -148,7 +165,9 @@ export const plannedSessions = [
     format: 'hybrid',
     startsAt: '2027-11-18T14:00:00-03:00',
     endsAt: '2027-11-18T15:30:00-03:00',
-    room: ROOM.baobab,
+    // À PLACER : dossier retenu, créneau souhaité recopié, salle non encore
+    // attribuée. Le planificateur la présente dans son panneau latéral.
+    room: null,
     registration: { required: true, capacity: 80, waitlist: true },
     streamed: true,
     recorded: true,
@@ -170,7 +189,9 @@ export const plannedSessions = [
     format: 'in_person',
     startsAt: '2027-11-19T09:30:00-03:00',
     endsAt: '2027-11-19T11:30:00-03:00',
-    room: ROOM.fromager,
+    // À PLACER : dossier retenu, créneau souhaité recopié, salle non encore
+    // attribuée. Le planificateur la présente dans son panneau latéral.
+    room: null,
     registration: { required: true, capacity: 20, waitlist: true },
     questions: false,
     createdBy: PERSON.tremblay,
@@ -193,7 +214,9 @@ export const plannedSessions = [
     format: 'in_person',
     startsAt: '2027-11-19T14:00:00-03:00',
     endsAt: '2027-11-19T16:00:00-03:00',
-    room: ROOM.fromager,
+    // À PLACER : dossier retenu, créneau souhaité recopié, salle non encore
+    // attribuée. Le planificateur la présente dans son panneau latéral.
+    room: null,
     registration: { required: true, capacity: 20, waitlist: true, closesAt: '2027-11-17T18:00:00-03:00' },
     questions: false,
     createdBy: PERSON.tremblay,
@@ -209,7 +232,7 @@ export const plannedSessions = [
     format: 'in_person',
     startsAt: '2027-11-19T17:30:00-03:00',
     endsAt: '2027-11-19T18:00:00-03:00',
-    room: ROOM.baobab,
+    room: ROOM.stand,
     createdBy: PERSON.nkoDiop,
     createdAt: '2026-08-04T11:35:00Z',
   }),
@@ -227,7 +250,7 @@ export const plannedSessions = [
     format: 'hybrid',
     startsAt: '2027-11-20T16:00:00-03:00',
     endsAt: '2027-11-20T17:30:00-03:00',
-    room: ROOM.baobab,
+    room: ROOM.stand,
     streamed: true,
     recorded: true,
     questions: false,

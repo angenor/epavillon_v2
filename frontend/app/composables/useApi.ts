@@ -27,7 +27,8 @@
  *
  * DÉCOUPAGE. Un écran dont les appels dépassent la centaine de lignes sort dans
  * `composables/api/`, monté ici par une fabrique qui reçoit `call` et `send` —
- * c'est le cas de la fiche d'évaluation (`review`). Rien ne change pour les
+ * c'est le cas de la fiche d'évaluation (`review`) et du planificateur
+ * (`planner`, qui reçoit en plus `assertEventInScope`). Rien ne change pour les
  * pages : elles appellent toujours `useApi()`, et la bascule vers l'API réelle,
  * la latence simulée et l'en-tête `Accept-Language` valent aussi là-bas. Ce
  * découpage suit la règle du projet — par ÉCRAN — et tient ce fichier sous le
@@ -81,6 +82,7 @@ import type {
 } from '~/types/organization-workspace'
 import type { Uuid } from '~/types/shared'
 import { createProposalReviewApi } from './api/proposal-review'
+import { createPlannerApi } from './api/planner'
 
 /** Erreur d'accès, à traduire par l'écran « accès refusé ». */
 export class ForbiddenError extends Error {
@@ -789,6 +791,17 @@ export function useApi() {
         })
       },
     },
+
+    // -----------------------------------------------------------------------
+    // Planificateur de créneaux (A9)
+    //
+    // Sorti dans `composables/api/planner.ts` — sept appels, dont quatre
+    // écritures. AUCUNE NE PEUT ÊTRE REFUSÉE POUR CHEVAUCHEMENT : le modèle ne
+    // pose aucune contrainte d'exclusion sur les créneaux, l'équipe arbitre en
+    // passant par des états incohérents, et le seul garde-fou dur est la
+    // publication du programme.
+    // -----------------------------------------------------------------------
+    planner: createPlannerApi({ call, send, assertEventInScope }),
 
     // -----------------------------------------------------------------------
     // Espace organisation (A5)

@@ -790,9 +790,9 @@ COMMENT ON VIEW programme.v_public_schedule IS
 --
 -- Deux niveaux :
 --   'blocking'  — matériellement impossible. L'IFDD tient UN SEUL stand : deux
---                 activités d'un même événement ne peuvent pas se tenir en même
---                 temps. Et une seule équipe technique : un seul direct à la
---                 fois, tous événements confondus. Ces conflits doivent être
+--                 activités d'un même événement ne peuvent pas occuper ses salles
+--                 en même temps. Et une seule équipe technique : un seul direct à
+--                 la fois, tous événements confondus. Ces conflits doivent être
 --                 résolus avant publication.
 --   'warning'   — gênant mais possible : un intervenant attendu à deux endroits,
 --                 une organisation programmée deux fois. L'équipe juge.
@@ -801,6 +801,28 @@ COMMENT ON VIEW programme.v_public_schedule IS
 -- événements distincts (un webinaire et une COP) peuvent parfaitement se tenir
 -- en parallèle. Les conflits de DIFFUSION, eux, sont cherchés au-delà : le
 -- direct est une ressource unique de la plateforme, pas de l'événement.
+--
+-- CE QU'OCCUPE UNE SÉANCE, ET CE QU'ELLE N'OCCUPE PAS (corrigé le 18/08 2026,
+-- écart n° 10 de docs/PROGRESSION.md, avant l'écriture du planificateur)
+-- La première version de la branche « stand unique » visait TOUTE paire de
+-- séances simultanées de l'édition. Elle remontait donc en gravité bloquante un
+-- atelier en ligne tenu dans une salle virtuelle, qui n'occupe pourtant aucun
+-- mètre carré du pavillon : le planificateur affichait un conflit matériel qui
+-- n'en était pas un, et une alerte qu'on apprend à ignorer a cessé d'être une
+-- alerte. La branche ne retient donc plus que les séances qui occupent
+-- RÉELLEMENT le stand, c'est-à-dire celles installées dans une salle PHYSIQUE
+-- (`enforce_room_exclusivity`, dérivée de `event.rooms.is_virtual` par trigger).
+--
+-- Pourquoi la salle et non le format : une table ronde `online` peut être
+-- diffusée depuis le studio du pavillon — elle occupe alors bien le stand —, et
+-- une séance `hybrid` posée en salle virtuelle ne l'occupe pas. C'est le LIEU
+-- qui dit l'occupation, jamais le mode de participation.
+--
+-- Corollaire : une séance SANS SALLE n'occupe rien. C'est l'état normal d'une
+-- activité retenue mais pas encore installée — le panneau « à placer » du
+-- planificateur. Ces séances ne doivent pas saturer le bandeau de conflits avant
+-- même que l'arbitrage ait commencé ; `publication_readiness()` les réclame de
+-- toute façon, au moment qui compte.
 -- -----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION programme.detect_conflicts(p_event_id uuid)
 RETURNS TABLE (
@@ -822,13 +844,22 @@ AS $$
         FROM programme.sessions s
         WHERE s.status IN ('planned', 'scheduled', 'live')
     )
-    -- 1. Un seul stand : deux activités du même événement en même temps.
+    -- 1. Un seul stand : deux activités du même événement OCCUPANT UNE SALLE
+    --    PHYSIQUE en même temps. Voir l'en-tête : une séance en salle virtuelle
+    --    ou pas encore installée n'occupe pas le stand.
+    --
+    --    Les deux séances dans la MÊME salle sont écartées ici : la branche 3 le
+    --    dit mieux, en nommant la salle. Sans cette exclusion, chaque double
+    --    réservation était comptée deux fois dans le bandeau du planificateur.
     SELECT 'blocking', 'venue_capacity',
            a.event_id, 'Stand unique de l''événement',
            a.id, a.label, b.id, b.label, a.time_range * b.time_range
     FROM active a
     JOIN active b ON b.event_id = a.event_id AND b.id > a.id AND a.time_range && b.time_range
     WHERE a.event_id = p_event_id
+      AND a.enforce_room_exclusivity
+      AND b.enforce_room_exclusivity
+      AND a.room_id IS DISTINCT FROM b.room_id
 
     UNION ALL
 
@@ -893,8 +924,16 @@ COMMENT ON FUNCTION programme.detect_conflicts IS
 -- Contrôle avant publication : ce qui doit être réglé pour que la programmation
 -- puisse être rendue publique. C'est ici que le garde-fou a du sens — pas
 -- pendant que l'équipe déplace ses blocs.
+-- `occurs_at` PLUTÔT QU'UN INTERVALLE DANS LE TEXTE (corrigé le 18/08 2026, en
+-- éprouvant le récapitulatif de publication du planificateur). La première
+-- version glissait le `tstzrange` brut dans `detail`, ce qui s'affichait tel
+-- quel à l'écran : « (["2027-11-12T14:00:00-03:00","2027-11-12T15:30:00-03:00") »
+-- au milieu d'une phrase française. Un instant n'est pas un texte : la base rend
+-- la DONNÉE, et l'interface la situe dans le fuseau de l'édition et la langue du
+-- lecteur — la règle du projet, « toute date affichée porte son fuseau », ne
+-- peut pas s'appliquer à une chaîne déjà figée.
 CREATE OR REPLACE FUNCTION programme.publication_readiness(p_event_id uuid)
-RETURNS TABLE (severity text, issue text, detail text, session_id uuid)
+RETURNS TABLE (severity text, issue text, detail text, session_id uuid, occurs_at timestamptz)
 LANGUAGE sql
 STABLE
 AS $$
@@ -906,14 +945,15 @@ AS $$
                WHEN 'speaker'        THEN 'Intervenant attendu à deux endroits'
                ELSE 'Organisation programmée deux fois'
            END,
-           format('%s ↔ %s (%s)', c.session_a_title, c.session_b_title, c.overlap),
-           c.session_a
+           format('%s ↔ %s', c.session_a_title, c.session_b_title),
+           c.session_a,
+           lower(c.overlap)
     FROM programme.detect_conflicts(p_event_id) c
 
     UNION ALL
 
     SELECT 'blocking', 'Session sans créneau valide',
-           platform.t(s.title), s.id
+           platform.t(s.title), s.id, s.starts_at
     FROM programme.sessions s
     WHERE s.event_id = p_event_id
       AND s.status IN ('planned', 'scheduled')
@@ -921,8 +961,27 @@ AS $$
 
     UNION ALL
 
+    -- SANS LIEU, NI MÊME UNE PRÉCISION DE LIEU (ajouté le 18/08 2026, en
+    -- écrivant le planificateur). Une séance retenue vit d'abord sans salle :
+    -- c'est l'état normal tant que l'équipe n'a pas arbitré, et c'est justement
+    -- ce que le panneau « à placer » du planificateur montre. Rien ne l'empêche
+    -- ni ne doit l'empêcher — mais une programmation rendue publique sans dire
+    -- OÙ se tient l'activité envoie le visiteur chercher une salle qui n'a pas
+    -- de nom. `location_note` suffit quand il n'y a pas de salle en base : une
+    -- séance en ligne y porte son mode d'accès, une séance hors pavillon
+    -- l'adresse de son hôte.
+    SELECT 'blocking', 'Séance sans lieu ni précision de lieu',
+           platform.t(s.title), s.id, s.starts_at
+    FROM programme.sessions s
+    WHERE s.event_id = p_event_id
+      AND s.status IN ('planned', 'scheduled')
+      AND s.room_id IS NULL
+      AND s.location_note IS NULL
+
+    UNION ALL
+
     SELECT 'warning', 'Session diffusée sans canal assigné',
-           platform.t(s.title), s.id
+           platform.t(s.title), s.id, s.starts_at
     FROM programme.sessions s
     WHERE s.event_id = p_event_id
       AND s.is_streamed
@@ -932,7 +991,7 @@ AS $$
     UNION ALL
 
     SELECT 'warning', 'Session sans intervenant déclaré',
-           platform.t(s.title), s.id
+           platform.t(s.title), s.id, s.starts_at
     FROM programme.sessions s
     WHERE s.event_id = p_event_id
       AND s.status IN ('planned', 'scheduled')

@@ -50,6 +50,9 @@
  *                        ses actions groupées
  *   proposal-review.ts   la composition de la fiche d'évaluation (A8), le voile
  *                        de l'évaluation en aveugle et ses quatre écritures
+ *   admin-planner.ts     la composition du planificateur de créneaux (A9) et ses
+ *                        quatre écritures — dont AUCUNE ne refuse un
+ *                        chevauchement
  */
 
 export * from './ids'
@@ -185,3 +188,11 @@ export {
   postProposalComment,
   decideProposal,
 } from './proposal-review'
+
+export {
+  plannerScreen,
+  scheduleSession,
+  setSessionTracks,
+  setSessionBroadcast,
+  publishProgramme,
+} from './admin-planner'

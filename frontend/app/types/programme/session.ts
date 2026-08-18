@@ -202,6 +202,15 @@ export interface PublicationReadinessIssue {
   issue: string
   detail: string | null
   session_id: SessionId | null
+  /**
+   * Quand cela se produit — début du chevauchement, ou de la séance en cause.
+   *
+   * UN INSTANT, PAS UN TEXTE. La première version du modèle glissait le
+   * `tstzrange` brut dans `detail`, qui s'affichait tel quel à l'écran ; une
+   * chaîne figée en base ne peut ni se traduire, ni se situer dans le fuseau de
+   * l'édition, alors que la règle du projet l'exige de toute date affichée.
+   */
+  occurs_at: IsoDateTime | null
 }
 
 // ---------------------------------------------------------------------------

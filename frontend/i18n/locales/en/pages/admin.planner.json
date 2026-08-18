@@ -1,0 +1,172 @@
+{
+  "title": "Slot planner",
+  "subtitle": "Place accepted activities into rooms, across the days of the edition. Overlaps are flagged, never blocked.",
+  "publishedSince": "Programme published on {date}",
+  "forbidden": {
+    "scope": "programme manager for an edition"
+  },
+  "empty": {
+    "title": "No edition selected",
+    "description": "Pick an edition at the top of the page to compose its programme."
+  },
+  "tabs": {
+    "label": "Planner view",
+    "unplaced": "To place",
+    "calendar": "Calendar"
+  },
+  "format": {
+    "online": "Online",
+    "in_person": "In person",
+    "hybrid": "Hybrid"
+  },
+  "unplaced": {
+    "title": "To place",
+    "remaining": "No activity left to place | {count} activity left to place | {count} activities left to place",
+    "empty": {
+      "title": "Everything is placed",
+      "description": "Every accepted activity has a room. What remains is to check overlaps, then publish."
+    },
+    "noResults": {
+      "title": "No activity matches these filters",
+      "description": "{total} activities are waiting for a slot, none matches this search."
+    }
+  },
+  "filters": {
+    "search": "Search an activity",
+    "searchPlaceholder": "Title, organization or file number",
+    "theme": "Theme",
+    "allThemes": "All themes",
+    "format": "Format",
+    "allFormats": "All formats",
+    "organization": "Organization",
+    "allOrganizations": "All organizations",
+    "shown": "{shown} of {total} activities",
+    "reset": "Clear filters",
+    "open": "Filter",
+    "openWithCount": "Filters ({count})"
+  },
+  "sort": {
+    "label": "Sort by",
+    "score": "Committee score",
+    "preferred": "Requested slot",
+    "duration": "Duration",
+    "title": "Title"
+  },
+  "card": {
+    "score": "{score} / 20",
+    "scoreTitle": "Average score given by the selection committee",
+    "durationLabel": "Duration",
+    "durationMinutes": "{minutes} min",
+    "durationHours": "{hours} h",
+    "durationHoursMinutes": "{hours} h {minutes}",
+    "preferredLabel": "Requested slot",
+    "preferred": "Requested: {date}, {range}",
+    "constraintsLabel": "Declared constraints",
+    "moreThemes": "+{count}",
+    "place": "Place",
+    "orDrag": "or drag the card onto the grid"
+  },
+  "calendar": {
+    "zoneNotice": "Times shown in {zone} local time.",
+    "hint": "Drag a block to move it, stretch its edge to change its duration.",
+    "viewLabel": "Displayed period",
+    "view": {
+      "day": "Day",
+      "week": "Week",
+      "month": "Month",
+      "year": "Year"
+    },
+    "hintReadOnly": "Overview: click a cell to go down to the day, a block to open the activity.",
+    "noEventIn": {
+      "day": "No activity placed on this day.",
+      "week": "No activity placed in this week.",
+      "month": "No activity placed in this month.",
+      "year": "No activity placed in this year."
+    },
+    "countLabel": "No activity | {count} activity | {count} activities",
+    "hintMonth": "Drag an activity onto a day: it takes the time requested in its proposal."
+  },
+  "conflict": {
+    "loading": "Looking for overlaps…",
+    "none": "No overlap",
+    "noneDetail": "No activity gets in the way of another in this edition.",
+    "total": "No overlap | {count} overlap | {count} overlaps",
+    "breakdown": "{blocking} blocking, {warning} to check",
+    "neverBlocked": "overlaps are flagged, never blocked",
+    "expand": "Show details",
+    "collapse": "Hide details",
+    "showFirst": "Show the first",
+    "showSecond": "Show the second",
+    "severity": {
+      "blocking": "Blocking",
+      "warning": "To check"
+    },
+    "kind": {
+      "venue_capacity": "Two activities on the stand at once",
+      "broadcast": "Two live streams at once",
+      "room": "Room booked twice",
+      "speaker": "Speaker expected in two places",
+      "organization": "Organization scheduled twice"
+    }
+  },
+  "dialog": {
+    "noOrganization": "IFDD activity",
+    "score": "Committee score",
+    "noScore": "No score",
+    "format": "Format",
+    "preferred": "Slot requested at submission",
+    "constraints": "Declared constraints",
+    "openProposal": "Open the original proposal",
+    "slot": "Slot",
+    "start": "Start",
+    "duration": "Duration",
+    "room": "Room",
+    "roomHint": "“To place” removes the activity from the calendar without deleting it.",
+    "noRoom": "To place — no room",
+    "virtualRoom": "Virtual room: simultaneous slots accepted",
+    "roomCapacity": "{capacity} seats",
+    "outsideEdition": "This slot falls outside the days of the edition. That is allowed — a preparatory webinar, for instance — but the activity will not appear on any calendar day.",
+    "tracks": "Special days",
+    "tracksHint": "Membership is decided by the team, never inferred from the date: not every activity of the day belongs to it.",
+    "trackOutOfRange": "Outside the announced period of this track — attaching it is still possible.",
+    "broadcast": "Streaming",
+    "isStreamed": "Stream this activity live",
+    "isStreamedHint": "One live stream at a time across all events: a second stream on the same slot will be flagged.",
+    "channel": "Broadcast channel",
+    "defaultChannel": "Streamed on {channel}, the edition's default channel.",
+    "conflicts": "Overlap for this activity | {count} overlap for this activity | {count} overlaps for this activity",
+    "save": "Save",
+    "unplace": "Remove from the calendar"
+  },
+  "publish": {
+    "open": "Publish the programme",
+    "title": "Publish the programme",
+    "description": "What must be settled before the programme goes public.",
+    "ready": "No activity to publish | {count} activity ready to publish | {count} activities ready to publish",
+    "readyDetail": "They will become visible to the public, with their room and time.",
+    "blocked": "{count} issue blocks publication | {count} issue blocks publication | {count} issues block publication",
+    "blockedDetail": "Nothing will be published until they are settled. This is the only place in the planner where a check prevents action.",
+    "mustFix": "Must be settled before publishing",
+    "shouldCheck": "Worth checking, does not prevent publishing",
+    "show": "Show",
+    "clean": {
+      "title": "Nothing to report",
+      "description": "No blocking overlap, no activity without a place."
+    },
+    "action": "Publish",
+    "actionAgain": "Publish the new entries",
+    "done": "No activity published | {count} activity published | {count} activities published"
+  },
+  "notice": {
+    "placed": "“{title}” has been placed.",
+    "unplaced": "“{title}” went back to the activities to place.",
+    "saved": "“{title}” has been saved.",
+    "published": "No activity published | {count} activity published | {count} activities published",
+    "moved": "The slot for “{title}” has been saved."
+  },
+  "error": {
+    "schedule": "The slot could not be saved. The grid has been reloaded.",
+    "save": "The changes could not be saved.",
+    "publish": "Publishing did not go through."
+  }
+}

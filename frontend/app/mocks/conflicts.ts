@@ -9,7 +9,9 @@
  *
  * Les cinq familles sont celles de la fonction SQL, dans le même ordre :
  *
- *   venue_capacity  un seul stand : deux séances simultanées de l'édition ;
+ *   venue_capacity  un seul stand : deux séances simultanées de l'édition qui
+ *                   OCCUPENT chacune une salle physique — une séance en ligne ou
+ *                   pas encore installée n'occupe rien (écart n° 10) ;
  *   broadcast       un seul direct, tous événements confondus ;
  *   room            une salle physique réservée deux fois ;
  *   speaker         un intervenant attendu à deux endroits ;
@@ -80,8 +82,16 @@ export function detectConflicts(eventId: string): ScheduleConflict[] {
       const b = active[j]!
       if (!overlaps(a, b)) continue
 
-      // 1. Un seul stand.
-      found.push(conflict('blocking', 'venue_capacity', eventId, "Stand unique de l'événement", a, b))
+      // 1. Un seul stand — MAIS SEULEMENT ENTRE SÉANCES QUI L'OCCUPENT
+      //    RÉELLEMENT : deux salles physiques différentes du pavillon. Une
+      //    séance en salle virtuelle, ou pas encore installée, n'occupe aucun
+      //    mètre carré ; la remonter en gravité bloquante apprenait à l'équipe à
+      //    ignorer le bandeau d'alerte (écart n° 10, corrigé dans le SQL le
+      //    18/08). Deux séances dans la MÊME salle relèvent de la branche 3, qui
+      //    le dit mieux en nommant la salle.
+      if (a.enforce_room_exclusivity && b.enforce_room_exclusivity && a.room_id !== b.room_id) {
+        found.push(conflict('blocking', 'venue_capacity', eventId, "Stand unique de l'événement", a, b))
+      }
 
       // 2. Un seul direct.
       if (a.is_streamed && b.is_streamed && a.broadcast_channel_id === b.broadcast_channel_id) {
@@ -140,20 +150,61 @@ export function publicationReadiness(eventId: string): PublicationReadinessIssue
             : c.conflict_kind === 'speaker'
               ? 'Intervenant attendu à deux endroits'
               : 'Organisation programmée deux fois',
-    detail: `${c.session_a_title} ↔ ${c.session_b_title} (${c.overlap})`,
+    // Le créneau n'est PAS collé dans le texte : `occurs_at` porte l'instant, et
+    // l'écran le situe dans le fuseau de l'édition et la langue du lecteur.
+    detail: `${c.session_a_title} ↔ ${c.session_b_title}`,
     session_id: c.session_a,
+    occurs_at: c.overlap.slice(2, c.overlap.indexOf('","')),
   }))
 
-  // Une séance sans salle ni précision de lieu ne peut pas être publiée.
+  // Les quatre contrôles que la fonction SQL ajoute aux conflits, dans son
+  // ordre. Ils ne portent que sur les séances `planned` et `scheduled` : une
+  // séance annulée ou reportée n'a rien à régler avant publication.
   for (const session of allSessions) {
     if (session.event_id !== eventId) continue
-    if (session.status === 'cancelled' || session.status === 'postponed') continue
+    if (session.status !== 'planned' && session.status !== 'scheduled') continue
+
+    if (Date.parse(session.ends_at) <= Date.parse(session.starts_at)) {
+      issues.push({
+        severity: 'blocking',
+        issue: 'Session sans créneau valide',
+        detail: session.title.fr,
+        session_id: session.id,
+        occurs_at: session.starts_at,
+      })
+    }
+
+    // SANS LIEU : l'état normal d'une activité retenue mais pas encore
+    // installée — celles du panneau « à placer ». Rien ne l'empêche ; c'est la
+    // PUBLICATION qui l'exige, faute de quoi le visiteur cherche une salle qui
+    // n'a pas de nom.
     if (session.room_id === null && session.location_note === null) {
       issues.push({
         severity: 'blocking',
         issue: 'Séance sans lieu ni précision de lieu',
         detail: session.title.fr,
         session_id: session.id,
+        occurs_at: session.starts_at,
+      })
+    }
+
+    if (session.is_streamed && session.broadcast_channel_id === null) {
+      issues.push({
+        severity: 'warning',
+        issue: 'Session diffusée sans canal assigné',
+        detail: session.title.fr,
+        session_id: session.id,
+        occurs_at: session.starts_at,
+      })
+    }
+
+    if (!sessionSpeakers.some((speaker) => speaker.session_id === session.id)) {
+      issues.push({
+        severity: 'warning',
+        issue: 'Session sans intervenant déclaré',
+        detail: session.title.fr,
+        session_id: session.id,
+        occurs_at: session.starts_at,
       })
     }
   }

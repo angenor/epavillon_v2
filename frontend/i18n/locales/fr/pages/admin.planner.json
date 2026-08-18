@@ -1,0 +1,172 @@
+{
+  "title": "Planificateur de créneaux",
+  "subtitle": "Placez les activités retenues dans les salles, sur les jours de l'édition. Les chevauchements sont signalés, jamais bloqués.",
+  "publishedSince": "Programmation publiée le {date}",
+  "forbidden": {
+    "scope": "chargé de programmation d'une édition"
+  },
+  "empty": {
+    "title": "Aucune édition sélectionnée",
+    "description": "Choisissez une édition en tête de page pour composer sa programmation."
+  },
+  "tabs": {
+    "label": "Vue du planificateur",
+    "unplaced": "À placer",
+    "calendar": "Calendrier"
+  },
+  "format": {
+    "online": "En ligne",
+    "in_person": "Sur place",
+    "hybrid": "Hybride"
+  },
+  "unplaced": {
+    "title": "À placer",
+    "remaining": "Aucune activité ne reste à placer | {count} activité restant à placer | {count} activités restant à placer",
+    "empty": {
+      "title": "Tout est placé",
+      "description": "Chaque activité retenue occupe une salle. Il reste à vérifier les conflits, puis à publier."
+    },
+    "noResults": {
+      "title": "Aucune activité pour ces filtres",
+      "description": "{total} activités attendent une place, aucune ne correspond à cette recherche."
+    }
+  },
+  "filters": {
+    "search": "Rechercher une activité",
+    "searchPlaceholder": "Titre, organisation ou numéro de dossier",
+    "theme": "Thématique",
+    "allThemes": "Toutes les thématiques",
+    "format": "Format",
+    "allFormats": "Tous les formats",
+    "organization": "Organisation",
+    "allOrganizations": "Toutes les organisations",
+    "shown": "{shown} activité sur {total}",
+    "reset": "Retirer les filtres",
+    "open": "Filtrer",
+    "openWithCount": "Filtres ({count})"
+  },
+  "sort": {
+    "label": "Trier par",
+    "score": "Note du comité",
+    "preferred": "Créneau souhaité",
+    "duration": "Durée",
+    "title": "Titre"
+  },
+  "card": {
+    "score": "{score} / 20",
+    "scoreTitle": "Note moyenne attribuée par le comité de sélection",
+    "durationLabel": "Durée",
+    "durationMinutes": "{minutes} min",
+    "durationHours": "{hours} h",
+    "durationHoursMinutes": "{hours} h {minutes}",
+    "preferredLabel": "Créneau souhaité",
+    "preferred": "Souhaité : {date}, {range}",
+    "constraintsLabel": "Contraintes déclarées",
+    "moreThemes": "+{count}",
+    "place": "Placer",
+    "orDrag": "ou glissez la carte dans la grille"
+  },
+  "calendar": {
+    "zoneNotice": "Horaires affichés à l'heure de {zone}.",
+    "hint": "Glissez un bloc pour le déplacer, étirez son bord pour changer sa durée.",
+    "viewLabel": "Période affichée",
+    "view": {
+      "day": "Jour",
+      "week": "Semaine",
+      "month": "Mois",
+      "year": "Année"
+    },
+    "hintReadOnly": "Vue d'ensemble : cliquez une case pour descendre au jour, un bloc pour ouvrir l'activité.",
+    "noEventIn": {
+      "day": "Aucune activité placée ce jour-là.",
+      "week": "Aucune activité placée cette semaine-là.",
+      "month": "Aucune activité placée ce mois-ci.",
+      "year": "Aucune activité placée cette année-là."
+    },
+    "countLabel": "Aucune activité | {count} activité | {count} activités",
+    "hintMonth": "Glissez une activité sur un jour : elle y prend l'heure demandée dans son dossier."
+  },
+  "conflict": {
+    "loading": "Recherche des chevauchements…",
+    "none": "Aucun chevauchement",
+    "noneDetail": "Aucune activité n'en gêne une autre sur cette édition.",
+    "total": "Aucun chevauchement | {count} chevauchement | {count} chevauchements",
+    "breakdown": "{blocking} bloquant(s), {warning} à vérifier",
+    "neverBlocked": "les chevauchements sont signalés, jamais bloqués",
+    "expand": "Voir le détail",
+    "collapse": "Masquer le détail",
+    "showFirst": "Voir la première",
+    "showSecond": "Voir la seconde",
+    "severity": {
+      "blocking": "Bloquant",
+      "warning": "À vérifier"
+    },
+    "kind": {
+      "venue_capacity": "Deux activités simultanées sur le stand",
+      "broadcast": "Deux diffusions en direct simultanées",
+      "room": "Salle réservée deux fois",
+      "speaker": "Intervenant attendu à deux endroits",
+      "organization": "Organisation programmée deux fois"
+    }
+  },
+  "dialog": {
+    "noOrganization": "Activité de l'IFDD",
+    "score": "Note du comité",
+    "noScore": "Sans note",
+    "format": "Format",
+    "preferred": "Créneau souhaité au dépôt",
+    "constraints": "Contraintes déclarées",
+    "openProposal": "Ouvrir le dossier d'origine",
+    "slot": "Créneau",
+    "start": "Début",
+    "duration": "Durée",
+    "room": "Salle",
+    "roomHint": "« À placer » retire l'activité du calendrier sans la supprimer.",
+    "noRoom": "À placer — aucune salle",
+    "virtualRoom": "Salle virtuelle : créneaux simultanés acceptés",
+    "roomCapacity": "{capacity} places",
+    "outsideEdition": "Ce créneau tombe hors des jours de l'édition. C'est possible — un webinaire préparatoire, par exemple — mais l'activité n'apparaîtra dans aucune journée du calendrier.",
+    "tracks": "Journées spéciales",
+    "tracksHint": "Le rattachement est décidé par l'équipe, jamais déduit de la date : toutes les activités du jour n'en font pas partie.",
+    "trackOutOfRange": "Hors de la période annoncée de ce fil — le rattachement reste possible.",
+    "broadcast": "Diffusion",
+    "isStreamed": "Diffuser cette activité en direct",
+    "isStreamedHint": "Une seule diffusion à la fois, tous événements confondus : une seconde diffusion sur le même créneau sera signalée.",
+    "channel": "Canal de diffusion",
+    "defaultChannel": "Diffusée sur {channel}, le canal par défaut de l'édition.",
+    "conflicts": "Chevauchement de cette activité | {count} chevauchement de cette activité | {count} chevauchements de cette activité",
+    "save": "Enregistrer",
+    "unplace": "Retirer du calendrier"
+  },
+  "publish": {
+    "open": "Publier la programmation",
+    "title": "Publier la programmation",
+    "description": "Ce qui doit être réglé avant de rendre le programme public.",
+    "ready": "Aucune activité à publier | {count} activité prête à être publiée | {count} activités prêtes à être publiées",
+    "readyDetail": "Elles deviendront visibles du public, avec leur salle et leur horaire.",
+    "blocked": "{count} point bloque la publication | {count} point bloque la publication | {count} points bloquent la publication",
+    "blockedDetail": "Rien ne sera publié tant qu'ils ne sont pas réglés. C'est le seul endroit du planificateur où un contrôle empêche d'agir.",
+    "mustFix": "À régler avant publication",
+    "shouldCheck": "À vérifier, sans empêcher la publication",
+    "show": "Voir",
+    "clean": {
+      "title": "Rien à signaler",
+      "description": "Aucun chevauchement bloquant, aucune activité sans lieu."
+    },
+    "action": "Publier",
+    "actionAgain": "Publier les nouveautés",
+    "done": "Aucune activité publiée | {count} activité publiée | {count} activités publiées"
+  },
+  "notice": {
+    "placed": "« {title} » a été placée.",
+    "unplaced": "« {title} » est retournée aux activités à placer.",
+    "saved": "« {title} » a été enregistrée.",
+    "published": "Aucune activité publiée | {count} activité publiée | {count} activités publiées",
+    "moved": "Le créneau de « {title} » a été enregistré."
+  },
+  "error": {
+    "schedule": "Le créneau n'a pas pu être enregistré. La grille a été rechargée.",
+    "save": "Les modifications n'ont pas pu être enregistrées.",
+    "publish": "La publication n'a pas abouti."
+  }
+}
