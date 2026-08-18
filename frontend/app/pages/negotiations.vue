@@ -23,6 +23,6 @@ useHead({ title: t('nav.main.negotiations') })
 <template>
   <UiMaintenanceState
     :title="t('nav.main.negotiations')"
-    :description="t('nav.maintenance.spaces.negotiations')"
+    :description="t('maintenance.modules.negotiation.description')"
   />
 </template>

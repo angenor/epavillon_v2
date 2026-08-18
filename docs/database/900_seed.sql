@@ -63,6 +63,7 @@ INSERT INTO platform.feature_flags (key, description, is_enabled, rollout_percen
     ('negotiation.channels',        'Canaux d''échange temps réel, à l''intérieur de l''espace Négociations.', false, 0),
     ('training.enabled',            'Espace Formations : catalogue, chapitres, quiz, attestations.', false, 0),
     ('messaging.enabled',           'Messagerie directe et mise en relation entre membres (tables du module engagement).', false, 0),
+    ('directory.enabled',           'Annuaire des organisations et des personnes, et profils publics — l''espace Communauté.', false, 0),
     ('tools.enabled',               'Espace Outils.', false, 0),
     ('tools.ai_assistant',          'Assistant IA et recherche documentaire (RAG), à l''intérieur des Outils.', false, 0),
     ('tools.surveys',               'Outil de sondages, à l''intérieur des Outils.', false, 0),

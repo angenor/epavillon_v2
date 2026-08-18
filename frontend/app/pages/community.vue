@@ -21,5 +21,5 @@ useHead({ title: t('nav.main.community') })
 </script>
 
 <template>
-  <UiMaintenanceState :title="t('nav.main.community')" :description="t('nav.maintenance.spaces.community')" />
+  <UiMaintenanceState :title="t('nav.main.community')" :description="t('maintenance.modules.directory.description')" />
 </template>

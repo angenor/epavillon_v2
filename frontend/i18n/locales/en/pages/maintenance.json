@@ -1,0 +1,32 @@
+{
+  "modules": {
+    "publications": {
+      "title": "Publications",
+      "description": "Articles, briefs and field reports published by organizations, with their editorial review process, will be gathered here."
+    },
+    "negotiation": {
+      "title": "Negotiations",
+      "description": "The negotiators' area — sessions, working documents and discussion channels — will open here."
+    },
+    "training": {
+      "title": "Training",
+      "description": "The training catalogue, its chapters, its quizzes and completion certificates will be offered here."
+    },
+    "tools": {
+      "title": "Tools",
+      "description": "Surveys, document search and writing assistance will be brought together here."
+    },
+    "messaging": {
+      "title": "Messaging",
+      "description": "Direct exchanges between members and introductions around an activity will go through here."
+    },
+    "directory": {
+      "title": "Community",
+      "description": "The organization directory, participant profiles and member discussions will be gathered here."
+    }
+  },
+  "available": {
+    "title": "What is open today",
+    "description": "The current milestone carries the call for proposals and the programme. Those pages do answer."
+  }
+}

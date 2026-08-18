@@ -65,6 +65,9 @@
  *   platform.ts          les onze modules de `platform.modules` — l'écran des
  *                        permissions groupe par module, et leur nom est une
  *                        DONNÉE, pas une chaîne d'interface
+ *   feature-flags.ts     les treize drapeaux de `platform.feature_flags`, tels
+ *                        que le semis les pose — c'est le ROUTAGE qui les lit,
+ *                        pour servir la page « En cours de maintenance » (A14)
  *   privacy.ts           les demandes RGPD et les consentements (A12) : les
  *                        échéances sont relatives à maintenant, sans quoi la
  *                        file n'aurait qu'un cas à montrer
@@ -213,6 +216,7 @@ export { adminDashboard } from './admin-dashboard'
 
 export { permissions, rolePermissions, roles, effectivePermissions } from './permissions'
 export { platformModules, moduleByCode, moduleRank } from './platform'
+export { featureFlags, isFeatureEnabled } from './feature-flags'
 export { privacyRequests, consents, currentConsents } from './privacy'
 export { proposalTransitionsAllowed } from './proposal-workflow'
 export { proposalReads } from './proposal-reads'

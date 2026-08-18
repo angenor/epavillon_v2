@@ -10,11 +10,15 @@
  * pas une chaîne d'interface : le recopier dans un fichier i18n serait
  * exactement le défaut n° 1 de la v1, appliqué au découpage technique.
  *
- * Le reste de `platform` — outbox, travaux, audit, drapeaux — n'a pas d'écran :
- * ses types viendront avec eux.
+ * DEPUIS A14, `FeatureFlag` s'y ajoute : la page « En cours de maintenance »
+ * n'est pas posée écran par écran mais SERVIE PAR LE ROUTAGE, qui doit donc
+ * savoir lire `platform.feature_flags`.
+ *
+ * Le reste de `platform` — outbox, travaux, audit — n'a pas d'écran : ses types
+ * viendront avec eux.
  */
 
-import type { I18nText, IsoDateTime, Url } from './shared'
+import type { FeatureFlagKey, I18nText, IsoDateTime, Url, Uuid } from './shared'
 
 /** Mode de déploiement d'un module — ENUM `platform.module_deployment`. */
 export type ModuleDeployment = 'embedded' | 'external'
@@ -30,5 +34,27 @@ export interface PlatformModule {
   base_url: Url | null
   depends_on: string[]
   created_at: IsoDateTime
+  updated_at: IsoDateTime
+}
+
+/**
+ * Table `platform.feature_flags` — `010_platform.sql` § 5.
+ *
+ * DEUX NATURES DE DRAPEAUX, que `900_seed.sql` § 2 distingue explicitement et
+ * qu'il ne faut pas confondre : `<module>.enabled` ferme l'interface d'un module
+ * ENTIER — c'est celui que le routage lit pour servir la page « En cours de
+ * maintenance » ; les drapeaux plus fins (`negotiation.channels`,
+ * `tools.ai_assistant`) commandent une fonctionnalité À L'INTÉRIEUR d'un module
+ * déjà ouvert et ne peuvent pas en tenir lieu.
+ */
+export interface FeatureFlag {
+  key: FeatureFlagKey
+  /** À quoi sert le drapeau, en français. Écrit pour l'exploitant, pas affiché. */
+  description: string
+  is_enabled: boolean
+  /** Déploiement progressif : 100 pour tout le monde, 0 pour personne. */
+  rollout_percent: number
+  /** Personnes explicitement ouvertes, quel que soit le pourcentage. */
+  enabled_for: Uuid[]
   updated_at: IsoDateTime
 }

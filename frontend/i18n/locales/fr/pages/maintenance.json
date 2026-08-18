@@ -1,0 +1,32 @@
+{
+  "modules": {
+    "publications": {
+      "title": "Publications",
+      "description": "Les articles, notes et retours d'expérience publiés par les organisations, avec leur circuit de relecture éditoriale, seront réunis ici."
+    },
+    "negotiation": {
+      "title": "Négociations",
+      "description": "L'espace réservé aux négociateurs — sessions, documents de travail et canaux d'échange — sera ouvert ici."
+    },
+    "training": {
+      "title": "Formations",
+      "description": "Le catalogue de formations, ses chapitres, ses quiz et les attestations de suivi seront proposés ici."
+    },
+    "tools": {
+      "title": "Outils",
+      "description": "Les sondages, la recherche documentaire et l'assistance à la rédaction seront regroupés ici."
+    },
+    "messaging": {
+      "title": "Messagerie",
+      "description": "Les échanges directs entre membres et la mise en relation autour d'une activité passeront par ici."
+    },
+    "directory": {
+      "title": "Communauté",
+      "description": "L'annuaire des organisations, les profils des participants et les échanges entre membres seront réunis ici."
+    }
+  },
+  "available": {
+    "title": "Ce qui est ouvert aujourd'hui",
+    "description": "Le jalon en cours porte l'appel à propositions et la programmation. Ces pages-là répondent."
+  }
+}

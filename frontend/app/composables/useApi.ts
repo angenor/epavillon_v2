@@ -65,6 +65,7 @@ import type {
   SubmitProposalResult,
 } from '~/types/proposal-form'
 import type { AdminDashboard } from '~/types/admin-dashboard'
+import type { FeatureFlag } from '~/types/platform'
 import type {
   AssignReviewerPayload,
   BulkResult,
@@ -246,6 +247,21 @@ export function useApi() {
 
       resetPassword: (token: string, password: string): Promise<PasswordResetResult> =>
         send('/auth/password-reset/confirm', { token, password }, (m) => m.resetPassword(token)),
+    },
+
+    // -----------------------------------------------------------------------
+    // Plateforme (A14)
+    //
+    // Les drapeaux sont lus par le ROUTAGE, pas par un écran : le middleware
+    // global `feature-flag` sert la page « En cours de maintenance » à la place
+    // d'un module éteint. C'est pour cela que l'appel rend la TABLE ENTIÈRE et
+    // non un booléen par clé — une navigation ne peut pas déclencher un appel
+    // par module traversé, et le store qui l'enveloppe ne charge qu'une fois.
+    // -----------------------------------------------------------------------
+    platform: {
+      /** `platform.feature_flags`, toutes clés confondues. */
+      featureFlags: (): Promise<FeatureFlag[]> =>
+        call('/platform/feature-flags', (m) => m.featureFlags),
     },
 
     // -----------------------------------------------------------------------
