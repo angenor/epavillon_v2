@@ -9,13 +9,15 @@
   },
   "main": {
     "label": "Navigation principale",
-    "home": "Accueil",
-    "events": "Événements",
-    "programme": "Programmations",
+    "about": "À propos",
     "call": "Appel à propositions",
+    "community": "Communauté",
     "criteria": "Critères d'évaluation",
+    "events": "Événements",
+    "home": "Accueil",
+    "negotiations": "Négociations",
     "organizations": "Organisations",
-    "about": "À propos"
+    "programme": "Programmations"
   },
   "account": {
     "login": "Se connecter",
@@ -92,6 +94,10 @@
   "maintenance": {
     "badge": "En cours de maintenance",
     "title": "Cet espace est en cours de maintenance",
-    "description": "Cette partie de la plateforme n'est pas encore ouverte. Elle le sera dans une prochaine version."
+    "description": "Cette partie de la plateforme n'est pas encore ouverte. Elle le sera dans une prochaine version.",
+    "spaces": {
+      "community": "L’annuaire des organisations, les profils des participants et les échanges entre membres seront réunis ici.",
+      "negotiations": "L’espace réservé aux négociateurs — sessions, documents de travail et canaux d’échange — sera ouvert ici."
+    }
   }
 }

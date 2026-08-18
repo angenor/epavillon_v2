@@ -6,9 +6,12 @@ import type { NavItem } from '~/types/navigation'
  * pied de page.
  *
  * Les liens pointent vers les écrans du jalon en cours ; ils sont créés par les
- * prompts A1 à A5. Les modules affichant « En cours de maintenance »
- * (Publications, Négociations, Formations, Outils) n'ont volontairement aucune
- * entrée ici tant que `platform.feature_flags` ne les ouvre pas.
+ * prompts A1 à A5. Deux espaces — Communauté et Négociations — sont annoncés
+ * dans la barre alors que leur module reste fermé : leur page existe et affiche
+ * l'état de maintenance. Un lien de barre qui répond 404 serait pire que pas de
+ * lien du tout (leçon du prompt A3) ; une entrée qui dit « bientôt » informe.
+ * Les autres modules fermés (Publications, Formations, Outils) n'ont toujours
+ * aucune entrée ici tant que `platform.feature_flags` ne les ouvre pas.
  *
  * A0.4 — la barre, le sélecteur de langue et la bascule de thème sont désormais
  * des composants d'interface (`UiNavBar`, `UiLocaleSwitch`, `UiThemeToggle`).
@@ -53,7 +56,7 @@ const memberships = useMembershipStore()
 void memberships.ensureLoaded()
 
 const myOrganizationTo = computed(() =>
-  localePath(memberships.hasActiveOrganization ? '/mon-organisation' : '/rattachement-organisation'),
+  memberships.hasActiveOrganization ? '/mon-organisation' : '/rattachement-organisation',
 )
 
 async function signOut(): Promise<void> {
@@ -82,8 +85,22 @@ async function signOut(): Promise<void> {
  */
 const mainNav: NavItem[] = [
   { labelKey: 'nav.main.programme', to: '/programmations' },
-  { labelKey: 'nav.main.call', to: '/#appel-a-propositions' },
+  { labelKey: 'nav.main.community', to: '/communaute' },
+  { labelKey: 'nav.main.negotiations', to: '/negociations' },
 ]
+
+/**
+ * LE MENU DU COMPTE NE CONTIENT QUE DES DESTINATIONS PERSONNELLES. La barre
+ * porte les espaces du site — ce qu'on vient consulter ; la bulle porte ce qui
+ * n'appartient qu'à la personne connectée. « Mon organisation » y a donc sa
+ * place, alors qu'elle encombrait la barre pour tous les autres.
+ *
+ * La déconnexion n'est pas une entrée de cette liste : ce n'est pas un lien, et
+ * `UiUserMenu` la rend à part, sous un trait.
+ */
+const accountNav = computed<NavItem[]>(() => [
+  { labelKey: 'nav.account.myOrganization', to: myOrganizationTo.value, icon: 'building' },
+])
 
 const footerSections: { labelKey: string; items: NavItem[] }[] = [
   {
@@ -151,23 +168,15 @@ const currentYear = new Date().getFullYear()
       <template #actions>
         <UiLocaleSwitch class="hidden sm:flex" />
         <UiThemeToggle />
-        <span v-if="auth.isAuthenticated && auth.person" class="hidden items-center gap-2 sm:flex">
-          <!-- « Mon organisation » : l'espace de suivi pour qui est rattaché,
-               l'écran de rattachement pour qui ne l'est pas encore. Une seule
-               entrée pour les deux — on change d'employeur, on rejoint une
-               seconde structure, on suit une demande en attente, et c'est
-               toujours par ici. -->
-          <NuxtLink
-            :to="myOrganizationTo"
-            class="text-sm text-text-secondary no-underline hover:text-text"
-          >
-            {{ t('nav.account.myOrganization') }}
-          </NuxtLink>
-          <span class="max-w-[16ch] truncate text-sm text-text-secondary">
-            {{ auth.person.display_name }}
-          </span>
-          <UiButton variant="secondary" size="sm" :label="t('nav.account.logout')" @click="signOut()" />
-        </span>
+        <UiUserMenu
+          v-if="auth.isAuthenticated && auth.person"
+          :name="auth.person.display_name"
+          :email="auth.person.primary_email"
+          :items="accountNav"
+          :label="t('nav.account.menuLabel')"
+          :sign-out-label="t('nav.account.logout')"
+          @sign-out="signOut()"
+        />
         <NuxtLink
           v-else
           :to="localePath('/connexion')"
@@ -181,7 +190,7 @@ const currentYear = new Date().getFullYear()
         <UiLocaleSwitch class="sm:hidden" />
         <NuxtLink
           v-if="auth.isAuthenticated"
-          :to="myOrganizationTo"
+          :to="localePath(myOrganizationTo)"
           class="text-sm text-text-secondary no-underline"
         >
           {{ t('nav.account.myOrganization') }}

@@ -9,13 +9,15 @@
   },
   "main": {
     "label": "Main navigation",
-    "home": "Home",
-    "events": "Events",
-    "programme": "Programmes",
+    "about": "About",
     "call": "Call for proposals",
+    "community": "Community",
     "criteria": "Review criteria",
+    "events": "Events",
+    "home": "Home",
+    "negotiations": "Negotiations",
     "organizations": "Organisations",
-    "about": "About"
+    "programme": "Programmes"
   },
   "account": {
     "login": "Sign in",
@@ -92,6 +94,10 @@
   "maintenance": {
     "badge": "Under maintenance",
     "title": "This area is under maintenance",
-    "description": "This part of the platform is not open yet. It will be in a future release."
+    "description": "This part of the platform is not open yet. It will be in a future release.",
+    "spaces": {
+      "community": "The organization directory, participant profiles and member discussions will be gathered here.",
+      "negotiations": "The negotiators’ area — sessions, working documents and discussion channels — will open here."
+    }
   }
 }
