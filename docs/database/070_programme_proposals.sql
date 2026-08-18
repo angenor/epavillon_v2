@@ -764,10 +764,95 @@ SELECT
         AND pc.resolved_at IS NULL AND pc.deleted_at IS NULL)         AS open_change_requests,
     (SELECT count(*) FROM programme.proposal_speakers ps
       WHERE ps.proposal_id = p.id)                                    AS speaker_count,
-    rank() OVER (PARTITION BY p.event_id ORDER BY p.weighted_score DESC NULLS LAST) AS event_rank
+    rank() OVER (PARTITION BY p.event_id ORDER BY p.weighted_score DESC NULLS LAST) AS event_rank,
+
+    -- -------------------------------------------------------------------------
+    -- CE QUE LA LISTE DU BACK-OFFICE MONTRE ET FILTRE (écran A7).
+    --
+    -- Ces colonnes ont été ajoutées le 18/08 : la vue portait l'avancement des
+    -- revues et le classement, mais rien de ce qui IDENTIFIE un dossier dans un
+    -- tableau de quarante lignes — son format, le pays de son porteur, ses
+    -- thématiques, ses co-organisateurs, qui l'évalue. L'écran devait donc
+    -- charger quatre tables de plus et refaire les correspondances lui-même,
+    -- c'est-à-dire perdre la raison d'être de cette vue : répondre à un écran en
+    -- une requête. Même correction que celle déjà faite sur v_public_schedule.
+    -- -------------------------------------------------------------------------
+    p.format,
+    p.activity_type_code,
+    o.acronym                 AS organization_acronym,
+    -- PAYS DE L'ORGANISATION PORTEUSE, et non `proposals.country_id` : la
+    -- colonne du dossier désigne le pays CONCERNÉ par l'activité, souvent nul et
+    -- parfois différent. Ce que la liste range, c'est d'où vient le déposant —
+    -- même choix qu'à la répartition géographique du tableau de bord.
+    -- Deux colonnes, deux usages : le code ISO est stable et sert au filtre, le
+    -- nom est multilingue et se résout à l'affichage.
+    cn.iso2                   AS organization_country_code,
+    cn.name                   AS organization_country,
+    -- Co-organisateurs, PORTEUR EXCLU : c'est le « +2 » de la colonne
+    -- organisation. Compté ici parce qu'une liste dense ne peut afficher trois
+    -- noms par ligne, et qu'un dossier co-organisé ne se lit pas comme un
+    -- dossier porté seul.
+    (SELECT count(*) FROM programme.proposal_organizations po
+      WHERE po.proposal_id = p.id AND po.role <> 'lead')              AS co_organizer_count,
+    -- Thématiques, DEUX FOIS et pour deux usages distincts — `theme_codes` pour
+    -- FILTRER (opérateurs de tableau, indexables), `themes` pour AFFICHER
+    -- (libellé traduit et couleur venus de reference.taxonomy_terms, où un
+    -- administrateur les modifie). N'exposer que les codes forcerait l'écran à
+    -- recharger la taxonomie : c'est ainsi que les libellés se sont retrouvés
+    -- figés dans le frontend de la v1.
+    reference.terms_of('programme', 'proposals', p.id, 'activity_theme')    AS theme_codes,
+    reference.term_badges('programme', 'proposals', p.id, 'activity_theme') AS themes,
+    -- QUI ÉVALUE CE DOSSIER, déports exclus comme `assigned_reviewers`.
+    -- `reviewer_ids` filtre (« les dossiers confiés à X »), `reviewers` affiche
+    -- l'avancement nominatif : un « 2/3 » ne dit pas de qui on attend la revue.
+    COALESCE((
+        SELECT array_agg(ra.reviewer_id ORDER BY ra.assigned_at)
+        FROM programme.review_assignments ra
+        WHERE ra.proposal_id = p.id AND ra.recused_at IS NULL
+    ), '{}'::uuid[]) AS reviewer_ids,
+    COALESCE((
+        SELECT jsonb_agg(jsonb_build_object(
+                   'person_id',    ra.reviewer_id,
+                   'name',         pe.display_name,
+                   'due_at',       ra.due_at,
+                   'submitted_at', rv.submitted_at)
+               ORDER BY pe.display_name)
+        FROM programme.review_assignments ra
+        JOIN identity.people pe ON pe.id = ra.reviewer_id
+        LEFT JOIN programme.reviews rv
+               ON rv.proposal_id = ra.proposal_id AND rv.reviewer_id = ra.reviewer_id
+        WHERE ra.proposal_id = p.id AND ra.recused_at IS NULL
+    ), '[]'::jsonb) AS reviewers,
+    -- EN RETARD : une revue attendue dont l'échéance est passée. C'est un état
+    -- du dossier, calculé ici une fois pour toutes — l'écran de liste, le
+    -- tableau de bord et la file du comité doivent en donner le même compte.
+    (SELECT count(*)
+       FROM programme.review_assignments ra
+       LEFT JOIN programme.reviews rv
+              ON rv.proposal_id = ra.proposal_id AND rv.reviewer_id = ra.reviewer_id
+      WHERE ra.proposal_id = p.id
+        AND ra.recused_at IS NULL
+        AND ra.due_at IS NOT NULL
+        AND ra.due_at < now()
+        AND rv.submitted_at IS NULL)                                  AS overdue_reviews,
+    -- Prochaine échéance encore due, toutes affectations confondues : ce que la
+    -- liste trie quand l'équipe cherche « ce qui tombe cette semaine ».
+    (SELECT min(ra.due_at)
+       FROM programme.review_assignments ra
+       LEFT JOIN programme.reviews rv
+              ON rv.proposal_id = ra.proposal_id AND rv.reviewer_id = ra.reviewer_id
+      WHERE ra.proposal_id = p.id
+        AND ra.recused_at IS NULL
+        AND rv.submitted_at IS NULL)                                  AS next_review_due_at,
+    -- « Lu par 3 membres du comité » — programme.proposal_reads. Ce compteur est
+    -- COLLECTIF ; savoir si la personne CONNECTÉE l'a ouvert dépend du lecteur et
+    -- ne peut donc pas être une colonne : voir programme.unread_proposals_for().
+    (SELECT count(*) FROM programme.proposal_reads pr
+      WHERE pr.proposal_id = p.id)                                    AS read_count
 FROM programme.proposals p
 JOIN org.organizations o ON o.id = p.organization_id
 LEFT JOIN event.calls_for_proposals c ON c.id = p.call_id
+LEFT JOIN reference.countries cn ON cn.id = o.country_id
 WHERE p.deleted_at IS NULL;
 
 COMMENT ON VIEW programme.v_proposal_dashboard IS
@@ -776,6 +861,44 @@ COMMENT ON COLUMN programme.v_proposal_dashboard.title IS
     'Titre multilingue brut, identique à programme.proposals.title. Un même nom de champ ne désigne jamais deux types.';
 COMMENT ON COLUMN programme.v_proposal_dashboard.title_text IS
     'Titre résolu par platform.t() (repli français). Réservé au tri, au filtrage et à l''export SQL ; ne pas l''afficher à la place de title.';
+COMMENT ON COLUMN programme.v_proposal_dashboard.organization_country IS
+    'Pays de l''organisation PORTEUSE, multilingue. Distinct de proposals.country_id, qui désigne le pays concerné par l''activité.';
+COMMENT ON COLUMN programme.v_proposal_dashboard.co_organizer_count IS
+    'Organisations associées hors porteur principal : la pastille « +2 » de la liste du back-office.';
+COMMENT ON COLUMN programme.v_proposal_dashboard.theme_codes IS
+    'Codes des thématiques, pour FILTRER. L''affichage passe par `themes`, qui porte libellé et couleur.';
+COMMENT ON COLUMN programme.v_proposal_dashboard.reviewers IS
+    'Révisionnistes affectés (déports exclus) avec leur échéance et la date de remise de leur revue. Un « 2/3 » ne dit pas de qui on attend la troisième.';
+COMMENT ON COLUMN programme.v_proposal_dashboard.overdue_reviews IS
+    'Revues attendues dont l''échéance est dépassée. Alimente le filtre « en retard » : un seul calcul pour la liste, le tableau de bord et la file du comité.';
+COMMENT ON COLUMN programme.v_proposal_dashboard.read_count IS
+    'Nombre de membres du comité ayant ouvert le dossier. Collectif : pour « non consulté PAR MOI », voir programme.unread_proposals_for().';
+
+-- Dossiers qu'une personne donnée n'a JAMAIS ouverts, sur une édition.
+--
+-- POURQUOI UNE FONCTION ET NON UNE COLONNE DE LA VUE. « Non consulté » n'est pas
+-- une propriété du dossier mais de la relation entre un dossier et un lecteur :
+-- la même ligne est lue par l'un et pas par l'autre. Une vue sans paramètre ne
+-- peut pas le dire, et la faire dépendre de current_setting('app.actor_id')
+-- rendrait son résultat invisible à la relecture — deux requêtes identiques, deux
+-- réponses. La liste du back-office croise donc cette réponse avec la vue.
+CREATE OR REPLACE FUNCTION programme.unread_proposals_for(p_person_id uuid, p_event_id uuid)
+RETURNS uuid[]
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT COALESCE(array_agg(p.id ORDER BY p.reference_code), '{}'::uuid[])
+    FROM programme.proposals p
+    WHERE p.event_id = p_event_id
+      AND p.deleted_at IS NULL
+      AND NOT EXISTS (
+          SELECT 1 FROM programme.proposal_reads pr
+          WHERE pr.proposal_id = p.id AND pr.person_id = p_person_id
+      );
+$$;
+
+COMMENT ON FUNCTION programme.unread_proposals_for IS
+    'Dossiers d''une édition que cette personne n''a jamais ouverts. Alimente l''indicateur discret « non consulté » de la liste du back-office.';
 
 -- -----------------------------------------------------------------------------
 -- 7 bis. Historique des modifications d'une proposition

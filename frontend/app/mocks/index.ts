@@ -42,6 +42,12 @@
  *   incidents.ts         quatre messages d'incident, dont trois à ne PAS afficher
  *   analytics.ts         les projections du module Analytique, reconstituées
  *   admin-dashboard.ts   la composition du tableau de bord du back-office (A6)
+ *   permissions.ts       le catalogue des permissions et ce que chaque rôle
+ *                        permet — l'autorisation se teste par PERMISSION
+ *   proposal-workflow.ts la machine à états des dossiers, en données
+ *   proposal-reads.ts    les accusés de lecture, par dossier et par personne
+ *   admin-proposals.ts   la composition de la liste des propositions (A7) et
+ *                        ses actions groupées
  */
 
 export * from './ids'
@@ -158,3 +164,13 @@ export {
 } from './analytics'
 
 export { adminDashboard } from './admin-dashboard'
+
+export { permissions, rolePermissions, effectivePermissions } from './permissions'
+export { proposalTransitionsAllowed } from './proposal-workflow'
+export { proposalReads } from './proposal-reads'
+export {
+  proposalListScreen,
+  committeeOf,
+  assignReviewer,
+  changeProposalStatus,
+} from './admin-proposals'

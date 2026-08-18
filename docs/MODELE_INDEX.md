@@ -20,7 +20,7 @@ Chaque fichier SQL porte sa propre documentation : en-tête expliquant les déci
 | **Appel à propositions, grille de critères** | `060_events.sql` | `calls_for_proposals`, `review_criteria`, `call_reviewers` · `is_call_open()`, `effective_deadline()`, `seed_default_criteria()`, `max_weighted_score()` |
 | **Formulaire de soumission** | `070_programme_proposals.sql` | `programme.proposals`, `proposal_organizations`, `proposal_speakers`, `proposal_documents` · `proposal_transitions_allowed` |
 | **Suivi d'un dossier (espace organisation)** | `070_programme_proposals.sql` | `proposal_transitions`, `proposal_comments`, `proposal_reads` · `proposal_history()` |
-| **Liste des propositions (back-office)** | `070_programme_proposals.sql` | `v_proposal_dashboard` (vue prête à l'emploi) |
+| **Liste des propositions (back-office)** | `070_programme_proposals.sql` | `v_proposal_dashboard` (vue prête à l'emploi) · `proposal_transitions_allowed` (les actions offertes) · `unread_proposals_for()` (dossiers jamais ouverts par une personne) |
 | **Fiche d'évaluation** | `070_programme_proposals.sql` + `060_events.sql` | `reviews`, `review_scores`, `review_assignments`, `event.review_criteria` · `refresh_proposal_score()` |
 | **Planificateur de créneaux** | `075_programme_sessions.sql` | `programme.sessions`, `session_speakers`, `session_organizations`, `session_tracks` · `detect_conflicts()`, `publication_readiness()`, `session_schedule_history()` |
 | **Programmation publique** | `075_programme_sessions.sql` | `v_public_schedule` (vue prête à l'emploi, état temporel calculé) |
@@ -61,7 +61,7 @@ Chaque fichier SQL porte sa propre documentation : en-tête expliquant les déci
 Trois vues répondent à des écrans entiers en une requête. Les utiliser plutôt que de recomposer la jointure à la main :
 
 - **`programme.v_public_schedule`** — la programmation publique, avec l'état temporel calculé (à venir / en cours / passé / reporté / annulé), le nom de la salle, l'organisation **et son pays**, les thématiques **avec leur libellé et leur couleur**, les journées spéciales et l'image de couverture, toutes déjà résolues. Elle répond à l'écran **en une requête** : une colonne qui manque coûte une requête par écran, ou un renoncement d'affichage.
-- **`programme.v_proposal_dashboard`** — la liste des propositions du back-office : avancement des revues, revues manquantes, demandes de correction ouvertes, rang dans l'événement.
+- **`programme.v_proposal_dashboard`** — la liste des propositions du back-office : avancement des revues et **qui les doit**, revues **en retard**, revues manquantes, demandes de correction ouvertes, rang dans l'événement, et de quoi identifier un dossier dans un tableau dense — format, pays de l'organisation porteuse, thématiques **avec leur libellé et leur couleur**, nombre de co-organisateurs, nombre de lectures. Elle répond à l'écran **en une requête**. Ce qu'elle ne peut pas porter : « ce dossier, MOI, l'ai-je ouvert ? » dépend du lecteur — c'est `programme.unread_proposals_for(personne, édition)`.
 - **`analytics.v_operational_health`** — l'état de santé du système : outbox en retard, travaux en échec, courriels en rebond, partitions manquantes.
 
 ---

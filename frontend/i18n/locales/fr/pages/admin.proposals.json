@@ -1,0 +1,161 @@
+{
+  "title": "Propositions",
+  "subtitle": "Les dossiers reçus pour cette édition, leur avancement et leur classement.",
+  "caption": "{event} — {count} dossiers, tri sur {sort}",
+  "loading": "Chargement des dossiers",
+  "forbidden": {
+    "scope": "Consulter toutes les propositions"
+  },
+  "empty": {
+    "title": "Aucune édition sélectionnée",
+    "description": "Choisissez une édition en tête de page pour voir les dossiers qui la concernent."
+  },
+  "noResults": {
+    "title": "Aucun dossier ne correspond",
+    "description": "Aucun des {total} dossiers de cette édition ne répond à ces filtres.",
+    "action": "Retirer tous les filtres"
+  },
+  "noProposals": {
+    "title": "Aucun dossier pour cette édition",
+    "description": "Les propositions apparaîtront ici dès le premier dépôt."
+  },
+  "deadline": {
+    "label": "Échéance de l'appel : {date}",
+    "passed": "Appel clos depuis le {date}"
+  },
+  "columns": {
+    "reference": "Dossier",
+    "title": "Titre",
+    "organization": "Porteur",
+    "country": "Pays",
+    "themes": "Thèmes",
+    "format": "Format",
+    "status": "Statut",
+    "reviews": "Revues",
+    "score": "Note",
+    "rank": "Rang",
+    "submitted": "Dépôt"
+  },
+  "row": {
+    "coOrganizers": "Aucun co-organisateur | Un co-organisateur | {count} co-organisateurs",
+    "unread": "Dossier que vous n'avez pas encore ouvert",
+    "unreadShort": "Non consulté",
+    "knockedOut": "Éliminé par un critère rédhibitoire",
+    "changeRequests": "Un point de correction ouvert | Un point de correction ouvert | {count} points de correction ouverts",
+    "reviewProgress": "{done} revues rendues sur {expected} attendues",
+    "reviewersPending": "Attendue de {names}",
+    "reviewersNone": "Aucun révisionniste affecté",
+    "late": "Une revue en retard | Une revue en retard | {count} revues en retard",
+    "dueAt": "Échéance de revue : {date}",
+    "noScore": "Pas encore noté",
+    "notSubmitted": "Non déposé",
+    "open": "Ouvrir le dossier {code}"
+  },
+  "status": {
+    "draft": "Brouillon",
+    "submitted": "Déposé",
+    "under_review": "En évaluation",
+    "changes_requested": "Corrections demandées",
+    "accepted": "Retenu",
+    "rejected": "Non retenu",
+    "withdrawn": "Retiré",
+    "cancelled": "Annulé"
+  },
+  "format": {
+    "in_person": "Sur place",
+    "online": "En ligne",
+    "hybrid": "Hybride"
+  },
+  "filters": {
+    "title": "Filtres",
+    "show": "Afficher les filtres",
+    "hide": "Masquer les filtres",
+    "search": "Rechercher un dossier",
+    "searchPlaceholder": "Numéro, titre, organisation…",
+    "status": "Statut",
+    "theme": "Thématique",
+    "format": "Format",
+    "country": "Pays",
+    "organization": "Organisation",
+    "reviewer": "Révisionniste affecté",
+    "anyReviewer": "Tous les révisionnistes",
+    "signals": "Signaux",
+    "reset": "Réinitialiser les filtres",
+    "activeCount": "Aucun filtre actif | Un filtre actif | {count} filtres actifs",
+    "facetCount": "{count}",
+    "flags": {
+      "unreviewed": "Non évaluées",
+      "late": "En retard",
+      "unread": "Non consultées par moi"
+    }
+  },
+  "results": {
+    "count": "Aucun dossier | Un dossier | {count} dossiers",
+    "filtered": "{shown} sur {total} dossiers",
+    "sortedBy": "Tri : {column}"
+  },
+  "export": {
+    "action": "Exporter en CSV",
+    "selection": "Exporter la sélection",
+    "done": "Aucun dossier exporté | Un dossier exporté | {count} dossiers exportés",
+    "columns": {
+      "reference": "Numéro de dossier",
+      "title": "Titre",
+      "organization": "Organisation porteuse",
+      "coOrganizers": "Co-organisateurs",
+      "country": "Pays",
+      "themes": "Thématiques",
+      "format": "Format",
+      "status": "Statut",
+      "reviewsDone": "Revues rendues",
+      "reviewsExpected": "Revues attendues",
+      "score": "Note sur 20",
+      "rank": "Rang",
+      "submitted": "Date de dépôt",
+      "reviewers": "Révisionnistes"
+    }
+  },
+  "selection": {
+    "count": "Aucun dossier retenu | Un dossier retenu | {count} dossiers retenus",
+    "clear": "Vider la sélection",
+    "assign": "Affecter à un révisionniste",
+    "changeStatus": "Changer de statut",
+    "onlyVisible": "La sélection ne porte que sur les lignes affichées."
+  },
+  "assign": {
+    "title": "Affecter à un révisionniste",
+    "description": "Les dossiers retenus seront confiés à cette personne, qui en sera notifiée.",
+    "reviewer": "Membre du comité",
+    "reviewerPlaceholder": "Choisir un membre du comité",
+    "workload": "{count} dossier en charge | {count} dossier en charge | {count} dossiers en charge",
+    "dueAt": "Échéance de la revue",
+    "dueAtHint": "Heure de {zone}. Laissée vide, aucune échéance n'est fixée.",
+    "submit": "Affecter",
+    "noCommittee": "Cette édition n'a pas de comité de sélection constitué.",
+    "success": "Aucun dossier affecté | Un dossier affecté | {count} dossiers affectés"
+  },
+  "changeStatus": {
+    "title": "Changer de statut",
+    "description": "Seules les transitions permises par le cycle de vie d'un dossier sont proposées.",
+    "target": "Nouveau statut",
+    "eligible": "s'applique à {eligible} des {selected} dossiers retenus",
+    "reason": "Motif",
+    "reasonHint": "Obligatoire pour cette transition : il est conservé dans l'historique du dossier et communiqué à l'organisation.",
+    "reasonRequired": "Cette transition exige un motif.",
+    "submit": "Appliquer",
+    "none": "Aucune transition n'est possible sur cette sélection.",
+    "success": "Aucun dossier modifié | Un dossier modifié | {count} dossiers modifiés"
+  },
+  "bulk": {
+    "partial": "Aucun dossier écarté | Un dossier a été écarté | {count} dossiers ont été écartés",
+    "reason": {
+      "already_assigned": "déjà confié à cette personne",
+      "recused": "cette personne s'est déportée",
+      "transition_not_allowed": "transition impossible depuis son statut actuel",
+      "reason_required": "motif obligatoire",
+      "not_found": "dossier introuvable"
+    },
+    "error": "L'action n'a pas pu être menée à son terme. Rien n'a été modifié.",
+    "andMore": "et {count} autre | et {count} autre | et {count} autres"
+  }
+}

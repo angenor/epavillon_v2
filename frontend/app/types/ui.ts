@@ -104,6 +104,15 @@ export interface TableColumn {
    * de laisser filer le tableau.
    */
   hideOnMobile?: boolean
+  /**
+   * Même idée, à un autre seuil : la colonne n'apparaît qu'à partir de cette
+   * largeur. `sm` équivaut à `hideOnMobile` ; `lg`, `xl` et `2xl` servent aux tableaux
+   * DENSES, dont la liste des propositions du back-office est le cas type — onze
+   * colonnes ne tiennent pas dans les 1 130 px que laisse la navigation
+   * latérale, et ce qui sert à DÉCIDER (titre, note, rang) doit rester lisible
+   * avant ce qui sert à situer (pays, format, thématiques).
+   */
+  hideBelow?: 'sm' | 'lg' | 'xl' | '2xl'
   /** Chiffres alignés en colonne — nombres, notes, montants. */
   numeric?: boolean
 }

@@ -10,7 +10,9 @@ import type { SortDirection, TableColumn } from '~/types/ui'
  *
  * PAS DE DÉFILEMENT HORIZONTAL DU CORPS DE PAGE — règle du projet. Deux
  * dispositifs, complémentaires : `hideOnMobile` retire les colonnes secondaires
- * sous 640 px, et ce qui reste défile DANS le tableau, jamais dans la page.
+ * sous 640 px — `hideBelow` fait de même à 1 024, 1 280 et 1 536 px, pour les
+ * tableaux de plus de huit colonnes —, et ce qui reste défile DANS le tableau, jamais
+ * dans la page.
  * C'est pourquoi le cadre extérieur est en `overflow-hidden` (il porte le
  * rayon, la barre d'outils et le filet) et que SEULE la zone du tableau défile :
  * mettre le défilement sur le cadre emporterait la barre d'outils avec lui.
@@ -43,6 +45,13 @@ interface Props {
   rows: T[]
   /** Nom du champ qui identifie une ligne. Jamais l'index : il change au tri. */
   rowKey: keyof T & string
+  /**
+   * Champ qui NOMME une ligne pour les lecteurs d'écran — le numéro de dossier,
+   * pas son identifiant technique. Sans lui, la colonne de cases à cocher
+   * s'annonce « Sélectionner la ligne 0198c1a0-0000-7040-… », ce qui n'est
+   * lisible par personne. À défaut, `rowKey` est utilisé.
+   */
+  rowLabelKey?: keyof T & string
   /** Nom du tableau, annoncé par les lecteurs d'écran. Obligatoire. */
   caption: string
   /** La légende est-elle masquée à l'œil ? Vrai quand un titre de section la porte déjà. */
@@ -124,6 +133,23 @@ const alignClass = (column: TableColumn): string => {
 
 const cellPadding = computed(() => (props.dense ? 'px-3 py-2' : 'px-3 py-3'))
 
+/**
+ * Seuil d'apparition d'une colonne. `hideOnMobile` reste le raccourci du cas le
+ * plus courant ; `hideBelow` ouvre les deux autres paliers, pour les tableaux
+ * qui portent plus de huit colonnes.
+ */
+const RESPONSIVE: Record<'sm' | 'lg' | 'xl' | '2xl', string> = {
+  sm: 'hidden sm:table-cell',
+  lg: 'hidden lg:table-cell',
+  xl: 'hidden xl:table-cell',
+  '2xl': 'hidden 2xl:table-cell',
+}
+
+function responsiveClass(column: TableColumn): string {
+  if (column.hideBelow) return RESPONSIVE[column.hideBelow]
+  return column.hideOnMobile ? RESPONSIVE.sm : ''
+}
+
 // --- Sélection ---------------------------------------------------------------
 
 /** Clés des lignes AFFICHÉES ; la sélection, elle, peut en contenir d'autres. */
@@ -137,6 +163,11 @@ const allPageSelected = computed(
 const somePageSelected = computed(
   () => !allPageSelected.value && pageKeys.value.some((key) => selectedKeys.value.has(key)),
 )
+
+/** Ce que le lecteur d'écran énonce pour cette ligne. */
+function rowLabel(row: T): string {
+  return String(row[props.rowLabelKey ?? props.rowKey])
+}
 
 function isSelected(row: T): boolean {
   return selectedKeys.value.has(String(row[props.rowKey]))
@@ -221,7 +252,7 @@ const spanCount = computed(() => props.columns.length + (props.selectable ? 1 : 
               :style="column.width ? { width: column.width } : undefined"
               :aria-sort="ariaSort(column)"
               class="border-b-(length:--border-medium) border-b-border-strong px-3 py-2 font-semibold tracking-caps whitespace-nowrap"
-              :class="[alignClass(column), column.hideOnMobile ? 'hidden sm:table-cell' : '']"
+              :class="[alignClass(column), responsiveClass(column)]"
             >
               <button
                 v-if="column.sortable"
@@ -259,7 +290,7 @@ const spanCount = computed(() => props.columns.length + (props.selectable ? 1 : 
             <td
               v-for="column in props.columns"
               :key="column.key"
-              :class="[cellPadding, column.hideOnMobile ? 'hidden sm:table-cell' : '']"
+              :class="[cellPadding, responsiveClass(column)]"
             >
               <UiSkeletonLoader :width="column.numeric ? '3rem' : '80%'" height="0.9rem" />
             </td>
@@ -295,7 +326,7 @@ const spanCount = computed(() => props.columns.length + (props.selectable ? 1 : 
             <td v-if="props.selectable" class="ui-table-check" :class="cellPadding" @click.stop>
               <UiCheckbox
                 :model-value="isSelected(row)"
-                :label="t('data.table.selectRow', { label: String(row[props.rowKey]) })"
+                :label="t('data.table.selectRow', { label: rowLabel(row) })"
                 @update:model-value="(checked: boolean) => toggleRow(row, checked)"
               />
             </td>
@@ -307,7 +338,7 @@ const spanCount = computed(() => props.columns.length + (props.selectable ? 1 : 
                 cellPadding,
                 alignClass(column),
                 column.numeric ? 'font-mono tabular-nums' : '',
-                column.hideOnMobile ? 'hidden sm:table-cell' : '',
+                responsiveClass(column),
                 'align-top text-text',
               ]"
             >

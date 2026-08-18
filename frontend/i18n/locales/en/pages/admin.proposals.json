@@ -1,0 +1,161 @@
+{
+  "title": "Proposals",
+  "subtitle": "Submissions received for this edition, their progress and their ranking.",
+  "caption": "{event} — {count} submissions, sorted by {sort}",
+  "loading": "Loading submissions",
+  "forbidden": {
+    "scope": "Read all proposals"
+  },
+  "empty": {
+    "title": "No edition selected",
+    "description": "Pick an edition at the top of the page to see its submissions."
+  },
+  "noResults": {
+    "title": "No submission matches",
+    "description": "None of the {total} submissions of this edition match these filters.",
+    "action": "Clear all filters"
+  },
+  "noProposals": {
+    "title": "No submission for this edition",
+    "description": "Proposals will appear here as soon as the first one is filed."
+  },
+  "deadline": {
+    "label": "Call deadline: {date}",
+    "passed": "Call closed on {date}"
+  },
+  "columns": {
+    "reference": "Reference",
+    "title": "Title",
+    "organization": "Lead",
+    "country": "Country",
+    "themes": "Themes",
+    "format": "Format",
+    "status": "Status",
+    "reviews": "Reviews",
+    "score": "Score",
+    "rank": "Rank",
+    "submitted": "Filed"
+  },
+  "row": {
+    "coOrganizers": "No co-organizer | One co-organizer | {count} co-organizers",
+    "unread": "You have not opened this submission yet",
+    "unreadShort": "Unread",
+    "knockedOut": "Knocked out by a decisive criterion",
+    "changeRequests": "One open change request | One open change request | {count} open change requests",
+    "reviewProgress": "{done} of {expected} reviews received",
+    "reviewersPending": "Awaited from {names}",
+    "reviewersNone": "No reviewer assigned",
+    "late": "One overdue review | One overdue review | {count} overdue reviews",
+    "dueAt": "Review due: {date}",
+    "noScore": "Not scored yet",
+    "notSubmitted": "Not submitted",
+    "open": "Open submission {code}"
+  },
+  "status": {
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "under_review": "Under review",
+    "changes_requested": "Changes requested",
+    "accepted": "Accepted",
+    "rejected": "Rejected",
+    "withdrawn": "Withdrawn",
+    "cancelled": "Cancelled"
+  },
+  "format": {
+    "in_person": "On site",
+    "online": "Online",
+    "hybrid": "Hybrid"
+  },
+  "filters": {
+    "title": "Filters",
+    "show": "Show filters",
+    "hide": "Hide filters",
+    "search": "Search a submission",
+    "searchPlaceholder": "Reference, title, organization…",
+    "status": "Status",
+    "theme": "Theme",
+    "format": "Format",
+    "country": "Country",
+    "organization": "Organization",
+    "reviewer": "Assigned reviewer",
+    "anyReviewer": "All reviewers",
+    "signals": "Signals",
+    "reset": "Clear filters",
+    "activeCount": "No active filter | One active filter | {count} active filters",
+    "facetCount": "{count}",
+    "flags": {
+      "unreviewed": "Not reviewed",
+      "late": "Overdue",
+      "unread": "Not opened by me"
+    }
+  },
+  "results": {
+    "count": "No submission | One submission | {count} submissions",
+    "filtered": "{shown} of {total} submissions",
+    "sortedBy": "Sorted by: {column}"
+  },
+  "export": {
+    "action": "Export to CSV",
+    "selection": "Export selection",
+    "done": "No submission exported | One submission exported | {count} submissions exported",
+    "columns": {
+      "reference": "Reference",
+      "title": "Title",
+      "organization": "Lead organization",
+      "coOrganizers": "Co-organizers",
+      "country": "Country",
+      "themes": "Themes",
+      "format": "Format",
+      "status": "Status",
+      "reviewsDone": "Reviews received",
+      "reviewsExpected": "Reviews expected",
+      "score": "Score out of 20",
+      "rank": "Rank",
+      "submitted": "Submission date",
+      "reviewers": "Reviewers"
+    }
+  },
+  "selection": {
+    "count": "No submission selected | One submission selected | {count} submissions selected",
+    "clear": "Clear selection",
+    "assign": "Assign to a reviewer",
+    "changeStatus": "Change status",
+    "onlyVisible": "The selection only covers the rows currently displayed."
+  },
+  "assign": {
+    "title": "Assign to a reviewer",
+    "description": "The selected submissions will be assigned to this person, who will be notified.",
+    "reviewer": "Committee member",
+    "reviewerPlaceholder": "Pick a committee member",
+    "workload": "{count} submission assigned | {count} submission assigned | {count} submissions assigned",
+    "dueAt": "Review deadline",
+    "dueAtHint": "{zone} time. Left empty, no deadline is set.",
+    "submit": "Assign",
+    "noCommittee": "This edition has no selection committee yet.",
+    "success": "No submission assigned | One submission assigned | {count} submissions assigned"
+  },
+  "changeStatus": {
+    "title": "Change status",
+    "description": "Only the transitions allowed by the submission lifecycle are offered.",
+    "target": "New status",
+    "eligible": "applies to {eligible} of the {selected} selected submissions",
+    "reason": "Reason",
+    "reasonHint": "Required for this transition: it is kept in the submission history and shared with the organization.",
+    "reasonRequired": "This transition requires a reason.",
+    "submit": "Apply",
+    "none": "No transition is possible on this selection.",
+    "success": "No submission changed | One submission changed | {count} submissions changed"
+  },
+  "bulk": {
+    "partial": "No submission skipped | One submission was skipped | {count} submissions were skipped",
+    "reason": {
+      "already_assigned": "already assigned to this person",
+      "recused": "this person recused themselves",
+      "transition_not_allowed": "transition not allowed from its current status",
+      "reason_required": "reason required",
+      "not_found": "submission not found"
+    },
+    "error": "The action could not be completed. Nothing was changed.",
+    "andMore": "and {count} more | and {count} more | and {count} more"
+  }
+}

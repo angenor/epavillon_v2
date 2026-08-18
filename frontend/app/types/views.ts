@@ -21,6 +21,7 @@ import type {
   IsoDateTime,
   Numeric,
   OrganizationId,
+  PersonId,
   ProposalId,
   RoomId,
   SessionId,
@@ -171,4 +172,48 @@ export interface ProposalDashboardRow {
   speaker_count: number
   /** Rang au sein de l'édition, par note pondérée décroissante. */
   event_rank: number
+
+  // --- Ce que la liste du back-office montre et filtre (A7, 18/08) ----------
+  // Ces colonnes ont été ajoutées à la vue le 18/08 : elle portait l'avancement
+  // des revues et le classement, mais rien de ce qui identifie un dossier dans
+  // un tableau de quarante lignes.
+
+  format: ParticipationMode
+  /** Code de la taxonomie `activity_category`. */
+  activity_type_code: TaxonomyTermCode | null
+  organization_acronym: string | null
+  /** Pays de l'organisation PORTEUSE, code ISO — pour filtrer et pour le drapeau. */
+  organization_country_code: string | null
+  /** Le même pays, multilingue : à résoudre à l'affichage. */
+  organization_country: I18nText | null
+  /** Organisations associées hors porteur principal : la pastille « +2 ». */
+  co_organizer_count: number
+  /** Codes de thématiques, POUR FILTRER. L'affichage passe par `themes`. */
+  theme_codes: TaxonomyTermCode[]
+  /** Thématiques prêtes à afficher — `reference.term_badges()`. */
+  themes: ScheduleThemeBadge[]
+  /** Révisionnistes affectés, déports exclus. Pour filtrer « les dossiers de X ». */
+  reviewer_ids: PersonId[]
+  /** Les mêmes, nommés : un « 2/3 » ne dit pas de qui on attend la troisième. */
+  reviewers: ProposalReviewer[]
+  /** Revues attendues dont l'échéance est dépassée — le filtre « en retard ». */
+  overdue_reviews: number
+  /** Prochaine échéance de revue encore due, toutes affectations confondues. */
+  next_review_due_at: IsoDateTime | null
+  /** Membres du comité ayant ouvert le dossier. COLLECTIF : « non consulté par
+   *  moi » dépend du lecteur et vient de `programme.unread_proposals_for()`. */
+  read_count: number
+}
+
+/**
+ * Une entrée de `v_proposal_dashboard.reviewers` — affectation non déportée,
+ * avec l'échéance qui lui est propre et la date de remise de sa revue.
+ * `submitted_at` nul : la revue est attendue, ou encore à l'état de brouillon.
+ */
+export interface ProposalReviewer {
+  person_id: PersonId
+  /** `identity.people.display_name`, colonne générée. */
+  name: string
+  due_at: IsoDateTime | null
+  submitted_at: IsoDateTime | null
 }

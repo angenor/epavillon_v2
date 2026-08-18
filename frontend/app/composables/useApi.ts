@@ -26,7 +26,7 @@
  * ne se voient jamais et finissent par ne plus être écrits.
  */
 
-import type { AdministeredEvents, Person } from '~/types/identity'
+import type { AdministeredEvents, EffectivePermission, Person } from '~/types/identity'
 import type { EventStatus } from '~/types/event/edition'
 import type {
   LoginPayload,
@@ -55,6 +55,13 @@ import type {
   SubmitProposalResult,
 } from '~/types/proposal-form'
 import type { AdminDashboard } from '~/types/admin-dashboard'
+import type {
+  AssignReviewerPayload,
+  BulkResult,
+  ChangeStatusPayload,
+  ProposalFacet,
+  ProposalListScreen,
+} from '~/types/admin-proposals'
 import type {
   DecideMembershipPayload,
   InviteMemberPayload,
@@ -357,6 +364,22 @@ export function useApi() {
         call(`/people/${personId}/roles`, (m) => m.roleAssignments.filter((r) => r.person_id === personId)),
 
       /**
+       * `identity.effective_permissions()` — CE QUE CETTE PERSONNE PEUT FAIRE, et
+       * sur quelle portée.
+       *
+       * La règle du projet est de tester une PERMISSION, jamais un nom de rôle.
+       * Sans cet appel, un écran ne pouvait que demander « administre-t-elle
+       * quelque chose ? », c'est-à-dire tester un rôle sans le dire. Les portées
+       * comptent autant que les codes : une permission accordée sur la COP31 ne
+       * vaut pas sur la COP30 — voir `utils/permissions.ts`.
+       *
+       * Ce que le front en fait est de l'AFFICHAGE : montrer ou masquer une
+       * action. Le refus, lui, appartient à l'API.
+       */
+      permissions: (personId: Uuid): Promise<EffectivePermission[]> =>
+        call(`/people/${personId}/permissions`, (m) => m.effectivePermissions(personId)),
+
+      /**
        * `identity.administered_events()` : périmètre d'administration d'une
        * personne. Renvoie TOUJOURS une valeur pleine — jamais `null` — de sorte
        * que « aucun droit » et « administrateur d'une édition » ne se confondent.
@@ -475,6 +498,62 @@ export function useApi() {
           { event_id: eventId },
         )
       },
+
+      /**
+       * TOUT L'ÉCRAN DE LA LISTE EN UNE RÉPONSE (A7) — les lignes de la vue, les
+       * facettes des filtres avec leur décompte, les dossiers que la personne
+       * n'a pas encore ouverts, le fuseau de l'édition et l'échéance de l'appel.
+       *
+       * UNE COMPOSITION, PAS SIX LECTURES. Les facettes se comptent sur le même
+       * jeu de lignes que la liste : demandées à part, elles seraient mesurées à
+       * un autre instant, et le « Retenu (17) » du filtre finirait par ne plus
+       * correspondre aux lignes affichées.
+       *
+       * LE FILTRAGE ET LE TRI RESTENT CÔTÉ ÉCRAN tant que les données sont
+       * simulées : quarante lignes tiennent en mémoire, et un tri serveur sur
+       * quarante lignes serait un aller-retour pour rien. Au raccordement (B7),
+       * ces paramètres deviendront ceux de la requête — c'est pourquoi ils vivent
+       * dans l'URL et non dans un état de composant.
+       */
+      list: (eventId: Uuid, scope: AdministeredEvents, personId: Uuid | null): Promise<ProposalListScreen | null> => {
+        assertEventInScope(eventId, scope)
+        return call('/proposals/list', (m) => m.proposalListScreen(eventId, personId), {
+          event_id: eventId,
+        })
+      },
+
+      /** Composition du comité de l'appel, avec la charge de chacun. */
+      committee: (eventId: Uuid, scope: AdministeredEvents): Promise<ProposalFacet[]> => {
+        assertEventInScope(eventId, scope)
+        return call('/proposals/committee', (m) => m.committeeOf(eventId), { event_id: eventId })
+      },
+
+      /**
+       * LA MACHINE À ÉTATS, LUE ET NON RÉÉCRITE —
+       * `programme.proposal_transitions_allowed`. L'écran n'affiche que les
+       * transitions déclarées, avec leur permission et leur exigence de motif.
+       * Ajouter un chemin en base ajoute une action, sans toucher au code.
+       */
+      transitionRules: () =>
+        call('/proposals/transitions', (m) => m.proposalTransitionsAllowed),
+
+      /**
+       * ACTION GROUPÉE — confier une sélection à un membre du comité.
+       *
+       * La réponse dit ce qui A ÉTÉ FAIT et, dossier par dossier, ce qui ne l'a
+       * pas été : déjà affecté, déporté, introuvable. Une action de masse qui ne
+       * rend qu'un nombre laisse croire à un succès complet.
+       */
+      assignReviewer: (actorId: Uuid | null, payload: AssignReviewerPayload): Promise<BulkResult> =>
+        send('/proposals/assignments', payload, (m) => m.assignReviewer(payload, actorId)),
+
+      /**
+       * ACTION GROUPÉE — changer le statut d'une sélection. Les transitions
+       * refusées par `proposal_transitions_allowed` sont écartées avec leur
+       * motif, comme le ferait le trigger.
+       */
+      changeStatus: (actorId: Uuid | null, payload: ChangeStatusPayload): Promise<BulkResult> =>
+        send('/proposals/status', payload, (m) => m.changeProposalStatus(payload, actorId)),
       byId: (id: Uuid) => call(`/proposals/${id}`, (m) => m.allProposals.find((p) => p.id === id) ?? null),
       /** Dossiers d'une organisation, brouillons compris (A5). */
       forOrganization: (organizationId: Uuid) =>

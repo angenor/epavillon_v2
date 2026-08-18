@@ -574,7 +574,7 @@ Graphiques sobres : pas de 3D, pas de dégradé, une couleur par série, légend
 directe sur la courbe.
 ```
 
-**A7 — Liste des propositions**
+**A7 — Liste des propositions** (fait le 18/08)
 
 ```
 [PRÉAMBULE]
