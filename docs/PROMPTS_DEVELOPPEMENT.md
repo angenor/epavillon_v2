@@ -738,7 +738,7 @@ Gestion des organisations, back-office, avec l'outil de fusion.
    historique.
 ```
 
-**A12 — Utilisateurs et rôles**
+**A12 — Utilisateurs et rôles**(en cours)
 
 ```
 [PRÉAMBULE]

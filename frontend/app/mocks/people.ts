@@ -428,6 +428,12 @@ function grant(
     valid_from: granted_at,
     valid_until: null,
     revoked_at: null,
+    // `ck_role_assignment_revocation` : ni auteur ni motif de retrait tant que
+    // l'attribution est vivante. Les deux colonnes ont été ajoutées au modèle au
+    // prompt A12 — `note` est le motif de l'OCTROI et ne pouvait pas servir deux
+    // fois.
+    revoked_by: null,
+    revoked_reason: null,
     note,
   }
 }
@@ -485,10 +491,72 @@ export const roleAssignments = [
     ...grant(29, PERSON.rasoanaivo, 'reviewer', 'global', null, '2025-09-01T08:00:00Z'),
     valid_until: '2025-12-31T23:59:59Z',
   },
-  // Attribution RÉVOQUÉE avant terme, conservée pour la traçabilité.
+  // Attribution RÉVOQUÉE avant terme, conservée pour la traçabilité. Depuis A12,
+  // elle dit aussi QUI l'a retirée et POURQUOI : c'est la question qu'on pose
+  // six mois plus tard, et une date nue n'y répondait pas.
   {
     ...grant(30, PERSON.lambert, 'org_member', 'organization', ORG.verdeo, '2026-05-29T18:10:00Z'),
     revoked_at: '2026-07-20T10:15:00Z',
-    note: 'Fin de mission de consultance.',
+    revoked_by: PERSON.bakayoko,
+    revoked_reason: "Fin de mission de consultance, confirmée par le référent de l'organisation.",
+    note: 'Consultance de six mois sur le volet finance.',
+  },
+
+  // ---------------------------------------------------------------------------
+  // Ajoutées au prompt A12 — l'écran des rôles a besoin des quatre états d'une
+  // attribution, et le jeu n'en portait que trois.
+  // ---------------------------------------------------------------------------
+
+  // LE CAS PACO, ENFIN REPRÉSENTÉ. « Confier un webinaire à un responsable qui
+  // ne doit voir que son événement » : dans la v1, cela avait imposé une page
+  // d'administration séparée, développée dans l'urgence. Ici, une ligne. Claire
+  // Perret tenait déjà le cas d'une COP ; il manquait celui d'une édition qui
+  // n'est pas une COP et dont le responsable n'appartient pas à l'IFDD — c'est
+  // lui que le commanditaire décrit, et lui qui prouve que le back-office se
+  // partage sans se dupliquer.
+  grant(
+    31,
+    PERSON.ngoBassong,
+    'admin',
+    'event',
+    EVENT.paco2027,
+    '2026-08-03T08:20:00Z',
+    "Responsable du cycle de webinaires PACO 2027. Accès borné à cette édition : ni la COP31, ni le référentiel des organisations.",
+  ),
+
+  // ATTRIBUTION À VENIR : la prise d'effet est postérieure à aujourd'hui.
+  // `effective_permissions()` l'écarte — `valid_from <= now()` —, et un écran qui
+  // n'afficherait que « attribué / révoqué » la donnerait pour active alors
+  // qu'elle ne l'est pas encore.
+  {
+    ...grant(
+      32,
+      PERSON.gagnon,
+      'reviewer',
+      'event',
+      EVENT.cop31,
+      '2026-08-10T09:00:00Z',
+      "Renfort du comité pour la vague d'évaluation d'octobre.",
+    ),
+    valid_from: '2026-10-01T00:00:00Z',
+    valid_until: '2027-01-15T23:59:59Z',
+  },
+
+  // Une attribution retirée SUR QUELQU'UN QUI EN GARDE UNE AUTRE : la fiche de
+  // Fatou Nko Diop porte donc à la fois un rôle en cours et un rôle révoqué.
+  // Sans ce cas, l'historique d'une personne active resterait toujours vide.
+  {
+    ...grant(
+      33,
+      PERSON.nkoDiop,
+      'programmer',
+      'event',
+      EVENT.cop30,
+      '2025-06-12T10:00:00Z',
+      'Programmation de la COP30.',
+    ),
+    revoked_at: '2026-01-30T16:45:00Z',
+    revoked_by: PERSON.bakayoko,
+    revoked_reason: 'Édition clôturée ; les accès de programmation sont retirés au bilan.',
   },
 ] satisfies RoleAssignment[]

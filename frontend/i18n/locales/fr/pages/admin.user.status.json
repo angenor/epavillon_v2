@@ -1,0 +1,44 @@
+{
+  "active": "Actif",
+  "suspended": "Suspendu",
+  "blocked": "Bloqué",
+  "anonymized": "Anonymisé",
+  "dialog": {
+    "title": "Statut du compte",
+    "description": "Restreindre ou rétablir l'accès de {name}.",
+    "open": {
+      "restrict": "Restreindre l'accès",
+      "restore": "Rétablir l'accès"
+    },
+    "field": {
+      "status": "Nouveau statut",
+      "until": "Fin de la suspension",
+      "untilHint": "Obligatoire : une suspension sans terme est un blocage qui n'ose pas dire son nom.",
+      "reason": "Motif",
+      "reasonHint": "C'est ce que la personne lira en trouvant porte close. Écrivez-le pour elle.",
+      "revokeSessions": "Fermer les sessions ouvertes",
+      "revokeSessionsHint": "Sans cela, la personne reste connectée jusqu'à l'expiration de son jeton."
+    },
+    "option": {
+      "active": "Actif",
+      "suspended": "Suspendu",
+      "blocked": "Bloqué"
+    },
+    "help": {
+      "active": "L'accès est rétabli immédiatement ; le motif précédent est effacé.",
+      "suspended": "Accès restreint jusqu'à une date. Les données sont conservées.",
+      "blocked": "Exclusion durable, sans terme. Les données sont conservées."
+    },
+    "submit": {
+      "active": "Rétablir l'accès",
+      "suspended": "Suspendre",
+      "blocked": "Bloquer"
+    },
+    "lockedNotice": "Un compte de cette personne est verrouillé après des tentatives infructueuses. Ce verrou expire seul et n'est pas une suspension."
+  },
+  "error": {
+    "missing_deadline": "Une suspension doit porter une date de fin.",
+    "forbidden": "Cette personne n'est pas dans votre périmètre d'administration.",
+    "not_found": "Cette personne n'existe plus."
+  }
+}

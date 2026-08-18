@@ -1,0 +1,98 @@
+{
+  "title": "Fiche d'une personne",
+  "breadcrumb": "Fiche",
+  "backToList": "Retour à la liste",
+  "readOnly": "Cette personne n'intervient pas dans les éditions que vous administrez : sa fiche est consultable, mais vous ne pouvez ni lui attribuer de rôle ni modifier son statut.",
+  "missing": {
+    "title": "Personne introuvable",
+    "description": "Cette fiche n'existe pas, ou plus."
+  },
+  "tabs": {
+    "label": "Sections de la fiche",
+    "profile": "Profil",
+    "roles": "Rôles",
+    "permissions": "Permissions effectives",
+    "history": "Historique"
+  },
+  "identity": {
+    "title": "Identité",
+    "email": "Adresse principale",
+    "verified": "Vérifiée",
+    "unverified": "Non vérifiée",
+    "otherEmails": "Autres adresses",
+    "jobTitle": "Fonction",
+    "organization": "Organisation",
+    "noOrganization": "Aucune",
+    "location": "Localisation",
+    "preferences": "Langue et fuseau",
+    "locale": "Interface en {locale}",
+    "directory": "Annuaire",
+    "directoryVisible": "Visible dans l'annuaire",
+    "directoryHidden": "Masquée dans l'annuaire",
+    "created": "Inscrite le"
+  },
+  "status": {
+    "title": "Statut du compte",
+    "until": "Jusqu'au {date}",
+    "by": "par {name}"
+  },
+  "accounts": {
+    "title": "Moyens de connexion",
+    "empty": {
+      "title": "Aucun compte",
+      "description": "Cette personne existe sans moyen de se connecter : invitée par son organisation, ou saisie comme intervenante. Elle ne peut pas ouvrir de session."
+    },
+    "provider": {
+      "password": "Mot de passe",
+      "google": "Google",
+      "microsoft": "Microsoft",
+      "linkedin": "LinkedIn",
+      "oidc": "Compte institutionnel"
+    },
+    "mfa": "Second facteur",
+    "locked": "Verrouillé jusqu'au {date}",
+    "lastLogin": "Dernière connexion",
+    "never": "jamais",
+    "passwordChanged": "Mot de passe changé le",
+    "failedAttempts": "Tentatives infructueuses"
+  },
+  "consents": {
+    "title": "Consentements",
+    "granted": "Accordé",
+    "refused": "Refusé"
+  },
+  "permissions": {
+    "scope": {
+      "title": "Périmètre d'administration",
+      "global": "Toute la plateforme. Cette personne administre toutes les éditions, présentes et à venir.",
+      "none": "Aucun. Cette personne n'administre aucune édition : les listes du back-office lui sont fermées.",
+      "events": "Une édition : {list}. | Une édition : {list}. | {count} éditions : {list}."
+    },
+    "summary": "{count} permission, réparties sur {modules} modules. | {count} permission, sur {modules} module. | {count} permissions, réparties sur {modules} modules.",
+    "everywhere": "Partout",
+    "empty": {
+      "title": "Aucune permission",
+      "description": "Cette personne n'a aucun rôle en cours : elle n'a que les droits d'un compte ordinaire."
+    },
+    "missing": {
+      "show": "Voir les {count} permissions qu'elle n'a pas",
+      "hide": "Masquer les permissions absentes"
+    }
+  },
+  "history": {
+    "kind": {
+      "granted": "Rôle attribué",
+      "revoked": "Rôle retiré"
+    },
+    "until": "Terme prévu : {date}",
+    "noReason": "Aucun motif saisi.",
+    "empty": {
+      "title": "Aucun mouvement",
+      "description": "Aucun rôle n'a jamais été attribué à cette personne."
+    }
+  },
+  "privacy": {
+    "title": "Demandes RGPD de cette personne",
+    "link": "Ouvrir la file"
+  }
+}

@@ -255,14 +255,34 @@ CREATE TABLE identity.role_assignments (
     valid_from   timestamptz NOT NULL DEFAULT now(),
     valid_until  timestamptz,
     revoked_at   timestamptz,
+    -- QUI a retiré le rôle, et POURQUOI. Ajouté en écrivant l'écran
+    -- d'attribution (prompt A12) : `note` est le motif de l'OCTROI, et il ne
+    -- peut pas servir deux fois. Sans ces deux colonnes, une révocation ne
+    -- laissait qu'une date — l'auteur ne se retrouvait que dans
+    -- `platform.audit_log`, et le motif nulle part. Or c'est précisément la
+    -- question qu'on pose six mois plus tard : « pourquoi cette personne
+    -- n'est-elle plus au comité ? ».
+    revoked_by     uuid      REFERENCES identity.people(id) ON DELETE SET NULL,
+    revoked_reason text,
     note         text,
 
     CONSTRAINT ck_role_assignment_scope
         CHECK ((scope_type = 'global' AND scope_id IS NULL)
             OR (scope_type <> 'global' AND scope_id IS NOT NULL)),
     CONSTRAINT ck_role_assignment_window
-        CHECK (valid_until IS NULL OR valid_until > valid_from)
+        CHECK (valid_until IS NULL OR valid_until > valid_from),
+    -- Ni auteur ni motif de révocation sur une attribution en cours : une
+    -- attribution vivante qui porterait « fin de mission » se lirait comme
+    -- révoquée dans toute liste qui ne teste pas `revoked_at`.
+    CONSTRAINT ck_role_assignment_revocation
+        CHECK (revoked_at IS NOT NULL
+            OR (revoked_by IS NULL AND revoked_reason IS NULL))
 );
+
+COMMENT ON COLUMN identity.role_assignments.note IS
+    'Motif de l''OCTROI, saisi à l''attribution. Ne sert jamais à la révocation : voir revoked_reason.';
+COMMENT ON COLUMN identity.role_assignments.revoked_reason IS
+    'Motif du RETRAIT. Une attribution révoquée n''est jamais supprimée : elle reste dans l''historique de la personne.';
 
 CREATE UNIQUE INDEX ux_role_assignments_active
     ON identity.role_assignments (person_id, role_code, scope_type, COALESCE(scope_id, '00000000-0000-0000-0000-000000000000'::uuid))
@@ -573,6 +593,18 @@ SELECT 'super_admin', code FROM identity.permissions
 ON CONFLICT DO NOTHING;
 
 INSERT INTO identity.role_permissions (role_code, permission_code) VALUES
+    -- `identity.role.assign` N'ÉTAIT DÉTENUE QUE PAR `super_admin`, par le seul
+    -- effet du trigger ci-dessous : aucune ligne ne l'accordait à personne
+    -- d'autre. Constaté en écrivant l'écran d'attribution (prompt A12) — le
+    -- back-office des rôles n'aurait été utilisable que par le compte technique
+    -- pivot, et confier un webinaire à son responsable aurait demandé de sortir
+    -- de l'application. L'accorder à `admin` NE CRÉE AUCUNE ÉLÉVATION : la
+    -- portée de l'attribution suit celle de l'administrateur — un compte détaché
+    -- sur la COP31 ne détient cette permission QUE sur `event:COP31`, et
+    -- `has_permission` refuse tout ce qui sort de là. Attribuer `super_admin`
+    -- lui reste impossible : ce rôle n'admet que la portée globale
+    -- (`allowed_scopes`), sur laquelle il n'a rien.
+    ('admin', 'identity.role.assign'),
     ('admin', 'identity.person.read'), ('admin', 'identity.person.manage'),
     ('admin', 'org.organization.read'), ('admin', 'org.organization.manage'), ('admin', 'org.organization.merge'),
     ('admin', 'event.event.manage'), ('admin', 'event.call.manage'),

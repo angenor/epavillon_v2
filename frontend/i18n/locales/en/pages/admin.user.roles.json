@@ -1,0 +1,87 @@
+{
+  "scope": { "global": "the whole platform", "dangling": "scope not found" },
+  "scopeType": {
+    "global": "The whole platform",
+    "event": "One edition",
+    "organization": "One organization",
+    "negotiation_space": "One negotiation space"
+  },
+  "scopeHelp": {
+    "global": "The role applies everywhere, to all editions present and future.",
+    "event": "The role applies only to the chosen edition and what depends on it.",
+    "organization": "The role applies only to the chosen organization.",
+    "negotiation_space": "The role applies only to the chosen space."
+  },
+  "state": { "active": "current", "scheduled": "upcoming", "expired": "expired", "revoked": "revoked" },
+  "badge": { "title": "{role} — {scope} ({state})" },
+  "empty": {
+    "title": "No current role",
+    "description": "This person only has the rights of an ordinary account."
+  },
+  "card": {
+    "granted": "Granted on",
+    "by": "by {name}",
+    "from": "Takes effect on",
+    "until": "Until",
+    "noEnd": "no end date",
+    "revoke": "Revoke",
+    "permissions": "This role grants {count} permission | This role grants {count} permission | This role grants {count} permissions",
+    "dangling": "The target of this scope no longer exists: the assignment grants access to nothing. It can be revoked."
+  },
+  "panel": {
+    "open": "Assign a role to {name}",
+    "openShort": "Assign a role",
+    "title": "Assign a role",
+    "description": "To {name}. The role decides what is allowed; the scope decides where.",
+    "step": {
+      "role": "1. Which role",
+      "scope": "2. On which scope",
+      "terms": "3. Duration and reason",
+      "effect": "What this changes"
+    },
+    "field": {
+      "role": "Role",
+      "rolePlaceholder": "Choose a role",
+      "scope": "Scope",
+      "target": { "event": "Edition", "organization": "Organization", "negotiation_space": "Negotiation space" },
+      "targetPlaceholder": "Choose the target",
+      "validFrom": "Takes effect",
+      "validFromHint": "Empty: immediately.",
+      "validUntil": "End date",
+      "validUntilHint": "Optional. With no end date, the role applies until it is revoked.",
+      "validUntilError": "The end must follow the start.",
+      "note": "Reason",
+      "noteHint": "Why this role, for this person. This is what will be read six months from now."
+    },
+    "grants": "This role grants {count} permission. | This role grants {count} permission. | This role grants {count} permissions.",
+    "showAll": "Show {count} more",
+    "showLess": "Show less",
+    "scopeForbidden": "You are not allowed to assign on this scope.",
+    "scopeUnavailable": "No negotiation space: the module is under maintenance.",
+    "restricted": "{count} target is outside your scope and cannot be selected. | {count} target is outside your scope and cannot be selected. | {count} targets are outside your scope and cannot be selected.",
+    "effect": {
+      "none": "This person already holds everything this role grants on this scope — usually because of a global assignment. Assigning it is still possible: a role documents as much as it authorizes.",
+      "gained": "This person will gain {count} permission: | This person will gain {count} permission: | This person will gain {count} permissions:"
+    },
+    "conflict": {
+      "title": "This role is already assigned on this scope",
+      "message": "Granted on {granted}. Revoke the existing assignment before creating a new one."
+    },
+    "submit": "Assign"
+  },
+  "revoke": {
+    "title": "Revoke a role",
+    "description": "Revoke “{role}” from {name}.",
+    "effect": "This person will lose {count} permission on this scope. | This person will lose {count} permission on this scope. | This person will lose {count} permissions on this scope.",
+    "reason": "Reason for revoking",
+    "reasonHint": "End of assignment, edition closed, departure. This is the question that will be asked six months from now.",
+    "kept": "The assignment is not deleted: it stays in the history, with its grant date, its revocation and both reasons.",
+    "submit": "Revoke role"
+  },
+  "error": {
+    "duplicate": "This role is already assigned to this person on this scope.",
+    "scope_not_allowed": "This role cannot be assigned on this scope.",
+    "forbidden_scope": "You are not allowed to assign or revoke a role on this scope.",
+    "not_found": "This person, role or assignment no longer exists."
+  }
+}

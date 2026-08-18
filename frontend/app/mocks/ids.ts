@@ -274,6 +274,16 @@ export const ONE_TIME_TOKEN = (n: number): Uuid => uuid('7008', n)
 /** `identity.role_assignments`. */
 export const ROLE_ASSIGNMENT = (n: number): Uuid => uuid('7006', n)
 
+/**
+ * `identity.privacy_requests` — demandes d'export, d'effacement et de
+ * rectification (prompt A12). Le RGPD était absent de la v1 ; ces demandes sont
+ * la file que l'IFDD doit vider en trente jours.
+ */
+export const PRIVACY_REQUEST = (n: number): Uuid => uuid('7010', n)
+
+/** `identity.consents` — l'historique des consentements, dont la vue tire l'état courant. */
+export const CONSENT = (n: number): Uuid => uuid('7011', n)
+
 // ---------------------------------------------------------------------------
 // Événement — 060_events.sql
 // ---------------------------------------------------------------------------

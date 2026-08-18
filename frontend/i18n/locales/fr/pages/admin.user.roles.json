@@ -1,0 +1,101 @@
+{
+  "scope": {
+    "global": "toute la plateforme",
+    "dangling": "portée introuvable"
+  },
+  "scopeType": {
+    "global": "Toute la plateforme",
+    "event": "Une édition",
+    "organization": "Une organisation",
+    "negotiation_space": "Un espace de négociation"
+  },
+  "scopeHelp": {
+    "global": "Le rôle vaut partout, sur toutes les éditions présentes et à venir.",
+    "event": "Le rôle ne vaut que pour l'édition désignée, et pour ce qui en dépend.",
+    "organization": "Le rôle ne vaut que pour l'organisation désignée.",
+    "negotiation_space": "Le rôle ne vaut que pour l'espace désigné."
+  },
+  "state": {
+    "active": "en cours",
+    "scheduled": "à venir",
+    "expired": "expiré",
+    "revoked": "retiré"
+  },
+  "badge": {
+    "title": "{role} — {scope} ({state})"
+  },
+  "empty": {
+    "title": "Aucun rôle en cours",
+    "description": "Cette personne n'a que les droits d'un compte ordinaire."
+  },
+  "card": {
+    "granted": "Attribué le",
+    "by": "par {name}",
+    "from": "Prend effet le",
+    "until": "Jusqu'au",
+    "noEnd": "sans terme",
+    "revoke": "Retirer",
+    "permissions": "Ce rôle donne {count} permission | Ce rôle donne {count} permission | Ce rôle donne {count} permissions",
+    "dangling": "La cible de cette portée n'existe plus : l'attribution ne donne accès à rien. Elle peut être retirée."
+  },
+  "panel": {
+    "open": "Attribuer un rôle à {name}",
+    "openShort": "Attribuer un rôle",
+    "title": "Attribuer un rôle",
+    "description": "À {name}. Le rôle décide de ce qui est permis ; la portée décide d'où.",
+    "step": {
+      "role": "1. Quel rôle",
+      "scope": "2. Sur quelle portée",
+      "terms": "3. Durée et motif",
+      "effect": "Ce que cela change"
+    },
+    "field": {
+      "role": "Rôle",
+      "rolePlaceholder": "Choisir un rôle",
+      "scope": "Portée",
+      "target": {
+        "event": "Édition",
+        "organization": "Organisation",
+        "negotiation_space": "Espace de négociation"
+      },
+      "targetPlaceholder": "Choisir la cible",
+      "validFrom": "Prise d'effet",
+      "validFromHint": "Vide : immédiatement.",
+      "validUntil": "Date de fin",
+      "validUntilHint": "Facultative. Sans terme, le rôle vaut jusqu'à son retrait.",
+      "validUntilError": "La fin doit suivre la prise d'effet.",
+      "note": "Motif",
+      "noteHint": "Pourquoi ce rôle, à cette personne. C'est ce qu'on relira dans six mois."
+    },
+    "grants": "Ce rôle donne {count} permission. | Ce rôle donne {count} permission. | Ce rôle donne {count} permissions.",
+    "showAll": "Voir les {count} autres",
+    "scopeForbidden": "Vous n'avez pas le droit d'attribuer sur cette portée.",
+    "scopeUnavailable": "Aucun espace de négociation : le module est en cours de maintenance.",
+    "restricted": "{count} cible est hors de votre périmètre et reste non sélectionnable. | {count} cible est hors de votre périmètre et reste non sélectionnable. | {count} cibles sont hors de votre périmètre et restent non sélectionnables.",
+    "effect": {
+      "none": "Cette personne détient déjà tout ce que ce rôle apporte sur cette portée — le plus souvent parce qu'elle a une attribution globale. L'attribution reste possible : un rôle documente autant qu'il autorise.",
+      "gained": "Cette personne gagnera {count} permission : | Cette personne gagnera {count} permission : | Cette personne gagnera {count} permissions :"
+    },
+    "conflict": {
+      "title": "Ce rôle est déjà attribué sur cette portée",
+      "message": "Attribué le {granted}. Retirez l'attribution existante avant d'en créer une nouvelle."
+    },
+    "submit": "Attribuer",
+    "showLess": "Réduire"
+  },
+  "revoke": {
+    "title": "Retirer un rôle",
+    "description": "Retirer « {role} » à {name}.",
+    "effect": "Cette personne perdra {count} permission sur cette portée. | Cette personne perdra {count} permission sur cette portée. | Cette personne perdra {count} permissions sur cette portée.",
+    "reason": "Motif du retrait",
+    "reasonHint": "Fin de mission, édition clôturée, départ. C'est la question qu'on posera dans six mois.",
+    "kept": "L'attribution n'est pas supprimée : elle reste dans l'historique, avec sa date d'octroi, son retrait et les deux motifs.",
+    "submit": "Retirer le rôle"
+  },
+  "error": {
+    "duplicate": "Ce rôle est déjà attribué à cette personne sur cette portée.",
+    "scope_not_allowed": "Ce rôle ne peut pas être attribué sur cette portée.",
+    "forbidden_scope": "Vous n'avez pas le droit d'attribuer ou de retirer un rôle sur cette portée.",
+    "not_found": "Cette personne, ce rôle ou cette attribution n'existe plus."
+  }
+}

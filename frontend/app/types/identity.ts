@@ -202,6 +202,16 @@ export interface RoleAssignment {
   valid_from: IsoDateTime
   valid_until: IsoDateTime | null
   revoked_at: IsoDateTime | null
+  /**
+   * Qui a retiré le rôle, et pourquoi. Colonnes AJOUTÉES AU MODÈLE au prompt
+   * A12 : `note` est le motif de l'OCTROI et ne pouvait pas servir deux fois.
+   * `ck_role_assignment_revocation` interdit de les renseigner tant que
+   * `revoked_at` est nul — une attribution vivante portant « fin de mission » se
+   * lirait comme révoquée dans toute liste qui ne teste pas la date.
+   */
+  revoked_by: PersonId | null
+  revoked_reason: string | null
+  /** Motif de l'OCTROI, saisi à l'attribution. */
   note: string | null
 }
 

@@ -1,0 +1,77 @@
+{
+  "title": "GDPR requests",
+  "breadcrumb": "GDPR",
+  "subtitle": "Export, rectification and erasure. The statutory deadline is {days} days from receipt.",
+  "caption": "GDPR requests, most urgent first",
+  "forbidden": {
+    "scope": "handling GDPR requests",
+    "description": "A GDPR request concerns the whole platform rather than one edition: it requires global access."
+  },
+  "empty": {
+    "title": "No request",
+    "description": "No export, rectification or erasure request has been recorded."
+  },
+  "overdueAlert": {
+    "title": "{count} request is past its deadline | {count} request is past its deadline | {count} requests are past their deadline",
+    "message": "The statutory one-month deadline has passed. These requests open the list."
+  },
+  "columns": {
+    "person": "Person",
+    "type": "Nature",
+    "status": "State",
+    "due": "Deadline",
+    "handler": "Handled by",
+    "actions": "Actions"
+  },
+  "type": { "export": "Export", "erasure": "Erasure", "rectification": "Rectification" },
+  "status": { "received": "Received", "in_progress": "In progress", "completed": "Fulfilled", "rejected": "Rejected" },
+  "purpose": {
+    "newsletter": "Newsletter",
+    "directory_listing": "Directory listing",
+    "photo_usage": "Photograph usage",
+    "analytics": "Audience measurement"
+  },
+  "daysLeft": "{count} day left | {count} day left | {count} days left",
+  "overdue": "{count} day overdue | {count} day overdue | {count} days overdue",
+  "unassigned": "Unassigned",
+  "handle": "Handle",
+  "view": "View",
+  "dialog": {
+    "title": "Handle the request",
+    "description": "{type} requested by {name}.",
+    "received": "Received on",
+    "due": "Deadline",
+    "field": {
+      "action": "What to do",
+      "resolution": "What was done",
+      "resolutionHint": "This is what will be read if the supervisory authority asks for an account."
+    },
+    "action": {
+      "start": "Take charge",
+      "complete": "Close the request",
+      "reject": "Reject the request",
+      "anonymize": "Anonymize the person"
+    },
+    "help": {
+      "start": "The request moves to in progress and you become responsible for it.",
+      "complete": "The request is fulfilled. The deadline stops being tracked.",
+      "reject": "The request is refused. The written reason is what will justify the refusal.",
+      "anonymize": "Carries out the requested erasure. Irreversible."
+    },
+    "anonymize": {
+      "title": "This action is irreversible",
+      "message": "Name, email, phone and biography are replaced by an anonymous token; accounts are deleted and sessions closed. Registrations, reviews and past-edition counters are KEPT, with no link to an identity.",
+      "confirm": "Type “{name}” to confirm"
+    },
+    "submit": {
+      "start": "Take charge",
+      "complete": "Close",
+      "reject": "Reject",
+      "anonymize": "Anonymize permanently"
+    }
+  },
+  "error": {
+    "wrong_type": "Anonymization only answers an erasure request.",
+    "not_found": "This request no longer exists."
+  }
+}

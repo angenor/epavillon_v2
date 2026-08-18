@@ -1,0 +1,65 @@
+{
+  "title": "Utilisateurs",
+  "subtitle": "Les personnes connues de la plateforme, leurs rôles et la portée de chacun. Un rôle sans portée n'existe pas.",
+  "forbidden": {
+    "scope": "consultation des utilisateurs"
+  },
+  "privacy": {
+    "link": "Demandes RGPD"
+  },
+  "scoped": {
+    "notice": "Vous ne voyez que les personnes qui interviennent dans les éditions que vous administrez : titulaires d'un rôle, membres d'une organisation ayant déposé, intervenants, inscrits."
+  },
+  "restricted": {
+    "notice": "{count} compte est suspendu ou bloqué. | {count} compte est suspendu ou bloqué. | {count} comptes sont suspendus ou bloqués."
+  },
+  "empty": {
+    "title": "Aucun utilisateur",
+    "description": "Aucune personne ne relève de votre périmètre d'administration."
+  },
+  "noResults": {
+    "title": "Aucune personne ne correspond",
+    "description": "Les filtres écartent les {total} personnes du périmètre.",
+    "action": "Retirer les filtres"
+  },
+  "caption": "Utilisateurs, triés par {column}",
+  "columns": {
+    "display_name": "Personne",
+    "primary_email": "Adresse",
+    "organization": "Organisation",
+    "country": "Pays",
+    "roles": "Rôles et portées",
+    "last_login_at": "Dernière connexion",
+    "status": "Statut",
+    "actions": "Actions"
+  },
+  "cell": {
+    "noOrganization": "Sans organisation",
+    "noRole": "Aucun rôle",
+    "noAccount": "Aucun compte",
+    "neverLogged": "Jamais connecté",
+    "emailUnverified": "Adresse non vérifiée : cette personne ne peut pas se connecter.",
+    "locked": "Compte verrouillé après des tentatives infructueuses",
+    "mfa": "Second facteur activé"
+  },
+  "filters": {
+    "label": "Filtrer les utilisateurs",
+    "search": "Rechercher",
+    "searchPlaceholder": "Nom, adresse, fonction, organisation",
+    "role": "Rôle",
+    "anyRole": "Tous les rôles",
+    "roleCount": "{count} attribution en cours | {count} attribution en cours | {count} attributions en cours",
+    "scope": "Portée",
+    "scopeHint": "« Qui a un rôle sur cette édition ? » — une question distincte du rôle lui-même.",
+    "anyScope": "Toutes les portées",
+    "organization": "Organisation",
+    "anyOrganization": "Toutes les organisations",
+    "country": "Pays",
+    "anyCountry": "Tous les pays",
+    "status": "Statut",
+    "withoutRole": "Sans rôle",
+    "withoutAccount": "Sans compte",
+    "count": "{shown} personne affichée sur {total} | {shown} personne affichée sur {total} | {shown} personnes affichées sur {total}",
+    "reset": "Retirer les filtres"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "active": "Active",
+  "suspended": "Suspended",
+  "blocked": "Blocked",
+  "anonymized": "Anonymized",
+  "dialog": {
+    "title": "Account status",
+    "description": "Restrict or restore access for {name}.",
+    "open": { "restrict": "Restrict access", "restore": "Restore access" },
+    "field": {
+      "status": "New status",
+      "until": "Suspension ends",
+      "untilHint": "Required: a suspension without an end date is a block that dares not say its name.",
+      "reason": "Reason",
+      "reasonHint": "This is what the person will read when they find the door closed. Write it for them.",
+      "revokeSessions": "Close open sessions",
+      "revokeSessionsHint": "Otherwise the person stays signed in until their token expires."
+    },
+    "option": { "active": "Active", "suspended": "Suspended", "blocked": "Blocked" },
+    "help": {
+      "active": "Access is restored immediately; the previous reason is cleared.",
+      "suspended": "Access restricted until a date. Data is kept.",
+      "blocked": "Lasting exclusion, with no end date. Data is kept."
+    },
+    "submit": { "active": "Restore access", "suspended": "Suspend", "blocked": "Block" },
+    "lockedNotice": "One of this person's accounts is locked after failed attempts. That lock expires on its own and is not a suspension."
+  },
+  "error": {
+    "missing_deadline": "A suspension must carry an end date.",
+    "forbidden": "This person is not within your administration scope.",
+    "not_found": "This person no longer exists."
+  }
+}

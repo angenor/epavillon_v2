@@ -149,6 +149,21 @@ export const accounts = [
   // compte : le cas central de l'espace organisation, « corriger un dossier que
   // le comité renvoie », n'était donc atteignable par personne.
   passwordAccount(ACCOUNT(13), PERSON.moreau),
+
+  // LE RESPONSABLE D'UN SEUL ÉVÉNEMENT, ENFIN CONNECTABLE. Ajouté au prompt
+  // A12 : Estelle Ngo Bassong administre le cycle PACO 2027 et rien d'autre —
+  // c'est le cas que le commanditaire décrit et le seul qui prouve que le
+  // back-office se partage sans se dupliquer. Claire Perret tenait déjà le
+  // périmètre restreint, mais son compte exige un second facteur, que le
+  // prompt A1 n'a pas implémenté : personne ne pouvait donc OUVRIR le
+  // back-office en périmètre restreint, et le filtrage n'était éprouvable que
+  // par lecture de code.
+  passwordAccount(ACCOUNT(14), PERSON.ngoBassong, {
+    password_changed_at: '2026-08-03T08:30:00Z',
+    last_login_at: '2026-08-17T14:05:00Z',
+    created_at: '2026-08-03T08:25:00Z',
+    updated_at: '2026-08-17T14:05:00Z',
+  }),
 ] satisfies Account[]
 
 // ---------------------------------------------------------------------------

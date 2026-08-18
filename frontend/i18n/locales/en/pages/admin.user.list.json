@@ -1,0 +1,61 @@
+{
+  "title": "Users",
+  "subtitle": "The people known to the platform, their roles and the scope of each. A role without a scope does not exist.",
+  "forbidden": { "scope": "viewing users" },
+  "privacy": { "link": "GDPR requests" },
+  "scoped": {
+    "notice": "You only see people involved in the editions you administer: role holders, members of organizations that submitted, speakers, registrants."
+  },
+  "restricted": {
+    "notice": "{count} account is suspended or blocked. | {count} account is suspended or blocked. | {count} accounts are suspended or blocked."
+  },
+  "empty": {
+    "title": "No users",
+    "description": "No one falls within your administration scope."
+  },
+  "noResults": {
+    "title": "No one matches",
+    "description": "The filters exclude all {total} people in scope.",
+    "action": "Clear filters"
+  },
+  "caption": "Users, sorted by {column}",
+  "columns": {
+    "display_name": "Person",
+    "primary_email": "Email",
+    "organization": "Organization",
+    "country": "Country",
+    "roles": "Roles and scopes",
+    "last_login_at": "Last sign-in",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "cell": {
+    "noOrganization": "No organization",
+    "noRole": "No role",
+    "noAccount": "No account",
+    "neverLogged": "Never signed in",
+    "emailUnverified": "Unverified email: this person cannot sign in.",
+    "locked": "Account locked after failed attempts",
+    "mfa": "Second factor enabled"
+  },
+  "filters": {
+    "label": "Filter users",
+    "search": "Search",
+    "searchPlaceholder": "Name, email, job title, organization",
+    "role": "Role",
+    "anyRole": "All roles",
+    "roleCount": "{count} current assignment | {count} current assignment | {count} current assignments",
+    "scope": "Scope",
+    "scopeHint": "“Who holds a role on this edition?” — a question distinct from the role itself.",
+    "anyScope": "All scopes",
+    "organization": "Organization",
+    "anyOrganization": "All organizations",
+    "country": "Country",
+    "anyCountry": "All countries",
+    "status": "Status",
+    "withoutRole": "Without a role",
+    "withoutAccount": "Without an account",
+    "count": "{shown} of {total} shown | {shown} of {total} shown | {shown} of {total} shown",
+    "reset": "Clear filters"
+  }
+}

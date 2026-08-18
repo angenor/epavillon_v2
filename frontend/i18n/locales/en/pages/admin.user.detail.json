@@ -1,0 +1,78 @@
+{
+  "title": "Person record",
+  "breadcrumb": "Record",
+  "backToList": "Back to the list",
+  "readOnly": "This person is not involved in the editions you administer: their record is readable, but you cannot assign them a role or change their status.",
+  "missing": { "title": "Person not found", "description": "This record does not exist, or no longer does." },
+  "tabs": {
+    "label": "Record sections",
+    "profile": "Profile",
+    "roles": "Roles",
+    "permissions": "Effective permissions",
+    "history": "History"
+  },
+  "identity": {
+    "title": "Identity",
+    "email": "Primary email",
+    "verified": "Verified",
+    "unverified": "Unverified",
+    "otherEmails": "Other addresses",
+    "jobTitle": "Job title",
+    "organization": "Organization",
+    "noOrganization": "None",
+    "location": "Location",
+    "preferences": "Language and time zone",
+    "locale": "Interface in {locale}",
+    "directory": "Directory",
+    "directoryVisible": "Listed in the directory",
+    "directoryHidden": "Hidden from the directory",
+    "created": "Registered on"
+  },
+  "status": { "title": "Account status", "until": "Until {date}", "by": "by {name}" },
+  "accounts": {
+    "title": "Sign-in methods",
+    "empty": {
+      "title": "No account",
+      "description": "This person exists without any way to sign in: invited by their organization, or entered as a speaker. They cannot open a session."
+    },
+    "provider": {
+      "password": "Password",
+      "google": "Google",
+      "microsoft": "Microsoft",
+      "linkedin": "LinkedIn",
+      "oidc": "Institutional account"
+    },
+    "mfa": "Second factor",
+    "locked": "Locked until {date}",
+    "lastLogin": "Last sign-in",
+    "never": "never",
+    "passwordChanged": "Password changed on",
+    "failedAttempts": "Failed attempts"
+  },
+  "consents": { "title": "Consents", "granted": "Granted", "refused": "Refused" },
+  "permissions": {
+    "scope": {
+      "title": "Administration scope",
+      "global": "The whole platform. This person administers every edition, present and future.",
+      "none": "None. This person administers no edition: back-office lists are closed to them.",
+      "events": "One edition: {list}. | One edition: {list}. | {count} editions: {list}."
+    },
+    "summary": "{count} permission across {modules} modules. | {count} permission across {modules} module. | {count} permissions across {modules} modules.",
+    "everywhere": "Everywhere",
+    "empty": {
+      "title": "No permission",
+      "description": "This person has no current role: they only have the rights of an ordinary account."
+    },
+    "missing": {
+      "show": "Show the {count} permissions they do not have",
+      "hide": "Hide missing permissions"
+    }
+  },
+  "history": {
+    "kind": { "granted": "Role granted", "revoked": "Role revoked" },
+    "until": "Planned end: {date}",
+    "noReason": "No reason recorded.",
+    "empty": { "title": "No movement", "description": "No role has ever been assigned to this person." }
+  },
+  "privacy": { "title": "GDPR requests for this person", "link": "Open the queue" }
+}

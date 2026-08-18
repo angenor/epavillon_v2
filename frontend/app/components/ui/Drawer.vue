@@ -54,21 +54,31 @@ function onBackdropClick(event: MouseEvent): void {
   if (props.dismissible && event.target === dialog.value) close()
 }
 
-watch(
-  () => props.open,
-  (isOpen) => {
-    const element = dialog.value
-    if (!element) return
-    if (isOpen && !element.open) {
-      element.showModal()
-      document.documentElement.style.overflow = 'hidden'
-    } else if (!isOpen && element.open) {
-      element.close()
-      document.documentElement.style.overflow = ''
-    }
-  },
-  { flush: 'post' },
-)
+function syncOpenState(): void {
+  const element = dialog.value
+  if (!element) return
+  if (props.open && !element.open) {
+    element.showModal()
+    document.documentElement.style.overflow = 'hidden'
+  } else if (!props.open && element.open) {
+    element.close()
+    document.documentElement.style.overflow = ''
+  }
+}
+
+watch(() => props.open, syncOpenState, { flush: 'post' })
+
+/**
+ * AU MONTAGE AUSSI — le même défaut que `UiModal` corrigeait au prompt A2, et
+ * que le tiroir traînait encore. Un tiroir monté DÉJÀ ouvert — `v-if="cible"`
+ * sur le composant, `open` posé dans le même geste que la cible — ne s'affichait
+ * jamais : le watcher n'avait rien vu changer. Le motif est naturel dès qu'un
+ * panneau porte sur un élément choisi dans une LISTE, et c'est exactement ce qui
+ * s'est produit au prompt A12 : le panneau d'attribution de rôle s'ouvrait depuis
+ * la fiche d'une personne, où il est monté fermé, et restait invisible depuis la
+ * liste, où il est monté ouvert.
+ */
+onMounted(syncOpenState)
 
 onBeforeUnmount(() => {
   document.documentElement.style.overflow = ''

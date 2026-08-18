@@ -1,0 +1,86 @@
+{
+  "title": "Demandes RGPD",
+  "breadcrumb": "RGPD",
+  "subtitle": "Export, rectification et effacement. L'échéance réglementaire est de {days} jours à compter de la réception.",
+  "caption": "Demandes RGPD, les plus urgentes en premier",
+  "forbidden": {
+    "scope": "traitement des demandes RGPD",
+    "description": "Une demande RGPD porte sur la plateforme entière et non sur une édition : elle demande un accès global."
+  },
+  "empty": {
+    "title": "Aucune demande",
+    "description": "Aucune demande d'export, de rectification ou d'effacement n'est enregistrée."
+  },
+  "overdueAlert": {
+    "title": "{count} demande a dépassé son échéance | {count} demande a dépassé son échéance | {count} demandes ont dépassé leur échéance",
+    "message": "Le délai réglementaire d'un mois est dépassé. Ces demandes ouvrent la liste."
+  },
+  "columns": {
+    "person": "Personne",
+    "type": "Nature",
+    "status": "État",
+    "due": "Échéance",
+    "handler": "Traitée par",
+    "actions": "Actions"
+  },
+  "type": {
+    "export": "Export",
+    "erasure": "Effacement",
+    "rectification": "Rectification"
+  },
+  "status": {
+    "received": "Reçue",
+    "in_progress": "En cours",
+    "completed": "Honorée",
+    "rejected": "Rejetée"
+  },
+  "purpose": {
+    "newsletter": "Lettre d'information",
+    "directory_listing": "Présence dans l'annuaire",
+    "photo_usage": "Usage de la photographie",
+    "analytics": "Mesure d'audience"
+  },
+  "daysLeft": "{count} jour restant | {count} jour restant | {count} jours restants",
+  "overdue": "{count} jour de retard | {count} jour de retard | {count} jours de retard",
+  "unassigned": "Non attribuée",
+  "handle": "Traiter",
+  "dialog": {
+    "title": "Traiter la demande",
+    "description": "{type} demandé par {name}.",
+    "received": "Reçue le",
+    "due": "Échéance",
+    "field": {
+      "action": "Que faire",
+      "resolution": "Ce qui a été fait",
+      "resolutionHint": "C'est ce qu'on relira si l'autorité de contrôle demande des comptes."
+    },
+    "action": {
+      "start": "Prendre en charge",
+      "complete": "Clore la demande",
+      "reject": "Rejeter la demande",
+      "anonymize": "Anonymiser la personne"
+    },
+    "help": {
+      "start": "La demande passe en cours et vous en devenez responsable.",
+      "complete": "La demande est honorée. L'échéance cesse d'être surveillée.",
+      "reject": "La demande est refusée. Le motif écrit est ce qui justifiera le refus.",
+      "anonymize": "Exécute l'effacement demandé. Irréversible."
+    },
+    "anonymize": {
+      "title": "Cette action est irréversible",
+      "message": "Le nom, l'adresse, le téléphone et la biographie sont remplacés par un jeton anonyme ; les comptes sont supprimés et les sessions fermées. Les inscriptions, les évaluations et les compteurs des éditions passées sont CONSERVÉS, sans lien avec une identité.",
+      "confirm": "Saisir « {name} » pour confirmer"
+    },
+    "submit": {
+      "start": "Prendre en charge",
+      "complete": "Clore",
+      "reject": "Rejeter",
+      "anonymize": "Anonymiser définitivement"
+    }
+  },
+  "error": {
+    "wrong_type": "L'anonymisation ne répond qu'à une demande d'effacement.",
+    "not_found": "Cette demande n'existe plus."
+  },
+  "view": "Consulter"
+}

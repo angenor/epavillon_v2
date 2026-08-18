@@ -59,6 +59,17 @@
  *                        et la liste, `duplicates` la file et le décompte de
  *                        transfert lu dans le registre, `detail` la fiche,
  *                        `writes` les cinq écritures
+ *   platform.ts          les onze modules de `platform.modules` — l'écran des
+ *                        permissions groupe par module, et leur nom est une
+ *                        DONNÉE, pas une chaîne d'interface
+ *   privacy.ts           les demandes RGPD et les consentements (A12) : les
+ *                        échéances sont relatives à maintenant, sans quoi la
+ *                        file n'aurait qu'un cas à montrer
+ *   admin-users/         les utilisateurs et les rôles (A12), en quatre
+ *                        fichiers — `session` le journal, `core` la résolution
+ *                        des portées et la liste, `detail` la fiche,
+ *                        l'historique et les permissions effectives, `writes`
+ *                        les quatre écritures
  *   admin-events/        la gestion des événements (A10), en trois fichiers —
  *                        `core` le socle, `detail` la composition des six
  *                        onglets, `writes` les quinze écritures et les
@@ -186,7 +197,9 @@ export {
 
 export { adminDashboard } from './admin-dashboard'
 
-export { permissions, rolePermissions, effectivePermissions } from './permissions'
+export { permissions, rolePermissions, roles, effectivePermissions } from './permissions'
+export { platformModules, moduleByCode, moduleRank } from './platform'
+export { privacyRequests, consents, currentConsents } from './privacy'
 export { proposalTransitionsAllowed } from './proposal-workflow'
 export { proposalReads } from './proposal-reads'
 export {
@@ -247,3 +260,24 @@ export {
   setNameConfirmation,
   setOrganizationVerification,
 } from './admin-organizations'
+
+export {
+  activeAssignmentsOf,
+  allAssignmentsOf,
+  assignableRoles,
+  assignmentHistoryOf,
+  effectivePermissionsView,
+  grantRole,
+  handlePrivacyRequest,
+  privacyQueue,
+  privacyRequestView,
+  privacyRequestsOf,
+  resolveScope,
+  revokeRole,
+  roleAssignmentOptions,
+  roleView,
+  setPersonStatus,
+  userDetail,
+  userListRow,
+  userListScreen,
+} from './admin-users'
