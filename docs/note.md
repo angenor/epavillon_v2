@@ -1,3 +1,10 @@
 `agent-browser --headed`
 `claude --dangerously-skip-permissions`
 
+Bonjour Mme Lionelle,
+
+Je comprends et je trouve que c'est une bonne idées de tenter de s'adapter à ce bouleverssement.
+J'ai jeté un coup d'oeil à https://lactusport.com/ et j'ai quelque question:
+1- Quel outils a été utilisé pour dévélopper la plateforme: En effet il existe une ifinité de d'outils de developpement et je ne les maitrise pas tous(Au cas où je devrais intervenir). La réponse à cette question déterminera mon aptitude à apporter une assistance technique.
+2- Depuis quand cette plateforme à été lancé
+3- Pour les module de paiement, si votre cible est l'afrique, je recommanderai cinetPay. Si votre cible est le monde entier: cinetPay + Stripe + PayPal
