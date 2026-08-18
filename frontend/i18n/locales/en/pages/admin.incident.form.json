@@ -1,0 +1,109 @@
+{
+  "titleNew": "Publish an incident message",
+  "titleEdit": "Edit an incident message",
+  "subtitle": "The banner appears at the top of the page, above the navigation. The most severe message speaks alone.",
+  "overrunNotice": "Form pre-filled from “{session}”. Check the message and the display window before publishing.",
+  "sections": {
+    "scope": "Who sees this message",
+    "nature": "What it is about",
+    "message": "What the audience reads",
+    "window": "When it is shown",
+    "preview": "Preview"
+  },
+  "scope": {
+    "label": "Scope",
+    "hint": "A whole-platform message appears on every page, including outside this event.",
+    "option": {
+      "global": "Whole platform",
+      "event": "This event",
+      "event_day": "One day",
+      "session": "One activity",
+      "organization": "One organization"
+    },
+    "help": {
+      "global": "Everywhere, for everyone. Reserve it for platform-wide outages.",
+      "event": "On the event and on all its activities.",
+      "event_day": "On the activities of that day.",
+      "session": "On this activity only, and on its public page.",
+      "organization": "On the activities run by this organization."
+    },
+    "target": {
+      "event_day": "Day",
+      "session": "Activity",
+      "organization": "Organization",
+      "placeholder": "Choose the target"
+    }
+  },
+  "kind": {
+    "label": "Kind",
+    "hint": "Vocabulary maintained by IFDD: add a term from the settings rather than slipping it into the message."
+  },
+  "severity": {
+    "label": "Severity",
+    "option": {
+      "info": "Information",
+      "warning": "Warning",
+      "error": "Incident",
+      "critical": "Major incident"
+    },
+    "help": {
+      "info": "Quiet, dismissible banner. An extended call, a room change.",
+      "warning": "Solid yellow. An activity running over, a late speaker.",
+      "error": "Solid red, not dismissible. An interrupted broadcast, a cancellation.",
+      "critical": "Solid red with a rule, not dismissible. The pavilion is down."
+    }
+  },
+  "field": {
+    "titleFr": "Title (French)",
+    "titleEn": "Title (English)",
+    "titleHint": "Optional. Without a title, the message speaks alone — often more direct.",
+    "messageFr": "Message (French)",
+    "messageEn": "Message (English)",
+    "messageHint": "Both languages are required: half the online audience reads English. Say what is happening, then what will happen.",
+    "actionUrl": "“Learn more” link",
+    "actionUrlHint": "Optional. A schedule page, an information note.",
+    "dismissible": "Dismissible by the viewer",
+    "dismissibleHint": "An incident and a major incident are never dismissible, whatever this setting says."
+  },
+  "window": {
+    "start": "Display starts",
+    "startNow": "Immediately",
+    "startScheduled": "Scheduled",
+    "end": "Display ends",
+    "endHint": "Fill it in as soon as you know: it is what removes the banner without anyone having to think about it.",
+    "endOpen": "No planned end",
+    "endOpenHint": "The banner will stay online until someone withdraws it by hand.",
+    "zone": "Times expressed in {zone}."
+  },
+  "preview": {
+    "title": "Banner preview",
+    "description": "As it will appear at the top of the page, for the audience.",
+    "empty": "Write the message to see the preview.",
+    "locale": "Preview language",
+    "scheduledNotice": "This message will only be shown from {date}."
+  },
+  "actions": {
+    "saveDraft": "Save without publishing",
+    "publish": "Publish now",
+    "publishScheduled": "Schedule publication",
+    "update": "Save changes",
+    "cancel": "Cancel"
+  },
+  "unsaved": "Message saved. It is not published: nobody sees it yet.",
+  "error": {
+    "missing_target": "The chosen scope requires a target.",
+    "missing_message": "The message must be written in French and in English.",
+    "invalid_window": "The end of display must be later than its start.",
+    "not_found": "This message no longer exists.",
+    "not_published": "This message was never published.",
+    "forbidden": "Your account cannot publish messages on this event."
+  },
+  "forbidden": {
+    "scope": "Publish an incident message, on this event"
+  },
+  "notFound": {
+    "title": "Message not found",
+    "description": "This message does not exist, or it belongs to an event outside your scope.",
+    "action": "Back to incident messages"
+  }
+}

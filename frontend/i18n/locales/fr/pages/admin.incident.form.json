@@ -1,0 +1,109 @@
+{
+  "titleNew": "Publier un message d'incident",
+  "titleEdit": "Modifier un message d'incident",
+  "subtitle": "Le bandeau s'affiche en tête de page, au-dessus de la navigation. Le message le plus grave parle seul.",
+  "overrunNotice": "Formulaire pré-rempli depuis « {session} ». Relisez le message et la fenêtre d'affichage avant de publier.",
+  "sections": {
+    "scope": "Qui voit ce message",
+    "nature": "De quoi il s'agit",
+    "message": "Ce que le public lit",
+    "window": "Quand il s'affiche",
+    "preview": "Aperçu"
+  },
+  "scope": {
+    "label": "Portée",
+    "hint": "Un message de portée « toute la plateforme » s'affiche sur chaque page, y compris hors de cet événement.",
+    "option": {
+      "global": "Toute la plateforme",
+      "event": "Cet événement",
+      "event_day": "Une journée",
+      "session": "Une activité",
+      "organization": "Une organisation"
+    },
+    "help": {
+      "global": "Partout, pour tout le monde. À réserver aux pannes de la plateforme elle-même.",
+      "event": "Sur l'événement et sur toutes ses activités.",
+      "event_day": "Sur les activités de cette journée.",
+      "session": "Sur cette activité seulement, et sur sa page publique.",
+      "organization": "Sur les activités animées par cette organisation."
+    },
+    "target": {
+      "event_day": "Journée",
+      "session": "Activité",
+      "organization": "Organisation",
+      "placeholder": "Choisir la cible"
+    }
+  },
+  "kind": {
+    "label": "Nature",
+    "hint": "Vocabulaire tenu par l'IFDD : ajoutez-y un terme depuis les paramètres plutôt que de le glisser dans le message."
+  },
+  "severity": {
+    "label": "Gravité",
+    "option": {
+      "info": "Information",
+      "warning": "Avertissement",
+      "error": "Incident",
+      "critical": "Incident majeur"
+    },
+    "help": {
+      "info": "Bandeau discret, refermable. Une prolongation d'appel, un changement de salle.",
+      "warning": "Aplat jaune. Une activité qui déborde, un intervenant en retard.",
+      "error": "Aplat rouge, non refermable. Une diffusion interrompue, une annulation.",
+      "critical": "Aplat rouge bordé, non refermable. Le pavillon ne fonctionne plus."
+    }
+  },
+  "field": {
+    "titleFr": "Titre (français)",
+    "titleEn": "Titre (anglais)",
+    "titleHint": "Facultatif. Sans titre, le message parle seul — c'est souvent plus direct.",
+    "messageFr": "Message (français)",
+    "messageEn": "Message (anglais)",
+    "messageHint": "Les deux langues sont exigées : la moitié du public en ligne lit l'anglais. Dites ce qui se passe, puis ce qui va se passer.",
+    "actionUrl": "Lien « En savoir plus »",
+    "actionUrlHint": "Facultatif. Une page de programmation, un billet d'information.",
+    "dismissible": "Refermable par le visiteur",
+    "dismissibleHint": "Un incident et un incident majeur ne se referment jamais, quoi qu'en dise ce réglage."
+  },
+  "window": {
+    "start": "Début d'affichage",
+    "startNow": "Immédiat",
+    "startScheduled": "Programmé",
+    "end": "Fin d'affichage",
+    "endHint": "Renseignez-la dès que vous savez : c'est elle qui retire le bandeau sans que personne ait à y penser.",
+    "endOpen": "Sans fin programmée",
+    "endOpenHint": "Le bandeau restera en ligne jusqu'à ce que quelqu'un le retire à la main.",
+    "zone": "Heures exprimées en {zone}."
+  },
+  "preview": {
+    "title": "Aperçu du bandeau",
+    "description": "Tel qu'il apparaîtra en tête de page, pour le public.",
+    "empty": "Écrivez le message pour voir l'aperçu.",
+    "locale": "Langue de l'aperçu",
+    "scheduledNotice": "Ce message ne s'affichera qu'à partir du {date}."
+  },
+  "actions": {
+    "saveDraft": "Enregistrer sans publier",
+    "publish": "Publier maintenant",
+    "publishScheduled": "Programmer la publication",
+    "update": "Enregistrer les modifications",
+    "cancel": "Annuler"
+  },
+  "unsaved": "Message enregistré. Il n'est pas publié : personne ne le voit encore.",
+  "error": {
+    "missing_target": "La portée choisie exige une cible.",
+    "missing_message": "Le message doit être écrit en français et en anglais.",
+    "invalid_window": "La fin d'affichage doit être postérieure au début.",
+    "not_found": "Ce message n'existe plus.",
+    "not_published": "Ce message n'a jamais été publié.",
+    "forbidden": "Votre compte ne peut pas publier de message sur cet événement."
+  },
+  "forbidden": {
+    "scope": "Publier un message d'incident, sur cet événement"
+  },
+  "notFound": {
+    "title": "Message introuvable",
+    "description": "Ce message n'existe pas, ou il appartient à un événement hors de votre périmètre.",
+    "action": "Retour aux messages d'incident"
+  }
+}

@@ -136,7 +136,9 @@
     "defaultChannel": "Diffusée sur {channel}, le canal par défaut de l'édition.",
     "conflicts": "Chevauchement de cette activité | {count} chevauchement de cette activité | {count} chevauchements de cette activité",
     "save": "Enregistrer",
-    "unplace": "Retirer du calendrier"
+    "unplace": "Retirer du calendrier",
+    "reportOverrun": "Signaler un débordement",
+    "reportOverrunHint": "Ouvre le formulaire de message d'incident, déjà pointé sur cette activité."
   },
   "publish": {
     "open": "Publier la programmation",

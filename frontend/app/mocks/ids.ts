@@ -122,6 +122,18 @@ export const TERM = {
   emailNewsletter: uuid('7011', 84),
   wordOfMouth: uuid('7011', 85),
   referralOther: uuid('7011', 86),
+  // incident_kind — 080_live.sql § 7. Vocabulaire OUVERT : l'IFDD en ajoute
+  // depuis le back-office, ce qui interdit d'écrire ces libellés dans un
+  // fichier i18n. L'écran A13 les lit comme il lit les thématiques.
+  incidentTechnicalIssue: uuid('7011', 90),
+  incidentConnectionIssue: uuid('7011', 91),
+  incidentDelay: uuid('7011', 92),
+  incidentOverrun: uuid('7011', 93),
+  incidentScheduleChange: uuid('7011', 94),
+  incidentRoomChange: uuid('7011', 95),
+  incidentCancellation: uuid('7011', 96),
+  incidentSpeakerAbsence: uuid('7011', 97),
+  incidentInformation: uuid('7011', 98),
 } as const
 
 // ---------------------------------------------------------------------------
@@ -621,12 +633,18 @@ export const SCHEDULED_REMINDER = (n: number): Uuid => uuid('7081', n)
  * messages servent le tableau de bord (A6) et serviront l'écran A13.
  */
 export const INCIDENT = {
-  /** Portée plateforme, actif : maintenance du dépôt de fichiers. */
-  maintenanceDepot: uuid('7090', 1),
-  /** Portée édition, actif : la prolongation de l'appel de la COP31. */
-  prolongationAppel: uuid('7090', 2),
+  /** Portée plateforme, actif : la visionneuse de direct est en panne partout. */
+  visionneusePanne: uuid('7090', 1),
+  /** Portée édition, actif : le direct du pavillon est coupé. */
+  directPavillonCoupe: uuid('7090', 2),
   /** Fenêtre d'affichage close : ne doit PAS remonter. */
-  incidentClos: uuid('7090', 3),
+  sonCoupePleniere: uuid('7090', 3),
   /** Jamais publié : rédigé, en attente de décision. */
   brouillonNonPublie: uuid('7090', 4),
+  /** Portée séance, publié pour un créneau à venir : le débordement d'un atelier. */
+  debordementAtelier: uuid('7090', 5),
+  /** Portée journée, publié pour un créneau à venir : changement de salle. */
+  changementSalleNov12: uuid('7090', 6),
+  /** Portée organisation, publié PUIS dépublié à la main, avec motif. */
+  panneVisioOrg: uuid('7090', 7),
 } as const

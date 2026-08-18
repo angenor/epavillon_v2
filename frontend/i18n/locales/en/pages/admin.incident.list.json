@@ -1,0 +1,113 @@
+{
+  "title": "Incident messages",
+  "subtitle": "What the audience reads when an activity runs over, a speaker is late or a broadcast is interrupted.",
+  "new": "Publish a message",
+  "desk": {
+    "title": "Live desk",
+    "today": "Activities on {date}",
+    "fallback": "No activity today — here is what comes next",
+    "empty": "No activity scheduled for this event.",
+    "streamed": "Broadcast",
+    "alreadyPublished": "{count} message already live on this activity | {count} message already live on this activity | {count} messages already live on this activity",
+    "state": {
+      "ongoing": "Live",
+      "upcoming": "Upcoming",
+      "past": "Ended",
+      "cancelled": "Cancelled",
+      "postponed": "Postponed"
+    },
+    "report": {
+      "delay": "Delay",
+      "overrun": "Overrun",
+      "technical_issue": "Technical issue",
+      "connection_issue": "Broadcast down"
+    }
+  },
+  "forbidden": {
+    "scope": "Publish an incident message, on this event"
+  },
+  "state": {
+    "active": "Live",
+    "scheduled": "Scheduled",
+    "draft": "Drafted",
+    "expired": "Ended",
+    "unpublished": "Withdrawn"
+  },
+  "stateHint": {
+    "active": "Currently shown to the audience.",
+    "scheduled": "Will appear at the planned time, with no further action.",
+    "draft": "Never published: nobody sees it.",
+    "expired": "Withdrew on its own, at the end of its display window.",
+    "unpublished": "Withdrawn by hand before the planned end."
+  },
+  "counts": {
+    "active": "{count} live",
+    "total": "{count} message | {count} message | {count} messages"
+  },
+  "columns": {
+    "message": "Message",
+    "scope": "Scope",
+    "kind": "Kind",
+    "window": "Display window",
+    "state": "State",
+    "actions": "Actions"
+  },
+  "caption": "Incident messages for this event, live messages first.",
+  "row": {
+    "noTitle": "Untitled",
+    "global": "Whole platform",
+    "publishedBy": "Published by {name}, on {date}",
+    "publishedAt": "Published on {date}",
+    "neverPublished": "Never published",
+    "unpublishedBy": "Withdrawn by {name}, on {date}",
+    "unpublishReason": "Reason: {reason}",
+    "from": "From {date}",
+    "until": "Until {date}",
+    "openEnded": "No planned end",
+    "dismissible": "Dismissible by the viewer",
+    "permanent": "Not dismissible"
+  },
+  "actions": {
+    "publish": "Publish",
+    "unpublish": "Withdraw",
+    "republish": "Restore",
+    "edit": "Edit",
+    "duplicate": "Reuse this message"
+  },
+  "filters": {
+    "label": "List filters",
+    "search": "Search messages",
+    "searchPlaceholder": "Message text, targeted activity…",
+    "state": "State",
+    "severity": "Severity",
+    "scope": "Scope",
+    "kind": "Kind",
+    "shown": "{shown} message shown out of {total} | {shown} message shown out of {total} | {shown} messages shown out of {total}",
+    "reset": "Clear filters"
+  },
+  "empty": {
+    "title": "No incident message",
+    "description": "Nothing has been published for this event. That is the normal situation: an incident message is written when something happens."
+  },
+  "noResults": {
+    "title": "No message matches",
+    "description": "None of the {total} messages for this event match these filters.",
+    "action": "Clear filters"
+  },
+  "unpublish": {
+    "title": "Withdraw this message",
+    "description": "The banner disappears from the site immediately. The row stays in the history, with the date, your name and the reason.",
+    "reason": "Reason for withdrawal",
+    "reasonHint": "What the team will read six months from now. “Broadcast restored at 15:15 UTC” is enough.",
+    "submit": "Withdraw",
+    "activeWarning": "This message is currently shown to the audience."
+  },
+  "error": {
+    "missing_target": "The chosen scope requires a target.",
+    "missing_message": "The message must be written in French and in English.",
+    "invalid_window": "The end of display must be later than its start.",
+    "not_published": "This message was never published: there is nothing to withdraw.",
+    "not_found": "This message no longer exists.",
+    "forbidden": "Your account cannot publish messages on this event."
+  }
+}

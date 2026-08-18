@@ -38,7 +38,7 @@ import { duplicateCandidates, organizations } from './org'
 import { reviewAssignments } from './reviews'
 import { events } from './event'
 import { detectConflicts } from './conflicts'
-import { activeIncidentsForEvent } from './incidents'
+import { activeIncidentsForEvent } from './admin-incidents'
 import {
   dailyRegistrations,
   dailySubmissions,

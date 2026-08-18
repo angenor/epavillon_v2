@@ -705,7 +705,7 @@ sélection en deux temps.
    - Comité de sélection : composition, plafond de charge par membre
 ```
 
-**A11 — Organisations et fusion des doublons**(en cours)
+**A11 — Organisations et fusion des doublons**
 
 ```
 [PRÉAMBULE]
@@ -738,7 +738,7 @@ Gestion des organisations, back-office, avec l'outil de fusion.
    historique.
 ```
 
-**A12 — Utilisateurs et rôles**(en cours)
+**A12 — Utilisateurs et rôles**
 
 ```
 [PRÉAMBULE]

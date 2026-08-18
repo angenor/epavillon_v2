@@ -884,10 +884,11 @@ $$;
 COMMENT ON FUNCTION live.active_incidents(uuid, timestamptz) IS
     'Incidents à afficher maintenant pour une session, en remontant sa journée, son événement et son organisation porteuse.';
 
--- Ce que le BACK-OFFICE doit voir pour une édition : tous les incidents actifs
--- qui la concernent, quelle que soit leur portée.
+-- Ce que le BACK-OFFICE doit voir pour une édition : TOUS les incidents qui la
+-- concernent, quel que soit leur état — publiés, programmés, rédigés, expirés,
+-- dépubliés — avec leur cible résolue.
 --
--- SYMÉTRIQUE DE LA PRÉCÉDENTE, ET DANS L'AUTRE SENS. active_incidents(session)
+-- SYMÉTRIQUE DE active_incidents(session), ET DANS L'AUTRE SENS. Celle-là
 -- REMONTE la hiérarchie depuis une séance ; celle-ci la DESCEND depuis une
 -- édition : ses journées, ses séances, les organisations qui y portent une
 -- séance, plus les messages globaux. Sans elle, le tableau de bord (écran A6) et
@@ -895,28 +896,44 @@ COMMENT ON FUNCTION live.active_incidents(uuid, timestamptz) IS
 -- le premier incident de portée `organization` oublié par l'un des deux
 -- passerait inaperçu là où il est publié.
 --
--- L'incident GLOBAL est renvoyé pour toute édition : il s'affiche partout, et
+-- L'INCIDENT GLOBAL EST RENVOYÉ POUR TOUTE ÉDITION : il s'affiche partout, et
 -- une équipe qui pilote une COP doit savoir qu'un bandeau de maintenance couvre
 -- son pavillon.
-CREATE OR REPLACE FUNCTION live.active_incidents_for_event(
+--
+-- L'ÉTAT EST CALCULÉ ICI, ET NULLE PART AILLEURS (A13). Un incident ne se lit
+-- pas à sa seule existence : il est publié ou non, sa fenêtre est ouverte,
+-- à venir ou close, et il a pu être dépublié à la main. Ces quatre conditions
+-- cumulées sont exactement celles que la v1 oubliait une par une — d'où ses
+-- bandeaux restés en ligne des mois. Les laisser recomposer par chaque appelant
+-- garantissait qu'un écran finirait par les compter autrement qu'un autre.
+CREATE OR REPLACE FUNCTION live.event_incidents(
     p_event_id uuid,
     p_at       timestamptz DEFAULT now()
 )
 RETURNS TABLE (
-    incident_id    uuid,
-    scope          live.incident_scope,
-    severity       live.incident_severity,
-    kind_code      text,
-    title          platform.i18n_text,
-    message        platform.i18n_text,
-    action_url     platform.url,
-    is_dismissible boolean,
-    display_from   timestamptz,
-    display_until  timestamptz,
+    incident_id       uuid,
+    scope             live.incident_scope,
+    severity          live.incident_severity,
+    kind_code         text,
+    title             platform.i18n_text,
+    message           platform.i18n_text,
+    action_url        platform.url,
+    is_dismissible    boolean,
+    display_from      timestamptz,
+    display_until     timestamptz,
     -- La cible, résolue : le back-office affiche « Salle Amazonie » ou
     -- « Atelier de négociation », pas un identifiant.
-    target_id      uuid,
-    target_label   text
+    target_id         uuid,
+    target_label      text,
+    -- 'active' | 'scheduled' | 'draft' | 'expired' | 'unpublished'
+    state             text,
+    published_at      timestamptz,
+    published_by      uuid,
+    published_by_name text,
+    unpublished_at    timestamptz,
+    unpublish_reason  text,
+    created_at        timestamptz,
+    updated_at        timestamptz
 )
 LANGUAGE plpgsql
 STABLE
@@ -930,17 +947,24 @@ BEGIN
                     -- Une journée peut n'avoir aucun titre : sa date la désigne alors.
                     COALESCE(platform.t(d.title), to_char(d.day_date, 'DD/MM/YYYY')),
                     o.legal_name,
-                    platform.t(e.title)) AS target_label
+                    platform.t(e.title)) AS target_label,
+           CASE
+               WHEN i.unpublished_at IS NOT NULL                                  THEN 'unpublished'
+               WHEN i.published_at IS NULL                                        THEN 'draft'
+               WHEN i.display_until IS NOT NULL AND i.display_until <= p_at       THEN 'expired'
+               WHEN i.display_from > p_at                                         THEN 'scheduled'
+               ELSE 'active'
+           END AS state,
+           i.published_at, i.published_by, pub.display_name,
+           i.unpublished_at, i.unpublish_reason,
+           i.created_at, i.updated_at
     FROM live.incidents i
-    LEFT JOIN programme.sessions s ON s.id = i.session_id
-    LEFT JOIN event.event_days   d ON d.id = i.event_day_id
-    LEFT JOIN org.organizations  o ON o.id = i.organization_id
-    LEFT JOIN event.events       e ON e.id = i.event_id
-    WHERE i.published_at IS NOT NULL
-      AND i.unpublished_at IS NULL
-      AND i.display_from <= p_at
-      AND (i.display_until IS NULL OR i.display_until > p_at)
-      AND (
+    LEFT JOIN programme.sessions s   ON s.id = i.session_id
+    LEFT JOIN event.event_days   d   ON d.id = i.event_day_id
+    LEFT JOIN org.organizations  o   ON o.id = i.organization_id
+    LEFT JOIN event.events       e   ON e.id = i.event_id
+    LEFT JOIN identity.people    pub ON pub.id = i.published_by
+    WHERE (
              i.scope = 'global'
           OR (i.scope = 'event'     AND i.event_id = p_event_id)
           OR (i.scope = 'event_day' AND EXISTS (
@@ -957,12 +981,60 @@ BEGIN
                   WHERE ss.organization_id = i.organization_id
                     AND ss.event_id = p_event_id))
          )
-    ORDER BY i.severity DESC, i.display_from DESC;
+    -- LES ACTIFS D'ABORD, puis ce qui va parler, puis ce qui est en attente de
+    -- décision, puis l'historique : l'ordre dans lequel l'équipe agit.
+    ORDER BY CASE
+                 WHEN i.unpublished_at IS NOT NULL                            THEN 4
+                 WHEN i.published_at IS NULL                                  THEN 2
+                 WHEN i.display_until IS NOT NULL AND i.display_until <= p_at THEN 4
+                 WHEN i.display_from > p_at                                   THEN 1
+                 ELSE 0
+             END,
+             i.severity DESC, i.display_from DESC;
+END;
+$$;
+
+COMMENT ON FUNCTION live.event_incidents(uuid, timestamptz) IS
+    'Tous les incidents d''une édition, toutes portées et tous états confondus, cible résolue et état calculé (actif, programmé, rédigé, expiré, dépublié). Écran A13.';
+
+-- Ce que le tableau de bord et le bandeau public consomment : la seule part
+-- ACTIVE de la fonction ci-dessus. Écrite au-dessus d'elle plutôt qu'à côté :
+-- deux balayages de portée qui divergent, et le même incident s'affiche dans un
+-- écran sans apparaître dans l'autre.
+CREATE OR REPLACE FUNCTION live.active_incidents_for_event(
+    p_event_id uuid,
+    p_at       timestamptz DEFAULT now()
+)
+RETURNS TABLE (
+    incident_id    uuid,
+    scope          live.incident_scope,
+    severity       live.incident_severity,
+    kind_code      text,
+    title          platform.i18n_text,
+    message        platform.i18n_text,
+    action_url     platform.url,
+    is_dismissible boolean,
+    display_from   timestamptz,
+    display_until  timestamptz,
+    target_id      uuid,
+    target_label   text
+)
+LANGUAGE plpgsql
+STABLE
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT x.incident_id, x.scope, x.severity, x.kind_code, x.title, x.message,
+           x.action_url, x.is_dismissible, x.display_from, x.display_until,
+           x.target_id, x.target_label
+    FROM live.event_incidents(p_event_id, p_at) x
+    WHERE x.state = 'active'
+    ORDER BY x.severity DESC, x.display_from DESC;
 END;
 $$;
 
 COMMENT ON FUNCTION live.active_incidents_for_event(uuid, timestamptz) IS
-    'Incidents actifs d''une édition, toutes portées confondues (globale, édition, journée, séance, organisation qui y anime). Symétrique descendante de active_incidents(session).';
+    'Incidents actifs d''une édition, toutes portées confondues (globale, édition, journée, séance, organisation qui y anime). Part active de live.event_incidents().';
 
 -- -----------------------------------------------------------------------------
 -- 7. Intégration inter-modules
@@ -986,6 +1058,11 @@ INSERT INTO reference.taxonomy_terms (taxonomy_code, code, label, sort_order) VA
     ('incident_kind', 'technical_issue',   '{"fr":"Problème technique","en":"Technical issue"}', 10),
     ('incident_kind', 'connection_issue',  '{"fr":"Problème de connexion","en":"Connection issue"}', 20),
     ('incident_kind', 'delay',             '{"fr":"Retard","en":"Delay"}', 30),
+    -- Ajouté en écrivant l'écran A13 : le cas le plus fréquent d'une COP, et
+    -- celui que le commanditaire nomme en premier. Une activité qui déborde
+    -- n'est ni un simple retard (elle en cause un, ailleurs) ni un changement
+    -- d'horaire (rien n'a été décidé) : c'est un fait constaté en direct.
+    ('incident_kind', 'overrun',           '{"fr":"Débordement sur le créneau suivant","en":"Overrun into the next slot"}', 35),
     ('incident_kind', 'schedule_change',   '{"fr":"Changement d''horaire","en":"Schedule change"}', 40),
     ('incident_kind', 'room_change',       '{"fr":"Changement de salle","en":"Room change"}', 50),
     ('incident_kind', 'cancellation',      '{"fr":"Annulation","en":"Cancellation"}', 60),

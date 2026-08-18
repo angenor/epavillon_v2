@@ -1,0 +1,113 @@
+{
+  "title": "Messages d'incident",
+  "subtitle": "Ce que le public lit quand une activité déborde, qu'un intervenant tarde ou qu'une diffusion s'interrompt.",
+  "new": "Publier un message",
+  "desk": {
+    "title": "Le direct",
+    "today": "Activités du {date}",
+    "fallback": "Aucune activité aujourd'hui — voici les prochaines",
+    "empty": "Aucune activité programmée sur cet événement.",
+    "streamed": "Diffusée",
+    "alreadyPublished": "{count} message déjà en ligne sur cette activité | {count} message déjà en ligne sur cette activité | {count} messages déjà en ligne sur cette activité",
+    "state": {
+      "ongoing": "En cours",
+      "upcoming": "À venir",
+      "past": "Terminée",
+      "cancelled": "Annulée",
+      "postponed": "Reportée"
+    },
+    "report": {
+      "delay": "Retard",
+      "overrun": "Débordement",
+      "technical_issue": "Panne technique",
+      "connection_issue": "Diffusion interrompue"
+    }
+  },
+  "forbidden": {
+    "scope": "Publier un message d'incident, sur cet événement"
+  },
+  "state": {
+    "active": "En ligne",
+    "scheduled": "Programmé",
+    "draft": "Rédigé",
+    "expired": "Terminé",
+    "unpublished": "Retiré"
+  },
+  "stateHint": {
+    "active": "Affiché en ce moment au public.",
+    "scheduled": "S'affichera à l'heure prévue, sans intervention.",
+    "draft": "Jamais publié : personne ne le voit.",
+    "expired": "Retiré tout seul, à la fin de sa fenêtre d'affichage.",
+    "unpublished": "Retiré à la main avant la fin prévue."
+  },
+  "counts": {
+    "active": "{count} en ligne",
+    "total": "{count} message | {count} message | {count} messages"
+  },
+  "columns": {
+    "message": "Message",
+    "scope": "Portée",
+    "kind": "Nature",
+    "window": "Fenêtre d'affichage",
+    "state": "État",
+    "actions": "Actions"
+  },
+  "caption": "Messages d'incident de l'événement, les messages en ligne en tête.",
+  "row": {
+    "noTitle": "Sans titre",
+    "global": "Toute la plateforme",
+    "publishedBy": "Publié par {name}, le {date}",
+    "publishedAt": "Publié le {date}",
+    "neverPublished": "Jamais publié",
+    "unpublishedBy": "Retiré par {name}, le {date}",
+    "unpublishReason": "Motif : {reason}",
+    "from": "Du {date}",
+    "until": "Jusqu'au {date}",
+    "openEnded": "Sans fin programmée",
+    "dismissible": "Refermable par le visiteur",
+    "permanent": "Non refermable"
+  },
+  "actions": {
+    "publish": "Publier",
+    "unpublish": "Dépublier",
+    "republish": "Rétablir",
+    "edit": "Modifier",
+    "duplicate": "Reprendre ce message"
+  },
+  "filters": {
+    "label": "Filtres de la liste",
+    "search": "Rechercher dans les messages",
+    "searchPlaceholder": "Texte du message, activité visée…",
+    "state": "État",
+    "severity": "Gravité",
+    "scope": "Portée",
+    "kind": "Nature",
+    "shown": "{shown} message affiché sur {total} | {shown} message affiché sur {total} | {shown} messages affichés sur {total}",
+    "reset": "Effacer les filtres"
+  },
+  "empty": {
+    "title": "Aucun message d'incident",
+    "description": "Rien n'a été publié pour cet événement. C'est la situation normale : un message d'incident se rédige quand quelque chose se passe."
+  },
+  "noResults": {
+    "title": "Aucun message ne correspond",
+    "description": "Aucun des {total} messages de cet événement ne correspond à ces filtres.",
+    "action": "Effacer les filtres"
+  },
+  "unpublish": {
+    "title": "Dépublier ce message",
+    "description": "Le bandeau disparaît immédiatement du site. La ligne reste dans l'historique, avec la date, votre nom et le motif.",
+    "reason": "Motif du retrait",
+    "reasonHint": "Ce que l'équipe lira dans six mois en relisant l'historique. « Diffusion rétablie à 15:15 UTC » suffit.",
+    "submit": "Dépublier",
+    "activeWarning": "Ce message est affiché en ce moment au public."
+  },
+  "error": {
+    "missing_target": "La portée choisie exige une cible.",
+    "missing_message": "Le message doit être écrit en français et en anglais.",
+    "invalid_window": "La fin d'affichage doit être postérieure au début.",
+    "not_published": "Ce message n'a jamais été publié : il n'y a rien à retirer.",
+    "not_found": "Ce message n'existe plus.",
+    "forbidden": "Votre compte ne peut pas publier de message sur cet événement."
+  }
+}

@@ -451,6 +451,18 @@ export const taxonomies = [
     created_at: '2026-01-12T09:00:00Z',
   },
   {
+    code: 'incident_kind',
+    label: { fr: "Natures d'incident", en: 'Incident kinds' },
+    description: {
+      fr: "Cause d'un message affiché aux téléspectateurs",
+      en: 'Cause of a message shown to viewers',
+    },
+    is_multi_select: false,
+    is_hierarchical: false,
+    is_system: false,
+    created_at: '2026-01-12T09:00:00Z',
+  },
+  {
     code: 'referral_source',
     label: { fr: "Canaux d'acquisition", en: 'Referral sources' },
     description: {
@@ -492,7 +504,7 @@ function term(
 }
 
 /**
- * Termes des cinq taxonomies utilisées par les écrans du jalon. Les couleurs
+ * Termes des six taxonomies utilisées par les écrans du jalon. Les couleurs
  * portées par les thématiques sont celles qui pastillent le calendrier : elles
  * appartiennent à la donnée, ce qui évite un `switch` de couleurs dans un
  * composant.
@@ -550,6 +562,19 @@ export const taxonomyTerms = [
   term(TERM.emailNewsletter, 'referral_source', 'email_newsletter', { fr: 'Infolettre', en: 'Newsletter' }, 50),
   term(TERM.wordOfMouth, 'referral_source', 'word_of_mouth', { fr: 'Bouche-à-oreille', en: 'Word of mouth' }, 60),
   term(TERM.referralOther, 'referral_source', 'other', { fr: 'Autre', en: 'Other' }, 90),
+
+  // Natures d'incident — 080_live.sql § 7. Elles s'affichent dans le formulaire
+  // de publication (A13) et dans la liste : ce sont des DONNÉES, modifiables
+  // depuis le back-office, jamais des libellés d'interface.
+  term(TERM.incidentTechnicalIssue, 'incident_kind', 'technical_issue', { fr: 'Problème technique', en: 'Technical issue' }, 10),
+  term(TERM.incidentConnectionIssue, 'incident_kind', 'connection_issue', { fr: 'Problème de connexion', en: 'Connection issue' }, 20),
+  term(TERM.incidentDelay, 'incident_kind', 'delay', { fr: 'Retard', en: 'Delay' }, 30),
+  term(TERM.incidentOverrun, 'incident_kind', 'overrun', { fr: 'Débordement sur le créneau suivant', en: 'Overrun into the next slot' }, 35),
+  term(TERM.incidentScheduleChange, 'incident_kind', 'schedule_change', { fr: "Changement d'horaire", en: 'Schedule change' }, 40),
+  term(TERM.incidentRoomChange, 'incident_kind', 'room_change', { fr: 'Changement de salle', en: 'Room change' }, 50),
+  term(TERM.incidentCancellation, 'incident_kind', 'cancellation', { fr: 'Annulation', en: 'Cancellation' }, 60),
+  term(TERM.incidentSpeakerAbsence, 'incident_kind', 'speaker_absence', { fr: "Absence d'un intervenant", en: 'Speaker absence' }, 70),
+  term(TERM.incidentInformation, 'incident_kind', 'information', { fr: 'Information', en: 'Information' }, 80),
 ] satisfies TaxonomyTerm[]
 
 // ---------------------------------------------------------------------------

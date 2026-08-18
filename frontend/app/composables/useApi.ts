@@ -83,6 +83,7 @@ import { createPlannerApi } from './api/planner'
 import { createAdminEventsApi } from './api/admin-events'
 import { createAdminOrganizationsApi } from './api/admin-organizations'
 import { createAdminUsersApi } from './api/admin-users'
+import { createAdminIncidentsApi } from './api/admin-incidents'
 import { createOrganizationWorkspaceApi } from './api/organization-workspace'
 
 /** Erreur d'accès, à traduire par l'écran « accès refusé ». */
@@ -864,6 +865,19 @@ export function useApi() {
     // porte sur la plateforme entière.
     // -----------------------------------------------------------------------
     adminUsers: createAdminUsersApi({ call, send }),
+
+    // -----------------------------------------------------------------------
+    // Messages d'incident (A13)
+    //
+    // LE PÉRIMÈTRE EST VÉRIFIÉ AVANT L'APPEL, comme pour le tableau de bord et
+    // le planificateur : un incident se publie SUR une édition, et une édition
+    // hors périmètre refuse l'accès plutôt que de rendre une liste vide.
+    //
+    // Les quatre écritures reçoivent les permissions de l'acteur : elles
+    // rejouent `has_permission(acteur, 'live.incident.publish', 'event', …)`
+    // tant que l'API n'existe pas. Ce paramètre disparaît au prompt B6.
+    // -----------------------------------------------------------------------
+    adminIncidents: createAdminIncidentsApi({ call, send, assertEventInScope }),
 
     // -----------------------------------------------------------------------
     // Espace organisation (A5)

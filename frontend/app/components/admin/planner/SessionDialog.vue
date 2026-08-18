@@ -421,6 +421,27 @@ const isPlaced = computed(() => props.session?.room_id !== null && props.session
         <p class="text-xs text-text-muted">{{ t('admin.planner.conflict.neverBlocked') }}</p>
       </section>
 
+      <!-- SIGNALER UN DÉBORDEMENT — le pont vers l'écran des messages
+           d'incident (A13). Il n'écrit rien ici : il ouvre le formulaire de
+           publication déjà pointé sur cette séance, avec la nature « débordement
+           sur le créneau suivant » et la fin du créneau comme fin d'affichage.
+           C'est le geste d'une équipe qui a trente secondes, pas d'un formulaire
+           à remplir de mémoire. -->
+      <section v-if="props.session && props.editable" class="border-t border-border pt-4">
+        <UiButton
+          variant="secondary"
+          icon="warning"
+          size="sm"
+          :to="localePath({
+            path: '/admin/incidents/nouveau',
+            query: { portee: 'session', cible: props.session.id, nature: 'overrun' },
+          })"
+        >
+          {{ t('admin.planner.dialog.reportOverrun') }}
+        </UiButton>
+        <p class="mt-1.5 text-xs text-text-muted">{{ t('admin.planner.dialog.reportOverrunHint') }}</p>
+      </section>
+
       <UiAlert v-if="props.error" intent="danger" live :message="props.error" />
     </div>
 

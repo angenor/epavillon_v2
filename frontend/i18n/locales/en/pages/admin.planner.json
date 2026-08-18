@@ -136,7 +136,9 @@
     "defaultChannel": "Streamed on {channel}, the edition's default channel.",
     "conflicts": "Overlap for this activity | {count} overlap for this activity | {count} overlaps for this activity",
     "save": "Save",
-    "unplace": "Remove from the calendar"
+    "unplace": "Remove from the calendar",
+    "reportOverrun": "Report an overrun",
+    "reportOverrunHint": "Opens the incident message form, already pointed at this activity."
   },
   "publish": {
     "open": "Publish the programme",

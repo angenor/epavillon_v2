@@ -39,7 +39,10 @@
  *   registrations.ts     67 inscriptions, canaux d'acquisition variés, dont
  *                        sept sur la seule séance du jeu qui se soit tenue
  *   views.ts             les deux vues du modèle, reconstituées
- *   incidents.ts         quatre messages d'incident, dont trois à ne PAS afficher
+ *   incidents.ts         sept messages d'incident : les cinq états que
+ *                        `live.event_incidents()` distingue, les cinq portées
+ *   admin-incidents.ts   ce que l'écran A13 en fait — état, portée, cible
+ *                        résolue, publication et dépublication
  *   analytics.ts         les projections du module Analytique, reconstituées
  *   admin-dashboard.ts   la composition du tableau de bord du back-office (A6)
  *   permissions.ts       le catalogue des permissions et ce que chaque rôle
@@ -183,7 +186,18 @@ export { registrationForms, registrationFormFields } from './registration-form'
 export { registrations } from './registrations'
 export { publicSchedule, proposalDashboard } from './views'
 export { detectConflicts, publicationReadiness } from './conflicts'
-export { incidents, activeIncidentsForEvent } from './incidents'
+export { incidents } from './incidents'
+export {
+  activeIncidentsForEvent,
+  createIncident,
+  eventIncidents,
+  incidentById,
+  incidentListScreen,
+  overrunTemplate,
+  publishIncident,
+  unpublishIncident,
+  updateIncident,
+} from './admin-incidents'
 
 export {
   proposalFunnel,
