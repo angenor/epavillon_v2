@@ -12,7 +12,8 @@
  */
 
 import type { Country, EntityTerm, Locale, Taxonomy, TaxonomyTerm } from '~/types/reference'
-import { COUNTRY, TERM, PROPOSAL, SESSION } from './ids'
+import { COUNTRY, TERM, PROPOSAL, SESSION, TRACK } from './ids'
+import { isoCountriesExcluding } from './countries-iso'
 
 // ---------------------------------------------------------------------------
 // Locales
@@ -47,7 +48,7 @@ export const locales = [
 // l'édition sans être membre de l'OIF — c'est le cas courant d'une COP.
 // ---------------------------------------------------------------------------
 
-export const countries = [
+const curatedCountries = [
   {
     id: COUNTRY.ca,
     iso2: 'CA',
@@ -381,6 +382,24 @@ export const countries = [
   },
 ] satisfies Country[]
 
+/**
+ * LE RÉFÉRENTIEL COMPLET — les dix-huit fiches curées, puis le reste de la norme.
+ *
+ * Les curées PASSENT DEVANT : « République démocratique du Congo » l'emporte sur
+ * le « Congo-Kinshasa » de CLDR, et leur identifiant reste celui de `ids.ts`, vers
+ * lequel pointent les organisations, les personnes et les éditions. Le semis SQL
+ * fait le même arbitrage, par `ON CONFLICT (iso2) DO NOTHING`.
+ *
+ * POURQUOI LA NORME ENTIÈRE. Le sélecteur de pays du back-office (A10) doit
+ * pouvoir désigner l'hôte de n'importe quelle conférence : Bakou pour la COP29,
+ * Dubaï pour la COP28, Belém pour les COP30 et 31. Une liste réduite à l'espace
+ * francophone obligeait à modifier les données avant chaque édition hors zone.
+ */
+export const countries = [
+  ...curatedCountries,
+  ...isoCountriesExcluding(curatedCountries.map((country) => country.iso2)),
+] satisfies Country[]
+
 // ---------------------------------------------------------------------------
 // Taxonomies
 // ---------------------------------------------------------------------------
@@ -544,8 +563,25 @@ export const taxonomyTerms = [
 
 /** Rattache une entité de `programme` à ses thématiques, dans l'ordre affiché. */
 function themesOf(table: 'proposals' | 'sessions', entityId: string, termIds: string[]): EntityTerm[] {
+  return linkTerms('programme', table, entityId, termIds)
+}
+
+/**
+ * Les thématiques d'une JOURNÉE SPÉCIALE — `('event', 'programme_tracks', id)`.
+ *
+ * Le commentaire de `060_events.sql` § 3 bis l'annonce : « Les thématiques d'un
+ * fil passent par reference.entity_terms ('event', 'programme_tracks', <id>) :
+ * aucune table de liaison à maintenir. » Elles manquaient au jeu de données —
+ * l'onglet des journées spéciales du back-office (A10) est le premier écran à les
+ * afficher, et sans elles il aurait laissé croire qu'un fil n'en porte pas.
+ */
+function trackThemes(trackId: string, termIds: string[]): EntityTerm[] {
+  return linkTerms('event', 'programme_tracks', trackId, termIds)
+}
+
+function linkTerms(schema: string, table: string, entityId: string, termIds: string[]): EntityTerm[] {
   return termIds.map((term_id, index) => ({
-    entity_schema: 'programme',
+    entity_schema: schema,
     entity_table: table,
     entity_id: entityId,
     term_id,
@@ -618,4 +654,9 @@ export const entityTerms = [
   ...themesOf('sessions', SESSION.pacoCdn, [TERM.climateAmbitionNdc, TERM.mitigation]),
   ...themesOf('sessions', SESSION.pacoAdaptation, [TERM.adaptation]),
   ...themesOf('sessions', SESSION.pacoBilan, [TERM.climateAmbitionNdc]),
+
+  // Thématiques des journées spéciales — `('event', 'programme_tracks', id)`.
+  ...trackThemes(TRACK.financeDurable, [TERM.climateFinance, TERM.lossAndDamage]),
+  ...trackThemes(TRACK.jeunesseClimat, [TERM.climateAmbitionNdc, TERM.gender]),
+  ...trackThemes(TRACK.genreEtClimat, [TERM.gender, TERM.healthSolidarity]),
 ] satisfies EntityTerm[]

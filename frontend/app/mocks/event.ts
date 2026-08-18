@@ -113,6 +113,11 @@ export const events = [
     country_id: COUNTRY.br,
     city: 'Belém',
     address: 'Parc des expositions du Hangar, avenida Doutor Freitas, Belém, Pará',
+    // POINT RELEVÉ SUR PLACE, et non géocodé depuis l'adresse : le parc des
+    // expositions couvre plusieurs hectares, et son adresse postale place un
+    // marqueur loin du pavillon.
+    latitude: -1.455833,
+    longitude: -48.503889,
     has_pavilion: true,
     // Première version du programme rendue publique ; elle s'enrichit au fil des
     // décisions du comité.
@@ -155,6 +160,8 @@ export const events = [
     country_id: COUNTRY.br,
     city: 'Belém',
     address: 'Parc du Hangar, avenida Doutor Freitas, Belém, Pará',
+    latitude: null,
+    longitude: null,
     has_pavilion: true,
     programme_published_at: '2025-10-06T14:00:00Z',
     highlights: null,
@@ -187,6 +194,8 @@ export const events = [
     country_id: COUNTRY.az,
     city: 'Bakou',
     address: 'Stade olympique de Bakou, zone bleue',
+    latitude: null,
+    longitude: null,
     has_pavilion: true,
     programme_published_at: '2024-10-14T12:00:00Z',
     highlights: null,
@@ -226,6 +235,8 @@ export const events = [
     country_id: null,
     city: null,
     address: null,
+    latitude: null,
+    longitude: null,
     has_pavilion: false,
     programme_published_at: '2026-01-20T15:00:00Z',
     highlights: {
@@ -270,6 +281,8 @@ export const events = [
     country_id: null,
     city: null,
     address: null,
+    latitude: null,
+    longitude: null,
     has_pavilion: false,
     programme_published_at: null,
     highlights: null,

@@ -27,6 +27,20 @@ import type { Uuid } from '~/types/shared'
 const uuid = (family: string, n: number): Uuid =>
   `0198c1a0-0000-${family}-8000-${String(n).padStart(12, '0')}`
 
+/**
+ * Le même composeur, pour les entités CRÉÉES À L'EXÉCUTION par un écran de
+ * gestion (A10 : une salle ajoutée, un fil créé, un canal ouvert).
+ *
+ * Ce ne sont pas des données de jeu : elles n'existent que le temps de la session
+ * du navigateur, et leur clé ne peut donc pas être déclarée dans ce fichier.
+ * Elles restent malgré tout composées ICI, par la même fonction, pour deux
+ * raisons : la forme reste conforme à `platform.uuid_v7()`, et aucun autre
+ * fichier de `app/mocks/` n'écrit d'identifiant en clair — la règle du projet
+ * tient toujours. Par convention, les numéros d'ordre partent de 900, au-delà de
+ * tout ce que les jeux de données déclarent.
+ */
+export const mockUuid = uuid
+
 // ---------------------------------------------------------------------------
 // Référentiel — 020_reference.sql
 // ---------------------------------------------------------------------------

@@ -1,0 +1,87 @@
+{
+  "title": "Événements",
+  "subtitle": "Les éditions de la plateforme, leurs dates, leur appel à propositions et l'état de leur programmation.",
+  "create": "Nouvelle édition",
+  "forbidden": {
+    "scope": "gestionnaire d'événements"
+  },
+  "empty": {
+    "title": "Aucune édition",
+    "description": "Aucune édition ne relève de votre périmètre d'administration."
+  },
+  "noResults": {
+    "title": "Aucune édition ne correspond",
+    "description": "Les filtres écartent les {total} éditions du périmètre.",
+    "action": "Retirer les filtres"
+  },
+  "caption": "Éditions, triées par {column}",
+  "columns": {
+    "title": "Édition",
+    "series": "Série",
+    "edition_year": "Année",
+    "starts_at": "Dates",
+    "location": "Lieu",
+    "status": "Statut",
+    "proposal_count": "Propositions",
+    "programme": "Programmation"
+  },
+  "cell": {
+    "noSeries": "Hors série",
+    "online": "En ligne",
+    "noPavilion": "Sans pavillon",
+    "pavilion": "Pavillon tenu",
+    "noCall": "Aucun appel",
+    "callDeadline": "Échéance le {date}",
+    "sessions": "{scheduled} sur {total} activités placées",
+    "days": "{count} jour | {count} jour | {count} jours"
+  },
+  "programme": {
+    "published": "Publiée le {date}",
+    "unpublished": "Non publiée"
+  },
+  "status": {
+    "draft": "Brouillon",
+    "announced": "Annoncée",
+    "ongoing": "En cours",
+    "completed": "Terminée",
+    "cancelled": "Annulée",
+    "suspended": "Suspendue"
+  },
+  "seriesKind": {
+    "cop_climate": "COP climat",
+    "cop_biodiversity": "COP biodiversité",
+    "cop_desertification": "COP désertification",
+    "un_conference": "Conférence onusienne",
+    "webinar_series": "Cycle de webinaires",
+    "standalone": "Rendez-vous ponctuel",
+    "other": "Autre"
+  },
+  "callStatus": {
+    "draft": "Appel en préparation",
+    "open": "Appel ouvert",
+    "closed": "Appel clos",
+    "under_review": "En évaluation",
+    "published": "Résultats publiés",
+    "cancelled": "Appel annulé"
+  },
+  "filters": {
+    "legend": "Filtrer les éditions",
+    "search": "Titre, sigle, ville",
+    "series": "Série",
+    "years": "Année",
+    "statuses": "Statut",
+    "pavilion": "Pavillon",
+    "pavilionAny": "Sans importance",
+    "pavilionYes": "Pavillon tenu",
+    "pavilionNo": "Sans pavillon",
+    "published": "Programmation",
+    "publishedAny": "Sans importance",
+    "publishedYes": "Publiée",
+    "publishedNo": "Non publiée",
+    "shown": "{shown} éditions sur {total}",
+    "seriesOption": "{name} — {count} édition | {name} — {count} édition | {name} — {count} éditions"
+  },
+  "restricted": {
+    "notice": "Vous administrez une seule édition ; elle est ouverte directement."
+  }
+}

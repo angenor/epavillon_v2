@@ -27,8 +27,9 @@
  *
  * DÉCOUPAGE. Un écran dont les appels dépassent la centaine de lignes sort dans
  * `composables/api/`, monté ici par une fabrique qui reçoit `call` et `send` —
- * c'est le cas de la fiche d'évaluation (`review`) et du planificateur
- * (`planner`, qui reçoit en plus `assertEventInScope`). Rien ne change pour les
+ * c'est le cas de la fiche d'évaluation (`review`), du planificateur
+ * (`planner`) et de la gestion des événements (`adminEvents`) — ces deux derniers
+ * recevant en plus `assertEventInScope`. Rien ne change pour les
  * pages : elles appellent toujours `useApi()`, et la bascule vers l'API réelle,
  * la latence simulée et l'en-tête `Accept-Language` valent aussi là-bas. Ce
  * découpage suit la règle du projet — par ÉCRAN — et tient ce fichier sous le
@@ -83,6 +84,7 @@ import type {
 import type { Uuid } from '~/types/shared'
 import { createProposalReviewApi } from './api/proposal-review'
 import { createPlannerApi } from './api/planner'
+import { createAdminEventsApi } from './api/admin-events'
 
 /** Erreur d'accès, à traduire par l'écran « accès refusé ». */
 export class ForbiddenError extends Error {
@@ -802,6 +804,25 @@ export function useApi() {
     // publication du programme.
     // -----------------------------------------------------------------------
     planner: createPlannerApi({ call, send, assertEventInScope }),
+
+    // -----------------------------------------------------------------------
+    // Gestion des événements (A10)
+    //
+    // Sorti dans `composables/api/admin-events.ts` — la liste des éditions, le
+    // formulaire d'une édition et les six onglets, avec leurs quinze écritures.
+    //
+    // À DISTINGUER DE `events` PLUS HAUT, qui porte les lectures PUBLIQUES d'une
+    // édition (page publique, sélecteur d'année, bannière) et ne prend aucun
+    // périmètre — une édition annoncée est publique. Ici, tout prend le périmètre
+    // d'administration et refuse une édition qui n'y est pas.
+    //
+    // ET CONTRAIREMENT AU PLANIFICATEUR, ces écritures REFUSENT : les contraintes
+    // de `060_events.sql` sont des invariants de données, pas des arbitrages. Un
+    // slug en double, une clôture avant l'ouverture, un second appel sur une même
+    // édition sont refusés en base et le sont ici — rien à voir avec un
+    // chevauchement de créneaux, qui reste toujours écrivable.
+    // -----------------------------------------------------------------------
+    adminEvents: createAdminEventsApi({ call, send, assertEventInScope }),
 
     // -----------------------------------------------------------------------
     // Espace organisation (A5)

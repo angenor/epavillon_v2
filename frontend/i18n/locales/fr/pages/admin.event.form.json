@@ -1,0 +1,99 @@
+{
+  "createTitle": "Nouvelle édition",
+  "createSubtitle": "Une édition se rattache à une série, porte son année et sa période. Le calendrier des journées est généré depuis les dates.",
+  "editTitle": "Modifier l'édition",
+  "sections": {
+    "identity": {
+      "legend": "Identité",
+      "hint": "La série porte l'identité durable du rendez-vous ; l'édition porte l'occurrence."
+    },
+    "content": {
+      "legend": "Présentation",
+      "hint": "Ces textes s'affichent sur la page publique de l'édition."
+    },
+    "period": {
+      "legend": "Période et fuseau",
+      "hint": "Les heures sont saisies dans le fuseau de l'édition et converties à l'affichage. Toute date montrée au public porte son fuseau."
+    },
+    "location": {
+      "legend": "Lieu",
+      "hint": "Le pays et la ville sont obligatoires dès que l'édition n'est pas entièrement en ligne."
+    },
+    "pavilion": {
+      "legend": "Pavillon",
+      "hint": "Sans pavillon, l'IFDD n'envoie qu'un représentant et n'ouvre aucun appel à propositions."
+    },
+    "visuals": {
+      "legend": "Visuels",
+      "hint": "La bannière habille la page publique. Elle est rattachée à l'édition, elle n'est pas une colonne de la table."
+    }
+  },
+  "fields": {
+    "series": "Série de rattachement",
+    "seriesHint": "Laisser vide pour un rendez-vous ponctuel, hors série.",
+    "seriesNone": "Hors série",
+    "editionLabel": "Libellé de l'édition",
+    "editionLabelHint": "Le nom de l'édition dans sa série : « COP31 », « Session 7 ».",
+    "editionYear": "Année",
+    "title": "Titre",
+    "acronym": "Sigle",
+    "acronymHint": "Préfixe des numéros de dossier communiqués aux organisations : « COP31-00147 ».",
+    "slug": "Identifiant d'adresse",
+    "slugHint": "Ce qui apparaît dans l'URL publique. Unique sur toute la plateforme.",
+    "description": "Description",
+    "highlights": "Message d'accueil",
+    "highlightsHint": "Consignes d'accès, horaires d'ouverture, conditions de badge.",
+    "status": "Statut",
+    "participationMode": "Mode de participation",
+    "timezone": "Fuseau de référence",
+    "timezoneHint": "Toutes les heures de l'édition sont converties depuis ce fuseau.",
+    "startsAt": "Début",
+    "endsAt": "Fin",
+    "country": "Pays",
+    "countryNone": "Non renseigné",
+    "city": "Ville",
+    "address": "Adresse",
+    "hasPavilion": "L'OIF tient un pavillon sur cette édition",
+    "banner": "Bannière",
+    "bannerReplace": "Remplacer la bannière",
+    "bannerNone": "Aucune bannière rattachée",
+    "slugAuto": "Composé depuis le libellé. Modifiable : dès que vous y touchez, il cesse de suivre.",
+    "slugReset": "Reprendre la proposition automatique",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "coordinatesHint": "Point relevé sur place, en degrés décimaux. Facultatif — mais les deux ensemble ou aucun.",
+    "coordinatesCheck": "Vérifier le point sur un plan"
+  },
+  "mode": {
+    "online": "En ligne",
+    "in_person": "Sur place",
+    "hybrid": "Hybride"
+  },
+  "localeTab": {
+    "fr": "Français",
+    "en": "Anglais",
+    "missing": "Traduction absente : le français sera affiché."
+  },
+  "errors": {
+    "title": "L'édition n'a pas pu être enregistrée",
+    "period": "La date de fin doit suivre la date de début.",
+    "physical_location": "Une édition qui n'est pas entièrement en ligne exige un pays et une ville.",
+    "slug_taken": "Cet identifiant d'adresse est déjà pris par une autre édition.",
+    "edition_taken": "Cette série porte déjà une édition avec cette année et ce libellé.",
+    "year_range": "L'année doit être comprise entre 2000 et 2100.",
+    "required": "Ce champ est obligatoire.",
+    "coordinates": "Latitude et longitude vont ensemble, et chacune dans ses bornes : −90 à 90, −180 à 180."
+  },
+  "saved": {
+    "created": "Édition créée. {days} jours de calendrier ont été générés.",
+    "updated": "Édition enregistrée.",
+    "daysAdded": "{count} jour a été ajouté au calendrier. | {count} jour a été ajouté au calendrier. | {count} jours ont été ajoutés au calendrier.",
+    "daysOutside": "Des jours du calendrier sortent désormais de la période. L'onglet des journées permet de les retirer."
+  },
+  "actions": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "backToList": "Retour à la liste"
+  },
+  "uploadNotice": "Le téléversement des visuels sera raccordé au module Média : la bannière se rattache par identifiant d'objet."
+}

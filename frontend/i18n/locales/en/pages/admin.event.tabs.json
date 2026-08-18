@@ -1,0 +1,373 @@
+{
+  "label": "Edition tabs",
+  "days": "Days",
+  "tracks": "Special days",
+  "venues": "Venues and rooms",
+  "channels": "Broadcasting",
+  "call": "Call for proposals",
+  "committee": "Selection committee",
+  "detachedNotice": "{count} activity lost its link; it remains scheduled. | {count} activity lost its link; it remains scheduled. | {count} activities lost their link; they remain scheduled.",
+  "confirm": {
+    "cancel": "Cancel",
+    "confirm": "Confirm"
+  },
+  "daysTab": {
+    "title": "Calendar days",
+    "intro": "One row per day of the period, generated from the edition's dates. The title, colour and day page are editorial: regeneration does not overwrite them.",
+    "generate": "Generate missing days",
+    "plan": {
+      "title": "What generation will do",
+      "create": "No day to create | {count} day to create | {count} days to create",
+      "unchanged": "{count} day already in place | {count} day already in place | {count} days already in place",
+      "outside": "{count} day falls outside the period | {count} day falls outside the period | {count} days fall outside the period",
+      "outsideDetail": "{date} — {count} scheduled activity | {date} — {count} scheduled activity | {date} — {count} scheduled activities",
+      "removeOutside": "Remove days outside the period",
+      "removeWarning": "Activities on those days are not deleted: they lose their link to the day and keep their time slot.",
+      "longPeriod": {
+        "title": "{count} day to create: the period is unusually long | {count} day to create: the period is unusually long | {count} days to create: the period is unusually long",
+        "description": "A conference calendar holds about a dozen days. A period of several months — a webinar series, for instance — would produce as many empty days. Check the edition's dates before confirming."
+      }
+    },
+    "columns": {
+      "date": "Date",
+      "title": "Title",
+      "slug": "Page",
+      "sessions": "Activities",
+      "actions": "Actions"
+    },
+    "outsideBadge": "Outside period",
+    "featuredBadge": "Notable day",
+    "noTitle": "Untitled",
+    "noSlug": "No dedicated page",
+    "empty": {
+      "title": "No day",
+      "description": "Generate the calendar from the edition's dates."
+    },
+    "edit": {
+      "title": "Day of {date}",
+      "titleField": "Day title",
+      "slugField": "Page identifier",
+      "slugHint": "Opens the public address /programmation/{event}/{slug}. Optional.",
+      "descriptionField": "Description",
+      "featured": "Notable day (opening, closing, high-level segment)",
+      "color": "Colour",
+      "colorNone": "No colour"
+    },
+    "errors": {
+      "slug_taken": "This page identifier is already used by another day.",
+      "not_found": "This day no longer exists."
+    }
+  },
+  "tracksTab": {
+    "title": "Special days and thematic tracks",
+    "intro": "A track is composed BY HAND from the selected activities: its composition happens in the planner, not here. The announced period is indicative — it links no activity.",
+    "add": "New track",
+    "kind": {
+      "special_day": "Thematic day",
+      "thematic_track": "Cross-cutting track",
+      "side_programme": "Side programme"
+    },
+    "composition": "No activity linked | {count} activity linked | {count} activities linked",
+    "compositionHint": "Composed in the planner",
+    "openPlanner": "Compose in the planner",
+    "published": "Public page opened on {date}",
+    "unpublished": "Public page closed",
+    "curator": "Curator: {name}",
+    "curatorNone": "No curator assigned",
+    "periodIndicative": "Indicative period: {range}",
+    "periodNone": "No announced period",
+    "empty": {
+      "title": "No thematic track",
+      "description": "Create a special day to group activities around a theme."
+    },
+    "form": {
+      "createTitle": "New thematic track",
+      "editTitle": "Edit track",
+      "code": "Code",
+      "codeHint": "Stable lowercase identifier: finance_durable.",
+      "slug": "URL identifier",
+      "slugHint": "Opens the public page of the track.",
+      "kindField": "Kind of track",
+      "titleField": "Title",
+      "subtitleField": "Subtitle",
+      "descriptionField": "Description",
+      "startsOn": "Announced start",
+      "endsOn": "Announced end",
+      "periodHint": "Purely indicative: an activity outside this range can still be linked to the track.",
+      "color": "Colour",
+      "curatedBy": "Curator",
+      "curatedByNone": "None",
+      "publish": "Open the public page of the track"
+    },
+    "remove": {
+      "action": "Delete track",
+      "title": "Delete this thematic track?",
+      "description": "Activities remain scheduled, but their link to the track is lost permanently.",
+      "withSessions": "This track groups {count} activity: the composition will be lost. | This track groups {count} activity: the composition will be lost. | This track groups {count} activities: the composition will be lost."
+    },
+    "errors": {
+      "required": "Title, code and URL identifier are required.",
+      "period": "The announced end must follow the start.",
+      "code_taken": "This code is already used by another track of this edition.",
+      "slug_taken": "This URL identifier is already used by another track of this edition.",
+      "not_found": "This track no longer exists."
+    }
+  },
+  "venuesTab": {
+    "title": "Venues and rooms",
+    "intro": "Rooms give conflicts a subject: without them, the planner can only report \"two activities at 2 p.m.\" instead of \"the stand is booked twice\".",
+    "addVenue": "New venue",
+    "addRoom": "New room",
+    "kind": {
+      "pavilion": "Francophonie pavilion",
+      "partner": "Partner space",
+      "plenary": "Plenary",
+      "virtual": "Online room",
+      "other": "Other"
+    },
+    "virtualBadge": "Virtual",
+    "streamingBadge": "Streaming equipped",
+    "capacity": "{count} seat | {count} seat | {count} seats",
+    "capacityNone": "Capacity not set",
+    "sessions": "No activity scheduled | {count} activity scheduled | {count} activities scheduled",
+    "equipmentNone": "No equipment declared",
+    "map": "View on map",
+    "virtualExplain": "A virtual room accepts simultaneous activities: no double booking is reported there.",
+    "physicalExplain": "A physical room hosts one activity at a time; an overlap is reported at high severity.",
+    "empty": {
+      "title": "No venue",
+      "description": "Declare the pavilion, then its rooms."
+    },
+    "noRooms": "No room in this venue.",
+    "venueForm": {
+      "createTitle": "New venue",
+      "editTitle": "Edit venue",
+      "nameField": "Name",
+      "kindField": "Kind of venue",
+      "addressField": "Address",
+      "mapUrlField": "Map link"
+    },
+    "roomForm": {
+      "createTitle": "New room",
+      "editTitle": "Edit room",
+      "nameField": "Name",
+      "codeField": "Code",
+      "codeHint": "Short and unique within the venue: STAND, ATELIER.",
+      "capacityField": "Capacity",
+      "isVirtual": "Virtual room",
+      "isVirtualHint": "Tick only for a room with no physical existence: double-booking detection is disabled there.",
+      "hasStreaming": "Streaming equipped",
+      "equipmentField": "Equipment",
+      "equipmentHint": "One item per line."
+    },
+    "removeVenue": {
+      "action": "Delete venue",
+      "title": "Delete this venue?",
+      "description": "Its rooms are deleted with it. Activities scheduled there return to the planner's side panel.",
+      "withSessions": "{count} activity will lose its room. | {count} activity will lose its room. | {count} activities will lose their room."
+    },
+    "removeRoom": {
+      "action": "Delete room",
+      "title": "Delete this room?",
+      "description": "Activities scheduled there return to the planner's side panel: they are not deleted.",
+      "withSessions": "{count} activity will lose its room. | {count} activity will lose its room. | {count} activities will lose their room."
+    },
+    "errors": {
+      "required": "Name and code are required.",
+      "code_taken": "This code is already used by another room in this venue.",
+      "capacity": "Capacity must be a positive number.",
+      "not_found": "This item no longer exists."
+    }
+  },
+  "channelsTab": {
+    "title": "Broadcast channels",
+    "intro": "IFDD never streams two activities live at the same time: one technical team, one feed. The channel is therefore a bookable resource, just like a room.",
+    "add": "New channel",
+    "defaultBadge": "Default channel",
+    "inactiveBadge": "Inactive",
+    "platformBadge": "Platform channel",
+    "platformHint": "This channel does not belong to this edition and cannot be edited from here.",
+    "provider": {
+      "youtube": "YouTube",
+      "vimeo": "Vimeo",
+      "facebook": "Facebook",
+      "linkedin": "LinkedIn",
+      "dailymotion": "Dailymotion",
+      "custom": "Other provider"
+    },
+    "sessions": "No activity streamed | {count} activity streamed | {count} activities streamed",
+    "noDefault": {
+      "title": "No default channel",
+      "description": "Without a default channel, an activity marked as streamed occupies no channel and escapes the single-live rule."
+    },
+    "empty": {
+      "title": "No channel",
+      "description": "Declare the channel on which this edition's activities will be streamed."
+    },
+    "form": {
+      "createTitle": "New channel",
+      "editTitle": "Edit channel",
+      "codeField": "Code",
+      "nameField": "Name",
+      "providerField": "Provider",
+      "channelRefField": "Broadcasting account",
+      "channelRefHint": "Starting point for automatic live detection: @ifddoif.",
+      "localeField": "Broadcast language",
+      "localeNone": "Not specified",
+      "isDefault": "Channel used by default for any streamed activity",
+      "isDefaultHint": "One default channel per edition. Setting it here removes it from the previous one.",
+      "isActive": "Active channel"
+    },
+    "remove": {
+      "action": "Remove channel",
+      "title": "Remove this channel?",
+      "description": "A channel that has already been used is deactivated rather than deleted: past activities keep the record of their broadcast.",
+      "willDeactivate": "{count} activity was streamed on this channel: it will be deactivated, not deleted. | {count} activity was streamed on this channel: it will be deactivated, not deleted. | {count} activities were streamed on this channel: it will be deactivated, not deleted."
+    },
+    "deactivated": "The channel was deactivated rather than deleted: it had already been used.",
+    "errors": {
+      "required": "Name and code are required.",
+      "code_taken": "This code is already used by another channel of this edition.",
+      "platform_channel": "A platform channel cannot be edited from an edition.",
+      "not_found": "This channel no longer exists."
+    }
+  },
+  "callTab": {
+    "title": "Call for proposals",
+    "intro": "An edition opens ONLY ONE call — none if there is no pavilion. The criteria grid is saved with the call: a call without criteria could evaluate no proposal.",
+    "create": "Open a call for proposals",
+    "edit": "Edit call",
+    "noPavilion": {
+      "title": "This edition holds no pavilion",
+      "description": "Without a pavilion, IFDD opens no call for proposals. Tick \"pavilion held\" on the edition if this is an oversight."
+    },
+    "empty": {
+      "title": "No call for proposals",
+      "description": "The edition holds a pavilion: open its call to receive proposals."
+    },
+    "summary": {
+      "window": "Open from {open} to {close}",
+      "extended": "Extended until {date}",
+      "originalDeadline": "Originally announced deadline: {date}",
+      "isOpen": "Currently accepting proposals",
+      "isClosed": "Submissions closed",
+      "results": "Results announced for {date}",
+      "proposals": "No proposal submitted | {count} proposal submitted | {count} proposals submitted",
+      "maxScore": "Maximum achievable score: {score}",
+      "reviews": "{count} independent review required | {count} independent review required | {count} independent reviews required",
+      "blind": "Blind review",
+      "notBlind": "Peer scores visible",
+      "perOrganization": "At most {count} proposal per organization | At most {count} proposal per organization | At most {count} proposals per organization",
+      "perOrganizationNone": "No cap per organization",
+      "verifiedOnly": "Restricted to verified organizations",
+      "duration": "Duration from {min} to {max} min, {default} min by default",
+      "dailyWindow": "Pavilion open from {start} to {end}, {zone} time",
+      "speakers": "From {min} to {max} speakers",
+      "guidelines": "Submission guidelines"
+    },
+    "form": {
+      "createTitle": "Open a call for proposals",
+      "editTitle": "Edit call",
+      "sections": {
+        "identity": "Call identity",
+        "window": "Submission window",
+        "eligibility": "Eligibility",
+        "duration": "Duration and daily window",
+        "review": "Review",
+        "criteria": "Weighted criteria grid"
+      },
+      "codeField": "Code",
+      "titleField": "Title",
+      "descriptionField": "Description",
+      "statusField": "Status",
+      "opensAt": "Opening",
+      "closesAt": "Closing",
+      "extendedUntil": "Extension",
+      "extendedHint": "The originally announced deadline stays readable beside it: that is what was communicated to organizations.",
+      "resultsExpectedAt": "Results announced for",
+      "maxPerOrganization": "Cap per organization",
+      "maxPerOrganizationHint": "Leave empty for no cap.",
+      "requiresVerified": "Restrict submission to verified organizations",
+      "minSpeakers": "Minimum speakers",
+      "maxSpeakers": "Maximum speakers",
+      "defaultDuration": "Default proposed duration",
+      "minDuration": "Minimum duration",
+      "maxDuration": "Maximum duration",
+      "durationHint": "These bounds belong to the CAMPAIGN: a COP pavilion runs one-hour sessions, a webinar series may want three-hour ones.",
+      "dailyStart": "Pavilion opening",
+      "dailyEnd": "Pavilion closing",
+      "dailyHint": "In local time of the edition. A proposal must END before closing — start plus duration included.",
+      "allowedFormats": "Accepted formats",
+      "requiredReviews": "Reviews required before decision",
+      "blindReview": "Blind review",
+      "blindReviewHint": "A committee member sees peer scores only after submitting their own. Protects against anchoring.",
+      "guidelinesUrl": "Link to submission guidelines"
+    },
+    "criteria": {
+      "columns": {
+        "label": "Criterion",
+        "code": "Code",
+        "maxScore": "Max score",
+        "weight": "Weight",
+        "knockout": "Knockout",
+        "actions": "Actions"
+      },
+      "add": "Add a criterion",
+      "loadDefault": "Load the default grid",
+      "remove": "Remove",
+      "knockoutHint": "A zero score on a knockout criterion disqualifies the proposal, whatever the average.",
+      "maxWeighted": "Maximum achievable score: {score}",
+      "scored": "{count} score already recorded | {count} score already recorded | {count} scores already recorded",
+      "scoredWarning": "This criterion has already been scored: removing the row or changing its scale will shift averages.",
+      "empty": "No criterion: the call could evaluate no proposal."
+    },
+    "errors": {
+      "title": "The call could not be saved",
+      "window": "Closing must follow opening.",
+      "extension": "The extension must go beyond the announced closing.",
+      "speakers": "The maximum number of speakers must reach the minimum.",
+      "duration_bounds": "Duration bounds are inconsistent, or the default duration falls outside them.",
+      "daily_window": "Pavilion closing must follow its opening.",
+      "already_exists": "This edition already has a call for proposals. An edition opens only one.",
+      "code_taken": "This code is already used by another call of this edition.",
+      "criteria_empty": "The grid must have at least one criterion.",
+      "criterion_code_duplicate": "Two criteria share the same code.",
+      "required": "This field is required."
+    },
+    "scoresAffected": "The scale changed while scores exist: proposal averages and ranking will be recomputed."
+  },
+  "committeeTab": {
+    "title": "Selection committee",
+    "intro": "This list says WHO SITS, not who is allowed in: authorization remains carried by roles assigned on the edition. Adding someone here does not open the proposals to them.",
+    "noCall": {
+      "title": "No call for proposals",
+      "description": "The selection committee is composed on a call. Open this edition's call first."
+    },
+    "columns": {
+      "member": "Member",
+      "lead": "Chair",
+      "cap": "Workload cap",
+      "load": "Current load",
+      "actions": "Actions"
+    },
+    "lead": "Committee chair",
+    "capNone": "Not set",
+    "capHint": "Indicative cap of proposals given to this member. Empty means \"no cap\", not \"no proposal\".",
+    "load": "{assigned} assigned · {submitted} reviewed",
+    "overCap": "Load beyond the declared cap.",
+    "missingPermission": "Does not hold the right to review on this edition: assigned proposals will stay closed to them.",
+    "add": "Call to committee",
+    "addTitle": "Call someone to the committee",
+    "addField": "Person",
+    "addHint": "Only people holding the right to review, globally or on this edition, are offered.",
+    "noCandidates": "Everyone entitled to review already sits on the committee.",
+    "remove": "Remove from committee",
+    "empty": {
+      "title": "No member",
+      "description": "Call to the committee the people who will evaluate this call's proposals."
+    },
+    "unsaved": "Unsaved changes.",
+    "removedWithAssignments": "These members still carried proposals: {names}. Their submitted reviews stay on file, the rest must be reassigned.",
+    "saved": "Committee composition saved."
+  }
+}

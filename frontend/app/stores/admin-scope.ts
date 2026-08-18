@@ -131,6 +131,20 @@ export const useAdminScopeStore = defineStore('admin-scope', () => {
     }
   }
 
+  /**
+   * Recharge le périmètre, même s'il l'a déjà été.
+   *
+   * `ensureLoaded()` est idempotent par personne — c'est ce qui évite au layout et
+   * à chaque écran de se coordonner. Mais une édition CRÉÉE au back-office (A10)
+   * entre dans le périmètre : sans ce forçage, le sélecteur de la tête de page
+   * ignorerait l'édition qu'on vient de créer jusqu'au prochain rechargement
+   * complet de l'application.
+   */
+  async function reload(): Promise<void> {
+    loadedFor.value = null
+    await ensureLoaded()
+  }
+
   return {
     events,
     scope,
@@ -142,6 +156,7 @@ export const useAdminScopeStore = defineStore('admin-scope', () => {
     isLoading,
     loadError,
     ensureLoaded,
+    reload,
     setEvents,
     selectEvent,
   }

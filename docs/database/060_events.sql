@@ -105,6 +105,15 @@ CREATE TABLE event.events (
     country_id         uuid        REFERENCES reference.countries(id) ON DELETE SET NULL,
     city               text,
     address            text,
+    -- COORDONNÉES DU LIEU, facultatives et indépendantes de l'adresse.
+    -- Une adresse de parc des expositions ne se géocode pas toujours : « Parc du
+    -- Hangar, avenida Doutor Freitas » place un marqueur à deux kilomètres du
+    -- pavillon. L'équipe relève donc le point sur place et le saisit. Deux
+    -- colonnes numériques plutôt qu'un type géométrique : PostGIS n'est pas une
+    -- dépendance du projet, et rien ici ne demande de calcul spatial — seulement
+    -- d'ouvrir un plan à la bonne épingle.
+    latitude           numeric(9,6) CHECK (latitude  IS NULL OR latitude  BETWEEN -90  AND 90),
+    longitude          numeric(9,6) CHECK (longitude IS NULL OR longitude BETWEEN -180 AND 180),
 
     -- L'OIF tient-elle un stand/pavillon sur cette édition ? Détermine, côté
     -- métier, s'il y a lieu d'ouvrir un appel à propositions.
@@ -123,6 +132,10 @@ CREATE TABLE event.events (
     updated_at         timestamptz NOT NULL DEFAULT now(),
 
     CONSTRAINT ck_events_period CHECK (ends_at > starts_at),
+    -- Un point se donne EN ENTIER ou pas du tout : une latitude sans longitude ne
+    -- désigne rien, et laisserait une carte s'ouvrir sur le méridien de Greenwich.
+    CONSTRAINT ck_events_coordinates
+        CHECK ((latitude IS NULL) = (longitude IS NULL)),
     CONSTRAINT ck_events_physical_location
         CHECK (participation_mode = 'online' OR (country_id IS NOT NULL AND city IS NOT NULL)),
     CONSTRAINT ux_events_slug UNIQUE (slug),
@@ -146,6 +159,8 @@ COMMENT ON COLUMN event.events.has_pavilion IS
     'Vrai si l''OIF tient un stand sur cette édition. Sans pavillon, l''IFDD envoie un représentant et n''ouvre pas d''appel.';
 COMMENT ON COLUMN event.events.timezone IS
     'Fuseau de référence. Les horaires sont stockés en timestamptz et convertis à l''affichage — jamais l''inverse.';
+COMMENT ON COLUMN event.events.latitude IS
+    'Point relevé du lieu, facultatif. Sert à ouvrir un plan ; aucun calcul spatial n''en dépend, d''où deux numeric plutôt que PostGIS.';
 
 -- -----------------------------------------------------------------------------
 -- 3. Journées du calendrier et JOURNÉES SPÉCIALES

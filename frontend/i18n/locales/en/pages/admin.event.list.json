@@ -1,0 +1,87 @@
+{
+  "title": "Events",
+  "subtitle": "Platform editions, their dates, their call for proposals and the state of their programme.",
+  "create": "New edition",
+  "forbidden": {
+    "scope": "event manager"
+  },
+  "empty": {
+    "title": "No edition",
+    "description": "No edition falls within your administration scope."
+  },
+  "noResults": {
+    "title": "No matching edition",
+    "description": "Filters exclude all {total} editions in scope.",
+    "action": "Clear filters"
+  },
+  "caption": "Editions, sorted by {column}",
+  "columns": {
+    "title": "Edition",
+    "series": "Series",
+    "edition_year": "Year",
+    "starts_at": "Dates",
+    "location": "Location",
+    "status": "Status",
+    "proposal_count": "Proposals",
+    "programme": "Programme"
+  },
+  "cell": {
+    "noSeries": "Standalone",
+    "online": "Online",
+    "noPavilion": "No pavilion",
+    "pavilion": "Pavilion held",
+    "noCall": "No call",
+    "callDeadline": "Deadline {date}",
+    "sessions": "{scheduled} of {total} activities scheduled",
+    "days": "{count} day | {count} day | {count} days"
+  },
+  "programme": {
+    "published": "Published on {date}",
+    "unpublished": "Not published"
+  },
+  "status": {
+    "draft": "Draft",
+    "announced": "Announced",
+    "ongoing": "Ongoing",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "suspended": "Suspended"
+  },
+  "seriesKind": {
+    "cop_climate": "Climate COP",
+    "cop_biodiversity": "Biodiversity COP",
+    "cop_desertification": "Desertification COP",
+    "un_conference": "UN conference",
+    "webinar_series": "Webinar series",
+    "standalone": "One-off event",
+    "other": "Other"
+  },
+  "callStatus": {
+    "draft": "Call in preparation",
+    "open": "Call open",
+    "closed": "Call closed",
+    "under_review": "Under review",
+    "published": "Results published",
+    "cancelled": "Call cancelled"
+  },
+  "filters": {
+    "legend": "Filter editions",
+    "search": "Title, acronym, city",
+    "series": "Series",
+    "years": "Year",
+    "statuses": "Status",
+    "pavilion": "Pavilion",
+    "pavilionAny": "Any",
+    "pavilionYes": "Pavilion held",
+    "pavilionNo": "No pavilion",
+    "published": "Programme",
+    "publishedAny": "Any",
+    "publishedYes": "Published",
+    "publishedNo": "Not published",
+    "shown": "{shown} of {total} editions",
+    "seriesOption": "{name} — {count} edition | {name} — {count} edition | {name} — {count} editions"
+  },
+  "restricted": {
+    "notice": "You administer a single edition; it opens directly."
+  }
+}

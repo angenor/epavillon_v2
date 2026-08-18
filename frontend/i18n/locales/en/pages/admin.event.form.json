@@ -1,0 +1,99 @@
+{
+  "createTitle": "New edition",
+  "createSubtitle": "An edition belongs to a series, carries its year and its period. The calendar of days is generated from the dates.",
+  "editTitle": "Edit edition",
+  "sections": {
+    "identity": {
+      "legend": "Identity",
+      "hint": "The series carries the lasting identity of the event; the edition carries the occurrence."
+    },
+    "content": {
+      "legend": "Presentation",
+      "hint": "These texts appear on the public page of the edition."
+    },
+    "period": {
+      "legend": "Period and time zone",
+      "hint": "Times are entered in the edition's time zone and converted on display. Every date shown publicly carries its zone."
+    },
+    "location": {
+      "legend": "Location",
+      "hint": "Country and city are required as soon as the edition is not entirely online."
+    },
+    "pavilion": {
+      "legend": "Pavilion",
+      "hint": "Without a pavilion, IFDD sends a representative only and opens no call for proposals."
+    },
+    "visuals": {
+      "legend": "Visuals",
+      "hint": "The banner dresses the public page. It is attached to the edition; it is not a column of the table."
+    }
+  },
+  "fields": {
+    "series": "Series",
+    "seriesHint": "Leave empty for a one-off event, outside any series.",
+    "seriesNone": "Standalone",
+    "editionLabel": "Edition label",
+    "editionLabelHint": "The name of the edition within its series: \"COP31\", \"Session 7\".",
+    "editionYear": "Year",
+    "title": "Title",
+    "acronym": "Acronym",
+    "acronymHint": "Prefix of the reference codes given to organizations: \"COP31-00147\".",
+    "slug": "URL identifier",
+    "slugHint": "What appears in the public URL. Unique across the whole platform.",
+    "description": "Description",
+    "highlights": "Welcome message",
+    "highlightsHint": "Access instructions, opening hours, badge requirements.",
+    "status": "Status",
+    "participationMode": "Participation mode",
+    "timezone": "Reference time zone",
+    "timezoneHint": "All times of the edition are converted from this zone.",
+    "startsAt": "Start",
+    "endsAt": "End",
+    "country": "Country",
+    "countryNone": "Not set",
+    "city": "City",
+    "address": "Address",
+    "hasPavilion": "OIF holds a pavilion at this edition",
+    "banner": "Banner",
+    "bannerReplace": "Replace banner",
+    "bannerNone": "No banner attached",
+    "slugAuto": "Composed from the label. Editable: as soon as you touch it, it stops following.",
+    "slugReset": "Restore the automatic suggestion",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "coordinatesHint": "Point surveyed on site, in decimal degrees. Optional — but both together or neither.",
+    "coordinatesCheck": "Check the point on a map"
+  },
+  "mode": {
+    "online": "Online",
+    "in_person": "In person",
+    "hybrid": "Hybrid"
+  },
+  "localeTab": {
+    "fr": "French",
+    "en": "English",
+    "missing": "Translation missing: French will be shown."
+  },
+  "errors": {
+    "title": "The edition could not be saved",
+    "period": "The end date must follow the start date.",
+    "physical_location": "An edition that is not entirely online requires a country and a city.",
+    "slug_taken": "This URL identifier is already taken by another edition.",
+    "edition_taken": "This series already has an edition with that year and label.",
+    "year_range": "The year must be between 2000 and 2100.",
+    "required": "This field is required.",
+    "coordinates": "Latitude and longitude go together, each within its bounds: −90 to 90, −180 to 180."
+  },
+  "saved": {
+    "created": "Edition created. {days} calendar days were generated.",
+    "updated": "Edition saved.",
+    "daysAdded": "{count} day was added to the calendar. | {count} day was added to the calendar. | {count} days were added to the calendar.",
+    "daysOutside": "Some calendar days now fall outside the period. The days tab lets you remove them."
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "backToList": "Back to list"
+  },
+  "uploadNotice": "Visual uploads will be wired to the Media module: the banner is attached by asset identifier."
+}

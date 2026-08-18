@@ -53,6 +53,10 @@
  *   admin-planner.ts     la composition du planificateur de créneaux (A9) et ses
  *                        quatre écritures — dont AUCUNE ne refuse un
  *                        chevauchement
+ *   admin-events/        la gestion des événements (A10), en trois fichiers —
+ *                        `core` le socle, `detail` la composition des six
+ *                        onglets, `writes` les quinze écritures et les
+ *                        contraintes de `060_events.sql` qui refusent
  */
 
 export * from './ids'
@@ -196,3 +200,24 @@ export {
   setSessionBroadcast,
   publishProgramme,
 } from './admin-planner'
+
+export {
+  editionListScreen,
+  editionFormOptions,
+  editionDetail,
+  saveEdition,
+  planDayGeneration,
+  generateEventDays,
+  saveEventDay,
+  saveTrack,
+  removeTrack,
+  saveVenue,
+  removeVenue,
+  saveRoom,
+  removeRoom,
+  saveChannel,
+  removeChannel,
+  saveCall,
+  defaultCriteriaGrid,
+  saveCommittee,
+} from './admin-events'

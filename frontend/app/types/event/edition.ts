@@ -9,6 +9,7 @@
 
 import type {
   ColorHex,
+  Numeric,
   CountryId,
   EventDayId,
   EventId,
@@ -64,6 +65,11 @@ export interface EventEdition {
   country_id: CountryId | null
   city: string | null
   address: string | null
+  /** Point relevé du lieu, facultatif — `ck_events_coordinates` les veut tous
+   *  deux ou aucun. Sert à ouvrir un plan : aucun calcul spatial n'en dépend,
+   *  d'où deux `numeric` plutôt que PostGIS. */
+  latitude: Numeric | null
+  longitude: Numeric | null
   /** L'OIF tient-elle un stand sur cette édition ? Sans pavillon, pas d'appel
    *  à propositions : l'IFDD n'envoie qu'un représentant. */
   has_pavilion: boolean

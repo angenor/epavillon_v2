@@ -1,0 +1,373 @@
+{
+  "label": "Onglets de l'édition",
+  "days": "Journées",
+  "tracks": "Journées spéciales",
+  "venues": "Lieux et salles",
+  "channels": "Diffusion",
+  "call": "Appel à propositions",
+  "committee": "Comité de sélection",
+  "detachedNotice": "{count} activité a perdu son rattachement ; elle reste programmée. | {count} activité a perdu son rattachement ; elle reste programmée. | {count} activités ont perdu leur rattachement ; elles restent programmées.",
+  "confirm": {
+    "cancel": "Annuler",
+    "confirm": "Confirmer"
+  },
+  "daysTab": {
+    "title": "Journées du calendrier",
+    "intro": "Une ligne par jour de la période, générée depuis les dates de l'édition. Le titre, la couleur et la page de la journée sont éditoriaux : la régénération ne les écrase pas.",
+    "generate": "Générer les journées manquantes",
+    "plan": {
+      "title": "Ce que la génération va faire",
+      "create": "Aucune journée à créer | {count} journée à créer | {count} journées à créer",
+      "unchanged": "{count} journée déjà en place | {count} journée déjà en place | {count} journées déjà en place",
+      "outside": "{count} journée sort de la période | {count} journée sort de la période | {count} journées sortent de la période",
+      "outsideDetail": "{date} — {count} activité programmée | {date} — {count} activité programmée | {date} — {count} activités programmées",
+      "removeOutside": "Retirer les journées hors période",
+      "removeWarning": "Les activités de ces journées ne sont pas supprimées : elles perdent leur rattachement au jour et restent à leur créneau.",
+      "longPeriod": {
+        "title": "{count} journée à créer : la période est inhabituellement longue | {count} journée à créer : la période est inhabituellement longue | {count} journées à créer : la période est inhabituellement longue",
+        "description": "Le calendrier d'une conférence compte une dizaine de jours. Une période de plusieurs mois — un cycle de webinaires, par exemple — produirait autant de journées vides. Vérifiez les dates de l'édition avant de confirmer."
+      }
+    },
+    "columns": {
+      "date": "Date",
+      "title": "Titre",
+      "slug": "Page",
+      "sessions": "Activités",
+      "actions": "Actions"
+    },
+    "outsideBadge": "Hors période",
+    "featuredBadge": "Jour remarquable",
+    "noTitle": "Sans titre",
+    "noSlug": "Pas de page dédiée",
+    "empty": {
+      "title": "Aucune journée",
+      "description": "Générez le calendrier depuis les dates de l'édition."
+    },
+    "edit": {
+      "title": "Journée du {date}",
+      "titleField": "Titre de la journée",
+      "slugField": "Identifiant de page",
+      "slugHint": "Ouvre l'adresse publique /programmation/{event}/{slug}. Facultatif.",
+      "descriptionField": "Description",
+      "featured": "Jour remarquable (ouverture, clôture, segment de haut niveau)",
+      "color": "Couleur",
+      "colorNone": "Aucune couleur"
+    },
+    "errors": {
+      "slug_taken": "Cet identifiant de page est déjà utilisé par une autre journée.",
+      "not_found": "Cette journée n'existe plus."
+    }
+  },
+  "tracksTab": {
+    "title": "Journées spéciales et fils thématiques",
+    "intro": "Un fil est composé À LA MAIN parmi les activités retenues : sa composition se fait au planificateur, pas ici. La période annoncée est indicative — elle ne rattache aucune activité.",
+    "add": "Nouveau fil",
+    "kind": {
+      "special_day": "Journée thématique",
+      "thematic_track": "Fil transversal",
+      "side_programme": "Programme parallèle"
+    },
+    "composition": "Aucune activité rattachée | {count} activité rattachée | {count} activités rattachées",
+    "compositionHint": "Composition faite au planificateur",
+    "openPlanner": "Composer au planificateur",
+    "published": "Page publique ouverte le {date}",
+    "unpublished": "Page publique fermée",
+    "curator": "Responsable : {name}",
+    "curatorNone": "Aucun responsable désigné",
+    "periodIndicative": "Période indicative : {range}",
+    "periodNone": "Aucune période annoncée",
+    "empty": {
+      "title": "Aucun fil thématique",
+      "description": "Créez une journée spéciale pour regrouper des activités autour d'un thème."
+    },
+    "form": {
+      "createTitle": "Nouveau fil thématique",
+      "editTitle": "Modifier le fil",
+      "code": "Code",
+      "codeHint": "Identifiant stable, en minuscules : finance_durable.",
+      "slug": "Identifiant d'adresse",
+      "slugHint": "Ouvre la page publique du fil.",
+      "kindField": "Nature du fil",
+      "titleField": "Titre",
+      "subtitleField": "Sous-titre",
+      "descriptionField": "Description",
+      "startsOn": "Début annoncé",
+      "endsOn": "Fin annoncée",
+      "periodHint": "Purement indicatif : une activité hors de cette plage peut être rattachée au fil.",
+      "color": "Couleur",
+      "curatedBy": "Responsable",
+      "curatedByNone": "Aucun",
+      "publish": "Ouvrir la page publique du fil"
+    },
+    "remove": {
+      "action": "Supprimer le fil",
+      "title": "Supprimer ce fil thématique ?",
+      "description": "Les activités restent programmées, mais leur rattachement au fil disparaît définitivement.",
+      "withSessions": "Ce fil regroupe {count} activité : la composition sera perdue. | Ce fil regroupe {count} activité : la composition sera perdue. | Ce fil regroupe {count} activités : la composition sera perdue."
+    },
+    "errors": {
+      "required": "Le titre, le code et l'identifiant d'adresse sont obligatoires.",
+      "period": "La fin annoncée doit suivre le début.",
+      "code_taken": "Ce code est déjà utilisé par un autre fil de cette édition.",
+      "slug_taken": "Cet identifiant d'adresse est déjà utilisé par un autre fil de cette édition.",
+      "not_found": "Ce fil n'existe plus."
+    }
+  },
+  "venuesTab": {
+    "title": "Lieux et salles",
+    "intro": "Les salles donnent un sujet aux conflits de créneaux : sans elles, le planificateur ne peut signaler qu'« deux activités à 14 h » au lieu de « le stand est réservé deux fois ».",
+    "addVenue": "Nouveau lieu",
+    "addRoom": "Nouvelle salle",
+    "kind": {
+      "pavilion": "Pavillon de la Francophonie",
+      "partner": "Espace partenaire",
+      "plenary": "Plénière",
+      "virtual": "Salle en ligne",
+      "other": "Autre"
+    },
+    "virtualBadge": "Virtuelle",
+    "streamingBadge": "Équipée pour la diffusion",
+    "capacity": "{count} place | {count} place | {count} places",
+    "capacityNone": "Capacité non renseignée",
+    "sessions": "Aucune activité placée | {count} activité placée | {count} activités placées",
+    "equipmentNone": "Aucun équipement déclaré",
+    "map": "Voir sur la carte",
+    "virtualExplain": "Une salle virtuelle accepte des activités simultanées : aucune double réservation n'y est signalée.",
+    "physicalExplain": "Une salle physique n'accueille qu'une activité à la fois ; un chevauchement y est signalé en gravité haute.",
+    "empty": {
+      "title": "Aucun lieu",
+      "description": "Déclarez le pavillon, puis ses salles."
+    },
+    "noRooms": "Aucune salle dans ce lieu.",
+    "venueForm": {
+      "createTitle": "Nouveau lieu",
+      "editTitle": "Modifier le lieu",
+      "nameField": "Nom",
+      "kindField": "Nature du lieu",
+      "addressField": "Adresse",
+      "mapUrlField": "Lien vers la carte"
+    },
+    "roomForm": {
+      "createTitle": "Nouvelle salle",
+      "editTitle": "Modifier la salle",
+      "nameField": "Nom",
+      "codeField": "Code",
+      "codeHint": "Court et unique dans le lieu : STAND, ATELIER.",
+      "capacityField": "Capacité",
+      "isVirtual": "Salle virtuelle",
+      "isVirtualHint": "À ne cocher que pour une salle sans existence physique : la détection des doubles réservations y est désactivée.",
+      "hasStreaming": "Équipée pour la diffusion",
+      "equipmentField": "Équipement",
+      "equipmentHint": "Un élément par ligne."
+    },
+    "removeVenue": {
+      "action": "Supprimer le lieu",
+      "title": "Supprimer ce lieu ?",
+      "description": "Ses salles sont supprimées avec lui. Les activités qui y étaient placées reviennent au panneau du planificateur.",
+      "withSessions": "{count} activité perdra sa salle. | {count} activité perdra sa salle. | {count} activités perdront leur salle."
+    },
+    "removeRoom": {
+      "action": "Supprimer la salle",
+      "title": "Supprimer cette salle ?",
+      "description": "Les activités qui y étaient placées reviennent au panneau du planificateur : elles ne sont pas supprimées.",
+      "withSessions": "{count} activité perdra sa salle. | {count} activité perdra sa salle. | {count} activités perdront leur salle."
+    },
+    "errors": {
+      "required": "Le nom et le code sont obligatoires.",
+      "code_taken": "Ce code est déjà utilisé par une autre salle de ce lieu.",
+      "capacity": "La capacité doit être un nombre positif.",
+      "not_found": "Cet élément n'existe plus."
+    }
+  },
+  "channelsTab": {
+    "title": "Canaux de diffusion",
+    "intro": "L'IFDD ne diffuse jamais deux activités en direct simultanément : une seule équipe technique, un seul flux. Le canal est donc une ressource réservable, au même titre qu'une salle.",
+    "add": "Nouveau canal",
+    "defaultBadge": "Canal par défaut",
+    "inactiveBadge": "Inactif",
+    "platformBadge": "Canal de la plateforme",
+    "platformHint": "Ce canal ne relève pas de cette édition et ne se modifie pas d'ici.",
+    "provider": {
+      "youtube": "YouTube",
+      "vimeo": "Vimeo",
+      "facebook": "Facebook",
+      "linkedin": "LinkedIn",
+      "dailymotion": "Dailymotion",
+      "custom": "Autre fournisseur"
+    },
+    "sessions": "Aucune activité diffusée | {count} activité diffusée | {count} activités diffusées",
+    "noDefault": {
+      "title": "Aucun canal par défaut",
+      "description": "Sans canal par défaut, une activité marquée comme diffusée n'occupe aucun canal et échappe à la règle du direct unique."
+    },
+    "empty": {
+      "title": "Aucun canal",
+      "description": "Déclarez le canal sur lequel les activités de cette édition seront diffusées."
+    },
+    "form": {
+      "createTitle": "Nouveau canal",
+      "editTitle": "Modifier le canal",
+      "codeField": "Code",
+      "nameField": "Nom",
+      "providerField": "Fournisseur",
+      "channelRefField": "Compte diffuseur",
+      "channelRefHint": "Point de départ de la détection automatique du direct : @ifddoif.",
+      "localeField": "Langue de diffusion",
+      "localeNone": "Non précisée",
+      "isDefault": "Canal retenu d'office pour toute activité diffusée",
+      "isDefaultHint": "Un seul canal par défaut par édition. Le poser ici le retire du canal précédent.",
+      "isActive": "Canal actif"
+    },
+    "remove": {
+      "action": "Retirer le canal",
+      "title": "Retirer ce canal ?",
+      "description": "Un canal qui a déjà servi est désactivé plutôt que supprimé : les activités passées gardent la trace de leur diffusion.",
+      "willDeactivate": "{count} activité a été diffusée sur ce canal : il sera désactivé, non supprimé. | {count} activité a été diffusée sur ce canal : il sera désactivé, non supprimé. | {count} activités ont été diffusées sur ce canal : il sera désactivé, non supprimé."
+    },
+    "deactivated": "Le canal a été désactivé plutôt que supprimé : il avait déjà servi.",
+    "errors": {
+      "required": "Le nom et le code sont obligatoires.",
+      "code_taken": "Ce code est déjà utilisé par un autre canal de cette édition.",
+      "platform_channel": "Un canal de la plateforme ne se modifie pas depuis une édition.",
+      "not_found": "Ce canal n'existe plus."
+    }
+  },
+  "callTab": {
+    "title": "Appel à propositions",
+    "intro": "Une édition n'ouvre QU'UN SEUL appel — zéro s'il n'y a pas de pavillon. La grille de critères s'enregistre avec l'appel : un appel sans critère ne pourrait évaluer aucun dossier.",
+    "create": "Ouvrir un appel à propositions",
+    "edit": "Modifier l'appel",
+    "noPavilion": {
+      "title": "Cette édition ne tient pas de pavillon",
+      "description": "Sans pavillon, l'IFDD n'ouvre pas d'appel à propositions. Cochez « pavillon tenu » dans la fiche de l'édition si c'est un oubli."
+    },
+    "empty": {
+      "title": "Aucun appel à propositions",
+      "description": "L'édition tient un pavillon : ouvrez son appel pour recevoir des dossiers."
+    },
+    "summary": {
+      "window": "Ouvert du {open} au {close}",
+      "extended": "Prolongé jusqu'au {date}",
+      "originalDeadline": "Échéance annoncée à l'origine : {date}",
+      "isOpen": "Réception des dossiers en cours",
+      "isClosed": "Réception fermée",
+      "results": "Résultats annoncés pour le {date}",
+      "proposals": "Aucun dossier déposé | {count} dossier déposé | {count} dossiers déposés",
+      "maxScore": "Note maximale atteignable : {score}",
+      "reviews": "{count} revue indépendante exigée | {count} revue indépendante exigée | {count} revues indépendantes exigées",
+      "blind": "Évaluation en aveugle",
+      "notBlind": "Notes des pairs visibles",
+      "perOrganization": "Au plus {count} dossier par organisation | Au plus {count} dossier par organisation | Au plus {count} dossiers par organisation",
+      "perOrganizationNone": "Aucun plafond par organisation",
+      "verifiedOnly": "Réservé aux organisations vérifiées",
+      "duration": "Durée de {min} à {max} min, {default} min par défaut",
+      "dailyWindow": "Pavillon ouvert de {start} à {end}, heure de {zone}",
+      "speakers": "De {min} à {max} intervenants",
+      "guidelines": "Consignes de dépôt"
+    },
+    "form": {
+      "createTitle": "Ouvrir un appel à propositions",
+      "editTitle": "Modifier l'appel",
+      "sections": {
+        "identity": "Identité de l'appel",
+        "window": "Fenêtre de dépôt",
+        "eligibility": "Recevabilité",
+        "duration": "Durée et plage d'accueil",
+        "review": "Évaluation",
+        "criteria": "Grille de critères pondérés"
+      },
+      "codeField": "Code",
+      "titleField": "Titre",
+      "descriptionField": "Description",
+      "statusField": "Statut",
+      "opensAt": "Ouverture",
+      "closesAt": "Clôture",
+      "extendedUntil": "Prolongation",
+      "extendedHint": "L'échéance annoncée à l'origine reste lisible à côté : c'est ce qui a été communiqué aux organisations.",
+      "resultsExpectedAt": "Résultats annoncés pour le",
+      "maxPerOrganization": "Plafond par organisation",
+      "maxPerOrganizationHint": "Laisser vide pour aucun plafond.",
+      "requiresVerified": "Réserver le dépôt aux organisations vérifiées",
+      "minSpeakers": "Intervenants au minimum",
+      "maxSpeakers": "Intervenants au maximum",
+      "defaultDuration": "Durée proposée d'office",
+      "minDuration": "Durée minimale",
+      "maxDuration": "Durée maximale",
+      "durationHint": "Ces bornes sont celles de la CAMPAGNE : le pavillon d'une COP tient des séances d'une heure, un cycle de webinaires peut en vouloir de trois.",
+      "dailyStart": "Ouverture du pavillon",
+      "dailyEnd": "Fermeture du pavillon",
+      "dailyHint": "En heure locale de l'édition. Une proposition doit se TERMINER avant la fermeture — début et durée comprises.",
+      "allowedFormats": "Formats acceptés",
+      "requiredReviews": "Revues exigées avant décision",
+      "blindReview": "Évaluation en aveugle",
+      "blindReviewHint": "Un membre du comité ne voit les notes de ses pairs qu'après avoir soumis la sienne. Protège de l'effet d'ancrage.",
+      "guidelinesUrl": "Lien vers les consignes de dépôt"
+    },
+    "criteria": {
+      "columns": {
+        "label": "Critère",
+        "code": "Code",
+        "maxScore": "Note max.",
+        "weight": "Poids",
+        "knockout": "Éliminatoire",
+        "actions": "Actions"
+      },
+      "add": "Ajouter un critère",
+      "loadDefault": "Reprendre la grille par défaut",
+      "remove": "Retirer",
+      "knockoutHint": "Une note nulle sur un critère éliminatoire disqualifie le dossier, quelle que soit la moyenne.",
+      "maxWeighted": "Note maximale atteignable : {score}",
+      "scored": "{count} note déjà posée | {count} note déjà posée | {count} notes déjà posées",
+      "scoredWarning": "Ce critère a déjà été noté : retirer la ligne ou changer son barème déplacera des moyennes.",
+      "empty": "Aucun critère : l'appel ne pourrait évaluer aucun dossier."
+    },
+    "errors": {
+      "title": "L'appel n'a pas pu être enregistré",
+      "window": "La clôture doit suivre l'ouverture.",
+      "extension": "La prolongation doit dépasser la clôture annoncée.",
+      "speakers": "Le nombre maximal d'intervenants doit atteindre le minimum.",
+      "duration_bounds": "Les bornes de durée sont incohérentes, ou la durée par défaut sort de ces bornes.",
+      "daily_window": "La fermeture du pavillon doit suivre son ouverture.",
+      "already_exists": "Cette édition porte déjà un appel à propositions. Une édition n'en ouvre qu'un seul.",
+      "code_taken": "Ce code est déjà utilisé par un autre appel de cette édition.",
+      "criteria_empty": "La grille doit compter au moins un critère.",
+      "criterion_code_duplicate": "Deux critères portent le même code.",
+      "required": "Ce champ est obligatoire."
+    },
+    "scoresAffected": "Le barème a changé alors que des notes existent : les moyennes et le classement des dossiers vont être recalculés."
+  },
+  "committeeTab": {
+    "title": "Comité de sélection",
+    "intro": "Cette liste dit QUI SIÈGE, pas qui a le droit d'accéder : l'autorisation reste portée par les rôles attribués sur l'édition. Ajouter quelqu'un ici ne lui ouvre pas les dossiers.",
+    "noCall": {
+      "title": "Aucun appel à propositions",
+      "description": "Le comité de sélection se compose sur un appel. Ouvrez d'abord l'appel de cette édition."
+    },
+    "columns": {
+      "member": "Membre",
+      "lead": "Président",
+      "cap": "Plafond de charge",
+      "load": "Charge actuelle",
+      "actions": "Actions"
+    },
+    "lead": "Président du comité",
+    "capNone": "Non renseigné",
+    "capHint": "Plafond indicatif de dossiers confiés à ce membre. Vide signifie « aucun plafond », et non « aucun dossier ».",
+    "load": "{assigned} confiés · {submitted} évalués",
+    "overCap": "Charge au-delà du plafond déclaré.",
+    "missingPermission": "Ne détient pas le droit d'évaluer sur cette édition : les dossiers confiés lui resteront fermés.",
+    "add": "Appeler au comité",
+    "addTitle": "Appeler une personne au comité",
+    "addField": "Personne",
+    "addHint": "Seules les personnes qui détiennent le droit d'évaluer, globalement ou sur cette édition, sont proposées.",
+    "noCandidates": "Toutes les personnes habilitées à évaluer siègent déjà.",
+    "remove": "Retirer du comité",
+    "empty": {
+      "title": "Aucun membre",
+      "description": "Appelez au comité les personnes qui évalueront les dossiers de cet appel."
+    },
+    "unsaved": "Modifications non enregistrées.",
+    "removedWithAssignments": "Ces membres portaient encore des dossiers : {names}. Leurs revues rendues restent au dossier, le reste est à confier de nouveau.",
+    "saved": "Composition du comité enregistrée."
+  }
+}
