@@ -40,6 +40,17 @@
     -webkit-text-size-adjust: 100%;
   }
 
+  /* Un lien d'ancre fait sauter la page d'une section à l'autre sans rien dire du
+     chemin parcouru — « Voir les critères d'évaluation », depuis le bandeau d'une
+     édition, traverse deux écrans d'un coup. Le défilement animé le montre. Il
+     est conditionné à la préférence système : un mouvement de plusieurs milliers
+     de pixels est exactement ce que `prefers-reduced-motion` sert à éviter. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
   body {
     background-color: var(--color-surface);
     color: var(--color-text);

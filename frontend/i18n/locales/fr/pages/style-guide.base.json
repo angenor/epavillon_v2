@@ -3,7 +3,7 @@
   "description": "Chaque composant est montré avec tous ses états côte à côte : repos, survol, focus clavier, actif, désactivé, chargement. C'est le seul moyen de vérifier qu'un état désactivé reste lisible et qu'un bouton qui travaille ne change pas de largeur.",
   "buttons": {
     "title": "Boutons",
-    "note": "Une page ne porte qu'UN bouton principal. Le secondaire borde, le discret sert les barres d'outils, le lien ne s'emploie que lorsqu'une action doit se fondre dans une phrase. « Danger » est réservé à ce qui détruit ou refuse — jamais à « enregistrer ». Cliquer sur « Enregistrer » ci-dessous déclenche un vrai état de chargement.",
+    "note": "Une page ne porte qu'UN bouton principal. Le secondaire borde, le discret sert les barres d'outils, le lien ne s'emploie que lorsqu'une action doit se fondre dans une phrase. « Danger » est réservé à ce qui détruit ou refuse — jamais à « enregistrer ». Cliquer sur « Enregistrer » ci-dessous déclenche un vrai état de chargement. Une sixième variante existe, `glass`, et ne figure pas ci-dessous : elle ne vaut que sur un média voilé — le bandeau d'une édition — et la démontrer sur une surface de page enseignerait exactement ce que la règle du verre interdit.",
     "rest": "Enregistrer",
     "withIcon": "Ajouter",
     "trailing": "Étape suivante",

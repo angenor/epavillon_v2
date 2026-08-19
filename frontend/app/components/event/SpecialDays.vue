@@ -13,9 +13,9 @@ import type { TimeZoneName } from '~/types/shared'
  * rédaction : `starts_on` « ne contraint pas le rattachement des sessions ».
  *
  * LA COULEUR VIENT DE LA DONNÉE (`programme_tracks.color_hex`), modifiable au
- * back-office, et elle est rendue en LISERÉ, jamais en fond : une teinte saisie
- * par un administrateur n'a aucune garantie de contraste avec le texte. Le fil
- * qui n'en porte pas s'affiche sans, sans couleur de remplacement.
+ * back-office, et elle est rendue en LISERÉ et en POINT, jamais en fond : une
+ * teinte saisie par un administrateur n'a aucune garantie de contraste avec le
+ * texte. Le fil qui n'en porte pas s'affiche sans, sans couleur de remplacement.
  */
 
 interface Props {
@@ -44,42 +44,55 @@ function period(track: ProgrammeTrack): string {
 
 <template>
   <section v-if="props.tracks.length" aria-labelledby="journees-titre">
-    <h2 id="journees-titre" class="font-display text-xl">{{ t('event.public.specialDays.title') }}</h2>
-    <p class="mt-1 text-sm text-text-muted" :style="{ maxWidth: 'var(--measure)' }">
+    <h2 id="journees-titre" class="font-display text-2xl sm:text-3xl">
+      {{ t('event.public.specialDays.title') }}
+    </h2>
+    <p class="mt-3 text-sm text-text-muted" :style="{ maxWidth: 'var(--measure)' }">
       {{ t('event.public.specialDays.description') }}
     </p>
 
-    <ul class="mt-5 grid list-none gap-4 p-0 md:grid-cols-2">
+    <ul class="mt-6 grid list-none gap-4 p-0 md:grid-cols-2">
       <li
         v-for="track in props.tracks"
         :key="track.id"
-        class="rounded-lg border border-border border-l-4 bg-surface-raised px-5 py-4"
-        :style="track.color_hex ? { borderLeftColor: track.color_hex } : undefined"
+        class="relative overflow-hidden rounded-xl border border-border bg-surface-raised p-5 pl-6"
       >
-        <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <h3 class="font-display text-lg">{{ tr(track.title) }}</h3>
-          <p v-if="period(track)" class="text-sm text-text-muted">
-            {{ period(track) }}
-            <span class="text-text-subtle">· {{ t('event.public.specialDays.indicative') }}</span>
-          </p>
-        </div>
+        <!-- LE LISERÉ PORTE LA COULEUR DE LA DONNÉE, jamais le fond : une teinte
+             saisie au back-office n'a aucune garantie de contraste avec le
+             texte. Le fil qui n'en porte pas s'affiche sans, sans remplacement. -->
+        <span
+          v-if="track.color_hex"
+          class="absolute inset-y-0 left-0 w-1.5"
+          :style="{ backgroundColor: track.color_hex }"
+          aria-hidden="true"
+        />
 
+        <h3 class="font-display text-lg">{{ tr(track.title) }}</h3>
         <p v-if="track.subtitle" class="mt-1 text-sm font-semibold text-text-secondary">
           {{ tr(track.subtitle) }}
         </p>
-        <p v-if="track.description" class="mt-2 text-sm text-text-secondary">
+        <p v-if="track.description" class="mt-3 text-sm text-text-secondary">
           {{ tr(track.description) }}
         </p>
 
-        <p v-if="props.sessionCounts?.[track.id]" class="mt-3 text-xs text-text-muted">
-          {{
-            t(
-              'event.public.specialDays.activityCount',
-              { count: props.sessionCounts[track.id] },
-              props.sessionCounts[track.id] ?? 0,
-            )
-          }}
-        </p>
+        <div class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+          <p v-if="period(track)" class="flex items-center gap-1.5 text-sm text-text-muted">
+            <UiIcon name="calendar" size="0.95rem" class="shrink-0" />
+            <span>
+              {{ period(track) }}
+              <span class="text-text-subtle">· {{ t('event.public.specialDays.indicative') }}</span>
+            </span>
+          </p>
+          <UiBadge v-if="props.sessionCounts?.[track.id]" size="sm" :dot-color="track.color_hex">
+            {{
+              t(
+                'event.public.specialDays.activityCount',
+                { count: props.sessionCounts[track.id] },
+                props.sessionCounts[track.id] ?? 0,
+              )
+            }}
+          </UiBadge>
+        </div>
       </li>
     </ul>
   </section>

@@ -6,7 +6,7 @@ Le contexte d'une session se perd ; le dépôt reste. Toute session commence par
 
 Il ne porte plus que ce qui se lit **en arrivant** : l'état général, l'avancement écran par écran, et ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
-**Dernière mise à jour** : 19 août 2026 — **la progression est découpée dans [`progression/`](progression/)**, un fichier par écran, par jour de journal et par jour de décisions. Avant cela, le même jour : accueil public et vitrine administrable (A15), le module `content` qui la porte, l'ouverture du verre dépoli dans la charte, les visuels réels repris de la plateforme v1, l'historique des éditions passé au rail-affiche, et les trois formats d'image d'une édition (32:9, 16:9, 1:1).
+**Dernière mise à jour** : 19 août 2026 — **la page publique d'une édition est refondue (A3)** : le dépôt monte dans le bandeau, la page passe à deux colonnes, la frise des échéances à la verticale, et `UiButton` gagne une variante `glass` bornée au média. La barre d'ancres essayée au passage a été retirée à la demande du commanditaire. Avant cela, le même jour : **la progression est découpée dans [`progression/`](progression/)**, un fichier par écran, par jour de journal et par jour de décisions. Avant cela, le même jour : accueil public et vitrine administrable (A15), le module `content` qui la porte, l'ouverture du verre dépoli dans la charte, les visuels réels repris de la plateforme v1, l'historique des éditions passé au rail-affiche, et les trois formats d'image d'une édition (32:9, 16:9, 1:1).
 
 ---
 
@@ -36,7 +36,7 @@ Un écran = un fichier. Il porte ce qui a été livré, les écarts relevés ent
 | A0.4 | Composants d'interface + page de guide de style | ✅ 16/08 | [écarts et vérifications](progression/ecrans/a0.4-composants.md) |
 | A1 | Authentification | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a1-authentification.md) |
 | A2 | Rattachement à une organisation | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a2-organisation.md) |
-| A3 | Page publique de l'événement | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a3-evenement-public.md) |
+| A3 | Page publique de l'événement | ✅ 17/08 · refondue 19/08 | [écarts et vérifications](progression/ecrans/a3-evenement-public.md) |
 | A4 | Formulaire de soumission | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a4-soumission.md) |
 | A5 | Espace organisation | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a5-espace-organisation.md) |
 | A6 | Tableau de bord back-office | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a6-tableau-de-bord.md) |

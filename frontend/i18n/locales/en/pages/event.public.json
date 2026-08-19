@@ -60,7 +60,7 @@
   },
   "programmeLink": {
     "title": "Programme",
-    "count": "{count} published activity | {count} published activity | {count} published activities",
+    "countUnit": "published activity | published activity | published activities",
     "dayCount": "{count} day | {count} day | {count} days",
     "unpublished": "The programme will be published once activities have been selected. Programmes of past editions remain available.",
     "see": "See the programme",

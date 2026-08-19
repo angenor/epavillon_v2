@@ -60,7 +60,7 @@
   },
   "programmeLink": {
     "title": "Programmation",
-    "count": "{count} activité publiée | {count} activité publiée | {count} activités publiées",
+    "countUnit": "activité publiée | activité publiée | activités publiées",
     "dayCount": "{count} jour | {count} jour | {count} jours",
     "unpublished": "Le programme sera publié après la sélection des activités. Les programmations des éditions passées, elles, restent consultables.",
     "see": "Voir la programmation",

@@ -59,8 +59,10 @@ const columns = computed<TableColumn[]>(() => [
 
 <template>
   <section id="criteres" class="scroll-mt-24" aria-labelledby="criteres-titre">
-    <h2 id="criteres-titre" class="font-display text-xl">{{ t('event.public.criteria.title') }}</h2>
-    <p class="mt-1 text-sm text-text-muted" :style="{ maxWidth: 'var(--measure)' }">
+    <h2 id="criteres-titre" class="font-display text-2xl sm:text-3xl">
+      {{ t('event.public.criteria.title') }}
+    </h2>
+    <p class="mt-3 text-sm text-text-muted" :style="{ maxWidth: 'var(--measure)' }">
       {{ t('event.public.criteria.description') }}
     </p>
 

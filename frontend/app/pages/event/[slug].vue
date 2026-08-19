@@ -2,24 +2,38 @@
 /**
  * PAGE PUBLIQUE D'UNE ÉDITION — écran A3.
  *
- * Elle répond à quatre questions, DANS CET ORDRE, et l'ordre est le contenu :
- *
- *   1. DE QUOI S'AGIT-IL ?        le bandeau — titre, dates, lieu, mode, visuel
- *   2. QUELLES ÉCHÉANCES ?        la frise des jalons, puis l'encart d'appel
- *   3. DE QUOI PARLE-T-ON ?       la présentation de l'édition
- *   4. QUE PUIS-JE FAIRE ?        déposer un dossier, lire les critères
- *   5. OÙ CELA SE PASSE-T-IL ?    les journées spéciales, le lien programmation
+ * ── L'ORDRE EST LE CONTENU ──────────────────────────────────────────────────
  *
  * Une organisation qui arrive ici veut savoir si elle peut encore déposer, et
- * jusqu'à quand. Tout ce qui retarde cette réponse — un long texte de
- * présentation, un carrousel — la fait partir. LES QUATRE DATES VIENNENT DONC EN
- * PREMIER : la frise des jalons tient en cent pixels et répond d'un coup d'œil à
- * « où en est-on », avant même l'encart d'appel qui, lui, développe.
+ * jusqu'à quand. Tout ce qui retarde cette réponse la fait partir.
  *
- * LA PROGRAMMATION N'EST PLUS ICI. Elle a sa page, parce qu'elle porte un
- * sélecteur d'édition : présentée sous le titre de la COP31, elle affichait aussi
- * le programme du cycle PACO. Il ne reste qu'un renvoi, qui part avec l'édition
- * de cette page déjà sélectionnée.
+ *   1. DE QUOI S'AGIT-IL, ET QUE PUIS-JE FAIRE ?  le bandeau — titre, faits, et
+ *      le PANNEAU D'ACTION : rebours, échéance, dépôt
+ *   2. QUELLES ÉCHÉANCES, À QUELLES CONDITIONS ?  la colonne de droite
+ *   3. DE QUOI PARLE-T-ON ?                       la présentation, les journées
+ *   4. ET APRÈS ?                                 la programmation, les critères
+ *
+ * ── LE DÉPÔT EST REMONTÉ DANS LE BANDEAU (19/08) ────────────────────────────
+ *
+ * Il vivait à mi-page, dans l'encart d'appel : sur un portable, le premier écran
+ * ne montrait que le titre de la conférence, et il fallait défiler pour trouver
+ * la seule chose qu'on vient faire. Le bandeau porte désormais l'action. LA PAGE
+ * NE PORTE QU'UN SEUL BOUTON PRINCIPAL, ET IL N'EN EXISTE PAS DE SECOND
+ * EXEMPLAIRE : `EventCallDetails` a été allégé d'autant, et garde ce qu'on vient
+ * VÉRIFIER — conditions, prolongation, consignes.
+ *
+ * ── DEUX COLONNES, PARCE QUE LES DEUX SE LISENT ENSEMBLE ────────────────────
+ *
+ * Les échéances et les conditions de l'appel tiennent dans une colonne COLLANTE
+ * à droite : elles restent visibles pendant qu'on lit la présentation et les
+ * journées spéciales, c'est-à-dire au moment précis où l'on se demande s'il
+ * reste du temps. Sous `lg`, la colonne repasse en tête du flux — l'ordre des
+ * priorités ne change pas parce que l'écran rétrécit.
+ *
+ * LA PROGRAMMATION N'EST PAS ICI. Elle a sa page, parce qu'elle porte un
+ * sélecteur d'édition : présentée sous le titre de la COP31, elle affichait
+ * aussi le programme du cycle PACO. Il ne reste qu'un renvoi, qui part avec
+ * l'édition de cette page déjà sélectionnée.
  *
  * ── CE QUE LA PAGE CHARGE, ET POURQUOI EN UNE FOIS ──────────────────────────
  *
@@ -29,15 +43,13 @@
  * partent en parallèle et le rendu serveur les attend toutes — un écran qui se
  * remplit par morceaux fait sauter la mise en page trois fois de suite.
  *
- * Les séances ne sont plus affichées ici, mais elles restent nécessaires : ce
+ * Les séances ne sont pas affichées ici, mais elles restent nécessaires : ce
  * sont elles qui donnent le nombre d'activités rattachées à chaque journée
- * spéciale, et le volume annoncé par le renvoi vers la programmation. Les salles,
- * en revanche, ne servaient qu'aux filtres et ne sont plus chargées.
+ * spéciale, et le volume annoncé par le renvoi vers la programmation.
  *
  * Le jour où l'API répond, la moitié de ces appels disparaîtront : la bannière
  * et le pays de l'hôte appartiennent à la réponse de `GET /events/:slug`
- * (obligation inscrite au prompt B3). Les autres restent des ressources
- * distinctes, et c'est très bien ainsi.
+ * (obligation inscrite au prompt B3).
  *
  * ── L'ADRESSE EST DANS LA LANGUE, LE FICHIER SUIT LA CONVENTION ─────────────
  *
@@ -119,7 +131,7 @@ useHead(() => ({
 </script>
 
 <template>
-  <div class="flex flex-col gap-12">
+  <div class="flex flex-col">
     <UiLoadingState
       v-if="status === 'pending'"
       variant="card"
@@ -151,39 +163,53 @@ useHead(() => ({
         :series="data.series"
         :images="data.images"
         :country="data.country ? tr(data.country) : null"
-      />
+        :has-action="Boolean(data.call)"
+      >
+        <template #action="{ tone }">
+          <EventHeroCall
+            :call="data.call"
+            :edition="data.edition"
+            :tone="tone"
+            :submit-to="localePath('proposal-form')"
+            criteria-href="#criteres"
+          />
+        </template>
+      </EventHero>
 
-      <!-- LES ÉCHÉANCES COLLENT AU BANDEAU. Quatre dates, cent pixels : c'est la
-           première chose qu'on vient chercher, et l'encart d'appel qui suit ne
-           fait que développer celle qui presse. Rien ne s'intercale — la
-           présentation de l'édition, qui occupait cette place, est descendue
-           sous l'appel. -->
-      <EventMilestones v-if="data.call" :edition="data.edition" :call="data.call" />
+      <div class="mt-12 grid gap-12 lg:grid-cols-12 lg:gap-x-12">
+        <!-- LA COLONNE DE DROITE VIENT EN PREMIER DANS LE FLUX. Sous `lg`, les
+             échéances et les conditions se lisent avant la présentation : c'est
+             l'ordre des priorités, et il ne change pas parce que l'écran
+             rétrécit. `lg:order-2` le rétablit visuellement à partir de là. -->
+        <aside v-if="data.call" class="lg:order-2 lg:col-span-4">
+          <div class="flex flex-col gap-6 lg:sticky lg:top-24">
+            <EventMilestones :edition="data.edition" :call="data.call" />
+            <EventCallDetails :call="data.call" :edition="data.edition" />
+          </div>
+        </aside>
 
-      <EventCallBanner
-        :call="data.call"
-        :edition="data.edition"
-        criteria-href="#criteres"
-        :submit-to="localePath('proposal-form')"
-      />
+        <div
+          class="flex flex-col gap-14 lg:order-1"
+          :class="data.call ? 'lg:col-span-8' : 'lg:col-span-12'"
+        >
+          <EventPresentation :edition="data.edition" />
 
-      <!-- Le contexte, une fois l'échéance répondue. -->
-      <EventPresentation :edition="data.edition" />
+          <EventSpecialDays
+            :tracks="data.tracks"
+            :timezone="data.edition.timezone"
+            :zone-label="data.edition.city ?? undefined"
+            :session-counts="trackCounts"
+          />
 
-      <EventSpecialDays
-        :tracks="data.tracks"
-        :timezone="data.edition.timezone"
-        :zone-label="data.edition.city ?? undefined"
-        :session-counts="trackCounts"
-      />
+          <EventProgrammeLink
+            :edition="data.edition"
+            :session-count="data.schedule.length"
+            :day-count="data.programmeDayCount"
+          />
 
-      <EventProgrammeLink
-        :edition="data.edition"
-        :session-count="data.schedule.length"
-        :day-count="data.programmeDayCount"
-      />
-
-      <EventCriteria :criteria="data.criteria" :call="data.call" />
+          <EventCriteria :criteria="data.criteria" :call="data.call" />
+        </div>
+      </div>
     </template>
   </div>
 </template>

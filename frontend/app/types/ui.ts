@@ -26,8 +26,15 @@ import type { I18nText } from './shared'
  */
 export type Intent = 'neutral' | 'info' | 'success' | 'warning' | 'danger'
 
-/** Variantes de bouton, dans l'ordre décroissant de poids visuel. */
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'link'
+/**
+ * Variantes de bouton, dans l'ordre décroissant de poids visuel.
+ *
+ * `glass` est à part : elle ne s'emploie QUE sur un média voilé — un bandeau
+ * photographique — et jamais sur une surface de page. C'est la même borne que
+ * les jetons `--color-glass-*` ; elle existe ici pour qu'aucun écran n'écrive
+ * son propre bouton translucide.
+ */
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'link' | 'glass'
 
 /** Trois tailles suffisent : `sm` est la version compacte des barres d'outils. */
 export type Size = 'sm' | 'md' | 'lg'

@@ -3,7 +3,7 @@
   "description": "Every component is shown with all its states side by side: rest, hover, keyboard focus, active, disabled, loading. That is the only way to check that a disabled state stays readable and that a working button does not change width.",
   "buttons": {
     "title": "Buttons",
-    "note": "A page carries only ONE primary button. The secondary frames it, the ghost serves toolbars, the link form is only for an action that must sit inside a sentence. “Danger” is reserved for what destroys or refuses — never for “save”. Clicking “Save” below triggers a real loading state.",
+    "note": "A page carries only ONE primary button. The secondary frames it, the ghost serves toolbars, the link form is only for an action that must sit inside a sentence. “Danger” is reserved for what destroys or refuses — never for “save”. Clicking “Save” below triggers a real loading state. A sixth variant exists, `glass`, and is absent below: it only holds on a scrimmed medium — an edition banner — and demonstrating it on a page surface would teach exactly what the glass rule forbids.",
     "rest": "Save",
     "withIcon": "Add",
     "trailing": "Next step",

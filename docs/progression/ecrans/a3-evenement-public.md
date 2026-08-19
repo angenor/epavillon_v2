@@ -66,3 +66,66 @@ Une page qui bascule entre deux vues, recharge un programme et partage des filtr
 |---|---|---|
 | **`UiSelect` affichait « facultatif » sur un filtre**, et son `placeholder` étant `disabled`, **la valeur « tous » n'était pas re-sélectionnable** : on pouvait filtrer, pas défiltrer | `components/ui/Select.vue` | Propriété `hideOptional` (même motif que la correction d'A2 sur `UiSearchInput`), et les filtres déclarent une option explicite de valeur vide plutôt qu'un `placeholder`. Le commentaire de la propriété dit désormais pourquoi une liste de filtre ne passe pas par elle |
 | **`UiStatusTimeline` affichait une heure sur une étape datée au jour** | `components/ui/StatusTimeline.vue`, `types/ui.ts` | `TimelineStep.dateOnly`. La distinction vient du modèle : `results_expected_at` est une `date`, pas un `timestamptz` |
+
+---
+
+## Refonte du 19/08 — le dépôt monte dans le bandeau, la page passe à deux colonnes
+
+**La demande** : « un design plus moderne et beau, le bouton de soumission pourrait être dans le hero parce qu'il est important ; pour ce qui y est déjà, regarde si c'est pertinent de laisser dedans ou de faire sortir ».
+
+### Ce qui a bougé dans le bandeau
+
+| | Verdict | Pourquoi |
+|---|---|---|
+| Série, état, titre | **reste** | C'est ce qui IDENTIFIE l'édition. Rien ne peut le remplacer plus haut |
+| Dates, lieu, mode, pavillon | **reste**, redessiné en tuiles | Quatre faits posés à même la photographie flottaient sans attache et se lisaient comme un paragraphe éclaté. Chacun tient désormais dans sa tuile de verre : le contraste ne dépend plus de ce que montre l'image |
+| **Rebours, échéance, bouton de dépôt** | **entre** | C'est la raison de la visite, et il fallait défiler pour la trouver. À 375 px, le premier écran ne montrait que le titre de la conférence |
+| Description de l'appel, conditions, consignes, prolongation | **reste hors du bandeau** | Ce qu'on vient VÉRIFIER, pas ce qu'on vient chercher. Dans la colonne latérale (`EventCallDetails`) |
+
+### Ce que la page est devenue
+
+1. **Bandeau** — photographie plein cadre, voile en deux temps, tuiles de verre, **panneau d'action flottant** (`EventHeroCall`).
+2. **Deux colonnes** — à droite, collantes : les échéances (frise passée à la **verticale**) et le détail de l'appel ; à gauche : présentation, journées spéciales, programmation, critères.
+
+**Une capsule d'ancres collante avait été posée entre les deux, et le commanditaire l'a fait retirer le même jour.** Elle a existé le temps d'un aller-retour ; ce qui suit garde la trace de ce qu'elle a appris, parce que le piège se représentera au premier sommaire de la plateforme.
+
+### Fichiers
+
+| Fichier | Nature |
+|---|---|
+| `components/event/HeroCall.vue` | **nouveau** — le panneau d'action du bandeau, trois phases |
+| `components/event/CallDetails.vue` | **remplace** `CallBanner.vue` — allégé de l'action, garde ce qu'on vérifie |
+| `components/event/Hero.vue` | réécrit — grille deux colonnes, créneau `action` qui expose sa MATIÈRE (`glass` / `surface`) |
+| `components/event/HeroFacts.vue` | réécrit — tuiles, `tone: glass \| surface` |
+| `components/event/Milestones.vue`, `Presentation.vue`, `SpecialDays.vue`, `ProgrammeLink.vue`, `Criteria.vue` | redessinés |
+| `components/ui/Button.vue`, `types/ui.ts` | variante **`glass`**, bornée au média |
+| `assets/css/main.css` | défilement animé sous `prefers-reduced-motion: no-preference` |
+| `i18n/…/pages/event.public.json` (fr, en) | `sections.*`, `programmeLink.countUnit` ; `programmeLink.count` retiré |
+
+### Ce qui a été vérifié dans un navigateur réel
+
+| Contrôle | Résultat |
+|---|---|
+| **Le dépôt est-il au premier écran ?** | 1440 × 900 : panneau visible entier à droite du titre. **375 × 812 : le bouton « Déposer une proposition » est à 620 px du haut**, donc dans le premier écran d'un iPhone SE |
+| Les trois phases de l'appel | **Ouvert** (COP31) : « 42 jours », échéance, dépôt, critères. **Clos** (COP29) : pastille grise, date de clôture, annonce des résultats, plus de bouton de dépôt. **À venir** : rendu par le composant, toujours sans donnée pour l'exercer |
+| **Le piège de la barre d'ancres, avant son retrait** | Son repérage marquait éternellement « L'appel » comme courant : **une section collante intersecte la fenêtre en permanence**, et un `IntersectionObserver` ne sait pas l'en distinguer. À retenir pour le prochain sommaire de la plateforme : un sommaire ne liste pas ce qui est déjà à l'écran, et le repérage se fait sur la dernière section franchie, pas sur ce qui intersecte |
+| L'ancre tombe-t-elle au bon endroit ? | Clic sur « Voir les critères d'évaluation » : `#criteres` sous la barre de navigation du site (`scroll-mt-24`) |
+| Édition **sans affiche** (COP29) | En-tête sobre : même composition, aucune matière de verre, aucun voile — le panneau d'action passe en `tone="surface"` |
+| 375 px | `scrollWidth == clientWidth == 375` |
+| Thème sombre | Le verre **ne s'inverse pas** — le fond est une photographie dans les deux thèmes. Les cartes suivent les jetons |
+| `nuxt typecheck` + construction | Vert |
+
+### Retrait de la barre d'ancres, le 19/08
+
+Le commanditaire : « enlève la barre de navigation superposée en bas du hero ». Elle est supprimée, et **rien n'en
+reste en dette** : `EventSectionNav` et `utils/edition-poster.ts` sont effacés, le type `SectionNavItem` retiré de
+`types/navigation.ts`, les libellés `sections.*` retirés des deux locales, et les deux ancres qui n'avaient été créées
+que pour elle (`#presentation`, `#journees-speciales`, `#echeances`) rendues à leur absence. Le décalage d'ancre
+redescend de `scroll-mt-40` à `scroll-mt-24` — il ne dégage plus que la barre de navigation du site — et la colonne
+collante de `lg:top-36` à `lg:top-24`.
+
+**Ce que le retrait coûte, et qui est assumé** : passé le bandeau, plus rien ne rappelle le dépôt. La colonne collante
+garde l'échéance et les conditions sous les yeux ; le bouton, lui, demande de remonter.
+
+Le défilement animé de `main.css` **reste** : « Voir les critères d'évaluation », depuis le bandeau, traverse toujours
+deux écrans d'un coup, et c'est ce que la règle sert à montrer.

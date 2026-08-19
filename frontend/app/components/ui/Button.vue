@@ -2,7 +2,7 @@
 import type { ButtonVariant, Size } from '~/types/ui'
 
 /**
- * Bouton — cinq variantes, trois tailles, tous les états.
+ * Bouton — six variantes, trois tailles, tous les états.
  *
  * SIX ÉTATS, TOUS TRAITÉS : repos, survol, focus clavier, actif (enfoncé),
  * désactivé, chargement. Ce sont les deux derniers qu'on oublie, et ce sont eux
@@ -12,7 +12,9 @@ import type { ButtonVariant, Size } from '~/types/ui'
  * POIDS VISUEL — une page ne porte qu'UN bouton principal. Le secondaire borde,
  * le discret (`ghost`) sert les actions de barre d'outils, le `link` ne sert que
  * lorsqu'une action doit se fondre dans une phrase. `danger` est réservé à ce
- * qui détruit ou refuse : la couleur distingue, elle ne décore pas.
+ * qui détruit ou refuse : la couleur distingue, elle ne décore pas. `glass` est
+ * la seule variante bornée à un contexte : un média voilé, jamais une surface de
+ * page — c'est la règle du verre, et elle vaut ici comme pour les panneaux.
  *
  * LE SECONDAIRE EST UN CONTOUR ACCENT, pas un bouton neutre. Un contour gris se
  * lit comme un bouton désactivé et laisse le primaire seul en piste ; le contour
@@ -137,6 +139,14 @@ const VARIANTS: Record<ButtonVariant, string> = {
   danger:
     'border-transparent bg-danger-solid text-danger-contrast ' +
     'hover:bg-danger-solid-hover active:bg-danger-solid-active',
+
+  // SUR UN MÉDIA VOILÉ, ET NULLE PART AILLEURS. Le contour accent du secondaire
+  // est un cyan foncé en thème clair : posé sur une photographie sombre, il
+  // disparaît. Cette variante prend la matière du bandeau — les jetons du verre,
+  // jamais un `bg-white/20` écrit à la main.
+  glass:
+    'border-glass-border-strong bg-glass-raised text-text-on-inverse ' +
+    'backdrop-blur-glass hover:bg-glass-hover active:bg-glass-hover',
 
   // Action qui se fond dans une phrase. Souligné au survol, comme un lien.
   link:

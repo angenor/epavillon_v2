@@ -8,7 +8,15 @@ import type { TimelineStep } from '~/types/ui'
  * tenue de l'événement.
  *
  * Elle répond à « où en est-on ? » d'un seul coup d'œil, ce que quatre dates
- * dispersées dans la page ne font pas. Les quatre jalons viennent tous du
+ * dispersées dans la page ne font pas.
+ *
+ * ── ELLE EST PASSÉE À LA VERTICALE, EN COLONNE LATÉRALE (19/08) ─────────────
+ *
+ * Horizontale et pleine largeur, elle occupait cent pixels de haut pour quatre
+ * dates, et écrasait ses libellés sous 640 px. Verticale dans la colonne de
+ * droite, elle tient dans le champ de vision pendant qu'on lit la présentation
+ * et les journées spéciales — c'est-à-dire exactement au moment où l'on se
+ * demande s'il reste du temps. Les quatre jalons viennent tous du
  * modèle, aucun n'est inventé :
  *
  *   ouverture   `calls_for_proposals.opens_at`
@@ -69,7 +77,10 @@ const steps = computed<TimelineStep[]>(() => {
 </script>
 
 <template>
-  <section aria-labelledby="jalons-titre">
+  <section
+    class="rounded-xl border border-border bg-surface-raised p-5 sm:p-6"
+    aria-labelledby="jalons-titre"
+  >
     <h2 id="jalons-titre" class="font-display text-xl">{{ t('event.public.milestones.title') }}</h2>
     <p class="mt-1 text-sm text-text-muted">{{ t('event.public.milestones.description') }}</p>
 
@@ -79,7 +90,7 @@ const steps = computed<TimelineStep[]>(() => {
       :label="t('event.public.milestones.title')"
       :timezone="props.edition.timezone"
       :zone-label="props.edition.city ?? undefined"
-      orientation="horizontal"
+      orientation="vertical"
     />
   </section>
 </template>
