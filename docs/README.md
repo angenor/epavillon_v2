@@ -5,7 +5,7 @@ Ce document explique ce que le modèle corrige de la version précédente, comme
 > **Où trouver quoi** — le tableau d'orientation complet (conventions, règles métier, prompts, cadrage, charte, historique du commanditaire) vit dans [`../CLAUDE.md`](../CLAUDE.md) et n'est pas repris ici.
 > Pour savoir quel fichier SQL lire pour la tâche du jour, aller directement à [MODELE_INDEX.md](MODELE_INDEX.md).
 
-Le modèle lui-même vit dans **[database/](database/)** : 18 fichiers SQL, 14 143 lignes, chaîne validée sur PostgreSQL 17 + pgvector.
+Le modèle lui-même vit dans **[database/](database/)** : 19 fichiers SQL, 15 928 lignes, chaîne validée sur PostgreSQL 17 + pgvector.
 
 **Relevé du 16 août 2026, sur une base réellement chargée.** C'est un constat de mesure, pas une constante du projet :
 
@@ -153,6 +153,7 @@ Les fichiers sont numérotés dans leur ordre de dépendance. **Ne pas les réor
 | 090 | [`090_publications.sql`](database/090_publications.sql) | `publication` | Articles, quotas éditoriaux et de stockage appliqués par la base, révisions, modération |
 | 100 | [`100_negotiations.sql`](database/100_negotiations.sql) | `negotiation` | Espaces, réunions unifiées, documents d'aide, canaux d'échange partitionnés |
 | 110 | [`110_engagement.sql`](database/110_engagement.sql) | `engagement` | Notifications, modèles, courriels partitionnés, rappels sans doublon, commentaires, messagerie |
+| 115 | [`115_content.sql`](database/115_content.sql) | `content` | Contenus mis en avant de la vitrine publique : témoignages, innovations, annonces — nature en taxonomie, ordre, fenêtre de diffusion, fond image ou vidéo |
 | 120 | [`120_tools.sql`](database/120_tools.sql) | `tool` | Sondages et évaluations, assistants IA et RAG (pgvector) — module conçu détaché |
 | 125 | [`125_training.sql`](database/125_training.sql) | `training` | Formations, chapitres, enregistrements et supports, quiz, évaluation finale, progression, attestations |
 | 130 | [`130_analytics.sql`](database/130_analytics.sql) | `analytics` | Vues matérialisées du back-office, santé opérationnelle, mesure d'audience |
@@ -179,7 +180,7 @@ SELECT * FROM analytics.v_operational_health;
 
 Ces contrôles, plus la compilation du front et de l'API, sont à passer avant tout commit important — une migration qui ne passe pas sur une base vierge se découvre autrement au déploiement, au pire moment.
 
-L'ensemble a été chargé et vérifié sur PostgreSQL 17 avec pgvector le 16 août 2026 : les 18 fichiers passent sous `ON_ERROR_STOP=1`, le seed est rejouable, les 167 clés étrangères inter-modules relevées ce jour-là étaient toutes conformes — le compte se refait avec la requête donnée en tête de document, il ne se recopie pas —, et un scénario fonctionnel de bout en bout confirme le comportement annoncé — rapprochement et fusion d'organisations, refus des transitions d'état interdites, co-organisation, détection des conflits de créneaux sans blocage, refus d'une inscription incomplète, bascule en liste d'attente, portée d'administration limitée à un événement, émission des événements de domaine.
+L'ensemble a été chargé et vérifié sur PostgreSQL 17 avec pgvector le 16 août 2026 : les 19 fichiers passent sous `ON_ERROR_STOP=1`, le seed est rejouable, les 167 clés étrangères inter-modules relevées ce jour-là étaient toutes conformes — le compte se refait avec la requête donnée en tête de document, il ne se recopie pas —, et un scénario fonctionnel de bout en bout confirme le comportement annoncé — rapprochement et fusion d'organisations, refus des transitions d'état interdites, co-organisation, détection des conflits de créneaux sans blocage, refus d'une inscription incomplète, bascule en liste d'attente, portée d'administration limitée à un événement, émission des événements de domaine.
 
 En production, ces fichiers sont la **source de référence**. Ils sont découpés en migrations incrémentales (SQLx / refinery) au moment de l'implémentation, et chaque application est tracée dans `platform.schema_migrations`.
 

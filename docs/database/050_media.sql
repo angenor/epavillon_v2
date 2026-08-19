@@ -64,8 +64,17 @@ CREATE TYPE media.rendition_format AS ENUM ('webp', 'avif', 'jpeg', 'png', 'mp4'
 
 CREATE TYPE media.rendition_status AS ENUM ('pending', 'generating', 'ready', 'failed');
 
+-- Rôle d'un rattachement. Fermé, et c'est le point : la table blanche
+-- `attachable_roles` déclare quelles combinaisons (entité, rôle) existent, et
+-- un rôle qui n'est pas ici ne peut pas être déclaré par erreur.
+--
+-- `video` A ÉTÉ AJOUTÉ pour le module `content` (115_content.sql) : l'énumération
+-- ne portait que des rôles d'image et de document, alors que la plateforme
+-- stocke déjà des enregistrements de séance et fait défiler des fonds vidéo sur
+-- sa page d'accueil. Le détourner sur `attachment` — le fourre-tout — aurait
+-- rendu illisible le seul endroit qui dit à quoi sert un fichier.
 CREATE TYPE media.attachment_role AS ENUM (
-    'cover', 'banner', 'logo', 'gallery', 'document', 'avatar', 'attachment'
+    'cover', 'banner', 'logo', 'gallery', 'document', 'avatar', 'video', 'attachment'
 );
 
 -- -----------------------------------------------------------------------------

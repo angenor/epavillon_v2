@@ -21,10 +21,11 @@
  *   programme/review.ts        070_programme_proposals.sql § 5
  *   programme/session.ts       075_programme_sessions.sql § 1, 2, 7
  *   programme/registration.ts  075_programme_sessions.sql § 3, 4, 5
+ *   content.ts                 115_content.sql — les contenus mis en avant
  *   engagement.ts              110_engagement.sql § 6 — les rappels seuls
  *   live.ts                    080_live.sql § 5 — les messages d'incident seuls
  *   analytics.ts               130_analytics.sql — les projections du tableau de bord
- *   views.ts                   les deux vues consommées telles quelles
+ *   views.ts                   les cinq vues consommées telles quelles
  *
  * Modules hors du jalon en cours — Publications, Négociations, Formations,
  * Outils — : leurs types viendront avec leurs écrans, dans leur propre fichier.
@@ -37,7 +38,8 @@
  *
  * `navigation.ts`, `ui.ts`, `auth.ts`, `organization-join.ts`,
  * `organization-workspace.ts`, `proposal-form.ts`, `event-programme.ts`,
- * `admin-dashboard.ts`, `admin-proposals.ts` et `admin-review.ts` ne
+ * `admin-dashboard.ts`, `admin-proposals.ts`, `admin-review.ts`, `home.ts` et
+ * `admin-showcase.ts` ne
  * sont PAS ré-exportés : ils ne décrivent pas le modèle. Le premier porte une
  * augmentation de `PageMeta` que les layouts importent directement, le deuxième
  * le vocabulaire des composants d'interface, les autres les contrats d'un écran
@@ -63,6 +65,7 @@ export type * from './programme/review'
 export type * from './programme/session'
 export type * from './programme/registration'
 
+export type * from './content'
 export type * from './engagement'
 export type * from './live'
 export type * from './analytics'

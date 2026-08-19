@@ -45,7 +45,11 @@ const isCurrent = (to: string): boolean => route.path === localePath(to)
 </script>
 
 <template>
-  <header class="sticky top-0 z-30 border-b border-border bg-surface-raised">
+  <!-- `min-h-(--nav-height)` : la hauteur de cette barre est une donnée de mise
+       en page, lue par le bandeau d'accueil pour occuper exactement un écran.
+       Sans elle, elle variait de 69 à 67,8 px selon la largeur, au gré du
+       rendu du logo. Le menu mobile déplié la fait grandir, et c'est voulu. -->
+  <header class="sticky top-0 z-30 min-h-(--nav-height) border-b border-border bg-surface-raised">
     <div class="mx-auto flex w-full max-w-[1280px] items-center gap-4 px-4 py-3 sm:px-6">
       <slot name="brand" />
 

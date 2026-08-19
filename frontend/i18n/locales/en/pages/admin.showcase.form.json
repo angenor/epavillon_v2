@@ -1,0 +1,157 @@
+{
+  "titleNew": "New slide",
+  "titleEdit": "Edit slide",
+  "subtitleNew": "A slide starts as a draft and is placed at the end of its placement. Its rank is then set from the list.",
+  "subtitleEdit": "The preview shows what the public will see. The rank is set from the list.",
+  "submitNew": "Create the slide",
+  "submitEdit": "Save",
+  "sections": {
+    "nature": "Kind and placement",
+    "texts": "Texts",
+    "attribution": "Attribution",
+    "media": "Media",
+    "link": "Attachment",
+    "broadcast": "Broadcast"
+  },
+  "nature": {
+    "label": "Kind of content",
+    "hint": "It gives the slide its label and colour. Kinds are managed in the reference data."
+  },
+  "placementField": "Placement",
+  "placement": {
+    "home_hero": "Home banner",
+    "home_aside": "Side panel"
+  },
+  "placementHint": {
+    "home_hero": "The large scrolling banner",
+    "home_aside": "The “Coming up” column"
+  },
+  "themes": {
+    "label": "Themes",
+    "hint": "At most three appear on a card; the rest fold into “+N”.",
+    "preview": "On screen:"
+  },
+  "text": {
+    "title": "Title",
+    "titleHint": "Your landmark in the list as much as the slide's title. French is required.",
+    "quote": "Quotation",
+    "quoteHint": "The text set large over the background. Choose the excerpt: trimming belongs to editing, not to layout.",
+    "body": "Body text",
+    "bodyHint": "Long text, for the detail page. It does not appear in the banner."
+  },
+  "attribution": {
+    "person": "Person from the directory",
+    "personHint": "Chosen here, their name corrects itself if their profile changes.",
+    "noPerson": "No person from the directory",
+    "authorName": "Free-form name",
+    "authorNameOverridden": "A person from the directory is selected: their name is the one that will show.",
+    "authorTitle": "Role",
+    "authorTitleHint": "“Negotiator, delegation of Benin”.",
+    "organization": "Organisation from the directory",
+    "organizationHint": "One record per organisation, whatever name it goes by.",
+    "noOrganization": "No organisation from the directory",
+    "organizationLabel": "Free-form organisation name",
+    "organizationLabelHint": "Only for an organisation missing from the directory.",
+    "organizationLabelBlocked": "An organisation from the directory is selected: leave this field empty.",
+    "country": "Country",
+    "countryHint": "Left empty, the organisation's country is used.",
+    "noCountry": "No country"
+  },
+  "media": {
+    "intro": "Three slots: a photographic background, a video background, a thumbnail for the rail. Video wins over image, image over colour.",
+    "family": {
+      "image": "image",
+      "video": "video"
+    },
+    "maxSize": "Maximum size: {size} MiB",
+    "pending": "A file is attached but is not yet ready to be served.",
+    "empty": "No file",
+    "soon": "Uploading arrives in the next phase.",
+    "color": "Fallback colour",
+    "colorHint": "The banner background when no media is ready. Format #RRGGBB."
+  },
+  "link": {
+    "event": "Edition",
+    "eventHint": "It situates the slide and decides who may edit it.",
+    "platform": "Whole platform",
+    "platformHint": "No edition: shown whichever COP is under way.",
+    "session": "Featured activity",
+    "sessionHint": "Optional. The chosen activity imposes its edition.",
+    "sessionLoading": "Loading the edition's activities…",
+    "noSession": "No activity",
+    "url": "Outbound link",
+    "urlHint": "Full address, starting with https://.",
+    "label": "Link label",
+    "labelHint": "“Read the full testimonial”. Without a link it has nowhere to lead."
+  },
+  "broadcast": {
+    "status": "Status",
+    "order": "Rank within the placement",
+    "orderHint": "Usually set from the list, with the move up and move down buttons.",
+    "startsAt": "Broadcast start",
+    "endsAt": "Broadcast end",
+    "timezone": "UTC",
+    "windowHint": "UTC time: a slide shows across the whole platform and belongs to no local time zone."
+  },
+  "status": {
+    "draft": "Draft",
+    "published": "Published",
+    "archived": "Archived"
+  },
+  "statusHint": {
+    "draft": "Nobody sees it",
+    "published": "Subject to the broadcast window",
+    "archived": "Withdrawn, kept, reusable"
+  },
+  "state": {
+    "live": "On screen",
+    "scheduled": "Scheduled",
+    "expired": "Ended",
+    "draft": "Draft",
+    "archived": "Archived"
+  },
+  "stateHint": {
+    "live": "It is being shown to the public right now.",
+    "scheduled": "It will switch on by itself at the start date.",
+    "expired": "Its window has passed: it is published, yet nobody sees it.",
+    "draft": "A draft never goes out, whatever its window.",
+    "archived": "Withdrawn from the showcase. It stays here, and can be duplicated for the next edition."
+  },
+  "errorSummary": {
+    "title": "Nothing was saved",
+    "description": "{count} field needs correcting. | {count} field needs correcting. | {count} fields need correcting."
+  },
+  "error": {
+    "window_inverted": "The broadcast end must come after its start.",
+    "organization_both": "An organisation is either picked from the directory OR named freely, never both.",
+    "link_label_without_url": "This label has nowhere to lead: fill in the link, or clear the label.",
+    "session_event_mismatch": "This activity belongs to a different edition from the one selected.",
+    "color_format": "The colour is written as #RRGGBB, six hexadecimal digits.",
+    "french_required": "French is required: it is the fallback language of the whole platform.",
+    "required": "This field is required.",
+    "url_format": "A full address is expected, starting with http:// or https://.",
+    "global_scope_required": "Content without an edition shows across the whole platform: it requires global scope.",
+    "forbidden": "This slide is outside your administration scope.",
+    "network": "The save did not go through. Try again in a moment."
+  },
+  "preview": {
+    "title": "Preview",
+    "background": {
+      "label": "Background used",
+      "video": "Looping video, muted",
+      "image": "Photograph",
+      "color": "Flat colour",
+      "none": "No media: the institutional background will show"
+    },
+    "link": "Outbound link",
+    "linkNoLabel": "Link with no label"
+  },
+  "forbidden": {
+    "scope": "Manage the home page showcase",
+    "action": "Back to the showcase"
+  },
+  "notFound": {
+    "title": "Slide not found",
+    "description": "This slide does not exist, or has been removed from the model."
+  }
+}

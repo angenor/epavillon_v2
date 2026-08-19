@@ -1,0 +1,77 @@
+{
+  "title": "Vitrine de l'accueil",
+  "subtitle": "Ce que le public voit en arrivant sur la plateforme, et dans quel ordre il le voit.",
+  "new": "Nouvelle diapositive",
+  "caption": "Contenus mis en avant, dans leur ordre de défilement.",
+  "placementTabs": "Emplacement de la vitrine",
+  "placement": {
+    "home_hero": "Bandeau d'accueil",
+    "home_aside": "Panneau latéral"
+  },
+  "placementHint": {
+    "home_hero": "Le grand bandeau d'ouverture, qui défile. La première diapositive est celle que l'on voit en arrivant.",
+    "home_aside": "La colonne « À venir », à gauche du bandeau. Elle remplace les annonces qui étaient écrites en dur."
+  },
+  "scopedNotice": "Votre compte administre une partie des éditions : vous ne voyez que leurs diapositives, et vous ne pouvez pas créer de contenu valable pour toute la plateforme.",
+  "columns": {
+    "order": "Ordre",
+    "slide": "Diapositive",
+    "attribution": "Attribution",
+    "event": "Édition",
+    "state": "Diffusion",
+    "window": "Fenêtre (UTC)",
+    "actions": "Actions"
+  },
+  "row": {
+    "untitled": "Sans titre",
+    "hasVideo": "Vidéo",
+    "session": "Activité : {session}",
+    "platform": "Toute la plateforme",
+    "window": {
+      "always": "Sans limite de temps",
+      "between": "Du {from} au {to}",
+      "from": "À partir du {from}",
+      "until": "Jusqu'au {to}"
+    },
+    "natureWithdrawn": "Nature retirée"
+  },
+  "state": {
+    "live": "À l'écran",
+    "scheduled": "Programmée",
+    "expired": "Terminée",
+    "draft": "Brouillon",
+    "archived": "Archivée"
+  },
+  "order": {
+    "up": "Monter : {title}",
+    "down": "Descendre : {title}",
+    "announce": "{title} est maintenant en position {position} sur {total}."
+  },
+  "actions": {
+    "menu": "Actions sur {title}",
+    "group": "Diffusion",
+    "edit": "Modifier",
+    "duplicate": "Dupliquer",
+    "publish": "Publier",
+    "unpublish": "Retirer de la vitrine",
+    "restore": "Sortir de l'archive",
+    "archive": "Archiver"
+  },
+  "empty": {
+    "title": "Aucun contenu mis en avant",
+    "description": "L'accueil affichera son fond de repli tant qu'aucune diapositive n'est publiée. Commencez par le bandeau d'ouverture."
+  },
+  "emptyPlacement": {
+    "title": "Rien à cet emplacement",
+    "home_hero": "Aucune diapositive n'est prévue pour le bandeau d'ouverture.",
+    "home_aside": "Aucune épingle éditoriale n'est prévue pour le panneau « À venir »."
+  },
+  "error": {
+    "refused": "L'enregistrement a été refusé. Ouvrez la diapositive pour voir ce qui manque.",
+    "forbidden": "Cette diapositive n'est pas dans votre périmètre d'administration."
+  },
+  "forbidden": {
+    "scope": "Gérer la vitrine de l'accueil",
+    "action": "Retour au tableau de bord"
+  }
+}

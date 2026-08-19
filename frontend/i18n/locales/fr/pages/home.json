@@ -1,0 +1,102 @@
+{
+  "title": "Accueil de l'ePavillon de la Francophonie",
+  "head": {
+    "title": "Accueil",
+    "description": "La programmation, les appels à propositions et les éditions de l'ePavillon de la Francophonie, porté par l'IFDD."
+  },
+  "loading": "Chargement de la page d'accueil",
+  "error": {
+    "title": "La page d'accueil n'a pas pu être chargée",
+    "description": "Le contenu n'est pas disponible pour le moment. Réessayez dans un instant."
+  },
+  "empty": {
+    "title": "Aucune édition publiée",
+    "description": "Aucune édition n'est encore ouverte au public. Revenez prochainement."
+  },
+  "showcase": {
+    "label": "À la une",
+    "carouselRole": "carrousel",
+    "slideRole": "diapositive",
+    "railLabel": "Diapositives du bandeau",
+    "position": "{index} / {total}",
+    "goTo": "Afficher la diapositive {index} : {title}",
+    "current": "diapositive en cours",
+    "previous": "Diapositive précédente",
+    "next": "Diapositive suivante",
+    "play": "Reprendre le défilement automatique",
+    "pause": "Mettre le défilement automatique en pause",
+    "playing": "défilement automatique en cours",
+    "paused": "défilement automatique en pause",
+    "reducedMotion": "Le défilement est arrêté parce que votre système demande moins d'animations.",
+    "discover": "En savoir plus"
+  },
+  "aside": {
+    "title": "À venir",
+    "empty": {
+      "title": "Rien d'annoncé pour l'instant",
+      "description": "Aucune séance ni édition n'est programmée à ce jour."
+    },
+    "pins": {
+      "title": "En avant",
+      "until": "Jusqu'au {date}",
+      "link": "Consulter"
+    },
+    "sessions": {
+      "title": "Prochaines séances",
+      "all": "Toute la programmation",
+      "ongoing": "En cours"
+    },
+    "editions": {
+      "title": "Prochains rendez-vous"
+    }
+  },
+  "call": {
+    "title": "Appel à propositions — {edition}",
+    "state": {
+      "open": "Appel ouvert",
+      "closed": "Appel clos"
+    },
+    "remaining": "Temps restant",
+    "countdown": {
+      "days": "{count} jour | {count} jour | {count} jours",
+      "hours": "{count} heure | {count} heure | {count} heures",
+      "minutes": "{count} minute | {count} minute | {count} minutes"
+    },
+    "deadline": "Échéance de dépôt",
+    "place": "Lieu",
+    "action": {
+      "submit": "Déposer une proposition",
+      "edition": "Voir l'édition"
+    },
+    "none": {
+      "title": "Aucun appel à propositions ouvert",
+      "description": "Aucun appel n'est ouvert en ce moment. Les prochains appels sont annoncés sur cette page et sur la page de l'édition concernée.",
+      "action": "Voir l'édition en cours"
+    }
+  },
+  "history": {
+    "title": "Les éditions",
+    "description": "Les rendez-vous de l'ePavillon, du plus récent au plus ancien.",
+    "filterLabel": "Filtrer les éditions par période",
+    "tabs": {
+      "all": "Toutes",
+      "upcoming": "À venir",
+      "ongoing": "En cours",
+      "past": "Passées"
+    },
+    "state": {
+      "upcoming": "À venir",
+      "ongoing": "En cours",
+      "past": "Terminée"
+    },
+    "sessions": "{count} activité publiée | {count} activité publiée | {count} activités publiées",
+    "card": {
+      "open": "Voir l'édition"
+    },
+    "empty": {
+      "title": "Aucune édition dans cette période",
+      "description": "Aucune édition ne correspond au filtre choisi.",
+      "action": "Voir toutes les éditions"
+    }
+  }
+}

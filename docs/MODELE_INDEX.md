@@ -1,6 +1,6 @@
 # Index du modèle de données — quoi lire pour quoi
 
-Ce fichier existe pour une raison précise : **une session Claude Code n'a pas la mémoire de la précédente**. Plutôt que de recharger tout le modèle à chaque fois — 14 143 lignes de SQL réparties sur 18 fichiers — on lit ici quels fichiers concernent la tâche du jour, et on ne lit que ceux-là.
+Ce fichier existe pour une raison précise : **une session Claude Code n'a pas la mémoire de la précédente**. Plutôt que de recharger tout le modèle à chaque fois — 15 928 lignes de SQL réparties sur 19 fichiers — on lit ici quels fichiers concernent la tâche du jour, et on ne lit que ceux-là.
 
 Chaque fichier SQL porte sa propre documentation : en-tête expliquant les décisions de conception, `COMMENT ON` sur les tables et colonnes non évidentes. Les lire suffit ; il n'est pas nécessaire de consulter le cadrage pour coder.
 
@@ -15,6 +15,8 @@ Chaque fichier SQL porte sa propre documentation : en-tête expliquant les déci
 | **RGPD** | `030_identity.sql` | `consents`, `current_consents`, `privacy_requests` · `anonymize_person()` |
 | **Rattachement / recherche d'organisation** | `040_organizations.sql` | `org.organizations`, `organization_names`, `organization_domains`, `memberships` · `find_similar_organizations()`, `public_email_domains` |
 | **Fusion des doublons** | `040_organizations.sql` | `duplicate_candidates`, `merge_log`, `organization_references` · `merge_organizations()`, `resolve_organization()`, `compute_trust_score()` |
+| **Page d'accueil, vitrine, contenus mis en avant** | `115_content.sql` | `content.highlights` · `v_showcase` (vue prête à l'emploi, fenêtre de diffusion déjà appliquée) · taxonomie `highlight_nature` · permission `content.highlight.manage` |
+| **Historique des éditions (accueil, sélecteur d'année)** | `060_events.sql` + `075_programme_sessions.sql` | `event.v_public_editions` (vue prête à l'emploi, état temporel et appel résolus) · `programme.v_edition_stats` (volume du programme) |
 | **Gestion d'un événement** | `060_events.sql` | `event.event_series`, `events`, `event_days`, `venues`, `rooms`, `broadcast_channels` |
 | **Journées spéciales** | `060_events.sql` + `075_programme_sessions.sql` | `event.programme_tracks` · `programme.session_tracks` |
 | **Appel à propositions, grille de critères** | `060_events.sql` | `calls_for_proposals`, `review_criteria`, `call_reviewers` · `is_call_open()`, `effective_deadline()`, `seed_default_criteria()`, `max_weighted_score()` |
@@ -58,17 +60,19 @@ Chaque fichier SQL porte sa propre documentation : en-tête expliquant les déci
 
 ## Vues prêtes à l'emploi
 
-Trois vues répondent à des écrans entiers en une requête. Les utiliser plutôt que de recomposer la jointure à la main :
+Cinq vues répondent à des écrans entiers en une requête. Les utiliser plutôt que de recomposer la jointure à la main :
 
 - **`programme.v_public_schedule`** — la programmation publique, avec l'état temporel calculé (à venir / en cours / passé / reporté / annulé), le nom de la salle, l'organisation **et son pays**, les thématiques **avec leur libellé et leur couleur**, les journées spéciales et l'image de couverture, toutes déjà résolues. Elle répond à l'écran **en une requête** : une colonne qui manque coûte une requête par écran, ou un renoncement d'affichage.
 - **`programme.v_proposal_dashboard`** — la liste des propositions du back-office : avancement des revues et **qui les doit**, revues **en retard**, revues manquantes, demandes de correction ouvertes, rang dans l'événement, et de quoi identifier un dossier dans un tableau dense — format, pays de l'organisation porteuse, thématiques **avec leur libellé et leur couleur**, nombre de co-organisateurs, nombre de lectures. Elle répond à l'écran **en une requête**. Ce qu'elle ne peut pas porter : « ce dossier, MOI, l'ai-je ouvert ? » dépend du lecteur — c'est `programme.unread_proposals_for(personne, édition)`.
+- **`content.v_showcase`** — la vitrine publique : nature du contenu **avec son libellé traduit et sa couleur**, attribution (auteur, fonction, organisation, pays), rattachement (édition, séance), et les trois médias possibles — fond image, fond vidéo, vignette. **La fenêtre de diffusion est déjà appliquée** : ce que la vue rend est ce qui doit s'afficher aujourd'hui. Trier par `placement` puis `sort_order`.
+- **`event.v_public_editions`** — les éditions publiques : série, pays, bannière, état temporel (à venir / en cours / passé), et l'appel à propositions avec son état **et son échéance effective**, prolongation comprise. Elle ne porte pas le nombre d'activités : `event` se charge avant `programme`, et la dépendance va dans ce sens-là — c'est `programme.v_edition_stats`, jointe sur `event_id`.
 - **`analytics.v_operational_health`** — l'état de santé du système : outbox en retard, travaux en échec, courriels en rebond, partitions manquantes.
 
 ---
 
 ## Ordre de chargement des fichiers
 
-Les 18 fichiers sont numérotés dans leur ordre de dépendance. **Ne pas les réordonner.** Le catalogue détaillé — numéro, schéma, contenu de chacun — est le tableau « Ordre d'exécution » de [README.md](README.md) ; il n'est pas repris ici, ce document répondant à la question « quoi lire pour quoi » et non « que contient chaque fichier ».
+Les 19 fichiers sont numérotés dans leur ordre de dépendance. **Ne pas les réordonner.** Le catalogue détaillé — numéro, schéma, contenu de chacun — est le tableau « Ordre d'exécution » de [README.md](README.md) ; il n'est pas repris ici, ce document répondant à la question « quoi lire pour quoi » et non « que contient chaque fichier ».
 
 ---
 

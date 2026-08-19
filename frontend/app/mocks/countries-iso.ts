@@ -3,7 +3,7 @@
  *
  * ── POURQUOI CE FICHIER EXISTE ──────────────────────────────────────────────
  *
- * `mocks/reference.ts` tient dix-huit fiches de pays écrites À LA MAIN : celles
+ * `mocks/reference.ts` tient vingt fiches de pays écrites À LA MAIN : celles
  * auxquelles se rattachent les organisations, les personnes et les éditions du jeu
  * d'essai. Elles portent des données que la norme ne donne pas — nom officiel,
  * indicatif téléphonique, code de région — et leur identifiant est déclaré dans
@@ -152,8 +152,8 @@ function displayName(alpha2: string, locale: 'fr' | 'en'): string {
 /**
  * Les pays de la norme qui ne sont pas déjà curés à la main.
  *
- * Numérotés à partir de 100 dans la famille `7010` : les dix-huit fiches curées
- * occupent 1 à 18, et rien ne doit les recouvrir.
+ * Numérotés à partir de 100 dans la famille `7010` : les vingt fiches curées
+ * occupent 1 à 20, et rien ne doit les recouvrir.
  */
 export function isoCountriesExcluding(curatedAlpha2: string[]): Country[] {
   const curated = new Set(curatedAlpha2)
@@ -169,7 +169,7 @@ export function isoCountriesExcluding(curatedAlpha2: string[]): Country[] {
       official_name: null,
       // Colonne GÉNÉRÉE en base (`platform.normalize_label(name->>'fr')`) : on la
       // dérive de la même façon plutôt que de la laisser vide, sans quoi une
-      // recherche par nom ne trouverait que les dix-huit fiches curées.
+      // recherche par nom ne trouverait que les vingt fiches curées.
       name_normalized: displayName(alpha2!, 'fr')
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')

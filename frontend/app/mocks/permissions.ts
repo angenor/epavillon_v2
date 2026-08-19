@@ -175,6 +175,7 @@ export const permissions: Permission[] = [
   { code: 'negotiation.space.access', label: { fr: "Accéder à l'espace de négociation", en: 'Access the negotiation space' }, module_code: 'negotiation' },
   { code: 'negotiation.content.manage', label: { fr: 'Gérer les contenus de négociation', en: 'Manage negotiation content' }, module_code: 'negotiation' },
   { code: 'engagement.campaign.send', label: { fr: 'Envoyer des campagnes', en: 'Send campaigns' }, module_code: 'engagement' },
+  { code: 'content.highlight.manage', label: { fr: 'Gérer la vitrine et les contenus mis en avant', en: 'Manage the showcase and featured content' }, module_code: 'content' },
   { code: 'tool.survey.manage', label: { fr: 'Gérer les sondages', en: 'Manage surveys' }, module_code: 'tool' },
   { code: 'analytics.dashboard.read', label: { fr: 'Consulter les tableaux de bord', en: 'Read dashboards' }, module_code: 'analytics' },
 ]
@@ -194,6 +195,10 @@ const GRANTS: Record<string, PermissionCode[]> = {
     'live.meeting.manage', 'live.incident.publish',
     'publication.article.moderate', 'publication.quota.manage',
     'engagement.campaign.send', 'analytics.dashboard.read',
+    // AJOUTÉE AU MODÈLE AU PROMPT A15 (`115_content.sql` § 6) : sans elle,
+    // `/admin/vitrine` rendait `UiForbiddenState` à tout le monde, `super_admin`
+    // compris — l'écran de la vitrine était inatteignable.
+    'content.highlight.manage',
   ],
   reviewer: [
     'programme.proposal.read_all', 'programme.review.write',

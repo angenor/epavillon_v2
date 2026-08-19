@@ -1,0 +1,77 @@
+{
+  "title": "Home page showcase",
+  "subtitle": "What the public sees on arriving at the platform, and the order in which they see it.",
+  "new": "New slide",
+  "caption": "Featured content, in scrolling order.",
+  "placementTabs": "Showcase placement",
+  "placement": {
+    "home_hero": "Home banner",
+    "home_aside": "Side panel"
+  },
+  "placementHint": {
+    "home_hero": "The large opening banner that scrolls. The first slide is the one visitors see on arrival.",
+    "home_aside": "The “Coming up” column beside the banner. It replaces the announcements that used to be hard-coded."
+  },
+  "scopedNotice": "Your account administers part of the editions: you only see their slides, and you cannot create content that applies to the whole platform.",
+  "columns": {
+    "order": "Order",
+    "slide": "Slide",
+    "attribution": "Attribution",
+    "event": "Edition",
+    "state": "Broadcast",
+    "window": "Window (UTC)",
+    "actions": "Actions"
+  },
+  "row": {
+    "untitled": "Untitled",
+    "hasVideo": "Video",
+    "session": "Activity: {session}",
+    "platform": "Whole platform",
+    "window": {
+      "always": "No time limit",
+      "between": "From {from} to {to}",
+      "from": "From {from}",
+      "until": "Until {to}"
+    },
+    "natureWithdrawn": "Kind withdrawn"
+  },
+  "state": {
+    "live": "On screen",
+    "scheduled": "Scheduled",
+    "expired": "Ended",
+    "draft": "Draft",
+    "archived": "Archived"
+  },
+  "order": {
+    "up": "Move up: {title}",
+    "down": "Move down: {title}",
+    "announce": "{title} is now in position {position} of {total}."
+  },
+  "actions": {
+    "menu": "Actions on {title}",
+    "group": "Broadcast",
+    "edit": "Edit",
+    "duplicate": "Duplicate",
+    "publish": "Publish",
+    "unpublish": "Remove from the showcase",
+    "restore": "Restore from the archive",
+    "archive": "Archive"
+  },
+  "empty": {
+    "title": "No featured content",
+    "description": "The home page will show its fallback background until a slide is published. Start with the opening banner."
+  },
+  "emptyPlacement": {
+    "title": "Nothing in this placement",
+    "home_hero": "No slide is planned for the opening banner.",
+    "home_aside": "No editorial pin is planned for the “Coming up” panel."
+  },
+  "error": {
+    "refused": "The save was refused. Open the slide to see what is missing.",
+    "forbidden": "This slide is outside your administration scope."
+  },
+  "forbidden": {
+    "scope": "Manage the home page showcase",
+    "action": "Back to the dashboard"
+  }
+}

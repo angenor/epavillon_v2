@@ -1104,3 +1104,32 @@ CROSS JOIN (VALUES
 ) AS v(code, label, field_type, is_required, options, sort_order)
 WHERE f.code = 'default'
 ON CONFLICT (form_id, code) DO NOTHING;
+
+-- -----------------------------------------------------------------------------
+-- Statistiques de programmation par édition
+--
+-- Le pendant de `event.v_public_editions` (060 § 9), qui ne peut pas les porter :
+-- `event` se charge avant `programme`, et la dépendance va dans ce sens-là — la
+-- programmation connaît son édition, jamais l'inverse. Les deux vues se
+-- joignent sur `event_id` en une requête.
+--
+-- Ce qu'elles servent : la frise d'historique de la page d'accueil, où « 42
+-- activités » distingue une édition documentée d'une édition simplement
+-- annoncée, et où les bornes réelles du programme diffèrent souvent des dates
+-- officielles de la conférence.
+-- -----------------------------------------------------------------------------
+CREATE OR REPLACE VIEW programme.v_edition_stats AS
+SELECT
+    s.event_id,
+    count(*)                                          AS published_session_count,
+    count(*) FILTER (WHERE s.is_streamed)             AS streamed_session_count,
+    count(DISTINCT s.organization_id)                 AS organization_count,
+    min(s.starts_at)                                  AS programme_starts_at,
+    max(s.ends_at)                                    AS programme_ends_at
+FROM programme.sessions s
+WHERE s.published_at IS NOT NULL
+  AND s.status <> 'cancelled'
+GROUP BY s.event_id;
+
+COMMENT ON VIEW programme.v_edition_stats IS
+    'Volume du programme publié par édition. Complète event.v_public_editions, qui ne peut pas dépendre de programme (ordre de chargement).';

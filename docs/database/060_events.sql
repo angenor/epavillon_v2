@@ -573,3 +573,98 @@ COMMENT ON TABLE event.call_reviewers IS
 INSERT INTO org.organization_references (ref_schema, ref_table, ref_column, strategy) VALUES
     ('event', 'event_series', 'organizer_organization_id', 'reassign')
 ON CONFLICT DO NOTHING;
+
+-- -----------------------------------------------------------------------------
+-- 9. Les éditions publiques, prêtes à afficher
+--
+-- L'HISTORIQUE DES ÉVÉNEMENTS — passés, en cours et à venir — est un écran à
+-- lui seul : la page d'accueil le déroule en frise, la page de programmation
+-- s'en sert de sélecteur. Sans cette vue, chaque écran recomposait la même
+-- jointure (série, pays, bannière, appel) et calculait l'état temporel à sa
+-- façon ; la v1 en est morte, son accueil filtrant sur `upcoming|ongoing` avant
+-- de trier sur `completed`, si bien qu'aucun événement passé ne s'y affichait
+-- jamais.
+--
+-- LE CRITÈRE DE PUBLICITÉ EST CELUI DU MODÈLE, pas une convention d'écran : une
+-- édition est publique dès lors qu'elle n'est ni un brouillon ni annulée. Une
+-- édition ANNONCÉE dont le programme n'est pas encore publié en fait donc
+-- partie — sa page existe, elle annonce ses échéances, et c'est précisément là
+-- qu'on dépose un dossier. Ne pas confondre avec `programme_published_at`, qui
+-- ne dit que la visibilité du PROGRAMME.
+--
+-- `temporal_state` reprend mot pour mot la sémantique de
+-- `programme.v_public_schedule` : deux écrans qui parlent du même temps doivent
+-- employer le même vocabulaire, sinon « en cours » finit par ne plus vouloir
+-- dire la même chose d'une page à l'autre.
+-- -----------------------------------------------------------------------------
+CREATE OR REPLACE VIEW event.v_public_editions AS
+SELECT
+    e.id,
+    e.slug,
+    e.title,
+    e.description,
+    e.acronym,
+    e.edition_label,
+    e.edition_year,
+    e.status,
+    e.participation_mode,
+    e.timezone,
+    e.starts_at,
+    e.ends_at,
+    e.has_pavilion,
+    e.programme_published_at,
+    e.highlights,
+
+    -- La série situe l'édition dans son cycle : c'est elle, et non une liste de
+    -- slugs recopiée dans un composant, qui distingue une COP d'un cycle de
+    -- webinaires.
+    e.series_id,
+    s.kind        AS series_kind,
+    s.name        AS series_name,
+    s.slug        AS series_slug,
+
+    e.country_id,
+    c.iso2        AS country_code,
+    c.name        AS country_name,
+    e.city,
+
+    -- `banner` et non `cover` : c'est le rôle déclaré pour cette table dans
+    -- `media.attachable_roles`, et un `cover` y serait refusé par le trigger.
+    media.attached_image('event', 'events', e.id, 'banner') AS banner,
+
+    CASE
+        WHEN now() < e.starts_at                      THEN 'upcoming'
+        WHEN now() BETWEEN e.starts_at AND e.ends_at  THEN 'ongoing'
+        ELSE 'past'
+    END AS temporal_state,
+
+    -- L'APPEL À PROPOSITIONS, EN TROIS COLONNES ET PAS UNE DE PLUS. Une édition
+    -- n'en porte qu'un (règle métier n° 5, garantie par ux_calls_one_per_event),
+    -- mais son état ne se déduit ni de `has_pavilion` ni de l'existence de la
+    -- ligne : un appel peut être en brouillon, clos ou annulé. `is_open` et
+    -- l'échéance effective viennent des fonctions du module, pour que la
+    -- prolongation s'affiche là où elle a été décidée.
+    cfp.id                                AS call_id,
+    cfp.status                            AS call_status,
+    (cfp.id IS NOT NULL AND event.is_call_open(cfp.id))  AS call_is_open,
+    event.effective_deadline(cfp.id)      AS call_deadline,
+
+    -- CE QUE CETTE VUE NE PORTE PAS, ET POURQUOI : le nombre d'activités
+    -- publiées. Il rendrait la frise plus parlante, mais `event` se charge AVANT
+    -- `programme` et la dépendance va dans l'autre sens — c'est la
+    -- programmation qui connaît son édition, jamais l'inverse. Le compte vit
+    -- donc dans `programme.v_edition_stats` (075), et l'API joint les deux en
+    -- une requête.
+    reference.terms_of('event', 'events', e.id, 'activity_theme')    AS theme_codes,
+    reference.term_badges('event', 'events', e.id, 'activity_theme') AS themes
+FROM event.events e
+-- LEFT JOIN et non INNER : `series_id` est nullable, et une jointure stricte
+-- ferait disparaître les rendez-vous hors série de tout historique.
+LEFT JOIN event.event_series s  ON s.id = e.series_id
+LEFT JOIN reference.countries c ON c.id = e.country_id
+LEFT JOIN event.calls_for_proposals cfp
+       ON cfp.event_id = e.id AND cfp.status <> 'cancelled'
+WHERE e.status NOT IN ('draft', 'cancelled');
+
+COMMENT ON VIEW event.v_public_editions IS
+    'Les éditions publiques prêtes à l''affichage : série, pays, bannière, état temporel, appel à propositions et volume du programme. Trier par starts_at.';

@@ -46,6 +46,7 @@ const sections: NavSection[] = [
       { labelKey: 'nav.admin.events', to: '/admin/evenements' },
       { labelKey: 'nav.admin.organizations', to: '/admin/organisations' },
       { labelKey: 'nav.admin.users', to: '/admin/utilisateurs' },
+      { labelKey: 'nav.admin.showcase', to: '/admin/vitrine' },
     ],
   },
   {

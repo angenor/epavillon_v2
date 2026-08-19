@@ -117,7 +117,7 @@ check-db-safe: assert-db
 # ce qui distingue un portail d'un affichage que personne ne lit.
 assert-db:
 	@echo '--- Schémas attendus'
-	@test "$$($(PSQL) -t -A -c "SELECT count(*) FROM information_schema.schemata WHERE schema_name IN ('platform','reference','identity','org','event','programme','live','publication','negotiation','engagement','media','tool','training','analytics','legacy')")" = "15" \
+	@test "$$($(PSQL) -t -A -c "SELECT count(*) FROM information_schema.schemata WHERE schema_name IN ('platform','reference','identity','org','event','programme','live','publication','negotiation','engagement','media','tool','content','training','analytics','legacy')")" = "16" \
 	  || (echo 'ÉCHEC : schémas manquants — le chargement du modèle est incomplet, voir `make logs-db`'; exit 1)
 	@echo '--- Frontières de modules (FK inter-modules nommées xmod_fk_*)'
 	@test "$$($(PSQL) -t -A -c 'SELECT count(*) FROM platform.cross_module_fk_report WHERE NOT is_compliant;')" = "0" \

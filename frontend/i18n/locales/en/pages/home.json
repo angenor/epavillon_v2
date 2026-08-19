@@ -1,0 +1,103 @@
+{
+  "title": "Home — ePavillon de la Francophonie",
+  "head": {
+    "title": "Home",
+    "description": "The programme, calls for proposals and editions of the ePavillon de la Francophonie, run by IFDD."
+  },
+  "loading": "Loading the home page",
+  "error": {
+    "title": "The home page could not be loaded",
+    "description": "The content is unavailable right now. Try again in a moment."
+  },
+  "empty": {
+    "title": "No published edition",
+    "description": "No edition is open to the public yet. Please come back soon."
+  },
+  "showcase": {
+    "label": "Featured",
+    "carouselRole": "carousel",
+    "slideRole": "slide",
+    "railLabel": "Banner slides",
+    "position": "{index} / {total}",
+    "goTo": "Show slide {index}: {title}",
+    "current": "current slide",
+    "previous": "Previous slide",
+    "next": "Next slide",
+    "play": "Resume automatic rotation",
+    "pause": "Pause automatic rotation",
+    "playing": "automatic rotation running",
+    "paused": "automatic rotation paused",
+    "reducedMotion": "Rotation is stopped because your system asks for reduced motion.",
+    "discover": "Find out more"
+  },
+  "aside": {
+    "title": "Coming up",
+    "description": "What starts soon, across every edition.",
+    "empty": {
+      "title": "Nothing announced yet",
+      "description": "No session or edition is scheduled at this time."
+    },
+    "pins": {
+      "title": "Spotlight",
+      "until": "Until {date}",
+      "link": "Read more"
+    },
+    "sessions": {
+      "title": "Next sessions",
+      "all": "Full programme",
+      "ongoing": "Live now"
+    },
+    "editions": {
+      "title": "Upcoming editions"
+    }
+  },
+  "call": {
+    "title": "Call for proposals — {edition}",
+    "state": {
+      "open": "Call open",
+      "closed": "Call closed"
+    },
+    "remaining": "Time left",
+    "countdown": {
+      "days": "{count} day | {count} day | {count} days",
+      "hours": "{count} hour | {count} hour | {count} hours",
+      "minutes": "{count} minute | {count} minute | {count} minutes"
+    },
+    "deadline": "Submission deadline",
+    "place": "Location",
+    "action": {
+      "submit": "Submit a proposal",
+      "edition": "See the edition"
+    },
+    "none": {
+      "title": "No open call for proposals",
+      "description": "No call is open at the moment. Upcoming calls are announced on this page and on the page of the edition concerned.",
+      "action": "See the current edition"
+    }
+  },
+  "history": {
+    "title": "Editions",
+    "description": "ePavillon events, from the most recent to the oldest.",
+    "filterLabel": "Filter editions by period",
+    "tabs": {
+      "all": "All",
+      "upcoming": "Upcoming",
+      "ongoing": "Ongoing",
+      "past": "Past"
+    },
+    "state": {
+      "upcoming": "Upcoming",
+      "ongoing": "Ongoing",
+      "past": "Ended"
+    },
+    "sessions": "{count} published activity | {count} published activity | {count} published activities",
+    "card": {
+      "open": "See the edition"
+    },
+    "empty": {
+      "title": "No edition in this period",
+      "description": "No edition matches the selected filter.",
+      "action": "See all editions"
+    }
+  }
+}

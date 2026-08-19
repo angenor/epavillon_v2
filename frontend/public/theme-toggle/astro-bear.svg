@@ -1,0 +1,11 @@
+<!-- INCOMPLET — À REMPLACER.
+     Le SVG d'origine a été tronqué en transit : seuls le casque et la silhouette
+     du corps ont été reçus. Manquent le tracé de contour noir, le visage, les
+     détails de la combinaison et le bloc <defs> (dégradé « aa » du reflet de
+     visière, retiré ici faute de définition). Affiché à ~14 px de large dans le
+     bouton, l'écart se voit peu, mais ce fichier n'est pas la version finale. -->
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 316 432">
+  <circle cx="158" cy="143" r="140" fill="#444"/>
+  <circle cx="158" cy="143" r="140" stroke="#000" stroke-width="6"/>
+  <path fill="#AF7128" fill-rule="evenodd" d="M65.98 159.61C49.913 155.643 38 141.134 38 123.842 38 103.495 54.495 87 74.842 87c14.337 0 26.761 8.19 32.85 20.146C119.687 100.674 133.414 97 148 97h20c14.52 0 28.19 3.641 40.146 10.059C214.251 95.15 226.65 87 240.952 87c20.347 0 36.842 16.495 36.842 36.842 0 17.222-11.818 31.685-27.787 35.72A85.104 85.104 0 0 1 253 182v66.56l10.054-10.054c11.325-11.325 29.687-11.325 41.012 0s11.325 29.687 0 41.012l-44.548 44.548a29.004 29.004 0 0 1-6.518 4.906V407c0 12.15-9.85 22-22 22h-44c-12.15 0-22-9.85-22-22v-28.69a41.072 41.072 0 0 1-14 .174V407c0 12.15-9.85 22-22 22H85c-12.15 0-22-9.85-22-22v-77.797a28.99 28.99 0 0 1-6.946-5.137l-44.548-44.548c-11.325-11.325-11.325-29.687 0-41.012 11.326-11.325 29.687-11.325 41.013 0L63 248.988V182a85.106 85.106 0 0 1 2.98-22.39Z" clip-rule="evenodd"/>
+</svg>

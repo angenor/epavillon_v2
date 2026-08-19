@@ -39,6 +39,16 @@
  *   registrations.ts     67 inscriptions, canaux d'acquisition variés, dont
  *                        sept sur la seule séance du jeu qui se soit tenue
  *   views.ts             les deux vues du modèle, reconstituées
+ *   content.ts           treize diapositives de la vitrine, les six natures de
+ *                        `highlight_nature` et `content.v_showcase` rejouée —
+ *                        une archivée, un brouillon, une hors fenêtre
+ *   home.ts              la composition de l'accueil public (A15), l'historique
+ *                        des éditions, les deux vues qu'il consomme
+ *                        (`v_public_editions`, `v_edition_stats`) et le journal
+ *                        d'écritures que le back-office alimente
+ *   admin-showcase.ts    le back-office de la vitrine (A15) : la liste filtrée
+ *                        par périmètre, le formulaire et son aperçu, l'ordre et
+ *                        les quatre écritures
  *   incidents.ts         sept messages d'incident : les cinq états que
  *                        `live.event_incidents()` distingue, les cinq portées
  *   admin-incidents.ts   ce que l'écran A13 en fait — état, portée, cible
@@ -184,7 +194,15 @@ export {
   resolveComment,
 } from './organization-workspace'
 
-export { coverAssets, coverAttachments, attachedImage } from './covers'
+export {
+  assetOf,
+  attachedImage,
+  attachmentOf,
+  coverAssets,
+  coverAttachments,
+  showcaseAssets,
+  showcaseAttachments,
+} from './covers'
 export { registrationForms, registrationFormFields } from './registration-form'
 export { registrations } from './registrations'
 export { publicSchedule, proposalDashboard } from './views'
@@ -299,3 +317,31 @@ export {
   userListRow,
   userListScreen,
 } from './admin-users'
+
+export {
+  highlightMediaRules,
+  highlightNatureTerms,
+  highlightThemeBadges,
+  highlights,
+  showcase,
+  showcaseRowOf,
+} from './content'
+
+export {
+  currentEdition,
+  editionHistory,
+  editionStats,
+  homeScreen,
+  publicEditions,
+} from './home'
+
+export {
+  blankShowcase,
+  duplicateShowcase,
+  moveShowcase,
+  saveShowcase,
+  setShowcaseStatus,
+  showcaseById,
+  showcaseForm,
+  showcaseList,
+} from './admin-showcase'

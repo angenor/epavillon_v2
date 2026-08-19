@@ -235,6 +235,49 @@
      ce qui empêche une photo claire de trouer la page. Sans ce rôle, un
      composant écrit `bg-black/50`, qui ne réagit à aucun thème. */
   --color-scrim: var(--ifdd-noir);
+
+  /* ---------------------------------------------------------------------
+     LE VERRE — surfaces posées SUR un média, et nulle part ailleurs.
+
+     Arbitrage du commanditaire, 19/08 : la page d'accueil reprend le rendu de
+     la plateforme de référence — fond photographique ou vidéo plein cadre, et
+     des panneaux translucides flottant dessus. Le guide de style proscrivait
+     le verre dépoli ; l'interdiction est LEVÉE pour ce cas précis et pour lui
+     seul, et le guide a été amendé en conséquence (§ « Le verre »).
+
+     POURQUOI DES JETONS PLUTÔT QUE DES `bg-white/20` SEMÉS DANS LES COMPOSANTS.
+     La v1 avait treize opacités différentes — `/10`, `/15`, `/20`, `/30`, `/40`,
+     `/50`, `/70`, `/80` — écrites au jugé dans huit fichiers, plus des
+     `backdrop-blur-sm|md|xl` sans règle. Deux panneaux voisins n'avaient pas la
+     même densité, et personne ne pouvait dire laquelle était la bonne. Ici il y
+     a QUATRE surfaces, deux traits et deux flous, nommés par leur rôle.
+
+     LA RÈGLE QUI TIENT L'ENSEMBLE : une surface de verre n'est lisible que
+     posée sur un média DÉJÀ VOILÉ par `--color-scrim`. Le verre apporte la
+     séparation, le voile apporte le contraste — jamais l'inverse. Un panneau de
+     verre sur un fond de page clair est un défaut, pas une variante.
+
+     ELLES NE S'INVERSENT PAS AU THÈME SOMBRE, comme les aplats institutionnels
+     juste au-dessus : le fond est une photographie, pas une surface de thème. */
+  --color-glass: color-mix(in srgb, var(--ifdd-noir) 52%, transparent);
+  --color-glass-raised: color-mix(in srgb, var(--ifdd-blanc) 14%, transparent);
+  --color-glass-hover: color-mix(in srgb, var(--ifdd-blanc) 26%, transparent);
+  /* Teinte institutionnelle : l'encart de citation du bandeau, qui doit se
+     distinguer des cartes du panneau sans changer de matière. */
+  --color-glass-accent: color-mix(in srgb, var(--ifdd-bleu-800) 46%, transparent);
+  --color-glass-border: color-mix(in srgb, var(--ifdd-blanc) 24%, transparent);
+  --color-glass-border-strong: color-mix(in srgb, var(--ifdd-blanc) 62%, transparent);
+
+  /* Deux flous, pas huit. `glass` pour les cartes et les barres — au-delà, le
+     fond devient une bouillie et la photographie ne raconte plus rien ;
+     `glass-strong` pour le seul encart qui porte un long texte, où la lisibilité
+     prime sur le fond. */
+  --blur-glass: 14px;
+  --blur-glass-strong: 24px;
+
+  /* L'ombre portée d'un panneau flottant. Plus marquée que `--shadow-lg` : sur
+     une photographie, une ombre discrète ne détache rien. */
+  --shadow-glass: 0 18px 40px -12px rgb(35 31 32 / 0.55);
   /* Cerne d'une pastille dont la couleur vient de la BASE (thématique, journée
      spéciale) : elle peut être claire ou foncée, le cerne la détache du fond
      dans les deux cas. Remplace les `ring-black/10` qui disparaissaient en
@@ -342,6 +385,14 @@
   --color-live-surface: var(--ifdd-rouge-50);
   --color-live-border: var(--ifdd-rouge-300);
 
+  /* Hauteur de la barre de navigation, bordure comprise. Elle existe pour UNE
+     raison : le bandeau d'accueil doit occuper exactement un écran, ni plus ni
+     moins, et il ne peut le calculer qu'en retranchant cette hauteur de
+     `100svh`. La barre elle-même s'y cale (`min-h`), sans quoi la valeur
+     mentirait dès qu'un logo change d'un pixel — c'était le cas : 69 px sur
+     grand écran, 67,8 px sur mobile. */
+  --nav-height: 4.3125rem;
+
   /* -- Polices -- */
   --font-sans: var(--ifdd-police-1);
   --font-display: var(--ifdd-police-2);
@@ -433,6 +484,33 @@
   --font-size-2xl: 1.75rem; /* 28 px — titre de section */
   --font-size-3xl: 2.25rem; /* 36 px — titre de page */
 
+  /* -- ÉCHELLE D'AFFICHAGE — DEUX TAILLES, ET ELLES NE SONT PAS UN HUITIÈME ET
+        UN NEUVIÈME NIVEAU. Les sept ci-dessus composent un DOCUMENT : elles
+        hiérarchisent des titres qu'on parcourt. Celles-ci ne servent qu'à un
+        bandeau d'ouverture, où une citation est l'objet même de l'écran et non
+        le titre d'une section — un seul emploi par page, jamais dans un
+        tableau, jamais dans une carte.
+
+        Sans elles, le bandeau écrivait `text-[3.5rem]` : une valeur en dur
+        qu'aucun thème, aucune relecture et aucune refonte ne peut retrouver.
+        C'est la règle d'usage n° 12 du guide de style — ajouter le jeton
+        manquant plutôt qu'une valeur arbitraire.
+
+        `clamp()` PLUTÔT QUE DES PALIERS : une citation en 44 px déborde à
+        375 px, et multiplier les surcharges de point d'arrêt sur un seul
+        élément revient à réécrire l'échelle dans le gabarit. Les bornes hautes
+        ne sont pas choisies au jugé : au-delà, une citation de cinq lignes ne
+        tient plus dans la hauteur du bandeau (`min(84vh, 720px)`) et s'y trouve
+        rognée.
+
+        DEUX TAILLES PARCE QU'IL Y A DEUX CADRES. Le bandeau pleine largeur de
+        l'accueil prend `display` ; l'aperçu réduit du back-office, qui rend LE
+        MÊME composant dans une boîte de quelques centaines de pixels, prend
+        `display-sm`. Sans la seconde, l'aperçu retomberait sur un niveau de
+        titre ordinaire et cesserait de ressembler à ce qu'il montre. -- */
+  --font-size-display-sm: clamp(1.5rem, 1.05rem + 1.8vw, 2rem); /*     24 → 32 px */
+  --font-size-display: clamp(1.75rem, 1.15rem + 2.4vw, 2.75rem); /*    28 → 44 px */
+
   /* Largeur maximale d'un paragraphe : 68 caractères. Au-delà, l'œil perd la
      ligne en revenant à gauche. Calibré sur le FRANÇAIS, plus long que l'anglais
      d'environ 20 % — un gabarit dimensionné sur l'anglais déborderait. */
@@ -449,6 +527,8 @@
   --text-xl: var(--font-size-xl);
   --text-2xl: var(--font-size-2xl);
   --text-3xl: var(--font-size-3xl);
+  --text-display-sm: var(--font-size-display-sm);
+  --text-display: var(--font-size-display);
 }
 
 /* -----------------------------------------------------------------------------

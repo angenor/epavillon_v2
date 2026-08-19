@@ -66,6 +66,14 @@ export const COUNTRY = {
   td: uuid('7010', 17),
   /** Hôte de la COP29 — hors espace francophone, ajouté au prompt A3. */
   az: uuid('7010', 18),
+
+  // AJOUTÉS LE 19/08 POUR LES TÉMOIGNAGES REPRIS DE LA PLATEFORME DE RÉFÉRENCE.
+  // Deux pays de l'OIF qui manquaient au jeu, et sans lesquels deux témoignages
+  // réels auraient dû se contenter d'un pays écrit dans leur fonction — c'est
+  // exactement ce que faisait la v1, dont le champ « organisation » portait
+  // « Négociatrice bénéficiaire, île Maurice ».
+  gn: uuid('7010', 19),
+  mu: uuid('7010', 20),
 } as const
 
 /**
@@ -648,3 +656,67 @@ export const INCIDENT = {
   /** Portée organisation, publié PUIS dépublié à la main, avec motif. */
   panneVisioOrg: uuid('7090', 7),
 } as const
+
+// ---------------------------------------------------------------------------
+// Contenus mis en avant — 115_content.sql
+// ---------------------------------------------------------------------------
+
+/**
+ * `reference.taxonomy_terms`, taxonomie `highlight_nature` — semée par
+ * `115_content.sql` § 6.
+ *
+ * Déclarée à part de `TERM` et non fondue dedans : ces six termes appartiennent
+ * au module `content`, qui se charge après le référentiel, et `mocks/reference.ts`
+ * ne les porte pas. Ils vivent avec les diapositives, dans `mocks/content.ts`,
+ * comme le semis les pose avec la table.
+ */
+export const HIGHLIGHT_NATURE = {
+  testimonial: uuid('7011', 110),
+  negotiatorVoice: uuid('7011', 111),
+  innovation: uuid('7011', 112),
+  bestPractice: uuid('7011', 113),
+  announcement: uuid('7011', 114),
+  keyFigure: uuid('7011', 115),
+} as const
+
+/**
+ * `content.highlights` — treize diapositives de la vitrine.
+ *
+ * Le jeu couvre délibérément ce que la vitrine publique DOIT ÉCARTER autant que
+ * ce qu'elle montre : une diapositive archivée, une dont la fenêtre de diffusion
+ * est close, un brouillon. Sans elles, ni les trois états du back-office ni le
+ * filtre temporel de `content.v_showcase` n'auraient de quoi se démontrer.
+ */
+export const HIGHLIGHT = {
+  // Bandeau d'ouverture — `home_hero`
+  temoignageNegociatrice: uuid('7100', 1),
+  temoignageCooperatives: uuid('7100', 2),
+  paroleNegociateur: uuid('7100', 3),
+  innovationMesureCarbone: uuid('7100', 4),
+  bonnePratiquePastoralisme: uuid('7100', 5),
+  chiffreClePavillon: uuid('7100', 6),
+  annonceJourneeJeunesse: uuid('7100', 7),
+  /** ARCHIVÉE : retirée de la vitrine, conservée pour être remise en avant. */
+  temoignageArchiveCop29: uuid('7100', 8),
+  /** HORS FENÊTRE : publiée, mais `ends_at` est passé — elle s'est éteinte seule. */
+  annonceWebinairePaco: uuid('7100', 9),
+
+  // Panneau latéral — `home_aside`
+  asideAppelCop31: uuid('7100', 20),
+  asideRediffusionsPaco: uuid('7100', 21),
+  asideChiffreOrganisations: uuid('7100', 22),
+  /** BROUILLON : rédigé, jamais sorti. */
+  asideGuidePavillon: uuid('7100', 23),
+} as const
+
+/**
+ * Diapositive CRÉÉE PENDANT LA SESSION par le back-office de la vitrine.
+ * Numérotée hors du jeu, comme `ORG_CREATED` et `PROPOSAL_DRAFTED`.
+ */
+export const HIGHLIGHT_CREATED = (n: number): Uuid => uuid('7100', 900 + n)
+
+/** `media.assets` des diapositives — fonds, vignettes et fond vidéo. */
+export const SHOWCASE_ASSET = (n: number): Uuid => uuid('7101', n)
+
+/** `media.attachments` des diapositives, numérotés à part des couvertures. */
+export const SHOWCASE_ATTACHMENT = (n: number): Uuid => uuid('7102', n)

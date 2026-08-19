@@ -809,6 +809,66 @@ Le routage doit la servir automatiquement quand le drapeau de fonctionnalité du
 module est désactivé, sans toucher aux pages elles-mêmes.
 ```
 
+**A15 — Accueil public et vitrine administrable** (fait le 19/08)
+
+```
+[PRÉAMBULE]
+
+Page d'accueil publique, et son back-office.
+
+CET ÉCRAN RÉVOQUE UNE DÉCISION. `pages/index.vue` redirigeait vers l'édition en
+cours, au motif qu'une seconde page d'accueil divergerait de celle de l'édition.
+La demande du commanditaire tranche autrement : l'accueil est une page à part
+entière. `/evenements/<slug>` reste l'adresse canonique d'une édition, et
+l'accueil y conduit — mais il porte ce que la page d'une édition ne peut pas
+porter : ce que la plateforme a produit, toutes éditions confondues.
+
+Trois blocs.
+
+1. UN BANDEAU D'OUVERTURE QUI DÉFILE, pleine largeur, fond vidéo en boucle ou
+   photographie, voile par-dessus, la citation en grand, l'attribution dessous,
+   un rail de vignettes en bas.
+
+   CE QUI DÉFILE EST UNE DONNÉE, PAS DU CODE. C'est le point de l'écran. En v1,
+   les contenus vivaient dans deux tables Supabase divergentes et cinq
+   composants Vue où les annonces étaient écrites en dur — dates, images et
+   identifiants compris. Changer l'accueil demandait un redéploiement, et
+   l'ordre du carrousel suivait la date de création : l'IFDD ne décidait pas ce
+   qui passe en premier.
+
+   Ici, une seule table (`content.highlights`), une nature en taxonomie
+   (témoignage, parole de négociateur, innovation, bonne pratique, annonce,
+   chiffre clé), un ordre, une fenêtre de diffusion, et un fond qui passe par
+   `media.assets` comme tout le reste.
+
+2. UN PANNEAU LATÉRAL GAUCHE « À venir » : les épingles éditoriales, les
+   prochaines séances toutes éditions confondues, les prochaines éditions. Il
+   remplace les cinq widgets promotionnels codés en dur de la v1. Sur écran
+   étroit il devient une section sous le bandeau, jamais un tiroir : c'est
+   l'information la plus utile de la page.
+
+3. L'HISTORIQUE DES ÉVÉNEMENTS, passés, en cours et à venir, groupés par année,
+   avec un filtre par période. La v1 ne l'avait pas : son accueil filtrait sur
+   « à venir » avant de trier sur « terminé », si bien qu'aucun événement passé
+   ne s'y affichait jamais.
+
+L'ancre `#appel-a-propositions` doit survivre : elle est câblée dans le pied de
+page, et elle vise désormais une section de l'accueil qui présente l'appel de
+l'édition en cours — édition choisie PAR LES DONNÉES, jamais par une constante.
+
+Back-office : `/admin/vitrine`. Liste par emplacement, réordonnancement
+utilisable au clavier, publication et retrait, fenêtre de diffusion, et un
+APERÇU qui réutilise le composant du bandeau public — pas une seconde mise en
+page qui divergerait. Filtré par le périmètre d'administration : un contenu sans
+édition est un contenu de plateforme, réservé à la portée globale.
+
+Compléments du modèle apportés par cet écran : le module `content`
+(`115_content.sql`), les vues `event.v_public_editions` et
+`programme.v_edition_stats`, et le rôle `video` ajouté à
+`media.attachment_role` — l'énumération ne portait que des rôles d'image et de
+document.
+```
+
 ---
 
 # PHASE B — L'API avec GitHub Spec Kit
@@ -1246,6 +1306,7 @@ Bascule le frontend des données simulées vers l'API réelle.
    └── A6 tableau de bord ── A7 liste ──┴─ A8 évaluation ── A9 planificateur
                               A10 événements · A11 organisations · A12 rôles
                               A13 incidents · A14 maintenance
+                              A15 accueil et vitrine
    │
    ▼
   B0 constitution

@@ -1,7 +1,7 @@
 /**
  * `platform.modules` — recopie du semis de `010_platform.sql` § 1.
  *
- * ONZE LIGNES, ET UNE SEULE RAISON DE LES AVOIR ICI : l'écran des permissions
+ * DOUZE LIGNES, ET UNE SEULE RAISON DE LES AVOIR ICI : l'écran des permissions
  * effectives (A12) groupe par module. Vingt-quatre permissions à plat ne se
  * lisent pas ; « Programmation : 4 · Organisations : 3 » se lit d'un coup d'œil,
  * et c'est aussi la façon dont le modèle lui-même est organisé — un module, un
@@ -38,6 +38,15 @@ export const platformModules = [
   platformModule('event', { fr: 'Événements', en: 'Events' }, ['org', 'identity']),
   platformModule('programme', { fr: 'Programmation', en: 'Programme' }, ['event', 'org', 'identity']),
   platformModule('live', { fr: 'Direct', en: 'Live' }, ['programme']),
+  // AJOUTÉ AU MODÈLE AU PROMPT A15 (`115_content.sql` § 0) : la vitrine
+  // éditoriale porte sa permission, donc son groupe dans l'écran A12.
+  platformModule('content', { fr: 'Contenu éditorial', en: 'Editorial content' }, [
+    'identity',
+    'org',
+    'media',
+    'event',
+    'programme',
+  ]),
   platformModule('publication', { fr: 'Publications', en: 'Publications' }, ['org', 'identity']),
   platformModule('negotiation', { fr: 'Négociations', en: 'Negotiations' }, ['identity']),
   platformModule('engagement', { fr: 'Engagement', en: 'Engagement' }, ['identity']),
@@ -61,6 +70,7 @@ const MODULE_ORDER = [
   'org',
   'identity',
   'live',
+  'content',
   'analytics',
   'engagement',
   'media',

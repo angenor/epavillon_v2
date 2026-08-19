@@ -86,6 +86,8 @@ import { createAdminOrganizationsApi } from './api/admin-organizations'
 import { createAdminUsersApi } from './api/admin-users'
 import { createAdminIncidentsApi } from './api/admin-incidents'
 import { createOrganizationWorkspaceApi } from './api/organization-workspace'
+import { createHomeApi } from './api/home'
+import { createAdminShowcaseApi } from './api/admin-showcase'
 
 /** Erreur d'accès, à traduire par l'écran « accès refusé ». */
 export class ForbiddenError extends Error {
@@ -263,6 +265,9 @@ export function useApi() {
       featureFlags: (): Promise<FeatureFlag[]> =>
         call('/platform/feature-flags', (m) => m.featureFlags),
     },
+
+    home: createHomeApi({ call }),
+    adminShowcase: createAdminShowcaseApi({ call, send, assertEventInScope }),
 
     // -----------------------------------------------------------------------
     // Référentiel

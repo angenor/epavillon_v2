@@ -121,6 +121,56 @@
   .skip-link:focus {
     top: var(--space-4);
   }
+
+  /* ---------------------------------------------------------------------
+     PLEINE LARGEUR DEPUIS UN CONTENEUR CENTRÉ.
+
+     `app/layouts/public.vue` enferme chaque page dans `max-w-[1280px]` avec
+     ses marges intérieures. Un bandeau d'ouverture doit en sortir : c'est le
+     seul bloc d'une page publique qui touche les deux bords de l'écran.
+
+     `margin-inline: calc(50% - 50vw)` est la seule forme qui n'exige rien du
+     parent — ni `position`, ni largeur connue. Les deux marges négatives
+     valent la moitié de ce qui sépare le conteneur du bord, l'élément
+     s'élargit d'autant, et il reste dans le flux : aucun `position: absolute`
+     à compenser, aucune hauteur à recopier.
+
+     POURQUOI CE N'EST PAS UNE SOURCE DE DÉFILEMENT HORIZONTAL. `50vw` compte
+     la barre de défilement, que `50%` ignore : l'élément dépasse donc de sa
+     largeur — quelques pixels sur un poste fixe, zéro sur mobile où les barres
+     sont superposées. `html { overflow-x: hidden }`, posé plus haut dans ce
+     même fichier au titre de la règle « le corps ne défile jamais
+     horizontalement », absorbe exactement ce dépassement. Les deux règles se
+     tiennent : retirer l'une casse l'autre.
+
+     `max-width: 100vw` empêche par ailleurs un contenu large (une vidéo, un
+     rail) de rouvrir le débordement par le bas.
+     --------------------------------------------------------------------- */
+  .full-bleed {
+    margin-inline: calc(50% - 50vw);
+    max-width: 100vw;
+  }
+
+  /* -------------------------------------------------------------------------
+     LE FONDU DU BAS D'UN MÉDIA.
+
+     Le rail de vignettes du bandeau et le titre de la diapositive courante se
+     posent sur la photographie elle-même. Un aplat les couperait en deux ; un
+     fondu les rattache au média. C'est LE SEUL dégradé autorisé de la charte,
+     et il ne décore rien : il porte la lisibilité d'un texte blanc sur une
+     image dont on ne connaît pas la luminosité (§ « Le verre » du guide).
+
+     Il part de `--color-scrim`, le même noir que le voile général, pour que les
+     deux se composent sans marche visible.
+     ------------------------------------------------------------------------- */
+  .scrim-fade-bottom {
+    background-image: linear-gradient(
+      to top,
+      color-mix(in srgb, var(--color-scrim) 92%, transparent) 0%,
+      color-mix(in srgb, var(--color-scrim) 62%, transparent) 45%,
+      transparent 100%
+    );
+  }
 }
 
 /* ---------------------------------------------------------------------------

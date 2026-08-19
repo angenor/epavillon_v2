@@ -41,10 +41,10 @@ Si le modèle paraît insuffisant pour une fonctionnalité, **on modifie le SQL 
 | Couleurs, polices, jetons de design | [docs/CHARTE_GRAPHIQUE.md](docs/CHARTE_GRAPHIQUE.md) puis `frontend/app/assets/css/design-tokens.css` |
 | Vue d'ensemble du modèle, invariants, conventions SQL | [docs/README.md](docs/README.md) |
 | Le guide de style vivant, rendu par les vrais composants | `frontend/app/pages/style-guide.vue` |
-| **À quoi l'interface doit ressembler — la référence qui fait autorité** | [docs/guide-de-style-epavillon.html](docs/guide-de-style-epavillon.html) : maquette complète écrite à la main, avec ses **douze règles d'usage** et ses décisions de conception. En cas de désaccord avec l'implémentation Vue, **c'est lui qui tranche** — sauf sur les thématiques, voir ci-dessous |
+| **À quoi l'interface doit ressembler — la référence qui fait autorité** | [docs/guide-de-style-epavillon.html](docs/guide-de-style-epavillon.html) : maquette complète écrite à la main, avec ses **treize règles d'usage** et ses décisions de conception. En cas de désaccord avec l'implémentation Vue, **c'est lui qui tranche** — sauf sur les thématiques, voir ci-dessous |
 | Ce que demandait le commanditaire, dans ses mots | [docs/historique/](docs/historique/) |
 
-**Ne charge pas tout.** `CADRAGE.md` fait plusieurs centaines de lignes et les 18 fichiers SQL en totalisent 14 143 : lis la section ou le fichier dont tu as besoin, pas l'ensemble.
+**Ne charge pas tout.** `CADRAGE.md` fait plusieurs centaines de lignes et les 19 fichiers SQL en totalisent 15 928 : lis la section ou le fichier dont tu as besoin, pas l'ensemble.
 
 ---
 
@@ -80,13 +80,15 @@ Elles sont détaillées dans le cadrage, mais on les oublie vite et chacune a d�
 
 Institutionnel et sérieux, mais vivant. Ni tableau de bord SaaS générique, ni site d'ONG militant. Références de posture : le site des Nations unies pour la rigueur, une revue scientifique en ligne pour la lisibilité, une billetterie de festival pour l'énergie de la programmation.
 
-**La référence détaillée est [docs/guide-de-style-epavillon.html](docs/guide-de-style-epavillon.html)** — elle porte douze règles d'usage numérotées et le dessin de chaque composant. Trois d'entre elles se trahissent facilement et coûtent cher :
+**La référence détaillée est [docs/guide-de-style-epavillon.html](docs/guide-de-style-epavillon.html)** — elle porte treize règles d'usage numérotées et le dessin de chaque composant. Trois d'entre elles se trahissent facilement et coûtent cher :
 
 - **La couleur d'un état n'est pas celle qu'on croit.** Cyan pour l'information et l'action ; vert pour ce qui est confirmé ; jaune pour ce qui demande attention — donc pour « en cours », qui n'est pas une réussite ; rouge pour l'échec, la suppression et le direct ; **violet pour le report**, déjà arbitré et qui n'attend plus rien ; gris pour ce qui est clos.
 - **Toute cible tactile fait 44 px** (`--target-min`). Les 40 px compacts sont réservés aux barres d'outils sur écran large, jamais à l'action principale d'un écran mobile.
 - **Trois pastilles thématiques au plus** sur une carte ; les suivantes se replient en « +N ». Au-delà, elles cessent d'informer.
 
 **Une seule divergence assumée avec ce guide** : il fige huit thématiques dans des jetons CSS. Ne pas le suivre là-dessus — les thématiques vivent dans `reference.taxonomy_terms` avec leur couleur, et les figer dans la feuille de style est exactement le défaut n° 1 de la v1.
+
+**Et une exception, arbitrée le 19/08** : le verre dépoli du bandeau d'accueil, décrite ci-dessous et inscrite au guide.
 
 **À faire**
 - Hiérarchie typographique forte : les titres portent le sens, pas les icônes.
@@ -96,10 +98,22 @@ Institutionnel et sérieux, mais vivant. Ni tableau de bord SaaS générique, ni
 - Coins légèrement arrondis (6 à 8 px), ombres très discrètes ou bordures fines.
 
 **À éviter absolument**
-- Dégradés, effets de verre dépoli, néons, halos flous.
+- Néons, halos flous.
 - Illustrations 3D, blobs, formes organiques flottantes.
 - Emoji en guise d'icônes fonctionnelles.
 - Les tournures marketing (« Boostez », « Révolutionnez ») et le mot « Bienvenue ».
+
+**Le verre et le dégradé : interdits partout, sauf sur un média.**
+
+Cette ligne interdisait le verre dépoli et les dégradés sans exception. **Le commanditaire a tranché autrement le 19/08** : la page d'accueil reprend le rendu de la plateforme de référence — fond photographique ou vidéo plein cadre, panneaux translucides flottant dessus. L'exception est donc **arbitrée, bornée, et outillée** :
+
+- Elle ne vaut **que sur un média** — une photographie, une vidéo. Un panneau de verre sur une surface de page est un défaut, pas une variante.
+- La matière vient de **jetons** : `--color-glass`, `-raised`, `-hover`, `-accent`, `--color-glass-border`, `-border-strong`, `--blur-glass`, `--blur-glass-strong`, `--shadow-glass`. Jamais un `bg-white/20` écrit dans un composant — la v1 avait treize opacités différentes réparties dans huit fichiers, et personne ne savait laquelle était la bonne.
+- **Le verre sépare, il ne contraste pas.** Le contraste reste porté par `--color-scrim` sous le média. Sans voile, une photographie claire rend le panneau illisible malgré son flou.
+- **Un seul dégradé** existe : `.scrim-fade-bottom`, le fondu qui rattache le rail de vignettes au bas d'une image. Il ne décore rien — il rend lisible un texte blanc sur une image dont on ignore la luminosité.
+- Ces surfaces **ne s'inversent pas** en thème sombre, comme les aplats institutionnels : le fond est une photographie dans les deux thèmes.
+
+Le détail est au § « Le verre » de [docs/guide-de-style-epavillon.html](docs/guide-de-style-epavillon.html).
 
 ### Deux niveaux de jetons de design, à ne jamais mélanger
 

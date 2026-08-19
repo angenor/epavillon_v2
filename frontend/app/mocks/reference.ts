@@ -380,10 +380,46 @@ const curatedCountries = [
     created_at: '2026-01-12T09:00:00Z',
     updated_at: '2026-01-12T09:00:00Z',
   },
+  {
+    id: COUNTRY.gn,
+    iso2: 'GN',
+    iso3: 'GIN',
+    numeric_code: '324',
+    name: { fr: 'Guinée', en: 'Guinea' },
+    official_name: null,
+    name_normalized: 'guinee',
+    region_code: 'africa-west',
+    continent: 'africa',
+    oif_status: 'member',
+    default_timezone: 'Africa/Conakry',
+    calling_code: '+224',
+    flag_emoji: '🇬🇳',
+    is_active: true,
+    created_at: '2026-01-12T09:00:00Z',
+    updated_at: '2026-01-12T09:00:00Z',
+  },
+  {
+    id: COUNTRY.mu,
+    iso2: 'MU',
+    iso3: 'MUS',
+    numeric_code: '480',
+    name: { fr: 'Maurice', en: 'Mauritius' },
+    official_name: { fr: 'République de Maurice', en: 'Republic of Mauritius' },
+    name_normalized: 'maurice',
+    region_code: 'africa-east',
+    continent: 'africa',
+    oif_status: 'member',
+    default_timezone: 'Indian/Mauritius',
+    calling_code: '+230',
+    flag_emoji: '🇲🇺',
+    is_active: true,
+    created_at: '2026-01-12T09:00:00Z',
+    updated_at: '2026-01-12T09:00:00Z',
+  },
 ] satisfies Country[]
 
 /**
- * LE RÉFÉRENTIEL COMPLET — les dix-huit fiches curées, puis le reste de la norme.
+ * LE RÉFÉRENTIEL COMPLET — les vingt fiches curées, puis le reste de la norme.
  *
  * Les curées PASSENT DEVANT : « République démocratique du Congo » l'emporte sur
  * le « Congo-Kinshasa » de CLDR, et leur identifiant reste celui de `ids.ts`, vers

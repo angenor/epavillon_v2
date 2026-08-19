@@ -51,7 +51,14 @@ export type RenditionFormat = 'webp' | 'avif' | 'jpeg' | 'png' | 'mp4' | 'pdf'
 /** ENUM `media.rendition_status`. */
 export type RenditionStatus = 'pending' | 'generating' | 'ready' | 'failed'
 
-/** ENUM `media.attachment_role`. */
+/**
+ * ENUM `media.attachment_role`.
+ *
+ * L'ordre suit celui du SQL. `video` y a été ajouté le 19/08 pour le module
+ * `content` : l'énumération ne portait que des rôles d'image et de document,
+ * alors que la plateforme stocke déjà des enregistrements de séance et fait
+ * défiler des fonds vidéo sur sa page d'accueil.
+ */
 export type AttachmentRole =
   | 'cover'
   | 'banner'
@@ -59,6 +66,7 @@ export type AttachmentRole =
   | 'gallery'
   | 'document'
   | 'avatar'
+  | 'video'
   | 'attachment'
 
 // ---------------------------------------------------------------------------

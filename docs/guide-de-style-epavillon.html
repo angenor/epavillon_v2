@@ -994,6 +994,7 @@ table.data td.num { text-align: end; font-variant-numeric: tabular-nums; }
     <a href="#progression"><span>03.5</span>Frise et étapes</a>
     <a href="#motifs"><span>04</span>Motifs transversaux</a>
     <a href="#regles"><span>05</span>Règles d'usage</a>
+    <a href="#verre"><span>05b</span>Le verre</a>
     <a href="#export"><span>06</span>Export des jetons</a>
   </div>
 </nav>
@@ -1944,7 +1945,56 @@ table.data td.num { text-align: end; font-variant-numeric: tabular-nums; }
     <li><b>Les états d'écran ne sont pas optionnels</b><p>Tout écran qui charge des données définit ses quatre états — chargement, vide, erreur, accès refusé — avant d'être considéré comme terminé.</p></li>
     <li><b>Toute cible tactile fait 44 px</b><p>Boutons, entrées de navigation, cases à cocher, actions de tableau. La taille compacte de 40 px reste réservée aux barres d'outils sur écran large.</p></li>
     <li><b>Aucune valeur en dur</b><p>Les composants n'appellent que des jetons de rôle. Une couleur écrite en hexadécimal dans une feuille de composant est un défaut, pas un raccourci ; l'échelle des espacements et des rayons obéit à la même règle.</p></li>
+    <li><b>Le verre ne se pose que sur un média</b><p>Un panneau translucide flouté est réservé au bandeau d'accueil, posé sur une photographie ou une vidéo. Sur une surface de page, c'est un défaut. Il sépare, il ne contraste pas : le contraste reste porté par <code>--color-scrim</code> sous le média. Voir la section suivante.</p></li>
   </ol>
+</section>
+
+<!-- ===================== 05 bis LE VERRE ===================== -->
+<section class="band" id="verre">
+  <div class="section-head"><span class="num">05b</span><h2>Le verre</h2></div>
+
+  <p class="note" style="max-width:var(--measure);color:var(--color-text-secondary)">
+    <b>Ce guide interdisait le verre dépoli et les dégradés sans exception.</b> Le commanditaire a
+    tranché autrement le 19 août 2026&nbsp;: la page d'accueil reprend le rendu de la plateforme de
+    référence — fond photographique ou vidéo plein cadre, panneaux translucides flottant dessus.
+    L'exception est bornée à ce cas, et elle est outillée.
+  </p>
+
+  <h3>Où le verre est permis</h3>
+  <ul>
+    <li>Le bandeau d'accueil et ce qui flotte dessus&nbsp;: l'encart de citation, le rail de vignettes, ses commandes, le panneau «&nbsp;À venir&nbsp;».</li>
+    <li>Nulle part ailleurs. Une carte de verre sur un fond de page est un défaut, pas une variante&nbsp;: elle n'a rien à laisser voir derrière elle, et le flou n'y produit qu'un gris sale.</li>
+  </ul>
+
+  <h3>Trois règles qui tiennent l'ensemble</h3>
+  <ol class="rules">
+    <li><b>Le verre sépare, le voile contraste</b><p>Une surface de verre n'est lisible que posée sur un média <b>déjà voilé</b> par <code>--color-scrim</code>. Sans voile, une photographie claire rend le panneau illisible malgré son flou. Inversement, depuis que la citation vit dans un panneau, le voile général a pu descendre de 65&nbsp;% à 38&nbsp;%&nbsp;: la photographie redevient lisible en tant que photographie.</p></li>
+    <li><b>Quatre surfaces, deux traits, deux flous — pas un de plus</b><p>La v1 comptait treize opacités écrites au jugé dans huit fichiers, plus des flous sans règle&nbsp;: deux panneaux voisins n'avaient pas la même densité et personne ne pouvait dire laquelle était la bonne. Ici, tout passe par des jetons nommés par leur rôle.</p></li>
+    <li><b>Le verre ne s'inverse pas</b><p>Comme les aplats institutionnels, ces surfaces gardent leur valeur en thème sombre&nbsp;: le fond est une photographie dans les deux thèmes, et un panneau qui s'y inverserait deviendrait illisible la nuit. Le texte reste <code>--color-text-on-inverse</code>.</p></li>
+  </ol>
+
+  <h3>Les jetons</h3>
+  <table>
+    <thead><tr><th>Jeton</th><th>Rôle</th></tr></thead>
+    <tbody>
+      <tr><td><code>--color-glass</code></td><td>Le panneau de fond — barre de commandes, colonne latérale. Noir de charte à 52&nbsp;%.</td></tr>
+      <tr><td><code>--color-glass-raised</code></td><td>Une carte DANS un panneau de verre. Blanc à 14&nbsp;%.</td></tr>
+      <tr><td><code>--color-glass-hover</code></td><td>La même, au survol. Blanc à 26&nbsp;%.</td></tr>
+      <tr><td><code>--color-glass-accent</code></td><td>Teinte institutionnelle&nbsp;: l'encart de citation, qui doit se distinguer des cartes sans changer de matière.</td></tr>
+      <tr><td><code>--color-glass-border</code></td><td>Le trait d'une surface de verre. Blanc à 24&nbsp;%.</td></tr>
+      <tr><td><code>--color-glass-border-strong</code></td><td>Le cerne d'un élément SÉLECTIONNÉ — la vignette courante du rail. Blanc à 62&nbsp;%.</td></tr>
+      <tr><td><code>--blur-glass</code></td><td>14&nbsp;px. Cartes et barres. Au-delà, le fond devient une bouillie et la photographie ne raconte plus rien.</td></tr>
+      <tr><td><code>--blur-glass-strong</code></td><td>24&nbsp;px. Le SEUL encart qui porte un long texte, où la lisibilité prime sur le fond.</td></tr>
+      <tr><td><code>--shadow-glass</code></td><td>L'ombre portée d'un panneau flottant. Plus marquée que <code>--shadow-lg</code>&nbsp;: sur une photographie, une ombre discrète ne détache rien.</td></tr>
+      <tr><td><code>.scrim-fade-bottom</code></td><td><b>Le seul dégradé de la charte.</b> Le fondu qui rattache le rail de vignettes au bas d'une image. Il ne décore rien&nbsp;: il rend lisible un texte blanc sur une image dont on ignore la luminosité. Un aplat, à sa place, couperait la photographie en deux.</td></tr>
+    </tbody>
+  </table>
+
+  <p class="note" style="max-width:var(--measure);color:var(--color-text-secondary)">
+    Les huit règles de couleur d'état, la cible de 44&nbsp;px, le plafond de trois pastilles
+    thématiques et l'obligation des quatre états d'écran <b>s'appliquent sur le verre comme
+    ailleurs</b>. Le verre change la matière du fond, pas les règles de l'interface.
+  </p>
 </section>
 
 <!-- ===================== 06 EXPORT ===================== -->

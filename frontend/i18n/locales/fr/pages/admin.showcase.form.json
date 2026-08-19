@@ -1,0 +1,157 @@
+{
+  "titleNew": "Nouvelle diapositive",
+  "titleEdit": "Modifier la diapositive",
+  "subtitleNew": "Une diapositive part en brouillon et se place en fin d'emplacement. Son rang se règle ensuite dans la liste.",
+  "subtitleEdit": "L'aperçu montre ce que le public verra. Le rang, lui, se règle dans la liste.",
+  "submitNew": "Créer la diapositive",
+  "submitEdit": "Enregistrer",
+  "sections": {
+    "nature": "Nature et emplacement",
+    "texts": "Textes",
+    "attribution": "Attribution",
+    "media": "Média",
+    "link": "Rattachement",
+    "broadcast": "Diffusion"
+  },
+  "nature": {
+    "label": "Nature du contenu",
+    "hint": "Elle donne son étiquette et sa couleur à la diapositive. Les natures se gèrent dans le référentiel."
+  },
+  "placementField": "Emplacement",
+  "placement": {
+    "home_hero": "Bandeau d'accueil",
+    "home_aside": "Panneau latéral"
+  },
+  "placementHint": {
+    "home_hero": "Le grand bandeau qui défile",
+    "home_aside": "La colonne « À venir »"
+  },
+  "themes": {
+    "label": "Thématiques",
+    "hint": "Trois au plus s'affichent sur une carte ; les suivantes se replient en « +N ».",
+    "preview": "À l'écran :"
+  },
+  "text": {
+    "title": "Titre",
+    "titleHint": "Votre repère dans la liste autant que le titre de la diapositive. Le français est obligatoire.",
+    "quote": "Citation",
+    "quoteHint": "Le texte porté en grand sur le fond. Choisissez l'extrait : couper appartient à la rédaction, pas à la mise en page.",
+    "body": "Corps du texte",
+    "bodyHint": "Texte long, pour la page de détail. Il n'apparaît pas dans le bandeau."
+  },
+  "attribution": {
+    "person": "Personne du répertoire",
+    "personHint": "Choisie ici, son nom se corrige tout seul si son profil change.",
+    "noPerson": "Aucune personne du répertoire",
+    "authorName": "Nom libre",
+    "authorNameOverridden": "Une personne du répertoire est choisie : c'est son nom qui sortira.",
+    "authorTitle": "Fonction",
+    "authorTitleHint": "« Négociatrice, délégation du Bénin ».",
+    "organization": "Organisation du répertoire",
+    "organizationHint": "Une seule fiche par organisation, quelle que soit la façon dont on l'appelle.",
+    "noOrganization": "Aucune organisation du répertoire",
+    "organizationLabel": "Nom d'organisation libre",
+    "organizationLabelHint": "À n'employer que pour une organisation absente du répertoire.",
+    "organizationLabelBlocked": "Une organisation du répertoire est désignée : ce champ doit rester vide.",
+    "country": "Pays",
+    "countryHint": "Vide, le pays de l'organisation est repris.",
+    "noCountry": "Aucun pays"
+  },
+  "media": {
+    "intro": "Trois emplacements : un fond photographique, un fond vidéo, une vignette pour le rail. La vidéo l'emporte sur l'image, l'image sur la couleur.",
+    "family": {
+      "image": "image",
+      "video": "vidéo"
+    },
+    "maxSize": "Poids maximal : {size} Mio",
+    "pending": "Un fichier est rattaché, il n'est pas encore prêt à être servi.",
+    "empty": "Aucun fichier",
+    "soon": "Le téléversement arrive à la prochaine étape.",
+    "color": "Couleur de repli",
+    "colorHint": "Le fond du bandeau quand aucun média n'est prêt. Format #RRGGBB."
+  },
+  "link": {
+    "event": "Édition",
+    "eventHint": "Elle situe la diapositive et décide de qui peut la modifier.",
+    "platform": "Toute la plateforme",
+    "platformHint": "Sans édition : affichée quelle que soit la COP en cours.",
+    "session": "Activité mise en avant",
+    "sessionHint": "Facultative. L'activité choisie impose son édition.",
+    "sessionLoading": "Chargement des activités de l'édition…",
+    "noSession": "Aucune activité",
+    "url": "Lien sortant",
+    "urlHint": "Adresse complète, commençant par https://.",
+    "label": "Libellé du lien",
+    "labelHint": "« Voir le témoignage complet ». Sans lien, il n'a nulle part où mener."
+  },
+  "broadcast": {
+    "status": "Statut",
+    "order": "Rang dans l'emplacement",
+    "orderHint": "Se règle d'ordinaire dans la liste, avec les boutons monter et descendre.",
+    "startsAt": "Début de diffusion",
+    "endsAt": "Fin de diffusion",
+    "timezone": "UTC",
+    "windowHint": "Heure UTC : une diapositive s'affiche sur toute la plateforme et n'appartient à aucun fuseau local."
+  },
+  "status": {
+    "draft": "Brouillon",
+    "published": "Publiée",
+    "archived": "Archivée"
+  },
+  "statusHint": {
+    "draft": "Personne ne la voit",
+    "published": "Soumise à la fenêtre de diffusion",
+    "archived": "Retirée, conservée, réutilisable"
+  },
+  "state": {
+    "live": "À l'écran",
+    "scheduled": "Programmée",
+    "expired": "Terminée",
+    "draft": "Brouillon",
+    "archived": "Archivée"
+  },
+  "stateHint": {
+    "live": "Elle est affichée au public en ce moment.",
+    "scheduled": "Elle s'allumera toute seule à la date de début.",
+    "expired": "Sa fenêtre est passée : elle est publiée, et pourtant personne ne la voit.",
+    "draft": "Un brouillon ne sort jamais, quelle que soit sa fenêtre.",
+    "archived": "Retirée de la vitrine. Elle reste ici, et se duplique pour l'édition suivante."
+  },
+  "errorSummary": {
+    "title": "L'enregistrement n'a pas eu lieu",
+    "description": "{count} champ demande une correction. | {count} champ demande une correction. | {count} champs demandent une correction."
+  },
+  "error": {
+    "window_inverted": "La fin de diffusion doit être postérieure à son début.",
+    "organization_both": "Une organisation se choisit dans le répertoire OU se nomme librement, jamais les deux.",
+    "link_label_without_url": "Ce libellé n'a nulle part où mener : renseignez le lien, ou effacez le libellé.",
+    "session_event_mismatch": "Cette activité appartient à une autre édition que celle choisie.",
+    "color_format": "La couleur s'écrit sous la forme #RRGGBB, six chiffres hexadécimaux.",
+    "french_required": "Le français est obligatoire : c'est la langue de repli de toute la plateforme.",
+    "required": "Ce champ est obligatoire.",
+    "url_format": "Une adresse complète est attendue, commençant par http:// ou https://.",
+    "global_scope_required": "Un contenu sans édition s'affiche sur toute la plateforme : il demande la portée globale.",
+    "forbidden": "Cette diapositive n'est pas dans votre périmètre d'administration.",
+    "network": "L'enregistrement n'a pas abouti. Réessayez dans un instant."
+  },
+  "preview": {
+    "title": "Aperçu",
+    "background": {
+      "label": "Fond retenu",
+      "video": "Vidéo en boucle, muette",
+      "image": "Photographie",
+      "color": "Aplat de couleur",
+      "none": "Aucun média : le fond institutionnel s'affichera"
+    },
+    "link": "Lien sortant",
+    "linkNoLabel": "Lien sans libellé"
+  },
+  "forbidden": {
+    "scope": "Gérer la vitrine de l'accueil",
+    "action": "Retour à la vitrine"
+  },
+  "notFound": {
+    "title": "Diapositive introuvable",
+    "description": "Cette diapositive n'existe pas ou a été retirée du modèle."
+  }
+}
