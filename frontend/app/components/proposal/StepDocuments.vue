@@ -162,7 +162,10 @@ function update(key: string, patch: Partial<DraftDocument>): void {
           />
         </div>
 
-        <div class="mt-3">
+        <!-- L'interrupteur mesure 80 × 40 : il lui faut sa propre rangée et un
+             écart plus large que celui des champs, sinon il vient toucher la
+             ligne de saisie qui le précède. -->
+        <div class="mt-4">
           <UiSwitch
             :model-value="document.is_public"
             :label="t('proposal.form.step-documents.fields.public.label')"

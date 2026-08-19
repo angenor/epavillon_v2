@@ -35,7 +35,7 @@
   },
   "choices": {
     "title": "Listes et choix",
-    "note": "La liste déroulante s'appuie sur le contrôle natif : sélecteur du système sur mobile, clavier gratuit, jamais coupée par le débordement d'un conteneur. Les boutons radio se comparent d'un coup d'œil — trois à cinq options, pas davantage. Un interrupteur bascule un réglage qui prend effet immédiatement ; s'il faut ensuite enregistrer, c'est une case qu'il fallait.",
+    "note": "La liste déroulante s'appuie sur le contrôle natif : sélecteur du système sur mobile, clavier gratuit, jamais coupée par le débordement d'un conteneur. Les boutons radio se comparent d'un coup d'œil — trois à cinq options, pas davantage.",
     "selectEmpty": "Format de participation",
     "selectFilled": "Format retenu",
     "selectReadonly": "Format (lecture seule)",
@@ -50,12 +50,16 @@
     "checkPartial": "Toutes les propositions de la page",
     "checkDisabled": "Option imposée par l'appel à propositions",
     "checkError": "J'accepte les conditions de participation",
-    "checkErrorText": "Vous devez accepter les conditions pour déposer un dossier.",
-    "switchOn": "Diffuser cette activité en direct",
-    "switchHint": "Un seul direct est possible à la fois sur la plateforme.",
-    "switchOff": "Ouvrir la liste d'attente",
-    "switchLoading": "Publier dans la programmation",
-    "switchDisabled": "Enregistrer la séance (indisponible)"
+    "checkErrorText": "Vous devez accepter les conditions pour déposer un dossier."
+  },
+  "switches": {
+    "title": "Interrupteurs",
+    "note": "L'interrupteur bascule un réglage qui prend effet immédiatement ; si un bouton « Enregistrer » suit, c'est une case qu'il fallait. Son dessin le dit : une piste de 80 × 40 creusée dans la surface, un curseur bombé de 32 qui court d'un bout à l'autre, un voyant qui passe du gris au vert et trois rainures qui s'allument en cyan quand le courant passe. Le relief vient de deux jetons de couleur, l'ombre d'un côté et la lumière de l'autre, et non d'une ombre noire : une pièce moulée reçoit sa lumière d'un côté et son ombre de l'autre, et c'est ce qui la fait exister en thème sombre comme en thème clair. La course est longue à dessein — c'est le seul mouvement de l'interface qu'il faut suivre de l'œil, puisqu'il dit dans quel sens le réglage vient de partir. Pendant un appel réseau, l'interrupteur ne bouge pas : le voyant cède la place au sablier et la bascule attend la réponse, car glisser tout de suite pour revenir en arrière sur erreur est la pire des deux solutions.",
+    "on": "Diffuser cette activité en direct",
+    "hint": "Un seul direct est possible à la fois sur la plateforme.",
+    "off": "Ouvrir la liste d'attente",
+    "loading": "Publier dans la programmation",
+    "disabled": "Enregistrer la séance (indisponible)"
   },
   "dates": {
     "title": "Dates et heures",

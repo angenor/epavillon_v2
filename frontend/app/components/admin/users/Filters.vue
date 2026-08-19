@@ -153,7 +153,12 @@ function toggleStatus(status: PersonStatus): void {
       </UiFormField>
     </div>
 
-    <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-3">
+    <!-- L'ÉCART HORIZONTAL EST PLUS LARGE QUE CELUI DES COMMANDES ELLES-MÊMES.
+         Un interrupteur porte son libellé à 12 px de sa piste ; si la barre
+         séparait ses groupes de 16 px seulement, on ne saurait plus quel
+         libellé appartient à quelle piste — d'autant que la piste fait
+         désormais 80 px et attire l'œil avant le texte. -->
+    <div class="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
       <!-- LE STATUT SE COCHE, IL NE SE JETONNE PAS. `UiChip` dit « ce filtre est
            appliqué, voici comment l'enlever » : quatre jetons posés d'avance se
            liraient comme quatre filtres actifs, c'est-à-dire l'inverse d'une

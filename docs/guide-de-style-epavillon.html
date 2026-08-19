@@ -274,6 +274,13 @@
   --shadow-sm: 0 1px 2px rgb(35 31 32 / .06);
   --shadow-md: 0 2px 6px rgb(35 31 32 / .08), 0 1px 2px rgb(35 31 32 / .06);
   --shadow-lg: 0 8px 24px rgb(35 31 32 / .12), 0 2px 6px rgb(35 31 32 / .06);
+
+  /* Relief moulé — le creux et la bosse d'une pièce mécanique. Réservé aux
+     commandes qui imitent un objet, c'est-à-dire l'interrupteur, et à rien
+     d'autre : deux couleurs plutôt qu'une ombre noire, parce qu'une surface
+     moulée reçoit sa lumière d'un côté et son ombre de l'autre. */
+  --color-relief-shade: var(--ifdd-gris-400);
+  --color-relief-light: var(--ifdd-blanc);
   --shadow-focus: 0 0 0 3px color-mix(in srgb, var(--color-focus) 35%, transparent);
 
   /* Cibles tactiles */
@@ -369,6 +376,10 @@
     --shadow-sm: 0 1px 2px rgb(0 0 0 / .4);
     --shadow-md: 0 2px 6px rgb(0 0 0 / .45), 0 1px 2px rgb(0 0 0 / .35);
     --shadow-lg: 0 8px 24px rgb(0 0 0 / .5), 0 2px 6px rgb(0 0 0 / .35);
+    /* En thème sombre, la « lumière » reste plus claire que le fond mais
+       bien plus sourde : un blanc franc y ferait du néon. */
+    --color-relief-shade: var(--ifdd-noir);
+    --color-relief-light: var(--ifdd-gris-700);
   }
 }
 
@@ -450,6 +461,10 @@
   --shadow-sm: 0 1px 2px rgb(0 0 0 / .4);
   --shadow-md: 0 2px 6px rgb(0 0 0 / .45), 0 1px 2px rgb(0 0 0 / .35);
   --shadow-lg: 0 8px 24px rgb(0 0 0 / .5), 0 2px 6px rgb(0 0 0 / .35);
+  /* En thème sombre, la « lumière » reste plus claire que le fond mais
+     bien plus sourde : un blanc franc y ferait du néon. */
+  --color-relief-shade: var(--ifdd-noir);
+  --color-relief-light: var(--ifdd-gris-700);
 }
 /*TOKENS>>*/
 
@@ -642,12 +657,54 @@ table.data tbody tr[aria-selected="true"] { background: var(--color-accent-surfa
 .check input[type="radio"]:checked::after { content: ""; display: block; width: 8px; height: 8px; margin: 4px auto; border-radius: var(--radius-pill); background: var(--color-on-accent); }
 .check input[disabled] { opacity: .45; cursor: not-allowed; }
 .check input[disabled] + span { color: var(--color-text-muted); }
+/* Interrupteur — basculeur mécanique moulé, arbitré le 19 août 2026 : piste
+   creusée, curseur bombé portant un voyant, rainures gravées au fond de la
+   piste qui s'allument quand le courant passe. Le relief vient de DEUX
+   couleurs, --color-relief-shade et --color-relief-light, et non d'une ombre
+   noire. La case native reste la commande : elle couvre toute la surface,
+   reçoit le clic et le focus ; la mécanique n'est que du décor (aria-hidden). */
 .switch { display: flex; gap: var(--space-3); align-items: center; min-height: var(--target-min); cursor: pointer; font-size: var(--font-size-6); }
-.switch input { appearance: none; width: 44px; height: 26px; flex: none; border-radius: var(--radius-pill); background: var(--color-neutral-surface); border: var(--border-thin) solid var(--color-border-strong); position: relative; cursor: pointer; transition: background-color var(--duration-base); }
-.switch input::after { content: ""; position: absolute; top: 3px; inset-inline-start: 3px; width: 18px; height: 18px; border-radius: var(--radius-pill); background: var(--color-surface); border: var(--border-thin) solid var(--color-border-strong); transition: transform var(--duration-base); }
-.switch input:checked { background: var(--color-accent-solid); border-color: var(--color-accent-solid); }
-.switch input:checked::after { transform: translateX(18px); border-color: transparent; }
-.switch input[disabled] { opacity: .45; cursor: not-allowed; }
+.switch:has(input[disabled]) { cursor: not-allowed; color: var(--color-text-muted); }
+.switch-control {
+  /* Les trois nombres du dessin tiennent ensemble : 4 px de piste tout autour
+     du curseur, et une course de 40 px assez longue pour que le geste se voie. */
+  --sw-track-w: 80px; --sw-track-h: 40px; --sw-thumb: 32px;
+  --sw-gap: calc((var(--sw-track-h) - var(--sw-thumb)) / 2);
+  /* La bascule est le seul mouvement de l'interface qu'il faut SUIVRE DE L'ŒIL :
+     il dit dans quel sens le réglage vient de partir. La courbe dépasse en fin
+     de course, comme un ressort qui claque. */
+  --sw-motion: all calc(var(--duration-base) * 1.6) cubic-bezier(.175, .885, .32, 1.275);
+  --sw-hollow: inset 2px 2px 5px var(--color-relief-shade), inset -2px -2px 5px var(--color-relief-light);
+  --sw-raised: 5px 5px 10px color-mix(in srgb, var(--color-relief-shade) 70%, transparent), -5px -5px 10px color-mix(in srgb, var(--color-relief-light) 70%, transparent);
+  position: relative; display: inline-block; flex: none; width: var(--sw-track-w); height: var(--sw-track-h);
+}
+/* Transparente et non « display: none » : masquée, Safari la retire de l'ordre de tabulation. */
+.switch-control input { position: absolute; inset: 0; z-index: 1; margin: 0; width: 100%; height: 100%; appearance: none; opacity: 0; cursor: pointer; }
+.switch-control input[disabled] { cursor: not-allowed; }
+.switch-track { position: absolute; inset: 0; overflow: hidden; border: var(--border-thin) solid var(--color-border); border-radius: var(--radius-pill); background: var(--color-surface-sunken); box-shadow: var(--sw-hollow); transition: var(--sw-motion); }
+/* Les trois rainures du fond. Éteintes, elles ne sont qu'un creux ; allumées, elles portent le cyan. */
+.switch-track::before { content: ""; position: absolute; top: 50%; inset-inline-start: calc(var(--sw-track-w) * .1875); width: calc(var(--sw-track-w) * .625); height: 1px; transform: translateY(-50%); background: var(--color-relief-shade); box-shadow: 0 4px 0 var(--color-relief-shade), 0 -4px 0 var(--color-relief-shade); transition: var(--sw-motion); }
+/* La lueur du voyant, qui suit le curseur. Seul flou admis hors du verre : c'est
+   ce qui distingue un voyant allumé d'une simple pastille verte. */
+.switch-glow { position: absolute; top: 0; inset-inline-start: 0; width: var(--sw-track-h); height: var(--sw-track-h); background: var(--color-success); filter: blur(15px); opacity: 0; transition: var(--sw-motion); }
+.switch-thumb { position: absolute; top: 50%; inset-inline-start: var(--sw-gap); z-index: 2; display: flex; align-items: center; justify-content: center; width: var(--sw-thumb); height: var(--sw-thumb); transform: translateY(-50%); border: var(--border-thin) solid var(--color-relief-light); border-radius: var(--radius-pill); background: var(--color-surface-raised); box-shadow: var(--sw-raised); transition: var(--sw-motion); }
+/* Le cercle gravé du curseur — le détail qui fait la pièce usinée. */
+.switch-engraving { position: absolute; top: 50%; inset-inline-start: 50%; width: calc(var(--sw-thumb) * .625); height: calc(var(--sw-thumb) * .625); transform: translate(-50%, -50%); border: var(--border-thin) dashed var(--color-separator); border-radius: var(--radius-pill); }
+.switch-led { position: relative; width: 6px; height: 6px; border-radius: var(--radius-pill); background: var(--color-text-muted); box-shadow: inset 1px 1px 2px var(--color-relief-shade); transition: var(--sw-motion); }
+/* Allumé : voyant vert, parce qu'un réglage allumé est CONFIRMÉ ; rainures cyan,
+   parce que le cyan porte l'information et l'action. */
+.switch-control input:checked + .switch-track { border-color: color-mix(in srgb, var(--color-success) 35%, transparent); }
+.switch-control input:checked + .switch-track::before { background: var(--color-accent-solid); box-shadow: 0 4px 0 var(--color-accent-solid), 0 -4px 0 var(--color-accent-solid); }
+.switch-control input:checked + .switch-track .switch-thumb { inset-inline-start: calc(var(--sw-track-w) - var(--sw-thumb) - var(--sw-gap)); border-color: color-mix(in srgb, var(--color-success) 40%, transparent); }
+.switch-control input:checked + .switch-track .switch-led { background: var(--color-success); box-shadow: 0 0 8px var(--color-success); }
+.switch-control input:checked + .switch-track .switch-glow { inset-inline-start: calc(var(--sw-track-w) - var(--sw-track-h)); opacity: .18; }
+.switch-control input:not([disabled]):hover + .switch-track .switch-thumb { box-shadow: 3px 3px 7px color-mix(in srgb, var(--color-relief-shade) 60%, transparent), -3px -3px 7px color-mix(in srgb, var(--color-relief-light) 60%, transparent); }
+.switch-control input:not([disabled]):active + .switch-track .switch-thumb { transform: translateY(-50%) scale(.95); box-shadow: var(--sw-hollow); }
+.switch-control input:focus-visible + .switch-track { outline: var(--border-medium) solid var(--color-focus); outline-offset: 2px; }
+/* Le désactivé enveloppe la mécanique entière : un curseur resté opaque sur une
+   piste éteinte se lirait comme une troisième position. */
+.switch-control input[disabled] + .switch-track { opacity: .45; }
+@media (prefers-reduced-motion: reduce) { .switch-track, .switch-track::before, .switch-thumb, .switch-glow, .switch-led { transition-duration: 1ms; } }
 .fieldset { border: var(--border-thin) solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); }
 .fieldset > legend { font-size: var(--font-size-7); text-transform: uppercase; letter-spacing: var(--letter-spacing-caps); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); padding: 0 var(--space-2); }
 
@@ -1341,12 +1398,12 @@ table.data td.num { text-align: end; font-variant-numeric: tabular-nums; }
       <div class="frame">
         <div class="frame-label">Interrupteurs</div>
         <div class="stack" style="gap:var(--space-2)">
-          <label class="switch"><input type="checkbox" checked><span>Retransmettre en direct</span></label>
-          <label class="switch"><input type="checkbox"><span>Interprétation français / anglais</span></label>
-          <label class="switch"><input type="checkbox" checked><span>Ouvrir les inscriptions au public</span></label>
-          <label class="switch"><input type="checkbox" disabled><span>Enregistrer la session — indisponible en salle B</span></label>
+          <label class="switch"><span class="switch-control"><input type="checkbox" role="switch" checked><span class="switch-track" aria-hidden="true"><span class="switch-glow"></span><span class="switch-thumb"><span class="switch-engraving"></span><span class="switch-led"></span></span></span></span><span>Retransmettre en direct</span></label>
+          <label class="switch"><span class="switch-control"><input type="checkbox" role="switch"><span class="switch-track" aria-hidden="true"><span class="switch-glow"></span><span class="switch-thumb"><span class="switch-engraving"></span><span class="switch-led"></span></span></span></span><span>Interprétation français / anglais</span></label>
+          <label class="switch"><span class="switch-control"><input type="checkbox" role="switch" checked><span class="switch-track" aria-hidden="true"><span class="switch-glow"></span><span class="switch-thumb"><span class="switch-engraving"></span><span class="switch-led"></span></span></span></span><span>Ouvrir les inscriptions au public</span></label>
+          <label class="switch"><span class="switch-control"><input type="checkbox" role="switch" disabled><span class="switch-track" aria-hidden="true"><span class="switch-glow"></span><span class="switch-thumb"><span class="switch-engraving"></span><span class="switch-led"></span></span></span></span><span>Enregistrer la session — indisponible en salle B</span></label>
         </div>
-        <p class="help" style="margin-top:var(--space-5);font-size:var(--font-size-7);color:var(--color-text-muted)">L'interrupteur s'applique immédiatement et sans validation. Si l'action doit être confirmée, utiliser une case à cocher dans un formulaire, pas un interrupteur.</p>
+        <p class="help" style="margin-top:var(--space-5);font-size:var(--font-size-7);color:var(--color-text-muted)">L'interrupteur s'applique immédiatement et sans validation. Si l'action doit être confirmée, utiliser une case à cocher dans un formulaire, pas un interrupteur. Le dessin est celui d'un basculeur moulé, et ses couleurs disent l'état&nbsp;: le voyant passe au vert parce qu'un réglage allumé est un réglage <b>confirmé</b>, les rainures du fond passent au cyan parce que le cyan porte l'information et l'action — le courant qui passe. Le relief, lui, est fait de <b>deux couleurs</b> et non d'une ombre noire&nbsp;: une pièce moulée reçoit sa lumière d'un côté et son ombre de l'autre.</p>
       </div>
     </div>
   </div>
@@ -1743,7 +1800,7 @@ table.data td.num { text-align: end; font-variant-numeric: tabular-nums; }
                 <label class="check"><input type="checkbox"><span>Genre</span></label>
               </fieldset>
               <div class="field" style="max-width:none"><label for="d1">Journée</label><div class="select-wrap"><select class="select" id="d1"><option>Toutes les journées</option><option selected>14 novembre</option><option>15 novembre</option></select><svg aria-hidden="true"><use href="#i-chevron-down"/></svg></div></div>
-              <label class="switch"><input type="checkbox" checked><span>Uniquement les places disponibles</span></label>
+              <label class="switch"><span class="switch-control"><input type="checkbox" role="switch" checked><span class="switch-track" aria-hidden="true"><span class="switch-glow"></span><span class="switch-thumb"><span class="switch-engraving"></span><span class="switch-led"></span></span></span></span><span>Uniquement les places disponibles</span></label>
             </div>
             <div class="drawer-foot"><button type="button" class="btn btn-ghost">Réinitialiser</button><button type="button" class="btn btn-primary">Voir 41 activités</button></div>
           </aside>
@@ -1775,7 +1832,7 @@ table.data td.num { text-align: end; font-variant-numeric: tabular-nums; }
       <div><span class="state-label">Bascule de thème · deux formes</span>
         <div class="frame stack">
           <div class="row"><button type="button" class="btn btn-secondary" data-theme-action="toggle"><svg aria-hidden="true"><use href="#i-theme"/></svg>Basculer clair / sombre</button></div>
-          <label class="switch"><input type="checkbox" data-theme-action="switch"><span>Thème sombre</span></label>
+          <label class="switch"><span class="switch-control"><input type="checkbox" role="switch" data-theme-action="switch"><span class="switch-track" aria-hidden="true"><span class="switch-glow"></span><span class="switch-thumb"><span class="switch-engraving"></span><span class="switch-led"></span></span></span></span><span>Thème sombre</span></label>
           <p style="font-size:var(--font-size-7);color:var(--color-text-muted);margin:0">Le thème par défaut suit la préférence système. Une fois basculé manuellement, le choix prime et se conserve d'une visite à l'autre.</p>
         </div>
       </div>
@@ -1946,6 +2003,7 @@ table.data td.num { text-align: end; font-variant-numeric: tabular-nums; }
     <li><b>Toute cible tactile fait 44 px</b><p>Boutons, entrées de navigation, cases à cocher, actions de tableau. La taille compacte de 40 px reste réservée aux barres d'outils sur écran large.</p></li>
     <li><b>Aucune valeur en dur</b><p>Les composants n'appellent que des jetons de rôle. Une couleur écrite en hexadécimal dans une feuille de composant est un défaut, pas un raccourci ; l'échelle des espacements et des rayons obéit à la même règle.</p></li>
     <li><b>Le verre ne se pose que sur un média</b><p>Un panneau translucide flouté est réservé au bandeau d'accueil, posé sur une photographie ou une vidéo. Sur une surface de page, c'est un défaut. Il sépare, il ne contraste pas : le contraste reste porté par <code>--color-scrim</code> sous le média. Voir la section suivante.</p></li>
+    <li><b>Le relief moulé n'habille que l'interrupteur</b><p>Ce guide donnait à l'interrupteur une pastille glissant sur un aplat accentué. Le commanditaire a tranché autrement le 19 août 2026 : c'est un basculeur mécanique — piste creusée, curseur bombé portant un voyant, rainures gravées qui s'allument quand le courant passe. Le relief y vient de deux couleurs, <code>--color-relief-shade</code> et <code>--color-relief-light</code>, jamais d'une ombre noire. L'exception s'arrête à cette commande : partout ailleurs la structure passe par les bordures et les ombres restent discrètes.</p></li>
   </ol>
 </section>
 
@@ -2265,6 +2323,13 @@ table.data td.num { text-align: end; font-variant-numeric: tabular-nums; }
   --shadow-sm: 0 1px 2px rgb(35 31 32 / .06);
   --shadow-md: 0 2px 6px rgb(35 31 32 / .08), 0 1px 2px rgb(35 31 32 / .06);
   --shadow-lg: 0 8px 24px rgb(35 31 32 / .12), 0 2px 6px rgb(35 31 32 / .06);
+
+  /* Relief moulé — le creux et la bosse d'une pièce mécanique. Réservé aux
+     commandes qui imitent un objet, c'est-à-dire l'interrupteur, et à rien
+     d'autre : deux couleurs plutôt qu'une ombre noire, parce qu'une surface
+     moulée reçoit sa lumière d'un côté et son ombre de l'autre. */
+  --color-relief-shade: var(--ifdd-gris-400);
+  --color-relief-light: var(--ifdd-blanc);
   --shadow-focus: 0 0 0 3px color-mix(in srgb, var(--color-focus) 35%, transparent);
 
   /* Cibles tactiles */
@@ -2360,6 +2425,10 @@ table.data td.num { text-align: end; font-variant-numeric: tabular-nums; }
     --shadow-sm: 0 1px 2px rgb(0 0 0 / .4);
     --shadow-md: 0 2px 6px rgb(0 0 0 / .45), 0 1px 2px rgb(0 0 0 / .35);
     --shadow-lg: 0 8px 24px rgb(0 0 0 / .5), 0 2px 6px rgb(0 0 0 / .35);
+    /* En thème sombre, la « lumière » reste plus claire que le fond mais
+       bien plus sourde : un blanc franc y ferait du néon. */
+    --color-relief-shade: var(--ifdd-noir);
+    --color-relief-light: var(--ifdd-gris-700);
   }
 }
 
@@ -2441,6 +2510,10 @@ table.data td.num { text-align: end; font-variant-numeric: tabular-nums; }
   --shadow-sm: 0 1px 2px rgb(0 0 0 / .4);
   --shadow-md: 0 2px 6px rgb(0 0 0 / .45), 0 1px 2px rgb(0 0 0 / .35);
   --shadow-lg: 0 8px 24px rgb(0 0 0 / .5), 0 2px 6px rgb(0 0 0 / .35);
+  /* En thème sombre, la « lumière » reste plus claire que le fond mais
+     bien plus sourde : un blanc franc y ferait du néon. */
+  --color-relief-shade: var(--ifdd-noir);
+  --color-relief-light: var(--ifdd-gris-700);
 }</pre>
 </section>
 

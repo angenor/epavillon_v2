@@ -41,7 +41,7 @@ Si le modèle paraît insuffisant pour une fonctionnalité, **on modifie le SQL 
 | Couleurs, polices, jetons de design | [docs/CHARTE_GRAPHIQUE.md](docs/CHARTE_GRAPHIQUE.md) puis `frontend/app/assets/css/design-tokens.css` |
 | Vue d'ensemble du modèle, invariants, conventions SQL | [docs/README.md](docs/README.md) |
 | Le guide de style vivant, rendu par les vrais composants | `frontend/app/pages/style-guide.vue` |
-| **À quoi l'interface doit ressembler — la référence qui fait autorité** | [docs/guide-de-style-epavillon.html](docs/guide-de-style-epavillon.html) : maquette complète écrite à la main, avec ses **treize règles d'usage** et ses décisions de conception. En cas de désaccord avec l'implémentation Vue, **c'est lui qui tranche** — sauf sur les thématiques, voir ci-dessous |
+| **À quoi l'interface doit ressembler — la référence qui fait autorité** | [docs/guide-de-style-epavillon.html](docs/guide-de-style-epavillon.html) : maquette complète écrite à la main, avec ses **quatorze règles d'usage** et ses décisions de conception. En cas de désaccord avec l'implémentation Vue, **c'est lui qui tranche** — sauf sur les thématiques, voir ci-dessous |
 | Ce que demandait le commanditaire, dans ses mots | [docs/historique/](docs/historique/) |
 
 **Ne charge pas tout.** `CADRAGE.md` fait plusieurs centaines de lignes et les 19 fichiers SQL en totalisent 15 928 : lis la section ou le fichier dont tu as besoin, pas l'ensemble.
@@ -80,7 +80,7 @@ Elles sont détaillées dans le cadrage, mais on les oublie vite et chacune a d�
 
 Institutionnel et sérieux, mais vivant. Ni tableau de bord SaaS générique, ni site d'ONG militant. Références de posture : le site des Nations unies pour la rigueur, une revue scientifique en ligne pour la lisibilité, une billetterie de festival pour l'énergie de la programmation.
 
-**La référence détaillée est [docs/guide-de-style-epavillon.html](docs/guide-de-style-epavillon.html)** — elle porte treize règles d'usage numérotées et le dessin de chaque composant. Trois d'entre elles se trahissent facilement et coûtent cher :
+**La référence détaillée est [docs/guide-de-style-epavillon.html](docs/guide-de-style-epavillon.html)** — elle porte quatorze règles d'usage numérotées et le dessin de chaque composant. Trois d'entre elles se trahissent facilement et coûtent cher :
 
 - **La couleur d'un état n'est pas celle qu'on croit.** Cyan pour l'information et l'action ; vert pour ce qui est confirmé ; jaune pour ce qui demande attention — donc pour « en cours », qui n'est pas une réussite ; rouge pour l'échec, la suppression et le direct ; **violet pour le report**, déjà arbitré et qui n'attend plus rien ; gris pour ce qui est clos.
 - **Toute cible tactile fait 44 px** (`--target-min`). Les 40 px compacts sont réservés aux barres d'outils sur écran large, jamais à l'action principale d'un écran mobile.
@@ -114,6 +114,12 @@ Cette ligne interdisait le verre dépoli et les dégradés sans exception. **Le 
 - Ces surfaces **ne s'inversent pas** en thème sombre, comme les aplats institutionnels : le fond est une photographie dans les deux thèmes.
 
 Le détail est au § « Le verre » de [docs/guide-de-style-epavillon.html](docs/guide-de-style-epavillon.html).
+
+**Le relief moulé : réservé à l'interrupteur, arbitré le 19/08.**
+
+Même forme d'exception, autre matière. L'interrupteur n'est plus une pastille glissant sur un aplat accentué mais un **basculeur mécanique** — piste creusée, curseur bombé portant un voyant, rainures gravées qui s'allument quand le courant passe. Son relief vient de deux jetons, `--color-relief-shade` et `--color-relief-light`, **jamais d'une ombre noire** : une pièce moulée reçoit sa lumière d'un côté et son ombre de l'autre, et un seul noir translucide ne la sculpte pas. Les couleurs y disent l'état, pas la marque : vert pour le voyant allumé (un réglage actif est *confirmé*), cyan pour les rainures, gris sourd éteint.
+
+L'exception s'arrête à cette commande. Partout ailleurs, la structure passe par les bordures et les ombres restent discrètes. Le dessin vit dans `UiSwitch` et nulle part ailleurs : **aucun écran ne dessine sa propre bascule**, et le `ThemeToggle` de la barre de navigation garde le sien, qui n'est pas un interrupteur de réglage.
 
 ### Deux niveaux de jetons de design, à ne jamais mélanger
 

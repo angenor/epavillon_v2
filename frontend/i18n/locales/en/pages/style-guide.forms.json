@@ -35,7 +35,7 @@
   },
   "choices": {
     "title": "Lists and choices",
-    "note": "The dropdown builds on the native control: system picker on mobile, keyboard support for free, never clipped by a container's overflow. Radio buttons are compared at a glance — three to five options, no more. A switch flips a setting that takes effect immediately; if a save button follows, it should have been a checkbox.",
+    "note": "The dropdown builds on the native control: system picker on mobile, keyboard support for free, never clipped by a container's overflow. Radio buttons are compared at a glance — three to five options, no more.",
     "selectEmpty": "Participation format",
     "selectFilled": "Selected format",
     "selectReadonly": "Format (read-only)",
@@ -50,12 +50,16 @@
     "checkPartial": "All proposals on this page",
     "checkDisabled": "Option imposed by the call for proposals",
     "checkError": "I accept the participation terms",
-    "checkErrorText": "You must accept the terms to submit a proposal.",
-    "switchOn": "Stream this activity live",
-    "switchHint": "Only one live stream can run at a time on the platform.",
-    "switchOff": "Open the waiting list",
-    "switchLoading": "Publish to the programme",
-    "switchDisabled": "Save the session (unavailable)"
+    "checkErrorText": "You must accept the terms to submit a proposal."
+  },
+  "switches": {
+    "title": "Switches",
+    "note": "A switch flips a setting that takes effect immediately; if a “Save” button follows, it should have been a checkbox. Its drawing says so: an 80 × 40 track sunk into the surface, a domed 32 px thumb travelling from one end to the other, an indicator turning from grey to green and three grooves lighting up in cyan when the current flows. The relief comes from two colour tokens, the shade on one side and the light on the other, rather than a black shadow: a moulded part takes its light from one side and its shade from the other, which is what keeps it readable in both the light and the dark theme. The travel is deliberately long — it is the one movement in the interface you are meant to follow with your eye, since it tells which way the setting has just gone. During a network call the switch does not move: the indicator gives way to the spinner and the toggle waits for the answer, because sliding at once and reverting on error is the worse of the two options.",
+    "on": "Stream this activity live",
+    "hint": "Only one live stream can run at a time on the platform.",
+    "off": "Open the waiting list",
+    "loading": "Publish to the programme",
+    "disabled": "Save the session (unavailable)"
   },
   "dates": {
     "title": "Dates and times",

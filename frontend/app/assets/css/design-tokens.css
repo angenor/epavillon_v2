@@ -414,6 +414,15 @@
   --shadow-sm: 0 1px 3px rgb(35 31 32 / 0.07), 0 1px 2px rgb(35 31 32 / 0.04);
   --shadow-md: 0 4px 10px rgb(35 31 32 / 0.07), 0 1px 3px rgb(35 31 32 / 0.05);
   --shadow-lg: 0 12px 28px rgb(35 31 32 / 0.10), 0 2px 6px rgb(35 31 32 / 0.05);
+
+  /* -- Relief moulé — le creux et la bosse d'une pièce mécanique.
+     Réservé aux commandes qui imitent un objet (l'interrupteur), jamais aux
+     panneaux : deux couleurs et non une ombre noire, parce qu'une surface
+     moulée reçoit sa lumière d'un côté et son ombre de l'autre. En thème
+     sombre la « lumière » reste plus claire que le fond, mais bien plus
+     sourde — un blanc franc y ferait du néon. -- */
+  --color-relief-shade: var(--ifdd-gris-400);
+  --color-relief-light: var(--ifdd-gris-0);
   /* Halo de focus des CHAMPS, en plus de l'anneau global de `main.css` : sur un
      champ, la bordure change déjà de couleur, et l'anneau seul se confond avec
      elle. Le halo l'en détache. */
@@ -636,6 +645,9 @@
     --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.50), 0 1px 2px rgb(0 0 0 / 0.30);
     --shadow-md: 0 4px 10px rgb(0 0 0 / 0.50), 0 1px 3px rgb(0 0 0 / 0.35);
     --shadow-lg: 0 12px 28px rgb(0 0 0 / 0.60), 0 2px 6px rgb(0 0 0 / 0.40);
+
+    --color-relief-shade: var(--ifdd-gris-950);
+    --color-relief-light: var(--ifdd-gris-700);
   }
 }
 
@@ -718,6 +730,9 @@
   --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.5), 0 1px 2px rgb(0 0 0 / 0.3);
   --shadow-md: 0 4px 10px rgb(0 0 0 / 0.5), 0 1px 3px rgb(0 0 0 / 0.35);
   --shadow-lg: 0 12px 28px rgb(0 0 0 / 0.6), 0 2px 6px rgb(0 0 0 / 0.4);
+
+  --color-relief-shade: var(--ifdd-gris-950);
+  --color-relief-light: var(--ifdd-gris-700);
 }
 
 /* Indique au navigateur quelle palette est active : ascenseurs, champs de

@@ -253,30 +253,39 @@ function toggleSwitchWithWork(): void {
               required
             />
           </div>
-
-          <div class="space-y-3 border-t border-border-subtle pt-4">
-            <UiSwitch
-              v-model="switchOne"
-              :label="t('style-guide.forms.choices.switchOn')"
-              :hint="t('style-guide.forms.choices.switchHint')"
-            />
-            <UiSwitch
-              :model-value="false"
-              :label="t('style-guide.forms.choices.switchOff')"
-            />
-            <UiSwitch
-              :model-value="true"
-              :loading="switchBusy"
-              :label="t('style-guide.forms.choices.switchLoading')"
-              @update:model-value="toggleSwitchWithWork"
-            />
-            <UiSwitch
-              :model-value="false"
-              disabled
-              :label="t('style-guide.forms.choices.switchDisabled')"
-            />
-          </div>
         </div>
+      </div>
+    </StyleGuideDemo>
+
+    <!-- INTERRUPTEURS — ils ont quitté la colonne des cases à cocher : leur
+         piste fait 80 px de large, et dans une demi-colonne le libellé se
+         repliait sur trois lignes avant même d'être lu. Une rangée entière leur
+         laisse la place que leur dessin réclame. -->
+    <StyleGuideDemo
+      :title="t('style-guide.forms.switches.title')"
+      :note="t('style-guide.forms.switches.note')"
+    >
+      <div class="grid items-start gap-x-8 gap-y-5 sm:grid-cols-2">
+        <UiSwitch
+          v-model="switchOne"
+          :label="t('style-guide.forms.switches.on')"
+          :hint="t('style-guide.forms.switches.hint')"
+        />
+        <UiSwitch
+          :model-value="false"
+          :label="t('style-guide.forms.switches.off')"
+        />
+        <UiSwitch
+          :model-value="true"
+          :loading="switchBusy"
+          :label="t('style-guide.forms.switches.loading')"
+          @update:model-value="toggleSwitchWithWork"
+        />
+        <UiSwitch
+          :model-value="false"
+          disabled
+          :label="t('style-guide.forms.switches.disabled')"
+        />
       </div>
     </StyleGuideDemo>
 
