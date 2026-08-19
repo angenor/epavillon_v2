@@ -1,41 +1,73 @@
 <script setup lang="ts">
 import type { EventEdition } from '~/types/event/edition'
 import type { EventSeries } from '~/types/event/series'
-import type { AttachedImage } from '~/types/media'
+import type { AttachedImage, EditionImageRole } from '~/types/media'
 
 /**
  * EN-TÊTE DE LA PAGE PUBLIQUE D'UNE ÉDITION — la première des quatre questions
  * auxquelles cette page répond : DE QUOI S'AGIT-IL ?
  *
  * Titre, dates, lieu, mode de participation, visuel. Rien d'autre : les
- * échéances viennent juste après (l'encart d'appel), et le programme plus bas.
- * Un en-tête qui répond à tout ne répond à rien.
+ * échéances viennent juste après, et le programme plus bas. Un en-tête qui
+ * répond à tout ne répond à rien.
  *
- * LE VISUEL N'EST PAS UNE BANNIÈRE DE FOND, ET IL RESTE À CÔTÉ DU TEXTE.
- * Le back-office, lui, a reçu le 19/08 un bandeau plein cadre : c'est un écran
- * de travail, on y reconnaît une édition d'un coup d'œil parmi vingt. Ici on
- * la LIT — un titre posé sur une photographie perd son contraste dès qu'elle
- * change, et elle change à chaque édition. Sans visuel — c'est le cas de la
- * COP29 dans les données simulées — l'en-tête reste entier.
+ * ── LE VISUEL PASSE DERRIÈRE LE TEXTE, ET C'EST UN REVIREMENT (19/08) ───────
  *
- * TOUTE DATE PORTE SON FUSEAU. Celui de l'édition (`event.events.timezone`),
- * jamais celui du visiteur : « du 9 au 20 novembre 2027, heure de Belém ».
+ * Ce composant posait l'image À CÔTÉ du titre, pour une raison qui tenait : un
+ * titre sur photographie perd son contraste dès que l'image change, et elle
+ * change à chaque édition. Le commanditaire a tranché autrement.
+ *
+ * L'objection était juste, elle n'est pas ignorée — elle est TRAITÉE, par le
+ * même voile en deux temps que l'affiche de l'accueil et le bandeau du
+ * back-office :
+ *   · un APLAT `bg-scrim/40` sur toute la surface, pour le surtitre et la
+ *     pastille d'état, qui se posent haut et qu'aucun fondu n'atteint ;
+ *   · le FONDU `.scrim-fade-bottom` sur les trois quarts bas, pour le titre et
+ *     les faits.
+ * Le contraste ne dépend donc plus de la photographie, ce qui était tout
+ * l'argument.
+ *
+ * ── LE 32:9, ET NON LE 16:9 ─────────────────────────────────────────────────
+ *
+ * Une édition porte trois recadrages téléversés à la main. Ce bandeau occupe
+ * toute la largeur de la fenêtre : c'est la forme du rôle `banner`. Le 16:9
+ * sert de repli — recadré, il vaut mieux qu'un en-tête nu — mais `thumbnail`
+ * n'entre PAS dans ce repli : un carré étiré sur 1 500 px ne montre plus rien,
+ * et l'en-tête sobre lui est alors préférable.
+ *
+ * ── LA PRÉSENTATION RESTE SUR LA SURFACE DE PAGE ────────────────────────────
+ *
+ * Description et message d'accueil sortent du bandeau. Un paragraphe de
+ * soixante-cinq caractères de large sur une photographie reste pénible à lire
+ * même voilé : le voile sert un titre de quelques mots, pas un texte suivi.
+ *
+ * ── SANS VISUEL, L'EN-TÊTE SOBRE ────────────────────────────────────────────
+ *
+ * Et surtout PAS le même bandeau sur un aplat : le voile et le fondu ne
+ * séparent rien d'une surface unie, ils ne seraient plus que de l'ornement.
+ * C'est le cas de la COP29 dans les données simulées, et il est gardé exprès.
+ *
+ * ── LE BANDEAU NE PREND PAS L'ÉCRAN ─────────────────────────────────────────
+ *
+ * Sa hauteur est bornée par le contenu, jamais par le ratio de l'image : un
+ * 32:9 pleine fenêtre mesurerait 420 px et pousserait la frise des échéances
+ * hors de vue. Or une organisation vient ici pour savoir si elle peut encore
+ * déposer — ce qui retarde cette réponse la fait partir.
+ *
+ * ── TOUTE DATE PORTE SON FUSEAU ─────────────────────────────────────────────
+ *
+ * Celui de l'édition, jamais celui du visiteur. Les faits eux-mêmes vivent dans
+ * `EventHeroFacts`, partagé par les deux rendus : écrits deux fois, ils
+ * auraient divergé là où la divergence se voit le moins — un seul des deux
+ * rendus est à l'écran à la fois.
  */
 
 interface Props {
   edition: EventEdition
   /** Série de rattachement, quand l'édition en a une : « COP Climat (CCNUCC) ». */
   series?: EventSeries | null
-  /**
-   * LA DÉCLINAISON 16:9 (rôle `cover`), et pas le bandeau 32:9.
-   *
-   * Depuis le 19/08, une édition porte trois recadrages téléversés à la main.
-   * Celui-ci est posé À CÔTÉ du texte, dans une colonne de 40 % de la page :
-   * un 32:9 y ferait une meurtrière de 120 px de haut. L'appelant se rabat sur
-   * `banner` quand le 16:9 manque — recadré par `object-cover`, ce qui reste
-   * préférable à un trou dans la mise en page.
-   */
-  cover?: AttachedImage | null
+  /** Les trois déclinaisons, telles que `v_public_editions` les rend. */
+  images?: Partial<Record<EditionImageRole, AttachedImage | null>> | null
   /** Nom du pays hôte, déjà résolu depuis `reference.countries`. */
   country?: string | null
 }
@@ -44,27 +76,9 @@ const props = defineProps<Props>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
-const { dateRange, zoneLabel } = useDateTime()
 
-/** « du 9 au 20 novembre 2027 » dans le fuseau de l'édition. */
-const dates = computed(() =>
-  dateRange(props.edition.starts_at, props.edition.ends_at, props.edition.timezone),
-)
-
-/** « heure de Belém » — le lieu prime sur la ville déduite de l'identifiant IANA. */
-const zone = computed(() => zoneLabel(props.edition.timezone, props.edition.city ?? undefined))
-
-/** « Belém, Brésil » ; rien du tout pour une édition entièrement en ligne. */
-const place = computed(() => {
-  const parts = [props.edition.city, props.country].filter((part): part is string => Boolean(part))
-  return parts.join(', ')
-})
-
-const FORMAT_ICONS: Record<EventEdition['participation_mode'], string> = {
-  online: 'monitor',
-  in_person: 'map-pin',
-  hybrid: 'globe',
-}
+/** Le 32:9 d'abord, le 16:9 à défaut. Jamais le carré — cf. l'en-tête. */
+const poster = computed(() => props.images?.banner ?? props.images?.cover ?? null)
 
 /**
  * L'état de l'édition, dit avec les couleurs des états et non celles des
@@ -82,10 +96,79 @@ const STATUS_INTENT: Record<EventEdition['status'], 'info' | 'warning' | 'neutra
 </script>
 
 <template>
-  <header class="grid gap-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start">
-    <div class="min-w-0">
+  <header>
+    <!-- AVEC VISUEL : le bandeau, débordant la gouttière de page.
+         `-mt-8 sm:-mt-10` annule le rembourrage haut du `<main>` : un bandeau
+         qui commence à quatre-vingts pixels du menu n'est pas un bandeau. -->
+    <div
+      v-if="poster"
+      class="full-bleed relative -mt-8 overflow-hidden bg-surface-inverse text-text-on-inverse sm:-mt-10"
+    >
+      <!-- Chargement IMMÉDIAT : l'image est au-dessus de la ligne de flottaison,
+           la différer ferait sauter la mise en page à l'ouverture. -->
+      <UiImage
+        :image="poster"
+        ratio="auto"
+        frame-class="size-full"
+        class="absolute inset-0"
+        loading="eager"
+        sizes="100vw"
+      />
+      <div class="pointer-events-none absolute inset-0 bg-scrim/40" aria-hidden="true" />
+      <div
+        class="scrim-fade-bottom pointer-events-none absolute inset-x-0 bottom-0 h-3/4"
+        aria-hidden="true"
+      />
+
+      <!-- Le texte reprend la gouttière du reste de la page : le bandeau déborde,
+           son contenu s'aligne. -->
+      <div
+        class="relative mx-auto flex min-h-64 w-full max-w-[1280px] flex-col justify-end px-4 pt-14 pb-8 sm:min-h-96 sm:px-6 sm:pt-20 sm:pb-10 lg:min-h-[26rem]"
+      >
+        <p class="flex flex-wrap items-center gap-2 text-sm text-text-on-inverse">
+          <span
+            v-if="props.series"
+            class="uppercase"
+            :style="{ letterSpacing: 'var(--tracking-caps)' }"
+          >
+            {{ tr(props.series.name) }}
+          </span>
+          <!-- LA PASTILLE GARDE SON DESSIN CLAIR : son fond est OPAQUE, donc
+               lisible sur n'importe quelle photographie, et son code de couleur
+               est le même sur toute la plateforme. -->
+          <UiBadge :intent="STATUS_INTENT[props.edition.status]" size="sm">
+            {{ t(`event.public.hero.status.${props.edition.status}`) }}
+          </UiBadge>
+        </p>
+
+        <h1 class="mt-3 font-display text-2xl leading-tight text-text-on-inverse text-balance sm:text-4xl lg:text-5xl">
+          {{ tr(props.edition.title) }}
+        </h1>
+
+        <!-- LES FAITS SORTENT DU BANDEAU SOUS `sm`, et c'est une mesure, pas
+             une préférence : à 375 px, un titre de COP tient cinq lignes et le
+             bandeau atteignait 673 px sur un écran de 812 — la frise des
+             échéances passait sous la ligne de flottaison, alors que c'est
+             exactement ce qu'une organisation vient chercher. Le voile porte
+             donc le titre seul, et les faits reprennent sur la surface de page,
+             où ils se lisent mieux de toute façon. -->
+        <EventHeroFacts
+          class="mt-6 hidden max-w-3xl sm:grid"
+          :edition="props.edition"
+          :country="props.country"
+          tone="inverse"
+        />
+      </div>
+    </div>
+
+    <!-- SANS VISUEL : l'en-tête sobre, sur la surface de page. -->
+    <div v-else class="min-w-0">
       <p class="flex flex-wrap items-center gap-2 text-sm text-text-subtle">
-        <span v-if="props.series" class="uppercase" :style="{ letterSpacing: 'var(--tracking-caps)' }">
+        <span
+          v-if="props.series"
+          class="uppercase"
+          :style="{ letterSpacing: 'var(--tracking-caps)' }"
+        >
           {{ tr(props.series.name) }}
         </span>
         <UiBadge :intent="STATUS_INTENT[props.edition.status]" size="sm">
@@ -93,63 +176,25 @@ const STATUS_INTENT: Record<EventEdition['status'], 'info' | 'warning' | 'neutra
         </UiBadge>
       </p>
 
-      <h1 class="mt-3 font-display text-3xl leading-tight sm:text-4xl">
+      <h1 class="mt-3 font-display text-3xl leading-tight text-balance sm:text-4xl">
         {{ tr(props.edition.title) }}
       </h1>
 
-      <!-- Les faits, sur une liste de définitions : ce sont des données, pas une
-           accroche. Chacune porte son icône, mais le sens est dans le texte. -->
-      <dl class="mt-6 grid gap-4 sm:grid-cols-2">
-        <div>
-          <dt class="text-xs uppercase text-text-subtle" :style="{ letterSpacing: 'var(--tracking-caps)' }">
-            {{ t('event.public.hero.dates') }}
-          </dt>
-          <dd class="mt-1 flex items-start gap-2 text-text">
-            <UiIcon name="calendar" size="1.05rem" class="mt-0.5 shrink-0 text-text-muted" />
-            <span>
-              {{ dates }}
-              <span class="block text-sm text-text-muted">{{ zone }}</span>
-            </span>
-          </dd>
-        </div>
+      <EventHeroFacts class="mt-6 max-w-3xl" :edition="props.edition" :country="props.country" />
+    </div>
 
-        <div v-if="place">
-          <dt class="text-xs uppercase text-text-subtle" :style="{ letterSpacing: 'var(--tracking-caps)' }">
-            {{ t('event.public.hero.place') }}
-          </dt>
-          <dd class="mt-1 flex items-start gap-2 text-text">
-            <UiIcon name="map-pin" size="1.05rem" class="mt-0.5 shrink-0 text-text-muted" />
-            <span>
-              {{ place }}
-              <span v-if="props.edition.address" class="block text-sm text-text-muted">
-                {{ props.edition.address }}
-              </span>
-            </span>
-          </dd>
-        </div>
+    <!-- Les mêmes faits, sur la surface de page, quand le bandeau les a laissés
+         partir. `sm:hidden` : jamais les deux à la fois. -->
+    <EventHeroFacts
+      v-if="poster"
+      class="mt-8 max-w-3xl sm:hidden"
+      :edition="props.edition"
+      :country="props.country"
+    />
 
-        <div>
-          <dt class="text-xs uppercase text-text-subtle" :style="{ letterSpacing: 'var(--tracking-caps)' }">
-            {{ t('event.public.hero.mode') }}
-          </dt>
-          <dd class="mt-1 flex items-start gap-2 text-text">
-            <UiIcon :name="FORMAT_ICONS[props.edition.participation_mode]" size="1.05rem" class="mt-0.5 shrink-0 text-text-muted" />
-            <span>{{ t(`session-card.format.${props.edition.participation_mode}`) }}</span>
-          </dd>
-        </div>
-
-        <div v-if="props.edition.has_pavilion">
-          <dt class="text-xs uppercase text-text-subtle" :style="{ letterSpacing: 'var(--tracking-caps)' }">
-            {{ t('event.public.hero.pavilion') }}
-          </dt>
-          <dd class="mt-1 flex items-start gap-2 text-text">
-            <UiIcon name="check" size="1.05rem" class="mt-0.5 shrink-0 text-success" />
-            <span>{{ t('event.public.hero.pavilionHeld') }}</span>
-          </dd>
-        </div>
-      </dl>
-
-      <p class="mt-6 text-lg text-text-secondary" :style="{ maxWidth: 'var(--measure)' }">
+    <!-- LA PRÉSENTATION, TOUJOURS SUR LA SURFACE DE PAGE. Cf. l'en-tête. -->
+    <div class="mt-8">
+      <p class="text-lg text-text-secondary" :style="{ maxWidth: 'var(--measure)' }">
         {{ tr(props.edition.description) }}
       </p>
 
@@ -161,17 +206,5 @@ const STATUS_INTENT: Record<EventEdition['status'], 'info' | 'warning' | 'neutra
         {{ tr(props.edition.highlights) }}
       </p>
     </div>
-
-    <!-- Le visuel, quand il existe. Chargement immédiat : il est au-dessus de la
-         ligne de flottaison, le différer ferait sauter la mise en page. -->
-    <UiImage
-      v-if="props.cover"
-      :image="props.cover"
-      ratio="16 / 9"
-      loading="eager"
-      sizes="(min-width: 1024px) 40vw, 100vw"
-      rounded="rounded-lg"
-      class="border border-border"
-    />
   </header>
 </template>

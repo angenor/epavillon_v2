@@ -148,7 +148,7 @@ useHead(() => ({
       <EventHero
         :edition="data.edition"
         :series="data.series"
-        :cover="data.images.cover ?? data.images.banner"
+        :images="data.images"
         :country="data.country ? tr(data.country) : null"
       />
 
