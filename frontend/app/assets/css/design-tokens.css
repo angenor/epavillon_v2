@@ -402,10 +402,13 @@
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
-  /* 12 px — PLUS AUCUN COMPOSANT NE L'EMPLOIE. La direction artistique plafonne
-     à 8 px, et les modales, dernières à s'en servir, sont repassées à
-     `--radius-lg`. Conservé pour un usage exceptionnel qui devra se justifier,
-     pas comme le rayon des surfaces flottantes. */
+  /* 12 px — UN SEUL EMPLOI, ET IL SE JUSTIFIE PAR LA TAILLE DU BLOC. La
+     direction artistique plafonne à 8 px et les modales, dernières à s'en
+     servir, sont repassées à `--radius-lg`. Seules les affiches d'édition de
+     l'accueil (`HomeEditionCard`) le gardent : sur une carte de 352 × 712 px,
+     8 px se lisent comme un angle droit, et aucune autre surface de la
+     plateforme n'a cette taille-là. Ce n'est pas le rayon des surfaces
+     flottantes, et il ne se répand pas. */
   --radius-xl: 12px;
   --radius-full: 9999px; /* puces et pastilles d'état */
 

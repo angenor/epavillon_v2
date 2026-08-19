@@ -79,6 +79,11 @@
     "title": "Editions",
     "description": "ePavillon events, from the most recent to the oldest.",
     "filterLabel": "Filter editions by period",
+    "rail": {
+      "label": "Editions, scrolling list",
+      "previous": "Previous editions",
+      "next": "Next editions"
+    },
     "tabs": {
       "all": "All",
       "upcoming": "Upcoming",
