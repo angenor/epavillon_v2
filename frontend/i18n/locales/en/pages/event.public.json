@@ -55,6 +55,9 @@
     "results": "Results announced",
     "event": "Event takes place"
   },
+  "presentation": {
+    "title": "About this edition"
+  },
   "programmeLink": {
     "title": "Programme",
     "count": "{count} published activity | {count} published activity | {count} published activities",

@@ -4,10 +4,11 @@
  *
  * Elle répond à quatre questions, DANS CET ORDRE, et l'ordre est le contenu :
  *
- *   1. DE QUOI S'AGIT-IL ?        l'en-tête — titre, dates, lieu, mode, visuel
+ *   1. DE QUOI S'AGIT-IL ?        le bandeau — titre, dates, lieu, mode, visuel
  *   2. QUELLES ÉCHÉANCES ?        la frise des jalons, puis l'encart d'appel
- *   3. QUE PUIS-JE FAIRE ?        déposer un dossier, lire les critères
- *   4. OÙ CELA SE PASSE-T-IL ?    les journées spéciales, le lien programmation
+ *   3. DE QUOI PARLE-T-ON ?       la présentation de l'édition
+ *   4. QUE PUIS-JE FAIRE ?        déposer un dossier, lire les critères
+ *   5. OÙ CELA SE PASSE-T-IL ?    les journées spéciales, le lien programmation
  *
  * Une organisation qui arrive ici veut savoir si elle peut encore déposer, et
  * jusqu'à quand. Tout ce qui retarde cette réponse — un long texte de
@@ -152,9 +153,11 @@ useHead(() => ({
         :country="data.country ? tr(data.country) : null"
       />
 
-      <!-- LES ÉCHÉANCES D'ABORD. Quatre dates, cent pixels : c'est la première
-           chose qu'on vient chercher, et l'encart d'appel qui suit ne fait que
-           développer celle qui presse. -->
+      <!-- LES ÉCHÉANCES COLLENT AU BANDEAU. Quatre dates, cent pixels : c'est la
+           première chose qu'on vient chercher, et l'encart d'appel qui suit ne
+           fait que développer celle qui presse. Rien ne s'intercale — la
+           présentation de l'édition, qui occupait cette place, est descendue
+           sous l'appel. -->
       <EventMilestones v-if="data.call" :edition="data.edition" :call="data.call" />
 
       <EventCallBanner
@@ -163,6 +166,9 @@ useHead(() => ({
         criteria-href="#criteres"
         :submit-to="localePath('proposal-form')"
       />
+
+      <!-- Le contexte, une fois l'échéance répondue. -->
+      <EventPresentation :edition="data.edition" />
 
       <EventSpecialDays
         :tracks="data.tracks"

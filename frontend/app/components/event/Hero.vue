@@ -35,11 +35,17 @@ import type { AttachedImage, EditionImageRole } from '~/types/media'
  * n'entre PAS dans ce repli : un carré étiré sur 1 500 px ne montre plus rien,
  * et l'en-tête sobre lui est alors préférable.
  *
- * ── LA PRÉSENTATION RESTE SUR LA SURFACE DE PAGE ────────────────────────────
+ * ── LA PRÉSENTATION A QUITTÉ CET EN-TÊTE ────────────────────────────────────
  *
- * Description et message d'accueil sortent du bandeau. Un paragraphe de
- * soixante-cinq caractères de large sur une photographie reste pénible à lire
- * même voilé : le voile sert un titre de quelques mots, pas un texte suivi.
+ * Elle n'est pas seulement sortie du bandeau — un paragraphe de soixante-cinq
+ * caractères de large sur une photographie reste pénible à lire même voilé —
+ * elle a quitté le composant. Posée sous le bandeau, elle repoussait la frise
+ * des échéances de deux cents pixels, alors que c'est la frise qui répond à la
+ * question pour laquelle on vient. Elle vit désormais dans
+ * `EventPresentation`, après l'encart d'appel.
+ *
+ * L'en-tête ne porte donc plus que ce qui IDENTIFIE l'édition : série, état,
+ * titre, et les quatre faits.
  *
  * ── SANS VISUEL, L'EN-TÊTE SOBRE ────────────────────────────────────────────
  *
@@ -192,19 +198,5 @@ const STATUS_INTENT: Record<EventEdition['status'], 'info' | 'warning' | 'neutra
       :country="props.country"
     />
 
-    <!-- LA PRÉSENTATION, TOUJOURS SUR LA SURFACE DE PAGE. Cf. l'en-tête. -->
-    <div class="mt-8">
-      <p class="text-lg text-text-secondary" :style="{ maxWidth: 'var(--measure)' }">
-        {{ tr(props.edition.description) }}
-      </p>
-
-      <p
-        v-if="props.edition.highlights"
-        class="mt-4 rounded-md border-l-4 border-accent bg-surface-sunken px-4 py-3 text-sm text-text-secondary"
-        :style="{ maxWidth: 'var(--measure)' }"
-      >
-        {{ tr(props.edition.highlights) }}
-      </p>
-    </div>
   </header>
 </template>

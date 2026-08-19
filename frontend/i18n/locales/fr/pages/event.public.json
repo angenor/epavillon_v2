@@ -55,6 +55,9 @@
     "results": "Annonce des résultats",
     "event": "Tenue de l'événement"
   },
+  "presentation": {
+    "title": "À propos de cette édition"
+  },
   "programmeLink": {
     "title": "Programmation",
     "count": "{count} activité publiée | {count} activité publiée | {count} activités publiées",
