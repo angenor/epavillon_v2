@@ -25,7 +25,7 @@
     },
     "visuals": {
       "legend": "Visuals",
-      "hint": "The banner dresses the public page. It is attached to the edition; it is not a column of the table."
+      "hint": "Three crops, uploaded separately: automatic cropping beheads speakers in a conference photograph. Each shape is checked on upload; all three are optional and independent."
     }
   },
   "fields": {
@@ -55,14 +55,29 @@
     "address": "Address",
     "hasPavilion": "OIF holds a pavilion at this edition",
     "banner": "Banner",
-    "bannerReplace": "Replace banner",
-    "bannerNone": "No banner attached",
     "slugAuto": "Composed from the label. Editable: as soon as you touch it, it stops following.",
     "slugReset": "Restore the automatic suggestion",
     "latitude": "Latitude",
     "longitude": "Longitude",
     "coordinatesHint": "Point surveyed on site, in decimal degrees. Optional — but both together or neither.",
-    "coordinatesCheck": "Check the point on a map"
+    "coordinatesCheck": "Check the point on a map",
+    "images": {
+      "shape": "{ratio} format",
+      "none": "No image for this format",
+      "assetId": "Asset identifier",
+      "banner": {
+        "label": "Panoramic banner",
+        "use": "tops the record and the public page"
+      },
+      "cover": {
+        "label": "Cover image",
+        "use": "home page cards and social sharing"
+      },
+      "thumbnail": {
+        "label": "Square thumbnail",
+        "use": "dense lists and networks that crop to square"
+      }
+    }
   },
   "mode": {
     "online": "Online",
@@ -95,5 +110,5 @@
     "cancel": "Cancel",
     "backToList": "Back to list"
   },
-  "uploadNotice": "Visual uploads will be wired to the Media module: the banner is attached by asset identifier."
+  "uploadNotice": "Uploading will be wired to the Media module: for now, each variant is attached by asset identifier. A file that does not match the shape of its slot is rejected on upload, never cropped."
 }

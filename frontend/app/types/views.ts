@@ -391,9 +391,20 @@ export interface PublicEditionRow {
   country_name: I18nText | null
   city: string | null
 
-  /** Rôle `banner` — et non `cover`, seul `banner` est déclaré pour
-   *  `event.events`. SOUVENT NUL : la carte doit rester présentable sans. */
+  /**
+   * LES TROIS DÉCLINAISONS, ET NON UNE SEULE À RECADRER (19/08).
+   *
+   * `banner` en 32:9 pour un bandeau pleine largeur, `cover` en 16:9 pour une
+   * carte ou un partage, `thumbnail` en 1:1 pour une liste dense. La vue les
+   * rend toutes les trois plutôt que de choisir : l'écran seul sait de quelle
+   * largeur il dispose, et un repli décidé en base serait le même pour une
+   * fiche pleine largeur et pour une vignette de 48 px.
+   *
+   * TOUTES SOUVENT NULLES : chaque écran doit rester présentable sans.
+   */
   banner: AttachedImage | null
+  cover: AttachedImage | null
+  thumbnail: AttachedImage | null
 
   temporal_state: EditionTemporalState
 

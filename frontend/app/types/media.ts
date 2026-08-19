@@ -58,6 +58,12 @@ export type RenditionStatus = 'pending' | 'generating' | 'ready' | 'failed'
  * `content` : l'énumération ne portait que des rôles d'image et de document,
  * alors que la plateforme stocke déjà des enregistrements de séance et fait
  * défiler des fonds vidéo sur sa page d'accueil.
+ *
+ * `thumbnail` y a été ajouté le 19/08 pour les trois déclinaisons d'une édition.
+ * UN RÔLE DIT UN USAGE, JAMAIS UNE FORME : c'est la vignette qui représente
+ * l'entité là où la place est comptée. Que cet usage appelle un carré est une
+ * conséquence, déclarée en base (`attachable_roles.expected_aspect_ratio`) et
+ * non dans ce nom — `square` aurait figé la forme dans le vocabulaire.
  */
 export type AttachmentRole =
   | 'cover'
@@ -67,7 +73,32 @@ export type AttachmentRole =
   | 'document'
   | 'avatar'
   | 'video'
+  | 'thumbnail'
   | 'attachment'
+
+// ---------------------------------------------------------------------------
+// Les trois déclinaisons d'une édition
+// ---------------------------------------------------------------------------
+
+/**
+ * LES TROIS FORMES D'UNE ÉDITION, ET LEUR RÔLE EN BASE.
+ *
+ * Trois recadrages TÉLÉVERSÉS À LA MAIN, jamais déduits l'un de l'autre : un
+ * bandeau 32:9 rogné depuis une photographie de conférence décapite les
+ * intervenants, et un carré tiré du même fichier ne garde qu'une épaule. La
+ * forme attendue est déclarée dans `media.attachable_roles` et vérifiée par
+ * trigger — l'écran l'annonce, il ne la fait pas respecter.
+ */
+export const EDITION_IMAGE_ROLES = ['banner', 'cover', 'thumbnail'] as const
+
+export type EditionImageRole = (typeof EDITION_IMAGE_ROLES)[number]
+
+/** Le rapport largeur ÷ hauteur exigé par la base, pour l'annoncer à l'éditeur. */
+export const EDITION_IMAGE_RATIO: Record<EditionImageRole, string> = {
+  banner: '32 / 9',
+  cover: '16 / 9',
+  thumbnail: '1 / 1',
+}
 
 // ---------------------------------------------------------------------------
 // Objets stockés

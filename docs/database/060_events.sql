@@ -628,9 +628,19 @@ SELECT
     c.name        AS country_name,
     e.city,
 
-    -- `banner` et non `cover` : c'est le rôle déclaré pour cette table dans
-    -- `media.attachable_roles`, et un `cover` y serait refusé par le trigger.
-    media.attached_image('event', 'events', e.id, 'banner') AS banner,
+    -- LES TROIS DÉCLINAISONS, ET NON UNE SEULE RECADRÉE (19/08). Chacune est
+    -- téléversée à la main pour un usage précis — 32:9 pour le bandeau, 16:9
+    -- pour la carte et le partage, 1:1 pour la liste dense et les réseaux
+    -- carrés — et `media.attachable_roles` refuse un fichier qui n'a pas la
+    -- forme du rôle. La vue les rend TOUTES LES TROIS plutôt que de choisir :
+    -- l'écran sait seul de quelle largeur il dispose, et un repli décidé ici
+    -- serait le même pour la fiche pleine largeur et pour une liste de 48 px.
+    --
+    -- Les trois sont nullables, et c'est le cas courant : une édition sans
+    -- image reste publique, chaque écran portant déjà son repli.
+    media.attached_image('event', 'events', e.id, 'banner')    AS banner,
+    media.attached_image('event', 'events', e.id, 'cover')     AS cover,
+    media.attached_image('event', 'events', e.id, 'thumbnail') AS thumbnail,
 
     CASE
         WHEN now() < e.starts_at                      THEN 'upcoming'
@@ -667,4 +677,4 @@ LEFT JOIN event.calls_for_proposals cfp
 WHERE e.status NOT IN ('draft', 'cancelled');
 
 COMMENT ON VIEW event.v_public_editions IS
-    'Les éditions publiques prêtes à l''affichage : série, pays, bannière, état temporel, appel à propositions et volume du programme. Trier par starts_at.';
+    'Les éditions publiques prêtes à l''affichage : série, pays, les trois déclinaisons d''image (32:9, 16:9, 1:1), état temporel et appel à propositions. Trier par starts_at.';

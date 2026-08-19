@@ -25,7 +25,7 @@
     },
     "visuals": {
       "legend": "Visuels",
-      "hint": "La bannière habille la page publique. Elle est rattachée à l'édition, elle n'est pas une colonne de la table."
+      "hint": "Trois recadrages, téléversés séparément : un rognage automatique décapite les intervenants d'une photographie de conférence. La forme de chacun est vérifiée au dépôt ; les trois sont facultatifs et indépendants."
     }
   },
   "fields": {
@@ -55,14 +55,29 @@
     "address": "Adresse",
     "hasPavilion": "L'OIF tient un pavillon sur cette édition",
     "banner": "Bannière",
-    "bannerReplace": "Remplacer la bannière",
-    "bannerNone": "Aucune bannière rattachée",
     "slugAuto": "Composé depuis le libellé. Modifiable : dès que vous y touchez, il cesse de suivre.",
     "slugReset": "Reprendre la proposition automatique",
     "latitude": "Latitude",
     "longitude": "Longitude",
     "coordinatesHint": "Point relevé sur place, en degrés décimaux. Facultatif — mais les deux ensemble ou aucun.",
-    "coordinatesCheck": "Vérifier le point sur un plan"
+    "coordinatesCheck": "Vérifier le point sur un plan",
+    "images": {
+      "shape": "Format {ratio}",
+      "none": "Aucune image pour ce format",
+      "assetId": "Identifiant de l'objet",
+      "banner": {
+        "label": "Bandeau panoramique",
+        "use": "coiffe la fiche et la page publique"
+      },
+      "cover": {
+        "label": "Image de couverture",
+        "use": "cartes de l'accueil et partage sur les réseaux"
+      },
+      "thumbnail": {
+        "label": "Vignette carrée",
+        "use": "listes denses et réseaux qui recadrent en carré"
+      }
+    }
   },
   "mode": {
     "online": "En ligne",
@@ -95,5 +110,5 @@
     "cancel": "Annuler",
     "backToList": "Retour à la liste"
   },
-  "uploadNotice": "Le téléversement des visuels sera raccordé au module Média : la bannière se rattache par identifiant d'objet."
+  "uploadNotice": "Le téléversement sera raccordé au module Média : pour l'instant, chaque déclinaison se rattache par identifiant d'objet. Un fichier qui n'a pas la forme de son emplacement est refusé au dépôt, jamais rogné."
 }

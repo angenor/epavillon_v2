@@ -295,7 +295,11 @@ const editionPayload = computed<EditionFormPayload | null>(() => {
     longitude: edition.longitude,
     has_pavilion: edition.has_pavilion,
     highlights: detail.value?.highlights ?? null,
-    banner_asset_id: detail.value?.banner?.asset_id ?? null,
+    images: {
+      banner: detail.value?.images.banner?.asset_id ?? null,
+      cover: detail.value?.images.cover?.asset_id ?? null,
+      thumbnail: detail.value?.images.thumbnail?.asset_id ?? null,
+    },
   }
 })
 
@@ -372,6 +376,16 @@ const createdDays = computed(() => Number(route.query.jours ?? 0))
 
 const plannerTo = computed(() => localePath('/admin/programmation'))
 
+/**
+ * LE VISUEL DU BANDEAU — le 32:9 d'abord, le 16:9 à défaut.
+ *
+ * Le bandeau occupe toute la largeur d'un écran de travail : c'est la forme du
+ * rôle `banner`. Quand il manque, `cover` recadré vaut mieux qu'un en-tête nu —
+ * mais `thumbnail` n'entre PAS dans ce repli : un carré étiré sur 1 500 px ne
+ * montre plus rien, et l'en-tête sobre est alors préférable.
+ */
+const heroImage = computed(() => detail.value?.images.banner ?? detail.value?.images.cover ?? null)
+
 const periodLabel = computed(() => {
   const edition = detail.value?.edition
   if (!edition) return ''
@@ -412,8 +426,120 @@ const periodLabel = computed(() => {
     <UiLoadingState v-else-if="!detail" :label="t('common.states.loading.label')" />
 
     <template v-else>
-      <!-- EN-TÊTE DE L'ÉDITION --------------------------------------------------->
-      <header class="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
+      <!-- EN-TÊTE DE L'ÉDITION, EN DEUX RENDUS ---------------------------------
+
+           AVEC VISUEL, un bandeau plein cadre : dans un back-office où l'on
+           passe d'une COP à un cycle de webinaires vingt fois par jour, une
+           image reconnue d'un coup d'œil vaut mieux qu'un titre lu.
+
+           SANS VISUEL, l'en-tête sobre — et surtout PAS le même bandeau sur un
+           aplat. Le voile et le fondu ne se posent que sur un média : sur une
+           surface de page ils ne séparent rien et ne font que de l'ornement.
+
+           LA HAUTEUR EST BORNÉE PAR LE CONTENU, jamais par le ratio de l'image.
+           Un 32:9 pleine largeur mesurerait 420 px sur un grand écran et
+           pousserait les onglets hors de vue : c'est une fiche de travail, le
+           bandeau la coiffe et ne la remplace pas. `min-h` par palier, et
+           `object-cover` recadre ce qui dépasse. -->
+      <header
+        v-if="heroImage"
+        class="relative overflow-hidden rounded-xl bg-surface-inverse text-text-on-inverse"
+      >
+        <UiImage
+          :image="heroImage"
+          ratio="auto"
+          frame-class="size-full"
+          class="absolute inset-0"
+          loading="eager"
+          sizes="100vw"
+        />
+        <!-- Le voile en deux temps : l'aplat pour les pastilles et le fil, qui
+             se posent haut ; le fondu pour le bloc de titre, en bas. -->
+        <div class="pointer-events-none absolute inset-0 bg-scrim/35" aria-hidden="true" />
+        <div
+          class="scrim-fade-bottom pointer-events-none absolute inset-x-0 bottom-0 h-4/5"
+          aria-hidden="true"
+        />
+
+        <!-- LE BOUTON EST DANS LE COIN, PAS DANS LE FLUX. En élément flex, il
+             passait sous le titre dès que celui-ci tenait deux lignes — c'est-à-dire
+             presque toujours, un intitulé de COP faisant soixante caractères. -->
+        <div class="relative flex min-h-52 flex-col justify-end p-5 sm:min-h-60 sm:p-7 lg:min-h-64">
+          <div class="min-w-0 pe-0 sm:pe-44">
+            <p class="flex flex-wrap items-center gap-x-2 text-sm text-text-on-inverse">
+              <span v-if="detail.edition.series_name">{{ tr(detail.edition.series_name) }}</span>
+              <span v-if="detail.edition.edition_label" class="font-mono">
+                {{ detail.edition.edition_label }}
+              </span>
+              <span>{{ detail.edition.edition_year }}</span>
+            </p>
+
+            <h1 class="mt-1 text-3xl leading-tight font-semibold text-balance text-text-on-inverse">
+              {{ tr(detail.edition.title) }}
+            </h1>
+
+            <p
+              class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-on-inverse-muted"
+            >
+              <span>{{ periodLabel }}</span>
+              <span>
+                {{ t('common.datetime.zoneOf', {
+                  zone: detail.edition.city ?? detail.edition.timezone,
+                }) }}
+              </span>
+              <span v-if="detail.edition.city">
+                {{ detail.edition.city
+                }}<template v-if="detail.edition.country_name">,
+                  {{ tr(detail.edition.country_name) }}</template>
+              </span>
+              <span v-else>{{ t('admin.event.list.cell.online') }}</span>
+            </p>
+
+            <!-- LES PASTILLES GARDENT LEUR DESSIN CLAIR, et c'est délibéré :
+                 leur fond est OPAQUE, donc lisible sur n'importe quelle
+                 photographie, et leur code de couleur est le même partout dans
+                 le back-office. Un jeu de pastilles propre à cet écran serait
+                 un second vocabulaire d'état à retenir. -->
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+              <UiBadge
+                :intent="detail.edition.status === 'ongoing' ? 'warning' : 'info'"
+                :label="t('admin.event.list.status.' + detail.edition.status)"
+              />
+              <UiBadge
+                :intent="detail.edition.has_pavilion ? 'info' : 'neutral'"
+                :label="t(detail.edition.has_pavilion
+                  ? 'admin.event.list.cell.pavilion'
+                  : 'admin.event.list.cell.noPavilion')"
+              />
+              <UiBadge
+                v-if="detail.edition.programme_published_at"
+                intent="success"
+                :label="t('admin.event.list.programme.published', {
+                  date: dateTime(detail.edition.programme_published_at, detail.edition.timezone),
+                })"
+              />
+              <UiBadge v-else intent="neutral" :label="t('admin.event.list.programme.unpublished')" />
+            </div>
+          </div>
+
+          <!-- LE VERRE, ICI, EST DANS SON SEUL CAS AUTORISÉ : une commande posée
+               sur un média. Un bouton d'interface ordinaire, dessiné pour une
+               surface claire, deviendrait illisible dès que la photographie
+               change — et elle change à chaque édition. -->
+          <button
+            v-if="canManageEvent && !editingEdition"
+            type="button"
+            class="mt-4 inline-flex min-h-(--target-min) cursor-pointer items-center gap-2 self-start rounded-md border border-glass-border bg-glass px-4 text-sm font-semibold text-text-on-inverse shadow-glass backdrop-blur-glass transition-colors hover:bg-glass-hover sm:absolute sm:end-7 sm:top-7 sm:mt-0"
+            @click="editingEdition = true"
+          >
+            <UiIcon name="edit" size="1rem" />
+            {{ t('admin.event.form.editTitle') }}
+          </button>
+        </div>
+      </header>
+
+      <!-- SANS VISUEL : l'en-tête sobre, sur la surface de page. -->
+      <header v-else class="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
         <div class="min-w-0">
           <p class="flex flex-wrap items-center gap-x-2 text-sm text-text-muted">
             <span v-if="detail.edition.series_name">{{ tr(detail.edition.series_name) }}</span>
@@ -518,7 +644,7 @@ const periodLabel = computed(() => {
           v-if="options && editionPayload"
           :initial="editionPayload"
           :options="options"
-          :banner="detail.banner"
+          :images="detail.images"
           :errors="editionErrors"
           :busy="busy"
           @submit="saveEdition"

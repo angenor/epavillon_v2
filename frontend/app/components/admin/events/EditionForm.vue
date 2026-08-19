@@ -5,7 +5,7 @@ import type {
   EditionFormOptions,
   EditionFormPayload,
 } from '~/types/admin-events'
-import type { AttachedImage } from '~/types/media'
+import type { AttachedImage, EditionImageRole } from '~/types/media'
 import type { ParticipationMode } from '~/types/event/edition'
 import type { SelectOption } from '~/types/ui'
 
@@ -35,18 +35,18 @@ import type { SelectOption } from '~/types/ui'
  *
  * ── LES VISUELS ─────────────────────────────────────────────────────────────
  *
- * `event.events` NE PORTE PAS son image : le rattachement média est polymorphe
- * (`media.attachments`, rôle `banner`). Le champ transmet donc un identifiant
- * d'objet, et le téléversement lui-même appartient au module Média — non encore
- * raccordé. La bannière existante s'affiche, elle se remplace par identifiant, et
- * l'écran le dit plutôt que d'offrir un bouton qui ne ferait rien.
+ * `event.events` NE PORTE PAS ses images : le rattachement média est polymorphe
+ * (`media.attachments`). Depuis le 19/08 l'édition en porte TROIS — 32:9, 16:9,
+ * 1:1 — et leur dessin appartient à `AdminEventsImagesPanel`, non à ce
+ * formulaire déjà long. Ce fichier ne fait que leur passer les valeurs.
  */
 
 interface Props {
   /** Valeurs de départ. Absentes à la création. */
   initial?: EditionFormPayload | null
   options: EditionFormOptions
-  banner?: AttachedImage | null
+  /** Les trois déclinaisons déjà rattachées, pour l'aperçu de chaque emplacement. */
+  images?: Record<EditionImageRole, AttachedImage | null> | null
   errors: EditionFormError[]
   busy?: boolean
   /** Vrai en création : le statut est alors figé à « brouillon ». */
@@ -85,7 +85,7 @@ function blank(): EditionFormPayload {
     longitude: null,
     has_pavilion: false,
     highlights: null,
-    banner_asset_id: null,
+    images: { banner: null, cover: null, thumbnail: null },
   }
 }
 
@@ -580,28 +580,13 @@ function submit(): void {
         {{ t('admin.event.form.sections.visuals.hint') }}
       </p>
 
-      <div class="grid gap-5 lg:grid-cols-2">
-        <div>
-          <UiImage
-            v-if="props.banner"
-            :image="props.banner"
-            ratio="16 / 9"
-            rounded="rounded-md"
-          />
-          <p v-else class="rounded-md border border-dashed border-border p-6 text-sm text-text-subtle">
-            {{ t('admin.event.form.fields.bannerNone') }}
-          </p>
-        </div>
+      <AdminEventsImagesPanel
+        :images="props.images ?? { banner: null, cover: null, thumbnail: null }"
+        :model-value="form.images"
+        @update:model-value="(next) => (form.images = next)"
+      />
 
-        <div>
-          <UiInput
-            :model-value="form.banner_asset_id ?? ''"
-            :label="t('admin.event.form.fields.bannerReplace')"
-            @update:model-value="(next: string) => (form.banner_asset_id = next || null)"
-          />
-          <p class="mt-2 text-sm text-text-subtle">{{ t('admin.event.form.uploadNotice') }}</p>
-        </div>
-      </div>
+      <p class="mt-4 text-sm text-text-subtle">{{ t('admin.event.form.uploadNotice') }}</p>
     </fieldset>
 
     <div class="flex flex-wrap items-center gap-3">

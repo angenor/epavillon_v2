@@ -490,16 +490,25 @@ export function useApi() {
       series: () => call('/event-series', (m) => m.eventSeries),
 
       /**
-       * VISUEL DE L'ÉDITION — `media.attached_image('event','events',id,'banner')`.
+       * LES TROIS DÉCLINAISONS DE L'ÉDITION — `banner` 32:9, `cover` 16:9,
+       * `thumbnail` 1:1, chacune résolue par `media.attached_image()`.
        *
-       * Un appel à part, et c'en est un de trop : `event.events` ne porte pas son
-       * image, le rattachement média étant polymorphe. La couverture d'une
+       * TROIS ROLES, UN SEUL APPEL : les demander séparément ferait trois
+       * allers-retours pour un écran qui, de toute façon, choisit celle qui va
+       * à sa largeur. Elles arrivent donc ensemble et l'écran arbitre.
+       *
+       * Un appel à part reste un appel de trop : `event.events` ne porte pas ses
+       * images, le rattachement média étant polymorphe. La couverture d'une
        * séance, elle, est résolue EN BASE par `v_public_schedule`. Obligation
-       * inscrite au prompt B3 : la réponse de `GET /events/:slug` embarque sa
-       * bannière résolue, et cet appel disparaît.
+       * inscrite au prompt B3 : la réponse de `GET /events/:slug` embarque ses
+       * images résolues, et cet appel disparaît.
        */
-      banner: (eventId: Uuid) =>
-        call(`/events/${eventId}/banner`, (m) => m.attachedImage('event', 'events', eventId, 'banner')),
+      images: (eventId: Uuid) =>
+        call(`/events/${eventId}/images`, (m) => ({
+          banner: m.attachedImage('event', 'events', eventId, 'banner'),
+          cover: m.attachedImage('event', 'events', eventId, 'cover'),
+          thumbnail: m.attachedImage('event', 'events', eventId, 'thumbnail'),
+        })),
       days: (eventId: Uuid) =>
         call(`/events/${eventId}/days`, (m) => m.eventDays.filter((d) => d.event_id === eventId)),
       tracks: (eventId: Uuid) =>

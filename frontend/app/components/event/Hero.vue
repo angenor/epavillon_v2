@@ -11,10 +11,12 @@ import type { AttachedImage } from '~/types/media'
  * échéances viennent juste après (l'encart d'appel), et le programme plus bas.
  * Un en-tête qui répond à tout ne répond à rien.
  *
- * LE VISUEL N'EST PAS UNE BANNIÈRE DE FOND. Il est posé à côté du texte, jamais
- * derrière : un titre sur photo perd son contraste dès que l'image change, et
- * l'image change à chaque édition. Sans visuel — c'est le cas de la COP29 dans
- * les données simulées — l'en-tête reste entier, comme la carte de séance.
+ * LE VISUEL N'EST PAS UNE BANNIÈRE DE FOND, ET IL RESTE À CÔTÉ DU TEXTE.
+ * Le back-office, lui, a reçu le 19/08 un bandeau plein cadre : c'est un écran
+ * de travail, on y reconnaît une édition d'un coup d'œil parmi vingt. Ici on
+ * la LIT — un titre posé sur une photographie perd son contraste dès qu'elle
+ * change, et elle change à chaque édition. Sans visuel — c'est le cas de la
+ * COP29 dans les données simulées — l'en-tête reste entier.
  *
  * TOUTE DATE PORTE SON FUSEAU. Celui de l'édition (`event.events.timezone`),
  * jamais celui du visiteur : « du 9 au 20 novembre 2027, heure de Belém ».
@@ -24,8 +26,16 @@ interface Props {
   edition: EventEdition
   /** Série de rattachement, quand l'édition en a une : « COP Climat (CCNUCC) ». */
   series?: EventSeries | null
-  /** `media.attached_image('event','events',id,'banner')`. */
-  banner?: AttachedImage | null
+  /**
+   * LA DÉCLINAISON 16:9 (rôle `cover`), et pas le bandeau 32:9.
+   *
+   * Depuis le 19/08, une édition porte trois recadrages téléversés à la main.
+   * Celui-ci est posé À CÔTÉ du texte, dans une colonne de 40 % de la page :
+   * un 32:9 y ferait une meurtrière de 120 px de haut. L'appelant se rabat sur
+   * `banner` quand le 16:9 manque — recadré par `object-cover`, ce qui reste
+   * préférable à un trou dans la mise en page.
+   */
+  cover?: AttachedImage | null
   /** Nom du pays hôte, déjà résolu depuis `reference.countries`. */
   country?: string | null
 }
@@ -155,12 +165,12 @@ const STATUS_INTENT: Record<EventEdition['status'], 'info' | 'warning' | 'neutra
     <!-- Le visuel, quand il existe. Chargement immédiat : il est au-dessus de la
          ligne de flottaison, le différer ferait sauter la mise en page. -->
     <UiImage
-      v-if="props.banner"
-      :image="props.banner"
-      ratio="3 / 2"
+      v-if="props.cover"
+      :image="props.cover"
+      ratio="16 / 9"
       loading="eager"
       sizes="(min-width: 1024px) 40vw, 100vw"
-      rounded="0.5rem"
+      rounded="rounded-lg"
       class="border border-border"
     />
   </header>

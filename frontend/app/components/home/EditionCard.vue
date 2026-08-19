@@ -27,12 +27,19 @@ import type { PublicEditionRow } from '~/types/views'
  * pas utile. Le voile suffit à porter le contraste, et un panneau flou sur une
  * carte de 320 px ajouterait un calcul de flou par carte pour un gain nul.
  *
- * ── LA BANNIÈRE EST SOUVENT NULLE, ET LA CARTE RESTE ENTIÈRE ────────────────
+ * ── LE 16:9, ET NON LE BANDEAU 32:9 ─────────────────────────────────────────
  *
- * `v_public_editions.banner` vient du rôle `banner` de `event.events` ; la
- * plupart des éditions passées n'en ont pas. Le repli n'invente AUCUNE image :
- * un aplat institutionnel portant le millésime en filigrane, ce qui reste un
- * repère là où un pictogramme générique n'en serait pas un.
+ * Depuis le 19/08, une édition porte trois recadrages téléversés à la main.
+ * L'affiche fait 352 × 712 px : aucun des trois n'a sa forme et `object-cover`
+ * recadrera de toute façon — mais un 32:9 ramené à cette largeur ne laisserait
+ * qu'une bande, là où le 16:9 garde une scène. On prend donc `cover`, et
+ * `banner` en repli.
+ *
+ * ── L'IMAGE EST SOUVENT NULLE, ET LA CARTE RESTE ENTIÈRE ────────────────────
+ *
+ * La plupart des éditions passées n'ont aucune déclinaison. Le repli n'invente
+ * AUCUNE image : un aplat institutionnel portant le millésime en filigrane, ce
+ * qui reste un repère là où un pictogramme générique n'en serait pas un.
  *
  * ── PAS DE PASTILLES THÉMATIQUES SUR L'AFFICHE ──────────────────────────────
  *
@@ -73,6 +80,9 @@ const localePath = useLocalePath()
 
 const to = computed(() => localePath(`/evenements/${props.edition.slug}`))
 
+/** Le 16:9 d'abord, le bandeau à défaut. Cf. l'en-tête du fichier. */
+const poster = computed(() => props.edition.cover ?? props.edition.banner)
+
 const dates = computed(() =>
   dateRange(props.edition.starts_at, props.edition.ends_at, props.edition.timezone),
 )
@@ -99,8 +109,8 @@ const stamp = computed(
     class="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-surface-inverse text-text-on-inverse shadow-sm transition duration-200 hover:shadow-lg motion-safe:hover:-translate-y-1"
   >
     <UiImage
-      v-if="props.edition.banner"
-      :image="props.edition.banner"
+      v-if="poster"
+      :image="poster"
       ratio="auto"
       frame-class="size-full"
       class="absolute inset-0"
@@ -131,12 +141,12 @@ const stamp = computed(
          Deux voiles superposés restent UN voile : le second ne fait qu'épaissir
          le premier là où le texte est dense. -->
     <div
-      v-if="props.edition.banner"
+      v-if="poster"
       class="pointer-events-none absolute inset-0 bg-scrim/30"
       aria-hidden="true"
     />
     <div
-      v-if="props.edition.banner"
+      v-if="poster"
       class="scrim-fade-bottom pointer-events-none absolute inset-x-0 bottom-0 h-2/3"
       aria-hidden="true"
     />

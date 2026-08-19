@@ -346,7 +346,11 @@ export function editionDetail(eventId: Uuid): EditionDetail | null {
     description: edition.description,
     highlights: edition.highlights,
     period: periodOf(edition),
-    banner: attachedImage('event', 'events', edition.id, 'banner'),
+    images: {
+      banner: attachedImage('event', 'events', edition.id, 'banner'),
+      cover: attachedImage('event', 'events', edition.id, 'cover'),
+      thumbnail: attachedImage('event', 'events', edition.id, 'thumbnail'),
+    },
     days: editionDays(edition),
     tracks: editionTracks(eventId),
     venues: editionVenues(eventId),

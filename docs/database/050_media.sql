@@ -73,8 +73,17 @@ CREATE TYPE media.rendition_status AS ENUM ('pending', 'generating', 'ready', 'f
 -- stocke déjà des enregistrements de séance et fait défiler des fonds vidéo sur
 -- sa page d'accueil. Le détourner sur `attachment` — le fourre-tout — aurait
 -- rendu illisible le seul endroit qui dit à quoi sert un fichier.
+--
+-- `thumbnail` A ÉTÉ AJOUTÉ pour les trois déclinaisons d'une édition (19/08).
+-- UN RÔLE DIT UN USAGE, JAMAIS UNE FORME : c'est « la vignette qui représente
+-- l'entité là où la place est comptée » — une liste dense, un partage sur un
+-- réseau qui recadre en carré. Que cet usage appelle un carré est une
+-- conséquence, et elle est déclarée là où se déclarent les autres contraintes
+-- de fichier : `attachable_roles.expected_aspect_ratio`. Nommer le rôle
+-- `square` aurait figé la forme dans le vocabulaire, et le jour où le réseau
+-- passe au 4:5 il aurait fallu un rôle de plus pour le même usage.
 CREATE TYPE media.attachment_role AS ENUM (
-    'cover', 'banner', 'logo', 'gallery', 'document', 'avatar', 'video', 'attachment'
+    'cover', 'banner', 'logo', 'gallery', 'document', 'avatar', 'video', 'thumbnail', 'attachment'
 );
 
 -- -----------------------------------------------------------------------------
@@ -338,9 +347,33 @@ CREATE TABLE media.attachable_roles (
     -- Préfixes MIME acceptés, motif '*' autorisé. Tableau vide = tout accepté.
     allowed_mime_prefixes text[]  NOT NULL DEFAULT '{}',
     max_byte_size         bigint  CHECK (max_byte_size IS NULL OR max_byte_size > 0),
+
+    -- LA FORME ATTENDUE, DÉCLARÉE ET NON CODÉE (19/08). Largeur ÷ hauteur :
+    -- 3.5556 pour un 32:9, 1.7778 pour un 16:9, 1.0000 pour un carré. NULL —
+    -- le défaut — n'impose rien, ce qui reste le cas d'une galerie, d'un
+    -- document ou d'un fond de bandeau recadré par le navigateur.
+    --
+    -- C'est ici et pas dans le code applicatif, pour la même raison que le type
+    -- MIME et le poids : un écran qui vérifierait seul finirait par accepter ce
+    -- que l'API refuse, ou l'inverse. Ajouter un ratio 4:5 pour les réseaux
+    -- reste alors une INSERTION, jamais une migration.
+    expected_aspect_ratio numeric(6,4) CHECK (expected_aspect_ratio IS NULL
+                                              OR expected_aspect_ratio > 0),
+    -- Écart relatif toléré. 2 % laisse passer un 1920×1080 comme un 1600×902,
+    -- et refuse un 4:3 présenté comme un 16:9. Zéro exigerait le pixel exact,
+    -- ce qu'aucun outil de recadrage ne garantit.
+    aspect_ratio_tolerance numeric(4,3) NOT NULL DEFAULT 0.02
+                                        CHECK (aspect_ratio_tolerance >= 0
+                                               AND aspect_ratio_tolerance <= 0.5),
+
     is_active             boolean NOT NULL DEFAULT true,
     PRIMARY KEY (owner_schema, owner_table, role)
 );
+
+COMMENT ON COLUMN media.attachable_roles.expected_aspect_ratio IS
+    'Forme attendue (largeur / hauteur) : 3.5556 = 32:9, 1.7778 = 16:9, 1.0 = carré. NULL n''impose rien.';
+COMMENT ON COLUMN media.attachable_roles.aspect_ratio_tolerance IS
+    'Écart relatif toléré sur expected_aspect_ratio. 0.02 = 2 %.';
 
 COMMENT ON TABLE media.attachable_roles IS
     'Table blanche des rattachements autorisés (entité porteuse x rôle). Toute combinaison non déclarée est rejetée par trigger.';
@@ -426,6 +459,25 @@ BEGIN
         RAISE EXCEPTION 'Rattachement refusé : % octets dépassent la limite de % pour le rôle « % ».',
             v_asset.byte_size, v_rule.max_byte_size, NEW.role
             USING ERRCODE = 'integrity_constraint_violation';
+    END IF;
+
+    -- CONTRÔLE DE LA FORME. Ne s'applique QU'AUX OBJETS MESURÉS : `width` et
+    -- `height` sont nuls pour un document, et un PDF n'a pas de ratio à
+    -- respecter. Un objet image sans dimensions relevées passe donc — c'est le
+    -- relevé qui a échoué, pas le fichier qui est mal cadré, et refuser ici
+    -- transformerait une panne de traitement en refus de téléversement.
+    IF v_rule.expected_aspect_ratio IS NOT NULL
+       AND v_asset.width IS NOT NULL AND v_asset.height IS NOT NULL
+       AND v_asset.height > 0
+       AND abs(v_asset.width::numeric / v_asset.height - v_rule.expected_aspect_ratio)
+           > v_rule.expected_aspect_ratio * v_rule.aspect_ratio_tolerance THEN
+        RAISE EXCEPTION 'Rattachement refusé : % × % ne respecte pas la forme attendue du rôle « % » (rapport %, attendu % à % près).',
+            v_asset.width, v_asset.height, NEW.role,
+            round(v_asset.width::numeric / v_asset.height, 4),
+            v_rule.expected_aspect_ratio,
+            to_char(v_rule.aspect_ratio_tolerance * 100, 'FM990.0') || ' %'
+            USING ERRCODE = 'integrity_constraint_violation',
+                  HINT = 'Recadrer le fichier avant de le téléverser : la déclinaison est choisie à la main, jamais rognée par le navigateur.';
     END IF;
 
     NEW.is_exclusive := NOT v_rule.is_multiple;
@@ -839,13 +891,26 @@ INSERT INTO platform.settings (key, value, description) VALUES
     ('media.orphan_retention_days', '30', 'Ancienneté minimale avant qu''un objet non rattaché soit proposé à la purge.')
 ON CONFLICT (key) DO NOTHING;
 
+-- UNE ÉDITION PORTE TROIS DÉCLINAISONS, ET C'EST UN CHOIX DE TERRAIN (19/08).
+-- Un bandeau 32:9 recadré automatiquement depuis une photographie de conférence
+-- décapite les intervenants ; un carré tiré du même fichier ne garde qu'une
+-- épaule. Les trois recadrages sont donc TÉLÉVERSÉS À LA MAIN, chacun pour un
+-- usage :
+--   banner    32:9  le bandeau qui coiffe la fiche et la page publique
+--   cover     16:9  la carte, la vignette d'historique, le partage social
+--   thumbnail 1:1   la liste dense et les réseaux qui recadrent en carré
+-- Les trois sont FACULTATIFS et indépendants : une édition sans image reste
+-- entière, chaque écran ayant déjà son repli. Aucun ne se déduit d'un autre —
+-- déduire, c'est recadrer, et c'est exactement ce qu'on refuse ici.
 INSERT INTO media.attachable_roles
-    (owner_schema, owner_table, role, label, is_multiple, allowed_mime_prefixes, max_byte_size) VALUES
-    ('org',         'organizations', 'logo',     '{"fr":"Logo","en":"Logo"}',                       false, '{image/*}',                       5242880),
-    ('event',       'events',        'banner',   '{"fr":"Bannière","en":"Banner"}',                 false, '{image/*}',                      15728640),
-    ('event',       'events',        'gallery',  '{"fr":"Galerie","en":"Gallery"}',                 true,  '{image/*}',                      15728640),
-    ('programme',   'proposals',     'cover',    '{"fr":"Image de couverture","en":"Cover image"}', false, '{image/*}',                      10485760),
-    ('programme',   'proposals',     'document', '{"fr":"Document joint","en":"Attached document"}',true,  '{application/pdf,application/vnd.*}', 26214400),
-    ('identity',    'people',        'avatar',   '{"fr":"Photo de profil","en":"Profile picture"}', false, '{image/*}',                       5242880),
-    ('publication', 'articles',      'cover',    '{"fr":"Image de couverture","en":"Cover image"}', false, '{image/*}',                      10485760)
+    (owner_schema, owner_table, role, label, is_multiple, allowed_mime_prefixes, max_byte_size, expected_aspect_ratio) VALUES
+    ('org',         'organizations', 'logo',      '{"fr":"Logo","en":"Logo"}',                        false, '{image/*}',                       5242880, NULL),
+    ('event',       'events',        'banner',    '{"fr":"Bandeau panoramique","en":"Panoramic banner"}', false, '{image/*}',                  15728640, 3.5556),
+    ('event',       'events',        'cover',     '{"fr":"Image de couverture","en":"Cover image"}',  false, '{image/*}',                      10485760, 1.7778),
+    ('event',       'events',        'thumbnail', '{"fr":"Vignette carrée","en":"Square thumbnail"}', false, '{image/*}',                       5242880, 1.0000),
+    ('event',       'events',        'gallery',   '{"fr":"Galerie","en":"Gallery"}',                  true,  '{image/*}',                      15728640, NULL),
+    ('programme',   'proposals',     'cover',     '{"fr":"Image de couverture","en":"Cover image"}',  false, '{image/*}',                      10485760, NULL),
+    ('programme',   'proposals',     'document',  '{"fr":"Document joint","en":"Attached document"}', true,  '{application/pdf,application/vnd.*}', 26214400, NULL),
+    ('identity',    'people',        'avatar',    '{"fr":"Photo de profil","en":"Profile picture"}',  false, '{image/*}',                       5242880, NULL),
+    ('publication', 'articles',      'cover',     '{"fr":"Image de couverture","en":"Cover image"}',  false, '{image/*}',                      10485760, NULL)
 ON CONFLICT DO NOTHING;

@@ -62,9 +62,9 @@ const { data, status, error, refresh } = await useAsyncData(
     const edition = await api.events.bySlug(slug.value)
     if (!edition) return null
 
-    const [series, banner, countries, call, tracks, editions, schedule] = await Promise.all([
+    const [series, images, countries, call, tracks, editions, schedule] = await Promise.all([
       api.events.series(),
-      api.events.banner(edition.id),
+      api.events.images(edition.id),
       api.reference.countries(),
       api.events.call(edition.id),
       api.events.tracks(edition.id),
@@ -79,7 +79,7 @@ const { data, status, error, refresh } = await useAsyncData(
     return {
       edition,
       series: series.find((entry) => entry.id === edition.series_id) ?? null,
-      banner,
+      images,
       country: countries.find((entry) => entry.id === edition.country_id)?.name ?? null,
       call,
       criteria,
@@ -148,7 +148,7 @@ useHead(() => ({
       <EventHero
         :edition="data.edition"
         :series="data.series"
-        :banner="data.banner"
+        :cover="data.images.cover ?? data.images.banner"
         :country="data.country ? tr(data.country) : null"
       />
 

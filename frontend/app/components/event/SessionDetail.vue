@@ -46,7 +46,7 @@ const specialDays = computed(() => props.session.tracks.filter((track) => track.
       v-if="props.session.cover"
       :image="props.session.cover"
       ratio="16 / 9"
-      rounded="0.5rem"
+      rounded="rounded-lg"
       sizes="(min-width: 640px) 32rem, 100vw"
     />
 

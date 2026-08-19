@@ -59,7 +59,7 @@ import type { SeriesKind } from './event/series'
 import type { EventStatus, ParticipationMode, TrackKind } from './event/edition'
 import type { BroadcastProvider, VenueKind } from './event/venue'
 import type { CallStatus } from './event/call'
-import type { AttachedImage } from './media'
+import type { AttachedImage, EditionImageRole } from './media'
 import type { ScheduleThemeBadge } from './views'
 
 // ===========================================================================
@@ -246,11 +246,17 @@ export interface EditionFormPayload {
   /** Message d'accueil, consignes d'accès — `event.events.highlights`. */
   highlights: I18nText | null
   /**
-   * Bannière de l'édition. `event.events` NE PORTE PAS son image : le
-   * rattachement média est polymorphe (`media.attachments`, rôle `banner`).
-   * L'objet est téléversé d'abord, son identifiant envoyé ensuite.
+   * LES TROIS DÉCLINAISONS. `event.events` NE PORTE PAS ses images : le
+   * rattachement média est polymorphe (`media.attachments`, rôles `banner`,
+   * `cover` et `thumbnail`). Chaque objet est téléversé d'abord, son
+   * identifiant envoyé ensuite.
+   *
+   * Les trois sont INDÉPENDANTES et facultatives : on peut n'en fournir
+   * qu'une, et `null` retire la déclinaison sans toucher aux deux autres.
+   * Aucune ne se déduit d'une autre — déduire, c'est recadrer, et la base
+   * refuse un fichier qui n'a pas la forme de son rôle.
    */
-  banner_asset_id: AssetId | null
+  images: Record<EditionImageRole, AssetId | null>
 }
 
 /**
@@ -731,8 +737,12 @@ export interface EditionDetail {
   highlights: I18nText | null
   /** Période de l'édition en dates civiles, dans son fuseau : ce que les onglets bornent. */
   period: { first_day: IsoDate; last_day: IsoDate }
-  /** `media.attached_image('event','events',id,'banner')`. */
-  banner: AttachedImage | null
+  /**
+   * Les trois déclinaisons, telles que `media.attached_image()` les rend pour
+   * les rôles `banner` (32:9), `cover` (16:9) et `thumbnail` (1:1). Chaque
+   * valeur est nulle tant que l'éditeur n'a rien téléversé pour ce rôle.
+   */
+  images: Record<EditionImageRole, AttachedImage | null>
   days: EditionDay[]
   tracks: EditionTrack[]
   venues: EditionVenue[]

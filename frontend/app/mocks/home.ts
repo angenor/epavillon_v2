@@ -211,9 +211,12 @@ export function publicEditions(at: number = Date.now()): PublicEditionRow[] {
         country_name: country?.name ?? null,
         city: edition.city,
 
-        // Rôle `banner` — et non `cover` : seul `banner` est déclaré pour
-        // `event.events`. Souvent nul, la carte doit rester présentable sans.
+        // LES TROIS DÉCLINAISONS, comme `v_public_editions` les rend. L'écran
+        // choisit celle qui va à sa largeur ; la vue ne choisit pas pour lui.
+        // Souvent nulles toutes les trois — la carte doit rester présentable.
         banner: attachedImage('event', 'events', edition.id, 'banner'),
+        cover: attachedImage('event', 'events', edition.id, 'cover'),
+        thumbnail: attachedImage('event', 'events', edition.id, 'thumbnail'),
 
         temporal_state: editionTemporalState(edition, at),
 

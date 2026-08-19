@@ -196,52 +196,138 @@ export const coverAssets: Asset[] = [
     height: 720,
   }),
 
-  // --- Bannières d'édition (rôle `banner`, prompt A3) -----------------------
-  // Le modèle déclare ce rôle pour `event.events` depuis l'origine
-  // (`media.attachable_roles`, 050 § 8) ; aucun écran ne l'avait encore
-  // consommé. Format large : une bannière n'a pas les proportions d'une
-  // couverture de carte, et l'en-tête de la page publique la recadre en 3:1.
+  // --- Les trois déclinaisons d'une édition (19/08) ------------------------
+  // TROIS RECADRAGES PAR ÉDITION, ET NON UN FICHIER REDIMENSIONNÉ TROIS FOIS.
+  // `media.attachable_roles` déclare la forme exigée par chaque rôle et le
+  // trigger la vérifie : un 16:9 posé en `banner` est REFUSÉ, pas rogné. Les
+  // dimensions ci-dessous sont donc exactes, relevées par `ffprobe` sur les
+  // fichiers réels — arrondir une hauteur ferait passer ici un jeu simulé que
+  // la base rejetterait.
   cover_asset(201, {
-    slug: 'pavillon-cop31',
+    slug: 'pavillon-cop31-32-9',
     alt: {
-      fr: "Vue du pavillon de la Francophonie : estrade, écran de projection et rangées de sièges",
-      en: 'View of the Francophonie pavilion: stage, projection screen and rows of seats',
+      fr: "Vue du pavillon de la Francophonie : estrade, écran de projection et rangées de sièges — bandeau panoramique 32:9",
+      en: 'View of the Francophonie pavilion: stage, projection screen and rows of seats — panoramic banner 32:9',
+    },
+    credit: 'IFDD',
+    owner: PERSON.nkoDiop,
+    organization: ORG.ifdd,
+    createdAt: '2026-07-28T09:00:00Z',
+    width: 1920,
+    height: 540,
+    bytes: 99_494,
+  }),
+  cover_asset(202, {
+    slug: 'pavillon-cop31-16-9',
+    alt: {
+      fr: "Vue du pavillon de la Francophonie : estrade, écran de projection et rangées de sièges — couverture 16:9",
+      en: 'View of the Francophonie pavilion: stage, projection screen and rows of seats — cover 16:9',
     },
     credit: 'IFDD',
     owner: PERSON.nkoDiop,
     organization: ORG.ifdd,
     createdAt: '2026-07-28T09:00:00Z',
     width: 1280,
-    height: 960,
-    bytes: 161_640,
+    height: 720,
+    bytes: 123_679,
   }),
-  cover_asset(202, {
-    slug: 'pavillon-cop30',
+  cover_asset(203, {
+    slug: 'pavillon-cop31-1-1',
     alt: {
-      fr: "Salle du pavillon de la Francophonie pendant une séance plénière, à Belém",
-      en: 'Francophonie pavilion room during a plenary session in Belém',
+      fr: "Vue du pavillon de la Francophonie : estrade, écran de projection et rangées de sièges — vignette carrée 1:1",
+      en: 'View of the Francophonie pavilion: stage, projection screen and rows of seats — square thumbnail 1:1',
+    },
+    credit: 'IFDD',
+    owner: PERSON.nkoDiop,
+    organization: ORG.ifdd,
+    createdAt: '2026-07-28T09:00:00Z',
+    width: 800,
+    height: 800,
+    bytes: 90_249,
+  }),
+  cover_asset(204, {
+    slug: 'pavillon-cop30-32-9',
+    alt: {
+      fr: "Salle du pavillon de la Francophonie pendant une séance plénière, à Belém — bandeau panoramique 32:9",
+      en: 'Francophonie pavilion room during a plenary session in Belém — panoramic banner 32:9',
+    },
+    credit: 'IFDD',
+    owner: PERSON.nkoDiop,
+    organization: ORG.ifdd,
+    createdAt: '2025-10-02T09:00:00Z',
+    width: 1920,
+    height: 540,
+    bytes: 103_775,
+  }),
+  cover_asset(205, {
+    slug: 'pavillon-cop30-16-9',
+    alt: {
+      fr: "Salle du pavillon de la Francophonie pendant une séance plénière, à Belém — couverture 16:9",
+      en: 'Francophonie pavilion room during a plenary session in Belém — cover 16:9',
     },
     credit: 'IFDD',
     owner: PERSON.nkoDiop,
     organization: ORG.ifdd,
     createdAt: '2025-10-02T09:00:00Z',
     width: 1280,
-    height: 718,
-    bytes: 95_919,
+    height: 720,
+    bytes: 101_752,
   }),
-  cover_asset(203, {
-    slug: 'cycle-paco',
+  cover_asset(206, {
+    slug: 'pavillon-cop30-1-1',
     alt: {
-      fr: "Grille de vignettes de participants lors d'un webinaire du cycle PACO",
-      en: 'Grid of participant thumbnails during a PACO series webinar',
+      fr: "Salle du pavillon de la Francophonie pendant une séance plénière, à Belém — vignette carrée 1:1",
+      en: 'Francophonie pavilion room during a plenary session in Belém — square thumbnail 1:1',
+    },
+    credit: 'IFDD',
+    owner: PERSON.nkoDiop,
+    organization: ORG.ifdd,
+    createdAt: '2025-10-02T09:00:00Z',
+    width: 800,
+    height: 800,
+    bytes: 64_986,
+  }),
+  cover_asset(207, {
+    slug: 'cycle-paco-32-9',
+    alt: {
+      fr: "Grille de vignettes de participants lors d'un webinaire du cycle PACO — bandeau panoramique 32:9",
+      en: 'Grid of participant thumbnails during a PACO series webinar — panoramic banner 32:9',
+    },
+    credit: 'IFDD',
+    owner: PERSON.tremblay,
+    organization: ORG.ifdd,
+    createdAt: '2026-01-16T09:00:00Z',
+    width: 1920,
+    height: 540,
+    bytes: 138_115,
+  }),
+  cover_asset(208, {
+    slug: 'cycle-paco-16-9',
+    alt: {
+      fr: "Grille de vignettes de participants lors d'un webinaire du cycle PACO — couverture 16:9",
+      en: 'Grid of participant thumbnails during a PACO series webinar — cover 16:9',
     },
     credit: 'IFDD',
     owner: PERSON.tremblay,
     organization: ORG.ifdd,
     createdAt: '2026-01-16T09:00:00Z',
     width: 1280,
-    height: 854,
-    bytes: 169_097,
+    height: 720,
+    bytes: 163_087,
+  }),
+  cover_asset(209, {
+    slug: 'cycle-paco-1-1',
+    alt: {
+      fr: "Grille de vignettes de participants lors d'un webinaire du cycle PACO — vignette carrée 1:1",
+      en: 'Grid of participant thumbnails during a PACO series webinar — square thumbnail 1:1',
+    },
+    credit: 'IFDD',
+    owner: PERSON.tremblay,
+    organization: ORG.ifdd,
+    createdAt: '2026-01-16T09:00:00Z',
+    width: 800,
+    height: 800,
+    bytes: 111_369,
   }),
 ]
 
@@ -265,12 +351,20 @@ export const coverAttachments: Attachment[] = [
   // elle emprunte celui de la journée jeunesse, à laquelle elle est rattachée.
   attachment(7, 'programme', 'sessions', SESSION.mangroves, ASSET(105)),
 
-  // Bannières d'édition. Une édition sans bannière — la COP29 — est laissée
-  // volontairement : l'en-tête de la page publique doit rester entier sans
-  // visuel, comme la carte de séance.
+  // LES TROIS DÉCLINAISONS, POUR TROIS ÉDITIONS SUR CINQ. La COP29 et PACO 2027
+  // n'en ont AUCUNE, et c'est délibéré : le bandeau de la fiche, la carte de
+  // l'accueil et la vignette de liste doivent rester entiers sans visuel, et
+  // c'est le seul moyen de le vérifier à chaque rendu plutôt qu'à la mise en
+  // ligne.
   attachment(8, 'event', 'events', EVENT.cop31, ASSET(201), 'banner'),
-  attachment(9, 'event', 'events', EVENT.cop30, ASSET(202), 'banner'),
-  attachment(10, 'event', 'events', EVENT.paco2026, ASSET(203), 'banner'),
+  attachment(9, 'event', 'events', EVENT.cop31, ASSET(202), 'cover'),
+  attachment(10, 'event', 'events', EVENT.cop31, ASSET(203), 'thumbnail'),
+  attachment(11, 'event', 'events', EVENT.cop30, ASSET(204), 'banner'),
+  attachment(12, 'event', 'events', EVENT.cop30, ASSET(205), 'cover'),
+  attachment(13, 'event', 'events', EVENT.cop30, ASSET(206), 'thumbnail'),
+  attachment(14, 'event', 'events', EVENT.paco2026, ASSET(207), 'banner'),
+  attachment(15, 'event', 'events', EVENT.paco2026, ASSET(208), 'cover'),
+  attachment(16, 'event', 'events', EVENT.paco2026, ASSET(209), 'thumbnail'),
 ]
 
 function attachment(
