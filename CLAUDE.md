@@ -28,6 +28,26 @@ Si le modèle paraît insuffisant pour une fonctionnalité, **on modifie le SQL 
 
 ---
 
+## Concision
+
+Court, mais clair. La brièveté ne doit jamais coûter une information utile — on coupe le remplissage, pas le sens.
+
+**Dans les réponses**
+- Aller au fait : ce qui a été fait, où, et ce qui reste. Pas de préambule, pas de résumé de ce qu'on vient de lire.
+- Des mots simples et des phrases courtes. Le terme technique quand il est juste, jamais pour faire savant.
+- Ne pas réexpliquer le code qu'on vient d'écrire ligne par ligne : le lecteur l'ouvre s'il veut le détail.
+- Pas de liste de ce qu'on aurait pu faire autrement, sauf si la question porte dessus.
+
+**Dans les fichiers**
+- **Très peu de commentaires.** Un nom juste vaut mieux qu'un commentaire ; du code lisible n'en demande pas.
+- On commente le *pourquoi*, jamais le *quoi* : une décision non évidente, un contournement, un piège. Pas `// incrémente le compteur`.
+- Une ligne suffit presque toujours. Un paragraphe de commentaire signale que le code est à revoir, pas à documenter.
+- Pas de bannières décoratives, pas de `TODO` sans suite, pas de code mort laissé en commentaire.
+
+Cette règle ne touche pas le SQL de `docs/database/` ni les fichiers de `docs/` : le modèle porte sa documentation, c'est voulu.
+
+---
+
 ## Où trouver quoi
 
 | Question | Fichier |
@@ -287,6 +307,7 @@ Interfaces locales : Mailpit `http://localhost:8025` (courriels capturés) · Ja
 - Tester un rôle par son nom plutôt qu'une permission.
 - Oublier le filtrage par périmètre d'administration sur une liste du back-office.
 - Écrire une couleur, une date ou un libellé en dur.
+- Noyer une réponse ou un fichier sous les commentaires et les explications.
 - Terminer une session sans mettre à jour `docs/PROGRESSION.md`.
 - Committer sans que `make check` passe.
 
