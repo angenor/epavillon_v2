@@ -21,7 +21,7 @@
  * dossiers retenus portent leurs agrégats sans que le détail de leurs
  * trente-neuf revues soit écrit — sept cents notes à la main que nul écran ne
  * consulte, la fiche d'évaluation (A8) travaillant sur les dossiers en cours.
- * L'écart est consigné dans `docs/PROGRESSION.md`.
+ * L'écart est consigné dans `docs/progression/ecrans/a0.3-donnees-simulees.md`.
  *
  * ÉVALUATION EN AVEUGLE : l'appel simulé pose `blind_review: true` depuis le
  * 18/08, donc un membre du comité ne voit les notes de ses pairs qu'APRÈS avoir

@@ -16,7 +16,7 @@ Cette version remplace une première plateforme en production depuis plusieurs a
 1. Monter l'environnement local — [docs/ENVIRONNEMENT_LOCAL.md](docs/ENVIRONNEMENT_LOCAL.md)
 2. Lancer les prompts de construction, dans l'ordre — [docs/PROMPTS_DEVELOPPEMENT.md](docs/PROMPTS_DEVELOPPEMENT.md)
 
-Avant chaque session : lire [docs/PROGRESSION.md](docs/PROGRESSION.md). Après chaque session : le mettre à jour.
+Avant chaque session : lire [docs/PROGRESSION.md](docs/PROGRESSION.md) — l'état général et le suivi des écrans, le détail étant dans [docs/progression/](docs/progression/). Après chaque session : le mettre à jour.
 
 ---
 
@@ -26,7 +26,8 @@ Avant chaque session : lire [docs/PROGRESSION.md](docs/PROGRESSION.md). Après c
 epavillon_v2/
 ├── CLAUDE.md              À lire en premier — conventions, règles métier, où trouver quoi
 ├── docs/
-│   ├── PROGRESSION.md     La mémoire du projet entre deux sessions
+│   ├── PROGRESSION.md     La mémoire du projet entre deux sessions — état général, suivi des écrans
+│   ├── progression/       Son détail : journal, écrans, décisions, modèle, points bloqués
 │   ├── MODELE_INDEX.md    Quels fichiers SQL lire pour quelle tâche
 │   ├── PROMPTS_DEVELOPPEMENT.md   Les prompts de construction, dans l'ordre
 │   ├── ENVIRONNEMENT_LOCAL.md     Services locaux, vérifications avant commit
@@ -66,7 +67,7 @@ Une bonne part des invariants métier est portée par le SGBD plutôt que par le
 2. **L'API ensuite**, spécifiée avec GitHub Spec Kit à partir de ce que le front consomme réellement.
 3. **Raccordement**, en tranchant chaque écart plutôt qu'en le masquant par une conversion.
 
-Les prompts sont dans [docs/PROMPTS_DEVELOPPEMENT.md](docs/PROMPTS_DEVELOPPEMENT.md), un par écran et un par module. Chacun est conçu pour tenir dans une session et pour être repris là où la précédente s'est arrêtée : l'état d'avancement vit dans [docs/PROGRESSION.md](docs/PROGRESSION.md), pas dans le contexte de la conversation.
+Les prompts sont dans [docs/PROMPTS_DEVELOPPEMENT.md](docs/PROMPTS_DEVELOPPEMENT.md), un par écran et un par module. Chacun est conçu pour tenir dans une session et pour être repris là où la précédente s'est arrêtée : l'état d'avancement vit dans [docs/PROGRESSION.md](docs/PROGRESSION.md) et [docs/progression/](docs/progression/), pas dans le contexte de la conversation.
 
 ---
 

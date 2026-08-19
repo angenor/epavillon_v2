@@ -558,7 +558,7 @@ Le présent document fixe le cap et les décisions ; il ne se lit pas seul. Le r
 - [`../README.md`](../README.md) — la présentation du dépôt et les trois premières choses à faire pour démarrer.
 - [`README.md`](README.md) — la vue d'ensemble du modèle de données : ce qu'il corrige de la v1, comment il est organisé, ce qu'il garantit lui-même, et l'ordre d'exécution des fichiers SQL.
 - [`MODELE_INDEX.md`](MODELE_INDEX.md) — quels fichiers SQL lire pour l'écran ou la tâche du jour, afin de ne jamais avoir à charger le modèle entier.
-- [`PROGRESSION.md`](PROGRESSION.md) — l'état d'avancement, les écarts constatés entre le modèle et l'interface, et les décisions prises en cours de route. Il se lit en arrivant et se met à jour en partant : c'est la mémoire du projet entre deux sessions.
+- [`PROGRESSION.md`](PROGRESSION.md) et [`progression/`](progression/) — l'état d'avancement et le suivi des écrans dans le premier ; dans le second, le journal, les écarts constatés entre le modèle et l'interface, et les décisions prises en cours de route. Il se lit en arrivant et se met à jour en partant : c'est la mémoire du projet entre deux sessions.
 - [`PROMPTS_DEVELOPPEMENT.md`](PROMPTS_DEVELOPPEMENT.md) — les prompts de construction, écran par écran puis module d'API par module d'API, dans l'ordre imposé par les dépendances. C'est la mise en œuvre détaillée de la méthode exposée au §5.7.
 - [`ENVIRONNEMENT_LOCAL.md`](ENVIRONNEMENT_LOCAL.md) — les services locaux (PostgreSQL, Valkey, Jaeger, Mailpit, Garage), leur configuration, et les vérifications réunies dans le `Makefile`.
 - [`CHARTE_GRAPHIQUE.md`](CHARTE_GRAPHIQUE.md) — les couleurs et polices officielles de l'IFDD, dont sont dérivés les jetons de design du frontend.

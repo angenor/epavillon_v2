@@ -114,7 +114,7 @@ const { data: granted } = await useAsyncData<EffectivePermission[]>(
  * n'engagent pas la même chose : composer la grille est réversible, publier
  * envoie le programme aux délégations. Si l'IFDD veut un jour confier la
  * composition sans la publication, c'est une permission à AJOUTER au modèle,
- * pas un test de rôle à écrire ici (écart consigné dans docs/PROGRESSION.md).
+ * pas un test de rôle à écrire ici (écart consigné dans docs/progression/ecrans/a9-planificateur.md).
  */
 const canManage = computed(() =>
   hasPermission(granted.value, 'programme.session.schedule', adminScope.currentEventId),

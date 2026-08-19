@@ -39,7 +39,7 @@
  * dérivation : la génération depuis les dates de l'édition est un comportement
  * d'APPLICATION, pas du modèle. Elle est donc explicite — un bouton, un plan
  * annoncé avant d'agir — et non un effet de bord de la sauvegarde de l'édition.
- * Écart consigné dans `docs/PROGRESSION.md`.
+ * Écart consigné dans `docs/progression/ecrans/a10-evenements.md`.
  *
  * ── LES ÉCRITURES MUTENT LES TABLEAUX EN MÉMOIRE ────────────────────────────
  *

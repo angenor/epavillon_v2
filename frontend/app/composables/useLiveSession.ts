@@ -18,7 +18,7 @@ import type { SessionId } from '~/types/shared'
  * `event.broadcast_channels` est une ressource réservable et `detect_conflicts()`
  * remonte un conflit `broadcast` quand deux séances se disputent le même canal.
  * Si deux éditions ouvrent chacune le leur, deux directs simultanés redeviennent
- * possibles en base — le point est en arbitrage (voir `docs/PROGRESSION.md`,
+ * possibles en base — le point est en arbitrage (voir `docs/progression/points-bloques.md`,
  * « Portée de la règle un seul direct »). L'interface, elle, tranche déjà : une
  * seule carte porte le repère.
  *

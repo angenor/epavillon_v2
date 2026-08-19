@@ -690,7 +690,8 @@ CREATE TABLE programme.session_question_votes (
 -- salle, organisation et son pays, journées spéciales, thématiques avec leur
 -- libellé et leur couleur, image de couverture. Chaque colonne manquante coûte
 -- une requête par écran, ou un renoncement d'affichage ; les deux se sont
--- produits (voir les écarts n° 14, 14 bis et 15 de docs/PROGRESSION.md).
+-- produits (voir les écarts n° 14, 14 bis et 15 de
+-- docs/progression/ecrans/a0.4-composants.md).
 -- -----------------------------------------------------------------------------
 CREATE OR REPLACE VIEW programme.v_public_schedule AS
 SELECT
@@ -803,7 +804,8 @@ COMMENT ON VIEW programme.v_public_schedule IS
 -- direct est une ressource unique de la plateforme, pas de l'événement.
 --
 -- CE QU'OCCUPE UNE SÉANCE, ET CE QU'ELLE N'OCCUPE PAS (corrigé le 18/08 2026,
--- écart n° 10 de docs/PROGRESSION.md, avant l'écriture du planificateur)
+-- écart n° 10 de docs/progression/ecrans/a9-planificateur.md, avant
+-- l'écriture du planificateur)
 -- La première version de la branche « stand unique » visait TOUTE paire de
 -- séances simultanées de l'édition. Elle remontait donc en gravité bloquante un
 -- atelier en ligne tenu dans une salle virtuelle, qui n'occupe pourtant aucun

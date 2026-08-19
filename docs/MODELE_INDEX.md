@@ -97,6 +97,6 @@ SELECT * FROM analytics.v_operational_health;
 2. Recharger une base propre : `docker compose -f ops/docker-compose.dev.yml down -v && up -d`.
 3. Vérifier que la chaîne complète passe et que le rapport de frontières reste vide.
 4. Répercuter dans les types TypeScript et les structures Rust.
-5. Noter le changement dans `docs/PROGRESSION.md`.
+5. Noter le changement dans `docs/progression/modele.md`.
 
 En production, ces fichiers sont découpés en migrations incrémentales tracées dans `platform.schema_migrations` — mais tant que la base n'est pas déployée, on modifie directement le fichier de référence.

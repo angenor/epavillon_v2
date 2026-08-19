@@ -7,7 +7,7 @@
  * ce fuseau : « 14:30 — 16:00, heure de Belém ». Les horaires sont écrits avec
  * leur décalage (`-03:00`) pour que la conversion soit vérifiable à l'œil.
  *
- * RÉSERVE, déjà consignée dans `docs/PROGRESSION.md` : la ville et l'année de
+ * RÉSERVE, déjà consignée dans `docs/progression/points-bloques.md` : la ville et l'année de
  * cette édition attendent confirmation du commanditaire — Belém a accueilli la
  * COP30. Ces valeurs sont celles du prompt A0.3 ; elles se changent ici, à un
  * seul endroit, le jour où l'arbitrage est rendu. Le prompt A3 ajoutant les
@@ -98,7 +98,7 @@ export const events = [
     },
     // Le sigle préfixe le numéro de dossier communiqué aux organisations
     // (« COP31-00147 ») : sans lui, la base retombe sur les huit premiers
-    // caractères du slug. Écart n°9 de `docs/PROGRESSION.md`.
+    // caractères du slug. Écart n°9 de `docs/progression/ecrans/a0.2-types.md`.
     acronym: 'COP31',
     slug: 'cop31-belem-2027',
     description: {

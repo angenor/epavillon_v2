@@ -29,7 +29,7 @@
  *     créneaux simultanés. En revanche, `detect_conflicts()` la remonte en
  *     `venue_capacity` — la règle « un seul stand » y vise toute paire de
  *     sessions simultanées de l'édition, en ligne comprise. Écart consigné dans
- *     `docs/PROGRESSION.md` : l'interface doit pouvoir distinguer une séance qui
+ *     `docs/progression/ecrans/a9-planificateur.md` : l'interface doit pouvoir distinguer une séance qui
  *     occupe le stand d'une séance qui ne l'occupe pas.
  */
 

@@ -57,7 +57,7 @@ export const callsForProposals = [
     // le prompt A8 demande de montrer. Elle était à `false` depuis le 17/08 pour
     // un arbitrage du commanditaire ; la fiche d'évaluation gère les DEUX modes,
     // et c'est celui-ci qui protège de l'effet d'ancrage. Bascule consignée dans
-    // `docs/PROGRESSION.md` : l'appel de la COP29 reste en aveugle, celui de la
+    // `docs/progression/decisions/2026-08-18.md` : l'appel de la COP29 reste en aveugle, celui de la
     // COP30 à découvert — les deux branches de l'écran ont donc des données.
     blind_review: true,
     guidelines_url: 'https://www.ifdd.francophonie.org/cop31/appel-a-propositions',

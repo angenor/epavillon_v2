@@ -91,7 +91,7 @@ Les quatorze écrans **A1 → A14** et les prompts **B0 → B6** ne le portent p
 
 **b. `PROGRESSION.md` est vide de ce qui compte.**
 
-Il s'annonce « la mémoire du projet entre deux sessions » ([`PROGRESSION.md:3`](PROGRESSION.md#L3)), mais ses trois tables porteuses sont vides (`— | — | —`) :
+Il s'annonce « la mémoire du projet entre deux sessions » ([`PROGRESSION.md`](PROGRESSION.md)), mais ses trois tables porteuses sont vides (`— | — | —`) :
 
 - modifications du modèle de données (ligne 80)
 - écarts constatés entre le modèle et l'interface (ligne 90)
@@ -128,7 +128,7 @@ Tout a été recompté sur les 18 fichiers de `docs/database/`.
 
 | Annoncé | Réel (recompté) | Où l'annonce apparaît |
 |---|---|---|
-| 149 tables | **146** (142 hors partitions `_default`) | [`../README.md:55`](../README.md#L55) · [`README.md:16`](README.md#L16) · [`PROGRESSION.md:15`](PROGRESSION.md#L15) · [`PROMPTS_DEVELOPPEMENT.md:107`](PROMPTS_DEVELOPPEMENT.md#L107) |
+| 149 tables | **146** (142 hors partitions `_default`) | [`../README.md:55`](../README.md#L55) · [`README.md:16`](README.md#L16) · [`PROGRESSION.md`](PROGRESSION.md) · [`PROMPTS_DEVELOPPEMENT.md:107`](PROMPTS_DEVELOPPEMENT.md#L107) |
 | 12 vues | **14** | [`../README.md:55`](../README.md#L55) · [`README.md:16`](README.md#L16) |
 | 145 fonctions | **152** distinctes (153 déclarations) | idem |
 | 14 schémas | **15** (`legacy` inclus) | [`../README.md:55`](../README.md#L55) |
@@ -191,7 +191,7 @@ Par ordre d'importance pour la suite du projet.
 
 1. **La méthode de travail du commanditaire n'est écrite nulle part dans le cadrage.** *« developper d'abord le front-end avec des donners mocks en tenant compte du modele de données […] ensuite developper le backend et l'interconnecter au front. Je developpe le backend avec gitHub speckit »* — zéro occurrence de `mock` ou `speckit` dans `CADRAGE.md`. C'est la seule instruction de *comment travailler* du dossier. Elle survit dans `PROMPTS_DEVELOPPEMENT.md`, mais le document qui fixe le cap l'ignore.
 
-2. **Un prompt « A0.0 — initialisation du dépôt »** : `ops/docker-compose.dev.yml`, `ops/garage.toml`, `Makefile`, `.gitignore`, `.env.example`. C'est la toute première action attendue ([`PROGRESSION.md:30`](PROGRESSION.md#L30)) et la seule sans prompt. Conséquence déjà visible : **4 fichiers `.DS_Store` sont versionnés** faute de `.gitignore`.
+2. **Un prompt « A0.0 — initialisation du dépôt »** : `ops/docker-compose.dev.yml`, `ops/garage.toml`, `Makefile`, `.gitignore`, `.env.example`. C'est la toute première action attendue ([`PROGRESSION.md`](PROGRESSION.md)) et la seule sans prompt. Conséquence déjà visible : **4 fichiers `.DS_Store` sont versionnés** faute de `.gitignore`.
 
 3. **La chaîne de connexion PostgreSQL**, jamais donnée en un seul morceau — alors que SQLx à vérification compilée en a besoin *pour compiler* (`check-back`). Ni le contenu de `.env.example`, ni le nom de la variable pointant l'API côté front.
 

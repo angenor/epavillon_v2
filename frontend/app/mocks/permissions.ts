@@ -18,7 +18,7 @@
  * (`event.call_reviewers`) : c'est donc `event.call.manage` qui l'ouvre.
  * `programme.proposal.decide` reste ce qu'elle dit — retenir ou rejeter —, et
  * c'est elle que porte `proposal_transitions_allowed.required_permission` sur
- * les transitions de décision. Écart consigné dans `docs/PROGRESSION.md` : si
+ * les transitions de décision. Écart consigné dans `docs/progression/ecrans/a7-propositions.md` : si
  * l'IFDD veut un jour confier l'affectation sans la décision, il faudra une
  * permission de plus dans `030_identity.sql`, pas une règle dans un écran.
  *

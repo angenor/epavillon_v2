@@ -12,7 +12,7 @@
  * `sessions.refresh_token_hash`, `one_time_tokens.token_hash`) ne quittent
  * jamais l'API. Les déclarer ici inviterait un écran à les demander. De même,
  * `people.search_vector` (`tsvector`) n'a pas de représentation utile côté
- * client. Voir l'écart consigné dans `docs/PROGRESSION.md`.
+ * client. Voir l'écart consigné dans `docs/progression/decisions/2026-08-16.md`.
  */
 
 import type {

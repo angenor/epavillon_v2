@@ -6,7 +6,7 @@ Un prompt = une session Claude Code = un écran ou un module.
 
 1. **`CLAUDE.md`** est chargé automatiquement au démarrage de chaque session : conventions, règles métier, interdits.
 2. **`docs/MODELE_INDEX.md`** dit quels fichiers SQL lire pour la tâche du jour — le modèle va chercher lui-même, on ne recopie jamais le schéma dans un prompt.
-3. **`docs/PROGRESSION.md`** porte l'état d'avancement. Chaque session le lit en arrivant et le met à jour en partant.
+3. **`docs/PROGRESSION.md`** porte l'état d'avancement, et **`docs/progression/`** son détail — le journal, un fichier par écran, les décisions. Chaque session lit le premier en arrivant et met à jour les deux en partant.
 
 Conséquence pratique : **aucun prompt n'est « à exécuter une seule fois »**. Tous commencent par constater l'existant et complètent ce qui manque. Relancer A0.2 après une interruption ne détruit rien — il reprend là où l'on s'était arrêté.
 
@@ -17,7 +17,9 @@ Conséquence pratique : **aucun prompt n'est « à exécuter une seule fois »**
 À coller en tête de **chaque** prompt de ce fichier, sans exception. Le marqueur `[PRÉAMBULE]` qui ouvre chaque bloc indique l'endroit exact où il se substitue — il n'y a aucun bloc sans marqueur. Dans les prompts Spec Kit de la phase B, il vient **juste après** la ligne `/speckit.xxx`, qui doit rester la toute première du message.
 
 ```
-Lis d'abord CLAUDE.md et docs/PROGRESSION.md.
+Lis d'abord CLAUDE.md et docs/PROGRESSION.md. Ce dernier renvoie à
+docs/progression/ : n'ouvre de ce dossier que le fichier utile à cette tâche —
+le journal du jour, le fichier de l'écran repris, les décisions récentes.
 
 Repère dans docs/MODELE_INDEX.md les fichiers SQL qui concernent cette tâche,
 et lis-les intégralement. Ils sont la source de vérité du modèle : chaque table
@@ -28,8 +30,12 @@ Constate ce qui existe déjà dans le dépôt avant de créer quoi que ce soit :
 complète, ne réécris pas. Si une partie du travail demandé est déjà faite,
 dis-le et passe à la suite.
 
-À la fin, mets à jour docs/PROGRESSION.md : ligne de journal, état du prompt,
-écarts constatés entre le modèle et l'interface, décisions prises en chemin.
+À la fin, mets à jour la progression, comme l'explique la fin de
+docs/PROGRESSION.md : une ligne dans docs/progression/journal/<date>.md, le
+fichier de l'écran dans docs/progression/ecrans/ (ce qui a été livré, les écarts
+constatés entre le modèle et l'interface, ce qui a été vérifié), les décisions
+prises en chemin dans docs/progression/decisions/<date>.md, et la ligne de suivi
+dans docs/PROGRESSION.md.
 ```
 
 ---
@@ -105,8 +111,9 @@ composant, ni crate. Uniquement l'outillage.
      assignée et le bucket créé : fais-le, et note la procédure exacte dans
      docs/ENVIRONNEMENT_LOCAL.md, qui ne la donne pas encore.
 
-Consigne dans docs/PROGRESSION.md ce qui a été vérifié, et tout écart entre ce
-que docs/ENVIRONNEMENT_LOCAL.md décrit et ce qui a réellement démarré.
+Consigne dans docs/progression/environnement-local.md ce qui a été vérifié, et
+tout écart entre ce que docs/ENVIRONNEMENT_LOCAL.md décrit et ce qui a
+réellement démarré.
 ```
 
 ## A0.1 — Socle du projet
@@ -229,13 +236,13 @@ attendront leur propre fichier.
   quelles par l'interface.
 
 Travaille fichier SQL par fichier SQL, en notant ta progression dans
-docs/PROGRESSION.md au fur et à mesure. Si le contexte sature avant la fin, la
+docs/progression/journal/ au fur et à mesure. Si le contexte sature avant la fin, la
 session suivante reprendra au module suivant — c'est précisément ce que ce
 découpage rend possible.
 
 Termine en listant les endroits où le modèle et ce que l'interface demanderait
-naturellement divergent. Ne corrige rien : consigne-les dans PROGRESSION.md,
-ils se trancheront un par un.
+naturellement divergent. Ne corrige rien : consigne-les dans le fichier d'écran
+de docs/progression/ecrans/, ils se trancheront un par un.
 ```
 
 ## A0.3 — Données simulées
@@ -970,7 +977,8 @@ modification sans la justifier explicitement.
 Le front existe et consomme des données simulées : lis les fichiers de
 frontend/app/types/ et frontend/app/mocks/ correspondant à CE module uniquement.
 Le contrat d'API doit servir CE front, sans renégociation des noms de champs.
-Les écarts déjà consignés dans PROGRESSION.md sont à traiter, pas à contourner.
+Les écarts déjà consignés dans docs/progression/ecrans/ sont à traiter, pas à
+contourner.
 
 Fonctionnalités attendues : <contenu du tableau ci-dessus>
 
@@ -984,7 +992,7 @@ réinvente pas.
 
 ### Exigences imposées par les écarts du modèle
 
-Quatre des neuf écarts relevés en dérivant les types (`PROGRESSION.md`, 16/08) ne se corrigent **ni dans le SQL ni dans les types** : ce sont des obligations d'API. S'y ajoutent celles qu'ont fait apparaître les écrans — authentification (n° 18 à 20, B1), rattachement à une organisation (n° 23, 24 et 33, B2), formulaire de soumission (n° 27 à 32, B4 et B6) et espace organisation (n° 34 à 37, B2, B4, B5 et B6). Elles sont écrites ici, dans le prompt du module qui les rencontrera, plutôt que dans un tableau que personne ne relit au moment utile.
+Quatre des neuf écarts relevés en dérivant les types (`progression/ecrans/a0.2-types.md`, 16/08) ne se corrigent **ni dans le SQL ni dans les types** : ce sont des obligations d'API. S'y ajoutent celles qu'ont fait apparaître les écrans — authentification (n° 18 à 20, B1), rattachement à une organisation (n° 23, 24 et 33, B2), formulaire de soumission (n° 27 à 32, B4 et B6) et espace organisation (n° 34 à 37, B2, B4, B5 et B6). Elles sont écrites ici, dans le prompt du module qui les rencontrera, plutôt que dans un tableau que personne ne relit au moment utile.
 
 **À recopier dans le prompt du module concerné, juste après « Fonctionnalités attendues ».**
 
@@ -1101,7 +1109,8 @@ Exigences issues des écarts du modèle :
   création ou à la modification d'une édition AVEC pavillon (`has_pavilion`),
   exiger un sigle (2 à 12 caractères, lettres, chiffres, tiret) et proposer une
   valeur par défaut modifiable ; sans pavillon, l'accepter vide.
-  [ÉCART N°9 — sous réserve de l'arbitrage en attente, voir PROGRESSION.md]
+  [ÉCART N°9 — sous réserve de l'arbitrage en attente, voir
+  docs/progression/points-bloques.md]
 
 - Le périmètre d'administration borne AUSSI ce module : listes d'éditions, de
   journées, de salles, de canaux de diffusion et d'appels. Voir le principe 5
@@ -1327,7 +1336,7 @@ Les écrans les plus **structurants** sont **A2** et **A8** : ce sont ceux dont 
 
 - [ ] L'environnement d'**A0.0** tient : les services démarrent, le schéma de `docs/database/` se charge intégralement sur une base neuve, et `DATABASE_URL` pointe dessus. Sans cela, SQLx ne compile pas et aucun prompt de la phase B n'est jouable.
 - [ ] Toutes les pages du jalon existent et fonctionnent sur les mocks.
-- [ ] Les écarts consignés dans `PROGRESSION.md` sont tranchés — dans le SQL si le modèle a tort, dans le front sinon.
+- [ ] Les écarts consignés dans `progression/ecrans/` sont tranchés — dans le SQL si le modèle a tort, dans le front sinon.
 - [ ] Les quatre états sont traités partout : chargement, vide, erreur, accès refusé.
 - [ ] Le thème sombre tient sur chaque page.
 - [ ] Rien n'est en dur : aucune chaîne hors i18n, aucune couleur hors jetons, aucune route de journée spéciale écrite en clair.

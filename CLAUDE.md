@@ -9,10 +9,10 @@ Plateforme numérique de l'IFDD (Institut de la Francophonie pour le développem
 
 ## Avant toute chose, à chaque session
 
-1. Lire **[docs/PROGRESSION.md](docs/PROGRESSION.md)** — où en est le projet, ce qui est fait, ce qui vient.
+1. Lire **[docs/PROGRESSION.md](docs/PROGRESSION.md)** — où en est le projet, ce qui est fait, ce qui vient. Il ne porte que l'essentiel ; le détail vit dans **[docs/progression/](docs/progression/)**, où l'on n'ouvre que le fichier utile à la tâche du jour.
 2. Identifier les fichiers SQL concernés par la tâche dans **[docs/MODELE_INDEX.md](docs/MODELE_INDEX.md)**, et les lire.
 3. Travailler.
-4. **Mettre à jour `docs/PROGRESSION.md` avant de terminer.** Une session qui ne le fait pas oblige la suivante à tout redécouvrir.
+4. **Mettre à jour la progression avant de terminer** — le journal du jour, le fichier de l'écran travaillé, et la ligne de suivi dans `docs/PROGRESSION.md`. Le mode d'emploi est en bas de ce fichier-là. Une session qui ne le fait pas oblige la suivante à tout redécouvrir.
 
 Ces quatre points remplacent la mémoire entre sessions. Le contexte se perd, le dépôt non.
 
@@ -42,7 +42,6 @@ Court, mais clair. La brièveté ne doit jamais coûter une information utile �
 - **Très peu de commentaires.** Un nom juste vaut mieux qu'un commentaire ; du code lisible n'en demande pas.
 - On commente le *pourquoi*, jamais le *quoi* : une décision non évidente, un contournement, un piège. Pas `// incrémente le compteur`.
 - Une ligne suffit presque toujours. Un paragraphe de commentaire signale que le code est à revoir, pas à documenter.
-- Pas de bannières décoratives, pas de `TODO` sans suite, pas de code mort laissé en commentaire.
 
 Cette règle ne touche pas le SQL de `docs/database/` ni les fichiers de `docs/` : le modèle porte sa documentation, c'est voulu.
 
@@ -53,7 +52,9 @@ Cette règle ne touche pas le SQL de `docs/database/` ni les fichiers de `docs/`
 | Question | Fichier |
 |----------|---------|
 | Quelles tables pour l'écran que je construis ? | [docs/MODELE_INDEX.md](docs/MODELE_INDEX.md) |
-| Où en est le projet ? | [docs/PROGRESSION.md](docs/PROGRESSION.md) |
+| Où en est le projet ? | [docs/PROGRESSION.md](docs/PROGRESSION.md) — l'état général et le suivi des prompts |
+| Les écarts et les vérifications de l'écran que je reprends | [docs/progression/ecrans/](docs/progression/ecrans/) — un fichier par prompt |
+| Ce qu'a fait la session d'hier, ce qui a été tranché | [docs/progression/journal/](docs/progression/journal/) et [docs/progression/decisions/](docs/progression/decisions/) |
 | Le prompt de la page ou du module à construire | [docs/PROMPTS_DEVELOPPEMENT.md](docs/PROMPTS_DEVELOPPEMENT.md) |
 | Comment monter la base et les services en local | [docs/ENVIRONNEMENT_LOCAL.md](docs/ENVIRONNEMENT_LOCAL.md) |
 | Pourquoi le modèle est fait ainsi ? Quelles décisions ? | [docs/CADRAGE.md](docs/CADRAGE.md) — §2 constat v1, §5 architecture, §6 les 14 ADR |
@@ -224,7 +225,7 @@ mocks/
 
 #### Ce que cela change concrètement
 
-Pour modifier un écran, on ouvre **son** fichier de traduction, **ses** types, **ses** mocks. Jamais l'ensemble. Si tu te surprends à charger plus de trois fichiers de traduction pour une seule page, le découpage est à revoir — signale-le dans `docs/PROGRESSION.md`.
+Pour modifier un écran, on ouvre **son** fichier de traduction, **ses** types, **ses** mocks. Jamais l'ensemble. Si tu te surprends à charger plus de trois fichiers de traduction pour une seule page, le découpage est à revoir — signale-le dans le journal du jour, `docs/progression/journal/`.
 
 ---
 
@@ -308,7 +309,8 @@ Interfaces locales : Mailpit `http://localhost:8025` (courriels capturés) · Ja
 - Oublier le filtrage par périmètre d'administration sur une liste du back-office.
 - Écrire une couleur, une date ou un libellé en dur.
 - Noyer une réponse ou un fichier sous les commentaires et les explications.
-- Terminer une session sans mettre à jour `docs/PROGRESSION.md`.
+- Terminer une session sans mettre à jour la progression — journal du jour, fichier de l'écran, ligne de suivi.
+- Regrossir `docs/PROGRESSION.md` : il se lit en entier à chaque session, le détail va dans `docs/progression/`.
 - Committer sans que `make check` passe.
 
 ---

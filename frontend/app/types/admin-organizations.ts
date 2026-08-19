@@ -47,7 +47,7 @@
  * quelle. Or le prompt demande de choisir, champ par champ, la valeur à
  * conserver — le site web renseigné d'un côté, le téléphone de l'autre. Ces
  * choix sont donc un UPDATE de la fiche cible, à faire AVANT l'appel et DANS LA
- * MÊME TRANSACTION. Obligation d'API inscrite dans `docs/PROGRESSION.md` : deux
+ * MÊME TRANSACTION. Obligation d'API inscrite dans `docs/progression/ecrans/a11-organisations-fusion.md` : deux
  * transactions laisseraient une fiche absorbante à moitié complétée si la fusion
  * échouait ensuite.
  *

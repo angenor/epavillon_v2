@@ -149,7 +149,8 @@ ON CONFLICT (iso2) DO NOTHING;
 -- bloc curé ci-dessus. Leur statut n'est PAS deviné ici : la liste évolue à chaque
 -- Sommet, elle fait autorité chez l'OIF, et un statut inventé serait une donnée
 -- fausse dans un référentiel dont l'IFDD se sert pour ses rapports. Il reste à
--- reprendre depuis la liste officielle — consigné dans docs/PROGRESSION.md.
+-- reprendre depuis la liste officielle — consigné dans
+-- docs/progression/ecrans/a10-evenements.md.
 -- -----------------------------------------------------------------------------
 INSERT INTO reference.countries (iso2, iso3, numeric_code, name, continent, oif_status, default_timezone, flag_emoji) VALUES
     ('AD', 'AND', '020', '{"fr":"Andorre","en":"Andorra"}', 'europe', 'none', 'Europe/Andorra', '🇦🇩'),

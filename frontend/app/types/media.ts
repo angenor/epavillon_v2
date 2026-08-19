@@ -5,7 +5,7 @@
  * Ce fichier ne figurait pas dans l'arborescence du prompt A0.2 ; il est requis
  * par le périmètre du jalon : le formulaire de soumission téléverse des
  * documents (`programme.proposal_documents.asset_id`) et les fiches
- * d'organisation portent un logo. Écart consigné dans `docs/PROGRESSION.md`.
+ * d'organisation portent un logo. Écart consigné dans `docs/progression/decisions/2026-08-16.md`.
  *
  * RÈGLE DU MODÈLE : la base ne stocke JAMAIS d'URL. Un objet est décrit par
  * `(bucket, object_key)` et l'URL publique est composée à la lecture par l'API
