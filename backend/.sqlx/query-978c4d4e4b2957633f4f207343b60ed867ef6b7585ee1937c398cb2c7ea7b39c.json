@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.one_time_tokens\n            SET expires_at = now()\n          WHERE person_id = $1\n            AND purpose = $2::text::identity.token_purpose\n            AND consumed_at IS NULL\n            AND expires_at > now()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "978c4d4e4b2957633f4f207343b60ed867ef6b7585ee1937c398cb2c7ea7b39c"
+}

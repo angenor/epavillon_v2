@@ -1,0 +1,48 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT o.id AS \"id!\",\n                      o.legal_name,\n                      COALESCE(platform.t(c.name, $2), o.city) AS \"hint?\"\n                 FROM org.organizations o\n                 LEFT JOIN reference.countries c ON c.id = o.country_id\n                WHERE o.id = ANY($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "legal_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "legal_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "hint?",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "Text"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      null
+    ]
+  },
+  "hash": "4576c3170d2fab5b81ef3ae707119b9f4327e320c4e2575c9431e3e837b1f4e6"
+}

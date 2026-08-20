@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (\n               SELECT 1 FROM identity.role_assignments ra\n                WHERE ra.person_id = $1\n                  AND ra.revoked_at IS NULL\n                  AND ra.scope_type = 'event'\n                  AND ra.scope_id = ANY($2)\n           ) AS \"dedans!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "dedans!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "cb44a18288a9f8699a9cb0ed48ced043544d235f201c5b6abc68b78611705ab0"
+}

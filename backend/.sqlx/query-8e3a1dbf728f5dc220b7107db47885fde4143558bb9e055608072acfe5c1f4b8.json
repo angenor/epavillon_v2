@@ -1,0 +1,81 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.code,\n                  r.label          AS \"label!: Value\",\n                  r.description    AS \"description?: Value\",\n                  r.allowed_scopes AS \"allowed_scopes!\",\n                  r.is_system,\n                  (SELECT count(*) FROM identity.role_assignments ra\n                    WHERE ra.role_code = r.code\n                      AND ra.revoked_at IS NULL\n                      AND ra.valid_from <= now()\n                      AND (ra.valid_until IS NULL OR ra.valid_until > now())) AS \"active_count!\"\n             FROM identity.roles r\n            ORDER BY r.code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.roles",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "label!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "identity.roles",
+            "name": "label"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "description?: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "identity.roles",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "allowed_scopes!",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "identity.roles",
+            "name": "allowed_scopes"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "is_system",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "identity.roles",
+            "name": "is_system"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "active_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "8e3a1dbf728f5dc220b7107db47885fde4143558bb9e055608072acfe5c1f4b8"
+}

@@ -1,0 +1,126 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.id,\n                  p.primary_email::text  AS \"email!\",\n                  p.status::text         AS \"statut!\",\n                  p.email_verified_at,\n                  p.suspended_until,\n                  a.id                   AS \"account_id?\",\n                  a.password_hash        AS \"password_hash?\",\n                  a.failed_attempts      AS \"failed_attempts?\",\n                  a.locked_until         AS \"locked_until?\",\n                  a.mfa_enabled_at       AS \"mfa_enabled_at?\"\n             FROM identity.people p\n             LEFT JOIN identity.accounts a\n                    ON a.person_id = p.id AND a.provider = 'password'\n            WHERE p.primary_email = $1::text::citext",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "statut!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "email_verified_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "email_verified_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "suspended_until",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "suspended_until"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "account_id?",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.accounts",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "password_hash?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.accounts",
+            "name": "password_hash"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "failed_attempts?",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "identity.accounts",
+            "name": "failed_attempts"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "locked_until?",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.accounts",
+            "name": "locked_until"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "mfa_enabled_at?",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.accounts",
+            "name": "mfa_enabled_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "859dc5a5157cff0551016770843d89e4889870f3a64ed3e263c04d18d0965ac5"
+}

@@ -1,0 +1,6 @@
+# Épinglée pour que `cargo fmt --check` et `cargo clippy -- -D warnings`
+# rendent le même verdict sur toutes les machines : une version différente
+# reformate autrement et invente des avertissements.
+[toolchain]
+channel = "1.97.1"
+components = ["rustfmt", "clippy"]

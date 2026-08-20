@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT round(extract(epoch FROM (due_at - created_at)) / 86400)::int AS \"jours!\"\n             FROM identity.privacy_requests",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "jours!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "2cf45888abf5766db014e7eb240371ec4fc3f4abe443f7639813404b8a9a39f6"
+}

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE platform.jobs SET locked_at = now() - interval '2 hours' WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "112f440989c41d3d537225e207d17a7f5bcd074511f221f112db8dc7e7d6bb4f"
+}

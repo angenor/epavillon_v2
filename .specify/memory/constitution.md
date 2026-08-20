@@ -247,8 +247,11 @@ B6 média et engagement, B7 raccordement du front.
 **La porte de qualité** — `make check` (`check-db`, `check-front`, `check-back`) DOIT passer avant tout
 commit important. `check-db` détruit le volume et recharge le schéma de zéro, puis assure que les 16
 schémas sont présents, que `cross_module_fk_report` ne contient aucune ligne non conforme, et que les
-projections analytiques se rafraîchissent. `check-back` exécute `cargo fmt --check`,
-`cargo clippy -- -D warnings` et `cargo test`. Un avertissement Clippy est une erreur ; on ne
+projections analytiques se rafraîchissent. `check-back` exécute la cible du `Makefile`, qui seule
+définit ce que le portail passe : `cargo fmt --all --check`, `cargo clippy --workspace
+--all-targets --all-features -- -D warnings` et `cargo test --workspace --all-features`. Les deux
+options de `clippy` ne sont pas décoratives — sans elles, ni les tests d'intégration ni le seul fichier
+qui compose du SQL dynamiquement ne sont analysés. Un avertissement Clippy est une erreur ; on ne
 livre pas avec un `#[allow]` non justifié en commentaire.
 
 **Le contrat d'API sert le front existant** — le front consomme des données simulées depuis le 16/08.
@@ -287,4 +290,4 @@ l'implémentation. Trois vérifications sont mécaniques et bloquantes, et le re
 entre deux modules. Toute complexité qui semble exiger une entorse se justifie par écrit dans
 `docs/progression/decisions/` — ou se règle autrement.
 
-**Version**: 1.0.0 | **Ratified**: 2026-08-20 | **Last Amended**: 2026-08-20
+**Version**: 1.0.1 | **Ratified**: 2026-08-20 | **Last Amended**: 2026-08-20

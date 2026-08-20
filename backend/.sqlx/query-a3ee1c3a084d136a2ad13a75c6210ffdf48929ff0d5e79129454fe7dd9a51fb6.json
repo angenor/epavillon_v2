@@ -1,0 +1,270 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.id,\n                  p.primary_email::text AS \"primary_email!\",\n                  p.email_verified_at,\n                  p.first_name,\n                  p.last_name,\n                  p.civility,\n                  p.display_name        AS \"display_name!\",\n                  p.phone,\n                  p.job_title,\n                  p.biography::jsonb    AS \"biography?\",\n                  p.country_id,\n                  p.city,\n                  p.preferred_locale,\n                  p.timezone::text      AS \"timezone!\",\n                  p.primary_organization_id,\n                  p.status::text        AS \"statut!\",\n                  p.status_reason,\n                  p.status_changed_by,\n                  p.status_changed_at,\n                  p.suspended_until,\n                  p.is_directory_visible,\n                  p.created_at,\n                  p.updated_at\n             FROM identity.people p\n            ORDER BY p.display_name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "primary_email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "email_verified_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "email_verified_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "first_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "first_name"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "last_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "last_name"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "civility",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "civility"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "phone",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "phone"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "job_title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "job_title"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "biography?",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "country_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "country_id"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "city",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "city"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "preferred_locale",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "preferred_locale"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "timezone!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 14,
+        "name": "primary_organization_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "primary_organization_id"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "statut!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 16,
+        "name": "status_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "status_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "status_changed_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "status_changed_by"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "status_changed_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "status_changed_at"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "suspended_until",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "suspended_until"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "is_directory_visible",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "is_directory_visible"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      null,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      null,
+      true,
+      true,
+      false,
+      null,
+      true,
+      null,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "a3ee1c3a084d136a2ad13a75c6210ffdf48929ff0d5e79129454fe7dd9a51fb6"
+}

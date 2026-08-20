@@ -47,6 +47,21 @@ Cette règle ne touche pas le SQL de `docs/database/` ni les fichiers de `docs/`
 
 ---
 
+## Quand tu me poses une question
+
+**Pose-la en mots simples, comme à quelqu'un qui n'a pas lu le code.** C'est une demande explicite du commanditaire, faite le 20/08 après une question posée en jargon qui n'a pas pu recevoir de réponse.
+
+- Dis **ce que la personne verra ou ne verra pas**, pas quelle colonne ou quel type porte la chose. « Un code à six chiffres en plus du mot de passe » se comprend ; « l'issue `mfa_required` du contrat » ne se comprend pas.
+- Aucun nom de fichier, de table, de colonne ou de type dans l'énoncé. Ils appartiennent à ta réflexion, pas à la question.
+- Une comparaison familière vaut mieux qu'une définition exacte.
+- Pour chaque réponse possible, dis **ce que ça change concrètement** : plus de travail, un écran de plus, quelqu'un de bloqué, une fonctionnalité à moitié faite.
+- Recommande une option, et dis pourquoi en une phrase.
+- Une seule question à la fois quand c'est possible.
+
+Cette règle vaut pour les questions posées au commanditaire. Le reste du dépôt — code, documentation, journaux — garde son vocabulaire technique.
+
+---
+
 ## Où trouver quoi
 
 | Question | Fichier |
@@ -65,7 +80,7 @@ Cette règle ne touche pas le SQL de `docs/database/` ni les fichiers de `docs/`
 | **À quoi l'interface doit ressembler — la référence qui fait autorité** | [docs/guide-de-style-epavillon.html](docs/guide-de-style-epavillon.html) : maquette complète écrite à la main, avec ses **quatorze règles d'usage** et ses décisions de conception. En cas de désaccord avec l'implémentation Vue, **c'est lui qui tranche** — sauf sur les thématiques, voir ci-dessous |
 | Ce que demandait le commanditaire, dans ses mots | [docs/historique/](docs/historique/) |
 
-**Ne charge pas tout.** `CADRAGE.md` fait plusieurs centaines de lignes et les 19 fichiers SQL en totalisent 15 928 : lis la section ou le fichier dont tu as besoin, pas l'ensemble.
+**Ne charge pas tout.** `CADRAGE.md` fait plusieurs centaines de lignes et les fichiers SQL en totalisent plus de quinze mille : lis la section ou le fichier dont tu as besoin, pas l'ensemble.
 
 ---
 

@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT set_config('app.actor_id', $1, true) AS acteur",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "acteur",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "6a26bb4f09362d8987d01b2bb0c387d13c6e13e07ad60579b459dd0ec4968ab7"
+}

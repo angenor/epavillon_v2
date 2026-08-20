@@ -333,6 +333,17 @@ export interface RoleWriteResult {
   assignments: RoleAssignmentView[]
   /** L'attribution déjà en place, quand `status` vaut `duplicate`. */
   conflict_with: RoleAssignmentView | null
+  /**
+   * Le message du trigger, MOT POUR MOT, quand `status` vaut `scope_not_allowed`
+   * — « Le rôle « admin » ne peut pas être attribué sur la portée
+   * « organization » (portées autorisées : global, event). ». Nul partout
+   * ailleurs.
+   *
+   * La base sait déjà dire quelles portées un rôle admet ; le reformuler dans
+   * l'écran produirait un second libellé qui se périmerait à la première
+   * évolution du modèle.
+   */
+  message: string | null
 }
 
 // ===========================================================================

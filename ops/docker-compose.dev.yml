@@ -2,7 +2,8 @@
 #
 # Cinq services, aucun n'est destiné à la production :
 #   postgres  base de données ; le schéma se charge AU PREMIER DÉMARRAGE seulement
-#   valkey    cache et sessions
+#   valkey    cache — provisionné, aucun code ne s'y connecte encore (research.md § R12) ;
+#             les sessions vivent en base, dans identity.sessions
 #   jaeger    collecteur et visualisation des traces OpenTelemetry
 #   mailpit   capture les courriels sans jamais en envoyer
 #   garage    stockage objet compatible S3 ; refuse toute écriture avant `make garage-init`
@@ -19,8 +20,9 @@ services:
     ports: ["${POSTGRES_PORT:-5432}:5432"]
     volumes:
       - pgdata:/var/lib/postgresql/data
-      # Les 18 fichiers SQL sont exécutés dans l'ordre alphabétique au premier
-      # démarrage — la numérotation 000 → 910 fait le travail.
+      # Les fichiers SQL de docs/database/ sont exécutés dans l'ordre
+      # alphabétique au premier démarrage — la numérotation 000 → 910 fait le
+      # travail. Aucun décompte ici : il se périmerait au fichier suivant.
       - ../docs/database:/docker-entrypoint-initdb.d:ro
     # pg_stat_statements est créé par 000_bootstrap.sql, mais l'extension reste
     # inexploitable tant que sa bibliothèque n'est pas préchargée au démarrage.

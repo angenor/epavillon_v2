@@ -8,10 +8,10 @@
 |---|---|
 | `docker compose up -d` — cinq services | Démarrés ; images `pgvector/pgvector:pg17`, `valkey:8-alpine`, `jaeger:1.60`, `mailpit:latest`, `garage:v1.0.1` |
 | Chargement intégral du schéma | `docker compose logs postgres` : **zéro `ERROR:` / `FATAL:` / `PANIC:`** hors messages bénins du healthcheck. Les deux `NOTICE` attendus de `900_seed.sql` sont présents, dont « Frontières de modules conformes » |
-| Schémas attendus | 15 présents (`legacy` compris) ; **142 tables** hors partitions — le compte annoncé, à condition de compter les tables partitionnées parentes |
+| Schémas attendus | **16 présents** — les seize qu'énumère l'assertion `check-db` du `Makefile`, `content` et `legacy` compris ; **143 tables** hors partitions, à condition de compter les tables partitionnées parentes. *Relevé corrigé le 20/08 : il annonçait 15 schémas et 142 tables, mesure prise avant `115_content.sql`* |
 | Extensions | `pgcrypto`, `citext`, `pg_trgm`, `unaccent`, `btree_gist`, `vector`, `pg_stat_statements` ; `shared_preload_libraries = pg_stat_statements` effectif |
 | `cross_module_fk_report WHERE NOT is_compliant` | **0** |
-| `analytics.refresh_all(true)` | 7 vues matérialisées rafraîchies, **0 échec** dans `refresh_log` |
+| `analytics.refresh_all(true)` | **8 vues matérialisées** rafraîchies, **0 échec** dans `refresh_log` |
 | Le portail échoue-t-il vraiment ? | Testé : ligne d'échec factice insérée dans `refresh_log` → `make check-db-safe` sort en **code 2**. Ligne retirée ensuite |
 | `make check` de bout en bout | Vert, code de sortie 0 (`down -v` → rechargement complet → assertions) |
 | Mailpit | Interface HTTP 200 ; courriel envoyé sur `localhost:1025` et **capturé** (1 message, sujet correct) |

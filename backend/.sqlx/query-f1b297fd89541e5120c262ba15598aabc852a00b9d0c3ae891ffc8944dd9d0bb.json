@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"compte!\" FROM platform.outbox_events\n            WHERE event_type = 'identity.account.locked'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "compte!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "f1b297fd89541e5120c262ba15598aabc852a00b9d0c3ae891ffc8944dd9d0bb"
+}

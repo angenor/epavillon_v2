@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO platform.inbox_events (consumer, event_id)\n         VALUES ($1, $2)\n         ON CONFLICT (consumer, event_id) DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0d19157abd3e1fa3e0813a542c4c1d679a73fc1ed1107a08d7bd9c7e1e05a87c"
+}

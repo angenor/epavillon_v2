@@ -58,7 +58,7 @@ composant, ni crate. Uniquement l'outillage.
    Le contenu exact est donné dans docs/ENVIRONNEMENT_LOCAL.md : va l'y lire et
    reprends-le, ne l'improvise pas. Cinq services — PostgreSQL 17 + pgvector
    (avec docs/database/ monté en lecture seule sur /docker-entrypoint-initdb.d,
-   les 18 fichiers s'exécutant dans l'ordre alphabétique), Valkey, Jaeger,
+   les fichiers SQL s'exécutant dans l'ordre alphabétique), Valkey, Jaeger,
    Mailpit, Garage.
 
 2. Makefile
@@ -204,7 +204,7 @@ Crée les types TypeScript dérivés LITTÉRALEMENT du schéma SQL — mêmes no
 champs, même nullabilité.
 
 **UN FICHIER PAR GROUPE D'ENTITÉS, jamais un fichier unique.** Le modèle compte
-142 tables : un `domain.ts` monolithique serait impossible à charger en
+143 tables : un `domain.ts` monolithique serait impossible à charger en
 contexte, et chaque écran n'a besoin que d'une poignée de types. `event` et
 `programme` comptent assez de tables pour mériter leur propre sous-dossier.
 
@@ -1354,6 +1354,6 @@ Les écrans les plus **structurants** sont **A2** et **A8** : ce sont ceux dont 
 - [ ] Les quatre états sont traités partout : chargement, vide, erreur, accès refusé.
 - [ ] Le thème sombre tient sur chaque page.
 - [ ] Rien n'est en dur : aucune chaîne hors i18n, aucune couleur hors jetons, aucune route de journée spéciale écrite en clair.
-- [ ] Aucun fichier de **code applicatif** ne dépasse 1000 lignes — `find frontend backend -type f \( -name '*.ts' -o -name '*.vue' -o -name '*.json' -o -name '*.rs' \) | xargs wc -l | sort -rn | head` le vérifie en une commande. La règle ne vise que `frontend/` et `backend/` : `docs/database/` est le modèle de données, et quatre de ses fichiers SQL dépassent 1000 lignes en toute légitimité.
+- [ ] Aucun fichier de **code applicatif** ne dépasse 1000 lignes — `find frontend/app backend/crates -type f \( -name '*.ts' -o -name '*.vue' -o -name '*.rs' \) | xargs wc -l | sort -rn | head` le vérifie en une commande. La règle ne vise que `frontend/` et `backend/` : `docs/database/` est le modèle de données, et quatre de ses fichiers SQL dépassent 1000 lignes en toute légitimité.
 - [ ] Aucun libellé venant de la base (thématique, catégorie, type d'organisation) n'a été recopié dans un fichier i18n.
 - [ ] Le parcours complet est jouable sur les mocks : créer un compte, rejoindre une organisation sans créer de doublon, soumettre une proposition au nom de plusieurs organisations, la noter, la retenir, la programmer, publier le programme, s'y inscrire.

@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT o.id,\n                  o.legal_name,\n                  COALESCE(platform.t(c.name, $1), o.city) AS \"hint?\"\n             FROM org.organizations o\n             LEFT JOIN reference.countries c ON c.id = o.country_id\n            WHERE o.status <> 'merged'\n            ORDER BY o.legal_name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "legal_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "legal_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "hint?",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "98dfac21e94a61f41d945f5d7487696b5ca70abb28a8e1b0d9175e778d9801d2"
+}

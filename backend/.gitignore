@@ -1,0 +1,4 @@
+target/
+.env
+
+# `.sqlx/` est VERSIONNÉ (research.md § R4) : ne jamais l'ajouter ici.

@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO identity.people (primary_email, first_name, last_name)\n         VALUES ($1, 'Awa', 'Diallo')\n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        {
+          "Custom": {
+            "name": "platform.email",
+            "kind": {
+              "Domain": {
+                "Custom": {
+                  "name": "citext",
+                  "kind": "Simple"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "edee4037c7909c81469782b126bfacc500928e05e439995924e2d44cdf20b239"
+}

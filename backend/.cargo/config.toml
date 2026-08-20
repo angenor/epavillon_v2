@@ -1,0 +1,19 @@
+# Compilation incrémentale plus rapide en développement : le workspace compile
+# cinq crates dont deux binaires, et l'édition de liens domine le temps d'attente.
+[build]
+rustflags = []
+
+[profile.dev]
+debug = 1
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+
+# Argon2id coûte 19 MiB et deux passes. Non optimisé, il met près d'une seconde
+# par vérification, et le test de discrétion — deux cents hachages — devient
+# interminable. Les dépendances sont donc compilées optimisées même en
+# développement ; le code du projet, lui, garde ses assertions et sa compilation
+# rapide.
+[profile.dev.package."*"]
+opt-level = 3

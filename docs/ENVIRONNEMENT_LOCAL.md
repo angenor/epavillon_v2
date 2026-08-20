@@ -15,6 +15,51 @@ make check-db-safe        # contrôle que la base est conforme
 
 ---
 
+## Lancer la plateforme : trois processus, et ils sont tous les trois nécessaires
+
+```bash
+cd backend  && cargo run -p api        # l'API,     sur 127.0.0.1:8080
+cd backend  && cargo run -p worker     # le relais d'outbox et la file de travaux
+cd frontend && npm run dev             # le site,   sur 127.0.0.1:3000
+```
+
+**Qui envoie les courriels ? Le site — jamais l'API.** C'est une contrainte
+d'hébergement, arbitrée le 20/08 : l'API et le site vivent sur deux serveurs, et
+seul celui du site a le droit d'émettre du courriel. La chaîne est donc :
+
+1. l'API **compose** le message et met un travail en file, dans la transaction du
+   changement d'état ;
+2. le **worker** réserve ce travail et remet le message au site, par
+   `POST {MAIL_RELAY_URL}` avec le secret `MAIL_RELAY_TOKEN` en en-tête ;
+3. le **site** ouvre la connexion SMTP et envoie — vers Mailpit en local.
+
+Trois conséquences pratiques, chacune déjà payée une fois :
+
+- **Sans le worker, aucun courriel ne part** : le travail reste en file, et
+  l'inscription réussit quand même. C'est voulu — la réponse ne dépend pas de
+  l'envoi.
+- **Sans le site, aucun courriel ne part non plus** : le worker échoue, le
+  travail se replanifie avec un délai croissant, et meurt au bout de cinq essais.
+  On le voit dans `platform.jobs`, et sur `GET /api/health`.
+- **Mailpit trie par date de réception, pas par date de demande.** Un travail
+  replanifié livre son courriel après un plus récent : pour retrouver le bon,
+  croiser l'heure du message avec `created_at` du travail plutôt que de prendre
+  le premier de la boîte.
+
+`cargo run` échoue si la base n'est pas démarrée : SQLx vérifie ses requêtes **à
+la compilation**. Ce n'est pas une gêne, c'est le mécanisme qui fait qu'un nom de
+colonne inventé ne compile pas.
+
+Deux routes servent aux vérifications, sous le préfixe `/api` :
+
+| Route | Autorisation | Ce qu'on y regarde |
+|---|---|---|
+| `GET /api/ready` | aucune | vivacité : le processus répond **et** son pool de connexions est ouvert |
+| `GET /api/health` | `analytics.dashboard.read`, portée globale | l'état d'exploitation, depuis `analytics.v_operational_health` — outbox en retard, travaux en échec, courriels en rebond, partitions manquantes |
+| `GET /api/docs` | aucune, sauf en production | la documentation OpenAPI **générée** : chaque route, chaque forme de réponse, chaque code d'erreur stable |
+
+---
+
 ## Les services
 
 | Service | Rôle | Accès |
@@ -40,7 +85,7 @@ services:
     ports: ["${POSTGRES_PORT:-5432}:5432"]
     volumes:
       - pgdata:/var/lib/postgresql/data
-      # Les 18 fichiers SQL sont exécutés dans l'ordre alphabétique au premier
+      # Les fichiers SQL de docs/database/ sont exécutés dans l'ordre alphabétique au premier
       # démarrage — la numérotation 000 → 910 fait le travail.
       - ../docs/database:/docker-entrypoint-initdb.d:ro
     # pg_stat_statements est créé par 000_bootstrap.sql, mais l'extension reste
@@ -102,7 +147,7 @@ C'est aussi la façon la plus fiable de vérifier qu'une base neuve accepte le s
 
 ### Le healthcheck passe au vert AVANT la fin du chargement
 
-Piège mesuré au premier démarrage, et qui coûte cher parce qu'il ne ressemble pas à une erreur : `pg_isready` répond « accepting connections » au bout de deux secondes alors que les 18 fichiers SQL sont encore en cours d'exécution. Le script d'entrée de l'image démarre en effet un serveur temporaire, accessible par la socket locale, le temps de jouer les scripts d'initialisation. Un script qui enchaîne sur le healthcheck interroge donc une base à moitié construite et échoue sur des objets « inexistants » qui existeront une seconde plus tard.
+Piège mesuré au premier démarrage, et qui coûte cher parce qu'il ne ressemble pas à une erreur : `pg_isready` répond « accepting connections » au bout de deux secondes alors que les fichiers SQL sont encore en cours d'exécution. Le script d'entrée de l'image démarre en effet un serveur temporaire, accessible par la socket locale, le temps de jouer les scripts d'initialisation. Un script qui enchaîne sur le healthcheck interroge donc une base à moitié construite et échoue sur des objets « inexistants » qui existeront une seconde plus tard.
 
 La cible `wait-db` du `Makefile` attend deux conditions : conteneur sain **et** `legacy.id_map` présent — cette table est créée par `910_migration_v1.sql`, le dernier fichier de la série. Un `sleep` fixe ne vaut rien ici : le chargement prend de 15 à 40 secondes selon la machine.
 
@@ -110,11 +155,11 @@ Corollaire visible dans les journaux : le healthcheck qui frappe pendant l'arrê
 
 ### Si un port est déjà pris
 
-Fréquent quand plusieurs projets tournent sur la même machine : le conteneur refuse alors de démarrer, ou pire, l'outil se connecte à la base d'un autre projet. Chaque port publié est paramétrable par le `.env` — `POSTGRES_PORT`, `S3_PORT`, `GARAGE_RPC_PORT`… la liste complète est en fin de `.env.example`.
+Fréquent quand plusieurs projets tournent sur la même machine : le conteneur refuse alors de démarrer, ou pire, l'outil se connecte à la base d'un autre projet. Chaque port publié est paramétrable par le `.env` — `POSTGRES_PORT`, `S3_PORT`, `GARAGE_RPC_PORT`… la liste complète est au bloc « Ports publiés par `ops/docker-compose.dev.yml` » de `.env.example`, plus `SMTP_PORT`, qui vit avec les clés de courriel et commande pourtant lui aussi la publication d'un port.
 
 Deux précautions :
 
-- répercuter le décalage dans les URL du même fichier (`DATABASE_URL`, `S3_ENDPOINT`, `OTEL_EXPORTER_OTLP_ENDPOINT`) — rien ne les recalcule ;
+- répercuter le décalage dans les **quatre** URL du même fichier qui portent un port (`DATABASE_URL`, `VALKEY_URL`, `S3_ENDPOINT`, `OTEL_EXPORTER_OTLP_ENDPOINT`) — rien ne les recalcule ;
 - le `Makefile` passe `--env-file .env` à `docker compose` quand ce fichier existe. Sans lui, Compose ne lirait que le `.env` du dossier `ops/`, et les valeurs par défaut s'appliqueraient en silence.
 
 ## `ops/garage.toml`
@@ -204,11 +249,15 @@ DATABASE_URL=postgres://postgres:dev@localhost:5432/epavillon
 
 # --- API ---------------------------------------------------------------------
 API_BIND_ADDR=127.0.0.1:8080
-RUST_LOG=info,epavillon=debug
+# Sert GET /api/docs. Ouverte par défaut ; à passer à false EN PRODUCTION, où le
+# document décrirait la totalité de la surface d'appel à qui sonde le port.
+API_DOCS_ENABLED=true
+RUST_LOG=info,api=debug,worker=debug,kernel=debug,identity=debug
 
 # --- Front (Nuxt) ------------------------------------------------------------
-# Le préfixe NUXT_PUBLIC_ expose la variable au navigateur : rien d'autre ici.
-NUXT_PUBLIC_API_BASE=http://localhost:8080/api
+# Bloc volontairement NON reproduit : NUXT_PUBLIC_API_BASE doit rester VIDE
+# jusqu'au prompt B7, et un extrait recopié ici se périmerait encore.
+# Le lire dans .env.example, qui porte l'avertissement complet.
 
 # --- Cache -------------------------------------------------------------------
 VALKEY_URL=redis://localhost:6379
@@ -223,18 +272,60 @@ S3_SECRET_ACCESS_KEY=
 S3_FORCE_PATH_STYLE=true
 
 # --- Courriel (Mailpit : capture tout, n'envoie rien) ------------------------
+# LUES PAR LE SITE, PAS PAR L'API : seul le serveur du site a le droit
+# d'émettre du courriel (contrainte d'hébergement du 20/08).
 SMTP_HOST=localhost
 SMTP_PORT=1025
 SMTP_FROM=ne-pas-repondre@epavillon.local
+
+# --- Relais de courriel : de l'API vers le site ------------------------------
+MAIL_TRANSPORT=relay
+MAIL_RELAY_URL=http://localhost:3000/api/internal/mail
+MAIL_RELAY_TOKEN=            # VIDE dans .env.example : à renseigner
+
+# --- Authentification --------------------------------------------------------
+# Bloc volontairement NON reproduit : dix-sept clés depuis le 20/08 — seuil et
+# durée du verrou, durée du jeton d'accès et des deux sessions, une durée par
+# finalité de lien, clé de signature, attributs des cookies. Le lire dans
+# .env.example, qui porte le commentaire de chacune.
+AUTH_SIGNING_KEY=            # VIDE dans .env.example : à renseigner
+
+# --- Mandataires de confiance ------------------------------------------------
+# Ceux dont on accepte l'en-tête X-Forwarded-For. VIDE = personne, et c'est le
+# bon défaut : n'importe quel client peut écrire cet en-tête. En local, l'API
+# est appelée en direct — rien à déclarer.
+TRUSTED_PROXIES=
+
+# --- Adresse publique du SITE ------------------------------------------------
+APP_PUBLIC_URL=http://localhost:3000
+
+# --- Worker ------------------------------------------------------------------
+WORKER_ID=                   # vide : engendré au démarrage
 
 # --- Traces (Jaeger, OTLP sur HTTP) ------------------------------------------
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 OTEL_SERVICE_NAME=epavillon-api
 ```
 
-Le fichier réel se termine par un dernier bloc, `POSTGRES_PORT`, `S3_PORT`, `GARAGE_RPC_PORT`… — les ports publiés par le compose, à ne toucher qu'en cas de collision avec un autre projet (voir « Si un port est déjà pris »).
+**Deux clés sont livrées VIDES et font échouer le démarrage de l'API** : `AUTH_SIGNING_KEY`, qu'on
+engendre une fois par `openssl rand -hex 32` et qu'on garde, et `MAIL_RELAY_TOKEN`, le secret partagé
+avec le site. La configuration est validée **au démarrage** : une durée mal écrite, une adresse de
+relais qui n'est pas absolue ou une clé manquante arrêtent le service — jamais une requête.
 
-Le front n'a besoin que de `NUXT_PUBLIC_API_BASE` ; tout le reste est du côté serveur et ne doit jamais se retrouver dans le bundle. Mailpit n'exige ni authentification ni TLS en local : hôte et port suffisent.
+Après ce bloc viennent les **ports publiés par le compose** (`POSTGRES_PORT`, `S3_PORT`,
+`GARAGE_RPC_PORT`…), à ne toucher qu'en cas de collision avec un autre projet (voir « Si un port est
+déjà pris »), puis un bloc de **compte de démonstration** qui ne vaut que pour les données simulées du
+site.
+
+Le site lit `NUXT_PUBLIC_API_BASE` et `NUXT_PUBLIC_SITE_URL` — seules ces deux-là, préfixées
+`NUXT_PUBLIC_`, atteignent le navigateur —, **plus les clés SMTP et `MAIL_RELAY_TOKEN`, que sa route
+de relais utilise depuis le 20/08** (`frontend/server/api/internal/mail.post.ts`). Tout le reste est
+du côté serveur et ne doit jamais se retrouver dans le bundle. Mailpit n'exige ni authentification ni
+TLS en local : hôte et port suffisent.
+
+**Une requête sans le bon secret reçoit 404, jamais 401** : une route privée ne confirme pas son
+existence. Et un `MAIL_RELAY_TOKEN` vide **ferme** la route au lieu de l'ouvrir — sans cela, une
+variable oubliée au déploiement en ferait un relais de courriel ouvert.
 
 ---
 
@@ -260,7 +351,7 @@ Le fichier `Makefile` à la racine les porte. Ses cibles :
 Le cœur tient en quatre assertions, exécutées dans cet ordre :
 
 1. **Les journaux d'initialisation ne contiennent ni `ERROR:` ni `FATAL:`** — une erreur pendant le chargement laisse une base incomplète sans empêcher le conteneur de tourner.
-2. **Les 15 schémas attendus sont présents**, `legacy` compris : c'est le contrôle qu'aucun fichier n'a été sauté.
+2. **Les 16 schémas attendus sont présents**, `legacy` compris : c'est le contrôle qu'aucun fichier n'a été sauté.
 3. **`platform.cross_module_fk_report` ne contient aucune ligne non conforme** — les lignes fautives sont imprimées avant l'échec.
 4. **`analytics.refresh_all(true)` ne laisse aucune ligne en échec dans `analytics.refresh_log`** — l'erreur de chaque vue est imprimée avant l'échec.
 

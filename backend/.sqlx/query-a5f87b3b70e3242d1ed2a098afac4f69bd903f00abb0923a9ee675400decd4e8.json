@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT entity_table AS \"table!\", action AS \"action!\", entity_id\n             FROM platform.audit_log\n            WHERE occurred_at >= $1 AND actor_id IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "table!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "platform.audit_log",
+            "name": "entity_table"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "action!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "platform.audit_log",
+            "name": "action"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "entity_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "platform.audit_log",
+            "name": "entity_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "a5f87b3b70e3242d1ed2a098afac4f69bd903f00abb0923a9ee675400decd4e8"
+}

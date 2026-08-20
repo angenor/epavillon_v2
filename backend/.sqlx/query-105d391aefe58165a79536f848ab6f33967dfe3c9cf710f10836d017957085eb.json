@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT code, display_name AS \"display_name!: Value\" FROM platform.modules",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "platform.modules",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "platform.modules",
+            "name": "display_name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "105d391aefe58165a79536f848ab6f33967dfe3c9cf710f10836d017957085eb"
+}

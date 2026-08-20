@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.accounts\n            SET locked_until = $2\n          WHERE id = $1 AND (locked_until IS NULL OR locked_until <= now())",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dc2334de21348affa1d1645e3b5d725eb02a853f1163ac3ba4ec1e2ded209efc"
+}

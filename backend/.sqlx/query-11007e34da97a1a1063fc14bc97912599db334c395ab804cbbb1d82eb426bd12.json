@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.person_id\n           FROM identity.sessions s\n           JOIN identity.people p ON p.id = s.person_id\n          WHERE s.id = $1\n            AND s.revoked_at IS NULL\n            AND s.expires_at > now()\n            AND p.status = 'active'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.sessions",
+            "name": "person_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "11007e34da97a1a1063fc14bc97912599db334c395ab804cbbb1d82eb426bd12"
+}

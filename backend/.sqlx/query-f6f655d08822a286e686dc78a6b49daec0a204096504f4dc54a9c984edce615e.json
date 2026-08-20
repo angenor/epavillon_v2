@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.people\n            SET status = $2::text::identity.person_status,\n                status_reason = $3,\n                status_changed_by = $4,\n                status_changed_at = now(),\n                suspended_until = $5\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f6f655d08822a286e686dc78a6b49daec0a204096504f4dc54a9c984edce615e"
+}

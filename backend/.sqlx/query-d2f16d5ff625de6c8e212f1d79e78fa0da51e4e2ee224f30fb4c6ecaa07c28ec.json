@@ -1,0 +1,228 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ra.id,\n                  ra.person_id,\n                  ra.role_code,\n                  ra.scope_type::text AS \"scope_type!\",\n                  ra.scope_id,\n                  ra.granted_by,\n                  ra.granted_at,\n                  ra.valid_from,\n                  ra.valid_until,\n                  ra.revoked_at,\n                  ra.revoked_by,\n                  ra.revoked_reason,\n                  ra.note,\n                  r.label       AS \"role_label!: Value\",\n                  r.description AS \"role_description?: Value\",\n                  r.is_system   AS \"role_is_system!\",\n                  g.display_name AS \"granted_by_name?\",\n                  v.display_name AS \"revoked_by_name?\"\n             FROM identity.role_assignments ra\n             JOIN identity.roles r ON r.code = ra.role_code\n             LEFT JOIN identity.people g ON g.id = ra.granted_by\n             LEFT JOIN identity.people v ON v.id = ra.revoked_by\n            WHERE ra.person_id = ANY($1)\n              AND (NOT $2 OR (ra.revoked_at IS NULL\n                              AND ra.valid_from <= now()\n                              AND (ra.valid_until IS NULL OR ra.valid_until > now())))\n            ORDER BY ra.granted_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "role_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "role_code"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "scope_type!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "scope_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "scope_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "granted_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "granted_by"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "granted_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "granted_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "valid_from",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "valid_from"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "valid_until",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "valid_until"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "revoked_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "revoked_at"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "revoked_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "revoked_by"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "revoked_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "revoked_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "note",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "note"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "role_label!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "identity.roles",
+            "name": "label"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "role_description?: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "identity.roles",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "role_is_system!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "identity.roles",
+            "name": "is_system"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "granted_by_name?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "revoked_by_name?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      true,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "d2f16d5ff625de6c8e212f1d79e78fa0da51e4e2ee224f30fb4c6ecaa07c28ec"
+}

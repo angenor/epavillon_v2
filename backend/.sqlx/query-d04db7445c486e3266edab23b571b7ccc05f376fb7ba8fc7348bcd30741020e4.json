@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT is_global AS \"is_global!\", event_ids AS \"event_ids!\"\n             FROM identity.administered_events($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "is_global!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "event_ids!",
+        "type_info": "UuidArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "d04db7445c486e3266edab23b571b7ccc05f376fb7ba8fc7348bcd30741020e4"
+}

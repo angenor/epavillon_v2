@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"compte!\"\n             FROM identity.privacy_requests\n            WHERE status IN ('received', 'in_progress')",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "compte!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "e4c505b46e1a094676add40966e2a34515326b9273059092059e2c763978d522"
+}

@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.privacy_requests\n            SET status = $2::text::identity.privacy_request_status,\n                handled_by = $3,\n                resolution = COALESCE($4, resolution),\n                completed_at = CASE\n                    WHEN $2 IN ('completed', 'rejected') THEN now()\n                    ELSE NULL\n                END\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ee569d5ef8c536f1b795bca90d932ec58a23879ea83500827a7147ccd814ac31"
+}

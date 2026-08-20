@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.accounts SET failed_attempts = 0 WHERE id = $1 AND failed_attempts <> 0",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9985efbe6cf91a0ec1e989e937292622ca2c1099d90cf64779c54c72af767733"
+}

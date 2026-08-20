@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT payload ->> 'token' FROM platform.jobs\n          WHERE task = 'identity.send_password_reset_email' ORDER BY created_at DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "?column?",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "0c4d6c2d759745d3b2ec2fa617a557f4de1b65dc7caf7c3209db9ebff777eb64"
+}

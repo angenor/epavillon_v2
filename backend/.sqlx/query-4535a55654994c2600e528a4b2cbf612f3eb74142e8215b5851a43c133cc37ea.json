@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT identity.has_permission($1, $2, $3::text::identity.scope_type, $4) AS \"autorise!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "autorise!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "4535a55654994c2600e528a4b2cbf612f3eb74142e8215b5851a43c133cc37ea"
+}

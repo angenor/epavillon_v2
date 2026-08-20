@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.sessions SET expires_at = now() - interval '1 minute'\n          WHERE person_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f3b61352f2f4d82e5c51a48bfbc3045ad59e237c6b3d10fdf296d4aec98a4243"
+}

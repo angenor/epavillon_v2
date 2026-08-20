@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM identity.one_time_tokens\n          WHERE consumed_at IS NOT NULL OR expires_at <= now()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "ff13702868f3027d06cc27b4ff5408b8614304a225c6e25de182dd78a1ab00f6"
+}

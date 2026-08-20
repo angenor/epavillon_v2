@@ -1,6 +1,6 @@
 # Index du modèle de données — quoi lire pour quoi
 
-Ce fichier existe pour une raison précise : **une session Claude Code n'a pas la mémoire de la précédente**. Plutôt que de recharger tout le modèle à chaque fois — 15 928 lignes de SQL réparties sur 19 fichiers — on lit ici quels fichiers concernent la tâche du jour, et on ne lit que ceux-là.
+Ce fichier existe pour une raison précise : **une session Claude Code n'a pas la mémoire de la précédente**. Plutôt que de recharger tout le modèle à chaque fois — plus de quinze mille lignes de SQL, un fichier par module — on lit ici quels fichiers concernent la tâche du jour, et on ne lit que ceux-là.
 
 Chaque fichier SQL porte sa propre documentation : en-tête expliquant les décisions de conception, `COMMENT ON` sur les tables et colonnes non évidentes. Les lire suffit ; il n'est pas nécessaire de consulter le cadrage pour coder.
 

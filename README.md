@@ -34,15 +34,15 @@ epavillon_v2/
 │   ├── CADRAGE.md         Constat sur la v1, architecture, 14 décisions d'architecture
 │   ├── CHARTE_GRAPHIQUE.md        Charte officielle IFDD — source des couleurs
 │   ├── README.md          Vue d'ensemble du modèle de données
-│   ├── database/          18 fichiers SQL — LA SOURCE DE VÉRITÉ du modèle
+│   ├── database/          LA SOURCE DE VÉRITÉ du modèle — un fichier par module
 │   ├── logos-IFDD-OIF/
 │   └── historique/        Ce que demandait le commanditaire, dans ses mots
-├── ops/                   (à créer : docker-compose local, configuration Garage)
+├── ops/                   docker-compose local, configuration Garage
 ├── frontend/              application Nuxt        (créée par les prompts A)
 └── backend/               workspace Cargo         (créé par les prompts B)
     ├── Cargo.toml
-    ├── crates/            kernel · contracts · modules/ · api · worker
-    └── migrations/
+    ├── .sqlx/             requêtes préparées, VERSIONNÉES (pas de migrations)
+    └── crates/            kernel · contracts · modules/ · api · worker
 ```
 
 `backend/` et `frontend/` sont symétriques : chacun porte son gestionnaire de dépendances et ses commandes.
@@ -51,7 +51,7 @@ epavillon_v2/
 
 ## Le modèle de données
 
-`docs/database/` contient 18 fichiers SQL numérotés dans leur ordre de dépendance, 14 143 lignes au total. Relevé le 16 août 2026 sur une base chargée : **15 schémas, 142 tables** (hors partitions filles), **14 vues, 7 vues matérialisées, 153 fonctions**. La chaîne complète passe sur PostgreSQL 17 avec pgvector, le seed est rejouable, et les **167 clés étrangères inter-modules** respectent toutes la convention de nommage qui rend chaque module extractible.
+`docs/database/` contient les fichiers SQL numérotés dans leur ordre de dépendance. Relevé le 20 août 2026 sur une base chargée : **16 schémas, 143 tables** (hors partitions filles), **17 vues, 8 vues matérialisées, 160 fonctions**. La chaîne complète passe sur PostgreSQL 17 avec pgvector, le seed est rejouable, et les **173 clés étrangères inter-modules** respectent toutes la convention de nommage qui rend chaque module extractible. Ces six chiffres se recomptent — la requête vit dans [docs/README.md](docs/README.md), et c'est le seul endroit du dépôt qui les porte à jour.
 
 Ce sont des chiffres mesurés à une date, pas des constantes : ils bougent à chaque modification du modèle. La requête qui les recompte est donnée dans [docs/README.md](docs/README.md) § « Le modèle de données » — la lancer plutôt que recopier ceux-ci.
 

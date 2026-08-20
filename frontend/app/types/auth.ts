@@ -7,9 +7,10 @@
  * dans `types/identity.ts`, et les secrets n'en franchissent jamais la frontière.
  *
  * POURQUOI DES RÉSULTATS EN UNION PLUTÔT QUE DES EXCEPTIONS. Une connexion qui
- * échoue n'est pas une panne : c'est une réponse. Sept issues sont prévues, le
+ * échoue n'est pas une panne : c'est une réponse. Six issues sont prévues, le
  * compilateur oblige l'écran à les traiter toutes, et le jour où le second
- * facteur sera branché (prompt B1), l'oubli d'une branche ne compilera pas.
+ * facteur sera branché — arbitré HORS du prompt B1 le 20/08 —, l'oubli d'une
+ * branche ne compilera pas.
  *
  * DISCRÉTION — RÈGLE DE L'ÉCRAN, PAS DU TYPE. « Ne jamais révéler si une adresse
  * existe » se joue dans ce que l'API accepte de renvoyer :

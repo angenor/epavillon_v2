@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT person_id,\n                  request_type::text AS \"request_type!\",\n                  status::text       AS \"statut!\"\n             FROM identity.privacy_requests\n            WHERE id = $1\n              FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.privacy_requests",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "request_type!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "statut!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "7d4f97b330bcfa529103a546f3614101274bb6e9ceeabb11cdef72c2f038d133"
+}

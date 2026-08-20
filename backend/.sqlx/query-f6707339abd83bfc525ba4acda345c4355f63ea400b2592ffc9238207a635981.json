@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT email_verified_at FROM identity.people\n          WHERE primary_email = $1::text::platform.email",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "email_verified_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "email_verified_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "f6707339abd83bfc525ba4acda345c4355f63ea400b2592ffc9238207a635981"
+}

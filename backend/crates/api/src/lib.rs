@@ -1,0 +1,96 @@
+//! Assemblage de l'application HTTP.
+//!
+//! Le binaire ne fait que charger la configuration et lancer le serveur ; le
+//! montage vit ici pour qu'un test d'intégration puisse dresser **la même**
+//! application, avec ses intergiciels et son préfixe, sur une base jetable. Un
+//! test qui remonterait son propre assemblage n'éprouverait pas celui-ci.
+
+pub mod middleware;
+pub mod modules;
+pub mod openapi;
+pub mod routes;
+pub mod state;
+
+use actix_web::body::MessageBody;
+use actix_web::dev::{ServiceFactory, ServiceRequest, ServiceResponse};
+use actix_web::{web, App, Error, HttpResponse};
+use kernel::error::ApiError;
+
+use crate::middleware::auth::SessionResolver;
+use crate::middleware::cors::Cors;
+use crate::middleware::origin::OriginCheck;
+use crate::middleware::request_context::RequestContextMiddleware;
+use crate::state::AppState;
+
+/// Préfixe prescrit par `.env.example` pour le raccordement du site.
+pub const PREFIXE: &str = "/api";
+
+/// Garde-fou d'entrée. Large pour un formulaire, étroit pour un envoi de
+/// fichier — qui ne passera jamais par du JSON de toute façon.
+const LIMITE_CORPS: usize = 1024 * 1024;
+
+pub fn build_app(
+    etat: &AppState,
+) -> App<
+    impl ServiceFactory<
+        ServiceRequest,
+        Response = ServiceResponse<impl MessageBody>,
+        Config = (),
+        InitError = (),
+        Error = Error,
+    >,
+> {
+    // `/ready` et non `/health` : le contrat réserve `/health` aux chiffres
+    // d'exploitation, protégés par une permission, et confie la vivacité anonyme
+    // à `/ready`. Prendre le nom protégé casserait la sonde le jour où `/health`
+    // arrive — il est arrivé, et les deux vivent côte à côte dans `routes/health.rs`.
+    let mut portee = web::scope(PREFIXE).configure(routes::health::configurer);
+
+    // Servie partout sauf en production, où le document décrirait la totalité
+    // de la surface d'appel à qui sonde le port.
+    if etat.config.api_docs_enabled {
+        let documentation = openapi::document(&etat.modules);
+        portee = portee.configure(|cfg| openapi::configurer(cfg, &documentation));
+    }
+
+    // Un module absent de `platform.modules`, ou marqué `disabled`, n'a
+    // simplement pas de routes : ses chemins rendent 404.
+    if etat.modules.is_mounted("identity") {
+        portee = portee.configure(identity::routes);
+    }
+
+    App::new()
+        .app_data(web::Data::new(etat.db.clone()))
+        .app_data(web::Data::from(etat.config.clone()))
+        .app_data(web::Data::from(etat.passwords.clone()))
+        .app_data(web::Data::from(etat.mailer.clone()))
+        .app_data(web::Data::new(etat.locales.clone()))
+        .app_data(web::Data::new(etat.modules.clone()))
+        .app_data(web::Data::new(etat.identity.clone()))
+        .app_data(web::Data::from(etat.identity.token_codec()))
+        .app_data(web::Data::new(etat.clone()))
+        .app_data(corps_json())
+        .wrap(SessionResolver)
+        .wrap(OriginCheck::new(etat.allowed_origins.clone()))
+        .wrap(RequestContextMiddleware::new(etat.locales.clone()))
+        // **Le plus à l'extérieur**, et ce n'est pas indifférent : il enveloppe
+        // aussi les refus des trois autres. Sans cela, le navigateur masque un
+        // 401 ou un 403 au code du site, qui affiche une panne réseau à la
+        // place du message que l'API a composé.
+        .wrap(Cors::new(etat.allowed_origins.clone()))
+        .service(portee)
+        // Un chemin inconnu rend un corps d'erreur du catalogue, pas la réponse
+        // vide d'Actix : le principe IX ne souffre pas d'exception parce que la
+        // route n'existe pas.
+        .default_service(web::to(|| async {
+            Err::<HttpResponse, ApiError>(ApiError::not_found())
+        }))
+}
+
+/// Sans cela, un champ manquant sortirait en 400 avec le texte anglais de serde
+/// — sans code stable, sans message français, sans identifiant de requête.
+fn corps_json() -> web::JsonConfig {
+    web::JsonConfig::default()
+        .limit(LIMITE_CORPS)
+        .error_handler(|erreur, _| ApiError::from(&erreur).into())
+}

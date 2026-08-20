@@ -1,0 +1,71 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT person_id, role_code, scope_type::text AS \"scope_type!\", scope_id, revoked_at\n             FROM identity.role_assignments\n            WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "role_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "role_code"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "scope_type!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "scope_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "scope_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "revoked_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "revoked_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      true,
+      true
+    ]
+  },
+  "hash": "18991a2b6729369a130491379e223bbc0587eac321cfa8ab7136883f3a995a37"
+}

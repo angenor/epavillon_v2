@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.accounts\n            SET failed_attempts = CASE\n                    WHEN locked_until IS NOT NULL AND locked_until <= now() THEN 1\n                    ELSE LEAST(failed_attempts + 1, 32000)\n                END,\n                locked_until = CASE\n                    WHEN locked_until IS NOT NULL AND locked_until <= now() THEN NULL\n                    ELSE locked_until\n                END\n          WHERE id = $1\n      RETURNING failed_attempts",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "failed_attempts",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "identity.accounts",
+            "name": "failed_attempts"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "20ed96c1cc9dea5b6a12ae6c33d232517a868629094d09e2b1d3f49c8f8d36e6"
+}

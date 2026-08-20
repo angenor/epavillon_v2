@@ -1,0 +1,136 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, aggregate_schema, aggregate_type, aggregate_id, event_type,\n                event_version, payload, metadata, correlation_id, occurred_at\n           FROM platform.outbox_events\n          WHERE id = $1 AND published_at IS NULL\n            FOR UPDATE SKIP LOCKED",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "platform.outbox_events",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "aggregate_schema",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "platform.outbox_events",
+            "name": "aggregate_schema"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "aggregate_type",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "platform.outbox_events",
+            "name": "aggregate_type"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "aggregate_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "platform.outbox_events",
+            "name": "aggregate_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "event_type",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "platform.outbox_events",
+            "name": "event_type"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "event_version",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "platform.outbox_events",
+            "name": "event_version"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "payload",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "platform.outbox_events",
+            "name": "payload"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "metadata",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "platform.outbox_events",
+            "name": "metadata"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "correlation_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "platform.outbox_events",
+            "name": "correlation_id"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "occurred_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "platform.outbox_events",
+            "name": "occurred_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "5188911dc88664e5aaf980f2f9a5d372309bc79368f55bcaf1ee86b403360ee0"
+}

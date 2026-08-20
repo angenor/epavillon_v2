@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT 1 AS \"un!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "un!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "6a9df76b59f1c1447f9f64b6169112cae3d8ef7942c1f61acf147d34e6f992cf"
+}

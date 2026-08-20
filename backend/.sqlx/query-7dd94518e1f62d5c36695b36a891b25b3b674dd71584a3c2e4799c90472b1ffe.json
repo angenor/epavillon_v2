@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.registrations (session_id, person_id, joined_at, attendance_minutes)\n         VALUES ($1, $2, now(), 95)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7dd94518e1f62d5c36695b36a891b25b3b674dd71584a3c2e4799c90472b1ffe"
+}

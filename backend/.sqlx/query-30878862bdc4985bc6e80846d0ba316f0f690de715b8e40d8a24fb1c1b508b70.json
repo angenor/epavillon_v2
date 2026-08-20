@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"n!\" FROM platform.audit_log\n            WHERE occurred_at >= $1\n              AND entity_table = 'people'\n              AND new_data ->> 'status_reason' IS NOT NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "30878862bdc4985bc6e80846d0ba316f0f690de715b8e40d8a24fb1c1b508b70"
+}

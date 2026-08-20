@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO identity.role_assignments\n             (person_id, role_code, scope_type, scope_id, granted_by,\n              valid_from, valid_until, note)\n         VALUES ($1, $2, $3::text::identity.scope_type, $4, $5,\n                 COALESCE($6, now()), $7, $8)\n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Uuid",
+        "Uuid",
+        "Timestamptz",
+        "Timestamptz",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "e62c5137852d3cef79c6a61dcfc31f8647ad24d270fe124e45c8ca1500b57b76"
+}

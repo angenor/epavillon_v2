@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO platform.jobs (queue, task, payload, idempotency_key, run_at)\n         VALUES ($1, $2, $3, $4, COALESCE($5, now()))\n         ON CONFLICT DO NOTHING\n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "platform.jobs",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Jsonb",
+        "Text",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "abd9e7879220e999a91910ecc2bdb077dd489ed6b2f7371c3e1916f8b476eafe"
+}

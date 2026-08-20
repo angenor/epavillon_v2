@@ -1,0 +1,62 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT rp.role_code,\n                  p.code,\n                  p.label AS \"label!: Value\",\n                  p.module_code\n             FROM identity.role_permissions rp\n             JOIN identity.permissions p ON p.code = rp.permission_code\n            ORDER BY p.module_code, p.code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "role_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.role_permissions",
+            "name": "role_code"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.permissions",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "label!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "identity.permissions",
+            "name": "label"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "module_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.permissions",
+            "name": "module_code"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "fd0e85aeb737dfecd97f6ee7c48ad2b4c0b6e455cebe5cbc95927e284f1ba1c5"
+}

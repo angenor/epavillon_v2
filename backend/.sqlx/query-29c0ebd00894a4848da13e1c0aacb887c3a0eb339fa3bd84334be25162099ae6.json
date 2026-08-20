@@ -1,0 +1,210 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.id,\n                  p.display_name        AS \"display_name!\",\n                  p.primary_email::text AS \"primary_email!\",\n                  p.email_verified_at,\n                  p.job_title,\n                  c.name                AS \"country_name?: Value\",\n                  p.country_id,\n                  p.primary_organization_id,\n                  o.legal_name          AS \"organization_name?\",\n                  o.acronym             AS \"organization_acronym?\",\n                  p.status::text        AS \"statut!\",\n                  p.status_reason,\n                  p.suspended_until,\n                  p.created_at,\n                  (SELECT max(a.last_login_at) FROM identity.accounts a\n                    WHERE a.person_id = p.id) AS \"last_login_at?\",\n                  EXISTS (SELECT 1 FROM identity.accounts a\n                           WHERE a.person_id = p.id) AS \"has_account!\",\n                  EXISTS (SELECT 1 FROM identity.accounts a\n                           WHERE a.person_id = p.id\n                             AND a.mfa_enabled_at IS NOT NULL) AS \"mfa_enabled!\",\n                  (SELECT max(a.locked_until) FROM identity.accounts a\n                    WHERE a.person_id = p.id) AS \"locked_until?\",\n                  (SELECT pr.request_type::text FROM identity.privacy_requests pr\n                    WHERE pr.person_id = p.id\n                      AND pr.status IN ('received', 'in_progress')\n                    ORDER BY pr.due_at LIMIT 1) AS \"open_privacy_request?\"\n             FROM identity.people p\n             LEFT JOIN reference.countries c ON c.id = p.country_id\n             LEFT JOIN org.organizations o ON o.id = p.primary_organization_id\n            WHERE $1 OR EXISTS (\n                    SELECT 1 FROM identity.role_assignments ra\n                     WHERE ra.person_id = p.id\n                       AND ra.revoked_at IS NULL\n                       AND ra.scope_type = 'event'\n                       AND ra.scope_id = ANY($2))\n            ORDER BY p.display_name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "primary_email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "email_verified_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "email_verified_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "job_title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "job_title"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "country_name?: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "reference.countries",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "country_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "country_id"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "primary_organization_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "primary_organization_id"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "organization_name?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "legal_name"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "organization_acronym?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "acronym"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "statut!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "status_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "status_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "suspended_until",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "suspended_until"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "last_login_at?",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 15,
+        "name": "has_account!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 16,
+        "name": "mfa_enabled!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 17,
+        "name": "locked_until?",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 18,
+        "name": "open_privacy_request?",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bool",
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      null,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      true,
+      null,
+      true,
+      true,
+      false,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "29c0ebd00894a4848da13e1c0aacb887c3a0eb339fa3bd84334be25162099ae6"
+}

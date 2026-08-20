@@ -1,0 +1,66 @@
+# Workspace Cargo — symétrique de frontend/, imposé par le principe II de la
+# constitution. Les versions vivent ici et nulle part ailleurs : un crate de
+# module ne choisit jamais sa version d'actix ni de sqlx.
+
+[workspace]
+resolver = "2"
+members = [
+    "crates/kernel",
+    "crates/contracts",
+    "crates/modules/identity",
+    "crates/api",
+    "crates/worker",
+]
+
+[workspace.package]
+edition = "2021"
+rust-version = "1.94"
+publish = false
+
+[workspace.dependencies]
+kernel = { path = "crates/kernel" }
+contracts = { path = "crates/contracts" }
+identity = { path = "crates/modules/identity" }
+
+actix-web = "4.14"
+argon2 = "0.5"
+async-trait = "0.1"
+base64 = "0.22"
+dotenvy = "0.15"
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+figment = { version = "0.10", features = ["env"] }
+futures-util = "0.3"
+humantime-serde = "1"
+opentelemetry = "0.32"
+# Client BLOQUANT, et non le client asynchrone : le processeur de lots
+# d'OpenTelemetry tourne sur son propre fil, sans réacteur Tokio — le client
+# asynchrone y meurt au premier export (« there is no reactor running »), et
+# plus aucune trace ne part ensuite.
+opentelemetry-otlp = { version = "0.32", features = ["http-proto", "reqwest-blocking-client"] }
+opentelemetry_sdk = { version = "0.32", features = ["rt-tokio"] }
+rand_core = { version = "0.6", features = ["getrandom"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+sqlx = { version = "0.9", default-features = false, features = [
+    "runtime-tokio",
+    "tls-rustls-ring",
+    "postgres",
+    "uuid",
+    "time",
+    "json",
+    "macros",
+    # `identity.sessions.ip_address` est du type `inet` : sans cette
+    # caractéristique, il faudrait le traverser en texte et laisser PostgreSQL
+    # refuser une adresse mal formée — donc un 500 là où il faut un 422.
+    "ipnetwork",
+] }
+thiserror = "2"
+time = { version = "0.3", features = ["serde-well-known", "macros"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal", "time", "sync"] }
+tracing = "0.1"
+tracing-opentelemetry = "0.33"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+utoipa = { version = "5", features = ["actix_extras", "uuid", "time", "preserve_order"] }
+uuid = { version = "1", features = ["v4", "v7", "serde"] }

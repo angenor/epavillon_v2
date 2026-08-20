@@ -168,6 +168,8 @@ DECLARE
     v_new      jsonb;
     v_changed  text[];
     v_entity   uuid;
+    v_actor    uuid;
+    v_label    text;
 BEGIN
     IF TG_OP = 'INSERT' THEN
         v_new := to_jsonb(NEW);
@@ -186,13 +188,24 @@ BEGIN
     END IF;
 
     v_entity := COALESCE(v_new ->> 'id', v_old ->> 'id')::uuid;
+    v_actor  := platform.current_actor_id();
+
+    -- `actor_label` est dénormalisée pour rester lisible APRÈS anonymisation
+    -- RGPD, et l'écriture est le seul instant où le nom existe encore : le lire
+    -- plus tard par jointure rendrait « Utilisateur anonymisé » pour toutes les
+    -- décisions passées d'une personne qui a exercé son droit à l'effacement.
+    -- Le coût est une lecture par clé primaire sur une écriture déjà auditée.
+    IF v_actor IS NOT NULL THEN
+        SELECT p.display_name INTO v_label FROM identity.people p WHERE p.id = v_actor;
+    END IF;
 
     INSERT INTO platform.audit_log (
-        actor_id, request_id, entity_schema, entity_table, entity_id,
+        actor_id, actor_label, request_id, entity_schema, entity_table, entity_id,
         action, changed_fields, old_data, new_data
     )
     VALUES (
-        platform.current_actor_id(),
+        v_actor,
+        v_label,
         platform.current_request_id(),
         TG_TABLE_SCHEMA,
         TG_TABLE_NAME,

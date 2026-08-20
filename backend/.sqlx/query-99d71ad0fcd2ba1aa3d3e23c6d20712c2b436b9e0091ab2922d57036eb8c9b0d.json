@@ -1,0 +1,53 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.one_time_tokens\n              SET consumed_at = now()\n            WHERE token_hash = $1\n              AND purpose = $2::text::identity.token_purpose\n              AND consumed_at IS NULL\n              AND expires_at > now()\n        RETURNING id, person_id, payload",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.one_time_tokens",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.one_time_tokens",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "payload",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "identity.one_time_tokens",
+            "name": "payload"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bytea",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "99d71ad0fcd2ba1aa3d3e23c6d20712c2b436b9e0091ab2922d57036eb8c9b0d"
+}

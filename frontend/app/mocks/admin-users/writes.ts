@@ -62,16 +62,21 @@ export function grantRole(
   actorId: Uuid | null,
   granted: EffectivePermission[],
 ): RoleWriteResult {
-  const empty = { assignment: null, assignments: activeAssignmentsOf(payload.person_id), conflict_with: null }
+  const empty = { assignment: null, assignments: activeAssignmentsOf(payload.person_id), conflict_with: null, message: null }
 
   if (!effectivePerson(payload.person_id)) return { status: 'not_found', ...empty }
 
   const role = roles.find((entry) => entry.code === payload.role_code)
   if (!role) return { status: 'not_found', ...empty }
 
-  // `tg_role_assignments_check_scope` : le rôle admet-il cette portée ?
+  // `tg_role_assignments_check_scope` : le rôle admet-il cette portée ? Le
+  // message reprend celui du trigger, mot pour mot — c'est lui que l'API rend.
   if (!role.allowed_scopes.includes(payload.scope_type)) {
-    return { status: 'scope_not_allowed', ...empty }
+    return {
+      status: 'scope_not_allowed',
+      ...empty,
+      message: `Le rôle « ${role.code} » ne peut pas être attribué sur la portée « ${payload.scope_type} » (portées autorisées : ${role.allowed_scopes.join(', ')}).`,
+    }
   }
 
   // `identity.role.assign` sur la portée VISÉE, pas « quelque part ».
@@ -120,6 +125,7 @@ export function grantRole(
     assignment: roleView(assignment),
     assignments: activeAssignmentsOf(payload.person_id),
     conflict_with: null,
+    message: null,
   }
 }
 
@@ -141,7 +147,7 @@ export function revokeRole(
 ): RoleWriteResult {
   const assignment = assignmentById(payload.assignment_id)
   if (!assignment) {
-    return { status: 'not_found', assignment: null, assignments: [], conflict_with: null }
+    return { status: 'not_found', assignment: null, assignments: [], conflict_with: null, message: null }
   }
 
   const role = roles.find((entry) => entry.code === assignment.role_code)
@@ -149,6 +155,7 @@ export function revokeRole(
     assignment: null,
     assignments: activeAssignmentsOf(assignment.person_id),
     conflict_with: null,
+    message: null,
   }
 
   // RETIRER DEMANDE LE MÊME DROIT QU'ATTRIBUER, SUR LA MÊME PORTÉE. Sans cette
@@ -167,6 +174,7 @@ export function revokeRole(
     assignment: revoked ? roleView(revoked) : null,
     assignments: activeAssignmentsOf(assignment.person_id),
     conflict_with: null,
+    message: null,
   }
 }
 

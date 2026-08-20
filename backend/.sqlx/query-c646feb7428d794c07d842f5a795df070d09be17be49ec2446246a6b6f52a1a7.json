@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT consumed_at, expires_at\n           FROM identity.one_time_tokens\n          WHERE token_hash = $1 AND purpose = $2::text::identity.token_purpose",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "consumed_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.one_time_tokens",
+            "name": "consumed_at"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "expires_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.one_time_tokens",
+            "name": "expires_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bytea",
+        "Text"
+      ]
+    },
+    "nullable": [
+      true,
+      false
+    ]
+  },
+  "hash": "c646feb7428d794c07d842f5a795df070d09be17be49ec2446246a6b6f52a1a7"
+}

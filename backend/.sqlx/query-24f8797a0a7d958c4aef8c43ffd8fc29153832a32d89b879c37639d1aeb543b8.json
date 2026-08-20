@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT e.id,\n                      e.title AS \"title!: Value\",\n                      to_char(e.starts_at AT TIME ZONE e.timezone, 'YYYY-MM-DD')\n                        || ' → '\n                        || to_char(e.ends_at AT TIME ZONE e.timezone, 'YYYY-MM-DD') AS \"dates!\"\n                 FROM event.events e\n                WHERE e.id = ANY($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "title!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "dates!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "24f8797a0a7d958c4aef8c43ffd8fc29153832a32d89b879c37639d1aeb543b8"
+}

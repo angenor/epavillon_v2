@@ -5,13 +5,17 @@ Ce document explique ce que le modèle corrige de la version précédente, comme
 > **Où trouver quoi** — le tableau d'orientation complet (conventions, règles métier, prompts, cadrage, charte, historique du commanditaire) vit dans [`../CLAUDE.md`](../CLAUDE.md) et n'est pas repris ici.
 > Pour savoir quel fichier SQL lire pour la tâche du jour, aller directement à [MODELE_INDEX.md](MODELE_INDEX.md).
 
-Le modèle lui-même vit dans **[database/](database/)** : 19 fichiers SQL, 15 928 lignes, chaîne validée sur PostgreSQL 17 + pgvector.
+Le modèle lui-même vit dans **[database/](database/)** : 19 fichiers SQL, 16 006 lignes au 20 août 2026, chaîne validée sur PostgreSQL 17 + pgvector. C'est le seul endroit du dépôt qui porte un décompte exact — les autres y renvoient, pour qu'il n'y ait qu'un chiffre à corriger.
 
-**Relevé du 16 août 2026, sur une base réellement chargée.** C'est un constat de mesure, pas une constante du projet :
+**Relevé du 20 août 2026, sur une base réellement chargée.** C'est un constat de mesure, pas une constante du projet :
 
 | Schémas | Tables | Vues | Vues matérialisées | Fonctions | FK inter-modules |
 |---------|--------|------|--------------------|-----------|------------------|
-| 15 | 142 | 14 | 7 | 153 | 167, aucune non conforme |
+| 16 | 143 | 17 | 8 | 160 | 173, aucune non conforme |
+
+*Le relevé précédent, daté du 16/08, portait 15 · 142 · 14 · 7 · 153 · 167 : il avait été pris avant
+`115_content.sql`, et la requête ci-dessous oubliait alors le schéma `content` — elle reproduisait donc
+l'erreur à chaque recomptage. Les seize noms sont désormais ceux qu'assère `make check-db`.*
 
 Les tables sont comptées hors partitions filles. Ces chiffres bougent dès qu'un fichier SQL change : **les recompter plutôt que les recopier**.
 
@@ -19,7 +23,9 @@ Les tables sont comptées hors partitions filles. Ces chiffres bougent dès qu'u
 -- Recomptage du modèle, sur la base locale chargée (voir ENVIRONNEMENT_LOCAL.md)
 WITH s AS (
     SELECT oid, nspname FROM pg_namespace
-    WHERE nspname IN ('platform','reference','identity','org','media','event',
+    -- Les seize schémas, ceux qu'énumère l'assertion `check-db` du Makefile.
+    -- En omettre un fausse les six colonnes d'un coup.
+    WHERE nspname IN ('platform','reference','identity','org','media','event','content',
                       'programme','live','publication','negotiation','engagement',
                       'tool','training','analytics','legacy')
 )
@@ -180,7 +186,7 @@ SELECT * FROM analytics.v_operational_health;
 
 Ces contrôles, plus la compilation du front et de l'API, sont à passer avant tout commit important — une migration qui ne passe pas sur une base vierge se découvre autrement au déploiement, au pire moment.
 
-L'ensemble a été chargé et vérifié sur PostgreSQL 17 avec pgvector le 16 août 2026 : les 19 fichiers passent sous `ON_ERROR_STOP=1`, le seed est rejouable, les 167 clés étrangères inter-modules relevées ce jour-là étaient toutes conformes — le compte se refait avec la requête donnée en tête de document, il ne se recopie pas —, et un scénario fonctionnel de bout en bout confirme le comportement annoncé — rapprochement et fusion d'organisations, refus des transitions d'état interdites, co-organisation, détection des conflits de créneaux sans blocage, refus d'une inscription incomplète, bascule en liste d'attente, portée d'administration limitée à un événement, émission des événements de domaine.
+L'ensemble a été chargé et vérifié sur PostgreSQL 17 avec pgvector le 16 août 2026 : les 19 fichiers passent sous `ON_ERROR_STOP=1`, le seed est rejouable, les clés étrangères inter-modules relevées ce jour-là étaient toutes conformes, et le sont restées au recomptage du 20 août — **173**, aucune non conforme ; le compte se refait avec la requête donnée en tête de document, il ne se recopie pas —, et un scénario fonctionnel de bout en bout confirme le comportement annoncé — rapprochement et fusion d'organisations, refus des transitions d'état interdites, co-organisation, détection des conflits de créneaux sans blocage, refus d'une inscription incomplète, bascule en liste d'attente, portée d'administration limitée à un événement, émission des événements de domaine.
 
 En production, ces fichiers sont la **source de référence**. Ils sont découpés en migrations incrémentales (SQLx / refinery) au moment de l'implémentation, et chaque application est tracée dans `platform.schema_migrations`.
 

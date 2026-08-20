@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (\n               SELECT 1 FROM identity.effective_permissions($1)\n                WHERE permission_code = $2\n           ) AS \"autorise!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "autorise!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "618786107f789e555e565608efef57757b0f868646b23353d6c064edf09571ef"
+}

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE platform.jobs\n            SET payload = '{}'::jsonb\n          WHERE id = $1 AND status = 'dead' AND payload <> '{}'::jsonb",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d07f42a44e2c91783faa2fbf036a4a320fe7bf696d14ac1e43e592e2679b081f"
+}

@@ -52,7 +52,7 @@ down:
 	$(COMPOSE) down
 
 # Attend que PostgreSQL soit prêt, plutôt qu'un `sleep` arbitraire : le
-# chargement des 18 fichiers SQL prend un temps variable.
+# chargement des fichiers SQL de docs/database/ prend un temps variable.
 #
 # PIÈGE MESURÉ : le healthcheck passe au vert AVANT la fin du chargement.
 # Pendant l'initialisation, le serveur écoute déjà sur la socket locale, donc
@@ -140,9 +140,16 @@ check-front:
 
 # SQLx vérifie ses requêtes À LA COMPILATION : DATABASE_URL doit être renseignée
 # et la base démarrée, sinon `cargo build` échoue au premier fichier.
+#
+# --all-targets ET --all-features ne sont pas décoratifs : sans eux, clippy ne
+# voit ni les tests d'intégration ni `kernel/src/testing.rs`, qui vit derrière
+# la caractéristique `testing` — le seul fichier du dépôt à composer du SQL
+# dynamiquement échapperait au portail.
 check-back:
 	@if [ -d backend ]; then \
-	   cd backend && cargo fmt --check && cargo clippy -- -D warnings && cargo test; \
+	   cd backend && cargo fmt --all --check \
+	   && cargo clippy --workspace --all-targets --all-features -- -D warnings \
+	   && cargo test --workspace --all-features; \
 	 else echo 'backend/ absent — rien à vérifier (prompt B1)'; fi
 
 # ---------------------------------------------------------------------------

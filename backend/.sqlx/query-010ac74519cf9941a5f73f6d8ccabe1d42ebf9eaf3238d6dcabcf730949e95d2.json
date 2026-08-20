@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT purpose        AS \"purpose!\",\n                  is_granted     AS \"is_granted!\",\n                  policy_version AS \"policy_version!\",\n                  recorded_at    AS \"recorded_at!\"\n             FROM identity.current_consents\n            WHERE person_id = $1\n            ORDER BY purpose",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "purpose!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.current_consents",
+            "name": "purpose"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "is_granted!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "identity.current_consents",
+            "name": "is_granted"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "policy_version!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.current_consents",
+            "name": "policy_version"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "recorded_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.current_consents",
+            "name": "recorded_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "010ac74519cf9941a5f73f6d8ccabe1d42ebf9eaf3238d6dcabcf730949e95d2"
+}

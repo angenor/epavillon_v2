@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.accounts\n            SET failed_attempts = 5, locked_until = now() + interval '15 minutes'\n          WHERE person_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "11fbb17e4697b84ed2710d0f3b0c869072e79c6d3c08e6ec68e196d69727063c"
+}

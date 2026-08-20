@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE platform.jobs\n            SET status = 'succeeded',\n                completed_at = now(),\n                payload = '{}'::jsonb,\n                locked_at = NULL,\n                locked_by = NULL\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "692458a47c085ec9103940cf2a3bd1693adbf02a90a450393a163e47f213eb85"
+}

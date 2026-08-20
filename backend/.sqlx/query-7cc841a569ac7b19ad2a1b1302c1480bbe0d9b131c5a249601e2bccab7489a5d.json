@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.id, s.name AS \"name!: Value\"\n                 FROM negotiation.spaces s\n                WHERE s.id = ANY($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.spaces",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "negotiation.spaces",
+            "name": "name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "7cc841a569ac7b19ad2a1b1302c1480bbe0d9b131c5a249601e2bccab7489a5d"
+}

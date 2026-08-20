@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT identity.anonymize_person($1, 'test')",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "anonymize_person",
+        "type_info": "Void",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "b51330258c904f70f91cbe609dd26ad1292ec5d295e4cbfaf19f25623774f560"
+}

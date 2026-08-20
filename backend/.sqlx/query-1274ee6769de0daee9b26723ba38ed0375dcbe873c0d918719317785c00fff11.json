@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT revoked_at, revoked_by, revoked_reason, note\n           FROM identity.role_assignments WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "revoked_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "revoked_at"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "revoked_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "revoked_by"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "revoked_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "revoked_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "note",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "note"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "1274ee6769de0daee9b26723ba38ed0375dcbe873c0d918719317785c00fff11"
+}

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE platform.jobs SET run_at = now() WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b478d795a3db49cb1e3c8a23bce0c227fce2a8ea2b9f0cd3bcccd6d09c7b39cb"
+}

@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT consumed_at FROM identity.one_time_tokens WHERE purpose = 'password_reset'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "consumed_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.one_time_tokens",
+            "name": "consumed_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "a26c8b05b71a35185318d786aed0ebd8af6aa6d3778c5d6ba1329120b3a62dfa"
+}

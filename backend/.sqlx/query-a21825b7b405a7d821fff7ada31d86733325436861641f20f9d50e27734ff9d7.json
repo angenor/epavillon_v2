@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.people\n            SET email_verified_at = now()\n          WHERE id = $1 AND email_verified_at IS NULL\n        RETURNING email_verified_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "email_verified_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "email_verified_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "a21825b7b405a7d821fff7ada31d86733325436861641f20f9d50e27734ff9d7"
+}

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.sessions\n               (event_id, title, slug, format, starts_at, ends_at, timezone)\n           VALUES ($1, jsonb_build_object('fr', 'Atelier adaptation'),\n                   'atelier-adaptation'::text::platform.slug, 'online',\n                   now() + interval '31 days', now() + interval '31 days 2 hours',\n                   'America/Belem'::platform.timezone_name)\n           RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "baef3ad47df78d7e97c0710b4f5c6823f04bcf197836eb42d01b51bdf30e3a1a"
+}

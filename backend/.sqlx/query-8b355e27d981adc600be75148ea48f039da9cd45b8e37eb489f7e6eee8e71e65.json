@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"compte!\"\n             FROM identity.sessions\n            WHERE person_id = $1 AND revoked_at IS NULL AND expires_at > now()",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "compte!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "8b355e27d981adc600be75148ea48f039da9cd45b8e37eb489f7e6eee8e71e65"
+}

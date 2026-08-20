@@ -1,0 +1,159 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT pr.id,\n                  pr.person_id,\n                  p.display_name        AS \"person_name!\",\n                  p.primary_email::text AS \"person_email!\",\n                  pr.request_type::text AS \"request_type!\",\n                  pr.status::text       AS \"statut!\",\n                  pr.due_at,\n                  ceil(extract(epoch FROM (pr.due_at - now())) / 86400)::int AS \"days_left!\",\n                  (pr.due_at < now() AND pr.completed_at IS NULL) AS \"is_overdue!\",\n                  h.display_name        AS \"handled_by_name?\",\n                  pr.resolution,\n                  pr.result_asset_id,\n                  pr.created_at,\n                  pr.completed_at\n             FROM identity.privacy_requests pr\n             JOIN identity.people p ON p.id = pr.person_id\n             LEFT JOIN identity.people h ON h.id = pr.handled_by\n            WHERE pr.person_id = $1\n            ORDER BY pr.created_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.privacy_requests",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.privacy_requests",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "person_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "person_email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "request_type!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "statut!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "due_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.privacy_requests",
+            "name": "due_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "days_left!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "is_overdue!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "handled_by_name?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "resolution",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.privacy_requests",
+            "name": "resolution"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "result_asset_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.privacy_requests",
+            "name": "result_asset_id"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.privacy_requests",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "completed_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.privacy_requests",
+            "name": "completed_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      null,
+      null,
+      null,
+      false,
+      null,
+      null,
+      true,
+      true,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "2ddc0e05cfc23dd785061b2bcac2f4bf8ecca027d187641e5400cb75dc77da6b"
+}

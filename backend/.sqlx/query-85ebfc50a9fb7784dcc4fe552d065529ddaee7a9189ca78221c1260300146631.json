@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT e.id,\n                  platform.t(e.title, $1) AS \"label!\",\n                  to_char(e.starts_at AT TIME ZONE e.timezone, 'YYYY-MM-DD') AS \"hint!\"\n             FROM event.events e\n            ORDER BY e.starts_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "label!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "hint!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "85ebfc50a9fb7784dcc4fe552d065529ddaee7a9189ca78221c1260300146631"
+}
