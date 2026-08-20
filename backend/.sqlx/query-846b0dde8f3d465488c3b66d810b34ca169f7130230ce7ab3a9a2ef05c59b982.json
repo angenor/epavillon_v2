@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE event.programme_tracks SET\n               code         = $2,\n               slug         = $3::text::platform.slug,\n               kind         = $4::text::event.track_kind,\n               title        = $5::jsonb,\n               subtitle     = $6::jsonb,\n               description  = $7::jsonb,\n               starts_on    = $8,\n               ends_on      = $9,\n               color_hex    = $10,\n               curated_by   = $11,\n               published_at = CASE WHEN $12 THEN COALESCE(published_at, now()) END,\n               sort_order   = $13\n         WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Jsonb",
+        "Jsonb",
+        "Date",
+        "Date",
+        "Text",
+        "Uuid",
+        "Bool",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "846b0dde8f3d465488c3b66d810b34ca169f7130230ce7ab3a9a2ef05c59b982"
+}

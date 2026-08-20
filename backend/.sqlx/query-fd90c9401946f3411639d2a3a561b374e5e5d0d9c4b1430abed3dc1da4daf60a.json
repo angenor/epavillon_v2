@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO identity.roles (code, label, description, allowed_scopes)\n               VALUES ($1::text, jsonb_build_object('fr', $1::text),\n                       '{\"fr\":\"Rôle de test\"}'::jsonb, '{global,event}')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fd90c9401946f3411639d2a3a561b374e5e5d0d9c4b1430abed3dc1da4daf60a"
+}

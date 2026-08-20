@@ -9,6 +9,7 @@ publish.workspace = true
 kernel.workspace = true
 identity.workspace = true
 org.workspace = true
+event.workspace = true
 
 async-trait.workspace = true
 dotenvy.workspace = true

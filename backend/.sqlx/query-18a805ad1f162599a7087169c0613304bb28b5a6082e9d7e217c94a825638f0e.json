@@ -1,0 +1,66 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT starts_at, ends_at, status::text AS \"status!\", has_pavilion,\n                  timezone::text AS \"timezone!\"\n             FROM event.events WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "starts_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "ends_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "ends_at"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "has_pavilion",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "has_pavilion"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "timezone!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      false,
+      null
+    ]
+  },
+  "hash": "18a805ad1f162599a7087169c0613304bb28b5a6082e9d7e217c94a825638f0e"
+}

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT programme_published_at FROM event.events WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "programme_published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "programme_published_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "1c474685eb85858749cd172b2f49a458b94f874df066f7c3cf84cde65d0b8d7e"
+}

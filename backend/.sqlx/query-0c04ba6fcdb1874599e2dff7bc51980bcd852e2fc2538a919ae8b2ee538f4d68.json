@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.id AS \"id!\",\n                  reference.term_badges('event', 'programme_tracks', t.id, 'activity_theme')\n                      AS \"themes!\"\n             FROM unnest($1::uuid[]) AS t(id)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "themes!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "0c04ba6fcdb1874599e2dff7bc51980bcd852e2fc2538a919ae8b2ee538f4d68"
+}

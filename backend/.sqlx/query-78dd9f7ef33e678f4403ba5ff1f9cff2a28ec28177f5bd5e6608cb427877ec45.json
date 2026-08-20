@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT event.seed_default_criteria($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "seed_default_criteria",
+        "type_info": "Void",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "78dd9f7ef33e678f4403ba5ff1f9cff2a28ec28177f5bd5e6608cb427877ec45"
+}

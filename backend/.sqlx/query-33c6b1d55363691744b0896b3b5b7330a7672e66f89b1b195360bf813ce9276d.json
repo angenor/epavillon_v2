@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposals\n               (call_id, event_id, organization_id, submitted_by, title, slug,\n                objectives, detailed_presentation, format, status, submitted_at)\n           VALUES ($1, $2, $3, $4, '{\"fr\":\"Dossier évalué\"}'::jsonb,\n                   ('dossier-evalue-' || gen_random_uuid())::platform.slug,\n                   '{\"fr\":\"Objectifs.\"}'::jsonb, '{\"fr\":\"<p>Présentation.</p>\"}'::jsonb,\n                   'hybrid', 'under_review', now())\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "33c6b1d55363691744b0896b3b5b7330a7672e66f89b1b195360bf813ce9276d"
+}

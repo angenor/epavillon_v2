@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.events\n               (edition_year, title, slug, description, participation_mode,\n                timezone, starts_at, ends_at)\n           VALUES (2000, '{\"fr\":\"Gabarit de grille\"}'::jsonb,\n                   ('grille-par-defaut-' || gen_random_uuid())::platform.slug,\n                   '{\"fr\":\"Édition jetable, jamais validée.\"}'::jsonb,\n                   'online', 'UTC'::platform.timezone_name,\n                   now(), now() + interval '1 day')\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "1e9e99ae6fc3cbc898a44e0052a24704ed6e33c050f9457ccf398e3001f422be"
+}

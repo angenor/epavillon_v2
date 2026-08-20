@@ -61,6 +61,9 @@ pub fn build_app(
     if etat.modules.is_mounted("org") {
         portee = portee.configure(org::routes);
     }
+    if etat.modules.is_mounted("event") {
+        portee = portee.configure(event::routes);
+    }
 
     // **Le scope `/people` est composé ici, et une seule fois.** Deux modules y
     // déposent des routes — l'identité pour les personnes, les organisations
@@ -81,6 +84,16 @@ pub fn build_app(
         }));
     }
 
+    // **Le scope `/admin/planner` est composé ici, et une seule fois** — même
+    // motif que `/people` ci-dessus, appliqué AVANT que le défaut ne se
+    // reproduise. B5 y déposera les routes du planificateur de séances ; ce
+    // module y dépose aujourd'hui le contrôle préalable et la publication de la
+    // programmation. Deux `web::scope` du même préfixe ne se complètent pas :
+    // Actix retient le premier et rend 404 sur les routes du second.
+    if etat.modules.is_mounted("event") {
+        portee = portee.service(web::scope("/admin/planner").configure(event::planner_routes));
+    }
+
     App::new()
         .app_data(web::Data::new(etat.db.clone()))
         .app_data(web::Data::from(etat.config.clone()))
@@ -90,6 +103,7 @@ pub fn build_app(
         .app_data(web::Data::new(etat.modules.clone()))
         .app_data(web::Data::new(etat.identity.clone()))
         .app_data(web::Data::new(etat.org.clone()))
+        .app_data(web::Data::new(etat.event.clone()))
         .app_data(web::Data::from(etat.identity.token_codec()))
         .app_data(web::Data::new(etat.clone()))
         .app_data(corps_json())

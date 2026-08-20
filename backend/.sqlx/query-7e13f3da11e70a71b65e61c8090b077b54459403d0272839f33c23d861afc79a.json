@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM event.call_reviewers\n          WHERE call_id = $1 AND person_id <> ALL($2::uuid[])",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7e13f3da11e70a71b65e61c8090b077b54459403d0272839f33c23d861afc79a"
+}

@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT description AS \"description!\", highlights\n             FROM event.events WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "description!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "highlights",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "highlights"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "8f2208e0a5efcc34087ae65ed6706701cc885aadbe4c4b6f609f9114c4b372f5"
+}

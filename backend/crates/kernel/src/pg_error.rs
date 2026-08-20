@@ -17,6 +17,35 @@ pub fn constraint(err: &sqlx::Error) -> Option<&str> {
     }
 }
 
+/// Nom du **type** mis en cause, quand la base le donne (`PG_DIAG_DATATYPE_NAME`).
+///
+/// C'est la seule information fiable sur une violation de DOMAINE : le nom de
+/// contrainte y est celui du domaine — `slug_check` pour `platform.slug` — et ne
+/// dit ni la table ni la colonne. Deux champs d'une même charge utile portant le
+/// même domaine seraient indiscernables sans lui.
+pub fn data_type(err: &sqlx::Error) -> Option<&str> {
+    match err {
+        sqlx::Error::Database(db) => db
+            .try_downcast_ref::<sqlx::postgres::PgDatabaseError>()
+            .and_then(|pg| pg.data_type()),
+        _ => None,
+    }
+}
+
+/// Le domaine qu'une violation met en cause — `timezone_name`, `slug`, `url`,
+/// `email`. C'est ce dont un module se sert pour poser le champ fautif, que lui
+/// seul connaît.
+///
+/// **Le nom vient nu, sans son schéma** : PostgreSQL envoie le schéma dans un
+/// champ à part (`PG_DIAG_SCHEMA_NAME`). Mesuré sur la base plutôt que supposé —
+/// `SELECT 'Mauvais Slug'::platform.slug` rend « DATATYPE NAME: slug ». Le
+/// dernier segment est pris malgré tout, pour que la valeur reste juste si une
+/// version future qualifiait le nom.
+pub fn violated_domain(err: &sqlx::Error) -> Option<&str> {
+    let nom = data_type(err)?;
+    Some(nom.rsplit('.').next().unwrap_or(nom))
+}
+
 pub fn sqlstate(err: &sqlx::Error) -> Option<String> {
     match err {
         sqlx::Error::Database(db) => db.code().map(|c| c.into_owned()),
@@ -68,6 +97,34 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
         ("23505", "ux_person_emails") => ApiError::new(IdentityEmailAlreadyUsed).field("email"),
         ("23505", "ux_accounts_password_per_person") => ApiError::new(IdentityAccountAlreadyExists),
         ("23505", "ux_accounts_provider_subject") => ApiError::new(Conflict),
+
+        // --- Événements (B3) : unicités ---------------------------------------
+        // La quasi-totalité de ces refus est reprise par le service, qui les
+        // rend en 200 sous la forme du contrat du front. Ce qu'on écrit ici est
+        // la réponse quand un refus ÉCHAPPE à ce chemin : elle nomme le champ
+        // plutôt que de rendre un conflit anonyme.
+        ("23505", "ux_events_slug") => ApiError::new(Conflict).field("slug"),
+        ("23505", "ux_events_series_edition") => ApiError::new(Conflict).field("edition_label"),
+        ("23505", "ux_event_days_slug") | ("23505", "ux_programme_tracks_slug") => {
+            ApiError::new(Conflict).field("slug")
+        }
+        ("23505", "ux_programme_tracks_code")
+        | ("23505", "ux_rooms_code")
+        | ("23505", "ux_broadcast_channels_code")
+        | ("23505", "ux_calls_code")
+        | ("23505", "ux_review_criteria") => ApiError::new(Conflict).field("code"),
+        ("23505", "ux_calls_one_per_event") => ApiError::new(Conflict),
+
+        // Ces trois-là NE DOIVENT JAMAIS remonter, et le dire ici est le seul
+        // moyen de s'en apercevoir : la génération du calendrier ne crée que
+        // les dates absentes, calculées dans la même transaction (R4) ; le
+        // canal par défaut se retire AVANT d'être posé (R6) ; la composition du
+        // comité est dédoublonnée par le service. Les voir signifie que l'ordre
+        // a été inversé — un défaut de code, pas une donnée de l'utilisateur.
+        ("23505", "ux_event_days_date")
+        | ("23505", "ux_broadcast_channels_default")
+        | ("23505", "call_reviewers_pkey") => ApiError::new(Internal),
+
         ("23505", _) => ApiError::new(Conflict),
 
         ("23514", "ck_role_assignment_window") => {
@@ -79,6 +136,63 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
         ("23514", "ck_role_assignment_revocation") => ApiError::new(IdentityRoleRevocationInvalid),
         ("23514", "people_first_name_check") => ApiError::new(ValidationFailed).field("first_name"),
         ("23514", "people_last_name_check") => ApiError::new(ValidationFailed).field("last_name"),
+
+        // --- Événements (B3) : vérifications ----------------------------------
+        ("23514", "ck_events_period") => ApiError::new(ValidationFailed).field("ends_at"),
+        ("23514", "ck_events_coordinates") => ApiError::new(ValidationFailed).field("latitude"),
+        ("23514", "events_latitude_check") => ApiError::new(ValidationFailed).field("latitude"),
+        ("23514", "events_longitude_check") => ApiError::new(ValidationFailed).field("longitude"),
+        ("23514", "ck_events_physical_location") => {
+            ApiError::new(ValidationFailed).field("country_id")
+        }
+        ("23514", "events_edition_year_check") => {
+            ApiError::new(ValidationFailed).field("edition_year")
+        }
+        ("23514", "ck_programme_tracks_period") => ApiError::new(ValidationFailed).field("ends_on"),
+        ("23514", "rooms_capacity_check") => ApiError::new(ValidationFailed).field("capacity"),
+        ("23514", "ck_calls_window") => ApiError::new(ValidationFailed).field("closes_at"),
+        ("23514", "ck_calls_extension") => ApiError::new(ValidationFailed).field("extended_until"),
+        ("23514", "ck_calls_speakers") => ApiError::new(ValidationFailed).field("max_speakers"),
+        // Une contrainte, TROIS conditions : borne basse, borne haute et durée
+        // par défaut. Le champ nommé ici est le cas courant ; c'est au service
+        // de désigner plus finement, en comparant les trois valeurs — sans
+        // jamais réimplémenter la vérification.
+        ("23514", "ck_calls_duration_bounds") => {
+            ApiError::new(ValidationFailed).field("default_duration_minutes")
+        }
+        ("23514", "ck_calls_daily_window") => ApiError::new(ValidationFailed).field("daily_end_time"),
+        ("23514", "calls_for_proposals_required_reviews_check") => {
+            ApiError::new(ValidationFailed).field("required_reviews")
+        }
+        ("23514", "calls_for_proposals_max_proposals_per_organization_check") => {
+            ApiError::new(ValidationFailed).field("max_proposals_per_organization")
+        }
+        ("23514", "review_criteria_max_score_check") => {
+            ApiError::new(ValidationFailed).field("max_score")
+        }
+        ("23514", "review_criteria_weight_check") => ApiError::new(ValidationFailed).field("weight"),
+
+        // Forme d'un code, et forme d'une couleur : le message précise ce qui
+        // était attendu, sinon l'écran ne peut rien dire d'utile.
+        ("23514", "programme_tracks_code_check")
+        | ("23514", "broadcast_channels_code_check")
+        | ("23514", "calls_for_proposals_code_check")
+        | ("23514", "review_criteria_code_check") => ApiError::with_message(
+            ValidationFailed,
+            "Le code doit commencer par une lettre minuscule et ne contenir que des lettres, des chiffres ou des tirets bas.",
+        )
+        .field("code"),
+        ("23514", "event_days_color_hex_check") | ("23514", "programme_tracks_color_hex_check") => {
+            ApiError::with_message(ValidationFailed, "La couleur doit s'écrire sous la forme #0a1b2c.")
+                .field("color_hex")
+        }
+
+        // Vocabulaires fermés du modèle : une valeur hors liste n'est pas une
+        // faute de saisie, c'est une référence inconnue.
+        ("23514", "venues_kind_check") => ApiError::new(EventUnknownReference).field("kind"),
+        ("23514", "broadcast_channels_provider_check") => {
+            ApiError::new(EventUnknownReference).field("provider")
+        }
 
         // Un domaine à CHECK lève 23514, jamais 22P02— mesuré sur la base. Le
         // refus ne porte NI table NI colonne : seuls le schéma, le domaine et
@@ -98,6 +212,30 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
         | ("23514", "i18n_text_check")
         | ("23514", "people_civility_check")
         | ("23514", "person_emails_label_check") => ApiError::new(Internal),
+
+        // --- Événements (B3) : clés étrangères --------------------------------
+        // **Déclarées avant la garde par sous-chaîne ci-dessous**, qui prendrait
+        // `events_country_id_fkey` pour une référence du module Identité.
+        ("23503", "events_series_id_fkey") => {
+            ApiError::new(EventUnknownReference).field("series_id")
+        }
+        ("23503", "events_country_id_fkey") => {
+            ApiError::new(EventUnknownReference).field("country_id")
+        }
+        ("23503", "broadcast_channels_locale_fkey") => {
+            ApiError::new(EventUnknownReference).field("locale")
+        }
+        ("23503", "xmod_fk_programme_tracks_curator") => {
+            ApiError::new(EventUnknownReference).field("curated_by")
+        }
+        ("23503", "xmod_fk_call_reviewers_person") => {
+            ApiError::new(EventUnknownReference).field("person_id")
+        }
+        // L'acteur vient de la session : s'il n'existe pas, ce n'est pas la
+        // charge utile qui est en cause.
+        ("23503", "xmod_fk_events_creator") | ("23503", "xmod_fk_calls_creator") => {
+            ApiError::new(Internal)
+        }
 
         ("23503", c) if c.contains("country_id") || c.contains("preferred_locale") => {
             let champ = if c.contains("country_id") {

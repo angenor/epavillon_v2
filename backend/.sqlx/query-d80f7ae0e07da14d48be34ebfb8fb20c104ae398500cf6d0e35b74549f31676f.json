@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT name AS \"name!\", utc_offset AS \"utc_offset!\"\n             FROM pg_timezone_names\n            WHERE name LIKE '%/%' AND name NOT LIKE 'posix/%'\n            ORDER BY name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "pg_timezone_names",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "utc_offset!",
+        "type_info": "Interval",
+        "origin": {
+          "Table": {
+            "table": "pg_timezone_names",
+            "name": "utc_offset"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      true,
+      true
+    ]
+  },
+  "hash": "d80f7ae0e07da14d48be34ebfb8fb20c104ae398500cf6d0e35b74549f31676f"
+}

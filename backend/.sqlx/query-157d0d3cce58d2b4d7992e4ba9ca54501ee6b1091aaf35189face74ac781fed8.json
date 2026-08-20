@@ -1,0 +1,124 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, event_id, code, name, provider, channel_ref, locale,\n                  is_default, is_active\n             FROM event.broadcast_channels\n            WHERE event_id = $1 OR event_id IS NULL\n            ORDER BY (event_id IS NULL), is_default DESC, code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.broadcast_channels",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.broadcast_channels",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.broadcast_channels",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "name",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.broadcast_channels",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "provider",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.broadcast_channels",
+            "name": "provider"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "channel_ref",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.broadcast_channels",
+            "name": "channel_ref"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "locale",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.broadcast_channels",
+            "name": "locale"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "is_default",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.broadcast_channels",
+            "name": "is_default"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "is_active",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.broadcast_channels",
+            "name": "is_active"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "157d0d3cce58d2b4d7992e4ba9ca54501ee6b1091aaf35189face74ac781fed8"
+}

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.event_days (event_id, day_date, sort_order)\n         SELECT $1, d.jour, d.rang\n           FROM unnest($2::date[], $3::int2[]) AS d(jour, rang)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "DateArray",
+        "Int2Array"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9c90cc9f6cb5e1f7b1d6867626f5657c7680f7bb0c16d0b5c31d1afb6636aa13"
+}

@@ -1,0 +1,71 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT day_date, title, slug::text AS \"slug?\", is_featured, color_hex\n             FROM event.event_days WHERE event_id = $1 ORDER BY day_date",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "day_date",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "day_date"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "slug?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "is_featured",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "is_featured"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "color_hex",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "color_hex"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      null,
+      false,
+      true
+    ]
+  },
+  "hash": "e280782b364965eb2569e029f7d9a4929e8ed97ee5dccb4824b845a6713dc81e"
+}

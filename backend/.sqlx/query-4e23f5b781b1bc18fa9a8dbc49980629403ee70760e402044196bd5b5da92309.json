@@ -1,0 +1,273 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT e.id, e.title, e.acronym, e.slug::text AS \"slug!\",\n                  e.series_id, s.name AS \"series_name?\", s.kind::text AS \"series_kind?\",\n                  s.is_active AS \"series_is_active?\",\n                  e.edition_label, e.edition_year,\n                  e.status::text AS \"status!\",\n                  e.participation_mode::text AS \"participation_mode!\",\n                  e.timezone::text AS \"timezone!\",\n                  e.starts_at, e.ends_at,\n                  e.country_id, c.name AS \"country_name?\",\n                  e.city, e.address,\n                  e.latitude::float8 AS \"latitude?\", e.longitude::float8 AS \"longitude?\",\n                  e.has_pavilion, e.programme_published_at,\n                  cfp.status::text AS \"call_status?\",\n                  event.effective_deadline(cfp.id) AS \"call_deadline?\"\n             FROM event.events e\n             LEFT JOIN event.event_series s ON s.id = e.series_id\n             LEFT JOIN reference.countries c ON c.id = e.country_id\n             LEFT JOIN event.calls_for_proposals cfp\n                    ON cfp.event_id = e.id AND cfp.status <> 'cancelled'\n            WHERE ($1::boolean OR e.id = ANY($2::uuid[]))\n              AND ($3::uuid IS NULL OR e.id = $3)\n            ORDER BY e.starts_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "acronym",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "acronym"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "series_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "series_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "series_name?",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.event_series",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "series_kind?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "series_is_active?",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.event_series",
+            "name": "is_active"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "edition_label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "edition_label"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "edition_year",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "edition_year"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "participation_mode!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "timezone!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
+        "name": "starts_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "ends_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "ends_at"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "country_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "country_id"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "country_name?",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "reference.countries",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "city",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "city"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "address",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "address"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "latitude?",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 20,
+        "name": "longitude?",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 21,
+        "name": "has_pavilion",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "has_pavilion"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
+        "name": "programme_published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "programme_published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 23,
+        "name": "call_status?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 24,
+        "name": "call_deadline?",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bool",
+        "UuidArray",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      null,
+      true,
+      false,
+      null,
+      false,
+      true,
+      false,
+      null,
+      null,
+      null,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+      null,
+      null,
+      false,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "4e23f5b781b1bc18fa9a8dbc49980629403ee70760e402044196bd5b5da92309"
+}

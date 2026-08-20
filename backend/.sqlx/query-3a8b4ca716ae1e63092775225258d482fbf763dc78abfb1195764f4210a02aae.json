@@ -1,0 +1,81 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.id,\n                  p.display_name AS \"full_name!\",\n                  p.primary_email::text AS \"email!\",\n                  o.legal_name AS \"organization_name?\",\n                  (SELECT count(*) FROM programme.review_assignments ra\n                    JOIN programme.proposals pr ON pr.id = ra.proposal_id\n                   WHERE ra.reviewer_id = p.id\n                     AND ra.recused_at IS NULL\n                     AND pr.call_id = $1)                       AS \"assigned_count!\",\n                  (SELECT count(*) FROM programme.reviews rv\n                    JOIN programme.proposals pr ON pr.id = rv.proposal_id\n                   WHERE rv.reviewer_id = p.id\n                     AND rv.submitted_at IS NOT NULL\n                     AND pr.call_id = $1)                       AS \"submitted_count!\",\n                  identity.has_permission(p.id, 'programme.review.write',\n                                          'event'::identity.scope_type, $2)\n                      AS \"has_review_permission!\"\n             FROM event.call_reviewers cr\n             JOIN identity.people p ON p.id = cr.person_id\n             LEFT JOIN org.organizations o ON o.id = p.primary_organization_id\n            WHERE cr.call_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "full_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "organization_name?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "legal_name"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "assigned_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "submitted_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "has_review_permission!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      null,
+      true,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "3a8b4ca716ae1e63092775225258d482fbf763dc78abfb1195764f4210a02aae"
+}

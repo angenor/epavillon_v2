@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE event.broadcast_channels SET is_active = false, is_default = false\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "10f438ffc97aba3dbcfd40f3a0c8e98e0368800ac4967f4ebe71650f52886dc1"
+}

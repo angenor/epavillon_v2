@@ -9,6 +9,7 @@ members = [
     "crates/contracts",
     "crates/modules/identity",
     "crates/modules/org",
+    "crates/modules/event",
     "crates/api",
     "crates/worker",
 ]
@@ -23,6 +24,7 @@ kernel = { path = "crates/kernel" }
 contracts = { path = "crates/contracts" }
 identity = { path = "crates/modules/identity" }
 org = { path = "crates/modules/org" }
+event = { path = "crates/modules/event" }
 
 actix-web = "4.14"
 argon2 = "0.5"

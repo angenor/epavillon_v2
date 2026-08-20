@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.sessions\n               (event_id, title, slug, format, starts_at, ends_at, timezone,\n                room_id, is_streamed)\n           VALUES ($1, '{\"fr\":\"Table ronde sur la finance climat\"}'::jsonb,\n                   'table-ronde-finance'::platform.slug, 'hybrid',\n                   timestamp '2027-11-10 14:00' AT TIME ZONE $2,\n                   timestamp '2027-11-10 15:30' AT TIME ZONE $2,\n                   $2::text::platform.timezone_name,\n                   $3, true)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "d0f5dd4959903ce1f287136d7fab916c05828ee13966a4ff25c67225027f1d73"
+}

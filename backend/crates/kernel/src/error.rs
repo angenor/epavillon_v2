@@ -111,6 +111,17 @@ codes! {
     OrgInvitationNotYours => "ORG_INVITATION_NOT_YOURS", StatusCode::FORBIDDEN,
         "Cette invitation ne vous est pas adressée.";
 
+    // --- Événements (B3) ------------------------------------------------------
+    // Trois seulement : la quasi-totalité des refus de ce module sont exprimés
+    // par le contrat du front et sortent donc en 200. Ces trois-là n'y ont
+    // aucune place.
+    EventGlobalScopeRequired => "EVENT_GLOBAL_SCOPE_REQUIRED", StatusCode::FORBIDDEN,
+        "La création d'une édition exige des droits sur l'ensemble de la plateforme.";
+    EventCriterionHasScores => "EVENT_CRITERION_HAS_SCORES", StatusCode::UNPROCESSABLE_ENTITY,
+        "Ce critère porte déjà des notes : le retirer effacerait l'argumentaire des évaluations rendues.";
+    EventUnknownReference => "EVENT_UNKNOWN_REFERENCE", StatusCode::UNPROCESSABLE_ENTITY,
+        "La valeur choisie n'existe pas.";
+
     // MAIL_RELAY_UNREACHABLE n'est PAS ici : il ne franchit aucune réponse
     // HTTP. Il vit dans `mail.rs`, d'où il part vers `platform.jobs.last_error`.
 }

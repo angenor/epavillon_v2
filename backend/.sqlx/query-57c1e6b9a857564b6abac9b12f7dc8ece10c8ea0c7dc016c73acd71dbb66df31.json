@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT payload FROM platform.outbox_events\n          WHERE aggregate_id = $1 AND event_type = 'event.programme.published'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "payload",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "platform.outbox_events",
+            "name": "payload"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "57c1e6b9a857564b6abac9b12f7dc8ece10c8ea0c7dc016c73acd71dbb66df31"
+}

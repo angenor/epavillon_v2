@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE event.events SET programme_published_at = now()\n          WHERE id = $1 AND programme_published_at IS NULL\n        RETURNING programme_published_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "programme_published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "programme_published_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "999bf5da475de80d5e423500b027d361e6ae5aee8404c06dacc6e08576cd8ead"
+}

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM event.event_days WHERE id = ANY($1::uuid[])",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4e6a2376ce6eb77be2c77dd2a2ea4b84fc0d1824296da5364febca0a2a58d2bd"
+}

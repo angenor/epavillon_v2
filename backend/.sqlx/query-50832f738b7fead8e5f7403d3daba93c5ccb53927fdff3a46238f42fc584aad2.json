@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.events\n               (series_id, edition_label, edition_year, title, acronym, slug, description,\n                status, participation_mode, timezone, starts_at, ends_at,\n                country_id, city, has_pavilion)\n           VALUES ($1, 'COP31', 2027,\n                   '{\"fr\":\"COP31 — Conférence des Parties\",\"en\":\"COP31\"}'::jsonb,\n                   'COP31', $2::text::platform.slug,\n                   '{\"fr\":\"Pavillon de la Francophonie à la COP31.\",\"en\":\"Francophonie pavilion at COP31.\"}'::jsonb,\n                   'announced', 'hybrid', $3::text::platform.timezone_name,\n                   timestamp '2027-11-09 09:00' AT TIME ZONE $3,\n                   timestamp '2027-11-20 18:00' AT TIME ZONE $3,\n                   $4, 'Belém', true)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "50832f738b7fead8e5f7403d3daba93c5ccb53927fdff3a46238f42fc584aad2"
+}

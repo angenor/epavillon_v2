@@ -1,0 +1,51 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT e.id AS \"id!\",\n             (SELECT count(*) FROM programme.proposals p\n               WHERE p.event_id = e.id AND p.status <> 'draft')      AS \"proposal_count!\",\n             (SELECT count(*) FROM programme.sessions s\n               WHERE s.event_id = e.id)                               AS \"session_count!\",\n             (SELECT count(*) FROM programme.sessions s\n               WHERE s.event_id = e.id AND s.room_id IS NOT NULL)     AS \"scheduled_session_count!\",\n             (SELECT count(*) FROM event.event_days d\n               WHERE d.event_id = e.id)                               AS \"day_count!\"\n           FROM unnest($1::uuid[]) AS e(id)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "proposal_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "session_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "scheduled_session_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "day_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "71b403cb48c7675db060f3d5d9c280fcbdcdd0a84a38ff324bde8299c9817405"
+}

@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.events\n               (series_id, edition_year, title, slug, description, status,\n                participation_mode, timezone, starts_at, ends_at)\n           VALUES ($1, 2027, '{\"fr\":\"Édition\"}'::jsonb, $2::text::platform.slug,\n                   '{\"fr\":\"Description.\"}'::jsonb, $3::text::event.event_status,\n                   'online', 'Africa/Dakar'::platform.timezone_name,\n                   now() + interval '30 days', now() + interval '32 days')\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "a2f6821795848c4f8e82f62ed00609eaabfaddbb8c6f3c812c2da85987a0ce4c"
+}

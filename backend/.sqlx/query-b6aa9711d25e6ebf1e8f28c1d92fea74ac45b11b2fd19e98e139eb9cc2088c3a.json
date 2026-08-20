@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.programme_tracks (event_id, code, slug, kind, title)\n           VALUES ($1, 'journee_finance', 'journee-finance'::platform.slug, 'special_day',\n                   '{\"fr\":\"Journée finance durable\",\"en\":\"Sustainable finance day\"}'::jsonb)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "b6aa9711d25e6ebf1e8f28c1d92fea74ac45b11b2fd19e98e139eb9cc2088c3a"
+}

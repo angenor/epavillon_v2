@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.event_day_id AS \"journee!\", count(*) AS \"n!\"\n             FROM programme.sessions s\n            WHERE s.event_id = $1 AND s.event_day_id IS NOT NULL\n            GROUP BY s.event_day_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "journee!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "event_day_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      null
+    ]
+  },
+  "hash": "a909202147f605b42e6c0ee86c255cccafc0bcb5245d7da894ef427e75e89983"
+}

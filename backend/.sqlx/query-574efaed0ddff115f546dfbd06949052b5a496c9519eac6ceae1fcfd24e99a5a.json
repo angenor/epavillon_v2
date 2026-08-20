@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO media.assets\n                   (object_key, checksum_sha256, mime_type, byte_size, width, height,\n                    alt_text, owner_person_id, scan_verdict, scanned_at, status)\n               VALUES ('2027/11/' || gen_random_uuid() || '/image.webp',\n                       encode(sha256(gen_random_uuid()::text::bytea), 'hex'),\n                       'image/webp', 120000, $1, $2,\n                       '{\"fr\":\"Pavillon de la Francophonie\"}'::jsonb, $3,\n                       'clean', now(), 'ready')\n            RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "media.assets",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "574efaed0ddff115f546dfbd06949052b5a496c9519eac6ceae1fcfd24e99a5a"
+}

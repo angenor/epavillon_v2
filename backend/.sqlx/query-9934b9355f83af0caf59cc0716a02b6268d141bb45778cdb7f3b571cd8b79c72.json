@@ -1,0 +1,484 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT v.id AS \"id!\", v.slug::text AS \"slug!\", v.title AS \"title!\", v.description AS \"description!\",\n                  v.acronym, v.edition_label, v.edition_year AS \"edition_year!\",\n                  v.status::text AS \"status!\",\n                  v.participation_mode::text AS \"participation_mode!\",\n                  v.timezone::text AS \"timezone!\",\n                  v.starts_at AS \"starts_at!\", v.ends_at AS \"ends_at!\",\n                  v.has_pavilion AS \"has_pavilion!\", v.programme_published_at, v.highlights,\n                  v.series_id, v.series_kind::text AS \"series_kind?\",\n                  v.series_name, v.series_slug::text AS \"series_slug?\",\n                  v.country_id, v.country_code, v.country_name, v.city,\n                  v.banner, v.cover, v.thumbnail,\n                  v.temporal_state AS \"temporal_state!\",\n                  v.call_id, v.call_status::text AS \"call_status?\",\n                  v.call_is_open, v.call_deadline,\n                  v.theme_codes AS \"theme_codes!\", v.themes AS \"themes!\",\n                  e.address, e.latitude::float8 AS \"latitude?\", e.longitude::float8 AS \"longitude?\",\n                  e.created_by, e.created_at AS \"created_at!\", e.updated_at AS \"updated_at!\",\n                  COALESCE(st.published_session_count, 0) AS \"published_session_count!\",\n                  COALESCE(st.streamed_session_count, 0)  AS \"streamed_session_count!\",\n                  COALESCE(st.organization_count, 0)      AS \"organization_count!\",\n                  st.programme_starts_at, st.programme_ends_at\n             FROM event.v_public_editions v\n             JOIN event.events e ON e.id = v.id\n             LEFT JOIN programme.v_edition_stats st ON st.event_id = v.id\n            WHERE $1::text IS NULL OR v.slug::text = $1\n            ORDER BY v.starts_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "title!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "description!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "acronym",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "acronym"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "edition_label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "edition_label"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "edition_year!",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "edition_year"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "participation_mode!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "timezone!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "starts_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "ends_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "ends_at"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "has_pavilion!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "has_pavilion"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "programme_published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "programme_published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "highlights",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "highlights"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "series_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "series_id"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "series_kind?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 17,
+        "name": "series_name",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "series_name"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "series_slug?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 19,
+        "name": "country_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "country_id"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "country_code",
+        "type_info": "Bpchar",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "country_code"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "country_name",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "country_name"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
+        "name": "city",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "city"
+          }
+        }
+      },
+      {
+        "ordinal": 23,
+        "name": "banner",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "banner"
+          }
+        }
+      },
+      {
+        "ordinal": 24,
+        "name": "cover",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "cover"
+          }
+        }
+      },
+      {
+        "ordinal": 25,
+        "name": "thumbnail",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "thumbnail"
+          }
+        }
+      },
+      {
+        "ordinal": 26,
+        "name": "temporal_state!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "temporal_state"
+          }
+        }
+      },
+      {
+        "ordinal": 27,
+        "name": "call_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "call_id"
+          }
+        }
+      },
+      {
+        "ordinal": 28,
+        "name": "call_status?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 29,
+        "name": "call_is_open",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "call_is_open"
+          }
+        }
+      },
+      {
+        "ordinal": 30,
+        "name": "call_deadline",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "call_deadline"
+          }
+        }
+      },
+      {
+        "ordinal": 31,
+        "name": "theme_codes!",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "theme_codes"
+          }
+        }
+      },
+      {
+        "ordinal": 32,
+        "name": "themes!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.v_public_editions",
+            "name": "themes"
+          }
+        }
+      },
+      {
+        "ordinal": 33,
+        "name": "address",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "address"
+          }
+        }
+      },
+      {
+        "ordinal": 34,
+        "name": "latitude?",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 35,
+        "name": "longitude?",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 36,
+        "name": "created_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "created_by"
+          }
+        }
+      },
+      {
+        "ordinal": 37,
+        "name": "created_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 38,
+        "name": "updated_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 39,
+        "name": "published_session_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 40,
+        "name": "streamed_session_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 41,
+        "name": "organization_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 42,
+        "name": "programme_starts_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.v_edition_stats",
+            "name": "programme_starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 43,
+        "name": "programme_ends_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.v_edition_stats",
+            "name": "programme_ends_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      true,
+      null,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null,
+      null,
+      null,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null,
+      true,
+      null,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null,
+      null,
+      true,
+      false,
+      false,
+      null,
+      null,
+      null,
+      true,
+      true
+    ]
+  },
+  "hash": "9934b9355f83af0caf59cc0716a02b6268d141bb45778cdb7f3b571cd8b79c72"
+}

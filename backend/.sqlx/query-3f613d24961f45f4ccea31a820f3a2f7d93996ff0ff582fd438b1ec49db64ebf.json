@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO media.attachments (owner_schema, owner_table, owner_id, asset_id, role)\n             VALUES ('event', 'events', $1, $2, $3::text::media.attachment_role)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3f613d24961f45f4ccea31a820f3a2f7d93996ff0ff582fd438b1ec49db64ebf"
+}

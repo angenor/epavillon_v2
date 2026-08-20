@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM reference.entity_terms\n          WHERE entity_schema = $1 AND entity_table = $2 AND entity_id = $3\n            AND term_id IN (SELECT id FROM reference.taxonomy_terms\n                             WHERE taxonomy_code = $4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ffaf0da8b239b02fb3822bda6bd99ccc75f699db145bb64f1f6789d976631d5b"
+}

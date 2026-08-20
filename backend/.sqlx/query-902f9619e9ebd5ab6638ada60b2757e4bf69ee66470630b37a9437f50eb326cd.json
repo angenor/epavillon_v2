@@ -1,0 +1,66 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT code, label, max_score::float8 AS \"max_score!\",\n                  weight::float8 AS \"weight!\", is_knockout\n             FROM event.review_criteria WHERE call_id = $1\n            ORDER BY sort_order, code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.review_criteria",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "label",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.review_criteria",
+            "name": "label"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "max_score!",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "weight!",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "is_knockout",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.review_criteria",
+            "name": "is_knockout"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      null,
+      false
+    ]
+  },
+  "hash": "902f9619e9ebd5ab6638ada60b2757e4bf69ee66470630b37a9437f50eb326cd"
+}

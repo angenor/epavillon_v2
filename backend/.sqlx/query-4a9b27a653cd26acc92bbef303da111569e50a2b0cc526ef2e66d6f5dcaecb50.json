@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.programme_tracks\n               (event_id, code, slug, kind, title, subtitle, description,\n                starts_on, ends_on, color_hex, curated_by, published_at, sort_order)\n           VALUES ($1, $2, $3::text::platform.slug, $4::text::event.track_kind,\n                   $5::jsonb, $6::jsonb, $7::jsonb, $8, $9, $10, $11,\n                   CASE WHEN $12 THEN now() END, $13)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.programme_tracks",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Jsonb",
+        "Jsonb",
+        "Date",
+        "Date",
+        "Text",
+        "Uuid",
+        "Bool",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "4a9b27a653cd26acc92bbef303da111569e50a2b0cc526ef2e66d6f5dcaecb50"
+}

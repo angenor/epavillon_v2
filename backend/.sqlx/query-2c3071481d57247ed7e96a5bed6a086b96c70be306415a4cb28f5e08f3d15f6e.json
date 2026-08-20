@@ -1,0 +1,33 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE event.events SET\n               series_id          = $2,\n               edition_label      = $3,\n               edition_year       = $4,\n               title              = $5::jsonb,\n               acronym            = $6,\n               slug               = $7::text::platform.slug,\n               description        = $8::jsonb,\n               status             = $9::text::event.event_status,\n               participation_mode = $10::text::event.participation_mode,\n               timezone           = $11::text::platform.timezone_name,\n               starts_at          = $12,\n               ends_at            = $13,\n               country_id         = $14,\n               city               = $15,\n               address            = $16,\n               latitude           = $17::float8::numeric(9,6),\n               longitude          = $18::float8::numeric(9,6),\n               has_pavilion       = $19,\n               highlights         = $20::jsonb\n         WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Int2",
+        "Jsonb",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Text",
+        "Text",
+        "Text",
+        "Timestamptz",
+        "Timestamptz",
+        "Uuid",
+        "Text",
+        "Text",
+        "Float8",
+        "Float8",
+        "Bool",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2c3071481d57247ed7e96a5bed6a086b96c70be306415a4cb28f5e08f3d15f6e"
+}

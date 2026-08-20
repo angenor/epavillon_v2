@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.events\n               (series_id, edition_label, edition_year, title, acronym, slug, description,\n                status, participation_mode, timezone, starts_at, ends_at,\n                country_id, city, address, latitude, longitude, has_pavilion,\n                highlights, created_by)\n           VALUES ($1, $2, $3, $4::jsonb, $5, $6::text::platform.slug, $7::jsonb,\n                   $8::text::event.event_status, $9::text::event.participation_mode,\n                   $10::text::platform.timezone_name, $11, $12,\n                   $13, $14, $15, $16::float8::numeric(9,6), $17::float8::numeric(9,6), $18,\n                   $19::jsonb, $20)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Int2",
+        "Jsonb",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Text",
+        "Text",
+        "Text",
+        "Timestamptz",
+        "Timestamptz",
+        "Uuid",
+        "Text",
+        "Text",
+        "Float8",
+        "Float8",
+        "Bool",
+        "Jsonb",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "0a49060f3f9984c2d0b56a38bbd92c22683c776a4388f759bebf32e6acc23516"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.review_assignments (proposal_id, reviewer_id) VALUES ($1, $2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d038ed513e0b792c076ffb0b5518a5976c9ac2908ccc142262816a79e0ea5951"
+}

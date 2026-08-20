@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.call_reviewers (call_id, person_id, is_lead, workload_cap)\n         SELECT $1, s.person_id, s.is_lead, s.workload_cap\n           FROM unnest($2::uuid[], $3::boolean[], $4::int2[])\n                AS s(person_id, is_lead, workload_cap)\n         ON CONFLICT (call_id, person_id) DO UPDATE\n            SET is_lead = EXCLUDED.is_lead, workload_cap = EXCLUDED.workload_cap",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray",
+        "BoolArray",
+        "Int2Array"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7e642d7f420f8aedf1989ffb62e9ba663d741ae38344a81ed7ec435cea6c65b4"
+}

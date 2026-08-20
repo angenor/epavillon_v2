@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.calls_for_proposals\n               (event_id, code, title, opens_at, closes_at)\n           VALUES ($1, 'reference', '{\"fr\":\"Référence\"}'::jsonb,\n                   now(), now() + interval '10 days')\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "7c801e02bc5d2d243edb4ac300c9729c9e276a083dbbf309bddd36ae58a0b3e5"
+}

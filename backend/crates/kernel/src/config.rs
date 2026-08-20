@@ -88,6 +88,9 @@ struct Raw {
     #[serde(with = "humantime_serde", default = "minutes_5")]
     org_scorecard_refresh_window: Duration,
 
+    #[serde(with = "humantime_serde", default = "hours_1")]
+    event_call_autoclose_interval: Duration,
+
     #[serde(default)]
     otel_exporter_otlp_endpoint: String,
     #[serde(default = "default_service_name")]
@@ -167,6 +170,7 @@ pub struct Config {
     pub trusted_proxies: crate::net::TrustedProxies,
     pub auth: AuthConfig,
     pub org: OrgConfig,
+    pub event: EventConfig,
     pub mail: MailConfig,
     pub telemetry: TelemetryConfig,
 }
@@ -192,6 +196,13 @@ pub struct OrgConfig {
     pub duplicate_score_threshold: u16,
     pub duplicate_scan_batch: u32,
     pub scorecard_refresh_window: Duration,
+}
+
+/// Réglages du module Événements. Une seule clé : la cadence à laquelle le
+/// worker clôt les appels dont l'échéance effective est passée.
+#[derive(Debug, Clone)]
+pub struct EventConfig {
+    pub call_autoclose_interval: Duration,
 }
 
 /// Une durée par valeur de `identity.token_purpose`. Aucun appelant ne pose
@@ -371,6 +382,15 @@ impl Config {
             ));
         }
 
+        // Une cadence nulle ferait replanifier la clôture des appels à
+        // l'instant même où elle vient de tourner : la file se remplirait
+        // aussi vite que le worker la vide.
+        if raw.event_call_autoclose_interval.is_zero() {
+            return Err(invalid(
+                "EVENT_CALL_AUTOCLOSE_INTERVAL vaut une durée nulle : la clôture des appels se replanifierait sans fin.",
+            ));
+        }
+
         let trusted_proxies = crate::net::TrustedProxies::parse(&raw.trusted_proxies)
             .map_err(|e| invalid(format!("TRUSTED_PROXIES : {e}")))?;
 
@@ -408,6 +428,9 @@ impl Config {
                 duplicate_score_threshold: raw.org_duplicate_score_threshold,
                 duplicate_scan_batch: raw.org_duplicate_scan_batch,
                 scorecard_refresh_window: raw.org_scorecard_refresh_window,
+            },
+            event: EventConfig {
+                call_autoclose_interval: raw.event_call_autoclose_interval,
             },
             mail: MailConfig {
                 transport,

@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.sessions\n                   (event_id, title, slug, format, starts_at, ends_at, timezone,\n                    status, location_note, published_at, cancelled_reason)\n               VALUES ($1, '{\"fr\":\"Séance\"}'::jsonb, $2::text::platform.slug, 'online',\n                       ('2027-11-10 14:00')::timestamp AT TIME ZONE $3,\n                       ('2027-11-10 15:00')::timestamp AT TIME ZONE $3,\n                       $3::text::platform.timezone_name,\n                       $4::text::programme.session_status,\n                       '{\"fr\":\"En ligne\"}'::jsonb,\n                       CASE WHEN $5 THEN now() END,\n                       CASE WHEN $4 = 'cancelled'\n                            THEN '{\"fr\":\"Report à une autre édition.\"}'::jsonb END)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "af10ec476c0dfb8757179023ad00e963cfa9d1973db829079552c0a72f5ae6ec"
+}

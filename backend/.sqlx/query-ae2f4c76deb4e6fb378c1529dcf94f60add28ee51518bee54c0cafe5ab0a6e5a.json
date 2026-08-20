@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO identity.role_permissions (role_code, permission_code) VALUES ($1, $2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ae2f4c76deb4e6fb378c1529dcf94f60add28ee51518bee54c0cafe5ab0a6e5a"
+}

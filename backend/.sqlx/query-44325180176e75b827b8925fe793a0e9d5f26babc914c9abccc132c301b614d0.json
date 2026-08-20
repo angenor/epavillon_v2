@@ -1,0 +1,124 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.id, r.venue_id, r.name, r.code, r.capacity,\n                  r.is_virtual, r.has_streaming, r.equipment, r.sort_order\n             FROM event.rooms r\n             JOIN event.venues v ON v.id = r.venue_id\n            WHERE v.event_id = $1\n            ORDER BY r.sort_order, r.code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.rooms",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "venue_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.rooms",
+            "name": "venue_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.rooms",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.rooms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "capacity",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.rooms",
+            "name": "capacity"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "is_virtual",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.rooms",
+            "name": "is_virtual"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "has_streaming",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.rooms",
+            "name": "has_streaming"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "equipment",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "event.rooms",
+            "name": "equipment"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "sort_order",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.rooms",
+            "name": "sort_order"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "44325180176e75b827b8925fe793a0e9d5f26babc914c9abccc132c301b614d0"
+}

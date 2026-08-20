@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.broadcast_channel_id AS \"canal!\", count(*) AS \"n!\"\n             FROM programme.sessions s\n            WHERE s.broadcast_channel_id = ANY($1::uuid[])\n            GROUP BY s.broadcast_channel_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "canal!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "broadcast_channel_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      true,
+      null
+    ]
+  },
+  "hash": "8361b83e80eac9f65f6b6a9d65f26327a802d3b886e1468829b44a4aae928235"
+}

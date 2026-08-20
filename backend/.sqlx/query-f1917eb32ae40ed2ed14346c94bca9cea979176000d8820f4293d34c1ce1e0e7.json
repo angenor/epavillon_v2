@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT code FROM event.broadcast_channels\n          WHERE event_id = $1 AND is_default AND is_active\n          ORDER BY code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.broadcast_channels",
+            "name": "code"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "f1917eb32ae40ed2ed14346c94bca9cea979176000d8820f4293d34c1ce1e0e7"
+}

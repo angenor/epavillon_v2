@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(\n                    jsonb_agg(jsonb_build_object(\n                        'code', code, 'label', label, 'color', color_hex, 'icon', icon)\n                      ORDER BY sort_order, code),\n                    '[]'::jsonb) AS \"themes!\"\n             FROM reference.taxonomy_terms\n            WHERE taxonomy_code = 'activity_theme' AND is_active",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "themes!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "8704dcf80d583d716862f756ef8b444572401bb970d5e7c9acf3586bc2f64987"
+}

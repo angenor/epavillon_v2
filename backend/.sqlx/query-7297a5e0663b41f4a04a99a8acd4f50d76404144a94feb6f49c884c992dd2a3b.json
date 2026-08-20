@@ -1,0 +1,51 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT severity AS \"severity!\", issue AS \"issue!\", detail,\n                  session_id, occurs_at\n             FROM programme.publication_readiness($1)\n            ORDER BY (severity = 'blocking') DESC, occurs_at NULLS LAST",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "severity!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "issue!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "detail",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "session_id",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "occurs_at",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "7297a5e0663b41f4a04a99a8acd4f50d76404144a94feb6f49c884c992dd2a3b"
+}

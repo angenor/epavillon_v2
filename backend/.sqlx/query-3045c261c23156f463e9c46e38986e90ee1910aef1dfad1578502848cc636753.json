@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.venues (event_id, name, kind)\n           VALUES ($1, '{\"fr\":\"Pavillon de la Francophonie\"}'::jsonb, 'pavilion')\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.venues",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "3045c261c23156f463e9c46e38986e90ee1910aef1dfad1578502848cc636753"
+}

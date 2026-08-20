@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.sessions\n               (event_id, title, slug, format, starts_at, ends_at, timezone, room_id)\n           VALUES ($1, '{\"fr\":\"Séance\"}'::jsonb,\n                   ('seance-' || gen_random_uuid())::platform.slug, 'in_person',\n                   ('2027-11-10 ' || $4)::timestamp AT TIME ZONE $2,\n                   ('2027-11-10 ' || $4)::timestamp AT TIME ZONE $2 + interval '1 hour',\n                   $2::text::platform.timezone_name, $3)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "452f12ae61084bd06d21505ff6d4a8e168ecf7f62c6e0b65dd8eb15808fd7480"
+}

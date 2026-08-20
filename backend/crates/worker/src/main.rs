@@ -43,13 +43,17 @@ async fn main() {
             &config,
             courrier.clone(),
         ))
-        .register_all(org::job_handlers(db.clone(), &config, courrier));
+        .register_all(org::job_handlers(db.clone(), &config, courrier))
+        // Ce module n'envoie aucun courriel : son unique travail clôt les
+        // appels échus, et le rappel d'échéance aux organisations appartient à
+        // B6.
+        .register_all(event::job_handlers(db.clone(), &config));
 
     // Les travaux récurrents se replanifient eux-mêmes ; le démarrage ne fait
     // que **réarmer** la chaîne, au cas où sa dernière occurrence serait morte
     // avant d'avoir posé la suivante. La clé d'unicité porte le jour : dix
     // redémarrages dans la journée n'en produisent pas dix purges.
-    armer_les_recurrents(&db).await;
+    armer_les_recurrents(&db, &config).await;
 
     tracing::info!(worker = %config.worker_id, "worker démarré");
 
@@ -71,7 +75,7 @@ async fn main() {
     db.close().await;
 }
 
-async fn armer_les_recurrents(db: &Db) {
+async fn armer_les_recurrents(db: &Db, config: &Config) {
     let resultat = async {
         let mut tx = db.write(&RequestContext::background("jobs")).await?;
         let maintenant = OffsetDateTime::now_utc();
@@ -81,18 +85,31 @@ async fn armer_les_recurrents(db: &Db) {
         // suivante. La clé d'unicité porte le jour — dix redémarrages n'en
         // produisent pas dix.
         let balayage = org::jobs::duplicates::planifier(&mut tx, maintenant).await?;
+        // Troisième chaîne, même patron. Sa grille est horaire plutôt que
+        // journalière : la clé d'unicité porte le créneau visé, pas le jour.
+        let cloture = event::jobs::autoclose::planifier(
+            &mut tx,
+            event::jobs::autoclose::prochaine_occurrence(
+                maintenant,
+                config.event.call_autoclose_interval,
+            ),
+        )
+        .await?;
         tx.commit().await?;
-        Ok::<_, kernel::error::ApiError>((purge, balayage))
+        Ok::<_, kernel::error::ApiError>((purge, balayage, cloture))
     }
     .await;
 
     match resultat {
-        Ok((purge, balayage)) => {
+        Ok((purge, balayage, cloture)) => {
             if purge {
                 tracing::info!("purge des jetons planifiée pour aujourd'hui");
             }
             if balayage {
                 tracing::info!("balayage des doublons planifié pour aujourd'hui");
+            }
+            if cloture {
+                tracing::info!("clôture des appels échus planifiée pour le prochain créneau");
             }
         }
         Err(e) => tracing::error!(erreur = %e, "planification des travaux récurrents impossible"),

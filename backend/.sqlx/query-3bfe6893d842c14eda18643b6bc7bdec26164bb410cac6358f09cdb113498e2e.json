@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT payload FROM platform.outbox_events\n          WHERE aggregate_id = $1 AND event_type = 'event.call.deadline_extended'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "payload",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "platform.outbox_events",
+            "name": "payload"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "3bfe6893d842c14eda18643b6bc7bdec26164bb410cac6358f09cdb113498e2e"
+}

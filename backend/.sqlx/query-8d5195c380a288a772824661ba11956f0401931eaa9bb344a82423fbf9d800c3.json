@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.id, s.name, s.kind::text AS \"kind!\", s.is_active,\n                  count(e.id) AS \"edition_count!\"\n             FROM event.event_series s\n             LEFT JOIN event.events e ON e.series_id = s.id\n            GROUP BY s.id, s.name, s.kind, s.is_active\n            ORDER BY s.kind, s.name->>'fr'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.event_series",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.event_series",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "kind!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "is_active",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.event_series",
+            "name": "is_active"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "edition_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      false,
+      null
+    ]
+  },
+  "hash": "8d5195c380a288a772824661ba11956f0401931eaa9bb344a82423fbf9d800c3"
+}

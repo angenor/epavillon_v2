@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"n!\"\n             FROM programme.sessions s\n             JOIN event.rooms r ON r.id = s.room_id\n            WHERE r.venue_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "82ee72be84275df5e38c41578a49d7ddeacab3bc740f2194fcc832cc050a5663"
+}

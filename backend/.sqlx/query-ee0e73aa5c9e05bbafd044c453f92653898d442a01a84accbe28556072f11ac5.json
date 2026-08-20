@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.sessions\n                   (event_id, title, slug, format, starts_at, ends_at, timezone,\n                    room_id, status, location_note)\n               VALUES ($1, '{\"fr\":\"Table ronde\"}'::jsonb, $2::text::platform.slug, 'in_person',\n                       ('2027-11-10 14:00')::timestamp AT TIME ZONE $3,\n                       ('2027-11-10 15:30')::timestamp AT TIME ZONE $3,\n                       $3::text::platform.timezone_name, $4, 'scheduled',\n                       '{\"fr\":\"Stand principal\"}'::jsonb)\n            RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "ee0e73aa5c9e05bbafd044c453f92653898d442a01a84accbe28556072f11ac5"
+}

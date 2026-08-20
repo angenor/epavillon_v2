@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.broadcast_channels\n               (event_id, code, name, provider, is_default, is_active)\n           VALUES ($1, 'cop31_direct', '{\"fr\":\"Direct COP31\"}'::jsonb, 'youtube', true, true)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.broadcast_channels",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "7bfd89c328c4781bccced858e10306f58225f3c2f43b0b49e5bd18c1c912dee6"
+}

@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.review_criteria\n               (call_id, code, label, description, max_score, weight, is_knockout, sort_order)\n           VALUES ($1, $2, $3::jsonb, $4::jsonb,\n                   $5::float8::numeric(5,2), $6::float8::numeric(5,2), $7, $8)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Jsonb",
+        "Jsonb",
+        "Float8",
+        "Float8",
+        "Bool",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "97ace674263fab61a0a5bd67464c9b18e03adba449cdc1af15415a2d3d48b6a4"
+}

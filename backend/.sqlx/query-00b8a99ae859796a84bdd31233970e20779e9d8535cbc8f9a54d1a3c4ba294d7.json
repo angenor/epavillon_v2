@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT person_id, is_lead, workload_cap, added_at\n           FROM event.call_reviewers\n          WHERE call_id = $1\n          ORDER BY is_lead DESC, added_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.call_reviewers",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "is_lead",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.call_reviewers",
+            "name": "is_lead"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "workload_cap",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.call_reviewers",
+            "name": "workload_cap"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "added_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.call_reviewers",
+            "name": "added_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "00b8a99ae859796a84bdd31233970e20779e9d8535cbc8f9a54d1a3c4ba294d7"
+}

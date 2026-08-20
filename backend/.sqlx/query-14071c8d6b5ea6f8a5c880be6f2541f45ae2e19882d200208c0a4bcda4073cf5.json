@@ -1,0 +1,107 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, day_date, title, slug::text AS \"slug?\", description,\n                  is_featured, color_hex, sort_order\n             FROM event.event_days\n            WHERE event_id = $1\n            ORDER BY day_date",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "day_date",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "day_date"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "title",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "slug?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "description",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "is_featured",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "is_featured"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "color_hex",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "color_hex"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "sort_order",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "sort_order"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      null,
+      true,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "14071c8d6b5ea6f8a5c880be6f2541f45ae2e19882d200208c0a4bcda4073cf5"
+}

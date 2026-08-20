@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT unnest(enum_range(NULL::event.event_status))::text AS \"statut!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "statut!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "eeac23452a342e8d2d4c14737ec38c239f9e10ce77cde706c2205fcf586c4d27"
+}

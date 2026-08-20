@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.review_scores (review_id, criterion_id, score)\n         VALUES ($1, $2, 4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a1e66dc91adc4b92ec13edbb8a7c6d2513efdef50c21935177c97834591760d7"
+}

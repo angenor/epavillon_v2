@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object(\n                     'banner',    media.attached_image('event', 'events', $1, 'banner'),\n                     'cover',     media.attached_image('event', 'events', $1, 'cover'),\n                     'thumbnail', media.attached_image('event', 'events', $1, 'thumbnail')\n                  ) AS \"images!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "images!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "0470a4a6b4bd5f9f5eb15c1b33b629483f0a671756b9148e7d5cf3c4ab08c61c"
+}

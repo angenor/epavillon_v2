@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT day_date FROM event.event_days WHERE event_id = $1 ORDER BY day_date",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "day_date",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "day_date"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "5ec191fdc287e2715c0fc6600d170d2774210813cf5510019ff2cd492b1af22f"
+}

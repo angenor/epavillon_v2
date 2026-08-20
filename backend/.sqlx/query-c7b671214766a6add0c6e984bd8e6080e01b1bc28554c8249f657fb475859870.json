@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT is_active, is_default FROM event.broadcast_channels WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "is_active",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.broadcast_channels",
+            "name": "is_active"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "is_default",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.broadcast_channels",
+            "name": "is_default"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "c7b671214766a6add0c6e984bd8e6080e01b1bc28554c8249f657fb475859870"
+}

@@ -1,0 +1,288 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.id, c.event_id, c.code, c.title, c.description,\n                  c.status::text AS \"status!\",\n                  c.opens_at, c.closes_at, c.extended_until, c.results_expected_at,\n                  c.max_proposals_per_organization, c.requires_verified_organization,\n                  c.min_speakers, c.max_speakers,\n                  c.default_duration_minutes, c.min_duration_minutes, c.max_duration_minutes,\n                  c.daily_start_time::text AS \"daily_start_time!\",\n                  c.daily_end_time::text   AS \"daily_end_time!\",\n                  c.allowed_formats::text[] AS \"allowed_formats!\",\n                  c.required_reviews, c.blind_review,\n                  c.guidelines_url::text AS \"guidelines_url?\",\n                  event.effective_deadline(c.id)  AS \"effective_deadline!\",\n                  event.is_call_open(c.id)        AS \"is_open!\",\n                  event.max_weighted_score(c.id)::float8 AS \"max_weighted_score!\"\n             FROM event.calls_for_proposals c\n            WHERE c.event_id = $1 AND c.status <> 'cancelled'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "title",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "description",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "opens_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "opens_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "closes_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "closes_at"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "extended_until",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "extended_until"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "results_expected_at",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "results_expected_at"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "max_proposals_per_organization",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "max_proposals_per_organization"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "requires_verified_organization",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "requires_verified_organization"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "min_speakers",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "min_speakers"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "max_speakers",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "max_speakers"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "default_duration_minutes",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "default_duration_minutes"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "min_duration_minutes",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "min_duration_minutes"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "max_duration_minutes",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "max_duration_minutes"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "daily_start_time!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 18,
+        "name": "daily_end_time!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 19,
+        "name": "allowed_formats!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 20,
+        "name": "required_reviews",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "required_reviews"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "blind_review",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "blind_review"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
+        "name": "guidelines_url?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 23,
+        "name": "effective_deadline!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 24,
+        "name": "is_open!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 25,
+        "name": "max_weighted_score!",
+        "type_info": "Float8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      null,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null,
+      null,
+      null,
+      false,
+      false,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "46537604e213f622d47c45bf95b342325361575ab60904a0d416cf02bfa2673d"
+}

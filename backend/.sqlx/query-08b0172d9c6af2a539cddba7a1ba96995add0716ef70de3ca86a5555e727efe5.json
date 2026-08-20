@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT status::text AS \"status!\", closes_at, extended_until\n             FROM event.calls_for_proposals WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "closes_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "closes_at"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "extended_until",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "extended_until"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      false,
+      true
+    ]
+  },
+  "hash": "08b0172d9c6af2a539cddba7a1ba96995add0716ef70de3ca86a5555e727efe5"
+}

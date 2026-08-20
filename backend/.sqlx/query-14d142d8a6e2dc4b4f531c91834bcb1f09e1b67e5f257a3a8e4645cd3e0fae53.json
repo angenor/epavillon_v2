@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM event.broadcast_channels WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "14d142d8a6e2dc4b4f531c91834bcb1f09e1b67e5f257a3a8e4645cd3e0fae53"
+}
