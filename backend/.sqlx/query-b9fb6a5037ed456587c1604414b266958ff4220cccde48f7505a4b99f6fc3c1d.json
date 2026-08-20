@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE org.organizations SET city = 'Dakar' WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b9fb6a5037ed456587c1604414b266958ff4220cccde48f7505a4b99f6fc3c1d"
+}

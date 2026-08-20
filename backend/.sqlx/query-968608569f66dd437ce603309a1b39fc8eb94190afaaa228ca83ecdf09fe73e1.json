@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT rows_reassigned AS \"rows!\" FROM org.merge_log\n            WHERE source_id = $1 AND target_id = $2\n            ORDER BY performed_at DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "rows!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "org.merge_log",
+            "name": "rows_reassigned"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "968608569f66dd437ce603309a1b39fc8eb94190afaaa228ca83ecdf09fe73e1"
+}

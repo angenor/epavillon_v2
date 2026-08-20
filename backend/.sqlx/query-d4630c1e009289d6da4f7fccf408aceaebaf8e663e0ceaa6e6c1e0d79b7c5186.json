@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposals\n               (reference_code, event_id, organization_id, submitted_by, title, slug,\n                objectives, detailed_presentation, format, submitted_at, status)\n           VALUES ($4, $2, $1, $3,\n                   jsonb_build_object('fr', 'Atelier de démonstration'),\n                   lower($4 || '-atelier')::platform.slug,\n                   jsonb_build_object('fr', 'Objectifs'),\n                   jsonb_build_object('fr', 'Présentation'),\n                   'online', now(), 'submitted')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d4630c1e009289d6da4f7fccf408aceaebaf8e663e0ceaa6e6c1e0d79b7c5186"
+}

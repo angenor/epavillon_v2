@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT payload ->> 'token' FROM platform.jobs\n          WHERE task = 'org.membership.invitation_email'\n          ORDER BY created_at DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "?column?",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "7a3aecaef5d81e05feda4b41df21eb94f5121abaf2b20e145f45e5d57efb2bd8"
+}

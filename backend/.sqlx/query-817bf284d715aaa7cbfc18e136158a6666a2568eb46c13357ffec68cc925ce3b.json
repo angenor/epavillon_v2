@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO org.organizations (legal_name, slug, organization_type_code, country_id, status)\n           VALUES ('Réseau ouest-africain pour le climat', 'roac'::platform.slug,\n                   'ngo_association', $1, 'active')\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "817bf284d715aaa7cbfc18e136158a6666a2568eb46c13357ffec68cc925ce3b"
+}

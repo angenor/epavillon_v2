@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (\n               SELECT 1 FROM org.memberships\n                WHERE organization_id = $1 AND person_id = $2\n                  AND role = 'manager' AND status = 'active'\n           ) AS \"referent!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "referent!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "7d0e2ae19f568533c7e19055c53007747ba48a7b3647aa8f957eccfafa77b931"
+}

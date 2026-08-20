@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE org.organizations SET acronym = $2 WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "bf53e5cf6d14d2cf16ea3f5be096e82d3e3c696ceb75816e523a6a21b4fbecd9"
+}

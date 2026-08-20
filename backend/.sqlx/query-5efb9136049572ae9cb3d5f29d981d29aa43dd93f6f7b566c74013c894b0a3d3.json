@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO org.organizations\n               (legal_name, acronym, slug, organization_type_code, country_id, city,\n                status, contact_email)\n           VALUES ('OSED Sahel', 'OSED-S', 'osed-sahel'::platform.slug,\n                   'ngo_association', $1, 'Ouagadougou', 'candidate',\n                   'contact@osed-sahel.org'::platform.email)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "5efb9136049572ae9cb3d5f29d981d29aa43dd93f6f7b566c74013c894b0a3d3"
+}

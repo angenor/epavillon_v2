@@ -1,0 +1,67 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT o.id, o.legal_name, o.country_id,\n                  o.contact_email::text AS \"contact_email?\",\n                  o.website::text AS \"website?\"\n             FROM org.organizations o\n            WHERE o.status IN ('candidate', 'active')\n              AND ($1::uuid IS NULL OR o.id > $1)\n            ORDER BY o.id\n            LIMIT $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "legal_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "legal_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "country_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "country_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "contact_email?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "website?",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "124710083860bff6df268e5416349e38b3ae3dbd05cecf38e33aca895b2aa0bf"
+}

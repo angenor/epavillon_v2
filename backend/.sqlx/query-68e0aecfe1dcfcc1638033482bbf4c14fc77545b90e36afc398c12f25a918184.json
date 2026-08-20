@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ((n.kind = 'legal'   AND n.name_normalized = o.legal_name_normalized)\n                OR (n.kind = 'acronym' AND n.name_normalized = o.acronym_normalized))\n                      AS \"derivee!\"\n             FROM org.organization_names n\n             JOIN org.organizations o ON o.id = n.organization_id\n            WHERE n.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "derivee!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "68e0aecfe1dcfcc1638033482bbf4c14fc77545b90e36afc398c12f25a918184"
+}

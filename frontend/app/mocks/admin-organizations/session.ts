@@ -49,10 +49,21 @@ const organizationPatches = new Map<string, Partial<Organization>>()
 const domainPatches = new Map<string, Partial<OrganizationDomain>>()
 /** Dénominations confirmées ou infirmées pendant la session. */
 const namePatches = new Map<string, Partial<OrganizationName>>()
-/** Arbitrages portés sur les paires de doublons. */
+/**
+ * Arbitrages portés sur les paires de doublons.
+ *
+ * Les champs sont NULLABLES : remettre une paire dans la file, c'est effacer sa
+ * décision, et une entrée à `null` doit primer sur celle du jeu de données —
+ * sinon la paire reprise resterait rangée avec les tranchées.
+ */
 const pairDecisions = new Map<
   string,
-  { decision: DuplicateDecision; reviewed_at: IsoDateTime; reviewed_by: string | null; note: string | null }
+  {
+    decision: DuplicateDecision | null
+    reviewed_at: IsoDateTime | null
+    reviewed_by: string | null
+    note: string | null
+  }
 >()
 /** Fusions consignées — `org.merge_log`. */
 const mergeEntries: OrganizationMergeEntry[] = []
@@ -207,6 +218,21 @@ export function recordPairDecision(
     reviewed_at: new Date().toISOString(),
     reviewed_by: reviewedBy,
     note,
+  })
+}
+
+/**
+ * Remet une paire dans la file — `remettre_en_circulation()` côté API, qui
+ * remet `decision`, `reviewed_at` et `reviewed_by` à nul. Les trois ensemble :
+ * l'écran range sur `reviewed_at`, et laisser la date reviendrait à ne rien
+ * remettre du tout.
+ */
+export function reopenPair(pairId: string): void {
+  pairDecisions.set(pairId, {
+    decision: null,
+    reviewed_at: null,
+    reviewed_by: null,
+    note: null,
   })
 }
 

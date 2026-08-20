@@ -7,4 +7,3 @@ pub mod people;
 pub mod privacy;
 pub mod rbac;
 pub mod sessions;
-pub mod tokens;

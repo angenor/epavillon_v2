@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT idempotency_key AS \"cle!\" FROM platform.jobs\n            WHERE task = 'org.trust_score.recompute' AND idempotency_key IS NOT NULL\n            ORDER BY created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "cle!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "platform.jobs",
+            "name": "idempotency_key"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "9fc6dd2bac0ccfe439b3ce222a3754619524452b11a7768919dd427f00334b34"
+}

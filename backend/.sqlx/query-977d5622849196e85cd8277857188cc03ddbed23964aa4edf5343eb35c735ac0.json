@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE org.organizations\n            SET status = 'merged', merged_into_id = $2, merged_at = now()\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "977d5622849196e85cd8277857188cc03ddbed23964aa4edf5343eb35c735ac0"
+}

@@ -1,0 +1,40 @@
+{
+  "title": "Invitation to join an organization",
+  "checking": "Checking the invitation",
+  "accepted": {
+    "title": "You have joined {organization}",
+    "description": "Your membership is active. Your email address is confirmed at the same time: the link has just proved it.",
+    "workspace": "Go to my organization's workspace",
+    "createAccount": "Create my password",
+    "createAccountHint": "All that is left is choosing a password to open your account.",
+    "haveAccount": "Already have an account?",
+    "signIn": "Sign in"
+  },
+  "rejected": {
+    "expired": {
+      "title": "This invitation has expired",
+      "description": "The link is no longer valid. Ask the person who wrote to you for a new invitation: they can send it again from their organization's workspace.",
+      "action": "Back to home"
+    },
+    "already_used": {
+      "title": "This invitation has already been accepted",
+      "description": "You are part of this organization: there is nothing more to do here.",
+      "action": "Sign in"
+    },
+    "invalid": {
+      "title": "This invitation is not valid",
+      "description": "Your email software may have broken the link: open it from the message rather than copying it out.",
+      "action": "Back to home"
+    }
+  },
+  "notYours": {
+    "title": "This invitation is for someone else",
+    "description": "You are signed in with an account other than the one that received this link. Sign out to accept it.",
+    "action": "Sign out and accept"
+  },
+  "empty": {
+    "title": "No invitation to open",
+    "description": "This page confirms a membership from the link received by email. Open that link from your mailbox.",
+    "action": "Back to home"
+  }
+}

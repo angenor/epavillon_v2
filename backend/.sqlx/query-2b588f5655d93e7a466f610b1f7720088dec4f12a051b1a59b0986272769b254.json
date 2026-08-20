@@ -1,0 +1,129 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT d.id, d.left_id, d.right_id, d.score::float8 AS \"score!\",\n                      d.reasons AS \"reasons!\", d.detected_at, d.reviewed_at, d.reviewed_by,\n                      p.display_name AS \"reviewed_by_name?\", d.decision\n                 FROM org.duplicate_candidates d\n                 LEFT JOIN identity.people p ON p.id = d.reviewed_by\n                WHERE d.reviewed_at IS NOT NULL\n                ORDER BY d.reviewed_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.duplicate_candidates",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "left_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.duplicate_candidates",
+            "name": "left_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "right_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.duplicate_candidates",
+            "name": "right_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "score!",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "reasons!",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "org.duplicate_candidates",
+            "name": "reasons"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "detected_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.duplicate_candidates",
+            "name": "detected_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "reviewed_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.duplicate_candidates",
+            "name": "reviewed_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "reviewed_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.duplicate_candidates",
+            "name": "reviewed_by"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "reviewed_by_name?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "decision",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.duplicate_candidates",
+            "name": "decision"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "2b588f5655d93e7a466f610b1f7720088dec4f12a051b1a59b0986272769b254"
+}

@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"n!\" FROM org.organizations\n            WHERE legal_name_normalized = platform.normalize_label('Réseau climat africain')",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "5631d4364dffa47a5b3a67f18a78c50ed1654b0bb9ab2d38f8a57ac34b0b99d9"
+}

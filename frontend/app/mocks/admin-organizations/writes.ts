@@ -71,6 +71,7 @@ import {
   recordHistory,
   recordMerge,
   recordPairDecision,
+  reopenPair,
   resolveOrganizationId,
   sessionMergeEntries,
 } from './session'
@@ -209,7 +210,22 @@ export function decideDuplicatePair(
   const exists = duplicateCandidates.some((candidate) => candidate.id === payload.pair_id)
   if (!exists) return { status: 'not_found', pair: null }
 
-  recordPairDecision(payload.pair_id, payload.decision, actorId, payload.note)
+  const avant =
+    duplicateQueue().settled.find((entry) => entry.id === payload.pair_id) ?? null
+
+  // REMETTRE DANS LA FILE. Un report posé sur une paire DÉJÀ SORTIE de la file
+  // l'y ramène — écartée comme reportée. C'est le geste « réexaminer », et il
+  // vaut d'abord pour les paires écartées : on se trompe en écartant, pas en
+  // reportant. Le tri se faisant sur `reviewed_at`, réenregistrer une décision
+  // laisserait la paire rangée et le bouton mentirait (défaut du 20/08).
+  //
+  // La fusion, elle, ne se reprend pas : l'API répond par un refus, et l'écran
+  // n'offre pas le bouton sur une paire fusionnée.
+  if (payload.decision === 'deferred' && avant && avant.decision !== 'merged') {
+    reopenPair(payload.pair_id)
+  } else {
+    recordPairDecision(payload.pair_id, payload.decision, actorId, payload.note)
+  }
 
   const queue = duplicateQueue()
   const pair =

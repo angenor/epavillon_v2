@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT payload AS \"payload!\" FROM platform.outbox_events\n            WHERE event_type = 'org.membership.revoked' ORDER BY occurred_at DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "payload!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "platform.outbox_events",
+            "name": "payload"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "79fcb6760d54ec76c8aa76724bffbdaab2808c58ba0791d44f3ad2eec28229f1"
+}

@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (\n               SELECT 1 FROM programme.proposals p\n                WHERE p.organization_id = $1 AND p.deleted_at IS NULL\n                  AND p.event_id = ANY($2::uuid[])\n               UNION ALL\n               SELECT 1 FROM programme.proposal_organizations po\n                JOIN programme.proposals p ON p.id = po.proposal_id\n                WHERE po.organization_id = $1 AND p.deleted_at IS NULL\n                  AND p.event_id = ANY($2::uuid[])\n               UNION ALL\n               SELECT 1 FROM programme.sessions s\n                WHERE s.organization_id = $1 AND s.event_id = ANY($2::uuid[])\n           ) AS \"visible!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "visible!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "11fe2844b7b60c36aa2bc6b554128cb4f9273d6a438f65daaa85b2733bf2751b"
+}

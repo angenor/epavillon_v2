@@ -1,0 +1,67 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.primary_email::text AS \"email!\", p.preferred_locale, p.first_name,\n                  o.legal_name,\n                  (SELECT d.display_name FROM identity.people d\n                    JOIN org.memberships dm ON dm.person_id = d.id\n                   WHERE dm.id = $1) AS demandeur\n             FROM org.memberships m\n             JOIN identity.people p ON p.id = m.person_id\n             JOIN org.organizations o ON o.id = m.organization_id\n            WHERE m.organization_id = $2 AND m.role = 'manager' AND m.status = 'active'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "preferred_locale",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "preferred_locale"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "first_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "first_name"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "legal_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "legal_name"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "demandeur",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "0b38c9559f87a2997e194422eaf9b4e0ad9aa122cd65f228272678cc428fba80"
+}

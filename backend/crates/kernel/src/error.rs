@@ -87,6 +87,30 @@ codes! {
     IdentityPrivacyWrongAction => "IDENTITY_PRIVACY_WRONG_ACTION", StatusCode::UNPROCESSABLE_ENTITY,
         "L'anonymisation ne répond qu'à une demande d'effacement.";
 
+    // --- Organisations (B2) ---------------------------------------------------
+    OrgNotManager => "ORG_NOT_MANAGER", StatusCode::FORBIDDEN,
+        "Seul un référent de cette organisation peut effectuer cette action.";
+    OrgMembershipIsInvitation => "ORG_MEMBERSHIP_IS_INVITATION", StatusCode::UNPROCESSABLE_ENTITY,
+        "Cette adhésion est une invitation : elle attend la réponse de la personne, pas la vôtre.";
+    OrgMembershipNotPending => "ORG_MEMBERSHIP_NOT_PENDING", StatusCode::UNPROCESSABLE_ENTITY,
+        "Cette adhésion n'attend plus de décision.";
+    OrgLastManager => "ORG_LAST_MANAGER", StatusCode::UNPROCESSABLE_ENTITY,
+        "Cette organisation n'aurait plus aucun référent. Désignez un remplaçant d'abord.";
+    OrgMergeFieldNotArbitrable => "ORG_MERGE_FIELD_NOT_ARBITRABLE", StatusCode::UNPROCESSABLE_ENTITY,
+        "L'adresse de la fiche absorbée ne peut pas être reprise : elle reste la sienne, et c'est ce qui fait que ses anciens liens continuent de fonctionner.";
+    OrgMergeGlobalScopeRequired => "ORG_MERGE_GLOBAL_SCOPE_REQUIRED", StatusCode::FORBIDDEN,
+        "La fusion de deux organisations exige des droits sur l'ensemble de la plateforme.";
+    OrgMergeSameOrganization => "ORG_MERGE_SAME_ORGANIZATION", StatusCode::UNPROCESSABLE_ENTITY,
+        "Une organisation ne peut pas être fusionnée avec elle-même.";
+    OrgDomainVerificationRequired => "ORG_DOMAIN_VERIFICATION_REQUIRED", StatusCode::UNPROCESSABLE_ENTITY,
+        "Un rattachement automatique exige un domaine vérifié.";
+    OrgNameIsDerived => "ORG_NAME_IS_DERIVED", StatusCode::UNPROCESSABLE_ENTITY,
+        "Le nom légal et le sigle suivent la fiche : ils ne se retirent pas à la main.";
+    OrgUnknownReference => "ORG_UNKNOWN_REFERENCE", StatusCode::UNPROCESSABLE_ENTITY,
+        "La valeur choisie n'existe pas.";
+    OrgInvitationNotYours => "ORG_INVITATION_NOT_YOURS", StatusCode::FORBIDDEN,
+        "Cette invitation ne vous est pas adressée.";
+
     // MAIL_RELAY_UNREACHABLE n'est PAS ici : il ne franchit aucune réponse
     // HTTP. Il vit dans `mail.rs`, d'où il part vers `platform.jobs.last_error`.
 }

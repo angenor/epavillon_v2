@@ -1,0 +1,275 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT o.id                     AS \"organization_id!\",\n                  o.legal_name             AS \"legal_name!\",\n                  o.acronym,\n                  o.slug::text             AS \"slug!\",\n                  -- Les quatre colonnes vives, relues sur la table : la\n                  -- projection a le retard de son dernier rafraîchissement.\n                  o.status::text           AS \"statut!\",\n                  (o.verified_at IS NOT NULL) AS \"est_verifiee!\",\n                  o.verified_at,\n                  o.trust_score            AS \"score_confiance!\",\n                  o.merged_into_id,\n                  o.organization_type_code AS \"organization_type_code!\",\n                  t.label::jsonb           AS \"organization_type_label?\",\n                  t.color_hex              AS \"organization_type_color?\",\n                  o.country_id,\n                  c.iso3                   AS \"pays_iso3?\",\n                  c.name::jsonb            AS \"pays_nom?\",\n                  COALESCE(s.statut_oif, 'none')       AS \"statut_oif!\",\n                  COALESCE(s.membres_actifs, 0)        AS \"membres_actifs!\",\n                  COALESCE(s.membres_en_attente, 0)    AS \"membres_en_attente!\",\n                  COALESCE(s.referents, 0)             AS \"referents!\",\n                  COALESCE(s.propositions_deposees, 0) AS \"propositions_deposees!\",\n                  COALESCE(s.propositions_acceptees, 0) AS \"propositions_acceptees!\",\n                  COALESCE(s.propositions_rejetees, 0) AS \"propositions_rejetees!\",\n                  s.ratio_acceptation::float8          AS \"ratio_acceptation?\",\n                  COALESCE(s.sessions_programmees, 0)  AS \"sessions_programmees!\",\n                  COALESCE(s.sessions_realisees, 0)    AS \"sessions_realisees!\",\n                  (SELECT count(*) FROM org.duplicate_candidates d\n                    WHERE (d.left_id = o.id OR d.right_id = o.id)\n                      AND d.reviewed_at IS NULL)  AS \"pending_duplicate_count!\",\n                  (SELECT count(*) FROM org.organizations a\n                    WHERE a.merged_into_id = o.id) AS \"absorbed_count!\",\n                  COALESCE(s.derniere_activite, o.updated_at) AS \"derniere_activite?\",\n                  o.created_at             AS \"inscrite_le!\"\n             FROM org.organizations o\n             LEFT JOIN analytics.mv_organization_scorecard s ON s.organization_id = o.id\n             LEFT JOIN reference.countries c ON c.id = o.country_id\n             LEFT JOIN reference.taxonomy_terms t\n                    ON t.taxonomy_code = 'organization_type'\n                   AND t.code = o.organization_type_code\n            WHERE $1::boolean\n               OR EXISTS (\n                      SELECT 1 FROM programme.proposals p\n                       WHERE p.organization_id = o.id\n                         AND p.deleted_at IS NULL\n                         AND p.event_id = ANY($2::uuid[])\n                  )\n               OR EXISTS (\n                      SELECT 1 FROM programme.proposal_organizations po\n                       JOIN programme.proposals p ON p.id = po.proposal_id\n                       WHERE po.organization_id = o.id\n                         AND p.deleted_at IS NULL\n                         AND p.event_id = ANY($2::uuid[])\n                  )\n               OR EXISTS (\n                      SELECT 1 FROM programme.sessions ses\n                       WHERE ses.organization_id = o.id\n                         AND ses.event_id = ANY($2::uuid[])\n                  )\n            ORDER BY o.legal_name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "organization_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "legal_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "legal_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "acronym",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "acronym"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "statut!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "est_verifiee!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "verified_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "verified_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "score_confiance!",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "trust_score"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "merged_into_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "merged_into_id"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "organization_type_code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "organization_type_code"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "organization_type_label?",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "organization_type_color?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "color_hex"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "country_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "country_id"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "pays_iso3?",
+        "type_info": "Bpchar",
+        "origin": {
+          "Table": {
+            "table": "reference.countries",
+            "name": "iso3"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "pays_nom?",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 15,
+        "name": "statut_oif!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 16,
+        "name": "membres_actifs!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 17,
+        "name": "membres_en_attente!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 18,
+        "name": "referents!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 19,
+        "name": "propositions_deposees!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 20,
+        "name": "propositions_acceptees!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 21,
+        "name": "propositions_rejetees!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 22,
+        "name": "ratio_acceptation?",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 23,
+        "name": "sessions_programmees!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 24,
+        "name": "sessions_realisees!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 25,
+        "name": "pending_duplicate_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 26,
+        "name": "absorbed_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 27,
+        "name": "derniere_activite?",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 28,
+        "name": "inscrite_le!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bool",
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      null,
+      null,
+      null,
+      true,
+      false,
+      true,
+      false,
+      null,
+      true,
+      true,
+      false,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      false
+    ]
+  },
+  "hash": "060988c2f3087e7de0378e5affed8b3953c6cc52b2e25e081e747f724c9370dd"
+}

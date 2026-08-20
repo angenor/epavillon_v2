@@ -18,15 +18,19 @@ use crate::routes::locale_de;
 use crate::service::rbac;
 use crate::state::IdentityState;
 
+/// Les routes de lecture d'identité, **sans leur scope**.
+///
+/// Le préfixe `/people` est partagé avec le module Organisations, qui y ajoute
+/// les adhésions d'une personne. Or deux `web::scope("/people")` enregistrés
+/// séparément **ne se complètent pas** : Actix retient le premier dont le
+/// préfixe correspond et rend 404 si la route n'y figure pas. Le scope est donc
+/// composé une seule fois, par l'API.
 pub fn configurer(cfg: &mut web::ServiceConfig) {
-    cfg.service(
-        web::scope("/people")
-            .route("", web::get().to(lister))
-            .route("/{id}", web::get().to(fiche))
-            .route("/{id}/roles", web::get().to(roles))
-            .route("/{id}/permissions", web::get().to(permissions))
-            .route("/{id}/administered-events", web::get().to(perimetre)),
-    );
+    cfg.route("", web::get().to(lister))
+        .route("/{id}", web::get().to(fiche))
+        .route("/{id}/roles", web::get().to(roles))
+        .route("/{id}/permissions", web::get().to(permissions))
+        .route("/{id}/administered-events", web::get().to(perimetre));
 }
 
 /// La liste des personnes. Elle n'est pas bornée par le périmètre

@@ -215,6 +215,14 @@ pub struct RegistrationTarget {
     pub first_name: String,
     pub preferred_locale: String,
     pub email_verified_at: Option<OffsetDateTime>,
+    /// La personne a-t-elle déjà un compte mot de passe ?
+    ///
+    /// **Une personne peut exister sans compte** : c'est ce que la séparation
+    /// personne / compte permet, et c'est ce qu'une invitation par adresse
+    /// produit. L'inscription a besoin de le savoir, sans quoi elle rappelle un
+    /// compte qui n'existe pas et l'invité ne peut jamais s'inscrire
+    /// (specs/002-organisations/research.md § R9).
+    pub has_password_account: bool,
 }
 
 /// La comparaison d'adresse est faite par la base : `platform.email` est un
@@ -230,7 +238,11 @@ pub async fn find_by_email(
                   p.primary_email::text AS "email!",
                   p.first_name,
                   p.preferred_locale,
-                  p.email_verified_at
+                  p.email_verified_at,
+                  EXISTS (
+                      SELECT 1 FROM identity.accounts a
+                       WHERE a.person_id = p.id AND a.provider = 'password'
+                  ) AS "a_un_compte!"
              FROM identity.people p
             WHERE p.primary_email = $1::text::platform.email"#,
         email
@@ -244,6 +256,7 @@ pub async fn find_by_email(
         first_name: l.first_name,
         preferred_locale: l.preferred_locale,
         email_verified_at: l.email_verified_at,
+        has_password_account: l.a_un_compte,
     }))
 }
 
@@ -287,6 +300,7 @@ pub async fn create(
         first_name: ligne.first_name,
         preferred_locale: ligne.preferred_locale,
         email_verified_at: ligne.email_verified_at,
+        has_password_account: false,
     })
 }
 

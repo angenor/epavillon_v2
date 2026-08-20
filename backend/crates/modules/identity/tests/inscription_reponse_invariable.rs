@@ -182,12 +182,16 @@ async fn un_mot_de_passe_trop_faible_est_refuse_avant_tout() {
     assert_eq!(personnes, 0, "rien n'a été créé");
 }
 
-/// Une adresse connue **sans compte mot de passe** — quelqu'un saisi comme
-/// intervenant, jamais inscrit — suit le même chemin : réponse invariable, et
-/// rappel plutôt que création. La distinction personne / compte ne change rien
-/// à ce que le formulaire dit.
+/// Une adresse connue **sans compte mot de passe** — quelqu'un créé par une
+/// invitation, jamais inscrit — obtient son compte et son lien de vérification.
+///
+/// **Ce test disait l'inverse jusqu'en B2**, et il avait tort : brancher sur la
+/// seule existence de l'adresse laissait une personne invitée sans aucune façon
+/// de se créer un compte, et l'invitation restait une moitié de fonctionnalité
+/// (specs/002-organisations/research.md § R9). La réponse, elle, n'a pas changé
+/// de forme — c'est ce que les autres tests de ce fichier vérifient.
 #[tokio::test]
-async fn une_personne_sans_compte_recoit_le_rappel_elle_aussi() {
+async fn une_personne_sans_compte_obtient_un_compte_et_son_lien() {
     let bac = Bac::monter().await;
     semer(&bac, Compte::sans_mot_de_passe(ADRESSE)).await;
 
@@ -197,19 +201,31 @@ async fn une_personne_sans_compte_recoit_le_rappel_elle_aussi() {
     assert_eq!(reponse.status, "verification_sent");
 
     let taches: Vec<_> = travaux(&bac).await.into_iter().map(|(t, _)| t).collect();
-    assert_eq!(taches, vec!["identity.send_existing_account_notice"]);
+    assert_eq!(
+        taches,
+        vec!["identity.send_verification_email"],
+        "un lien de vérification, pas un rappel de compte existant"
+    );
 
     let comptes = sqlx::query_scalar!(
         "SELECT count(*) AS \"n!\" FROM identity.accounts a
            JOIN identity.people p ON p.id = a.person_id
-          WHERE p.primary_email = $1::text::platform.email",
+          WHERE p.primary_email = $1::text::platform.email AND a.provider = 'password'",
         ADRESSE
     )
     .fetch_one(bac.base.pool())
     .await
     .expect("comptage des comptes");
-    assert_eq!(
-        comptes, 0,
-        "aucun compte n'est créé dans le dos de personne"
-    );
+    assert_eq!(comptes, 1, "la personne a désormais un compte");
+
+    // Aucune seconde personne : c'est la ligne existante qui est dotée.
+    let personnes = sqlx::query_scalar!(
+        "SELECT count(*) AS \"n!\" FROM identity.people
+          WHERE primary_email = $1::text::platform.email",
+        ADRESSE
+    )
+    .fetch_one(bac.base.pool())
+    .await
+    .expect("comptage des personnes");
+    assert_eq!(personnes, 1);
 }

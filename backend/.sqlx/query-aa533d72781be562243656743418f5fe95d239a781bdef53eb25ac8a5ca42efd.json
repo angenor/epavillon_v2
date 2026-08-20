@@ -1,0 +1,104 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT organization_id        AS \"organization_id!\",\n                  legal_name             AS \"legal_name!\",\n                  acronym,\n                  organization_type_code AS \"organization_type_code!\",\n                  country_id,\n                  city,\n                  status::text           AS \"status!\",\n                  verified_at,\n                  member_count           AS \"member_count!\",\n                  matched_name,\n                  score::float8          AS \"score!\",\n                  match_reasons          AS \"match_reasons!\"\n             FROM org.find_similar_organizations($1, $2, $3, $4, $5)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "organization_id!",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "legal_name!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "acronym",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "organization_type_code!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "country_id",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "city",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "verified_at",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "member_count!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "matched_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "score!",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "match_reasons!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid",
+        "Text",
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "aa533d72781be562243656743418f5fe95d239a781bdef53eb25ac8a5ca42efd"
+}

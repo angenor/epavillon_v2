@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT org.merge_organizations($1, $2, NULL)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "merge_organizations",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "35fb799a114666ef208857d10679a96439da75aacdaefc2015f0aa80914286ae"
+}

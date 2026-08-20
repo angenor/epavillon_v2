@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE org.organizations\n            SET verified_at = COALESCE(verified_at, now()),\n                verified_by = COALESCE(verified_by, $2),\n                status = CASE WHEN status = 'candidate' THEN 'active' ELSE status END\n          WHERE id = $1\n      RETURNING verified_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "verified_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "verified_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "1c8a43b94380da80f9deff80c68e77f591436bb5068cb31c67d4a259f1961032"
+}

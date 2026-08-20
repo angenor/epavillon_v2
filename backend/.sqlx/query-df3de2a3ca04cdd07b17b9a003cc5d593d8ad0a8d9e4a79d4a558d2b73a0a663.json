@@ -1,0 +1,74 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ref_schema, ref_table, ref_column, strategy, dedupe_on\n           FROM org.organization_references\n          ORDER BY ref_schema, ref_table, ref_column",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ref_schema",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organization_references",
+            "name": "ref_schema"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "ref_table",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organization_references",
+            "name": "ref_table"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "ref_column",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organization_references",
+            "name": "ref_column"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "strategy",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organization_references",
+            "name": "strategy"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "dedupe_on",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "org.organization_references",
+            "name": "dedupe_on"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "df3de2a3ca04cdd07b17b9a003cc5d593d8ad0a8d9e4a79d4a558d2b73a0a663"
+}

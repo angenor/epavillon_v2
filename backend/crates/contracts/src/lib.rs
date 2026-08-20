@@ -5,3 +5,4 @@
 //! refusée pour cette raison (research.md § R16).
 
 pub mod identity;
+pub mod org;

@@ -222,6 +222,16 @@ export const oneTimeTokens: DemoToken[] = [
   demoToken('reinitialisation-valide', 4, 'password_reset', PERSON.ouedraogo, 'valid'),
   demoToken('reinitialisation-expiree', 5, 'password_reset', PERSON.ouedraogo, 'expired'),
   demoToken('reinitialisation-utilisee', 6, 'password_reset', PERSON.kabore, 'used'),
+
+  // INVITATION À REJOINDRE UNE ORGANISATION — les mêmes trois issues, et c'est
+  // la seule des trois finalités dont la personne visée n'a PAS DE COMPTE :
+  // Aminata Diallo a été invitée au ROAC (adhésion 12) et n'a jamais répondu.
+  // Son jeton est donc celui qui montre le parcours complet, création de compte
+  // comprise. Le jeton « déjà utilisé » vise une adhésion DÉJÀ ACTIVE, ce qui
+  // est exactement ce que raconte ce refus : le travail est fait.
+  demoToken('invitation-valide', 7, 'invitation', PERSON.diallo, 'valid'),
+  demoToken('invitation-expiree', 8, 'invitation', PERSON.diallo, 'expired'),
+  demoToken('invitation-utilisee', 9, 'invitation', PERSON.mbayeNdiaye, 'used'),
 ]
 
 /**
@@ -230,7 +240,7 @@ export const oneTimeTokens: DemoToken[] = [
  * consommé puis périmé raconte quelque chose de vrai — le travail est fait — là
  * où « le lien a expiré » enverrait redemander un courriel inutile.
  */
-function resolveToken(
+export function resolveToken(
   token: string,
   purpose: TokenPurpose,
 ): { ok: true; entry: DemoToken } | { ok: false; reason: TokenRejection } {

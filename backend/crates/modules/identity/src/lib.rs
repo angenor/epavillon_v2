@@ -23,11 +23,19 @@ pub use state::IdentityState;
 
 /// Routes exposées par le module. Le montage est décidé par l'API d'après
 /// `platform.modules` : le module ne teste pas son propre état.
+///
+/// **`/people` n'est pas ici** : son préfixe est partagé avec le module
+/// Organisations, et deux scopes du même préfixe ne se complètent pas. L'API le
+/// compose une seule fois, à partir de `people_routes` de chaque module.
 pub fn routes(cfg: &mut ServiceConfig) {
     routes::auth::configurer(cfg);
-    routes::people::configurer(cfg);
     routes::admin_users::configurer(cfg);
     routes::admin_privacy::configurer(cfg);
+}
+
+/// Ce que ce module ajoute au scope `/people`.
+pub fn people_routes(cfg: &mut ServiceConfig) {
+    routes::people::configurer(cfg);
 }
 
 /// Travaux différés du module, montés par le worker sans qu'il les connaisse.

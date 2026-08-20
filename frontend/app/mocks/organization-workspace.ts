@@ -35,6 +35,7 @@ import type { Membership } from '~/types/org'
 import type { Person } from '~/types/identity'
 import type { ProposalComment } from '~/types/programme/proposal'
 import type {
+  AcceptInvitationResult,
   DecideMembershipPayload,
   InviteMemberPayload,
   InviteMemberResult,
@@ -48,6 +49,7 @@ import type {
   WorkspaceOverview,
 } from '~/types/organization-workspace'
 import { MEMBERSHIP, PERSON_INVITED, PROPOSAL_COMMENT } from './ids'
+import { resolveToken } from './auth'
 import { events } from './event'
 import { rooms } from './rooms'
 import { people } from './people'
@@ -493,6 +495,53 @@ export function inviteMember(actorId: string, payload: InviteMemberPayload): Inv
   addSessionMembership(membership)
 
   return { status: 'invited', entry: { membership, person, is_invitation: true } }
+}
+
+/**
+ * ACCEPTATION D'UNE INVITATION DEPUIS LE LIEN REÇU PAR COURRIEL.
+ *
+ * L'AUTRE BOUT DE `inviteMember`, et le seul appel de ce fichier qui ne prend
+ * AUCUN identifiant de personne : le jeton porte la sienne. C'est ce qui rend
+ * l'écran utilisable par quelqu'un qui n'a pas encore de compte — le cas le plus
+ * fréquent d'une invitation.
+ *
+ * LES TROIS REFUS VIENNENT DU JETON, pas de l'adhésion : `resolveToken` les
+ * ordonne déjà — « déjà utilisé » avant « périmé », parce qu'un jeton consommé
+ * puis périmé raconte que le travail est fait.
+ *
+ * L'ADHÉSION RENDUE EST LA LIGNE ACTIVÉE. La règle de l'adhésion principale est
+ * celle de la base (`tg_default_primary_membership`), reprise telle quelle par
+ * `decideMembership` : on la reproduit, on ne l'invente pas.
+ */
+export function acceptInvitation(token: string): AcceptInvitationResult {
+  const result = resolveToken(token, 'invitation')
+  if (!result.ok) return { status: 'rejected', reason: result.reason }
+
+  const personId = result.entry.record.person_id
+  const invitation = allMemberships().find(
+    (m) => m.person_id === personId && m.invited_at !== null && m.status === 'pending',
+  )
+  // Le jeton est valide mais n'a plus d'invitation en face : elle a été révoquée
+  // entre l'envoi et le clic. Rien à accepter, et rien à raconter de plus.
+  if (!invitation) return { status: 'rejected', reason: 'invalid' }
+
+  const organization = organizationById(invitation.organization_id)
+  if (!organization) return { status: 'rejected', reason: 'invalid' }
+
+  const now = new Date().toISOString()
+  const accepted: Membership = {
+    ...invitation,
+    status: 'active',
+    approved_by: personId,
+    approved_at: now,
+    is_primary: !allMemberships().some(
+      (m) => m.person_id === personId && m.status === 'active' && m.is_primary,
+    ),
+    updated_at: now,
+  }
+  sessionMembershipDecisions.set(invitation.id, accepted)
+
+  return { status: 'accepted', membership: accepted, organization }
 }
 
 /**

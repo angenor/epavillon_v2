@@ -12,6 +12,31 @@ Fait le 17/08, **repris le même jour** : « une personne doit pouvoir modifier 
 
 ---
 
+## Complément du 20/08 — l'autre bout de l'invitation
+
+L'espace organisation savait **émettre** une invitation depuis le 17/08 ; le lien du courriel, lui, ne menait nulle
+part. `app/pages/invitation.vue` referme la boucle.
+
+**Le chemin n'est pas traduit, et c'est volontaire.** `backend/crates/modules/org/src/mail.rs` compose `/invitation`
+en français et `/en/invitation` en anglais — exactement ce que produit `prefix_except_default` sur un chemin sans
+`defineI18nRoute`. Traduire ce chemin comme le font les écrans d'authentification casserait les liens déjà partis par
+courriel, et ceux-là ne se redéploient pas.
+
+**Aucune session n'est exigée.** Le jeton est la preuve d'adresse, comme pour la vérification d'adresse de B1 : la
+personne qu'une invitation vise n'a le plus souvent pas encore de compte. Le middleware `guest` ne refuse rien ici, il
+résout seulement la session avant le rendu.
+
+**Quatre issues, quatre suites différentes** — adhésion active, lien périmé (à redemander à l'organisation), lien déjà
+utilisé (proposer la connexion), lien invalide (l'accueil, et rien d'autre) —, plus l'état vide quand aucun jeton n'est
+porté, et le refus nommé du cas où quelqu'un de connecté suit le lien d'un collègue (`ORG_INVITATION_NOT_YOURS`), qui
+offre de se déconnecter et de reprendre.
+
+**Un écart assumé** : hors session, l'écran propose **les deux** suites — créer son mot de passe, ou se connecter.
+La réponse de l'API ne dit pas si un compte existe derrière l'adresse, et se tromper coûte dans les deux sens. La
+création passe en premier : c'est le cas de la personne qu'une invitation vise le plus souvent.
+
+---
+
 ## Écarts relevés en écrivant l'espace organisation (A5, 17/08)
 
 Un défaut du modèle, corrigé dans le SQL avant d'écrire une ligne d'interface (voir « Modifications du modèle »). Quatre autres points sont des **règles ou des lectures que le modèle ne porte pas** et que l'écran compose seul : ce sont des obligations des prompts **B2**, **B4**, **B5** et **B6**, écrites ici pour ne pas être redécouvertes.

@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT o.id, o.legal_name\n             FROM org.organization_domains d\n             JOIN org.organization_domains autre ON autre.domain = d.domain\n                                                AND autre.verified_at IS NOT NULL\n             JOIN org.organizations o ON o.id = autre.organization_id\n            WHERE d.id = $1 AND autre.id <> d.id\n            LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "legal_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "legal_name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "473925f051c3875e699e3f63f4c20e9aad07373a44a1920ebf9aa204675839e4"
+}

@@ -1,32 +1,108 @@
-//! Jetons à usage unique : création, consommation, invalidation.
+//! Jetons à usage unique — les liens reçus par courriel.
 //!
-//! **La base ne garde que l'empreinte.** Le clair ne vit que dans le courriel
-//! et dans la charge utile du travail différé, effacée dès l'envoi réussi
-//! (research.md § R8).
+//! **Ce service vivait dans `identity` jusqu'en B2, et il en est sorti sans
+//! changer de comportement** (specs/002-organisations/research.md § R8). Le
+//! modèle déclare cinq finalités et **trois n'appartiennent pas à `identity`** :
+//! l'invitation est le geste du module Organisations, la confirmation d'un
+//! intervenant sera celui de B4. Or aucun crate de module ne peut dépendre d'un
+//! autre — recopier « consommer un jeton atomiquement » aurait produit deux
+//! implémentations de la seule opération du lot où une divergence se paie en
+//! jeton rejouable.
 //!
-//! **L'expiration se dérive de la finalité, jamais de l'appelant** (FR-018) :
-//! `expires_at` est `NOT NULL` sans valeur par défaut — c'est précisément
-//! l'écart n° 19 —, et la durée est lue dans la configuration à cet endroit et
-//! nulle part ailleurs. Sans cela, deux liens de finalités différentes vivraient
-//! des durées différentes sans que personne l'ait décidé.
+//! Le noyau connaît déjà le schéma `identity` : c'est là que vit le garde
+//! d'autorisation depuis B1, pour exactement la même raison.
+//!
+//! **La base ne garde que l'empreinte.** Le clair ne vit que dans le courriel et
+//! dans la charge utile du travail différé, effacée dès l'envoi réussi.
+//!
+//! **L'expiration se dérive de la finalité, jamais de l'appelant** : `expires_at`
+//! est `NOT NULL` sans valeur par défaut, et la durée est lue dans la
+//! configuration à cet endroit et nulle part ailleurs.
 
-use kernel::config::TokenTtls;
-use kernel::crypto;
-use kernel::error::{ApiError, Result};
+use serde::Serialize;
 use serde_json::Value;
 use sqlx::postgres::PgConnection;
 use sqlx::PgPool;
 use time::OffsetDateTime;
+use uuid::Uuid;
 
-use crate::domain::ids::{PersonId, TokenId};
-use crate::domain::token::{ConsumedToken, TokenPurpose, TokenRejection};
+use crate::config::TokenTtls;
+use crate::crypto;
+use crate::error::{ApiError, Result};
+
+/// Valeurs de `identity.token_purpose`. La finalité **détermine la durée de
+/// validité** : aucun appelant ne pose d'expiration lui-même.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TokenPurpose {
+    EmailVerification,
+    PasswordReset,
+    Invitation,
+    MagicLink,
+    SpeakerConfirmation,
+}
+
+impl TokenPurpose {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::EmailVerification => "email_verification",
+            Self::PasswordReset => "password_reset",
+            Self::Invitation => "invitation",
+            Self::MagicLink => "magic_link",
+            Self::SpeakerConfirmation => "speaker_confirmation",
+        }
+    }
+}
+
+/// Pourquoi un jeton a été refusé.
+///
+/// Le modèle ne distingue pas ces trois cas — il porte `consumed_at` et
+/// `expires_at`, rien de plus. L'écran, lui, ne propose pas la même suite : un
+/// lien périmé se redemande, un lien déjà consommé signifie que c'est fait.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum TokenRejection {
+    Invalid,
+    Expired,
+    AlreadyUsed,
+}
+
+impl TokenRejection {
+    /// L'ordre du contrat, en un seul endroit. `consommee` avant `expiree` :
+    /// inverser les deux lignes suffirait à renvoyer quelqu'un demander un
+    /// courriel dont il n'a plus besoin.
+    pub fn from_state(
+        consommee: Option<OffsetDateTime>,
+        expiration: OffsetDateTime,
+        maintenant: OffsetDateTime,
+    ) -> Self {
+        if consommee.is_some() {
+            Self::AlreadyUsed
+        } else if expiration <= maintenant {
+            Self::Expired
+        } else {
+            // Le jeton est valide : l'appelant n'aurait pas dû demander de refus.
+            // Le cas n'arrive que si la ligne a changé entre deux lectures, et
+            // « invalide » est alors le seul refus honnête.
+            Self::Invalid
+        }
+    }
+}
+
+/// Un jeton consommé, et ce qu'il portait. Le clair n'existe plus à ce stade :
+/// il a servi à retrouver la ligne, et rien d'autre.
+#[derive(Debug, Clone)]
+pub struct ConsumedToken {
+    pub id: Uuid,
+    pub person_id: Option<Uuid>,
+    pub payload: Value,
+}
 
 /// Un jeton neuf : sa ligne, et son clair — **le seul instant où les deux
 /// coexistent**. Le clair part dans la charge utile du travail d'envoi ; il
 /// n'est jamais journalisé.
 #[derive(Debug, Clone)]
 pub struct IssuedToken {
-    pub id: TokenId,
+    pub id: Uuid,
     pub clear: String,
     pub expires_at: OffsetDateTime,
 }
@@ -34,7 +110,7 @@ pub struct IssuedToken {
 pub async fn create(
     conn: &mut PgConnection,
     ttls: &TokenTtls,
-    person_id: PersonId,
+    person_id: Uuid,
     purpose: TokenPurpose,
     payload: Value,
 ) -> Result<IssuedToken> {
@@ -54,7 +130,7 @@ pub async fn create(
              (person_id, purpose, token_hash, payload, expires_at)
          VALUES ($1, $2::text::identity.token_purpose, $3, $4, $5)
          RETURNING id",
-        person_id.as_uuid(),
+        person_id,
         purpose.as_str(),
         &empreinte[..],
         payload,
@@ -64,14 +140,14 @@ pub async fn create(
     .await?;
 
     Ok(IssuedToken {
-        id: TokenId(id),
+        id,
         clear,
         expires_at,
     })
 }
 
 /// Invalide les jetons **non consommés** de la même finalité pour la même
-/// personne (FR-040).
+/// personne.
 ///
 /// Le modèle ne porte pas de colonne « invalidé » : l'expiration est ramenée à
 /// maintenant. Le refus rendu à qui cliquerait l'ancien lien sera donc
@@ -79,7 +155,7 @@ pub async fn create(
 /// d'arriver. Poser `consumed_at` dirait « c'est fait », ce qui est faux.
 pub async fn invalidate_pending(
     conn: &mut PgConnection,
-    person_id: PersonId,
+    person_id: Uuid,
     purpose: TokenPurpose,
 ) -> Result<u64> {
     let touches = sqlx::query!(
@@ -89,7 +165,7 @@ pub async fn invalidate_pending(
             AND purpose = $2::text::identity.token_purpose
             AND consumed_at IS NULL
             AND expires_at > now()",
-        person_id.as_uuid(),
+        person_id,
         purpose.as_str()
     )
     .execute(conn)
@@ -99,7 +175,7 @@ pub async fn invalidate_pending(
     Ok(touches)
 }
 
-/// Consommation **atomique** : `WHERE consumed_at IS NULL` (FR-041).
+/// Consommation **atomique** : `WHERE consumed_at IS NULL`.
 ///
 /// Deux clics simultanés n'aboutissent qu'une fois — c'est la base qui
 /// tranche, pas une lecture suivie d'une écriture. Le second appel retombe sur
@@ -130,8 +206,8 @@ pub async fn consume(
 
     if let Some(ligne) = consomme {
         return Ok(Ok(ConsumedToken {
-            id: TokenId(ligne.id),
-            person_id: ligne.person_id.map(PersonId),
+            id: ligne.id,
+            person_id: ligne.person_id,
             payload: ligne.payload,
         }));
     }
@@ -141,12 +217,12 @@ pub async fn consume(
 
 /// Contrôle d'un jeton **sans le consommer** : sert à décider d'afficher un
 /// formulaire avant que la personne ait rien saisi. Le jeton est revérifié à
-/// l'envoi (FR-042) — ce contrôle-ci ne vaut aucune garantie.
+/// l'envoi — ce contrôle-ci ne vaut aucune garantie.
 pub async fn check(
     pool: &PgPool,
     clear: &str,
     purpose: TokenPurpose,
-) -> Result<std::result::Result<PersonId, TokenRejection>> {
+) -> Result<std::result::Result<Uuid, TokenRejection>> {
     let empreinte = crypto::token_hash(clear);
 
     let ligne = sqlx::query!(
@@ -173,15 +249,17 @@ pub async fn check(
     }
 
     match ligne.person_id {
-        Some(id) => Ok(Ok(PersonId(id))),
-        // Les deux finalités de ce jalon renseignent toujours la personne ;
-        // l'invitation d'un inconnu, elle, ne le fera pas.
+        Some(id) => Ok(Ok(id)),
+        // Les finalités de ce jalon renseignent toujours la personne :
+        // l'invitation crée la personne AVANT d'émettre son jeton, précisément
+        // pour que le lien mène à quelqu'un.
         None => Ok(Err(TokenRejection::Invalid)),
     }
 }
 
-/// Supprime les jetons périmés et consommés (FR-044). Rendu au travail
-/// récurrent de purge.
+/// Supprime les jetons périmés et consommés. Rendu au travail récurrent de
+/// purge, qui **reste une tâche du module `identity`** : c'est une opération
+/// d'exploitation, et la déplacer n'apporterait rien.
 pub async fn purge(conn: &mut PgConnection) -> Result<u64> {
     let supprimes = sqlx::query!(
         "DELETE FROM identity.one_time_tokens
@@ -215,4 +293,26 @@ async fn diagnostiquer(
             TokenRejection::from_state(l.consumed_at, l.expires_at, OffsetDateTime::now_utc())
         }
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use time::Duration;
+
+    #[test]
+    fn deja_utilise_lemporte_sur_perime() {
+        let maintenant = OffsetDateTime::now_utc();
+        let hier = maintenant - Duration::days(1);
+
+        assert_eq!(
+            TokenRejection::from_state(Some(hier), hier, maintenant),
+            TokenRejection::AlreadyUsed,
+            "un jeton consommé PUIS périmé dit que le travail est fait"
+        );
+        assert_eq!(
+            TokenRejection::from_state(None, hier, maintenant),
+            TokenRejection::Expired
+        );
+    }
 }

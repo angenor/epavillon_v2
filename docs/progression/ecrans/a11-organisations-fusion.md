@@ -12,6 +12,30 @@ Fait le 18/08. **Le modèle a été corrigé sur un point, trouvé en éprouvant
 
 ---
 
+## Reprise du 20/08 — le bouton « Examiner la fusion »
+
+Le défaut consigné le 20/08 — « le bouton ne navigue pas » — **ne se reproduit pas**. Huit conditions ont été
+éprouvées au navigateur : chargement direct de l'URL, navigation interne depuis la liste des organisations, après
+ouverture puis fermeture de la modale « ce ne sont pas des doublons », après un aller-retour vers l'écran de fusion,
+à 375, 1280 et 1920 px, en français et en anglais, par un vrai clic souris comme par un clic programmé. L'écran de
+fusion s'ouvre à chaque fois sur la paire OSED.
+
+**La piste `localePath()` est écartée par la mesure, pas par le raisonnement.** Instrumenté dans la page, il rend
+`/admin/organisations/fusion?gauche=…` en français et `/en/admin/organisations/fusion?…` en anglais : la forme objet
+`{ path, query }` se résout correctement, parce que sous `prefix_except_default` la résolution par chemin se réduit à
+`router.resolve`. Deux autres écrans l'emploient déjà — `admin/organisations/[id].vue` compose ainsi ses deux liens de
+fusion.
+
+**Une seule chose a été durcie, et elle est réelle** : `openMerge()` ignorait la promesse de `navigateTo`. Un refus de
+navigation — garde de route, route disparue — n'aurait laissé aucune trace, ce qui est exactement le symptôme décrit.
+Elle est désormais attendue.
+
+**Un défaut trouvé en chemin, non corrigé faute de mandat** : « Remettre dans la file » ne remet pas la paire dans la
+file. La répartition entre « à trancher » et « déjà tranchées » se fait sur `reviewed_at`, que toute décision
+renseigne — y compris `deferred`. Consigné dans [`points-bloques.md`](../points-bloques.md).
+
+---
+
 ## Écarts relevés en écrivant les organisations et la fusion (A11, 18/08)
 
 **Un défaut du MODÈLE, corrigé avant d'écrire l'écran de fusion** (registre des références, voir le tableau plus haut).

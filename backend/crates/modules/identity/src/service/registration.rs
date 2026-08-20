@@ -12,6 +12,12 @@
 //! adresse libre rendrait l'inscription dix à cent fois plus rapide sur une
 //! adresse déjà connue, et le formulaire redirait ce qu'on vient de taire.
 //!
+//! **Une personne connue mais SANS compte obtient un compte**, et non un rappel :
+//! l'invitation par adresse crée une personne sans compte, et brancher sur la
+//! seule existence de l'adresse la laissait sans issue. La réponse ne change pas
+//! de forme pour autant — le formulaire d'inscription ne devient pas l'annuaire
+//! des personnes.
+//!
 //! **Le jeton en clair et son travail d'envoi naissent dans la transaction du
 //! changement d'état** (research.md § R8) : ni l'un ni l'autre ne survit à un
 //! `ROLLBACK`, et l'événement de domaine, lui, ne porte aucun secret.
@@ -21,17 +27,17 @@ use kernel::context::RequestContext;
 use kernel::error::{ApiError, ErrorCode, Result};
 use kernel::events::{self, DomainEvent};
 use kernel::jobs::{self, NewJob};
+use kernel::tokens::{self, TokenPurpose, TokenRejection};
 use serde_json::json;
 use sqlx::postgres::PgConnection;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
+use crate::domain::ids::PersonId;
 use crate::domain::password;
-use crate::domain::token::{
-    RegisterOutcome, ResendOutcome, TokenPurpose, TokenRejection, VerifyEmailOutcome,
-};
+use crate::domain::token::{RegisterOutcome, ResendOutcome, VerifyEmailOutcome};
 use crate::jobs::emails;
-use crate::repo::{people, tokens};
+use crate::repo::people;
 use crate::state::IdentityState;
 
 pub struct RegisterRequest<'a> {
@@ -58,8 +64,27 @@ pub async fn register(
     let mut tx = state.db().write(ctx).await?;
 
     match people::find_by_email(&mut tx, demande.email).await? {
-        Some(connue) => {
+        // Connue AVEC un compte : rien n'est créé, un rappel part.
+        Some(connue) if connue.has_password_account => {
             rappeler_le_compte_existant(&mut tx, &connue).await?;
+        }
+        // Connue SANS compte — une personne créée par une invitation. Elle
+        // obtient son compte et son lien de vérification : sans cela, l'invitée
+        // ne pourrait jamais s'inscrire et l'invitation resterait une moitié de
+        // fonctionnalité (specs/002-organisations/research.md § R9).
+        //
+        // Ce n'est pas une brèche : l'adresse est prouvée par le lien avant que
+        // le compte ne serve à quoi que ce soit, et une personne sans compte n'a
+        // par définition aucun secret à voler.
+        Some(sans_compte) => {
+            match doter_dun_compte(state, &mut tx, &sans_compte, &empreinte).await {
+                Ok(()) => {}
+                // Deux inscriptions simultanées sur la même personne sans
+                // compte : l'unicité tranche, et la perdante rend la même
+                // réponse. Le lien est déjà parti par l'autre requête.
+                Err(e) if e.code == ErrorCode::IdentityAccountAlreadyExists => {}
+                Err(e) => return Err(e),
+            }
         }
         None => match creer(state, &mut tx, &demande, &empreinte).await {
             Ok(()) => {}
@@ -90,7 +115,7 @@ pub async fn verify_email(
         Err(refus) => return Ok(VerifyEmailOutcome::Rejected { reason: refus }),
     };
 
-    let Some(person_id) = consomme.person_id else {
+    let Some(person_id) = consomme.person_id.map(PersonId) else {
         return Ok(VerifyEmailOutcome::Rejected {
             reason: TokenRejection::Invalid,
         });
@@ -194,6 +219,18 @@ async fn creer(
     Ok(())
 }
 
+/// Une personne connue mais sans compte : on lui en crée un, et le lien de
+/// vérification part comme pour une inscription ordinaire.
+async fn doter_dun_compte(
+    state: &IdentityState,
+    tx: &mut PgConnection,
+    personne: &people::RegistrationTarget,
+    empreinte: &str,
+) -> Result<()> {
+    people::create_password_account(tx, personne.person_id, empreinte).await?;
+    envoyer_la_verification(state, tx, personne).await
+}
+
 /// Crée le jeton et met le courriel en file, **dans la transaction en cours**.
 ///
 /// Les jetons de vérification encore en vie sont invalidés d'abord (FR-040) :
@@ -204,12 +241,17 @@ async fn envoyer_la_verification(
     tx: &mut PgConnection,
     personne: &people::RegistrationTarget,
 ) -> Result<()> {
-    tokens::invalidate_pending(tx, personne.person_id, TokenPurpose::EmailVerification).await?;
+    tokens::invalidate_pending(
+        tx,
+        personne.person_id.as_uuid(),
+        TokenPurpose::EmailVerification,
+    )
+    .await?;
 
     let jeton = tokens::create(
         tx,
         &state.config().auth.token_ttl,
-        personne.person_id,
+        personne.person_id.as_uuid(),
         TokenPurpose::EmailVerification,
         json!({ "email": personne.email }),
     )

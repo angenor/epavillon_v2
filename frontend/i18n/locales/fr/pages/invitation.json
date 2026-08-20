@@ -1,0 +1,40 @@
+{
+  "title": "Invitation à rejoindre une organisation",
+  "checking": "Vérification de l'invitation en cours",
+  "accepted": {
+    "title": "Vous avez rejoint {organization}",
+    "description": "Votre adhésion est active. Votre adresse électronique est confirmée par la même occasion : le lien vient de le prouver.",
+    "workspace": "Aller à l'espace de mon organisation",
+    "createAccount": "Créer mon mot de passe",
+    "createAccountHint": "Il ne reste qu'à choisir un mot de passe pour ouvrir votre compte.",
+    "haveAccount": "Vous avez déjà un compte ?",
+    "signIn": "Se connecter"
+  },
+  "rejected": {
+    "expired": {
+      "title": "Cette invitation a expiré",
+      "description": "Le lien n'est plus valable. Demandez une nouvelle invitation à la personne qui vous a écrit : elle peut la relancer depuis l'espace de son organisation.",
+      "action": "Retour à l'accueil"
+    },
+    "already_used": {
+      "title": "Cette invitation a déjà été acceptée",
+      "description": "Vous faites partie de cette organisation : il n'y a rien de plus à faire ici.",
+      "action": "Se connecter"
+    },
+    "invalid": {
+      "title": "Cette invitation n'est pas valide",
+      "description": "Le lien a peut-être été coupé par votre logiciel de messagerie : ouvrez-le depuis le courriel plutôt qu'en le recopiant.",
+      "action": "Retour à l'accueil"
+    }
+  },
+  "notYours": {
+    "title": "Cette invitation vise une autre personne",
+    "description": "Vous êtes connecté sous un autre compte que celui qui a reçu ce lien. Déconnectez-vous pour l'accepter.",
+    "action": "Se déconnecter et accepter"
+  },
+  "empty": {
+    "title": "Aucune invitation à ouvrir",
+    "description": "Cette page confirme une adhésion à partir du lien reçu par courriel. Ouvrez ce lien depuis votre boîte aux lettres.",
+    "action": "Retour à l'accueil"
+  }
+}

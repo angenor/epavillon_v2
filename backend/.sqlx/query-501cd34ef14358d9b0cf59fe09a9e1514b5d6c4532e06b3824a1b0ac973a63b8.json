@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE org.organizations SET contact_email = $2::text::platform.email\n                  WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "501cd34ef14358d9b0cf59fe09a9e1514b5d6c4532e06b3824a1b0ac973a63b8"
+}

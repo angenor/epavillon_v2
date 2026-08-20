@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE org.duplicate_candidates SET decision = 'merged', reviewed_at = now()\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2226686826524b983eceedd8440ee40c08b46e272f50635de54affc0e1e16eeb"
+}

@@ -46,10 +46,22 @@
  * champ : elle réaffecte les rattachements et laisse la fiche cible telle
  * quelle. Or le prompt demande de choisir, champ par champ, la valeur à
  * conserver — le site web renseigné d'un côté, le téléphone de l'autre. Ces
- * choix sont donc un UPDATE de la fiche cible, à faire AVANT l'appel et DANS LA
- * MÊME TRANSACTION. Obligation d'API inscrite dans `docs/progression/ecrans/a11-organisations-fusion.md` : deux
- * transactions laisseraient une fiche absorbante à moitié complétée si la fusion
- * échouait ensuite.
+ * choix sont donc un UPDATE de la fiche cible, dans la MÊME TRANSACTION mais
+ * **APRÈS** l'appel.
+ *
+ * CE FICHIER DISAIT « AVANT » JUSQU'EN B2, ET IL AVAIT TORT. La seconde moitié
+ * de l'obligation était juste, la première ne l'était pas :
+ * `ux_organizations_name_country` ne porte que sur les fiches VIVANTES, et tant
+ * que la fiche absorbée l'est encore, la survivante ne peut pas reprendre son
+ * nom légal — qui est le champ le plus souvent arbitré. La garantie recherchée
+ * est conservée intacte : si un arbitrage échoue, la fusion est annulée avec
+ * lui. Seul l'ordre change. Voir `specs/002-organisations/research.md` § R5.
+ *
+ * MergeField range `slug` parmi les champs comparés, et l'API le compare bien —
+ * mais elle REFUSE de le déplacer (`ORG_MERGE_FIELD_NOT_ARBITRABLE`, champ
+ * nommé). L'unicité de l'adresse d'URL ne connaît aucune condition de statut :
+ * la fiche absorbée garde la sienne pour toujours, puisqu'elle survit, et c'est
+ * ce qui fait que ses anciens liens continuent de fonctionner.
  *
  * ── LE PÉRIMÈTRE D'ADMINISTRATION, ICI, N'EST PAS UNE ÉDITION ───────────────
  *

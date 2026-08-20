@@ -1,0 +1,145 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.id, m.person_id, p.display_name AS \"display_name!\",\n                  p.primary_email::text AS \"primary_email!\",\n                  m.role::text AS \"role!\", m.status::text AS \"statut!\",\n                  m.is_primary, m.job_title, m.invited_at, m.approved_at,\n                  m.revoked_at, m.created_at\n             FROM org.memberships m\n             JOIN identity.people p ON p.id = m.person_id\n            WHERE m.organization_id = $1\n            ORDER BY m.status, m.role, p.display_name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "primary_email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "role!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "statut!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "is_primary",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "is_primary"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "job_title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "job_title"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "invited_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "invited_at"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "approved_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "approved_at"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "revoked_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "revoked_at"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      null,
+      null,
+      null,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "9b238104fe5fa20d6bde8a63a38e32250ba14f1c0d756d996f3bd7dc14c49088"
+}

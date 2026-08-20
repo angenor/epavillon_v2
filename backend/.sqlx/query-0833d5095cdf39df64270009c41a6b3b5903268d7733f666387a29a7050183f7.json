@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT payload AS \"payload!\" FROM platform.outbox_events\n            WHERE event_type = 'org.organization.created'\n            ORDER BY occurred_at DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "payload!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "platform.outbox_events",
+            "name": "payload"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "0833d5095cdf39df64270009c41a6b3b5903268d7733f666387a29a7050183f7"
+}

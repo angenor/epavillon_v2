@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO org.organizations\n               (legal_name, slug, organization_type_code, country_id, status)\n           VALUES ('Observatoire sahélien', 'observatoire-sahelien'::platform.slug,\n                   'ngo_association', $1, 'active')\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "d1dded2f8f4b3c390420ce927c78e594ccefacd73c6afa640a74fda25a1e3262"
+}

@@ -81,6 +81,13 @@ struct Raw {
     #[serde(default)]
     mail_relay_token: String,
 
+    #[serde(default = "default_duplicate_score_threshold")]
+    org_duplicate_score_threshold: u16,
+    #[serde(default = "default_duplicate_scan_batch")]
+    org_duplicate_scan_batch: u32,
+    #[serde(with = "humantime_serde", default = "minutes_5")]
+    org_scorecard_refresh_window: Duration,
+
     #[serde(default)]
     otel_exporter_otlp_endpoint: String,
     #[serde(default = "default_service_name")]
@@ -112,6 +119,15 @@ fn default_cookie_secure() -> bool {
 }
 fn vrai() -> bool {
     true
+}
+fn default_duplicate_score_threshold() -> u16 {
+    60
+}
+fn default_duplicate_scan_batch() -> u32 {
+    200
+}
+fn minutes_5() -> Duration {
+    Duration::from_secs(5 * 60)
 }
 fn minutes_15() -> Duration {
     Duration::from_secs(15 * 60)
@@ -150,6 +166,7 @@ pub struct Config {
     /// eux, n'importe quel client choisirait l'adresse qu'on enregistre.
     pub trusted_proxies: crate::net::TrustedProxies,
     pub auth: AuthConfig,
+    pub org: OrgConfig,
     pub mail: MailConfig,
     pub telemetry: TelemetryConfig,
 }
@@ -165,6 +182,16 @@ pub struct AuthConfig {
     pub signing_key: Secret,
     pub cookie_secure: bool,
     pub cookie_domain: Option<String>,
+}
+
+/// Réglages du module Organisations. Le seuil s'exprime sur l'échelle de
+/// `org.find_similar_organizations()`, qui monte à 175 — nom entier 100,
+/// domaine partagé 40, sigle exact 25, pays 10.
+#[derive(Debug, Clone)]
+pub struct OrgConfig {
+    pub duplicate_score_threshold: u16,
+    pub duplicate_scan_batch: u32,
+    pub scorecard_refresh_window: Duration,
 }
 
 /// Une durée par valeur de `identity.token_purpose`. Aucun appelant ne pose
@@ -324,6 +351,26 @@ impl Config {
             }
         }
 
+        // L'échelle du score va de 0 à 175 : un seuil au-delà ne laisserait
+        // jamais entrer une paire, et la file resterait vide sans que rien ne
+        // le dise.
+        if raw.org_duplicate_score_threshold > 175 {
+            return Err(invalid(format!(
+                "ORG_DUPLICATE_SCORE_THRESHOLD vaut {} : l'échelle du score va de 0 à 175, et aucune paire n'entrerait dans la file.",
+                raw.org_duplicate_score_threshold
+            )));
+        }
+        if raw.org_duplicate_scan_batch == 0 {
+            return Err(invalid(
+                "ORG_DUPLICATE_SCAN_BATCH vaut 0 : le balayage n'avancerait jamais.",
+            ));
+        }
+        if raw.org_scorecard_refresh_window.is_zero() {
+            return Err(invalid(
+                "ORG_SCORECARD_REFRESH_WINDOW vaut une durée nulle.",
+            ));
+        }
+
         let trusted_proxies = crate::net::TrustedProxies::parse(&raw.trusted_proxies)
             .map_err(|e| invalid(format!("TRUSTED_PROXIES : {e}")))?;
 
@@ -356,6 +403,11 @@ impl Config {
                 signing_key: Secret(raw.auth_signing_key),
                 cookie_secure: raw.auth_cookie_secure,
                 cookie_domain: Some(raw.auth_cookie_domain).filter(|d| !d.trim().is_empty()),
+            },
+            org: OrgConfig {
+                duplicate_score_threshold: raw.org_duplicate_score_threshold,
+                duplicate_scan_batch: raw.org_duplicate_scan_batch,
+                scorecard_refresh_window: raw.org_scorecard_refresh_window,
             },
             mail: MailConfig {
                 transport,

@@ -14,11 +14,10 @@ use async_trait::async_trait;
 use kernel::db::Db;
 use kernel::error::Result;
 use kernel::jobs::{self, ClaimedJob, JobHandler, NewJob};
+use kernel::tokens;
 use serde_json::json;
 use sqlx::postgres::PgConnection;
 use time::{Duration, OffsetDateTime, Time};
-
-use crate::repo::tokens;
 
 pub const PURGE_EXPIRED_TOKENS: &str = "identity.purge_expired_tokens";
 

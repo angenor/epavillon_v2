@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO org.organizations\n               (legal_name, slug, organization_type_code, country_id, status)\n           VALUES ('Réseau des jeunes pour le climat', 'rjc'::platform.slug,\n                   'ngo_association', $1, 'candidate')\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "5e343578e630aeaae3efc54e7e2ab9cbc886d04090816e9085a88578df29bd32"
+}

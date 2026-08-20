@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO org.organizations\n               (legal_name, slug, organization_type_code, country_id, status)\n           VALUES ('ROAC Afrique', 'roac-afrique'::platform.slug,\n                   'ngo_association', $1, 'active')\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "2742d70461594544a7a90ad84c5197efa770644d3e47b67b59454fc53e11fa80"
+}

@@ -1,0 +1,245 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT o.id, o.legal_name, o.acronym, o.slug::text AS \"slug!\",\n                  o.status::text AS \"statut!\", o.organization_type_code,\n                  t.label::jsonb AS \"type_label?\",\n                  o.country_id, c.name::jsonb AS \"country_name?\", o.city,\n                  o.description::jsonb AS \"description?\",\n                  o.website::text AS \"website?\",\n                  o.contact_email::text AS \"contact_email?\",\n                  o.contact_phone,\n                  o.verified_at,\n                  v.display_name AS \"verified_by_name?\",\n                  o.trust_score, o.created_at,\n                  cr.display_name AS \"created_by_name?\",\n                  o.merged_into_id, o.merged_at,\n                  cible.legal_name AS \"merged_into_name?\"\n             FROM org.organizations o\n             LEFT JOIN reference.taxonomy_terms t\n                    ON t.taxonomy_code = 'organization_type' AND t.code = o.organization_type_code\n             LEFT JOIN reference.countries c ON c.id = o.country_id\n             LEFT JOIN identity.people v  ON v.id = o.verified_by\n             LEFT JOIN identity.people cr ON cr.id = o.created_by\n             LEFT JOIN org.organizations cible ON cible.id = o.merged_into_id\n            WHERE o.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "legal_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "legal_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "acronym",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "acronym"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "statut!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "organization_type_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "organization_type_code"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "type_label?",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "country_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "country_id"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "country_name?",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "city",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "city"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "description?",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "website?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "contact_email?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
+        "name": "contact_phone",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "contact_phone"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "verified_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "verified_at"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "verified_by_name?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "trust_score",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "trust_score"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "created_by_name?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "merged_into_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "merged_into_id"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "merged_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "merged_at"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "merged_into_name?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "legal_name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      null,
+      null,
+      false,
+      null,
+      true,
+      null,
+      true,
+      null,
+      null,
+      null,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "c08c190d5977e1831129e36595aa38f9074a6e46dd3fb4318a37d3526653d67a"
+}

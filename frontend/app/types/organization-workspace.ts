@@ -26,6 +26,7 @@ import type { CallForProposals } from './event/call'
 import type { Room } from './event/venue'
 import type { Membership, Organization } from './org'
 import type { Person } from './identity'
+import type { TokenRejection } from './auth'
 import type {
   Proposal,
   ProposalComment,
@@ -214,6 +215,28 @@ export type InviteMemberResult =
   | { status: 'invited'; entry: MemberEntry }
   | { status: 'already_member'; entry: MemberEntry }
   | { status: 'already_invited'; entry: MemberEntry }
+
+/**
+ * L'AUTRE BOUT DE L'INVITATION : ce que rend le lien reçu par courriel, une fois
+ * suivi. `POST /organizations/invitations/accept`, corps `{ token }`.
+ *
+ * AUCUNE SESSION N'EST EXIGÉE, et c'est ce qui distingue cet appel de tous les
+ * autres de ce fichier : le jeton EST la preuve d'adresse. La personne visée par
+ * une invitation n'a le plus souvent pas encore de compte — le lui demander
+ * avant d'accepter serait exiger d'elle ce que l'invitation est censée
+ * déclencher.
+ *
+ * LES TROIS REFUS SONT CEUX DES JETONS DU NOYAU, et l'écran les rend
+ * différemment : un lien périmé se redemande à l'organisation, un lien déjà
+ * utilisé annonce que le travail est fait, un lien invalide ne suppose rien.
+ *
+ * L'ADHÉSION RENDUE EST LA LIGNE APPROUVÉE, pas celle d'avant : l'API l'active
+ * dans la même transaction, et l'écran nomme l'organisation rejointe à partir de
+ * la fiche jointe.
+ */
+export type AcceptInvitationResult =
+  | { status: 'accepted'; membership: Membership; organization: Organization }
+  | { status: 'rejected'; reason: TokenRejection }
 
 // ---------------------------------------------------------------------------
 // Le fil de discussion

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO identity.people\n               (primary_email, first_name, last_name, status)\n           VALUES ($1::text::platform.email, 'Sans', 'Preuve', 'active')\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "3dec488b03055b3cf03135273f5766f1915285bb36d64961b5b898b187a1dc57"
+}

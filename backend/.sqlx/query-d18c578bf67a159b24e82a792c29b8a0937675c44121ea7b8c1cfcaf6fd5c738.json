@@ -1,0 +1,95 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT d.id, d.domain, d.verified_at, d.verification_method, d.auto_join,\n                  d.created_at,\n                  COALESCE(\n                      (SELECT jsonb_agg(jsonb_build_object(\n                                  'organization_id', autre.organization_id,\n                                  'legal_name', o.legal_name))\n                         FROM org.organization_domains autre\n                         JOIN org.organizations o ON o.id = autre.organization_id\n                        WHERE autre.domain = d.domain\n                          AND autre.organization_id <> d.organization_id),\n                      '[]'::jsonb)  AS \"shared_with!\"\n             FROM org.organization_domains d\n            WHERE d.organization_id = $1\n            ORDER BY d.verified_at DESC NULLS LAST, d.domain",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organization_domains",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "domain",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organization_domains",
+            "name": "domain"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "verified_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.organization_domains",
+            "name": "verified_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "verification_method",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organization_domains",
+            "name": "verification_method"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "auto_join",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "org.organization_domains",
+            "name": "auto_join"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.organization_domains",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "shared_with!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "d18c578bf67a159b24e82a792c29b8a0937675c44121ea7b8c1cfcaf6fd5c738"
+}

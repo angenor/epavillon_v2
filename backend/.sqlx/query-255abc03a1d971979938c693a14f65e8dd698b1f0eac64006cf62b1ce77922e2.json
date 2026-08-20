@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE org.duplicate_candidates\n            SET decision = $2, reviewed_at = now(), reviewed_by = $3\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "255abc03a1d971979938c693a14f65e8dd698b1f0eac64006cf62b1ce77922e2"
+}

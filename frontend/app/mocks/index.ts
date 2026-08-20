@@ -189,6 +189,7 @@ export {
   workspaceEditions,
   proposalFile,
   inviteMember,
+  acceptInvitation,
   decideMembership,
   replyToComment,
   resolveComment,

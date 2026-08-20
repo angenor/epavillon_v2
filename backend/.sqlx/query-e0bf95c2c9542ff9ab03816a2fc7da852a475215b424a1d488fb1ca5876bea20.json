@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT quote_ident($1) AS \"cite!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "cite!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "e0bf95c2c9542ff9ab03816a2fc7da852a475215b424a1d488fb1ca5876bea20"
+}

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT count(*) AS \"n!\" FROM identity.accounts a\n           JOIN identity.people p ON p.id = a.person_id\n          WHERE p.primary_email = $1::text::platform.email",
+  "query": "SELECT count(*) AS \"n!\" FROM identity.accounts a\n           JOIN identity.people p ON p.id = a.person_id\n          WHERE p.primary_email = $1::text::platform.email AND a.provider = 'password'",
   "describe": {
     "columns": [
       {
@@ -19,5 +19,5 @@
       null
     ]
   },
-  "hash": "5a553a4164ca89422a3f409be79ac37bd7a97ea75201b6f361a067d909147054"
+  "hash": "1871868e68786674ebc19bfac19f9383d9ceddf0e40d4069aced4392b439b620"
 }

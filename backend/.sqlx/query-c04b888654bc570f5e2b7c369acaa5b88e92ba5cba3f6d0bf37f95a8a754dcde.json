@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT detected_at, score::float8 AS \"score!\" FROM org.duplicate_candidates\n            WHERE left_id IN ($1, $2) AND right_id IN ($1, $2)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "detected_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.duplicate_candidates",
+            "name": "detected_at"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "score!",
+        "type_info": "Float8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "c04b888654bc570f5e2b7c369acaa5b88e92ba5cba3f6d0bf37f95a8a754dcde"
+}

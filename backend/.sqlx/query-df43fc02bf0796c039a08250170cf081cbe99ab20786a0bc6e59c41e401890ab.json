@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id FROM org.organizations\n          WHERE status IN ('candidate', 'active') AND ($1::uuid IS NULL OR id > $1)\n          ORDER BY id LIMIT 200",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "df43fc02bf0796c039a08250170cf081cbe99ab20786a0bc6e59c41e401890ab"
+}

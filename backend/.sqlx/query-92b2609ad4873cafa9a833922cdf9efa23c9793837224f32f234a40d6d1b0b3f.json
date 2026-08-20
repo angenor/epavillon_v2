@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (platform.normalize_label($2) IN (o.legal_name_normalized, o.acronym_normalized))\n                  AS \"valide!\"\n             FROM org.organizations o WHERE o.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "valide!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "92b2609ad4873cafa9a833922cdf9efa23c9793837224f32f234a40d6d1b0b3f"
+}

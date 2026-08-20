@@ -58,6 +58,28 @@ pub fn build_app(
     if etat.modules.is_mounted("identity") {
         portee = portee.configure(identity::routes);
     }
+    if etat.modules.is_mounted("org") {
+        portee = portee.configure(org::routes);
+    }
+
+    // **Le scope `/people` est composé ici, et une seule fois.** Deux modules y
+    // déposent des routes — l'identité pour les personnes, les organisations
+    // pour leurs adhésions —, et deux `web::scope` du même préfixe **ne se
+    // complètent pas** : Actix retient le premier dont le préfixe correspond et
+    // rend 404 si la route n'y figure pas, sans essayer le suivant. Le défaut
+    // s'est produit sur `/organizations` avant d'être vu ici.
+    let identite = etat.modules.is_mounted("identity");
+    let organisations = etat.modules.is_mounted("org");
+    if identite || organisations {
+        portee = portee.service(web::scope("/people").configure(move |cfg| {
+            if identite {
+                identity::people_routes(cfg);
+            }
+            if organisations {
+                org::people_routes(cfg);
+            }
+        }));
+    }
 
     App::new()
         .app_data(web::Data::new(etat.db.clone()))
@@ -67,6 +89,7 @@ pub fn build_app(
         .app_data(web::Data::new(etat.locales.clone()))
         .app_data(web::Data::new(etat.modules.clone()))
         .app_data(web::Data::new(etat.identity.clone()))
+        .app_data(web::Data::new(etat.org.clone()))
         .app_data(web::Data::from(etat.identity.token_codec()))
         .app_data(web::Data::new(etat.clone()))
         .app_data(corps_json())

@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object(\n                      'legal_name', o.legal_name,\n                      'acronym', o.acronym,\n                      'slug', o.slug::text,\n                      'organization_type_code', o.organization_type_code,\n                      'country_id', o.country_id,\n                      'city', o.city,\n                      'description', o.description::jsonb,\n                      'website', o.website::text,\n                      'contact_email', o.contact_email::text,\n                      'contact_phone', o.contact_phone\n                  ) AS \"champs!\"\n             FROM org.organizations o WHERE o.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "champs!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "7d676fa6ef441be9a3d211022bd4d8cfa87fbac915f48c553df282b4ae9b1c69"
+}

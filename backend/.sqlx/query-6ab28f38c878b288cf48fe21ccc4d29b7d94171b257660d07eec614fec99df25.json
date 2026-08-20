@@ -1,0 +1,86 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT 'proposal'::text            AS \"kind!\",\n                  p.id                        AS \"id!\",\n                  p.reference_code            AS \"reference_code?\",\n                  p.title::jsonb              AS \"title!\",\n                  p.event_id                  AS \"event_id!\",\n                  e.title::jsonb              AS \"event_name!\",\n                  e.edition_year              AS \"edition_year!\",\n                  COALESCE(po.role::text, 'lead') AS \"role!\",\n                  p.status::text              AS \"statut!\",\n                  COALESCE(p.submitted_at, p.created_at) AS \"occurred_at?\"\n             FROM programme.proposals p\n             JOIN event.events e ON e.id = p.event_id\n             LEFT JOIN programme.proposal_organizations po\n                    ON po.proposal_id = p.id AND po.organization_id = $1\n            WHERE p.deleted_at IS NULL\n              AND (p.organization_id = $1 OR po.organization_id = $1)\n\n            UNION ALL\n\n           SELECT 'session'::text, s.id, NULL, s.title::jsonb, s.event_id,\n                  e.title::jsonb, e.edition_year, 'lead', s.status::text, s.starts_at\n             FROM programme.sessions s\n             JOIN event.events e ON e.id = s.event_id\n            WHERE s.organization_id = $1\n\n            ORDER BY 10 DESC NULLS LAST",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "kind!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "reference_code?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "title!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "event_id!",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "event_name!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "edition_year!",
+        "type_info": "Int2",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "role!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "statut!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "occurred_at?",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "6ab28f38c878b288cf48fe21ccc4d29b7d94171b257660d07eec614fec99df25"
+}

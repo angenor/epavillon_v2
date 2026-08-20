@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE org.organization_domains\n            SET verified_at = CASE WHEN $3 THEN COALESCE(verified_at, now()) ELSE NULL END,\n                verification_method = CASE WHEN $3 THEN 'manual' ELSE NULL END,\n                auto_join = $4\n          WHERE id = $2 AND organization_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Bool",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8369e794294c7e642a48b978585afa327bba3bd46dc5a2c7ebeec87822b0267c"
+}

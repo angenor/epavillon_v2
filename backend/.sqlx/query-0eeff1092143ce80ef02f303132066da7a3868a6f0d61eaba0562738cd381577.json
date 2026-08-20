@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT p.id,\n                  p.primary_email::text AS \"email!\",\n                  p.first_name,\n                  p.preferred_locale,\n                  p.email_verified_at\n             FROM identity.people p\n            WHERE p.primary_email = $1::text::platform.email",
+  "query": "SELECT p.id,\n                  p.primary_email::text AS \"email!\",\n                  p.first_name,\n                  p.preferred_locale,\n                  p.email_verified_at,\n                  EXISTS (\n                      SELECT 1 FROM identity.accounts a\n                       WHERE a.person_id = p.id AND a.provider = 'password'\n                  ) AS \"a_un_compte!\"\n             FROM identity.people p\n            WHERE p.primary_email = $1::text::platform.email",
   "describe": {
     "columns": [
       {
@@ -52,6 +52,12 @@
             "name": "email_verified_at"
           }
         }
+      },
+      {
+        "ordinal": 5,
+        "name": "a_un_compte!",
+        "type_info": "Bool",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -64,8 +70,9 @@
       null,
       false,
       false,
-      true
+      true,
+      null
     ]
   },
-  "hash": "cf4766b122202d70ae76e72ac72026aa29299b71e74c2659f7959ef87473dc50"
+  "hash": "0eeff1092143ce80ef02f303132066da7a3868a6f0d61eaba0562738cd381577"
 }

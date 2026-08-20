@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT setseed(0.42)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "setseed",
+        "type_info": "Void",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a104d0a4bb522e84b6c71aaf5e0a3980e98d194fd612705e5bbbf64984a3153e"
+}

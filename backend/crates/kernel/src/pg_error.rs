@@ -116,6 +116,22 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
         // Trigger du modèle : le message français existe déjà, on le rend.
         ("23001", _) => ApiError::with_message(ValidationFailed, message),
 
+        // Les trois exceptions que `org.merge_organizations()` et
+        // `org.tg_forbid_merge_chains()` lèvent. **Leurs codes ont été relevés
+        // SUR LA BASE**, jamais recopiés d'un document : les noms de condition
+        // que le SQL écrit — `integrity_constraint_violation`,
+        // `invalid_parameter_value`, `no_data_found` — se traduisent en 23000,
+        // 22023 et P0002, et B1 a payé une fois d'avoir supposé au lieu de
+        // mesurer.
+        //
+        // Le message est rendu **tel quel** dans les trois cas : le modèle
+        // l'écrit en français, pour être lu. « Cibler la fiche finale » dit à
+        // l'opérateur exactement quoi faire ; le reformuler produirait un second
+        // libellé qui se périmerait à la première évolution du SQL.
+        ("23000", _) => ApiError::with_message(Conflict, message),
+        ("22023", _) => ApiError::with_message(ValidationFailed, message),
+        ("P0002", _) => ApiError::with_message(NotFound, message),
+
         _ => ApiError::new(Internal),
     }
 }

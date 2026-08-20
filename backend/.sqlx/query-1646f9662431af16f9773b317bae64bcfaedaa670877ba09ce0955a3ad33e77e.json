@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT primary_organization_id FROM identity.people WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "primary_organization_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "primary_organization_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "1646f9662431af16f9773b317bae64bcfaedaa670877ba09ce0955a3ad33e77e"
+}

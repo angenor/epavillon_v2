@@ -27,16 +27,15 @@ use kernel::context::RequestContext;
 use kernel::error::{ApiError, Result};
 use kernel::events::{self, DomainEvent};
 use kernel::jobs::{self, NewJob};
+use kernel::tokens::{self, TokenPurpose, TokenRejection};
 use serde_json::json;
 use sqlx::postgres::PgConnection;
 
+use crate::domain::ids::PersonId;
 use crate::domain::password;
-use crate::domain::token::{
-    PasswordResetOutcome, PasswordResetRequestOutcome, TokenCheckOutcome, TokenPurpose,
-    TokenRejection,
-};
+use crate::domain::token::{PasswordResetOutcome, PasswordResetRequestOutcome, TokenCheckOutcome};
 use crate::jobs::emails;
-use crate::repo::{accounts, people, tokens};
+use crate::repo::{accounts, people};
 use crate::service::session;
 use crate::state::IdentityState;
 
@@ -64,7 +63,7 @@ pub async fn request(
 /// repris, ce qui n'apprend rien à qui tient déjà le lien.
 pub async fn check(state: &IdentityState, jeton: &str) -> Result<TokenCheckOutcome> {
     let person_id = match tokens::check(state.pool(), jeton, TokenPurpose::PasswordReset).await? {
-        Ok(id) => id,
+        Ok(id) => PersonId(id),
         Err(refus) => return Ok(TokenCheckOutcome::Rejected { reason: refus }),
     };
 
@@ -100,7 +99,7 @@ pub async fn confirm(
         Err(refus) => return Ok(PasswordResetOutcome::Rejected { reason: refus }),
     };
 
-    let Some(person_id) = consomme.person_id else {
+    let Some(person_id) = consomme.person_id.map(PersonId) else {
         return Ok(PasswordResetOutcome::Rejected {
             reason: TokenRejection::Invalid,
         });
@@ -156,12 +155,17 @@ async fn envoyer_le_lien(
     tx: &mut PgConnection,
     personne: &people::RegistrationTarget,
 ) -> Result<()> {
-    tokens::invalidate_pending(tx, personne.person_id, TokenPurpose::PasswordReset).await?;
+    tokens::invalidate_pending(
+        tx,
+        personne.person_id.as_uuid(),
+        TokenPurpose::PasswordReset,
+    )
+    .await?;
 
     let jeton = tokens::create(
         tx,
         &state.config().auth.token_ttl,
-        personne.person_id,
+        personne.person_id.as_uuid(),
         TokenPurpose::PasswordReset,
         json!({ "email": personne.email }),
     )

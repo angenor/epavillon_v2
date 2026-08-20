@@ -18,6 +18,7 @@ pub mod mail;
 pub mod net;
 pub mod pg_error;
 pub mod telemetry;
+pub mod tokens;
 
 #[cfg(feature = "testing")]
 pub mod testing;

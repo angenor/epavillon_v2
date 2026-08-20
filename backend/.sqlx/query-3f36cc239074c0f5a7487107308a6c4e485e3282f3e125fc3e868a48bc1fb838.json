@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO org.organization_names (organization_id, name, kind, is_confirmed)\n         VALUES ($1, 'Observatoire du Sahel', 'short', true)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3f36cc239074c0f5a7487107308a6c4e485e3282f3e125fc3e868a48bc1fb838"
+}

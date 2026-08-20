@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id FROM org.organizations\n          WHERE legal_name_normalized = platform.normalize_label($1)\n            AND COALESCE(country_id, '00000000-0000-0000-0000-000000000000'::uuid)\n              = COALESCE($2, '00000000-0000-0000-0000-000000000000'::uuid)\n            AND status IN ('candidate', 'active')\n          LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "0ffd31e608548c948c03962cf2fb122aeab6d97cf7a2e62c726fd2ec3f0c4c8a"
+}

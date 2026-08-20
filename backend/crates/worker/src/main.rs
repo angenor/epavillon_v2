@@ -37,8 +37,13 @@ async fn main() {
 
     let consommateurs = ConsumerRegistry::new().register(TelemetryConsumer);
     let courrier = kernel::mail::build(&config.mail);
-    let travaux =
-        JobRegistry::new().register_all(identity::job_handlers(db.clone(), &config, courrier));
+    let travaux = JobRegistry::new()
+        .register_all(identity::job_handlers(
+            db.clone(),
+            &config,
+            courrier.clone(),
+        ))
+        .register_all(org::job_handlers(db.clone(), &config, courrier));
 
     // Les travaux récurrents se replanifient eux-mêmes ; le démarrage ne fait
     // que **réarmer** la chaîne, au cas où sa dernière occurrence serait morte
@@ -69,15 +74,27 @@ async fn main() {
 async fn armer_les_recurrents(db: &Db) {
     let resultat = async {
         let mut tx = db.write(&RequestContext::background("jobs")).await?;
-        let pose = identity::jobs::purge::planifier(&mut tx, OffsetDateTime::now_utc()).await?;
+        let maintenant = OffsetDateTime::now_utc();
+        let purge = identity::jobs::purge::planifier(&mut tx, maintenant).await?;
+        // Le balayage des doublons se réarme de la même façon, et pour la même
+        // raison : sa dernière tranche a pu mourir avant d'avoir posé la
+        // suivante. La clé d'unicité porte le jour — dix redémarrages n'en
+        // produisent pas dix.
+        let balayage = org::jobs::duplicates::planifier(&mut tx, maintenant).await?;
         tx.commit().await?;
-        Ok::<_, kernel::error::ApiError>(pose)
+        Ok::<_, kernel::error::ApiError>((purge, balayage))
     }
     .await;
 
     match resultat {
-        Ok(true) => tracing::info!("purge des jetons planifiée pour aujourd'hui"),
-        Ok(false) => {}
+        Ok((purge, balayage)) => {
+            if purge {
+                tracing::info!("purge des jetons planifiée pour aujourd'hui");
+            }
+            if balayage {
+                tracing::info!("balayage des doublons planifié pour aujourd'hui");
+            }
+        }
         Err(e) => tracing::error!(erreur = %e, "planification des travaux récurrents impossible"),
     }
 }

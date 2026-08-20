@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO org.duplicate_candidates (left_id, right_id, score, reasons)\n         VALUES (LEAST($1::uuid, $2::uuid), GREATEST($1::uuid, $2::uuid), 145.0, ARRAY['name_similarity','shared_domain'])\n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.duplicate_candidates",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "28e97c62c290a227e43e064123fbb52335a985de2ff34a503d58426cddd89cb0"
+}

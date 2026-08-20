@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT org.merge_organizations($1, $2, 'fusion de contrôle')",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "merge_organizations",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "8a6895fd0a022d8500014f637002df06bf034cfe663c03d77d41263fc735f2a5"
+}

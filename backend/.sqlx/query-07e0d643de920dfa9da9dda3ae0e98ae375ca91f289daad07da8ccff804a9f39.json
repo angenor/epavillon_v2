@@ -1,0 +1,55 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT n.name, n.kind::text AS \"kind!\", n.is_confirmed,\n                  EXISTS (\n                      SELECT 1 FROM org.organization_names t\n                       WHERE t.organization_id = $2\n                         AND t.name_normalized = n.name_normalized\n                         AND t.kind = n.kind\n                  ) AS \"already_present!\"\n             FROM org.organization_names n\n            WHERE n.organization_id = $1\n            ORDER BY n.kind, n.name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organization_names",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "kind!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "is_confirmed",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "org.organization_names",
+            "name": "is_confirmed"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "already_present!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      null
+    ]
+  },
+  "hash": "07e0d643de920dfa9da9dda3ae0e98ae375ca91f289daad07da8ccff804a9f39"
+}

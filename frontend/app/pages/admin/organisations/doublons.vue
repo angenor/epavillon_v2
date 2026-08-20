@@ -108,19 +108,25 @@ async function decide(
 
 /**
  * REMETTRE UNE PAIRE DANS LA FILE. Le modèle ne porte pas de valeur « à
- * réexaminer » : on repasse la décision à `deferred`, qui dit « pas maintenant »
- * — et la paire, n'étant plus `distinct`, redevient un dossier ouvert. Le
- * `reviewed_at` reste posé, ce qui est exact : quelqu'un l'a bien regardée.
+ * réexaminer » : on repasse la décision à `deferred`, et l'API reconnaît le
+ * geste à ceci que la paire est DÉJÀ SORTIE de la file — elle efface alors la
+ * décision et sa date, ce qui la ramène parmi les dossiers ouverts.
+ *
+ * Effacer la DATE est le point qui compte : l'écran range sur elle, pas sur la
+ * décision. La laisser posée laissait la paire parmi les tranchées, et le
+ * bouton disait le contraire de ce qu'il faisait (corrigé le 20/08).
  */
 async function reopen(pair: DuplicatePair): Promise<void> {
   await decide(pair, 'deferred', null, t('admin.organization.duplicates.reopened'))
 }
 
-function openMerge(pair: DuplicatePair): void {
+// La promesse est ATTENDUE : ignorée, un refus de navigation — garde de route,
+// route disparue — ne laisserait aucune trace, et l'écran resterait muet.
+async function openMerge(pair: DuplicatePair): Promise<void> {
   // Le SENS n'est pas décidé ici : l'écran de fusion propose, l'équipe tranche.
   // Les deux fiches partent donc comme « gauche » et « droite », pas comme
   // source et cible.
-  navigateTo(
+  await navigateTo(
     localePath({
       path: '/admin/organisations/fusion',
       query: {

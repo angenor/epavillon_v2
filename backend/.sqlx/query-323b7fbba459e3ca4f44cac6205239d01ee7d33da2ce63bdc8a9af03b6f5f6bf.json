@@ -1,0 +1,114 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.id, m.source_id, m.target_id,\n                  COALESCE(src.legal_name, m.source_snapshot ->> 'legal_name', '')\n                      AS \"source_name!\",\n                  COALESCE(cible.legal_name, '') AS \"target_name!\",\n                  p.display_name AS \"performed_by_name?\",\n                  m.performed_at, m.rows_reassigned, m.reason\n             FROM org.merge_log m\n             LEFT JOIN org.organizations src   ON src.id = m.source_id\n             LEFT JOIN org.organizations cible ON cible.id = m.target_id\n             LEFT JOIN identity.people p       ON p.id = m.performed_by\n            WHERE m.source_id = $1 OR m.target_id = $1\n            ORDER BY m.performed_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.merge_log",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "source_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.merge_log",
+            "name": "source_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "target_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.merge_log",
+            "name": "target_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "source_name!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "target_name!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "performed_by_name?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "performed_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.merge_log",
+            "name": "performed_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "rows_reassigned",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "org.merge_log",
+            "name": "rows_reassigned"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.merge_log",
+            "name": "reason"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      null,
+      true,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "323b7fbba459e3ca4f44cac6205239d01ee7d33da2ce63bdc8a9af03b6f5f6bf"
+}

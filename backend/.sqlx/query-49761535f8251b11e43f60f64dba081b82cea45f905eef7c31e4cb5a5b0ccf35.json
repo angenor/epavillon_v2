@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE org.organizations SET verified_at = NULL, verified_by = NULL WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "49761535f8251b11e43f60f64dba081b82cea45f905eef7c31e4cb5a5b0ccf35"
+}

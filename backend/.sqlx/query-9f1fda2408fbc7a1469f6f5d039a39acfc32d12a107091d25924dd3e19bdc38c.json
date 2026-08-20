@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (\n               SELECT 1\n                 FROM identity.people p\n                 JOIN org.organization_domains d\n                   ON d.domain = platform.extract_domain(p.primary_email::text)\n                WHERE p.id = $2\n                  AND p.email_verified_at IS NOT NULL\n                  AND d.organization_id = $1\n                  AND d.verified_at IS NOT NULL\n                  AND d.auto_join\n                  AND NOT EXISTS (\n                      SELECT 1 FROM org.public_email_domains g WHERE g.domain = d.domain\n                  )\n           ) AS \"applique!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "applique!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "9f1fda2408fbc7a1469f6f5d039a39acfc32d12a107091d25924dd3e19bdc38c"
+}

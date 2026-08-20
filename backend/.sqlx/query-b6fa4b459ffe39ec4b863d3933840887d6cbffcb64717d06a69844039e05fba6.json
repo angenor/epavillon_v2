@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.events\n               (edition_year, title, slug, description, participation_mode,\n                timezone, starts_at, ends_at)\n           VALUES ($3, jsonb_build_object('fr', $2::text), $1::text::platform.slug,\n                   jsonb_build_object('fr', $2::text), 'online',\n                   'America/Belem'::platform.timezone_name,\n                   now() + interval '30 days', now() + interval '40 days')\n           RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "b6fa4b459ffe39ec4b863d3933840887d6cbffcb64717d06a69844039e05fba6"
+}

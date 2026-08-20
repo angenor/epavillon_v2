@@ -23,6 +23,7 @@ pub struct AppState {
     pub mailer: Arc<dyn Mailer>,
     pub modules: ModuleRegistry,
     pub identity: identity::IdentityState,
+    pub org: org::OrgState,
     /// Origines acceptées sur une écriture. Celle du site, et rien d'autre.
     pub allowed_origins: Vec<String>,
 }
@@ -38,6 +39,7 @@ impl AppState {
         let allowed_origins = vec![config.app_public_url.clone()];
         let config = Arc::new(config);
         let identity = identity::IdentityState::new(db.clone(), config.clone(), passwords.clone())?;
+        let org = org::OrgState::new(db.clone(), config.clone());
 
         Ok(Self {
             db,
@@ -47,6 +49,7 @@ impl AppState {
             mailer,
             modules,
             identity,
+            org,
             allowed_origins,
         })
     }

@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT platform.slugify($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "slugify",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "37c8eeeb45886b66dcecd7996318bcb5bf0f34e2cd7f45e3173ffab29590ce9d"
+}

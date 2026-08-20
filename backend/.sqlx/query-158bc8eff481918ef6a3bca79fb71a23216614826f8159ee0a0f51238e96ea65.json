@@ -1,0 +1,263 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO org.organizations\n               (legal_name, acronym, slug, organization_type_code, country_id, city,\n                website, description, created_by, status)\n           VALUES ($1, $2, $3::text::platform.slug, $4, $5, $6,\n                   $7::text::platform.url, $8::jsonb::platform.i18n_text, $9, 'candidate')\n        RETURNING id, legal_name, legal_name_normalized, acronym, acronym_normalized,\n                  slug::text AS \"slug!\", organization_type_code, country_id, city,\n                  description::jsonb AS \"description?\", website::text AS \"website?\",\n                  contact_email::text AS \"contact_email?\", contact_phone,\n                  status::text AS \"statut!\", merged_into_id, merged_at,\n                  verified_at, verified_by, trust_score, created_by, created_at, updated_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "legal_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "legal_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "legal_name_normalized",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "legal_name_normalized"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "acronym",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "acronym"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "acronym_normalized",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "acronym_normalized"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "organization_type_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "organization_type_code"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "country_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "country_id"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "city",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "city"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "description?",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "website?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "contact_email?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "contact_phone",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "contact_phone"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "statut!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 14,
+        "name": "merged_into_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "merged_into_id"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "merged_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "merged_at"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "verified_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "verified_at"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "verified_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "verified_by"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "trust_score",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "trust_score"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "created_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "created_by"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Uuid",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      null,
+      false,
+      true,
+      true,
+      null,
+      null,
+      null,
+      true,
+      null,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "158bc8eff481918ef6a3bca79fb71a23216614826f8159ee0a0f51238e96ea65"
+}

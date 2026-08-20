@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT org.merge_organizations($1, $2, 'doublon manifeste')",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "merge_organizations",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "1aa61e5ed468a520bb9e769be314768c239f7ffd1bb9e830010475ef0df430a9"
+}

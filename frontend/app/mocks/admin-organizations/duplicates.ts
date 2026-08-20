@@ -85,10 +85,13 @@ function pairOf(candidate: (typeof duplicateCandidates)[number]): DuplicatePair 
     score: candidate.score,
     reasons: candidate.reasons as DuplicateReason[],
     detected_at: candidate.detected_at,
-    reviewed_at: settled?.reviewed_at ?? candidate.reviewed_at,
-    reviewed_by: settled?.reviewed_by ?? candidate.reviewed_by,
-    reviewed_by_name: personName(settled?.reviewed_by ?? candidate.reviewed_by),
-    decision: settled?.decision ?? candidate.decision,
+    // `??` ne convient PAS ici : une paire remise dans la file porte une
+    // décision nulle, et le repli ramènerait celle du jeu de données. Dès
+    // qu'une entrée de session existe, elle prime en entier.
+    reviewed_at: settled ? settled.reviewed_at : candidate.reviewed_at,
+    reviewed_by: settled ? settled.reviewed_by : candidate.reviewed_by,
+    reviewed_by_name: personName(settled ? settled.reviewed_by : candidate.reviewed_by),
+    decision: settled ? settled.decision : candidate.decision,
     left,
     right,
   }

@@ -1,0 +1,229 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.id, m.organization_id, m.person_id, m.role::text AS \"role!\",\n                  m.status::text AS \"statut!\", m.is_primary, m.job_title,\n                  m.invited_by, m.invited_at, m.approved_by, m.approved_at, m.revoked_at,\n                  m.created_at, m.updated_at,\n                  p.display_name AS \"display_name!\",\n                  p.primary_email::text AS \"primary_email!\",\n                  p.first_name AS \"first_name!\", p.last_name AS \"last_name!\",\n                  p.preferred_locale AS \"preferred_locale!\"\n             FROM org.memberships m\n             JOIN identity.people p ON p.id = m.person_id\n            WHERE m.organization_id = $1 AND m.status = 'pending' AND m.invited_at IS NULL\n            ORDER BY m.created_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "organization_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "organization_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "role!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "statut!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "is_primary",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "is_primary"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "job_title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "job_title"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "invited_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "invited_by"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "invited_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "invited_at"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "approved_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "approved_by"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "approved_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "approved_at"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "revoked_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "revoked_at"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "primary_email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 16,
+        "name": "first_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "first_name"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "last_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "last_name"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "preferred_locale!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "preferred_locale"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      null,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true,
+      null,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "95eaae32fa37138ad97016c0051b3b274efa2a4f2763bac8060c24498165f0ac"
+}

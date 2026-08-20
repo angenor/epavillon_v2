@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT org.resolve_organization($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "resolve_organization",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "32928400eba6ca31c28ee071baee1b62dd52feeffc77019b18ff2ee4beb3dfdf"
+}
