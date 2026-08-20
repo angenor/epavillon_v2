@@ -14,7 +14,7 @@ Conséquence pratique : **aucun prompt n'est « à exécuter une seule fois »**
 
 ## Le préambule
 
-À coller en tête de **chaque** prompt de ce fichier, sans exception. Le marqueur `[PRÉAMBULE]` qui ouvre chaque bloc indique l'endroit exact où il se substitue — il n'y a aucun bloc sans marqueur. Dans les prompts Spec Kit de la phase B, il vient **juste après** la ligne `/speckit.xxx`, qui doit rester la toute première du message.
+À coller en tête de **chaque** prompt de ce fichier, sans exception. Le marqueur `[PRÉAMBULE]` qui ouvre chaque bloc indique l'endroit exact où il se substitue — il n'y a aucun bloc sans marqueur. Dans les prompts Spec Kit de la phase B, il vient **juste après** la ligne `/speckit-xxx`, qui doit rester la toute première du message.
 
 ```
 Lis d'abord CLAUDE.md et docs/PROGRESSION.md. Ce dernier renvoie à
@@ -882,10 +882,24 @@ document.
 
 Une fois le front stabilisé sur les mocks, les écarts sont connus et le contrat d'API se déduit de ce qui est réellement affiché.
 
+Spec Kit est installé dans le dépôt depuis le 20/08 : CLI `specify` 0.16.5,
+intégration `claude`, scripts `sh`. Les gabarits vivent dans `.specify/`, la
+constitution dans `.specify/memory/constitution.md`, et les commandes sont
+servies comme **compétences** dans `.claude/skills/speckit-*`. Depuis la 0.16
+elles s'appellent avec un tiret — `/speckit-specify`, plus `/speckit.specify`.
+
+Mettre à jour l'outil : `specify self upgrade`, puis
+`specify init --here --force --non-interactive --integration claude --script sh`
+pour rafraîchir gabarits et compétences.
+
+Deux compétences s'ajoutent aux six du cycle : `/speckit-converge`, qui relit le
+code existant et ajoute à `tasks.md` ce qui reste à faire, et
+`/speckit-taskstoissues`, qui ouvre les issues GitHub correspondantes.
+
 ## B0 — Constitution
 
 ```
-/speckit.constitution
+/speckit-constitution
 
 [PRÉAMBULE]
 
@@ -947,9 +961,9 @@ Principes non négociables :
 
 ## B1 à B6 — Les modules
 
-Un module = un cycle complet : `/speckit.specify` → `/speckit.clarify` → `/speckit.plan` → `/speckit.tasks` → `/speckit.implement`.
+Un module = un cycle complet : `/speckit-specify` → `/speckit-clarify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-implement`.
 
-Le modèle de prompt qui suit est à instancier **une fois par module** : six modules, six cycles, six sessions. Chacune reçoit le préambule au même endroit — juste après la ligne `/speckit.specify`.
+Le modèle de prompt qui suit est à instancier **une fois par module** : six modules, six cycles, six sessions. Chacune reçoit le préambule au même endroit — juste après la ligne `/speckit-specify`.
 
 Ordre imposé par les dépendances :
 
@@ -965,7 +979,7 @@ Ordre imposé par les dépendances :
 **Modèle de prompt** :
 
 ```
-/speckit.specify
+/speckit-specify
 
 [PRÉAMBULE]
 
