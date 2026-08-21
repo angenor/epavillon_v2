@@ -378,27 +378,22 @@ async fn corriger_un_dossier_retenu_laisse_sa_seance_inchangee() {
             .unwrap_or_else(|e| panic!("transition vers {vers:?} : {e}"));
     }
 
-    // La séance, programmée par l'IFDD sur un créneau ARBITRÉ — différent du
-    // créneau souhaité, comme il l'est presque toujours.
+    // **La séance existe déjà** : depuis B5, l'acceptation la fait naître. Ce
+    // que l'IFDD fait ensuite, c'est l'ARBITRER — lui poser un créneau
+    // différent du créneau souhaité, comme il l'est presque toujours, et une
+    // jauge.
     let seance = sqlx::query!(
-        r#"INSERT INTO programme.sessions
-               (event_id, proposal_id, organization_id, title, slug, format,
-                starts_at, ends_at, timezone, capacity)
-           VALUES ($1, $2, $3,
-                   '{"fr":"Atelier adaptation"}'::jsonb,
-                   'seance-atelier-adaptation'::platform.slug,
-                   'hybrid',
-                   timestamp '2027-11-14 09:00' AT TIME ZONE 'America/Belem',
-                   timestamp '2027-11-14 10:30' AT TIME ZONE 'America/Belem',
-                   'America/Belem'::platform.timezone_name, 40)
+        r#"UPDATE programme.sessions
+              SET starts_at = timestamp '2027-11-14 09:00' AT TIME ZONE 'America/Belem',
+                  ends_at   = timestamp '2027-11-14 10:30' AT TIME ZONE 'America/Belem',
+                  capacity  = 40
+            WHERE proposal_id = $1
         RETURNING id, starts_at, ends_at, title, capacity, format::text AS "format!""#,
-        terrain.edition,
-        dossier,
-        terrain.organisation
+        dossier
     )
     .fetch_one(bac.pool())
     .await
-    .expect("programmation de la séance");
+    .expect("arbitrage de la séance née de l'acceptation");
 
     // La correction change le titre, le créneau souhaité, le format et la durée.
     let mut brouillon = commun::brouillon(&terrain, "Atelier adaptation — version corrigée");

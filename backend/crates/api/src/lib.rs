@@ -67,8 +67,13 @@ pub fn build_app(
     if etat.modules.is_mounted("programme") {
         portee = portee.configure(programme::routes);
         // `/proposal-comments` n'appartient qu'à ce module : aucun autre n'y
-        // dépose, il n'y a donc rien à composer ici.
+        // dépose, il n'y a donc rien à composer ici. `/sessions` et
+        // `/registrations` sont dans le même cas depuis B5, et les deux lectures
+        // publiques du programme n'exigent aucune session.
         portee = portee.configure(programme::comment_routes);
+        portee = portee.configure(programme::session_routes);
+        portee = portee.configure(programme::registration_routes);
+        portee = portee.configure(programme::public_schedule_routes);
     }
 
     // **Le scope `/people` est composé ici, et une seule fois.** Trois modules y
@@ -117,13 +122,21 @@ pub fn build_app(
     }
 
     // **Le scope `/admin/planner` est composé ici, et une seule fois** — même
-    // motif que `/people` ci-dessus, appliqué AVANT que le défaut ne se
-    // reproduise. B5 y déposera les routes du planificateur de séances ; ce
-    // module y dépose aujourd'hui le contrôle préalable et la publication de la
-    // programmation. Deux `web::scope` du même préfixe ne se complètent pas :
-    // Actix retient le premier et rend 404 sur les routes du second.
-    if etat.modules.is_mounted("event") {
-        portee = portee.service(web::scope("/admin/planner").configure(event::planner_routes));
+    // motif que `/people` ci-dessus, écrit AVANT que le défaut ne se reproduise.
+    // Il porte désormais les DEUX modules : `event` y dépose le contrôle
+    // préalable et la publication (B3), `programme` l'écran du planificateur
+    // (B5). Deux `web::scope` du même préfixe ne se complètent pas : Actix
+    // retient le premier et rend 404 sur les routes du second.
+    let evenements = etat.modules.is_mounted("event");
+    if evenements || propositions {
+        portee = portee.service(web::scope("/admin/planner").configure(move |cfg| {
+            if evenements {
+                event::planner_routes(cfg);
+            }
+            if propositions {
+                programme::planner_routes(cfg);
+            }
+        }));
     }
 
     App::new()

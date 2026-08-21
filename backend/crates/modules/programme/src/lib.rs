@@ -22,6 +22,7 @@
 
 use actix_web::web::ServiceConfig;
 
+pub mod consumers;
 pub mod domain;
 pub mod repo;
 pub mod routes;
@@ -87,6 +88,62 @@ pub fn people_routes(cfg: &mut ServiceConfig) {
 /// chemin**, et `crates/api/tests/routes_org.rs` le prouve (research.md § R18).
 pub fn organization_routes(cfg: &mut ServiceConfig) {
     routes::workspace::sous_organizations(cfg);
+}
+
+/// Ce que ce module dépose sous `/admin/planner`, **sans le préfixe**.
+///
+/// Le scope est composé par l'API **à partir de deux modules** : B3 y a déposé
+/// le contrôle préalable et la publication, B5 y dépose l'écran du
+/// planificateur. Deux `web::scope` du même préfixe **ne se complètent pas** —
+/// Actix retient le premier et rend 404 sur les routes du second, et le défaut a
+/// déjà coûté trois routes muettes sur vingt et une en B2.
+pub fn planner_routes(cfg: &mut ServiceConfig) {
+    routes::planner::configurer(cfg);
+}
+
+/// Le scope `/sessions` — **propre à ce module**, rien à composer.
+///
+/// **Chemins littéraux avant chemins paramétrés.** `/sessions/conflicts` et
+/// `/sessions/{id}/…` ne se recouvrent pas — le risque de capture n'existe que
+/// lorsque les méthodes ET le nombre de segments coïncident —, mais l'ordre est
+/// tenu par la structure plutôt que par la vigilance : une route ajoutée au
+/// mauvais groupe se voit à la relecture.
+pub fn session_routes(cfg: &mut ServiceConfig) {
+    use actix_web::web;
+
+    cfg.service(
+        web::scope("/sessions")
+            .configure(routes::sessions::chemins_litteraux)
+            .configure(routes::sessions::chemins_de_seance),
+    );
+}
+
+/// Le scope `/registrations`, et les deux lectures publiques du programme.
+pub fn registration_routes(cfg: &mut ServiceConfig) {
+    use actix_web::web;
+
+    cfg.service(
+        web::scope("/registrations")
+            .configure(routes::registrations::chemins_litteraux)
+            .configure(routes::registrations::chemins_dinscription),
+    );
+}
+
+/// La programmation publique — **aucune session exigée**.
+pub fn public_schedule_routes(cfg: &mut ServiceConfig) {
+    routes::public_schedule::configurer(cfg);
+}
+
+/// Ce que ce module consomme de l'outbox — **le premier consommateur du
+/// dépôt**.
+///
+/// La garde de rejeu n'est pas ici : le relais du noyau réserve
+/// `(consommateur, événement)` **avant** d'appeler `handle`, et n'appelle pas le
+/// consommateur une seconde fois (research.md § R13).
+pub fn event_consumers() -> Vec<std::sync::Arc<dyn kernel::events::EventConsumer>> {
+    vec![std::sync::Arc::new(
+        consumers::publication::PublicationConsumer,
+    )]
 }
 
 /// Les deux scopes **propres à ce module** : personne d'autre n'y dépose, il

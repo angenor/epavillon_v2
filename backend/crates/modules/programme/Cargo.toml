@@ -18,6 +18,9 @@ actix-web.workspace = true
 # analyseur conforme — research.md § R14.
 ammonia.workspace = true
 async-trait.workspace = true
+# B5 : la règle `pattern` d'un champ de formulaire. Déjà transitive du
+# workspace — voir le commentaire de `backend/Cargo.toml`.
+regex.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 sqlx.workspace = true

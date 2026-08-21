@@ -35,7 +35,13 @@ async fn main() {
             std::process::exit(1);
         });
 
-    let consommateurs = ConsumerRegistry::new().register(TelemetryConsumer);
+    // **Le premier consommateur d'un module métier du dépôt** : la machinerie
+    // du noyau n'avait jamais servi ailleurs que pour la télémétrie. `programme`
+    // reçoit l'annonce de publication de `event` et rend publiques les séances
+    // désignées — l'autre moitié d'un geste partagé entre deux schémas.
+    let consommateurs = ConsumerRegistry::new()
+        .register(TelemetryConsumer)
+        .register_all(programme::event_consumers());
     let courrier = kernel::mail::build(&config.mail);
     let travaux = JobRegistry::new()
         .register_all(identity::job_handlers(

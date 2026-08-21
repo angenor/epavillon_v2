@@ -48,6 +48,10 @@ identifiant!(
     ReviewId,
     CommentId,
     TransitionId,
+    // Les agrégats de la partie « séances » (fichier 075), posés par B5.
+    SessionId,
+    RegistrationId,
+    FormId,
     // Les cinq suivants appartiennent à d'autres schémas. Ils sont typés ici
     // parce que ce module les manipule, pas parce qu'il les possède : un
     // identifiant d'appel et un identifiant d'édition se confondent sans cela.
@@ -57,4 +61,11 @@ identifiant!(
     OrganizationId,
     PersonId,
     AssetId,
+    // Quatre de plus, tous d'`event` : une salle, un fil de programmation, un
+    // canal de diffusion et une journée du calendrier. Ce module les désigne,
+    // il ne les possède pas.
+    RoomId,
+    TrackId,
+    ChannelId,
+    EventDayId,
 );

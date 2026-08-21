@@ -62,6 +62,24 @@ pub struct ApiErrorBody {
         crate::routes::workspace::resoudre,
         crate::routes::workspace::rouvrir,
         crate::routes::admin_ops::deduire,
+        // --- Séances et inscriptions (B5) : dix-sept chemins ------------------
+        crate::routes::planner::ecran,
+        crate::routes::sessions::liste,
+        crate::routes::sessions::conflits,
+        crate::routes::sessions::intervenants,
+        crate::routes::sessions::organisations,
+        crate::routes::sessions::fils,
+        crate::routes::sessions::placer,
+        crate::routes::sessions::rattacher,
+        crate::routes::sessions::diffuser,
+        crate::routes::public_schedule::programmation,
+        crate::routes::public_schedule::seance,
+        crate::routes::registrations::formulaire,
+        crate::routes::registrations::sinscrire,
+        crate::routes::registrations::liste_nominative,
+        crate::routes::registrations::les_miennes,
+        crate::routes::registrations::annuler,
+        crate::routes::registrations::rejoindre,
     ),
     components(schemas(ApiErrorBody)),
     tags(
@@ -69,6 +87,9 @@ pub struct ApiErrorBody {
         (name = "Espace organisation", description = "Ce qu'une organisation voit de ses propres dossiers. Ni note, ni rang, ni nom de membre du comité, ni inscrit nommé : le filtrage est à la source, jamais dans l'écran."),
         (name = "Back-office — propositions", description = "La liste, la fiche d'évaluation, les décisions. Permission de lecture générale ET périmètre d'administration : un dossier remonte à son édition AVANT que le périmètre soit vérifié, y compris sur une URL forgée."),
         (name = "Back-office — évaluation", description = "Notation, déport, messages. Noter exige une AFFECTATION non déportée ; lire n'en exige pas — la permission et l'affectation sont décorrélées."),
+        (name = "Planificateur de séances", description = "L'écran d'arbitrage et ses trois écritures. **Aucune ne peut être refusée pour chevauchement** : le modèle ne pose aucune contrainte d'exclusion sur les créneaux, l'équipe travaille par déplacements successifs, et le seul garde-fou dur est la publication du programme. Gardé par `programme.session.schedule` sur l'édition DE LA SÉANCE, résolue en base."),
+        (name = "Inscriptions", description = "Le formulaire applicable, l'inscription et ses six issues, l'annulation avec sa promotion. Trois régimes d'autorisation distincts : le formulaire décide si l'on peut s'inscrire sans compte, la liste nominative exige `programme.registration.manage` — que le rôle de programmation ne détient pas —, et l'annulation est ouverte à l'inscrit lui-même."),
+        (name = "Programmation publique", description = "Ce que le public lit, **sans session**. Seules les séances publiées y figurent ; une édition dont le programme n'est pas paru rend une liste vide, jamais une erreur."),
     )
 )]
 pub struct ProgrammeApi;
@@ -77,7 +98,8 @@ pub struct ProgrammeApi;
 mod tests {
     use utoipa::OpenApi;
 
-    /// **Les trente-sept routes du contrat sont documentées.**
+    /// **Les cinquante-quatre routes du contrat sont documentées** — trente-sept
+    /// de B4, dix-sept de B5.
     ///
     /// Le compte est écrit, comme celui du test de montage : une route ajoutée
     /// sans annotation n'apparaîtrait nulle part, et une annotation posée sur
@@ -87,7 +109,7 @@ mod tests {
     /// en porte deux — une lecture et un rattachement —, et
     /// `/proposal-comments/{id}/resolution` aussi.
     #[test]
-    fn les_trente_sept_routes_sont_documentees() {
+    fn les_cinquante_quatre_routes_sont_documentees() {
         let doc = super::ProgrammeApi::openapi();
         let operations: usize = doc
             .paths
@@ -107,14 +129,57 @@ mod tests {
             })
             .sum();
 
-        assert_eq!(operations, 37, "les trente-sept routes du contrat");
+        assert_eq!(operations, 54, "trente-sept routes de B4, dix-sept de B5");
     }
 
-    /// **Les six codes du module sont au catalogue du noyau.** Ils sont
+    /// **Les dix-sept chemins de B5**, comptés à part : le total ci-dessus
+    /// bougerait sans qu'on sache lequel des deux jalons a changé.
+    ///
+    /// `/sessions/{id}/tracks` en porte **deux** — une lecture et un
+    /// remplacement —, d'où dix-sept opérations sur seize chemins.
+    #[test]
+    fn les_dix_sept_routes_de_b5_sont_documentees() {
+        let doc = super::ProgrammeApi::openapi();
+        let chemins: Vec<&str> = doc
+            .paths
+            .paths
+            .keys()
+            .filter(|c| {
+                c.starts_with("/sessions")
+                    || c.starts_with("/registrations")
+                    || c.starts_with("/schedule")
+                    || c.starts_with("/events/")
+                    || c.starts_with("/admin/planner")
+            })
+            .map(String::as_str)
+            .collect();
+
+        let operations: usize = chemins
+            .iter()
+            .map(|c| {
+                let chemin = &doc.paths.paths[*c];
+                [
+                    chemin.get.is_some(),
+                    chemin.put.is_some(),
+                    chemin.post.is_some(),
+                    chemin.delete.is_some(),
+                    chemin.patch.is_some(),
+                ]
+                .iter()
+                .filter(|servi| **servi)
+                .count()
+            })
+            .sum();
+
+        assert_eq!(operations, 17, "les dix-sept routes de B5");
+    }
+
+    /// **Les quatorze codes du module sont au catalogue du noyau** — six de B4,
+    /// huit de B5. Ils sont
     /// engendrés dans la documentation depuis lui : un code ajouté apparaît au
     /// prochain démarrage, un code oublié n'existe pas.
     #[test]
-    fn les_six_codes_sont_au_catalogue() {
+    fn les_quatorze_codes_sont_au_catalogue() {
         let catalogue: Vec<&str> = kernel::error::ErrorCode::ALL
             .iter()
             .map(|c| c.as_str())
@@ -127,6 +192,14 @@ mod tests {
             "PROPOSAL_UNKNOWN_TERM",
             "PROPOSAL_TEXT_TOO_LONG",
             "PROPOSAL_UNKNOWN_REFERENCE",
+            "SESSION_DERIVED_FIELD",
+            "SESSION_UNKNOWN_REFERENCE",
+            "SESSION_TRACK_EVENT_MISMATCH",
+            "REGISTRATION_NOT_ACCEPTED",
+            "REGISTRATION_ANSWER_INVALID",
+            "REGISTRATION_CONSENT_REQUIRED",
+            "REGISTRATION_ACCOUNT_REQUIRED",
+            "REGISTRATION_LOCKED",
         ] {
             assert!(catalogue.contains(&code), "{code} manque au catalogue");
         }

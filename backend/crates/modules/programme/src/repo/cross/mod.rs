@@ -13,7 +13,7 @@
 //! elles se relisent en un fichier, et **c'est ici qu'un ajout se discute**.
 //! C'est le patron de B3, repris sans être réinventé.
 //!
-//! # Les onze lectures hors schéma autorisées
+//! # Les seize lectures hors schéma autorisées
 //!
 //! | # | Lecture | Question de **ce** module |
 //! |---|---|---|
@@ -28,14 +28,24 @@
 //! | 9 | `media.assets` et `object_url()` | les pièces du dossier et leur adresse |
 //! | 10 | `analytics.mv_organization_scorecard` | l'historique de participation de l'organisation porteuse |
 //! | 11 | `platform.entity_history()`, par `programme.proposal_history()` | l'historique champ par champ |
+//! | 12 | `event.event_days` | « quelles colonnes de jours le planificateur affiche-t-il, et à quel jour cette séance se rattache-t-elle ? » |
+//! | 13 | `event.rooms` | « où cette séance est-elle installée, et occupe-t-elle le stand ? » |
+//! | 14 | `event.programme_tracks` | « quelles journées spéciales peut-on lui rattacher ? » |
+//! | 15 | `event.broadcast_channels` | « quel canal cette séance occupe-t-elle ? » |
+//! | 16 | `reference.countries.iso2`, `reference.taxonomy_terms.code` | les valeurs admises d'une réponse « pays » ou d'un champ adossé à une taxonomie |
+//!
+//! Les cinq dernières sont arrivées avec B5 et vivent dans `cross/grille.rs`,
+//! **dans le même espace de noms** : le découpage est un fait de fichier — le
+//! garde-fou de mille lignes —, pas de frontière.
 //!
 //! Le périmètre d'administration ne figure pas dans cette liste : il est lu par
 //! le garde du noyau (`kernel::auth`), jamais par une requête d'ici.
 //!
 //! **Aucune ligne de ce fichier n'écrit.** Pas un `INSERT`, pas un `UPDATE`,
 //! pas un `DELETE` — c'est vérifiable d'un coup d'œil, et c'est le second
-//! intérêt du regroupement. Les deux **écritures** hors schéma vivent ailleurs,
-//! chacune dans son fichier : `repo/themes.rs` et `repo/people.rs`.
+//! intérêt du regroupement. Les **trois** écritures hors schéma vivent ailleurs,
+//! chacune dans son fichier : `repo/themes.rs`, `repo/people.rs` et, depuis B5,
+//! `repo/consents.rs`.
 
 use kernel::error::Result;
 use sqlx::PgExecutor;
@@ -137,8 +147,15 @@ pub struct ContexteEdition {
     pub timezone: String,
     /// Nomme le fuseau à l'écran — « heure de Belém ».
     pub city: Option<String>,
+    /// Ouverture de l'édition. **Le repli de créneau d'une séance naissante s'y
+    /// appuie** quand le dossier n'a proposé aucun horaire (B5, R4).
+    pub starts_at: OffsetDateTime,
     pub ends_at: OffsetDateTime,
     pub status: String,
+    /// La programmation est-elle déjà publique ? Change le libellé du bouton du
+    /// planificateur — et **ce module ne l'écrit jamais** : elle est posée par
+    /// l'émetteur de l'annonce (B5, contracts/events.md § 3).
+    pub programme_published_at: Option<OffsetDateTime>,
 }
 
 pub async fn contexte_edition<'e>(
@@ -146,7 +163,8 @@ pub async fn contexte_edition<'e>(
     event_id: EventId,
 ) -> Result<Option<ContexteEdition>> {
     let ligne = sqlx::query!(
-        r#"SELECT id, timezone::text AS "timezone!", city, ends_at, status::text AS "status!"
+        r#"SELECT id, timezone::text AS "timezone!", city, starts_at, ends_at,
+                  status::text AS "status!", programme_published_at
              FROM event.events WHERE id = $1"#,
         event_id.as_uuid()
     )
@@ -157,8 +175,10 @@ pub async fn contexte_edition<'e>(
         event_id: l.id,
         timezone: l.timezone,
         city: l.city,
+        starts_at: l.starts_at,
         ends_at: l.ends_at,
         status: l.status,
+        programme_published_at: l.programme_published_at,
     }))
 }
 
@@ -775,3 +795,14 @@ pub async fn historique_organisation<'e>(
 mod fiches;
 
 pub use fiches::*;
+
+// -----------------------------------------------------------------------------
+// Les lectures de la GRILLE, ajoutées par B5, dans le même espace de noms
+//
+// Jours, salles, fils, canaux, et les valeurs admises d'une réponse. Elles
+// répondent toutes à une question de CE module — « où cette séance est-elle
+// installée ? », « à quel fil peut-on la rattacher ? » — et n'écrivent rien.
+// -----------------------------------------------------------------------------
+mod grille;
+
+pub use grille::*;

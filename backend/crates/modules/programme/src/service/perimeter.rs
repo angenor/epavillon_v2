@@ -13,7 +13,8 @@
 //!
 //! B3 remontait d'un enfant à son édition. Ici, un **message** appartient à un
 //! **dossier**, qui appartient à une **édition** : la remontée est de deux
-//! sauts, et la revue suit le même chemin.
+//! sauts, et la revue suit le même chemin. B5 en ajoute deux : une **séance**
+//! remonte d'un saut, une **inscription** de deux.
 //!
 //! # Ce que la résolution ne divulgue jamais
 //!
@@ -34,17 +35,22 @@ use kernel::auth::Perimeter;
 use kernel::error::{ApiError, Result};
 use sqlx::PgPool;
 
-use crate::domain::ids::{CommentId, EventId, ProposalId, ReviewId};
-use crate::repo::cross;
+use crate::domain::ids::{CommentId, EventId, ProposalId, RegistrationId, ReviewId, SessionId};
+use crate::repo::{cross, sessions};
 
-/// Ce qu'une route paramétrée désigne. Quatre portes d'entrée, et c'est la
-/// liste exhaustive.
+/// Ce qu'une route paramétrée désigne. Six portes d'entrée, et c'est la liste
+/// exhaustive.
 #[derive(Debug, Clone, Copy)]
 pub enum Cible {
     Edition(EventId),
     Dossier(ProposalId),
     Message(CommentId),
     Revue(ReviewId),
+    /// B5 : une séance appartient directement à son édition.
+    Seance(SessionId),
+    /// B5 : une inscription appartient à une séance, qui appartient à une
+    /// édition — **deux sauts**, comme un message.
+    Inscription(RegistrationId),
 }
 
 /// **Résoudre l'ascendance, puis vérifier le périmètre.**
@@ -58,6 +64,8 @@ pub async fn edition_dans_le_perimetre(
         Cible::Dossier(id) => cross::event_id_of_proposal(pool, id).await?,
         Cible::Message(id) => cross::event_id_of_comment(pool, id).await?,
         Cible::Revue(id) => cross::event_id_of_review(pool, id).await?,
+        Cible::Seance(id) => sessions::event_id_of_session(pool, id).await?,
+        Cible::Inscription(id) => sessions::event_id_of_registration(pool, id).await?,
     };
 
     let edition = edition.ok_or_else(ApiError::not_found)?;

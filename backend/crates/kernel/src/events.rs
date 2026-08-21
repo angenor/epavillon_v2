@@ -86,6 +86,19 @@ impl ConsumerRegistry {
         self
     }
 
+    /// Entrée en lot, par symétrie exacte avec `JobRegistry::register_all` : un
+    /// module déclare ses consommateurs, le worker les monte sans les connaître.
+    ///
+    /// Sans elle, `worker/main.rs` grossirait d'une ligne par consommateur, et
+    /// l'asymétrie avec les travaux différés inviterait à la contourner.
+    pub fn register_all(
+        mut self,
+        consumers: impl IntoIterator<Item = std::sync::Arc<dyn EventConsumer>>,
+    ) -> Self {
+        self.consumers.extend(consumers);
+        self
+    }
+
     pub fn interested<'a>(
         &'a self,
         event_type: &'a str,

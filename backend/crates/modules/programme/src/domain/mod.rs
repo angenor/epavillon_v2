@@ -6,8 +6,11 @@
 //! base ; ici, chacune se prouve seule — et `tests/domaine.rs` les éprouve sans
 //! ouvrir une connexion.
 
+pub mod answers;
+pub mod birth;
 pub mod blind;
 pub mod bulk;
+pub mod derived;
 pub mod desk;
 pub mod draft;
 pub mod eligibility;
@@ -16,6 +19,8 @@ pub mod ids;
 pub mod limits;
 pub mod ownership;
 pub mod permissions;
+pub mod registration;
 pub mod sanitize;
+pub mod sessions;
 pub mod slug;
 pub mod transitions;

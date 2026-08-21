@@ -1,6 +1,7 @@
 //! Les règles du module. Un fichier par geste.
 
 pub mod backfill;
+pub mod birth;
 pub mod comments;
 pub mod desk;
 pub mod detail;
@@ -9,6 +10,10 @@ pub mod draft_read;
 pub mod draft_write;
 pub mod list;
 pub mod perimeter;
+pub mod planner;
+pub mod public_schedule;
+pub mod publication;
+pub mod registration;
 pub mod resubmit;
 pub mod review;
 pub mod submit;

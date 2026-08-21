@@ -95,6 +95,23 @@ pub async fn tenter(
 
     match issue {
         Ok(_) => {
+            // 🔴 L'UNIQUE HAMEÇON DE LA NAISSANCE DES SÉANCES (B5, R3).
+            //
+            // Il n'y en a qu'un parce que **les deux chemins d'acceptation
+            // passent ici** : la décision individuelle (`routes/admin_desk.rs`)
+            // appelle `tenter`, et l'action groupée l'appelle aussi, dossier par
+            // dossier. Le troisième chemin d'écriture d'état — la reprise v1 de
+            // `service/backfill.rs` — **n'écrit pas `status`** : il journalise
+            // sans réveiller le déclencheur, et ne doit surtout pas créer de
+            // séances, les activités de la v1 étant importées par le fichier de
+            // migration.
+            //
+            // **Dans la transaction**, et c'est le point : un dossier retenu A
+            // ses séances, ou n'est pas retenu.
+            if vers == ProposalStatus::Accepted {
+                crate::service::birth::faire_naitre(&mut tx, dossier.as_uuid()).await?;
+            }
+
             // La ligne de journal est écrite par le déclencheur, DANS cette
             // transaction : elle se lit donc avant de valider, sur la même
             // connexion. La lire après validation rendrait la ligne d'une

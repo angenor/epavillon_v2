@@ -7,6 +7,10 @@ pub mod admin_ops;
 pub mod detail;
 pub mod openapi;
 pub mod people;
+pub mod planner;
+pub mod public_schedule;
+pub mod registrations;
+pub mod sessions;
 pub mod submission;
 pub mod workspace;
 

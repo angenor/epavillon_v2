@@ -19,13 +19,14 @@
 //! sens ici, et un administrateur de la COP31 n'entre pas dans l'espace d'une
 //! organisation dont il n'est pas membre — il a la fiche du comité pour cela.
 //!
-//! # Deux blocs que ce jalon ne peut pas remplir, et qui ne mentent pas
+//! # Un bloc rempli par B5, un autre qui attend B6
 //!
-//! **Les séances programmées** (`sessions`) appartiennent à `075_programme_
-//! sessions.sql`, livré par B5 : la liste part **vide**, jamais absente — le
-//! champ existe au contrat, et le supprimer ferait échouer l'écran. **Les
-//! rappels** appartiennent à B6, pour la même raison. Ce sont des faits de
-//! calendrier, pas des oublis (écart n° 108).
+//! **Les séances programmées** (`sessions`) sont servies depuis B5 : chacune
+//! avec sa salle et **trois nombres** — confirmées, en attente, jauge. **Aucun
+//! nom d'inscrit n'y entre**, et le test balaie la charge utile entière pour
+//! s'en assurer (écart n° 36). **Les rappels** appartiennent toujours à B6 : la
+//! liste part **vide**, jamais absente — le champ existe au contrat, et le
+//! supprimer ferait échouer l'écran (écart n° 108).
 
 use kernel::error::{ApiError, Result};
 use serde::Serialize;
@@ -56,8 +57,9 @@ pub struct SuiviDeDossier {
     /// Demandes de correction **encore ouvertes** — c'est LE nombre que l'écran
     /// crie.
     pub open_change_requests: i64,
-    /// **Vide jusqu'à B5.** Voir l'en-tête du fichier.
-    pub sessions: Vec<serde_json::Value>,
+    /// Les séances programmées, **vides tant que le dossier n'est pas retenu**.
+    /// Trois nombres par séance, et jamais un nom.
+    pub sessions: Vec<crate::domain::sessions::TrackedSession>,
 }
 
 /// Le détail d'un dossier côté organisation — `ProposalFile`.
@@ -150,7 +152,8 @@ pub async fn espace(
         None => (None, None),
     };
 
-    let actions = actions_en_attente(&proposals_suivis, &membres, open_call.as_ref());
+    let mut actions = actions_en_attente(&proposals_suivis, &membres, open_call.as_ref());
+    actions.extend(comptes_rendus_manquants(state, &proposals_suivis).await?);
 
     Ok(EspaceOrganisation {
         organization,
@@ -310,7 +313,7 @@ async fn suivre(state: &ProgrammeState, dossier: Fiche) -> Result<SuiviDeDossier
         edition,
         transitions: transitions::journal(state.pool(), id).await?,
         open_change_requests: ouvertes,
-        sessions: Vec::new(),
+        sessions: crate::repo::sessions::seances_suivies(state.pool(), id.as_uuid()).await?,
     })
 }
 
@@ -331,11 +334,56 @@ fn sans_le_comite(dossier: Fiche) -> Fiche {
     }
 }
 
+/// La cinquième nature d'action, arrivée avec B5 : **une séance terminée dont
+/// le compte rendu manque**.
+///
+/// Elle nomme la séance, et non le dossier : une organisation à trois
+/// occurrences doit savoir laquelle réclame son compte rendu. `due_at` porte la
+/// fin de la séance — c'est depuis ce moment-là que le compte rendu est dû.
+///
+/// Aucun écran n'écrit encore ce compte rendu (écart n° 122) ; l'action, elle,
+/// est servie, parce qu'elle satisfait le critère d'entrée du bloc : c'est une
+/// chose que l'organisation **seule** peut débloquer.
+async fn comptes_rendus_manquants(
+    state: &ProgrammeState,
+    dossiers: &[SuiviDeDossier],
+) -> Result<Vec<ActionEnAttente>> {
+    let mut actions = Vec::new();
+
+    for suivi in dossiers {
+        if suivi.sessions.is_empty() {
+            continue;
+        }
+
+        let manquants =
+            crate::repo::sessions::comptes_rendus_manquants(state.pool(), suivi.proposal.id)
+                .await?;
+
+        for (session_id, titre, fin) in manquants {
+            actions.push(ActionEnAttente {
+                kind: "session_report_missing".to_owned(),
+                proposal_id: Some(suivi.proposal.id),
+                reference_code: Some(suivi.proposal.reference_code.clone()),
+                subject: titre
+                    .get("fr")
+                    .and_then(|t| t.as_str())
+                    .unwrap_or_default()
+                    .to_owned(),
+                count: 1,
+                due_at: Some(fin),
+                target: format!("/espace/dossiers/{}?seance={session_id}", suivi.proposal.id),
+            });
+        }
+    }
+
+    Ok(actions)
+}
+
 /// Ce qui attend une action **de l'organisation**.
 ///
-/// Quatre natures sur cinq sont calculables aujourd'hui. La cinquième —
-/// « compte rendu de séance manquant » — attend B5 : sans séances, il n'y a
-/// aucun compte rendu à réclamer.
+/// Quatre natures sur cinq se calculent sans requête, sur ce que le suivi porte
+/// déjà. La cinquième — « compte rendu de séance manquant » — demande une
+/// lecture et vit juste au-dessus.
 fn actions_en_attente(
     dossiers: &[SuiviDeDossier],
     membres: &[LigneDAdhesion],

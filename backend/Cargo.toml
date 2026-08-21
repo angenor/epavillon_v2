@@ -49,6 +49,12 @@ opentelemetry = "0.32"
 opentelemetry-otlp = { version = "0.32", features = ["http-proto", "reqwest-blocking-client"] }
 opentelemetry_sdk = { version = "0.32", features = ["rt-tokio"] }
 rand_core = { version = "0.6", features = ["getrandom"] }
+# Honore la règle `pattern` d'un champ de formulaire d'inscription (B5, R27).
+# **Déjà dans l'arbre de compilation** en dépendance transitive : la déclarer
+# ici ne fait rien entrer de neuf, elle rend l'usage direct visible en revue.
+# Une expression fautive est une donnée d'administrateur : la règle est ignorée
+# avec une trace, jamais transformée en refus d'inscription.
+regex = "1"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

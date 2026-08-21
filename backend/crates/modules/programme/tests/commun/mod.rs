@@ -34,6 +34,10 @@
 
 #![allow(dead_code)]
 
+/// Ce que B5 ajoute : une édition complète, un dossier prêt à être retenu,
+/// et de quoi relire une séance en base.
+pub mod seances;
+
 use kernel::config::Config;
 use kernel::context::RequestContext;
 use kernel::testing::TestDb;

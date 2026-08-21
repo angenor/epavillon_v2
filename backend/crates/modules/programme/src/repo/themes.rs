@@ -1,5 +1,13 @@
-//! **Écriture hors schéma n° 1 : les thématiques d'un dossier** (R11, écarts
-//! n° 3 et n° 94).
+//! **Écriture hors schéma n° 1 : les thématiques d'un dossier — et, depuis B5,
+//! celles d'une séance** (R11, écarts n° 3 et n° 94).
+//!
+//! # Deux entités, un seul fichier
+//!
+//! B5 recopie les thématiques du dossier sur chacune de ses séances : la
+//! programmation publique les affiche, et `v_public_schedule` les lit sur
+//! `('programme', 'sessions', …)`. C'est **la même dérogation**, sur une seconde
+//! entité — et l'élargir ici plutôt que d'ouvrir un second fichier garde la
+//! propriété qui la rend défendable : un seul endroit où un ajout se discute.
 //!
 //! # Pourquoi cette table n'a pas d'autre porte
 //!
@@ -37,6 +45,9 @@ use uuid::Uuid;
 /// ici, jamais reçue.**
 const SCHEMA: &str = "programme";
 const TABLE: &str = "proposals";
+/// La seconde entité, posée par B5. **Littérale elle aussi** : accepter la table
+/// dans une charge utile rouvrirait l'écart n° 3 en entier.
+const TABLE_SEANCES: &str = "sessions";
 /// La taxonomie attendue. **Un code, pas un libellé** : les libellés vivent en
 /// base et se modifient au back-office.
 const TAXONOMIE: &str = "activity_theme";
@@ -96,6 +107,42 @@ pub async fn poser(conn: &mut PgConnection, proposal_id: Uuid, codes: &[String])
     if poses < codes.len() as i64 {
         return Err(nommer_le_code_refuse(conn, codes).await);
     }
+
+    Ok(())
+}
+
+/// Recopier les thématiques d'un dossier sur une **séance**.
+///
+/// Le triplet de destination est `('programme', 'sessions', <id>)`, écrit
+/// littéralement. La recopie se fait **par identifiants de termes**, sans passer
+/// par les codes : les termes sont déjà posés sur le dossier, les relire par
+/// leur code ferait resurgir un refus qui n'a pas lieu d'être ici — la
+/// classification a été validée au dépôt.
+pub async fn recopier_sur_la_seance(
+    conn: &mut PgConnection,
+    proposal_id: Uuid,
+    session_id: Uuid,
+) -> Result<()> {
+    sqlx::query!(
+        "INSERT INTO reference.entity_terms
+             (entity_schema, entity_table, entity_id, term_id, sort_order)
+         SELECT $1, $2, $4, source.term_id, source.sort_order
+           FROM reference.entity_terms source
+           JOIN reference.taxonomy_terms t ON t.id = source.term_id
+          WHERE source.entity_schema = $1
+            AND source.entity_table = $5
+            AND source.entity_id = $3
+            AND t.taxonomy_code = $6
+         ON CONFLICT DO NOTHING",
+        SCHEMA,
+        TABLE_SEANCES,
+        proposal_id,
+        session_id,
+        TABLE,
+        TAXONOMIE
+    )
+    .execute(conn)
+    .await?;
 
     Ok(())
 }

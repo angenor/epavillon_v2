@@ -32,6 +32,15 @@ pub const PROPOSAL_DECIDE: &str = "programme.proposal.decide";
 /// sans arête (research.md § R12, précédent de B3).
 pub const CALL_MANAGE: &str = "event.call.manage";
 
+/// **Les deux permissions de B5.** Détenir l'une n'accorde pas l'autre, et le
+/// modèle en tire une conséquence qui surprend : le rôle de programmation
+/// détient la première et **pas** la seconde (écart n° 119). Une chargée de
+/// programmation compose la grille sans pouvoir ouvrir la liste nominative des
+/// inscrits — une ligne de la table des droits, modifiable au back-office, pas
+/// une fatalité du code.
+pub const SESSION_SCHEDULE: &str = "programme.session.schedule";
+pub const REGISTRATION_MANAGE: &str = "programme.registration.manage";
+
 pub struct ProposalSubmit;
 impl PermissionSpec for ProposalSubmit {
     const CODE: &'static str = PROPOSAL_SUBMIT;
@@ -55,4 +64,14 @@ impl PermissionSpec for ProposalDecide {
 pub struct CallManage;
 impl PermissionSpec for CallManage {
     const CODE: &'static str = CALL_MANAGE;
+}
+
+pub struct SessionSchedule;
+impl PermissionSpec for SessionSchedule {
+    const CODE: &'static str = SESSION_SCHEDULE;
+}
+
+pub struct RegistrationManage;
+impl PermissionSpec for RegistrationManage {
+    const CODE: &'static str = REGISTRATION_MANAGE;
 }

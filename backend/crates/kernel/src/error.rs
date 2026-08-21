@@ -141,6 +141,30 @@ codes! {
     ProposalUnknownReference => "PROPOSAL_UNKNOWN_REFERENCE", StatusCode::UNPROCESSABLE_ENTITY,
         "La valeur choisie n'existe pas.";
 
+    // --- Sessions et inscriptions (B5) ----------------------------------------
+    // Huit, et pas plus. Cinq refus d'inscription sont déjà des membres d'union
+    // du contrat du front et sortent en 200 avec leur valeur : inscriptions
+    // closes, pas encore ouvertes, jauge atteinte, déjà inscrit, bascule en
+    // liste d'attente. Et le PLANIFICATEUR ne refuse rien : aucun chevauchement
+    // ne produit d'erreur, à aucun statut — c'est le contrat le plus important
+    // du module.
+    SessionDerivedField => "SESSION_DERIVED_FIELD", StatusCode::UNPROCESSABLE_ENTITY,
+        "Cette valeur est déduite par le système : elle ne se saisit pas.";
+    SessionUnknownReference => "SESSION_UNKNOWN_REFERENCE", StatusCode::UNPROCESSABLE_ENTITY,
+        "La valeur choisie n'existe pas, ou n'appartient pas à cette édition.";
+    SessionTrackEventMismatch => "SESSION_TRACK_EVENT_MISMATCH", StatusCode::UNPROCESSABLE_ENTITY,
+        "Cette journée spéciale appartient à une autre édition.";
+    RegistrationNotAccepted => "REGISTRATION_NOT_ACCEPTED", StatusCode::UNPROCESSABLE_ENTITY,
+        "Cette séance ne prend pas d'inscription.";
+    RegistrationAnswerInvalid => "REGISTRATION_ANSWER_INVALID", StatusCode::UNPROCESSABLE_ENTITY,
+        "Cette réponse n'est pas valide.";
+    RegistrationConsentRequired => "REGISTRATION_CONSENT_REQUIRED", StatusCode::UNPROCESSABLE_ENTITY,
+        "Cette question porte une donnée personnelle sensible : votre accord est nécessaire pour y répondre.";
+    RegistrationAccountRequired => "REGISTRATION_ACCOUNT_REQUIRED", StatusCode::UNAUTHORIZED,
+        "L'inscription à cette séance demande un compte. Veuillez vous connecter.";
+    RegistrationLocked => "REGISTRATION_LOCKED", StatusCode::UNPROCESSABLE_ENTITY,
+        "Cette inscription ne peut plus être modifiée. Elle ne vous engage plus à rien.";
+
     // MAIL_RELAY_UNREACHABLE n'est PAS ici : il ne franchit aucune réponse
     // HTTP. Il vit dans `mail.rs`, d'où il part vers `platform.jobs.last_error`.
 }
