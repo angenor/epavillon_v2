@@ -10,6 +10,7 @@ members = [
     "crates/modules/identity",
     "crates/modules/org",
     "crates/modules/event",
+    "crates/modules/programme",
     "crates/api",
     "crates/worker",
 ]
@@ -25,8 +26,13 @@ contracts = { path = "crates/contracts" }
 identity = { path = "crates/modules/identity" }
 org = { path = "crates/modules/org" }
 event = { path = "crates/modules/event" }
+programme = { path = "crates/modules/programme" }
 
 actix-web = "4.14"
+# Assainissement du HTML restreint de la présentation détaillée (B4, R14).
+# Fondée sur html5ever : seul un analyseur conforme refuse ce qu'un navigateur
+# accepterait — attribut d'événement, `javascript:` encodé, balise mal fermée.
+ammonia = "4"
 argon2 = "0.5"
 async-trait = "0.1"
 base64 = "0.22"

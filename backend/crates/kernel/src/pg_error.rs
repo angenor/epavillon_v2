@@ -254,6 +254,15 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
         // Trigger du modèle : le message français existe déjà, on le rend.
         ("23001", _) => ApiError::with_message(ValidationFailed, message),
 
+        // **Un `check_violation` SANS nom de contrainte** ne peut venir que
+        // d'un `RAISE … USING ERRCODE = 'check_violation'` dans un déclencheur :
+        // une vraie contrainte `CHECK` porte toujours son nom. Le message est
+        // alors écrit en français par le modèle, pour être lu — `Note 6.00
+        // supérieure au maximum autorisé (5.00) pour ce critère.` —, et le
+        // repli anonyme le transformait en 500 (écart n° 106, relevé en B4 :
+        // le contrat annonçait un 422, la mesure a rendu un 500).
+        ("23514", "") => ApiError::with_message(ValidationFailed, message),
+
         // Les trois exceptions que `org.merge_organizations()` et
         // `org.tg_forbid_merge_chains()` lèvent. **Leurs codes ont été relevés
         // SUR LA BASE**, jamais recopiés d'un document : les noms de condition

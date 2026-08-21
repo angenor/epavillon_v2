@@ -10,6 +10,7 @@ kernel.workspace = true
 identity.workspace = true
 org.workspace = true
 event.workspace = true
+programme.workspace = true
 
 actix-web.workspace = true
 dotenvy.workspace = true

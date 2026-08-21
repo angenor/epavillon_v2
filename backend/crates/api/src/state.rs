@@ -25,6 +25,7 @@ pub struct AppState {
     pub identity: identity::IdentityState,
     pub org: org::OrgState,
     pub event: event::EventState,
+    pub programme: programme::ProgrammeState,
     /// Origines acceptées sur une écriture. Celle du site, et rien d'autre.
     pub allowed_origins: Vec<String>,
 }
@@ -42,6 +43,7 @@ impl AppState {
         let identity = identity::IdentityState::new(db.clone(), config.clone(), passwords.clone())?;
         let org = org::OrgState::new(db.clone(), config.clone());
         let event = event::EventState::new(db.clone(), config.clone());
+        let programme = programme::ProgrammeState::new(db.clone(), config.clone());
 
         Ok(Self {
             db,
@@ -53,6 +55,7 @@ impl AppState {
             identity,
             org,
             event,
+            programme,
             allowed_origins,
         })
     }

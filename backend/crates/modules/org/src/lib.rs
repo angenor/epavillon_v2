@@ -36,16 +36,15 @@ pub use state::OrgState;
 /// le second est muet, et rien ne le signale à la compilation. Le défaut s'est
 /// produit, et `crates/api/tests/routes_org.rs` est écrit pour qu'il ne se
 /// reproduise pas.
+///
+/// **`/organizations` n'est plus ouvert ici depuis B4** : le module
+/// Propositions y dépose deux routes, et le préfixe est donc composé une seule
+/// fois par l'API, sur le patron de `/people`. Voir [`organization_routes`].
 pub fn routes(cfg: &mut ServiceConfig) {
     use actix_web::web;
 
-    cfg.service(
-        web::scope("/organizations")
-            .configure(routes::public::configurer)
-            .configure(routes::memberships::organisations),
-    )
-    .service(web::scope("/memberships").configure(routes::memberships::adhesions))
-    .service(web::scope("/admin/organizations").configure(routes::admin::configurer));
+    cfg.service(web::scope("/memberships").configure(routes::memberships::adhesions))
+        .service(web::scope("/admin/organizations").configure(routes::admin::configurer));
 }
 
 /// Les routes du module qui vivent sous `/people`, préfixe que le module
@@ -53,6 +52,18 @@ pub fn routes(cfg: &mut ServiceConfig) {
 /// scope existant : deux scopes du même préfixe ne se complètent pas.
 pub fn people_routes(cfg: &mut ServiceConfig) {
     routes::memberships::personnes(cfg);
+}
+
+/// Les routes du module qui vivent sous `/organizations`, **sans le préfixe**.
+///
+/// Le scope était ouvert ici jusqu'à B4 ; le module Propositions y déposant
+/// désormais l'espace d'une organisation et ses éditions, il est composé par
+/// l'API — même patron que `/people` depuis B1, appliqué pour la même raison.
+/// **Aucune route n'a changé de chemin** : l'ordre d'enregistrement est celui
+/// d'avant, et `crates/api/tests/routes_org.rs` frappe les vingt et une.
+pub fn organization_routes(cfg: &mut ServiceConfig) {
+    routes::public::configurer(cfg);
+    routes::memberships::organisations(cfg);
 }
 
 /// Travaux différés du module, montés par le worker sans qu'il les connaisse.

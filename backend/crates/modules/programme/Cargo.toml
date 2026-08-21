@@ -1,0 +1,31 @@
+[package]
+name = "programme"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+# Principe II : un crate de module ne dépend QUE de kernel et de contracts.
+# Toute autre ligne `path = "../..."` ici est un échec de revue — et
+# `cargo tree -p programme | grep -E 'identity|org|event'` doit ne rien rendre.
+[dependencies]
+kernel.workspace = true
+contracts.workspace = true
+
+actix-web.workspace = true
+# Seule dépendance NOUVELLE du jalon : l'assainissement du HTML de la
+# présentation détaillée. Une fonction pure sur une chaîne, fondée sur un
+# analyseur conforme — research.md § R14.
+ammonia.workspace = true
+async-trait.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+time.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+utoipa.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+kernel = { workspace = true, features = ["testing"] }

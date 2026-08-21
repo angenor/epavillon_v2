@@ -122,6 +122,25 @@ codes! {
     EventUnknownReference => "EVENT_UNKNOWN_REFERENCE", StatusCode::UNPROCESSABLE_ENTITY,
         "La valeur choisie n'existe pas.";
 
+    // --- Propositions (B4) ----------------------------------------------------
+    // Six, et pas plus. Sept refus métier de ce module sont déjà des membres
+    // d'union du contrat du front et sortent en 200 avec leur discriminant :
+    // appel clos, plafond atteint, transition impossible, motif exigé, et les
+    // trois écarts d'une action groupée. Aucun code n'est ajouté pour la
+    // recevabilité — ses refus sont des RÉPONSES, pas des erreurs.
+    ProposalNotEditable => "PROPOSAL_NOT_EDITABLE", StatusCode::UNPROCESSABLE_ENTITY,
+        "Ce dossier n'est plus modifiable. Vous pouvez en déposer un nouveau.";
+    ProposalSpeakerIdentityLocked => "PROPOSAL_SPEAKER_IDENTITY_LOCKED", StatusCode::UNPROCESSABLE_ENTITY,
+        "Cette personne possède un compte : son identité lui appartient et ne se modifie pas depuis un dossier.";
+    ProposalReviewNotAssigned => "PROPOSAL_REVIEW_NOT_ASSIGNED", StatusCode::FORBIDDEN,
+        "Ce dossier ne vous est pas confié : vous pouvez le lire, pas le noter.";
+    ProposalUnknownTerm => "PROPOSAL_UNKNOWN_TERM", StatusCode::UNPROCESSABLE_ENTITY,
+        "Cette thématique n'existe pas.";
+    ProposalTextTooLong => "PROPOSAL_TEXT_TOO_LONG", StatusCode::UNPROCESSABLE_ENTITY,
+        "Ce texte dépasse la longueur autorisée.";
+    ProposalUnknownReference => "PROPOSAL_UNKNOWN_REFERENCE", StatusCode::UNPROCESSABLE_ENTITY,
+        "La valeur choisie n'existe pas.";
+
     // MAIL_RELAY_UNREACHABLE n'est PAS ici : il ne franchit aucune réponse
     // HTTP. Il vit dans `mail.rs`, d'où il part vers `platform.jobs.last_error`.
 }

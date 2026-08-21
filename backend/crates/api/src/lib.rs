@@ -64,22 +64,54 @@ pub fn build_app(
     if etat.modules.is_mounted("event") {
         portee = portee.configure(event::routes);
     }
+    if etat.modules.is_mounted("programme") {
+        portee = portee.configure(programme::routes);
+        // `/proposal-comments` n'appartient qu'à ce module : aucun autre n'y
+        // dépose, il n'y a donc rien à composer ici.
+        portee = portee.configure(programme::comment_routes);
+    }
 
-    // **Le scope `/people` est composé ici, et une seule fois.** Deux modules y
-    // déposent des routes — l'identité pour les personnes, les organisations
-    // pour leurs adhésions —, et deux `web::scope` du même préfixe **ne se
-    // complètent pas** : Actix retient le premier dont le préfixe correspond et
-    // rend 404 si la route n'y figure pas, sans essayer le suivant. Le défaut
-    // s'est produit sur `/organizations` avant d'être vu ici.
+    // **Le scope `/people` est composé ici, et une seule fois.** Trois modules y
+    // déposent des routes depuis B4 — l'identité pour les personnes, les
+    // organisations pour leurs adhésions, les propositions pour la recherche
+    // d'un intervenant par son adresse —, et deux `web::scope` du même préfixe
+    // **ne se complètent pas** : Actix retient le premier dont le préfixe
+    // correspond et rend 404 si la route n'y figure pas, sans essayer le
+    // suivant. Le défaut s'est produit sur `/organizations` avant d'être vu ici.
     let identite = etat.modules.is_mounted("identity");
     let organisations = etat.modules.is_mounted("org");
-    if identite || organisations {
+    let propositions = etat.modules.is_mounted("programme");
+    if identite || organisations || propositions {
         portee = portee.service(web::scope("/people").configure(move |cfg| {
             if identite {
                 identity::people_routes(cfg);
             }
             if organisations {
                 org::people_routes(cfg);
+            }
+            if propositions {
+                programme::people_routes(cfg);
+            }
+        }));
+    }
+
+    // **Le scope `/organizations` est composé ici depuis B4, et une seule
+    // fois.** Il appartenait au module Organisations, qui l'ouvrait lui-même ;
+    // le module Propositions y déposant l'espace d'une organisation et ses
+    // éditions, le laisser là aurait rendu ces deux routes **muettes** — c'est
+    // exactement le défaut qui a coûté trois routes sur vingt et une en B2, et
+    // le reproduire alors qu'il est raconté six lignes plus haut serait
+    // difficile à défendre.
+    //
+    // **Aucune route n'a changé de chemin**, et l'ordre d'enregistrement est
+    // celui d'avant : `org` d'abord, `programme` ensuite.
+    if organisations || propositions {
+        portee = portee.service(web::scope("/organizations").configure(move |cfg| {
+            if organisations {
+                org::organization_routes(cfg);
+            }
+            if propositions {
+                programme::organization_routes(cfg);
             }
         }));
     }
@@ -104,6 +136,7 @@ pub fn build_app(
         .app_data(web::Data::new(etat.identity.clone()))
         .app_data(web::Data::new(etat.org.clone()))
         .app_data(web::Data::new(etat.event.clone()))
+        .app_data(web::Data::new(etat.programme.clone()))
         .app_data(web::Data::from(etat.identity.token_codec()))
         .app_data(web::Data::new(etat.clone()))
         .app_data(corps_json())
