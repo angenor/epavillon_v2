@@ -354,6 +354,19 @@ pub async fn ecrire_la_diffusion(
 /// `registered_count` compte `registered` **et** `attended`, exactement comme
 /// `v_public_schedule` et comme le contrôle de jauge : trois définitions du même
 /// mot produiraient trois chiffres.
+///
+/// # Les rappels viennent de la fonction du modèle, jamais d'une seconde requête
+///
+/// `engagement.session_reminder_schedule()` a **deux** lecteurs : cette
+/// composition, et la lecture par séance du module Engagement. Deux agrégations
+/// écrites séparément divergeraient au premier ajustement de la consolidation
+/// d'état — et la divergence serait **silencieuse** : un nombre de destinataires
+/// faux ressemble à un nombre juste (FR-052, écart n° 108).
+///
+/// C'est une **lecture** hors schéma, le geste ordinaire décrit par
+/// [`crate::repo::cross`] : la question porte sur les séances de ce module. Les
+/// noms de clés reprennent `ReminderSlot` du contrat du front, et un test les
+/// confronte à ceux que le module Engagement sérialise.
 pub async fn seances_suivies<'e>(
     executor: impl PgExecutor<'e>,
     proposal_id: Uuid,
@@ -367,7 +380,19 @@ pub async fn seances_suivies<'e>(
                       AND rg.status IN ('registered', 'attended')) AS "confirmes!",
                   (SELECT count(*) FROM programme.registrations rg
                     WHERE rg.session_id = s.id AND rg.status = 'waitlisted')
-                      AS "en_attente!"
+                      AS "en_attente!",
+                  COALESCE((
+                      SELECT jsonb_agg(jsonb_build_object(
+                                 'offset_before',   sch.offset_minutes,
+                                 'channel',         sch.channel,
+                                 'scheduled_for',   sch.scheduled_for,
+                                 'status',          sch.status,
+                                 'recipient_count', sch.recipient_count,
+                                 'skip_reason',     sch.skip_reason,
+                                 'sent_at',         sch.sent_at)
+                             ORDER BY sch.offset_minutes DESC, sch.channel)
+                        FROM engagement.session_reminder_schedule(s.id) sch
+                  ), '[]'::jsonb) AS "rappels!"
              FROM programme.sessions s
              LEFT JOIN event.rooms r ON r.id = s.room_id
             WHERE s.proposal_id = $1
@@ -385,9 +410,10 @@ pub async fn seances_suivies<'e>(
             registered_count: l.confirmes,
             waitlisted_count: l.en_attente,
             capacity: l.capacity,
-            // **Vide jusqu'à B6, jamais absente** : le champ existe au contrat,
-            // et le supprimer ferait échouer l'écran (écart n° 108).
-            reminders: Vec::new(),
+            reminders: match l.rappels {
+                serde_json::Value::Array(lignes) => lignes,
+                _ => Vec::new(),
+            },
         })
         .collect())
 }

@@ -35,25 +35,45 @@ async fn main() {
             std::process::exit(1);
         });
 
-    // **Le premier consommateur d'un module métier du dépôt** : la machinerie
-    // du noyau n'avait jamais servi ailleurs que pour la télémétrie. `programme`
-    // reçoit l'annonce de publication de `event` et rend publiques les séances
-    // désignées — l'autre moitié d'un geste partagé entre deux schémas.
+    // **Le mailer est ENVELOPPÉ**, exactement comme dans l'API : la liste de
+    // suppression et le journal d'expédition s'appliquent donc aussi aux
+    // courriels que les travaux différés de B1 et B2 envoient, **sans qu'aucun
+    // de ces modules ne change d'une ligne** (écart n° 133).
+    let courrier = engagement::GardedMailer::envelopper(&config.mail, db.clone());
+
     let consommateurs = ConsumerRegistry::new()
         .register(TelemetryConsumer)
-        .register_all(programme::event_consumers());
-    let courrier = kernel::mail::build(&config.mail);
+        // `programme` reçoit l'annonce de publication de `event` et rend
+        // publiques les séances désignées — l'autre moitié d'un geste partagé
+        // entre deux schémas (B5).
+        .register_all(programme::event_consumers())
+        // **Les deux plus gros consommateurs du dépôt.** Le premier écoute les
+        // inscriptions et les séances et branche sur le STATUT porté par la
+        // charge utile — `programme.registration.confirmed`, que le modèle
+        // nomme lui-même, N'EXISTE PAS, et un consommateur écrit d'après ce
+        // commentaire ne serait jamais réveillé (écart n° 126). Le second
+        // écoute tout : la correspondance entre un événement et un avis est une
+        // DONNÉE, portée par `notification_types.code`.
+        .register_all(engagement::event_consumers(db.clone(), courrier.clone()));
+
     let travaux = JobRegistry::new()
         .register_all(identity::job_handlers(
             db.clone(),
             &config,
             courrier.clone(),
         ))
-        .register_all(org::job_handlers(db.clone(), &config, courrier))
+        .register_all(org::job_handlers(db.clone(), &config, courrier.clone()))
         // Ce module n'envoie aucun courriel : son unique travail clôt les
-        // appels échus, et le rappel d'échéance aux organisations appartient à
-        // B6.
-        .register_all(event::job_handlers(db.clone(), &config));
+        // appels échus.
+        .register_all(event::job_handlers(db.clone(), &config))
+        // Trois travaux : le traitement d'un objet déposé — mis en file par le
+        // DÉCLENCHEUR du modèle, jamais par le service —, la purge et la
+        // réconciliation des compteurs de quota. Les trois déclarent la file
+        // « media », que le worker n'écoute que pour cette raison.
+        .register_all(media::job_handlers(db.clone(), &config))
+        // Deux travaux : l'envoi d'un rappel — mis en file par la FONCTION du
+        // modèle — et la préparation des partitions mensuelles.
+        .register_all(engagement::job_handlers(db.clone(), &config, courrier));
 
     // Les travaux récurrents se replanifient eux-mêmes ; le démarrage ne fait
     // que **réarmer** la chaîne, au cas où sa dernière occurrence serait morte
@@ -85,39 +105,75 @@ async fn armer_les_recurrents(db: &Db, config: &Config) {
     let resultat = async {
         let mut tx = db.write(&RequestContext::background("jobs")).await?;
         let maintenant = OffsetDateTime::now_utc();
-        let purge = identity::jobs::purge::planifier(&mut tx, maintenant).await?;
+        let mut armees = Vec::new();
+
+        if identity::jobs::purge::planifier(&mut tx, maintenant).await? {
+            armees.push("purge des jetons");
+        }
         // Le balayage des doublons se réarme de la même façon, et pour la même
         // raison : sa dernière tranche a pu mourir avant d'avoir posé la
         // suivante. La clé d'unicité porte le jour — dix redémarrages n'en
         // produisent pas dix.
-        let balayage = org::jobs::duplicates::planifier(&mut tx, maintenant).await?;
+        if org::jobs::duplicates::planifier(&mut tx, maintenant).await? {
+            armees.push("balayage des doublons");
+        }
         // Troisième chaîne, même patron. Sa grille est horaire plutôt que
         // journalière : la clé d'unicité porte le créneau visé, pas le jour.
-        let cloture = event::jobs::autoclose::planifier(
+        if event::jobs::autoclose::planifier(
             &mut tx,
             event::jobs::autoclose::prochaine_occurrence(
                 maintenant,
                 config.event.call_autoclose_interval,
             ),
         )
-        .await?;
+        .await?
+        {
+            armees.push("clôture des appels échus");
+        }
+        // Les trois chaînes de B6. La purge est la seule du dépôt qui touche au
+        // stockage : la manquer laisse des octets payés pour rien sur un disque
+        // fini, et c'est tout le sujet d'US9.
+        if media::jobs::purge::planifier(
+            &mut tx,
+            media::jobs::purge::prochaine_occurrence(maintenant, config.media.purge_interval),
+        )
+        .await?
+        {
+            armees.push("purge des objets");
+        }
+        if media::jobs::reconcile::planifier(
+            &mut tx,
+            media::jobs::reconcile::prochaine_occurrence(
+                maintenant,
+                config.media.reconcile_interval,
+            ),
+        )
+        .await?
+        {
+            armees.push("réconciliation des quotas");
+        }
+        if engagement::jobs::partitions::planifier(
+            &mut tx,
+            engagement::jobs::partitions::prochaine_occurrence(
+                maintenant,
+                config.engagement.partition_interval,
+            ),
+        )
+        .await?
+        {
+            armees.push("partitions du journal d'expédition");
+        }
+
         tx.commit().await?;
-        Ok::<_, kernel::error::ApiError>((purge, balayage, cloture))
+        Ok::<_, kernel::error::ApiError>(armees)
     }
     .await;
 
     match resultat {
-        Ok((purge, balayage, cloture)) => {
-            if purge {
-                tracing::info!("purge des jetons planifiée pour aujourd'hui");
-            }
-            if balayage {
-                tracing::info!("balayage des doublons planifié pour aujourd'hui");
-            }
-            if cloture {
-                tracing::info!("clôture des appels échus planifiée pour le prochain créneau");
-            }
+        Ok(armees) if armees.is_empty() => {
+            tracing::debug!("travaux récurrents : toutes les chaînes étaient déjà posées")
         }
+        Ok(armees) => tracing::info!(chaines = ?armees, "travaux récurrents armés"),
         Err(e) => tracing::error!(erreur = %e, "planification des travaux récurrents impossible"),
     }
 }

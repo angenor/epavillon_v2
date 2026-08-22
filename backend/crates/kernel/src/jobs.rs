@@ -183,6 +183,22 @@ pub async fn reclaim_stalled(
 pub trait JobHandler: Send + Sync {
     fn task(&self) -> &'static str;
 
+    /// La file où ce travail arrive.
+    ///
+    /// **Le worker n'écoute que les files que ses gestionnaires déclarent** :
+    /// `platform.claim_jobs()` filtre strictement sur la file, et un travail
+    /// déposé dans une file inécoutée s'empile sans erreur, sans trace, et sans
+    /// que rien ne l'exécute jamais.
+    ///
+    /// Les déclencheurs du modèle nomment **quatre** files hors de la file par
+    /// défaut — `media.tg_enqueue_processing()` dans « media », la
+    /// matérialisation des rappels dans « email », le direct dans « live »,
+    /// l'analytique dans « analytics ». Ce n'est donc pas un réglage de
+    /// confort : c'est ce qui relie un déclencheur à son gestionnaire.
+    fn queue(&self) -> &'static str {
+        DEFAULT_QUEUE
+    }
+
     /// La charge utile de cette tâche porte-t-elle un secret ?
     ///
     /// `succeed()` vide la charge utile de tout travail réussi ; un travail
@@ -197,6 +213,38 @@ pub trait JobHandler: Send + Sync {
     }
 
     async fn run(&self, job: &ClaimedJob) -> Result<()>;
+}
+
+/// **Déplace l'échéance de travaux encore en file**, du même décalage.
+///
+/// Un travail porte son propre `run_at`, indépendant de l'état métier qui l'a
+/// produit : déplacer une séance sans déplacer ses travaux ferait partir les
+/// rappels à l'ancienne heure, en silence — la ligne dirait l'heure nouvelle et
+/// le courriel arriverait à l'ancienne.
+///
+/// Le décalage est **le même pour tous** : quand un créneau bouge, tous les
+/// rappels qui en dépendent bougent d'autant. Un travail déjà pris, réussi ou
+/// mort n'est pas touché — son échéance n'a plus de sens.
+///
+/// Vit ici et non dans un module : `platform.jobs` appartient au noyau, et un
+/// module qui l'écrirait lui-même sortirait de son schéma.
+pub async fn reschedule_by(conn: &mut PgConnection, job_ids: &[Uuid], seconds: f64) -> Result<u64> {
+    if job_ids.is_empty() || seconds == 0.0 {
+        return Ok(0);
+    }
+
+    let deplaces = sqlx::query!(
+        "UPDATE platform.jobs
+            SET run_at = run_at + make_interval(secs => $2)
+          WHERE id = ANY($1) AND status = 'queued'",
+        job_ids,
+        seconds
+    )
+    .execute(conn)
+    .await?
+    .rows_affected();
+
+    Ok(deplaces)
 }
 
 /// Efface la charge utile d'un travail **mort**, et lui seul : un travail

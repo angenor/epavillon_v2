@@ -11,6 +11,8 @@ identity.workspace = true
 org.workspace = true
 event.workspace = true
 programme.workspace = true
+media.workspace = true
+engagement.workspace = true
 
 actix-web.workspace = true
 dotenvy.workspace = true

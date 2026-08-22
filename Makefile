@@ -6,7 +6,7 @@
 #   make check          les trois — DÉTRUIT la base (voir ci-dessous)
 #   make check-db-safe  les mêmes assertions SQL, sans rien détruire
 #   make up / down      services locaux
-#   make garage-init    layout, bucket et clé S3 — à refaire après chaque `down -v`
+#   make garage-init    layout, bucket et clé S3 — rejoué tout seul par `check-db`
 #
 # ############################################################################
 # #  AVERTISSEMENT : `check-db` — donc `make check` — commence par `down -v`. #
@@ -21,6 +21,14 @@ COMPOSE  ?= docker compose $(if $(ENV_FILE),--env-file $(ENV_FILE),) -f ops/dock
 PSQL     ?= docker exec -i epavillon-postgres psql -U postgres -d epavillon
 GARAGE   ?= docker exec epavillon-garage /garage
 
+# Identifiants S3 lus dans .env. `down -v` efface le layout de Garage ET sa clé :
+# une clé engendrée au hasard rendait donc FAUSSES les valeurs du .env après
+# chaque `make check`, et le point de contrôle manuel du stockage échouait pour
+# une raison sans rapport avec le code. On IMPORTE la clé que le .env déclare
+# plutôt que d'en créer une (B6, R31).
+S3_KEY_ID     ?= $(shell sed -n 's/^S3_ACCESS_KEY_ID=//p'     $(ENV_FILE) 2>/dev/null | tail -1)
+S3_KEY_SECRET ?= $(shell sed -n 's/^S3_SECRET_ACCESS_KEY=//p' $(ENV_FILE) 2>/dev/null | tail -1)
+
 .PHONY: help check check-db check-db-safe assert-db assert-init-logs check-front check-back \
         up down wait-db logs-db garage-init garage-info
 
@@ -34,7 +42,7 @@ help:
 	@echo '  make down           arrête les services (conserve les volumes)'
 	@echo '  make check-db-safe  assertions sur la base en place — aucune perte'
 	@echo '  make check          les trois vérifications — DÉTRUIT la base (down -v)'
-	@echo '  make garage-init    layout, bucket et clé S3 — à refaire après chaque down -v'
+	@echo '  make garage-init    layout, bucket et clé S3 — rejoué tout seul par check-db'
 	@echo '  make garage-info    état du bucket'
 	@echo '  make logs-db        journaux PostgreSQL'
 
@@ -108,7 +116,7 @@ check-db:
 	@$(MAKE) --no-print-directory wait-db
 	@$(MAKE) --no-print-directory assert-init-logs
 	@$(MAKE) --no-print-directory assert-db
-	@echo 'Rappel : le stockage objet est reparti de zéro — relancer `make garage-init`.'
+	@$(MAKE) --no-print-directory garage-init
 
 # Les mêmes assertions, SANS détruire la base : à lancer pendant qu'on développe.
 check-db-safe: assert-db
@@ -158,19 +166,21 @@ check-back:
 
 # Un nœud Garage neuf refuse toute écriture tant que son layout n'est pas
 # assigné : le conteneur démarre, l'API S3 répond, et chaque dépôt échoue.
-# À refaire après chaque `down -v`, qui efface garage-meta et garage-data.
+# À refaire après chaque `down -v`, qui efface garage-meta et garage-data —
+# `check-db` s'en charge lui-même depuis B6.
 garage-init:
+	@test -n "$(S3_KEY_ID)" && test -n "$(S3_KEY_SECRET)" \
+	  || { echo 'ÉCHEC : S3_ACCESS_KEY_ID / S3_SECRET_ACCESS_KEY absentes de .env — faire `cp .env.example .env`.'; exit 1; }
 	@node=$$($(GARAGE) status | grep -Eo '^[0-9a-f]{8,}' | head -1); \
 	 test -n "$$node" || { echo 'ÉCHEC : nœud Garage introuvable — le conteneur est-il démarré ?'; exit 1; }; \
 	 echo "Nœud : $$node"; \
 	 $(GARAGE) layout assign -z dc1 -c 1G $$node; \
 	 version=$$($(GARAGE) layout show | awk -F': ' '/Current cluster layout version/ {print $$2 + 1; exit}'); \
 	 $(GARAGE) layout apply --version $${version:-1}
-	@$(GARAGE) bucket create epavillon        || true
-	@$(GARAGE) key create epavillon-dev       || true
-	@$(GARAGE) bucket allow --read --write epavillon --key epavillon-dev
-	@echo '--- Clé S3 à recopier dans .env (S3_ACCESS_KEY_ID / S3_SECRET_ACCESS_KEY) :'
-	@$(GARAGE) key info --show-secret epavillon-dev
+	@$(GARAGE) bucket create epavillon || true
+	@$(GARAGE) key import --yes -n epavillon-dev $(S3_KEY_ID) $(S3_KEY_SECRET) > /dev/null || true
+	@$(GARAGE) bucket allow --read --write epavillon --key $(S3_KEY_ID)
+	@echo 'Garage : bucket « epavillon » ouvert à la clé du .env — rien à recopier.'
 
 garage-info:
 	@$(GARAGE) bucket info epavillon

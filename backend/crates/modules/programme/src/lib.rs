@@ -101,7 +101,17 @@ pub fn planner_routes(cfg: &mut ServiceConfig) {
     routes::planner::configurer(cfg);
 }
 
-/// Le scope `/sessions` — **propre à ce module**, rien à composer.
+/// Les routes du module qui vivent sous `/sessions`, **sans le préfixe**.
+///
+/// Le scope était ouvert ici jusqu'à B6 ; le module Engagement y déposant
+/// désormais le calendrier des rappels d'une séance et la règle qui s'y
+/// applique, il est composé par l'API — même patron que `/people` depuis B1 et
+/// `/organizations` depuis B4, appliqué pour la même raison : deux `web::scope`
+/// du même préfixe **ne se complètent pas**, Actix retient le premier et rend
+/// 404 sur les routes du second.
+///
+/// **Aucune route n'a changé de chemin** : l'ordre d'enregistrement est celui
+/// d'avant, et `crates/api/tests/` frappe les dix-sept.
 ///
 /// **Chemins littéraux avant chemins paramétrés.** `/sessions/conflicts` et
 /// `/sessions/{id}/…` ne se recouvrent pas — le risque de capture n'existe que
@@ -109,13 +119,8 @@ pub fn planner_routes(cfg: &mut ServiceConfig) {
 /// tenu par la structure plutôt que par la vigilance : une route ajoutée au
 /// mauvais groupe se voit à la relecture.
 pub fn session_routes(cfg: &mut ServiceConfig) {
-    use actix_web::web;
-
-    cfg.service(
-        web::scope("/sessions")
-            .configure(routes::sessions::chemins_litteraux)
-            .configure(routes::sessions::chemins_de_seance),
-    );
+    routes::sessions::chemins_litteraux(cfg);
+    routes::sessions::chemins_de_seance(cfg);
 }
 
 /// Le scope `/registrations`, et les deux lectures publiques du programme.

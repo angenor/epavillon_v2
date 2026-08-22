@@ -165,6 +165,51 @@ codes! {
     RegistrationLocked => "REGISTRATION_LOCKED", StatusCode::UNPROCESSABLE_ENTITY,
         "Cette inscription ne peut plus être modifiée. Elle ne vous engage plus à rien.";
 
+    // --- Média (B6) -----------------------------------------------------------
+    // Onze. Neuf situations qui ressemblent à des erreurs sortent en 200 avec
+    // leur valeur : un fichier annoncé qui serait refusé, un contenu déjà
+    // connu, un objet en cours de traitement, un objet en échec ou en
+    // quarantaine sur la route d'avancement. Une pré-vérification est une
+    // QUESTION, pas une tentative.
+    MediaQuotaExceeded => "MEDIA_QUOTA_EXCEEDED", StatusCode::UNPROCESSABLE_ENTITY,
+        "L'espace de stockage de cette organisation est atteint.";
+    MediaMimeNotAllowed => "MEDIA_MIME_NOT_ALLOWED", StatusCode::UNPROCESSABLE_ENTITY,
+        "Ce type de fichier n'est pas accepté pour ce rôle.";
+    MediaTooLarge => "MEDIA_TOO_LARGE", StatusCode::PAYLOAD_TOO_LARGE,
+        "Ce fichier dépasse la taille acceptée pour ce rôle.";
+    MediaAspectRatio => "MEDIA_ASPECT_RATIO", StatusCode::UNPROCESSABLE_ENTITY,
+        "Les dimensions de cette image ne correspondent pas à la forme attendue.";
+    MediaRoleNotDeclared => "MEDIA_ROLE_NOT_DECLARED", StatusCode::UNPROCESSABLE_ENTITY,
+        "Ce rôle n'est pas prévu pour ce type de contenu.";
+    MediaRoleExclusive => "MEDIA_ROLE_EXCLUSIVE", StatusCode::CONFLICT,
+        "Ce rôle n'accepte qu'un seul fichier ; remplacez celui qui s'y trouve.";
+    MediaAssetNotServable => "MEDIA_ASSET_NOT_SERVABLE", StatusCode::UNPROCESSABLE_ENTITY,
+        "Ce fichier n'est pas exploitable : il est supprimé ou en quarantaine.";
+    MediaAltTextRequired => "MEDIA_ALT_TEXT_REQUIRED", StatusCode::UNPROCESSABLE_ENTITY,
+        "Décrivez cette image en une phrase : elle ne pourra pas s'afficher sans.";
+    MediaAssetInUse => "MEDIA_ASSET_IN_USE", StatusCode::CONFLICT,
+        "Ce fichier est encore utilisé ; il ne peut pas être supprimé.";
+    MediaUploadIncomplete => "MEDIA_UPLOAD_INCOMPLETE", StatusCode::BAD_REQUEST,
+        "L'envoi du fichier s'est interrompu.";
+    MediaStorageUnavailable => "MEDIA_STORAGE_UNAVAILABLE", StatusCode::SERVICE_UNAVAILABLE,
+        "Le stockage des fichiers est momentanément indisponible.";
+
+    // --- Engagement (B6) ------------------------------------------------------
+    // Cinq. Une séance sans règle, un rappel écarté, un type sans modèle
+    // publié, une préférence posée sur un type critique et une annonce de
+    // délivrabilité déjà reçue sortent tous en 200 : ce sont des issues, pas
+    // des pannes.
+    EngagementReminderOffsetsInvalid => "ENGAGEMENT_REMINDER_OFFSETS_INVALID", StatusCode::UNPROCESSABLE_ENTITY,
+        "Les délais de rappel doivent être compris entre un et huit valeurs, toutes positives.";
+    EngagementReminderScopeInvalid => "ENGAGEMENT_REMINDER_SCOPE_INVALID", StatusCode::UNPROCESSABLE_ENTITY,
+        "Une règle de rappel vise une édition ou une séance, jamais les deux.";
+    EngagementTemplateVariableUnknown => "ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN", StatusCode::UNPROCESSABLE_ENTITY,
+        "Ce modèle utilise une variable que ce type de message ne fournit pas.";
+    EngagementTemplateVersionUnknown => "ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN", StatusCode::NOT_FOUND,
+        "Cette révision de modèle n'existe pas.";
+    EngagementNotificationTypeUnknown => "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN", StatusCode::UNPROCESSABLE_ENTITY,
+        "Ce type de notification n'existe pas ou n'est plus actif.";
+
     // MAIL_RELAY_UNREACHABLE n'est PAS ici : il ne franchit aucune réponse
     // HTTP. Il vit dans `mail.rs`, d'où il part vers `platform.jobs.last_error`.
 }

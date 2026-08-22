@@ -11,6 +11,8 @@ members = [
     "crates/modules/org",
     "crates/modules/event",
     "crates/modules/programme",
+    "crates/modules/media",
+    "crates/modules/engagement",
     "crates/api",
     "crates/worker",
 ]
@@ -27,8 +29,15 @@ identity = { path = "crates/modules/identity" }
 org = { path = "crates/modules/org" }
 event = { path = "crates/modules/event" }
 programme = { path = "crates/modules/programme" }
+media = { path = "crates/modules/media" }
+engagement = { path = "crates/modules/engagement" }
 
 actix-web = "4.14"
+# Le dépôt de fichier est la SEULE route de l'API qui ne parle pas JSON (B6, R6).
+# Composant officiel d'Actix, de la même famille que le serveur déjà déclaré :
+# il relaie le flux sans charger les deux cents mégaoctets d'un fond vidéo en
+# mémoire, ce qu'un décodage maison de `multipart/form-data` ne garantirait pas.
+actix-multipart = "0.8"
 # Assainissement du HTML restreint de la présentation détaillée (B4, R14).
 # Fondée sur html5ever : seul un analyseur conforme refuse ce qu'un navigateur
 # accepterait — attribut d'événement, `javascript:` encodé, balise mal fermée.
@@ -40,6 +49,22 @@ dotenvy = "0.15"
 ed25519-dalek = { version = "2", features = ["rand_core"] }
 figment = { version = "0.10", features = ["env"] }
 futures-util = "0.3"
+# La dépendance la plus lourde du dépôt, et elle est assumée (B6, R12). Décoder,
+# MESURER et redimensionner une image : le relevé des dimensions est exigé par
+# le modèle — `attachable_roles.expected_aspect_ratio` ne peut pas être vérifié
+# sans lui. Codecs choisis un par un : sans `default-features = false`, `image`
+# amène TIFF, DDS, EXR et une dizaine d'autres dont rien n'a l'usage.
+# L'alternative sans crate serait d'appeler `vipsthumbnail` en sous-processus :
+# une dépendance système invisible à `cargo`, absente le jour du déploiement, et
+# qu'aucun test ne signale.
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp", "gif"] }
+# La signature SigV4 du stockage objet, écrite ici plutôt que déléguée à
+# `aws-sdk-s3` et à sa quarantaine de crates (B6, R8). Minuscule, RustCrypto,
+# même famille que `sha2` déjà déclarée.
+# **0.12 et non 0.13** : la 0.13 exige `sha2` 0.11, quand le workspace tient la
+# 0.10 — la 0.13 est déjà dans l'arbre par transitivité, et les mélanger ne
+# compile pas.
+hmac = "0.12"
 humantime-serde = "1"
 opentelemetry = "0.32"
 # Client BLOQUANT, et non le client asynchrone : le processeur de lots
@@ -55,7 +80,10 @@ rand_core = { version = "0.6", features = ["getrandom"] }
 # Une expression fautive est une donnée d'administrateur : la règle est ignorée
 # avec une trace, jamais transformée en refus d'inscription.
 regex = "1"
-reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+# `stream` sert au dépôt d'un objet sur le stockage : sans elle, un corps de
+# requête ne peut être qu'un bloc en mémoire, et un fond vidéo de deux cents
+# mégaoctets tiendrait entier dans le tas (B6).
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "stream"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"

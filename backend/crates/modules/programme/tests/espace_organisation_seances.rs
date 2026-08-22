@@ -85,7 +85,7 @@ async fn les_trois_nombres_sont_exacts_et_un_dossier_non_retenu_est_vide() {
     assert_eq!(suivie.capacity, Some(2));
     assert!(
         suivie.reminders.is_empty(),
-        "les rappels appartiennent à B6 : vides, jamais absents"
+        "aucune règle de rappel ne s'applique : liste vide, jamais absente"
     );
     assert!(suivie.room.is_none(), "la séance n'est pas encore placée");
 
@@ -247,4 +247,151 @@ async fn une_seance_terminee_sans_compte_rendu_produit_son_action() {
         action.due_at.is_some(),
         "le compte rendu est dû depuis la fin"
     );
+}
+
+// -----------------------------------------------------------------------------
+// L'écart n° 108 — le calendrier des rappels, servi par l'espace organisation
+// -----------------------------------------------------------------------------
+
+/// Pose une règle de rappel d'édition et **matérialise** les rappels de la
+/// séance par la fonction du modèle.
+///
+/// Les deux gestes appartiennent au module Engagement : ce fichier ne peut pas
+/// appeler son service — un module ne dépend jamais d'un autre module —, et il
+/// pose donc les lignes en SQL, comme le ferait n'importe quel semis de test.
+async fn rappels_materialises(bac: &Bac, edition: uuid::Uuid, seance: uuid::Uuid, minutes: &[i32]) {
+    sqlx::query!(
+        r#"INSERT INTO engagement.reminder_rules (event_id, offsets, channels)
+           VALUES ($1,
+                   (SELECT array_agg(make_interval(mins => m) ORDER BY m DESC)
+                      FROM unnest($2::int[]) m),
+                   '{email}')"#,
+        edition,
+        minutes
+    )
+    .execute(bac.pool())
+    .await
+    .expect("insertion de la règle de rappel");
+
+    sqlx::query_scalar!(
+        r#"SELECT engagement.schedule_session_reminders($1) AS "crees!""#,
+        seance
+    )
+    .fetch_one(bac.pool())
+    .await
+    .expect("matérialisation des rappels");
+}
+
+/// 🔴 **L'espace organisation porte le calendrier des rappels** — l'écart n° 108,
+/// laissé ouvert par B4, est refermé.
+///
+/// Ce que ce test éprouve et qu'aucune relecture ne remplace : **la forme
+/// exacte du contrat du front**. Les sept clés sont écrites ici et dans
+/// `engagement`, où la même agrégation est sérialisée par `ReminderSlot` ; une
+/// divergence de nom ferait un écran vide sans erreur.
+///
+/// Et **trois inscrits sur deux décalages font deux lignes de trois**, jamais
+/// six lignes de un : l'agrégation est celle de la fonction du modèle, la même
+/// que sert la lecture par séance.
+#[tokio::test]
+async fn lespace_organisation_porte_le_calendrier_des_rappels() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+    seances::grille(&bac, terrain.edition).await;
+
+    let dossier =
+        seances::dossier_pret(&bac, &terrain, "Atelier", "atelier", Souhaits::default()).await;
+    transition::tenter(
+        &bac.state,
+        &bac.ctx(),
+        dossier.id.into(),
+        ProposalStatus::Accepted,
+        None,
+    )
+    .await
+    .unwrap();
+
+    let seance = seances::seances_du_dossier(&bac, dossier.id)
+        .await
+        .remove(0)
+        .id;
+    seances::ouvrir_les_inscriptions(&bac, seance, None, false).await;
+
+    for rang in 0..3 {
+        let personne = commun::personne(
+            &bac,
+            &format!("rappele{rang}@example.org"),
+            "Inscrit",
+            &format!("Numéro{rang}"),
+        )
+        .await;
+        seances::sinscrire(&bac, seance, Some(personne), seances::reponses_valides())
+            .await
+            .unwrap();
+    }
+
+    rappels_materialises(&bac, terrain.edition, seance, &[1440, 60]).await;
+
+    let espace = workspace::espace(&bac.state, terrain.deposante, terrain.organisation)
+        .await
+        .expect("l'espace de l'organisation");
+    let suivie = &espace
+        .proposals
+        .iter()
+        .find(|p| p.proposal.id == dossier.id)
+        .expect("le dossier retenu")
+        .sessions[0];
+
+    assert_eq!(
+        suivie.reminders.len(),
+        2,
+        "deux décalages : deux lignes, jamais six"
+    );
+
+    // **La forme exacte du contrat du front.** Les clés, et rien d'autre.
+    let mut clefs: Vec<&str> = suivie.reminders[0]
+        .as_object()
+        .expect("une ligne est un objet")
+        .keys()
+        .map(String::as_str)
+        .collect();
+    clefs.sort_unstable();
+    assert_eq!(
+        clefs,
+        vec![
+            "channel",
+            "offset_before",
+            "recipient_count",
+            "scheduled_for",
+            "sent_at",
+            "skip_reason",
+            "status",
+        ]
+    );
+
+    let minutes: Vec<i64> = suivie
+        .reminders
+        .iter()
+        .map(|r| r["offset_before"].as_i64().expect("un décalage en minutes"))
+        .collect();
+    assert_eq!(minutes, vec![1440, 60], "du plus lointain au plus proche");
+
+    for ligne in &suivie.reminders {
+        assert_eq!(
+            ligne["recipient_count"].as_i64(),
+            Some(3),
+            "chaque ligne porte les trois inscrits"
+        );
+        assert_eq!(ligne["channel"], "email");
+    }
+
+    // **Un nombre, jamais un nom** : la même garantie qu'à la lecture par séance,
+    // et elle vaut ici parce que c'est la même fonction du modèle qui la porte.
+    let charge = serde_json::to_string(&suivie.reminders).expect("sérialisation");
+    for motif in ["rappele", "@example.org", "Numéro"] {
+        assert!(
+            !charge.contains(motif),
+            "« {motif} » figure dans le calendrier servi à l'organisation"
+        );
+    }
 }

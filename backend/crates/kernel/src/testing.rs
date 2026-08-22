@@ -264,6 +264,16 @@ fn repertoire_sql() -> PathBuf {
         .expect("docs/database/ introuvable depuis backend/crates/kernel")
 }
 
+/// Racine jetable du stockage sur fichiers, sous le répertoire temporaire du
+/// système. Elle n'est pas effacée en sortie : quelques kilo-octets par test,
+/// et le contenu déposé est la seule matière de diagnostic d'un test rouge.
+fn racine_media_jetable() -> String {
+    std::env::temp_dir()
+        .join(format!("epavillon-media-{}", Uuid::new_v4().simple()))
+        .to_string_lossy()
+        .into_owned()
+}
+
 /// Configuration minimale d'un test, passée par **la même validation qu'au
 /// démarrage** : un test ne doit pas pouvoir s'appuyer sur un réglage que la
 /// production refuserait. Seule la base change d'un test à l'autre.
@@ -280,6 +290,19 @@ pub fn test_config(database_url: &str) -> crate::config::Config {
         "mail_transport": "relay",
         "mail_relay_url": "http://localhost:3000/api/internal/mail",
         "mail_relay_token": "secret-de-test",
+        // Le stockage des tests est le SYSTÈME DE FICHIERS, jamais Garage
+        // (B6, R7) : `make check-db` fait `down -v`, ce qui efface le layout du
+        // stockage objet — des tests qui le frapperaient échoueraient après
+        // chaque vérification complète, et on prendrait l'habitude de les
+        // sauter. La racine est unique par test : deux tests parallèles ne
+        // doivent pas se voir.
+        "media_storage": "filesystem",
+        "media_fs_root": racine_media_jetable(),
+        "media_scanner": "none",
+        // Le jeton d'ingestion est RENSEIGNÉ ici : sans lui, la route de
+        // délivrabilité n'est pas montée et le test qui la frappe lirait un 404
+        // sans savoir si c'est le montage ou le chemin qui manque.
+        "mail_webhook_token": "jeton-webhook-de-test",
     });
 
     crate::config::Config::from_figment(Figment::from(Serialized::defaults(valeurs)))

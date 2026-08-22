@@ -243,8 +243,12 @@ pub struct TrackedSession {
     pub registered_count: i64,
     pub waitlisted_count: i64,
     pub capacity: Option<i32>,
-    /// **Vide jusqu'à B6**, jamais absente : le champ existe au contrat, et le
-    /// supprimer ferait échouer l'écran (écart n° 108).
+    /// `ReminderSlot[]` — une ligne par (décalage, canal), **un nombre de
+    /// destinataires et jamais un nom**. Elle vient de
+    /// `engagement.session_reminder_schedule()`, la même fonction que sert la
+    /// lecture par séance : deux agrégations divergeraient en silence (B6,
+    /// écart n° 108 refermé). Vide quand aucune règle ne s'applique — jamais
+    /// absente.
     pub reminders: Vec<serde_json::Value>,
 }
 

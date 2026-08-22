@@ -67,13 +67,28 @@ pub fn build_app(
     if etat.modules.is_mounted("programme") {
         portee = portee.configure(programme::routes);
         // `/proposal-comments` n'appartient qu'à ce module : aucun autre n'y
-        // dépose, il n'y a donc rien à composer ici. `/sessions` et
-        // `/registrations` sont dans le même cas depuis B5, et les deux lectures
-        // publiques du programme n'exigent aucune session.
+        // dépose, il n'y a donc rien à composer ici. `/registrations` est dans
+        // le même cas depuis B5, et les deux lectures publiques du programme
+        // n'exigent aucune session. **`/sessions` n'y est plus** : le module
+        // Engagement y dépose depuis B6, et le préfixe est composé plus bas.
         portee = portee.configure(programme::comment_routes);
-        portee = portee.configure(programme::session_routes);
         portee = portee.configure(programme::registration_routes);
         portee = portee.configure(programme::public_schedule_routes);
+    }
+
+    // Les quatre préfixes du module Média n'appartiennent qu'à lui : aucun
+    // autre module n'y dépose, il n'y a donc rien à composer plus bas.
+    if etat.modules.is_mounted("media") {
+        portee = portee.configure(media::routes);
+    }
+    if etat.modules.is_mounted("engagement") {
+        portee = portee.configure(engagement::routes);
+        // **La porte d'ingestion des retours de courriel n'est montée que si son
+        // jeton est configuré** : sans secret, elle rend 404 comme un module
+        // éteint. Le contrôle d'origine la laisse passer d'elle-même — le site
+        // n'est pas un navigateur, et n'annonce donc aucune origine (R30).
+        let jeton_dingestion = etat.config.mail.webhook_token.is_some();
+        portee = portee.configure(move |cfg| engagement::internal_routes(cfg, jeton_dingestion));
     }
 
     // **Le scope `/people` est composé ici, et une seule fois.** Trois modules y
@@ -121,6 +136,28 @@ pub fn build_app(
         }));
     }
 
+    // **Le scope `/sessions` est composé ici depuis B6, et une seule fois.**
+    //
+    // Il appartenait au module Programmation, qui l'ouvrait lui-même depuis B5 ;
+    // le module Engagement y déposant le calendrier des rappels d'une séance et
+    // la règle qui s'y applique, le laisser là aurait rendu ces deux routes
+    // **muettes** — le défaut qui a coûté trois routes sur vingt et une en B2,
+    // puis a failli se reproduire sur `/organizations` en B4.
+    //
+    // **Aucune route de B5 ne change de chemin**, et l'ordre d'enregistrement
+    // est celui d'avant : `programme` d'abord, `engagement` ensuite.
+    let engagement_monte = etat.modules.is_mounted("engagement");
+    if propositions || engagement_monte {
+        portee = portee.service(web::scope("/sessions").configure(move |cfg| {
+            if propositions {
+                programme::session_routes(cfg);
+            }
+            if engagement_monte {
+                engagement::session_routes(cfg);
+            }
+        }));
+    }
+
     // **Le scope `/admin/planner` est composé ici, et une seule fois** — même
     // motif que `/people` ci-dessus, écrit AVANT que le défaut ne se reproduise.
     // Il porte désormais les DEUX modules : `event` y dépose le contrôle
@@ -150,6 +187,8 @@ pub fn build_app(
         .app_data(web::Data::new(etat.org.clone()))
         .app_data(web::Data::new(etat.event.clone()))
         .app_data(web::Data::new(etat.programme.clone()))
+        .app_data(web::Data::new(etat.media.clone()))
+        .app_data(web::Data::new(etat.engagement.clone()))
         .app_data(web::Data::from(etat.identity.token_codec()))
         .app_data(web::Data::new(etat.clone()))
         .app_data(corps_json())

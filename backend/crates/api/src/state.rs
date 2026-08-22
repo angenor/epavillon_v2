@@ -26,6 +26,8 @@ pub struct AppState {
     pub org: org::OrgState,
     pub event: event::EventState,
     pub programme: programme::ProgrammeState,
+    pub media: media::MediaState,
+    pub engagement: engagement::EngagementState,
     /// Origines acceptées sur une écriture. Celle du site, et rien d'autre.
     pub allowed_origins: Vec<String>,
 }
@@ -37,13 +39,22 @@ impl AppState {
         let locales = Locales::load(db.pool()).await?;
         let modules = ModuleRegistry::load(db.pool()).await?;
         let passwords = Arc::new(Passwords::new()?);
-        let mailer = kernel::mail::build(&config.mail);
+        // **Le mailer est ENVELOPPÉ, et c'est tout l'écart n° 133.** La liste
+        // de suppression et le journal d'expédition s'appliquent dès lors aux
+        // six courriels de B1 et B2 **sans qu'aucun module livré ne change
+        // d'une ligne** : le décorateur implémente le contrat du noyau, il ne
+        // l'étend pas. C'est ce que `kernel::mail` annonçait en B1 — « le jour
+        // où l'envoi se réécrit ici, aucun module ne bouge ».
+        let mailer = engagement::GardedMailer::envelopper(&config.mail, db.clone());
         let allowed_origins = vec![config.app_public_url.clone()];
         let config = Arc::new(config);
         let identity = identity::IdentityState::new(db.clone(), config.clone(), passwords.clone())?;
         let org = org::OrgState::new(db.clone(), config.clone());
         let event = event::EventState::new(db.clone(), config.clone());
         let programme = programme::ProgrammeState::new(db.clone(), config.clone());
+        let media = media::MediaState::new(db.clone(), config.clone());
+        let engagement =
+            engagement::EngagementState::new(db.clone(), config.clone(), mailer.clone());
 
         Ok(Self {
             db,
@@ -56,6 +67,8 @@ impl AppState {
             org,
             event,
             programme,
+            media,
+            engagement,
             allowed_origins,
         })
     }

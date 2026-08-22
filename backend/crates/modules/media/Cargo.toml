@@ -1,0 +1,46 @@
+[package]
+name = "media"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+# Principe II : un crate de module ne dépend QUE de kernel et de contracts.
+# Toute autre ligne `path = "../..."` ici est un échec de revue — `engagement`
+# compris : le seul lien que le modèle établit entre les deux schémas
+# (`direct_messages.attachment_id`) appartient à la messagerie, hors périmètre.
+[dependencies]
+kernel.workspace = true
+contracts.workspace = true
+
+actix-multipart.workspace = true
+actix-web.workspace = true
+async-trait.workspace = true
+base64.workspace = true
+futures-util.workspace = true
+hmac.workspace = true
+image.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+sqlx.workspace = true
+thiserror.workspace = true
+time.workspace = true
+tokio = { workspace = true, features = ["fs", "io-util", "net"] }
+tracing.workspace = true
+utoipa.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+kernel = { workspace = true, features = ["testing"] }
+dotenvy.workspace = true
+# Le harnais fabrique de VRAIES images aux formes que la table blanche exige :
+# un PNG écrit à la main ne serait pas décodable, et le relevé des dimensions —
+# qui est ce qu'on éprouve — n'aurait rien à mesurer.
+image.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+time.workspace = true
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+uuid.workspace = true

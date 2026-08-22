@@ -80,6 +80,44 @@ struct Raw {
     mail_relay_url: String,
     #[serde(default)]
     mail_relay_token: String,
+    /// Jeton du sens INVERSE — le relais qui remonte ce que le fournisseur dit
+    /// d'un courriel. **Vide vaut « route non montée »**, jamais « route
+    /// ouverte » (B6, R30).
+    #[serde(default)]
+    mail_webhook_token: String,
+
+    #[serde(default = "default_media_storage")]
+    media_storage: String,
+    #[serde(default = "default_media_fs_root")]
+    media_fs_root: String,
+    #[serde(default = "default_media_max_upload_bytes")]
+    media_max_upload_bytes: u64,
+    #[serde(default = "default_media_scanner")]
+    media_scanner: String,
+    #[serde(default)]
+    media_clamd_addr: String,
+    #[serde(default = "default_media_scan_max_bytes")]
+    media_scan_max_bytes: u64,
+    #[serde(with = "humantime_serde", default = "hours_6")]
+    media_purge_interval: Duration,
+    #[serde(with = "humantime_serde", default = "hours_24")]
+    media_reconcile_interval: Duration,
+
+    #[serde(default = "default_s3_endpoint")]
+    s3_endpoint: String,
+    #[serde(default = "default_s3_region")]
+    s3_region: String,
+    #[serde(default = "default_s3_bucket")]
+    s3_bucket: String,
+    #[serde(default)]
+    s3_access_key_id: String,
+    #[serde(default)]
+    s3_secret_access_key: String,
+    #[serde(default = "vrai")]
+    s3_force_path_style: bool,
+
+    #[serde(with = "humantime_serde", default = "hours_24")]
+    engagement_partition_interval: Duration,
 
     #[serde(default = "default_duplicate_score_threshold")]
     org_duplicate_score_threshold: u16,
@@ -139,6 +177,37 @@ fn default_duplicate_score_threshold() -> u16 {
 fn default_duplicate_scan_batch() -> u32 {
     200
 }
+fn default_media_storage() -> String {
+    "s3".to_owned()
+}
+fn default_media_fs_root() -> String {
+    "./.media".to_owned()
+}
+/// 200 Mio : le poids du fond vidéo de la page d'accueil, le plus gros fichier
+/// que la plateforme accepte.
+fn default_media_max_upload_bytes() -> u64 {
+    209_715_200
+}
+fn default_media_scanner() -> String {
+    "none".to_owned()
+}
+/// 50 Mio. Au-delà, verdict « non pris en charge » plutôt qu'une analyse de
+/// cinq minutes qui bloque un fil du worker.
+fn default_media_scan_max_bytes() -> u64 {
+    52_428_800
+}
+fn default_s3_endpoint() -> String {
+    "http://localhost:3900".to_owned()
+}
+fn default_s3_region() -> String {
+    "garage".to_owned()
+}
+fn default_s3_bucket() -> String {
+    "epavillon".to_owned()
+}
+fn hours_6() -> Duration {
+    Duration::from_secs(6 * 3600)
+}
 fn minutes_5() -> Duration {
     Duration::from_secs(5 * 60)
 }
@@ -182,6 +251,8 @@ pub struct Config {
     pub org: OrgConfig,
     pub event: EventConfig,
     pub programme: ProgrammeConfig,
+    pub media: MediaConfig,
+    pub engagement: EngagementConfig,
     pub mail: MailConfig,
     pub telemetry: TelemetryConfig,
 }
@@ -222,6 +293,67 @@ pub struct EventConfig {
 #[derive(Debug, Clone)]
 pub struct ProgrammeConfig {
     pub privacy_policy_version: String,
+}
+
+/// Où le module Média dépose les octets. Deux implémentations, choisies par la
+/// configuration — exactement le patron de `MailTransport`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum MediaStorage {
+    /// Garage, ou tout stockage compatible S3. Le mode normal.
+    S3,
+    /// Des fichiers sous `fs_root`. Celui des tests d'intégration : `check-db`
+    /// efface le layout de Garage, et des tests qui le frapperaient
+    /// échoueraient après chaque vérification complète (B6, R7).
+    Filesystem,
+}
+
+/// Le moteur d'analyse antivirus. `None` est un moteur DÉCLARÉ, pas une
+/// absence : il rend « non pris en charge » et jamais « sain » (B6, R13).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum MediaScanner {
+    None,
+    Clamd,
+}
+
+/// Identifiants du stockage objet. Ils existent dans `.env.example` depuis le
+/// 16/08 et n'avaient jamais servi : B6 est le premier jalon qui écrit un octet.
+#[derive(Debug, Clone)]
+pub struct S3Config {
+    pub endpoint: String,
+    pub region: String,
+    pub bucket: String,
+    pub access_key_id: String,
+    pub secret_access_key: Secret,
+    /// `true` : l'adresse porte le nom du bucket dans son chemin plutôt que
+    /// dans son nom d'hôte. Garage ne sait faire que cela.
+    pub force_path_style: bool,
+}
+
+/// Réglages du module Média.
+#[derive(Debug, Clone)]
+pub struct MediaConfig {
+    pub storage: MediaStorage,
+    pub fs_root: String,
+    /// Plafond ABSOLU d'un dépôt. Il ne remplace pas les limites par rôle, qui
+    /// vivent en base (`media.attachable_roles.max_byte_size`) — il les couvre
+    /// toutes.
+    pub max_upload_bytes: u64,
+    pub scanner: MediaScanner,
+    pub clamd_addr: String,
+    pub scan_max_bytes: u64,
+    pub purge_interval: Duration,
+    pub reconcile_interval: Duration,
+    pub s3: S3Config,
+}
+
+/// Réglages du module Engagement. Une seule clé : la cadence à laquelle le
+/// worker prépare les partitions mensuelles du journal d'expédition. Le modèle
+/// amorce le trimestre courant puis annonce un worker de maintenance qui
+/// n'existait pas (écart n° 137) : sans lui, la purge par bascule de partition
+/// cesse de fonctionner au bout de trois mois.
+#[derive(Debug, Clone)]
+pub struct EngagementConfig {
+    pub partition_interval: Duration,
 }
 
 /// Une durée par valeur de `identity.token_purpose`. Aucun appelant ne pose
@@ -288,7 +420,18 @@ pub enum MailTransport {
 pub struct MailConfig {
     pub transport: MailTransport,
     pub relay_url: String,
+    /// Le secret de SORTIE : l'API se fait reconnaître du site quand elle lui
+    /// remet un message.
     pub relay_token: Secret,
+    /// Le secret d'ENTRÉE : le site se fait reconnaître de l'API quand il lui
+    /// remonte ce que le fournisseur a dit d'un courriel. **Deux jetons et non
+    /// un** — confondre les deux ferait d'un jeton de sortie un jeton d'entrée,
+    /// donc ouvrirait la porte d'ingestion à qui a seulement lu la
+    /// configuration du relais (B6, R30).
+    ///
+    /// `None` ne signifie pas « route ouverte » mais **route non montée** :
+    /// elle rend 404, comme un module éteint.
+    pub webhook_token: Option<Secret>,
 }
 
 #[derive(Debug, Clone)]
@@ -419,6 +562,75 @@ impl Config {
             ));
         }
 
+        let media_storage = match raw.media_storage.as_str() {
+            "s3" => MediaStorage::S3,
+            "filesystem" => MediaStorage::Filesystem,
+            other => {
+                return Err(invalid(format!(
+                    "MEDIA_STORAGE vaut « {other} » : valeurs acceptées, s3 ou filesystem."
+                )))
+            }
+        };
+        if media_storage == MediaStorage::S3 {
+            // Sans clé, chaque dépôt échouerait en 403 au moment de signer —
+            // une panne à l'exécution là où le démarrage peut le dire.
+            if raw.s3_access_key_id.trim().is_empty() || raw.s3_secret_access_key.trim().is_empty()
+            {
+                return Err(invalid(
+                    "S3_ACCESS_KEY_ID ou S3_SECRET_ACCESS_KEY est vide alors que MEDIA_STORAGE vaut s3 : aucun fichier ne pourrait être déposé. Lancer `make garage-init`.",
+                ));
+            }
+            if !raw.s3_endpoint.starts_with("http://") && !raw.s3_endpoint.starts_with("https://") {
+                return Err(invalid(
+                    "S3_ENDPOINT doit être une adresse absolue (http:// ou https://).",
+                ));
+            }
+        }
+        if media_storage == MediaStorage::Filesystem && raw.media_fs_root.trim().is_empty() {
+            return Err(invalid(
+                "MEDIA_FS_ROOT est vide alors que MEDIA_STORAGE vaut filesystem.",
+            ));
+        }
+
+        let media_scanner = match raw.media_scanner.as_str() {
+            "none" => MediaScanner::None,
+            "clamd" => MediaScanner::Clamd,
+            other => {
+                return Err(invalid(format!(
+                    "MEDIA_SCANNER vaut « {other} » : valeurs acceptées, none ou clamd."
+                )))
+            }
+        };
+        if media_scanner == MediaScanner::Clamd && raw.media_clamd_addr.trim().is_empty() {
+            return Err(invalid(
+                "MEDIA_CLAMD_ADDR est vide alors que MEDIA_SCANNER vaut clamd : aucun fichier ne serait analysé.",
+            ));
+        }
+
+        if raw.media_max_upload_bytes == 0 {
+            return Err(invalid(
+                "MEDIA_MAX_UPLOAD_BYTES vaut 0 : aucun fichier ne pourrait être déposé.",
+            ));
+        }
+
+        // Une cadence nulle ferait replanifier le travail à l'instant même où
+        // il vient de tourner : la file se remplirait aussi vite qu'elle se
+        // vide. Même raisonnement que pour la clôture des appels de B3.
+        for (cle, duree) in [
+            ("MEDIA_PURGE_INTERVAL", raw.media_purge_interval),
+            ("MEDIA_RECONCILE_INTERVAL", raw.media_reconcile_interval),
+            (
+                "ENGAGEMENT_PARTITION_INTERVAL",
+                raw.engagement_partition_interval,
+            ),
+        ] {
+            if duree.is_zero() {
+                return Err(invalid(format!(
+                    "{cle} vaut une durée nulle : le travail se replanifierait sans fin."
+                )));
+            }
+        }
+
         let trusted_proxies = crate::net::TrustedProxies::parse(&raw.trusted_proxies)
             .map_err(|e| invalid(format!("TRUSTED_PROXIES : {e}")))?;
 
@@ -463,10 +675,34 @@ impl Config {
             programme: ProgrammeConfig {
                 privacy_policy_version: raw.privacy_policy_version.trim().to_owned(),
             },
+            media: MediaConfig {
+                storage: media_storage,
+                fs_root: raw.media_fs_root,
+                max_upload_bytes: raw.media_max_upload_bytes,
+                scanner: media_scanner,
+                clamd_addr: raw.media_clamd_addr,
+                scan_max_bytes: raw.media_scan_max_bytes,
+                purge_interval: raw.media_purge_interval,
+                reconcile_interval: raw.media_reconcile_interval,
+                s3: S3Config {
+                    endpoint: raw.s3_endpoint.trim_end_matches('/').to_owned(),
+                    region: raw.s3_region,
+                    bucket: raw.s3_bucket,
+                    access_key_id: raw.s3_access_key_id,
+                    secret_access_key: Secret(raw.s3_secret_access_key),
+                    force_path_style: raw.s3_force_path_style,
+                },
+            },
+            engagement: EngagementConfig {
+                partition_interval: raw.engagement_partition_interval,
+            },
             mail: MailConfig {
                 transport,
                 relay_url: raw.mail_relay_url,
                 relay_token: Secret(raw.mail_relay_token),
+                webhook_token: Some(raw.mail_webhook_token)
+                    .filter(|j| !j.trim().is_empty())
+                    .map(Secret),
             },
             telemetry: TelemetryConfig {
                 otlp_endpoint: Some(raw.otel_exporter_otlp_endpoint)

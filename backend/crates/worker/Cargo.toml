@@ -12,6 +12,9 @@ org.workspace = true
 event.workspace = true
 # B5 : le module ne déclare aucun travail différé — il déclare un CONSOMMATEUR.
 programme.workspace = true
+# B6 : deux crates de plus, cinq travaux différés et deux consommateurs.
+media.workspace = true
+engagement.workspace = true
 
 async-trait.workspace = true
 dotenvy.workspace = true

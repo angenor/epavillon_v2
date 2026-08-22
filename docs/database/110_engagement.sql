@@ -597,6 +597,95 @@ $$;
 COMMENT ON FUNCTION engagement.schedule_session_reminders(uuid) IS
     'Matérialise les rappels d''une session d''après la règle applicable. Idempotente : rejouable après un incident sans risque de doublon.';
 
+-- Calendrier des rappels d'une session, AGRÉGÉ PAR (décalage, canal).
+--
+-- POURQUOI UNE FONCTION ET NON DEUX REQUÊTES. Cet agrégat a DEUX lecteurs : la
+-- lecture par séance du module Engagement, et la composition de l'espace
+-- organisation servie par le module Programmation. Écrites séparément, les deux
+-- agrégations divergeraient au premier ajustement de la règle de consolidation
+-- — et la divergence serait SILENCIEUSE : un nombre de destinataires faux
+-- ressemble à un nombre juste. C'est le raisonnement exact de
+-- media.attached_image(), que trois modules appellent déjà.
+--
+-- CE QU'ELLE NE REND JAMAIS : ni identifiant de personne, ni nom, ni adresse.
+-- L'organisation qui anime une séance a droit au NOMBRE de destinataires, pas à
+-- leur identité — et cette garantie est portée par la SIGNATURE de la fonction,
+-- pas par la discipline de ses appelants.
+--
+-- L'ÉTAT CONSOLIDÉ EST CELUI DE LA LIGNE LA MOINS AVANCÉE, dans cet ordre :
+-- une seule ligne encore à traiter suffit à dire « en attente », puis « en
+-- file », puis « parti ». « Parti » ne doit pas se dire tant qu'une personne
+-- attend encore son courriel. Un groupe entièrement écarté ou annulé prend
+-- l'état majoritaire des deux, et porte alors son motif dominant — seul cas où
+-- le motif sort, sans quoi une ligne écartée dans un groupe encore vivant
+-- ferait croire à un incident.
+--
+-- Le décalage sort EN MINUTES : `'1 day'` et `'24 hours'` sont le même
+-- intervalle pour la base et deux chaînes différentes pour l'écran qui les
+-- regrouperait par leur texte.
+CREATE OR REPLACE FUNCTION engagement.session_reminder_schedule(p_session_id uuid)
+RETURNS TABLE (
+    offset_minutes  integer,
+    channel         text,
+    scheduled_for   timestamptz,
+    status          text,
+    recipient_count bigint,
+    skip_reason     text,
+    sent_at         timestamptz
+)
+LANGUAGE sql
+STABLE
+AS $$
+    WITH groupes AS (
+        SELECT sr.offset_before,
+               sr.channel                                          AS canal,
+               min(sr.scheduled_for)                               AS scheduled_for,
+               count(*)                                            AS recipient_count,
+               max(sr.sent_at)                                     AS sent_at,
+               count(*) FILTER (WHERE sr.status = 'pending')       AS n_pending,
+               count(*) FILTER (WHERE sr.status = 'queued')        AS n_queued,
+               count(*) FILTER (WHERE sr.status = 'sent')          AS n_sent,
+               count(*) FILTER (WHERE sr.status = 'skipped')       AS n_skipped,
+               count(*) FILTER (WHERE sr.status = 'cancelled')     AS n_cancelled
+        FROM engagement.scheduled_reminders sr
+        WHERE sr.session_id = p_session_id
+        GROUP BY sr.offset_before, sr.channel
+    ),
+    consolides AS (
+        SELECT g.*,
+               CASE
+                   WHEN g.n_pending > 0            THEN 'pending'
+                   WHEN g.n_queued  > 0            THEN 'queued'
+                   WHEN g.n_sent    > 0            THEN 'sent'
+                   WHEN g.n_skipped >= g.n_cancelled THEN 'skipped'
+                   ELSE 'cancelled'
+               END AS etat
+        FROM groupes g
+    )
+    SELECT (extract(epoch FROM c.offset_before) / 60)::integer,
+           c.canal::text,
+           c.scheduled_for,
+           c.etat,
+           c.recipient_count,
+           CASE WHEN c.etat IN ('skipped', 'cancelled') THEN (
+               SELECT m.skip_reason
+               FROM engagement.scheduled_reminders m
+               WHERE m.session_id    = p_session_id
+                 AND m.offset_before = c.offset_before
+                 AND m.channel       = c.canal
+                 AND m.skip_reason IS NOT NULL
+               GROUP BY m.skip_reason
+               ORDER BY count(*) DESC, m.skip_reason
+               LIMIT 1
+           ) END,
+           c.sent_at
+    FROM consolides c
+    ORDER BY c.offset_before DESC, c.canal;
+$$;
+
+COMMENT ON FUNCTION engagement.session_reminder_schedule(uuid) IS
+    'Calendrier des rappels d''une session, agrégé par (décalage, canal) : instant d''envoi, état consolidé, NOMBRE de destinataires. Ne rend jamais d''identité. Écrite une fois pour ses deux lecteurs — engagement et programme.';
+
 -- -----------------------------------------------------------------------------
 -- 7. Commentaires et réactions
 --

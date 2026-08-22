@@ -93,3 +93,53 @@ pub struct ReviewAssigned {
     #[serde(with = "time::serde::rfc3339::option")]
     pub due_at: Option<OffsetDateTime>,
 }
+
+// -----------------------------------------------------------------------------
+// Ce que la BASE émet, et que B6 consomme
+//
+// Ces quatorze noms n'étaient nulle part. Sans eux, chaque consommateur les
+// écrirait en littéral dans son coin, et une faute de frappe donnerait un
+// consommateur qui ne se réveille jamais — sans erreur, sans trace.
+//
+// **Aucune charge utile n'est déclarée ici.** Ces événements sont émis par
+// `programme.tg_sessions_emit_events()` et `programme.tg_registrations_emit_events()`,
+// pas par le service : leur forme appartient au SQL, et la figer dans une
+// structure Rust ferait croire à un contrat que le déclencheur ne connaît pas.
+// Le consommateur lit les champs dont il a besoin, un par un.
+//
+// LE PIÈGE, ET IL EST ÉCRIT LÀ OÙ ON LE CHERCHERAIT : il n'existe **aucun**
+// `programme.registration.confirmed`. Le commentaire de
+// `engagement.schedule_session_reminders()` le nomme, mais `registration_status`
+// vaut `registered`, `waitlisted`, `cancelled`, `attended`, `no_show` — jamais
+// `confirmed`. Et une inscription ordinaire naît **à l'état inscrit, par une
+// création** : un consommateur qui n'écouterait que les changements d'état
+// raterait la quasi-totalité des inscriptions. On branche donc sur le STATUT
+// porté par la charge utile, jamais sur le type d'événement (écart n° 126).
+// -----------------------------------------------------------------------------
+
+pub const AGGREGATE_SESSION: &str = "session";
+pub const AGGREGATE_REGISTRATION: &str = "registration";
+
+/// Émis à l'insertion, avec le statut d'arrivée en charge utile — c'est le
+/// chemin le plus courant, et celui qu'une lecture du modèle aurait cassé.
+pub const REGISTRATION_CREATED: &str = "programme.registration.created";
+/// Les cinq suivants portent le nom d'une valeur de `programme.registration_status`
+/// et sont émis à chaque changement d'état.
+pub const REGISTRATION_REGISTERED: &str = "programme.registration.registered";
+pub const REGISTRATION_WAITLISTED: &str = "programme.registration.waitlisted";
+pub const REGISTRATION_CANCELLED: &str = "programme.registration.cancelled";
+pub const REGISTRATION_ATTENDED: &str = "programme.registration.attended";
+pub const REGISTRATION_NO_SHOW: &str = "programme.registration.no_show";
+
+/// Émis à l'insertion d'une séance.
+pub const SESSION_CREATED: &str = "programme.session.created";
+/// Les cinq suivants portent le nom d'une valeur de `programme.session_status`.
+pub const SESSION_PLANNED: &str = "programme.session.planned";
+pub const SESSION_SCHEDULED: &str = "programme.session.scheduled";
+pub const SESSION_LIVE: &str = "programme.session.live";
+pub const SESSION_COMPLETED: &str = "programme.session.completed";
+pub const SESSION_POSTPONED: &str = "programme.session.postponed";
+pub const SESSION_CANCELLED: &str = "programme.session.cancelled";
+/// Le seul qui ne soit pas un état : émis quand le créneau change **sans** que
+/// le statut bouge. La charge utile porte alors `previous_starts_at`.
+pub const SESSION_RESCHEDULED: &str = "programme.session.rescheduled";

@@ -6,7 +6,7 @@
 use kernel::context::RequestContext;
 use kernel::db::Db;
 use kernel::error::Result;
-use kernel::jobs::{self, ClaimedJob, DEFAULT_QUEUE};
+use kernel::jobs::{self, ClaimedJob};
 use std::time::Duration;
 
 use crate::registry::JobRegistry;
@@ -23,18 +23,26 @@ const LOT: i32 = 10;
 const BAIL: f64 = 30.0 * 60.0;
 const RYTHME_REPRISE: Duration = Duration::from_secs(60);
 
+/// **Toutes les files déclarées sont écoutées, pas seulement la file par
+/// défaut.** `platform.claim_jobs()` filtre strictement sur la file, et les
+/// déclencheurs du modèle en nomment **quatre** autres — « media », « email »,
+/// « live », « analytics ». N'écouter que « default » y laisserait les travaux
+/// s'empiler sans erreur ni trace, ce qui est le pire des silences.
 pub async fn run(db: Db, worker_id: String, registry: JobRegistry) -> Result<()> {
+    let files = registry.queues();
+    tracing::info!(files = ?files, "files écoutées");
+
     let mut prochaine_reprise = tokio::time::Instant::now();
 
     loop {
         if tokio::time::Instant::now() >= prochaine_reprise {
-            if let Err(e) = reprendre_les_bloques(&db).await {
+            if let Err(e) = reprendre_les_bloques(&db, &files).await {
                 tracing::error!(erreur = %e, "reprise des travaux bloqués impossible");
             }
             prochaine_reprise = tokio::time::Instant::now() + RYTHME_REPRISE;
         }
 
-        let travaux = match reserver(&db, &worker_id).await {
+        let travaux = match reserver(&db, &worker_id, &files).await {
             Ok(t) => t,
             Err(e) => {
                 tracing::error!(erreur = %e, "réservation de travaux impossible");
@@ -54,16 +62,25 @@ pub async fn run(db: Db, worker_id: String, registry: JobRegistry) -> Result<()>
     }
 }
 
-async fn reserver(db: &Db, worker_id: &str) -> Result<Vec<ClaimedJob>> {
+/// Un lot par file, dans **une seule** transaction : ouvrir une connexion par
+/// file à chaque tour de boucle multiplierait le trafic par le nombre de files
+/// pour, la plupart du temps, ne rien trouver.
+async fn reserver(db: &Db, worker_id: &str, files: &[String]) -> Result<Vec<ClaimedJob>> {
     let mut tx = db.write(&RequestContext::background("jobs")).await?;
-    let travaux = jobs::claim(&mut tx, DEFAULT_QUEUE, worker_id, LOT).await?;
+    let mut travaux = Vec::new();
+    for file in files {
+        travaux.extend(jobs::claim(&mut tx, file, worker_id, LOT).await?);
+    }
     tx.commit().await?;
     Ok(travaux)
 }
 
-async fn reprendre_les_bloques(db: &Db) -> Result<()> {
+async fn reprendre_les_bloques(db: &Db, files: &[String]) -> Result<()> {
     let mut tx = db.write(&RequestContext::background("jobs")).await?;
-    let reprises = jobs::reclaim_stalled(&mut tx, DEFAULT_QUEUE, BAIL).await?;
+    let mut reprises = 0;
+    for file in files {
+        reprises += jobs::reclaim_stalled(&mut tx, file, BAIL).await?;
+    }
     tx.commit().await?;
 
     if reprises > 0 {

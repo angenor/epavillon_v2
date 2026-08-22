@@ -26,4 +26,22 @@ impl JobRegistry {
     pub fn get(&self, task: &str) -> Option<&dyn JobHandler> {
         self.handlers.get(task).map(|h| h.as_ref())
     }
+
+    /// Les files à écouter, dédoublonnées et **ordonnées** : la boucle les
+    /// parcourt dans le même ordre à chaque tour, ce qui rend son comportement
+    /// reproductible d'une exécution à l'autre.
+    ///
+    /// La file par défaut y figure toujours, même sans gestionnaire qui la
+    /// déclare : c'est celle où atterrit tout travail enfilé sans précision.
+    pub fn queues(&self) -> Vec<String> {
+        let mut files: Vec<String> = self
+            .handlers
+            .values()
+            .map(|h| h.queue().to_owned())
+            .chain(std::iter::once(kernel::jobs::DEFAULT_QUEUE.to_owned()))
+            .collect();
+        files.sort();
+        files.dedup();
+        files
+    }
 }
