@@ -1,0 +1,22 @@
+{
+  "unreachable": {
+    "network": "The platform is temporarily unreachable. Check your connection, then try again.",
+    "timeout": "The platform is taking too long to respond. Try again in a moment.",
+    "gateway": "The platform is temporarily unavailable. The technical team has been notified.",
+    "malformed": "The platform returned an unexpected response. Try again in a moment."
+  },
+  "offline": {
+    "title": "Connection to the platform lost",
+    "description": "The data shown may be out of date. Changes will not be saved until the connection is restored.",
+    "retry": "Try again now",
+    "checking": "Retrying…"
+  },
+  "session": {
+    "expired": "Your session has expired. Sign in again to continue.",
+    "signInAgain": "Sign in again"
+  },
+  "mockData": {
+    "title": "Part of this screen uses sample data",
+    "description": "The platform does not serve this data yet; the rest of the screen shows real information. Expected routes:"
+  }
+}

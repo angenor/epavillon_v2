@@ -93,11 +93,63 @@ pub async fn identite(
     }))
 }
 
-/// La fiche de performance, telle que la projection la rend.
+/// La fiche de performance — **jamais nulle pour une organisation qui existe**.
+///
+/// La projection est MATÉRIALISÉE : une organisation créée depuis le dernier
+/// rafraîchissement n'y figure pas encore, et la fiche du back-office s'ouvrait
+/// alors sur une valeur nulle qu'aucun écran n'attendait. Ses compteurs valent
+/// zéro, ce qui est vrai — c'est déjà ce que fait la liste, par `COALESCE` sur
+/// chaque colonne (`repo/admin_list.rs`).
+///
+/// `ratio_acceptation` reste NUL, et c'est délibéré : une organisation qui n'a
+/// jamais rien déposé n'a pas un taux d'acceptation de zéro, elle n'en a pas.
+/// Le modèle le dit dans le `COMMENT ON COLUMN` de la vue.
 pub async fn scorecard(conn: &mut PgConnection, id: OrganizationId) -> Result<Option<Value>> {
     let ligne = sqlx::query_scalar!(
-        r#"SELECT to_jsonb(s) AS "fiche!" FROM analytics.mv_organization_scorecard s
-            WHERE s.organization_id = $1"#,
+        r#"SELECT COALESCE(
+                      to_jsonb(s),
+                      jsonb_build_object(
+                          'organization_id',           o.id,
+                          'legal_name',                o.legal_name,
+                          'acronym',                   o.acronym,
+                          'slug',                      o.slug,
+                          'statut',                    o.status::text,
+                          'organization_type_code',    o.organization_type_code,
+                          'country_id',                o.country_id,
+                          'pays_iso3',                 c.iso3,
+                          'pays_nom',                  platform.t(c.name),
+                          'statut_oif',                COALESCE(c.oif_status::text, 'none'),
+                          'est_verifiee',              (o.verified_at IS NOT NULL),
+                          'verified_at',               o.verified_at,
+                          'score_confiance',           o.trust_score,
+                          'merged_into_id',            o.merged_into_id,
+                          'membres_actifs',            0,
+                          'membres_en_attente',        0,
+                          'referents',                 0,
+                          'propositions_deposees',     0,
+                          'propositions_en_brouillon', 0,
+                          'propositions_acceptees',    0,
+                          'propositions_rejetees',     0,
+                          'propositions_retirees',     0,
+                          'evenements_couverts',       0,
+                          'note_moyenne_obtenue',      NULL,
+                          'ratio_acceptation',         NULL,
+                          'sessions_programmees',      0,
+                          'sessions_realisees',        0,
+                          'sessions_annulees',         0,
+                          'inscrits_a_ses_sessions',   0,
+                          'presents_a_ses_sessions',   0,
+                          'articles_publies',          0,
+                          'articles_en_moderation',    0,
+                          'octets_stockes',            0,
+                          'derniere_activite',         o.updated_at,
+                          'inscrite_le',               o.created_at
+                      )
+                  ) AS "fiche!"
+             FROM org.organizations o
+             LEFT JOIN reference.countries c ON c.id = o.country_id
+             LEFT JOIN analytics.mv_organization_scorecard s ON s.organization_id = o.id
+            WHERE o.id = $1"#,
         id.as_uuid()
     )
     .fetch_optional(conn)

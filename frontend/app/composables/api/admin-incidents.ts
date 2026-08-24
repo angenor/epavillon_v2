@@ -6,6 +6,24 @@
  * `$fetch`. Seule la place du code change, pour tenir `useApi.ts` sous le
  * garde-fou de mille lignes.
  *
+ * ── AUCUNE DE CES SEPT ROUTES N'EXISTE ENCORE ───────────────────────────────
+ *
+ * La base sert déjà tout — `live.incidents`, `live.event_incidents()`,
+ * `live.publish_incident()`, `live.unpublish_incident()`, la permission
+ * `live.incident.publish` — mais aucun crate Rust ne porte le schéma `live`. Les
+ * sept appels passent donc par `pending` et non par `call`/`send` : l'écran
+ * continue de fonctionner sur les données d'exemple, API configurée ou non, et
+ * le bandeau nomme les routes attendues. Les faire appeler leur route rendrait
+ * un 404, c'est-à-dire une panne affichée sur un écran livré et vérifié.
+ *
+ * Rien ne part sur le réseau : ni corps, ni verbe, ni paramètre — `pending` n'en
+ * prend aucun. Les chemins restent écrits parce qu'ils documentent les routes
+ * attendues, mais la bascule ne se réduira pas à changer le nom de la primitive :
+ * il faudra RÉTABLIR les paramètres de la liste et du gabarit (`event_id`,
+ * `session_id`), les corps des quatre écritures et leurs verbes — `PUT` pour la
+ * correction, `DELETE` pour la dépublication. Tout est encore là, en argument des
+ * méthodes.
+ *
  * ── LE PÉRIMÈTRE EST VÉRIFIÉ AVANT L'APPEL ──────────────────────────────────
  *
  * `assertEventInScope` d'abord, comme pour le tableau de bord, la liste des
@@ -13,18 +31,19 @@
  * plutôt que de rendre une liste vide, qui se lirait comme « aucun incident » au
  * lieu de « ceci ne vous regarde pas ». Règle métier n° 8.
  *
- * ── L'ACTEUR VOYAGE AVEC SES PERMISSIONS, ET CE N'EST PAS UN DÉTAIL ─────────
+ * ── L'ACTEUR ET SES PERMISSIONS NE QUITTENT PAS LE NAVIGATEUR ───────────────
  *
  * Les quatre écritures reçoivent `granted` — les permissions effectives de celui
  * qui agit. Tant que l'API n'existe pas, c'est la seule façon de rejouer ce que
  * `has_permission(acteur, 'live.incident.publish', 'event', édition)` décidera en
- * base. Le paramètre DISPARAÎTRA au prompt B6 : l'API lit sa propre session, et
- * un client qui déclare ses propres droits n'est pas un contrôle d'accès. Il est
- * ici pour que le comportement de l'écran soit juste, pas pour le protéger.
+ * base. Le paramètre DISPARAÎTRA au branchement du crate `live` : l'API lit sa
+ * propre session, et un client qui déclare ses propres droits n'est pas un
+ * contrôle d'accès. Il est ici pour que le comportement de l'écran soit juste,
+ * pas pour le protéger.
  *
  * ── PUBLIER N'EST PAS ENREGISTRER ───────────────────────────────────────────
  *
- * Deux routes distinctes, parce que ce sont deux actes distincts en base :
+ * Deux chemins distincts, parce que ce sont deux actes distincts en base :
  * `live.publish_incident()` et `live.unpublish_incident()` horodatent et
  * attribuent, la seconde gardant le motif. Un brouillon se relit avant de parler
  * à toute une COP, et un bandeau retiré laisse une trace.
@@ -42,11 +61,11 @@ import type { AdministeredEvents, EffectivePermission } from '~/types/identity'
 import type { EventId, SessionId, Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
 
-interface IncidentsApiDeps extends ApiTransport {
+interface IncidentsApiDeps extends Pick<ApiTransport, 'pending'> {
   assertEventInScope: (eventId: Uuid, scope: AdministeredEvents) => void
 }
 
-export function createAdminIncidentsApi({ call, send, assertEventInScope }: IncidentsApiDeps) {
+export function createAdminIncidentsApi({ pending, assertEventInScope }: IncidentsApiDeps) {
   return {
     /**
      * LA LISTE ET SES CIBLES — en une réponse.
@@ -57,13 +76,13 @@ export function createAdminIncidentsApi({ call, send, assertEventInScope }: Inci
      */
     list: (eventId: EventId, scope: AdministeredEvents): Promise<IncidentListScreen | null> => {
       assertEventInScope(eventId, scope)
-      return call('/admin/incidents', (m) => m.incidentListScreen(eventId), { event_id: eventId })
+      return pending('/admin/incidents', (m) => m.incidentListScreen(eventId))
     },
 
     /** UN MESSAGE, pour le relire et le corriger. `null` s'il n'existe pas. */
     byId: (incidentId: Uuid, eventId: EventId, scope: AdministeredEvents): Promise<ManagedIncident | null> => {
       assertEventInScope(eventId, scope)
-      return call(`/admin/incidents/${incidentId}`, (m) => m.incidentById(incidentId))
+      return pending(`/admin/incidents/${incidentId}`, (m) => m.incidentById(incidentId))
     },
 
     /**
@@ -74,9 +93,7 @@ export function createAdminIncidentsApi({ call, send, assertEventInScope }: Inci
      * soit pendant que la salle attend.
      */
     overrunTemplate: (sessionId: SessionId) =>
-      call(`/admin/incidents/overrun-template`, (m) => m.overrunTemplate(sessionId), {
-        session_id: sessionId,
-      }),
+      pending(`/admin/incidents/overrun-template`, (m) => m.overrunTemplate(sessionId)),
 
     /** RÉDIGER, et publier dans le même geste si `publish` est vrai. */
     create: (
@@ -84,7 +101,7 @@ export function createAdminIncidentsApi({ call, send, assertEventInScope }: Inci
       actorId: Uuid | null,
       granted: EffectivePermission[],
     ): Promise<IncidentWriteResult> =>
-      send('/admin/incidents', payload, (m) => m.createIncident(payload, actorId, granted)),
+      pending('/admin/incidents', (m) => m.createIncident(payload, actorId, granted), 'write'),
 
     /** CORRIGER. Republier efface la dépublication, comme `live.publish_incident()`. */
     update: (
@@ -92,11 +109,10 @@ export function createAdminIncidentsApi({ call, send, assertEventInScope }: Inci
       actorId: Uuid | null,
       granted: EffectivePermission[],
     ): Promise<IncidentWriteResult> =>
-      send(
+      pending(
         `/admin/incidents/${payload.incident_id}`,
-        payload,
         (m) => m.updateIncident(payload, actorId, granted),
-        'PUT',
+        'write',
       ),
 
     /** PUBLIER un brouillon, ou rétablir un message retiré. */
@@ -106,19 +122,20 @@ export function createAdminIncidentsApi({ call, send, assertEventInScope }: Inci
       actorId: Uuid | null,
       granted: EffectivePermission[],
     ): Promise<IncidentWriteResult> =>
-      send(
+      pending(
         `/admin/incidents/${incidentId}/publish`,
-        { event_id: eventId },
         (m) => m.publishIncident(incidentId, eventId, actorId, granted),
+        'write',
       ),
 
     /**
      * DÉPUBLIER EN UN CLIC, avec motif.
      *
-     * `DELETE` par la route, mais pas une suppression : la ligne reste, avec
-     * `unpublished_at`, `unpublished_by` et `unpublish_reason`. C'est
-     * l'historique que le prompt demande, et c'est aussi ce que fait la base —
-     * `live.incidents` n'a pas de suppression.
+     * Le chemin est celui de la publication, que l'API servira en `DELETE` — mais
+     * pas une suppression : la ligne reste, avec `unpublished_at`,
+     * `unpublished_by` et `unpublish_reason`. C'est l'historique que le prompt
+     * demande, et c'est aussi ce que fait la base — `live.incidents` n'a pas de
+     * suppression.
      */
     unpublish: (
       payload: UnpublishIncidentPayload,
@@ -126,11 +143,10 @@ export function createAdminIncidentsApi({ call, send, assertEventInScope }: Inci
       actorId: Uuid | null,
       granted: EffectivePermission[],
     ): Promise<IncidentWriteResult> =>
-      send(
+      pending(
         `/admin/incidents/${payload.incident_id}/publish`,
-        payload,
         (m) => m.unpublishIncident(payload, eventId, actorId, granted),
-        'DELETE',
+        'write',
       ),
   }
 }

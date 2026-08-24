@@ -26,9 +26,20 @@ use crate::domain::sessions::PublicScheduleRow;
 /// **Vide — jamais une erreur — quand le programme n'est pas paru** : aucune
 /// séance ne porte de date de publication, et la vue ne rend rien. C'est un état
 /// normal, que l'écran annonce.
+/// **Sans édition, ce sont les séances À VENIR de toutes les éditions.**
+///
+/// L'accueil du site compose une seule liste des prochaines séances, toutes COP
+/// confondues : il n'a pas d'édition à nommer, et lui en faire choisir une le
+/// ferait passer à côté de celles des autres. La lecture est alors bornée — les
+/// séances passées sont écartées et le nombre de lignes est plafonné —, sans
+/// quoi elle rendrait la programmation entière de toutes les éditions de
+/// l'histoire de la plateforme à chaque affichage de la page d'accueil.
 pub async fn programmation<'e>(
     executor: impl PgExecutor<'e>,
-    event_id: EventId,
+    event_id: Option<EventId>,
+    // `limite` nulle = aucun plafond : `LIMIT NULL` vaut `LIMIT ALL` en
+    // PostgreSQL, ce qui évite de composer deux requêtes pour une seule lecture.
+    limite: Option<i64>,
 ) -> Result<Vec<PublicScheduleRow>> {
     let lignes = sqlx::query!(
         r#"SELECT v.id AS "id!", v.event_id AS "event_id!", v.event_day_id,
@@ -46,9 +57,12 @@ pub async fn programmation<'e>(
                   v.registered_count AS "registered_count!",
                   v.theme_codes AS "theme_codes!", v.themes AS "themes!"
              FROM programme.v_public_schedule v
-            WHERE v.event_id = $1
-            ORDER BY v.starts_at, v.id"#,
-        event_id.as_uuid()
+            WHERE ($1::uuid IS NULL OR v.event_id = $1)
+              AND ($1::uuid IS NOT NULL OR v.temporal_state IN ('upcoming', 'ongoing'))
+            ORDER BY v.starts_at, v.id
+            LIMIT $2"#,
+        event_id.map(|e| e.0),
+        limite
     )
     .fetch_all(executor)
     .await?;
@@ -97,7 +111,10 @@ pub async fn par_adresse<'e>(
     event_id: EventId,
     slug: &str,
 ) -> Result<Option<PublicScheduleRow>> {
-    Ok(programmation(executor, event_id)
+    // **Aucun plafond ici.** Cette lecture cherche une séance précise dans une
+    // édition : la borner ferait rendre « introuvable » pour une séance qui
+    // existe, simplement parce qu'elle arrive tard dans le programme.
+    Ok(programmation(executor, Some(event_id), None)
         .await?
         .into_iter()
         .find(|s| s.slug == slug))

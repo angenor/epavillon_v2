@@ -49,6 +49,7 @@ import type {
   PersonId,
   RoomId,
   Slug,
+  TaxonomyTermCode,
   TimeZoneName,
   TrackId,
   Url,
@@ -245,19 +246,23 @@ export interface EditionFormPayload {
   has_pavilion: boolean
   /** Message d'accueil, consignes d'accès — `event.events.highlights`. */
   highlights: I18nText | null
-  /**
-   * LES TROIS DÉCLINAISONS. `event.events` NE PORTE PAS ses images : le
-   * rattachement média est polymorphe (`media.attachments`, rôles `banner`,
-   * `cover` et `thumbnail`). Chaque objet est téléversé d'abord, son
-   * identifiant envoyé ensuite.
-   *
-   * Les trois sont INDÉPENDANTES et facultatives : on peut n'en fournir
-   * qu'une, et `null` retire la déclinaison sans toucher aux deux autres.
-   * Aucune ne se déduit d'une autre — déduire, c'est recadrer, et la base
-   * refuse un fichier qui n'a pas la forme de son rôle.
-   */
-  images: Record<EditionImageRole, AssetId | null>
 }
+
+/**
+ * LES TROIS DÉCLINAISONS, ÉCRITES À PART DE LA FICHE.
+ *
+ * `event.events` NE PORTE PAS ses images : le rattachement est polymorphe
+ * (`media.attachments`, rôles `banner`, `cover` et `thumbnail`) et il appartient
+ * au module Média, qui l'écrit par `PUT /media/attachments`. Les joindre à
+ * l'enregistrement de l'édition les confiait à une route qui les acceptait sans
+ * jamais les poser.
+ *
+ * Les trois sont INDÉPENDANTES et facultatives : on peut n'en fournir qu'une, et
+ * `null` retire la déclinaison sans toucher aux deux autres. Aucune ne se déduit
+ * d'une autre — déduire, c'est recadrer, et la base refuse un fichier qui n'a pas
+ * la forme de son rôle.
+ */
+export type EditionImagePayload = Record<EditionImageRole, AssetId | null>
 
 /**
  * Un refus de sauvegarde, tel que la base le formule.
@@ -310,6 +315,12 @@ export interface EditionSaveResult {
    */
   days_removed: number
   sessions_detached: number
+  /**
+   * Le sigle que l'API propose quand elle refuse une édition qui n'en porte pas.
+   * Dérivé du libellé, utilisable tel quel : un refus qui ne propose rien fait
+   * chercher une convention que personne n'a écrite.
+   */
+  suggested_acronym: string | null
 }
 
 // ===========================================================================
@@ -417,6 +428,12 @@ export interface EditionTrackPayload {
   /** Ouvrir ou refermer la page publique du fil. */
   is_published: boolean
   sort_order: number
+  /**
+   * Thématiques du fil, par leur code de taxonomie. LA LISTE EST REMPLACÉE À
+   * CHAQUE ENREGISTREMENT : l'omettre efface les thématiques du fil, et c'est ce
+   * qui permet d'en retirer une.
+   */
+  theme_codes: TaxonomyTermCode[]
 }
 
 // --- 3.3 Lieux et salles ---------------------------------------------------

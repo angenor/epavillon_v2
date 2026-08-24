@@ -18,7 +18,6 @@ import type {
   I18nText,
   Int8,
   IsoDateTime,
-  Numeric,
   OrganizationId,
   PersonId,
   TaxonomyTermCode,
@@ -118,7 +117,9 @@ export interface Asset {
   original_filename: string | null
   width: number | null
   height: number | null
-  duration_seconds: Numeric | null
+  /** `numeric(10,3)` traversée en TEXTE (`duration_seconds::text`) : un flottant
+   *  perdrait les millisecondes d'une vidéo sans le dire. */
+  duration_seconds: string | null
   owner_person_id: PersonId | null
   owner_organization_id: OrganizationId | null
   visibility: AssetVisibility
@@ -140,6 +141,12 @@ export interface Asset {
   purged_at: IsoDateTime | null
   created_at: IsoDateTime
   updated_at: IsoDateTime
+  /** Adresse publique de l'ORIGINAL. Ce n'est pas une colonne : la base ne
+   *  stocke jamais d'URL, `media.object_url()` la compose à la lecture. */
+  url: Url
+  /** Déclinaisons prêtes. Objet VIDE ET NON NUL tant que le worker n'a rien
+   *  produit — l'écran affiche alors `url`, pas un trou. */
+  sources: AssetSources
 }
 
 /**
@@ -203,6 +210,41 @@ export interface AttachedImage {
   sources: AssetSources
 }
 
+/**
+ * Retour de `GET /media/attachments` — `AttachedMedia`.
+ *
+ * C'est `AttachedImage` PLUS ce que l'écran qui GÈRE les médias d'une entité
+ * exige, et que l'affichage n'a jamais eu à connaître : l'identifiant du
+ * rattachement, sans lequel on ne sait pas quoi détacher ; le rôle, sans lequel
+ * on ne sait pas où ranger la ligne ; l'ordre de tri, sans lequel une galerie ne
+ * se réordonne pas ; et l'état de l'objet, pour dire « en traitement » au lieu
+ * de laisser un trou entre le dépôt et le passage du worker.
+ *
+ * LES DEUX FORMES COEXISTENT : `AttachedImage` décrit ce que rend
+ * `media.attached_image()`, qui ne sert que des objets servables ; celle-ci sert
+ * aussi les documents et les objets encore en traitement.
+ */
+export interface AttachedMedia {
+  attachment_id: Uuid
+  role: AttachmentRole
+  sort_order: number
+  asset_id: AssetId
+  /** L'ORIGINAL, déjà là au dépôt quand `sources` est encore vide. */
+  url: Url
+  width: number | null
+  height: number | null
+  /** NULLABLE ici, contrairement à `AttachedImage.alt_text` : un document n'a
+   *  pas de texte alternatif, et un objet en traitement n'a pas encore atteint
+   *  l'état où `ck_assets_alt_text_required` l'exige. Résolu en base,
+   *  surcharge du rattachement d'abord, texte de l'objet ensuite. */
+  alt_text: I18nText | null
+  caption: I18nText | null
+  credit: string | null
+  sources: AssetSources
+  /** `ready` est le seul état servi au public ; les autres se disent ici. */
+  status: AssetStatus
+}
+
 // ---------------------------------------------------------------------------
 // Rattachements
 // ---------------------------------------------------------------------------
@@ -260,4 +302,98 @@ export interface StorageQuota {
   used_files: number
   note: string | null
   updated_at: IsoDateTime
+}
+
+/**
+ * Une ligne du tableau des quotas du back-office — `QuotaRow`.
+ *
+ * CE N'EST PAS `StorageQuota`, qui est la TABLE : celle-là porte `id`,
+ * `updated_at` et un `organization_id` nul pour la ligne de défaut ; celle-ci
+ * est une lecture jointe à la dénomination et triée par proximité du plafond.
+ * Une organisation qui n'a rien déposé n'y figure pas — l'absence de ligne dit
+ * « rien déposé », jamais « aucun quota ».
+ */
+export interface QuotaRow {
+  organization_id: OrganizationId
+  organization_name: string
+  max_bytes: Int8
+  used_bytes: Int8
+  max_files: number
+  used_files: number
+  /** Part consommée — c'est par elle que le tableau se trie. Elle DÉPASSE 1
+   *  quand le plafond a été abaissé sous la consommation déjà écrite : une
+   *  jauge doit l'écrêter plutôt que déborder. */
+  used_ratio: number
+  note: string | null
+}
+
+/** Plafond, consommation et reste — ce qu'un refus de quota affiche, `QuotaSnapshot`. */
+export interface QuotaSnapshot {
+  max_bytes: Int8
+  used_bytes: Int8
+  remaining_bytes: Int8
+  max_files: number
+  used_files: number
+}
+
+// ---------------------------------------------------------------------------
+// Dépôt et traitement
+// ---------------------------------------------------------------------------
+
+/**
+ * Le verdict d'une annonce préalable — `UploadVerdict`.
+ *
+ * ELLE N'ÉCRIT RIEN ET NE RÉSERVE RIEN : ni espace, ni clé, ni identifiant. Elle
+ * rend ce que le dépôt ferait de ce fichier, et TOUS SES REFUS SORTENT EN 200 —
+ * une annonce est une question, pas une tentative.
+ */
+export interface UploadVerdict {
+  accepted: boolean
+  /** Le code stable que le dépôt rendrait, s'il refusait. */
+  code: string | null
+  /** Le champ que l'écran doit souligner. */
+  field: string | null
+  message: string | null
+  /** L'objet déjà connu pour cette empreinte : le succès de la déduplication,
+   *  pas un refus. */
+  existing_asset: Asset | null
+  /** Renseigné quand le refus vient du quota. */
+  quota: QuotaSnapshot | null
+}
+
+/**
+ * L'avancement du traitement — `AssetProgress`.
+ *
+ * Sans elle, « en cours » et « en échec » se lisent tous les deux « pas encore
+ * là ». Un objet en échec ou en quarantaine sort ici en 200 avec son état ; il
+ * est simplement absent des lectures publiques.
+ */
+export interface AssetProgress {
+  asset_id: AssetId
+  status: AssetStatus
+  scan_verdict: ScanVerdict
+  scan_engine: string | null
+  width: number | null
+  height: number | null
+  renditions_ready: number
+  /** Zéro pour un document : rien n'est décliné. */
+  renditions_expected: number
+  last_error: string | null
+}
+
+/**
+ * Un objet prêt que plus rien n'utilise — `OrphanAsset`.
+ * Retour de `media.find_orphan_assets()`, du plus lourd au plus léger.
+ */
+export interface OrphanAsset {
+  asset_id: AssetId
+  bucket: string
+  object_key: string
+  byte_size: Int8
+  /** Octets des déclinaisons prêtes, EN PLUS de `byte_size` — il ne les contient pas. */
+  rendition_bytes: Int8
+  owner_organization_id: OrganizationId | null
+  created_at: IsoDateTime
+  /** Jours entiers écoulés depuis le dépôt. */
+  age_days: number
 }

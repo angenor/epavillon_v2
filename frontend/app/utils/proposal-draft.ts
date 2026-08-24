@@ -27,11 +27,13 @@
 
 import type { CallForProposals } from '~/types/event/call'
 import type { EventEdition } from '~/types/event/edition'
+import type { ProposalDocumentEntry } from '~/types/admin-review'
 import type {
   DraftDocument,
   DraftIssue,
   DraftSpeaker,
   ProposalDraft,
+  ReopenedDraft,
 } from '~/types/proposal-form'
 import {
   DOCUMENT_MAX_BYTES,
@@ -93,6 +95,64 @@ export function emptyDraftSpeaker(index: number): DraftSpeaker {
     role: 'speaker',
     bio: '',
     photo: null,
+  }
+}
+
+/**
+ * LE BROUILLON RECOMPOSÉ, RENDU MODIFIABLE.
+ *
+ * Deux choses manquent à ce que l'API rend, et aucune ne lui appartient.
+ *
+ * LA CLÉ DE LISTE DES INTERVENANTS se pose ICI, à la réception. Sans elle, tous
+ * les intervenants rouverts partagent la même clé vide : l'écran retrouve
+ * toujours le premier, en modifier un les remplace tous, et en supprimer un les
+ * supprime tous. La faire porter par l'API obligerait à la persister pour
+ * qu'elle reste stable, alors qu'elle ne sert que le temps de la saisie.
+ *
+ * LES PIÈCES JOINTES ont leurs propres routes : le brouillon ne les porte pas,
+ * l'écran les charge à part et les passe ici.
+ */
+export function draftFromReopened(
+  reopened: ReopenedDraft,
+  documents: DraftDocument[] = [],
+): ProposalDraft {
+  return {
+    ...reopened,
+    speakers: reopened.speakers.map((speaker, index) => ({
+      ...speaker,
+      key: draftKey('speaker', index),
+      // La photo appartient à la fiche de la personne : le formulaire ne la
+      // rouvre pas et n'a rien à réenvoyer.
+      photo: null,
+    })),
+    documents,
+  }
+}
+
+/**
+ * UNE PIÈCE DÉJÀ AU DOSSIER, telle que le formulaire la tient.
+ *
+ * `preview_url` porte ici l'adresse composée EN BASE — l'objet est stocké, ce
+ * n'est plus un aperçu local. Elle est nulle tant qu'il n'est pas servi :
+ * quarantaine, purge, téléversement inachevé.
+ *
+ * Le titre est lu en français et non résolu par la locale : le dossier se
+ * saisit dans cette seule langue (`platform.is_i18n_text`), et rouvrir un titre
+ * anglais donnerait à corriger un texte que l'enregistrement écraserait.
+ */
+export function draftDocumentOf(entry: ProposalDocumentEntry, index: number): DraftDocument {
+  return {
+    key: draftKey('document', index),
+    upload: {
+      file_name: entry.asset?.original_filename ?? '',
+      mime_type: entry.asset?.mime_type ?? '',
+      byte_size: entry.asset?.byte_size ?? 0,
+      asset_id: entry.document.asset_id,
+      preview_url: entry.url ?? undefined,
+    },
+    title: entry.document.title.fr,
+    document_type_code: entry.document.document_type_code,
+    is_public: entry.document.is_public,
   }
 }
 
@@ -501,10 +561,23 @@ function validateSchedule(
   return issues
 }
 
+/**
+ * ON NE VALIDE QUE CE QUI N'EST PAS ENCORE PARTI.
+ *
+ * Une pièce déjà rattachée (`upload.asset_id` renseigné) a passé
+ * `media.tg_validate_attachment()`, qui fait foi ; les règles écrites ici
+ * servent à refuser AVANT l'envoi. Les rejouer à la réouverture d'un dossier
+ * bloquerait le dépôt sur une pièce que l'écran ne montre plus — l'étape des
+ * documents est masquée —, et l'archive en compte : un `.zip` mis en
+ * quarantaine, dont le type n'est pas de ceux que le formulaire accepte
+ * aujourd'hui, rendrait la correction impossible sans dire pourquoi.
+ */
 function validateDocuments(draft: ProposalDraft): DraftIssue[] {
   const issues: DraftIssue[] = []
 
   for (const document of draft.documents) {
+    if (document.upload.asset_id) continue
+
     if (document.title.trim().length === 0) {
       issues.push({
         step: 'documents',

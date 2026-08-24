@@ -36,6 +36,7 @@ import type { EventDay, EventEdition } from '~/types/event/edition'
 import type { EventSeries } from '~/types/event/series'
 import type { IsoDate } from '~/types/shared'
 import { COUNTRY, EVENT, EVENT_DAY, EVENT_DAY_COP29, EVENT_DAY_COP30, PERSON, SERIES } from './ids'
+import { countries } from './reference'
 
 // ---------------------------------------------------------------------------
 // Série — reprise de `900_seed.sql`
@@ -86,7 +87,7 @@ export const eventSeries = [
 // L'édition
 // ---------------------------------------------------------------------------
 
-export const events = [
+const editionsSansPays = [
   {
     id: EVENT.cop31,
     series_id: SERIES.copClimate,
@@ -290,7 +291,20 @@ export const events = [
     created_at: '2026-07-02T14:00:00Z',
     updated_at: '2026-07-02T14:00:00Z',
   },
-] satisfies EventEdition[]
+] satisfies Omit<EventEdition, 'country_code' | 'country_name'>[]
+
+/**
+ * Le pays RÉSOLU, joint comme l'API le joint.
+ *
+ * L'API rend `country_code` et `country_name` avec l'édition ; les recopier à la
+ * main sur chaque ligne les ferait diverger du référentiel à la première
+ * correction d'un libellé. Ils sont donc dérivés de `countries`, exactement
+ * comme la jointure de `repo/public.rs`.
+ */
+export const events: EventEdition[] = editionsSansPays.map((edition) => {
+  const pays = countries.find((entry) => entry.id === edition.country_id) ?? null
+  return { ...edition, country_code: pays?.iso2 ?? null, country_name: pays?.name ?? null }
+})
 
 // ---------------------------------------------------------------------------
 // Calendrier

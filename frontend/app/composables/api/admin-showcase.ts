@@ -6,6 +6,24 @@
  * `$fetch`. Seule la place du code change, pour tenir `useApi.ts` sous le
  * garde-fou de mille lignes de `CLAUDE.md`.
  *
+ * ── AUCUNE DE CES DIX ROUTES N'EXISTE ENCORE ────────────────────────────────
+ *
+ * `content.highlights`, sa vue `v_showcase` et la permission
+ * `content.highlight.manage` sont en base, mais aucun crate Rust ne porte le
+ * schéma `content`. Les dix appels passent donc par `pending` et non par
+ * `call`/`send` : l'écran continue de fonctionner sur les données d'exemple, API
+ * configurée ou non, et le bandeau nomme les routes attendues. Les faire appeler
+ * leur route rendrait un 404, c'est-à-dire une panne affichée sur un écran livré
+ * et vérifié.
+ *
+ * Rien ne part sur le réseau : ni corps, ni verbe, ni paramètre — `pending` n'en
+ * prend aucun. Les chemins restent écrits parce qu'ils documentent les routes
+ * attendues, mais la bascule ne se réduira pas à changer le nom de la primitive :
+ * il faudra RÉTABLIR `placement` en paramètre de `form()`, `event_id` en
+ * paramètre de `sessionsFor()`, les corps des quatre écritures et le `PUT` de la
+ * mise à jour, du statut et de l'ordre. Tout est encore là, en argument des
+ * méthodes.
+ *
  * ── LE PÉRIMÈTRE SE REFUSE ICI, PAS DANS LA PAGE ────────────────────────────
  *
  * Règle métier n° 8, ADR-14 : une administratrice détachée sur la COP31 ne voit
@@ -30,20 +48,20 @@
  *
  * ── POURQUOI CERTAINS REFUS SE JOUENT DANS LA LECTURE SIMULÉE ───────────────
  *
- * `assertEventInScope` s'appelle AVANT la requête partout ailleurs, parce que
+ * `assertEventInScope` s'appelle AVANT l'appel partout ailleurs, parce que
  * l'édition visée est dans l'URL. Ici, l'édition d'une diapositive n'est connue
  * qu'une fois la ligne lue : le garde vit donc DANS la lecture simulée, où il
- * rejoue ce que l'API répondra en 403. Sur API réelle la fonction n'est pas
- * appelée — le refus vient du serveur, et c'est la bonne place. Seules les
- * écritures dont la CIBLE est dans la charge utile (`save`) gardent le contrôle
- * avant l'appel.
+ * rejoue ce que l'API répondra en 403 le jour où elle existera — et c'est bien
+ * elle qui refusera alors, pas le client. Seules les écritures dont la CIBLE est
+ * dans la charge utile (`save`) gardent le contrôle avant l'appel.
  *
- * ── ENREGISTRER EST UN SEUL ACTE, MÊME S'IL A DEUX VERBES ───────────────────
+ * ── ENREGISTRER EST UN SEUL ACTE, MÊME S'IL A DEUX ADRESSES ─────────────────
  *
  * `ShowcaseSavePayload` porte `id: null` pour une création : une seule méthode
- * `save()`, qui choisit `POST` ou `PUT` d'après cet identifiant. Deux méthodes
- * pour un formulaire unique auraient dédoublé la validation — et c'est bien un
- * seul acte en base, `content.highlights` n'ayant pas de table de brouillon.
+ * `save()`, qui choisit la création ou la mise à jour d'après cet identifiant.
+ * Deux méthodes pour un formulaire unique auraient dédoublé la validation — et
+ * c'est bien un seul acte en base, `content.highlights` n'ayant pas de table de
+ * brouillon.
  *
  * ── ON N'EFFACE PAS UNE DIAPOSITIVE, ON L'ARCHIVE ───────────────────────────
  *
@@ -74,18 +92,9 @@ import type {
 import type { HighlightId, HighlightPlacement } from '~/types/content'
 import type { AdministeredEvents } from '~/types/identity'
 import type { EventId, Uuid } from '~/types/shared'
-/**
- * Import de VALEUR, et il ferme un cycle avec `useApi.ts` — qui importe cette
- * fabrique. Il est sans danger : la classe n'est référencée que dans un corps de
- * fonction, exécuté longtemps après l'évaluation des deux modules. C'est aussi
- * la seule façon de lever l'erreur que les écrans reconnaissent
- * (`instanceof ForbiddenError`, `error.name === 'ForbiddenError'`) — une erreur
- * maison ne serait pas rattrapée par `UiForbiddenState`.
- */
-import { ForbiddenError } from '~/composables/useApi'
 import type { ApiTransport } from './proposal-review'
 
-interface ShowcaseApiDeps extends ApiTransport {
+interface ShowcaseApiDeps extends Pick<ApiTransport, 'pending'> {
   assertEventInScope: (eventId: Uuid, scope: AdministeredEvents) => void
 }
 
@@ -93,7 +102,7 @@ interface ShowcaseApiDeps extends ApiTransport {
 const PLATFORM_SCOPE_REFUSAL =
   "Ce contenu s'affiche sur toute la plateforme : sa modification demande la portée globale."
 
-export function createAdminShowcaseApi({ call, send, assertEventInScope }: ShowcaseApiDeps) {
+export function createAdminShowcaseApi({ pending, assertEventInScope }: ShowcaseApiDeps) {
   /**
    * LE PÉRIMÈTRE D'UNE DIAPOSITIVE — son édition, ou la plateforme entière.
    *
@@ -102,6 +111,9 @@ export function createAdminShowcaseApi({ call, send, assertEventInScope }: Showc
    * modifiable qu'en portée globale. Écrit une fois, appelé par les six
    * méthodes : c'est ce qui garantit que la lecture et l'écriture refusent la
    * même chose.
+   *
+   * `ForbiddenError` vient de `utils/api-error.ts`, auto-importé : c'est la seule
+   * erreur que les écrans rattrapent pour afficher `UiForbiddenState`.
    */
   function assertContentInScope(eventId: EventId | null, scope: AdministeredEvents): void {
     if (eventId === null) {
@@ -126,7 +138,7 @@ export function createAdminShowcaseApi({ call, send, assertEventInScope }: Showc
      * sur l'accueil rendrait les boutons monter/descendre incompréhensibles.
      */
     list: (scope: AdministeredEvents): Promise<ShowcaseListScreen | null> =>
-      call('/admin/showcase', (m) => m.showcaseList(scope)),
+      pending('/admin/showcase', (m) => m.showcaseList(scope)),
 
     /**
      * L'ÉCRAN DE FORMULAIRE — création comme modification.
@@ -150,7 +162,7 @@ export function createAdminShowcaseApi({ call, send, assertEventInScope }: Showc
       scope: AdministeredEvents,
       options: { placement?: HighlightPlacement } = {},
     ): Promise<ShowcaseFormScreen | null> =>
-      call(
+      pending(
         highlightId === null ? '/admin/showcase/new' : `/admin/showcase/${highlightId}/form`,
         (m) => {
           if (highlightId !== null) {
@@ -159,7 +171,6 @@ export function createAdminShowcaseApi({ call, send, assertEventInScope }: Showc
           }
           return m.showcaseForm(highlightId, scope, options)
         },
-        { placement: options.placement },
       ),
 
     /**
@@ -170,7 +181,7 @@ export function createAdminShowcaseApi({ call, send, assertEventInScope }: Showc
      * personnes) que `form()` embarque. Même règle de refus.
      */
     byId: (highlightId: HighlightId, scope: AdministeredEvents): Promise<ShowcaseFormValues | null> =>
-      call(`/admin/showcase/${highlightId}`, (m) => {
+      pending(`/admin/showcase/${highlightId}`, (m) => {
         const found = m.showcaseById(highlightId)
         if (found === null) return null
         assertContentInScope(found.event_id, scope)
@@ -188,25 +199,22 @@ export function createAdminShowcaseApi({ call, send, assertEventInScope }: Showc
      */
     sessionsFor: (eventId: EventId, scope: AdministeredEvents): Promise<ShowcaseSessionOption[]> => {
       assertEventInScope(eventId, scope)
-      return call(
-        '/admin/showcase/sessions',
-        (m) =>
-          m.allSessions
-            .filter((session) => session.event_id === eventId)
-            .map((session) => ({
-              id: session.id,
-              event_id: session.event_id,
-              title: session.title,
-              starts_at: session.starts_at,
-              timezone: session.timezone,
-            }))
-            .sort((a, b) => a.starts_at.localeCompare(b.starts_at)),
-        { event_id: eventId },
+      return pending('/admin/showcase/sessions', (m) =>
+        m.allSessions
+          .filter((session) => session.event_id === eventId)
+          .map((session) => ({
+            id: session.id,
+            event_id: session.event_id,
+            title: session.title,
+            starts_at: session.starts_at,
+            timezone: session.timezone,
+          }))
+          .sort((a, b) => a.starts_at.localeCompare(b.starts_at)),
       )
     },
 
     /**
-     * CRÉER OU MODIFIER — un seul acte, deux verbes.
+     * CRÉER OU MODIFIER — un seul acte, deux adresses.
      *
      * LE PÉRIMÈTRE SE VÉRIFIE SUR LA CIBLE, avant l'appel : on ne déplace pas une
      * diapositive vers une édition qu'on n'administre pas, et on n'en fait pas un
@@ -223,15 +231,17 @@ export function createAdminShowcaseApi({ call, send, assertEventInScope }: Showc
      */
     save: (payload: ShowcaseSavePayload, scope: AdministeredEvents): Promise<ShowcaseWriteResult> => {
       assertContentInScope(payload.event_id, scope)
-      return payload.id === null
-        ? send('/admin/showcase', payload, (m) => m.saveShowcase(payload, scope))
-        : send(`/admin/showcase/${payload.id}`, payload, (m) => m.saveShowcase(payload, scope), 'PUT')
+      return pending(
+        payload.id === null ? '/admin/showcase' : `/admin/showcase/${payload.id}`,
+        (m) => m.saveShowcase(payload, scope),
+        'write',
+      )
     },
 
     /**
      * PUBLIER, RETIRER, ARCHIVER — depuis la liste, sans ouvrir le formulaire.
      *
-     * Une route à part parce que ce sont trois actes de diffusion, pas une
+     * Une adresse à part parce que ce sont trois actes de diffusion, pas une
      * modification de contenu : ils ne touchent ni les textes ni les médias, et
      * ils doivent rester possibles à une main depuis le tableau.
      *
@@ -240,15 +250,14 @@ export function createAdminShowcaseApi({ call, send, assertEventInScope }: Showc
      * back-office ne peut pas le contredire.
      */
     setStatus: (payload: ShowcaseStatusPayload, scope: AdministeredEvents): Promise<ShowcaseWriteResult> =>
-      send(
+      pending(
         `/admin/showcase/${payload.id}/status`,
-        payload,
         (m) => {
           const found = m.showcaseById(payload.id)
           if (found !== null) assertContentInScope(found.event_id, scope)
           return m.setShowcaseStatus(payload, scope)
         },
-        'PUT',
+        'write',
       ),
 
     /**
@@ -263,15 +272,14 @@ export function createAdminShowcaseApi({ call, send, assertEventInScope }: Showc
      * bougé, et rafraîchir la seule ligne cliquée laisserait sa voisine mentir.
      */
     move: (payload: ShowcaseReorderPayload, scope: AdministeredEvents): Promise<ShowcaseWriteResult> =>
-      send(
+      pending(
         `/admin/showcase/${payload.id}/order`,
-        payload,
         (m) => {
           const found = m.showcaseById(payload.id)
           if (found !== null) assertContentInScope(found.event_id, scope)
           return m.moveShowcase(payload, scope)
         },
-        'PUT',
+        'write',
       ),
 
     /**
@@ -282,10 +290,14 @@ export function createAdminShowcaseApi({ call, send, assertEventInScope }: Showc
      * personne n'a demandée.
      */
     duplicate: (highlightId: HighlightId, scope: AdministeredEvents): Promise<ShowcaseWriteResult> =>
-      send(`/admin/showcase/${highlightId}/duplicate`, {}, (m) => {
-        const found = m.showcaseById(highlightId)
-        if (found !== null) assertContentInScope(found.event_id, scope)
-        return m.duplicateShowcase(highlightId, scope)
-      }),
+      pending(
+        `/admin/showcase/${highlightId}/duplicate`,
+        (m) => {
+          const found = m.showcaseById(highlightId)
+          if (found !== null) assertContentInScope(found.event_id, scope)
+          return m.duplicateShowcase(highlightId, scope)
+        },
+        'write',
+      ),
   }
 }

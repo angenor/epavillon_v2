@@ -221,7 +221,6 @@ pub fn formulaire(slug: &str, titre_fr: &str) -> EditionFormPayload {
         longitude: None,
         has_pavilion: false,
         highlights: None,
-        images: None,
     }
 }
 

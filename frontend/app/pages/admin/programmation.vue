@@ -8,7 +8,7 @@ import type {
 import type { PublishProgrammeResult } from '~/types/admin-planner'
 import type { EffectivePermission } from '~/types/identity'
 import type { ParticipationMode } from '~/types/event/edition'
-import type { ScheduleConflict } from '~/types/programme/session'
+import type { ScheduleConflict, SessionStatus } from '~/types/programme/session'
 import type { PlannerSessionText } from '~/utils/planner'
 import type { PlannerCalendarView } from '~/components/admin/planner/Calendar.vue'
 import type { IsoDate, IsoDateTime, RoomId, Uuid } from '~/types/shared'
@@ -90,9 +90,25 @@ const {
   async () => {
     const eventId = adminScope.currentEventId
     if (!eventId) return null
-    return api.planner.screen(eventId, adminScope.scope)
+    try {
+      return await api.planner.screen(eventId, adminScope.scope)
+    } catch (thrown) {
+      // `useAsyncData` réemballe ce qu'on lève, et le transfert du rendu serveur
+      // ne conserve que le message et le statut : ni la classe de l'erreur ni sa
+      // cause ne traversent. Un refus reposé en 403 est le seul état que l'écran
+      // retrouve aussi bien au premier chargement qu'après une navigation.
+      if (thrown instanceof ForbiddenError) {
+        throw createError({ statusCode: 403, message: thrown.message })
+      }
+      throw thrown
+    }
   },
   { watch: [() => adminScope.currentEventId], lazy: true },
+)
+
+/** Périmètre d'administration vide, ou lecture refusée : le même écran. */
+const isForbidden = computed(
+  () => (!adminScope.isLoading && !adminScope.canAdminister) || error.value?.statusCode === 403,
 )
 
 const { data: granted } = await useAsyncData<EffectivePermission[]>(
@@ -275,6 +291,19 @@ const busy = ref(false)
 const actionError = ref<string | null>(null)
 const actionNotice = ref<string | null>(null)
 
+/**
+ * Ce qu'on montre quand une écriture n'aboutit pas.
+ *
+ * L'API SEULE SAIT POURQUOI ELLE REFUSE, et son catalogue est déjà français :
+ * son message s'affiche tel quel — « Ce canal de diffusion n'existe pas, ou
+ * n'appartient pas à cette édition » vaut mieux que « l'enregistrement a
+ * échoué ». Le site ne prend la parole que lorsqu'elle s'est tue, et un refus de
+ * périmètre porte déjà sa phrase.
+ */
+function refusalMessage(thrown: unknown): string {
+  return thrown instanceof ForbiddenError ? thrown.message : apiErrorMessage(thrown, t)
+}
+
 /** Range la séance modifiée du bon côté : au calendrier, ou au panneau. */
 function applyMutation(session: PlannerSession, nextConflicts: ScheduleConflict[]): void {
   placed.value = placed.value.filter((entry) => entry.id !== session.id)
@@ -314,7 +343,6 @@ async function schedule(payload: {
       starts_at: payload.startsAt,
       ends_at: payload.endsAt,
     })
-    if (!result) return
     applyMutation(result.session, result.conflicts)
     actionNotice.value =
       payload.roomId === null
@@ -322,8 +350,8 @@ async function schedule(payload: {
         : wasUnplaced
           ? t('admin.planner.notice.placed', { title: tr(result.session.title) })
           : t('admin.planner.notice.moved', { title: tr(result.session.title) })
-  } catch {
-    actionError.value = t('admin.planner.error.schedule')
+  } catch (thrown) {
+    actionError.value = refusalMessage(thrown)
     // La grille a bougé côté bibliothèque : on la remet sur les données réelles.
     await refresh()
   } finally {
@@ -345,14 +373,14 @@ async function submitSessionChanges(changes: {
   try {
     if (changes.schedule) {
       const result = await api.planner.schedule({ session_id: session.id, ...changes.schedule })
-      if (result) applyMutation(result.session, result.conflicts)
+      applyMutation(result.session, result.conflicts)
     }
     if (changes.track_ids) {
       const result = await api.planner.setTracks(auth.person?.id ?? null, {
         session_id: session.id,
         track_ids: changes.track_ids,
       })
-      if (result) applyMutation(result.session, result.conflicts)
+      applyMutation(result.session, result.conflicts)
     }
     if (changes.broadcast) {
       const result = await api.planner.setBroadcast({
@@ -360,12 +388,15 @@ async function submitSessionChanges(changes: {
         is_streamed: changes.broadcast.is_streamed,
         broadcast_channel_id: changes.broadcast.broadcast_channel_id,
       })
-      if (result) applyMutation(result.session, result.conflicts)
+      applyMutation(result.session, result.conflicts)
     }
     actionNotice.value = t('admin.planner.notice.saved', { title: tr(session.title) })
     updateQuery({ seance: null })
-  } catch {
-    actionError.value = t('admin.planner.error.save')
+  } catch (thrown) {
+    // Le panneau reste OUVERT : les trois écritures s'enchaînent, et la seconde
+    // peut échouer quand la première a abouti. Le refermer effacerait le seul
+    // endroit où l'on voit ce qui reste à reprendre.
+    actionError.value = refusalMessage(thrown)
   } finally {
     busy.value = false
   }
@@ -399,9 +430,22 @@ const { data: readiness, refresh: refreshReadiness } = await useAsyncData(
   { default: () => [], watch: [() => adminScope.currentEventId], lazy: true },
 )
 
-/** Ce qui deviendrait public : les séances placées et pas encore publiées. */
+/**
+ * CE QUI DEVIENDRAIT PUBLIC — le prédicat de l'API, et pas un autre.
+ *
+ * Elle publie les séances `planned` ou `scheduled` pas encore publiées, SANS
+ * condition de salle. Compter les seules séances placées se trompait deux fois :
+ * une séance annulée qui occupe encore une salle gonflait le chiffre sans jamais
+ * être publiée, et une séance sans salle mais portant une précision de lieu
+ * passait le contrôle en manquant au décompte.
+ */
+const PUBLISHABLE_STATUSES: ReadonlySet<SessionStatus> = new Set(['planned', 'scheduled'])
+
 const readyCount = computed(
-  () => placed.value.filter((session) => session.published_at === null).length,
+  () =>
+    allSessions.value.filter(
+      (session) => session.published_at === null && PUBLISHABLE_STATUSES.has(session.status),
+    ).length,
 )
 
 async function openPublish(): Promise<void> {
@@ -424,8 +468,8 @@ async function publish(): Promise<void> {
       await refresh()
     }
     await refreshReadiness()
-  } catch {
-    actionError.value = t('admin.planner.error.publish')
+  } catch (thrown) {
+    actionError.value = refusalMessage(thrown)
   } finally {
     busy.value = false
   }
@@ -455,7 +499,7 @@ const mobileTab = ref<'unplaced' | 'calendar'>('unplaced')
 <template>
   <div class="mx-auto w-full max-w-[110rem]">
     <UiForbiddenState
-      v-if="!adminScope.isLoading && !adminScope.canAdminister"
+      v-if="isForbidden"
       :required-scope="t('admin.planner.forbidden.scope')"
       action-to="/"
       :action-label="t('nav.admin.backToSite')"

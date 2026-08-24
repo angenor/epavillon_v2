@@ -234,7 +234,10 @@ async fn une_adhesion_approuvee_met_le_recalcul_en_file() {
         &bac.ctx().with_actor(awa),
         PersonId(awa),
         OrganizationId(organisation),
-        org::domain::membership::JoinOrganization::default(),
+        org::domain::membership::JoinOrganization {
+            job_title: Some("Chargée de projet".to_owned()),
+            ..Default::default()
+        },
     )
     .await
     .expect("rattachement automatique");

@@ -183,6 +183,15 @@ const decisionError = ref<string | null>(null)
 const notice = ref<string | null>(null)
 const savedAt = ref<string | null>(null)
 
+/**
+ * Un refus de l'API s'affiche TEL QUEL : elle seule sait pourquoi elle refuse, et
+ * son catalogue est déjà français. Le site ne reprend la parole que lorsqu'elle
+ * s'est tue — c'est ce que fait `apiErrorMessage`.
+ */
+function writeError(thrown: unknown): string {
+  return thrown instanceof ForbiddenError ? thrown.message : apiErrorMessage(thrown, (key) => t(key))
+}
+
 const recusalOpen = ref(false)
 const decisionOpen = ref(false)
 const pendingDecision = ref<DecisionOption | null>(null)
@@ -199,8 +208,8 @@ async function saveReview(payload: Omit<SaveReviewPayload, 'proposal_id'>): Prom
     // pas champ par champ.
     savedAt.value = new Date().toLocaleTimeString()
     await refresh()
-  } catch {
-    reviewError.value = t('admin.proposal.review.panel.error')
+  } catch (thrown) {
+    reviewError.value = writeError(thrown)
   } finally {
     busy.value = false
   }
@@ -216,8 +225,8 @@ async function recuse(reason: string): Promise<void> {
     recusalOpen.value = false
     notice.value = t('admin.proposal.review.recusal.success')
     await refresh()
-  } catch {
-    reviewError.value = t('admin.proposal.review.recusal.error')
+  } catch (thrown) {
+    reviewError.value = writeError(thrown)
   } finally {
     busy.value = false
   }
@@ -232,8 +241,8 @@ async function postComment(payload: Omit<PostCommentPayload, 'proposal_id'>): Pr
     await api.review.comment(person.id, { ...payload, proposal_id: screen.value.proposal.id })
     notice.value = t('admin.proposal.review.comments.sent')
     await refresh()
-  } catch {
-    commentError.value = t('admin.proposal.review.comments.error')
+  } catch (thrown) {
+    commentError.value = writeError(thrown)
   } finally {
     busy.value = false
   }
@@ -269,8 +278,8 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
         result.status === 'reason_required' ? 'reasonRequired' : 'notAllowed'
       }`)
     }
-  } catch {
-    decisionError.value = t('admin.proposal.review.decision.error')
+  } catch (thrown) {
+    decisionError.value = writeError(thrown)
   } finally {
     busy.value = false
   }
@@ -283,7 +292,7 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
          Distinct d'un dossier introuvable : l'un dit « vous n'avez pas ce
          droit », l'autre « ce dossier n'existe pas ». -->
     <UiForbiddenState
-      v-if="(!adminScope.isLoading && !adminScope.canAdminister) || error?.name === 'ForbiddenError'"
+      v-if="(!adminScope.isLoading && !adminScope.canAdminister) || isForbiddenError(error)"
       :required-scope="t('admin.proposal.review.forbidden.scope')"
       action-to="/admin/propositions"
       :action-label="t('admin.proposal.review.backToList')"

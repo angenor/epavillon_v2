@@ -30,6 +30,11 @@ pub async fn join(
     visee: OrganizationId,
     demande: JoinOrganization,
 ) -> Result<JoinOutcome> {
+    // Avant toute écriture : une adhésion qui deviendrait active sans fonction
+    // serait refusée par la base, et le refus arriverait alors sans nommer le
+    // champ fautif.
+    let fonction = crate::domain::membership::fonction_declaree(demande.job_title.as_deref())?;
+
     let mut tx = state.db().write(ctx).await?;
 
     let Some(cible) = organizations::resolve(&mut *tx, visee).await? else {
@@ -49,7 +54,7 @@ pub async fn join(
         cible,
         person_id,
         MembershipRole::Member,
-        demande.job_title.as_deref(),
+        Some(fonction.as_str()),
         auto,
     )
     .await?;

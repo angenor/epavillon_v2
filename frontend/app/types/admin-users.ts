@@ -296,9 +296,14 @@ export interface RoleAssignmentOptions {
   grantable_event_ids: Uuid[]
 }
 
-/** Attribution d'un rôle. `valid_until` facultative, motif conseillé. */
+/**
+ * Attribution d'un rôle. `valid_until` facultative, motif conseillé.
+ *
+ * LA PERSONNE VISÉE VIENT DU CHEMIN, JAMAIS DU CORPS. L'API ne lit pas de
+ * `person_id` ici : le porter attribuerait un rôle à quelqu'un d'autre que la
+ * fiche ouverte le jour où les deux divergent.
+ */
 export interface GrantRolePayload {
-  person_id: PersonId
   role_code: RoleCode
   scope_type: ScopeType
   scope_id: Uuid | null
@@ -310,9 +315,11 @@ export interface GrantRolePayload {
   note: string | null
 }
 
-/** Retrait d'un rôle. Le motif alimente `revoked_reason`, ajoutée pour A12. */
+/**
+ * Retrait d'un rôle. Le motif alimente `revoked_reason`, ajoutée pour A12.
+ * L'attribution visée vient du chemin.
+ */
 export interface RevokeRolePayload {
-  assignment_id: RoleAssignmentId
   reason: string
 }
 
@@ -495,9 +502,10 @@ export interface UserDetail {
  * depuis un panneau de modération — l'offrir ici reviendrait à proposer la
  * destruction irréversible d'une identité à côté d'une suspension de quinze
  * jours.
+ *
+ * La personne visée vient du chemin.
  */
 export interface SetPersonStatusPayload {
-  person_id: PersonId
   status: Exclude<PersonStatus, 'anonymized'>
   /** Motif OBLIGATOIRE dès qu'on restreint : c'est ce que la personne lira. */
   reason: string
@@ -507,8 +515,13 @@ export interface SetPersonStatusPayload {
   revoke_sessions: boolean
 }
 
+/**
+ * Aucun refus de portée ici : une personne n'appartient à aucune édition. Le
+ * droit se vérifie GLOBALEMENT, avant l'appel, et l'API répond 403 — jamais un
+ * statut de plus dans cette union.
+ */
 export interface PersonWriteResult {
-  status: 'saved' | 'missing_deadline' | 'forbidden' | 'not_found'
+  status: 'saved' | 'missing_deadline' | 'not_found'
   detail: UserDetail | null
 }
 
@@ -551,9 +564,10 @@ export interface PrivacyQueueScreen {
  * supprime les comptes et révoque les sessions, en conservant les agrégats de
  * participation. Le distinguer de la clôture administrative évite qu'on
  * l'exécute en croyant seulement classer un dossier.
+ *
+ * La demande visée vient du chemin.
  */
 export interface HandlePrivacyRequestPayload {
-  request_id: Uuid
   action: 'start' | 'complete' | 'reject' | 'anonymize'
   resolution: string
 }

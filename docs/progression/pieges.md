@@ -54,3 +54,43 @@ Trois pièges du modèle, et trois de l'implémentation. Les trois premiers ont 
 
 **Un écart mesuré, et assumé** : le décompte de transfert d'une fusion est exact au chiffre près sur **dix-sept lignes du registre sur dix-huit**. La dernière — `identity.people.primary_organization_id` — est déplacée par `tg_memberships_sync_primary` **avant** que la boucle du registre n'y arrive, si bien que le journal en compte moins que l'aperçu n'en annonçait. Les lignes ont bien été déplacées, simplement pas par l'ordre qui les comptait. Le corriger demanderait de reproduire l'effet d'un trigger dans un décompte, ce que le principe VIII interdit. Consigné dans l'en-tête de `repo/merge_counts.rs`.
 
+
+---
+
+## Le raccordement à l'API (B7, 22/08)
+
+**Une instance de classe ne se met JAMAIS dans l'état d'un store.**
+Le payload de Nuxt est composé par `devalue`, qui refuse tout ce qui n'est pas un objet simple. Une
+erreur — `ApiUnreachableError`, `FetchError`, n'importe laquelle — posée dans un `ref` de store fait
+échouer la sérialisation de la page **entière** : le visiteur reçoit un **500**. Le piège est vicieux
+parce qu'il ne se déclenche **qu'en cas de panne d'API**, c'est-à-dire au seul moment où ce chemin
+sert : tous les écrans passent en développement, et l'écran dégradé qu'on a pris soin d'écrire ne
+s'affiche jamais. Retenir un objet plat — `LoadFailure` : message, code, référence d'incident.
+
+**Le site et l'API doivent partager le même HÔTE, pas seulement le même site.**
+La portée d'un cookie ignore le port mais pas l'hôte : un site sur `localhost:3000` qui appelle
+`127.0.0.1:8080` n'enverra jamais sa session. Rien ne le signale — les appels aboutissent, et tout
+ressort simplement déconnecté.
+
+**Le site doit être ouvert sur l'adresse EXACTE d'`APP_PUBLIC_URL`.**
+C'est la seule origine que l'API autorise. Ouvrir le site ailleurs fait refuser toutes les écritures,
+et le refus arrive **sans en-têtes CORS** : le navigateur le masque au code du site, qui affiche une
+panne réseau au lieu du message français que l'API a composé.
+
+**Le rendu serveur ne peut pas renouveler un jeton, et ce n'est pas un manque.**
+Le cookie de rafraîchissement est limité au chemin `/api/auth` : il n'atteint jamais le serveur Nuxt.
+C'est ce qui borne le dégât d'une fuite. Toute logique de rotation écrite pour le rendu serveur est du
+code mort — la rotation est un geste du navigateur, exclusivement.
+
+**Un bandeau posé dans la mise en page ne voit pas ce que la page charge.**
+Vue rend l'arbre en une passe : un composant placé au-dessus du contenu est évalué **avant** que la
+page n'ait chargé quoi que ce soit. L'information arrive à l'hydratation, pas au rendu serveur. À
+savoir avant d'y passer une demi-heure.
+
+**Deux `operation_id` égaux produisent un TypeScript qui ne compile pas.**
+Et le message ne nomme ni la route ni le module : il dit « Duplicate identifier » sur un fichier
+engendré de onze mille lignes. Le binaire d'export refuse maintenant le document.
+
+**`#[serde(flatten)]` sur une struct qui partage un nom de champ émet la clé DEUX FOIS.**
+Le JSON reste lisible — la dernière valeur écrite l'emporte — donc cela « marche », par accident. Un
+changement d'ordre de champs suffit à inverser le résultat, en silence.

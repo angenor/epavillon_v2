@@ -107,6 +107,10 @@ function cover_asset(n: number, fields: CoverFields): Asset {
     purged_at: null,
     created_at: fields.createdAt,
     updated_at: fields.createdAt,
+    // En local le stockage objet ne répond pas : l'adresse pointe vers
+    // `public/mocks/`. En production, `media.object_url()` la compose en base.
+    url: `/mocks/covers/${fields.slug}.jpg`,
+    sources: {},
   }
 }
 
@@ -420,7 +424,9 @@ interface ShowcaseAssetFields extends CoverFields {
   bytes: number
   /** Seul `ready` est servi. `processing` reproduit l'attente du worker. */
   status?: AssetStatus
-  durationSeconds?: number
+  /** En TEXTE, comme l'API la fait traverser : un flottant perdrait les
+   *  millisecondes sans le dire. */
+  durationSeconds?: string
 }
 
 /** Un objet de la vitrine. Même fabrique que les couvertures, autre dossier. */
@@ -457,6 +463,8 @@ function showcase_asset(n: number, fields: ShowcaseAssetFields): Asset {
     purged_at: null,
     created_at: fields.createdAt,
     updated_at: fields.createdAt,
+    url: `/mocks/showcase/${fields.slug}.${fields.ext}`,
+    sources: {},
   }
 }
 
@@ -753,7 +761,7 @@ export const showcaseAssets: Asset[] = [
     bytes: 483_577,
     width: 1280,
     height: 720,
-    durationSeconds: 14,
+    durationSeconds: '14.000',
   }),
   showcase_asset(42, {
     // ENCORE EN TRAITEMENT, et c'est sa raison d'être : la vue ne la sert pas,
@@ -773,7 +781,7 @@ export const showcaseAssets: Asset[] = [
     bytes: 24_800_000,
     width: 1920,
     height: 1080,
-    durationSeconds: 18,
+    durationSeconds: '18.000',
     status: 'processing',
   }),
 ]

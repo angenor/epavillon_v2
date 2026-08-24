@@ -53,6 +53,7 @@ import type {
   EditionDetail,
   EditionFormOptions,
   EditionFormPayload,
+  EditionImagePayload,
   EditionListScreen,
   EditionRoomPayload,
   EditionSaveResult,
@@ -61,12 +62,26 @@ import type {
   EditionVenuePayload,
 } from '~/types/admin-events'
 import type { AdministeredEvents } from '~/types/identity'
-import type { Uuid } from '~/types/shared'
+import type { AssetId, Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
 
 export interface AdminEventsApiContext extends ApiTransport {
   /** Refuse une édition hors périmètre plutôt que de rendre une page vide. */
   assertEventInScope: (eventId: Uuid, scope: AdministeredEvents) => void
+}
+
+/**
+ * Le lot de remplacement de `PUT /media/attachments`.
+ *
+ * Chaque rôle NOMMÉ dans la liste est vidé puis regarni ; un rôle absent n'est
+ * pas touché. C'est ce qui permet aux trois déclinaisons de partir d'un geste et
+ * à un `asset_id` nul d'en retirer une sans toucher aux deux autres.
+ */
+interface AttachmentBatch {
+  owner_schema: string
+  owner_table: string
+  owner_id: Uuid
+  assignments: { role: string; asset_id: AssetId | null }[]
 }
 
 export function createAdminEventsApi({ call, send, assertEventInScope }: AdminEventsApiContext) {
@@ -122,6 +137,32 @@ export function createAdminEventsApi({ call, send, assertEventInScope }: AdminEv
         (m) => m.saveEdition(payload, actorId),
         payload.id ? 'PUT' : 'POST',
       )
+    },
+
+    /**
+     * LES TROIS DÉCLINAISONS DE L'ÉDITION — écriture du module MÉDIA.
+     *
+     * L'enregistrement d'une édition NE POSE PAS ses images : `event.events` ne
+     * les porte pas, le rattachement est polymorphe, et un crate de module
+     * n'écrit pas dans le schéma d'un autre. C'est donc `PUT /media/attachments`
+     * qui les pose, sur `('event', 'events', <édition>)`.
+     *
+     * L'ORDRE COMPTE. Sur une édition existante, on rattache AVANT d'enregistrer
+     * la fiche : un fichier qui n'a pas la forme de son rôle est refusé, et rien
+     * n'a alors été écrit. À la création, l'inverse est forcé — l'objet à qui
+     * rattacher n'existe pas encore.
+     */
+    saveImages: (eventId: Uuid, images: EditionImagePayload, scope: AdministeredEvents): Promise<void> => {
+      assertEventInScope(eventId, scope)
+      const batch: AttachmentBatch = {
+        owner_schema: 'event',
+        owner_table: 'events',
+        owner_id: eventId,
+        assignments: Object.entries(images).map(([role, asset_id]) => ({ role, asset_id })),
+      }
+      // Hors ligne, rien n'est posé : `attachEditionImages` existe dans
+      // `mocks/admin-events` mais attend d'être ré-exporté par `mocks/index.ts`.
+      return send('/media/attachments', batch, () => undefined, 'PUT')
     },
 
     // -----------------------------------------------------------------------

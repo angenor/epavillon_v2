@@ -106,6 +106,9 @@ await adminScope.ensureLoaded()
     </UiSideNav>
 
     <div class="flex min-w-0 flex-1 flex-col">
+      <UiApiOfflineBanner />
+      <UiMockDataBanner />
+
       <header
         class="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-surface-raised px-4 py-3 sm:px-6"
       >

@@ -96,7 +96,7 @@ struct Statut {
     operation_id = "login",
     request_body = Object,
     responses(
-        (status = 200, description = "LoginResult — authenticated, mfa_required, invalid_credentials, locked, suspended, unverified_email", body = Object),
+        (status = 200, description = "LoginResult — authenticated, mfa_required, invalid_credentials, locked, suspended, email_unverified", body = Object),
         (status = 422, description = "Requête invalide", body = crate::routes::openapi::ApiErrorBody),
     )
 )]

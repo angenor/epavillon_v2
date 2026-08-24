@@ -287,6 +287,17 @@ const actionError = ref<Error | null>(null)
 /** Message d'information non bloquant — « vous êtes déjà membre », par exemple. */
 const notice = ref<string | null>(null)
 
+/**
+ * Le texte d'un échec de rattachement ou de création. **Si l'API a parlé, c'est
+ * elle qui a raison** : son catalogue est déjà français et s'affiche tel quel.
+ * Le site ne prend la parole que lorsqu'elle n'a pas répondu du tout.
+ */
+const actionErrorMessage = computed(() => {
+  const thrown = actionError.value
+  if (thrown === null) return ''
+  return thrown instanceof ForbiddenError ? thrown.message : apiErrorMessage(thrown, (key) => t(key))
+})
+
 // ---------------------------------------------------------------------------
 // Rejoindre
 // ---------------------------------------------------------------------------
@@ -552,7 +563,7 @@ const continueTo = computed(() => {
         intent="danger"
         live
         :title="t('validation.server.generic')"
-        :message="actionError.message"
+        :message="actionErrorMessage"
       />
       <UiAlert v-if="notice" intent="info" live :message="notice" dismissible @dismiss="notice = null" />
 

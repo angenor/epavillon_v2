@@ -37,7 +37,7 @@ async fn cent_creations_simultanees_ne_produisent_quune_fiche() {
                     city: None,
                     website: None,
                     description: None,
-                    job_title: None,
+                    job_title: Some("Directrice".to_owned()),
                     acknowledged_match_ids: Vec::new(),
                 },
             )

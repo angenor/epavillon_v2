@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { EditionDetail, EditionTrack, EditionTrackPayload } from '~/types/admin-events'
 import type { TrackKind } from '~/types/event/edition'
+import type { TaxonomyTermCode } from '~/types/shared'
 import type { SelectOption } from '~/types/ui'
 
 /**
@@ -24,6 +25,12 @@ import type { SelectOption } from '~/types/ui'
  * LA PAGE PUBLIQUE EST UN INTERRUPTEUR ICI ET UNE DATE EN BASE
  * (`published_at`) : refermer puis rouvrir ne réécrit pas la date de première
  * ouverture. Le formulaire n'a pas à saisir un horodatage pour dire « oui ».
+ *
+ * LES THÉMATIQUES PARTENT AVEC LE FIL, ET ELLES REMPLACENT LA LISTE. Les
+ * omettre de l'enregistrement les efface toutes — c'est la contrepartie de
+ * pouvoir en retirer une. Elles viennent de `reference.taxonomy_terms` et
+ * arrivent par la composition (`available_themes`) : ni libellé ni couleur
+ * n'est écrit ici.
  */
 
 interface Props {
@@ -89,6 +96,7 @@ function blank(): EditionTrackPayload {
     curated_by: null,
     is_published: false,
     sort_order: (props.detail.tracks.length + 1) * 10,
+    theme_codes: [],
   }
 }
 
@@ -112,6 +120,7 @@ function openEdit(track: EditionTrack): void {
     curated_by: track.curated_by,
     is_published: track.published_at !== null,
     sort_order: track.sort_order,
+    theme_codes: track.themes.map((theme) => theme.code),
   }
 }
 
@@ -360,6 +369,16 @@ function periodLabel(track: EditionTrack): string {
           multiline
           :rows="4"
           @update:model-value="(next) => (draft!.description = next)"
+        />
+
+        <!-- LA LISTE ENVOYÉE REMPLACE CELLE DU FIL : décocher retire vraiment. -->
+        <AdminShowcaseThemePicker
+          v-if="props.detail.available_themes.length > 0"
+          :model-value="draft.theme_codes"
+          :themes="props.detail.available_themes"
+          :label="t('admin.event.tabs.tracksTab.form.themes')"
+          :hint="t('admin.event.tabs.tracksTab.form.themesHint')"
+          @update:model-value="(next: TaxonomyTermCode[]) => (draft!.theme_codes = next)"
         />
 
         <UiSelect

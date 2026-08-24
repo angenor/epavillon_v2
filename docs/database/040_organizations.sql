@@ -296,6 +296,11 @@ CREATE TABLE org.memberships (
     -- que l'appelant a omis le champ. La primauté est attribuée automatiquement
     -- à la première adhésion active (voir tg_memberships_default_primary).
     is_primary      boolean     NOT NULL DEFAULT false,
+    -- Fonction occupée dans l'organisation, telle que la personne la DÉCLARE
+    -- ELLE-MÊME. Exigée dès que l'adhésion est active (ck_memberships_job_title
+    -- plus bas) : appartenir à une organisation sans dire à quel titre laisse
+    -- l'équipe deviner qui répond de quoi, et c'est ce qui rendait l'annuaire de
+    -- la v1 inexploitable.
     job_title       text,
     -- Adhésion ÉMISE PAR L'ORGANISATION, et non demandée par la personne : elle
     -- attend alors que l'invité l'accepte, pas qu'un référent l'approuve.
@@ -312,7 +317,20 @@ CREATE TABLE org.memberships (
     -- Les deux colonnes de l'invitation vont ensemble : une date sans auteur ne
     -- permet ni de relancer, ni de dire qui répond de l'invitation.
     CONSTRAINT ck_memberships_invitation
-        CHECK ((invited_at IS NULL) = (invited_by IS NULL))
+        CHECK ((invited_at IS NULL) = (invited_by IS NULL)),
+    -- UNE ADHÉSION ACTIVE PORTE TOUJOURS SA FONCTION.
+    --
+    -- Elle n'est PAS exigée en attente, et c'est le cœur de la règle : un
+    -- référent qui invite quelqu'un ne connaît pas toujours son intitulé exact,
+    -- et le lui faire inventer produirait une donnée fausse que personne ne
+    -- corrigerait ensuite. C'est la personne invitée qui la déclare EN
+    -- ACCEPTANT — au moment où elle parle d'elle-même, et où l'adhésion devient
+    -- active. Une demande de rattachement, elle, la porte dès le départ.
+    --
+    -- Une adhésion révoquée garde la sienne : elle dit à quel titre la personne
+    -- a siégé, et l'effacer réécrirait l'histoire.
+    CONSTRAINT ck_memberships_job_title
+        CHECK (status <> 'active' OR job_title IS NOT NULL)
 );
 
 -- Une seule organisation principale par personne.

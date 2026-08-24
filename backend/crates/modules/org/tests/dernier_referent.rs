@@ -29,8 +29,8 @@ async fn referent(bac: &Bac, organisation: Uuid) -> (Uuid, MembershipId) {
 
 async fn ajouter_referent(bac: &Bac, organisation: Uuid, qui: Uuid) -> MembershipId {
     let id = sqlx::query_scalar!(
-        "INSERT INTO org.memberships (organization_id, person_id, role, status, approved_at)
-         VALUES ($1, $2, 'manager', 'active', now())
+        "INSERT INTO org.memberships (organization_id, person_id, role, status, job_title, approved_at)
+         VALUES ($1, $2, 'manager', 'active', 'Chargée de projet', now())
          RETURNING id",
         organisation,
         qui
@@ -184,8 +184,8 @@ async fn une_personne_quitte_son_organisation() {
 
     let awa = personne(&bac, "awa.diallo@ifdd.francophonie.org", "Awa", "Diallo").await;
     let sienne = sqlx::query_scalar!(
-        "INSERT INTO org.memberships (organization_id, person_id, role, status, approved_at)
-         VALUES ($1, $2, 'member', 'active', now())
+        "INSERT INTO org.memberships (organization_id, person_id, role, status, job_title, approved_at)
+         VALUES ($1, $2, 'member', 'active', 'Chargée de projet', now())
          RETURNING id",
         organisation,
         awa

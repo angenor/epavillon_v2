@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import type { Person } from '~/types/identity'
 import type { LoginPayload, LoginResult, RegisterPayload } from '~/types/auth'
 import type { Uuid } from '~/types/shared'
+import type { LoadFailure } from '~/utils/api-error'
 
 /**
  * Session de la personne connectée.
@@ -9,9 +10,9 @@ import type { Uuid } from '~/types/shared'
  * CE STORE N'EST PAS UN CONTRÔLE DE SÉCURITÉ, et il faut le lire ainsi. Il porte
  * l'état de l'INTERFACE — qui est connecté, ce qu'on affiche, où l'on redirige.
  * L'autorisation réelle appartient à l'API : `identity.has_permission()`, testée
- * par permission et jamais par nom de rôle. Le jour où l'API existe (prompt B1),
- * la session vivra dans un cookie `HttpOnly` que ce fichier ne pourra même pas
- * lire, et c'est très bien.
+ * par permission et jamais par nom de rôle. Depuis la bascule, la session vit
+ * dans deux cookies `HttpOnly` que ce fichier ne peut même pas lire, et c'est
+ * très bien.
  *
  * POURQUOI UN COOKIE, ET PAS `localStorage`. Même raison que pour le thème (voir
  * `preferences.ts`) : le rendu serveur doit savoir, dès la première réponse, si
@@ -19,15 +20,20 @@ import type { Uuid } from '~/types/shared'
  * de seconde à une personne déjà authentifiée, puis se remplace — ce clignotement
  * est exactement ce que le rendu serveur est censé éviter.
  *
- * CE QUE LE COOKIE CONTIENT AUJOURD'HUI : un identifiant de personne, en clair,
- * lisible et falsifiable. C'est acceptable parce que rien de sensible n'est
- * servi — les données sont simulées — et parce que la bascule est déjà écrite :
- * `useApi().auth.session()` prend cet identifiant tant que l'API n'est pas
- * configurée, et l'ignorera ensuite.
+ * CE QUE LE COOKIE CONTIENT : un identifiant de personne, en clair, lisible et
+ * falsifiable. Il n'autorise RIEN. Sur l'API réelle, la session vit dans deux
+ * cookies `HttpOnly` que ce fichier ne peut même pas lire, et `/auth/me`
+ * n'accepte aucun identifiant du client — c'est la session qui dit qui parle.
+ * Ce cookie-ci ne sert donc plus qu'à deux choses : retrouver la personne dans
+ * les données simulées, et TÉMOIGNER qu'une session a existé sur ce navigateur.
+ *
+ * Ce témoignage n'est pas décoratif. Le jeton d'accès dure un quart d'heure ; le
+ * cookie qui permet de le renouveler est limité au chemin `/api/auth` et
+ * n'atteint jamais le serveur Nuxt. Une page rendue côté serveur après ce délai
+ * s'affiche donc déconnectée alors que la session court toujours. Le témoin dit
+ * au navigateur de tenter une rotation — et, pour quelqu'un qui ne s'est jamais
+ * connecté, de ne pas la tenter.
  */
-
-/** Nom du cookie de session simulée. Remplacé par le cookie `HttpOnly` de l'API. */
-const SESSION_COOKIE = 'epavillon_session'
 
 /** Trente jours avec « rester connecté », la journée sinon. */
 const REMEMBERED_MAX_AGE = 60 * 60 * 24 * 30
@@ -43,15 +49,11 @@ export const useAuthStore = defineStore('auth', () => {
    * pour lire, l'autre pour écrire avec ses options, est la façon prévue par
    * Nuxt de faire varier `maxAge` d'un même cookie.
    */
-  const personId = useCookie<Uuid | null>(SESSION_COOKIE, {
-    default: () => null,
-    sameSite: 'lax',
-    path: '/',
-  })
+  const personId = useSessionWitness()
 
-  /** Pose le cookie de session avec la durée qu'a choisie la personne. */
+  /** Pose le témoin de session avec la durée qu'a choisie la personne. */
   function writeSession(id: Uuid, remember: boolean): void {
-    const cookie = useCookie<Uuid | null>(SESSION_COOKIE, {
+    const cookie = useCookie<string | null>(SESSION_WITNESS_COOKIE, {
       default: () => null,
       sameSite: 'lax',
       path: '/',
@@ -64,7 +66,7 @@ export const useAuthStore = defineStore('auth', () => {
   const person = ref<Person | null>(null)
   const isLoading = ref(false)
   /** Échec du chargement de la session — l'écran affiche son état d'erreur. */
-  const loadError = ref<Error | null>(null)
+  const loadError = ref<LoadFailure | null>(null)
   /** La session a-t-elle déjà été résolue une fois ? Évite de la recharger. */
   const isResolved = ref(false)
 
@@ -92,12 +94,22 @@ export const useAuthStore = defineStore('auth', () => {
     loadError.value = null
     try {
       person.value = await api.auth.session(personId.value)
-      // Cookie orphelin — la personne n'existe plus : on le retire plutôt que de
-      // laisser l'interface hésiter à chaque navigation.
+
+      // Personne inconnue alors qu'un témoin existe : le jeton d'accès a pu
+      // expirer sans que la session soit finie. Une rotation, une relecture, et
+      // on n'insiste pas — `refreshSession()` efface le témoin si elle échoue.
+      if (person.value === null && personId.value !== null && import.meta.client) {
+        if (await api.refreshSession()) {
+          person.value = await api.auth.session(personId.value)
+        }
+      }
+
+      // Témoin orphelin — la personne n'existe plus, ou la session est close :
+      // on le retire plutôt que de laisser l'interface hésiter à chaque navigation.
       if (person.value === null) personId.value = null
       isResolved.value = true
     } catch (error) {
-      loadError.value = error instanceof Error ? error : new Error(String(error))
+      loadError.value = toLoadFailure(error)
     } finally {
       isLoading.value = false
     }

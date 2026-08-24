@@ -205,7 +205,7 @@ export {
   showcaseAttachments,
 } from './covers'
 export { registrationForms, registrationFormFields } from './registration-form'
-export { registrations } from './registrations'
+export { registrations, registrationRowsOf } from './registrations'
 export { publicSchedule, proposalDashboard } from './views'
 export { detectConflicts, publicationReadiness } from './conflicts'
 export { incidents } from './incidents'
@@ -330,10 +330,12 @@ export {
 
 export {
   currentEdition,
+  currentShowcase,
   editionHistory,
   editionStats,
   homeScreen,
   publicEditions,
+  upcomingSessions,
 } from './home'
 
 export {

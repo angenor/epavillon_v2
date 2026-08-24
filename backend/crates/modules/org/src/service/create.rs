@@ -35,6 +35,10 @@ pub async fn create(
     acteur: PersonId,
     demande: CreateOrganization,
 ) -> Result<CreateOrganizationOutcome> {
+    // Le créateur devient référent ACTIF d'emblée : sa fonction est donc exigée,
+    // au même titre qu'une demande de rattachement.
+    let fonction = crate::domain::membership::fonction_declaree(demande.job_title.as_deref())?;
+
     let mut tx = state.db().write(ctx).await?;
 
     let fiche = match inserer(&mut tx, &demande, acteur).await {
@@ -64,7 +68,7 @@ pub async fn create(
         fiche.id,
         acteur,
         MembershipRole::Manager,
-        demande.job_title.as_deref(),
+        Some(fonction.as_str()),
         true,
     )
     .await?;

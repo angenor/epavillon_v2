@@ -80,13 +80,13 @@ pub(crate) async fn fiche(
 
 #[utoipa::path(
     get,
-    description = "`RoleAssignment[]` — attributions en cours.",
+    description = "`RoleAssignmentView[]` — attributions en cours, avec le libellé du rôle, la cible de la portée résolue et qui l'a confiée. **Ce n'est pas `RoleAssignment`**, la ligne nue de la table : une pastille ne porte jamais un rôle sans sa PORTÉE, et la résoudre côté site demanderait une lecture par attribution.",
     path = "/people/{id}/roles",
     tag = "Identité",
     operation_id = "roles",
     params(("id" = Uuid, Path, description = "Identifiant de la personne")),
     responses(
-        (status = 200, description = "RoleAssignment[]", body = Object),
+        (status = 200, description = "RoleAssignmentView[]", body = Object),
         (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
         (status = 403, description = "Permission ou portée insuffisante", body = crate::routes::openapi::ApiErrorBody),
     )

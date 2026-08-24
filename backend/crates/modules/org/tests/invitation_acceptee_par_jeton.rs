@@ -66,9 +66,15 @@ async fn une_invitation_saccepte_sans_session() {
     let jeton = inviter(&bac, organisation, chef).await;
 
     // **Aucune session** : c'est le cas de la personne qui n'a pas de compte.
-    let issue = membership::accept_invitation(&bac.state, &bac.ctx(), None, &jeton)
-        .await
-        .expect("acceptation");
+    let issue = membership::accept_invitation(
+        &bac.state,
+        &bac.ctx(),
+        None,
+        &jeton,
+        Some("Chargée de projet"),
+    )
+    .await
+    .expect("acceptation");
 
     let adhesion = match issue {
         AcceptInvitationOutcome::Accepted { membership, .. } => membership,
@@ -102,13 +108,25 @@ async fn le_rejeu_du_lien_dit_deja_utilise() {
     let chef = referent(&bac, organisation).await;
     let jeton = inviter(&bac, organisation, chef).await;
 
-    membership::accept_invitation(&bac.state, &bac.ctx(), None, &jeton)
-        .await
-        .expect("première acceptation");
+    membership::accept_invitation(
+        &bac.state,
+        &bac.ctx(),
+        None,
+        &jeton,
+        Some("Chargée de projet"),
+    )
+    .await
+    .expect("première acceptation");
 
-    let seconde = membership::accept_invitation(&bac.state, &bac.ctx(), None, &jeton)
-        .await
-        .expect("le rejeu ne produit pas d'erreur");
+    let seconde = membership::accept_invitation(
+        &bac.state,
+        &bac.ctx(),
+        None,
+        &jeton,
+        Some("Chargée de projet"),
+    )
+    .await
+    .expect("le rejeu ne produit pas d'erreur");
 
     match seconde {
         AcceptInvitationOutcome::Rejected { reason } => {
@@ -134,6 +152,7 @@ async fn la_session_dune_autre_personne_est_refusee() {
         &bac.ctx().with_actor(karim),
         Some(PersonId(karim)),
         &jeton,
+        Some("Chargée de projet"),
     )
     .await
     .expect_err("une session étrangère est refusée");
@@ -169,9 +188,15 @@ async fn la_session_dune_autre_personne_est_refusee() {
 async fn un_jeton_inconnu_est_invalide() {
     let bac = Bac::monter().await;
 
-    let issue = membership::accept_invitation(&bac.state, &bac.ctx(), None, "jeton-inexistant")
-        .await
-        .expect("un jeton inconnu ne produit pas d'erreur");
+    let issue = membership::accept_invitation(
+        &bac.state,
+        &bac.ctx(),
+        None,
+        "jeton-inexistant",
+        Some("Chargée de projet"),
+    )
+    .await
+    .expect("un jeton inconnu ne produit pas d'erreur");
 
     match issue {
         AcceptInvitationOutcome::Rejected { reason } => {
@@ -203,6 +228,7 @@ async fn la_session_de_la_personne_invitee_passe() {
         &bac.ctx().with_actor(invitee),
         Some(PersonId(invitee)),
         &jeton,
+        Some("Chargée de projet"),
     )
     .await
     .expect("acceptation par la personne visée");

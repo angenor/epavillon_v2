@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import type { AdministeredEvents } from '~/types/identity'
 import type { I18nText, Uuid } from '~/types/shared'
+import type { LoadFailure } from '~/utils/api-error'
 
 /** Événement visible dans le sélecteur du back-office. */
 export interface AdminScopeEvent {
@@ -56,14 +57,31 @@ export const useAdminScopeStore = defineStore('admin-scope', () => {
   const scope = ref<AdministeredEvents>({ is_global: false, event_ids: [] })
   const currentEventId = ref<Uuid | null>(null)
   const isLoading = ref(false)
-  const loadError = ref<Error | null>(null)
+  const loadError = ref<LoadFailure | null>(null)
   const loadedFor = ref<string | null>(null)
 
   /** Vrai quand le compte n'administre qu'un seul événement : pas de choix à offrir. */
   const isRestricted = computed(() => events.value.length === 1)
   const isEmpty = computed(() => events.value.length === 0)
-  /** A-t-elle le moindre droit d'administration ? La seule question qui ouvre la porte. */
-  const canAdminister = computed(() => events.value.length > 0)
+  /**
+   * A-t-elle le moindre droit d'administration ? La seule question qui ouvre la porte.
+   *
+   * **C'EST LE PÉRIMÈTRE QUI RÉPOND, JAMAIS LA LISTE D'ÉVÉNEMENTS.** Les deux
+   * ont longtemps semblé équivalents parce qu'une plateforme en service porte
+   * toujours au moins une édition. Sur une plateforme NEUVE, ils divergent : un
+   * administrateur global n'administre encore aucun événement, et tester la
+   * liste lui refusait le back-office — donc l'écran où l'on crée la première
+   * édition. Le blocage était circulaire, et il ne se voyait qu'une fois : au
+   * tout premier démarrage, celui d'une mise en service.
+   *
+   * Les trois cas du contrat, tels que `useApi.ts` les déclare :
+   *   { is_global: true,  event_ids: [] }    administrateur de la plateforme
+   *   { is_global: false, event_ids: [id…] } administrateur des éditions listées
+   *   { is_global: false, event_ids: [] }    aucun droit → accès refusé
+   */
+  const canAdminister = computed(
+    () => scope.value.is_global || scope.value.event_ids.length > 0,
+  )
 
   const currentEvent = computed<AdminScopeEvent | null>(
     () => events.value.find((event) => event.id === currentEventId.value) ?? null,
@@ -125,7 +143,7 @@ export const useAdminScopeStore = defineStore('admin-scope', () => {
       )
       loadedFor.value = person.id
     } catch (error) {
-      loadError.value = error instanceof Error ? error : new Error(String(error))
+      loadError.value = toLoadFailure(error)
     } finally {
       isLoading.value = false
     }

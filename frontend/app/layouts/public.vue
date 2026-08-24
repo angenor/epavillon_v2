@@ -142,6 +142,9 @@ const currentYear = new Date().getFullYear()
   <div class="flex min-h-screen flex-col bg-surface text-text">
     <a class="skip-link" href="#contenu-principal">{{ t('common.a11y.skipToContent') }}</a>
 
+    <UiApiOfflineBanner />
+    <UiMockDataBanner />
+
     <UiNavBar v-model:open="isMobileNavOpen" :items="mainNav" :label="t('nav.main.label')">
       <template #brand>
         <NuxtLink :to="localePath('/')" class="flex shrink-0 items-center gap-3 no-underline">

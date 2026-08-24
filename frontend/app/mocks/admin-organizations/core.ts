@@ -347,12 +347,43 @@ export function organizationListScreen(scope: AdministeredEvents): OrganizationL
   const visible = all.filter(inScope)
   const queue = duplicateQueue().pending
 
+  // LES COLONNES SONT ÉNUMÉRÉES, JAMAIS ÉTALÉES. La liste ne rend pas la
+  // projection entière : dix compteurs qu'aucun écran n'affiche — brouillons,
+  // retraits, note moyenne, stockage, articles — restent dans la fiche de
+  // performance et n'entrent pas dans la ligne. Un `...row` les aurait fait
+  // paraître disponibles ici, alors que l'API ne les sélectionne pas.
   const rows: OrganizationListRow[] = visible.map((row) => {
     const type = organizationTypeTerm(row.organization_type_code)
     return {
-      ...row,
+      organization_id: row.organization_id,
+      legal_name: row.legal_name,
+      acronym: row.acronym,
+      slug: row.slug,
+      statut: row.statut,
+      organization_type_code: row.organization_type_code,
       organization_type_label: type.label,
       organization_type_color: type.color,
+      country_id: row.country_id,
+      pays_iso3: row.pays_iso3,
+      pays_nom: row.pays_nom,
+      statut_oif: row.statut_oif,
+      est_verifiee: row.est_verifiee,
+      verified_at: row.verified_at,
+      score_confiance: row.score_confiance,
+      merged_into_id: row.merged_into_id,
+
+      membres_actifs: row.membres_actifs,
+      membres_en_attente: row.membres_en_attente,
+      referents: row.referents,
+
+      propositions_deposees: row.propositions_deposees,
+      propositions_acceptees: row.propositions_acceptees,
+      propositions_rejetees: row.propositions_rejetees,
+      ratio_acceptation: row.ratio_acceptation,
+
+      sessions_programmees: row.sessions_programmees,
+      sessions_realisees: row.sessions_realisees,
+
       pending_duplicate_count: queue.filter(
         (pair) =>
           pair.left.organization_id === row.organization_id ||
@@ -361,6 +392,9 @@ export function organizationListScreen(scope: AdministeredEvents): OrganizationL
       absorbed_count:
         absorbedBy(row.organization_id).length +
         all.filter((other) => other.merged_into_id === row.organization_id).length,
+
+      derniere_activite: row.derniere_activite,
+      inscrite_le: row.inscrite_le,
     }
   })
 

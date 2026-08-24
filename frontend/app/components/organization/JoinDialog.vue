@@ -29,19 +29,39 @@ interface Props {
 const props = defineProps<Props>()
 const emit = defineEmits<{
   'update:open': [value: boolean]
-  confirm: [jobTitle: string | null]
+  confirm: [jobTitle: string]
 }>()
 
 const { t } = useI18n()
 
 const jobTitle = ref(props.defaultJobTitle ?? '')
 
+/**
+ * La fonction est OBLIGATOIRE : une adhésion active en porte toujours une
+ * (`ck_memberships_job_title`). L'API refuse sans elle ; l'écran le dit avant.
+ *
+ * L'erreur n'apparaît qu'après une première interaction — un formulaire qui
+ * s'ouvre déjà en rouge accuse avant qu'on ait rien fait.
+ */
+const touched = ref(false)
+const isEmpty = computed(() => jobTitle.value.trim().length === 0)
+const showError = computed(() => touched.value && isEmpty.value)
+
+function submit(): void {
+  touched.value = true
+  if (isEmpty.value) return
+  emit('confirm', jobTitle.value.trim())
+}
+
 // Le champ se recharge à chaque ouverture : la fiche visée a pu changer entre
 // deux ouvertures, et une valeur restée d'un essai précédent serait trompeuse.
 watch(
   () => props.open,
   (open) => {
-    if (open) jobTitle.value = props.defaultJobTitle ?? ''
+    if (open) {
+      jobTitle.value = props.defaultJobTitle ?? ''
+      touched.value = false
+    }
   },
 )
 </script>
@@ -62,6 +82,9 @@ watch(
       :hint="t('organization.join.confirm.jobTitleHint')"
       :disabled="props.submitting"
       :maxlength="120"
+      required
+      :error="showError ? t('validation.required') : undefined"
+      @blur="touched = true"
     />
 
     <template #footer>
@@ -77,7 +100,8 @@ watch(
         :label="props.immediate
           ? t('organization.join.confirm.submitImmediate')
           : t('organization.join.confirm.submitRequest')"
-        @click="emit('confirm', jobTitle.trim() || null)"
+        :disabled="isEmpty"
+        @click="submit"
       />
     </template>
   </UiModal>

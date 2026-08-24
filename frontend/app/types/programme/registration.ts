@@ -12,6 +12,7 @@
 
 import type {
   AssetId,
+  Email,
   EventId,
   I18nText,
   IsoDateTime,
@@ -124,6 +125,62 @@ export interface Registration {
   cancelled_reason: string | null
   created_at: IsoDateTime
   updated_at: IsoDateTime
+}
+
+// ---------------------------------------------------------------------------
+// Ce que les routes d'inscription rendent
+// ---------------------------------------------------------------------------
+
+/**
+ * L'issue d'une tentative d'inscription — `RegistrationResult`.
+ *
+ * LES SIX ISSUES SORTENT EN 200. Arriver une minute après la clôture ou trouver
+ * la salle pleine sont des issues normales d'une demande bien formée, pas des
+ * erreurs : seul un formulaire mal rempli en est une, et elle porte alors un
+ * code stable et un champ fautif.
+ *
+ * La bascule en liste d'attente n'est pas un refus : elle porte la position
+ * obtenue, posée par la base. Et `capacity` est RELU sur la séance, jamais
+ * extrait du message français du déclencheur.
+ */
+export type RegistrationResult =
+  | { status: 'registered'; registration: Registration }
+  | { status: 'waitlisted'; registration: Registration; position: number }
+  /** Une inscription vivante existait déjà : elle est relue et rendue, pas refusée. */
+  | { status: 'already_registered'; registration: Registration }
+  /** Jauge atteinte SANS liste d'attente. */
+  | { status: 'full'; capacity: number }
+  | { status: 'closed'; closed_at: IsoDateTime }
+  | { status: 'not_open_yet'; opens_at: IsoDateTime }
+
+/** Ce qu'une annulation rend — `CancelRegistrationResult`. */
+export interface CancelRegistrationResult {
+  registration: Registration
+  /** 0 ou 1 : une annulation libère une place, et une seule. Annuler une
+   *  inscription en attente ne promeut personne — elle n'occupait rien. */
+  promoted: number
+}
+
+/**
+ * Une ligne de la liste NOMINATIVE du back-office — `RegistrationRow`.
+ *
+ * Elle exige `programme.registration.manage` sur l'édition : le rôle de
+ * programmation ne la détient pas, et compose donc la grille sans pouvoir
+ * ouvrir la liste des inscrits.
+ */
+export interface RegistrationRow {
+  registration: Registration
+  /** Extrait d'`identity.people`, composé par la requête — jamais la fiche entière. */
+  person: {
+    id: PersonId
+    /** Colonne engendrée : `first_name || ' ' || last_name`. */
+    display_name: string
+    first_name: string
+    last_name: string
+    primary_email: Email
+  }
+  /** `org.organizations.legal_name` ; nul quand l'inscription n'en déclare aucune. */
+  organization_name: string | null
 }
 
 // ---------------------------------------------------------------------------

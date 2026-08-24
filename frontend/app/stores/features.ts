@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
-import type { FeatureFlag } from '~/types/platform'
+import type { ResolvedFeatureFlag } from '~/types/platform'
 import type { FeatureFlagKey } from '~/types/shared'
+import type { LoadFailure } from '~/utils/api-error'
 
 /**
  * Les drapeaux de `platform.feature_flags`, chargés une seule fois.
@@ -24,22 +25,21 @@ import type { FeatureFlagKey } from '~/types/shared'
 export const useFeatureStore = defineStore('features', () => {
   const api = useApi()
 
-  const flags = ref<FeatureFlag[]>([])
+  const flags = ref<ResolvedFeatureFlag[]>([])
   const isLoading = ref(false)
-  const loadError = ref<Error | null>(null)
+  const loadError = ref<LoadFailure | null>(null)
   const isLoaded = ref(false)
 
   /**
-   * Un drapeau ouvert pour tout le monde.
+   * Le drapeau est-il ouvert POUR LA PERSONNE QUI REGARDE ?
    *
-   * Le déploiement progressif — `rollout_percent` entre 1 et 99, `enabled_for`
-   * nommant des personnes — n'est PAS arbitré ici : il dépend de qui regarde, et
-   * la fonction qui sait le calculer est en base. Aucun drapeau du semis ne s'en
-   * sert ; le jour où l'un le fera, c'est l'API qui rendra le booléen résolu.
+   * Le déploiement progressif n'est pas arbitré ici, et ne l'a jamais été : il
+   * dépend de qui regarde, et la fonction qui sait le calculer est en base.
+   * C'est désormais l'API qui rend le booléen résolu — le test du pourcentage
+   * qui vivait ici en était une seconde version, condamnée à diverger.
    */
   function isEnabled(key: FeatureFlagKey): boolean {
-    const flag = flags.value.find((entry) => entry.key === key)
-    return flag !== undefined && flag.is_enabled && flag.rollout_percent === 100
+    return flags.value.find((entry) => entry.key === key)?.is_enabled === true
   }
 
   /** Charge la table une fois. Idempotent : le middleware l'appelle sans se coordonner. */
@@ -52,8 +52,11 @@ export const useFeatureStore = defineStore('features', () => {
       flags.value = await api.platform.featureFlags()
       isLoaded.value = true
     } catch (error) {
-      loadError.value = error instanceof Error ? error : new Error(String(error))
+      loadError.value = toLoadFailure(error)
       flags.value = []
+      // `isLoaded` reste FAUX : la prochaine navigation vers un module fermé
+      // retentera. Le poser ici figerait « tout est fermé » pour la durée de la
+      // session, y compris après le retour de la plateforme.
     } finally {
       isLoading.value = false
     }

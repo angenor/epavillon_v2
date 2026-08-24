@@ -58,7 +58,13 @@ const { data: granted } = await useAsyncData<EffectivePermission[]>(
 
 const canRead = computed(() => hasPermissionOnAnyScope(granted.value, 'identity.person.read'))
 const canAssign = computed(() => hasPermissionOnAnyScope(granted.value, 'identity.role.assign'))
-const canManage = computed(() => hasPermissionOnAnyScope(granted.value, 'identity.person.manage'))
+/**
+ * Portée GLOBALE, comme la file RGPD. Une suspension vaut sur toute la
+ * plateforme : un administrateur détaché sur une COP ne peut pas fermer un compte
+ * qui sert ailleurs, et l'API refuse en portée globale — offrir le bouton
+ * l'enverrait dans un 403.
+ */
+const canManage = computed(() => hasPermission(granted.value, 'identity.person.manage'))
 
 const {
   data: user,
@@ -114,18 +120,36 @@ const { data: targetPermissions, refresh: refreshTarget } = await useAsyncData<E
   { default: () => [], watch: [personId], lazy: true },
 )
 
+/**
+ * Un refus de l'API s'affiche TEL QUEL : elle seule sait pourquoi elle refuse, et
+ * son catalogue est déjà français. Sans ce message, un 403 laisserait la boîte de
+ * dialogue ouverte et muette.
+ */
+function writeError(thrown: unknown): string {
+  return thrown instanceof ForbiddenError ? thrown.message : apiErrorMessage(thrown, (key) => t(key))
+}
+
 async function grantRole(payload: GrantRolePayload): Promise<void> {
   submitting.value = true
   panelError.value = null
 
   try {
-    const result = await api.adminUsers.grantRole(payload, auth.person?.id ?? null, granted.value)
+    const result = await api.adminUsers.grantRole(
+      personId.value,
+      payload,
+      auth.person?.id ?? null,
+      granted.value,
+    )
     if (result.status !== 'granted') {
-      panelError.value = t(`admin.user.roles.error.${result.status}`)
+      // `scope_not_allowed` rend le message du trigger, mot pour mot, avec les
+      // portées réellement autorisées : le libellé générique les perdrait.
+      panelError.value = result.message ?? t(`admin.user.roles.error.${result.status}`)
       return
     }
     panelOpen.value = false
     await Promise.all([refresh(), refreshTarget()])
+  } catch (thrown) {
+    panelError.value = writeError(thrown)
   } finally {
     submitting.value = false
   }
@@ -152,16 +176,19 @@ async function revokeRole(reason: string): Promise<void> {
 
   try {
     const result = await api.adminUsers.revokeRole(
-      { assignment_id: revoking.value.id, reason },
+      revoking.value.id,
+      { reason },
       auth.person?.id ?? null,
       granted.value,
     )
     if (result.status !== 'revoked') {
-      revokeError.value = t(`admin.user.roles.error.${result.status}`)
+      revokeError.value = result.message ?? t(`admin.user.roles.error.${result.status}`)
       return
     }
     revokeOpen.value = false
     await Promise.all([refresh(), refreshTarget()])
+  } catch (thrown) {
+    revokeError.value = writeError(thrown)
   } finally {
     submitting.value = false
   }
@@ -174,13 +201,14 @@ async function revokeRole(reason: string): Promise<void> {
 const statusOpen = ref(false)
 const statusError = ref<string | null>(null)
 
-async function setStatus(payload: Omit<SetPersonStatusPayload, 'person_id'>): Promise<void> {
+async function setStatus(payload: SetPersonStatusPayload): Promise<void> {
   submitting.value = true
   statusError.value = null
 
   try {
     const result = await api.adminUsers.setStatus(
-      { ...payload, person_id: personId.value },
+      personId.value,
+      payload,
       auth.person?.id ?? null,
       adminScope.scope,
     )
@@ -190,6 +218,8 @@ async function setStatus(payload: Omit<SetPersonStatusPayload, 'person_id'>): Pr
     }
     statusOpen.value = false
     await refresh()
+  } catch (thrown) {
+    statusError.value = writeError(thrown)
   } finally {
     submitting.value = false
   }
@@ -324,7 +354,6 @@ async function setStatus(payload: Omit<SetPersonStatusPayload, 'person_id'>): Pr
 
       <AdminUsersRolePanel
         v-model:open="panelOpen"
-        :person-id="user.person_id"
         :person-name="user.display_name"
         :options="roleOptions"
         :assignments="user.assignments"

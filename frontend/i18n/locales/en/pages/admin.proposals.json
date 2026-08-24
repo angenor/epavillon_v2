@@ -155,7 +155,6 @@
       "reason_required": "reason required",
       "not_found": "submission not found"
     },
-    "error": "The action could not be completed. Nothing was changed.",
     "andMore": "and {count} more | and {count} more | and {count} more"
   }
 }

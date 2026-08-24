@@ -422,6 +422,25 @@ export interface PublicEditionRow {
 
   theme_codes: TaxonomyTermCode[]
   themes: ScheduleThemeBadge[]
+
+  /**
+   * LE VOLUME DU PROGRAMME PUBLIÉ, joint par l'API — les mêmes colonnes que
+   * `EditionStatsRow` ci-dessous.
+   *
+   * La vue `event.v_public_editions` ne peut pas les porter : le module `event`
+   * se charge AVANT `programme`, et la dépendance irait dans le mauvais sens.
+   * L'API les joint donc à la lecture, PAR LA GAUCHE — sans quoi une édition
+   * annoncée, dont aucune séance n'est encore publiée, disparaîtrait de
+   * l'historique. Elles valent alors zéro, ce qui est vrai.
+   *
+   * Les avoir ici évite un second appel : l'accueil compose ses chiffres à
+   * partir de cette liste, sans rien redemander.
+   */
+  published_session_count: number
+  streamed_session_count: number
+  organization_count: number
+  programme_starts_at: IsoDateTime | null
+  programme_ends_at: IsoDateTime | null
 }
 
 // ---------------------------------------------------------------------------

@@ -220,7 +220,7 @@ export function proposalDashboard(): ProposalDashboardRow[] {
           requiredReviews === null ? null : Math.max(0, requiredReviews - p.review_count),
         assigned_reviewers: assignments.length,
         open_change_requests: proposalComments.filter(
-          (c) => c.proposal_id === p.id && c.is_change_request && c.resolved_at === null && c.deleted_at === null,
+          (c) => c.proposal_id === p.id && c.is_change_request && c.resolved_at === null,
         ).length,
         speaker_count: proposalSpeakers.filter((s) => s.proposal_id === p.id).length,
         // Rang provisoire : recalculé juste après, une fois l'ensemble trié.

@@ -76,14 +76,15 @@ function openRequest(request: PrivacyRequestView): void {
   dialogOpen.value = true
 }
 
-async function handle(payload: Omit<HandlePrivacyRequestPayload, 'request_id'>): Promise<void> {
+async function handle(payload: HandlePrivacyRequestPayload): Promise<void> {
   if (!handling.value) return
   submitting.value = true
   dialogError.value = null
 
   try {
     const result = await api.adminUsers.handlePrivacyRequest(
-      { ...payload, request_id: handling.value.id },
+      handling.value.id,
+      payload,
       auth.person?.id ?? null,
     )
 
@@ -94,6 +95,11 @@ async function handle(payload: Omit<HandlePrivacyRequestPayload, 'request_id'>):
 
     dialogOpen.value = false
     await refresh()
+  } catch (thrown) {
+    // Le refus de l'API porte son message français : le réécrire ici donnerait
+    // deux textes pour un même refus, et une anonymisation refusée en silence.
+    dialogError.value =
+      thrown instanceof ForbiddenError ? thrown.message : apiErrorMessage(thrown, (key) => t(key))
   } finally {
     submitting.value = false
   }

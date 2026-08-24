@@ -37,6 +37,9 @@ const legalLinks = [
   <div class="flex min-h-screen flex-col bg-surface-sunken text-text">
     <a class="skip-link" href="#contenu-principal">{{ t('common.a11y.skipToContent') }}</a>
 
+    <UiApiOfflineBanner />
+    <UiMockDataBanner />
+
     <header class="mx-auto flex w-full max-w-[64rem] items-center justify-between gap-4 px-4 py-5 sm:px-6">
       <NuxtLink :to="localePath('/')" class="flex shrink-0 items-center gap-3 no-underline">
         <img

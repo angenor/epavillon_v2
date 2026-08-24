@@ -442,7 +442,12 @@ pub async fn personnes_affichees<'e>(
 pub struct FicheOrganisationComplete {
     pub id: Uuid,
     pub legal_name: String,
+    /// Colonne engendrée : la forme canonique du nom légal, sur laquelle la
+    /// recherche compare. Le contrat la déclare et l'écran de fusion la lit pour
+    /// montrer POURQUOI deux fiches se ressemblent.
+    pub legal_name_normalized: String,
     pub acronym: Option<String>,
+    pub acronym_normalized: Option<String>,
     pub slug: String,
     pub organization_type_code: String,
     pub country_id: Option<Uuid>,
@@ -457,6 +462,7 @@ pub struct FicheOrganisationComplete {
     pub merged_at: Option<OffsetDateTime>,
     #[serde(with = "time::serde::rfc3339::option")]
     pub verified_at: Option<OffsetDateTime>,
+    pub verified_by: Option<Uuid>,
     pub trust_score: i16,
     pub created_by: Option<Uuid>,
     #[serde(with = "time::serde::rfc3339")]
@@ -470,11 +476,12 @@ pub async fn fiche_organisation_complete<'e>(
     organization_id: Uuid,
 ) -> Result<Option<FicheOrganisationComplete>> {
     let ligne = sqlx::query!(
-        r#"SELECT id, legal_name, acronym, slug::text AS "slug!",
+        r#"SELECT id, legal_name, legal_name_normalized AS "legal_name_normalized!",
+                  acronym, acronym_normalized, slug::text AS "slug!",
                   organization_type_code, country_id, city, description,
                   website::text, contact_email::text, contact_phone,
                   status::text AS "status!", merged_into_id, merged_at,
-                  verified_at, trust_score, created_by, created_at, updated_at
+                  verified_at, verified_by, trust_score, created_by, created_at, updated_at
              FROM org.organizations WHERE id = $1"#,
         organization_id
     )
@@ -484,7 +491,9 @@ pub async fn fiche_organisation_complete<'e>(
     Ok(ligne.map(|l| FicheOrganisationComplete {
         id: l.id,
         legal_name: l.legal_name,
+        legal_name_normalized: l.legal_name_normalized,
         acronym: l.acronym,
+        acronym_normalized: l.acronym_normalized,
         slug: l.slug,
         organization_type_code: l.organization_type_code,
         country_id: l.country_id,
@@ -497,6 +506,7 @@ pub async fn fiche_organisation_complete<'e>(
         merged_into_id: l.merged_into_id,
         merged_at: l.merged_at,
         verified_at: l.verified_at,
+        verified_by: l.verified_by,
         trust_score: l.trust_score,
         created_by: l.created_by,
         created_at: l.created_at,

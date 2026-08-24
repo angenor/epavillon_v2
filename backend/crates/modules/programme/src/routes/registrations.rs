@@ -24,7 +24,7 @@ use crate::domain::ids::{RegistrationId, SessionId};
 use crate::domain::permissions::REGISTRATION_MANAGE;
 use crate::routes::{contexte_de, locale_de};
 use crate::service::perimeter::{self, Cible};
-use crate::service::registration::{self, AnnulationDemandee, RegisterPayload};
+use crate::service::registration::{self, AnnulationDemandee, SessionRegisterPayload};
 use crate::state::ProgrammeState;
 
 #[derive(Debug, Deserialize)]
@@ -72,12 +72,12 @@ pub(crate) async fn formulaire(
 /// S'inscrire à une séance.
 #[utoipa::path(
     post,
-    description = "`RegisterPayload` → `RegistrationResult`. **Six issues, toutes en 200** : inscrit, placé en liste d'attente avec sa position, déjà inscrit, complet avec le nombre de places, clos avec son échéance, pas encore ouvert avec sa date. Ce sont des issues normales d'une tentative bien formée — une personne peut arriver une minute après la clôture. Les réponses sont validées contre le formulaire **résolu**, avant toute écriture, et une clé inconnue est **refusée** plutôt qu'ignorée. Une réponse à un champ marqué sensible exige un consentement, dont la preuve est écrite dans la même transaction. **Sans session**, l'inscription n'aboutit que si le formulaire admet l'anonyme, et l'identité vient de champs dédiés — jamais des réponses.",
+    description = "`SessionRegisterPayload` → `RegistrationResult`. **Six issues, toutes en 200** : inscrit, placé en liste d'attente avec sa position, déjà inscrit, complet avec le nombre de places, clos avec son échéance, pas encore ouvert avec sa date. Ce sont des issues normales d'une tentative bien formée — une personne peut arriver une minute après la clôture. Les réponses sont validées contre le formulaire **résolu**, avant toute écriture, et une clé inconnue est **refusée** plutôt qu'ignorée. Une réponse à un champ marqué sensible exige un consentement, dont la preuve est écrite dans la même transaction. **Sans session**, l'inscription n'aboutit que si le formulaire admet l'anonyme, et l'identité vient de champs dédiés — jamais des réponses.",
     path = "/sessions/{id}/registrations",
     tag = "Inscriptions",
     operation_id = "inscriptions_sinscrire",
     params(("id" = Uuid, Path, description = "Identifiant de la séance")),
-    request_body = RegisterPayload,
+    request_body = SessionRegisterPayload,
     responses(
         (status = 200, description = "RegistrationResult", body = Object),
         (status = 401, description = "Le formulaire n'admet pas l'inscription sans compte", body = crate::routes::openapi::ApiErrorBody),
@@ -89,7 +89,7 @@ pub(crate) async fn sinscrire(
     requete: HttpRequest,
     state: web::Data<ProgrammeState>,
     id: web::Path<Uuid>,
-    corps: web::Json<RegisterPayload>,
+    corps: web::Json<SessionRegisterPayload>,
 ) -> Result<HttpResponse> {
     let seance = SessionId(id.into_inner());
     // La session est **facultative** : c'est le formulaire qui décide, et

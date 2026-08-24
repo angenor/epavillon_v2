@@ -8,7 +8,6 @@ import type {
 import type { HighlightPlacement } from '~/types/content'
 import type { EffectivePermission } from '~/types/identity'
 import type { EventId } from '~/types/shared'
-import { ForbiddenError } from '~/composables/useApi'
 
 /**
  * CRÉER UNE DIAPOSITIVE — `/admin/vitrine/nouveau`.

@@ -84,8 +84,8 @@ async fn un_arbitrage_qui_echoue_ne_laisse_aucune_trace() {
     // basculé.
     let awa = personne(&bac, "awa@roac-afrique.org", "Awa", "Sow Fall").await;
     sqlx::query!(
-        "INSERT INTO org.memberships (organization_id, person_id, role, status, approved_at)
-         VALUES ($1, $2, 'member', 'active', now())",
+        "INSERT INTO org.memberships (organization_id, person_id, role, status, job_title, approved_at)
+         VALUES ($1, $2, 'member', 'active', 'Chargée de projet', now())",
         source,
         awa
     )

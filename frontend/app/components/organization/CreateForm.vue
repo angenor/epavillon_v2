@@ -85,12 +85,17 @@ onBeforeUnmount(() => {
 
 function validate(): boolean {
   const errors: Record<string, string> = {}
-  // Les trois seules obligations sont celles de la base : `legal_name` d'au
-  // moins deux signes (`ck` du § 1), le type et le pays. Tout le reste se
-  // complète depuis la fiche, plus tard, sans bloquer une inscription.
+  // Les obligations sont celles de la base : `legal_name` d'au moins deux signes
+  // (`ck` du § 1), le type, le pays — et la FONCTION, car le créateur devient
+  // référent actif d'emblée et une adhésion active en porte toujours une
+  // (`ck_memberships_job_title`). Tout le reste se complète depuis la fiche,
+  // plus tard, sans bloquer une inscription.
   if (form.legal_name.trim().length < 2) errors.legal_name = t('organization.join.create.errors.nameTooShort')
   if (form.organization_type_code.length === 0) errors.organization_type_code = t('validation.required')
   if (form.country_id.length === 0) errors.country_id = t('validation.required')
+  // Le créateur devient référent ACTIF d'emblée : sa fonction est exigée, comme
+  // pour toute adhésion active (`ck_memberships_job_title`).
+  if (form.job_title.trim().length === 0) errors.job_title = t('validation.required')
   // `acronym` : 2 à 32 caractères quand il est renseigné — `ck_` du § 1.
   const acronym = form.acronym.trim()
   if (acronym.length > 0 && (acronym.length < 2 || acronym.length > 32)) {
@@ -114,7 +119,7 @@ function submit(): void {
     city: form.city.trim() || null,
     website: form.website.trim() || null,
     description: description ? { fr: description } : null,
-    job_title: form.job_title.trim() || null,
+    job_title: form.job_title.trim(),
   })
 }
 
@@ -211,6 +216,9 @@ defineExpose({ form })
         :label="t('organization.join.create.fields.jobTitle')"
         :hint="t('organization.join.create.fields.jobTitleHint')"
         :disabled="props.submitting"
+        :error="fieldErrors.job_title"
+        required
+        :maxlength="120"
       />
 
       <div class="flex flex-col gap-3 sm:flex-row-reverse sm:justify-start">

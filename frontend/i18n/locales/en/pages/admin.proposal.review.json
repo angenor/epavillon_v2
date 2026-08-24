@@ -70,8 +70,7 @@
     },
     "success": "Submission moved to “{status}”.",
     "notAllowed": "This transition is not available from the current state of the submission.",
-    "reasonRequired": "This transition requires a reason.",
-    "error": "The decision could not be saved. Nothing was changed."
+    "reasonRequired": "This transition requires a reason."
   },
   "tabs": {
     "dossier": "Submission",
@@ -192,7 +191,6 @@
     "submitBlocked": "Score every criterion before submitting your review.",
     "saved": "Draft saved at {time}.",
     "submitted": "Review submitted on {date}.",
-    "error": "Your review could not be saved. Nothing was lost: try again.",
     "unsaved": "Unsaved changes"
   },
   "recusal": {
@@ -205,8 +203,7 @@
     "submit": "Recuse myself",
     "success": "You have recused yourself from this submission. The committee is informed.",
     "done": "You recused yourself from this submission on {date}.",
-    "doneReason": "Declared reason: {reason}",
-    "error": "The recusal could not be saved."
+    "doneReason": "Declared reason: {reason}"
   },
   "peers": {
     "title": "Committee reviews",
@@ -286,7 +283,6 @@
     "unresolved": "Awaiting correction",
     "edited": "edited",
     "you": "You",
-    "sent": "Message sent.",
-    "error": "The message could not be sent."
+    "sent": "Message sent."
   }
 }

@@ -38,6 +38,7 @@
 
 import type { AdministeredEvents, EffectivePermission, Person } from '~/types/identity'
 import type { EventStatus } from '~/types/event/edition'
+import type { PublicCall } from '~/types/event/call'
 import type {
   LoginPayload,
   LoginResult,
@@ -59,13 +60,17 @@ import type {
   OrganizationSearchQuery,
 } from '~/types/organization-join'
 import type { AdminDashboard } from '~/types/admin-dashboard'
-import type { FeatureFlag } from '~/types/platform'
+import type { RoleAssignmentView } from '~/types/admin-users'
+import type { ResolvedFeatureFlag } from '~/types/platform'
 import type {
   DecideMembershipPayload,
   InviteMemberPayload,
   InviteMemberResult,
 } from '~/types/organization-workspace'
+import type { RegistrationRow } from '~/types/programme/registration'
 import type { Uuid } from '~/types/shared'
+import { ApiRequestError, ForbiddenError } from '~/utils/api-error'
+import { createApiHttp, readMocks } from './api/http'
 import { createProposalReviewApi } from './api/proposal-review'
 import { createProposalsApi } from './api/proposals'
 import { createPlannerApi } from './api/planner'
@@ -78,13 +83,11 @@ import { createOrganizationWorkspaceApi } from './api/organization-workspace'
 import { createHomeApi } from './api/home'
 import { createAdminShowcaseApi } from './api/admin-showcase'
 
-/** Erreur d'accès, à traduire par l'écran « accès refusé ». */
-export class ForbiddenError extends Error {
-  constructor(message = "Cette édition n'est pas dans votre périmètre d'administration.") {
-    super(message)
-    this.name = 'ForbiddenError'
-  }
-}
+// `ForbiddenError` vit désormais dans `utils/api-error.ts`, avec les deux autres
+// erreurs de la couche d'accès : le client HTTP doit pouvoir la lever sur un
+// `FORBIDDEN` de l'API, et l'importer d'ici lui ferait remonter tout ce fichier.
+// Elle y est auto-importée par Nuxt, comme tout `app/utils/` — la réexporter ici
+// en ferait un second nom pour la même classe, que l'auto-import signale.
 
 /** Périmètre sans aucun droit : la valeur sûre par défaut. */
 export const NO_ADMIN_SCOPE: AdministeredEvents = { is_global: false, event_ids: [] }
@@ -92,34 +95,9 @@ export const NO_ADMIN_SCOPE: AdministeredEvents = { is_global: false, event_ids:
 const MOCK_LATENCY_MS = 120
 
 export function useApi() {
-  const config = useRuntimeConfig()
-  const baseURL = String(config.public.apiBase ?? '')
-  /**
-   * La locale vient de l'instance i18n de l'application, PAS de `useI18n()`.
-   *
-   * `useI18n()` exige d'être appelé au sommet d'un `setup` et lève sinon
-   * « Must be called at the top of a `setup` function ». Or ce composable est
-   * consommé depuis un store initialisé par un middleware de navigation
-   * (`stores/auth.ts`, chargé par `middleware/guest.ts`) : hors de tout
-   * composant. L'instance injectée, elle, est disponible partout où le contexte
-   * Nuxt l'est — et c'est la même.
-   */
-  const { $i18n } = useNuxtApp()
-  const locale = $i18n.locale
-
-  const isConfigured = computed(() => baseURL.length > 0)
-
-  const client = $fetch.create({
-    baseURL,
-    // Les cookies de session sont posés par l'API : la requête doit les porter.
-    credentials: 'include',
-    retry: 1,
-    retryStatusCodes: [408, 409, 425, 429, 500, 502, 503, 504],
-    onRequest({ options }) {
-      // L'API résout les colonnes `platform.i18n_text` selon cet en-tête.
-      options.headers.set('Accept-Language', locale.value)
-    },
-  })
+  const http = createApiHttp()
+  const { baseURL, isConfigured, client, request, refreshSession } = http
+  const mockData = useMockData()
 
   type Mocks = typeof import('~/mocks')
 
@@ -129,14 +107,35 @@ export function useApi() {
    */
   async function call<T>(path: string, fromMocks: (m: Mocks) => T | Promise<T>, query?: Record<string, unknown>): Promise<T> {
     if (isConfigured.value) {
-      return client<T>(path, { query })
+      return request<T>(path, { query })
     }
+    return readMocks(fromMocks, MOCK_LATENCY_MS)
+  }
 
-    const mocks = await import('~/mocks')
-    if (import.meta.client && MOCK_LATENCY_MS > 0) {
-      await new Promise((resolve) => setTimeout(resolve, MOCK_LATENCY_MS))
+  /**
+   * Une lecture dont « rien » est une réponse acceptable — le 404 devient `null`.
+   *
+   * POURQUOI DEUX FONCTIONS PLUTÔT QU'UNE OPTION. Beaucoup de lectures rendent
+   * une LISTE : leur donner `null` sur un 404 ferait planter le premier `.map()`
+   * de l'écran, loin de l'appel, avec un message qui ne dit rien. La distinction
+   * est donc portée par le nom, et se voit à l'endroit où l'on choisit.
+   *
+   * CE QUE L'API DIT DE SES 404 : « inexistant **ou hors périmètre** —
+   * indiscernables ». C'est délibéré, et l'écran doit s'en tenir là : afficher
+   * « introuvable » plutôt que de laisser deviner qu'une édition existe ailleurs.
+   */
+  async function callOrNull<T>(
+    path: string,
+    fromMocks: (m: Mocks) => T | null | Promise<T | null>,
+    query?: Record<string, unknown>,
+  ): Promise<T | null> {
+    if (!isConfigured.value) return readMocks(fromMocks, MOCK_LATENCY_MS)
+    try {
+      return await request<T>(path, { query })
+    } catch (error) {
+      if (error instanceof ApiRequestError && error.code === 'NOT_FOUND') return null
+      throw error
     }
-    return fromMocks(mocks)
   }
 
   /**
@@ -159,18 +158,48 @@ export function useApi() {
       // signature d'index implicite, et `LoginPayload` serait refusé — le même
       // écueil que la contrainte générique de `UiTable`. La conversion est sûre,
       // un corps de requête étant toujours sérialisé en JSON.
-      return client<T>(path, { method, body: body as Record<string, unknown> })
+      // `retry: 0`, et ce n'est pas négociable : une écriture rejouée après une
+      // coupure de passerelle peut créer deux lieux, déposer deux fois le même
+      // dossier, ou rendre un échec sur une réinitialisation qui a abouti. Une
+      // lecture se rejoue sans dommage, une écriture non.
+      return request<T>(path, { method, body: body as Record<string, unknown>, retry: 0 })
     }
+    // Une écriture attend plus longtemps qu'une lecture : c'est pendant ce
+    // temps-là que le bouton doit se désactiver et afficher son témoin. Sans
+    // cette latence, l'état de chargement d'un formulaire ne se voit jamais et
+    // finit par ne plus être écrit.
+    return readMocks(fromMocks, MOCK_LATENCY_MS * 3)
+  }
 
-    const mocks = await import('~/mocks')
-    if (import.meta.client && MOCK_LATENCY_MS > 0) {
-      // Une écriture attend plus longtemps qu'une lecture : c'est pendant ce
-      // temps-là que le bouton doit se désactiver et afficher son témoin. Sans
-      // cette latence, l'état de chargement d'un formulaire ne se voit jamais et
-      // finit par ne plus être écrit.
-      await new Promise((resolve) => setTimeout(resolve, MOCK_LATENCY_MS * 3))
-    }
-    return fromMocks(mocks)
+  /**
+   * Un écran dont l'API N'EXISTE PAS ENCORE.
+   *
+   * Trois écrans du jalon sont dans ce cas : les messages d'incident, l'accueil
+   * public et sa vitrine administrable. Leurs données vivent bien en base — dans
+   * les schémas `live` et `content` — mais aucun crate Rust ne les sert à ce
+   * jour. Les faire appeler leur route produirait un 404 : un écran livré et
+   * vérifié se mettrait à afficher une panne le jour où l'API est branchée.
+   *
+   * Ils continuent donc de lire les données simulées, MÊME quand l'API est
+   * configurée, et ils le DISENT — `usesMockData` allume un bandeau sur l'écran
+   * concerné. Le faux-semblant serait de servir ces données sans le signaler ;
+   * l'écran cassé serait de les réclamer à une API qui ne les a pas.
+   *
+   * Le chemin est passé quand même : il documente la route attendue, et
+   * `scripts/check-api-contract.mjs` s'en sert pour lister la dette au lieu de la
+   * compter comme une faute.
+   */
+  async function pending<T>(
+    path: string,
+    fromMocks: (m: Mocks) => T | Promise<T>,
+    kind: 'read' | 'write' = 'read',
+  ): Promise<T> {
+    if (isConfigured.value) mockData.mark(path)
+    // Une écriture garde la latence d'une écriture, même simulée : c'est ce qui
+    // fait voir le témoin de soumission d'un formulaire. Sans ce paramètre, les
+    // sept écritures des incidents et de la vitrine s'exécutaient trois fois
+    // plus vite que partout ailleurs, et leur bouton ne montrait rien.
+    return readMocks(fromMocks, kind === 'write' ? MOCK_LATENCY_MS * 3 : MOCK_LATENCY_MS)
   }
 
   /** Refuse l'accès à une édition hors périmètre, plutôt que de rendre une liste vide. */
@@ -180,14 +209,28 @@ export function useApi() {
     }
   }
 
+  /**
+   * Ce que reçoit une fabrique d'écran. Déclaré comme VARIABLE et non écrit à
+   * chaque appel : passé en littéral, TypeScript refuserait les propriétés
+   * qu'une fabrique donnée ne déclare pas, et il faudrait tenir onze listes à
+   * jour au lieu d'une.
+   */
+  const deps = { call, callOrNull, send, pending, assertEventInScope }
+
   return {
     baseURL,
     /** L'API est-elle configurée ? Faux tant que la variable n'est pas posée. */
     isConfigured,
     /** Client HTTP préconfiguré. Réservé aux cas non couverts ci-dessous. */
     client,
+    /** Tente une rotation du jeton de session. Utilisé par le store de session. */
+    refreshSession,
     ForbiddenError,
     assertEventInScope,
+    /** Une lecture dont « rien » est une réponse acceptable — 404 devient `null`. */
+    callOrNull,
+    /** Un écran dont l'API n'existe pas encore : données d'exemple, et le dire. */
+    pending,
 
     // -----------------------------------------------------------------------
     // Authentification (A1)
@@ -198,11 +241,11 @@ export function useApi() {
     //  · DISCRÉTION — `register` et `requestPasswordReset` rendent TOUJOURS la
     //    même réponse, adresse connue ou non. Rien dans le contrat ne permet
     //    d'écrire un écran bavard, même par inadvertance.
-    //  · SESSION — l'API pose un cookie `HttpOnly` que le navigateur renvoie
-    //    seul (`credentials: 'include'`, plus haut). Tant qu'elle n'existe pas,
-    //    le store d'authentification tient un cookie ordinaire et passe
-    //    l'identifiant à `session()` ; ce paramètre disparaîtra au prompt B7,
-    //    l'API lisant sa propre session.
+    //  · SESSION — l'API pose deux cookies `HttpOnly` que le navigateur renvoie
+    //    seuls (`credentials: 'include'`, voir `api/http.ts`). `GET /auth/me`
+    //    N'ACCEPTE AUCUN IDENTIFIANT : c'est la session qui dit qui parle. Le
+    //    paramètre de `session()` ne sert donc qu'aux données simulées, qui
+    //    n'ont pas de session à consulter — il n'est jamais envoyé.
     // -----------------------------------------------------------------------
     auth: {
       login: (payload: LoginPayload): Promise<LoginResult> =>
@@ -211,7 +254,14 @@ export function useApi() {
       logout: (): Promise<{ status: 'signed_out' }> =>
         send('/auth/logout', {}, () => ({ status: 'signed_out' as const })),
 
-      /** Personne connectée, ou `null` si la session n'existe plus. */
+      /**
+       * Personne connectée, ou `null` si la session n'existe plus.
+       *
+       * `GET /auth/me` ne rend JAMAIS 401 — le site l'appelle déconnecté à
+       * chaque navigation, et un statut d'erreur y ferait afficher un écran en
+       * panne au lieu d'un état déconnecté. L'identifiant reçu ici ne part pas
+       * dans la requête : il ne sert qu'à retrouver la personne dans les mocks.
+       */
       session: (personId: Uuid | null): Promise<Person | null> =>
         call('/auth/me', (m) =>
           personId === null ? null : (m.people.find((p) => p.id === personId) ?? null),
@@ -250,13 +300,21 @@ export function useApi() {
     // par module traversé, et le store qui l'enveloppe ne charge qu'une fois.
     // -----------------------------------------------------------------------
     platform: {
-      /** `platform.feature_flags`, toutes clés confondues. */
-      featureFlags: (): Promise<FeatureFlag[]> =>
-        call('/platform/feature-flags', (m) => m.featureFlags),
+      /**
+       * Chaque drapeau et son verdict POUR L'APPELANT, toutes clés confondues.
+       *
+       * La table entière, et non un booléen par clé : une navigation ne peut pas
+       * déclencher un appel par module traversé. Mais chaque ligne est déjà
+       * TRANCHÉE — le déploiement progressif se calcule en base, jamais ici.
+       */
+      featureFlags: (): Promise<ResolvedFeatureFlag[]> =>
+        call('/platform/feature-flags', (m) =>
+          m.featureFlags.map((f) => ({ key: f.key, is_enabled: m.isFeatureEnabled(f.key) })),
+        ),
     },
 
-    home: createHomeApi({ call }),
-    adminShowcase: createAdminShowcaseApi({ call, send, assertEventInScope }),
+    home: createHomeApi(deps),
+    adminShowcase: createAdminShowcaseApi(deps),
 
     // -----------------------------------------------------------------------
     // Référentiel
@@ -311,9 +369,13 @@ export function useApi() {
        * Ce que le domaine d'une adresse révèle — `organization_domains`. Rend
        * `null` pour une messagerie grand public : deux ONG ne sont pas la même
        * parce que leurs référents utilisent Gmail (`org.public_email_domains`).
+       *
+       * L'ADRESSE N'EST PAS ENVOYÉE : l'API lit celle de la session, et rien
+       * d'autre. Le paramètre ne sert qu'aux données simulées — le transmettre
+       * laisserait croire qu'on peut interroger le domaine de quelqu'un d'autre.
        */
       byEmailDomain: (email: string): Promise<EmailDomainMatch | null> =>
-        call('/organizations/by-email-domain', (m) => m.organizationForEmail(email), { email }),
+        call('/organizations/by-email-domain', (m) => m.organizationForEmail(email)),
 
       /**
        * Demande de rattachement. L'issue dépend du DOMAINE de l'adresse, pas de
@@ -366,15 +428,11 @@ export function useApi() {
           'PUT',
         ),
 
-      names: (id: Uuid) =>
-        call(`/organizations/${id}/names`, (m) => m.organizationNames.filter((n) => n.organization_id === id)),
-      domains: (id: Uuid) =>
-        call(`/organizations/${id}/domains`, (m) => m.organizationDomains.filter((d) => d.organization_id === id)),
-      members: (id: Uuid) =>
-        call(`/organizations/${id}/members`, (m) => m.memberships.filter((x) => x.organization_id === id)),
-      /** Doublons présumés en attente de décision (A11). */
-      duplicates: () =>
-        call('/organizations/duplicates', (m) => m.duplicateCandidates.filter((d) => d.decision === null)),
+      // Les dénominations, les domaines, les membres et les doublons ne se
+      // lisent PAS ici. Ce sont des lectures de back-office, servies sous
+      // `/admin/organizations/…` et montées par `adminOrganizations` : quatre
+      // méthodes de plus ici visaient des chemins que l'API n'a jamais exposés,
+      // restes d'avant le découpage de l'écran A11.
     },
 
     // -----------------------------------------------------------------------
@@ -383,8 +441,16 @@ export function useApi() {
     identity: {
       people: () => call('/people', (m) => m.people),
       byId: (id: Uuid) => call(`/people/${id}`, (m) => m.people.find((p) => p.id === id) ?? null),
-      roleAssignments: (personId: Uuid) =>
-        call(`/people/${personId}/roles`, (m) => m.roleAssignments.filter((r) => r.person_id === personId)),
+      /**
+       * Les attributions EN COURS d'une personne, **avec leur portée résolue**.
+       *
+       * `RoleAssignmentView` et non `RoleAssignment` : une pastille ne porte
+       * jamais un rôle sans sa portée, et la résoudre côté site demanderait une
+       * lecture par attribution. L'API compose déjà le libellé du rôle, la cible
+       * de la portée et qui l'a confiée.
+       */
+      roleAssignments: (personId: Uuid): Promise<RoleAssignmentView[]> =>
+        call(`/people/${personId}/roles`, (m) => m.activeAssignmentsOf(personId)),
 
       /**
        * `identity.effective_permissions()` — CE QUE CETTE PERSONNE PEUT FAIRE, et
@@ -514,47 +580,37 @@ export function useApi() {
           m.broadcastChannels.filter((c) => c.event_id === eventId || c.event_id === null),
         ),
       /** Zéro ou UN appel par édition, jamais plusieurs. */
-      call: (eventId: Uuid) =>
-        call(`/events/${eventId}/call`, (m) => m.callsForProposals.find((c) => c.event_id === eventId) ?? null),
+      /**
+       * L'appel de l'édition, **avec sa grille d'évaluation**. Zéro ou un,
+       * jamais un tableau — `ux_calls_one_per_event` tient la cardinalité.
+       */
+      call: (eventId: Uuid): Promise<PublicCall | null> =>
+        call(`/events/${eventId}/call`, (m) => {
+          const found = m.callsForProposals.find((c) => c.event_id === eventId)
+          if (!found) return null
+          return { ...found, criteria: m.reviewCriteria.filter((c) => c.call_id === found.id) }
+        }),
     },
 
-    calls: {
-      criteria: (callId: Uuid) =>
-        call(`/calls/${callId}/criteria`, (m) => m.reviewCriteria.filter((c) => c.call_id === callId)),
-      reviewers: (callId: Uuid) =>
-        call(`/calls/${callId}/reviewers`, (m) => m.callReviewers.filter((r) => r.call_id === callId)),
-    },
+    // La grille d'évaluation d'un appel ne se lit plus à part : elle arrive
+    // avec l'appel lui-même (`events.call`), et la page publique d'une édition
+    // y a gagné une vague d'appels en moins. La COMPOSITION du comité, elle,
+    // n'est pas publique — le back-office la reçoit dans le détail de l'édition.
 
     // -----------------------------------------------------------------------
     // Propositions (A4 · A7) — `api/proposals.ts`
     // -----------------------------------------------------------------------
-    proposals: createProposalsApi({ call, send, assertEventInScope }),
+    proposals: createProposalsApi(deps),
 
     // -----------------------------------------------------------------------
     // Évaluation
+    //
+    // Il n'y a PLUS de lecture table par table ici. Les revues d'un dossier, la
+    // revue en cours de la personne, ses notes et les affectations du comité
+    // arrivent toutes dans `ReviewDeskScreen` — voile de l'évaluation en aveugle
+    // compris, ce qu'une lecture directe des tables ne saurait pas appliquer.
+    // Cinq méthodes vivaient ici et visaient des chemins que l'API ne sert pas.
     // -----------------------------------------------------------------------
-    reviews: {
-      forProposal: (proposalId: Uuid) =>
-        call(`/proposals/${proposalId}/reviews`, (m) =>
-          m.reviews.filter((r) => r.proposal_id === proposalId && r.submitted_at !== null),
-        ),
-      /** Brouillon de la personne connectée, y compris non soumis. */
-      mine: (proposalId: Uuid, reviewerId: Uuid) =>
-        call(`/proposals/${proposalId}/reviews/mine`, (m) =>
-          m.reviews.find((r) => r.proposal_id === proposalId && r.reviewer_id === reviewerId) ?? null,
-        ),
-      scores: (reviewId: Uuid) =>
-        call(`/reviews/${reviewId}/scores`, (m) => m.reviewScores.filter((s) => s.review_id === reviewId)),
-      assignments: (proposalId: Uuid) =>
-        call(`/proposals/${proposalId}/assignments`, (m) =>
-          m.reviewAssignments.filter((a) => a.proposal_id === proposalId),
-        ),
-      /** Charge de travail d'un membre du comité, déports exclus. */
-      assignedTo: (reviewerId: Uuid) =>
-        call('/reviews/assignments', (m) =>
-          m.reviewAssignments.filter((a) => a.reviewer_id === reviewerId && a.recused_at === null),
-        ),
-    },
 
     // -----------------------------------------------------------------------
     // Fiche d'évaluation (A8)
@@ -568,7 +624,7 @@ export function useApi() {
     // (revues d'un dossier, notes d'une revue, charge d'un membre). `review`
     // compose l'ÉCRAN, voile de l'évaluation en aveugle compris.
     // -----------------------------------------------------------------------
-    review: createProposalReviewApi({ call, send }),
+    review: createProposalReviewApi(deps),
 
     // -----------------------------------------------------------------------
     // Sessions
@@ -586,10 +642,13 @@ export function useApi() {
           event_id: eventId,
         })
       },
-      bySlug: (eventId: Uuid, slug: string) =>
-        call(`/events/${eventId}/sessions/${slug}`, (m) =>
-          m.allSessions.find((s) => s.event_id === eventId && s.slug === slug) ?? null,
-        ),
+      /**
+       * Détail public d'une séance. L'API rend `{ session, speakers,
+       * organizations }` et un 404 quand la séance n'est pas publiée — pas une
+       * séance nue, et jamais `null`. Aucun écran ne l'appelle encore : la page
+       * publique d'une séance n'est pas au jalon, et le type de son écran se
+       * déclarera avec elle.
+       */
       speakers: (sessionId: Uuid) =>
         call(`/sessions/${sessionId}/speakers`, (m) => m.sessionSpeakers.filter((s) => s.session_id === sessionId)),
       organizations: (sessionId: Uuid) =>
@@ -604,13 +663,11 @@ export function useApi() {
         assertEventInScope(eventId, scope)
         return call('/sessions/conflicts', (m) => m.detectConflicts(eventId), { event_id: eventId })
       },
-      /** Ce qui reste à régler avant de publier le programme. */
-      publicationReadiness: (eventId: Uuid, scope: AdministeredEvents) => {
-        assertEventInScope(eventId, scope)
-        return call('/sessions/publication-readiness', (m) => m.publicationReadiness(eventId), {
-          event_id: eventId,
-        })
-      },
+
+      // Le contrôle préalable à la publication n'est PAS ici : il vit dans
+      // `planner.readiness`, sur `/admin/planner/readiness`. Deux chemins pour
+      // la même lecture, c'est deux réponses qui divergent le jour où l'un des
+      // deux évolue — et c'est l'écran A9 qui appelle le bon.
     },
 
     // -----------------------------------------------------------------------
@@ -622,7 +679,7 @@ export function useApi() {
     // passant par des états incohérents, et le seul garde-fou dur est la
     // publication du programme.
     // -----------------------------------------------------------------------
-    planner: createPlannerApi({ call, send, assertEventInScope }),
+    planner: createPlannerApi(deps),
 
     // -----------------------------------------------------------------------
     // Gestion des événements (A10)
@@ -641,7 +698,7 @@ export function useApi() {
     // édition sont refusés en base et le sont ici — rien à voir avec un
     // chevauchement de créneaux, qui reste toujours écrivable.
     // -----------------------------------------------------------------------
-    adminEvents: createAdminEventsApi({ call, send, assertEventInScope }),
+    adminEvents: createAdminEventsApi(deps),
 
     // -----------------------------------------------------------------------
     // Organisations et fusion des doublons (A11)
@@ -661,7 +718,7 @@ export function useApi() {
     // permission. Il n'existe pas de fusion limitée à une COP : elle déplace des
     // rattachements dans toutes les éditions à la fois.
     // -----------------------------------------------------------------------
-    adminOrganizations: createAdminOrganizationsApi({ call, send }),
+    adminOrganizations: createAdminOrganizationsApi(deps),
 
     // -----------------------------------------------------------------------
     // Acceptation d'une invitation (B7)
@@ -671,7 +728,7 @@ export function useApi() {
     // n'exige aucune session — le jeton du lien reçu par courriel est la preuve
     // d'adresse, et la personne invitée n'a le plus souvent pas encore de compte.
     // -----------------------------------------------------------------------
-    invitation: createInvitationApi({ call, send }),
+    invitation: createInvitationApi(deps),
 
     // -----------------------------------------------------------------------
     // Utilisateurs et rôles (A12)
@@ -693,7 +750,7 @@ export function useApi() {
     // n'a pas. La file RGPD, elle, ne se filtre pas : une demande d'effacement
     // porte sur la plateforme entière.
     // -----------------------------------------------------------------------
-    adminUsers: createAdminUsersApi({ call, send }),
+    adminUsers: createAdminUsersApi(deps),
 
     // -----------------------------------------------------------------------
     // Messages d'incident (A13)
@@ -706,7 +763,7 @@ export function useApi() {
     // rejouent `has_permission(acteur, 'live.incident.publish', 'event', …)`
     // tant que l'API n'existe pas. Ce paramètre disparaît au prompt B6.
     // -----------------------------------------------------------------------
-    adminIncidents: createAdminIncidentsApi({ call, send, assertEventInScope }),
+    adminIncidents: createAdminIncidentsApi(deps),
 
     // -----------------------------------------------------------------------
     // Espace organisation (A5)
@@ -724,7 +781,7 @@ export function useApi() {
     // tenir ce fichier sous le garde-fou de mille lignes de `CLAUDE.md` : c'est
     // un écran entier, donc l'unité de découpage du projet.
     // -----------------------------------------------------------------------
-    workspace: createOrganizationWorkspaceApi({ call, send }),
+    workspace: createOrganizationWorkspaceApi(deps),
 
     // -----------------------------------------------------------------------
     // Back-office (A6)
@@ -742,9 +799,14 @@ export function useApi() {
     // « il ne se passe rien » au lieu de « ceci ne vous regarde pas ».
     // -----------------------------------------------------------------------
     admin: {
+      /**
+       * EN ATTENTE D'API — aucun crate ne porte le schéma `analytics`, dont les
+       * cinq projections composent cet écran. Il lit donc des exemples, et le
+       * dit : voir `pending()` plus haut.
+       */
       dashboard: (eventId: Uuid, scope: AdministeredEvents): Promise<AdminDashboard | null> => {
         assertEventInScope(eventId, scope)
-        return call('/admin/dashboard', (m) => m.adminDashboard(eventId), { event_id: eventId })
+        return pending('/admin/dashboard', (m) => m.adminDashboard(eventId))
       },
 
       /**
@@ -760,33 +822,47 @@ export function useApi() {
        * d'une autre COP, et un administrateur détaché doit le voir : les rappels
        * qui ne partent plus sont ceux de SES activités.
        */
-      operationalHealth: () => call('/admin/health', (m) => m.operationalHealth()),
+      operationalHealth: () => call('/health', (m) => m.operationalHealth()),
 
-      /** Compteurs temps réel de la plateforme — `analytics.v_platform_overview`. */
-      overview: () => call('/admin/overview', (m) => m.platformOverview()),
+      // `overview` a disparu : aucun écran n'affichait ces compteurs, et les
+      // seuls qu'on aurait voulus — les doublons d'organisations non arbitrés —
+      // arrivent déjà par la revue des doublons du back-office.
     },
 
     // -----------------------------------------------------------------------
     // Inscriptions
     // -----------------------------------------------------------------------
     registrations: {
-      forSession: (sessionId: Uuid, scope: AdministeredEvents) => {
+      /**
+       * La liste NOMINATIVE des inscrits d'une séance.
+       *
+       * L'API rend `RegistrationRow[]` — l'inscription, la personne et le nom de
+       * son organisation, joints par la requête —, et non la ligne nue :
+       * afficher une liste d'inscrits demande de les nommer, et les résoudre un
+       * par un côté site serait le N+1 que cette composition existe pour éviter.
+       */
+      forSession: (sessionId: Uuid, scope: AdministeredEvents): Promise<RegistrationRow[]> => {
         return call(
           '/registrations',
           (m) => {
             const session = m.allSessions.find((s) => s.id === sessionId)
             if (!session) return []
             assertEventInScope(session.event_id, scope)
-            return m.registrations.filter((r) => r.session_id === sessionId)
+            return m.registrationRowsOf(sessionId)
           },
           { session_id: sessionId },
         )
       },
-      /** Ce à quoi une personne est inscrite, annulations comprises. */
+      /**
+       * Ce à quoi la personne connectée est inscrite, annulations comprises.
+       *
+       * L'identifiant reçu ne part PAS dans la requête : `/registrations/mine`
+       * lit sa propre session, et le lui envoyer laisserait croire qu'un écran
+       * pourrait lire les inscriptions de quelqu'un d'autre. Il ne sert qu'à
+       * retrouver la personne dans les données simulées.
+       */
       forPerson: (personId: Uuid) =>
-        call('/registrations/mine', (m) => m.registrations.filter((r) => r.person_id === personId), {
-          person_id: personId,
-        }),
+        call('/registrations/mine', (m) => m.registrations.filter((r) => r.person_id === personId)),
       /** Formulaire applicable à une séance, avec ses champs actifs. */
       form: (sessionId: Uuid) =>
         call(`/sessions/${sessionId}/registration-form`, (m) => {

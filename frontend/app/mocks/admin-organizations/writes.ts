@@ -85,6 +85,16 @@ function actorLabel(actorId: string | null): string | null {
   return people.find((p) => p.id === actorId)?.display_name ?? null
 }
 
+/**
+ * La fiche recomposée après une écriture. Une fiche devenue introuvable entre
+ * l'écriture et la relecture n'est pas un enregistrement à moitié réussi : la
+ * réponse le dit, plutôt que de rendre un succès sans fiche.
+ */
+function saved(organizationId: string): OrganizationWriteResult {
+  const detail = organizationDetail(organizationId)
+  return detail ? { status: 'saved', detail } : { status: 'not_found' }
+}
+
 // ---------------------------------------------------------------------------
 // 1. La fusion
 // ---------------------------------------------------------------------------
@@ -98,20 +108,23 @@ function actorLabel(actorId: string | null): string | null {
  * rattachements que la cible portait déjà en double.
  */
 export function mergeOrganizations(payload: MergePayload, actorId: string | null): MergeResult {
-  const empty: MergeResult = { status: 'not_found', target: null, rows_reassigned: {}, fields_applied: [] }
-
   const preview = mergePreview(payload.source_id, payload.target_id, payload.pair_id)
   if (!preview) {
     const source = effectiveOrganization(payload.source_id)
     const target = effectiveOrganization(payload.target_id)
-    if (!source || !target) return empty
+    if (!source || !target) return { status: 'not_found' }
     // Les deux fiches existent, mais l'une d'elles est déjà absorbée : c'est le
-    // refus de `tg_forbid_merge_chains`, pas une fiche introuvable.
-    return { ...empty, status: 'already_merged', target: resolveOrganizationId(payload.target_id) }
+    // refus de `tg_forbid_merge_chains`, pas une fiche introuvable. Le message
+    // est celui du déclencheur, mot pour mot — l'API le reprend tel quel.
+    return {
+      status: 'already_merged',
+      target: resolveOrganizationId(payload.target_id),
+      message: `Fusion impossible : la fiche cible ${payload.target_id} est elle-même fusionnée. Cibler la fiche finale.`,
+    }
   }
 
   if (!isMergeConfirmationValid(payload.confirmation_name, preview.source)) {
-    return { ...empty, status: 'confirmation_mismatch', target: payload.target_id }
+    return { status: 'confirmation_mismatch' }
   }
 
   const now = new Date().toISOString()
@@ -208,7 +221,7 @@ export function decideDuplicatePair(
   actorId: string | null,
 ): DuplicateDecisionResult {
   const exists = duplicateCandidates.some((candidate) => candidate.id === payload.pair_id)
-  if (!exists) return { status: 'not_found', pair: null }
+  if (!exists) return { status: 'not_found' }
 
   const avant =
     duplicateQueue().settled.find((entry) => entry.id === payload.pair_id) ?? null
@@ -233,7 +246,9 @@ export function decideDuplicatePair(
     queue.pending.find((entry) => entry.id === payload.pair_id) ??
     null
 
-  return { status: 'recorded', pair }
+  // La paire arbitrée accompagne TOUJOURS la réponse : ne pas la retrouver
+  // signifie qu'elle n'existe pas, et non qu'un arbitrage s'est perdu.
+  return pair ? { status: 'recorded', pair } : { status: 'not_found' }
 }
 
 // ---------------------------------------------------------------------------
@@ -252,7 +267,7 @@ export function setOrganizationVerification(
   actorId: string | null,
 ): OrganizationWriteResult {
   const organization = effectiveOrganization(payload.organization_id)
-  if (!organization) return { status: 'not_found', detail: null, conflict_with: null }
+  if (!organization) return { status: 'not_found' }
 
   const now = new Date().toISOString()
   patchOrganization(payload.organization_id, {
@@ -273,7 +288,7 @@ export function setOrganizationVerification(
     new_value: payload.verified ? now : null,
   })
 
-  return { status: 'saved', detail: organizationDetail(payload.organization_id), conflict_with: null }
+  return saved(payload.organization_id)
 }
 
 // ---------------------------------------------------------------------------
@@ -298,7 +313,7 @@ export function setDomainVerification(
 ): OrganizationWriteResult {
   const domains = effectiveDomains()
   const domain = domains.find((d) => d.id === payload.domain_id)
-  if (!domain) return { status: 'not_found', detail: null, conflict_with: null }
+  if (!domain) return { status: 'not_found' }
 
   // Un domaine vérifié appartient à UNE organisation — `ux_organization_domains_verified`.
   if (payload.verified && domain.verified_at === null) {
@@ -311,7 +326,6 @@ export function setDomainVerification(
     if (holder) {
       return {
         status: 'domain_taken',
-        detail: organizationDetail(payload.organization_id),
         conflict_with: {
           organization_id: holder.organization_id,
           legal_name: effectiveOrganization(holder.organization_id)?.legal_name ?? '',
@@ -336,7 +350,7 @@ export function setDomainVerification(
     new_value: payload.verified ? (domain.verified_at ?? now) : null,
   })
 
-  return { status: 'saved', detail: organizationDetail(payload.organization_id), conflict_with: null }
+  return saved(payload.organization_id)
 }
 
 // ---------------------------------------------------------------------------
@@ -359,7 +373,7 @@ export function setNameConfirmation(
 ): OrganizationWriteResult {
   const detail = organizationDetail(payload.organization_id)
   const name = detail?.names.find((entry) => entry.id === payload.name_id)
-  if (!detail || !name) return { status: 'not_found', detail: null, conflict_with: null }
+  if (!detail || !name) return { status: 'not_found' }
 
   patchName(payload.name_id, { is_confirmed: payload.is_confirmed })
   recordHistory(payload.organization_id, {
@@ -372,5 +386,5 @@ export function setNameConfirmation(
     new_value: payload.is_confirmed,
   })
 
-  return { status: 'saved', detail: organizationDetail(payload.organization_id), conflict_with: null }
+  return saved(payload.organization_id)
 }

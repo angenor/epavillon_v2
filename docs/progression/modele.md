@@ -53,3 +53,37 @@ Toute modification d'un fichier de `docs/database/` se note ici. C'est ce qui pe
 | 08-16 | `010_platform.sql` | Ajout de `entity_history()` ; historique dérivé du journal d'audit | Le commanditaire demande l'historique des modifications d'activité |
 | 08-16 | `125_training.sql` | Nouveau module Formations (12 tables) | Remonté au produit minimum viable à la demande du commanditaire |
 | 08-16 | `030_identity.sql` | `privacy_requests.due_at` passé de colonne générée à `DEFAULT` | `timestamptz + interval` est STABLE, donc interdit dans une expression `GENERATED` |
+
+## 22/08 — B7 (raccordement)
+
+**Aucune modification du modèle.** Les quatre routes de socle ajoutées — pays, langues, taxonomies,
+drapeaux — lisent des tables qui existaient déjà, sans y toucher. Une obligation reste **écrite pour le
+SQL** et n'a pas été prise : `review_note` sur `org.duplicate_candidates`, la justification saisie pour
+écarter une paire de doublons étant aujourd'hui envoyée par l'écran puis perdue faute de colonne. Elle
+est inscrite aux [points bloqués](points-bloques.md) — le modèle d'abord, le code ensuite.
+
+## 24 août 2026 — `040_organizations.sql` et `900_seed.sql`
+
+**`ck_memberships_job_title`** — une adhésion **active** porte toujours la fonction de la personne.
+
+```sql
+CONSTRAINT ck_memberships_job_title
+    CHECK (status <> 'active' OR job_title IS NOT NULL)
+```
+
+Demande du commanditaire : appartenir à une organisation sans dire à quel titre laisse l'équipe deviner
+qui répond de quoi. La contrainte est portée par le **modèle** et non par les écrans — trois chemins
+mènent à une adhésion active (demande de rattachement, création d'une organisation, acceptation d'une
+invitation), et trois validations séparées auraient fini par diverger.
+
+**Elle ne s'applique pas en attente**, et c'est l'arbitrage central : un référent qui invite quelqu'un
+ne connaît pas toujours son intitulé exact. C'est la personne invitée qui déclare sa fonction **en
+acceptant**, au moment où l'adhésion devient active. Une adhésion **révoquée** garde la sienne : elle
+dit à quel titre la personne a siégé.
+
+`900_seed.sql` accompagne le changement : l'adhésion du compte d'amorçage porte désormais
+« Administration de la plateforme » — elle est active, et ne pouvait donc plus rester sans fonction.
+
+**Appliquée à chaud sur la base de développement** (`ALTER TABLE`), et non par un rechargement : celui-ci
+aurait détruit le seul compte capable de se connecter. Le chargement de zéro a été vérifié sur une base
+jetable — 17 schémas, 159 tables, contrainte comprise.

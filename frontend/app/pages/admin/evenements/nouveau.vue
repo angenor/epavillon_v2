@@ -3,8 +3,10 @@ import type {
   EditionFormError,
   EditionFormOptions,
   EditionFormPayload,
+  EditionImagePayload,
 } from '~/types/admin-events'
 import type { EffectivePermission } from '~/types/identity'
+import type { Uuid } from '~/types/shared'
 
 /**
  * CRÉATION D'UNE ÉDITION — `/admin/evenements/nouveau`.
@@ -34,6 +36,7 @@ const { t } = useI18n()
 const api = useApi()
 const auth = useAuthStore()
 const adminScope = useAdminScopeStore()
+const route = useRoute()
 const localePath = useLocalePath()
 
 useHead(() => ({ title: t('admin.event.form.createTitle') }))
@@ -68,24 +71,65 @@ const { data: granted } = await useAsyncData<EffectivePermission[]>(
 const canCreate = computed(() => hasPermission(granted.value, 'event.event.manage'))
 
 const errors = ref<EditionFormError[]>([])
+const suggestedAcronym = ref<string | null>(null)
+const requestError = ref<string | null>(null)
+const forbidden = ref(false)
 const busy = ref(false)
 
-async function submit(payload: EditionFormPayload): Promise<void> {
+/** Une déclinaison au moins a été renseignée : il y a quelque chose à rattacher. */
+function hasImages(images: EditionImagePayload): boolean {
+  return Object.values(images).some((assetId) => assetId !== null)
+}
+
+/**
+ * L'ÉDITION DÉJÀ CRÉÉE, quand ce qui suit sa création a échoué.
+ *
+ * Le rattachement des images vient forcément APRÈS elle, et il peut être refusé.
+ * Sans cette mémoire, le second envoi créerait une seconde édition — un doublon
+ * que personne ne verrait avant la liste.
+ */
+const created = ref<{ id: Uuid; daysCreated: number } | null>(null)
+
+async function submit(payload: EditionFormPayload, images: EditionImagePayload): Promise<void> {
   busy.value = true
   errors.value = []
+  suggestedAcronym.value = null
+  requestError.value = null
   try {
-    const result = await api.adminEvents.save(payload, auth.person?.id ?? null, adminScope.scope)
-    if (!result.ok || !result.edition) {
-      errors.value = result.errors
+    if (!created.value) {
+      const result = await api.adminEvents.save(payload, auth.person?.id ?? null, adminScope.scope)
+      if (!result.ok || !result.edition) {
+        errors.value = result.errors
+        suggestedAcronym.value = result.suggested_acronym
+        return
+      }
+      created.value = { id: result.edition.id, daysCreated: result.days_created }
+      // Le périmètre porte une édition de plus : sans ce rechargement, le sélecteur
+      // de la tête de page ignorerait celle qu'on vient de créer — et le
+      // rattachement des images la croirait hors périmètre.
+      await adminScope.reload()
+    }
+    // LES IMAGES APRÈS, ici, et l'ordre est forcé : le rattachement vise
+    // l'édition, qui n'existe pas avant d'être enregistrée.
+    if (hasImages(images)) {
+      await api.adminEvents.saveImages(created.value.id, images, adminScope.scope)
+    }
+    await navigateTo({
+      path: localePath(`/admin/evenements/${created.value.id}`),
+      query: created.value.daysCreated > 0 ? { jours: String(created.value.daysCreated) } : {},
+    })
+  } catch (thrown) {
+    if (isSessionLost(thrown)) {
+      await navigateTo({ path: localePath('auth-login'), query: { redirect: route.fullPath } })
       return
     }
-    // Le périmètre porte une édition de plus : sans ce rechargement, le sélecteur
-    // de la tête de page ignorerait celle qu'on vient de créer.
-    await adminScope.reload()
-    await navigateTo({
-      path: localePath(`/admin/evenements/${result.edition.id}`),
-      query: result.days_created > 0 ? { jours: String(result.days_created) } : {},
-    })
+    // Un refus qui ne nomme pas sa raison appelle l'écran d'accès refusé ; les
+    // autres s'affichent avec les mots de l'API, qui seule sait pourquoi.
+    if (thrown instanceof ForbiddenError) {
+      forbidden.value = true
+      return
+    }
+    requestError.value = apiErrorMessage(thrown, t)
   } finally {
     busy.value = false
   }
@@ -95,7 +139,7 @@ async function submit(payload: EditionFormPayload): Promise<void> {
 <template>
   <div class="mx-auto w-full max-w-5xl">
     <UiForbiddenState
-      v-if="status !== 'pending' && !canCreate"
+      v-if="forbidden || (status !== 'pending' && !canCreate)"
       :required-scope="t('admin.event.list.forbidden.scope')"
       action-to="/admin/evenements"
       :action-label="t('admin.event.form.actions.backToList')"
@@ -111,6 +155,16 @@ async function submit(payload: EditionFormPayload): Promise<void> {
         </p>
       </header>
 
+      <UiAlert
+        v-if="requestError"
+        class="mt-6"
+        intent="danger"
+        live
+        dismissible
+        :message="requestError"
+        @dismiss="requestError = null"
+      />
+
       <UiErrorState
         v-if="optionsError"
         class="mt-8"
@@ -125,6 +179,7 @@ async function submit(payload: EditionFormPayload): Promise<void> {
         class="mt-8"
         :options="options"
         :errors="errors"
+        :suggested-acronym="suggestedAcronym"
         :busy="busy"
         is-creation
         @submit="submit"

@@ -41,9 +41,14 @@ use crate::domain::{answers, sessions as formes};
 use crate::repo::{consents, forms, people, registrations};
 use crate::state::ProgrammeState;
 
-/// Ce qu'une tentative d'inscription porte — `RegisterPayload`.
+/// Ce qu'une tentative d'inscription porte — `SessionRegisterPayload`.
+///
+/// **Pas `RegisterPayload`** : ce nom est celui de l'ouverture de compte, servi
+/// par le module Identité. Deux formes sans rapport sous un même nom faisaient
+/// coexister dans le contrat engendré une inscription à une séance et une
+/// création de compte, et le garde-fou de contrat validait l'une contre l'autre.
 #[derive(Debug, Clone, Deserialize, ToSchema)]
-pub struct RegisterPayload {
+pub struct SessionRegisterPayload {
     /// Clés = `code` des champs **actifs** du formulaire applicable. Une clé
     /// inconnue est refusée : une réponse mal orthographiée qui disparaît sans
     /// un mot est une réponse perdue.
@@ -86,7 +91,7 @@ pub async fn sinscrire(
     session_id: SessionId,
     lecteur: Option<Uuid>,
     ip: Option<std::net::IpAddr>,
-    payload: RegisterPayload,
+    payload: SessionRegisterPayload,
 ) -> Result<IssueDInscription> {
     let (form_id, admet_anonyme, _) = forms::formulaire_applicable(state.pool(), session_id)
         .await?

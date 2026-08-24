@@ -310,7 +310,7 @@ async fn linscription_sans_compte_cree_puis_retrouve_la_personne() {
         civility: None,
     };
 
-    let charge = || registration::RegisterPayload {
+    let charge = || registration::SessionRegisterPayload {
         guest: Some(registration::Invite {
             email: invitee.email.clone(),
             first_name: invitee.first_name.clone(),

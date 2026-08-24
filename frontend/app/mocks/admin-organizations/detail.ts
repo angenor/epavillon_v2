@@ -328,7 +328,7 @@ export function organizationDetail(organizationId: string): OrganizationDetail |
           merged_at:
             organization.merged_at ??
             sessionMergeEntries().find((entry) => entry.source_id === organizationId)?.performed_at ??
-            organization.updated_at,
+            null,
         }
       : null,
     absorbed: [...new Set(absorbed)].map((id) => {
@@ -339,7 +339,7 @@ export function organizationDetail(organizationId: string): OrganizationDetail |
         merged_at:
           source?.merged_at ??
           sessionMergeEntries().find((entry) => entry.source_id === id)?.performed_at ??
-          '',
+          null,
       }
     }),
 

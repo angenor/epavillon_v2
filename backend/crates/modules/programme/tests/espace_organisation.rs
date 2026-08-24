@@ -89,9 +89,11 @@ async fn lespace_du_deposant_ne_porte_rien_du_comite() {
 
     let espace = workspace::espace(&bac.state, terrain.deposante, terrain.organisation)
         .await
+        .expect("pas de panne")
         .expect("la déposante ouvre l'espace de son organisation");
     let fichier = workspace::dossier(&bac.state, terrain.deposante, ProposalId(dossier))
         .await
+        .expect("pas de panne")
         .expect("elle ouvre son dossier");
 
     let charge = format!(
@@ -167,6 +169,7 @@ async fn le_deposant_ne_recoit_que_ce_qui_lui_est_adresse() {
 
     let fichier = workspace::dossier(&bac.state, terrain.deposante, ProposalId(dossier))
         .await
+        .expect("pas de panne")
         .expect("le dossier du déposant");
 
     assert_eq!(
@@ -215,6 +218,7 @@ async fn la_resolution_se_pose_et_se_retire_et_le_compteur_suit() {
     async fn ouvertes(bac: &Bac, lecteur: Uuid, dossier: Uuid) -> i64 {
         workspace::dossier(&bac.state, lecteur, ProposalId(dossier))
             .await
+            .expect("pas de panne")
             .expect("le dossier")
             .tracking
             .open_change_requests
@@ -283,36 +287,56 @@ async fn ladhesion_active_est_le_seul_droit_dentree() {
     let terrain = commun::terrain(&bac).await;
     let dossier = commun::dossier(&bac, &terrain, "Atelier adaptation", "atelier-adaptation").await;
 
+    // **Le refus n'est pas une panne** : il rend `None`, que la route sérialise
+    // en `null`. Un statut d'erreur faisait afficher « une erreur est survenue »
+    // sur les trois écrans de l'espace, là où il faut lire « vous n'avez pas
+    // d'espace ici ». L'indiscernabilité voulue est intacte — étrangère et
+    // inexistante rendent la même chose, c'est-à-dire rien.
     let quidam = commun::personne(&bac, "quidam@example.org", "Quid", "Am").await;
     let refus = workspace::espace(&bac.state, quidam, terrain.organisation)
         .await
-        .expect_err("une personne étrangère est refusée");
+        .expect("une personne étrangère n'est pas une panne");
     let inexistante = workspace::espace(&bac.state, quidam, Uuid::now_v7())
         .await
-        .expect_err("une organisation inexistante est refusée");
-    assert_eq!(refus.code, inexistante.code);
-    assert_eq!(refus.message, inexistante.message);
-    assert_eq!(refus.code, ErrorCode::NotFound);
+        .expect("une organisation inexistante n'est pas une panne");
+    assert!(refus.is_none());
+    assert!(inexistante.is_none());
 
     // **Un administrateur de l'édition n'y entre pas non plus.**
     let droits = commun::droits(&bac, &terrain).await;
-    let refus = workspace::espace(&bac.state, droits.decideur, terrain.organisation)
-        .await
-        .expect_err("le périmètre d'administration n'ouvre pas l'espace organisation");
-    assert_eq!(refus.code, ErrorCode::NotFound);
-    let refus = workspace::dossier(&bac.state, droits.decideur, ProposalId(dossier))
-        .await
-        .expect_err("ni le dossier vu par son déposant");
-    assert_eq!(refus.code, ErrorCode::NotFound);
+    assert!(
+        workspace::espace(&bac.state, droits.decideur, terrain.organisation)
+            .await
+            .expect("pas de panne")
+            .is_none(),
+        "le périmètre d'administration n'ouvre pas l'espace organisation"
+    );
+    assert!(
+        workspace::dossier(&bac.state, droits.decideur, ProposalId(dossier))
+            .await
+            .expect("pas de panne")
+            .is_none(),
+        "ni le dossier vu par son déposant"
+    );
+    assert!(
+        workspace::editions(&bac.state, droits.decideur, terrain.organisation)
+            .await
+            .expect("pas de panne")
+            .is_none(),
+        "ni la liste de ses éditions — et `None`, jamais une liste vide : « aucun          dossier » et « ce n'est pas votre espace » ne se confondent pas"
+    );
 
     // **Une adhésion en attente ne suffit pas** : « active » est le mot du
     // modèle, et un membre invité qui n'a pas répondu n'écrit rien.
     let invitee = commun::personne(&bac, "invitee@example.org", "Ines", "Vitee").await;
     commun::adherer(&bac, terrain.organisation, invitee, "pending").await;
-    let refus = workspace::espace(&bac.state, invitee, terrain.organisation)
-        .await
-        .expect_err("une adhésion en attente n'ouvre rien");
-    assert_eq!(refus.code, ErrorCode::NotFound);
+    assert!(
+        workspace::espace(&bac.state, invitee, terrain.organisation)
+            .await
+            .expect("pas de panne")
+            .is_none(),
+        "une adhésion en attente n'ouvre rien"
+    );
 }
 
 /// Les éditions et le bloc « ce qui attend une action » se composent sur ce que
@@ -341,12 +365,14 @@ async fn les_editions_et_les_actions_se_composent_sur_les_dossiers() {
 
     let editions = workspace::editions(&bac.state, terrain.deposante, terrain.organisation)
         .await
+        .expect("pas de panne")
         .expect("les éditions");
     assert_eq!(editions.len(), 1);
     assert_eq!(editions[0].id, terrain.edition);
 
     let espace = workspace::espace(&bac.state, terrain.deposante, terrain.organisation)
         .await
+        .expect("pas de panne")
         .expect("l'espace");
 
     let natures: Vec<&str> = espace.actions.iter().map(|a| a.kind.as_str()).collect();

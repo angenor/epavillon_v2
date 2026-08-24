@@ -249,6 +249,10 @@ pub struct OrganizationDetail {
     pub merged_into: Option<MergedRef>,
     pub absorbed: Vec<MergedRef>,
 
+    /// **Toujours pleine sur la route.** `Option` n'est ici que la valeur de
+    /// départ de la composition : le service la remplace aussitôt, et la lecture
+    /// COALESCE ses compteurs à zéro pour une organisation que la projection
+    /// matérialisée ne connaît pas encore. Le site la déclare non nulle.
     pub scorecard: Option<Value>,
     pub names: Vec<OrganizationNameRow>,
     pub domains: Vec<OrganizationDomainRow>,

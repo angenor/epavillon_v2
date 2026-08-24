@@ -22,7 +22,7 @@ async fn rejoindre(bac: &Bac, qui: Uuid, organisation: Uuid) -> JoinOutcome {
         OrganizationId(organisation),
         JoinOrganization {
             organization_id: None,
-            job_title: None,
+            job_title: Some("Chargée de projet".to_owned()),
         },
     )
     .await
@@ -200,7 +200,7 @@ async fn cent_demandes_simultanees_ne_produisent_quune_ligne() {
                 OrganizationId(organisation),
                 JoinOrganization {
                     organization_id: None,
-                    job_title: None,
+                    job_title: Some("Chargée de projet".to_owned()),
                 },
             )
             .await

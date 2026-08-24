@@ -28,7 +28,10 @@ interface Props {
   /** Fuseau de l'édition : chaque point est situé à l'heure du pavillon. */
   timezone: TimeZoneName
   zoneLabel?: string
-  /** Séances qui deviendront publiques si l'on publie maintenant. */
+  /**
+   * Séances qui deviendront publiques si l'on publie maintenant, comptées sur le
+   * prédicat de l'API : `planned` ou `scheduled`, pas encore publiées.
+   */
   readyCount: number
   /** Déjà publiée une première fois ? Le libellé du bouton change. */
   publishedAt: string | null
@@ -186,11 +189,14 @@ const warningGroups = computed(() => groupOf(warnings.value))
           {{ t('common.actions.close') }}
         </UiButton>
         <!-- Le bouton reste VISIBLE mais inerte quand un point bloque : le
-             masquer laisserait croire que la publication n'existe pas. -->
+             masquer laisserait croire que la publication n'existe pas. UN POINT
+             BLOQUANT EST LE SEUL MOTIF : une édition sans aucune activité à
+             publier s'estampille quand même, l'API le documente, et l'inerter
+             sur un décompte nul laissait un bouton mort sans dire pourquoi. -->
         <UiButton
           icon="globe"
           :loading="props.busy"
-          :disabled="isBlocked || props.readyCount === 0"
+          :disabled="isBlocked"
           @click="emit('publish')"
         >
           {{ props.publishedAt

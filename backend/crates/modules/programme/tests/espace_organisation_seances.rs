@@ -67,6 +67,7 @@ async fn les_trois_nombres_sont_exacts_et_un_dossier_non_retenu_est_vide() {
 
     let espace = workspace::espace(&bac.state, terrain.deposante, terrain.organisation)
         .await
+        .expect("pas de panne")
         .expect("l'espace de l'organisation");
 
     let suivi_retenu = espace
@@ -141,7 +142,7 @@ async fn aucun_nom_dinscrit_ne_sort_vers_lorganisation() {
         &bac,
         seance,
         Some(inscrite),
-        programme::service::registration::RegisterPayload {
+        programme::service::registration::SessionRegisterPayload {
             answers: serde_json::json!({
                 "country": "SN",
                 "job_title": "Directrice-du-temoin-unique"
@@ -154,7 +155,8 @@ async fn aucun_nom_dinscrit_ne_sort_vers_lorganisation() {
 
     let espace = workspace::espace(&bac.state, terrain.deposante, terrain.organisation)
         .await
-        .unwrap();
+        .unwrap()
+        .expect("l'espace de l'organisation");
     let charge = serde_json::to_string(&espace).expect("sérialisation");
 
     for temoin in [
@@ -208,7 +210,8 @@ async fn une_seance_terminee_sans_compte_rendu_produit_son_action() {
     // À venir : aucune action.
     let espace = workspace::espace(&bac.state, terrain.deposante, terrain.organisation)
         .await
-        .unwrap();
+        .unwrap()
+        .expect("l'espace de l'organisation");
     assert!(
         !espace
             .actions
@@ -231,7 +234,8 @@ async fn une_seance_terminee_sans_compte_rendu_produit_son_action() {
 
     let espace = workspace::espace(&bac.state, terrain.deposante, terrain.organisation)
         .await
-        .unwrap();
+        .unwrap()
+        .expect("l'espace de l'organisation");
     let action = espace
         .actions
         .iter()
@@ -334,6 +338,7 @@ async fn lespace_organisation_porte_le_calendrier_des_rappels() {
 
     let espace = workspace::espace(&bac.state, terrain.deposante, terrain.organisation)
         .await
+        .expect("pas de panne")
         .expect("l'espace de l'organisation");
     let suivie = &espace
         .proposals

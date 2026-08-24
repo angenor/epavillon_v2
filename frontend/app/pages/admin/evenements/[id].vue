@@ -11,6 +11,7 @@ import type {
   EditionFormError,
   EditionFormOptions,
   EditionFormPayload,
+  EditionImagePayload,
   EditionRoomPayload,
   EditionTabKey,
   EditionTabResult,
@@ -19,7 +20,7 @@ import type {
 } from '~/types/admin-events'
 import type { EffectivePermission } from '~/types/identity'
 import type { TabItem } from '~/types/ui'
-import { ForbiddenError } from '~/composables/useApi'
+import { EDITION_IMAGE_ROLES } from '~/types/media'
 
 /**
  * FICHE D'UNE ÉDITION — `/admin/evenements/[id]`.
@@ -226,7 +227,38 @@ const tabs = computed<TabItem[]>(() => [
 const busy = ref(false)
 const tabError = ref<string | null>(null)
 const tabNotice = ref<string | null>(null)
+const requestError = ref<string | null>(null)
 const detachedCount = ref(0)
+
+/**
+ * UN REFUS DE L'API, DIT À L'ÉCRAN — avec SES mots.
+ *
+ * Elle seule sait pourquoi elle refuse et son catalogue est déjà français : le
+ * message s'affiche tel quel plutôt que d'en écrire un second ici. Trois issues
+ * distinctes, parce qu'elles n'appellent pas la même suite.
+ *
+ * SESSION PERDUE : on renvoie à la connexion. Un message ne sert à rien quand
+ * plus rien ne passera.
+ *
+ * REFUS GÉNÉRIQUE : l'écran bascule en « accès refusé ». Une ligne rouge
+ * au-dessus d'une fiche qu'on n'a pas le droit de lire serait pire que rien.
+ *
+ * ÉLÉMENT INTROUVABLE : la composition affichée ment jusqu'au rechargement — un
+ * lieu, un jour ou l'édition entière a pu disparaître sous les doigts, et l'API
+ * répond 404 aussi bien pour « supprimé » que pour « hors périmètre ».
+ */
+async function reportWriteFailure(thrown: unknown): Promise<void> {
+  if (isSessionLost(thrown)) {
+    await navigateTo({ path: localePath('auth-login'), query: { redirect: route.fullPath } })
+    return
+  }
+  if (thrown instanceof ForbiddenError) {
+    forbidden.value = true
+    return
+  }
+  requestError.value = apiErrorMessage(thrown, t)
+  if (thrown instanceof ApiRequestError && thrown.status === 404) await refresh()
+}
 
 /** Traduit un code d'erreur d'onglet dans le vocabulaire de l'onglet concerné. */
 function tabErrorMessage(section: string, code: string | null): string | null {
@@ -243,6 +275,7 @@ async function runTabWrite(
   busy.value = true
   tabError.value = null
   tabNotice.value = null
+  requestError.value = null
   detachedCount.value = 0
   try {
     const result = await action()
@@ -257,6 +290,8 @@ async function runTabWrite(
     detachedCount.value = result.sessions_detached
     if (result.detail) detail.value = result.detail
     await refreshPlan()
+  } catch (thrown) {
+    await reportWriteFailure(thrown)
   } finally {
     busy.value = false
   }
@@ -266,6 +301,7 @@ async function runTabWrite(
 
 const editingEdition = ref(false)
 const editionErrors = ref<EditionFormError[]>([])
+const suggestedAcronym = ref<string | null>(null)
 
 /** La fiche, recomposée en charge utile de formulaire. */
 const editionPayload = computed<EditionFormPayload | null>(() => {
@@ -295,21 +331,31 @@ const editionPayload = computed<EditionFormPayload | null>(() => {
     longitude: edition.longitude,
     has_pavilion: edition.has_pavilion,
     highlights: detail.value?.highlights ?? null,
-    images: {
-      banner: detail.value?.images.banner?.asset_id ?? null,
-      cover: detail.value?.images.cover?.asset_id ?? null,
-      thumbnail: detail.value?.images.thumbnail?.asset_id ?? null,
-    },
   }
 })
 
-async function saveEdition(payload: EditionFormPayload): Promise<void> {
+/** Les trois déclinaisons ont-elles bougé ? Sinon, rien à écrire au module Média. */
+function imagesChanged(next: EditionImagePayload): boolean {
+  const attached = detail.value?.images
+  return EDITION_IMAGE_ROLES.some((role) => (attached?.[role]?.asset_id ?? null) !== next[role])
+}
+
+async function saveEdition(payload: EditionFormPayload, images: EditionImagePayload): Promise<void> {
   busy.value = true
   editionErrors.value = []
+  suggestedAcronym.value = null
+  requestError.value = null
   try {
+    // LES IMAGES D'ABORD, et par le module Média : `event.events` ne les porte
+    // pas. En premier parce qu'un fichier qui n'a pas la forme de son rôle est
+    // refusé — la fiche n'a alors pas bougé, et on recommence sans rien défaire.
+    if (imagesChanged(images)) {
+      await api.adminEvents.saveImages(eventId.value, images, adminScope.scope)
+    }
     const result = await api.adminEvents.save(payload, auth.person?.id ?? null, adminScope.scope)
     if (!result.ok) {
       editionErrors.value = result.errors
+      suggestedAcronym.value = result.suggested_acronym
       return
     }
     editingEdition.value = false
@@ -321,6 +367,8 @@ async function saveEdition(payload: EditionFormPayload): Promise<void> {
     if (result.days_created > 0) {
       tabNotice.value = t('admin.event.form.saved.daysAdded', result.days_created)
     }
+  } catch (thrown) {
+    await reportWriteFailure(thrown)
   } finally {
     busy.value = false
   }
@@ -337,6 +385,7 @@ async function saveCall(payload: EditionCallPayload): Promise<void> {
   busy.value = true
   callErrors.value = []
   scoresAffected.value = false
+  requestError.value = null
   try {
     const result = await api.adminEvents.saveCall(
       payload,
@@ -349,6 +398,10 @@ async function saveCall(payload: EditionCallPayload): Promise<void> {
     }
     scoresAffected.value = result.scores_affected
     await refresh()
+  } catch (thrown) {
+    // Le retrait d'un critère porteur de notes sort en 422 : le contrat ne
+    // l'exprime pas, l'API a raison d'employer un code HTTP.
+    await reportWriteFailure(thrown)
   } finally {
     busy.value = false
   }
@@ -358,6 +411,7 @@ async function saveCommittee(payload: CommitteePayload): Promise<void> {
   busy.value = true
   committeeNotice.value = null
   removedWithAssignments.value = []
+  requestError.value = null
   try {
     const result = await api.adminEvents.saveCommittee(eventId.value, payload, adminScope.scope)
     if (!result.ok) return
@@ -366,6 +420,8 @@ async function saveCommittee(payload: CommitteePayload): Promise<void> {
       (entry) => `${entry.full_name} (${entry.assigned_count})`,
     )
     await refresh()
+  } catch (thrown) {
+    await reportWriteFailure(thrown)
   } finally {
     busy.value = false
   }
@@ -625,6 +681,19 @@ const periodLabel = computed(() => {
         @dismiss="tabNotice = null"
       />
 
+      <!-- LE REFUS DE L'API, AVEC SES MOTS. Il vaut pour les onze écritures de
+           l'écran : sans lui, un enregistrement refusé ne laissait aucune trace
+           à l'écran, et le bouton reprenait simplement son état de repos. -->
+      <UiAlert
+        v-if="requestError"
+        class="mt-6"
+        intent="danger"
+        live
+        dismissible
+        :message="requestError"
+        @dismiss="requestError = null"
+      />
+
       <!-- LES CONSÉQUENCES `ON DELETE SET NULL`, DITES À VOIX HAUTE. Silencieuses
            en base ; l'écran les chiffre. -->
       <UiAlert
@@ -646,6 +715,7 @@ const periodLabel = computed(() => {
           :options="options"
           :images="detail.images"
           :errors="editionErrors"
+          :suggested-acronym="suggestedAcronym"
           :busy="busy"
           @submit="saveEdition"
           @cancel="editingEdition = false"

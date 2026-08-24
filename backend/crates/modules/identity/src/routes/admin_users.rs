@@ -85,7 +85,7 @@ pub struct SetPersonStatusPayload {
     description = "`UserListScreen`, borné par le périmètre d'administration.",
     path = "/admin/users",
     tag = "Back-office — utilisateurs",
-    operation_id = "liste",
+    operation_id = "admin_utilisateur_liste",
     responses(
         (status = 200, description = "UserListScreen", body = Object),
         (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
@@ -111,7 +111,7 @@ pub(crate) async fn liste(
     description = "`UserDetail | null`. **Hors périmètre → 200 avec `in_scope: false`.**",
     path = "/admin/users/{id}",
     tag = "Back-office — utilisateurs",
-    operation_id = "fiche",
+    operation_id = "admin_utilisateur_fiche",
     params(("id" = Uuid, Path, description = "Identifiant de la personne")),
     responses(
         (status = 200, description = "UserDetail | null", body = Object),
@@ -155,7 +155,7 @@ pub(crate) async fn fiche(
     description = "`GrantRolePayload` → `RoleWriteResult`. **Les six issues sortent en 200.**",
     path = "/admin/users/{id}/roles",
     tag = "Back-office — utilisateurs",
-    operation_id = "attribuer_role",
+    operation_id = "admin_utilisateur_attribuer_role",
     params(("id" = Uuid, Path, description = "Identifiant de la personne")),
     request_body = Object,
     responses(
@@ -203,7 +203,7 @@ pub(crate) async fn attribuer_role(
     description = "`RevokeRolePayload` → `RoleWriteResult`. **Pas une suppression** : la ligne reste.",
     path = "/admin/users/roles/{assignment_id}",
     tag = "Back-office — utilisateurs",
-    operation_id = "retirer_role",
+    operation_id = "admin_utilisateur_retirer_role",
     params(("assignment_id" = Uuid, Path, description = "Identifiant de l'attribution")),
     request_body = Object,
     responses(
@@ -241,7 +241,7 @@ pub(crate) async fn retirer_role(
     description = "`SetPersonStatusPayload` → `PersonWriteResult`. Portée **globale**.",
     path = "/admin/users/{id}/status",
     tag = "Back-office — utilisateurs",
-    operation_id = "changer_le_statut",
+    operation_id = "admin_utilisateur_changer_le_statut",
     params(("id" = Uuid, Path, description = "Identifiant de la personne")),
     request_body = Object,
     responses(
@@ -284,7 +284,7 @@ pub(crate) async fn changer_le_statut(
     description = "`RoleAssignmentOptions` — restreint à ce que l'appelant peut accorder.",
     path = "/admin/users/role-options",
     tag = "Back-office — utilisateurs",
-    operation_id = "options_dattribution",
+    operation_id = "admin_utilisateur_options_dattribution",
     responses(
         (status = 200, description = "RoleAssignmentOptions", body = Object),
         (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
@@ -307,7 +307,7 @@ pub(crate) async fn options_dattribution(
     description = "`EffectivePermissionsView`.",
     path = "/admin/users/{id}/effective-permissions",
     tag = "Back-office — utilisateurs",
-    operation_id = "permissions_effectives",
+    operation_id = "admin_utilisateur_permissions_effectives",
     params(("id" = Uuid, Path, description = "Identifiant de la personne")),
     responses(
         (status = 200, description = "EffectivePermissionsView", body = Object),

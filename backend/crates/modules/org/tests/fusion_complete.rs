@@ -23,8 +23,8 @@ async fn la_fusion_conserve_tout_et_ne_perd_rien() {
     let boureima =
         commun::personne(&bac, "b.ouedraogo@osed-sahel.org", "Boureima", "Ouédraogo").await;
     sqlx::query!(
-        "INSERT INTO org.memberships (organization_id, person_id, role, status, approved_at)
-         VALUES ($1, $2, 'manager', 'active', now())",
+        "INSERT INTO org.memberships (organization_id, person_id, role, status, job_title, approved_at)
+         VALUES ($1, $2, 'manager', 'active', 'Chargée de projet', now())",
         osed.jumelle,
         boureima
     )

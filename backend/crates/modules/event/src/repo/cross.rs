@@ -236,12 +236,17 @@ pub async fn decomptes<'e>(executor: impl PgExecutor<'e>, event_id: EventId) -> 
 // Listes du formulaire — lecture n° 9 de l'inventaire
 // -----------------------------------------------------------------------------
 
-/// Les pays du référentiel, triés par leur nom français.
+/// Les pays ACTIFS du référentiel, triés par leur nom français.
+///
+/// `is_active` n'est pas décoratif : un pays retiré du référentiel — parce qu'il
+/// a changé de nom, ou n'existe plus — reste en base pour que les fiches
+/// anciennes continuent de le nommer, mais il ne se propose plus au choix.
 pub async fn pays_du_referentiel<'e>(executor: impl PgExecutor<'e>) -> Result<Vec<CountryOption>> {
-    let lignes =
-        sqlx::query!(r#"SELECT id, name, iso2 FROM reference.countries ORDER BY name->>'fr'"#)
-            .fetch_all(executor)
-            .await?;
+    let lignes = sqlx::query!(
+        r#"SELECT id, name, iso2 FROM reference.countries WHERE is_active ORDER BY name->>'fr'"#
+    )
+    .fetch_all(executor)
+    .await?;
 
     Ok(lignes
         .into_iter()

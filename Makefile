@@ -21,6 +21,9 @@ COMPOSE  ?= docker compose $(if $(ENV_FILE),--env-file $(ENV_FILE),) -f ops/dock
 PSQL     ?= docker exec -i epavillon-postgres psql -U postgres -d epavillon
 GARAGE   ?= docker exec epavillon-garage /garage
 
+# Document intermédiaire, NON versionné : le livrable est le client TypeScript.
+OPENAPI_JSON ?= backend/target/openapi.json
+
 # Identifiants S3 lus dans .env. `down -v` efface le layout de Garage ET sa clé :
 # une clé engendrée au hasard rendait donc FAUSSES les valeurs du .env après
 # chaque `make check`, et le point de contrôle manuel du stockage échouait pour
@@ -30,7 +33,7 @@ S3_KEY_ID     ?= $(shell sed -n 's/^S3_ACCESS_KEY_ID=//p'     $(ENV_FILE) 2>/dev
 S3_KEY_SECRET ?= $(shell sed -n 's/^S3_SECRET_ACCESS_KEY=//p' $(ENV_FILE) 2>/dev/null | tail -1)
 
 .PHONY: help check check-db check-db-safe assert-db assert-init-logs check-front check-back \
-        up down wait-db logs-db garage-init garage-info
+        up down wait-db logs-db garage-init garage-info openapi check-api-contract
 
 # `make` tout court affiche l'aide et ne détruit rien : la première cible d'un
 # Makefile est celle qu'on exécute par mégarde, et `check` efface la base.
@@ -42,6 +45,7 @@ help:
 	@echo '  make down           arrête les services (conserve les volumes)'
 	@echo '  make check-db-safe  assertions sur la base en place — aucune perte'
 	@echo '  make check          les trois vérifications — DÉTRUIT la base (down -v)'
+	@echo '  make openapi        engendre frontend/app/types/api.ts depuis les routes Rust'
 	@echo '  make garage-init    layout, bucket et clé S3 — rejoué tout seul par check-db'
 	@echo '  make garage-info    état du bucket'
 	@echo '  make logs-db        journaux PostgreSQL'
@@ -141,7 +145,7 @@ assert-db:
 # ---------------------------------------------------------------------------
 # Front et API — inertes tant que les dossiers n'existent pas
 # ---------------------------------------------------------------------------
-check-front:
+check-front: check-api-contract
 	@if [ -d frontend ]; then \
 	   cd frontend && npm run typecheck && npm run build; \
 	 else echo 'frontend/ absent — rien à vérifier (prompt A0.1)'; fi
@@ -159,6 +163,34 @@ check-back:
 	   && cargo clippy --workspace --all-targets --all-features -- -D warnings \
 	   && cargo test --workspace --all-features; \
 	 else echo 'backend/ absent — rien à vérifier (prompt B1)'; fi
+
+# ---------------------------------------------------------------------------
+# Contrat d'API — le client TypeScript est ENGENDRÉ, jamais écrit
+# ---------------------------------------------------------------------------
+
+# `frontend/app/types/api.ts` est le seul fichier engendré du dépôt. Il vient du
+# document OpenAPI, lui-même assemblé depuis les annotations posées auprès des
+# gestionnaires Rust : un chemin ne peut donc pas exister dans le client sans
+# exister dans l'API.
+#
+# L'export passe par le BINAIRE et non par `GET /api/docs` : la route ne décrit
+# que les modules réellement montés, et l'engendrer depuis une base de
+# développement ferait disparaître du client les chemins d'un module éteint ce
+# jour-là. Le binaire ne touche ni base ni réseau.
+openapi:
+	@test -d backend && test -d frontend || { echo 'backend/ ou frontend/ absent — rien à engendrer.'; exit 0; }
+	@cd backend && cargo run -q -p api --bin openapi > ../$(OPENAPI_JSON)
+	@cd frontend && npx --no-install openapi-typescript ../$(OPENAPI_JSON) -o app/types/api.ts
+	@node frontend/scripts/prefix-api-types.mjs frontend/app/types/api.ts
+	@node frontend/scripts/check-api-contract.mjs
+
+# Deux vérifications, toutes deux mécaniques parce qu'elles portent sur des
+# choses qui ne se voient qu'à l'exécution, sur l'écran de la personne qui s'en
+# sert : aucun chemin appelé par le site n'est absent du contrat, et aucune
+# forme annoncée par l'API n'est absente de `frontend/app/types/`.
+check-api-contract:
+	@if [ -d frontend ]; then node frontend/scripts/check-api-contract.mjs; \
+	 else echo 'frontend/ absent — rien à vérifier'; fi
 
 # ---------------------------------------------------------------------------
 # Stockage objet

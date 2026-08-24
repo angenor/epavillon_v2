@@ -15,8 +15,18 @@ use crate::state::ProgrammeState;
 
 #[derive(Debug, Deserialize)]
 pub struct EditionDemandee {
-    event_id: Uuid,
+    /// **Facultative.** Absente, ce sont les séances à venir de toutes les
+    /// éditions — ce que compose l'accueil du site, qui n'a pas d'édition à
+    /// nommer.
+    event_id: Option<Uuid>,
+    limit: Option<i64>,
 }
+
+/// Plafond de la lecture sans édition. Assez large pour que l'accueil compose
+/// sa liste, assez étroit pour qu'une page publique ne puisse pas demander la
+/// programmation entière de toutes les COP.
+const LIMITE_PAR_DEFAUT: i64 = 50;
+const LIMITE_MAX: i64 = 200;
 
 /// Les deux chemins publics. **Ils ne vivent pas sous `/sessions`** : le premier
 /// est `/schedule`, le second passe par l'édition et l'adresse d'URL de la
@@ -29,18 +39,28 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
 /// La programmation d'une édition.
 #[utoipa::path(
     get,
-    description = "`PublicScheduleRow[]` — `programme.v_public_schedule`, **telle quelle**, et **sans session**. Une ligne = un bloc du calendrier : salle, organisation avec son sigle et son pays, journées spéciales, thématiques avec libellé et couleur, image de couverture — celle de la séance, **à défaut celle du dossier d'origine** —, état temporel calculé en base, nombre d'inscrits. Une édition dont le programme n'est pas paru rend une liste **vide**, jamais une erreur.",
+    description = "`PublicScheduleRow[]` — `programme.v_public_schedule`, **telle quelle**, et **sans session**. Une ligne = un bloc du calendrier : salle, organisation avec son sigle et son pays, journées spéciales, thématiques avec libellé et couleur, image de couverture — celle de la séance, **à défaut celle du dossier d'origine** —, état temporel calculé en base, nombre d'inscrits. Une édition dont le programme n'est pas paru rend une liste **vide**, jamais une erreur. **`event_id` est facultative** : absente, ce sont les séances `upcoming` et `ongoing` de TOUTES les éditions, dans l'ordre du temps — ce que compose l'accueil, qui n'a pas d'édition à nommer. La lecture est alors plafonnée.",
     path = "/schedule",
     tag = "Programmation publique",
     operation_id = "programmation_publique",
-    params(("event_id" = Uuid, Query, description = "Édition dont on lit le programme")),
+    params(
+        ("event_id" = Option<Uuid>, Query, description = "Édition dont on lit le programme. Absente : les séances à venir de toutes les éditions"),
+        ("limit" = Option<i64>, Query, description = "Plafond du nombre de lignes (défaut 50, maximum 200)"),
+    ),
     responses((status = 200, description = "PublicScheduleRow[]", body = Object))
 )]
 pub(crate) async fn programmation(
     state: web::Data<ProgrammeState>,
     demande: web::Query<EditionDemandee>,
 ) -> Result<HttpResponse> {
-    let lignes = public_schedule::programmation(state.pool(), EventId(demande.event_id)).await?;
+    // Le plafond ne s'applique qu'à la lecture SANS édition : la programmation
+    // d'une édition se rend entière, c'est un calendrier qu'on affiche en bloc.
+    let limite = match (demande.event_id, demande.limit) {
+        (Some(_), aucune) => aucune,
+        (None, choisie) => Some(choisie.unwrap_or(LIMITE_PAR_DEFAUT).clamp(1, LIMITE_MAX)),
+    };
+    let lignes =
+        public_schedule::programmation(state.pool(), demande.event_id.map(EventId), limite).await?;
 
     Ok(HttpResponse::Ok().json(lignes))
 }

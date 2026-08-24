@@ -13,6 +13,7 @@
 mod commun;
 
 use commun::Bac;
+use time::OffsetDateTime;
 
 /// Le nom qu'une partition mensuelle porte, tel que
 /// `platform.ensure_month_partition()` le compose.
@@ -33,17 +34,27 @@ async fn partition_existe(bac: &Bac, mois_a_venir: i32) -> bool {
     .expect("lecture de pg_class")
 }
 
-/// Pose une occurrence **au présent de la base** : l'horloge du conteneur et
-/// celle du processus diffèrent, et un instant posé depuis Rust peut tomber dans
-/// le futur de la base — `claim_jobs()` ne réserverait alors rien.
-async fn armer(bac: &Bac) -> bool {
-    let maintenant = sqlx::query_scalar!(r#"SELECT now() AS "maintenant!""#)
+/// L'instant **de la base**, et non celui du processus : les deux horloges
+/// diffèrent, et un créneau posé depuis Rust peut tomber dans le futur de la
+/// base — `claim_jobs()` ne réserverait alors rien.
+async fn maintenant(bac: &Bac) -> OffsetDateTime {
+    sqlx::query_scalar!(r#"SELECT now() AS "maintenant!""#)
         .fetch_one(bac.pool())
         .await
-        .expect("instant de la base");
+        .expect("instant de la base")
+}
 
+/// Pose une occurrence à l'instant donné.
+///
+/// **L'INSTANT EST UN PARAMÈTRE, ET C'EST INDISPENSABLE.** La clé d'unicité du
+/// travail porte l'horodatage **à la seconde** : deux appels qui relisent chacun
+/// `now()` tombent, une fois sur dix, de part et d'autre d'une seconde, posent
+/// deux clés différentes et font échouer un test qui mesure exactement le
+/// contraire. Le second armement doit rejouer le MÊME créneau, comme le fait un
+/// worker qu'on redémarre.
+async fn armer(bac: &Bac, moment: OffsetDateTime) -> bool {
     let mut tx = bac.db().write(&bac.ctx()).await.expect("transaction");
-    let pose = engagement::jobs::partitions::planifier(&mut tx, maintenant)
+    let pose = engagement::jobs::partitions::planifier(&mut tx, moment)
         .await
         .expect("planification");
     tx.commit().await.expect("validation");
@@ -65,7 +76,8 @@ async fn le_travail_prepare_les_mois_que_le_semis_na_pas_amorces() {
         "le semis s'arrête là — c'est l'écart n° 137"
     );
 
-    assert!(armer(&bac).await);
+    let moment = maintenant(&bac).await;
+    assert!(armer(&bac, moment).await);
     let issues = commun::passer_le_worker(&bac).await;
     assert!(issues.iter().all(|i| i.is_ok()), "{issues:?}");
 
@@ -83,9 +95,10 @@ async fn le_travail_prepare_les_mois_que_le_semis_na_pas_amorces() {
 async fn le_travail_se_replanifie_sans_doublon() {
     let bac = Bac::monter().await;
 
-    assert!(armer(&bac).await, "le créneau n'était pas posé");
+    let moment = maintenant(&bac).await;
+    assert!(armer(&bac, moment).await, "le créneau n'était pas posé");
     assert!(
-        !armer(&bac).await,
+        !armer(&bac, moment).await,
         "le démarrage du worker repose le même créneau : la clé d'unicité le confond"
     );
     assert_eq!(
@@ -120,7 +133,8 @@ async fn le_travail_se_replanifie_sans_doublon() {
 async fn rejouer_le_travail_est_sans_effet() {
     let bac = Bac::monter().await;
 
-    armer(&bac).await;
+    let moment = maintenant(&bac).await;
+    armer(&bac, moment).await;
     commun::passer_le_worker(&bac).await;
 
     let rejoues = commun::rejouer_les_travaux(&bac, "engagement.ensure_partitions").await;

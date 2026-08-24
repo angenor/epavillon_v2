@@ -4,6 +4,7 @@ import type {
   EditionFormError,
   EditionFormOptions,
   EditionFormPayload,
+  EditionImagePayload,
 } from '~/types/admin-events'
 import type { AttachedImage, EditionImageRole } from '~/types/media'
 import type { ParticipationMode } from '~/types/event/edition'
@@ -39,6 +40,10 @@ import type { SelectOption } from '~/types/ui'
  * (`media.attachments`). Depuis le 19/08 l'édition en porte TROIS — 32:9, 16:9,
  * 1:1 — et leur dessin appartient à `AdminEventsImagesPanel`, non à ce
  * formulaire déjà long. Ce fichier ne fait que leur passer les valeurs.
+ *
+ * ELLES SORTENT PAR UNE SECONDE VALEUR, et non dans la fiche : elles ne
+ * s'enregistrent pas avec l'édition mais par le module Média, en un geste
+ * distinct que l'écran appelant enchaîne.
  */
 
 interface Props {
@@ -48,13 +53,18 @@ interface Props {
   /** Les trois déclinaisons déjà rattachées, pour l'aperçu de chaque emplacement. */
   images?: Record<EditionImageRole, AttachedImage | null> | null
   errors: EditionFormError[]
+  /** Le sigle que l'API propose quand elle refuse une édition qui n'en porte pas. */
+  suggestedAcronym?: string | null
   busy?: boolean
   /** Vrai en création : le statut est alors figé à « brouillon ». */
   isCreation?: boolean
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits<{ submit: [payload: EditionFormPayload]; cancel: [] }>()
+const emit = defineEmits<{
+  submit: [payload: EditionFormPayload, images: EditionImagePayload]
+  cancel: []
+}>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
@@ -85,7 +95,6 @@ function blank(): EditionFormPayload {
     longitude: null,
     has_pavilion: false,
     highlights: null,
-    images: { banner: null, cover: null, thumbnail: null },
   }
 }
 
@@ -97,6 +106,19 @@ watch(
     if (next) form.value = { ...next }
   },
 )
+
+/** Ce qui partira au module Média : un identifiant d'objet par rôle, ou rien. */
+function attachedAssets(): EditionImagePayload {
+  return {
+    banner: props.images?.banner?.asset_id ?? null,
+    cover: props.images?.cover?.asset_id ?? null,
+    thumbnail: props.images?.thumbnail?.asset_id ?? null,
+  }
+}
+
+const images = ref<EditionImagePayload>(attachedAssets())
+
+watch(() => props.images, () => (images.value = attachedAssets()))
 
 // ---------------------------------------------------------------------------
 // Le slug, proposé pendant la frappe
@@ -273,8 +295,15 @@ const globalErrors = computed(() =>
 /** Le lieu est exigé dès que l'édition n'est pas entièrement en ligne. */
 const locationRequired = computed(() => form.value.participation_mode !== 'online')
 
+/** La proposition de sigle n'apparaît qu'avec le refus qu'elle répare. */
+const acronymSuggestion = computed(() =>
+  props.suggestedAcronym && props.errors.some((entry) => entry.field === 'acronym')
+    ? props.suggestedAcronym
+    : null,
+)
+
 function submit(): void {
-  emit('submit', { ...form.value })
+  emit('submit', { ...form.value }, { ...images.value })
 }
 </script>
 
@@ -336,9 +365,24 @@ function submit(): void {
           :model-value="form.acronym ?? ''"
           :label="t('admin.event.form.fields.acronym')"
           :hint="t('admin.event.form.fields.acronymHint')"
-          :maxlength="16"
+          :error="errorOf('acronym')"
+          :required="form.has_pavilion"
+          :maxlength="12"
           @update:model-value="(next: string) => (form.acronym = next || null)"
-        />
+        >
+          <!-- LE SIGLE PROPOSÉ PAR L'API, EN UN CLIC. Refuser sans rien proposer
+               fait inventer une convention que personne n'a écrite. -->
+          <template v-if="acronymSuggestion" #suffix>
+            <UiButton
+              variant="ghost"
+              size="sm"
+              icon="refresh"
+              icon-only
+              :label="t('admin.event.form.fields.acronymSuggested', { acronym: acronymSuggestion })"
+              @click="form.acronym = acronymSuggestion"
+            />
+          </template>
+        </UiInput>
 
         <UiInput
           :model-value="form.slug"
@@ -582,8 +626,8 @@ function submit(): void {
 
       <AdminEventsImagesPanel
         :images="props.images ?? { banner: null, cover: null, thumbnail: null }"
-        :model-value="form.images"
-        @update:model-value="(next) => (form.images = next)"
+        :model-value="images"
+        @update:model-value="(next) => (images = next)"
       />
 
       <p class="mt-4 text-sm text-text-subtle">{{ t('admin.event.form.uploadNotice') }}</p>

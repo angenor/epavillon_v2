@@ -39,7 +39,7 @@ import type {
   OffsetMinutes,
   ReminderStatus,
 } from './engagement'
-import type { Email, IsoDateTime, OrganizationId, ProposalId, Uuid } from './shared'
+import type { Email, IsoDateTime, OrganizationId, PersonId, ProposalId, Uuid } from './shared'
 
 // ---------------------------------------------------------------------------
 // Rappels — la lecture agrégée que l'écran demande
@@ -99,6 +99,27 @@ export interface TrackedSession {
 // ---------------------------------------------------------------------------
 
 /**
+ * DEUX FORMES DE PERSONNE, ET ELLES NE VIENNENT PAS DE LA MÊME ROUTE. Les
+ * confondre sous un seul nom faisait déclarer ici une ligne `identity.people`
+ * entière là où sept champs arrivent — et un écran qui lirait l'adresse d'un
+ * membre de l'espace recevrait `undefined` sans que rien ne le dise.
+ *
+ * L'espace organisation AFFICHE ses membres et les auteurs d'un fil : ni
+ * adresse, ni téléphone, ce qui n'est pas envoyé ne peut pas fuiter.
+ * L'invitation, elle, rend l'adresse — c'est le seul moyen d'écrire
+ * « invitation envoyée à … ».
+ */
+export interface DisplayedPerson {
+  id: PersonId
+  readonly display_name: string
+  civility: Person['civility']
+  first_name: string
+  last_name: string
+  job_title: string | null
+  primary_organization_id: OrganizationId | null
+}
+
+/**
  * UN DOSSIER ET SON AVANCEMENT — la brique de la liste comme de la fiche.
  *
  * `transitions` est le JOURNAL RÉEL (`programme.proposal_transitions`), et c'est
@@ -124,7 +145,7 @@ export interface ProposalFile {
   /** Fil partagé avec le soumissionnaire. Les notes du comité n'y sont jamais. */
   comments: ProposalComment[]
   /** Auteurs des messages, pour ne pas résoudre les noms un par un. */
-  participants: Person[]
+  participants: DisplayedPerson[]
   /** `programme.proposal_history()` — champ par champ, auteur et date. */
   history: ProposalHistoryEntry[]
 }
@@ -169,18 +190,35 @@ export interface WorkspaceAction {
 // Les membres
 // ---------------------------------------------------------------------------
 
+/** La personne servie avec une adhésion par le module Organisations. */
+export interface MemberPerson {
+  id: PersonId
+  readonly display_name: string
+  primary_email: Email
+  first_name: string
+  last_name: string
+  preferred_locale: string
+}
+
 /**
- * Un membre, son adhésion et la personne derrière.
+ * Un membre de l'espace, son adhésion et la personne derrière.
  *
  * Une adhésion `pending` porte sa DIRECTION (`invited_at`) : invitation émise
  * par l'organisation, ou demande reçue d'une personne. Les deux se traitent à
  * l'opposé — l'une se relance, l'autre s'accepte — et le modèle les distingue
  * depuis le 17/08.
  */
+export interface WorkspaceMember {
+  membership: Membership
+  person: DisplayedPerson
+  /** L'organisation a invité cette personne et attend sa réponse. */
+  is_invitation: boolean
+}
+
+/** Le même trio, servi par la file d'adhésions du module Organisations. */
 export interface MemberEntry {
   membership: Membership
-  person: Person
-  /** L'organisation a invité cette personne et attend sa réponse. */
+  person: MemberPerson
   is_invitation: boolean
 }
 
@@ -281,7 +319,7 @@ export interface WorkspaceOverview {
    *  référent (inviter, accepter une demande). */
   membership: Membership
   proposals: ProposalTracking[]
-  members: MemberEntry[]
+  members: WorkspaceMember[]
   actions: WorkspaceAction[]
   open_call: CallForProposals | null
   call_edition: EventEdition | null

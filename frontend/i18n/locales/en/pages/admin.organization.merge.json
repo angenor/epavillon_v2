@@ -152,7 +152,6 @@
   },
   "error": {
     "mismatch": "The name you typed does not match the absorbed record. Nothing was merged.",
-    "alreadyMerged": "This record has been merged in the meantime. Reload the queue.",
     "generic": "The merge did not complete. Nothing was changed."
   }
 }

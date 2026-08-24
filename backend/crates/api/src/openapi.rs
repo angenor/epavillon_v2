@@ -34,9 +34,20 @@ pub struct ApiErrorBody {
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(crate::routes::health::ready, crate::routes::health::health),
+    paths(
+        crate::routes::health::ready,
+        crate::routes::health::health,
+        crate::routes::reference::pays,
+        crate::routes::reference::langues,
+        crate::routes::reference::termes,
+        crate::routes::platform::drapeaux,
+    ),
     components(schemas(ApiErrorBody)),
-    tags((name = "Exploitation", description = "Vivacité et santé. `/ready` ne divulgue rien ; `/health` porte des chiffres et se protège comme une donnée."))
+    tags(
+        (name = "Exploitation", description = "Vivacité et santé. `/ready` ne divulgue rien ; `/health` porte des chiffres et se protège comme une donnée."),
+        (name = "Référentiel", description = "Pays, langues, vocabulaires administrables. Transverse à tous les modules, sans session : un formulaire d'inscription en a besoin avant qu'un compte existe."),
+        (name = "Plateforme", description = "Les drapeaux de fonctionnalité, résolus pour qui demande. Lus par le routage du site à la première navigation."),
+    )
 )]
 struct ApiRoutes;
 

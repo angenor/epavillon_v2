@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Person } from '~/types/identity'
+import type { DisplayedPerson } from '~/types/organization-workspace'
 import type { ProposalComment } from '~/types/programme/proposal'
 import type { PersonId } from '~/types/shared'
 
@@ -28,7 +28,7 @@ import type { PersonId } from '~/types/shared'
 
 interface Props {
   comments: ProposalComment[]
-  participants: Person[]
+  participants: DisplayedPerson[]
   /** Personne connectée — pour distinguer ses propres messages. */
   viewerId: PersonId
   /** Une écriture est en vol : les boutons attendent. */

@@ -75,27 +75,26 @@ const { data, status, error, refresh } = await useAsyncData(
     const edition = await api.events.bySlug(slug.value)
     if (!edition) return null
 
-    const [series, images, countries, call, tracks, editions, schedule] = await Promise.all([
+    // UNE SEULE VAGUE. Le nom du pays vient de l'édition et la grille vient de
+    // l'appel : ni l'un ni l'autre ne demande un aller-retour de plus. Recharger
+    // les deux cent quarante-neuf pays pour en nommer un que la réponse porte
+    // déjà, c'était une seconde d'attente offerte à chaque visiteur.
+    const [series, images, call, tracks, editions, schedule] = await Promise.all([
       api.events.series(),
       api.events.images(edition.id),
-      api.reference.countries(),
       api.events.call(edition.id),
       api.events.tracks(edition.id),
       api.events.publicList(),
       api.sessions.schedule(edition.id),
     ])
 
-    // Les critères dépendent de l'appel : deuxième vague, et seulement s'il y en
-    // a un. Une édition sans pavillon n'ouvre pas d'appel (règle métier n° 5).
-    const criteria = call ? await api.calls.criteria(call.id) : []
-
     return {
       edition,
       series: series.find((entry) => entry.id === edition.series_id) ?? null,
       images,
-      country: countries.find((entry) => entry.id === edition.country_id)?.name ?? null,
+      country: edition.country_name,
       call,
-      criteria,
+      criteria: call?.criteria ?? [],
       // Seuls les fils PUBLIÉS sont montrés : `published_at` est ce qui ouvre la
       // page publique d'une journée spéciale, et une journée en préparation
       // n'engage pas encore l'IFDD.

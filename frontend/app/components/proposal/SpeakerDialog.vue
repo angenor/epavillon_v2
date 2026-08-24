@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DraftSpeaker, DraftUpload, PersonLookup } from '~/types/proposal-form'
-import { TEXT_LIMITS } from '~/types/proposal-form'
+import { SPEAKER_PHOTO_ENABLED, TEXT_LIMITS } from '~/types/proposal-form'
 import type { SpeakerRole } from '~/types/programme/proposal'
 import type { SelectOption } from '~/types/ui'
 
@@ -40,6 +40,11 @@ import type { SelectOption } from '~/types/ui'
  * `media.attachable_roles`), et elle est MONTRÉE : une photo choisie sans être
  * affichée est une photo qu'on ne peut pas vérifier — mauvais fichier, portrait
  * de travers, image d'une autre personne.
+ *
+ * ELLE EST TOUTEFOIS RETIRÉE DE L'ÉCRAN (`SPEAKER_PHOTO_ENABLED`) tant que rien
+ * ne la téléverse : le brouillon la porte, l'API l'ignore, et le fichier est
+ * perdu sans le dire. Le dessin reste ici, prêt pour le jour où l'envoi
+ * multipart existera.
  */
 
 interface Props {
@@ -449,7 +454,7 @@ function removePhoto(): void {
       />
 
       <!-- PHOTO, AVEC SON APERÇU. Rattachée à la personne, jamais au dossier. -->
-      <div>
+      <div v-if="SPEAKER_PHOTO_ENABLED">
         <p class="mb-1.5 text-sm font-bold text-text">
           {{ t('proposal.form.step-speakers.photo.label') }}
           <span class="ml-1.5 text-xs font-normal text-text-subtle">{{ t('form.optional') }}</span>

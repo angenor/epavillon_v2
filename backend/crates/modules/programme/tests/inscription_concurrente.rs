@@ -78,7 +78,7 @@ async fn cent_inscriptions_simultanees_sur_dix_places() {
                 seance.into(),
                 Some(personne),
                 None,
-                programme::service::registration::RegisterPayload {
+                programme::service::registration::SessionRegisterPayload {
                     answers: serde_json::json!({ "country": "SN" }),
                     locale: None,
                     guest: None,

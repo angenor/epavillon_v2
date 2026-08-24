@@ -72,8 +72,12 @@ export function createPlannerApi({ call, send, assertEventInScope }: PlannerApiC
      *
      * La réponse porte les conflits de TOUTE l'édition : un déplacement peut
      * résoudre le conflit d'un bloc situé à l'autre bout de la semaine.
+     *
+     * Elle est TOUJOURS rendue : une séance inconnue vaut 404, donc une erreur
+     * levée, jamais un corps vide. Un type nullable aurait offert à l'écran une
+     * branche muette — ni séance rangée, ni message.
      */
-    schedule: (payload: ScheduleSessionPayload): Promise<PlannerMutationResult | null> =>
+    schedule: (payload: ScheduleSessionPayload): Promise<PlannerMutationResult> =>
       send(`/sessions/${payload.session_id}/schedule`, payload, (m) => m.scheduleSession(payload), 'PUT'),
 
     /**
@@ -85,7 +89,7 @@ export function createPlannerApi({ call, send, assertEventInScope }: PlannerApiC
      * composition d'un fil est un choix éditorial qu'il arrive d'expliquer à une
      * organisation qui s'étonne de ne pas y figurer.
      */
-    setTracks: (personId: Uuid | null, payload: SessionTracksPayload): Promise<PlannerMutationResult | null> =>
+    setTracks: (personId: Uuid | null, payload: SessionTracksPayload): Promise<PlannerMutationResult> =>
       send(`/sessions/${payload.session_id}/tracks`, payload, (m) => m.setSessionTracks(payload, personId), 'PUT'),
 
     /**
@@ -97,7 +101,7 @@ export function createPlannerApi({ call, send, assertEventInScope }: PlannerApiC
      * directs simultanés restent écrivables — ils remontent au bandeau en
      * gravité bloquante.
      */
-    setBroadcast: (payload: SessionBroadcastPayload): Promise<PlannerMutationResult | null> =>
+    setBroadcast: (payload: SessionBroadcastPayload): Promise<PlannerMutationResult> =>
       send(`/sessions/${payload.session_id}/broadcast`, payload, (m) => m.setSessionBroadcast(payload), 'PUT'),
 
     /**

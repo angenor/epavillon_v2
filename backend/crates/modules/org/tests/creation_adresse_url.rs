@@ -27,7 +27,7 @@ async fn creer(bac: &Bac, qui: Uuid, nom: &str, pays: Option<Uuid>) -> CreateOrg
             city: None,
             website: None,
             description: None,
-            job_title: None,
+            job_title: Some("Directrice".to_owned()),
             acknowledged_match_ids: Vec::new(),
         },
     )

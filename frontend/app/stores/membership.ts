@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import type { Membership, Organization } from '~/types/org'
+import type { LoadFailure } from '~/utils/api-error'
 
 /**
  * Les rattachements de la personne connectée.
@@ -29,7 +30,7 @@ export const useMembershipStore = defineStore('membership', () => {
 
   const entries = ref<{ membership: Membership; organization: Organization }[]>([])
   const isLoading = ref(false)
-  const loadError = ref<Error | null>(null)
+  const loadError = ref<LoadFailure | null>(null)
   /** Identifiant de la personne pour laquelle les données ont été chargées. */
   const loadedFor = ref<string | null>(null)
 
@@ -68,7 +69,7 @@ export const useMembershipStore = defineStore('membership', () => {
       entries.value = loaded.filter((entry) => entry !== null)
       loadedFor.value = person.id
     } catch (error) {
-      loadError.value = error instanceof Error ? error : new Error(String(error))
+      loadError.value = toLoadFailure(error)
     } finally {
       isLoading.value = false
     }

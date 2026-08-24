@@ -244,6 +244,10 @@ pub struct DecideMembership {
 /// Le jeton d'une invitation, et ce qu'il porte.
 #[derive(Debug, Clone, Deserialize)]
 pub struct AcceptInvitation {
+    /// La fonction que la personne déclare occuper. **Exigée** : l'adhésion
+    /// devient active, et une adhésion active porte toujours sa fonction.
+    #[serde(default)]
+    pub job_title: Option<String>,
     pub token: String,
 }
 
@@ -284,4 +288,26 @@ impl InvitationPayload {
     pub fn to_value(&self) -> Value {
         serde_json::to_value(self).unwrap_or(Value::Null)
     }
+}
+
+/// La fonction déclarée dans une organisation, **exigée dès que l'adhésion
+/// devient active** (`ck_memberships_job_title`).
+///
+/// Rendue ici plutôt que dans chaque service : trois chemins mènent à une
+/// adhésion active — la demande de rattachement, la création d'une organisation
+/// et l'acceptation d'une invitation —, et trois messages différents pour un
+/// même refus se seraient mis à diverger.
+///
+/// **Une invitation n'y passe pas** : elle crée une adhésion `pending`, et c'est
+/// la personne invitée qui déclare sa fonction en acceptant. Un référent ne
+/// devine pas l'intitulé de quelqu'un d'autre.
+pub fn fonction_declaree(saisie: Option<&str>) -> kernel::error::Result<String> {
+    let propre = saisie.map(str::trim).unwrap_or_default();
+    if propre.is_empty() {
+        return Err(kernel::error::ApiError::validation(
+            "Indiquez la fonction que vous occupez dans cette organisation.",
+            "job_title",
+        ));
+    }
+    Ok(propre.to_owned())
 }

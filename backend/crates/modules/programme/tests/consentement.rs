@@ -60,7 +60,7 @@ async fn une_reponse_sensible_exige_un_consentement_dont_la_preuve_est_conservee
     let seance = seance_ouverte(&bac, &terrain, "atelier").await;
     let personne = commun::personne(&bac, "inscrite@example.org", "Ida", "Ndour").await;
 
-    let avec_donnee_sensible = || registration::RegisterPayload {
+    let avec_donnee_sensible = || registration::SessionRegisterPayload {
         answers: json!({ "country": "SN", "besoin_accessibilite": "Boucle magnétique" }),
         ..seances::reponses_valides()
     };
@@ -82,7 +82,7 @@ async fn une_reponse_sensible_exige_un_consentement_dont_la_preuve_est_conservee
         &bac,
         seance,
         Some(personne),
-        registration::RegisterPayload {
+        registration::SessionRegisterPayload {
             sensitive_data_consent: true,
             ..avec_donnee_sensible()
         },
@@ -136,7 +136,7 @@ async fn une_seule_finalite_quel_que_soit_le_nombre_de_champs() {
         &bac,
         seance,
         Some(personne),
-        registration::RegisterPayload {
+        registration::SessionRegisterPayload {
             answers: json!({
                 "country": "SN",
                 "besoin_accessibilite": "Boucle magnétique",
@@ -165,7 +165,7 @@ async fn un_accord_deja_donne_dispense_de_le_redemander() {
     let seconde = seance_ouverte(&bac, &terrain, "seconde").await;
     let personne = commun::personne(&bac, "inscrite@example.org", "Ida", "Ndour").await;
 
-    let charge = |accord: bool| registration::RegisterPayload {
+    let charge = |accord: bool| registration::SessionRegisterPayload {
         answers: json!({ "country": "SN", "besoin_accessibilite": "Boucle magnétique" }),
         sensitive_data_consent: accord,
         ..seances::reponses_valides()

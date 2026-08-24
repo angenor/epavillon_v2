@@ -6,13 +6,20 @@
  * la place du code change, pour tenir `useApi.ts` sous le garde-fou de mille
  * lignes de `CLAUDE.md`.
  *
- * ── DEUX LECTURES, AUCUNE ÉCRITURE ──────────────────────────────────────────
+ * ── UNE LECTURE, AUCUNE ÉCRITURE, ET PAS ENCORE D'API ───────────────────────
  *
- * La fabrique ne reçoit que `call`. L'accueil est public et ne modifie rien ; ce
- * qui compose la vitrine, lui, écrit et exige `content.highlight.manage` — il
+ * La fabrique ne reçoit que `pending`. L'accueil est public et ne modifie rien ;
+ * ce qui compose la vitrine, lui, écrit et exige `content.highlight.manage` — il
  * vit dans `api/admin-showcase.ts`. La séparation n'est pas cosmétique : aucune
  * route servie à un visiteur anonyme ne doit voisiner avec une route
  * d'administration, ne serait-ce que dans ce fichier.
+ *
+ * `pending` et non `call`, parce que le schéma `content` d'où sort la vitrine
+ * n'a pas encore de crate Rust : `GET /home` n'existe nulle part, et l'appeler
+ * ferait afficher une panne à un écran livré et vérifié. La page lit donc les
+ * données d'exemple, API configurée ou non, et le bandeau nomme la route
+ * attendue. Le jour où le crate existe, `pending` redevient `call` — le chemin
+ * et la forme sont déjà écrits.
  *
  * ── UNE REQUÊTE, PAS QUATRE ─────────────────────────────────────────────────
  *
@@ -50,51 +57,120 @@
  * redemander, c'est-à-dire à payer trois allers-retours pour des données déjà
  * en main. `api.events.publicList()` garde sa place — il sert le sélecteur
  * d'année de la page d'une édition (A3), qui est un autre écran.
+ *
+ * Ni l'historique groupé par millésime : `screen()` porte la liste entière et
+ * non filtrée, et `utils/edition-history.ts` en compose les groupes, les
+ * décomptes et les volumes dans le navigateur — changer d'onglet ne coûte donc
+ * aucune requête. Une adresse `/home/editions` que personne n'appelle serait une
+ * dette de plus au contrat ; elle se réintroduira le jour où il y aura cinquante
+ * éditions et non cinq, avec un appelant.
  */
 
-import type { EditionHistory, EditionPeriod, HomeScreen } from '~/types/home'
+import type { HomeScreen } from '~/types/home'
+import type {
+  EditionStatsRow,
+  PublicEditionRow,
+  PublicScheduleRow,
+  ShowcaseRow,
+} from '~/types/views'
+import type { EventId } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
 
-/** L'accueil ne fait que lire : `send` ne lui est pas passé. */
-type HomeApiDeps = Pick<ApiTransport, 'call'>
+/** Ce que l'accueil montre des prochaines séances. Le reste défilerait sous le pli. */
+const SEANCES_ANNONCEES = 6
 
-export function createHomeApi({ call }: HomeApiDeps) {
+/**
+ * L'accueil est composé de DEUX APPELS RÉELS et d'un bloc en attente d'API.
+ *
+ * Il devait n'en faire qu'un — `GET /home`, une composition en base, un seul
+ * instant. Cette route appartient au module de la vitrine, qui n'existe pas
+ * encore : trois de ses cinq blocs sont pourtant déjà servis, et les faire lire
+ * les données réelles vaut mieux que d'attendre le module pour tout.
+ *
+ * CE QUI EST RÉEL : les éditions, les prochaines séances, et les chiffres de
+ * chaque édition — ces derniers SANS APPEL, car chaque ligne d'édition les porte
+ * déjà (`published_session_count` et ses voisins). Les redemander serait un
+ * aller-retour pour une donnée qu'on tient en main.
+ *
+ * CE QUI RESTE UN EXEMPLE : les deux blocs de la vitrine, que l'équipe compose
+ * depuis le back-office. Le bandeau de l'écran le dit, et ne désigne plus que
+ * ceux-là.
+ *
+ * LE JOUR OÙ `/home` EXISTERA, cette fonction redevient un appel unique. C'est
+ * la composition en base qu'il faut viser : elle seule garantit que les cinq
+ * blocs décrivent le même instant.
+ */
+export function createHomeApi({ call, pending }: Pick<ApiTransport, 'call' | 'pending'>) {
   return {
-    /**
-     * TOUTE LA PAGE D'ACCUEIL EN UNE RÉPONSE.
-     *
-     * `hero` et `aside` sortent de `content.v_showcase`, qui a DÉJÀ appliqué le
-     * statut et la fenêtre de diffusion ; `editions` sort de
-     * `event.v_public_editions`, qui a déjà écarté brouillons et annulations ;
-     * `stats` sort de `programme.v_edition_stats`. La page ne rejoue aucun de
-     * ces filtres — un écran qui les rejoue finit par en oublier un, et c'est
-     * exactement ainsi que les annonces périmées survivaient en v1.
-     *
-     * `stats` est INDEXÉE par `event_id` et une édition sans programme publié
-     * n'y a AUCUNE CLÉ : l'absence vaut zéro. La forme est choisie pour que la
-     * règle soit difficile à oublier.
-     *
-     * En phase B, un seul `GET /home`.
-     */
-    screen: (): Promise<HomeScreen> => call('/home', (m) => m.homeScreen()),
+    screen: async (): Promise<HomeScreen> => {
+      const [editions, upcomingSessions, showcase] = await Promise.all([
+        call<PublicEditionRow[]>('/events/public', (m) => m.publicEditions()),
+        call<PublicScheduleRow[]>('/schedule', (m) => m.upcomingSessions()),
+        pending<Pick<HomeScreen, 'hero' | 'aside'>>('/home', (m) => {
+          const rows: ShowcaseRow[] = m.currentShowcase()
+          return {
+            hero: rows.filter((row) => row.placement === 'home_hero'),
+            aside: rows.filter((row) => row.placement === 'home_aside'),
+          }
+        }),
+      ])
 
-    /**
-     * L'HISTORIQUE GROUPÉ PAR MILLÉSIME — le segment `?periode=` de l'URL.
-     *
-     * CE QUI EST ICI EST LE GROUPEMENT, PAS LE FILTRE. `screen()` porte déjà la
-     * liste entière et non filtrée : changer d'onglet ne coûte donc aucune
-     * requête, et les onglets peuvent annoncer leurs décomptes — calculés sur
-     * l'ensemble, pour que « Passés (0) » se voie avant d'y aller. Ce que cette
-     * méthode ajoute, c'est la COMPOSITION que la section attend : années
-     * décroissantes, éditions triées à l'intérieur, décomptes, volumes de
-     * programme. Écrite dans la page, elle y serait réécrite une seconde fois
-     * le jour où l'historique aura sa propre adresse.
-     *
-     * Elle sert donc l'arrivée directe sur `/?periode=passes` rendue côté
-     * serveur, et elle deviendra la pagination le jour où il y aura cinquante
-     * éditions et non cinq.
-     */
-    editions: (period: EditionPeriod = 'all'): Promise<EditionHistory> =>
-      call('/home/editions', (m) => m.editionHistory(period), { period }),
+      // Décroissant : l'accueil ouvre sur ce qui vient, pas sur 2024.
+      const parDateDecroissante = [...editions].sort((a, b) =>
+        b.starts_at.localeCompare(a.starts_at),
+      )
+
+      return {
+        ...showcase,
+        // Les six premières dans l'ordre du temps. L'API les rend déjà triées
+        // et bornées aux séances à venir : l'écran ne retrie ni ne refiltre.
+        upcomingSessions: upcomingSessions.slice(0, SEANCES_ANNONCEES),
+        editions: parDateDecroissante,
+        stats: chiffresParEdition(editions),
+        currentEdition: editionDuPavillon(parDateDecroissante),
+        generated_at: new Date().toISOString(),
+      }
+    },
   }
+}
+
+/**
+ * Les chiffres du programme, indexés par édition.
+ *
+ * INDEXÉS, et non listés : une édition sans programme publié n'a AUCUNE CLÉ, et
+ * l'absence vaut zéro. Une liste obligerait à chercher, et « pas trouvé » se
+ * serait vite transformé en tiret à l'écran.
+ */
+function chiffresParEdition(editions: PublicEditionRow[]): Record<EventId, EditionStatsRow> {
+  const parEdition: Record<EventId, EditionStatsRow> = {}
+  for (const edition of editions) {
+    if (edition.published_session_count === 0) continue
+    parEdition[edition.id] = {
+      event_id: edition.id,
+      published_session_count: edition.published_session_count,
+      streamed_session_count: edition.streamed_session_count,
+      organization_count: edition.organization_count,
+      programme_starts_at: edition.programme_starts_at,
+      programme_ends_at: edition.programme_ends_at,
+    }
+  }
+  return parEdition
+}
+
+/**
+ * L'édition dont l'accueil présente l'appel.
+ *
+ * La première qui tient un pavillon et n'est pas terminée ; à défaut, la
+ * dernière qui en a tenu un. `null` quand aucune n'en tient — l'ancre de la
+ * section reste, mais elle s'efface (règle métier n° 5 : sans pavillon, pas
+ * d'appel à propositions).
+ */
+function editionDuPavillon(parDateDecroissante: PublicEditionRow[]): PublicEditionRow | null {
+  const avecPavillon = parDateDecroissante.filter((edition) => edition.has_pavilion)
+  if (avecPavillon.length === 0) return null
+  return (
+    avecPavillon.find((edition) => edition.temporal_state !== 'past') ??
+    avecPavillon[0] ??
+    null
+  )
 }

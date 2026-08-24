@@ -9,9 +9,15 @@
  * cent-cinquante, ce qui l'aurait porté au-delà du garde-fou de mille lignes de
  * `CLAUDE.md`. Le découpage suit donc la règle du projet : par ÉCRAN.
  *
- * La fabrique reçoit `call` et `send` — les deux mêmes fonctions que le reste du
- * composable —, si bien que la bascule vers l'API réelle, la latence simulée et
- * l'en-tête `Accept-Language` valent ici comme ailleurs, sans être redéclarés.
+ * La fabrique reçoit les primitives de `useApi()` — les mêmes fonctions que le
+ * reste du composable —, si bien que la bascule vers l'API réelle, la latence
+ * simulée et l'en-tête `Accept-Language` valent ici comme ailleurs, sans être
+ * redéclarés.
+ *
+ * `personId` NE PART JAMAIS À L'API : elle tient l'acteur de la session, et un
+ * acteur déclaré par le client ne serait pas cru. Le paramètre reste parce que
+ * le mode hors ligne n'a pas de session — les données simulées ont besoin qu'on
+ * leur dise qui lit et qui écrit.
  */
 
 import type {
@@ -29,18 +35,38 @@ import type { Uuid } from '~/types/shared'
 
 type Mocks = typeof import('~/mocks')
 
-/** Les deux primitives de `useApi()` : une lecture, une écriture. */
+/**
+ * Les primitives de `useApi()` : deux lectures, une écriture, et l'attente.
+ *
+ * `callOrNull` est la lecture dont « rien » est une réponse — le 404 devient
+ * `null` au lieu de faire basculer l'écran en erreur.
+ *
+ * `pending` sert les trois écrans dont l'API n'existe pas encore : rien ne part
+ * sur le réseau, les données simulées répondent même API configurée, et un
+ * bandeau le dit. Il est déclaré ICI et non dans chaque fabrique concernée —
+ * trois déclarations de la même signature finissent par diverger.
+ */
 export interface ApiTransport {
   call: <T>(path: string, fromMocks: (m: Mocks) => T | Promise<T>, query?: Record<string, unknown>) => Promise<T>
+  callOrNull: <T>(
+    path: string,
+    fromMocks: (m: Mocks) => T | null | Promise<T | null>,
+    query?: Record<string, unknown>,
+  ) => Promise<T | null>
   send: <T>(
     path: string,
     body: object,
     fromMocks: (m: Mocks) => T | Promise<T>,
     method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE',
   ) => Promise<T>
+  pending: <T>(
+    path: string,
+    fromMocks: (m: Mocks) => T | Promise<T>,
+    kind?: 'read' | 'write',
+  ) => Promise<T>
 }
 
-export function createProposalReviewApi({ call, send }: ApiTransport) {
+export function createProposalReviewApi({ callOrNull, send }: ApiTransport) {
   return {
     /**
      * TOUT L'ÉCRAN EN UNE RÉPONSE — dossier, grille, comité, échanges, droits.
@@ -56,9 +82,15 @@ export function createProposalReviewApi({ call, send }: ApiTransport) {
      * —, ce qui alimente le « lu par 3 membres du comité » de la liste. C'est
      * une lecture qui écrit : assumé, et c'est déjà ce que fait la fonction en
      * base.
+     *
+     * DOSSIER INEXISTANT ET DOSSIER HORS PÉRIMÈTRE SONT INDISCERNABLES — l'API
+     * répond 404 aux deux, délibérément, pour ne pas laisser deviner qu'une
+     * édition existe ailleurs. `callOrNull` en fait le `null` que l'écran rend
+     * en « dossier introuvable ». Le refus qui NOMME sa raison, lui, remonte :
+     * `ForbiddenError` déclenche l'écran d'accès refusé.
      */
     desk: (proposalId: Uuid, personId: Uuid | null): Promise<ReviewDeskScreen | null> =>
-      call(`/proposals/${proposalId}/review-desk`, (m) => m.reviewDesk(proposalId, personId)),
+      callOrNull(`/proposals/${proposalId}/review-desk`, (m) => m.reviewDesk(proposalId, personId)),
 
     /**
      * ENREGISTRER OU DÉPOSER SA REVUE.
@@ -68,9 +100,15 @@ export function createProposalReviewApi({ call, send }: ApiTransport) {
      * est nul tant qu'elle est en brouillon. La réponse rend les agrégats
      * recalculés par `refresh_proposal_score()` — moyenne, rang, élimination —
      * pour que l'en-tête change sans recharger la page.
+     *
+     * `proposal_id` COMPOSE L'URL et ne part pas dans le corps : le dossier est
+     * déjà nommé par le chemin, et deux endroits pour une même donnée finissent
+     * par se contredire.
      */
-    save: (personId: Uuid, payload: SaveReviewPayload): Promise<SaveReviewResult> =>
-      send(`/proposals/${payload.proposal_id}/reviews`, payload, (m) => m.saveReview(personId, payload), 'PUT'),
+    save: (personId: Uuid, payload: SaveReviewPayload): Promise<SaveReviewResult> => {
+      const { proposal_id, ...body } = payload
+      return send(`/proposals/${proposal_id}/reviews`, body, (m) => m.saveReview(personId, payload), 'PUT')
+    },
 
     /**
      * SE DÉPORTER, EN DÉCLARANT SON LIEN AVEC L'ORGANISATION.
@@ -79,10 +117,12 @@ export function createProposalReviewApi({ call, send }: ApiTransport) {
      * pour que l'impartialité du comité se relise, et un déport sans motif ne
      * prouve rien.
      */
-    recuse: (personId: Uuid, payload: RecusalPayload): Promise<ReviewAssignment> =>
-      send(`/proposals/${payload.proposal_id}/recusal`, payload, (m) =>
+    recuse: (personId: Uuid, payload: RecusalPayload): Promise<ReviewAssignment> => {
+      const { proposal_id, ...body } = payload
+      return send(`/proposals/${proposal_id}/recusal`, body, (m) =>
         m.recuseFromProposal(personId, payload),
-      ),
+      )
+    },
 
     /**
      * ÉCRIRE SUR LE DOSSIER — avec sa visibilité.
@@ -92,10 +132,12 @@ export function createProposalReviewApi({ call, send }: ApiTransport) {
      * de correction est forcée en `submitter` à la source : une demande que le
      * déposant ne verrait pas bloquerait son dossier sans qu'il sache pourquoi.
      */
-    comment: (personId: Uuid, payload: PostCommentPayload): Promise<ProposalComment> =>
-      send(`/proposals/${payload.proposal_id}/comments`, payload, (m) =>
+    comment: (personId: Uuid, payload: PostCommentPayload): Promise<ProposalComment> => {
+      const { proposal_id, ...body } = payload
+      return send(`/proposals/${proposal_id}/comments`, body, (m) =>
         m.postProposalComment(personId, payload),
-      ),
+      )
+    },
 
     /**
      * DÉCIDER — retenir, demander des corrections, rejeter.
@@ -104,9 +146,11 @@ export function createProposalReviewApi({ call, send }: ApiTransport) {
      * RÉPONSES, pas des erreurs de réseau : transition impossible depuis cet
      * état, ou motif manquant. L'écran les rend comme telles.
      */
-    decide: (personId: Uuid | null, payload: DecisionPayload): Promise<DecisionResult> =>
-      send(`/proposals/${payload.proposal_id}/decision`, payload, (m) =>
+    decide: (personId: Uuid | null, payload: DecisionPayload): Promise<DecisionResult> => {
+      const { proposal_id, ...body } = payload
+      return send(`/proposals/${proposal_id}/decision`, body, (m) =>
         m.decideProposal(personId, payload),
-      ),
+      )
+    },
   }
 }

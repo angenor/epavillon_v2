@@ -769,10 +769,15 @@ watch(
               />
 
               <div class="flex justify-end">
+                <!-- UN CRITÈRE NOTÉ NE SE RETIRE PLUS : la clé est
+                     `ON DELETE CASCADE` et la base effacerait sans un mot
+                     l'argumentaire des évaluations rendues. L'API refuse en 422 ;
+                     le bouton s'éteint avant, plutôt que de laisser tenter. -->
                 <UiButton
                   variant="ghost"
                   size="sm"
                   icon="trash"
+                  :disabled="criterion.score_count > 0"
                   @click="removeCriterion(index)"
                 >
                   {{ t('admin.event.tabs.callTab.criteria.remove') }}

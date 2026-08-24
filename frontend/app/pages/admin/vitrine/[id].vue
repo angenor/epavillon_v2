@@ -7,7 +7,6 @@ import type {
 } from '~/types/admin-showcase'
 import type { EffectivePermission } from '~/types/identity'
 import type { EventId } from '~/types/shared'
-import { ForbiddenError } from '~/composables/useApi'
 
 /**
  * MODIFIER UNE DIAPOSITIVE — `/admin/vitrine/[id]`.
@@ -89,7 +88,7 @@ const canEdit = computed(() =>
   hasPermission(granted.value, 'content.highlight.manage', screen.value?.values.event_id ?? null),
 )
 
-const isForbidden = computed(() => error.value?.name === 'ForbiddenError')
+const isForbidden = computed(() => isForbiddenError(error.value))
 const isSettling = computed(
   () => adminScope.isLoading || status.value === 'pending' || permissionStatus.value === 'pending',
 )

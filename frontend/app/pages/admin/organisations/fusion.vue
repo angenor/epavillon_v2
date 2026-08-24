@@ -31,8 +31,9 @@ import type { SimilarOrganization } from '~/types/org'
  *
  * DEUX ENTRÉES POSSIBLES. Depuis la file, les deux fiches sont connues. Depuis la
  * fiche d'une organisation, une seule l'est : l'écran ouvre alors le sélecteur, et
- * la recherche est celle du rattachement — `org.find_similar_organizations()`,
- * jamais une seconde implémentation.
+ * la recherche est CELLE DE LA REVUE DES DOUBLONS — `/admin/organizations/similar`,
+ * qui ne filtre rien. Celle du rattachement écarte les fiches n'entrant que par
+ * le domaine partagé, c'est-à-dire précisément celles qu'on vient chercher ici.
  *
  * PORTÉE GLOBALE EXIGÉE : `org.organization.merge`. Une fusion ne se limite pas à
  * une édition, il n'y a donc pas de version restreinte de cet écran.
@@ -148,15 +149,38 @@ function swapDirection(): void {
 // ---------------------------------------------------------------------------
 
 const search = ref('')
+
+/**
+ * LA FICHE DÉJÀ CONNUE, lue pour la seule recherche.
+ *
+ * Son SITE et son ADRESSE DE CONTACT arment le motif du domaine partagé — le
+ * signal que le module désigne comme le plus fiable. Sans eux, une fiche qui
+ * n'entre que par son domaine ne remonterait jamais, et c'est exactement le cas
+ * des deux fiches à fusionner.
+ */
+const { data: leftDetail } = await useAsyncData(
+  'admin-merge-left',
+  async () =>
+    canMerge.value && leftId.value && !rightId.value
+      ? api.adminOrganizations.detail(leftId.value)
+      : null,
+  { watch: [canMerge, leftId, rightId], lazy: true },
+)
+
 const { data: candidates, status: searchStatus } = await useAsyncData<SimilarOrganization[]>(
   'admin-merge-candidates',
   async () => {
     if (search.value.trim().length < 2) return []
-    const results = await api.organizations.similar({ name: search.value, limit: 8 })
+    const results = await api.adminOrganizations.similar({
+      name: search.value,
+      email: leftDetail.value?.contact_email ?? null,
+      website: leftDetail.value?.website ?? null,
+      limit: 8,
+    })
     // Une fiche ne se fusionne pas avec elle-même.
     return results.filter((entry) => entry.organization_id !== leftId.value)
   },
-  { default: () => [], watch: [search], lazy: true },
+  { default: () => [], watch: [search, leftDetail], lazy: true },
 )
 
 function pickSecond(organizationId: string): void {
@@ -166,6 +190,17 @@ function pickSecond(organizationId: string): void {
 // ---------------------------------------------------------------------------
 // Les choix de champ
 // ---------------------------------------------------------------------------
+
+/**
+ * L'ADRESSE D'URL SE COMPARE, MAIS NE S'ARBITRE PAS.
+ *
+ * L'API refuse de la déplacer — `ORG_MERGE_FIELD_NOT_ARBITRABLE`, 422 — et elle a
+ * raison : la fiche absorbée survit et garde la sienne, c'est ce qui fait que ses
+ * anciens liens continuent de fonctionner. Deux fiches ayant TOUJOURS deux
+ * adresses différentes, l'écran demandait un arbitrage dont une réponse sur deux
+ * partait en refus. Il l'affiche désormais en comparaison seule.
+ */
+const NON_ARBITRABLE_FIELDS: MergeField[] = ['slug']
 
 const choices = ref<Partial<Record<MergeField, MergeSideKey>>>({})
 
@@ -187,9 +222,13 @@ function choose(field: MergeField, side: MergeSideKey): void {
   choices.value = { ...choices.value, [field]: side }
 }
 
-const unresolved = computed(() =>
-  rawPreview.value ? unresolvedFields(rawPreview.value.comparisons, choices.value) : [],
+const arbitrableComparisons = computed(() =>
+  (rawPreview.value?.comparisons ?? []).filter(
+    (comparison) => !NON_ARBITRABLE_FIELDS.includes(comparison.field),
+  ),
 )
+
+const unresolved = computed(() => unresolvedFields(arbitrableComparisons.value, choices.value))
 
 // ---------------------------------------------------------------------------
 // Motif, confirmation, exécution
@@ -201,7 +240,7 @@ const confirmOpen = ref(false)
 const busy = ref(false)
 const serverMismatch = ref(false)
 const errorMessage = ref<string | null>(null)
-const result = ref<MergeResult | null>(null)
+const result = ref<Extract<MergeResult, { status: 'merged' }> | null>(null)
 
 const reasonError = computed(() =>
   reasonTouched.value && reason.value.trim().length === 0
@@ -250,11 +289,19 @@ async function submit(typedName: string): Promise<void> {
     }
 
     confirmOpen.value = false
-    errorMessage.value = t(
+    // Le refus de fusion en chaîne NOMME la fiche finale : c'est le message du
+    // déclencheur de la base, et il en dit plus que n'importe quelle traduction.
+    errorMessage.value =
       response.status === 'already_merged'
-        ? 'admin.organization.merge.error.alreadyMerged'
-        : 'admin.organization.merge.error.generic',
-    )
+        ? response.message
+        : t('admin.organization.merge.error.generic')
+  } catch (thrown) {
+    // LES REFUS QUE LE CONTRAT N'EXPRIME PAS EN `status` — champ non arbitrable,
+    // portée insuffisante, fiches identiques. L'API les compose déjà en
+    // français : les retraduire ici en écrirait un second catalogue.
+    confirmOpen.value = false
+    errorMessage.value =
+      thrown instanceof ForbiddenError ? thrown.message : apiErrorMessage(thrown, (key) => t(key))
   } finally {
     busy.value = false
   }
@@ -328,8 +375,9 @@ const movedRows = computed(() =>
           @retry="refresh()"
         />
 
-        <!-- UNE SEULE FICHE CONNUE : on choisit la seconde, par la recherche du
-             rattachement — la même fonction, jamais une seconde. -->
+        <!-- UNE SEULE FICHE CONNUE : on choisit la seconde, par la recherche de
+             la revue des doublons — celle qui ne filtre rien, et qui fait entrer
+             une fiche sur son seul domaine partagé. -->
         <section v-else-if="leftId && !rightId" class="mt-8 rounded-lg border border-border bg-surface-raised p-6">
           <h2 class="text-lg font-semibold text-text">
             {{ t('admin.organization.merge.picker.title') }}
@@ -456,6 +504,7 @@ const movedRows = computed(() =>
           <AdminOrganizationsMergeCompare
             class="mt-6"
             :comparisons="rawPreview.comparisons"
+            :non-arbitrable="NON_ARBITRABLE_FIELDS"
             :source="rawPreview.source"
             :target="rawPreview.target"
             :choices="choices"

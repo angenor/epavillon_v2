@@ -100,7 +100,7 @@ export function rawHighlight(id: Uuid): Highlight | null {
  * diapositive depuis le back-office et ne pas la voir apparaître sur l'accueil
  * ferait mentir la démonstration.
  */
-function currentShowcase(at: number): ShowcaseRow[] {
+export function currentShowcase(at: number = Date.now()): ShowcaseRow[] {
   return effectiveHighlights()
     .filter((highlight) => {
       if (highlight.status !== 'published') return false
@@ -167,6 +167,10 @@ function editionTemporalState(edition: EventEdition, at: number): EditionTempora
  * (prolongation comprise) viennent des fonctions du module.
  */
 export function publicEditions(at: number = Date.now()): PublicEditionRow[] {
+  // Le volume du programme publié est JOINT PAR LA GAUCHE, comme le fait l'API :
+  // une édition sans séance publiée reste dans la liste, ses compteurs à zéro.
+  const volumes = editionStats()
+
   return editions
     .filter((edition) => edition.status !== 'draft' && edition.status !== 'cancelled')
     .map((edition) => {
@@ -232,6 +236,12 @@ export function publicEditions(at: number = Date.now()): PublicEditionRow[] {
 
         theme_codes: themes.map((theme) => theme.code),
         themes,
+
+        published_session_count: volumes[edition.id]?.published_session_count ?? 0,
+        streamed_session_count: volumes[edition.id]?.streamed_session_count ?? 0,
+        organization_count: volumes[edition.id]?.organization_count ?? 0,
+        programme_starts_at: volumes[edition.id]?.programme_starts_at ?? null,
+        programme_ends_at: volumes[edition.id]?.programme_ends_at ?? null,
       }
     })
     .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
@@ -289,7 +299,7 @@ export function editionStats(): Record<EventId, EditionStatsRow> {
 // ===========================================================================
 
 /** Les six prochaines séances, TOUTES ÉDITIONS CONFONDUES. */
-function upcomingSessions(): PublicScheduleRow[] {
+export function upcomingSessions(): PublicScheduleRow[] {
   return publicSchedule()
     .filter(
       (session) =>

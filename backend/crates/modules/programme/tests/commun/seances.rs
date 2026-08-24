@@ -697,7 +697,7 @@ pub async fn sinscrire(
     bac: &Bac,
     session_id: Uuid,
     personne: Option<Uuid>,
-    charge: registration::RegisterPayload,
+    charge: registration::SessionRegisterPayload,
 ) -> Result<IssueDInscription> {
     let ctx = match personne {
         Some(id) => bac.ctx().with_actor(id),
@@ -717,8 +717,8 @@ pub async fn sinscrire(
 
 /// Une charge utile **valide et minimale** pour le formulaire par défaut : le
 /// pays est la seule réponse obligatoire qu'il porte.
-pub fn reponses_valides() -> registration::RegisterPayload {
-    registration::RegisterPayload {
+pub fn reponses_valides() -> registration::SessionRegisterPayload {
+    registration::SessionRegisterPayload {
         answers: serde_json::json!({ "country": "SN" }),
         locale: None,
         guest: None,

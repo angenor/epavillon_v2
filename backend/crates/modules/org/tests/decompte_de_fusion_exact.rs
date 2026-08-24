@@ -31,8 +31,10 @@ async fn semer_des_rattachements(bac: &Bac, source: Uuid, cible: Uuid) {
         (cible, cote_cible),
     ] {
         sqlx::query!(
-            "INSERT INTO org.memberships (organization_id, person_id, role, status, approved_at)
-             VALUES ($1, $2, 'member', 'active', now())",
+            // `job_title` renseignée : une adhésion ACTIVE en porte toujours une
+            // (`ck_memberships_job_title`).
+            "INSERT INTO org.memberships (organization_id, person_id, role, status, job_title, approved_at)
+             VALUES ($1, $2, 'member', 'active', 'Chargée de projet', now())",
             organisation,
             personne
         )
@@ -202,8 +204,10 @@ async fn le_decompte_nest_pas_symetrique() {
         )
         .await;
         sqlx::query!(
-            "INSERT INTO org.memberships (organization_id, person_id, role, status, approved_at)
-             VALUES ($1, $2, 'member', 'active', now())",
+            // `job_title` renseignée : une adhésion ACTIVE en porte toujours une
+            // (`ck_memberships_job_title`).
+            "INSERT INTO org.memberships (organization_id, person_id, role, status, job_title, approved_at)
+             VALUES ($1, $2, 'member', 'active', 'Chargée de projet', now())",
             osed.jumelle,
             qui
         )
@@ -214,8 +218,8 @@ async fn le_decompte_nest_pas_symetrique() {
 
     let seul = personne(&bac, "seul@osed-sahel.org", "Seul", "Membre").await;
     sqlx::query!(
-        "INSERT INTO org.memberships (organization_id, person_id, role, status, approved_at)
-         VALUES ($1, $2, 'member', 'active', now())",
+        "INSERT INTO org.memberships (organization_id, person_id, role, status, job_title, approved_at)
+         VALUES ($1, $2, 'member', 'active', 'Chargée de projet', now())",
         osed.complete,
         seul
     )

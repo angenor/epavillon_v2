@@ -240,9 +240,36 @@ pub struct PublicCall {
     pub required_reviews: i16,
     pub blind_review: bool,
     pub guidelines_url: Option<String>,
+    /// La grille d'évaluation, **avec l'appel et non à part**.
+    ///
+    /// Elle est publique par nature : une organisation qui prépare un dossier
+    /// doit savoir sur quoi il sera jugé. La servir sous un chemin propre ferait
+    /// une exception dans un module dont toutes les lectures publiques passent
+    /// par `/events/{id}/…`, et coûterait une seconde vague d'appels à la page
+    /// qui l'affiche — elle a déjà l'appel en main quand elle la demande.
+    pub criteria: Vec<PublicCriterion>,
     pub created_by: Option<Uuid>,
     #[serde(with = "time::serde::rfc3339")]
     pub created_at: OffsetDateTime,
     #[serde(with = "time::serde::rfc3339")]
     pub updated_at: OffsetDateTime,
+}
+
+/// Un critère tel que le public le voit — `ReviewCriterion`.
+///
+/// **Ce n'est pas `EditionCriterion`**, qui sert le formulaire du back-office :
+/// celui-là porte un identifiant facultatif — une ligne nouvelle n'en a pas
+/// encore — et le décompte des notes déjà posées, qui ne regarde personne
+/// d'autre que l'équipe. Ici l'identifiant est certain et le décompte absent.
+#[derive(Debug, Clone, Serialize)]
+pub struct PublicCriterion {
+    pub id: Uuid,
+    pub call_id: Uuid,
+    pub code: String,
+    pub label: Value,
+    pub description: Option<Value>,
+    pub max_score: f64,
+    pub weight: f64,
+    pub is_knockout: bool,
+    pub sort_order: i16,
 }

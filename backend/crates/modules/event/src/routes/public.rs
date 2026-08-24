@@ -62,11 +62,11 @@ pub(crate) async fn selecteur_des_editions(
 /// Les éditions publiques.
 #[utoipa::path(
     get,
-    description = "`EventEdition[]` — les éditions publiques, décroissantes sur la date de début. **Le critère de publicité vient du modèle** : ni brouillon, ni annulée. Il n'est recopié dans aucun écran, ce qui referme l'écart n° 26 — une édition **annoncée** dont le programme n'est pas publié en fait partie, car sa page existe et c'est là qu'on dépose un dossier. Chaque ligne porte sa série et son pays résolus, ses **trois déclinaisons d'image**, son état temporel, son appel résolu et le volume de son programme publié. **Ce chemin est déclaré AVANT `/events/{slug}`** : sans cela, `public` serait lu comme une adresse d'URL.",
+    description = "`PublicEditionRow[]` — la ligne de `event.v_public_editions`, et **non** `EventEdition`, la ligne nue de la table : elle porte en plus la série et le pays résolus, les trois déclinaisons d'image, l'état temporel, l'appel résolu et le volume du programme publié. Les éditions publiques, décroissantes sur la date de début. **Le critère de publicité vient du modèle** : ni brouillon, ni annulée. Il n'est recopié dans aucun écran, ce qui referme l'écart n° 26 — une édition **annoncée** dont le programme n'est pas publié en fait partie, car sa page existe et c'est là qu'on dépose un dossier. Chaque ligne porte sa série et son pays résolus, ses **trois déclinaisons d'image**, son état temporel, son appel résolu et le volume de son programme publié. **Ce chemin est déclaré AVANT `/events/{slug}`** : sans cela, `public` serait lu comme une adresse d'URL.",
     path = "/events/public",
     tag = "Événements",
     operation_id = "editions_publiques",
-    responses((status = 200, description = "EventEdition[]", body = Object))
+    responses((status = 200, description = "PublicEditionRow[]", body = Object))
 )]
 pub(crate) async fn editions_publiques(state: web::Data<EventState>) -> Result<HttpResponse> {
     let editions = public_read::editions(state.pool()).await?;
@@ -206,12 +206,12 @@ pub(crate) async fn canaux(
 /// L'appel à propositions d'une édition — **zéro ou un**.
 #[utoipa::path(
     get,
-    description = "`CallForProposals | null` — **zéro ou un, jamais un tableau** : `ux_calls_one_per_event` tient la cardinalité, et l'annulé est exclu. Zéro pour une COP sans pavillon, où l'IFDD n'envoie qu'un représentant.",
+    description = "`PublicCall | null` — **zéro ou un, jamais un tableau** : `ux_calls_one_per_event` tient la cardinalité, et l'annulé est exclu. Zéro pour une COP sans pavillon, où l'IFDD n'envoie qu'un représentant. Porte sa GRILLE D'ÉVALUATION (`criteria`) : elle est publique par nature — une organisation qui prépare un dossier doit savoir sur quoi il sera jugé —, et la servir à part coûtait une seconde vague d'appels à la page qui l'affiche.",
     path = "/events/{id}/call",
     tag = "Événements",
     operation_id = "appel_public",
     params(("id" = uuid::Uuid, Path, description = "Identifiant de l'édition")),
-    responses((status = 200, description = "CallForProposals | null", body = Object))
+    responses((status = 200, description = "PublicCall | null", body = Object))
 )]
 pub(crate) async fn appel(
     state: web::Data<EventState>,

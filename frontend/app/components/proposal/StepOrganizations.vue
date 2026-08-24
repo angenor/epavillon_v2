@@ -211,6 +211,17 @@ function setRole(organizationId: string, role: string): void {
         :error="leadError"
         required
       />
+
+      <!-- LE PORTEUR COMMANDE LA CRÉATION DU DOSSIER : la colonne est NOT NULL,
+           et l'enregistrement automatique n'a rien à écrire tant qu'il manque.
+           Le dire ici évite d'attribuer le silence du témoin à une panne. -->
+      <p
+        v-if="!draft.organization_id"
+        class="flex items-start gap-2 rounded-md bg-surface-sunken px-3 py-2 text-sm text-text-secondary"
+      >
+        <UiIcon name="info" size="1.05rem" class="mt-0.5 shrink-0 text-text-muted" />
+        {{ t('proposal.form.step-organizations.lead.createsRecord') }}
+      </p>
     </section>
 
     <!-- LES CO-ORGANISATEURS -->

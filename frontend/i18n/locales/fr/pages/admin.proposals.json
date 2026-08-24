@@ -155,7 +155,6 @@
       "reason_required": "motif obligatoire",
       "not_found": "dossier introuvable"
     },
-    "error": "L'action n'a pas pu être menée à son terme. Rien n'a été modifié.",
     "andMore": "et {count} autre | et {count} autre | et {count} autres"
   }
 }

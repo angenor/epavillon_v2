@@ -75,8 +75,20 @@ const { data: granted } = await useAsyncData<EffectivePermission[]>(
   { default: () => [], lazy: true },
 )
 
+/**
+ * PÉRIMÈTRE NON VIDE — la seconde moitié de la garde, et elle n'est pas
+ * optionnelle : `org.organization.read` est accordée au rôle d'utilisateur
+ * ORDINAIRE. La permission seule laissait donc entrer n'importe quel compte
+ * connecté, que l'API refusait ensuite : l'écran affichait une panne là où il
+ * fallait un accès refusé.
+ */
+const hasScope = computed(
+  () => adminScope.scope.is_global || adminScope.scope.event_ids.length > 0,
+)
 /** Ouvre l'écran, quelle que soit la portée : la liste, elle, est filtrée. */
-const canRead = computed(() => hasPermissionOnAnyScope(granted.value, 'org.organization.read'))
+const canRead = computed(
+  () => hasPermissionOnAnyScope(granted.value, 'org.organization.read') && hasScope.value,
+)
 /** La fusion déplace des rattachements partout : portée GLOBALE exigée. */
 const canMerge = computed(() => hasPermission(granted.value, 'org.organization.merge'))
 

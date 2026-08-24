@@ -244,20 +244,39 @@ function openPanel(row: UserListRow): void {
   panelOpen.value = true
 }
 
+/**
+ * Un refus de l'API s'affiche TEL QUEL : elle seule sait pourquoi elle refuse, et
+ * son catalogue est déjà français. Sans ce message, un 403 laisserait le panneau
+ * ouvert et muet.
+ */
+function writeError(thrown: unknown): string {
+  return thrown instanceof ForbiddenError ? thrown.message : apiErrorMessage(thrown, (key) => t(key))
+}
+
 async function grantRole(payload: GrantRolePayload): Promise<void> {
+  if (!panelRow.value) return
   submitting.value = true
   panelError.value = null
 
   try {
-    const result = await api.adminUsers.grantRole(payload, auth.person?.id ?? null, granted.value)
+    const result = await api.adminUsers.grantRole(
+      panelRow.value.person_id,
+      payload,
+      auth.person?.id ?? null,
+      granted.value,
+    )
 
     if (result.status !== 'granted') {
-      panelError.value = t(`admin.user.roles.error.${result.status}`)
+      // `scope_not_allowed` rend le message du trigger, mot pour mot, avec les
+      // portées réellement autorisées : le libellé générique les perdrait.
+      panelError.value = result.message ?? t(`admin.user.roles.error.${result.status}`)
       return
     }
 
     panelOpen.value = false
     await Promise.all([refresh(), refreshTarget()])
+  } catch (thrown) {
+    panelError.value = writeError(thrown)
   } finally {
     submitting.value = false
   }
@@ -376,7 +395,6 @@ async function grantRole(payload: GrantRolePayload): Promise<void> {
       <AdminUsersRolePanel
         v-if="panelRow"
         v-model:open="panelOpen"
-        :person-id="panelRow.person_id"
         :person-name="panelRow.display_name"
         :options="roleOptions"
         :assignments="panelRow.roles"

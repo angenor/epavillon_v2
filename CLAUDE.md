@@ -108,7 +108,15 @@ Elles sont détaillées dans le cadrage, mais on les oublie vite et chacune a d�
 - Aucune chaîne en dur dans un template : tout passe par i18n (`fr` par défaut, `en`).
 - Aucune couleur en dur : tout passe par les jetons CSS.
 - Toute date affichée porte son fuseau (« 14:30 — 16:00, heure de Belém »).
-- Aucune page n'importe un mock : tout passe par `composables/useApi.ts`.
+- Aucune page n'importe un mock : tout passe par `composables/useApi.ts`, qui offre quatre primitives —
+  `call` (un 404 lève), `callOrNull` (un 404 est une réponse), `send` (**jamais rejouée**) et `pending`
+  (l'écran dont l'API n'existe pas encore : il lit des exemples **et le dit**).
+- Un message d'erreur venant de l'API s'affiche **tel quel** : son catalogue est déjà français, et en
+  écrire un second côté site donnerait deux textes pour un même refus. Le site ne parle que lorsque
+  l'API s'est tue — injoignable, délai dépassé —, sous les clés de `i18n/locales/*/_api.json`.
+- **Aucune instance de classe dans l'état d'un store** : le payload du rendu serveur ne sérialise que
+  des objets simples, et une erreur posée dans un `ref` fait rendre 500 à la page entière — seulement
+  en cas de panne d'API, c'est-à-dire au seul moment où ce chemin sert.
 - Quatre états obligatoires par écran : chargement (squelettes), vide, erreur, accès refusé.
 - Responsive à partir de 375 px ; le corps de page ne défile jamais horizontalement.
 
@@ -300,10 +308,20 @@ L'environnement local (Postgres avec le schéma chargé, Valkey, Jaeger, Mailpit
 docker compose -f ops/docker-compose.dev.yml up -d     # services locaux
 docker compose -f ops/docker-compose.dev.yml down -v   # + up : base repartie de zéro
 make check                                             # avant tout commit important
+make openapi                                           # engendre frontend/app/types/api.ts depuis les routes Rust
 cd frontend && npm run dev                             # front
 cd backend  && cargo run -p api                        # API
 cd backend  && cargo run -p worker                     # travaux différés, relais d'outbox
 ```
+
+**Le contrat d'API est ENGENDRÉ, jamais écrit.** `frontend/app/types/api.ts` vient de `make openapi`,
+qui exporte le document OpenAPI par un binaire — sans base, sans serveur — et le convertit. Il porte les
+chemins, les verbes, les paramètres et les 65 codes d'erreur stables ; il ne porte **pas** la forme des
+corps, que l'API désigne par leur **nom TypeScript** et dont la définition reste dans
+`frontend/app/types/`. Ce lien est vérifié par `make check-api-contract`, branché sur `check-front` :
+il refuse un appel vers un chemin absent du contrat, une forme annoncée sans définition, et une route
+laissée en données d'exemple alors que l'API la sert. **Ne pas modifier `api.ts` à la main** ; il est
+exclu du garde-fou des mille lignes.
 
 `backend/` et `frontend/` sont symétriques : chacun porte son gestionnaire de dépendances et ses commandes. Le workspace Cargo vit dans `backend/`, pas à la racine.
 
@@ -331,6 +349,18 @@ Interfaces locales : Mailpit `http://localhost:8025` (courriels capturés) · Ja
 ---
 
 ## Périmètre actuel
+
+**Le site est raccordé à l'API depuis le 22/08.** Renseigner `NUXT_PUBLIC_API_BASE` suffit ; vide, tout
+tourne sur `frontend/app/mocks/`, qui reste en place pour les tests et le travail hors ligne. Deux
+conditions, dont l'oubli produit un refus que rien n'explique : **ouvrir le site sur l'adresse exacte
+d'`APP_PUBLIC_URL`** (seule origine autorisée) et **garder le même hôte des deux côtés** — la portée
+d'un cookie ignore le port, pas l'hôte.
+
+**Trois écrans lisent encore des données d'exemple, API branchée ou non, et le disent** : les messages
+d'incident, l'accueil public avec sa vitrine, et le tableau de bord du back-office. Leurs données
+existent en base — schémas `live`, `content`, `analytics` — mais aucun crate Rust ne les sert. Ils
+passent par `pending()`, et `make check-api-contract` les compte comme **dette nommée**, jamais comme
+faute.
 
 Le jalon en cours ne contient que ce qui permet de **lancer l'appel à propositions de la COP31** : authentification, organisations, événements, appel, soumission, espace organisation, back-office.
 

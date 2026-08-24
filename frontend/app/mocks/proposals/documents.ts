@@ -68,6 +68,10 @@ function document_asset(n: number, fields: AssetFields): Asset {
     purged_at: null,
     created_at: fields.createdAt,
     updated_at: fields.createdAt,
+    // Aucun fichier n'est servi hors ligne : seule la FORME de l'adresse
+    // composée par `media.object_url()` est reproduite.
+    url: `/mocks/documents/${fields.key}`,
+    sources: {},
   }
 }
 

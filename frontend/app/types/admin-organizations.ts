@@ -108,19 +108,59 @@ import type { SessionStatus } from './programme/session'
 // ===========================================================================
 
 /**
- * Une ligne de la liste — la fiche de performance, plus ce qu'il faut pour la
- * LIRE.
+ * Une ligne de la liste — la fiche de performance recomposée, plus ce qu'il
+ * faut pour la LIRE.
+ *
+ * ELLE N'ÉTEND PLUS `OrganizationScorecard`, ET C'EST VOULU. La liste n'est pas
+ * la projection : quatre colonnes — statut, sceau, score, pointeur de fusion —
+ * sont relues sur la table VIVANTE, parce qu'elles bougent au geste de
+ * l'opérateur alors que la projection n'est rafraîchie que par un travail
+ * différé ; et dix compteurs de la projection ne sont pas rendus du tout
+ * (brouillons, retraits, note moyenne, stockage, articles…), aucun écran ne les
+ * affichant. Hériter du contrat de la projection promettait donc des champs que
+ * la réponse ne porte pas. La fiche, elle, rend la projection entière : c'est
+ * `OrganizationDetail.scorecard`.
  *
  * La vue rend `organization_type_code` et `pays_nom` ; le code d'un type ne
  * s'affiche pas (`ngo_association` n'est pas un libellé), d'où le terme résolu
  * qui l'accompagne. Il vient de `reference.taxonomy_terms`, jamais d'un fichier
  * i18n : c'est une donnée que l'IFDD modifie depuis le back-office.
  */
-export interface OrganizationListRow extends OrganizationScorecard {
+export interface OrganizationListRow {
+  organization_id: OrganizationId
+  legal_name: string
+  acronym: string | null
+  slug: Slug
+  statut: OrganizationStatus
+  organization_type_code: TaxonomyTermCode
   /** Libellé du type, résolu depuis `reference.taxonomy_terms`. */
   organization_type_label: I18nText | null
   /** Couleur du terme, quand elle est posée — repère de teinte, pas de fond de texte. */
   organization_type_color: string | null
+  country_id: CountryId | null
+  pays_iso3: string | null
+  pays_nom: I18nText | null
+  /** `reference.countries.oif_status`, `'none'` à défaut. */
+  statut_oif: string
+  est_verifiee: boolean
+  verified_at: IsoDateTime | null
+  /** `org.compute_trust_score()` — 0 à 100. Le tri de référence de cet écran. */
+  score_confiance: number
+  merged_into_id: OrganizationId | null
+
+  membres_actifs: number
+  membres_en_attente: number
+  referents: number
+
+  propositions_deposees: number
+  propositions_acceptees: number
+  propositions_rejetees: number
+  /** Acceptées / déposées. NUL — et non zéro — sans aucun dépôt. */
+  ratio_acceptation: Numeric | null
+
+  sessions_programmees: number
+  sessions_realisees: number
+
   /**
    * Cette fiche figure-t-elle dans une paire de doublons présumés NON ARBITRÉE ?
    * C'est le signal qui relie les deux écrans : une fiche douteuse se repère
@@ -129,6 +169,10 @@ export interface OrganizationListRow extends OrganizationScorecard {
   pending_duplicate_count: number
   /** Fiches absorbées par celle-ci. Zéro pour la quasi-totalité. */
   absorbed_count: number
+
+  /** Dernier signe de vie, toutes natures confondues : le tri des fiches dormantes. */
+  derniere_activite: IsoDateTime | null
+  inscrite_le: IsoDateTime
 }
 
 /** Colonnes triables de la liste. */
@@ -277,10 +321,16 @@ export interface DuplicateDecisionPayload {
   note: string | null
 }
 
-export interface DuplicateDecisionResult {
-  status: 'recorded' | 'not_found'
-  pair: DuplicatePair | null
-}
+/**
+ * Ce que rend l'arbitrage — union DISCRIMINÉE, comme l'enum étiqueté de l'API.
+ *
+ * Une variante ne porte que ses propres champs : `not_found` n'a pas de paire,
+ * et la déclarer nulle plutôt qu'absente ferait écrire des gardes là où le
+ * discriminant suffit.
+ */
+export type DuplicateDecisionResult =
+  | { status: 'recorded'; pair: DuplicatePair }
+  | { status: 'not_found' }
 
 // ===========================================================================
 // 3. ÉCRAN DE FUSION
@@ -290,6 +340,12 @@ export interface DuplicateDecisionResult {
  * Champ comparé dans la vue côte à côte. Ce sont les colonnes d'`org.organizations`
  * qu'un humain a saisies ; les colonnes générées (`*_normalized`), les états de
  * fusion et les compteurs n'y figurent pas — ils ne se choisissent pas.
+ *
+ * `slug` EST COMPARÉ MAIS NE S'ARBITRE PAS : l'API refuse de le déplacer
+ * (`ORG_MERGE_FIELD_NOT_ARBITRABLE`, 422). Deux fiches ayant toujours deux
+ * adresses différentes, offrir le choix ne produisait qu'un refus — l'écran
+ * l'affiche donc sans bouton, et dit que l'adresse de la fiche absorbée lui
+ * reste attachée.
  */
 export type MergeField =
   | 'legal_name'
@@ -441,19 +497,46 @@ export interface MergePayload {
  * elle-même fusionnée (« Cibler la fiche finale »), et une fusion concurrente a
  * pu passer entre l'ouverture de l'écran et la validation.
  */
-export interface MergeResult {
-  status: 'merged' | 'confirmation_mismatch' | 'already_merged' | 'not_found'
-  /** Fiche absorbante après fusion — celle vers laquelle l'écran renvoie. */
-  target: OrganizationId | null
-  /** Décompte réel des lignes déplacées, par `schéma.table.colonne` — `merge_log.rows_reassigned`. */
-  rows_reassigned: Record<string, number>
-  /** Champs de la cible modifiés par les choix de l'opérateur. */
-  fields_applied: MergeField[]
-}
+export type MergeResult =
+  | {
+      status: 'merged'
+      /** Fiche absorbante après fusion — celle vers laquelle l'écran renvoie. */
+      target: OrganizationId
+      /** Décompte réel des lignes déplacées, par `schéma.table.colonne` — `merge_log.rows_reassigned`. */
+      rows_reassigned: Record<string, number>
+      /** Champs de la cible modifiés par les choix de l'opérateur. */
+      fields_applied: MergeField[]
+    }
+  | { status: 'confirmation_mismatch' }
+  | {
+      status: 'already_merged'
+      /** Fiche FINALE, quand elle se relit : c'est vers elle que l'écran renvoie. */
+      target: OrganizationId | null
+      /** Le message du déclencheur de la base, repris mot pour mot — il nomme la fiche. */
+      message: string
+    }
+  | { status: 'not_found' }
 
 // ===========================================================================
 // 4. FICHE D'UNE ORGANISATION
 // ===========================================================================
+
+/** Une organisation désignée par son identifiant et son nom — ce qu'un renvoi affiche. */
+export interface OrganizationRef {
+  organization_id: OrganizationId
+  legal_name: string
+}
+
+/**
+ * Un renvoi de fusion, dans un sens ou dans l'autre.
+ *
+ * `merged_at` est NUL sur les fiches dont le pointeur a été posé sans date —
+ * reprises de la v1, corrections à la main. L'écran affiche alors le renvoi sans
+ * date plutôt que de fabriquer un jour qui n'a pas eu lieu.
+ */
+export interface MergedRef extends OrganizationRef {
+  merged_at: IsoDateTime | null
+}
 
 /** Une dénomination, avec l'auteur qui l'a ajoutée. */
 export interface OrganizationNameRow {
@@ -484,7 +567,7 @@ export interface OrganizationDomainRow {
    * Ce domaine est-il porté par une AUTRE fiche ? C'est le signal de doublon le
    * plus fiable du modèle, et il se voit d'abord ici.
    */
-  shared_with: { organization_id: OrganizationId; legal_name: string }[]
+  shared_with: OrganizationRef[]
 }
 
 /** Un membre, avec la direction de son attente quand il y en a une. */
@@ -585,9 +668,9 @@ export interface OrganizationDetail {
   created_by_name: string | null
 
   /** Fiche absorbante, quand celle-ci a été fusionnée. */
-  merged_into: { organization_id: OrganizationId; legal_name: string; merged_at: IsoDateTime } | null
+  merged_into: MergedRef | null
   /** Fiches que celle-ci a absorbées. */
-  absorbed: { organization_id: OrganizationId; legal_name: string; merged_at: IsoDateTime }[]
+  absorbed: MergedRef[]
 
   scorecard: OrganizationScorecard
   names: OrganizationNameRow[]
@@ -639,9 +722,8 @@ export interface NameConfirmationPayload {
  * file des doublons affiche. Rendre le seul objet modifié laisserait trois
  * panneaux afficher des valeurs fausses jusqu'au prochain rechargement.
  */
-export interface OrganizationWriteResult {
-  status: 'saved' | 'not_found' | 'domain_taken'
-  detail: OrganizationDetail | null
+export type OrganizationWriteResult =
+  | { status: 'saved'; detail: OrganizationDetail }
+  | { status: 'not_found' }
   /** Fiche qui détient déjà ce domaine vérifié — `ux_organization_domains_verified`. */
-  conflict_with: { organization_id: OrganizationId; legal_name: string } | null
-}
+  | { status: 'domain_taken'; conflict_with: OrganizationRef }

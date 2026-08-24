@@ -277,8 +277,10 @@ pub async fn personne(bac: &Bac, email: &str, prenom: &str, nom: &str) -> Uuid {
 
 pub async fn adherer(bac: &Bac, organisation: Uuid, personne: Uuid, statut: &str) {
     sqlx::query!(
-        "INSERT INTO org.memberships (organization_id, person_id, role, status, approved_at)
-         VALUES ($1, $2, 'member', $3::text::org.membership_status, now())",
+        // `job_title` renseignée : une adhésion ACTIVE en porte toujours une
+        // (`ck_memberships_job_title`).
+        "INSERT INTO org.memberships (organization_id, person_id, role, status, job_title, approved_at)
+         VALUES ($1, $2, 'member', $3::text::org.membership_status, 'Chargée de projet', now())",
         organisation,
         personne,
         statut

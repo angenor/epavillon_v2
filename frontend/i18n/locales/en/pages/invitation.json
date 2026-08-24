@@ -36,5 +36,12 @@
     "title": "No invitation to open",
     "description": "This page confirms a membership from the link received by email. Open that link from your mailbox.",
     "action": "Back to home"
+  },
+  "jobTitle": {
+    "title": "Your role in the organization",
+    "description": "State the position you hold before joining the organization. It appears next to your name in the workspace.",
+    "label": "Role",
+    "hint": "For example: Climate project officer, Head of programmes.",
+    "submit": "Join the organization"
   }
 }

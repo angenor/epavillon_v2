@@ -9,7 +9,7 @@ import type { CallId, EventId, IsoDateTime, ProposalId } from '~/types/shared'
  * demander « Enregistrer » à chaque étape, c'est perdre le dossier de qui ferme
  * l'onglet. La v1 n'enregistrait qu'à la soumission.
  *
- * TROIS RÈGLES, ET CHACUNE ÉVITE UN DÉFAUT OBSERVABLE :
+ * QUATRE RÈGLES, ET CHACUNE ÉVITE UN DÉFAUT OBSERVABLE :
  *
  *  1. AUCUN ENREGISTREMENT AVANT LA PREMIÈRE MODIFICATION. Sans cela, ouvrir la
  *     page créerait une ligne vide en base — et le compteur du plafond de
@@ -19,7 +19,11 @@ import type { CallId, EventId, IsoDateTime, ProposalId } from '~/types/shared'
  *     déclenche pas un second appel : elle marque le brouillon à reprendre dès
  *     que le premier est revenu. Deux écritures concurrentes sur la même ligne,
  *     c'est la plus lente qui gagne — donc la plus ancienne.
- *  3. L'HORODATAGE VIENT DU SERVEUR. L'écran n'affiche jamais sa propre horloge
+ *  3. RIEN NE PART SANS ORGANISATION PORTEUSE. La colonne est NOT NULL et l'API
+ *     refuse : une personne membre de deux organisations ouvre le formulaire
+ *     sans porteur, et sa première frappe échouerait en 422. On attend l'étape 1
+ *     plutôt que d'afficher un échec qui ne dit pas quoi corriger.
+ *  4. L'HORODATAGE VIENT DU SERVEUR. L'écran n'affiche jamais sa propre horloge
  *     comme heure d'enregistrement : elles divergent, et c'est celle du serveur
  *     qui fait foi. La réponse porte `saved_at` ; on l'affiche telle quelle.
  *
@@ -79,6 +83,15 @@ export function useProposalDraft(options: UseProposalDraftOptions) {
     const callId = options.callId.value
     const eventId = options.eventId.value
     if (!person || !callId || !eventId) return
+
+    // SANS PORTEUR, PAS DE LIGNE. `proposals.organization_id` est NOT NULL et
+    // l'API refuse la création en 422 : partir quand même afficherait « Échec de
+    // l'enregistrement » sans dire quoi corriger. Le brouillon reste « non
+    // enregistré » jusqu'au choix de l'étape 1, qui déclenche l'écriture.
+    if (!options.draft.value.organization_id) {
+      state.value = 'dirty'
+      return
+    }
 
     if (state.value === 'saving') {
       pending = true

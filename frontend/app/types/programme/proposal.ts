@@ -249,7 +249,10 @@ export interface ProposalComment {
   resolved_at: IsoDateTime | null
   resolved_by: PersonId | null
   edited_at: IsoDateTime | null
-  deleted_at: IsoDateTime | null
+  // `deleted_at` existe en base et n'est PAS rendu : l'API filtre les messages
+  // supprimés à la source. Le déclarer ici obligeait chaque écran à refiltrer
+  // ce qui n'a jamais transité — et laissait croire qu'un message effacé
+  // voyage, ce qui est exactement ce qu'il ne doit pas faire.
   created_at: IsoDateTime
 }
 

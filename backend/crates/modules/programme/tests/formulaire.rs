@@ -105,7 +105,7 @@ async fn le_formulaire_applicable_est_resolu_et_ses_reponses_exigees() {
         &bac,
         seance,
         Some(personne),
-        registration::RegisterPayload {
+        registration::SessionRegisterPayload {
             answers: json!({}),
             ..seances::reponses_valides()
         },
@@ -174,7 +174,7 @@ async fn les_six_familles_de_refus_nomment_leur_champ() {
             &bac,
             seance,
             Some(personne),
-            registration::RegisterPayload {
+            registration::SessionRegisterPayload {
                 answers: reponses.clone(),
                 ..seances::reponses_valides()
             },
@@ -206,7 +206,7 @@ async fn le_pays_est_un_code_iso_valide_contre_le_referentiel() {
             &bac,
             seance,
             Some(personne),
-            registration::RegisterPayload {
+            registration::SessionRegisterPayload {
                 answers: json!({ "country": valeur }),
                 ..seances::reponses_valides()
             },
@@ -220,7 +220,7 @@ async fn le_pays_est_un_code_iso_valide_contre_le_referentiel() {
         &bac,
         seance,
         Some(personne),
-        registration::RegisterPayload {
+        registration::SessionRegisterPayload {
             answers: json!({ "country": "SN" }),
             ..seances::reponses_valides()
         },

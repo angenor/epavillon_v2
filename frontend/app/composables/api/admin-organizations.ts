@@ -16,11 +16,18 @@
  * mélanger sous une même clé aurait fini par faire passer une écriture
  * d'administration pour une lecture publique.
  *
- * LA RECHERCHE, ELLE, RESTE CELLE DE TOUT LE MONDE. L'écran de fusion choisit sa
- * seconde fiche par `api.organizations.similar()` — la même fonction que le
- * rattachement, `org.find_similar_organizations()`. Deux recherches divergentes
- * rapprocheraient les fiches dans un écran et pas dans l'autre, ce qui est
- * exactement la façon dont naissent les doublons.
+ * LA RECHERCHE AUSSI EST CELLE DU BACK-OFFICE, ET C'EST UNE CORRECTION. Ce
+ * fichier disait le contraire jusqu'ici : l'écran de fusion cherchait sa seconde
+ * fiche par `api.organizations.similar()`. Les deux lectures interrogent bien la
+ * même fonction — `org.find_similar_organizations()`, il n'y en a pas deux —,
+ * mais elles n'en gardent pas la même chose :
+ *   · `/organizations/similar` répond à « ce que j'ai tapé, existe-t-il déjà ? »
+ *     et ne retient que les fiches dont une DÉNOMINATION ressemble au terme ;
+ *   · `/admin/organizations/similar` répond à « qu'est-ce qui pourrait être la
+ *     même entité ? » et ne filtre rien — une fiche entrée par le seul DOMAINE
+ *     PARTAGÉ y figure.
+ * La seconde est un sur-ensemble de la première : on ne perd aucun résultat, et
+ * on récupère exactement les fiches que la revue des doublons vient chercher.
  *
  * ── LE PÉRIMÈTRE : UN FILTRE POUR LA LISTE, UNE PERMISSION POUR LA FUSION ───
  *
@@ -55,6 +62,8 @@ import type {
   OrganizationWriteResult,
 } from '~/types/admin-organizations'
 import type { AdministeredEvents } from '~/types/identity'
+import type { SimilarOrganization } from '~/types/org'
+import type { OrganizationSearchQuery } from '~/types/organization-join'
 import type { Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
 
@@ -70,6 +79,24 @@ export function createAdminOrganizationsApi({ call, send }: ApiTransport) {
      */
     list: (scope: AdministeredEvents): Promise<OrganizationListScreen> =>
       call('/admin/organizations', (m) => m.organizationListScreen(scope)),
+
+    /**
+     * LA RECHERCHE DE LA REVUE DES DOUBLONS — sans aucun filtre.
+     *
+     * Elle sert à choisir la seconde fiche d'une fusion. Lui passer le SITE et
+     * l'ADRESSE DE CONTACT de la fiche déjà connue n'est pas un détail : c'est
+     * ce qui arme le motif `shared_domain`, celui que le module désigne
+     * lui-même comme le plus fiable — deux fiches qui déclarent le même domaine
+     * sont la même maison, quels que soient les libellés saisis.
+     */
+    similar: (query: OrganizationSearchQuery): Promise<SimilarOrganization[]> =>
+      call('/admin/organizations/similar', (m) => m.findSimilarOrganizations(query), {
+        name: query.name,
+        country_id: query.country_id ?? undefined,
+        email: query.email ?? undefined,
+        website: query.website ?? undefined,
+        limit: query.limit,
+      }),
 
     /**
      * LA FILE DES DOUBLONS PRÉSUMÉS — `org.duplicate_candidates`.

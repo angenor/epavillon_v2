@@ -477,8 +477,13 @@ BEGIN
     VALUES (v_person_id, 'super_admin', 'global')
     ON CONFLICT DO NOTHING;
 
-    INSERT INTO org.memberships (organization_id, person_id, role, status, is_primary, approved_at)
-    VALUES (v_org_id, v_person_id, 'manager', 'active', true, now())
+    -- La fonction est EXIGÉE sur une adhésion active (ck_memberships_job_title).
+    -- Celle du compte d'amorçage est générique à dessein : elle sera corrigée par
+    -- la personne qui reprend ce compte, et la laisser vide était impossible.
+    INSERT INTO org.memberships (organization_id, person_id, role, status, is_primary,
+                                 job_title, approved_at)
+    VALUES (v_org_id, v_person_id, 'manager', 'active', true,
+            'Administration de la plateforme', now())
     ON CONFLICT (organization_id, person_id) DO NOTHING;
 
     RAISE NOTICE 'Compte d''administration initial : % (identifiant %). Envoyer un lien d''activation, aucun mot de passe n''a été créé.',

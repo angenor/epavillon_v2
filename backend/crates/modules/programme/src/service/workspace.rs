@@ -93,11 +93,21 @@ pub struct ActionEnAttente {
     pub target: String,
 }
 
-/// Un membre, son adhésion et la personne derrière — `MemberEntry`.
+/// Un membre, son adhésion et la personne derrière — `WorkspaceMember`.
+///
+/// **Ce n'est PAS `MemberEntry`**, que sert le module Organisations sur la file
+/// d'adhésions. Les deux se ressemblent et ne portent pas la même personne :
+/// celle-là a son adresse électronique et sa langue, parce qu'un référent
+/// décide d'une demande et écrit à qui la dépose ; celle-ci s'arrête à
+/// l'affichage, et ce qui n'est pas envoyé ne peut pas fuiter. Leur donner le
+/// même nom au contrat obligeait le site à déclarer une forme qui n'était vraie
+/// ni pour l'une ni pour l'autre.
 #[derive(Debug, Clone, Serialize, ToSchema)]
 pub struct Membre {
     pub membership: LigneDAdhesion,
-    pub person: Option<PersonneAffichee>,
+    /// **Jamais nulle** : `org.memberships.person_id` est `NOT NULL` et
+    /// référence `identity.people`. La composition la retrouve toujours.
+    pub person: PersonneAffichee,
     /// **L'organisation a invité cette personne et attend sa réponse.**
     /// Une adhésion en attente a deux origines opposées, et les confondre
     /// ferait approuver une adhésion que l'intéressé n'a jamais acceptée.
@@ -126,12 +136,15 @@ pub async fn espace(
     state: &ProgrammeState,
     lecteur: Uuid,
     organisation: Uuid,
-) -> Result<EspaceOrganisation> {
-    let adhesion = exiger_ladhesion_active(state, lecteur, organisation).await?;
+) -> Result<Option<EspaceOrganisation>> {
+    let Some(adhesion) = adhesion_active(state, lecteur, organisation).await? else {
+        return Ok(None);
+    };
 
-    let organization = cross::fiche_organisation_complete(state.pool(), organisation)
-        .await?
-        .ok_or_else(ApiError::not_found)?;
+    let Some(organization) = cross::fiche_organisation_complete(state.pool(), organisation).await?
+    else {
+        return Ok(None);
+    };
 
     let dossiers = proposals::de_lorganisation(state.pool(), organisation, None).await?;
     let mut proposals_suivis = Vec::with_capacity(dossiers.len());
@@ -155,25 +168,34 @@ pub async fn espace(
     let mut actions = actions_en_attente(&proposals_suivis, &membres, open_call.as_ref());
     actions.extend(comptes_rendus_manquants(state, &proposals_suivis).await?);
 
-    Ok(EspaceOrganisation {
+    Ok(Some(EspaceOrganisation {
         organization,
         membership: adhesion,
         proposals: proposals_suivis,
+        // **La personne manquante fait disparaître l'adhésion, pas son nom.**
+        // Le cas ne se produit pas — `person_id` est `NOT NULL` et référence
+        // `identity.people` —, et le rendre nul obligeait chaque écran à se
+        // demander ce qu'est un membre sans personne. Si la lecture croisée
+        // devait un jour rater quelqu'un, mieux vaut une liste courte qu'une
+        // ligne vide dont personne ne sait quoi faire.
         members: membres
             .into_iter()
-            .map(|membership| Membre {
-                person: personnes
+            .filter_map(|membership| {
+                let person = personnes
                     .iter()
                     .find(|p| p.id == membership.person_id)
-                    .cloned(),
-                is_invitation: membership.invited_at.is_some(),
-                membership,
+                    .cloned()?;
+                Some(Membre {
+                    person,
+                    is_invitation: membership.invited_at.is_some(),
+                    membership,
+                })
             })
             .collect(),
         actions,
         open_call,
         call_edition,
-    })
+    }))
 }
 
 /// Le dossier d'un déposant — `ProposalFile`.
@@ -181,15 +203,20 @@ pub async fn dossier(
     state: &ProgrammeState,
     lecteur: Uuid,
     id: ProposalId,
-) -> Result<DossierDuDeposant> {
-    let etat = proposals::etat(state.pool(), id)
+) -> Result<Option<DossierDuDeposant>> {
+    let Some(etat) = proposals::etat(state.pool(), id).await? else {
+        return Ok(None);
+    };
+    if adhesion_active(state, lecteur, etat.organization_id)
         .await?
-        .ok_or_else(ApiError::not_found)?;
-    exiger_ladhesion_active(state, lecteur, etat.organization_id).await?;
+        .is_none()
+    {
+        return Ok(None);
+    }
 
-    let fiche = proposals::fiche(state.pool(), id)
-        .await?
-        .ok_or_else(ApiError::not_found)?;
+    let Some(fiche) = proposals::fiche(state.pool(), id).await? else {
+        return Ok(None);
+    };
     let tracking = suivre(state, fiche).await?;
 
     // **Filtré à la source, côté organisation** : ce qui n'est pas envoyé ne
@@ -197,12 +224,12 @@ pub async fn dossier(
     // deux fois serait écrire deux filtres, et le second finirait par diverger.
     let fil = comments::fil(state.pool(), id, lecteur, Cote::Organisation).await?;
 
-    Ok(DossierDuDeposant {
+    Ok(Some(DossierDuDeposant {
         tracking,
         participants: auteurs_nommables(state, &fil, etat.organization_id).await?,
         history: cross::historique_du_dossier(state.pool(), id).await?,
         comments: fil,
-    })
+    }))
 }
 
 /// **🔴 Les auteurs que le déposant a le droit de VOIR NOMMÉS** (écart n° 109).
@@ -249,8 +276,13 @@ pub async fn editions(
     state: &ProgrammeState,
     lecteur: Uuid,
     organisation: Uuid,
-) -> Result<Vec<FicheEdition>> {
-    exiger_ladhesion_active(state, lecteur, organisation).await?;
+) -> Result<Option<Vec<FicheEdition>>> {
+    if adhesion_active(state, lecteur, organisation)
+        .await?
+        .is_none()
+    {
+        return Ok(None);
+    }
 
     let ids = cross::editions_de_lorganisation(state.pool(), organisation).await?;
     let mut fiches = Vec::with_capacity(ids.len());
@@ -263,7 +295,7 @@ pub async fn editions(
     // De la plus récente à la plus ancienne : c'est le dossier en cours qu'on
     // cherche en arrivant, pas celui de la COP28.
     fiches.sort_by_key(|e| std::cmp::Reverse(e.starts_at));
-    Ok(fiches)
+    Ok(Some(fiches))
 }
 
 // -----------------------------------------------------------------------------
@@ -272,23 +304,24 @@ pub async fn editions(
 
 /// **L'adhésion active, et rien d'autre.**
 ///
-/// Le refus est celui d'une ressource inexistante : une organisation dont on
-/// n'est pas membre ne doit pas se distinguer d'une organisation qui n'existe
-/// pas (principe IX).
-async fn exiger_ladhesion_active(
+/// Rend `None` plutôt qu'une erreur, et les trois lectures qui l'appellent
+/// rendent alors `200` avec un corps `null`. Une organisation dont on n'est pas
+/// membre ne se distingue toujours pas d'une organisation qui n'existe pas
+/// (principe IX) — mais l'indiscernabilité ne demandait pas un statut d'erreur.
+/// En 404, les trois écrans de l'espace organisation affichaient « une erreur
+/// est survenue » là où il fallait lire « vous n'avez pas d'espace ici », et
+/// c'est le contrat lui-même qui annonce `| null`.
+async fn adhesion_active(
     state: &ProgrammeState,
     lecteur: Uuid,
     organisation: Uuid,
-) -> Result<LigneDAdhesion> {
+) -> Result<Option<LigneDAdhesion>> {
     let adhesion = cross::adhesions_de_lorganisation(state.pool(), organisation)
         .await?
         .into_iter()
         .find(|a| a.person_id == lecteur);
 
-    match adhesion {
-        Some(a) if a.status == "active" => Ok(a),
-        _ => Err(ApiError::not_found()),
-    }
+    Ok(adhesion.filter(|a| a.status == "active"))
 }
 
 /// Composer le suivi d'un dossier — **et lui retirer ce qui appartient au

@@ -38,7 +38,6 @@ export const proposalComments = [
     resolved_at: null,
     resolved_by: null,
     edited_at: null,
-    deleted_at: null,
     created_at: '2026-08-10T08:30:00Z',
   },
   {
@@ -52,7 +51,6 @@ export const proposalComments = [
     resolved_at: null,
     resolved_by: null,
     edited_at: null,
-    deleted_at: null,
     created_at: '2026-08-11T14:05:00Z',
   },
   {
@@ -66,7 +64,6 @@ export const proposalComments = [
     resolved_at: null,
     resolved_by: null,
     edited_at: '2026-08-12T15:10:00Z',
-    deleted_at: null,
     created_at: '2026-08-12T15:00:00Z',
   },
   {
@@ -80,7 +77,6 @@ export const proposalComments = [
     resolved_at: null,
     resolved_by: null,
     edited_at: null,
-    deleted_at: null,
     created_at: '2026-08-13T09:20:00Z',
   },
 
@@ -96,7 +92,6 @@ export const proposalComments = [
     resolved_at: '2026-07-12T09:30:00Z',
     resolved_by: PERSON.nkoDiop,
     edited_at: null,
-    deleted_at: null,
     created_at: '2026-07-08T11:00:00Z',
   },
   {
@@ -110,7 +105,6 @@ export const proposalComments = [
     resolved_at: null,
     resolved_by: null,
     edited_at: null,
-    deleted_at: null,
     created_at: '2026-07-11T16:20:00Z',
   },
 
@@ -126,7 +120,6 @@ export const proposalComments = [
     resolved_at: null,
     resolved_by: null,
     edited_at: null,
-    deleted_at: null,
     created_at: '2026-07-25T10:40:00Z',
   },
   {
@@ -140,7 +133,6 @@ export const proposalComments = [
     resolved_at: null,
     resolved_by: null,
     edited_at: null,
-    deleted_at: null,
     created_at: '2026-07-25T13:15:00Z',
   },
   {
@@ -154,7 +146,6 @@ export const proposalComments = [
     resolved_at: null,
     resolved_by: null,
     edited_at: null,
-    deleted_at: null,
     created_at: '2026-08-01T09:00:00Z',
   },
 
@@ -170,7 +161,6 @@ export const proposalComments = [
     resolved_at: null,
     resolved_by: null,
     edited_at: null,
-    deleted_at: null,
     created_at: '2026-08-05T07:45:00Z',
   },
 
@@ -192,7 +182,6 @@ export const proposalComments = [
     resolved_at: null,
     resolved_by: null,
     edited_at: null,
-    deleted_at: null,
     created_at: '2026-08-04T10:20:00Z',
   },
   {
@@ -206,7 +195,6 @@ export const proposalComments = [
     resolved_at: null,
     resolved_by: null,
     edited_at: null,
-    deleted_at: null,
     created_at: '2026-08-05T16:40:00Z',
   },
   {
@@ -223,7 +211,6 @@ export const proposalComments = [
     resolved_at: null,
     resolved_by: null,
     edited_at: null,
-    deleted_at: null,
     created_at: '2026-08-07T08:15:00Z',
   },
   {
@@ -237,7 +224,6 @@ export const proposalComments = [
     resolved_at: null,
     resolved_by: null,
     edited_at: null,
-    deleted_at: null,
     created_at: '2026-08-08T11:30:00Z',
   },
   {
@@ -254,25 +240,13 @@ export const proposalComments = [
     resolved_at: null,
     resolved_by: null,
     edited_at: null,
-    deleted_at: null,
     created_at: '2026-08-09T07:05:00Z',
   },
 
-  // --- Commentaire supprimé, conservé en base ------------------------------
-  {
-    id: PROPOSAL_COMMENT(11),
-    proposal_id: PROPOSAL.creditsVolontaires,
-    parent_id: null,
-    author_id: PERSON.rasoanaivo,
-    visibility: 'committee',
-    body: '',
-    is_change_request: false,
-    resolved_at: null,
-    resolved_by: null,
-    edited_at: null,
-    deleted_at: '2026-07-27T11:00:00Z',
-    created_at: '2026-07-26T18:30:00Z',
-  },
+  // Un message SUPPRIMÉ ne figure plus ici, et c'est le modèle qui le veut :
+  // `deleted_at` existe en base, mais l'API filtre à la source et ne le rend
+  // jamais. Le simuler ferait décrire aux données simulées une réponse que la
+  // plateforme n'envoie pas.
 ] satisfies ProposalComment[]
 
 // ---------------------------------------------------------------------------

@@ -94,12 +94,6 @@ pub struct EditionFormPayload {
     pub has_pavilion: bool,
     #[serde(default)]
     pub highlights: Option<Value>,
-    /// **Acceptées et non posées** (research.md § R17). Le rattachement média
-    /// est polymorphe et appartient au module Média : ce jalon **lit** les trois
-    /// déclinaisons résolues et accepte sans les écrire les identifiants
-    /// d'objet que le formulaire envoie. Obligation inscrite pour B6.
-    #[serde(default)]
-    pub images: Option<Value>,
 }
 
 impl EditionFormPayload {

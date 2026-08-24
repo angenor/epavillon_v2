@@ -5,6 +5,7 @@ import type { Country, Locale, TaxonomyTerm } from '~/types/reference'
 import type { Organization } from '~/types/org'
 import type { ProposalStatus } from '~/types/programme/proposal'
 import type {
+  EditableProposal,
   ProposalDraft,
   ProposalFormStep,
   SubmitProposalResult,
@@ -263,31 +264,28 @@ watch(
         isDraftReady.value = true
         return
       }
-      draft.value = existing.draft
       editedStatus.value = existing.status
-      adoptDraft({
-        proposal_id: existing.proposal_id,
-        reference_code: existing.reference_code,
-        saved_at: existing.saved_at,
-      })
-      isDraftReady.value = true
-      await nextTick()
-      armAutosave()
+      await adoptReopened(existing)
       return
     }
 
-    const existing = await api.proposals.myDraft(personId)
-    const active = memberships.active
-    if (existing) {
-      draft.value = existing.draft
-      adoptDraft(existing)
-    } else {
-      draft.value = emptyProposalDraft({
-        organizationId: active.length === 1 ? active[0]?.organization.id : null,
-        durationMinutes: ready.call.default_duration_minutes,
-        locale: locale.value,
-      })
+    // REPRISE D'UN BROUILLON : DEUX LECTURES, et c'est le contrat. La première
+    // ne rend que l'IDENTITÉ du dossier — numéro, horodatage, état ; le contenu
+    // vient de la MÊME recomposition que la correction, et non d'une seconde
+    // forme qui divergerait au premier champ ajouté.
+    const pending = await api.proposals.myDraft(personId)
+    const reopened = pending ? await api.proposals.forEdit(pending.proposal_id) : null
+    if (reopened) {
+      await adoptReopened(reopened)
+      return
     }
+
+    const active = memberships.active
+    draft.value = emptyProposalDraft({
+      organizationId: active.length === 1 ? active[0]?.organization.id : null,
+      durationMinutes: ready.call.default_duration_minutes,
+      locale: locale.value,
+    })
 
     isDraftReady.value = true
     await nextTick()
@@ -295,6 +293,29 @@ watch(
   },
   { immediate: true },
 )
+
+/**
+ * POSER DANS LE FORMULAIRE UN DOSSIER ROUVERT.
+ *
+ * L'API rend le brouillon recomposé, mais ni les clés de liste des intervenants
+ * — locales à l'écran, et sans elles en modifier un les remplace tous — ni les
+ * pièces jointes, qui ont leur propre route. Les deux se complètent ICI, en un
+ * seul endroit : reprise et correction rouvrent le même dossier.
+ */
+async function adoptReopened(existing: EditableProposal): Promise<void> {
+  // Les pièces ne commandent pas la reprise : perdre le formulaire entier parce
+  // qu'une liste annexe n'est pas revenue serait le pire des deux échecs.
+  const attached = await api.proposals.documents(existing.proposal_id).catch(() => [])
+  draft.value = draftFromReopened(existing.draft, attached.map(draftDocumentOf))
+  adoptDraft({
+    proposal_id: existing.proposal_id,
+    reference_code: existing.reference_code,
+    saved_at: existing.saved_at,
+  })
+  isDraftReady.value = true
+  await nextTick()
+  armAutosave()
+}
 
 // ---------------------------------------------------------------------------
 // Les défauts du dossier
@@ -435,7 +456,7 @@ async function previousStep(): Promise<void> {
 
 const isSubmitting = ref(false)
 const submitError = ref<Error | null>(null)
-const refusal = ref<Extract<SubmitProposalResult, { status: 'call_closed' | 'quota_reached' }> | null>(null)
+const refusal = ref<Exclude<SubmitProposalResult, { status: 'submitted' }> | null>(null)
 const outcome = ref<Extract<SubmitProposalResult, { status: 'submitted' }> | null>(null)
 /**
  * Une correction ENREGISTRÉE sur un dossier qui ne repart pas au comité.
@@ -502,7 +523,7 @@ async function submit(): Promise<void> {
       outcome.value = result
       if (import.meta.client) window.scrollTo({ top: 0 })
     } else {
-      // Les deux refus de `tg_check_submission_eligibility()`. Ce ne sont pas
+      // Les trois refus de `tg_check_submission_eligibility()`. Ce ne sont pas
       // des erreurs de réseau : ils se rendent en clair, avec la suite possible.
       refusal.value = result
     }
@@ -520,6 +541,19 @@ async function submit(): Promise<void> {
 /** Le plafond annoncé par le refus, extrait pour que le gabarit reste typé. */
 const refusedQuota = computed(() =>
   refusal.value?.status === 'quota_reached' ? refusal.value.max : null,
+)
+
+/**
+ * UN REFUS QUE CETTE VERSION NE CONNAÎT PAS.
+ *
+ * La recevabilité se tranche en base, et l'API rend le discriminant même quand
+ * l'écran l'ignore. Le taire laisserait un bouton « Déposer » sans effet
+ * apparent — l'organisation clique, rien ne bouge, personne ne sait pourquoi.
+ */
+const KNOWN_REFUSALS: string[] = ['call_closed', 'quota_reached', 'organization_not_verified']
+
+const unknownRefusal = computed(() =>
+  refusal.value && !KNOWN_REFUSALS.includes(refusal.value.status) ? refusal.value.status : null,
 )
 
 const eventTo = computed(() =>
@@ -702,7 +736,8 @@ const organizationSpaceTo = computed<string | null>(() =>
             :message="submitError.message"
           />
 
-          <!-- Les deux refus de la base, rendus en clair. -->
+          <!-- Les refus de la base, rendus en clair — y compris celui que
+               cette version ne connaîtrait pas encore. -->
           <UiAlert
             v-if="refusal?.status === 'call_closed'"
             intent="warning"
@@ -716,6 +751,20 @@ const organizationSpaceTo = computed<string | null>(() =>
             live
             :title="t('proposal.form.refusals.quota.title')"
             :message="t('proposal.form.refusals.quota.description', { max: refusedQuota ?? 0 })"
+          />
+          <UiAlert
+            v-if="refusal?.status === 'organization_not_verified'"
+            intent="warning"
+            live
+            :title="t('proposal.form.refusals.notVerified.title')"
+            :message="t('proposal.form.refusals.notVerified.description')"
+          />
+          <UiAlert
+            v-if="unknownRefusal"
+            intent="warning"
+            live
+            :title="t('proposal.form.refusals.unknown.title')"
+            :message="t('proposal.form.refusals.unknown.description', { status: unknownRefusal })"
           />
 
           <section class="rounded-lg border border-border bg-surface-raised px-4 py-5 sm:px-6 sm:py-6">

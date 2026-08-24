@@ -64,7 +64,7 @@ async fn la_programmation_ne_porte_que_le_publie() {
     publier(&bac, publique).await;
 
     // Aucun acteur, aucun périmètre : la lecture ne garde rien.
-    let lignes = public_schedule::programmation(bac.pool(), EventId(terrain.edition))
+    let lignes = public_schedule::programmation(bac.pool(), Some(EventId(terrain.edition)), None)
         .await
         .expect("la lecture aboutit sans session");
 
@@ -112,7 +112,7 @@ async fn chaque_ligne_porte_ce_que_la_carte_affiche() {
         .unwrap();
     publier(&bac, id).await;
 
-    let ligne = public_schedule::programmation(bac.pool(), EventId(terrain.edition))
+    let ligne = public_schedule::programmation(bac.pool(), Some(EventId(terrain.edition)), None)
         .await
         .unwrap()
         .remove(0);
@@ -206,7 +206,7 @@ async fn la_couverture_se_replie_sur_celle_du_dossier() {
         .id;
     publier(&bac, id).await;
 
-    let ligne = public_schedule::programmation(bac.pool(), EventId(terrain.edition))
+    let ligne = public_schedule::programmation(bac.pool(), Some(EventId(terrain.edition)), None)
         .await
         .unwrap()
         .remove(0);
@@ -251,7 +251,7 @@ async fn une_edition_non_publiee_rend_une_liste_vide() {
     seances::grille(&bac, terrain.edition).await;
     seance(&bac, &terrain, "Interne", "interne").await;
 
-    let lignes = public_schedule::programmation(bac.pool(), EventId(terrain.edition))
+    let lignes = public_schedule::programmation(bac.pool(), Some(EventId(terrain.edition)), None)
         .await
         .expect("aucune erreur");
 
@@ -276,4 +276,41 @@ async fn le_detail_dune_seance_publiee_porte_ses_participants() {
     assert_eq!(detail.session.id, id);
     assert_eq!(detail.speakers.len(), 2);
     assert_eq!(detail.organizations.len(), 2, "le porteur et sa partenaire");
+}
+
+/// **Sans édition, la lecture traverse toutes les éditions** — c'est ce que
+/// compose l'accueil du site, qui n'a pas d'édition à nommer.
+///
+/// Et elle est BORNÉE dans les deux sens : les séances passées n'y figurent
+/// pas, et le plafond est respecté. Sans ces deux bornes, la page d'accueil
+/// rendrait la programmation entière de toutes les COP de l'histoire de la
+/// plateforme à chaque affichage.
+#[tokio::test]
+async fn sans_edition_la_lecture_rend_les_seances_a_venir_de_toutes_les_editions() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+    seances::grille(&bac, terrain.edition).await;
+
+    let premiere = seance(&bac, &terrain, "Ouverture", "ouverture").await;
+    let seconde = seance(&bac, &terrain, "Clôture", "cloture").await;
+    publier(&bac, premiere).await;
+    publier(&bac, seconde).await;
+
+    let toutes = public_schedule::programmation(bac.pool(), None, Some(50))
+        .await
+        .expect("la lecture aboutit sans édition et sans session");
+
+    assert!(
+        toutes.iter().any(|l| l.id == premiere),
+        "une séance publiée d'une édition à venir figure dans la liste sans édition"
+    );
+    assert!(
+        toutes.iter().all(|l| l.temporal_state != "past"),
+        "aucune séance passée : l'accueil annonce ce qui vient, pas ce qui a eu lieu"
+    );
+
+    let plafonnee = public_schedule::programmation(bac.pool(), None, Some(1))
+        .await
+        .expect("la lecture aboutit");
+    assert_eq!(plafonnee.len(), 1, "le plafond est respecté");
 }

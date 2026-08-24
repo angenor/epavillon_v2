@@ -36,5 +36,12 @@
     "title": "Aucune invitation à ouvrir",
     "description": "Cette page confirme une adhésion à partir du lien reçu par courriel. Ouvrez ce lien depuis votre boîte aux lettres.",
     "action": "Retour à l'accueil"
+  },
+  "jobTitle": {
+    "title": "Votre fonction dans l'organisation",
+    "description": "Indiquez le poste que vous occupez avant de rejoindre l'organisation. Il apparaîtra auprès de votre nom dans l'espace de travail.",
+    "label": "Fonction occupée",
+    "hint": "Par exemple : Chargée de projet climat, Directrice des programmes.",
+    "submit": "Rejoindre l'organisation"
   }
 }

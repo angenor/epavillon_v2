@@ -4,7 +4,8 @@
     "description": "C'est elle qui figure au programme, répond des engagements pris et reçoit la décision du comité.",
     "single": "Vous déposez au nom de cette organisation. Pour en changer, rattachez-vous à une autre depuis votre profil.",
     "field": "Déposer au nom de",
-    "fieldHint": "Vous appartenez à plusieurs organisations : choisissez celle qui porte cette activité."
+    "fieldHint": "Vous appartenez à plusieurs organisations : choisissez celle qui porte cette activité.",
+    "createsRecord": "Commencez par là : le dossier n'est créé, et son enregistrement automatique ne démarre, qu'une fois l'organisation porteuse choisie."
   },
   "co": {
     "title": "Co-organisateurs, partenaires et soutiens",

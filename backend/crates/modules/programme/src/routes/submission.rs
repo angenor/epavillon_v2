@@ -259,7 +259,7 @@ pub(crate) async fn modifier(
 /// Le dépôt.
 #[utoipa::path(
     post,
-    description = "`SubmitProposalPayload` → `SubmitProposalResult`. **Les trois refus de recevabilité sortent en 200**, avec leur valeur : l'échéance pour un appel clos, le plafond pour un quota atteint. Ils sont classés **avant** l'écriture parce que le déclencheur ne les rend que dans une phrase française, et parce qu'un même code d'erreur PostgreSQL sert aux quatre causes possibles. Le déclencheur reste le dernier mot : une course est **reclassée**, jamais lue au texte. Le brouillon est enregistré **avant** toute décision — si l'appel a fermé entre le chargement et le clic, l'organisation ne perd pas en plus ce qu'elle venait de saisir. La réponse porte le nombre de revues attendues et la date d'annonce, **lus sur l'appel**.",
+    description = "`SaveDraftPayload` → `SubmitProposalResult`. **Les trois refus de recevabilité sortent en 200**, avec leur valeur : l'échéance pour un appel clos, le plafond pour un quota atteint. Ils sont classés **avant** l'écriture parce que le déclencheur ne les rend que dans une phrase française, et parce qu'un même code d'erreur PostgreSQL sert aux quatre causes possibles. Le déclencheur reste le dernier mot : une course est **reclassée**, jamais lue au texte. Le brouillon est enregistré **avant** toute décision — si l'appel a fermé entre le chargement et le clic, l'organisation ne perd pas en plus ce qu'elle venait de saisir. La réponse porte le nombre de revues attendues et la date d'annonce, **lus sur l'appel**.",
     path = "/proposals/{id}/submit",
     tag = "Dépôt",
     operation_id = "depot_deposer",

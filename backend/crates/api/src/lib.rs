@@ -44,7 +44,13 @@ pub fn build_app(
     // d'exploitation, protégés par une permission, et confie la vivacité anonyme
     // à `/ready`. Prendre le nom protégé casserait la sonde le jour où `/health`
     // arrive — il est arrivé, et les deux vivent côte à côte dans `routes/health.rs`.
-    let mut portee = web::scope(PREFIXE).configure(routes::health::configurer);
+    let mut portee = web::scope(PREFIXE)
+        .configure(routes::health::configurer)
+        // Le référentiel et les drapeaux ne dépendent d'AUCUN module : ils sont
+        // montés inconditionnellement. Un module démonté ne doit pas emporter la
+        // liste des pays du formulaire d'inscription avec lui.
+        .configure(routes::reference::configurer)
+        .configure(routes::platform::configurer);
 
     // Servie partout sauf en production, où le document décrirait la totalité
     // de la surface d'appel à qui sonde le port.

@@ -35,8 +35,10 @@
 import type { Proposal, ProposalStatus } from '~/types/programme/proposal'
 import type {
   DraftOrganization,
-  DraftSpeaker,
+  EditableProposal,
   ProposalDraft,
+  ReopenedDraft,
+  ReopenedSpeaker,
   SaveDraftPayload,
   SaveDraftResult,
   SubmitProposalResult,
@@ -48,17 +50,6 @@ import { organizations } from './org'
 import { people } from './people'
 import { entityTerms, taxonomyTerms } from './reference'
 import { allProposals, proposalOrganizations, proposalSpeakers } from './proposals'
-
-/** Ce que l'écran reçoit pour rouvrir un dossier. */
-export interface EditableProposal {
-  proposal_id: string
-  reference_code: string
-  call_id: string | null
-  event_id: string
-  status: ProposalStatus
-  saved_at: string
-  draft: ProposalDraft
-}
 
 // ---------------------------------------------------------------------------
 // Le journal des modifications de la session
@@ -115,6 +106,19 @@ function fr(value: { fr: string } | null | undefined): string {
   return value?.fr ?? ''
 }
 
+/**
+ * CE QUE L'API REND D'UN BROUILLON qu'elle a reçu : ni clés de liste, ni photos,
+ * ni pièces jointes. Le mock doit dire la même chose qu'elle, sinon la bascule
+ * vers l'API réelle se ferait sans que rien ne signale l'écart.
+ */
+function reopened(draft: ProposalDraft): ReopenedDraft {
+  const { documents: _documents, speakers, ...rest } = draft
+  return {
+    ...rest,
+    speakers: speakers.map(({ key: _key, photo: _photo, ...speaker }) => speaker),
+  }
+}
+
 function coOrganizationsOf(proposalId: string): DraftOrganization[] {
   return proposalOrganizations
     .filter((link) => link.proposal_id === proposalId && link.role !== 'lead')
@@ -131,14 +135,17 @@ function coOrganizationsOf(proposalId: string): DraftOrganization[] {
     })
 }
 
-function speakersOf(proposalId: string): DraftSpeaker[] {
+/**
+ * NI CLÉ DE LISTE NI PHOTO : l'API n'en rend pas. La clé est locale à l'écran,
+ * qui la pose à la réception ; la photo appartient à la fiche de la personne.
+ */
+function speakersOf(proposalId: string): ReopenedSpeaker[] {
   return proposalSpeakers
     .filter((speaker) => speaker.proposal_id === proposalId)
     .sort((a, b) => a.sort_order - b.sort_order)
-    .map((speaker, index) => {
+    .map((speaker) => {
       const person = people.find((p) => p.id === speaker.person_id)
       return {
-        key: `existing-${index}`,
         person_id: speaker.person_id,
         // L'identité d'une personne qui a un COMPTE lui appartient : le
         // formulaire la verrouille (écart n° 31).
@@ -152,9 +159,6 @@ function speakersOf(proposalId: string): DraftSpeaker[] {
         organization_id: speaker.organization_id,
         role: speaker.role,
         bio: fr(speaker.bio),
-        // La photo n'est pas rechargée : l'aperçu local ne survit pas à la
-        // session, et le téléversement réel appartient au prompt B6.
-        photo: null,
       }
     })
 }
@@ -189,14 +193,14 @@ export function editableProposal(proposalId: string): EditableProposal | null {
       event_id: stored.event_id,
       status: record.status,
       saved_at: record.saved_at,
-      draft: record.draft,
+      draft: reopened(record.draft),
     }
   }
 
   const edition = events.find((event) => event.id === stored.event_id)
   const timezone = edition?.timezone ?? 'UTC'
 
-  const draft: ProposalDraft = {
+  const draft: ReopenedDraft = {
     organization_id: stored.organization_id,
     co_organizations: coOrganizationsOf(proposalId),
     title: fr(stored.title),
@@ -219,9 +223,6 @@ export function editableProposal(proposalId: string): EditableProposal | null {
     duration_minutes: stored.duration_minutes,
     requested_sessions: stored.requested_sessions,
     scheduling_constraints: stored.scheduling_constraints ?? '',
-    // Les pièces jointes ne se rechargent pas tant que le téléversement réel
-    // n'existe pas (prompt B6) : les redéposer effacerait ce qui est en base.
-    documents: [],
   }
 
   return {

@@ -36,7 +36,7 @@ interface Props {
 const props = defineProps<Props>()
 const emit = defineEmits<{
   'update:open': [value: boolean]
-  submit: [payload: Omit<SetPersonStatusPayload, 'person_id'>]
+  submit: [payload: SetPersonStatusPayload]
 }>()
 
 const { t } = useI18n()

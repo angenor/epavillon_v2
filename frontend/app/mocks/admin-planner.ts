@@ -47,7 +47,7 @@ import type {
   SessionBroadcastPayload,
   SessionTracksPayload,
 } from '~/types/admin-planner'
-import type { Session, SessionTrack } from '~/types/programme/session'
+import type { Session, SessionStatus, SessionTrack } from '~/types/programme/session'
 import type { Uuid } from '~/types/shared'
 import { detectConflicts, publicationReadiness } from './conflicts'
 import { events, eventDays } from './event'
@@ -186,16 +186,17 @@ function toPlannerSession(session: Session): PlannerSession {
 
 /**
  * Les séances que le planificateur montre : celles de l'édition, DANS TOUS LEURS
- * ÉTATS sauf ceux qui n'occupent plus rien.
+ * ÉTATS.
  *
- * Une séance annulée ou reportée n'est ni au calendrier ni au panneau : elle
- * n'attend aucun placement et son bloc ferait croire à une salle occupée. Elle
- * reste en base, et l'écran de la séance la montrera (A13).
+ * `seances_de_ledition` ne filtre aucun statut, et l'écran doit voir ce que
+ * l'API lui enverra : une séance annulée qui occupe encore une salle apparaît
+ * bel et bien dans la grille, et c'est justement ce qu'il faut arbitrer. Le tri
+ * par statut se fait ailleurs, et deux fois plutôt qu'une : `detect_conflicts()`
+ * ne retient que `planned`, `scheduled` et `live` ; la publication, que les deux
+ * premiers.
  */
-function schedulableSessions(eventId: Uuid): Session[] {
-  return allSessions.filter(
-    (s) => s.event_id === eventId && s.status !== 'cancelled' && s.status !== 'postponed',
-  )
+function editionSessions(eventId: Uuid): Session[] {
+  return allSessions.filter((s) => s.event_id === eventId)
 }
 
 /** TOUT L'ÉCRAN EN UNE RÉPONSE, conflits compris. */
@@ -203,7 +204,7 @@ export function plannerScreen(eventId: Uuid): PlannerScreen | null {
   const event = events.find((e) => e.id === eventId)
   if (!event) return null
 
-  const sessions = schedulableSessions(eventId).map(toPlannerSession)
+  const sessions = editionSessions(eventId).map(toPlannerSession)
 
   const days: PlannerDay[] = eventDays
     .filter((day) => day.event_id === eventId)
@@ -287,26 +288,19 @@ export function plannerScreen(eventId: Uuid): PlannerScreen | null {
  * déplacement peut résoudre le conflit d'un autre bloc à l'autre bout de la
  * semaine.
  *
- * Une séance placée passe de `planned` à `scheduled` — elle a désormais un
- * créneau et un lieu arrêtés. Elle ne devient PAS publique pour autant :
- * `published_at` reste nul jusqu'à la publication du programme.
+ * PLACER NE CHANGE PAS LE STATUT. `ecrire_le_creneau` n'écrit que `room_id`,
+ * `starts_at`, `ends_at` et `event_day_id` ; `scheduled` veut dire « programmé
+ * ET publié » (`075` l. 43), et c'est la PUBLICATION qui fait passer `planned` à
+ * `scheduled`. Le faire ici marquerait comme publique une séance qui n'est que
+ * posée, et le calendrier lui retirerait le fond neutre de l'état de travail.
  */
-export function scheduleSession(payload: ScheduleSessionPayload): PlannerMutationResult | null {
+export function scheduleSession(payload: ScheduleSessionPayload): PlannerMutationResult {
   const session = sessionById(payload.session_id)
-  if (!session) return null
+  if (!session) throw new Error(`Séance ${payload.session_id} introuvable.`)
 
   session.room_id = payload.room_id
   session.starts_at = payload.starts_at
   session.ends_at = payload.ends_at
-
-  if (payload.room_id === null) {
-    // Retirée du calendrier : elle retourne au panneau, elle n'est pas supprimée
-    // et son créneau souhaité reste celui du dossier.
-    if (session.status === 'scheduled') session.status = 'planned'
-  } else if (session.status === 'planned') {
-    session.status = 'scheduled'
-  }
-
   session.updated_at = new Date().toISOString()
   deriveFields(session)
 
@@ -325,9 +319,9 @@ export function scheduleSession(payload: ScheduleSessionPayload): PlannerMutatio
  * `tg_session_tracks_check_event()` le refuse en base — c'est le seul refus de
  * ce fichier avec la publication, et il ne porte pas sur un créneau.
  */
-export function setSessionTracks(payload: SessionTracksPayload, actorId: Uuid | null): PlannerMutationResult | null {
+export function setSessionTracks(payload: SessionTracksPayload, actorId: Uuid | null): PlannerMutationResult {
   const session = sessionById(payload.session_id)
-  if (!session) return null
+  if (!session) throw new Error(`Séance ${payload.session_id} introuvable.`)
 
   const allowed = new Set(
     programmeTracks.filter((track) => track.event_id === session.event_id).map((track) => track.id),
@@ -373,9 +367,9 @@ export function setSessionTracks(payload: SessionTracksPayload, actorId: Uuid | 
  * règle. Deux directs simultanés restent parfaitement écrivables — ils
  * apparaissent alors au bandeau, en gravité bloquante.
  */
-export function setSessionBroadcast(payload: SessionBroadcastPayload): PlannerMutationResult | null {
+export function setSessionBroadcast(payload: SessionBroadcastPayload): PlannerMutationResult {
   const session = sessionById(payload.session_id)
-  if (!session) return null
+  if (!session) throw new Error(`Séance ${payload.session_id} introuvable.`)
 
   session.is_streamed = payload.is_streamed
   session.broadcast_channel_id = payload.is_streamed ? payload.broadcast_channel_id : null
@@ -385,6 +379,9 @@ export function setSessionBroadcast(payload: SessionBroadcastPayload): PlannerMu
   return { session: toPlannerSession(session), conflicts: detectConflicts(session.event_id) }
 }
 
+/** Le prédicat de la publication, celui de l'API — `STATUTS_A_PUBLIER`. */
+const PUBLISHABLE_STATUSES: ReadonlySet<SessionStatus> = new Set(['planned', 'scheduled'])
+
 /**
  * PUBLIER LA PROGRAMMATION — le seul contrôle bloquant de l'écran.
  *
@@ -393,8 +390,13 @@ export function setSessionBroadcast(payload: SessionBroadcastPayload): PlannerMu
  * sans la retenir : un intervenant attendu à deux endroits est un problème que
  * l'équipe juge, pas une impossibilité matérielle.
  *
- * Ce qui devient public : les séances placées et arrêtées (`scheduled`), jamais
- * celles qui attendent encore une salle. Une séance déjà publiée le reste.
+ * CE QUI DEVIENT PUBLIC : les séances `planned` ou `scheduled` pas encore
+ * publiées — avec ou sans salle. Une séance sans salle mais portant une
+ * précision de lieu a passé le contrôle : rien ne justifie de l'écarter ici.
+ *
+ * REPUBLIER NE PUBLIE RIEN. L'API estampille sous `WHERE
+ * programme_published_at IS NULL` : une édition déjà publiée rend sa date
+ * d'origine, zéro séance, et n'annonce rien.
  */
 export function publishProgramme(eventId: Uuid): PublishProgrammeResult {
   const issues = publicationReadiness(eventId)
@@ -404,16 +406,29 @@ export function publishProgramme(eventId: Uuid): PublishProgrammeResult {
     return { blocked: true, published_count: 0, published_at: null, issues }
   }
 
+  const event = events.find((e) => e.id === eventId)
+  if (event?.programme_published_at) {
+    return {
+      blocked: false,
+      published_count: 0,
+      published_at: event.programme_published_at,
+      issues,
+    }
+  }
+
   const now = new Date().toISOString()
   let published = 0
-  for (const session of schedulableSessions(eventId) as MutableSession[]) {
+  for (const session of editionSessions(eventId) as MutableSession[]) {
     if (session.published_at !== null) continue
-    if (session.status !== 'scheduled') continue
+    if (!PUBLISHABLE_STATUSES.has(session.status)) continue
     session.published_at = now
+    // `planned` devient `scheduled` — « programmé et publié ». Le consommateur
+    // de l'annonce l'écrit dans le même UPDATE que la date, et c'est le seul
+    // endroit où ce passage se fait.
+    if (session.status === 'planned') session.status = 'scheduled'
     published += 1
   }
 
-  const event = events.find((e) => e.id === eventId)
   if (event) (event as { programme_published_at: string | null }).programme_published_at = now
 
   return { blocked: false, published_count: published, published_at: now, issues }

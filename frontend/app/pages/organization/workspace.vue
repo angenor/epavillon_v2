@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { EventEdition } from '~/types/event/edition'
 import type { InviteMemberPayload, ProposalTracking, WorkspaceOverview } from '~/types/organization-workspace'
-import type { SelectOption } from '~/types/ui'
+import type { Intent, SelectOption } from '~/types/ui'
 import type { Uuid } from '~/types/shared'
 
 /**
@@ -147,7 +147,16 @@ const isManager = computed(() => overview.value?.membership.role === 'manager')
 // ---------------------------------------------------------------------------
 
 const inviting = ref(false)
-const inviteMessage = ref<{ intent: 'success' | 'info'; text: string } | null>(null)
+const memberMessage = ref<{ intent: Intent; text: string } | null>(null)
+
+/**
+ * Le texte d'un refus. L'API refuse en nommant sa raison — « seul un référent
+ * peut inviter », « cette adhésion est une invitation » — et son catalogue est
+ * déjà français : on l'affiche tel quel. Le site ne parle que si elle s'est tue.
+ */
+function refusalOf(thrown: unknown): string {
+  return thrown instanceof ForbiddenError ? thrown.message : apiErrorMessage(thrown, (key) => t(key))
+}
 
 async function invite(payload: Omit<InviteMemberPayload, 'organization_id'>): Promise<void> {
   const organizationId = currentOrganizationId.value
@@ -155,10 +164,10 @@ async function invite(payload: Omit<InviteMemberPayload, 'organization_id'>): Pr
   if (!organizationId || !person) return
 
   inviting.value = true
-  inviteMessage.value = null
+  memberMessage.value = null
   try {
     const result = await api.organizations.invite(person.id, { ...payload, organization_id: organizationId })
-    inviteMessage.value = {
+    memberMessage.value = {
       // Seule l'invitation réellement partie est une réussite. « Déjà membre »
       // et « déjà invitée » ne sont pas des erreurs — ce sont des réponses, et
       // les peindre en rouge ferait croire à un échec de l'envoi.
@@ -168,6 +177,8 @@ async function invite(payload: Omit<InviteMemberPayload, 'organization_id'>): Pr
       }),
     }
     await refresh()
+  } catch (error) {
+    memberMessage.value = { intent: 'danger', text: refusalOf(error) }
   } finally {
     inviting.value = false
   }
@@ -178,9 +189,12 @@ async function decide(membershipId: string, approved: boolean): Promise<void> {
   const person = auth.person
   if (!person) return
   inviting.value = true
+  memberMessage.value = null
   try {
     await api.organizations.decideMembership(person.id, { membership_id: membershipId, approved })
     await refresh()
+  } catch (error) {
+    memberMessage.value = { intent: 'danger', text: refusalOf(error) }
   } finally {
     inviting.value = false
   }
@@ -294,10 +308,10 @@ async function decide(membershipId: string, approved: boolean): Promise<void> {
       </section>
 
       <UiAlert
-        v-if="inviteMessage"
+        v-if="memberMessage"
         class="mt-12"
-        :intent="inviteMessage.intent === 'success' ? 'success' : 'info'"
-        :message="inviteMessage.text"
+        :intent="memberMessage.intent"
+        :message="memberMessage.text"
         live
       />
 

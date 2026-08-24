@@ -4,6 +4,10 @@ version = "0.1.0"
 edition.workspace = true
 rust-version.workspace = true
 publish.workspace = true
+# Le crate porte deux binaires depuis la bascule du site : le serveur et
+# l'export du document OpenAPI. Sans cette ligne, `cargo run -p api` — la
+# commande écrite dans CLAUDE.md — refuse de choisir.
+default-run = "api"
 
 [dependencies]
 kernel.workspace = true

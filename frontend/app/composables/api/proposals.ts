@@ -27,7 +27,10 @@
  */
 
 import type { AdministeredEvents } from '~/types/identity'
+import type { ProposalDocumentEntry } from '~/types/admin-review'
+import type { ScheduleThemeBadge } from '~/types/views'
 import type {
+  EditableProposal,
   SaveDraftPayload,
   SaveDraftResult,
   SubmitProposalPayload,
@@ -48,7 +51,7 @@ export interface ProposalsApiContext extends ApiTransport {
   assertEventInScope: (eventId: Uuid, scope: AdministeredEvents) => void
 }
 
-export function createProposalsApi({ call, send, assertEventInScope }: ProposalsApiContext) {
+export function createProposalsApi({ call, callOrNull, send, assertEventInScope }: ProposalsApiContext) {
   return {
   /** Liste du back-office (A7) : la vue prête à l'emploi, filtrée par périmètre. */
   dashboard: (eventId: Uuid, scope: AdministeredEvents) => {
@@ -127,17 +130,46 @@ export function createProposalsApi({ call, send, assertEventInScope }: Proposals
     call(`/proposals/${id}/organizations`, (m) => m.proposalOrganizations.filter((o) => o.proposal_id === id)),
   speakers: (id: Uuid) =>
     call(`/proposals/${id}/speakers`, (m) => m.proposalSpeakers.filter((s) => s.proposal_id === id)),
-  documents: (id: Uuid) =>
-    call(`/proposals/${id}/documents`, (m) => m.proposalDocuments.filter((d) => d.proposal_id === id)),
-  /** Fil d'échanges, filtré sur ce que le lecteur a le droit de voir. */
-  comments: (id: Uuid, viewerId: Uuid, isCommittee: boolean) =>
+  /**
+   * LES PIÈCES DU DOSSIER, chacune avec son objet stocké et son adresse.
+   *
+   * L'ADRESSE EST COMPOSÉE EN BASE (`media.object_url()`) et NULLE quand
+   * l'objet n'est pas servi — quarantaine, purge, téléversement inachevé. C'est
+   * cette nullité qui commande l'avertissement plutôt que le bouton : on doit
+   * savoir qu'une pièce manque au dossier, pas cliquer sur un lien mort.
+   */
+  documents: (id: Uuid): Promise<ProposalDocumentEntry[]> =>
+    call(`/proposals/${id}/documents`, (m) =>
+      m.proposalDocuments
+        .filter((document) => document.proposal_id === id)
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map((document) => {
+          const asset = m.proposalAssets.find((entry) => entry.id === document.asset_id) ?? null
+          return {
+            document,
+            asset,
+            url: asset && asset.status === 'ready' ? `/mocks/documents/${asset.object_key}` : null,
+          }
+        }),
+    ),
+  /**
+   * LE FIL D'ÉCHANGES, filtré À LA SOURCE.
+   *
+   * L'API ne prend ni lecteur ni appartenance au comité : elle tranche sur
+   * l'acteur de la requête et n'envoie que ce qu'il a le droit de lire — « ce
+   * qui n'est pas envoyé ne peut pas fuiter ». Un second filtre d'écran serait
+   * mort, et le nôtre était plus permissif que le sien.
+   *
+   * Hors ligne, faute de lecteur, on s'en tient au fil PARTAGÉ (`submitter`) :
+   * c'est ce que l'API rend au déposant, et le seul sous-ensemble que tout
+   * lecteur a le droit de voir. Rendre les notes du comité serait refaire le
+   * filtre trop permissif que cette correction supprime.
+   */
+  comments: (id: Uuid) =>
     call(`/proposals/${id}/comments`, (m) =>
-      m.proposalComments.filter((c) => {
-        if (c.proposal_id !== id || c.deleted_at !== null) return false
-        if (c.visibility === 'private') return c.author_id === viewerId
-        if (c.visibility === 'committee') return isCommittee
-        return true
-      }),
+      m.proposalComments.filter(
+        (c) => c.proposal_id === id && c.visibility === 'submitter',
+      ),
     ),
   history: (id: Uuid) =>
     call(`/proposals/${id}/transitions`, (m) => m.proposalTransitions.filter((t) => t.proposal_id === id)),
@@ -156,8 +188,12 @@ export function createProposalsApi({ call, send, assertEventInScope }: Proposals
       organization_ids: organizationIds.join(','),
     }),
 
-  /** Brouillon en cours de la personne, pour reprendre où elle s'est arrêtée. */
-  myDraft: (personId: Uuid) =>
+  /**
+   * L'IDENTITÉ DU BROUILLON EN COURS, et rien d'autre : numéro de dossier,
+   * horodatage, état. Le CONTENU se lit par `forEdit()` — la reprise passe donc
+   * par deux lectures, et cette route ne rend jamais un dossier déjà déposé.
+   */
+  myDraft: (personId: Uuid): Promise<SaveDraftResult | null> =>
     call('/proposals/draft', (m) => m.draftProposalOf(personId)),
 
   /**
@@ -171,8 +207,11 @@ export function createProposalsApi({ call, send, assertEventInScope }: Proposals
    * (prompt B4), pas à la page : deux écrans qui la referaient chacun de
    * leur côté divergeraient sur le premier champ ajouté.
    */
-  forEdit: (proposalId: Uuid) =>
-    call(`/proposals/${proposalId}/draft`, (m) => m.editableProposal(proposalId)),
+  forEdit: (proposalId: Uuid): Promise<EditableProposal | null> =>
+    // Un dossier inconnu — ou hors d'accès, l'API ne les distingue pas — est une
+    // RÉPONSE pour cet écran, qui affiche « introuvable » : elle ne doit pas
+    // remonter en erreur au milieu de l'amorçage du formulaire.
+    callOrNull(`/proposals/${proposalId}/draft`, (m) => m.editableProposal(proposalId)),
 
   /**
    * ENREGISTREMENT AUTOMATIQUE. Le premier appel CRÉE la ligne et rend son
@@ -206,10 +245,11 @@ export function createProposalsApi({ call, send, assertEventInScope }: Proposals
     }),
 
   /**
-   * DÉPÔT — la transition `draft → submitted`. Les deux refus possibles sont
-   * ceux de `tg_check_submission_eligibility()` : appel clos, plafond
-   * atteint. Ils ne sont pas des erreurs de réseau mais des réponses, et
-   * l'écran les rend comme telles.
+   * DÉPÔT — la transition `draft → submitted`. Les trois refus possibles sont
+   * ceux de `tg_check_submission_eligibility()` : appel clos, plafond atteint,
+   * organisation non vérifiée. Ils ne sont pas des erreurs de réseau mais des
+   * réponses, et l'écran les rend comme telles — y compris un quatrième que
+   * cette version ne connaîtrait pas encore.
    */
   submit: (personId: Uuid, payload: SubmitProposalPayload): Promise<SubmitProposalResult> =>
     send(`/proposals/${payload.proposal_id}/submit`, payload, (m) =>
@@ -240,13 +280,24 @@ export function createProposalsApi({ call, send, assertEventInScope }: Proposals
   fieldHistory: (id: Uuid) =>
     call(`/proposals/${id}/history`, (m) => m.proposalHistory(id)),
 
-  themes: (id: Uuid) =>
+  /**
+   * LES PASTILLES THÉMATIQUES, prêtes à peindre — `reference.term_badges()`.
+   *
+   * Ce ne sont PAS des termes de taxonomie : la fonction ne rend que le code,
+   * le libellé, la couleur et l'icône. C'est voulu — l'écran n'a pas à
+   * recharger la taxonomie entière pour afficher trois puces. C'est la MÊME
+   * pastille que partout ailleurs, et elle porte donc le même type : deux noms
+   * pour une seule forme divergeraient au premier champ ajouté.
+   */
+  themes: (id: Uuid): Promise<ScheduleThemeBadge[]> =>
     call(`/proposals/${id}/themes`, (m) => {
       const termIds = new Set(
         m.entityTerms
           .filter((t) => t.entity_table === 'proposals' && t.entity_id === id)
           .map((t) => t.term_id),
       )
-      return m.taxonomyTerms.filter((t) => termIds.has(t.id))
+      return m.taxonomyTerms
+        .filter((t) => termIds.has(t.id) && t.is_active && t.taxonomy_code === 'activity_theme')
+        .map((t) => ({ code: t.code, label: t.label, color: t.color_hex, icon: t.icon }))
     }),  }
 }

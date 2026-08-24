@@ -317,6 +317,15 @@ const actionSkipped = ref<string[]>([])
  */
 const MAX_SKIPS_SHOWN = 5
 
+/**
+ * Un refus de l'API s'affiche TEL QUEL : elle seule sait pourquoi elle refuse, et
+ * son catalogue est déjà français. Le site ne reprend la parole que lorsqu'elle
+ * s'est tue — c'est ce que fait `apiErrorMessage`.
+ */
+function writeError(thrown: unknown): string {
+  return thrown instanceof ForbiddenError ? thrown.message : apiErrorMessage(thrown, (key) => t(key))
+}
+
 function describeSkips(skips: { reference_code: string; reason: string }[]): string[] {
   const lines = skips
     .slice(0, MAX_SKIPS_SHOWN)
@@ -342,8 +351,8 @@ async function submitAssign(payload: { reviewerId: string; dueAt: string | null 
     assignOpen.value = false
     selected.value = []
     await refresh()
-  } catch {
-    actionError.value = t('admin.proposals.bulk.error')
+  } catch (thrown) {
+    actionError.value = writeError(thrown)
   } finally {
     busy.value = false
   }
@@ -363,8 +372,8 @@ async function submitStatus(payload: { toStatus: ProposalStatus; reason: string 
     statusOpen.value = false
     selected.value = []
     await refresh()
-  } catch {
-    actionError.value = t('admin.proposals.bulk.error')
+  } catch (thrown) {
+    actionError.value = writeError(thrown)
   } finally {
     busy.value = false
   }

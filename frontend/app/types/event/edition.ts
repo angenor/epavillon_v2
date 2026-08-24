@@ -63,6 +63,13 @@ export interface EventEdition {
   starts_at: IsoDateTime
   ends_at: IsoDateTime
   country_id: CountryId | null
+  /**
+   * Le pays RÉSOLU, joint par l'API. Il évite à chaque écran de recharger les
+   * deux cent quarante-neuf pays du référentiel pour en nommer un seul — c'est
+   * ce que faisait la page publique, et cela coûtait une vague d'appels.
+   */
+  country_code: string | null
+  country_name: I18nText | null
   city: string | null
   address: string | null
   /** Point relevé du lieu, facultatif — `ck_events_coordinates` les veut tous

@@ -27,11 +27,13 @@ import { EDITION_IMAGE_RATIO, EDITION_IMAGE_ROLES } from '~/types/media'
  * rien — il ANNONCE, pour que le refus n'arrive pas en surprise. Un contrôle
  * réécrit ici finirait par accepter ce que la base refuse, ou l'inverse.
  *
- * ── LE TÉLÉVERSEMENT N'EXISTE PAS ENCORE ────────────────────────────────────
+ * ── LE RATTACHEMENT EXISTE, LE TÉLÉVERSEMENT PAS ENCORE ─────────────────────
  *
- * Le module Média n'est pas raccordé : le champ transmet un identifiant d'objet
- * et l'écran le DIT, plutôt que d'offrir un bouton qui ne ferait rien. Même
- * traitement que la vitrine (`AdminShowcaseMediaPanel`).
+ * Ce que l'écran choisit ici part par `PUT /media/attachments` — les trois rôles
+ * d'un geste, un identifiant nul en retirant un. Ce qui manque est le DÉPÔT du
+ * fichier : le champ transmet donc un identifiant d'objet et l'écran le DIT,
+ * plutôt que d'offrir un bouton qui ne ferait rien. Même traitement que la
+ * vitrine (`AdminShowcaseMediaPanel`).
  */
 
 interface Props {

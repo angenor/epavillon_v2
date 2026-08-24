@@ -12,7 +12,7 @@
 //! qui mérite attention, et la redoubler en Rust ferait deux vérités.
 
 use actix_web::{web, HttpResponse};
-use kernel::auth::{PermissionSpec, Requires};
+use kernel::auth::{PermissionSpec, RequiresAnyScope};
 use kernel::db::Db;
 use kernel::error::{ApiError, ErrorCode, Result};
 use serde::Serialize;
@@ -92,12 +92,19 @@ async fn ready(db: web::Data<Db>) -> Result<HttpResponse> {
     responses(
         (status = 200, description = "Les indicateurs et leurs seuils", body = OperationalHealth),
         (status = 401, description = "Aucune session", body = crate::openapi::ApiErrorBody),
-        (status = 403, description = "`analytics.dashboard.read` exigée en portée globale", body = crate::openapi::ApiErrorBody),
+        (status = 403, description = "`analytics.dashboard.read` absente, quelle que soit la portée", body = crate::openapi::ApiErrorBody),
     )
 )]
-/// Santé d'exploitation. La portée est **globale** : ce sont les chiffres de la
-/// plateforme entière, et il n'existe aucune édition à laquelle les rapporter.
-async fn health(db: web::Data<Db>, _permission: Requires<DashboardRead>) -> Result<HttpResponse> {
+/// Santé d'exploitation. Ce sont les chiffres de la plateforme entière, et il
+/// n'existe aucune édition à laquelle les rapporter — mais la permission n'est
+/// PAS exigée en portée globale pour autant : ce que ces indicateurs révèlent —
+/// des courriels en rebond, un outbox en retard — touche d'abord les rappels des
+/// activités d'un administrateur détaché, qui doit pouvoir les voir. La portée
+/// commande ce qu'on lit, pas la nature de ce qu'on regarde.
+async fn health(
+    db: web::Data<Db>,
+    _permission: RequiresAnyScope<DashboardRead>,
+) -> Result<HttpResponse> {
     let lignes = sqlx::query!(
         r#"SELECT code            AS "code!",
                   libelle         AS "libelle!",

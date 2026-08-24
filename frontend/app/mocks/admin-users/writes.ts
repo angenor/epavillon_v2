@@ -35,6 +35,7 @@ import type {
 } from '~/types/admin-users'
 import type { AdministeredEvents, EffectivePermission, RoleAssignment } from '~/types/identity'
 import type { Uuid } from '~/types/shared'
+import { ApiRequestError } from '~/utils/api-error'
 import { canGrant, findConflictingAssignment } from '~/utils/role-scope'
 import { roles } from '../permissions'
 import { activeAssignmentsOf, roleView } from './core'
@@ -58,13 +59,14 @@ const now = (): string => new Date().toISOString()
 // ---------------------------------------------------------------------------
 
 export function grantRole(
+  personId: Uuid,
   payload: GrantRolePayload,
   actorId: Uuid | null,
   granted: EffectivePermission[],
 ): RoleWriteResult {
-  const empty = { assignment: null, assignments: activeAssignmentsOf(payload.person_id), conflict_with: null, message: null }
+  const empty = { assignment: null, assignments: activeAssignmentsOf(personId), conflict_with: null, message: null }
 
-  if (!effectivePerson(payload.person_id)) return { status: 'not_found', ...empty }
+  if (!effectivePerson(personId)) return { status: 'not_found', ...empty }
 
   const role = roles.find((entry) => entry.code === payload.role_code)
   if (!role) return { status: 'not_found', ...empty }
@@ -89,7 +91,7 @@ export function grantRole(
   // reste en base et interdit toujours le doublon. Filtrer sur les attributions
   // ACTIVES ferait passer l'écran, puis échouer l'API — le piège de cet index.
   const conflict = findConflictingAssignment(
-    nonRevokedAssignmentsOf(payload.person_id),
+    nonRevokedAssignmentsOf(personId),
     payload.role_code,
     payload.scope_type,
     payload.scope_id,
@@ -97,14 +99,24 @@ export function grantRole(
   if (conflict) return { status: 'duplicate', ...empty, conflict_with: conflict }
 
   const validFrom = payload.valid_from ?? now()
-  // `ck_role_assignment_window` : une fin doit suivre le début.
+  // `ck_role_assignment_window` N'EST PAS UN DISCRIMINANT DU CONTRAT : la base
+  // refuse, et l'API rend un 422 `IDENTITY_ROLE_WINDOW_INVALID`. Le rendre en
+  // `scope_not_allowed` ferait lire « ce rôle n'admet pas cette portée » devant
+  // une date mal saisie.
   if (payload.valid_until !== null && Date.parse(payload.valid_until) <= Date.parse(validFrom)) {
-    return { status: 'scope_not_allowed', ...empty }
+    throw new ApiRequestError(
+      {
+        code: 'IDENTITY_ROLE_WINDOW_INVALID',
+        message: "La date de fin doit être postérieure à la prise d'effet.",
+        field: 'valid_until',
+      },
+      422,
+    )
   }
 
   const assignment: RoleAssignment = {
     id: nextAssignmentId(),
-    person_id: payload.person_id,
+    person_id: personId,
     role_code: payload.role_code,
     scope_type: payload.scope_type,
     scope_id: payload.scope_type === 'global' ? null : payload.scope_id,
@@ -123,7 +135,7 @@ export function grantRole(
   return {
     status: 'granted',
     assignment: roleView(assignment),
-    assignments: activeAssignmentsOf(payload.person_id),
+    assignments: activeAssignmentsOf(personId),
     conflict_with: null,
     message: null,
   }
@@ -141,11 +153,12 @@ function nonRevokedAssignmentsOf(personId: Uuid) {
 // ---------------------------------------------------------------------------
 
 export function revokeRole(
+  assignmentId: Uuid,
   payload: RevokeRolePayload,
   actorId: Uuid | null,
   granted: EffectivePermission[],
 ): RoleWriteResult {
-  const assignment = assignmentById(payload.assignment_id)
+  const assignment = assignmentById(assignmentId)
   if (!assignment) {
     return { status: 'not_found', assignment: null, assignments: [], conflict_with: null, message: null }
   }
@@ -165,9 +178,9 @@ export function revokeRole(
     return { status: 'forbidden_scope', ...empty }
   }
 
-  recordRevocation(payload.assignment_id, actorId, payload.reason.trim(), now())
+  recordRevocation(assignmentId, actorId, payload.reason.trim(), now())
 
-  const revoked = assignmentById(payload.assignment_id)
+  const revoked = assignmentById(assignmentId)
 
   return {
     status: 'revoked',
@@ -191,16 +204,21 @@ export function revokeRole(
  * trois ans parce que personne ne se souvient pourquoi. Le blocage, lui, est
  * durable et assumé — il n'a pas de terme.
  */
-export function setPersonStatus(payload: SetPersonStatusPayload, actorId: Uuid | null, scope: AdministeredEvents): PersonWriteResult {
-  const person = effectivePerson(payload.person_id)
+export function setPersonStatus(
+  personId: Uuid,
+  payload: SetPersonStatusPayload,
+  actorId: Uuid | null,
+  scope: AdministeredEvents,
+): PersonWriteResult {
+  const person = effectivePerson(personId)
   if (!person) return { status: 'not_found', detail: null }
 
   if (payload.status === 'suspended' && !payload.suspended_until) {
-    return { status: 'missing_deadline', detail: userDetail(payload.person_id, scope) }
+    return { status: 'missing_deadline', detail: userDetail(personId, scope) }
   }
 
   recordStatus(
-    payload.person_id,
+    personId,
     {
       status: payload.status,
       status_reason: payload.status === 'active' ? null : payload.reason.trim(),
@@ -214,7 +232,7 @@ export function setPersonStatus(payload: SetPersonStatusPayload, actorId: Uuid |
     payload.revoke_sessions ? 1 : 0,
   )
 
-  return { status: 'saved', detail: userDetail(payload.person_id, scope) }
+  return { status: 'saved', detail: userDetail(personId, scope) }
 }
 
 // ---------------------------------------------------------------------------
@@ -222,10 +240,11 @@ export function setPersonStatus(payload: SetPersonStatusPayload, actorId: Uuid |
 // ---------------------------------------------------------------------------
 
 export function handlePrivacyRequest(
+  requestId: Uuid,
   payload: HandlePrivacyRequestPayload,
   actorId: Uuid | null,
 ): PrivacyWriteResult {
-  const request = privacyRequestView(payload.request_id)
+  const request = privacyRequestView(requestId)
   if (!request) return { status: 'not_found', request: null, requests: privacyQueue().requests }
 
   if (payload.action === 'anonymize') {
@@ -237,7 +256,7 @@ export function handlePrivacyRequest(
     }
 
     recordAnonymization(request.person_id, actorId, payload.resolution.trim())
-    recordPrivacyPatch(payload.request_id, {
+    recordPrivacyPatch(requestId, {
       status: 'completed',
       handled_by: actorId,
       resolution: payload.resolution.trim(),
@@ -246,7 +265,7 @@ export function handlePrivacyRequest(
 
     return {
       status: 'anonymized',
-      request: privacyRequestView(payload.request_id),
+      request: privacyRequestView(requestId),
       requests: privacyQueue().requests,
     }
   }
@@ -261,11 +280,11 @@ export function handlePrivacyRequest(
           completed_at: now(),
         }
 
-  recordPrivacyPatch(payload.request_id, patch)
+  recordPrivacyPatch(requestId, patch)
 
   return {
     status: 'saved',
-    request: privacyRequestView(payload.request_id),
+    request: privacyRequestView(requestId),
     requests: privacyQueue().requests,
   }
 }

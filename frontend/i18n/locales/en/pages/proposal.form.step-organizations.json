@@ -4,7 +4,8 @@
     "description": "It appears in the programme, answers for the commitments made and receives the committee's decision.",
     "single": "You are submitting on behalf of this organization. To use another one, join it from your profile first.",
     "field": "Submit on behalf of",
-    "fieldHint": "You belong to several organizations: choose the one leading this activity."
+    "fieldHint": "You belong to several organizations: choose the one leading this activity.",
+    "createsRecord": "Start here: the submission is only created — and auto-saving only starts — once the lead organization has been chosen."
   },
   "co": {
     "title": "Co-organizers, partners and supporters",

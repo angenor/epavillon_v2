@@ -31,9 +31,14 @@ pub struct SeancePublique {
     pub organizations: Vec<serde_json::Value>,
 }
 
-/// La programmation d'une édition.
-pub async fn programmation(pool: &PgPool, event_id: EventId) -> Result<Vec<PublicScheduleRow>> {
-    public_schedule::programmation(pool, event_id).await
+/// La programmation d'une édition — ou, **sans édition**, les séances à venir
+/// de toutes les éditions, plafonnées.
+pub async fn programmation(
+    pool: &PgPool,
+    event_id: Option<EventId>,
+    limite: Option<i64>,
+) -> Result<Vec<PublicScheduleRow>> {
+    public_schedule::programmation(pool, event_id, limite).await
 }
 
 /// Le détail d'une séance **publiée**, par son adresse d'URL.

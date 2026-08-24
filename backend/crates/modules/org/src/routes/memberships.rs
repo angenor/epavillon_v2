@@ -193,7 +193,7 @@ pub(crate) async fn decider(
 /// de quelqu'un de connecté qui suit le lien reçu par un collègue.
 #[utoipa::path(
     post,
-    description = "`{ status, membership, organization }`. **Aucune session exigée** : le jeton est la preuve d'adresse. Si une session existe, elle doit désigner la même personne (`ORG_INVITATION_NOT_YOURS`). L'adresse est marquée vérifiée : le lien vient de la prouver.",
+    description = "`AcceptInvitation` → `{ status, membership, organization }`. **Aucune session exigée** : le jeton est la preuve d'adresse. Si une session existe, elle doit désigner la même personne (`ORG_INVITATION_NOT_YOURS`). L'adresse est marquée vérifiée : le lien vient de la prouver. **`job_title` est exigée** — l'adhésion devient active, et une adhésion active porte toujours sa fonction : c'est la personne invitée qui la déclare, pas le référent qui l'a invitée.",
     path = "/organizations/invitations/accept",
     tag = "Organisations",
     operation_id = "invitation_accepter",
@@ -211,11 +211,13 @@ pub(crate) async fn accepter_invitation(
     let session = crate::routes::acteur_optionnel(&requete);
     let ctx = crate::routes::contexte_sans_acteur(&requete);
 
+    let charge = corps.into_inner();
     let issue = membership::accept_invitation(
         &state,
         &ctx,
         session.map(PersonId),
-        &corps.into_inner().token,
+        &charge.token,
+        charge.job_title.as_deref(),
     )
     .await?;
 

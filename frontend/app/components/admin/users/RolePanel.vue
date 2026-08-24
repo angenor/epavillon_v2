@@ -8,7 +8,6 @@ import type {
 } from '~/types/admin-users'
 import type { EffectivePermission, ScopeType } from '~/types/identity'
 import type { SelectOption } from '~/types/ui'
-import type { Uuid } from '~/types/shared'
 
 /**
  * LE PANNEAU D'ATTRIBUTION — le point central de cet écran, et sa raison d'être.
@@ -41,7 +40,6 @@ import type { Uuid } from '~/types/shared'
 interface Props {
   open: boolean
   personName: string
-  personId: Uuid
   options: RoleAssignmentOptions | null
   /** Attributions en cours de la personne — pour détecter le doublon avant l'envoi. */
   assignments: RoleAssignmentView[]
@@ -204,7 +202,6 @@ function submit(): void {
   if (!isValid.value || scopeType.value === '') return
 
   emit('submit', {
-    person_id: props.personId,
     role_code: roleCode.value,
     scope_type: scopeType.value,
     scope_id: needsTarget.value ? scopeId.value : null,

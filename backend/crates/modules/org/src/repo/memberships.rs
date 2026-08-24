@@ -255,22 +255,32 @@ pub async fn invite(
 
 /// Approuve une adhésion : l'auteur et la date sont posés, et c'est la base qui
 /// décide de la primauté.
+/// `fonction` nulle = celle déjà posée sur la ligne est conservée.
+///
+/// Les deux appelants n'ont pas la même situation. Le référent qui approuve une
+/// DEMANDE ne touche à rien : la personne a déclaré sa fonction en demandant.
+/// La personne qui accepte une INVITATION, elle, l'apporte — c'est le moment où
+/// elle parle d'elle-même, et l'adhésion ne peut pas devenir active sans
+/// (`ck_memberships_job_title`).
 pub async fn approve(
     conn: &mut PgConnection,
     id: MembershipId,
     approuve_par: PersonId,
+    fonction: Option<&str>,
 ) -> Result<Option<Membership>> {
     let ligne = sqlx::query_as!(
         Ligne,
         r#"UPDATE org.memberships
-              SET status = 'active', approved_by = $2, approved_at = now(), revoked_at = NULL
+              SET status = 'active', approved_by = $2, approved_at = now(), revoked_at = NULL,
+                  job_title = COALESCE($3, job_title)
             WHERE id = $1 AND status = 'pending'
         RETURNING id, organization_id, person_id, role::text AS "role!",
                   status::text AS "statut!", is_primary, job_title,
                   invited_by, invited_at, approved_by, approved_at, revoked_at,
                   created_at, updated_at"#,
         id.as_uuid(),
-        approuve_par.as_uuid()
+        approuve_par.as_uuid(),
+        fonction
     )
     .fetch_optional(conn)
     .await?;

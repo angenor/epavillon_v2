@@ -70,6 +70,14 @@
     "quota": {
       "title": "Your organization has reached the cap",
       "description": "This call accepts at most {max} submissions per organization. Yours remains saved as a draft."
+    },
+    "notVerified": {
+      "title": "This call is open to verified organizations only",
+      "description": "Your organization has not been verified by IFDD yet. Your submission remains saved as a draft and can be submitted once the verification is done."
+    },
+    "unknown": {
+      "title": "The submission was refused",
+      "description": "Reason returned by the platform: {status}. Your submission remains saved as a draft. Contact IFDD quoting that reason."
     }
   },
   "confirmation": {

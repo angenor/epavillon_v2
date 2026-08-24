@@ -47,15 +47,14 @@ pub fn chemins_de_dossier(cfg: &mut web::ServiceConfig) {
 /// La page d'accueil de l'espace.
 #[utoipa::path(
     get,
-    description = "`WorkspaceOverview` — l'organisation, l'adhésion de la personne connectée, ses dossiers avec leur journal et leurs demandes de correction ouvertes, ses membres, ce qui attend une action **de sa part**, et l'appel en cours. **Composition propre au soumissionnaire, jamais la vue de pilotage du comité** : ni note, ni note pondérée, ni rang, ni nom de membre du comité, ni inscrit nommé (FR-076, FR-077). **Gardée par l'adhésion active**, jamais par un périmètre d'administration : une organisation n'administre rien. Les séances programmées et leurs rappels partent **vides** jusqu'à B5 et B6 — un champ absent ferait échouer l'écran, un champ vide dit qu'il n'y a rien.",
+    description = "`WorkspaceOverview` — l'organisation, l'adhésion de la personne connectée, ses dossiers avec leur journal et leurs demandes de correction ouvertes, ses membres, ce qui attend une action **de sa part**, et l'appel en cours. **Composition propre au soumissionnaire, jamais la vue de pilotage du comité** : ni note, ni note pondérée, ni rang, ni nom de membre du comité, ni inscrit nommé (FR-076, FR-077). **Gardée par l'adhésion active**, jamais par un périmètre d'administration : une organisation n'administre rien. Sans adhésion active, la réponse est `null` en 200, et non 404 : l'indiscernabilité voulue — inexistante et non-membre donnent la même réponse — ne demandait pas un statut d'erreur, et l'écran affichait « une erreur est survenue » là où il faut lire « vous n'avez pas d'espace ici ». Les séances programmées et leurs rappels partent **vides** jusqu'à B5 et B6 — un champ absent ferait échouer l'écran, un champ vide dit qu'il n'y a rien.",
     path = "/organizations/{id}/workspace",
     tag = "Espace organisation",
     operation_id = "propositions_espace_organisation",
     params(("id" = Uuid, Path, description = "Identifiant de l'organisation")),
     responses(
-        (status = 200, description = "WorkspaceOverview", body = Object),
+        (status = 200, description = "WorkspaceOverview | null", body = Object),
         (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
-        (status = 404, description = "Organisation inexistante **ou dont on n'est pas membre actif** — indiscernables", body = crate::routes::openapi::ApiErrorBody),
     )
 )]
 pub(crate) async fn espace(
@@ -70,15 +69,14 @@ pub(crate) async fn espace(
 /// Les éditions sur lesquelles cette organisation a déposé.
 #[utoipa::path(
     get,
-    description = "`EventEdition[]`, de la plus récente à la plus ancienne. Une organisation fidèle en a plusieurs, et sa liste de dossiers les groupe : un dossier de la COP30 ne se lit pas comme un dossier en cours. **Adhésion active exigée.**",
+    description = "`EventEdition[] | null`, de la plus récente à la plus ancienne. Une organisation fidèle en a plusieurs, et sa liste de dossiers les groupe : un dossier de la COP30 ne se lit pas comme un dossier en cours. **Adhésion active exigée** — à défaut, `null` en 200, jamais une liste vide : « aucun dossier » et « ce n'est pas votre espace » ne se confondent pas.",
     path = "/organizations/{id}/editions",
     tag = "Espace organisation",
     operation_id = "propositions_editions_de_lorganisation",
     params(("id" = Uuid, Path, description = "Identifiant de l'organisation")),
     responses(
-        (status = 200, description = "EventEdition[]", body = Object),
+        (status = 200, description = "EventEdition[] | null", body = Object),
         (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
-        (status = 404, description = "Organisation inexistante **ou dont on n'est pas membre actif**", body = crate::routes::openapi::ApiErrorBody),
     )
 )]
 pub(crate) async fn editions(
@@ -93,15 +91,14 @@ pub(crate) async fn editions(
 /// Le dossier vu par son déposant.
 #[utoipa::path(
     get,
-    description = "`ProposalFile` — le suivi du dossier, le **fil partagé** et l'historique champ par champ. Le fil est filtré **à la source** sur la visibilité partagée : les délibérations du comité n'y sont jamais, et les notes personnelles encore moins. C'est le **même** filtre que celui du comité — l'écrire deux fois serait écrire deux filtres, et le second finirait par diverger.",
+    description = "`ProposalFile` — le suivi du dossier, le **fil partagé** et l'historique champ par champ. Le fil est filtré **à la source** sur la visibilité partagée : les délibérations du comité n'y sont jamais, et les notes personnelles encore moins. C'est le **même** filtre que celui du comité — l'écrire deux fois serait écrire deux filtres, et le second finirait par diverger. `null` en 200 pour un dossier inexistant **ou porté par une organisation dont on n'est pas membre** : indiscernables, et ce n'est pas une panne.",
     path = "/proposals/{id}/file",
     tag = "Espace organisation",
     operation_id = "propositions_dossier_du_deposant",
     params(("id" = Uuid, Path, description = "Identifiant du dossier")),
     responses(
-        (status = 200, description = "ProposalFile", body = Object),
+        (status = 200, description = "ProposalFile | null", body = Object),
         (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
-        (status = 404, description = "Dossier inexistant **ou porté par une organisation dont on n'est pas membre**", body = crate::routes::openapi::ApiErrorBody),
     )
 )]
 pub(crate) async fn fichier(

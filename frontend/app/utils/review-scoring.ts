@@ -23,7 +23,7 @@
 import type { ReviewCriterion } from '~/types/event/call'
 import type { CommitteeMemberProgress, ReviewProgressState } from '~/types/admin-review'
 import type { ProposalStatus, ProposalTransitionRule } from '~/types/programme/proposal'
-import type { Review, ReviewAssignment, ReviewRecommendation } from '~/types/programme/review'
+import type { ReviewRecommendation } from '~/types/programme/review'
 import type { EffectivePermission } from '~/types/identity'
 import type { Intent } from '~/types/ui'
 import type { CriterionId, Numeric, Uuid } from '~/types/shared'
@@ -31,15 +31,6 @@ import type { CriterionId, Numeric, Uuid } from '~/types/shared'
 // ---------------------------------------------------------------------------
 // La grille
 // ---------------------------------------------------------------------------
-
-/**
- * Note maximale atteignable sur cette grille — `event.max_weighted_score()`.
- * Somme des `max_score × weight`, jamais une constante : la grille de la COP31
- * plafonne à 40, celle d'un autre appel plafonnera ailleurs.
- */
-export function maxWeightedScoreOfCriteria(criteria: ReviewCriterion[]): number {
-  return criteria.reduce((total, criterion) => total + criterion.max_score * criterion.weight, 0)
-}
 
 /**
  * TOTAL PONDÉRÉ DES NOTES POSÉES.
@@ -109,24 +100,11 @@ export function scoreChoices(criterion: ReviewCriterion): number[] {
 // ---------------------------------------------------------------------------
 
 /**
- * OÙ EN EST UNE AFFECTATION, en un seul calcul pour tout l'écran.
- *
- * L'ORDRE DES TESTS PORTE UNE RÈGLE : un déport l'emporte sur tout le reste —
- * une personne qui s'est retirée n'est ni en retard ni attendue —, et une revue
- * COMMENCÉE mais non soumise reste une revue manquante. C'est ce que fait la
- * vue `v_proposal_dashboard`, qui ne compte que `submitted_at IS NOT NULL`.
+ * L'ÉTAT D'AVANCEMENT D'UNE AFFECTATION NE SE CALCULE PLUS ICI : il arrive
+ * calculé dans `committee[].state`. Deux calculs pour une même règle avaient
+ * déjà divergé — l'un plaçait le retard avant le brouillon, l'autre l'inverse —
+ * et une revue commencée en retard ne se lisait pas pareil des deux côtés.
  */
-export function progressState(
-  assignment: ReviewAssignment,
-  review: Review | null,
-  now: number,
-): ReviewProgressState {
-  if (assignment.recused_at) return 'recused'
-  if (review?.submitted_at) return 'submitted'
-  if (assignment.due_at && Date.parse(assignment.due_at) < now) return 'overdue'
-  if (review) return 'drafted'
-  return 'pending'
-}
 
 /** Revues effectivement rendues, déports exclus — le numérateur du « 2/3 ». */
 export function submittedCount(committee: CommitteeMemberProgress[]): number {

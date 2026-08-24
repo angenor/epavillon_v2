@@ -70,7 +70,12 @@ pub struct DraftSpeaker {
 pub struct ProposalDraft {
     // — Étape 1 : organisations
     pub organization_id: Option<Uuid>,
-    #[serde(default)]
+    /// **Jamais sérialisé.** À la relecture d'un dossier, `BrouillonRecompose`
+    /// rend une forme ENRICHIE des co-organisations — leur dénomination, leur
+    /// pays — sous la même clé. Sans ce `skip`, le JSON portait deux fois
+    /// `co_organizations` : la liste vide d'ici, puis la vraie, et seule la
+    /// dernière écrite survivait. Cela fonctionnait par accident.
+    #[serde(default, skip_serializing)]
     pub co_organizations: Vec<DraftOrganization>,
 
     // — Étape 2 : présentation, en français
@@ -108,7 +113,10 @@ pub struct ProposalDraft {
     pub country_id: Option<Uuid>,
 
     // — Étape 4 : intervenants
-    #[serde(default)]
+    /// **Jamais sérialisé**, même motif que `co_organizations` ci-dessus : la
+    /// relecture rend une forme enrichie du verrouillage d'identité sous la même
+    /// clé, et les deux se marchaient dessus.
+    #[serde(default, skip_serializing)]
     pub speakers: Vec<DraftSpeaker>,
 
     // — Étape 5 : créneau souhaité

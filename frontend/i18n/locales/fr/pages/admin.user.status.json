@@ -38,7 +38,6 @@
   },
   "error": {
     "missing_deadline": "Une suspension doit porter une date de fin.",
-    "forbidden": "Cette personne n'est pas dans votre périmètre d'administration.",
     "not_found": "Cette personne n'existe plus."
   }
 }

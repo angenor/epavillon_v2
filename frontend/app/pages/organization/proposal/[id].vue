@@ -44,19 +44,15 @@ const localePath = useLocalePath()
 const route = useRoute()
 const api = useApi()
 const auth = useAuthStore()
-const memberships = useMembershipStore()
 
 const proposalId = computed(() => String(route.params.id ?? ''))
 
-await memberships.ensureLoaded()
-
 /**
- * L'organisation depuis laquelle on consulte. Le dossier appartient à une seule
- * organisation ; on cherche donc, parmi les adhésions actives de la personne,
- * celle qui le porte — plutôt que d'imposer un paramètre d'URL de plus.
+ * UN SEUL APPEL, SANS ORGANISATION. Le dossier désigne lui-même celle qui le
+ * porte, et l'accès se décide sur l'adhésion active du lecteur : demander la
+ * fiche une fois par adhésion ne trouverait rien de plus et ferait échouer
+ * l'écran dès la première organisation qui n'est pas la bonne.
  */
-const organizationIds = computed(() => memberships.active.map((entry) => entry.organization.id))
-
 const {
   data: file,
   status,
@@ -64,14 +60,11 @@ const {
   refresh,
 } = await useAsyncData<ProposalFile | null>(
   () => `workspace-proposal-${proposalId.value}`,
-  async () => {
-    for (const organizationId of organizationIds.value) {
-      const found = await api.workspace.proposalFile(proposalId.value, organizationId)
-      if (found) return found
-    }
-    return null
+  () => {
+    const person = auth.person
+    return person ? api.workspace.proposalFile(proposalId.value, person.id) : Promise.resolve(null)
   },
-  { watch: [proposalId], lazy: true },
+  { watch: [proposalId, () => auth.person?.id], lazy: true },
 )
 
 useHead(() => ({

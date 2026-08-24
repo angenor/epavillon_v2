@@ -47,6 +47,7 @@ import type {
   RecusalPayload,
   ReviewDeskPermissions,
   ReviewDeskScreen,
+  ReviewProgressState,
   SaveReviewPayload,
   SaveReviewResult,
 } from '~/types/admin-review'
@@ -81,7 +82,6 @@ import {
   sessionReviewAssignments,
 } from './admin-proposals'
 import { proposalDashboard } from './views'
-import { progressState } from '~/utils/review-scoring'
 
 const organizationById = new Map(organizations.map((o) => [o.id, o]))
 const personById = new Map(people.map((p) => [p.id, p]))
@@ -133,6 +133,24 @@ function assignmentsOf(proposalId: Uuid): ReviewAssignment[] {
     })
 }
 
+/**
+ * OÙ EN EST UNE AFFECTATION — l'ordre des tests EST la règle, et il est celui de
+ * l'API : déport, dépôt, brouillon, retard. Une revue commencée et en retard est
+ * annoncée « commencée » ; l'inverse ferait dire à l'écran hors ligne autre
+ * chose qu'à l'écran branché.
+ */
+function progressStateOf(
+  assignment: ReviewAssignment,
+  review: Review | null,
+  now: number,
+): ReviewProgressState {
+  if (assignment.recused_at) return 'recused'
+  if (review?.submitted_at) return 'submitted'
+  if (review) return 'drafted'
+  if (assignment.due_at && Date.parse(assignment.due_at) < now) return 'overdue'
+  return 'pending'
+}
+
 /** Les revues d'un dossier, tampon de session appliqué par-dessus la base. */
 function reviewsOf(proposalId: Uuid): Review[] {
   const base = reviews.filter((review) => review.proposal_id === proposalId)
@@ -164,7 +182,7 @@ function commentsVisibleTo(
   isCommittee: boolean,
 ): ProposalComment[] {
   return [...proposalComments, ...sessionComments]
-    .filter((comment) => comment.proposal_id === proposalId && comment.deleted_at === null)
+    .filter((comment) => comment.proposal_id === proposalId)
     .filter((comment) => {
       if (comment.visibility === 'private') return comment.author_id === viewerId
       if (comment.visibility === 'committee') return isCommittee
@@ -352,7 +370,7 @@ export function reviewDesk(proposalId: Uuid, personId: Uuid | null): ReviewDeskS
       return {
         assignment,
         person: personById.get(assignment.reviewer_id) ?? null,
-        state: progressState(assignment, review, now),
+        state: progressStateOf(assignment, review, now),
         submitted_at: review?.submitted_at ?? null,
       }
     })
@@ -456,7 +474,9 @@ export function reviewDesk(proposalId: Uuid, personId: Uuid | null): ReviewDeskS
     required_reviews: call?.required_reviews ?? null,
     blind_review: blindReview,
     blind_veiled: blindVeiled,
-    veiled_count: blindVeiled ? submittedPeers.length : 0,
+    // Compté même quand le voile est levé : `compter_deposees()` s'exécute
+    // toujours, seule la LECTURE des revues est conditionnelle.
+    veiled_count: submittedPeers.length,
     my_review: myReview,
     peer_reviews: peerReviews,
     committee,
@@ -622,7 +642,6 @@ export function postProposalComment(
     resolved_at: null,
     resolved_by: null,
     edited_at: null,
-    deleted_at: null,
     created_at: new Date(at).toISOString(),
   }
   sessionComments.push(comment)

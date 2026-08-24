@@ -40,12 +40,18 @@ export interface PlatformModule {
 /**
  * Table `platform.feature_flags` — `010_platform.sql` § 5.
  *
+ * ELLE N'EST PAS RENDUE PAR L'API, et ne doit pas l'être : `enabled_for` est une
+ * liste d'identifiants de personnes et `description` est écrite pour
+ * l'exploitant. Ce type décrit la LIGNE, pour les données simulées qui
+ * reproduisent la base ; ce que le site reçoit est `ResolvedFeatureFlag`.
+ *
  * DEUX NATURES DE DRAPEAUX, que `900_seed.sql` § 2 distingue explicitement et
  * qu'il ne faut pas confondre : `<module>.enabled` ferme l'interface d'un module
  * ENTIER — c'est celui que le routage lit pour servir la page « En cours de
  * maintenance » ; les drapeaux plus fins (`negotiation.channels`,
  * `tools.ai_assistant`) commandent une fonctionnalité À L'INTÉRIEUR d'un module
  * déjà ouvert et ne peuvent pas en tenir lieu.
+ *
  */
 export interface FeatureFlag {
   key: FeatureFlagKey
@@ -57,4 +63,19 @@ export interface FeatureFlag {
   /** Personnes explicitement ouvertes, quel que soit le pourcentage. */
   enabled_for: Uuid[]
   updated_at: IsoDateTime
+}
+
+/**
+ * Ce que le site reçoit — `ResolvedFeatureFlag`, rendu par
+ * `GET /platform/feature-flags`.
+ *
+ * DEUX CHAMPS, ET C'EST TOUT. Le déploiement progressif — un pourcentage, une
+ * liste de personnes explicitement ouvertes — est tranché par
+ * `platform.is_feature_enabled()`, en base : le refaire côté site en donnerait
+ * une seconde version, qui divergerait au premier ajustement.
+ */
+export interface ResolvedFeatureFlag {
+  key: FeatureFlagKey
+  /** Le verdict POUR L'APPELANT. Hors session, seul un déploiement complet ouvre. */
+  is_enabled: boolean
 }

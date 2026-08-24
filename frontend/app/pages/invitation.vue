@@ -59,12 +59,17 @@ const acceptError = ref<Error | null>(null)
 
 /**
  * Le refus d'autorisation se distingue de la panne : il ne se réessaie pas, et
- * sa suite n'est pas la même. Le code de l'API fait foi ; le statut sert de
- * repli tant que le corps d'erreur n'est pas normalisé côté transport.
+ * sa suite n'est pas la même. **Le code de l'API fait foi.**
+ *
+ * Il se lit sur `ApiRequestError`, que le client compose pour tout refus — plus
+ * sur `error.data.code`, qui était la forme brute de `$fetch` et n'existe plus
+ * depuis que le transport normalise. Le repli sur le statut couvre le cas où
+ * l'erreur a traversé un rendu serveur, qui n'en garde que `statusCode`.
  */
 const isNotYours = computed(() => {
-  const error = acceptError.value as { statusCode?: number; data?: { code?: string } } | null
-  return error?.data?.code === 'ORG_INVITATION_NOT_YOURS' || error?.statusCode === 403
+  const error = acceptError.value
+  if (error instanceof ApiRequestError) return error.code === 'ORG_INVITATION_NOT_YOURS'
+  return isForbiddenError(error)
 })
 
 /**
@@ -80,22 +85,38 @@ async function signOutThenAccept(): Promise<void> {
   await accept()
 }
 
+/**
+ * LA FONCTION EST DEMANDÉE AVANT D'ACCEPTER, et c'est le cœur de l'écran.
+ *
+ * L'acceptation était automatique au montage. Elle ne peut plus l'être : une
+ * adhésion active porte toujours la fonction de la personne
+ * (`ck_memberships_job_title`), et c'est l'invitée qui la déclare — le référent
+ * qui l'a invitée ne connaît pas toujours son intitulé exact.
+ *
+ * ELLE N'EST PAS PRÉ-REMPLIE, même si le référent en a proposé une : le jeton
+ * est à usage unique, et le lire pour afficher son contenu le consommerait. Ce
+ * que le référent a écrit sert d'indication interne, pas de valeur par défaut.
+ */
+const jobTitle = ref('')
+const touched = ref(false)
+const isEmpty = computed(() => jobTitle.value.trim().length === 0)
+const showJobTitleError = computed(() => touched.value && isEmpty.value)
+
 async function accept(): Promise<void> {
   if (token.value === null) return
+  touched.value = true
+  if (isEmpty.value) return
+
   isAccepting.value = true
   acceptError.value = null
   try {
-    outcome.value = await api.invitation.accept(token.value)
+    outcome.value = await api.invitation.accept(token.value, jobTitle.value.trim())
   } catch (error) {
     acceptError.value = error instanceof Error ? error : new Error(String(error))
   } finally {
     isAccepting.value = false
   }
 }
-
-onMounted(() => {
-  if (token.value !== null) void accept()
-})
 
 const rejection = computed<TokenRejection | null>(() =>
   outcome.value?.status === 'rejected' ? outcome.value.reason : null,
@@ -129,11 +150,41 @@ const signInThenWorkspace = computed(
     <!-- ─── Le lien a été suivi ─────────────────────────────────────────── -->
     <template v-if="token !== null">
       <UiLoadingState
-        v-if="isAccepting || (outcome === null && acceptError === null)"
+        v-if="isAccepting"
         variant="text"
         :lines="3"
         :label="t('invitation.checking')"
       />
+
+      <!-- LA FONCTION, AVANT D'ACCEPTER. Une adhésion active en porte toujours
+           une, et c'est la personne invitée qui la déclare. -->
+      <AuthCard
+        v-else-if="outcome === null && acceptError === null"
+        icon="user"
+        icon-intent="info"
+        :title="t('invitation.jobTitle.title')"
+        :description="t('invitation.jobTitle.description')"
+      >
+        <form class="grid gap-4" novalidate @submit.prevent="accept()">
+          <UiInput
+            v-model="jobTitle"
+            :label="t('invitation.jobTitle.label')"
+            :hint="t('invitation.jobTitle.hint')"
+            :error="showJobTitleError ? t('validation.required') : undefined"
+            required
+            :maxlength="120"
+            :disabled="isAccepting"
+          />
+          <UiButton
+            type="submit"
+            variant="primary"
+            block
+            size="lg"
+            :label="t('invitation.jobTitle.submit')"
+            :loading="isAccepting"
+          />
+        </form>
+      </AuthCard>
 
       <!-- ACCÈS REFUSÉ — connecté sous un autre compte que l'invitée. Ce n'est
            pas une panne : aucune reprise n'est proposée, seulement la sortie. -->

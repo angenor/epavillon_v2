@@ -94,6 +94,19 @@ export interface ReviewCriterion {
   sort_order: number
 }
 
+/**
+ * L'appel tel que la page publique d'une édition le reçoit — `GET /events/{id}/call`.
+ *
+ * IL PORTE SA GRILLE. Elle est publique par nature : une organisation qui
+ * prépare un dossier doit savoir sur quoi il sera jugé. La demander à part
+ * coûtait une seconde vague d'appels à une page qui tient déjà l'appel en main,
+ * et faisait une exception dans un module dont toutes les lectures publiques
+ * passent par `/events/{id}/…`.
+ */
+export interface PublicCall extends CallForProposals {
+  criteria: ReviewCriterion[]
+}
+
 // ---------------------------------------------------------------------------
 // Comité de sélection
 // ---------------------------------------------------------------------------

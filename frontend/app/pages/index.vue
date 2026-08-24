@@ -77,7 +77,7 @@ function setPeriod(next: EditionPeriod): void {
  * quand même — c'est le quatrième état exigé de tout écran, et une API mal
  * configurée qui répondrait 403 doit le DIRE plutôt que se taire.
  */
-const isForbidden = computed(() => error.value?.name === 'ForbiddenError')
+const isForbidden = computed(() => isForbiddenError(error.value))
 
 useHead(() => ({
   title: t('home.head.title'),

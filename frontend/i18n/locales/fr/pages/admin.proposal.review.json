@@ -70,8 +70,7 @@
     },
     "success": "Dossier passé à « {status} ».",
     "notAllowed": "Cette transition n'est pas possible depuis l'état actuel du dossier.",
-    "reasonRequired": "Cette transition exige un motif.",
-    "error": "La décision n'a pas pu être enregistrée. Rien n'a été modifié."
+    "reasonRequired": "Cette transition exige un motif."
   },
   "tabs": {
     "dossier": "Dossier",
@@ -192,7 +191,6 @@
     "submitBlocked": "Notez tous les critères avant de déposer votre revue.",
     "saved": "Brouillon enregistré à {time}.",
     "submitted": "Revue déposée le {date}.",
-    "error": "Votre revue n'a pas pu être enregistrée. Rien n'a été perdu : réessayez.",
     "unsaved": "Modifications non enregistrées"
   },
   "recusal": {
@@ -205,8 +203,7 @@
     "submit": "Me déporter",
     "success": "Vous vous êtes déporté de ce dossier. Le comité en est informé.",
     "done": "Vous vous êtes déporté de ce dossier le {date}.",
-    "doneReason": "Motif déclaré : {reason}",
-    "error": "Le déport n'a pas pu être enregistré."
+    "doneReason": "Motif déclaré : {reason}"
   },
   "peers": {
     "title": "Revues du comité",
@@ -286,7 +283,6 @@
     "unresolved": "En attente de correction",
     "edited": "modifié",
     "you": "Vous",
-    "sent": "Message envoyé.",
-    "error": "Le message n'a pas pu être envoyé."
+    "sent": "Message envoyé."
   }
 }

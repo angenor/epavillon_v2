@@ -70,6 +70,14 @@
     "quota": {
       "title": "Plafond atteint pour votre organisation",
       "description": "Cet appel accepte au plus {max} dossiers par organisation. Le vôtre reste enregistré en brouillon."
+    },
+    "notVerified": {
+      "title": "Cet appel est réservé aux organisations vérifiées",
+      "description": "Votre organisation n'a pas encore été vérifiée par l'IFDD. Votre dossier reste enregistré en brouillon : il pourra être déposé dès la vérification faite."
+    },
+    "unknown": {
+      "title": "Le dépôt a été refusé",
+      "description": "Motif transmis par la plateforme : {status}. Votre dossier reste enregistré en brouillon. Contactez l'IFDD en citant ce motif."
     }
   },
   "confirmation": {

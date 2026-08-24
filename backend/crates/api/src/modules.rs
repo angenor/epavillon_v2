@@ -30,3 +30,31 @@ impl ModuleRegistry {
         self.montes.contains(code)
     }
 }
+
+impl ModuleRegistry {
+    /// Tous les modules montés, sans consulter la base.
+    ///
+    /// Réservé à l'**export** du document OpenAPI (`cargo run -p api --bin
+    /// openapi`) : la documentation décrit la surface complète de l'API, alors
+    /// qu'une application réelle ne monte que ce que `platform.modules` déclare.
+    /// Engendrer le document depuis une base de développement le ferait varier
+    /// avec l'état de cette base — un module éteint le jour de la génération
+    /// retirerait ses chemins du client TypeScript du site.
+    pub fn complet() -> Self {
+        Self {
+            montes: Arc::new(
+                [
+                    "identity",
+                    "org",
+                    "event",
+                    "programme",
+                    "media",
+                    "engagement",
+                ]
+                .into_iter()
+                .map(str::to_owned)
+                .collect(),
+            ),
+        }
+    }
+}

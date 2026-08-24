@@ -135,7 +135,7 @@ async fn une_demande_nest_pas_acceptable_par_un_jeton() {
         OrganizationId(organisation),
         JoinOrganization {
             organization_id: None,
-            job_title: None,
+            job_title: Some("Chargée de projet".to_owned()),
         },
     )
     .await
@@ -147,6 +147,7 @@ async fn une_demande_nest_pas_acceptable_par_un_jeton() {
         &bac.ctx().with_actor(karim),
         Some(PersonId(karim)),
         &jeton,
+        Some("Chargée de projet"),
     )
     .await
     .expect_err("un jeton qui ne vous désigne pas est refusé");
@@ -206,7 +207,7 @@ async fn les_deux_files_ne_se_melent_jamais() {
         OrganizationId(organisation),
         JoinOrganization {
             organization_id: None,
-            job_title: None,
+            job_title: Some("Chargée de projet".to_owned()),
         },
     )
     .await
@@ -289,9 +290,15 @@ async fn une_seconde_invitation_propose_de_relancer() {
 
     // Acceptée, puis réinvitée : « déjà membre ».
     let jeton = jeton_dinvitation(&bac).await;
-    membership::accept_invitation(&bac.state, &bac.ctx(), None, &jeton)
-        .await
-        .expect("acceptation");
+    membership::accept_invitation(
+        &bac.state,
+        &bac.ctx(),
+        None,
+        &jeton,
+        Some("Chargée de projet"),
+    )
+    .await
+    .expect("acceptation");
 
     match membership::invite(
         &bac.state,

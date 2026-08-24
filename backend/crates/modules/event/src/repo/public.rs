@@ -22,8 +22,8 @@ use sqlx::PgExecutor;
 
 use crate::domain::ids::EventId;
 use crate::domain::public::{
-    PublicCall, PublicChannel, PublicDay, PublicEdition, PublicRoom, PublicSeries, PublicTrack,
-    PublicVenue,
+    PublicCall, PublicChannel, PublicCriterion, PublicDay, PublicEdition, PublicRoom, PublicSeries,
+    PublicTrack, PublicVenue,
 };
 
 /// Les éditions publiques, **décroissantes sur la date de début** : la prochaine
@@ -345,10 +345,10 @@ pub async fn canaux<'e>(
 }
 
 /// L'appel **non annulé** d'une édition. Zéro ou un, jamais un tableau.
-pub async fn appel<'e>(
-    executor: impl PgExecutor<'e>,
-    event_id: EventId,
-) -> Result<Option<PublicCall>> {
+/// **Deux lectures, pas une jointure.** La grille compte au plus une dizaine de
+/// lignes ; les ramener par jointure dupliquerait les vingt-cinq colonnes de
+/// l'appel autant de fois, pour les jeter ensuite.
+pub async fn appel(pool: &sqlx::PgPool, event_id: EventId) -> Result<Option<PublicCall>> {
     let ligne = sqlx::query!(
         r#"SELECT id, event_id, code, title, description, status::text AS "status!",
                   opens_at, closes_at, extended_until, results_expected_at,
@@ -365,10 +365,25 @@ pub async fn appel<'e>(
             WHERE event_id = $1 AND status <> 'cancelled'"#,
         event_id.as_uuid()
     )
-    .fetch_optional(executor)
+    .fetch_optional(pool)
     .await?;
 
-    Ok(ligne.map(|l| PublicCall {
+    let Some(l) = ligne else { return Ok(None) };
+
+    let criteria = sqlx::query_as!(
+        PublicCriterion,
+        r#"SELECT id, call_id, code, label, description,
+                  max_score::float8 AS "max_score!", weight::float8 AS "weight!",
+                  is_knockout, sort_order
+             FROM event.review_criteria
+            WHERE call_id = $1
+            ORDER BY sort_order, code"#,
+        l.id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(Some(PublicCall {
         id: l.id,
         event_id: l.event_id,
         code: l.code,
@@ -392,6 +407,7 @@ pub async fn appel<'e>(
         required_reviews: l.required_reviews,
         blind_review: l.blind_review,
         guidelines_url: l.guidelines_url,
+        criteria,
         created_by: l.created_by,
         created_at: l.created_at,
         updated_at: l.updated_at,

@@ -37,15 +37,18 @@ import type { ProposalComment } from '~/types/programme/proposal'
 import type {
   AcceptInvitationResult,
   DecideMembershipPayload,
+  DisplayedPerson,
   InviteMemberPayload,
   InviteMemberResult,
   MemberEntry,
+  MemberPerson,
   ProposalFile,
   ProposalTracking,
   ReplyToCommentPayload,
   ResolveCommentPayload,
   TrackedSession,
   WorkspaceAction,
+  WorkspaceMember,
   WorkspaceOverview,
 } from '~/types/organization-workspace'
 import { MEMBERSHIP, PERSON_INVITED, PROPOSAL_COMMENT } from './ids'
@@ -96,9 +99,38 @@ function commentsWithSession(): ProposalComment[] {
 // Lectures
 // ---------------------------------------------------------------------------
 
+/**
+ * La personne d'un membre, RÉDUITE À CE QUE L'API SERT. Rendre la ligne entière
+ * ferait passer l'adresse et le téléphone dans une réponse qui ne les porte
+ * pas : le mode hors ligne mentirait sur ce que l'écran a le droit de lire.
+ */
+function displayed(person: Person): DisplayedPerson {
+  return {
+    id: person.id,
+    display_name: person.display_name,
+    civility: person.civility,
+    first_name: person.first_name,
+    last_name: person.last_name,
+    job_title: person.job_title,
+    primary_organization_id: person.primary_organization_id,
+  }
+}
+
+/** L'autre forme : la file d'adhésions écrit à qui demande à entrer. */
+function contactable(person: Person): MemberPerson {
+  return {
+    id: person.id,
+    display_name: person.display_name,
+    primary_email: person.primary_email,
+    first_name: person.first_name,
+    last_name: person.last_name,
+    preferred_locale: person.preferred_locale,
+  }
+}
+
 /** Personnes de l'organisation, décisions de la session appliquées. */
-function membersOf(organizationId: string): MemberEntry[] {
-  const entries: MemberEntry[] = []
+function membersOf(organizationId: string): WorkspaceMember[] {
+  const entries: WorkspaceMember[] = []
   for (const stored of allMemberships()) {
     const membership = sessionMembershipDecisions.get(stored.id) ?? stored
     if (membership.organization_id !== organizationId) continue
@@ -109,7 +141,7 @@ function membersOf(organizationId: string): MemberEntry[] {
     if (!person) continue
     entries.push({
       membership,
-      person,
+      person: displayed(person),
       // La DIRECTION de la demande, et non son statut : les deux « pending » ne
       // se traitent pas pareil — l'un se relance, l'autre s'accepte.
       is_invitation: membership.invited_at !== null,
@@ -130,9 +162,7 @@ function openChangeRequests(proposalId: string): number {
   return commentsWithSession().filter(
     (comment) =>
       comment.proposal_id === proposalId &&
-      comment.is_change_request &&
-      comment.resolved_at === null &&
-      comment.deleted_at === null,
+      comment.is_change_request && comment.resolved_at === null,
   ).length
 }
 
@@ -351,27 +381,31 @@ export function workspaceOverview(
  */
 export function proposalFile(
   proposalId: string,
-  organizationId: string,
+  personId: string,
   at: number = Date.now(),
 ): ProposalFile | null {
   const tracking = trackingOf(proposalId, at)
   if (!tracking) return null
-  // Un dossier ne se consulte que depuis l'organisation qui le porte. Ce n'est
-  // pas le contrôle d'accès — l'API le refait — mais l'écran ne doit pas
-  // afficher le dossier d'un tiers à qui forge une URL.
-  if (tracking.proposal.organization_id !== organizationId) return null
+  // L'accès se décide comme dans l'API : le dossier désigne l'organisation qui
+  // le porte, et le lecteur doit y avoir une adhésion active. Aucune
+  // organisation n'est demandée à l'appelant.
+  const member = allMemberships().some(
+    (m) =>
+      m.organization_id === tracking.proposal.organization_id &&
+      m.person_id === personId &&
+      m.status === 'active',
+  )
+  if (!member) return null
 
   const comments = commentsWithSession()
     .filter(
       (comment) =>
-        comment.proposal_id === proposalId &&
-        comment.visibility === 'submitter' &&
-        comment.deleted_at === null,
+        comment.proposal_id === proposalId && comment.visibility === 'submitter',
     )
     .sort((a, b) => a.created_at.localeCompare(b.created_at))
 
   const authorIds = new Set(comments.map((comment) => comment.author_id))
-  const participants: Person[] = people.filter((person) => authorIds.has(person.id))
+  const participants = people.filter((person) => authorIds.has(person.id)).map(displayed)
 
   return {
     tracking,
@@ -431,7 +465,7 @@ export function inviteMember(actorId: string, payload: InviteMemberPayload): Inv
     if (existing) {
       const entry: MemberEntry = {
         membership: existing,
-        person: existingPerson,
+        person: contactable(existingPerson),
         is_invitation: existing.invited_at !== null,
       }
       return {
@@ -443,21 +477,23 @@ export function inviteMember(actorId: string, payload: InviteMemberPayload): Inv
 
   // Personne inconnue : la fiche est créée, SANS COMPTE. C'est ce que la
   // séparation personne / compte permet, et l'invitation qui lui en fera ouvrir
-  // un — pas l'inverse. Le nom reste vide tant qu'elle ne l'a pas donné : le
-  // déduire de l'adresse fabriquerait un « a.diallo » qu'aucun écran ne saurait
-  // corriger ensuite.
+  // un — pas l'inverse. Les deux colonnes de nom sont NOT NULL et non vides : on
+  // y écrit le même libellé neutre que l'API, plutôt qu'un « a.diallo » déduit de
+  // l'adresse, faux une fois sur deux et qu'aucun écran ne saurait corriger. La
+  // fonction reste vide : elle appartient à l'adhésion, et l'API n'écrit sur la
+  // personne que son adresse et ce libellé.
   const person: Person =
     existingPerson ??
     ({
       id: PERSON_INVITED(nextSessionMembershipIndex()),
       primary_email: email,
       email_verified_at: null,
-      first_name: '',
-      last_name: '',
+      first_name: 'Invité·e',
+      last_name: '—',
       civility: null,
-      display_name: '',
+      display_name: 'Invité·e —',
       phone: null,
-      job_title: payload.job_title,
+      job_title: null,
       biography: null,
       country_id: null,
       city: null,
@@ -494,7 +530,7 @@ export function inviteMember(actorId: string, payload: InviteMemberPayload): Inv
   }
   addSessionMembership(membership)
 
-  return { status: 'invited', entry: { membership, person, is_invitation: true } }
+  return { status: 'invited', entry: { membership, person: contactable(person), is_invitation: true } }
 }
 
 /**
@@ -603,7 +639,6 @@ export function replyToComment(authorId: string, payload: ReplyToCommentPayload)
     resolved_at: null,
     resolved_by: null,
     edited_at: null,
-    deleted_at: null,
     created_at: now,
   }
   sessionComments.push(reply)

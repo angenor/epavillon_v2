@@ -1,0 +1,22 @@
+{
+  "unreachable": {
+    "network": "La plateforme est momentanément injoignable. Vérifiez votre connexion, puis réessayez.",
+    "timeout": "La plateforme met trop de temps à répondre. Réessayez dans un instant.",
+    "gateway": "La plateforme est momentanément indisponible. L'équipe technique en est informée.",
+    "malformed": "La plateforme a renvoyé une réponse inattendue. Réessayez dans un instant."
+  },
+  "offline": {
+    "title": "Liaison interrompue avec la plateforme",
+    "description": "Les données affichées peuvent dater. Les enregistrements n'aboutiront pas tant que la liaison n'est pas rétablie.",
+    "retry": "Réessayer maintenant",
+    "checking": "Nouvelle tentative en cours…"
+  },
+  "session": {
+    "expired": "Votre session a expiré. Reconnectez-vous pour continuer.",
+    "signInAgain": "Se reconnecter"
+  },
+  "mockData": {
+    "title": "Une partie de cet écran vient d'un jeu d'exemple",
+    "description": "La plateforme ne sert pas encore ces données ; le reste de l'écran affiche les informations réelles. Routes attendues :"
+  }
+}

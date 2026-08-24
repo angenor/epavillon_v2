@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { InviteMemberPayload, MemberEntry } from '~/types/organization-workspace'
+import type { InviteMemberPayload, WorkspaceMember } from '~/types/organization-workspace'
 import type { Membership } from '~/types/org'
 import type { SelectOption } from '~/types/ui'
 import type { PersonId } from '~/types/shared'
@@ -24,7 +24,7 @@ import type { PersonId } from '~/types/shared'
  */
 
 interface Props {
-  members: MemberEntry[]
+  members: WorkspaceMember[]
   organizationName: string
   /** Personne connectée — pour marquer sa propre ligne. */
   viewerId: PersonId
@@ -86,10 +86,10 @@ function submit(): void {
   jobTitle.value = ''
 }
 
-/** Nom affichable : une personne invitée n'a pas encore donné le sien. */
-function nameOf(entry: MemberEntry): string {
-  const full = `${entry.person.first_name} ${entry.person.last_name}`.trim()
-  return full.length > 0 ? full : entry.person.primary_email
+/** Aucun repli sur l'adresse : les deux colonnes de nom sont non vides en base,
+ *  et une personne invitée porte le libellé neutre que l'API lui écrit. */
+function nameOf(entry: WorkspaceMember): string {
+  return `${entry.person.first_name} ${entry.person.last_name}`.trim()
 }
 </script>
 

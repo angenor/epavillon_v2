@@ -10,7 +10,7 @@ import type { I18nText } from '~/types/shared'
 /**
  * LA VUE COMPARÉE, CHAMP PAR CHAMP.
  *
- * TROIS ÉTATS PAR LIGNE, ET ILS NE DEMANDENT PAS LE MÊME GESTE :
+ * QUATRE ÉTATS PAR LIGNE, ET ILS NE DEMANDENT PAS LE MÊME GESTE :
  *   · identiques — rien à décider. La ligne reste, discrète : voir ce qui
  *     concorde rassure autant que voir ce qui diverge ;
  *   · renseigné d'un seul côté — la valeur existante est retenue d'office, et
@@ -18,7 +18,10 @@ import type { I18nText } from '~/types/shared'
  *     est tout l'intérêt de la manœuvre ;
  *   · les deux renseignés et différents — ARBITRAGE. Deux boutons radio, aucun
  *     présélectionné, et le décompte des champs restants empêche de valider à
- *     l'aveugle.
+ *     l'aveugle ;
+ *   · NON ARBITRABLE — l'adresse d'URL. Elle se compare, elle ne se déplace pas :
+ *     la fiche absorbée garde la sienne pour toujours, et c'est ce qui fait que
+ *     ses anciens liens continuent de fonctionner. Aucun bouton, une mention.
  *
  * LA COLONNE DE GAUCHE EST TOUJOURS LA FICHE CONSERVÉE. Elle ne change pas de
  * place quand on inverse le sens de la fusion : c'est le CONTENU des colonnes
@@ -33,6 +36,8 @@ import type { I18nText } from '~/types/shared'
 
 interface Props {
   comparisons: MergeFieldComparison[]
+  /** Champs que l'API compare mais refuse de déplacer — `ORG_MERGE_FIELD_NOT_ARBITRABLE`. */
+  nonArbitrable: MergeField[]
   source: DuplicateSide
   target: DuplicateSide
   choices: Partial<Record<MergeField, MergeSideKey>>
@@ -63,16 +68,28 @@ function sideValue(comparison: MergeFieldComparison, side: MergeSideKey): string
     : display(comparison.target_value, comparison.target_label)
 }
 
-const unresolved = computed(() => unresolvedFields(props.comparisons, props.choices))
+/** Le champ se compare-t-il sans pouvoir se déplacer ? */
+function isFixed(comparison: MergeFieldComparison): boolean {
+  return props.nonArbitrable.includes(comparison.field)
+}
+
+const unresolved = computed(() =>
+  unresolvedFields(
+    props.comparisons.filter((comparison) => !isFixed(comparison)),
+    props.choices,
+  ),
+)
 
 /** Le champ est-il à trancher par un humain ? */
 function isContested(comparison: MergeFieldComparison): boolean {
-  return comparison.differs && comparison.filled === 'both'
+  return !isFixed(comparison) && comparison.differs && comparison.filled === 'both'
 }
 
 /** Côté retenu pour ce champ — la cible tant que rien n'est décidé. */
 function chosen(comparison: MergeFieldComparison): MergeSideKey | null {
   if (!comparison.differs) return null
+  // Un champ non arbitrable reste celui de la fiche conservée, sans arbitrage.
+  if (isFixed(comparison)) return 'target'
   if (comparison.filled === 'source') return 'source'
   if (comparison.filled === 'target') return 'target'
   return props.choices[comparison.field] ?? null
@@ -140,7 +157,10 @@ function rowName(field: MergeField): string {
             <p class="text-sm font-medium text-text">
               {{ t('admin.organization.merge.compare.fields.' + comparison.field) }}
             </p>
-            <p v-if="isContested(comparison)" class="text-xs font-semibold text-warning">
+            <p v-if="isFixed(comparison)" class="text-xs text-text-subtle">
+              {{ t('admin.organization.merge.reversible.urls') }}
+            </p>
+            <p v-else-if="isContested(comparison)" class="text-xs font-semibold text-warning">
               {{ t('admin.organization.merge.compare.contested') }}
             </p>
             <p v-else-if="!comparison.differs" class="text-xs text-text-subtle">

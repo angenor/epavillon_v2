@@ -32,6 +32,12 @@
  * permission sur la portée visée. La file RGPD, elle, ne se filtre pas du tout —
  * une demande d'effacement porte sur la plateforme entière : elle s'ouvre sur la
  * permission globale, ou pas du tout.
+ *
+ * ── LA CIBLE EST DANS LE CHEMIN, JAMAIS DANS LE CORPS ───────────────────────
+ *
+ * Les quatre écritures prennent leur identifiant en PREMIER ARGUMENT et ne le
+ * répètent pas dans la charge utile : l'API ne lit que l'URL, et un corps qui
+ * porterait un second identifiant finirait par en désigner un autre.
  */
 
 import type {
@@ -98,11 +104,12 @@ export function createAdminUsersApi({ call, send }: ApiTransport) {
      * le refus du trigger, `forbidden_scope` celui de l'autorisation.
      */
     grantRole: (
+      personId: Uuid,
       payload: GrantRolePayload,
       actorId: Uuid | null,
       granted: EffectivePermission[],
     ): Promise<RoleWriteResult> =>
-      send(`/admin/users/${payload.person_id}/roles`, payload, (m) => m.grantRole(payload, actorId, granted)),
+      send(`/admin/users/${personId}/roles`, payload, (m) => m.grantRole(personId, payload, actorId, granted)),
 
     /**
      * RETIRER UN RÔLE, AVEC MOTIF.
@@ -113,14 +120,15 @@ export function createAdminUsersApi({ call, send }: ApiTransport) {
      * pas de suppression.
      */
     revokeRole: (
+      assignmentId: Uuid,
       payload: RevokeRolePayload,
       actorId: Uuid | null,
       granted: EffectivePermission[],
     ): Promise<RoleWriteResult> =>
       send(
-        `/admin/users/roles/${payload.assignment_id}`,
+        `/admin/users/roles/${assignmentId}`,
         payload,
-        (m) => m.revokeRole(payload, actorId, granted),
+        (m) => m.revokeRole(assignmentId, payload, actorId, granted),
         'DELETE',
       ),
 
@@ -132,14 +140,15 @@ export function createAdminUsersApi({ call, send }: ApiTransport) {
      * date de fin, c'est un blocage qui n'ose pas dire son nom.
      */
     setStatus: (
+      personId: Uuid,
       payload: SetPersonStatusPayload,
       actorId: Uuid | null,
       scope: AdministeredEvents,
     ): Promise<PersonWriteResult> =>
       send(
-        `/admin/users/${payload.person_id}/status`,
+        `/admin/users/${personId}/status`,
         payload,
-        (m) => m.setPersonStatus(payload, actorId, scope),
+        (m) => m.setPersonStatus(personId, payload, actorId, scope),
         'PUT',
       ),
 
@@ -155,13 +164,14 @@ export function createAdminUsersApi({ call, send }: ApiTransport) {
      * l'exécuter sur une demande d'export, qui ne réclamait qu'une copie.
      */
     handlePrivacyRequest: (
+      requestId: Uuid,
       payload: HandlePrivacyRequestPayload,
       actorId: Uuid | null,
     ): Promise<PrivacyWriteResult> =>
       send(
-        `/admin/privacy-requests/${payload.request_id}`,
+        `/admin/privacy-requests/${requestId}`,
         payload,
-        (m) => m.handlePrivacyRequest(payload, actorId),
+        (m) => m.handlePrivacyRequest(requestId, payload, actorId),
         'PUT',
       ),
   }

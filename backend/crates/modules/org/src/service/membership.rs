@@ -163,7 +163,8 @@ pub async fn decide(
     }
 
     let issue = if demande.approved {
-        let approuvee = memberships::approve(&mut tx, id, acteur)
+        // La personne a déclaré sa fonction en demandant : le référent n'y touche pas.
+        let approuvee = memberships::approve(&mut tx, id, acteur, None)
             .await?
             .ok_or_else(|| ApiError::new(ErrorCode::OrgMembershipNotPending))?;
 
@@ -203,7 +204,15 @@ pub async fn accept_invitation(
     ctx: &RequestContext,
     session: Option<PersonId>,
     jeton: &str,
+    job_title: Option<&str>,
 ) -> Result<AcceptInvitationOutcome> {
+    // **C'est ici que la personne déclare sa fonction**, et non à l'invitation :
+    // le référent qui invite ne connaît pas toujours l'intitulé exact de la
+    // personne qu'il vise, et le lui faire inventer produirait une donnée fausse
+    // que personne ne corrigerait. L'écran la pré-remplit avec ce que le
+    // référent a proposé, s'il a proposé quelque chose.
+    let fonction = crate::domain::membership::fonction_declaree(job_title)?;
+
     let mut tx = state.db().write(ctx).await?;
 
     let consomme = match tokens::consume(&mut tx, jeton, TokenPurpose::Invitation).await? {
@@ -241,17 +250,21 @@ pub async fn accept_invitation(
         });
     };
 
-    let approuvee = match memberships::approve(&mut tx, adhesion_id, person_id).await? {
-        Some(a) => a,
-        // L'adhésion n'attend plus : elle a été révoquée, ou déjà acceptée par
-        // un autre onglet. Le jeton, lui, vient d'être consommé.
-        None if adhesion.status == crate::domain::membership::MembershipStatus::Active => adhesion,
-        None => {
-            return Ok(AcceptInvitationOutcome::Rejected {
-                reason: TokenRejection::Invalid,
-            })
-        }
-    };
+    let approuvee =
+        match memberships::approve(&mut tx, adhesion_id, person_id, Some(fonction.as_str())).await?
+        {
+            Some(a) => a,
+            // L'adhésion n'attend plus : elle a été révoquée, ou déjà acceptée par
+            // un autre onglet. Le jeton, lui, vient d'être consommé.
+            None if adhesion.status == crate::domain::membership::MembershipStatus::Active => {
+                adhesion
+            }
+            None => {
+                return Ok(AcceptInvitationOutcome::Rejected {
+                    reason: TokenRejection::Invalid,
+                })
+            }
+        };
 
     // **Le lien vient de prouver l'adresse** : laisser la personne redemander un
     // second lien pour la même adresse serait une formalité vide.

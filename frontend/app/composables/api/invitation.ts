@@ -29,8 +29,16 @@ import type { ApiTransport } from './proposal-review'
 
 export function createInvitationApi({ send }: ApiTransport) {
   return {
-    /** `POST /organizations/invitations/accept`, corps `{ token }`. */
-    accept: (token: string): Promise<AcceptInvitationResult> =>
-      send('/organizations/invitations/accept', { token }, (m) => m.acceptInvitation(token)),
+    /**
+     * `POST /organizations/invitations/accept`, corps `{ token, job_title }`.
+     *
+     * La fonction est EXIGÉE : l'adhésion devient active, et une adhésion active
+     * porte toujours celle de la personne. C'est l'invitée qui la déclare, pas
+     * le référent qui l'a invitée.
+     */
+    accept: (token: string, jobTitle: string): Promise<AcceptInvitationResult> =>
+      send('/organizations/invitations/accept', { token, job_title: jobTitle }, (m) =>
+        m.acceptInvitation(token),
+      ),
   }
 }

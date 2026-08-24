@@ -81,6 +81,10 @@ pub struct IntervenantRecompose {
 
 /// Le brouillon recomposé — la forme d'écran, enrichie de ce que la lecture
 /// seule peut donner.
+///
+/// Les deux listes portent le MÊME NOM que celles de `ProposalDraft`, et c'est
+/// voulu : l'écran ne connaît qu'une clé `speakers`. Ce sont celles de
+/// `ProposalDraft` qui ne sortent pas — `skip_serializing`, posé là-bas.
 #[derive(Debug, Clone, Serialize, ToSchema)]
 pub struct BrouillonRecompose {
     #[serde(flatten)]

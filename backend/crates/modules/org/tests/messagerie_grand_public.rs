@@ -96,7 +96,7 @@ async fn une_personne_sur_gmail_ne_se_rattache_pas_doffice() {
         OrganizationId(organisation),
         JoinOrganization {
             organization_id: None,
-            job_title: None,
+            job_title: Some("Chargée de projet".to_owned()),
         },
     )
     .await

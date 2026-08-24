@@ -67,8 +67,27 @@ const { data: granted } = await useAsyncData<EffectivePermission[]>(
   { default: () => [], lazy: true },
 )
 
-const canRead = computed(() => hasPermissionOnAnyScope(granted.value, 'org.organization.read'))
-const canManage = computed(() => hasPermission(granted.value, 'org.organization.manage'))
+/**
+ * PÉRIMÈTRE NON VIDE, en plus de la permission : `org.organization.read` est
+ * accordée au rôle d'utilisateur ORDINAIRE, et l'API refuse alors sur le
+ * périmètre. Sans ce second test, l'écran affichait une panne au lieu d'un accès
+ * refusé.
+ */
+const hasScope = computed(
+  () => adminScope.scope.is_global || adminScope.scope.event_ids.length > 0,
+)
+const canRead = computed(
+  () => hasPermissionOnAnyScope(granted.value, 'org.organization.read') && hasScope.value,
+)
+/**
+ * LES TROIS ÉCRITURES DE LA FICHE NE DEMANDENT PAS LA PORTÉE GLOBALE. L'API se
+ * contente de la permission de gestion sur n'importe quelle portée : c'est le
+ * PÉRIMÈTRE qui borne ce qu'on voit, pas la portée du droit. Une coordonnatrice
+ * détachée sur la COP31 doit pouvoir poser le sceau et vérifier un domaine sur
+ * les organisations qui y déposent.
+ */
+const canManage = computed(() => hasPermissionOnAnyScope(granted.value, 'org.organization.manage'))
+/** La fusion, elle, déplace des rattachements partout : portée GLOBALE exigée. */
 const canMerge = computed(() => hasPermission(granted.value, 'org.organization.merge'))
 
 const {
@@ -83,6 +102,23 @@ const {
 )
 
 useHead(() => ({ title: detail.value?.legal_name ?? t('nav.admin.organizations') }))
+
+/**
+ * LE RENVOI DE LA FICHE ABSORBÉE.
+ *
+ * La date accompagne toujours le pointeur en base — `ck_organizations_merge_consistency`
+ * l'exige — mais le contrat de l'API la rend facultative. À défaut, le renvoi
+ * s'affiche quand même : perdre le lien vers la fiche vivante serait bien pire
+ * que de ne pas savoir quel jour la fusion a eu lieu.
+ */
+const mergedNotice = computed(() => {
+  const merged = detail.value?.merged_into
+  if (!merged) return ''
+  return t('admin.organization.detail.merged.notice', {
+    name: merged.legal_name,
+    date: merged.merged_at ? date(merged.merged_at, timezone.value) : t('common.labels.unknown'),
+  })
+})
 
 // ---------------------------------------------------------------------------
 // Onglets — portés par l'URL
@@ -155,7 +191,7 @@ async function apply(action: () => Promise<OrganizationWriteResult>): Promise<vo
 
     if (result.status === 'domain_taken') {
       writeError.value = t('admin.organization.detail.domains.taken', {
-        name: result.conflict_with?.legal_name ?? '',
+        name: result.conflict_with.legal_name,
       })
       return
     }
@@ -163,6 +199,12 @@ async function apply(action: () => Promise<OrganizationWriteResult>): Promise<vo
 
     detail.value = result.detail
     notice.value = t('admin.organization.detail.saved')
+  } catch (thrown) {
+    // Sans ce rattrapage, une écriture refusée ne laissait AUCUNE trace à
+    // l'écran. Le message vient de l'API et s'affiche tel quel : elle seule sait
+    // pourquoi elle refuse, et son catalogue est déjà en français.
+    writeError.value =
+      thrown instanceof ForbiddenError ? thrown.message : apiErrorMessage(thrown, (key) => t(key))
   } finally {
     busy.value = false
   }
@@ -278,12 +320,7 @@ function pairLink(pairId: string, otherId: string): string {
           v-if="detail.merged_into"
           class="mt-4"
           intent="info"
-          :message="
-            t('admin.organization.detail.merged.notice', {
-              name: detail.merged_into.legal_name,
-              date: date(detail.merged_into.merged_at, timezone),
-            })
-          "
+          :message="mergedNotice"
         >
           <template #actions>
             <UiButton

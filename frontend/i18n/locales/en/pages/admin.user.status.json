@@ -6,7 +6,10 @@
   "dialog": {
     "title": "Account status",
     "description": "Restrict or restore access for {name}.",
-    "open": { "restrict": "Restrict access", "restore": "Restore access" },
+    "open": {
+      "restrict": "Restrict access",
+      "restore": "Restore access"
+    },
     "field": {
       "status": "New status",
       "until": "Suspension ends",
@@ -16,18 +19,25 @@
       "revokeSessions": "Close open sessions",
       "revokeSessionsHint": "Otherwise the person stays signed in until their token expires."
     },
-    "option": { "active": "Active", "suspended": "Suspended", "blocked": "Blocked" },
+    "option": {
+      "active": "Active",
+      "suspended": "Suspended",
+      "blocked": "Blocked"
+    },
     "help": {
       "active": "Access is restored immediately; the previous reason is cleared.",
       "suspended": "Access restricted until a date. Data is kept.",
       "blocked": "Lasting exclusion, with no end date. Data is kept."
     },
-    "submit": { "active": "Restore access", "suspended": "Suspend", "blocked": "Block" },
+    "submit": {
+      "active": "Restore access",
+      "suspended": "Suspend",
+      "blocked": "Block"
+    },
     "lockedNotice": "One of this person's accounts is locked after failed attempts. That lock expires on its own and is not a suspension."
   },
   "error": {
     "missing_deadline": "A suspension must carry an end date.",
-    "forbidden": "This person is not within your administration scope.",
     "not_found": "This person no longer exists."
   }
 }

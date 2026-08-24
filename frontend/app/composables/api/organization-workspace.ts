@@ -41,11 +41,15 @@ export function createOrganizationWorkspaceApi({ call, send }: ApiTransport) {
         m.workspaceOverview(organizationId, personId),
       ),
 
-    /** Le détail d'un dossier : suivi, fil partagé, historique. */
-    proposalFile: (proposalId: Uuid, organizationId: Uuid): Promise<ProposalFile | null> =>
-      call(`/proposals/${proposalId}/file`, (m) => m.proposalFile(proposalId, organizationId), {
-        organization_id: organizationId,
-      }),
+    /**
+     * Le détail d'un dossier : suivi, fil partagé, historique.
+     *
+     * L'ORGANISATION N'EST PAS UN PARAMÈTRE : l'API lit celle qui porte le
+     * dossier, puis exige du LECTEUR une adhésion active à celle-ci. La personne
+     * ne sert qu'aux données simulées, qui n'ont pas de session.
+     */
+    proposalFile: (proposalId: Uuid, personId: Uuid): Promise<ProposalFile | null> =>
+      call(`/proposals/${proposalId}/file`, (m) => m.proposalFile(proposalId, personId)),
 
     /** Éditions auxquelles cette organisation a déposé, pour grouper la liste. */
     editions: (organizationId: Uuid) =>

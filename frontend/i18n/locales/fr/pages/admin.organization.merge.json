@@ -152,7 +152,6 @@
   },
   "error": {
     "mismatch": "Le nom saisi ne correspond pas à la fiche absorbée. Rien n'a été fusionné.",
-    "alreadyMerged": "Cette fiche a été fusionnée entre-temps. Rechargez la file.",
     "generic": "La fusion n'a pas abouti. Rien n'a été modifié."
   }
 }

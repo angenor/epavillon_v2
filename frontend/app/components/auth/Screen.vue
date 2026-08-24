@@ -54,7 +54,7 @@ const showSignedIn = computed(
       v-else-if="auth.loadError !== null"
       :title="t('common.states.error.title')"
       :description="t('common.states.error.description')"
-      :detail="auth.loadError.message"
+      :detail="loadFailureMessage(auth.loadError, t)"
       :retry-label="t('common.actions.retry')"
       @retry="auth.retryLoad()"
     />

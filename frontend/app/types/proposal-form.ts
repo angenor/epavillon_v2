@@ -84,6 +84,18 @@ export const PROPOSAL_FORM_STEPS: ProposalFormStep[] = [
   'review',
 ]
 
+/**
+ * LE SÉLECTEUR DE PHOTO D'UN INTERVENANT, ouvert ou fermé.
+ *
+ * Fermé pour la même raison que l'étape des documents, mais celle-ci tient au
+ * chemin et non au calendrier : `DraftSpeaker.photo` part avec le brouillon et
+ * l'API l'ignore en silence — la photo est un objet de `media.assets`, déposé
+ * par un envoi multipart que le point d'entrée ne sait pas encore faire. Une
+ * photo choisie, montrée, puis perdue est pire que pas de photo du tout. La
+ * ligne se rebascule le jour où le téléversement existe.
+ */
+export const SPEAKER_PHOTO_ENABLED = false
+
 // ---------------------------------------------------------------------------
 // Limites de saisie
 // ---------------------------------------------------------------------------
@@ -289,7 +301,14 @@ export interface ProposalDraft {
   requested_sessions: number
   scheduling_constraints: string
 
-  // — Étape 6 : documents
+  /**
+   * — Étape 6 : documents.
+   *
+   * ILS NE PARTENT PAS AVEC LE BROUILLON : l'enregistrement automatique ne les
+   * transmet pas, et la recomposition d'un dossier ne les rend pas. Les pièces
+   * ont leurs propres routes (`GET`/`POST /proposals/{id}/documents`) et un
+   * objet déjà stocké ; ce champ ne tient que la saisie de l'écran.
+   */
   documents: DraftDocument[]
 }
 
@@ -353,11 +372,16 @@ export interface SubmitProposalPayload {
 /**
  * Issue d'un dépôt.
  *
- * LES DEUX REFUS SONT CEUX DE LA BASE, pas des inventions d'écran :
- * `tg_check_submission_eligibility()` (`070` § 3) refuse hors fenêtre de l'appel
- * et au-delà du plafond `max_proposals_per_organization`. L'écran les prévient,
+ * LES TROIS REFUS SONT CEUX DE LA BASE, pas des inventions d'écran :
+ * `tg_check_submission_eligibility()` (`070` § 3) refuse hors fenêtre de l'appel,
+ * au-delà du plafond `max_proposals_per_organization`, et quand l'appel exige une
+ * organisation vérifiée (`requires_verified_organization`). L'écran les prévient,
  * mais doit savoir les rendre : entre le chargement de la page et le clic, une
  * échéance peut tomber.
+ *
+ * L'ÉCRAN REND AUSSI CE QU'IL NE CONNAÎT PAS. Un quatrième refus ajouté à l'API
+ * arriverait ici en discriminant inconnu ; le taire laisserait un bouton sans
+ * effet, ce qui est pire qu'un message imparfait.
  */
 export type SubmitProposalResult =
   | {
@@ -372,6 +396,55 @@ export type SubmitProposalResult =
     }
   | { status: 'call_closed'; deadline: IsoDateTime }
   | { status: 'quota_reached'; max: number }
+  | { status: 'organization_not_verified' }
+
+// ---------------------------------------------------------------------------
+// Rouvrir un dossier existant
+// ---------------------------------------------------------------------------
+
+/**
+ * UN INTERVENANT TEL QUE L'API LE REND — sans clé de liste ni photo.
+ *
+ * `key` est locale à l'écran par définition : la faire porter par l'API
+ * obligerait à la persister pour qu'elle reste stable, alors qu'elle ne survit
+ * pas à la saisie. C'est donc l'écran qui la pose à la réception, sans quoi tous
+ * les intervenants rouverts partagent la même clé vide — en modifier un les
+ * remplace tous.
+ *
+ * `photo` est absente pour une autre raison : elle appartient à la fiche de la
+ * personne, que la recomposition ne rouvre pas.
+ */
+export type ReopenedSpeaker = Omit<DraftSpeaker, 'key' | 'photo'>
+
+/**
+ * LE BROUILLON RECOMPOSÉ PAR L'API.
+ *
+ * Il ne porte PAS les pièces jointes : elles ont leurs propres routes et leur
+ * propre objet stocké. L'écran les charge à part et complète le brouillon —
+ * voir `draftFromReopened()`.
+ */
+export interface ReopenedDraft extends Omit<ProposalDraft, 'speakers' | 'documents'> {
+  speakers: ReopenedSpeaker[]
+}
+
+/**
+ * CE QUE L'ÉCRAN REÇOIT POUR ROUVRIR UN DOSSIER — `GET /proposals/{id}/draft`.
+ *
+ * La recomposition n'est pas un `SELECT` : le formulaire travaille sur une
+ * structure d'écran — français, heures murales, identités verrouillées — quand
+ * la base range la même chose dans cinq tables. Elle appartient à l'API, et une
+ * seule implémentation sert le dépôt et la correction.
+ */
+export interface EditableProposal {
+  proposal_id: ProposalId
+  reference_code: string
+  /** Nul pour un dossier qui n'est rattaché à aucun appel. */
+  call_id: CallId | null
+  event_id: EventId
+  status: ProposalStatus
+  saved_at: IsoDateTime
+  draft: ReopenedDraft
+}
 
 /**
  * Ce que l'écran charge avant d'afficher quoi que ce soit : l'édition qui reçoit

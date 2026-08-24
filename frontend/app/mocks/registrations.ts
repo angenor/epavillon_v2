@@ -39,8 +39,15 @@
  * rappels sont inchangés : seules les dates de création ont bougé.
  */
 
-import type { Registration, RegistrationStatus, RegistrationSource } from '~/types/programme/registration'
+import type {
+  Registration,
+  RegistrationRow,
+  RegistrationStatus,
+  RegistrationSource,
+} from '~/types/programme/registration'
 import { ORG, PERSON, REGISTRATION, SESSION } from './ids'
+import { organizations } from './org'
+import { people } from './people'
 
 // ---------------------------------------------------------------------------
 // Profils des inscrits
@@ -325,3 +332,36 @@ export const registrations = [
     cancelledReason: 'Empêchement de dernière minute.',
   }),
 ] satisfies Registration[]
+
+/**
+ * La liste NOMINATIVE d'une séance — `RegistrationRow[]`, ce que rend l'API.
+ *
+ * Elle joint la personne et le nom de son organisation, comme le fait la
+ * requête du back-office. Composer cet objet dans `useApi()` aurait mis une
+ * jointure dans la couche d'accès, où rien ne la relirait.
+ */
+export function registrationRowsOf(sessionId: string): RegistrationRow[] {
+  return registrations
+    .filter((r) => r.session_id === sessionId)
+    .flatMap((registration) => {
+      // La jointure de l'API est INTERNE sur `identity.people` : une inscription
+      // dont la personne a disparu ne sort pas de la liste. `person_id` est
+      // `NOT NULL` et référencé, donc le cas ne se produit pas.
+      const person = people.find((p) => p.id === registration.person_id)
+      if (!person) return []
+      const organization = organizations.find((o) => o.id === registration.organization_id)
+      return [
+        {
+          registration,
+          person: {
+            id: person.id,
+            display_name: person.display_name,
+            first_name: person.first_name,
+            last_name: person.last_name,
+            primary_email: person.primary_email,
+          },
+          organization_name: organization?.legal_name ?? null,
+        },
+      ]
+    })
+}
