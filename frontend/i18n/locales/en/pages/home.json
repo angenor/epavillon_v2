@@ -37,18 +37,30 @@
       "title": "Nothing announced yet",
       "description": "No session or edition is scheduled at this time."
     },
-    "pins": {
-      "title": "Spotlight",
-      "until": "Until {date}",
-      "link": "Read more"
-    },
     "sessions": {
-      "title": "Next sessions",
-      "all": "Full programme",
-      "ongoing": "Live now"
+      "ongoing": "Ongoing"
     },
     "editions": {
-      "title": "Upcoming editions"
+      "title": "Upcoming events",
+      "all": "All",
+      "startsToday": "Starts today",
+      "inDays": "in {count} day | in {count} day | in {count} days",
+      "sessions": "{count} activity selected | {count} activity selected | {count} activities selected",
+      "days": "{count} day | {count} day | {count} days",
+      "nextSession": "Next session on {date}, {time} ({zone})"
+    },
+    "programme": {
+      "title": "Programme",
+      "titleOf": "Programme — {edition}",
+      "all": "Full programme",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "moreThemes": "also: {themes}",
+      "format": {
+        "online": "Online",
+        "in_person": "On site",
+        "hybrid": "On site and online"
+      }
     }
   },
   "call": {

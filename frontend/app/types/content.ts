@@ -65,13 +65,16 @@ export type HighlightNatureCode = TaxonomyTermCode
 /**
  * ENUM `content.highlight_placement` — `115_content.sql` § 1.
  *
- * Où la diapositive s'affiche. `home_hero` est le bandeau d'ouverture qui
- * défile ; `home_aside` le panneau latéral « À venir », celui qui remplace les
- * cinq widgets d'annonce codés en dur de la v1. Ajouter un emplacement demande
- * un `ALTER TYPE` **et** un composant : c'est voulu, un emplacement sans rendu
- * n'existe pas.
+ * Où la diapositive s'affiche. UN SEUL emplacement : `home_hero`, le bandeau
+ * d'ouverture de l'accueil, qui défile.
+ *
+ * `home_aside` — le panneau latéral « À venir » — a été retiré du modèle le
+ * 24/08 : cette colonne ne se compose plus, elle affiche les événements à venir
+ * puis la frise des activités retenues. Ajouter un emplacement demande un
+ * `ALTER TYPE` **et** un composant : c'est voulu, un emplacement sans rendu
+ * n'existe pas — et c'est cette règle qui a fait retirer celui-là.
  */
-export type HighlightPlacement = 'home_hero' | 'home_aside'
+export type HighlightPlacement = 'home_hero'
 
 /**
  * ENUM `content.highlight_status` — `115_content.sql` § 1.

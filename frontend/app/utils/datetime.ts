@@ -91,6 +91,28 @@ export function formatWeekdayShort(
   }).format(date)
 }
 
+/**
+ * « mercredi 17 novembre » — en-tête de journée d'une frise.
+ *
+ * SANS L'ANNÉE, délibérément : la frise du panneau d'accueil ne montre que les
+ * jours qui viennent, et le millésime y répéterait la même valeur sur chaque
+ * en-tête d'une colonne de 340 px. La date complète reste portée par le créneau
+ * de chaque séance.
+ */
+export function formatDayLong(
+  value: DateInput | null | undefined,
+  options: ZonedFormatOptions,
+): string {
+  const date = toDate(value)
+  if (!date) return ''
+  return new Intl.DateTimeFormat(options.locale, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    timeZone: options.timeZone,
+  }).format(date)
+}
+
 /** Nom court du fuseau tel que l'affiche le navigateur : « GMT-3 », « UTC+1 ». */
 export function timeZoneShortName(
   options: ZonedFormatOptions & { at?: DateInput },

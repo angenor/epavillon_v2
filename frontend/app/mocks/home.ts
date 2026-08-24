@@ -337,7 +337,6 @@ export function homeScreen(at: number = Date.now()): HomeScreen {
 
   return {
     hero: rows.filter((row) => row.placement === 'home_hero'),
-    aside: rows.filter((row) => row.placement === 'home_aside'),
     upcomingSessions: upcomingSessions(),
     // Décroissant : l'accueil ouvre sur ce qui vient, pas sur 2024.
     editions: publicEditions(at).sort((a, b) => b.starts_at.localeCompare(a.starts_at)),

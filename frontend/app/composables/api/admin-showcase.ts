@@ -6,23 +6,13 @@
  * `$fetch`. Seule la place du code change, pour tenir `useApi.ts` sous le
  * garde-fou de mille lignes de `CLAUDE.md`.
  *
- * ── AUCUNE DE CES DIX ROUTES N'EXISTE ENCORE ────────────────────────────────
+ * ── LES DIX ROUTES SONT SERVIES DEPUIS LE 24/08 ─────────────────────────────
  *
- * `content.highlights`, sa vue `v_showcase` et la permission
- * `content.highlight.manage` sont en base, mais aucun crate Rust ne porte le
- * schéma `content`. Les dix appels passent donc par `pending` et non par
- * `call`/`send` : l'écran continue de fonctionner sur les données d'exemple, API
- * configurée ou non, et le bandeau nomme les routes attendues. Les faire appeler
- * leur route rendrait un 404, c'est-à-dire une panne affichée sur un écran livré
- * et vérifié.
- *
- * Rien ne part sur le réseau : ni corps, ni verbe, ni paramètre — `pending` n'en
- * prend aucun. Les chemins restent écrits parce qu'ils documentent les routes
- * attendues, mais la bascule ne se réduira pas à changer le nom de la primitive :
- * il faudra RÉTABLIR `placement` en paramètre de `form()`, `event_id` en
- * paramètre de `sessionsFor()`, les corps des quatre écritures et le `PUT` de la
- * mise à jour, du statut et de l'ordre. Tout est encore là, en argument des
- * méthodes.
+ * Le crate `content` existe : `pending` a laissé la place à `call` et `send`,
+ * et les paramètres que les appels portaient déjà — `placement`, `event_id`, les
+ * corps des écritures — partent réellement. **C'est ce qui manquait quand une
+ * diapositive retirée réapparaissait au rechargement** : l'écran répondait
+ * « c'est fait » sur un objet en mémoire, et rien n'atteignait la base.
  *
  * ── LE PÉRIMÈTRE SE REFUSE ICI, PAS DANS LA PAGE ────────────────────────────
  *
@@ -94,7 +84,7 @@ import type { AdministeredEvents } from '~/types/identity'
 import type { EventId, Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
 
-interface ShowcaseApiDeps extends Pick<ApiTransport, 'pending'> {
+interface ShowcaseApiDeps extends Pick<ApiTransport, 'call' | 'callOrNull' | 'send'> {
   assertEventInScope: (eventId: Uuid, scope: AdministeredEvents) => void
 }
 
@@ -102,7 +92,12 @@ interface ShowcaseApiDeps extends Pick<ApiTransport, 'pending'> {
 const PLATFORM_SCOPE_REFUSAL =
   "Ce contenu s'affiche sur toute la plateforme : sa modification demande la portée globale."
 
-export function createAdminShowcaseApi({ pending, assertEventInScope }: ShowcaseApiDeps) {
+export function createAdminShowcaseApi({
+  call,
+  callOrNull,
+  send,
+  assertEventInScope,
+}: ShowcaseApiDeps) {
   /**
    * LE PÉRIMÈTRE D'UNE DIAPOSITIVE — son édition, ou la plateforme entière.
    *
@@ -138,7 +133,7 @@ export function createAdminShowcaseApi({ pending, assertEventInScope }: Showcase
      * sur l'accueil rendrait les boutons monter/descendre incompréhensibles.
      */
     list: (scope: AdministeredEvents): Promise<ShowcaseListScreen | null> =>
-      pending('/admin/showcase', (m) => m.showcaseList(scope)),
+      callOrNull('/admin/showcase', (m) => m.showcaseList(scope)),
 
     /**
      * L'ÉCRAN DE FORMULAIRE — création comme modification.
@@ -162,7 +157,7 @@ export function createAdminShowcaseApi({ pending, assertEventInScope }: Showcase
       scope: AdministeredEvents,
       options: { placement?: HighlightPlacement } = {},
     ): Promise<ShowcaseFormScreen | null> =>
-      pending(
+      callOrNull(
         highlightId === null ? '/admin/showcase/new' : `/admin/showcase/${highlightId}/form`,
         (m) => {
           if (highlightId !== null) {
@@ -171,6 +166,7 @@ export function createAdminShowcaseApi({ pending, assertEventInScope }: Showcase
           }
           return m.showcaseForm(highlightId, scope, options)
         },
+        highlightId === null && options.placement ? { placement: options.placement } : undefined,
       ),
 
     /**
@@ -181,7 +177,7 @@ export function createAdminShowcaseApi({ pending, assertEventInScope }: Showcase
      * personnes) que `form()` embarque. Même règle de refus.
      */
     byId: (highlightId: HighlightId, scope: AdministeredEvents): Promise<ShowcaseFormValues | null> =>
-      pending(`/admin/showcase/${highlightId}`, (m) => {
+      callOrNull(`/admin/showcase/${highlightId}`, (m) => {
         const found = m.showcaseById(highlightId)
         if (found === null) return null
         assertContentInScope(found.event_id, scope)
@@ -199,7 +195,9 @@ export function createAdminShowcaseApi({ pending, assertEventInScope }: Showcase
      */
     sessionsFor: (eventId: EventId, scope: AdministeredEvents): Promise<ShowcaseSessionOption[]> => {
       assertEventInScope(eventId, scope)
-      return pending('/admin/showcase/sessions', (m) =>
+      return call(
+        '/admin/showcase/sessions',
+        (m) =>
         m.allSessions
           .filter((session) => session.event_id === eventId)
           .map((session) => ({
@@ -210,6 +208,7 @@ export function createAdminShowcaseApi({ pending, assertEventInScope }: Showcase
             timezone: session.timezone,
           }))
           .sort((a, b) => a.starts_at.localeCompare(b.starts_at)),
+        { event_id: eventId },
       )
     },
 
@@ -231,10 +230,11 @@ export function createAdminShowcaseApi({ pending, assertEventInScope }: Showcase
      */
     save: (payload: ShowcaseSavePayload, scope: AdministeredEvents): Promise<ShowcaseWriteResult> => {
       assertContentInScope(payload.event_id, scope)
-      return pending(
+      return send(
         payload.id === null ? '/admin/showcase' : `/admin/showcase/${payload.id}`,
+        payload,
         (m) => m.saveShowcase(payload, scope),
-        'write',
+        payload.id === null ? 'POST' : 'PATCH',
       )
     },
 
@@ -250,14 +250,14 @@ export function createAdminShowcaseApi({ pending, assertEventInScope }: Showcase
      * back-office ne peut pas le contredire.
      */
     setStatus: (payload: ShowcaseStatusPayload, scope: AdministeredEvents): Promise<ShowcaseWriteResult> =>
-      pending(
+      send(
         `/admin/showcase/${payload.id}/status`,
+        payload,
         (m) => {
           const found = m.showcaseById(payload.id)
           if (found !== null) assertContentInScope(found.event_id, scope)
           return m.setShowcaseStatus(payload, scope)
         },
-        'write',
       ),
 
     /**
@@ -272,14 +272,14 @@ export function createAdminShowcaseApi({ pending, assertEventInScope }: Showcase
      * bougé, et rafraîchir la seule ligne cliquée laisserait sa voisine mentir.
      */
     move: (payload: ShowcaseReorderPayload, scope: AdministeredEvents): Promise<ShowcaseWriteResult> =>
-      pending(
+      send(
         `/admin/showcase/${payload.id}/order`,
+        payload,
         (m) => {
           const found = m.showcaseById(payload.id)
           if (found !== null) assertContentInScope(found.event_id, scope)
           return m.moveShowcase(payload, scope)
         },
-        'write',
       ),
 
     /**
@@ -290,14 +290,14 @@ export function createAdminShowcaseApi({ pending, assertEventInScope }: Showcase
      * personne n'a demandée.
      */
     duplicate: (highlightId: HighlightId, scope: AdministeredEvents): Promise<ShowcaseWriteResult> =>
-      pending(
+      send(
         `/admin/showcase/${highlightId}/duplicate`,
+        {},
         (m) => {
           const found = m.showcaseById(highlightId)
           if (found !== null) assertContentInScope(found.event_id, scope)
           return m.duplicateShowcase(highlightId, scope)
         },
-        'write',
       ),
   }
 }

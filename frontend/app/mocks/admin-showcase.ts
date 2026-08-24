@@ -164,7 +164,7 @@ function withRank(rows: ShowcaseListRow[]): ShowcaseListRow[] {
   const ordered = [...rows].sort(
     (a, b) => a.placement.localeCompare(b.placement) || a.sort_order - b.sort_order,
   )
-  for (const placement of ['home_hero', 'home_aside'] as HighlightPlacement[]) {
+  for (const placement of ['home_hero'] as HighlightPlacement[]) {
     const bucket = ordered.filter((row) => row.placement === placement)
     bucket.forEach((row, index) => {
       row.is_first = index === 0
@@ -232,7 +232,6 @@ export function showcaseList(
     rows,
     counts: {
       home_hero: rows.filter((row) => row.placement === 'home_hero').length,
-      home_aside: rows.filter((row) => row.placement === 'home_aside').length,
     },
     broadcast_counts: broadcastCounts,
     natures: natureOptions(),

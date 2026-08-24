@@ -8,7 +8,7 @@
  *
  * ── CE QUI GOUVERNE CET ÉCRAN ───────────────────────────────────────────────
  *
- * UNE REQUÊTE, PAS SIX. L'accueil montre le bandeau, le panneau « À venir »,
+ * UNE REQUÊTE, PAS SIX. L'accueil montre le bandeau, la colonne « À venir »,
  * l'appel en cours et l'historique des éditions. Chacun a sa vue en base ; les
  * assembler côté client, c'est six états de chargement à composer et six
  * occasions de désynchronisation. `HomeScreen` est donc la réponse ENTIÈRE.
@@ -46,10 +46,6 @@ export interface HomeScreen {
    *  bandeau qui défile. Tableau VIDE possible : la page reste entière, elle
    *  s'ouvre alors sur l'appel à propositions. */
   hero: ShowcaseRow[]
-  /** `content.v_showcase`, `placement = 'home_aside'`, par `sort_order`. Les
-   *  épingles éditoriales du panneau « À venir » — elles remplacent les cinq
-   *  widgets d'annonce écrits en dur de la v1. */
-  aside: ShowcaseRow[]
   /** `programme.v_public_schedule` — `temporal_state` valant `'upcoming'` ou
    *  `'ongoing'`, TOUTES ÉDITIONS CONFONDUES, annulations exclues, les six
    *  premières par `starts_at`. Chaque heure porte son fuseau. */

@@ -36,18 +36,30 @@
       "title": "Rien d'annoncé pour l'instant",
       "description": "Aucune séance ni édition n'est programmée à ce jour."
     },
-    "pins": {
-      "title": "En avant",
-      "until": "Jusqu'au {date}",
-      "link": "Consulter"
-    },
     "sessions": {
-      "title": "Prochaines séances",
-      "all": "Toute la programmation",
       "ongoing": "En cours"
     },
     "editions": {
-      "title": "Prochains rendez-vous"
+      "title": "Prochains événements",
+      "all": "Tous",
+      "startsToday": "Commence aujourd'hui",
+      "inDays": "dans {count} jour | dans {count} jour | dans {count} jours",
+      "sessions": "{count} activité retenue | {count} activité retenue | {count} activités retenues",
+      "days": "{count} jour | {count} jour | {count} jours",
+      "nextSession": "Prochaine séance le {date}, {time} ({zone})"
+    },
+    "programme": {
+      "title": "Au programme",
+      "titleOf": "Au programme — {edition}",
+      "all": "Tout le programme",
+      "today": "Aujourd'hui",
+      "tomorrow": "Demain",
+      "moreThemes": "et aussi : {themes}",
+      "format": {
+        "online": "En ligne",
+        "in_person": "Sur place",
+        "hybrid": "Sur place et en ligne"
+      }
     }
   },
   "call": {

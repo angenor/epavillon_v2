@@ -466,113 +466,6 @@ export const highlights = [
     updated_at: '2026-04-02T12:10:00Z',
   },
 
-  // =========================================================================
-  // PANNEAU LATÉRAL « À VENIR » — `home_aside`
-  //
-  // Ces trois-là remplacent les cinq widgets d'annonce écrits en dur de la v1
-  // (FPHN, PACO, Chypre…), dont le changement demandait un redéploiement.
-  // =========================================================================
-
-  {
-    ...BLANK,
-    id: HIGHLIGHT.asideAppelCop31,
-    placement: 'home_aside',
-    status: 'published',
-    nature_code: 'announcement',
-    sort_order: 10,
-    title: {
-      fr: "L'appel à propositions de la COP31 est ouvert",
-      en: 'The COP31 call for proposals is open',
-    },
-    quote: {
-      fr: "Les organisations francophones peuvent déposer une activité jusqu'au 30 septembre.",
-      en: 'French-speaking organizations may submit an activity until 30 September.',
-    },
-    event_id: EVENT.cop31,
-    organization_id: ORG.ifdd,
-    link_url: 'https://epavillonclimatique.francophonie.org/evenements/cop31-belem-2027',
-    link_label: { fr: "Déposer une activité", en: 'Submit an activity' },
-    ends_at: '2026-10-01T00:00:00Z',
-    background_color_hex: '#0c6792',
-    published_at: '2026-08-06T09:30:00Z',
-    created_by: PERSON.bakayoko,
-    created_at: '2026-08-06T09:10:00Z',
-    updated_at: '2026-08-06T09:30:00Z',
-  },
-
-  {
-    ...BLANK,
-    id: HIGHLIGHT.asideRediffusionsPaco,
-    placement: 'home_aside',
-    status: 'published',
-    nature_code: 'innovation',
-    sort_order: 20,
-    title: {
-      fr: 'Les webinaires PACO sont rediffusés',
-      en: 'PACO webinars are available on replay',
-    },
-    quote: {
-      fr: "Les quatre premières séances du cycle sont en ligne, sous-titrées en français et en anglais.",
-      en: 'The first four sessions of the series are online, subtitled in French and English.',
-    },
-    event_id: EVENT.paco2026,
-    // ORGANISATION NOMMÉE ET NON RÉFÉRENCÉE : le partenaire technique n'est pas
-    // au répertoire. `organization_id` reste nul — les deux ensemble seraient
-    // refusés par `ck_highlights_organization_shape`.
-    organization_label: 'Médiathèque de la Francophonie',
-    country_id: COUNTRY.ca,
-    background_color_hex: '#1d1a5b',
-    published_at: '2026-07-10T08:00:00Z',
-    created_by: PERSON.tremblay,
-    created_at: '2026-07-09T10:10:00Z',
-    updated_at: '2026-07-10T08:00:00Z',
-  },
-
-  {
-    ...BLANK,
-    id: HIGHLIGHT.asideChiffreOrganisations,
-    placement: 'home_aside',
-    status: 'published',
-    nature_code: 'key_figure',
-    sort_order: 30,
-    title: { fr: 'Le répertoire francophone', en: 'The French-speaking directory' },
-    quote: {
-      fr: '1 240 organisations de 54 pays inscrites sur la plateforme.',
-      en: '1,240 organizations from 54 countries registered on the platform.',
-    },
-    // Contenu de PLATEFORME, comme le chiffre clé du bandeau : portée globale.
-    organization_id: ORG.ifdd,
-    background_color_hex: '#3f5a10',
-    published_at: '2026-08-12T08:00:00Z',
-    created_by: PERSON.bakayoko,
-    created_at: '2026-08-11T16:00:00Z',
-    updated_at: '2026-08-12T08:00:00Z',
-  },
-
-  {
-    ...BLANK,
-    /*
-     * BROUILLON — le troisième état, celui qui n'est jamais sorti.
-     * `published_at` est nul, et `ck_highlights_published_dated` n'a rien à
-     * redire : la contrainte n'exige la date que pour `published`.
-     */
-    id: HIGHLIGHT.asideGuidePavillon,
-    placement: 'home_aside',
-    status: 'draft',
-    nature_code: 'best_practice',
-    sort_order: 40,
-    title: { fr: "Guide d'accueil au pavillon", en: 'Pavilion visitor guide' },
-    quote: {
-      fr: "Accès, badges, horaires d'ouverture et salles de repli : ce qu'il faut savoir avant d'arriver.",
-      en: 'Access, badges, opening hours and fallback rooms: what to know before arriving.',
-    },
-    event_id: EVENT.cop31,
-    organization_id: ORG.ifdd,
-    background_color_hex: '#3f5a10',
-    created_by: PERSON.nkoDiop,
-    created_at: '2026-08-12T14:10:00Z',
-    updated_at: '2026-08-14T09:00:00Z',
-  },
 ] satisfies Highlight[]
 
 // ---------------------------------------------------------------------------
@@ -610,12 +503,8 @@ export const highlightThemes = [
   ]),
   ...themesOf(HIGHLIGHT.temoignageArchiveCop29, [TERM.climateFinance]),
   ...themesOf(HIGHLIGHT.annonceWebinairePaco, [TERM.climateFinance, TERM.adaptation]),
-  ...themesOf(HIGHLIGHT.asideAppelCop31, [TERM.climateAmbitionNdc]),
-  ...themesOf(HIGHLIGHT.asideRediffusionsPaco, [TERM.transparency]),
-  ...themesOf(HIGHLIGHT.asideGuidePavillon, [TERM.healthSolidarity]),
-  // `chiffreClePavillon` et `asideChiffreOrganisations` n'en portent AUCUNE :
-  // un décompte de plateforme ne relève d'aucune thématique, et la carte doit
-  // rester entière sans pastille.
+  // `chiffreClePavillon` n'en porte AUCUNE : un décompte de plateforme ne relève
+  // d'aucune thématique, et la carte doit rester entière sans pastille.
 ] satisfies EntityTerm[]
 
 // ---------------------------------------------------------------------------

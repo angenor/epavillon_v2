@@ -109,14 +109,20 @@ ON CONFLICT (code) DO NOTHING;
 -- elle sort. La NATURE du contenu, elle, est ouverte : elle est en taxonomie.
 -- -----------------------------------------------------------------------------
 
--- Où la diapositive s'affiche. Deux emplacements aujourd'hui, tous deux servis
--- par la page d'accueil :
---   · `home_hero`  — le bandeau d'ouverture, plein cadre, qui défile ;
---   · `home_aside` — le panneau latéral, sous les prochaines échéances. C'est
---     lui qui remplace les cinq widgets d'annonce codés en dur de la v1.
+-- Où la diapositive s'affiche. UN SEUL emplacement : `home_hero`, le bandeau
+-- d'ouverture de la page d'accueil, plein cadre, qui défile.
+--
+-- `home_aside` — le panneau latéral — A ÉTÉ RETIRÉ LE 24/08, sur arbitrage du
+-- commanditaire. Cette colonne ne se compose plus à la main : elle affiche les
+-- ÉVÉNEMENTS À VENIR dès qu'il en existe un, puis la frise des activités
+-- retenues dès qu'une programmation est publiée. Rien n'y est éditorial, donc
+-- rien n'y est mis en avant. Le retrait suit la règle écrite juste en dessous
+-- plutôt que de laisser une valeur que plus aucun écran ne rend — un
+-- administrateur y aurait composé un contenu que personne n'aurait jamais vu.
+--
 -- Ajouter un emplacement (page d'une édition, pied de page) demande un ALTER
 -- TYPE et un composant : c'est voulu, un emplacement sans rendu n'existe pas.
-CREATE TYPE content.highlight_placement AS ENUM ('home_hero', 'home_aside');
+CREATE TYPE content.highlight_placement AS ENUM ('home_hero');
 
 -- Cycle de vie éditorial. `archived` n'est pas une suppression : une diapositive
 -- retirée de la vitrine reste consultable au back-office et réutilisable

@@ -17,10 +17,10 @@ import type { EventId } from '~/types/shared'
  * pour la même table, c'est la garantie qu'ils divergeront au premier ajout de
  * colonne.
  *
- * L'EMPLACEMENT ARRIVE PAR L'URL (`?emplacement=bandeau|panneau`). C'est la
- * liste qui l'y met, pour qu'on revienne dans l'onglet d'où l'on est parti. Le
- * paramètre est en français, comme partout dans ce projet : ces adresses
- * s'échangent entre collègues.
+ * L'EMPLACEMENT NE SE CHOISIT PLUS. Il arrivait par l'URL, la liste ayant deux
+ * onglets ; depuis le 24/08 il n'y a plus qu'un emplacement — le bandeau
+ * d'ouverture. Le panneau latéral de l'accueil s'alimente seul, et `home_aside`
+ * a quitté le modèle.
  *
  * LA CRÉATION SE PLACE EN FIN D'EMPLACEMENT, et c'est l'API qui le décide : la
  * placer en tête déplacerait silencieusement tout le reste du bandeau. Le rang
@@ -47,17 +47,14 @@ const { t } = useI18n()
 const api = useApi()
 const auth = useAuthStore()
 const adminScope = useAdminScopeStore()
-const route = useRoute()
 const localePath = useLocalePath()
 
 useHead(() => ({ title: t('admin.showcase.form.titleNew') }))
 
 await adminScope.ensureLoaded()
 
-/** L'onglet d'arrivée, en français dans l'URL — voir l'en-tête. */
-const placement = computed<HighlightPlacement>(() =>
-  route.query.emplacement === 'panneau' ? 'home_aside' : 'home_hero',
-)
+/** Un seul emplacement depuis le 24/08 : le bandeau d'ouverture. */
+const placement = computed<HighlightPlacement>(() => 'home_hero')
 
 const {
   data: screen,

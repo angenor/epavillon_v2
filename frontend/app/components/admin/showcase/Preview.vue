@@ -2,21 +2,23 @@
 import type { ShowcaseRow } from '~/types/views'
 
 /**
- * L'APERÇU DE LA DIAPOSITIVE — RENDU PAR LES COMPOSANTS PUBLICS EUX-MÊMES.
+ * L'APERÇU DE LA DIAPOSITIVE — RENDU PAR LE COMPOSANT PUBLIC LUI-MÊME.
  *
  * ── LA SEULE DÉCISION DE CE FICHIER ─────────────────────────────────────────
  *
- * Ce n'est PAS une mise en page : c'est un aiguillage. Une diapositive du
- * bandeau se rend par `HomeShowcaseSlide`, une épingle du panneau latéral par
- * `HomeAsidePin` — les composants MÊMES que sert l'accueil public. Dessiner ici
+ * Ce n'est PAS une mise en page : c'est un cadre. La diapositive se rend par
+ * `HomeShowcaseSlide`, le composant MÊME que sert l'accueil public. Dessiner ici
  * une seconde version du bandeau divergerait au premier ajustement de charte, et
  * l'éditeur cesserait de croire ce qu'il voit : il composerait à l'aveugle,
  * exactement comme dans la v1.
  *
+ * Il aiguillait jusqu'au 24/08 entre deux rendus — bandeau et panneau latéral.
+ * Ce dernier ne se compose plus : il n'y a qu'un emplacement, donc qu'un rendu.
+ *
  * Le contrat s'y prêtait déjà : `api.adminShowcase.form()` rend
  * `preview: ShowcaseRow`, c'est-à-dire une ligne de `content.v_showcase`, et
- * c'est la seule chose que ces deux composants acceptent. Rien du contexte
- * n'entre — ni route, ni store, ni instant.
+ * c'est la seule chose que ce composant accepte. Rien du contexte n'entre — ni
+ * route, ni store, ni instant.
  *
  * ── CE QUE L'APERÇU AJOUTE, ET POURQUOI CE N'EST PAS DE L'ORNEMENT ──────────
  *
@@ -66,9 +68,6 @@ const linkLabel = computed(() => tr(props.row.link_label).trim())
       <h2 class="font-display text-base leading-snug">
         {{ t('admin.showcase.form.preview.title') }}
       </h2>
-      <UiBadge size="sm" icon="grid">
-        {{ t(`admin.showcase.form.placement.${props.row.placement}`) }}
-      </UiBadge>
     </header>
 
     <div class="px-4 py-4">
@@ -84,13 +83,9 @@ const linkLabel = computed(() => tr(props.row.link_label).trim())
            tient un ratio qu'à partir de `lg` ; en dessous, il grandit avec son
            contenu, exactement comme ici. Le plancher garde l'allure d'un
            bandeau quand la diapositive est encore vide. -->
-      <div v-if="props.row.placement === 'home_hero'" class="min-h-56 overflow-hidden rounded-md">
+      <div class="min-h-56 overflow-hidden rounded-md">
         <HomeShowcaseSlide :slide="props.row" compact skip-video />
       </div>
-
-      <!-- Une épingle du panneau « À venir » n'est pas un bandeau réduit :
-           c'est un autre composant, et l'aperçu doit montrer celui-là. -->
-      <HomeAsidePin v-else :pin="props.row" />
 
       <dl class="mt-4 space-y-3 border-t border-border-subtle pt-4 text-sm">
         <div class="flex flex-wrap items-baseline gap-x-2">

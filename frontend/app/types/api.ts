@@ -965,6 +965,188 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/showcase": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * La liste et ses facettes.
+         * @description `ShowcaseListScreen` — les lignes du périmètre, leurs facettes et les référentiels du filtre, **en une réponse**. Les lignes arrivent triées par emplacement puis rang, avec `is_first` / `is_last` déjà posés : c'est ce qui désactive les boutons d'ordre aux extrémités sans que l'écran recompte.
+         *
+         *     **`broadcast_state` n'est pas `status`** : une diapositive publiée dont la fenêtre s'ouvre la semaine prochaine est `scheduled`, une autre dont la fenêtre est close est `expired`. La liste dit ce que le public voit, pas seulement ce que l'éditeur a décidé.
+         *
+         *     **Un périmètre vide reçoit 403, jamais une liste vide.** Un contenu de plateforme (`event_id` nul) n'est visible qu'en portée globale.
+         */
+        get: operations["admin_vitrine_lister"];
+        put?: never;
+        /**
+         * Création.
+         * @description `ShowcaseFormValues` → `ShowcaseWriteResult`. La diapositive se place **en fin d'emplacement** : la placer en tête déplacerait silencieusement tout le reste du bandeau. `placement_rows` rend l'emplacement entier renuméroté.
+         *
+         *     **Les refus de validation sortent en 200**, avec leur champ et leur code : fenêtre inversée, organisation désignée ET nommée, libellé de lien sans lien, français manquant, couleur mal formée, contenu de plateforme sans portée globale.
+         */
+        post: operations["admin_vitrine_creer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/showcase/new": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * L'écran de formulaire, en création.
+         * @description `ShowcaseFormScreen` — le formulaire vierge et ses référentiels : natures, éditions du périmètre, organisations, personnes, pays, thématiques et les trois emplacements de média avec leurs contraintes, lues de `media.attachable_roles`.
+         *
+         *     `preview` porte le contrat **exact** du bandeau public : l'aperçu est rendu par le composant qui sert la vitrine, jamais par une seconde mise en page qui divergerait au premier ajustement de charte.
+         *
+         *     **Une administratrice détachée n'ouvre pas un contenu de plateforme** : `is_global_scope` est faux, et le formulaire s'ouvre alors sur son édition.
+         */
+        get: operations["admin_vitrine_formulaire_vierge"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/showcase/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Les séances d'une édition, pour la cascade « édition → séance ».
+         * @description `ShowcaseSessionOption[]` — les séances **publiées** de l'édition demandée, dans l'ordre du temps, chacune avec son fuseau. Changer d'édition dans le formulaire change la liste sans recharger l'écran : sans cette route, la saisie en cours serait perdue à chaque changement. L'édition est vérifiée contre le périmètre **avant** la lecture.
+         */
+        get: operations["admin_vitrine_seances"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/showcase/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Les valeurs seules — pour recharger le fond du formulaire après une écriture.
+         * @description `ShowcaseFormValues` — la diapositive **sans les référentiels**. Sert à relire le fond du formulaire après une écriture sans repayer les natures, les éditions, les organisations et les pays que l'écran de formulaire embarque. Mêmes refus que lui.
+         */
+        get: operations["admin_vitrine_valeurs"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Modification.
+         * @description `ShowcaseFormValues` → `ShowcaseWriteResult`. Mêmes refus que la création. **Le périmètre se vérifie sur la source ET sur la cible** : on ne déplace pas une diapositive vers une édition qu'on n'administre pas, et on n'en fait pas un contenu de plateforme sans la portée globale.
+         *
+         *     `published_at` ne se rejoue jamais : c'est le déclencheur du modèle qui le pose au premier passage en `published`.
+         */
+        patch: operations["admin_vitrine_modifier"];
+        trace?: never;
+    };
+    "/admin/showcase/{id}/duplicate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dupliquer — le geste qui remet un témoignage de la COP30 à la COP31.
+         * @description `ShowcaseWriteResult` — la copie part **en brouillon**, en fin d'emplacement : dupliquer un contenu publié et le voir sortir aussitôt sur l'accueil serait une publication que personne n'a demandée. Les thématiques suivent. `row` porte la COPIE, et `placement_rows` l'emplacement renuméroté.
+         */
+        post: operations["admin_vitrine_dupliquer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/showcase/{id}/form": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * L'écran de formulaire, en modification.
+         * @description `ShowcaseFormScreen` — la diapositive et tous ses référentiels. **Deux issues pour deux choses différentes** : une diapositive inexistante ou hors périmètre rend 404 — les deux sont indiscernables, sans quoi une URL forgée dirait à qui la forge si l'objet existe —, tandis qu'un contenu de plateforme demandé sans portée globale rend 403 **en le disant** : l'écran doit pouvoir expliquer pourquoi une ligne visible n'est pas modifiable.
+         */
+        get: operations["admin_vitrine_formulaire"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/showcase/{id}/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Monter ou descendre d'un cran, dans son emplacement.
+         * @description `ShowcaseReorderPayload` → `ShowcaseWriteResult`. L'ordre est la fonction principale de cet écran — son absence était le défaut n° 6 de la v1. **Aux extrémités, la réponse est `ok: true` sans changement** : les boutons y sont déjà désactivés, et une erreur pour une action que l'écran n'offrait pas serait du bruit.
+         *
+         *     `placement_rows` rend l'emplacement **entier**, renuméroté : deux lignes ont bougé, et rafraîchir la seule ligne cliquée laisserait sa voisine afficher un rang faux.
+         */
+        post: operations["admin_vitrine_ordonner"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/showcase/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Publier, retirer, archiver — depuis la liste, sans ouvrir le formulaire.
+         * @description `ShowcaseStatusPayload` → `ShowcaseWriteResult`. Trois actes de diffusion, pas une modification de contenu : ils ne touchent ni les textes ni les médias, et restent possibles à une main depuis le tableau. `placement_rows` est nul — aucun ordre ne change.
+         */
+        post: operations["admin_vitrine_statut"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/tracks": {
         parameters: {
             query?: never;
@@ -1660,6 +1842,26 @@ export interface paths {
          * @description État d'exploitation, depuis `analytics.v_operational_health` : outbox en retard, travaux en échec, courriels en rebond, partitions manquantes. Protégé comme une donnée.
          */
         get: operations["health"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/home": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * La vitrine de l'accueil.
+         * @description `Pick<HomeScreen, 'hero'>` — les diapositives du bandeau d'ouverture, **dans l'ordre de défilement** (`sort_order`, puis `id`). Le reste de l'accueil est servi par les modules qui en répondent : les éditions par `GET /events/public`, les prochaines séances par `GET /schedule`, et les chiffres du programme voyagent avec chaque ligne d'édition. **Le filtre de diffusion vient du modèle** : `content.v_showcase` ne rend qu'une diapositive publiée et dans sa fenêtre — il n'est recopié dans aucun écran. Tableau **vide** possible : la page d'accueil reste entière et s'ouvre alors sur l'appel à propositions.
+         */
+        get: operations["vitrine_de_l_accueil"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3724,6 +3926,50 @@ export interface components {
             /** Format: uuid */
             session_id?: string | null;
             track_ids: string[];
+        };
+        /** @description Les valeurs saisissables — une par colonne éditable, plus les thématiques. */
+        ShowcaseFormValues: {
+            /** Format: uuid */
+            id?: string | null;
+            placement: string;
+            status: string;
+            nature_code: string;
+            /** Format: int32 */
+            sort_order: number;
+            title: unknown;
+            quote?: unknown;
+            body?: unknown;
+            /** Format: uuid */
+            person_id?: string | null;
+            author_name?: string | null;
+            author_title?: unknown;
+            /** Format: uuid */
+            organization_id?: string | null;
+            organization_label?: string | null;
+            /** Format: uuid */
+            country_id?: string | null;
+            /** Format: uuid */
+            event_id?: string | null;
+            /** Format: uuid */
+            session_id?: string | null;
+            link_url?: string | null;
+            link_label?: unknown;
+            background_color_hex?: string | null;
+            /** Format: date-time */
+            starts_at?: string | null;
+            /** Format: date-time */
+            ends_at?: string | null;
+            theme_codes?: string[];
+        };
+        ShowcaseReorderPayload: {
+            /** Format: uuid */
+            id: string;
+            direction: string;
+        };
+        ShowcaseStatusPayload: {
+            /** Format: uuid */
+            id: string;
+            status: string;
         };
         SuppressionPayload: {
             email: string;
@@ -6134,6 +6380,489 @@ export interface operations {
             };
         };
     };
+    admin_vitrine_lister: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ShowcaseListScreen */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente, ou périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_vitrine_creer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShowcaseFormValues"];
+            };
+        };
+        responses: {
+            /** @description ShowcaseWriteResult */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente, ou périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_vitrine_formulaire_vierge: {
+        parameters: {
+            query?: {
+                /** @description Emplacement d'arrivée — un seul existe */
+                placement?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ShowcaseFormScreen */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente, ou périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_vitrine_seances: {
+        parameters: {
+            query: {
+                /** @description Édition dont on veut les séances */
+                event_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ShowcaseSessionOption[] */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente, ou périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Édition hors périmètre */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_vitrine_valeurs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la diapositive */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ShowcaseFormValues */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente, périmètre vide, ou contenu de plateforme hors portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Diapositive inexistante **ou hors périmètre** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_vitrine_modifier: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la diapositive */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShowcaseFormValues"];
+            };
+        };
+        responses: {
+            /** @description ShowcaseWriteResult */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente, périmètre vide, ou contenu de plateforme hors portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Diapositive inexistante **ou hors périmètre** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_vitrine_dupliquer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la diapositive à copier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ShowcaseWriteResult */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente, périmètre vide, ou contenu de plateforme hors portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Diapositive inexistante **ou hors périmètre** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_vitrine_formulaire: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la diapositive */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ShowcaseFormScreen */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente, périmètre vide, ou contenu de plateforme hors portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Diapositive inexistante **ou hors périmètre** — indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_vitrine_ordonner: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la diapositive */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShowcaseReorderPayload"];
+            };
+        };
+        responses: {
+            /** @description ShowcaseWriteResult */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente, périmètre vide, ou contenu de plateforme hors portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Diapositive inexistante **ou hors périmètre** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_vitrine_statut: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la diapositive */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShowcaseStatusPayload"];
+            };
+        };
+        responses: {
+            /** @description ShowcaseWriteResult */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente, périmètre vide, ou contenu de plateforme hors portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Diapositive inexistante **ou hors périmètre** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     admin_fil_creer: {
         parameters: {
             query?: never;
@@ -7383,6 +8112,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    vitrine_de_l_accueil: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Pick<HomeScreen, 'hero'> */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
                 };
             };
         };

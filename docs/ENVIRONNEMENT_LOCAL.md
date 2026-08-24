@@ -412,3 +412,20 @@ dumps/
 coverage/
 ops/data/
 ```
+
+
+## Voir les médias téléversés — le relais du 24/08
+
+Le modèle compose l'URL d'un objet **en chemin** : `<base>/<bucket>/<clé>`. C'est ce que sert n'importe quel stockage en « path-style », et ce que fera le domaine média en production.
+
+Garage, lui, n'ouvre ses objets à la lecture anonyme que par **sous-domaine** (`epavillon.web.garage.localhost`), et son API S3 exige une signature. Sans relais, **aucun média téléversé n'est visible dans le navigateur en local** — ni une bannière de vitrine, ni une couverture d'activité. Le constat a été fait au premier téléversement réel.
+
+Le service `media-proxy` du compose traduit le chemin en sous-domaine, et rien d'autre (`ops/media-proxy.conf`, port `MEDIA_PROXY_PORT`). Il faut aussi, **une fois**, ouvrir le bucket en lecture web et pointer le réglage dessus :
+
+```bash
+docker exec epavillon-garage /garage bucket website --allow epavillon
+docker exec -i epavillon-postgres psql -U postgres -d epavillon \
+  -c "UPDATE platform.settings SET value = '\"http://localhost:3920\"' WHERE key = 'media.public_base_url';"
+```
+
+`media.public_base_url` est un réglage de `platform.settings`, pas une variable d'environnement : la valeur du modèle (`docs/database/050_media.sql` § 8) est celle de production, et un rechargement de la base la remet. C'est voulu — « seule valeur à changer lors d'une migration ».

@@ -161,9 +161,12 @@ watch(
        barre de navigation ; l'en-tête garde sa taille, le rail prend le reste.
        `min-h` et non `h` : si l'en-tête passe sur trois lignes à 375 px, la
        section grandit plutôt que d'écraser les affiches. -->
+  <!-- `id="editions"` : le panneau « À venir » y renvoie depuis son bloc des
+       prochains rendez-vous, comme le pied de page renvoie à l'appel. -->
   <section
+    id="editions"
     aria-labelledby="historique-titre"
-    class="flex flex-col min-h-[calc(100svh-var(--nav-height))]"
+    class="flex scroll-mt-24 flex-col min-h-[calc(100svh-var(--nav-height))]"
   >
     <div class="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
       <div class="min-w-0">

@@ -17,7 +17,7 @@
  * concernée pour gagner ces quelques dizaines de millisecondes obligerait à
  * poser la même balise sur sept écrans, et à ne pas l'oublier sur le huitième.
  */
-const { active, paths } = useMockData()
+const { active, hasWrites, paths } = useMockData()
 const { isConfigured } = useApi()
 const { t } = useI18n()
 </script>
@@ -33,6 +33,12 @@ const { t } = useI18n()
       <p class="text-sm text-text-secondary">
         {{ t('api.mockData.description') }}
         <span class="font-mono text-xs">{{ paths.join(' · ') }}</span>
+      </p>
+      <!-- UNE ÉCRITURE SIMULÉE NE CONSERVE RIEN, et l'écran vient pourtant de
+           répondre « c'est fait » : sans cette ligne, la modification qui
+           disparaît au rechargement passe pour une panne. -->
+      <p v-if="hasWrites" class="text-sm font-medium text-warning">
+        {{ t('api.mockData.writes') }}
       </p>
     </div>
   </div>

@@ -128,9 +128,10 @@ useHead(() => ({
       <HomeShowcase :slides="data.hero">
         <template #aside>
           <HomeAsidePanel
-            :pins="data.aside"
             :sessions="data.upcomingSessions"
             :editions="data.editions"
+            :stats="data.stats"
+            :now="data.generated_at"
           />
         </template>
       </HomeShowcase>

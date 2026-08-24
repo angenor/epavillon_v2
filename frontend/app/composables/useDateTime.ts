@@ -29,6 +29,10 @@ export function useDateTime() {
     date: (value: DateInput | null | undefined, timeZone: TimeZoneName) =>
       formatDate(value, base(timeZone)),
 
+    /** « mercredi 17 novembre » — en-tête de journée d'une frise, sans millésime. */
+    dayLong: (value: DateInput | null | undefined, timeZone: TimeZoneName) =>
+      formatDayLong(value, base(timeZone)),
+
     /** « 14:30 » — sans mention de fuseau : à réserver aux contextes qui la portent déjà. */
     time: (value: DateInput | null | undefined, timeZone: TimeZoneName) =>
       formatTime(value, base(timeZone)),

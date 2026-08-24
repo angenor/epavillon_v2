@@ -194,7 +194,7 @@ export function useApi() {
     fromMocks: (m: Mocks) => T | Promise<T>,
     kind: 'read' | 'write' = 'read',
   ): Promise<T> {
-    if (isConfigured.value) mockData.mark(path)
+    if (isConfigured.value) mockData.mark(path, kind)
     // Une écriture garde la latence d'une écriture, même simulée : c'est ce qui
     // fait voir le témoin de soumission d'un formulaire. Sans ce paramètre, les
     // sept écritures des incidents et de la vitrine s'exécutaient trois fois

@@ -17,6 +17,7 @@
   },
   "mockData": {
     "title": "Une partie de cet écran vient d'un jeu d'exemple",
-    "description": "La plateforme ne sert pas encore ces données ; le reste de l'écran affiche les informations réelles. Routes attendues :"
+    "description": "La plateforme ne sert pas encore ces données ; le reste de l'écran affiche les informations réelles. Routes attendues :",
+    "writes": "Ce que vous modifiez ici n'est enregistré nulle part : la modification disparaît au rechargement de la page."
   }
 }

@@ -700,13 +700,6 @@ export const HIGHLIGHT = {
   temoignageArchiveCop29: uuid('7100', 8),
   /** HORS FENÊTRE : publiée, mais `ends_at` est passé — elle s'est éteinte seule. */
   annonceWebinairePaco: uuid('7100', 9),
-
-  // Panneau latéral — `home_aside`
-  asideAppelCop31: uuid('7100', 20),
-  asideRediffusionsPaco: uuid('7100', 21),
-  asideChiffreOrganisations: uuid('7100', 22),
-  /** BROUILLON : rédigé, jamais sorti. */
-  asideGuidePavillon: uuid('7100', 23),
 } as const
 
 /**

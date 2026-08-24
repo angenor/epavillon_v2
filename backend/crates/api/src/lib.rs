@@ -97,6 +97,11 @@ pub fn build_app(
         portee = portee.configure(move |cfg| engagement::internal_routes(cfg, jeton_dingestion));
     }
 
+    // `/home` n'appartient qu'à la vitrine : chemin plat, rien à composer.
+    if etat.modules.is_mounted("content") {
+        portee = portee.configure(content::routes);
+    }
+
     // **Le scope `/people` est composé ici, et une seule fois.** Trois modules y
     // déposent des routes depuis B4 — l'identité pour les personnes, les
     // organisations pour leurs adhésions, les propositions pour la recherche
@@ -195,6 +200,7 @@ pub fn build_app(
         .app_data(web::Data::new(etat.programme.clone()))
         .app_data(web::Data::new(etat.media.clone()))
         .app_data(web::Data::new(etat.engagement.clone()))
+        .app_data(web::Data::new(etat.content.clone()))
         .app_data(web::Data::from(etat.identity.token_codec()))
         .app_data(web::Data::new(etat.clone()))
         .app_data(corps_json())

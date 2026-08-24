@@ -6,7 +6,7 @@ import type {
   ShowcaseSessionOption,
   ShowcaseValidationError,
 } from '~/types/admin-showcase'
-import type { HighlightPlacement, HighlightStatus } from '~/types/content'
+import type { HighlightStatus } from '~/types/content'
 import type { EventId, I18nText } from '~/types/shared'
 import type { SelectOption } from '~/types/ui'
 
@@ -87,7 +87,6 @@ const { date, timeWithZone } = useDateTime()
 /** Le fuseau de la fenêtre de diffusion — voir l'en-tête. */
 const WINDOW_TZ = 'UTC'
 
-const PLACEMENTS: HighlightPlacement[] = ['home_hero', 'home_aside']
 const STATUSES: HighlightStatus[] = ['draft', 'published', 'archived']
 
 // ---------------------------------------------------------------------------
@@ -210,14 +209,6 @@ function onSubmit(): void {
 
 const natureOptions = computed<SelectOption[]>(() =>
   props.screen.natures.map((nature) => ({ value: nature.code, label: tr(nature.label) })),
-)
-
-const placementOptions = computed<SelectOption[]>(() =>
-  PLACEMENTS.map((placement) => ({
-    value: placement,
-    label: t(`admin.showcase.form.placement.${placement}`),
-    description: t(`admin.showcase.form.placementHint.${placement}`),
-  })),
 )
 
 const statusOptions = computed<SelectOption[]>(() =>
@@ -362,12 +353,11 @@ const broadcastState = computed(() => showcaseBroadcastStateOf(values.value, now
             />
           </div>
 
-          <UiSelect
-            :model-value="values.placement"
-            :options="placementOptions"
-            :label="t('admin.showcase.form.placementField')"
-            @update:model-value="(next: string) => (values.placement = next as HighlightPlacement)"
-          />
+          <!-- L'EMPLACEMENT NE SE CHOISIT PLUS (24/08) : il n'y en a qu'un, le
+               bandeau d'ouverture. Le panneau latéral de l'accueil s'alimente
+               seul — événements à venir, puis frise des activités retenues —
+               et `home_aside` a quitté le modèle. Un menu déroulant à une
+               seule entrée ne pose pas de question, il en fait perdre le sens. -->
         </div>
 
         <AdminShowcaseThemePicker

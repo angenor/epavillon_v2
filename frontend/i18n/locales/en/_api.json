@@ -17,6 +17,7 @@
   },
   "mockData": {
     "title": "Part of this screen uses sample data",
-    "description": "The platform does not serve this data yet; the rest of the screen shows real information. Expected routes:"
+    "description": "The platform does not serve this data yet; the rest of the screen shows real information. Expected routes:",
+    "writes": "Changes made here are not saved anywhere: they disappear when the page reloads."
   }
 }

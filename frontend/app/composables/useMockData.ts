@@ -14,19 +14,33 @@
  *
  * LA LISTE SE VIDE À CHAQUE NAVIGATION (`middleware/mock-data.global.ts`) : elle
  * décrit l'écran affiché, pas l'historique de la session.
+ *
+ * ── UNE ÉCRITURE SIMULÉE N'EST PAS UNE LECTURE SIMULÉE ──────────────────────
+ *
+ * Une lecture d'exemple affiche des données fausses ; une ÉCRITURE d'exemple ne
+ * conserve rien du tout. L'écran répond « c'est fait », l'ordre change sous les
+ * yeux, et la modification disparaît au rechargement. C'est arrivé sur la
+ * vitrine, où retirer une épingle du panneau semblait sans effet : personne ne
+ * pouvait le deviner du bandeau, qui ne parlait que des données lues. Les
+ * chemins d'écriture sont donc suivis à part, et le bandeau le dit franchement.
  */
 export function useMockData() {
   const paths = useState<string[]>('api:mock-paths', () => [])
+  const writes = useState<string[]>('api:mock-writes', () => [])
 
   return {
     paths: readonly(paths),
     /** Vrai dès qu'un bloc de l'écran courant vient des données simulées. */
     active: computed(() => paths.value.length > 0),
-    mark(path: string) {
+    /** Vrai dès qu'une écriture de l'écran courant n'a été enregistrée nulle part. */
+    hasWrites: computed(() => writes.value.length > 0),
+    mark(path: string, kind: 'read' | 'write' = 'read') {
       if (!paths.value.includes(path)) paths.value = [...paths.value, path]
+      if (kind === 'write' && !writes.value.includes(path)) writes.value = [...writes.value, path]
     },
     reset() {
       if (paths.value.length > 0) paths.value = []
+      if (writes.value.length > 0) writes.value = []
     },
   }
 }

@@ -6,7 +6,6 @@ import type {
 } from '~/types/admin-showcase'
 import type { HighlightPlacement, HighlightStatus } from '~/types/content'
 import type { EffectivePermission } from '~/types/identity'
-import type { TabItem } from '~/types/ui'
 
 /**
  * LA VITRINE — `/admin/vitrine`.
@@ -60,8 +59,6 @@ const { tr } = useI18nText()
 const api = useApi()
 const auth = useAuthStore()
 const adminScope = useAdminScopeStore()
-const route = useRoute()
-const router = useRouter()
 const localePath = useLocalePath()
 
 useHead(() => ({ title: t('admin.showcase.list.title') }))
@@ -104,50 +101,18 @@ const isSettling = computed(
 const rows = ref<ShowcaseListRow[]>([])
 watch(screen, (next) => (rows.value = next ? [...next.rows] : []), { immediate: true })
 
-// ---------------------------------------------------------------------------
-// Les onglets d'emplacement — état porté par l'URL, comme partout ici
-// ---------------------------------------------------------------------------
-
-/** Les paramètres sont en FRANÇAIS : ils apparaissent dans une URL qu'on partage. */
-const PLACEMENT_OF: Record<string, HighlightPlacement> = {
-  bandeau: 'home_hero',
-  panneau: 'home_aside',
-}
-const SLUG_OF: Record<HighlightPlacement, string> = {
-  home_hero: 'bandeau',
-  home_aside: 'panneau',
-}
-
-const placement = computed<HighlightPlacement>(() => {
-  const slug = typeof route.query.emplacement === 'string' ? route.query.emplacement : ''
-  return PLACEMENT_OF[slug] ?? 'home_hero'
-})
-
-function selectPlacement(slug: string): void {
-  const next = { ...route.query }
-  if (slug === 'bandeau') delete next.emplacement
-  else next.emplacement = slug
-  router.replace({ query: next })
-}
-
-const countOf = (target: HighlightPlacement): number =>
-  rows.value.filter((row) => row.placement === target).length
-
-const tabs = computed<TabItem[]>(() => [
-  {
-    value: 'bandeau',
-    label: t('admin.showcase.list.placement.home_hero'),
-    count: countOf('home_hero'),
-  },
-  {
-    value: 'panneau',
-    label: t('admin.showcase.list.placement.home_aside'),
-    count: countOf('home_aside'),
-  },
-])
-
-/** Jamais retriées : `sort_order` est l'ordre de défilement du bandeau public. */
-const visibleRows = computed(() => rows.value.filter((row) => row.placement === placement.value))
+/**
+ * UN SEUL EMPLACEMENT DEPUIS LE 24/08 — le bandeau d'ouverture.
+ *
+ * Cet écran portait deux onglets, `bandeau` et `panneau`, et l'onglet vivait
+ * dans l'URL (`?emplacement=`). Le panneau latéral de l'accueil ne se compose
+ * plus : il affiche les événements à venir et la frise des activités retenues,
+ * sans rien d'éditorial. `home_aside` a donc quitté le modèle, et les onglets
+ * avec — un onglet unique n'est pas un choix, c'est un cadre vide.
+ *
+ * Jamais retriées : `sort_order` est l'ordre de défilement du bandeau public.
+ */
+const visibleRows = computed(() => rows.value)
 
 // ---------------------------------------------------------------------------
 // Les écritures
@@ -239,10 +204,7 @@ function open(row: ShowcaseListRow): void {
   void navigateTo(localePath(`/admin/vitrine/${row.id}`))
 }
 
-/** La création s'ouvre sur l'onglet en cours : c'est là qu'on regardait. */
-const newSlideTo = computed(() =>
-  localePath(`/admin/vitrine/nouveau?emplacement=${SLUG_OF[placement.value]}`),
-)
+const newSlideTo = computed(() => localePath('/admin/vitrine/nouveau'))
 </script>
 
 <template>
@@ -293,15 +255,9 @@ const newSlideTo = computed(() =>
           :message="t('admin.showcase.list.scopedNotice')"
         />
 
-        <UiTabs
-          class="mt-6"
-          :items="tabs"
-          :model-value="SLUG_OF[placement]"
-          :label="t('admin.showcase.list.placementTabs')"
-          @update:model-value="selectPlacement"
-        >
-          <p class="mt-3 max-w-(--measure) text-sm text-text-muted">
-            {{ t(`admin.showcase.list.placementHint.${placement}`) }}
+        <div class="mt-6">
+          <p class="max-w-(--measure) text-sm text-text-muted">
+            {{ t('admin.showcase.list.placementHint.home_hero') }}
           </p>
 
           <UiEmptyState
@@ -332,13 +288,13 @@ const newSlideTo = computed(() =>
                 icon="grid"
                 compact
                 :title="t('admin.showcase.list.emptyPlacement.title')"
-                :description="t(`admin.showcase.list.emptyPlacement.${placement}`)"
+                :description="t('admin.showcase.list.emptyPlacement.home_hero')"
                 :action-label="t('admin.showcase.list.new')"
                 :action-to="newSlideTo"
               />
             </template>
           </AdminShowcaseTable>
-        </UiTabs>
+        </div>
 
         <!-- Le déplacement se voit ; il doit aussi s'entendre. -->
         <p role="status" aria-live="polite" class="sr-only">{{ announcement }}</p>

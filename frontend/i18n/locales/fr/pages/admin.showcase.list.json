@@ -3,14 +3,11 @@
   "subtitle": "Ce que le public voit en arrivant sur la plateforme, et dans quel ordre il le voit.",
   "new": "Nouvelle diapositive",
   "caption": "Contenus mis en avant, dans leur ordre de défilement.",
-  "placementTabs": "Emplacement de la vitrine",
   "placement": {
-    "home_hero": "Bandeau d'accueil",
-    "home_aside": "Panneau latéral"
+    "home_hero": "Bandeau d'accueil"
   },
   "placementHint": {
-    "home_hero": "Le grand bandeau d'ouverture, qui défile. La première diapositive est celle que l'on voit en arrivant.",
-    "home_aside": "La colonne « À venir », à gauche du bandeau. Elle remplace les annonces qui étaient écrites en dur."
+    "home_hero": "Le grand bandeau d'ouverture, qui défile. La première diapositive est celle que l'on voit en arrivant."
   },
   "scopedNotice": "Votre compte administre une partie des éditions : vous ne voyez que leurs diapositives, et vous ne pouvez pas créer de contenu valable pour toute la plateforme.",
   "columns": {
@@ -63,8 +60,7 @@
   },
   "emptyPlacement": {
     "title": "Rien à cet emplacement",
-    "home_hero": "Aucune diapositive n'est prévue pour le bandeau d'ouverture.",
-    "home_aside": "Aucune épingle éditoriale n'est prévue pour le panneau « À venir »."
+    "home_hero": "Aucune diapositive n'est prévue pour le bandeau d'ouverture."
   },
   "error": {
     "refused": "L'enregistrement a été refusé. Ouvrez la diapositive pour voir ce qui manque.",

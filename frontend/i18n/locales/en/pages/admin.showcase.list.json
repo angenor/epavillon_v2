@@ -3,14 +3,11 @@
   "subtitle": "What the public sees on arriving at the platform, and the order in which they see it.",
   "new": "New slide",
   "caption": "Featured content, in scrolling order.",
-  "placementTabs": "Showcase placement",
   "placement": {
-    "home_hero": "Home banner",
-    "home_aside": "Side panel"
+    "home_hero": "Home banner"
   },
   "placementHint": {
-    "home_hero": "The large opening banner that scrolls. The first slide is the one visitors see on arrival.",
-    "home_aside": "The “Coming up” column beside the banner. It replaces the announcements that used to be hard-coded."
+    "home_hero": "The large opening banner that scrolls. The first slide is the one visitors see on arrival."
   },
   "scopedNotice": "Your account administers part of the editions: you only see their slides, and you cannot create content that applies to the whole platform.",
   "columns": {
@@ -63,8 +60,7 @@
   },
   "emptyPlacement": {
     "title": "Nothing in this placement",
-    "home_hero": "No slide is planned for the opening banner.",
-    "home_aside": "No editorial pin is planned for the “Coming up” panel."
+    "home_hero": "No slide is planned for the opening banner."
   },
   "error": {
     "refused": "The save was refused. Open the slide to see what is missing.",

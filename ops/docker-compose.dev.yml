@@ -69,6 +69,20 @@ services:
       - garage-data:/var/lib/garage/data
       - ./garage.toml:/etc/garage.toml:ro
 
+  # Les objets, servis EN CHEMIN comme le fera le domaine média en production.
+  # Garage ne les ouvre à la lecture anonyme que par sous-domaine : sans ce
+  # relais, aucun média téléversé n'est visible dans le navigateur en local.
+  # Voir l'en-tête de `media-proxy.conf`.
+  media-proxy:
+    image: nginx:1.27-alpine
+    container_name: epavillon-media-proxy
+    depends_on:
+      - garage
+    ports:
+      - "${MEDIA_PROXY_PORT:-3920}:80"
+    volumes:
+      - ./media-proxy.conf:/etc/nginx/conf.d/default.conf:ro
+
 volumes:
   pgdata:
   garage-meta:

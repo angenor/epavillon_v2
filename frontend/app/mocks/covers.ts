@@ -793,8 +793,8 @@ export const showcaseAssets: Asset[] = [
  *
  *   · `bonnePratiquePastoralisme` n'a pas de vignette — le rail se rabat sur le
  *     fond photographique ;
- *   · `chiffreClePavillon` et `asideChiffreOrganisations` n'ont aucun média —
- *     l'aplat `background_color_hex` est le seul fond ;
+ *   · `chiffreClePavillon` n'a aucun média — l'aplat `background_color_hex` est
+ *     le seul fond ;
  *   · `temoignageArchiveCop29` et `annonceWebinairePaco` en portent, bien
  *     qu'elles ne sortent jamais : une diapositive archivée reste complète, et
  *     c'est ce qui permet de la remettre en avant l'année suivante.
@@ -817,9 +817,6 @@ export const showcaseAttachments: Attachment[] = [
   showcaseAttachment(14, HIGHLIGHT.temoignageArchiveCop29, SHOWCASE_ASSET(7), 'banner'),
   showcaseAttachment(15, HIGHLIGHT.annonceWebinairePaco, SHOWCASE_ASSET(8), 'banner'),
   showcaseAttachment(16, HIGHLIGHT.annonceWebinairePaco, SHOWCASE_ASSET(28), 'cover'),
-  showcaseAttachment(17, HIGHLIGHT.asideAppelCop31, SHOWCASE_ASSET(30), 'cover'),
-  showcaseAttachment(18, HIGHLIGHT.asideRediffusionsPaco, SHOWCASE_ASSET(31), 'cover'),
-  showcaseAttachment(19, HIGHLIGHT.asideGuidePavillon, SHOWCASE_ASSET(32), 'cover'),
 ]
 
 function showcaseAttachment(

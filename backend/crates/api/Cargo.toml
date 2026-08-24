@@ -17,6 +17,7 @@ event.workspace = true
 programme.workspace = true
 media.workspace = true
 engagement.workspace = true
+content.workspace = true
 
 actix-web.workspace = true
 dotenvy.workspace = true

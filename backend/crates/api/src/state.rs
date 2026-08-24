@@ -28,6 +28,7 @@ pub struct AppState {
     pub programme: programme::ProgrammeState,
     pub media: media::MediaState,
     pub engagement: engagement::EngagementState,
+    pub content: content::ContentState,
     /// Origines acceptées sur une écriture. Celle du site, et rien d'autre.
     pub allowed_origins: Vec<String>,
 }
@@ -55,6 +56,7 @@ impl AppState {
         let media = media::MediaState::new(db.clone(), config.clone());
         let engagement =
             engagement::EngagementState::new(db.clone(), config.clone(), mailer.clone());
+        let content = content::ContentState::new(db.clone(), config.clone());
 
         Ok(Self {
             db,
@@ -69,6 +71,7 @@ impl AppState {
             programme,
             media,
             engagement,
+            content,
             allowed_origins,
         })
     }

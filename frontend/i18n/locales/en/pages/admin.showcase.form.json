@@ -17,15 +17,6 @@
     "label": "Kind of content",
     "hint": "It gives the slide its label and colour. Kinds are managed in the reference data."
   },
-  "placementField": "Placement",
-  "placement": {
-    "home_hero": "Home banner",
-    "home_aside": "Side panel"
-  },
-  "placementHint": {
-    "home_hero": "The large scrolling banner",
-    "home_aside": "The “Coming up” column"
-  },
   "themes": {
     "label": "Themes",
     "hint": "At most three appear on a card; the rest fold into “+N”.",

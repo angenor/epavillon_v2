@@ -50,6 +50,7 @@ impl ModuleRegistry {
                     "programme",
                     "media",
                     "engagement",
+                    "content",
                 ]
                 .into_iter()
                 .map(str::to_owned)

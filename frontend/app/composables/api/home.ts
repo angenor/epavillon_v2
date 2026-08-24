@@ -8,23 +8,20 @@
  *
  * ── UNE LECTURE, AUCUNE ÉCRITURE, ET PAS ENCORE D'API ───────────────────────
  *
- * La fabrique ne reçoit que `pending`. L'accueil est public et ne modifie rien ;
+ * La fabrique ne reçoit que `call`. L'accueil est public et ne modifie rien ;
  * ce qui compose la vitrine, lui, écrit et exige `content.highlight.manage` — il
  * vit dans `api/admin-showcase.ts`. La séparation n'est pas cosmétique : aucune
  * route servie à un visiteur anonyme ne doit voisiner avec une route
  * d'administration, ne serait-ce que dans ce fichier.
  *
- * `pending` et non `call`, parce que le schéma `content` d'où sort la vitrine
- * n'a pas encore de crate Rust : `GET /home` n'existe nulle part, et l'appeler
- * ferait afficher une panne à un écran livré et vérifié. La page lit donc les
- * données d'exemple, API configurée ou non, et le bandeau nomme la route
- * attendue. Le jour où le crate existe, `pending` redevient `call` — le chemin
- * et la forme sont déjà écrits.
+ * **`GET /home` EST SERVIE DEPUIS LE 24/08** : le crate `content` existe, et
+ * `pending` est redevenu `call` — le chemin et la forme étaient déjà écrits.
+ * L'accueil ne lit plus aucune donnée d'exemple lorsque l'API est configurée.
  *
  * ── UNE REQUÊTE, PAS QUATRE ─────────────────────────────────────────────────
  *
- * `screen()` rend le bandeau, le panneau « À venir », les prochaines séances,
- * l'appel de l'édition en cours et l'historique des éditions — en une fois.
+ * `screen()` rend le bandeau, les prochaines séances, l'appel de l'édition en
+ * cours et l'historique des éditions — en une fois.
  * C'est le principe tenu par tous les écrans composés du projet (`review.desk`,
  * `admin.dashboard`, `proposals.list`) : quatre vues du modèle assemblées par le
  * client, ce sont quatre états de chargement à composer et surtout quatre
@@ -80,39 +77,28 @@ import type { ApiTransport } from './proposal-review'
 const SEANCES_ANNONCEES = 6
 
 /**
- * L'accueil est composé de DEUX APPELS RÉELS et d'un bloc en attente d'API.
+ * L'accueil est composé de TROIS APPELS, tous servis par la plateforme.
  *
- * Il devait n'en faire qu'un — `GET /home`, une composition en base, un seul
- * instant. Cette route appartient au module de la vitrine, qui n'existe pas
- * encore : trois de ses cinq blocs sont pourtant déjà servis, et les faire lire
- * les données réelles vaut mieux que d'attendre le module pour tout.
+ * Il devait n'en faire qu'un — une composition en base, un seul instant. Les
+ * trois lectures appartiennent à trois modules, et la composition en base
+ * exigerait qu'un module lise les tables d'un autre : c'est précisément ce que
+ * la constitution interdit. Le prix est connu et borné — trois instants de
+ * mesure séparés de quelques millisecondes, sur des données qui changent à la
+ * journée.
  *
- * CE QUI EST RÉEL : les éditions, les prochaines séances, et les chiffres de
- * chaque édition — ces derniers SANS APPEL, car chaque ligne d'édition les porte
- * déjà (`published_session_count` et ses voisins). Les redemander serait un
- * aller-retour pour une donnée qu'on tient en main.
- *
- * CE QUI RESTE UN EXEMPLE : les deux blocs de la vitrine, que l'équipe compose
- * depuis le back-office. Le bandeau de l'écran le dit, et ne désigne plus que
- * ceux-là.
- *
- * LE JOUR OÙ `/home` EXISTERA, cette fonction redevient un appel unique. C'est
- * la composition en base qu'il faut viser : elle seule garantit que les cinq
- * blocs décrivent le même instant.
+ * LES CHIFFRES DU PROGRAMME NE COÛTENT AUCUN APPEL : chaque ligne d'édition les
+ * porte déjà (`published_session_count` et ses voisins). Les redemander serait
+ * un aller-retour pour une donnée qu'on tient en main.
  */
-export function createHomeApi({ call, pending }: Pick<ApiTransport, 'call' | 'pending'>) {
+export function createHomeApi({ call }: Pick<ApiTransport, 'call'>) {
   return {
     screen: async (): Promise<HomeScreen> => {
       const [editions, upcomingSessions, showcase] = await Promise.all([
         call<PublicEditionRow[]>('/events/public', (m) => m.publicEditions()),
         call<PublicScheduleRow[]>('/schedule', (m) => m.upcomingSessions()),
-        pending<Pick<HomeScreen, 'hero' | 'aside'>>('/home', (m) => {
-          const rows: ShowcaseRow[] = m.currentShowcase()
-          return {
-            hero: rows.filter((row) => row.placement === 'home_hero'),
-            aside: rows.filter((row) => row.placement === 'home_aside'),
-          }
-        }),
+        call<Pick<HomeScreen, 'hero'>>('/home', (m) => ({
+          hero: m.currentShowcase().filter((row: ShowcaseRow) => row.placement === 'home_hero'),
+        })),
       ])
 
       // Décroissant : l'accueil ouvre sur ce qui vient, pas sur 2024.

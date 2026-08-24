@@ -17,15 +17,6 @@
     "label": "Nature du contenu",
     "hint": "Elle donne son étiquette et sa couleur à la diapositive. Les natures se gèrent dans le référentiel."
   },
-  "placementField": "Emplacement",
-  "placement": {
-    "home_hero": "Bandeau d'accueil",
-    "home_aside": "Panneau latéral"
-  },
-  "placementHint": {
-    "home_hero": "Le grand bandeau qui défile",
-    "home_aside": "La colonne « À venir »"
-  },
   "themes": {
     "label": "Thématiques",
     "hint": "Trois au plus s'affichent sur une carte ; les suivantes se replient en « +N ».",

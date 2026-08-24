@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { PublicEditionRow, PublicScheduleRow, ShowcaseRow } from '~/types/views'
-import type { EventId, TimeZoneName } from '~/types/shared'
+import type { EditionStatsRow, PublicEditionRow, PublicScheduleRow } from '~/types/views'
+import type { EventId, IsoDateTime } from '~/types/shared'
 
 /**
  * LE PANNEAU « À VENIR » — la colonne gauche du bandeau.
@@ -13,20 +13,25 @@ import type { EventId, TimeZoneName } from '~/types/shared'
  * l'information la PLUS utile de la page : ce qui commence bientôt. La cacher
  * derrière une interaction serait un contresens.
  *
- * ── TROIS BLOCS, DANS CET ORDRE ─────────────────────────────────────────────
+ * ── DEUX BLOCS, ET RIEN QUI SE COMPOSE À LA MAIN ────────────────────────────
  *
- *   1. Les ÉPINGLES ÉDITORIALES (`home_aside`) — ce que l'IFDD veut dire
- *      aujourd'hui. Elles remplacent cinq widgets d'annonce écrits en dur.
- *   2. Les PROCHAINES SÉANCES, toutes éditions confondues. C'est le bloc qu'on
- *      vient chercher.
- *   3. Les PROCHAINS RENDEZ-VOUS — les éditions qui s'ouvrent.
+ *   1. LES ÉVÉNEMENTS À VENIR — le prochain rendez-vous en carte pleine, les
+ *      suivants en lignes. Dès qu'une édition à venir existe, elle est là.
+ *   2. LA FRISE DES ACTIVITÉS RETENUES — jour par jour, la programmation qui
+ *      vient. Dès qu'une activité est retenue et publiée, elle est là.
+ *
+ * CE PANNEAU EST AUTOMATIQUE, arbitrage du commanditaire du 24/08. Il portait
+ * jusque-là les épingles éditoriales de la vitrine (`home_aside`), et sur une
+ * plateforme dont la base ne portait encore ni édition ni séance, elles étaient
+ * seules à s'afficher : un panneau qui promet un calendrier ne montrait que des
+ * annonces. Rien ne s'y compose plus depuis le back-office — la vitrine reste
+ * ce qu'elle est, mais pour le BANDEAU, pas pour cette colonne.
  *
  * ── RIEN N'EST RE-FILTRÉ ────────────────────────────────────────────────────
  *
- * `api.home.screen()` sert des séances déjà réduites aux six premières à venir
- * ou en cours, annulations exclues, et des épingles dont la vue a déjà appliqué
- * le statut et la fenêtre de diffusion. Le seul choix fait ici est celui des
- * trois prochaines éditions — un tri, pas un filtre de publication.
+ * `api.home.screen()` sert des séances déjà réduites aux premières à venir ou
+ * en cours, annulations exclues. Le seul choix fait ici est celui des trois
+ * prochaines éditions — un tri, pas un filtre de publication.
  *
  * ── LE DIRECT SE DÉCLARE, IL NE SE DEVINE PAS ───────────────────────────────
  *
@@ -38,12 +43,14 @@ import type { EventId, TimeZoneName } from '~/types/shared'
  */
 
 interface Props {
-  /** `content.v_showcase`, `placement = 'home_aside'`, trié par `sort_order`. */
-  pins: ShowcaseRow[]
-  /** Les six prochaines séances, déjà choisies par l'API. */
+  /** Les prochaines séances, déjà choisies par l'API. */
   sessions: PublicScheduleRow[]
   /** L'historique COMPLET : le panneau n'en montre que les prochaines. */
   editions: PublicEditionRow[]
+  /** `programme.v_edition_stats`, indexée par édition. Absent vaut zéro. */
+  stats: Record<EventId, EditionStatsRow>
+  /** Instant de composition de la réponse — l'horloge qui fait autorité. */
+  now: IsoDateTime
 }
 
 const props = defineProps<Props>()
@@ -53,34 +60,6 @@ const localePath = useLocalePath()
 const { setLive } = useLiveSession()
 
 const nextThree = computed(() => nextEditions(props.editions, 3))
-
-/**
- * Une séance ne porte pas son édition en slug : la vue publique n'expose que
- * `event_id`. La correspondance vient donc de la liste des éditions, déjà en
- * main — aucune requête de plus pour fabriquer un lien.
- */
-const slugByEvent = computed<Record<EventId, string>>(() =>
-  Object.fromEntries(props.editions.map((edition) => [edition.id, edition.slug])),
-)
-
-function sessionTo(session: PublicScheduleRow): string | undefined {
-  const slug = slugByEvent.value[session.event_id]
-  return slug ? localePath(`/programmations?edition=${slug}`) : undefined
-}
-
-/**
- * Le fuseau de l'édition de rattachement d'une épingle. `v_showcase` ne le
- * porte pas — la vue n'expose que `event_id` — et il décide pourtant du JOUR
- * affiché : une fenêtre close le 30 septembre à 23 h 59 heure de Belém tombe le
- * 1er octobre en temps universel. La liste des éditions est déjà en main.
- */
-const timezoneByEvent = computed<Record<EventId, TimeZoneName>>(() =>
-  Object.fromEntries(props.editions.map((edition) => [edition.id, edition.timezone])),
-)
-
-function pinTimezone(pin: ShowcaseRow): TimeZoneName | null {
-  return pin.event_id ? (timezoneByEvent.value[pin.event_id] ?? null) : null
-}
 
 /** La séance en direct, déclarée UNE fois pour toute l'application. */
 watch(
@@ -92,9 +71,7 @@ watch(
   { immediate: true },
 )
 
-const isEmpty = computed(
-  () => props.pins.length === 0 && props.sessions.length === 0 && nextThree.value.length === 0,
-)
+const isEmpty = computed(() => props.sessions.length === 0 && nextThree.value.length === 0)
 </script>
 
 <template>
@@ -137,67 +114,38 @@ const isEmpty = computed(
           :description="t('home.aside.empty.description')"
         />
 
-        <!-- L'ORDRE DES TROIS BLOCS EST CELUI DE LA DEMANDE, PAS CELUI DU MODÈLE.
-             Le panneau s'appelle « À venir » : ce qu'on vient y chercher, ce
-             sont les prochaines séances et les prochaines éditions. Les
-             épingles éditoriales — ce que l'IFDD veut faire remarquer — passent
-             après, sans quoi le premier écran d'un panneau qui promet un
-             calendrier n'en montre aucun. Elles restent DANS le panneau et non
-             dans le bandeau : ce sont des rappels datés, pas des diapositives. -->
-        <section v-if="props.sessions.length">
+        <!-- 1. LES ÉVÉNEMENTS À VENIR -->
+        <section v-if="nextThree.length">
           <div class="flex items-baseline justify-between gap-2">
             <h3
               class="text-xs font-bold uppercase text-text-on-inverse-muted"
               :style="{ letterSpacing: 'var(--tracking-caps)' }"
             >
-              {{ t('home.aside.sessions.title') }}
+              {{ t('home.aside.editions.title') }}
             </h3>
-            <NuxtLink :to="localePath('/programmations')" class="text-xs text-text-on-inverse no-underline hover:underline">
-              {{ t('home.aside.sessions.all') }}
+            <NuxtLink
+              :to="{ path: localePath('/'), query: { periode: 'a-venir' }, hash: '#editions' }"
+              class="text-xs text-text-on-inverse no-underline hover:underline"
+            >
+              {{ t('home.aside.editions.all') }}
             </NuxtLink>
           </div>
           <div class="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
-            <HomeAsideSession
-              v-for="session in props.sessions"
-              :key="session.id"
-              :session="session"
-              :to="sessionTo(session)"
-            />
-          </div>
-        </section>
-
-        <section v-if="nextThree.length">
-          <h3
-            class="text-xs font-bold uppercase text-text-on-inverse-muted"
-            :style="{ letterSpacing: 'var(--tracking-caps)' }"
-          >
-            {{ t('home.aside.editions.title') }}
-          </h3>
-          <div class="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
             <HomeAsideEdition
-              v-for="edition in nextThree"
+              v-for="(edition, index) in nextThree"
               :key="edition.id"
               :edition="edition"
+              :featured="index === 0"
+              :session-count="publishedSessionCount(props.stats, edition.id)"
+              :next-session="nextSessionOfEdition(props.sessions, edition.id)"
+              :now="props.now"
+              :class="index === 0 ? 'sm:col-span-2 lg:col-span-1' : ''"
             />
           </div>
         </section>
 
-        <section v-if="props.pins.length">
-          <h3
-            class="text-xs font-bold uppercase text-text-on-inverse-muted"
-            :style="{ letterSpacing: 'var(--tracking-caps)' }"
-          >
-            {{ t('home.aside.pins.title') }}
-          </h3>
-          <div class="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
-            <HomeAsidePin
-              v-for="pin in props.pins"
-              :key="pin.id"
-              :pin="pin"
-              :timezone="pinTimezone(pin)"
-            />
-          </div>
-        </section>
+        <!-- 2. LA FRISE DES ACTIVITÉS RETENUES -->
+        <HomeAsideTimeline :sessions="props.sessions" :editions="props.editions" :now="props.now" />
       </div>
     </div>
   </aside>
