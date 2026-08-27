@@ -114,7 +114,7 @@ const editionPath = computed(() =>
             {{ t('home.call.title', { edition: props.edition.edition_label ?? tr(props.edition.title) }) }}
           </h2>
           <p class="mt-2 text-text-secondary" :style="{ maxWidth: 'var(--measure)' }">
-            {{ tr(props.edition.description) }}
+            {{ richTextToPlain(tr(props.edition.description)) }}
           </p>
         </div>
 

@@ -27,11 +27,8 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const isEmpty = computed(() => {
-  const value = props.html ?? ''
-  // Un document vierge de ProseMirror vaut `<p></p>` : c'est du vide.
-  return value.replace(/<[^>]*>/g, '').trim().length === 0
-})
+// Un document vierge de ProseMirror vaut `<p></p>` : c'est du vide.
+const isEmpty = computed(() => richTextToPlain(props.html).length === 0)
 </script>
 
 <template>

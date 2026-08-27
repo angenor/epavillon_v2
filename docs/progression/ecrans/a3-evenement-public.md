@@ -129,3 +129,31 @@ garde l'échéance et les conditions sous les yeux ; le bouton, lui, demande de 
 
 Le défilement animé de `main.css` **reste** : « Voir les critères d'évaluation », depuis le bandeau, traverse toujours
 deux écrans d'un coup, et c'est ce que la règle sert à montrer.
+
+---
+
+## Correction du 27/08 — la description s'affichait avec ses balises
+
+Signalé par le commanditaire. `EventPresentation` rendait `edition.description` par interpolation
+(`{{ tr(...) }}`), alors que ce champ est saisi dans **l'éditeur riche** du back-office — décision de B3,
+`AdminEventsI18nField … rich`, « même éditeur que la présentation détaillée d'une proposition ». Le champ
+arrive donc en HTML restreint, et la page publique en montrait le balisage.
+
+**Pourquoi la vérification au navigateur du 19/08 ne l'a pas vu** : les sept descriptions d'édition de
+`mocks/event.ts` sont écrites en texte nu. Rendues comme du texte, elles sont correctes ; c'est seulement
+contre l'API, sur une édition saisie dans l'écran d'administration, que le défaut apparaît. **La leçon vaut
+au-delà de cet écran** : une donnée d'exemple qui ne reproduit pas la forme réelle du champ rend la
+vérification aveugle sur ce point précis.
+
+| Fichier | Ce qui change |
+|---|---|
+| `components/event/Presentation.vue` | la description passe par `UiRichContent` — feuille `.rich-text`, même allure à la saisie et à la publication |
+| `components/home/CallSection.vue` | l'aperçu du bloc d'appel passe par `richTextToPlain()` : un paragraphe court n'a pas de place pour des titres ni des listes |
+| `utils/rich-text.ts` (nouveau) | `richTextToPlain()` — dépouille le balisage, sépare les blocs par une espace, décode les entités que l'éditeur produit |
+| `components/ui/RichContent.vue` | juge le vide par le même utilitaire, au lieu de sa propre expression régulière |
+
+`highlights` **reste du texte simple** : son champ de saisie est un `textarea`, pas l'éditeur.
+
+**Vérifié** : `make check-front` au vert — typecheck, construction, contrat d'API inchangé (139 appels,
+8 routes en attente). **Non vérifié** : le rendu contre une édition réelle porteuse de HTML — les données
+d'exemple ne peuvent pas l'exercer.

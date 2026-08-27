@@ -23,9 +23,9 @@ const { tr } = useI18nText()
       {{ t('event.public.presentation.title') }}
     </h2>
 
-    <p class="mt-5 text-lg leading-relaxed text-text-secondary" :style="{ maxWidth: 'var(--measure)' }">
-      {{ tr(props.edition.description) }}
-    </p>
+    <!-- La description est saisie dans l'éditeur riche du back-office : titres,
+         listes, liens. Rendue comme du texte, elle affichait ses balises. -->
+    <UiRichContent class="mt-5 text-lg leading-relaxed" :html="tr(props.edition.description)" />
 
     <!-- `highlights` porte les consignes pratiques — accès, badge, inscription.
          D'où le cadre et l'icône : ce n'est pas la suite de la description, c'est
