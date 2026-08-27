@@ -1,0 +1,37 @@
+{
+  "canvasLabel": "Zone de recadrage",
+  "hint": "Glissez le cadre pour le déplacer, tirez ses poignées pour l'ajuster. Au clavier : les flèches déplacent, Maj et les flèches redimensionnent.",
+  "preview": "Ce qui partira",
+  "previewAlt": "Aperçu du recadrage",
+  "apply": "Téléverser",
+  "ratio": {
+    "free": "Recadrage libre",
+    "locked": "Forme imposée : {ratio}"
+  },
+  "format": {
+    "label": "Format",
+    "jpeg": "JPEG",
+    "webp": "WebP",
+    "png": "PNG",
+    "jpegHint": "Le plus sûr pour une photographie. Ce qui était transparent devient blanc.",
+    "webpHint": "Plus léger que le JPEG à qualité égale, et la transparence est gardée.",
+    "pngHint": "Sans perte, transparence gardée. Beaucoup plus lourd sur une photographie."
+  },
+  "quality": {
+    "label": "Qualité"
+  },
+  "width": {
+    "label": "Largeur",
+    "hint": "Au-delà de la largeur réellement affichée, le fichier s'alourdit sans gagner en netteté."
+  },
+  "weight": {
+    "label": "Poids du fichier",
+    "max": "Maximum accepté pour cet emplacement : {max}.",
+    "tooHeavy": "Le fichier dépasse le poids accepté. Baissez la qualité ou la largeur."
+  },
+  "errors": {
+    "unreadable": "Ce fichier n'a pas pu être lu comme une image.",
+    "encoding": "Ce fichier n'a pas pu être préparé. Essayez un autre format de sortie, ou une autre image."
+  },
+  "preparing": "Préparation du fichier…"
+}

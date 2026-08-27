@@ -59,6 +59,8 @@ export interface ApiTransport {
     fromMocks: (m: Mocks) => T | Promise<T>,
     method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE',
   ) => Promise<T>
+  /** Une écriture qui porte un fichier — corps composite, jamais JSON. */
+  sendForm: <T>(path: string, form: FormData, fromMocks: (m: Mocks) => T | Promise<T>) => Promise<T>
   pending: <T>(
     path: string,
     fromMocks: (m: Mocks) => T | Promise<T>,

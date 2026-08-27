@@ -62,9 +62,6 @@
     "coordinatesHint": "Point surveyed on site, in decimal degrees. Optional — but both together or neither.",
     "coordinatesCheck": "Check the point on a map",
     "images": {
-      "shape": "{ratio} format",
-      "none": "No image for this format",
-      "assetId": "Asset identifier",
       "banner": {
         "label": "Panoramic banner",
         "use": "tops the record and the public page"
@@ -110,5 +107,5 @@
     "cancel": "Cancel",
     "backToList": "Back to list"
   },
-  "uploadNotice": "Uploading will be wired to the Media module: for now, each variant is attached by asset identifier. A file that does not match the shape of its slot is rejected on upload, never cropped."
+  "uploadNotice": "Each slot is filled directly: choose a file, crop it to the required shape, and it is uploaded. A file that does not have that shape is rejected on upload, never cropped automatically."
 }

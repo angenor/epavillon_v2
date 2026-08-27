@@ -62,11 +62,11 @@ const appels = []
 const dette = []
 for (const fichier of sources) {
   const src = readFileSync(fichier, 'utf8')
-  // Premier argument de call(…), send(…) et pending(…). Il n'est pas toujours un
+  // Premier argument de call(…), send(…), sendForm(…) et pending(…). Il n'est pas toujours un
   // littéral collé à la parenthèse : deux appels choisissent entre création et
   // modification par un ternaire, et ne pas lire les deux branches laissait
   // passer deux chemins sans qu'aucune des listes ne les nomme.
-  for (const m of src.matchAll(/\b(call|send|pending)\s*(?:<[^(]*>)?\s*\(\s*([\s\S]{0,200}?)(?:,\s*(?:\(|async)|\)\s*$)/gm)) {
+  for (const m of src.matchAll(/\b(call|sendForm|send|pending)\s*(?:<[^(]*>)?\s*\(\s*([\s\S]{0,200}?)(?:,\s*(?:\(|async)|\)\s*$)/gm)) {
     const ligne = src.slice(0, m.index).split('\n').length
     const chemins = [...m[2].matchAll(/[`'"](\/[^`'"]*)[`'"]/g)].map((c) => c[1])
     for (const chemin of chemins) {

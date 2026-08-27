@@ -20,6 +20,7 @@ import type {
 } from '~/types/admin-events'
 import type { EffectivePermission } from '~/types/identity'
 import type { TabItem } from '~/types/ui'
+import type { AttachableRoleRule } from '~/types/media'
 import { EDITION_IMAGE_ROLES } from '~/types/media'
 
 /**
@@ -115,6 +116,19 @@ const { data: options } = await useAsyncData<EditionFormOptions | null>(
   'admin-edition-form-options',
   () => api.adminEvents.formOptions(),
   { lazy: true },
+)
+
+/**
+ * CE QUE CHAQUE EMPLACEMENT D'IMAGE EXIGE — `media.attachable_roles`.
+ *
+ * Chargé ICI et non dans le panneau : un composant de cet écran ne va pas
+ * chercher ses données lui-même, et les trois emplacements n'ont pas à faire
+ * trois appels pour une table de référence qui ne change jamais.
+ */
+const { data: mediaRules } = await useAsyncData<AttachableRoleRule[]>(
+  'media-roles-event-events',
+  () => api.media.roles('event', 'events'),
+  { default: () => [], lazy: true },
 )
 
 const { data: defaultCriteria } = await useAsyncData<EditionCriterion[]>(
@@ -714,6 +728,7 @@ const periodLabel = computed(() => {
           :initial="editionPayload"
           :options="options"
           :images="detail.images"
+          :media-rules="mediaRules"
           :errors="editionErrors"
           :suggested-acronym="suggestedAcronym"
           :busy="busy"

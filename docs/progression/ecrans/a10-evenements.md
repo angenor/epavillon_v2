@@ -22,7 +22,7 @@ Le modèle n'a rien exigé de nouveau — le premier point n'est pas un manque d
 
 3. **`EditionListRow` ne porte ni `description` ni `highlights`, et c'est délibéré.** Une ligne de tableau à huit colonnes n'a pas à charger deux paragraphes par édition. Les deux textes sont donc portés par `EditionDetail`, que le formulaire de modification consomme. Première tentative : les relire par `api.events.bySlug()` — un appel de plus pour deux colonnes de la même table. Corrigé avant la fin. **Obligation inscrite au prompt B3** : `GET /admin/events/:id` embarque la description, le message d'accueil ET la bannière résolue, comme le fait déjà `v_public_schedule` pour les séances.
 
-4. **La bannière d'une édition ne se téléverse pas encore.** `event.events` ne porte pas son image — le rattachement média est polymorphe (`media.attachments`, rôle `banner`). Le champ transmet donc un identifiant d'objet, et l'écran le DIT plutôt que d'offrir un bouton inerte. Le téléversement viendra avec le module Média.
+4. **~~La bannière d'une édition ne se téléverse pas encore.~~ REFERMÉ LE 26/08.** `event.events` ne porte toujours pas son image — le rattachement média reste polymorphe (`media.attachments`) —, mais le fichier part maintenant de l'écran : `MediaImageField` dépose par `POST /media/assets`, le formulaire rattache par `PUT /media/attachments`. Les trois déclinaisons sont recadrées **à la forme exigée par `media.attachable_roles`**, lue par `GET /media/roles` : la personne cadre, l'algorithme ne rogne pas. Le champ d'identifiant d'objet a disparu — il n'était remplissable que depuis la base.
 
 5. **Deux permissions distinctes, et c'est une bonne chose.** `event.event.manage` couvre l'édition, ses journées, ses fils, ses lieux et ses canaux ; `event.call.manage` couvre l'appel et son comité. Les tester séparément permet à un chargé de programmation de composer les journées spéciales sans toucher à la grille d'évaluation. **La création d'une édition demande la portée GLOBALE** : une édition qui n'existe pas encore n'a aucun périmètre où vérifier un droit. C'est la règle métier n° 8 prise par l'autre bout, et elle mérite d'être confirmée au prompt B3.
 
@@ -49,3 +49,46 @@ Le modèle n'a rien exigé de nouveau — le premier point n'est pas un manque d
 - **Un piège d'outillage, pas de code** : deux serveurs de développement partagent `frontend/.nuxt/`. En lancer un second pendant qu'un premier tourne casse les deux (« worker entry not found »). Se rabattre sur celui qui tourne, ou arrêter avant de relancer.
 
 **Après les retours du commanditaire (reprise du 18/08).** Base **rechargée de zéro** (`down -v` puis `up`) : le schéma se charge sans une erreur, 249 pays semés, `event.events` porte bien `latitude` et `longitude`, et le rapport des frontières inter-modules reste à zéro. Les trois contraintes de coordonnées éprouvées sur une ligne réelle dans une transaction annulée — une latitude seule est refusée, une latitude de 95 est refusée, le point de Belém est accepté. `platform.slugify()` comparée à `utils/slug.ts` sur six libellés, dont « Côte d'Ivoire » et « COP31 — Conférence… » : sorties identiques. Au navigateur : **250 options de pays et 419 de fuseau** dans le formulaire, le slug se compose pendant la frappe (« COP32 » → `cop32`), il cesse de suivre après correction manuelle, il ne bouge pas sur une édition existante dont on change le libellé, l'éditeur enrichi est monté avec sa barre d'outils (gras, italique, listes), et une latitude sans longitude est refusée au bon champ. Le lien « Vérifier le point sur un plan » ouvre bien la bonne épingle.
+
+---
+
+## Le téléversement des trois déclinaisons — 26/08
+
+Écart n° 4 refermé, à la demande du commanditaire : « impossible de téléverser directement une image ».
+
+**Ce qui existait, et ce qui manquait.** Le dépôt (`POST /media/assets`, B6) et le rattachement (`PUT /media/attachments`, B3) étaient tous deux servis. Entre les deux, l'écran demandait un **identifiant d'objet** — un champ de texte que seule une personne ayant accès à la base pouvait remplir. Les trois emplacements étaient donc décoratifs.
+
+**Ce qui a été écrit.**
+
+- `UiImageEditor` — le recadrage, sur canevas. Sélection déplaçable et redimensionnable à la souris, au doigt (événements *pointer*, capture comprise) et **au clavier** (flèches pour déplacer, `Maj` pour redimensionner, `Alt` pour le pas fin). Grille des tiers. Format JPEG · WebP · PNG, qualité, largeur de sortie. **Le poids affiché est mesuré, jamais estimé** : chaque réglage réencode l'image et conserve le fichier produit, qui est celui qui partira. Les couleurs du canevas sont lues **une fois** dans les jetons CSS — un canevas ignore les variables, et une couleur écrite en dur rouvrirait la porte que `design-tokens.css` a fermée.
+- `MediaImageField` — l'emplacement complet : choisir, recadrer, décrire, déposer, remplacer, retirer. Générique : il ne connaît ni les éditions ni leurs trois rôles.
+- `api.media` — `roles()` et `upload()`, plus la primitive `sendForm` dans `useApi.ts`, seule écriture du site qui ne parle pas JSON. Les métadonnées sont ajoutées **avant** le fichier, comme la route l'exige : c'est ce qui lui permet de refuser un type, un poids ou un droit sans avoir lu un octet.
+
+**Trois décisions qui méritent d'être retenues.**
+
+1. **La forme est IMPOSÉE, plus apprise par le refus.** La poignée est verrouillée sur `expected_aspect_ratio` (3,5556 · 1,7778 · 1,0000), servi par `GET /media/roles`. Le trigger des 2 % reste en place et redevient ce qu'il doit être — un filet, pas un mode d'emploi. **Deux champs manquaient au type du site** ; l'obligation inscrite au contrat de la route est refermée.
+2. **Une seule image part, pas trois tailles.** `lg`, `md` et `thumb` sont produites par le worker (`domain/variants.rs`). En fabriquer côté navigateur écrirait une seconde fois un invariant déjà porté, et déposerait trois objets pour un rôle, dont deux orphelins le jour même.
+3. **Le texte alternatif se saisit DANS l'éditeur.** `ck_assets_alt_text_required` le rend obligatoire et le dépôt le refuse avant de lire le flux. Le demander après ferait perdre le fichier ; le demander avant le recadrage ferait décrire une image qu'on n'a pas encore cadrée.
+
+**Trois pièges traités.**
+
+- Un PNG transparent aplati en JPEG donne du **noir** là où il n'y avait rien — le canevas est peint en blanc avant le dessin, et le défaut ne se serait vu qu'après le dépôt.
+- Le poids annoncé doit être **exact** : la route refuse un flux dont le poids diffère de sa déclaration. Il vient du `Blob`, jamais d'une estimation.
+- La mesure du cadre passe par un **observateur de taille** : la modale vient de s'ouvrir au montage du composant, et une mesure unique dessinerait dans une largeur nulle sans rien signaler.
+
+**Ce qui a été vérifié, et comment.** `npm run typecheck`, `npm run build` et `node scripts/check-api-contract.mjs` au vert — le contrôle du contrat reconnaît désormais `sendForm`, le chemin `/media/assets` est donc vérifié comme les autres. **Au navigateur, sur les données d'exemple, connecté comme administratrice globale :**
+
+- `/admin/evenements/nouveau` — les trois emplacements annoncent leur forme et leur plafond lus de la base (« Format 32:9 — 15 Mo au plus »). Dépôt bout en bout sur le bandeau : choix du fichier, recadrage verrouillé au 32:9, description saisie, « Téléverser », aperçu affiché, boutons « Remplacer » et « Retirer ».
+- `/admin/evenements/<COP31>` — le formulaire de modification rend les trois emplacements avec leurs images en place. Éditeur ouvert sur la couverture : forme annoncée « 16:9 », déplacement de la sélection à la souris avec butée sur le bord de l'image, redimensionnement par un coin. **Rapport de sortie mesuré à 851 × 479, soit 1,7766 pour 1,7778 exigé — 0,07 % d'écart, pour 2 % tolérés.**
+
+**Corrigé dans la foulée, signalé par le commanditaire : « le bouton reste grisé ».** Aucun défaut de logique — la **description de l'image**, seul champ obligatoire, était rangée en bas de la colonne de réglages, à **huit cents pixels sous le pli** d'une boîte de dialogue haute de 381 px, et rien ne disait pourquoi l'envoi était fermé. Deux corrections : ce que l'appelant EXIGE passe **avant** les réglages facultatifs, juste sous l'aperçu ; et **le pied de la boîte dit la raison** du refus, à côté du bouton. La leçon dépasse cet écran : **un bouton grisé sans raison visible est une impasse**, et l'ordre d'une colonne de réglages n'est pas cosmétique.
+
+**Deuxième passe sur le même signalement, 27/08 — « toujours grisé ».** Trois causes possibles restaient invisibles, et deux étaient de vrais défauts.
+
+- **`encode()` pouvait échouer en silence**, par trois chemins : un contexte de canevas refusé, un `toBlob` rendant `null` (format non gravé dans le navigateur), un `drawImage` qui lève sur une sélection dégénérée. Dans les trois cas le fichier n'existait pas, le bouton restait fermé, **et rien ne l'expliquait**. Les trois se disent désormais.
+- **Une image sans dimensions passait pour valide** — un SVG qui ne porte qu'un `viewBox` se charge sans erreur et mesure zéro. Elle est refusée à la lecture, comme une image illisible.
+- **Le français est la langue de repli, et le champ de description ne remonte RIEN tant qu'il manque** : une description saisie dans le seul onglet anglais laisse l'envoi fermé, et l'écran ne peut pas distinguer « rien saisi » de « saisi dans l'autre onglet ». Le message nomme donc la langue.
+
+**Le pied de la boîte ne peut plus être muet** : lecture impossible, encodage impossible, poids dépassé, description manquante, fichier en préparation — cinq raisons, dans l'ordre de la correction à faire. Un bouton fermé sans raison visible n'existe plus dans cet écran.
+
+**Ce qui n'a PAS été vérifié.** Rien contre l'API réelle : hors ligne, le dépôt simulé rend une adresse `blob:` qui meurt avec la page. Le refus de quota et la déduplication n'ont pas d'équivalent simulé et restent à voir passer.

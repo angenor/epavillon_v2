@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { AssetId } from '~/types/shared'
-import type { AttachedImage, EditionImageRole } from '~/types/media'
+import type { AssetId, Uuid } from '~/types/shared'
+import type { AttachableRoleRule, AttachedImage, EditionImageRole } from '~/types/media'
 import { EDITION_IMAGE_RATIO, EDITION_IMAGE_ROLES } from '~/types/media'
 
 /**
@@ -11,29 +11,28 @@ import { EDITION_IMAGE_RATIO, EDITION_IMAGE_ROLES } from '~/types/media'
  *
  * Un bandeau 32:9 rogné automatiquement dans une photographie de conférence
  * décapite les intervenants ; un carré tiré du même fichier ne garde qu'une
- * épaule. Les trois recadrages sont donc TÉLÉVERSÉS À LA MAIN — c'est la
- * personne qui sait où est le sujet, pas l'algorithme.
+ * épaule. Les trois recadrages sont donc CHOISIS À LA MAIN — c'est la personne
+ * qui sait où est le sujet, pas l'algorithme. L'éditeur lui donne la grille des
+ * tiers et verrouille le rapport ; il ne cadre pas à sa place.
  *
  * Les trois sont INDÉPENDANTES et FACULTATIVES : on peut n'en fournir qu'une,
- * et vider un champ retire cette déclinaison sans toucher aux deux autres.
+ * et vider un emplacement retire cette déclinaison sans toucher aux deux autres.
  * Chaque écran porte déjà son repli — l'accueil se rabat du 16:9 sur le 32:9,
  * la fiche affiche son en-tête sobre sans aucune image.
  *
- * ── LA FORME EST ANNONCÉE ICI, ELLE EST EXIGÉE EN BASE ──────────────────────
+ * ── LA FORME VIENT DE LA BASE, PAS D'UNE CONSTANTE ──────────────────────────
  *
- * `media.attachable_roles.expected_aspect_ratio` porte le rapport attendu et le
- * trigger de `media.attachments` refuse ce qui s'en écarte de plus de 2 % : un
- * 16:9 déposé en bandeau est REJETÉ, pas rogné. Cet écran ne revérifie donc
- * rien — il ANNONCE, pour que le refus n'arrive pas en surprise. Un contrôle
- * réécrit ici finirait par accepter ce que la base refuse, ou l'inverse.
+ * `GET /media/roles` rend `media.attachable_roles` : rapport attendu, tolérance,
+ * types acceptés, poids maximal. C'est ce qui verrouille la poignée de
+ * l'éditeur. `EDITION_IMAGE_RATIO` ne sert plus qu'à ÉCRIRE la forme — « 32:9 »
+ * se lit, « 3,5556 » se calcule.
  *
- * ── LE RATTACHEMENT EXISTE, LE TÉLÉVERSEMENT PAS ENCORE ─────────────────────
+ * ── LE DÉPÔT A REJOINT LE RATTACHEMENT ─────────────────────────────────────
  *
- * Ce que l'écran choisit ici part par `PUT /media/attachments` — les trois rôles
- * d'un geste, un identifiant nul en retirant un. Ce qui manque est le DÉPÔT du
- * fichier : le champ transmet donc un identifiant d'objet et l'écran le DIT,
- * plutôt que d'offrir un bouton qui ne ferait rien. Même traitement que la
- * vitrine (`AdminShowcaseMediaPanel`).
+ * Jusqu'au 26/08, chaque emplacement demandait un IDENTIFIANT D'OBJET saisi à la
+ * main : la route de rattachement existait, celle du dépôt aussi, et il manquait
+ * l'écran entre les deux. Le fichier part maintenant d'ici, et ce panneau ne
+ * transmet plus que ce qu'il a toujours transmis — un identifiant par rôle.
  */
 
 interface Props {
@@ -41,16 +40,38 @@ interface Props {
   images: Record<EditionImageRole, AttachedImage | null>
   /** Ce que le formulaire enverra — un identifiant d'objet par rôle. */
   modelValue: Record<EditionImageRole, AssetId | null>
+  /**
+   * Les règles des rôles, telles que `media.attachable_roles` les déclare.
+   * Chargées par la PAGE : un composant de cet écran ne va pas chercher ses
+   * données lui-même, et les trois emplacements n'ont pas à faire trois appels.
+   */
+  rules: AttachableRoleRule[]
+  /** L'édition, quand elle existe déjà. Absente à la création. */
+  eventId?: Uuid | null
+  disabled?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { eventId: null })
 
 const emit = defineEmits<{ 'update:modelValue': [value: Record<EditionImageRole, AssetId | null>] }>()
 
 const { t } = useI18n()
 
-function setRole(role: EditionImageRole, raw: string): void {
-  emit('update:modelValue', { ...props.modelValue, [role]: (raw.trim() || null) as AssetId | null })
+/**
+ * La règle d'un rôle. ABSENTE, l'éditeur recadre librement et le dépôt s'en
+ * remet au refus de la base : une table de référence muette ne doit pas mettre
+ * le panneau en panne, elle doit le rendre moins précis.
+ */
+const ruleOf = (role: EditionImageRole): AttachableRoleRule | null =>
+  props.rules.find((rule) => rule.role === role) ?? null
+
+/** L'entité porteuse du dépôt. Nulle à la création : elle n'existe pas encore. */
+const owner = computed(() =>
+  props.eventId ? { schema: 'event', table: 'events', id: props.eventId } : null,
+)
+
+function setRole(role: EditionImageRole, assetId: AssetId | null): void {
+  emit('update:modelValue', { ...props.modelValue, [role]: assetId })
 }
 </script>
 
@@ -60,48 +81,19 @@ function setRole(role: EditionImageRole, raw: string): void {
        300 px de vide. Trois hauteurs différentes sont ici la conséquence
        normale de trois formes différentes. -->
   <div class="grid items-start gap-5 sm:grid-cols-2 xl:grid-cols-3">
-    <section
+    <MediaImageField
       v-for="role in EDITION_IMAGE_ROLES"
       :key="role"
-      class="flex flex-col gap-3 rounded-lg border border-border-subtle bg-surface p-4"
-    >
-      <header>
-        <h3 class="text-sm font-semibold">
-          {{ t(`admin.event.form.fields.images.${role}.label`) }}
-        </h3>
-        <!-- LA FORME EXIGÉE, ÉCRITE. Elle vient de `EDITION_IMAGE_RATIO`, qui
-             reprend `attachable_roles.expected_aspect_ratio` : deux endroits,
-             une seule vérité, et celle qui tranche est en base. -->
-        <p class="mt-0.5 text-xs text-text-subtle">
-          {{ t('admin.event.form.fields.images.shape', {
-            ratio: EDITION_IMAGE_RATIO[role].replace(' / ', ':'),
-          }) }}
-          — {{ t(`admin.event.form.fields.images.${role}.use`) }}
-        </p>
-      </header>
-
-      <UiImage
-        v-if="props.images[role]"
-        :image="props.images[role]"
-        :ratio="EDITION_IMAGE_RATIO[role]"
-        rounded="rounded-md"
-        sizes="(min-width: 1280px) 20rem, (min-width: 640px) 45vw, 90vw"
-      />
-      <!-- L'EMPLACEMENT VIDE GARDE LA FORME du fichier attendu : c'est ce qui
-           fait comprendre « très large » ou « carré » sans le lire. -->
-      <p
-        v-else
-        class="flex items-center justify-center rounded-md border border-dashed border-border px-3 text-center text-xs text-text-subtle"
-        :style="{ aspectRatio: EDITION_IMAGE_RATIO[role] }"
-      >
-        {{ t('admin.event.form.fields.images.none') }}
-      </p>
-
-      <UiInput
-        :model-value="props.modelValue[role] ?? ''"
-        :label="t('admin.event.form.fields.images.assetId')"
-        @update:model-value="(next: string) => setRole(role, next)"
-      />
-    </section>
+      :role="role"
+      :label="t(`admin.event.form.fields.images.${role}.label`)"
+      :use="t(`admin.event.form.fields.images.${role}.use`)"
+      :shape-label="EDITION_IMAGE_RATIO[role].replace(' / ', ':')"
+      :rule="ruleOf(role)"
+      :image="props.images[role]"
+      :asset-id="props.modelValue[role]"
+      :owner="owner"
+      :disabled="props.disabled"
+      @update:asset-id="(next: AssetId | null) => setRole(role, next)"
+    />
   </div>
 </template>

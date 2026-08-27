@@ -1,0 +1,23 @@
+{
+  "shape": "{ratio} format",
+  "max": "{max} at most",
+  "empty": "No image for this format",
+  "actions": {
+    "choose": "Choose an image",
+    "replace": "Replace",
+    "remove": "Remove"
+  },
+  "altText": {
+    "label": "Image description",
+    "hint": "What the image shows, for those who cannot see it. Required: without it the image cannot be served.",
+    "required": "A French image description is required before uploading — it is the fallback language when another is missing."
+  },
+  "editor": {
+    "title": "{slot} — cropping",
+    "description": "The file is not sent as is: what leaves is what the preview shows, in the shape this slot requires.",
+    "apply": "Upload"
+  },
+  "errors": {
+    "mimeRejected": "This file type is not accepted for this slot."
+  }
+}

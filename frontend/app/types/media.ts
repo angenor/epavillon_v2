@@ -263,6 +263,17 @@ export interface AttachableRoleRule {
   /** Préfixes MIME acceptés, `*` autorisé. Tableau vide = tout accepté. */
   allowed_mime_prefixes: string[]
   max_byte_size: Int8 | null
+  /**
+   * Largeur ÷ hauteur exigée — `3.5556` pour un 32:9, `1.0000` pour un carré.
+   *
+   * EN TEXTE, et non en nombre : `numeric(6,4)` n'a pas de représentant flottant
+   * exact, et le rapport sert à AFFICHER autant qu'à comparer. C'est ce que
+   * l'éditeur de recadrage impose à la poignée qu'on tire — la forme n'est donc
+   * plus apprise par le refus, après que le fichier a traversé le réseau.
+   */
+  expected_aspect_ratio: string | null
+  /** Écart relatif toléré par le trigger. `0.02` = 2 %. */
+  aspect_ratio_tolerance: string
   is_active: boolean
 }
 
@@ -396,4 +407,48 @@ export interface OrphanAsset {
   created_at: IsoDateTime
   /** Jours entiers écoulés depuis le dépôt. */
   age_days: number
+}
+
+// ---------------------------------------------------------------------------
+// Le dépôt, vu de l'écran
+// ---------------------------------------------------------------------------
+
+/**
+ * Ce qu'un écran envoie à `POST /media/assets` — `UploadPayload`.
+ *
+ * LE FICHIER EST UN `Blob`, jamais un `File` : ce qui part n'est pas ce qui a
+ * été choisi sur le disque, mais ce que l'éditeur de recadrage a produit. Le nom
+ * et le type voyagent donc à côté, puisque le `Blob` n'en porte pas.
+ *
+ * L'ENTITÉ PORTEUSE EST FACULTATIVE, et son absence n'est pas un oubli : à la
+ * création d'une édition, l'entité n'existe pas encore. Renseignée, elle vaut
+ * refus AVANT lecture — type, poids et droit sont vérifiés sans qu'un octet
+ * traverse le réseau.
+ *
+ * LE TEXTE ALTERNATIF EST OBLIGATOIRE POUR UNE IMAGE. Ce n'est pas une politesse
+ * d'écran : `ck_assets_alt_text_required` interdit à une image d'atteindre
+ * l'état servable sans lui, et le dépôt le refuse avant de lire le flux.
+ */
+export interface UploadPayload {
+  file: Blob
+  filename: string
+  mimeType: string
+  altText: I18nText
+  ownerSchema?: string
+  ownerTable?: string
+  ownerId?: Uuid
+  role?: AttachmentRole
+}
+
+/**
+ * Ce que rend le dépôt — `UploadedAsset`.
+ *
+ * C'est `Asset` PLUS `deduplicated`, que la route ajoute au corps. Le drapeau
+ * est un SUCCÈS, jamais un refus : le contenu était déjà connu du stockage,
+ * aucun second objet n'a été écrit, et l'objet rendu est celui d'avant. Un écran
+ * qui l'ignorerait afficherait quand même la bonne image ; il ne saurait
+ * simplement pas qu'il n'a rien coûté.
+ */
+export interface UploadedAsset extends Asset {
+  deduplicated: boolean
 }

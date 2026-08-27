@@ -62,9 +62,6 @@
     "coordinatesHint": "Point relevé sur place, en degrés décimaux. Facultatif — mais les deux ensemble ou aucun.",
     "coordinatesCheck": "Vérifier le point sur un plan",
     "images": {
-      "shape": "Format {ratio}",
-      "none": "Aucune image pour ce format",
-      "assetId": "Identifiant de l'objet",
       "banner": {
         "label": "Bandeau panoramique",
         "use": "coiffe la fiche et la page publique"
@@ -110,5 +107,5 @@
     "cancel": "Annuler",
     "backToList": "Retour à la liste"
   },
-  "uploadNotice": "Le téléversement sera raccordé au module Média : pour l'instant, chaque déclinaison se rattache par identifiant d'objet. Un fichier qui n'a pas la forme de son emplacement est refusé au dépôt, jamais rogné."
+  "uploadNotice": "Chaque emplacement se remplit directement : on choisit un fichier, on le recadre à la forme exigée, et il est déposé. Un fichier qui n'a pas cette forme est refusé au dépôt, jamais rogné automatiquement."
 }

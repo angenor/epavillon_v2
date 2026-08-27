@@ -5,6 +5,7 @@ import type {
   EditionFormPayload,
   EditionImagePayload,
 } from '~/types/admin-events'
+import type { AttachableRoleRule } from '~/types/media'
 import type { EffectivePermission } from '~/types/identity'
 import type { Uuid } from '~/types/shared'
 
@@ -59,6 +60,13 @@ const {
   'admin-edition-form-options',
   () => api.adminEvents.formOptions(),
   { lazy: true },
+)
+
+/** Ce que chaque emplacement d'image exige — `media.attachable_roles`. */
+const { data: mediaRules } = await useAsyncData<AttachableRoleRule[]>(
+  'media-roles-event-events',
+  () => api.media.roles('event', 'events'),
+  { default: () => [], lazy: true },
 )
 
 const { data: granted } = await useAsyncData<EffectivePermission[]>(
@@ -178,6 +186,7 @@ async function submit(payload: EditionFormPayload, images: EditionImagePayload):
         v-else
         class="mt-8"
         :options="options"
+        :media-rules="mediaRules"
         :errors="errors"
         :suggested-acronym="suggestedAcronym"
         :busy="busy"

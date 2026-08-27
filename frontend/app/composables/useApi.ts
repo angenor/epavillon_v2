@@ -82,6 +82,7 @@ import { createAdminIncidentsApi } from './api/admin-incidents'
 import { createOrganizationWorkspaceApi } from './api/organization-workspace'
 import { createHomeApi } from './api/home'
 import { createAdminShowcaseApi } from './api/admin-showcase'
+import { createMediaApi } from './api/media'
 
 // `ForbiddenError` vit désormais dans `utils/api-error.ts`, avec les deux autres
 // erreurs de la couche d'accès : le client HTTP doit pouvoir la lever sur un
@@ -172,6 +173,33 @@ export function useApi() {
   }
 
   /**
+   * UNE ÉCRITURE QUI PORTE UN FICHIER — la seule route de l'API qui ne parle pas
+   * JSON, et la seule raison pour laquelle cette primitive existe.
+   *
+   * `send` sérialise son corps en JSON ; un corps composite s'y perdrait. Elle
+   * est déclarée à part plutôt qu'en option de `send` pour la même raison que
+   * `send` l'est de `call` : on voit d'un coup d'œil ce qui traverse le réseau
+   * en octets.
+   *
+   * L'ORDRE DES CHAMPS COMPTE, et il appartient à l'appelant : la route lit le
+   * corps dans l'ordre où il a été écrit, et n'accepte le fichier qu'après ses
+   * métadonnées — c'est ce qui lui permet de refuser un type, un poids ou un
+   * droit sans avoir lu un octet.
+   *
+   * `retry: 0`, comme toute écriture : un dépôt rejoué après une coupure de
+   * passerelle écrit deux fois le même objet.
+   */
+  async function sendForm<T>(path: string, form: FormData, fromMocks: (m: Mocks) => T | Promise<T>): Promise<T> {
+    if (isConfigured.value) {
+      // `body` reste un `FormData` : le client HTTP laisse alors le navigateur
+      // poser `Content-Type` avec sa frontière. L'écrire à la main la ferait
+      // manquer, et le corps deviendrait illisible pour l'API.
+      return request<T>(path, { method: 'POST', body: form, retry: 0 })
+    }
+    return readMocks(fromMocks, MOCK_LATENCY_MS * 3)
+  }
+
+  /**
    * Un écran dont l'API N'EXISTE PAS ENCORE.
    *
    * Trois écrans du jalon sont dans ce cas : les messages d'incident, l'accueil
@@ -215,7 +243,7 @@ export function useApi() {
    * qu'une fabrique donnée ne déclare pas, et il faudrait tenir onze listes à
    * jour au lieu d'une.
    */
-  const deps = { call, callOrNull, send, pending, assertEventInScope }
+  const deps = { call, callOrNull, send, sendForm, pending, assertEventInScope }
 
   return {
     baseURL,
@@ -315,6 +343,15 @@ export function useApi() {
 
     home: createHomeApi(deps),
     adminShowcase: createAdminShowcaseApi(deps),
+
+    // -----------------------------------------------------------------------
+    // Média (B3 — dépôt et rattachement)
+    //
+    // Le module sert le dépôt depuis B3 ; jusqu'au 26/08 aucun écran ne
+    // l'appelait, et les trois déclinaisons d'une édition se rattachaient par
+    // un identifiant d'objet saisi à la main — c'est-à-dire par personne.
+    // -----------------------------------------------------------------------
+    media: createMediaApi(deps),
 
     // -----------------------------------------------------------------------
     // Référentiel

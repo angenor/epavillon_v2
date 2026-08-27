@@ -1,0 +1,37 @@
+{
+  "canvasLabel": "Cropping area",
+  "hint": "Drag the frame to move it, pull its handles to adjust it. With the keyboard: arrows move, Shift and arrows resize.",
+  "preview": "What will be sent",
+  "previewAlt": "Crop preview",
+  "apply": "Upload",
+  "ratio": {
+    "free": "Free crop",
+    "locked": "Required shape: {ratio}"
+  },
+  "format": {
+    "label": "Format",
+    "jpeg": "JPEG",
+    "webp": "WebP",
+    "png": "PNG",
+    "jpegHint": "The safest choice for a photograph. Anything transparent turns white.",
+    "webpHint": "Lighter than JPEG at equal quality, and transparency is kept.",
+    "pngHint": "Lossless, transparency kept. Far heavier on a photograph."
+  },
+  "quality": {
+    "label": "Quality"
+  },
+  "width": {
+    "label": "Width",
+    "hint": "Beyond the width actually displayed, the file grows heavier without looking sharper."
+  },
+  "weight": {
+    "label": "File size",
+    "max": "Maximum accepted for this slot: {max}.",
+    "tooHeavy": "The file exceeds the accepted size. Lower the quality or the width."
+  },
+  "errors": {
+    "unreadable": "This file could not be read as an image.",
+    "encoding": "This file could not be prepared. Try another output format, or another image."
+  },
+  "preparing": "Preparing the file…"
+}

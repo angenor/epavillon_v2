@@ -6,7 +6,7 @@ import type {
   EditionFormPayload,
   EditionImagePayload,
 } from '~/types/admin-events'
-import type { AttachedImage, EditionImageRole } from '~/types/media'
+import type { AttachableRoleRule, AttachedImage, EditionImageRole } from '~/types/media'
 import type { ParticipationMode } from '~/types/event/edition'
 import type { SelectOption } from '~/types/ui'
 
@@ -52,6 +52,11 @@ interface Props {
   options: EditionFormOptions
   /** Les trois déclinaisons déjà rattachées, pour l'aperçu de chaque emplacement. */
   images?: Record<EditionImageRole, AttachedImage | null> | null
+  /**
+   * Ce que `media.attachable_roles` exige de chaque rôle — forme, poids, types.
+   * C'est ce qui verrouille la poignée de l'éditeur de recadrage.
+   */
+  mediaRules?: AttachableRoleRule[]
   errors: EditionFormError[]
   /** Le sigle que l'API propose quand elle refuse une édition qui n'en porte pas. */
   suggestedAcronym?: string | null
@@ -626,7 +631,10 @@ function submit(): void {
 
       <AdminEventsImagesPanel
         :images="props.images ?? { banner: null, cover: null, thumbnail: null }"
+        :rules="props.mediaRules ?? []"
+        :event-id="props.initial?.id ?? null"
         :model-value="images"
+        :disabled="props.busy"
         @update:model-value="(next) => (images = next)"
       />
 
