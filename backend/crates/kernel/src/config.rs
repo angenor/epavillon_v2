@@ -129,6 +129,11 @@ struct Raw {
     #[serde(with = "humantime_serde", default = "hours_1")]
     event_call_autoclose_interval: Duration,
 
+    #[serde(with = "humantime_serde", default = "minutes_15")]
+    analytics_refresh_interval: Duration,
+    #[serde(with = "humantime_serde", default = "minutes_5")]
+    analytics_refresh_debounce: Duration,
+
     /// Version de la politique de confidentialité opposée à qui consent, écrite
     /// dans `identity.consents.policy_version`. C'est un réglage
     /// d'exploitation : la mettre en base la rendrait modifiable par migration
@@ -251,6 +256,7 @@ pub struct Config {
     pub org: OrgConfig,
     pub event: EventConfig,
     pub programme: ProgrammeConfig,
+    pub analytics: AnalyticsConfig,
     pub media: MediaConfig,
     pub engagement: EngagementConfig,
     pub mail: MailConfig,
@@ -285,6 +291,24 @@ pub struct OrgConfig {
 #[derive(Debug, Clone)]
 pub struct EventConfig {
     pub call_autoclose_interval: Duration,
+}
+
+/// Réglages du module Tableaux de bord. La cadence du rafraîchissement des
+/// projections matérialisées, et la fenêtre d'anti-rebond que la mise en file
+/// applique.
+///
+/// **L'INTERVALLE DOIT DÉPASSER LA FENÊTRE D'ANTI-REBOND**, et le contrôle est
+/// au démarrage. La clé d'unicité d'`analytics.enqueue_refresh()` est
+/// `refresh_all:<tranche>`, la tranche étant l'horloge arrondie au pas
+/// d'anti-rebond ; le conflit de `platform.jobs` porte sur `(task,
+/// idempotency_key)` **quel que soit l'état du travail**, `cancelled` excepté.
+/// Un travail déjà réussi bloque donc une nouvelle mise en file de la même
+/// tranche : si l'intervalle était plus court, la chaîne récurrente se
+/// dédoublonnerait contre elle-même et **s'arrêterait sans erreur ni trace**.
+#[derive(Debug, Clone)]
+pub struct AnalyticsConfig {
+    pub refresh_interval: Duration,
+    pub refresh_debounce: Duration,
 }
 
 /// Réglages du module Programmation. Une seule clé : la version de la politique
@@ -553,6 +577,23 @@ impl Config {
             ));
         }
 
+        // LE DÉFAUT LE PLUS SILENCIEUX DU JALON. Voir `AnalyticsConfig` : une
+        // chaîne récurrente dont l'intervalle n'excède pas sa propre fenêtre
+        // d'anti-rebond se dédoublonne contre elle-même et s'arrête. Rien ne
+        // lève, rien ne se journalise, et le tableau de bord vieillit en
+        // affichant sa fraîcheur.
+        if raw.analytics_refresh_interval.is_zero() {
+            return Err(invalid(
+                "ANALYTICS_REFRESH_INTERVAL vaut une durée nulle : le rafraîchissement des projections se replanifierait sans fin.",
+            ));
+        }
+        if raw.analytics_refresh_interval <= raw.analytics_refresh_debounce {
+            return Err(invalid(format!(
+                "ANALYTICS_REFRESH_INTERVAL ({:?}) doit dépasser ANALYTICS_REFRESH_DEBOUNCE ({:?}) : à durée égale ou moindre, la chaîne de rafraîchissement se dédoublonne contre elle-même et s'arrête sans erreur ni trace.",
+                raw.analytics_refresh_interval, raw.analytics_refresh_debounce
+            )));
+        }
+
         // Vide, la preuve de consentement ne nommerait aucun texte : une
         // colonne NOT NULL remplie d'une chaîne vide est une preuve qui
         // n'oppose rien.
@@ -674,6 +715,10 @@ impl Config {
             },
             programme: ProgrammeConfig {
                 privacy_policy_version: raw.privacy_policy_version.trim().to_owned(),
+            },
+            analytics: AnalyticsConfig {
+                refresh_interval: raw.analytics_refresh_interval,
+                refresh_debounce: raw.analytics_refresh_debounce,
             },
             media: MediaConfig {
                 storage: media_storage,

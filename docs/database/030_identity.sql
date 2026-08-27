@@ -617,6 +617,17 @@ INSERT INTO identity.role_permissions (role_code, permission_code) VALUES
     ('reviewer', 'org.organization.read'), ('reviewer', 'analytics.dashboard.read'),
     ('programmer', 'programme.proposal.read_all'), ('programmer', 'programme.session.schedule'),
     ('programmer', 'live.meeting.manage'), ('programmer', 'live.incident.publish'),
+    -- LE TABLEAU DE BORD N'EST PAS UNE ÉLÉVATION POUR CE RÔLE. Un programmateur
+    -- lit déjà, écran par écran et pour sa seule édition, tout ce que le
+    -- tableau de bord agrège : les dossiers (`programme.proposal.read_all`), le
+    -- calendrier et ses conflits (`programme.session.schedule`), les messages
+    -- d'incident (`live.incident.publish`). L'écran A6 lui donne la même
+    -- matière en une page ; la lui refuser lui retirerait un raccourci, pas un
+    -- droit. Constaté le 27/08 : sans cette ligne, le compte qui a servi à
+    -- vérifier la règle métier n° 8 sur cet écran en serait refusé. La portée
+    -- reste celle de l'attribution — un compte détaché sur la COP31 ne détient
+    -- cette permission QUE sur `event:COP31`.
+    ('programmer', 'analytics.dashboard.read'),
     ('org_manager', 'programme.proposal.submit'), ('org_manager', 'publication.article.write'),
     ('org_member', 'programme.proposal.submit'),
     ('negotiator', 'negotiation.space.access'),

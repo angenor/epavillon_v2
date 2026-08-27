@@ -142,7 +142,6 @@ async function submit(payload: IncidentPayload): Promise<void> {
     const result = await api.adminIncidents.create(
       { ...payload, from_event_id: eventId },
       auth.person?.id ?? null,
-      granted.value,
     )
 
     if (result.status !== 'created' && result.status !== 'published') {

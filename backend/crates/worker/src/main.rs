@@ -73,7 +73,14 @@ async fn main() {
         .register_all(media::job_handlers(db.clone(), &config))
         // Deux travaux : l'envoi d'un rappel — mis en file par la FONCTION du
         // modèle — et la préparation des partitions mensuelles.
-        .register_all(engagement::job_handlers(db.clone(), &config, courrier));
+        .register_all(engagement::job_handlers(db.clone(), &config, courrier))
+        // **Un seul travail, et c'est ce geste qui fait écouter la file
+        // « analytics ».** `JobRegistry::queues()` est construite à partir des
+        // files que les gestionnaires nomment, et `platform.claim_jobs()` filtre
+        // strictement : sans cette ligne, les demandes de rafraîchissement
+        // s'empileraient sans erreur, sans trace, et sans que rien ne les
+        // exécute jamais.
+        .register_all(analytics::job_handlers(db.clone(), &config));
 
     // Les travaux récurrents se replanifient eux-mêmes ; le démarrage ne fait
     // que **réarmer** la chaîne, au cas où sa dernière occurrence serait morte
@@ -162,6 +169,20 @@ async fn armer_les_recurrents(db: &Db, config: &Config) {
         .await?
         {
             armees.push("partitions du journal d'expédition");
+        }
+        // Septième chaîne, et la seule qui ne pose PAS son propre créneau : la
+        // mise en file passe par `analytics.enqueue_refresh()`, dont la clé
+        // d'anti-rebond porte la tranche de temps. Dix redémarrages dans la même
+        // tranche n'arment donc pas dix rafraîchissements — et l'intervalle doit
+        // dépasser cette fenêtre, ce que la configuration vérifie au démarrage.
+        if analytics::jobs::refresh::planifier(
+            &mut tx,
+            config.analytics.refresh_interval,
+            config.analytics.refresh_debounce,
+        )
+        .await?
+        {
+            armees.push("rafraîchissement des projections");
         }
 
         tx.commit().await?;

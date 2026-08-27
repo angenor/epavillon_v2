@@ -75,12 +75,22 @@ export interface Incident {
 }
 
 /**
- * Ligne de `live.active_incidents(session_id, at)` — `080` § 5.
+ * Ligne de `live.active_incidents(session_id, at)` et de
+ * `live.active_incidents_for_event(event_id, at)` — `080` § 6.
  *
- * La fonction remonte la hiérarchie : incidents de la séance, de sa journée, de
- * son édition, de son organisation porteuse, plus les incidents globaux. Le
- * front n'a donc AUCUN filtre de portée à réimplémenter — il affiche ce qui lui
- * est renvoyé, dans l'ordre où il le reçoit.
+ * Les deux fonctions balaient les MÊMES cinq portées, dans deux sens opposés :
+ * la première REMONTE depuis une activité (sa journée, son édition, son
+ * organisation porteuse, plus les messages globaux), la seconde DESCEND depuis
+ * une édition. Le front n'a donc AUCUN filtre de portée à réimplémenter — il
+ * affiche ce qui lui est renvoyé, dans l'ordre où il le reçoit, le plus grave en
+ * tête.
+ *
+ * LA CIBLE EST RÉSOLUE PAR LE MODÈLE, et elle compte : sur la page des
+ * programmations, qui parle de trente activités, « la diffusion est
+ * interrompue » ne dit pas laquelle. `target_label` le dit — « Atelier de
+ * négociation », « Journée finance », le nom légal d'une organisation. Elle est
+ * nulle pour un message global, qui ne vise rien de particulier, et pour la
+ * fonction ascendante, qui parle d'une activité déjà nommée par la page.
  */
 export interface ActiveIncident {
   incident_id: Uuid
@@ -93,4 +103,8 @@ export interface ActiveIncident {
   is_dismissible: boolean
   display_from: IsoDateTime
   display_until: IsoDateTime | null
+  /** Cible de la portée. Nulle pour un message global. */
+  target_id?: Uuid | null
+  /** Cible résolue par la fonction — jamais un identifiant. */
+  target_label?: string | null
 }

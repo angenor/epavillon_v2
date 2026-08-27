@@ -31,6 +31,21 @@ import type { ProgrammeData } from '~/types/event-programme'
  * Les éditions publiques, les séries (leur `kind` sépare les conférences du
  * reste), puis le programme de la seule édition ouverte à l'arrivée. Les autres
  * se chargent à la demande, une fois chacune, dans `EventProgramme`.
+ *
+ * ── LE BANDEAU D'INCIDENT ───────────────────────────────────────────────────
+ *
+ * Publier un message d'incident ne servait à rien tant qu'aucune page publique
+ * ne le montrait. C'est ici qu'il atteint quelqu'un — à l'échelle de l'ÉDITION,
+ * par la fonction descendante du modèle, et non sur la page d'une activité, qui
+ * n'existe pas.
+ *
+ * TROIS AU PLUS, le plus grave en tête, le reste replié en « +N » : c'est la
+ * règle des pastilles de la charte, appliquée à un cas qu'elle décrit. L'API
+ * rend tout ; l'écran décide de ce qu'il montre.
+ *
+ * Il se charge À PART du programme, et une panne de sa lecture ne casse pas la
+ * page : un bandeau absent se lit comme une édition sans incident, ce qui est le
+ * cas normal.
  */
 
 definePageMeta({ layout: 'public' })
@@ -64,11 +79,52 @@ const { data, status, error, refresh } = await useAsyncData('programme-page', as
   return { editions, series, edition, programme: { schedule, days, rooms } satisfies ProgrammeData }
 })
 
+/**
+ * Les messages actifs de l'édition ouverte. Chargés à part, et **sans casser la
+ * page s'ils manquent** : le programme reste le sujet de l'écran.
+ */
+const { data: incidents } = await useAsyncData(
+  () => `programme-incidents-${data.value?.edition.id ?? 'aucune'}`,
+  async () => {
+    const eventId = data.value?.edition.id
+    if (!eventId) return []
+    return api.incidents.forEvent(eventId).catch(() => [])
+  },
+  { watch: [data], default: () => [] },
+)
+
+/** Trois au plus — la règle des pastilles de la charte. */
+const AFFICHES = 3
+const bandeaux = computed(() => (incidents.value ?? []).slice(0, AFFICHES))
+const replies = computed(() => Math.max((incidents.value ?? []).length - AFFICHES, 0))
+
 useHead(() => ({ title: t('programme.title') }))
 </script>
 
 <template>
   <div class="flex flex-col gap-8">
+    <!-- Avant le titre : ce qui ne se passe pas comme prévu se lit d'abord. -->
+    <div v-if="bandeaux.length" class="flex flex-col gap-2">
+      <UiIncidentBanner
+        v-for="incident in bandeaux"
+        :key="incident.incident_id"
+        :severity="incident.severity"
+        :title="incident.title"
+        :message="incident.message"
+        :scope="incident.scope"
+        :action-url="incident.action_url"
+        :target-label="incident.target_label"
+        :dismissible="incident.is_dismissible"
+        :display-until="incident.display_until"
+        :timezone="data?.edition.timezone"
+        :zone-label="data?.edition.city ?? undefined"
+        standalone
+      />
+      <p v-if="replies" class="text-sm text-text-muted">
+        {{ t('programme.incidents.more', { count: replies }) }}
+      </p>
+    </div>
+
     <header>
       <h1 class="font-display text-3xl">{{ t('programme.title') }}</h1>
       <p class="mt-2 max-w-(--measure) text-text-muted">{{ t('programme.description') }}</p>

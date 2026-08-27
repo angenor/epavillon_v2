@@ -150,6 +150,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `AdminDashboard` — tout l'écran d'une édition **en une réponse et un instant** : l'édition et son fuseau, son appel, les cinq familles d'alerte, les chiffres, la santé opérationnelle et les messages d'incident actifs.
+         *
+         *     **Une transaction de lecture, un instant** : `now()` y est constant, et les dix lectures parlent donc du même. C'est la réponse aux « neuf instants de mesure » que le contrat du site interdit.
+         *
+         *     **Gardée par le périmètre ET par `analytics.dashboard.read` sur l'édition demandée.** Le rôle `programmer` la détient depuis le 27/08 : il lit déjà, écran par écran, tout ce que le tableau de bord agrège — la lui refuser lui retirerait un raccourci, pas un droit.
+         *
+         *     **Le tableau de bord n'a pas d'issue de contrat** : il s'ouvre, ou il se refuse. Périmètre vide ou permission absente → 403 ; édition hors périmètre → 404, **jamais 403**.
+         */
+        get: operations["admin_tableau_de_bord"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/email-suppressions": {
         parameters: {
             query?: never;
@@ -325,6 +350,117 @@ export interface paths {
         put: operations["admin_journee_habiller"];
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/incidents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `IncidentListScreen` — tout l'écran d'une édition **en une réponse et un instant** : l'en-tête (titre, fuseau, ville), les lignes rendues par `live.event_incidents()` **dans l'ordre où elle les rend** (actifs, programmés, brouillons, historique ; gravité décroissante à état égal), le poste de direct, les compteurs par état, les natures d'incident et les cibles visables.
+         *
+         *     **Aucune permission n'est exigée** : lire les messages d'une édition qu'on administre n'est pas un privilège — un bandeau publié est de toute façon public. Ce qui est gardé, c'est le périmètre.
+         *
+         *     **Les cinq portées remontent**, la portée `organization` comprise dès lors que l'organisation anime une activité de l'édition, et un message `global` apparaît sur **chaque** édition administrée : une équipe qui pilote un pavillon doit savoir qu'un bandeau d'entretien le couvre.
+         */
+        get: operations["admin_incidents_lister"];
+        put?: never;
+        /**
+         * @description `CreateIncidentPayload` → `IncidentWriteResult`, **toujours en 200**. Rédiger, et publier dans le même geste si `publish` est vrai.
+         *
+         *     **`granted` n'existe pas** : le site l'envoyait pour rejouer l'autorisation sur des données d'exemple, et un client qui déclare ses droits n'est pas un contrôle d'accès. **`from_event_id` reste** — c'est l'édition depuis laquelle on agit, donc l'ancre du contrôle de périmètre.
+         *
+         *     **Les dix issues sortent en 200**, `forbidden` et `not_found` compris : le contrat du site les nomme et l'écran les traduit champ par champ. L'autorisation se vérifie sur la **portée visée** — l'édition de la cible, ou la portée globale pour un message `global`.
+         */
+        post: operations["admin_incidents_creer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/incidents/overrun-template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `OverrunTemplate` — de quoi pré-remplir le formulaire depuis le raccourci « Signaler un débordement » du planificateur, sans une saisie pendant que la salle attend : l'activité, son titre **résolu**, son créneau et son édition.
+         *
+         *     **`title` est ici résolu et non brut**, à la différence du reste : c'est une valeur de pré-remplissage de champ, que le site pose telle quelle. Le site lit cette route par `callOrNull` — un 404 y est une réponse, pas une panne.
+         *
+         *     **Cette route est déclarée AVANT `/admin/incidents/{id}`**, toutes deux étant en `GET`.
+         */
+        get: operations["admin_incidents_gabarit_debordement"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/incidents/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `ManagedIncident` — un message, pour le relire et le corriger.
+         *
+         *     **L'édition d'un message se CALCULE, elle ne se lit pas** : pour les portées `session`, `event_day` et `organization`, la ligne ne porte aucune colonne d'édition. La route retrouve donc le message **par `live.event_incidents()`** sur les éditions du périmètre, ce qui rend le contrôle et la lecture indissociables.
+         *
+         *     Le site la lit par `callOrNull`.
+         */
+        get: operations["admin_incidents_relire"];
+        /**
+         * @description `UpdateIncidentPayload` → `IncidentWriteResult`. Corriger.
+         *
+         *     **La portée peut changer, et l'autorisation se vérifie sur celle d'ARRIVÉE** : déplacer un message d'une édition vers la portée globale exige la permission globale.
+         *
+         *     **Republier efface la dépublication** — instant, auteur, motif —, exactement comme le fait `live.publish_incident()`. Le comportement n'est pas recomposé : la fonction est appelée.
+         */
+        put: operations["admin_incidents_corriger"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/incidents/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `IncidentWriteResult` (`published`). Publier un brouillon depuis la ligne de liste, ou rétablir un message retiré.
+         *
+         *     Appelle `live.publish_incident(id)` : la fonction horodate, attribue depuis la session, efface le retrait **et émet** `live.incident.published`. **Le service n'émet rien** — un `emit_event` ajouté ici doublerait chaque ligne d'outbox.
+         */
+        post: operations["admin_incidents_publier"];
+        /**
+         * @description `UnpublishIncidentPayload` → `IncidentWriteResult` (`unpublished`). Retirer un bandeau, avec un motif. **Ce n'est pas une suppression** : la ligne demeure — instant, auteur, motif — et reparaît à l'historique de la liste.
+         *
+         *     **Un `DELETE` porteur d'un corps, et c'est délibéré** : le chemin est celui de la publication, le verbe dit qu'on la retire, et le motif accompagne le geste.
+         *
+         *     Appelle `live.unpublish_incident(id, motif)`, qui lève sur un message jamais publié ; le service **traduit** la levée en issue `not_published` plutôt que de rejouer la condition en amont.
+         */
+        delete: operations["admin_incidents_depublier"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1637,6 +1773,29 @@ export interface paths {
          * @description `PublicEditionRow[]` — la ligne de `event.v_public_editions`, et **non** `EventEdition`, la ligne nue de la table : elle porte en plus la série et le pays résolus, les trois déclinaisons d'image, l'état temporel, l'appel résolu et le volume du programme publié. Les éditions publiques, décroissantes sur la date de début. **Le critère de publicité vient du modèle** : ni brouillon, ni annulée. Il n'est recopié dans aucun écran, ce qui referme l'écart n° 26 — une édition **annoncée** dont le programme n'est pas publié en fait partie, car sa page existe et c'est là qu'on dépose un dossier. Chaque ligne porte sa série et son pays résolus, ses **trois déclinaisons d'image**, son état temporel, son appel résolu et le volume de son programme publié. **Ce chemin est déclaré AVANT `/events/{slug}`** : sans cela, `public` serait lu comme une adresse d'URL.
          */
         get: operations["editions_publiques"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/events/{event_id}/incidents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `ActiveIncident[]` — les messages actifs de l'édition, **le plus grave en tête**, dans l'ordre où `live.active_incidents_for_event()` les rend. Les cinq portées y remontent : édition, journée, activité, organisation **qui y anime**, et les messages globaux.
+         *
+         *     **Chaque ligne porte `target_label` déjà résolu** par le modèle — « Atelier de négociation », « Journée finance », le nom légal d'une organisation : le bandeau nomme son sujet, et un message de portée `session` reste lisible sur une page qui parle de trente activités.
+         *
+         *     **Aucune garde**, et **jamais 404** : une édition inconnue rend une liste vide. Le site n'en affiche que trois, le reste replié en « +N » — c'est la règle des pastilles de la charte ; l'API, elle, rend tout.
+         */
+        get: operations["evenement_incidents_actifs"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3640,13 +3799,16 @@ export interface components {
          *     - `ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN` (422) — Ce modèle utilise une variable que ce type de message ne fournit pas.
          *     - `ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN` (404) — Cette révision de modèle n'existe pas.
          *     - `ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN` (422) — Ce type de notification n'existe pas ou n'est plus actif.
+         *     - `LIVE_INCIDENT_SCOPE_TARGET_MISMATCH` (422) — La portée choisie et la cible renseignée ne correspondent pas : une portée vise exactement une cible, et la portée globale n'en vise aucune.
+         *     - `LIVE_INCIDENT_WINDOW_INVALID` (422) — La fin d'affichage doit être postérieure au début.
+         *     - `LIVE_INCIDENT_NOT_PUBLISHED` (422) — Ce message n'a jamais été publié : il n'y a rien à retirer.
          */
         ApiError: {
             /**
              * @description Code stable. Le renommer est un changement majeur.
              * @enum {string}
              */
-            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "INTERNAL" | "SERVICE_UNAVAILABLE" | "IDENTITY_SESSION_EXPIRED" | "IDENTITY_SESSION_REVOKED" | "IDENTITY_REFRESH_REUSED" | "IDENTITY_ORIGIN_REJECTED" | "IDENTITY_PASSWORD_TOO_WEAK" | "IDENTITY_EMAIL_ALREADY_USED" | "IDENTITY_ACCOUNT_ALREADY_EXISTS" | "IDENTITY_ROLE_WINDOW_INVALID" | "IDENTITY_ROLE_SCOPE_MISMATCH" | "IDENTITY_ROLE_REVOCATION_INVALID" | "IDENTITY_UNKNOWN_REFERENCE" | "IDENTITY_PRIVACY_WRONG_ACTION" | "ORG_NOT_MANAGER" | "ORG_MEMBERSHIP_IS_INVITATION" | "ORG_MEMBERSHIP_NOT_PENDING" | "ORG_LAST_MANAGER" | "ORG_MERGE_FIELD_NOT_ARBITRABLE" | "ORG_MERGE_GLOBAL_SCOPE_REQUIRED" | "ORG_MERGE_SAME_ORGANIZATION" | "ORG_DOMAIN_VERIFICATION_REQUIRED" | "ORG_NAME_IS_DERIVED" | "ORG_UNKNOWN_REFERENCE" | "ORG_INVITATION_NOT_YOURS" | "EVENT_GLOBAL_SCOPE_REQUIRED" | "EVENT_CRITERION_HAS_SCORES" | "EVENT_UNKNOWN_REFERENCE" | "PROPOSAL_NOT_EDITABLE" | "PROPOSAL_SPEAKER_IDENTITY_LOCKED" | "PROPOSAL_REVIEW_NOT_ASSIGNED" | "PROPOSAL_UNKNOWN_TERM" | "PROPOSAL_TEXT_TOO_LONG" | "PROPOSAL_UNKNOWN_REFERENCE" | "SESSION_DERIVED_FIELD" | "SESSION_UNKNOWN_REFERENCE" | "SESSION_TRACK_EVENT_MISMATCH" | "REGISTRATION_NOT_ACCEPTED" | "REGISTRATION_ANSWER_INVALID" | "REGISTRATION_CONSENT_REQUIRED" | "REGISTRATION_ACCOUNT_REQUIRED" | "REGISTRATION_LOCKED" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_MIME_NOT_ALLOWED" | "MEDIA_TOO_LARGE" | "MEDIA_ASPECT_RATIO" | "MEDIA_ROLE_NOT_DECLARED" | "MEDIA_ROLE_EXCLUSIVE" | "MEDIA_ASSET_NOT_SERVABLE" | "MEDIA_ALT_TEXT_REQUIRED" | "MEDIA_ASSET_IN_USE" | "MEDIA_UPLOAD_INCOMPLETE" | "MEDIA_STORAGE_UNAVAILABLE" | "ENGAGEMENT_REMINDER_OFFSETS_INVALID" | "ENGAGEMENT_REMINDER_SCOPE_INVALID" | "ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN" | "ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN" | "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN";
+            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "INTERNAL" | "SERVICE_UNAVAILABLE" | "IDENTITY_SESSION_EXPIRED" | "IDENTITY_SESSION_REVOKED" | "IDENTITY_REFRESH_REUSED" | "IDENTITY_ORIGIN_REJECTED" | "IDENTITY_PASSWORD_TOO_WEAK" | "IDENTITY_EMAIL_ALREADY_USED" | "IDENTITY_ACCOUNT_ALREADY_EXISTS" | "IDENTITY_ROLE_WINDOW_INVALID" | "IDENTITY_ROLE_SCOPE_MISMATCH" | "IDENTITY_ROLE_REVOCATION_INVALID" | "IDENTITY_UNKNOWN_REFERENCE" | "IDENTITY_PRIVACY_WRONG_ACTION" | "ORG_NOT_MANAGER" | "ORG_MEMBERSHIP_IS_INVITATION" | "ORG_MEMBERSHIP_NOT_PENDING" | "ORG_LAST_MANAGER" | "ORG_MERGE_FIELD_NOT_ARBITRABLE" | "ORG_MERGE_GLOBAL_SCOPE_REQUIRED" | "ORG_MERGE_SAME_ORGANIZATION" | "ORG_DOMAIN_VERIFICATION_REQUIRED" | "ORG_NAME_IS_DERIVED" | "ORG_UNKNOWN_REFERENCE" | "ORG_INVITATION_NOT_YOURS" | "EVENT_GLOBAL_SCOPE_REQUIRED" | "EVENT_CRITERION_HAS_SCORES" | "EVENT_UNKNOWN_REFERENCE" | "PROPOSAL_NOT_EDITABLE" | "PROPOSAL_SPEAKER_IDENTITY_LOCKED" | "PROPOSAL_REVIEW_NOT_ASSIGNED" | "PROPOSAL_UNKNOWN_TERM" | "PROPOSAL_TEXT_TOO_LONG" | "PROPOSAL_UNKNOWN_REFERENCE" | "SESSION_DERIVED_FIELD" | "SESSION_UNKNOWN_REFERENCE" | "SESSION_TRACK_EVENT_MISMATCH" | "REGISTRATION_NOT_ACCEPTED" | "REGISTRATION_ANSWER_INVALID" | "REGISTRATION_CONSENT_REQUIRED" | "REGISTRATION_ACCOUNT_REQUIRED" | "REGISTRATION_LOCKED" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_MIME_NOT_ALLOWED" | "MEDIA_TOO_LARGE" | "MEDIA_ASPECT_RATIO" | "MEDIA_ROLE_NOT_DECLARED" | "MEDIA_ROLE_EXCLUSIVE" | "MEDIA_ASSET_NOT_SERVABLE" | "MEDIA_ALT_TEXT_REQUIRED" | "MEDIA_ASSET_IN_USE" | "MEDIA_UPLOAD_INCOMPLETE" | "MEDIA_STORAGE_UNAVAILABLE" | "ENGAGEMENT_REMINDER_OFFSETS_INVALID" | "ENGAGEMENT_REMINDER_SCOPE_INVALID" | "ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN" | "ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN" | "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN" | "LIVE_INCIDENT_SCOPE_TARGET_MISMATCH" | "LIVE_INCIDENT_WINDOW_INVALID" | "LIVE_INCIDENT_NOT_PUBLISHED";
             /** @description Message français, affichable tel quel. */
             message: string;
             /** @description Champ fautif, quand le refus en désigne un. */
@@ -3737,6 +3899,15 @@ export interface components {
             link_path?: string | null;
             audience: components["schemas"]["Audience"];
         };
+        /**
+         * @description **`from_event_id` est le seul champ du corps qui ne soit pas une colonne** :
+         *     c'est l'édition **depuis laquelle** on agit, et donc l'ancre du contrôle de
+         *     périmètre.
+         */
+        CreateIncidentPayload: components["schemas"]["IncidentPayload"] & {
+            /** Format: uuid */
+            from_event_id: string;
+        };
         HealthIndicator: {
             code: string;
             label: string;
@@ -3749,6 +3920,35 @@ export interface components {
             critical_threshold: number;
             severity: string;
             detail: Record<string, never>;
+        };
+        /**
+         * @description Le corps commun aux deux écritures de contenu.
+         *
+         *     `publish` est **à part du reste** : enregistrer et publier sont deux actes
+         *     distincts en base — `live.publish_incident()` horodate, attribue et émet. Un
+         *     brouillon se relit avant de parler à toute une COP.
+         */
+        IncidentPayload: {
+            scope: string;
+            /** Format: uuid */
+            event_id?: string | null;
+            /** Format: uuid */
+            event_day_id?: string | null;
+            /** Format: uuid */
+            session_id?: string | null;
+            /** Format: uuid */
+            organization_id?: string | null;
+            incident_kind_code: string;
+            severity: string;
+            title?: unknown;
+            message: unknown;
+            action_url?: string | null;
+            is_dismissible: boolean;
+            /** Format: date-time */
+            display_from: string;
+            /** Format: date-time */
+            display_until?: string | null;
+            publish: boolean;
         };
         Invite: {
             email: string;
@@ -3992,6 +4192,26 @@ export interface components {
             subject: unknown;
             body_html: unknown;
             body_text?: unknown;
+        };
+        /**
+         * @description Le retrait, et son motif. **Ce n'est pas une suppression** : la ligne
+         *     demeure, avec son instant, son auteur et ce motif, et reparaît à
+         *     l'historique de la liste.
+         */
+        UnpublishIncidentPayload: {
+            /** Format: uuid */
+            incident_id?: string | null;
+            reason?: string | null;
+        };
+        /**
+         * @description Même corps, plus l'identifiant du message corrigé. Il est **redondant avec
+         *     le chemin** et le contrat du site le porte : c'est le chemin qui fait foi.
+         */
+        UpdateIncidentPayload: components["schemas"]["IncidentPayload"] & {
+            /** Format: uuid */
+            from_event_id: string;
+            /** Format: uuid */
+            incident_id?: string | null;
         };
         /**
          * @description Ce qu'une annonce déclare — `UploadDeclaration`.
@@ -4398,6 +4618,56 @@ export interface operations {
                 };
             };
             /** @description Canal inexistant **ou hors périmètre** — indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_tableau_de_bord: {
+        parameters: {
+            query: {
+                /** @description Édition mesurée */
+                event_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description AdminDashboard */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Périmètre d'administration vide, ou `analytics.dashboard.read` absente sur l'édition */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Édition inexistante **ou hors périmètre** — indiscernables */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4932,6 +5202,347 @@ export interface operations {
             };
             /** @description Journée inexistante **ou hors périmètre** — indiscernables */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_incidents_lister: {
+        parameters: {
+            query: {
+                /** @description Édition dont on veut l'écran */
+                event_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description IncidentListScreen */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Édition inexistante **ou hors périmètre** — indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_incidents_creer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateIncidentPayload"];
+            };
+        };
+        responses: {
+            /** @description IncidentWriteResult */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `from_event_id` inexistant **ou hors périmètre** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_incidents_gabarit_debordement: {
+        parameters: {
+            query: {
+                /** @description Activité qui déborde */
+                session_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OverrunTemplate */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Activité inexistante **ou hors périmètre** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_incidents_relire: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du message */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ManagedIncident */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Message inexistant **ou hors périmètre** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_incidents_corriger: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du message */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateIncidentPayload"];
+            };
+        };
+        responses: {
+            /** @description IncidentWriteResult */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description `from_event_id` inexistant **ou hors périmètre** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_incidents_publier: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du message */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description IncidentWriteResult */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Périmètre d'administration vide */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_incidents_depublier: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du message */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["UnpublishIncidentPayload"];
+            };
+        };
+        responses: {
+            /** @description IncidentWriteResult */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Périmètre d'administration vide */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7850,6 +8461,29 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description PublicEditionRow[] */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    evenement_incidents_actifs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Édition affichée */
+                event_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ActiveIncident[] */
             200: {
                 headers: {
                     [name: string]: unknown;

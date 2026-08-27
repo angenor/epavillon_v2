@@ -1516,3 +1516,26 @@ ORDER BY
 
 COMMENT ON VIEW analytics.v_operational_health IS
     'Santé opérationnelle temps réel : outbox, file de travaux, rappels, synchronisation visio, délivrabilité, partitions et fraîcheur analytique. Une ligne par indicateur, avec ses seuils.';
+
+-- -----------------------------------------------------------------------------
+-- 12. Amorçage : les réglages du module
+--
+-- UN MODULE DÉCLARE SES PROPRES RÉGLAGES, et non `900_seed.sql`. Le fichier de
+-- semis porte une mise en garde datée : deux réglages du module média y avaient
+-- été posés avec d'autres valeurs que celles de `050_media.sql`, et comme le
+-- semis se charge APRÈS, son `ON CONFLICT DO NOTHING` les écartait en silence.
+--
+-- POURQUOI CE SEUIL EXISTE. Le tableau de bord (écran A6) signale les dossiers
+-- déposés que personne n'a encore évalués. Tous ne sont pas une alerte : un
+-- dossier arrivé la veille d'un appel qui ferme dans trois mois est le
+-- fonctionnement normal. Il n'en devient une qu'à l'approche de l'échéance qui
+-- fait foi. Ce nombre de jours est la limite — en deçà, la ligne s'allume.
+--
+-- IL EST EN BASE ET NON DANS LE CODE (écart n° 43, ouvert le 17/08) : c'est une
+-- règle d'exploitation que l'IFDD ajuste d'une COP à l'autre, sans
+-- redéploiement. Écrit dans le code du site, il aurait été une dette immédiate
+-- au sens du principe I — et invisible de qui pilote l'édition.
+INSERT INTO platform.settings (key, value, description) VALUES
+    ('analytics.review_alert_days', '21',
+     'Jours avant l''échéance applicable à partir desquels un dossier sans évaluation devient une alerte du tableau de bord.')
+ON CONFLICT (key) DO NOTHING;

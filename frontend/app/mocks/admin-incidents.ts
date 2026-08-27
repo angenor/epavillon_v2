@@ -32,13 +32,14 @@ import type {
   LiveDesk,
   LiveDeskSession,
   ManagedIncident,
+  OverrunTemplate,
   UnpublishIncidentPayload,
   UpdateIncidentPayload,
 } from '~/types/admin-incidents'
 import type { TemporalState } from '~/types/views'
 import type { EventIncident } from '~/types/admin-dashboard'
 import type { EffectivePermission } from '~/types/identity'
-import type { Incident } from '~/types/live'
+import type { ActiveIncident, Incident } from '~/types/live'
 import type { Uuid } from '~/types/shared'
 import { hasPermission } from '~/utils/permissions'
 import { resolveI18nText } from '~/utils/i18n-text'
@@ -124,6 +125,33 @@ export function activeIncidentsForEvent(eventId: string, at: number = Date.now()
       target_label: incident.target_label,
       display_from: incident.display_from,
       display_until: incident.display_until,
+    }))
+}
+
+/**
+ * Ce que le BANDEAU PUBLIC lit — `ActiveIncident[]`, la même part active, mais
+ * avec les colonnes que le visiteur voit : le lien d'action et le caractère
+ * refermable, que le tableau de bord n'affiche pas.
+ *
+ * Une édition inconnue rend une liste vide, **jamais une erreur** : cette
+ * lecture ne dit pas si une édition existe.
+ */
+export function publicIncidents(eventId: string, at: number = Date.now()): ActiveIncident[] {
+  return eventIncidents(eventId, at)
+    .filter((incident) => incident.state === 'active')
+    .map((incident) => ({
+      incident_id: incident.incident_id,
+      scope: incident.scope,
+      severity: incident.severity,
+      kind_code: incident.kind_code,
+      title: incident.title,
+      message: incident.message,
+      action_url: incident.action_url,
+      is_dismissible: incident.is_dismissible,
+      display_from: incident.display_from,
+      display_until: incident.display_until,
+      target_id: incident.target_id,
+      target_label: incident.target_label,
     }))
 }
 
@@ -588,13 +616,7 @@ export function unpublishIncident(
 }
 
 /** Le brouillon que le raccourci « Signaler un débordement » pré-remplit. */
-export function overrunTemplate(sessionId: string): {
-  session_id: string
-  title: string
-  starts_at: string
-  ends_at: string
-  event_id: string
-} | null {
+export function overrunTemplate(sessionId: string): OverrunTemplate | null {
   const session = allSessions.find((s) => s.id === sessionId)
   if (!session) return null
 

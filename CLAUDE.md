@@ -356,11 +356,14 @@ conditions, dont l'oubli produit un refus que rien n'explique : **ouvrir le site
 d'`APP_PUBLIC_URL`** (seule origine autorisée) et **garder le même hôte des deux côtés** — la portée
 d'un cookie ignore le port, pas l'hôte.
 
-**Trois écrans lisent encore des données d'exemple, API branchée ou non, et le disent** : les messages
-d'incident, l'accueil public avec sa vitrine, et le tableau de bord du back-office. Leurs données
-existent en base — schémas `live`, `content`, `analytics` — mais aucun crate Rust ne les sert. Ils
-passent par `pending()`, et `make check-api-contract` les compte comme **dette nommée**, jamais comme
-faute.
+**Plus aucun écran ne lit de données d'exemple quand l'API est branchée**, depuis le 27/08 : les trois
+derniers — les messages d'incident, l'accueil public avec sa vitrine, et le tableau de bord — sont
+servis par les crates `content`, `live` et `analytics`. `make check-api-contract` compte **zéro route
+en attente**.
+
+**Les jeux d'exemple de `frontend/app/mocks/` restent**, et c'est désormais leur seule raison d'être :
+les tests, et le travail hors ligne. Sans `NUXT_PUBLIC_API_BASE`, tout le site fonctionne encore sur
+eux. La primitive `pending()` reste elle aussi, pour le prochain écran livré avant son API.
 
 Le jalon en cours ne contient que ce qui permet de **lancer l'appel à propositions de la COP31** : authentification, organisations, événements, appel, soumission, espace organisation, back-office.
 

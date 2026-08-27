@@ -65,6 +65,15 @@ interface Props {
   message: I18nText
   /** Portée déclarée, affichée en repère (« toute la plateforme », « cette activité »). */
   scope?: IncidentScope
+  /**
+   * SUJET NOMMÉ — « Atelier de négociation », « Journée finance », le nom légal
+   * d'une organisation. Résolu par le modèle, jamais recomposé ici.
+   *
+   * Sans lui, « la diffusion est interrompue » ne dit pas de QUOI il s'agit sur
+   * une page qui parle de trente activités. La portée seule ne suffit pas :
+   * « cette activité » ne nomme rien quand le bandeau coiffe tout un programme.
+   */
+  targetLabel?: string | null
   actionUrl?: Url | null
   /** Libellé du lien d'action ; à défaut, un libellé générique. */
   actionLabel?: string
@@ -148,6 +157,13 @@ function dismiss(): void {
         </span>
         <span v-if="props.scope" class="text-xs" :class="isSolid ? '' : 'text-text-subtle'">
           {{ t(`incident-banner.scope.${props.scope}`) }}
+        </span>
+        <span
+          v-if="props.targetLabel"
+          class="min-w-0 truncate text-xs font-medium"
+          :class="isSolid ? '' : 'text-text'"
+        >
+          {{ props.targetLabel }}
         </span>
       </div>
 

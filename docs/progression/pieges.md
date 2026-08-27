@@ -94,3 +94,31 @@ engendré de onze mille lignes. Le binaire d'export refuse maintenant le documen
 **`#[serde(flatten)]` sur une struct qui partage un nom de champ émet la clé DEUX FOIS.**
 Le JSON reste lisible — la dernière valeur écrite l'emporte — donc cela « marche », par accident. Un
 changement d'ordre de champs suffit à inverser le résultat, en silence.
+
+---
+
+## Le registre de modules du générateur d'OpenAPI est écrit à la main (27/08)
+
+`cargo run -p api --bin openapi` **ne consulte pas la base** — c'est voulu : engendrer le client depuis
+une base de développement retirerait du contrat les chemins d'un module éteint ce jour-là. Il se sert
+donc de `ModuleRegistry::complet()`, une liste **écrite à la main** dans `crates/api/src/modules.rs`.
+
+**Un module créé sans l'y inscrire ne figure pas au contrat**, et le symptôme accuse le mauvais côté :
+`check-api-contract` reproche au site d'appeler des chemins absents du contrat, alors que le défaut est
+dans le générateur. Constaté en livrant B9, sur les neuf routes des deux nouveaux crates.
+
+C'est le **seul endroit du dépôt** où la liste des modules est écrite à la main : partout ailleurs elle
+vient de `platform.modules`.
+
+---
+
+## Une écriture concurrente sur une fonction qui lève invalide la transaction (27/08)
+
+`live.unpublish_incident()` lève `no_data_found` sur un message jamais publié, et le service traduit
+cette levée en issue de contrat plutôt que de rejouer la condition en amont — la règle vit à un seul
+endroit.
+
+**Mais la transaction est alors invalidée**, et tout ce qu'on y tenterait ensuite échouerait sur
+« current transaction is aborted ». Elle est donc abandonnée avant de composer la réponse. C'est le
+même piège que partout où l'on traduit une levée de fonction : le refus se lit **après** avoir renoncé
+à la transaction, jamais dedans.

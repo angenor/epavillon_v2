@@ -94,6 +94,12 @@ pub fn document(modules: &ModuleRegistry) -> Document {
     if modules.is_mounted("content") {
         doc.merge(content::routes::openapi::ContentApi::openapi());
     }
+    if modules.is_mounted("live") {
+        doc.merge(live::routes::openapi::LiveApi::openapi());
+    }
+    if modules.is_mounted("analytics") {
+        doc.merge(analytics::routes::openapi::AnalyticsApi::openapi());
+    }
 
     // Le catalogue complet des codes vient du noyau, par le module qui sait le
     // rendre. Il est reposé APRÈS la fusion : `merge` garde le schéma déjà

@@ -272,6 +272,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "analytics"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "async-trait",
+ "contracts",
+ "figment",
+ "kernel",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "time",
+ "tokio",
+ "tracing",
+ "utoipa",
+ "uuid",
+]
+
+[[package]]
 name = "anyhow"
 version = "1.0.104"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -282,6 +301,7 @@ name = "api"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "analytics",
  "content",
  "dotenvy",
  "engagement",
@@ -289,6 +309,7 @@ dependencies = [
  "futures-util",
  "identity",
  "kernel",
+ "live",
  "media",
  "org",
  "programme",
@@ -977,6 +998,7 @@ dependencies = [
  "atomic",
  "pear",
  "serde",
+ "serde_json",
  "uncased",
  "version_check",
 ]
@@ -1705,6 +1727,23 @@ name = "litemap"
 version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "47d9d19d1d6efa0109d2f65ff4c85cddd50bd572e5a00127ab10987290bcefae"
+
+[[package]]
+name = "live"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "contracts",
+ "kernel",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "time",
+ "tokio",
+ "tracing",
+ "utoipa",
+ "uuid",
+]
 
 [[package]]
 name = "local-channel"
@@ -3730,6 +3769,7 @@ checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
 name = "worker"
 version = "0.1.0"
 dependencies = [
+ "analytics",
  "async-trait",
  "dotenvy",
  "engagement",

@@ -87,3 +87,55 @@ dit à quel titre la personne a siégé.
 **Appliquée à chaud sur la base de développement** (`ALTER TABLE`), et non par un rechargement : celui-ci
 aurait détruit le seul compte capable de se connecter. Le chargement de zéro a été vérifié sur une base
 jetable — 17 schémas, 159 tables, contrainte comprise.
+
+---
+
+## 27 août 2026 — `130_analytics.sql` et `030_identity.sql`
+
+**Deux lignes de données, aucune structure.** Ni table, ni colonne, ni type, ni fonction, ni index :
+`platform.cross_module_fk_report` reste vide sans qu'on y touche.
+
+### 1. Le seuil d'urgence du tableau de bord
+
+```sql
+INSERT INTO platform.settings (key, value, description) VALUES
+    ('analytics.review_alert_days', '21',
+     'Jours avant l''échéance applicable à partir desquels un dossier sans évaluation devient une alerte du tableau de bord.')
+ON CONFLICT (key) DO NOTHING;
+```
+
+Ferme l'**écart n° 43**, ouvert le 17/08 : le seuil de vingt et un jours était écrit dans le code du
+site, ce que le principe I qualifie de « dette immédiate ». C'est une règle d'exploitation que l'IFDD
+ajuste d'une COP à l'autre — un test change le seuil en base et voit le contenu de la famille d'alerte
+changer, **sans redéploiement**.
+
+**Déclaré par `130_analytics.sql` et non par `900_seed.sql`**, et ce n'est pas indifférent : le fichier
+de semis porte une mise en garde datée — deux réglages du module média y avaient été posés avec d'autres
+valeurs que celles de `050_media.sql`, et comme le semis se charge **après**, son `ON CONFLICT DO
+NOTHING` les écartait en silence. Un module déclare ses propres réglages.
+
+*Alternative écartée* : une colonne sur `calls_for_proposals`. Ce n'est pas une propriété de l'appel
+mais un réglage d'affichage ; il faudrait le renseigner douze fois pour une valeur que personne ne veut
+faire varier, et il resterait vide sur les appels déjà créés — donc à replier sur une constante qu'il
+faudrait bien écrire quelque part.
+
+### 2. L'accès du programmateur au tableau de bord
+
+```sql
+('programmer', 'analytics.dashboard.read'),
+```
+
+**Ce n'est pas une élévation, c'est le contraire.** Un programmateur lit déjà, écran par écran et pour
+sa seule édition, tout ce que le tableau de bord agrège : les dossiers
+(`programme.proposal.read_all`), le calendrier et ses conflits (`programme.session.schedule`), les
+messages d'incident (`live.incident.publish`). L'écran A6 lui donne la même matière en une page.
+
+Sans cette ligne, **le compte qui a servi à vérifier la règle métier n° 8 sur cet écran le 17/08 en
+serait refusé** — et le défaut ne se serait vu qu'en se connectant avec un tel compte. La portée reste
+celle de l'attribution : un compte détaché sur la COP31 ne détient cette permission que sur
+`event:COP31`, et `has_permission()` refuse tout ce qui sort de là.
+
+**Conséquence d'exploitation** : `down -v` était obligatoire avant de compiler. Le schéma n'est chargé
+qu'au **premier** démarrage du conteneur ; sans destruction du volume, la base garde l'ancien semis
+sans le dire, et le test du seuil serait passé sur la valeur de repli — au vert, pour une mauvaise
+raison.

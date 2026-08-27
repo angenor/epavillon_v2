@@ -60,6 +60,7 @@ import type {
   OrganizationSearchQuery,
 } from '~/types/organization-join'
 import type { AdminDashboard } from '~/types/admin-dashboard'
+import type { ActiveIncident } from '~/types/live'
 import type { RoleAssignmentView } from '~/types/admin-users'
 import type { ResolvedFeatureFlag } from '~/types/platform'
 import type {
@@ -202,16 +203,16 @@ export function useApi() {
   /**
    * Un écran dont l'API N'EXISTE PAS ENCORE.
    *
-   * Trois écrans du jalon sont dans ce cas : les messages d'incident, l'accueil
-   * public et sa vitrine administrable. Leurs données vivent bien en base — dans
-   * les schémas `live` et `content` — mais aucun crate Rust ne les sert à ce
-   * jour. Les faire appeler leur route produirait un 404 : un écran livré et
-   * vérifié se mettrait à afficher une panne le jour où l'API est branchée.
+   * **AUCUN ÉCRAN N'EST PLUS DANS CE CAS depuis le 27/08.** Les trois derniers —
+   * les messages d'incident, l'accueil et sa vitrine, le tableau de bord —
+   * lisent la plateforme réelle. La primitive RESTE, et c'est délibéré : le
+   * prochain écran livré avant son API en aura besoin, et la réécrire alors
+   * coûterait plus cher que de la garder.
    *
-   * Ils continuent donc de lire les données simulées, MÊME quand l'API est
-   * configurée, et ils le DISENT — `usesMockData` allume un bandeau sur l'écran
-   * concerné. Le faux-semblant serait de servir ces données sans le signaler ;
-   * l'écran cassé serait de les réclamer à une API qui ne les a pas.
+   * Ce qu'elle fait quand elle sert : l'écran continue de lire les données
+   * simulées, MÊME quand l'API est configurée, et il le DIT — `usesMockData`
+   * allume un bandeau. Le faux-semblant serait de servir ces données sans le
+   * signaler ; l'écran cassé serait de les réclamer à une API qui ne les a pas.
    *
    * Le chemin est passé quand même : il documente la route attendue, et
    * `scripts/check-api-contract.mjs` s'en sert pour lister la dette au lieu de la
@@ -803,6 +804,25 @@ export function useApi() {
     adminIncidents: createAdminIncidentsApi(deps),
 
     // -----------------------------------------------------------------------
+    // Messages d'incident — la part PUBLIQUE (B9)
+    //
+    // Aucune garde : un bandeau d'incident est public par nature, et le
+    // protéger reviendrait à protéger ce qui est précisément fait pour être vu.
+    // -----------------------------------------------------------------------
+    incidents: {
+      /**
+       * LES MESSAGES ACTIFS D'UNE ÉDITION, le plus grave en tête.
+       *
+       * `call` et non `callOrNull` : une édition inconnue rend une **liste
+       * vide**, jamais 404 — cette route ne dit pas si une édition existe, et un
+       * bandeau absent se lit exactement comme une édition sans incident, ce qui
+       * est le cas normal.
+       */
+      forEvent: (eventId: Uuid): Promise<ActiveIncident[]> =>
+        call(`/events/${eventId}/incidents`, (m) => m.publicIncidents(eventId)),
+    },
+
+    // -----------------------------------------------------------------------
     // Espace organisation (A5)
     //
     // TROIS LECTURES ET TROIS ÉCRITURES, et la ligne de partage est toujours la
@@ -837,13 +857,17 @@ export function useApi() {
     // -----------------------------------------------------------------------
     admin: {
       /**
-       * EN ATTENTE D'API — aucun crate ne porte le schéma `analytics`, dont les
-       * cinq projections composent cet écran. Il lit donc des exemples, et le
-       * dit : voir `pending()` plus haut.
+       * TOUT L'ÉCRAN EN UNE RÉPONSE ET UN INSTANT — le crate `analytics` la sert
+       * depuis le 27/08.
+       *
+       * `callOrNull` et non `call` : une édition sans aucune donnée est une
+       * réponse, pas une panne.
        */
       dashboard: (eventId: Uuid, scope: AdministeredEvents): Promise<AdminDashboard | null> => {
         assertEventInScope(eventId, scope)
-        return pending('/admin/dashboard', (m) => m.adminDashboard(eventId))
+        return callOrNull('/admin/dashboard', (m) => m.adminDashboard(eventId), {
+          event_id: eventId,
+        })
       },
 
       /**

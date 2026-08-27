@@ -18,6 +18,8 @@ programme.workspace = true
 media.workspace = true
 engagement.workspace = true
 content.workspace = true
+live.workspace = true
+analytics.workspace = true
 
 actix-web.workspace = true
 dotenvy.workspace = true

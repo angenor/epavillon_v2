@@ -102,6 +102,22 @@ pub fn build_app(
         portee = portee.configure(content::routes);
     }
 
+    // **`/admin/incidents` et `/events/{id}/incidents` sont des CHEMINS PLATS**,
+    // et il n'y a rien à composer plus bas pour eux. Aucun `web::scope` : le
+    // préfixe `/admin` est partagé avec quatre modules, et deux scopes du même
+    // préfixe ne se complètent pas — Actix retient le premier et rend 404 sur
+    // les routes du second. Quant à `/events`, le module `event` y dépose déjà à
+    // plat, et `/events/{slug}` porte un segment là où la lecture publique des
+    // messages d'incident en porte deux : les motifs ne se recouvrent pas.
+    if etat.modules.is_mounted("live") {
+        portee = portee.configure(live::routes);
+        portee = portee.configure(live::event_routes);
+    }
+    // Une seule route, plate elle aussi.
+    if etat.modules.is_mounted("analytics") {
+        portee = portee.configure(analytics::routes);
+    }
+
     // **Le scope `/people` est composé ici, et une seule fois.** Trois modules y
     // déposent des routes depuis B4 — l'identité pour les personnes, les
     // organisations pour leurs adhésions, les propositions pour la recherche
@@ -201,6 +217,8 @@ pub fn build_app(
         .app_data(web::Data::new(etat.media.clone()))
         .app_data(web::Data::new(etat.engagement.clone()))
         .app_data(web::Data::new(etat.content.clone()))
+        .app_data(web::Data::new(etat.live.clone()))
+        .app_data(web::Data::new(etat.analytics.clone()))
         .app_data(web::Data::from(etat.identity.token_codec()))
         .app_data(web::Data::new(etat.clone()))
         .app_data(corps_json())

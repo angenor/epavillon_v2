@@ -14,6 +14,8 @@ members = [
     "crates/modules/media",
     "crates/modules/engagement",
     "crates/modules/content",
+    "crates/modules/live",
+    "crates/modules/analytics",
     "crates/api",
     "crates/worker",
 ]
@@ -33,6 +35,8 @@ programme = { path = "crates/modules/programme" }
 media = { path = "crates/modules/media" }
 engagement = { path = "crates/modules/engagement" }
 content = { path = "crates/modules/content" }
+live = { path = "crates/modules/live" }
+analytics = { path = "crates/modules/analytics" }
 
 actix-web = "4.14"
 # Le dépôt de fichier est la SEULE route de l'API qui ne parle pas JSON (B6, R6).

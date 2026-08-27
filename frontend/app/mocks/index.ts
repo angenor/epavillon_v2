@@ -217,6 +217,7 @@ export {
   incidentById,
   incidentListScreen,
   overrunTemplate,
+  publicIncidents,
   publishIncident,
   unpublishIncident,
   updateIncident,

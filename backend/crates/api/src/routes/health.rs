@@ -12,20 +12,21 @@
 //! qui mérite attention, et la redoubler en Rust ferait deux vérités.
 
 use actix_web::{web, HttpResponse};
-use kernel::auth::{PermissionSpec, RequiresAnyScope};
+use kernel::auth::RequiresAnyScope;
 use kernel::db::Db;
 use kernel::error::{ApiError, ErrorCode, Result};
 use serde::Serialize;
 use serde_json::Value;
 use time::OffsetDateTime;
 
-/// La permission appartient au module `analytics`, qui n'a pas de crate dans ce
-/// jalon. Elle est déclarée ici, auprès de la seule route qui la teste, plutôt
-/// que dans `identity` — l'y mettre laisserait croire qu'elle en relève.
-pub struct DashboardRead;
-impl PermissionSpec for DashboardRead {
-    const CODE: &'static str = "analytics.dashboard.read";
-}
+/// La permission est **déclarée par le module `analytics`**, à qui elle
+/// appartient, et réemployée ici.
+///
+/// **La route, elle, ne bouge pas.** Elle fait paire avec `/ready` — vivacité
+/// anonyme d'un côté, santé protégée de l'autre — et montée derrière
+/// `is_mounted("analytics")` elle disparaîtrait le jour où le module serait
+/// éteint, emportant la sonde d'exploitation avec lui.
+use analytics::authz::DashboardRead;
 
 pub fn configurer(cfg: &mut web::ServiceConfig) {
     cfg.route("/ready", web::get().to(ready))

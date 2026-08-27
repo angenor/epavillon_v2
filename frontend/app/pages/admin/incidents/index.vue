@@ -147,7 +147,6 @@ async function unpublish(reason: string | null): Promise<void> {
       { incident_id: target.incident_id, reason },
       eventId,
       auth.person?.id ?? null,
-      granted.value,
     )
 
     if (result.status !== 'unpublished') {
@@ -175,7 +174,6 @@ async function publish(row: ManagedIncident): Promise<void> {
       row.incident_id,
       eventId,
       auth.person?.id ?? null,
-      granted.value,
     )
 
     if (result.status !== 'published') {

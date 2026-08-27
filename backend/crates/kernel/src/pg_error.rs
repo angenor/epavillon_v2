@@ -246,6 +246,25 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
             ApiError::new(IdentityUnknownReference).field(champ)
         }
 
+        // --- Direct (B9) : les trois contraintes de `live.incidents` ----------
+        // Les deux premières sont doublées par une validation en amont, qui rend
+        // l'issue que le formulaire pose sur son champ. Elles ne remontent donc
+        // qu'à un refus qui ÉCHAPPE au chemin nominal — écriture concurrente,
+        // donnée reprise, chemin ajouté plus tard sans validation.
+        ("23514", "ck_incidents_scope_target") => {
+            ApiError::new(LiveIncidentScopeTargetMismatch).field("scope")
+        }
+        ("23514", "ck_incidents_window") => {
+            ApiError::new(LiveIncidentWindowInvalid).field("display_until")
+        }
+        // **CELLE-CI NE DOIT JAMAIS REMONTER**, et la déclarer est le seul
+        // moyen de s'apercevoir qu'elle l'a fait. `live.unpublish_incident()`
+        // exige déjà `published_at IS NOT NULL` : la contrainte est
+        // inatteignable par les fonctions du modèle. Si elle répond, c'est
+        // qu'une écriture les a contournées — même parti que les trois
+        // « défauts de code » ci-dessus.
+        ("23514", "ck_incidents_unpublish_shape") => ApiError::new(Conflict),
+
         // Conversion impossible : uuid, date ou valeur d'énumération mal formée.
         // Le domaine `platform.email` ne passe PAS par là — `citext` accepte
         // toute chaîne, et c'est son CHECK qui refuse, en 23514.

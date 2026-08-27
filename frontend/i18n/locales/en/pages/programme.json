@@ -56,5 +56,8 @@
   "noEdition": {
     "title": "No programme published yet",
     "description": "Conference and webinar-series programmes will appear here as soon as they are published."
+  },
+  "incidents": {
+    "more": "+{count} more message | +{count} more message | +{count} more messages"
   }
 }

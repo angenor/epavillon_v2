@@ -197,6 +197,28 @@ export interface IncidentListScreen {
   targets: IncidentTargets
 }
 
+/**
+ * Ce que le raccourci « Signaler un débordement » a besoin de savoir.
+ *
+ * NOMMER UNE FORME QUI EXISTAIT DÉJÀ, sans en changer un champ. Les données
+ * simulées la rendaient anonyme, et `check-api-contract` refuse toute forme
+ * annoncée par l'API sans définition dans `app/types/` : ce n'est donc pas une
+ * renégociation du contrat, c'est sa mise au net.
+ */
+export interface OverrunTemplate {
+  session_id: SessionId
+  /**
+   * Titre RÉSOLU — l'API le rend déjà dans la langue négociée, à la différence
+   * du reste de l'écran. C'est une valeur de pré-remplissage de champ, que le
+   * formulaire pose telle quelle ; la résoudre ici obligerait chaque appelant à
+   * choisir une langue pour une donnée que personne n'affiche.
+   */
+  title: string
+  starts_at: IsoDateTime
+  ends_at: IsoDateTime
+  event_id: EventId
+}
+
 // ---------------------------------------------------------------------------
 // Le formulaire
 // ---------------------------------------------------------------------------

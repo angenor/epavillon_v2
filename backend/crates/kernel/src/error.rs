@@ -210,6 +210,19 @@ codes! {
     EngagementNotificationTypeUnknown => "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN", StatusCode::UNPROCESSABLE_ENTITY,
         "Ce type de notification n'existe pas ou n'est plus actif.";
 
+    // --- Direct (B9) ----------------------------------------------------------
+    // Trois, et ils ne répondent JAMAIS sur le chemin nominal : le service
+    // valide en amont et rend l'issue que le contrat du site nomme, en 200.
+    // Ils existent pour le cas où un refus de la base échappe à ce chemin —
+    // écriture concurrente, donnée reprise, chemin ajouté plus tard qui
+    // oublierait la validation. Même parti qu'en B3 pour ses unicités.
+    LiveIncidentScopeTargetMismatch => "LIVE_INCIDENT_SCOPE_TARGET_MISMATCH", StatusCode::UNPROCESSABLE_ENTITY,
+        "La portée choisie et la cible renseignée ne correspondent pas : une portée vise exactement une cible, et la portée globale n'en vise aucune.";
+    LiveIncidentWindowInvalid => "LIVE_INCIDENT_WINDOW_INVALID", StatusCode::UNPROCESSABLE_ENTITY,
+        "La fin d'affichage doit être postérieure au début.";
+    LiveIncidentNotPublished => "LIVE_INCIDENT_NOT_PUBLISHED", StatusCode::UNPROCESSABLE_ENTITY,
+        "Ce message n'a jamais été publié : il n'y a rien à retirer.";
+
     // MAIL_RELAY_UNREACHABLE n'est PAS ici : il ne franchit aucune réponse
     // HTTP. Il vit dans `mail.rs`, d'où il part vers `platform.jobs.last_error`.
 }

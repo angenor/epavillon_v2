@@ -1,12 +1,13 @@
 /**
  * Ce que l'écran courant n'a PAS reçu de l'API.
  *
- * Trois écrans du jalon lisent encore des données simulées alors même que l'API
- * est configurée : les messages d'incident, l'accueil public et sa vitrine
- * administrable. Leurs données existent en base — schémas `live` et `content` —
- * mais aucun crate Rust ne les sert à ce jour.
+ * **AUCUN ÉCRAN DU JALON N'EST PLUS DANS CE CAS depuis le 27/08** : les trois
+ * derniers — les messages d'incident, l'accueil et sa vitrine, le tableau de
+ * bord — lisent la plateforme réelle. Ce compteur reste, pour le prochain écran
+ * livré avant son API : c'est lui qui rendra la dette visible sur l'écran de la
+ * personne qui l'utilise, et pas seulement dans un fichier de suivi.
  *
- * ILS LE DISENT. Servir des exemples sans le signaler ferait prendre une
+ * ILS LE DISENT ALORS. Servir des exemples sans le signaler ferait prendre une
  * programmation fictive pour la vraie, et c'est le genre de méprise qui se
  * découvre en réunion. Un bandeau l'annonce, et nomme les routes attendues :
  * la dette est visible sur l'écran de la personne qui l'utilise, pas seulement

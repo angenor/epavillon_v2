@@ -87,7 +87,6 @@ async function submit(payload: IncidentPayload): Promise<void> {
     const result = await api.adminIncidents.update(
       { ...payload, incident_id: incidentId.value, from_event_id: eventId },
       auth.person?.id ?? null,
-      granted.value,
     )
 
     if (result.status !== 'updated' && result.status !== 'published') {

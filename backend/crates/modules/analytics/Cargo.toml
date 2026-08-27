@@ -1,0 +1,39 @@
+[package]
+name = "analytics"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+# Principe II : un crate de module ne dépend QUE de kernel et de contracts.
+# Aucune ligne vers un autre crate de module, `live` compris — les incidents
+# actifs se lisent par `live.active_incidents_for_event()`, une fonction SQL.
+#
+# `async-trait` en plus : le gestionnaire de travail différé implémente
+# `kernel::jobs::JobHandler`, dont les méthodes sont asynchrones.
+[dependencies]
+kernel.workspace = true
+contracts.workspace = true
+
+actix-web.workspace = true
+async-trait.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+time.workspace = true
+tracing.workspace = true
+utoipa.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+kernel = { workspace = true, features = ["testing"] }
+# **Aucune dépendance nouvelle au workspace** : `figment` y est déclarée depuis
+# B1, c'est elle que `kernel::config` lit. Elle sert ici à composer une
+# configuration invalide sans toucher aux variables d'environnement du
+# processus — que `cargo test` partage entre tous ses tests parallèles.
+figment = { workspace = true, features = ["json"] }
+serde_json.workspace = true
+sqlx.workspace = true
+time.workspace = true
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+uuid.workspace = true
