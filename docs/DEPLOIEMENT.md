@@ -215,10 +215,7 @@ curl -i https://epavillonclimatique.francophonie.org/v2/api/health
 
 Trois choses qu'aucun test local ne peut dire, dans l'ordre où elles font mal :
 
-1. **Le premier courriel réel.** Un serveur de soumission n'accepte le plus souvent qu'un expéditeur
-   appartenant au compte authentifié : `SMTP_FROM` différent de `SMTP_USERNAME` donne un 550 au
-   premier message. Et l'hébergement mutualisé impose une limite horaire d'envoi, à connaître avant
-   le jour d'un appel à propositions.
+1. ~~Le premier courriel réel.~~ **Fait le 02/09** — voir le § 10.
 2. **Le téléversement d'un gros média.** La configuration accepte 200 Mio ; Apache mutualisé impose
    souvent moins, et le refus vient du relais, pas de l'application. Si ça bloque, le dépôt de médias
    — une opération du back-office, où l'adresse affichée n'a aucune importance — peut passer
@@ -316,9 +313,50 @@ Ce qui manque encore :
 1. **Le relais du cPanel institutionnel** — `ops/htaccess-v2.conf` à déposer en
    `public_html/v2/.htaccess`. Tant qu'il n'y est pas, la v2 n'est joignable que
    par son adresse de transport.
-2. **La boîte d'expédition** — `SMTP_USERNAME` et `SMTP_PASSWORD` sont vides.
-   `SMTP_FROM` est renseignée pour laisser l'API démarrer, mais **aucun courriel
-   ne part** : sans authentification, le serveur de soumission refuse le relais.
-   Les envois échouent, sont rejoués, puis meurent en file.
+2. ~~La boîte d'expédition.~~ **Faite le 02/09** : l'API envoie, éprouvé de bout
+   en bout — voir le § 10.
 3. **Aucune donnée métier** — ni édition, ni appel. À créer depuis le back-office,
    ou à semer.
+
+---
+
+## 10. Le courriel : qui a le droit d'écrire au nom du domaine (02/09)
+
+**L'expéditeur porte le SOUS-DOMAINE, et cette lettre-là décide de tout.**
+
+```
+francophonie.org                     v=spf1 include:spf.protection.outlook.com … -all
+_dmarc.francophonie.org              v=DMARC1; p=reject
+epavillonclimatique.francophonie.org v=spf1 +mx +a +ip4:173.209.54.36 -all
+```
+
+Le domaine parent est sur Microsoft 365 et n'autorise que ses propres relais ; le
+`-all` interdit tout le reste, et `p=reject` fait **refuser** — pas classer en
+indésirable — les messages qui échouent. Le serveur applicatif (`173.209.36.111`)
+n'y figure pas.
+
+Le sous-domaine, lui, publie son propre SPF, et son `+a` autorise l'adresse du
+domaine — c'est-à-dire `68.168.118.201`, le serveur qui héberge la plateforme.
+C'est une configuration délibérée : **seule la machine du site peut écrire en son
+nom**. D'où le montage retenu, et le seul qui fonctionne sans rien demander à
+l'OIF : l'API se connecte à ce serveur en client authentifié, et c'est lui qui
+émet.
+
+Une adresse en `@francophonie.org` serait donc rejetée, quelle que soit la
+machine qui l'envoie de notre côté. La faire accepter demanderait que l'OIF
+ajoute une IP à son SPF, ou fournisse un relais joignable depuis l'Internet —
+`courriels.francophonie.org`, transmis le 02/09, **n'existe pas dans le DNS
+public** : ni A, ni CNAME. C'est vraisemblablement un nom interne à leur réseau.
+
+**Le port 465 est fermé sur ce serveur**, malgré ce qu'affiche cPanel dans
+« Connect Devices » : la connexion est refusée. C'est 587 avec STARTTLS qui
+répond, ce que la configuration prend par défaut.
+
+Éprouvé de bout en bout le 02/09 : une inscription par `POST /auth/register` a
+posé son travail différé, le worker l'a pris, et `identity.send_verification_email`
+est passé en `succeeded` au premier essai. Ce n'est pas un envoi de test à côté
+de l'application — c'est l'application qui a écrit.
+
+Reste à connaître, et qui ne se mesure qu'à l'usage : **la limite horaire
+d'envoi** de l'hébergement mutualisé, à vérifier avant le jour d'un appel à
+propositions.
