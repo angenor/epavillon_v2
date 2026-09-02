@@ -63,13 +63,22 @@ impl GardedMailer {
         }
     }
 
-    /// Enveloppe l'expéditeur que la configuration a choisi.
-    pub fn envelopper(cfg: &kernel::config::MailConfig, db: Db) -> Arc<dyn Mailer> {
+    /// Enveloppe l'expéditeur que la configuration a choisi. Faillible depuis le
+    /// 01/09 : décrire un serveur de courriel, c'est pouvoir le décrire mal, et
+    /// le démarrage est le seul moment où ça se voit.
+    pub fn envelopper(
+        cfg: &kernel::config::MailConfig,
+        db: Db,
+    ) -> Result<Arc<dyn Mailer>, kernel::config::ConfigError> {
         let fournisseur = match cfg.transport {
             kernel::config::MailTransport::Relay => "laravel_relay",
             kernel::config::MailTransport::Smtp => "smtp",
         };
-        Arc::new(Self::new(kernel::mail::build(cfg), db, fournisseur))
+        Ok(Arc::new(Self::new(
+            kernel::mail::build(cfg)?,
+            db,
+            fournisseur,
+        )))
     }
 
     async fn est_supprimee(&self, adresse: &str) -> bool {

@@ -149,14 +149,14 @@ const currentYear = new Date().getFullYear()
       <template #brand>
         <NuxtLink :to="localePath('/')" class="flex shrink-0 items-center gap-3 no-underline">
           <img
-            src="/logos/ifdd-horizontal-gris.svg"
+            :src="assetUrl('/logos/ifdd-horizontal-gris.svg')"
             :alt="t('nav.site.owner')"
             class="h-9 w-auto dark:hidden"
             width="176"
             height="36"
           >
           <img
-            src="/logos/ifdd-horizontal-blanc.svg"
+            :src="assetUrl('/logos/ifdd-horizontal-blanc.svg')"
             :alt="t('nav.site.owner')"
             class="hidden h-9 w-auto dark:block"
             width="176"
@@ -232,7 +232,7 @@ const currentYear = new Date().getFullYear()
       <div class="mx-auto grid w-full max-w-[1280px] gap-8 px-4 py-10 sm:px-6 md:grid-cols-4">
         <div class="md:col-span-1">
           <img
-            src="/logos/oif-ifdd-blanc.svg"
+            :src="assetUrl('/logos/oif-ifdd-blanc.svg')"
             :alt="`${t('nav.site.parent')} — ${t('nav.site.owner')}`"
             class="h-14 w-auto"
             width="224"

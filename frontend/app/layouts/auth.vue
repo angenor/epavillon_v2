@@ -43,14 +43,14 @@ const legalLinks = [
     <header class="mx-auto flex w-full max-w-[64rem] items-center justify-between gap-4 px-4 py-5 sm:px-6">
       <NuxtLink :to="localePath('/')" class="flex shrink-0 items-center gap-3 no-underline">
         <img
-          src="/logos/ifdd-horizontal-gris.svg"
+          :src="assetUrl('/logos/ifdd-horizontal-gris.svg')"
           :alt="t('nav.site.owner')"
           class="h-8 w-auto dark:hidden"
           width="176"
           height="36"
         >
         <img
-          src="/logos/ifdd-horizontal-blanc.svg"
+          :src="assetUrl('/logos/ifdd-horizontal-blanc.svg')"
           :alt="t('nav.site.owner')"
           class="hidden h-8 w-auto dark:block"
           width="176"

@@ -27,3 +27,4 @@ uuid.workspace = true
 
 [dev-dependencies]
 kernel = { workspace = true, features = ["testing"] }
+figment.workspace = true

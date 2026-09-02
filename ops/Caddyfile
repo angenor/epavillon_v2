@@ -1,0 +1,53 @@
+# Point d'entrée du serveur applicatif — ePavillon v2
+#
+# Le nom qui figure ici n'est PAS celui que les visiteurs voient. Ils arrivent
+# sur `epavillonclimatique.francophonie.org/v2`, qu'Apache relaie jusqu'ici ;
+# `epavillon.mefali.com` n'est qu'une adresse de transport, jamais montrée.
+#
+# Elle existe pour une seule raison : **chiffrer le segment entre les deux
+# serveurs**. Relayer vers l'adresse IP en clair ferait traverser l'Internet
+# public aux cookies de session, sans que le navigateur — qui, lui, parle bien
+# en HTTPS — n'ait le moindre moyen de le signaler. Caddy obtient et renouvelle
+# le certificat tout seul, à condition que le nom résolve vers cette machine.
+
+{
+	# Sans elle, un certificat expiré ne prévient personne.
+	email {$ADMIN_EMAIL}
+}
+
+{$PUBLIC_HOSTNAME} {
+	encode zstd gzip
+
+	# L'API d'abord : le chemin le plus long gagne, et `/v2/api` doit être
+	# reconnu avant que `/v2/*` ne prenne tout.
+	#
+	# `strip_prefix` retire les deux segments que le routeur Rust ne connaît
+	# pas : ses routes sont montées sur `/api`, et le préfixe de cohabitation
+	# est une affaire d'hébergement, pas d'application. Le jour où la v2 passe à
+	# la racine, cette ligne devient `uri strip_prefix /api`... et rien d'autre
+	# ne bouge.
+	handle /v2/api/* {
+		uri strip_prefix /v2
+		reverse_proxy api:8080
+	}
+
+	# Le site, lui, GARDE le préfixe : Nuxt est construit avec
+	# `NUXT_APP_BASE_URL=/v2/` et attend ses propres URL préfixées.
+	handle /v2/* {
+		reverse_proxy front:3000
+	}
+
+	# Qui arrive à la racine de cette adresse de transport n'a rien à y faire.
+	handle {
+		redir {$PUBLIC_BASE_URL} temporary
+	}
+
+	# Le relais d'Apache pose déjà `X-Forwarded-For` ; Caddy y ajoute le sien.
+	# C'est l'API qui tranche, par `TRUSTED_PROXIES` — sans quoi toutes les
+	# adresses enregistrées dans les sessions et l'audit seraient celle du
+	# relais, et l'historique de connexion ne vaudrait rien.
+	log {
+		output stdout
+		format console
+	}
+}

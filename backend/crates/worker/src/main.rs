@@ -39,7 +39,11 @@ async fn main() {
     // suppression et le journal d'expédition s'appliquent donc aussi aux
     // courriels que les travaux différés de B1 et B2 envoient, **sans qu'aucun
     // de ces modules ne change d'une ligne** (écart n° 133).
-    let courrier = engagement::GardedMailer::envelopper(&config.mail, db.clone());
+    let courrier =
+        engagement::GardedMailer::envelopper(&config.mail, db.clone()).unwrap_or_else(|e| {
+            tracing::error!("courriel : {e}");
+            std::process::exit(1);
+        });
 
     let consommateurs = ConsumerRegistry::new()
         .register(TelemetryConsumer)

@@ -72,6 +72,22 @@ image = { version = "0.25", default-features = false, features = ["jpeg", "png",
 # compile pas.
 hmac = "0.12"
 humantime-serde = "1"
+# Envoi SMTP direct depuis le worker (01/09). `default-features = false` puis
+# les caractéristiques une par une : le défaut de `lettre` amène `native-tls`,
+# donc OpenSSL du système — une seconde pile TLS à côté de `rustls`, déjà tenue
+# par `reqwest` et `sqlx`, et une bibliothèque à installer dans l'image.
+# `webpki-roots` vient avec `rustls-tls` : les racines sont EMBARQUÉES, donc le
+# conteneur valide le certificat Sectigo du serveur de courriel sans dépendre
+# d'un paquet `ca-certificates` que rien ne garantit présent.
+lettre = { version = "0.11", default-features = false, features = [
+    "tokio1",
+    "tokio1-rustls-tls",
+    "smtp-transport",
+    "builder",
+    # Le nom de machine annoncé au EHLO. Sans elle, `lettre` s'annonce
+    # « localhost », que des serveurs stricts refusent.
+    "hostname",
+] }
 opentelemetry = "0.32"
 # Client BLOQUANT, et non le client asynchrone : le processeur de lots
 # d'OpenTelemetry tourne sur son propre fil, sans réacteur Tokio — le client

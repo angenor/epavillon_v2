@@ -79,14 +79,14 @@ await adminScope.ensureLoaded()
       <template #brand>
         <NuxtLink :to="localePath('/')" class="flex items-center gap-2 no-underline">
           <img
-            src="/logos/ifdd-horizontal-gris.svg"
+            :src="assetUrl('/logos/ifdd-horizontal-gris.svg')"
             :alt="t('nav.site.owner')"
             class="h-7 w-auto dark:hidden"
             width="140"
             height="28"
           >
           <img
-            src="/logos/ifdd-horizontal-blanc.svg"
+            :src="assetUrl('/logos/ifdd-horizontal-blanc.svg')"
             :alt="t('nav.site.owner')"
             class="hidden h-7 w-auto dark:block"
             width="140"

@@ -31,7 +31,8 @@ pub struct AppState {
     pub content: content::ContentState,
     pub live: live::LiveState,
     pub analytics: analytics::AnalyticsState,
-    /// Origines acceptées sur une écriture. Celle du site, et rien d'autre.
+    /// Origines acceptées sur une écriture. Celle du site, et rien d'autre —
+    /// schéma et autorité, sans le chemin de base.
     pub allowed_origins: Vec<String>,
 }
 
@@ -48,8 +49,12 @@ impl AppState {
         // d'une ligne** : le décorateur implémente le contrat du noyau, il ne
         // l'étend pas. C'est ce que `kernel::mail` annonçait en B1 — « le jour
         // où l'envoi se réécrit ici, aucun module ne bouge ».
-        let mailer = engagement::GardedMailer::envelopper(&config.mail, db.clone());
-        let allowed_origins = vec![config.app_public_url.clone()];
+        let mailer = engagement::GardedMailer::envelopper(&config.mail, db.clone())
+            .map_err(kernel::error::ApiError::internal)?;
+        // **L'ORIGINE, PAS L'URL.** Le navigateur annonce « https://site » dans
+        // son en-tête, jamais « https://site/v2 » : comparer à l'URL complète
+        // refuserait toute écriture dès que le site est servi sous un préfixe.
+        let allowed_origins = vec![config.app_public_origin.clone()];
         let config = Arc::new(config);
         let identity = identity::IdentityState::new(db.clone(), config.clone(), passwords.clone())?;
         let org = org::OrgState::new(db.clone(), config.clone());

@@ -7,6 +7,13 @@ import tailwindcss from '@tailwindcss/vite'
 // `frontend/i18n/` reste hors de `app/` : c'est la convention du module
 // @nuxtjs/i18n. Un fichier posé ailleurs n'est pas auto-importé et l'erreur
 // n'apparaît qu'à l'exécution.
+// Base sous laquelle le site est servi : `/v2/` en cohabitation avec la v1,
+// `/` à la racine. Lue de l'environnement plutôt qu'écrite ici — c'est
+// `NUXT_APP_BASE_URL` que Nuxt consulte lui-même, et deux endroits à tenir
+// d'accord finiraient par diverger. La barre finale est forcée : sans elle,
+// `/v2` donnerait `/v2favicon.svg`.
+const BASE = (process.env.NUXT_APP_BASE_URL || '/').replace(/\/*$/, '/')
+
 export default defineNuxtConfig({
   compatibilityDate: '2026-08-16',
 
@@ -85,7 +92,11 @@ export default defineNuxtConfig({
         { name: 'theme-color', content: '#ffffff', media: '(prefers-color-scheme: light)' },
         { name: 'theme-color', content: '#231f20', media: '(prefers-color-scheme: dark)' },
       ],
-      link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+      // Le seul chemin de `public/` que le code ne peut pas préfixer par
+      // `assetUrl()` : il est composé à la construction, hors de tout contexte
+      // Nuxt. Servi sous un préfixe, une icône laissée à la racine irait
+      // chercher celle de l'autre application hébergée là.
+      link: [{ rel: 'icon', type: 'image/svg+xml', href: `${BASE}favicon.svg` }],
     },
   },
 })

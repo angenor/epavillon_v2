@@ -23,22 +23,27 @@ cd backend  && cargo run -p worker     # le relais d'outbox et la file de travau
 cd frontend && npm run dev             # le site,   sur 127.0.0.1:3000
 ```
 
-**Qui envoie les courriels ? Le site — jamais l'API.** C'est une contrainte
-d'hébergement, arbitrée le 20/08 : l'API et le site vivent sur deux serveurs, et
-seul celui du site a le droit d'émettre du courriel. La chaîne est donc :
+**Qui envoie les courriels ? L'API — depuis le 01/09.** La chaîne est donc :
 
 1. l'API **compose** le message et met un travail en file, dans la transaction du
    changement d'état ;
-2. le **worker** réserve ce travail et remet le message au site, par
-   `POST {MAIL_RELAY_URL}` avec le secret `MAIL_RELAY_TOKEN` en en-tête ;
-3. le **site** ouvre la connexion SMTP et envoie — vers Mailpit en local.
+2. le **worker** réserve ce travail, ouvre la connexion SMTP et envoie — vers
+   Mailpit en local, vers le serveur de courriel du domaine en production.
+
+**Ce n'était pas le cas jusqu'ici, et la raison était fausse.** Le 20/08, on a
+tenu pour acquis que « seul le serveur du site a le droit d'émettre », et l'API
+remettait donc ses messages au site par `POST {MAIL_RELAY_URL}`. Or émettre au
+nom d'un domaine ne demande pas de l'héberger : il faut un compte et le port 587
+en sortie, tous deux disponibles depuis le serveur de l'API. Le détour a été
+retiré. `MAIL_TRANSPORT=relay` le rétablit sans redéploiement — le contrat
+d'envoi du noyau existe pour cela, et **aucun module n'a bougé d'une ligne**.
 
 Trois conséquences pratiques, chacune déjà payée une fois :
 
 - **Sans le worker, aucun courriel ne part** : le travail reste en file, et
   l'inscription réussit quand même. C'est voulu — la réponse ne dépend pas de
   l'envoi.
-- **Sans le site, aucun courriel ne part non plus** : le worker échoue, le
+- **Sans Mailpit, aucun courriel ne part non plus** : le worker échoue, le
   travail se replanifie avec un délai croissant, et meurt au bout de cinq essais.
   On le voit dans `platform.jobs`, et sur `GET /api/health`.
 - **Mailpit trie par date de réception, pas par date de demande.** Un travail
@@ -272,14 +277,20 @@ S3_SECRET_ACCESS_KEY=
 S3_FORCE_PATH_STYLE=true
 
 # --- Courriel (Mailpit : capture tout, n'envoie rien) ------------------------
-# LUES PAR LE SITE, PAS PAR L'API : seul le serveur du site a le droit
-# d'émettre du courriel (contrainte d'hébergement du 20/08).
+# LUES PAR L'API depuis le 01/09.
 SMTP_HOST=localhost
 SMTP_PORT=1025
 SMTP_FROM=ne-pas-repondre@epavillon.local
+SMTP_FROM_NAME=ePavillon
+SMTP_ENCRYPTION=none         # Mailpit en local, et RIEN D'AUTRE
+SMTP_USERNAME=               # vides en local : Mailpit n'authentifie personne
+SMTP_PASSWORD=
 
-# --- Relais de courriel : de l'API vers le site ------------------------------
-MAIL_TRANSPORT=relay
+# --- Transport --------------------------------------------------------------
+# smtp   l'API envoie elle-même — le chemin normal
+# relay  remise HTTP au site, qui ouvre la connexion : le chemin d'avant le
+#        01/09, gardé le temps que le premier envoi réel soit vérifié
+MAIL_TRANSPORT=smtp
 MAIL_RELAY_URL=http://localhost:3000/api/internal/mail
 MAIL_RELAY_TOKEN=            # VIDE dans .env.example : à renseigner
 
@@ -307,10 +318,13 @@ OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318
 OTEL_SERVICE_NAME=epavillon-api
 ```
 
-**Deux clés sont livrées VIDES et font échouer le démarrage de l'API** : `AUTH_SIGNING_KEY`, qu'on
-engendre une fois par `openssl rand -hex 32` et qu'on garde, et `MAIL_RELAY_TOKEN`, le secret partagé
-avec le site. La configuration est validée **au démarrage** : une durée mal écrite, une adresse de
-relais qui n'est pas absolue ou une clé manquante arrêtent le service — jamais une requête.
+**Une clé est livrée VIDE et fait échouer le démarrage de l'API** : `AUTH_SIGNING_KEY`, qu'on engendre
+une fois par `openssl rand -hex 32` et qu'on garde. `MAIL_RELAY_TOKEN` ne l'exige plus que si
+`MAIL_TRANSPORT` vaut `relay`. La configuration est validée **au démarrage** : une durée mal écrite,
+une adresse de relais qui n'est pas absolue, une adresse d'expéditeur mal formée ou une clé manquante
+arrêtent le service — jamais une requête. **Le refus le plus utile du lot** : `SMTP_ENCRYPTION=none`
+accompagné d'un `SMTP_USERNAME` est rejeté, faute de quoi le mot de passe de la boîte traverserait
+l'Internet en clair sans que rien ne le signale.
 
 Après ce bloc viennent les **ports publiés par le compose** (`POSTGRES_PORT`, `S3_PORT`,
 `GARAGE_RPC_PORT`…), à ne toucher qu'en cas de collision avec un autre projet (voir « Si un port est
@@ -318,10 +332,10 @@ déjà pris »), puis un bloc de **compte de démonstration** qui ne vaut que po
 site.
 
 Le site lit `NUXT_PUBLIC_API_BASE` et `NUXT_PUBLIC_SITE_URL` — seules ces deux-là, préfixées
-`NUXT_PUBLIC_`, atteignent le navigateur —, **plus les clés SMTP et `MAIL_RELAY_TOKEN`, que sa route
-de relais utilise depuis le 20/08** (`frontend/server/api/internal/mail.post.ts`). Tout le reste est
-du côté serveur et ne doit jamais se retrouver dans le bundle. Mailpit n'exige ni authentification ni
-TLS en local : hôte et port suffisent.
+`NUXT_PUBLIC_`, atteignent le navigateur. Sa route de relais lit encore les clés SMTP et
+`MAIL_RELAY_TOKEN` (`frontend/server/api/internal/mail.post.ts`), mais elle ne sert plus que si
+`MAIL_TRANSPORT` vaut `relay`. Tout le reste est du côté serveur et ne doit jamais se retrouver dans
+le bundle. Mailpit n'exige ni authentification ni TLS en local : hôte et port suffisent.
 
 **Une requête sans le bon secret reçoit 404, jamais 401** : une route privée ne confirme pas son
 existence. Et un `MAIL_RELAY_TOKEN` vide **ferme** la route au lieu de l'ouvrir — sans cela, une

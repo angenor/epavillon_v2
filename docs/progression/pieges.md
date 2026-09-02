@@ -122,3 +122,35 @@ endroit.
 « current transaction is aborted ». Elle est donc abandonnée avant de composer la réponse. C'est le
 même piège que partout où l'on traduit une levée de fonction : le refus se lit **après** avoir renoncé
 à la transaction, jamais dedans.
+
+---
+
+## Une contrainte d'hébergement admise sans être mesurée (01/09)
+
+Le 20/08, « seul le serveur du site a le droit d'émettre du courriel » est entré dans quatre fichiers
+et a commandé une architecture — l'API composant ses messages puis les remettant au site par HTTP,
+avec son secret partagé, sa mémoire anti-doublon et sa route privée rendant 404.
+
+**La contrainte n'existait pas.** Un serveur qui émet n'a pas besoin d'héberger le domaine : il lui
+faut un compte et le port 587 en sortie, comme un client de messagerie sur un portable. La vérifier
+coûtait une commande, lancée pour la première fois le 01/09 :
+
+```bash
+openssl s_client -starttls smtp -connect <serveur-de-courriel>:587 -crlf
+( sleep 1; echo EHLO test; sleep 1; echo QUIT ) | openssl s_client -starttls smtp -connect … 2>/dev/null | grep 250-
+```
+
+Elle répond, négocie TLS et annonce `250-AUTH PLAIN LOGIN`. **Onze jours d'architecture pour une
+hypothèse d'une ligne que personne n'avait éprouvée.**
+
+Le piège n'est pas le courriel — c'est qu'une contrainte d'infrastructure énoncée en une phrase se
+propage plus vite qu'une contrainte du modèle, parce qu'elle ne rencontre aucun fichier SQL pour la
+contredire. **La règle d'or du dépôt dit que rien du modèle ne se devine ; l'infrastructure mérite la
+même exigence.** Ce qui a sauvé la mise ici, c'est que la contrainte avait été rangée derrière un
+contrat (`kernel::mail::Mailer`) plutôt qu'écrite dans les modules : le jour où elle est tombée,
+**aucun des six courriels de B1 et B2 n'a bougé d'une ligne.**
+
+Et le contournement était de toute façon inopérant : le relais était une route serveur Nitro, l'hébergement
+du site ne fait tourner que HTML, JS, CSS et PHP, et `nuxt generate` ne déploie aucune route serveur.
+**La contrainte qu'on cherchait à contourner rendait le contournement impossible** — ce qu'une seule
+question sur la pile réelle de l'hébergement aurait montré tout de suite.

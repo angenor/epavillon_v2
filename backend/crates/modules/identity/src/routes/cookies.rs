@@ -19,11 +19,22 @@ pub const COOKIE_RAFRAICHISSEMENT: &str = "epavillon_rt";
 /// celui du routeur.
 const CHEMIN_RAFRAICHISSEMENT: &str = "/api/auth";
 
+/// Préfixe les deux chemins par celui sous lequel le site est servi.
+///
+/// **C'est ce qui rend la cohabitation possible.** Servi sous `/v2`, le
+/// navigateur appelle `/v2/api/auth/refresh` ; un cookie posé sur `/api/auth`
+/// ne lui serait jamais renvoyé, et la session mourrait au bout du jeton
+/// d'accès — quinze minutes, sans message, sans trace, sans erreur en journal.
+/// À la racine, `app_base_path` est vide et les chemins ne changent pas.
+fn chemin(config: &Config, suffixe: &str) -> String {
+    format!("{}{suffixe}", config.app_base_path)
+}
+
 fn batir(
     config: &Config,
     nom: &'static str,
     valeur: String,
-    chemin: &'static str,
+    chemin: String,
     same_site: SameSite,
     max_age: CookieDuration,
 ) -> Cookie<'static> {
@@ -46,7 +57,7 @@ pub fn acces(config: &Config, jeton: String, duree: Duration) -> Cookie<'static>
         config,
         COOKIE_ACCES,
         jeton,
-        "/",
+        chemin(config, "/"),
         SameSite::Lax,
         CookieDuration::seconds(duree.as_secs() as i64),
     )
@@ -64,7 +75,7 @@ pub fn rafraichissement(
         config,
         COOKIE_RAFRAICHISSEMENT,
         jeton,
-        CHEMIN_RAFRAICHISSEMENT,
+        chemin(config, CHEMIN_RAFRAICHISSEMENT),
         SameSite::Strict,
         CookieDuration::seconds(restant),
     )
@@ -78,7 +89,7 @@ pub fn effacer(config: &Config) -> [Cookie<'static>; 2] {
             config,
             COOKIE_ACCES,
             String::new(),
-            "/",
+            chemin(config, "/"),
             SameSite::Lax,
             CookieDuration::ZERO,
         ),
@@ -86,7 +97,7 @@ pub fn effacer(config: &Config) -> [Cookie<'static>; 2] {
             config,
             COOKIE_RAFRAICHISSEMENT,
             String::new(),
-            CHEMIN_RAFRAICHISSEMENT,
+            chemin(config, CHEMIN_RAFRAICHISSEMENT),
             SameSite::Strict,
             CookieDuration::ZERO,
         ),

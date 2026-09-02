@@ -66,7 +66,22 @@ async fn armer(db: &Db, moment: OffsetDateTime) -> (bool, bool, bool) {
 async fn le_demarrage_du_worker_rearme_la_chaine_sans_doublon() {
     let base = TestDb::new().await;
     let db = base.db();
-    let maintenant = OffsetDateTime::now_utc();
+
+    // **Ancré au DÉBUT d'un créneau, jamais sur `now()`.** La grille des
+    // occurrences est ancrée à l'époque Unix : neuf minutes ajoutées à un
+    // instant proche d'une frontière tombent dans le créneau SUIVANT, et
+    // l'armement rend alors « posé » là où le test attend « déjà posé ». Parti
+    // de l'heure courante, il échouait pendant les neuf minutes précédant
+    // chaque multiple de six heures — trente-six minutes par jour, quatre
+    // fenêtres, et un échec qu'on impute d'abord à ce qu'on vient d'écrire.
+    const CRENEAU: i64 = 6 * 3600;
+    let maintenant = OffsetDateTime::from_unix_timestamp(
+        OffsetDateTime::now_utc()
+            .unix_timestamp()
+            .div_euclid(CRENEAU)
+            * CRENEAU,
+    )
+    .expect("début du créneau courant");
 
     assert_eq!(
         armer(&db, maintenant).await,
@@ -116,7 +131,7 @@ async fn chaque_travail_recurrent_atterrit_dans_la_file_de_son_gestionnaire() {
     gestionnaires.extend(engagement::job_handlers(
         db.clone(),
         &config,
-        engagement::GardedMailer::envelopper(&config.mail, db.clone()),
+        engagement::GardedMailer::envelopper(&config.mail, db.clone()).expect("expéditeur"),
     ));
 
     for tache in [

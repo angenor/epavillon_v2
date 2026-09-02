@@ -1,0 +1,130 @@
+# Déploiement — ePavillon v2, serveur applicatif
+#
+# À lancer sur le serveur qui accepte Docker. Le cPanel ne fait que relayer :
+# il ne porte aucun fichier de la v2.
+#
+#   docker compose --env-file .env.prod -f ops/docker-compose.prod.yml up -d --build
+#
+# Sept services. Deux différences de fond avec `docker-compose.dev.yml`, et
+# elles se voient à l'œil : AUCUN port n'est publié sauf ceux de Caddy — la
+# base, le cache et le stockage ne sont joignables que depuis le réseau interne
+# —, et il n'y a ni Mailpit ni Jaeger : le courriel part vraiment, par le
+# serveur du domaine.
+#
+# **Le schéma n'est chargé qu'au PREMIER démarrage du volume de la base.** Après
+# toute modification de `docs/database/`, il faut le rejouer à la main : un
+# `down -v` en production effacerait les données.
+
+name: epavillon
+
+networks:
+  interne:
+    ipam:
+      config:
+        # Sous-réseau FIXÉ, et c'est ce qui rend `TRUSTED_PROXIES` écrivable :
+        # Docker en choisirait un autre à la première recréation, et l'API
+        # cesserait alors de croire son propre frontal — enregistrant l'adresse
+        # de Caddy à la place de celle de chaque visiteur, sans erreur.
+        - subnet: 172.28.0.0/16
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    networks: [interne]
+    ports:
+      - "80:80"     # exigé par Let's Encrypt pour l'émission du certificat
+      - "443:443"
+    environment:
+      PUBLIC_HOSTNAME: ${PUBLIC_HOSTNAME:?adresse de transport, ex. epavillon.mefali.com}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?adresse vue des visiteurs}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?destinataire des avis d expiration de certificat}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data     # les certificats vivent ici : ne pas effacer
+      - caddy-config:/config
+    depends_on: [api, front]
+
+  front:
+    build:
+      context: ../frontend
+      args:
+        NUXT_APP_BASE_URL: ${NUXT_APP_BASE_URL:-/v2/}
+        NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-/v2/api}
+        NUXT_PUBLIC_SITE_URL: ${APP_PUBLIC_URL:?adresse publique complète}
+    restart: unless-stopped
+    networks: [interne]
+
+  api:
+    build:
+      context: ../backend
+    command: ["api"]
+    restart: unless-stopped
+    networks: [interne]
+    env_file: [../.env.prod]
+    environment:
+      # Écoute sur toutes les interfaces DU CONTENEUR : seul Caddy y accède,
+      # aucun port n'étant publié. `127.0.0.1` ici rendrait l'API injoignable
+      # depuis le réseau interne, pour un gain de sécurité nul.
+      API_BIND_ADDR: 0.0.0.0:8080
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:?mot de passe de la base}@postgres:5432/epavillon
+      VALKEY_URL: redis://valkey:6379
+      S3_ENDPOINT: http://garage:3900
+    depends_on:
+      postgres: {condition: service_healthy}
+
+  worker:
+    build:
+      context: ../backend
+    command: ["worker"]
+    restart: unless-stopped
+    networks: [interne]
+    env_file: [../.env.prod]
+    environment:
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:?mot de passe de la base}@postgres:5432/epavillon
+      VALKEY_URL: redis://valkey:6379
+      S3_ENDPOINT: http://garage:3900
+    depends_on:
+      postgres: {condition: service_healthy}
+
+  postgres:
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    networks: [interne]
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?mot de passe de la base}
+      POSTGRES_DB: epavillon
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../docs/database:/docker-entrypoint-initdb.d:ro
+    command: ["postgres", "-c", "shared_preload_libraries=pg_stat_statements"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d epavillon"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    restart: unless-stopped
+    networks: [interne]
+    command: valkey-server --save 60 1
+    volumes:
+      - valkey-data:/data
+
+  garage:
+    image: dxflrs/garage:v1.0.1
+    restart: unless-stopped
+    networks: [interne]
+    volumes:
+      - garage-meta:/var/lib/garage/meta
+      - garage-data:/var/lib/garage/data
+      - ./garage.toml:/etc/garage.toml:ro
+
+volumes:
+  pgdata:
+  valkey-data:
+  garage-meta:
+  garage-data:
+  caddy-data:
+  caddy-config:

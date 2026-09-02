@@ -193,6 +193,20 @@ check-api-contract:
 	 else echo 'frontend/ absent — rien à vérifier'; fi
 
 # ---------------------------------------------------------------------------
+# Déploiement
+# ---------------------------------------------------------------------------
+
+# Le plan de chaque requête SQL, figé dans `backend/.sqlx/`.
+#
+# **L'image de production se construit HORS LIGNE** : elle n'a pas de base à
+# joindre, et ne doit pas en avoir. Sans un `.sqlx/` à jour, la construction
+# échoue — ou pire, réussit sur l'ancien plan et rend une colonne absente à
+# l'exécution. À refaire après toute modification d'une requête.
+sqlx-prepare:
+	@cd backend && cargo sqlx prepare --workspace -- --all-targets \
+	 || { echo 'ÉCHEC : `cargo install sqlx-cli --no-default-features --features postgres` puis `make up`.'; exit 1; }
+
+# ---------------------------------------------------------------------------
 # Stockage objet
 # ---------------------------------------------------------------------------
 

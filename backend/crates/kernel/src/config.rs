@@ -7,6 +7,7 @@
 
 use figment::providers::Env;
 use figment::Figment;
+use lettre::message::Mailbox;
 use serde::Deserialize;
 use std::time::Duration;
 
@@ -22,6 +23,54 @@ pub enum ConfigError {
 
 fn invalid(message: impl Into<String>) -> ConfigError {
     ConfigError::Invalid(message.into())
+}
+
+/// Sépare `APP_PUBLIC_URL` en ce que le navigateur annonce et ce sous quoi le
+/// site est servi.
+///
+/// `https://exemple.org/v2` rend `("https://exemple.org", "/v2")` ;
+/// `https://exemple.org/` rend `("https://exemple.org", "")`.
+fn decouper_url_publique(url: &str) -> Result<(String, String), ConfigError> {
+    let url = url.trim().trim_end_matches('/');
+    let (schema, reste) = url.split_once("://").ok_or_else(|| {
+        invalid("APP_PUBLIC_URL doit être une adresse absolue (http:// ou https://).")
+    })?;
+    let (autorite, chemin) = match reste.split_once('/') {
+        Some((a, c)) => (a, format!("/{}", c.trim_end_matches('/'))),
+        None => (reste, String::new()),
+    };
+    if autorite.is_empty() {
+        return Err(invalid("APP_PUBLIC_URL ne porte aucun nom d'hôte."));
+    }
+    Ok((format!("{schema}://{autorite}"), chemin))
+}
+
+/// L'adresse portée en tête des courriels, analysée **au démarrage**.
+///
+/// `SMTP_FROM` accepte les deux écritures d'usage, `boite@domaine.org` et
+/// `ePavillon <boite@domaine.org>` ; `SMTP_FROM_NAME` impose le nom affiché
+/// quand elle est renseignée.
+///
+/// Un serveur de soumission n'accepte le plus souvent qu'un expéditeur
+/// appartenant au compte authentifié : une adresse d'un autre domaine se fait
+/// refuser à l'envoi, pas ici.
+fn adresse_expediteur(brut: &str, nom: &str) -> Result<Mailbox, ConfigError> {
+    let brut = brut.trim();
+    if brut.is_empty() {
+        return Err(invalid(
+            "SMTP_FROM est vide : un courriel sans expéditeur est refusé par tout serveur.",
+        ));
+    }
+    let adresse: Mailbox = brut.parse().map_err(|e| {
+        invalid(format!(
+            "SMTP_FROM (« {brut} ») n'est pas une adresse exploitable : {e}"
+        ))
+    })?;
+    let nom = nom.trim();
+    if nom.is_empty() {
+        return Ok(adresse);
+    }
+    Ok(Mailbox::new(Some(nom.to_owned()), adresse.email))
 }
 
 /// Reflet plat de l'environnement. Les noms de champs sont ceux des variables,
@@ -85,6 +134,23 @@ struct Raw {
     /// ouverte » (B6, R30).
     #[serde(default)]
     mail_webhook_token: String,
+
+    /// Le serveur de courriel du domaine, joint en client authentifié — pas
+    /// besoin d'héberger le domaine pour émettre en son nom (01/09).
+    #[serde(default)]
+    smtp_host: String,
+    #[serde(default = "default_smtp_port")]
+    smtp_port: u16,
+    #[serde(default = "default_smtp_encryption")]
+    smtp_encryption: String,
+    #[serde(default)]
+    smtp_username: String,
+    #[serde(default)]
+    smtp_password: String,
+    #[serde(default)]
+    smtp_from: String,
+    #[serde(default)]
+    smtp_from_name: String,
 
     #[serde(default = "default_media_storage")]
     media_storage: String,
@@ -157,6 +223,19 @@ fn default_public_url() -> String {
 }
 fn default_mail_transport() -> String {
     "relay".to_owned()
+}
+
+/// 587, le port de soumission. Le 25 est celui du transit entre serveurs, que
+/// presque tout hébergeur bloque en sortie.
+fn default_smtp_port() -> u16 {
+    587
+}
+
+/// **Le défaut chiffre.** Une clé oubliée au déploiement doit coûter une
+/// connexion refusée, jamais un mot de passe de boîte aux lettres traversant
+/// l'Internet en clair — c'est le même parti que `AUTH_COOKIE_SECURE`.
+fn default_smtp_encryption() -> String {
+    "starttls".to_owned()
 }
 fn default_service_name() -> String {
     "epavillon-api".to_owned()
@@ -248,6 +327,17 @@ pub struct Config {
     pub api_docs_enabled: bool,
     /// Adresse du SITE, pas de l'API : un lien de courriel mène à un écran.
     pub app_public_url: String,
+    /// Ce que le navigateur ANNONCE dans son en-tête `Origin` : schéma et
+    /// autorité, jamais le chemin. Dérivée d'`APP_PUBLIC_URL` et non réglée à
+    /// part — deux valeurs à tenir d'accord finissent par diverger, et le jour
+    /// où elles divergent toute écriture est refusée sans que rien ne l'explique.
+    pub app_public_origin: String,
+    /// Ce sous quoi le site est servi : `/v2` en cohabitation, **vide** à la
+    /// racine. Jamais de barre oblique finale. Il commande le chemin des
+    /// cookies : un cookie posé sur `/api/auth` alors que le navigateur appelle
+    /// `/v2/api/auth` n'est jamais renvoyé, et la session expire au bout de
+    /// quinze minutes sans message ni trace.
+    pub app_base_path: String,
     pub worker_id: String,
     /// Ceux dont on croit l'en-tête d'adresse d'origine. Vide par défaut : sans
     /// eux, n'importe quel client choisirait l'adresse qu'on enregistre.
@@ -435,8 +525,10 @@ impl std::fmt::Debug for Secret {
 pub enum MailTransport {
     /// Remise HTTP au serveur du site : le seul chemin autorisé aujourd'hui.
     Relay,
-    /// SMTP direct depuis le worker — laissé non branché jusqu'au jour où
-    /// l'hébergeur de l'API autorise l'émission (research.md § R13).
+    /// SMTP direct depuis l'API et le worker. **Branché le 01/09** : le serveur
+    /// de courriel du domaine accepte la soumission authentifiée sur le port
+    /// 587 depuis n'importe quelle machine, ce qui retire au site son rôle de
+    /// relais. Émettre au nom d'un domaine ne demande pas de l'héberger.
     Smtp,
 }
 
@@ -456,6 +548,45 @@ pub struct MailConfig {
     /// `None` ne signifie pas « route ouverte » mais **route non montée** :
     /// elle rend 404, comme un module éteint.
     pub webhook_token: Option<Secret>,
+    /// `Some` dès que `SMTP_HOST` est renseignée, même quand `transport` vaut
+    /// `Relay` : décrire les deux chemins à la fois rend la bascule — et le
+    /// retour en arrière — réversible par la seule variable `MAIL_TRANSPORT`,
+    /// sans redéploiement. `None` est l'absence de serveur déclaré, et le
+    /// démarrage la refuse si le transport SMTP est celui qu'on a choisi.
+    pub smtp: Option<SmtpConfig>,
+}
+
+/// Comment la connexion au serveur de courriel se chiffre. Ce n'est pas un
+/// détail de transport : c'est ce qui décide si le mot de passe de la boîte
+/// traverse le réseau en clair.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum SmtpEncryption {
+    /// Connexion ouverte en clair, puis élevée par la commande STARTTLS — le
+    /// mode du port 587, et celui que le serveur du domaine annonce.
+    StartTls,
+    /// Chiffrée dès l'ouverture, avant le moindre octet de protocole — le
+    /// mode du port 465.
+    Implicit,
+    /// Aucun chiffrement. **Mailpit en local, et rien d'autre** : la
+    /// configuration refuse ce mode dès qu'un identifiant l'accompagne.
+    None,
+}
+
+#[derive(Debug, Clone)]
+pub struct SmtpConfig {
+    pub host: String,
+    pub port: u16,
+    pub encryption: SmtpEncryption,
+    /// Vide : on n'ouvre pas de session authentifiée. Mailpit n'en veut pas, un
+    /// serveur de soumission l'exige.
+    pub username: String,
+    pub password: Secret,
+    /// **Déjà analysée**, et c'est délibéré : le démarrage refuse une adresse
+    /// mal formée plutôt que de laisser le premier envoi échouer une heure
+    /// plus tard dans un travail différé. L'analyse emploie la bibliothèque qui
+    /// enverra — deux analyseurs d'adresses dans une même chaîne, c'est le
+    /// défaut qui a fait tomber le formulaire du front sur les fuseaux.
+    pub from: Mailbox,
 }
 
 #[derive(Debug, Clone)]
@@ -492,6 +623,7 @@ impl Config {
                 "APP_PUBLIC_URL doit être une adresse absolue (http:// ou https://).",
             ));
         }
+        let (app_public_origin, app_base_path) = decouper_url_publique(&raw.app_public_url)?;
 
         let transport = match raw.mail_transport.as_str() {
             "relay" => MailTransport::Relay,
@@ -519,6 +651,51 @@ impl Config {
                 ));
             }
         }
+
+        let encryption = match raw.smtp_encryption.as_str() {
+            "starttls" => SmtpEncryption::StartTls,
+            "implicit" => SmtpEncryption::Implicit,
+            "none" => SmtpEncryption::None,
+            other => {
+                return Err(invalid(format!(
+                    "SMTP_ENCRYPTION vaut « {other} » : starttls, implicit ou none."
+                )))
+            }
+        };
+        // Refus le plus utile du lot : sans lui, une variable oubliée ferait
+        // traverser l'Internet au mot de passe de la boîte, en clair, à chaque
+        // courriel — sans que rien ne le signale.
+        if encryption == SmtpEncryption::None && !raw.smtp_username.trim().is_empty() {
+            return Err(invalid(
+                "SMTP_ENCRYPTION vaut none alors que SMTP_USERNAME est renseigné : le mot de passe partirait en clair.",
+            ));
+        }
+        if !raw.smtp_username.trim().is_empty() && raw.smtp_password.is_empty() {
+            return Err(invalid(
+                "SMTP_USERNAME est renseigné mais SMTP_PASSWORD est vide : le serveur refuserait la session.",
+            ));
+        }
+
+        let smtp_host = raw.smtp_host.trim().to_owned();
+        if transport == MailTransport::Smtp && smtp_host.is_empty() {
+            return Err(invalid(
+                "SMTP_HOST est vide alors que MAIL_TRANSPORT vaut smtp : aucun courriel ne partirait.",
+            ));
+        }
+
+        let smtp = if smtp_host.is_empty() {
+            None
+        } else {
+            let from = adresse_expediteur(&raw.smtp_from, &raw.smtp_from_name)?;
+            Some(SmtpConfig {
+                host: smtp_host,
+                port: raw.smtp_port,
+                encryption,
+                username: raw.smtp_username.trim().to_owned(),
+                password: Secret(raw.smtp_password),
+                from,
+            })
+        };
 
         for (cle, duree) in [
             ("AUTH_LOCKOUT_DURATION", raw.auth_lockout_duration),
@@ -686,6 +863,8 @@ impl Config {
             api_bind_addr: raw.api_bind_addr,
             api_docs_enabled: raw.api_docs_enabled,
             app_public_url: raw.app_public_url.trim_end_matches('/').to_owned(),
+            app_public_origin,
+            app_base_path,
             worker_id,
             trusted_proxies,
             auth: AuthConfig {
@@ -748,6 +927,7 @@ impl Config {
                 webhook_token: Some(raw.mail_webhook_token)
                     .filter(|j| !j.trim().is_empty())
                     .map(Secret),
+                smtp,
             },
             telemetry: TelemetryConfig {
                 otlp_endpoint: Some(raw.otel_exporter_otlp_endpoint)

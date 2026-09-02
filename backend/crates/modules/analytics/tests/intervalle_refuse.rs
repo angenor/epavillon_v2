@@ -17,7 +17,12 @@ fn configuration(intervalle: &str, anti_rebond: &str) -> Figment {
         "database_url": "postgres://postgres:dev@localhost:5442/epavillon",
         "auth_signing_key": "cle-de-test-suffisamment-longue-pour-passer",
         "app_public_url": "http://localhost:3000",
+        // Le transport SMTP exige son serveur depuis le 01/09 : sans ces deux
+        // clés, c'est le courriel qui refuserait le démarrage, et le test
+        // passerait au vert pour la mauvaise raison.
         "mail_transport": "smtp",
+        "smtp_host": "localhost",
+        "smtp_from": "ne-pas-repondre@epavillon.local",
         "s3_access_key_id": "cle",
         "s3_secret_access_key": "secret",
         "analytics_refresh_interval": intervalle,

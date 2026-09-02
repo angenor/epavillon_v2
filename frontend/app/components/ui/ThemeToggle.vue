@@ -86,7 +86,7 @@ function toggle(): void {
       <span class="pilot__container">
         <span class="pilot-bear">
           <span class="pilot">
-            <img src="/theme-toggle/pilot-bear.svg" alt="" width="1448" height="938" >
+            <img :src="assetUrl('/theme-toggle/pilot-bear.svg')" alt="" width="1448" height="938" >
           </span>
         </span>
       </span>
@@ -129,7 +129,7 @@ function toggle(): void {
 
       <span class="astrobear__container">
         <span class="astrobear">
-          <img src="/theme-toggle/astro-bear.svg" alt="" width="316" height="432" >
+          <img :src="assetUrl('/theme-toggle/astro-bear.svg')" alt="" width="316" height="432" >
         </span>
       </span>
     </span>
