@@ -72,7 +72,7 @@ Cette règle vaut pour les questions posées au commanditaire. Le reste du dép�
 | Ce qu'a fait la session d'hier, ce qui a été tranché | [docs/progression/journal/](docs/progression/journal/) et [docs/progression/decisions/](docs/progression/decisions/) |
 | Le prompt de la page ou du module à construire | [docs/PROMPTS_DEVELOPPEMENT.md](docs/PROMPTS_DEVELOPPEMENT.md) |
 | Comment monter la base et les services en local | [docs/ENVIRONNEMENT_LOCAL.md](docs/ENVIRONNEMENT_LOCAL.md) |
-| Comment la v2 arrive en ligne, et sur quels serveurs | [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md) |
+| Comment la v2 arrive en ligne, et sur quels serveurs | [docs/DEPLOIEMENT.md](docs/DEPLOIEMENT.md) — et `./deploy.sh` pour l'exécuter |
 | Pourquoi le modèle est fait ainsi ? Quelles décisions ? | [docs/CADRAGE.md](docs/CADRAGE.md) — §2 constat v1, §5 architecture, §6 les 14 ADR |
 | Le périmètre du jalon en cours, ce qui attend | [docs/CADRAGE.md](docs/CADRAGE.md) §10 |
 | Couleurs, polices, jetons de design | [docs/CHARTE_GRAPHIQUE.md](docs/CHARTE_GRAPHIQUE.md) puis `frontend/app/assets/css/design-tokens.css` |

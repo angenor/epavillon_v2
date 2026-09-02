@@ -96,7 +96,35 @@ que rien ne l'explique.
 
 ---
 
-## 4. Mise en place
+## 4. Le script
+
+`./deploy.sh` porte tout ce qui suit. `./deploy.sh` sans argument liste ses
+commandes.
+
+> **Il n'est pas versionné**, et ne doit pas l'être : il porte l'adresse du
+> serveur, son port SSH et les chemins d'un hébergement qui abrite aussi la
+> plateforme d'un tiers. Une carte de l'infrastructure n'a pas à voyager avec
+> le code. **Les sections 5 à 7 ci-dessous font foi** : elles décrivent chaque
+> geste à la main, et suffisent à réécrire le script si la machine qui le porte
+> disparaît.
+
+| | |
+|---|---|
+| `update` | le geste courant : envoi du code, reconstruction du site et de l'API, redémarrage |
+| `deploy` | tout, y compris la base et le stockage |
+| `status` · `sante` · `logs <service>` | surveiller |
+| `backup` · `restore <fichier>` | `pg_dump` compressé, rapatrié dans `sauvegardes/` |
+| `vhost` · `ssl` | l'infrastructure Apache et le certificat |
+| `reseau` | après un rechargement du pare-feu, si la pile est devenue injoignable |
+
+**Chaque commande qui touche l'infrastructure mesure `financedurable.francophonie.org`
+avant et après, et s'arrête s'il a bougé.** C'est la contrainte n° 1 de cette
+machine, et elle vaut plus que la rapidité d'un déploiement.
+
+Les sections qui suivent décrivent ce que le script fait, pour le jour où il
+faudra le faire à la main.
+
+## 5. Mise en place, geste par geste
 
 ### 4.1 DNS — chez ton registrar, pas chez l'OIF
 
@@ -183,7 +211,7 @@ curl -i https://epavillonclimatique.francophonie.org/v2/api/health
 
 ---
 
-## 5. Ce qui reste à vérifier une fois en ligne
+## 6. Ce qui reste à vérifier une fois en ligne
 
 Trois choses qu'aucun test local ne peut dire, dans l'ordre où elles font mal :
 
@@ -200,7 +228,7 @@ Trois choses qu'aucun test local ne peut dire, dans l'ordre où elles font mal :
 
 ---
 
-## 6. Le jour de la bascule à la racine
+## 7. Le jour de la bascule à la racine
 
 Quand l'OIF aura répondu, ou quand la v1 pourra être remplacée :
 
@@ -215,7 +243,7 @@ qui méritait d'être payé d'avance.
 
 ---
 
-## 7. Ce que le serveur a appris de nous, et nous de lui (02/09)
+## 8. Ce que le serveur a appris de nous, et nous de lui (02/09)
 
 Sept obstacles, tous rencontrés une fois, tous silencieux ou trompeurs. Ils sont
 consignés ici parce qu'aucun ne se déduit d'une documentation.
@@ -270,7 +298,7 @@ l'API sur une base sans données.
 
 ---
 
-## 8. État au 02/09
+## 9. État au 02/09
 
 Déployé et vérifié sur `https://epavillon.mefali.com/v2` :
 

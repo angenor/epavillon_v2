@@ -11,6 +11,13 @@ dist/
 # à composer.
 !.env.prod.example
 
+# Le script de déploiement reste LOCAL : il porte l'adresse du serveur, son
+# port SSH et les chemins d'un hébergement qui abrite aussi la plateforme d'un
+# tiers. Rien là-dedans n'est un secret cryptographique, et c'est précisément
+# pourquoi on l'oublierait — une carte de l'infrastructure n'a pas à voyager
+# avec le code. La procédure, elle, est versionnée : docs/DEPLOIEMENT.md.
+/deploy.sh
+
 # Sauvegardes de base de données — mais PAS docs/database/,
 # qui est le modèle de données versionné et du CODE SOURCE.
 # Ne jamais élargir en `*.sql` : la règle a déjà mis tout un modèle de
