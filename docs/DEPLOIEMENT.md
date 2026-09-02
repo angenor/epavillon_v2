@@ -360,3 +360,44 @@ de l'application — c'est l'application qui a écrit.
 Reste à connaître, et qui ne se mesure qu'à l'usage : **la limite horaire
 d'envoi** de l'hébergement mutualisé, à vérifier avant le jour d'un appel à
 propositions.
+
+---
+
+## 11. L'adresse de recette, et pourquoi elle garde son préfixe (02/09)
+
+**Le relais depuis le domaine institutionnel ne fonctionne pas encore**, et le
+diagnostic est arrêté : `mod_rewrite [P]` vers une cible **HTTPS** exige
+`SSLProxyEngine On`, directive qu'Apache n'accepte qu'en configuration de
+serveur — jamais en `.htaccess`. Mesuré depuis le compte, avec deux relais de
+test identiques à la cible près :
+
+| cible | code |
+|---|---|
+| `http://example.com/` | **200** |
+| `https://example.com/` | **500** |
+
+Le proxy fonctionne donc ; c'est le chiffrement de la requête sortante qui
+manque. Un ticket est ouvert chez l'hébergeur pour l'ajouter — une ligne, sans
+effet sur le reste du site. Le `.htaccess` déposé attend sous le nom
+`.htaccess.desactive` dans `public_html/v2/` ; le jour de la réponse, un `mv`
+suffit.
+
+Relayer en clair a été écarté : les cookies de session traverseraient l'Internet
+public entre les deux serveurs, et le navigateur, qui voit une connexion
+chiffrée de bout en bout, n'aurait aucun moyen de le signaler.
+
+**La recette vit donc sur `https://epavillon.mefali.com/v2`, préfixe compris.**
+Servir à la racine serait plus présentable et ne coûterait qu'une reconstruction
+— mais **le préfixe est la partie fragile du montage** : il a produit à lui seul
+les trois défauts silencieux du § 3. Une recette servie à la racine n'en
+exercerait aucun, et validerait une configuration qui n'est pas celle qui
+partira en production. La laideur de l'adresse est le prix d'un test qui porte
+sur la vraie chose.
+
+`https://epavillon.mefali.com/` redirige vers `/v2/` : tant que la recette vit
+là, taper le nom nu doit aboutir quelque part.
+
+Ce choix se renverse le jour où la bascule s'éloigne durablement — changer
+`NUXT_APP_BASE_URL`, `NUXT_PUBLIC_API_BASE`, retirer le `/v2` du vhost, et
+reconstruire l'image du site. C'est le même travail à quelque moment qu'on le
+fasse.
