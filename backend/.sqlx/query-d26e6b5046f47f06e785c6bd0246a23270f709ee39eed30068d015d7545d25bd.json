@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE media.assets SET purged_at = now()\n          WHERE id = $1 AND purged_at IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d26e6b5046f47f06e785c6bd0246a23270f709ee39eed30068d015d7545d25bd"
+}

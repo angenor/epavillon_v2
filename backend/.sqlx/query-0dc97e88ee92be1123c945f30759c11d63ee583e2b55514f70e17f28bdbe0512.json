@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT max(rl.finished_at) AS \"instant?\"\n             FROM analytics.refresh_log rl\n            WHERE rl.succeeded",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "instant?",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "0dc97e88ee92be1123c945f30759c11d63ee583e2b55514f70e17f28bdbe0512"
+}

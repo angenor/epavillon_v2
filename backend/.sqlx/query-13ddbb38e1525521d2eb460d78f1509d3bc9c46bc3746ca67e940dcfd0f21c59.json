@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT reference.terms_of('programme', 'proposals', $1, 'activity_theme')\n               AS \"codes!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "codes!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "13ddbb38e1525521d2eb460d78f1509d3bc9c46bc3746ca67e940dcfd0f21c59"
+}

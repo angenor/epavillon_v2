@@ -1,0 +1,37 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposals\n               (call_id, event_id, organization_id, submitted_by,\n                title, slug, summary, objectives, detailed_presentation, format,\n                preferred_start_at, duration_minutes, requested_sessions,\n                scheduling_constraints)\n           SELECT CASE WHEN $10 THEN $1::uuid END, $2, $3, $4,\n                  jsonb_build_object('fr', $5::text),\n                  $6::text::platform.slug,\n                  jsonb_build_object('fr', 'Un résumé.'),\n                  '{\"fr\":\"Objectifs du dossier.\"}'::jsonb,\n                  '{\"fr\":\"<p>Présentation.</p>\"}'::jsonb,\n                  'hybrid',\n                  CASE WHEN $7::text IS NOT NULL\n                       THEN ($7::text)::timestamp AT TIME ZONE e.timezone END,\n                  $8, $9, 'Pas le matin.'\n             FROM event.events e WHERE e.id = $2\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Int2",
+        "Int2",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8b622d1145d49099d4d45f619a6b2b47f5aa41448648b0241a8c12c14ecc00c7"
+}

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.proposals\n            SET average_score = 17.25, weighted_score = 86.00,\n                review_count = 3, is_knocked_out = true\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "bb6dbabd18203ab6d70f0377014df7229ccf1b2e5c68fee3945db2c712468fc2"
+}

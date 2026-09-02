@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT engagement.is_email_suppressed($1::text::platform.email) AS \"supprimee!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "supprimee!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "4d9937a078fa350203dddd91ae3e2f8f02f15249ed4a98022dd8eadd2e8a3734"
+}

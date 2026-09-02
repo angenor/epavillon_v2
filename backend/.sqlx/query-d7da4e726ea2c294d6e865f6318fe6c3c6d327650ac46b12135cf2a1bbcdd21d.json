@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.sessions\n            SET published_at = now(),\n                status = $2::text::programme.session_status,\n                cancelled_reason = CASE WHEN $2 = 'cancelled'\n                                        THEN '{\"fr\":\"Motif du test.\"}'::jsonb::platform.i18n_text END\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d7da4e726ea2c294d6e865f6318fe6c3c6d327650ac46b12135cf2a1bbcdd21d"
+}

@@ -1,0 +1,71 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.event_id,\n                  platform.t(s.title, $2) AS \"titre!\",\n                  s.slug::text AS \"slug!\",\n                  e.slug::text AS \"event_slug!\",\n                  s.timezone::text AS \"timezone!\",\n                  to_char(s.starts_at AT TIME ZONE s.timezone,\n                          CASE WHEN $2 LIKE 'en%' THEN 'YYYY-MM-DD \"at\" HH24:MI'\n                               ELSE 'DD/MM/YYYY \"à\" HH24\"h\"MI' END) AS \"debut_local!\",\n                  s.status::text AS \"status!\"\n             FROM programme.sessions s\n             JOIN event.events e ON e.id = s.event_id\n            WHERE s.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "titre!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "event_slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "timezone!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "debut_local!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "11838189e29d2e6c7b7fc44b30081c492f58ada8f9898fd3d2f300c2362b7e89"
+}

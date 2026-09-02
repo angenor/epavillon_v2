@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT w.revisionniste,\n                  w.propositions_assignees AS \"propositions_assignees!\",\n                  w.revues_soumises        AS \"revues_soumises!\",\n                  w.revues_en_retard       AS \"revues_en_retard!\"\n             FROM analytics.mv_reviewer_workload w\n            WHERE w.event_id = $1\n            ORDER BY w.revues_en_retard DESC, w.revisionniste",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "revisionniste",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_reviewer_workload",
+            "name": "revisionniste"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "propositions_assignees!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_reviewer_workload",
+            "name": "propositions_assignees"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "revues_soumises!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_reviewer_workload",
+            "name": "revues_soumises"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "revues_en_retard!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_reviewer_workload",
+            "name": "revues_en_retard"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "7fbc99cab9f46bef3a51dcbba9ea74f3a9b073b24f1801edfc9090f48af4a71f"
+}

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.proposals SET status = 'withdrawn', submitted_at = now()\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c74860b24c3b5dd2d76dd1acd94dde9548344af8c01353be10d5cb2b18082768"
+}

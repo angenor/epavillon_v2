@@ -1,0 +1,122 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT code            AS \"code!\",\n                  libelle         AS \"libelle!\",\n                  domaine         AS \"domaine!\",\n                  valeur          AS \"valeur!\",\n                  seuil_attention AS \"seuil_attention!\",\n                  seuil_critique  AS \"seuil_critique!\",\n                  gravite         AS \"gravite!\",\n                  detail          AS \"detail!: Value\",\n                  mesure_le       AS \"mesure_le!\"\n             FROM analytics.v_operational_health",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "analytics.v_operational_health",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "libelle!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "analytics.v_operational_health",
+            "name": "libelle"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "domaine!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "analytics.v_operational_health",
+            "name": "domaine"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "valeur!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.v_operational_health",
+            "name": "valeur"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "seuil_attention!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.v_operational_health",
+            "name": "seuil_attention"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "seuil_critique!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.v_operational_health",
+            "name": "seuil_critique"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "gravite!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "analytics.v_operational_health",
+            "name": "gravite"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "detail!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "analytics.v_operational_health",
+            "name": "detail"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "mesure_le!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "analytics.v_operational_health",
+            "name": "mesure_le"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "8a0e96864a7a689ccc3e2222a65b6da38b430addb127678f73b917b997d703c9"
+}

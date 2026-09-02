@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (SELECT object_key FROM media.assets WHERE id = $1) AS \"objet!\",\n                  array_agg(r.object_key) AS \"declinaisons!\"\n             FROM media.renditions r WHERE r.asset_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "objet!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "declinaisons!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "549e5f080afe2a1a59417974f1d8ba90fe4fb8996d5ae74f4933353cf58669ee"
+}

@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO live.incidents\n               (scope, event_id, event_day_id, session_id, organization_id,\n                incident_kind_code, severity, message, display_from, display_until, created_by)\n           VALUES ($1::text::live.incident_scope, $2, $3, $4, $5,\n                   'technical_issue', 'warning',\n                   '{\"fr\":\"Message.\",\"en\":\"Message.\"}'::jsonb,\n                   now() + make_interval(secs => $6),\n                   CASE WHEN $7::float8 IS NULL THEN NULL\n                        ELSE now() + make_interval(secs => $7) END,\n                   $8)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.incidents",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Float8",
+        "Float8",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "20c6035ea004f7e28ea188635c1ee53ae9b544bf76af1cd23332268a4efdf28f"
+}

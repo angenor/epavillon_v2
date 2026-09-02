@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (\n               SELECT 1 FROM event.rooms r\n                 JOIN event.venues v ON v.id = r.venue_id\n                WHERE r.id = $2 AND v.event_id = $1\n           ) AS \"existe!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "existe!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "fd7f4fce7655e040cd880be80a9f816bec407e8429384205bc2b39ddb7ea4b04"
+}

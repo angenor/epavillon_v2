@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT event.effective_deadline($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "effective_deadline",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "1d4bef274c817d52d9955559fdfa55df6b56bfb23d22a3e810b88b44d587d20a"
+}

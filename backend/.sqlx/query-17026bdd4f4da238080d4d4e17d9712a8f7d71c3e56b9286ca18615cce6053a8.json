@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.sessions\n            SET registration_opens_at = now() + interval '7 days'\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "17026bdd4f4da238080d4d4e17d9712a8f7d71c3e56b9286ca18615cce6053a8"
+}

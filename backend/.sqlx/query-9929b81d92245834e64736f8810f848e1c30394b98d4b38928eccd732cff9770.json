@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.sessions\n               (event_id, title, slug, format, timezone, starts_at, ends_at,\n                status, location_note, cancelled_reason, published_at)\n           VALUES ($1, jsonb_build_object('fr', 'Séance ' || $2::int4::text),\n                   ('seance-' || $2::int4::text)::platform.slug, 'hybrid',\n                   'America/Belem'::platform.timezone_name,\n                   (timestamp '2027-11-12 09:00' AT TIME ZONE 'America/Belem')\n                       + make_interval(hours => $2::int4),\n                   (timestamp '2027-11-12 10:00' AT TIME ZONE 'America/Belem')\n                       + make_interval(hours => $2::int4),\n                   $3::text::programme.session_status,\n                   '{\"fr\":\"En ligne, lien communiqué aux inscrits.\"}'::jsonb,\n                   CASE WHEN $3 = 'cancelled'\n                        THEN '{\"fr\":\"Annulée.\"}'::jsonb END,\n                   CASE WHEN $4 THEN now() END)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4",
+        "Text",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9929b81d92245834e64736f8810f848e1c30394b98d4b38928eccd732cff9770"
+}

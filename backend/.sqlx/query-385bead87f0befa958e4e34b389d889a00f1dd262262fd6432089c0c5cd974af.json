@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT view_name AS \"vue!\", succeeded AS \"succes!\", duration_ms\n             FROM analytics.refresh_log\n            WHERE was_concurrent\n            ORDER BY started_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "vue!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "analytics.refresh_log",
+            "name": "view_name"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "succes!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "analytics.refresh_log",
+            "name": "succeeded"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "duration_ms",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "analytics.refresh_log",
+            "name": "duration_ms"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "385bead87f0befa958e4e34b389d889a00f1dd262262fd6432089c0c5cd974af"
+}

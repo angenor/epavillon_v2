@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.registration_form_fields\n               (form_id, code, label, field_type, is_sensitive, sort_order)\n           SELECT id, 'regime_alimentaire',\n                  '{\"fr\":\"Régime alimentaire\"}'::jsonb, 'text', true, 80\n             FROM programme.registration_forms WHERE code = 'default'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "9bf0050dd2f60e3540cb32c10647f2efea3b60164b20e7a1be8ad6871bf05e4a"
+}

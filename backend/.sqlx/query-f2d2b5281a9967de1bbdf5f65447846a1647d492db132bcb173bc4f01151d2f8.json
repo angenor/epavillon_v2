@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT template_version AS \"version!\"\n             FROM engagement.email_messages\n            WHERE template_id = $1\n            ORDER BY created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "version!",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "engagement.email_messages",
+            "name": "template_version"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "f2d2b5281a9967de1bbdf5f65447846a1647d492db132bcb173bc4f01151d2f8"
+}

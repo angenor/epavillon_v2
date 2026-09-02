@@ -1,0 +1,260 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT h.id, h.placement::text AS \"placement!\", h.status::text AS \"status!\",\n                  h.nature_code AS \"nature_code!\", h.sort_order AS \"sort_order!\",\n                  h.title AS \"title!\", h.quote, h.body,\n                  h.person_id, h.author_name, h.author_title,\n                  h.organization_id, h.organization_label, h.country_id,\n                  h.event_id, h.session_id, h.link_url::text AS \"link_url?\", h.link_label,\n                  h.background_color_hex, h.starts_at, h.ends_at,\n                  reference.terms_of('content', 'highlights', h.id, 'activity_theme') AS \"theme_codes!\"\n             FROM content.highlights h\n            WHERE h.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "placement!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "nature_code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "nature_code"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "sort_order!",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "sort_order"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "title!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "quote",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "quote"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "body",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "body"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "author_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "author_name"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "author_title",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "author_title"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "organization_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "organization_id"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "organization_label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "organization_label"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "country_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "country_id"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "session_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "session_id"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "link_url?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 17,
+        "name": "link_label",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "link_label"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "background_color_hex",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "background_color_hex"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "starts_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "ends_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "ends_at"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "theme_codes!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null,
+      true,
+      true,
+      true,
+      true,
+      null
+    ]
+  },
+  "hash": "9326a1ede4a3b9cbc4a1371ce51aa7b43c3716736437599330bc6a175dc13657"
+}

@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT job_title_snapshot FROM programme.proposal_speakers\n          WHERE proposal_id = $1 AND person_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "job_title_snapshot",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_speakers",
+            "name": "job_title_snapshot"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "e847805b4c00ec308905e0394f91cb0d924bea326ad792f387959ca206ea153f"
+}

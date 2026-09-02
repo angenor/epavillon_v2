@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT body_html ->> 'fr' AS \"corps!\"\n             FROM engagement.template_versions\n            WHERE template_id = $1 AND version = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "corps!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "eb09d4d30ab8a4dbf0243ad605d9969173bc08b6b9a03da25f1af947a20cc54d"
+}

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.sessions\n            SET registration_required = true,\n                capacity = $2,\n                waitlist_enabled = $3,\n                registration_opens_at = now() - interval '1 day',\n                registration_closes_at = now() + interval '30 days'\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9243d58d2312e0add0edd715d82b8113cd28314c698f26b67ca038c9e7bcf73b"
+}

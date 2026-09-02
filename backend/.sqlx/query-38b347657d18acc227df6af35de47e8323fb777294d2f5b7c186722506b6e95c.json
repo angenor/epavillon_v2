@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.sessions\n              SET status = 'cancelled',\n                  cancelled_reason = '{\"fr\":\"Annulée.\"}'::jsonb\n            WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "38b347657d18acc227df6af35de47e8323fb777294d2f5b7c186722506b6e95c"
+}

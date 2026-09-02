@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT review_count FROM programme.proposals WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "review_count",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "review_count"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "e4b191d42a8424815d6cd72b851ab0d667163b0ca84179a9cfd9a59e015d1815"
+}

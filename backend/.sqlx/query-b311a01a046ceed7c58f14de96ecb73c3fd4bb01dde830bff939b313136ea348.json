@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM programme.review_scores\n          WHERE review_id = $1 AND criterion_id <> ALL($2::uuid[])",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b311a01a046ceed7c58f14de96ecb73c3fd4bb01dde830bff939b313136ea348"
+}

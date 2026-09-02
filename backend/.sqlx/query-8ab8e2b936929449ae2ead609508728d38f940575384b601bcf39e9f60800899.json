@@ -1,0 +1,33 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.sessions\n               (event_id, proposal_id, organization_id, sequence_number,\n                title, slug, summary, format, timezone, starts_at, ends_at)\n           SELECT p.event_id, p.id, p.organization_id, $2,\n                  p.title, $3::text::platform.slug, p.summary, p.format, e.timezone,\n                  debut.instant,\n                  debut.instant + make_interval(mins => $6)\n             FROM programme.proposals p\n             JOIN event.events e ON e.id = p.event_id\n             CROSS JOIN LATERAL (\n                 SELECT COALESCE(\n                     $4::timestamptz,\n                     CASE WHEN $5::text IS NOT NULL THEN\n                         (((e.starts_at AT TIME ZONE e.timezone)::date::text)\n                          || ' ' || $5::text)::timestamp AT TIME ZONE e.timezone\n                     END,\n                     e.starts_at\n                 ) AS instant\n             ) AS debut\n            WHERE p.id = $1\n           ON CONFLICT (proposal_id, sequence_number) DO NOTHING\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Text",
+        "Timestamptz",
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8ab8e2b936929449ae2ead609508728d38f940575384b601bcf39e9f60800899"
+}

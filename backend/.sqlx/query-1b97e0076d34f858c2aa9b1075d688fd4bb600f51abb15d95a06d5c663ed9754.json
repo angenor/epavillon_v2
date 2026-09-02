@@ -1,0 +1,48 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT d.id,\n                  COALESCE(platform.t(d.title, $2), to_char(d.day_date, 'DD/MM/YYYY')) AS \"label!\",\n                  d.day_date\n             FROM event.event_days d\n            WHERE d.event_id = $1\n            ORDER BY d.day_date",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "label!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "day_date",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "day_date"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false
+    ]
+  },
+  "hash": "1b97e0076d34f858c2aa9b1075d688fd4bb600f51abb15d95a06d5c663ed9754"
+}

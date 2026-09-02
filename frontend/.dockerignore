@@ -1,0 +1,9 @@
+# Ce que la construction engendre elle-même, et qui ne doit jamais venir de la
+# machine qui lance le déploiement : un `node_modules` compilé pour macOS dans
+# une image Linux produit des erreurs de binaire natif très loin de leur cause.
+node_modules
+.nuxt
+.output
+.env
+.env.*
+dist

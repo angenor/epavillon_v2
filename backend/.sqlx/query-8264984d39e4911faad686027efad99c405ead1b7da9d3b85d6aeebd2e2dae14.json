@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT event.is_call_open($1) AS \"ouvert!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ouvert!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "8264984d39e4911faad686027efad99c405ead1b7da9d3b85d6aeebd2e2dae14"
+}

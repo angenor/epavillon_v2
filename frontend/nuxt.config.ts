@@ -47,6 +47,10 @@ export default defineNuxtConfig({
   // Surchargeable par NUXT_PUBLIC_API_BASE, lue dans le `.env` de la racine
   // (voir le drapeau --dotenv des scripts npm). À renseigner au prompt B7.
   runtimeConfig: {
+    // PRIVÉE : n'atteint jamais le navigateur. L'adresse interne de l'API,
+    // pour le rendu serveur seul — voir `composables/api/http.ts`. Vide en
+    // développement, où le chemin public suffit.
+    apiBaseServer: '',
     public: {
       apiBase: '',
     },

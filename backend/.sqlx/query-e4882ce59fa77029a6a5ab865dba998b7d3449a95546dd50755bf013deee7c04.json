@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE engagement.scheduled_reminders\n            SET status = 'skipped', skip_reason = $2\n          WHERE id = $1 AND status IN ('pending', 'queued')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e4882ce59fa77029a6a5ab865dba998b7d3449a95546dd50755bf013deee7c04"
+}

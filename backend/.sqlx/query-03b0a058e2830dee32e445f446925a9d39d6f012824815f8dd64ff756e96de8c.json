@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE platform.jobs\n            SET status = 'queued', locked_at = NULL, locked_by = NULL, completed_at = NULL\n          WHERE task = $1 AND status <> 'queued'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "03b0a058e2830dee32e445f446925a9d39d6f012824815f8dd64ff756e96de8c"
+}

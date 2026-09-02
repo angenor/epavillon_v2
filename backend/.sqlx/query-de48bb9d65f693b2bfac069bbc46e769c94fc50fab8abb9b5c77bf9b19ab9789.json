@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH ordonnees AS (\n               SELECT id, (row_number() OVER (ORDER BY sort_order, id) * $2)::smallint AS rang\n                 FROM content.highlights\n                WHERE placement = $1::text::content.highlight_placement\n           )\n           UPDATE content.highlights h\n              SET sort_order = o.rang\n             FROM ordonnees o\n            WHERE h.id = o.id AND h.sort_order <> o.rang",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "de48bb9d65f693b2bfac069bbc46e769c94fc50fab8abb9b5c77bf9b19ab9789"
+}

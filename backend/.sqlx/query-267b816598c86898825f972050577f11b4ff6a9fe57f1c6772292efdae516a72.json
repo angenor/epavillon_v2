@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.people\n            SET first_name = $2, last_name = $3, civility = $4\n          WHERE id = $1\n            AND NOT EXISTS (SELECT 1 FROM identity.accounts a WHERE a.person_id = $1)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "267b816598c86898825f972050577f11b4ff6a9fe57f1c6772292efdae516a72"
+}

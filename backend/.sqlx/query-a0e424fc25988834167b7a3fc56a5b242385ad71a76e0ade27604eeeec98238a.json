@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"n!\"\n             FROM engagement.scheduled_reminders sr\n             JOIN platform.jobs j ON j.id = sr.job_id\n            WHERE sr.session_id = $1 AND j.run_at = sr.scheduled_for",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a0e424fc25988834167b7a3fc56a5b242385ad71a76e0ade27604eeeec98238a"
+}

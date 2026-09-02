@@ -1,0 +1,184 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, taxonomy_code, parent_id, code,\n                  label AS \"label!: Value\", description AS \"description?: Value\",\n                  color_hex, icon, sort_order, is_active, superseded_by,\n                  metadata AS \"metadata!: Value\",\n                  created_at, updated_at\n             FROM reference.taxonomy_terms\n            WHERE taxonomy_code = $1 AND is_active\n            ORDER BY sort_order, code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "taxonomy_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "taxonomy_code"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "parent_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "parent_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "label!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "label"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "description?: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "color_hex",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "color_hex"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "icon",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "icon"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "sort_order",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "sort_order"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "is_active",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "is_active"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "superseded_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "superseded_by"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "metadata!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "metadata"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "68ab258e54cf5ee419bcf61d2cb05cfda7ae9df9c0f94ccccceda899ae95a2bc"
+}

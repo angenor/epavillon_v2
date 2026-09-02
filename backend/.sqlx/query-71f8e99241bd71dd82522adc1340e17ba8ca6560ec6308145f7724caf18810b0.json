@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.incidents\n              SET scope              = $2::text::live.incident_scope,\n                  event_id           = $3,\n                  event_day_id       = $4,\n                  session_id         = $5,\n                  organization_id    = $6,\n                  incident_kind_code = $7,\n                  severity           = $8::text::live.incident_severity,\n                  title              = $9,\n                  message            = $10,\n                  action_url         = $11::text::platform.url,\n                  is_dismissible     = $12,\n                  display_from       = $13,\n                  display_until      = $14\n            WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        {
+          "Custom": {
+            "name": "platform.i18n_text",
+            "kind": {
+              "Domain": "Jsonb"
+            }
+          }
+        },
+        {
+          "Custom": {
+            "name": "platform.i18n_text",
+            "kind": {
+              "Domain": "Jsonb"
+            }
+          }
+        },
+        "Text",
+        "Bool",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "71f8e99241bd71dd82522adc1340e17ba8ca6560ec6308145f7724caf18810b0"
+}

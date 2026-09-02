@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE media.assets\n              SET scan_verdict = $2::text::media.scan_verdict,\n                  scan_engine  = $3,\n                  scanned_at   = now(),\n                  scan_details = CASE WHEN $4::text IS NULL THEN NULL\n                                      ELSE jsonb_build_object('message', $4::text) END\n            WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9db4444502a8fbef5df3fc0b5a55ceb70eafbfa918ee3834a62662618acef2b3"
+}

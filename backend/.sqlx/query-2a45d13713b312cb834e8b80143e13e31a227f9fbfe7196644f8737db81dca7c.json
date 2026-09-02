@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.session_organizations\n             (session_id, organization_id, role, sort_order)\n         SELECT $2, o.organization_id, o.role, o.sort_order\n           FROM programme.proposal_organizations o\n          WHERE o.proposal_id = $1 AND o.role <> 'lead'\n         ON CONFLICT (session_id, organization_id) DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2a45d13713b312cb834e8b80143e13e31a227f9fbfe7196644f8737db81dca7c"
+}

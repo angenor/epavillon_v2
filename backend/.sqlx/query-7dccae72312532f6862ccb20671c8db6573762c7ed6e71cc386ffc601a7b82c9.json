@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.broadcast_channels (event_id, code, name, is_default)\n           VALUES ($1, 'principal', '{\"fr\":\"Chaîne du pavillon\"}'::jsonb, true)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.broadcast_channels",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "7dccae72312532f6862ccb20671c8db6573762c7ed6e71cc386ffc601a7b82c9"
+}

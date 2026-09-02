@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM programme.proposal_speakers s\n            WHERE s.proposal_id = $1\n              AND NOT EXISTS (\n                  SELECT 1 FROM unnest($2::uuid[], $3::text[]) AS g(personne, role)\n                   WHERE g.personne = s.person_id\n                     AND g.role::programme.speaker_role = s.role\n              )",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3becddd96b7aa89d5324a6766ce068aff60ec86c504983fa3b47cfbac624b68e"
+}

@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.to_status::text AS \"vers!\", r.requires_reason\n             FROM programme.proposals p\n             JOIN programme.proposal_transitions_allowed r ON r.from_status = p.status\n            WHERE p.id = $1\n              AND p.deleted_at IS NULL\n              AND (\n                    (r.allowed_for_owner AND EXISTS (\n                         SELECT 1 FROM org.memberships m\n                          WHERE m.organization_id = p.organization_id\n                            AND m.person_id = $2\n                            AND m.status = 'active'))\n                 OR (r.required_permission IS NOT NULL\n                     AND identity.has_permission($2, r.required_permission, 'event', p.event_id))\n              )\n            ORDER BY r.to_status",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "vers!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "requires_reason",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_transitions_allowed",
+            "name": "requires_reason"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      false
+    ]
+  },
+  "hash": "a7382a6f831f4d275d74d5b231dea009254f49cbc092898ffed8d76d57e290a6"
+}

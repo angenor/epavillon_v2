@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO reference.entity_terms (entity_schema, entity_table, entity_id, term_id)\n           SELECT 'content', 'highlights', $1, t.id\n             FROM reference.taxonomy_terms t\n            WHERE t.taxonomy_code = 'activity_theme' AND t.is_active AND t.code = ANY($2::text[])\n           ON CONFLICT DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "35556473fe37dcb7a63e78533d2f985946100d4b72d298702d2583aa08b261cb"
+}

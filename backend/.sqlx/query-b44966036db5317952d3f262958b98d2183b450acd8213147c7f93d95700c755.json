@@ -1,0 +1,54 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT d.jour                AS \"jour!\",\n                  d.soumissions         AS \"valeur!\",\n                  d.soumissions_cumulees::bigint AS \"cumul!\",\n                  d.moyenne_mobile_7j::float8 AS \"moyenne_7j?\"\n             FROM analytics.mv_daily_submissions d\n            WHERE d.event_id = $1\n            ORDER BY d.jour",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "jour!",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_daily_submissions",
+            "name": "jour"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "valeur!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_daily_submissions",
+            "name": "soumissions"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "cumul!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "moyenne_7j?",
+        "type_info": "Float8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "b44966036db5317952d3f262958b98d2183b450acd8213147c7f93d95700c755"
+}

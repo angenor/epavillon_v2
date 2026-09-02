@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.events\n               (series_id, edition_label, edition_year, title, slug, description,\n                status, participation_mode, timezone, starts_at, ends_at, has_pavilion)\n           VALUES ($1, 'PACO 2027', 2027,\n                   '{\"fr\":\"Rendez-vous du PACO\",\"en\":\"PACO meeting\"}'::jsonb,\n                   'rendez-vous-paco-2027'::platform.slug,\n                   '{\"fr\":\"Cycle en ligne, sans pavillon.\",\"en\":\"Online series, no pavilion.\"}'::jsonb,\n                   'announced', 'online', 'Africa/Dakar'::platform.timezone_name,\n                   timestamp '2027-03-02 10:00' AT TIME ZONE 'Africa/Dakar',\n                   timestamp '2027-03-04 16:00' AT TIME ZONE 'Africa/Dakar',\n                   false)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8fcb9d96427e3f9a537b90d7a2fcc2a72acad830382f15f8684def663a909263"
+}

@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(\n                      to_jsonb(s),\n                      jsonb_build_object(\n                          'organization_id',           o.id,\n                          'legal_name',                o.legal_name,\n                          'acronym',                   o.acronym,\n                          'slug',                      o.slug,\n                          'statut',                    o.status::text,\n                          'organization_type_code',    o.organization_type_code,\n                          'country_id',                o.country_id,\n                          'pays_iso3',                 c.iso3,\n                          'pays_nom',                  platform.t(c.name),\n                          'statut_oif',                COALESCE(c.oif_status::text, 'none'),\n                          'est_verifiee',              (o.verified_at IS NOT NULL),\n                          'verified_at',               o.verified_at,\n                          'score_confiance',           o.trust_score,\n                          'merged_into_id',            o.merged_into_id,\n                          'membres_actifs',            0,\n                          'membres_en_attente',        0,\n                          'referents',                 0,\n                          'propositions_deposees',     0,\n                          'propositions_en_brouillon', 0,\n                          'propositions_acceptees',    0,\n                          'propositions_rejetees',     0,\n                          'propositions_retirees',     0,\n                          'evenements_couverts',       0,\n                          'note_moyenne_obtenue',      NULL,\n                          'ratio_acceptation',         NULL,\n                          'sessions_programmees',      0,\n                          'sessions_realisees',        0,\n                          'sessions_annulees',         0,\n                          'inscrits_a_ses_sessions',   0,\n                          'presents_a_ses_sessions',   0,\n                          'articles_publies',          0,\n                          'articles_en_moderation',    0,\n                          'octets_stockes',            0,\n                          'derniere_activite',         o.updated_at,\n                          'inscrite_le',               o.created_at\n                      )\n                  ) AS \"fiche!\"\n             FROM org.organizations o\n             LEFT JOIN reference.countries c ON c.id = o.country_id\n             LEFT JOIN analytics.mv_organization_scorecard s ON s.organization_id = o.id\n            WHERE o.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "fiche!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "1154d1cbcf571da3bb9a144268f0d1d8b93d763a4f3b1bc1850c8c0d18eac40f"
+}

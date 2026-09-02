@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.review_assignments (proposal_id, reviewer_id, due_at)\n         VALUES ($1, $2, now() + interval '10 days')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0684c02b8c6049c9abf0ec8216ed7b7128ed6d180606b86e3c43ad2bd1e33392"
+}

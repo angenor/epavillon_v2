@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposal_comments (proposal_id, author_id, visibility, body)\n         VALUES ($1, $2, 'committee', 'Un point à vérifier.')\n      RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_comments",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "3ae92c59ea48080f3a1c0f93613f827dbbdf75d53dc3767e5e1b673fd2a006ff"
+}

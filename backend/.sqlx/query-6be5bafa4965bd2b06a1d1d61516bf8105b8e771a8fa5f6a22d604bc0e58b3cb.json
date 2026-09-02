@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE engagement.scheduled_reminders SET status = 'sent', sent_at = now() WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6be5bafa4965bd2b06a1d1d61516bf8105b8e771a8fa5f6a22d604bc0e58b3cb"
+}

@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH sans_journal AS (\n               SELECT p.id, p.status, p.created_at, p.submitted_at, p.decided_at\n                 FROM programme.proposals p\n                WHERE p.deleted_at IS NULL\n                  AND NOT EXISTS (\n                      SELECT 1 FROM programme.proposal_transitions t\n                       WHERE t.proposal_id = p.id\n                  )\n           ),\n           lignes AS (\n               -- 1. L'ouverture du dossier. Toujours : un dossier a été créé.\n               --\n               --    L'instant est BORNÉ par les deux autres dates, et ce n'est\n               --    pas une précaution théorique : une reprise qui ne recopie\n               --    pas la date d'origine laisse `created_at` à l'instant de\n               --    l'IMPORT, c'est-à-dire après le dépôt et la décision. La\n               --    frise afficherait alors « dossier créé » en dernier — faux,\n               --    et visible du premier coup d'œil.\n               --\n               --    Quand la date de création est postérieure au dépôt, on la\n               --    ramène **une microseconde avant** : c'est une convention\n               --    assumée, pas une invention de date. L'alternative — deux\n               --    lignes au même instant — laisserait l'ordre au hasard, les\n               --    identifiants v7 n'étant pas ordonnés à l'intérieur d'une\n               --    milliseconde.\n               SELECT id AS proposal_id, 1 AS rang,\n                      NULL::programme.proposal_status AS depuis,\n                      'draft'::programme.proposal_status AS vers,\n                      CASE\n                          WHEN created_at < coalesce(submitted_at, decided_at, created_at + interval '1 second')\n                          THEN created_at\n                          ELSE coalesce(submitted_at, decided_at) - interval '1 microsecond'\n                      END AS instant\n                 FROM sans_journal\n               UNION ALL\n               -- 2. Le dépôt, si le dossier porte sa date.\n               SELECT id, 2, 'draft'::programme.proposal_status,\n                      'submitted'::programme.proposal_status, submitted_at\n                 FROM sans_journal WHERE submitted_at IS NOT NULL\n               UNION ALL\n               -- 3. La décision, si elle existe ET que l'état est final. On ne\n               --    devine NI le passage par l'évaluation, NI une demande de\n               --    correction : ce qui n'est pas dans les dates n'est pas\n               --    déductible, et l'inventer serait pire qu'un trou.\n               SELECT id, 3, 'submitted'::programme.proposal_status, status, decided_at\n                 FROM sans_journal\n                WHERE decided_at IS NOT NULL\n                  AND status IN ('accepted', 'rejected', 'cancelled', 'withdrawn')\n           ),\n           inserees AS (\n               INSERT INTO programme.proposal_transitions\n                   (proposal_id, from_status, to_status, actor_id, reason, occurred_at)\n               SELECT proposal_id, depuis, vers, NULL, NULL, instant\n                 FROM lignes\n                ORDER BY proposal_id, rang\n               RETURNING proposal_id\n           )\n           SELECT count(*) AS \"semees!\" FROM inserees",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "semees!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "3170fac779102f5dddd88f3310c67471d62da0d0b4fb2e898040a259788e4732"
+}

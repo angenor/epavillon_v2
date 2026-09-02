@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT co.iso2 AS \"cle!\", count(DISTINCT p.organization_id) AS \"compte!\"\n             FROM programme.proposals p\n             JOIN org.organizations o    ON o.id = p.organization_id\n             JOIN reference.countries co ON co.id = o.country_id\n            WHERE p.event_id = $1 AND p.deleted_at IS NULL\n            GROUP BY co.iso2\n            ORDER BY count(DISTINCT p.organization_id) DESC, co.iso2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "cle!",
+        "type_info": "Bpchar",
+        "origin": {
+          "Table": {
+            "table": "reference.countries",
+            "name": "iso2"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "compte!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "e9a19d93ea9bb7f4b71d089207780533b41a18c15bf3a6ba5a17ccae09c08e28"
+}

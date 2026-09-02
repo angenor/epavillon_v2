@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT taxonomy_code, code, label\n             FROM reference.taxonomy_terms\n            WHERE taxonomy_code = ANY($1) AND is_active\n            ORDER BY taxonomy_code, sort_order, code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "taxonomy_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "taxonomy_code"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "label",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "label"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "6827b5624b822e89e393dc5e1d605aafc2ca264f427d06252051f7df3fe8032f"
+}

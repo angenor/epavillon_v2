@@ -1,0 +1,54 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT weighted_score::float8, average_score::float8,\n                  review_count, is_knocked_out\n             FROM programme.proposals WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "weighted_score",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "average_score",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "review_count",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "review_count"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "is_knocked_out",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "is_knocked_out"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      false,
+      false
+    ]
+  },
+  "hash": "0a50cc49b8f0f662d443f999d071e289fa2a08913578eeca8d49e867ae4365bb"
+}

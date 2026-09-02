@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT is_enabled AS \"actif!\" FROM engagement.notification_preferences\n            WHERE person_id = $1 AND type_code = $2 AND channel = 'in_app'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "actif!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "engagement.notification_preferences",
+            "name": "is_enabled"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "c3b30bb02b4b86ef5fa0d93213958d28307c4e7e90b3318cf22460ae5a759def"
+}

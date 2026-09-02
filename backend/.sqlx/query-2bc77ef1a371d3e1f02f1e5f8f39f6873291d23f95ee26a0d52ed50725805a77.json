@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposal_organizations (proposal_id, organization_id, role)\n         VALUES ($1, $2, $3::text::programme.organization_role)\n         ON CONFLICT (proposal_id, organization_id) DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2bc77ef1a371d3e1f02f1e5f8f39f6873291d23f95ee26a0d52ed50725805a77"
+}

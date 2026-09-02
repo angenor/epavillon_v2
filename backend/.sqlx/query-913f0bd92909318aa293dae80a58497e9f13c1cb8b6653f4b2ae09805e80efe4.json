@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.registration_form_fields\n               (form_id, code, label, field_type, is_active, sort_order)\n           SELECT id, 'retire', '{\"fr\":\"Question retirée\"}'::jsonb, 'text', false, 90\n             FROM programme.registration_forms WHERE code = 'default'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "913f0bd92909318aa293dae80a58497e9f13c1cb8b6653f4b2ae09805e80efe4"
+}

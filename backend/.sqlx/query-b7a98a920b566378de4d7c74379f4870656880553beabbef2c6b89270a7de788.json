@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT DISTINCT view_name AS \"vue!\" FROM analytics.refresh_log ORDER BY view_name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "vue!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "analytics.refresh_log",
+            "name": "view_name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "b7a98a920b566378de4d7c74379f4870656880553beabbef2c6b89270a7de788"
+}

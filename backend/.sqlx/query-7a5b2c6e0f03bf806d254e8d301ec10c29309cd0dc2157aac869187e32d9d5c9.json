@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM programme.session_tracks\n          WHERE session_id = $1 AND NOT (track_id = ANY($2))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7a5b2c6e0f03bf806d254e8d301ec10c29309cd0dc2157aac869187e32d9d5c9"
+}

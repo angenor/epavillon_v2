@@ -1,0 +1,39 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposal_organizations\n               (proposal_id, organization_id, role, sort_order, added_by)\n           SELECT $1, e.org, e.role::programme.organization_role, e.rang, $5\n             FROM unnest($2::uuid[], $3::text[], $4::smallint[]) AS e(org, role, rang)\n           ON CONFLICT (proposal_id, organization_id) DO UPDATE\n               SET role = EXCLUDED.role, sort_order = EXCLUDED.sort_order\n        RETURNING organization_id, (xmax = 0) AS \"nouvelle!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "organization_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_organizations",
+            "name": "organization_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "nouvelle!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray",
+        "TextArray",
+        "Int2Array",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "0c836cbbb9a9fdba1577d0023a7aeff5b0fd8393d6abfcb9442e22a14c1ec650"
+}

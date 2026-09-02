@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT media.has_storage_capacity($1, $2) AS \"place!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "place!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a0e488b1e548776d58843d5af5d1d4b416ab4bc456606a1fa01430e52bd7cd88"
+}

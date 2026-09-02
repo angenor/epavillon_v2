@@ -1,0 +1,63 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT to_jsonb(s) - 'search_vector' AS \"session!\",\n                  to_jsonb(r) AS \"room?\",\n                  s.capacity::int4 AS \"capacity?\",\n                  (SELECT count(*) FROM programme.registrations rg\n                    WHERE rg.session_id = s.id\n                      AND rg.status IN ('registered', 'attended')) AS \"confirmes!\",\n                  (SELECT count(*) FROM programme.registrations rg\n                    WHERE rg.session_id = s.id AND rg.status = 'waitlisted')\n                      AS \"en_attente!\",\n                  COALESCE((\n                      SELECT jsonb_agg(jsonb_build_object(\n                                 'offset_before',   sch.offset_minutes,\n                                 'channel',         sch.channel,\n                                 'scheduled_for',   sch.scheduled_for,\n                                 'status',          sch.status,\n                                 'recipient_count', sch.recipient_count,\n                                 'skip_reason',     sch.skip_reason,\n                                 'sent_at',         sch.sent_at)\n                             ORDER BY sch.offset_minutes DESC, sch.channel)\n                        FROM engagement.session_reminder_schedule(s.id) sch\n                  ), '[]'::jsonb) AS \"rappels!\"\n             FROM programme.sessions s\n             LEFT JOIN event.rooms r ON r.id = s.room_id\n            WHERE s.proposal_id = $1\n            ORDER BY s.sequence_number, s.starts_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "session!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "room?",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "capacity?",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "capacity"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "confirmes!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "en_attente!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "rappels!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      true,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "37c05d45a94ea11d7d40e11b3c03638f655e8783c6855121d0411b3086f86f71"
+}

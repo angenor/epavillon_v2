@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.rooms (venue_id, name, code, capacity, is_virtual, has_streaming)\n           VALUES ($1, jsonb_build_object('fr', $3::text), $2, 80, $4, true)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.rooms",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "89cbf89ebdb7f6aadc84eaaabc9021b3b21b8b85789c2af18110f8e71fa84f5f"
+}

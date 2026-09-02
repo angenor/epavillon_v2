@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(DISTINCT proposal_id) AS \"n!\"\n             FROM programme.proposal_transitions\n            WHERE actor_id IS NULL AND reason IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "94134cc5e2fcf960bb553a25f19c13d41af8ed228a18006c96598eea92f173b3"
+}

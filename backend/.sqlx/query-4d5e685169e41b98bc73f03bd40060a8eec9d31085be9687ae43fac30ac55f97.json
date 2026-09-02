@@ -1,0 +1,163 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, type_code, title, body, variables, link_path,\n                  subject_schema, subject_table, subject_id, group_count,\n                  read_at, created_at\n             FROM engagement.notifications\n            WHERE person_id = $1\n              AND archived_at IS NULL\n              AND ($2 = false OR read_at IS NULL)\n              AND ($3::timestamptz IS NULL OR created_at < $3)\n            ORDER BY created_at DESC\n            LIMIT $4",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.notifications",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "type_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.notifications",
+            "name": "type_code"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "title",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "engagement.notifications",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "body",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "engagement.notifications",
+            "name": "body"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "variables",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "engagement.notifications",
+            "name": "variables"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "link_path",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.notifications",
+            "name": "link_path"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "subject_schema",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.notifications",
+            "name": "subject_schema"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "subject_table",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.notifications",
+            "name": "subject_table"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "subject_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.notifications",
+            "name": "subject_id"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "group_count",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "engagement.notifications",
+            "name": "group_count"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "read_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.notifications",
+            "name": "read_at"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.notifications",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool",
+        "Timestamptz",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "4d5e685169e41b98bc73f03bd40060a8eec9d31085be9687ae43fac30ac55f97"
+}

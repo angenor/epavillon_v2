@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT media.rendition_bytes($1) AS \"poids!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "poids!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "c672b8631b892633dfa850c41aeeaae0e6bedb8ff60e5f1fd130bd1509d669b8"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO analytics.refresh_log\n             (view_name, started_at, finished_at, succeeded, error_message)\n         VALUES ('mv_proposal_funnel', now() + interval '1 hour',\n                 now() + interval '1 hour', false, 'échec simulé')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "dc8f844ba975f3baa308cf9d67a9da662655c167300296e5b105685daa1d9765"
+}

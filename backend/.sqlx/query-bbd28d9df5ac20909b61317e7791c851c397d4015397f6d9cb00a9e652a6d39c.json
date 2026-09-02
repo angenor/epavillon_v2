@@ -1,0 +1,443 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, reference_code, call_id, event_id, organization_id, submitted_by,\n                  contact_person_id, title, slug::text AS \"slug!\", summary, objectives,\n                  detailed_presentation, expected_outcomes,\n                  target_audiences::jsonb[] AS \"target_audiences!\",\n                  format::text AS \"format!\", activity_type_code, language_codes,\n                  country_id, preferred_start_at, preferred_end_at, duration_minutes,\n                  requested_sessions, scheduling_constraints,\n                  status::text AS \"status!\", submitted_at, decided_at, decision_reason,\n                  decided_by, average_score::float8, weighted_score::float8,\n                  review_count, is_knocked_out, view_count,\n                  deleted_at, deleted_by, deleted_reason, created_at, updated_at\n             FROM programme.proposals\n            WHERE organization_id = $1\n              AND deleted_at IS NULL\n              AND ($2::uuid[] IS NULL OR event_id = ANY($2::uuid[]))\n            ORDER BY created_at DESC, reference_code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "reference_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "reference_code"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "call_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "call_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "organization_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "organization_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "submitted_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "submitted_by"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "contact_person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "contact_person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "title",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "summary",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "summary"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "objectives",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "objectives"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "detailed_presentation",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "detailed_presentation"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "expected_outcomes",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "expected_outcomes"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "target_audiences!",
+        "type_info": "JsonbArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 14,
+        "name": "format!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 15,
+        "name": "activity_type_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "activity_type_code"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "language_codes",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "language_codes"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "country_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "country_id"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "preferred_start_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "preferred_start_at"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "preferred_end_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "preferred_end_at"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "duration_minutes",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "duration_minutes"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "requested_sessions",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "requested_sessions"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
+        "name": "scheduling_constraints",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "scheduling_constraints"
+          }
+        }
+      },
+      {
+        "ordinal": 23,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 24,
+        "name": "submitted_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "submitted_at"
+          }
+        }
+      },
+      {
+        "ordinal": 25,
+        "name": "decided_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "decided_at"
+          }
+        }
+      },
+      {
+        "ordinal": 26,
+        "name": "decision_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "decision_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 27,
+        "name": "decided_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "decided_by"
+          }
+        }
+      },
+      {
+        "ordinal": 28,
+        "name": "average_score",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 29,
+        "name": "weighted_score",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 30,
+        "name": "review_count",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "review_count"
+          }
+        }
+      },
+      {
+        "ordinal": 31,
+        "name": "is_knocked_out",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "is_knocked_out"
+          }
+        }
+      },
+      {
+        "ordinal": 32,
+        "name": "view_count",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "view_count"
+          }
+        }
+      },
+      {
+        "ordinal": 33,
+        "name": "deleted_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "deleted_at"
+          }
+        }
+      },
+      {
+        "ordinal": 34,
+        "name": "deleted_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "deleted_by"
+          }
+        }
+      },
+      {
+        "ordinal": 35,
+        "name": "deleted_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "deleted_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 36,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 37,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      null,
+      true,
+      false,
+      false,
+      true,
+      null,
+      null,
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      null,
+      true,
+      true,
+      true,
+      true,
+      null,
+      null,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "bbd28d9df5ac20909b61317e7791c851c397d4015397f6d9cb00a9e652a6d39c"
+}

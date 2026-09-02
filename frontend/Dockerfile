@@ -25,6 +25,15 @@ ENV NUXT_APP_BASE_URL=$NUXT_APP_BASE_URL \
     NUXT_PUBLIC_API_BASE=$NUXT_PUBLIC_API_BASE \
     NUXT_PUBLIC_SITE_URL=$NUXT_PUBLIC_SITE_URL
 
+# **`prepare` AVANT `build`, et ce n'est pas redondant.** Le `postinstall` du
+# paquet l'a déjà lancé — mais à l'étape précédente, quand seul `package.json`
+# était copié : le `tsconfig` engendré ignorait alors l'arborescence, et donc
+# l'alias `~`. Le compilateur de composants ne résolvait plus les types importés
+# et refusait les six composants dont les propriétés étendent un type partagé,
+# sur une erreur qui ne nomme ni l'alias ni le fichier manquant. Le rejouer une
+# fois les sources en place coûte quelques secondes.
+RUN npx nuxt prepare
+
 # `npm run build` passe `--dotenv ../.env`, absent ici et sans objet : les
 # valeurs viennent des arguments ci-dessus.
 RUN npx nuxt build

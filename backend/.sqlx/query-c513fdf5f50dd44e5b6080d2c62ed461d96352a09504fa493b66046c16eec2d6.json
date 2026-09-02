@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT owner_schema, owner_table, owner_id, asset_id\n           FROM media.attachments WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "owner_schema",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "media.attachments",
+            "name": "owner_schema"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "owner_table",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "media.attachments",
+            "name": "owner_table"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "owner_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "media.attachments",
+            "name": "owner_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "asset_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "media.attachments",
+            "name": "asset_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "c513fdf5f50dd44e5b6080d2c62ed461d96352a09504fa493b66046c16eec2d6"
+}

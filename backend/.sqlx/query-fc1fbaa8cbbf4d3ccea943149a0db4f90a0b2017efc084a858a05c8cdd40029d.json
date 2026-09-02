@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO media.attachments\n               (owner_schema, owner_table, owner_id, asset_id, role,\n                sort_order, alt_text_override, created_by)\n           VALUES ($1, $2, $3, $4, $5::text::media.attachment_role,\n                   $6, $7::jsonb::platform.i18n_text, $8)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "media.attachments",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Int2",
+        "Jsonb",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "fc1fbaa8cbbf4d3ccea943149a0db4f90a0b2017efc084a858a05c8cdd40029d"
+}

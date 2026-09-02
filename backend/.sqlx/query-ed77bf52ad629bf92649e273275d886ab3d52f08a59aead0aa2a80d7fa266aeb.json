@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE engagement.email_messages\n            SET type_code = $2,\n                template_id = $3,\n                template_version = $4,\n                reminder_id = $5,\n                to_person_id = $6\n          WHERE job_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid",
+        "Int2",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ed77bf52ad629bf92649e273275d886ab3d52f08a59aead0aa2a80d7fa266aeb"
+}

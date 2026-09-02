@@ -1,0 +1,66 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.status::text AS \"statut!\", c.opens_at,\n                  event.effective_deadline(c.id) AS \"echeance!\",\n                  c.max_proposals_per_organization, c.requires_verified_organization\n             FROM event.calls_for_proposals c WHERE c.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "statut!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "opens_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "opens_at"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "echeance!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "max_proposals_per_organization",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "max_proposals_per_organization"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "requires_verified_organization",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "requires_verified_organization"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      false,
+      null,
+      true,
+      false
+    ]
+  },
+  "hash": "b36c249211efef66d58047a38d208550ebaf319d89b432e0bf6e396dc828b6f4"
+}

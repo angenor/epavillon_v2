@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT rs.review_id, rs.criterion_id, rs.score::float8 AS \"score!\", rs.comment\n             FROM programme.review_scores rs\n             JOIN event.review_criteria c ON c.id = rs.criterion_id\n            WHERE rs.review_id = ANY($1)\n            ORDER BY c.sort_order, c.code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "review_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.review_scores",
+            "name": "review_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "criterion_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.review_scores",
+            "name": "criterion_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "score!",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "comment",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.review_scores",
+            "name": "comment"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      true
+    ]
+  },
+  "hash": "d32ab29742c682c393441f93bfe55365923aa889a4d6c7eca144345bf41aad83"
+}

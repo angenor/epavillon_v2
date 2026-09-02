@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (\n               SELECT 1 FROM programme.proposal_reads\n                WHERE proposal_id = $1 AND person_id = $2\n           ) AS \"lu!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "lu!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "dcf485c4a895e167597ce8e738a9349ef6ad99bf5cdc21a1a7c11adbabf465df"
+}

@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO engagement.message_templates (key, label, type_code)\n           VALUES ($1::text::platform.slug,\n                   jsonb_build_object('fr', $1::text, 'en', $1::text)::platform.i18n_text,\n                   $2)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.message_templates",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "2aed7af902361cd0e92e4d5a5e847588ae0be2dbe0960cfaf9ef2504529e7f26"
+}

@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT to_jsonb(f) AS \"champ!\", f.options ->> 'taxonomy' AS \"taxonomie?\"\n             FROM programme.registration_form_fields f\n            WHERE f.form_id = $1 AND f.is_active\n            ORDER BY f.sort_order, f.code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "champ!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "taxonomie?",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "96c181f19b12623415d0d4767e4482f5589e2dfa35dc6cd53a40346ed6a1fcad"
+}

@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT cr.person_id, p.display_name AS \"display_name!\",\n                  cr.is_lead, cr.workload_cap\n             FROM event.call_reviewers cr\n             JOIN identity.people p ON p.id = cr.person_id\n            WHERE cr.call_id = $1\n            ORDER BY p.display_name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.call_reviewers",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "is_lead",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.call_reviewers",
+            "name": "is_lead"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "workload_cap",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.call_reviewers",
+            "name": "workload_cap"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "6281c9f14cb29c9f142c2f4d3892243c6e19f3bc2b4319f1ccea011e43a27fe9"
+}

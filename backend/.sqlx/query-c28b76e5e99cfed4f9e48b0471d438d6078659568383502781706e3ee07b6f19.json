@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT payload::text AS \"charge!\" FROM platform.outbox_events\n            WHERE event_type = 'engagement.email.suppressed'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "charge!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "c28b76e5e99cfed4f9e48b0471d438d6078659568383502781706e3ee07b6f19"
+}

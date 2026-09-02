@@ -1,0 +1,82 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO engagement.email_suppressions\n               (email, reason, detail, expires_at, suppressed_by)\n           VALUES ($1::text::platform.email,\n                   $2::text::engagement.suppression_reason, $3, $4, $5)\n           ON CONFLICT (email) DO UPDATE\n               SET reason = EXCLUDED.reason,\n                   detail = EXCLUDED.detail,\n                   expires_at = EXCLUDED.expires_at,\n                   suppressed_at = now(),\n                   suppressed_by = EXCLUDED.suppressed_by\n        RETURNING email::text AS \"email!\", reason::text AS \"reason!\", detail,\n                  expires_at, suppressed_at, suppressed_by",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "reason!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "detail",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.email_suppressions",
+            "name": "detail"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "expires_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.email_suppressions",
+            "name": "expires_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "suppressed_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.email_suppressions",
+            "name": "suppressed_at"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "suppressed_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.email_suppressions",
+            "name": "suppressed_by"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Timestamptz",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      true,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "210923fbd6d3ba22bf62bdab1c4f4d8a92d5434981db12da21f84e05bacf227e"
+}

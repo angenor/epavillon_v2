@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE engagement.scheduled_reminders\n            SET status = 'cancelled', skip_reason = $2\n          WHERE rule_id = $1 AND status IN ('pending', 'queued')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "60b9b78c4a70e0019ab3f25cce2aeb868b9152d0b78e76b1e4a5737a3b6f33c3"
+}

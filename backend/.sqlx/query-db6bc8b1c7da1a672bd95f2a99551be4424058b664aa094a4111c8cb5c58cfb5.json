@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT purpose, is_granted, policy_version, source\n             FROM identity.consents\n            WHERE person_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "purpose",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.consents",
+            "name": "purpose"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "is_granted",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "identity.consents",
+            "name": "is_granted"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "policy_version",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.consents",
+            "name": "policy_version"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "source",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.consents",
+            "name": "source"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "db6bc8b1c7da1a672bd95f2a99551be4424058b664aa094a4111c8cb5c58cfb5"
+}

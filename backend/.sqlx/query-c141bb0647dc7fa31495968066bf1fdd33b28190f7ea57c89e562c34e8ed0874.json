@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, iso2 AS \"iso2!\", name AS \"name!\"\n             FROM reference.countries\n            ORDER BY iso2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "reference.countries",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "iso2!",
+        "type_info": "Bpchar",
+        "origin": {
+          "Table": {
+            "table": "reference.countries",
+            "name": "iso2"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "name!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "reference.countries",
+            "name": "name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "c141bb0647dc7fa31495968066bf1fdd33b28190f7ea57c89e562c34e8ed0874"
+}

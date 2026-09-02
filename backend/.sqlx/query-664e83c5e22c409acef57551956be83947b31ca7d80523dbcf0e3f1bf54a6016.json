@@ -1,0 +1,274 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, series_id, edition_label, edition_year, title, acronym,\n                  slug::text AS \"slug!\", description, status::text AS \"status!\",\n                  participation_mode::text AS \"participation_mode!\",\n                  timezone::text AS \"timezone!\", starts_at, ends_at,\n                  country_id, city, address,\n                  latitude::float8, longitude::float8, has_pavilion,\n                  programme_published_at, highlights, created_by,\n                  created_at, updated_at\n             FROM event.events WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "series_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "series_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "edition_label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "edition_label"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "edition_year",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "edition_year"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "title",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "acronym",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "acronym"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "description",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "participation_mode!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "timezone!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "starts_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "ends_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "ends_at"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "country_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "country_id"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "city",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "city"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "address",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "address"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "latitude",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 17,
+        "name": "longitude",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 18,
+        "name": "has_pavilion",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "has_pavilion"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "programme_published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "programme_published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "highlights",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "highlights"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "created_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "created_by"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 23,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      true,
+      false,
+      false,
+      true,
+      null,
+      false,
+      null,
+      null,
+      null,
+      false,
+      false,
+      true,
+      true,
+      true,
+      null,
+      null,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "664e83c5e22c409acef57551956be83947b31ca7d80523dbcf0e3f1bf54a6016"
+}

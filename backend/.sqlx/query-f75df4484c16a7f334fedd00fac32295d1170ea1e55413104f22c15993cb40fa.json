@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT et.entity_schema, et.entity_table, t.code\n             FROM reference.entity_terms et\n             JOIN reference.taxonomy_terms t ON t.id = et.term_id\n            WHERE et.entity_id = $1\n            ORDER BY et.sort_order, t.code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "entity_schema",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.entity_terms",
+            "name": "entity_schema"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "entity_table",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.entity_terms",
+            "name": "entity_table"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "f75df4484c16a7f334fedd00fac32295d1170ea1e55413104f22c15993cb40fa"
+}

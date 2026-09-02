@@ -57,7 +57,24 @@ export interface ApiHttp {
 
 export function createApiHttp(): ApiHttp {
   const config = useRuntimeConfig()
-  const baseURL = String(config.public.apiBase ?? '')
+
+  /**
+   * **Deux bases, et elles ne peuvent pas être la même.**
+   *
+   * Le navigateur appelle un CHEMIN — `/v2/api` —, ce qui garde une seule
+   * origine, donc des cookies de première partie et aucun CORS. Mais un chemin
+   * n'a pas d'origine : au rendu serveur, il ne désigne plus l'API mais Nitro
+   * lui-même, qui ne connaît pas cette route. Les pages publiques se rendraient
+   * alors vides — sans erreur visible, et pour les moteurs de recherche
+   * d'abord, c'est-à-dire là où personne ne regarde.
+   *
+   * `apiBaseServer` porte donc l'adresse INTERNE de l'API (`http://api:8080/api`
+   * entre conteneurs). Absente, tout retombe sur la base publique : en
+   * développement, où le site et l'API partagent l'hôte, elle est inutile.
+   */
+  const baseURL = import.meta.server && config.apiBaseServer
+    ? String(config.apiBaseServer)
+    : String(config.public.apiBase ?? '')
   const isConfigured = computed(() => baseURL.length > 0)
 
   const status = useApiStatus()

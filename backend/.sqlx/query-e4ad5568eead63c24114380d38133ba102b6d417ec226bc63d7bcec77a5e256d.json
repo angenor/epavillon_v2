@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT variant_code, format::text AS \"format!\"\n             FROM media.renditions\n            WHERE asset_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "variant_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "media.renditions",
+            "name": "variant_code"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "format!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "e4ad5568eead63c24114380d38133ba102b6d417ec226bc63d7bcec77a5e256d"
+}

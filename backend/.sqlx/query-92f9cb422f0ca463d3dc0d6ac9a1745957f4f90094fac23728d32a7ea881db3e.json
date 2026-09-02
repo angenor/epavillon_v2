@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE org.memberships SET status = 'revoked'\n          WHERE organization_id = $1 AND person_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "92f9cb422f0ca463d3dc0d6ac9a1745957f4f90094fac23728d32a7ea881db3e"
+}

@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (\n               SELECT 1 FROM programme.sessions\n                WHERE event_id = $1 AND slug = $2::text::platform.slug\n           ) AS \"prise!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "prise!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "1b48b7ef24cb12b821c243140b24e0a19de0a3251789ecde63152f1b2cc98844"
+}

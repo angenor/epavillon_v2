@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM platform.settings WHERE key = 'analytics.review_alert_days'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "ba6d8e29f6a298ea629a48926d1c63d84e3bdc6fa14eb0d71a62ffae387c6296"
+}

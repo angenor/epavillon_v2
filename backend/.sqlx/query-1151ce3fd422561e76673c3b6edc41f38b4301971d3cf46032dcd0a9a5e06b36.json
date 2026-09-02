@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.registration_form_fields\n               (form_id, code, label, field_type, is_required, options, validation, sort_order)\n           SELECT id, v.code, v.label::jsonb, v.nature::programme.form_field_type,\n                  v.obligatoire, v.options::jsonb, v.regles::jsonb, v.rang\n             FROM programme.registration_forms f\n             CROSS JOIN (VALUES\n                 ('participants', '{\"fr\":\"Nombre de participants\"}', 'number', false,\n                  '{}', '{\"min\": 1, \"max\": 50}', 50),\n                 ('interets', '{\"fr\":\"Centres d''intérêt\"}', 'multiple_choice', true,\n                  '{\"values\":[{\"value\":\"eau\",\"label\":{\"fr\":\"Eau\"}}]}', '{}', 60)\n             ) AS v(code, label, nature, obligatoire, options, regles, rang)\n            WHERE f.code = 'default'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "1151ce3fd422561e76673c3b6edc41f38b4301971d3cf46032dcd0a9a5e06b36"
+}

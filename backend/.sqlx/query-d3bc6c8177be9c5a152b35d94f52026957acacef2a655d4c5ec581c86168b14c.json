@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(max(sort_order), 0) AS \"max!\"\n             FROM content.highlights\n            WHERE placement = $1::text::content.highlight_placement",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "max!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "d3bc6c8177be9c5a152b35d94f52026957acacef2a655d4c5ec581c86168b14c"
+}

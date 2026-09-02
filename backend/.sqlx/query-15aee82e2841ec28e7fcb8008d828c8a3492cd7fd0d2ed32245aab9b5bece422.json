@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.sessions\n               (event_id, proposal_id, title, slug, status, format,\n                starts_at, ends_at, timezone)\n           VALUES ($1, $2,\n                   '{\"fr\":\"Financer l''adaptation\",\"en\":\"Financing adaptation\"}'::jsonb,\n                   'financer-adaptation', 'scheduled', 'hybrid',\n                   now() + make_interval(days => $3::int),\n                   now() + make_interval(days => $3::int, hours => 2),\n                   'America/Belem'::platform.timezone_name)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "15aee82e2841ec28e7fcb8008d828c8a3492cd7fd0d2ed32245aab9b5bece422"
+}

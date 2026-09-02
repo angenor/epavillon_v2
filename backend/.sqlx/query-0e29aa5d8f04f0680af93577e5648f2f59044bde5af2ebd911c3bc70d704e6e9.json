@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT nt.label, nt.criticality::text AS \"criticality!\", nt.module_code\n             FROM engagement.notification_types nt\n            WHERE nt.code = $1 AND nt.is_active",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "label",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "engagement.notification_types",
+            "name": "label"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "criticality!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "module_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.notification_types",
+            "name": "module_code"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false
+    ]
+  },
+  "hash": "0e29aa5d8f04f0680af93577e5648f2f59044bde5af2ebd911c3bc70d704e6e9"
+}

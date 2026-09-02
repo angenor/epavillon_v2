@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT v.temporal_state AS \"etat?\"\n             FROM programme.v_public_schedule v\n            WHERE v.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "etat?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "temporal_state"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "fdd0f5bddbddf5862c808d777ba0feb3f503985310d90de3271a58364de53248"
+}

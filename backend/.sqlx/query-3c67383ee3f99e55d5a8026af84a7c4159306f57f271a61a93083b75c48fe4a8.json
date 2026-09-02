@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO engagement.email_suppressions (email, reason)\n         VALUES ((SELECT primary_email FROM identity.people WHERE id = $1), 'hard_bounce')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3c67383ee3f99e55d5a8026af84a7c4159306f57f271a61a93083b75c48fe4a8"
+}

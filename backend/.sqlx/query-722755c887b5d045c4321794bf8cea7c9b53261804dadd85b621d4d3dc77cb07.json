@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.sessions\n            SET starts_at = now() - interval '2 days',\n                ends_at = now() - interval '2 days' + interval '90 minutes'\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "722755c887b5d045c4321794bf8cea7c9b53261804dadd85b621d4d3dc77cb07"
+}

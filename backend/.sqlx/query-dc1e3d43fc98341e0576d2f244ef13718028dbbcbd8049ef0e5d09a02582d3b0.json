@@ -1,0 +1,67 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT d.id                 AS \"proposal_id!\",\n                  d.reference_code     AS \"reference_code!\",\n                  d.title_text,\n                  COALESCE(d.next_review_due_at, event.effective_deadline(d.call_id))\n                                       AS \"echeance_applicable?\",\n                  (d.assigned_reviewers = 0) AS \"sans_revisionniste!\"\n             FROM programme.v_proposal_dashboard d\n            WHERE d.event_id = $1\n              AND d.status IN ('submitted', 'under_review')\n              AND d.review_count = 0\n              AND (\n                    d.assigned_reviewers = 0\n                 OR COALESCE(d.next_review_due_at, event.effective_deadline(d.call_id))\n                      <= now() + make_interval(days => $2)\n                  )\n            ORDER BY COALESCE(d.next_review_due_at, event.effective_deadline(d.call_id))\n                     NULLS LAST,\n                     d.submitted_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "proposal_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "reference_code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "reference_code"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "title_text",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "title_text"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "echeance_applicable?",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "sans_revisionniste!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "dc1e3d43fc98341e0576d2f244ef13718028dbbcbd8049ef0e5d09a02582d3b0"
+}

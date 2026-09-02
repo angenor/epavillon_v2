@@ -1,0 +1,343 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.id, s.event_id, s.proposal_id, s.event_day_id,\n                  s.title, s.slug::text AS \"slug!\", s.summary,\n                  s.status::text AS \"status!\", s.format::text AS \"format!\",\n                  s.starts_at, s.ends_at, s.timezone::text AS \"timezone!\",\n                  -- Les quatre jointures sont EXTERNES : sans salle, sans\n                  -- organisation, sans pays ou sans dossier, la colonne est\n                  -- nulle. SQLx ne le déduit pas d'un LEFT JOIN — il lit la\n                  -- nullité de la colonne d'origine —, d'où le `?`.\n                  s.room_id, r.name AS \"room_name?\",\n                  s.enforce_room_exclusivity, s.location_note,\n                  s.organization_id, o.legal_name AS \"organization_name?\",\n                  o.acronym AS \"organization_acronym?\",\n                  c.iso2 AS \"organization_country_code?\",\n                  p.reference_code AS \"reference_code?\",\n                  p.average_score::float8 AS \"average_score?\",\n                  p.duration_minutes::int4 AS \"requested_duration_minutes?\",\n                  p.preferred_start_at,\n                  p.scheduling_constraints,\n                  s.is_streamed, s.broadcast_channel_id, s.published_at,\n                  COALESCE((SELECT array_agg(st.track_id ORDER BY st.sort_order)\n                              FROM programme.session_tracks st\n                             WHERE st.session_id = s.id), '{}') AS \"track_ids!\",\n                  reference.term_badges('programme', 'sessions', s.id, 'activity_theme')\n                      AS \"themes!\",\n                  (SELECT count(*) FROM programme.session_speakers sp\n                    WHERE sp.session_id = s.id) AS \"speaker_count!\"\n             FROM programme.sessions s\n             LEFT JOIN event.rooms r         ON r.id = s.room_id\n             LEFT JOIN org.organizations o   ON o.id = s.organization_id\n             LEFT JOIN reference.countries c ON c.id = o.country_id\n             LEFT JOIN programme.proposals p ON p.id = s.proposal_id\n            WHERE s.event_id = $1\n            ORDER BY s.starts_at, s.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "proposal_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "proposal_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "event_day_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "event_day_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "title",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "summary",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "summary"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "format!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "starts_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "ends_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "ends_at"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "timezone!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "room_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "room_id"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "room_name?",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.rooms",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "enforce_room_exclusivity",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "enforce_room_exclusivity"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "location_note",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "location_note"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "organization_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "organization_id"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "organization_name?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "legal_name"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "organization_acronym?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "acronym"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "organization_country_code?",
+        "type_info": "Bpchar",
+        "origin": {
+          "Table": {
+            "table": "reference.countries",
+            "name": "iso2"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "reference_code?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "reference_code"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "average_score?",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 22,
+        "name": "requested_duration_minutes?",
+        "type_info": "Int4",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 23,
+        "name": "preferred_start_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "preferred_start_at"
+          }
+        }
+      },
+      {
+        "ordinal": 24,
+        "name": "scheduling_constraints",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "scheduling_constraints"
+          }
+        }
+      },
+      {
+        "ordinal": 25,
+        "name": "is_streamed",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "is_streamed"
+          }
+        }
+      },
+      {
+        "ordinal": 26,
+        "name": "broadcast_channel_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "broadcast_channel_id"
+          }
+        }
+      },
+      {
+        "ordinal": 27,
+        "name": "published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 28,
+        "name": "track_ids!",
+        "type_info": "UuidArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 29,
+        "name": "themes!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 30,
+        "name": "speaker_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      null,
+      true,
+      null,
+      null,
+      false,
+      false,
+      null,
+      true,
+      false,
+      false,
+      true,
+      true,
+      false,
+      true,
+      false,
+      false,
+      null,
+      null,
+      true,
+      true,
+      false,
+      true,
+      true,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "fdd570fc9e40201e5f4ceba91c7cbe54d471018583739b00748d997eaa5b3212"
+}

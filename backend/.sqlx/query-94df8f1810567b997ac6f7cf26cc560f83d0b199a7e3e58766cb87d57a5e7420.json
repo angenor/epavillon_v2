@@ -1,0 +1,88 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT nt.code AS \"type_code!\",\n                  platform.t(nt.label, $2) AS \"label!\",\n                  nt.description,\n                  nt.module_code,\n                  nt.criticality::text AS \"criticality!\",\n                  c.canal::text AS \"channel!\",\n                  -- Le repli est celui du modèle : sans arbitrage, le canal est\n                  -- servi s'il figure dans les canaux par défaut du type.\n                  COALESCE(np.is_enabled, c.canal = ANY (nt.default_channels)) AS \"is_enabled!\",\n                  (nt.criticality <> 'critical') AS \"is_overridable!\"\n             FROM engagement.notification_types nt\n             CROSS JOIN unnest(enum_range(NULL::engagement.notification_channel)) AS c(canal)\n             LEFT JOIN engagement.notification_preferences np\n                    ON np.type_code = nt.code\n                   AND np.person_id = $1\n                   AND np.channel   = c.canal\n            WHERE nt.is_active\n            ORDER BY nt.module_code, nt.code, c.canal",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "type_code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.notification_types",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "label!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "engagement.notification_types",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "module_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.notification_types",
+            "name": "module_code"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "criticality!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "channel!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "is_enabled!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "is_overridable!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      true,
+      false,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "94df8f1810567b997ac6f7cf26cc560f83d0b199a7e3e58766cb87d57a5e7420"
+}

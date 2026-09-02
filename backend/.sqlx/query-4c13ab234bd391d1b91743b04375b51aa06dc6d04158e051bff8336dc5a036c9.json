@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (((now() AT TIME ZONE e.timezone)::date + $2::time)\n                    AT TIME ZONE e.timezone) AS \"instant!\"\n             FROM event.events e WHERE e.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "instant!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Time"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "4c13ab234bd391d1b91743b04375b51aa06dc6d04158e051bff8336dc5a036c9"
+}

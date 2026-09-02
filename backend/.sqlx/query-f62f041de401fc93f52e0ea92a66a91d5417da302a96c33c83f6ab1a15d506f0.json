@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT purge_after FROM media.assets WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "purge_after",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "media.assets",
+            "name": "purge_after"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "f62f041de401fc93f52e0ea92a66a91d5417da302a96c33c83f6ab1a15d506f0"
+}

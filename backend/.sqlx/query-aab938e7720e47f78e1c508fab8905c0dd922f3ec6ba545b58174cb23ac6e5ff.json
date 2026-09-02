@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT programme.record_join($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "record_join",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "aab938e7720e47f78e1c508fab8905c0dd922f3ec6ba545b58174cb23ac6e5ff"
+}

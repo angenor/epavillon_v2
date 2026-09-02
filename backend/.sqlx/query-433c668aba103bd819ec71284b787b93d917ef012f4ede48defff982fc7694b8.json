@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH nouvelle AS (\n               INSERT INTO programme.registrations\n                   (session_id, person_id, organization_id, answers, locale)\n               VALUES ($1, $2, $3, $4, $5)\n               RETURNING *\n           )\n           SELECT to_jsonb(nouvelle) AS \"ligne!\" FROM nouvelle",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ligne!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Jsonb",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "433c668aba103bd819ec71284b787b93d917ef012f4ede48defff982fc7694b8"
+}

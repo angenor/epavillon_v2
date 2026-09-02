@@ -1,0 +1,55 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO live.incidents (\n               scope, event_id, event_day_id, session_id, organization_id,\n               incident_kind_code, severity, title, message, action_url,\n               is_dismissible, display_from, display_until, created_by)\n           VALUES ($1::text::live.incident_scope, $2, $3, $4, $5,\n                   $6, $7::text::live.incident_severity, $8, $9, $10::text::platform.url,\n                   $11, $12, $13, $14)\n           RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.incidents",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        {
+          "Custom": {
+            "name": "platform.i18n_text",
+            "kind": {
+              "Domain": "Jsonb"
+            }
+          }
+        },
+        {
+          "Custom": {
+            "name": "platform.i18n_text",
+            "kind": {
+              "Domain": "Jsonb"
+            }
+          }
+        },
+        "Text",
+        "Bool",
+        "Timestamptz",
+        "Timestamptz",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8debb57d5ed5259cc76dfad9bbfe96851aa9e49f1ec27222622d334005a5d2ad"
+}

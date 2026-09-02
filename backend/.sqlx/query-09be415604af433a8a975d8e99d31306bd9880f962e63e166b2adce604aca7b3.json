@@ -1,0 +1,51 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.severity        AS \"severity!\",\n                  c.conflict_kind   AS \"conflict_kind!\",\n                  c.subject_label,\n                  c.session_a_title,\n                  c.session_b_title\n             FROM programme.detect_conflicts($1) c",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "severity!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "conflict_kind!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "subject_label",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "session_a_title",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "session_b_title",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "09be415604af433a8a975d8e99d31306bd9880f962e63e166b2adce604aca7b3"
+}

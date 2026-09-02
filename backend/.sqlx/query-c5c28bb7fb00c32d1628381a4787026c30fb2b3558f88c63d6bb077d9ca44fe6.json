@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.person_id FROM programme.registrations r\n          WHERE r.session_id = $1 AND r.status::text <> 'cancelled'\n          ORDER BY r.person_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.registrations",
+            "name": "person_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "c5c28bb7fb00c32d1628381a4787026c30fb2b3558f88c63d6bb077d9ca44fe6"
+}

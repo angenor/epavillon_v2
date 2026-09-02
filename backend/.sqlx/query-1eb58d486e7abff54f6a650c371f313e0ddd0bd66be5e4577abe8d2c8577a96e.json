@@ -1,0 +1,95 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.id, r.name, r.code, r.capacity::int4 AS \"capacity?\",\n                  r.is_virtual, r.has_streaming, r.sort_order\n             FROM event.rooms r\n             JOIN event.venues v ON v.id = r.venue_id\n            WHERE v.event_id = $1\n            ORDER BY r.sort_order, r.code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.rooms",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.rooms",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.rooms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "capacity?",
+        "type_info": "Int4",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "is_virtual",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.rooms",
+            "name": "is_virtual"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "has_streaming",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.rooms",
+            "name": "has_streaming"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "sort_order",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.rooms",
+            "name": "sort_order"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "1eb58d486e7abff54f6a650c371f313e0ddd0bd66be5e4577abe8d2c8577a96e"
+}

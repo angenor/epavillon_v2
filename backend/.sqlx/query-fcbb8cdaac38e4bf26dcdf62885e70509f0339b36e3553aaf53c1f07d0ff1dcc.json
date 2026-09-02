@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT queue AS \"queue!\" FROM platform.jobs WHERE task = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "queue!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "platform.jobs",
+            "name": "queue"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "fcbb8cdaac38e4bf26dcdf62885e70509f0339b36e3553aaf53c1f07d0ff1dcc"
+}

@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT succeeded AS \"succes!\" FROM analytics.refresh_log WHERE was_concurrent",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "succes!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "analytics.refresh_log",
+            "name": "succeeded"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "a05035e714e7b339ab0106a23005af7596c88ef0b667d5d13de3931bc6886c23"
+}

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.event_days (event_id, day_date, sort_order)\n           SELECT $1, jour::date, (row_number() OVER (ORDER BY jour))::smallint\n             FROM event.events e,\n                  generate_series((e.starts_at AT TIME ZONE e.timezone)::date,\n                                  (e.ends_at   AT TIME ZONE e.timezone)::date,\n                                  interval '1 day') AS jour\n            WHERE e.id = $1\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "67bb975a4a26f38bbc26b78666cd70b9ea11db424c4457f3f123b11a56c61c08"
+}

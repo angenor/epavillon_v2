@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT daily_start_time, default_duration_minutes\n           FROM event.calls_for_proposals WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "daily_start_time",
+        "type_info": "Time",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "daily_start_time"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "default_duration_minutes",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "default_duration_minutes"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "13b0305f1f7217b3d7d051cca134bec312fda6c16f608d2b60453a259fa3b064"
+}

@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE engagement.scheduled_reminders\n              SET scheduled_for = now()\n            WHERE session_id = $1\n              AND status IN ('pending', 'queued')\n              AND ($2::int IS NULL OR offset_before = make_interval(mins => $2))\n        RETURNING job_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "job_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.scheduled_reminders",
+            "name": "job_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "e16122e2c1bcf1968e5816048c66468e92422220922665633dbb63ab6a5ff458"
+}

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE engagement.email_messages\n                    SET status     = CASE WHEN $3::text IS NULL THEN 'sent'::engagement.email_status\n                                          ELSE 'failed'::engagement.email_status END,\n                        sent_at    = CASE WHEN $3::text IS NULL THEN now() END,\n                        failed_at  = CASE WHEN $3::text IS NOT NULL THEN now() END,\n                        last_error = $3,\n                        attempts   = attempts + 1\n                  WHERE created_at = $1 AND id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Timestamptz",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "06d2fb04b06b3194537ce717364a0c8a86393738da5f8ef0309077450fdf6cbd"
+}

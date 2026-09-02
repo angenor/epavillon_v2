@@ -1,0 +1,77 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH cible AS (\n               SELECT t.id, t.current_version\n                 FROM engagement.message_templates t\n                WHERE t.is_active\n                  AND t.current_version IS NOT NULL\n                  AND t.id = COALESCE(\n                        $1,\n                        (SELECT nt.default_template_id\n                           FROM engagement.notification_types nt\n                          WHERE nt.code = $2),\n                        (SELECT t2.id\n                           FROM engagement.message_templates t2\n                          WHERE t2.type_code = $2\n                            AND t2.is_active\n                            AND t2.current_version IS NOT NULL\n                          ORDER BY t2.updated_at DESC\n                          LIMIT 1))\n           )\n           SELECT c.id AS \"template_id!\", v.version AS \"version!\",\n                  v.subject AS \"subject!\", v.body_html AS \"body_html!\", v.body_text\n             FROM cible c\n             JOIN engagement.template_versions v\n               ON v.template_id = c.id\n              AND v.version = c.current_version\n              AND v.published_at IS NOT NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "template_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.message_templates",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "version!",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "engagement.template_versions",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "subject!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "engagement.template_versions",
+            "name": "subject"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "body_html!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "engagement.template_versions",
+            "name": "body_html"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "body_text",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "engagement.template_versions",
+            "name": "body_text"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "25e4658d35bcc83465339773cec4b4a5ad67c7ceb02ece42d1271df146ad0e46"
+}

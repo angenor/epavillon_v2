@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.code AS \"cle!\", count(*) AS \"compte!\"\n             FROM programme.proposals p\n             JOIN reference.entity_terms et\n               ON et.entity_schema = 'programme'\n              AND et.entity_table  = 'proposals'\n              AND et.entity_id     = p.id\n             JOIN reference.taxonomy_terms t\n               ON t.id = et.term_id AND t.taxonomy_code = 'activity_theme'\n            WHERE p.event_id = $1 AND p.deleted_at IS NULL\n            GROUP BY t.code\n            ORDER BY count(*) DESC, t.code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "cle!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "compte!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "f798e78e14a79453fd962f9d0eb821021b48c810c09b71d32a52c9cf0a624feb"
+}

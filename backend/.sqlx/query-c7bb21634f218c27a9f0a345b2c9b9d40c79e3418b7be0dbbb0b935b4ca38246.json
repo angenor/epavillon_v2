@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.events\n               (series_id, edition_label, edition_year, title, acronym, slug, description,\n                status, participation_mode, timezone, starts_at, ends_at, has_pavilion)\n           VALUES ($1, 'COP31', 2027,\n                   '{\"fr\":\"COP31 — Conférence des Parties\",\"en\":\"COP31\"}'::jsonb,\n                   'COP31', 'cop31-belem'::platform.slug,\n                   '{\"fr\":\"Pavillon de la Francophonie.\",\"en\":\"Francophonie pavilion.\"}'::jsonb,\n                   'announced', 'online', 'America/Belem'::platform.timezone_name,\n                   now() + interval '1 year', now() + interval '1 year 10 days', true)\n        RETURNING id, slug::text AS \"slug!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "c7bb21634f218c27a9f0a345b2c9b9d40c79e3418b7be0dbbb0b935b4ca38246"
+}

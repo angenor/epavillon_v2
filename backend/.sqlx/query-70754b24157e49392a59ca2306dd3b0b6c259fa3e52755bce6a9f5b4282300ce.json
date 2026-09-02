@@ -1,0 +1,387 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id AS \"id!\", reference_code AS \"reference_code!\",\n                  event_id AS \"event_id!\", call_id,\n                  organization_id AS \"organization_id!\",\n                  organization_name AS \"organization_name!\",\n                  title AS \"title!\", title_text,\n                  status::text AS \"status!\", submitted_at,\n                  weighted_score::float8, average_score::float8,\n                  is_knocked_out AS \"is_knocked_out!\",\n                  review_count AS \"review_count!\",\n                  required_reviews, reviews_missing,\n                  assigned_reviewers AS \"assigned_reviewers!\",\n                  open_change_requests AS \"open_change_requests!\",\n                  speaker_count AS \"speaker_count!\",\n                  event_rank AS \"event_rank!\",\n                  format::text AS \"format!\", activity_type_code,\n                  organization_acronym,\n                  organization_country_code::text,\n                  organization_country,\n                  co_organizer_count AS \"co_organizer_count!\",\n                  theme_codes AS \"theme_codes!\", themes AS \"themes!\",\n                  reviewer_ids AS \"reviewer_ids!\", reviewers AS \"reviewers!\",\n                  overdue_reviews AS \"overdue_reviews!\",\n                  next_review_due_at,\n                  read_count AS \"read_count!\"\n             FROM programme.v_proposal_dashboard\n            WHERE event_id = $1\n            ORDER BY event_rank, reference_code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "reference_code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "reference_code"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "event_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "call_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "call_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "organization_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "organization_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "organization_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "organization_name"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "title!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "title_text",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "title_text"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "submitted_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "submitted_at"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "weighted_score",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "average_score",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "is_knocked_out!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "is_knocked_out"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "review_count!",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "review_count"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "required_reviews",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "required_reviews"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "reviews_missing",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "reviews_missing"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "assigned_reviewers!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "assigned_reviewers"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "open_change_requests!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "open_change_requests"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "speaker_count!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "speaker_count"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "event_rank!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "event_rank"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "format!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 21,
+        "name": "activity_type_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "activity_type_code"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
+        "name": "organization_acronym",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "organization_acronym"
+          }
+        }
+      },
+      {
+        "ordinal": 23,
+        "name": "organization_country_code",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 24,
+        "name": "organization_country",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "organization_country"
+          }
+        }
+      },
+      {
+        "ordinal": 25,
+        "name": "co_organizer_count!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "co_organizer_count"
+          }
+        }
+      },
+      {
+        "ordinal": 26,
+        "name": "theme_codes!",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "theme_codes"
+          }
+        }
+      },
+      {
+        "ordinal": 27,
+        "name": "themes!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "themes"
+          }
+        }
+      },
+      {
+        "ordinal": 28,
+        "name": "reviewer_ids!",
+        "type_info": "UuidArray",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "reviewer_ids"
+          }
+        }
+      },
+      {
+        "ordinal": 29,
+        "name": "reviewers!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "reviewers"
+          }
+        }
+      },
+      {
+        "ordinal": 30,
+        "name": "overdue_reviews!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "overdue_reviews"
+          }
+        }
+      },
+      {
+        "ordinal": 31,
+        "name": "next_review_due_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "next_review_due_at"
+          }
+        }
+      },
+      {
+        "ordinal": 32,
+        "name": "read_count!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "read_count"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null,
+      true,
+      null,
+      null,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null,
+      true,
+      true,
+      null,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "70754b24157e49392a59ca2306dd3b0b6c259fa3e52755bce6a9f5b4282300ce"
+}

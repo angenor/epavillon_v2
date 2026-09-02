@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT platform.ensure_month_partition(\n                       'engagement', 'email_messages',\n                       (date_trunc('month', now()) + make_interval(months => $1::int))::date\n                   ) AS \"nom!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "nom!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "9042c49e2d497c03228d5ac19fb9ca871b0755bac3beae071316edd53ed868b9"
+}

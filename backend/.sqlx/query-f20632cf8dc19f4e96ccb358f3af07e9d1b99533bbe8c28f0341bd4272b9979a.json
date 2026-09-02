@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO engagement.notification_preferences\n             (person_id, type_code, channel, is_enabled)\n         VALUES ($1, $2, $3::text::engagement.notification_channel, $4)\n         ON CONFLICT (person_id, type_code, channel)\n             DO UPDATE SET is_enabled = EXCLUDED.is_enabled",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f20632cf8dc19f4e96ccb358f3af07e9d1b99533bbe8c28f0341bd4272b9979a"
+}

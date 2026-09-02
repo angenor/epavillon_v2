@@ -1,0 +1,185 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.id, s.event_id, s.sequence_number, s.slug::text AS \"slug!\",\n                  s.title ->> 'fr' AS \"titre!\", s.status::text AS \"status!\",\n                  s.format::text AS \"format!\", s.timezone::text AS \"timezone!\",\n                  s.room_id, s.event_day_id, s.organization_id,\n                  s.enforce_room_exclusivity, s.is_streamed, s.broadcast_channel_id,\n                  s.published_at,\n                  to_char(s.starts_at AT TIME ZONE s.timezone,\n                          'YYYY-MM-DD\"T\"HH24:MI') AS \"debut!\",\n                  to_char(s.ends_at AT TIME ZONE s.timezone,\n                          'YYYY-MM-DD\"T\"HH24:MI') AS \"fin!\"\n             FROM programme.sessions s\n            WHERE s.proposal_id = $1\n            ORDER BY s.sequence_number",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "sequence_number",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "sequence_number"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "titre!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "format!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "timezone!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "room_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "room_id"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "event_day_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "event_day_id"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "organization_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "organization_id"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "enforce_room_exclusivity",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "enforce_room_exclusivity"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "is_streamed",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "is_streamed"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "broadcast_channel_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "broadcast_channel_id"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "debut!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 16,
+        "name": "fin!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      null,
+      null,
+      null,
+      null,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "19cd6113f486ceb7e82e8c59a3402aad6799f6b99b4c75c3003dbe4872bce058"
+}

@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (\n               SELECT 1 FROM pg_class c\n               JOIN pg_namespace n ON n.oid = c.relnamespace\n               WHERE n.nspname = 'engagement'\n                 AND c.relname = format('email_messages_%s',\n                     to_char(date_trunc('month', now()) + make_interval(months => $1::int),\n                             'YYYYMM'))\n           ) AS \"existe!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "existe!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "c42b1e62d993a2f5276bfe35dd7371706946e9ad574544517acc789b39b9217a"
+}

@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT used_bytes AS \"octets!\", used_files AS \"fichiers!\"\n             FROM media.storage_quotas WHERE organization_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "octets!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "media.storage_quotas",
+            "name": "used_bytes"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "fichiers!",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "media.storage_quotas",
+            "name": "used_files"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "0b3cb3878325079fc06a28b873e268c55ffd32a1d0349379d8646e2b0e7a2781"
+}

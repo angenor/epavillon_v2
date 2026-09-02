@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT min(ra.due_at) AS \"echeance?\"\n             FROM programme.review_assignments ra\n             JOIN programme.proposals p ON p.id = ra.proposal_id AND p.deleted_at IS NULL\n            WHERE p.event_id = $1 AND ra.recused_at IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "echeance?",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "dd0cdb857bdccd57ebb7c4e631b11ebd8e8f7805b107e4cd7c5f424838d1be17"
+}

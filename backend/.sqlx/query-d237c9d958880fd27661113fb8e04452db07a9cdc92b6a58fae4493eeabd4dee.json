@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE media.assets\n            SET status = 'failed'\n          WHERE id = $1 AND status NOT IN ('ready', 'quarantined')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d237c9d958880fd27661113fb8e04452db07a9cdc92b6a58fae4493eeabd4dee"
+}

@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO engagement.notifications\n               (person_id, type_code, title, body, variables, link_path,\n                subject_schema, subject_table, subject_id, group_key)\n           VALUES ($1, $2, $3::jsonb::platform.i18n_text, $4::jsonb::platform.i18n_text,\n                   $5, $6, $7, $8, $9, $10)\n           ON CONFLICT (person_id, group_key)\n               WHERE group_key IS NOT NULL AND read_at IS NULL\n               DO UPDATE SET group_count = engagement.notifications.group_count + 1,\n                             created_at  = now()\n        RETURNING (xmax = 0) AS \"cree!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "cree!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Jsonb",
+        "Jsonb",
+        "Jsonb",
+        "Text",
+        "Text",
+        "Text",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "3482ac48741b321b4db2bade1503f6c2d6896c147a1ffe58a630bcb279dba8c3"
+}

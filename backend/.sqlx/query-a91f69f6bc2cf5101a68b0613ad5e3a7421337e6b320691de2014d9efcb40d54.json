@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT propositions_deposees AS \"deposees!\",\n                  propositions_acceptees AS \"acceptees!\",\n                  evenements_couverts AS \"evenements!\",\n                  sessions_realisees AS \"sessions!\"\n             FROM analytics.mv_organization_scorecard\n            WHERE organization_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "deposees!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_organization_scorecard",
+            "name": "propositions_deposees"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "acceptees!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_organization_scorecard",
+            "name": "propositions_acceptees"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "evenements!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_organization_scorecard",
+            "name": "evenements_couverts"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "sessions!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_organization_scorecard",
+            "name": "sessions_realisees"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "a91f69f6bc2cf5101a68b0613ad5e3a7421337e6b320691de2014d9efcb40d54"
+}

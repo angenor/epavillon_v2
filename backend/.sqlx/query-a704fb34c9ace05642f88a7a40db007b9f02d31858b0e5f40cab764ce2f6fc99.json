@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT DISTINCT skip_reason FROM engagement.scheduled_reminders\n          WHERE session_id = $1 AND skip_reason IS NOT NULL\n          ORDER BY skip_reason",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "skip_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.scheduled_reminders",
+            "name": "skip_reason"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "a704fb34c9ace05642f88a7a40db007b9f02d31858b0e5f40cab764ce2f6fc99"
+}

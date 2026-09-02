@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO media.assets\n               (bucket, object_key, checksum_sha256, mime_type, byte_size,\n                original_filename, owner_organization_id, status, scan_verdict)\n           VALUES ('epavillon', '2027/03/' || gen_random_uuid()::text || '/' || $1,\n                   md5(gen_random_uuid()::text) || md5(gen_random_uuid()::text),\n                   'application/pdf', 2048, $1, $2,\n                   $3::text::media.asset_status,\n                   CASE WHEN $3 = 'ready' THEN 'clean' ELSE 'pending' END::media.scan_verdict)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "media.assets",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "e994fe136ff1e79bc809945534a6d39f272a03a0dc3e7bc93bb079e31bb98a4d"
+}

@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT media.schedule_asset_purge($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "schedule_asset_purge",
+        "type_info": "Void",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "d5eeaa039ef677ad3f0f99acc66205fce4a3131fe58c0f940558024b81e33c15"
+}

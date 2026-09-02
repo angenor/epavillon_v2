@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.registrations SET status = 'cancelled'\n          WHERE session_id = $1 AND person_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4d4125876c77849a9e533f9a5464af94c7557e974e2c5fd374d3f5989fc8e7b2"
+}

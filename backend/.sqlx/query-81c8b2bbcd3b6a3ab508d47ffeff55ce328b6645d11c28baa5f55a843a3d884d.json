@@ -1,0 +1,83 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO content.highlights\n               (placement, status, nature_code, sort_order, title, quote, body,\n                person_id, author_name, author_title, organization_id, organization_label,\n                country_id, event_id, session_id, link_url, link_label,\n                background_color_hex, starts_at, ends_at, published_at, created_by)\n           VALUES ($1::text::content.highlight_placement, $2::text::content.highlight_status,\n                   $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15,\n                   $16::text::platform.url, $17, $18, $19, $20,\n                   CASE WHEN $2 = 'published' THEN now() END, $21)\n           RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Int2",
+        {
+          "Custom": {
+            "name": "platform.i18n_text",
+            "kind": {
+              "Domain": "Jsonb"
+            }
+          }
+        },
+        {
+          "Custom": {
+            "name": "platform.i18n_text",
+            "kind": {
+              "Domain": "Jsonb"
+            }
+          }
+        },
+        {
+          "Custom": {
+            "name": "platform.i18n_text",
+            "kind": {
+              "Domain": "Jsonb"
+            }
+          }
+        },
+        "Uuid",
+        "Text",
+        {
+          "Custom": {
+            "name": "platform.i18n_text",
+            "kind": {
+              "Domain": "Jsonb"
+            }
+          }
+        },
+        "Uuid",
+        "Text",
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text",
+        {
+          "Custom": {
+            "name": "platform.i18n_text",
+            "kind": {
+              "Domain": "Jsonb"
+            }
+          }
+        },
+        "Text",
+        "Timestamptz",
+        "Timestamptz",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "81c8b2bbcd3b6a3ab508d47ffeff55ce328b6645d11c28baa5f55a843a3d884d"
+}

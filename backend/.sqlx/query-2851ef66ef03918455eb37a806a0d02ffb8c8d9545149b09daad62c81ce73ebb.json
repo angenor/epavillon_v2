@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposal_speakers\n               (proposal_id, person_id, role, job_title_snapshot, organization_snapshot,\n                organization_id, bio, sort_order)\n           SELECT $1, e.personne, e.role::programme.speaker_role,\n                  e.fonction, e.organisation, e.org_id,\n                  e.bio::jsonb::platform.i18n_text, e.rang\n             FROM unnest($2::uuid[], $3::text[], $4::text[], $5::text[],\n                         $6::uuid[], $7::jsonb[], $8::smallint[])\n                  AS e(personne, role, fonction, organisation, org_id, bio, rang)\n           ON CONFLICT (proposal_id, person_id, role) DO UPDATE\n               SET job_title_snapshot = EXCLUDED.job_title_snapshot,\n                   organization_snapshot = EXCLUDED.organization_snapshot,\n                   organization_id = EXCLUDED.organization_id,\n                   bio = EXCLUDED.bio,\n                   sort_order = EXCLUDED.sort_order",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray",
+        "TextArray",
+        "TextArray",
+        "TextArray",
+        "UuidArray",
+        "JsonbArray",
+        "Int2Array"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2851ef66ef03918455eb37a806a0d02ffb8c8d9545149b09daad62c81ce73ebb"
+}

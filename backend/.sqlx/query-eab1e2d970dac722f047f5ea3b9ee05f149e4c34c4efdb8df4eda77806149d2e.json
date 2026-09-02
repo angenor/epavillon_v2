@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO org.duplicate_candidates (left_id, right_id, score, reasons)\n         VALUES ($1, $2, 150, ARRAY['nom', 'domaine']::text[])",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "eab1e2d970dac722f047f5ea3b9ee05f149e4c34c4efdb8df4eda77806149d2e"
+}

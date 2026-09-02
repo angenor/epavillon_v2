@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO live.incidents\n               (scope, event_id, incident_kind_code, severity, message,\n                display_from, display_until, created_by)\n           VALUES ('event', $1, 'technical_issue', 'warning',\n                   '{\"fr\":\"Message.\",\"en\":\"Message.\"}'::jsonb,\n                   now(), now() - interval '1 hour', $2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c44ab88256e069383c2407b9f9f592889ac28890d0d4b3d12ff91102ea024628"
+}

@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT status::text AS \"etat!\", last_error, type_code\n             FROM engagement.email_messages\n            WHERE to_email::text = $1\n            ORDER BY created_at DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "etat!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "last_error",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.email_messages",
+            "name": "last_error"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "type_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.email_messages",
+            "name": "type_code"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      true,
+      true
+    ]
+  },
+  "hash": "8e6c4f8274cbab5a593d994ff6f2a62e0d811d118e1452a9ffa09b6f019dd448"
+}

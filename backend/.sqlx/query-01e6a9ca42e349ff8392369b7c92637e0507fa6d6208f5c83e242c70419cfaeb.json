@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM media.attachments\n          WHERE owner_schema = $1 AND owner_table = $2 AND owner_id = $3\n            AND role = $4::text::media.attachment_role",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "01e6a9ca42e349ff8392369b7c92637e0507fa6d6208f5c83e242c70419cfaeb"
+}

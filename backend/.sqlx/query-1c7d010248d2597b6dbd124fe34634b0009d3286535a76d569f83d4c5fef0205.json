@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.proposals\n                SET status = $2::text::programme.proposal_status\n              WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1c7d010248d2597b6dbd124fe34634b0009d3286535a76d569f83d4c5fef0205"
+}

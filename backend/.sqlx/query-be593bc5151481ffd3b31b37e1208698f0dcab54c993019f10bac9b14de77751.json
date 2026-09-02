@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT last_error FROM platform.jobs\n          WHERE task = 'media.process_asset' AND idempotency_key = $1::text\n            AND last_error IS NOT NULL\n          ORDER BY created_at DESC\n          LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "last_error",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "platform.jobs",
+            "name": "last_error"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "be593bc5151481ffd3b31b37e1208698f0dcab54c993019f10bac9b14de77751"
+}

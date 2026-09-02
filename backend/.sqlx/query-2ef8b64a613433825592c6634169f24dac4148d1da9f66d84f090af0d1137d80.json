@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT programme.refresh_proposal_score($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "refresh_proposal_score",
+        "type_info": "Void",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "2ef8b64a613433825592c6634169f24dac4148d1da9f66d84f090af0d1137d80"
+}

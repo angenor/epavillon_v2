@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO engagement.reminder_rules (event_id, offsets, channels)\n           VALUES ($1,\n                   (SELECT array_agg(make_interval(mins => m) ORDER BY m DESC)\n                      FROM unnest($2::int[]) m),\n                   '{email}')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4Array"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2d4aab1e4020b8336bded73d89427d83a9b2cd51fa04e6da4e909444292aa0fa"
+}

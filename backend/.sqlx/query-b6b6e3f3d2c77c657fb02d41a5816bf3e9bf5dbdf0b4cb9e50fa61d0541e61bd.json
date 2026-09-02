@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (\n               SELECT 1 FROM platform.modules m\n                WHERE m.code = $1 AND m.deployment <> 'disabled'\n           ) AS \"deploye!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "deploye!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "b6b6e3f3d2c77c657fb02d41a5816bf3e9bf5dbdf0b4cb9e50fa61d0541e61bd"
+}

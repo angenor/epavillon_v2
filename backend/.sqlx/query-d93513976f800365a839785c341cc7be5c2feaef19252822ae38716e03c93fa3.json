@@ -1,0 +1,78 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.email::text AS \"email!\", s.reason::text AS \"reason!\", s.detail,\n                  s.expires_at, s.suppressed_at, s.suppressed_by\n             FROM engagement.email_suppressions s\n            WHERE $1::text IS NULL OR s.email::text ILIKE '%' || $1 || '%'\n            ORDER BY s.suppressed_at DESC\n            LIMIT 200",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "reason!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "detail",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.email_suppressions",
+            "name": "detail"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "expires_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.email_suppressions",
+            "name": "expires_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "suppressed_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.email_suppressions",
+            "name": "suppressed_at"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "suppressed_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.email_suppressions",
+            "name": "suppressed_by"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      true,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "d93513976f800365a839785c341cc7be5c2feaef19252822ae38716e03c93fa3"
+}

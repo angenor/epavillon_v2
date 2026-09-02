@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE event.calls_for_proposals\n            SET max_proposals_per_organization = $2 WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f8dec4d8b08ea3f04a2b668c1ab27825f32569e90043be69b9cccf331892c2a4"
+}

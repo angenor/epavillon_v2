@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE engagement.scheduled_reminders\n            SET status = $2::text::engagement.reminder_status,\n                skip_reason = $3,\n                sent_at = $4\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0ecc907cb8b2e360e864367bec58777f2b7bdc60a112d81dde16fca257ba828b"
+}

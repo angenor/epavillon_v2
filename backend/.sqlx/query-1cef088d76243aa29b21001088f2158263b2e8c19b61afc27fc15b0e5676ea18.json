@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, max_score::float8 AS \"max!\", is_knockout\n             FROM event.review_criteria WHERE call_id = $1 ORDER BY sort_order, code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.review_criteria",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "max!",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "is_knockout",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.review_criteria",
+            "name": "is_knockout"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false
+    ]
+  },
+  "hash": "1cef088d76243aa29b21001088f2158263b2e8c19b61afc27fc15b0e5676ea18"
+}

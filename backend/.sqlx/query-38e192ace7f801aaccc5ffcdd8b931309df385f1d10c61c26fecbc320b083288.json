@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT from_status::text AS \"depuis!\", to_status::text AS \"vers!\",\n                  required_permission, allowed_for_owner, requires_reason\n             FROM programme.proposal_transitions_allowed\n            ORDER BY from_status, to_status",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "depuis!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "vers!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "required_permission",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_transitions_allowed",
+            "name": "required_permission"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "allowed_for_owner",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_transitions_allowed",
+            "name": "allowed_for_owner"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "requires_reason",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_transitions_allowed",
+            "name": "requires_reason"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null,
+      null,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "38e192ace7f801aaccc5ffcdd8b931309df385f1d10c61c26fecbc320b083288"
+}

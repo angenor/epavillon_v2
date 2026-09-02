@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE engagement.email_messages SET status = 'sent' WHERE to_email::text = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dc36ab26c96a57e0021688f462358d2df12daa7f8816f63ee9c4a8fb77afc4bf"
+}

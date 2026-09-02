@@ -1,0 +1,44 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(q.max_bytes, d.max_bytes) AS \"max_bytes!\",\n                  COALESCE(q.used_bytes, 0)          AS \"used_bytes!\",\n                  COALESCE(q.max_files, d.max_files) AS \"max_files!\",\n                  COALESCE(q.used_files, 0)          AS \"used_files!\"\n             FROM media.storage_quotas d\n             LEFT JOIN media.storage_quotas q ON q.organization_id = $1\n            WHERE d.organization_id IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "max_bytes!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "used_bytes!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "max_files!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "used_files!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "5c3cda81a808f323eac1b8c98e08e8d568a45433eab5dbba75393c83f8cf4654"
+}

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE event.calls_for_proposals\n            SET status = 'closed', closes_at = now() - interval '1 day'\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a4b98d9d8e49843564fc79f1aea5343cb2286888dce3df5b05bc71c415b9e66a"
+}

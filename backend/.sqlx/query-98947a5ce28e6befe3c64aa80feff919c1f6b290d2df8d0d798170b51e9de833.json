@@ -1,0 +1,83 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT code, field_type::text AS \"field_type!\", is_required,\n                  is_sensitive, options, validation\n             FROM programme.registration_form_fields\n            WHERE form_id = $1 AND is_active\n            ORDER BY sort_order, code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.registration_form_fields",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "field_type!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "is_required",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.registration_form_fields",
+            "name": "is_required"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "is_sensitive",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.registration_form_fields",
+            "name": "is_sensitive"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "options",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.registration_form_fields",
+            "name": "options"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "validation",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.registration_form_fields",
+            "name": "validation"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "98947a5ce28e6befe3c64aa80feff919c1f6b290d2df8d0d798170b51e9de833"
+}

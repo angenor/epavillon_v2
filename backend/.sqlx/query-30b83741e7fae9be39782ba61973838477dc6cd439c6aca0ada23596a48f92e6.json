@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT reference.term_badges('programme', 'proposals', $1, 'activity_theme')\n               AS \"pastilles!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "pastilles!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "30b83741e7fae9be39782ba61973838477dc6cd439c6aca0ada23596a48f92e6"
+}

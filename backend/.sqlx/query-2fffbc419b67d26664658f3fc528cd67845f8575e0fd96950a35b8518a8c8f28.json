@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE engagement.email_messages\n            SET status       = $3::text::engagement.email_status,\n                bounce_kind  = COALESCE($4, bounce_kind),\n                last_error   = COALESCE($5, last_error),\n                provider_message_id = COALESCE($6, provider_message_id),\n                delivered_at = CASE WHEN $3 = 'delivered' THEN now() ELSE delivered_at END,\n                failed_at    = CASE WHEN $3 IN ('bounced', 'failed') THEN now() ELSE failed_at END\n          WHERE created_at = $1 AND id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Timestamptz",
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2fffbc419b67d26664658f3fc528cd67845f8575e0fd96950a35b8518a8c8f28"
+}

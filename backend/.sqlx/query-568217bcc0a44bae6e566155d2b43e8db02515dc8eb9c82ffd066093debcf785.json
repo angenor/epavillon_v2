@@ -1,0 +1,72 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, title AS \"title!\", acronym, edition_year AS \"edition_year!\",\n                  slug::text AS \"slug!\"\n             FROM event.events\n            WHERE ($1::bool OR id = ANY($2::uuid[]))\n              AND status <> 'draft'\n            ORDER BY starts_at DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "title!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "acronym",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "acronym"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "edition_year!",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "edition_year"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bool",
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      null
+    ]
+  },
+  "hash": "568217bcc0a44bae6e566155d2b43e8db02515dc8eb9c82ffd066093debcf785"
+}

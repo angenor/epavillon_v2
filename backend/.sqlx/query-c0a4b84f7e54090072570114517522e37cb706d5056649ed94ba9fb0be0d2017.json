@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE platform.jobs\n            SET run_at = run_at + make_interval(secs => $2)\n          WHERE id = ANY($1) AND status = 'queued'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "Float8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c0a4b84f7e54090072570114517522e37cb706d5056649ed94ba9fb0be0d2017"
+}

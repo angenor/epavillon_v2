@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposal_speakers\n               (proposal_id, person_id, role, job_title_snapshot,\n                organization_snapshot, bio, confirmed_at, sort_order)\n           VALUES ($1, $2, $3::text::programme.speaker_role, 'Directrice',\n                   'IFDD', jsonb_build_object('fr', 'Une notice.'), now(), 0)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f1c1f2e77a1f0dd639c046fc515b61bd60d27702d67b556403a7f15b4353edef"
+}

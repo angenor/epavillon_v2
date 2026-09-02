@@ -1,0 +1,65 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT offset_minutes  AS \"offset_minutes!\",\n                  channel         AS \"channel!\",\n                  scheduled_for   AS \"scheduled_for!\",\n                  status          AS \"status!\",\n                  recipient_count AS \"recipient_count!\",\n                  skip_reason,\n                  sent_at\n             FROM engagement.session_reminder_schedule($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "offset_minutes!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "channel!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "scheduled_for!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "recipient_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "skip_reason",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "sent_at",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "fb5836c394589476d50bb00183c2d399aaf374ed435a22a20ad9b69f2869550a"
+}

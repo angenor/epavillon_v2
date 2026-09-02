@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.registrations\n            SET status = 'registered', waitlist_position = NULL\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "356efb61837104e94129d67f71245759cc3376d017a634f5b0ecc839e9a678c6"
+}

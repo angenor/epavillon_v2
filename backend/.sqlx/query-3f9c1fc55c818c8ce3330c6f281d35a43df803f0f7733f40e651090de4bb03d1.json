@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO engagement.reminder_rules\n               (event_id, offsets, channels, type_code, template_id, is_active, created_by)\n           VALUES ($1,\n                   (SELECT array_agg(make_interval(mins => m) ORDER BY m DESC)\n                      FROM unnest($2::int[]) AS m),\n                   $3::text[]::engagement.notification_channel[],\n                   $4, $5, $6, $7)\n           ON CONFLICT (event_id) WHERE event_id IS NOT NULL\n           DO UPDATE SET offsets     = EXCLUDED.offsets,\n                         channels    = EXCLUDED.channels,\n                         type_code   = EXCLUDED.type_code,\n                         template_id = EXCLUDED.template_id,\n                         is_active   = EXCLUDED.is_active\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.reminder_rules",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4Array",
+        "TextArray",
+        "Text",
+        "Uuid",
+        "Bool",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "3f9c1fc55c818c8ce3330c6f281d35a43df803f0f7733f40e651090de4bb03d1"
+}

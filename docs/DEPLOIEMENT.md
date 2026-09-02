@@ -13,7 +13,7 @@ Deux serveurs, et un seul porte le nom de domaine.
 | | Où | Ce qu'il sait faire |
 |---|---|---|
 | **cPanel** — `epavillonclimatique.francophonie.org` | `68.168.118.201` | HTML, CSS, JS, PHP. Apache 2.4. **Pas de Node, pas de Passenger.** Sert la v1 |
-| **Serveur applicatif** — `epavillon.mefali.com` | `173.209.36.111` | Docker, SSH, root. Ubuntu 22.04 |
+| **Serveur applicatif** — `epavillon.mefali.com` | `173.209.36.111` | **cPanel/WHM aussi**, mais avec root et SSH. Apache 2.4.68 (service `httpd`), CSF, 16 Go, 8 cœurs. Docker installé le 02/09. Héberge déjà `financedurable.francophonie.org` — Node sous PM2 sur le port 3000, MongoDB, proxifié par Apache. **La licence WHM n'autorise qu'un seul compte cPanel** : le domaine d'ePavillon n'y est donc pas déclaré, son vhost vit dans un include |
 
 Le nom de domaine est un sous-domaine de `francophonie.org`, dont la zone DNS est tenue par l'OIF —
 serveurs `agecop` et `palabre`, sans délégation vers le cPanel. **Aucun enregistrement ne peut être
@@ -34,13 +34,28 @@ C'est la seconde qui commande toute l'architecture ci-dessous.
 ## 2. Le chemin d'une requête
 
 ```
-navigateur ──HTTPS──> epavillonclimatique.francophonie.org/v2/…   (Apache, cPanel)
+navigateur ──HTTPS──> epavillonclimatique.francophonie.org/v2/…   (Apache, cPanel institutionnel)
                           │  .htaccess : RewriteRule … [P]
                           │
-                          └──HTTPS──> epavillon.mefali.com/v2/…   (Caddy, serveur applicatif)
-                                         ├─ /v2/api/*  ──> api:8080   (préfixe retiré)
-                                         └─ /v2/*      ──> front:3000 (préfixe conservé)
+                          └──HTTPS──> epavillon.mefali.com/v2/…   (Apache, VPS)
+                                         │  include userdata/ : ProxyPass
+                                         ├─ /v2/api/* ──> 127.0.0.1:8080  (préfixe retiré)
+                                         └─ /v2/*     ──> 127.0.0.1:3100  (préfixe conservé)
 ```
+
+**Aucun serveur web dans la pile Docker**, et c'est le point qui a fait tomber
+le plan initial : le VPS est un cPanel, son Apache tient déjà 80 et 443 pour un
+site en production. Un Caddy qui les réclamerait ne démarrerait pas — ou pire,
+démarrerait et couperait ce site. Les deux conteneurs publient sur `127.0.0.1`
+et rien d'autre ; Apache termine le TLS, avec le certificat qu'AutoSSL a émis.
+Le port 3000 étant pris par l'application de `financedurable`, le site va sur
+3100.
+
+Le greffage passe par un **include `userdata/`** et jamais par un `VirtualHost`
+écrit à la main : cPanel régénère `httpd.conf` — à la création d'un compte, au
+renouvellement d'un certificat, à une mise à jour — et un vhost manuel y
+disparaît sans prévenir. Le même mécanisme sert déjà à `financedurable` sur ce
+serveur.
 
 **Le visiteur ne voit qu'une adresse.** `epavillon.mefali.com` est une adresse de transport : elle
 n'apparaît ni dans la barre du navigateur, ni dans un lien, ni dans un courriel.
@@ -108,10 +123,20 @@ serveurs veulent `boite+domaine.org` plutôt que `boite@domaine.org`.
 
 ### 4.3 Serveur applicatif
 
+Docker a été installé le 02/09 depuis le dépôt officiel, **sans aucune mise à
+jour globale du système** — on n'installe que ce qu'on nomme, pour ne toucher à
+rien de ce que cPanel tient. Le pare-feu a été prévenu : `DOCKER = "1"` dans
+`/etc/csf/csf.conf`. **Sans ce réglage, le réseau Docker tomberait au prochain
+rechargement de CSF** — des jours plus tard, sans cause apparente, et sans que
+`financedurable` en souffre, ce qui rend le diagnostic d'autant plus long. Les
+règles d'origine sont sauvegardées dans `/root/avant-epavillon/`.
+
+Le domaine `epavillon.mefali.com` doit exister **dans cPanel** — sans cela,
+aucun vhost, donc aucun certificat et aucun include possible.
+
 ```bash
-git clone <dépôt> epavillon && cd epavillon
+git clone <dépôt> /opt/epavillon && cd /opt/epavillon
 cp .env.prod.example .env.prod        # puis renseigner tout ce qui est marqué À REMPLIR
-make sqlx-prepare                      # seulement si des requêtes SQL ont changé
 docker compose --env-file .env.prod -f ops/docker-compose.prod.yml up -d --build
 ```
 
@@ -128,7 +153,25 @@ Vérifier avant d'aller plus loin :
 curl -i https://epavillon.mefali.com/v2/api/health     # 200, et un certificat valide
 ```
 
-### 4.4 cPanel — le relais
+### 4.4 VPS — greffer le proxy Apache
+
+```bash
+USER=<le compte cPanel du domaine>
+D=/etc/apache2/conf.d/userdata/ssl/2_4/$USER/epavillon.mefali.com
+mkdir -p $D && cp ops/apache-epavillon.conf $D/epavillon-proxy.conf
+/scripts/ensure_vhost_includes --user=$USER
+apachectl configtest && systemctl reload apache2
+```
+
+`configtest` avant le rechargement n'est pas une politesse : une directive
+fautive fait échouer le démarrage d'Apache, **et emporte alors le site en
+production avec elle**.
+
+```bash
+curl -i https://epavillon.mefali.com/v2/api/health
+```
+
+### 4.5 cPanel institutionnel — le relais public
 
 Déposer [`ops/htaccess-v2.conf`](../ops/htaccess-v2.conf) en `public_html/v2/.htaccess`.
 
@@ -169,3 +212,85 @@ Quand l'OIF aura répondu, ou quand la v1 pourra être remplacée :
 
 Aucun code ne change. Le préfixe n'existe qu'en configuration, et c'est le seul point de ce montage
 qui méritait d'être payé d'avance.
+
+---
+
+## 7. Ce que le serveur a appris de nous, et nous de lui (02/09)
+
+Sept obstacles, tous rencontrés une fois, tous silencieux ou trompeurs. Ils sont
+consignés ici parce qu'aucun ne se déduit d'une documentation.
+
+**Le service Apache s'appelle `httpd`, pas `apache2`.** `systemctl reload apache2`
+échoue sur « Unit not found » — mais `httpd -S` lit la configuration **sur le
+disque**. Un vhost peut donc y figurer, paraître parfaitement chargé, et n'avoir
+jamais atteint la mémoire du serveur. On cherche alors une faute dans le fichier
+pendant que le rechargement n'a simplement pas eu lieu.
+
+**Les vhosts de cPanel sont déclarés sur `173.209.36.111:80`, jamais sur `*:80`.**
+Apache traite les deux comme des ensembles séparés : un vhost générique n'est
+jamais consulté pour une adresse qui a les siens. Le symptôme est la page 404 de
+cPanel, qui fait chercher du côté des chemins et des droits.
+
+**Le domaine n'a pas à exister dans cPanel.** `conf.d/includes/post_virtualhost_global.conf`
+est référencé par la configuration engendrée et jamais réécrit. C'est ce qui
+permet de se passer d'un compte — la licence n'en autorise qu'un — et de ne rien
+modifier au compte de `financedurable`. Le certificat vient donc de certbot, en
+mode `--webroot` sur `/var/www/certbot`, et non d'AutoSSL, qui ne couvre que ce
+que le panneau connaît.
+
+**CSF efface les chaînes de Docker à chaque rechargement.** Le réglage
+`DOCKER = "1"` de `csf.conf` ne suffit pas : il ne couvre que `172.17.0.0/16`,
+le pont par défaut. Deux gestes le corrigent — `systemctl restart docker` après
+un `csf -r`, qui recrée les chaînes, et surtout `/etc/csf/csfpost.sh`, exécuté
+par CSF après chaque reconstruction, qui autorise `172.28.0.0/16`. **Sans ce
+fichier, la pile tombe au prochain rechargement du pare-feu**, spontané ou
+déclenché par lfd, et le symptôme — une connexion acceptée puis refermée — fait
+suspecter l'application, à qui rien n'est parvenu.
+
+**`set -o pipefail` plus un filtre qui sort tôt tue un script sans un mot.**
+`garage layout show | awk '… exit'` ferme le tube, `garage` reçoit un SIGPIPE,
+le code de retour devient non nul, et `set -e` arrête tout — sans que personne
+n'ait échoué au sens habituel. On capture la sortie d'abord, on la filtre après.
+
+**Un nœud Garage assigné mais non validé apparaît dans « STAGED ROLE CHANGES ».**
+Y chercher son identifiant fait croire que le layout est appliqué, et un script
+idempotent saute alors l'application à chaque relance : le stockage reste
+indéfiniment en refus d'écriture. On teste la version **appliquée**.
+
+**Deux bases d'API, et elles ne peuvent pas être la même.** Le navigateur appelle
+un chemin — `/v2/api` —, ce qui garde une seule origine, donc des cookies de
+première partie et aucun CORS. Mais un chemin n'a pas d'origine : au rendu
+serveur, il désigne Nitro lui-même, qui ne connaît pas cette route. Les pages
+publiques se rendaient vides, sans une ligne d'erreur, **et d'abord pour les
+moteurs de recherche** — c'est-à-dire là où personne ne regarde. D'où
+`NUXT_API_BASE_SERVER`, l'adresse interne entre conteneurs. La preuve que la
+correction tient se lit à l'œil : l'accueil est passé de 117 Ko de squelettes de
+chargement à 37 Ko portant « Aucune édition », qui est la réponse **exacte** de
+l'API sur une base sans données.
+
+---
+
+## 8. État au 02/09
+
+Déployé et vérifié sur `https://epavillon.mefali.com/v2` :
+
+| | |
+|---|---|
+| Six conteneurs | `api`, `worker`, `front`, `postgres`, `valkey`, `garage` |
+| Schéma | chargé au premier démarrage du volume |
+| Stockage objet | layout appliqué, bucket `epavillon`, clé engendrée dans `.env.prod` |
+| TLS | certbot, expire le 01/12/2026, renouvellement automatique armé |
+| Rendu serveur | atteint l'API ; la page d'accueil rend ses états vides, qui sont exacts |
+| `financedurable.francophonie.org` | **200 à chaque étape**, vérifié avant et après chaque geste |
+
+Ce qui manque encore :
+
+1. **Le relais du cPanel institutionnel** — `ops/htaccess-v2.conf` à déposer en
+   `public_html/v2/.htaccess`. Tant qu'il n'y est pas, la v2 n'est joignable que
+   par son adresse de transport.
+2. **La boîte d'expédition** — `SMTP_USERNAME` et `SMTP_PASSWORD` sont vides.
+   `SMTP_FROM` est renseignée pour laisser l'API démarrer, mais **aucun courriel
+   ne part** : sans authentification, le serveur de soumission refuse le relais.
+   Les envois échouent, sont rejoués, puis meurent en file.
+3. **Aucune donnée métier** — ni édition, ni appel. À créer depuis le back-office,
+   ou à semer.

@@ -1,0 +1,6 @@
+# `target/` pèse plusieurs gigaoctets et n'a aucune utilité dans le contexte :
+# la construction recompile de toute façon. `.sqlx/`, lui, est INDISPENSABLE —
+# c'est ce qui permet à SQLx de vérifier ses requêtes sans base.
+target
+.env
+.env.*

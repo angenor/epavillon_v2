@@ -1,0 +1,174 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.id, m.organization_id, m.person_id, m.role::text AS \"role!\",\n                  m.status::text AS \"status!\", m.is_primary, m.job_title,\n                  m.invited_by, m.invited_at, m.approved_by, m.approved_at,\n                  m.revoked_at, m.created_at, m.updated_at\n             FROM org.memberships m\n             JOIN identity.people p ON p.id = m.person_id\n            WHERE m.organization_id = $1 AND m.revoked_at IS NULL\n            ORDER BY (m.status = 'pending') DESC, p.display_name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "organization_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "organization_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "role!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "is_primary",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "is_primary"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "job_title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "job_title"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "invited_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "invited_by"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "invited_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "invited_at"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "approved_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "approved_by"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "approved_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "approved_at"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "revoked_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "revoked_at"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "org.memberships",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      null,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "7b4454c8e40f39e6633a0bf7951f9ffdcdd0954d9bb16dd2fcff1134de84ef63"
+}

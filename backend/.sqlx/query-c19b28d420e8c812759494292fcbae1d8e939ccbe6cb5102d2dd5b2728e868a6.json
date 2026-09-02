@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO identity.people\n               (primary_email, first_name, last_name, email_verified_at, status)\n           VALUES ('admin@ifdd.org'::text::platform.email, 'Sylvie', 'Nomo', now(), 'active')\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "c19b28d420e8c812759494292fcbae1d8e939ccbe6cb5102d2dd5b2728e868a6"
+}

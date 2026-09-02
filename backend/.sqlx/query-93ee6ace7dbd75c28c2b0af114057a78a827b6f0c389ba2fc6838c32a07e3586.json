@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO org.memberships (organization_id, person_id, role, status, job_title, approved_at)\n         VALUES ($1, $2, 'member', $3::text::org.membership_status, 'Chargée de projet',\n                 CASE WHEN $3 = 'active' THEN now() END)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "93ee6ace7dbd75c28c2b0af114057a78a827b6f0c389ba2fc6838c32a07e3586"
+}

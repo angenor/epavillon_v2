@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO identity.role_assignments (person_id, role_code, scope_type, scope_id)\n         VALUES ($1, 'admin', 'event', $2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c645f3b9da26d3e98e0508e9e7bf8306d15cc621db2128b72a60b37e564be1fd"
+}

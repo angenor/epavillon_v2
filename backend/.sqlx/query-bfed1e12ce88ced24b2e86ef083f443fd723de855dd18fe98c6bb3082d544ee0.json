@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT event.effective_deadline($1) AS \"echeance?\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "echeance?",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "bfed1e12ce88ced24b2e86ef083f443fd723de855dd18fe98c6bb3082d544ee0"
+}

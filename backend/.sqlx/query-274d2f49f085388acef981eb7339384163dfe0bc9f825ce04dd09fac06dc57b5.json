@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM programme.proposal_documents WHERE id = $1 AND proposal_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "274d2f49f085388acef981eb7339384163dfe0bc9f825ce04dd09fac06dc57b5"
+}

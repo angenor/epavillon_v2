@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT to_char(preferred_start_at AT TIME ZONE $2, 'YYYY-MM-DD\"T\"HH24:MI')\n             FROM programme.proposals WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "to_char",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "4817d07bdcab736cc217031038526d06c47b3ad55b6f372a9c3f46ef75d55533"
+}

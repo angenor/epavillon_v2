@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT event_rank FROM programme.v_proposal_dashboard WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "event_rank",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "event_rank"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "f090c722d56d07530772bac014b08517f13295705fba544379b5ed3c89632212"
+}

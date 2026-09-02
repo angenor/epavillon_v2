@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.registration_forms SET allows_anonymous = false WHERE code = 'default'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "18b5ecba4c59b29123d5c2e6473de408f56e33846811e2aca8bb32ec0a6efbf9"
+}

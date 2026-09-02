@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (s.value #>> '{}') AS \"valeur?\"\n             FROM platform.settings s\n            WHERE s.key = 'analytics.review_alert_days'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "valeur?",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "77b824cf0366ebc7a16d84d95869ec5b291f3104efb923a4d6e42496cbbf3fef"
+}

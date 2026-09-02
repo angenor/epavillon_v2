@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n               (SELECT count(*) FROM programme.proposals p\n                 WHERE p.call_id = $1\n                   AND p.organization_id = $2\n                   AND p.id IS DISTINCT FROM $3\n                   AND p.status NOT IN ('draft', 'withdrawn', 'rejected')\n                   AND p.deleted_at IS NULL) AS \"comptes!\",\n               (SELECT o.verified_at IS NOT NULL FROM org.organizations o\n                 WHERE o.id = $2) AS \"verifiee!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "comptes!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "verifiee!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "c4521fb2fa6cfdaafae48ea0e01e5805e5994a93814da36cb3e4f037b51bfe70"
+}

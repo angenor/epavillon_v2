@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM reference.entity_terms\n            WHERE entity_schema = 'content' AND entity_table = 'highlights' AND entity_id = $1\n              AND term_id IN (SELECT id FROM reference.taxonomy_terms WHERE taxonomy_code = 'activity_theme')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c54cc7a1e12862a4eda58dfc3b4a03f7573d38df61a3a7b837242adcf206cde9"
+}

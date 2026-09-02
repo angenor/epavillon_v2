@@ -1,0 +1,93 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT code AS \"code!\", native_label, english_label, is_default, is_active,\n                  sort_order, text_search_config::text AS \"text_search_config!\"\n             FROM reference.locales\n            WHERE is_active\n            ORDER BY sort_order, code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.locales",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "native_label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.locales",
+            "name": "native_label"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "english_label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.locales",
+            "name": "english_label"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "is_default",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "reference.locales",
+            "name": "is_default"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "is_active",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "reference.locales",
+            "name": "is_active"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "sort_order",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "reference.locales",
+            "name": "sort_order"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "text_search_config!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "213d336607149bc0dbfacafd0d9531a8253a39c940c8b1ad76e611feb82def3c"
+}

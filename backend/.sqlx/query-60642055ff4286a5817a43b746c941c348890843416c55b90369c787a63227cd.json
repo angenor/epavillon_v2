@@ -1,0 +1,71 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT cr.person_id, p.display_name AS \"display_name!\",\n                  cr.is_lead, cr.workload_cap,\n                  (SELECT count(*)\n                     FROM programme.review_assignments ra\n                     JOIN programme.proposals pr ON pr.id = ra.proposal_id\n                    WHERE ra.reviewer_id = cr.person_id\n                      AND ra.recused_at IS NULL\n                      AND pr.call_id = cr.call_id\n                      AND pr.deleted_at IS NULL) AS \"charge!\"\n             FROM event.call_reviewers cr\n             JOIN identity.people p ON p.id = cr.person_id\n            WHERE cr.call_id = $1\n            ORDER BY p.display_name",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.call_reviewers",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "is_lead",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.call_reviewers",
+            "name": "is_lead"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "workload_cap",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "event.call_reviewers",
+            "name": "workload_cap"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "charge!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      true,
+      null
+    ]
+  },
+  "hash": "60642055ff4286a5817a43b746c941c348890843416c55b90369c787a63227cd"
+}

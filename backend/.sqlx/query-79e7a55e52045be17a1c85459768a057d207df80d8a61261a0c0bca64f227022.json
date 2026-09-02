@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM engagement.email_suppressions WHERE email = $1::text::platform.email",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "79e7a55e52045be17a1c85459768a057d207df80d8a61261a0c0bca64f227022"
+}

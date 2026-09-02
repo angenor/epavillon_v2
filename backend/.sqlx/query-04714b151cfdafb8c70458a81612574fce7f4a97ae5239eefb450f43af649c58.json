@@ -1,0 +1,113 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, proposal_id, reviewer_id, assigned_by, assigned_at,\n                due_at, recused_at, recusal_reason\n           FROM programme.review_assignments\n          WHERE proposal_id = $1 AND reviewer_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.review_assignments",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "proposal_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.review_assignments",
+            "name": "proposal_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "reviewer_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.review_assignments",
+            "name": "reviewer_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "assigned_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.review_assignments",
+            "name": "assigned_by"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "assigned_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.review_assignments",
+            "name": "assigned_at"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "due_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.review_assignments",
+            "name": "due_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "recused_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.review_assignments",
+            "name": "recused_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "recusal_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.review_assignments",
+            "name": "recusal_reason"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "04714b151cfdafb8c70458a81612574fce7f4a97ae5239eefb450f43af649c58"
+}

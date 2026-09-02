@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT iso2 AS \"iso2!\", name AS \"name!: Value\"\n             FROM reference.countries",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "iso2!",
+        "type_info": "Bpchar",
+        "origin": {
+          "Table": {
+            "table": "reference.countries",
+            "name": "iso2"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "reference.countries",
+            "name": "name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "15c4a24a5457a4e8e7092fa7ce5981f9ad0fe50bef3c765b5de697293714ad44"
+}

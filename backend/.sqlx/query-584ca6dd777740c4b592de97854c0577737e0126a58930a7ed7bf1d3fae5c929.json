@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.events\n               (edition_year, title, slug, description, status, participation_mode,\n                timezone, starts_at, ends_at, has_pavilion, country_id, city)\n           VALUES (2027, jsonb_build_object('fr', $2::text, 'en', $2::text), $1,\n                   '{\"fr\":\"Description.\"}'::jsonb, 'ongoing', 'hybrid',\n                   $3::text::platform.timezone_name,\n                   now() - interval '2 days', now() + interval '8 days', true,\n                   (SELECT id FROM reference.countries ORDER BY iso2 LIMIT 1), $4)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        {
+          "Custom": {
+            "name": "platform.slug",
+            "kind": {
+              "Domain": "Text"
+            }
+          }
+        },
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "584ca6dd777740c4b592de97854c0577737e0126a58930a7ed7bf1d3fae5c929"
+}

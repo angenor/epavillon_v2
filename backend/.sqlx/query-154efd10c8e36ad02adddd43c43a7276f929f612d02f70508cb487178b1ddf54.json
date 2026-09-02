@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO reference.entity_terms (entity_schema, entity_table, entity_id, term_id)\n         SELECT 'programme', 'proposals', $1, id\n           FROM reference.taxonomy_terms\n          WHERE taxonomy_code = 'activity_theme' AND code = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "154efd10c8e36ad02adddd43c43a7276f929f612d02f70508cb487178b1ddf54"
+}

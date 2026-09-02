@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.review_scores (review_id, criterion_id, score, comment)\n         SELECT $1, c.critere, v.valeur::numeric(5,2), t.texte\n           FROM unnest($2::uuid[])  WITH ORDINALITY AS c(critere, i)\n           JOIN unnest($3::float8[]) WITH ORDINALITY AS v(valeur, i) USING (i)\n           JOIN unnest($4::text[])  WITH ORDINALITY AS t(texte, i)  USING (i)\n         ON CONFLICT (review_id, criterion_id) DO UPDATE\n            SET score = EXCLUDED.score, comment = EXCLUDED.comment",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray",
+        "Float8Array",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7d4dbdb3e929d62e45add9390b54c0605aa5543bc691e485bc74fea8f4bec03e"
+}

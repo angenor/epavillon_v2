@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.events\n               (edition_label, edition_year, title, slug, description, status,\n                participation_mode, timezone, starts_at, ends_at, country_id, city)\n           VALUES ('COP31', 2027, '{\"fr\":\"COP31\"}'::jsonb,\n                   'cop31-montage'::platform.slug,\n                   '{\"fr\":\"Pavillon.\"}'::jsonb, 'announced', 'hybrid',\n                   'America/Belem'::platform.timezone_name,\n                   timestamp '2027-11-09 09:00' AT TIME ZONE 'America/Belem',\n                   timestamp '2027-11-20 18:00' AT TIME ZONE 'America/Belem',\n                   (SELECT id FROM reference.countries WHERE iso3 = 'BRA'), 'Belém')\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "18ac2a5e0451191d49fd852a4e46f20303bdfcf57a86fbb351ca9395233f732c"
+}

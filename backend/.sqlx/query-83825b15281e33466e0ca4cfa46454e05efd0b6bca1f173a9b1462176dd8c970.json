@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DROP INDEX analytics.ux_mv_proposal_funnel",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "83825b15281e33466e0ca4cfa46454e05efd0b6bca1f173a9b1462176dd8c970"
+}

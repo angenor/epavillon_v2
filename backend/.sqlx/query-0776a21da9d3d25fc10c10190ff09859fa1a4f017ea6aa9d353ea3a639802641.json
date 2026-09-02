@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE engagement.template_versions\n            SET published_at = COALESCE(published_at, now())\n          WHERE template_id = $1 AND version = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0776a21da9d3d25fc10c10190ff09859fa1a4f017ea6aa9d353ea3a639802641"
+}

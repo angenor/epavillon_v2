@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT to_jsonb(o) AS \"ligne!\"\n             FROM programme.session_organizations o\n            WHERE o.session_id = $1\n            ORDER BY o.role = 'lead' DESC, o.sort_order",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ligne!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "99ec211ee4bf7b9b52f4d8d4c7cf395cab9fe3b016084e918556db1f308280f5"
+}

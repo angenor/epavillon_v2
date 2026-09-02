@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM identity.role_permissions\n          WHERE role_code = $1 AND permission_code = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8fc215d12e27304b6c7ac1d3659a81493bdea249dcc51842bb925bb640dec04e"
+}

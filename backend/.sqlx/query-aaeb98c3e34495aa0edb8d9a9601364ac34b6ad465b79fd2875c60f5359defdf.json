@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT analytics.enqueue_refresh(true, interval '0', 300) AS \"id?\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id?",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "aaeb98c3e34495aa0edb8d9a9601364ac34b6ad465b79fd2875c60f5359defdf"
+}

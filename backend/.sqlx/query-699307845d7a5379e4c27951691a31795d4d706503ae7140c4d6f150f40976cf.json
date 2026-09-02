@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE platform.settings SET value = to_jsonb($1::text)\n          WHERE key = 'analytics.review_alert_days'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "699307845d7a5379e4c27951691a31795d4d706503ae7140c4d6f150f40976cf"
+}

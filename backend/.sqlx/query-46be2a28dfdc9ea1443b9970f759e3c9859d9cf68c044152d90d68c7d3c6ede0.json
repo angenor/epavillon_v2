@@ -1,0 +1,48 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH ouvert AS (\n               SELECT c.id, c.event_id\n                 FROM event.calls_for_proposals c\n                WHERE event.is_call_open(c.id)\n                ORDER BY c.opens_at DESC\n                LIMIT 1\n           )\n           SELECT o.id AS \"call_id?\", o.event_id AS \"event_id?\",\n                  (SELECT count(*) FROM programme.proposals p\n                    WHERE p.call_id = o.id\n                      AND p.organization_id = ANY($1)\n                      AND p.id IS DISTINCT FROM $2\n                      AND p.status NOT IN ('draft', 'withdrawn', 'rejected')\n                      AND p.deleted_at IS NULL) AS \"comptes!\"\n             FROM ouvert o",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "call_id?",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "event_id?",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "comptes!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "46be2a28dfdc9ea1443b9970f759e3c9859d9cf68c044152d90d68c7d3c6ede0"
+}

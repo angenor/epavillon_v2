@@ -1,0 +1,43 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT platform.t(nt.label, $2) AS \"label!\",\n                  nt.module_code,\n                  nt.criticality::text AS \"criticality!\"\n             FROM engagement.notification_types nt\n            WHERE nt.code = $1 AND nt.is_active",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "label!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "module_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.notification_types",
+            "name": "module_code"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "criticality!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      false,
+      null
+    ]
+  },
+  "hash": "46a41a3af419be966c3c08ad99517f8469da68300690951ff63cc25ab1cb85b8"
+}

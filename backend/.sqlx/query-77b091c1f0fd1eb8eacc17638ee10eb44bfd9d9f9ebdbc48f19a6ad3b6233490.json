@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT vue FROM analytics.refresh_all(false)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "vue",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "77b091c1f0fd1eb8eacc17638ee10eb44bfd9d9f9ebdbc48f19a6ad3b6233490"
+}

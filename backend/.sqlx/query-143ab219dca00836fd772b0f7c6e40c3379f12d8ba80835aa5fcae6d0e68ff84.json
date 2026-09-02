@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE org.organizations\n            SET country_id = (SELECT id FROM reference.countries WHERE iso3 = 'BRA')\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "143ab219dca00836fd772b0f7c6e40c3379f12d8ba80835aa5fcae6d0e68ff84"
+}

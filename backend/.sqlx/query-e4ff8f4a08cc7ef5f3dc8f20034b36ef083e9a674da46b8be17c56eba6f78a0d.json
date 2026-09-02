@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO engagement.reminder_rules (event_id, session_id, offsets, channels)\n           VALUES ($1, $2,\n                   (SELECT array_agg(make_interval(mins => m) ORDER BY m DESC)\n                      FROM unnest($3::int[]) m),\n                   '{email}')\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.reminder_rules",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Int4Array"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "e4ff8f4a08cc7ef5f3dc8f20034b36ef083e9a674da46b8be17c56eba6f78a0d"
+}

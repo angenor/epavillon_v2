@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, day_date, title, is_featured, color_hex\n           FROM event.event_days\n          WHERE event_id = $1\n          ORDER BY day_date",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "day_date",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "day_date"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "title",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "is_featured",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "is_featured"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "color_hex",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.event_days",
+            "name": "color_hex"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "43e5b52bcfddd3eb6a81ef89c45739d15c2345e9965a399e99945408df10e584"
+}

@@ -1,0 +1,95 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, event_id, call_id, slug::text AS \"slug!\",\n                  requested_sessions, preferred_start_at, duration_minutes\n             FROM programme.proposals\n            WHERE id = $1 AND deleted_at IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "call_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "call_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "requested_sessions",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "requested_sessions"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "preferred_start_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "preferred_start_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "duration_minutes",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "duration_minutes"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      null,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "8a49d5a5fb4b62ae5e2c818e93d1b56d9a4eae04aa68c8920dccc1d9bb7b19aa"
+}

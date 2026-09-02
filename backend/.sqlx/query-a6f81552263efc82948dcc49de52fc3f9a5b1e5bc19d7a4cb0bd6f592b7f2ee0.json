@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.registration_form_fields\n               (form_id, code, label, field_type, is_required, is_sensitive, sort_order)\n           SELECT id, 'besoin_accessibilite',\n                  '{\"fr\":\"Besoin d''accessibilité\"}'::jsonb, 'text', false, true, 70\n             FROM programme.registration_forms WHERE code = 'default'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "a6f81552263efc82948dcc49de52fc3f9a5b1e5bc19d7a4cb0bd6f592b7f2ee0"
+}

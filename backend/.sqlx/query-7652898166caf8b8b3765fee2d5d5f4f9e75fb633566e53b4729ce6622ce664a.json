@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE content.highlights\n              SET status = $2::text::content.highlight_status,\n                  published_at = CASE WHEN $2 = 'published' THEN COALESCE(published_at, now())\n                                      ELSE published_at END,\n                  updated_at = now()\n            WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7652898166caf8b8b3765fee2d5d5f4f9e75fb633566e53b4729ce6622ce664a"
+}

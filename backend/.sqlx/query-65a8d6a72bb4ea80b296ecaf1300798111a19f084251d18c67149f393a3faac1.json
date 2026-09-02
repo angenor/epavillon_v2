@@ -1,0 +1,107 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, event_id, status::text AS \"status!\", registration_required,\n                  registration_opens_at, registration_closes_at,\n                  capacity, waitlist_enabled\n             FROM programme.sessions\n            WHERE id = $1\n              FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "registration_required",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "registration_required"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "registration_opens_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "registration_opens_at"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "registration_closes_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "registration_closes_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "capacity",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "capacity"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "waitlist_enabled",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "waitlist_enabled"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      false,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "65a8d6a72bb4ea80b296ecaf1300798111a19f084251d18c67149f393a3faac1"
+}

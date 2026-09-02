@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.sessions\n               (event_id, event_day_id, organization_id, title, slug, status,\n                starts_at, ends_at, is_streamed, format, timezone)\n           VALUES ($1, $2, $3, jsonb_build_object('fr', $4::text, 'en', $4::text),\n                   $5::text::platform.slug, 'scheduled', $6, $7, true,\n                   'in_person',\n                   (SELECT e.timezone FROM event.events e WHERE e.id = $1))\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "5478aa64c147a2ba0930bcee1b4f34ca89e9260c56b5cdd8a315b6c5e90c56f0"
+}

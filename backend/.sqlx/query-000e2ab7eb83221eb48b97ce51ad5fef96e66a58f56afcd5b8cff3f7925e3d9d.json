@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE event.calls_for_proposals SET requires_verified_organization = true WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "000e2ab7eb83221eb48b97ce51ad5fef96e66a58f56afcd5b8cff3f7925e3d9d"
+}

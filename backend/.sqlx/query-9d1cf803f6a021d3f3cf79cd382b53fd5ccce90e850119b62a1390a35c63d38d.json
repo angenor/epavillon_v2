@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT media.reconcile_storage_quotas() AS \"corrigees!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "corrigees!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "9d1cf803f6a021d3f3cf79cd382b53fd5ccce90e850119b62a1390a35c63d38d"
+}

@@ -1,0 +1,137 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposal_documents\n               (proposal_id, asset_id, title, document_type_code, is_public,\n                uploaded_by, sort_order)\n           VALUES ($1, $2, $3, $4, $5, $6, $7)\n        RETURNING id, proposal_id, asset_id, title, document_type_code,\n                  is_public, uploaded_by, uploaded_at, sort_order",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_documents",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "proposal_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_documents",
+            "name": "proposal_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "asset_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_documents",
+            "name": "asset_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "title",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_documents",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "document_type_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_documents",
+            "name": "document_type_code"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "is_public",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_documents",
+            "name": "is_public"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "uploaded_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_documents",
+            "name": "uploaded_by"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "uploaded_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_documents",
+            "name": "uploaded_at"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "sort_order",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_documents",
+            "name": "sort_order"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        {
+          "Custom": {
+            "name": "platform.i18n_text",
+            "kind": {
+              "Domain": "Jsonb"
+            }
+          }
+        },
+        "Text",
+        "Bool",
+        "Uuid",
+        "Int2"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "7928cf547bd91ce1d76e5ab25960deb5945e95b55035f4e9126045fbebfd6ee6"
+}

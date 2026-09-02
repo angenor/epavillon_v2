@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO engagement.notification_preferences (person_id, type_code, channel, is_enabled)\n         VALUES ($1, 'programme.session.reminder', 'email', false)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ebdeac7d2d80bdb68c09113be29545a8d4f1d1ebc3e9152c02d95d7627906899"
+}

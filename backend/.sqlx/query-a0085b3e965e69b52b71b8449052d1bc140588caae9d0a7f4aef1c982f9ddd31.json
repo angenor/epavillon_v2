@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.sessions\n                SET starts_at = $2::timestamptz,\n                    ends_at = $2::timestamptz + interval '90 minutes'\n              WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a0085b3e965e69b52b71b8449052d1bc140588caae9d0a7f4aef1c982f9ddd31"
+}

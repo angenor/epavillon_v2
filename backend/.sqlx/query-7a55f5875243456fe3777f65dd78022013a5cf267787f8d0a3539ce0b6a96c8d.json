@@ -1,0 +1,122 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.owner_schema, r.owner_table,\n                  r.role::text  AS \"role!\",\n                  r.label       AS \"label: serde_json::Value\",\n                  r.is_multiple,\n                  r.allowed_mime_prefixes AS \"prefixes!\",\n                  r.max_byte_size,\n                  r.expected_aspect_ratio::text  AS ratio,\n                  r.aspect_ratio_tolerance::text AS \"tolerance!\",\n                  r.is_active\n             FROM media.attachable_roles r\n            WHERE r.owner_schema = $1 AND r.owner_table = $2\n            ORDER BY r.role",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "owner_schema",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "media.attachable_roles",
+            "name": "owner_schema"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "owner_table",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "media.attachable_roles",
+            "name": "owner_table"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "role!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "label: serde_json::Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "media.attachable_roles",
+            "name": "label"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "is_multiple",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "media.attachable_roles",
+            "name": "is_multiple"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "prefixes!",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "media.attachable_roles",
+            "name": "allowed_mime_prefixes"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "max_byte_size",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "media.attachable_roles",
+            "name": "max_byte_size"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "ratio",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "tolerance!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "is_active",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "media.attachable_roles",
+            "name": "is_active"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      false,
+      false,
+      false,
+      true,
+      null,
+      null,
+      false
+    ]
+  },
+  "hash": "7a55f5875243456fe3777f65dd78022013a5cf267787f8d0a3539ce0b6a96c8d"
+}

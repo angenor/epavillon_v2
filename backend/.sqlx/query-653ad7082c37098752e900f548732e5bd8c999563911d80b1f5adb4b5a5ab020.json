@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.event_id\n           FROM programme.proposal_comments c\n           JOIN programme.proposals p ON p.id = c.proposal_id\n          WHERE c.id = $1 AND c.deleted_at IS NULL AND p.deleted_at IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "event_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "653ad7082c37098752e900f548732e5bd8c999563911d80b1f5adb4b5a5ab020"
+}

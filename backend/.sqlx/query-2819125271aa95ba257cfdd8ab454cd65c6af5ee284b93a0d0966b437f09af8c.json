@@ -1,0 +1,450 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT v.id AS \"id!\", v.placement::text AS \"placement!\", v.sort_order AS \"sort_order!\",\n                  v.nature_code AS \"nature_code!\", v.nature_label, v.nature_color, v.nature_icon,\n                  v.title AS \"title!\", v.quote, v.body,\n                  v.author_name, v.author_title, v.person_id,\n                  v.organization_id, v.organization_name, v.organization_acronym,\n                  v.country_code, v.country_name,\n                  v.event_id, v.event_slug::text AS \"event_slug?\", v.event_title,\n                  v.session_id, v.session_slug::text AS \"session_slug?\", v.session_title,\n                  v.session_starts_at, v.session_ends_at,\n                  v.session_timezone::text AS \"session_timezone?\",\n                  v.link_url, v.link_label,\n                  v.background_image, v.background_video, v.thumbnail, v.background_color_hex,\n                  v.theme_codes AS \"theme_codes!\", v.themes AS \"themes!\",\n                  v.starts_at, v.ends_at, v.published_at\n             FROM content.v_showcase v\n            WHERE v.placement = 'home_hero'\n            ORDER BY v.sort_order, v.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "placement!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "sort_order!",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "sort_order"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "nature_code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "nature_code"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "nature_label",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "nature_label"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "nature_color",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "nature_color"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "nature_icon",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "nature_icon"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "title!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "quote",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "quote"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "body",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "body"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "author_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "author_name"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "author_title",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "author_title"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "organization_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "organization_id"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "organization_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "organization_name"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "organization_acronym",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "organization_acronym"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "country_code",
+        "type_info": "Bpchar",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "country_code"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "country_name",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "country_name"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "event_slug?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 20,
+        "name": "event_title",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "event_title"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "session_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "session_id"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
+        "name": "session_slug?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 23,
+        "name": "session_title",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "session_title"
+          }
+        }
+      },
+      {
+        "ordinal": 24,
+        "name": "session_starts_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "session_starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 25,
+        "name": "session_ends_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "session_ends_at"
+          }
+        }
+      },
+      {
+        "ordinal": 26,
+        "name": "session_timezone?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 27,
+        "name": "link_url",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "link_url"
+          }
+        }
+      },
+      {
+        "ordinal": 28,
+        "name": "link_label",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "link_label"
+          }
+        }
+      },
+      {
+        "ordinal": 29,
+        "name": "background_image",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "background_image"
+          }
+        }
+      },
+      {
+        "ordinal": 30,
+        "name": "background_video",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "background_video"
+          }
+        }
+      },
+      {
+        "ordinal": 31,
+        "name": "thumbnail",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "thumbnail"
+          }
+        }
+      },
+      {
+        "ordinal": 32,
+        "name": "background_color_hex",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "background_color_hex"
+          }
+        }
+      },
+      {
+        "ordinal": 33,
+        "name": "theme_codes!",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "theme_codes"
+          }
+        }
+      },
+      {
+        "ordinal": 34,
+        "name": "themes!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "themes"
+          }
+        }
+      },
+      {
+        "ordinal": 35,
+        "name": "starts_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "starts_at"
+          }
+        }
+      },
+      {
+        "ordinal": 36,
+        "name": "ends_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "ends_at"
+          }
+        }
+      },
+      {
+        "ordinal": 37,
+        "name": "published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "content.v_showcase",
+            "name": "published_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      true,
+      null,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null,
+      true,
+      true,
+      null,
+      true,
+      true,
+      true,
+      null,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "2819125271aa95ba257cfdd8ab454cd65c6af5ee284b93a0d0966b437f09af8c"
+}

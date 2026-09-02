@@ -1,0 +1,68 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE content.highlights\n              SET placement = $2::text::content.highlight_placement,\n                  status = $3::text::content.highlight_status,\n                  nature_code = $4, title = $5, quote = $6, body = $7,\n                  person_id = $8, author_name = $9, author_title = $10,\n                  organization_id = $11, organization_label = $12, country_id = $13,\n                  event_id = $14, session_id = $15,\n                  link_url = $16::text::platform.url, link_label = $17,\n                  background_color_hex = $18, starts_at = $19, ends_at = $20,\n                  updated_at = now()\n            WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        {
+          "Custom": {
+            "name": "platform.i18n_text",
+            "kind": {
+              "Domain": "Jsonb"
+            }
+          }
+        },
+        {
+          "Custom": {
+            "name": "platform.i18n_text",
+            "kind": {
+              "Domain": "Jsonb"
+            }
+          }
+        },
+        {
+          "Custom": {
+            "name": "platform.i18n_text",
+            "kind": {
+              "Domain": "Jsonb"
+            }
+          }
+        },
+        "Uuid",
+        "Text",
+        {
+          "Custom": {
+            "name": "platform.i18n_text",
+            "kind": {
+              "Domain": "Jsonb"
+            }
+          }
+        },
+        "Uuid",
+        "Text",
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text",
+        {
+          "Custom": {
+            "name": "platform.i18n_text",
+            "kind": {
+              "Domain": "Jsonb"
+            }
+          }
+        },
+        "Text",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "33a3221aa25c28904a79e17bb0c08edd2607bbf623ca3c8a245bfa6285c36b1b"
+}

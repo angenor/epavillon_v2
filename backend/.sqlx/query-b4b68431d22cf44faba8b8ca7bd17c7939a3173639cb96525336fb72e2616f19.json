@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT to_jsonb(r) AS \"ligne!\"\n             FROM programme.registrations r\n            WHERE r.session_id = $1 AND r.person_id = $2 AND r.status <> 'cancelled'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ligne!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "b4b68431d22cf44faba8b8ca7bd17c7939a3173639cb96525336fb72e2616f19"
+}

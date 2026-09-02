@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT array(SELECT (extract(epoch FROM o) / 60)::int\n                          FROM unnest(r.offsets) o) AS \"minutes!: Vec<i32>\"\n             FROM engagement.reminder_rules r WHERE r.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "minutes!: Vec<i32>",
+        "type_info": "Int4Array",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "0564ea8d0d6222ec745dce91efe797d8305a5437b3589bc485c6aeb3a8b3a439"
+}

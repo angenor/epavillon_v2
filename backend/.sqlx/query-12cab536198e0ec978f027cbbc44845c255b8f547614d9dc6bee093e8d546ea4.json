@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposal_documents (proposal_id, asset_id, title)\n               VALUES ($1, $2, jsonb_build_object('fr', $3::text))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "12cab536198e0ec978f027cbbc44845c255b8f547614d9dc6bee093e8d546ea4"
+}

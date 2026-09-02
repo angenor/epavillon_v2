@@ -1,0 +1,60 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT v.id, v.sort_order AS \"sort_order!\", h.sort_order AS \"rang_courant!\",\n                  h.placement::text AS \"placement!\"\n             FROM content.highlights h\n             JOIN content.highlights v\n               ON v.placement = h.placement AND v.id <> h.id\n              AND (($2::bool AND (v.sort_order, v.id) < (h.sort_order, h.id))\n                OR (NOT $2::bool AND (v.sort_order, v.id) > (h.sort_order, h.id)))\n            WHERE h.id = $1\n            ORDER BY CASE WHEN $2 THEN -v.sort_order ELSE v.sort_order END, v.id\n            LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "sort_order!",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "sort_order"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "rang_courant!",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "content.highlights",
+            "name": "sort_order"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "placement!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "989b03de7335d83e9200022fd42e2fda90804d60d7ae7707886f34eec97b9f2e"
+}

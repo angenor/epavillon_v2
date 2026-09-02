@@ -1,0 +1,138 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.id,\n                  t.role::text AS \"role!\",\n                  t.sort_order,\n                  t.asset_id,\n                  media.object_url(a.bucket, a.object_key) AS \"url!\",\n                  a.width, a.height,\n                  COALESCE(t.alt_text_override, a.alt_text) AS \"alt_text: serde_json::Value\",\n                  a.caption AS \"caption: serde_json::Value\",\n                  a.credit,\n                  media.asset_sources(a.id) AS \"sources!\",\n                  a.status::text AS \"status!\"\n             FROM media.attachments t\n             JOIN media.assets a ON a.id = t.asset_id\n            WHERE t.owner_schema = $1 AND t.owner_table = $2 AND t.owner_id = $3\n              AND ($4::text IS NULL OR t.role::text = $4)\n              AND a.deleted_at IS NULL\n            ORDER BY t.role, t.sort_order, t.created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "media.attachments",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "role!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "sort_order",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "media.attachments",
+            "name": "sort_order"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "asset_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "media.attachments",
+            "name": "asset_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "url!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "width",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "media.assets",
+            "name": "width"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "height",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "media.assets",
+            "name": "height"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "alt_text: serde_json::Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "caption: serde_json::Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "media.assets",
+            "name": "caption"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "credit",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "media.assets",
+            "name": "credit"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "sources!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      false,
+      null,
+      true,
+      true,
+      null,
+      true,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "3e1e46fd23effb677c9f8f40655f1f97fd43c49972b954464d47fc65ab4b1bb5"
+}

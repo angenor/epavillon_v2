@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT expected_variables AS \"promises!\"\n             FROM engagement.notification_types WHERE code = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "promises!",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "engagement.notification_types",
+            "name": "expected_variables"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "d4229322a3e1d3409c13307e6fe66fba1eb7481225c088e3033e47cadd579793"
+}

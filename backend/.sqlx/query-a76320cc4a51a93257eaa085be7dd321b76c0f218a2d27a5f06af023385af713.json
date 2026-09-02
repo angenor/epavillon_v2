@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.value #>> '{}' FROM platform.settings s WHERE s.key = 'media.default_bucket'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "?column?",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a76320cc4a51a93257eaa085be7dd321b76c0f218a2d27a5f06af023385af713"
+}

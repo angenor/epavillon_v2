@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM programme.proposal_organizations\n          WHERE proposal_id = $1 AND role <> 'lead' AND organization_id <> ALL($2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8572f7b27d2111fb23e42b8572da30dd6ea2382d0175f51e468f8b09cf08479c"
+}

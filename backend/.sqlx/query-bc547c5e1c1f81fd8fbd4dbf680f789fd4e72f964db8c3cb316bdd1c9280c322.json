@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT DISTINCT owner_schema, owner_table\n           FROM media.attachable_roles\n          ORDER BY owner_schema, owner_table",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "owner_schema",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "media.attachable_roles",
+            "name": "owner_schema"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "owner_table",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "media.attachable_roles",
+            "name": "owner_table"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "bc547c5e1c1f81fd8fbd4dbf680f789fd4e72f964db8c3cb316bdd1c9280c322"
+}

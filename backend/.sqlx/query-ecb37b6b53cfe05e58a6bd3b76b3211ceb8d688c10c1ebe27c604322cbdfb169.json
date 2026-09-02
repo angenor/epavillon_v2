@@ -1,0 +1,381 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT f.event_id            AS \"event_id!\",\n                  f.cle_appel           AS \"cle_appel!\",\n                  f.call_id,\n                  f.evenement,\n                  f.edition_year        AS \"edition_year!\",\n                  f.statut_evenement    AS \"statut_evenement!\",\n                  f.code_appel,\n                  f.appel,\n                  f.statut_appel,\n                  f.appel_ouvre_le,\n                  f.appel_ferme_le,\n                  f.required_reviews,\n                  f.total               AS \"total!\",\n                  f.brouillons          AS \"brouillons!\",\n                  f.deposees            AS \"deposees!\",\n                  f.en_attente_affectation AS \"en_attente_affectation!\",\n                  f.en_revue            AS \"en_revue!\",\n                  f.modifications_demandees AS \"modifications_demandees!\",\n                  f.acceptees           AS \"acceptees!\",\n                  f.rejetees            AS \"rejetees!\",\n                  f.retirees            AS \"retirees!\",\n                  f.annulees            AS \"annulees!\",\n                  f.decidees            AS \"decidees!\",\n                  f.en_instance         AS \"en_instance!\",\n                  f.taux_acceptation::float8    AS \"taux_acceptation?\",\n                  f.taux_acceptation_sur_depots::float8 AS \"taux_acceptation_sur_depots?\",\n                  f.organisations_distinctes AS \"organisations_distinctes!\",\n                  f.note_moyenne::float8 AS \"note_moyenne?\",\n                  f.delai_median_decision_heures::float8 AS \"delai_median_decision_heures?\",\n                  f.premier_depot,\n                  f.dernier_depot,\n                  f.sessions_programmees AS \"sessions_programmees!\"\n             FROM analytics.mv_proposal_funnel f\n            WHERE f.event_id = $1\n            ORDER BY (f.call_id IS NOT DISTINCT FROM $2) DESC, f.deposees DESC\n            LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "event_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "cle_appel!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "cle_appel"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "call_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "call_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "evenement",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "evenement"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "edition_year!",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "edition_year"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "statut_evenement!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "statut_evenement"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "code_appel",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "code_appel"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "appel",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "appel"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "statut_appel",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "statut_appel"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "appel_ouvre_le",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "appel_ouvre_le"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "appel_ferme_le",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "appel_ferme_le"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "required_reviews",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "required_reviews"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "total!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "total"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "brouillons!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "brouillons"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "deposees!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "deposees"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "en_attente_affectation!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "en_attente_affectation"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "en_revue!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "en_revue"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "modifications_demandees!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "modifications_demandees"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "acceptees!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "acceptees"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "rejetees!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "rejetees"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "retirees!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "retirees"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "annulees!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "annulees"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
+        "name": "decidees!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "decidees"
+          }
+        }
+      },
+      {
+        "ordinal": 23,
+        "name": "en_instance!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "en_instance"
+          }
+        }
+      },
+      {
+        "ordinal": 24,
+        "name": "taux_acceptation?",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 25,
+        "name": "taux_acceptation_sur_depots?",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 26,
+        "name": "organisations_distinctes!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "organisations_distinctes"
+          }
+        }
+      },
+      {
+        "ordinal": 27,
+        "name": "note_moyenne?",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 28,
+        "name": "delai_median_decision_heures?",
+        "type_info": "Float8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 29,
+        "name": "premier_depot",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "premier_depot"
+          }
+        }
+      },
+      {
+        "ordinal": 30,
+        "name": "dernier_depot",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "dernier_depot"
+          }
+        }
+      },
+      {
+        "ordinal": 31,
+        "name": "sessions_programmees!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "analytics.mv_proposal_funnel",
+            "name": "sessions_programmees"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null,
+      null,
+      true,
+      null,
+      null,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "ecb37b6b53cfe05e58a6bd3b76b3211ceb8d688c10c1ebe27c604322cbdfb169"
+}

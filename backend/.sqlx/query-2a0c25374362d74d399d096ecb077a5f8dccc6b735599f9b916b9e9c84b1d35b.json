@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO media.assets\n               (object_key, checksum_sha256, mime_type, byte_size, original_filename,\n                owner_person_id, status, scan_verdict, scan_engine, scanned_at, alt_text)\n           VALUES ($1, encode(digest($1, 'sha256'), 'hex'), 'image/png', 4096, $2,\n                   $3, 'ready', 'unsupported', 'none', now(),\n                   '{\"fr\":\"Une image d''épreuve\",\"en\":\"A test image\"}'::jsonb::platform.i18n_text)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "media.assets",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "2a0c25374362d74d399d096ecb077a5f8dccc6b735599f9b916b9e9c84b1d35b"
+}
