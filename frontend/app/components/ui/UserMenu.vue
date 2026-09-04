@@ -8,10 +8,8 @@ import type { NavItem } from '~/types/navigation'
  * IL NE DÉCIDE DE RIEN, comme `UiNavBar` : les entrées lui sont données par le
  * layout, qui seul sait où mène « Mon organisation » selon le rattachement.
  *
- * PAS DE PHOTO, ET CE N'EST PAS UN OUBLI. `identity.people` ne porte aucune
- * colonne d'avatar : il n'y a rien à afficher. La bulle rend donc les INITIALES,
- * qui sont une donnée réelle, plutôt qu'une silhouette générique répétée à
- * l'identique pour tout le monde.
+ * PAS DE PHOTO, ET CE N'EST PAS UN OUBLI : voir `initialsOf()`, que le pied de
+ * la navigation du back-office partage avec ce menu.
  *
  * ── OUVERTURE AU SURVOL, MAIS PAS SEULEMENT ─────────────────────────────────
  *
@@ -63,18 +61,7 @@ const trigger = ref<HTMLButtonElement | null>(null)
 const panel = ref<HTMLElement | null>(null)
 let closeTimer: ReturnType<typeof setTimeout> | null = null
 
-/**
- * Deux lettres au plus, prises sur les mots du nom affiché. `Array.from` et non
- * `split('')` : une initiale accentuée ou hors du plan latin ne doit pas être
- * coupée en deux unités de code.
- */
-const initials = computed(() => {
-  const words = props.name.trim().split(/\s+/).filter(Boolean)
-  const letters = [words[0], words.length > 1 ? words[words.length - 1] : undefined]
-    .filter((word): word is string => Boolean(word))
-    .map((word) => Array.from(word)[0] ?? '')
-  return letters.join('').toLocaleUpperCase()
-})
+const initials = computed(() => initialsOf(props.name))
 
 const isCurrent = (to: string): boolean => route.path === localePath(to)
 

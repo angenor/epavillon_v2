@@ -92,6 +92,13 @@ const PATHS: Record<string, string> = {
   // — Actions
   search: 'M10.8 17.6a6.8 6.8 0 1 0 0-13.6 6.8 6.8 0 0 0 0 13.6ZM15.8 15.8 20.5 20.5',
   filter: 'M4 6h16l-6.2 7.2v5.4l-3.6 1.8v-7.2L4 6Z',
+  // Curseurs de réglage : « Paramètres ». Un engrenage à 16 px, tracé à 1,7,
+  // se referme en tache — ces trois glissières restent lisibles à la taille
+  // d'une entrée de navigation.
+  sliders: 'M4 7h6M13.4 7H20M4 17h9.6M16.8 17H20M11.8 8.6a1.6 1.6 0 1 0 0-3.2 1.6 1.6 0 0 0 0 3.2ZM15.2 18.6a1.6 1.6 0 1 0 0-3.2 1.6 1.6 0 0 0 0 3.2Z',
+  // Porte ouverte, flèche qui sort : la déconnexion. À ne pas confondre avec
+  // `arrow-right`, qui fait avancer dans un parcours.
+  'log-out': 'M14 4h4.2a.8.8 0 0 1 .8.8v14.4a.8.8 0 0 1-.8.8H14M9.5 8.2 13.3 12l-3.8 3.8M13.3 12H3.5',
   plus: 'M12 5v14M5 12h14',
   minus: 'M5 12h14',
   edit: 'M4.5 19.5h4l10-10a2.1 2.1 0 0 0-3-3l-10 10v3ZM14.5 6.5l3 3',

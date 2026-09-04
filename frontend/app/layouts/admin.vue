@@ -23,37 +23,59 @@ import type { NavSection } from '~/types/navigation'
  * ne peut pas être caché derrière un bouton, c'est le sujet de tout ce qu'on lit
  * en dessous. Le layout le pose une fois pour tous les écrans du back-office,
  * plutôt que chaque page à sa manière.
+ *
+ * CHAQUE ENTRÉE PORTE SON ICÔNE — le guide en dessine une par ligne, et la
+ * colonne n'en avait aucune : douze libellés de même graisse, de même longueur,
+ * ne se distinguent qu'à la lecture. Les pictogrammes reprennent ceux du guide,
+ * dont le calendrier pour les événements et l'horloge pour la programmation.
+ *
+ * LE COMPTE CONNECTÉ VIT AU PIED DE LA COLONNE, avec la déconnexion. L'en-tête du
+ * back-office n'en portait aucune trace : pour se déconnecter, il fallait repasser
+ * par le site public. Et savoir SOUS QUEL COMPTE on arbitre n'est pas un confort
+ * quand le périmètre d'administration décide de ce que la page montre (règle
+ * métier n° 8).
  */
 
 const { t } = useI18n()
 const localePath = useLocalePath()
 const route = useRoute()
 const adminScope = useAdminScopeStore()
+const auth = useAuthStore()
+
+// SANS `await` : la garde d'accès du back-office a déjà résolu la session, cette
+// lecture ne coûte donc aucun appel de plus — mais le layout ne doit pas retarder
+// le rendu pour un pied de colonne.
+void auth.ensureLoaded()
+
+async function signOut(): Promise<void> {
+  await auth.signOut()
+  await navigateTo(localePath('/'))
+}
 
 const sections: NavSection[] = [
   {
     labelKey: 'nav.admin.sections.programme',
     items: [
-      { labelKey: 'nav.admin.dashboard', to: '/admin' },
-      { labelKey: 'nav.admin.proposals', to: '/admin/propositions' },
-      { labelKey: 'nav.admin.reviews', to: '/admin/evaluations' },
-      { labelKey: 'nav.admin.schedule', to: '/admin/programmation' },
+      { labelKey: 'nav.admin.dashboard', to: '/admin', icon: 'grid' },
+      { labelKey: 'nav.admin.proposals', to: '/admin/propositions', icon: 'inbox' },
+      { labelKey: 'nav.admin.reviews', to: '/admin/evaluations', icon: 'check-circle' },
+      { labelKey: 'nav.admin.schedule', to: '/admin/programmation', icon: 'clock' },
     ],
   },
   {
     labelKey: 'nav.admin.sections.referential',
     items: [
-      { labelKey: 'nav.admin.events', to: '/admin/evenements' },
-      { labelKey: 'nav.admin.organizations', to: '/admin/organisations' },
-      { labelKey: 'nav.admin.users', to: '/admin/utilisateurs' },
-      { labelKey: 'nav.admin.showcase', to: '/admin/vitrine' },
+      { labelKey: 'nav.admin.events', to: '/admin/evenements', icon: 'calendar' },
+      { labelKey: 'nav.admin.organizations', to: '/admin/organisations', icon: 'building' },
+      { labelKey: 'nav.admin.users', to: '/admin/utilisateurs', icon: 'users' },
+      { labelKey: 'nav.admin.showcase', to: '/admin/vitrine', icon: 'monitor' },
     ],
   },
   {
     labelKey: 'nav.admin.sections.operations',
     items: [
-      { labelKey: 'nav.admin.incidents', to: '/admin/incidents' },
-      { labelKey: 'nav.admin.settings', to: '/admin/parametres' },
+      { labelKey: 'nav.admin.incidents', to: '/admin/incidents', icon: 'broadcast' },
+      { labelKey: 'nav.admin.settings', to: '/admin/parametres', icon: 'sliders' },
     ],
   },
 ]
@@ -75,9 +97,18 @@ await adminScope.ensureLoaded()
   <div class="min-h-screen bg-surface text-text lg:flex">
     <a class="skip-link" href="#contenu-admin">{{ t('common.a11y.skipToContent') }}</a>
 
-    <UiSideNav :sections="sections" :label="t('nav.admin.sidebar.label')" :open="isSidebarOpen">
+    <UiSideNav
+      :sections="sections"
+      :label="t('nav.admin.sidebar.label')"
+      :open="isSidebarOpen"
+      @close="isSidebarOpen = false"
+    >
       <template #brand>
-        <NuxtLink :to="localePath('/')" class="flex items-center gap-2 no-underline">
+        <!-- LOGO ET MENTION EMPILÉS, ET NON CÔTE À CÔTE : la colonne fait 260 px,
+             le logo 140, et « Back-office » ne tenait à côté qu'en rognant l'un
+             des deux. Le logo mène au tableau de bord — le retour au site public
+             est au pied, où on le cherche. -->
+        <NuxtLink :to="localePath('/admin')" class="block no-underline">
           <img
             :src="assetUrl('/logos/ifdd-horizontal-gris.svg')"
             :alt="t('nav.site.owner')"
@@ -92,16 +123,57 @@ await adminScope.ensureLoaded()
             width="140"
             height="28"
           >
+          <span
+            class="mt-2 block font-display text-xs font-semibold tracking-caps text-text-subtle uppercase"
+          >
+            {{ t('nav.admin.title') }}
+          </span>
         </NuxtLink>
-        <span class="font-display text-sm tracking-wide text-text-subtle uppercase">
-          {{ t('nav.admin.title') }}
-        </span>
       </template>
 
       <template #footer>
-        <NuxtLink :to="localePath('/')" class="text-sm text-text-muted no-underline hover:text-text">
+        <div v-if="auth.person" class="mb-1 flex items-center gap-3 px-3 py-2">
+          <span
+            class="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent-surface font-mono text-xs font-bold text-accent"
+            aria-hidden="true"
+          >
+            {{ initialsOf(auth.person.display_name) }}
+          </span>
+          <span class="min-w-0 flex-1">
+            <span class="block truncate text-sm font-semibold text-text">
+              {{ auth.person.display_name }}
+            </span>
+            <span class="block truncate text-xs text-text-subtle">
+              {{ auth.person.primary_email }}
+            </span>
+          </span>
+        </div>
+
+        <NuxtLink
+          :to="localePath('/')"
+          class="group flex min-h-(--target-min) items-center gap-3 rounded-md px-3 text-sm text-text-secondary no-underline transition-colors duration-(--duration-fast) hover:bg-surface-hover hover:text-text"
+        >
+          <UiIcon
+            name="arrow-left"
+            size="1.05rem"
+            class="shrink-0 text-text-subtle transition-colors duration-(--duration-fast) group-hover:text-text"
+          />
           {{ t('nav.admin.backToSite') }}
         </NuxtLink>
+
+        <button
+          v-if="auth.isAuthenticated"
+          type="button"
+          class="group flex min-h-(--target-min) w-full cursor-pointer items-center gap-3 rounded-md px-3 text-sm text-text-secondary transition-colors duration-(--duration-fast) hover:bg-danger-surface hover:text-danger"
+          @click="signOut"
+        >
+          <UiIcon
+            name="log-out"
+            size="1.05rem"
+            class="shrink-0 text-text-subtle transition-colors duration-(--duration-fast) group-hover:text-danger"
+          />
+          {{ t('nav.account.logout') }}
+        </button>
       </template>
     </UiSideNav>
 
@@ -125,13 +197,19 @@ await adminScope.ensureLoaded()
           <UiIcon :name="isSidebarOpen ? 'close' : 'menu'" size="1.25rem" :stroke-width="1.8" />
         </button>
 
-        <UiBreadcrumb
-          v-if="breadcrumb.length"
-          :items="breadcrumb"
-          :root="{ label: t('nav.admin.title'), to: '/admin' }"
-          class="min-w-0 flex-1"
-        />
-        <div v-else class="min-w-0 flex-1" />
+        <!-- LA PLACE DU FIL EST RÉSERVÉE, QU'IL S'AFFICHE OU NON. `UiBreadcrumb`
+             se tait en dessous de trois maillons — un fil à deux n'apprend rien —,
+             et le `v-else` qui poussait la langue et le thème à droite ne voyait
+             pas ce silence : sur toutes les listes du back-office, dont le fil
+             n'a qu'un maillon, les deux commandes se retrouvaient collées au
+             bouton de menu, à gauche. -->
+        <div class="min-w-0 flex-1">
+          <UiBreadcrumb
+            v-if="breadcrumb.length"
+            :items="breadcrumb"
+            :root="{ label: t('nav.admin.title'), to: '/admin' }"
+          />
+        </div>
 
         <UiLocaleSwitch class="hidden sm:flex" />
         <UiThemeToggle />
