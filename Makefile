@@ -32,8 +32,15 @@ OPENAPI_JSON ?= backend/target/openapi.json
 S3_KEY_ID     ?= $(shell sed -n 's/^S3_ACCESS_KEY_ID=//p'     $(ENV_FILE) 2>/dev/null | tail -1)
 S3_KEY_SECRET ?= $(shell sed -n 's/^S3_SECRET_ACCESS_KEY=//p' $(ENV_FILE) 2>/dev/null | tail -1)
 
+# Port hôte du relais média (ops/media-proxy.conf). Il compose l'URL publique
+# des objets en local : sans elle, `media.object_url()` garde la valeur de
+# production, dont le nom d'hôte n'existe pas — le navigateur rend alors
+# ERR_NAME_NOT_RESOLVED sur chaque aperçu, et le téléversement paraît échouer
+# alors qu'il a réussi.
+MEDIA_PROXY_PORT ?= $(shell sed -n 's/^MEDIA_PROXY_PORT=//p' $(ENV_FILE) 2>/dev/null | tail -1)
+
 .PHONY: help check check-db check-db-safe assert-db assert-init-logs check-front check-back \
-        up down wait-db logs-db garage-init garage-info openapi check-api-contract
+        up down wait-db logs-db garage-init garage-info media-base-url openapi check-api-contract
 
 # `make` tout court affiche l'aide et ne détruit rien : la première cible d'un
 # Makefile est celle qu'on exécute par mégarde, et `check` efface la base.
@@ -47,6 +54,7 @@ help:
 	@echo '  make check          les trois vérifications — DÉTRUIT la base (down -v)'
 	@echo '  make openapi        engendre frontend/app/types/api.ts depuis les routes Rust'
 	@echo '  make garage-init    layout, bucket et clé S3 — rejoué tout seul par check-db'
+	@echo '  make media-base-url URL publique des médias → relais local (refait par garage-init)'
 	@echo '  make garage-info    état du bucket'
 	@echo '  make logs-db        journaux PostgreSQL'
 
@@ -226,7 +234,19 @@ garage-init:
 	@$(GARAGE) bucket create epavillon || true
 	@$(GARAGE) key import --yes -n epavillon-dev $(S3_KEY_ID) $(S3_KEY_SECRET) > /dev/null || true
 	@$(GARAGE) bucket allow --read --write epavillon --key $(S3_KEY_ID)
+	@$(GARAGE) bucket website --allow epavillon > /dev/null
+	@$(MAKE) --no-print-directory media-base-url
 	@echo 'Garage : bucket « epavillon » ouvert à la clé du .env — rien à recopier.'
+
+# Pointe `media.public_base_url` sur le relais local. `down -v` recharge le
+# modèle, qui porte la valeur de PRODUCTION (docs/database/050_media.sql § 8) —
+# c'est voulu, mais en local elle ne se résout pas. On la corrige donc à chaque
+# initialisation plutôt qu'une fois à la main, oubliée au rechargement suivant.
+media-base-url:
+	@test -n "$(MEDIA_PROXY_PORT)" \
+	  || { echo 'ÉCHEC : MEDIA_PROXY_PORT absent de .env — faire `cp .env.example .env`.'; exit 1; }
+	@$(PSQL) -q -c "UPDATE platform.settings SET value = '\"http://localhost:$(MEDIA_PROXY_PORT)\"' WHERE key = 'media.public_base_url';"
+	@echo 'Médias : URL publique locale → http://localhost:$(MEDIA_PROXY_PORT)'
 
 garage-info:
 	@$(GARAGE) bucket info epavillon

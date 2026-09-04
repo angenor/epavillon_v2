@@ -58,4 +58,31 @@ fi
 $GARAGE bucket create epavillon 2>/dev/null || true
 $GARAGE key import --yes -n epavillon-prod "$cle" "$secret" >/dev/null 2>&1 || true
 $GARAGE bucket allow --read --write epavillon --key "$cle"
-echo 'Garage : bucket « epavillon » ouvert à la clé de .env.prod.'
+
+# ┌─ CE QUI REND LES MÉDIAS VISIBLES, ET QUI MANQUAIT ──────────────────────┐
+# │ L'API S3 exige une signature : le navigateur ne peut donc pas y lire un │
+# │ objet. C'est le point d'accès WEB qui sert les lectures anonymes, et il │
+# │ n'ouvre un bucket que si celui-ci l'autorise explicitement.             │
+# │                                                                         │
+# │ Sans ces deux gestes, tout se passe bien jusqu'à l'affichage : le dépôt │
+# │ réussit, l'objet est écrit, et seule l'image reste cassée — le symptôme │
+# │ paraît alors venir du téléversement, qui n'y est pour rien.             │
+# └─────────────────────────────────────────────────────────────────────────┘
+$GARAGE bucket website --allow epavillon >/dev/null
+echo 'Garage : bucket « epavillon » ouvert à la clé de .env.prod, et lisible par le web.'
+
+# L'adresse publique des objets suit celle du SITE : `<APP_PUBLIC_URL>/media`,
+# servi par le relais `media-proxy` que l'Apache du VPS atteint sous ce chemin.
+# Rien à demander à l'OIF — ni entrée DNS, ni certificat —, et la valeur suit le
+# domaine du jour : le jour du relais institutionnel, seule `APP_PUBLIC_URL`
+# change, et un nouveau passage ici reporte le changement.
+#
+# LE RÉGLAGE VIT EN BASE, pas dans l'environnement : le modèle y met l'adresse
+# de production définitive (`docs/database/050_media.sql` § 8), et tout
+# rechargement du schéma la remet en silence.
+adresse=$(grep -E '^APP_PUBLIC_URL=' "$ENV_FILE" | cut -d= -f2- | tr -d '"' || true)
+[ -n "$adresse" ] || { echo 'ÉCHEC : APP_PUBLIC_URL absente de .env.prod.'; exit 1; }
+base_media="${adresse%/}/media"
+$COMPOSE exec -T postgres psql -U postgres -d epavillon -q \
+    -c "UPDATE platform.settings SET value = to_jsonb('$base_media'::text) WHERE key = 'media.public_base_url';"
+echo "Médias : URL publique → $base_media"

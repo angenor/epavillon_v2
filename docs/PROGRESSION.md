@@ -34,7 +34,7 @@ Un écran = un fichier. Il porte ce qui a été livré, les écarts relevés ent
 | A0.1 | Socle Nuxt, Tailwind, i18n, jetons | ✅ 16/08 | [écarts et vérifications](progression/ecrans/a0.1-socle.md) |
 | A0.2 | Types TypeScript dérivés du SQL | ✅ 16/08 | [écarts et vérifications](progression/ecrans/a0.2-types.md) |
 | A0.3 | Données simulées | ✅ 16/08 | [écarts et vérifications](progression/ecrans/a0.3-donnees-simulees.md) |
-| A0.4 | Composants d'interface + page de guide de style | ✅ 16/08 | [écarts et vérifications](progression/ecrans/a0.4-composants.md) |
+| A0.4 | Composants d'interface + page de guide de style | ✅ 16/08 · navigation latérale du back-office refondue 04/09 | [écarts et vérifications](progression/ecrans/a0.4-composants.md) |
 | A1 | Authentification | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a1-authentification.md) |
 | A2 | Rattachement à une organisation | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a2-organisation.md) |
 | A3 | Page publique de l'événement | ✅ 17/08 · refondue 19/08 · corrigée 27/08 | [écarts et vérifications](progression/ecrans/a3-evenement-public.md) |
@@ -79,6 +79,7 @@ Le tableau et les obligations d'API relevées en écrivant les écrans : [`progr
 
 | Jour | Fichier |
 |------|---------|
+| 4 septembre 2026 | [`journal/2026-09-04.md`](progression/journal/2026-09-04.md) |
 | 2 septembre 2026 | [`journal/2026-09-02.md`](progression/journal/2026-09-02.md) |
 | 1er septembre 2026 | [`journal/2026-09-01.md`](progression/journal/2026-09-01.md) |
 | 27 août 2026 | [`journal/2026-08-27.md`](progression/journal/2026-08-27.md) |

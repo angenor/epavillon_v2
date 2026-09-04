@@ -119,6 +119,24 @@ services:
       - garage-data:/var/lib/garage/data
       - ./garage.toml:/etc/garage.toml:ro
 
+  # Garage n'ouvre ses objets à la lecture anonyme que par SOUS-DOMAINE, alors
+  # que le modèle compose leur adresse en CHEMIN. Ce relais traduit l'un en
+  # l'autre — voir l'en-tête de `media-proxy.conf`. Sans lui, aucune image
+  # téléversée n'est visible : ni bannière d'édition, ni couverture d'activité.
+  #
+  # Il passe par Apache comme le reste (`/v2/media/`), ce qui garde les médias
+  # sur l'ORIGINE DU SITE : pas d'entrée DNS à demander à l'OIF, pas de
+  # certificat de plus, et une adresse qui suit le domaine du jour.
+  media-proxy:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    networks: [interne]
+    depends_on: [garage]
+    volumes:
+      - ./media-proxy.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "127.0.0.1:${MEDIA_PROXY_PORT:-3120}:80"
+
 volumes:
   pgdata:
   valkey-data:

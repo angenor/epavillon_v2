@@ -434,12 +434,12 @@ Le modèle compose l'URL d'un objet **en chemin** : `<base>/<bucket>/<clé>`. C'
 
 Garage, lui, n'ouvre ses objets à la lecture anonyme que par **sous-domaine** (`epavillon.web.garage.localhost`), et son API S3 exige une signature. Sans relais, **aucun média téléversé n'est visible dans le navigateur en local** — ni une bannière de vitrine, ni une couverture d'activité. Le constat a été fait au premier téléversement réel.
 
-Le service `media-proxy` du compose traduit le chemin en sous-domaine, et rien d'autre (`ops/media-proxy.conf`, port `MEDIA_PROXY_PORT`). Il faut aussi, **une fois**, ouvrir le bucket en lecture web et pointer le réglage dessus :
+Le service `media-proxy` du compose traduit le chemin en sous-domaine, et rien d'autre (`ops/media-proxy.conf`, port `MEDIA_PROXY_PORT`). Deux gestes l'accompagnent — ouvrir le bucket en lecture web, et pointer le réglage dessus. **`make garage-init` les fait tous les deux**, et `check-db` l'appelle : après un `down -v`, il n'y a rien à refaire à la main.
+
+`media.public_base_url` est un réglage de `platform.settings`, pas une variable d'environnement : la valeur du modèle (`docs/database/050_media.sql` § 8) est celle de production, et un rechargement de la base la remet. C'est voulu — « seule valeur à changer lors d'une migration ». C'est aussi pourquoi la corriger une fois à la main ne suffisait pas : le rechargement suivant la remettait en silence, et le seul signe était un `ERR_NAME_NOT_RESOLVED` dans la console du navigateur — le téléversement, lui, avait réussi.
+
+Pour la reposer seule, sans toucher au layout Garage :
 
 ```bash
-docker exec epavillon-garage /garage bucket website --allow epavillon
-docker exec -i epavillon-postgres psql -U postgres -d epavillon \
-  -c "UPDATE platform.settings SET value = '\"http://localhost:3920\"' WHERE key = 'media.public_base_url';"
+make media-base-url
 ```
-
-`media.public_base_url` est un réglage de `platform.settings`, pas une variable d'environnement : la valeur du modèle (`docs/database/050_media.sql` § 8) est celle de production, et un rechargement de la base la remet. C'est voulu — « seule valeur à changer lors d'une migration ».

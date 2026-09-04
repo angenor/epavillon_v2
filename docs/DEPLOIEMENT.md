@@ -39,8 +39,9 @@ navigateur ──HTTPS──> epavillonclimatique.francophonie.org/v2/…   (Apa
                           │
                           └──HTTPS──> epavillon.mefali.com/v2/…   (Apache, VPS)
                                          │  include userdata/ : ProxyPass
-                                         ├─ /v2/api/* ──> 127.0.0.1:8080  (préfixe retiré)
-                                         └─ /v2/*     ──> 127.0.0.1:3100  (préfixe conservé)
+                                         ├─ /v2/api/*   ──> 127.0.0.1:8080  (préfixe retiré)
+                                         ├─ /v2/media/* ──> 127.0.0.1:3120  (relais Garage)
+                                         └─ /v2/*       ──> 127.0.0.1:3100  (préfixe conservé)
 ```
 
 **Aucun serveur web dans la pile Docker**, et c'est le point qui a fait tomber
@@ -317,6 +318,7 @@ Ce qui manque encore :
    en bout — voir le § 10.
 3. **Aucune donnée métier** — ni édition, ni appel. À créer depuis le back-office,
    ou à semer.
+4. ~~Les médias ne sont pas servis.~~ **Fait le 04/09** — voir le § 12.
 
 ---
 
@@ -397,7 +399,101 @@ sur la vraie chose.
 `https://epavillon.mefali.com/` redirige vers `/v2/` : tant que la recette vit
 là, taper le nom nu doit aboutir quelque part.
 
+**Et `APP_PUBLIC_URL` doit suivre — elle ne suivait pas.** Le serveur portait
+encore `https://epavillonclimatique.francophonie.org/v2`, alors que l'adresse de
+recette est l'autre. Or cette valeur donne à l'API **la seule origine acceptée
+en écriture** : mesuré le 04/09, un `POST /auth/login` depuis
+`https://epavillon.mefali.com` rendait `403 IDENTITY_ORIGIN_REJECTED`.
+**Personne ne pouvait se connecter en ligne**, et le message ne nommait pas la
+cause côté écran. Corrigé le 04/09 — la même requête rend maintenant 200 avec
+`invalid_credentials`, c'est-à-dire la réponse métier.
+
+Trois choses en dérivent, et toutes trois étaient fausses : l'origine acceptée,
+la base des liens envoyés par courriel, et depuis le § 12 l'adresse publique des
+médias. Le jour du relais institutionnel, cette valeur reprend l'adresse
+définitive, et `ops/init-garage-prod.sh` est à rejouer pour que les médias
+suivent.
+
+Le seul reste bâti sur l'ancienne valeur est `NUXT_PUBLIC_SITE_URL`, figé à la
+construction de l'image du site : il ne sert qu'aux liens `hreflang` et aux URL
+canoniques. Les laisser pointer vers l'adresse définitive pendant la recette est
+sans effet sur le fonctionnement — et plutôt souhaitable, l'adresse de transport
+n'ayant pas à être indexée.
+
 Ce choix se renverse le jour où la bascule s'éloigne durablement — changer
 `NUXT_APP_BASE_URL`, `NUXT_PUBLIC_API_BASE`, retirer le `/v2` du vhost, et
 reconstruire l'image du site. C'est le même travail à quelque moment qu'on le
 fasse.
+
+---
+
+## 12. Les médias, et pourquoi ils vivent sur l'origine du site (04/09)
+
+Le défaut s'est manifesté en local — « impossible de téléverser une image » —,
+et le téléversement n'y était pour rien : **il réussissait**. C'est l'affichage
+qui échouait, et la production porte exactement le même trou.
+
+**Deux adresses, pas une.** L'API S3 de Garage exige une signature à chaque
+lecture : un navigateur ne peut donc pas y prendre une image. C'est le point
+d'accès *web* qui sert les lectures anonymes — et il n'ouvre un bucket que si
+celui-ci l'y autorise (`bucket website --allow`), qu'il n'y a aucune raison de
+deviner.
+
+**Et il n'écoute qu'en sous-domaine.** `epavillon.web.garage.localhost`, quand
+le modèle compose l'adresse d'un objet **en chemin** — `<base>/<bucket>/<clé>`,
+ce que sert n'importe quel stockage en « path-style » et ce que ferait un
+fournisseur cloud. Un relais traduit l'un en l'autre, et rien d'autre :
+`ops/media-proxy.conf`, un nginx de dix lignes, le même fichier en
+développement et en production.
+
+**Le chemin retenu est `/v2/media/`**, sur l'origine du site :
+
+```
+navigateur ──> …/v2/media/epavillon/2026/09/<clé>.webp
+                  │  Apache : ProxyPass /v2/media/ → 127.0.0.1:3120
+                  └──> nginx : Host « epavillon.web.garage.localhost » → garage:3902
+```
+
+Un sous-domaine `media.…` aurait demandé une entrée DNS à l'OIF — le § 1 dit ce
+que cela coûte en délai — et un certificat de plus. Le chemin ne demande rien,
+et **suit le domaine du jour** : le relais institutionnel, quand il sera posé,
+relaiera `/v2/media/` comme le reste.
+
+La règle de vhost est placée **avant** `/v2/`, pour la même raison que celle de
+l'API : Apache retient la première qui correspond, et Nuxt rendrait sa page 404
+à la place de chaque image — avec un code 200.
+
+**L'adresse publique est un réglage de base**, `media.public_base_url`, et non
+une variable d'environnement. Le modèle y met l'adresse de production définitive
+(`docs/database/050_media.sql` § 8), si bien que **tout rechargement du schéma
+la remet en silence** ; le seul signe est un `ERR_NAME_NOT_RESOLVED` en console,
+le dépôt ayant réussi. `ops/init-garage-prod.sh` la pose désormais d'après
+`APP_PUBLIC_URL` — il est donc à rejouer après un rechargement du schéma, et le
+jour où l'adresse publique change.
+
+En développement, `make garage-init` fait les deux mêmes gestes, et `check-db`
+l'appelle déjà : après un `down -v`, il n'y a rien à refaire à la main.
+
+**Déployé et éprouvé le 04/09.** Un objet de test déposé dans le bucket est
+revenu par son adresse publique en 200, `text/plain`, contenu exact — la chaîne
+entière, d'Apache à Garage, est donc prouvée et non déduite. L'objet et l'image
+utilitaire qui l'a déposé ont été retirés dans la foulée. `financedurable`
+mesuré à 200 avant, pendant et après.
+
+Pour refaire ces gestes ailleurs, ou après un rechargement du schéma :
+
+```bash
+./deploy.sh push
+ssh … "cd /opt/epavillon && docker compose --env-file .env.prod \
+       -f ops/docker-compose.prod.yml up -d media-proxy"
+./deploy.sh vhost                     # configtest, reload, voisin mesuré
+ssh … "cd /opt/epavillon && bash ops/init-garage-prod.sh"
+curl -sI https://epavillon.mefali.com/v2/media/epavillon/<une-clé>
+```
+
+**Un défaut de `deploy.sh` a été corrigé en chemin** : `scp` nomme le port `-P`
+et non `-p` — qui signifie chez lui « préserver les horodatages ». Les deux
+appels réutilisaient les options de `ssh` telles quelles, et prenaient donc le
+numéro de port pour un fichier à copier. La cible `vhost` échouait sur
+« stat local "2243" », après avoir mesuré le voisin et avant d'avoir rien
+touché : sans dommage, mais sans effet.
