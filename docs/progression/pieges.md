@@ -154,3 +154,29 @@ Et le contournement était de toute façon inopérant : le relais était une rou
 du site ne fait tourner que HTML, JS, CSS et PHP, et `nuxt generate` ne déploie aucune route serveur.
 **La contrainte qu'on cherchait à contourner rendait le contournement impossible** — ce qu'une seule
 question sur la pile réelle de l'hébergement aurait montré tout de suite.
+
+## Un verbe HTTP absent des en-têtes CORS échoue comme une panne réseau (05/09)
+
+**Symptôme.** `/admin/vitrine/<id>` affiche « L'enregistrement n'a pas abouti. Réessayez dans un instant. » En console : *« méthode manquante dans l'en-tête `Access-Control-Allow-Methods` »*, puis *« échec de la requête CORS. Code d'état : (null) »*.
+
+**Cause.** `crates/api/src/middleware/cors.rs` annonçait `GET, POST, PUT, DELETE, OPTIONS`. **`PATCH` manquait**, et une seule route de tout le dépôt l'emploie — `PATCH /admin/showcase/{id}`, la modification d'une diapositive. Le verbe rare est précisément celui qu'on oublie.
+
+**Ce qui rend le défaut coûteux à diagnostiquer** : le refus n'est pas un refus de l'API. Le navigateur bloque le **préalable**, l'appel ne part jamais, et le site ne reçoit **aucun code** — exactement ce qu'il observe quand l'API est éteinte. L'écran affiche donc son message de panne réseau, qui désigne le mauvais coupable. `curl` n'a jamais eu le problème : il n'envoie pas de préalable.
+
+**Correction.** `PATCH` ajouté à la liste, et le test `entetes_cors.rs` vérifie désormais **les six verbes un par un**, avec un message qui nomme celui qui manque. Une assertion qui ne contrôlait que `POST` et `DELETE` laissait passer l'absence des quatre autres.
+
+**La règle qui en sort** : toute route servie par un verbe doit voir ce verbe dans cette liste, et le contrôle appartient au test, pas à la relecture. Le même piège attend `HEAD` ou tout verbe qu'une route future emploierait seule.
+
+## Une date civile sortait de l'API en tuple `[année, jour]` (08/09)
+
+**Symptôme.** Tout le back-office rend **500**, dès la page d'accueil : `RangeError: Invalid time value`, levée par un `computed` de `AdminTrendChart` pendant le rendu serveur. Aucun écran n'est atteignable — le tableau de bord est la porte d'entrée.
+
+**Cause.** `backend/Cargo.toml` déclarait `time = { features = ["serde-well-known", "macros"] }`. **`serde-well-known` n'implique PAS `serde-human-readable`**, bien que les deux activent exactement les mêmes dépendances (`serde`, `formatting`, `parsing`) — d'où la confusion. Sans la seconde, `time::Date` se sérialise par `(self.year(), self.ordinal())` : `2026-09-08` traverse en **`[2026, 251]`**.
+
+**Pourquoi le défaut a vécu si longtemps sans se voir.** Les **instants** n'en souffraient pas : les 270 champs `OffsetDateTime` du dépôt portent tous `#[serde(with = "time::serde::rfc3339")]`, que `serde-well-known` fournit. Seules les **dates civiles** — journées d'une édition, bornes d'un appel, points des courbes du tableau de bord — sont des `Date` **nues**, sans attribut : leur forme dépendait entièrement de la feature manquante. Toutes les dates *avec heure* étant justes, rien ne mettait la puce à l'oreille.
+
+**Pourquoi l'erreur ne désignait pas sa cause.** Un tableau JavaScript possède une méthode `slice` : `` `${[2026,251].slice(0,10)}T00:00:00Z` `` produit `"2026,251T00:00:00Z"` — **pas d'exception**, juste un `NaN` silencieux à l'analyse. C'est `Intl.DateTimeFormat.format()` qui lève, trois appels plus loin, sans nommer ni le champ ni la valeur.
+
+**Correction.** `serde-human-readable` ajoutée aux features, et **le contrat verrouillé par un test** — `crates/contracts/tests/dates_civiles_en_iso.rs` — qui vérifie qu'une date part et revient en `"AAAA-MM-JJ"`. Une option de compilation ne se relit pas ; elle disparaît à un `cargo update` ou à une refonte du manifeste, et le défaut reviendrait aussi silencieusement qu'il est venu.
+
+**Second défaut, corrigé aussi.** Un graphique **ne doit pas pouvoir faire tomber la page qui le contient**. `AdminTrendChart` formatait ses dates sans garde ; il rend maintenant une chaîne vide sur une valeur non finie. Le trou se voit, il ne se venge pas. C'est la même règle que celle déjà écrite pour les erreurs posées dans un store : au rendu serveur, ce qui lève emporte l'écran entier.

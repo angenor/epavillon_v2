@@ -51,7 +51,7 @@ Un écran = un fichier. Il porte ce qui a été livré, les écarts relevés ent
 | A14 | Page « En cours de maintenance » | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a14-maintenance.md) |
 | A15 | Accueil public et vitrine administrable | ✅ 19/08 · panneau « À venir » refondu 24/08 | [écarts et vérifications](progression/ecrans/a15-accueil.md) |
 | B7 | Raccordement du front à l'API | ✅ 22/08 | [écarts et vérifications](progression/ecrans/b7-raccordement.md) |
-| B8 | Module Vitrine (`content`) | ✅ 24/08 | [écarts et vérifications](progression/ecrans/b8-vitrine.md) |
+| B8 | Module Vitrine (`content`) | ✅ 24/08 · téléversement des images 05/09 | [écarts et vérifications](progression/ecrans/b8-vitrine.md) |
 | B9 | Direct + Tableaux de bord (`live`, `analytics`) | ✅ 27/08 | [écarts et vérifications](progression/ecrans/b9-direct-tableaux-de-bord.md) |
 
 Les pièges transverses, ceux qui ne tiennent à aucun écran : [`progression/pieges.md`](progression/pieges.md).
@@ -79,6 +79,8 @@ Le tableau et les obligations d'API relevées en écrivant les écrans : [`progr
 
 | Jour | Fichier |
 |------|---------|
+| 8 septembre 2026 | [`journal/2026-09-08.md`](progression/journal/2026-09-08.md) |
+| 5 septembre 2026 | [`journal/2026-09-05.md`](progression/journal/2026-09-05.md) |
 | 4 septembre 2026 | [`journal/2026-09-04.md`](progression/journal/2026-09-04.md) |
 | 2 septembre 2026 | [`journal/2026-09-02.md`](progression/journal/2026-09-02.md) |
 | 1er septembre 2026 | [`journal/2026-09-01.md`](progression/journal/2026-09-01.md) |
