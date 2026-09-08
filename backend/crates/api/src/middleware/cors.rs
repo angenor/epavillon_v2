@@ -41,7 +41,12 @@ use crate::middleware::origin::normaliser;
 /// personne ne peut le citer dans un signalement d'incident.
 const EXPOSES: &str = "X-Request-Id";
 
-const METHODES: &str = "GET, POST, PUT, DELETE, OPTIONS";
+/// **`PATCH` en fait partie, et son oubli a coûté une panne.** Un verbe absent
+/// de cette ligne n'échoue pas à l'appel : le navigateur refuse le PRÉALABLE, et
+/// l'écran ne voit qu'un échec réseau sans code — exactement ce qu'il affiche
+/// quand l'API est éteinte. La liste doit donc porter TOUS les verbes que les
+/// routes servent, y compris celui qu'une seule route emploie.
+const METHODES: &str = "GET, POST, PUT, PATCH, DELETE, OPTIONS";
 
 /// Dix minutes. Assez pour qu'une navigation ne repaye pas le préalable à
 /// chaque appel, assez court pour qu'un changement de configuration se voie

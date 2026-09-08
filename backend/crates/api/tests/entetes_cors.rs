@@ -78,8 +78,18 @@ async fn un_prealable_est_repondu_sans_atteindre_la_route() {
         entete(&reponse, ACCESS_CONTROL_ALLOW_CREDENTIALS).as_deref(),
         Some("true")
     );
-    assert!(entete(&reponse, ACCESS_CONTROL_ALLOW_METHODS)
-        .is_some_and(|m| m.contains("POST") && m.contains("DELETE")));
+    // Les CINQ verbes que les routes servent. `PATCH` y est nommé parce qu'une
+    // SEULE route l'emploie — la modification d'une diapositive — et qu'un verbe
+    // rare est précisément celui qu'on oublie : son absence n'a été vue que le
+    // 05/09, par un écran qui ne pouvait plus enregistrer.
+    let methodes = entete(&reponse, ACCESS_CONTROL_ALLOW_METHODS).unwrap_or_default();
+    for verbe in ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"] {
+        assert!(
+            methodes.contains(verbe),
+            "`{verbe}` manque aux méthodes annoncées : le navigateur refusera le préalable, \
+             et l'écran affichera une panne réseau sans code"
+        );
+    }
     assert_eq!(
         entete(&reponse, ACCESS_CONTROL_ALLOW_HEADERS).as_deref(),
         Some("content-type, accept-language"),
