@@ -123,7 +123,15 @@ sqlx = { version = "0.9", default-features = false, features = [
     "ipnetwork",
 ] }
 thiserror = "2"
-time = { version = "0.3", features = ["serde-well-known", "macros"] }
+# `serde-human-readable` N'EST PAS IMPLIQUÉE PAR `serde-well-known`, et son
+# absence a coûté le back-office entier le 08/09. Sans elle, `time::Date` se
+# sérialise en TUPLE `(année, jour de l'année)` — `[2026, 251]` en JSON — au lieu
+# de la date ISO que le contrat annonce. Les `OffsetDateTime` n'en souffraient
+# pas : ils portent tous `#[serde(with = "time::serde::rfc3339")]`, que
+# `serde-well-known` fournit. Les DATES CIVILES, elles, n'ont aucun attribut : ce
+# sont les journées d'une édition, les bornes d'un appel, les points des courbes
+# du tableau de bord. Le front recevait un tableau là où il attendait « 2026-09-08 ».
+time = { version = "0.3", features = ["serde-well-known", "serde-human-readable", "macros"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal", "time", "sync"] }
 tracing = "0.1"
 tracing-opentelemetry = "0.33"

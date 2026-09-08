@@ -76,7 +76,26 @@ const chartTone = computed<ChartTone>(() =>
 
 /** Minuit UTC du jour civil — les séries du modèle sont découpées en UTC. */
 function dayTime(day: string): number {
-  return Date.parse(`${day.slice(0, 10)}T00:00:00Z`)
+  return Date.parse(`${String(day).slice(0, 10)}T00:00:00Z`)
+}
+
+/**
+ * UNE DATE QU'ON NE SAIT PAS LIRE NE DOIT PAS FAIRE TOMBER L'ÉCRAN.
+ *
+ * `Intl.DateTimeFormat.format()` **lève** sur une valeur non finie, et ce
+ * composant est rendu par le serveur : la page entière du back-office sortait
+ * alors en 500, sur un `Invalid time value` qui ne nommait ni le champ ni la
+ * valeur. C'est arrivé le 08/09 — l'API sérialisait ses dates civiles en tuple
+ * `[année, jour]`, corrigé à la source par la feature `serde-human-readable`.
+ *
+ * La garde reste : un graphique est un ORNEMENT de cet écran, jamais sa raison
+ * d'être, et aucune donnée mal formée ne doit interdire l'accès au tableau de
+ * bord. Le trou se voit — le résumé n'annonce pas le jour —, il ne se venge pas.
+ */
+function formatDay(format: Intl.DateTimeFormat, day: string | undefined): string {
+  if (day === undefined) return ''
+  const time = dayTime(day)
+  return Number.isFinite(time) ? format.format(new Date(time)) : ''
 }
 
 /**
@@ -186,8 +205,10 @@ const options = computed<ApexOptions>(() => {
         rotate: 0,
         hideOverlappingLabels: true,
         style: { fontSize: '11px', fontFamily: fontFamily.value },
-        formatter: (_value: string, timestamp?: number) =>
-          dayLabel.value.format(new Date(timestamp ?? Number(_value))),
+        formatter: (_value: string, timestamp?: number) => {
+          const time = timestamp ?? Number(_value)
+          return Number.isFinite(time) ? dayLabel.value.format(new Date(time)) : ''
+        },
       },
     },
     yaxis: {
@@ -203,7 +224,10 @@ const options = computed<ApexOptions>(() => {
       ...base.tooltip,
       shared: true,
       intersect: false,
-      x: { formatter: (value: number) => fullDayLabel.value.format(new Date(value)) },
+      x: {
+        formatter: (value: number) =>
+          Number.isFinite(value) ? fullDayLabel.value.format(new Date(value)) : '',
+      },
       y: {
         formatter: (value: number | null, opts?: ApexFormatterOpts) =>
           value === null
@@ -269,11 +293,11 @@ const summary = computed(() => {
   const last = props.points.at(-1)
   return t('admin.dashboard.charts.summary', {
     series: props.seriesLabel,
-    from: first ? fullDayLabel.value.format(new Date(dayTime(first.jour))) : '',
-    to: last ? fullDayLabel.value.format(new Date(dayTime(last.jour))) : '',
+    from: formatDay(fullDayLabel.value, first?.jour),
+    to: formatDay(fullDayLabel.value, last?.jour),
     total: lastPoint.value?.cumul ?? 0,
     peakValue: peak.value?.valeur ?? 0,
-    peakDay: peak.value ? fullDayLabel.value.format(new Date(dayTime(peak.value.jour))) : '',
+    peakDay: formatDay(fullDayLabel.value, peak.value?.jour),
   })
 })
 </script>
