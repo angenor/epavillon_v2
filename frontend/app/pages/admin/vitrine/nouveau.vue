@@ -2,11 +2,13 @@
 import type {
   ShowcaseFormScreen,
   ShowcaseFormValues,
+  ShowcaseMediaPayload,
   ShowcaseSessionOption,
   ShowcaseValidationError,
 } from '~/types/admin-showcase'
-import type { HighlightPlacement } from '~/types/content'
+import type { HighlightId, HighlightPlacement } from '~/types/content'
 import type { EffectivePermission } from '~/types/identity'
+import type { AttachableRoleRule } from '~/types/media'
 import type { EventId } from '~/types/shared'
 
 /**
@@ -26,6 +28,11 @@ import type { EventId } from '~/types/shared'
  * placer en tête déplacerait silencieusement tout le reste du bandeau. Le rang
  * se règle ensuite, dans la liste, avec les deux boutons qui sont la raison
  * d'être de cet écran.
+ *
+ * LES MÉDIAS VIENNENT APRÈS, ET L'ORDRE EST FORCÉ. Le rattachement vise la
+ * diapositive, qui n'existe pas avant d'être enregistrée. Un rattachement refusé
+ * ne doit pas faire recréer la diapositive au second envoi : elle est retenue le
+ * temps de l'écran, faute de quoi la liste montrerait deux fois la même.
  *
  * UN COMPTE DÉTACHÉ NE CRÉE PAS DE CONTENU DE PLATEFORME. `form(null, scope)`
  * ouvre alors le formulaire sur SON édition, et l'option « toute la plateforme »
@@ -65,6 +72,13 @@ const {
   'admin-showcase-new',
   () => api.adminShowcase.form(null, adminScope.scope, { placement: placement.value }),
   { watch: [() => adminScope.scope, placement], lazy: true },
+)
+
+/** Ce que chaque emplacement de média exige — `media.attachable_roles`. */
+const { data: mediaRules } = await useAsyncData<AttachableRoleRule[]>(
+  'media-roles-content-highlights',
+  () => api.media.roles('content', 'highlights'),
+  { default: () => [], lazy: true },
 )
 
 const { data: granted, status: permissionStatus } = await useAsyncData<EffectivePermission[]>(
@@ -116,18 +130,28 @@ const submitting = ref(false)
 const serverErrors = ref<ShowcaseValidationError[]>([])
 const formError = ref<string | null>(null)
 
-async function submit(values: ShowcaseFormValues): Promise<void> {
+/** La diapositive déjà créée, quand le rattachement de ses médias a échoué. */
+const created = ref<HighlightId | null>(null)
+
+async function submit(values: ShowcaseFormValues, media: ShowcaseMediaPayload): Promise<void> {
   submitting.value = true
   serverErrors.value = []
   formError.value = null
 
   try {
-    const result = await api.adminShowcase.save(values, adminScope.scope)
-    if (!result.ok) {
-      // Un refus de validation N'EST PAS une erreur de réseau : il se pose sur
-      // les champs, et le formulaire reste rempli.
-      serverErrors.value = result.errors
-      return
+    if (created.value === null) {
+      const result = await api.adminShowcase.save(values, adminScope.scope)
+      if (!result.ok || !result.row) {
+        // Un refus de validation N'EST PAS une erreur de réseau : il se pose sur
+        // les champs, et le formulaire reste rempli.
+        serverErrors.value = result.errors
+        return
+      }
+      created.value = result.row.id
+    }
+    // LES MÉDIAS APRÈS, ici : le rattachement vise la diapositive. Voir l'en-tête.
+    if (Object.keys(media).length > 0) {
+      await api.adminShowcase.saveMedia(created.value, media, values.event_id, adminScope.scope)
     }
     await navigateTo(localePath('/admin/vitrine'))
   } catch (thrown) {
@@ -175,6 +199,8 @@ async function submit(values: ShowcaseFormValues): Promise<void> {
         :screen="screen"
         :sessions="sessions"
         :sessions-loading="sessionsLoading"
+        :media-rules="mediaRules"
+        :highlight-id="created"
         :submit-label="t('admin.showcase.form.submitNew')"
         :submitting="submitting"
         :server-errors="serverErrors"

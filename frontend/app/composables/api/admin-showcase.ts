@@ -73,13 +73,15 @@ import type {
   ShowcaseFormScreen,
   ShowcaseFormValues,
   ShowcaseListScreen,
+  ShowcaseMediaPayload,
   ShowcaseReorderPayload,
   ShowcaseSavePayload,
   ShowcaseSessionOption,
   ShowcaseStatusPayload,
   ShowcaseWriteResult,
 } from '~/types/admin-showcase'
-import type { HighlightId, HighlightPlacement } from '~/types/content'
+import type { HighlightId, HighlightMediaRole, HighlightPlacement } from '~/types/content'
+import type { AttachmentBatch } from '~/types/media'
 import type { AdministeredEvents } from '~/types/identity'
 import type { EventId, Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
@@ -236,6 +238,46 @@ export function createAdminShowcaseApi({
         (m) => m.saveShowcase(payload, scope),
         payload.id === null ? 'POST' : 'PATCH',
       )
+    },
+
+    /**
+     * LES MÉDIAS DE LA DIAPOSITIVE — écriture du module MÉDIA.
+     *
+     * L'enregistrement d'une diapositive NE POSE PAS ses médias :
+     * `content.highlights` ne les porte pas, le rattachement est polymorphe, et
+     * un crate de module n'écrit pas dans le schéma d'un autre. C'est donc
+     * `PUT /media/attachments` qui les pose, sur
+     * `('content', 'highlights', <diapositive>)` — exactement comme les trois
+     * déclinaisons d'une édition.
+     *
+     * L'ORDRE COMPTE. Sur une diapositive existante, on rattache AVANT
+     * d'enregistrer la fiche : un fichier refusé par son rôle n'a alors rien
+     * laissé derrière lui. À la création, l'inverse est forcé — l'objet à qui
+     * rattacher n'existe pas encore.
+     *
+     * LE PÉRIMÈTRE EST CELUI DU CONTENU, pas celui du média : l'API garde cette
+     * écriture par `content.highlight.manage` sur la portée de la diapositive,
+     * et le client refuse la même chose avant l'appel.
+     */
+    saveMedia: (
+      highlightId: HighlightId,
+      media: ShowcaseMediaPayload,
+      eventId: EventId | null,
+      scope: AdministeredEvents,
+    ): Promise<void> => {
+      assertContentInScope(eventId, scope)
+      const batch: AttachmentBatch = {
+        owner_schema: 'content',
+        owner_table: 'highlights',
+        owner_id: highlightId,
+        assignments: Object.entries(media).map(([role, asset_id]) => ({
+          role: role as HighlightMediaRole,
+          asset_id: asset_id ?? null,
+        })),
+      }
+      // Hors ligne, rien n'est posé : le dépôt simulé rend déjà une adresse
+      // `blob:` que l'aperçu affiche, et aucun rattachement n'a de sens.
+      return send('/media/attachments', batch, () => undefined, 'PUT')
     },
 
     /**

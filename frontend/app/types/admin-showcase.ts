@@ -30,6 +30,7 @@
  */
 
 import type {
+  AssetId,
   ColorHex,
   CountryId,
   EventId,
@@ -45,6 +46,7 @@ import type {
 } from './shared'
 import type {
   HighlightId,
+  HighlightMediaRole,
   HighlightMediaRule,
   HighlightPlacement,
   HighlightStatus,
@@ -179,8 +181,10 @@ export interface ShowcaseListScreen {
  * plus les thématiques, qui vivent dans `reference.entity_terms`.
  *
  * `id` nul : création. Les trois médias n'y sont PAS : ils passent par
- * `media.attachments`, et leur téléversement arrive en phase B — le formulaire
- * en montre les emplacements et les contraintes, lus de `media_rules`.
+ * `media.attachments`, et donc par `PUT /media/attachments` — voir
+ * `ShowcaseMediaPayload`. Les joindre ici les confierait à une route qui les
+ * accepterait sans jamais les poser, `content` n'écrivant pas dans le schéma
+ * d'un autre module.
  */
 export interface ShowcaseFormValues {
   id: HighlightId | null
@@ -302,6 +306,23 @@ export interface ShowcaseFormScreen {
 
 /** Le corps de `saveShowcase` — création si `id` est nul, mise à jour sinon. */
 export type ShowcaseSavePayload = ShowcaseFormValues
+
+/**
+ * LES MÉDIAS D'UNE DIAPOSITIVE, ÉCRITS À PART DE LA FICHE.
+ *
+ * `content.highlights` NE PORTE PAS ses médias : le rattachement est polymorphe
+ * (`media.attachments`, rôles `banner`, `video`, `cover`) et il appartient au
+ * module Média, qui l'écrit par `PUT /media/attachments`.
+ *
+ * PARTIEL, ET C'EST LE POINT. Le lot vide puis regarnit tout rôle qu'il NOMME ;
+ * un rôle absent n'est pas touché. On n'y met donc que les emplacements
+ * réellement modifiés — nommer le fond vidéo que l'écran ne sait pas encore
+ * téléverser le détacherait, et réaffirmer une image inchangée réécrirait son
+ * rattachement pour rien.
+ *
+ * Un `null` explicite, lui, RETIRE le média de son rôle.
+ */
+export type ShowcaseMediaPayload = Partial<Record<HighlightMediaRole, AssetId | null>>
 
 /** Publier, retirer (retour en brouillon) ou archiver, depuis la liste. */
 export interface ShowcaseStatusPayload {

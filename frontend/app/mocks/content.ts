@@ -100,8 +100,8 @@ export const highlightNatureTerms = [
 // 2. Les contraintes de téléversement — `media.attachable_roles`
 //
 // `115_content.sql` § 5. Le formulaire du back-office les affiche telles quelles
-// (« image, 15 Mio au plus ») : le téléversement réel arrive en phase B, la
-// contrainte s'annonce dès maintenant. 200 Mio pour la vidéo est haut pour la
+// (« image, 15 Mio au plus ») et les fait respecter : les deux emplacements
+// d'image se téléversent depuis le 05/09. 200 Mio pour la vidéo est haut pour la
 // plateforme et bas pour de la vidéo — une boucle de bandeau fait quinze à vingt
 // secondes, muette. La v1 imposait 60 secondes par un CHECK ; la limite est ici
 // une limite de POIDS, qui est le vrai coût.

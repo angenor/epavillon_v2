@@ -56,8 +56,8 @@
     },
     "maxSize": "Poids maximal : {size} Mio",
     "pending": "Un fichier est rattaché, il n'est pas encore prêt à être servi.",
+    "videoSoon": "Le fond vidéo ne se téléverse pas encore : 200 Mio demandent un envoi par morceaux, avec reprise.",
     "empty": "Aucun fichier",
-    "soon": "Le téléversement arrive à la prochaine étape.",
     "color": "Couleur de repli",
     "colorHint": "Le fond du bandeau quand aucun média n'est prêt. Format #RRGGBB."
   },

@@ -60,7 +60,18 @@ const props = withDefaults(
   { rule: null, image: null, owner: null },
 )
 
-const emit = defineEmits<{ 'update:assetId': [value: AssetId | null] }>()
+const emit = defineEmits<{
+  'update:assetId': [value: AssetId | null]
+  /**
+   * L'OBJET DÉPOSÉ, tel qu'il s'affiche — pas seulement son identifiant.
+   *
+   * Un écran qui rend un APERÇU de ce qu'il enregistre a besoin de l'image
+   * elle-même : l'identifiant seul ne se dessine pas, et rappeler l'API pour
+   * relire ce que l'on vient d'envoyer ferait clignoter l'aperçu. Facultatif —
+   * un formulaire qui ne montre rien peut l'ignorer.
+   */
+  'update:image': [value: AttachedImage | null]
+}>()
 
 const { t, locale } = useI18n()
 const api = useApi()
@@ -170,6 +181,7 @@ async function upload(result: {
       sources: asset.sources,
     }
     emit('update:assetId', asset.id)
+    emit('update:image', uploaded.value)
     cancelEditing()
   } catch (thrown) {
     failure.value = apiErrorMessage(thrown, t)
@@ -182,6 +194,7 @@ function clear(): void {
   failure.value = null
   uploaded.value = null
   emit('update:assetId', null)
+  emit('update:image', null)
 }
 
 /**

@@ -121,6 +121,21 @@ Elles sont détaillées dans le cadrage, mais on les oublie vite et chacune a d�
 - Quatre états obligatoires par écran : chargement (squelettes), vide, erreur, accès refusé.
 - Responsive à partir de 375 px ; le corps de page ne défile jamais horizontalement.
 
+### Réutiliser avant d'écrire
+
+> **Avant de construire un bout d'interface, chercher s'il existe déjà.**
+
+Un écran qui redessine un composant existant produit deux comportements pour un même geste, et le second ne recevra jamais les corrections du premier. Le téléversement d'image l'a montré : les éditions d'événement avaient leur champ complet — choix du fichier, recadrage au rapport exigé, texte alternatif, dépôt — pendant que la vitrine affichait un bouton désactivé et la mention « bientôt ».
+
+**Le réflexe, dans cet ordre :**
+
+1. **Chercher le composant.** `frontend/app/components/` est rangé par domaine (`ui/`, `media/`, `admin/`, `proposal/`…) ; `frontend/app/pages/style-guide.vue` les montre en fonctionnement. Un `grep` sur le geste à faire — « upload », « picker », « dialog » — coûte moins qu'une réimplémentation.
+2. **Chercher l'écran qui fait déjà la même chose.** Si une page du back-office pose un fichier, une adresse, une plage de dates, elle a résolu le problème : on lit sa page, son composant et sa méthode de `useApi()`, puis on refait pareil.
+3. **Généraliser plutôt que dupliquer.** Le composant existant ne couvre pas tout à fait le besoin : on l'étend par une prop, on ne le recopie pas ailleurs. Une variante de plus dans un composant partagé se corrige une fois ; une copie se corrige deux fois, et la seconde est oubliée.
+4. **Ne créer un composant que lorsque rien n'approche.** Il vit alors au bon niveau : `ui/` s'il ne connaît aucun métier, le dossier du domaine sinon.
+
+Vaut aussi pour les **méthodes d'API** (`composables/api/`), les **utilitaires** (`utils/`) et les **routes Rust** : deux fabriques qui déposent un fichier, c'est un contrat de trop.
+
 ### Direction artistique
 
 Institutionnel et sérieux, mais vivant. Ni tableau de bord SaaS générique, ni site d'ONG militant. Références de posture : le site des Nations unies pour la rigueur, une revue scientifique en ligne pour la lisibilité, une billetterie de festival pour l'énergie de la programmation.
@@ -255,7 +270,7 @@ Pour modifier un écran, on ouvre **son** fichier de traduction, **ses** types, 
 
 ## Sous-agents
 
-Tu peux lancer autant de sous-agents que tu le juges utile. Le contexte d'une session est la ressource rare de ce projet : déléguer permet d'explorer large sans le saturer.
+**Délègue dès que la tâche s'y prête, et lance les sous-agents en parallèle.** Le contexte d'une session est la ressource rare de ce projet : déléguer permet d'explorer large sans le saturer, et deux explorations indépendantes lancées ensemble coûtent le temps de la plus longue, pas celui des deux. Pendant qu'un sous-agent lit le back, on lit le front.
 
 **Cas où c'est le bon réflexe :**
 - Lire plusieurs fichiers SQL volumineux pour en extraire ce qui concerne la tâche — le sous-agent rend la conclusion, pas les quatorze mille lignes.
@@ -342,6 +357,7 @@ Interfaces locales : Mailpit `http://localhost:8025` (courriels capturés) · Ja
 - Tester un rôle par son nom plutôt qu'une permission.
 - Oublier le filtrage par périmètre d'administration sur une liste du back-office.
 - Écrire une couleur, une date ou un libellé en dur.
+- Réécrire un composant, une méthode d'API ou un utilitaire qui existe déjà, au lieu de l'étendre.
 - Noyer une réponse ou un fichier sous les commentaires et les explications.
 - Terminer une session sans mettre à jour la progression — journal du jour, fichier de l'écran, ligne de suivi.
 - Regrossir `docs/PROGRESSION.md` : il se lit en entier à chaque session, le détail va dans `docs/progression/`.

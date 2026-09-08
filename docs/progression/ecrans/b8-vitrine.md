@@ -2,7 +2,7 @@
 
 > Extrait de la [progression](../../PROGRESSION.md).
 
-**État** : ✅ 24/08
+**État** : ✅ 24/08 · téléversement des images branché 05/09
 
 ---
 
@@ -40,6 +40,28 @@ Les fichiers sont passés par **l'API réelle** (`POST /media/assets` puis `POST
 
 **Un compte de service a été créé pour cela** (`semis.vitrine@ifdd.francophonie.org`), activé et promu à la main, motif inscrit dans `identity.role_assignments.note` : le relais de courriel passe par le serveur du site, arrêté pendant le semis, et le jeton d'activation est haché en base.
 
+## Le téléversement des images — 05/09
+
+**Le bouton était désactivé sous la mention « phase B » alors que la chaîne existait depuis le 26/08.** Les trois déclinaisons d'une édition se téléversent depuis cette date par `MediaImageField` — choix du fichier, recadrage au rapport du rôle, texte alternatif exigé par `ck_assets_alt_text_required`, dépôt par `POST /media/assets`. La vitrine, elle, affichait ses trois emplacements et un bouton mort : le travail était fait, à un écran de distance, et personne n'avait rebranché celui-ci.
+
+`AdminShowcaseMediaPanel` ne dessine donc plus de bouton à lui. Chaque emplacement d'**image** est le composant partagé ; le fond vidéo garde son bouton fermé, seul de son espèce, et le dit en propre.
+
+**Ce que la reprise a demandé**, et rien de plus :
+
+| Où | Quoi |
+|----|------|
+| `types/media.ts` | `AttachmentBatch` et `AttachmentAssignment` **remontés du composable des éditions**, où ils étaient déclarés en local. Deux écrans posent le même corps ; deux définitions auraient divergé au premier champ ajouté |
+| `types/admin-showcase.ts` | `ShowcaseMediaPayload`, **partiel** — voir plus bas |
+| `composables/api/admin-showcase.ts` | `saveMedia()`, jumelle de `adminEvents.saveImages()` : `PUT /media/attachments` sur `('content','highlights',<id>)` |
+| `components/media/ImageField.vue` | un second événement, `update:image` : l'aperçu de la vitrine dessine ce qu'il enregistre, et un identifiant seul ne se dessine pas |
+| Les deux pages | `GET /media/roles?owner_schema=content&owner_table=highlights` — la forme vient de la base, jamais d'une constante d'écran |
+
+**Trois décisions.**
+
+1. **Le lot n'emporte que les emplacements MODIFIÉS.** `PUT /media/attachments` vide puis regarnit tout rôle qu'il **nomme** ; réaffirmer une image inchangée réécrirait son rattachement pour rien, et nommer le fond vidéo le **détacherait**. D'où un payload partiel, calculé par différence avec ce que l'écran a chargé.
+2. **L'ordre s'inverse entre les deux pages.** À la création, la diapositive d'abord — le rattachement vise une ligne qui n'existe pas encore ; en modification, les médias d'abord — un fichier refusé par son rôle n'a alors rien laissé derrière lui. C'est l'ordre déjà retenu pour les éditions, et la page de création **retient la diapositive créée** pour qu'un second envoi n'en crée pas une deuxième.
+3. **La vitrine ne déclare aucun rapport attendu** (`115_content.sql` § 5 ne sème pas `expected_aspect_ratio`) : le recadrage y est donc **libre**, et l'éditeur l'écrit. Contraste avec les éditions, qui imposent 32:9, 16:9 et 1:1.
+
 ## Ce que le semis a révélé
 
 **Aucun média téléversé n'était visible en local.** Le modèle compose l'URL d'un objet en chemin — `<base>/<bucket>/<clé>` —, ce que sert n'importe quel stockage en « path-style » et ce que fera le domaine média en production. Garage, lui, n'ouvre ses objets à la lecture anonyme que par **sous-domaine**, et son API S3 exige une signature.
@@ -56,5 +78,5 @@ D'où `ops/media-proxy.conf` et le service `media-proxy` du compose : un relais 
 ## Ce qui reste
 
 - **Aucun test d'intégration Rust** pour ce module : les 858 tests sont ceux des modules livrés. Les onze routes ont été éprouvées contre l'API réelle, à la main.
-- Le **téléversement depuis le formulaire** n'existe pas encore : les emplacements de média sont rendus avec leurs contraintes et ce qui y est rattaché, mais joindre un fichier depuis l'écran reste à écrire.
+- Le **fond vidéo** ne se téléverse toujours pas : 200 Mio ne traversent pas un envoi d'un seul tenant sans reprise ni progression. Son emplacement garde un bouton fermé qui dit pourquoi, et il est **absent du lot de rattachement** — le lot vide tout rôle qu'il nomme, et le nommer sans savoir le remplir détacherait une vidéo posée par ailleurs.
 - Les deux autres écrans en attente d'API — messages d'incident (`live`), tableau de bord (`analytics`) — n'ont pas bougé.

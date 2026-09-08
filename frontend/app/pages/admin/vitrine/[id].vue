@@ -2,10 +2,12 @@
 import type {
   ShowcaseFormScreen,
   ShowcaseFormValues,
+  ShowcaseMediaPayload,
   ShowcaseSessionOption,
   ShowcaseValidationError,
 } from '~/types/admin-showcase'
 import type { EffectivePermission } from '~/types/identity'
+import type { AttachableRoleRule } from '~/types/media'
 import type { EventId } from '~/types/shared'
 
 /**
@@ -30,6 +32,13 @@ import type { EventId } from '~/types/shared'
  * un nom de rôle, jamais une permission « quelque part ». Le droit d'ENTRER sur
  * l'écran et celui de MODIFIER cette ligne sont deux questions : la première
  * ouvre la page en lecture, la seconde ouvre le bouton d'enregistrement.
+ *
+ * ── LES MÉDIAS SE RATTACHENT AVANT LA FICHE ──────────────────────────────
+ *
+ * Ici la diapositive existe : on pose ses médias D'ABORD. Un fichier refusé par
+ * son rôle n'a alors rien laissé derrière lui, alors que l'ordre inverse
+ * enregistrerait la fiche avant d'échouer sur l'image — et laisserait croire que
+ * rien n'a été retenu. À la création, l'ordre est forcé dans l'autre sens.
  *
  * ── APRÈS ENREGISTREMENT, ON REVIENT À LA LISTE ───────────────────────────
  *
@@ -75,6 +84,13 @@ const {
   `admin-showcase-${highlightId.value}`,
   () => api.adminShowcase.form(highlightId.value, adminScope.scope),
   { watch: [highlightId, () => adminScope.scope], lazy: true },
+)
+
+/** Ce que chaque emplacement de média exige — `media.attachable_roles`. */
+const { data: mediaRules } = await useAsyncData<AttachableRoleRule[]>(
+  'media-roles-content-highlights',
+  () => api.media.roles('content', 'highlights'),
+  { default: () => [], lazy: true },
 )
 
 const { data: granted, status: permissionStatus } = await useAsyncData<EffectivePermission[]>(
@@ -131,12 +147,21 @@ const submitting = ref(false)
 const serverErrors = ref<ShowcaseValidationError[]>([])
 const formError = ref<string | null>(null)
 
-async function submit(values: ShowcaseFormValues): Promise<void> {
+async function submit(values: ShowcaseFormValues, media: ShowcaseMediaPayload): Promise<void> {
   submitting.value = true
   serverErrors.value = []
   formError.value = null
 
   try {
+    // LES MÉDIAS D'ABORD — voir l'en-tête.
+    if (Object.keys(media).length > 0) {
+      await api.adminShowcase.saveMedia(
+        highlightId.value,
+        media,
+        values.event_id,
+        adminScope.scope,
+      )
+    }
     const result = await api.adminShowcase.save(values, adminScope.scope)
     if (!result.ok) {
       serverErrors.value = result.errors
@@ -197,6 +222,8 @@ async function submit(values: ShowcaseFormValues): Promise<void> {
         :screen="screen"
         :sessions="sessions"
         :sessions-loading="sessionsLoading"
+        :media-rules="mediaRules"
+        :highlight-id="highlightId"
         :submit-label="t('admin.showcase.form.submitEdit')"
         :submitting="submitting"
         :server-errors="serverErrors"

@@ -193,8 +193,13 @@ export type HighlightMediaRole = 'banner' | 'video' | 'cover'
 
 /**
  * Une contrainte de téléversement, lue de `media.attachable_roles` et affichée
- * telle quelle par le formulaire : « image, 15 Mio au plus ». Le téléversement
- * réel arrive en phase B ; la contrainte, elle, s'annonce dès maintenant.
+ * telle quelle par le formulaire : « image, 15 Mio au plus ».
+ *
+ * Elle ne porte NI le rapport attendu NI sa tolérance : `GET /admin/showcase/…`
+ * ne les remonte pas, et l'éditeur de recadrage les obtient de
+ * `GET /media/roles`. Les deux emplacements d'image se téléversent depuis le
+ * 05/09 ; le fond vidéo, lui, attend un envoi par morceaux — 200 Mio ne passent
+ * pas d'un seul tenant.
  */
 export interface HighlightMediaRule {
   role: HighlightMediaRole

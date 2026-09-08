@@ -56,8 +56,8 @@
     },
     "maxSize": "Maximum size: {size} MiB",
     "pending": "A file is attached but is not yet ready to be served.",
+    "videoSoon": "The video background cannot be uploaded yet: 200 MiB requires a resumable, chunked upload.",
     "empty": "No file",
-    "soon": "Uploading arrives in the next phase.",
     "color": "Fallback colour",
     "colorHint": "The banner background when no media is ready. Format #RRGGBB."
   },

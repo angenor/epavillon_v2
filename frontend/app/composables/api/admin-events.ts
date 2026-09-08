@@ -61,27 +61,14 @@ import type {
   EditionTrackPayload,
   EditionVenuePayload,
 } from '~/types/admin-events'
+import type { AttachmentBatch, EditionImageRole } from '~/types/media'
 import type { AdministeredEvents } from '~/types/identity'
-import type { AssetId, Uuid } from '~/types/shared'
+import type { Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
 
 export interface AdminEventsApiContext extends ApiTransport {
   /** Refuse une édition hors périmètre plutôt que de rendre une page vide. */
   assertEventInScope: (eventId: Uuid, scope: AdministeredEvents) => void
-}
-
-/**
- * Le lot de remplacement de `PUT /media/attachments`.
- *
- * Chaque rôle NOMMÉ dans la liste est vidé puis regarni ; un rôle absent n'est
- * pas touché. C'est ce qui permet aux trois déclinaisons de partir d'un geste et
- * à un `asset_id` nul d'en retirer une sans toucher aux deux autres.
- */
-interface AttachmentBatch {
-  owner_schema: string
-  owner_table: string
-  owner_id: Uuid
-  assignments: { role: string; asset_id: AssetId | null }[]
 }
 
 export function createAdminEventsApi({ call, send, assertEventInScope }: AdminEventsApiContext) {
@@ -158,7 +145,10 @@ export function createAdminEventsApi({ call, send, assertEventInScope }: AdminEv
         owner_schema: 'event',
         owner_table: 'events',
         owner_id: eventId,
-        assignments: Object.entries(images).map(([role, asset_id]) => ({ role, asset_id })),
+        assignments: Object.entries(images).map(([role, asset_id]) => ({
+          role: role as EditionImageRole,
+          asset_id,
+        })),
       }
       // Hors ligne, rien n'est posé : `attachEditionImages` existe dans
       // `mocks/admin-events` mais attend d'être ré-exporté par `mocks/index.ts`.

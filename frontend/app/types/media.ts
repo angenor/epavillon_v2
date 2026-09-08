@@ -277,6 +277,37 @@ export interface AttachableRoleRule {
   is_active: boolean
 }
 
+/**
+ * UNE AFFECTATION D'UN LOT DE RATTACHEMENT — `AttachmentAssignment`.
+ * `asset_id` nul VIDE le rôle sans toucher aux autres.
+ */
+export interface AttachmentAssignment {
+  role: AttachmentRole
+  asset_id: AssetId | null
+  /** Le texte alternatif propre à CET usage : un objet dédupliqué sert
+   *  plusieurs fiches, et le texte pertinent n'y est pas le même. */
+  alt_text_override?: I18nText | null
+}
+
+/**
+ * Le lot de remplacement de `PUT /media/attachments` — `AttachmentBatch`.
+ *
+ * Chaque rôle NOMMÉ dans la liste est vidé puis regarni ; un rôle ABSENT n'est
+ * pas touché. C'est ce qui permet à plusieurs déclinaisons de partir d'un geste,
+ * à un `asset_id` nul d'en retirer une sans toucher aux autres, et à un écran
+ * qui ne sait pas encore téléverser un rôle de le laisser intact en l'omettant.
+ *
+ * PARTAGÉ, et non recopié par chaque fabrique d'API : deux écrans qui posent un
+ * fichier écrivent le même corps, et deux définitions divergeraient au premier
+ * champ ajouté.
+ */
+export interface AttachmentBatch {
+  owner_schema: string
+  owner_table: string
+  owner_id: Uuid
+  assignments: AttachmentAssignment[]
+}
+
 /** Table `media.attachments` — `050_media.sql` § 4. */
 export interface Attachment {
   id: Uuid

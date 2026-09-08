@@ -3,10 +3,13 @@ import type {
   ShowcaseFormField,
   ShowcaseFormScreen,
   ShowcaseFormValues,
+  ShowcaseMediaPayload,
+  ShowcaseMediaSlot,
   ShowcaseSessionOption,
   ShowcaseValidationError,
 } from '~/types/admin-showcase'
-import type { HighlightStatus } from '~/types/content'
+import type { HighlightId, HighlightStatus } from '~/types/content'
+import type { AttachableRoleRule } from '~/types/media'
 import type { EventId, I18nText } from '~/types/shared'
 import type { SelectOption } from '~/types/ui'
 
@@ -41,6 +44,13 @@ import type { SelectOption } from '~/types/ui'
  * sortira jamais est la meilleure façon de faire recréer le doublon « IFDD » que
  * la v2 corrige.
  *
+ * ── LES MÉDIAS NE PARTENT PAS AVEC LA FICHE ────────────────────────────────
+ *
+ * `content.highlights` ne porte pas ses médias : ils passent par
+ * `media.attachments`, et l'envoi du formulaire porte donc DEUX charges — les
+ * valeurs, et les seuls emplacements MODIFIÉS. C'est la page qui les pose, dans
+ * l'ordre que la création impose : la diapositive d'abord, ses médias ensuite.
+ *
  * ── LE FUSEAU DE LA FENÊTRE DE DIFFUSION EST UTC, ET C'EST UN CHOIX ────────
  *
  * Une diapositive n'appartient pas à un lieu : elle s'affiche sur l'accueil de
@@ -57,6 +67,15 @@ interface Props {
    * l'écran, sous peine de perdre la saisie en cours.
    */
   sessions: ShowcaseSessionOption[]
+  /**
+   * Ce que chaque emplacement de média exige — `media.attachable_roles`, lu par
+   * `GET /media/roles`. Chargé par la PAGE : trois emplacements ne font pas
+   * trois appels, et un composant de cet écran ne va pas chercher ses données.
+   */
+  mediaRules: AttachableRoleRule[]
+  /** La diapositive, quand elle existe déjà. Nulle à la création : le dépôt a
+   *  lieu quand même, et le rattachement suivra l'enregistrement. */
+  highlightId?: HighlightId | null
   /** Libellé du bouton d'envoi — « Créer » ou « Enregistrer ». */
   submitLabel: string
   submitting?: boolean
@@ -71,10 +90,11 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   serverErrors: () => [],
   formError: null,
+  highlightId: null,
 })
 
 const emit = defineEmits<{
-  submit: [values: ShowcaseFormValues]
+  submit: [values: ShowcaseFormValues, media: ShowcaseMediaPayload]
   cancel: []
   /** L'édition a changé : à la page d'aller chercher ses séances. */
   eventChange: [eventId: EventId | null]
@@ -120,6 +140,38 @@ function resetFrom(source: ShowcaseFormValues): void {
 }
 
 watch(() => props.screen.values, resetFrom, { immediate: true })
+
+/**
+ * LES EMPLACEMENTS DE MÉDIA, ÉTAT DE SAISIE ET NON LECTURE FIGÉE.
+ *
+ * Un dépôt remplace le `current` de son rôle ; l'aperçu le montre aussitôt, et
+ * l'envoi en dérive ce qu'il doit rattacher. Copié depuis `screen` pour la même
+ * raison que les valeurs : une annulation ne doit rien laisser dans la réponse
+ * d'API.
+ */
+const mediaSlots = ref<ShowcaseMediaSlot[]>([])
+watch(
+  () => props.screen.media,
+  (source) => (mediaSlots.value = source.map((slot) => ({ ...slot }))),
+  { immediate: true },
+)
+
+/**
+ * LES SEULS EMPLACEMENTS MODIFIÉS — voir `ShowcaseMediaPayload`.
+ *
+ * Le lot de rattachement vide puis regarnit tout rôle qu'il nomme : réaffirmer
+ * une image inchangée réécrirait son rattachement sans raison, et nommer le fond
+ * vidéo — que cet écran ne sait pas encore téléverser — le détacherait.
+ */
+const mediaChanges = computed<ShowcaseMediaPayload>(() => {
+  const changes: ShowcaseMediaPayload = {}
+  for (const slot of mediaSlots.value) {
+    const before = props.screen.media.find((entry) => entry.role === slot.role)?.current ?? null
+    const after = slot.current?.asset_id ?? null
+    if (after !== (before?.asset_id ?? null)) changes[slot.role] = after
+  }
+  return changes
+})
 
 function setWall(key: 'starts_at' | 'ends_at', next: string): void {
   wall.value[key] = next
@@ -188,19 +240,23 @@ function onSubmit(): void {
     nextTick(focusFirstError)
     return
   }
-  emit('submit', {
-    ...values.value,
-    // Les chaînes vidées redeviennent `null` : `''` en base serait servi comme
-    // une valeur, et un nom d'auteur vide s'afficherait sous la citation.
-    author_name: trimmedOrNull(values.value.author_name),
-    organization_label: trimmedOrNull(values.value.organization_label),
-    link_url: trimmedOrNull(values.value.link_url),
-    quote: emptyToNull(values.value.quote),
-    body: emptyToNull(values.value.body),
-    author_title: emptyToNull(values.value.author_title),
-    link_label: emptyToNull(values.value.link_label),
-    theme_codes: [...values.value.theme_codes],
-  })
+  emit(
+    'submit',
+    {
+      ...values.value,
+      // Les chaînes vidées redeviennent `null` : `''` en base serait servi comme
+      // une valeur, et un nom d'auteur vide s'afficherait sous la citation.
+      author_name: trimmedOrNull(values.value.author_name),
+      organization_label: trimmedOrNull(values.value.organization_label),
+      link_url: trimmedOrNull(values.value.link_url),
+      quote: emptyToNull(values.value.quote),
+      body: emptyToNull(values.value.body),
+      author_title: emptyToNull(values.value.author_title),
+      link_label: emptyToNull(values.value.link_label),
+      theme_codes: [...values.value.theme_codes],
+    },
+    { ...mediaChanges.value },
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -309,7 +365,7 @@ const preview = computed(() =>
     people: props.screen.people,
     countries: props.screen.countries,
     themes: props.screen.available_themes,
-    media: props.screen.media,
+    media: mediaSlots.value,
   }),
 )
 
@@ -499,7 +555,13 @@ const broadcastState = computed(() => showcaseBroadcastStateOf(values.value, now
           {{ t('admin.showcase.form.media.intro') }}
         </p>
 
-        <AdminShowcaseMediaPanel class="mt-4" :media="props.screen.media" />
+        <AdminShowcaseMediaPanel
+          v-model="mediaSlots"
+          class="mt-4"
+          :rules="props.mediaRules"
+          :highlight-id="props.highlightId"
+          :disabled="props.submitting"
+        />
 
         <div class="mt-4 sm:max-w-xs" data-field="background_color_hex">
           <UiInput
