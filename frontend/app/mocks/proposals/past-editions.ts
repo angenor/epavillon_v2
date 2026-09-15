@@ -38,10 +38,6 @@ export const pastEditionProposals = [
       en: 'West African coastlines: three years of monitoring',
     },
     slug: 'cop30-littoraux-afrique-ouest',
-    summary: {
-      fr: "Restitution du réseau d'observation côtière : ce que trois campagnes de mesure ont changé dans les plans nationaux d'adaptation.",
-      en: 'Findings from the coastal observation network and their effect on national adaptation plans.',
-    },
     objectives: {
       fr: "Rendre publiques les mesures de recul du trait de côte relevées entre 2022 et 2025, et confronter leur usage réel dans les plans nationaux d'adaptation de quatre pays.",
     },

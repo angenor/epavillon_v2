@@ -3,17 +3,14 @@
     "title": "Thématiques",
     "description": "Elles servent aux filtres de la programmation publique et à la composition des journées thématiques. Choisissez celles que l'activité traite réellement.",
     "selected": "{count} thématique retenue | {count} thématique retenue | {count} thématiques retenues",
-    "tooMany": "au-delà de {max}, les pastilles cessent d'informer et l'activité paraît généraliste",
-    "warningsMissing": "Sans thématique, votre activité n'apparaîtra dans aucun filtre du programme."
+    "tooMany": "au-delà de {max}, les pastilles cessent d'informer et l'activité paraît généraliste"
   },
   "category": {
-    "label": "Catégorie d'activité",
-    "hint": "La nature de ce que vous proposez.",
-    "placeholder": "Choisir une catégorie"
+    "label": "Catégories d'activité",
+    "hint": "La nature de ce que vous proposez. Cochez-en autant que nécessaire."
   },
   "format": {
-    "label": "Format de participation",
-    "hint": "Seuls les formats ouverts par cet appel sont proposés."
+    "label": "Format de participation"
   },
   "formats": {
     "in_person": {
@@ -41,10 +38,8 @@
   "errors": {
     "formatRequired": "Choisissez un format de participation.",
     "formatNotAllowed": "Ce format n'est plus accepté par l'appel. Choisissez-en un autre.",
-    "languagesRequired": "Indiquez au moins une langue."
-  },
-  "warnings": {
-    "themesMissing": "Sans thématique, votre activité n'apparaîtra dans aucun filtre de la programmation publique.",
-    "categoryMissing": "La catégorie aide le comité à comparer des activités de même nature."
+    "languagesRequired": "Indiquez au moins une langue.",
+    "themesRequired": "Choisissez au moins une thématique.",
+    "categoriesRequired": "Choisissez au moins une catégorie d'activité."
   }
 }

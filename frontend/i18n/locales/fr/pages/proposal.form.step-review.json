@@ -10,13 +10,12 @@
     "lead": "Organisation porteuse",
     "coOrganizations": "Co-organisateurs",
     "title": "Titre",
-    "summary": "Résumé",
     "objectives": "Objectifs",
     "presentation": "Présentation détaillée",
     "outcomes": "Résultats attendus",
     "audience": "Publics visés",
     "themes": "Thématiques",
-    "category": "Catégorie",
+    "category": "Catégories",
     "format": "Format",
     "languages": "Langues",
     "country": "Pays concerné",
@@ -30,9 +29,6 @@
     "en": "Anglais"
   },
   "next": {
-    "title": "Ce qui se passe après l'envoi",
-    "reviews": "{count} membre du comité évaluera le dossier sur les critères publiés. | {count} membre du comité évaluera le dossier sur les critères publiés. | {count} membres du comité évalueront le dossier sur les critères publiés.",
-    "editable": "Le dossier n'est plus modifiable une fois envoyé, sauf si le comité demande des compléments.",
-    "notification": "Vous recevrez un accusé de réception portant votre numéro de dossier."
+    "title": "Ce qui se passe après l'envoi"
   }
 }

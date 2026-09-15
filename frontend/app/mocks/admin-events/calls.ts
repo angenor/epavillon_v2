@@ -25,6 +25,7 @@ import type {
 import type { CallForProposals } from '~/types/event/call'
 import type { Uuid } from '~/types/shared'
 import { ApiRequestError } from '~/utils/api-error'
+import { DEFAULT_SUBMISSION_NEXT_STEPS } from '../calls'
 import { seedDefaultCriteria } from '../criteria'
 import { calls, criteria, newId, reviewers } from './core'
 import { committeeOfCall, criterionRows, editionCall } from './detail'
@@ -133,6 +134,7 @@ export function saveCall(payload: EditionCallPayload, actorId: Uuid | null): Cal
       required_reviews: 2,
       blind_review: true,
       guidelines_url: null,
+      submission_next_steps: null,
       created_by: actorId,
       created_at: now,
       updated_at: now,
@@ -160,6 +162,7 @@ export function saveCall(payload: EditionCallPayload, actorId: Uuid | null): Cal
     required_reviews: payload.required_reviews,
     blind_review: payload.blind_review,
     guidelines_url: payload.guidelines_url,
+    submission_next_steps: payload.submission_next_steps ?? (existing ? null : DEFAULT_SUBMISSION_NEXT_STEPS),
     updated_at: now,
   })
 

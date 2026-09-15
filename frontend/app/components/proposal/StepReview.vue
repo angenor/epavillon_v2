@@ -48,6 +48,8 @@ const { t } = useI18n()
 const { tr } = useI18nText()
 const { dateTime } = useDateTime()
 
+const nextSteps = computed(() => submissionStepLines(tr(props.call.submission_next_steps)))
+
 const zone = computed(() => props.edition.timezone)
 
 /** Le texte, ou la mention d'absence : jamais un blanc. */
@@ -63,10 +65,9 @@ const selectedThemes = computed(() =>
   props.themes.filter((term) => props.draft.theme_codes.includes(term.code)),
 )
 
-const categoryLabel = computed(() => {
-  const term = props.categories.find((entry) => entry.code === props.draft.activity_type_code)
-  return term ? tr(term.label) : t('common.labels.unknown')
-})
+const selectedCategories = computed(() =>
+  props.categories.filter((term) => props.draft.category_codes.includes(term.code)),
+)
 
 const languagesLabel = computed(() =>
   props.draft.language_codes
@@ -151,12 +152,6 @@ const durationLabel = computed(() =>
           <dd class="font-display text-lg text-text">{{ orMissing(props.draft.title) }}</dd>
         </div>
         <div>
-          <dt class="text-text-subtle">{{ t('proposal.form.step-review.fields.summary') }}</dt>
-          <dd class="max-w-(--measure) whitespace-pre-line text-text-secondary">
-            {{ orMissing(props.draft.summary) }}
-          </dd>
-        </div>
-        <div>
           <dt class="text-text-subtle">{{ t('proposal.form.step-review.fields.objectives') }}</dt>
           <dd class="max-w-(--measure) whitespace-pre-line text-text-secondary">
             {{ orMissing(props.draft.objectives) }}
@@ -218,9 +213,14 @@ const durationLabel = computed(() =>
           </dd>
           <dd v-else class="text-text-muted">{{ t('common.labels.unknown') }}</dd>
         </div>
-        <div>
+        <div class="sm:col-span-2">
           <dt class="text-text-subtle">{{ t('proposal.form.step-review.fields.category') }}</dt>
-          <dd class="text-text">{{ categoryLabel }}</dd>
+          <dd v-if="selectedCategories.length > 0" class="mt-1 flex flex-wrap gap-1.5">
+            <UiBadge v-for="term in selectedCategories" :key="term.code" size="sm">
+              {{ tr(term.label) }}
+            </UiBadge>
+          </dd>
+          <dd v-else class="text-text-muted">{{ t('common.labels.unknown') }}</dd>
         </div>
         <div>
           <dt class="text-text-subtle">{{ t('proposal.form.step-review.fields.format') }}</dt>
@@ -319,14 +319,14 @@ const durationLabel = computed(() =>
       </dl>
     </section>
 
-    <!-- CE QUI SE PASSE APRÈS L'ENVOI, dit AVANT de cliquer. -->
-    <UiAlert intent="info" :title="t('proposal.form.step-review.next.title')">
+    <!-- CE QUI SE PASSE APRÈS L'ENVOI, dit AVANT de cliquer. Rédigé au back-office, par appel. -->
+    <UiAlert
+      v-if="nextSteps.length > 0"
+      intent="info"
+      :title="t('proposal.form.step-review.next.title')"
+    >
       <ul class="grid list-disc gap-1 ps-5">
-        <li>
-          {{ t('proposal.form.step-review.next.reviews', { count: props.call.required_reviews }, props.call.required_reviews) }}
-        </li>
-        <li>{{ t('proposal.form.step-review.next.editable') }}</li>
-        <li>{{ t('proposal.form.step-review.next.notification') }}</li>
+        <li v-for="(step, index) in nextSteps" :key="index">{{ step }}</li>
       </ul>
     </UiAlert>
 

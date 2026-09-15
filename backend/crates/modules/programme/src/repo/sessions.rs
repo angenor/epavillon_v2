@@ -165,9 +165,9 @@ pub async fn creer(
     let id = sqlx::query_scalar!(
         r#"INSERT INTO programme.sessions
                (event_id, proposal_id, organization_id, sequence_number,
-                title, slug, summary, format, timezone, starts_at, ends_at)
+                title, slug, format, timezone, starts_at, ends_at)
            SELECT p.event_id, p.id, p.organization_id, $2,
-                  p.title, $3::text::platform.slug, p.summary, p.format, e.timezone,
+                  p.title, $3::text::platform.slug, p.format, e.timezone,
                   debut.instant,
                   debut.instant + make_interval(mins => $6)
              FROM programme.proposals p

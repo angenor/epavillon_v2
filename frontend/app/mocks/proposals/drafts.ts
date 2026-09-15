@@ -26,9 +26,6 @@ export const draftProposals = [
       en: 'Adapting Lake Chad wetlands to receding waters',
     },
     slug: 'zones-humides-lac-tchad',
-    summary: {
-      fr: "Retour sur cinq ans de restauration des mares de décrue et de gestion partagée de la ressource entre éleveurs et pêcheurs.",
-    },
     objectives: {
       fr: "Présenter les résultats du programme de restauration des mares de décrue et les modalités de gestion partagée retenues avec les communautés riveraines.",
     },
@@ -76,9 +73,6 @@ export const draftProposals = [
       en: 'Transboundary ecological corridors in the Congo Basin',
     },
     slug: 'corridors-ecologiques-bassin-congo',
-    summary: {
-      fr: "Trois pays, un corridor, et la question jamais réglée du partage des bénéfices avec les communautés forestières.",
-    },
     objectives: {
       fr: "Confronter les modèles de gouvernance des corridors transfrontaliers et la place réelle qu'y tiennent les communautés forestières.",
     },

@@ -27,9 +27,6 @@ export const submittedProposals = [
       en: 'Decarbonising river transport on the Congo River',
     },
     slug: 'decarboner-transport-fluvial-congo',
-    summary: {
-      fr: "Le fleuve porte l'essentiel du fret de la région ; ses moteurs hors-bord sont parmi les plus polluants du continent.",
-    },
     objectives: {
       fr: "Présenter les premiers résultats du remplacement des moteurs deux-temps par des motorisations électriques sur trois axes fluviaux, et le modèle de financement associé.",
     },
@@ -68,9 +65,6 @@ export const submittedProposals = [
       en: 'A French-speaking observatory of nationally determined contributions',
     },
     slug: 'observatoire-francophone-cdn',
-    summary: {
-      fr: "Suivre, en français, ce que les États francophones ont promis et ce qu'ils ont fait.",
-    },
     objectives: {
       fr: "Lancer publiquement l'observatoire, en exposer la méthode de notation et recueillir les critiques des délégations concernées avant la mise en ligne définitive.",
     },
@@ -141,9 +135,6 @@ export const submittedProposals = [
       en: 'Local knowledge and community management of coastal forests',
     },
     slug: 'savoirs-locaux-forets-littorales',
-    summary: {
-      fr: "Ce que les calendriers de coupe traditionnels disent de la régénération des mangroves, et ce que les plans d'aménagement en ignorent.",
-    },
     objectives: {
       fr: "Documenter la convergence entre règles coutumières de prélèvement et rythmes de régénération observés, et proposer leur reconnaissance dans les plans d'aménagement.",
     },
@@ -179,9 +170,6 @@ export const submittedProposals = [
       en: 'Green hydrogen in North Africa: promise or mirage?',
     },
     slug: 'hydrogene-vert-afrique-du-nord',
-    summary: {
-      fr: "Les projets annoncés mobilisent une ressource en eau que la région n'a pas.",
-    },
     objectives: {
       fr: "Mettre en regard les volumes d'eau nécessaires aux projets d'hydrogène annoncés et les disponibilités réelles des bassins concernés.",
     },
@@ -217,9 +205,6 @@ export const submittedProposals = [
       en: 'Energy sufficiency: campaigns that actually change behaviour',
     },
     slug: 'sobriete-energetique-campagnes',
-    summary: {
-      fr: "Quatre campagnes de sensibilisation, deux qui ont modifié les consommations, deux qui n'ont rien changé.",
-    },
     objectives: {
       fr: "Comparer quatre campagnes de sobriété conduites au Sahel et identifier ce qui distingue celles dont l'effet est mesurable.",
     },

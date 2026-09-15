@@ -413,7 +413,9 @@ CREATE TABLE event.calls_for_proposals (
     -- planification, une fois les dossiers acceptés.
     daily_start_time  time        NOT NULL DEFAULT '09:00',
     daily_end_time    time        NOT NULL DEFAULT '17:00',
-    allowed_formats   event.participation_mode[] NOT NULL DEFAULT '{online,in_person,hybrid}',
+    -- Présentiel seul par défaut depuis le 15/09 : un pavillon est un stand. Un
+    -- cycle de webinaires ouvre les autres formats explicitement.
+    allowed_formats   event.participation_mode[] NOT NULL DEFAULT '{in_person}',
     -- Nombre de revues indépendantes exigé avant décision : matérialise la règle
     -- « au moins deux révisionnistes se prononcent ».
     required_reviews  smallint    NOT NULL DEFAULT 2 CHECK (required_reviews >= 0),
@@ -422,6 +424,13 @@ CREATE TABLE event.calls_for_proposals (
     blind_review      boolean     NOT NULL DEFAULT true,
 
     guidelines_url    platform.url,
+    -- « Ce qui se passe après l'envoi », montré au déposant juste avant qu'il
+    -- n'envoie. Texte brut, UNE ÉTAPE PAR LIGNE : l'écran en fait une liste.
+    -- Rédigé au back-office, parce que le circuit change d'une campagne à
+    -- l'autre — nombre d'évaluateurs, accusé de réception, calendrier.
+    submission_next_steps platform.i18n_text DEFAULT jsonb_build_object(
+        'fr', E'Au moins deux membres du comité évalueront le dossier sur les critères publiés.\nVous recevrez un accusé de réception portant votre numéro de dossier.\nLe dossier reste modifiable jusqu''à la fin de l''événement ; le comité verra les modifications.',
+        'en', E'At least two committee members will assess the submission against the published criteria.\nYou will receive an acknowledgement bearing your submission number.\nThe submission remains editable until the end of the event; the committee will see the changes.'),
     created_by        uuid        CONSTRAINT xmod_fk_calls_creator
                                   REFERENCES identity.people(id) ON DELETE SET NULL,
     created_at        timestamptz NOT NULL DEFAULT now(),
@@ -464,6 +473,8 @@ COMMENT ON COLUMN event.calls_for_proposals.daily_end_time IS
     'Heure de fermeture, en heure locale de l''événement. Une proposition doit se TERMINER avant — début + durée comprise.';
 COMMENT ON COLUMN event.calls_for_proposals.min_duration_minutes IS
     'Durée minimale acceptée pour une proposition de cet appel. Distincte du CHECK large de programme.proposals.duration_minutes, qui est un garde-fou de données.';
+COMMENT ON COLUMN event.calls_for_proposals.submission_next_steps IS
+    'Ce qui se passe après l''envoi, affiché à la relecture du formulaire de dépôt. Une étape par ligne. Nul ou vide : le bloc ne s''affiche pas.';
 COMMENT ON COLUMN event.calls_for_proposals.blind_review IS
     'Évaluation en aveugle : un révisionniste ne voit les notes des autres qu''après avoir soumis la sienne.';
 

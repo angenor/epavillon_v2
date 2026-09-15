@@ -667,18 +667,19 @@ pub async fn fiches_personnes<'e>(
 }
 
 // -----------------------------------------------------------------------------
-// 8. Les thématiques — LECTURE seule. L'écriture vit dans `repo/themes.rs`.
+// 8. Les thématiques et catégories — LECTURE seule. L'écriture vit dans `repo/themes.rs`.
 // -----------------------------------------------------------------------------
 
-/// Les codes des thématiques d'un dossier, pour **filtrer**.
-pub async fn themes_du_dossier<'e>(
+/// Les codes d'une taxonomie posés sur un dossier — thématiques ou catégories.
+pub async fn termes_du_dossier<'e>(
     executor: impl PgExecutor<'e>,
     proposal_id: ProposalId,
+    taxonomie: &str,
 ) -> Result<Vec<String>> {
     let codes = sqlx::query_scalar!(
-        r#"SELECT reference.terms_of('programme', 'proposals', $1, 'activity_theme')
-               AS "codes!""#,
-        proposal_id.as_uuid()
+        r#"SELECT reference.terms_of('programme', 'proposals', $1, $2) AS "codes!""#,
+        proposal_id.as_uuid(),
+        taxonomie
     )
     .fetch_one(executor)
     .await?;

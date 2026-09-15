@@ -263,7 +263,8 @@
       "duration": "Durée de {min} à {max} min, {default} min par défaut",
       "dailyWindow": "Pavillon ouvert de {start} à {end}, heure de {zone}",
       "speakers": "De {min} à {max} intervenants",
-      "guidelines": "Consignes de dépôt"
+      "guidelines": "Consignes de dépôt",
+      "nextSteps": "Ce qui se passe après l'envoi"
     },
     "form": {
       "createTitle": "Ouvrir un appel à propositions",
@@ -301,7 +302,10 @@
       "requiredReviews": "Revues exigées avant décision",
       "blindReview": "Évaluation en aveugle",
       "blindReviewHint": "Un membre du comité ne voit les notes de ses pairs qu'après avoir soumis la sienne. Protège de l'effet d'ancrage.",
-      "guidelinesUrl": "Lien vers les consignes de dépôt"
+      "guidelinesUrl": "Lien vers les consignes de dépôt",
+      "nextStepsField": "Ce qui se passe après l'envoi",
+      "nextStepsHint": "Montré au déposant juste avant l'envoi. Une étape par ligne ; laissé vide, le bloc n'apparaît pas.",
+      "nextStepsCreateHint": "Une étape par ligne. Laissé vide, l'appel reçoit le circuit par défaut, modifiable ensuite."
     },
     "criteria": {
       "columns": {

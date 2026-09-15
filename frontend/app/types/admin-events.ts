@@ -584,6 +584,7 @@ export interface EditionCall {
   required_reviews: number
   blind_review: boolean
   guidelines_url: Url | null
+  submission_next_steps: I18nText | null
 
   // -- Dérivés, jamais des colonnes ---------------------------------------
 
@@ -629,6 +630,8 @@ export interface EditionCallPayload {
   required_reviews: number
   blind_review: boolean
   guidelines_url: Url | null
+  /** Nul à la création : la base pose le circuit par défaut. */
+  submission_next_steps: I18nText | null
   criteria: EditionCriterion[]
 }
 

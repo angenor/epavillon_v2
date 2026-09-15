@@ -3,17 +3,14 @@
     "title": "Themes",
     "description": "They drive the filters of the public programme and the composition of thematic days. Pick the ones the activity genuinely covers.",
     "selected": "{count} theme selected | {count} theme selected | {count} themes selected",
-    "tooMany": "beyond {max}, the tags stop informing and the activity looks unfocused",
-    "warningsMissing": "Without a theme, your activity will not appear in any programme filter."
+    "tooMany": "beyond {max}, the tags stop informing and the activity looks unfocused"
   },
   "category": {
-    "label": "Activity category",
-    "hint": "The nature of what you are proposing.",
-    "placeholder": "Choose a category"
+    "label": "Activity categories",
+    "hint": "The nature of what you propose. Tick as many as apply."
   },
   "format": {
-    "label": "Participation format",
-    "hint": "Only the formats opened by this call are offered."
+    "label": "Participation format"
   },
   "formats": {
     "in_person": {
@@ -41,10 +38,8 @@
   "errors": {
     "formatRequired": "Choose a participation format.",
     "formatNotAllowed": "This format is no longer accepted by the call. Choose another one.",
-    "languagesRequired": "Select at least one language."
-  },
-  "warnings": {
-    "themesMissing": "Without a theme, your activity will not appear in any filter of the public programme.",
-    "categoryMissing": "The category helps the committee compare activities of the same nature."
+    "languagesRequired": "Select at least one language.",
+    "themesRequired": "Choose at least one theme.",
+    "categoriesRequired": "Choose at least one activity category."
   }
 }

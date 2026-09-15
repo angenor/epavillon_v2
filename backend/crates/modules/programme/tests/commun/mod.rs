@@ -184,11 +184,11 @@ pub async fn appel_ouvert(bac: &Bac, event_id: Uuid) -> Uuid {
     let call_id = sqlx::query_scalar!(
         r#"INSERT INTO event.calls_for_proposals
                (event_id, code, title, status, opens_at, closes_at,
-                results_expected_at, required_reviews, blind_review)
+                results_expected_at, required_reviews, blind_review, allowed_formats)
            VALUES ($1, 'principal',
                    '{"fr":"Appel à propositions","en":"Call for proposals"}'::jsonb,
                    'open', now() - interval '1 day', now() + interval '30 days',
-                   date '2027-09-15', 2, true)
+                   date '2027-09-15', 2, true, '{online,in_person,hybrid}')
         RETURNING id"#,
         event_id
     )
@@ -415,13 +415,12 @@ pub fn brouillon(terrain: &Terrain, titre: &str) -> ProposalDraft {
         organization_id: Some(terrain.organisation),
         co_organizations: Vec::new(),
         title: titre.to_owned(),
-        summary: "Un résumé.".to_owned(),
         objectives: "Les objectifs de l'activité.".to_owned(),
         detailed_presentation: "<p>Une présentation détaillée.</p>".to_owned(),
         expected_outcomes: String::new(),
         target_audiences: vec!["Ministères".to_owned()],
         theme_codes: vec!["adaptation".to_owned()],
-        activity_type_code: Some("results_sharing".to_owned()),
+        category_codes: vec!["results_sharing".to_owned()],
         format: Some("hybrid".to_owned()),
         language_codes: vec!["fr".to_owned()],
         country_id: None,
@@ -540,7 +539,7 @@ pub async fn thematiques(bac: &Bac, proposal_id: Uuid) -> Vec<(String, String, S
         r#"SELECT et.entity_schema, et.entity_table, t.code
              FROM reference.entity_terms et
              JOIN reference.taxonomy_terms t ON t.id = et.term_id
-            WHERE et.entity_id = $1
+            WHERE et.entity_id = $1 AND t.taxonomy_code = 'activity_theme'
             ORDER BY et.sort_order, t.code"#,
         proposal_id
     )

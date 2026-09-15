@@ -110,10 +110,9 @@ async fn le_premier_enregistrement_aboutit_avec_un_titre_vide() {
     let mut vide = commun::brouillon(&terrain, "");
     vide.objectives = String::new();
     vide.detailed_presentation = String::new();
-    vide.summary = String::new();
     vide.target_audiences = Vec::new();
     vide.theme_codes = Vec::new();
-    vide.activity_type_code = None;
+    vide.category_codes = Vec::new();
     vide.format = None;
 
     let cree = draft_write::enregistrer(

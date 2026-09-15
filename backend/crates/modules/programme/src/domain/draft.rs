@@ -82,8 +82,6 @@ pub struct ProposalDraft {
     #[serde(default)]
     pub title: String,
     #[serde(default)]
-    pub summary: String,
-    #[serde(default)]
     pub objectives: String,
     /// HTML restreint produit par l'éditeur du front. Assaini à l'écriture.
     #[serde(default)]
@@ -103,8 +101,9 @@ pub struct ProposalDraft {
     /// service, jamais reçu (R11).
     #[serde(default)]
     pub theme_codes: Vec<String>,
+    /// Codes de la taxonomie `activity_category`, **plusieurs** depuis le 15/09.
     #[serde(default)]
-    pub activity_type_code: Option<String>,
+    pub category_codes: Vec<String>,
     #[serde(default)]
     pub format: Option<String>,
     #[serde(default)]
@@ -139,7 +138,7 @@ fn une_seance() -> i16 {
 /// Un texte français prêt pour `platform.i18n_text`, ou rien quand il est vide.
 ///
 /// **La colonne nullable et la colonne obligatoire ne se traitent pas
-/// pareil** : `summary` accepte l'absence, `objectives` non. Rendre `null` pour
+/// pareil** : `expected_outcomes` accepte l'absence, `objectives` non. Rendre `null` pour
 /// une chaîne vide laisse la base trancher — ce qui est exactement ce qu'on
 /// veut, plutôt que d'écrire `{"fr": ""}` que le domaine refuserait avec un
 /// message moins clair.

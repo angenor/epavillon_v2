@@ -263,7 +263,8 @@
       "duration": "Duration from {min} to {max} min, {default} min by default",
       "dailyWindow": "Pavilion open from {start} to {end}, {zone} time",
       "speakers": "From {min} to {max} speakers",
-      "guidelines": "Submission guidelines"
+      "guidelines": "Submission guidelines",
+      "nextSteps": "What happens after sending"
     },
     "form": {
       "createTitle": "Open a call for proposals",
@@ -301,7 +302,10 @@
       "requiredReviews": "Reviews required before decision",
       "blindReview": "Blind review",
       "blindReviewHint": "A committee member sees peer scores only after submitting their own. Protects against anchoring.",
-      "guidelinesUrl": "Link to submission guidelines"
+      "guidelinesUrl": "Link to submission guidelines",
+      "nextStepsField": "What happens after sending",
+      "nextStepsHint": "Shown to the submitter just before sending. One step per line; left empty, the block does not appear.",
+      "nextStepsCreateHint": "One step per line. Left empty, the call receives the default circuit, editable afterwards."
     },
     "criteria": {
       "columns": {

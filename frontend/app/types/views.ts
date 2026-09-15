@@ -192,8 +192,6 @@ export interface ProposalDashboardRow {
   // un tableau de quarante lignes.
 
   format: ParticipationMode
-  /** Code de la taxonomie `activity_category`. */
-  activity_type_code: TaxonomyTermCode | null
   organization_acronym: string | null
   /** Pays de l'organisation PORTEUSE, code ISO — pour filtrer et pour le drapeau. */
   organization_country_code: string | null
@@ -205,6 +203,9 @@ export interface ProposalDashboardRow {
   theme_codes: TaxonomyTermCode[]
   /** Thématiques prêtes à afficher — `reference.term_badges()`. */
   themes: ScheduleThemeBadge[]
+  /** Catégories d'activité, même double usage. */
+  category_codes: TaxonomyTermCode[]
+  categories: ScheduleThemeBadge[]
   /** Révisionnistes affectés, déports exclus. Pour filtrer « les dossiers de X ». */
   reviewer_ids: PersonId[]
   /** Les mêmes, nommés : un « 2/3 » ne dit pas de qui on attend la troisième. */

@@ -35,9 +35,6 @@ export const reviewedProposals = [
       en: 'Gender-responsive climate budgets: equipping finance ministries',
     },
     slug: 'budgets-climat-sensibles-au-genre',
-    summary: {
-      fr: "Un marqueur budgétaire ne suffit pas : encore faut-il que la direction du budget sache s'en servir.",
-    },
     objectives: {
       fr: "Transmettre la méthode de marquage budgétaire genre-climat éprouvée dans trois pays et en montrer les limites d'exécution.",
     },
@@ -75,9 +72,6 @@ export const reviewedProposals = [
       en: 'Participatory flood risk mapping in Cotonou',
     },
     slug: 'cartographie-participative-inondations-cotonou',
-    summary: {
-      fr: "Douze quartiers ont cartographié eux-mêmes leurs points de submersion ; la carte officielle en ignorait la moitié.",
-    },
     objectives: {
       fr: "Montrer comment une cartographie produite par les habitants a corrigé le plan de prévention des risques et modifié les priorités d'investissement.",
     },
@@ -118,9 +112,6 @@ export const reviewedProposals = [
       en: 'Interpretation and multilingualism in climate negotiations',
     },
     slug: 'interpretation-multilinguisme-negociations',
-    summary: {
-      fr: "Ce que coûte, à une délégation francophone, une session de contact tenue sans interprétation.",
-    },
     objectives: {
       fr: "Documenter l'effet de l'absence d'interprétation sur la participation effective des délégations francophones et proposer des mesures concrètes au secrétariat.",
     },
@@ -156,9 +147,6 @@ export const reviewedProposals = [
       en: 'Urban reforestation: measuring the real effect on heat islands',
     },
     slug: 'reboisement-urbain-ilots-chaleur',
-    summary: {
-      fr: "Trois ans de capteurs dans deux villes du delta : l'effet est réel, il est très inégal.",
-    },
     objectives: {
       fr: "Livrer des mesures de terrain sur l'effet du couvert arboré urbain et distinguer les plantations qui rafraîchissent de celles qui ne changent rien.",
     },
@@ -199,9 +187,6 @@ export const reviewedProposals = [
       en: 'Parametric crop insurance: three years of implementation in the Sahel',
     },
     slug: 'assurance-parametrique-agricole-sahel',
-    summary: {
-      fr: "Des indemnisations déclenchées par satellite, versées en quinze jours — et des producteurs qui n'ont rien touché malgré une mauvaise récolte.",
-    },
     objectives: {
       fr: "Exposer sans complaisance les résultats de trois campagnes d'assurance indicielle, y compris les cas de non-déclenchement mal vécus par les producteurs.",
     },
@@ -308,9 +293,6 @@ export const reviewedProposals = [
       en: 'Resilient schools: adapting school buildings to heatwaves',
     },
     slug: 'ecoles-resilientes-vagues-de-chaleur',
-    summary: {
-      fr: "Les jours de classe perdus pour cause de chaleur ne sont comptés nulle part.",
-    },
     objectives: {
       fr: "Documenter les interruptions scolaires liées à la chaleur et évaluer trois solutions de rafraîchissement passif du bâti existant.",
     },

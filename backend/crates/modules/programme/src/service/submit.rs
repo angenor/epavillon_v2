@@ -268,7 +268,8 @@ async fn classer(
     Ok(eligibility::classer(&appel, porteuse, premier_depot, OffsetDateTime::now_utc()).into())
 }
 
-/// **Les trois textes obligatoires doivent être réellement remplis.**
+/// **Les trois textes obligatoires doivent être réellement remplis**, et le
+/// dossier classé : une thématique et une catégorie au moins.
 ///
 /// Un brouillon naît avec des textes provisoires — `platform.i18n_text` refuse
 /// un français vide et les colonnes sont `NOT NULL`. Les laisser passer au
@@ -296,6 +297,26 @@ async fn verifier_la_completude(state: &ProgrammeState, dossier: ProposalId) -> 
                 "Ce champ doit être renseigné avant le dépôt du dossier.",
             )
             .field(champ));
+        }
+    }
+
+    for (taxonomie, champ, message) in [
+        (
+            "activity_theme",
+            "theme_codes",
+            "Choisissez au moins une thématique avant le dépôt du dossier.",
+        ),
+        (
+            "activity_category",
+            "category_codes",
+            "Choisissez au moins une catégorie d'activité avant le dépôt du dossier.",
+        ),
+    ] {
+        if cross::termes_du_dossier(state.pool(), dossier, taxonomie)
+            .await?
+            .is_empty()
+        {
+            return Err(ApiError::with_message(ErrorCode::ValidationFailed, message).field(champ));
         }
     }
 

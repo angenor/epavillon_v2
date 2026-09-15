@@ -1,4 +1,4 @@
-//! Les huit longueurs maximales des textes d'un dossier (R15, écart n° 28).
+//! Les sept longueurs maximales des textes d'un dossier (R15, écart n° 28).
 //!
 //! # Pourquoi elles sont ici et pas dans la configuration
 //!
@@ -31,7 +31,6 @@ const fn borne(champ: &'static str, max: usize) -> Borne {
 }
 
 pub const TITRE: Borne = borne("title", 180);
-pub const RESUME: Borne = borne("summary", 400);
 pub const OBJECTIFS: Borne = borne("objectives", 1200);
 pub const PRESENTATION: Borne = borne("detailed_presentation", 4000);
 pub const RESULTATS: Borne = borne("expected_outcomes", 1200);

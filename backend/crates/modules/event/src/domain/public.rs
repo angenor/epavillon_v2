@@ -240,6 +240,8 @@ pub struct PublicCall {
     pub required_reviews: i16,
     pub blind_review: bool,
     pub guidelines_url: Option<String>,
+    /// « Ce qui se passe après l'envoi », une étape par ligne.
+    pub submission_next_steps: Option<Value>,
     /// La grille d'évaluation, **avec l'appel et non à part**.
     ///
     /// Elle est publique par nature : une organisation qui prépare un dossier

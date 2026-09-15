@@ -198,6 +198,7 @@ pub struct EditionCall {
     pub required_reviews: i16,
     pub blind_review: bool,
     pub guidelines_url: Option<String>,
+    pub submission_next_steps: Option<Value>,
 
     // -- Dérivés, jamais des colonnes : les trois fonctions du modèle sont
     //    APPELÉES, jamais recalculées ici.

@@ -32,7 +32,13 @@ import { organizations } from './org'
 import { programmeTracks } from './tracks'
 import { rooms } from './rooms'
 import { entityTerms, taxonomyTerms } from './reference'
-import { allProposals, proposalComments, proposalOrganizations, proposalSpeakers } from './proposals'
+import {
+  allProposals,
+  proposalCategoryCodes,
+  proposalComments,
+  proposalOrganizations,
+  proposalSpeakers,
+} from './proposals'
 import { people } from './people'
 import { proposalReads } from './proposal-reads'
 import { allSessions, sessionTracks } from './sessions'
@@ -67,6 +73,13 @@ export function termBadges(table: 'sessions' | 'proposals', entityId: string): S
       color: pair.term!.color_hex,
       icon: pair.term!.icon,
     }))
+}
+
+function categoryBadges(proposalId: string): ScheduleThemeBadge[] {
+  const codes = proposalCategoryCodes.get(proposalId) ?? []
+  return taxonomyTerms
+    .filter((term) => term.taxonomy_code === 'activity_category' && codes.includes(term.code))
+    .map((term) => ({ code: term.code, label: term.label, color: term.color_hex, icon: term.icon }))
 }
 
 /** Reproduit le calcul d'état temporel de la vue, dans le même ordre de tests. */
@@ -228,7 +241,6 @@ export function proposalDashboard(): ProposalDashboardRow[] {
 
         // --- Colonnes ajoutées à la vue le 18/08 pour la liste du back-office
         format: p.format,
-        activity_type_code: p.activity_type_code,
         organization_acronym: organization?.acronym ?? null,
         organization_country_code: country?.iso2 ?? null,
         organization_country: country?.name ?? null,
@@ -239,6 +251,8 @@ export function proposalDashboard(): ProposalDashboardRow[] {
         ).length,
         theme_codes: themes.map((theme) => theme.code),
         themes,
+        category_codes: proposalCategoryCodes.get(p.id) ?? [],
+        categories: categoryBadges(p.id),
         reviewer_ids: assignments.map((a) => a.reviewer_id),
         reviewers,
         overdue_reviews: overdue.length,

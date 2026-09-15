@@ -590,12 +590,11 @@ pub async fn dossier_depose(
 ) -> Uuid {
     sqlx::query_scalar!(
         r#"INSERT INTO programme.proposals
-               (event_id, call_id, organization_id, title, slug, summary,
+               (event_id, call_id, organization_id, title, slug,
                 objectives, detailed_presentation, format,
                 duration_minutes, status, submitted_at, submitted_by)
            VALUES ($1, $2, $3, jsonb_build_object('fr', $4::text, 'en', $4::text),
                    platform.slugify($4 || '-' || gen_random_uuid()::text)::platform.slug,
-                   jsonb_build_object('fr', $4::text, 'en', $4::text),
                    jsonb_build_object('fr', 'Objectifs.', 'en', 'Objectives.'),
                    jsonb_build_object('fr', '<p>Présentation.</p>', 'en', '<p>Presentation.</p>'),
                    'in_person', 60, 'submitted', now(), $5)

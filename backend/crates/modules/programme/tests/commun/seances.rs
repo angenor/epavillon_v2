@@ -203,13 +203,12 @@ pub async fn dossier_pret(
     let id = sqlx::query_scalar!(
         r#"INSERT INTO programme.proposals
                (call_id, event_id, organization_id, submitted_by,
-                title, slug, summary, objectives, detailed_presentation, format,
+                title, slug, objectives, detailed_presentation, format,
                 preferred_start_at, duration_minutes, requested_sessions,
                 scheduling_constraints)
            SELECT CASE WHEN $10 THEN $1::uuid END, $2, $3, $4,
                   jsonb_build_object('fr', $5::text),
                   $6::text::platform.slug,
-                  jsonb_build_object('fr', 'Un résumé.'),
                   '{"fr":"Objectifs du dossier."}'::jsonb,
                   '{"fr":"<p>Présentation.</p>"}'::jsonb,
                   'hybrid',

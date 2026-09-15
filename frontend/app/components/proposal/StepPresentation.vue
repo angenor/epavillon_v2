@@ -3,12 +3,12 @@ import type { DraftIssue, ProposalDraft } from '~/types/proposal-form'
 import { TEXT_LIMITS } from '~/types/proposal-form'
 
 /**
- * ÉTAPE 2 — CE QUE L'ACTIVITÉ EST : titre, résumé, objectifs, présentation
- * détaillée, résultats attendus, public visé.
+ * ÉTAPE 2 — CE QUE L'ACTIVITÉ EST : titre, objectifs, présentation détaillée,
+ * résultats attendus, public visé. Le résumé a été retiré le 15/09.
  *
  * TROIS CHAMPS SEULEMENT SONT OBLIGATOIRES, et ce sont exactement les trois
  * colonnes `NOT NULL` du dossier : `title`, `objectives`,
- * `detailed_presentation`. Les trois autres sont facultatives en base et le
+ * `detailed_presentation`. Les deux autres sont facultatives en base et le
  * restent ici — mais leur absence est signalée comme un affaiblissement du
  * dossier, pas comme une erreur. Le comité note sur six critères, dont l'impact
  * attendu et l'inclusion : un dossier qui ne dit ni ce qu'il produit ni à qui il
@@ -23,9 +23,7 @@ import { TEXT_LIMITS } from '~/types/proposal-form'
  * COMPTEURS DE CARACTÈRES PARTOUT, et la saisie n'est JAMAIS coupée : le texte
  * au-delà reste visible, le compteur passe en rouge, l'envoi refuse avec un
  * message. Couper la frappe à mi-mot fait croire à un clavier cassé. Les limites
- * sont des règles d'écran (`TEXT_LIMITS`), pas des contraintes de la base : un
- * résumé de mille signes ne tient pas sur une carte de programmation, et
- * personne ne le raccourcira après coup.
+ * sont des règles d'écran (`TEXT_LIMITS`), pas des contraintes de la base.
  */
 
 const draft = defineModel<ProposalDraft>({ required: true })
@@ -136,17 +134,6 @@ function onAudienceKey(event: KeyboardEvent): void {
       :maxlength="TEXT_LIMITS.title"
       show-counter
       required
-    />
-
-    <UiTextarea
-      id="proposal-summary"
-      v-model="draft.summary"
-      :label="t('proposal.form.step-presentation.fields.summary.label')"
-      :hint="hintOf('summary', t('proposal.form.step-presentation.fields.summary.hint'))"
-      :error="errorOf('summary')"
-      :maxlength="TEXT_LIMITS.summary"
-      :rows="3"
-      auto-grow
     />
 
     <UiTextarea

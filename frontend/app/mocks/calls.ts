@@ -14,7 +14,14 @@
  */
 
 import type { CallForProposals, CallReviewer } from '~/types/event/call'
+import type { I18nText } from '~/types/shared'
 import { CALL, EVENT, PERSON } from './ids'
+
+/** Le défaut de `event.calls_for_proposals.submission_next_steps`. */
+export const DEFAULT_SUBMISSION_NEXT_STEPS: I18nText = {
+  fr: "Au moins deux membres du comité évalueront le dossier sur les critères publiés.\nVous recevrez un accusé de réception portant votre numéro de dossier.\nLe dossier reste modifiable jusqu'à la fin de l'événement ; le comité verra les modifications.",
+  en: 'At least two committee members will assess the submission against the published criteria.\nYou will receive an acknowledgement bearing your submission number.\nThe submission remains editable until the end of the event; the committee will see the changes.',
+}
 
 export const callsForProposals = [
   {
@@ -61,6 +68,7 @@ export const callsForProposals = [
     // COP30 à découvert — les deux branches de l'écran ont donc des données.
     blind_review: true,
     guidelines_url: 'https://www.ifdd.francophonie.org/cop31/appel-a-propositions',
+    submission_next_steps: DEFAULT_SUBMISSION_NEXT_STEPS,
     created_by: PERSON.bakayoko,
     created_at: '2026-05-12T09:00:00Z',
     updated_at: '2026-08-24T16:30:00Z',
@@ -105,6 +113,7 @@ export const callsForProposals = [
     required_reviews: 3,
     blind_review: false,
     guidelines_url: 'https://www.ifdd.francophonie.org/cop30/appel-a-propositions',
+    submission_next_steps: null,
     created_by: PERSON.bakayoko,
     created_at: '2025-04-14T09:00:00Z',
     updated_at: '2025-09-15T17:00:00Z',
@@ -139,6 +148,7 @@ export const callsForProposals = [
     required_reviews: 2,
     blind_review: true,
     guidelines_url: null,
+    submission_next_steps: null,
     created_by: PERSON.bakayoko,
     created_at: '2024-04-15T09:00:00Z',
     updated_at: '2024-09-13T17:00:00Z',

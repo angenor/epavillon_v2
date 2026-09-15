@@ -64,3 +64,11 @@ export function callPhase(call: CallForProposals, at: number = Date.now()): Call
 export function isCallOpen(call: CallForProposals, at: number = Date.now()): boolean {
   return callPhase(call, at) === 'open'
 }
+
+/** « Ce qui se passe après l'envoi » : une étape par ligne, lignes vides ignorées. */
+export function submissionStepLines(text: string): string[] {
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+}

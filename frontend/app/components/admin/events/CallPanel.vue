@@ -121,6 +121,7 @@ function openForm(): void {
         required_reviews: 2,
         blind_review: true,
         guidelines_url: null,
+        submission_next_steps: null,
         // La grille par défaut du MODÈLE, lue et non recopiée : six lignes vides
         // devant un formulaire de grille se remplissent mal.
         criteria: props.defaultCriteria.map((c) => ({ ...c })),
@@ -211,6 +212,10 @@ function criterionError(index: number): string | undefined {
   const found = props.errors.find((entry) => entry.criterion_index === index)
   return found ? t('admin.event.tabs.callTab.errors.' + found.code) : undefined
 }
+
+const summaryNextSteps = computed(() =>
+  call.value ? submissionStepLines(tr(call.value.submission_next_steps)) : [],
+)
 
 const globalErrors = computed(() =>
   props.errors
@@ -394,6 +399,15 @@ watch(
           </div>
         </dl>
 
+        <div v-if="summaryNextSteps.length > 0" class="mt-4">
+          <p class="text-xs font-semibold tracking-wide text-text-subtle uppercase">
+            {{ t('admin.event.tabs.callTab.summary.nextSteps') }}
+          </p>
+          <ul class="mt-1 grid max-w-(--measure) list-disc gap-0.5 ps-5 text-sm text-text-secondary">
+            <li v-for="(step, index) in summaryNextSteps" :key="index">{{ step }}</li>
+          </ul>
+        </div>
+
         <UiButton
           v-if="call.guidelines_url"
           class="mt-4"
@@ -508,6 +522,15 @@ watch(
             type="url"
             :label="t('admin.event.tabs.callTab.form.guidelinesUrl')"
             @update:model-value="(next: string) => (draft!.guidelines_url = next || null)"
+          />
+
+          <AdminEventsI18nField
+            :model-value="draft.submission_next_steps"
+            :label="t('admin.event.tabs.callTab.form.nextStepsField')"
+            :hint="t(draft.id ? 'admin.event.tabs.callTab.form.nextStepsHint' : 'admin.event.tabs.callTab.form.nextStepsCreateHint')"
+            multiline
+            :rows="4"
+            @update:model-value="(next) => (draft!.submission_next_steps = next)"
           />
         </div>
       </fieldset>

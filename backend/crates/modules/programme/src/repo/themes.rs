@@ -1,5 +1,8 @@
-//! **Écriture hors schéma n° 1 : les thématiques d'un dossier — et, depuis B5,
-//! celles d'une séance** (R11, écarts n° 3 et n° 94).
+//! **Écriture hors schéma n° 1 : les thématiques et catégories d'un dossier — et,
+//! depuis B5, les thématiques d'une séance** (R11, écarts n° 3 et n° 94).
+//!
+//! Les catégories ont rejoint ce fichier le 15/09, quand elles sont devenues à
+//! choix multiple : même table, même dérogation, une taxonomie de plus.
 //!
 //! # Deux entités, un seul fichier
 //!
@@ -48,11 +51,41 @@ const TABLE: &str = "proposals";
 /// La seconde entité, posée par B5. **Littérale elle aussi** : accepter la table
 /// dans une charge utile rouvrirait l'écart n° 3 en entier.
 const TABLE_SEANCES: &str = "sessions";
-/// La taxonomie attendue. **Un code, pas un libellé** : les libellés vivent en
-/// base et se modifient au back-office.
+/// La taxonomie des thématiques, seule recopiée sur les séances.
 const TAXONOMIE: &str = "activity_theme";
 
-/// Poser les thématiques d'un dossier, **exactement celles-là**.
+/// Les deux classements d'un dossier. **Des codes de taxonomie, pas des
+/// libellés** : les libellés vivent en base et se modifient au back-office.
+#[derive(Debug, Clone, Copy)]
+pub enum Classement {
+    Thematiques,
+    Categories,
+}
+
+impl Classement {
+    fn taxonomie(self) -> &'static str {
+        match self {
+            Self::Thematiques => TAXONOMIE,
+            Self::Categories => "activity_category",
+        }
+    }
+
+    fn champ(self) -> &'static str {
+        match self {
+            Self::Thematiques => "theme_codes",
+            Self::Categories => "category_codes",
+        }
+    }
+
+    fn refus(self, code: &str) -> String {
+        match self {
+            Self::Thematiques => format!("La thématique « {code} » n'existe pas."),
+            Self::Categories => format!("La catégorie « {code} » n'existe pas."),
+        }
+    }
+}
+
+/// Poser les thématiques ou les catégories d'un dossier, **exactement celles-là**.
 ///
 /// Le geste est un remplacement et non un ajout : l'écran envoie la liste
 /// entière, et une thématique retirée doit disparaître.
@@ -64,8 +97,13 @@ const TAXONOMIE: &str = "activity_theme";
 /// est une étape à part entière du formulaire : accepter en silence une
 /// pastille périmée ferait déposer un dossier que le comité ne retrouverait sur
 /// aucun filtre, sans que personne ne soit averti.
-pub async fn poser(conn: &mut PgConnection, proposal_id: Uuid, codes: &[String]) -> Result<()> {
-    purger(conn, proposal_id).await?;
+pub async fn poser(
+    conn: &mut PgConnection,
+    proposal_id: Uuid,
+    classement: Classement,
+    codes: &[String],
+) -> Result<()> {
+    retirer(conn, proposal_id, &[classement.taxonomie()]).await?;
 
     // Dédoublonné AVANT l'insertion, et sans trier : le rang de la liste porte
     // l'ordre d'affichage des pastilles. Sans cette étape, deux fois la même
@@ -95,7 +133,7 @@ pub async fn poser(conn: &mut PgConnection, proposal_id: Uuid, codes: &[String])
         SCHEMA,
         TABLE,
         proposal_id,
-        TAXONOMIE,
+        classement.taxonomie(),
         codes
     )
     .fetch_one(&mut *conn)
@@ -105,7 +143,7 @@ pub async fn poser(conn: &mut PgConnection, proposal_id: Uuid, codes: &[String])
     // la jointure ne rend que ce qui existe, et sans cette comparaison le refus
     // serait silencieux — exactement ce que l'écart n° 3 reproche.
     if poses < codes.len() as i64 {
-        return Err(nommer_le_code_refuse(conn, codes).await);
+        return Err(nommer_le_code_refuse(conn, classement, codes).await);
     }
 
     Ok(())
@@ -147,21 +185,34 @@ pub async fn recopier_sur_la_seance(
     Ok(())
 }
 
-/// Retirer tous les liens de thématique d'un dossier.
+/// Retirer tous les liens de thématique et de catégorie d'un dossier.
 ///
-/// **La purge se borne à la taxonomie des thématiques.** Un dossier peut porter
+/// **La purge se borne à ces deux taxonomies.** Un dossier peut porter
 /// d'autres rattachements un jour ; les effacer tous ferait de ce fichier une
 /// porte plus large que ce qu'il déclare.
 pub async fn purger(conn: &mut PgConnection, proposal_id: Uuid) -> Result<()> {
+    retirer(
+        conn,
+        proposal_id,
+        &[
+            Classement::Thematiques.taxonomie(),
+            Classement::Categories.taxonomie(),
+        ],
+    )
+    .await
+}
+
+async fn retirer(conn: &mut PgConnection, proposal_id: Uuid, taxonomies: &[&str]) -> Result<()> {
+    let taxonomies: Vec<String> = taxonomies.iter().map(|t| (*t).to_owned()).collect();
     sqlx::query!(
         "DELETE FROM reference.entity_terms
           WHERE entity_schema = $1 AND entity_table = $2 AND entity_id = $3
             AND term_id IN (SELECT id FROM reference.taxonomy_terms
-                             WHERE taxonomy_code = $4)",
+                             WHERE taxonomy_code = ANY($4))",
         SCHEMA,
         TABLE,
         proposal_id,
-        TAXONOMIE
+        &taxonomies
     )
     .execute(&mut *conn)
     .await?;
@@ -171,11 +222,15 @@ pub async fn purger(conn: &mut PgConnection, proposal_id: Uuid) -> Result<()> {
 
 /// **Nommer le code refusé**, et non « une thématique est inconnue » : l'écran
 /// doit pouvoir retirer la bonne pastille.
-async fn nommer_le_code_refuse(conn: &mut PgConnection, codes: &[String]) -> ApiError {
+async fn nommer_le_code_refuse(
+    conn: &mut PgConnection,
+    classement: Classement,
+    codes: &[String],
+) -> ApiError {
     let connus: Vec<String> = sqlx::query_scalar!(
         "SELECT code FROM reference.taxonomy_terms
           WHERE taxonomy_code = $1 AND code = ANY($2)",
-        TAXONOMIE,
+        classement.taxonomie(),
         codes
     )
     .fetch_all(conn)
@@ -183,15 +238,14 @@ async fn nommer_le_code_refuse(conn: &mut PgConnection, codes: &[String]) -> Api
     .unwrap_or_default();
 
     match codes.iter().find(|c| !connus.contains(c)) {
-        Some(inconnu) => ApiError::with_message(
-            ErrorCode::ProposalUnknownTerm,
-            format!("La thématique « {inconnu} » n'existe pas."),
-        )
-        .field("theme_codes"),
+        Some(inconnu) => {
+            ApiError::with_message(ErrorCode::ProposalUnknownTerm, classement.refus(inconnu))
+                .field(classement.champ())
+        }
         // La liste est dédoublonnée en amont et tous ses codes existent : le
         // seul cas restant est un lien déjà posé par un autre rôle sur la même
         // entité. Il n'y a rien à refuser, mais rien non plus qui doive passer
         // en silence — le refus générique porte alors le champ.
-        None => ApiError::new(ErrorCode::ProposalUnknownTerm).field("theme_codes"),
+        None => ApiError::new(ErrorCode::ProposalUnknownTerm).field(classement.champ()),
     }
 }

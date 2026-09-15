@@ -128,15 +128,6 @@ const hasSlot = computed(
       />
     </section>
 
-    <section v-if="props.proposal.summary" aria-labelledby="dossier-summary">
-      <h3 id="dossier-summary" class="text-sm font-semibold tracking-wide uppercase">
-        {{ t('admin.proposal.review.dossier.summary') }}
-      </h3>
-      <p class="mt-2 max-w-(--measure) text-lg leading-relaxed text-text-secondary">
-        {{ tr(props.proposal.summary) }}
-      </p>
-    </section>
-
     <section aria-labelledby="dossier-objectives">
       <h3 id="dossier-objectives" class="text-sm font-semibold tracking-wide uppercase">
         {{ t('admin.proposal.review.dossier.objectives') }}

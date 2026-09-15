@@ -39,6 +39,7 @@ pub async fn de_l_edition<'e>(
                   c.allowed_formats::text[] AS "allowed_formats!",
                   c.required_reviews, c.blind_review,
                   c.guidelines_url::text AS "guidelines_url?",
+                  c.submission_next_steps,
                   event.effective_deadline(c.id)  AS "effective_deadline!",
                   event.is_call_open(c.id)        AS "is_open!",
                   event.max_weighted_score(c.id)::float8 AS "max_weighted_score!"
@@ -73,6 +74,7 @@ pub async fn de_l_edition<'e>(
         required_reviews: l.required_reviews,
         blind_review: l.blind_review,
         guidelines_url: l.guidelines_url,
+        submission_next_steps: l.submission_next_steps,
         effective_deadline: l.effective_deadline,
         is_open: l.is_open,
         max_weighted_score: l.max_weighted_score,
@@ -104,6 +106,7 @@ pub async fn par_id<'e>(
                   c.allowed_formats::text[] AS "allowed_formats!",
                   c.required_reviews, c.blind_review,
                   c.guidelines_url::text AS "guidelines_url?",
+                  c.submission_next_steps,
                   event.effective_deadline(c.id)  AS "effective_deadline!",
                   event.is_call_open(c.id)        AS "is_open!",
                   event.max_weighted_score(c.id)::float8 AS "max_weighted_score!"
@@ -138,6 +141,7 @@ pub async fn par_id<'e>(
         required_reviews: l.required_reviews,
         blind_review: l.blind_review,
         guidelines_url: l.guidelines_url,
+        submission_next_steps: l.submission_next_steps,
         effective_deadline: l.effective_deadline,
         is_open: l.is_open,
         max_weighted_score: l.max_weighted_score,
@@ -241,6 +245,18 @@ pub async fn inserer(
     .fetch_one(&mut *conn)
     .await?;
 
+    // Colonne absente de l'INSERT quand la charge est nulle : c'est ce qui laisse
+    // la base poser son circuit par défaut à la création.
+    if let Some(etapes) = &p.submission_next_steps {
+        sqlx::query!(
+            "UPDATE event.calls_for_proposals SET submission_next_steps = $2::jsonb WHERE id = $1",
+            id,
+            etapes
+        )
+        .execute(&mut *conn)
+        .await?;
+    }
+
     Ok(CallId::from(id))
 }
 
@@ -277,7 +293,8 @@ pub async fn modifier(
                allowed_formats                = $19::text[]::event.participation_mode[],
                required_reviews               = $20,
                blind_review                   = $21,
-               guidelines_url                 = $22::text::platform.url
+               guidelines_url                 = $22::text::platform.url,
+               submission_next_steps          = $23::jsonb
          WHERE id = $1"#,
         call_id.as_uuid(),
         p.code,
@@ -300,7 +317,8 @@ pub async fn modifier(
         &p.allowed_formats,
         p.required_reviews,
         p.blind_review,
-        p.guidelines_url
+        p.guidelines_url,
+        p.submission_next_steps
     )
     .execute(&mut *conn)
     .await?

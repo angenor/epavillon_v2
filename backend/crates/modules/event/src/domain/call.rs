@@ -81,6 +81,10 @@ pub struct EditionCallPayload {
     pub blind_review: bool,
     #[serde(default)]
     pub guidelines_url: Option<String>,
+    /// Une étape par ligne. Nul à la création : la base pose le circuit par
+    /// défaut ; nul à la modification : le bloc disparaît du formulaire public.
+    #[serde(default)]
+    pub submission_next_steps: Option<Value>,
     #[serde(default)]
     pub criteria: Vec<CriterionPayload>,
 }

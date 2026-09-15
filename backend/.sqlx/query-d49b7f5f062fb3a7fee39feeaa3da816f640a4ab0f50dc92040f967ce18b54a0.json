@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT c.id, c.event_id, c.code, c.title, c.description,\n                  c.status::text AS \"status!\",\n                  c.opens_at, c.closes_at, c.extended_until, c.results_expected_at,\n                  c.max_proposals_per_organization, c.requires_verified_organization,\n                  c.min_speakers, c.max_speakers,\n                  c.default_duration_minutes, c.min_duration_minutes, c.max_duration_minutes,\n                  c.daily_start_time::text AS \"daily_start_time!\",\n                  c.daily_end_time::text   AS \"daily_end_time!\",\n                  c.allowed_formats::text[] AS \"allowed_formats!\",\n                  c.required_reviews, c.blind_review,\n                  c.guidelines_url::text AS \"guidelines_url?\",\n                  event.effective_deadline(c.id)  AS \"effective_deadline!\",\n                  event.is_call_open(c.id)        AS \"is_open!\",\n                  event.max_weighted_score(c.id)::float8 AS \"max_weighted_score!\"\n             FROM event.calls_for_proposals c\n            WHERE c.id = $1",
+  "query": "SELECT id, event_id, code, title, description, status::text AS \"status!\",\n                  opens_at, closes_at, extended_until, results_expected_at,\n                  max_proposals_per_organization, requires_verified_organization,\n                  min_speakers, max_speakers,\n                  default_duration_minutes, min_duration_minutes, max_duration_minutes,\n                  daily_start_time::text AS \"daily_start_time!\",\n                  daily_end_time::text   AS \"daily_end_time!\",\n                  allowed_formats::text[] AS \"allowed_formats!\",\n                  required_reviews, blind_review,\n                  guidelines_url::text AS \"guidelines_url?\",\n                  submission_next_steps,\n                  created_by, created_at, updated_at\n             FROM event.calls_for_proposals\n            WHERE event_id = $1 AND status <> 'cancelled'",
   "describe": {
     "columns": [
       {
@@ -233,21 +233,47 @@
       },
       {
         "ordinal": 23,
-        "name": "effective_deadline!",
-        "type_info": "Timestamptz",
-        "origin": "Expression"
+        "name": "submission_next_steps",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "submission_next_steps"
+          }
+        }
       },
       {
         "ordinal": 24,
-        "name": "is_open!",
-        "type_info": "Bool",
-        "origin": "Expression"
+        "name": "created_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "created_by"
+          }
+        }
       },
       {
         "ordinal": 25,
-        "name": "max_weighted_score!",
-        "type_info": "Float8",
-        "origin": "Expression"
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 26,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "updated_at"
+          }
+        }
       }
     ],
     "parameters": {
@@ -279,10 +305,11 @@
       false,
       false,
       null,
-      null,
-      null,
-      null
+      true,
+      true,
+      false,
+      false
     ]
   },
-  "hash": "375354538e5475368673c7445c1b00fe586529f74eb6b43e3f4c04ae3437a828"
+  "hash": "d49b7f5f062fb3a7fee39feeaa3da816f640a4ab0f50dc92040f967ce18b54a0"
 }

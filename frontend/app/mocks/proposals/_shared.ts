@@ -8,7 +8,7 @@
  * `submitted_at` obligatoire dès que le dossier n'est plus un brouillon
  * (`ck_proposals_submitted_at`).
  *
- * Tout ce qui distingue un dossier d'un autre — titre, résumé, objectifs,
+ * Tout ce qui distingue un dossier d'un autre — titre, objectifs,
  * porteur, créneau souhaité, note — est écrit à la main dans les fichiers de
  * statut, qui sont ce qu'un développeur va lire.
  *
@@ -48,14 +48,13 @@ export interface ProposalDraftFields {
   contact?: string | null
   title: I18nText
   slug: string
-  summary?: I18nText | null
   objectives: I18nText
   presentation: I18nText
   outcomes?: I18nText | null
   /** Publics visés, un par entrée — `proposals.target_audiences`. */
   audience?: I18nText[]
   format: ParticipationMode
-  /** Code de la taxonomie `activity_category`. */
+  /** Code de la taxonomie `activity_category` — rattaché comme en base, hors de la ligne. */
   category: string | null
   /** Codes de `reference.locales`. */
   languages?: string[]
@@ -79,7 +78,12 @@ export interface ProposalDraftFields {
   viewCount?: number
 }
 
+/** Les catégories de chaque dossier, comme `reference.entity_terms` les porterait. */
+export const proposalCategoryCodes = new Map<string, string[]>()
+
 export function proposal(fields: ProposalDraftFields): Proposal {
+  if (fields.category) proposalCategoryCodes.set(fields.id, [fields.category])
+
   const submitted_at = fields.submittedAt ?? null
   if (fields.status !== 'draft' && submitted_at === null) {
     // La base refuserait la ligne (`ck_proposals_submitted_at`) : mieux vaut le
@@ -102,13 +106,11 @@ export function proposal(fields: ProposalDraftFields): Proposal {
     contact_person_id: fields.contact ?? fields.submittedBy,
     title: fields.title,
     slug: fields.slug,
-    summary: fields.summary ?? null,
     objectives: fields.objectives,
     detailed_presentation: fields.presentation,
     expected_outcomes: fields.outcomes ?? null,
     target_audiences: fields.audience ?? [],
     format: fields.format,
-    activity_type_code: fields.category,
     language_codes: fields.languages ?? ['fr'],
     country_id: fields.country ?? null,
     preferred_start_at: fields.preferredStart ?? null,

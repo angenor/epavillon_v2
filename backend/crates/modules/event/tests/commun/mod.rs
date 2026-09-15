@@ -318,6 +318,7 @@ pub fn formulaire_appel(event_id: Uuid, code: &str) -> event::domain::call::Edit
         required_reviews: 2,
         blind_review: true,
         guidelines_url: None,
+        submission_next_steps: None,
         criteria: vec![critere("relevance", 2.0)],
     }
 }

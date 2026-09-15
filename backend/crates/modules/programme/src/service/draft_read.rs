@@ -126,7 +126,8 @@ pub async fn rouvrir(
         .ok_or_else(ApiError::not_found)?;
 
     let creneau = creneau_mural(state, dossier, &edition.timezone).await?;
-    let themes = cross::themes_du_dossier(state.pool(), dossier).await?;
+    let themes = cross::termes_du_dossier(state.pool(), dossier, "activity_theme").await?;
+    let categories = cross::termes_du_dossier(state.pool(), dossier, "activity_category").await?;
 
     Ok(DossierRouvert {
         proposal_id: fiche.id,
@@ -144,7 +145,6 @@ pub async fn rouvrir(
                 // **Les replis sont effacés** : le formulaire ne doit jamais
                 // afficher « Dossier sans titre » (écart n° 102).
                 title: draft::fr_sans_repli(&fiche.title),
-                summary: fiche.summary.as_ref().map(draft::fr).unwrap_or_default(),
                 objectives: draft::fr_sans_repli(&fiche.objectives),
                 detailed_presentation: draft::fr_sans_repli(&fiche.detailed_presentation),
                 expected_outcomes: fiche
@@ -154,7 +154,7 @@ pub async fn rouvrir(
                     .unwrap_or_default(),
                 target_audiences: fiche.target_audiences.iter().map(draft::fr).collect(),
                 theme_codes: themes,
-                activity_type_code: fiche.activity_type_code.clone(),
+                category_codes: categories,
                 format: Some(fiche.format.clone()),
                 language_codes: fiche.language_codes.clone(),
                 country_id: fiche.country_id,

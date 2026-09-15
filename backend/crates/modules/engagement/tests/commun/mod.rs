@@ -350,11 +350,10 @@ pub async fn dossier_retenu(
     // dupliquerait, ou la ferait diverger de la colonne qui fait foi.
     sqlx::query_scalar!(
         r#"INSERT INTO programme.proposals
-               (event_id, call_id, organization_id, slug, title, summary,
+               (event_id, call_id, organization_id, slug, title,
                 objectives, detailed_presentation, format, submitted_by, status, submitted_at)
            VALUES ($1, $2, $3, 'financer-adaptation'::platform.slug,
                    '{"fr":"Financer l''adaptation","en":"Financing adaptation"}'::jsonb,
-                   '{"fr":"Un résumé.","en":"A summary."}'::jsonb,
                    '{"fr":"Des objectifs.","en":"Objectives."}'::jsonb,
                    '{"fr":"<p>Une présentation.</p>","en":"<p>A presentation.</p>"}'::jsonb,
                    'hybrid', $4, 'accepted', now())

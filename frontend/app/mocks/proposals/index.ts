@@ -24,6 +24,7 @@ export { proposalOrganizations } from './organizations'
 export { proposalSpeakers } from './speakers'
 export { proposalAssets, proposalDocuments } from './documents'
 export { proposalComments, proposalTransitions } from './exchanges'
+export { proposalCategoryCodes } from './_shared'
 
 /**
  * Les quarante et un dossiers, dans l'ordre de leur numéro — les quarante de la

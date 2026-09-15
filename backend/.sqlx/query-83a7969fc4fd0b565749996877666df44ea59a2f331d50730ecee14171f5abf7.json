@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, event_id, code, title, description, status::text AS \"status!\",\n                  opens_at, closes_at, extended_until,\n                  results_expected_at::text AS \"results_expected_at_texte\",\n                  max_proposals_per_organization, requires_verified_organization,\n                  min_speakers, max_speakers, default_duration_minutes,\n                  min_duration_minutes, max_duration_minutes,\n                  daily_start_time::text AS \"daily_start_time!\",\n                  daily_end_time::text AS \"daily_end_time!\",\n                  allowed_formats::text[] AS \"allowed_formats!\",\n                  required_reviews, blind_review,\n                  guidelines_url::text, created_by, created_at, updated_at\n             FROM event.calls_for_proposals WHERE id = $1",
+  "query": "SELECT c.id, c.event_id, c.code, c.title, c.description,\n                  c.status::text AS \"status!\",\n                  c.opens_at, c.closes_at, c.extended_until, c.results_expected_at,\n                  c.max_proposals_per_organization, c.requires_verified_organization,\n                  c.min_speakers, c.max_speakers,\n                  c.default_duration_minutes, c.min_duration_minutes, c.max_duration_minutes,\n                  c.daily_start_time::text AS \"daily_start_time!\",\n                  c.daily_end_time::text   AS \"daily_end_time!\",\n                  c.allowed_formats::text[] AS \"allowed_formats!\",\n                  c.required_reviews, c.blind_review,\n                  c.guidelines_url::text AS \"guidelines_url?\",\n                  c.submission_next_steps,\n                  event.effective_deadline(c.id)  AS \"effective_deadline!\",\n                  event.is_call_open(c.id)        AS \"is_open!\",\n                  event.max_weighted_score(c.id)::float8 AS \"max_weighted_score!\"\n             FROM event.calls_for_proposals c\n            WHERE c.id = $1",
   "describe": {
     "columns": [
       {
@@ -99,9 +99,14 @@
       },
       {
         "ordinal": 9,
-        "name": "results_expected_at_texte",
-        "type_info": "Text",
-        "origin": "Expression"
+        "name": "results_expected_at",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "results_expected_at"
+          }
+        }
       },
       {
         "ordinal": 10,
@@ -222,42 +227,38 @@
       },
       {
         "ordinal": 22,
-        "name": "guidelines_url",
+        "name": "guidelines_url?",
         "type_info": "Text",
         "origin": "Expression"
       },
       {
         "ordinal": 23,
-        "name": "created_by",
-        "type_info": "Uuid",
+        "name": "submission_next_steps",
+        "type_info": "Jsonb",
         "origin": {
           "Table": {
             "table": "event.calls_for_proposals",
-            "name": "created_by"
+            "name": "submission_next_steps"
           }
         }
       },
       {
         "ordinal": 24,
-        "name": "created_at",
+        "name": "effective_deadline!",
         "type_info": "Timestamptz",
-        "origin": {
-          "Table": {
-            "table": "event.calls_for_proposals",
-            "name": "created_at"
-          }
-        }
+        "origin": "Expression"
       },
       {
         "ordinal": 25,
-        "name": "updated_at",
-        "type_info": "Timestamptz",
-        "origin": {
-          "Table": {
-            "table": "event.calls_for_proposals",
-            "name": "updated_at"
-          }
-        }
+        "name": "is_open!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 26,
+        "name": "max_weighted_score!",
+        "type_info": "Float8",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -275,7 +276,7 @@
       false,
       false,
       true,
-      null,
+      true,
       true,
       false,
       false,
@@ -290,9 +291,10 @@
       false,
       null,
       true,
-      false,
-      false
+      null,
+      null,
+      null
     ]
   },
-  "hash": "9e24ffa146117ab4df7459acc25499335bcd79aef9c6b512bb527f6e4518c6ec"
+  "hash": "83a7969fc4fd0b565749996877666df44ea59a2f331d50730ecee14171f5abf7"
 }

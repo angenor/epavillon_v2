@@ -80,7 +80,7 @@ async fn un_texte_trop_long_est_refuse_en_nommant_son_champ_et_sa_limite() {
     let terrain = commun::terrain(&bac).await;
 
     let mut bavard = complet(&terrain, "Titre correct");
-    bavard.summary = "é".repeat(401);
+    bavard.objectives = "é".repeat(1201);
 
     let refus = draft_write::enregistrer(
         &bac.state,
@@ -89,17 +89,17 @@ async fn un_texte_trop_long_est_refuse_en_nommant_son_champ_et_sa_limite() {
         commun::charge(&terrain, bavard),
     )
     .await
-    .expect_err("quatre cent un caractères dépassent la borne du résumé");
+    .expect_err("mille deux cent un caractères dépassent la borne des objectifs");
 
     assert_eq!(refus.code, ErrorCode::ProposalTextTooLong);
-    assert_eq!(refus.field.as_deref(), Some("summary"));
-    assert!(refus.message.contains("400"), "{}", refus.message);
+    assert_eq!(refus.field.as_deref(), Some("objectives"));
+    assert!(refus.message.contains("1200"), "{}", refus.message);
 
-    // Et quatre cents caractères ACCENTUÉS passent : la borne se compte en
+    // Et mille deux cents caractères ACCENTUÉS passent : la borne se compte en
     // caractères, pas en octets — les compter en octets reviendrait à refuser
     // le français.
     let mut juste = complet(&terrain, "Titre correct");
-    juste.summary = "é".repeat(400);
+    juste.objectives = "é".repeat(1200);
     draft_write::enregistrer(
         &bac.state,
         &bac.ctx(),
@@ -107,7 +107,7 @@ async fn un_texte_trop_long_est_refuse_en_nommant_son_champ_et_sa_limite() {
         commun::charge(&terrain, juste),
     )
     .await
-    .expect("quatre cents caractères accentués tiennent dans la borne");
+    .expect("mille deux cents caractères accentués tiennent dans la borne");
 }
 
 // -----------------------------------------------------------------------------
@@ -492,6 +492,80 @@ async fn un_dossier_encore_provisoire_ne_part_pas_au_comite() {
 
     assert_eq!(refus.code, ErrorCode::ValidationFailed);
     assert_eq!(refus.field.as_deref(), Some("title"));
+}
+
+#[tokio::test]
+async fn un_dossier_sans_thematique_ou_sans_categorie_ne_se_depose_pas() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+
+    for (champ, vider) in [
+        (
+            "theme_codes",
+            (|b: &mut programme::domain::draft::ProposalDraft| b.theme_codes.clear())
+                as fn(&mut programme::domain::draft::ProposalDraft),
+        ),
+        ("category_codes", |b| b.category_codes.clear()),
+    ] {
+        let mut brouillon = complet(&terrain, &format!("Sans {champ}"));
+        vider(&mut brouillon);
+
+        let cree = draft_write::enregistrer(
+            &bac.state,
+            &bac.ctx(),
+            terrain.deposante,
+            commun::charge(&terrain, brouillon.clone()),
+        )
+        .await
+        .expect("le brouillon non classé s'enregistre");
+
+        let refus = submit::deposer(
+            &bac.state,
+            &bac.ctx(),
+            terrain.deposante,
+            ProposalId(cree.proposal_id),
+            commun::charge(&terrain, brouillon),
+        )
+        .await
+        .expect_err("un dossier non classé ne se dépose pas");
+
+        assert_eq!(refus.code, ErrorCode::ValidationFailed);
+        assert_eq!(refus.field.as_deref(), Some(champ));
+    }
+}
+
+#[tokio::test]
+async fn plusieurs_categories_se_posent_et_se_relisent() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+
+    let mut brouillon = complet(&terrain, "Deux catégories");
+    brouillon.category_codes = vec!["awareness".to_owned(), "results_sharing".to_owned()];
+
+    let cree = draft_write::enregistrer(
+        &bac.state,
+        &bac.ctx(),
+        terrain.deposante,
+        commun::charge(&terrain, brouillon),
+    )
+    .await
+    .expect("création");
+
+    let rouvert = programme::service::draft_read::rouvrir(
+        &bac.state,
+        terrain.deposante,
+        ProposalId(cree.proposal_id),
+    )
+    .await
+    .expect("recomposition");
+    assert_eq!(
+        rouvert.draft.draft.category_codes,
+        vec!["awareness".to_owned(), "results_sharing".to_owned()]
+    );
+    assert_eq!(
+        rouvert.draft.draft.theme_codes,
+        vec!["adaptation".to_owned()]
+    );
 }
 
 #[tokio::test]

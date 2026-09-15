@@ -98,7 +98,9 @@ CREATE TABLE programme.proposals (
 
     title             platform.i18n_text NOT NULL,
     slug              platform.slug NOT NULL,
-    summary           platform.i18n_text,
+    -- PAS DE RÉSUMÉ, retiré le 15/09 à la demande du commanditaire : il doublait
+    -- les objectifs. Le résumé public vit sur la séance (`sessions.summary`),
+    -- rédigé par l'IFDD à la programmation.
     objectives        platform.i18n_text NOT NULL,
     -- TEXTE RICHE : fragment HTML restreint (gras, italique, listes, sous-titres,
     -- citations, liens), et non du texte brut. Le jeu de balises autorisé est
@@ -117,9 +119,12 @@ CREATE TABLE programme.proposals (
     target_audiences  platform.i18n_text[] NOT NULL DEFAULT '{}',
 
     format            event.participation_mode NOT NULL,
-    -- Type d'activité (side event, journée pays, autre) : code de la taxonomie
-    -- `activity_category`. Les thématiques passent par reference.entity_terms.
-    activity_type_code text,
+    -- CATÉGORIES ET THÉMATIQUES passent toutes deux par reference.entity_terms
+    -- (taxonomies `activity_category` et `activity_theme`), et toutes deux sont
+    -- à choix multiple. La colonne `activity_type_code`, qui n'admettait qu'une
+    -- catégorie, a disparu le 15/09 : une activité peut à la fois sensibiliser
+    -- et partager des résultats. Au moins une de chaque est exigée AU DÉPÔT —
+    -- jamais au brouillon, qui se remplit dans le désordre.
     language_codes    text[]      NOT NULL DEFAULT '{fr}',
     country_id        uuid        REFERENCES reference.countries(id) ON DELETE SET NULL,
 
@@ -151,7 +156,6 @@ CREATE TABLE programme.proposals (
     search_vector     tsvector    GENERATED ALWAYS AS (
         to_tsvector('french',
             coalesce(title ->> 'fr', '') || ' ' ||
-            coalesce(summary ->> 'fr', '') || ' ' ||
             coalesce(objectives ->> 'fr', ''))
     ) STORED,
 
@@ -778,7 +782,6 @@ SELECT
     -- une requête. Même correction que celle déjà faite sur v_public_schedule.
     -- -------------------------------------------------------------------------
     p.format,
-    p.activity_type_code,
     o.acronym                 AS organization_acronym,
     -- PAYS DE L'ORGANISATION PORTEUSE, et non `proposals.country_id` : la
     -- colonne du dossier désigne le pays CONCERNÉ par l'activité, souvent nul et
@@ -802,6 +805,9 @@ SELECT
     -- figés dans le frontend de la v1.
     reference.terms_of('programme', 'proposals', p.id, 'activity_theme')    AS theme_codes,
     reference.term_badges('programme', 'proposals', p.id, 'activity_theme') AS themes,
+    -- Catégories, même double usage.
+    reference.terms_of('programme', 'proposals', p.id, 'activity_category')    AS category_codes,
+    reference.term_badges('programme', 'proposals', p.id, 'activity_category') AS categories,
     -- QUI ÉVALUE CE DOSSIER, déports exclus comme `assigned_reviewers`.
     -- `reviewer_ids` filtre (« les dossiers confiés à X »), `reviewers` affiche
     -- l'avancement nominatif : un « 2/3 » ne dit pas de qui on attend la revue.

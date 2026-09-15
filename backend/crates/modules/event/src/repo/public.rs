@@ -360,6 +360,7 @@ pub async fn appel(pool: &sqlx::PgPool, event_id: EventId) -> Result<Option<Publ
                   allowed_formats::text[] AS "allowed_formats!",
                   required_reviews, blind_review,
                   guidelines_url::text AS "guidelines_url?",
+                  submission_next_steps,
                   created_by, created_at, updated_at
              FROM event.calls_for_proposals
             WHERE event_id = $1 AND status <> 'cancelled'"#,
@@ -407,6 +408,7 @@ pub async fn appel(pool: &sqlx::PgPool, event_id: EventId) -> Result<Option<Publ
         required_reviews: l.required_reviews,
         blind_review: l.blind_review,
         guidelines_url: l.guidelines_url,
+        submission_next_steps: l.submission_next_steps,
         criteria,
         created_by: l.created_by,
         created_at: l.created_at,

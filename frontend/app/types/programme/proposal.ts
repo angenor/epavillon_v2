@@ -98,7 +98,6 @@ export interface Proposal {
   contact_person_id: PersonId | null
   title: I18nText
   slug: Slug
-  summary: I18nText | null
   objectives: I18nText
   /** HTML RESTREINT — gras, italique, listes, sous-titres, citations, liens.
    *  Ni police ni couleur : la mise en forme appartient à la charte. L'API
@@ -110,9 +109,8 @@ export interface Proposal {
    *  quiconque essaie. Le français reste exigé sur chaque entrée. */
   target_audiences: I18nText[]
   format: ParticipationMode
-  /** Code de la taxonomie `activity_category`. Les thématiques passent par
-   *  `reference.entity_terms` (`'programme'`, `'proposals'`, id). */
-  activity_type_code: TaxonomyTermCode | null
+  // Thématiques et catégories passent par `reference.entity_terms`
+  // (`'programme'`, `'proposals'`, id) : elles ne sont pas sur la ligne.
   /** Codes de `reference.locales`. */
   language_codes: string[]
   country_id: CountryId | null

@@ -6,7 +6,7 @@ import type { DraftIssue, ProposalDraft } from '~/types/proposal-form'
 import type { SelectOption } from '~/types/ui'
 
 /**
- * ÉTAPE 3 — CLASSER L'ACTIVITÉ : thématiques, catégorie, format, langues, pays.
+ * ÉTAPE 3 — CLASSER L'ACTIVITÉ : thématiques, catégories, format, langues, pays.
  *
  * TOUT CE QUI EST PROPOSÉ ICI VIENT DE LA BASE, sans exception. Les thématiques
  * et les catégories sont des lignes de `reference.taxonomy_terms`, avec leur
@@ -16,9 +16,12 @@ import type { SelectOption } from '~/types/ui'
  * l'ENUM `activity_theme` à quinze valeurs et ses libellés recopiés dans le
  * frontend ont fini désynchronisés.
  *
+ * THÉMATIQUES ET CATÉGORIES SONT OBLIGATOIRES, une au moins de chaque, et
+ * toutes deux à choix multiple (15/09).
+ *
  * LES FORMATS PROPOSÉS SONT CEUX DE L'APPEL (`calls_for_proposals.allowed_formats`),
- * pas les trois valeurs de l'ENUM. Un appel qui n'accepte que le présentiel ne
- * doit pas offrir « en ligne » pour le refuser ensuite.
+ * pas les trois valeurs de l'ENUM. Un appel qui n'en ouvre qu'un — le présentiel,
+ * par défaut depuis le 15/09 — l'affiche sans rien faire choisir.
  *
  * TROIS THÉMATIQUES SUFFISENT. Le guide de style l'impose côté affichage — au-delà
  * de trois pastilles, une carte cesse d'informer — et c'est aussi vrai du fond :
@@ -52,34 +55,27 @@ function errorOf(field: string): string | undefined {
   return issue ? t(issue.messageKey, issue.params ?? {}) : undefined
 }
 
-function warningOf(field: string): string | undefined {
-  const issue = props.issues.find((entry) => entry.field === field && entry.severity === 'warning')
-  return issue ? t(issue.messageKey) : undefined
-}
-
 // ---------------------------------------------------------------------------
-// Thématiques
+// Thématiques et catégories — même geste, deux taxonomies
 // ---------------------------------------------------------------------------
 
-function isThemeSelected(code: string): boolean {
-  return draft.value.theme_codes.includes(code)
+type TermField = 'theme_codes' | 'category_codes'
+
+function isSelected(field: TermField, code: string): boolean {
+  return draft.value[field].includes(code)
 }
 
-function toggleTheme(code: string, selected: boolean): void {
-  draft.value.theme_codes = selected
-    ? [...draft.value.theme_codes, code]
-    : draft.value.theme_codes.filter((entry) => entry !== code)
+function toggle(field: TermField, code: string, selected: boolean): void {
+  draft.value[field] = selected
+    ? [...draft.value[field], code]
+    : draft.value[field].filter((entry) => entry !== code)
 }
 
 const themeCount = computed(() => draft.value.theme_codes.length)
 
 // ---------------------------------------------------------------------------
-// Catégorie, format, langues
+// Format, langues
 // ---------------------------------------------------------------------------
-
-const categoryOptions = computed<SelectOption[]>(() =>
-  props.categories.map((term) => ({ value: term.code, label: tr(term.label) })),
-)
 
 /** Les formats OUVERTS PAR L'APPEL, dans l'ordre de l'ENUM. */
 const formatOptions = computed<SelectOption[]>(() =>
@@ -88,6 +84,19 @@ const formatOptions = computed<SelectOption[]>(() =>
     label: t(`proposal.form.step-classification.formats.${mode}.label`),
     description: t(`proposal.form.step-classification.formats.${mode}.hint`),
   })),
+)
+
+const onlyFormat = computed<ParticipationMode | null>(() =>
+  props.call.allowed_formats.length === 1 ? (props.call.allowed_formats[0] ?? null) : null,
+)
+
+// Un brouillon repris après que l'appel s'est restreint reçoit le seul format admis.
+watch(
+  onlyFormat,
+  (mode) => {
+    if (mode && draft.value.format !== mode) draft.value.format = mode
+  },
+  { immediate: true },
 )
 
 function isLanguageSelected(code: string): boolean {
@@ -106,8 +115,9 @@ function toggleLanguage(code: string, selected: boolean): void {
     <!-- THÉMATIQUES -->
     <section class="grid gap-3">
       <header>
-        <h2 class="font-display text-xl text-text">
+        <h2 id="proposal-theme_codes" tabindex="-1" class="font-display text-xl text-text">
           {{ t('proposal.form.step-classification.themes.title') }}
+          <span class="ml-0.5 text-danger" aria-hidden="true">*</span>
         </h2>
         <p class="mt-1 max-w-(--measure) text-sm text-text-muted">
           {{ t('proposal.form.step-classification.themes.description') }}
@@ -125,8 +135,8 @@ function toggleLanguage(code: string, selected: boolean): void {
         </span>
       </p>
 
-      <p v-if="warningOf('theme_codes')" class="text-sm text-warning">
-        {{ warningOf('theme_codes') }}
+      <p v-if="errorOf('theme_codes')" role="alert" class="text-sm font-bold text-danger">
+        {{ errorOf('theme_codes') }}
       </p>
 
       <ul class="grid gap-2 sm:grid-cols-2">
@@ -134,14 +144,14 @@ function toggleLanguage(code: string, selected: boolean): void {
           <label
             class="flex min-h-(--target-min) cursor-pointer items-center gap-3 rounded-md border px-3 py-2 transition-colors duration-(--duration-fast)"
             :class="
-              isThemeSelected(term.code)
+              isSelected('theme_codes', term.code)
                 ? 'border-accent bg-accent-surface'
                 : 'border-border hover:bg-surface-hover'
             "
           >
             <UiCheckbox
-              :model-value="isThemeSelected(term.code)"
-              @update:model-value="toggleTheme(term.code, $event)"
+              :model-value="isSelected('theme_codes', term.code)"
+              @update:model-value="toggle('theme_codes', term.code, $event)"
             />
             <span class="flex min-w-0 items-center gap-2">
               <!-- La couleur vient de la base : point coloré, jamais fond de texte. -->
@@ -158,24 +168,61 @@ function toggleLanguage(code: string, selected: boolean): void {
       </ul>
     </section>
 
-    <!-- CATÉGORIE, FORMAT, LANGUES, PAYS -->
+    <!-- CATÉGORIES -->
+    <section class="grid gap-3 border-t border-border pt-8">
+      <header>
+        <h2 id="proposal-category_codes" tabindex="-1" class="font-display text-xl text-text">
+          {{ t('proposal.form.step-classification.category.label') }}
+          <span class="ml-0.5 text-danger" aria-hidden="true">*</span>
+        </h2>
+        <p class="mt-1 max-w-(--measure) text-sm text-text-muted">
+          {{ t('proposal.form.step-classification.category.hint') }}
+        </p>
+      </header>
+
+      <p v-if="errorOf('category_codes')" role="alert" class="text-sm font-bold text-danger">
+        {{ errorOf('category_codes') }}
+      </p>
+
+      <ul class="grid gap-2 sm:grid-cols-2">
+        <li v-for="term in props.categories" :key="term.code">
+          <label
+            class="flex min-h-(--target-min) cursor-pointer items-center gap-3 rounded-md border px-3 py-2 transition-colors duration-(--duration-fast)"
+            :class="
+              isSelected('category_codes', term.code)
+                ? 'border-accent bg-accent-surface'
+                : 'border-border hover:bg-surface-hover'
+            "
+          >
+            <UiCheckbox
+              :model-value="isSelected('category_codes', term.code)"
+              @update:model-value="toggle('category_codes', term.code, $event)"
+            />
+            <span class="text-sm text-text">{{ tr(term.label) }}</span>
+          </label>
+        </li>
+      </ul>
+    </section>
+
+    <!-- FORMAT, LANGUES, PAYS -->
     <section class="grid gap-6 border-t border-border pt-8">
-      <UiSelect
-        v-model="draft.activity_type_code"
-        :options="categoryOptions"
-        :label="t('proposal.form.step-classification.category.label')"
-        :hint="warningOf('activity_type_code') ?? t('proposal.form.step-classification.category.hint')"
-        :placeholder="t('proposal.form.step-classification.category.placeholder')"
-      />
+      <div v-if="onlyFormat">
+        <p class="mb-1.5 text-sm font-bold text-text">
+          {{ t('proposal.form.step-classification.format.label') }}
+        </p>
+        <p class="text-sm text-text">
+          {{ t(`proposal.form.step-classification.formats.${onlyFormat}.label`) }}
+        </p>
+      </div>
 
       <!-- `:model-value` et non `v-model` : le composant émet une chaîne, la
            colonne attend l'ENUM `event.participation_mode`. La conversion est
            sûre — les options sortent de `call.allowed_formats`. -->
       <UiRadio
+        v-else
         :model-value="draft.format"
         :options="formatOptions"
         :label="t('proposal.form.step-classification.format.label')"
-        :hint="t('proposal.form.step-classification.format.hint')"
         :error="errorOf('format')"
         required
         @update:model-value="draft.format = $event as ParticipationMode"

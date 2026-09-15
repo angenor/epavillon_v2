@@ -48,19 +48,20 @@ export function emptyProposalDraft(defaults: {
   durationMinutes?: number | null
   /** Langue de l'interface au moment où le dossier s'ouvre. */
   locale?: string
+  /** Le seul format ouvert par l'appel, quand il n'y en a qu'un. */
+  format?: ProposalDraft['format']
 }): ProposalDraft {
   return {
     organization_id: defaults.organizationId ?? null,
     co_organizations: [],
     title: '',
-    summary: '',
     objectives: '',
     detailed_presentation: '',
     expected_outcomes: '',
     target_audiences: [],
     theme_codes: [],
-    activity_type_code: null,
-    format: null,
+    category_codes: [],
+    format: defaults.format ?? null,
     // `proposals.language_codes` a pour défaut `{fr}` : on part de la langue de
     // travail de la personne, qu'elle reste libre de retirer.
     language_codes: [defaults.locale === 'en' ? 'en' : 'fr'],
@@ -231,11 +232,10 @@ function validatePresentation(draft: ProposalDraft): DraftIssue[] {
     }
   }
 
-  // Les trois colonnes facultatives. Elles ne bloquent rien, mais un dossier qui
+  // Les deux colonnes facultatives. Elles ne bloquent rien, mais un dossier qui
   // ne dit ni ce qu'il produit ni à qui il s'adresse s'évalue mal : le comité
   // note sur six critères, dont l'impact et l'inclusion.
   const recommended = [
-    ['summary', draft.summary],
     ['expected_outcomes', draft.expected_outcomes],
   ] as const
 
@@ -264,7 +264,6 @@ function validatePresentation(draft: ProposalDraft): DraftIssue[] {
   // Dépassements de longueur : la saisie n'a pas été coupée, l'envoi refuse.
   const limited = [
     ['title', draft.title, TEXT_LIMITS.title],
-    ['summary', draft.summary, TEXT_LIMITS.summary],
     ['objectives', draft.objectives, TEXT_LIMITS.objectives],
     // La présentation détaillée est du HTML : on compte le TEXTE. Compter le
     // balisage ferait grossir le décompte à chaque mise en gras.
@@ -317,25 +316,22 @@ function validateClassification(draft: ProposalDraft, call: CallForProposals): D
     })
   }
 
-  // Ni les thématiques ni la catégorie ne sont obligatoires en base — les
-  // premières vivent dans `reference.entity_terms`, la seconde est nullable.
-  // Elles commandent pourtant les filtres de la programmation publique : un
-  // dossier sans thématique devient introuvable une fois retenu.
+  // Obligatoires depuis le 15/09 — exigées par l'API au dépôt.
   if (draft.theme_codes.length === 0) {
     issues.push({
       step: 'classification',
       field: 'theme_codes',
-      severity: 'warning',
-      messageKey: 'proposal.form.step-classification.warnings.themesMissing',
+      severity: 'error',
+      messageKey: 'proposal.form.step-classification.errors.themesRequired',
     })
   }
 
-  if (!draft.activity_type_code) {
+  if (draft.category_codes.length === 0) {
     issues.push({
       step: 'classification',
-      field: 'activity_type_code',
-      severity: 'warning',
-      messageKey: 'proposal.form.step-classification.warnings.categoryMissing',
+      field: 'category_codes',
+      severity: 'error',
+      messageKey: 'proposal.form.step-classification.errors.categoriesRequired',
     })
   }
 

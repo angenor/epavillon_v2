@@ -38,6 +38,7 @@ use crate::domain::limits::{self, Borne};
 use crate::domain::{ownership, sanitize};
 use crate::repo::cross::{ContexteEdition, ReglesDeLAppel};
 use crate::repo::proposals::{ChampsDuDossier, Enregistrement, NouveauDossier};
+use crate::repo::themes::Classement;
 use crate::repo::{cross, organizations, people, proposals, speakers, themes};
 use crate::state::ProgrammeState;
 
@@ -88,7 +89,20 @@ pub async fn enregistrer(
         }
     };
 
-    themes::poser(&mut tx, dossier.as_uuid(), &payload.draft.theme_codes).await?;
+    themes::poser(
+        &mut tx,
+        dossier.as_uuid(),
+        Classement::Thematiques,
+        &payload.draft.theme_codes,
+    )
+    .await?;
+    themes::poser(
+        &mut tx,
+        dossier.as_uuid(),
+        Classement::Categories,
+        &payload.draft.category_codes,
+    )
+    .await?;
 
     let associations = associations(&payload.draft, porteur)?;
     let ajoutees = organizations::remplacer(&mut tx, dossier, acteur, &associations).await?;
@@ -241,7 +255,6 @@ fn composer(
     _porteur: Uuid,
 ) -> Result<ChampsDuDossier> {
     borner(&brouillon.title, &limits::TITRE)?;
-    borner(&brouillon.summary, &limits::RESUME)?;
     borner(&brouillon.objectives, &limits::OBJECTIFS)?;
     borner(&brouillon.expected_outcomes, &limits::RESULTATS)?;
     borner(&brouillon.scheduling_constraints, &limits::CONTRAINTES)?;
@@ -262,7 +275,6 @@ fn composer(
 
     Ok(ChampsDuDossier {
         title: draft::i18n_de_brouillon(&brouillon.title, draft::TITRE_PROVISOIRE),
-        summary: draft::i18n(&brouillon.summary),
         objectives: draft::i18n_de_brouillon(&brouillon.objectives, draft::TEXTE_PROVISOIRE),
         detailed_presentation: draft::i18n_de_brouillon(
             &sans_balisage_vide(&presentation),
@@ -271,7 +283,6 @@ fn composer(
         expected_outcomes: draft::i18n(&brouillon.expected_outcomes),
         target_audiences: draft::i18n_liste(&brouillon.target_audiences),
         format,
-        activity_type_code: brouillon.activity_type_code.clone(),
         language_codes: if brouillon.language_codes.is_empty() {
             vec!["fr".to_owned()]
         } else {

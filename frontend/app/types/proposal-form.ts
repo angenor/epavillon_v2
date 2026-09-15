@@ -114,7 +114,6 @@ export const SPEAKER_PHOTO_ENABLED = false
  */
 export const TEXT_LIMITS = {
   title: 180,
-  summary: 400,
   objectives: 1200,
   detailed_presentation: 4000,
   expected_outcomes: 1200,
@@ -269,7 +268,6 @@ export interface ProposalDraft {
 
   // — Étape 2 : présentation (français, voir l'en-tête)
   title: string
-  summary: string
   objectives: string
   /** HTML RESTREINT produit par `UiRichText` — structure seulement, aucune
    *  couleur ni police. Vide, c'est la chaîne vide et non `<p></p>`. */
@@ -283,8 +281,8 @@ export interface ProposalDraft {
   // — Étape 3 : classification
   /** Codes de `reference.taxonomy_terms` (taxonomie `activity_theme`). */
   theme_codes: TaxonomyTermCode[]
-  /** Code de la taxonomie `activity_category` — `proposals.activity_type_code`. */
-  activity_type_code: TaxonomyTermCode | null
+  /** Codes de la taxonomie `activity_category`, par `reference.entity_terms`. */
+  category_codes: TaxonomyTermCode[]
   format: ParticipationMode | null
   /** Codes de `reference.locales`. `proposals.language_codes` est NOT NULL. */
   language_codes: string[]

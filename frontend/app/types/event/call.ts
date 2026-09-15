@@ -66,6 +66,9 @@ export interface CallForProposals {
    *  qu'après avoir soumis la sienne. */
   blind_review: boolean
   guidelines_url: Url | null
+  /** « Ce qui se passe après l'envoi » : texte brut, une étape par ligne. Nul
+   *  ou sans ligne, le bloc n'apparaît pas au déposant. */
+  submission_next_steps: I18nText | null
   created_by: PersonId | null
   created_at: IsoDateTime
   updated_at: IsoDateTime

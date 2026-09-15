@@ -49,7 +49,7 @@ import { callsForProposals } from './calls'
 import { organizations } from './org'
 import { people } from './people'
 import { entityTerms, taxonomyTerms } from './reference'
-import { allProposals, proposalOrganizations, proposalSpeakers } from './proposals'
+import { allProposals, proposalCategoryCodes, proposalOrganizations, proposalSpeakers } from './proposals'
 
 // ---------------------------------------------------------------------------
 // Le journal des modifications de la session
@@ -79,13 +79,11 @@ export function editedProposal(proposalId: string): Partial<Proposal> | null {
 
   return {
     title: { fr: record.draft.title },
-    summary: record.draft.summary ? { fr: record.draft.summary } : null,
     objectives: { fr: record.draft.objectives },
     detailed_presentation: { fr: record.draft.detailed_presentation },
     expected_outcomes: record.draft.expected_outcomes ? { fr: record.draft.expected_outcomes } : null,
     target_audiences: record.draft.target_audiences.map((audience) => ({ fr: audience })),
     format: record.draft.format ?? undefined,
-    activity_type_code: record.draft.activity_type_code,
     language_codes: record.draft.language_codes,
     country_id: record.draft.country_id,
     duration_minutes: record.draft.duration_minutes,
@@ -204,13 +202,12 @@ export function editableProposal(proposalId: string): EditableProposal | null {
     organization_id: stored.organization_id,
     co_organizations: coOrganizationsOf(proposalId),
     title: fr(stored.title),
-    summary: fr(stored.summary),
     objectives: fr(stored.objectives),
     detailed_presentation: fr(stored.detailed_presentation),
     expected_outcomes: fr(stored.expected_outcomes),
     target_audiences: stored.target_audiences.map((audience) => fr(audience)),
     theme_codes: themeCodesOf(proposalId),
-    activity_type_code: stored.activity_type_code,
+    category_codes: proposalCategoryCodes.get(proposalId) ?? [],
     format: stored.format,
     language_codes: stored.language_codes,
     country_id: stored.country_id,

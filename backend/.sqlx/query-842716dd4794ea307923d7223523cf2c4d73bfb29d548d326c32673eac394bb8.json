@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, reference_code, call_id, event_id, organization_id, submitted_by,\n                  contact_person_id, title, slug::text AS \"slug!\", summary, objectives,\n                  detailed_presentation, expected_outcomes,\n                  target_audiences::jsonb[] AS \"target_audiences!\",\n                  format::text AS \"format!\", activity_type_code, language_codes,\n                  country_id, preferred_start_at, preferred_end_at, duration_minutes,\n                  requested_sessions, scheduling_constraints,\n                  status::text AS \"status!\", submitted_at, decided_at, decision_reason,\n                  decided_by, average_score::float8, weighted_score::float8,\n                  review_count, is_knocked_out, view_count,\n                  deleted_at, deleted_by, deleted_reason, created_at, updated_at\n             FROM programme.proposals\n            WHERE id = $1 AND deleted_at IS NULL",
+  "query": "SELECT id, reference_code, call_id, event_id, organization_id, submitted_by,\n                  contact_person_id, title, slug::text AS \"slug!\", objectives,\n                  detailed_presentation, expected_outcomes,\n                  target_audiences::jsonb[] AS \"target_audiences!\",\n                  format::text AS \"format!\", language_codes,\n                  country_id, preferred_start_at, preferred_end_at, duration_minutes,\n                  requested_sessions, scheduling_constraints,\n                  status::text AS \"status!\", submitted_at, decided_at, decision_reason,\n                  decided_by, average_score::float8, weighted_score::float8,\n                  review_count, is_knocked_out, view_count,\n                  deleted_at, deleted_by, deleted_reason, created_at, updated_at\n             FROM programme.proposals\n            WHERE id = $1 AND deleted_at IS NULL",
   "describe": {
     "columns": [
       {
@@ -99,17 +99,6 @@
       },
       {
         "ordinal": 9,
-        "name": "summary",
-        "type_info": "Jsonb",
-        "origin": {
-          "Table": {
-            "table": "programme.proposals",
-            "name": "summary"
-          }
-        }
-      },
-      {
-        "ordinal": 10,
         "name": "objectives",
         "type_info": "Jsonb",
         "origin": {
@@ -120,7 +109,7 @@
         }
       },
       {
-        "ordinal": 11,
+        "ordinal": 10,
         "name": "detailed_presentation",
         "type_info": "Jsonb",
         "origin": {
@@ -131,7 +120,7 @@
         }
       },
       {
-        "ordinal": 12,
+        "ordinal": 11,
         "name": "expected_outcomes",
         "type_info": "Jsonb",
         "origin": {
@@ -142,30 +131,19 @@
         }
       },
       {
-        "ordinal": 13,
+        "ordinal": 12,
         "name": "target_audiences!",
         "type_info": "JsonbArray",
         "origin": "Expression"
       },
       {
-        "ordinal": 14,
+        "ordinal": 13,
         "name": "format!",
         "type_info": "Text",
         "origin": "Expression"
       },
       {
-        "ordinal": 15,
-        "name": "activity_type_code",
-        "type_info": "Text",
-        "origin": {
-          "Table": {
-            "table": "programme.proposals",
-            "name": "activity_type_code"
-          }
-        }
-      },
-      {
-        "ordinal": 16,
+        "ordinal": 14,
         "name": "language_codes",
         "type_info": "TextArray",
         "origin": {
@@ -176,7 +154,7 @@
         }
       },
       {
-        "ordinal": 17,
+        "ordinal": 15,
         "name": "country_id",
         "type_info": "Uuid",
         "origin": {
@@ -187,7 +165,7 @@
         }
       },
       {
-        "ordinal": 18,
+        "ordinal": 16,
         "name": "preferred_start_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -198,7 +176,7 @@
         }
       },
       {
-        "ordinal": 19,
+        "ordinal": 17,
         "name": "preferred_end_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -209,7 +187,7 @@
         }
       },
       {
-        "ordinal": 20,
+        "ordinal": 18,
         "name": "duration_minutes",
         "type_info": "Int2",
         "origin": {
@@ -220,7 +198,7 @@
         }
       },
       {
-        "ordinal": 21,
+        "ordinal": 19,
         "name": "requested_sessions",
         "type_info": "Int2",
         "origin": {
@@ -231,7 +209,7 @@
         }
       },
       {
-        "ordinal": 22,
+        "ordinal": 20,
         "name": "scheduling_constraints",
         "type_info": "Text",
         "origin": {
@@ -242,13 +220,13 @@
         }
       },
       {
-        "ordinal": 23,
+        "ordinal": 21,
         "name": "status!",
         "type_info": "Text",
         "origin": "Expression"
       },
       {
-        "ordinal": 24,
+        "ordinal": 22,
         "name": "submitted_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -259,7 +237,7 @@
         }
       },
       {
-        "ordinal": 25,
+        "ordinal": 23,
         "name": "decided_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -270,7 +248,7 @@
         }
       },
       {
-        "ordinal": 26,
+        "ordinal": 24,
         "name": "decision_reason",
         "type_info": "Text",
         "origin": {
@@ -281,7 +259,7 @@
         }
       },
       {
-        "ordinal": 27,
+        "ordinal": 25,
         "name": "decided_by",
         "type_info": "Uuid",
         "origin": {
@@ -292,19 +270,19 @@
         }
       },
       {
-        "ordinal": 28,
+        "ordinal": 26,
         "name": "average_score",
         "type_info": "Float8",
         "origin": "Expression"
       },
       {
-        "ordinal": 29,
+        "ordinal": 27,
         "name": "weighted_score",
         "type_info": "Float8",
         "origin": "Expression"
       },
       {
-        "ordinal": 30,
+        "ordinal": 28,
         "name": "review_count",
         "type_info": "Int2",
         "origin": {
@@ -315,7 +293,7 @@
         }
       },
       {
-        "ordinal": 31,
+        "ordinal": 29,
         "name": "is_knocked_out",
         "type_info": "Bool",
         "origin": {
@@ -326,7 +304,7 @@
         }
       },
       {
-        "ordinal": 32,
+        "ordinal": 30,
         "name": "view_count",
         "type_info": "Int4",
         "origin": {
@@ -337,7 +315,7 @@
         }
       },
       {
-        "ordinal": 33,
+        "ordinal": 31,
         "name": "deleted_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -348,7 +326,7 @@
         }
       },
       {
-        "ordinal": 34,
+        "ordinal": 32,
         "name": "deleted_by",
         "type_info": "Uuid",
         "origin": {
@@ -359,7 +337,7 @@
         }
       },
       {
-        "ordinal": 35,
+        "ordinal": 33,
         "name": "deleted_reason",
         "type_info": "Text",
         "origin": {
@@ -370,7 +348,7 @@
         }
       },
       {
-        "ordinal": 36,
+        "ordinal": 34,
         "name": "created_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -381,7 +359,7 @@
         }
       },
       {
-        "ordinal": 37,
+        "ordinal": 35,
         "name": "updated_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -407,13 +385,11 @@
       true,
       false,
       null,
-      true,
       false,
       false,
       true,
       null,
       null,
-      true,
       false,
       true,
       true,
@@ -438,5 +414,5 @@
       false
     ]
   },
-  "hash": "11677975ccb8775d2cdcdefc45ad4f2de77f67225e001805bec0d204dba2c340"
+  "hash": "842716dd4794ea307923d7223523cf2c4d73bfb29d548d326c32673eac394bb8"
 }

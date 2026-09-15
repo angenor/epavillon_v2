@@ -31,10 +31,6 @@ export const acceptedProposals = [
       en: 'Financing coastal adaptation in West Africa',
     },
     slug: 'financer-adaptation-cotiere-afrique-ouest',
-    summary: {
-      fr: "Deux mille kilomètres de littoral reculent, et les guichets de financement raisonnent encore par projet isolé.",
-      en: 'Two thousand kilometres of coastline are receding, while funding windows still think project by project.',
-    },
     objectives: {
       fr: "Confronter les besoins de financement de l'adaptation côtière aux instruments réellement accessibles, et proposer un montage régional plutôt que national.",
     },
@@ -81,9 +77,6 @@ export const acceptedProposals = [
       en: 'Multi-hazard early warning systems in the Sahel: what works',
     },
     slug: 'alerte-precoce-multirisques-sahel',
-    summary: {
-      fr: "Une alerte qui n'atteint pas le dernier kilomètre ne sert à rien, quelle que soit la qualité de la prévision.",
-    },
     objectives: {
       fr: "Comparer les dispositifs de diffusion de l'alerte au dernier kilomètre et mesurer leur taux de réception effective.",
     },
@@ -126,9 +119,6 @@ export const acceptedProposals = [
       en: 'Solar mini-grids: finally viable business models?',
     },
     slug: 'mini-reseaux-solaires-modeles-economiques',
-    summary: {
-      fr: "Quarante mini-réseaux, huit ans de recul, et un point mort atteint par moins de la moitié d'entre eux.",
-    },
     objectives: {
       fr: "Exposer les comptes d'exploitation réels de quarante mini-réseaux et identifier les facteurs qui séparent ceux qui tiennent de ceux qui s'arrêtent.",
     },
@@ -170,9 +160,6 @@ export const acceptedProposals = [
       en: 'Agroecology and food security in the face of repeated droughts',
     },
     slug: 'agroecologie-securite-alimentaire-secheresses',
-    summary: {
-      fr: "Six campagnes agricoles comparées, dont deux années sèches : c'est là que l'écart se creuse.",
-    },
     objectives: {
       fr: "Comparer les rendements et les revenus des parcelles agroécologiques et conventionnelles sur six campagnes, dont deux déficitaires en pluie.",
     },
@@ -214,9 +201,6 @@ export const acceptedProposals = [
       en: 'Loss and damage: making the fund work for French-speaking countries',
     },
     slug: 'pertes-prejudices-operationnaliser-fonds',
-    summary: {
-      fr: "Le fonds existe. Les dossiers, eux, se rédigent toujours en anglais et dans des formats qu'aucune administration locale ne maîtrise.",
-    },
     objectives: {
       fr: "Identifier les obstacles concrets d'accès au fonds pertes et préjudices pour les petits États et les pays les moins avancés francophones.",
     },
@@ -263,9 +247,6 @@ export const acceptedProposals = [
       en: 'Gender and just transition: the experience of women’s cooperatives',
     },
     slug: 'genre-transition-juste-cooperatives',
-    summary: {
-      fr: "Quand une filière se ferme, ce sont les emplois informels, très majoritairement féminins, qui disparaissent en premier.",
-    },
     objectives: {
       fr: "Montrer ce que devient l'emploi féminin informel dans les plans de transition, et ce qu'il faudrait y inscrire.",
     },
@@ -308,9 +289,6 @@ export const acceptedProposals = [
       en: 'Preparing your biennial transparency report: hands-on workshop',
     },
     slug: 'atelier-rapport-biennal-transparence',
-    summary: {
-      fr: "Un atelier, pas une présentation : chaque délégation repart avec son tableau de suivi amorcé.",
-    },
     objectives: {
       fr: "Faire travailler les points focaux sur leur propre inventaire et lever les difficultés de format les plus courantes.",
     },
@@ -392,9 +370,6 @@ export const acceptedProposals = [
       en: 'Climate litigation: where does state responsibility stand?',
     },
     slug: 'contentieux-climatique-responsabilite-etats',
-    summary: {
-      fr: "Les décisions récentes déplacent la charge de la preuve ; les administrations francophones n'y sont pas préparées.",
-    },
     objectives: {
       fr: "Faire le point sur la jurisprudence récente et ses conséquences concrètes pour les administrations francophones.",
     },
@@ -439,9 +414,6 @@ export const acceptedProposals = [
       en: 'The next French-speaking generation in climate negotiations',
     },
     slug: 'releve-francophone-negociations',
-    summary: {
-      fr: "Former des jeunes négociateurs suppose de leur donner un mandat, pas seulement un badge.",
-    },
     objectives: {
       fr: "Confronter les dispositifs d'intégration des jeunes délégués et ce qu'ils produisent réellement dans les délégations.",
     },
@@ -567,9 +539,6 @@ export const acceptedProposals = [
       en: 'Article 6 carbon markets: what integrity safeguards?',
     },
     slug: 'marches-carbone-article-6-integrite',
-    summary: {
-      fr: "Les premières autorisations sont délivrées ; les garde-fous, eux, restent à écrire dans le droit national.",
-    },
     objectives: {
       fr: "Examiner ce que les États francophones doivent inscrire dans leur droit interne avant d'autoriser des transferts au titre de l'article 6.",
     },
@@ -613,9 +582,6 @@ export const acceptedProposals = [
       en: 'Direct access to the Green Climate Fund: an accreditation walkthrough',
     },
     slug: 'acces-direct-fonds-vert-accreditation',
-    summary: {
-      fr: "Trois entités nationales francophones accréditées en cinq ans : la session explique pourquoi si peu, et comment faire.",
-    },
     objectives: {
       fr: "Décomposer le parcours d'accréditation directe et donner les moyens de le franchir aux entités candidates.",
     },

@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposals\n               (event_id, call_id, organization_id, title, slug,\n                objectives, detailed_presentation, format,\n                duration_minutes, status, submitted_at, submitted_by)\n           VALUES ($1, $2, $3, jsonb_build_object('fr', $4::text, 'en', $4::text),\n                   platform.slugify($4 || '-' || gen_random_uuid()::text)::platform.slug,\n                   jsonb_build_object('fr', 'Objectifs.', 'en', 'Objectives.'),\n                   jsonb_build_object('fr', '<p>Présentation.</p>', 'en', '<p>Presentation.</p>'),\n                   'in_person', 60, 'submitted', now(), $5)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "cb707fa89de1056ae9e8c56f9406d7550cb1b849546ad43de2edeb06f77f5f43"
+}

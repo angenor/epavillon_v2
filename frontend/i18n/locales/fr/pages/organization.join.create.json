@@ -17,7 +17,7 @@
     "description": "Présentation",
     "descriptionHint": "Quelques lignes sur les activités de l'organisation.",
     "jobTitle": "Votre fonction",
-    "jobTitleHint": "Facultatif. Affichée à côté de votre nom dans l'espace de l'organisation."
+    "jobTitleHint": "Affichée à côté de votre nom dans l'espace de l'organisation."
   },
   "errors": {
     "nameTooShort": "Saisissez le nom complet de l'organisation.",

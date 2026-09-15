@@ -10,13 +10,12 @@
     "lead": "Lead organization",
     "coOrganizations": "Co-organizers",
     "title": "Title",
-    "summary": "Summary",
     "objectives": "Objectives",
     "presentation": "Detailed presentation",
     "outcomes": "Expected outcomes",
     "audience": "Target audiences",
     "themes": "Themes",
-    "category": "Category",
+    "category": "Categories",
     "format": "Format",
     "languages": "Languages",
     "country": "Country concerned",
@@ -30,9 +29,6 @@
     "en": "English"
   },
   "next": {
-    "title": "What happens after sending",
-    "reviews": "{count} committee member will assess the submission against the published criteria. | {count} committee member will assess the submission against the published criteria. | {count} committee members will assess the submission against the published criteria.",
-    "editable": "The submission can no longer be edited once sent, unless the committee requests additions.",
-    "notification": "You will receive an acknowledgement carrying your submission number."
+    "title": "What happens after sending"
   }
 }

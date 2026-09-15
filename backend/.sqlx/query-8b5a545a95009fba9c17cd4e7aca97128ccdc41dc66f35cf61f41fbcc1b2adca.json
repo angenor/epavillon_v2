@@ -1,0 +1,75 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH creneau AS (\n               SELECT CASE WHEN $14::text IS NULL THEN NULL\n                           ELSE ($14 || ' ' || $15)::timestamp AT TIME ZONE $16 END AS debut\n           )\n           UPDATE programme.proposals p\n              SET contact_person_id = $2,\n                  title = $3::jsonb::platform.i18n_text,\n                  slug = COALESCE($4::text::platform.slug, p.slug),\n                  objectives = $5::jsonb::platform.i18n_text,\n                  detailed_presentation = $6::jsonb::platform.i18n_text,\n                  expected_outcomes = $7::jsonb::platform.i18n_text,\n                  target_audiences = $8::jsonb[]::platform.i18n_text[],\n                  format = $9::text::event.participation_mode,\n                  language_codes = $10,\n                  country_id = $11,\n                  preferred_start_at = c.debut,\n                  preferred_end_at = c.debut + make_interval(mins => $17::int),\n                  duration_minutes = $17,\n                  requested_sessions = $12,\n                  scheduling_constraints = $13\n             FROM creneau c\n            WHERE p.id = $1 AND p.deleted_at IS NULL\n        RETURNING p.id, p.reference_code, p.updated_at, p.status::text AS \"status!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "reference_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "reference_code"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Jsonb",
+        "Text",
+        "Jsonb",
+        "Jsonb",
+        "Jsonb",
+        "JsonbArray",
+        "Text",
+        "TextArray",
+        "Uuid",
+        "Int2",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "8b5a545a95009fba9c17cd4e7aca97128ccdc41dc66f35cf61f41fbcc1b2adca"
+}

@@ -38,7 +38,6 @@ async fn dossier_complet(bac: &Bac, terrain: &Terrain, titre: &str) -> Uuid {
     let mut brouillon = commun::brouillon(terrain, titre);
     brouillon.preferred_start_at = Some("2027-11-12T14:30".to_owned());
     brouillon.duration_minutes = Some(90);
-    brouillon.summary = "Un résumé.".to_owned();
     brouillon.expected_outcomes = "Des résultats.".to_owned();
     brouillon.target_audiences = vec!["Ministères".to_owned(), "ONG".to_owned()];
     brouillon.scheduling_constraints = "Pas le matin.".to_owned();
@@ -87,7 +86,10 @@ async fn la_recomposition_rend_le_dossier_tel_quil_a_ete_saisi() {
     assert_eq!(rouvert.proposal_id, dossier);
     assert_eq!(rouvert.status, "submitted");
     assert_eq!(rouvert.draft.draft.title, "Atelier adaptation");
-    assert_eq!(rouvert.draft.draft.summary, "Un résumé.");
+    assert_eq!(
+        rouvert.draft.draft.category_codes,
+        vec!["results_sharing".to_owned()]
+    );
     assert_eq!(rouvert.draft.draft.expected_outcomes, "Des résultats.");
     assert_eq!(
         rouvert.draft.draft.target_audiences,

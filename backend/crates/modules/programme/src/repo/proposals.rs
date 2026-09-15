@@ -38,13 +38,11 @@ use crate::domain::slug;
 /// fuseau de l'édition : la conversion en instant se fait en base (R6).
 pub struct ChampsDuDossier {
     pub title: serde_json::Value,
-    pub summary: Option<serde_json::Value>,
     pub objectives: serde_json::Value,
     pub detailed_presentation: serde_json::Value,
     pub expected_outcomes: Option<serde_json::Value>,
     pub target_audiences: Vec<serde_json::Value>,
     pub format: String,
-    pub activity_type_code: Option<String>,
     pub language_codes: Vec<String>,
     pub country_id: Option<Uuid>,
     /// `(date, heure)` en heure locale de l'édition, ou rien.
@@ -319,23 +317,23 @@ async fn inserer(
 
     let ligne = sqlx::query!(
         r#"WITH creneau AS (
-               SELECT CASE WHEN $17::text IS NULL THEN NULL
-                           ELSE ($17 || ' ' || $18)::timestamp AT TIME ZONE $19 END AS debut
+               SELECT CASE WHEN $15::text IS NULL THEN NULL
+                           ELSE ($15 || ' ' || $16)::timestamp AT TIME ZONE $17 END AS debut
            )
            INSERT INTO programme.proposals
                (call_id, event_id, organization_id, submitted_by, contact_person_id,
-                title, slug, summary, objectives, detailed_presentation, expected_outcomes,
-                target_audiences, format, activity_type_code, language_codes, country_id,
+                title, slug, objectives, detailed_presentation, expected_outcomes,
+                target_audiences, format, language_codes, country_id,
                 preferred_start_at, preferred_end_at,
                 duration_minutes, requested_sessions, scheduling_constraints)
            SELECT $1, $2, $3, $4, $5,
                   $6::jsonb::platform.i18n_text, $7::text::platform.slug,
-                  $8::jsonb::platform.i18n_text, $9::jsonb::platform.i18n_text,
-                  $10::jsonb::platform.i18n_text, $11::jsonb::platform.i18n_text,
-                  $12::jsonb[]::platform.i18n_text[],
-                  $13::text::event.participation_mode, $14, $15, $16,
-                  c.debut, c.debut + make_interval(mins => $20::int),
-                  $20, $21, $22
+                  $8::jsonb::platform.i18n_text,
+                  $9::jsonb::platform.i18n_text, $10::jsonb::platform.i18n_text,
+                  $11::jsonb[]::platform.i18n_text[],
+                  $12::text::event.participation_mode, $13, $14,
+                  c.debut, c.debut + make_interval(mins => $18::int),
+                  $18, $19, $20
              FROM creneau c
         RETURNING id, reference_code, updated_at, status::text AS "status!""#,
         nouveau.call_id,
@@ -345,13 +343,11 @@ async fn inserer(
         champs.contact_person_id,
         champs.title,
         adresse,
-        champs.summary,
         champs.objectives,
         champs.detailed_presentation,
         champs.expected_outcomes,
         &champs.target_audiences,
         champs.format,
-        champs.activity_type_code,
         &champs.language_codes,
         champs.country_id,
         date,
@@ -384,27 +380,25 @@ async fn ecrire(
 
     let ligne = sqlx::query!(
         r#"WITH creneau AS (
-               SELECT CASE WHEN $16::text IS NULL THEN NULL
-                           ELSE ($16 || ' ' || $17)::timestamp AT TIME ZONE $18 END AS debut
+               SELECT CASE WHEN $14::text IS NULL THEN NULL
+                           ELSE ($14 || ' ' || $15)::timestamp AT TIME ZONE $16 END AS debut
            )
            UPDATE programme.proposals p
               SET contact_person_id = $2,
                   title = $3::jsonb::platform.i18n_text,
                   slug = COALESCE($4::text::platform.slug, p.slug),
-                  summary = $5::jsonb::platform.i18n_text,
-                  objectives = $6::jsonb::platform.i18n_text,
-                  detailed_presentation = $7::jsonb::platform.i18n_text,
-                  expected_outcomes = $8::jsonb::platform.i18n_text,
-                  target_audiences = $9::jsonb[]::platform.i18n_text[],
-                  format = $10::text::event.participation_mode,
-                  activity_type_code = $11,
-                  language_codes = $12,
-                  country_id = $13,
+                  objectives = $5::jsonb::platform.i18n_text,
+                  detailed_presentation = $6::jsonb::platform.i18n_text,
+                  expected_outcomes = $7::jsonb::platform.i18n_text,
+                  target_audiences = $8::jsonb[]::platform.i18n_text[],
+                  format = $9::text::event.participation_mode,
+                  language_codes = $10,
+                  country_id = $11,
                   preferred_start_at = c.debut,
-                  preferred_end_at = c.debut + make_interval(mins => $19::int),
-                  duration_minutes = $19,
-                  requested_sessions = $14,
-                  scheduling_constraints = $15
+                  preferred_end_at = c.debut + make_interval(mins => $17::int),
+                  duration_minutes = $17,
+                  requested_sessions = $12,
+                  scheduling_constraints = $13
              FROM creneau c
             WHERE p.id = $1 AND p.deleted_at IS NULL
         RETURNING p.id, p.reference_code, p.updated_at, p.status::text AS "status!""#,
@@ -412,13 +406,11 @@ async fn ecrire(
         champs.contact_person_id,
         champs.title,
         adresse,
-        champs.summary,
         champs.objectives,
         champs.detailed_presentation,
         champs.expected_outcomes,
         &champs.target_audiences,
         champs.format,
-        champs.activity_type_code,
         &champs.language_codes,
         champs.country_id,
         champs.requested_sessions,
@@ -464,13 +456,11 @@ pub struct Fiche {
     pub contact_person_id: Option<Uuid>,
     pub title: serde_json::Value,
     pub slug: String,
-    pub summary: Option<serde_json::Value>,
     pub objectives: serde_json::Value,
     pub detailed_presentation: serde_json::Value,
     pub expected_outcomes: Option<serde_json::Value>,
     pub target_audiences: Vec<serde_json::Value>,
     pub format: String,
-    pub activity_type_code: Option<String>,
     pub language_codes: Vec<String>,
     pub country_id: Option<Uuid>,
     #[serde(with = "time::serde::rfc3339::option")]
@@ -519,10 +509,10 @@ pub async fn fiche<'e>(
 ) -> Result<Option<Fiche>> {
     let ligne = sqlx::query!(
         r#"SELECT id, reference_code, call_id, event_id, organization_id, submitted_by,
-                  contact_person_id, title, slug::text AS "slug!", summary, objectives,
+                  contact_person_id, title, slug::text AS "slug!", objectives,
                   detailed_presentation, expected_outcomes,
                   target_audiences::jsonb[] AS "target_audiences!",
-                  format::text AS "format!", activity_type_code, language_codes,
+                  format::text AS "format!", language_codes,
                   country_id, preferred_start_at, preferred_end_at, duration_minutes,
                   requested_sessions, scheduling_constraints,
                   status::text AS "status!", submitted_at, decided_at, decision_reason,
@@ -546,13 +536,11 @@ pub async fn fiche<'e>(
         contact_person_id: l.contact_person_id,
         title: l.title,
         slug: l.slug,
-        summary: l.summary,
         objectives: l.objectives,
         detailed_presentation: l.detailed_presentation,
         expected_outcomes: l.expected_outcomes,
         target_audiences: l.target_audiences,
         format: l.format,
-        activity_type_code: l.activity_type_code,
         language_codes: l.language_codes,
         country_id: l.country_id,
         preferred_start_at: l.preferred_start_at,
@@ -595,10 +583,10 @@ pub async fn de_lorganisation<'e>(
 ) -> Result<Vec<Fiche>> {
     let lignes = sqlx::query!(
         r#"SELECT id, reference_code, call_id, event_id, organization_id, submitted_by,
-                  contact_person_id, title, slug::text AS "slug!", summary, objectives,
+                  contact_person_id, title, slug::text AS "slug!", objectives,
                   detailed_presentation, expected_outcomes,
                   target_audiences::jsonb[] AS "target_audiences!",
-                  format::text AS "format!", activity_type_code, language_codes,
+                  format::text AS "format!", language_codes,
                   country_id, preferred_start_at, preferred_end_at, duration_minutes,
                   requested_sessions, scheduling_constraints,
                   status::text AS "status!", submitted_at, decided_at, decision_reason,
@@ -628,13 +616,11 @@ pub async fn de_lorganisation<'e>(
             contact_person_id: l.contact_person_id,
             title: l.title,
             slug: l.slug,
-            summary: l.summary,
             objectives: l.objectives,
             detailed_presentation: l.detailed_presentation,
             expected_outcomes: l.expected_outcomes,
             target_audiences: l.target_audiences,
             format: l.format,
-            activity_type_code: l.activity_type_code,
             language_codes: l.language_codes,
             country_id: l.country_id,
             preferred_start_at: l.preferred_start_at,

@@ -7,10 +7,6 @@
       "label": "Titre de l'activité",
       "hint": "Court et explicite. Il sera repris tel quel dans le programme et sur les supports."
     },
-    "summary": {
-      "label": "Résumé",
-      "hint": "Deux ou trois phrases. C'est ce qui s'affiche sur la carte de l'activité dans la programmation publique."
-    },
     "objectives": {
       "label": "Objectifs",
       "hint": "Ce que l'activité cherche à obtenir. Le comité évalue la pertinence au regard des priorités de l'IFDD."
@@ -37,7 +33,6 @@
     "detailed_presentationRequired": "La présentation détaillée est obligatoire."
   },
   "warnings": {
-    "summaryMissing": "Sans résumé, la carte de votre activité restera muette dans la programmation publique.",
     "expected_outcomesMissing": "Les résultats attendus pèsent dans la note du comité : le critère « impact » porte dessus.",
     "target_audienceMissing": "Préciser les publics visés aide le comité à situer l'activité et à composer les journées thématiques."
   }

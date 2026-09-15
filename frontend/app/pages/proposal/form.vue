@@ -285,6 +285,7 @@ watch(
       organizationId: active.length === 1 ? active[0]?.organization.id : null,
       durationMinutes: ready.call.default_duration_minutes,
       locale: locale.value,
+      format: ready.call.allowed_formats.length === 1 ? ready.call.allowed_formats[0] : null,
     })
 
     isDraftReady.value = true

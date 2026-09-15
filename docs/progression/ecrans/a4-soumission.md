@@ -53,3 +53,18 @@ Un formulaire qui s'enregistre tout seul, se remplit dans le désordre et refuse
 | Toutes les étapes atteignables | Cliquer sur l'étape 5 depuis l'étape 1 fonctionne — `UiStepper` ne le permettait pas (`allowSkipAhead`). Une étape visitée puis quittée en défaut porte sa pastille rouge et « 1 point à corriger » |
 | Thème clair, anglais, clés brutes | Thème clair vérifié sur l'étape 1 ; `/en/submit-a-proposal` complet, y compris les six rôles d'intervenant et les trois formats ; **zéro clé brute** relevée dans le texte de la page |
 | `make check-front` | Vert — `npm run typecheck` à 0 erreur et build de production complet |
+
+---
+
+## Ajustements du 15/09 (`docs/observations1.md`)
+
+| Demande | Livré |
+|---|---|
+| Retirer le résumé | Champ, relecture, fiche d'évaluation, colonne `proposals.summary`, borne `RESUME`, clés i18n |
+| Thématiques obligatoires | Erreur bloquante à l'étape 3 (`errors.themesRequired`) et refus au dépôt côté API |
+| Catégories multiples et obligatoires | Cases à cocher comme les thématiques ; `category_codes` dans le brouillon ; `reference.entity_terms` en base |
+| Format « En présentiel » | Défaut `{in_person}` des appels ; un format unique s'affiche en texte, sans choix |
+| Retirer « Seuls les formats ouverts… » | Clé `format.hint` supprimée |
+| « Ce qui se passe après l'envoi » éditable | `calls_for_proposals.submission_next_steps`, champ fr/en dans `CallPanel`, liste dans `StepReview` |
+
+**Écarts** : le bloc « après l'envoi » ne lit plus `required_reviews` — l'IFDD l'écrit dans le texte. Un brouillon repris sur un appel à format unique reçoit ce format d'office. **Pas de vérification en navigateur cette session.**

@@ -151,6 +151,7 @@ pub struct FicheAppel {
     pub required_reviews: i16,
     pub blind_review: bool,
     pub guidelines_url: Option<String>,
+    pub submission_next_steps: Option<serde_json::Value>,
     pub created_by: Option<Uuid>,
     #[serde(with = "time::serde::rfc3339")]
     pub created_at: OffsetDateTime,
@@ -173,7 +174,7 @@ pub async fn fiche_appel<'e>(
                   daily_end_time::text AS "daily_end_time!",
                   allowed_formats::text[] AS "allowed_formats!",
                   required_reviews, blind_review,
-                  guidelines_url::text, created_by, created_at, updated_at
+                  guidelines_url::text, submission_next_steps, created_by, created_at, updated_at
              FROM event.calls_for_proposals WHERE id = $1"#,
         call_id
     )
@@ -204,6 +205,7 @@ pub async fn fiche_appel<'e>(
         required_reviews: l.required_reviews,
         blind_review: l.blind_review,
         guidelines_url: l.guidelines_url,
+        submission_next_steps: l.submission_next_steps,
         created_by: l.created_by,
         created_at: l.created_at,
         updated_at: l.updated_at,
