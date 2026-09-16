@@ -90,6 +90,8 @@ pub struct LigneDePilotage {
     /// **Collectif.** « Non consulté par moi » dépend du lecteur et vient de
     /// `programme.unread_proposals_for()` — voir `repo/reads.rs`.
     pub read_count: i64,
+    /// Vignette de la liste — `media.attached_image`, nulle sans image servable.
+    pub cover: Option<serde_json::Value>,
 }
 
 /// Les lignes d'une édition, **du plus haut classement au plus bas**.
@@ -133,7 +135,8 @@ pub async fn lignes<'e>(
                   reviewer_ids AS "reviewer_ids!", reviewers AS "reviewers!",
                   overdue_reviews AS "overdue_reviews!",
                   next_review_due_at,
-                  read_count AS "read_count!"
+                  read_count AS "read_count!",
+                  cover
              FROM programme.v_proposal_dashboard
             WHERE event_id = $1
             ORDER BY event_rank, reference_code"#,
@@ -179,6 +182,7 @@ pub async fn lignes<'e>(
             overdue_reviews: l.overdue_reviews,
             next_review_due_at: l.next_review_due_at,
             read_count: l.read_count,
+            cover: l.cover,
         })
         .collect())
 }

@@ -17,7 +17,7 @@ import type { CsvColumn } from '~/utils/proposal-list'
 /**
  * LISTE DES PROPOSITIONS REÇUES — `/admin/propositions`.
  *
- * L'ÉCRAN OÙ LE COMITÉ TRAVAILLE. Quarante dossiers, onze colonnes, et une seule
+ * L'ÉCRAN OÙ LE COMITÉ TRAVAILLE. Quarante dossiers en liste, et une seule
  * question à l'ouverture : lesquels tiennent le haut du classement, et lesquels
  * n'ont encore été lus par personne. D'où le tri par défaut sur la NOTE
  * DÉCROISSANTE — c'est le prompt qui le demande, et c'est ce que fait déjà
@@ -45,7 +45,7 @@ import type { CsvColumn } from '~/utils/proposal-list'
  * chacune sur la portée de l'édition regardée. Ce que fait l'écran est de
  * l'affichage ; le refus appartient à l'API.
  *
- * QUATRE ÉTATS : chargement (lignes squelettes à la forme du tableau), erreur
+ * QUATRE ÉTATS : chargement (rangées squelettes à la forme de la liste), erreur
  * avec reprise, vide (aucune édition, ou aucun résultat après filtrage — deux
  * messages différents), accès refusé.
  */
@@ -64,7 +64,6 @@ const auth = useAuthStore()
 const adminScope = useAdminScopeStore()
 const route = useRoute()
 const router = useRouter()
-const localePath = useLocalePath()
 
 useHead(() => ({ title: t('admin.proposals.title') }))
 
@@ -168,7 +167,6 @@ const filters = computed<ProposalListFilters>(() => ({
 }))
 
 const SORT_PARAM: Record<string, ProposalSortKey> = {
-  dossier: 'reference_code',
   titre: 'title',
   organisation: 'organization',
   pays: 'country',
@@ -257,7 +255,7 @@ const pageRows = computed(() =>
   filteredRows.value.slice((page.value - 1) * PER_PAGE, page.value * PER_PAGE),
 )
 
-/** Légende du tableau, lue par les lecteurs d'écran : périmètre et tri. */
+/** Nom de la liste, lu par les lecteurs d'écran : périmètre et tri. */
 const caption = computed(() =>
   t('admin.proposals.caption', {
     event: adminScope.currentEvent ? tr(adminScope.currentEvent.title) : '',
@@ -268,7 +266,7 @@ const caption = computed(() =>
 
 const captionSortKey = computed(() => {
   const map: Record<ProposalSortKey, string> = {
-    reference_code: 'reference',
+    reference_code: 'title',
     title: 'title',
     organization: 'organization',
     country: 'country',
@@ -288,8 +286,8 @@ const captionSortKey = computed(() => {
 
 /**
  * LA SÉLECTION EST UNE LISTE DE CLÉS, portée par la page. Elle survit au
- * changement de page ; « tout sélectionner » ne touche que les lignes affichées
- * — c'est `UiTable` qui le garantit, et la barre d'actions le rappelle.
+ * changement de page ; « tout sélectionner » ne touche que les rangées affichées
+ * — c'est la liste qui le garantit, et la barre d'actions le rappelle.
  */
 const selected = ref<string[]>([])
 
@@ -450,12 +448,6 @@ function exportCsv(rows: ProposalDashboardRow[]): void {
   actionSkipped.value = []
 }
 
-function openProposal(row: ProposalDashboardRow): void {
-  // La fiche d'évaluation est l'écran A8 : la route est déjà celle vers laquelle
-  // pointe le tableau de bord.
-  navigateTo(localePath(`/admin/propositions/${row.id}`))
-}
-
 const deadlineNotice = computed(() => {
   const deadline = screen.value?.deadline
   if (!deadline) return null
@@ -549,13 +541,13 @@ const deadlineNotice = computed(() => {
           @clear="selected = []"
         />
 
-        <AdminProposalsTable
+        <AdminProposalsList
           class="mt-4"
           :rows="pageRows"
           :unread-ids="unreadIds"
           :timezone="timezone"
           :required-reviews="screen?.required_reviews ?? null"
-          :caption="caption"
+          :label="caption"
           :sort-key="sortKey"
           :sort-direction="sortDirection"
           :selected="selected"
@@ -563,12 +555,8 @@ const deadlineNotice = computed(() => {
           :loading="status === 'pending'"
           @sort="setSort"
           @update:selected="(keys: string[]) => (selected = keys)"
-          @open="openProposal"
         >
           <template #toolbar>
-            <p class="text-sm text-text-muted">
-              {{ t('admin.proposals.results.sortedBy', { column: t(`admin.proposals.columns.${captionSortKey}`) }) }}
-            </p>
             <UiButton
               class="ml-auto"
               variant="secondary"
@@ -603,7 +591,7 @@ const deadlineNotice = computed(() => {
               })"
             />
           </template>
-        </AdminProposalsTable>
+        </AdminProposalsList>
 
         <UiPagination
           v-if="filteredRows.length > PER_PAGE"

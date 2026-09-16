@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id AS \"id!\", reference_code AS \"reference_code!\",\n                  event_id AS \"event_id!\", call_id,\n                  organization_id AS \"organization_id!\",\n                  organization_name AS \"organization_name!\",\n                  title AS \"title!\", title_text,\n                  status::text AS \"status!\", submitted_at,\n                  weighted_score::float8, average_score::float8,\n                  is_knocked_out AS \"is_knocked_out!\",\n                  review_count AS \"review_count!\",\n                  required_reviews, reviews_missing,\n                  assigned_reviewers AS \"assigned_reviewers!\",\n                  open_change_requests AS \"open_change_requests!\",\n                  speaker_count AS \"speaker_count!\",\n                  event_rank AS \"event_rank!\",\n                  format::text AS \"format!\",\n                  organization_acronym,\n                  organization_country_code::text,\n                  organization_country,\n                  co_organizer_count AS \"co_organizer_count!\",\n                  theme_codes AS \"theme_codes!\", themes AS \"themes!\",\n                  category_codes AS \"category_codes!\", categories AS \"categories!\",\n                  reviewer_ids AS \"reviewer_ids!\", reviewers AS \"reviewers!\",\n                  overdue_reviews AS \"overdue_reviews!\",\n                  next_review_due_at,\n                  read_count AS \"read_count!\"\n             FROM programme.v_proposal_dashboard\n            WHERE event_id = $1\n            ORDER BY event_rank, reference_code",
+  "query": "SELECT id AS \"id!\", reference_code AS \"reference_code!\",\n                  event_id AS \"event_id!\", call_id,\n                  organization_id AS \"organization_id!\",\n                  organization_name AS \"organization_name!\",\n                  title AS \"title!\", title_text,\n                  status::text AS \"status!\", submitted_at,\n                  weighted_score::float8, average_score::float8,\n                  is_knocked_out AS \"is_knocked_out!\",\n                  review_count AS \"review_count!\",\n                  required_reviews, reviews_missing,\n                  assigned_reviewers AS \"assigned_reviewers!\",\n                  open_change_requests AS \"open_change_requests!\",\n                  speaker_count AS \"speaker_count!\",\n                  event_rank AS \"event_rank!\",\n                  format::text AS \"format!\",\n                  organization_acronym,\n                  organization_country_code::text,\n                  organization_country,\n                  co_organizer_count AS \"co_organizer_count!\",\n                  theme_codes AS \"theme_codes!\", themes AS \"themes!\",\n                  category_codes AS \"category_codes!\", categories AS \"categories!\",\n                  reviewer_ids AS \"reviewer_ids!\", reviewers AS \"reviewers!\",\n                  overdue_reviews AS \"overdue_reviews!\",\n                  next_review_due_at,\n                  read_count AS \"read_count!\",\n                  cover\n             FROM programme.v_proposal_dashboard\n            WHERE event_id = $1\n            ORDER BY event_rank, reference_code",
   "describe": {
     "columns": [
       {
@@ -351,6 +351,17 @@
             "name": "read_count"
           }
         }
+      },
+      {
+        "ordinal": 34,
+        "name": "cover",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.v_proposal_dashboard",
+            "name": "cover"
+          }
+        }
       }
     ],
     "parameters": {
@@ -392,8 +403,9 @@
       true,
       true,
       true,
+      true,
       true
     ]
   },
-  "hash": "c5c75bc252f17f35b82a5b1115be2cb769d0076f597955bd27a9d3a7174bab64"
+  "hash": "1464a761b5f673e917196c44fda9535a18cb6fa936c08c1e5c74888d342f28d5"
 }

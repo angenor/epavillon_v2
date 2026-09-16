@@ -54,3 +54,13 @@ Un tableau de bord de comité se prouve sur ce qu'il AFFICHE et sur ce que ses a
 | **`line-clamp-2` n'existe pas dans la feuille produite** | Les titres s'étalaient sur **six lignes** et la colonne tombait à 128 px de large. La classe était dans le balisage, sans aucune règle derrière — le pire des cas, puisque rien ne signale l'absence | Troncature écrite à la main dans le `<style scoped>` du composant, comme `ProgrammeCalendar` le faisait déjà. **Aucun autre écran n'utilise `line-clamp-*`** : le piège ne se reproduira pas ailleurs sans être vu |
 | **Une pastille thématique insécable imposait le quart du tableau** | « Justice climatique et peuples autochtones » en `whitespace-nowrap` : colonne à 284 px, tableau à 1 501 px pour 1 130 disponibles | Repli autorisé DANS la cellule, par CSS local — sans toucher au composant partagé, et **sans jamais abréger le libellé**, que le guide de style exige complet |
 | **« Aucun révisionniste affecté » sur un dossier portant trois revues** | Vrai littéralement — aucune ligne d'affectation —, absurde à l'écran : les trois revues étaient rendues | Le message ne s'affiche plus que si `review_count` vaut zéro aussi. L'affectation ORGANISE le travail, elle ne le conditionne pas |
+
+## Révision du 15/09 — la liste remplace le tableau
+
+Demande du commanditaire : plus de colonne « Thèmes » ni « Dossier », un affichage plus soigné, et une vignette de couverture à gauche de chaque dossier, avec un placeholder quand il n'y en a pas.
+
+- `components/admin/proposals/Table.vue` supprimé ; `List.vue` le remplace. Le tri passe par une liste déroulante et un bouton de sens ; le tri par numéro (`?tri=dossier`) n'est plus offert et retombe sur la note. L'export CSV garde ses quatorze colonnes, numéro et thématiques compris.
+- Le repère « non consulté » devient un liseré d'accent à gauche de la rangée et la mention « Non consulté » à côté du statut.
+- `v_proposal_dashboard` gagne `cover` (`media.attached_image`) ; `LigneDePilotage` et `ProposalDashboardRow` suivent, les mocks rendent `null`.
+- **Écart** : aucun écran ne permet de joindre une couverture à un dossier ; le rôle `cover` de `programme.proposals` existe depuis 050 mais n'a pas de champ.
+- Vérifié : `nuxt typecheck`, `make sqlx-prepare`, `make openapi`, `make check-api-contract`, rendu au navigateur sur mocks (sombre, clair, 375 px : `scrollWidth` = 375). Défaut trouvé en éprouvant : la vignette s'étirait sur la hauteur de la rangée à 375 px (`self-start`).

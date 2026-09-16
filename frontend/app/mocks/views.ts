@@ -262,6 +262,7 @@ export function proposalDashboard(): ProposalDashboardRow[] {
             .map((r) => r.due_at as string)
             .sort((a, b) => a.localeCompare(b))[0] ?? null,
         read_count: proposalReads.filter((r) => r.proposal_id === p.id).length,
+        cover: null,
       }
     })
 

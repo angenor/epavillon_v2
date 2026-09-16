@@ -24,11 +24,9 @@
     "passed": "Call closed on {date}"
   },
   "columns": {
-    "reference": "Reference",
     "title": "Title",
     "organization": "Lead",
     "country": "Country",
-    "themes": "Themes",
     "format": "Format",
     "status": "Status",
     "reviews": "Reviews",
@@ -49,7 +47,7 @@
     "dueAt": "Review due: {date}",
     "noScore": "Not scored yet",
     "notSubmitted": "Not submitted",
-    "open": "Open submission {code}"
+    "rank": "Rank {rank}"
   },
   "status": {
     "draft": "Draft",
@@ -71,7 +69,7 @@
     "show": "Show filters",
     "hide": "Hide filters",
     "search": "Search a submission",
-    "searchPlaceholder": "Reference, title, organization…",
+    "searchPlaceholder": "Title, organization…",
     "status": "Status",
     "theme": "Theme",
     "format": "Format",
@@ -91,8 +89,12 @@
   },
   "results": {
     "count": "No submission | One submission | {count} submissions",
-    "filtered": "{shown} of {total} submissions",
-    "sortedBy": "Sorted by: {column}"
+    "filtered": "{shown} of {total} submissions"
+  },
+  "sort": {
+    "label": "Sort by",
+    "asc": "Ascending order",
+    "desc": "Descending order"
   },
   "export": {
     "action": "Export to CSV",

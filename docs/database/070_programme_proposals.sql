@@ -854,7 +854,10 @@ SELECT
     -- COLLECTIF ; savoir si la personne CONNECTÉE l'a ouvert dépend du lecteur et
     -- ne peut donc pas être une colonne : voir programme.unread_proposals_for().
     (SELECT count(*) FROM programme.proposal_reads pr
-      WHERE pr.proposal_id = p.id)                                    AS read_count
+      WHERE pr.proposal_id = p.id)                                    AS read_count,
+    -- Vignette de la liste (ajoutée le 15/09) : l'image jointe au dossier, pour
+    -- reconnaître un dossier d'un coup d'œil. NULL si aucune image servable.
+    media.attached_image('programme', 'proposals', p.id, 'cover')     AS cover
 FROM programme.proposals p
 JOIN org.organizations o ON o.id = p.organization_id
 LEFT JOIN event.calls_for_proposals c ON c.id = p.call_id
@@ -879,6 +882,8 @@ COMMENT ON COLUMN programme.v_proposal_dashboard.overdue_reviews IS
     'Revues attendues dont l''échéance est dépassée. Alimente le filtre « en retard » : un seul calcul pour la liste, le tableau de bord et la file du comité.';
 COMMENT ON COLUMN programme.v_proposal_dashboard.read_count IS
     'Nombre de membres du comité ayant ouvert le dossier. Collectif : pour « non consulté PAR MOI », voir programme.unread_proposals_for().';
+COMMENT ON COLUMN programme.v_proposal_dashboard.cover IS
+    'Image de couverture jointe au dossier (rôle cover), prête à l''affichage — vignette de la liste du back-office. NULL si aucune image servable.';
 
 -- Dossiers qu'une personne donnée n'a JAMAIS ouverts, sur une édition.
 --

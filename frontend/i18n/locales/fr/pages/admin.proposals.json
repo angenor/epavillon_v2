@@ -24,11 +24,9 @@
     "passed": "Appel clos depuis le {date}"
   },
   "columns": {
-    "reference": "Dossier",
     "title": "Titre",
     "organization": "Porteur",
     "country": "Pays",
-    "themes": "Thèmes",
     "format": "Format",
     "status": "Statut",
     "reviews": "Revues",
@@ -49,7 +47,7 @@
     "dueAt": "Échéance de revue : {date}",
     "noScore": "Pas encore noté",
     "notSubmitted": "Non déposé",
-    "open": "Ouvrir le dossier {code}"
+    "rank": "Rang {rank}"
   },
   "status": {
     "draft": "Brouillon",
@@ -71,7 +69,7 @@
     "show": "Afficher les filtres",
     "hide": "Masquer les filtres",
     "search": "Rechercher un dossier",
-    "searchPlaceholder": "Numéro, titre, organisation…",
+    "searchPlaceholder": "Titre, organisation…",
     "status": "Statut",
     "theme": "Thématique",
     "format": "Format",
@@ -91,8 +89,12 @@
   },
   "results": {
     "count": "Aucun dossier | Un dossier | {count} dossiers",
-    "filtered": "{shown} sur {total} dossiers",
-    "sortedBy": "Tri : {column}"
+    "filtered": "{shown} sur {total} dossiers"
+  },
+  "sort": {
+    "label": "Trier par",
+    "asc": "Ordre croissant",
+    "desc": "Ordre décroissant"
   },
   "export": {
     "action": "Exporter en CSV",

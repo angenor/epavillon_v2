@@ -217,6 +217,8 @@ export interface ProposalDashboardRow {
   /** Membres du comité ayant ouvert le dossier. COLLECTIF : « non consulté par
    *  moi » dépend du lecteur et vient de `programme.unread_proposals_for()`. */
   read_count: number
+  /** Vignette de la liste — rôle `cover` du dossier. */
+  cover: AttachedImage | null
 }
 
 /**
