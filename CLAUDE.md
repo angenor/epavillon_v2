@@ -323,7 +323,8 @@ L'environnement local (Postgres avec le schéma chargé, Valkey, Jaeger, Mailpit
 ```bash
 docker compose -f ops/docker-compose.dev.yml up -d     # services locaux
 docker compose -f ops/docker-compose.dev.yml down -v   # + up : base repartie de zéro
-make check                                             # avant tout commit important
+make check-safe                                        # avant tout commit — ne détruit rien
+make check                                             # DÉTRUIT la base locale : jamais sans accord explicite
 make openapi                                           # engendre frontend/app/types/api.ts depuis les routes Rust
 cd frontend && npm run dev                             # front
 cd backend  && cargo run -p api                        # API
@@ -361,7 +362,8 @@ Interfaces locales : Mailpit `http://localhost:8025` (courriels capturés) · Ja
 - Noyer une réponse ou un fichier sous les commentaires et les explications.
 - Terminer une session sans mettre à jour la progression — journal du jour, fichier de l'écran, ligne de suivi.
 - Regrossir `docs/PROGRESSION.md` : il se lit en entier à chaque session, le détail va dans `docs/progression/`.
-- Committer sans que `make check` passe.
+- Committer sans que `make check-safe` passe.
+- Lancer `make check` ou `make check-db` sans l'accord explicite du commanditaire : ils commencent par `down -v` et effacent la base locale, qui n'a pas de sauvegarde. Le 16/09, un `make check` lancé avant un commit l'a détruite.
 
 ---
 

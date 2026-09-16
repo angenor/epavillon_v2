@@ -355,7 +355,8 @@ Le fichier `Makefile` à la racine les porte. Ses cibles :
 
 | Cible | Ce qu'elle fait |
 |---|---|
-| `make check` | les trois vérifications — **détruit la base**, voir plus bas |
+| `make check-safe` | les trois vérifications sur la base en place — **celle d'avant un commit** |
+| `make check` | les trois vérifications sur base vierge — **détruit la base**, voir plus bas |
 | `make check-db` | recharge le schéma sur une base vierge, puis les assertions |
 | `make check-db-safe` | les mêmes assertions, sans rien détruire |
 | `make check-front` · `check-back` | typecheck + build Nuxt · fmt + clippy + tests Cargo |
@@ -381,14 +382,15 @@ Une précision utile pour `check-db-safe` : sur une base qui n'est pas neuve, `a
 
 > **`check-db` commence par `down -v`. Chaque `make check` supprime le volume `pgdata` et, avec lui, TOUTES les données saisies à la main depuis le dernier chargement du schéma.** Sans confirmation, sans sauvegarde.
 
-C'est le prix de la seule vérification qui compte vraiment : prouver que le schéma complet se charge sur une base vierge. Mais [CLAUDE.md](../CLAUDE.md) fait de `make check` une condition de commit — il faut donc savoir qu'un commit fréquent signifie un jeu d'essai détruit tout aussi souvent.
+C'est le prix de la seule vérification qui compte vraiment : prouver que le schéma complet se charge sur une base vierge. [CLAUDE.md](../CLAUDE.md) en faisait une condition de commit : le 16/09, un `make check` lancé avant un commit a effacé la base de travail, sans sauvegarde. La condition de commit est désormais `make check-safe`.
 
 D'où la cible `check-db-safe` : mêmes assertions, base en place. Le réflexe à prendre :
 
 | Moment | Commande | Effet sur les données |
 |---|---|---|
 | Pendant le développement | `make check-db-safe` | aucune perte |
-| Avant un commit important | `make check` | base recréée de zéro |
+| Avant un commit | `make check-safe` | aucune perte |
+| Avant un changement de `docs/database/`, avec accord et après `pg_dump` | `make check` | base recréée de zéro |
 
 Un jeu d'essai qu'on tient à garder se rejoue depuis un script SQL versionné, jamais depuis la mémoire du volume Docker.
 

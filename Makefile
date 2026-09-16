@@ -3,7 +3,8 @@
 # Pas d'intégration continue : développeur seul, contrainte de temps. Trois
 # vérifications locales à la place, décrites dans docs/ENVIRONNEMENT_LOCAL.md.
 #
-#   make check          les trois — DÉTRUIT la base (voir ci-dessous)
+#   make check-safe     les trois, base en place — la vérification avant commit
+#   make check          les trois sur base vierge — DÉTRUIT la base (voir ci-dessous)
 #   make check-db-safe  les mêmes assertions SQL, sans rien détruire
 #   make up / down      services locaux
 #   make garage-init    layout, bucket et clé S3 — rejoué tout seul par `check-db`
@@ -51,7 +52,8 @@ help:
 	@echo '  make up             démarre les cinq services et attend le chargement du schéma'
 	@echo '  make down           arrête les services (conserve les volumes)'
 	@echo '  make check-db-safe  assertions sur la base en place — aucune perte'
-	@echo '  make check          les trois vérifications — DÉTRUIT la base (down -v)'
+	@echo '  make check-safe     les trois vérifications, base en place — avant tout commit'
+	@echo '  make check          les trois sur base vierge — DÉTRUIT la base (down -v)'
 	@echo '  make openapi        engendre frontend/app/types/api.ts depuis les routes Rust'
 	@echo '  make garage-init    layout, bucket et clé S3 — rejoué tout seul par check-db'
 	@echo '  make media-base-url URL publique des médias → relais local (refait par garage-init)'
@@ -59,6 +61,10 @@ help:
 	@echo '  make logs-db        journaux PostgreSQL'
 
 check: check-db check-front check-back
+
+# Avant un commit : rien n'est détruit. Une base effacée par `make check` le 16/09
+# n'avait aucune sauvegarde locale.
+check-safe: check-db-safe check-front check-back
 
 # ---------------------------------------------------------------------------
 # Services
