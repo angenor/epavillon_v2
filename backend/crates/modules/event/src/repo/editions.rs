@@ -219,6 +219,7 @@ pub struct LigneBase {
     pub programme_published_at: Option<OffsetDateTime>,
     pub call_status: Option<String>,
     pub call_deadline: Option<OffsetDateTime>,
+    pub cover: Option<serde_json::Value>,
 }
 
 /// Une ligne, par son identifiant.
@@ -280,7 +281,8 @@ async fn lire<'e>(
                   e.latitude::float8 AS "latitude?", e.longitude::float8 AS "longitude?",
                   e.has_pavilion, e.programme_published_at,
                   cfp.status::text AS "call_status?",
-                  event.effective_deadline(cfp.id) AS "call_deadline?"
+                  event.effective_deadline(cfp.id) AS "call_deadline?",
+                  media.attached_image('event', 'events', e.id, 'cover') AS "cover?"
              FROM event.events e
              LEFT JOIN event.event_series s ON s.id = e.series_id
              LEFT JOIN reference.countries c ON c.id = e.country_id
@@ -324,6 +326,7 @@ async fn lire<'e>(
             programme_published_at: l.programme_published_at,
             call_status: l.call_status,
             call_deadline: l.call_deadline,
+            cover: l.cover,
         })
         .collect())
 }

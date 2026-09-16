@@ -37,14 +37,14 @@ Un écran = un fichier. Il porte ce qui a été livré, les écarts relevés ent
 | A0.4 | Composants d'interface + page de guide de style | ✅ 16/08 · navigation latérale du back-office refondue 04/09 | [écarts et vérifications](progression/ecrans/a0.4-composants.md) |
 | A1 | Authentification | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a1-authentification.md) |
 | A2 | Rattachement à une organisation | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a2-organisation.md) |
-| A3 | Page publique de l'événement | ✅ 17/08 · refondue 19/08 · corrigée 27/08 | [écarts et vérifications](progression/ecrans/a3-evenement-public.md) |
+| A3 | Page publique de l'événement | ✅ 17/08 · refondue 19/08 · corrigée 27/08 · bandeau de programmation 16/09 (migration de prod à faire) | [écarts et vérifications](progression/ecrans/a3-evenement-public.md) |
 | A4 | Formulaire de soumission | ✅ 17/08 · ajusté 15/09 | [écarts et vérifications](progression/ecrans/a4-soumission.md) |
 | A5 | Espace organisation | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a5-espace-organisation.md) |
 | A6 | Tableau de bord back-office | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a6-tableau-de-bord.md) |
 | A7 | Liste des propositions | ✅ 18/08 · révisé 15/09 | [écarts et vérifications](progression/ecrans/a7-propositions.md) |
 | A8 | Fiche d'évaluation | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a8-evaluation.md) |
 | A9 | Planificateur de créneaux | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a9-planificateur.md) |
-| A10 | Gestion des événements | ✅ 18/08 · téléversement des visuels 26/08 | [écarts et vérifications](progression/ecrans/a10-evenements.md) |
+| A10 | Gestion des événements | ✅ 18/08 · téléversement des visuels 26/08 · liste en rangées 16/09 | [écarts et vérifications](progression/ecrans/a10-evenements.md) |
 | A11 | Organisations et fusion | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a11-organisations-fusion.md) |
 | A12 | Utilisateurs et rôles | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a12-utilisateurs-roles.md) |
 | A13 | Messages d'incident | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a13-incidents.md) |

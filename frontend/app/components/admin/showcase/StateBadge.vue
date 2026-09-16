@@ -44,7 +44,7 @@ const props = withDefaults(defineProps<Props>(), { size: 'md' })
  * attention » ; un brouillon ne demande rien tant que l'éditeur n'a pas décidé,
  * et l'aide de l'écran le dit elle-même — « Personne ne la voit ». C'est aussi
  * ce que font les trois autres listes du back-office qui affichent un brouillon
- * (`admin/events/EditionsTable.vue`, `admin/proposals/Table.vue`,
+ * (`admin/events/EditionsList.vue`, `admin/proposals/List.vue`,
  * `admin/review/Header.vue`) : le gris est la majorité, et un cinquième écran
  * n'a pas à la renverser. L'icône `edit` continue de porter la forme — la
  * couleur ne dit jamais seule ce qu'est un état.

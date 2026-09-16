@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT e.id, e.title, e.acronym, e.slug::text AS \"slug!\",\n                  e.series_id, s.name AS \"series_name?\", s.kind::text AS \"series_kind?\",\n                  s.is_active AS \"series_is_active?\",\n                  e.edition_label, e.edition_year,\n                  e.status::text AS \"status!\",\n                  e.participation_mode::text AS \"participation_mode!\",\n                  e.timezone::text AS \"timezone!\",\n                  e.starts_at, e.ends_at,\n                  e.country_id, c.name AS \"country_name?\",\n                  e.city, e.address,\n                  e.latitude::float8 AS \"latitude?\", e.longitude::float8 AS \"longitude?\",\n                  e.has_pavilion, e.programme_published_at,\n                  cfp.status::text AS \"call_status?\",\n                  event.effective_deadline(cfp.id) AS \"call_deadline?\"\n             FROM event.events e\n             LEFT JOIN event.event_series s ON s.id = e.series_id\n             LEFT JOIN reference.countries c ON c.id = e.country_id\n             LEFT JOIN event.calls_for_proposals cfp\n                    ON cfp.event_id = e.id AND cfp.status <> 'cancelled'\n            WHERE ($1::boolean OR e.id = ANY($2::uuid[]))\n              AND ($3::uuid IS NULL OR e.id = $3)\n            ORDER BY e.starts_at DESC",
+  "query": "SELECT e.id, e.title, e.acronym, e.slug::text AS \"slug!\",\n                  e.series_id, s.name AS \"series_name?\", s.kind::text AS \"series_kind?\",\n                  s.is_active AS \"series_is_active?\",\n                  e.edition_label, e.edition_year,\n                  e.status::text AS \"status!\",\n                  e.participation_mode::text AS \"participation_mode!\",\n                  e.timezone::text AS \"timezone!\",\n                  e.starts_at, e.ends_at,\n                  e.country_id, c.name AS \"country_name?\",\n                  e.city, e.address,\n                  e.latitude::float8 AS \"latitude?\", e.longitude::float8 AS \"longitude?\",\n                  e.has_pavilion, e.programme_published_at,\n                  cfp.status::text AS \"call_status?\",\n                  event.effective_deadline(cfp.id) AS \"call_deadline?\",\n                  media.attached_image('event', 'events', e.id, 'cover') AS \"cover?\"\n             FROM event.events e\n             LEFT JOIN event.event_series s ON s.id = e.series_id\n             LEFT JOIN reference.countries c ON c.id = e.country_id\n             LEFT JOIN event.calls_for_proposals cfp\n                    ON cfp.event_id = e.id AND cfp.status <> 'cancelled'\n            WHERE ($1::boolean OR e.id = ANY($2::uuid[]))\n              AND ($3::uuid IS NULL OR e.id = $3)\n            ORDER BY e.starts_at DESC",
   "describe": {
     "columns": [
       {
@@ -232,6 +232,12 @@
         "name": "call_deadline?",
         "type_info": "Timestamptz",
         "origin": "Expression"
+      },
+      {
+        "ordinal": 25,
+        "name": "cover?",
+        "type_info": "Jsonb",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -266,8 +272,9 @@
       false,
       true,
       null,
+      null,
       null
     ]
   },
-  "hash": "4e23f5b781b1bc18fa9a8dbc49980629403ee70760e402044196bd5b5da92309"
+  "hash": "c027405cd6b0823890e11a232ffe1c7bb7532cf2d7cf233302cb9ad980da63ba"
 }

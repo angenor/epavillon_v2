@@ -124,6 +124,8 @@ export interface EditionListRow {
   call_deadline: IsoDateTime | null
   /** Nombre de jours du calendrier déjà créés (`event.event_days`). */
   day_count: number
+  /** `media.attached_image()` — la couverture 16:9. */
+  cover: AttachedImage | null
 }
 
 /** Une série proposée au filtre et au formulaire. */

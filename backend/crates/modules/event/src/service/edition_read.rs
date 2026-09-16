@@ -98,6 +98,7 @@ pub fn composer(base: editions::LigneBase, d: Decomptes) -> EditionListRow {
         call_status: base.call_status,
         call_deadline: base.call_deadline,
         day_count: d.day_count,
+        cover: base.cover,
     }
 }
 

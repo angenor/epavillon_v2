@@ -41,6 +41,7 @@ import { allSessions } from '../sessions'
 import { people } from '../people'
 import { organizations } from '../org'
 import { countries, entityTerms, taxonomyTerms } from '../reference'
+import { attachedImage } from '../covers'
 
 // ---------------------------------------------------------------------------
 // Tableaux mutables
@@ -184,6 +185,7 @@ export function listRow(edition: EventEdition): EditionListRow {
     // `event.effective_deadline()` — la prolongation d'abord, la clôture ensuite.
     call_deadline: call ? (call.extended_until ?? call.closes_at) : null,
     day_count: days.filter((d) => d.event_id === edition.id).length,
+    cover: attachedImage('event', 'events', edition.id, 'cover'),
   }
 }
 

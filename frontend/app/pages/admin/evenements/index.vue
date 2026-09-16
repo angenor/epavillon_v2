@@ -137,7 +137,7 @@ const PARAM_BY_SORT = Object.fromEntries(
  * de pouvoir lire quoi que ce soit. Même raisonnement que le sélecteur d'édition.
  */
 const sortKey = computed<EditionSortKey>(() => SORT_PARAM[queryText(route.query.tri)] ?? 'starts_at')
-const sortDirection = computed<SortDirection>(() =>
+const sortDirection = computed<Exclude<SortDirection, null>>(() =>
   queryText(route.query.sens) === 'asc' ? 'asc' : 'desc',
 )
 
@@ -183,15 +183,6 @@ const sortedRows = computed(() =>
   ),
 )
 
-const caption = computed(() =>
-  t('admin.event.list.caption', {
-    column: t('admin.event.list.columns.' + sortKey.value),
-  }),
-)
-
-function openEdition(row: EditionListRow): void {
-  navigateTo(localePath(`/admin/evenements/${row.id}`))
-}
 </script>
 
 <template>
@@ -255,15 +246,14 @@ function openEdition(row: EditionListRow): void {
           @update:filters="setFilters"
         />
 
-        <AdminEventsEditionsTable
+        <AdminEventsEditionsList
           class="mt-4"
           :rows="sortedRows"
-          :caption="caption"
+          :label="t('admin.event.list.label')"
           :sort-key="sortKey"
           :sort-direction="sortDirection"
           :loading="status === 'pending'"
           @sort="setSort"
-          @open="openEdition"
         >
           <template #empty>
             <!-- Aucun résultat APRÈS filtrage : offrir de retirer les filtres,
@@ -276,7 +266,7 @@ function openEdition(row: EditionListRow): void {
               @action="setFilters(NO_EDITION_FILTERS)"
             />
           </template>
-        </AdminEventsEditionsTable>
+        </AdminEventsEditionsList>
       </template>
     </template>
   </div>

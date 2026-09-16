@@ -52,6 +52,8 @@ pub struct EditionListRow {
     #[serde(with = "time::serde::rfc3339::option")]
     pub call_deadline: Option<OffsetDateTime>,
     pub day_count: i64,
+    /// `media.attached_image()` — la couverture 16:9, souvent nulle.
+    pub cover: Option<Value>,
 }
 
 /// Ce que le formulaire envoie — `EditionFormPayload`.

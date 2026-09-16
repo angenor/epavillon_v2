@@ -83,5 +83,15 @@
   },
   "restricted": {
     "notice": "Vous administrez une seule édition ; elle est ouverte directement."
+  },
+  "label": "Liste des éditions",
+  "sort": {
+    "label": "Trier par",
+    "asc": "Ordre croissant",
+    "desc": "Ordre décroissant"
+  },
+  "row": {
+    "proposals": "dossier reçu | dossier reçu | dossiers reçus",
+    "noImage": "Aucune image"
   }
 }

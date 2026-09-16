@@ -92,3 +92,14 @@ Le modèle n'a rien exigé de nouveau — le premier point n'est pas un manque d
 **Le pied de la boîte ne peut plus être muet** : lecture impossible, encodage impossible, poids dépassé, description manquante, fichier en préparation — cinq raisons, dans l'ordre de la correction à faire. Un bouton fermé sans raison visible n'existe plus dans cet écran.
 
 **Ce qui n'a PAS été vérifié.** Rien contre l'API réelle : hors ligne, le dépôt simulé rend une adresse `blob:` qui meurt avec la page. Le refus de quota et la déduplication n'ont pas d'équivalent simulé et restent à voir passer.
+
+## 16/09 — la liste quitte le tableau, comme celle des propositions
+
+Demande du commanditaire : « améliorer l'affichage des occurrences comme sur `/admin/propositions` ».
+
+- `AdminEventsEditionsTable` devient **`AdminEventsEditionsList`** (le tableau est supprimé) : image de couverture à gauche, en 16:9 (icône sinon) — le commanditaire a écarté la vignette carrée, statut en pastille, pavillon, titre dont le lien couvre la rangée, métadonnées à icônes (sigle · année, série, dates avec le fuseau de l'édition, lieu ou « En ligne », jours), puis à droite les dossiers reçus avec l'état de l'appel, et la programmation — barre des activités placées, « Publiée le … » ou « Non publiée ». Tri par liste et bouton de sens, comme en A7 ; `caption` et `openEdition` disparaissent de la page.
+- **API** : la ligne de liste gagne `cover`, par `media.attached_image()` dans `repo/editions.rs::lire` — la même fonction que `v_public_editions`, aucune modification du modèle. Cache `.sqlx` régénéré.
+- Fuseau d'une édition sans ville : `zoneLabel()` (« heure de Toronto ») au lieu du nom IANA brut qu'affichait le tableau.
+
+**Vérifié** : `make check-front`, `cargo clippy -p event -p api --all-targets` sans avertissement, `cargo test -p event` ; au navigateur en données d'exemple (compte de démonstration), 1440 px clair et 375 px sombre, sans défilement horizontal.
+**Non vérifié** contre l'API réelle : elle tournait encore sur l'ancien binaire, et la page demande une connexion.

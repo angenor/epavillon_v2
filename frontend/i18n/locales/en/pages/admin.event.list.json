@@ -83,5 +83,15 @@
   },
   "restricted": {
     "notice": "You administer a single edition; it opens directly."
+  },
+  "label": "List of editions",
+  "sort": {
+    "label": "Sort by",
+    "asc": "Ascending order",
+    "desc": "Descending order"
+  },
+  "row": {
+    "proposals": "proposal received | proposal received | proposals received",
+    "noImage": "No image"
   }
 }
