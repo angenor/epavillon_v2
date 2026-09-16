@@ -609,6 +609,10 @@ INSERT INTO identity.role_permissions (role_code, permission_code) VALUES
     ('admin', 'org.organization.read'), ('admin', 'org.organization.manage'), ('admin', 'org.organization.merge'),
     ('admin', 'event.event.manage'), ('admin', 'event.call.manage'),
     ('admin', 'programme.proposal.read_all'), ('admin', 'programme.proposal.decide'),
+    -- NOTER EST OUVERT À L'ÉQUIPE (arbitré le 16/09) : l'IFDD note sans passer
+    -- par le comité, comme en v1. Conséquence assumée : `admin` peut aussi
+    -- renvoyer un dossier pour corrections (écart n° 50, désormais refermé).
+    ('admin', 'programme.review.write'),
     ('admin', 'programme.session.schedule'), ('admin', 'programme.registration.manage'),
     ('admin', 'live.meeting.manage'), ('admin', 'live.incident.publish'),
     ('admin', 'publication.article.moderate'), ('admin', 'publication.quota.manage'),

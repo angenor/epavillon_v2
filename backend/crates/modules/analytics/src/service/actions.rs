@@ -129,7 +129,7 @@ async fn revues_en_retard(conn: &mut PgConnection, event_id: Uuid) -> Result<Opt
         count,
         due_at,
         examples,
-        target: "/admin/evaluations?filtre=en-retard".to_owned(),
+        target: "/admin/propositions?filtre=en-retard".to_owned(),
     }))
 }
 

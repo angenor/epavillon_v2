@@ -38,20 +38,29 @@ export interface ReviewAssignment {
 export type ReviewRecommendation = 'accept' | 'accept_with_changes' | 'neutral' | 'reject'
 
 /**
+ * Contrainte `ck_reviews_mode` : la grille pondérée, ou une note directe sur 20
+ * quand le temps manque (arbitré le 16/09).
+ */
+export type ReviewMode = 'quick' | 'detailed'
+
+/**
  * Table `programme.reviews` — `070` § 5.
- * L'avis complet d'un membre du comité sur une proposition. Tant que
- * `submitted_at` est nul, la revue est un brouillon et ne compte pas dans les
- * agrégats de la proposition.
+ * L'avis d'un membre de l'équipe sur une proposition. Tant que `submitted_at`
+ * est nul, la revue est un brouillon et ne compte pas dans les agrégats. Elle
+ * n'est jamais un préalable à la décision.
  */
 export interface Review {
   id: ReviewId
   proposal_id: ProposalId
   reviewer_id: PersonId
+  mode: ReviewMode
   recommendation: ReviewRecommendation
-  /** Calculée depuis les notes par critère. */
+  /** Calculée des critères en mode détaillé, déduite de la note sur 20 en mode rapide. */
   weighted_score: Numeric | null
-  /** La même note ramenée sur 20, échelle familière aux équipes de la v1. */
+  /** Calculée en mode détaillé, SAISIE en mode rapide. */
   score_out_of_20: Numeric | null
+  /** Commentaire général, lu de l'équipe. */
+  comment: string | null
   strengths: string | null
   weaknesses: string | null
   /** Visible du seul comité, JAMAIS du soumissionnaire. */

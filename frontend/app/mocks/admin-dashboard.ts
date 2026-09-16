@@ -162,9 +162,9 @@ function overdueReviews(eventId: string, at: number): AdminAction | null {
     examples: enRetard.slice(0, MAX_EXAMPLES).map<AdminActionExample>((row) => ({
       label: row.revisionniste,
       hint: String(row.revues_en_retard),
-      target: `/admin/evaluations?revisionniste=${row.reviewer_id}`,
+      target: `/admin/propositions?revisionniste=${row.reviewer_id}`,
     })),
-    target: '/admin/evaluations?filtre=en-retard',
+    target: '/admin/propositions?filtre=en-retard',
   }
 }
 

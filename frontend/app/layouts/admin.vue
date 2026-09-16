@@ -58,7 +58,6 @@ const sections: NavSection[] = [
     items: [
       { labelKey: 'nav.admin.dashboard', to: '/admin', icon: 'grid' },
       { labelKey: 'nav.admin.proposals', to: '/admin/propositions', icon: 'inbox' },
-      { labelKey: 'nav.admin.reviews', to: '/admin/evaluations', icon: 'check-circle' },
       { labelKey: 'nav.admin.schedule', to: '/admin/programmation', icon: 'clock' },
     ],
   },

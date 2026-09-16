@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"n!\"\n             FROM programme.review_scores rs\n             JOIN programme.reviews r ON r.id = rs.review_id\n            WHERE r.proposal_id = $1 AND r.reviewer_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "dbd22c8007114253ce6d79d834e3d31edfd7aec08f0f28431abc2c76ec44a681"
+}

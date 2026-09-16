@@ -40,9 +40,12 @@ pub struct Revue {
     pub id: Uuid,
     pub proposal_id: Uuid,
     pub reviewer_id: Uuid,
+    /// `detailed` ou `quick`.
+    pub mode: String,
     pub recommendation: String,
     pub weighted_score: Option<f64>,
     pub score_out_of_20: Option<f64>,
+    pub comment: Option<String>,
     pub strengths: Option<String>,
     pub weaknesses: Option<String>,
     /// **Visible du seul comité, jamais du soumissionnaire.** Aucune
@@ -62,9 +65,11 @@ macro_rules! revue_depuis {
             id: $l.id,
             proposal_id: $l.proposal_id,
             reviewer_id: $l.reviewer_id,
+            mode: $l.mode,
             recommendation: $l.recommendation,
             weighted_score: $l.weighted_score,
             score_out_of_20: $l.score_out_of_20,
+            comment: $l.comment,
             strengths: $l.strengths,
             weaknesses: $l.weaknesses,
             private_note: $l.private_note,
@@ -83,9 +88,9 @@ pub async fn mienne<'e>(
     membre: Uuid,
 ) -> Result<Option<Revue>> {
     let ligne = sqlx::query!(
-        r#"SELECT id, proposal_id, reviewer_id, recommendation,
+        r#"SELECT id, proposal_id, reviewer_id, mode, recommendation,
                   weighted_score::float8, score_out_of_20::float8,
-                  strengths, weaknesses, private_note, submitted_at,
+                  comment, strengths, weaknesses, private_note, submitted_at,
                   created_at, updated_at
              FROM programme.reviews
             WHERE proposal_id = $1 AND reviewer_id = $2"#,
@@ -110,9 +115,9 @@ pub async fn des_pairs<'e>(
     sauf: Uuid,
 ) -> Result<Vec<Revue>> {
     let lignes = sqlx::query!(
-        r#"SELECT id, proposal_id, reviewer_id, recommendation,
+        r#"SELECT id, proposal_id, reviewer_id, mode, recommendation,
                   weighted_score::float8, score_out_of_20::float8,
-                  strengths, weaknesses, private_note, submitted_at,
+                  comment, strengths, weaknesses, private_note, submitted_at,
                   created_at, updated_at
              FROM programme.reviews
             WHERE proposal_id = $1 AND reviewer_id <> $2
@@ -153,6 +158,11 @@ pub async fn compter_deposees<'e>(
 /// Ce qu'une écriture de revue pose, hors les notes par critère.
 pub struct ChampsDeLaRevue<'a> {
     pub recommendation: &'a str,
+    pub mode: &'a str,
+    /// Écrite en mode `quick` seulement ; en `detailed`, la consolidation la
+    /// recalcule des critères.
+    pub score_out_of_20: Option<f64>,
+    pub comment: Option<&'a str>,
     pub strengths: Option<&'a str>,
     pub weaknesses: Option<&'a str>,
     pub private_note: Option<&'a str>,
@@ -169,26 +179,36 @@ pub async fn enregistrer(
     membre: Uuid,
     champs: &ChampsDeLaRevue<'_>,
 ) -> Result<Revue> {
+    // Les notes calculées sont remises à zéro : une revue détaillée sans
+    // critère noté garderait sinon la note de son passé rapide.
     let ligne = sqlx::query!(
         r#"INSERT INTO programme.reviews
-               (proposal_id, reviewer_id, recommendation, strengths, weaknesses,
-                private_note, submitted_at)
-           VALUES ($1, $2, $3, $4, $5, $6,
-                   CASE WHEN $7 THEN now() END)
+               (proposal_id, reviewer_id, mode, recommendation, score_out_of_20,
+                comment, strengths, weaknesses, private_note, submitted_at)
+           VALUES ($1, $2, $3, $4,
+                   CASE WHEN $3 = 'quick' THEN $5::float8::numeric(4,2) END,
+                   $6, $7, $8, $9, CASE WHEN $10 THEN now() END)
            ON CONFLICT (proposal_id, reviewer_id) DO UPDATE
-              SET recommendation = EXCLUDED.recommendation,
+              SET mode           = EXCLUDED.mode,
+                  recommendation = EXCLUDED.recommendation,
+                  score_out_of_20 = EXCLUDED.score_out_of_20,
+                  weighted_score = NULL,
+                  comment        = EXCLUDED.comment,
                   strengths      = EXCLUDED.strengths,
                   weaknesses     = EXCLUDED.weaknesses,
                   private_note   = EXCLUDED.private_note,
                   submitted_at   = COALESCE(programme.reviews.submitted_at,
                                             EXCLUDED.submitted_at)
-        RETURNING id, proposal_id, reviewer_id, recommendation,
+        RETURNING id, proposal_id, reviewer_id, mode, recommendation,
                   weighted_score::float8, score_out_of_20::float8,
-                  strengths, weaknesses, private_note, submitted_at,
+                  comment, strengths, weaknesses, private_note, submitted_at,
                   created_at, updated_at"#,
         dossier.as_uuid(),
         membre,
+        champs.mode,
         champs.recommendation,
+        champs.score_out_of_20,
+        champs.comment,
         champs.strengths,
         champs.weaknesses,
         champs.private_note,

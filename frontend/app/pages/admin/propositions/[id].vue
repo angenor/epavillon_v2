@@ -14,13 +14,10 @@ import type { DecisionOption } from '~/utils/review-scoring'
  * lecture recommencée — l'écran le plus dense de la plateforme est aussi celui
  * qu'on ne doit jamais avoir à quitter.
  *
- * DEUX COLONNES, ET LEUR RAISON D'ÊTRE. À GAUCHE le dossier, en largeur
- * dominante : c'est un texte qu'on lit, avec ses organisations, ses
- * intervenants, ses pièces et son historique. À DROITE le panneau d'évaluation,
- * COLLANT AU DÉFILEMENT — on note EN LISANT, et un panneau qui s'échappe vers le
- * haut oblige à noter de mémoire. Sous 1024 px, la colonne de droite passe
- * dessous et la colle est retirée : coller un panneau de 600 px sur un téléphone
- * masque le texte qu'il sert à juger.
+ * LE DOSSIER PREND TOUTE LA LARGEUR ; L'ÉVALUATION FLOTTE (arbitré le 16/09).
+ * Noter est facultatif — l'IFDD retient parfois un dossier de partenaire sans
+ * l'évaluer —, la notation s'ouvre donc à la demande dans une fenêtre flottante,
+ * comme en v1, et reste ouverte pendant qu'on lit.
  *
  * L'ÉVALUATION EN AVEUGLE EST LA RÈGLE DE L'APPEL, pas un réglage d'écran.
  * `calls_for_proposals.blind_review` commande, et le voile est appliqué À LA
@@ -29,8 +26,8 @@ import type { DecisionOption } from '~/utils/review-scoring'
  * sans explication passe pour une panne.
  *
  * LA NOTATION ET LA DÉCISION SONT DEUX GESTES DIFFÉRENTS, faits par deux
- * personnes différentes, et l'écran les sépare : la grille à droite, les actions
- * de décision dans un bloc distinct de l'en-tête. Chacune se teste par
+ * personnes différentes, et l'écran les sépare : la note dans la fenêtre
+ * flottante, les actions de décision dans l'en-tête. Chacune se teste par
  * PERMISSION — `programme.review.write` pour noter, `programme.proposal.decide`
  * pour trancher —, toujours sur la portée de l'édition regardée.
  *
@@ -287,7 +284,8 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-[100rem]">
+  <!-- pb-20 : le bouton flottant ne couvre jamais la fin du fil. -->
+  <div class="mx-auto w-full max-w-[100rem] pb-20">
     <!-- ACCÈS REFUSÉ — aucun droit d'administration, ou édition hors périmètre.
          Distinct d'un dossier introuvable : l'un dit « vous n'avez pas ce
          droit », l'autre « ce dossier n'existe pas ». -->
@@ -307,10 +305,7 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
 
       <div v-else-if="status === 'pending' && !screen" class="flex flex-col gap-4">
         <UiSkeletonLoader height="9rem" />
-        <div class="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-          <UiSkeletonLoader height="28rem" />
-          <UiSkeletonLoader height="28rem" />
-        </div>
+        <UiSkeletonLoader height="28rem" />
       </div>
 
       <UiEmptyState
@@ -356,72 +351,56 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
           @dismiss="notice = null"
         />
 
-        <!-- DEUX COLONNES. La lecture domine (3/2) ; le panneau colle au
-             défilement à partir de 1024 px, et repasse dessous en dessous. -->
-        <div class="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-          <div class="flex min-w-0 flex-col gap-8">
-            <UiTabs
-              :items="tabs"
-              :model-value="activeTab"
-              :label="t('admin.proposal.review.tabs.dossier')"
-              @update:model-value="selectTab"
-            />
+        <div class="mt-6 flex min-w-0 flex-col gap-8">
+          <UiTabs
+            :items="tabs"
+            :model-value="activeTab"
+            :label="t('admin.proposal.review.tabs.dossier')"
+            @update:model-value="selectTab"
+          />
 
-            <template v-if="activeTab === 'dossier'">
-              <AdminReviewDossier
-                :proposal="screen.proposal"
-                :themes="screen.themes"
-                :timezone="timezone"
-                :zone-label="zoneLabel"
-                :country-name="countryName"
-                :submitter-name="personName(screen.proposal.submitted_by)"
-                :contact-name="personName(screen.proposal.contact_person_id)"
-              />
-
-              <AdminReviewOrganizations :entries="screen.organizations" :timezone="timezone" />
-              <AdminReviewSpeakers :entries="screen.speakers" :timezone="timezone" />
-              <AdminReviewDocuments :entries="screen.documents" :timezone="timezone" />
-            </template>
-
-            <!-- L'HISTORIQUE CHAMP PAR CHAMP est le même composant que l'espace
-                 organisation : `programme.proposal_history()` rend la même chose
-                 aux deux écrans, et deux rendus divergeraient sur les cas qui
-                 comptent — un titre multilingue, une date, un statut. -->
-            <WorkspaceHistoryList v-else :entries="screen.history" :timezone="timezone" />
-          </div>
-
-          <!-- LA COLONNE D'ÉVALUATION. `lg:sticky` la garde sous les yeux
-               pendant la lecture ; `top-20` la pose sous l'en-tête collant du
-               back-office. -->
-          <div class="flex flex-col gap-6 lg:sticky lg:top-20">
-            <AdminReviewScorePanel
-              :criteria="screen.criteria"
-              :max-weighted-score="screen.max_weighted_score"
-              :my-review="screen.my_review"
-              :permissions="screen.permissions"
+          <template v-if="activeTab === 'dossier'">
+            <AdminReviewDossier
+              :proposal="screen.proposal"
+              :themes="screen.themes"
               :timezone="timezone"
-              :busy="busy"
-              :error="reviewError"
-              :saved-at="savedAt"
-              @save="saveReview"
-              @recuse="recusalOpen = true"
+              :zone-label="zoneLabel"
+              :country-name="countryName"
+              :submitter-name="personName(screen.proposal.submitted_by)"
+              :contact-name="personName(screen.proposal.contact_person_id)"
             />
 
-            <AdminReviewPeerReviews
-              :peer-reviews="screen.peer_reviews"
-              :committee="screen.committee"
-              :criteria="screen.criteria"
-              :max-weighted-score="screen.max_weighted_score"
-              :blind-veiled="screen.blind_veiled"
-              :veiled-count="screen.veiled_count"
-              :required-reviews="screen.required_reviews"
-              :timezone="timezone"
-            />
-          </div>
+            <AdminReviewOrganizations :entries="screen.organizations" :timezone="timezone" />
+            <AdminReviewSpeakers :entries="screen.speakers" :timezone="timezone" />
+            <AdminReviewDocuments :entries="screen.documents" :timezone="timezone" />
+          </template>
+
+          <!-- L'HISTORIQUE CHAMP PAR CHAMP est le même composant que l'espace
+               organisation : `programme.proposal_history()` rend la même chose
+               aux deux écrans, et deux rendus divergeraient sur les cas qui
+               comptent — un titre multilingue, une date, un statut. -->
+          <WorkspaceHistoryList v-else :entries="screen.history" :timezone="timezone" />
         </div>
 
-        <!-- LES ÉCHANGES, SOUS LE PANNEAU et sur toute la largeur : un fil de
-             discussion dans une colonne de 400 px se lit trois mots par ligne. -->
+        <AdminReviewFloatingDesk
+          :reference-code="screen.proposal.reference_code"
+          :criteria="screen.criteria"
+          :max-weighted-score="screen.max_weighted_score"
+          :my-review="screen.my_review"
+          :permissions="screen.permissions"
+          :peer-reviews="screen.peer_reviews"
+          :committee="screen.committee"
+          :blind-veiled="screen.blind_veiled"
+          :veiled-count="screen.veiled_count"
+          :required-reviews="screen.required_reviews"
+          :timezone="timezone"
+          :busy="busy"
+          :error="reviewError"
+          :saved-at="savedAt"
+          @save="saveReview"
+          @recuse="recusalOpen = true"
+        />
+
         <AdminReviewComments
           class="mt-8"
           :comments="screen.comments"

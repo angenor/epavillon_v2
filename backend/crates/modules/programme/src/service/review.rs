@@ -13,18 +13,17 @@
 //! écrite en SQL produirait deux vérités pour le même dossier, et l'en-tête de
 //! l'écran afficherait un classement que la liste contredirait.
 //!
-//! # Noter exige une AFFECTATION ; lire n'en exige pas
+//! # Noter exige la PERMISSION, pas l'affectation (arbitré le 16/09)
 //!
-//! Rien ne lie la permission à l'affectation en base (R21) : un membre du
-//! comité détenant `programme.review.write` pourrait noter n'importe quel
-//! dossier de son édition. Le service l'interdit — **et l'interdit aussi après
-//! un déport**, sans quoi une déclaration d'impartialité se contredirait d'un
-//! clic.
+//! Toute l'équipe qui détient `programme.review.write` sur l'édition note
+//! n'importe quel dossier. Seul le **déport** refuse : une déclaration
+//! d'impartialité ne se contredit pas d'un clic.
 //!
-//! **Mais lire reste permis** : un membre du comité ouvre un dossier qu'on ne
-//! lui a pas confié sans le noter. Les deux règles sont décorrélées, et c'est
-//! ce que `PROPOSAL_REVIEW_NOT_ASSIGNED` dit à l'écran — « masque la grille,
-//! laisse la lecture ».
+//! # Deux modes : `detailed` (la grille) et `quick` (une note sur 20)
+//!
+//! Une revue rapide ne garde aucune note par critère : les anciennes sont
+//! effacées, sans quoi elles pèseraient encore sur l'élimination d'une revue
+//! repassée en détaillé.
 //!
 //! # Ce service n'émet aucun événement
 //!
@@ -50,6 +49,14 @@ use crate::state::ProgrammeState;
 #[derive(Debug, Clone, Deserialize, ToSchema)]
 pub struct SaveReviewPayload {
     pub recommendation: String,
+    /// `detailed` (par défaut) ou `quick`.
+    #[serde(default = "mode_par_defaut")]
+    pub mode: String,
+    /// Lue en mode `quick` seulement : en `detailed`, la base la calcule.
+    #[serde(default)]
+    pub score_out_of_20: Option<f64>,
+    #[serde(default)]
+    pub comment: Option<String>,
     /// Indexé par critère. **Une entrée absente est une note non posée**, pas
     /// un zéro : zéro sur un critère éliminatoire disqualifie le dossier.
     #[serde(default)]
@@ -68,6 +75,13 @@ pub struct SaveReviewPayload {
     /// **lève le voile**.
     pub submit: bool,
 }
+
+fn mode_par_defaut() -> String {
+    MODE_DETAILLE.to_owned()
+}
+
+const MODE_RAPIDE: &str = "quick";
+const MODE_DETAILLE: &str = "detailed";
 
 /// `SaveReviewResult` — la revue, et les agrégats **relus** du dossier.
 #[derive(Debug, Clone, Serialize, ToSchema)]
@@ -105,10 +119,26 @@ pub async fn enregistrer(
         ));
     }
 
+    let rapide = match payload.mode.as_str() {
+        MODE_RAPIDE => true,
+        MODE_DETAILLE => false,
+        _ => {
+            return Err(ApiError::validation(
+                "Ce mode de notation n'existe pas : « quick » ou « detailed ».",
+                "mode",
+            ))
+        }
+    };
+
     exiger_de_pouvoir_noter(state, membre, edition.as_uuid(), dossier).await?;
 
-    let grille = grille_du_dossier(state, dossier).await?;
-    let notes = classer_les_notes(&payload, &grille)?;
+    let (notes, grille, note_sur_20) = if rapide {
+        let note = note_rapide(state, &payload, dossier, membre).await?;
+        (Vec::new(), Vec::new(), note)
+    } else {
+        let grille = grille_du_dossier(state, dossier).await?;
+        (classer_les_notes(&payload, &grille)?, grille, None)
+    };
 
     let mut tx = state.db().write(ctx).await?;
 
@@ -118,6 +148,13 @@ pub async fn enregistrer(
         membre,
         &ChampsDeLaRevue {
             recommendation: &payload.recommendation,
+            mode: &payload.mode,
+            score_out_of_20: note_sur_20,
+            comment: payload
+                .comment
+                .as_deref()
+                .map(str::trim)
+                .filter(|c| !c.is_empty()),
             strengths: payload.strengths.as_deref(),
             weaknesses: payload.weaknesses.as_deref(),
             private_note: payload.private_note.as_deref(),
@@ -245,7 +282,8 @@ pub async fn se_deporter(
 // Les gardes
 // -----------------------------------------------------------------------------
 
-/// **Permission ET affectation non déportée.** Les deux, et dans cet ordre.
+/// **La permission, puis l'absence de déport.** L'affectation n'est pas
+/// requise (16/09).
 async fn exiger_de_pouvoir_noter(
     state: &ProgrammeState,
     membre: Uuid,
@@ -268,15 +306,42 @@ async fn exiger_de_pouvoir_noter(
     }
 
     match assignments::affectation(state.pool(), dossier, membre).await? {
-        Some(a) if a.recused_at.is_none() => Ok(()),
-        Some(_) => Err(ApiError::with_message(
+        Some(a) if a.recused_at.is_some() => Err(ApiError::with_message(
             ErrorCode::ProposalReviewNotAssigned,
             "Vous vous êtes déporté de ce dossier : vous ne pouvez plus le noter.",
         )),
-        None => Err(ApiError::with_message(
-            ErrorCode::ProposalReviewNotAssigned,
-            "Ce dossier ne vous a pas été confié.",
+        _ => Ok(()),
+    }
+}
+
+/// La note sur 20 d'une revue rapide. Elle est exigée au dépôt — et après : une
+/// revue déposée le reste, et `ck_reviews_quick_scored` la refuserait sans note.
+async fn note_rapide(
+    state: &ProgrammeState,
+    payload: &SaveReviewPayload,
+    dossier: ProposalId,
+    membre: Uuid,
+) -> Result<Option<f64>> {
+    match payload.score_out_of_20 {
+        Some(note) if !(0.0..=20.0).contains(&note) => Err(ApiError::validation(
+            "La note doit être comprise entre 0 et 20.",
+            "score_out_of_20",
         )),
+        Some(note) => Ok(Some(note)),
+        None => {
+            let deja_deposee = payload.submit
+                || reviews::mienne(state.pool(), dossier, membre)
+                    .await?
+                    .is_some_and(|r| r.submitted_at.is_some());
+            if deja_deposee {
+                Err(ApiError::validation(
+                    "Une notation rapide se dépose avec sa note sur 20.",
+                    "score_out_of_20",
+                ))
+            } else {
+                Ok(None)
+            }
+        }
     }
 }
 

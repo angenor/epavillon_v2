@@ -416,8 +416,9 @@ CREATE TABLE event.calls_for_proposals (
     -- Présentiel seul par défaut depuis le 15/09 : un pavillon est un stand. Un
     -- cycle de webinaires ouvre les autres formats explicitement.
     allowed_formats   event.participation_mode[] NOT NULL DEFAULT '{in_person}',
-    -- Nombre de revues indépendantes exigé avant décision : matérialise la règle
-    -- « au moins deux révisionnistes se prononcent ».
+    -- Nombre de revues visé par dossier. Objectif d'avancement affiché au
+    -- back-office, JAMAIS un préalable à la décision (arbitré le 16/09) : l'IFDD
+    -- retient parfois un dossier de partenaire sans l'évaluer.
     required_reviews  smallint    NOT NULL DEFAULT 2 CHECK (required_reviews >= 0),
     -- Les révisionnistes voient-ils les notes de leurs pairs avant d'avoir posé
     -- la leur ? Faux = évaluation en aveugle, pour éviter l'effet d'ancrage.

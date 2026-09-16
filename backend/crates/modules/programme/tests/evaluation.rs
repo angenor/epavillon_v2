@@ -9,118 +9,22 @@
 //!   d'un pair dans la réponse ;
 //! - **la consolidation**, dont l'absence est muette : les agrégats rendus
 //!   sont comparés à ceux relus en base ;
-//! - **l'affectation**, qui garde la notation sans garder la lecture ;
+//! - **le déport**, qui ferme la notation sans fermer la lecture ;
 //! - **les trois visibilités**, chacune sur son lecteur, et la demande de
 //!   correction qui ressort partagée quoi qu'on ait demandé.
 
 mod commun;
 
-use commun::{Bac, Terrain};
+use commun::comite::{comite, notation, noteur, perimetre};
+use commun::Bac;
 use kernel::auth::{AdminScope, Perimeter};
 use kernel::error::ErrorCode;
 use programme::domain::desk::EtatDAvancement;
 use programme::domain::ids::ProposalId;
 use programme::service::comments::{self, PostCommentPayload};
-use programme::service::review::{self, RecusalPayload, SaveReviewPayload};
+use programme::service::review::{self, RecusalPayload};
 use programme::service::{desk, transition};
-use std::collections::BTreeMap;
 use uuid::Uuid;
-
-// -----------------------------------------------------------------------------
-// La fabrique — un dossier confié à deux membres du comité
-// -----------------------------------------------------------------------------
-
-struct Comite {
-    dossier: Uuid,
-    /// Affectée, n'a pas encore noté : **le voile est baissé pour elle**.
-    premiere: Perimeter,
-    /// Affectée, a déposé sa revue : elle n'ancre plus personne.
-    seconde: Perimeter,
-    /// Décide sans noter, **donc n'est pas affectée, donc pas voilée**.
-    decideur: Perimeter,
-    criteres: Vec<(Uuid, f64, bool)>,
-}
-
-async fn perimetre(bac: &Bac, personne: Uuid) -> Perimeter {
-    commun::perimetre_de(bac, personne).await
-}
-
-async fn noteur(bac: &Bac, terrain: &Terrain, courriel: &str, prenom: &str) -> Uuid {
-    let personne = commun::personne(bac, courriel, prenom, "Comite").await;
-    commun::attribuer(bac, personne, "reviewer", "event", Some(terrain.edition)).await;
-    sqlx::query!(
-        "INSERT INTO event.call_reviewers (call_id, person_id) VALUES ($1, $2)",
-        terrain.appel,
-        personne
-    )
-    .execute(bac.pool())
-    .await
-    .expect("inscription au comité");
-    personne
-}
-
-async fn confier(bac: &Bac, dossier: Uuid, membre: Uuid) {
-    sqlx::query!(
-        "INSERT INTO programme.review_assignments (proposal_id, reviewer_id) VALUES ($1, $2)",
-        dossier,
-        membre
-    )
-    .execute(bac.pool())
-    .await
-    .expect("affectation");
-}
-
-/// La grille par défaut de l'appel : six critères, dont un éliminatoire.
-async fn criteres(bac: &Bac, appel: Uuid) -> Vec<(Uuid, f64, bool)> {
-    sqlx::query!(
-        r#"SELECT id, max_score::float8 AS "max!", is_knockout
-             FROM event.review_criteria WHERE call_id = $1 ORDER BY sort_order, code"#,
-        appel
-    )
-    .fetch_all(bac.pool())
-    .await
-    .expect("grille de l'appel")
-    .into_iter()
-    .map(|l| (l.id, l.max, l.is_knockout))
-    .collect()
-}
-
-async fn comite(bac: &Bac, terrain: &Terrain) -> Comite {
-    let dossier = commun::dossier(bac, terrain, "Atelier adaptation", "atelier-adaptation").await;
-    let premiere = noteur(bac, terrain, "premiere@ifdd.francophonie.org", "Prisca").await;
-    let seconde = noteur(bac, terrain, "seconde@ifdd.francophonie.org", "Sophie").await;
-    let decideur = commun::personne(bac, "decideur@ifdd.francophonie.org", "Denis", "Kabore").await;
-    commun::attribuer(bac, decideur, "admin", "event", Some(terrain.edition)).await;
-
-    confier(bac, dossier, premiere).await;
-    confier(bac, dossier, seconde).await;
-
-    Comite {
-        dossier,
-        premiere: perimetre(bac, premiere).await,
-        seconde: perimetre(bac, seconde).await,
-        decideur: perimetre(bac, decideur).await,
-        criteres: criteres(bac, terrain.appel).await,
-    }
-}
-
-/// Une charge utile de notation qui pose la même note sur chaque critère.
-fn notation(criteres: &[(Uuid, f64, bool)], part: f64, deposer: bool) -> SaveReviewPayload {
-    let mut scores = BTreeMap::new();
-    for (id, max, _) in criteres {
-        scores.insert(*id, (max * part * 100.0).round() / 100.0);
-    }
-
-    SaveReviewPayload {
-        recommendation: "accept".to_owned(),
-        scores,
-        comments: BTreeMap::new(),
-        strengths: Some("Un sujet bien cadré.".to_owned()),
-        weaknesses: None,
-        private_note: Some("À suivre en séance.".to_owned()),
-        submit: deposer,
-    }
-}
 
 // -----------------------------------------------------------------------------
 // T110 — le voile, par inspection de la charge utile
@@ -244,8 +148,7 @@ async fn le_voile_se_leve_au_depot_et_ne_touche_pas_qui_decide_sans_noter() {
     assert!(!levee.blind_veiled, "sa revue est déposée");
     assert_eq!(levee.peer_reviews.len(), 1, "elle lit celle de sa collègue");
 
-    // **Qui décide sans noter n'est pas affecté, donc pas voilé** : l'ancrage
-    // vise celui qui va poser une note, et masquer les notes à qui doit
+    // **Qui n'est pas affecté n'est pas voilé** : masquer les notes à qui doit
     // trancher rendrait la décision impossible.
     let decideur = desk::ouvrir(
         &bac.state,
@@ -260,8 +163,8 @@ async fn le_voile_se_leve_au_depot_et_ne_touche_pas_qui_decide_sans_noter() {
     assert!(!decideur.permissions.is_assigned);
     assert!(decideur.permissions.can_decide);
     assert!(
-        !decideur.permissions.can_review,
-        "le rôle d'administration ne détient pas la permission de noter (écart n° 50)"
+        decideur.permissions.can_review,
+        "l'administration note aussi, depuis le 16/09 (écart n° 50 refermé)"
     );
 }
 
@@ -415,15 +318,12 @@ async fn une_note_au_dessus_du_maximum_de_son_critere_est_refusee() {
 }
 
 // -----------------------------------------------------------------------------
-// T113 — noter exige une affectation ; lire n'en exige pas
+// T113 — noter n'exige plus d'affectation (16/09)
 // -----------------------------------------------------------------------------
 
-/// **Les deux règles sont décorrélées, et c'est le sujet.**
-///
-/// Rien ne lie la permission à l'affectation en base : sans ce contrôle, un
-/// membre du comité noterait n'importe quel dossier de son édition.
+/// **Toute l'équipe qui détient la permission note**, confiée ou non.
 #[tokio::test]
-async fn noter_exige_une_affectation_mais_lire_nen_exige_pas() {
+async fn noter_nexige_plus_daffectation() {
     let bac = Bac::monter().await;
     let terrain = commun::terrain(&bac).await;
     let comite = comite(&bac, &terrain).await;
@@ -431,7 +331,6 @@ async fn noter_exige_une_affectation_mais_lire_nen_exige_pas() {
     let non_affectee = noteur(&bac, &terrain, "libre@ifdd.francophonie.org", "Lina").await;
     let perimetre_libre = perimetre(&bac, non_affectee).await;
 
-    // Elle LIT le dossier sans difficulté…
     let fiche = desk::ouvrir(
         &bac.state,
         &bac.ctx(),
@@ -439,22 +338,21 @@ async fn noter_exige_une_affectation_mais_lire_nen_exige_pas() {
         ProposalId(comite.dossier),
     )
     .await
-    .expect("un membre du comité lit un dossier qu'on ne lui a pas confié");
+    .expect("un membre de l'équipe lit un dossier qu'on ne lui a pas confié");
     assert!(fiche.permissions.can_review);
     assert!(!fiche.permissions.is_assigned);
     assert!(fiche.my_review.assignment.is_none());
 
-    // …et ne peut pas le noter.
-    let refus = review::enregistrer(
+    let rendu = review::enregistrer(
         &bac.state,
         &bac.ctx(),
         &perimetre_libre,
         ProposalId(comite.dossier),
-        notation(&comite.criteres, 0.5, false),
+        notation(&comite.criteres, 0.5, true),
     )
     .await
-    .expect_err("noter sans affectation est refusé");
-    assert_eq!(refus.code, ErrorCode::ProposalReviewNotAssigned);
+    .expect("noter sans affectation est permis");
+    assert_eq!(rendu.review_count, 1);
 }
 
 // -----------------------------------------------------------------------------

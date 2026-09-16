@@ -46,7 +46,7 @@
   },
   "decision": {
     "title": "Décision",
-    "hint": "Réservée aux personnes qui en ont le droit. La notation, elle, est ouverte à tout membre du comité affecté.",
+    "hint": "Réservée aux personnes qui en ont le droit. La notation est facultative et ne conditionne pas la décision.",
     "none": "Aucune décision n'est possible depuis l'état actuel du dossier.",
     "forbidden": "Vous n'avez pas le droit de décider sur cette édition.",
     "action": {
@@ -146,12 +146,6 @@
     "size": "{size} Mo"
   },
   "panel": {
-    "title": "Mon évaluation",
-    "description": "Vos notes ne sont visibles de personne tant que vous ne les avez pas déposées.",
-    "notAssigned": {
-      "title": "Ce dossier ne vous est pas confié",
-      "description": "Vous pouvez le lire et écrire au comité, mais la grille est réservée aux membres qui en sont chargés."
-    },
     "cannotReview": {
       "title": "Lecture seule",
       "description": "Vous n'avez pas le droit de noter les propositions de cette édition."
@@ -190,7 +184,8 @@
     "submitBlocked": "Notez tous les critères avant de déposer votre revue.",
     "saved": "Brouillon enregistré à {time}.",
     "submitted": "Revue déposée le {date}.",
-    "unsaved": "Modifications non enregistrées"
+    "unsaved": "Modifications non enregistrées",
+    "optional": "Facultatif : un dossier se retient ou s'écarte sans note."
   },
   "recusal": {
     "action": "Me déporter de ce dossier",
@@ -205,7 +200,6 @@
     "doneReason": "Motif déclaré : {reason}"
   },
   "peers": {
-    "title": "Revues du comité",
     "empty": "Aucune autre revue n'a encore été déposée.",
     "blind": {
       "title": "Évaluation en aveugle",
@@ -233,7 +227,7 @@
     "dueAt": "Échéance : {date}",
     "noDue": "Sans échéance",
     "recusedOn": "Déporté le {date}",
-    "missing": "Une revue manque encore | Une revue manque encore | {count} revues manquent encore",
+    "missing": "Objectif du comité : une revue de plus | Objectif du comité : une revue de plus | Objectif du comité : {count} revues de plus",
     "complete": "Toutes les revues attendues sont rendues.",
     "empty": "Aucun membre du comité n'est affecté à ce dossier.",
     "assign": "Affecter un membre du comité"
@@ -283,5 +277,40 @@
     "edited": "modifié",
     "you": "Vous",
     "sent": "Message envoyé."
+  },
+  "mode": {
+    "label": "Façon de noter",
+    "quick": "Note rapide",
+    "detailed": "Grille détaillée"
+  },
+  "quick": {
+    "label": "Note sur 20",
+    "unset": "Aucune note",
+    "hint": "Faites glisser le curseur pour noter.",
+    "verdict": {
+      "accept": "Avis : à retenir",
+      "reject": "Avis : à écarter"
+    },
+    "relevance": {
+      "none": "Non pertinent",
+      "low": "Peu pertinent",
+      "weak": "Faiblement pertinent",
+      "acceptable": "Acceptable",
+      "relevant": "Pertinent",
+      "high": "Très pertinent"
+    },
+    "comment": "Commentaire",
+    "commentPlaceholder": "Ce qui justifie votre note, en une phrase.",
+    "save": "Enregistrer ma note",
+    "update": "Mettre à jour ma note"
+  },
+  "floating": {
+    "launcher": "Évaluer ce dossier",
+    "launcherScored": "Ma note : {score} sur 20 — ouvrir l'évaluation",
+    "title": "Évaluation — {reference}",
+    "tabs": {
+      "mine": "Ma note",
+      "all": "Toutes les notes"
+    }
   }
 }

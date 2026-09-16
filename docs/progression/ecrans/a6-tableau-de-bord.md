@@ -69,7 +69,7 @@ Un écran de pilotage se prouve sur ce qu'il AFFICHE, pas sur ce qu'il compile. 
 | Arborescence d'accessibilité | Les cinq lignes d'action sont des **liens au nom complet** (décompte, détail, exemples, échéance) ; les trois zones sont des `region` nommées ; le sélecteur est un `combobox` étiqueté |
 | Résumé des graphiques pour les lecteurs d'écran | « Graphique : Dépôts, du 9 juin 2026 au 17 août 2026. 35 au total. Journée la plus forte : 2 le 17 juin 2026. » Un graphique est une image : sans ce texte, il ne dit rien |
 | Cibles tactiles | `min-height` mesurée à **44 px** sur les lignes d'action (`--target-min`) |
-| Destinations | `/admin/evaluations?filtre=en-retard`, `/admin/propositions?filtre=non-evaluees`, `/admin/programmation?filtre=conflits`, `/admin/incidents`, `/admin/organisations/doublons` — chaque ligne mène à l'écran **déjà réglé** sur le problème. Les cinq écrans n'existent pas encore (A7 à A13) : le routeur le signale en console, c'est attendu |
+| Destinations | `/admin/propositions?filtre=en-retard` (écrit `/admin/evaluations` jusqu'au 16/09 — cet écran n'a jamais existé), `/admin/propositions?filtre=non-evaluees`, `/admin/programmation?filtre=conflits`, `/admin/incidents`, `/admin/organisations/doublons` — chaque ligne mène à l'écran **déjà réglé** sur le problème. Les cinq écrans n'existent pas encore (A7 à A13) : le routeur le signale en console, c'est attendu |
 | Dépliage des indicateurs au vert | Les onze s'affichent avec leur valeur et leur seuil (`26 / 120`, `0 / 1`…) |
 | Défilement horizontal à 375 px | `scrollWidth === clientWidth === 375`. Mesuré dans le navigateur, pas déduit d'une capture |
 | Thème sombre | Bascule à chaud (`data-theme="dark"`), rendu intact |

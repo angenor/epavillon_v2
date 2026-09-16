@@ -95,10 +95,12 @@ function review(n: number, proposal_id: string, reviewer_id: string, fields: Rev
     id,
     proposal_id,
     reviewer_id,
+    mode: 'detailed',
     recommendation: fields.recommendation,
     // Un brouillon ne porte pas encore de note consolidée.
     weighted_score: fields.submittedAt ? weighted : null,
     score_out_of_20: fields.submittedAt ? (weighted * 20) / maxWeightedScore : null,
+    comment: null,
     strengths: fields.strengths ?? null,
     weaknesses: fields.weaknesses ?? null,
     private_note: fields.privateNote ?? null,

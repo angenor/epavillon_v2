@@ -46,7 +46,7 @@
   },
   "decision": {
     "title": "Decision",
-    "hint": "Restricted to those entitled to it. Scoring, on the other hand, is open to any assigned committee member.",
+    "hint": "Restricted to those entitled to it. Scoring is optional and never a precondition.",
     "none": "No decision is available from the current state of this submission.",
     "forbidden": "You are not entitled to decide on this edition.",
     "action": {
@@ -146,12 +146,6 @@
     "size": "{size} MB"
   },
   "panel": {
-    "title": "My review",
-    "description": "Your scores are visible to no one until you submit them.",
-    "notAssigned": {
-      "title": "This submission is not assigned to you",
-      "description": "You may read it and write to the committee, but the grid is reserved for the members in charge of it."
-    },
     "cannotReview": {
       "title": "Read only",
       "description": "You are not entitled to score proposals for this edition."
@@ -190,7 +184,8 @@
     "submitBlocked": "Score every criterion before submitting your review.",
     "saved": "Draft saved at {time}.",
     "submitted": "Review submitted on {date}.",
-    "unsaved": "Unsaved changes"
+    "unsaved": "Unsaved changes",
+    "optional": "Optional: a proposal can be accepted or declined without a score."
   },
   "recusal": {
     "action": "Recuse myself from this submission",
@@ -205,7 +200,6 @@
     "doneReason": "Declared reason: {reason}"
   },
   "peers": {
-    "title": "Committee reviews",
     "empty": "No other review has been submitted yet.",
     "blind": {
       "title": "Blind review",
@@ -233,7 +227,7 @@
     "dueAt": "Due: {date}",
     "noDue": "No deadline",
     "recusedOn": "Recused on {date}",
-    "missing": "One review is still missing | One review is still missing | {count} reviews are still missing",
+    "missing": "Committee target: one more review | Committee target: one more review | Committee target: {count} more reviews",
     "complete": "Every expected review has been submitted.",
     "empty": "No committee member is assigned to this submission.",
     "assign": "Assign a committee member"
@@ -283,5 +277,40 @@
     "edited": "edited",
     "you": "You",
     "sent": "Message sent."
+  },
+  "mode": {
+    "label": "How to score",
+    "quick": "Quick score",
+    "detailed": "Detailed grid"
+  },
+  "quick": {
+    "label": "Score out of 20",
+    "unset": "No score",
+    "hint": "Drag the slider to score.",
+    "verdict": {
+      "accept": "Opinion: accept",
+      "reject": "Opinion: decline"
+    },
+    "relevance": {
+      "none": "Not relevant",
+      "low": "Barely relevant",
+      "weak": "Weakly relevant",
+      "acceptable": "Acceptable",
+      "relevant": "Relevant",
+      "high": "Highly relevant"
+    },
+    "comment": "Comment",
+    "commentPlaceholder": "What justifies your score, in one sentence.",
+    "save": "Save my score",
+    "update": "Update my score"
+  },
+  "floating": {
+    "launcher": "Review this proposal",
+    "launcherScored": "My score: {score} out of 20 — open the review",
+    "title": "Review — {reference}",
+    "tabs": {
+      "mine": "My score",
+      "all": "All scores"
+    }
   }
 }

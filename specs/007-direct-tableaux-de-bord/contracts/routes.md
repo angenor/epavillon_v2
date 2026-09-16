@@ -231,7 +231,7 @@ Sert `live.active_incidents_for_event(event, now())` : les portées `event`, `ev
 | `kind` | Ce qui la déclenche | `severity` | `target` |
 |---|---|---|---|
 | `proposals_unreviewed` | dossier `submitted` ou `under_review`, sans aucune revue, **et** (échéance applicable à moins de `analytics.review_alert_days` **ou** aucun révisionniste affecté, déports exclus) | `high` | `/admin/propositions?filtre=non-evaluees` |
-| `reviews_overdue` | `mv_reviewer_workload.revues_en_retard > 0` | `high` | `/admin/evaluations?filtre=en-retard` |
+| `reviews_overdue` | `mv_reviewer_workload.revues_en_retard > 0` | `high` | `/admin/propositions?filtre=en-retard` |
 | `active_incidents` | au moins un message actif | `high` — il est vu du public | `/admin/incidents` |
 | `schedule_conflicts` | `programme.detect_conflicts(event)` non vide | `high` si un conflit `blocking`, sinon `medium` | `/admin/programmation?filtre=conflits` |
 | `organization_duplicates` | `org.duplicate_candidates` non arbitrées | `medium` | `/admin/organisations/doublons` |

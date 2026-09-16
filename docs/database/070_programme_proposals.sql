@@ -556,25 +556,47 @@ CREATE INDEX ix_review_assignments_reviewer
     ON programme.review_assignments (reviewer_id, due_at)
     WHERE recused_at IS NULL;
 
--- Une revue = l'avis complet d'un membre du comité sur une proposition.
+-- Une revue = l'avis d'un membre de l'équipe sur une proposition.
+--
+-- ÉVALUER N'EST JAMAIS UN PRÉALABLE À LA DÉCISION (arbitré le 16/09) : aucune
+-- transition de `proposal_transitions_allowed` ne lit cette table, et un dossier
+-- de partenaire se retient sans une seule revue. `required_reviews` est un
+-- objectif d'avancement affiché, pas une barrière.
+--
+-- DEUX MANIÈRES DE NOTER, au choix de l'évaluateur et revue par revue :
+--   - `detailed` : la grille pondérée de l'appel (`review_scores`), qui dit
+--     POURQUOI un dossier l'emporte ;
+--   - `quick` : une note directe sur 20 et un commentaire, comme en v1, quand le
+--     temps manque. Elle ne porte aucune note par critère, donc ne peut
+--     déclencher aucune élimination.
+-- Les deux alimentent la même moyenne du dossier (`refresh_proposal_score`).
 CREATE TABLE programme.reviews (
     id             uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
     proposal_id    uuid        NOT NULL REFERENCES programme.proposals(id) ON DELETE CASCADE,
     reviewer_id    uuid        NOT NULL CONSTRAINT xmod_fk_reviews_reviewer
                                REFERENCES identity.people(id) ON DELETE CASCADE,
+    mode           text        NOT NULL DEFAULT 'detailed'
+                               CONSTRAINT ck_reviews_mode CHECK (mode IN ('quick', 'detailed')),
     recommendation text        NOT NULL DEFAULT 'neutral'
                                CHECK (recommendation IN ('accept', 'accept_with_changes', 'neutral', 'reject')),
-    -- Note pondérée calculée à partir des critères (voir trigger ci-dessous).
+    -- Note pondérée : calculée des critères en mode détaillé, déduite de la note
+    -- sur 20 en mode rapide (voir refresh_proposal_score).
     weighted_score numeric(6,2),
-    -- Note ramenée sur 20, pour rester lisible par les équipes habituées à la v1.
-    score_out_of_20 numeric(4,2),
+    -- Note sur 20 : calculée en mode détaillé, SAISIE en mode rapide.
+    score_out_of_20 numeric(4,2)
+                               CONSTRAINT ck_reviews_score_out_of_20 CHECK (score_out_of_20 BETWEEN 0 AND 20),
+    -- Commentaire général, lu de l'équipe. Seul texte de la notation rapide.
+    comment        text,
     strengths      text,
     weaknesses     text,
     private_note   text,       -- visible du seul comité, jamais du soumissionnaire
     submitted_at   timestamptz,
     created_at     timestamptz NOT NULL DEFAULT now(),
     updated_at     timestamptz NOT NULL DEFAULT now(),
-    CONSTRAINT ux_reviews UNIQUE (proposal_id, reviewer_id)
+    CONSTRAINT ux_reviews UNIQUE (proposal_id, reviewer_id),
+    -- Une note rapide déposée sans note n'est pas un avis.
+    CONSTRAINT ck_reviews_quick_scored
+        CHECK (mode <> 'quick' OR submitted_at IS NULL OR score_out_of_20 IS NOT NULL)
 );
 
 CREATE INDEX ix_reviews_proposal ON programme.reviews (proposal_id);
@@ -629,7 +651,7 @@ BEGIN
     SELECT call_id INTO v_call_id FROM programme.proposals WHERE id = p_proposal_id;
     v_max := COALESCE(NULLIF(event.max_weighted_score(v_call_id), 0), 0);
 
-    -- Note pondérée de chaque revue.
+    -- Note pondérée de chaque revue détaillée.
     UPDATE programme.reviews r
     SET weighted_score = agg.total,
         score_out_of_20 = CASE WHEN v_max > 0 THEN round(agg.total / v_max * 20, 2) END
@@ -639,7 +661,15 @@ BEGIN
         JOIN event.review_criteria c ON c.id = rs.criterion_id
         GROUP BY rs.review_id
     ) agg
-    WHERE r.id = agg.review_id AND r.proposal_id = p_proposal_id;
+    WHERE r.id = agg.review_id AND r.proposal_id = p_proposal_id
+      AND r.mode = 'detailed';
+
+    -- Une note rapide est saisie sur 20 : on en déduit la note pondérée, pour que
+    -- la moyenne pondérée du dossier mélange des grandeurs comparables.
+    UPDATE programme.reviews r
+    SET weighted_score = CASE WHEN v_max > 0 AND r.score_out_of_20 IS NOT NULL
+                              THEN round(r.score_out_of_20 / 20 * v_max, 2) END
+    WHERE r.proposal_id = p_proposal_id AND r.mode = 'quick';
 
     -- Agrégats de la proposition : seules les revues soumises comptent.
     UPDATE programme.proposals p
@@ -660,6 +690,7 @@ BEGIN
         JOIN programme.review_scores rs ON rs.review_id = r.id
         JOIN event.review_criteria c ON c.id = rs.criterion_id AND c.is_knockout
         WHERE r.proposal_id = p_proposal_id AND r.submitted_at IS NOT NULL
+          AND r.mode = 'detailed'
     ) ko ON true
     WHERE p.id = p_proposal_id;
 END;

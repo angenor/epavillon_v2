@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, proposal_id, reviewer_id, recommendation,\n                  weighted_score::float8, score_out_of_20::float8,\n                  strengths, weaknesses, private_note, submitted_at,\n                  created_at, updated_at\n             FROM programme.reviews\n            WHERE proposal_id = $1 AND reviewer_id = $2",
+  "query": "INSERT INTO programme.reviews\n               (proposal_id, reviewer_id, mode, recommendation, score_out_of_20,\n                comment, strengths, weaknesses, private_note, submitted_at)\n           VALUES ($1, $2, $3, $4,\n                   CASE WHEN $3 = 'quick' THEN $5::float8::numeric(4,2) END,\n                   $6, $7, $8, $9, CASE WHEN $10 THEN now() END)\n           ON CONFLICT (proposal_id, reviewer_id) DO UPDATE\n              SET mode           = EXCLUDED.mode,\n                  recommendation = EXCLUDED.recommendation,\n                  score_out_of_20 = EXCLUDED.score_out_of_20,\n                  weighted_score = NULL,\n                  comment        = EXCLUDED.comment,\n                  strengths      = EXCLUDED.strengths,\n                  weaknesses     = EXCLUDED.weaknesses,\n                  private_note   = EXCLUDED.private_note,\n                  submitted_at   = COALESCE(programme.reviews.submitted_at,\n                                            EXCLUDED.submitted_at)\n        RETURNING id, proposal_id, reviewer_id, mode, recommendation,\n                  weighted_score::float8, score_out_of_20::float8,\n                  comment, strengths, weaknesses, private_note, submitted_at,\n                  created_at, updated_at",
   "describe": {
     "columns": [
       {
@@ -38,6 +38,17 @@
       },
       {
         "ordinal": 3,
+        "name": "mode",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.reviews",
+            "name": "mode"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
         "name": "recommendation",
         "type_info": "Text",
         "origin": {
@@ -48,19 +59,30 @@
         }
       },
       {
-        "ordinal": 4,
+        "ordinal": 5,
         "name": "weighted_score",
         "type_info": "Float8",
         "origin": "Expression"
       },
       {
-        "ordinal": 5,
+        "ordinal": 6,
         "name": "score_out_of_20",
         "type_info": "Float8",
         "origin": "Expression"
       },
       {
-        "ordinal": 6,
+        "ordinal": 7,
+        "name": "comment",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.reviews",
+            "name": "comment"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
         "name": "strengths",
         "type_info": "Text",
         "origin": {
@@ -71,7 +93,7 @@
         }
       },
       {
-        "ordinal": 7,
+        "ordinal": 9,
         "name": "weaknesses",
         "type_info": "Text",
         "origin": {
@@ -82,7 +104,7 @@
         }
       },
       {
-        "ordinal": 8,
+        "ordinal": 10,
         "name": "private_note",
         "type_info": "Text",
         "origin": {
@@ -93,7 +115,7 @@
         }
       },
       {
-        "ordinal": 9,
+        "ordinal": 11,
         "name": "submitted_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -104,7 +126,7 @@
         }
       },
       {
-        "ordinal": 10,
+        "ordinal": 12,
         "name": "created_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -115,7 +137,7 @@
         }
       },
       {
-        "ordinal": 11,
+        "ordinal": 13,
         "name": "updated_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -129,7 +151,15 @@
     "parameters": {
       "Left": [
         "Uuid",
-        "Uuid"
+        "Uuid",
+        "Text",
+        "Text",
+        "Float8",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Bool"
       ]
     },
     "nullable": [
@@ -137,8 +167,10 @@
       false,
       false,
       false,
+      false,
       null,
       null,
+      true,
       true,
       true,
       true,
@@ -147,5 +179,5 @@
       false
     ]
   },
-  "hash": "9abc13ec781168fc2e1dafd66ac02e31cb9f357e13f6a0aa88c23817fb1f8ed1"
+  "hash": "ef3031bd9f7be634dd2357e958fced29c57cf030642b6c4edf920ae44aada597"
 }

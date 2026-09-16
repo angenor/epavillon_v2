@@ -55,6 +55,7 @@ const PATHS: Record<string, string> = {
 
   // — État et retour d'information
   check: 'M4.5 12.5 9.5 17.5 19.5 7',
+  star: 'M12 3.5l2.6 5.3 5.9.9-4.25 4.1 1 5.85L12 16.9l-5.25 2.75 1-5.85L3.5 9.7l5.9-.9L12 3.5Z',
   'check-circle': 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM8 12.2l2.8 2.8L16 9.8',
   info: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 11v5.5M12 7.6v.01',
   warning: 'M12 3.8 2.9 19.4h18.2L12 3.8ZM12 10v4.2M12 17.1v.01',

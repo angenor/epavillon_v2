@@ -104,15 +104,18 @@ async fn trois_lecteurs_voient_trois_menus_differents() {
     assert_eq!(cibles(&siennes), vec!["changes_requested"]);
     assert!(siennes[0].requires_reason);
 
-    // Le DÉCIDEUR : il retient sans motif, rejette avec motif. **Il ne peut pas
-    // demander de corrections** — le rôle d'administration ne détient pas
-    // `programme.review.write` (écart n° 50).
+    // Le DÉCIDEUR : depuis le 16/09, l'administration note aussi, donc demande
+    // des corrections (écart n° 50 refermé). Il retient sans motif.
     let siennes = repo::offertes(bac.pool(), dossier, decideur)
         .await
         .expect("transitions du décideur");
-    assert_eq!(cibles(&siennes), vec!["accepted", "rejected"]);
-    assert!(!siennes[0].requires_reason, "retenir n'exige pas de motif");
-    assert!(siennes[1].requires_reason, "rejeter exige un motif");
+    assert_eq!(
+        cibles(&siennes),
+        vec!["changes_requested", "accepted", "rejected"]
+    );
+    assert!(siennes[0].requires_reason);
+    assert!(!siennes[1].requires_reason, "retenir n'exige pas de motif");
+    assert!(siennes[2].requires_reason, "rejeter exige un motif");
 }
 
 #[tokio::test]

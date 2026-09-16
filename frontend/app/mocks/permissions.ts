@@ -190,7 +190,7 @@ const GRANTS: Record<string, PermissionCode[]> = {
     'identity.person.read', 'identity.person.manage',
     'org.organization.read', 'org.organization.manage', 'org.organization.merge',
     'event.event.manage', 'event.call.manage',
-    'programme.proposal.read_all', 'programme.proposal.decide',
+    'programme.proposal.read_all', 'programme.proposal.decide', 'programme.review.write',
     'programme.session.schedule', 'programme.registration.manage',
     'live.meeting.manage', 'live.incident.publish',
     'publication.article.moderate', 'publication.quota.manage',

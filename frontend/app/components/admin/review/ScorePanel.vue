@@ -1,18 +1,16 @@
 <script setup lang="ts">
 import type { MyReview, ReviewDeskPermissions, SaveReviewPayload } from '~/types/admin-review'
 import type { ReviewCriterion } from '~/types/event/call'
-import type { ReviewRecommendation } from '~/types/programme/review'
+import type { ReviewMode, ReviewRecommendation } from '~/types/programme/review'
 import type { CriterionId, Numeric, TimeZoneName } from '~/types/shared'
 
 /**
- * LE PANNEAU D'ÉVALUATION — la grille pondérée, le total recalculé en direct, la
- * recommandation, les points forts et faibles, le déport.
+ * MA NOTE — rendue dans la fenêtre flottante de la fiche.
  *
- * IL COLLE AU DÉFILEMENT, et ce n'est pas un effet : on note EN LISANT. Le
- * dossier fait plusieurs écrans de haut ; un panneau qui défile avec lui
- * obligerait à remonter après chaque paragraphe, ou à noter de mémoire. Sur
- * écran étroit, la colle est retirée — coller un panneau de 600 px sur un
- * téléphone masque le texte qu'il sert à juger.
+ * DEUX MANIÈRES DE NOTER (arbitré le 16/09) : une note directe sur 20, quand le
+ * temps manque, ou la grille pondérée de l'appel. Le choix est retenu d'une
+ * visite à l'autre. Noter ne conditionne jamais la décision, et toute personne
+ * qui détient le droit de noter le peut, désignée ou non.
  *
  * LE TOTAL SE RECALCULE À CHAQUE NOTE, et il le fait comme la base :
  * `somme(score × poids)`, ramenée sur 20 par `event.max_weighted_score()`. Les
@@ -61,6 +59,40 @@ const { date, dateTime } = useDateTime()
 // L'état du formulaire
 // ---------------------------------------------------------------------------
 
+const MODE_STORAGE_KEY = 'epavillon.review.mode'
+
+function rememberedMode(): ReviewMode {
+  try {
+    return localStorage.getItem(MODE_STORAGE_KEY) === 'detailed' ? 'detailed' : 'quick'
+  } catch {
+    return 'quick'
+  }
+}
+
+const mode = ref<ReviewMode>(props.myReview.review?.mode ?? 'quick')
+onMounted(() => {
+  if (!props.myReview.review) mode.value = rememberedMode()
+})
+
+function setMode(value: string): void {
+  mode.value = value === 'detailed' ? 'detailed' : 'quick'
+  dirty.value = true
+  try {
+    localStorage.setItem(MODE_STORAGE_KEY, mode.value)
+  } catch {
+    // Un navigateur qui refuse le stockage garde simplement le choix par défaut.
+  }
+}
+
+const quickScore = ref<number | null>(quickScoreOf(props.myReview))
+const generalComment = ref(props.myReview.review?.comment ?? '')
+
+function quickScoreOf(mine: MyReview): number | null {
+  return mine.review?.mode === 'quick' && mine.review.score_out_of_20 !== null
+    ? Number(mine.review.score_out_of_20)
+    : null
+}
+
 const scores = ref<Record<CriterionId, Numeric>>({ ...props.myReview.scores })
 const comments = ref<Record<CriterionId, string>>({ ...props.myReview.comments })
 const recommendation = ref<ReviewRecommendation>(props.myReview.review?.recommendation ?? 'neutral')
@@ -74,6 +106,9 @@ const dirty = ref(false)
 watch(
   () => props.myReview,
   (mine) => {
+    if (mine.review) mode.value = mine.review.mode
+    quickScore.value = quickScoreOf(mine)
+    generalComment.value = mine.review?.comment ?? ''
     scores.value = { ...mine.scores }
     comments.value = { ...mine.comments }
     recommendation.value = mine.review?.recommendation ?? 'neutral'
@@ -115,15 +150,40 @@ const recommendationOptions = computed(() =>
   ),
 )
 
-/** Grille close : on ne note pas un dossier dont on s'est déporté. */
-const readOnly = computed(
-  () => !props.permissions.can_review || !props.permissions.is_assigned || props.permissions.is_recused,
+const modeOptions = computed(() =>
+  (['quick', 'detailed'] as ReviewMode[]).map((value) => ({
+    value,
+    label: t(`admin.proposal.review.mode.${value}`),
+  })),
 )
+
+/** Grille close : on ne note pas un dossier dont on s'est déporté. */
+const readOnly = computed(() => !props.permissions.can_review || props.permissions.is_recused)
 
 const submittedAt = computed(() => props.myReview.review?.submitted_at ?? null)
 
+function saveQuick(): void {
+  if (quickScore.value === null) return
+  emit('save', {
+    mode: 'quick',
+    recommendation: quickRecommendation(quickScore.value),
+    score_out_of_20: quickScore.value,
+    comment: generalComment.value.trim() || null,
+    scores: {},
+    comments: {},
+    strengths: null,
+    weaknesses: null,
+    private_note: privateNote.value.trim() || null,
+    submit: true,
+  })
+  dirty.value = false
+}
+
 function save(submit: boolean): void {
   emit('save', {
+    mode: 'detailed',
+    score_out_of_20: null,
+    comment: generalComment.value.trim() || null,
     recommendation: recommendation.value,
     scores: scores.value,
     comments: comments.value,
@@ -137,22 +197,9 @@ function save(submit: boolean): void {
 </script>
 
 <template>
-  <section
-    class="rounded-lg border border-border bg-surface-raised"
-    aria-labelledby="review-panel-title"
-  >
-    <header class="border-b border-border-subtle px-5 py-4">
-      <h2 id="review-panel-title" class="text-lg font-semibold">
-        {{ t('admin.proposal.review.panel.title') }}
-      </h2>
-      <p class="mt-1 text-sm text-text-muted">
-        {{ t('admin.proposal.review.panel.description') }}
-      </p>
-    </header>
-
-    <!-- TROIS RAISONS DE NE PAS POUVOIR NOTER, ET TROIS MESSAGES DIFFÉRENTS :
-         le déport déclaré, le dossier non confié, le droit absent. Un panneau
-         grisé sans explication laisse chercher la manipulation qui manque. -->
+  <div>
+    <!-- Deux raisons de ne pas pouvoir noter, deux messages : un panneau grisé
+         sans explication laisse chercher la manipulation qui manque. -->
     <div v-if="props.permissions.is_recused" class="p-5">
       <UiAlert
         intent="neutral"
@@ -182,243 +229,283 @@ function save(submit: boolean): void {
       />
     </div>
 
-    <div v-else-if="!props.permissions.is_assigned" class="p-5">
-      <UiAlert
-        intent="info"
-        :title="t('admin.proposal.review.panel.notAssigned.title')"
-        :message="t('admin.proposal.review.panel.notAssigned.description')"
-      />
-    </div>
-
     <div v-else class="flex flex-col gap-5 p-5">
+      <p class="text-sm text-text-muted">{{ t('admin.proposal.review.panel.optional') }}</p>
+
       <UiAlert v-if="props.error" intent="danger" live :message="props.error" />
 
-      <!-- L'AVERTISSEMENT ÉLIMINATOIRE, NOMMÉ. Il apparaît à la note, pas au
-           dépôt : c'est avant de valider qu'il faut savoir ce qu'on fait. -->
-      <UiAlert
-        v-if="breaches.length > 0"
-        intent="danger"
-        live
-        icon="ban"
-        :message="
-          t('admin.proposal.review.panel.knockoutWarning', {
-            criteria: breaches.map((criterion) => tr(criterion.label)).join(', '),
-          })
-        "
+      <UiRadio
+        :model-value="mode"
+        :label="t('admin.proposal.review.mode.label')"
+        :options="modeOptions"
+        :disabled="props.busy"
+        inline
+        @update:model-value="setMode"
       />
 
-      <!-- LA GRILLE ------------------------------------------------------- -->
-      <fieldset class="flex flex-col gap-5">
-        <legend class="sr-only">{{ t('admin.proposal.review.panel.grid') }}</legend>
+      <template v-if="mode === 'quick'">
+        <AdminReviewQuickScore
+          :model-value="quickScore"
+          :disabled="props.busy"
+          @update:model-value="(value: number) => { quickScore = value; dirty = true }"
+        />
 
-        <div v-for="criterion in props.criteria" :key="criterion.id" class="flex flex-col gap-2">
-          <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            <span class="font-medium text-text">{{ tr(criterion.label) }}</span>
-            <span class="text-xs text-text-subtle">
-              {{ t('admin.proposal.review.panel.weight', { weight: criterion.weight }) }} ·
-              {{ t('admin.proposal.review.panel.max', { max: criterion.max_score }) }}
-            </span>
-            <UiBadge
-              v-if="criterion.is_knockout"
-              intent="warning"
-              size="sm"
-              :label="t('admin.proposal.review.panel.knockout')"
+        <UiTextarea
+          v-model="generalComment"
+          :label="t('admin.proposal.review.quick.comment')"
+          :placeholder="t('admin.proposal.review.quick.commentPlaceholder')"
+          :rows="3"
+          auto-grow
+          block
+          :disabled="props.busy"
+          @update:model-value="dirty = true"
+        />
+
+        <div class="flex flex-col gap-2">
+          <p v-if="submittedAt && !dirty" class="text-sm text-success">
+            {{ t('admin.proposal.review.panel.submitted', { date: dateTime(submittedAt, props.timezone) }) }}
+          </p>
+          <p v-else-if="dirty" class="text-sm text-warning">{{ t('admin.proposal.review.panel.unsaved') }}</p>
+          <UiButton
+            variant="primary"
+            block
+            :loading="props.busy"
+            :disabled="readOnly || quickScore === null"
+            @click="saveQuick"
+          >
+            {{ submittedAt ? t('admin.proposal.review.quick.update') : t('admin.proposal.review.quick.save') }}
+          </UiButton>
+        </div>
+      </template>
+
+      <template v-else>
+
+        <!-- L'AVERTISSEMENT ÉLIMINATOIRE, NOMMÉ. Il apparaît à la note, pas au
+             dépôt : c'est avant de valider qu'il faut savoir ce qu'on fait. -->
+        <UiAlert
+          v-if="breaches.length > 0"
+          intent="danger"
+          live
+          icon="ban"
+          :message="
+            t('admin.proposal.review.panel.knockoutWarning', {
+              criteria: breaches.map((criterion) => tr(criterion.label)).join(', '),
+            })
+          "
+        />
+
+        <!-- LA GRILLE ------------------------------------------------------- -->
+        <fieldset class="flex flex-col gap-5">
+          <legend class="sr-only">{{ t('admin.proposal.review.panel.grid') }}</legend>
+
+          <div v-for="criterion in props.criteria" :key="criterion.id" class="flex flex-col gap-2">
+            <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+              <span class="font-medium text-text">{{ tr(criterion.label) }}</span>
+              <span class="text-xs text-text-subtle">
+                {{ t('admin.proposal.review.panel.weight', { weight: criterion.weight }) }} ·
+                {{ t('admin.proposal.review.panel.max', { max: criterion.max_score }) }}
+              </span>
+              <UiBadge
+                v-if="criterion.is_knockout"
+                intent="warning"
+                size="sm"
+                :label="t('admin.proposal.review.panel.knockout')"
+              />
+            </div>
+
+            <p v-if="criterion.description" class="max-w-(--measure) text-sm text-text-muted">
+              {{ tr(criterion.description) }}
+            </p>
+            <p v-if="criterion.is_knockout" class="text-sm text-warning">
+              {{ t('admin.proposal.review.panel.knockoutHint') }}
+            </p>
+
+            <!-- LES NOTES SONT DES BOUTONS, PAS UNE LISTE DÉROULANTE. Six critères
+                 notés de 0 à 5 font trente-six clics dans une liste ; ici, un seul
+                 par critère. Chaque cible fait 44 px — c'est la règle de la
+                 charte, et ce panneau se remplit aussi sur tablette en réunion. -->
+            <div class="flex flex-wrap gap-1.5" role="radiogroup" :aria-label="tr(criterion.label)">
+              <button
+                v-for="choice in scoreChoices(criterion)"
+                :key="choice"
+                type="button"
+                role="radio"
+                :aria-checked="scores[criterion.id] === choice"
+                :disabled="props.busy"
+                class="min-h-(--target-min) min-w-(--target-min) rounded-md border px-3 text-base font-semibold tabular-nums transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+                :class="
+                  scores[criterion.id] === choice
+                    ? choice === 0 && criterion.is_knockout
+                      ? 'border-transparent bg-danger-solid text-danger-contrast'
+                      : 'border-transparent bg-accent-solid text-accent-contrast'
+                    : 'border-border bg-surface text-text-muted hover:bg-surface-hover'
+                "
+                @click="setScore(criterion, choice)"
+              >
+                {{ choice }}
+              </button>
+
+              <UiButton
+                variant="ghost"
+                size="sm"
+                icon="mail"
+                class="ml-auto"
+                :aria-expanded="openComments.has(criterion.id)"
+                @click="toggleComment(criterion.id)"
+              >
+                {{ t('admin.proposal.review.panel.addComment') }}
+              </UiButton>
+            </div>
+
+            <UiTextarea
+              v-if="openComments.has(criterion.id)"
+              :id="`criterion-comment-${criterion.id}`"
+              :model-value="comments[criterion.id] ?? ''"
+              :label="t('admin.proposal.review.panel.criterionComment')"
+              :placeholder="t('admin.proposal.review.panel.criterionCommentPlaceholder')"
+              :rows="2"
+              auto-grow
+              hide-label
+              block
+              :disabled="props.busy"
+              @update:model-value="
+                (value: string) => {
+                  comments = { ...comments, [criterion.id]: value }
+                  dirty = true
+                }
+              "
             />
           </div>
+        </fieldset>
 
-          <p v-if="criterion.description" class="max-w-(--measure) text-sm text-text-muted">
-            {{ tr(criterion.description) }}
+        <!-- LE TOTAL, RECALCULÉ EN DIRECT ------------------------------------ -->
+        <div class="rounded-md border border-border bg-surface-sunken px-4 py-3">
+          <dl class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+            <div>
+              <dt class="text-xs tracking-wide text-text-subtle uppercase">
+                {{ t('admin.proposal.review.panel.total') }}
+              </dt>
+              <dd class="mt-0.5 text-lg font-semibold tabular-nums">
+                {{
+                  t('admin.proposal.review.panel.totalValue', {
+                    total: Math.round(total * 100) / 100,
+                    max: props.maxWeightedScore,
+                  })
+                }}
+              </dd>
+            </div>
+            <div class="text-right">
+              <dt class="text-xs tracking-wide text-text-subtle uppercase">
+                {{ t('admin.proposal.review.panel.outOf20') }}
+              </dt>
+              <dd class="mt-0.5 text-2xl font-semibold tabular-nums text-accent">
+                {{ outOf20 ?? '—' }}
+              </dd>
+            </div>
+          </dl>
+          <p v-if="missing.length > 0" class="mt-2 text-sm text-text-muted">
+            {{ t('admin.proposal.review.panel.missing', missing.length) }}
           </p>
-          <p v-if="criterion.is_knockout" class="text-sm text-warning">
-            {{ t('admin.proposal.review.panel.knockoutHint') }}
+        </div>
+
+        <UiRadio
+          v-model="recommendation"
+          :label="t('admin.proposal.review.panel.recommendation')"
+          :options="recommendationOptions"
+          :disabled="props.busy"
+          @update:model-value="dirty = true"
+        />
+
+        <UiTextarea
+          v-model="strengths"
+          :label="t('admin.proposal.review.panel.strengths')"
+          :placeholder="t('admin.proposal.review.panel.strengthsPlaceholder')"
+          :rows="3"
+          auto-grow
+          block
+          :disabled="props.busy"
+          @update:model-value="dirty = true"
+        />
+
+        <UiTextarea
+          v-model="weaknesses"
+          :label="t('admin.proposal.review.panel.weaknesses')"
+          :placeholder="t('admin.proposal.review.panel.weaknessesPlaceholder')"
+          :rows="3"
+          auto-grow
+          block
+          :disabled="props.busy"
+          @update:model-value="dirty = true"
+        />
+
+        <!-- LA NOTE PERSONNELLE porte son avertissement de visibilité, comme les
+             messages du fil : `reviews.private_note` n'est lue de personne
+             d'autre, et il faut le dire pour qu'on ose s'en servir. -->
+        <UiTextarea
+          v-model="privateNote"
+          :label="t('admin.proposal.review.panel.privateNote')"
+          :hint="t('admin.proposal.review.panel.privateNoteHint')"
+          :rows="2"
+          auto-grow
+          block
+          :disabled="props.busy"
+          @update:model-value="dirty = true"
+        />
+
+        <div class="flex flex-col gap-2">
+          <p v-if="submittedAt" class="text-sm text-success">
+            {{
+              t('admin.proposal.review.panel.submitted', {
+                date: dateTime(submittedAt, props.timezone),
+              })
+            }}
+          </p>
+          <p v-else-if="props.savedAt" class="text-sm text-text-muted">
+            {{ t('admin.proposal.review.panel.saved', { time: props.savedAt }) }}
+          </p>
+          <p v-if="dirty" class="text-sm text-warning">
+            {{ t('admin.proposal.review.panel.unsaved') }}
           </p>
 
-          <!-- LES NOTES SONT DES BOUTONS, PAS UNE LISTE DÉROULANTE. Six critères
-               notés de 0 à 5 font trente-six clics dans une liste ; ici, un seul
-               par critère. Chaque cible fait 44 px — c'est la règle de la
-               charte, et ce panneau se remplit aussi sur tablette en réunion. -->
-          <div class="flex flex-wrap gap-1.5" role="radiogroup" :aria-label="tr(criterion.label)">
-            <button
-              v-for="choice in scoreChoices(criterion)"
-              :key="choice"
-              type="button"
-              role="radio"
-              :aria-checked="scores[criterion.id] === choice"
-              :disabled="props.busy"
-              class="min-h-(--target-min) min-w-(--target-min) rounded-md border px-3 text-base font-semibold tabular-nums transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-              :class="
-                scores[criterion.id] === choice
-                  ? choice === 0 && criterion.is_knockout
-                    ? 'border-transparent bg-danger-solid text-danger-contrast'
-                    : 'border-transparent bg-accent-solid text-accent-contrast'
-                  : 'border-border bg-surface text-text-muted hover:bg-surface-hover'
-              "
-              @click="setScore(criterion, choice)"
-            >
-              {{ choice }}
-            </button>
-
+          <div class="flex flex-wrap gap-2">
             <UiButton
-              variant="ghost"
-              size="sm"
-              icon="mail"
-              class="ml-auto"
-              :aria-expanded="openComments.has(criterion.id)"
-              @click="toggleComment(criterion.id)"
+              variant="primary"
+              :loading="props.busy"
+              :disabled="readOnly || missing.length > 0"
+              @click="save(true)"
             >
-              {{ t('admin.proposal.review.panel.addComment') }}
+              {{
+                submittedAt
+                  ? t('admin.proposal.review.panel.resubmit')
+                  : t('admin.proposal.review.panel.submit')
+              }}
+            </UiButton>
+            <UiButton
+              variant="secondary"
+              :disabled="props.busy || readOnly"
+              @click="save(false)"
+            >
+              {{ t('admin.proposal.review.panel.save') }}
             </UiButton>
           </div>
 
-          <UiTextarea
-            v-if="openComments.has(criterion.id)"
-            :id="`criterion-comment-${criterion.id}`"
-            :model-value="comments[criterion.id] ?? ''"
-            :label="t('admin.proposal.review.panel.criterionComment')"
-            :placeholder="t('admin.proposal.review.panel.criterionCommentPlaceholder')"
-            :rows="2"
-            auto-grow
-            hide-label
-            block
-            :disabled="props.busy"
-            @update:model-value="
-              (value: string) => {
-                comments = { ...comments, [criterion.id]: value }
-                dirty = true
-              }
-            "
-          />
-        </div>
-      </fieldset>
-
-      <!-- LE TOTAL, RECALCULÉ EN DIRECT ------------------------------------ -->
-      <div class="rounded-md border border-border bg-surface-sunken px-4 py-3">
-        <dl class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-          <div>
-            <dt class="text-xs tracking-wide text-text-subtle uppercase">
-              {{ t('admin.proposal.review.panel.total') }}
-            </dt>
-            <dd class="mt-0.5 text-lg font-semibold tabular-nums">
-              {{
-                t('admin.proposal.review.panel.totalValue', {
-                  total: Math.round(total * 100) / 100,
-                  max: props.maxWeightedScore,
-                })
-              }}
-            </dd>
-          </div>
-          <div class="text-right">
-            <dt class="text-xs tracking-wide text-text-subtle uppercase">
-              {{ t('admin.proposal.review.panel.outOf20') }}
-            </dt>
-            <dd class="mt-0.5 text-2xl font-semibold tabular-nums text-accent">
-              {{ outOf20 ?? '—' }}
-            </dd>
-          </div>
-        </dl>
-        <p v-if="missing.length > 0" class="mt-2 text-sm text-text-muted">
-          {{ t('admin.proposal.review.panel.missing', missing.length) }}
-        </p>
-      </div>
-
-      <UiRadio
-        v-model="recommendation"
-        :label="t('admin.proposal.review.panel.recommendation')"
-        :options="recommendationOptions"
-        :disabled="props.busy"
-        @update:model-value="dirty = true"
-      />
-
-      <UiTextarea
-        v-model="strengths"
-        :label="t('admin.proposal.review.panel.strengths')"
-        :placeholder="t('admin.proposal.review.panel.strengthsPlaceholder')"
-        :rows="3"
-        auto-grow
-        block
-        :disabled="props.busy"
-        @update:model-value="dirty = true"
-      />
-
-      <UiTextarea
-        v-model="weaknesses"
-        :label="t('admin.proposal.review.panel.weaknesses')"
-        :placeholder="t('admin.proposal.review.panel.weaknessesPlaceholder')"
-        :rows="3"
-        auto-grow
-        block
-        :disabled="props.busy"
-        @update:model-value="dirty = true"
-      />
-
-      <!-- LA NOTE PERSONNELLE porte son avertissement de visibilité, comme les
-           messages du fil : `reviews.private_note` n'est lue de personne
-           d'autre, et il faut le dire pour qu'on ose s'en servir. -->
-      <UiTextarea
-        v-model="privateNote"
-        :label="t('admin.proposal.review.panel.privateNote')"
-        :hint="t('admin.proposal.review.panel.privateNoteHint')"
-        :rows="2"
-        auto-grow
-        block
-        :disabled="props.busy"
-        @update:model-value="dirty = true"
-      />
-
-      <div class="flex flex-col gap-2">
-        <p v-if="submittedAt" class="text-sm text-success">
-          {{
-            t('admin.proposal.review.panel.submitted', {
-              date: dateTime(submittedAt, props.timezone),
-            })
-          }}
-        </p>
-        <p v-else-if="props.savedAt" class="text-sm text-text-muted">
-          {{ t('admin.proposal.review.panel.saved', { time: props.savedAt }) }}
-        </p>
-        <p v-if="dirty" class="text-sm text-warning">
-          {{ t('admin.proposal.review.panel.unsaved') }}
-        </p>
-
-        <div class="flex flex-wrap gap-2">
-          <UiButton
-            variant="primary"
-            :loading="props.busy"
-            :disabled="readOnly || missing.length > 0"
-            @click="save(true)"
-          >
+          <p class="text-sm text-text-subtle">
             {{
-              submittedAt
-                ? t('admin.proposal.review.panel.resubmit')
-                : t('admin.proposal.review.panel.submit')
+              missing.length > 0
+                ? t('admin.proposal.review.panel.submitBlocked')
+                : t('admin.proposal.review.panel.submitHint')
             }}
-          </UiButton>
-          <UiButton
-            variant="secondary"
-            :disabled="props.busy || readOnly"
-            @click="save(false)"
-          >
-            {{ t('admin.proposal.review.panel.save') }}
-          </UiButton>
+          </p>
         </div>
+      </template>
 
-        <p class="text-sm text-text-subtle">
-          {{
-            missing.length > 0
-              ? t('admin.proposal.review.panel.submitBlocked')
-              : t('admin.proposal.review.panel.submitHint')
-          }}
-        </p>
-      </div>
-
-      <!-- LE DÉPORT, EN BAS ET DISCRET. C'est un geste rare et grave : il n'a
-           pas sa place à côté des notes, mais il doit être atteignable sans
-           écrire à l'IFDD. -->
-      <div class="border-t border-border-subtle pt-4">
+      <!-- LE DÉPORT, EN BAS ET DISCRET. Il date une affectation : sans
+           désignation, il n'y a rien à déclarer, on s'abstient de noter. -->
+      <div v-if="props.permissions.is_assigned" class="border-t border-border-subtle pt-4">
         <UiButton variant="ghost" size="sm" icon="ban" :disabled="props.busy" @click="emit('recuse')">
           {{ t('admin.proposal.review.recusal.action') }}
         </UiButton>
       </div>
     </div>
-  </section>
+  </div>
 </template>

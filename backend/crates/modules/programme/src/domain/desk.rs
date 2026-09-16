@@ -132,8 +132,8 @@ pub struct DroitsSurLaFiche {
     pub can_review: bool,
     pub can_decide: bool,
     pub can_assign: bool,
-    /// **Décorrélé de la permission** : un membre du comité peut lire un
-    /// dossier qu'on ne lui a pas confié, sans le noter (R21).
+    /// **Décorrélé de `can_review`** : depuis le 16/09, noter n'exige plus
+    /// d'affectation ; seul le déport l'interdit.
     pub is_assigned: bool,
     pub is_recused: bool,
 }

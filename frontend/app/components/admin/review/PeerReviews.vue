@@ -50,13 +50,7 @@ const missing = computed(() => reviewsMissing(props.committee, props.requiredRev
 </script>
 
 <template>
-  <section class="rounded-lg border border-border bg-surface-raised" aria-labelledby="peer-reviews-title">
-    <header class="border-b border-border-subtle px-5 py-4">
-      <h2 id="peer-reviews-title" class="text-lg font-semibold">
-        {{ t('admin.proposal.review.peers.title') }}
-      </h2>
-    </header>
-
+  <div>
     <div class="flex flex-col gap-4 p-5">
       <!-- LE VOILE. Il s'explique : sans raison donnée, un panneau vide passe
            pour une panne, et l'on cherche ailleurs ce qu'on croit avoir perdu. -->
@@ -95,7 +89,13 @@ const missing = computed(() => reviewsMissing(props.committee, props.requiredRev
               :intent="recommendationIntent(entry.review.recommendation)"
               :label="t(`admin.proposal.review.panel.recommendationValue.${entry.review.recommendation}`)"
             />
-            <span class="text-sm text-text-subtle">
+            <UiBadge
+              v-if="entry.review.mode === 'quick'"
+              size="sm"
+              intent="neutral"
+              :label="t('admin.proposal.review.mode.quick')"
+            />
+            <span v-else class="text-sm text-text-subtle">
               {{
                 t('admin.proposal.review.peers.weighted', {
                   score: entry.review.weighted_score ?? '—',
@@ -112,6 +112,10 @@ const missing = computed(() => reviewsMissing(props.committee, props.requiredRev
             </time>
           </div>
 
+          <p v-if="entry.review.comment" class="mt-3 text-sm whitespace-pre-line text-text-secondary">
+            {{ entry.review.comment }}
+          </p>
+
           <dl v-if="entry.review.strengths || entry.review.weaknesses" class="mt-3 flex flex-col gap-2 text-sm">
             <div v-if="entry.review.strengths">
               <dt class="text-text-subtle">{{ t('admin.proposal.review.peers.strengths') }}</dt>
@@ -127,6 +131,7 @@ const missing = computed(() => reviewsMissing(props.committee, props.requiredRev
                note surprend — rarement —, et le déplier d'office ferait de ce
                panneau six blocs de six lignes. -->
           <UiButton
+            v-if="entry.scores.length > 0"
             variant="ghost"
             size="sm"
             class="mt-2"
@@ -207,7 +212,7 @@ const missing = computed(() => reviewsMissing(props.committee, props.requiredRev
           </li>
         </ul>
 
-        <p class="mt-3 text-sm" :class="missing > 0 ? 'text-warning' : 'text-success'">
+        <p class="mt-3 text-sm" :class="missing > 0 ? 'text-text-muted' : 'text-success'">
           {{
             missing > 0
               ? t('admin.proposal.review.committee.missing', missing)
@@ -216,5 +221,5 @@ const missing = computed(() => reviewsMissing(props.committee, props.requiredRev
         </p>
       </div>
     </div>
-  </section>
+  </div>
 </template>

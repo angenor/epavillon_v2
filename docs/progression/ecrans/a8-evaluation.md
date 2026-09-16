@@ -2,7 +2,7 @@
 
 > Extrait de la [progression](../../PROGRESSION.md). Le prompt de cet écran est dans [PROMPTS_DEVELOPPEMENT.md](../../PROMPTS_DEVELOPPEMENT.md).
 
-**État** : ✅
+**État** : ✅ · évaluation en fenêtre flottante le 16/09
 
 ---
 
@@ -11,6 +11,22 @@
 Fait le 18/08. **Aucune modification du modèle** — le premier écran du jalon dont le SQL couvrait déjà tout. 1 page `app/pages/admin/propositions/[id].vue`, 10 composants sous `app/components/admin/review/`, 1 utilitaire pur (`utils/review-scoring.ts`), 1 fichier de contrats (`types/admin-review.ts`), 1 fichier de mocks (`proposal-review.ts`), 2 fichiers de traduction. Deux colonnes : le dossier à gauche (organisations et leur historique de participation, intervenants, pièces, onglet historique champ par champ), le panneau d'évaluation collant à droite (grille pondérée, total et conversion sur 20 recalculés en direct, avertissement éliminatoire NOMMÉ, recommandation, points forts et faibles, déport motivé). **Le voile de l'évaluation en aveugle est appliqué à la source.** Les échanges distinguent les trois visibilités du modèle par le fond, le libellé et une confirmation au premier envoi partagé. `useApi()` commence à se découper (`composables/api/proposal-review.ts`), et son périmètre d'administration teste enfin une permission — il refusait l'écran à tout membre du comité
 
 ---
+
+## Révision du 16/09 — l'évaluation passe dans une fenêtre flottante
+
+Demande du commanditaire, sur le modèle de la v1 (`RatingFloatingButton`) : pas de page `/admin/evaluations`, un bouton flottant sur la fiche. Trois arbitrages : **noter n'est jamais bloquant** (un dossier de partenaire se retient sans revue), **toute l'équipe note** (plus d'affectation requise ; le rôle `admin` reçoit `programme.review.write`), et **deux modes au choix** — note rapide sur 20 + commentaire, ou grille détaillée.
+
+**Livré** : `UiFloatingPanel` (bouton + fenêtre non modale, Échap, pleine largeur sous 640 px), `AdminReviewFloatingDesk` (onglets « Ma note » / « Toutes les notes »), `AdminReviewQuickScore` (curseur 0–20 par pas de 0,5, avis « à retenir / à écarter » au seuil de 10, paliers de pertinence de la v1). `ScorePanel` porte le choix du mode, retenu dans le navigateur ; le déport n'est proposé qu'à une personne désignée. La fiche passe en une colonne. Icône `star` ajoutée. Le lien de menu « Évaluations » disparaît ; l'alerte « revues en retard » du tableau de bord pointe vers `/admin/propositions?filtre=en-retard`, qui existait déjà. **Modèle** : `reviews.mode`, `reviews.comment`, `refresh_proposal_score()` — voir [modele.md](../modele.md). **API** : garde sans affectation, validation du mode rapide, `tests/notation_rapide.rs` (4 tests).
+
+**Une note rapide porte une recommandation déduite** (`accept` à partir de 10, `reject` en dessous), comme l'avis affiché en v1 : sans elle, la liste des pairs l'aurait montrée « Neutre ».
+
+**Vérifié au navigateur** sur données d'exemple, 1440 et 375 px (aucun défilement horizontal) : note rapide 14,5 déposée, moyenne du dossier recalculée, bouton flottant affichant la note, bascule vers la grille, Échap qui rend le focus au bouton ; compte administrateur : onglet « Toutes les notes » avec les trois revues. **Pas vérifié contre l'API réelle** (base sans dossier).
+
+**Reste ouvert** : le voile de l'évaluation en aveugle ne vise que les personnes désignées. Un membre de l'équipe non désigné lit donc les notes des autres avant de poser la sienne. **Migration de production à faire** (§ 13) : `ALTER TABLE programme.reviews` (deux colonnes, deux contraintes), `CREATE OR REPLACE FUNCTION programme.refresh_proposal_score`, et la ligne de `role_permissions`.
+
+| N° | Écart | Suite donnée |
+|---|---|---|
+| **50** | Le rôle `admin` ne pouvait pas noter ni renvoyer pour corrections | **REFERMÉ le 16/09** : la permission est accordée au rôle dans `030` |
 
 ## Écarts relevés en écrivant la fiche d'évaluation (A8, 18/08)
 

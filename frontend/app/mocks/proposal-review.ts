@@ -528,10 +528,27 @@ export function saveReview(
   // La note pondérée est CALCULÉE, jamais reçue du formulaire : c'est le trigger
   // qui fait foi en base, et deux calculs séparés divergeraient au premier
   // changement de pondération.
-  const weighted = criteria.reduce((total, criterion) => {
-    const score = payload.scores[criterion.id]
+  // Une note rapide ne porte aucune note par critère : la base les efface.
+  const quick = payload.mode === 'quick'
+  if (quick && payload.submit && payload.score_out_of_20 === null) {
+    throw new Error('Une note rapide ne se dépose pas sans note sur 20.')
+  }
+  const scores = quick ? {} : payload.scores
+
+  const detailedWeighted = criteria.reduce((total, criterion) => {
+    const score = scores[criterion.id]
     return score === undefined || score === null ? total : total + score * criterion.weight
   }, 0)
+  const outOf20 = quick
+    ? payload.score_out_of_20
+    : maxWeighted > 0
+      ? Math.round(((detailedWeighted * 20) / maxWeighted) * 100) / 100
+      : null
+  const weighted = quick
+    ? outOf20 !== null && maxWeighted > 0
+      ? Math.round(((outOf20 / 20) * maxWeighted) * 100) / 100
+      : null
+    : detailedWeighted
 
   const submittedAt = payload.submit ? (existing?.submitted_at ?? now) : existing?.submitted_at ?? null
 
@@ -539,10 +556,11 @@ export function saveReview(
     id,
     proposal_id: payload.proposal_id,
     reviewer_id: personId,
+    mode: payload.mode,
     recommendation: payload.recommendation,
-    weighted_score: submittedAt ? weighted : null,
-    score_out_of_20:
-      submittedAt && maxWeighted > 0 ? Math.round(((weighted * 20) / maxWeighted) * 100) / 100 : null,
+    weighted_score: quick || submittedAt ? weighted : null,
+    score_out_of_20: quick || submittedAt ? outOf20 : null,
+    comment: payload.comment,
     strengths: payload.strengths,
     weaknesses: payload.weaknesses,
     private_note: payload.private_note,
@@ -555,11 +573,11 @@ export function saveReview(
   sessionScores.set(
     id,
     criteria
-      .filter((criterion) => payload.scores[criterion.id] !== undefined)
+      .filter((criterion) => scores[criterion.id] !== undefined)
       .map((criterion) => ({
         review_id: id,
         criterion_id: criterion.id,
-        score: payload.scores[criterion.id] as number,
+        score: scores[criterion.id] as number,
         comment: payload.comments[criterion.id]?.trim() || null,
       })),
   )

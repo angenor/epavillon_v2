@@ -43,7 +43,7 @@ import type {
   ProposalStatus,
   ProposalTransition,
 } from './programme/proposal'
-import type { Review, ReviewAssignment, ReviewRecommendation, ReviewScore } from './programme/review'
+import type { Review, ReviewAssignment, ReviewMode, ReviewRecommendation, ReviewScore } from './programme/review'
 import type { ScheduleThemeBadge } from './views'
 import type {
   CriterionId,
@@ -306,7 +306,11 @@ export interface ReviewDeskScreen {
  */
 export interface SaveReviewPayload {
   proposal_id: ProposalId
+  mode: ReviewMode
   recommendation: ReviewRecommendation
+  /** Mode rapide seulement ; ignorée en mode détaillé, où la base la calcule. */
+  score_out_of_20: Numeric | null
+  comment: string | null
   /** Note par critère. Une entrée absente est une note NON POSÉE, pas un zéro. */
   scores: Record<CriterionId, Numeric>
   comments: Record<CriterionId, string>

@@ -38,6 +38,9 @@
 /// et de quoi relire une séance en base.
 pub mod seances;
 
+/// La fabrique de l'évaluation : un comité, une grille, des notations.
+pub mod comite;
+
 use kernel::config::Config;
 use kernel::context::RequestContext;
 use kernel::testing::TestDb;

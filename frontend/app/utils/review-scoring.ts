@@ -96,6 +96,29 @@ export function scoreChoices(criterion: ReviewCriterion): number[] {
 }
 
 // ---------------------------------------------------------------------------
+// La note rapide
+// ---------------------------------------------------------------------------
+
+export const QUICK_PASS_MARK = 20 / 2
+
+export type QuickRelevance = 'none' | 'low' | 'weak' | 'acceptable' | 'relevant' | 'high'
+
+/** Les paliers de la v1, que les équipes connaissent déjà. */
+export function quickRelevance(score: number): QuickRelevance {
+  if (score <= 3) return 'none'
+  if (score <= 6) return 'low'
+  if (score < QUICK_PASS_MARK) return 'weak'
+  if (score <= 13) return 'acceptable'
+  if (score <= 16) return 'relevant'
+  return 'high'
+}
+
+/** Une note rapide n'a pas de recommandation saisie : elle se lit du seuil. */
+export function quickRecommendation(score: number): ReviewRecommendation {
+  return score < QUICK_PASS_MARK ? 'reject' : 'accept'
+}
+
+// ---------------------------------------------------------------------------
 // L'avancement du comité
 // ---------------------------------------------------------------------------
 
