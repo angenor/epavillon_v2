@@ -22,7 +22,7 @@ Demande du commanditaire, sur le modèle de la v1 (`RatingFloatingButton`) : pas
 
 **Vérifié au navigateur** sur données d'exemple, 1440 et 375 px (aucun défilement horizontal) : note rapide 14,5 déposée, moyenne du dossier recalculée, bouton flottant affichant la note, bascule vers la grille, Échap qui rend le focus au bouton ; compte administrateur : onglet « Toutes les notes » avec les trois revues. **Pas vérifié contre l'API réelle** (base sans dossier).
 
-**Reste ouvert** : le voile de l'évaluation en aveugle ne vise que les personnes désignées. Un membre de l'équipe non désigné lit donc les notes des autres avant de poser la sienne. **Migration de production à faire** (§ 13) : `ALTER TABLE programme.reviews` (deux colonnes, deux contraintes), `CREATE OR REPLACE FUNCTION programme.refresh_proposal_score`, et la ligne de `role_permissions`.
+**Reste ouvert** : le voile de l'évaluation en aveugle ne vise que les personnes désignées. Un membre de l'équipe non désigné lit donc les notes des autres avant de poser la sienne. **Migré en production le 16/09** (§ 13), avec la migration d'A3 : `/root/epavillon-migrations/migration-prod-2026-09-16-b.sql`.
 
 | N° | Écart | Suite donnée |
 |---|---|---|
