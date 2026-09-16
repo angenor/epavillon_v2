@@ -148,6 +148,13 @@ const VARIANTS: Record<ButtonVariant, string> = {
     'border-glass-border-strong bg-glass-raised text-text-on-inverse ' +
     'backdrop-blur-glass hover:bg-glass-hover active:bg-glass-hover',
 
+  // SUR L'APLAT INSTITUTIONNEL (`--color-surface-inverse`), qui ne s'inverse pas
+  // au thème sombre : le contour accent y disparaît, et le verre n'a pas de média
+  // à séparer. Reste lisible sur un média voilé.
+  inverse:
+    'border-border-on-inverse bg-transparent text-text-on-inverse ' +
+    'hover:bg-surface-inverse-raised active:bg-surface-inverse-raised',
+
   // Action qui se fond dans une phrase. Souligné au survol, comme un lien.
   link:
     'border-transparent bg-transparent px-0! text-text-link underline-offset-4 ' +

@@ -138,6 +138,8 @@ function chiffresParEdition(editions: PublicEditionRow[]): Record<EventId, Editi
       organization_count: edition.organization_count,
       programme_starts_at: edition.programme_starts_at,
       programme_ends_at: edition.programme_ends_at,
+      country_count: edition.country_count,
+      programme_updated_at: edition.programme_updated_at,
     }
   }
   return parEdition

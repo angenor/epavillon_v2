@@ -98,6 +98,11 @@ pub struct PublicEdition {
     pub programme_starts_at: Option<OffsetDateTime>,
     #[serde(with = "time::serde::rfc3339::option")]
     pub programme_ends_at: Option<OffsetDateTime>,
+    /// Pays distincts des organisations porteuses.
+    pub country_count: i64,
+    /// Dernière retouche d'une séance publiée, annulations comprises.
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub programme_updated_at: Option<OffsetDateTime>,
 }
 
 /// Une série — `EventSeries`, augmentée de son **décompte d'éditions**.

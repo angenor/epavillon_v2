@@ -157,3 +157,22 @@ vérification aveugle sur ce point précis.
 **Vérifié** : `make check-front` au vert — typecheck, construction, contrat d'API inchangé (139 appels,
 8 routes en attente). **Non vérifié** : le rendu contre une édition réelle porteuse de HTML — les données
 d'exemple ne peuvent pas l'exercer.
+
+## 16/09 — `/programmations` reçoit son propre bandeau
+
+Demande du commanditaire, en deux temps : une première version réutilisait `EventHero` — **refusée** (« un copier-coller de la page d'édition », trop haute, sans information propre au programme). Version retenue :
+
+- **`components/event/ProgrammeHero.vue`** : aplat institutionnel, couverture fondue à droite (`.fade-inverse-start`, comme la section d'appel de l'accueil), hauteur bornée par le contenu. Titre « Programme du Pavillon de la Francophonie à la {édition} » (sans pavillon : « Programme de {édition} »), état temporel, dates et lieu, **activités / organisations / pays**, **date de dernière mise à jour**, et le **sélecteur des autres programmations** (année · sigle) dès qu'il y a deux éditions.
+- **Édition par défaut** (`utils/programme-edition.ts`, arbitré ce jour) : en cours, sinon la plus proche à venir, sinon la dernière passée — sur `temporal_state`, l'horloge du serveur. La règle précédente préférait un programme publié ; le commanditaire ne l'a pas retenue.
+- **`EventProgramme`** : `named-above` masque son sélecteur et son titre (gardé pour les lecteurs d'écran), `select()` est exposé au bandeau, `update:edition` signale l'édition chargée.
+- **`UiButton`** gagne la variante `inverse`, pour un bouton sur l'aplat institutionnel.
+- **`api.events.publicList()`** rend désormais `PublicEditionRow` — la forme que l'API servait déjà (contrat) — et `PublicEditionRow` déclare les six colonnes de table que l'API joignait sans que le type le dise.
+
+**Modèle** (`075_programme_sessions.sql`) :
+- `programme.sessions.listing_changed_at`, tenue par `tg_sessions_listing_changed` : horaires, titre, salle, statut. Le commanditaire a demandé « la dernière modification de date et d'heure », puis le titre ; salle et statut (une annulation) ajoutés pour la même raison — c'est ce que lit le public. Exclue de `session_history()`.
+- `programme.v_edition_stats` gagne `country_count` (pays des porteurs) et `programme_updated_at` = `max(greatest(listing_changed_at, published_at))`, annulées comprises. L'API les joint à `GET /events/public`.
+
+**Migration** : appliquée à chaud en local. En production, à faire selon DEPLOIEMENT § 13 : `ADD COLUMN listing_changed_at … DEFAULT now()`, reprise `= updated_at` **triggers `tg_sessions_updated_at` et `tg_sessions_audit` désactivés** (sinon chaque séance change d'`updated_at` et l'audit se remplit), puis la fonction et le trigger, `session_history()` et la vue.
+
+**Vérifié** : `make check-front` (contrat : toutes les formes définies), `cargo clippy -p event -p api --all-targets` sans avertissement, `cargo test -p event` et le test des routes publiques ; au navigateur, l'API réelle (COP31 à venir, sans programme) et les données d'exemple (PACO26 en cours choisie par défaut, bascule vers COP30 : image, titre, chiffres et adresse suivent), 1440 px clair et 375 px sombre, sans défilement horizontal.
+Après redémarrage de la machine : `cargo test -p programme -p event`, tout passe.

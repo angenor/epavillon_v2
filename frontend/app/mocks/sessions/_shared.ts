@@ -164,5 +164,6 @@ export function session(fields: SessionFields): Session {
     created_by: fields.createdBy,
     created_at: fields.createdAt,
     updated_at: fields.updatedAt ?? fields.createdAt,
+    listing_changed_at: fields.updatedAt ?? fields.createdAt,
   }
 }

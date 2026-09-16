@@ -59,5 +59,23 @@
   },
   "incidents": {
     "more": "+{count} autre message | +{count} autre message | +{count} autres messages"
+  },
+  "hero": {
+    "overline": "Programmation",
+    "titlePavilion": "Programme du Pavillon de la Francophonie à la {edition}",
+    "title": "Programme de {edition}",
+    "state": {
+      "upcoming": "À venir",
+      "ongoing": "En cours",
+      "past": "Terminée"
+    },
+    "stats": {
+      "label": "Le programme en chiffres",
+      "activities": "activité | activité | activités",
+      "organizations": "organisation | organisation | organisations",
+      "countries": "pays | pays | pays",
+      "updated": "Mis à jour le"
+    },
+    "others": "Autres programmations"
   }
 }

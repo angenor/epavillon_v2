@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { EventEdition } from '~/types/event/edition'
+import type { PublicEditionRow } from '~/types/views'
 import type { ProgrammeData } from '~/types/event-programme'
 
 /**
@@ -19,12 +19,16 @@ import type { ProgrammeData } from '~/types/event-programme'
  *
  * ── L'ÉDITION PAR DÉFAUT ────────────────────────────────────────────────────
  *
- * Sans paramètre — quand on entre par la barre de navigation — l'écran ouvre la
- * dernière édition dont le programme est PUBLIÉ. Ouvrir sur l'édition en cours
- * serait plus cohérent avec le reste du site, mais son programme ne l'est
- * justement pas encore : on afficherait « programme à venir » à quelqu'un qui
- * vient lire un programme. À défaut de toute publication, l'édition en cours
- * fait l'affaire et l'écran l'annonce.
+ * Sans paramètre — quand on entre par la barre de navigation —, l'édition en
+ * cours, sinon la plus proche à venir, sinon la dernière passée
+ * (`defaultProgrammeEdition()`, arbitré par le commanditaire le 16/09).
+ *
+ * ── LE BANDEAU SUIT L'ÉDITION CONSULTÉE ─────────────────────────────────────
+ *
+ * `EventProgrammeHero` porte le sélecteur ; le changement passe par
+ * `EventProgramme.select()`, qui charge le programme avant de le signaler. Un
+ * bandeau qui resterait sur la COP31 pendant qu'on lit PACO referait le défaut
+ * qui a créé cette page.
  *
  * ── CE QUE LA PAGE CHARGE ───────────────────────────────────────────────────
  *
@@ -60,13 +64,9 @@ const { data, status, error, refresh } = await useAsyncData('programme-page', as
   if (!editions.length) return null
 
   const wanted = typeof route.query.edition === 'string' ? route.query.edition : null
-  const published = editions.filter((edition) => edition.programme_published_at !== null)
-
-  // `publicList()` rend les éditions de la plus récente à la plus ancienne.
-  const edition: EventEdition | undefined =
+  const edition: PublicEditionRow | undefined =
     (wanted ? editions.find((entry) => entry.slug === wanted) : undefined) ??
-    published[0] ??
-    editions[0]
+    defaultProgrammeEdition(editions)
 
   if (!edition) return null
 
@@ -79,18 +79,22 @@ const { data, status, error, refresh } = await useAsyncData('programme-page', as
   return { editions, series, edition, programme: { schedule, days, rooms } satisfies ProgrammeData }
 })
 
+const current = ref<PublicEditionRow | null>(null)
+const shown = computed(() => current.value ?? data.value?.edition ?? null)
+const programme = useTemplateRef<{ select: (eventId: string) => Promise<void> }>('programme')
+
 /**
  * Les messages actifs de l'édition ouverte. Chargés à part, et **sans casser la
  * page s'ils manquent** : le programme reste le sujet de l'écran.
  */
 const { data: incidents } = await useAsyncData(
-  () => `programme-incidents-${data.value?.edition.id ?? 'aucune'}`,
+  () => `programme-incidents-${shown.value?.id ?? 'aucune'}`,
   async () => {
-    const eventId = data.value?.edition.id
+    const eventId = shown.value?.id
     if (!eventId) return []
     return api.incidents.forEvent(eventId).catch(() => [])
   },
-  { watch: [data], default: () => [] },
+  { default: () => [] },
 )
 
 /** Trois au plus — la règle des pastilles de la charte. */
@@ -103,7 +107,21 @@ useHead(() => ({ title: t('programme.title') }))
 
 <template>
   <div class="flex flex-col gap-8">
-    <!-- Avant le titre : ce qui ne se passe pas comme prévu se lit d'abord. -->
+    <!-- Le bandeau déborde la gouttière et remonte sous le menu : il doit
+         rester le premier enfant de la page. -->
+    <EventProgrammeHero
+      v-if="shown && data"
+      :edition="shown"
+      :editions="data.editions"
+      @select="programme?.select($event)"
+    />
+
+    <header v-else>
+      <h1 class="font-display text-3xl">{{ t('programme.title') }}</h1>
+      <p class="mt-2 max-w-(--measure) text-text-muted">{{ t('programme.description') }}</p>
+    </header>
+
+    <!-- Juste sous le bandeau : ce qui ne se passe pas comme prévu se lit avant le programme. -->
     <div v-if="bandeaux.length" class="flex flex-col gap-2">
       <UiIncidentBanner
         v-for="incident in bandeaux"
@@ -116,19 +134,14 @@ useHead(() => ({ title: t('programme.title') }))
         :target-label="incident.target_label"
         :dismissible="incident.is_dismissible"
         :display-until="incident.display_until"
-        :timezone="data?.edition.timezone"
-        :zone-label="data?.edition.city ?? undefined"
+        :timezone="shown?.timezone"
+        :zone-label="shown?.city ?? undefined"
         standalone
       />
       <p v-if="replies" class="text-sm text-text-muted">
         {{ t('programme.incidents.more', { count: replies }) }}
       </p>
     </div>
-
-    <header>
-      <h1 class="font-display text-3xl">{{ t('programme.title') }}</h1>
-      <p class="mt-2 max-w-(--measure) text-text-muted">{{ t('programme.description') }}</p>
-    </header>
 
     <UiLoadingState
       v-if="status === 'pending'"
@@ -156,10 +169,13 @@ useHead(() => ({ title: t('programme.title') }))
 
     <EventProgramme
       v-else
+      ref="programme"
       :edition="data.edition"
       :initial="data.programme"
       :editions="data.editions"
       :series="data.series"
+      named-above
+      @update:edition="current = $event"
     />
   </div>
 </template>

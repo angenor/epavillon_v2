@@ -70,6 +70,8 @@ export interface Session {
    *  détection des chevauchements et des requêtes de calendrier. */
   readonly time_range: TsTzRange
   timezone: TimeZoneName
+  /** Dernier changement visible du public — horaires, titre, salle, statut. Tenu par trigger. */
+  readonly listing_changed_at: IsoDateTime
   room_id: RoomId | null
   /** Dérivée de `event.rooms.is_virtual` par trigger. Purement indicative : elle
    *  colore un chevauchement, elle ne bloque aucune écriture. */

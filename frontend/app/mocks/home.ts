@@ -55,6 +55,7 @@ import { callsForProposals } from './calls'
 import { countries, entityTerms, taxonomyTerms } from './reference'
 import { events, eventSeries } from './event'
 import { allSessions } from './sessions'
+import { organizations } from './org'
 import { publicSchedule } from './views'
 
 // ===========================================================================
@@ -204,6 +205,12 @@ export function publicEditions(at: number = Date.now()): PublicEditionRow[] {
         has_pavilion: edition.has_pavilion,
         programme_published_at: edition.programme_published_at,
         highlights: edition.highlights,
+        address: edition.address,
+        latitude: edition.latitude,
+        longitude: edition.longitude,
+        created_by: edition.created_by,
+        created_at: edition.created_at,
+        updated_at: edition.updated_at,
 
         series_id: edition.series_id,
         series_kind: series?.kind ?? null,
@@ -242,6 +249,8 @@ export function publicEditions(at: number = Date.now()): PublicEditionRow[] {
         organization_count: volumes[edition.id]?.organization_count ?? 0,
         programme_starts_at: volumes[edition.id]?.programme_starts_at ?? null,
         programme_ends_at: volumes[edition.id]?.programme_ends_at ?? null,
+        country_count: volumes[edition.id]?.country_count ?? 0,
+        programme_updated_at: volumes[edition.id]?.programme_updated_at ?? null,
       }
     })
     .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
@@ -260,9 +269,9 @@ export function publicEditions(at: number = Date.now()): PublicEditionRow[] {
  * clé manque au lieu de valoir zéro.
  */
 export function editionStats(): Record<EventId, EditionStatsRow> {
-  const published = allSessions.filter(
-    (session) => session.published_at !== null && session.status !== 'cancelled',
-  )
+  // Les annulées restent dans le lot : elles datent la dernière mise à jour,
+  // sans entrer dans les comptes — comme la vue.
+  const published = allSessions.filter((session) => session.published_at !== null)
 
   const byEvent = new Map<EventId, typeof published>()
   for (const session of published) {
@@ -272,22 +281,34 @@ export function editionStats(): Record<EventId, EditionStatsRow> {
   }
 
   const stats: Record<EventId, EditionStatsRow> = {}
-  for (const [eventId, sessions] of byEvent) {
-    const organizations = new Set(
-      sessions
-        .map((session) => session.organization_id)
-        .filter((id): id is Uuid => id !== null),
+  for (const [eventId, all] of byEvent) {
+    const sessions = all.filter((session) => session.status !== 'cancelled')
+    const organizationIds = sessions
+      .map((session) => session.organization_id)
+      .filter((id): id is Uuid => id !== null)
+    const countries = new Set(
+      organizationIds
+        .map((id) => organizations.find((organization) => organization.id === id)?.country_id)
+        .filter((id): id is Uuid => Boolean(id)),
     )
     stats[eventId] = {
       event_id: eventId,
       published_session_count: sessions.length,
       streamed_session_count: sessions.filter((session) => session.is_streamed).length,
-      organization_count: organizations.size,
+      organization_count: new Set(organizationIds).size,
       programme_starts_at: sessions
         .map((session) => session.starts_at)
         .sort((a, b) => a.localeCompare(b))[0] ?? null,
       programme_ends_at: sessions
         .map((session) => session.ends_at)
+        .sort((a, b) => b.localeCompare(a))[0] ?? null,
+      country_count: countries.size,
+      programme_updated_at: all
+        .map((session) =>
+          session.published_at && session.published_at > session.listing_changed_at
+            ? session.published_at
+            : session.listing_changed_at,
+        )
         .sort((a, b) => b.localeCompare(a))[0] ?? null,
     }
   }

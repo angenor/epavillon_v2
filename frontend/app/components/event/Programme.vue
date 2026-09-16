@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { EventEdition } from '~/types/event/edition'
 import type { EventSeries } from '~/types/event/series'
 import type {
   ProgrammeData,
@@ -7,7 +6,7 @@ import type {
   ProgrammeEditionOption,
   ProgrammeFilterState,
 } from '~/types/event-programme'
-import type { PublicScheduleRow } from '~/types/views'
+import type { PublicEditionRow, PublicScheduleRow } from '~/types/views'
 import type { SelectOption } from '~/types/ui'
 import type { IsoDate } from '~/types/shared'
 import type { LocationQueryRaw } from 'vue-router'
@@ -59,15 +58,18 @@ import type { LocationQueryRaw } from 'vue-router'
 
 interface Props {
   /** Édition sélectionnée à l'arrivée, résolue par la page depuis l'URL. */
-  edition: EventEdition
+  edition: PublicEditionRow
   /** Programme de cette édition, chargé par la page (rendu serveur). */
   initial: ProgrammeData
   /** Éditions publiques, toutes séries confondues. */
-  editions: EventEdition[]
+  editions: PublicEditionRow[]
   series: EventSeries[]
+  /** Un bandeau nomme l'édition et porte le sélecteur : ici, le titre ne reste que pour les lecteurs d'écran. */
+  namedAbove?: boolean
 }
 
 const props = defineProps<Props>()
+const emit = defineEmits<{ 'update:edition': [edition: PublicEditionRow] }>()
 
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
@@ -155,11 +157,14 @@ async function select(eventId: string): Promise<void> {
   await load(eventId)
   if (failed.value) return
   selectedId.value = eventId
+  emit('update:edition', selectedEdition.value)
   // Les filtres appartiennent à un programme : les garder d'une édition à
   // l'autre afficherait « aucun résultat » sur une salle qui n'existe pas ici.
   filters.value = { day: null, theme: null, format: null, room: null }
   selectedSessionId.value = null
 }
+
+defineExpose({ select })
 
 // ---------------------------------------------------------------------------
 // Vue active, filtres, sélection — l'état PARTAGÉ par les deux vues
@@ -345,7 +350,11 @@ const period = computed(() =>
   <section aria-labelledby="programmation-titre">
     <!-- SÉLECTEUR D'ÉDITION. Les conférences d'abord, puis ce qui ne relève
          d'aucune conférence : deux groupes nommés, jamais une liste mêlée. -->
-    <nav class="flex flex-wrap items-center gap-x-6 gap-y-3" :aria-label="t('programme.editions.label')">
+    <nav
+      v-if="!props.namedAbove"
+      class="flex flex-wrap items-center gap-x-6 gap-y-3"
+      :aria-label="t('programme.editions.label')"
+    >
       <div class="flex flex-wrap items-center gap-2">
         <span class="text-xs uppercase text-text-subtle" :style="{ letterSpacing: 'var(--tracking-caps)' }">
           {{ t('programme.editions.conferences') }}
@@ -381,8 +390,11 @@ const period = computed(() =>
     <!-- L'ÉDITION CONSULTÉE, NOMMÉE. C'est la correction du défaut qui a motivé
          la sortie de cette section hors de la page d'édition : sans ce titre, on
          lisait le programme du cycle PACO en croyant lire celui de la COP31. -->
-    <div class="mt-6 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
-      <div class="min-w-0">
+    <div
+      class="flex flex-wrap items-end justify-between gap-4"
+      :class="props.namedAbove ? '' : 'mt-6 border-b border-border pb-4'"
+    >
+      <div class="min-w-0" :class="{ 'sr-only': props.namedAbove }">
         <h2 id="programmation-titre" class="font-display text-2xl">
           {{ t('programme.editions.showing', { edition: tr(selectedEdition.title) }) }}
         </h2>

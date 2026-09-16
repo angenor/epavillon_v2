@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT v.id AS \"id!\", v.slug::text AS \"slug!\", v.title AS \"title!\", v.description AS \"description!\",\n                  v.acronym, v.edition_label, v.edition_year AS \"edition_year!\",\n                  v.status::text AS \"status!\",\n                  v.participation_mode::text AS \"participation_mode!\",\n                  v.timezone::text AS \"timezone!\",\n                  v.starts_at AS \"starts_at!\", v.ends_at AS \"ends_at!\",\n                  v.has_pavilion AS \"has_pavilion!\", v.programme_published_at, v.highlights,\n                  v.series_id, v.series_kind::text AS \"series_kind?\",\n                  v.series_name, v.series_slug::text AS \"series_slug?\",\n                  v.country_id, v.country_code, v.country_name, v.city,\n                  v.banner, v.cover, v.thumbnail,\n                  v.temporal_state AS \"temporal_state!\",\n                  v.call_id, v.call_status::text AS \"call_status?\",\n                  v.call_is_open, v.call_deadline,\n                  v.theme_codes AS \"theme_codes!\", v.themes AS \"themes!\",\n                  e.address, e.latitude::float8 AS \"latitude?\", e.longitude::float8 AS \"longitude?\",\n                  e.created_by, e.created_at AS \"created_at!\", e.updated_at AS \"updated_at!\",\n                  COALESCE(st.published_session_count, 0) AS \"published_session_count!\",\n                  COALESCE(st.streamed_session_count, 0)  AS \"streamed_session_count!\",\n                  COALESCE(st.organization_count, 0)      AS \"organization_count!\",\n                  st.programme_starts_at, st.programme_ends_at\n             FROM event.v_public_editions v\n             JOIN event.events e ON e.id = v.id\n             LEFT JOIN programme.v_edition_stats st ON st.event_id = v.id\n            WHERE $1::text IS NULL OR v.slug::text = $1\n            ORDER BY v.starts_at DESC",
+  "query": "SELECT v.id AS \"id!\", v.slug::text AS \"slug!\", v.title AS \"title!\", v.description AS \"description!\",\n                  v.acronym, v.edition_label, v.edition_year AS \"edition_year!\",\n                  v.status::text AS \"status!\",\n                  v.participation_mode::text AS \"participation_mode!\",\n                  v.timezone::text AS \"timezone!\",\n                  v.starts_at AS \"starts_at!\", v.ends_at AS \"ends_at!\",\n                  v.has_pavilion AS \"has_pavilion!\", v.programme_published_at, v.highlights,\n                  v.series_id, v.series_kind::text AS \"series_kind?\",\n                  v.series_name, v.series_slug::text AS \"series_slug?\",\n                  v.country_id, v.country_code, v.country_name, v.city,\n                  v.banner, v.cover, v.thumbnail,\n                  v.temporal_state AS \"temporal_state!\",\n                  v.call_id, v.call_status::text AS \"call_status?\",\n                  v.call_is_open, v.call_deadline,\n                  v.theme_codes AS \"theme_codes!\", v.themes AS \"themes!\",\n                  e.address, e.latitude::float8 AS \"latitude?\", e.longitude::float8 AS \"longitude?\",\n                  e.created_by, e.created_at AS \"created_at!\", e.updated_at AS \"updated_at!\",\n                  COALESCE(st.published_session_count, 0) AS \"published_session_count!\",\n                  COALESCE(st.streamed_session_count, 0)  AS \"streamed_session_count!\",\n                  COALESCE(st.organization_count, 0)      AS \"organization_count!\",\n                  st.programme_starts_at, st.programme_ends_at,\n                  COALESCE(st.country_count, 0)           AS \"country_count!\",\n                  st.programme_updated_at\n             FROM event.v_public_editions v\n             JOIN event.events e ON e.id = v.id\n             LEFT JOIN programme.v_edition_stats st ON st.event_id = v.id\n            WHERE $1::text IS NULL OR v.slug::text = $1\n            ORDER BY v.starts_at DESC",
   "describe": {
     "columns": [
       {
@@ -426,6 +426,23 @@
             "name": "programme_ends_at"
           }
         }
+      },
+      {
+        "ordinal": 44,
+        "name": "country_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 45,
+        "name": "programme_updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.v_edition_stats",
+            "name": "programme_updated_at"
+          }
+        }
       }
     ],
     "parameters": {
@@ -477,8 +494,10 @@
       null,
       null,
       true,
+      true,
+      null,
       true
     ]
   },
-  "hash": "9934b9355f83af0caf59cc0716a02b6268d141bb45778cdb7f3b571cd8b79c72"
+  "hash": "afc62261eca091ae7554630e8c40b8053b0dc4676026e5b1f9a682906a0f9dcf"
 }

@@ -67,7 +67,9 @@ async fn lire<'e>(executor: impl PgExecutor<'e>, slug: Option<&str>) -> Result<V
                   COALESCE(st.published_session_count, 0) AS "published_session_count!",
                   COALESCE(st.streamed_session_count, 0)  AS "streamed_session_count!",
                   COALESCE(st.organization_count, 0)      AS "organization_count!",
-                  st.programme_starts_at, st.programme_ends_at
+                  st.programme_starts_at, st.programme_ends_at,
+                  COALESCE(st.country_count, 0)           AS "country_count!",
+                  st.programme_updated_at
              FROM event.v_public_editions v
              JOIN event.events e ON e.id = v.id
              LEFT JOIN programme.v_edition_stats st ON st.event_id = v.id
@@ -125,6 +127,8 @@ async fn lire<'e>(executor: impl PgExecutor<'e>, slug: Option<&str>) -> Result<V
             organization_count: l.organization_count,
             programme_starts_at: l.programme_starts_at,
             programme_ends_at: l.programme_ends_at,
+            country_count: l.country_count,
+            programme_updated_at: l.programme_updated_at,
         })
         .collect())
 }

@@ -77,6 +77,11 @@ CREATE TABLE programme.sessions (
     -- passe-t-il entre 14 h et 16 h ? »).
     time_range       tstzrange   GENERATED ALWAYS AS (tstzrange(starts_at, ends_at, '[)')) STORED,
     timezone         platform.timezone_name NOT NULL,
+    -- Dernier changement de ce que le PUBLIC lit d'une ligne du programme
+    -- (16/09) : horaires, titre, salle, statut. `updated_at` bouge aussi pour
+    -- une capacité ou un compte rendu, qui ne changent rien pour le visiteur.
+    -- Tenue par `tg_sessions_listing_changed`.
+    listing_changed_at timestamptz NOT NULL DEFAULT now(),
 
     room_id          uuid        CONSTRAINT xmod_fk_sessions_room
                                  REFERENCES event.rooms(id) ON DELETE SET NULL,
@@ -207,6 +212,26 @@ CREATE TRIGGER tg_sessions_derive
     BEFORE INSERT OR UPDATE OF room_id, starts_at, event_id, is_streamed, broadcast_channel_id
     ON programme.sessions
     FOR EACH ROW EXECUTE FUNCTION programme.tg_sessions_derive_fields();
+
+CREATE OR REPLACE FUNCTION programme.tg_sessions_touch_listing()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    NEW.listing_changed_at := now();
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER tg_sessions_listing_changed
+    BEFORE UPDATE OF starts_at, ends_at, title, room_id, status ON programme.sessions
+    FOR EACH ROW
+    WHEN (NEW.starts_at IS DISTINCT FROM OLD.starts_at
+       OR NEW.ends_at   IS DISTINCT FROM OLD.ends_at
+       OR NEW.title     IS DISTINCT FROM OLD.title
+       OR NEW.room_id   IS DISTINCT FROM OLD.room_id
+       OR NEW.status    IS DISTINCT FROM OLD.status)
+    EXECUTE FUNCTION programme.tg_sessions_touch_listing();
 
 -- Publication d'un événement de domaine à chaque changement d'état : c'est ce
 -- qui déclenche la création de la réunion visio, les rappels et les
@@ -1022,7 +1047,7 @@ AS $$
     SELECT * FROM platform.entity_history(
         'programme', 'sessions', p_session_id,
         ARRAY['updated_at', 'search_vector', 'view_count', 'time_range',
-              'enforce_room_exclusivity', 'attendee_count']
+              'enforce_room_exclusivity', 'attendee_count', 'listing_changed_at']
     );
 $$;
 
@@ -1119,18 +1144,29 @@ ON CONFLICT (form_id, code) DO NOTHING;
 -- activités » distingue une édition documentée d'une édition simplement
 -- annoncée, et où les bornes réelles du programme diffèrent souvent des dates
 -- officielles de la conférence.
+--
+-- Deux colonnes ajoutées le 16/09 pour le bandeau de `/programmations`, EN FIN
+-- DE LISTE pour qu'un `CREATE OR REPLACE` suffise sur une base en service :
+--   · `country_count` — pays DISTINCTS des organisations porteuses, comptés
+--     comme `organization_count` (le porteur, pas les co-organisateurs) ;
+--   · `programme_updated_at` — dernier changement visible d'une séance publiée
+--     (`listing_changed_at` : horaires, titre, salle, statut), ou dernière
+--     entrée d'une séance au programme. Une ANNULATION en est un, d'où le
+--     filtre posé colonne par colonne et non dans le `WHERE`.
 -- -----------------------------------------------------------------------------
 CREATE OR REPLACE VIEW programme.v_edition_stats AS
 SELECT
     s.event_id,
-    count(*)                                          AS published_session_count,
-    count(*) FILTER (WHERE s.is_streamed)             AS streamed_session_count,
-    count(DISTINCT s.organization_id)                 AS organization_count,
-    min(s.starts_at)                                  AS programme_starts_at,
-    max(s.ends_at)                                    AS programme_ends_at
+    count(*) FILTER (WHERE s.status <> 'cancelled')                       AS published_session_count,
+    count(*) FILTER (WHERE s.status <> 'cancelled' AND s.is_streamed)     AS streamed_session_count,
+    count(DISTINCT s.organization_id) FILTER (WHERE s.status <> 'cancelled') AS organization_count,
+    min(s.starts_at) FILTER (WHERE s.status <> 'cancelled')               AS programme_starts_at,
+    max(s.ends_at)   FILTER (WHERE s.status <> 'cancelled')               AS programme_ends_at,
+    count(DISTINCT o.country_id) FILTER (WHERE s.status <> 'cancelled')   AS country_count,
+    max(greatest(s.listing_changed_at, s.published_at))                   AS programme_updated_at
 FROM programme.sessions s
+LEFT JOIN org.organizations o ON o.id = s.organization_id
 WHERE s.published_at IS NOT NULL
-  AND s.status <> 'cancelled'
 GROUP BY s.event_id;
 
 COMMENT ON VIEW programme.v_edition_stats IS

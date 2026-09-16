@@ -39,7 +39,7 @@ import type {
   Url,
   Uuid,
 } from './shared'
-import type { EventStatus, ParticipationMode, TrackKind } from './event/edition'
+import type { EventEdition, EventStatus, ParticipationMode, TrackKind } from './event/edition'
 import type { SeriesKind } from './event/series'
 import type { CallStatus } from './event/call'
 import type { AttachedImage } from './media'
@@ -359,7 +359,10 @@ export interface ShowcaseRow {
 export type EditionTemporalState = 'upcoming' | 'ongoing' | 'past'
 
 /** Ligne de `event.v_public_editions` — une ligne = une édition publique. */
-export interface PublicEditionRow {
+/** L'API joint aussi les colonnes de la table que la vue ne porte pas : la ligne
+ *  vaut donc une `EventEdition`, et se passe à tout composant qui en attend une. */
+export interface PublicEditionRow
+  extends Pick<EventEdition, 'address' | 'latitude' | 'longitude' | 'created_by' | 'created_at' | 'updated_at'> {
   id: EventId
   slug: Slug
   title: I18nText
@@ -444,6 +447,10 @@ export interface PublicEditionRow {
   organization_count: number
   programme_starts_at: IsoDateTime | null
   programme_ends_at: IsoDateTime | null
+  /** Pays distincts des organisations porteuses. */
+  country_count: number
+  /** Dernier changement visible d'une séance publiée, ou dernière entrée au programme. */
+  programme_updated_at: IsoDateTime | null
 }
 
 // ---------------------------------------------------------------------------
@@ -470,4 +477,8 @@ export interface EditionStatsRow {
   /** Premier début et dernière fin du programme publié. */
   programme_starts_at: IsoDateTime | null
   programme_ends_at: IsoDateTime | null
+  /** Pays distincts des organisations porteuses. */
+  country_count: number
+  /** Dernier changement visible d'une séance publiée, ou dernière entrée au programme. */
+  programme_updated_at: IsoDateTime | null
 }
