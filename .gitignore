@@ -25,6 +25,9 @@ deploy.sh
 *.dump
 backup*
 dumps/
+# Où `./deploy.sh backup` rapatrie la base de production.
+sauvegardes/
+*.sql.gz
 
 .DS_Store
 *.log

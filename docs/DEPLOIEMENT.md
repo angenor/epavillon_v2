@@ -497,3 +497,43 @@ appels réutilisaient les options de `ssh` telles quelles, et prenaient donc le
 numéro de port pour un fichier à copier. La cible `vhost` échouait sur
 « stat local "2243" », après avoir mesuré le voisin et avant d'avoir rien
 touché : sans dommage, mais sans effet.
+
+---
+
+## 13. Faire évoluer le schéma d'une base en service (16/09)
+
+**Il n'existe pas d'outil de migration.** `docs/database/` est chargé une seule
+fois, à la création du volume ; ensuite, la base garde le schéma qu'elle avait,
+**sans le dire**. Recharger efface les données : dès qu'il y a un compte en
+production, on migre à la main. Première migration faite le 16/09 — schéma du
+02/09 vers celui du 16/09 : dossiers sans résumé ni catégorie unique, appel
+avec son texte « après l'envoi », rôle d'organisation attribué avec
+l'adhésion.
+
+**La méthode, et chaque étape a une raison :**
+
+1. **Mesurer l'écart, ne pas le déduire.** On exporte le schéma de production
+   (`pg_dump --schema-only`) et celui d'une base locale chargée depuis
+   `docs/database/`, puis on les compare. L'historique git dit ce qui a changé
+   dans les fichiers, pas ce que la base porte réellement.
+2. **Éprouver le script sur une copie de la production**, données comprises,
+   puis recomparer à la base de référence. Comparer après tri des lignes : une
+   base restaurée depuis une sauvegarde réécrit le texte de ses vues, et une
+   comparaison brute accuse des écarts qui n'en sont pas.
+3. **Sauvegarder** (`./deploy.sh backup`).
+4. **Construire les images AVANT de migrer** — l'ancienne version continue de
+   servir pendant les minutes de compilation.
+5. **Migrer, puis redémarrer aussitôt** (`up -d api worker front`) : l'ancien
+   code face au nouveau schéma ne dure que quelques secondes.
+6. **Recomparer le schéma de production au modèle.** C'est ce contrôle qui a
+   trouvé le seul oubli du 16/09 — un commentaire de colonne dont le texte
+   contient un point-virgule, coupé par l'extraction.
+
+**Un écart qui n'en est pas** : `engagement.email_messages_AAAAMM`. Les
+partitions de courriels sont créées à la volée par le worker ; la production en
+porte que la base de référence n'a pas.
+
+**Où sont les scripts** : `/root/epavillon-migrations/` sur le serveur, hors
+du dossier synchronisé — l'envoi du code efface côté serveur ce qui n'existe
+pas en local.
+
