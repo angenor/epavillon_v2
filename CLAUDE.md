@@ -170,7 +170,7 @@ Cette ligne interdisait le verre dépoli et les dégradés sans exception. **Le 
 - Elle ne vaut **que sur un média** — une photographie, une vidéo. Un panneau de verre sur une surface de page est un défaut, pas une variante.
 - La matière vient de **jetons** : `--color-glass`, `-raised`, `-hover`, `-accent`, `--color-glass-border`, `-border-strong`, `--blur-glass`, `--blur-glass-strong`, `--shadow-glass`. Jamais un `bg-white/20` écrit dans un composant — la v1 avait treize opacités différentes réparties dans huit fichiers, et personne ne savait laquelle était la bonne.
 - **Le verre sépare, il ne contraste pas.** Le contraste reste porté par `--color-scrim` sous le média. Sans voile, une photographie claire rend le panneau illisible malgré son flou.
-- **Un seul dégradé** existe : `.scrim-fade-bottom`, le fondu qui rattache le rail de vignettes au bas d'une image. Il ne décore rien — il rend lisible un texte blanc sur une image dont on ignore la luminosité.
+- **Deux dégradés** existent : `.scrim-fade-bottom`, le fondu qui rattache le rail de vignettes au bas d'une image — il rend lisible un texte blanc sur une image dont on ignore la luminosité ; et `.fade-inverse-start` (arbitré le 16/09), qui fond une photographie dans l'aplat institutionnel portant le texte, sur la section d'appel de l'accueil.
 - Ces surfaces **ne s'inversent pas** en thème sombre, comme les aplats institutionnels : le fond est une photographie dans les deux thèmes.
 
 Le détail est au § « Le verre » de [docs/guide-de-style-epavillon.html](docs/guide-de-style-epavillon.html).

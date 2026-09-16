@@ -67,3 +67,14 @@ Le modèle écrit qu'« un emplacement sans rendu n'existe pas » (`115_content.
 **La base a été alignée à chaud**, et c'est délibéré : `make check` commence par un `down -v` qui aurait détruit le seul compte capable de se connecter (voir le journal du 24/08). `DROP VIEW`, recréation du type, `ALTER COLUMN … USING`, vue recréée à l'identique depuis le fichier. `content.highlights` étant vide, aucune ligne ne pouvait être perdue. **Le chargement de zéro a été revérifié sur une base jetable** : 178 tables, aucune erreur.
 
 **Vérifié** : `make check-db-safe` (conforme), `npm run typecheck`, `npm run build`, `make check-api-contract`, l'accueil et `/admin/vitrine` au navigateur.
+
+## 16/09 — la section d'appel devient une affiche
+
+Demande du commanditaire : rendre la section « Appel ouvert » plus belle, avec une image à droite fondue de gauche à droite.
+
+- `components/home/CallSection.vue` : aplat institutionnel, couverture de l'édition (`cover`, à défaut `banner`) sur les trois cinquièmes droits, rebours dans un panneau de verre posé sur l'image. Sous 1024 px l'image passe derrière tout le bloc, voilée. Sans image : libellé de l'édition en filigrane. Appel clos : image en niveaux de gris. Le bouton secondaire devient un lien blanc — le contour accent disparaît sur l'aplat foncé.
+- `assets/css/main.css` : **second dégradé de la charte**, `.fade-inverse-start`, arbitré ce jour. Il part de `--color-surface-inverse` ; le texte ne se pose jamais sur sa partie transparente. Guide de style et `CLAUDE.md` amendés.
+
+**Vérifié** : `nuxi typecheck`, l'accueil au navigateur à 1440 px (thèmes clair et sombre) et à 375 px, sans défilement horizontal.
+
+**Écart de données relevé** : le libellé d'édition de la COP31 est tronqué en base (« 31e conférence des Nations Unies sur le »), et le pays s'affiche « Turquie, Türkiye ». Le titre de la section les reprend tels quels.

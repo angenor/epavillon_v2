@@ -25,12 +25,18 @@ import type { PublicEditionRow } from '~/types/views'
  * C'est la date que les organisations tiennent, et la seule qu'on ait le droit
  * de leur annoncer.
  *
- * ── LES COULEURS D'ÉTAT NE SONT PAS CELLES QU'ON CROIT ──────────────────────
+ * ── UN APLAT INSTITUTIONNEL, UNE PHOTOGRAPHIE À DROITE (16/09) ─────────────
  *
- * Cyan pour l'information et l'action — un appel ouvert. Jaune pour ce qui
- * demande attention, donc pour les dernières 48 heures : une échéance qui
- * approche en demande. Gris pour ce qui est clos, qui n'est ni un succès ni un
- * échec. Aucun vert : rien n'est confirmé ici.
+ * Le texte vit sur l'aplat foncé, qui ne s'inverse pas au thème sombre ; la
+ * couverture de l'édition occupe la droite et s'y fond par `.fade-inverse-start`.
+ * Sous 1024 px l'image passe derrière tout le bloc, sous un voile. Sans image,
+ * le libellé de l'édition en filigrane — aucun visuel inventé.
+ *
+ * ── SUR PHOTOGRAPHIE, L'URGENCE PASSE PAR LA PASTILLE ───────────────────────
+ *
+ * Comme dans `EventHeroCall` : `--color-warning` est illisible sur un fond foncé.
+ * Le rebours reste blanc ; la pastille, aplat opaque, porte le jaune des
+ * dernières 48 heures. Cyan pour un appel ouvert, gris pour un appel clos.
  */
 
 interface Props {
@@ -64,10 +70,26 @@ const zone = computed(() =>
   props.edition ? zoneLabel(props.edition.timezone, props.edition.city ?? undefined) : '',
 )
 
-const tone = computed(() => {
-  if (!isOpen.value) return 'border-border bg-surface-sunken'
-  return isUrgent.value ? 'border-warning-border bg-warning-surface' : 'border-accent bg-info-surface'
+const place = computed(() => {
+  const edition = props.edition
+  if (!edition) return ''
+  return [edition.city, tr(edition.country_name)].filter(Boolean).join(', ')
 })
+
+const picture = computed(() => props.edition?.cover ?? props.edition?.banner ?? null)
+
+const stamp = computed(() =>
+  props.edition ? (props.edition.edition_label ?? String(props.edition.edition_year)) : '',
+)
+
+const showCountdown = computed(() => isOpen.value && Boolean(countdown.value) && !countdown.value?.expired)
+
+/** Le panneau du rebours est de verre sur la photographie, en relief sur l'aplat. */
+const countdownPanel = computed(() =>
+  picture.value
+    ? 'border-glass-border bg-glass shadow-glass backdrop-blur-glass'
+    : 'border-border-on-inverse bg-surface-inverse-raised',
+)
 
 const editionPath = computed(() =>
   props.edition ? localePath(`/evenements/${props.edition.slug}`) : localePath('/'),
@@ -96,44 +118,127 @@ const editionPath = computed(() =>
       />
     </div>
 
+    <!-- `rounded-xl` : bloc d'affiche, comme les cartes d'édition voisines. -->
     <div
       v-else
-      class="rounded-lg border-(length:--border-medium) px-5 py-6 sm:px-7"
-      :class="tone"
+      class="relative isolate overflow-hidden rounded-xl bg-surface-inverse text-text-on-inverse shadow-md"
     >
-      <div class="flex flex-wrap items-start justify-between gap-4">
-        <div class="min-w-0">
-          <UiBadge
-            :intent="isOpen ? (isUrgent ? 'warning' : 'info') : 'neutral'"
-            size="sm"
-            :solid="isOpen"
+      <div class="absolute inset-0 -z-10 lg:left-2/5" aria-hidden="true">
+        <template v-if="picture">
+          <UiImage
+            :image="picture"
+            ratio="auto"
+            frame-class="size-full"
+            class="size-full"
+            :class="{ grayscale: !isOpen }"
+            sizes="(min-width: 1024px) 45rem, 100vw"
+          />
+          <div class="absolute inset-0 bg-scrim/60 lg:bg-scrim/15" />
+          <div class="fade-inverse-start absolute inset-y-0 left-0 hidden w-3/5 lg:block" />
+        </template>
+        <div v-else class="flex size-full items-center justify-end overflow-hidden pr-8">
+          <span
+            class="font-display text-8xl leading-none whitespace-nowrap text-text-on-inverse/10 tabular-nums sm:text-9xl"
           >
-            {{ t(isOpen ? 'home.call.state.open' : 'home.call.state.closed') }}
-          </UiBadge>
-          <h2 id="appel-titre" class="mt-2 font-display text-2xl leading-snug">
+            {{ stamp }}
+          </span>
+        </div>
+      </div>
+
+      <div
+        class="grid gap-8 px-5 py-8 sm:px-10 sm:py-12 lg:min-h-96 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:px-12"
+      >
+        <div class="max-w-xl">
+          <div class="flex flex-wrap items-center gap-3">
+            <UiBadge
+              :intent="isOpen ? (isUrgent ? 'warning' : 'info') : 'neutral'"
+              size="sm"
+              solid
+            >
+              {{ t(isOpen ? 'home.call.state.open' : 'home.call.state.closed') }}
+            </UiBadge>
+            <span
+              v-if="props.edition.series_name"
+              class="text-xs uppercase text-text-on-inverse-muted"
+              :style="{ letterSpacing: 'var(--tracking-caps)' }"
+            >
+              {{ tr(props.edition.series_name) }}
+            </span>
+          </div>
+
+          <h2
+            id="appel-titre"
+            class="mt-4 font-display text-2xl leading-tight text-text-on-inverse sm:text-4xl"
+          >
             {{ t('home.call.title', { edition: props.edition.edition_label ?? tr(props.edition.title) }) }}
           </h2>
-          <p class="mt-2 text-text-secondary" :style="{ maxWidth: 'var(--measure)' }">
+          <p class="mt-3 line-clamp-4 text-text-on-inverse-muted">
             {{ richTextToPlain(tr(props.edition.description)) }}
           </p>
+
+          <dl v-if="deadlineLabel || place" class="mt-6 grid gap-4 sm:grid-cols-2">
+            <div v-if="deadlineLabel" class="flex items-start gap-3">
+              <UiIcon name="clock" size="1.15rem" class="mt-0.5 shrink-0 text-text-on-inverse-muted" />
+              <div>
+                <dt
+                  class="text-xs uppercase text-text-on-inverse-muted"
+                  :style="{ letterSpacing: 'var(--tracking-caps)' }"
+                >
+                  {{ t('home.call.deadline') }}
+                </dt>
+                <dd class="mt-1 font-bold">
+                  {{ deadlineLabel }}
+                  <span class="block text-sm font-normal text-text-on-inverse-muted">{{ zone }}</span>
+                </dd>
+              </div>
+            </div>
+
+            <div v-if="place" class="flex items-start gap-3">
+              <UiIcon name="map-pin" size="1.15rem" class="mt-0.5 shrink-0 text-text-on-inverse-muted" />
+              <div>
+                <dt
+                  class="text-xs uppercase text-text-on-inverse-muted"
+                  :style="{ letterSpacing: 'var(--tracking-caps)' }"
+                >
+                  {{ t('home.call.place') }}
+                </dt>
+                <dd class="mt-1 font-bold">{{ place }}</dd>
+              </div>
+            </div>
+          </dl>
+
+          <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+            <UiButton
+              v-if="isOpen"
+              size="lg"
+              :to="localePath('/deposer-une-proposition')"
+              icon-trailing="arrow-right"
+              :label="t('home.call.action.submit')"
+            />
+            <NuxtLink
+              :to="editionPath"
+              class="inline-flex min-h-(--target-min) items-center gap-2 font-bold text-text-on-inverse underline-offset-4 hover:underline"
+            >
+              {{ t('home.call.action.edition') }}
+              <UiIcon name="arrow-right" size="1rem" />
+            </NuxtLink>
+          </div>
         </div>
 
         <!-- LE REBOURS n'a de sens qu'ouvert. Absent du rendu serveur, il se
              remplit à l'hydratation — `useCountdown()` explique pourquoi. -->
         <div
-          v-if="isOpen && countdown && !countdown.expired"
-          class="rounded-md border border-border bg-surface-raised px-4 py-3 text-center"
+          v-if="showCountdown && countdown"
+          class="justify-self-start rounded-lg border px-6 py-5 lg:justify-self-end"
+          :class="countdownPanel"
         >
           <p
-            class="text-xs uppercase text-text-subtle"
+            class="text-xs uppercase text-text-on-inverse-muted"
             :style="{ letterSpacing: 'var(--tracking-caps)' }"
           >
             {{ t('home.call.remaining') }}
           </p>
-          <p
-            class="mt-1 font-display text-2xl tabular-nums"
-            :class="isUrgent ? 'text-warning' : 'text-accent'"
-          >
+          <p class="mt-1 font-display text-4xl leading-none text-text-on-inverse tabular-nums sm:text-5xl">
             <template v-if="countdown.days > 0">
               {{ t('home.call.countdown.days', { count: countdown.days }, countdown.days) }}
             </template>
@@ -145,52 +250,6 @@ const editionPath = computed(() =>
             </template>
           </p>
         </div>
-      </div>
-
-      <dl v-if="deadlineLabel" class="mt-5 grid gap-4 sm:grid-cols-2">
-        <div>
-          <dt
-            class="text-xs uppercase text-text-subtle"
-            :style="{ letterSpacing: 'var(--tracking-caps)' }"
-          >
-            {{ t('home.call.deadline') }}
-          </dt>
-          <dd class="mt-1 flex items-start gap-2 text-text">
-            <UiIcon name="clock" size="1.05rem" class="mt-0.5 shrink-0 text-text-muted" />
-            <span>
-              {{ deadlineLabel }}
-              <span class="block text-sm text-text-muted">{{ zone }}</span>
-            </span>
-          </dd>
-        </div>
-
-        <div v-if="props.edition.city || props.edition.country_name">
-          <dt
-            class="text-xs uppercase text-text-subtle"
-            :style="{ letterSpacing: 'var(--tracking-caps)' }"
-          >
-            {{ t('home.call.place') }}
-          </dt>
-          <dd class="mt-1 flex items-start gap-2 text-text">
-            <UiIcon name="map-pin" size="1.05rem" class="mt-0.5 shrink-0 text-text-muted" />
-            <span>{{ [props.edition.city, tr(props.edition.country_name)].filter(Boolean).join(', ') }}</span>
-          </dd>
-        </div>
-      </dl>
-
-      <div class="mt-6 flex flex-wrap gap-3">
-        <UiButton
-          v-if="isOpen"
-          variant="primary"
-          :to="localePath('/deposer-une-proposition')"
-          icon-trailing="arrow-right"
-          :label="t('home.call.action.submit')"
-        />
-        <UiButton
-          variant="secondary"
-          :to="editionPath"
-          :label="t('home.call.action.edition')"
-        />
       </div>
     </div>
   </section>

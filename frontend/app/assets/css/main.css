@@ -182,6 +182,20 @@
       transparent 100%
     );
   }
+
+  /* LE FONDU DE GAUCHE D'UN MÉDIA — second dégradé, arbitré le 16/09 pour la
+     section d'appel de l'accueil. Il part de l'aplat institutionnel qui porte le
+     texte, pour que la photographie de droite s'y fonde sans arête ; le texte ne
+     se pose jamais sur la partie transparente. */
+  .fade-inverse-start {
+    background-image: linear-gradient(
+      to right,
+      var(--color-surface-inverse) 0%,
+      color-mix(in srgb, var(--color-surface-inverse) 80%, transparent) 30%,
+      color-mix(in srgb, var(--color-surface-inverse) 25%, transparent) 70%,
+      transparent 100%
+    );
+  }
 }
 
 /* ---------------------------------------------------------------------------

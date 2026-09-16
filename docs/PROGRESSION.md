@@ -49,7 +49,7 @@ Un écran = un fichier. Il porte ce qui a été livré, les écarts relevés ent
 | A12 | Utilisateurs et rôles | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a12-utilisateurs-roles.md) |
 | A13 | Messages d'incident | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a13-incidents.md) |
 | A14 | Page « En cours de maintenance » | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a14-maintenance.md) |
-| A15 | Accueil public et vitrine administrable | ✅ 19/08 · panneau « À venir » refondu 24/08 | [écarts et vérifications](progression/ecrans/a15-accueil.md) |
+| A15 | Accueil public et vitrine administrable | ✅ 19/08 · panneau « À venir » refondu 24/08 · section d'appel en affiche 16/09 | [écarts et vérifications](progression/ecrans/a15-accueil.md) |
 | B7 | Raccordement du front à l'API | ✅ 22/08 | [écarts et vérifications](progression/ecrans/b7-raccordement.md) |
 | B8 | Module Vitrine (`content`) | ✅ 24/08 · téléversement des images 05/09 | [écarts et vérifications](progression/ecrans/b8-vitrine.md) |
 | B9 | Direct + Tableaux de bord (`live`, `analytics`) | ✅ 27/08 | [écarts et vérifications](progression/ecrans/b9-direct-tableaux-de-bord.md) |
