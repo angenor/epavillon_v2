@@ -149,22 +149,19 @@ const currentYear = new Date().getFullYear()
       <template #brand>
         <NuxtLink :to="localePath('/')" class="flex shrink-0 items-center gap-3 no-underline">
           <img
-            :src="assetUrl('/logos/ifdd-horizontal-gris.svg')"
-            :alt="t('nav.site.owner')"
-            class="h-9 w-auto dark:hidden"
-            width="176"
-            height="36"
+            :src="assetUrl('/logos/svg/epavillon-symbole.svg')"
+            :alt="t('nav.site.name')"
+            class="h-10 w-auto dark:hidden"
+            width="42"
+            height="40"
           >
           <img
-            :src="assetUrl('/logos/ifdd-horizontal-blanc.svg')"
-            :alt="t('nav.site.owner')"
-            class="hidden h-9 w-auto dark:block"
-            width="176"
-            height="36"
+            :src="assetUrl('/logos/svg/epavillon-symbole-inverse.svg')"
+            :alt="t('nav.site.name')"
+            class="hidden h-10 w-auto dark:block"
+            width="42"
+            height="40"
           >
-          <span class="sr-only sm:not-sr-only sm:inline-block sm:border-l sm:border-border sm:pl-3">
-            <span class="block font-display text-lg leading-tight text-text">{{ t('nav.site.name') }}</span>
-          </span>
         </NuxtLink>
       </template>
 
@@ -226,17 +223,17 @@ const currentYear = new Date().getFullYear()
          page sur la marque plutôt que sur un gris de plus, et il ne s'inverse
          pas au thème sombre — un aplat est un bloc de mise en page.
 
-         Le logo n'a donc plus de variante : sur cet aplat, c'est le tracé blanc
-         qui vaut dans les deux thèmes. -->
+         Le logo n'a donc plus de variante : sur cet aplat, c'est la version
+         inverse qui vaut dans les deux thèmes. -->
     <footer class="bg-surface-inverse text-text-on-inverse">
       <div class="mx-auto grid w-full max-w-[1280px] gap-8 px-4 py-10 sm:px-6 md:grid-cols-4">
         <div class="md:col-span-1">
           <img
-            :src="assetUrl('/logos/oif-ifdd-blanc.svg')"
-            :alt="`${t('nav.site.parent')} — ${t('nav.site.owner')}`"
-            class="h-14 w-auto"
-            width="224"
-            height="56"
+            :src="assetUrl('/logos/svg/epavillon-inverse.svg')"
+            :alt="t('nav.site.name')"
+            class="h-24 w-auto"
+            width="75"
+            height="96"
           >
           <p class="mt-4 text-sm text-text-on-inverse-muted">{{ t('nav.site.tagline') }}</p>
         </div>

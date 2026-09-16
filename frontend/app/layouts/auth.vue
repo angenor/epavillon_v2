@@ -43,22 +43,19 @@ const legalLinks = [
     <header class="mx-auto flex w-full max-w-[64rem] items-center justify-between gap-4 px-4 py-5 sm:px-6">
       <NuxtLink :to="localePath('/')" class="flex shrink-0 items-center gap-3 no-underline">
         <img
-          :src="assetUrl('/logos/ifdd-horizontal-gris.svg')"
-          :alt="t('nav.site.owner')"
-          class="h-8 w-auto dark:hidden"
-          width="176"
-          height="36"
+          :src="assetUrl('/logos/svg/epavillon-symbole.svg')"
+          :alt="t('nav.site.name')"
+          class="h-10 w-auto dark:hidden"
+          width="42"
+          height="40"
         >
         <img
-          :src="assetUrl('/logos/ifdd-horizontal-blanc.svg')"
-          :alt="t('nav.site.owner')"
-          class="hidden h-8 w-auto dark:block"
-          width="176"
-          height="36"
+          :src="assetUrl('/logos/svg/epavillon-symbole-inverse.svg')"
+          :alt="t('nav.site.name')"
+          class="hidden h-10 w-auto dark:block"
+          width="42"
+          height="40"
         >
-        <span class="sr-only sm:not-sr-only sm:inline-block sm:border-l sm:border-border sm:pl-3">
-          <span class="block font-display text-base leading-tight text-text">{{ t('nav.site.name') }}</span>
-        </span>
       </NuxtLink>
 
       <div class="flex items-center gap-2">

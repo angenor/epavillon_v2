@@ -104,24 +104,22 @@ await adminScope.ensureLoaded()
       @close="isSidebarOpen = false"
     >
       <template #brand>
-        <!-- LOGO ET MENTION EMPILÉS, ET NON CÔTE À CÔTE : la colonne fait 260 px,
-             le logo 140, et « Back-office » ne tenait à côté qu'en rognant l'un
-             des deux. Le logo mène au tableau de bord — le retour au site public
-             est au pied, où on le cherche. -->
+        <!-- Le logo mène au tableau de bord — le retour au site public est au
+             pied, où on le cherche. -->
         <NuxtLink :to="localePath('/admin')" class="block no-underline">
           <img
-            :src="assetUrl('/logos/ifdd-horizontal-gris.svg')"
-            :alt="t('nav.site.owner')"
-            class="h-7 w-auto dark:hidden"
-            width="140"
-            height="28"
+            :src="assetUrl('/logos/svg/epavillon-symbole.svg')"
+            :alt="t('nav.site.name')"
+            class="h-10 w-auto dark:hidden"
+            width="42"
+            height="40"
           >
           <img
-            :src="assetUrl('/logos/ifdd-horizontal-blanc.svg')"
-            :alt="t('nav.site.owner')"
-            class="hidden h-7 w-auto dark:block"
-            width="140"
-            height="28"
+            :src="assetUrl('/logos/svg/epavillon-symbole-inverse.svg')"
+            :alt="t('nav.site.name')"
+            class="hidden h-10 w-auto dark:block"
+            width="42"
+            height="40"
           >
           <span
             class="mt-2 block font-display text-xs font-semibold tracking-caps text-text-subtle uppercase"
