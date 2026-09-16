@@ -41,7 +41,11 @@
     "saving": "Saving…",
     "savedAt": "Saved at {time}",
     "error": "Saving failed. Your text is still on screen.",
-    "reference": "Submission number:"
+    "reference": "Submission number:",
+    "failed": {
+      "title": "Your submission was not saved",
+      "description": "Your text is still on screen, but it is not safe yet. Try again before leaving the page."
+    }
   },
   "deadline": {
     "label": "Call deadline",

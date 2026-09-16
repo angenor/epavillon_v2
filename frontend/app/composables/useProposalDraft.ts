@@ -54,6 +54,8 @@ export function useProposalDraft(options: UseProposalDraftOptions) {
   const savedAt = ref<IsoDateTime | null>(null)
   const state = ref<DraftSaveState>('untouched')
   const error = ref<Error | null>(null)
+  /** Le message de l'API, tel quel : son catalogue est déjà français. */
+  const errorMessage = computed(() => error.value?.message ?? null)
 
   /** Une modification est arrivée pendant qu'on enregistrait. */
   let pending = false
@@ -147,12 +149,38 @@ export function useProposalDraft(options: UseProposalDraftOptions) {
     if (timer) clearTimeout(timer)
   })
 
+  /**
+   * ON NE QUITTE PAS UN DOSSIER NON ENREGISTRÉ SANS LE SAVOIR.
+   *
+   * L'écran dit déjà que l'enregistrement a échoué, mais en une ligne, au bas
+   * d'un formulaire de six étapes : quelqu'un qui ferme l'onglet ne la lit pas,
+   * et son dossier reste vide en base — un dossier orphelin que personne ne
+   * relance. Le navigateur pose alors sa propre question, la seule qu'il ne
+   * laisse pas ignorer. La navigation interne, elle, ENREGISTRE plutôt que de
+   * demander : c'est le même geste que le changement d'étape.
+   */
+  function estEnSuspens(): boolean {
+    return state.value === 'dirty' || state.value === 'saving' || state.value === 'error'
+  }
+
+  if (import.meta.client) {
+    const avertir = (event: BeforeUnloadEvent) => {
+      if (!estEnSuspens()) return
+      event.preventDefault()
+      // Chrome ignore le texte mais exige une valeur de retour non vide.
+      event.returnValue = ''
+    }
+    window.addEventListener('beforeunload', avertir)
+    onBeforeUnmount(() => window.removeEventListener('beforeunload', avertir))
+  }
+
   return {
     proposalId,
     referenceCode,
     savedAt,
     state,
     error,
+    errorMessage,
     adopt,
     arm,
     /**

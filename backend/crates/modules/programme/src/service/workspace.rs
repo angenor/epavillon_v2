@@ -392,7 +392,9 @@ async fn comptes_rendus_manquants(
             crate::repo::sessions::comptes_rendus_manquants(state.pool(), suivi.proposal.id)
                 .await?;
 
-        for (session_id, titre, fin) in manquants {
+        // L'identifiant de la séance ne voyage pas : le dossier ouvre son onglet
+        // des séances, et la ligne s'y retrouve.
+        for (_session_id, titre, fin) in manquants {
             actions.push(ActionEnAttente {
                 kind: "session_report_missing".to_owned(),
                 proposal_id: Some(suivi.proposal.id),
@@ -404,7 +406,10 @@ async fn comptes_rendus_manquants(
                     .to_owned(),
                 count: 1,
                 due_at: Some(fin),
-                target: format!("/espace/dossiers/{}?seance={session_id}", suivi.proposal.id),
+                target: format!(
+                    "/mon-organisation/dossiers/{}?vue=sessions",
+                    suivi.proposal.id
+                ),
             });
         }
     }
@@ -441,7 +446,7 @@ fn actions_en_attente(
                 subject: titre.clone(),
                 count: suivi.open_change_requests,
                 due_at: None,
-                target: format!("/espace/dossiers/{}", suivi.proposal.id),
+                target: format!("/mon-organisation/dossiers/{}", suivi.proposal.id),
             });
         }
 
@@ -461,7 +466,7 @@ fn actions_en_attente(
                     subject: titre,
                     count: 1,
                     due_at: echeance,
-                    target: format!("/proposer?dossier={}", suivi.proposal.id),
+                    target: format!("/deposer-une-proposition?dossier={}", suivi.proposal.id),
                 });
             }
         }
@@ -483,7 +488,7 @@ fn actions_en_attente(
             subject: String::new(),
             count: demandes,
             due_at: None,
-            target: "/espace/membres".to_owned(),
+            target: "/mon-organisation#membres".to_owned(),
         });
     }
 

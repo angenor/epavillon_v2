@@ -226,6 +226,7 @@ const {
   referenceCode,
   savedAt,
   state: saveState,
+  errorMessage: saveErrorMessage,
   adopt: adoptDraft,
   arm: armAutosave,
   saveNow,
@@ -728,6 +729,27 @@ const organizationSpaceTo = computed<string | null>(() =>
             show-warnings
             @go-to="goToStep"
           />
+
+          <!-- L'ENREGISTREMENT A ÉCHOUÉ, ET ON LE DIT EN HAUT. La ligne d'état
+               au bas du formulaire ne suffit pas : qui ferme l'onglet ne la lit
+               pas, et son dossier reste vide en base. -->
+          <UiAlert
+            v-if="saveState === 'error'"
+            intent="danger"
+            live
+            :title="t('proposal.form.autosave.failed.title')"
+          >
+            {{ saveErrorMessage ?? t('proposal.form.autosave.failed.description') }}
+            <template #actions>
+              <UiButton
+                variant="secondary"
+                size="sm"
+                icon="refresh"
+                :label="t('common.actions.retry')"
+                @click="saveNow()"
+              />
+            </template>
+          </UiAlert>
 
           <UiAlert
             v-if="submitError"

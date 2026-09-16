@@ -90,3 +90,6 @@ Un écran qui écrit — une invitation, une réponse, une résolution — ne se
 | `make check-db-safe` et `make check-front` | Verts — `npm run typecheck` à 0 erreur et build de production complet |
 
 **Un piège d'outillage, noté pour la prochaine session** : la barre flottante des Nuxt DevTools se pose au centre-bas de la fenêtre et **intercepte les clics** d'un pilote de navigateur. Trois boutons ont paru inertes avant qu'un clic programmatique ne prouve le contraire. Ce n'est pas un défaut de l'écran, mais cela coûte du temps si on ne le sait pas.
+
+**Corrigé le 16/09 — quatre liens morts.** Le bloc « ce qui attend une action » est composé par l'API (`programme/src/service/workspace.rs`), qui portait les chemins d'avant le renommage des écrans. Les cibles sont désormais celles du site : `/deposer-une-proposition?dossier=<id>`, `/mon-organisation/dossiers/<id>` (avec `?vue=sessions` pour un compte rendu manquant) et `/mon-organisation#membres`. Rien ne les vérifie automatiquement : ce sont des chaînes côté API, jamais confrontées au routage du site.
+

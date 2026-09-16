@@ -79,6 +79,7 @@ Le tableau et les obligations d'API relevées en écrivant les écrans : [`progr
 
 | Jour | Fichier |
 |------|---------|
+| 16 septembre 2026 | [`journal/2026-09-16.md`](progression/journal/2026-09-16.md) |
 | 15 septembre 2026 | [`journal/2026-09-15.md`](progression/journal/2026-09-15.md) |
 | 8 septembre 2026 | [`journal/2026-09-08.md`](progression/journal/2026-09-08.md) |
 | 5 septembre 2026 | [`journal/2026-09-05.md`](progression/journal/2026-09-05.md) |

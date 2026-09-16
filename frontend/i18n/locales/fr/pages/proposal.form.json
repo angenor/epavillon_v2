@@ -41,7 +41,11 @@
     "saving": "Enregistrement…",
     "savedAt": "Enregistré à {time}",
     "error": "L'enregistrement a échoué. Votre saisie reste à l'écran.",
-    "reference": "Numéro de dossier :"
+    "reference": "Numéro de dossier :",
+    "failed": {
+      "title": "Votre dossier n'a pas été enregistré",
+      "description": "Votre saisie reste à l'écran, mais elle n'est pas en sécurité. Réessayez avant de quitter la page."
+    }
   },
   "deadline": {
     "label": "Échéance de l'appel",
