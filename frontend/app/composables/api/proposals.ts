@@ -270,6 +270,17 @@ export function createProposalsApi({ call, callOrNull, send, assertEventInScope 
     call('/people/lookup', (m) => m.lookupSpeakerByEmail(email), { email }),
 
   /**
+   * LES INTERVENANTS DONT L'ADRESSE COMMENCE PAR CE QUI EST TAPÉ.
+   *
+   * Une autocomplétion, pas un annuaire : l'API exige trois caractères, rend
+   * huit réponses au plus, et ne connaît que deux populations — adresse
+   * confirmée, ou intervenant d'une activité retenue. Ne rien trouver n'est
+   * jamais un obstacle : la saisie à la main reste le chemin normal.
+   */
+  suggestSpeakers: (prefix: string) =>
+    call('/people/suggest', (m) => m.suggestSpeakers(prefix), { q: prefix }),
+
+  /**
    * L'HISTORIQUE CHAMP PAR CHAMP — `programme.proposal_history()`.
    *
    * Sous-produit du journal d'audit, et non une table entretenue à la main :

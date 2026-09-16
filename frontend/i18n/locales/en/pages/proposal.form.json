@@ -97,7 +97,6 @@
     "next": {
       "title": "What happens next",
       "acknowledgement": "An acknowledgement is sent to your account address, with the submission number.",
-      "review": "{count} selection committee member assesses the submission against the published criteria. | {count} selection committee member assesses the submission against the published criteria. | {count} selection committee members assess the submission against the published criteria.",
       "results": "Results will be sent to you by email as soon as the assessment is complete.",
       "resultsOn": "Results are announced on {date}.",
       "changes": "The committee may request additions: you will then be notified and the submission will become editable again."

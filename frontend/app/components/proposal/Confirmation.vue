@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { EventEdition } from '~/types/event/edition'
+import type { I18nText } from '~/types/shared'
 
 /**
  * APRÈS L'ENVOI — le numéro de dossier, et la suite des opérations.
@@ -15,16 +16,28 @@ import type { EventEdition } from '~/types/event/edition'
  * Là où le presse-papiers n'est pas accessible — contexte non sécurisé, refus du
  * navigateur —, le numéro reste sélectionnable : il n'est pas dans un bouton.
  *
- * LA SUITE DES OPÉRATIONS EST ÉCRITE, pas sous-entendue : combien de membres du
- * comité liront le dossier, quand les résultats sont annoncés, ce qu'on peut
- * encore modifier. Une organisation qui ne sait pas ce qui l'attend écrit à
- * l'IFDD pour le demander — et c'est autant de courriels que la v1 recevait.
+ * LA SUITE DES OPÉRATIONS EST ÉCRITE, pas sous-entendue : ce qui attend le
+ * dossier, quand les résultats sont annoncés, ce qu'on peut encore modifier. Une
+ * organisation qui ne sait pas ce qui l'attend écrit à l'IFDD pour le demander —
+ * et c'est autant de courriels que la v1 recevait.
+ *
+ * ELLE EST RÉDIGÉE AU BACK-OFFICE, par appel
+ * (`calls_for_proposals.submission_next_steps`), et c'est LE MÊME TEXTE que la
+ * relecture annonce avant l'envoi : deux listes à tenir divergeraient dès la
+ * première campagne. Sans texte saisi, l'écran retombe sur ses trois étapes de
+ * base — jamais sur un décompte de relecteurs, qui vaut « 0 membre du comité »
+ * quand l'appel n'en exige aucun (mesuré le 16/09). Un nombre à afficher qui
+ * peut valoir zéro n'est pas une information : c'est une inquiétude.
  */
 
 interface Props {
   referenceCode: string
   submittedAt: string
-  requiredReviews: number
+  /**
+   * « Ce qui se passe après l'envoi », rédigé au back-office — une étape par
+   * ligne. Nul ou vide : l'écran garde ses étapes de base.
+   */
+  nextSteps: I18nText | null
   /** `calls_for_proposals.results_expected_at` — une DATE, jamais une heure. */
   resultsExpectedAt: string | null
   edition: EventEdition
@@ -50,6 +63,9 @@ const { date, dateTime } = useDateTime()
 const zone = computed(() => props.edition.timezone)
 
 const submittedLabel = computed(() => dateTime(props.submittedAt, zone.value))
+
+/** Les étapes de l'appel, découpées comme à la relecture — une par ligne. */
+const steps = computed(() => submissionStepLines(tr(props.nextSteps)))
 const resultsLabel = computed(() =>
   props.resultsExpectedAt ? date(`${props.resultsExpectedAt}T12:00:00Z`, zone.value) : null,
 )
@@ -131,7 +147,16 @@ onBeforeUnmount(() => {
     <!-- LA SUITE DES OPÉRATIONS -->
     <section class="rounded-lg border border-border px-5 py-5">
       <h2 class="font-display text-lg text-text">{{ t('proposal.form.confirmation.next.title') }}</h2>
-      <ol class="mt-3 grid gap-4">
+      <!-- LE TEXTE DE L'APPEL quand il y en a un, les étapes de base sinon. -->
+      <ol v-if="steps.length > 0" class="mt-3 grid gap-4">
+        <li v-for="(step, index) in steps" :key="index" class="flex items-start gap-3">
+          <span class="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-neutral-surface font-mono text-xs font-bold text-text-secondary">
+            {{ index + 1 }}
+          </span>
+          <span class="text-sm text-text-secondary">{{ step }}</span>
+        </li>
+      </ol>
+      <ol v-else class="mt-3 grid gap-4">
         <li class="flex items-start gap-3">
           <span class="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-neutral-surface font-mono text-xs font-bold text-text-secondary">1</span>
           <span class="text-sm text-text-secondary">
@@ -140,12 +165,6 @@ onBeforeUnmount(() => {
         </li>
         <li class="flex items-start gap-3">
           <span class="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-neutral-surface font-mono text-xs font-bold text-text-secondary">2</span>
-          <span class="text-sm text-text-secondary">
-            {{ t('proposal.form.confirmation.next.review', { count: props.requiredReviews }, props.requiredReviews) }}
-          </span>
-        </li>
-        <li class="flex items-start gap-3">
-          <span class="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-neutral-surface font-mono text-xs font-bold text-text-secondary">3</span>
           <span class="text-sm text-text-secondary">
             <template v-if="resultsLabel">
               {{ t('proposal.form.confirmation.next.resultsOn', { date: resultsLabel }) }}
@@ -156,7 +175,7 @@ onBeforeUnmount(() => {
           </span>
         </li>
         <li class="flex items-start gap-3">
-          <span class="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-neutral-surface font-mono text-xs font-bold text-text-secondary">4</span>
+          <span class="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-neutral-surface font-mono text-xs font-bold text-text-secondary">3</span>
           <span class="text-sm text-text-secondary">
             {{ t('proposal.form.confirmation.next.changes') }}
           </span>

@@ -692,3 +692,59 @@ async fn le_contexte_du_formulaire_exclut_le_brouillon_en_cours() {
     .expect("contexte");
     assert_eq!(contexte.counted_proposals, 1);
 }
+
+/// **UNE CIVILITÉ ABSENTE SE COMPLÈTE, UNE CIVILITÉ DÉCLARÉE NE BOUGE PAS.**
+///
+/// Le verrouillage d'identité protège ce que la personne a écrit d'elle-même ;
+/// une colonne vide n'est l'identité de personne. Beaucoup de comptes se créent
+/// sans civilité, et le programme annonce « Mme Awa Sow Fall » : sans cette
+/// nuance, le déposant devrait laisser un trou qu'il est seul à pouvoir combler.
+#[tokio::test]
+async fn la_civilite_manquante_se_complete_sans_jamais_ecraser_celle_qui_existe() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+
+    let titulaire = commun::personne(&bac, "awa.sow@example.org", "Awa", "Sow").await;
+    commun::donner_un_compte(&bac, titulaire).await;
+
+    let mut avec_civilite = commun::brouillon(&terrain, "Dossier avec civilité");
+    let mut intervenant = commun::intervenant("awa.sow@example.org", "Awa", "Sow");
+    intervenant.civility = Some("mme".to_owned());
+    avec_civilite.speakers = vec![intervenant.clone()];
+
+    let cree = draft_write::enregistrer(
+        &bac.state,
+        &bac.ctx(),
+        terrain.deposante,
+        commun::charge(&terrain, avec_civilite),
+    )
+    .await
+    .expect("enregistrement");
+
+    async fn civilite(bac: &Bac, personne: uuid::Uuid) -> Option<String> {
+        sqlx::query_scalar!(
+            "SELECT civility FROM identity.people WHERE id = $1",
+            personne
+        )
+        .fetch_one(bac.pool())
+        .await
+        .expect("lecture de la civilité")
+    }
+
+    assert_eq!(civilite(&bac, titulaire).await.as_deref(), Some("mme"));
+
+    // Une seconde écriture ne la réécrit pas : ce que la personne porte lui
+    // appartient, même quand c'est le dossier qui l'a renseigné.
+    let mut autre = commun::brouillon(&terrain, "Dossier avec civilité");
+    let mut change = intervenant;
+    change.civility = Some("pr".to_owned());
+    autre.speakers = vec![change];
+    let mut charge = commun::charge(&terrain, autre);
+    charge.proposal_id = Some(cree.proposal_id);
+
+    draft_write::enregistrer(&bac.state, &bac.ctx(), terrain.deposante, charge)
+        .await
+        .expect("seconde écriture");
+
+    assert_eq!(civilite(&bac, titulaire).await.as_deref(), Some("mme"));
+}

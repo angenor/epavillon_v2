@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.people SET is_directory_visible = false WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e63ab58b9d4dae7b13d406e2b32bb1841c8314d4877d1375f59f337bf2f09ab0"
+}

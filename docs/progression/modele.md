@@ -6,6 +6,7 @@ Toute modification d'un fichier de `docs/database/` se note ici. C'est ce qui pe
 
 | Date | Fichier | Changement | Motif |
 |------|---------|------------|-------|
+| 09-16 | `060_events.sql` | **Texte par défaut de `submission_next_steps` réécrit** : quatre étapes, **aucun décompte d'évaluateurs** | « 0 membre du comité évalue le dossier » s'affichait après l'envoi. Un appel peut n'exiger aucune revue, et des membres du comité peuvent n'avoir aucun compte |
 | 09-15 | `040_organizations.sql` | **Déclencheur `tg_memberships_sync_role`** : une adhésion active attribue `org_manager` ou `org_member` sur la portée `organization` ; une adhésion close ou changée de rôle révoque l'attribution | Écart n° 74 : rien n'attribuait ces rôles, et un membre d'organisation se voyait refuser le dépôt (`FORBIDDEN`) malgré une adhésion active |
 | 09-15 | `070_programme_proposals.sql` | **`v_proposal_dashboard` gagne `cover`** (§ 7), `media.attached_image('programme','proposals',id,'cover')`, et son `COMMENT ON COLUMN` | Vignette de la liste du back-office, demandée par le commanditaire. Colonne ajoutée **en fin de vue** : `CREATE OR REPLACE VIEW` l'accepte à chaud, la base de dev n'a pas été rechargée |
 | 09-15 | `070_programme_proposals.sql` | **`proposals.summary` et `proposals.activity_type_code` supprimées** ; `search_vector` sans résumé ; `v_proposal_dashboard` perd `activity_type_code`, gagne `category_codes` et `categories` | Demande du commanditaire : pas de résumé, catégories à choix multiple — elles rejoignent `reference.entity_terms` comme les thématiques |

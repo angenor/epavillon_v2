@@ -97,7 +97,6 @@
     "next": {
       "title": "La suite des opérations",
       "acknowledgement": "Un accusé de réception part à l'adresse de votre compte, avec le numéro de dossier.",
-      "review": "{count} membre du comité de sélection évalue le dossier sur les critères publiés. | {count} membre du comité de sélection évalue le dossier sur les critères publiés. | {count} membres du comité de sélection évaluent le dossier sur les critères publiés.",
       "results": "Les résultats vous seront communiqués par courriel dès la fin de l'évaluation.",
       "resultsOn": "Les résultats sont annoncés le {date}.",
       "changes": "Le comité peut demander des compléments : vous recevrez alors un message et le dossier redeviendra modifiable."

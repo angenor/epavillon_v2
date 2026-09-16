@@ -1,0 +1,115 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.id, p.civility, p.first_name, p.last_name,\n                  p.primary_email::text AS \"email!\", p.job_title, p.biography,\n                  p.primary_organization_id,\n                  EXISTS (SELECT 1 FROM identity.accounts a WHERE a.person_id = p.id)\n                      AS \"has_account!\"\n             FROM identity.people p\n            WHERE p.status = 'active'\n              AND p.is_directory_visible\n              AND p.primary_email::text ILIKE $1\n              AND (\n                  p.email_verified_at IS NOT NULL\n                  OR EXISTS (\n                      SELECT 1\n                        FROM programme.proposal_speakers ps\n                        JOIN programme.proposals pr ON pr.id = ps.proposal_id\n                       WHERE ps.person_id = p.id\n                         AND pr.status = 'accepted'\n                         AND pr.deleted_at IS NULL)\n              )\n            ORDER BY p.primary_email::text\n            LIMIT $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "civility",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "civility"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "first_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "first_name"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "last_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "last_name"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "job_title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "job_title"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "biography",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "biography"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "primary_organization_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "primary_organization_id"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "has_account!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      null,
+      true,
+      true,
+      true,
+      null
+    ]
+  },
+  "hash": "27888c83517da8ec4c9c91983d421e37eed955a3e87681395a783af83999fc1e"
+}

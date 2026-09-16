@@ -2621,6 +2621,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/people/suggest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Les intervenants dont l'adresse commence par ce qui est tapé.
+         * @description `PersonLookup[]`. **Une autocomplétion, pas un annuaire** : préfixe d'adresse de trois caractères au minimum, huit réponses au plus, et deux populations seulement — adresse confirmée, ou intervenant d'une activité RETENUE. Le choix de la personne de figurer dans les listes (`is_directory_visible`) est respecté. Rend une liste vide plutôt qu'une erreur : ne rien trouver n'empêche jamais de saisir l'intervenant à la main.
+         */
+        get: operations["depot_suggerer_intervenants"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/people/{id}": {
         parameters: {
             query?: never;
@@ -10024,6 +10044,38 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description PersonLookup ou null */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_suggerer_intervenants: {
+        parameters: {
+            query: {
+                /** @description Début de l'adresse électronique */
+                q: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PersonLookup[] */
             200: {
                 headers: {
                     [name: string]: unknown;

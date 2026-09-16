@@ -10,12 +10,10 @@
   "moveDown": "Move {speaker} down",
   "confirmationNotice": "Naming someone commits them: each person will receive an email asking them to confirm their participation.",
   "accountBadge": "Platform account",
-
   "empty": {
     "title": "No speaker declared",
     "description": "Add the people who will take part. You can change the list until the submission is sent."
   },
-
   "dialog": {
     "addTitle": "Add a speaker",
     "editTitle": "Edit speaker",
@@ -29,17 +27,26 @@
     "linkedTitle": "Known person selected",
     "linkedDescription": "They have spoken elsewhere without holding an account: you can correct their details. Once the activity is approved, these will no longer be editable from this submission.",
     "detach": "Enter another person",
-    "unknownPerson": "This address is unknown to the platform: the person will be created when your submission is saved."
+    "unknownPerson": "This address is unknown to the platform: the person will be created when your submission is saved.",
+    "suggestionsLabel": "People already known to the platform",
+    "suggestionAction": "Use",
+    "civilityMissing": "This person has not stated a title: what you choose will complete their profile."
   },
-
   "fields": {
     "email": {
       "label": "Email address",
       "hint": "It will not be published. It identifies the person and lets us write to them."
     },
-    "civility": { "label": "Title", "placeholder": "Choose" },
-    "first_name": { "label": "First name" },
-    "last_name": { "label": "Last name" },
+    "civility": {
+      "label": "Title",
+      "placeholder": "Choose"
+    },
+    "first_name": {
+      "label": "First name"
+    },
+    "last_name": {
+      "label": "Last name"
+    },
     "job_title": {
       "label": "Position",
       "hint": "As it stands at the time of the activity: it is kept in the archive."
@@ -58,7 +65,6 @@
       "locked": "This note belongs to the person's profile: only they can change it."
     }
   },
-
   "civilities": {
     "mme": "Ms",
     "m": "Mr",
@@ -66,16 +72,32 @@
     "pr": "Prof.",
     "other": "Other"
   },
-
   "roles": {
-    "speaker": { "label": "Speaker", "hint": "Speaks on substance" },
-    "moderator": { "label": "Moderator", "hint": "Runs the discussion" },
-    "panelist": { "label": "Panellist", "hint": "Takes part in a round table" },
-    "keynote": { "label": "Keynote", "hint": "Opening or closing address" },
-    "facilitator": { "label": "Facilitator", "hint": "Leads a participatory workshop" },
-    "interpreter": { "label": "Interpreter", "hint": "Provides interpretation" }
+    "speaker": {
+      "label": "Speaker",
+      "hint": "Speaks on substance"
+    },
+    "moderator": {
+      "label": "Moderator",
+      "hint": "Runs the discussion"
+    },
+    "panelist": {
+      "label": "Panellist",
+      "hint": "Takes part in a round table"
+    },
+    "keynote": {
+      "label": "Keynote",
+      "hint": "Opening or closing address"
+    },
+    "facilitator": {
+      "label": "Facilitator",
+      "hint": "Leads a participatory workshop"
+    },
+    "interpreter": {
+      "label": "Interpreter",
+      "hint": "Provides interpretation"
+    }
   },
-
   "photo": {
     "label": "Photograph",
     "hint": "Portrait, image format, 5 MB at most. It is attached to the person, not to this submission: it will serve their future participations too.",
@@ -86,7 +108,6 @@
     "typeError": "This file is not an image.",
     "sizeError": "The photograph exceeds the maximum size of {size}."
   },
-
   "errors": {
     "tooFew": "This call requires at least {min} speaker. | This call requires at least {min} speaker. | This call requires at least {min} speakers.",
     "tooMany": "This call accepts at most {max} speaker. | This call accepts at most {max} speaker. | This call accepts at most {max} speakers.",
@@ -97,5 +118,4 @@
     "jobTitleRequired": "{speaker}: the position is required.",
     "organizationRequired": "{speaker}: the organization is required."
   }
-
 }

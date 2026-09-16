@@ -19,8 +19,8 @@ import { CALL, EVENT, PERSON } from './ids'
 
 /** Le défaut de `event.calls_for_proposals.submission_next_steps`. */
 export const DEFAULT_SUBMISSION_NEXT_STEPS: I18nText = {
-  fr: "Au moins deux membres du comité évalueront le dossier sur les critères publiés.\nVous recevrez un accusé de réception portant votre numéro de dossier.\nLe dossier reste modifiable jusqu'à la fin de l'événement ; le comité verra les modifications.",
-  en: 'At least two committee members will assess the submission against the published criteria.\nYou will receive an acknowledgement bearing your submission number.\nThe submission remains editable until the end of the event; the committee will see the changes.',
+  fr: "Un accusé de réception part à l'adresse de votre compte, avec le numéro de dossier.\nLe comité examine le dossier sur les critères publiés.\nLes résultats vous sont communiqués par courriel dès la fin de l'évaluation.\nLe comité peut demander des compléments : vous recevrez alors un message, et le dossier redeviendra modifiable.",
+  en: 'An acknowledgement is sent to your account address, with your submission number.\nThe committee reviews the submission against the published criteria.\nResults are sent to you by email once the assessment is complete.\nThe committee may ask for additions: you will then receive a message, and the submission will become editable again.',
 }
 
 export const callsForProposals = [

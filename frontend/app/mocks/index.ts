@@ -159,6 +159,7 @@ export {
   saveProposalDraft,
   submitProposal,
   lookupSpeakerByEmail,
+  suggestSpeakers,
 } from './proposal-submission'
 
 export { reviews, reviewScores, reviewAssignments } from './reviews'

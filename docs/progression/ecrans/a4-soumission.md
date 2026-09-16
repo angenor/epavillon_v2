@@ -73,3 +73,8 @@ Un formulaire qui s'enregistre tout seul, se remplit dans le désordre et refuse
 
 - **Le dépôt était refusé à tout membre d'organisation** (`FORBIDDEN`). Rien n'attribuait les rôles `org_manager` / `org_member` dont dépend la permission — écart n° 74, resté invisible tant que seuls des super-administrateurs essayaient. Le rôle suit désormais l'adhésion, par déclencheur (`040_organizations.sql`).
 - **Le nombre d'occurrences souhaitées est en lecture seule, à 1.** Décision du commanditaire pour cette campagne ; la colonne en accepte toujours plusieurs.
+
+**Ajouté le 16/09 — l'autocomplétion des intervenants.** Le champ d'adresse propose les personnes connues dès trois caractères (`GET /people/suggest`) : adresse confirmée ou intervenant d'une activité retenue, visibles dans l'annuaire, huit réponses au plus, préfixe d'adresse seulement. Le choix est facultatif, et la saisie à la main reste le chemin normal. En le branchant, on a découvert que `/people/lookup` **ne répondait pas** : `/people/{id}` capturait le chemin. Les deux sont désormais couverts par un test **avec session** — sans session, un 401 masque le 404.
+
+**Repris le 16/09, après essai du commanditaire :** l'aide du champ d'adresse s'efface pendant que les suggestions sont ouvertes — intercalée, elle faisait lire la liste comme une explication de plus. Et la civilité reste modifiable sur un profil verrouillé **quand il n'en porte aucune** : l'API complète une civilité absente, y compris sur un compte, mais n'écrase jamais celle qui existe.
+

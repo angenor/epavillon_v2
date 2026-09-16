@@ -18,6 +18,14 @@ import type { SelectOption } from '~/types/ui'
  * qui la porte (`people.primary_email`, clé de rapprochement du modèle). Trois
  * situations, et elles ne se ressemblent pas :
  *
+ * DEPUIS LE 16/09, LA PLATEFORME SUGGÈRE AUSSI PENDANT LA FRAPPE — trois
+ * caractères suffisent. Elle ne propose que des personnes dont l'adresse est
+ * confirmée ou qui ont parlé dans une activité retenue, et seulement celles qui
+ * acceptent de figurer dans les listes. **Rien n'oblige à choisir** : ne rien
+ * trouver n'est pas une erreur, et la saisie à la main reste le chemin normal.
+ * Retenir une suggestion pré-remplit les champs comme le ferait le profil trouvé
+ * par adresse exacte — c'est la même opération, écrite une seule fois.
+ *
  *  1. PERSONNE INCONNUE — on saisit tout, et l'API créera la personne à
  *     l'enregistrement du dossier.
  *  2. PERSONNE CONNUE, SANS COMPTE — elle a été intervenante ailleurs. On peut
@@ -94,6 +102,10 @@ watch(
     touched.value = false
     lookup.value = null
     lookupState.value = 'idle'
+    suggestions.value = []
+    suggestionsOpen.value = false
+    highlighted.value = -1
+    profileHasCivility.value = Boolean(speaker?.civility)
   },
   { immediate: true },
 )
@@ -107,8 +119,17 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 const lookup = ref<PersonLookup | null>(null)
 const lookupState = ref<'idle' | 'searching' | 'found' | 'unknown'>('idle')
 
+/** Ce que la plateforme propose pendant la frappe, et l'option survolée. */
+const suggestions = ref<PersonLookup[]>([])
+const highlighted = ref(-1)
+const suggestionsOpen = ref(false)
+
+/** L'API n'en rend rien en deçà : inutile de l'appeler. */
+const SUGGEST_MIN = 3
+
 /** Seule la dernière recherche écrit : même garde qu'aux organisations. */
 let sequence = 0
+let suggestionSequence = 0
 let timer: ReturnType<typeof setTimeout> | null = null
 
 /**
@@ -117,6 +138,18 @@ let timer: ReturnType<typeof setTimeout> | null = null
  * qui l'entretient, et personne d'autre ne le fera.
  */
 const isIdentityLocked = computed(() => form.value.person_id !== null && form.value.has_account)
+
+/**
+ * LA CIVILITÉ FAIT EXCEPTION AU VERROUILLAGE quand le profil n'en porte pas.
+ *
+ * On ne réécrit pas l'identité de quelqu'un ; mais une colonne vide n'est
+ * l'identité de personne, et beaucoup de comptes se créent sans civilité. Or le
+ * programme annonce « Mme Awa Sow Fall, directrice exécutive » : la verrouiller
+ * vide obligerait le déposant à laisser un trou qu'il est seul à pouvoir
+ * combler. L'API suit la même règle — elle COMPLÈTE, elle n'écrase jamais.
+ */
+const profileHasCivility = ref(false)
+const isCivilityLocked = computed(() => isIdentityLocked.value && profileHasCivility.value)
 
 async function runLookup(email: string): Promise<void> {
   const needle = email.trim().toLowerCase()
@@ -142,10 +175,74 @@ async function runLookup(email: string): Promise<void> {
   lookupState.value = found ? 'found' : 'unknown'
 }
 
+/**
+ * Les suggestions. Elles n'écrivent jamais dans le formulaire : elles
+ * proposent, et c'est le déposant qui tranche.
+ */
+async function runSuggestions(value: string): Promise<void> {
+  const needle = value.trim().toLowerCase()
+  if (needle.length < SUGGEST_MIN || isIdentityLocked.value) {
+    suggestions.value = []
+    return
+  }
+
+  const current = ++suggestionSequence
+  const found = await api.proposals.suggestSpeakers(needle)
+  if (current !== suggestionSequence) return
+
+  // L'adresse exacte est déjà annoncée par le bloc « personne déjà connue » :
+  // la répéter dans la liste ferait deux fois la même proposition.
+  suggestions.value = found.filter(
+    (person) =>
+      person.email.toLowerCase() !== needle &&
+      !props.takenEmails.some((taken) => taken.toLowerCase() === person.email.toLowerCase()),
+  )
+  highlighted.value = -1
+  suggestionsOpen.value = suggestions.value.length > 0
+}
+
 function onEmailInput(value: string): void {
   form.value.email = value
   if (timer) clearTimeout(timer)
-  timer = setTimeout(() => void runLookup(value), 400)
+  timer = setTimeout(() => {
+    void runLookup(value)
+    void runSuggestions(value)
+  }, 400)
+}
+
+/**
+ * Le clavier commande la liste : flèches pour parcourir, Entrée pour retenir,
+ * Échap pour refermer. Sans cela, la suggestion n'existe que pour la souris.
+ */
+function onEmailKeydown(event: KeyboardEvent): void {
+  if (!suggestionsOpen.value || suggestions.value.length === 0) return
+
+  if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+    event.preventDefault()
+    const pas = event.key === 'ArrowDown' ? 1 : -1
+    const total = suggestions.value.length
+    highlighted.value = (highlighted.value + pas + total) % total
+    return
+  }
+  if (event.key === 'Enter' && highlighted.value >= 0) {
+    event.preventDefault()
+    const choisi = suggestions.value[highlighted.value]
+    if (choisi) selectSuggestion(choisi)
+    return
+  }
+  if (event.key === 'Escape') {
+    suggestionsOpen.value = false
+  }
+}
+
+/** Retenir une suggestion : même remplissage que le profil trouvé par adresse. */
+function selectSuggestion(person: PersonLookup): void {
+  lookup.value = person
+  lookupState.value = 'found'
+  form.value.email = person.email
+  applyProfile(person)
+  suggestions.value = []
+  suggestionsOpen.value = false
 }
 
 onBeforeUnmount(() => {
@@ -158,9 +255,11 @@ onBeforeUnmount(() => {
  * compte.
  */
 function selectProfile(): void {
-  const person = lookup.value
-  if (!person) return
+  if (lookup.value) applyProfile(lookup.value)
+}
 
+function applyProfile(person: PersonLookup): void {
+  profileHasCivility.value = Boolean(person.civility)
   form.value = {
     ...form.value,
     person_id: person.person_id,
@@ -183,6 +282,14 @@ function selectProfile(): void {
 function detachProfile(): void {
   form.value.person_id = null
   form.value.has_account = false
+  profileHasCivility.value = false
+}
+
+/** Le clic sur une option arrive après le `blur` : on referme en différé. */
+function closeSuggestionsSoon(): void {
+  setTimeout(() => {
+    suggestionsOpen.value = false
+  }, 150)
 }
 
 // ---------------------------------------------------------------------------
@@ -304,22 +411,76 @@ function removePhoto(): void {
   >
     <form class="grid gap-5" @submit.prevent="save">
       <!-- L'ADRESSE D'ABORD : c'est elle qui interroge l'annuaire. -->
-      <UiInput
-        :model-value="form.email"
-        type="email"
-        autocomplete="off"
-        :label="t('proposal.form.step-speakers.fields.email.label')"
-        :hint="t('proposal.form.step-speakers.fields.email.hint')"
-        :error="emailError"
-        :readonly="isIdentityLocked"
-        required
-        @update:model-value="onEmailInput"
-        @blur="touched = true"
-      >
-        <template v-if="lookupState === 'searching'" #suffix>
-          <UiSpinner size="1rem" />
-        </template>
-      </UiInput>
+      <div class="relative">
+        <UiInput
+          id="speaker-email"
+          :model-value="form.email"
+          type="email"
+          autocomplete="off"
+          :label="t('proposal.form.step-speakers.fields.email.label')"
+          :hint="suggestionsOpen && suggestions.length > 0
+            ? undefined
+            : t('proposal.form.step-speakers.fields.email.hint')"
+          :error="emailError"
+          :readonly="isIdentityLocked"
+          required
+          @update:model-value="onEmailInput"
+          @keydown="onEmailKeydown"
+          @blur="touched = true; closeSuggestionsSoon()"
+        >
+          <template v-if="lookupState === 'searching'" #suffix>
+            <UiSpinner size="1rem" />
+          </template>
+        </UiInput>
+
+        <!-- CE QUE LA PLATEFORME PROPOSE, et qu'on peut ignorer.
+             L'AIDE DU CHAMP S'EFFACE pendant ce temps : un texte gris entre le
+             champ et la liste faisait lire celle-ci comme une explication de
+             plus, et personne ne cliquait. La liste colle donc au champ, porte
+             son intitulé, et chaque ligne dit ce que le clic va faire. -->
+        <div
+          v-if="suggestionsOpen && suggestions.length > 0"
+          class="absolute z-10 mt-1 w-full overflow-hidden rounded-md border border-accent bg-surface-raised shadow-lg"
+        >
+          <p class="border-b border-border bg-surface-sunken px-3 py-1.5 text-xs font-bold text-text-secondary">
+            {{ t('proposal.form.step-speakers.dialog.suggestionsLabel') }}
+          </p>
+          <ul
+            role="listbox"
+            :aria-label="t('proposal.form.step-speakers.dialog.suggestionsLabel')"
+            class="max-h-64 overflow-y-auto"
+          >
+            <li v-for="(person, index) in suggestions" :key="person.person_id">
+              <button
+                type="button"
+                role="option"
+                :aria-selected="index === highlighted"
+                class="flex min-h-(--target-min) w-full cursor-pointer items-center gap-3 px-3 py-2 text-start transition-colors duration-(--duration-fast)"
+                :class="index === highlighted ? 'bg-accent-surface' : 'hover:bg-surface-hover'"
+                @mousedown.prevent="selectSuggestion(person)"
+                @mouseenter="highlighted = index"
+              >
+                <UiIcon name="users" size="1.1rem" class="shrink-0 text-text-muted" />
+                <span class="flex min-w-0 flex-1 flex-col">
+                  <span class="truncate text-sm font-bold text-text">
+                    {{ person.first_name }} {{ person.last_name }}
+                  </span>
+                  <span class="truncate text-sm text-text-muted">{{ person.email }}</span>
+                  <span
+                    v-if="person.job_title || person.organization_name"
+                    class="truncate text-xs text-text-subtle"
+                  >
+                    {{ [person.job_title, person.organization_name].filter(Boolean).join(' · ') }}
+                  </span>
+                </span>
+                <span class="shrink-0 text-sm font-bold text-accent">
+                  {{ t('proposal.form.step-speakers.dialog.suggestionAction') }}
+                </span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
 
       <!-- PROFIL TROUVÉ, PAS ENCORE RETENU. -->
       <UiAlert
@@ -390,7 +551,10 @@ function removePhoto(): void {
           :label="t('proposal.form.step-speakers.fields.civility.label')"
           :placeholder="t('proposal.form.step-speakers.fields.civility.placeholder')"
           :error="requiredError(form.civility)"
-          :disabled="isIdentityLocked"
+          :hint="isIdentityLocked && !profileHasCivility
+            ? t('proposal.form.step-speakers.dialog.civilityMissing')
+            : undefined"
+          :disabled="isCivilityLocked"
           required
         />
         <UiInput

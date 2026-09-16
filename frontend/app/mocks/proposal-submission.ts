@@ -48,7 +48,7 @@ import { organizations } from './org'
 import { people } from './people'
 import { memberships } from './memberships'
 import { accounts } from './auth'
-import { allProposals } from './proposals'
+import { allProposals, proposalSpeakers } from './proposals'
 
 // ---------------------------------------------------------------------------
 // La séquence de numérotation
@@ -357,4 +357,39 @@ export function lookupSpeakerByEmail(email: string): PersonLookup | null {
     // intouchable par un tiers.
     has_account: accounts.some((account) => account.person_id === person.id),
   }
+}
+
+/**
+ * LES SUGGESTIONS PENDANT LA FRAPPE, mêmes bornes que l'API (16/09).
+ *
+ * Trois caractères au minimum, huit réponses au plus, et **un préfixe
+ * d'adresse** : on complète ce qui est tapé, on ne laisse pas parcourir
+ * l'annuaire. Deux populations seulement — adresse confirmée, ou intervenant
+ * d'une activité RETENUE —, et le choix de figurer dans les listes
+ * (`is_directory_visible`) est respecté.
+ */
+export function suggestSpeakers(prefix: string): PersonLookup[] {
+  const needle = prefix.trim().toLowerCase()
+  if (needle.length < 3) return []
+
+  const retenus = new Set(
+    proposalSpeakers
+      .filter((speaker) =>
+        allProposals.some((p) => p.id === speaker.proposal_id && p.status === 'accepted'),
+      )
+      .map((speaker) => speaker.person_id),
+  )
+
+  return people
+    .filter(
+      (candidate) =>
+        candidate.status === 'active' &&
+        candidate.is_directory_visible &&
+        candidate.primary_email.toLowerCase().startsWith(needle) &&
+        (candidate.email_verified_at !== null || retenus.has(candidate.id)),
+    )
+    .sort((a, b) => a.primary_email.localeCompare(b.primary_email))
+    .slice(0, 8)
+    .map((person) => lookupSpeakerByEmail(person.primary_email))
+    .filter((entry): entry is PersonLookup => entry !== null)
 }

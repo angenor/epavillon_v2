@@ -135,3 +135,36 @@ pub async fn corriger_identite(
 
     Ok(())
 }
+
+/// **COMPLÉTER une civilité absente, y compris sur un compte** (16/09).
+///
+/// Ce n'est pas une exception au verrouillage d'identité, c'est son revers :
+/// l'identité d'un titulaire de compte ne se RÉÉCRIT pas, mais une colonne vide
+/// n'est l'identité de personne. Or le programme annonce « Mme Awa Sow Fall,
+/// directrice exécutive » et beaucoup de comptes se créent sans civilité — la
+/// refuser obligerait le déposant à laisser un trou qu'il est seul à pouvoir
+/// combler.
+///
+/// `WHERE civility IS NULL` porte toute la règle : une civilité déjà déclarée
+/// par la personne ne bouge pas, quel que soit ce que le dossier envoie.
+pub async fn completer_civilite(
+    conn: &mut PgConnection,
+    person_id: Uuid,
+    civility: &str,
+) -> Result<()> {
+    let civility = civility.trim();
+    if civility.is_empty() {
+        return Ok(());
+    }
+
+    sqlx::query!(
+        "UPDATE identity.people SET civility = $2
+          WHERE id = $1 AND civility IS NULL",
+        person_id,
+        civility
+    )
+    .execute(conn)
+    .await?;
+
+    Ok(())
+}

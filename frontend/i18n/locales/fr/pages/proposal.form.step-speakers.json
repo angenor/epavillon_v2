@@ -10,12 +10,10 @@
   "moveDown": "Descendre {speaker}",
   "confirmationNotice": "Citer une personne l'engage : chacune recevra un courriel lui demandant de confirmer sa participation.",
   "accountBadge": "Compte de la plateforme",
-
   "empty": {
     "title": "Aucun intervenant déclaré",
     "description": "Ajoutez les personnes qui interviendront. Vous pourrez modifier la liste tant que le dossier n'est pas envoyé."
   },
-
   "dialog": {
     "addTitle": "Ajouter un intervenant",
     "editTitle": "Modifier l'intervenant",
@@ -29,17 +27,26 @@
     "linkedTitle": "Personne déjà connue retenue",
     "linkedDescription": "Elle est intervenue ailleurs sans avoir de compte : vous pouvez corriger ses informations. Une fois l'activité validée, elles ne seront plus modifiables depuis ce dossier.",
     "detach": "Saisir une autre personne",
-    "unknownPerson": "Cette adresse est inconnue de la plateforme : la personne sera créée à l'enregistrement de votre dossier."
+    "unknownPerson": "Cette adresse est inconnue de la plateforme : la personne sera créée à l'enregistrement de votre dossier.",
+    "suggestionsLabel": "Personnes déjà connues de la plateforme",
+    "suggestionAction": "Reprendre",
+    "civilityMissing": "Cette personne n'a pas indiqué sa civilité : ce que vous choisissez complétera sa fiche."
   },
-
   "fields": {
     "email": {
       "label": "Adresse électronique",
       "hint": "Elle ne sera pas publiée. Elle sert à reconnaître la personne et à lui écrire."
     },
-    "civility": { "label": "Civilité", "placeholder": "Choisir" },
-    "first_name": { "label": "Prénom" },
-    "last_name": { "label": "Nom" },
+    "civility": {
+      "label": "Civilité",
+      "placeholder": "Choisir"
+    },
+    "first_name": {
+      "label": "Prénom"
+    },
+    "last_name": {
+      "label": "Nom"
+    },
     "job_title": {
       "label": "Fonction",
       "hint": "Telle qu'elle est au moment de l'activité : elle est conservée dans l'archive."
@@ -58,7 +65,6 @@
       "locked": "Cette notice appartient au profil de la personne : elle seule peut la modifier."
     }
   },
-
   "civilities": {
     "mme": "Mme",
     "m": "M.",
@@ -66,16 +72,32 @@
     "pr": "Pre / Pr",
     "other": "Autre"
   },
-
   "roles": {
-    "speaker": { "label": "Intervenant", "hint": "Prend la parole sur le fond" },
-    "moderator": { "label": "Modérateur", "hint": "Conduit les échanges" },
-    "panelist": { "label": "Panéliste", "hint": "Participe à une table ronde" },
-    "keynote": { "label": "Grand témoin", "hint": "Intervention d'ouverture ou de clôture" },
-    "facilitator": { "label": "Facilitateur", "hint": "Anime un atelier participatif" },
-    "interpreter": { "label": "Interprète", "hint": "Assure l'interprétation" }
+    "speaker": {
+      "label": "Intervenant",
+      "hint": "Prend la parole sur le fond"
+    },
+    "moderator": {
+      "label": "Modérateur",
+      "hint": "Conduit les échanges"
+    },
+    "panelist": {
+      "label": "Panéliste",
+      "hint": "Participe à une table ronde"
+    },
+    "keynote": {
+      "label": "Grand témoin",
+      "hint": "Intervention d'ouverture ou de clôture"
+    },
+    "facilitator": {
+      "label": "Facilitateur",
+      "hint": "Anime un atelier participatif"
+    },
+    "interpreter": {
+      "label": "Interprète",
+      "hint": "Assure l'interprétation"
+    }
   },
-
   "photo": {
     "label": "Photo",
     "hint": "Portrait, format image, 5 Mo au plus. Elle est rattachée à la personne, pas à ce dossier : elle servira aussi à ses prochaines participations.",
@@ -86,7 +108,6 @@
     "typeError": "Ce fichier n'est pas une image.",
     "sizeError": "La photo dépasse la taille maximale de {size}."
   },
-
   "errors": {
     "tooFew": "Cet appel demande au moins {min} intervenant. | Cet appel demande au moins {min} intervenant. | Cet appel demande au moins {min} intervenants.",
     "tooMany": "Cet appel accepte au plus {max} intervenant. | Cet appel accepte au plus {max} intervenant. | Cet appel accepte au plus {max} intervenants.",
@@ -97,5 +118,4 @@
     "jobTitleRequired": "{speaker} : la fonction est obligatoire.",
     "organizationRequired": "{speaker} : l'organisation est obligatoire."
   }
-
 }

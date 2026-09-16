@@ -27,9 +27,13 @@ async fn defaut_a_la_creation_puis_reecrit_puis_retire() {
     .expect("création");
     let appel = cree.call.expect("l'appel créé");
     let defaut = appel.submission_next_steps.expect("le défaut du modèle");
-    assert!(defaut["fr"]
-        .as_str()
-        .is_some_and(|t| t.lines().count() == 3));
+    // Le nombre de lignes n'est pas le sujet — le texte se rédige au
+    // back-office. Ce qui compte : la base en pose un, et **il n'annonce aucun
+    // décompte d'évaluateurs**, qui vaudrait « 0 membre du comité » sur une
+    // campagne qui arbitre sans revues (16/09).
+    let texte = defaut["fr"].as_str().expect("un texte français");
+    assert!(texte.lines().count() >= 3);
+    assert!(!texte.contains("deux membres"), "{texte}");
 
     let call_id = CallId::from(appel.id);
     let etapes = json!({ "fr": "Première étape.\nSeconde étape.", "en": "First step." });

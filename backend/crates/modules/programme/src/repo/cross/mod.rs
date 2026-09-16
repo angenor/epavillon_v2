@@ -500,6 +500,36 @@ pub async fn fiche_organisation<'e>(
     }))
 }
 
+/// Les mêmes, par lot — une suggestion de huit intervenants ne fait pas huit
+/// requêtes.
+pub async fn fiches_organisations<'e>(
+    executor: impl PgExecutor<'e>,
+    ids: &[Uuid],
+) -> Result<Vec<FicheOrganisation>> {
+    if ids.is_empty() {
+        return Ok(Vec::new());
+    }
+
+    let lignes = sqlx::query!(
+        "SELECT id, legal_name, acronym, country_id, verified_at
+           FROM org.organizations WHERE id = ANY($1)",
+        ids
+    )
+    .fetch_all(executor)
+    .await?;
+
+    Ok(lignes
+        .into_iter()
+        .map(|l| FicheOrganisation {
+            id: l.id,
+            legal_name: l.legal_name,
+            acronym: l.acronym,
+            country_id: l.country_id,
+            verified: l.verified_at.is_some(),
+        })
+        .collect())
+}
+
 /// L'adhésion d'une personne à une organisation, réduite à ce qui décide.
 ///
 /// C'est **la** lecture qui borne l'espace organisation : une organisation
@@ -629,6 +659,74 @@ pub async fn fiche_personne_par_email<'e>(
         primary_organization_id: l.primary_organization_id,
         has_account: l.has_account,
     }))
+}
+
+/// **LES INTERVENANTS QUE LA PLATEFORME PEUT SUGGÉRER**, et eux seuls.
+///
+/// Deux populations, et pas une de plus : les personnes dont l'adresse est
+/// CONFIRMÉE — elles ont cliqué le lien de vérification — et celles qui ont déjà
+/// PARLÉ dans une activité retenue. Un dossier refusé ou en cours d'examen ne
+/// fait entrer personne : ce serait révéler qui a été proposé, à qui n'a pas à
+/// le savoir.
+///
+/// **`is_directory_visible` est respecté**, et c'est la colonne qui tranche : la
+/// personne a dit si elle acceptait de figurer dans les listes, la suggestion
+/// n'est pas une exception à sa réponse. Un compte suspendu ou anonymisé ne sort
+/// jamais.
+///
+/// **La recherche est un PRÉFIXE d'adresse**, jamais un fragment quelconque : on
+/// complète ce que le déposant tape, on ne laisse pas parcourir l'annuaire à
+/// coups de deux lettres. Le service borne aussi la longueur minimale et le
+/// nombre de réponses. C'est la nuance qui sépare une autocomplétion d'un export
+/// de la liste de contacts.
+pub async fn suggestions_dintervenants<'e>(
+    executor: impl PgExecutor<'e>,
+    prefixe: &str,
+    limite: i64,
+) -> Result<Vec<FichePersonne>> {
+    let motif = format!("{prefixe}%");
+    let lignes = sqlx::query!(
+        r#"SELECT p.id, p.civility, p.first_name, p.last_name,
+                  p.primary_email::text AS "email!", p.job_title, p.biography,
+                  p.primary_organization_id,
+                  EXISTS (SELECT 1 FROM identity.accounts a WHERE a.person_id = p.id)
+                      AS "has_account!"
+             FROM identity.people p
+            WHERE p.status = 'active'
+              AND p.is_directory_visible
+              AND p.primary_email::text ILIKE $1
+              AND (
+                  p.email_verified_at IS NOT NULL
+                  OR EXISTS (
+                      SELECT 1
+                        FROM programme.proposal_speakers ps
+                        JOIN programme.proposals pr ON pr.id = ps.proposal_id
+                       WHERE ps.person_id = p.id
+                         AND pr.status = 'accepted'
+                         AND pr.deleted_at IS NULL)
+              )
+            ORDER BY p.primary_email::text
+            LIMIT $2"#,
+        motif,
+        limite
+    )
+    .fetch_all(executor)
+    .await?;
+
+    Ok(lignes
+        .into_iter()
+        .map(|l| FichePersonne {
+            id: l.id,
+            civility: l.civility,
+            first_name: l.first_name,
+            last_name: l.last_name,
+            email: l.email,
+            job_title: l.job_title,
+            biography: l.biography,
+            primary_organization_id: l.primary_organization_id,
+            has_account: l.has_account,
+        })
+        .collect())
 }
 
 /// Les personnes d'un lot, pour ne pas résoudre les noms un par un.

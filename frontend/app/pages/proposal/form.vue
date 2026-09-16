@@ -607,7 +607,7 @@ const organizationSpaceTo = computed<string | null>(() =>
       v-else-if="outcome && edition"
       :reference-code="outcome.reference_code"
       :submitted-at="outcome.submitted_at"
-      :required-reviews="outcome.required_reviews"
+      :next-steps="call?.submission_next_steps ?? null"
       :results-expected-at="outcome.results_expected_at"
       :edition="edition"
       :organization-space-to="organizationSpaceTo"

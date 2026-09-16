@@ -628,6 +628,16 @@ async fn resoudre_intervenants(
                     )
                     .await?;
                 }
+
+                // La civilité MANQUANTE se complète, compte ou non : une colonne
+                // vide n'est l'identité de personne, et le programme annonce
+                // « Mme ». Une civilité déjà déclarée, elle, ne bouge pas.
+                if fiche.civility.is_none() {
+                    if let Some(civilite) = saisi.civility.as_deref() {
+                        people::completer_civilite(&mut *conn, fiche.id, civilite).await?;
+                    }
+                }
+
                 fiche.id
             }
         };

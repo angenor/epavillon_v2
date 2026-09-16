@@ -129,15 +129,22 @@ pub fn build_app(
     let organisations = etat.modules.is_mounted("org");
     let propositions = etat.modules.is_mounted("programme");
     if identite || organisations || propositions {
+        // **L'ORDRE COMPTE, et il est l'inverse de l'ordre des modules.** Actix
+        // retient la PREMIÈRE route dont le motif correspond : `/people/{id}`,
+        // déclarée par l'identité, capture « lookup » et « suggest » et échoue à
+        // en faire un UUID. Le défaut ne se voit pas sans session — l'absence de
+        // session répond 401 avant que le chemin ne soit lu —, et c'est ce qui
+        // l'a laissé passer jusqu'au 16/09. Les chemins LITTÉRAUX passent donc
+        // devant.
         portee = portee.service(web::scope("/people").configure(move |cfg| {
-            if identite {
-                identity::people_routes(cfg);
+            if propositions {
+                programme::people_routes(cfg);
             }
             if organisations {
                 org::people_routes(cfg);
             }
-            if propositions {
-                programme::people_routes(cfg);
+            if identite {
+                identity::people_routes(cfg);
             }
         }));
     }

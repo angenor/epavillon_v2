@@ -428,9 +428,14 @@ CREATE TABLE event.calls_for_proposals (
     -- n'envoie. Texte brut, UNE ÉTAPE PAR LIGNE : l'écran en fait une liste.
     -- Rédigé au back-office, parce que le circuit change d'une campagne à
     -- l'autre — nombre d'évaluateurs, accusé de réception, calendrier.
+    -- **AUCUN DÉCOMPTE dans le texte par défaut.** Annoncer « deux membres du
+    -- comité » suppose que le comité soit tenu dans la plateforme : des
+    -- évaluateurs peuvent n'y avoir aucun compte, et le nombre de revues exigées
+    -- vaut zéro sur une campagne qui arbitre autrement. Un nombre qui peut
+    -- valoir zéro à l'écran n'informe pas, il inquiète (mesuré le 16/09).
     submission_next_steps platform.i18n_text DEFAULT jsonb_build_object(
-        'fr', E'Au moins deux membres du comité évalueront le dossier sur les critères publiés.\nVous recevrez un accusé de réception portant votre numéro de dossier.\nLe dossier reste modifiable jusqu''à la fin de l''événement ; le comité verra les modifications.',
-        'en', E'At least two committee members will assess the submission against the published criteria.\nYou will receive an acknowledgement bearing your submission number.\nThe submission remains editable until the end of the event; the committee will see the changes.'),
+        'fr', E'Un accusé de réception part à l''adresse de votre compte, avec le numéro de dossier.\nLe comité examine le dossier sur les critères publiés.\nLes résultats vous sont communiqués par courriel dès la fin de l''évaluation.\nLe comité peut demander des compléments : vous recevrez alors un message, et le dossier redeviendra modifiable.',
+        'en', E'An acknowledgement is sent to your account address, with your submission number.\nThe committee reviews the submission against the published criteria.\nResults are sent to you by email once the assessment is complete.\nThe committee may ask for additions: you will then receive a message, and the submission will become editable again.'),
     created_by        uuid        CONSTRAINT xmod_fk_calls_creator
                                   REFERENCES identity.people(id) ON DELETE SET NULL,
     created_at        timestamptz NOT NULL DEFAULT now(),

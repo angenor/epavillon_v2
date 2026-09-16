@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.people SET civility = $2\n          WHERE id = $1 AND civility IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "da88023a26b64d836dea8e0883a902ae9d9af8d9f4f918e59b46ae5754866bfc"
+}

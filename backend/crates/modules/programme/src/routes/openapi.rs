@@ -33,6 +33,7 @@ pub struct ApiErrorBody {
         crate::routes::submission::rouvrir,
         crate::routes::submission::renvoyer,
         crate::routes::people::chercher,
+        crate::routes::people::suggerer,
         crate::routes::detail::regles,
         crate::routes::detail::journal,
         crate::routes::detail::transitions_offertes,
@@ -109,7 +110,7 @@ mod tests {
     /// en porte deux — une lecture et un rattachement —, et
     /// `/proposal-comments/{id}/resolution` aussi.
     #[test]
-    fn les_cinquante_quatre_routes_sont_documentees() {
+    fn les_cinquante_cinq_routes_sont_documentees() {
         let doc = super::ProgrammeApi::openapi();
         let operations: usize = doc
             .paths
@@ -129,7 +130,10 @@ mod tests {
             })
             .sum();
 
-        assert_eq!(operations, 54, "trente-sept routes de B4, dix-sept de B5");
+        assert_eq!(
+            operations, 55,
+            "trente-sept routes de B4, dix-sept de B5, et la suggestion d'intervenants du 16/09"
+        );
     }
 
     /// **Les dix-sept chemins de B5**, comptés à part : le total ci-dessus
