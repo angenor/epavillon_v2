@@ -229,6 +229,7 @@ const {
   errorMessage: saveErrorMessage,
   adopt: adoptDraft,
   arm: armAutosave,
+  reset: resetDraft,
   saveNow,
 } = useProposalDraft({
   draft,
@@ -281,13 +282,7 @@ watch(
       return
     }
 
-    const active = memberships.active
-    draft.value = emptyProposalDraft({
-      organizationId: active.length === 1 ? active[0]?.organization.id : null,
-      durationMinutes: ready.call.default_duration_minutes,
-      locale: locale.value,
-      format: ready.call.allowed_formats.length === 1 ? ready.call.allowed_formats[0] : null,
-    })
+    draft.value = blankDraft(ready.call)
 
     isDraftReady.value = true
     await nextTick()
@@ -295,6 +290,42 @@ watch(
   },
   { immediate: true },
 )
+
+function blankDraft(openCall: CallForProposals): ProposalDraft {
+  const active = memberships.active
+  return emptyProposalDraft({
+    organizationId: active.length === 1 ? active[0]?.organization.id : null,
+    durationMinutes: openCall.default_duration_minutes,
+    locale: locale.value,
+    format: openCall.allowed_formats.length === 1 ? openCall.allowed_formats[0] : null,
+  })
+}
+
+const isResetOpen = ref(false)
+const isResetting = ref(false)
+const resetError = ref<string | null>(null)
+const canReset = computed(
+  () => !isEditing.value && (saveState.value !== 'untouched' || proposalId.value !== null),
+)
+
+async function confirmReset(): Promise<void> {
+  if (!call.value) return
+  isResetting.value = true
+  resetError.value = null
+  try {
+    await resetDraft(blankDraft(call.value))
+    visitedSteps.value = new Set(['organizations'])
+    hasTriedToSubmit.value = false
+    refusal.value = null
+    submitError.value = null
+    isResetOpen.value = false
+    await goToStep('organizations')
+  } catch (error) {
+    resetError.value = error instanceof Error ? error.message : t('proposal.form.reset.failed')
+  } finally {
+    isResetting.value = false
+  }
+}
 
 /**
  * POSER DANS LE FORMULAIRE UN DOSSIER ROUVERT.
@@ -923,7 +954,39 @@ const organizationSpaceTo = computed<string | null>(() =>
             :timezone="auth.person?.timezone ?? edition.timezone"
             @retry="saveNow()"
           />
+
+          <UiButton
+            v-if="!isEditing"
+            variant="ghost"
+            icon="refresh"
+            class="justify-self-start"
+            :disabled="!canReset || saveState === 'saving'"
+            :label="t('proposal.form.reset.action')"
+            @click="isResetOpen = true"
+          />
         </div>
+
+        <UiModal
+          v-model:open="isResetOpen"
+          size="sm"
+          :title="t('proposal.form.reset.title')"
+          :description="
+            referenceCode
+              ? t('proposal.form.reset.descriptionSaved', { code: referenceCode })
+              : t('proposal.form.reset.description')
+          "
+        >
+          <UiAlert v-if="resetError" intent="danger" live :message="resetError" />
+          <template #footer>
+            <UiButton variant="ghost" :label="t('common.actions.cancel')" @click="isResetOpen = false" />
+            <UiButton
+              variant="danger"
+              :loading="isResetting"
+              :label="t('proposal.form.reset.confirm')"
+              @click="confirmReset()"
+            />
+          </template>
+        </UiModal>
 
         <!-- L'ENCART PERMANENT. En colonne latérale sur écran large, en tête de
              la pile sur mobile — jamais replié, jamais fermable. -->

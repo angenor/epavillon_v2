@@ -53,6 +53,7 @@ pub fn chemins_litteraux(cfg: &mut web::ServiceConfig) {
 /// Ce que ce fichier dépose **sous un identifiant de dossier**.
 pub fn chemins_de_dossier(cfg: &mut web::ServiceConfig) {
     cfg.route("/{id}", web::put().to(modifier))
+        .route("/{id}", web::delete().to(abandonner))
         .route("/{id}/draft", web::get().to(rouvrir))
         .route("/{id}/submit", web::post().to(deposer))
         .route("/{id}/resubmit", web::post().to(renvoyer));
@@ -254,6 +255,40 @@ pub(crate) async fn modifier(
     let ligne = draft_write::enregistrer(&state, &ctx, droit.person_id, payload).await?;
 
     Ok(HttpResponse::Ok().json(ligne))
+}
+
+/// Abandonner un brouillon.
+#[utoipa::path(
+    delete,
+    description = "Réinitialisation du formulaire : le brouillon est **effacé logiquement** et quitte le back-office. **Seul un brouillon s'abandonne** — un dossier déposé se retire par une transition, son numéro et son journal restent. Même garde que l'enregistrement : adhésion active à l'organisation porteuse.",
+    path = "/proposals/{id}",
+    tag = "Dépôt",
+    operation_id = "depot_abandonner_brouillon",
+    params(("id" = Uuid, Path, description = "Identifiant du dossier")),
+    responses(
+        (status = 204, description = "Brouillon abandonné"),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 403, description = "Permission de soumettre absente", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Dossier inexistant **ou hors de vos organisations** — indiscernables", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "Le dossier a déjà été déposé (PROPOSAL_NOT_EDITABLE)", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn abandonner(
+    requete: HttpRequest,
+    state: web::Data<ProgrammeState>,
+    droit: RequiresAnyScope<ProposalSubmit>,
+    chemin: web::Path<Uuid>,
+) -> Result<HttpResponse> {
+    let ctx = contexte_de(&requete, droit.person_id);
+    draft_write::abandonner(
+        &state,
+        &ctx,
+        droit.person_id,
+        ProposalId(chemin.into_inner()),
+    )
+    .await?;
+
+    Ok(HttpResponse::NoContent().finish())
 }
 
 /// Le dépôt.

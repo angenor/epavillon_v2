@@ -229,6 +229,15 @@ export function createProposalsApi({ call, callOrNull, send, assertEventInScope 
       payload.proposal_id ? 'PUT' : 'POST',
     ),
 
+  /** ABANDON D'UN BROUILLON — la réinitialisation du formulaire. Refusé sur un dossier déposé. */
+  discardDraft: (personId: Uuid, proposalId: Uuid): Promise<void> =>
+    send(
+      `/proposals/${proposalId}`,
+      {},
+      (m) => m.discardProposalDraft(personId, proposalId),
+      'DELETE',
+    ),
+
   /**
    * RENVOI AU COMITÉ d'un dossier corrigé — `changes_requested → submitted`.
    *

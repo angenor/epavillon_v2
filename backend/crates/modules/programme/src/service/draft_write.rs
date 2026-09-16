@@ -154,6 +154,56 @@ pub async fn enregistrer(
     Ok(ligne)
 }
 
+/// Abandonner un brouillon : le formulaire est réinitialisé, le dossier quitte
+/// le back-office.
+///
+/// **Seul un brouillon s'abandonne.** Un dossier déposé porte un numéro
+/// communiqué et un journal : il se retire par une transition, pas ici.
+/// L'effacement reste logique, comme celui du back-office.
+pub async fn abandonner(
+    state: &ProgrammeState,
+    ctx: &RequestContext,
+    acteur: Uuid,
+    dossier: ProposalId,
+) -> Result<()> {
+    let etat = proposals::etat(state.pool(), dossier)
+        .await?
+        .ok_or_else(ApiError::not_found)?;
+    let adhesion = cross::adhesion(state.pool(), etat.organization_id, acteur).await?;
+    ownership::exiger(adhesion)?;
+    if etat.status != "draft" {
+        return Err(ApiError::with_message(
+            ErrorCode::ProposalNotEditable,
+            "Ce dossier a été déposé : il ne peut plus être abandonné, seulement retiré.",
+        ));
+    }
+
+    let mut tx = state.db().write(ctx).await?;
+
+    // Le filtre sur l'état se rejoue ici : un dépôt concurrent l'emporte.
+    let efface = sqlx::query!(
+        "UPDATE programme.proposals
+            SET deleted_at = now(), deleted_by = $2,
+                deleted_reason = 'Brouillon abandonné par le déposant'
+          WHERE id = $1 AND status = 'draft' AND deleted_at IS NULL",
+        dossier.as_uuid(),
+        acteur
+    )
+    .execute(&mut *tx)
+    .await?
+    .rows_affected();
+
+    if efface == 0 {
+        tx.rollback().await?;
+        return Err(ApiError::new(ErrorCode::ProposalNotEditable));
+    }
+
+    themes::purger(&mut tx, dossier.as_uuid()).await?;
+    tx.commit().await?;
+
+    Ok(())
+}
+
 // -----------------------------------------------------------------------------
 // Ce qu'il faut savoir avant de composer
 // -----------------------------------------------------------------------------

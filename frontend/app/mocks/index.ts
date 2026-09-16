@@ -157,6 +157,7 @@ export {
   proposalFormContext,
   draftProposalOf,
   saveProposalDraft,
+  discardProposalDraft,
   submitProposal,
   lookupSpeakerByEmail,
   suggestSpeakers,

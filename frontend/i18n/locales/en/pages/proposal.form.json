@@ -47,6 +47,14 @@
       "description": "Your text is still on screen, but it is not safe yet. Try again before leaving the page."
     }
   },
+  "reset": {
+    "action": "Reset the form",
+    "title": "Reset the form?",
+    "description": "Everything you have entered will be cleared and the form will start over.",
+    "descriptionSaved": "Everything you have entered will be cleared, and draft {code} will be deleted. This cannot be undone.",
+    "confirm": "Clear everything",
+    "failed": "The form could not be reset."
+  },
   "deadline": {
     "label": "Call deadline",
     "title": "Submission deadline",

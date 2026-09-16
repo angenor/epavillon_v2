@@ -29,6 +29,7 @@ pub struct ApiErrorBody {
         crate::routes::submission::mon_brouillon,
         crate::routes::submission::creer,
         crate::routes::submission::modifier,
+        crate::routes::submission::abandonner,
         crate::routes::submission::deposer,
         crate::routes::submission::rouvrir,
         crate::routes::submission::renvoyer,
@@ -110,7 +111,7 @@ mod tests {
     /// en porte deux — une lecture et un rattachement —, et
     /// `/proposal-comments/{id}/resolution` aussi.
     #[test]
-    fn les_cinquante_cinq_routes_sont_documentees() {
+    fn les_cinquante_six_routes_sont_documentees() {
         let doc = super::ProgrammeApi::openapi();
         let operations: usize = doc
             .paths
@@ -131,8 +132,8 @@ mod tests {
             .sum();
 
         assert_eq!(
-            operations, 55,
-            "trente-sept routes de B4, dix-sept de B5, et la suggestion d'intervenants du 16/09"
+            operations, 56,
+            "trente-sept routes de B4, dix-sept de B5, la suggestion d'intervenants et l'abandon de brouillon du 16/09"
         );
     }
 

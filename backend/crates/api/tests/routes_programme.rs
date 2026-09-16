@@ -39,6 +39,7 @@ fn chemins() -> Vec<(&'static str, String)> {
         ("GET", "/api/proposals/draft".to_owned()),
         ("POST", "/api/proposals".to_owned()),
         ("PUT", format!("/api/proposals/{dossier}")),
+        ("DELETE", format!("/api/proposals/{dossier}")),
         ("POST", format!("/api/proposals/{dossier}/submit")),
         // US6 — corriger et renvoyer
         ("GET", format!("/api/proposals/{dossier}/draft")),
@@ -121,7 +122,7 @@ async fn les_routes_du_depot_sont_montees() {
     let app = test::init_service(api::build_app(&etat)).await;
 
     let routes = chemins();
-    assert_eq!(routes.len(), 37, "les trente-sept routes du contrat");
+    assert_eq!(routes.len(), 38, "les trente-huit routes du contrat");
 
     for (verbe, chemin) in routes {
         let requete = match verbe {

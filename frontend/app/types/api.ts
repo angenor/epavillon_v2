@@ -2978,7 +2978,11 @@ export interface paths {
          */
         put: operations["depot_enregistrer_brouillon"];
         post?: never;
-        delete?: never;
+        /**
+         * Abandonner un brouillon.
+         * @description Réinitialisation du formulaire : le brouillon est **effacé logiquement** et quitte le back-office. **Seul un brouillon s'abandonne** — un dossier déposé se retire par une transition, son numéro et son journal restent. Même garde que l'enregistrement : adhésion active à l'organisation porteuse.
+         */
+        delete: operations["depot_abandonner_brouillon"];
         options?: never;
         head?: never;
         patch?: never;
@@ -10956,6 +10960,63 @@ export interface operations {
                 };
             };
             /** @description Dossier clos (PROPOSAL_NOT_EDITABLE), texte trop long, thématique inconnue, identité verrouillée */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    depot_abandonner_brouillon: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du dossier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Brouillon abandonné */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission de soumettre absente */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Dossier inexistant **ou hors de vos organisations** — indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Le dossier a déjà été déposé (PROPOSAL_NOT_EDITABLE) */
             422: {
                 headers: {
                     [name: string]: unknown;

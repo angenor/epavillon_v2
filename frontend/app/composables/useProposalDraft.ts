@@ -11,10 +11,10 @@ import type { CallId, EventId, IsoDateTime, ProposalId } from '~/types/shared'
  *
  * QUATRE RÈGLES, ET CHACUNE ÉVITE UN DÉFAUT OBSERVABLE :
  *
- *  1. AUCUN ENREGISTREMENT AVANT LA PREMIÈRE MODIFICATION. Sans cela, ouvrir la
- *     page créerait une ligne vide en base — et le compteur du plafond de
- *     l'organisation avancerait pour une visite. La ligne naît à la première
- *     frappe, pas au premier affichage.
+ *  1. AUCUN ENREGISTREMENT TANT QUE LE DOSSIER EST VIERGE. Sans cela, ouvrir la
+ *     page — ou la parcourir avec « Suivant » — créerait une ligne vide en base,
+ *     visible au back-office. La ligne naît au premier champ saisi ; choisir
+ *     l'organisation porteuse ne suffit pas.
  *  2. UNE SEULE ÉCRITURE EN VOL. Une deuxième frappe pendant l'enregistrement ne
  *     déclenche pas un second appel : elle marque le brouillon à reprendre dès
  *     que le premier est revenu. Deux écritures concurrentes sur la même ligne,
@@ -62,6 +62,23 @@ export function useProposalDraft(options: UseProposalDraftOptions) {
   let timer: ReturnType<typeof setTimeout> | null = null
   /** L'observation est-elle armée ? Elle ne l'est qu'après le premier chargement. */
   let armed = false
+  /** Le formulaire vierge, tel qu'à l'armement — seulement pour un dossier neuf. */
+  let blank: string | null = null
+
+  function contentOf(draft: ProposalDraft): string {
+    return JSON.stringify({ ...draft, organization_id: null })
+  }
+
+  function isBlank(): boolean {
+    return proposalId.value === null && blank === contentOf(options.draft.value)
+  }
+
+  function cancelScheduledSave(): void {
+    if (timer) {
+      clearTimeout(timer)
+      timer = null
+    }
+  }
 
   /** Reprise d'un brouillon existant : on adopte son identité, sans écrire. */
   function adopt(existing: {
@@ -77,6 +94,7 @@ export function useProposalDraft(options: UseProposalDraftOptions) {
 
   /** Arme l'observation. À appeler une fois le brouillon initial posé. */
   function arm(): void {
+    blank = proposalId.value === null ? contentOf(options.draft.value) : null
     armed = true
   }
 
@@ -85,6 +103,10 @@ export function useProposalDraft(options: UseProposalDraftOptions) {
     const callId = options.callId.value
     const eventId = options.eventId.value
     if (!person || !callId || !eventId) return
+    if (isBlank()) {
+      state.value = 'untouched'
+      return
+    }
 
     // SANS PORTEUR, PAS DE LIGNE. `proposals.organization_id` est NOT NULL et
     // l'API refuse la création en 422 : partir quand même afficherait « Échec de
@@ -139,15 +161,40 @@ export function useProposalDraft(options: UseProposalDraftOptions) {
     () => options.draft.value,
     () => {
       if (!armed) return
+      // Un champ saisi puis effacé ramène le dossier neuf à « rien à enregistrer ».
+      if (isBlank()) {
+        cancelScheduledSave()
+        state.value = 'untouched'
+        return
+      }
       state.value = 'dirty'
       scheduleSave()
     },
     { deep: true },
   )
 
-  onBeforeUnmount(() => {
-    if (timer) clearTimeout(timer)
-  })
+  onBeforeUnmount(cancelScheduledSave)
+
+  /**
+   * Remet le formulaire à zéro. Un brouillon déjà enregistré est abandonné en
+   * base : sinon il resterait, vide ou non, dans la liste du back-office.
+   */
+  async function reset(fresh: ProposalDraft): Promise<void> {
+    cancelScheduledSave()
+    const person = options.personId.value
+    if (proposalId.value !== null && person) {
+      await api.proposals.discardDraft(person, proposalId.value)
+    }
+    armed = false
+    options.draft.value = fresh
+    proposalId.value = null
+    referenceCode.value = null
+    savedAt.value = null
+    error.value = null
+    state.value = 'untouched'
+    await nextTick()
+    arm()
+  }
 
   /**
    * ON NE QUITTE PAS UN DOSSIER NON ENREGISTRÉ SANS LE SAVOIR.
@@ -183,6 +230,7 @@ export function useProposalDraft(options: UseProposalDraftOptions) {
     errorMessage,
     adopt,
     arm,
+    reset,
     /**
      * Enregistrement immédiat — changement d'étape, envoi, départ de la page.
      *
@@ -192,10 +240,7 @@ export function useProposalDraft(options: UseProposalDraftOptions) {
      * possible — reprise d'un brouillon repris tel quel, par exemple.
      */
     saveNow: async () => {
-      if (timer) {
-        clearTimeout(timer)
-        timer = null
-      }
+      cancelScheduledSave()
       if (state.value === 'saved') return
       if (state.value === 'untouched' && proposalId.value !== null) return
       await save()

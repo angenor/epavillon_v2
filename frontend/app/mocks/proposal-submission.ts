@@ -230,6 +230,17 @@ export function saveProposalDraft(personId: string, payload: SaveDraftPayload): 
   }
 }
 
+/** Abandon du brouillon : la réinitialisation du formulaire le retire. */
+export function discardProposalDraft(personId: string, proposalId: string): void {
+  const index = sessionDrafts.findIndex(
+    (entry) => entry.person_id === personId && entry.proposal_id === proposalId,
+  )
+  const record = sessionDrafts[index]
+  if (!record) throw new Error(`Dossier ${proposalId} introuvable.`)
+  if (record.status !== 'draft') throw new Error('Ce dossier a été déposé : il ne peut plus être abandonné.')
+  sessionDrafts.splice(index, 1)
+}
+
 /**
  * Dépôt du dossier — la transition `draft → submitted`.
  *

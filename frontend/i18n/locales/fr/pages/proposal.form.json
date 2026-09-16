@@ -47,6 +47,14 @@
       "description": "Votre saisie reste à l'écran, mais elle n'est pas en sécurité. Réessayez avant de quitter la page."
     }
   },
+  "reset": {
+    "action": "Réinitialiser le formulaire",
+    "title": "Réinitialiser le formulaire ?",
+    "description": "Tout ce que vous avez saisi sera effacé et le formulaire repartira de zéro.",
+    "descriptionSaved": "Tout ce que vous avez saisi sera effacé, et le brouillon {code} sera supprimé. Cette action ne peut pas être annulée.",
+    "confirm": "Tout effacer",
+    "failed": "Le formulaire n'a pas pu être réinitialisé."
+  },
   "deadline": {
     "label": "Échéance de l'appel",
     "title": "Date limite de dépôt",

@@ -446,3 +446,92 @@ async fn un_format_hors_de_ceux_de_lappel_est_refuse() {
 
     assert_eq!(refus.field.as_deref(), Some("format"));
 }
+
+// -----------------------------------------------------------------------------
+// Réinitialisation du formulaire : l'abandon d'un brouillon
+// -----------------------------------------------------------------------------
+
+#[tokio::test]
+async fn un_brouillon_abandonne_quitte_les_lectures() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+
+    let cree = draft_write::enregistrer(
+        &bac.state,
+        &bac.ctx(),
+        terrain.deposante,
+        commun::charge(&terrain, commun::brouillon(&terrain, "Atelier abandonné")),
+    )
+    .await
+    .expect("brouillon");
+
+    draft_write::abandonner(
+        &bac.state,
+        &bac.ctx(),
+        terrain.deposante,
+        ProposalId(cree.proposal_id),
+    )
+    .await
+    .expect("abandon");
+
+    let efface = sqlx::query_scalar!(
+        "SELECT deleted_at IS NOT NULL AS \"efface!\" FROM programme.proposals WHERE id = $1",
+        cree.proposal_id
+    )
+    .fetch_one(bac.pool())
+    .await
+    .expect("lecture");
+    assert!(efface, "le brouillon doit être effacé logiquement");
+    assert!(commun::thematiques(&bac, cree.proposal_id).await.is_empty());
+
+    let encore = draft_write::abandonner(
+        &bac.state,
+        &bac.ctx(),
+        terrain.deposante,
+        ProposalId(cree.proposal_id),
+    )
+    .await
+    .expect_err("un dossier effacé n'existe plus");
+    assert_eq!(encore.code, ErrorCode::NotFound);
+}
+
+#[tokio::test]
+async fn un_dossier_depose_ou_etranger_ne_s_abandonne_pas() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+
+    let cree = draft_write::enregistrer(
+        &bac.state,
+        &bac.ctx(),
+        terrain.deposante,
+        commun::charge(&terrain, complet(&terrain, "Atelier déposé")),
+    )
+    .await
+    .expect("brouillon");
+    let dossier = ProposalId(cree.proposal_id);
+
+    let inconnue = commun::personne(&bac, "inconnue@example.org", "Ina", "Connue").await;
+    let refus = draft_write::abandonner(&bac.state, &bac.ctx(), inconnue, dossier)
+        .await
+        .expect_err("une personne étrangère à l'organisation ne voit pas le dossier");
+    assert_eq!(refus.code, ErrorCode::NotFound);
+
+    submit::deposer(
+        &bac.state,
+        &bac.ctx(),
+        terrain.deposante,
+        dossier,
+        commun::charge(&terrain, complet(&terrain, "Atelier déposé")),
+    )
+    .await
+    .expect("dépôt");
+
+    let refus = draft_write::abandonner(&bac.state, &bac.ctx(), terrain.deposante, dossier)
+        .await
+        .expect_err("un dossier déposé se retire, il ne s'abandonne pas");
+    assert_eq!(refus.code, ErrorCode::ProposalNotEditable);
+    assert_eq!(
+        commun::ligne(&bac, cree.proposal_id).await.status,
+        "submitted"
+    );
+}
