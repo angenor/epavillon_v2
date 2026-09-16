@@ -68,3 +68,8 @@ Un formulaire qui s'enregistre tout seul, se remplit dans le désordre et refuse
 | « Ce qui se passe après l'envoi » éditable | `calls_for_proposals.submission_next_steps`, champ fr/en dans `CallPanel`, liste dans `StepReview` |
 
 **Écarts** : le bloc « après l'envoi » ne lit plus `required_reviews` — l'IFDD l'écrit dans le texte. Un brouillon repris sur un appel à format unique reçoit ce format d'office. **Pas de vérification en navigateur cette session.**
+
+**Deux corrections du 15/09, après essai avec un compte non administrateur :**
+
+- **Le dépôt était refusé à tout membre d'organisation** (`FORBIDDEN`). Rien n'attribuait les rôles `org_manager` / `org_member` dont dépend la permission — écart n° 74, resté invisible tant que seuls des super-administrateurs essayaient. Le rôle suit désormais l'adhésion, par déclencheur (`040_organizations.sql`).
+- **Le nombre d'occurrences souhaitées est en lecture seule, à 1.** Décision du commanditaire pour cette campagne ; la colonne en accepte toujours plusieurs.

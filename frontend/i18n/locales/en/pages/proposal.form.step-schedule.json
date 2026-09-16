@@ -18,7 +18,7 @@
   },
   "sessions": {
     "label": "Number of occurrences",
-    "hint": "Leave 1 for a single activity. A recurring series declares several from the outset."
+    "hint": "One occurrence per submission for this campaign."
   },
   "endsAt": "Expected end: {end}",
   "constraints": {

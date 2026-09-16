@@ -408,6 +408,56 @@ CREATE TRIGGER tg_memberships_sync_primary
     AFTER INSERT OR UPDATE OF is_primary, status, organization_id ON org.memberships
     FOR EACH ROW EXECUTE FUNCTION org.tg_sync_primary_organization();
 
+-- LE DROIT DE DÉPOSER SUIT L'ADHÉSION, et rien d'autre ne le donne.
+--
+-- Les permissions se lisent sur `identity.role_assignments` : sans attribution,
+-- un membre d'organisation parfaitement actif se voit refuser le dépôt d'une
+-- proposition — écart n° 74, mesuré le 15/09 sur un compte fraîchement inscrit.
+-- Le rôle est donc posé ICI, comme le rattachement principal juste au-dessus :
+-- l'adhésion est le fait, le rôle n'en est que la conséquence, et trois chemins
+-- d'écriture (création, approbation, invitation acceptée) ne peuvent pas s'en
+-- souvenir chacun de leur côté.
+--
+-- La portée est l'ORGANISATION : `has_permission()` ne l'accorde que là.
+CREATE OR REPLACE FUNCTION org.tg_sync_membership_role()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_role text;
+BEGIN
+    v_role := CASE WHEN NEW.role = 'manager' THEN 'org_manager' ELSE 'org_member' END;
+
+    -- Une adhésion qui n'est plus active ne laisse aucun rôle derrière elle, et
+    -- un changement de rôle retire l'ancien : l'attribution est révoquée, jamais
+    -- supprimée — elle dit à quel titre la personne a siégé.
+    UPDATE identity.role_assignments
+       SET revoked_at = now(),
+           revoked_reason = 'Adhésion à l''organisation close ou modifiée'
+     WHERE person_id = NEW.person_id
+       AND scope_type = 'organization'
+       AND scope_id = NEW.organization_id
+       AND role_code IN ('org_manager', 'org_member')
+       AND revoked_at IS NULL
+       AND (NEW.status <> 'active' OR role_code <> v_role);
+
+    IF NEW.status = 'active' THEN
+        INSERT INTO identity.role_assignments
+            (person_id, role_code, scope_type, scope_id, granted_by, note)
+        VALUES (NEW.person_id, v_role, 'organization', NEW.organization_id,
+                COALESCE(NEW.approved_by, NEW.invited_by),
+                'Attribué avec l''adhésion à l''organisation')
+        ON CONFLICT DO NOTHING;
+    END IF;
+
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER tg_memberships_sync_role
+    AFTER INSERT OR UPDATE OF status, role ON org.memberships
+    FOR EACH ROW EXECUTE FUNCTION org.tg_sync_membership_role();
+
 -- FK différée du module identity vers org (déclarée ici car org est créé après).
 ALTER TABLE identity.people
     ADD CONSTRAINT xmod_fk_people_primary_organization

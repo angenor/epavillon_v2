@@ -18,7 +18,7 @@
   },
   "sessions": {
     "label": "Nombre d'occurrences",
-    "hint": "Laissez 1 pour une activité unique. Un cycle qui se répète en annonce plusieurs dès le dépôt."
+    "hint": "Une seule occurrence par dossier pour cette campagne."
   },
   "endsAt": "Fin prévue : {end}",
   "constraints": {

@@ -27,9 +27,11 @@ import type { SelectOption } from '~/types/ui'
  * proposerait 14:30 heure de Dakar, soit 11:30 sur place, et personne ne s'en
  * apercevrait avant la publication du programme.
  *
- * LES OCCURRENCES (`requested_sessions`) NE SONT PAS UN DÉTAIL : un cycle de
- * webinaires en annonce plusieurs dès le dépôt. La v1 ne savait pas l'exprimer
- * et a dû rattraper le cas PACO par une colonne ajoutée dans les inscriptions.
+ * LES OCCURRENCES (`requested_sessions`) SONT FIGÉES À UNE, en lecture seule
+ * depuis le 15/09 : cette campagne ne veut pas offrir le choix. La colonne
+ * accepte toujours plusieurs occurrences — un cycle de webinaires en annonce
+ * plusieurs dès le dépôt, cas que la v1 a dû rattraper après coup —, et rouvrir
+ * la saisie ne demandera que de retirer `readonly`.
  *
  * CRÉNEAU ET DURÉE SONT OBLIGATOIRES depuis le 17/08 (arbitrage du
  * commanditaire), et les bornes viennent de l'APPEL : durée entre
@@ -194,8 +196,7 @@ const endLabel = computed(() => {
         :label="t('proposal.form.step-schedule.sessions.label')"
         :hint="t('proposal.form.step-schedule.sessions.hint')"
         :error="errorOf('requested_sessions')"
-        required
-        @update:model-value="draft.requested_sessions = Number($event)"
+        readonly
       />
     </div>
 
