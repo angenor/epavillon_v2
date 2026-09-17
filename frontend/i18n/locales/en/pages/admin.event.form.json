@@ -107,5 +107,10 @@
     "cancel": "Cancel",
     "backToList": "Back to list"
   },
-  "uploadNotice": "Each slot is filled directly: choose a file, crop it to the required shape, and it is uploaded. A file that does not have that shape is rejected on upload, never cropped automatically."
+  "uploadNotice": "Each slot is filled directly: choose a file, crop it to the required shape, and it is uploaded. A file that does not have that shape is rejected on upload, never cropped automatically.",
+  "draft": {
+    "found": "Unsaved input from {date} ({zone}) was found in this browser.",
+    "restore": "Resume this input",
+    "discard": "Discard it"
+  }
 }

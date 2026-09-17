@@ -21,5 +21,8 @@
     "blockquote": "Quote",
     "heading": "Level {level} subheading",
     "headingShort": "H{level}"
+  },
+  "combobox": {
+    "toggle": "Show the list"
   }
 }

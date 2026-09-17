@@ -107,5 +107,10 @@
     "cancel": "Annuler",
     "backToList": "Retour à la liste"
   },
-  "uploadNotice": "Chaque emplacement se remplit directement : on choisit un fichier, on le recadre à la forme exigée, et il est déposé. Un fichier qui n'a pas cette forme est refusé au dépôt, jamais rogné automatiquement."
+  "uploadNotice": "Chaque emplacement se remplit directement : on choisit un fichier, on le recadre à la forme exigée, et il est déposé. Un fichier qui n'a pas cette forme est refusé au dépôt, jamais rogné automatiquement.",
+  "draft": {
+    "found": "Une saisie non enregistrée du {date} ({zone}) a été retrouvée sur ce navigateur.",
+    "restore": "Reprendre cette saisie",
+    "discard": "L'écarter"
+  }
 }

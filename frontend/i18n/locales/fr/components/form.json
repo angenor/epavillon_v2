@@ -21,5 +21,8 @@
     "blockquote": "Citation",
     "heading": "Sous-titre de niveau {level}",
     "headingShort": "T{level}"
+  },
+  "combobox": {
+    "toggle": "Afficher la liste"
   }
 }

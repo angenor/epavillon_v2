@@ -354,6 +354,10 @@ function imagesChanged(next: EditionImagePayload): boolean {
   return EDITION_IMAGE_ROLES.some((role) => (attached?.[role]?.asset_id ?? null) !== next[role])
 }
 
+const editionDraftKey = computed(() =>
+  auth.person ? `edition:${eventId.value}:${auth.person.id}` : null,
+)
+
 async function saveEdition(payload: EditionFormPayload, images: EditionImagePayload): Promise<void> {
   busy.value = true
   editionErrors.value = []
@@ -372,6 +376,7 @@ async function saveEdition(payload: EditionFormPayload, images: EditionImagePayl
       suggestedAcronym.value = result.suggested_acronym
       return
     }
+    clearLocalDraft(editionDraftKey.value)
     editingEdition.value = false
     // Le titre et le fuseau de l'édition alimentent le sélecteur de la tête de
     // page : le laisser en arrière serait afficher deux vérités sur le même écran.
@@ -732,6 +737,7 @@ const periodLabel = computed(() => {
           :errors="editionErrors"
           :suggested-acronym="suggestedAcronym"
           :busy="busy"
+          :draft-key="editionDraftKey"
           @submit="saveEdition"
           @cancel="editingEdition = false"
         />

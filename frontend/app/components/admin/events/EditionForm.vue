@@ -8,6 +8,7 @@ import type {
 } from '~/types/admin-events'
 import type { AttachableRoleRule, AttachedImage, EditionImageRole } from '~/types/media'
 import type { ParticipationMode } from '~/types/event/edition'
+import type { CountryId } from '~/types/shared'
 import type { SelectOption } from '~/types/ui'
 
 /**
@@ -63,6 +64,8 @@ interface Props {
   busy?: boolean
   /** Vrai en création : le statut est alors figé à « brouillon ». */
   isCreation?: boolean
+  /** Clé du brouillon gardé dans le navigateur ; l'écran l'efface après un envoi réussi. */
+  draftKey?: string | null
 }
 
 const props = defineProps<Props>()
@@ -228,6 +231,34 @@ watch(
   },
 )
 
+/**
+ * Choisir un fuseau remplit le pays et la ville restés vides. Une valeur ainsi
+ * remplie suit le fuseau tant que personne n'y a touché : corriger Paris en Dakar
+ * ne doit pas laisser « France ».
+ */
+const autofilled = ref<{ country_id: CountryId | null; city: string | null }>({
+  country_id: null,
+  city: null,
+})
+
+function chooseTimezone(zone: string): void {
+  form.value.timezone = zone
+  const option = props.options.timezones.find((entry) => entry.value === zone)
+  const iso2 = timeZoneCountryIso2(zone)
+  const country = iso2
+    ? props.options.countries.find((entry) => entry.iso2.toUpperCase() === iso2)
+    : undefined
+
+  if (!form.value.country_id || form.value.country_id === autofilled.value.country_id) {
+    form.value.country_id = country?.id ?? null
+    autofilled.value.country_id = form.value.country_id
+  }
+  if (!form.value.city || form.value.city === autofilled.value.city) {
+    form.value.city = iso2 && option && hasCityName(zone) ? option.city : null
+    autofilled.value.city = form.value.city
+  }
+}
+
 const zoneLabel = computed(() => {
   const option = props.options.timezones.find((entry) => entry.value === form.value.timezone)
   return t('common.datetime.zoneOf', {
@@ -307,13 +338,64 @@ const acronymSuggestion = computed(() =>
     : null,
 )
 
+// ---------------------------------------------------------------------------
+// Brouillon local
+// ---------------------------------------------------------------------------
+
+// Les images n'y entrent pas : un fichier déposé mais jamais rattaché peut avoir
+// disparu du stockage le jour où l'on revient.
+const draft = useLocalDraft({
+  key: () => props.draftKey ?? null,
+  snapshot: () => ({
+    form: form.value,
+    wall: wall.value,
+    slugTouched: slugTouched.value,
+    autofilled: autofilled.value,
+  }),
+  apply: (saved) => {
+    slugTouched.value = saved.slugTouched
+    autofilled.value = { ...saved.autofilled }
+    form.value = { ...saved.form }
+    wall.value = { ...saved.wall }
+  },
+})
+
+const { dateTime } = useDateTime()
+const draftNotice = computed(() => {
+  const found = draft.found.value
+  if (!found) return null
+  const zone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  return t('admin.event.form.draft.found', {
+    date: dateTime(found.savedAt, zone),
+    zone: t('common.datetime.zoneOf', { zone: timeZoneCityLabel(zone) }),
+  })
+})
+
 function submit(): void {
+  draft.flush()
   emit('submit', { ...form.value }, { ...images.value })
 }
 </script>
 
 <template>
   <form class="space-y-8" novalidate @submit.prevent="submit">
+    <UiAlert v-if="draftNotice" intent="info" :message="draftNotice">
+      <template #actions>
+        <UiButton
+          variant="primary"
+          size="sm"
+          :label="t('admin.event.form.draft.restore')"
+          @click="draft.restore()"
+        />
+        <UiButton
+          variant="ghost"
+          size="sm"
+          :label="t('admin.event.form.draft.discard')"
+          @click="draft.discard()"
+        />
+      </template>
+    </UiAlert>
+
     <UiAlert
       v-if="props.errors.length > 0"
       intent="danger"
@@ -480,7 +562,7 @@ function submit(): void {
 
       <div class="grid gap-5 lg:grid-cols-3">
         <!-- LE FUSEAU D'ABORD : les dates saisies ensuite s'y rapportent. -->
-        <UiSelect
+        <UiCombobox
           :model-value="form.timezone"
           :label="t('admin.event.form.fields.timezone')"
           :hint="t('admin.event.form.fields.timezoneHint')"
@@ -488,7 +570,7 @@ function submit(): void {
           :error="errorOf('timezone')"
           required
           hide-optional
-          @update:model-value="(next: string) => (form.timezone = next)"
+          @update:model-value="chooseTimezone"
         />
 
         <UiDatePicker

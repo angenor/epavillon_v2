@@ -42,6 +42,18 @@ const switchBusy = ref(false)
 const dateValue = ref('2027-11-14')
 const dateTimeValue = ref('2027-11-14T14:30')
 
+const zoneValue = ref('America/Belem')
+const zoneOptions: SelectOption[] = [
+  { value: 'America/Belem', label: 'Belém', description: 'America/Belem · UTC−03:00' },
+  { value: 'America/Sao_Paulo', label: 'São Paulo', description: 'America/Sao_Paulo · UTC−03:00' },
+  { value: 'Africa/Abidjan', label: 'Abidjan', description: 'Africa/Abidjan · UTC+00:00' },
+  { value: 'Africa/Dakar', label: 'Dakar', description: 'Africa/Dakar · UTC+00:00' },
+  { value: 'Europe/Paris', label: 'Paris', description: 'Europe/Paris · UTC+01:00' },
+  { value: 'America/Montreal', label: 'Montréal', description: 'America/Montreal · UTC−05:00' },
+  { value: 'Asia/Baku', label: 'Bakou', description: 'Asia/Baku · UTC+04:00' },
+  { value: 'Asia/Riyadh', label: 'Riyad', description: 'Asia/Riyadh · UTC+03:00' },
+]
+
 const search = ref('')
 const searchResults = ref<number | null>(null)
 const searching = ref(false)
@@ -254,6 +266,28 @@ function toggleSwitchWithWork(): void {
             />
           </div>
         </div>
+      </div>
+    </StyleGuideDemo>
+
+    <!-- LISTE AVEC RECHERCHE -->
+    <StyleGuideDemo
+      :title="t('style-guide.forms.choices.comboboxTitle')"
+      :note="t('style-guide.forms.choices.comboboxNote')"
+    >
+      <div class="grid gap-6 md:grid-cols-2">
+        <UiCombobox
+          v-model="zoneValue"
+          :options="zoneOptions"
+          :label="t('style-guide.forms.choices.combobox')"
+          :hint="t('style-guide.forms.choices.comboboxHint')"
+          required
+        />
+        <UiCombobox
+          v-model="zoneValue"
+          :options="zoneOptions"
+          :label="t('style-guide.forms.choices.combobox')"
+          readonly
+        />
       </div>
     </StyleGuideDemo>
 

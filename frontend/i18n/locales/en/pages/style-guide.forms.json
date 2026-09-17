@@ -50,7 +50,11 @@
     "checkPartial": "All proposals on this page",
     "checkDisabled": "Option imposed by the call for proposals",
     "checkError": "I accept the participation terms",
-    "checkErrorText": "You must accept the terms to submit a proposal."
+    "checkErrorText": "You must accept the terms to submit a proposal.",
+    "comboboxTitle": "Searchable list",
+    "comboboxNote": "When options run into the hundreds, the list filters as you type. Accents, case and punctuation are ignored; arrows, Enter and Escape drive the list.",
+    "combobox": "Reference time zone",
+    "comboboxHint": "Type a city or an identifier: “sao paulo”, “Europe/Paris”."
   },
   "switches": {
     "title": "Switches",

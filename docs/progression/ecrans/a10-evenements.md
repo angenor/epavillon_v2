@@ -103,3 +103,15 @@ Demande du commanditaire : « améliorer l'affichage des occurrences comme sur `
 
 **Vérifié** : `make check-front`, `cargo clippy -p event -p api --all-targets` sans avertissement, `cargo test -p event` ; au navigateur en données d'exemple (compte de démonstration), 1440 px clair et 375 px sombre, sans défilement horizontal.
 **Non vérifié** contre l'API réelle : elle tournait encore sur l'ancien binaire, et la page demande une connexion.
+
+## 16/09 — fuseau cherchable, pays et ville déduits, brouillon local
+
+Trois demandes du commanditaire sur le formulaire d'édition (création et modification, un seul composant).
+
+- **Fuseau de référence** : `UiSelect` remplacé par **`UiCombobox`**, nouveau composant générique (`components/ui/`) — saisie qui filtre la liste, sans accent ni casse ni ponctuation, sur la ville, l'identifiant IANA et le décalage ; les villes qui commencent par la saisie passent devant ; flèches, Entrée (qui ne soumet pas le formulaire), Échap. Démo ajoutée au guide de style. La liste de l'API est triée par identifiant IANA et affichée par ville : d'où l'impression de désordre.
+- **Pays et ville déduits du fuseau** quand ils sont vides. PostgreSQL ne donne pas le pays d'un fuseau : `utils/timezone-country.ts` est **généré** depuis `zone.tab` et les liens de `tzdata.zi` du conteneur PostgreSQL (553 fuseaux servis, 518 rattachés ; seuls les `Etc/…` restent sans pays). La ville n'est déduite que des fuseaux nommés par région (`Brazil/East` n'est pas une ville). Une valeur déduite suit les changements de fuseau suivants tant qu'on n'y a pas touché ; une valeur saisie ou venue de la base n'est jamais remplacée. **L'API écrit les villes sans accent** (« Belem ») : la ville déduite hérite de ce défaut, corrigible à la main.
+- **Brouillon local** : `composables/useLocalDraft.ts`, générique (clé `epavillon:draft:…` par écran et par personne). Enregistré 600 ms après la dernière frappe, jamais appliqué d'office : un bandeau propose « Reprendre cette saisie » ou « L'écarter ». Effacé après un enregistrement réussi ; supprimé si la saisie revient à son point de départ. **Les images n'y entrent pas** : un dépôt non rattaché peut avoir disparu au retour.
+
+**Vérifié** : `make check-front` ; au navigateur en données d'exemple, création et modification — recherche « belem » → Belém, remplissage Brésil/Belém puis Sénégal/Dakar, ville modifiée à la main conservée, « Aucun résultat », reprise et abandon du brouillon après rechargement, brouillon effacé après enregistrement.
+**Non vérifié** contre l'API réelle, ni à 375 px.
+

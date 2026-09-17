@@ -98,6 +98,8 @@ function hasImages(images: EditionImagePayload): boolean {
  */
 const created = ref<{ id: Uuid; daysCreated: number } | null>(null)
 
+const draftKey = computed(() => (auth.person ? `edition:new:${auth.person.id}` : null))
+
 async function submit(payload: EditionFormPayload, images: EditionImagePayload): Promise<void> {
   busy.value = true
   errors.value = []
@@ -122,6 +124,7 @@ async function submit(payload: EditionFormPayload, images: EditionImagePayload):
     if (hasImages(images)) {
       await api.adminEvents.saveImages(created.value.id, images, adminScope.scope)
     }
+    clearLocalDraft(draftKey.value)
     await navigateTo({
       path: localePath(`/admin/evenements/${created.value.id}`),
       query: created.value.daysCreated > 0 ? { jours: String(created.value.daysCreated) } : {},
@@ -191,6 +194,7 @@ async function submit(payload: EditionFormPayload, images: EditionImagePayload):
         :suggested-acronym="suggestedAcronym"
         :busy="busy"
         is-creation
+        :draft-key="draftKey"
         @submit="submit"
         @cancel="navigateTo(localePath('/admin/evenements'))"
       />
