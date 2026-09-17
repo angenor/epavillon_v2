@@ -60,12 +60,141 @@ pub async fn enregistrer(
     let adhesion = cross::adhesion(state.pool(), porteur, acteur).await?;
     ownership::exiger(adhesion)?;
 
-    let champs = composer(&payload.draft, &regles, &edition, acteur, porteur)?;
+    ecrire(
+        state,
+        ctx,
+        acteur,
+        &payload,
+        &regles,
+        &edition,
+        existant.as_ref(),
+        porteur,
+        Some(acteur),
+    )
+    .await
+}
+
+/// La correction d'un dossier DÉPOSÉ par l'équipe, à la demande de l'organisation.
+///
+/// Sans adhésion : c'est le périmètre et `programme.proposal.edit` sur l'édition
+/// qui gardent. Le contact du dossier est conservé — l'agent n'en devient pas le
+/// contact. Un brouillon reste à son organisation : deux personnes qui écrivent
+/// en même temps le même dossier s'écrasent l'une l'autre.
+pub async fn corriger_par_lequipe(
+    state: &ProgrammeState,
+    ctx: &RequestContext,
+    perimetre: &kernel::auth::Perimeter,
+    acteur: Uuid,
+    dossier: ProposalId,
+    payload: SaveDraftPayload,
+) -> Result<Enregistrement> {
+    let edition_du_dossier = crate::service::perimeter::edition_dans_le_perimetre(
+        state.pool(),
+        perimetre,
+        crate::service::perimeter::Cible::Dossier(dossier),
+    )
+    .await?;
+    let autorise = kernel::auth::has_permission(
+        state.pool(),
+        acteur,
+        crate::domain::permissions::PROPOSAL_EDIT,
+        kernel::auth::Scope::Event(edition_du_dossier.as_uuid()),
+    )
+    .await?;
+    if !autorise {
+        return Err(ApiError::forbidden());
+    }
+
+    let payload = SaveDraftPayload {
+        proposal_id: Some(dossier.as_uuid()),
+        ..payload
+    };
+    let (regles, edition, existant) = contexte(state, acteur, &payload).await?;
+    let etat = existant.as_ref().ok_or_else(ApiError::not_found)?;
+    if etat.status == "draft" {
+        return Err(ApiError::with_message(
+            ErrorCode::ProposalNotEditable,
+            "Ce dossier est encore en brouillon : seule son organisation le complète.",
+        ));
+    }
+    exiger_un_dossier_complet(&payload.draft, &regles)?;
+
+    ecrire(
+        state,
+        ctx,
+        acteur,
+        &payload,
+        &regles,
+        &edition,
+        Some(etat),
+        etat.organization_id,
+        etat.contact_person_id,
+    )
+    .await
+}
+
+/// Ce que le dépôt a exigé doit rester vrai après une correction de l'équipe.
+fn exiger_un_dossier_complet(brouillon: &ProposalDraft, regles: &ReglesDeLAppel) -> Result<()> {
+    let presentation = sanitize::assainir(&brouillon.detailed_presentation);
+    for (champ, vide) in [
+        ("title", brouillon.title.trim().is_empty()),
+        ("objectives", brouillon.objectives.trim().is_empty()),
+        ("detailed_presentation", sanitize::est_vide(&presentation)),
+    ] {
+        if vide {
+            return Err(ApiError::with_message(
+                ErrorCode::ValidationFailed,
+                "Ce champ doit rester renseigné sur un dossier déposé.",
+            )
+            .field(champ));
+        }
+    }
+    if brouillon.theme_codes.is_empty() {
+        return Err(ApiError::with_message(
+            ErrorCode::ValidationFailed,
+            "Un dossier déposé garde au moins une thématique.",
+        )
+        .field("theme_codes"));
+    }
+    if brouillon.category_codes.is_empty() {
+        return Err(ApiError::with_message(
+            ErrorCode::ValidationFailed,
+            "Un dossier déposé garde au moins une catégorie d'activité.",
+        )
+        .field("category_codes"));
+    }
+    let compte = brouillon.speakers.len() as i64;
+    if compte < i64::from(regles.min_speakers) || compte > i64::from(regles.max_speakers) {
+        return Err(ApiError::with_message(
+            ErrorCode::ValidationFailed,
+            format!(
+                "Cet appel demande entre {} et {} intervenant(s).",
+                regles.min_speakers, regles.max_speakers
+            ),
+        )
+        .field("speakers"));
+    }
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+async fn ecrire(
+    state: &ProgrammeState,
+    ctx: &RequestContext,
+    acteur: Uuid,
+    payload: &SaveDraftPayload,
+    regles: &ReglesDeLAppel,
+    edition: &ContexteEdition,
+    existant: Option<&proposals::EtatDuDossier>,
+    porteur: Uuid,
+    contact: Option<Uuid>,
+) -> Result<Enregistrement> {
+    let champs = composer(&payload.draft, regles, edition, contact, porteur)?;
     let titre_brut = payload.draft.title.trim().to_owned();
 
     let mut tx = state.db().write(ctx).await?;
 
-    let (dossier, ligne) = match &existant {
+    let (dossier, ligne) = match existant {
         None => {
             let nouveau = NouveauDossier {
                 call_id: regles.call_id,
@@ -301,7 +430,7 @@ fn composer(
     brouillon: &ProposalDraft,
     regles: &ReglesDeLAppel,
     edition: &ContexteEdition,
-    deposant: Uuid,
+    contact: Option<Uuid>,
     _porteur: Uuid,
 ) -> Result<ChampsDuDossier> {
     borner(&brouillon.title, &limits::TITRE)?;
@@ -348,7 +477,7 @@ fn composer(
         // règle explicite : la colonne est nullable et rien ne la remplit
         // (écart n° 30). Le demander à l'étape des organisations est un geste
         // d'écran, pas d'API.
-        contact_person_id: Some(deposant),
+        contact_person_id: contact,
     })
 }
 

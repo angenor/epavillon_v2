@@ -132,6 +132,8 @@ pub struct DroitsSurLaFiche {
     pub can_review: bool,
     pub can_decide: bool,
     pub can_assign: bool,
+    /// `programme.proposal.edit` sur l'édition : corriger le contenu du dossier.
+    pub can_edit: bool,
     /// **Décorrélé de `can_review`** : depuis le 16/09, noter n'exige plus
     /// d'affectation ; seul le déport l'interdit.
     pub is_assigned: bool,

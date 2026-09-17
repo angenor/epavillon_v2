@@ -30,6 +30,7 @@ import type {
   SaveReviewResult,
 } from '~/types/admin-review'
 import type { ProposalComment } from '~/types/programme/proposal'
+import type { SaveDraftPayload, SaveDraftResult } from '~/types/proposal-form'
 import type { ReviewAssignment } from '~/types/programme/review'
 import type { Uuid } from '~/types/shared'
 
@@ -148,6 +149,22 @@ export function createProposalReviewApi({ callOrNull, send }: ApiTransport) {
      * RÉPONSES, pas des erreurs de réseau : transition impossible depuis cet
      * état, ou motif manquant. L'écran les rend comme telles.
      */
+    /**
+     * CORRIGER UN DOSSIER DÉPOSÉ, AU NOM DE L'ÉQUIPE — sans adhésion à
+     * l'organisation porteuse. L'état et le contact du dossier ne bougent pas.
+     */
+    editContent: (payload: SaveDraftPayload): Promise<SaveDraftResult> =>
+      send(
+        `/proposals/${payload.proposal_id}/content`,
+        payload,
+        (m) => {
+          const result = m.saveExistingProposal(payload)
+          if (!result) throw new Error(`Dossier ${payload.proposal_id} introuvable.`)
+          return result
+        },
+        'PUT',
+      ),
+
     decide: (personId: Uuid | null, payload: DecisionPayload): Promise<DecisionResult> => {
       const { proposal_id, ...body } = payload
       return send(`/proposals/${proposal_id}/decision`, body, (m) =>

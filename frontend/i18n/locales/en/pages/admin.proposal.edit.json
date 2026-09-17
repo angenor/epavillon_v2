@@ -1,0 +1,23 @@
+{
+  "title": "Edit the proposal",
+  "subtitle": "The change is saved on behalf of the team and appears in the proposal's history. Its status and contact stay the same.",
+  "action": "Edit the proposal",
+  "backToFile": "Back to the proposal",
+  "save": "Save changes",
+  "saved": "Proposal updated. The change appears in the history.",
+  "unsaved": "Unsaved changes",
+  "leaveConfirm": "Some changes are not saved. Leave the page anyway?",
+  "leadNote": "The lead organisation of a submitted proposal does not change.",
+  "forbiddenScope": "Editing proposals of this edition",
+  "issues": {
+    "title": "The proposal cannot be saved as it is",
+    "hint": "{count} field needs fixing in the flagged tab. | {count} field needs fixing in the flagged tab. | {count} fields need fixing in the flagged tabs."
+  },
+  "blocked": {
+    "title": "This proposal cannot be edited from the back office",
+    "draft": "It is still a draft: its organisation is writing it.",
+    "file_closed": "It was rejected, withdrawn or cancelled.",
+    "edition_over": "Its edition is over.",
+    "no_call": "It belongs to no call for proposals, so its input rules are unknown."
+  }
+}

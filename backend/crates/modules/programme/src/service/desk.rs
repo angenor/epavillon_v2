@@ -50,7 +50,7 @@ use crate::domain::desk::{
     IntervenantDuDossier, MaRevue, OrganisationDuDossier, RevueDUnPair,
 };
 use crate::domain::ids::ProposalId;
-use crate::domain::permissions::{CALL_MANAGE, PROPOSAL_DECIDE, REVIEW_WRITE};
+use crate::domain::permissions::{CALL_MANAGE, PROPOSAL_DECIDE, PROPOSAL_EDIT, REVIEW_WRITE};
 use crate::repo::{
     assignments, comments, cross, dashboard, documents, organizations, proposals, reads, reviews,
     scores, speakers, transitions,
@@ -315,13 +315,15 @@ async fn droits(
     let ligne = sqlx::query!(
         r#"SELECT identity.has_permission($1, $2, $4::text::identity.scope_type, $5) AS "noter!",
                   identity.has_permission($1, $3, $4::text::identity.scope_type, $5) AS "decider!",
-                  identity.has_permission($1, $6, $4::text::identity.scope_type, $5) AS "affecter!""#,
+                  identity.has_permission($1, $6, $4::text::identity.scope_type, $5) AS "affecter!",
+                  identity.has_permission($1, $7, $4::text::identity.scope_type, $5) AS "modifier!""#,
         lecteur,
         REVIEW_WRITE,
         PROPOSAL_DECIDE,
         portee.scope_type().as_str(),
         portee.scope_id(),
         CALL_MANAGE,
+        PROPOSAL_EDIT,
     )
     .fetch_one(conn)
     .await?;
@@ -330,6 +332,7 @@ async fn droits(
         can_review: ligne.noter,
         can_decide: ligne.decider,
         can_assign: ligne.affecter,
+        can_edit: ligne.modifier,
         is_assigned: affectation.is_some_and(|a| a.recused_at.is_none()),
         is_recused: affectation.is_some_and(|a| a.recused_at.is_some()),
     })

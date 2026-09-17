@@ -69,3 +69,16 @@ dossier) et Mme Perret (administratrice de la seule COP31).
 | **375 px** | `scrollWidth` = `clientWidth` = **375** : aucun défilement horizontal. L'en-tête s'empile, le panneau d'évaluation passe sous le dossier et **perd sa colle** — un panneau collant de 600 px sur un téléphone masquerait le texte qu'il sert à juger |
 | **Anglais et thème clair** | Écran complet en anglais, **zéro clé brute** (aucun `admin.proposal.review.*` dans le texte rendu). Le titre du dossier bascule en anglais — c'est une donnée `i18n_text` —, le résumé reste en français faute de traduction : le repli du modèle, pas un défaut |
 | **Console** | Aucune erreur, aucun avertissement Vue. Les seuls messages sont les routes du pied de page public qui n'existent pas encore (`/aide`, `/contact`…), signalées depuis A1 |
+
+## 17/09 — l'équipe corrige un dossier déposé
+
+Demande du commanditaire : les organisations demandent des corrections rapides, et l'administrateur ne pouvait rien modifier sans être membre de l'organisation porteuse.
+
+- **Modèle** : nouvelle permission `programme.proposal.edit`, accordée à `admin` (`030_identity.sql`). Appliquée **à chaud** à la base locale ; **la production ne l'a pas encore**.
+- **API** : `PUT /proposals/{id}/content`, gardée par le périmètre et la permission sur l'édition. Réutilise l'écriture du dépôt (`draft_write::ecrire`, extrait d'`enregistrer`) : mêmes bornes de l'appel, mêmes longueurs, identité verrouillée des intervenants qui ont un compte. En plus : le dossier doit rester complet (textes, une thématique, une catégorie, bornes d'intervenants). **Refusée sur un brouillon** (l'organisation l'écrit), sur un dossier clos et sur une édition terminée. **L'état ne change pas, le contact du dossier non plus.** La fiche rend `permissions.can_edit`. Quatre tests (`tests/correction_par_lequipe.rs`).
+- **Site** : bouton « Modifier le dossier » sur la fiche ; page `/admin/propositions/[id]/modifier` (la fiche passe en `[id]/index.vue`), qui reprend les étapes du dépôt en onglets, sans enregistrement automatique, avec confirmation avant de quitter une saisie non enregistrée. `ProposalStepOrganizations` reçoit désormais `leadCandidates` (des organisations) au lieu des adhésions.
+- **Hors périmètre** : les pièces jointes (l'étape est masquée au dépôt aussi) ; aucune notification à l'organisation ; les tables filles (`proposal_speakers`, `proposal_organizations`, thématiques) ne sont pas auditées, donc seules les modifications de `proposals` apparaissent dans l'historique.
+- **Défaut relevé, non corrigé** : `POST /proposals/{id}/decision` ne vérifie que le périmètre, pas la permission de la transition. Un membre du comité pourrait probablement retenir ou rejeter un dossier par cette route.
+
+**Vérifié** : `cargo test -p programme` (tests ciblés), `make check-front`, compilation hors ligne. Au navigateur **contre l'API réelle** (seconde instance sur 8081) : correction du titre de COP31-00007, contrôle bloquant sur l'intervenant incomplet puis correction dans sa fenêtre, retour à la fiche avec l'avis, titre et état relus en base, trace dans l'historique ; 375 px sans défilement horizontal.
+

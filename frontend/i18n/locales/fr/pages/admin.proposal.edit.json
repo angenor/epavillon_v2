@@ -1,0 +1,23 @@
+{
+  "title": "Modifier le dossier",
+  "subtitle": "La correction s'enregistre au nom de l'équipe et figure dans l'historique du dossier. Son état et son contact ne changent pas.",
+  "action": "Modifier le dossier",
+  "backToFile": "Retour à la fiche du dossier",
+  "save": "Enregistrer les modifications",
+  "saved": "Dossier modifié. La correction figure dans l'historique.",
+  "unsaved": "Modifications non enregistrées",
+  "leaveConfirm": "Des modifications ne sont pas enregistrées. Quitter la page quand même ?",
+  "leadNote": "Le porteur d'un dossier déposé ne change pas.",
+  "forbiddenScope": "Correction des dossiers de cette édition",
+  "issues": {
+    "title": "Le dossier ne peut pas être enregistré en l'état",
+    "hint": "{count} champ est à corriger dans l'onglet signalé. | {count} champ est à corriger dans l'onglet signalé. | {count} champs sont à corriger dans les onglets signalés."
+  },
+  "blocked": {
+    "title": "Ce dossier ne se modifie pas depuis le back-office",
+    "draft": "Il est encore en brouillon : son organisation est en train de le rédiger.",
+    "file_closed": "Il a été refusé, retiré ou annulé.",
+    "edition_over": "Son édition est terminée.",
+    "no_call": "Il ne relève d'aucun appel à propositions : ses règles de saisie sont inconnues."
+  }
+}

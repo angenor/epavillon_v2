@@ -168,6 +168,7 @@ pub struct EtatDuDossier {
     pub call_id: Option<Uuid>,
     pub organization_id: Uuid,
     pub submitted_by: Uuid,
+    pub contact_person_id: Option<Uuid>,
     pub status: String,
 }
 
@@ -177,7 +178,7 @@ pub async fn etat<'e>(
 ) -> Result<Option<EtatDuDossier>> {
     let ligne = sqlx::query!(
         r#"SELECT id, reference_code, event_id, call_id, organization_id, submitted_by,
-                  status::text AS "status!"
+                  contact_person_id, status::text AS "status!"
              FROM programme.proposals
             WHERE id = $1 AND deleted_at IS NULL"#,
         dossier.as_uuid()
@@ -192,6 +193,7 @@ pub async fn etat<'e>(
         call_id: l.call_id,
         organization_id: l.organization_id,
         submitted_by: l.submitted_by,
+        contact_person_id: l.contact_person_id,
         status: l.status,
     }))
 }

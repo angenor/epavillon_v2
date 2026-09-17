@@ -19,6 +19,8 @@ pub const PROPOSAL_SUBMIT: &str = "programme.proposal.submit";
 pub const PROPOSAL_READ_ALL: &str = "programme.proposal.read_all";
 pub const REVIEW_WRITE: &str = "programme.review.write";
 pub const PROPOSAL_DECIDE: &str = "programme.proposal.decide";
+/// Corriger un dossier déposé sans être membre de son organisation.
+pub const PROPOSAL_EDIT: &str = "programme.proposal.edit";
 
 /// **Permission d'un autre module, et cela ne crée aucune arête.**
 ///

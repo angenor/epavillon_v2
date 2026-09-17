@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT identity.has_permission($1, $2, $4::text::identity.scope_type, $5) AS \"noter!\",\n                  identity.has_permission($1, $3, $4::text::identity.scope_type, $5) AS \"decider!\",\n                  identity.has_permission($1, $6, $4::text::identity.scope_type, $5) AS \"affecter!\"",
+  "query": "SELECT identity.has_permission($1, $2, $4::text::identity.scope_type, $5) AS \"noter!\",\n                  identity.has_permission($1, $3, $4::text::identity.scope_type, $5) AS \"decider!\",\n                  identity.has_permission($1, $6, $4::text::identity.scope_type, $5) AS \"affecter!\",\n                  identity.has_permission($1, $7, $4::text::identity.scope_type, $5) AS \"modifier!\"",
   "describe": {
     "columns": [
       {
@@ -20,6 +20,12 @@
         "name": "affecter!",
         "type_info": "Bool",
         "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "modifier!",
+        "type_info": "Bool",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -29,14 +35,16 @@
         "Text",
         "Text",
         "Uuid",
+        "Text",
         "Text"
       ]
     },
     "nullable": [
       null,
       null,
+      null,
       null
     ]
   },
-  "hash": "494d73a1eb4cd2eff65e05212eb527b28b3e039106af14f8eb5a49b3ed73fce2"
+  "hash": "569072053ac43138108027ff1beb8829cfe2f2b0bb0db621e90569dd60d9f6e4"
 }

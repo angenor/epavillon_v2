@@ -572,6 +572,7 @@ INSERT INTO identity.permissions (code, label, module_code) VALUES
     ('programme.proposal.read_all', '{"fr":"Consulter toutes les propositions","en":"Read all proposals"}', 'programme'),
     ('programme.review.write',      '{"fr":"Noter et commenter une proposition","en":"Score and comment a proposal"}', 'programme'),
     ('programme.proposal.decide',   '{"fr":"Retenir ou rejeter une proposition","en":"Accept or reject a proposal"}', 'programme'),
+    ('programme.proposal.edit',     '{"fr":"Modifier le contenu d''une proposition","en":"Edit a proposal''s content"}', 'programme'),
     ('programme.session.schedule',  '{"fr":"Planifier les sessions","en":"Schedule sessions"}', 'programme'),
     ('programme.registration.manage','{"fr":"Gérer les inscriptions","en":"Manage registrations"}', 'programme'),
     ('live.meeting.manage',         '{"fr":"Gérer les réunions et diffusions","en":"Manage meetings and streams"}', 'live'),
@@ -613,6 +614,11 @@ INSERT INTO identity.role_permissions (role_code, permission_code) VALUES
     -- par le comité, comme en v1. Conséquence assumée : `admin` peut aussi
     -- renvoyer un dossier pour corrections (écart n° 50, désormais refermé).
     ('admin', 'programme.review.write'),
+    -- L'ÉQUIPE CORRIGE UN DOSSIER DÉPOSÉ À LA DEMANDE DE L'ORGANISATION (arbitré le
+    -- 17/09) : titre, textes, intervenants, classement, créneau souhaité. Sans
+    -- adhésion à l'organisation porteuse, et jamais sur un brouillon en cours de
+    -- saisie. La modification est tracée dans l'audit sous le nom de l'agent.
+    ('admin', 'programme.proposal.edit'),
     ('admin', 'programme.session.schedule'), ('admin', 'programme.registration.manage'),
     ('admin', 'live.meeting.manage'), ('admin', 'live.incident.publish'),
     ('admin', 'publication.article.moderate'), ('admin', 'publication.quota.manage'),

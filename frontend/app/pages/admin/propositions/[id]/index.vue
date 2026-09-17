@@ -180,6 +180,23 @@ const decisionError = ref<string | null>(null)
 const notice = ref<string | null>(null)
 const savedAt = ref<string | null>(null)
 
+/** Retour de la page de modification : l'avis s'affiche une fois, puis le paramètre s'efface. */
+onMounted(() => {
+  if (route.query.modifie === undefined) return
+  notice.value = t('admin.proposal.edit.saved')
+  const { modifie: _, ...rest } = route.query
+  router.replace({ query: rest })
+})
+
+/** Un brouillon reste à son organisation ; un dossier clos ou une édition passée ne bougent plus. */
+const canEditContent = computed(() => {
+  const current = screen.value
+  if (!current?.permissions.can_edit) return false
+  return current.proposal.status !== 'draft' && canEditProposal(current.proposal, current.edition)
+})
+
+const editTo = computed(() => localePath(`/admin/propositions/${proposalId.value}/modifier`))
+
 /**
  * Un refus de l'API s'affiche TEL QUEL : elle seule sait pourquoi elle refuse, et
  * son catalogue est déjà français. Le site ne reprend la parole que lorsqu'elle
@@ -360,6 +377,15 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
           />
 
           <template v-if="activeTab === 'dossier'">
+            <div v-if="canEditContent" class="flex justify-end">
+              <UiButton
+                variant="secondary"
+                icon="edit"
+                :to="editTo"
+                :label="t('admin.proposal.edit.action')"
+              />
+            </div>
+
             <AdminReviewDossier
               :proposal="screen.proposal"
               :themes="screen.themes"

@@ -825,7 +825,7 @@ const organizationSpaceTo = computed<string | null>(() =>
             <ProposalStepOrganizations
               v-if="currentStep === 'organizations'"
               v-model="draft"
-              :memberships="memberships.active"
+              :lead-candidates="memberships.active.map((entry) => entry.organization)"
               :issues="visibleIssuesOf('organizations')"
               :country-name-of="countryNameOf"
             />

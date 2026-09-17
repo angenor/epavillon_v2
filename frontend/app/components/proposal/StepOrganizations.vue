@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Membership, Organization, SimilarOrganization } from '~/types/org'
+import type { Organization, SimilarOrganization } from '~/types/org'
 import type { DraftIssue, DraftOrganization, ProposalDraft } from '~/types/proposal-form'
 import type { OrganizationRole } from '~/types/programme/proposal'
 import type { SelectOption } from '~/types/ui'
@@ -35,8 +35,13 @@ import type { SelectOption } from '~/types/ui'
 const draft = defineModel<ProposalDraft>({ required: true })
 
 interface Props {
-  /** Adhésions ACTIVES de la personne — le porteur se choisit parmi elles. */
-  memberships: { membership: Membership; organization: Organization }[]
+  /**
+   * Les porteurs possibles : les organisations dont la personne est membre
+   * active, ou le seul porteur du dossier quand l'équipe le corrige.
+   */
+  leadCandidates: Organization[]
+  /** Remplace la phrase adressée au déposant sous un porteur unique. */
+  leadNote?: string
   issues: DraftIssue[]
   /** Résolution des libellés venus de la base. */
   countryNameOf: (countryId: string | null) => string | null
@@ -60,7 +65,7 @@ const leadError = computed(() => {
 // ---------------------------------------------------------------------------
 
 const leadOptions = computed<SelectOption[]>(() =>
-  props.memberships.map(({ organization }) => ({
+  props.leadCandidates.map((organization) => ({
     value: organization.id,
     label: organization.acronym
       ? `${organization.legal_name} (${organization.acronym})`
@@ -70,7 +75,7 @@ const leadOptions = computed<SelectOption[]>(() =>
 )
 
 const leadOrganization = computed(
-  () => props.memberships.find((entry) => entry.organization.id === draft.value.organization_id)?.organization ?? null,
+  () => props.leadCandidates.find((organization) => organization.id === draft.value.organization_id) ?? null,
 )
 
 // ---------------------------------------------------------------------------
@@ -185,7 +190,7 @@ function setRole(organizationId: string, role: string): void {
 
       <!-- Une seule adhésion : on l'affiche, on ne la fait pas choisir. Un menu
            à une entrée demande un geste pour une décision déjà prise. -->
-      <UiCard v-if="props.memberships.length === 1 && leadOrganization" sunken>
+      <UiCard v-if="props.leadCandidates.length === 1 && leadOrganization" sunken>
         <div class="flex items-start gap-3">
           <UiIcon name="building" size="1.4rem" class="mt-0.5 text-text-muted" />
           <div class="min-w-0">
@@ -196,7 +201,7 @@ function setRole(organizationId: string, role: string): void {
               <span>{{ props.countryNameOf(leadOrganization.country_id) }}</span>
             </p>
             <p class="mt-2 text-sm text-text-secondary">
-              {{ t('proposal.form.step-organizations.lead.single') }}
+              {{ props.leadNote ?? t('proposal.form.step-organizations.lead.single') }}
             </p>
           </div>
         </div>

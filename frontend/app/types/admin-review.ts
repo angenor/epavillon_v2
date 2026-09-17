@@ -209,6 +209,8 @@ export interface ReviewDeskPermissions {
   can_decide: boolean
   /** `event.call.manage` — affecter un membre du comité à ce dossier. */
   can_assign: boolean
+  /** `programme.proposal.edit` — corriger le contenu d'un dossier déposé. */
+  can_edit: boolean
   /** Suis-je AFFECTÉ à ce dossier ? Décorrélé de la permission : un membre du
    *  comité peut lire un dossier qu'on ne lui a pas confié, sans le noter. */
   is_assigned: boolean

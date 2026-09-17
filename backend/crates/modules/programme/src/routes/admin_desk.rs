@@ -20,13 +20,14 @@ use kernel::error::Result;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::domain::draft::SaveDraftPayload;
 use crate::domain::ids::ProposalId;
 use crate::domain::transitions::ProposalStatus;
 use crate::repo::proposals::Fiche;
 use crate::repo::transitions::LigneDeJournal;
 use crate::routes::contexte_de;
 use crate::service::review::{RecusalPayload, SaveReviewPayload};
-use crate::service::{desk, review, transition};
+use crate::service::{desk, draft_write, review, transition};
 use crate::state::ProgrammeState;
 
 /// Les chemins portant un identifiant de dossier.
@@ -34,7 +35,8 @@ pub fn chemins_de_dossier(cfg: &mut web::ServiceConfig) {
     cfg.route("/{id}/review-desk", web::get().to(fiche))
         .route("/{id}/reviews", web::put().to(noter))
         .route("/{id}/recusal", web::post().to(se_deporter))
-        .route("/{id}/decision", web::post().to(decider));
+        .route("/{id}/decision", web::post().to(decider))
+        .route("/{id}/content", web::put().to(corriger));
 }
 
 /// Toute la fiche, en une réponse.
@@ -216,4 +218,42 @@ pub(crate) async fn decider(
     };
 
     Ok(HttpResponse::Ok().json(resultat))
+}
+
+/// Corriger le contenu d'un dossier déposé, au nom de l'équipe.
+#[utoipa::path(
+    put,
+    description = "`SaveDraftPayload` → `SaveDraftResult`. L'équipe corrige un dossier **déposé** à la demande de son organisation, sans en être membre : périmètre de l'édition et `programme.proposal.edit` sur elle. Mêmes règles que le dépôt — bornes de l'appel, longueurs, identité verrouillée d'un intervenant qui a un compte — et le dossier doit rester complet. **L'état ne change pas**, le contact du dossier non plus. Un brouillon est refusé : son organisation est en train de l'écrire.",
+    path = "/proposals/{id}/content",
+    tag = "Back-office — évaluation",
+    operation_id = "propositions_corriger_le_contenu",
+    params(("id" = Uuid, Path, description = "Identifiant du dossier")),
+    request_body = Object,
+    responses(
+        (status = 200, description = "SaveDraftResult", body = Object),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 403, description = "Périmètre vide, ou `programme.proposal.edit` absente sur l'édition", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Dossier inexistant **ou hors périmètre** — indiscernables", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "Brouillon, dossier clos ou édition terminée (PROPOSAL_NOT_EDITABLE), champ vidé, bornes de l'appel", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn corriger(
+    requete: HttpRequest,
+    state: web::Data<ProgrammeState>,
+    perimetre: Perimeter,
+    chemin: web::Path<Uuid>,
+    corps: web::Json<SaveDraftPayload>,
+) -> Result<HttpResponse> {
+    let ctx = contexte_de(&requete, perimetre.person_id);
+    let ligne = draft_write::corriger_par_lequipe(
+        &state,
+        &ctx,
+        &perimetre,
+        perimetre.person_id,
+        ProposalId(chemin.into_inner()),
+        corps.into_inner(),
+    )
+    .await?;
+
+    Ok(HttpResponse::Ok().json(ligne))
 }

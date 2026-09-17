@@ -3032,6 +3032,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/proposals/{id}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Corriger le contenu d'un dossier déposé, au nom de l'équipe.
+         * @description `SaveDraftPayload` → `SaveDraftResult`. L'équipe corrige un dossier **déposé** à la demande de son organisation, sans en être membre : périmètre de l'édition et `programme.proposal.edit` sur elle. Mêmes règles que le dépôt — bornes de l'appel, longueurs, identité verrouillée d'un intervenant qui a un compte — et le dossier doit rester complet. **L'état ne change pas**, le contact du dossier non plus. Un brouillon est refusé : son organisation est en train de l'écrire.
+         */
+        put: operations["propositions_corriger_le_contenu"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/proposals/{id}/decision": {
         parameters: {
             query?: never;
@@ -11153,6 +11173,69 @@ export interface operations {
                 };
             };
             /** @description Corps vide */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    propositions_corriger_le_contenu: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du dossier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description SaveDraftResult */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Périmètre vide, ou `programme.proposal.edit` absente sur l'édition */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Dossier inexistant **ou hors périmètre** — indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Brouillon, dossier clos ou édition terminée (PROPOSAL_NOT_EDITABLE), champ vidé, bornes de l'appel */
             422: {
                 headers: {
                     [name: string]: unknown;

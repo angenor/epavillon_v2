@@ -319,6 +319,7 @@ export function reviewDesk(proposalId: Uuid, personId: Uuid | null): ReviewDeskS
     can_review: can('programme.review.write'),
     can_decide: can('programme.proposal.decide'),
     can_assign: can('event.call.manage'),
+    can_edit: can('programme.proposal.edit'),
     is_assigned: myAssignment !== null && myAssignment.recused_at === null,
     is_recused: myAssignment?.recused_at != null,
   }
