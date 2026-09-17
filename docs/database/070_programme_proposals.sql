@@ -390,6 +390,36 @@ BEGIN
         END IF;
     END IF;
 
+    -- LES INTERVENANTS D'UN DOSSIER DÉPOSÉ SONT COMPLETS (ajouté le 17/09). Le
+    -- formulaire l'exigeait seul : un dossier écrit hors de lui partait au comité
+    -- avec un intervenant sans civilité ni organisation. Vérifié au passage vers
+    -- `submitted` par mise à jour — dépôt et renvoi — et non à l'insertion
+    -- directe d'un dossier déjà déposé, qui n'a pas encore d'intervenants : ce
+    -- chemin est celui des reprises de données, qui répondent de leur contenu.
+    IF TG_OP = 'UPDATE' THEN
+        SELECT count(*) INTO v_count
+        FROM programme.proposal_speakers s
+        WHERE s.proposal_id = NEW.id;
+
+        IF v_count < v_call.min_speakers OR v_count > v_call.max_speakers THEN
+            RAISE EXCEPTION 'Cet appel demande entre % et % intervenant(s) ; le dossier en compte %.',
+                v_call.min_speakers, v_call.max_speakers, v_count
+                USING ERRCODE = 'check_violation', CONSTRAINT = 'ck_proposal_speakers_count';
+        END IF;
+
+        PERFORM 1
+        FROM programme.proposal_speakers s
+        JOIN identity.people p ON p.id = s.person_id
+        WHERE s.proposal_id = NEW.id
+          AND (p.civility IS NULL
+               OR btrim(COALESCE(s.job_title_snapshot, '')) = ''
+               OR btrim(COALESCE(s.organization_snapshot, '')) = '');
+        IF FOUND THEN
+            RAISE EXCEPTION 'Chaque intervenant doit avoir une civilité, une fonction et une organisation.'
+                USING ERRCODE = 'check_violation', CONSTRAINT = 'ck_proposal_speakers_complete';
+        END IF;
+    END IF;
+
     RETURN NEW;
 END;
 $$;

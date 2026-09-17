@@ -450,7 +450,7 @@ pub fn charge(terrain: &Terrain, brouillon: ProposalDraft) -> SaveDraftPayload {
 pub fn intervenant(email: &str, prenom: &str, nom: &str) -> DraftSpeaker {
     DraftSpeaker {
         person_id: None,
-        civility: None,
+        civility: Some("other".to_owned()),
         first_name: prenom.to_owned(),
         last_name: nom.to_owned(),
         email: email.to_owned(),

@@ -290,6 +290,15 @@ pub async fn intervenant_du_dossier(
 ) -> Uuid {
     let person_id = super::personne(bac, email, prenom, nom).await;
 
+    // Un dossier déposé n'a que des intervenants complets : la base l'exige.
+    sqlx::query!(
+        "UPDATE identity.people SET civility = 'other' WHERE id = $1 AND civility IS NULL",
+        person_id
+    )
+    .execute(bac.pool())
+    .await
+    .expect("civilité de l'intervenant");
+
     sqlx::query!(
         r#"INSERT INTO programme.proposal_speakers
                (proposal_id, person_id, role, job_title_snapshot,

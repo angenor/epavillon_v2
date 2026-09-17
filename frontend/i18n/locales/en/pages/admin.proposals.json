@@ -47,7 +47,8 @@
     "dueAt": "Review due: {date}",
     "noScore": "Not scored yet",
     "notSubmitted": "Not submitted",
-    "rank": "Rank {rank}"
+    "rank": "Rank {rank}",
+    "edit": "Edit the proposal “{title}”"
   },
   "status": {
     "draft": "Draft",

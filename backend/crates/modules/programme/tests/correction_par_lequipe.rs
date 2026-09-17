@@ -132,3 +132,55 @@ async fn un_dossier_depose_garde_ses_thematiques() {
     .expect_err("sans thématique, le dossier ne serait plus complet");
     assert_eq!(refus.code, ErrorCode::ValidationFailed);
 }
+
+#[tokio::test]
+async fn un_intervenant_sans_civilite_ne_se_depose_pas() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+    let mut brouillon = complet(&terrain, "Atelier incomplet");
+    brouillon.speakers[0].civility = None;
+    let ligne = draft_write::enregistrer(
+        &bac.state,
+        &bac.ctx(),
+        terrain.deposante,
+        commun::charge(&terrain, brouillon.clone()),
+    )
+    .await
+    .expect("un brouillon incomplet s'enregistre");
+
+    let refus = submit::deposer(
+        &bac.state,
+        &bac.ctx(),
+        terrain.deposante,
+        ProposalId(ligne.proposal_id),
+        commun::charge(&terrain, brouillon),
+    )
+    .await
+    .expect_err("la base refuse le dépôt");
+    assert_eq!(refus.code, ErrorCode::ValidationFailed);
+    assert_eq!(refus.field.as_deref(), Some("speakers"));
+    assert_eq!(commun::ligne(&bac, ligne.proposal_id).await.status, "draft");
+}
+
+#[tokio::test]
+async fn lequipe_ne_laisse_pas_un_intervenant_sans_organisation() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+    let droits = commun::droits(&bac, &terrain).await;
+    let dossier = depose(&bac, &terrain).await;
+    let perimetre = commun::perimetre_de(&bac, droits.decideur).await;
+
+    let mut brouillon = complet(&terrain, "Atelier adaptation");
+    brouillon.speakers[0].organization_name.clear();
+    let refus = draft_write::corriger_par_lequipe(
+        &bac.state,
+        &bac.ctx(),
+        &perimetre,
+        droits.decideur,
+        ProposalId(dossier),
+        commun::charge(&terrain, brouillon),
+    )
+    .await
+    .expect_err("un intervenant sans organisation se refuse");
+    assert_eq!(refus.code, ErrorCode::ValidationFailed);
+}

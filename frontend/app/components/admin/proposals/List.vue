@@ -21,6 +21,8 @@ interface Props {
   selected: string[]
   loading?: boolean
   selectable?: boolean
+  /** `programme.proposal.edit` sur l'édition affichée. */
+  canEdit?: boolean
 }
 
 const props = defineProps<Props>()
@@ -60,6 +62,13 @@ const STATUS_TONE: Record<ProposalDashboardRow['status'], string> = {
   rejected: 'text-danger bg-danger-surface',
   withdrawn: 'text-neutral bg-neutral-surface',
   cancelled: 'text-postponed bg-postponed-surface',
+}
+
+// Un brouillon reste à son organisation ; un dossier clos ne se corrige plus.
+const NOT_EDITABLE: ProposalDashboardRow['status'][] = ['draft', 'rejected', 'withdrawn', 'cancelled']
+
+function isEditable(row: ProposalDashboardRow): boolean {
+  return Boolean(props.canEdit) && !NOT_EDITABLE.includes(row.status)
 }
 
 function expectedReviews(row: ProposalDashboardRow): number {
@@ -208,6 +217,15 @@ function toggleAll(checked: boolean): void {
                 <span class="size-1.5 rounded-full bg-accent-solid" aria-hidden="true" />
                 {{ t('admin.proposals.row.unreadShort') }}
               </span>
+              <UiButton
+                v-if="isEditable(row)"
+                class="relative z-10 ms-auto"
+                variant="ghost"
+                icon="edit"
+                icon-only
+                :to="localePath(`/admin/propositions/${row.id}/modifier`)"
+                :label="t('admin.proposals.row.edit', { title: tr(row.title) })"
+              />
             </div>
 
             <h3 class="mt-1.5 text-base leading-snug font-semibold text-heading">

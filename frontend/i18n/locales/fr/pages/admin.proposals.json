@@ -47,7 +47,8 @@
     "dueAt": "Échéance de revue : {date}",
     "noScore": "Pas encore noté",
     "notSubmitted": "Non déposé",
-    "rank": "Rang {rank}"
+    "rank": "Rang {rank}",
+    "edit": "Modifier le dossier « {title} »"
   },
   "status": {
     "draft": "Brouillon",

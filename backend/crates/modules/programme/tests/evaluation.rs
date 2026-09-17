@@ -726,7 +726,25 @@ async fn la_fiche_porte_les_transitions_offertes_a_son_lecteur() {
     let dossier = ProposalId(comite.dossier);
 
     // Le dossier est en brouillon : il faut le déposer pour que le comité ait
-    // quoi que ce soit à décider.
+    // quoi que ce soit à décider — avec un intervenant complet, que la base exige.
+    let orateur = commun::personne(&bac, "orateur@example.org", "Awa", "Sow").await;
+    sqlx::query!(
+        "UPDATE identity.people SET civility = 'other' WHERE id = $1",
+        orateur
+    )
+    .execute(bac.pool())
+    .await
+    .expect("civilité");
+    sqlx::query!(
+        "INSERT INTO programme.proposal_speakers
+             (proposal_id, person_id, role, job_title_snapshot, organization_snapshot)
+         VALUES ($1, $2, 'speaker', 'Directrice', 'IFDD')",
+        comite.dossier,
+        orateur
+    )
+    .execute(bac.pool())
+    .await
+    .expect("intervenant");
     transition::tenter(
         &bac.state,
         &bac.ctx(),

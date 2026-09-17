@@ -174,6 +174,18 @@ fn exiger_un_dossier_complet(brouillon: &ProposalDraft, regles: &ReglesDeLAppel)
         )
         .field("speakers"));
     }
+    let incomplet = brouillon.speakers.iter().any(|i| {
+        i.civility.as_deref().is_none_or(|c| c.trim().is_empty())
+            || i.job_title.trim().is_empty()
+            || i.organization_name.trim().is_empty()
+    });
+    if incomplet {
+        return Err(ApiError::with_message(
+            ErrorCode::ValidationFailed,
+            "Chaque intervenant doit avoir une civilité, une fonction et une organisation.",
+        )
+        .field("speakers"));
+    }
     Ok(())
 }
 

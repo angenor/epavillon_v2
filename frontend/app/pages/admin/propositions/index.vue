@@ -115,6 +115,9 @@ const { data: committee } = await useAsyncData<ProposalFacet[]>(
 const canAssign = computed(() =>
   hasPermission(granted.value, 'event.call.manage', adminScope.currentEventId),
 )
+const canEdit = computed(() =>
+  hasPermission(granted.value, 'programme.proposal.edit', adminScope.currentEventId),
+)
 const canDecide = computed(() =>
   hasPermission(granted.value, 'programme.proposal.decide', adminScope.currentEventId),
 )
@@ -552,6 +555,7 @@ const deadlineNotice = computed(() => {
           :sort-direction="sortDirection"
           :selected="selected"
           :selectable="canAssign || canDecide"
+          :can-edit="canEdit"
           :loading="status === 'pending'"
           @sort="setSort"
           @update:selected="(keys: string[]) => (selected = keys)"

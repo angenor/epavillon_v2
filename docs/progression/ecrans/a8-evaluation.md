@@ -82,3 +82,12 @@ Demande du commanditaire : les organisations demandent des corrections rapides, 
 
 **Vérifié** : `cargo test -p programme` (tests ciblés), `make check-front`, compilation hors ligne. Au navigateur **contre l'API réelle** (seconde instance sur 8081) : correction du titre de COP31-00007, contrôle bloquant sur l'intervenant incomplet puis correction dans sa fenêtre, retour à la fiche avec l'avis, titre et état relus en base, trace dans l'historique ; 375 px sans défilement horizontal.
 
+### 17/09, suite — intervenants complets exigés en base, icône dans la liste
+
+- **Modèle** : `tg_check_submission_eligibility()` refuse le passage vers `submitted` **par mise à jour** (dépôt et renvoi) quand le nombre d'intervenants sort des bornes de l'appel (`ck_proposal_speakers_count`) ou qu'un intervenant n'a pas de civilité, de fonction ou d'organisation (`ck_proposal_speakers_complete`). L'insertion directe d'un dossier déjà déposé n'est pas contrôlée : il n'a pas encore d'intervenants, et c'est le chemin des reprises de données. Appliqué à chaud en local ; **à migrer en production**.
+- **Pourquoi** : ces règles n'existaient que dans le formulaire du site. Le jeu d'essai du 17/09, écrit en SQL, a déposé cinq dossiers dont les intervenants n'avaient ni civilité ni organisation, sans aucun refus. Données corrigées (civilité « Autre » pour les trois comptes de test, faute de source ; organisation du porteur).
+- **API** : les deux refus sont traduits sur le champ `speakers` avec le message de la base ; la correction par l'équipe, qui ne change pas l'état, fait le même contrôle sur la saisie. Trois aides de test complétées ; deux tests ajoutés.
+- **Liste `/admin/propositions`** : crayon de modification sur chaque dossier déposé non clos, quand la personne détient `programme.proposal.edit` sur l'édition. Vérifié au navigateur : il mène à la page de modification, pas à la fiche.
+
+**Vérifié** : `make check-safe` complet (224 suites), refus relu en base locale dans une transaction annulée.
+

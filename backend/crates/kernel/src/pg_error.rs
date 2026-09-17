@@ -153,6 +153,9 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
         ("23514", "ck_calls_window") => ApiError::new(ValidationFailed).field("closes_at"),
         ("23514", "ck_calls_extension") => ApiError::new(ValidationFailed).field("extended_until"),
         ("23514", "ck_calls_speakers") => ApiError::new(ValidationFailed).field("max_speakers"),
+        ("23514", "ck_proposal_speakers_count") | ("23514", "ck_proposal_speakers_complete") => {
+            ApiError::with_message(ValidationFailed, message.to_owned()).field("speakers")
+        }
         // Une contrainte, TROIS conditions : borne basse, borne haute et durée
         // par défaut. Le champ nommé ici est le cas courant ; c'est au service
         // de désigner plus finement, en comparant les trois valeurs — sans

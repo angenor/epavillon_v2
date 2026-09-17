@@ -62,8 +62,9 @@ async fn un_intervenant_dun_dossier_retenu_est_suggere_meme_sans_compte() {
     let dossier = commun::dossier(&bac, &terrain, "Dossier retenu", "dossier-retenu").await;
 
     sqlx::query!(
-        "INSERT INTO programme.proposal_speakers (proposal_id, person_id, role)
-         VALUES ($1, $2, 'speaker')",
+        "INSERT INTO programme.proposal_speakers
+             (proposal_id, person_id, role, job_title_snapshot, organization_snapshot)
+         VALUES ($1, $2, 'speaker', 'Directeur', 'IFDD')",
         dossier,
         orateur
     )
@@ -74,6 +75,12 @@ async fn un_intervenant_dun_dossier_retenu_est_suggere_meme_sans_compte() {
     // Tant que le dossier n'est pas RETENU, la personne reste invisible : la
     // suggestion dirait sinon qui a été proposé, à qui n'a pas à le savoir.
     assert!(suggerer(&bac, "karim").await.is_empty());
+
+    sqlx::query("UPDATE identity.people SET civility = 'other' WHERE id = $1")
+        .bind(orateur)
+        .execute(bac.pool())
+        .await
+        .expect("civilité de l'intervenant");
 
     // La machine à états n'autorise pas `draft -> accepted` : on suit le chemin
     // que le comité suit, sans quoi le déclencheur refuse la ligne.
