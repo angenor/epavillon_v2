@@ -53,6 +53,9 @@ export default defineNuxtConfig({
     apiBaseServer: '',
     public: {
       apiBase: '',
+      // Mot de passe des comptes simulés, pour le seul travail hors ligne. Vide en
+      // production : aucune connexion simulée n'y aboutit.
+      demoPassword: '',
     },
   },
 

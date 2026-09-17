@@ -124,7 +124,6 @@ export {
 export {
   accounts,
   oneTimeTokens,
-  DEMO_PASSWORD,
   authenticate,
   registerPerson,
   verifyEmailToken,

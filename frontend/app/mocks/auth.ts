@@ -46,17 +46,12 @@ import { people } from './people'
 // ---------------------------------------------------------------------------
 
 /**
- * Mot de passe commun à tous les comptes simulés. Il satisfait les trois
- * exigences de la plateforme — huit signes au moins, une majuscule, une
- * minuscule : un jeu de démonstration qui ne passerait pas sa propre validation
- * serait un piège pour la session suivante.
- *
- * Il contient volontairement « epavillon », que `evaluatePassword()` signale
- * comme fragment trop commun : la démonstration montre ainsi un mot de passe
- * CONFORME et pourtant mal noté, qui est exactement le comportement voulu — les
- * exigences opposent, l'indicateur conseille.
+ * Mot de passe commun à tous les comptes simulés, lu dans `NUXT_PUBLIC_DEMO_PASSWORD`.
+ * Jamais écrit dans le code : un mot de passe versionné le reste dans l'historique.
  */
-export const DEMO_PASSWORD = 'ePavillon2027!'
+function demoPassword(): string {
+  return useRuntimeConfig().public.demoPassword
+}
 
 // ---------------------------------------------------------------------------
 // Comptes — `identity.accounts`
@@ -275,7 +270,8 @@ export function authenticate(payload: LoginPayload): LoginResult {
   const person = people.find((p) => p.primary_email.toLowerCase() === email)
   const account = person ? accounts.find((a) => a.person_id === person.id) : undefined
 
-  if (!person || !account || payload.password !== DEMO_PASSWORD) {
+  const expected = demoPassword()
+  if (!person || !account || !expected || payload.password !== expected) {
     return { status: 'invalid_credentials' }
   }
 
