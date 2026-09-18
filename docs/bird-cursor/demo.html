@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>bird-cursor — démo</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Karla:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root { --cream:#FFFDF8; --plum:#682335; --coral:#EF3F1D; --sky:#EAF1F4; --yellow:#FFCD40; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--sky); color:var(--plum); font:400 16px/1.55 Karla, system-ui, sans-serif; }
+  .wrap { max-width:1080px; margin:0 auto; padding:clamp(20px,4vw,56px); display:flex; flex-direction:column; gap:28px; }
+  .panel { background:var(--cream); border:2px solid var(--plum); border-radius:18px; padding:22px 26px; }
+  header.panel { display:flex; flex-wrap:wrap; gap:20px; justify-content:space-between; align-items:center; }
+  .logo { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:20px; letter-spacing:-.02em; }
+  nav { display:flex; gap:22px; font-weight:500; }
+  h1 { font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:clamp(32px,5vw,52px); line-height:1.03; letter-spacing:-.03em; margin:0; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr)); gap:20px; }
+  .num { font-family:'Bricolage Grotesque',sans-serif; font-size:38px; font-weight:800; letter-spacing:-.02em; }
+  .kicker { font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; opacity:.6; }
+  .row { display:flex; flex-wrap:wrap; gap:12px; }
+  button { font:700 15px Karla,sans-serif; border:2px solid var(--plum); border-radius:999px; padding:13px 26px; cursor:pointer; }
+  .primary { background:var(--coral); color:var(--cream); }
+  .second { background:var(--yellow); color:var(--plum); }
+  footer { background:var(--coral); color:var(--cream); border:2px solid var(--plum); border-radius:18px; padding:22px 26px; display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; }
+  pre { margin:0; background:var(--sky); border-radius:12px; padding:18px; overflow-x:auto; font:13.5px/1.7 ui-monospace,Menlo,monospace; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="panel" data-bird-perch>
+      <div class="logo" data-bird-say="Bienvenue ! Survolez un élément marqué et je viens vous expliquer.">volière<span style="color:var(--coral)">.</span>app</div>
+      <nav>
+        <span data-bird-say="Ici vous suivez l'activité de la semaine.">Tableau de bord</span>
+        <span data-bird-say="Vos 12 projets en cours, triés par échéance.">Projets</span>
+        <span data-bird-say="Invitez vos collègues — 20 sièges inclus.">Équipe</span>
+      </nav>
+    </header>
+
+    <section style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:28px;align-items:start">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <h1>Bougez la souris.<br />Il vous poursuit.</h1>
+        <p style="margin:0;max-width:42ch;opacity:.85">Il garde ses distances avec le curseur, se pose sur le composant le plus proche dès que vous vous arrêtez, et vient vous parler quand vous survolez une info.</p>
+        <div class="row">
+          <button class="primary" data-bird-perch data-bird-say="Gratuit pendant 14 jours, sans carte bancaire.">Commencer</button>
+          <button class="second" data-bird-perch data-bird-say="Tout est dans le README : options et API.">Documentation</button>
+        </div>
+      </div>
+      <div class="panel" data-bird-perch style="background:var(--plum);color:var(--cream)">
+        <div class="kicker" style="opacity:.75">Quatre états</div>
+        <p style="margin:12px 0 0">Poursuite à distance · atterrissage sur le composant le plus proche · assis et suivant du regard · bulle de conversation au survol.</p>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="panel" data-bird-perch data-bird-say="Les perchoirs sont les éléments marqués data-bird-perch."><div class="kicker">Perchoirs</div><div class="num">6</div></div>
+      <div class="panel" data-bird-perch data-bird-say="Un seul fichier JS : le SVG et le moteur sont dedans."><div class="kicker">Livraison</div><div class="num">1 fichier</div></div>
+      <div class="panel" data-bird-perch data-bird-say="Zéro dépendance, JavaScript natif."><div class="kicker">Dépendances</div><div class="num">0</div></div>
+    </section>
+
+    <section class="panel" data-bird-perch>
+      <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:22px;margin-bottom:14px">Intégration</div>
+      <pre>&lt;script src="bird-cursor.js" defer
+        data-scale="0.42" data-near="230"
+        data-standoff="150" data-idle="550"&gt;&lt;/script&gt;
+
+&lt;div class="card" data-bird-perch&gt;…&lt;/div&gt;
+&lt;button data-bird-say="Gratuit pendant 14 jours."&gt;Commencer&lt;/button&gt;</pre>
+    </section>
+
+    <footer data-bird-perch data-bird-say="Merci d'être venu jusqu'ici. Je retourne me percher.">
+      <span>Perchoir de secours : le bas de la fenêtre.</span><span style="font-weight:700">bird-cursor.js</span>
+    </footer>
+  </div>
+
+  <script src="bird-cursor.js" defer></script>
+</body>
+</html>
