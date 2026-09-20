@@ -5,16 +5,21 @@ Plateforme numérique de l'IFDD (Institut de la Francophonie pour le développem
 **Pile** : Nuxt 4 (front) · Rust + Actix Web + SQLx (API) · PostgreSQL 17 + pgvector · Garage (S3) · Valkey
 **Architecture** : monolithe modulaire — un module = un schéma PostgreSQL = un crate Rust = une frontière de service potentielle.
 
+Le dépôt porte aussi **Guide Négo**, l'application mobile des négociatrices et négociateurs francophones — même base, même API, même compte. Elle est documentée dans **[docs/AppNego/](docs/AppNego/)**.
+
 ---
 
 ## Avant toute chose, à chaque session
 
-1. Lire **[docs/PROGRESSION.md](docs/PROGRESSION.md)** — où en est le projet, ce qui est fait, ce qui vient. Il ne porte que l'essentiel ; le détail vit dans **[docs/progression/](docs/progression/)**, où l'on n'ouvre que le fichier utile à la tâche du jour.
+1. Lire **[docs/PROGRESSION.md](docs/PROGRESSION.md)** — où en est le projet, ce qui est fait, ce qui vient. Il ne porte que l'essentiel, et reste court par règle : « Dernière mise à jour » ne garde que cinq faits d'une ligne, l'ancien contenu est archivé dans [docs/progression/archive/](docs/progression/archive/). Le détail vit dans **[docs/progression/](docs/progression/)**, où l'on n'ouvre que le fichier utile à la tâche du jour.
 2. Identifier les fichiers SQL concernés par la tâche dans **[docs/MODELE_INDEX.md](docs/MODELE_INDEX.md)**, et les lire.
 3. Travailler.
 4. **Mettre à jour la progression avant de terminer** — le journal du jour, le fichier de l'écran travaillé, et la ligne de suivi dans `docs/PROGRESSION.md`. Le mode d'emploi est en bas de ce fichier-là. Une session qui ne le fait pas oblige la suivante à tout redécouvrir.
 
 Ces quatre points remplacent la mémoire entre sessions. Le contexte se perd, le dépôt non.
+
+> **Si la session porte sur Guide Négo** — on lit **[docs/AppNego/progress.md](docs/AppNego/progress.md)**, et non `docs/PROGRESSION.md`, puis [docs/AppNego/04-roadmap.md](docs/AppNego/04-roadmap.md) pour l'étape en cours. On met à jour `progress.md` en partant.
+> **On n'écrit ni dans `docs/PROGRESSION.md` ni dans `docs/progression/`.** Seule exception : une modification de `docs/database/` se consigne dans `docs/progression/modele.md`, puisque le modèle est commun (ADR-017).
 
 ---
 
@@ -80,6 +85,12 @@ Cette règle vaut pour les questions posées au commanditaire. Le reste du dép�
 | Le guide de style vivant, rendu par les vrais composants | `frontend/app/pages/style-guide.vue` |
 | **À quoi l'interface doit ressembler — la référence qui fait autorité** | [docs/guide-de-style-epavillon.html](docs/guide-de-style-epavillon.html) : maquette complète écrite à la main, avec ses **quatorze règles d'usage** et ses décisions de conception. En cas de désaccord avec l'implémentation Vue, **c'est lui qui tranche** — sauf sur les thématiques, voir ci-dessous |
 | Ce que demandait le commanditaire, dans ses mots | [docs/historique/](docs/historique/) |
+| Guide Négo : de quoi il s'agit | [docs/AppNego/00-brief.md](docs/AppNego/00-brief.md) |
+| Où en est Guide Négo ? | [docs/AppNego/progress.md](docs/AppNego/progress.md) |
+| L'étape de Guide Négo à construire, et son prompt Spec Kit | [docs/AppNego/04-roadmap.md](docs/AppNego/04-roadmap.md) |
+| Guide Négo : le métier, ce qui existe dans le modèle et ce qui manque | [docs/AppNego/02-domaine.md](docs/AppNego/02-domaine.md) |
+| À quoi l'application Guide Négo doit ressembler | [docs/AppNego/05-design.md](docs/AppNego/05-design.md) · [design/ecrans/](docs/AppNego/design/ecrans/) — la maquette, **qui fait foi** · [design/passation/](docs/AppNego/design/passation/) — jetons, thème, pictogrammes, composants, police |
+| Les décisions de Guide Négo | [docs/AppNego/adr/](docs/AppNego/adr/) |
 
 **Ne charge pas tout.** `CADRAGE.md` fait plusieurs centaines de lignes et les fichiers SQL en totalisent plus de quinze mille : lis la section ou le fichier dont tu as besoin, pas l'ensemble.
 
@@ -97,6 +108,12 @@ Elles sont détaillées dans le cadrage, mais on les oublie vite et chacune a d�
 6. **Plusieurs organisations peuvent co-organiser** une activité : un porteur principal, des co-organisateurs, des partenaires, des soutiens.
 7. **Les journées spéciales sont composées à la main** par l'IFDD, parmi les activités retenues. Ce ne sont pas des jours du calendrier : toutes les activités d'un jour n'en font pas partie.
 8. **Un administrateur peut n'avoir accès qu'à un seul événement.** Toute liste du back-office est filtrée par le périmètre d'administration — y compris quand l'utilisateur forge une URL.
+
+**Guide Négo ajoute trois règles** :
+
+- **Trois agendas, jamais confondus** : Sessions de négociation, Réunions de la Francophonie, Pavillon de la Francophonie. Le mot « Programme » seul est banni de l'interface et de l'API.
+- **La source officielle fait foi.** Une donnée importée porte son origine et son heure de lecture ; un signalement validé se pose par-dessus, sans jamais la modifier.
+- **Rien de produit par une IA n'est publié sans validation humaine.**
 
 ---
 
@@ -137,6 +154,8 @@ Un écran qui redessine un composant existant produit deux comportements pour un
 Vaut aussi pour les **méthodes d'API** (`composables/api/`), les **utilitaires** (`utils/`) et les **routes Rust** : deux fabriques qui déposent un fichier, c'est un contrat de trop.
 
 ### Direction artistique
+
+**Tout ce qui suit vaut pour le site et le back-office de l'ePavillon, pas pour l'application Guide Négo.** Elle a sa propre identité — vert et jaune foncés de la charte, police Atkinson Hyperlegible Next, cibles de 48 px, et un jaune qui ne signale que ce qui concerne la personne à l'instant. Sa référence est [docs/AppNego/05-design.md](docs/AppNego/05-design.md). Son système de design vit dans son dossier, borné à `[data-app="guide-nego"]` : il ne redéfinit aucun jeton du site et n'emprunte aucun de ses composants. Le back-office de Guide Négo, lui, s'ajoute à celui de l'ePavillon et en garde l'apparence.
 
 Institutionnel et sérieux, mais vivant. Ni tableau de bord SaaS générique, ni site d'ONG militant. Références de posture : le site des Nations unies pour la rigueur, une revue scientifique en ligne pour la lisibilité, une billetterie de festival pour l'énergie de la programmation.
 
@@ -360,6 +379,9 @@ Interfaces locales : Mailpit `http://localhost:8025` (courriels capturés) · Ja
 - Écrire une couleur, une date ou un libellé en dur.
 - Réécrire un composant, une méthode d'API ou un utilitaire qui existe déjà, au lieu de l'étendre.
 - Noyer une réponse ou un fichier sous les commentaires et les explications.
+- Appliquer à Guide Négo le guide de style ou les composants du site.
+- Écrire le suivi de Guide Négo dans la progression de l'ePavillon.
+- Écrire « Programme » seul, ou mêler les trois agendas.
 - Terminer une session sans mettre à jour la progression — journal du jour, fichier de l'écran, ligne de suivi.
 - Regrossir `docs/PROGRESSION.md` : il se lit en entier à chaque session, le détail va dans `docs/progression/`.
 - Committer sans que `make check-safe` passe.
@@ -390,4 +412,4 @@ Les modules Publications, Négociations, Formations et Outils **existent dans le
 
 L'affichage est commandé par `platform.feature_flags`, et **le routage s'en charge tout seul** : le middleware global `feature-flag` sert `pages/maintenance/[module].vue` dès qu'un drapeau `<module>.enabled` est éteint, d'après le registre `frontend/app/utils/feature-modules.ts`. Aucune page ne teste son propre drapeau — pour fermer un espace, on l'inscrit au registre ; pour l'ouvrir, on bascule le drapeau en base, sans redéploiement.
 
-Les six drapeaux de module sont semés et éteints : `publications.enabled`, `negotiation.enabled`, `training.enabled`, `messaging.enabled`, `tools.enabled`, `directory.enabled`. **Ne pas les confondre avec les drapeaux fins** (`negotiation.channels`, `tools.surveys`, `tools.ai_assistant`), qui commandent une fonctionnalité à l'intérieur d'un module déjà ouvert et ne peuvent pas tenir lieu de drapeau de module. Ne pas développer ces modules sans instruction explicite.
+Les six drapeaux de module sont semés et éteints : `publications.enabled`, `negotiation.enabled`, `training.enabled`, `messaging.enabled`, `tools.enabled`, `directory.enabled`. **Ne pas les confondre avec les drapeaux fins** (`negotiation.channels`, `tools.surveys`, `tools.ai_assistant`), qui commandent une fonctionnalité à l'intérieur d'un module déjà ouvert et ne peuvent pas tenir lieu de drapeau de module. Ne pas développer ces modules sans instruction explicite. **L'instruction existe pour Guide Négo** : les modules Négociations, puis Formations et Outils, se construisent dans l'ordre de [docs/AppNego/04-roadmap.md](docs/AppNego/04-roadmap.md), avec Spec Kit.
