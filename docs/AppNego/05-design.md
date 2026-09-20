@@ -110,7 +110,7 @@ Numéros de [ecarts.md](design/passation/ecarts.md). Le code suit ces décisions
 | 1 | `#2E3F0E` entre au système, pour le squelette sombre seulement ; jamais en filet |
 | 2, 11 | Badges de maquette et rayon 6 px : hors application |
 | 3 | Un seul vert d'état en sombre : `#B5D66A` |
-| 4, 27 | Les rôles sans valeur sombre se définissent à l'étape 0, contrastes mesurés ; aucun écran ne sort sans son thème sombre |
+| 4, 27 | Les rôles sans valeur sombre se définissent à l'étape 0a, contrastes mesurés ; aucun écran ne sort sans son thème sombre |
 | 5 | Pictogramme Document : vert moyen dans une liste, vert très foncé dans un menu ou un bouton |
 | 6, 15 | Pas de 16 px : onglets de filtre et titres de ligne à 17 ; hauteur d'onglet de filtre 48 |
 | 7 | Page 00 : planche d'archive, rien à en reprendre sous 15 px |
@@ -123,4 +123,4 @@ Numéros de [ecarts.md](design/passation/ecarts.md). Le code suit ces décisions
 | 20 | Croix rouge = annulé ; triangle rouge = erreur ou lecture impossible |
 | 21, 22, 24, 25 | Données et phrases : une seule phrase de verrou, celle de la page 12 ; « Synchronisé à » porte l'heure de dernière lecture, distincte de l'instant |
 | 26 | Icône provisoire : `frontend/public/logos/svg/epavillon-symbole-inverse.svg`, à la place du monogramme « GN » |
-| 28, 29 | À faire à l'étape 0 : ordre de focus et annonces d'état, vérification à 390 px |
+| 28, 29 | À faire à l'étape 0a : ordre de focus et annonces d'état, vérification à 390 px |

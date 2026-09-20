@@ -1,6 +1,6 @@
 # 04 — Feuille de route
 
-> **Un ordre, pas un calendrier.** Chaque étape commence quand la précédente est stable. Chaque étape est une fonctionnalité Spec Kit : son prompt `/speckit-specify` est ci-dessous, prêt à coller. La suite du MVP est décrite dans [06-apres-mvp.md](06-apres-mvp.md) ; l'avancement, dans [progress.md](progress.md).
+> **Un ordre, pas un calendrier.** Chaque étape commence quand la précédente est stable. Chaque étape est une fonctionnalité Spec Kit — deux ou trois pour les plus larges, le socle et les sessions : son prompt `/speckit-specify` est ci-dessous, prêt à coller. La suite du MVP est décrite dans [06-apres-mvp.md](06-apres-mvp.md) ; l'avancement, dans [progress.md](progress.md).
 
 ## Le chemin d'une étape
 
@@ -76,49 +76,86 @@ de plus de mille lignes. Ne jamais lancer `make check` ; `make check-safe` seule
 
 | # | Étape | Maquette | Critère de sortie |
 |---|---|---|---|
-| 0 | Socle | `02-socle.html`, `01-systeme.html` | Une négociatrice entre avec son code ; l'administrateur révoque un code et bascule en approbation sans redéployer |
+| 0a | Coquille et système de design | `01-systeme.html`, `02-socle.html` | L'application installée s'ouvre en mode avion ; le drapeau la ferme sans redéployer |
+| 0b | Compte et admission | `02-socle.html` | Une négociatrice entre avec son code ; l'administrateur révoque un code et bascule en approbation sans redéployer |
+| 0c | Thématiques, « Ma journée », profil | `02-socle.html` | Les thématiques choisies suivent la personne ; « Ma journée » montre ses blocs vides |
 | 1 | Documents | `03-documents.html`, `04-lecteur.html` | Le guide est publié en une journée, lu en salle sans réseau |
 | 2 | FAQ et lexique | `05-savoir.html`, `06-lexique.html` | *Contact group* trouvé hors connexion ; une entrée de FAQ porte sa date de vérification |
-| 3 | Sessions de négociation | `07`, `08`, `09`, `11-validation.html` (écran 1) | L'import tourne sur les données archivées, se coupe seul, et un signalement validé s'affiche par-dessus |
+| 3a | Sessions : l'agenda et son import | `07`, `08`, `09` (Mon agenda) | L'import tourne sur les données archivées et se coupe seul |
+| 3b | Sessions : signalements et notifications | `09`, `11-validation.html` (écran 1) | Un signalement validé s'affiche par-dessus la donnée officielle |
 | 4 | Réunions de la Francophonie | `10-francophonie.html` | Une réunion saisie par l'IFDD apparaît, avec son lien vers le Pavillon |
 | 5 | Pavillon de la Francophonie | `10-francophonie.html` | L'API existante est servie telle quelle |
 
-### Étape 0 — Socle
+### Étape 0 — Socle, en trois spécifications
+
+Le socle mêle trois chantiers qui n'ont ni les mêmes risques ni les mêmes questions : une coquille, une porte, un accueil. Une seule spécification donnerait plus de cent tâches et une clarification trop courte pour toutes les couvrir. Chacune se mène jusqu'à `make check-safe` avant d'ouvrir la suivante.
+
+#### 0a — Coquille et système de design
 
 ```
 /speckit-specify
-Le socle de Guide Négo, l'application mobile des négociatrices et négociateurs
-francophones (docs/AppNego/00-brief.md). Maquette : docs/AppNego/design/ecrans/02-socle.html,
-tous ses écrans, de « 01 Installation » à « 13 Réservé ».
-Une personne installe l'application depuis son navigateur et l'ouvre sans compte : elle
-voit ce qui est public et ce qui demande un compte. Elle crée un compte ou se connecte
-avec celui de l'ePavillon — c'est le même compte (ADR-001) ; la session note qu'elle vient
-de l'application, et de quel appareil. Elle saisit un code d'invitation reçu sur WhatsApp :
-code juste, inconnu, révoqué, épuisé, trop d'essais. Selon le réglage d'admission — code,
-approbation, ou les deux (ADR-006) —, elle entre aussitôt ou attend qu'un administrateur
-l'admette. Le code du réseau des négociatrices lui donne en plus l'appartenance au réseau
-(ADR-007) ; aucun champ « genre » ne commande un droit. Elle choisit une ou plusieurs
-thématiques de négociation, modifiables ensuite. L'accueil « Ma journée » rassemble ce qui
-la concerne aujourd'hui ; chaque ligne porte son origine ; tant que les modules suivants
-n'existent pas, leurs blocs affichent leur état vide. Recherche globale, centre de
-notifications, profil et réglages (thématiques, téléchargements et place occupée, thème
-clair, sombre ou système, notifications par thématique, mon accès, déconnexion), à propos,
-confidentialité et consentements. Un module réservé, vu sans code, montre son verrou et
-invite à saisir le code. Hors connexion, l'application s'ouvre, dit « Hors connexion — lu
-à… », et garde ce qui a déjà été lu (ADR-003).
-Côté back-office de l'ePavillon : créer et révoquer des codes, voir qui est entré avec
-lequel et retirer ces accès, choisir le mode d'admission, traiter les demandes en attente.
-L'application entière s'ouvre ou se ferme par un drapeau de module, sans redéploiement.
-Inclus dans cette étape : la mise en page et la coquille de l'application (barre d'onglets à
-largeur de libellé et bouton « Aa », ADR-018 : quatre onglets tant que les Échanges sont
-fermés, cinq ensuite), le système de design repris de docs/AppNego/design/passation/ —
-theme.css, mesures.css, pictogrammes.svg, composants.md, police Atkinson Hyperlegible Next
-fournie dans police/ (latin et latin étendu, pour « œ ») —, l'icône provisoire de
-l'application (frontend/public/logos/svg/epavillon-symbole-inverse.svg, déclinée aux
-tailles du manifeste), les écarts tranchés dans 05-design.md, et le service worker. Les onglets des modules à venir montrent leur état vide.
-Hors périmètre : documents, FAQ, lexique, agendas, échanges, notifications poussées.
+La coquille de Guide Négo, l'application mobile des négociatrices et négociateurs
+francophones (docs/AppNego/00-brief.md). Maquette : docs/AppNego/design/ecrans/01-systeme.html,
+et dans 02-socle.html les écrans « 01 Installation », « 02 Ouverture », « 08 Ma journée
+hors connexion » pour le bandeau, et « 14c Ressources » pour la barre d'onglets.
+Une personne installe l'application depuis son navigateur et l'ouvre sans compte. Elle voit
+la barre d'onglets à largeur de libellé et le bouton « Aa » (ADR-018 : quatre onglets tant
+que les Échanges sont fermés, cinq ensuite) ; chaque onglet montre son état vide. Thème
+clair, sombre ou système. Hors connexion, l'application s'ouvre, dit « Hors connexion — lu
+à… », et garde ce qui a déjà été lu (ADR-003). L'application entière s'ouvre ou se ferme
+par un drapeau de module, sans redéploiement.
+Le système de design est repris de docs/AppNego/design/passation/ — theme.css, mesures.css,
+pictogrammes.svg, composants.md, mouvement.md, police Atkinson Hyperlegible Next fournie
+dans police/ (latin et latin étendu, pour « œ ») —, avec les écarts tranchés dans
+05-design.md. Il reste borné à l'application et ne touche à rien du site. Une page interne
+montre chaque composant dans les deux thèmes. Icône provisoire :
+frontend/public/logos/svg/epavillon-symbole-inverse.svg, déclinée aux tailles du manifeste.
+Hors périmètre : compte, code d'invitation, accueil, tout contenu.
+Critère : installée sur un téléphone, l'application s'ouvre en mode avion ; le drapeau
+éteint la ferme sans redéploiement ; la page des composants est fidèle à 01-systeme.html
+à 360 px, en clair et en sombre.
+```
+
+#### 0b — Compte et admission
+
+```
+/speckit-specify
+L'entrée dans Guide Négo. Maquette : docs/AppNego/design/ecrans/02-socle.html, les écrans
+« 03a Compte » à « 05 Demande en attente », « 13 Réservé », et « mon accès » dans « 11 Profil ».
+Une personne crée un compte ou se connecte avec celui de l'ePavillon — c'est le même
+compte (ADR-001) ; la session note qu'elle vient de l'application, et de quel appareil.
+Elle saisit un code d'invitation reçu sur WhatsApp : code juste, inconnu, révoqué, épuisé,
+trop d'essais. Selon le réglage d'admission — code, approbation, ou les deux (ADR-006) —,
+elle entre aussitôt ou attend qu'un administrateur l'admette. Le code du réseau des
+négociatrices lui donne en plus l'appartenance au réseau (ADR-007) ; aucun champ « genre »
+ne commande un droit. Un module réservé, vu sans code, montre son verrou et invite à saisir
+le code. Dans le profil : « mon accès » et la déconnexion.
+Côté back-office de l'ePavillon, avec ses composants : créer et révoquer des codes, voir
+qui est entré avec lequel et retirer ces accès, choisir le mode d'admission, traiter les
+demandes en attente.
+Hors périmètre : thématiques, accueil, réglages autres que l'accès.
 Critère : une négociatrice entre avec le code reçu sur WhatsApp ; l'administrateur révoque
 ce code et bascule en approbation sans redéployer.
+```
+
+#### 0c — Thématiques, « Ma journée » et profil
+
+```
+/speckit-specify
+Ce qui accueille une personne entrée dans Guide Négo. Maquette :
+docs/AppNego/design/ecrans/02-socle.html, les écrans « 06 Thématiques », « 07 Ma journée »,
+« 08 Ma journée hors connexion », « 11 Profil » et « 12 À propos ».
+À sa première entrée, elle choisit une ou plusieurs thématiques de négociation, modifiables
+ensuite ; ce sont des données de la base, jamais des traductions. L'accueil « Ma journée »
+rassemble ce qui la concerne aujourd'hui ; chaque ligne porte son origine ; tant que les
+modules suivants n'existent pas, leurs blocs affichent leur état vide, et chaque étape
+suivante remplit le sien. Profil et réglages : thématiques, téléchargements et place
+occupée, thème, à propos, confidentialité et consentements. Ses choix la suivent d'un
+appareil à l'autre et restent lisibles hors connexion.
+Hors périmètre : recherche globale (étape 2), centre de notifications et réglage des
+notifications (étape 3b), documents, agendas, échanges.
+Critère : une négociatrice choisit ses thématiques, les retrouve sur un autre appareil, et
+« Ma journée » montre ses blocs vides sans erreur, en ligne comme hors connexion.
 ```
 
 ### Étape 1 — Documents
@@ -164,6 +201,8 @@ aux fautes, dans l'anglais et le français ; liste alphabétique avec rail, filt
 famille ; entrée : terme, traduction, définition, exemple entendu en salle, sigle
 développé, termes liés, source ; favoris ; « aucun résultat » propose de soumettre le
 terme, ouvert à tout compte. FAQ, parcours et lexique se lisent en entier sans réseau.
+La recherche globale de l'application (écran « 09 Recherche » de 02-socle.html) s'ouvre avec cette étape :
+elle cherche dans les documents, la FAQ et le lexique, et dit ce qu'elle ne couvre pas encore.
 La feuille du lecteur (étape 1) ouvre désormais l'entrée du lexique.
 Rubriques, familles et libellés du métier sont des données, jamais des traductions.
 Back-office : rédiger, publier, dater la vérification, mettre « à revoir » ; répondre aux
@@ -171,20 +210,24 @@ questions et les promouvoir en FAQ ; traiter les retours et les termes proposés
 Critère : « contact group » trouvé hors connexion ; une entrée porte sa date de vérification.
 ```
 
-### Étape 3 — Sessions de négociation
+### Étape 3 — Sessions de négociation, en deux spécifications
+
+L'étape est trop large pour une seule passe : lire l'agenda d'abord, le corriger ensuite. 3b ne commence que lorsque 3a est stable.
+
+#### 3a — L'agenda et son import
 
 ```
 /speckit-specify
 Les sessions de négociation de Guide Négo — les réunions officielles de la CCNUCC, et
 elles seules : ni les réunions de la Francophonie, ni le Pavillon (ADR-008). Maquette :
-07-sessions.html, 08-detail-de-session.html, 09-signaler-et-mon-agenda.html, et l'écran
-« file des signalements » de 11-validation.html.
+07-sessions.html, 08-detail-de-session.html, et la partie « Mon agenda » de
+09-signaler-et-mon-agenda.html.
 Liste d'un jour : bande des jours qui ont au moins une session, filtre « Mes thématiques /
 Toutes » — les coordinations de groupe portent « Mon groupe » et passent toujours le
 filtre —, ligne avec heures de début et de fin, salle, type de réunion, titre anglais
 d'origine et titre français marqué « Traduction automatique », accès ouvert ou limité,
-thématique, état : Prévue, En cours, Déplacée (ancienne valeur barrée), Annulée, Terminée,
-Non annoncée. Toute heure porte son fuseau.
+thématique, état : Prévue, En cours, Déplacée (ancienne valeur barrée), Annulée, Terminée.
+Toute heure porte son fuseau. La liste et les fiches déjà lues restent lisibles sans réseau.
 Import (ADR-009) : un travail récurrent lit la source officielle et n'écrit que les
 écarts ; chaque session porte son origine et l'heure de dernière lecture ; l'état de
 l'import se lit ; passé un seuil réglable de lectures manquées, l'affichage se coupe seul
@@ -194,18 +237,34 @@ attendre l'accord du secrétariat.
 Détail : lignes « avant → après », point de l'ordre du jour, documents liés, lien vers
 l'original, type de réunion relié au lexique, « Ajouter à mon agenda » qui arme « Me
 rappeler 15 minutes avant ». Mon agenda signale les chevauchements sans jamais les empêcher,
-et n'en signale pas avec une session annulée.
-Signalements (ADR-010) : depuis une fiche — Annulée, Déplacée, Salle changée, Autre — ou
-depuis la liste, « réunion non annoncée » (quoi, où, quand, thématique) ; trois gestes,
-possibles hors connexion ; réservés aux négociatrices. Un administrateur valide en un geste
-depuis son téléphone, avec « Annuler » six secondes, ou refuse avec un motif que l'autrice
-verra. Un signalement validé s'affiche dans un encart distinct, sans nom d'auteur,
-par-dessus la donnée officielle qu'il ne modifie jamais ; il se retire quand la source
-l'a rattrapé. « Mes signalements » : Envoyé, Validé, Non retenu.
-Notification d'un changement sur une session suivie : dans l'application et par courriel.
-Hors périmètre : notifications poussées, export vers le calendrier du téléphone.
-Critère : l'import tourne sur les données archivées, se coupe seul quand la source manque,
-et un signalement validé s'affiche par-dessus.
+et n'en signale pas avec une session annulée. Le bloc des sessions de « Ma journée »
+(étape 0c) se remplit.
+Hors périmètre : signalements, état « Non annoncée », notifications d'un changement,
+notifications poussées, export vers le calendrier du téléphone.
+Critère : l'import tourne sur les données archivées et se coupe seul quand la source manque.
+```
+
+#### 3b — Signalements et notifications
+
+```
+/speckit-specify
+Les signalements sur les sessions de négociation de Guide Négo (ADR-010), par-dessus
+l'agenda livré à l'étape 3a. Maquette : 09-signaler-et-mon-agenda.html, l'encart de
+signalement de 08-detail-de-session.html, l'écran « file des signalements » de
+11-validation.html, et l'écran « 10 Notifications » de 02-socle.html.
+Signaler : depuis une fiche — Annulée, Déplacée, Salle changée, Autre — ou depuis la
+liste, « réunion non annoncée » (quoi, où, quand, thématique), qui crée l'état « Non
+annoncée » ; trois gestes, possibles hors connexion ; réservé aux négociatrices. Un
+administrateur valide en un geste depuis son téléphone, avec « Annuler » six secondes, ou
+refuse avec un motif que l'autrice verra. Un signalement validé s'affiche dans un encart
+distinct, sans nom d'auteur, par-dessus la donnée officielle qu'il ne modifie jamais ; il
+se retire quand la source l'a rattrapé. « Mes signalements » : Envoyé, Validé, Non retenu.
+Notification d'un changement sur une session suivie, qu'il vienne de l'import ou d'un
+signalement validé : dans l'application et par courriel. Le centre de notifications s'ouvre
+avec cette étape : liste, non lues en jaune, réglage par thématique dans le profil.
+Hors périmètre : notifications poussées.
+Critère : un signalement envoyé hors connexion part au retour du réseau ; validé, il
+s'affiche par-dessus la donnée officielle, et la personne qui suit la session est prévenue.
 ```
 
 ### Étape 4 — Réunions de la Francophonie

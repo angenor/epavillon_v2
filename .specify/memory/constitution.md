@@ -1,4 +1,40 @@
 <!--
+Sync Impact Report — 2026-09-20
+Version : 1.0.1 → 1.1.0
+Motif du calibrage : MINEUR — ajout d'une section et de quatre principes, sans retrait ni
+redéfinition. Guide Négo, l'application mobile des négociatrices et négociateurs, entre dans le
+dépôt ; la constitution ignorait quatre choses qu'il apporte.
+
+Principes modifiés : aucun. Les dix principes I à X sont inchangés, au mot près.
+
+Section ajoutée : « Guide Négo », qui renvoie à docs/AppNego/ et porte quatre principes :
+  XI.   Hors connexion d'abord (ADR-003)
+  XII.  Confiance (ADR-009, 010, 011, 012, 013)
+  XIII. Un design propre et borné (ADR-016, 018)
+  XIV.  Une seule porte (ADR-004)
+
+Contraintes ajoutées : « Trois agendas, jamais confondus » (ADR-008) ; « Le suivi de Guide Négo »
+(ADR-017). « Périmètre du jalon » précise que l'instruction explicite existe pour Guide Négo.
+
+Gouvernance : un amendement né de Guide Négo se consigne dans docs/AppNego/progress.md
+(ADR-017) ; le contrôle de conformité porte sur quatorze principes, XI à XIV ne valant que pour
+Guide Négo.
+
+Sections supprimées : aucune.
+
+Gabarits :
+  ✅ .specify/templates/plan-template.md — sa « Constitution Check » tire ses portes de ce fichier
+     à l'exécution ; rien n'y est recopié, donc rien à y modifier.
+  ✅ spec-template.md, tasks-template.md, checklist-template.md — aucun renvoi à un principe.
+  ✅ docs/AppNego/04-roadmap.md — le prompt de plan commun renvoie déjà à « la constitution ».
+
+TODO reportés :
+  - « La porte de qualité » exige encore `make check` avant tout commit, alors que CLAUDE.md
+    l'interdit sans accord depuis le 16/09 (il détruit la base locale) et demande `make check-safe`.
+    Hors du périmètre demandé pour cet amendement ; à corriger par un correctif 1.1.1.
+
+────────────────────────────────────────────────────────────────────────────────────────────────
+
 Sync Impact Report — 2026-08-20
 Version : GABARIT (aucune) → 1.0.0
 Motif du calibrage : première ratification. Le fichier ne contenait que les
@@ -39,6 +75,9 @@ l'OIF). API Rust + Actix Web + SQLx sur PostgreSQL 17, front Nuxt 4.
 Ce document gouverne le développement de l'API (phase B). Il **découle de [CLAUDE.md](../../CLAUDE.md)
 et ne le contredit jamais** : en cas de désaccord apparent, `CLAUDE.md` et `docs/database/` tranchent,
 et la constitution est amendée pour cesser de diverger.
+
+Depuis la 1.1.0, il gouverne aussi **Guide Négo**, l'application mobile portée par le même dépôt : les
+dix principes s'y appliquent sans exception, et la section « Guide Négo » en ajoute quatre.
 
 ## Core Principles
 
@@ -207,6 +246,87 @@ Chaque module livre au minimum, sur cette base :
 4. l'écriture des événements attendus dans `platform.outbox_events`, pour chaque changement d'état qui
    doit en produire (principe IV).
 
+## Guide Négo
+
+Guide Négo est l'application mobile des négociatrices et négociateurs francophones — même base, même
+API, même compte que l'ePavillon. Sa documentation vit dans [docs/AppNego/](../../docs/AppNego/) :
+le [brief](../../docs/AppNego/00-brief.md) dit de quoi il s'agit, le
+[domaine](../../docs/AppNego/02-domaine.md) ce que le modèle porte déjà et ce qui lui manque, et les
+[ADR](../../docs/AppNego/adr/) ce qui a été tranché. Les principes I à X s'y appliquent tels quels ;
+les quatre qui suivent ne valent que pour elle, et chacun se vérifie.
+
+### XI. Hors connexion d'abord
+
+Le hors-connexion est la règle, pas une option
+([ADR-003](../../docs/AppNego/adr/003-tout-ce-qui-se-lit-se-lit-hors-connexion.md)) : sur le site
+d'une COP le réseau est saturé, et une application qui l'attend ne sert pas en salle.
+
+- Tout écran de **lecture** DOIT s'afficher sans réseau, à partir de ce qui a déjà été lu. Seuls
+  l'assistant et les échanges exigent le réseau, et le disent.
+- Toute donnée affichée hors connexion DOIT porter l'**heure de sa lecture**.
+- Une **écriture** faite sans réseau — signalement, favori, inscription — n'est ni refusée ni perdue :
+  elle est mise en file et part au retour du réseau.
+
+Vérification : chaque écran de lecture livré se teste réseau coupé ; chaque écriture livrée se teste
+réseau coupé puis rétabli, et arrive une seule fois.
+
+### XII. Confiance
+
+Une fausse information peut tromper tout un continent ; l'application dit ce qu'elle sait, d'où elle
+le tient, et depuis quand.
+
+- Une donnée **importée** DOIT porter son origine et l'heure de sa dernière lecture, et les afficher.
+  Passé le seuil de lectures manquées, l'affichage **se coupe** et renvoie à la source officielle :
+  jamais une donnée périmée présentée comme fraîche
+  ([ADR-009](../../docs/AppNego/adr/009-la-source-officielle-fait-foi.md)).
+- Un signalement NE DOIT JAMAIS modifier la donnée officielle. Rien ne s'affiche avant validation par
+  un administrateur ; validé, il se pose **par-dessus**, dans un encart distinct
+  ([ADR-010](../../docs/AppNego/adr/010-un-signalement-se-pose-par-dessus.md)).
+- Rien de produit par une IA n'est **publié** sans validation humaine : l'assistant ne lit que la
+  référence validée par un expert, une source ne sert que dans l'état « valide », un quiz ne se publie
+  qu'après relecture — un quiz personnel reste privé et marqué « Non relu »
+  ([ADR-011](../../docs/AppNego/adr/011-un-corpus-a-deux-etages.md),
+  [012](../../docs/AppNego/adr/012-toute-source-porte-un-etat.md),
+  [013](../../docs/AppNego/adr/013-aucun-quiz-publie-sans-relecture.md)).
+
+Vérification, sur base réelle (principe X) : un import laissé sans lecture au-delà du seuil cesse
+d'être servi ; la validation d'un signalement laisse la ligne officielle inchangée ; aucune route ne
+fait passer un contenu d'origine IA à l'état publié sans l'identité d'un relecteur.
+
+### XIII. Un design propre et borné
+
+L'interface de Guide Négo suit
+[docs/AppNego/design/ecrans/01-systeme.html](../../docs/AppNego/design/ecrans/01-systeme.html), qui
+fait foi ([ADR-016](../../docs/AppNego/adr/016-vert-et-jaune-fonces-police-hors-charte.md),
+[018](../../docs/AppNego/adr/018-direction-typographique-quatre-onglets.md)).
+
+- Son système de design — jetons, composants, police — vit **dans le dossier de Guide Négo** et se
+  borne à `[data-app="guide-nego"]`.
+- Il NE DOIT redéfinir **aucun jeton du site** (`--ifdd-*`, `--color-*`) et n'emprunter **aucun de ses
+  composants** d'interface. Le guide de style de l'ePavillon ne s'y applique pas.
+- Le **back-office** de Guide Négo s'ajoute à celui de l'ePavillon et en garde l'apparence, les
+  composants et les règles.
+
+Vérification : aucun import d'un composant du site sous le dossier de Guide Négo ; aucune
+déclaration d'un jeton du site dans ses feuilles de style ; aucun sélecteur de ses feuilles hors de
+`[data-app="guide-nego"]`.
+
+### XIV. Une seule porte
+
+L'API Rust est la seule porte
+([ADR-004](../../docs/AppNego/adr/004-rust-en-facade-python-au-sidecar.md)). Tout service annexe —
+aujourd'hui l'IA, en Python — est **interne** :
+
+- il n'a **aucune route publique** : l'API Rust tient la session, les droits et les quotas, et relaie,
+  réponses en flux comprises ;
+- il n'**écrit que dans son schéma** (`tool`) et ne lit aucun schéma métier : ce dont il a besoin lui
+  arrive par la file d'événements (principe IV), avec sa référence de stockage ;
+- sa panne ne touche ni les documents, ni les agendas, ni les échanges.
+
+Vérification : le service n'est joignable que depuis le réseau interne ; son rôle PostgreSQL n'a de
+droit d'écriture que sur son schéma ; aucun client — navigateur ou application — ne connaît son
+adresse.
+
 ## Contraintes techniques
 
 **Pile imposée** — Rust stable, Actix Web, SQLx, PostgreSQL 17 + pgvector, Garage (S3), Valkey. Aucune
@@ -234,6 +354,22 @@ COP31 : identité, organisations, événements, propositions, sessions, média e
 interface affiche « En cours de maintenance », commandée par `platform.feature_flags`. Ils ne se
 développent pas sans instruction explicite. Un drapeau de module (`<module>.enabled`) ne se confond
 pas avec un drapeau fin (`negotiation.channels`, `tools.surveys`, `tools.ai_assistant`).
+**L'instruction existe pour Guide Négo** : ses modules se construisent dans l'ordre de
+[docs/AppNego/04-roadmap.md](../../docs/AppNego/04-roadmap.md).
+
+**Trois agendas, jamais confondus** — Sessions de négociation, Réunions de la Francophonie, Pavillon
+de la Francophonie : trois noms complets, trois origines
+([ADR-008](../../docs/AppNego/adr/008-trois-agendas-jamais-confondus.md)). Le mot « Programme » seul
+est **banni de l'interface et de l'API** — libellés, chemins, noms de champs exposés. Aucune liste ne
+les mêle, sauf « Ma journée », où chaque ligne porte son origine. Une réunion de la Francophonie tenue
+au Pavillon est un lien entre deux objets, pas une fusion.
+
+**Le suivi de Guide Négo** — il vit dans [docs/AppNego/progress.md](../../docs/AppNego/progress.md),
+ses décisions dans `docs/AppNego/adr/`
+([ADR-017](../../docs/AppNego/adr/017-le-suivi-vit-dans-progress-md.md)). Une session qui travaille sur
+Guide Négo n'écrit ni dans `docs/PROGRESSION.md` ni dans `docs/progression/` — sauf
+`docs/progression/modele.md` quand `docs/database/` bouge, puisque le modèle est commun. L'obligation
+de mise à jour en fin de session est la même ; seul le lieu change.
 
 ## Flux de travail et portes de qualité
 
@@ -272,7 +408,8 @@ avec l'un des deux se corrige **ici**, par amendement, jamais en écartant la so
 
 **Amendement** — un amendement exige trois choses : la modification de ce fichier, une entrée datée
 dans `docs/progression/decisions/<date>.md` disant ce qui a changé et pourquoi, et la mise à jour du
-numéro de version et de la date ci-dessous. Un principe non négociable ne se contourne pas au cas par
+numéro de version et de la date ci-dessous. Un amendement né de Guide Négo consigne cette entrée dans
+`docs/AppNego/progress.md` (ADR-017). Un principe non négociable ne se contourne pas au cas par
 cas : soit il est amendé pour tous, soit il s'applique.
 
 **Versionnage** — sémantique, sur cette constitution seule :
@@ -283,11 +420,12 @@ cas : soit il est amendé pour tous, soit il s'applique.
 - **CORRECTIF** — clarification, reformulation, correction typographique, précision sans effet sur ce
   qui est autorisé ou interdit.
 
-**Contrôle de conformité** — chaque revue vérifie les dix principes sur le périmètre modifié. Les
+**Contrôle de conformité** — chaque revue vérifie les principes sur le périmètre modifié : I à X partout, XI à
+XIV dès que Guide Négo est touché. Les
 étapes `/speckit-plan` et `/speckit-analyze` relisent ce fichier et signalent tout écart avant
 l'implémentation. Trois vérifications sont mécaniques et bloquantes, et le restent :
 `cross_module_fk_report` vide, `make check` au vert, et le graphe de dépendances des crates sans arête
 entre deux modules. Toute complexité qui semble exiger une entorse se justifie par écrit dans
 `docs/progression/decisions/` — ou se règle autrement.
 
-**Version**: 1.0.1 | **Ratified**: 2026-08-20 | **Last Amended**: 2026-08-20
+**Version**: 1.1.0 | **Ratified**: 2026-08-20 | **Last Amended**: 2026-09-20
