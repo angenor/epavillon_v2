@@ -1,4 +1,14 @@
 <!--
+Sync Impact Report — 2026-09-20 (correctif)
+Version : 1.1.0 → 1.1.1
+Motif du calibrage : CORRECTIF — alignement sur CLAUDE.md, dont la constitution dérive. « La porte de
+qualité » et « Contrôle de conformité » exigeaient `make check`, qui détruit la base locale ; la porte
+est désormais `make check-safe`, et `make check` / `make check-db` exigent l'accord du commanditaire.
+Principes modifiés : aucun. Sections ajoutées ou supprimées : aucune. Gabarits : rien à modifier.
+TODO reportés : aucun.
+
+────────────────────────────────────────────────────────────────────────────────────────────────
+
 Sync Impact Report — 2026-09-20
 Version : 1.0.1 → 1.1.0
 Motif du calibrage : MINEUR — ajout d'une section et de quatre principes, sans retrait ni
@@ -28,10 +38,7 @@ Gabarits :
   ✅ spec-template.md, tasks-template.md, checklist-template.md — aucun renvoi à un principe.
   ✅ docs/AppNego/04-roadmap.md — le prompt de plan commun renvoie déjà à « la constitution ».
 
-TODO reportés :
-  - « La porte de qualité » exige encore `make check` avant tout commit, alors que CLAUDE.md
-    l'interdit sans accord depuis le 16/09 (il détruit la base locale) et demande `make check-safe`.
-    Hors du périmètre demandé pour cet amendement ; à corriger par un correctif 1.1.1.
+TODO reportés : aucun — la divergence sur `make check` est levée par la 1.1.1.
 
 ────────────────────────────────────────────────────────────────────────────────────────────────
 
@@ -380,10 +387,13 @@ vérifie la cohérence entre `spec.md`, `plan.md` et `tasks.md`. L'ordre des mod
 dépendances : B1 socle et identité, B2 organisations, B3 événements, B4 propositions, B5 sessions,
 B6 média et engagement, B7 raccordement du front.
 
-**La porte de qualité** — `make check` (`check-db`, `check-front`, `check-back`) DOIT passer avant tout
-commit important. `check-db` détruit le volume et recharge le schéma de zéro, puis assure que les 16
-schémas sont présents, que `cross_module_fk_report` ne contient aucune ligne non conforme, et que les
-projections analytiques se rafraîchissent. `check-back` exécute la cible du `Makefile`, qui seule
+**La porte de qualité** — `make check-safe` (`check-db-safe`, `check-front`, `check-back`) DOIT passer
+avant tout commit. `check-db-safe` ne détruit rien : sur la base en place, il assure que les 16 schémas
+sont présents, que `cross_module_fk_report` ne contient aucune ligne non conforme, et que les
+projections analytiques se rafraîchissent. `make check` et `make check-db` passent les mêmes assertions
+mais **commencent par détruire le volume** pour recharger le schéma de zéro : ils NE DOIVENT JAMAIS être
+lancés sans l'accord explicite du commanditaire — le 16/09, un `make check` lancé avant un commit a
+effacé la base locale, qui n'avait pas de sauvegarde. `check-back` exécute la cible du `Makefile`, qui seule
 définit ce que le portail passe : `cargo fmt --all --check`, `cargo clippy --workspace
 --all-targets --all-features -- -D warnings` et `cargo test --workspace --all-features`. Les deux
 options de `clippy` ne sont pas décoratives — sans elles, ni les tests d'intégration ni le seul fichier
@@ -424,8 +434,8 @@ cas : soit il est amendé pour tous, soit il s'applique.
 XIV dès que Guide Négo est touché. Les
 étapes `/speckit-plan` et `/speckit-analyze` relisent ce fichier et signalent tout écart avant
 l'implémentation. Trois vérifications sont mécaniques et bloquantes, et le restent :
-`cross_module_fk_report` vide, `make check` au vert, et le graphe de dépendances des crates sans arête
+`cross_module_fk_report` vide, `make check-safe` au vert, et le graphe de dépendances des crates sans arête
 entre deux modules. Toute complexité qui semble exiger une entorse se justifie par écrit dans
 `docs/progression/decisions/` — ou se règle autrement.
 
-**Version**: 1.1.0 | **Ratified**: 2026-08-20 | **Last Amended**: 2026-09-20
+**Version**: 1.1.1 | **Ratified**: 2026-08-20 | **Last Amended**: 2026-09-20

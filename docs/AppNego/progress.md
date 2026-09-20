@@ -45,7 +45,8 @@
 
 | Date | Fait | À suivre |
 |---|---|---|
-| 2026-09-20 | Constitution amendée en 1.1.0 : section « Guide Négo » et principes XI à XIV (hors connexion, confiance, design borné, une seule porte) ; contraintes des trois agendas et du suivi ; un amendement né de Guide Négo se consigne ici. Gabarits vérifiés : rien à y modifier, ils lisent la constitution à l'exécution | Correctif du modèle (vecteurs), puis 0a. À part : la constitution exige encore `make check` avant commit, contre `CLAUDE.md` — correctif 1.1.1 à décider |
+| 2026-09-20 | Constitution 1.1.1, correctif : la porte de qualité est `make check-safe` ; `make check` et `make check-db`, qui détruisent la base locale, exigent l'accord du commanditaire — comme `CLAUDE.md` | Correctif du modèle (vecteurs), puis 0a |
+| 2026-09-20 | Constitution amendée en 1.1.0 : section « Guide Négo » et principes XI à XIV (hors connexion, confiance, design borné, une seule porte) ; contraintes des trois agendas et du suivi ; un amendement né de Guide Négo se consigne ici. Gabarits vérifiés : rien à y modifier, ils lisent la constitution à l'exécution | Correctif du modèle (vecteurs), puis 0a. |
 | 2026-09-20 | Feuille de route : le socle scindé en 0a, 0b, 0c et les sessions en 3a, 3b — une spécification par chantier ; la recherche globale s'ouvre à l'étape 2, le centre de notifications à l'étape 3b | `/speckit-constitution`, puis 0a |
 | 2026-09-20 | Seconde livraison de la maquette rangée : page « Échanges », dossier `passation/` (jetons, thème, mesures, pictogrammes, composants), 29 écarts tranchés ; barre à cinq onglets à l'ouverture des Échanges | — |
 | 2026-09-20 | Maquette terminée et rangée dans `design/ecrans/` ; feuille de route réécrite avec un prompt Spec Kit par étape, un prompt de plan commun et l'amendement de la constitution | `/speckit-constitution`, puis l'étape 0 — Socle |
