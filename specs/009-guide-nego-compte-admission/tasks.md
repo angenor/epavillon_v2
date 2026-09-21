@@ -173,17 +173,17 @@ qu'il n'ouvre plus **et que les accès tiennent**, puis retirer un accès.
 
 ### Tests
 
-- [ ] T067 [P] [US3] Test : **refus par périmètre, URL forgée comprise, sur les DOUZE routes de `contracts/api-admin.md`** — sept sur les codes, deux sur le mode d'admission, trois sur les demandes ; un identifiant hors périmètre se refuse comme inexistant — `negotiation/tests/perimetre_url_forgee.rs`
+- [ ] T067 [P] [US3] Test : **un administrateur d'ÉVÉNEMENT ne voit rien du back-office de Guide Négo**, sur les DOUZE routes de `contracts/api-admin.md` — sept sur les codes, deux sur le mode d'admission, trois sur les demandes —, URL forgée comprise : le refus est le même que pour un identifiant inexistant (SC-008). La garde est `negotiation.space.manage` **sur la portée globale** (`Requires<SpaceManage>`), **jamais `RequiresAnyScope`** — le rôle `admin` porte cette permission et s'attribue aussi sur un événement, et la route paraîtrait gardée — `negotiation/tests/perimetre_url_forgee.rs`
 - [ ] T068 [P] [US3] Test : **révoquer un code ne retire aucun accès déjà accordé** (ADR-006) — `negotiation/tests/revocation_ne_retire_pas.rs`
 - [ ] T069 [P] [US3] Test : un accès retiré cesse d'ouvrir dès la lecture suivante de `me/access` — `negotiation/tests/retrait_acces.rs`
-- [ ] T070 [P] [US3] Test : `(false, '{}')` d'`administered_events` donne un **refus explicite**, jamais une liste vide — `negotiation/tests/perimetre_vide_refuse.rs`
+- [ ] T070 [P] [US3] Test : **aucune permission sur la portée globale donne un refus explicite**, jamais une liste vide — `negotiation/tests/perimetre_vide_refuse.rs`. *`administered_events()` n'est pas appelée par ce module* : elle ne rend que des portées `event`, quand un code porte `global` ou `negotiation_space`
 - [ ] T070 bis [P] [US3] Test : **toute écriture de `negotiation` laisse son auteur** — création, révocation, retrait d'accès et décision retrouvés dans `platform.audit_log` avec leur `actor_id` (FR-046, principe VII) — `negotiation/tests/toute_ecriture_laisse_son_auteur.rs`
 
 ### Back
 
 - [ ] T071 [P] [US3] `negotiation/src/repo/uses.rs` : usages d'un code par `v_invitation_code_uses`, avec l'état réel de l'accès
 - [ ] T072 [US3] `negotiation/src/service/admin_codes.rs` : engendrer le code (**huit caractères, tirets compris**, exemple `NEGO-024`, alphabet sans `0/O` ni `1/I/L`), créer, révoquer, retirer un accès, retirer tous les accès d'un code — **chaque écriture ouverte par `Db::write(&ctx)`**, jamais une connexion nue
-- [ ] T073 [US3] `negotiation/src/routes/admin_codes.rs` : les sept routes sous `/api/admin/negotiation/invitation-codes`, toutes derrière `RequiresAnyScope<SpaceManage>` et `Perimeter`
+- [ ] T073 [US3] `negotiation/src/routes/admin_codes.rs` : les sept routes sous `/api/admin/negotiation/invitation-codes`, toutes derrière **`Requires<SpaceManage>`** — portée globale, et **ni `RequiresAnyScope` ni `Perimeter`**
 - [ ] T074 [US3] `make openapi`
 
 ### Client

@@ -82,7 +82,7 @@ entre `docs/database/` et le script de migration.
 | **II. Frontières de modules** | Crate `negotiation` nouveau, dépendances limitées à `kernel` et `contracts`. Le courriel de décision vit dans `negotiation`, pas dans `identity` — c'est précisément ce que ce principe évite | ✅ |
 | **III. `xmod_fk_*`** | Toute FK vers `identity.people`, `identity.sessions` la porte. `reference` et `platform` sont le noyau partagé, exemptés par `cross_module_fk_report` | ✅ |
 | **IV. Outbox transactionnel** | Six événements par `platform.emit_event()`, dans la transaction du changement d'état. Les courriels par `jobs::enqueue` dans la même transaction, comme `registration.rs` | ✅ |
-| **V. Permission et portée** | `negotiation.space.access` et `negotiation.space.manage`, testées par `identity.has_permission` avec leur portée. Aucun nom de rôle nulle part. `Perimeter` sur chaque route d'administration, URL forgée comprise | ✅ |
+| **V. Permission et portée** | `negotiation.space.access` et `negotiation.space.manage`, testées par `identity.has_permission` avec leur portée. Aucun nom de rôle nulle part. **Le back-office exige la portée `global`** (tranché le 21/09) : `Requires<SpaceManage>` et non `RequiresAnyScope`, qu'un administrateur d'événement franchirait — il porte la permission sans qu'aucun espace de négociation ne soit rattaché à son édition. URL forgée comprise | ✅ |
 | **VI. SQLx vérifié, pas d'ORM** | Macros vérifiées à la compilation ; deux vues servent les écrans de back-office en une requête | ✅ |
 | **VII. Contexte d'écriture** | Toute écriture par `Db::write(&ctx)`. `platform.tg_audit()` posé sur les trois tables mutables | ✅ |
 | **VIII. Les invariants ne se réimplémentent pas** | Une seule demande en attente, un seul usage par personne et par code, portée cohérente, transition d'état, taxonomie du réseau : **tous portés par la base**, traduits en français par l'API | ✅ |
@@ -228,8 +228,12 @@ minutes ; entre-temps, `npm run check:guide-nego`, `test:guide-nego`, `typecheck
    c'est l'application qui relit l'état à son retour au premier plan (recherche R13).
 8. **`down -v` n'est pas une procédure.** Il efface une base sans sauvegarde. La migration est le
    livrable qui rend ce plan applicable en production (recherche R14).
-9. **Le périmètre se teste sur les douze routes de back-office**, pas seulement sur celles qui
-   listent : l'admission et les demandes en font partie (FR-044, principe V).
+9. **`RequiresAnyScope` laisserait entrer un administrateur d'événement.** Le rôle `admin` porte
+   `negotiation.space.manage` et s'attribue aussi sur une édition ; « n'importe quelle portée »
+   ouvrirait donc tout le back-office de Guide Négo à quelqu'un qui n'a aucun espace de négociation
+   à administrer — et la route paraîtrait gardée. La garde est la portée **globale**, et elle se
+   teste sur les **douze** routes, pas seulement sur celles qui listent : l'admission et les
+   demandes en font partie (FR-044, SC-008, principe V).
 10. **Deux noms voisins, deux choses** : `useGnConnexion` (livré en 0a) dit l'état du **réseau** ;
    `useGnSession`, créé ici, dit celui du **compte**. Les confondre ferait croire qu'une personne
    hors connexion est déconnectée.

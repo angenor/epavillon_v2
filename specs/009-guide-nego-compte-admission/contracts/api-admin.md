@@ -1,28 +1,47 @@
 # Contrat — le back-office de l'admission
 
-> Routes du crate `negotiation`, sous `/api/admin/negotiation`. **Toutes** passent par l'extracteur
-> `Perimeter` et par `RequiresAnyScope<SpaceManage>` — permission `negotiation.space.manage`, déjà
-> semée dans `100_negotiations.sql`. Aucune ne se contente de filtrer à l'affichage.
+> Routes du crate `negotiation`, sous `/api/admin/negotiation`. **Toutes** exigent
+> `negotiation.space.manage` **sur la portée globale** — permission déjà semée dans
+> `100_negotiations.sql`. Aucune ne se contente de filtrer à l'affichage.
 
-## Le périmètre, d'abord
+## Le périmètre, d'abord — et pour Guide Négo, il est global
 
-**Les douze routes de ce contrat** — sept sur les codes, deux sur le mode d'admission, trois sur les
-demandes — passent **toutes** par le périmètre, y compris celles qui ne listent rien. Un test d'URL
-forgée qui n'en couvrirait que sept laisserait l'admission et les demandes ouvertes.
+**Tranché par le commanditaire le 21/09** : seul un administrateur **global** tient les codes, les
+usages, les demandes et le mode d'admission.
 
-`identity.administered_events($1)` rend toujours une ligne, jamais NULL, et ses trois cas restent
-distincts dans le code (principe V) :
+La garde des douze routes est donc, et uniquement :
 
-| Retour | Réponse de ces routes |
+```
+identity.has_permission(personne, 'negotiation.space.manage', 'global', NULL)
+```
+
+c'est-à-dire l'extracteur `Requires<SpaceManage>` du noyau, qui teste `Scope::Global`.
+
+**Et surtout pas `RequiresAnyScope`.** Le rôle `admin` porte `negotiation.space.manage` et
+s'attribue aussi **sur un événement** : un administrateur d'une seule édition passerait « n'importe
+quelle portée » et ouvrirait tout le back-office de Guide Négo — alors qu'aucun espace de
+négociation n'est rattaché à un événement, et qu'il n'a donc rien à y voir. Le piège est d'autant
+plus sournois que la route paraîtrait gardée.
+
+**`Perimeter` ne sert pas ici**, et `identity.administered_events()` n'est pas touchée : elle est
+bâtie sur `programme.proposal.read_all` et ne rend que des portées `event`, quand un code
+d'invitation porte `global` ou `negotiation_space`. Aucune fonction de périmètre nouvelle, aucun
+lien espace ↔ événement, aucun semis de rôle.
+
+| Qui frappe | Réponse de ces douze routes |
 |---|---|
-| `(true, …)` | tous les codes, tous les usages, toutes les demandes |
-| `(false, {…})` | seulement les espaces rattachés à ces éditions |
-| `(false, '{}')` | **refus d'accès explicite**, jamais une liste vide |
+| `negotiation.space.manage` sur `global` | tous les codes, tous les usages, toutes les demandes |
+| La même permission sur un **événement** | **refus**, comme si la route n'existait pas pour cette personne |
+| Aucune de ces deux | refus |
 
-Une route paramétrée par un identifiant — `{id}` d'un code, d'un usage, d'une demande — **vérifie le
-périmètre avant de lire** : un identifiant hors périmètre se refuse comme un identifiant inexistant,
-sans que la forme de la réponse les distingue (principe IX). C'est le test « URL forgée » exigé par
-le principe X.
+Une route paramétrée par un identifiant — `{id}` d'un code, d'un usage, d'une demande — se refuse
+donc **avant de lire quoi que ce soit** : un administrateur d'événement qui forge l'adresse d'un
+code reçoit le même refus que pour un identifiant inexistant, sans que la forme de la réponse les
+distingue (principe IX). C'est SC-008, et c'est le test « URL forgée » exigé par le principe X.
+
+**Le menu du back-office suit la même règle** : sans la permission sur la portée globale, aucune
+entrée « Guide Négo » n'apparaît. Un menu qui l'afficherait pour la faire refuser ensuite dirait à
+la personne qu'il existe quelque chose qu'elle ne peut pas voir.
 
 ## Les codes
 

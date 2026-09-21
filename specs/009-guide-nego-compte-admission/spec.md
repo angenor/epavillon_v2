@@ -217,7 +217,7 @@ Une personne connectée touche « Échanges », un document réservé ou l'annua
 - **FR-041** : un accès retiré DOIT cesser d'ouvrir les modules réservés dès l'ouverture suivante de l'application, et DOIT être dit dans « Mon accès ».
 - **FR-042** : l'administrateur DOIT pouvoir lire et changer le mode d'admission, et voir quel effet chaque valeur produit pour la personne qui entre.
 - **FR-043** : la file des demandes en attente DOIT montrer le nom, le pays, l'heure d'envoi et le code éventuel, et permettre d'admettre ou de refuser avec un motif facultatif.
-- **FR-044** : toute liste de ce back-office — codes, usages, demandes — DOIT être filtrée par le périmètre d'administration, **y compris quand l'adresse est forgée**.
+- **FR-044** : le back-office de l'admission — codes, usages, demandes, mode — DOIT être réservé aux administrateurs **de la plateforme entière**, **y compris quand l'adresse est forgée**. *Tranché le 21/09* : pour Guide Négo, « son périmètre » veut dire **global**. La garde est `negotiation.space.manage` sur la portée globale, et non « sur n'importe quelle portée » — le rôle `admin` porte cette permission et s'attribue aussi sur un événement, alors qu'aucun espace de négociation n'est rattaché à une édition. Un administrateur limité à un événement NE DOIT rien voir de ce back-office : ni liste, ni fiche, ni entrée de menu. Aucune fonction de périmètre nouvelle n'est créée pour cela.
 - **FR-045** : ces écrans DOIVENT être construits avec les composants existants du back-office de l'ePavillon, et NE DOIVENT emprunter ni jeton ni composant à Guide Négo.
 - **FR-046** : la création d'un code, sa révocation, un retrait d'accès, un changement de mode et chaque décision sur une demande DOIVENT laisser une trace qui nomme leur auteur.
 
@@ -259,7 +259,7 @@ La permission `negotiation.space.access`, le rôle `negotiator` et la portée `n
 - **SC-005** : après un retrait d'accès, la personne ne voit plus aucun module réservé dès son ouverture suivante, et « Mon accès » l'explique.
 - **SC-006** : aucun écran ni aucune donnée de ce périmètre ne demande, n'affiche ni n'utilise le genre pour accorder un droit ; l'appartenance au réseau se déduit du seul code utilisé.
 - **SC-007** : l'IFDD peut dire à tout moment combien de personnes sont entrées avec chaque code, et combien appartiennent au réseau des négociatrices.
-- **SC-008** : un administrateur dont le périmètre ne couvre qu'un événement ne voit aucun code, aucun usage et aucune demande d'un autre périmètre, y compris en forgeant l'adresse.
+- **SC-008** : un administrateur dont le périmètre ne couvre qu'un événement ne voit **rien** du back-office de Guide Négo — aucun code, aucun usage, aucune demande, aucune entrée de menu —, et l'adresse forgée d'un code lui rend le **même refus qu'un identifiant inexistant**.
 - **SC-009** : hors connexion, l'application ouvre « Mon accès » et affiche l'état lu avec son heure, et ne promet jamais un accès non obtenu.
 - **SC-010** : les écrans de cette étape sont fidèles à la maquette à 360 px, en thème clair et sombre, sans défilement horizontal.
 - **SC-011** : toute décision sur une demande — admission comme refus — part en courriel à la personne concernée, et la décision reste acquise même si l'envoi échoue.

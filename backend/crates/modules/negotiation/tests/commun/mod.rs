@@ -232,13 +232,25 @@ pub async fn evenements(bac: &Bac, aggregate_id: Uuid) -> Vec<String> {
     .expect("lecture de l'outbox")
 }
 
-/// Le périmètre d'administration tel que le garde du noyau le lit — refus
-/// compris. C'est ce que l'extracteur `Perimeter` fait avant toute liste.
-pub async fn perimetre(
-    bac: &Bac,
-    person_id: Uuid,
-) -> kernel::error::Result<kernel::auth::AdminScope> {
-    kernel::auth::require_perimeter(bac.pool(), person_id).await
+/// Le back-office de Guide Négo est-il ouvert à cette personne ?
+///
+/// **La portée globale, et elle seule** (tranché le 21/09) : le rôle `admin`
+/// porte `negotiation.space.manage` et s'attribue aussi sur un événement, si
+/// bien qu'un test « sur n'importe quelle portée » passerait pour un
+/// administrateur d'une seule édition — alors qu'aucun espace de négociation
+/// n'est rattaché à une édition.
+///
+/// `identity.administered_events()` n'est **pas** appelée par ce module : elle
+/// ne rend que des portées `event`.
+pub async fn administre_guide_nego(bac: &Bac, person_id: Uuid) -> bool {
+    kernel::auth::has_permission(
+        bac.pool(),
+        person_id,
+        negotiation::domain::permissions::SPACE_MANAGE,
+        kernel::auth::Scope::Global,
+    )
+    .await
+    .expect("lecture de la permission")
 }
 
 // ---------------------------------------------------------------------------
