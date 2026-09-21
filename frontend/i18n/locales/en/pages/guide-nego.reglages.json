@@ -7,5 +7,19 @@
     "clair": "Light",
     "sombre": "Dark",
     "systeme": "System"
+  },
+  "compte": {
+    "titre": "Account",
+    "sans-adresse": "Signed in",
+    "lu-a": "Read {moment}",
+    "deconnexion": "Sign out",
+    "creer": "Create my account",
+    "se-connecter": "Sign in",
+    "confirmation": {
+      "question": "Sign out of this device?",
+      "phrase": "Your other devices stay signed in. Anything downloaded for offline reading stays on this phone.",
+      "action": "Sign out",
+      "retour": "Cancel"
+    }
   }
 }

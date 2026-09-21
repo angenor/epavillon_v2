@@ -500,3 +500,155 @@ async fn lentete_dadresse_dun_pair_inconnu_est_ignoree() {
         Some("198.51.100.4".parse().expect("adresse attendue"))
     );
 }
+
+// -----------------------------------------------------------------------------
+// L'objet `client` de Guide Négo (0b)
+// -----------------------------------------------------------------------------
+
+fn corps_de_connexion_de_lapplication() -> Value {
+    serde_json::json!({
+        "email": ADRESSE,
+        "password": MOT_DE_PASSE,
+        "client": {
+            "kind": "app",
+            "device_id": "9f2c-appareil-de-test",
+            "label": "Android · Chrome",
+            "platform": "android",
+        },
+    })
+}
+
+/// **La non-régression du site, à travers HTTP.** Ses appels ne portent aucun
+/// objet `client` : le corps, les cookies et leurs attributs sont ceux d'avant,
+/// et la session s'inscrit « web ».
+#[actix_web::test]
+async fn un_appel_sans_objet_client_se_comporte_exactement_comme_avant() {
+    let bac = monter().await;
+    let app = test::init_service(api::build_app(&bac.etat)).await;
+
+    let reponse = test::call_service(
+        &app,
+        test::TestRequest::post()
+            .uri("/api/auth/login")
+            .set_json(corps_de_connexion(MOT_DE_PASSE))
+            .to_request(),
+    )
+    .await;
+
+    assert_eq!(reponse.status(), StatusCode::OK);
+    assert_eq!(
+        cookie(&reponse, "epavillon_rt")
+            .expect("cookie de rafraîchissement")
+            .path(),
+        Some("/api/auth")
+    );
+    let corps: Value = test::read_body_json(reponse).await;
+    assert_eq!(corps["status"], "authenticated");
+
+    let clients: Vec<String> =
+        sqlx::query_scalar("SELECT client_kind::text FROM identity.sessions ORDER BY issued_at")
+            .fetch_all(bac.base.pool())
+            .await
+            .expect("lecture des sessions");
+    assert_eq!(clients, vec!["web".to_owned()]);
+}
+
+/// L'objet déclaré traverse la route et se retrouve en base — et `/auth/me`
+/// dit de quel appareil la session vient, **sans requête de plus**.
+#[actix_web::test]
+async fn lobjet_client_traverse_la_route_et_me_le_rend() {
+    let bac = monter().await;
+    let app = test::init_service(api::build_app(&bac.etat)).await;
+
+    let connexion = test::call_service(
+        &app,
+        test::TestRequest::post()
+            .uri("/api/auth/login")
+            .set_json(corps_de_connexion_de_lapplication())
+            .to_request(),
+    )
+    .await;
+    assert_eq!(connexion.status(), StatusCode::OK);
+    let acces = cookie(&connexion, "epavillon_at").expect("cookie d'accès");
+
+    let moi = test::call_service(
+        &app,
+        test::TestRequest::get()
+            .uri("/api/auth/me")
+            .cookie(acces)
+            .to_request(),
+    )
+    .await;
+    assert_eq!(moi.status(), StatusCode::OK);
+
+    let corps: Value = test::read_body_json(moi).await;
+    assert_eq!(corps["primary_email"], ADRESSE);
+    assert_eq!(corps["session"]["client_kind"], "app");
+    assert_eq!(corps["session"]["device_label"], "Android · Chrome");
+    assert!(corps["session"]["issued_at"].is_string());
+}
+
+/// **Un `kind` inconnu désigne son champ**, et n'est jamais corrigé en silence :
+/// replier « iOS » sur « web » ferait mentir le décompte des téléphones sans que
+/// rien ne le signale.
+#[actix_web::test]
+async fn un_kind_inconnu_rend_422_en_designant_son_champ() {
+    let bac = monter().await;
+    let app = test::init_service(api::build_app(&bac.etat)).await;
+
+    let reponse = test::call_service(
+        &app,
+        test::TestRequest::post()
+            .uri("/api/auth/login")
+            .set_json(serde_json::json!({
+                "email": ADRESSE,
+                "password": MOT_DE_PASSE,
+                "client": { "kind": "iOS" },
+            }))
+            .to_request(),
+    )
+    .await;
+
+    assert_eq!(reponse.status(), StatusCode::UNPROCESSABLE_ENTITY);
+    let corps: Value = test::read_body_json(reponse).await;
+    assert_eq!(corps["code"], "VALIDATION_FAILED");
+    assert_eq!(corps["field"], "client.kind");
+}
+
+/// **La rotation ne déclare rien.** `POST /auth/refresh` ne porte pas d'objet
+/// `client` : s'il en portait un, il suffirait de l'envoyer pour changer
+/// d'appareil déclaré. La session neuve garde donc « app ».
+#[actix_web::test]
+async fn le_renouvellement_garde_le_client_sans_quon_le_lui_dise() {
+    let bac = monter().await;
+    let app = test::init_service(api::build_app(&bac.etat)).await;
+
+    let connexion = test::call_service(
+        &app,
+        test::TestRequest::post()
+            .uri("/api/auth/login")
+            .set_json(corps_de_connexion_de_lapplication())
+            .to_request(),
+    )
+    .await;
+    let rafraichissement = cookie(&connexion, "epavillon_rt").expect("cookie de rafraîchissement");
+
+    let renouvelle = test::call_service(
+        &app,
+        test::TestRequest::post()
+            .uri("/api/auth/refresh")
+            .cookie(rafraichissement)
+            .to_request(),
+    )
+    .await;
+    assert_eq!(renouvelle.status(), StatusCode::OK);
+    let corps: Value = test::read_body_json(renouvelle).await;
+    assert_eq!(corps["status"], "renewed");
+
+    let clients: Vec<String> =
+        sqlx::query_scalar("SELECT client_kind::text FROM identity.sessions ORDER BY issued_at")
+            .fetch_all(bac.base.pool())
+            .await
+            .expect("lecture des sessions");
+    assert_eq!(clients, vec!["app".to_owned(), "app".to_owned()]);
+}

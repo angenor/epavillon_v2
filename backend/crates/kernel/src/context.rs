@@ -13,6 +13,14 @@ pub const REQUEST_ID_HEADER: &str = "X-Request-Id";
 pub struct RequestContext {
     pub request_id: String,
     pub actor_id: Option<Uuid>,
+    /// La session par laquelle l'acteur est arrivé.
+    ///
+    /// Elle vit ici et non dans le module `identity` parce qu'un module qui
+    /// n'a pas le droit d'en dépendre en a besoin : l'usage d'un code
+    /// d'invitation garde la session d'où il a été saisi, et c'est ce qui
+    /// distingue plus tard une entrée faite du téléphone d'une entrée faite du
+    /// site. Nulle pour une écriture du worker ou une requête sans session.
+    pub session_id: Option<Uuid>,
     pub locale: String,
 }
 
@@ -21,6 +29,7 @@ impl RequestContext {
         Self {
             request_id: request_id.into(),
             actor_id: None,
+            session_id: None,
             locale: locale.into(),
         }
     }
@@ -34,6 +43,16 @@ impl RequestContext {
     pub fn with_actor(&self, actor_id: Uuid) -> Self {
         Self {
             actor_id: Some(actor_id),
+            ..self.clone()
+        }
+    }
+
+    /// L'acteur **et** la session par laquelle il est arrivé : ce que pose
+    /// l'intergiciel de session.
+    pub fn with_session(&self, actor_id: Uuid, session_id: Uuid) -> Self {
+        Self {
+            actor_id: Some(actor_id),
+            session_id: Some(session_id),
             ..self.clone()
         }
     }

@@ -25,7 +25,7 @@ use kernel::mail::{Mailer, OutgoingMail};
 use serde::Deserialize;
 use std::sync::Arc;
 
-use crate::mail::{self, MailContext};
+use crate::mail::{self, Client, MailContext};
 
 pub const SEND_VERIFICATION_EMAIL: &str = "identity.send_verification_email";
 pub const SEND_EXISTING_ACCOUNT_NOTICE: &str = "identity.send_existing_account_notice";
@@ -41,6 +41,11 @@ struct Charge {
     first_name: String,
     #[serde(default)]
     token: Option<String>,
+    /// D'où la demande venait. Absent sur un travail mis en file avant 0b, et
+    /// c'est pourquoi il a un défaut : une reprise ne doit pas échouer sur un
+    /// champ qui n'existait pas.
+    #[serde(default)]
+    client: Option<String>,
 }
 
 pub struct SendVerificationEmail {
@@ -174,6 +179,7 @@ fn contexte<'a>(
         locale: &charge.locale,
         first_name: &charge.first_name,
         app_public_url,
+        client: Client::lire(charge.client.as_deref()),
     }
 }
 

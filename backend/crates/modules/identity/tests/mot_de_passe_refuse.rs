@@ -13,6 +13,7 @@
 mod commun;
 
 use commun::{semer, Bac, Compte};
+use identity::repo::sessions::ClientKind;
 use kernel::error::{ApiError, ErrorCode};
 
 const ADRESSE: &str = "awa.diallo@example.org";
@@ -55,6 +56,7 @@ async fn linscription_refuse_un_mot_de_passe_non_conforme() {
                 password: faible,
                 preferred_locale: "fr",
                 timezone: "Africa/Dakar",
+                client: ClientKind::Web,
             },
         )
         .await
@@ -81,7 +83,7 @@ async fn la_reinitialisation_refuse_sans_consommer_le_jeton() {
     let bac = Bac::monter().await;
     semer(&bac, Compte::actif(ADRESSE)).await;
 
-    identity::service::password_reset::request(&bac.state, &bac.ctx(), ADRESSE)
+    identity::service::password_reset::request(&bac.state, &bac.ctx(), ADRESSE, ClientKind::Web)
         .await
         .expect("demande");
 

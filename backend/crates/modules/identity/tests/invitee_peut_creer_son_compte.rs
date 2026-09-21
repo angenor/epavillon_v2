@@ -10,6 +10,7 @@
 mod commun;
 
 use commun::{semer, Bac, Compte, MOT_DE_PASSE};
+use identity::repo::sessions::ClientKind;
 use identity::service::auth::{self, LoginRequest};
 use identity::service::registration::{self, RegisterRequest};
 use identity::service::session::Device;
@@ -42,6 +43,7 @@ async fn une_personne_creee_sans_compte_sinscrit_verifie_et_se_connecte() {
             password: MOT_DE_PASSE,
             preferred_locale: "fr",
             timezone: "Africa/Ouagadougou",
+            client: ClientKind::Web,
         },
     )
     .await
@@ -72,6 +74,7 @@ async fn une_personne_creee_sans_compte_sinscrit_verifie_et_se_connecte() {
             device: Device {
                 user_agent: Some("test"),
                 ip: None,
+                ..Default::default()
             },
         },
     )

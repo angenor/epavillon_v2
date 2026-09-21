@@ -1,0 +1,32 @@
+{
+  "titre": "Create my account",
+  "sous-titre": "One account for both Guide Négo and ePavillon",
+  "etape": "Step 1 of 3 — Account",
+  "champ": {
+    "prenom": "First name",
+    "nom": "Last name",
+    "adresse": "Email address",
+    "adresse-aide": "The one on your ePavillon account, if you have one.",
+    "pays": "Country",
+    "pays-vide": "Choose your country",
+    "mot-de-passe": "Password",
+    "mot-de-passe-aide": "At least eight characters, including one uppercase and one lowercase letter."
+  },
+  "faute": {
+    "prenom": "Enter your first name.",
+    "nom": "Enter your last name.",
+    "adresse": "This does not look like an email address.",
+    "pays": "Choose your country.",
+    "mot-de-passe": "At least {min} characters, including one uppercase and one lowercase letter."
+  },
+  "creer": "Create my account",
+  "deja-un-compte": "I already have an account — Sign in",
+  "attente": {
+    "titre": "Confirm your address",
+    "propos": "An email has just been sent to {adresse}. Tap the link it contains to confirm your address.",
+    "duree": "The link is valid for 24 hours. Check your spam folder too.",
+    "jai-confirme": "I have confirmed my address",
+    "renvoyer": "Resend the email",
+    "renvoye": "Email resent"
+  }
+}

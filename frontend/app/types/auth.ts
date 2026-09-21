@@ -27,6 +27,47 @@ import type { Person } from './identity'
 import type { CountryId, Email, IsoDateTime, TimeZoneName, Uuid } from './shared'
 
 // ---------------------------------------------------------------------------
+// D'où vient la session — l'objet `client` de Guide Négo (0b)
+// ---------------------------------------------------------------------------
+
+/**
+ * Ce que le client déclare de lui-même à l'ouverture d'une session.
+ *
+ * **Facultatif, et son absence vaut « le site »** : aucun appel de l'ePavillon
+ * ne le porte, et aucun n'a à changer. Seule l'application le pose.
+ *
+ * **Aucun de ces champs n'accorde de droit.** L'identifiant d'appareil est
+ * engendré par le téléphone et se forge, au même titre qu'un `user-agent` : il
+ * nomme une session dans une liste et permet de compter les téléphones sans
+ * dédoubler personne. Il n'autorise rien, et le compteur d'essais de code se
+ * tient par personne.
+ */
+export interface SessionClient {
+  kind: 'web' | 'app'
+  device_id?: string
+  label?: string
+  platform?: 'android' | 'ios' | 'other'
+}
+
+/**
+ * La session courante, telle que `GET /auth/me` la joint à la personne.
+ *
+ * Elle **s'ajoute** à la personne, elle ne l'enveloppe pas : le site lit déjà
+ * cette réponse comme un `Person`, et l'envelopper casserait chacun de ses
+ * appels pour un champ dont il n'a pas l'usage.
+ */
+export interface CurrentSession {
+  client_kind: 'web' | 'app'
+  device_label: string | null
+  issued_at: IsoDateTime
+}
+
+/** La personne connectée, et d'où elle l'est. */
+export interface AuthenticatedPerson extends Person {
+  session?: CurrentSession | null
+}
+
+// ---------------------------------------------------------------------------
 // Connexion
 // ---------------------------------------------------------------------------
 
@@ -38,6 +79,12 @@ export interface LoginPayload {
    * quelques heures sans, plusieurs semaines avec.
    */
   remember_me: boolean
+  /**
+   * D'où vient la demande. Absent depuis le site ; posé par Guide Négo, qui y
+   * gagne une session de quatre-vingt-dix jours **sans case à cocher** — son
+   * écran de connexion n'en a pas.
+   */
+  client?: SessionClient
 }
 
 /**
@@ -77,6 +124,11 @@ export interface RegisterPayload {
   password: string
   preferred_locale: string
   timezone: TimeZoneName
+  /**
+   * D'où vient la demande. **Retenu avec le jeton**, ce qui décide de l'écran
+   * où mène le lien du courriel : celui du site, ou celui de Guide Négo.
+   */
+  client?: SessionClient
 }
 
 /**

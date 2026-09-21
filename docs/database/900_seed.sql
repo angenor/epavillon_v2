@@ -40,7 +40,16 @@ INSERT INTO platform.settings (key, value, description, is_secret) VALUES
      'Score au-delà duquel des suggestions de rattachement sont proposées à l''utilisateur.', false),
     ('zoom.account_id', '"__secret__"', 'Identifiant de compte Zoom — la valeur réelle vit dans le coffre de secrets.', true),
     ('zoom.client_id', '"__secret__"', 'Client OAuth Zoom.', true),
-    ('zoom.client_secret', '"__secret__"', 'Secret OAuth Zoom.', true)
+    ('zoom.client_secret', '"__secret__"', 'Secret OAuth Zoom.', true),
+    -- Admission dans l'espace réservé aux négociateurs (Guide Négo). C'est un
+    -- RÉGLAGE et non un drapeau : platform.feature_flags n'ouvre et ne ferme
+    -- qu'en binaire, et il y a trois valeurs. L'API valide les trois ; la base
+    -- ne les contraint pas, comme pour les autres réglages libres.
+    ('negotiation.admission_mode', '"code"',
+     'Comment on entre dans les modules réservés : "code", "approval" ou "code_and_approval". Modifiable depuis le back-office, sans redéploiement.', false),
+    ('negotiation.invitation_attempts',
+     '{"max": 5, "window_minutes": 15, "lock_minutes": 15}',
+     'Limite des essais de code d''invitation, comptés par personne — jamais par appareil, qui se forge.', false)
 ON CONFLICT (key) DO NOTHING;
 
 -- -----------------------------------------------------------------------------
@@ -501,6 +510,53 @@ $$;
 -- -----------------------------------------------------------------------------
 SELECT platform.ensure_month_partition('platform', 'audit_log', current_date);
 SELECT platform.ensure_month_partition('platform', 'audit_log', (current_date + interval '1 month')::date);
+
+-- -----------------------------------------------------------------------------
+-- 6 bis. Guide Négo — espace et codes d'invitation de DÉVELOPPEMENT
+--
+-- Ce bloc ne s'exécute QUE si le serveur porte `epavillon.seed_dev = on`, que
+-- `ops/docker-compose.dev.yml` pose et que la production ne pose pas. Un code
+-- d'invitation écrit dans un dépôt public ouvrirait l'espace réservé à qui le
+-- lit : il n'a rien à faire dans une base en service, et un commentaire
+-- « ne pas utiliser en production » n'a jamais arrêté personne.
+-- -----------------------------------------------------------------------------
+DO $$
+DECLARE
+    v_space_id   uuid;
+    v_network_id uuid;
+BEGIN
+    IF coalesce(current_setting('epavillon.seed_dev', true), 'off') <> 'on' THEN
+        RAISE NOTICE 'Semis de développement de Guide Négo ignoré (epavillon.seed_dev absent).';
+        RETURN;
+    END IF;
+
+    INSERT INTO negotiation.spaces (slug, name, description, track_term_id, visibility, is_membership_open)
+    SELECT 'cop31',
+           '{"fr":"COP31 — délégation francophone","en":"COP31 — Francophone delegation"}'::jsonb::platform.i18n_text,
+           '{"fr":"Espace de travail de la délégation francophone à la COP31.","en":"Working space of the Francophone delegation at COP31."}'::jsonb::platform.i18n_text,
+           t.id, 'listed', false
+      FROM reference.taxonomy_terms t
+     WHERE t.taxonomy_code = 'negotiation_track' AND t.code = 'climate'
+    ON CONFLICT (slug) DO NOTHING;
+
+    SELECT id INTO v_space_id   FROM negotiation.spaces WHERE slug = 'cop31';
+    SELECT id INTO v_network_id FROM reference.taxonomy_terms
+     WHERE taxonomy_code = 'negotiation_network' AND code = 'women_negotiators';
+
+    -- L'un ouvre un espace précis et donne l'appartenance au réseau, l'autre
+    -- ouvre Guide Négo en entier : les deux portées du rôle `negotiator`.
+    INSERT INTO negotiation.invitation_codes
+        (code, label, scope_type, space_id, grants_network_term_id, max_uses, valid_until)
+    VALUES
+        ('NEGO-001', 'Développement — réseau des négociatrices, COP31',
+         'negotiation_space', v_space_id, v_network_id, 50, now() + interval '1 year'),
+        ('NEGO-002', 'Développement — accès général à Guide Négo',
+         'global', NULL, NULL, NULL, now() + interval '1 year')
+    ON CONFLICT (code_normalized) DO NOTHING;
+
+    RAISE NOTICE 'Semis de développement de Guide Négo : espace « cop31 », codes NEGO-001 et NEGO-002.';
+END
+$$;
 
 -- -----------------------------------------------------------------------------
 -- 7. Contrôle de conformité des frontières de modules

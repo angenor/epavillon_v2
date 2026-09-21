@@ -26,6 +26,7 @@ mod commun;
 use commun::Bac;
 use kernel::ErrorCode;
 use media::domain::attachment::AttachmentPayload;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 /// Un objet servable, appartenant à l'organisation, **et détaché** : le logo
@@ -126,10 +127,14 @@ async fn echoir(bac: &Bac, asset_id: Uuid) {
 }
 
 /// Pose une occurrence de travail récurrent **au présent de la base**.
-async fn armer(bac: &Bac, tache: &str) {
-    let maintenant = media::repo::assets::maintenant(bac.pool())
-        .await
-        .expect("instant de la base");
+/// Arme un créneau récurrent **à l'instant donné**.
+///
+/// L'instant est un argument, et non une lecture faite ici : la clé
+/// d'idempotence se construit sur la **seconde** du créneau, et deux lectures de
+/// `now()` séparées par une frontière de seconde produisent deux clés
+/// différentes — donc deux travaux là où le test en attend un. Relevé le 21/09 :
+/// le test de replanification échouait sous charge, et seulement sous charge.
+async fn armer(bac: &Bac, tache: &str, maintenant: OffsetDateTime) {
     let mut tx = bac.db().write(&bac.ctx()).await.expect("transaction");
     let pose = match tache {
         "purge" => media::jobs::purge::planifier(&mut tx, maintenant).await,
@@ -398,7 +403,14 @@ async fn un_objet_purge_a_quitte_le_stockage() {
         .expect("suppression");
     echoir(&bac, asset).await;
 
-    armer(&bac, "purge").await;
+    armer(
+        &bac,
+        "purge",
+        media::repo::assets::maintenant(bac.pool())
+            .await
+            .expect("instant de la base"),
+    )
+    .await;
     let issues = commun::passer_le_worker(&bac).await;
     assert!(
         issues.iter().all(|i| i.is_ok()),
@@ -473,7 +485,14 @@ async fn un_objet_dont_la_fenetre_court_encore_nest_pas_touche() {
         .await
         .expect("suppression");
 
-    armer(&bac, "purge").await;
+    armer(
+        &bac,
+        "purge",
+        media::repo::assets::maintenant(bac.pool())
+            .await
+            .expect("instant de la base"),
+    )
+    .await;
     commun::passer_le_worker(&bac).await;
 
     assert!(
@@ -523,7 +542,14 @@ async fn une_purge_dont_lobjet_a_deja_disparu_aboutit() {
             .expect("effacement préalable");
     }
 
-    armer(&bac, "purge").await;
+    armer(
+        &bac,
+        "purge",
+        media::repo::assets::maintenant(bac.pool())
+            .await
+            .expect("instant de la base"),
+    )
+    .await;
     let issues = commun::passer_le_worker(&bac).await;
     assert!(
         issues.iter().all(|i| i.is_ok()),
@@ -568,7 +594,14 @@ async fn la_reconciliation_realigne_le_compteur_sur_le_calcul() {
     .await
     .expect("dérive du compteur");
 
-    armer(&bac, "reconcile").await;
+    armer(
+        &bac,
+        "reconcile",
+        media::repo::assets::maintenant(bac.pool())
+            .await
+            .expect("instant de la base"),
+    )
+    .await;
     let issues = commun::passer_le_worker(&bac).await;
     assert!(issues.iter().all(|i| i.is_ok()), "{issues:?}");
 
@@ -604,15 +637,17 @@ async fn la_reconciliation_realigne_le_compteur_sur_le_calcul() {
 async fn les_travaux_recurrents_se_replanifient_sans_doublon() {
     let bac = Bac::monter().await;
 
+    // **Un seul instant pour les trois armements**, voir `armer`.
+    let maintenant = media::repo::assets::maintenant(bac.pool())
+        .await
+        .expect("instant de la base");
+
     for tache in ["purge", "reconcile"] {
-        armer(&bac, tache).await;
+        armer(&bac, tache, maintenant).await;
     }
 
     // Le démarrage du worker repose le même créneau : la clé d'unicité le
     // confond avec celui qui est déjà là.
-    let maintenant = media::repo::assets::maintenant(bac.pool())
-        .await
-        .expect("instant de la base");
     let mut tx = bac.db().write(&bac.ctx()).await.expect("transaction");
     assert!(!media::jobs::purge::planifier(&mut tx, maintenant)
         .await

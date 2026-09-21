@@ -52,6 +52,8 @@
  *   incidents.ts         sept messages d'incident : les cinq états que
  *                        `live.event_incidents()` distingue, les cinq portées
  *   admin-incidents.ts   ce que l'écran A13 en fait — état, portée, cible
+ *   negotiation-access.ts  l'admission de Guide Négo : l'état d'accès et les
+ *                        issues d'un code, hors ligne
  *                        résolue, publication et dépublication
  *   analytics.ts         les projections du module Analytique, reconstituées
  *   admin-dashboard.ts   la composition du tableau de bord du back-office (A6)
@@ -211,6 +213,7 @@ export { registrations, registrationRowsOf } from './registrations'
 export { publicSchedule, proposalDashboard } from './views'
 export { detectConflicts, publicationReadiness } from './conflicts'
 export { incidents } from './incidents'
+export { accesVisiteuse, monAcces, reinitialiserLAcces, saisirUnCode } from './negotiation-access'
 export {
   activeIncidentsForEvent,
   createIncident,

@@ -16,6 +16,8 @@ programme.workspace = true
 media.workspace = true
 engagement.workspace = true
 analytics.workspace = true
+# Guide Négo 0b : la purge des essais de code s'y branchera.
+negotiation.workspace = true
 
 async-trait.workspace = true
 dotenvy.workspace = true

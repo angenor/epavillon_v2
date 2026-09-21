@@ -311,6 +311,7 @@ dependencies = [
  "kernel",
  "live",
  "media",
+ "negotiation",
  "org",
  "programme",
  "serde",
@@ -1951,6 +1952,23 @@ checksum = "bb85c154ba489f01b25c0d36ae69a87e4a1c73a72631fc6c0eb6dde34a73e44b"
 dependencies = [
  "num-traits",
  "pxfm",
+]
+
+[[package]]
+name = "negotiation"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "contracts",
+ "kernel",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "time",
+ "tokio",
+ "tracing",
+ "utoipa",
+ "uuid",
 ]
 
 [[package]]
@@ -3856,6 +3874,7 @@ dependencies = [
  "identity",
  "kernel",
  "media",
+ "negotiation",
  "org",
  "programme",
  "serde_json",

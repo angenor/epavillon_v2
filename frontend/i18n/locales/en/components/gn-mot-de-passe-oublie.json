@@ -1,0 +1,8 @@
+{
+  "propos": "We will send you a link to choose a new one. It stays valid for one hour.",
+  "champ": "Email address",
+  "envoyer": "Send the link",
+  "annuler": "Cancel",
+  "fermer": "Close",
+  "envoye": "If an account exists for {adresse}, a link has just been sent. It stays valid for one hour."
+}

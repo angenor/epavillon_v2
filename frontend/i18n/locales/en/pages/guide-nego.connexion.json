@@ -1,0 +1,22 @@
+{
+  "titre": "Sign in",
+  "sous-titre": "With your Guide Négo or ePavillon account",
+  "champ": {
+    "adresse": "Email address",
+    "mot-de-passe": "Password"
+  },
+  "mot-de-passe-oublie": "Forgot your password?",
+  "entrer": "Sign in",
+  "creer-un-compte": "Create my account",
+  "renvoyer": "Resend the confirmation email",
+  "oubli": {
+    "titre": "Forgotten password"
+  },
+  "refus": {
+    "identifiants": "Incorrect address or password.",
+    "verrouille": "Too many attempts: this account is locked for a few minutes. Try again afterwards.",
+    "suspendu": "This account is suspended. Contact IFDD to find out more.",
+    "second-facteur": "This account requires a second factor, which is not yet wired in the application. Sign in from the website.",
+    "adresse-non-confirmee": "Your address {adresse} is not confirmed yet. Tap the link in the email you received, or ask for a new one."
+  }
+}

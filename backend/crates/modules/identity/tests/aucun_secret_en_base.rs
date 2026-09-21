@@ -15,6 +15,7 @@ mod commun;
 
 use commun::{Bac, MOT_DE_PASSE};
 use identity::domain::token::VerifyEmailOutcome;
+use identity::repo::sessions::ClientKind;
 use identity::service::registration::RegisterRequest;
 use identity::service::{password_reset, registration};
 use kernel::jobs::{self, DEFAULT_QUEUE};
@@ -130,6 +131,7 @@ async fn apres_un_cycle_complet_la_base_ne_porte_aucun_secret_utilisable() {
             email: ADRESSE,
             country_id: None,
             password: MOT_DE_PASSE,
+            client: ClientKind::Web,
             preferred_locale: "fr",
             timezone: "Africa/Dakar",
         },
@@ -150,7 +152,7 @@ async fn apres_un_cycle_complet_la_base_ne_porte_aucun_secret_utilisable() {
     let session = commun::connexion(&bac, ADRESSE).await;
 
     // 4. Réinitialisation — un second jeton de lien, et un nouveau mot de passe.
-    password_reset::request(&bac.state, &bac.ctx(), ADRESSE)
+    password_reset::request(&bac.state, &bac.ctx(), ADRESSE, ClientKind::Web)
         .await
         .expect("demande de réinitialisation");
     let jeton_reinitialisation = jeton_en_file(&bac, "identity.send_password_reset_email").await;
@@ -206,6 +208,7 @@ async fn la_charge_utile_dun_travail_reussi_est_videe() {
             email: ADRESSE,
             country_id: None,
             password: MOT_DE_PASSE,
+            client: ClientKind::Web,
             preferred_locale: "fr",
             timezone: "Africa/Dakar",
         },

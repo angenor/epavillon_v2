@@ -1,0 +1,22 @@
+{
+  "titre": "Code d'invitation",
+  "sous-titre": "Réservé aux négociatrices et négociateurs",
+  "etape": "Étape 2 sur 3 — Code",
+  "propos": "Le code est diffusé dans le groupe WhatsApp du réseau, ou remis par l'IFDD à l'atelier préparatoire. Il ouvre les échanges, les documents réservés et les signalements.",
+  "champ": {
+    "libelle": "Code d'invitation",
+    "aide": "Huit caractères, tirets compris. La casse et les espaces n'ont pas d'importance.",
+    "indication": "NEGO-024"
+  },
+  "valider": "Valider le code",
+  "continuer": "Continuer",
+  "plus-tard": "Plus tard",
+  "hors-connexion": "La saisie d'un code demande le réseau. Rien n'est envoyé pour l'instant, et aucun accès n'est ouvert.",
+  "sans-compte": "Le code s'ajoute à un compte. Créez le vôtre ou connectez-vous, puis revenez le saisir.",
+  "creer-mon-compte": "Créer mon compte",
+  "me-connecter": "J'ai déjà un compte — Me connecter",
+  "pas-de-code": {
+    "titre": "Vous n'avez pas de code ?",
+    "propos": "Demandez-le dans votre groupe, ou à l'IFDD lors de l'atelier préparatoire."
+  }
+}

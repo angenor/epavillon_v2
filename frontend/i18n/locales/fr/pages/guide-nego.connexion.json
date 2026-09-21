@@ -1,0 +1,22 @@
+{
+  "titre": "Me connecter",
+  "sous-titre": "Avec votre compte Guide Négo ou ePavillon",
+  "champ": {
+    "adresse": "Adresse électronique",
+    "mot-de-passe": "Mot de passe"
+  },
+  "mot-de-passe-oublie": "Mot de passe oublié ?",
+  "entrer": "Me connecter",
+  "creer-un-compte": "Créer mon compte",
+  "renvoyer": "Renvoyer le courriel de confirmation",
+  "oubli": {
+    "titre": "Mot de passe oublié"
+  },
+  "refus": {
+    "identifiants": "Adresse ou mot de passe incorrect.",
+    "verrouille": "Trop d'essais : ce compte est bloqué quelques minutes. Réessayez ensuite.",
+    "suspendu": "Ce compte est suspendu. Écrivez à l'IFDD pour en savoir plus.",
+    "second-facteur": "Ce compte demande un second facteur, qui n'est pas encore branché dans l'application. Connectez-vous depuis le site.",
+    "adresse-non-confirmee": "Votre adresse {adresse} n'est pas encore confirmée. Touchez le lien du courriel reçu, ou redemandez-en un."
+  }
+}

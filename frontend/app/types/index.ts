@@ -24,6 +24,7 @@
  *   content.ts                 115_content.sql — les contenus mis en avant
  *   engagement.ts              110_engagement.sql § 6 — les rappels seuls
  *   live.ts                    080_live.sql § 5 — les messages d'incident seuls
+ *   negotiation.ts             100_negotiations.sql § 2 bis — l'admission seule
  *   analytics.ts               130_analytics.sql — les projections du tableau de bord
  *   views.ts                   les cinq vues consommées telles quelles
  *
@@ -68,5 +69,6 @@ export type * from './programme/registration'
 export type * from './content'
 export type * from './engagement'
 export type * from './live'
+export type * from './negotiation'
 export type * from './analytics'
 export type * from './views'

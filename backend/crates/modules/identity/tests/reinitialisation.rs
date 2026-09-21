@@ -10,6 +10,7 @@ mod commun;
 use commun::{semer, sessions_vivantes, Bac, Compte, MOT_DE_PASSE};
 use identity::domain::login::LoginOutcome;
 use identity::domain::token::{PasswordResetOutcome, TokenCheckOutcome, TokenRejection};
+use identity::repo::sessions::ClientKind;
 use identity::service::auth::{login, LoginRequest};
 use identity::service::password_reset;
 use identity::service::session::Device;
@@ -32,7 +33,7 @@ async fn jeton_en_file(bac: &Bac) -> String {
 }
 
 async fn demander(bac: &Bac, email: &str) {
-    let issue = password_reset::request(&bac.state, &bac.ctx(), email)
+    let issue = password_reset::request(&bac.state, &bac.ctx(), email, ClientKind::Web)
         .await
         .expect("demande de réinitialisation");
     assert_eq!(issue.status, "sent");
@@ -311,9 +312,14 @@ async fn un_jeton_dune_autre_finalite_est_invalide() {
     let bac = Bac::monter().await;
     let person_id = semer(&bac, Compte::non_verifie(ADRESSE)).await;
 
-    identity::service::registration::resend_verification(&bac.state, &bac.ctx(), ADRESSE)
-        .await
-        .expect("renvoi du lien de vérification");
+    identity::service::registration::resend_verification(
+        &bac.state,
+        &bac.ctx(),
+        ADRESSE,
+        ClientKind::Web,
+    )
+    .await
+    .expect("renvoi du lien de vérification");
 
     let jeton = sqlx::query_scalar!(
         "SELECT payload ->> 'token' FROM platform.jobs

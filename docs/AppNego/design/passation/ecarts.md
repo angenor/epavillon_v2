@@ -54,3 +54,12 @@ Relevé mécanique (styles en ligne de toutes les pages, 20 septembre 2026) conf
 30. `theme.css` déclare la charte et les nuances sombres sous `:root` : hors de `[data-app="guide-nego"]`, ce que la constitution (XIII) interdit.
 31. `--gn-picto` est une couleur dans `theme.css` et une taille (24 px) dans `mesures.css` : un nom, deux sens.
 32. « Dernière synchronisation — Aujourd'hui, 11:35 — heure d'Antalya » (02 · 11 Profil) donne un fuseau à une heure de lecture ; « lu à » et « Synchronisé à » n'en portent pas, et rien ne dit ce qu'on écrit quand la lecture date de la veille.
+
+## Relevés en construisant 0b (21 septembre 2026)
+
+33. **Le rouge de charte sur un aplat de bouton.** Voir la décision au § « Les écarts, tranchés » de [05-design.md](../../05-design.md).
+34. **Le retour d'un courriel n'a pas d'écran.** `02-socle.html` mène du compte (03a) au code (04a) sans passer par la confirmation d'adresse, alors que le courriel de vérification ramène aujourd'hui sur un écran du **site**. Voir la décision au même endroit.
+35. **Le champ « Pays » de 03a est dessiné comme un champ de texte** (« Sénégal »), sans dire comment on le choisit. La liste des pays est une donnée du référentiel — 249 entrées —, qu'aucune saisie libre ne peut viser juste.
+36. **L'indicateur d'étapes n'est pas dans la planche des composants.** Les pages 03a et 04a dessinent trois segments et un libellé — « Étape 2 sur 3 — Code » —, et les jetons existent (`--gn-segment-etape`), mais la recherche R8 annonçait `GnVerrou` comme « le seul composant qui manque ». Trois écrans l'emploient : le compte, le code, et le choix des thématiques à venir. Livré en `GnEtapes`, segments `aria-hidden` et sens porté par le libellé — une barre remplie ne se lit pas à voix haute.
+37. **Le code de 04a porte sept caractères** (« NEGO-24 »), et le texte de 04b en annonce huit (« Vérifiez les huit caractères, tirets compris »). C'est la spécification qui tranche : huit, tirets compris. La maquette se corrige.
+38. **La sortie « Demander l'accès à l'IFDD » de 04b et 04c n'est pas livrée en 0b phase 4.** L'écran de demande arrive avec US4 (T093) ; un bouton qui mènerait à une adresse inexistante serait pire que son absence. Les deux écrans gardent « Plus tard » et la ressaisie, donc au moins une suite dans tous les cas (FR-015), et l'aide « Vous n'avez pas de code ? » dit où le chercher.

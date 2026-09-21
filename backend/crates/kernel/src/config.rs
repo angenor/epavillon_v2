@@ -97,6 +97,11 @@ struct Raw {
     auth_session_ttl: Duration,
     #[serde(with = "humantime_serde", default = "days_30")]
     auth_session_ttl_remembered: Duration,
+    /// La durée d'une session ouverte depuis l'application Guide Négo, **sans
+    /// case à cocher**. Douze heures déconnecteraient une négociatrice en salle,
+    /// là où aucun réseau ne permet de se reconnecter.
+    #[serde(with = "humantime_serde", default = "days_90")]
+    auth_session_ttl_app: Duration,
 
     #[serde(with = "humantime_serde", default = "hours_24")]
     auth_token_ttl_email_verification: Duration,
@@ -316,6 +321,9 @@ fn days_14() -> Duration {
 fn days_30() -> Duration {
     Duration::from_secs(30 * 86_400)
 }
+fn days_90() -> Duration {
+    Duration::from_secs(90 * 86_400)
+}
 
 #[derive(Debug, Clone)]
 pub struct Config {
@@ -360,6 +368,7 @@ pub struct AuthConfig {
     pub access_token_ttl: Duration,
     pub session_ttl: Duration,
     pub session_ttl_remembered: Duration,
+    pub session_ttl_app: Duration,
     pub token_ttl: TokenTtls,
     pub signing_key: Secret,
     pub cookie_secure: bool,
@@ -705,6 +714,7 @@ impl Config {
                 "AUTH_SESSION_TTL_REMEMBERED",
                 raw.auth_session_ttl_remembered,
             ),
+            ("AUTH_SESSION_TTL_APP", raw.auth_session_ttl_app),
             (
                 "AUTH_TOKEN_TTL_EMAIL_VERIFICATION",
                 raw.auth_token_ttl_email_verification,
@@ -873,6 +883,7 @@ impl Config {
                 access_token_ttl: raw.auth_access_token_ttl,
                 session_ttl: raw.auth_session_ttl,
                 session_ttl_remembered: raw.auth_session_ttl_remembered,
+                session_ttl_app: raw.auth_session_ttl_app,
                 token_ttl: TokenTtls {
                     email_verification: raw.auth_token_ttl_email_verification,
                     password_reset: raw.auth_token_ttl_password_reset,

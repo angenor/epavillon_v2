@@ -1,0 +1,26 @@
+{
+  "titre": "Address confirmation",
+  "attente": "Confirming…",
+  "renvoyer": "Resend the email",
+  "vers-connexion": "Sign in",
+  "confirmee": {
+    "titre": "Address confirmed",
+    "suite": "Your account is ready. Taking you to the next step.",
+    "retournez": "Go back to Guide Négo to continue: the application picks up where you left off."
+  },
+  "perimee": {
+    "titre": "This link has expired",
+    "texte": "A confirmation link is valid for 24 hours. Ask for a new one."
+  },
+  "deja-utilisee": {
+    "titre": "Already done",
+    "texte": "This address has already been confirmed. You can sign in."
+  },
+  "inconnue": {
+    "titre": "This link is not recognised",
+    "texte": "The link may be incomplete. Open it from the email rather than retyping it."
+  },
+  "panne": {
+    "titre": "Confirmation failed"
+  }
+}

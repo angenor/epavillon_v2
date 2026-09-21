@@ -8,12 +8,17 @@
 mod commun;
 
 use commun::{semer, Bac, Compte, MOT_DE_PASSE};
+use identity::repo::sessions::ClientKind;
 use identity::service::registration::{self, RegisterRequest};
 use kernel::error::ErrorCode;
 
 const ADRESSE: &str = "awa.diallo@example.org";
 
 fn demande(email: &str) -> RegisterRequest<'_> {
+    demande_de(email, ClientKind::Web)
+}
+
+fn demande_de(email: &str, client: ClientKind) -> RegisterRequest<'_> {
     RegisterRequest {
         first_name: "Awa",
         last_name: "Diallo",
@@ -22,6 +27,7 @@ fn demande(email: &str) -> RegisterRequest<'_> {
         password: MOT_DE_PASSE,
         preferred_locale: "fr",
         timezone: "Africa/Dakar",
+        client,
     }
 }
 
@@ -228,4 +234,33 @@ async fn une_personne_sans_compte_obtient_un_compte_et_son_lien() {
     .await
     .expect("comptage des personnes");
     assert_eq!(personnes, 1);
+}
+
+/// **La règle vaut aussi depuis l'application** (FR-002). L'écran d'inscription
+/// de Guide Négo ne doit pas devenir l'annuaire des comptes que le site refuse
+/// d'être : adresse libre ou déjà prise, la réponse est la même, et seul le
+/// courriel diffère.
+#[tokio::test]
+async fn depuis_lapplication_la_reponse_ne_change_pas_non_plus() {
+    let bac = Bac::monter().await;
+
+    let libre = registration::register(
+        &bac.state,
+        &bac.ctx(),
+        demande_de("inconnue@example.org", ClientKind::App),
+    )
+    .await
+    .expect("adresse libre");
+
+    semer(&bac, Compte::actif(ADRESSE)).await;
+    let prise =
+        registration::register(&bac.state, &bac.ctx(), demande_de(ADRESSE, ClientKind::App))
+            .await
+            .expect("adresse déjà prise");
+
+    assert_eq!(
+        serde_json::to_value(&libre).unwrap()["status"],
+        serde_json::to_value(&prise).unwrap()["status"],
+        "l'issue est la même dans les deux cas"
+    );
 }

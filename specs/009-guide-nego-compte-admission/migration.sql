@@ -21,9 +21,9 @@
 -- ORDRE
 --   1. identity : le type de client et l'appareil sur les sessions
 --   2. reference : la taxonomie des réseaux
---   3. negotiation : types, tables, contraintes, index, fonctions, triggers
---   4. negotiation : les deux vues du back-office
---   5. platform : les réglages
+--   3. negotiation : types, tables, contraintes, index, fonctions, triggers,
+--      et les deux vues du back-office
+--   4. platform : les réglages
 --
 -- CONTRÔLE APRÈS COUP (§ 13, étape 6)
 --   pg_dump --schema-only de cette base, comparé à celui d'une base chargée
@@ -72,11 +72,13 @@ COMMENT ON COLUMN identity.sessions.device_platform IS
 
 -- is_system : le code du terme est lu par l'API (« women_negotiators »), il ne
 -- doit pas se renommer librement depuis le back-office.
-INSERT INTO reference.taxonomies (code, label, description, is_system)
+-- `description` est un platform.i18n_text, pas du texte : une chaîne simple
+-- échouerait ici, et le semis de 020_reference.sql porte les deux langues.
+INSERT INTO reference.taxonomies (code, label, description, is_multi_select, is_hierarchical, is_system)
 VALUES ('negotiation_network',
         '{"fr":"Réseaux de négociation","en":"Negotiation networks"}'::jsonb,
-        'Réseaux auxquels un code d''invitation peut donner l''appartenance (ADR-007).',
-        true)
+        '{"fr":"Réseaux auxquels un code d''invitation peut donner l''appartenance","en":"Networks a invitation code may grant membership to"}'::jsonb,
+        false, false, true)
 ON CONFLICT (code) DO NOTHING;
 
 INSERT INTO reference.taxonomy_terms (taxonomy_code, code, label, sort_order)
@@ -85,45 +87,45 @@ VALUES ('negotiation_network', 'women_negotiators',
         10)
 ON CONFLICT (taxonomy_code, code) DO NOTHING;
 
--- -----------------------------------------------------------------------------
--- 3. negotiation — types
--- -----------------------------------------------------------------------------
-
-DO $$
-BEGIN
-    CREATE TYPE negotiation.access_request_status AS ENUM
-        ('pending', 'approved', 'rejected', 'cancelled');
-    -- 'cancelled' se dit « annulée » : le fait de la personne entrée par un code
-    -- entre-temps. « Révoquée » qualifie un accès retiré, jamais une demande.
-EXCEPTION
-    WHEN duplicate_object THEN NULL;
-END
-$$;
-
-DO $$
-BEGIN
-    CREATE TYPE negotiation.invitation_attempt_outcome AS ENUM
-        ('accepted', 'unknown', 'revoked', 'exhausted', 'expired', 'not_yet_valid', 'throttled');
-EXCEPTION
-    WHEN duplicate_object THEN NULL;
-END
-$$;
+-- LE BLOC QUI SUIT EST LE MÊME TEXTE que le § 2 bis de
+-- docs/database/100_negotiations.sql, à l'idempotence près : IF NOT EXISTS,
+-- DROP TRIGGER IF EXISTS, types encapsulés. C'est ce qui rend la comparaison de
+-- schémas du § 13 exploitable — un mot qui diffère dans un COMMENT ou dans une
+-- expression de vue ressortirait comme un écart, et on perdrait le seul
+-- contrôle dont on dispose.
 
 -- -----------------------------------------------------------------------------
--- 3.1 Les codes d'invitation
+-- 3. Admission — comment on entre dans l'espace réservé
+--
+-- Le parcours : une personne reçoit un code d'invitation (souvent sur WhatsApp,
+-- recopié à la main), le saisit dans Guide Négo, et obtient le rôle
+-- `negotiator` avec sa portée — aussitôt, ou après l'approbation d'un
+-- administrateur selon le réglage `negotiation.admission_mode`.
+--
+-- CE QUI ACCORDE LE DROIT reste `identity.role_assignments`, et lui seul. Les
+-- tables ci-dessous sont l'HISTORIQUE (qui est entré avec quel code, qui a
+-- demandé, qui a essayé) : aucune ne porte d'état d'accès, parce que deux
+-- vérités divergent toujours un jour.
+--
+-- LA PORTÉE D'UN CODE est celle du rôle `negotiator`, dont les allowed_scopes
+-- valent exactement `{global, negotiation_space}` : un code ouvre un espace
+-- précis, ou Guide Négo en entier. Rien d'autre n'est offert au back-office.
 -- -----------------------------------------------------------------------------
 
+-- 3.1 — Les codes d'invitation
 CREATE TABLE IF NOT EXISTS negotiation.invitation_codes (
     id                     uuid    PRIMARY KEY DEFAULT platform.uuid_v7(),
     code                   text    NOT NULL CHECK (code ~ '^[A-Z0-9-]{6,16}$'),
+    -- Comparaison insensible à la casse et aux séparateurs : le code circule
+    -- recopié à la main depuis WhatsApp, avec ou sans tiret.
     code_normalized        text    GENERATED ALWAYS AS
                                    (upper(regexp_replace(code, '[^A-Za-z0-9]', '', 'g'))) STORED,
     label                  text    NOT NULL,
     scope_type             identity.scope_type NOT NULL,
     space_id               uuid    REFERENCES negotiation.spaces(id) ON DELETE CASCADE,
     grants_network_term_id uuid    REFERENCES reference.taxonomy_terms(id) ON DELETE RESTRICT,
-    max_uses               integer,
-    used_count             integer NOT NULL DEFAULT 0,
+    max_uses               integer,                    -- NULL = sans limite
+    used_count             integer NOT NULL DEFAULT 0, -- tenu par trigger, jamais écrit à la main
     valid_from             timestamptz NOT NULL DEFAULT now(),
     valid_until            timestamptz,
     revoked_at             timestamptz,
@@ -134,62 +136,83 @@ CREATE TABLE IF NOT EXISTS negotiation.invitation_codes (
                                    REFERENCES identity.people(id) ON DELETE SET NULL,
     created_at             timestamptz NOT NULL DEFAULT now(),
     updated_at             timestamptz NOT NULL DEFAULT now(),
+    -- Les deux seules portées offertes, et les deux seules que le rôle
+    -- `negotiator` autorise : un espace précis, ou Guide Négo en entier.
     CONSTRAINT ck_invitation_codes_scope CHECK (
         (scope_type = 'global'            AND space_id IS NULL) OR
         (scope_type = 'negotiation_space' AND space_id IS NOT NULL)),
     CONSTRAINT ck_invitation_codes_uses   CHECK (max_uses IS NULL OR max_uses > 0),
-    -- Le quota se tient EN BASE : l'incrément du trigger prend le verrou de
-    -- ligne, et la 121e entrée sur un code de 120 échoue ici, pas dans une
-    -- vérification applicative que deux requêtes simultanées contourneraient.
+    -- Le quota se tient EN BASE. Sans ce CHECK, deux entrées simultanées sur le
+    -- dernier usage passeraient toutes les deux : chacune lit `used_count = 119`
+    -- avant que l'autre n'écrive. L'incrément du trigger prend le verrou de
+    -- ligne, la seconde échoue ici, et l'API la traduit en « code épuisé ».
     CONSTRAINT ck_invitation_codes_quota  CHECK (max_uses IS NULL OR used_count <= max_uses),
     CONSTRAINT ck_invitation_codes_period CHECK (valid_until IS NULL OR valid_until > valid_from),
     -- Un auteur de révocation sans date serait une révocation qu'on ne peut pas
-    -- dater — or l'écran « 04c » doit dire « révoqué le 8 novembre ».
+    -- dater — or l'écran de saisie doit dire « révoqué le 8 novembre ».
     CONSTRAINT ck_invitation_codes_revoked CHECK (revoked_by IS NULL OR revoked_at IS NOT NULL)
 );
 
--- Unicité TOTALE, révoqués compris : l'écran « 04c » doit pouvoir dire
--- « révoqué le 8 novembre » plutôt que « code inconnu », qui enverrait la
--- personne chercher une faute de frappe.
-CREATE UNIQUE INDEX IF NOT EXISTS ux_invitation_codes_normalized
-    ON negotiation.invitation_codes (code_normalized);
-CREATE INDEX IF NOT EXISTS ix_invitation_codes_space
-    ON negotiation.invitation_codes (space_id, created_at DESC);
+-- Unicité TOTALE, révoqués compris : retrouver un code révoqué est ce qui
+-- permet de répondre « ce code a été révoqué le … » plutôt que « inconnu ».
+CREATE UNIQUE INDEX IF NOT EXISTS ux_invitation_codes_normalized ON negotiation.invitation_codes (code_normalized);
+CREATE INDEX IF NOT EXISTS ix_invitation_codes_space ON negotiation.invitation_codes (space_id, created_at DESC);
+
+DROP TRIGGER IF EXISTS tg_invitation_codes_updated_at ON negotiation.invitation_codes;
+CREATE TRIGGER tg_invitation_codes_updated_at BEFORE UPDATE ON negotiation.invitation_codes
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
+DROP TRIGGER IF EXISTS tg_invitation_codes_audit ON negotiation.invitation_codes;
+CREATE TRIGGER tg_invitation_codes_audit AFTER INSERT OR UPDATE OR DELETE ON negotiation.invitation_codes
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
+DROP TRIGGER IF EXISTS tg_invitation_codes_check_network ON negotiation.invitation_codes;
+CREATE TRIGGER tg_invitation_codes_check_network
+    BEFORE INSERT OR UPDATE OF grants_network_term_id ON negotiation.invitation_codes
+    FOR EACH ROW EXECUTE FUNCTION negotiation.tg_check_term_taxonomy(
+        'grants_network_term_id', 'negotiation_network');
 
 COMMENT ON TABLE negotiation.invitation_codes IS
-    'Code partagé, diffusé à un groupe (WhatsApp, atelier). Sa portée est celle du rôle negotiator : un espace, ou global. Révoquer un code N''EN RETIRE AUCUN ACCÈS déjà accordé — c''est un second geste (ADR-006).';
+    'Code d''invitation ouvrant l''espace réservé. N''a pas de colonne d''état : actif, révoqué, épuisé et terminé se dérivent (voir negotiation.v_invitation_codes).';
 COMMENT ON COLUMN negotiation.invitation_codes.code_normalized IS
-    'Forme comparée : majuscules, sans séparateur. Le code se recopie à la main depuis un message.';
-COMMENT ON COLUMN negotiation.invitation_codes.used_count IS
-    'Tenu par tg_invitation_code_uses_count. Jamais écrit à la main.';
+    'Forme de comparaison : majuscules, sans séparateur. « nego-024 », « NEGO 024 » et « Nego024 » désignent le même code.';
+COMMENT ON COLUMN negotiation.invitation_codes.scope_type IS
+    'Portée accordée par le code, reprise telle quelle dans role_assignments : negotiation_space (un espace) ou global (Guide Négo en entier).';
 COMMENT ON COLUMN negotiation.invitation_codes.grants_network_term_id IS
-    'Réseau que ce code fait rejoindre (taxonomie negotiation_network). NULL = code général. ADR-007 : c''est le réseau qui distingue, pas le genre.';
+    'Réseau dont le code donne l''appartenance (taxonomie negotiation_network). Aucun champ « genre » n''existe : l''appartenance vient du code, et de rien d''autre.';
+COMMENT ON COLUMN negotiation.invitation_codes.used_count IS
+    'Tenu par tg_invitation_code_uses_count. Jamais écrit par l''application : c''est l''incrément sous verrou de ligne qui borne le quota.';
 
--- -----------------------------------------------------------------------------
--- 3.2 Qui est entré avec quel code
+-- 3.2 — Qui est entré avec quel code
 --
--- Historique, pas droit : comme space_members, cette table n'accorde rien.
--- L'accès effectif vit dans identity.role_assignments, et le retrait s'y écrit.
--- -----------------------------------------------------------------------------
-
+-- Historique, pas droit : comme space_members, cette table n'accorde rien et ne
+-- porte AUCUNE colonne de révocation. L'accès effectif se lit dans
+-- identity.role_assignments, et le retrait s'y écrit.
 CREATE TABLE IF NOT EXISTS negotiation.invitation_code_uses (
-    id         uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
-    code_id    uuid        NOT NULL REFERENCES negotiation.invitation_codes(id) ON DELETE CASCADE,
-    person_id  uuid        NOT NULL CONSTRAINT xmod_fk_invitation_code_uses_person
-                           REFERENCES identity.people(id) ON DELETE CASCADE,
-    session_id uuid        CONSTRAINT xmod_fk_invitation_code_uses_session
-                           REFERENCES identity.sessions(id) ON DELETE SET NULL,
-    used_at    timestamptz NOT NULL DEFAULT now()
+    id           uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    code_id      uuid        NOT NULL REFERENCES negotiation.invitation_codes(id) ON DELETE CASCADE,
+    person_id    uuid        NOT NULL CONSTRAINT xmod_fk_invitation_code_uses_person
+                             REFERENCES identity.people(id) ON DELETE CASCADE,
+    session_id   uuid        CONSTRAINT xmod_fk_invitation_code_uses_session
+                             REFERENCES identity.sessions(id) ON DELETE SET NULL,
+    used_at      timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS ux_invitation_code_uses_person
-    ON negotiation.invitation_code_uses (code_id, person_id);
-CREATE INDEX IF NOT EXISTS ix_invitation_code_uses_person
-    ON negotiation.invitation_code_uses (person_id, used_at DESC);
+-- Deux appareils qui saisissent le même code pour la même personne ne produisent
+-- qu'un usage : l'opération est idempotente.
+CREATE UNIQUE INDEX IF NOT EXISTS ux_invitation_code_uses_person ON negotiation.invitation_code_uses (code_id, person_id);
+CREATE INDEX IF NOT EXISTS ix_invitation_code_uses_person ON negotiation.invitation_code_uses (person_id, used_at DESC);
 
-COMMENT ON TABLE negotiation.invitation_code_uses IS
-    'Qui est entré avec quel code. N''accorde aucun droit : l''autorisation passe par identity.has_permission. Sert à retirer en bloc les accès d''un code compromis.';
-
+-- L'incrément prend le verrou EXCLUSIF de la ligne du code, et
+-- ck_invitation_codes_quota refuse la seconde entrée.
+--
+-- ATTENTION — L'APPELANT DOIT VERROUILLER LA LIGNE DU CODE AVANT D'INSÉRER :
+--     SELECT id FROM negotiation.invitation_codes WHERE id = :code FOR UPDATE;
+-- Relevé en éprouvant quatre entrées simultanées, le 21/09. L'insertion d'un
+-- usage prend d'abord un verrou PARTAGÉ sur la ligne du code, par la clé
+-- étrangère ; l'incrément ci-dessous tente ensuite de le hausser en exclusif.
+-- Deux transactions qui détiennent chacune le partagé s'attendent l'une
+-- l'autre : PostgreSQL en tue une (40P01), et la personne reçoit une panne au
+-- lieu du « code épuisé » qu'on lui promet. Verrouiller d'abord les sérialise
+-- dans le bon ordre, sans jamais lire `used_count`.
 CREATE OR REPLACE FUNCTION negotiation.tg_invitation_code_uses_count()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -213,10 +236,13 @@ CREATE TRIGGER tg_invitation_code_uses_count
     AFTER INSERT OR DELETE ON negotiation.invitation_code_uses
     FOR EACH ROW EXECUTE FUNCTION negotiation.tg_invitation_code_uses_count();
 
--- -----------------------------------------------------------------------------
--- 3.3 L'appartenance à un réseau (ADR-007)
--- -----------------------------------------------------------------------------
+COMMENT ON TABLE negotiation.invitation_code_uses IS
+    'Qui est entré avec quel code, et quand. Historique : n''accorde aucun droit et ne porte aucun état de révocation — dupliquer le RBAC, c''est se préparer à deux vérités.';
 
+-- 3.3 — L'appartenance à un réseau
+--
+-- Elle n'ouvre aucun droit à ce stade : elle sert les chiffres des bailleurs et,
+-- plus tard, les canaux réservés. Sa traçabilité passe par le code utilisé.
 CREATE TABLE IF NOT EXISTS negotiation.network_memberships (
     id              uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
     person_id       uuid        NOT NULL CONSTRAINT xmod_fk_network_memberships_person
@@ -230,20 +256,42 @@ CREATE TABLE IF NOT EXISTS negotiation.network_memberships (
 
 CREATE UNIQUE INDEX IF NOT EXISTS ux_network_memberships_active
     ON negotiation.network_memberships (person_id, network_term_id) WHERE left_at IS NULL;
+CREATE INDEX IF NOT EXISTS ix_network_memberships_network
+    ON negotiation.network_memberships (network_term_id, joined_at DESC) WHERE left_at IS NULL;
+
+DROP TRIGGER IF EXISTS tg_network_memberships_audit ON negotiation.network_memberships;
+CREATE TRIGGER tg_network_memberships_audit
+    AFTER INSERT OR UPDATE OR DELETE ON negotiation.network_memberships
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
+DROP TRIGGER IF EXISTS tg_network_memberships_check_network ON negotiation.network_memberships;
+CREATE TRIGGER tg_network_memberships_check_network
+    BEFORE INSERT OR UPDATE OF network_term_id ON negotiation.network_memberships
+    FOR EACH ROW EXECUTE FUNCTION negotiation.tg_check_term_taxonomy(
+        'network_term_id', 'negotiation_network');
 
 COMMENT ON TABLE negotiation.network_memberships IS
-    'Appartenance à un réseau, portée par le code utilisé (ADR-007). N''ouvre aucun droit à l''étape 0b : elle sert le canal réservé et les chiffres des bailleurs. AUCUN champ « genre » n''existe ni n''est déduit.';
+    'Appartenance à un réseau de négociation, venue du code d''invitation utilisé. N''ouvre aucun droit ; sert les chiffres et, plus tard, les canaux réservés.';
+COMMENT ON COLUMN negotiation.network_memberships.source_code_id IS
+    'Code par lequel l''appartenance est venue : c''est ce qui rend les chiffres du réseau vérifiables.';
 
--- -----------------------------------------------------------------------------
--- 3.4 Les demandes d'accès (ADR-006)
--- -----------------------------------------------------------------------------
-
+-- 3.4 — Les demandes d'accès
+--
+-- `cancelled` = « annulée », le fait de la personne entrée par un code entre-temps.
+-- Ce n'est PAS « révoquée », qui qualifie un accès retiré, jamais une demande.
+DO $$
+BEGIN
+    CREATE TYPE negotiation.access_request_status AS ENUM ('pending', 'approved', 'rejected', 'cancelled');
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END
+$$;
 CREATE TABLE IF NOT EXISTS negotiation.access_requests (
     id                 uuid    PRIMARY KEY DEFAULT platform.uuid_v7(),
     person_id          uuid    NOT NULL CONSTRAINT xmod_fk_access_requests_person
                                REFERENCES identity.people(id) ON DELETE CASCADE,
     scope_type         identity.scope_type NOT NULL,
     space_id           uuid    REFERENCES negotiation.spaces(id) ON DELETE CASCADE,
+    -- Mode « les deux » : le code a été reconnu, il n'a pas suffi à ouvrir.
     invitation_code_id uuid    REFERENCES negotiation.invitation_codes(id) ON DELETE SET NULL,
     message            text,
     status             negotiation.access_request_status NOT NULL DEFAULT 'pending',
@@ -257,11 +305,13 @@ CREATE TABLE IF NOT EXISTS negotiation.access_requests (
     CONSTRAINT ck_access_requests_scope CHECK (
         (scope_type = 'global'            AND space_id IS NULL) OR
         (scope_type = 'negotiation_space' AND space_id IS NOT NULL)),
-    CONSTRAINT ck_access_requests_decision CHECK ((status = 'pending') = (decided_at IS NULL))
+    CONSTRAINT ck_access_requests_decision CHECK (
+        (status = 'pending') = (decided_at IS NULL))
 );
 
--- « Une seule demande en attente » est porté par la base : deux appareils qui
--- l'envoient ensemble ne produisent qu'une ligne, et l'API traduit le conflit.
+-- « Une seule demande en attente à la fois » se tient en base : deux appareils
+-- qui l'envoient ensemble ne produisent qu'une ligne, et l'API traduit le
+-- conflit plutôt que de le prévenir par un SELECT préalable.
 CREATE UNIQUE INDEX IF NOT EXISTS ux_access_requests_pending_space
     ON negotiation.access_requests (person_id, space_id)
     WHERE status = 'pending' AND space_id IS NOT NULL;
@@ -271,71 +321,92 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_access_requests_pending_global
 CREATE INDEX IF NOT EXISTS ix_access_requests_queue
     ON negotiation.access_requests (space_id, submitted_at) WHERE status = 'pending';
 
-COMMENT ON TABLE negotiation.access_requests IS
-    'Demande d''accès à trancher par un administrateur (ADR-006). Une seule en attente par personne et par portée. Un refus n''efface rien : une nouvelle demande est une nouvelle ligne.';
+DROP TRIGGER IF EXISTS tg_access_requests_updated_at ON negotiation.access_requests;
+CREATE TRIGGER tg_access_requests_updated_at BEFORE UPDATE ON negotiation.access_requests
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
+DROP TRIGGER IF EXISTS tg_access_requests_audit ON negotiation.access_requests;
+CREATE TRIGGER tg_access_requests_audit AFTER INSERT OR UPDATE OR DELETE ON negotiation.access_requests
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
 
+-- La machine à états : depuis `pending` on va vers approved, rejected ou
+-- cancelled ; un état final ne se rouvre pas. Une nouvelle demande après un
+-- refus est une NOUVELLE LIGNE, ce qui conserve l'historique des décisions.
 CREATE OR REPLACE FUNCTION negotiation.tg_access_request_transition()
 RETURNS trigger
 LANGUAGE plpgsql
 AS $$
 BEGIN
-    IF OLD.status <> 'pending' AND NEW.status IS DISTINCT FROM OLD.status THEN
-        RAISE EXCEPTION 'Cette demande d''accès a déjà été tranchée (% → %).', OLD.status, NEW.status
+    IF NEW.status IS DISTINCT FROM OLD.status AND OLD.status <> 'pending' THEN
+        RAISE EXCEPTION 'Demande d''accès % déjà tranchée (%) : elle ne peut plus passer à %',
+            OLD.id, OLD.status, NEW.status
             USING ERRCODE = 'integrity_constraint_violation';
     END IF;
     RETURN NEW;
 END;
 $$;
 
-DROP TRIGGER IF EXISTS tg_access_requests_transition ON negotiation.access_requests;
-CREATE TRIGGER tg_access_requests_transition
-    BEFORE UPDATE OF status ON negotiation.access_requests
+DROP TRIGGER IF EXISTS tg_access_request_transition ON negotiation.access_requests;
+CREATE TRIGGER tg_access_request_transition BEFORE UPDATE OF status ON negotiation.access_requests
     FOR EACH ROW EXECUTE FUNCTION negotiation.tg_access_request_transition();
 
+-- L'événement part DANS la transaction de la décision : le courriel ne peut pas
+-- partir avant qu'elle soit enregistrée, et `negotiation` n'appelle jamais
+-- `identity` directement.
 CREATE OR REPLACE FUNCTION negotiation.tg_access_request_event()
 RETURNS trigger
 LANGUAGE plpgsql
 AS $$
+DECLARE
+    v_action text;
 BEGIN
     IF TG_OP = 'INSERT' THEN
-        PERFORM platform.emit_event(
-            'negotiation', 'access_request', NEW.id,
-            'negotiation.access_request.submitted',
-            jsonb_build_object('person_id', NEW.person_id, 'space_id', NEW.space_id,
-                               'invitation_code_id', NEW.invitation_code_id));
+        v_action := 'submitted';
     ELSIF NEW.status IS DISTINCT FROM OLD.status AND NEW.status IN ('approved', 'rejected') THEN
-        PERFORM platform.emit_event(
-            'negotiation', 'access_request', NEW.id,
-            'negotiation.access_request.' || NEW.status::text,
-            jsonb_build_object('person_id', NEW.person_id, 'space_id', NEW.space_id,
-                               'decided_by', NEW.decided_by, 'reason', NEW.decision_reason));
+        v_action := NEW.status;
+    ELSE
+        RETURN NULL;
     END IF;
+
+    PERFORM platform.emit_event(
+        'negotiation', 'access_request', NEW.id,
+        'negotiation.access_request.' || v_action,
+        jsonb_build_object('person_id', NEW.person_id, 'scope_type', NEW.scope_type,
+                           'space_id', NEW.space_id, 'reason', NEW.decision_reason)
+    );
     RETURN NULL;
 END;
 $$;
 
-DROP TRIGGER IF EXISTS tg_access_requests_event ON negotiation.access_requests;
-CREATE TRIGGER tg_access_requests_event
-    AFTER INSERT OR UPDATE OF status ON negotiation.access_requests
+DROP TRIGGER IF EXISTS tg_access_request_event ON negotiation.access_requests;
+CREATE TRIGGER tg_access_request_event AFTER INSERT OR UPDATE OF status ON negotiation.access_requests
     FOR EACH ROW EXECUTE FUNCTION negotiation.tg_access_request_event();
 
--- -----------------------------------------------------------------------------
--- 3.5 Les essais de code
+COMMENT ON TABLE negotiation.access_requests IS
+    'Demande d''accès à l''espace réservé, quand le mode d''admission exige une approbation. Un état final ne se rouvre pas : une nouvelle demande est une nouvelle ligne.';
+COMMENT ON COLUMN negotiation.access_requests.status IS
+    'cancelled se dit « annulée » — la personne est entrée par un code entre-temps. « Révoquée » qualifie un accès retiré, jamais une demande.';
+COMMENT ON COLUMN negotiation.access_requests.invitation_code_id IS
+    'Code reconnu mais insuffisant à ouvrir, en mode « code et approbation ». Sert à l''administrateur qui tranche.';
+
+-- 3.5 — Les essais de code
 --
--- LE COMPTE SE FAIT PAR PERSONNE. `device_id` vient du corps de la requête :
--- il se forge, et compter « par personne ET par appareil » laisserait changer
--- d'identifiant pour remettre le compteur à zéro. L'appareil n'est ici qu'une
--- information, utile à un administrateur qui regarde une série d'échecs.
+-- Le compte se fait PAR PERSONNE, et par personne seulement. `device_id` vient
+-- du corps de la requête : il se forge. Compter « par personne ET par appareil »
+-- suffirait à changer d'identifiant pour remettre le compteur à zéro, et la
+-- limite ne limiterait rien. L'appareil est gardé comme INFORMATION — il aide un
+-- administrateur à lire une série d'échecs —, jamais comme borne.
 --
 -- Le code essayé n'est JAMAIS stocké, ni en clair ni en empreinte : un essai
--- raté peut être le vrai code d'un autre espace, et cette table se lit au
--- back-office.
---
--- DURÉE DE GARDE : 90 jours, purgés par une chaîne récurrente du worker. C'est
--- assez pour constater une série d'échecs et enquêter, trop court pour que la
--- table devienne un journal de fréquentation.
--- -----------------------------------------------------------------------------
-
+-- raté peut être le vrai code d'un autre espace, et cette table est lisible par
+-- un administrateur.
+DO $$
+BEGIN
+    CREATE TYPE negotiation.invitation_attempt_outcome AS ENUM (
+        'accepted', 'unknown', 'revoked', 'exhausted', 'expired', 'not_yet_valid', 'throttled');
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END
+$$;
 CREATE TABLE IF NOT EXISTS negotiation.invitation_code_attempts (
     id           uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
     person_id    uuid        NOT NULL CONSTRAINT xmod_fk_invitation_attempts_person
@@ -349,8 +420,12 @@ CREATE INDEX IF NOT EXISTS ix_invitation_attempts_window
     ON negotiation.invitation_code_attempts (person_id, attempted_at DESC);
 
 COMMENT ON TABLE negotiation.invitation_code_attempts IS
-    'Essais de code, pour en limiter le nombre. Comptés PAR PERSONNE — device_id se forge. Le code essayé n''est jamais stocké. Gardés 90 jours, purgés par le worker.';
+    'Essais de code, comptés par personne. Gardés 90 jours, purgés par une chaîne récurrente du worker : assez pour constater une série d''échecs, trop court pour devenir un journal de fréquentation.';
+COMMENT ON COLUMN negotiation.invitation_code_attempts.device_id IS
+    'Information, jamais borne : un client forge son identifiant d''appareil. La limite se compte par personne.';
 
+-- Sa signature ne prend DÉLIBÉRÉMENT pas d'appareil : ce qui n'est pas passé en
+-- argument ne peut pas être contourné.
 CREATE OR REPLACE FUNCTION negotiation.invitation_attempts_recent(
     p_person_id uuid,
     p_window    interval
@@ -360,115 +435,73 @@ LANGUAGE sql
 STABLE
 AS $$
     SELECT count(*)::integer
-      FROM negotiation.invitation_code_attempts
-     WHERE person_id = p_person_id
-       AND outcome <> 'accepted'
-       AND attempted_at > now() - p_window;
+      FROM negotiation.invitation_code_attempts a
+     WHERE a.person_id = p_person_id
+       -- `throttled` est exclu AVEC `accepted`, et pour une raison qui se
+       -- mesure : un essai refusé par la limite est lui-même un essai non
+       -- accepté. Le compter ferait repartir la fenêtre à chaque appui, et le
+       -- quart d'heure annoncé à l'écran ne finirait jamais — la limite
+       -- deviendrait un verrou définitif pour qui insiste. La ligne reste
+       -- écrite : l'administrateur doit voir qu'on a continué de frapper.
+       AND a.outcome NOT IN ('accepted', 'throttled')
+       AND a.attempted_at > now() - p_window;
 $$;
 
 COMMENT ON FUNCTION negotiation.invitation_attempts_recent(uuid, interval) IS
-    'Essais non acceptés d''une personne sur une fenêtre glissante. Volontairement sans device_id : le compte est par personne.';
+    'Essais ayant CONSOMMÉ une tentative, sur la fenêtre donnée : ni les acceptés ni ceux que la limite a déjà refusés. Ne prend pas d''appareil : changer d''identifiant ne remet aucun compteur à zéro.';
 
--- -----------------------------------------------------------------------------
--- 3.6 Déclencheurs partagés
--- -----------------------------------------------------------------------------
-
-DROP TRIGGER IF EXISTS tg_invitation_codes_updated_at ON negotiation.invitation_codes;
-CREATE TRIGGER tg_invitation_codes_updated_at BEFORE UPDATE ON negotiation.invitation_codes
-    FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
-
-DROP TRIGGER IF EXISTS tg_invitation_codes_audit ON negotiation.invitation_codes;
-CREATE TRIGGER tg_invitation_codes_audit
-    AFTER INSERT OR UPDATE OR DELETE ON negotiation.invitation_codes
-    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
-
-DROP TRIGGER IF EXISTS tg_invitation_codes_check_network ON negotiation.invitation_codes;
-CREATE TRIGGER tg_invitation_codes_check_network
-    BEFORE INSERT OR UPDATE OF grants_network_term_id ON negotiation.invitation_codes
-    FOR EACH ROW EXECUTE FUNCTION negotiation.tg_check_term_taxonomy(
-        'grants_network_term_id', 'negotiation_network');
-
-DROP TRIGGER IF EXISTS tg_network_memberships_check_term ON negotiation.network_memberships;
-CREATE TRIGGER tg_network_memberships_check_term
-    BEFORE INSERT OR UPDATE OF network_term_id ON negotiation.network_memberships
-    FOR EACH ROW EXECUTE FUNCTION negotiation.tg_check_term_taxonomy(
-        'network_term_id', 'negotiation_network');
-
-DROP TRIGGER IF EXISTS tg_network_memberships_audit ON negotiation.network_memberships;
-CREATE TRIGGER tg_network_memberships_audit
-    AFTER INSERT OR UPDATE OR DELETE ON negotiation.network_memberships
-    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
-
-DROP TRIGGER IF EXISTS tg_access_requests_updated_at ON negotiation.access_requests;
-CREATE TRIGGER tg_access_requests_updated_at BEFORE UPDATE ON negotiation.access_requests
-    FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
-
-DROP TRIGGER IF EXISTS tg_access_requests_audit ON negotiation.access_requests;
-CREATE TRIGGER tg_access_requests_audit
-    AFTER INSERT OR UPDATE OR DELETE ON negotiation.access_requests
-    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
-
--- -----------------------------------------------------------------------------
--- 4. negotiation — les deux vues du back-office
+-- 3.6 — Les deux vues du back-office
 --
--- L'état d'un code se CALCULE. Deux calculs séparés — un pour l'écran, un pour
--- le refus — divergeraient le jour où l'un des deux oublierait valid_from.
--- -----------------------------------------------------------------------------
-
+-- L'état affiché au back-office et celui qui refuse un code à l'application
+-- sortent de LA MÊME expression : deux calculs séparés divergeraient le jour où
+-- l'un des deux oublierait `valid_from`.
 CREATE OR REPLACE VIEW negotiation.v_invitation_codes AS
-SELECT c.id,
-       c.code,
-       c.code_normalized,
-       c.label,
-       c.scope_type,
-       c.space_id,
-       s.name              AS space_name,
-       c.grants_network_term_id,
-       t.code              AS network_code,
-       t.label             AS network_label,
-       c.max_uses,
-       c.used_count,
-       c.valid_from,
-       c.valid_until,
-       c.revoked_at,
-       c.revoked_by,
-       c.revoked_reason,
-       c.created_by,
-       c.created_at,
-       CASE
-           WHEN c.revoked_at IS NOT NULL                              THEN 'revoked'
-           WHEN c.valid_until IS NOT NULL AND c.valid_until <= now()  THEN 'expired'
-           WHEN c.valid_from > now()                                  THEN 'not_yet_valid'
-           WHEN c.max_uses IS NOT NULL AND c.used_count >= c.max_uses THEN 'exhausted'
-           ELSE 'active'
-       END AS state
+SELECT c.*,
+       CASE WHEN c.revoked_at IS NOT NULL                          THEN 'revoked'
+            WHEN c.valid_until IS NOT NULL AND c.valid_until <= now() THEN 'expired'
+            WHEN c.valid_from > now()                              THEN 'not_yet_valid'
+            WHEN c.max_uses IS NOT NULL AND c.used_count >= c.max_uses THEN 'exhausted'
+            ELSE 'active' END                          AS state,
+       s.slug                                          AS space_slug,
+       s.name                                          AS space_name,
+       n.code                                          AS network_code,
+       n.label                                         AS network_label
   FROM negotiation.invitation_codes c
-  LEFT JOIN negotiation.spaces s          ON s.id = c.space_id
-  LEFT JOIN reference.taxonomy_terms t    ON t.id = c.grants_network_term_id;
+  LEFT JOIN negotiation.spaces s           ON s.id = c.space_id
+  LEFT JOIN reference.taxonomy_terms n     ON n.id = c.grants_network_term_id;
 
 COMMENT ON VIEW negotiation.v_invitation_codes IS
-    'Un écran, une requête. L''état affiché au back-office et celui qui refuse un code sortent de cette même expression.';
+    'Un écran, une requête. L''état (active, revoked, expired, not_yet_valid, exhausted) est dérivé ici et nulle part ailleurs.';
 
+-- Dit, ligne par ligne, si la personne entrée par ce code a encore son accès ou
+-- quand il lui a été retiré. L'attribution se retrouve par sa portée, celle-là
+-- même que le code a accordée.
 CREATE OR REPLACE VIEW negotiation.v_invitation_code_uses AS
 SELECT u.id,
        u.code_id,
        u.person_id,
-       p.display_name,
-       p.primary_email,
+       u.session_id,
        u.used_at,
-       ra.granted_at,
-       ra.revoked_at        AS access_revoked_at,
-       ra.revoked_by        AS access_revoked_by,
-       (ra.id IS NOT NULL AND ra.revoked_at IS NULL
+       p.display_name,
+       p.primary_email        AS email,
+       c.code,
+       c.label                AS code_label,
+       c.scope_type,
+       c.space_id,
+       ra.id                  AS role_assignment_id,
+       ra.revoked_at          AS access_revoked_at,
+       ra.revoked_reason      AS access_revoked_reason,
+       (ra.id IS NOT NULL
+        AND ra.revoked_at IS NULL
         AND (ra.valid_until IS NULL OR ra.valid_until > now())) AS access_active
   FROM negotiation.invitation_code_uses u
   JOIN negotiation.invitation_codes c ON c.id = u.code_id
   JOIN identity.people p              ON p.id = u.person_id
   LEFT JOIN LATERAL (
-      SELECT r.id, r.granted_at, r.revoked_at, r.revoked_by, r.valid_until
+      SELECT r.id, r.revoked_at, r.revoked_reason, r.valid_until
         FROM identity.role_assignments r
-       WHERE r.person_id = u.person_id
-         AND r.role_code = 'negotiator'
+       WHERE r.person_id  = u.person_id
+         AND r.role_code  = 'negotiator'
          AND r.scope_type = c.scope_type
          AND r.scope_id IS NOT DISTINCT FROM c.space_id
        ORDER BY r.granted_at DESC
@@ -476,23 +509,27 @@ SELECT u.id,
   ) ra ON true;
 
 COMMENT ON VIEW negotiation.v_invitation_code_uses IS
-    'Qui est entré avec un code, et si son accès tient encore. Le RBAC fait foi : aucun état d''accès n''est dupliqué dans invitation_code_uses.';
+    'Usages d''un code avec l''état réel de l''accès, lu dans identity.role_assignments : la table des usages ne porte aucun état, c''est ici qu''il se joint.';
 
 -- -----------------------------------------------------------------------------
--- 5. platform — les réglages (ADR-006)
+-- 4. platform — les réglages (ADR-006)
+--
+-- Le mode d'admission est un RÉGLAGE et non un drapeau : platform.feature_flags
+-- n'ouvre et ne ferme qu'en binaire, et il y a trois valeurs.
 -- -----------------------------------------------------------------------------
 
 INSERT INTO platform.settings (key, value, description, is_secret) VALUES
     ('negotiation.admission_mode', '"code"'::jsonb,
-     'Comment on entre dans les modules réservés : "code", "approval" ou "code_and_approval" (ADR-006). Modifiable depuis le back-office, relu à chaque tentative, sans redéploiement.',
+     'Comment on entre dans les modules réservés : "code", "approval" ou "code_and_approval". Modifiable depuis le back-office, sans redéploiement.',
      false),
     ('negotiation.invitation_attempts',
      '{"max": 5, "window_minutes": 15, "lock_minutes": 15}'::jsonb,
-     'Limite des essais de code d''invitation, comptés par personne.',
+     'Limite des essais de code d''invitation, comptés par personne — jamais par appareil, qui se forge.',
      false)
 ON CONFLICT (key) DO NOTHING;
 
 COMMIT;
+
 
 -- =============================================================================
 -- APRÈS : le contrôle du § 13, étape 6

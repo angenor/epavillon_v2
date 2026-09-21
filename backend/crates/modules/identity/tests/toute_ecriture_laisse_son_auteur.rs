@@ -17,6 +17,7 @@ use identity::domain::admin_users::PrivacyRequestType;
 use identity::domain::ids::{PersonId, RoleAssignmentId};
 use identity::domain::login::PersonStatus;
 use identity::domain::privacy::PrivacyAction;
+use identity::repo::sessions::ClientKind;
 use identity::service::admin_users::{self, GrantRequest, StatusRequest};
 use identity::service::registration::{self, RegisterRequest};
 use identity::service::{password_reset, privacy};
@@ -108,7 +109,7 @@ async fn aucune_ecriture_du_cycle_dadministration_ne_perd_son_auteur() {
     // Réinitialisation : la personne n'a **pas de session**, et son identifiant
     // sort du jeton consommé — donc de l'intérieur de la transaction. C'est le
     // cas que `kernel::db::set_actor()` existe pour couvrir.
-    password_reset::request(&bac.state, &bac.ctx(), SUJET)
+    password_reset::request(&bac.state, &bac.ctx(), SUJET, ClientKind::Web)
         .await
         .expect("demande de lien");
     let jeton = sqlx::query_scalar!(
@@ -199,6 +200,7 @@ async fn la_seule_trace_anonyme_est_linscription_de_soi_meme() {
             email: SUJET,
             country_id: None,
             password: MOT_DE_PASSE,
+            client: ClientKind::Web,
             preferred_locale: "fr",
             timezone: "Africa/Dakar",
         },

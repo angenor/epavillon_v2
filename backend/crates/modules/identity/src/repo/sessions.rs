@@ -41,12 +41,49 @@ impl RevokeReason {
     }
 }
 
+/// D'où vient la session. ENUM fermé côté base (`identity.session_client`), et
+/// l'API n'en accepte pas d'autre valeur — un `kind` inconnu est refusé, jamais
+/// « corrigé » en silence.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum ClientKind {
+    #[default]
+    Web,
+    App,
+}
+
+impl ClientKind {
+    pub fn as_db(self) -> &'static str {
+        match self {
+            Self::Web => "web",
+            Self::App => "app",
+        }
+    }
+
+    /// `None` sur une valeur inconnue : c'est l'appelant qui décide du refus, et
+    /// il désigne alors le champ fautif.
+    pub fn parse(valeur: &str) -> Option<Self> {
+        match valeur {
+            "web" => Some(Self::Web),
+            "app" => Some(Self::App),
+            _ => None,
+        }
+    }
+
+    pub fn est_app(self) -> bool {
+        self == Self::App
+    }
+}
+
 pub struct NewSession<'a> {
     pub person_id: PersonId,
     pub account_id: Option<AccountId>,
     pub refresh_token_hash: &'a [u8],
     pub user_agent: Option<&'a str>,
     pub ip_address: Option<std::net::IpAddr>,
+    pub client_kind: ClientKind,
+    pub device_id: Option<&'a str>,
+    pub device_label: Option<&'a str>,
+    pub device_platform: Option<&'a str>,
     pub expires_at: OffsetDateTime,
 }
 
@@ -57,8 +94,9 @@ pub struct NewSession<'a> {
 pub async fn create(conn: &mut PgConnection, session: NewSession<'_>) -> Result<Option<SessionId>> {
     let id = sqlx::query_scalar!(
         "INSERT INTO identity.sessions
-             (person_id, account_id, refresh_token_hash, user_agent, ip_address, expires_at)
-         VALUES ($1, $2, $3, $4, $5, $6)
+             (person_id, account_id, refresh_token_hash, user_agent, ip_address,
+              client_kind, device_id, device_label, device_platform, expires_at)
+         VALUES ($1, $2, $3, $4, $5, $6::text::identity.session_client, $7, $8, $9, $10)
          ON CONFLICT (refresh_token_hash) DO NOTHING
          RETURNING id",
         session.person_id.as_uuid(),
@@ -69,6 +107,10 @@ pub async fn create(conn: &mut PgConnection, session: NewSession<'_>) -> Result<
         // le cas dégénéré, et la conversion garde la vérification à la
         // compilation là où un `as _` l'aurait écartée.
         session.ip_address.map(IpNetwork::from),
+        session.client_kind.as_db(),
+        session.device_id,
+        session.device_label,
+        session.device_platform,
         session.expires_at
     )
     .fetch_optional(conn)
@@ -85,6 +127,14 @@ pub struct SessionRecord {
     pub expires_at: OffsetDateTime,
     pub revoked_at: Option<OffsetDateTime>,
     pub revoked_reason: Option<String>,
+    /// **Relu pour être RECOPIÉ par la rotation.** Sans lui, toute session de
+    /// l'application redeviendrait « web » au premier renouvellement : rien
+    /// n'échouerait, et le compte des personnes qui utilisent l'application
+    /// mentirait sans que personne ne s'en aperçoive.
+    pub client_kind: ClientKind,
+    pub device_id: Option<String>,
+    pub device_label: Option<String>,
+    pub device_platform: Option<String>,
 }
 
 impl SessionRecord {
@@ -107,9 +157,10 @@ pub async fn find_by_refresh_hash(
     empreinte: &[u8],
 ) -> Result<Option<SessionRecord>> {
     let ligne = sqlx::query!(
-        "SELECT id, person_id, account_id, expires_at, revoked_at, revoked_reason
-           FROM identity.sessions
-          WHERE refresh_token_hash = $1",
+        r#"SELECT id, person_id, account_id, expires_at, revoked_at, revoked_reason,
+                  client_kind::text AS "client_kind!", device_id, device_label, device_platform
+             FROM identity.sessions
+            WHERE refresh_token_hash = $1"#,
         empreinte
     )
     .fetch_optional(pool)
@@ -122,6 +173,13 @@ pub async fn find_by_refresh_hash(
         expires_at: l.expires_at,
         revoked_at: l.revoked_at,
         revoked_reason: l.revoked_reason,
+        // Une valeur que la base rendrait et que l'API ne connaîtrait pas
+        // retomberait sur « web » : c'est le seul repli qui ne donne rien de
+        // plus que ce qui est déjà accordé.
+        client_kind: ClientKind::parse(&l.client_kind).unwrap_or_default(),
+        device_id: l.device_id,
+        device_label: l.device_label,
+        device_platform: l.device_platform,
     }))
 }
 
@@ -143,6 +201,33 @@ pub async fn resolve_active(pool: &PgPool, session_id: SessionId) -> Result<Opti
     .await?;
 
     Ok(ligne.map(PersonId))
+}
+
+/// Ce que `GET /auth/me` ajoute à la personne : de quel appareil la session
+/// courante vient, et depuis quand. Une requête de plus n'est pas nécessaire —
+/// l'identifiant de session sort déjà du jeton d'accès.
+#[derive(Debug, Clone)]
+pub struct CurrentSession {
+    pub client_kind: ClientKind,
+    pub device_label: Option<String>,
+    pub issued_at: OffsetDateTime,
+}
+
+pub async fn describe(pool: &PgPool, session_id: SessionId) -> Result<Option<CurrentSession>> {
+    let ligne = sqlx::query!(
+        r#"SELECT client_kind::text AS "client_kind!", device_label, issued_at
+             FROM identity.sessions
+            WHERE id = $1"#,
+        session_id.as_uuid()
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    Ok(ligne.map(|l| CurrentSession {
+        client_kind: ClientKind::parse(&l.client_kind).unwrap_or_default(),
+        device_label: l.device_label,
+        issued_at: l.issued_at,
+    }))
 }
 
 pub async fn revoke(

@@ -18,7 +18,7 @@ pub mod service;
 pub mod state;
 
 pub use domain::access_token::AccessTokenCodec;
-pub use routes::auth::{resolve_actor, COOKIE_ACCES};
+pub use routes::auth::{resolve_actor, ResolvedSession, COOKIE_ACCES};
 pub use state::IdentityState;
 
 /// Routes exposées par le module. Le montage est décidé par l'API d'après

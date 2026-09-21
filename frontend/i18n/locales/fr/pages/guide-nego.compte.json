@@ -1,0 +1,32 @@
+{
+  "titre": "Créer mon compte",
+  "sous-titre": "Un seul compte pour Guide Négo et l'ePavillon",
+  "etape": "Étape 1 sur 3 — Compte",
+  "champ": {
+    "prenom": "Prénom",
+    "nom": "Nom",
+    "adresse": "Adresse électronique",
+    "adresse-aide": "Celle de votre compte ePavillon, si vous en avez un.",
+    "pays": "Pays",
+    "pays-vide": "Choisissez votre pays",
+    "mot-de-passe": "Mot de passe",
+    "mot-de-passe-aide": "Huit caractères au moins, dont une majuscule et une minuscule."
+  },
+  "faute": {
+    "prenom": "Indiquez votre prénom.",
+    "nom": "Indiquez votre nom.",
+    "adresse": "Cette adresse ne ressemble pas à une adresse électronique.",
+    "pays": "Choisissez votre pays.",
+    "mot-de-passe": "Au moins {min} caractères, dont une majuscule et une minuscule."
+  },
+  "creer": "Créer mon compte",
+  "deja-un-compte": "J'ai déjà un compte — Me connecter",
+  "attente": {
+    "titre": "Confirmez votre adresse",
+    "propos": "Un courriel vient de partir à {adresse}. Touchez le lien qu'il contient pour confirmer votre adresse.",
+    "duree": "Le lien reste valable 24 heures. Regardez aussi vos courriers indésirables.",
+    "jai-confirme": "J'ai confirmé mon adresse",
+    "renvoyer": "Renvoyer le courriel",
+    "renvoye": "Courriel renvoyé"
+  }
+}

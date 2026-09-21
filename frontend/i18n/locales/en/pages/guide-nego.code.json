@@ -1,0 +1,22 @@
+{
+  "titre": "Invitation code",
+  "sous-titre": "For negotiators only",
+  "etape": "Step 2 of 3 — Code",
+  "propos": "The code is shared in the network's WhatsApp group, or handed out by IFDD at the preparatory workshop. It opens the discussions, the reserved documents and the reports.",
+  "champ": {
+    "libelle": "Invitation code",
+    "aide": "Eight characters, dashes included. Case and spaces do not matter.",
+    "indication": "NEGO-024"
+  },
+  "valider": "Submit code",
+  "continuer": "Continue",
+  "plus-tard": "Later",
+  "hors-connexion": "Entering a code requires a network connection. Nothing has been sent yet, and no access has been opened.",
+  "sans-compte": "A code is added to an account. Create yours or sign in, then come back to enter it.",
+  "creer-mon-compte": "Create my account",
+  "me-connecter": "I already have an account — Sign in",
+  "pas-de-code": {
+    "titre": "No code yet?",
+    "propos": "Ask for it in your group, or from IFDD at the preparatory workshop."
+  }
+}

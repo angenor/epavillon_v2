@@ -20,6 +20,8 @@ engagement.workspace = true
 content.workspace = true
 live.workspace = true
 analytics.workspace = true
+# Guide Négo 0b : l'admission dans les modules réservés.
+negotiation.workspace = true
 
 actix-web.workspace = true
 dotenvy.workspace = true

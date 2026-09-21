@@ -84,7 +84,12 @@ async fn main() {
         // strictement : sans cette ligne, les demandes de rafraîchissement
         // s'empileraient sans erreur, sans trace, et sans que rien ne les
         // exécute jamais.
-        .register_all(analytics::job_handlers(db.clone(), &config));
+        .register_all(analytics::job_handlers(db.clone(), &config))
+        // Guide Négo 0b : monté vide, et c'est délibéré. La chaîne qui purge
+        // les essais de code d'invitation s'y branche dès que `jobs/purge.rs`
+        // existe — la ligne posée maintenant évite qu'on l'oublie alors, et un
+        // gestionnaire de plus n'aura rien à modifier ici.
+        .register_all(negotiation::job_handlers(db.clone(), &config));
 
     // Les travaux récurrents se replanifient eux-mêmes ; le démarrage ne fait
     // que **réarmer** la chaîne, au cas où sa dernière occurrence serait morte

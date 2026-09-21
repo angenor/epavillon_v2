@@ -53,6 +53,7 @@ impl ModuleRegistry {
                     "content",
                     "live",
                     "analytics",
+                    "negotiation",
                 ]
                 .into_iter()
                 .map(str::to_owned)

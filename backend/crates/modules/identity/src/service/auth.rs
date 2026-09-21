@@ -141,7 +141,9 @@ pub async fn login(
         &mut tx,
         candidat.person_id,
         Some(account_id),
-        session::expiry(state, requete.remember_me),
+        // La durée suit le client : quatre-vingt-dix jours pour l'application,
+        // sans case à cocher, parce que son écran de connexion n'en a pas.
+        session::expiry(state, requete.device.client_kind, requete.remember_me),
         requete.device,
     )
     .await?;

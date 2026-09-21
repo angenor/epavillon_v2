@@ -223,6 +223,23 @@ codes! {
     LiveIncidentNotPublished => "LIVE_INCIDENT_NOT_PUBLISHED", StatusCode::UNPROCESSABLE_ENTITY,
         "Ce message n'a jamais été publié : il n'y a rien à retirer.";
 
+    // --- Guide Négo, admission (0b) -------------------------------------------
+    // **Aucun de ces codes ne répond sur le chemin nominal de la saisie d'un
+    // code** : les neuf issues sortent en 200 avec leur discriminant, comme
+    // `mfa_required`. Ils traduisent ce que la BASE refuse — un invariant que
+    // le service ne réimplémente pas (principe VIII) — et ce que le back-office
+    // demande d'impossible.
+    NegotiationAccessRequestPending => "NEGOTIATION_ACCESS_REQUEST_PENDING", StatusCode::CONFLICT,
+        "Vous avez déjà une demande en attente. Vous recevrez un courriel dès qu'elle sera tranchée.";
+    NegotiationAccessRequestDecided => "NEGOTIATION_ACCESS_REQUEST_DECIDED", StatusCode::CONFLICT,
+        "Cette demande a déjà été tranchée : elle ne peut plus l'être une seconde fois.";
+    NegotiationInvitationCodeDuplicate => "NEGOTIATION_INVITATION_CODE_DUPLICATE", StatusCode::CONFLICT,
+        "Ce code existe déjà. Les codes se comparent sans tenir compte de la casse ni des tirets.";
+    NegotiationAdmissionModeInvalid => "NEGOTIATION_ADMISSION_MODE_INVALID", StatusCode::UNPROCESSABLE_ENTITY,
+        "Le mode d'admission doit être « code », « approval » ou « code_and_approval ».";
+    NegotiationSpaceUnknown => "NEGOTIATION_SPACE_UNKNOWN", StatusCode::NOT_FOUND,
+        "Cet espace de négociation n'existe pas.";
+
     // MAIL_RELAY_UNREACHABLE n'est PAS ici : il ne franchit aucune réponse
     // HTTP. Il vit dans `mail.rs`, d'où il part vers `platform.jobs.last_error`.
 }

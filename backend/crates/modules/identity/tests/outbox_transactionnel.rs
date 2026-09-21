@@ -12,6 +12,7 @@ mod commun;
 use commun::{semer, Bac, Compte, MOT_DE_PASSE};
 use identity::domain::ids::PersonId;
 use identity::domain::login::PersonStatus;
+use identity::repo::sessions::ClientKind;
 use identity::service::admin_users::{self, StatusRequest};
 use identity::service::registration::{self, RegisterRequest};
 use kernel::events::{self, DomainEvent};
@@ -43,6 +44,7 @@ async fn un_changement_detat_ecrit_exactement_un_evenement() {
             email: ADRESSE,
             country_id: None,
             password: MOT_DE_PASSE,
+            client: ClientKind::Web,
             preferred_locale: "fr",
             timezone: "Africa/Dakar",
         },

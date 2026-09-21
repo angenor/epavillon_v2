@@ -1,0 +1,19 @@
+{
+  "titre": "Nouveau mot de passe",
+  "attente": "Vérification du lien…",
+  "champ": "Nouveau mot de passe",
+  "aide": "Huit caractères au moins, dont une majuscule et une minuscule.",
+  "faute": "Au moins {min} caractères, dont une majuscule et une minuscule.",
+  "enregistrer": "Enregistrer",
+  "redemander": "Demander un nouveau lien",
+  "vers-connexion": "Me connecter",
+  "panne": "Vérification impossible",
+  "fait": {
+    "titre": "Mot de passe enregistré",
+    "texte": "Vos autres appareils ont été déconnectés. Connectez-vous avec votre nouveau mot de passe."
+  },
+  "refuse": {
+    "titre": "Ce lien ne vaut plus",
+    "texte": "Un lien de réinitialisation vaut une heure et ne sert qu'une fois."
+  }
+}

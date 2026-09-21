@@ -7,5 +7,19 @@
     "clair": "Clair",
     "sombre": "Sombre",
     "systeme": "Système"
+  },
+  "compte": {
+    "titre": "Compte",
+    "sans-adresse": "Compte connecté",
+    "lu-a": "Lu {moment}",
+    "deconnexion": "Me déconnecter",
+    "creer": "Créer mon compte",
+    "se-connecter": "Me connecter",
+    "confirmation": {
+      "question": "Me déconnecter de cet appareil ?",
+      "phrase": "Vos autres appareils restent connectés. Ce qui a été téléchargé pour la lecture hors connexion reste sur ce téléphone.",
+      "action": "Me déconnecter",
+      "retour": "Annuler"
+    }
   }
 }

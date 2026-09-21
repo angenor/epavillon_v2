@@ -38,6 +38,7 @@ use crate::domain::password;
 use crate::domain::token::{RegisterOutcome, ResendOutcome, VerifyEmailOutcome};
 use crate::jobs::emails;
 use crate::repo::people;
+use crate::repo::sessions::ClientKind;
 use crate::state::IdentityState;
 
 pub struct RegisterRequest<'a> {
@@ -48,6 +49,10 @@ pub struct RegisterRequest<'a> {
     pub password: &'a str,
     pub preferred_locale: &'a str,
     pub timezone: &'a str,
+    /// D'où la demande vient. **Retenu avec le jeton**, jamais relu d'une
+    /// session : au moment où le lien du courriel s'ouvre, la personne n'en a
+    /// pas encore. C'est lui qui décide si le lien mène au site ou à Guide Négo.
+    pub client: ClientKind,
 }
 
 pub async fn register(
@@ -77,7 +82,7 @@ pub async fn register(
         // le compte ne serve à quoi que ce soit, et une personne sans compte n'a
         // par définition aucun secret à voler.
         Some(sans_compte) => {
-            match doter_dun_compte(state, &mut tx, &sans_compte, &empreinte).await {
+            match doter_dun_compte(state, &mut tx, &sans_compte, &empreinte, demande.client).await {
                 Ok(()) => {}
                 // Deux inscriptions simultanées sur la même personne sans
                 // compte : l'unicité tranche, et la perdante rend la même
@@ -162,12 +167,15 @@ pub async fn resend_verification(
     state: &IdentityState,
     ctx: &RequestContext,
     email: &str,
+    client: ClientKind,
 ) -> Result<ResendOutcome> {
     let mut tx = state.db().write(ctx).await?;
 
     if let Some(personne) = people::find_by_email(&mut tx, email).await? {
         if personne.email_verified_at.is_none() {
-            envoyer_la_verification(state, &mut tx, &personne).await?;
+            // Le client du RENVOI, pas celui de l'inscription : c'est depuis
+            // l'application qu'on redemande, c'est là qu'il faut revenir.
+            envoyer_la_verification(state, &mut tx, &personne, client).await?;
         }
     }
 
@@ -197,7 +205,7 @@ async fn creer(
     .await?;
 
     people::create_password_account(tx, personne.person_id, empreinte).await?;
-    envoyer_la_verification(state, tx, &personne).await?;
+    envoyer_la_verification(state, tx, &personne, demande.client).await?;
 
     events::emit(
         tx,
@@ -226,9 +234,10 @@ async fn doter_dun_compte(
     tx: &mut PgConnection,
     personne: &people::RegistrationTarget,
     empreinte: &str,
+    client: ClientKind,
 ) -> Result<()> {
     people::create_password_account(tx, personne.person_id, empreinte).await?;
-    envoyer_la_verification(state, tx, personne).await
+    envoyer_la_verification(state, tx, personne, client).await
 }
 
 /// Crée le jeton et met le courriel en file, **dans la transaction en cours**.
@@ -240,6 +249,7 @@ async fn envoyer_la_verification(
     state: &IdentityState,
     tx: &mut PgConnection,
     personne: &people::RegistrationTarget,
+    client: ClientKind,
 ) -> Result<()> {
     tokens::invalidate_pending(
         tx,
@@ -253,7 +263,7 @@ async fn envoyer_la_verification(
         &state.config().auth.token_ttl,
         personne.person_id.as_uuid(),
         TokenPurpose::EmailVerification,
-        json!({ "email": personne.email }),
+        json!({ "email": personne.email, "client": client.as_db() }),
     )
     .await?;
 
@@ -268,6 +278,7 @@ async fn envoyer_la_verification(
                 "locale": personne.preferred_locale,
                 "first_name": personne.first_name,
                 "token": jeton.clear,
+                "client": client.as_db(),
             }),
         )
         .idempotent(jeton.id.to_string()),

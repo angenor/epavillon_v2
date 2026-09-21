@@ -6,7 +6,7 @@
 
 mod commun;
 
-use commun::{connexion, semer, Bac, Compte};
+use commun::{appareil_de_lapplication, connexion, connexion_avec, semer, Bac, Compte};
 use identity::service::session::{self, Device, RefreshOutcome};
 
 const ADRESSE: &str = "awa.diallo@example.org";
@@ -148,4 +148,63 @@ async fn un_jeton_inconnu_ne_renouvelle_rien() {
     .expect("renouvellement");
 
     assert!(matches!(issue, RefreshOutcome::Expired));
+}
+
+/// **Le piège n° 1 de l'étape 0b, et il est muet.** La rotation ouvre une
+/// session neuve à partir de la remplacée ; si elle n'en recopie pas le client,
+/// toute session de l'application redevient « web » au premier renouvellement.
+/// Rien n'échoue, personne n'est déconnecté, et le décompte des téléphones ment.
+///
+/// Le renouvellement **ne déclare rien** : `POST /auth/refresh` ne porte aucun
+/// objet `client`, et le test le prouve en passant un appareil vide.
+#[tokio::test]
+async fn la_rotation_recopie_le_client_et_lappareil() {
+    let bac = Bac::monter().await;
+    semer(&bac, Compte::actif(ADRESSE)).await;
+    let ouverte = connexion_avec(&bac, ADRESSE, appareil_de_lapplication(), false).await;
+
+    let RefreshOutcome::Renewed(neuve) = session::refresh(
+        &bac.state,
+        &bac.ctx(),
+        &ouverte.refresh_token,
+        Device::default(),
+    )
+    .await
+    .expect("renouvellement") else {
+        panic!("le renouvellement devait aboutir");
+    };
+
+    let ligne = commun::ligne_de_session(&bac, neuve.session_id.as_uuid()).await;
+    assert_eq!(
+        ligne.client_kind, "app",
+        "une session d'application qui redevient « web » ne fait échouer aucun test : celui-ci existe pour ça"
+    );
+    assert_eq!(ligne.device_id.as_deref(), Some("9f2c-appareil-de-test"));
+    assert_eq!(ligne.device_label.as_deref(), Some("Android · Chrome"));
+    assert_eq!(ligne.device_platform.as_deref(), Some("android"));
+}
+
+/// Deux tours d'affilée : le client se recopie de proche en proche, et ne se
+/// perd pas au second. Un seul renouvellement ne le prouverait pas.
+#[tokio::test]
+async fn le_client_survit_a_deux_rotations() {
+    let bac = Bac::monter().await;
+    semer(&bac, Compte::actif(ADRESSE)).await;
+    let mut jeton = connexion_avec(&bac, ADRESSE, appareil_de_lapplication(), false)
+        .await
+        .refresh_token;
+
+    for tour in 1..=2 {
+        let RefreshOutcome::Renewed(neuve) =
+            session::refresh(&bac.state, &bac.ctx(), &jeton, Device::default())
+                .await
+                .expect("renouvellement")
+        else {
+            panic!("le renouvellement devait aboutir");
+        };
+
+        let ligne = commun::ligne_de_session(&bac, neuve.session_id.as_uuid()).await;
+        assert_eq!(ligne.client_kind, "app", "tour {tour}");
+        jeton = neuve.refresh_token;
+    }
 }

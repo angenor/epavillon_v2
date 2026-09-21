@@ -15,6 +15,7 @@ members = [
     "crates/modules/engagement",
     "crates/modules/content",
     "crates/modules/live",
+    "crates/modules/negotiation",
     "crates/modules/analytics",
     "crates/api",
     "crates/worker",
@@ -36,6 +37,7 @@ media = { path = "crates/modules/media" }
 engagement = { path = "crates/modules/engagement" }
 content = { path = "crates/modules/content" }
 live = { path = "crates/modules/live" }
+negotiation = { path = "crates/modules/negotiation" }
 analytics = { path = "crates/modules/analytics" }
 
 actix-web = "4.14"

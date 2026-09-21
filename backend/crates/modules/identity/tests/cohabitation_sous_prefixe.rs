@@ -93,3 +93,57 @@ fn lorigine_autorisee_ne_porte_pas_le_prefixe() {
         "https://epavillonclimatique.francophonie.org/v2"
     );
 }
+
+/// **Les liens de Guide Négo portent le préfixe eux aussi.** L'application vit
+/// sous le même toit que le site : `/v2/guide-nego/…`. Sans le préfixe, le lien
+/// d'un courriel mènerait à la v1, qui n'a pas d'application — et la personne
+/// n'aurait aucun moyen de comprendre pourquoi.
+///
+/// À vérifier, pas à supposer : le préfixe est le réglage qui se trahit sans
+/// bruit, et c'est ce qui vaut à ce fichier d'exister.
+#[test]
+fn sous_un_prefixe_les_liens_de_guide_nego_le_portent() {
+    let config = configuration("https://epavillonclimatique.francophonie.org/v2");
+
+    let ctx = identity::mail::MailContext {
+        message_id: "01J",
+        to: "awa.diallo@example.org",
+        locale: "fr",
+        first_name: "Awa",
+        app_public_url: &config.app_public_url,
+        client: identity::mail::Client::App,
+    };
+
+    assert!(identity::mail::verification_email(&ctx, "abc")
+        .text
+        .contains(
+        "https://epavillonclimatique.francophonie.org/v2/guide-nego/verification-adresse?token=abc"
+    ));
+    assert!(identity::mail::password_reset_email(&ctx, "abc")
+        .text
+        .contains(
+        "https://epavillonclimatique.francophonie.org/v2/guide-nego/nouveau-mot-de-passe?token=abc"
+    ));
+}
+
+/// Et le site garde les siens, préfixe compris — la cohabitation ne change rien
+/// pour lui.
+#[test]
+fn sous_un_prefixe_les_liens_du_site_le_portent_aussi() {
+    let config = configuration("https://epavillonclimatique.francophonie.org/v2");
+
+    let ctx = identity::mail::MailContext {
+        message_id: "01J",
+        to: "awa.diallo@example.org",
+        locale: "fr",
+        first_name: "Awa",
+        app_public_url: &config.app_public_url,
+        client: identity::mail::Client::Web,
+    };
+
+    assert!(identity::mail::verification_email(&ctx, "abc")
+        .text
+        .contains(
+            "https://epavillonclimatique.francophonie.org/v2/verification-adresse?token=abc"
+        ));
+}

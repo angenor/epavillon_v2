@@ -37,19 +37,19 @@ phase.
 
 **⚠️ Bloquant** : SQLx ne compile pas sans la base migrée. Rien ne commence avant.
 
-- [ ] T001 Ajouter le type `identity.session_client` et les quatre colonnes d'appareil à `identity.sessions`, avec `ix_sessions_client` et leurs `COMMENT ON`, dans `docs/database/030_identity.sql` § sessions
-- [ ] T002 [P] Ajouter la taxonomie `negotiation_network` (`is_system = true`) et le terme `women_negotiators` dans `docs/database/020_reference.sql`
-- [ ] T003 Ajouter `negotiation.invitation_codes` — contraintes `ck_invitation_codes_scope`, `_uses`, **`_quota`**, `_period`, index `ux_invitation_codes_normalized` (unicité **totale**, révoqués compris) — dans `docs/database/100_negotiations.sql` après le § 2
-- [ ] T004 Ajouter `negotiation.invitation_code_uses` et son trigger `tg_invitation_code_uses_count` dans `docs/database/100_negotiations.sql`
-- [ ] T005 Ajouter `negotiation.network_memberships` et ses triggers dans `docs/database/100_negotiations.sql`
-- [ ] T006 Ajouter `negotiation.access_requests`, le type `access_request_status`, les deux index partiels d'unicité et les triggers `tg_access_request_transition` et `tg_access_request_event` dans `docs/database/100_negotiations.sql`
-- [ ] T007 Ajouter `negotiation.invitation_code_attempts`, le type `invitation_attempt_outcome` et la fonction `invitation_attempts_recent(uuid, interval)` — **sans argument d'appareil** — dans `docs/database/100_negotiations.sql`
-- [ ] T008 Ajouter les vues `negotiation.v_invitation_codes` et `negotiation.v_invitation_code_uses` dans `docs/database/100_negotiations.sql`
-- [ ] T009 [P] Semer `negotiation.admission_mode` (`"code"`) et `negotiation.invitation_attempts` dans `docs/database/900_seed.sql`, plus un espace et deux codes d'exemple pour le développement local
-- [ ] T010 **Relire et compléter** `specs/009-guide-nego-compte-admission/migration.sql` — écrit avec le plan — contre les fichiers de `docs/database/` modifiés en T001 à T009 : type et colonnes de session, taxonomie, cinq tables, vues, fonctions, triggers, réglages. **Rejouable sans dégât**, chaque objet créé sous condition
-- [ ] T011 Sauvegarder la base locale (`pg_dump`), puis **jouer `specs/009-guide-nego-compte-admission/migration.sql`, puis le rejouer** : la seconde passe ne doit rien changer ni rien faire échouer
-- [ ] T012 Comparer les schémas (§ 13 de `docs/DEPLOIEMENT.md`, étape 6) : `pg_dump --schema-only` de la base migrée contre celui de la base modèle du harnais, triés — **aucun écart** hors partitions `engagement.email_messages_AAAAMM`
-- [ ] T013 `make check-db-safe` au vert, puis consigner le changement de modèle dans `docs/progression/modele.md` — seule écriture hors `docs/AppNego/` autorisée (ADR-017)
+- [X] T001 Ajouter le type `identity.session_client` et les quatre colonnes d'appareil à `identity.sessions`, avec `ix_sessions_client` et leurs `COMMENT ON`, dans `docs/database/030_identity.sql` § sessions
+- [X] T002 [P] Ajouter la taxonomie `negotiation_network` (`is_system = true`) et le terme `women_negotiators` dans `docs/database/020_reference.sql`
+- [X] T003 Ajouter `negotiation.invitation_codes` — contraintes `ck_invitation_codes_scope`, `_uses`, **`_quota`**, `_period`, index `ux_invitation_codes_normalized` (unicité **totale**, révoqués compris) — dans `docs/database/100_negotiations.sql` après le § 2
+- [X] T004 Ajouter `negotiation.invitation_code_uses` et son trigger `tg_invitation_code_uses_count` dans `docs/database/100_negotiations.sql`
+- [X] T005 Ajouter `negotiation.network_memberships` et ses triggers dans `docs/database/100_negotiations.sql`
+- [X] T006 Ajouter `negotiation.access_requests`, le type `access_request_status`, les deux index partiels d'unicité et les triggers `tg_access_request_transition` et `tg_access_request_event` dans `docs/database/100_negotiations.sql`
+- [X] T007 Ajouter `negotiation.invitation_code_attempts`, le type `invitation_attempt_outcome` et la fonction `invitation_attempts_recent(uuid, interval)` — **sans argument d'appareil** — dans `docs/database/100_negotiations.sql`
+- [X] T008 Ajouter les vues `negotiation.v_invitation_codes` et `negotiation.v_invitation_code_uses` dans `docs/database/100_negotiations.sql`
+- [X] T009 [P] Semer `negotiation.admission_mode` (`"code"`) et `negotiation.invitation_attempts` dans `docs/database/900_seed.sql`, plus un espace et deux codes d'exemple pour le développement local
+- [X] T010 **Relire et compléter** `specs/009-guide-nego-compte-admission/migration.sql` — écrit avec le plan — contre les fichiers de `docs/database/` modifiés en T001 à T009 : type et colonnes de session, taxonomie, cinq tables, vues, fonctions, triggers, réglages. **Rejouable sans dégât**, chaque objet créé sous condition
+- [X] T011 Sauvegarder la base locale (`pg_dump`), puis **jouer `specs/009-guide-nego-compte-admission/migration.sql`, puis le rejouer** : la seconde passe ne doit rien changer ni rien faire échouer
+- [X] T012 Comparer les schémas (§ 13 de `docs/DEPLOIEMENT.md`, étape 6) : `pg_dump --schema-only` de la base migrée contre celui de la base modèle du harnais, triés — **aucun écart** hors partitions `engagement.email_messages_AAAAMM`
+- [X] T013 `make check-db-safe` au vert, puis consigner le changement de modèle dans `docs/progression/modele.md` — seule écriture hors `docs/AppNego/` autorisée (ADR-017)
 
 **Point de contrôle** : la base locale porte le nouveau schéma, **sans avoir été détruite**, et la migration est prouvée rejouable.
 
@@ -61,16 +61,16 @@ phase.
 
 **⚠️ Bloquant** : aucun récit ne commence avant.
 
-- [ ] T014 Créer `backend/crates/modules/negotiation/Cargo.toml`, calqué sur celui d'`identity`, **dépendances limitées à `kernel` et `contracts`** (principe II), et l'inscrire aux membres et alias de `backend/Cargo.toml`
-- [ ] T015 Créer `backend/crates/modules/negotiation/src/lib.rs` : `NegotiationState`, `routes(cfg)`, `admin_routes(cfg)`, `job_handlers(...)`
-- [ ] T016 [P] Créer `backend/crates/contracts/src/negotiation.rs` (constantes d'agrégat et les six types d'événements) et l'exporter depuis `backend/crates/contracts/src/lib.rs`
-- [ ] T017 [P] Déclarer les permissions typées dans `backend/crates/modules/negotiation/src/domain/permissions.rs` : `negotiation.space.access`, `negotiation.space.manage` — **jamais un nom de rôle**
-- [ ] T018 Monter le crate dans l'API : dépendance de `backend/crates/api/Cargo.toml`, champ et construction dans `src/state.rs`, bloc `is_mounted("negotiation")` et `app_data` dans `src/lib.rs`, code dans la liste figée de `src/modules.rs`
-- [ ] T019 Ajouter `doc.merge(negotiation::routes::openapi::NegotiationApi::openapi())` dans `backend/crates/api/src/openapi.rs` et créer `negotiation/src/routes/openapi.rs` — **après T018**, qui pose la dépendance de crate
-- [ ] T020 [P] Monter `negotiation::job_handlers(...)` dans `backend/crates/worker/src/main.rs`, avec `backend/crates/worker/Cargo.toml` — **la chaîne de purge s'y branche en T091**, quand `jobs/purge.rs` existe
-- [ ] T021 [P] Ajouter les cinq codes d'erreur à la macro `codes!` de `backend/crates/kernel/src/error.rs` : `NegotiationAccessRequestPending`, `NegotiationAccessRequestDecided`, `NegotiationInvitationCodeDuplicate`, `NegotiationAdmissionModeInvalid`, `NegotiationSpaceUnknown`
-- [ ] T022 Créer `backend/crates/modules/negotiation/tests/commun/mod.rs` sur le modèle de celui d'`identity` : base jetable, état, semis d'un espace, d'un code et d'un compte
-- [ ] T023 Vérifier dans `backend/crates/modules/negotiation/Cargo.toml` et le graphe du workspace qu'**aucune arête ne relie deux crates de modules** — contrôle mécanique de la constitution
+- [X] T014 Créer `backend/crates/modules/negotiation/Cargo.toml`, calqué sur celui d'`identity`, **dépendances limitées à `kernel` et `contracts`** (principe II), et l'inscrire aux membres et alias de `backend/Cargo.toml`
+- [X] T015 Créer `backend/crates/modules/negotiation/src/lib.rs` : `NegotiationState`, `routes(cfg)`, `admin_routes(cfg)`, `job_handlers(...)`
+- [X] T016 [P] Créer `backend/crates/contracts/src/negotiation.rs` (constantes d'agrégat et les six types d'événements) et l'exporter depuis `backend/crates/contracts/src/lib.rs`
+- [X] T017 [P] Déclarer les permissions typées dans `backend/crates/modules/negotiation/src/domain/permissions.rs` : `negotiation.space.access`, `negotiation.space.manage` — **jamais un nom de rôle**
+- [X] T018 Monter le crate dans l'API : dépendance de `backend/crates/api/Cargo.toml`, champ et construction dans `src/state.rs`, bloc `is_mounted("negotiation")` et `app_data` dans `src/lib.rs`, code dans la liste figée de `src/modules.rs`
+- [X] T019 Ajouter `doc.merge(negotiation::routes::openapi::NegotiationApi::openapi())` dans `backend/crates/api/src/openapi.rs` et créer `negotiation/src/routes/openapi.rs` — **après T018**, qui pose la dépendance de crate
+- [X] T020 [P] Monter `negotiation::job_handlers(...)` dans `backend/crates/worker/src/main.rs`, avec `backend/crates/worker/Cargo.toml` — **la chaîne de purge s'y branche en T091**, quand `jobs/purge.rs` existe
+- [X] T021 [P] Ajouter les cinq codes d'erreur à la macro `codes!` de `backend/crates/kernel/src/error.rs` : `NegotiationAccessRequestPending`, `NegotiationAccessRequestDecided`, `NegotiationInvitationCodeDuplicate`, `NegotiationAdmissionModeInvalid`, `NegotiationSpaceUnknown`
+- [X] T022 Créer `backend/crates/modules/negotiation/tests/commun/mod.rs` sur le modèle de celui d'`identity` : base jetable, état, semis d'un espace, d'un code et d'un compte
+- [X] T023 Vérifier dans `backend/crates/modules/negotiation/Cargo.toml` et le graphe du workspace qu'**aucune arête ne relie deux crates de modules** — contrôle mécanique de la constitution
 
 **Point de contrôle** : `cargo run -p api` démarre, le module est monté, `make openapi` passe.
 
@@ -87,39 +87,39 @@ la même adresse, sans second compte.
 
 ### Tests
 
-- [ ] T024 [P] [US1] Test : une session ouverte avec `client.kind = "app"` porte `client_kind = 'app'` et son appareil — `backend/crates/modules/identity/tests/session_client.rs`
-- [ ] T025 [P] [US1] Test : **la rotation recopie le client** — après `refresh`, `client_kind` vaut toujours `'app'`. C'est le piège n° 1 : sans ce test, rien n'échoue et les chiffres mentent — `identity/tests/session_rotation.rs` (étendu)
-- [ ] T026 [P] [US1] Test : une session `app` dure la durée longue **sans case cochée** ; le site garde 12 h, et 30 j avec « se souvenir de moi » ; la durée **repart** à chaque rotation — `identity/tests/session_duree_app.rs`
-- [ ] T027 [P] [US1] Test : le lien du courriel de vérification mène à `/guide-nego/…` quand la demande vient de l'application, et à l'écran du site sinon — `identity/tests/courriel_retour_app.rs`
-- [ ] T028 [P] [US1] Test : un appel sans objet `client` se comporte exactement comme avant — **non-régression du site** — `backend/crates/api/tests/routes_auth.rs` (étendu)
-- [ ] T028 bis [P] [US1] Test : une personne inscrite **sur le site** se connecte depuis l'application sans second compte, et l'inverse (FR-003, SC-004) — `identity/tests/compte_unique_deux_clients.rs`
-- [ ] T028 ter [P] [US1] Test : une inscription depuis l'application avec une adresse **déjà connue** rend la **même réponse** qu'avec une adresse inconnue (FR-002) — `identity/tests/inscription_reponse_invariable.rs` (étendu)
-- [ ] T028 quater [P] [US1] Test : la déconnexion d'un appareil **laisse les autres sessions ouvertes** (FR-006) — `identity/tests/deconnexion_un_seul_appareil.rs`
+- [X] T024 [P] [US1] Test : une session ouverte avec `client.kind = "app"` porte `client_kind = 'app'` et son appareil — `backend/crates/modules/identity/tests/session_client.rs`
+- [X] T025 [P] [US1] Test : **la rotation recopie le client** — après `refresh`, `client_kind` vaut toujours `'app'`. C'est le piège n° 1 : sans ce test, rien n'échoue et les chiffres mentent — `identity/tests/session_rotation.rs` (étendu)
+- [X] T026 [P] [US1] Test : une session `app` dure la durée longue **sans case cochée** ; le site garde 12 h, et 30 j avec « se souvenir de moi » ; la durée **repart** à chaque rotation — `identity/tests/session_duree_app.rs`
+- [X] T027 [P] [US1] Test : le lien du courriel de vérification mène à `/guide-nego/…` quand la demande vient de l'application, et à l'écran du site sinon — `identity/tests/courriel_retour_app.rs`
+- [X] T028 [P] [US1] Test : un appel sans objet `client` se comporte exactement comme avant — **non-régression du site** — `backend/crates/api/tests/routes_auth.rs` (étendu)
+- [X] T028 bis [P] [US1] Test : une personne inscrite **sur le site** se connecte depuis l'application sans second compte, et l'inverse (FR-003, SC-004) — `identity/tests/compte_unique_deux_clients.rs`
+- [X] T028 ter [P] [US1] Test : une inscription depuis l'application avec une adresse **déjà connue** rend la **même réponse** qu'avec une adresse inconnue (FR-002) — `identity/tests/inscription_reponse_invariable.rs` (étendu)
+- [X] T028 quater [P] [US1] Test : la déconnexion d'un appareil **laisse les autres sessions ouvertes** (FR-006) — `identity/tests/deconnexion_un_seul_appareil.rs`
 
 ### Back
 
-- [ ] T029 [US1] Étendre `NewSession` et l'INSERT de `backend/crates/modules/identity/src/repo/sessions.rs` aux quatre colonnes
-- [ ] T030 [US1] Étendre `Device` et `session::open` dans `identity/src/service/session.rs` ; **`expiry()` choisit la durée d'après le client** ; la rotation recopie `client_kind`, `device_id`, `device_label`, `device_platform` de la session remplacée
-- [ ] T031 [P] [US1] Ajouter `AUTH_SESSION_TTL_APP` (défaut `90d`) à `backend/crates/kernel/src/config.rs` et à `.env.example`
-- [ ] T032 [US1] Accepter l'objet `client` facultatif dans les corps de `login` et `register` — `identity/src/routes/auth.rs` —, le valider (un `kind` inconnu désigne son champ), le passer à `identity/src/service/auth.rs`
-- [ ] T033 [US1] Faire rendre par `GET /auth/me` le `client_kind`, le `device_label` et l'`issued_at` de la session courante — `identity/src/routes/auth.rs`
-- [ ] T034 [US1] Retenir le client de la demande avec le jeton (`one_time_tokens.payload`) dans `identity/src/service/registration.rs` et `service/password_reset.rs`
-- [ ] T035 [US1] Composer le lien d'après ce client dans `identity/src/mail.rs` : variantes `/guide-nego/verification-adresse` et `/guide-nego/nouveau-mot-de-passe`, **non localisées** — Guide Négo est en français quel que soit le téléphone
-- [ ] T036 [US1] Étendre `identity/tests/cohabitation_sous_prefixe.rs` au préfixe `/v2` pour les liens de courriel et le `Path` du cookie de rafraîchissement
-- [ ] T037 [US1] `make openapi` et vérifier que les deux routes portent leur nouveau corps
+- [X] T029 [US1] Étendre `NewSession` et l'INSERT de `backend/crates/modules/identity/src/repo/sessions.rs` aux quatre colonnes
+- [X] T030 [US1] Étendre `Device` et `session::open` dans `identity/src/service/session.rs` ; **`expiry()` choisit la durée d'après le client** ; la rotation recopie `client_kind`, `device_id`, `device_label`, `device_platform` de la session remplacée
+- [X] T031 [P] [US1] Ajouter `AUTH_SESSION_TTL_APP` (défaut `90d`) à `backend/crates/kernel/src/config.rs` et à `.env.example`
+- [X] T032 [US1] Accepter l'objet `client` facultatif dans les corps de `login` et `register` — `identity/src/routes/auth.rs` —, le valider (un `kind` inconnu désigne son champ), le passer à `identity/src/service/auth.rs`
+- [X] T033 [US1] Faire rendre par `GET /auth/me` le `client_kind`, le `device_label` et l'`issued_at` de la session courante — `identity/src/routes/auth.rs`
+- [X] T034 [US1] Retenir le client de la demande avec le jeton (`one_time_tokens.payload`) dans `identity/src/service/registration.rs` et `service/password_reset.rs`
+- [X] T035 [US1] Composer le lien d'après ce client dans `identity/src/mail.rs` : variantes `/guide-nego/verification-adresse` et `/guide-nego/nouveau-mot-de-passe`, **non localisées** — Guide Négo est en français quel que soit le téléphone
+- [X] T036 [US1] Étendre `identity/tests/cohabitation_sous_prefixe.rs` au préfixe `/v2` pour les liens de courriel et le `Path` du cookie de rafraîchissement
+- [X] T037 [US1] `make openapi` et vérifier que les deux routes portent leur nouveau corps
 
 ### Client
 
-- [ ] T038 [P] [US1] Créer `frontend/app/utils/guide-nego/appareil.ts` : `device_id` engendré une fois et gardé en stockage local (`gn.appareil`), libellé et plateforme composés — **jamais un cookie**
-- [ ] T039 [P] [US1] Créer `frontend/app/composables/api/guide-nego.ts` et brancher le bloc `negotiation` dans `frontend/app/composables/useApi.ts`
-- [ ] T040 [P] [US1] Créer `frontend/app/composables/guide-nego/useGnSession.ts` — **à ne pas confondre avec `useGnConnexion` (0a), qui dit l'état du réseau** : enveloppe le store `auth` du site, expose l'état du compte lisible hors connexion, relit au retour au premier plan (`visibilitychange`), **ne nomme aucun cookie**. Session expirée **sans réseau** : garder ce qui a été lu avec son heure, ne réclamer la reconnexion qu'au retour du réseau, **ne jamais vider l'écran** (FR-006 ter)
-- [ ] T041 [US1] Créer `frontend/app/pages/guide-nego/compte.vue` — étape 1 sur 3, prénom et nom, adresse, pays, mot de passe, l'aide sur le compte ePavillon, la sortie « J'ai déjà un compte », et l'**attente de confirmation** avec « J'ai confirmé mon adresse » et « Renvoyer le courriel »
-- [ ] T042 [P] [US1] Créer `frontend/app/pages/guide-nego/connexion.vue` et `frontend/app/pages/guide-nego/mot-de-passe-oublie.vue`, avec la feuille basse du mot de passe oublié
-- [ ] T043 [P] [US1] Créer `frontend/app/pages/guide-nego/verification-adresse.vue` — quatre états du jeton, et sur iPhone « Adresse confirmée — retournez dans Guide Négo »
-- [ ] T044 [P] [US1] Créer `frontend/app/pages/guide-nego/nouveau-mot-de-passe.vue`, mêmes exigences de mot de passe que le site
-- [ ] T045 [US1] Ajouter la déconnexion à `frontend/app/pages/guide-nego/ressources/reglages.vue`, avec la mention de ce qu'elle laisse sur le téléphone
-- [ ] T046 [P] [US1] Poser les fichiers i18n `fr` et `en` : `pages/guide-nego.{compte,connexion,mot-de-passe-oublie,verification-adresse,nouveau-mot-de-passe}.json`
-- [ ] T047 [P] [US1] Test `node --test` de l'identifiant d'appareil et de la session hors connexion — `frontend/tests/guide-nego/appareil.test.ts`
+- [X] T038 [P] [US1] Créer `frontend/app/utils/guide-nego/appareil.ts` : `device_id` engendré une fois et gardé en stockage local (`gn.appareil`), libellé et plateforme composés — **jamais un cookie**
+- [X] T039 [P] [US1] Créer `frontend/app/composables/api/guide-nego.ts` et brancher le bloc `negotiation` dans `frontend/app/composables/useApi.ts`
+- [X] T040 [P] [US1] Créer `frontend/app/composables/guide-nego/useGnSession.ts` — **à ne pas confondre avec `useGnConnexion` (0a), qui dit l'état du réseau** : enveloppe le store `auth` du site, expose l'état du compte lisible hors connexion, relit au retour au premier plan (`visibilitychange`), **ne nomme aucun cookie**. Session expirée **sans réseau** : garder ce qui a été lu avec son heure, ne réclamer la reconnexion qu'au retour du réseau, **ne jamais vider l'écran** (FR-006 ter)
+- [X] T041 [US1] Créer `frontend/app/pages/guide-nego/compte.vue` — étape 1 sur 3, prénom et nom, adresse, pays, mot de passe, l'aide sur le compte ePavillon, la sortie « J'ai déjà un compte », et l'**attente de confirmation** avec « J'ai confirmé mon adresse » et « Renvoyer le courriel »
+- [X] T042 [P] [US1] Créer `frontend/app/pages/guide-nego/connexion.vue` et `frontend/app/pages/guide-nego/mot-de-passe-oublie.vue`, avec la feuille basse du mot de passe oublié
+- [X] T043 [P] [US1] Créer `frontend/app/pages/guide-nego/verification-adresse.vue` — quatre états du jeton, et sur iPhone « Adresse confirmée — retournez dans Guide Négo »
+- [X] T044 [P] [US1] Créer `frontend/app/pages/guide-nego/nouveau-mot-de-passe.vue`, mêmes exigences de mot de passe que le site
+- [X] T045 [US1] Ajouter la déconnexion à `frontend/app/pages/guide-nego/ressources/reglages.vue`, avec la mention de ce qu'elle laisse sur le téléphone
+- [X] T046 [P] [US1] Poser les fichiers i18n `fr` et `en` : `pages/guide-nego.{compte,connexion,mot-de-passe-oublie,verification-adresse,nouveau-mot-de-passe}.json`
+- [X] T047 [P] [US1] Test `node --test` de l'identifiant d'appareil et de la session hors connexion — `frontend/tests/guide-nego/appareil.test.ts`
 
 **Point de contrôle** : § 1 du [quickstart](quickstart.md) déroulé en entier, **T025 et T026 comprises**.
 
@@ -134,31 +134,31 @@ inconnu, révoqué, épuisé, terminé, puis répéter les essais faux jusqu'au 
 
 ### Tests
 
-- [ ] T048 [P] [US2] Test : les neuf issues de `redeem`, chacune en **200** avec son message — `backend/crates/modules/negotiation/tests/redeem_issues.rs`
-- [ ] T049 [P] [US2] Test : **cinq échecs, puis un sixième essai avec un `device_id` différent → `throttled`**. C'est la preuve que le compte est par personne — `negotiation/tests/essais_par_personne.rs`
-- [ ] T050 [P] [US2] Test : **deux entrées simultanées sur le dernier usage d'un code** — une seule passe, l'autre reçoit `exhausted` ; `used_count` n'excède jamais `max_uses` — `negotiation/tests/quota_concurrent.rs`
-- [ ] T051 [P] [US2] Test : le code du réseau accorde l'appartenance ; un code général ne l'accorde pas ; une personne déjà admise gagne l'appartenance **sans second accès** — `negotiation/tests/reseau.rs`
-- [ ] T052 [P] [US2] Test : `redeem` écrit l'usage, l'attribution de rôle et l'événement d'outbox **dans une seule transaction** — `negotiation/tests/redeem_transaction.rs`
-- [ ] T053 [P] [US2] Test : `nego-024`, `NEGO 024` et `Nego024` désignent le même code, et le code engendré fait **huit caractères, tirets compris** — `negotiation/tests/code_normalise.rs`
+- [X] T048 [P] [US2] Test : les neuf issues de `redeem`, chacune en **200** avec son message — `backend/crates/modules/negotiation/tests/redeem_issues.rs`
+- [X] T049 [P] [US2] Test : **cinq échecs, puis un sixième essai avec un `device_id` différent → `throttled`**. C'est la preuve que le compte est par personne — `negotiation/tests/essais_par_personne.rs`
+- [X] T050 [P] [US2] Test : **deux entrées simultanées sur le dernier usage d'un code** — une seule passe, l'autre reçoit `exhausted` ; `used_count` n'excède jamais `max_uses` — `negotiation/tests/quota_concurrent.rs`
+- [X] T051 [P] [US2] Test : le code du réseau accorde l'appartenance ; un code général ne l'accorde pas ; une personne déjà admise gagne l'appartenance **sans second accès** — `negotiation/tests/reseau.rs`
+- [X] T052 [P] [US2] Test : `redeem` écrit l'usage, l'attribution de rôle et l'événement d'outbox **dans une seule transaction** — `negotiation/tests/redeem_transaction.rs`
+- [X] T053 [P] [US2] Test : `nego-024`, `NEGO 024` et `Nego024` désignent le même code, et le code engendré fait **huit caractères, tirets compris** — `negotiation/tests/code_normalise.rs`
 
 ### Back
 
-- [ ] T054 [P] [US2] `negotiation/src/repo/settings.rs` : lire `negotiation.admission_mode` et `negotiation.invitation_attempts` — **relus à chaque tentative, sans cache**
-- [ ] T055 [P] [US2] `negotiation/src/repo/codes.rs` : retrouver un code par sa forme normalisée, via `v_invitation_codes` pour son état
-- [ ] T056 [P] [US2] `negotiation/src/repo/attempts.rs` : enregistrer un essai, compter par `invitation_attempts_recent(person, window)`
-- [ ] T057 [US2] `negotiation/src/service/redeem.rs` : les neuf issues, l'attribution de rôle avec sa portée, l'adhésion `space_members`, l'appartenance au réseau, l'événement — une transaction ouverte par `Db::write(&ctx)`
-- [ ] T058 [US2] `negotiation/src/routes/acces.rs` : `POST /api/negotiation/invitation-codes/redeem`, union en 200, message français composé par l'API
-- [ ] T059 [US2] `negotiation/src/repo/access.rs` et `routes/acces.rs` : `GET /api/negotiation/me/access` — état dérivé du RBAC, portée, réseau, demande, mode ; `ETag` et `?since=`
-- [ ] T060 [US2] Traduire les erreurs d'invariant de la base en codes français dans `backend/crates/modules/negotiation/src/service/redeem.rs` : usage en double, quota dépassé, portée invalide, terme hors taxonomie — **aucune vérification préalable en Rust**
-- [ ] T061 [US2] `make openapi` et `make check-api-contract`
+- [X] T054 [P] [US2] `negotiation/src/repo/settings.rs` : lire `negotiation.admission_mode` et `negotiation.invitation_attempts` — **relus à chaque tentative, sans cache**
+- [X] T055 [P] [US2] `negotiation/src/repo/codes.rs` : retrouver un code par sa forme normalisée, via `v_invitation_codes` pour son état
+- [X] T056 [P] [US2] `negotiation/src/repo/attempts.rs` : enregistrer un essai, compter par `invitation_attempts_recent(person, window)`
+- [X] T057 [US2] `negotiation/src/service/redeem.rs` : les neuf issues, l'attribution de rôle avec sa portée, l'adhésion `space_members`, l'appartenance au réseau, l'événement — une transaction ouverte par `Db::write(&ctx)`
+- [X] T058 [US2] `negotiation/src/routes/acces.rs` : `POST /api/negotiation/invitation-codes/redeem`, union en 200, message français composé par l'API
+- [X] T059 [US2] `negotiation/src/repo/access.rs` et `routes/acces.rs` : `GET /api/negotiation/me/access` — état dérivé du RBAC, portée, réseau, demande, mode ; `ETag` et `If-None-Match` — **`?since=` écarté**, voir le journal du 21/09 : l'état vient de quatre tables et de `now()`, aucune colonne ne porte l'instant où il a changé, et un 304 fautif laisserait ouverts les modules d'un accès retiré
+- [X] T060 [US2] Traduire les erreurs d'invariant de la base en codes français dans `backend/crates/modules/negotiation/src/service/redeem.rs` : usage en double, quota dépassé, portée invalide, terme hors taxonomie — **aucune vérification préalable en Rust**
+- [X] T061 [US2] `make openapi` et `make check-api-contract`
 
 ### Client
 
-- [ ] T062 [US2] Créer `frontend/app/pages/guide-nego/code.vue` — étape 2 sur 3, la phrase sur le groupe WhatsApp, le champ, les neuf issues affichées **telles que l'API les formule**, les sorties de chaque cas
-- [ ] T063 [P] [US2] Créer `frontend/app/composables/guide-nego/useGnAcces.ts` : lit `me/access` à travers `useGnLecture` — hors connexion, l'état lu avec son heure
-- [ ] T064 [US2] Hors connexion, dans `frontend/app/pages/guide-nego/code.vue` (après T062) : dire que la saisie demande le réseau, **n'annoncer aucun accès**, et ne rien mettre en file
-- [ ] T065 [P] [US2] i18n `fr` et `en` : `pages/guide-nego.code.json` — titres, aides et boutons seulement, **aucun message de refus**
-- [ ] T066 [P] [US2] Test `node --test` de l'état d'accès hors connexion — `frontend/tests/guide-nego/acces.test.ts`
+- [X] T062 [US2] Créer `frontend/app/pages/guide-nego/code.vue` — étape 2 sur 3, la phrase sur le groupe WhatsApp, le champ, les neuf issues affichées **telles que l'API les formule**, les sorties de chaque cas
+- [X] T063 [P] [US2] Créer `frontend/app/composables/guide-nego/useGnAcces.ts` : lit `me/access` à travers `useGnLecture` — hors connexion, l'état lu avec son heure
+- [X] T064 [US2] Hors connexion, dans `frontend/app/pages/guide-nego/code.vue` (après T062) : dire que la saisie demande le réseau, **n'annoncer aucun accès**, et ne rien mettre en file
+- [X] T065 [P] [US2] i18n `fr` et `en` : `pages/guide-nego.code.json` — titres, aides et boutons seulement, **aucun message de refus**
+- [X] T066 [P] [US2] Test `node --test` de l'état d'accès hors connexion — `frontend/tests/guide-nego/acces.test.ts`
 
 **Point de contrôle** : § 2 du quickstart déroulé. **Le critère de sortie est à moitié tenu.**
 

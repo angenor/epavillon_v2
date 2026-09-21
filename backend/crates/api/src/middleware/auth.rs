@@ -73,10 +73,12 @@ where
         Box::pin(async move {
             if let (Some(jeton), Some(pool), Some(codec)) = (jeton, pool, codec) {
                 match identity::resolve_actor(&pool, &codec, &jeton).await {
-                    Ok(Some(acteur)) => {
+                    Ok(Some(resolue)) => {
                         let contexte = req.extensions().get::<RequestContext>().cloned();
                         if let Some(contexte) = contexte {
-                            req.extensions_mut().insert(contexte.with_actor(acteur));
+                            req.extensions_mut().insert(
+                                contexte.with_session(resolue.person_id, resolue.session_id),
+                            );
                         }
                     }
                     Ok(None) => {}

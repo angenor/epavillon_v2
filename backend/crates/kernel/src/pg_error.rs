@@ -125,6 +125,21 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
         | ("23505", "ux_broadcast_channels_default")
         | ("23505", "call_reviewers_pkey") => ApiError::new(Internal),
 
+        // --- Admission de Guide Négo (0b) ------------------------------------
+        // Les deux index partiels tiennent « une seule demande en attente par
+        // personne et par portée » : deux appareils qui l'envoient ensemble ne
+        // produisent qu'une ligne, et le conflit se traduit au lieu d'être
+        // prévenu par un SELECT que la seconde requête contournerait.
+        ("23505", "ux_access_requests_pending_space")
+        | ("23505", "ux_access_requests_pending_global") => {
+            ApiError::new(NegotiationAccessRequestPending)
+        }
+        // L'unicité du code **couvre les révoqués** : c'est ce qui permet de
+        // répondre « révoqué le 8 novembre » plutôt que « code inconnu ».
+        ("23505", "ux_invitation_codes_normalized") => {
+            ApiError::new(NegotiationInvitationCodeDuplicate).field("code")
+        }
+
         ("23505", _) => ApiError::new(Conflict),
 
         ("23514", "ck_role_assignment_window") => {
@@ -134,6 +149,22 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
             ApiError::new(IdentityRoleScopeMismatch).field("scope_id")
         }
         ("23514", "ck_role_assignment_revocation") => ApiError::new(IdentityRoleRevocationInvalid),
+        // **NE DOIT JAMAIS REMONTER**, et le déclarer est le seul moyen de
+        // s'apercevoir qu'elle l'a fait : le service de saisie d'un code
+        // traduit cette violation en issue `exhausted`, rendue en 200 avec son
+        // message et ses sorties. La voir ici signifie qu'une écriture a
+        // contourné ce chemin.
+        ("23514", "ck_invitation_codes_quota") => ApiError::new(Conflict),
+        ("23514", "ck_invitation_codes_uses") => ApiError::new(ValidationFailed).field("max_uses"),
+        ("23514", "ck_invitation_codes_period") => {
+            ApiError::new(ValidationFailed).field("valid_until")
+        }
+        // Les deux seules portées offertes par le rôle `negotiator` : un espace
+        // précis, ou Guide Négo en entier. Un désaccord entre le type de portée
+        // et l'espace nomme l'espace, qui est ce que le formulaire a choisi.
+        ("23514", "ck_invitation_codes_scope") | ("23514", "ck_access_requests_scope") => {
+            ApiError::new(ValidationFailed).field("space_id")
+        }
         ("23514", "people_first_name_check") => ApiError::new(ValidationFailed).field("first_name"),
         ("23514", "people_last_name_check") => ApiError::new(ValidationFailed).field("last_name"),
 

@@ -1,0 +1,19 @@
+{
+  "titre": "New password",
+  "attente": "Checking the link…",
+  "champ": "New password",
+  "aide": "At least eight characters, including one uppercase and one lowercase letter.",
+  "faute": "At least {min} characters, including one uppercase and one lowercase letter.",
+  "enregistrer": "Save",
+  "redemander": "Ask for a new link",
+  "vers-connexion": "Sign in",
+  "panne": "Check failed",
+  "fait": {
+    "titre": "Password saved",
+    "texte": "Your other devices have been signed out. Sign in with your new password."
+  },
+  "refuse": {
+    "titre": "This link is no longer valid",
+    "texte": "A reset link is valid for one hour and can only be used once."
+  }
+}

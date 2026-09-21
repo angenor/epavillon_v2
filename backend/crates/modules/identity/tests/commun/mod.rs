@@ -6,6 +6,7 @@
 
 #![allow(dead_code)]
 
+use identity::repo::sessions::ClientKind;
 use identity::state::IdentityState;
 use kernel::config::Config;
 use kernel::context::RequestContext;
@@ -181,17 +182,46 @@ pub async fn sessions_vivantes(bac: &Bac, person_id: Uuid) -> i64 {
 /// Une connexion réussie, avec ses deux jetons. Panique sur toute autre issue :
 /// un test qui croit ouvrir une session ne doit pas continuer sans.
 pub async fn connexion(bac: &Bac, email: &str) -> identity::service::session::IssuedSession {
+    connexion_avec(bac, email, appareil_du_site(), false).await
+}
+
+/// L'appareil que le site déclare : rien. L'objet `client` est absent de ses
+/// appels, et c'est ce qui prouve la non-régression.
+pub fn appareil_du_site() -> identity::service::session::Device<'static> {
+    identity::service::session::Device {
+        user_agent: Some("test"),
+        ip: "127.0.0.1".parse().ok(),
+        ..Default::default()
+    }
+}
+
+/// L'appareil que Guide Négo déclare. **Aucun de ces champs n'accorde de
+/// droit** : un client peut les forger.
+pub fn appareil_de_lapplication() -> identity::service::session::Device<'static> {
+    identity::service::session::Device {
+        user_agent: Some("test"),
+        ip: "127.0.0.1".parse().ok(),
+        client_kind: ClientKind::App,
+        device_id: Some("9f2c-appareil-de-test"),
+        device_label: Some("Android · Chrome"),
+        device_platform: Some("android"),
+    }
+}
+
+pub async fn connexion_avec(
+    bac: &Bac,
+    email: &str,
+    device: identity::service::session::Device<'_>,
+    remember_me: bool,
+) -> identity::service::session::IssuedSession {
     let reponse = identity::service::auth::login(
         &bac.state,
         &bac.ctx(),
         identity::service::auth::LoginRequest {
             email,
             password: MOT_DE_PASSE,
-            remember_me: false,
-            device: identity::service::session::Device {
-                user_agent: Some("test"),
-                ip: "127.0.0.1".parse().ok(),
-            },
+            remember_me,
+            device,
         },
     )
     .await
@@ -205,6 +235,37 @@ pub async fn connexion(bac: &Bac, email: &str) -> identity::service::session::Is
     reponse.session.expect("session ouverte")
 }
 
+/// Ce que la ligne de session porte réellement : d'où elle vient, quel appareil,
+/// et quand elle expire. C'est la seule façon de prouver qu'une rotation a
+/// recopié le client — la réponse HTTP, elle, n'en dit rien.
+pub struct LigneDeSession {
+    pub client_kind: String,
+    pub device_id: Option<String>,
+    pub device_label: Option<String>,
+    pub device_platform: Option<String>,
+    pub expires_at: OffsetDateTime,
+}
+
+pub async fn ligne_de_session(bac: &Bac, session_id: Uuid) -> LigneDeSession {
+    let l = sqlx::query!(
+        r#"SELECT client_kind::text AS "client_kind!", device_id, device_label,
+                  device_platform, expires_at
+             FROM identity.sessions WHERE id = $1"#,
+        session_id
+    )
+    .fetch_one(bac.base.pool())
+    .await
+    .expect("lecture de la session");
+
+    LigneDeSession {
+        client_kind: l.client_kind,
+        device_id: l.device_id,
+        device_label: l.device_label,
+        device_platform: l.device_platform,
+        expires_at: l.expires_at,
+    }
+}
+
 /// Ce que l'intergiciel de session de l'API ferait de ce jeton d'accès. Une
 /// erreur ici est une panne de base, pas une session invalide : le test doit
 /// s'arrêter dessus, jamais la confondre avec « déconnecté ».
@@ -212,6 +273,7 @@ pub async fn acteur_resolu(bac: &Bac, jeton_dacces: &str) -> Option<Uuid> {
     identity::resolve_actor(bac.base.pool(), bac.state.tokens(), jeton_dacces)
         .await
         .expect("résolution de session")
+        .map(|resolue| resolue.person_id)
 }
 
 /// Une édition, pour donner une cible aux portées d'événement. Le module

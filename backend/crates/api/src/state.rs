@@ -31,6 +31,7 @@ pub struct AppState {
     pub content: content::ContentState,
     pub live: live::LiveState,
     pub analytics: analytics::AnalyticsState,
+    pub negotiation: negotiation::NegotiationState,
     /// Origines acceptées sur une écriture. Celle du site, et rien d'autre —
     /// schéma et autorité, sans le chemin de base.
     pub allowed_origins: Vec<String>,
@@ -66,6 +67,7 @@ impl AppState {
         let content = content::ContentState::new(db.clone(), config.clone());
         let live = live::LiveState::new(db.clone(), config.clone());
         let analytics = analytics::AnalyticsState::new(db.clone(), config.clone());
+        let negotiation = negotiation::NegotiationState::new(db.clone(), config.clone());
 
         Ok(Self {
             db,
@@ -83,6 +85,7 @@ impl AppState {
             content,
             live,
             analytics,
+            negotiation,
             allowed_origins,
         })
     }

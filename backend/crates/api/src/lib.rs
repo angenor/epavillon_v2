@@ -118,6 +118,17 @@ pub fn build_app(
         portee = portee.configure(analytics::routes);
     }
 
+    // **`negotiation.enabled` ne commande PAS ces routes.** Ce drapeau ferme
+    // l'espace `/negociations` du site ; Guide Négo a le sien, `guide_nego`.
+    // Ce qui décide du montage est `platform.modules`, comme pour les huit
+    // autres. Les deux jeux de chemins sont plats : `/negotiation/…` n'appartient
+    // qu'à ce module, et `/admin` est un préfixe partagé où un scope rendrait
+    // muettes les routes des autres.
+    if etat.modules.is_mounted("negotiation") {
+        portee = portee.configure(negotiation::routes);
+        portee = portee.configure(negotiation::admin_routes);
+    }
+
     // **Le scope `/people` est composé ici, et une seule fois.** Trois modules y
     // déposent des routes depuis B4 — l'identité pour les personnes, les
     // organisations pour leurs adhésions, les propositions pour la recherche
@@ -226,6 +237,7 @@ pub fn build_app(
         .app_data(web::Data::new(etat.content.clone()))
         .app_data(web::Data::new(etat.live.clone()))
         .app_data(web::Data::new(etat.analytics.clone()))
+        .app_data(web::Data::new(etat.negotiation.clone()))
         .app_data(web::Data::from(etat.identity.token_codec()))
         .app_data(web::Data::new(etat.clone()))
         .app_data(corps_json())

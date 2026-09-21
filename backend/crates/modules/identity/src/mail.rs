@@ -20,6 +20,31 @@ fn en_anglais(locale: &str) -> bool {
     locale.starts_with("en")
 }
 
+/// D'où venait la demande. **Le lien suit le client, pas la session** : au
+/// moment où le courriel s'ouvre, la personne n'a pas de session — le client a
+/// été retenu avec le jeton.
+///
+/// Une personne qui crée son compte dans Guide Négo et se retrouve sur
+/// l'ePavillon a perdu son parcours : autre apparence, autre logique, et aucun
+/// chemin de retour.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum Client {
+    #[default]
+    Web,
+    App,
+}
+
+impl Client {
+    /// Ce que la charge utile du travail d'envoi porte. Une valeur inconnue vaut
+    /// « le site » : c'est le lien qui existait avant, et il mène quelque part.
+    pub fn lire(valeur: Option<&str>) -> Self {
+        match valeur {
+            Some("app") => Self::App,
+            _ => Self::Web,
+        }
+    }
+}
+
 /// Les écrans du site, dans les deux langues.
 ///
 /// **Les chemins sont traduits** : le site sert `/verification-adresse` en
@@ -48,16 +73,34 @@ impl Ecran {
             (Self::MotDePasseOublie, true) => "/en/forgot-password",
         }
     }
+
+    /// Les écrans de Guide Négo. **Aucun préfixe de langue** : l'application est
+    /// en français quel que soit le téléphone (R3 de l'étape 0a), et ses routes
+    /// ne sont pas localisées. Un `/en/guide-nego/…` n'existe pas.
+    ///
+    /// Les deux écrans sans équivalent dans l'application — se connecter, mot de
+    /// passe oublié — gardent ceux du site : ils ne sortent que du rappel de
+    /// compte existant, qui n'a pas de parcours à reprendre.
+    fn chemin_guide_nego(self) -> Option<&'static str> {
+        match self {
+            Self::VerificationAdresse => Some("/guide-nego/verification-adresse"),
+            Self::NouveauMotDePasse => Some("/guide-nego/nouveau-mot-de-passe"),
+            Self::Connexion | Self::MotDePasseOublie => None,
+        }
+    }
 }
 
-/// Le lien mène à un **écran du site**, jamais à une route de l'API :
-/// `APP_PUBLIC_URL` est l'adresse du front.
+/// Le lien mène à un **écran du front**, jamais à une route de l'API :
+/// `APP_PUBLIC_URL` est l'adresse du site, et Guide Négo vit sous le même toit.
 fn url(ctx: &MailContext<'_>, ecran: Ecran) -> String {
-    format!(
-        "{}{}",
-        ctx.app_public_url.trim_end_matches('/'),
-        ecran.chemin(en_anglais(ctx.locale))
-    )
+    let chemin = match ctx.client {
+        Client::App => ecran
+            .chemin_guide_nego()
+            .unwrap_or_else(|| ecran.chemin(en_anglais(ctx.locale))),
+        Client::Web => ecran.chemin(en_anglais(ctx.locale)),
+    };
+
+    format!("{}{}", ctx.app_public_url.trim_end_matches('/'), chemin)
 }
 
 fn lien(ctx: &MailContext<'_>, ecran: Ecran, jeton: &str) -> String {
@@ -70,6 +113,7 @@ pub struct MailContext<'a> {
     pub locale: &'a str,
     pub first_name: &'a str,
     pub app_public_url: &'a str,
+    pub client: Client,
 }
 
 pub fn verification_email(ctx: &MailContext<'_>, jeton: &str) -> OutgoingMail {
@@ -211,6 +255,7 @@ mod tests {
             locale: "fr",
             first_name: "Awa",
             app_public_url: "http://localhost:3000/",
+            client: Client::Web,
         }
     }
 
@@ -262,6 +307,44 @@ mod tests {
         let mail = existing_account_notice(&contexte());
         assert!(!mail.text.contains("verify-email"));
         assert!(!mail.text.contains("token="));
+    }
+
+    /// **Le lien suit le client, et il n'est pas localisé.** Une personne qui
+    /// crée son compte dans l'application doit y revenir ; et `/en/guide-nego/`
+    /// n'existe pas — l'application est en français quel que soit le téléphone.
+    #[test]
+    fn le_lien_mene_a_guide_nego_quand_la_demande_en_vient() {
+        let mut ctx = contexte();
+        ctx.client = Client::App;
+
+        assert!(verification_email(&ctx, "x")
+            .text
+            .contains("http://localhost:3000/guide-nego/verification-adresse?token=x"));
+        assert!(password_reset_email(&ctx, "x")
+            .text
+            .contains("http://localhost:3000/guide-nego/nouveau-mot-de-passe?token=x"));
+
+        ctx.locale = "en";
+        let anglais = verification_email(&ctx, "x");
+        assert!(
+            anglais.text.contains("/guide-nego/verification-adresse"),
+            "les routes de Guide Négo ne sont pas localisées"
+        );
+        assert!(!anglais.text.contains("/en/guide-nego"));
+    }
+
+    /// Le rappel de compte existant n'a pas de parcours à reprendre : ses deux
+    /// liens restent ceux du site, dans les deux cas.
+    #[test]
+    fn le_rappel_de_compte_existant_garde_les_ecrans_du_site() {
+        let mut ctx = contexte();
+        ctx.client = Client::App;
+        let mail = existing_account_notice(&ctx);
+        assert!(mail.text.contains("http://localhost:3000/connexion"));
+        assert!(mail
+            .text
+            .contains("http://localhost:3000/mot-de-passe-oublie"));
+        assert!(!mail.text.contains("/guide-nego"));
     }
 
     #[test]

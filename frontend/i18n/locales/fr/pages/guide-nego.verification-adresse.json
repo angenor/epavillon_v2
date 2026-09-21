@@ -1,0 +1,26 @@
+{
+  "titre": "Confirmation de l'adresse",
+  "attente": "Confirmation en cours…",
+  "renvoyer": "Renvoyer le courriel",
+  "vers-connexion": "Me connecter",
+  "confirmee": {
+    "titre": "Adresse confirmée",
+    "suite": "Votre compte est prêt. Nous vous emmenons à la suite.",
+    "retournez": "Retournez dans Guide Négo pour continuer : l'application reprend là où vous en étiez."
+  },
+  "perimee": {
+    "titre": "Ce lien a expiré",
+    "texte": "Un lien de confirmation vaut 24 heures. Demandez-en un nouveau."
+  },
+  "deja-utilisee": {
+    "titre": "C'est déjà fait",
+    "texte": "Cette adresse a déjà été confirmée. Vous pouvez vous connecter."
+  },
+  "inconnue": {
+    "titre": "Ce lien n'est pas reconnu",
+    "texte": "Le lien est peut-être incomplet. Ouvrez-le depuis le courriel plutôt que de le recopier."
+  },
+  "panne": {
+    "titre": "Confirmation impossible"
+  }
+}

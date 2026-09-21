@@ -38,6 +38,15 @@ import type { LoadFailure } from '~/utils/api-error'
 /** Trente jours avec « rester connecté », la journée sinon. */
 const REMEMBERED_MAX_AGE = 60 * 60 * 24 * 30
 const SESSION_MAX_AGE = 60 * 60 * 12
+/**
+ * Quatre-vingt-dix jours depuis l'application, **et le témoin doit suivre**.
+ *
+ * Sans cela, le témoin tombe au bout de douze heures alors que la session court
+ * encore trois mois : `ensureLoaded()` n'ose plus tenter la rotation, et
+ * l'application se croit déconnectée sans l'être. Rien n'échoue, et la personne
+ * ressaisit son mot de passe pour rien — au pire moment, en salle.
+ */
+const APP_MAX_AGE = 60 * 60 * 24 * 90
 
 export const useAuthStore = defineStore('auth', () => {
   const api = useApi()
@@ -51,13 +60,22 @@ export const useAuthStore = defineStore('auth', () => {
    */
   const personId = useSessionWitness()
 
+  /**
+   * La durée du témoin suit celle de la session : c'est l'API qui décide, et le
+   * témoin ne fait que ne pas la contredire.
+   */
+  function witnessMaxAge(payload: LoginPayload): number {
+    if (payload.client?.kind === 'app') return APP_MAX_AGE
+    return payload.remember_me ? REMEMBERED_MAX_AGE : SESSION_MAX_AGE
+  }
+
   /** Pose le témoin de session avec la durée qu'a choisie la personne. */
-  function writeSession(id: Uuid, remember: boolean): void {
+  function writeSession(id: Uuid, maxAge: number): void {
     const cookie = useCookie<string | null>(SESSION_WITNESS_COOKIE, {
       default: () => null,
       sameSite: 'lax',
       path: '/',
-      maxAge: remember ? REMEMBERED_MAX_AGE : SESSION_MAX_AGE,
+      maxAge,
     })
     cookie.value = id
     personId.value = id
@@ -131,7 +149,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (result.status === 'authenticated') {
       person.value = result.person
       isResolved.value = true
-      writeSession(result.person.id, payload.remember_me)
+      writeSession(result.person.id, witnessMaxAge(payload))
     }
     return result
   }

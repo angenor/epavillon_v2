@@ -9,6 +9,7 @@ mod commun;
 
 use commun::{Bac, MOT_DE_PASSE};
 use identity::domain::token::{TokenRejection, VerifyEmailOutcome};
+use identity::repo::sessions::ClientKind;
 use identity::service::registration::{self, RegisterRequest};
 
 const ADRESSE: &str = "awa.diallo@example.org";
@@ -25,6 +26,7 @@ async fn inscrire(bac: &Bac, email: &str) -> String {
             email,
             country_id: None,
             password: MOT_DE_PASSE,
+            client: ClientKind::Web,
             preferred_locale: "fr",
             timezone: "Africa/Dakar",
         },
@@ -185,7 +187,7 @@ async fn un_lien_plus_recent_invalide_le_precedent() {
     let bac = Bac::monter().await;
     let ancien = inscrire(&bac, ADRESSE).await;
 
-    registration::resend_verification(&bac.state, &bac.ctx(), ADRESSE)
+    registration::resend_verification(&bac.state, &bac.ctx(), ADRESSE, ClientKind::Web)
         .await
         .expect("renvoi du lien");
 
@@ -217,10 +219,14 @@ async fn un_lien_plus_recent_invalide_le_precedent() {
 async fn le_renvoi_rend_toujours_la_meme_chose() {
     let bac = Bac::monter().await;
 
-    let inconnue =
-        registration::resend_verification(&bac.state, &bac.ctx(), "personne@example.org")
-            .await
-            .expect("renvoi sur adresse inconnue");
+    let inconnue = registration::resend_verification(
+        &bac.state,
+        &bac.ctx(),
+        "personne@example.org",
+        ClientKind::Web,
+    )
+    .await
+    .expect("renvoi sur adresse inconnue");
     assert_eq!(inconnue.status, "sent");
 
     let jeton = inscrire(&bac, ADRESSE).await;
@@ -228,9 +234,10 @@ async fn le_renvoi_rend_toujours_la_meme_chose() {
         .await
         .expect("vérification");
 
-    let deja_verifiee = registration::resend_verification(&bac.state, &bac.ctx(), ADRESSE)
-        .await
-        .expect("renvoi sur adresse déjà vérifiée");
+    let deja_verifiee =
+        registration::resend_verification(&bac.state, &bac.ctx(), ADRESSE, ClientKind::Web)
+            .await
+            .expect("renvoi sur adresse déjà vérifiée");
     assert_eq!(deja_verifiee.status, "sent");
 
     let envois = sqlx::query_scalar!(

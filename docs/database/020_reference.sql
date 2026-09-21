@@ -272,7 +272,10 @@ INSERT INTO reference.taxonomies (code, label, description, is_multi_select, is_
     ('document_type',     '{"fr":"Types de document","en":"Document types"}',           NULL, false, false, true),
     ('negotiation_track', '{"fr":"Filières de négociation","en":"Negotiation tracks"}',  '{"fr":"Convention de rattachement : climat, biodiversité, désertification","en":"Related convention"}', false, false, true),
     ('referral_source',   '{"fr":"Canaux d''acquisition","en":"Referral sources"}',      '{"fr":"Comment le participant a connu l''activité","en":"How the attendee heard about the activity"}', false, false, false),
-    ('media_license',     '{"fr":"Licences des médias","en":"Media licences"}',          '{"fr":"Conditions de réutilisation d''un fichier téléversé","en":"Reuse terms of an uploaded file"}', false, false, true)
+    ('media_license',     '{"fr":"Licences des médias","en":"Media licences"}',          '{"fr":"Conditions de réutilisation d''un fichier téléversé","en":"Reuse terms of an uploaded file"}', false, false, true),
+    -- Réseaux de négociation : l'appartenance vient du code d'invitation
+    -- utilisé, jamais d'une case « genre » sur l'identité (ADR-007).
+    ('negotiation_network','{"fr":"Réseaux de négociation","en":"Negotiation networks"}', '{"fr":"Réseaux auxquels un code d''invitation peut donner l''appartenance","en":"Networks a invitation code may grant membership to"}', false, false, true)
 ON CONFLICT (code) DO NOTHING;
 
 INSERT INTO reference.taxonomy_terms (taxonomy_code, code, label, sort_order) VALUES
@@ -351,5 +354,8 @@ INSERT INTO reference.taxonomy_terms (taxonomy_code, code, label, sort_order) VA
     ('media_license', 'cc_by_nc',            '{"fr":"CC BY-NC","en":"CC BY-NC"}', 40),
     ('media_license', 'cc_by_nc_sa',         '{"fr":"CC BY-NC-SA","en":"CC BY-NC-SA"}', 50),
     ('media_license', 'public_domain',       '{"fr":"Domaine public","en":"Public domain"}', 60),
-    ('media_license', 'ifdd_internal',       '{"fr":"Usage interne IFDD","en":"IFDD internal use"}', 70)
+    ('media_license', 'ifdd_internal',       '{"fr":"Usage interne IFDD","en":"IFDD internal use"}', 70),
+
+    -- Réseaux de négociation
+    ('negotiation_network', 'women_negotiators', '{"fr":"Réseau des négociatrices francophones","en":"Francophone women negotiators network"}', 10)
 ON CONFLICT (taxonomy_code, code) DO NOTHING;

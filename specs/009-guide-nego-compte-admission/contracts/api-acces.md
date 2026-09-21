@@ -28,8 +28,12 @@
 }
 ```
 
-- Réponse **`ETag`** + `If-None-Match`, et `?since=` : c'est ce qui la rend lisible hors connexion par
-  `useGnLecture`, avec l'heure de sa lecture (principe XI).
+- Réponse **`ETag`** + `If-None-Match` : c'est ce qui la rend lisible hors connexion par
+  `useGnLecture`, avec l'heure de sa lecture (principe XI). **L'empreinte est calculée sur le contenu
+  rendu**, et `?since=` a été écarté en construisant (21/09) : l'état vient de quatre tables et de
+  `now()`, aucune colonne ne porte l'instant où il a changé, et un `304` fautif laisserait ouverts,
+  sur le téléphone, les modules d'un accès retiré — exactement ce qu'ADR-006 interdit. Une empreinte
+  de contenu, elle, ne peut pas se tromper.
 - `state` est **dérivé du RBAC**, jamais d'une colonne d'état : `identity.has_permission` fait foi.
 - `networks` ne commande aucun droit à cette étape (FR-014).
 - **Rien dans cette réponse ne nomme ni ne suppose un genre** (SC-006).

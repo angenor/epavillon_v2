@@ -81,6 +81,34 @@ pub fn random_token() -> String {
     URL_SAFE_NO_PAD.encode(octets)
 }
 
+/// Chaîne aléatoire tirée d'un alphabet donné.
+///
+/// **Sans biais** : un octet hors du plus grand multiple de la taille de
+/// l'alphabet est rejeté plutôt que replié par un modulo. Sur un alphabet de
+/// 31 lettres, `octet % 31` rendrait les huit premières sensiblement plus
+/// probables que les autres — et un code d'invitation est un secret partagé
+/// qu'on devine d'autant mieux que ses lettres sont prévisibles.
+pub fn random_string(alphabet: &[u8], longueur: usize) -> String {
+    assert!(!alphabet.is_empty() && alphabet.len() <= 256);
+    let plafond = (256 / alphabet.len() * alphabet.len()) as u16;
+
+    let mut sortie = String::with_capacity(longueur);
+    let mut tampon = [0u8; 32];
+    while sortie.len() < longueur {
+        OsRng.fill_bytes(&mut tampon);
+        for octet in tampon {
+            if u16::from(octet) >= plafond {
+                continue;
+            }
+            sortie.push(alphabet[usize::from(octet) % alphabet.len()] as char);
+            if sortie.len() == longueur {
+                break;
+            }
+        }
+    }
+    sortie
+}
+
 pub fn token_hash(jeton: &str) -> [u8; 32] {
     let mut hacheur = Sha256::new();
     hacheur.update(jeton.as_bytes());

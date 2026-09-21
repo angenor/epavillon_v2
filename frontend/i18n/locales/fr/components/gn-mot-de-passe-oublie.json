@@ -1,0 +1,8 @@
+{
+  "propos": "Nous vous envoyons un lien pour en choisir un nouveau. Il reste valable une heure.",
+  "champ": "Adresse électronique",
+  "envoyer": "Envoyer le lien",
+  "annuler": "Annuler",
+  "fermer": "Fermer",
+  "envoye": "Si un compte existe pour {adresse}, un lien vient de partir. Il reste valable une heure."
+}

@@ -35,6 +35,7 @@ use crate::domain::ids::PersonId;
 use crate::domain::password;
 use crate::domain::token::{PasswordResetOutcome, PasswordResetRequestOutcome, TokenCheckOutcome};
 use crate::jobs::emails;
+use crate::repo::sessions::ClientKind;
 use crate::repo::{accounts, people};
 use crate::service::session;
 use crate::state::IdentityState;
@@ -47,11 +48,12 @@ pub async fn request(
     state: &IdentityState,
     ctx: &RequestContext,
     email: &str,
+    client: ClientKind,
 ) -> Result<PasswordResetRequestOutcome> {
     let mut tx = state.db().write(ctx).await?;
 
     if let Some(personne) = people::find_by_email(&mut tx, email).await? {
-        envoyer_le_lien(state, &mut tx, &personne).await?;
+        envoyer_le_lien(state, &mut tx, &personne, client).await?;
     }
 
     tx.commit().await?;
@@ -154,6 +156,7 @@ async fn envoyer_le_lien(
     state: &IdentityState,
     tx: &mut PgConnection,
     personne: &people::RegistrationTarget,
+    client: ClientKind,
 ) -> Result<()> {
     tokens::invalidate_pending(
         tx,
@@ -167,7 +170,7 @@ async fn envoyer_le_lien(
         &state.config().auth.token_ttl,
         personne.person_id.as_uuid(),
         TokenPurpose::PasswordReset,
-        json!({ "email": personne.email }),
+        json!({ "email": personne.email, "client": client.as_db() }),
     )
     .await?;
 
@@ -180,6 +183,7 @@ async fn envoyer_le_lien(
                 "locale": personne.preferred_locale,
                 "first_name": personne.first_name,
                 "token": jeton.clear,
+                "client": client.as_db(),
             }),
         )
         .idempotent(jeton.id.to_string()),

@@ -164,6 +164,11 @@ CREATE TRIGGER tg_accounts_updated_at
 COMMENT ON COLUMN identity.accounts.password_hash IS
     'Empreinte Argon2id calculée par l''API. Aucune fonction SQL ne doit vérifier de mot de passe.';
 
+-- Le client d'où vient la session. ENUM fermé et technique, au même titre
+-- qu'auth_provider : ce n'est pas un vocabulaire métier ouvert. La coquille
+-- native de Guide Négo y ajoutera sa valeur le jour venu.
+CREATE TYPE identity.session_client AS ENUM ('web', 'app');
+
 -- Sessions : jetons de rafraîchissement, révocables individuellement
 -- (déconnexion d'un appareil) ou en masse (compromission).
 CREATE TABLE identity.sessions (
@@ -178,12 +183,31 @@ CREATE TABLE identity.sessions (
     expires_at         timestamptz NOT NULL,
     last_seen_at       timestamptz NOT NULL DEFAULT now(),
     revoked_at         timestamptz,
-    revoked_reason     text
+    revoked_reason     text,
+    -- Ces quatre colonnes closent la table, et c'est délibéré : elles sont
+    -- arrivées par ALTER sur une base en service (migration 0b), et pg_dump
+    -- compare les colonnes dans leur ordre d'ajout.
+    client_kind        identity.session_client NOT NULL DEFAULT 'web',
+    device_id          text,
+    device_label       text,
+    device_platform    text
 );
 
 CREATE INDEX ix_sessions_person_active
     ON identity.sessions (person_id, expires_at DESC)
     WHERE revoked_at IS NULL;
+
+-- Compter les personnes qui utilisent l'application sans dédoubler personne.
+CREATE INDEX ix_sessions_client ON identity.sessions (client_kind, issued_at DESC);
+
+COMMENT ON COLUMN identity.sessions.client_kind IS
+    'D''où vient la session : "web" (le site) ou "app" (Guide Négo). Déclaré par le client à la connexion et RECOPIÉ À CHAQUE ROTATION — sans cela toute session de l''application redeviendrait "web" au premier renouvellement.';
+COMMENT ON COLUMN identity.sessions.device_id IS
+    'Identifiant d''installation opaque, engendré par le client. N''ACCORDE AUCUN DROIT et ne borne aucun compteur : il se forge, comme user_agent. Information d''affichage.';
+COMMENT ON COLUMN identity.sessions.device_label IS
+    'Ce que la personne lit dans la liste de ses appareils : « Android · Chrome ».';
+COMMENT ON COLUMN identity.sessions.device_platform IS
+    'Plateforme déclarée : android, ios, other.';
 
 -- Jetons à usage unique : vérification d'email, réinitialisation de mot de
 -- passe, invitation, lien magique d'inscription rapide (cas PACO).

@@ -20,6 +20,7 @@ async fn tenter(bac: &Bac, email: &str, mot_de_passe: &str) -> LoginResponse {
             device: Device {
                 user_agent: Some("test"),
                 ip: "127.0.0.1".parse().ok(),
+                ..Default::default()
             },
         },
     )
