@@ -58,6 +58,10 @@ Chaque décision : ce qui est retenu, pourquoi, ce qui a été écarté. Les con
 
 **À vérifier en première tâche** : sur une route non localisée, avec `epavillon_locale=en` posé par le site, l'affichage est en `fr`, et le cookie est inchangé après la visite. Si `@nuxtjs/i18n` v10 suit le cookie malgré tout, la mise en page fixe la langue de l'instance (`locale.value = 'fr'`, après chargement des messages `fr`) — écriture en mémoire, sans cookie.
 
+**Vérifié le 21/09 (T001)**, `@nuxtjs/i18n` 10.6, cookie `epavillon_locale=en` posé : la route non localisée s'affiche en `fr`, `/en/guide-nego` rend 404, le nom de route est `guide-nego` sans suffixe de langue. **Mais le module réécrit le cookie en `fr`** : `setLocaleSuspend` appelle `setCookieLocale` sans condition, et aucune option ne l'en empêche par route. Le serveur, lui, n'écrit rien sur ces routes. D'où `frontend/app/plugins/guide-nego-langue.client.ts` : il relève le cookie avant le module (`enforce: 'pre'`) et le rétablit à `page:finish`, sur les seules routes `guide-nego*`. Revérifié : affichage `fr`, cookie resté à `en`. C'est le seul fichier de Guide Négo qui nomme ce cookie, et il vit hors des dossiers `guide-nego`.
+
+Le cookie `epavillon_theme`, lui, est posé à sa valeur par défaut par `app.vue`, racine commune à toutes les pages : ce n'est pas Guide Négo qui l'écrit, et la valeur est celle que le site aurait posée.
+
 **Écarté** : suivre `navigator.languages` ; le repli « deux adresses, deux portées ».
 
 ## R4 — Manifeste et service worker : des chemins relatifs

@@ -147,3 +147,17 @@ celle de l'attribution : un compte détaché sur la COP31 ne détient cette perm
 qu'au **premier** démarrage du conteneur ; sans destruction du volume, la base garde l'ancien semis
 sans le dire, et le test du seuil serait passé sur la valeur de repli — au vert, pour une mauvaise
 raison.
+
+## 21/09/2026 — Guide Négo 0a : un drapeau de module semé
+
+`900_seed.sql` § 2 : `('guide_nego.enabled', …, false, 0)`. Une ligne de semis ; ni table, ni colonne,
+ni type, ni fonction. Il ouvre ou ferme l'application Guide Négo entière, et ne se confond pas avec
+`negotiation.enabled`, qui ferme l'espace Négociations du site. Le cinquième onglet de l'application
+suit `negotiation.channels`, déjà semé : aucun drapeau n'a été créé pour lui.
+
+**Allumer veut dire `is_enabled = true` ET `rollout_percent = 100`** : l'application s'ouvre sans
+compte, et sans session `platform.is_feature_enabled()` n'ouvre qu'à 100 %.
+
+**Conséquence d'exploitation** : aucune. La ligne s'insère à la main sur une base montée
+(`ON CONFLICT (key) DO NOTHING`) ; pas de `down -v`. Le suivi de l'étape vit dans
+`docs/AppNego/progress.md` (ADR-017).

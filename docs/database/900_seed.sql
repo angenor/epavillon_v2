@@ -61,6 +61,7 @@ INSERT INTO platform.feature_flags (key, description, is_enabled, rollout_percen
     ('publications.enabled',        'Espace Publications ouvert aux organisations.', false, 0),
     ('negotiation.enabled',         'Espace Négociations, réservé aux négociateurs.', false, 0),
     ('negotiation.channels',        'Canaux d''échange temps réel, à l''intérieur de l''espace Négociations.', false, 0),
+    ('guide_nego.enabled',          'Guide Négo : l''application mobile entière. Elle s''ouvre sans compte : allumer = is_enabled ET rollout_percent = 100.', false, 0),
     ('training.enabled',            'Espace Formations : catalogue, chapitres, quiz, attestations.', false, 0),
     ('messaging.enabled',           'Messagerie directe et mise en relation entre membres (tables du module engagement).', false, 0),
     ('directory.enabled',           'Annuaire des organisations et des personnes, et profils publics — l''espace Communauté.', false, 0),

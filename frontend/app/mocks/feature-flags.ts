@@ -44,6 +44,13 @@ export const featureFlags = [
     false,
     0,
   ),
+  // Allumé ici seulement : hors ligne, on travaille dans l'application, pas devant sa page fermée.
+  flag(
+    'guide_nego.enabled',
+    "Guide Négo : l'application mobile entière.",
+    true,
+    100,
+  ),
   flag(
     'training.enabled',
     'Espace Formations : catalogue, chapitres, quiz, attestations.',

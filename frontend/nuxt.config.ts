@@ -23,6 +23,21 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  // Le système de design de Guide Négo est borné à son dossier (constitution, XIII) :
+  // ses composants portent le préfixe `Gn`, ses composables vivent à part.
+  components: [
+    { path: '~/components/guide-nego', prefix: 'Gn', pathPrefix: false },
+    { path: '~/components', ignore: ['guide-nego/**'] },
+  ],
+  imports: { dirs: ['composables/guide-nego'] },
+
+  // Guide Négo se rend dans le navigateur seul (ADR-002) : c'est ce qui lui permet
+  // de s'ouvrir hors connexion, et d'être emballé plus tard pour les magasins.
+  routeRules: {
+    '/guide-nego': { ssr: false },
+    '/guide-nego/**': { ssr: false },
+  },
+
   // TailwindCSS v4 s'installe comme greffon Vite : il n'y a ni fichier de
   // configuration JavaScript, ni directive `@tailwind`. Le thème est décrit en
   // CSS dans app/assets/css/design-tokens.css.
