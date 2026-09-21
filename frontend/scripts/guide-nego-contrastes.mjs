@@ -63,6 +63,8 @@ const PAIRES = [
   ['--gn-attention-aplat-texte', '--gn-attention-aplat', COURANT, 'bandeau de connexion'],
   ['--gn-texte', '--gn-attention-fond', COURANT, 'bandeau « Remplacé par… »'],
   ['--gn-bulle-envoyee-texte', '--gn-bulle-envoyee', COURANT, 'bulle envoyée'],
+  ['--gn-sur-titre', '--gn-titre', COURANT, 'texte sur aplat de titre'],
+  ['--gn-danger-texte', '--gn-danger-aplat', COURANT, 'texte sur bouton dangereux'],
   ['--gn-texte-2', '--gn-fond', SECONDAIRE, 'texte secondaire'],
   ['--gn-texte-2', '--gn-fond-2', SECONDAIRE, 'texte secondaire sur bloc'],
   ['--gn-desactive-texte', '--gn-desactive-fond', SECONDAIRE, 'commande désactivée'],

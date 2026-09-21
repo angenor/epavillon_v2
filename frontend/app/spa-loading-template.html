@@ -1,0 +1,28 @@
+<!--
+  Ce que le téléphone montre AVANT que l'application ne s'affiche.
+
+  Guide Négo est la seule partie du site rendue dans le navigateur seul : ce gabarit ne
+  paraît donc que sous `guide-nego/`. Il n'a qu'un travail — poser le bon fond tout de
+  suite. Sans lui, un thème sombre choisi la veille s'ouvre sur un éclair blanc, en
+  pleine séance de nuit.
+
+  Les deux couleurs s'écrivent ici en clair : le CSS de l'application n'est pas encore
+  chargé, et c'est le seul moment où ses jetons ne peuvent pas répondre. Ce sont
+  `--gn-fond` des deux thèmes.
+-->
+<div id="gn-avant-affichage"></div>
+<script>
+  ;(function () {
+    var SOMBRE = '#101704'
+    var CLAIR = '#FFFFFF'
+    var choix = 'systeme'
+    try {
+      choix = localStorage.getItem('gn.theme') || 'systeme'
+    } catch (e) {
+      /* Stockage refusé : le réglage du téléphone tranchera. */
+    }
+    var duTelephone = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+    var sombre = choix === 'sombre' || (choix !== 'clair' && duTelephone)
+    document.documentElement.style.background = sombre ? SOMBRE : CLAIR
+  })()
+</script>

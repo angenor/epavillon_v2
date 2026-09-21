@@ -137,12 +137,12 @@ Placée avant US1 : toutes les pages naissent derrière le drapeau, et l'étape 
 
 **Independent Test** : forcer « Sombre », fermer, rouvrir en mode avion ; le site garde son thème.
 
-- [ ] T052 [P] [US4] Écrire `frontend/app/utils/guide-nego/theme.ts` (`clair | sombre | systeme` + préférence du téléphone ⇒ thème affiché ; valeur invalide ⇒ `systeme`) et son test `frontend/tests/guide-nego/theme.test.ts`
-- [ ] T053 [US4] Créer `frontend/app/composables/guide-nego/useGnTheme.ts` : clé `localStorage` `gn.theme`, écoute de `matchMedia('(prefers-color-scheme: dark)')`, expose `choix`, `affiche`, `choisir()` ; brancher dans `frontend/app/layouts/guide-nego.vue` : `data-theme="sombre"` sur l'élément racine — jamais sur `<html>` —, `theme-color` selon le thème ; ne lit ni n'écrit `epavillon_theme`
-- [ ] T054 [US4] Créer `frontend/app/spa-loading-template.html` : script en ligne qui lit `gn.theme` et la préférence du téléphone et pose le fond (`#101704` ou `#FFFFFF`) avant tout affichage ; vérifier qu'aucune page du site ne l'emploie (aucune autre route en `ssr: false`)
-- [ ] T055 [P] [US4] Créer `frontend/app/components/guide-nego/GnSegmente.vue` : choix unique, 48 px, bord 2 px, rayon 4, segments égaux séparés de 2 px, texte 17/600, pictogramme 20 facultatif, actif = `titre` plein et texte blanc ; `role="radiogroup"`, flèches du clavier, `aria-checked`
-- [ ] T056 [US4] Créer `frontend/app/pages/guide-nego/ressources/reglages.vue` : écran secondaire, groupe « Affichage », libellé « Thème », `GnSegmente` « Clair » (`gn-sun`) · « Sombre » (`gn-moon`) · « Système » ; rien d'autre ; textes dans `pages/guide-nego.reglages.json`
-- [ ] T057 [US4] Passer en sombre tous les écrans livrés (ouverture, installation, fermée, cinq onglets, lexique, réglages) et corriger toute valeur claire restée par oubli dans les composants `frontend/app/components/guide-nego/`
+- [X] T052 [P] [US4] Écrire `frontend/app/utils/guide-nego/theme.ts` (`clair | sombre | systeme` + préférence du téléphone ⇒ thème affiché ; valeur invalide ⇒ `systeme`) et son test `frontend/tests/guide-nego/theme.test.ts`
+- [X] T053 [US4] Créer `frontend/app/composables/guide-nego/useGnTheme.ts` : clé `localStorage` `gn.theme`, écoute de `matchMedia('(prefers-color-scheme: dark)')`, expose `choix`, `affiche`, `choisir()` ; brancher dans `frontend/app/layouts/guide-nego.vue` : `data-theme="sombre"` sur l'élément racine — jamais sur `<html>` —, `theme-color` selon le thème ; ne lit ni n'écrit `epavillon_theme`
+- [X] T054 [US4] Créer `frontend/app/spa-loading-template.html` : script en ligne qui lit `gn.theme` et la préférence du téléphone et pose le fond (`#101704` ou `#FFFFFF`) avant tout affichage ; vérifier qu'aucune page du site ne l'emploie (aucune autre route en `ssr: false`)
+- [X] T055 [P] [US4] Créer `frontend/app/components/guide-nego/GnSegmente.vue` : choix unique, 48 px, bord 2 px, rayon 4, segments égaux séparés de 2 px, texte 17/600, pictogramme 20 facultatif, actif = `titre` plein et texte blanc ; `role="radiogroup"`, flèches du clavier, `aria-checked`
+- [X] T056 [US4] Créer `frontend/app/pages/guide-nego/ressources/reglages.vue` : écran secondaire, groupe « Affichage », libellé « Thème », `GnSegmente` « Clair » (`gn-sun`) · « Sombre » (`gn-moon`) · « Système » ; rien d'autre ; textes dans `pages/guide-nego.reglages.json`
+- [X] T057 [US4] Passer en sombre tous les écrans livrés (ouverture, installation, fermée, cinq onglets, lexique, réglages) et corriger toute valeur claire restée par oubli dans les composants `frontend/app/components/guide-nego/`
 
 **Checkpoint** : quickstart § 2, points 5 et 8.
 

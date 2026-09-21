@@ -90,7 +90,7 @@ const { t } = useI18n()
 
 [data-app="guide-nego"] .gn-entete__aa--ouvert {
   background: var(--gn-titre);
-  color: var(--gn-accent-inv);
+  color: var(--gn-sur-titre);
 }
 
 [data-app="guide-nego"][data-theme="sombre"] .gn-entete__aa--ouvert {

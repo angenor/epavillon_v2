@@ -1,5 +1,5 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
 import { createResolver, defineNuxtModule } from '@nuxt/kit'
 import {
   empreinteDesMessages,
@@ -52,14 +52,22 @@ export default defineNuxtModule({
 
     const resolver = createResolver(import.meta.url)
     const modele = resolver.resolve('../guide-nego/sw.modele.js')
-    // Nitro copie ses fichiers publics pendant sa propre construction, après celle du
-    // client : le service worker, écrit au manifeste, y est déjà. Le dossier se crée
-    // AU MOMENT D'ÉCRIRE — Nuxt vide `buildDir` après le montage des modules.
+    // Le fichier s'écrit dans `buildDir` puis se COPIE dans la sortie publique, une
+    // fois Nitro passé. Le déclarer comme dossier de fichiers publics servait le
+    // service worker, mais faisait rendre 404 à toute adresse de `guide-nego/` qui
+    // n'était pas un fichier — Nitro cessait de laisser la main au rendu de page, et
+    // une première ouverture sur un lien profond échouait. Le service worker, en
+    // servant la page vide de son cache, masquait la panne à partir de la deuxième.
+    // Le dossier se crée AU MOMENT D'ÉCRIRE : Nuxt vide `buildDir` après le montage
+    // des modules.
     const dossier = join(nuxt.options.buildDir, 'guide-nego-public')
 
-    nuxt.hook('nitro:config', (config) => {
-      config.publicAssets ||= []
-      config.publicAssets.push({ dir: dossier, baseURL: `/${PORTEE}`, maxAge: 0 })
+    nuxt.hook('nitro:build:public-assets', (nitro) => {
+      const engendre = join(dossier, 'sw.js')
+      if (!existsSync(engendre)) return
+      const destination = join(nitro.options.output.publicDir, PORTEE, 'sw.js')
+      mkdirSync(dirname(destination), { recursive: true })
+      copyFileSync(engendre, destination)
     })
 
     nuxt.hook('build:manifest', (manifeste) => {

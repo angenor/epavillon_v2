@@ -38,6 +38,10 @@
   --gn-nuance-sombre-gris: #A7A6A3;
   --gn-nuance-sombre-squelette: #2E3F0E; /* squelette seulement, jamais en filet — écart 1 */
   --gn-nuance-sombre-jaune-bloc: #2B2607; /* fond du bandeau « Remplacé par… » — écarts 4 et 27 */
+  /* Le rouge de charte porte du texte blanc à 6,0:1 : sous les 7:1 que le plein soleil
+     exige. Même teinte, clarté abaissée jusqu'au seuil — l'APLAT seulement ; le texte
+     et les pictogrammes rouges gardent la couleur de charte. Arbitré le 21/09. */
+  --gn-nuance-rouge-aplat: #B30E1A;
 }
 
 [data-app="guide-nego"] {
@@ -49,6 +53,8 @@
   --gn-titre: var(--gn-charte-vert-tres-fonce);
   --gn-accent: var(--gn-charte-vert-fonce);
   --gn-accent-inv: var(--gn-charte-blanc);             /* texte sur action principale */
+  --gn-sur-titre: var(--gn-charte-blanc);              /* texte sur un aplat `titre` : message éphémère, segment actif */
+  --gn-danger-texte: var(--gn-charte-blanc);           /* texte sur un aplat `danger` */
   --gn-bulle-envoyee: var(--gn-charte-vert-tres-fonce);
   --gn-bulle-envoyee-texte: var(--gn-charte-blanc);
 
@@ -64,6 +70,7 @@
   --gn-succes: var(--gn-charte-vert-moyen);
   --gn-information: var(--gn-charte-cyan-fonce);
   --gn-danger: var(--gn-charte-rouge);
+  --gn-danger-aplat: var(--gn-nuance-rouge-aplat);     /* bouton dangereux : un aplat qui porte du texte */
   --gn-reseau: var(--gn-charte-violet);
   --gn-terminee: var(--gn-charte-gris);
   --gn-prevue: var(--gn-charte-noir);
@@ -173,6 +180,8 @@
   --gn-titre: var(--gn-nuance-sombre-texte);
   --gn-accent: var(--gn-nuance-sombre-vert);
   --gn-accent-inv: var(--gn-nuance-sombre-fond);
+  --gn-sur-titre: var(--gn-nuance-sombre-fond);        /* en sombre l'aplat `titre` devient clair : le texte passe foncé */
+  --gn-danger-texte: var(--gn-nuance-sombre-fond);     /* le rouge sombre est clair : le texte devient foncé */
   --gn-filet: var(--gn-nuance-sombre-vert-filet);
   --gn-filet-fort: var(--gn-nuance-sombre-vert-filet);
   --gn-attention: var(--gn-nuance-sombre-jaune);
@@ -181,6 +190,7 @@
   --gn-succes: var(--gn-nuance-sombre-vert);           /* un seul vert d'état en sombre — écart 3 */
   --gn-information: var(--gn-nuance-sombre-cyan);
   --gn-danger: var(--gn-nuance-sombre-rouge);
+  --gn-danger-aplat: var(--gn-nuance-sombre-rouge);    /* en sombre, le rouge est déjà clair : il porte un texte foncé */
   --gn-reseau: var(--gn-nuance-sombre-violet);
   --gn-terminee: var(--gn-nuance-sombre-gris);
   --gn-prevue: var(--gn-nuance-sombre-texte);

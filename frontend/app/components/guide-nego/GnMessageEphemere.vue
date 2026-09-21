@@ -61,16 +61,10 @@ function agir() {
   justify-content: space-between;
   gap: var(--gn-espace-16);
   background: var(--gn-titre);
-  color: var(--gn-charte-blanc);
+  color: var(--gn-sur-titre);
   font-size: var(--gn-taille-17);
   line-height: var(--gn-interligne-17);
   animation: gn-ephemere-entre var(--gn-duree-standard) var(--gn-courbe-sortie);
-}
-
-[data-app="guide-nego"][data-theme="sombre"] .gn-ephemere {
-  background: var(--gn-fond-2);
-  border: var(--gn-filet-1) solid var(--gn-filet);
-  color: var(--gn-texte);
 }
 
 [data-app="guide-nego"] .gn-ephemere__action {

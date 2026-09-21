@@ -30,6 +30,23 @@
   padding: 0;
 }
 
+/* LE SITE COLORE ET COMPOSE TOUS LES TITRES (assets/css/main.css : police de titrage,
+   interligne, couleur de marque). Cette règle d'élément atteint aussi les nôtres, et un
+   titre de Guide Négo qui oubliait de déclarer sa couleur sortait en bleu. Ici, la main
+   se reprend une fois : sans `:where()`, pour peser plus qu'une règle d'élément, et par
+   héritage, pour que chaque titre déclare ensuite les siennes. Même raison pour `hr`. */
+[data-app="guide-nego"] h1,
+[data-app="guide-nego"] h2,
+[data-app="guide-nego"] h3,
+[data-app="guide-nego"] h4,
+[data-app="guide-nego"] h5,
+[data-app="guide-nego"] h6,
+[data-app="guide-nego"] hr {
+  font: inherit;
+  color: inherit;
+  border-color: currentcolor;
+}
+
 [data-app="guide-nego"] :where(ul, ol) {
   list-style: none;
 }

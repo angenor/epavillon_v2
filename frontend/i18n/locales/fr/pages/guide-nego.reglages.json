@@ -1,0 +1,11 @@
+{
+  "titre": "Profil et réglages",
+  "affichage": "Affichage",
+  "theme": {
+    "libelle": "Thème",
+    "aide": "« Système » suit le réglage de votre téléphone.",
+    "clair": "Clair",
+    "sombre": "Sombre",
+    "systeme": "Système"
+  }
+}

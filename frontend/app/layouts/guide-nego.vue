@@ -11,13 +11,16 @@ import '~/assets/guide-nego/mesures.css'
 import '~/assets/guide-nego/base.css'
 import { CLE_GARDE_ANNONCEE, lireCle, poserCle } from '~/utils/guide-nego/stockage'
 
-// La barre système du téléphone ne lit pas le CSS : elle veut une valeur. C'est
-// `--gn-charte-vert-tres-fonce` ; le thème sombre la remplacera (0a, US4).
-const COULEUR_BARRE_SYSTEME = '#233400'
+// La barre système du téléphone ne lit pas le CSS : elle veut une valeur. Ce sont
+// `--gn-charte-vert-tres-fonce` et `--gn-nuance-sombre-fond`, les seuls endroits du
+// code où une couleur s'écrit — la barre n'a pas d'autre langue.
+const BARRE_SYSTEME = { clair: '#233400', sombre: '#101704' }
+
+const { affiche } = useGnTheme()
 
 // Le manifeste et l'icône ne se posent QUE sous cette mise en page : le site n'est pas
 // installable, et son onglet garde son propre titre.
-useHead({
+useHead(() => ({
   htmlAttrs: { lang: 'fr' },
   titleTemplate: (titre) => (titre ? `${titre} — Guide Négo` : 'Guide Négo'),
   link: [
@@ -25,11 +28,11 @@ useHead({
     { rel: 'apple-touch-icon', href: assetUrl('/guide-nego/icones/180.png') },
   ],
   meta: [
-    { name: 'theme-color', content: COULEUR_BARRE_SYSTEME },
+    { name: 'theme-color', content: BARRE_SYSTEME[affiche.value] },
     { name: 'apple-mobile-web-app-capable', content: 'yes' },
     { name: 'apple-mobile-web-app-title', content: 'Guide Négo' },
   ],
-})
+}))
 
 // Le verdict du drapeau peut arriver après l'ouverture : il s'applique alors dans les
 // deux sens, sans attendre une navigation.
@@ -116,7 +119,7 @@ async function enregistrerLaGarde() {
 </script>
 
 <template>
-  <div data-app="guide-nego">
+  <div data-app="guide-nego" :data-theme="affiche">
     <slot />
     <div id="gn-portail" />
     <GnMessageEphemere

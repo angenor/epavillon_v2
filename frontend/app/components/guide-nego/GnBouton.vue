@@ -89,18 +89,14 @@ defineEmits<{ clic: [MouseEvent] }>()
 }
 
 [data-app="guide-nego"] .gn-bouton--dangereux {
-  background: var(--gn-danger);
-  color: var(--gn-charte-blanc);
-}
-
-[data-app="guide-nego"][data-theme="sombre"] .gn-bouton--dangereux {
-  color: var(--gn-nuance-sombre-fond);
+  background: var(--gn-danger-aplat);
+  color: var(--gn-danger-texte);
 }
 
 /* L'état actif d'une commande qui bascule : aplat plein, jamais un simple changement de teinte. */
 [data-app="guide-nego"] .gn-bouton--secondaire.gn-bouton--actif {
   background: var(--gn-titre);
-  color: var(--gn-accent-inv);
+  color: var(--gn-sur-titre);
 }
 
 [data-app="guide-nego"][data-theme="sombre"] .gn-bouton--secondaire.gn-bouton--actif {
