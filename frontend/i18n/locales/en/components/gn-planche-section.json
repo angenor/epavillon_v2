@@ -1,0 +1,7 @@
+{
+  "jeton": "Token",
+  "valeur": "Value",
+  "usage": "Use",
+  "renvoi": "points to",
+  "lecture": "Values read from this page, at render time, in the theme shown."
+}

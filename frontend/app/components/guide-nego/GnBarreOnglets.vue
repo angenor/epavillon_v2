@@ -6,17 +6,29 @@ import { onglets as listerOnglets, ongletActif, type Onglet } from '~/utils/guid
  * tiennent pas dans un cinquième d'écran. À 360 px, cinq onglets tiennent exactement ;
  * quand la place manque — police agrandie, écran plus étroit — la barre seule défile,
  * et rien n'est tronqué.
+ *
+ * L'onglet allumé se déduit de l'adresse. `forcerActif` le désigne à la main : hors
+ * d'un écran de l'application — la planche de design — aucune adresse ne l'allume, et
+ * une barre sans onglet actif ne montre pas ce qu'elle est censée montrer.
  */
-const props = withDefaults(defineProps<{ echangesOuverts?: boolean; compteurs?: Record<string, number> }>(), {
-  echangesOuverts: false,
-  compteurs: () => ({}),
-})
+const props = withDefaults(
+  defineProps<{
+    echangesOuverts?: boolean
+    compteurs?: Record<string, number>
+    forcerActif?: string
+  }>(),
+  { echangesOuverts: false, compteurs: () => ({}), forcerActif: undefined },
+)
 
 const { t } = useI18n()
 const route = useRoute()
 
 const onglets = computed<Onglet[]>(() => listerOnglets(props.echangesOuverts))
-const actif = computed(() => ongletActif(route.path, onglets.value))
+const actif = computed(() =>
+  props.forcerActif
+    ? (onglets.value.find((onglet) => onglet.cle === props.forcerActif) ?? null)
+    : ongletActif(route.path, onglets.value),
+)
 
 const barre = useTemplateRef<HTMLElement>('barre')
 
@@ -25,7 +37,19 @@ function amenerDansLaVue() {
   barre.value?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
 }
 
-onMounted(amenerDansLaVue)
+let observateur: ResizeObserver | undefined
+
+onMounted(() => {
+  amenerDansLaVue()
+  // La place peut changer sans que l'onglet change : police agrandie en cours de
+  // session, rotation de l'écran. Sans cela l'onglet actif sortait de la vue et n'y
+  // revenait qu'à la navigation suivante.
+  observateur = new ResizeObserver(amenerDansLaVue)
+  observateur.observe(barre.value!)
+})
+
+onBeforeUnmount(() => observateur?.disconnect())
+
 watch(actif, () => nextTick(amenerDansLaVue))
 </script>
 

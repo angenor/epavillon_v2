@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import sprite from '~/assets/guide-nego/pictogrammes.svg'
+import type { NomDePicto } from '~/utils/guide-nego/pictogrammes'
 
 /** Un pictogramme n'informe jamais seul : le mot qui l'accompagne porte le sens. */
-withDefaults(defineProps<{ nom: string; taille?: 16 | 18 | 20 | 24 | 26 | 40 }>(), { taille: 24 })
+withDefaults(defineProps<{ nom: NomDePicto; taille?: 16 | 18 | 20 | 24 | 26 | 40 }>(), { taille: 24 })
 </script>
 
 <template>

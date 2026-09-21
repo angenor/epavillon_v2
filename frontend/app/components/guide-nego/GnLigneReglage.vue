@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { NomDePicto } from '~/utils/guide-nego/pictogrammes'
 import { NuxtLink } from '#components'
 
 /**
@@ -9,7 +10,7 @@ withDefaults(
   defineProps<{
     libelle: string
     valeur?: string
-    picto?: string
+    picto?: NomDePicto
     vers?: string
     /** La dernière d'une liste n'a pas de filet : le bloc s'achève de lui-même. */
     derniere?: boolean

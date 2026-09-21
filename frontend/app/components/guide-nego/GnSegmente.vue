@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { NomDePicto } from '~/utils/guide-nego/pictogrammes'
 /**
  * Un choix unique parmi trois ou quatre, tous visibles : taille de lecture, thème.
  *
@@ -9,7 +10,7 @@
 export interface SegmentDeChoix {
   valeur: string
   libelle: string
-  picto?: string
+  picto?: NomDePicto
 }
 
 const props = defineProps<{ segments: SegmentDeChoix[]; libelle: string }>()

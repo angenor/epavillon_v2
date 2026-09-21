@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import type { NomDePicto } from '~/utils/guide-nego/pictogrammes'
 /** Nom de groupe en capitales, compteur facultatif, filet franc dessous. */
-withDefaults(defineProps<{ titre: string; compteur?: number | string; picto?: string }>(), {
+withDefaults(defineProps<{ titre: string; compteur?: number | string; picto?: NomDePicto }>(), {
   compteur: undefined,
   picto: undefined,
 })

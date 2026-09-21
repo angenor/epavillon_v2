@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import type { NomDePicto } from '~/utils/guide-nego/pictogrammes'
 /** Dit ce qu'il n'y a pas, et quand ça viendra. Une sortie, s'il y en a une. */
 withDefaults(
-  defineProps<{ picto: string; titre: string; texte: string; sortie?: string; sortieVers?: string }>(),
+  defineProps<{ picto: NomDePicto; titre: string; texte: string; sortie?: string; sortieVers?: string }>(),
   { sortie: undefined, sortieVers: undefined },
 )
 </script>

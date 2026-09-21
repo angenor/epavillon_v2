@@ -1,0 +1,8 @@
+{
+  "titre": "Components",
+  "propos": "Every component delivered at stage 0a, in all its variants and states.",
+  "etats-communs": "Shared states: rest · pressed (fond-2 background) · focus (3 px ring, 2 px from the edge) · disabled (grey text on pale grey, never transparency) · loading (spinning arc, or skeleton). Every component is shown in the light theme; the dark theme applies the tokens of table 1.",
+  "interactif": "Pressed and focus cannot be frozen on a board: press a control to see the first, tab through the section to see the second.",
+  "absents": "What is not shown here",
+  "absents-propos": "The mock-up also draws a session row, a document row, an activity row, a message bubble, a source quotation, a notification card, an avatar with its role badge and the lock of a restricted module. None of them ships at stage 0a: they arrive with the screen that uses them. Drawing them by hand would make the board lie, and a board that lies is worse than none."
+}

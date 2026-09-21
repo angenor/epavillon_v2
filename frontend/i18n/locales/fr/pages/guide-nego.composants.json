@@ -1,0 +1,18 @@
+{
+  "titre": "Système de design",
+  "propos": "Les jetons et les composants de Guide Négo, rendus par le code qui les sert. Cette page n'est liée depuis aucun écran : elle sert à vérifier, pas à naviguer.",
+  "affichage": "Thème de la planche",
+  "sommaire": "Aller à une section",
+  "clair": "Clair",
+  "sombre": "Sombre",
+  "cote-a-cote": "Côte à côte",
+  "section": {
+    "1": "Couleurs",
+    "2": "Typographie",
+    "3": "Mesures",
+    "4": "Pictogrammes",
+    "5": "Composants",
+    "6": "États",
+    "7": "Mouvement"
+  }
+}

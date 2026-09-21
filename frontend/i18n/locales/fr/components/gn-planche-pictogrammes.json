@@ -1,0 +1,11 @@
+{
+  "titre": "Pictogrammes",
+  "propos": "Une seule famille : grille de 24, trait de 2, bouts et angles ronds, aucun remplissage sauf le point de « En cours ».",
+  "regle": "Un pictogramme n'informe jamais seul : le mot qui l'accompagne porte le sens. Seule la barre d'onglets le place au-dessus de son libellé. La couleur est héritée du texte.",
+  "famille": "Les {nombre} symboles",
+  "famille-propos": "Le nom s'écrit sans le préfixe du sprite. Ce sont des identifiants techniques : ils ne se traduisent pas.",
+  "tailles": "Les six tailles",
+  "tailles-propos": "Le même symbole aux six tailles admises. Aucune autre n'existe.",
+  "couleur": "La couleur",
+  "couleur-propos": "Le pictogramme prend la couleur du texte qui l'entoure : c'est le parent qui décide, jamais le symbole."
+}

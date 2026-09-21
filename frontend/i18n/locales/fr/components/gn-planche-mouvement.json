@@ -1,0 +1,38 @@
+{
+  "titre": "Mouvement",
+  "propos": "Six durées, deux courbes. Le mouvement confirme un geste ou situe un écran.",
+  "principe": "Aucune animation n'est nécessaire pour comprendre : une marque d'état, un message, un compteur restent lisibles sans elle. Le mouvement ne porte jamais seul une information.",
+  "durees": "Les jetons",
+  "durees-propos": "Valeurs lues sur cette page. Sous « réduire les animations », les cinq premières tombent à zéro.",
+  "rejouables": "Les trois durées de transition",
+  "rejouables-propos": "Touchez « Rejouer » : le pion fait l'aller, puis le retour.",
+  "rejouer": "Rejouer",
+  "rejouer-nom": "Rejouer le mouvement de {jeton}",
+  "rejouer-ensemble": "Rejouer les deux",
+  "courbes": "Les courbes",
+  "courbes-propos": "Même durée pour les deux : seule la courbe change. L'une part vite et se pose, l'autre accélère et ralentit.",
+  "boucles": "Ce qui tourne sans fin",
+  "boucles-propos": "L'arc de chargement et le squelette. Sous « réduire les animations », ils restent dessinés, immobiles.",
+  "ephemere": "La tenue du message éphémère",
+  "ephemere-propos": "Ce n'est pas une animation mais un délai : il ne tombe pas à zéro sous « réduire les animations ».",
+  "ephemere-message": "Signalement envoyé. Il sera relu avant publication.",
+  "envoyer": "Afficher le message",
+  "reduit": "« Réduire les animations »",
+  "reduit-propos": "Le réglage d'accessibilité du téléphone, lu par la page.",
+  "reduit-actif": "Le réglage est actif sur cet appareil : toutes les durées de transition valent zéro, et l'arc comme le squelette sont figés.",
+  "reduit-inactif": "Le réglage n'est pas actif sur cet appareil. S'il l'était, toutes les durées de transition vaudraient zéro et l'arc comme le squelette seraient figés.",
+  "reduit-preuve": "La preuve est au-dessus : la liste des jetons affiche la valeur réellement appliquée, pas celle qui est écrite dans le thème.",
+  "immobile": "Ce qui ne bouge jamais : le fond, l'en-tête, la barre d'onglets. Aucun défilement automatique, aucun parallaxe, aucun rebond. Les listes ne s'animent pas à l'entrée — elles sont là.",
+  "usage": {
+    "bref": "Pression d'un bouton, bascule d'un filtre, apparition d'une marque d'état",
+    "standard": "Feuille basse, message éphémère, changement d'onglet",
+    "long": "Ouverture d'un document, transition entre écrans",
+    "arc": "Arc de chargement, en boucle linéaire",
+    "squelette": "Pulsation du squelette de chargement, opacité 1 → 0,55 → 1",
+    "ephemere": "Tenue du message éphémère ; délai d'« Annuler » après une acceptation"
+  },
+  "usage-courbe": {
+    "sortie": "Ce qui apparaît ou entre : feuille basse, message éphémère, marque d'état. Part vite, se pose doucement.",
+    "standard": "Ce qui se déplace ou change de taille : bascule de filtre, barre de progression, transition d'écran."
+  }
+}

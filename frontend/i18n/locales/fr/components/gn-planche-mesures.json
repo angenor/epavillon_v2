@@ -1,0 +1,24 @@
+{
+  "titre": "Mesures",
+  "propos": "Tout est multiple de 4. Chaque mesure est dessinée ici à sa taille réelle, pas seulement écrite.",
+  "cadre-note": "La hauteur du cadre est dessinée comme une longueur : 800 px ne tiennent pas dans un écran. La bande défile toute seule ; la page, jamais.",
+  "composants-note": "Chaque carré porte la mesure sur ses deux côtés, même quand le jeton ne vaut que pour une largeur ou une hauteur.",
+  "groupe": {
+    "espacements": "Grille et espacements",
+    "cibles": "Cibles",
+    "rayons": "Rayons",
+    "filets": "Filets",
+    "zones": "Zones sûres",
+    "cadre": "Cadre et mesure de lecture",
+    "composants": "Dimensions de composants"
+  },
+  "propos-groupe": {
+    "espacements": "Grille de 4. Sept espacements, et rien entre eux.",
+    "cibles": "48 px au minimum pour tout ce qui se touche ; 56 px pour une ligne à réglage, à cocher ou à cercle.",
+    "rayons": "Trois rayons seulement : la direction est carrée.",
+    "filets": "Un filet dit la séparation, l'épaisseur dit l'importance. L'anneau de focus fait 3 px, posé à 2 px de la cible.",
+    "zones": "Ce que la barre d'état, la barre d'onglets et le geste système prennent à l'écran.",
+    "cadre": "Cadre de référence 360 × 800, vérifié à 390 × 844. Rien n'a de largeur fixe, sauf la colonne d'heure.",
+    "composants": "Les dimensions qu'un composant ne choisit pas lui-même."
+  }
+}

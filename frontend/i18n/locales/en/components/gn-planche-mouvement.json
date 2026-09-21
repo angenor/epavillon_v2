@@ -1,0 +1,38 @@
+{
+  "titre": "Motion",
+  "propos": "Six durations, two curves. Motion confirms a gesture or places a screen.",
+  "principe": "No animation is needed to understand: a state marker, a message, a counter all read fine without one. Motion never carries information on its own.",
+  "durees": "The tokens",
+  "durees-propos": "Values read from this page. Under “reduce motion”, the first five fall to zero.",
+  "rejouables": "The three transition durations",
+  "rejouables-propos": "Press “Play again”: the marker travels out, then back.",
+  "rejouer": "Play again",
+  "rejouer-nom": "Play the motion of {jeton} again",
+  "rejouer-ensemble": "Play both again",
+  "courbes": "The curves",
+  "courbes-propos": "Same duration for both: only the curve changes. One leaves quickly and settles, the other speeds up then slows down.",
+  "boucles": "What loops without end",
+  "boucles-propos": "The loading arc and the skeleton. Under “reduce motion” they stay drawn, motionless.",
+  "ephemere": "How long the transient message stays",
+  "ephemere-propos": "This is a delay, not an animation: it does not fall to zero under “reduce motion”.",
+  "ephemere-message": "Report sent. It will be reviewed before publication.",
+  "envoyer": "Show the message",
+  "reduit": "“Reduce motion”",
+  "reduit-propos": "The phone's accessibility setting, as read by this page.",
+  "reduit-actif": "The setting is active on this device: every transition duration is zero, and both the arc and the skeleton are frozen.",
+  "reduit-inactif": "The setting is not active on this device. If it were, every transition duration would be zero and both the arc and the skeleton would be frozen.",
+  "reduit-preuve": "The proof is above: the token list shows the value actually applied, not the one written in the theme.",
+  "immobile": "What never moves: the background, the header, the tab bar. No automatic scrolling, no parallax, no bounce. Lists do not animate in — they are simply there.",
+  "usage": {
+    "bref": "Pressing a button, toggling a filter, a state marker appearing",
+    "standard": "Bottom sheet, transient message, changing tab",
+    "long": "Opening a document, moving between screens",
+    "arc": "Loading arc, looping linearly",
+    "squelette": "Skeleton pulse, opacity 1 → 0.55 → 1",
+    "ephemere": "How long the transient message stays; the “Undo” delay after an approval"
+  },
+  "usage-courbe": {
+    "sortie": "What appears or enters: bottom sheet, transient message, state marker. Leaves quickly, settles gently.",
+    "standard": "What moves or changes size: filter toggle, progress bar, screen transition."
+  }
+}

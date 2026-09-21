@@ -1,0 +1,24 @@
+{
+  "titre": "Measurements",
+  "propos": "Everything is a multiple of 4. Each measurement is drawn here at its real size, not merely written.",
+  "cadre-note": "The frame height is drawn as a length: 800 px do not fit on a screen. The strip scrolls on its own; the page never does.",
+  "composants-note": "Each square carries the measurement on both sides, even when the token only applies to a width or a height.",
+  "groupe": {
+    "espacements": "Grid and spacing",
+    "cibles": "Targets",
+    "rayons": "Corner radii",
+    "filets": "Rules",
+    "zones": "Safe areas",
+    "cadre": "Frame and reading measure",
+    "composants": "Component dimensions"
+  },
+  "propos-groupe": {
+    "espacements": "A grid of 4. Seven spacings, and nothing in between.",
+    "cibles": "48 px minimum for anything that is touched; 56 px for a settings, checkbox or radio row.",
+    "rayons": "Three radii only: the direction is square.",
+    "filets": "A rule states the separation, its thickness states the importance. The focus ring is 3 px, set 2 px away from the target.",
+    "zones": "What the status bar, the tab bar and the system gesture take from the screen.",
+    "cadre": "Reference frame 360 × 800, checked at 390 × 844. Nothing has a fixed width except the time column.",
+    "composants": "The dimensions a component does not choose for itself."
+  }
+}

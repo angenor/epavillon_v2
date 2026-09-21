@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { SegmentDeChoix } from '~/components/guide-nego/GnSegmente.vue'
 import type { ChoixDeTheme } from '~/utils/guide-nego/theme'
 
 /**
@@ -11,7 +12,7 @@ defineI18nRoute(false)
 const { t } = useI18n()
 const { choix, choisir } = useGnTheme()
 
-const segments = computed(() => [
+const segments = computed<SegmentDeChoix[]>(() => [
   { valeur: 'clair', libelle: t('guide-nego.reglages.theme.clair'), picto: 'sun' },
   { valeur: 'sombre', libelle: t('guide-nego.reglages.theme.sombre'), picto: 'moon' },
   { valeur: 'systeme', libelle: t('guide-nego.reglages.theme.systeme') },

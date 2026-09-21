@@ -1,0 +1,43 @@
+{
+  "titre": "The states of every object",
+  "propos": "The same rule everywhere: a 20 px pictogram, a word, a colour.",
+  "regle": "The meaning of the colours never moves — green: it holds · cyan: it has changed · red: it no longer holds · purple: it comes from the network · dark yellow: attention, restricted · grey: past or neutral.",
+  "compte": "All {nombre} states of the system are shown here, light and dark side by side. The last family gathers those the mock-up does not file: a state with no showcase is a state nobody checks.",
+
+  "sens": "What each colour says",
+  "sens-propos": "A state carries no colour of its own: it refers to the role that carries it. Adding a state therefore never creates one more hue.",
+  "sens-de": {
+    "succes": "It holds — confirmed, up to date, in progress",
+    "information": "It has changed — moved, sent, under review",
+    "danger": "It no longer holds — cancelled, outdated, unreadable",
+    "reseau": "It comes from the network — reported, not yet official",
+    "attention": "Attention, restricted — what concerns the person right now",
+    "terminee": "Past or neutral — closed, not retained, full"
+  },
+
+  "famille": {
+    "session": "Negotiation session",
+    "acces": "Access to a session",
+    "signalement": "Report",
+    "document": "Document",
+    "quiz": "Quiz",
+    "connexion": "Connection",
+    "importee": "Imported data",
+    "faq": "FAQ entry",
+    "inscription": "Registration — Francophonie, Pavilion",
+    "autres": "Other states in the table"
+  },
+
+  "theme": {
+    "clair": "Light theme",
+    "sombre": "Dark theme"
+  },
+
+  "libelle": {
+    "remplace": "Replaced by the Negotiations Guide — COP31",
+    "synchronise": "Synced at 11:35",
+    "lecture-impossible": "Could not be read — see the official UNFCCC programme",
+    "verifie": "Verified on 12 November 2026",
+    "rediffusion": "Replay · 52 min"
+  }
+}

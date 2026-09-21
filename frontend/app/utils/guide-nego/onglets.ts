@@ -1,3 +1,5 @@
+import type { NomDePicto } from './pictogrammes'
+
 /**
  * Les onglets de la barre basse.
  *
@@ -9,7 +11,7 @@ export interface Onglet {
   /** Sert de clé de traduction dans `components/gn-barre-onglets.json`. */
   cle: string
   route: string
-  picto: string
+  picto: NomDePicto
 }
 
 const ACCUEIL: Onglet = { cle: 'accueil', route: '/guide-nego', picto: 'home' }

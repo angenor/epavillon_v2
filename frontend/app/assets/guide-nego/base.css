@@ -5,7 +5,7 @@
   min-height: 100dvh;
   width: 100%;
   /* Sur un écran large, le fond reste celui de l'application : la colonne se centre par ses marges intérieures. */
-  padding-inline: max(0px, calc((100% - 480px) / 2));
+  padding-inline: max(0px, calc((100% - var(--gn-colonne-largeur)) / 2));
   display: flex;
   flex-direction: column;
   position: relative;

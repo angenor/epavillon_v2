@@ -1,0 +1,11 @@
+{
+  "titre": "Icons",
+  "propos": "One family: a 24 grid, 2 px stroke, round caps and joins, no fill except the dot in “Under way”.",
+  "regle": "An icon never informs on its own: the word beside it carries the meaning. Only the tab bar places it above its label. Colour is inherited from the text.",
+  "famille": "The {nombre} symbols",
+  "famille-propos": "The name is written without the sprite prefix. These are technical identifiers: they are not translated.",
+  "tailles": "The six sizes",
+  "tailles-propos": "The same symbol at the six permitted sizes. No other exists.",
+  "couleur": "Colour",
+  "couleur-propos": "An icon takes the colour of the text around it: the parent decides, never the symbol."
+}

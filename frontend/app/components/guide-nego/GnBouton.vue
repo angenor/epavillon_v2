@@ -1,12 +1,17 @@
 <script setup lang="ts">
+import type { NomDePicto } from '~/utils/guide-nego/pictogrammes'
 import { NuxtLink } from '#components'
 
 /**
  * Bouton ou lien, selon `vers`. L'état `actif` sert aux commandes qui basculent
  * — Favori, M'inscrire, Dans mon agenda : le mot ne change pas, l'aplat le dit,
  * et `aria-pressed` le fait entendre.
+ *
+ * `chargement` désactive le bouton et met l'arc à la place du pictogramme. L'attente est
+ * annoncée par `aria-busy` sur le bouton lui-même : l'arc reste muet, sinon la commande
+ * porterait une région vivante en son sein.
  */
-withDefaults(
+const props = withDefaults(
   defineProps<{
     variante?: 'principal' | 'secondaire' | 'discret' | 'dangereux'
     largeur?: 'pleine' | 'demie'
@@ -14,7 +19,8 @@ withDefaults(
     type?: 'button' | 'submit'
     desactive?: boolean
     actif?: boolean
-    picto?: string
+    chargement?: boolean
+    picto?: NomDePicto
   }>(),
   {
     variante: 'principal',
@@ -23,26 +29,32 @@ withDefaults(
     type: 'button',
     desactive: false,
     actif: false,
+    chargement: false,
     picto: undefined,
   },
 )
 
 defineEmits<{ clic: [MouseEvent] }>()
+
+/** Un bouton qui attend ne se presse plus : le chargement vaut désactivation. */
+const inerte = computed(() => props.desactive || props.chargement)
 </script>
 
 <template>
   <component
-    :is="vers && !desactive ? NuxtLink : 'button'"
-    :to="vers && !desactive ? vers : undefined"
-    :type="vers && !desactive ? undefined : type"
-    :disabled="vers ? undefined : desactive || undefined"
-    :aria-disabled="vers && desactive ? 'true' : undefined"
+    :is="vers && !inerte ? NuxtLink : 'button'"
+    :to="vers && !inerte ? vers : undefined"
+    :type="vers && !inerte ? undefined : type"
+    :disabled="vers ? undefined : inerte || undefined"
+    :aria-disabled="vers && inerte ? 'true' : undefined"
     :aria-pressed="actif ? 'true' : undefined"
+    :aria-busy="chargement ? 'true' : undefined"
     class="gn-bouton"
     :class="[`gn-bouton--${variante}`, `gn-bouton--${largeur}`, { 'gn-bouton--actif': actif }]"
     @click="$emit('clic', $event)"
   >
-    <GnPicto v-if="picto" :nom="picto" :taille="20" />
+    <GnChargement v-if="chargement" :taille="20" decoratif />
+    <GnPicto v-else-if="picto" :nom="picto" :taille="20" />
     <slot />
   </component>
 </template>

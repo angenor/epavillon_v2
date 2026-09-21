@@ -23,7 +23,7 @@ Référence : `docs/AppNego/design/ecrans/01-systeme.html`, `passation/composant
 | `GnBouton` | Principal, secondaire, discret, dangereux ; repos, pressé, focus, désactivé, actif ; pleine largeur et deux demis |
 | `GnChampRecherche` · `GnChamp` · `GnZoneTexte` | Repos, focus, erreur, désactivé ; compteur « n / 600 » |
 | `GnCase` · `GnInterrupteur` · `GnCercle` | Coché ou non, focus, désactivé ; ligne de 56 px cible entière |
-| `GnOngletsFiltre` · `GnPilule` · `GnSegmente` | Actif, décochable, à chevron ; texte à 17 |
+| `GnOngletsFiltre` · `GnPilule` · `GnSegmente` | Actif, décochable, à chevron. Onglet de filtre et segmenté à **17** (écarts 6 et 15, qui relèvent le 16 de la maquette) ; la pilule reste à **15**, sa taille d'origine, que l'écart ne vise pas |
 | `GnEnteteGroupe` | Avec et sans compteur |
 | `GnLigneReglage` | Valeur + chevron ; interrupteur ; pressée ; dernière ligne sans filet |
 | `GnMarqueEtat` | Les six états de session et les rôles sémantiques ; pictogramme + mot + couleur |

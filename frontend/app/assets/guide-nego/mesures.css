@@ -16,6 +16,7 @@
   --gn-entre-blocs: 24px;
   --gn-ligne-air: 10px;                 /* au-dessus et au-dessous du filet d'une ligne de liste */
   --gn-entre-paragraphes: 12px;         /* texte de lecture */
+  --gn-etiquette-air: 6px 10px;         /* air intérieur d'une étiquette bordée — hors grille, mesuré sur la maquette */
 
   /* Cibles */
   --gn-cible: 48px;                     /* minimum, boutons, lignes de liste */
@@ -45,6 +46,7 @@
   --gn-action-principale-marge-bas: 16px;
 
   /* Cadre */
+  --gn-colonne-largeur: 480px;          /* au-delà, la colonne se centre au lieu de s'étirer */
   --gn-cadre-largeur: 360px;
   --gn-cadre-hauteur: 800px;
   --gn-mesure-lecture: 328px;           /* 360 − 2 × 16 */
@@ -66,6 +68,7 @@
   --gn-interrupteur-hauteur: 32px;
   --gn-interrupteur-curseur: 24px;
   --gn-carre-non-lu: 10px;
+  --gn-squelette-hauteur: 16px;         /* bloc de squelette : une hauteur, pas un espacement */
   --gn-jauge: 6px;
   --gn-segment-etape: 4px;
   --gn-carre-etape: 32px;

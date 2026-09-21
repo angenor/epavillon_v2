@@ -1,0 +1,18 @@
+{
+  "titre": "Design system",
+  "propos": "The tokens and components of Guide Négo, rendered by the code that serves them. No screen links to this page: it exists to be checked, not browsed.",
+  "affichage": "Board theme",
+  "sommaire": "Go to a section",
+  "clair": "Light",
+  "sombre": "Dark",
+  "cote-a-cote": "Side by side",
+  "section": {
+    "1": "Colours",
+    "2": "Typography",
+    "3": "Measures",
+    "4": "Icons",
+    "5": "Components",
+    "6": "States",
+    "7": "Motion"
+  }
+}
