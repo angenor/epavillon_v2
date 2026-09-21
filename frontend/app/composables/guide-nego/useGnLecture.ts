@@ -27,9 +27,10 @@ function avecDelai<T>(promesse: Promise<T>): Promise<T> {
  *
  * La garde vaut AUSSITÔT : l'application n'attend pas un réseau saturé pour s'ouvrir.
  * La réponse du réseau s'applique à son arrivée. Un échec ne lève jamais — il laisse
- * la garde en place, avec son heure.
+ * la garde en place, avec son heure. `lire` reçoit ce qui est gardé, pour compléter une
+ * réponse partielle.
  */
-export function useGnLecture<T>(cle: string, lire: () => Promise<T>) {
+export function useGnLecture<T>(cle: string, lire: (garde: T | null) => Promise<T>) {
   const etat = useState<EtatLecture<T>>(`gn-lecture-${cle}`, () => ({
     valeur: null,
     luA: null,
@@ -52,7 +53,7 @@ export function useGnLecture<T>(cle: string, lire: () => Promise<T>) {
     }
 
     try {
-      const valeur = await avecDelai(lire())
+      const valeur = await avecDelai(lire(etat.value.valeur))
       const luA = new Date().toISOString()
       etat.value = { valeur, luA, source: 'reseau', pret: true, enCours: false }
       connexion.noterReussite(luA)

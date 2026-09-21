@@ -55,6 +55,18 @@ export interface ClosedModule {
    * OUVERT est renvoyé là plutôt que de lire une annonce périmée.
    */
   entryPath: string | null
+  /**
+   * Où mener quand c'est fermé, à la place de `/maintenance/<clé>`. Pour un espace
+   * qui a son propre design : la page de maintenance est au design du site.
+   * L'adresse n'est pas localisée.
+   */
+  closedPath?: string
+  /**
+   * L'état se résout par le dernier état LU, gardé sur l'appareil, et non par le
+   * store du site — qui ferme tout dès que l'API se tait. Juste pour un module non
+   * construit ; faux pour une application qui doit s'ouvrir sans réseau.
+   */
+  lastKnown?: boolean
 }
 
 export const CLOSED_MODULES: ClosedModule[] = [
@@ -87,6 +99,17 @@ export const CLOSED_MODULES: ClosedModule[] = [
     flag: 'messaging.enabled',
     routeNames: ['messagerie', 'messaging'],
     entryPath: null,
+  },
+  {
+    // GUIDE NÉGO N'EST PAS L'ESPACE NÉGOCIATIONS DU SITE : c'est l'application
+    // mobile, avec son drapeau, son design et sa page fermée. Elle s'ouvre hors
+    // connexion, donc sur le dernier état lu (docs/AppNego/, spec 008).
+    key: 'guide-nego',
+    flag: 'guide_nego.enabled',
+    routeNames: ['guide-nego'],
+    entryPath: '/guide-nego',
+    closedPath: '/guide-nego/fermee',
+    lastKnown: true,
   },
   {
     // L'ANNUAIRE ET LA COMMUNAUTÉ SONT LE MÊME ESPACE, sous deux noms. Le modèle
