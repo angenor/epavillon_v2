@@ -23,7 +23,7 @@ Guide Négo — Nuxt, installable, hors connexion
 | API | Rust, Actix, SQLx — la même. Nouveaux crates `negotiation`, puis `training` | [03-api](03-api.md) |
 | Base | PostgreSQL 17 + pgvector — la même. Schémas `negotiation`, `training`, `tool`, et ceux déjà servis | [02-domaine](02-domaine.md) |
 | Fichiers | Garage (S3), par `media.assets` | — |
-| Éphémère | Valkey : essais de code d'invitation, fraîcheur de l'import | — |
+| Éphémère | Valkey : fraîcheur de l'import. **Pas les essais de code d'invitation** — ils se comptent en base (`negotiation.invitation_code_attempts`), Valkey n'étant câblé nulle part dans `backend/` et l'y introduire étant une dépendance d'ampleur ; voir [009 § R7](../../specs/009-guide-nego-compte-admission/research.md) | — |
 | Travaux | Le worker Rust existant : import des sessions de négociation en chaîne récurrente, notifications, relais d'outbox | [ADR-009](adr/009-la-source-officielle-fait-foi.md) |
 | IA | Service Python (FastAPI), interne, jamais exposé ; il possède le schéma `tool` | [ADR-004](adr/004-rust-en-facade-python-au-sidecar.md) |
 | Modèles | OpenRouter : Gemini pour rédiger, voyage-4 pour vectoriser | [ADR-005](adr/005-openrouter-et-embedding-versionne.md) |
