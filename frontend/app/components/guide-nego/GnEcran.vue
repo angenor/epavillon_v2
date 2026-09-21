@@ -18,13 +18,34 @@ withDefaults(
 )
 
 const { echangesOuverts } = useGnDrapeaux()
+const { etat, marquerBandeauVu } = useGnConnexion()
+
+// Le bandeau se montre une fois par épisode : l'écran qui le montre le marque vu et le
+// garde affiché, les écrans suivants n'en portent plus que le rappel de l'en-tête.
+const bandeau = ref(false)
+watch(
+  [() => etat.value.enLigne, () => etat.value.bandeauVu],
+  ([enLigne, vu]) => {
+    if (enLigne) return (bandeau.value = false)
+    if (!vu) {
+      bandeau.value = true
+      marquerBandeauVu()
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
   <div class="gn-ecran" :class="{ 'gn-ecran--sans-onglets': !onglets }">
     <GnEntete :titre="titre" :sous-titre="sousTitre" :retour="retour" :lexique-ouvert="lexiqueOuvert">
-      <template #connexion><slot name="connexion" /></template>
+      <template #connexion>
+        <slot name="connexion">
+          <GnLigneConnexion :en-ligne="etat.enLigne" :lu-a="etat.luA" />
+        </slot>
+      </template>
     </GnEntete>
+    <GnBandeauConnexion v-if="bandeau" :lu-a="etat.luA" />
     <main class="gn-ecran__contenu">
       <slot />
     </main>
@@ -41,5 +62,11 @@ const { echangesOuverts } = useGnDrapeaux()
 
 [data-app="guide-nego"] .gn-ecran__contenu {
   flex: 1;
+}
+
+/* Le bandeau est pleine largeur : il sort des marges de l'écran. */
+[data-app="guide-nego"] .gn-ecran > .gn-bandeau {
+  margin-inline: calc(-1 * var(--gn-marge-ecran));
+  margin-top: var(--gn-espace-12);
 }
 </style>

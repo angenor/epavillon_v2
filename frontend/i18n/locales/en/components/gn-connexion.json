@@ -1,0 +1,13 @@
+{
+  "moment": {
+    "aujourdhui": "at {heure}",
+    "hier": "yesterday at {heure}",
+    "avant": "on {jour} at {heure}"
+  },
+  "synchronise": "Synced {moment}",
+  "hors-connexion": "Offline",
+  "hors-connexion-lu": "Offline — read {moment}",
+  "bandeau": "Offline — read {moment}. Everything here reads without a network.",
+  "bandeau-sans-heure": "Offline. Everything here reads without a network.",
+  "prete": "Ready offline"
+}
