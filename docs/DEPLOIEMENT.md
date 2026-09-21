@@ -549,3 +549,66 @@ porte que la base de référence n'a pas.
 du dossier synchronisé — l'envoi du code efface côté serveur ce qui n'existe
 pas en local.
 
+
+---
+
+## 14. Ouvrir Guide Négo (21/09)
+
+L'application mobile est **fermée par `guide_nego.enabled`**, semé à `false`. Tant que le drapeau
+est éteint, toute adresse `guide-nego/` sert la page « bientôt disponible » ; le reste du site
+ignore l'application.
+
+### La bascule, et sa seule forme valable
+
+```sql
+UPDATE platform.feature_flags
+   SET is_enabled = true, rollout_percent = 100
+ WHERE key = 'guide_nego.enabled';
+```
+
+**Les deux colonnes, toujours ensemble. Pas de déploiement progressif** — ce n'est pas une
+préférence, c'est ce que la fonction permet :
+
+```sql
+-- platform.is_feature_enabled(p_key, p_person_id)
+f.rollout_percent = 100
+OR (p_person_id IS NOT NULL AND p_person_id = ANY (f.enabled_for))
+OR (p_person_id IS NOT NULL AND <tirage sur md5(clé || personne)> < f.rollout_percent)
+```
+
+Les deux dernières branches exigent une personne identifiée. **Guide Négo s'ouvre sans compte** :
+`p_person_id` y vaut `NULL`, et seule `rollout_percent = 100` peut alors être vraie. Un drapeau
+allumé à 50 % n'ouvre donc l'application à *personne* — ni à la moitié des gens, ni à un groupe
+d'essai. Même remarque pour `enabled_for` : la liste ne sert à rien ici.
+
+Pour ouvrir à quelques personnes avant tout le monde, la réponse n'est pas le drapeau : c'est
+l'adresse, qu'on ne communique pas encore.
+
+### Le cinquième onglet
+
+`negotiation.channels` commande l'onglet « Échanges », et **ne s'allume pas** à ce stade : l'étape
+0a ne livre que la coquille. Il obéit à la même règle des deux colonnes, et l'onglet n'apparaît
+jamais dans une application fermée — `guide_nego.enabled` prime.
+
+### Fermer
+
+```sql
+UPDATE platform.feature_flags SET is_enabled = false WHERE key = 'guide_nego.enabled';
+```
+
+Sans redéploiement, comme pour les six modules du site. Mais **la fermeture n'est pas immédiate sur
+un téléphone déjà ouvert** : seule une réponse réussie qui dit « éteint » ferme l'application. Une
+API injoignable, lente ou en erreur laisse le dernier état lu en place — c'est voulu, une panne en
+pleine COP ne doit pas fermer l'application. Un téléphone hors connexion gardera donc l'application
+ouverte jusqu'à sa prochaine lecture réussie.
+
+### L'ordre des gestes, le jour de l'ouverture
+
+1. **Déployer** (`./deploy.sh deploy`), drapeau encore éteint.
+2. **Vérifier la garde** — § 6, point 4. Une adresse cassée et aucun téléphone n'installe
+   l'application, sans le moindre message.
+3. **Basculer le drapeau**, les deux colonnes.
+4. **Ouvrir `…/v2/guide-nego/` sur un téléphone réel**, l'installer, puis couper le réseau et la
+   rouvrir. Le service worker et la garde ne se laissent pas éprouver depuis un poste de travail.
+
+Rien à redémarrer entre 3 et 4 : le drapeau se lit à chaque ouverture.

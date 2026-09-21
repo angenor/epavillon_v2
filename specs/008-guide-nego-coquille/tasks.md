@@ -172,11 +172,13 @@ Placée avant US1 : toutes les pages naissent derrière le drapeau, et l'étape 
 
 ## Phase 8: Polish & recette
 
-- [ ] T069 [P] Relire `frontend/i18n/locales/en/pages/guide-nego.*.json` et `components/gn-*.json` : toutes les clés de `fr` y sont, aucune chaîne en dur dans les gabarits de `frontend/app/{pages,components}/guide-nego/`
-- [ ] T070 [P] Vérifier que le site n'a pas bougé (quickstart § 5) : accueil, une page du back-office, `/negociations`, en clair et en sombre ; les six modules fermés se ferment comme avant ; aucun service worker hors de `guide-nego/`
+- [X] T069 [P] Relire `frontend/i18n/locales/en/pages/guide-nego.*.json` et `components/gn-*.json` : toutes les clés de `fr` y sont, aucune chaîne en dur dans les gabarits de `frontend/app/{pages,components}/guide-nego/`
+- [X] T070 [P] Vérifier que le site n'a pas bougé (quickstart § 5) : accueil, une page du back-office, `/negociations`, en clair et en sombre ; les six modules fermés se ferment comme avant ; aucun service worker hors de `guide-nego/`
 - [ ] T071 Dérouler `specs/008-guide-nego-coquille/quickstart.md` en entier sur un téléphone Android réel, puis l'installation sur iPhone ; noter les écarts et les corriger
-- [ ] T072 `make check-safe` au vert (jamais `make check`)
-- [ ] T073 Écrire la procédure d'ouverture — `is_enabled = true` **et** `rollout_percent = 100`, pas de déploiement progressif — dans `docs/DEPLOIEMENT.md`, et mettre à jour `docs/AppNego/progress.md` : ligne 0a, journal, point ouvert R3 levé, ADR-019
+  - [X] Au navigateur, 21/09, sur la version construite : § 1 entier, § 2 hors installations, § 3 entier. **Un défaut corrigé** — « Prête hors connexion » ne paraissait qu'à la deuxième ouverture (`navigator.serviceWorker.ready` attend le contrôle de la page, pas l'activation de la garde).
+  - [ ] **Sur appareil réel** : installation Android, installation iPhone par Partager, et débit bridé « 3G lente » avec coupure pendant l'installation.
+- [X] T072 `make check-safe` au vert (jamais `make check`)
+- [X] T073 Écrire la procédure d'ouverture — `is_enabled = true` **et** `rollout_percent = 100`, pas de déploiement progressif — dans `docs/DEPLOIEMENT.md`, et mettre à jour `docs/AppNego/progress.md` : ligne 0a, journal, point ouvert R3 levé, ADR-019
 
 ---
 

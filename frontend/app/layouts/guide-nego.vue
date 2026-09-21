@@ -93,6 +93,23 @@ function prendreLaVersionEnAttente(inscription: ServiceWorkerRegistration) {
 }
 
 /**
+ * Résout dès que la garde est CONSTITUÉE, sans attendre qu'elle contrôle la page.
+ * `navigator.serviceWorker.ready` attend le contrôle, qui n'arrive qu'au chargement
+ * suivant : la personne qui entre puis referme n'apprenait jamais, à la seule ouverture
+ * qui a pris le temps du réseau, que l'application tiendra sans réseau.
+ */
+function gardeConstituee(inscription: ServiceWorkerRegistration): Promise<void> {
+  if (inscription.active) return Promise.resolve()
+  const enCours = inscription.installing ?? inscription.waiting
+  if (!enCours) return navigator.serviceWorker.ready.then(() => undefined)
+  return new Promise((resoudre) => {
+    enCours.addEventListener('statechange', () => {
+      if (enCours.state === 'activated') resoudre()
+    })
+  })
+}
+
+/**
  * Le service worker n'existe qu'en construction et ne vit que sous `guide-nego/` : le
  * site n'en enregistre aucun, et celui-ci ne peut contrôler aucune de ses pages.
  */
@@ -105,7 +122,7 @@ async function enregistrerLaGarde() {
     prendreLaVersionEnAttente(inscription)
     // À chaque ouverture : c'est ainsi qu'une nouvelle version se garde en arrière-plan.
     void inscription.update()
-    await navigator.serviceWorker.ready
+    await gardeConstituee(inscription)
     // Dit une seule fois par téléphone : la première garde a pris le temps du réseau,
     // et c'est elle qui permet la salle sans réseau (FR-012 bis).
     if (!lireCle(CLE_GARDE_ANNONCEE)) {

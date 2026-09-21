@@ -20,12 +20,10 @@ const recherche = ref('')
 const rechercheSaisie = ref('adapt')
 const code = ref('')
 const codeFaux = ref('NEGO-2')
-const pays = ref('Sénégal')
+const pays = ref(t('gn-planche-composants-saisie.champ-pays-valeur'))
 const heure = ref('14:30')
 const restitution = ref('')
-const signalement = ref(
-  "La session a commencé avec vingt minutes de retard ; le président a annoncé une reprise à 15:00 en salle 9.",
-)
+const signalement = ref(t('gn-planche-composants-saisie.zone-valeur'))
 
 const thematique = ref(true)
 const veilleTexte = ref(false)

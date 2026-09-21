@@ -27,7 +27,9 @@ Cycle : `install` garde **toute** `LISTE` dans `gn-coquille-<VERSION>`, ou écho
 
 **Vérification.** `frontend/scripts/guide-nego-verifier-garde.mjs <adresse de guide-nego/>` lit `sw.js`, en tire `LISTE` et demande chaque adresse : toute réponse autre que 200, **toute redirection comprise**, échoue. Une réponse redirigée, gardée puis servie à une navigation, est refusée par le navigateur. À lancer sur la construction locale, avec et sans `/v2/`, et après chaque mise en ligne.
 
-**Première garde, dite à la personne** : quand `navigator.serviceWorker.ready` se résout et que `gn.garde-annoncee` est absente, la mise en page affiche le message éphémère « Prête hors connexion » et pose la clé.
+**Première garde, dite à la personne** : dès que l'inscription porte un worker **activé** et que `gn.garde-annoncee` est absente, la mise en page affiche le message éphémère « Prête hors connexion » et pose la clé.
+
+**Pas `navigator.serviceWorker.ready`** : il n'est tenu que lorsque la garde **contrôle** la page, ce qui n'arrive qu'au chargement suivant. Le message ne paraissait alors qu'à la deuxième ouverture — jamais à celle qui a pris le temps du réseau, et jamais pour qui entre puis referme. Corrigé le 21/09 à la recette (T071) : la mise en page attend l'activation de l'inscription, `gardeConstituee()`.
 
 Garanties :
 
