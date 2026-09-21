@@ -34,7 +34,7 @@ Le mot « Programme » seul est interdit. Libellés d'onglets : « Négociations
 | Document | À jour · Remplacé par… · Dépassé · Téléchargé |
 | Entrée de FAQ | Vérifié le 12 novembre 2026 |
 | Quiz | Relu par un expert · Non relu |
-| Connexion | Hors connexion · Synchronisé à 14:05 |
+| Connexion | Hors connexion · Synchronisé à 14:05 · **Prête hors connexion** (message éphémère, quand l'application est gardée en entier pour la première fois). L'heure est celle du téléphone, sans fuseau ; hors du jour : « hier à 23:10 », puis « le 11 nov. à 23:10 » |
 
 ## Les mots du métier
 

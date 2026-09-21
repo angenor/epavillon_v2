@@ -66,7 +66,8 @@ rendu côté navigateur, PWA. Composants dans le dossier de Guide Négo, bâtis 
 docs/AppNego/design/passation/ (jetons, mesures, pictogrammes, composants.md) et la page de maquette nommée par la
 spécification — mêmes mesures, mêmes états, mêmes libellés (docs/AppNego/design/lexique.md).
 i18n par écran, quatre états par écran, 360 px sans défilement horizontal, thèmes clair et
-sombre. Aucun composant ni jeton du site. Back-office : pages sous `admin/`, avec les
+sombre. Aucun composant ni jeton du site. Un composant de composants.md qui n'existe pas
+encore se crée à l'étape qui l'emploie, et s'ajoute à la page interne des composants. Back-office : pages sous `admin/`, avec les
 composants `ui/` existants du site.
 Attention au préfixe `/v2` (portée du service worker, manifeste, cookies). Aucun fichier
 de plus de mille lignes. Ne jamais lancer `make check` ; `make check-safe` seulement.
@@ -107,13 +108,21 @@ par un drapeau de module, sans redéploiement.
 Le système de design est repris de docs/AppNego/design/passation/ — theme.css, mesures.css,
 pictogrammes.svg, composants.md, mouvement.md, police Atkinson Hyperlegible Next fournie
 dans police/ (latin et latin étendu, pour « œ ») —, avec les écarts tranchés dans
-05-design.md. Il reste borné à l'application et ne touche à rien du site. Une page interne
-montre chaque composant dans les deux thèmes. Icône provisoire :
+05-design.md. Il reste borné à l'application et ne touche à rien du site. Les fondations
+sont reprises en entier : couleurs, mesures, pictogrammes, police, mouvement. Des
+composants, seuls ceux de la coquille et ceux que toute étape emploie : barre d'onglets,
+en-tête, bandeau de connexion, états vide et erreur, chargement, boutons, champs, case,
+interrupteur, cercle, filtres et sélecteur segmenté, en-tête de groupe, ligne de réglage,
+marque d'état, étiquettes, feuille basse, boîte de confirmation, message éphémère, ligne
+d'information. Les autres arrivent avec l'étape qui les emploie. Une page interne montre
+ce qui est livré, dans les deux thèmes ; chaque étape y ajoute ses composants.
+L'onglet Ressources porte déjà la ligne « Profil et réglages », qui n'ouvre à cette étape
+que le choix du thème ; 0b et 0c la complètent. Icône provisoire :
 frontend/public/logos/svg/epavillon-symbole-inverse.svg, déclinée aux tailles du manifeste.
 Hors périmètre : compte, code d'invitation, accueil, tout contenu.
 Critère : installée sur un téléphone, l'application s'ouvre en mode avion ; le drapeau
 éteint la ferme sans redéploiement ; la page des composants est fidèle à 01-systeme.html
-à 360 px, en clair et en sombre.
+à 360 px, en clair et en sombre, pour tout ce qu'elle porte.
 ```
 
 #### 0b — Compte et admission

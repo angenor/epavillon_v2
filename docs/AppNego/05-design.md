@@ -124,3 +124,6 @@ Numéros de [ecarts.md](design/passation/ecarts.md). Le code suit ces décisions
 | 21, 22, 24, 25 | Données et phrases : une seule phrase de verrou, celle de la page 12 ; « Synchronisé à » porte l'heure de dernière lecture, distincte de l'instant |
 | 26 | Icône provisoire : `frontend/public/logos/svg/epavillon-symbole-inverse.svg`, à la place du monogramme « GN » |
 | 28, 29 | À faire à l'étape 0a : ordre de focus et annonces d'état, vérification à 390 px |
+| 30 | Le bloc `:root` de `theme.css` — charte et nuances sombres — passe sous `[data-app="guide-nego"]` : aucun sélecteur de Guide Négo hors de sa borne (constitution, XIII) |
+| 31 | `--gn-picto` désigne la couleur (`theme.css`) ; la taille de `mesures.css` devient `--gn-picto-taille` |
+| 32 | « lu à » et « Synchronisé à » disent l'heure du téléphone, **sans fuseau** : elles se jugent contre l'horloge affichée au-dessus. Hors du jour : « hier à 23:10 », puis « le 11 nov. à 23:10 ». La ligne « Dernière synchronisation » du profil (0c) suit la règle et perd « heure d'Antalya ». Seules les heures d'événement portent leur fuseau |

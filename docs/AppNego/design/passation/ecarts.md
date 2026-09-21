@@ -48,3 +48,9 @@ Relevé mécanique (styles en ligne de toutes les pages, 20 septembre 2026) conf
 27. Thème sombre des composants ajoutés après la page 04 (bulles, réactions, canaux, annuaire, feuille de partage).
 28. Comportement au clavier physique / lecteur d'écran des composants à cercle et pilules décochables (ordre de focus, annonce d'état).
 29. Largeur d'onglet à 390 px (vérifiée seulement à 360 px sur la page 12).
+
+## Relevés à la reprise dans le code (21 septembre 2026)
+
+30. `theme.css` déclare la charte et les nuances sombres sous `:root` : hors de `[data-app="guide-nego"]`, ce que la constitution (XIII) interdit.
+31. `--gn-picto` est une couleur dans `theme.css` et une taille (24 px) dans `mesures.css` : un nom, deux sens.
+32. « Dernière synchronisation — Aujourd'hui, 11:35 — heure d'Antalya » (02 · 11 Profil) donne un fuseau à une heure de lecture ; « lu à » et « Synchronisé à » n'en portent pas, et rien ne dit ce qu'on écrit quand la lecture date de la veille.
