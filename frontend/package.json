@@ -10,6 +10,8 @@
     "preview": "nuxt preview --dotenv ../.env",
     "generate": "nuxt generate --dotenv ../.env",
     "typecheck": "nuxt typecheck",
+    "check:guide-nego": "node scripts/check-guide-nego.mjs && node scripts/guide-nego-contrastes.mjs",
+    "test:guide-nego": "node --test \"tests/guide-nego/*.test.ts\"",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {

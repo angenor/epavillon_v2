@@ -1,0 +1,96 @@
+/* Guide Négo — mesures.css
+   Grille, espacements, cibles, filets, rayons, zones sûres et dimensions des composants.
+   Extrait de « 01 — Système », section 3 et sections 4 bis à 4 septdecies. Cadre de référence 360 × 800, vérifié à 390 × 844. */
+
+[data-app="guide-nego"] {
+  /* Grille de 4 px */
+  --gn-grille: 4px;
+  --gn-espace-4: 4px;
+  --gn-espace-8: 8px;
+  --gn-espace-12: 12px;
+  --gn-espace-16: 16px;
+  --gn-espace-24: 24px;
+  --gn-espace-32: 32px;
+  --gn-espace-48: 48px;
+  --gn-marge-ecran: 16px;
+  --gn-entre-blocs: 24px;
+  --gn-ligne-air: 10px;                 /* au-dessus et au-dessous du filet d'une ligne de liste */
+  --gn-entre-paragraphes: 12px;         /* texte de lecture */
+
+  /* Cibles */
+  --gn-cible: 48px;                     /* minimum, boutons, lignes de liste */
+  --gn-entre-cibles: 8px;
+  --gn-ligne-reglage: 56px;             /* ligne de réglage, option de feuille basse, ligne à cocher ou à cercle */
+  --gn-filtre-hauteur: 40px;            /* pilule de filtre, dans une zone de 48 */
+  --gn-onglet-filtre-hauteur: 48px;     /* onglet de filtre sous l'en-tête, texte à 17 — écarts 6 et 15 */
+  --gn-reaction-pilule: 36px;           /* réaction, dans une zone de 48 */
+
+  /* Rayons — la direction est carrée */
+  --gn-rayon-0: 0;                      /* blocs, lignes, en-têtes, aplats */
+  --gn-rayon-4: 4px;                    /* champs, boutons, boîtes, cases */
+  --gn-rayon-24: 24px;                  /* pilules, avatar, interrupteur, cercles de choix */
+
+  /* Filets */
+  --gn-filet-1: 1px;                    /* entre lignes, étiquettes, boîtes bordées, marque de rôle */
+  --gn-filet-2: 2px;                    /* bord de champ, bouton secondaire, haut de la barre d'onglets, case, cercle, saisie */
+  --gn-filet-3: 3px;                    /* sous l'en-tête, onglet ou filtre actif, ligne en cours, citation, haut de feuille basse */
+  --gn-focus-anneau: 3px;
+  --gn-focus-decalage: 2px;
+
+  /* Zones sûres */
+  --gn-sur-haut-barre-etat: 24px;       /* barre d'état Android */
+  --gn-sur-haut-avant-contenu: 14px;
+  --gn-sur-bas-barre-onglets: 68px;
+  --gn-sur-bas-geste: 16px;
+  --gn-action-principale-marge-bas: 16px;
+
+  /* Cadre */
+  --gn-cadre-largeur: 360px;
+  --gn-cadre-hauteur: 800px;
+  --gn-mesure-lecture: 328px;           /* 360 − 2 × 16 */
+
+  /* Composants */
+  --gn-colonne-heure: 62px;
+  --gn-barre-onglets: 68px;
+  --gn-onglet-picto: 26px;
+  --gn-onglet-min: 48px;                /* largeur d'onglet : libellé + 2 × 3 px d'air, 48 au moins */
+  --gn-onglet-air: 3px;
+  --gn-compteur: 22px;
+  --gn-en-tete-titre: 28px;
+  --gn-en-tete-lecture: 48px;
+  --gn-bouton-aa: 48px;
+  --gn-avatar: 40px;
+  --gn-case: 24px;
+  --gn-cercle-choix: 24px;
+  --gn-interrupteur-largeur: 52px;
+  --gn-interrupteur-hauteur: 32px;
+  --gn-interrupteur-curseur: 24px;
+  --gn-carre-non-lu: 10px;
+  --gn-jauge: 6px;
+  --gn-segment-etape: 4px;
+  --gn-carre-etape: 32px;
+  --gn-champ: 48px;
+  --gn-zone-texte: 120px;
+  --gn-champ-heure: 110px;
+  --gn-feuille-poignee-largeur: 40px;
+  --gn-feuille-poignee-hauteur: 4px;
+  --gn-barre-lecture-repliee: 32px;
+  --gn-rail-alpha: 24px;
+  --gn-rail-alpha-interligne: 20px;
+  --gn-bande-jour-min: 48px;
+  --gn-bande-jour-hauteur: 56px;
+  --gn-picto-taille: 24px;                     /* isolé */
+  --gn-picto-marque: 20px;              /* dans une marque d'état */
+  --gn-picto-18: 18px;
+  --gn-picto-16: 16px;
+  --gn-picto-40: 40px;                  /* verrou, hors connexion, lecture */
+}
+
+/* Zones sûres appliquées à un écran */
+[data-app="guide-nego"] .gn-ecran {
+  padding-top: calc(var(--gn-sur-haut-barre-etat) + var(--gn-sur-haut-avant-contenu));
+  padding-bottom: calc(var(--gn-sur-bas-barre-onglets) + var(--gn-sur-bas-geste));
+  padding-left: var(--gn-marge-ecran);
+  padding-right: var(--gn-marge-ecran);
+}
+[data-app="guide-nego"] .gn-ecran--sans-onglets { padding-bottom: var(--gn-sur-bas-geste); } /* conversation, lecteur */

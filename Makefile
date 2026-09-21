@@ -41,7 +41,7 @@ S3_KEY_SECRET ?= $(shell sed -n 's/^S3_SECRET_ACCESS_KEY=//p' $(ENV_FILE) 2>/dev
 MEDIA_PROXY_PORT ?= $(shell sed -n 's/^MEDIA_PROXY_PORT=//p' $(ENV_FILE) 2>/dev/null | tail -1)
 
 .PHONY: help check check-db check-db-safe assert-db assert-init-logs check-front check-back \
-        up down wait-db logs-db garage-init garage-info media-base-url openapi check-api-contract
+        up down wait-db logs-db garage-init garage-info media-base-url openapi check-api-contract check-guide-nego
 
 # `make` tout court affiche l'aide et ne détruit rien : la première cible d'un
 # Makefile est celle qu'on exécute par mégarde, et `check` efface la base.
@@ -159,7 +159,7 @@ assert-db:
 # ---------------------------------------------------------------------------
 # Front et API — inertes tant que les dossiers n'existent pas
 # ---------------------------------------------------------------------------
-check-front: check-api-contract
+check-front: check-api-contract check-guide-nego
 	@if [ -d frontend ]; then \
 	   cd frontend && npm run typecheck && npm run build; \
 	 else echo 'frontend/ absent — rien à vérifier (prompt A0.1)'; fi
@@ -197,6 +197,13 @@ openapi:
 	@cd frontend && npx --no-install openapi-typescript ../$(OPENAPI_JSON) -o app/types/api.ts
 	@node frontend/scripts/prefix-api-types.mjs frontend/app/types/api.ts
 	@node frontend/scripts/check-api-contract.mjs
+
+# Guide Négo a son propre design, borné à [data-app="guide-nego"] (constitution,
+# XIII) : bornage des styles, contrastes des deux thèmes, logique pure.
+check-guide-nego:
+	@node frontend/scripts/check-guide-nego.mjs
+	@node frontend/scripts/guide-nego-contrastes.mjs
+	@cd frontend && npm run --silent test:guide-nego
 
 # Deux vérifications, toutes deux mécaniques parce qu'elles portent sur des
 # choses qui ne se voient qu'à l'exécution, sur l'écran de la personne qui s'en

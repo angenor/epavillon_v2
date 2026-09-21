@@ -127,3 +127,17 @@ Numéros de [ecarts.md](design/passation/ecarts.md). Le code suit ces décisions
 | 30 | Le bloc `:root` de `theme.css` — charte et nuances sombres — passe sous `[data-app="guide-nego"]` : aucun sélecteur de Guide Négo hors de sa borne (constitution, XIII) |
 | 31 | `--gn-picto` désigne la couleur (`theme.css`) ; la taille de `mesures.css` devient `--gn-picto-taille` |
 | 32 | « lu à » et « Synchronisé à » disent l'heure du téléphone, **sans fuseau** : elles se jugent contre l'horloge affichée au-dessus. Hors du jour : « hier à 23:10 », puis « le 11 nov. à 23:10 ». La ligne « Dernière synchronisation » du profil (0c) suit la règle et perd « heure d'Antalya ». Seules les heures d'événement portent leur fuseau |
+
+### Les rôles sombres définis à l'étape 0a (écarts 4 et 27)
+
+Mesurés par `frontend/scripts/guide-nego-contrastes.mjs`, qui échoue la construction sous le seuil.
+
+| Rôle | Valeur sombre | Mesure |
+|---|---|---|
+| Pressé | `#182208` (bloc) | Texte `#EEF2E4` dessus : 14,5:1 |
+| Focus | `#B5D66A` | Anneau sur fond : 11,2:1 ; sur bloc : 10,1:1 |
+| Désactivé | Fond `#182208`, texte `#A7A6A3` | 6,8:1 |
+| Fond d'attention — bandeau « Remplacé par… » | `#2B2607`, **nuance ajoutée** : aucune existante ne gardait le jaune | Texte dessus : 13,3:1 |
+| Bulle envoyée | Fond `#B5D66A`, texte `#101704` | 11,2:1 |
+| Fond de jauge | `#182208` — presque le fond : en sombre, la jauge porte un contour d'un filet | Partie pleine `#B5D66A` : 10,1:1 sur la piste |
+| Voile | `#231F20` à 70 % | — |

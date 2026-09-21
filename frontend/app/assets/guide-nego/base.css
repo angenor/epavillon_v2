@@ -1,0 +1,83 @@
+/* Guide Négo — socle d'affichage. Tout est borné à [data-app="guide-nego"] (constitution, XIII). */
+
+[data-app="guide-nego"] {
+  box-sizing: border-box;
+  min-height: 100dvh;
+  width: 100%;
+  /* Sur un écran large, le fond reste celui de l'application : la colonne se centre par ses marges intérieures. */
+  padding-inline: max(0px, calc((100% - 480px) / 2));
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: clip;
+  color-scheme: light;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+[data-app="guide-nego"][data-theme="sombre"] {
+  color-scheme: dark;
+}
+
+[data-app="guide-nego"] *,
+[data-app="guide-nego"] *::before,
+[data-app="guide-nego"] *::after {
+  box-sizing: border-box;
+}
+
+[data-app="guide-nego"] :where(h1, h2, h3, p, ul, ol) {
+  margin: 0;
+  padding: 0;
+}
+
+[data-app="guide-nego"] :where(ul, ol) {
+  list-style: none;
+}
+
+[data-app="guide-nego"] :where(a) {
+  color: inherit;
+}
+
+[data-app="guide-nego"] :where(button, input, textarea, select) {
+  font: inherit;
+  color: inherit;
+}
+
+[data-app="guide-nego"] :where(button) {
+  cursor: pointer;
+}
+
+[data-app="guide-nego"] :where(:focus-visible) {
+  outline: var(--gn-focus-anneau) solid var(--gn-focus);
+  outline-offset: var(--gn-focus-decalage);
+}
+
+/* Cible de toute téléportation : hors de lui, ni jetons ni thème. */
+[data-app="guide-nego"] #gn-portail {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+}
+
+[data-app="guide-nego"] #gn-portail > * {
+  pointer-events: auto;
+}
+
+[data-app="guide-nego"] .gn-hors-ecran {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@keyframes gn-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes gn-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}

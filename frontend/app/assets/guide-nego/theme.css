@@ -1,0 +1,214 @@
+/* Guide Négo — theme.css
+   Jetons de couleur, typographie et mouvement, extraits de « 01 — Système ».
+   Repris de docs/AppNego/design/passation/theme.css, corrigé des écarts tranchés dans 05-design.md.
+   Tout est borné à [data-app="guide-nego"], charte comprise (écart 30) ;
+   thème sombre sous [data-app="guide-nego"][data-theme="sombre"].
+   Un rôle référence toujours une couleur de charte par var(), jamais une valeur hexadécimale. */
+
+[data-app="guide-nego"] {
+  /* Charte IFDD — valeurs exactes */
+  --gn-charte-vert-tres-fonce: #233400;
+  --gn-charte-vert-fonce: #3C5404;
+  --gn-charte-vert-moyen: #557607;
+  --gn-charte-vert-de-fond: #ECFFD3;
+  --gn-charte-vert-de-charte: #8FBF2F;
+  --gn-charte-jaune-fonce: #D3B011;
+  --gn-charte-jaune-tres-fonce: #816B06;
+  --gn-charte-jaune-de-fond: #FFF7DA;
+  --gn-charte-jaune-de-charte: #FFD500;
+  --gn-charte-noir: #231F20;
+  --gn-charte-gris: #565554;
+  --gn-charte-gris-pale: #D9D8D6;
+  --gn-charte-blanc: #FFFFFF;
+  --gn-charte-rouge: #C7101D;
+  --gn-charte-violet: #732F85;
+  --gn-charte-cyan-fonce: #0C6792;
+
+  /* Nuances hors charte (thème sombre), par variation de clarté d'une teinte de charte */
+  --gn-nuance-sombre-fond: #101704;
+  --gn-nuance-sombre-bloc: #182208;
+  --gn-nuance-sombre-texte: #EEF2E4;
+  --gn-nuance-sombre-texte-2: #B9C0AA;
+  --gn-nuance-sombre-vert: #B5D66A;
+  --gn-nuance-sombre-vert-filet: #6E9A2A;
+  --gn-nuance-sombre-jaune: #D9C878;
+  --gn-nuance-sombre-cyan: #63B9E0;
+  --gn-nuance-sombre-rouge: #F08A90;
+  --gn-nuance-sombre-violet: #CB9AD8;
+  --gn-nuance-sombre-gris: #A7A6A3;
+  --gn-nuance-sombre-squelette: #2E3F0E; /* squelette seulement, jamais en filet — écart 1 */
+  --gn-nuance-sombre-jaune-bloc: #2B2607; /* fond du bandeau « Remplacé par… » — écarts 4 et 27 */
+}
+
+[data-app="guide-nego"] {
+  /* Fonds et textes */
+  --gn-fond: var(--gn-charte-blanc);
+  --gn-fond-2: var(--gn-charte-vert-de-fond);          /* bloc, fond alterné, bulle reçue, ligne pressée */
+  --gn-texte: var(--gn-charte-noir);
+  --gn-texte-2: var(--gn-charte-gris);
+  --gn-titre: var(--gn-charte-vert-tres-fonce);
+  --gn-accent: var(--gn-charte-vert-fonce);
+  --gn-accent-inv: var(--gn-charte-blanc);             /* texte sur action principale */
+  --gn-bulle-envoyee: var(--gn-charte-vert-tres-fonce);
+  --gn-bulle-envoyee-texte: var(--gn-charte-blanc);
+
+  /* Filets */
+  --gn-filet: var(--gn-charte-gris);                   /* 1 px */
+  --gn-filet-fort: var(--gn-charte-vert-tres-fonce);   /* 2 et 3 px */
+
+  /* Attention, succès, danger, information, réseau, neutre */
+  --gn-attention: var(--gn-charte-jaune-tres-fonce);
+  --gn-attention-aplat: var(--gn-charte-jaune-fonce);  /* « maintenant » : session en cours, non-lu, mention, bandeau hors connexion */
+  --gn-attention-aplat-texte: var(--gn-charte-noir);
+  --gn-attention-fond: var(--gn-charte-jaune-de-fond); /* bandeau « Remplacé par… » */
+  --gn-succes: var(--gn-charte-vert-moyen);
+  --gn-information: var(--gn-charte-cyan-fonce);
+  --gn-danger: var(--gn-charte-rouge);
+  --gn-reseau: var(--gn-charte-violet);
+  --gn-terminee: var(--gn-charte-gris);
+  --gn-prevue: var(--gn-charte-noir);
+
+  /* Sur vert foncé */
+  --gn-vif-jaune: var(--gn-charte-jaune-de-charte);
+  --gn-vif-vert: var(--gn-charte-vert-de-charte);
+
+  /* États communs des composants */
+  --gn-presse: var(--gn-charte-vert-de-fond);
+  --gn-focus: var(--gn-charte-vert-fonce);
+  --gn-desactive-fond: var(--gn-charte-gris-pale);
+  --gn-desactive-texte: var(--gn-charte-gris);
+  --gn-squelette: var(--gn-charte-gris-pale);
+  --gn-jauge-fond: var(--gn-charte-gris-pale);
+  --gn-voile: var(--gn-charte-gris);
+  --gn-voile-opacite: 0.6;
+
+  /* Pictogrammes isolés (24 px) et de document */
+  --gn-picto: var(--gn-charte-vert-tres-fonce);
+  --gn-picto-secondaire: var(--gn-charte-gris);
+  --gn-picto-document: var(--gn-charte-vert-moyen);
+
+  /* Un état = un pictogramme + un mot + une couleur */
+  --gn-etat-prevue: var(--gn-prevue);
+  --gn-etat-en-cours: var(--gn-succes);
+  --gn-etat-deplacee: var(--gn-information);
+  --gn-etat-annulee: var(--gn-danger);
+  --gn-etat-terminee: var(--gn-terminee);
+  --gn-etat-non-annoncee: var(--gn-reseau);
+  --gn-etat-ouverte: var(--gn-succes);
+  --gn-etat-acces-limite: var(--gn-attention);
+  --gn-etat-envoye: var(--gn-information);
+  --gn-etat-valide: var(--gn-succes);
+  --gn-etat-non-retenu: var(--gn-terminee);
+  --gn-etat-a-jour: var(--gn-succes);
+  --gn-etat-remplace: var(--gn-attention);
+  --gn-etat-depasse: var(--gn-danger);
+  --gn-etat-telecharge: var(--gn-accent);
+  --gn-etat-reserve: var(--gn-attention);
+  --gn-etat-lien-externe: var(--gn-texte-2);
+  --gn-etat-nouveau: var(--gn-prevue);
+  --gn-etat-propose: var(--gn-attention);
+  --gn-etat-classe: var(--gn-succes);
+  --gn-etat-relu: var(--gn-succes);
+  --gn-etat-non-relu: var(--gn-attention);
+  --gn-etat-en-relecture: var(--gn-information);
+  --gn-etat-reussi: var(--gn-succes);
+  --gn-etat-a-refaire: var(--gn-terminee);
+  --gn-etat-hors-connexion: var(--gn-attention);
+  --gn-etat-synchronise: var(--gn-succes);
+  --gn-etat-a-envoyer: var(--gn-attention);
+  --gn-etat-source-officielle: var(--gn-texte-2);
+  --gn-etat-traduction: var(--gn-texte-2);
+  --gn-etat-lecture-impossible: var(--gn-danger);
+  --gn-etat-verifie: var(--gn-succes);
+  --gn-etat-inscrite: var(--gn-succes);
+  --gn-etat-liste-attente: var(--gn-attention);
+  --gn-etat-complet: var(--gn-terminee);
+  --gn-etat-rediffusion: var(--gn-accent);
+  --gn-etat-en-attente: var(--gn-attention);
+  --gn-etat-repondue: var(--gn-succes);
+  --gn-etat-ajoutee-faq: var(--gn-accent);
+  --gn-etat-chevauche: var(--gn-attention);
+  --gn-etat-expert: var(--gn-succes);
+  --gn-etat-a-confirmer: var(--gn-attention);
+
+  /* Typographie */
+  --gn-police: 'Atkinson Hyperlegible Next', system-ui, sans-serif;
+  --gn-graisse-regulier: 400;
+  --gn-graisse-demi-gras: 600;
+  --gn-graisse-gras: 700;
+  --gn-taille-32: 32px; --gn-interligne-32: 1.1;
+  --gn-taille-28: 28px; --gn-interligne-28: 1.1;
+  --gn-taille-24: 24px; --gn-interligne-24: 1.2;
+  --gn-taille-20: 20px; --gn-interligne-20: 1.2;
+  --gn-taille-17: 17px; --gn-interligne-17: 1.5;
+  --gn-taille-15: 15px; --gn-interligne-15: 1.4;
+  --gn-taille-13: 13px; --gn-interligne-13: 1.2;   /* libellés d'onglets, marque de rôle, compteur */
+  --gn-lecture-normale: 17px;
+  --gn-lecture-grande: 20px;
+  --gn-lecture-tres-grande: 24px;
+
+  /* Mouvement */
+  --gn-duree-bref: 120ms;
+  --gn-duree-standard: 200ms;
+  --gn-duree-long: 320ms;
+  --gn-duree-arc: 1s;
+  --gn-duree-squelette: 1.6s;
+  --gn-duree-ephemere: 6s;
+  --gn-courbe-sortie: cubic-bezier(0.2, 0, 0, 1);
+  --gn-courbe-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  color: var(--gn-texte);
+  background: var(--gn-fond);
+  font-family: var(--gn-police);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--gn-taille-17);
+  line-height: var(--gn-interligne-17);
+}
+
+[data-app="guide-nego"][data-theme="sombre"] {
+  --gn-fond: var(--gn-nuance-sombre-fond);
+  --gn-fond-2: var(--gn-nuance-sombre-bloc);
+  --gn-texte: var(--gn-nuance-sombre-texte);
+  --gn-texte-2: var(--gn-nuance-sombre-texte-2);
+  --gn-titre: var(--gn-nuance-sombre-texte);
+  --gn-accent: var(--gn-nuance-sombre-vert);
+  --gn-accent-inv: var(--gn-nuance-sombre-fond);
+  --gn-filet: var(--gn-nuance-sombre-vert-filet);
+  --gn-filet-fort: var(--gn-nuance-sombre-vert-filet);
+  --gn-attention: var(--gn-nuance-sombre-jaune);
+  --gn-attention-aplat: var(--gn-nuance-sombre-jaune);
+  --gn-attention-aplat-texte: var(--gn-nuance-sombre-fond);
+  --gn-succes: var(--gn-nuance-sombre-vert);           /* un seul vert d'état en sombre — écart 3 */
+  --gn-information: var(--gn-nuance-sombre-cyan);
+  --gn-danger: var(--gn-nuance-sombre-rouge);
+  --gn-reseau: var(--gn-nuance-sombre-violet);
+  --gn-terminee: var(--gn-nuance-sombre-gris);
+  --gn-prevue: var(--gn-nuance-sombre-texte);
+  --gn-squelette: var(--gn-nuance-sombre-squelette);
+  --gn-picto: var(--gn-nuance-sombre-texte);
+  --gn-picto-secondaire: var(--gn-nuance-sombre-texte-2);
+  --gn-picto-document: var(--gn-nuance-sombre-vert);
+  /* Absents de la maquette en sombre, définis à l'étape 0a (écarts 4 et 27) ; contrastes vérifiés par scripts/guide-nego-contrastes.mjs */
+  --gn-presse: var(--gn-nuance-sombre-bloc);
+  --gn-focus: var(--gn-nuance-sombre-vert);
+  --gn-desactive-fond: var(--gn-nuance-sombre-bloc);
+  --gn-desactive-texte: var(--gn-nuance-sombre-gris);
+  --gn-attention-fond: var(--gn-nuance-sombre-jaune-bloc);
+  --gn-bulle-envoyee: var(--gn-nuance-sombre-vert);
+  --gn-bulle-envoyee-texte: var(--gn-nuance-sombre-fond);
+  --gn-jauge-fond: var(--gn-nuance-sombre-bloc);
+  --gn-voile: var(--gn-charte-noir);
+  --gn-voile-opacite: 0.7;
+}
+
+/* « Réduire les animations » : les durées tombent à 0, squelettes et arc deviennent fixes. */
+@media (prefers-reduced-motion: reduce) {
+  [data-app="guide-nego"] {
+    --gn-duree-bref: 0ms;
+    --gn-duree-standard: 0ms;
+    --gn-duree-long: 0ms;
+    --gn-duree-arc: 0s;
+    --gn-duree-squelette: 0s;
+  }
+  [data-app="guide-nego"] * { animation: none !important; }
+}
