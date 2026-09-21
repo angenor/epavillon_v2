@@ -68,6 +68,28 @@ onMounted(() => {
 onBeforeUnmount(() => window.removeEventListener('online', relire))
 
 /**
+ * Une version gardée lors d'une visite précédente prend la main MAINTENANT, au
+ * chargement, et jamais en cours d'usage : une version en attente a, par construction,
+ * son cache complet, et la page n'a encore rien à perdre. Sans cela elle attendrait que
+ * l'application soit fermée pour de bon — sur un téléphone, ce jour peut ne pas venir.
+ */
+function prendreLaVersionEnAttente(inscription: ServiceWorkerRegistration) {
+  // Sans contrôleur, c'est la toute première ouverture : il n'y a rien à remplacer.
+  if (!inscription.waiting || !navigator.serviceWorker.controller) return
+  let rechargee = false
+  navigator.serviceWorker.addEventListener(
+    'controllerchange',
+    () => {
+      if (rechargee) return
+      rechargee = true
+      location.reload()
+    },
+    { once: true },
+  )
+  inscription.waiting.postMessage('prendre-la-main')
+}
+
+/**
  * Le service worker n'existe qu'en construction et ne vit que sous `guide-nego/` : le
  * site n'en enregistre aucun, et celui-ci ne peut contrôler aucune de ses pages.
  */
@@ -77,6 +99,7 @@ async function enregistrerLaGarde() {
     const inscription = await navigator.serviceWorker.register(assetUrl('/guide-nego/sw.js'), {
       scope: assetUrl('/guide-nego/'),
     })
+    prendreLaVersionEnAttente(inscription)
     // À chaque ouverture : c'est ainsi qu'une nouvelle version se garde en arrière-plan.
     void inscription.update()
     await navigator.serviceWorker.ready

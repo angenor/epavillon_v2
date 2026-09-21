@@ -125,7 +125,7 @@ Placée avant US1 : toutes les pages naissent derrière le drapeau, et l'étape 
 - [X] T048 [P] [US2] Créer `frontend/app/components/guide-nego/GnMessageEphemere.vue` : fond `titre`, texte blanc 17, action `vif-jaune` facultative, 6 s, `role="status"`, téléporté dans `#gn-portail`, durées par `--gn-duree-*`
 - [X] T049 [US2] Dire « Prête hors connexion » (FR-012 bis) : dans `frontend/app/layouts/guide-nego.vue`, quand `navigator.serviceWorker.ready` se résout et que `gn.garde-annoncee` est absente, afficher `GnMessageEphemere` et poser la clé ; libellé dans `frontend/i18n/locales/{fr,en}/components/gn-connexion.json`
 - [X] T050 [US2] Vérifier sur construction, sans préfixe puis avec `NUXT_APP_BASE_URL=/v2/` : la liste couvre police, sprite, paquet de locale `fr` et toutes les pages ; mode avion après une seule ouverture, « Prête hors connexion » vu, sans avoir visité les onglets ; aucune requête vers une autre origine ; aucun service worker sur les pages du site ; corriger `T045`–`T047` au besoin
-- [ ] T051 [US2] **Reste à faire sur appareil (voir T071)** — dérouler l'essai « Réseau lent + nouvelle construction » de `specs/008-guide-nego-coquille/quickstart.md` : ouverture en moins de deux secondes sur la version gardée, deux caches pendant la mise à jour, installation interrompue sans dégât, drapeau éteint appliqué sans attendre
+- [X] T051 [US2] Dérouler l'essai « Réseau lent + nouvelle construction » de `specs/008-guide-nego-coquille/quickstart.md` : ouverture en moins de deux secondes sur la version gardée, deux caches pendant la mise à jour, installation interrompue sans dégât, drapeau éteint appliqué sans attendre
 
 **Checkpoint** : quickstart § 2, points 1 à 4, 7, et le tableau du réseau lent.
 

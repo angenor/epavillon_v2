@@ -223,6 +223,18 @@ Trois choses qu'aucun test local ne peut dire, dans l'ordre où elles font mal :
    directement par `epavillon.mefali.com`.
 3. **Une session complète**, connexion puis navigation au-delà de quinze minutes. C'est ce qui
    éprouve le chemin des cookies pour de vrai.
+4. **La garde de Guide Négo**, après **chaque** mise en ligne :
+
+   ```bash
+   cd frontend && node scripts/guide-nego-verifier-garde.mjs https://<domaine>/v2/guide-nego/
+   ```
+
+   Le script lit `sw.js`, en tire la liste des fichiers gardés et les demande un par un. Il échoue
+   sur toute réponse autre qu'un 200 franc — **une redirection comprise**, qu'un navigateur refuse
+   ensuite de servir à une navigation. C'est une panne autrement muette : l'installation du service
+   worker est tout ou rien, et une seule adresse cassée — la route des traductions derrière Apache,
+   par exemple — suffit à ce qu'aucun téléphone ne garde l'application, sans qu'aucun message ne le
+   dise. `./deploy.sh` le lance tout seul après `update` et `deploy`.
 
 ---
 

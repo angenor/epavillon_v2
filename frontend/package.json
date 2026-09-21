@@ -11,6 +11,7 @@
     "generate": "nuxt generate --dotenv ../.env",
     "typecheck": "nuxt typecheck",
     "check:guide-nego": "node scripts/check-guide-nego.mjs && node scripts/guide-nego-contrastes.mjs",
+    "verifier-garde:guide-nego": "node scripts/guide-nego-verifier-garde.mjs",
     "icones:guide-nego": "node scripts/guide-nego-icones.mjs",
     "test:guide-nego": "node --test \"tests/guide-nego/*.test.ts\"",
     "postinstall": "nuxt prepare"
