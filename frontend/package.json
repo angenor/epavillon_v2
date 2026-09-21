@@ -11,6 +11,7 @@
     "generate": "nuxt generate --dotenv ../.env",
     "typecheck": "nuxt typecheck",
     "check:guide-nego": "node scripts/check-guide-nego.mjs && node scripts/guide-nego-contrastes.mjs",
+    "icones:guide-nego": "node scripts/guide-nego-icones.mjs",
     "test:guide-nego": "node --test \"tests/guide-nego/*.test.ts\"",
     "postinstall": "nuxt prepare"
   },
@@ -37,6 +38,7 @@
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^26.2.0",
     "openapi-typescript": "^7.13.0",
+    "sharp": "^0.35.4",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
     "vue-tsc": "^3.3.10"

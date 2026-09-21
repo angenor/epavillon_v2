@@ -1,0 +1,25 @@
+{
+  "titre": "Welcome",
+  "sous-titre": "The app for Francophone negotiators",
+  "sans-compte": {
+    "titre": "No account, right away",
+    "documents": "Negotiation documents",
+    "faq": "FAQ",
+    "lexique": "English-French glossary",
+    "sessions": "Today's negotiation sessions",
+    "francophonie": "Francophonie meetings and Pavilion"
+  },
+  "avec-compte": {
+    "titre": "With an account",
+    "thematiques": "Your topics and alerts",
+    "favoris": "Favourites, downloads, quizzes",
+    "inscriptions": "Registrations for the Francophonie Pavilion"
+  },
+  "avec-code": {
+    "titre": "With an invitation code",
+    "echanges": "Network exchanges, reports",
+    "reserves": "Restricted documents, assistant"
+  },
+  "continuer": "Continue as a guest",
+  "installer": "Install Guide Négo on my phone"
+}

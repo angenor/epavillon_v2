@@ -1,0 +1,25 @@
+{
+  "titre": "Bienvenue",
+  "sous-titre": "L'application des négociatrices et négociateurs francophones",
+  "sans-compte": {
+    "titre": "Sans compte, tout de suite",
+    "documents": "Documents de négociation",
+    "faq": "FAQ",
+    "lexique": "Lexique anglais-français",
+    "sessions": "Sessions de négociation du jour",
+    "francophonie": "Réunions et Pavillon de la Francophonie"
+  },
+  "avec-compte": {
+    "titre": "Avec un compte",
+    "thematiques": "Vos thématiques et vos alertes",
+    "favoris": "Favoris, téléchargements, quiz",
+    "inscriptions": "Inscriptions au Pavillon de la Francophonie"
+  },
+  "avec-code": {
+    "titre": "Avec un code d'invitation",
+    "echanges": "Échanges du réseau, signalements",
+    "reserves": "Documents réservés, assistant"
+  },
+  "continuer": "Continuer en visiteur",
+  "installer": "Installer Guide Négo sur mon téléphone"
+}

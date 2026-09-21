@@ -10,7 +10,25 @@ import '~/assets/guide-nego/theme.css'
 import '~/assets/guide-nego/mesures.css'
 import '~/assets/guide-nego/base.css'
 
-useHead({ htmlAttrs: { lang: 'fr' } })
+// La barre système du téléphone ne lit pas le CSS : elle veut une valeur. C'est
+// `--gn-charte-vert-tres-fonce` ; le thème sombre la remplacera (0a, US4).
+const COULEUR_BARRE_SYSTEME = '#233400'
+
+// Le manifeste et l'icône ne se posent QUE sous cette mise en page : le site n'est pas
+// installable, et son onglet garde son propre titre.
+useHead({
+  htmlAttrs: { lang: 'fr' },
+  titleTemplate: (titre) => (titre ? `${titre} — Guide Négo` : 'Guide Négo'),
+  link: [
+    { rel: 'manifest', href: assetUrl('/guide-nego/manifest.webmanifest') },
+    { rel: 'apple-touch-icon', href: assetUrl('/guide-nego/icones/180.png') },
+  ],
+  meta: [
+    { name: 'theme-color', content: COULEUR_BARRE_SYSTEME },
+    { name: 'apple-mobile-web-app-capable', content: 'yes' },
+    { name: 'apple-mobile-web-app-title', content: 'Guide Négo' },
+  ],
+})
 
 // Le verdict du drapeau peut arriver après l'ouverture : il s'applique alors dans les
 // deux sens, sans attendre une navigation.

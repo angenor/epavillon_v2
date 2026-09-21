@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="16 16 208 200" width="208" height="200">
+<!-- Copie de ../../logos/svg/epavillon-symbole-inverse.svg dont la lettre « e » est tracée :
+     le fichier du site l'exprime par un <text> en Helvetica Neue Light, que librsvg
+     remplace en silence par la police que trouve la machine. L'icône installée serait
+     alors différente d'un poste à l'autre. Tracé ici depuis cette police, à l'identique. -->
+<g fill="none" stroke-width="16" stroke-linecap="round">
+<path d="M30 112L120 26" stroke="#3BB9F0"></path><path d="M120 26L210 112" stroke="#8B4EF7"></path>
+<path d="M30 112V206" stroke="#FBD44E"></path><path d="M210 112V206" stroke="#0F8C46"></path></g>
+<g fill="none" stroke="#F0181F" stroke-width="17" stroke-linecap="round"><path d="M30 206H104"></path><path d="M136 206H210"></path></g>
+<path d="M104 112Q120 125 136 112" fill="none" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"></path>
+<path d="M136.46 155.78H104.4Q104.78 152.42 105.98 149.2Q107.18 145.98 109.2 143.54Q111.22 141.09 114.1 139.6Q116.98 138.11 120.72 138.11Q124.37 138.11 127.25 139.6Q130.13 141.09 132.14 143.54Q134.16 145.98 135.26 149.15Q136.37 152.32 136.46 155.78ZM104.4 160.86H142.51Q142.7 155.68 141.55 150.64Q140.4 145.6 137.76 141.71Q135.12 137.82 130.9 135.42Q126.67 133.02 120.72 133.02Q114.86 133.02 110.59 135.28Q106.32 137.54 103.63 141.23Q100.94 144.93 99.65 149.63Q98.35 154.34 98.35 159.23Q98.35 164.51 99.65 169.26Q100.94 174.02 103.63 177.62Q106.32 181.22 110.59 183.28Q114.86 185.34 120.72 185.34Q130.13 185.34 135.26 180.74Q140.4 176.13 142.32 167.68H136.27Q134.83 173.44 131.09 176.9Q127.34 180.35 120.72 180.35Q116.4 180.35 113.33 178.53Q110.26 176.7 108.24 173.92Q106.22 171.14 105.31 167.63Q104.4 164.13 104.4 160.86Z" fill="#FFFFFF"></path>
+</svg>

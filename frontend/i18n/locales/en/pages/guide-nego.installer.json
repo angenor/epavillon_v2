@@ -1,0 +1,21 @@
+{
+  "titre": "Install Guide Négo",
+  "sous-titre": "IFDD · International Organisation of La Francophonie",
+  "intro": "Add Guide Négo to your phone's home screen: it then opens like an app, and everything readable reads without a connection.",
+  "avant-la-salle": "Open the app once with a network connection before relying on it in the room: that first opening is what stores everything on the phone.",
+  "android": {
+    "titre": "On Android",
+    "etape-1": "Open the browser menu",
+    "etape-1-precision": "The three dots, top right.",
+    "etape-2": "Choose “Add to home screen”",
+    "etape-3": "Confirm “Add”",
+    "etape-3-precision": "The Guide Négo icon appears among your apps."
+  },
+  "iphone": {
+    "titre": "On iPhone",
+    "etape": "Tap Share, then “Add to Home Screen”."
+  },
+  "installer": "Install Guide Négo",
+  "continuer": "Continue in the browser",
+  "etapes-libelle": "Installation steps"
+}

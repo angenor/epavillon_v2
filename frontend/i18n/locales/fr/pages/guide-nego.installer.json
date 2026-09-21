@@ -1,0 +1,21 @@
+{
+  "titre": "Installer Guide Négo",
+  "sous-titre": "IFDD · Organisation internationale de la Francophonie",
+  "intro": "Ajoutez Guide Négo à l'écran d'accueil de votre téléphone : elle s'ouvre ensuite comme une application, et tout ce qui se lit se lit sans connexion.",
+  "avant-la-salle": "Ouvrez l'application une fois avec du réseau avant de compter sur elle en salle : c'est cette première ouverture qui garde tout sur le téléphone.",
+  "android": {
+    "titre": "Sur Android",
+    "etape-1": "Ouvrez le menu du navigateur",
+    "etape-1-precision": "Les trois points, en haut à droite.",
+    "etape-2": "Choisissez « Ajouter à l'écran d'accueil »",
+    "etape-3": "Confirmez « Ajouter »",
+    "etape-3-precision": "L'icône Guide Négo apparaît parmi vos applications."
+  },
+  "iphone": {
+    "titre": "Sur iPhone",
+    "etape": "Touchez Partager, puis « Sur l'écran d'accueil »."
+  },
+  "installer": "Installer Guide Négo",
+  "continuer": "Continuer dans le navigateur",
+  "etapes-libelle": "Étapes d'installation"
+}
