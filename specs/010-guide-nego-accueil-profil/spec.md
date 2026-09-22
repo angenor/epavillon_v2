@@ -185,7 +185,7 @@ Depuis le profil, Aïssatou ouvre « À propos ». Elle y lit qui édite l'appli
 - **FR-033** : Les deux textes DOIVENT s'afficher en entier dans le dessin de Guide Négo, porter leur version, et rester lisibles hors connexion une fois lus, avec l'heure de leur lecture.
 - **FR-034** : Les licences DOIVENT dire la police et les bibliothèques embarquées ; elles ne sont pas un texte d'engagement, n'appellent aucun accord, et se tiennent avec la construction.
 - **FR-035** : Aucun interrupteur d'accord NE DOIT paraître à cette étape : les trois que dessine la maquette n'ont encore aucun effet — pas de mesure d'usage, pas de notifications, pas d'annuaire —, et un interrupteur sans effet trompe. Chacun paraîtra avec l'étape qui lui donne un effet, et l'écart est inscrit.
-- **FR-036** : L'enregistrement d'un accord et sa relecture DOIVENT être disponibles, avec leur version, pour les étapes qui en auront besoin.
+- **FR-036** : L'enregistrement d'un accord et sa relecture, avec leur version, **sont déjà portés par l'existant** — cette étape n'a rien à construire pour eux, et n'ajoute aucune route d'accord. Elle change seulement d'où vient la version (FR-031).
 - **FR-037** : Sans compte, l'écran « À propos » et ses textes DOIVENT rester lisibles.
 
 ### Ce qui vaut pour tous les écrans de l'étape

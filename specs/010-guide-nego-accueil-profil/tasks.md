@@ -83,6 +83,7 @@ nouvelle, aucune signature retouchée, aucun comportement changé.
 - [ ] T019 [P] Test « rejeu identique » dans `backend/crates/modules/negotiation/tests/thematiques_rejeu.rs` : deux `PUT` du même corps donnent le même état et **aucune ligne d'audit de plus**
 - [ ] T020 [P] Test « sans If-Match » dans `backend/crates/modules/negotiation/tests/thematiques_sans_if_match.rs` : accepté, pour ne pas casser l'écran en ligne
 - [ ] T021 [P] Test « vocabulaire gardé par la base » dans `backend/crates/modules/negotiation/tests/thematiques_vocabulaire.rs` : un `INSERT` direct d'un terme d'`activity_theme` est refusé par le trigger, et l'API rend un message qui nomme le code
+- [ ] T021 bis [P] Test « terme désactivé » dans `backend/crates/modules/negotiation/tests/thematiques_desactive.rs` : un terme désactivé **déjà suivi** reste accepté, un terme désactivé **nouveau** est refusé — on ne retire pas à quelqu'un ce qu'il suivait
 - [ ] T022 [P] Test « on ferme, on ne supprime pas » dans `backend/crates/modules/negotiation/tests/thematiques_fermeture.rs` : retirer une thématique pose `left_at`, la ligne reste, l'index unique n'empêche pas de la reprendre plus tard
 - [ ] T023 [P] Test « toute écriture laisse son auteur » dans `backend/crates/modules/negotiation/tests/thematiques_audit.rs` : `platform.audit_log` porte un `actor_id` à chaque ligne
 - [ ] T024 [P] Test « refus sans session » dans `backend/crates/api/tests/routes_negotiation_themes.rs` : `401` sur les deux routes, URL forgée comprise, et le `304` éprouvé en HTTP de bout en bout
@@ -103,11 +104,12 @@ nouvelle, aucune signature retouchée, aucun comportement changé.
 - [ ] T030 Déclencher le départ de la file **à l'ouverture de l'application** dans `frontend/app/layouts/guide-nego.vue`, et au retour au premier plan — deux déclencheurs simultanés n'envoient qu'une fois
 - [ ] T031 Vider la file à la déconnexion, dans `frontend/app/composables/guide-nego/useGnSession.ts` : ce qu'une personne a choisi ne part pas sous le compte de la suivante
 - [ ] T032 Lire le vocabulaire `negotiation_theme` **à la première ouverture en ligne, avec le drapeau**, et le garder comme lui — dix termes, lecture publique sans session, dans `frontend/app/layouts/guide-nego.vue` et `frontend/app/composables/guide-nego/useGnThematiques.ts`
-- [ ] T033 [P] Test « une seule entrée par clé » dans `frontend/test/guide-nego/file-intention.test.ts` : deux intentions successives, une entrée, et **l'empreinte de la première**
-- [ ] T034 [P] Test « 412 » dans `frontend/test/guide-nego/file-412.test.ts` : l'entrée part, la relecture est déclenchée, le message est produit
-- [ ] T035 [P] Test « 5xx garde, refus définitif retire » dans `frontend/test/guide-nego/file-echecs.test.ts`
-- [ ] T036 [P] Test « déconnexion et compte » dans `frontend/test/guide-nego/file-compte.test.ts` : la file se vide, et une intention prise par quelqu'un d'autre ne part jamais
-- [ ] T037 [P] Test « trois déclencheurs, un seul envoi » dans `frontend/test/guide-nego/file-declencheurs.test.ts` : ouverture, `online`, retour au premier plan — chacun déclenche, deux à la fois n'envoient qu'une fois
+- [ ] T032 bis Étendre `frontend/scripts/check-guide-nego.mjs` : **refuser tout fichier `*.test.ts` sous `frontend/` hors de `frontend/tests/`** — la porte ne ramasse que `tests/guide-nego/*.test.ts`, et un test qu'elle ne voit pas est pire qu'un test absent, puisqu'il donne le vert
+- [ ] T033 [P] Test « une seule entrée par clé » dans `frontend/tests/guide-nego/file-intention.test.ts` : deux intentions successives, une entrée, et **l'empreinte de la première**
+- [ ] T034 [P] Test « 412 » dans `frontend/tests/guide-nego/file-412.test.ts` : l'entrée part, la relecture est déclenchée, le message est produit
+- [ ] T035 [P] Test « 5xx garde, refus définitif retire » dans `frontend/tests/guide-nego/file-echecs.test.ts`
+- [ ] T036 [P] Test « déconnexion et compte » dans `frontend/tests/guide-nego/file-compte.test.ts` : la file se vide, et une intention prise par quelqu'un d'autre ne part jamais
+- [ ] T037 [P] Test « trois déclencheurs, un seul envoi » dans `frontend/tests/guide-nego/file-declencheurs.test.ts` : ouverture, `online`, retour au premier plan — chacun déclenche, deux à la fois n'envoient qu'une fois
 
 **Checkpoint** : `npm run test:guide-nego` au vert, six preuves de file. **Commit.**
 
@@ -121,16 +123,14 @@ retrouve sur un autre appareil.
 **Test indépendant** : cocher deux thématiques sur un téléphone, se connecter sur un second navigateur
 avec le même compte, les y retrouver sans geste ; puis en changer une depuis le profil.
 
-- [ ] T038 [P] [US1] Créer `frontend/app/components/guide-nego/GnAvatar.vue` — 40 px, rayon 24, initiales 15/700, image du compte quand elle existe — et son `frontend/i18n/locales/{fr,en}/components/gn-avatar.json`
-- [ ] T039 [P] [US1] Ajouter `GnAvatar` à la planche dans `frontend/app/components/guide-nego/planche/PlancheComposantsSurfaces.vue`, dans les deux thèmes, et le retirer de la liste « Ce qui n'est pas montré ici »
-- [ ] T040 [US1] Ajouter `mesThematiques()` et `suivreDesThematiques(codes, empreinte?)` à `frontend/app/composables/api/guide-nego.ts` — **jamais dans `useApi.ts`**
-- [ ] T041 [US1] Écrire `frontend/app/composables/guide-nego/useGnThematiques.ts` sur le motif de `useGnAcces` : `useGnLecture` pour le vocabulaire et pour les suivis, `assurer()`, `pret`, `luA`, et l'écriture qui passe par la file
-- [ ] T042 [US1] Écrire `frontend/app/pages/guide-nego/thematiques.vue` : `GnCase` par ligne de 56 px, récapitulatif du pied, bouton inactif à zéro avec son aide, indicateur d'étapes à la première entrée seulement
-- [ ] T043 [P] [US1] Écrire `frontend/i18n/locales/fr/pages/guide-nego.thematiques.json` et son jumeau `en` — libellés d'écran seulement, **aucun libellé de thématique**
-- [ ] T044 [US1] Proposer l'écran **une seule fois** à la première entrée d'une personne connectée qui ne suit rien, par une clé locale de `frontend/app/utils/guide-nego/stockage.ts`, sans jamais enfermer personne
-- [ ] T045 [US1] Afficher le message du `412` — « Vos thématiques ont changé sur un autre appareil » — et relire, dans `frontend/app/pages/guide-nego/thematiques.vue`
-- [ ] T046 [US1] Porter les quatre états de `frontend/app/pages/guide-nego/thematiques.vue` : chargement, vide (aucune thématique proposée), erreur, accès refusé
-- [ ] T047 [P] [US1] Test de l'écran dans `frontend/test/guide-nego/thematiques.test.ts` : zéro coché n'est pas validable, le récapitulatif compte juste, et la garde de première entrée ne se déclenche qu'une fois
+- [ ] T038 [US1] Ajouter `mesThematiques()` et `suivreDesThematiques(codes, empreinte?)` à `frontend/app/composables/api/guide-nego.ts` — **jamais dans `useApi.ts`**
+- [ ] T039 [US1] Écrire `frontend/app/composables/guide-nego/useGnThematiques.ts` sur le motif de `useGnAcces` : `useGnLecture` pour le vocabulaire et pour les suivis, `assurer()`, `pret`, `luA`, la résolution du libellé dans la langue de la personne **avec repli sur le français** (FR-002), et l'écriture qui passe par la file
+- [ ] T040 [US1] Écrire `frontend/app/pages/guide-nego/thematiques.vue` : `GnCase` par ligne de 56 px, récapitulatif du pied, bouton inactif à zéro avec son aide, indicateur d'étapes à la première entrée seulement
+- [ ] T041 [P] [US1] Écrire `frontend/i18n/locales/fr/pages/guide-nego.thematiques.json` et son jumeau `en` — libellés d'écran seulement, **aucun libellé de thématique**
+- [ ] T042 [US1] Proposer l'écran **une seule fois** à la première entrée d'une personne connectée qui ne suit rien, par une clé locale de `frontend/app/utils/guide-nego/stockage.ts`, sans jamais enfermer personne
+- [ ] T043 [US1] Afficher le message du `412` — « Vos thématiques ont changé sur un autre appareil » — et relire, dans `frontend/app/pages/guide-nego/thematiques.vue`
+- [ ] T044 [US1] Porter les quatre états de `frontend/app/pages/guide-nego/thematiques.vue` : chargement, vide (aucune thématique proposée), erreur, accès refusé
+- [ ] T045 [P] [US1] Test de l'écran dans `frontend/tests/guide-nego/thematiques.test.ts` : zéro coché n'est pas validable, le récapitulatif compte juste, et la garde de première entrée ne se déclenche qu'une fois
 
 **Checkpoint** : le critère de sortie de l'étape est tenu. **Commit.**
 
@@ -143,6 +143,8 @@ hors connexion, sans jamais ressembler à une panne.
 
 **Test indépendant** : ouvrir l'onglet Accueil sur un compte neuf, en ligne puis en mode avion.
 
+- [ ] T046 [P] [US2] Créer `frontend/app/components/guide-nego/GnAvatar.vue` — 40 px, rayon 24, initiales 15/700, image du compte quand elle existe — et son `frontend/i18n/locales/{fr,en}/components/gn-avatar.json`
+- [ ] T047 [P] [US2] Ajouter `GnAvatar` à la planche dans `frontend/app/components/guide-nego/planche/PlancheComposantsSurfaces.vue`, dans les deux thèmes, et le retirer de la liste « Ce qui n'est pas montré ici »
 - [ ] T048 [US2] Ajouter la prop d'avatar à `frontend/app/components/guide-nego/GnEntete.vue`, exclusive du bouton retour, et la relayer depuis `frontend/app/components/guide-nego/GnEcran.vue` — aucune page n'instancie `GnEntete` directement
 - [ ] T049 [US2] Composer les cinq blocs de `frontend/app/pages/guide-nego/index.vue` dans l'ordre fixe — prochaine session de négociation, changements du jour, aujourd'hui vos trois agendas, documents récents, accès au lexique
 - [ ] T050 [US2] Donner à chacun des quatre premiers blocs de `frontend/app/pages/guide-nego/index.vue` **son** `GnEtatVide` : ce qui manque, quand cela reviendra, une sortie quand il y en a une — jamais une erreur, jamais un chargement qui dure
@@ -150,8 +152,8 @@ hors connexion, sans jamais ressembler à une panne.
 - [ ] T052 [US2] Porter l'état sans compte de `frontend/app/pages/guide-nego/index.vue` : l'écran s'ouvre et invite à créer un compte ou à se connecter, sans avatar
 - [ ] T053 [US2] Vérifier le comportement hors connexion de `frontend/app/pages/guide-nego/index.vue` : bandeau « Hors connexion — lu à … », compteur « connus à … », et passage à « Synchronisé à … » au retour du réseau **sans rechargement**
 - [ ] T054 [P] [US2] Écrire `frontend/i18n/locales/fr/pages/guide-nego.accueil.json` complété et son jumeau `en` — les cinq blocs, leurs états vides, l'accès au lexique
-- [ ] T055 [P] [US2] Test dans `frontend/test/guide-nego/ma-journee.test.ts` : les cinq blocs paraissent dans l'ordre, chacun avec son état vide, et **aucun message d'erreur** quand rien n'est disponible
-- [ ] T056 [US2] Vérifier qu'aucun libellé de `frontend/i18n/locales/{fr,en}/pages/guide-nego.accueil.json` n'emploie « Programme » seul, et que chaque bloc nomme son agenda en toutes lettres
+- [ ] T055 [P] [US2] Test dans `frontend/tests/guide-nego/ma-journee.test.ts` : les cinq blocs paraissent dans l'ordre, chacun avec son état vide, et **aucun message d'erreur** quand rien n'est disponible
+- [ ] T056 [US2] Vérifier que `frontend/i18n/locales/{fr,en}/pages/guide-nego.accueil.json` et `guide-nego.thematiques.json` n'emploient **ni « Programme » seul, ni « Thème »** — le mot reste légitime ailleurs, dans les réglages d'affichage et sur la planche, où il désigne l'apparence
 
 **Checkpoint** : le cadre des étapes 1, 3a, 4 et 5 est posé. **Commit.**
 
@@ -168,6 +170,7 @@ occupée, la libérer, se déconnecter.
 - [ ] T058 [P] [US3] Ajouter `GnJauge` à la planche dans `frontend/app/components/guide-nego/planche/PlancheComposantsSurfaces.vue`, dans les deux thèmes
 - [ ] T059 [US3] Écrire `frontend/app/composables/guide-nego/useGnPlace.ts` : l'estimation du navigateur, le repli qui **dit** qu'on ne peut pas mesurer, et la libération — données lues et documents, **jamais la coquille**
 - [ ] T060 [US3] Écrire `frontend/app/pages/guide-nego/ressources/telechargements.vue` : l'état vide (aucun document, et à quelle étape ils arrivent), la jauge, et la libération derrière une `GnConfirmation` qui dit ce qui reste lisible sans réseau
+- [ ] T060 bis [US3] Porter les quatre états de `frontend/app/pages/guide-nego/ressources/telechargements.vue` : chargement, vide, erreur, accès refusé
 - [ ] T061 [US3] Ajouter le groupe « Mon suivi » à `frontend/app/pages/guide-nego/ressources/reglages.vue` : « Mes thématiques » avec sa valeur, « Mes téléchargements », puis « Mon accès » livré en 0b — dans cet ordre
 - [ ] T062 [US3] Faire afficher à la ligne « Mes thématiques » de `frontend/app/pages/guide-nego/ressources/reglages.vue` les **noms** croisés avec le vocabulaire gardé, et **le nombre** en repli quand le vocabulaire n'a jamais été lu
 - [ ] T063 [US3] Ajouter le groupe « Application » à `reglages.vue` : l'entrée « À propos » et la ligne « Dernière synchronisation » — l'heure **sans fuseau** (écart 32), et ce n'est pas une action
@@ -200,11 +203,12 @@ l'application reçoivent la même version ; modifier un texte sans lever sa vers
 - [ ] T075 [US4] Faire lire la version depuis `kernel::legal` dans `backend/crates/modules/programme/src/service/registration.rs:122` — **une ligne**, la signature d'`exiger_le_consentement` ne bouge pas
 - [ ] T076 [US4] Réécrire le commentaire de doctrine de `backend/crates/modules/programme/src/repo/consents.rs:26-31` : la version ne vient plus de la configuration
 - [ ] T077 [US4] Vérifier qu'aucune ligne existante d'`identity.consents` n'est réécrite — les preuves sous `2026-01` restent telles quelles
-- [ ] T078 [P] [US4] Créer `frontend/app/components/guide-nego/GnTexteLong.vue` : rendu de la grammaire close, tout le reste échappé ; et son test `frontend/test/guide-nego/texte-long.test.ts`
+- [ ] T078 [P] [US4] Créer `frontend/app/components/guide-nego/GnTexteLong.vue` : rendu de la grammaire close, tout le reste échappé ; et son test `frontend/tests/guide-nego/texte-long.test.ts`
 - [ ] T079 [P] [US4] Ajouter `GnTexteLong` à la planche dans `frontend/app/components/guide-nego/planche/PlancheComposantsSurfaces.vue`, dans les deux thèmes
 - [ ] T080 [US4] Écrire `frontend/app/composables/guide-nego/useGnTextes.ts` : lecture par `useGnLecture`, garde par texte, heure de lecture
-- [ ] T081 [US4] Écrire `frontend/app/pages/guide-nego/ressources/a-propos.vue` : édition, étiquette de source, paragraphe de confidentialité, groupe des textes — **et aucun interrupteur d'accord** (écart 40)
+- [ ] T081 [US4] Écrire `frontend/app/pages/guide-nego/ressources/a-propos.vue` : édition, étiquette de source, paragraphe de confidentialité, groupe des textes — **et aucun interrupteur d'accord** (écart 40) ; **l'écran et ses textes se lisent sans compte** (FR-037)
 - [ ] T082 [US4] Écrire `frontend/app/pages/guide-nego/ressources/textes/[cle].vue` : le texte entier, sa version, son heure de lecture hors connexion
+- [ ] T082 bis [US4] Porter les quatre états de `frontend/app/pages/guide-nego/ressources/a-propos.vue` et de `frontend/app/pages/guide-nego/ressources/textes/[cle].vue` : chargement, vide, erreur, accès refusé
 - [ ] T083 [US4] Écrire les licences dans `frontend/i18n/locales/{fr,en}/pages/guide-nego.a-propos.json` — police et bibliothèques embarquées, **aucun accord demandé**
 - [ ] T084 [P] [US4] Écrire `frontend/i18n/locales/fr/pages/guide-nego.a-propos.json` et `guide-nego.textes.json`, plus leurs jumeaux `en`
 - [ ] T085 [US4] Ajouter `mesTextes` / `texte(cle)` à `frontend/app/composables/api/guide-nego.ts`, puis `make openapi` et `make check-api-contract`
@@ -221,11 +225,12 @@ l'application reçoivent la même version ; modifier un texte sans lever sa vers
 
 - [ ] T086 Dérouler les §§ 1 à 3 de `specs/010-guide-nego-accueil-profil/quickstart.md` : le vocabulaire servi, le suivi de bout en bout, ce que la base refuse et ce que l'API répond
 - [ ] T087 Dérouler le § 4 de `specs/010-guide-nego-accueil-profil/quickstart.md` : les huit points du hors-connexion, dont **les deux appareils** et le **téléphone partagé**
-- [ ] T088 Dérouler les §§ 5 à 7 de `specs/010-guide-nego-accueil-profil/quickstart.md` : « Ma journée » vide sans erreur, le profil, « À propos » et ses textes — dont les deux contrôles qu'on fait mordre exprès
+- [ ] T088 Dérouler les §§ 5 à 7 de `specs/010-guide-nego-accueil-profil/quickstart.md` : « Ma journée » vide sans erreur, le profil, « À propos » et ses textes — dont les deux contrôles qu'on fait mordre exprès. **Chronométrer SC-001** : entrer, choisir ses thématiques, arriver sur « Ma journée » en moins d'une minute
 - [ ] T089 Mesurer le § 8 de `specs/010-guide-nego-accueil-profil/quickstart.md` : 320, 360 et 390 px, thème clair et sombre, sur les écrans nouveaux et le profil — aucun débordement, aucune cible sous 44 px, anneau de focus partout
 - [ ] T090 [P] Relire les traductions `en` sous `frontend/i18n/locales/en/` et comparer les clés `fr`/`en` par `npm run check:guide-nego`
+- [ ] T090 bis [P] Vérifier qu'**aucun libellé de thématique** n'apparaît dans `frontend/i18n/locales/` ni sous `frontend/app/` — un `grep` sur les dix libellés `fr` et `en` (SC-007), à garder pour les étapes suivantes
 - [ ] T091 [P] Vérifier que `frontend/app/pages/guide-nego/composants.vue` montre `GnAvatar`, `GnJauge` et `GnTexteLong` dans les deux thèmes, et que la section « Ce qui n'est pas montré ici » est à jour
-- [ ] T092 Vérifier la non-régression du site — `frontend/app/pages/index.vue`, `/negociations`, le back-office et `frontend/app/pages/auth/*.vue` : accueil, `/negociations`, back-office, les quatre écrans d'authentification — **`auth` a bougé de fichier en phase 1**
+- [ ] T092 Vérifier la non-régression du site — `frontend/app/pages/index.vue`, `frontend/app/pages/negotiations.vue`, le back-office et `frontend/app/pages/auth/*.vue` : accueil, `/negociations`, back-office, les quatre écrans d'authentification — **`auth` a bougé de fichier en phase 1**
 - [ ] T093 Lancer `node frontend/scripts/guide-nego-verifier-garde.mjs` contre la version construite : toutes les adresses gardées servies en 200, écrans nouveaux compris
 - [ ] T094 Lancer `make check-safe` depuis la racine, **API arrêtée** — deux tests d'`identity` sont sensibles à une activité concurrente sur la base
 - [ ] T095 Mettre à jour `docs/AppNego/progress.md` et, si `docs/database/` a bougé depuis la phase 2, `docs/progression/modele.md` : la ligne d'état et le journal, avec ce qui a été trouvé en construisant
@@ -249,17 +254,17 @@ l'application reçoivent la même version ; modifier un texte sans lever sa vers
 - **Phase 3 (API)** — dépend de la 2. **Bloque la 5.**
 - **Phase 4 (plomberie)** — dépend de la 3 pour l'empreinte et le `412` ; le vocabulaire gardé (T032) ne dépend que de la 2. **Bloque la 5.**
 - **Phase 5 (US1)** — dépend des phases 2, 3 et 4.
-- **Phase 6 (US2)** — dépend de T038 (l'avatar, en phase 5) et de rien d'autre : « Ma journée » ne lit aucune donnée.
-- **Phase 7 (US3)** — dépend de la 5 pour la ligne « Mes thématiques » et de la 6 pour l'avatar.
+- **Phase 6 (US2)** — **ne dépend de rien** : elle porte son propre avatar (T046), et « Ma journée » ne lit aucune donnée. Elle pourrait précéder la phase 5.
+- **Phase 7 (US3)** — dépend de la 5 pour la ligne « Mes thématiques » et de la 6 pour l'avatar (T046).
 - **Phase 8 (US4)** — **indépendante de tout le reste**. Elle pourrait se faire à tout moment ; elle est placée tard parce qu'elle touche `programme` et `kernel`.
 - **Phase 9 (recette)** — dépend de tout.
 
 ### Ce qui peut avancer en parallèle
 
-- Phase 3 : les huit tests T017 à T024 — fichiers distincts, aucune dépendance entre eux.
-- Phase 4 : les cinq tests T033 à T037.
+- Phase 3 : les neuf tests T017 à T024 et T021 bis — fichiers distincts, aucune dépendance entre eux.
+- Phase 4 : les cinq tests T033 à T037. T032 bis les précède : sans lui, ils pourraient être écrits au mauvais endroit sans que rien ne le dise.
 - Phase 8 : les trois contrôles T069 à T071, et les composants T078/T079.
-- Les fichiers i18n T043, T054, T065, T084 — chacun dans son écran.
+- Les fichiers i18n T041, T054, T065, T084 — chacun dans son écran.
 - **Les phases 5 à 8 se répartissent entre deux personnes** : une sur les écrans (5, 6, 7), une sur les textes (8), qui ne partagent aucun fichier.
 
 ### Ce qui ne se parallélise pas
