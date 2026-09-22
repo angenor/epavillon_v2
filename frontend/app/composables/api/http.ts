@@ -26,10 +26,20 @@
  *     lieu de vingt messages d'error identiques.
  */
 import type { ComputedRef } from 'vue'
-import { ApiRequestError, ApiUnreachableError, ForbiddenError, normalizeApiError } from '~/utils/api-error'
+import {
+  ApiRequestError,
+  ApiUnreachableError,
+  ForbiddenError,
+  normalizeApiError,
+  type ApiUnreachableReason,
+} from '~/utils/api-error'
+import { issueDeRotation, type IssueDeRotation } from '~/utils/rotation'
 
-/** Ce que rend la rotation du jeton. Le contrat de `POST /auth/refresh`. */
-type RefreshOutcome = { status: 'renewed' | 'expired' }
+interface Rotation {
+  issue: IssueDeRotation
+  /** Pourquoi l'API n'a pas répondu, quand elle n'a pas répondu. */
+  raison: ApiUnreachableReason | null
+}
 
 /**
  * Rotation en cours, partagée par tous les appels du même onglet.
@@ -40,7 +50,7 @@ type RefreshOutcome = { status: 'renewed' | 'expired' }
  * ferme toutes les sessions. Elle n'est touchée que sous `import.meta.client` :
  * en rendu serveur, un état de module serait partagé entre deux visiteurs.
  */
-let pendingRotation: Promise<boolean> | null = null
+let pendingRotation: Promise<Rotation> | null = null
 
 export interface ApiHttp {
   /** L'adresse de l'API. Vide = données simulées. */
@@ -53,6 +63,8 @@ export interface ApiHttp {
   request: <T>(path: string, options?: Record<string, unknown>) => Promise<T>
   /** Tente une rotation du jeton. Vrai si la session continue. */
   refreshSession: () => Promise<boolean>
+  /** La même, avec ses trois issues : seule « finie » vaut déconnexion. */
+  rotation: () => Promise<IssueDeRotation>
 }
 
 export function createApiHttp(): ApiHttp {
@@ -106,31 +118,43 @@ export function createApiHttp(): ApiHttp {
   })
 
   /**
-   * Rotation du jeton. Rend vrai si la session continue.
+   * Rotation du jeton, et ses trois issues.
    *
    * Le refus de rotation n'est PAS une erreur : `POST /auth/refresh` rend 200
    * avec `{ status: "expired" }` quand la session est finie, et efface ses
-   * cookies au passage. Seul le rejeu d'un jeton déjà consommé sort en 401 —
-   * l'API ayant alors fermé toutes les sessions, il n'y a rien à retenter.
+   * cookies au passage. Le rejeu d'un jeton déjà consommé sort en 401. **Ce sont
+   * les deux seules réponses qui effacent le témoin** : une API muette ne dit pas
+   * que la session est finie, et la tenir pour finie la perdrait pour rien.
    */
-  async function rotate(): Promise<boolean> {
+  async function rotate(): Promise<Rotation> {
+    let issue: IssueDeRotation
+    let raison: ApiUnreachableReason | null = null
     try {
-      const outcome = await client<RefreshOutcome>('/auth/refresh', { method: 'POST', body: {}, retry: 0 })
-      if (outcome.status === 'renewed') return true
-    } catch {
-      // 401 sur rejeu, ou API muette : dans les deux cas la session est perdue.
+      const corps = await client<unknown>('/auth/refresh', { method: 'POST', body: {}, retry: 0 })
+      issue = issueDeRotation({ status: 200, corps })
+      if (issue === 'injoignable') raison = 'malformed'
+    } catch (raw) {
+      const normalisee = normalizeApiError(raw)
+      issue = issueDeRotation(normalisee.status === null ? null : { status: normalisee.status, corps: null })
+      if (normalisee instanceof ApiUnreachableError) raison = normalisee.reason
     }
-    witness.value = null
-    return false
+    if (issue === 'finie') witness.value = null
+    if (raison) status.reportOutage(raison)
+    return { issue, raison }
   }
 
-  async function refreshSession(): Promise<boolean> {
-    if (!isConfigured.value || import.meta.server) return false
+  function tourner(): Promise<Rotation> {
+    // Hors navigateur, rien à tourner — et rien ne dit que la session est finie.
+    if (!isConfigured.value) return Promise.resolve({ issue: 'finie', raison: null })
+    if (import.meta.server) return Promise.resolve({ issue: 'injoignable', raison: null })
     pendingRotation ??= rotate().finally(() => {
       pendingRotation = null
     })
     return pendingRotation
   }
+
+  const rotation = async (): Promise<IssueDeRotation> => (await tourner()).issue
+  const refreshSession = async (): Promise<boolean> => (await rotation()) === 'renouvelee'
 
   async function request<T>(path: string, options: Record<string, unknown> = {}): Promise<T> {
     try {
@@ -154,21 +178,27 @@ export function createApiHttp(): ApiHttp {
         (error.code === 'UNAUTHENTICATED' || error.code === 'IDENTITY_SESSION_EXPIRED') &&
         !path.startsWith('/auth/')
 
-      if (recoverable && (await refreshSession())) {
-        try {
-          const response = await client<T>(path, options)
-          status.reportRecovery()
-          return response
-        } catch (second) {
-          throw refus(normalizeApiError(second))
+      if (recoverable) {
+        const { issue, raison } = await tourner()
+        if (issue === 'renouvelee') {
+          try {
+            const response = await client<T>(path, options)
+            status.reportRecovery()
+            return response
+          } catch (second) {
+            throw refus(normalizeApiError(second))
+          }
         }
+        // L'API n'a pas dit que la session était finie : c'est une panne, pas
+        // un refus — l'écran le dit comme tel, et le témoin reste.
+        if (issue === 'injoignable') throw new ApiUnreachableError(raison ?? 'gateway', null, error)
       }
 
       throw refus(error)
     }
   }
 
-  return { baseURL, isConfigured, client, request, refreshSession }
+  return { baseURL, isConfigured, client, request, refreshSession, rotation }
 }
 
 /**

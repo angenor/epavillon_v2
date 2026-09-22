@@ -115,10 +115,18 @@ export const useAuthStore = defineStore('auth', () => {
 
       // Personne inconnue alors qu'un témoin existe : le jeton d'accès a pu
       // expirer sans que la session soit finie. Une rotation, une relecture, et
-      // on n'insiste pas — `refreshSession()` efface le témoin si elle échoue.
-      if (person.value === null && personId.value !== null && import.meta.client) {
-        if (await api.refreshSession()) {
-          person.value = await api.auth.session(personId.value)
+      // on n'insiste pas. **Une API muette n'est pas une fin de session** : le
+      // témoin reste, l'écran dit la panne, et la navigation suivante relit.
+      if (person.value === null && personId.value !== null) {
+        // Le serveur ne peut pas tourner le jeton — le cookie de rotation ne
+        // l'atteint pas : il ne conclut rien, et le navigateur décidera. Conclure
+        // ici effaçait le témoin de toute session vieille d'un quart d'heure.
+        if (import.meta.server) return
+        const issue = await api.rotation()
+        if (issue === 'renouvelee') person.value = await api.auth.session(personId.value)
+        if (issue === 'injoignable') {
+          loadError.value = toLoadFailure(new ApiUnreachableError('network', null))
+          return
         }
       }
 

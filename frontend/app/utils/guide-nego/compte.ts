@@ -7,6 +7,7 @@
  * sans navigateur.
  */
 import type { AuthenticatedPerson } from '~/types/auth'
+import type { IssueDeRotation } from '~/utils/rotation'
 
 export interface EtatDuCompte {
   connectee: boolean
@@ -98,4 +99,44 @@ export function initialesDe(prenom: string | null, nom: string | null): string {
     .map((partie) => partie?.trim().charAt(0) ?? '')
     .join('')
     .toLocaleUpperCase('fr')
+}
+
+/**
+ * Levée quand l'API n'a pas dit si la session tenait : la lecture échoue, et
+ * `useGnLecture` garde l'état connu avec son heure — jamais une déconnexion.
+ */
+export class CompteInjoignable extends Error {
+  constructor() {
+    super('session non vérifiée : API injoignable')
+    this.name = 'CompteInjoignable'
+  }
+}
+
+export interface LectureDuCompte {
+  lire: () => Promise<AuthenticatedPerson | null>
+  tourner: () => Promise<IssueDeRotation>
+  /** Ce que la garde disait : une personne connectée ? */
+  gardeConnectee: boolean
+  /** Le témoin de session du navigateur est-il posé ? */
+  temoin: boolean
+}
+
+/**
+ * Lire le compte, et décider — **seule une réponse qui dit « session finie »
+ * déconnecte** (même règle que le drapeau, FR-020 bis).
+ *
+ * `/auth/me` ne rend jamais 401 : il répond « personne » dès que le jeton d'accès
+ * d'un quart d'heure expire. On tourne alors le jeton si l'on a une raison de
+ * croire à une session ; renouvelée, on relit ; finie, on se déconnecte ;
+ * injoignable, on lève, et l'état connu reste.
+ */
+export async function relireLeCompte(lecture: LectureDuCompte): Promise<EtatDuCompte> {
+  const moi = await lecture.lire()
+  if (moi) return etatDuCompte(moi)
+  if (!lecture.gardeConnectee && !lecture.temoin) return COMPTE_DECONNECTE
+
+  const issue = await lecture.tourner()
+  if (issue === 'injoignable') throw new CompteInjoignable()
+  if (issue === 'finie') return COMPTE_DECONNECTE
+  return etatDuCompte(await lecture.lire())
 }

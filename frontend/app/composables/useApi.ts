@@ -90,7 +90,7 @@ const MOCK_LATENCY_MS = 120
 
 export function useApi() {
   const http = createApiHttp()
-  const { baseURL, isConfigured, client, request, refreshSession } = http
+  const { baseURL, isConfigured, client, request, refreshSession, rotation } = http
   const mockData = useMockData()
 
   type Mocks = typeof import('~/mocks')
@@ -251,6 +251,7 @@ export function useApi() {
     client,
     /** Tente une rotation du jeton de session. Utilisé par le store de session. */
     refreshSession,
+    rotation,
     ForbiddenError,
     assertEventInScope,
     /** Une lecture dont « rien » est une réponse acceptable — 404 devient `null`. */
