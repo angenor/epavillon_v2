@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.code AS \"code!\"\n             FROM negotiation.network_memberships m\n             JOIN reference.taxonomy_terms t ON t.id = m.network_term_id\n            WHERE m.person_id = $1 AND m.left_at IS NULL\n            ORDER BY m.joined_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "25598cc71644b0005b2e1e60aefea756a3e1d57db3fd386f1a4d01b89cb67d3a"
+}

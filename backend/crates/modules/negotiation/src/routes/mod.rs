@@ -3,6 +3,7 @@ pub mod admin_admission;
 pub mod admin_codes;
 pub mod admin_requests;
 pub mod openapi;
+pub mod themes;
 
 use actix_web::{HttpMessage, HttpRequest};
 use kernel::context::RequestContext;

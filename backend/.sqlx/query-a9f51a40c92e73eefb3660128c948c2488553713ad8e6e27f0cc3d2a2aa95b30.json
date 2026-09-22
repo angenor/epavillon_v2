@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE platform.settings\n              SET value = jsonb_build_object('max', $1::integer,\n                                             'window_minutes', $2::integer,\n                                             'lock_minutes', $3::integer)\n            WHERE key = 'negotiation.invitation_attempts'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a9f51a40c92e73eefb3660128c948c2488553713ad8e6e27f0cc3d2a2aa95b30"
+}

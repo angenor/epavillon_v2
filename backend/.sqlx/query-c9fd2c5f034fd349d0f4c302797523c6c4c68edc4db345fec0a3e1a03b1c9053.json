@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (s.value #>> '{}') AS \"valeur?\"\n             FROM platform.settings s\n            WHERE s.key = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "valeur?",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "c9fd2c5f034fd349d0f4c302797523c6c4c68edc4db345fec0a3e1a03b1c9053"
+}

@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.invitation_codes\n             (code, label, scope_type, space_id, grants_network_term_id,\n              max_uses, valid_from, valid_until)\n         VALUES ($1, $2, $3::text::identity.scope_type, $4, $5, $6,\n                 COALESCE($7, now()), $8)\n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.invitation_codes",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Uuid",
+        "Uuid",
+        "Int4",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "ace941ff697d9ff249453dac28d8752be845acc64e324b747796731d1aa96359"
+}

@@ -240,6 +240,17 @@ codes! {
     NegotiationSpaceUnknown => "NEGOTIATION_SPACE_UNKNOWN", StatusCode::NOT_FOUND,
         "Cet espace de négociation n'existe pas.";
 
+    // --- Guide Négo, thématiques suivies (0c) ---------------------------------
+    // Un choix pris hors connexion part en file avec l'empreinte de l'état sur
+    // lequel il a été pris ; `412` dit qu'il arrive trop tard, et l'application
+    // l'abandonne plutôt que d'écraser un choix plus récent fait ailleurs.
+    NegotiationThemesEmpty => "NEGOTIATION_THEMES_EMPTY", StatusCode::BAD_REQUEST,
+        "Choisissez au moins une thématique.";
+    NegotiationThemeUnknown => "NEGOTIATION_THEME_UNKNOWN", StatusCode::BAD_REQUEST,
+        "Cette thématique n'existe pas.";
+    NegotiationThemesStale => "NEGOTIATION_THEMES_STALE", StatusCode::PRECONDITION_FAILED,
+        "Vos thématiques ont changé sur un autre appareil. Elles ont été relues.";
+
     // MAIL_RELAY_UNREACHABLE n'est PAS ici : il ne franchit aucune réponse
     // HTTP. Il vit dans `mail.rs`, d'où il part vers `platform.jobs.last_error`.
 }

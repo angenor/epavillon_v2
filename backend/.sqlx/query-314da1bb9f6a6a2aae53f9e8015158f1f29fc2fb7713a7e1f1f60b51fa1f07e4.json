@@ -1,0 +1,242 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.id                              AS \"id!\",\n                  c.code                            AS \"code!\",\n                  c.label                           AS \"label!\",\n                  c.state                           AS \"state!\",\n                  c.scope_type::text                AS \"scope_type!\",\n                  c.space_id,\n                  platform.t(c.space_name, $7)      AS space_name,\n                  c.grants_network_term_id,\n                  c.network_code,\n                  platform.t(c.network_label, $7)   AS network_label,\n                  c.used_count                      AS \"used_count!\",\n                  c.max_uses,\n                  c.valid_from                      AS \"valid_from!\",\n                  c.valid_until,\n                  c.revoked_at,\n                  c.revoked_reason,\n                  rv.display_name                   AS revoked_by_name,\n                  c.created_at                      AS \"created_at!\",\n                  cr.display_name                   AS created_by_name,\n                  count(*) OVER ()                  AS \"total!\"\n             FROM negotiation.v_invitation_codes c\n             LEFT JOIN identity.people cr ON cr.id = c.created_by\n             LEFT JOIN identity.people rv ON rv.id = c.revoked_by\n            WHERE ($1::text IS NULL OR c.state = $1)\n              AND ($2::boolean IS NOT TRUE OR c.scope_type = 'global')\n              AND ($3::uuid IS NULL OR c.space_id = $3)\n              AND ($4::text IS NULL\n                   OR c.label ILIKE '%' || $4 || '%'\n                   OR c.code_normalized LIKE\n                      '%' || upper(regexp_replace($4, '[^A-Za-z0-9]', '', 'g')) || '%')\n            ORDER BY c.created_at DESC\n            LIMIT $5 OFFSET $6",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.v_invitation_codes",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.v_invitation_codes",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "label!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.v_invitation_codes",
+            "name": "label"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "state!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.v_invitation_codes",
+            "name": "state"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "scope_type!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "space_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.v_invitation_codes",
+            "name": "space_id"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "space_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "grants_network_term_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.v_invitation_codes",
+            "name": "grants_network_term_id"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "network_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.v_invitation_codes",
+            "name": "network_code"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "network_label",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "used_count!",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.v_invitation_codes",
+            "name": "used_count"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "max_uses",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.v_invitation_codes",
+            "name": "max_uses"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "valid_from!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.v_invitation_codes",
+            "name": "valid_from"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "valid_until",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.v_invitation_codes",
+            "name": "valid_until"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "revoked_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.v_invitation_codes",
+            "name": "revoked_at"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "revoked_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.v_invitation_codes",
+            "name": "revoked_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "revoked_by_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "created_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.v_invitation_codes",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "created_by_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "total!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Bool",
+        "Uuid",
+        "Text",
+        "Int8",
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      true,
+      null,
+      true,
+      null,
+      true,
+      true,
+      null,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null
+    ]
+  },
+  "hash": "314da1bb9f6a6a2aae53f9e8015158f1f29fc2fb7713a7e1f1f60b51fa1f07e4"
+}

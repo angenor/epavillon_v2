@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (SELECT count(*) FROM negotiation.invitation_code_uses u\n                    WHERE u.code_id = c.id)      AS \"lignes!\",\n                  c.used_count                   AS \"compteur!\"\n             FROM negotiation.invitation_codes c\n            WHERE c.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "lignes!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "compteur!",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.invitation_codes",
+            "name": "used_count"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      false
+    ]
+  },
+  "hash": "302c67f5981b1e09603245a2e01db682b4c6a03f0ac017b4ab1d78a8f18e6e76"
+}

@@ -39,12 +39,14 @@ pub mod state;
 
 pub use state::NegotiationState;
 
-/// Ce que l'application appelle : l'accès de la personne connectée.
+/// Ce que l'application appelle : l'accès de la personne connectée, et les
+/// thématiques qu'elle suit.
 ///
 /// Les chemins sont plats et vivent sous `/negotiation` — aucun autre module
 /// n'y dépose, il n'y a donc rien à composer côté API.
 pub fn routes(cfg: &mut ServiceConfig) {
     routes::acces::configurer(cfg);
+    routes::themes::configurer(cfg);
 }
 
 /// Le back-office de l'admission.

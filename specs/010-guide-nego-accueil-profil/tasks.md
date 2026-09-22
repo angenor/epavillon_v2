@@ -71,23 +71,23 @@ nouvelle, aucune signature retouchée, aucun comportement changé.
 
 **Objectif** : les deux routes, leur empreinte, leur `If-Match`, et les huit preuves.
 
-- [ ] T010 [P] Ajouter trois codes stables au catalogue de `backend/crates/kernel/src/error.rs` : liste vide, thématique inconnue, état périmé — le catalogue **s'étend, il ne se double pas**
-- [ ] T011 [P] Déclarer les formes `MyThemes` et `ThemesPayload` dans `frontend/app/types/negotiation.ts` et les réexporter depuis `frontend/app/types/index.ts` — **des codes, jamais de libellés** ([api-thematiques.md § 2](contracts/api-thematiques.md))
-- [ ] T012 Écrire `backend/crates/modules/negotiation/src/domain/themes.rs` : les formes sérialisées, et le calcul d'empreinte **sur les codes triés** (`kernel::crypto::token_hash`, 16 octets, entre guillemets)
-- [ ] T013 Écrire `backend/crates/modules/negotiation/src/repo/themes.rs` : lire les suivis vivants d'une personne, et le remplacement en bloc — fermer par `left_at`, ouvrir les nouveaux, ne pas toucher les inchangés
-- [ ] T014 Écrire `backend/crates/modules/negotiation/src/service/themes.rs` : transaction par `Db::write(&ctx)`, verrouillage des suivis de la personne, **comparaison de l'`If-Match` dans la transaction**, traduction de l'erreur du trigger en message qui **nomme le code refusé**
-- [ ] T015 Écrire `backend/crates/modules/negotiation/src/routes/themes.rs` : `GET` et `PUT /negotiation/me/themes`, `ETag`, `If-None-Match` → 304, `If-Match` absent accepté, `If-Match` périmé → 412
-- [ ] T016 Inscrire les deux chemins dans `backend/crates/modules/negotiation/src/routes/openapi.rs` et monter `routes::themes::configurer` dans `backend/crates/modules/negotiation/src/lib.rs` — chemins **plats**, jamais un `web::scope`
-- [ ] T017 [P] Test « chemin nominal » dans `backend/crates/modules/negotiation/tests/thematiques_nominal.rs` : un `PUT` de deux codes ouvre deux suivis, le `GET` les rend avec son empreinte
-- [ ] T018 [P] Test « état périmé » dans `backend/crates/modules/negotiation/tests/thematiques_etat_perime.rs` : lire l'empreinte, changer l'état par une autre voie, rejouer avec l'ancienne — **412, et la base est inchangée**
-- [ ] T019 [P] Test « rejeu identique » dans `backend/crates/modules/negotiation/tests/thematiques_rejeu.rs` : deux `PUT` du même corps donnent le même état et **aucune ligne d'audit de plus**
-- [ ] T020 [P] Test « sans If-Match » dans `backend/crates/modules/negotiation/tests/thematiques_sans_if_match.rs` : accepté, pour ne pas casser l'écran en ligne
-- [ ] T021 [P] Test « vocabulaire gardé par la base » dans `backend/crates/modules/negotiation/tests/thematiques_vocabulaire.rs` : un `INSERT` direct d'un terme d'`activity_theme` est refusé par le trigger, et l'API rend un message qui nomme le code
-- [ ] T021 bis [P] Test « terme désactivé » dans `backend/crates/modules/negotiation/tests/thematiques_desactive.rs` : un terme désactivé **déjà suivi** reste accepté, un terme désactivé **nouveau** est refusé — on ne retire pas à quelqu'un ce qu'il suivait
-- [ ] T022 [P] Test « on ferme, on ne supprime pas » dans `backend/crates/modules/negotiation/tests/thematiques_fermeture.rs` : retirer une thématique pose `left_at`, la ligne reste, l'index unique n'empêche pas de la reprendre plus tard
-- [ ] T023 [P] Test « toute écriture laisse son auteur » dans `backend/crates/modules/negotiation/tests/thematiques_audit.rs` : `platform.audit_log` porte un `actor_id` à chaque ligne
-- [ ] T024 [P] Test « refus sans session » dans `backend/crates/api/tests/routes_negotiation_themes.rs` : `401` sur les deux routes, URL forgée comprise, et le `304` éprouvé en HTTP de bout en bout
-- [ ] T025 Lancer `cargo test -p negotiation`, puis `make openapi` et `make check-api-contract` depuis la racine, et vérifier `frontend/app/types/api.ts` — les deux formes annoncées sont définies, zéro route en attente
+- [X] T010 [P] Ajouter trois codes stables au catalogue de `backend/crates/kernel/src/error.rs` : liste vide, thématique inconnue, état périmé — le catalogue **s'étend, il ne se double pas**
+- [X] T011 [P] Déclarer les formes `MyThemes` et `ThemesPayload` dans `frontend/app/types/negotiation.ts` et les réexporter depuis `frontend/app/types/index.ts` — **des codes, jamais de libellés** ([api-thematiques.md § 2](contracts/api-thematiques.md))
+- [X] T012 Écrire `backend/crates/modules/negotiation/src/domain/themes.rs` : les formes sérialisées, et le calcul d'empreinte **sur les codes triés** (`kernel::crypto::token_hash`, 16 octets, entre guillemets)
+- [X] T013 Écrire `backend/crates/modules/negotiation/src/repo/themes.rs` : lire les suivis vivants d'une personne, et le remplacement en bloc — fermer par `left_at`, ouvrir les nouveaux, ne pas toucher les inchangés
+- [X] T014 Écrire `backend/crates/modules/negotiation/src/service/themes.rs` : transaction par `Db::write(&ctx)`, verrouillage des suivis de la personne, **comparaison de l'`If-Match` dans la transaction**, traduction de l'erreur du trigger en message qui **nomme le code refusé**
+- [X] T015 Écrire `backend/crates/modules/negotiation/src/routes/themes.rs` : `GET` et `PUT /negotiation/me/themes`, `ETag`, `If-None-Match` → 304, `If-Match` absent accepté, `If-Match` périmé → 412
+- [X] T016 Inscrire les deux chemins dans `backend/crates/modules/negotiation/src/routes/openapi.rs` et monter `routes::themes::configurer` dans `backend/crates/modules/negotiation/src/lib.rs` — chemins **plats**, jamais un `web::scope`
+- [X] T017 [P] Test « chemin nominal » dans `backend/crates/modules/negotiation/tests/thematiques_nominal.rs` : un `PUT` de deux codes ouvre deux suivis, le `GET` les rend avec son empreinte
+- [X] T018 [P] Test « état périmé » dans `backend/crates/modules/negotiation/tests/thematiques_etat_perime.rs` : lire l'empreinte, changer l'état par une autre voie, rejouer avec l'ancienne — **412, et la base est inchangée**
+- [X] T019 [P] Test « rejeu identique » dans `backend/crates/modules/negotiation/tests/thematiques_rejeu.rs` : deux `PUT` du même corps donnent le même état et **aucune ligne d'audit de plus**
+- [X] T020 [P] Test « sans If-Match » dans `backend/crates/modules/negotiation/tests/thematiques_sans_if_match.rs` : accepté, pour ne pas casser l'écran en ligne
+- [X] T021 [P] Test « vocabulaire gardé par la base » dans `backend/crates/modules/negotiation/tests/thematiques_vocabulaire.rs` : un `INSERT` direct d'un terme d'`activity_theme` est refusé par le trigger, et l'API rend un message qui nomme le code
+- [X] T021 bis [P] Test « terme désactivé » dans `backend/crates/modules/negotiation/tests/thematiques_desactive.rs` : un terme désactivé **déjà suivi** reste accepté, un terme désactivé **nouveau** est refusé — on ne retire pas à quelqu'un ce qu'il suivait
+- [X] T022 [P] Test « on ferme, on ne supprime pas » dans `backend/crates/modules/negotiation/tests/thematiques_fermeture.rs` : retirer une thématique pose `left_at`, la ligne reste, l'index unique n'empêche pas de la reprendre plus tard
+- [X] T023 [P] Test « toute écriture laisse son auteur » dans `backend/crates/modules/negotiation/tests/thematiques_audit.rs` : `platform.audit_log` porte un `actor_id` à chaque ligne
+- [X] T024 [P] Test « refus sans session » dans `backend/crates/api/tests/routes_negotiation_themes.rs` : `401` sur les deux routes, URL forgée comprise, et le `304` éprouvé en HTTP de bout en bout
+- [X] T025 Lancer `cargo test -p negotiation`, puis `make openapi` et `make check-api-contract` depuis la racine, et vérifier `frontend/app/types/api.ts` — les deux formes annoncées sont définies, zéro route en attente
 
 **Checkpoint** : les huit preuves du contrat passent. **Commit.**
 

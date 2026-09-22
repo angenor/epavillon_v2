@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.access_requests\n            SET status = 'approved', decided_at = now()\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "752985b259483a29cc4ba1439254670c899151ca53cb4da84d753d36db0edc12"
+}

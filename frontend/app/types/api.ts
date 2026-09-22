@@ -2647,6 +2647,36 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/negotiation/me/themes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `MyThemes` — les thématiques de négociation que la personne connectée suit : **des codes et leur date de suivi, jamais de libellés**. Les libellés viennent de `GET /reference/taxonomies/negotiation_theme/terms`, seule source, que le client lit de toute façon.
+         *
+         *     Sans thématique suivie : `200` et une liste vide, jamais un 404.
+         *
+         *     L'`ETag` est calculé **sur les codes triés** — l'état, pas sa représentation —, et rend **304** sur `If-None-Match`. C'est cette même empreinte qu'un choix pris hors connexion renvoie en `If-Match`.
+         */
+        get: operations["negotiation_mes_thematiques"];
+        /**
+         * @description `ThemesPayload` → `MyThemes` — remplacer **en bloc** la liste des thématiques suivies. Jamais un ajout ni un retrait unitaire : le corps porte la liste entière, et rejouer le même corps donne le même état sans rien écrire de plus.
+         *
+         *     `If-Match` porte l'empreinte de l'état sur lequel le choix a été pris. Absent, accepté — l'écran en ligne vient de lire. Différent de l'état courant : **412**, aucune écriture ; l'application abandonne l'intention, relit, et le dit. C'est ce qui empêche un choix parti en retard d'un téléphone d'effacer un choix plus récent fait sur une tablette.
+         *
+         *     Les suivis absents de la liste sont **fermés**, jamais supprimés. Un code inconnu, ou d'un autre vocabulaire, est refusé en nommant le code. Un terme retiré du vocabulaire reste à qui le suivait et ne se choisit plus.
+         */
+        put: operations["negotiation_suivre_des_thematiques"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/notification-preferences": {
         parameters: {
             query?: never;
@@ -4205,13 +4235,16 @@ export interface components {
          *     - `NEGOTIATION_INVITATION_CODE_DUPLICATE` (409) — Ce code existe déjà. Les codes se comparent sans tenir compte de la casse ni des tirets.
          *     - `NEGOTIATION_ADMISSION_MODE_INVALID` (422) — Le mode d'admission doit être « code », « approval » ou « code_and_approval ».
          *     - `NEGOTIATION_SPACE_UNKNOWN` (404) — Cet espace de négociation n'existe pas.
+         *     - `NEGOTIATION_THEMES_EMPTY` (400) — Choisissez au moins une thématique.
+         *     - `NEGOTIATION_THEME_UNKNOWN` (400) — Cette thématique n'existe pas.
+         *     - `NEGOTIATION_THEMES_STALE` (412) — Vos thématiques ont changé sur un autre appareil. Elles ont été relues.
          */
         ApiError: {
             /**
              * @description Code stable. Le renommer est un changement majeur.
              * @enum {string}
              */
-            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "INTERNAL" | "SERVICE_UNAVAILABLE" | "IDENTITY_SESSION_EXPIRED" | "IDENTITY_SESSION_REVOKED" | "IDENTITY_REFRESH_REUSED" | "IDENTITY_ORIGIN_REJECTED" | "IDENTITY_PASSWORD_TOO_WEAK" | "IDENTITY_EMAIL_ALREADY_USED" | "IDENTITY_ACCOUNT_ALREADY_EXISTS" | "IDENTITY_ROLE_WINDOW_INVALID" | "IDENTITY_ROLE_SCOPE_MISMATCH" | "IDENTITY_ROLE_REVOCATION_INVALID" | "IDENTITY_UNKNOWN_REFERENCE" | "IDENTITY_PRIVACY_WRONG_ACTION" | "ORG_NOT_MANAGER" | "ORG_MEMBERSHIP_IS_INVITATION" | "ORG_MEMBERSHIP_NOT_PENDING" | "ORG_LAST_MANAGER" | "ORG_MERGE_FIELD_NOT_ARBITRABLE" | "ORG_MERGE_GLOBAL_SCOPE_REQUIRED" | "ORG_MERGE_SAME_ORGANIZATION" | "ORG_DOMAIN_VERIFICATION_REQUIRED" | "ORG_NAME_IS_DERIVED" | "ORG_UNKNOWN_REFERENCE" | "ORG_INVITATION_NOT_YOURS" | "EVENT_GLOBAL_SCOPE_REQUIRED" | "EVENT_CRITERION_HAS_SCORES" | "EVENT_UNKNOWN_REFERENCE" | "PROPOSAL_NOT_EDITABLE" | "PROPOSAL_SPEAKER_IDENTITY_LOCKED" | "PROPOSAL_REVIEW_NOT_ASSIGNED" | "PROPOSAL_UNKNOWN_TERM" | "PROPOSAL_TEXT_TOO_LONG" | "PROPOSAL_UNKNOWN_REFERENCE" | "SESSION_DERIVED_FIELD" | "SESSION_UNKNOWN_REFERENCE" | "SESSION_TRACK_EVENT_MISMATCH" | "REGISTRATION_NOT_ACCEPTED" | "REGISTRATION_ANSWER_INVALID" | "REGISTRATION_CONSENT_REQUIRED" | "REGISTRATION_ACCOUNT_REQUIRED" | "REGISTRATION_LOCKED" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_MIME_NOT_ALLOWED" | "MEDIA_TOO_LARGE" | "MEDIA_ASPECT_RATIO" | "MEDIA_ROLE_NOT_DECLARED" | "MEDIA_ROLE_EXCLUSIVE" | "MEDIA_ASSET_NOT_SERVABLE" | "MEDIA_ALT_TEXT_REQUIRED" | "MEDIA_ASSET_IN_USE" | "MEDIA_UPLOAD_INCOMPLETE" | "MEDIA_STORAGE_UNAVAILABLE" | "ENGAGEMENT_REMINDER_OFFSETS_INVALID" | "ENGAGEMENT_REMINDER_SCOPE_INVALID" | "ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN" | "ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN" | "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN" | "LIVE_INCIDENT_SCOPE_TARGET_MISMATCH" | "LIVE_INCIDENT_WINDOW_INVALID" | "LIVE_INCIDENT_NOT_PUBLISHED" | "NEGOTIATION_ACCESS_REQUEST_PENDING" | "NEGOTIATION_ACCESS_REQUEST_DECIDED" | "NEGOTIATION_INVITATION_CODE_DUPLICATE" | "NEGOTIATION_ADMISSION_MODE_INVALID" | "NEGOTIATION_SPACE_UNKNOWN";
+            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "INTERNAL" | "SERVICE_UNAVAILABLE" | "IDENTITY_SESSION_EXPIRED" | "IDENTITY_SESSION_REVOKED" | "IDENTITY_REFRESH_REUSED" | "IDENTITY_ORIGIN_REJECTED" | "IDENTITY_PASSWORD_TOO_WEAK" | "IDENTITY_EMAIL_ALREADY_USED" | "IDENTITY_ACCOUNT_ALREADY_EXISTS" | "IDENTITY_ROLE_WINDOW_INVALID" | "IDENTITY_ROLE_SCOPE_MISMATCH" | "IDENTITY_ROLE_REVOCATION_INVALID" | "IDENTITY_UNKNOWN_REFERENCE" | "IDENTITY_PRIVACY_WRONG_ACTION" | "ORG_NOT_MANAGER" | "ORG_MEMBERSHIP_IS_INVITATION" | "ORG_MEMBERSHIP_NOT_PENDING" | "ORG_LAST_MANAGER" | "ORG_MERGE_FIELD_NOT_ARBITRABLE" | "ORG_MERGE_GLOBAL_SCOPE_REQUIRED" | "ORG_MERGE_SAME_ORGANIZATION" | "ORG_DOMAIN_VERIFICATION_REQUIRED" | "ORG_NAME_IS_DERIVED" | "ORG_UNKNOWN_REFERENCE" | "ORG_INVITATION_NOT_YOURS" | "EVENT_GLOBAL_SCOPE_REQUIRED" | "EVENT_CRITERION_HAS_SCORES" | "EVENT_UNKNOWN_REFERENCE" | "PROPOSAL_NOT_EDITABLE" | "PROPOSAL_SPEAKER_IDENTITY_LOCKED" | "PROPOSAL_REVIEW_NOT_ASSIGNED" | "PROPOSAL_UNKNOWN_TERM" | "PROPOSAL_TEXT_TOO_LONG" | "PROPOSAL_UNKNOWN_REFERENCE" | "SESSION_DERIVED_FIELD" | "SESSION_UNKNOWN_REFERENCE" | "SESSION_TRACK_EVENT_MISMATCH" | "REGISTRATION_NOT_ACCEPTED" | "REGISTRATION_ANSWER_INVALID" | "REGISTRATION_CONSENT_REQUIRED" | "REGISTRATION_ACCOUNT_REQUIRED" | "REGISTRATION_LOCKED" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_MIME_NOT_ALLOWED" | "MEDIA_TOO_LARGE" | "MEDIA_ASPECT_RATIO" | "MEDIA_ROLE_NOT_DECLARED" | "MEDIA_ROLE_EXCLUSIVE" | "MEDIA_ASSET_NOT_SERVABLE" | "MEDIA_ALT_TEXT_REQUIRED" | "MEDIA_ASSET_IN_USE" | "MEDIA_UPLOAD_INCOMPLETE" | "MEDIA_STORAGE_UNAVAILABLE" | "ENGAGEMENT_REMINDER_OFFSETS_INVALID" | "ENGAGEMENT_REMINDER_SCOPE_INVALID" | "ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN" | "ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN" | "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN" | "LIVE_INCIDENT_SCOPE_TARGET_MISMATCH" | "LIVE_INCIDENT_WINDOW_INVALID" | "LIVE_INCIDENT_NOT_PUBLISHED" | "NEGOTIATION_ACCESS_REQUEST_PENDING" | "NEGOTIATION_ACCESS_REQUEST_DECIDED" | "NEGOTIATION_INVITATION_CODE_DUPLICATE" | "NEGOTIATION_ADMISSION_MODE_INVALID" | "NEGOTIATION_SPACE_UNKNOWN" | "NEGOTIATION_THEMES_EMPTY" | "NEGOTIATION_THEME_UNKNOWN" | "NEGOTIATION_THEMES_STALE";
             /** @description Message français, affichable tel quel. */
             message: string;
             /** @description Champ fautif, quand le refus en désigne un. */
@@ -10611,6 +10644,102 @@ export interface operations {
             };
             /** @description Aucune session, ou session close */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_mes_thematiques: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MyThemes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Rien n'a changé depuis l'empreinte présentée */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_suivre_des_thematiques: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description MyThemes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Liste vide, ou thématique inconnue — le message nomme le code */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description L'état a changé depuis l'empreinte présentée en If-Match */
+            412: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Corps malformé */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

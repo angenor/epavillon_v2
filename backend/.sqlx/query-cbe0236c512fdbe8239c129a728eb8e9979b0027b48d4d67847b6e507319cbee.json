@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.space_members (space_id, person_id, role)\n         VALUES ($1, $2, 'negotiator')\n         ON CONFLICT (space_id, person_id) WHERE left_at IS NULL DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cbe0236c512fdbe8239c129a728eb8e9979b0027b48d4d67847b6e507319cbee"
+}

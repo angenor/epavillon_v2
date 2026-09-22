@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.network_memberships\n             (person_id, network_term_id, source_code_id)\n         VALUES ($1, $2, $3)\n         ON CONFLICT (person_id, network_term_id) WHERE left_at IS NULL DO NOTHING\n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.network_memberships",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9097e4fea13cb9a927b8551d0fd70312d239bf7c3d295d536583a94aea5e45ef"
+}

@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.events\n               (edition_year, title, slug, description, participation_mode,\n                timezone, starts_at, ends_at)\n           VALUES (2027, jsonb_build_object('fr', 'COP31'),\n                   'cop31-url-forgee'::text::platform.slug,\n                   jsonb_build_object('fr', 'COP31'), 'online',\n                   'America/Belem'::platform.timezone_name,\n                   now() + interval '30 days', now() + interval '40 days')\n           RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "2416cf0a1d687b86ea5949a754492257154c28221f5038ce926474b951fdbf1d"
+}

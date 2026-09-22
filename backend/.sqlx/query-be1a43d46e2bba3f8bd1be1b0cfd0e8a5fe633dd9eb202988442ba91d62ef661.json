@@ -1,0 +1,61 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.role_assignments ra\n              SET revoked_at = now(), revoked_by = $2, revoked_reason = $3\n             FROM negotiation.invitation_codes c\n             JOIN negotiation.invitation_code_uses u ON u.code_id = c.id\n            WHERE c.id = $1\n              AND ra.person_id = u.person_id\n              AND ra.role_code = 'negotiator'\n              AND ra.scope_type = c.scope_type\n              AND ra.scope_id IS NOT DISTINCT FROM c.space_id\n              AND ra.revoked_at IS NULL\n        RETURNING ra.id AS \"role_assignment_id!\",\n                  ra.person_id AS \"person_id!\",\n                  ra.scope_type::text AS \"scope_type!\",\n                  ra.scope_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "role_assignment_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "person_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "scope_type!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "scope_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "scope_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      true
+    ]
+  },
+  "hash": "be1a43d46e2bba3f8bd1be1b0cfd0e8a5fe633dd9eb202988442ba91d62ef661"
+}

@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO identity.role_assignments\n             (person_id, role_code, scope_type, scope_id, note)\n         VALUES ($1, $2, $3::text::identity.scope_type, $4, $5)\n         ON CONFLICT (person_id, role_code, scope_type,\n                      COALESCE(scope_id, '00000000-0000-0000-0000-000000000000'::uuid))\n             WHERE revoked_at IS NULL\n             DO NOTHING\n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "0633a433158c2e22e0d0c2b63624c1cad327cbaefdcdcbab7e770d40a1629f0f"
+}

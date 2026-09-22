@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT client_kind::text AS \"client_kind!\", device_label, issued_at\n             FROM identity.sessions\n            WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "client_kind!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "device_label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.sessions",
+            "name": "device_label"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "issued_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.sessions",
+            "name": "issued_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      true,
+      false
+    ]
+  },
+  "hash": "6e8d0956d4ba1be69a26fa07216b37fdfe17985f1a994cb187c4e8c56af53fc0"
+}

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT event_type FROM platform.outbox_events\n          WHERE aggregate_id = $1 ORDER BY occurred_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "event_type",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "platform.outbox_events",
+            "name": "event_type"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "a455d8561d65e56984d3cc1c873d48481b48cb03d820130ef8775722993f694b"
+}

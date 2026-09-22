@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.access_requests\n            SET status = 'cancelled', decided_at = now()\n          WHERE id = $1 AND person_id = $2 AND status = 'pending'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ae4d3b5ebb9343c32575196f113d9f99b50d0fa7196a2de6699804fb05da20d4"
+}

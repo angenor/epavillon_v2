@@ -1,0 +1,44 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.invitation_codes\n              SET revoked_at = now(), revoked_by = $2, revoked_reason = $3\n            WHERE id = $1 AND revoked_at IS NULL\n        RETURNING scope_type::text AS \"scope_type!\", space_id,\n                  (SELECT count(*)::integer\n                     FROM negotiation.v_invitation_code_uses u\n                    WHERE u.code_id = $1 AND u.access_active) AS \"granted_uses!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "scope_type!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "space_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.invitation_codes",
+            "name": "space_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "granted_uses!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      true,
+      null
+    ]
+  },
+  "hash": "1b5482652054cf03a74922aaa15cd886bcfce3e885e4ac6289547abde8dd0360"
+}

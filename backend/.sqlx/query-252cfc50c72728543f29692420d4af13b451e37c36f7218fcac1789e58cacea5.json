@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.invitation_code_attempts (person_id, device_id, outcome)\n         VALUES ($1, $2, $3::text::negotiation.invitation_attempt_outcome)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "252cfc50c72728543f29692420d4af13b451e37c36f7218fcac1789e58cacea5"
+}

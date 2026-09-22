@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT source_code_id FROM negotiation.network_memberships\n          WHERE person_id = $1 AND left_at IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "source_code_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.network_memberships",
+            "name": "source_code_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "d33597216cf6e667a720f8a102e574845f3e4fcb5f45577e8df9b3319dce48b5"
+}

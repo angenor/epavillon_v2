@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ra.scope_type::text AS \"scope_type!\", ra.scope_id\n             FROM identity.role_assignments ra\n            WHERE ra.person_id = $1 AND ra.revoked_at IS NULL\n            ORDER BY ra.granted_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "scope_type!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "scope_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "scope_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      true
+    ]
+  },
+  "hash": "14674cf3ec004ac0699328edc098a3b6569e5dba234953ffea972f2d067b0d10"
+}

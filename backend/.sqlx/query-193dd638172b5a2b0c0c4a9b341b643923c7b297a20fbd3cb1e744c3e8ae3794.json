@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.invitation_code_uses (code_id, person_id, session_id)\n         VALUES ($1, $2, $3)\n         ON CONFLICT (code_id, person_id) DO NOTHING\n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.invitation_code_uses",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "193dd638172b5a2b0c0c4a9b341b643923c7b297a20fbd3cb1e744c3e8ae3794"
+}

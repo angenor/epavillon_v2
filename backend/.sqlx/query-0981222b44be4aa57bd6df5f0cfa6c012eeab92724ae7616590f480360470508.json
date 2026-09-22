@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT upper(regexp_replace($1, '[^A-Za-z0-9]', '', 'g')) AS \"forme!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "forme!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "0981222b44be4aa57bd6df5f0cfa6c012eeab92724ae7616590f480360470508"
+}

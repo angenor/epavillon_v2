@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id FROM identity.role_assignments\n          WHERE person_id = $1 AND role_code = 'negotiator'\n            AND scope_id IS NOT DISTINCT FROM $2\n          ORDER BY granted_at DESC LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "89d9bedfcf556f06d341065a0d2573e9dc6371e54947046c8cf13d8affc9e369"
+}

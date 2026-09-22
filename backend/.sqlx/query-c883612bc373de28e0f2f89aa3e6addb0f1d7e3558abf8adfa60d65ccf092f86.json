@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.space_members\n            SET left_at = now()\n          WHERE space_id = $1 AND person_id = $2 AND left_at IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c883612bc373de28e0f2f89aa3e6addb0f1d7e3558abf8adfa60d65ccf092f86"
+}

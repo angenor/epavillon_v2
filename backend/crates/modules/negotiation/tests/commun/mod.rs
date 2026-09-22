@@ -727,3 +727,88 @@ pub async fn etat_de_la_demande(bac: &Bac, request_id: Uuid) -> String {
     .await
     .expect("lecture de l'état de la demande")
 }
+
+// ---------------------------------------------------------------------------
+// Les thématiques suivies (0c)
+// ---------------------------------------------------------------------------
+
+/// Un terme de `negotiation_theme`, **lu et jamais inventé** : il est semé par
+/// `020_reference.sql`.
+pub async fn terme_thematique(bac: &Bac, code: &str) -> Uuid {
+    sqlx::query_scalar!(
+        "SELECT id FROM reference.taxonomy_terms
+          WHERE taxonomy_code = 'negotiation_theme' AND code = $1",
+        code
+    )
+    .fetch_one(bac.pool())
+    .await
+    .expect("terme de la taxonomie negotiation_theme")
+}
+
+pub async fn mes_thematiques(bac: &Bac, person_id: Uuid) -> negotiation::domain::themes::MyThemes {
+    negotiation::service::themes::mes_thematiques(&bac.state, person_id)
+        .await
+        .expect("lecture des thématiques")
+}
+
+/// Le `PUT`, tel que la route l'appelle : la liste entière, et l'empreinte
+/// éventuelle de l'état sur lequel le choix a été pris.
+pub async fn suivre(
+    bac: &Bac,
+    person_id: Uuid,
+    codes: &[&str],
+    si_correspond: Option<&str>,
+) -> kernel::error::Result<negotiation::domain::themes::MyThemes> {
+    let codes: Vec<String> = codes.iter().map(|c| (*c).to_owned()).collect();
+    negotiation::service::themes::remplacer(
+        &bac.state,
+        &bac.ctx(person_id),
+        negotiation::service::themes::Remplacement {
+            person_id,
+            codes: &codes,
+            si_correspond,
+        },
+    )
+    .await
+}
+
+pub fn codes_de(mes: &negotiation::domain::themes::MyThemes) -> Vec<String> {
+    mes.themes.iter().map(|t| t.code.clone()).collect()
+}
+
+/// Toutes les lignes de suivi d'une personne, vivantes ou fermées : `(code,
+/// fermée ?)`, dans l'ordre d'ouverture.
+pub async fn lignes_de_suivi(bac: &Bac, person_id: Uuid) -> Vec<(String, bool)> {
+    sqlx::query!(
+        r#"SELECT t.code AS "code!", (s.left_at IS NOT NULL) AS "fermee!"
+             FROM negotiation.theme_subscriptions s
+             JOIN reference.taxonomy_terms t ON t.id = s.theme_term_id
+            WHERE s.person_id = $1
+            ORDER BY s.followed_at, t.code"#,
+        person_id
+    )
+    .fetch_all(bac.pool())
+    .await
+    .expect("lecture des suivis")
+    .into_iter()
+    .map(|l| (l.code, l.fermee))
+    .collect()
+}
+
+/// Les traces d'audit de tous les suivis d'une personne : `(action, acteur)`.
+pub async fn traces_de_suivi(bac: &Bac, person_id: Uuid) -> Vec<(String, Option<Uuid>)> {
+    sqlx::query!(
+        r#"SELECT a.action AS "action!", a.actor_id
+             FROM platform.audit_log a
+             JOIN negotiation.theme_subscriptions s ON s.id = a.entity_id
+            WHERE a.entity_table = 'theme_subscriptions' AND s.person_id = $1
+            ORDER BY a.occurred_at"#,
+        person_id
+    )
+    .fetch_all(bac.pool())
+    .await
+    .expect("lecture de l'audit des suivis")
+    .into_iter()
+    .map(|l| (l.action, l.actor_id))
+    .collect()
+}

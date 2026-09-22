@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposal_speakers\n             (proposal_id, person_id, role, job_title_snapshot, organization_snapshot)\n         VALUES ($1, $2, 'speaker', 'Directeur', 'IFDD')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e4e3638e0e3c1313ca34c430a2f70335ff19aa3c51166047e87df5807d1b85b6"
+}

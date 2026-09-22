@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT code_normalized AS \"forme!\" FROM negotiation.invitation_codes WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "forme!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.invitation_codes",
+            "name": "code_normalized"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "59627020cf56222d314c15ba9ec9f5ebabcb689c225e46c514ff8738138e89d5"
+}

@@ -5,3 +5,4 @@ pub mod code;
 pub mod permissions;
 pub mod redeem;
 pub mod requests;
+pub mod themes;

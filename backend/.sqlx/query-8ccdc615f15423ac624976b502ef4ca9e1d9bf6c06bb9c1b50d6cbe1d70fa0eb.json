@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.role_assignments ra\n              SET revoked_at = now(), revoked_by = $3, revoked_reason = $4\n             FROM negotiation.invitation_codes c\n            WHERE c.id = $1\n              AND ra.person_id = $2\n              AND ra.role_code = 'negotiator'\n              AND ra.scope_type = c.scope_type\n              AND ra.scope_id IS NOT DISTINCT FROM c.space_id\n              AND ra.revoked_at IS NULL\n        RETURNING ra.id AS \"role_assignment_id!\",\n                  ra.scope_type::text AS \"scope_type!\", ra.scope_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "role_assignment_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "scope_type!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "scope_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "scope_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      true
+    ]
+  },
+  "hash": "8ccdc615f15423ac624976b502ef4ca9e1d9bf6c06bb9c1b50d6cbe1d70fa0eb"
+}

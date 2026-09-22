@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.sessions SET expires_at = expires_at - interval '30 days' WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ce7ed1bac307615ccaedb1505d11d971d8bc2e46a533c2f735fefd375854bea7"
+}

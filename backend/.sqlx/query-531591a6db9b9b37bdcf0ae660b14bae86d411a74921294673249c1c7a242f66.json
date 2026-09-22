@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (\n               SELECT 1\n                 FROM identity.role_assignments ra\n                 JOIN identity.role_permissions rp ON rp.role_code = ra.role_code\n                WHERE ra.person_id = $1\n                  AND rp.permission_code = $2\n                  AND ra.revoked_at IS NOT NULL\n           ) AS \"retire!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "retire!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "531591a6db9b9b37bdcf0ae660b14bae86d411a74921294673249c1c7a242f66"
+}

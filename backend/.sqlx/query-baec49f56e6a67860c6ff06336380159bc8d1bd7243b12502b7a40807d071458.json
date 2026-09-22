@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.theme_subscriptions (person_id, theme_term_id)\n         SELECT $1, t\n           FROM unnest($2::uuid[]) AS t\n          WHERE NOT EXISTS (\n                SELECT 1 FROM negotiation.theme_subscriptions s\n                 WHERE s.person_id = $1 AND s.theme_term_id = t AND s.left_at IS NULL\n          )",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "baec49f56e6a67860c6ff06336380159bc8d1bd7243b12502b7a40807d071458"
+}

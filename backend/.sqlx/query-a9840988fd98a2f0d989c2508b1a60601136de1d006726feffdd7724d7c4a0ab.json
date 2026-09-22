@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(DISTINCT person_id) AS \"compte!\"\n             FROM identity.sessions WHERE client_kind = 'app'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "compte!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a9840988fd98a2f0d989c2508b1a60601136de1d006726feffdd7724d7c4a0ab"
+}

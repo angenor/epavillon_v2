@@ -1,0 +1,129 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.id                      AS \"id!\",\n                  r.status::text            AS \"status!\",\n                  r.person_id               AS \"person_id!\",\n                  r.scope_type::text        AS \"scope_type!\",\n                  r.space_id,\n                  r.invitation_code_id,\n                  c.grants_network_term_id,\n                  p.primary_email::text     AS \"email!\",\n                  p.first_name              AS \"first_name!\",\n                  p.preferred_locale        AS \"preferred_locale!\",\n                  platform.t(s.name, $2)    AS space_name\n             FROM negotiation.access_requests r\n             JOIN identity.people p ON p.id = r.person_id\n             LEFT JOIN negotiation.spaces s ON s.id = r.space_id\n             LEFT JOIN negotiation.invitation_codes c ON c.id = r.invitation_code_id\n            WHERE r.id = $1\n              FOR UPDATE OF r",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.access_requests",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "person_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.access_requests",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "scope_type!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "space_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.access_requests",
+            "name": "space_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "invitation_code_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.access_requests",
+            "name": "invitation_code_id"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "grants_network_term_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.invitation_codes",
+            "name": "grants_network_term_id"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "first_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "first_name"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "preferred_locale!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "preferred_locale"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "space_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      null,
+      true,
+      true,
+      true,
+      null,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "b183dc3530e8482e763713ba7c132667516223a15410f22fea286bcffd6470c2"
+}

@@ -1,0 +1,71 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.id                  AS \"id!\",\n                  r.status::text        AS \"status!\",\n                  r.submitted_at        AS \"submitted_at!\",\n                  r.decided_at,\n                  r.decision_reason\n             FROM negotiation.access_requests r\n            WHERE r.person_id = $1\n            ORDER BY r.submitted_at DESC\n            LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.access_requests",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "submitted_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.access_requests",
+            "name": "submitted_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "decided_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.access_requests",
+            "name": "decided_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "decision_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.access_requests",
+            "name": "decision_reason"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "a324e0cbfc4d4c69f5a9108da672090b33910a293bc95088e2bde3cd2dd9959d"
+}

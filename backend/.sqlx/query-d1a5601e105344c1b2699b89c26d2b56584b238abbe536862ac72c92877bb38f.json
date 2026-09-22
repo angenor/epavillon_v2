@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT a.outcome::text AS \"outcome!\", a.device_id\n             FROM negotiation.invitation_code_attempts a\n            WHERE a.person_id = $1\n            ORDER BY a.attempted_at, a.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "outcome!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "device_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.invitation_code_attempts",
+            "name": "device_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      true
+    ]
+  },
+  "hash": "d1a5601e105344c1b2699b89c26d2b56584b238abbe536862ac72c92877bb38f"
+}

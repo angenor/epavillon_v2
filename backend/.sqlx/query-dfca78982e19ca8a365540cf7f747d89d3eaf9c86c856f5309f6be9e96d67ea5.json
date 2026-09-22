@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.access_requests\n            SET status = $2::text::negotiation.access_request_status,\n                decided_at = now(), decided_by = $3, decision_reason = $4\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dfca78982e19ca8a365540cf7f747d89d3eaf9c86c856f5309f6be9e96d67ea5"
+}

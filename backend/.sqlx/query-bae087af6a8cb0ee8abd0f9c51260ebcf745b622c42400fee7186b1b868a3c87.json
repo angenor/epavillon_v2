@@ -1,0 +1,37 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO identity.sessions\n             (person_id, account_id, refresh_token_hash, user_agent, ip_address,\n              client_kind, device_id, device_label, device_platform, expires_at)\n         VALUES ($1, $2, $3, $4, $5, $6::text::identity.session_client, $7, $8, $9, $10)\n         ON CONFLICT (refresh_token_hash) DO NOTHING\n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.sessions",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Bytea",
+        "Text",
+        "Inet",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "bae087af6a8cb0ee8abd0f9c51260ebcf745b622c42400fee7186b1b868a3c87"
+}

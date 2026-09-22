@@ -1,0 +1,200 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.id                            AS \"id!\",\n                  r.status::text                  AS \"status!\",\n                  r.person_id                     AS \"person_id!\",\n                  p.display_name                  AS \"display_name!\",\n                  p.primary_email::text           AS \"email!\",\n                  platform.t(pays.name, $4)       AS country,\n                  r.scope_type::text              AS \"scope_type!\",\n                  r.space_id,\n                  platform.t(s.name, $4)          AS space_name,\n                  -- Le « ? » force la nullabilité : la jointure est externe,\n                  -- mais ces deux colonnes sont NOT NULL dans leur table et\n                  -- sqlx en conclut que la colonne jointe l'est aussi.\n                  c.code                          AS \"invitation_code?\",\n                  c.label                         AS \"invitation_code_label?\",\n                  r.message,\n                  r.submitted_at                  AS \"submitted_at!\",\n                  r.decided_at,\n                  d.display_name                  AS decided_by_name,\n                  r.decision_reason,\n                  count(*) OVER ()                AS \"total!\",\n                  (SELECT count(*) FROM negotiation.access_requests q\n                    WHERE q.status = 'pending')   AS \"pending!\"\n             FROM negotiation.access_requests r\n             JOIN identity.people p               ON p.id = r.person_id\n             LEFT JOIN reference.countries pays   ON pays.id = p.country_id\n             LEFT JOIN negotiation.spaces s       ON s.id = r.space_id\n             LEFT JOIN negotiation.invitation_codes c ON c.id = r.invitation_code_id\n             LEFT JOIN identity.people d          ON d.id = r.decided_by\n            WHERE ($1::text IS NULL OR r.status::text = $1)\n            ORDER BY (r.status = 'pending') DESC, r.submitted_at\n            LIMIT $2 OFFSET $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.access_requests",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "person_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.access_requests",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "country",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "scope_type!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "space_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.access_requests",
+            "name": "space_id"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "space_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "invitation_code?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.invitation_codes",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "invitation_code_label?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.invitation_codes",
+            "name": "label"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "message",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.access_requests",
+            "name": "message"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "submitted_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.access_requests",
+            "name": "submitted_at"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "decided_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.access_requests",
+            "name": "decided_at"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "decided_by_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "decision_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.access_requests",
+            "name": "decision_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "total!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 17,
+        "name": "pending!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8",
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      true,
+      null,
+      null,
+      null,
+      true,
+      null,
+      false,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "39311de11bc8bd7834f1b5590f4f9705c97ad97d216b8f77a6f2b7d472c32004"
+}

@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"compte!\"\n             FROM negotiation.v_invitation_code_uses u\n            WHERE u.code_id = $1 AND u.access_active",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "compte!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "f33ff3bcf84629d18dbb47c4d1e9fd1943bef4ea9c0f48b68e01f813dd2c3fec"
+}

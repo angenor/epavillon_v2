@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE platform.settings SET value = to_jsonb($1::text)\n          WHERE key = 'negotiation.admission_mode'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0da9eac111403d4fe7c53d82b221b850ba630c1bad8105713edc850d82c6019a"
+}

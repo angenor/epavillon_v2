@@ -1,0 +1,106 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT u.person_id             AS \"person_id!\",\n                  u.display_name          AS \"display_name!\",\n                  u.email::text           AS \"email!\",\n                  u.used_at               AS \"used_at!\",\n                  COALESCE(u.access_active, false) AS \"access_active!\",\n                  u.access_revoked_at,\n                  u.access_revoked_reason,\n                  count(*) OVER ()                                  AS \"total!\",\n                  count(*) FILTER (WHERE u.access_active) OVER ()    AS \"ouverts!\"\n             FROM negotiation.v_invitation_code_uses u\n            WHERE u.code_id = $1\n            ORDER BY u.access_active DESC, u.used_at DESC\n            LIMIT $2 OFFSET $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "person_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.v_invitation_code_uses",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.v_invitation_code_uses",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "used_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.v_invitation_code_uses",
+            "name": "used_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "access_active!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "access_revoked_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.v_invitation_code_uses",
+            "name": "access_revoked_at"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "access_revoked_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.v_invitation_code_uses",
+            "name": "access_revoked_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "total!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "ouverts!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      null,
+      true,
+      null,
+      true,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "9c9ce123228944d85f63fdce2f27f06d778274ae2b133eadae8a5c903324d9d3"
+}

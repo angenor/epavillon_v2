@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT status::text AS \"statut!\", attempts AS \"essais!\", last_error\n             FROM platform.jobs WHERE task = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "statut!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "essais!",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "platform.jobs",
+            "name": "attempts"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "last_error",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "platform.jobs",
+            "name": "last_error"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      false,
+      true
+    ]
+  },
+  "hash": "3028b7862d4c78fff4421b22b292147e0a7157702f74588776d343ee16f35c31"
+}

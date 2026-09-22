@@ -1,0 +1,68 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ra.scope_type::text        AS \"scope_type!\",\n                  ra.scope_id,\n                  ra.granted_at             AS \"granted_at!\",\n                  platform.t(s.name, $3)    AS space_name,\n                  -- Le « ? » force la nullabilité : la jointure latérale est\n                  -- externe, mais `c.label` est NOT NULL et sqlx en conclut\n                  -- que la colonne jointe l'est aussi.\n                  u.code_label              AS \"code_label?\"\n             FROM identity.role_assignments ra\n             JOIN identity.role_permissions rp ON rp.role_code = ra.role_code\n             LEFT JOIN negotiation.spaces s ON s.id = ra.scope_id\n             LEFT JOIN LATERAL (\n                 SELECT c.label AS code_label\n                   FROM negotiation.invitation_code_uses cu\n                   JOIN negotiation.invitation_codes c ON c.id = cu.code_id\n                  WHERE cu.person_id = ra.person_id\n                    AND c.scope_type = ra.scope_type\n                    AND c.space_id IS NOT DISTINCT FROM ra.scope_id\n                  ORDER BY cu.used_at DESC\n                  LIMIT 1\n             ) u ON true\n            WHERE ra.person_id = $1\n              AND rp.permission_code = $2\n              AND ra.revoked_at IS NULL\n              AND ra.valid_from <= now()\n              AND (ra.valid_until IS NULL OR ra.valid_until > now())\n            ORDER BY (ra.scope_type = 'global') DESC, ra.granted_at\n            LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "scope_type!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "scope_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "scope_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "granted_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "granted_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "space_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "code_label?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.invitation_codes",
+            "name": "label"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      true,
+      false,
+      null,
+      false
+    ]
+  },
+  "hash": "1c13f513f69eb62e951f08a8e28fd775ca3c6a51c879edb50bd9c30b8408aac8"
+}

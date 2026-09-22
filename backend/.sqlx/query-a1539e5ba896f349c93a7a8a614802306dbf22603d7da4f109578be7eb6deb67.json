@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO platform.settings (key, value, description, updated_by)\n         VALUES ($1, to_jsonb($2::text),\n                 'Mode d''admission de Guide Négo : code, approval ou code_and_approval.', $3)\n         ON CONFLICT (key) DO UPDATE\n             SET value = EXCLUDED.value, updated_by = EXCLUDED.updated_by",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a1539e5ba896f349c93a7a8a614802306dbf22603d7da4f109578be7eb6deb67"
+}

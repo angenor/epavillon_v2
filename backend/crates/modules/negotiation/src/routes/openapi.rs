@@ -28,6 +28,8 @@ pub struct ApiErrorBody {
         crate::routes::acces::saisir_un_code,
         crate::routes::acces::demander,
         crate::routes::acces::annuler_sa_demande,
+        crate::routes::themes::mes_thematiques,
+        crate::routes::themes::suivre_des_thematiques,
         crate::routes::admin_codes::lister,
         crate::routes::admin_codes::creer,
         crate::routes::admin_codes::fiche,

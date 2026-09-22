@@ -1,0 +1,37 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (s.value ->> 'max')::integer            AS \"max?\",\n                  (s.value ->> 'window_minutes')::integer AS \"fenetre?\",\n                  (s.value ->> 'lock_minutes')::integer   AS \"verrou?\"\n             FROM platform.settings s\n            WHERE s.key = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "max?",
+        "type_info": "Int4",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "fenetre?",
+        "type_info": "Int4",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "verrou?",
+        "type_info": "Int4",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "15a1ccd3e910f8a5c3a2842db1b87a504a3b077e1950ba73e69079a3f47a7adf"
+}

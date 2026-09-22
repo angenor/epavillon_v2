@@ -1,0 +1,33 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT j.task AS \"task!\", (j.payload ->> 'to') AS \"destinataire?\"\n             FROM platform.jobs j\n            WHERE j.task LIKE 'negotiation.%'\n            ORDER BY j.created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "task!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "platform.jobs",
+            "name": "task"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "destinataire?",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "409365f450f67324d9361d9fa886c631167ed0c1296b228f5a42b0139ec63cda"
+}

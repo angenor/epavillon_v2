@@ -132,3 +132,34 @@ export interface CreateAccessRequestPayload {
   /** Facultatif : il aide l'IFDD à reconnaître une délégation qu'elle attend. */
   message?: string | null
 }
+
+// ---------------------------------------------------------------------------
+// Les thématiques suivies (0c)
+// ---------------------------------------------------------------------------
+
+/**
+ * `GET` et `PUT /api/negotiation/me/themes` — ce que la personne suit.
+ *
+ * **Des codes, jamais de libellés.** L'empreinte (`ETag`) se calcule sur les
+ * codes triés : deux appareils de la même personne, l'un en français, l'autre
+ * en anglais, voient la même empreinte pour un même état. Les libellés viennent
+ * de la route publique des termes de `negotiation_theme`, seule source.
+ */
+export interface FollowedTheme {
+  code: string
+  followed_at: IsoDateTime
+}
+
+export interface MyThemes {
+  themes: FollowedTheme[]
+}
+
+/**
+ * Le corps du `PUT` : la liste **entière** des codes suivis, jamais un delta.
+ * Rejouer le même corps donne le même état — c'est ce qui rend sûre la file
+ * d'écritures différées. `If-Match` porte l'empreinte de l'état sur lequel le
+ * choix a été pris ; un écart sort en 412 et l'intention s'abandonne.
+ */
+export interface ThemesPayload {
+  codes: string[]
+}
