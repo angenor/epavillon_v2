@@ -510,6 +510,18 @@ export const taxonomies = [
     is_system: false,
     created_at: '2026-01-12T09:00:00Z',
   },
+  {
+    code: 'negotiation_theme',
+    label: { fr: 'Thématiques de négociation', en: 'Negotiation themes' },
+    description: {
+      fr: 'Filières suivies par une négociatrice ou un négociateur : adaptation, finance, genre…',
+      en: 'Tracks followed by a negotiator: adaptation, finance, gender…',
+    },
+    is_multi_select: true,
+    is_hierarchical: false,
+    is_system: true,
+    created_at: '2026-09-22T09:00:00Z',
+  },
 ] satisfies Taxonomy[]
 
 /** Fabrique un terme : tous partagent les mêmes valeurs administratives. */
@@ -611,6 +623,18 @@ export const taxonomyTerms = [
   term(TERM.incidentCancellation, 'incident_kind', 'cancellation', { fr: 'Annulation', en: 'Cancellation' }, 60),
   term(TERM.incidentSpeakerAbsence, 'incident_kind', 'speaker_absence', { fr: "Absence d'un intervenant", en: 'Speaker absence' }, 70),
   term(TERM.incidentInformation, 'incident_kind', 'information', { fr: 'Information', en: 'Information' }, 80),
+
+  // Thématiques de négociation (Guide Négo) — même semis que 020_reference.sql
+  term(TERM.negoAdaptation, 'negotiation_theme', 'adaptation', { fr: 'Adaptation', en: 'Adaptation' }, 10),
+  term(TERM.negoMitigation, 'negotiation_theme', 'mitigation', { fr: 'Atténuation', en: 'Mitigation' }, 20),
+  term(TERM.negoFinance, 'negotiation_theme', 'finance', { fr: 'Finance', en: 'Finance' }, 30),
+  term(TERM.negoLossAndDamage, 'negotiation_theme', 'loss_and_damage', { fr: 'Pertes et préjudices', en: 'Loss and damage' }, 40),
+  term(TERM.negoArticle6, 'negotiation_theme', 'article_6', { fr: 'Article 6', en: 'Article 6' }, 50),
+  term(TERM.negoTransparency, 'negotiation_theme', 'transparency', { fr: 'Transparence', en: 'Transparency' }, 60),
+  term(TERM.negoGender, 'negotiation_theme', 'gender', { fr: 'Genre', en: 'Gender' }, 70),
+  term(TERM.negoJustTransition, 'negotiation_theme', 'just_transition', { fr: 'Transition juste', en: 'Just transition' }, 80),
+  term(TERM.negoAgriculture, 'negotiation_theme', 'agriculture', { fr: 'Agriculture', en: 'Agriculture' }, 90),
+  term(TERM.negoTechnology, 'negotiation_theme', 'technology', { fr: 'Technologie', en: 'Technology' }, 100),
 ] satisfies TaxonomyTerm[]
 
 // ---------------------------------------------------------------------------

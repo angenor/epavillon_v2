@@ -97,19 +97,19 @@ nouvelle, aucune signature retouchée, aucun comportement changé.
 
 **Objectif** : la file d'écritures différées, qui n'existait pas, et le vocabulaire gardé avec le drapeau.
 
-- [ ] T026 Ajouter le magasin `ecritures` à la base IndexedDB `guide-nego` dans `frontend/app/utils/guide-nego/garde.ts`, par montée de version, **sans toucher au magasin `lectures`** ni à ce qu'il porte
-- [ ] T027 Écrire `frontend/app/utils/guide-nego/file.ts` : poser une intention (clé, corps, empreinte, identifiant de personne, heure), une seule entrée par clé — **l'empreinte gardée reste celle de la première** —, lire, retirer, vider ; aucune fonction ne lève
-- [ ] T028 Écrire l'envoi de la file dans `frontend/app/utils/guide-nego/file.ts` : succès → retrait ; `412` → retrait, relecture et message ; `400`/`401`/`403` → retrait et message ; panne réseau ou `5xx` → l'entrée reste
-- [ ] T029 Ajouter l'écoute de l'événement `online` dans `frontend/app/composables/guide-nego/useGnConnexion.ts`, qui n'écoutait que `offline`
-- [ ] T030 Déclencher le départ de la file **à l'ouverture de l'application** dans `frontend/app/layouts/guide-nego.vue`, et au retour au premier plan — deux déclencheurs simultanés n'envoient qu'une fois
-- [ ] T031 Vider la file à la déconnexion, dans `frontend/app/composables/guide-nego/useGnSession.ts` : ce qu'une personne a choisi ne part pas sous le compte de la suivante
-- [ ] T032 Lire le vocabulaire `negotiation_theme` **à la première ouverture en ligne, avec le drapeau**, et le garder comme lui — dix termes, lecture publique sans session, dans `frontend/app/layouts/guide-nego.vue` et `frontend/app/composables/guide-nego/useGnThematiques.ts`
-- [ ] T032 bis Étendre `frontend/scripts/check-guide-nego.mjs` : **refuser tout fichier `*.test.ts` sous `frontend/` hors de `frontend/tests/`** — la porte ne ramasse que `tests/guide-nego/*.test.ts`, et un test qu'elle ne voit pas est pire qu'un test absent, puisqu'il donne le vert
-- [ ] T033 [P] Test « une seule entrée par clé » dans `frontend/tests/guide-nego/file-intention.test.ts` : deux intentions successives, une entrée, et **l'empreinte de la première**
-- [ ] T034 [P] Test « 412 » dans `frontend/tests/guide-nego/file-412.test.ts` : l'entrée part, la relecture est déclenchée, le message est produit
-- [ ] T035 [P] Test « 5xx garde, refus définitif retire » dans `frontend/tests/guide-nego/file-echecs.test.ts`
-- [ ] T036 [P] Test « déconnexion et compte » dans `frontend/tests/guide-nego/file-compte.test.ts` : la file se vide, et une intention prise par quelqu'un d'autre ne part jamais
-- [ ] T037 [P] Test « trois déclencheurs, un seul envoi » dans `frontend/tests/guide-nego/file-declencheurs.test.ts` : ouverture, `online`, retour au premier plan — chacun déclenche, deux à la fois n'envoient qu'une fois
+- [X] T026 Ajouter le magasin `ecritures` à la base IndexedDB `guide-nego` dans `frontend/app/utils/guide-nego/garde.ts`, par montée de version, **sans toucher au magasin `lectures`** ni à ce qu'il porte
+- [X] T027 Écrire `frontend/app/utils/guide-nego/file.ts` : poser une intention (clé, corps, empreinte, identifiant de personne, heure), une seule entrée par clé — **l'empreinte gardée reste celle de la première** —, lire, retirer, vider ; aucune fonction ne lève
+- [X] T028 Écrire l'envoi de la file dans `frontend/app/utils/guide-nego/file.ts` : succès → retrait ; `412` → retrait, relecture et message ; `400`/`401`/`403` → retrait et message ; panne réseau ou `5xx` → l'entrée reste
+- [X] T029 Ajouter l'écoute de l'événement `online` dans `frontend/app/composables/guide-nego/useGnConnexion.ts`, qui n'écoutait que `offline`
+- [X] T030 Déclencher le départ de la file **à l'ouverture de l'application** dans `frontend/app/layouts/guide-nego.vue`, et au retour au premier plan — deux déclencheurs simultanés n'envoient qu'une fois
+- [X] T031 Vider la file à la déconnexion, dans `frontend/app/composables/guide-nego/useGnSession.ts` : ce qu'une personne a choisi ne part pas sous le compte de la suivante
+- [X] T032 Lire le vocabulaire `negotiation_theme` **à la première ouverture en ligne, avec le drapeau**, et le garder comme lui — dix termes, lecture publique sans session, dans `frontend/app/layouts/guide-nego.vue` et `frontend/app/composables/guide-nego/useGnThematiques.ts`
+- [X] T032 bis Étendre `frontend/scripts/check-guide-nego.mjs` : **refuser tout fichier `*.test.ts` sous `frontend/` hors de `frontend/tests/`** — la porte ne ramasse que `tests/guide-nego/*.test.ts`, et un test qu'elle ne voit pas est pire qu'un test absent, puisqu'il donne le vert
+- [X] T033 [P] Test « une seule entrée par clé » dans `frontend/tests/guide-nego/file-intention.test.ts` : deux intentions successives, une entrée, et **l'empreinte de la première**
+- [X] T034 [P] Test « 412 » dans `frontend/tests/guide-nego/file-412.test.ts` : l'entrée part, la relecture est déclenchée, le message est produit
+- [X] T035 [P] Test « 5xx garde, refus définitif retire » dans `frontend/tests/guide-nego/file-echecs.test.ts`
+- [X] T036 [P] Test « déconnexion et compte » dans `frontend/tests/guide-nego/file-compte.test.ts` : la file se vide, et une intention prise par quelqu'un d'autre ne part jamais
+- [X] T037 [P] Test « trois déclencheurs, un seul envoi » dans `frontend/tests/guide-nego/file-declencheurs.test.ts` : ouverture, `online`, retour au premier plan — chacun déclenche, deux à la fois n'envoient qu'une fois
 
 **Checkpoint** : `npm run test:guide-nego` au vert, six preuves de file. **Commit.**
 

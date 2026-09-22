@@ -34,6 +34,15 @@ export function apresEchec(etat: EtatConnexion): EtatConnexion {
   return etat.enLigne ? { ...etat, enLigne: false, bandeauVu: false } : etat
 }
 
+/**
+ * Le navigateur annonce le retour du réseau. On le croit — c'est ce qui rend les
+ * boutons à leur état actif et fait partir la file — et la prochaine lecture le
+ * confirme ou le dément. Le bandeau ne bouge pas : seule une lecture réussie le retire.
+ */
+export function apresAnnonceEnLigne(etat: EtatConnexion): EtatConnexion {
+  return etat.enLigne ? etat : { ...etat, enLigne: true }
+}
+
 export function apresLectureGardee(etat: EtatConnexion, luA: string): EtatConnexion {
   return { ...etat, luA: plusRecent(etat.luA, luA) }
 }

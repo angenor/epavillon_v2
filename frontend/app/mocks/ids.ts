@@ -82,6 +82,17 @@ export const COUNTRY = {
  * par sa clé primaire et non par son code.
  */
 export const TERM = {
+  // negotiation_theme — ce qu'une personne SUIT en salle, pas ce que le Pavillon programme
+  negoAdaptation: uuid('7012', 1),
+  negoMitigation: uuid('7012', 2),
+  negoFinance: uuid('7012', 3),
+  negoLossAndDamage: uuid('7012', 4),
+  negoArticle6: uuid('7012', 5),
+  negoTransparency: uuid('7012', 6),
+  negoGender: uuid('7012', 7),
+  negoJustTransition: uuid('7012', 8),
+  negoAgriculture: uuid('7012', 9),
+  negoTechnology: uuid('7012', 10),
   // activity_theme
   mitigation: uuid('7011', 1),
   adaptation: uuid('7011', 2),

@@ -140,6 +140,21 @@ for (const locale of ['fr', 'en']) {
   }
 }
 
+// Un test que la porte ne ramasse pas est pire qu'un test absent : il donne le vert
+// sans avoir tourné. La porte est le glob `tests/guide-nego/*.test.ts`, et rien d'autre.
+const HORS_PORTEE = new Set(['node_modules', '.nuxt', '.output', 'dist', 'tests', '.git'])
+function testsEgares(dossier) {
+  return readdirSync(dossier).flatMap((nom) => {
+    if (HORS_PORTEE.has(nom)) return []
+    const chemin = join(dossier, nom)
+    if (statSync(chemin).isDirectory()) return testsEgares(chemin)
+    return /\.test\.[cm]?[jt]s$/.test(nom) ? [chemin] : []
+  })
+}
+for (const fichier of testsEgares(FRONT)) {
+  signaler(fichier, 'un test hors de tests/ : la porte ne le voit pas, il ne tourne jamais')
+}
+
 if (ecarts.length > 0) {
   console.error(`Guide Négo — ${ecarts.length} écart(s) au bornage :\n`)
   for (const ecart of ecarts) console.error(`  ✗ ${ecart}`)

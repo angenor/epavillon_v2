@@ -1,6 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
+  apresAnnonceEnLigne,
   apresEchec,
   apresLectureGardee,
   apresReussite,
@@ -20,6 +21,13 @@ test('le bandeau se remontre à chaque nouvel épisode hors connexion, pas penda
 
   etat = apresEchec(apresReussite(etat, '2026-11-12T10:00:00.000Z'))
   assert.equal(etat.bandeauVu, false, 'un nouvel épisode le remontre')
+})
+
+test('le retour annoncé rend « en ligne » sans toucher au bandeau ni à l’heure', () => {
+  const horsLigne = { ...apresEchec(connexionInitiale(true)), bandeauVu: true, luA: '2026-11-12T10:00:00.000Z' }
+  const annonce = apresAnnonceEnLigne(horsLigne)
+  assert.deepEqual(annonce, { enLigne: true, luA: '2026-11-12T10:00:00.000Z', bandeauVu: true })
+  assert.equal(apresAnnonceEnLigne(annonce), annonce, 'déjà en ligne : rien ne change')
 })
 
 test('« lu à » garde la lecture la plus récente', () => {

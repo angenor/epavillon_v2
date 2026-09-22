@@ -19,7 +19,7 @@
  */
 import type { LoginResult } from '~/types/auth'
 import { appareilDeclare } from '~/utils/guide-nego/appareil'
-import { ecrireGarde } from '~/utils/guide-nego/garde'
+import { ecrireGarde, magasinEcrituresIndexedDb } from '~/utils/guide-nego/garde'
 import {
   COMPTE_DECONNECTE,
   etatDuCompte,
@@ -98,8 +98,12 @@ export function useGnSession() {
    * Ferme **cette** session, et elle seule : les autres appareils restent
    * ouverts. L'état gardé est réécrit tout de suite — sans cela, la prochaine
    * ouverture hors connexion afficherait un compte dont on vient de sortir.
+   *
+   * **La file se vide d'abord** : ce qu'une personne a choisi sans réseau ne
+   * part pas sous le compte de la suivante, sur un téléphone partagé au stand.
    */
   async function deconnecter(): Promise<void> {
+    await magasinEcrituresIndexedDb.vider()
     await auth.signOut()
     const maintenant = new Date().toISOString()
     etat.value = {

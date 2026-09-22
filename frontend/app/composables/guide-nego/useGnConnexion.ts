@@ -1,4 +1,5 @@
 import {
+  apresAnnonceEnLigne,
   apresEchec,
   apresLectureGardee,
   apresReussite,
@@ -17,6 +18,9 @@ export function useGnConnexion() {
   if (!ecoute.value) {
     ecoute.value = true
     window.addEventListener('offline', () => (etat.value = apresEchec(etat.value)))
+    // Le retour annoncé rend leur état actif aux boutons ; c'est la lecture qui suit
+    // qui le prouve. Le départ de la file, lui, s'écoute dans la mise en page.
+    window.addEventListener('online', () => (etat.value = apresAnnonceEnLigne(etat.value)))
   }
 
   return {

@@ -10,6 +10,8 @@ import type { AuthenticatedPerson } from '~/types/auth'
 
 export interface EtatDuCompte {
   connectee: boolean
+  /** L'identifiant de la personne : c'est lui qui tient une intention à son compte. */
+  id: string | null
   prenom: string | null
   nom: string | null
   adresse: string | null
@@ -23,6 +25,7 @@ export interface EtatDuCompte {
 
 export const COMPTE_DECONNECTE: EtatDuCompte = {
   connectee: false,
+  id: null,
   prenom: null,
   nom: null,
   adresse: null,
@@ -42,6 +45,7 @@ export function etatDuCompte(moi: AuthenticatedPerson | null): EtatDuCompte {
 
   return {
     connectee: true,
+    id: moi.id,
     prenom: moi.first_name ?? null,
     nom: moi.last_name ?? null,
     adresse: moi.primary_email ?? null,

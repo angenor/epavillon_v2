@@ -57,18 +57,38 @@ watch(
 const { t } = useI18n()
 const gardePrete = ref(false)
 
+// Le vocabulaire des thématiques se lit avec le drapeau et se garde comme lui : une
+// lecture publique de dix termes, qui donne ses noms à la ligne du profil même sur un
+// appareil qui n'a jamais ouvert l'écran des thématiques.
+const { assurerLeVocabulaire } = useGnThematiques()
+// Ce qui a été choisi sans réseau repart d'ici — et de nulle part ailleurs.
+const { partir } = useGnFile()
+
 // Le navigateur annonce le retour du réseau ; seule une lecture réussie le prouve, et
 // c'est elle qui met à jour « Synchronisé à » — sans recharger la page.
 function relire() {
   void rafraichir()
+  void partir()
+}
+
+// Trois déclencheurs, tous nécessaires : un téléphone rouvert le lendemain n'émet pas
+// d'`online`, et une application restée ouverte ne se réouvre pas.
+function auRetourAuPremierPlan() {
+  if (document.visibilityState === 'visible') void partir()
 }
 
 onMounted(() => {
   window.addEventListener('online', relire)
+  document.addEventListener('visibilitychange', auRetourAuPremierPlan)
   enregistrerLaGarde()
+  void assurerLeVocabulaire()
+  void partir()
 })
 
-onBeforeUnmount(() => window.removeEventListener('online', relire))
+onBeforeUnmount(() => {
+  window.removeEventListener('online', relire)
+  document.removeEventListener('visibilitychange', auRetourAuPremierPlan)
+})
 
 /**
  * Une version gardée lors d'une visite précédente prend la main MAINTENANT, au
