@@ -74,7 +74,7 @@ Et l'auteur de l'écriture :
 
 ```sql
 SELECT action, actor_id FROM platform.audit_log
-WHERE table_name = 'theme_subscriptions' ORDER BY occurred_at DESC LIMIT 3;
+WHERE entity_table = 'theme_subscriptions' ORDER BY occurred_at DESC LIMIT 3;
 ```
 
 **Attendu** : `actor_id` renseigné à chaque ligne — jamais une trace anonyme.
@@ -172,7 +172,7 @@ Sans compte, l'écran s'ouvre aussi, et invite à créer un compte ou à se conn
 **La source est unique** :
 
 ```bash
-curl -s "$API/api/legal/privacy" | jq '{cle, langue, version}'
+curl -s "$API/api/legal/privacy" | jq '{key, locale, version}'
 curl -s -H 'Accept-Language: en' "$API/api/legal/privacy" | jq '.version'   # même version
 curl -s "$API/api/legal/inconnu" -o /dev/null -w '%{http_code}\n'           # 404
 ```

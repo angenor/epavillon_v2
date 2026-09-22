@@ -1,6 +1,6 @@
 {
   "titre": "Components",
-  "propos": "Every component delivered at stage 0a, in all its variants and states.",
+  "propos": "Every component delivered so far, in all its variants and states.",
   "etats-communs": "Shared states: rest · pressed (fond-2 background) · focus (3 px ring, 2 px from the edge) · disabled (grey text on pale grey, never transparency) · loading (spinning arc, or skeleton). Every component is shown in the light theme; the dark theme applies the tokens of table 1.",
   "interactif": "Pressed and focus cannot be frozen on a board: press a control to see the first, tab through the section to see the second.",
   "absents": "What is not shown here",

@@ -1,11 +1,11 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT p.id,\n                  p.primary_email::text  AS \"email!\",\n                  p.status::text         AS \"statut!\",\n                  p.email_verified_at,\n                  p.suspended_until,\n                  a.id                   AS \"account_id?\",\n                  a.password_hash        AS \"password_hash?\",\n                  a.failed_attempts      AS \"failed_attempts?\",\n                  a.locked_until         AS \"locked_until?\",\n                  a.mfa_enabled_at       AS \"mfa_enabled_at?\"\n             FROM identity.people p\n             LEFT JOIN identity.accounts a\n                    ON a.person_id = p.id AND a.provider = 'password'\n            WHERE p.primary_email = $1::text::citext",
+  "query": "SELECT p.id                   AS \"id!\",\n                  p.primary_email::text  AS \"email!\",\n                  p.status::text         AS \"statut!\",\n                  p.email_verified_at,\n                  p.suspended_until,\n                  a.id                   AS \"account_id?\",\n                  a.password_hash        AS \"password_hash?\",\n                  a.failed_attempts      AS \"failed_attempts?\",\n                  a.locked_until         AS \"locked_until?\",\n                  a.mfa_enabled_at       AS \"mfa_enabled_at?\"\n             FROM identity.people p\n             LEFT JOIN identity.accounts a\n                    ON a.person_id = p.id AND a.provider = 'password'\n            WHERE p.primary_email = $1::text::citext",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
-        "name": "id",
+        "name": "id!",
         "type_info": "Uuid",
         "origin": {
           "Table": {
@@ -110,17 +110,17 @@
       ]
     },
     "nullable": [
+      true,
+      null,
+      null,
+      true,
+      true,
       false,
-      null,
-      null,
       true,
-      true,
-      true,
-      true,
-      true,
+      false,
       true,
       true
     ]
   },
-  "hash": "859dc5a5157cff0551016770843d89e4889870f3a64ed3e263c04d18d0965ac5"
+  "hash": "e3af0bc26d6a8a2cb8f11dd836dfd3a61688adca2a524eee1941236facbe60e0"
 }

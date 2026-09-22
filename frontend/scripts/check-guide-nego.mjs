@@ -140,6 +140,33 @@ for (const locale of ['fr', 'en']) {
   }
 }
 
+// SC-007 de l'étape 0c : un libellé de thématique est une donnée. Les libellés sont lus
+// dans le semis SQL, pour que ce contrôle n'en recopie aucun. Les données d'exemple
+// miroitent la base, et la planche des composants s'en sert comme spécimens.
+const semis = readFileSync(join(FRONT, '../docs/database/020_reference.sql'), 'utf8')
+const LIBELLES_DE_THEMATIQUES = new Set(
+  [...semis.matchAll(/\('negotiation_theme',\s*'\w+',\s*'(\{[^']*\})'/g)].flatMap((m) =>
+    Object.values(JSON.parse(m[1])),
+  ),
+)
+if (LIBELLES_DE_THEMATIQUES.size === 0) {
+  signaler(join(FRONT, '../docs/database/020_reference.sql'), 'aucun terme negotiation_theme lu : le semis a changé de forme')
+}
+const libellesTrouves = (valeurs) => valeurs.filter((v) => LIBELLES_DE_THEMATIQUES.has(v.trim()))
+const valeursDe = (objet) =>
+  typeof objet === 'string' ? [objet] : Object.values(objet).flatMap(valeursDe)
+for (const fichier of parcourir(join(FRONT, 'i18n/locales'))) {
+  if (!fichier.endsWith('.json') || /\/components\/gn-planche-/.test(fichier)) continue
+  const trouves = libellesTrouves(valeursDe(JSON.parse(readFileSync(fichier, 'utf8'))))
+  if (trouves.length) signaler(fichier, `libellé de thématique recopié : ${trouves.join(', ')} — il vit en base`)
+}
+for (const fichier of parcourir(join(FRONT, 'app'))) {
+  if (!/\.(vue|ts)$/.test(fichier) || /\/app\/mocks\//.test(fichier)) continue
+  const litteraux = [...readFileSync(fichier, 'utf8').matchAll(/(['"`])([^'"`\n]{3,40})\1/g)].map((m) => m[2])
+  const trouves = libellesTrouves(litteraux)
+  if (trouves.length) signaler(fichier, `libellé de thématique en dur : ${trouves.join(', ')} — il vit en base`)
+}
+
 // Un test que la porte ne ramasse pas est pire qu'un test absent : il donne le vert
 // sans avoir tourné. La porte est le glob `tests/guide-nego/*.test.ts`, et rien d'autre.
 const HORS_PORTEE = new Set(['node_modules', '.nuxt', '.output', 'dist', 'tests', '.git'])

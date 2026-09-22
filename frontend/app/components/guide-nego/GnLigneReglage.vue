@@ -67,6 +67,8 @@ withDefaults(
   min-width: 0;
   display: flex;
   flex-direction: column;
+  /* Une adresse électronique n'a pas d'espace où revenir à la ligne. */
+  overflow-wrap: anywhere;
 }
 
 [data-app="guide-nego"] .gn-reglage__libelle {

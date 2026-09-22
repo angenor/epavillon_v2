@@ -10,6 +10,7 @@ import '~/assets/guide-nego/theme.css'
 import '~/assets/guide-nego/mesures.css'
 import '~/assets/guide-nego/base.css'
 import { CLE_GARDE_ANNONCEE, lireCle, poserCle } from '~/utils/guide-nego/stockage'
+import { CLE_FILE_THEMATIQUES } from '~/utils/guide-nego/thematiques'
 
 // La barre système du téléphone ne lit pas le CSS : elle veut une valeur. Ce sont
 // `--gn-charte-vert-tres-fonce` et `--gn-nuance-sombre-fond`, les seuls endroits du
@@ -62,7 +63,16 @@ const gardePrete = ref(false)
 // appareil qui n'a jamais ouvert l'écran des thématiques.
 const { assurerLeVocabulaire } = useGnThematiques()
 // Ce qui a été choisi sans réseau repart d'ici — et de nulle part ailleurs.
-const { partir } = useGnFile()
+const { partir, avis } = useGnFile()
+
+// Un choix abandonné ou refusé se dit là où la personne se trouve quand le réseau
+// revient (FR-009 bis) ; l'écran qui l'a pris le redit en place, et on ne l'y double pas.
+const ECRAN_DE_LA_CLE: Record<string, string> = { [CLE_FILE_THEMATIQUES]: '/guide-nego/thematiques' }
+const avisAnnonce = ref<{ texte: string; rang: number } | null>(null)
+watch(avis, (suite) => {
+  if (!suite?.message || route.path.replace(/\/$/, '') === ECRAN_DE_LA_CLE[suite.cle]) return
+  avisAnnonce.value = { texte: suite.message, rang: (avisAnnonce.value?.rang ?? 0) + 1 }
+})
 
 // Le navigateur annonce le retour du réseau ; seule une lecture réussie le prouve, et
 // c'est elle qui met à jour « Synchronisé à » — sans recharger la page.
@@ -163,6 +173,12 @@ async function enregistrerLaGarde() {
       v-if="gardePrete"
       :texte="t('gn-connexion.prete')"
       @fini="gardePrete = false"
+    />
+    <GnMessageEphemere
+      v-if="avisAnnonce"
+      :key="avisAnnonce.rang"
+      :texte="avisAnnonce.texte"
+      @fini="avisAnnonce = null"
     />
   </div>
 </template>

@@ -10,11 +10,15 @@ export const CLE_GARDE_ANNONCEE = 'gn.garde-annoncee'
 /** L'écran de premier choix des thématiques a été proposé sur cet appareil. */
 export const CLE_THEMATIQUES_PROPOSEES = 'gn.thematiques-proposees'
 
+// Stockage refusé, une clé vit le temps de la visite : sans elle, « Continuer en
+// visiteur » ramènerait à l'ouverture, en boucle.
+const enMemoire = new Map<string, string>()
+
 export function lireCle(cle: string): string | null {
   try {
     return localStorage.getItem(cle)
   } catch {
-    return null
+    return enMemoire.get(cle) ?? null
   }
 }
 
@@ -22,6 +26,6 @@ export function poserCle(cle: string, valeur = '1'): void {
   try {
     localStorage.setItem(cle, valeur)
   } catch {
-    /* Un stockage refusé ne doit jamais empêcher l'écran de s'ouvrir. */
+    enMemoire.set(cle, valeur)
   }
 }

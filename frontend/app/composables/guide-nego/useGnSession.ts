@@ -19,7 +19,7 @@
  */
 import type { LoginResult } from '~/types/auth'
 import { appareilDeclare } from '~/utils/guide-nego/appareil'
-import { ecrireGarde, magasinEcrituresIndexedDb } from '~/utils/guide-nego/garde'
+import { ecrireGarde, magasinDesEcritures } from '~/utils/guide-nego/garde'
 import {
   COMPTE_DECONNECTE,
   reconnexionAReclamer,
@@ -110,7 +110,7 @@ export function useGnSession() {
    * part pas sous le compte de la suivante, sur un téléphone partagé au stand.
    */
   async function deconnecter(): Promise<void> {
-    await magasinEcrituresIndexedDb.vider()
+    await magasinDesEcritures.vider()
     await auth.signOut()
     const maintenant = new Date().toISOString()
     etat.value = {

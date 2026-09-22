@@ -34,7 +34,7 @@ pub struct AuthCandidate {
 
 pub async fn find_for_login(pool: &PgPool, email: &str) -> Result<Option<AuthCandidate>> {
     let ligne = sqlx::query!(
-        r#"SELECT p.id,
+        r#"SELECT p.id                   AS "id!",
                   p.primary_email::text  AS "email!",
                   p.status::text         AS "statut!",
                   p.email_verified_at,

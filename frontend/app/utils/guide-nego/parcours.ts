@@ -28,3 +28,12 @@ export const APRES_LE_CODE = '/guide-nego/thematiques'
 
 /** « Plus tard », à toutes les marches du parcours : on va lire. */
 export const PLUS_TARD = '/guide-nego'
+
+/**
+ * Après la connexion, le code n'est demandé qu'à qui n'est pas admis. Admise
+ * depuis un autre appareil, la personne va lire ; « Ma journée » lui propose ses
+ * thématiques si elle n'en suit aucune.
+ */
+export function apresLaConnexion(accesOuvert: boolean): string {
+  return accesOuvert ? PLUS_TARD : APRES_LE_COMPTE
+}

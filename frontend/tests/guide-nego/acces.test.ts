@@ -9,6 +9,7 @@ import {
   etatDAcces,
   saisiePossible,
 } from '../../app/utils/guide-nego/acces.ts'
+import { APRES_LE_COMPTE, PLUS_TARD, apresLaConnexion } from '../../app/utils/guide-nego/parcours.ts'
 
 const ADMISE = {
   admission_mode: 'code' as const,
@@ -141,4 +142,11 @@ test("la demande d'accès ne se propose que lorsqu'elle a un sens", () => {
     'un refus n\'est pas définitif : une nouvelle demande est une nouvelle ligne',
   )
   assert.equal(demandePossible(null, true), false, 'rien de lu : on ne propose rien')
+})
+
+/** Un compte admis sur un autre appareil ne ressaisit pas son code à la connexion. */
+test('après la connexion, le code ne se demande qu’à qui n’est pas admis', () => {
+  assert.equal(apresLaConnexion(accesOuvert(ADMISE)), PLUS_TARD)
+  assert.equal(apresLaConnexion(accesOuvert(ACCES_VISITEUSE)), APRES_LE_COMPTE)
+  assert.equal(apresLaConnexion(accesOuvert(null)), APRES_LE_COMPTE, 'rien de lu : le parcours ordinaire')
 })

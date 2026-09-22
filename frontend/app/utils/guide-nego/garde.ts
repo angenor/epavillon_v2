@@ -6,7 +6,7 @@
  * repartent à son retour — voir `file.ts`. Si le téléphone refuse ou vide le stockage,
  * l'application fonctionne sans garde : aucune de ces fonctions ne lève.
  */
-import type { Intention, MagasinEcritures } from './file'
+import { magasinEnMemoire, type Intention, type MagasinEcritures } from './file.ts'
 
 export interface LectureGardee<T> {
   cle: string
@@ -83,8 +83,7 @@ export async function viderLesGardes(): Promise<void> {
   await executer(LECTURES, 'readwrite', (magasin) => magasin.clear())
 }
 
-/** Le magasin des écritures, tel que `file.ts` l'attend. */
-export const magasinEcrituresIndexedDb: MagasinEcritures = {
+const ecrituresIndexedDb: MagasinEcritures = {
   lire: () =>
     executer<Intention[]>(ECRITURES, 'readonly', (magasin) => magasin.getAll()).then(
       (intentions) => intentions ?? [],
@@ -99,4 +98,23 @@ export const magasinEcrituresIndexedDb: MagasinEcritures = {
   vider: async () => {
     await executer(ECRITURES, 'readwrite', (magasin) => magasin.clear())
   },
+}
+
+// Stockage refusé : les intentions vivent le temps de la visite, et partent quand même.
+// Sans ce secours, un choix fait en ligne se perdrait en silence.
+const ecrituresEnMemoire = magasinEnMemoire()
+
+async function ecrituresDisponibles(): Promise<MagasinEcritures> {
+  const base = await ouvrir()
+  base?.close()
+  return base ? ecrituresIndexedDb : ecrituresEnMemoire
+}
+
+/** Le magasin des écritures, tel que `file.ts` l'attend. */
+export const magasinDesEcritures: MagasinEcritures = {
+  lire: () => ecrituresDisponibles().then((m) => m.lire()),
+  lireUne: (cle) => ecrituresDisponibles().then((m) => m.lireUne(cle)),
+  poser: (intention) => ecrituresDisponibles().then((m) => m.poser(intention)),
+  retirer: (cle) => ecrituresDisponibles().then((m) => m.retirer(cle)),
+  vider: () => ecrituresDisponibles().then((m) => m.vider()),
 }

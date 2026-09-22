@@ -223,17 +223,17 @@ l'application reçoivent la même version ; modifier un texte sans lever sa vers
 
 ### Depuis un poste
 
-- [ ] T086 Dérouler les §§ 1 à 3 de `specs/010-guide-nego-accueil-profil/quickstart.md` : le vocabulaire servi, le suivi de bout en bout, ce que la base refuse et ce que l'API répond
-- [ ] T087 Dérouler le § 4 de `specs/010-guide-nego-accueil-profil/quickstart.md` : les huit points du hors-connexion, dont **les deux appareils** et le **téléphone partagé**
-- [ ] T088 Dérouler les §§ 5 à 7 de `specs/010-guide-nego-accueil-profil/quickstart.md` : « Ma journée » vide sans erreur, le profil, « À propos » et ses textes — dont les deux contrôles qu'on fait mordre exprès. **Chronométrer SC-001** : entrer, choisir ses thématiques, arriver sur « Ma journée » en moins d'une minute
-- [ ] T089 Mesurer le § 8 de `specs/010-guide-nego-accueil-profil/quickstart.md` : 320, 360 et 390 px, thème clair et sombre, sur les écrans nouveaux et le profil — aucun débordement, aucune cible sous 44 px, anneau de focus partout
-- [ ] T090 [P] Relire les traductions `en` sous `frontend/i18n/locales/en/` et comparer les clés `fr`/`en` par `npm run check:guide-nego`
-- [ ] T090 bis [P] Vérifier qu'**aucun libellé de thématique** n'apparaît dans `frontend/i18n/locales/` ni sous `frontend/app/` — un `grep` sur les dix libellés `fr` et `en` (SC-007), à garder pour les étapes suivantes
-- [ ] T091 [P] Vérifier que `frontend/app/pages/guide-nego/composants.vue` montre `GnAvatar`, `GnJauge` et `GnTexteLong` dans les deux thèmes, et que la section « Ce qui n'est pas montré ici » est à jour
-- [ ] T092 Vérifier la non-régression du site — `frontend/app/pages/index.vue`, `frontend/app/pages/negotiations.vue`, le back-office et `frontend/app/pages/auth/*.vue` : accueil, `/negociations`, back-office, les quatre écrans d'authentification — **`auth` a bougé de fichier en phase 1**
-- [ ] T093 Lancer `node frontend/scripts/guide-nego-verifier-garde.mjs` contre la version construite : toutes les adresses gardées servies en 200, écrans nouveaux compris
-- [ ] T094 Lancer `make check-safe` depuis la racine, **API arrêtée** — deux tests d'`identity` sont sensibles à une activité concurrente sur la base
-- [ ] T095 Mettre à jour `docs/AppNego/progress.md` et, si `docs/database/` a bougé depuis la phase 2, `docs/progression/modele.md` : la ligne d'état et le journal, avec ce qui a été trouvé en construisant
+- [X] T086 Dérouler les §§ 1 à 3 de `specs/010-guide-nego-accueil-profil/quickstart.md` : le vocabulaire servi, le suivi de bout en bout, ce que la base refuse et ce que l'API répond
+- [X] T087 Dérouler le § 4 de `specs/010-guide-nego-accueil-profil/quickstart.md` : les huit points du hors-connexion, dont **les deux appareils** et le **téléphone partagé**
+- [X] T088 Dérouler les §§ 5 à 7 de `specs/010-guide-nego-accueil-profil/quickstart.md` : « Ma journée » vide sans erreur, le profil, « À propos » et ses textes — dont les deux contrôles qu'on fait mordre exprès. **Chronométrer SC-001** : entrer, choisir ses thématiques, arriver sur « Ma journée » en moins d'une minute
+- [X] T089 Mesurer le § 8 de `specs/010-guide-nego-accueil-profil/quickstart.md` : 320, 360 et 390 px, thème clair et sombre, sur les écrans nouveaux et le profil — aucun débordement, aucune cible sous 44 px, anneau de focus partout
+- [X] T090 [P] Relire les traductions `en` sous `frontend/i18n/locales/en/` et comparer les clés `fr`/`en` par `npm run check:guide-nego`
+- [X] T090 bis [P] Vérifier qu'**aucun libellé de thématique** n'apparaît dans `frontend/i18n/locales/` ni sous `frontend/app/` — un `grep` sur les dix libellés `fr` et `en` (SC-007), à garder pour les étapes suivantes
+- [X] T091 [P] Vérifier que `frontend/app/pages/guide-nego/composants.vue` montre `GnAvatar`, `GnJauge` et `GnTexteLong` dans les deux thèmes, et que la section « Ce qui n'est pas montré ici » est à jour
+- [X] T092 Vérifier la non-régression du site — `frontend/app/pages/index.vue`, `frontend/app/pages/negotiations.vue`, le back-office et `frontend/app/pages/auth/*.vue` : accueil, `/negociations`, back-office, les quatre écrans d'authentification — **`auth` a bougé de fichier en phase 1**
+- [X] T093 Lancer `node frontend/scripts/guide-nego-verifier-garde.mjs` contre la version construite : toutes les adresses gardées servies en 200, écrans nouveaux compris
+- [X] T094 Lancer `make check-safe` depuis la racine, **API arrêtée** — deux tests d'`identity` sont sensibles à une activité concurrente sur la base
+- [X] T095 Mettre à jour `docs/AppNego/progress.md` et, si `docs/database/` a bougé depuis la phase 2, `docs/progression/modele.md` : la ligne d'état et le journal, avec ce qui a été trouvé en construisant
 
 ### Sur appareil réel — ne se fait pas depuis un poste
 

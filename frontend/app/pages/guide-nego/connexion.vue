@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { APRES_LE_COMPTE } from '~/utils/guide-nego/parcours'
+import { apresLaConnexion } from '~/utils/guide-nego/parcours'
+import { CLE_OUVERTURE_VUE, poserCle } from '~/utils/guide-nego/stockage'
 
 /**
  * Écran 03b — se connecter.
@@ -20,6 +21,7 @@ const { t } = useI18n()
 const api = useApi()
 const route = useRoute()
 const session = useGnSession()
+const acces = useGnAcces()
 
 // L'adresse est reportée depuis l'écran de compte ou depuis le retour du
 // courriel : personne ne doit la ressaisir juste après l'avoir confirmée.
@@ -42,7 +44,10 @@ async function envoyer(): Promise<void> {
 
     switch (issue.status) {
       case 'authenticated':
-        await navigateTo(APRES_LE_COMPTE)
+        // Connectée, la personne a passé la porte : l'ouverture ne se montre plus.
+        poserCle(CLE_OUVERTURE_VUE)
+        await acces.rafraichir()
+        await navigateTo(apresLaConnexion(acces.ouvert.value))
         break
       case 'email_unverified':
         adresseAConfirmer.value = issue.email

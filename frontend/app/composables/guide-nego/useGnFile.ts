@@ -10,7 +10,7 @@
  * écran — c'est ce qui la fera servir au parcours (étape 2) et aux signalements (3b).
  */
 import { ApiRequestError, normalizeApiError } from '~/utils/api-error'
-import { magasinEcrituresIndexedDb } from '~/utils/guide-nego/garde'
+import { magasinDesEcritures } from '~/utils/guide-nego/garde'
 import {
   creerFile,
   type Expediteur,
@@ -44,7 +44,7 @@ export function useGnFile() {
 
   if (import.meta.client && !file) {
     file = creerFile({
-      magasin: magasinEcrituresIndexedDb,
+      magasin: magasinDesEcritures,
       expediteurs: (cle) => expediteurs.get(cle),
       personne: () => session.compte.value.id,
       signaler: (suite) => (avis.value = suite),
