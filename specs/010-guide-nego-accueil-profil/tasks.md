@@ -56,12 +56,12 @@ nouvelle, aucune signature retouchée, aucun comportement changé.
 
 **⚠️ La base se migre, elle ne se recharge pas.** Le volume n'est jamais détruit.
 
-- [ ] T004 Déclarer le vocabulaire `negotiation_theme` dans `docs/database/020_reference.sql`, dans l'`INSERT INTO reference.taxonomies` — `is_multi_select = true`, `is_hierarchical = false`, `is_system = true` —, précédé du commentaire qui dit pourquoi il n'est pas `activity_theme`
-- [ ] T005 Semer les dix termes dans l'`INSERT INTO reference.taxonomy_terms` de `docs/database/020_reference.sql`, codes et libellés `fr`/`en` de [research.md § R13](research.md), `sort_order` de 10 en 10, avant le `ON CONFLICT`
-- [ ] T006 Créer `negotiation.theme_subscriptions` dans `docs/database/100_negotiations.sql` sur le patron de `network_memberships` : colonnes, `xmod_fk_theme_subscriptions_person`, `ck_theme_subscriptions_period`, `ux_theme_subscriptions_active`, `ix_theme_subscriptions_theme`, `tg_theme_subscriptions_audit`, `tg_theme_subscriptions_check_theme`, et les `COMMENT ON` en français
-- [ ] T007 Écrire `specs/010-guide-nego-accueil-profil/migration.sql`, rejouable — `CREATE TABLE IF NOT EXISTS`, gardes `DO $$ … EXCEPTION WHEN duplicate_object` sur les triggers, `INSERT … ON CONFLICT DO NOTHING` sur le vocabulaire et les termes
-- [ ] T008 Appliquer `specs/010-guide-nego-accueil-profil/migration.sql` **deux fois** sur la base locale, puis comparer les schémas avec `pg_dump --schema-only` à ce que `docs/database/020_reference.sql` et `100_negotiations.sql` décrivent
-- [ ] T009 Consigner le changement de modèle dans `docs/progression/modele.md` — seule exception à la règle qui veut que Guide Négo n'écrive pas dans la progression de l'ePavillon (ADR-017)
+- [X] T004 Déclarer le vocabulaire `negotiation_theme` dans `docs/database/020_reference.sql`, dans l'`INSERT INTO reference.taxonomies` — `is_multi_select = true`, `is_hierarchical = false`, `is_system = true` —, précédé du commentaire qui dit pourquoi il n'est pas `activity_theme`
+- [X] T005 Semer les dix termes dans l'`INSERT INTO reference.taxonomy_terms` de `docs/database/020_reference.sql`, codes et libellés `fr`/`en` de [research.md § R13](research.md), `sort_order` de 10 en 10, avant le `ON CONFLICT`
+- [X] T006 Créer `negotiation.theme_subscriptions` dans `docs/database/100_negotiations.sql` sur le patron de `network_memberships` : colonnes, `xmod_fk_theme_subscriptions_person`, `ck_theme_subscriptions_period`, `ux_theme_subscriptions_active`, `ix_theme_subscriptions_theme`, `tg_theme_subscriptions_audit`, `tg_theme_subscriptions_check_theme`, et les `COMMENT ON` en français
+- [X] T007 Écrire `specs/010-guide-nego-accueil-profil/migration.sql`, rejouable — `CREATE TABLE IF NOT EXISTS`, gardes `DO $$ … EXCEPTION WHEN duplicate_object` sur les triggers, `INSERT … ON CONFLICT DO NOTHING` sur le vocabulaire et les termes
+- [X] T008 Appliquer `specs/010-guide-nego-accueil-profil/migration.sql` **deux fois** sur la base locale, puis comparer les schémas avec `pg_dump --schema-only` à ce que `docs/database/020_reference.sql` et `100_negotiations.sql` décrivent
+- [X] T009 Consigner le changement de modèle dans `docs/progression/modele.md` — seule exception à la règle qui veut que Guide Négo n'écrive pas dans la progression de l'ePavillon (ADR-017)
 
 **Checkpoint** : `SELECT * FROM reference.taxonomy_terms WHERE taxonomy_code = 'negotiation_theme'` rend dix lignes, et `GET /api/reference/taxonomies/negotiation_theme/terms` les sert **sans une ligne de Rust**. **Commit.**
 

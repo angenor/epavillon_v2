@@ -344,6 +344,43 @@ COMMENT ON TABLE negotiation.network_memberships IS
 COMMENT ON COLUMN negotiation.network_memberships.source_code_id IS
     'Code par lequel l''appartenance est venue : c''est ce qui rend les chiffres du réseau vérifiables.';
 
+-- 2 bis.3 bis — Les thématiques suivies
+--
+-- Une préférence de lecture, choisie et défaite librement depuis l'application :
+-- elle n'ouvre aucun droit, elle commande ce qu'on montre en premier et ce dont
+-- on avertit. Ce n'est PAS une compétence attestée — celle-là vit dans
+-- identity.negotiator_profiles, renseignée par un administrateur.
+--
+-- Même patron que network_memberships : un suivi se ferme (left_at), il ne se
+-- supprime pas, et l'index unique ne porte que sur le suivi vivant.
+CREATE TABLE negotiation.theme_subscriptions (
+    id              uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    person_id       uuid        NOT NULL CONSTRAINT xmod_fk_theme_subscriptions_person
+                                REFERENCES identity.people(id) ON DELETE CASCADE,
+    theme_term_id   uuid        NOT NULL REFERENCES reference.taxonomy_terms(id) ON DELETE RESTRICT,
+    followed_at     timestamptz NOT NULL DEFAULT now(),
+    left_at         timestamptz,
+    CONSTRAINT ck_theme_subscriptions_period CHECK (left_at IS NULL OR left_at >= followed_at)
+);
+
+CREATE UNIQUE INDEX ux_theme_subscriptions_active
+    ON negotiation.theme_subscriptions (person_id, theme_term_id) WHERE left_at IS NULL;
+CREATE INDEX ix_theme_subscriptions_theme
+    ON negotiation.theme_subscriptions (theme_term_id, followed_at DESC) WHERE left_at IS NULL;
+
+CREATE TRIGGER tg_theme_subscriptions_audit
+    AFTER INSERT OR UPDATE OR DELETE ON negotiation.theme_subscriptions
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
+CREATE TRIGGER tg_theme_subscriptions_check_theme
+    BEFORE INSERT OR UPDATE OF theme_term_id ON negotiation.theme_subscriptions
+    FOR EACH ROW EXECUTE FUNCTION negotiation.tg_check_term_taxonomy(
+        'theme_term_id', 'negotiation_theme');
+
+COMMENT ON TABLE negotiation.theme_subscriptions IS
+    'Thématiques de négociation qu''une personne choisit de suivre. N''ouvre aucun droit : commande ce qu''on lui montre en premier et ce dont on l''avertit. Choix révocable, jamais une compétence attestée — celle-là vit dans identity.negotiator_profiles.';
+COMMENT ON COLUMN negotiation.theme_subscriptions.left_at IS
+    'Un suivi se ferme, il ne se supprime pas : ce qu''une personne a suivi pendant une COP reste lisible, et l''index unique ne porte que sur le suivi vivant.';
+
 -- 2 bis.4 — Les demandes d'accès
 --
 -- `cancelled` = « annulée », le fait de la personne entrée par un code entre-temps.

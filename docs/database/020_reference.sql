@@ -275,7 +275,15 @@ INSERT INTO reference.taxonomies (code, label, description, is_multi_select, is_
     ('media_license',     '{"fr":"Licences des médias","en":"Media licences"}',          '{"fr":"Conditions de réutilisation d''un fichier téléversé","en":"Reuse terms of an uploaded file"}', false, false, true),
     -- Réseaux de négociation : l'appartenance vient du code d'invitation
     -- utilisé, jamais d'une case « genre » sur l'identité (ADR-007).
-    ('negotiation_network','{"fr":"Réseaux de négociation","en":"Negotiation networks"}', '{"fr":"Réseaux auxquels un code d''invitation peut donner l''appartenance","en":"Networks a invitation code may grant membership to"}', false, false, true)
+    ('negotiation_network','{"fr":"Réseaux de négociation","en":"Negotiation networks"}', '{"fr":"Réseaux auxquels un code d''invitation peut donner l''appartenance","en":"Networks a invitation code may grant membership to"}', false, false, true),
+    -- Thématiques de négociation : ce qu'une personne SUIT en salle, pas ce que
+    -- le Pavillon programme. `activity_theme` classe les activités et les
+    -- publications de l'ePavillon ; les mêler ferait voir « Élevage durable »
+    -- à une négociatrice et « Article 6 » dans les filtres du site. Cinq codes
+    -- coexistent avec un homonyme sous `activity_theme` : la clé est
+    -- (taxonomy_code, code), et c'est voulu. is_system : le vocabulaire commande
+    -- les alertes de Guide Négo, aucun écran ne le modifie.
+    ('negotiation_theme',  '{"fr":"Thématiques de négociation","en":"Negotiation themes"}', '{"fr":"Filières suivies par une négociatrice ou un négociateur : adaptation, finance, genre…","en":"Tracks followed by a negotiator: adaptation, finance, gender…"}', true, false, true)
 ON CONFLICT (code) DO NOTHING;
 
 INSERT INTO reference.taxonomy_terms (taxonomy_code, code, label, sort_order) VALUES
@@ -357,5 +365,17 @@ INSERT INTO reference.taxonomy_terms (taxonomy_code, code, label, sort_order) VA
     ('media_license', 'ifdd_internal',       '{"fr":"Usage interne IFDD","en":"IFDD internal use"}', 70),
 
     -- Réseaux de négociation
-    ('negotiation_network', 'women_negotiators', '{"fr":"Réseau des négociatrices francophones","en":"Francophone women negotiators network"}', 10)
+    ('negotiation_network', 'women_negotiators', '{"fr":"Réseau des négociatrices francophones","en":"Francophone women negotiators network"}', 10),
+
+    -- Thématiques de négociation, dans l'ordre de la maquette de Guide Négo
+    ('negotiation_theme', 'adaptation',      '{"fr":"Adaptation","en":"Adaptation"}', 10),
+    ('negotiation_theme', 'mitigation',      '{"fr":"Atténuation","en":"Mitigation"}', 20),
+    ('negotiation_theme', 'finance',         '{"fr":"Finance","en":"Finance"}', 30),
+    ('negotiation_theme', 'loss_and_damage', '{"fr":"Pertes et préjudices","en":"Loss and damage"}', 40),
+    ('negotiation_theme', 'article_6',       '{"fr":"Article 6","en":"Article 6"}', 50),
+    ('negotiation_theme', 'transparency',    '{"fr":"Transparence","en":"Transparency"}', 60),
+    ('negotiation_theme', 'gender',          '{"fr":"Genre","en":"Gender"}', 70),
+    ('negotiation_theme', 'just_transition', '{"fr":"Transition juste","en":"Just transition"}', 80),
+    ('negotiation_theme', 'agriculture',     '{"fr":"Agriculture","en":"Agriculture"}', 90),
+    ('negotiation_theme', 'technology',      '{"fr":"Technologie","en":"Technology"}', 100)
 ON CONFLICT (taxonomy_code, code) DO NOTHING;
