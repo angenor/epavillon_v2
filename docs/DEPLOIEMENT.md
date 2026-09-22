@@ -588,6 +588,11 @@ UPDATE platform.feature_flags
  WHERE key = 'guide_nego.enabled';
 ```
 
+**La réponse doit être `UPDATE 1`.** `UPDATE 0` veut dire que la ligne n'existe pas : elle n'est
+semée que par `900_seed.sql`, chargé sur une base neuve, et une base en service ne l'a jamais reçue.
+L'application resterait alors fermée, sans un message. Jouer d'abord la migration de 0a —
+`specs/008-guide-nego-coquille/migration.sql`, § 15 —, puis rejouer la bascule.
+
 **Les deux colonnes, toujours ensemble. Pas de déploiement progressif** — ce n'est pas une
 préférence, c'est ce que la fonction permet :
 
@@ -626,11 +631,205 @@ ouverte jusqu'à sa prochaine lecture réussie.
 
 ### L'ordre des gestes, le jour de l'ouverture
 
-1. **Déployer** (`./deploy.sh deploy`), drapeau encore éteint.
+1. **Déployer** (`./deploy.sh deploy`), drapeau encore éteint — et, la première fois, migrer
+   selon le § 15.
 2. **Vérifier la garde** — § 6, point 4. Une adresse cassée et aucun téléphone n'installe
    l'application, sans le moindre message.
-3. **Basculer le drapeau**, les deux colonnes.
+3. **Basculer le drapeau**, les deux colonnes. **`UPDATE 1`, sinon s'arrêter** (ci-dessus).
 4. **Ouvrir `…/v2/guide-nego/` sur un téléphone réel**, l'installer, puis couper le réseau et la
    rouvrir. Le service worker et la garde ne se laissent pas éprouver depuis un poste de travail.
 
 Rien à redémarrer entre 3 et 4 : le drapeau se lit à chaque ouverture.
+
+
+---
+
+## 15. Mettre en ligne 0a, 0b et 0c (22/09)
+
+Une seule mise en ligne porte les trois premières étapes de Guide Négo : le code de la branche, et
+**trois migrations**. Préparée ici, **pas encore exécutée**. Le drapeau reste éteint pendant toute
+la mise en ligne : le site ne voit que ce qui le touche (§ 3 ci-dessous), l'application ne s'ouvre
+qu'à la recette sur téléphones (§ 4).
+
+### Ce qui change
+
+| Ordre | Migration | Ce qu'elle porte |
+|---|---|---|
+| 1 | `specs/008-guide-nego-coquille/migration.sql` | Une ligne : le drapeau `guide_nego.enabled`, éteint. Sans elle, la bascule du § 14 rend `UPDATE 0` |
+| 2 | `specs/009-guide-nego-compte-admission/migration.sql` | `identity.sessions` dit d'où vient la session (site ou application) ; le vocabulaire des réseaux ; les codes d'invitation, leurs usages, les demandes d'accès, les appartenances ; deux réglages d'admission |
+| 3 | `specs/010-guide-nego-accueil-profil/migration.sql` | Le vocabulaire des thématiques et ses dix termes ; `negotiation.theme_subscriptions` ; `identity.sessions.replaced_by`, qui distingue une réponse de rotation perdue d'un vol (ADR-020) |
+
+Les trois sont **rejouables** : un second passage ne crée rien, ne perd rien, n'échoue pas.
+
+**Aucun réglage à ajouter à `.env.prod`.** Les deux réglages nouveaux ont un défaut, et ce défaut
+est la valeur voulue :
+
+| Réglage | Défaut | Ce qu'il fait |
+|---|---|---|
+| `AUTH_SESSION_TTL_APP` | 90 jours, glissants | Durée d'une session ouverte depuis Guide Négo, sans case à cocher |
+| `AUTH_REFRESH_GRACE` | 60 secondes | Fenêtre où l'ancien jeton de rafraîchissement, représenté après une réponse perdue, n'est pas pris pour un vol |
+
+Ne les écrire que pour s'écarter du défaut. `PRIVACY_POLICY_VERSION` disparaît : encore posée dans
+`.env.prod`, elle est sans effet — la version vient désormais du texte servi par l'API.
+
+### 1. Répéter sur une copie de la production — la veille
+
+```bash
+./deploy.sh backup     # rapatrie sauvegardes/epavillon-AAAAMMJJ-HHMMSS.sql.gz
+COPIE=postgres://postgres:dev@localhost:5442/copie_prod
+psql postgres://postgres:dev@localhost:5442/postgres -c 'CREATE DATABASE copie_prod'
+gunzip -c sauvegardes/epavillon-AAAAMMJJ-HHMMSS.sql.gz | psql "$COPIE"
+
+for passage in 1 2; do          # deux passages : le second ne doit rien changer
+  for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil; do
+    psql "$COPIE" -v ON_ERROR_STOP=1 -f "specs/$etape/migration.sql" || exit 1
+  done
+done
+```
+
+Une base **à part** : la base de développement n'est pas touchée, et `make media-base-url` n'a pas
+lieu d'être.
+
+Puis **comparer les schémas**, § 13 — la copie migrée contre une base chargée depuis
+`docs/database/` (la base modèle du harnais de test, `epavillon_test_template_<empreinte>`, fait
+l'affaire), après tri des lignes :
+
+```bash
+pg_dump --schema-only --no-owner --no-privileges "$COPIE"  | sort > /tmp/migree.sql
+pg_dump --schema-only --no-owner --no-privileges "$MODELE" | sort > /tmp/modele.sql
+diff /tmp/modele.sql /tmp/migree.sql
+```
+
+Écarts admis : les partitions `engagement.email_messages_AAAAMM`, et le texte des vues réécrit par
+la restauration. Tout autre écart arrête la mise en ligne.
+
+**Et les lignes semées**, que la comparaison des schémas ne voit pas — c'est ainsi que le drapeau
+de 0a a manqué :
+
+```sql
+SELECT (SELECT count(*) FROM platform.feature_flags  WHERE key = 'guide_nego.enabled')                  AS drapeau,      -- 1
+       (SELECT count(*) FROM platform.settings       WHERE key IN ('negotiation.admission_mode',
+                                                                   'negotiation.invitation_attempts'))  AS reglages,     -- 2
+       (SELECT count(*) FROM reference.taxonomy_terms WHERE taxonomy_code = 'negotiation_network')      AS reseaux,      -- 1
+       (SELECT count(*) FROM reference.taxonomy_terms WHERE taxonomy_code = 'negotiation_theme')        AS thematiques;  -- 10
+```
+
+### 2. Le jour de la mise en ligne
+
+Dans l'ordre du § 13, chaque étape pour sa raison :
+
+1. **Sauvegarder** : `./deploy.sh backup`.
+2. **Envoyer le code** sans rien reconstruire : `./deploy.sh push`.
+3. **Déposer les migrations** hors du dossier synchronisé, renommées — elles s'appellent toutes
+   `migration.sql` :
+   ```bash
+   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil; do
+     scp "specs/$etape/migration.sql" "root@<serveur>:/root/epavillon-migrations/$etape.sql"
+   done
+   ```
+4. **Construire les images avant de migrer** — l'ancienne version sert pendant la compilation.
+   Sur le serveur (`./deploy.sh connect`), dans le dossier de la pile :
+   ```bash
+   COMPOSE="docker compose --env-file .env.prod -f ops/docker-compose.prod.yml"
+   $COMPOSE build api worker front
+   ```
+5. **Migrer, puis redémarrer aussitôt** :
+   ```bash
+   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil; do
+     $COMPOSE exec -T postgres psql -U postgres -d epavillon -v ON_ERROR_STOP=1 \
+       < /root/epavillon-migrations/$etape.sql || break
+   done
+   $COMPOSE up -d api worker front
+   ```
+   Une migration qui échoue arrête la boucle, et sa transaction est annulée : la base reste dans
+   l'état de l'étape précédente. Ne pas redémarrer ; lire l'erreur.
+6. **Santé et garde** : `./deploy.sh sante`, puis la garde du § 6, point 4.
+7. **Recomparer** le schéma de production au modèle, puis la requête des lignes semées (§ 1
+   ci-dessus). `GET /v2/api/platform/feature-flags` doit rendre `guide_nego.enabled` — éteint.
+
+### 3. Juste après le redémarrage : le site
+
+Ce que cette mise en ligne touche sur le site — les sessions, le renouvellement du jeton, la version
+consignée d'un consentement. À faire dans le quart d'heure, avec un compte ordinaire puis un
+compte d'administration.
+
+- [ ] **La connexion.** `/v2/connexion`, sans « Rester connecté » : l'accueil s'ouvre, le menu du
+      compte paraît. La session porte son origine :
+      `SELECT client_kind FROM identity.sessions WHERE person_id = :p ORDER BY issued_at DESC LIMIT 1;`
+      → `web`.
+- [ ] **Une session qui tient au-delà d'un quart d'heure.** Le jeton d'accès vit quinze minutes.
+      Laisser l'onglet seize minutes, puis ouvrir une page de l'espace organisation : on reste
+      connecté, sans retour à l'écran de connexion. C'est le renouvellement qu'ADR-020 a modifié.
+      Aucune coupure prise pour un vol :
+      `SELECT revoked_reason, count(*) FROM identity.sessions WHERE revoked_at > now() - interval '1 hour' GROUP BY 1;`
+      → pas de `reuse_detected`.
+- [ ] **L'inscription, et son consentement sous `2026-01`.** Créer un compte : courriel reçu, lien
+      suivi, connexion. **Créer un compte ne consigne aucun consentement** — constaté le 22/09 ;
+      l'accord est écrit à l'inscription à une **séance** dont le formulaire pose une question
+      sensible. S'inscrire à une telle séance, y répondre, accepter, puis :
+      `SELECT purpose, policy_version FROM identity.current_consents WHERE person_id = :p;`
+      → `2026-01`, la version servie par `GET /v2/api/legal/privacy`. S'il n'existe aucune séance
+      de ce genre en production, ne pas en créer pour l'occasion : ce chemin est éprouvé par
+      `programme/tests/consentement.rs`, dans `make check-safe`.
+- [ ] **Le dépôt d'une proposition.** « Déposer une proposition », sur l'appel ouvert, jusqu'à
+      l'envoi : l'écran confirme l'envoi, et la proposition paraît dans l'espace organisation
+      comme dans la liste du back-office.
+- [ ] **Le back-office.** En administrateur : la liste des propositions, celle des utilisateurs,
+      puis `/v2/admin/negociations` — nouveau en 0b, les codes d'invitation. Y **créer le code**
+      qui servira au § 4.
+- [ ] **Guide Négo reste fermée** : `/v2/guide-nego/` sert « bientôt disponible ».
+
+Un point qui échoue et ne se corrige pas sur place : `./deploy.sh restore <sauvegarde de l'étape 1>`
+ramène la base d'avant les migrations, puis redéployer la version précédente du code.
+
+### 4. La recette sur téléphones réels — une seule séance
+
+Ce qu'aucun poste de travail ne peut éprouver, pour les trois étapes à la fois : l'appareil réel de
+0a (T071), T112 de 0b, T096 à T098 de 0c. **Deux jours de suite** — deux points exigent une nuit ;
+on les prépare en fin de première journée.
+
+**Avant** : le drapeau ouvert (§ 14, `UPDATE 1`) ; le code créé au back-office (§ 3) ; un Android,
+un iPhone, deux adresses électroniques qu'on relève sur le téléphone ; un débit bridé — sur Android,
+Chrome relié à `chrome://inspect` d'un poste, profil « 3G lente » ; à défaut, le téléphone réglé sur
+la 3G seule. L'application s'installe depuis `https://<domaine>/v2/guide-nego/` — **avec la barre
+finale** : sans elle, l'adresse est hors de la portée du service worker et tombe sur l'erreur du
+navigateur hors connexion.
+
+**Premier jour — Android**
+
+- [ ] `guide-nego/installer`, installer, lancer depuis l'icône : plein écran, icône et nom justes.
+- [ ] « Continuer en visiteur » : le message « Prête hors connexion » paraît, sans visiter les onglets.
+- [ ] Débit bridé, application gardée : elle s'ouvre en moins de deux secondes sur la version gardée.
+      Couper le réseau pendant l'installation d'une nouvelle version : l'ancienne sert toujours.
+- [ ] Créer un compte **depuis l'application installée** ; le lien du courriel s'ouvre dans
+      l'application et enchaîne sur le code.
+- [ ] En débit bridé, saisir le code : « Code reconnu », accès ouvert. Un code faux : message distinct.
+- [ ] En débit bridé, choisir ses thématiques ; « Ma journée » s'ouvre.
+- [ ] Mode avion : changer ses thématiques — le choix s'affiche aussitôt.
+- [ ] **Préparer la nuit** : toujours en mode avion, changer encore ses thématiques, noter lesquelles,
+      fermer l'application.
+
+**Premier jour — iPhone**
+
+- [ ] « Installer » mène aux étapes manuelles ; l'installation par Partager fonctionne.
+- [ ] Créer un compte depuis l'application installée ; le lien du courriel s'ouvre **dans Safari** et
+      dit « Adresse confirmée — retournez dans Guide Négo ». Revenir par le sélecteur
+      d'applications : l'application relit l'état du compte **seule** et passe au code.
+- [ ] Saisir le code, choisir ses thématiques, arriver sur « Ma journée ».
+- [ ] Mode avion, relancer depuis l'icône : tout s'ouvre, bandeau une fois, « lu à … » dans
+      l'en-tête ; la police rend « œ », « Œ », « É ».
+- [ ] Thème « Sombre », fermer, rouvrir en mode avion : sombre d'emblée, sans éclair.
+
+**Le lendemain matin**
+
+- [ ] Android : **rendre le réseau sans ouvrir l'application**, puis l'ouvrir. Le choix de la veille
+      part — c'est le départ à l'ouverture qui l'attrape, aucun `online` n'ayant été émis. En base,
+      les thématiques notées la veille, en une écriture.
+- [ ] Les deux téléphones : `client_kind` est resté `app` après la nuit —
+      `SELECT client_kind, expires_at FROM identity.sessions WHERE person_id = :p AND revoked_at IS NULL;`
+      → `app`, et une échéance à quatre-vingt-dix jours.
+- [ ] Les deux téléphones : ouverts sans réseau puis rendus au réseau, « Synchronisé à … » sans
+      recharger.
+
+Un écart se note dans `docs/AppNego/progress.md`, avec l'appareil et le système. Tout coché, T071,
+T112, T096, T097 et T098 le sont aussi dans leurs `tasks.md`.
