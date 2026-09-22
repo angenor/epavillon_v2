@@ -71,6 +71,13 @@ n'oppose plus rien. Le même test vérifie que chaque texte porte bien une versi
 vigueur, et que les deux langues d'un texte déclarent **la même version** — deux langues qui divergeraient
 feraient deux textes.
 
+**Et un second test rend les fichiers réels avec la grammaire close, et échoue sur toute construction
+qu'elle ne couvre pas.** Ces textes seront écrits par quelqu'un d'autre, qui n'a aucune raison de
+connaître les bornes du rendu : un tableau, une note de bas de page, une image ou un bloc de code
+produiraient du charabia à l'écran **sans prévenir personne**. Le test échoue à la place, avec le
+numéro de ligne et la construction en cause. C'est le prix d'un rendu écrit à la main plutôt
+qu'emprunté — et il se paye une fois, à la construction, pas devant une négociatrice.
+
 ---
 
 ## 5. Le rendu côté application

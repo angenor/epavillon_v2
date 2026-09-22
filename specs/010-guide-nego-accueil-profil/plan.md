@@ -25,6 +25,9 @@ et 5. Le profil rassemble ce qui la concerne, et « À propos » sert les textes
   ligne pour personne et décrit une compétence attestée, pas une préférence ([R1](research.md)).
 - **L'écriture** est un **remplacement en bloc**, donc idempotente, ce qui rend sûre la file d'écritures
   différées que cette étape construit — elle n'existait pas, et la constitution l'exige ([R3](research.md), [R5](research.md)).
+  Et parce que l'idempotence protège du rejeu mais **pas de l'ancienneté**, une intention porte l'empreinte
+  de l'état sur lequel elle a été prise : un choix parti en retard reçoit `412` et s'abandonne, au lieu
+  d'effacer un choix plus récent fait ailleurs ([R16](research.md)).
 - **Les textes** sont des fichiers embarqués dans `kernel`, servis par une route publique de `api` au
   site comme à l'application ; la version servie remplace le réglage `PRIVACY_POLICY_VERSION`
   ([R6](research.md)).
@@ -183,23 +186,35 @@ d'écritures dans `utils/guide-nego/`**, à côté de la garde qu'elle prolonge,
 
 ## Séquencement
 
-Chaque phase se termine par ses contrôles ciblés et un commit. `make check-safe` **en fin de cycle
-seulement**, API arrêtée.
+**Sur la branche `010-guide-nego-accueil-profil`, comme à l'étape 0b. Un commit par phase**, avec ses
+contrôles ciblés. `make check-safe` **en fin de cycle seulement**, API arrêtée.
 
 | # | Phase | Ce qu'elle livre | Pourquoi là |
 |---|---|---|---|
-| 1 | **Le modèle** | Vocabulaire, dix termes, table, triggers, index, migration rejouable, ligne dans `docs/progression/modele.md` | Rien ne s'écrit avant le SQL |
-| 2 | **La place, côté client** | Sortie du bloc `auth` vers `composables/api/auth.ts` | 27 lignes de marge : tout ajout la franchirait |
-| 3 | **Les thématiques, côté API** | `GET` et `PUT /negotiation/me/themes`, codes d'erreur, OpenAPI, tests sur base réelle | Le client a besoin d'un contrat servi |
-| 4 | **La file d'écritures** | Magasin `ecritures`, départ à `online` et au retour au premier plan, tests sans navigateur | Elle conditionne le récit 1 hors connexion |
-| 5 | **US1 — Mes thématiques** | `GnAvatar`, l'écran de choix, `useGnThematiques`, la garde de première entrée | Le critère de sortie de l'étape |
+| 1 | **La place, côté client** | Sortie du bloc `auth` vers `composables/api/auth.ts` — **et rien d'autre** | 27 lignes de marge sous le garde-fou : tout ajout la franchirait. Voir la note ci-dessous |
+| 2 | **Le modèle** | Vocabulaire, dix termes, table, triggers, index, migration rejouable, ligne dans `docs/progression/modele.md` | Rien du métier ne s'écrit avant le SQL |
+| 3 | **Les thématiques, côté API** | `GET` et `PUT /negotiation/me/themes`, l'empreinte sur les codes triés, `If-Match` et le `412`, trois codes d'erreur, OpenAPI, tests sur base réelle | Le client a besoin d'un contrat servi |
+| 4 | **La file d'écritures** | Magasin `ecritures`, intention portant empreinte et compte, départ à l'ouverture · `online` · retour au premier plan, vidange à la déconnexion, tests sans navigateur | Elle conditionne le récit 1 hors connexion |
+| 5 | **US1 — Mes thématiques** | `GnAvatar`, l'écran de choix, `useGnThematiques`, la garde de première entrée, le message du `412` | Le critère de sortie de l'étape |
 | 6 | **US2 — Ma journée** | Les cinq blocs et leurs états vides, l'avatar dans l'en-tête | Le cadre des quatre étapes suivantes |
 | 7 | **US3 — Profil** | Mon suivi, `GnJauge`, les téléchargements, la place occupée et sa libération | S'appuie sur 5 |
-| 8 | **US4 — Textes** | `kernel/legal`, `GET /legal/{cle}`, le contrôle d'empreinte, la bascule de `PRIVACY_POLICY_VERSION`, « À propos », `GnTexteLong` | Touche `programme` : la faire seule, et tard |
+| 8 | **US4 — Textes** | `kernel/legal`, `GET /legal/{cle}`, les **deux** contrôles — empreinte figée, et grammaire close éprouvée sur les fichiers réels —, la bascule de `PRIVACY_POLICY_VERSION`, « À propos », `GnTexteLong` | Touche `programme` : la faire seule, et tard |
 | 9 | **Recette** | Le quickstart déroulé, traductions `en` relues, planche complétée, non-régression du site, `make check-safe` | — |
 
-**Ce qui ne se fait pas depuis un poste** : l'installation sur Android et iPhone réels, la file qui
-repart après une nuit de veille, et **T112 de l'étape 0b**, toujours due.
+### La phase 1 est un commit à part, et ne fait qu'une chose
+
+Elle **déplace** le bloc `auth` et ne change rien d'autre : pas de méthode nouvelle, pas de signature
+retouchée, **aucun des 14 appelants modifié**. Rien d'autre du site ne bouge dans toute l'étape — c'est
+le seul fichier partagé auquel 0c touche, avec la ligne de `programme` en phase 8.
+
+Sa porte : `npm run typecheck`, `npm run build` et `make check-api-contract` au vert, et la revue du
+diff doit se lire comme un déplacement.
+
+### Ce qui ne se fait pas depuis un poste
+
+L'installation sur Android et iPhone réels, le choix pris en 3G bridée, la file qui repart **après une
+nuit de veille** — c'est le cas que l'événement `online` ne couvre pas et que le départ à l'ouverture
+existe pour attraper —, et **T112 de l'étape 0b**, toujours due.
 
 ## Complexity Tracking
 

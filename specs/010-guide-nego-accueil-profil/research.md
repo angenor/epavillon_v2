@@ -203,6 +203,11 @@ paragraphes, listes, liens, emphase — échappe tout le reste, et se teste sans
 bibliothèque de rendu Markdown au client pour trois textes serait une dépendance d'ampleur au sens de la
 constitution, pour un gain nul.
 
+**Et un test rend les fichiers réels avec cette grammaire, et échoue sur ce qu'elle ne couvre pas.**
+Les textes seront écrits par quelqu'un qui n'a aucune raison d'en connaître les bornes : un tableau ou
+une note de bas de page rendraient du charabia sans prévenir. Le test échoue à la place. C'est ce qui
+rend le rendu maison tenable : il n'a pas à tout couvrir, il doit dire ce qu'il ne couvre pas.
+
 ---
 
 ## R8 — La place occupée sur l'appareil
@@ -339,6 +344,43 @@ La modification de `docs/database/` se consigne dans `docs/progression/modele.md
 aux deux applications, c'est la seule exception à la règle de suivi de Guide Négo.
 
 `make check` et `make check-db` détruisent la base locale et ne se lancent pas.
+
+---
+
+## R16 — Deux appareils, et un choix qui arrive en retard
+
+**Décision : une intention porte l'empreinte de l'état sur lequel elle a été prise, l'envoie en
+`If-Match`, et l'API rend `412` si l'état a changé.**
+
+L'idempotence de R3 protège du **rejeu** — envoyer deux fois la même chose ne fait pas deux fois l'effet.
+Elle ne protège pas de l'**ancienneté**, et le scénario tient en trois lignes :
+
+> Téléphone sans réseau à 10:00, la personne choisit *adaptation* et *genre* : l'intention part en file.
+> Tablette en ligne à 11:00, elle choisit *finance*. Téléphone de retour à 12:00 : l'intention de 10:00
+> part et **efface le choix de 11:00**, sans que personne ne le voie.
+
+`If-Match` ferme cela. Un `PUT` **sans** `If-Match` reste accepté : l'écran en ligne vient de lire
+l'état, il n'a rien à opposer. Sur `412`, l'application **abandonne** l'intention, relit, et le dit —
+« Vos thématiques ont changé sur un autre appareil ». Jamais de fusion : la liste qu'une fusion
+produirait n'aurait été choisie par personne.
+
+**L'empreinte se calcule sur les codes suivis, triés** — jamais sur le corps rendu. Deux appareils de la
+même personne, l'un en français l'autre en anglais, auraient sinon deux empreintes pour un même état.
+
+**Conséquence non prévue, et heureuse** : le corps rendu **ne peut donc pas porter de libellés**. Si
+l'empreinte les ignorait mais que le corps les portait, un appareil qui change de langue recevrait un
+`304` et garderait les anciens libellés. Le corps ne rend donc que des codes — le client a déjà le
+vocabulaire par la route publique des termes, qu'il lit de toute façon. Une source de libellés au lieu
+de deux, et un contrat plus court.
+
+**Trois règles de file qui en découlent**, écrites pour tenir au-delà des thématiques, puisque le
+parcours (étape 2) et les signalements (3b) emploieront la même file :
+
+1. Une entrée porte **l'identifiant de la personne** qui l'a prise, et ne part jamais sous un autre
+   compte — un téléphone se prête, au stand.
+2. La file **se vide à la déconnexion**.
+3. Elle part **aussi à l'ouverture de l'application**, pas seulement sur `online` et au retour au
+   premier plan : un téléphone rouvert le lendemain n'émet pas d'`online`.
 
 ---
 

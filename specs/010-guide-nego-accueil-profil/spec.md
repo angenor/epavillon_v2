@@ -126,7 +126,8 @@ Depuis le profil, Aïssatou ouvre « À propos ». Elle y lit qui édite l'appli
 - **Aucune thématique n'existe en base.** L'écran de choix ne montre pas une liste vide sans explication : il dit qu'aucune thématique n'est proposée pour l'instant et laisse continuer sans bloquer l'entrée.
 - **La personne quitte l'application au milieu du choix.** À sa prochaine ouverture, elle retrouve l'étape des thématiques, sans avoir à refaire les précédentes.
 - **Elle décoche tout depuis le profil.** La modification n'est pas enregistrable : au moins une thématique est exigée, et l'écran le dit avant qu'elle ne valide.
-- **Deux appareils modifient les thématiques en même temps.** Le dernier choix enregistré fait foi, et l'autre appareil l'adopte à sa prochaine lecture, sans message d'échec.
+- **Deux appareils modifient les thématiques en même temps, tous deux en ligne.** Le dernier choix enregistré fait foi, et l'autre appareil l'adopte à sa prochaine lecture, sans message d'échec.
+- **Un choix pris hors connexion arrive après un autre, fait ailleurs entre-temps.** Le choix parti en retard **n'écrase pas** le plus récent : il est abandonné, l'application relit l'état vrai et le dit — « Vos thématiques ont changé sur un autre appareil ». Rien ne se perd en silence, et rien ne revient en arrière.
 - **Le choix est fait en mode avion.** Il s'affiche aussitôt comme choisi, part au retour du réseau, et n'est enregistré qu'une fois même si l'application a été fermée entre-temps.
 - **Le stockage du téléphone est refusé ou plein.** L'application s'ouvre malgré tout, la place occupée dit ce qu'elle peut, et rien ne lève d'erreur à l'écran.
 - **La date du jour change pendant que l'écran est ouvert** — minuit, ou changement de fuseau en voyage. « Ma journée » se remet à la bonne date à sa prochaine lecture, sans laisser une date fausse en titre.
@@ -148,6 +149,7 @@ Depuis le profil, Aïssatou ouvre « À propos ». Elle y lit qui édite l'appli
 - **FR-007** : Une personne DOIT pouvoir modifier ses thématiques depuis « Profil et réglages », sur le même écran que le premier choix, ses thématiques déjà cochées.
 - **FR-008** : Le système NE DOIT proposer que les thématiques actives ; une thématique désactivée cesse d'être proposée sans effacer les choix portant sur les autres.
 - **FR-009** : Le choix des thématiques DOIT être possible sans réseau : l'écran s'affiche à partir de la dernière liste lue, avec son heure de lecture, et l'enregistrement part au retour du réseau, une seule fois.
+- **FR-009 bis** : Un choix parti en retard NE DOIT JAMAIS écraser un choix plus récent fait sur un autre appareil. Le système DOIT le détecter, abandonner le choix en retard, relire l'état vrai et l'annoncer à la personne. Une écriture en attente NE DOIT jamais partir sous un autre compte que celui qui l'a prise, et la file DOIT se vider à la déconnexion.
 - **FR-010** : Le système NE DOIT proposer le choix des thématiques qu'à une personne disposant d'un compte ; une visiteuse sans compte ne le voit pas.
 - **FR-011** : Les thématiques suivies NE DOIVENT filtrer aucune liste à cette étape ; les activités du Pavillon NE DOIVENT jamais être filtrées par elles, à aucune étape.
 
@@ -228,6 +230,7 @@ Rien n'est à ajouter pour « Ma journée » à cette étape : ses blocs sont vi
 - **SC-003** : « Ma journée » s'ouvre avec ses cinq blocs, chacun dans son état vide, sans qu'aucun message d'erreur ne paraisse — en ligne comme en mode avion.
 - **SC-004** : Réseau coupé, chacun des écrans de l'étape s'affiche et dit l'heure de sa dernière lecture.
 - **SC-005** : Un choix de thématiques fait en mode avion est enregistré au retour du réseau, une seule fois, y compris si l'application a été fermée entre-temps.
+- **SC-005 bis** : Un choix fait hors connexion sur un état devenu périmé est abandonné, jamais appliqué : l'état le plus récent survit, et la personne apprend pourquoi son choix n'a pas pris.
 - **SC-006** : Les écrans nouveaux sont fidèles à la maquette à 360 px, en thème clair et en thème sombre, sans défilement horizontal — aux écarts inscrits près.
 - **SC-007** : Aucun libellé de thématique n'apparaît dans un fichier de traduction ni dans le code — la recherche le prouve.
 - **SC-008** : Le site et l'application reçoivent le même texte et la même version pour la politique de confidentialité et les conditions d'utilisation ; un texte modifié sans nouvelle version fait échouer le contrôle.

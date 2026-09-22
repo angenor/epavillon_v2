@@ -91,6 +91,9 @@ WHERE table_name = 'theme_subscriptions' ORDER BY occurred_at DESC LIMIT 3;
 | `INSERT` direct d'un terme d'un autre vocabulaire | La base lève : `tg_theme_subscriptions_check_theme` |
 | Deux `PUT` identiques d'affilée | Même état, **aucune écriture de plus** dans l'audit |
 | `GET` puis `GET` avec l'`ETag` en `If-None-Match` | `304`, sans corps |
+| `PUT` avec un `If-Match` périmé | **`412`**, et **la base est inchangée** |
+| `PUT` sans `If-Match` | Accepté — l'écran en ligne vient de lire |
+| Le même `GET` en `fr` puis en `en` | **La même empreinte** : elle porte l'état, pas sa langue |
 | `PUT` sans session | `401` |
 
 ---
@@ -104,9 +107,18 @@ WHERE table_name = 'theme_subscriptions' ORDER BY occurred_at DESC LIMIT 3;
    base porte **une seule** écriture.
 3. **Intentions successives.** Réseau coupé, choisir, changer d'avis, choisir encore. Rétablir.
    **Attendu** : une seule écriture, celle du dernier état.
-4. **Retour en cours de route.** Réseau rétabli pendant que l'écran est ouvert. **Attendu** : le bandeau
+4. **Deux appareils — le cas qui compte.** Téléphone hors réseau, choisir *adaptation* et *genre*. Sur
+   un second navigateur, même compte, en ligne, choisir *finance*. Rendre le réseau au téléphone.
+   **Attendu** : *finance* survit, le téléphone affiche l'état vrai et dit « Vos thématiques ont changé
+   sur un autre appareil ». En base, **aucune trace d'un passage par `{adaptation, genre}`**.
+5. **Téléphone partagé.** Hors réseau, choisir, se déconnecter, connecter un autre compte, rendre le
+   réseau. **Attendu** : rien ne part, et le second compte garde ses thématiques.
+6. **Après une nuit.** Téléphone hors réseau, choisir, fermer l'application, laisser l'appareil en veille,
+   rétablir le réseau **sans ouvrir l'application**, puis l'ouvrir. **Attendu** : le choix part — c'est le
+   départ à l'ouverture qui l'attrape, aucun `online` n'ayant été émis.
+7. **Retour en cours de route.** Réseau rétabli pendant que l'écran est ouvert. **Attendu** : le bandeau
    cède à « Synchronisé à … », sans rechargement.
-5. **Stockage refusé** (navigation privée, site data bloqué). **Attendu** : l'application s'ouvre, rien
+8. **Stockage refusé** (navigation privée, site data bloqué). **Attendu** : l'application s'ouvre, rien
    ne lève, la place occupée dit qu'elle ne peut pas mesurer.
 
 ```bash
@@ -165,8 +177,13 @@ curl -s -H 'Accept-Language: en' "$API/api/legal/privacy" | jq '.version'   # m�
 curl -s "$API/api/legal/inconnu" -o /dev/null -w '%{http_code}\n'           # 404
 ```
 
-**Et le contrôle mord** : modifier une phrase d'un texte sans toucher sa version, puis
-`cargo test -p kernel` — **le test échoue**. Remettre la phrase, ou lever la version.
+**Et les deux contrôles mordent** :
+
+- modifier une phrase d'un texte sans toucher sa version, puis `cargo test -p kernel` — **le test
+  échoue**. Remettre la phrase, ou lever la version ;
+- ajouter un tableau, une note de bas de page ou un bloc de code dans un fichier — **le test de grammaire
+  échoue**, en nommant la ligne et la construction. C'est ce qui protège des textes écrits par quelqu'un
+  qui ne connaît pas les bornes du rendu.
 
 En base, après une inscription qui recueille un consentement :
 
