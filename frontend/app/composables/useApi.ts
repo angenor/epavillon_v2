@@ -60,7 +60,7 @@ import type {
 import type { RegistrationRow } from '~/types/programme/registration'
 import type { Uuid } from '~/types/shared'
 import { ApiRequestError, ForbiddenError } from '~/utils/api-error'
-import { createApiHttp, readMocks } from './api/http'
+import { createApiHttp, creerAppelsEtiquetes, readMocks } from './api/http'
 import { createProposalReviewApi } from './api/proposal-review'
 import { createProposalsApi } from './api/proposals'
 import { createPlannerApi } from './api/planner'
@@ -288,7 +288,7 @@ export function useApi() {
      * site et y joint son objet `client` — en un seul endroit, jamais écran par
      * écran (voir `api/guide-nego.ts`).
      */
-    guideNego: createGuideNegoApi({ auth, call, send }),
+    guideNego: createGuideNegoApi({ auth, call, send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
 
     home: createHomeApi(deps),
     adminShowcase: createAdminShowcaseApi(deps),

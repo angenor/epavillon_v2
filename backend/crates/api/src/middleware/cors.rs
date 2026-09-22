@@ -39,7 +39,12 @@ use crate::middleware::origin::normaliser;
 /// Ce que le contrat annonce : l'identifiant de requête voyage sur **toute**
 /// réponse. Sans cette ligne, le navigateur le cache au code du site, et
 /// personne ne peut le citer dans un signalement d'incident.
-const EXPOSES: &str = "X-Request-Id";
+///
+/// **`ETag` s'y ajoute depuis 0c.** Une empreinte que le navigateur cache au
+/// code ne sert à rien : Guide Négo la lit pour la renvoyer en `If-Match`, et
+/// sans elle un choix pris hors connexion repartirait sans garde d'ancienneté,
+/// c'est-à-dire en écrasant en silence un choix plus récent fait ailleurs.
+const EXPOSES: &str = "X-Request-Id, ETag";
 
 /// **`PATCH` en fait partie, et son oubli a coûté une panne.** Un verbe absent
 /// de cette ligne n'échoue pas à l'appel : le navigateur refuse le PRÉALABLE, et

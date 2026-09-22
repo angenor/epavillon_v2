@@ -225,6 +225,12 @@ export {
   saisirUnCode,
 } from './negotiation-access'
 export {
+  empreinteDesThematiques,
+  mesThematiques,
+  reinitialiserLesThematiques,
+  suivreDesThematiques,
+} from './negotiation-themes'
+export {
   changerLeModeDAdmission,
   codeDInvitation,
   codesDInvitation,

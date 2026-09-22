@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { APRES_LE_CODE } from '~/utils/guide-nego/parcours'
+import { APRES_LE_CODE, PLUS_TARD } from '~/utils/guide-nego/parcours'
 
 /**
  * Demander l'accès à l'IFDD — étape 2 sur 3, quand le mode l'exige.
@@ -150,7 +150,7 @@ async function retirer(): Promise<void> {
       </p>
 
       <div class="gn-demande__sorties">
-        <GnBouton variante="principal" :vers="APRES_LE_CODE">
+        <GnBouton variante="principal" :vers="PLUS_TARD">
           {{ t('guide-nego.demande.attente.ma-journee') }}
         </GnBouton>
         <GnBouton v-if="acces.codeOffert.value" variante="secondaire" vers="/guide-nego/code">
@@ -198,7 +198,7 @@ async function retirer(): Promise<void> {
         >
           {{ t('guide-nego.demande.refusee.redemander') }}
         </GnBouton>
-        <GnBouton variante="discret" :vers="APRES_LE_CODE">
+        <GnBouton variante="discret" :vers="PLUS_TARD">
           {{ t('guide-nego.demande.attente.ma-journee') }}
         </GnBouton>
       </div>

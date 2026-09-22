@@ -16,11 +16,15 @@
 export const APRES_LE_COMPTE = '/guide-nego/code'
 
 /**
- * Étape 2 franchie : l'accès est ouvert.
+ * Étape 2 franchie : l'accès est ouvert. La suite est le choix des thématiques,
+ * dernière marche de l'entrée (FR-003).
  *
- * Tant que le choix des thématiques n'existe pas — étape 3, qui vient avec 0c —,
- * la suite est « Ma journée » : un accès ouvert donne déjà tout ce que
- * l'application réserve. C'est aussi la sortie « Plus tard » de l'écran du code,
- * et les deux sont volontairement la même : dans les deux cas, on va lire.
+ * **La sortie « Plus tard » n'est plus la même** : qui n'a pas saisi de code va
+ * lire, et se verra proposer ses thématiques depuis « Ma journée », une seule
+ * fois. Les envoyer là depuis un écran qu'on a choisi de quitter serait la même
+ * marche imposée deux fois.
  */
-export const APRES_LE_CODE = '/guide-nego'
+export const APRES_LE_CODE = '/guide-nego/thematiques'
+
+/** « Plus tard », à toutes les marches du parcours : on va lire. */
+export const PLUS_TARD = '/guide-nego'

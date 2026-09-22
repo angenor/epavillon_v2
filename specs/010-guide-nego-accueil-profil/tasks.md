@@ -123,14 +123,14 @@ retrouve sur un autre appareil.
 **Test indépendant** : cocher deux thématiques sur un téléphone, se connecter sur un second navigateur
 avec le même compte, les y retrouver sans geste ; puis en changer une depuis le profil.
 
-- [ ] T038 [US1] Ajouter `mesThematiques()` et `suivreDesThematiques(codes, empreinte?)` à `frontend/app/composables/api/guide-nego.ts` — **jamais dans `useApi.ts`**
-- [ ] T039 [US1] Écrire `frontend/app/composables/guide-nego/useGnThematiques.ts` sur le motif de `useGnAcces` : `useGnLecture` pour le vocabulaire et pour les suivis, `assurer()`, `pret`, `luA`, la résolution du libellé dans la langue de la personne **avec repli sur le français** (FR-002), et l'écriture qui passe par la file
-- [ ] T040 [US1] Écrire `frontend/app/pages/guide-nego/thematiques.vue` : `GnCase` par ligne de 56 px, récapitulatif du pied, bouton inactif à zéro avec son aide, indicateur d'étapes à la première entrée seulement
-- [ ] T041 [P] [US1] Écrire `frontend/i18n/locales/fr/pages/guide-nego.thematiques.json` et son jumeau `en` — libellés d'écran seulement, **aucun libellé de thématique**
-- [ ] T042 [US1] Proposer l'écran **une seule fois** à la première entrée d'une personne connectée qui ne suit rien, par une clé locale de `frontend/app/utils/guide-nego/stockage.ts`, sans jamais enfermer personne
-- [ ] T043 [US1] Afficher le message du `412` — « Vos thématiques ont changé sur un autre appareil » — et relire, dans `frontend/app/pages/guide-nego/thematiques.vue`
-- [ ] T044 [US1] Porter les quatre états de `frontend/app/pages/guide-nego/thematiques.vue` : chargement, vide (aucune thématique proposée), erreur, accès refusé
-- [ ] T045 [P] [US1] Test de l'écran dans `frontend/tests/guide-nego/thematiques.test.ts` : zéro coché n'est pas validable, le récapitulatif compte juste, et la garde de première entrée ne se déclenche qu'une fois
+- [X] T038 [US1] Ajouter `mesThematiques()` et `suivreDesThematiques(codes, empreinte?)` à `frontend/app/composables/api/guide-nego.ts` — **jamais dans `useApi.ts`**
+- [X] T039 [US1] Écrire `frontend/app/composables/guide-nego/useGnThematiques.ts` sur le motif de `useGnAcces` : `useGnLecture` pour le vocabulaire et pour les suivis, `assurer()`, `pret`, `luA`, la résolution du libellé dans la langue de la personne **avec repli sur le français** (FR-002), et l'écriture qui passe par la file
+- [X] T040 [US1] Écrire `frontend/app/pages/guide-nego/thematiques.vue` : `GnCase` par ligne de 56 px, récapitulatif du pied, bouton inactif à zéro avec son aide, indicateur d'étapes à la première entrée seulement
+- [X] T041 [P] [US1] Écrire `frontend/i18n/locales/fr/pages/guide-nego.thematiques.json` et son jumeau `en` — libellés d'écran seulement, **aucun libellé de thématique**
+- [X] T042 [US1] Proposer l'écran **une seule fois** à la première entrée d'une personne connectée qui ne suit rien, par une clé locale de `frontend/app/utils/guide-nego/stockage.ts`, sans jamais enfermer personne
+- [X] T043 [US1] Afficher le message du `412` — « Vos thématiques ont changé sur un autre appareil » — et relire, dans `frontend/app/pages/guide-nego/thematiques.vue`
+- [X] T044 [US1] Porter les quatre états de `frontend/app/pages/guide-nego/thematiques.vue` : chargement, vide (aucune thématique proposée), erreur, accès refusé
+- [X] T045 [P] [US1] Test de l'écran dans `frontend/tests/guide-nego/thematiques.test.ts` : zéro coché n'est pas validable, le récapitulatif compte juste, et la garde de première entrée ne se déclenche qu'une fois
 
 **Checkpoint** : le critère de sortie de l'étape est tenu. **Commit.**
 

@@ -1,0 +1,31 @@
+{
+  "titre": "My themes",
+  "sous-titre": "One or more",
+  "etape": "Step 3 of 3 — Themes",
+  "aide": "Your negotiation sessions and your alerts follow these themes. You will be able to change them in your profile.",
+  "recapitulatif": "{count} theme followed — {noms} | {count} theme followed — {noms} | {count} themes followed — {noms}",
+  "aucune": "No theme ticked yet.",
+  "au-moins-une": "Pick at least one theme to confirm.",
+  "valider": "Follow these themes",
+  "enregistrer": "Save my themes",
+  "plus-tard": "Later",
+  "retour-au-profil": "Back to profile",
+  "hors-connexion": "Without a network, your choice is kept on this device and sent when it returns.",
+  "perimee": "Your themes changed on another device. They have been read again.",
+  "chargement": "Reading themes",
+  "vide": {
+    "titre": "No theme offered",
+    "texte": "The IFDD has not published any yet. You can come back here as soon as they open, and nothing stops you from carrying on."
+  },
+  "erreur": {
+    "titre": "The themes could not be read",
+    "texte": "The list did not arrive. What was already read on this device is still shown.",
+    "reessayer": "Try again"
+  },
+  "sans-compte": {
+    "titre": "Accounts only",
+    "texte": "Themes follow your account from one device to another. Create yours or sign in to pick them.",
+    "creer-mon-compte": "Create my account",
+    "me-connecter": "I already have an account — Sign in"
+  }
+}

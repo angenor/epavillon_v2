@@ -7,6 +7,8 @@
  */
 export const CLE_OUVERTURE_VUE = 'gn.ouverture-vue'
 export const CLE_GARDE_ANNONCEE = 'gn.garde-annoncee'
+/** L'écran de premier choix des thématiques a été proposé sur cet appareil. */
+export const CLE_THEMATIQUES_PROPOSEES = 'gn.thematiques-proposees'
 
 export function lireCle(cle: string): string | null {
   try {

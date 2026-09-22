@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { APRES_LE_CODE } from '~/utils/guide-nego/parcours'
+import { APRES_LE_CODE, PLUS_TARD } from '~/utils/guide-nego/parcours'
 import type { RedeemResult } from '~/types/negotiation'
 
 /**
@@ -140,7 +140,7 @@ useHead({ title: t('guide-nego.code.titre') })
         <GnBouton variante="principal" vers="/guide-nego/demande">
           {{ t('guide-nego.code.demander-lacces') }}
         </GnBouton>
-        <GnBouton variante="discret" :vers="APRES_LE_CODE">
+        <GnBouton variante="discret" :vers="PLUS_TARD">
           {{ t('guide-nego.code.plus-tard') }}
         </GnBouton>
       </div>
@@ -209,7 +209,7 @@ useHead({ title: t('guide-nego.code.titre') })
             {{ t('guide-nego.code.valider') }}
           </GnBouton>
 
-          <GnBouton variante="discret" :vers="APRES_LE_CODE">
+          <GnBouton variante="discret" :vers="PLUS_TARD">
             {{ t('guide-nego.code.plus-tard') }}
           </GnBouton>
         </div>

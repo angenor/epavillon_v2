@@ -1,0 +1,31 @@
+{
+  "titre": "Mes thématiques",
+  "sous-titre": "Une ou plusieurs",
+  "etape": "Étape 3 sur 3 — Thématiques",
+  "aide": "Vos sessions de négociation et vos alertes suivent ces thématiques. Vous pourrez les changer dans votre profil.",
+  "recapitulatif": "{count} thématique suivie — {noms} | {count} thématique suivie — {noms} | {count} thématiques suivies — {noms}",
+  "aucune": "Aucune thématique cochée pour l'instant.",
+  "au-moins-une": "Choisissez au moins une thématique pour valider.",
+  "valider": "Suivre ces thématiques",
+  "enregistrer": "Enregistrer mes thématiques",
+  "plus-tard": "Plus tard",
+  "retour-au-profil": "Revenir au profil",
+  "hors-connexion": "Sans réseau, votre choix est gardé sur cet appareil et part à son retour.",
+  "perimee": "Vos thématiques ont changé sur un autre appareil. Elles ont été relues.",
+  "chargement": "Lecture des thématiques",
+  "vide": {
+    "titre": "Aucune thématique proposée",
+    "texte": "L'IFDD n'en a publié aucune pour l'instant. Vous pourrez revenir ici dès qu'elles seront ouvertes, et rien ne vous empêche de continuer."
+  },
+  "erreur": {
+    "titre": "Les thématiques n'ont pas pu être lues",
+    "texte": "La liste n'a pas été reçue. Ce qui a déjà été lu sur cet appareil reste affiché.",
+    "reessayer": "Réessayer"
+  },
+  "sans-compte": {
+    "titre": "Réservé aux comptes",
+    "texte": "Les thématiques suivent votre compte d'un appareil à l'autre. Créez le vôtre ou connectez-vous pour les choisir.",
+    "creer-mon-compte": "Créer mon compte",
+    "me-connecter": "J'ai déjà un compte — Me connecter"
+  }
+}

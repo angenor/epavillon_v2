@@ -189,6 +189,78 @@ function refus(error: ApiRequestError | ApiUnreachableError) {
 }
 
 /**
+ * La latence des données simulées. Elle vit ici, avec `readMocks` : `useApi()`
+ * l'importe, et les appels étiquetés ci-dessus s'en servent aussi.
+ */
+/**
+ * Ce qu'une route rend **avec son empreinte** : le corps, et l'`ETag` qui dit
+ * l'état.
+ *
+ * Deux routes seulement en ont besoin — les thématiques suivies —, et elles en
+ * ont un besoin réel : l'empreinte part en `If-Match` avec un choix pris hors
+ * connexion, et c'est elle qui empêche ce choix d'écraser un choix plus récent
+ * fait ailleurs. Sans en-tête lu, la file n'aurait rien à opposer.
+ *
+ * **L'API doit exposer `ETag`** (`middleware/cors.rs`) : un en-tête non exposé
+ * est caché au code par le navigateur, et `empreinte` serait nulle sans qu'une
+ * seule erreur ne le dise.
+ */
+export interface AvecEmpreinte<T> {
+  valeur: T
+  /** Nulle si la réponse n'en portait pas — l'écriture part alors sans garde. */
+  empreinte: string | null
+}
+
+type Mocks = typeof import('~/mocks')
+
+/**
+ * Les deux appels qui lisent et renvoient l'empreinte.
+ *
+ * Ils ne posent **pas** `If-None-Match` : ces listes sont minuscules, et un
+ * `304` ne se distingue pas d'un échec pour le client HTTP, qui le traiterait
+ * en erreur. Le `304` reste servi par l'API et éprouvé côté Rust ; le jour où
+ * une lecture le vaudra, ce sera avec le client brut.
+ */
+export function creerAppelsEtiquetes(http: ApiHttp, latenceSimuleeMs: number) {
+  async function etiquete<T>(path: string, options: Record<string, unknown>): Promise<AvecEmpreinte<T>> {
+    let empreinte: string | null = null
+    const valeur = await http.request<T>(path, {
+      ...options,
+      onResponse: ({ response }: { response: Response }) => {
+        empreinte = response.headers.get('etag')
+      },
+    })
+    return { valeur, empreinte }
+  }
+
+  return {
+    lireEtiquete<T>(path: string, fromMocks: (m: Mocks) => AvecEmpreinte<T> | Promise<AvecEmpreinte<T>>) {
+      if (!http.isConfigured.value) return readMocks(fromMocks, latenceSimuleeMs)
+      return etiquete<T>(path, {})
+    },
+
+    /**
+     * `retry: 0`, comme toute écriture. `If-Match` absent est accepté par
+     * l'API : l'écran en ligne vient de lire, il n'a rien à opposer.
+     */
+    ecrireEtiquete<T>(
+      path: string,
+      body: object,
+      fromMocks: (m: Mocks) => AvecEmpreinte<T> | Promise<AvecEmpreinte<T>>,
+      siCorrespond?: string | null,
+    ) {
+      if (!http.isConfigured.value) return readMocks(fromMocks, latenceSimuleeMs * 3)
+      return etiquete<T>(path, {
+        method: 'PUT',
+        body: body as Record<string, unknown>,
+        retry: 0,
+        headers: siCorrespond ? { 'If-Match': siCorrespond } : undefined,
+      })
+    },
+  }
+}
+
+/**
  * Lecture des données simulées, avec sa latence.
  *
  * L'ATTENTE EST DÉLIBÉRÉE : sans elle, les états de chargement — squelettes,

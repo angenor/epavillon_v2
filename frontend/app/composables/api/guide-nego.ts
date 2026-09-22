@@ -15,8 +15,10 @@ import type {
   AccessRequestView,
   AccessStateView,
   CreateAccessRequestPayload,
+  MyThemes,
   RedeemResult,
 } from '~/types/negotiation'
+import type { AvecEmpreinte } from './http'
 import type {
   PasswordResetRequestResult,
   RegisterPayload,
@@ -45,7 +47,7 @@ export interface AuthEmprunte {
 
 type Mocks = typeof import('~/mocks')
 
-/** Les deux primitives de `useApi()` dont ce bloc a besoin. */
+/** Les primitives de `useApi()` dont ce bloc a besoin. */
 export interface Primitives {
   call: <T>(path: string, fromMocks: (m: Mocks) => T | Promise<T>) => Promise<T>
   send: <T>(
@@ -54,12 +56,25 @@ export interface Primitives {
     fromMocks: (m: Mocks) => T | Promise<T>,
     method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE',
   ) => Promise<T>
+  /** Les deux appels qui rendent l'empreinte de l'état, et eux seuls. */
+  lireEtiquete: <T>(
+    path: string,
+    fromMocks: (m: Mocks) => AvecEmpreinte<T> | Promise<AvecEmpreinte<T>>,
+  ) => Promise<AvecEmpreinte<T>>
+  ecrireEtiquete: <T>(
+    path: string,
+    body: object,
+    fromMocks: (m: Mocks) => AvecEmpreinte<T> | Promise<AvecEmpreinte<T>>,
+    siCorrespond?: string | null,
+  ) => Promise<AvecEmpreinte<T>>
 }
 
 export function createGuideNegoApi({
   auth,
   call,
   send,
+  lireEtiquete,
+  ecrireEtiquete,
 }: { auth: AuthEmprunte } & Primitives) {
   return {
     // La CONNEXION n'est pas ici : elle passe par le store du site, qui tient la
@@ -121,6 +136,37 @@ export function createGuideNegoApi({
         {},
         (m) => m.annulerSaDemande(requestId),
         'DELETE',
+      ),
+
+    /**
+     * Les thématiques suivies, **avec l'empreinte de l'état**. Des codes, pas
+     * de libellés : ceux-ci viennent de `reference.terms('negotiation_theme')`,
+     * seule source, que l'application lit de toute façon.
+     */
+    mesThematiques: (): Promise<AvecEmpreinte<MyThemes>> =>
+      lireEtiquete('/negotiation/me/themes', (m) => ({
+        valeur: m.mesThematiques(),
+        empreinte: m.empreinteDesThematiques(),
+      })),
+
+    /**
+     * Remplace la liste **entière**. L'empreinte reçue part en `If-Match` :
+     * absente, l'API accepte — l'écran en ligne vient de lire ; périmée, elle
+     * rend `412` et l'intention s'abandonne au lieu d'écraser un choix plus
+     * récent fait sur un autre appareil.
+     */
+    suivreDesThematiques: (
+      codes: string[],
+      empreinte?: string | null,
+    ): Promise<AvecEmpreinte<MyThemes>> =>
+      ecrireEtiquete(
+        '/negotiation/me/themes',
+        { codes },
+        (m) => ({
+          valeur: m.suivreDesThematiques(codes),
+          empreinte: m.empreinteDesThematiques(),
+        }),
+        empreinte,
       ),
   }
 }

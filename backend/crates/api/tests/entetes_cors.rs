@@ -121,8 +121,8 @@ async fn une_reponse_ordinaire_porte_les_entetes_et_expose_lidentifiant() {
     );
     assert_eq!(
         entete(&reponse, ACCESS_CONTROL_EXPOSE_HEADERS).as_deref(),
-        Some("X-Request-Id"),
-        "sans cette ligne le navigateur cache l'identifiant au code du site"
+        Some("X-Request-Id, ETag"),
+        "sans cette ligne le navigateur cache l'identifiant — et l'empreinte — au code du site"
     );
 }
 
