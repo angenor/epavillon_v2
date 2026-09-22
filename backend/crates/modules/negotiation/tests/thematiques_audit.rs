@@ -11,11 +11,19 @@ async fn ouvrir_et_fermer_nomment_la_personne() {
     let bac = Bac::monter().await;
     let awa = personne(&bac, "awa.diallo@example.org").await;
 
-    suivre(&bac, awa, &["adaptation", "gender"], None).await.expect("ouverture");
-    suivre(&bac, awa, &["gender"], None).await.expect("fermeture");
+    suivre(&bac, awa, &["adaptation", "gender"], None)
+        .await
+        .expect("ouverture");
+    suivre(&bac, awa, &["gender"], None)
+        .await
+        .expect("fermeture");
 
     let traces = traces_de_suivi(&bac, awa).await;
-    assert_eq!(traces.len(), 3, "deux insertions, une mise à jour : {traces:?}");
+    assert_eq!(
+        traces.len(),
+        3,
+        "deux insertions, une mise à jour : {traces:?}"
+    );
     assert_eq!(traces.iter().filter(|(a, _)| a == "insert").count(), 2);
     assert_eq!(traces.iter().filter(|(a, _)| a == "update").count(), 1);
     assert!(

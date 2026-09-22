@@ -20,6 +20,7 @@ use kernel::context::RequestContext;
 use kernel::error::{ApiError, ErrorCode, Result};
 use uuid::Uuid;
 
+use crate::domain::empreinte;
 use crate::domain::themes::{empreinte_des_codes, MyThemes};
 use crate::repo::themes;
 use crate::state::NegotiationState;
@@ -58,7 +59,7 @@ pub async fn remplacer(
     let avant = themes::suivis(&mut tx, r.person_id).await?;
     if let Some(attendue) = r.si_correspond {
         let courante = empreinte_des_codes(avant.iter().map(|t| t.code.as_str()));
-        if attendue != courante {
+        if !empreinte::correspond(attendue, &courante) {
             tx.rollback().await?;
             return Err(ApiError::new(ErrorCode::NegotiationThemesStale));
         }

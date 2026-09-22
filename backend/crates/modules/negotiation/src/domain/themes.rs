@@ -34,20 +34,12 @@ pub struct ThemesPayload {
     pub codes: Vec<String>,
 }
 
-/// Codes triés, dédoublonnés, joints ; 16 octets de `token_hash` en
-/// hexadécimal, entre guillemets comme l'exige l'en-tête `ETag`.
+/// Codes triés, dédoublonnés, joints.
 pub fn empreinte_des_codes<'a>(codes: impl IntoIterator<Item = &'a str>) -> String {
     let mut codes: Vec<&str> = codes.into_iter().collect();
     codes.sort_unstable();
     codes.dedup();
-    let octets = kernel::crypto::token_hash(&codes.join("\n"));
-    let mut hexa = String::with_capacity(34);
-    hexa.push('"');
-    for octet in &octets[..16] {
-        hexa.push_str(&format!("{octet:02x}"));
-    }
-    hexa.push('"');
-    hexa
+    super::empreinte::de(&codes.join("\n"))
 }
 
 #[cfg(test)]

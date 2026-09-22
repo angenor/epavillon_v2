@@ -5,6 +5,7 @@ pub mod admin_requests;
 pub mod openapi;
 pub mod themes;
 
+use actix_web::http::header::{HeaderName, CACHE_CONTROL};
 use actix_web::{HttpMessage, HttpRequest};
 use kernel::context::RequestContext;
 use uuid::Uuid;
@@ -33,6 +34,16 @@ pub fn contexte_de(requete: &HttpRequest, acteur: Uuid) -> RequestContext {
             RequestContext::new(RequestContext::generated_request_id(), locale_de(requete))
         })
         .with_actor(acteur)
+}
+
+/// Une réponse de session qui porte une empreinte dit l'état d'**une**
+/// personne : aucun cache partagé ne la garde, et le navigateur la revalide.
+pub const PERSONNEL: (HeaderName, &str) = (CACHE_CONTROL, "private, no-cache");
+
+/// `If-None-Match` désigne-t-il l'état courant ? Voir `domain::empreinte`.
+pub fn inchange(requete: &HttpRequest, empreinte: &str) -> bool {
+    entete(requete, actix_web::http::header::IF_NONE_MATCH.as_str())
+        .is_some_and(|presentee| crate::domain::empreinte::correspond(&presentee, empreinte))
 }
 
 pub fn entete(requete: &HttpRequest, nom: &str) -> Option<String> {

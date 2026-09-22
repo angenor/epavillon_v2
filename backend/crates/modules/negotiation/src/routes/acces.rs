@@ -11,7 +11,7 @@
 //! **Ce qui reste en HTTP** : l'absence de session (401), et un corps malformé
 //! (422). Rien d'autre.
 
-use actix_web::http::header::{ETAG, IF_NONE_MATCH};
+use actix_web::http::header::ETAG;
 use actix_web::{web, HttpMessage, HttpRequest, HttpResponse};
 use kernel::auth::Actor;
 use kernel::context::RequestContext;
@@ -71,16 +71,18 @@ pub(crate) async fn mon_acces(
     // peut pas se tromper ; un « modifié depuis » le pourrait, et un 304 fautif
     // laisserait ouverts, sur le téléphone, les modules d'un accès retiré.
     let corps = serde_json::to_string(&etat).map_err(kernel::error::ApiError::internal)?;
-    let empreinte = empreinte_de(&corps);
+    let empreinte = crate::domain::empreinte::de(&corps);
 
-    if crate::routes::entete(&requete, IF_NONE_MATCH.as_str()).as_deref() == Some(&empreinte) {
+    if crate::routes::inchange(&requete, &empreinte) {
         return Ok(HttpResponse::NotModified()
             .insert_header((ETAG, empreinte))
+            .insert_header(crate::routes::PERSONNEL)
             .finish());
     }
 
     Ok(HttpResponse::Ok()
         .insert_header((ETAG, empreinte))
+        .insert_header(crate::routes::PERSONNEL)
         .content_type("application/json")
         .body(corps))
 }
@@ -128,15 +130,6 @@ pub(crate) async fn saisir_un_code(
 }
 
 /// Empreinte faible et courte, entre guillemets comme l'exige l'en-tête.
-fn empreinte_de(corps: &str) -> String {
-    let octets = kernel::crypto::token_hash(corps);
-    let mut hexa = String::with_capacity(32);
-    for octet in &octets[..16] {
-        hexa.push_str(&format!("{octet:02x}"));
-    }
-    format!("\"{hexa}\"")
-}
-
 #[utoipa::path(
     post,
     description = "`CreateAccessRequestPayload` → `AccessRequestView` — demander l'accès aux modules réservés, quand le mode d'admission exige une approbation.\n\n`space_id` absent vaut une demande de portée globale. Le message est facultatif : il aide l'administrateur à reconnaître une délégation qu'il attend.\n\n**Une seule demande en attente par personne et par portée**, et c'est la base qui le tient : deux appareils qui l'envoient ensemble ne produisent qu'une ligne, et le conflit sort en `NEGOTIATION_ACCESS_REQUEST_PENDING`. Le code **traduit** ce refus, il ne le prévient pas par une lecture préalable qu'une seconde requête contournerait.\n\nUne personne qui détient déjà l'accès reçoit un conflit : elle recevrait sinon un courriel pour un droit acquis, et la file porterait une décision sans objet.",

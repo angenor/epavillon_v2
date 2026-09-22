@@ -11,8 +11,12 @@ async fn sans_empreinte_le_remplacement_passe_toujours() {
     let bac = Bac::monter().await;
     let awa = personne(&bac, "awa.diallo@example.org").await;
 
-    suivre(&bac, awa, &["adaptation"], None).await.expect("premier");
-    suivre(&bac, awa, &["finance"], None).await.expect("changé ailleurs");
+    suivre(&bac, awa, &["adaptation"], None)
+        .await
+        .expect("premier");
+    suivre(&bac, awa, &["finance"], None)
+        .await
+        .expect("changé ailleurs");
 
     let rendu = suivre(&bac, awa, &["gender"], None)
         .await

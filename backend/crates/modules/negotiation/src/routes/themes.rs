@@ -4,7 +4,7 @@
 //! dit **l'état**, et deux appareils dans deux langues la voient identique. Le
 //! `PUT` la reçoit en `If-Match` et refuse en `412` ce qui arrive trop tard.
 
-use actix_web::http::header::{ETAG, IF_MATCH, IF_NONE_MATCH};
+use actix_web::http::header::{ETAG, IF_MATCH};
 use actix_web::{web, HttpRequest, HttpResponse};
 use kernel::auth::Actor;
 use kernel::error::Result;
@@ -15,7 +15,10 @@ use crate::state::NegotiationState;
 
 pub fn configurer(cfg: &mut web::ServiceConfig) {
     cfg.route("/negotiation/me/themes", web::get().to(mes_thematiques))
-        .route("/negotiation/me/themes", web::put().to(suivre_des_thematiques));
+        .route(
+            "/negotiation/me/themes",
+            web::put().to(suivre_des_thematiques),
+        );
 }
 
 #[utoipa::path(
@@ -39,9 +42,10 @@ pub(crate) async fn mes_thematiques(
     let mes = themes::mes_thematiques(&state, acteur.0).await?;
     let empreinte = mes.empreinte();
 
-    if crate::routes::entete(&requete, IF_NONE_MATCH.as_str()).as_deref() == Some(&empreinte) {
+    if crate::routes::inchange(&requete, &empreinte) {
         return Ok(HttpResponse::NotModified()
             .insert_header((ETAG, empreinte))
+            .insert_header(crate::routes::PERSONNEL)
             .finish());
     }
 
@@ -89,5 +93,8 @@ pub(crate) async fn suivre_des_thematiques(
 }
 
 fn rendre(mes: MyThemes, empreinte: String) -> HttpResponse {
-    HttpResponse::Ok().insert_header((ETAG, empreinte)).json(mes)
+    HttpResponse::Ok()
+        .insert_header((ETAG, empreinte))
+        .insert_header(crate::routes::PERSONNEL)
+        .json(mes)
 }

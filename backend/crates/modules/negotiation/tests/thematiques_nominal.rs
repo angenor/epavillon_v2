@@ -12,7 +12,10 @@ async fn deux_codes_ouvrent_deux_suivis_et_se_relisent() {
     let awa = personne(&bac, "awa.diallo@example.org").await;
 
     let avant = mes_thematiques(&bac, awa).await;
-    assert!(avant.themes.is_empty(), "sans suivi : une liste vide, jamais une erreur");
+    assert!(
+        avant.themes.is_empty(),
+        "sans suivi : une liste vide, jamais une erreur"
+    );
 
     let rendu = suivre(&bac, awa, &["gender", "adaptation"], None)
         .await

@@ -437,6 +437,28 @@ Ce choix se renverse le jour où la bascule s'éloigne durablement — changer
 reconstruire l'image du site. C'est le même travail à quelque moment qu'on le
 fasse.
 
+### Le jour du `mv` — ce qu'on vérifie par l'adresse institutionnelle
+
+1. `APP_PUBLIC_URL` reprend l'adresse définitive, et une connexion aboutit
+   (réponse métier, jamais `IDENTITY_ORIGIN_REJECTED`).
+2. `ops/init-garage-prod.sh` est rejoué, et une image de la vitrine s'affiche.
+3. **Un choix fait hors connexion dans Guide Négo survit au retour du réseau.**
+   Ouvrir « Mes thématiques » en ligne, passer en mode avion, changer une
+   thématique, revenir en ligne : le choix doit être enregistré, **sans** le
+   message « Vos thématiques ont changé sur un autre appareil ».
+
+La troisième vérification tient à un détail mesuré le 22/09 : **ce relais
+compresse ses réponses en brotli**, et Apache, réglé par défaut
+(`BrotliAlterETag` / `DeflateAlterETag AddSuffix`), ajoute alors « -br » ou
+« -gzip » à l'`ETag`. L'empreinte revient ainsi réécrite en `If-Match`. L'API
+n'en compare que les 32 caractères hexadécimaux qu'elle a émis
+(`negotiation::domain::empreinte`), `W/` et suffixe de relais retirés : c'est
+elle qui compare ce qui a du sens, puisqu'on ne tient pas la configuration de
+l'hébergeur. Mais ni le développement ni la recette ne compressent : **seul ce
+geste, par cette adresse, prouve que la comparaison tient** — un échec rendrait
+`412` à chaque choix fait sans réseau, et abandonnerait l'intention avec un
+message faux.
+
 ---
 
 ## 12. Les médias, et pourquoi ils vivent sur l'origine du site (04/09)

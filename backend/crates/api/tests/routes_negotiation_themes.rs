@@ -2,7 +2,7 @@
 //! montées sous `/api` et gardées par la session — URL forgée comprise —, que
 //! l'`ETag` circule, que `If-None-Match` rend 304 et `If-Match` périmé 412.
 
-use actix_web::http::header::{ETAG, IF_MATCH, IF_NONE_MATCH};
+use actix_web::http::header::{CACHE_CONTROL, ETAG, IF_MATCH, IF_NONE_MATCH};
 use actix_web::http::StatusCode;
 use actix_web::test;
 use api::state::AppState;
@@ -216,6 +216,70 @@ async fn letag_le_304_et_le_412_de_bout_en_bout() {
     )
     .await;
     assert_eq!(etag_de(&relu), empreinte, "l'état n'a pas bougé");
+}
+
+/// Derrière un relais qui compresse, l'empreinte revient réécrite : elle désigne
+/// toujours le même état. Et l'état d'une personne ne se garde dans aucun cache
+/// partagé.
+#[actix_web::test]
+async fn le_304_resiste_au_relais_et_rien_ne_se_garde_en_cache_partage() {
+    let bac = monter().await;
+    let app = test::init_service(api::build_app(&bac.etat)).await;
+    let cookie = se_connecter!(app);
+
+    let lue = test::call_service(
+        &app,
+        test::TestRequest::get()
+            .uri("/api/negotiation/me/themes")
+            .insert_header(("cookie", cookie.clone()))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(
+        lue.headers()
+            .get(CACHE_CONTROL)
+            .and_then(|v| v.to_str().ok()),
+        Some("private, no-cache")
+    );
+    let empreinte = etag_de(&lue);
+    let nu = empreinte.trim_matches('"').to_owned();
+
+    for presentee in [format!("W/\"{nu}-gzip\""), format!("\"{nu}-br\"")] {
+        let inchange = test::call_service(
+            &app,
+            test::TestRequest::get()
+                .uri("/api/negotiation/me/themes")
+                .insert_header(("cookie", cookie.clone()))
+                .insert_header((IF_NONE_MATCH, presentee.clone()))
+                .to_request(),
+        )
+        .await;
+        assert_eq!(inchange.status(), StatusCode::NOT_MODIFIED, "{presentee}");
+        assert_eq!(
+            inchange
+                .headers()
+                .get(CACHE_CONTROL)
+                .and_then(|v| v.to_str().ok()),
+            Some("private, no-cache")
+        );
+    }
+
+    let acces = test::call_service(
+        &app,
+        test::TestRequest::get()
+            .uri("/api/negotiation/me/access")
+            .insert_header(("cookie", cookie))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(acces.status(), StatusCode::OK);
+    assert_eq!(
+        acces
+            .headers()
+            .get(CACHE_CONTROL)
+            .and_then(|v| v.to_str().ok()),
+        Some("private, no-cache")
+    );
 }
 
 #[actix_web::test]

@@ -69,7 +69,9 @@ async fn une_liste_vide_est_refusee() {
     let bac = Bac::monter().await;
     let awa = personne(&bac, "awa.diallo@example.org").await;
 
-    let refus = suivre(&bac, awa, &[], None).await.expect_err("au moins une");
+    let refus = suivre(&bac, awa, &[], None)
+        .await
+        .expect_err("au moins une");
     assert_eq!(refus.code, ErrorCode::NegotiationThemesEmpty);
     assert_eq!(refus.code.status().as_u16(), 400);
 

@@ -42,7 +42,11 @@ async fn nouveau_il_est_refuse_en_nommant_le_code() {
         .await
         .expect_err("un terme retiré ne se choisit plus");
     assert_eq!(refus.code, ErrorCode::NegotiationThemeUnknown);
-    assert!(refus.message.contains("« technology »"), "{}", refus.message);
+    assert!(
+        refus.message.contains("« technology »"),
+        "{}",
+        refus.message
+    );
     assert!(
         refus.message.contains("plus proposée"),
         "le message distingue « retirée » d'« inconnue » : {}",

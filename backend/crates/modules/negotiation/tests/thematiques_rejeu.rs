@@ -28,7 +28,11 @@ async fn rejouer_le_meme_corps_necrit_rien() {
         second.themes[0].followed_at, premier.themes[0].followed_at,
         "un suivi inchangé garde sa date"
     );
-    assert_eq!(lignes_de_suivi(&bac, awa).await, lignes, "aucune ligne de plus");
+    assert_eq!(
+        lignes_de_suivi(&bac, awa).await,
+        lignes,
+        "aucune ligne de plus"
+    );
     assert_eq!(
         traces_de_suivi(&bac, awa).await,
         traces,
