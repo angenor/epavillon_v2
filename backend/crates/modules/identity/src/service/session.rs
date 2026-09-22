@@ -24,7 +24,7 @@ use sqlx::postgres::PgConnection;
 use time::OffsetDateTime;
 
 use crate::domain::ids::{AccountId, PersonId, SessionId};
-use crate::repo::sessions::{self, ClientKind, NewSession, RevokeReason};
+use crate::repo::sessions::{self, ClientKind, NewSession, RevokeReason, SessionRecord};
 use crate::state::IdentityState;
 
 /// Ce que la connexion et le renouvellement rendent au client. Le jeton de
@@ -144,6 +144,10 @@ pub async fn refresh(
 
     if session.est_un_rejeu() {
         let mut tx = state.db().write(&contexte).await?;
+        if let Some(neuve) = reprendre_une_reponse_perdue(state, &mut tx, &session, device).await? {
+            tx.commit().await?;
+            return Ok(RefreshOutcome::Renewed(Box::new(neuve)));
+        }
         let erreur = couper_tout_pour_rejeu(&mut tx, session.person_id).await?;
         tx.commit().await?;
         return Err(erreur);
@@ -157,16 +161,29 @@ pub async fn refresh(
 
     // **La révocation est le verrou.** La session a été lue hors transaction ;
     // si l'UPDATE ne touche aucune ligne, un autre renouvellement l'a prise
-    // entre-temps. Deux appels portant le même jeton, c'est la définition du
-    // rejeu — R3 écarte explicitement toute fenêtre de tolérance —, et surtout
-    // on ne peut pas en ouvrir deux : ce serait une session orpheline vivante,
-    // née d'un jeton déjà consommé.
+    // entre-temps. Deux appels partis ENSEMBLE avec le même jeton restent un
+    // rejeu — la tolérance de l'ADR-020 ne vaut que pour une réponse perdue, pas
+    // pour deux requêtes concurrentes —, et surtout on ne peut pas en ouvrir
+    // deux : ce serait une session orpheline vivante, née d'un jeton consommé.
     if !sessions::revoke(&mut tx, session.id, RevokeReason::Rotated).await? {
         let erreur = couper_tout_pour_rejeu(&mut tx, session.person_id).await?;
         tx.commit().await?;
         return Err(erreur);
     }
 
+    let neuve = remplacer(state, &mut tx, &session, device).await?;
+    tx.commit().await?;
+
+    Ok(RefreshOutcome::Renewed(Box::new(neuve)))
+}
+
+/// Ouvre la session qui remplace `session`, et la nomme sur elle.
+async fn remplacer(
+    state: &IdentityState,
+    conn: &mut PgConnection,
+    session: &SessionRecord,
+    device: Device<'_>,
+) -> Result<IssuedSession> {
     // **La rotation recopie le client et l'appareil de la session remplacée**,
     // et n'écoute pas le client sur ce point : `POST /auth/refresh` ne porte
     // aucun objet `client`, et s'il en portait un, il suffirait de l'envoyer
@@ -191,16 +208,49 @@ pub async fn refresh(
 
     let neuve = open(
         state,
-        &mut tx,
+        conn,
         session.person_id,
         session.account_id,
         echeance,
         herite,
     )
     .await?;
-    tx.commit().await?;
+    sessions::set_replaced_by(conn, session.id, neuve.session_id).await?;
+    Ok(neuve)
+}
 
-    Ok(RefreshOutcome::Renewed(Box::new(neuve)))
+/// **La réponse de rotation perdue** — ADR-020, qui nuance R3.
+///
+/// Le serveur a tourné le jeton, mais le navigateur n'a jamais reçu le nouveau
+/// cookie : réseau saturé, passage du Wi-Fi à la 4G, téléphone verrouillé au
+/// mauvais moment. Il représente l'ancien. Dans la fenêtre `refresh_grace`, et
+/// tant que la remplaçante n'a jamais été renouvelée, ce n'est pas un vol : la
+/// remplaçante est révoquée et une session neuve s'ouvre — **une seule vivante**.
+/// `None` : hors de ces bornes, et rien n'a été écrit ; l'appelant coupe tout.
+async fn reprendre_une_reponse_perdue(
+    state: &IdentityState,
+    conn: &mut PgConnection,
+    session: &SessionRecord,
+    device: Device<'_>,
+) -> Result<Option<IssuedSession>> {
+    let Some(remplacante) = session.replaced_by else {
+        return Ok(None);
+    };
+    if session.revoked_reason.as_deref() != Some(RevokeReason::Rotated.as_db())
+        || !session.tournee_depuis_moins_de(state.config().auth.refresh_grace)
+    {
+        return Ok(None);
+    }
+    if !sessions::revoke_unused_replacement(conn, remplacante).await? {
+        return Ok(None);
+    }
+
+    let neuve = remplacer(state, conn, session, device).await?;
+    tracing::info!(
+        person_id = %session.person_id,
+        "réponse de rotation perdue : la remplaçante est révoquée, une session neuve la remplace"
+    );
+    Ok(Some(neuve))
 }
 
 /// Un jeton présenté deux fois n'a aucune explication innocente : soit il a été

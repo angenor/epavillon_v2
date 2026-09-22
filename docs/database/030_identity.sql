@@ -184,13 +184,14 @@ CREATE TABLE identity.sessions (
     last_seen_at       timestamptz NOT NULL DEFAULT now(),
     revoked_at         timestamptz,
     revoked_reason     text,
-    -- Ces quatre colonnes closent la table, et c'est délibéré : elles sont
-    -- arrivées par ALTER sur une base en service (migration 0b), et pg_dump
+    -- Ces colonnes closent la table, et c'est délibéré : elles sont arrivées
+    -- par ALTER sur une base en service (migrations 0b puis 0c), et pg_dump
     -- compare les colonnes dans leur ordre d'ajout.
     client_kind        identity.session_client NOT NULL DEFAULT 'web',
     device_id          text,
     device_label       text,
-    device_platform    text
+    device_platform    text,
+    replaced_by        uuid        REFERENCES identity.sessions(id) ON DELETE SET NULL
 );
 
 CREATE INDEX ix_sessions_person_active
@@ -208,6 +209,8 @@ COMMENT ON COLUMN identity.sessions.device_label IS
     'Ce que la personne lit dans la liste de ses appareils : « Android · Chrome ».';
 COMMENT ON COLUMN identity.sessions.device_platform IS
     'Plateforme déclarée : android, ios, other.';
+COMMENT ON COLUMN identity.sessions.replaced_by IS
+    'La session qui a remplacé celle-ci à sa rotation — la remplaçante VIVANTE, tenue à jour. C''est ce qui distingue une réponse de rotation perdue d''un vol : l''ancien jeton, présenté dans la minute qui suit sa rotation (AUTH_REFRESH_GRACE) et tant que la remplaçante n''a jamais été renouvelée, révoque celle-ci (motif « response_lost ») et en ouvre une neuve, une seule vivante. Hors de ces bornes, tout est coupé (« reuse_detected »). ADR-020 de Guide Négo, qui nuance R3 de specs/001.';
 
 -- Jetons à usage unique : vérification d'email, réinitialisation de mot de
 -- passe, invitation, lien magique d'inscription rapide (cas PACO).

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.sessions\n            SET revoked_at = revoked_at - make_interval(secs => $2)\n          WHERE person_id = $1 AND revoked_at IS NOT NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Float8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a8ffc51770f10b66fe70cfca482723f15997a4868ed9ab686f14fc06ac18ee0d"
+}

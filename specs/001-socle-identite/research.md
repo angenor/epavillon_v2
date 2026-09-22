@@ -73,6 +73,8 @@ Un jeton présenté deux fois n'a **aucune explication innocente** : soit il a �
 - *Jeton de rafraîchissement réutilisable jusqu'à son échéance* — un jeton volé vaudrait trente jours sans que rien ne le signale.
 - *Fenêtre de tolérance au rejeu* (accepter un rejeu dans les quelques secondes, pour les requêtes concurrentes) — ajoute un état à gérer pour un cas que le front ne produit pas : il n'y a qu'un seul appel de renouvellement en vol à la fois.
 
+> **Nuancé le 22/09/2026 par l'[ADR-020](../../docs/AppNego/adr/020-la-reponse-de-rotation-perdue.md) de Guide Négo.** L'écart ci-dessus ne pensait qu'aux requêtes concurrentes. Il existe une explication innocente qu'il n'a pas vue : **la réponse de rotation perdue au retour**, le cas courant d'un téléphone en salle. L'ancien jeton, présenté dans la minute et tant que sa remplaçante n'a jamais été renouvelée, révoque celle-ci et ouvre une session neuve. Hors de ces bornes, et pour deux requêtes concurrentes, R3 tient tel quel.
+
 ---
 
 ## R4 — Vérification à la compilation et requêtes préparées

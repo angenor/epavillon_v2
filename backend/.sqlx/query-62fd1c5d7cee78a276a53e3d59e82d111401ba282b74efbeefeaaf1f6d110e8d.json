@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE identity.sessions SET replaced_by = $2 WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "62fd1c5d7cee78a276a53e3d59e82d111401ba282b74efbeefeaaf1f6d110e8d"
+}

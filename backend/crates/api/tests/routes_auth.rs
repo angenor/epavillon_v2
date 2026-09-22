@@ -240,6 +240,56 @@ async fn renouvellement_puis_deconnexion() {
     assert_eq!(corps["status"], "expired");
 }
 
+async fn vieillir_la_rotation(bac: &Bac, secondes: f64) {
+    sqlx::query("UPDATE identity.sessions SET revoked_at = revoked_at - make_interval(secs => $1) WHERE revoked_at IS NOT NULL")
+        .bind(secondes)
+        .execute(bac.base.pool())
+        .await
+        .expect("vieillissement de la rotation");
+}
+
+/// La réponse de la rotation se perd, le navigateur représente l'ancien jeton
+/// dans la minute : 200, et **de nouveaux cookies** — ADR-020.
+#[actix_web::test]
+async fn une_reponse_de_rotation_perdue_se_reprend() {
+    let bac = monter().await;
+    let app = test::init_service(api::build_app(&bac.etat)).await;
+
+    let connexion = test::call_service(
+        &app,
+        test::TestRequest::post()
+            .uri("/api/auth/login")
+            .set_json(corps_de_connexion(MOT_DE_PASSE))
+            .to_request(),
+    )
+    .await;
+    let ancien = cookie(&connexion, "epavillon_rt").expect("cookie de rafraîchissement");
+
+    let perdue = test::call_service(
+        &app,
+        test::TestRequest::post()
+            .uri("/api/auth/refresh")
+            .cookie(ancien.clone())
+            .to_request(),
+    )
+    .await;
+    assert_eq!(perdue.status(), StatusCode::OK);
+
+    let reprise = test::call_service(
+        &app,
+        test::TestRequest::post()
+            .uri("/api/auth/refresh")
+            .cookie(ancien.clone())
+            .to_request(),
+    )
+    .await;
+    assert_eq!(reprise.status(), StatusCode::OK);
+    let neuf = cookie(&reprise, "epavillon_rt").expect("nouveau cookie de rafraîchissement");
+    assert!(!neuf.value().is_empty() && neuf.value() != ancien.value());
+    let corps: Value = test::read_body_json(reprise).await;
+    assert_eq!(corps["status"], "renewed");
+}
+
 /// Le rejeu efface les deux cookies : les laisser ferait rejouer la même
 /// détection à chaque appel du navigateur.
 #[actix_web::test]
@@ -266,6 +316,9 @@ async fn le_rejeu_rend_401_et_efface_les_cookies() {
     )
     .await;
     assert_eq!(premier.status(), StatusCode::OK);
+
+    // Au-delà de la minute de tolérance : ce n'est plus une réponse perdue.
+    vieillir_la_rotation(&bac, 120.0).await;
 
     let rejeu = test::call_service(
         &app,

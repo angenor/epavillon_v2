@@ -21,6 +21,10 @@ use crate::domain::ids::{AccountId, PersonId, SessionId};
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RevokeReason {
     Rotated,
+    /// La remplaçante d'une rotation dont la réponse s'est perdue : l'ancien
+    /// jeton est revenu dans la fenêtre de tolérance, et une session neuve la
+    /// remplace à son tour. ADR-020.
+    ResponseLost,
     Logout,
     LogoutAll,
     ReuseDetected,
@@ -32,6 +36,7 @@ impl RevokeReason {
     pub fn as_db(self) -> &'static str {
         match self {
             Self::Rotated => "rotated",
+            Self::ResponseLost => "response_lost",
             Self::Logout => "logout",
             Self::LogoutAll => "logout_all",
             Self::ReuseDetected => "reuse_detected",
@@ -135,6 +140,8 @@ pub struct SessionRecord {
     pub device_id: Option<String>,
     pub device_label: Option<String>,
     pub device_platform: Option<String>,
+    /// La remplaçante vivante, depuis la rotation de cette session.
+    pub replaced_by: Option<SessionId>,
 }
 
 impl SessionRecord {
@@ -143,10 +150,26 @@ impl SessionRecord {
     }
 
     /// Une session révoquée **pour cause de rotation** dont le jeton se présente
-    /// à nouveau n'a aucune explication innocente : le jeton a été volé, ou une
-    /// copie de la session circule.
+    /// à nouveau : volé, ou copié — **ou une réponse de rotation perdue**, la seule
+    /// explication innocente, que le service examine avant de tout couper
+    /// (ADR-020). Une remplaçante révoquée pour réponse perdue n'a jamais été
+    /// remise au navigateur : son jeton qui revient ne peut être qu'un vol.
     pub fn est_un_rejeu(&self) -> bool {
-        self.revoked_reason.as_deref() == Some(RevokeReason::Rotated.as_db())
+        matches!(
+            self.revoked_reason.as_deref(),
+            Some(motif) if motif == RevokeReason::Rotated.as_db() || motif == RevokeReason::ResponseLost.as_db()
+        )
+    }
+
+    /// Tournée depuis moins que `tolerance` : la réponse de sa rotation a pu se
+    /// perdre au retour. Une tolérance nulle ne laisse rien passer.
+    pub fn tournee_depuis_moins_de(&self, tolerance: std::time::Duration) -> bool {
+        let Some(revoquee) = self.revoked_at else {
+            return false;
+        };
+        !tolerance.is_zero()
+            && OffsetDateTime::now_utc() - revoquee
+                < time::Duration::seconds(tolerance.as_secs() as i64)
     }
 }
 
@@ -158,7 +181,8 @@ pub async fn find_by_refresh_hash(
 ) -> Result<Option<SessionRecord>> {
     let ligne = sqlx::query!(
         r#"SELECT id, person_id, account_id, expires_at, revoked_at, revoked_reason,
-                  client_kind::text AS "client_kind!", device_id, device_label, device_platform
+                  client_kind::text AS "client_kind!", device_id, device_label, device_platform,
+                  replaced_by
              FROM identity.sessions
             WHERE refresh_token_hash = $1"#,
         empreinte
@@ -180,7 +204,46 @@ pub async fn find_by_refresh_hash(
         device_id: l.device_id,
         device_label: l.device_label,
         device_platform: l.device_platform,
+        replaced_by: l.replaced_by.map(SessionId),
     }))
+}
+
+/// Nomme la remplaçante vivante d'une session tournée.
+pub async fn set_replaced_by(
+    conn: &mut PgConnection,
+    remplacee: SessionId,
+    remplacante: SessionId,
+) -> Result<()> {
+    sqlx::query!(
+        "UPDATE identity.sessions SET replaced_by = $2 WHERE id = $1",
+        remplacee.as_uuid(),
+        remplacante.as_uuid()
+    )
+    .execute(conn)
+    .await?;
+    Ok(())
+}
+
+/// Révoque la remplaçante **si elle n'a jamais été renouvelée** et vit encore —
+/// révocation conditionnelle, qui tient lieu de verrou comme celle de la
+/// rotation. Faux : elle a servi, ou elle est close ; le rejeu n'a plus
+/// d'explication innocente.
+pub async fn revoke_unused_replacement(
+    conn: &mut PgConnection,
+    remplacante: SessionId,
+) -> Result<bool> {
+    let touchees = sqlx::query!(
+        "UPDATE identity.sessions
+            SET revoked_at = now(), revoked_reason = $2
+          WHERE id = $1 AND revoked_at IS NULL AND expires_at > now()",
+        remplacante.as_uuid(),
+        RevokeReason::ResponseLost.as_db()
+    )
+    .execute(conn)
+    .await?
+    .rows_affected();
+
+    Ok(touchees == 1)
 }
 
 /// Session vivante et personne en état de se connecter, en une seule lecture :

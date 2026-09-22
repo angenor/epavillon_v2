@@ -48,7 +48,8 @@
 |---|---|
 | `refresh_token_hash` | SHA-256 du jeton de rafraîchissement. Le clair n'existe que dans le cookie |
 | `expires_at` | 12 h, ou 30 j avec « rester connecté » (FR-030) |
-| `revoked_at`, `revoked_reason` | La rotation s'écrit ici, en chaînant des lignes. Motifs employés : `rotated`, `logout`, `logout_all`, `reuse_detected`, `password_changed`, `status_changed`, `anonymization` (ce dernier écrit par la base) |
+| `revoked_at`, `revoked_reason` | La rotation s'écrit ici, en chaînant des lignes. Motifs employés : `rotated`, `response_lost` (depuis le 22/09, [ADR-020](../../docs/AppNego/adr/020-la-reponse-de-rotation-perdue.md)), `logout`, `logout_all`, `reuse_detected`, `password_changed`, `status_changed`, `anonymization` (ce dernier écrit par la base) |
+| `replaced_by` | La remplaçante **vivante** d'une session tournée, tenue à jour. Ajoutée le 22/09 pour distinguer une réponse de rotation perdue d'un vol ([ADR-020](../../docs/AppNego/adr/020-la-reponse-de-rotation-perdue.md)) |
 | `user_agent`, `ip_address` | Renseignés à l'ouverture, pour que la personne reconnaisse ses appareils |
 | `last_seen_at` | Porte l'instant d'ouverture de la ligne, et rien d'autre : la rotation en crée une neuve à chaque renouvellement, donc la date suit l'activité **sans qu'aucune écriture ne s'ajoute**. Une mise à jour par requête ferait de cette table le point chaud de la base |
 | `account_id` | `ON DELETE SET NULL` : l'effacement d'un compte laisse la session historisée |

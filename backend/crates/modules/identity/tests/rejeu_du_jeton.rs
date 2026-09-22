@@ -1,10 +1,11 @@
 //! FR-031 : un jeton de rafraîchissement rejoué révoque **toutes** les sessions
 //! de la personne.
 //!
-//! Un jeton présenté deux fois n'a aucune explication innocente : soit il a été
-//! volé, soit une copie de la session circule. La seule réponse sûre est de tout
-//! couper — y compris les sessions ouvertes sur d'autres appareils, qui sont
-//! précisément celles qu'un vol vise ensuite.
+//! Hors d'une réponse de rotation perdue — la minute qui suit la rotation, tant
+//! que la remplaçante n'a pas servi (ADR-020, `rejeu_reponse_perdue.rs`) —, un
+//! jeton présenté deux fois n'a aucune explication innocente : volé, ou copié.
+//! La seule réponse sûre est de tout couper — y compris les sessions ouvertes sur
+//! d'autres appareils, qui sont précisément celles qu'un vol vise ensuite.
 
 mod commun;
 
@@ -33,6 +34,9 @@ async fn rejeu_du_jeton_revoque_tout() {
     .await
     .expect("premier renouvellement");
     assert!(matches!(premier, RefreshOutcome::Renewed(_)));
+
+    // Au-delà de la tolérance : la réponse perdue n'explique plus rien.
+    commun::vieillir_la_rotation(&bac, personne, 120).await;
 
     let rejeu = session::refresh(
         &bac.state,
@@ -95,15 +99,15 @@ async fn une_session_expiree_nest_pas_un_rejeu() {
 
 /// La course : deux renouvellements partis ensemble avec le même jeton.
 ///
-/// R3 écarte explicitement toute fenêtre de tolérance — « il n'y a qu'un seul
-/// appel de renouvellement en vol à la fois ». Ce que le test tient, c'est
-/// l'invariant qui compte quand cette hypothèse est fausse : **un jeton n'ouvre
-/// jamais deux sessions.** Sans lui, un double-clic laissait une session
-/// orpheline vivante, née d'un jeton déjà consommé.
+/// Le client n'en envoie qu'un à la fois. Ce que le test tient, c'est
+/// l'invariant qui compte quand cette hypothèse est fausse : **jamais deux
+/// sessions vivantes.** Selon l'ordre d'arrivée, le second est pris pour un
+/// rejeu — tout est coupé — ou pour une réponse perdue — la première remplaçante
+/// tombe (ADR-020) ; dans les deux cas, aucune session orpheline ne survit.
 #[tokio::test]
 async fn deux_renouvellements_simultanes_nouvrent_quune_session() {
     let bac = Bac::monter().await;
-    semer(&bac, Compte::actif(ADRESSE)).await;
+    let personne = semer(&bac, Compte::actif(ADRESSE)).await;
     let ouverte = connexion(&bac, ADRESSE).await;
 
     let ctx = bac.ctx();
@@ -116,12 +120,13 @@ async fn deux_renouvellements_simultanes_nouvrent_quune_session() {
         .iter()
         .filter(|issue| matches!(issue, Ok(RefreshOutcome::Renewed(_))))
         .count();
-    assert_eq!(renouvelees, 1, "un jeton n'ouvre jamais deux sessions");
+    assert!(renouvelees >= 1);
 
-    let refus = [un, deux]
-        .into_iter()
-        .filter_map(Result::err)
-        .collect::<Vec<_>>();
-    assert_eq!(refus.len(), 1);
-    assert_eq!(refus[0].code, ErrorCode::IdentityRefreshReused);
+    for refus in [un, deux].into_iter().filter_map(Result::err) {
+        assert_eq!(refus.code, ErrorCode::IdentityRefreshReused);
+    }
+    assert!(
+        commun::sessions_vivantes(&bac, personne).await <= 1,
+        "jamais deux sessions vivantes nées d'un même jeton"
+    );
 }

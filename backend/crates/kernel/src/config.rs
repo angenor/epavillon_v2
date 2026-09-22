@@ -102,6 +102,12 @@ struct Raw {
     /// là où aucun réseau ne permet de se reconnecter.
     #[serde(with = "humantime_serde", default = "days_90")]
     auth_session_ttl_app: Duration,
+    /// Combien de temps l'ancien jeton de rafraîchissement reste présentable
+    /// quand la réponse de sa rotation s'est perdue au retour — réseau saturé,
+    /// passage du Wi-Fi à la 4G. **Zéro rend la règle stricte** de R3 : tout
+    /// rejeu coupe tout. ADR-020 de Guide Négo.
+    #[serde(with = "humantime_serde", default = "seconds_60")]
+    auth_refresh_grace: Duration,
 
     #[serde(with = "humantime_serde", default = "hours_24")]
     auth_token_ttl_email_verification: Duration,
@@ -297,6 +303,9 @@ fn default_s3_bucket() -> String {
 fn hours_6() -> Duration {
     Duration::from_secs(6 * 3600)
 }
+fn seconds_60() -> Duration {
+    Duration::from_secs(60)
+}
 fn minutes_5() -> Duration {
     Duration::from_secs(5 * 60)
 }
@@ -369,6 +378,7 @@ pub struct AuthConfig {
     pub session_ttl: Duration,
     pub session_ttl_remembered: Duration,
     pub session_ttl_app: Duration,
+    pub refresh_grace: Duration,
     pub token_ttl: TokenTtls,
     pub signing_key: Secret,
     pub cookie_secure: bool,
@@ -884,6 +894,7 @@ impl Config {
                 session_ttl: raw.auth_session_ttl,
                 session_ttl_remembered: raw.auth_session_ttl_remembered,
                 session_ttl_app: raw.auth_session_ttl_app,
+                refresh_grace: raw.auth_refresh_grace,
                 token_ttl: TokenTtls {
                     email_verification: raw.auth_token_ttl_email_verification,
                     password_reset: raw.auth_token_ttl_password_reset,

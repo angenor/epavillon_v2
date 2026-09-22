@@ -173,6 +173,21 @@ pub async fn sessions(bac: &Bac, person_id: Uuid) -> Vec<(Uuid, Option<String>)>
     .collect()
 }
 
+/// Fait remonter la dernière rotation de `secondes` dans le passé : c'est la
+/// seule façon d'éprouver la fenêtre de tolérance sans attendre une minute.
+pub async fn vieillir_la_rotation(bac: &Bac, person_id: Uuid, secondes: i64) {
+    sqlx::query!(
+        "UPDATE identity.sessions
+            SET revoked_at = revoked_at - make_interval(secs => $2)
+          WHERE person_id = $1 AND revoked_at IS NOT NULL",
+        person_id,
+        secondes as f64
+    )
+    .execute(bac.base.pool())
+    .await
+    .expect("vieillissement de la rotation");
+}
+
 pub async fn sessions_vivantes(bac: &Bac, person_id: Uuid) -> i64 {
     identity::repo::sessions::count_active(bac.base.pool(), person_id)
         .await

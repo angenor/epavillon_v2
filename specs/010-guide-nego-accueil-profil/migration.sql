@@ -103,3 +103,18 @@ COMMENT ON COLUMN negotiation.theme_subscriptions.left_at IS
     'Un suivi se ferme, il ne se supprime pas : ce qu''une personne a suivi pendant une COP reste lisible, et l''index unique ne porte que sur le suivi vivant.';
 
 COMMIT;
+
+-- -----------------------------------------------------------------------------
+-- La réponse de rotation perdue (reprise 2, 22/09) — ADR-020
+--
+-- L'ancien jeton présenté dans la minute qui suit sa rotation, tant que sa
+-- remplaçante n'a jamais été renouvelée, n'est pas un vol : c'est une réponse
+-- perdue au retour. Pour retrouver la remplaçante sans deviner, la ligne
+-- remplacée la nomme.
+-- -----------------------------------------------------------------------------
+
+ALTER TABLE identity.sessions
+    ADD COLUMN IF NOT EXISTS replaced_by uuid REFERENCES identity.sessions(id) ON DELETE SET NULL;
+
+COMMENT ON COLUMN identity.sessions.replaced_by IS
+    'La session qui a remplacé celle-ci à sa rotation — la remplaçante VIVANTE, tenue à jour. C''est ce qui distingue une réponse de rotation perdue d''un vol : l''ancien jeton, présenté dans la minute qui suit sa rotation (AUTH_REFRESH_GRACE) et tant que la remplaçante n''a jamais été renouvelée, révoque celle-ci (motif « response_lost ») et en ouvre une neuve, une seule vivante. Hors de ces bornes, tout est coupé (« reuse_detected »). ADR-020 de Guide Négo, qui nuance R3 de specs/001.';
