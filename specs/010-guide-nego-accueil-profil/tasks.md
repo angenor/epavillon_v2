@@ -42,9 +42,9 @@ Pendant le cycle : `npm run typecheck`, `npm run test:guide-nego`, `npm run chec
 **Commit à part, le premier de l'étape. Le diff doit se lire comme un déplacement** : aucune méthode
 nouvelle, aucune signature retouchée, aucun comportement changé.
 
-- [ ] T001 Créer `frontend/app/composables/api/auth.ts` : `createAuthApi(deps)` portant les neuf méthodes déplacées telles quelles — `login`, `logout`, `session`, `register`, `verifyEmail`, `resendVerification`, `requestPasswordReset`, `checkPasswordResetToken`, `resetPassword` —, avec les types de `~/types/auth` qu'elles emploient
-- [ ] T002 Retirer le bloc `auth` et son commentaire de `frontend/app/composables/useApi.ts`, y monter `const auth = createAuthApi(deps)` **avant le littéral de retour** (l'ordre compte : `createGuideNegoApi({ auth, … })` en a besoin), et élaguer les imports de types devenus inutiles
-- [ ] T003 Vérifier que **aucun des 14 appelants de `api.auth.*` n'est modifié** — `stores/auth.ts`, `composables/guide-nego/useGnSession.ts`, `pages/auth/{verify-email,reset-password,forgot-password}.vue`, `pages/guide-nego/{nouveau-mot-de-passe,verification-adresse}.vue` —, puis `npm run typecheck`, `npm run build` et `make check-api-contract`
+- [X] T001 Créer `frontend/app/composables/api/auth.ts` : `createAuthApi(deps)` portant les neuf méthodes déplacées telles quelles — `login`, `logout`, `session`, `register`, `verifyEmail`, `resendVerification`, `requestPasswordReset`, `checkPasswordResetToken`, `resetPassword` —, avec les types de `~/types/auth` qu'elles emploient
+- [X] T002 Retirer le bloc `auth` et son commentaire de `frontend/app/composables/useApi.ts`, y monter `const auth = createAuthApi(deps)` **avant le littéral de retour** (l'ordre compte : `createGuideNegoApi({ auth, … })` en a besoin), et élaguer les imports de types devenus inutiles
+- [X] T003 Vérifier que **aucun des 14 appelants de `api.auth.*` n'est modifié** — `stores/auth.ts`, `composables/guide-nego/useGnSession.ts`, `pages/auth/{verify-email,reset-password,forgot-password}.vue`, `pages/guide-nego/{nouveau-mot-de-passe,verification-adresse}.vue` —, puis `npm run typecheck`, `npm run build` et `make check-api-contract`
 
 **Checkpoint** : `useApi.ts` sous 910 lignes, site inchangé, rien d'autre touché. **Commit.**
 
