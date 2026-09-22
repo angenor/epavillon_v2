@@ -166,17 +166,17 @@ hors connexion, sans jamais ressembler à une panne.
 **Test indépendant** : ouvrir le profil par ses deux chemins, changer ses thématiques, lire la place
 occupée, la libérer, se déconnecter.
 
-- [ ] T057 [P] [US3] Créer `frontend/app/components/guide-nego/GnJauge.vue` — 6 px, accent sur gris pâle, **toujours avec le nombre écrit** (« 7 Mo utilisés · 2,1 Go libres ») — et son `frontend/i18n/locales/{fr,en}/components/gn-jauge.json`
-- [ ] T058 [P] [US3] Ajouter `GnJauge` à la planche dans `frontend/app/components/guide-nego/planche/PlancheComposantsSurfaces.vue`, dans les deux thèmes
-- [ ] T059 [US3] Écrire `frontend/app/composables/guide-nego/useGnPlace.ts` : l'estimation du navigateur, le repli qui **dit** qu'on ne peut pas mesurer, et la libération — données lues et documents, **jamais la coquille**
-- [ ] T060 [US3] Écrire `frontend/app/pages/guide-nego/ressources/telechargements.vue` : l'état vide (aucun document, et à quelle étape ils arrivent), la jauge, et la libération derrière une `GnConfirmation` qui dit ce qui reste lisible sans réseau
-- [ ] T060 bis [US3] Porter les quatre états de `frontend/app/pages/guide-nego/ressources/telechargements.vue` : chargement, vide, erreur, accès refusé
-- [ ] T061 [US3] Ajouter le groupe « Mon suivi » à `frontend/app/pages/guide-nego/ressources/reglages.vue` : « Mes thématiques » avec sa valeur, « Mes téléchargements », puis « Mon accès » livré en 0b — dans cet ordre
-- [ ] T062 [US3] Faire afficher à la ligne « Mes thématiques » de `frontend/app/pages/guide-nego/ressources/reglages.vue` les **noms** croisés avec le vocabulaire gardé, et **le nombre** en repli quand le vocabulaire n'a jamais été lu
-- [ ] T063 [US3] Ajouter le groupe « Application » à `reglages.vue` : l'entrée « À propos » et la ligne « Dernière synchronisation » — l'heure **sans fuseau** (écart 32), et ce n'est pas une action
-- [ ] T064 [US3] Déplacer le nom et le pays en tête de `reglages.vue`, avec l'avatar, sans toucher au groupe « Compte » ni à la déconnexion de 0b
-- [ ] T065 [P] [US3] Écrire `frontend/i18n/locales/fr/pages/guide-nego.telechargements.json`, compléter `guide-nego.reglages.json`, et leurs jumeaux `en`
-- [ ] T066 [US3] Découper `reglages.vue` en composants de groupe **si elle dépasse 300 lignes** — le garde-fou est à 1000, mais un écran de réglages qui grossit à chaque étape se découpe avant d'y arriver
+- [X] T057 [P] [US3] Créer `frontend/app/components/guide-nego/GnJauge.vue` — 6 px, accent sur gris pâle, **toujours avec le nombre écrit** (« 7 Mo utilisés · 2,1 Go libres ») — et son `frontend/i18n/locales/{fr,en}/components/gn-jauge.json`
+- [X] T058 [P] [US3] Ajouter `GnJauge` à la planche dans `frontend/app/components/guide-nego/planche/PlancheComposantsSurfaces.vue`, dans les deux thèmes
+- [X] T059 [US3] Écrire `frontend/app/composables/guide-nego/useGnPlace.ts` : l'estimation du navigateur, le repli qui **dit** qu'on ne peut pas mesurer, et la libération — données lues et documents, **jamais la coquille**
+- [X] T060 [US3] Écrire `frontend/app/pages/guide-nego/ressources/telechargements.vue` : l'état vide (aucun document, et à quelle étape ils arrivent), la jauge, et la libération derrière une `GnConfirmation` qui dit ce qui reste lisible sans réseau
+- [X] T060 bis [US3] Porter les quatre états de `frontend/app/pages/guide-nego/ressources/telechargements.vue` : chargement, vide, erreur, accès refusé — *livré le 22/09 : l'erreur est la mesure impossible, dite en toutes lettres ; **l'accès refusé est sans objet**, rien de ce qui est gardé sur le téléphone ne demande de compte*
+- [X] T061 [US3] Ajouter le groupe « Mon suivi » à `frontend/app/pages/guide-nego/ressources/reglages.vue` : « Mes thématiques » avec sa valeur, « Mes téléchargements », puis « Mon accès » livré en 0b — dans cet ordre
+- [X] T062 [US3] Faire afficher à la ligne « Mes thématiques » de `frontend/app/pages/guide-nego/ressources/reglages.vue` les **noms** croisés avec le vocabulaire gardé, et **le nombre** en repli quand le vocabulaire n'a jamais été lu
+- [X] T063 [US3] Ajouter le groupe « Application » à `reglages.vue` : l'entrée « À propos » et la ligne « Dernière synchronisation » — l'heure **sans fuseau** (écart 32), et ce n'est pas une action
+- [X] T064 [US3] Déplacer le nom et le pays en tête de `reglages.vue`, avec l'avatar, sans toucher au groupe « Compte » ni à la déconnexion de 0b
+- [X] T065 [P] [US3] Écrire `frontend/i18n/locales/fr/pages/guide-nego.telechargements.json`, compléter `guide-nego.reglages.json`, et leurs jumeaux `en`
+- [X] T066 [US3] Découper `reglages.vue` en composants de groupe **si elle dépasse 300 lignes** — *248 lignes le 22/09 : pas de découpe* — le garde-fou est à 1000, mais un écran de réglages qui grossit à chaque étape se découpe avant d'y arriver
 
 **Checkpoint** : le profil porte tout ce que 0c lui doit. **Commit.**
 

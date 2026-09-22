@@ -277,6 +277,27 @@ const IMAGE_ABSENTE = assetUrl('/guide-nego/icones/absente.png')
     </GnPlancheSection>
 
     <GnPlancheSection
+      :titre="t('gn-planche-composants-surfaces.jauge')"
+      :propos="t('gn-planche-composants-surfaces.jauge-propos')"
+    >
+      <div class="gn-planche-composants__themes">
+        <div
+          v-for="theme in THEMES"
+          :key="theme"
+          class="gn-planche-composants__theme"
+          data-app="guide-nego"
+          :data-theme="theme"
+        >
+          <span class="gn-planche-composants__legende">{{ t(`gn-planche-composants-surfaces.theme-${theme}`) }}</span>
+          <GnJauge :place="{ utilise: 7_000_000, libre: 2_100_000_000 }" />
+          <GnJauge :place="{ utilise: 1_400_000_000, libre: 600_000_000 }" />
+          <GnJauge :place="{ utilise: 7_000_000, libre: null }" />
+        </div>
+      </div>
+      <p class="gn-planche-note">{{ t('gn-planche-composants-surfaces.jauge-note') }}</p>
+    </GnPlancheSection>
+
+    <GnPlancheSection
       :titre="t('gn-planche-composants-surfaces.picto')"
       :propos="t('gn-planche-composants-surfaces.picto-propos')"
     >

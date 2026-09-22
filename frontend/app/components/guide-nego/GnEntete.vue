@@ -20,10 +20,12 @@ withDefaults(
     retour?: string
     /** Écran d'onglet, personne connectée. Ignoré quand un retour est donné. */
     avatar?: AvatarDEntete
+    /** Le profil : l'avatar en grand, à côté du titre qui porte le nom. */
+    avatarDuTitre?: AvatarDEntete
     /** Vrai sur le lexique lui-même : le bouton dit où l'on est. */
     lexiqueOuvert?: boolean
   }>(),
-  { sousTitre: undefined, retour: undefined, avatar: undefined, lexiqueOuvert: false },
+  { sousTitre: undefined, retour: undefined, avatar: undefined, avatarDuTitre: undefined, lexiqueOuvert: false },
 )
 
 const { t } = useI18n()
@@ -54,7 +56,11 @@ const { t } = useI18n()
         Aa
       </NuxtLink>
     </div>
-    <h1 class="gn-entete__titre">{{ titre }}</h1>
+    <div v-if="avatarDuTitre" class="gn-entete__identite">
+      <GnAvatar grand :prenom="avatarDuTitre.prenom" :nom="avatarDuTitre.nom" :image="avatarDuTitre.image" />
+      <h1 class="gn-entete__titre">{{ titre }}</h1>
+    </div>
+    <h1 v-else class="gn-entete__titre">{{ titre }}</h1>
     <p v-if="sousTitre" class="gn-entete__sous-titre">{{ sousTitre }}</p>
   </header>
 </template>
@@ -112,6 +118,12 @@ const { t } = useI18n()
 [data-app="guide-nego"][data-theme="sombre"] .gn-entete__aa--ouvert {
   background: var(--gn-accent);
   color: var(--gn-accent-inv);
+}
+
+[data-app="guide-nego"] .gn-entete__identite {
+  display: flex;
+  align-items: center;
+  gap: var(--gn-espace-12);
 }
 
 [data-app="guide-nego"] .gn-entete__titre {

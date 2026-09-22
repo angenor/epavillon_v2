@@ -21,6 +21,27 @@
       "phrase": "Your other devices stay signed in. Anything downloaded for offline reading stays on this phone.",
       "action": "Sign out",
       "retour": "Cancel"
+    },
+    "telechargements-restent": "Your downloads stay on the phone."
+  },
+  "suivi": {
+    "titre": "What I follow",
+    "thematiques": "My themes",
+    "aucune-thematique": "No theme followed",
+    "nombre-de-thematiques": "{count} theme followed | {count} theme followed | {count} themes followed",
+    "telechargements": "My downloads",
+    "telechargements-place": "No document · {place} on the phone",
+    "telechargements-vide": "No document kept"
+  },
+  "application": {
+    "titre": "App",
+    "a-propos": "About and privacy",
+    "synchronisation": "Last sync",
+    "jamais": "Not yet",
+    "moment": {
+      "aujourdhui": "Today, {heure}",
+      "hier": "Yesterday, {heure}",
+      "avant": "{jour}, {heure}"
     }
   }
 }

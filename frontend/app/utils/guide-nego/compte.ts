@@ -21,6 +21,8 @@ export interface EtatDuCompte {
   appareil: string | null
   /** Depuis quand cette session est ouverte, en ISO. */
   ouverteLe: string | null
+  /** Le pays du profil ; son nom se résout par le référentiel, dans la langue de l'écran. */
+  paysId: string | null
 }
 
 export const COMPTE_DECONNECTE: EtatDuCompte = {
@@ -32,6 +34,7 @@ export const COMPTE_DECONNECTE: EtatDuCompte = {
   adresseConfirmee: false,
   appareil: null,
   ouverteLe: null,
+  paysId: null,
 }
 
 /**
@@ -52,6 +55,7 @@ export function etatDuCompte(moi: AuthenticatedPerson | null): EtatDuCompte {
     adresseConfirmee: moi.email_verified_at !== null && moi.email_verified_at !== undefined,
     appareil: moi.session?.device_label ?? null,
     ouverteLe: moi.session?.issued_at ?? null,
+    paysId: moi.country_id ?? null,
   }
 }
 

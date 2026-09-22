@@ -1,0 +1,22 @@
+{
+  "titre": "My downloads",
+  "sous-titre": "On this phone",
+  "vide": {
+    "titre": "No document kept",
+    "texte": "Negotiation documents will download from the Resources tab as soon as they are published there, to be read offline. They will stay on this phone, not on your account."
+  },
+  "place": {
+    "titre": "Space used",
+    "mesure": "Measuring space used",
+    "impossible": "This browser does not tell how much space Guide Négo uses: it cannot be measured on this device.",
+    "aide": "The app itself and what it has already read, so that it opens offline."
+  },
+  "liberer": {
+    "bouton": "Free up space",
+    "question": "Free up space on this phone?",
+    "phrase": "Lists already read will be erased: they will be read again when the network returns. The app stays, with your account and the choices not yet sent — it will still open offline.",
+    "action": "Free up",
+    "retour": "Cancel",
+    "faite": "Space freed"
+  }
+}

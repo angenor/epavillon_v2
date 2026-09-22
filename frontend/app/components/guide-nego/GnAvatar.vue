@@ -19,8 +19,10 @@ const props = withDefaults(
     nom: string | null
     image?: string | null
     vers?: string
+    /** 48 px, initiales 17 : en tête du profil, à côté du nom. */
+    grand?: boolean
   }>(),
-  { image: null, vers: undefined },
+  { image: null, vers: undefined, grand: false },
 )
 
 const { t } = useI18n()
@@ -41,7 +43,7 @@ const imageMontree = computed(() => Boolean(props.image) && !imageEnEchec.value)
     :is="vers ? NuxtLink : 'span'"
     :to="vers"
     class="gn-avatar"
-    :class="{ 'gn-avatar--lien': vers }"
+    :class="{ 'gn-avatar--lien': vers, 'gn-avatar--grand': grand }"
     :aria-label="vers ? libelle : undefined"
   >
     <span class="gn-avatar__rond" aria-hidden="true">
@@ -86,6 +88,12 @@ const imageMontree = computed(() => Boolean(props.image) && !imageEnEchec.value)
   font-size: var(--gn-taille-15);
   line-height: 1;
   font-weight: var(--gn-graisse-gras);
+}
+
+[data-app="guide-nego"] .gn-avatar--grand .gn-avatar__rond {
+  width: var(--gn-cible);
+  height: var(--gn-cible);
+  font-size: var(--gn-taille-17);
 }
 
 [data-app="guide-nego"] .gn-avatar__image {

@@ -77,5 +77,8 @@
   "avatar-propos": "The account at 40 px, at the top of “My day”. It opens “Profile and settings” through a 48 px target.",
   "avatar-note": "Left to right: initials; the account image; an image that fails to load, as when offline — it falls back to initials, never an empty circle; and an account with no name read, which shows the silhouette.",
   "theme-clair": "Light",
-  "theme-sombre": "Dark"
+  "theme-sombre": "Dark",
+  "jauge": "Gauge",
+  "jauge-propos": "Space used on the phone: a 6 px bar, accent on pale grey, and always the figure written out.",
+  "jauge-note": "Top to bottom: almost empty; two thirds full; and a browser that does not tell the free space — the bar goes, the figure stays. When it measures nothing at all, the screen says so in words and the gauge does not appear."
 }

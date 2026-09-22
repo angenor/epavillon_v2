@@ -77,5 +77,8 @@
   "avatar-propos": "Le compte en 40 px, en tête de « Ma journée ». Il ouvre « Profil et réglages » par une cible de 48 px.",
   "avatar-note": "De gauche à droite : les initiales ; l'image du compte ; une image qui ne se charge pas, comme hors connexion — elle rend les initiales, jamais un rond vide ; et un compte sans nom lu, qui montre la silhouette.",
   "theme-clair": "Clair",
-  "theme-sombre": "Sombre"
+  "theme-sombre": "Sombre",
+  "jauge": "Jauge",
+  "jauge-propos": "La place occupée sur le téléphone : un trait de 6 px, accent sur gris pâle, et toujours le nombre écrit.",
+  "jauge-note": "De haut en bas : presque vide ; aux deux tiers ; et un navigateur qui ne dit pas la place libre — le trait disparaît, le nombre reste. Quand il ne mesure rien du tout, l'écran le dit en toutes lettres et la jauge ne paraît pas."
 }

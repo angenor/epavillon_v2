@@ -14,10 +14,18 @@ withDefaults(
     retour?: string
     /** Relayé à l'en-tête : aucune page n'instancie `GnEntete` directement. */
     avatar?: AvatarDEntete
+    avatarDuTitre?: AvatarDEntete
     onglets?: boolean
     lexiqueOuvert?: boolean
   }>(),
-  { sousTitre: undefined, retour: undefined, avatar: undefined, onglets: true, lexiqueOuvert: false },
+  {
+    sousTitre: undefined,
+    retour: undefined,
+    avatar: undefined,
+    avatarDuTitre: undefined,
+    onglets: true,
+    lexiqueOuvert: false,
+  },
 )
 
 const { echangesOuverts } = useGnDrapeaux()
@@ -46,6 +54,7 @@ watch(
       :sous-titre="sousTitre"
       :retour="retour"
       :avatar="avatar"
+      :avatar-du-titre="avatarDuTitre"
       :lexique-ouvert="lexiqueOuvert"
     >
       <template #connexion>

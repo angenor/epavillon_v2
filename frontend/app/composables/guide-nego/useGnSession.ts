@@ -34,8 +34,16 @@ export function useGnSession() {
 
   // La lecture passe par la primitive de 0a : garde en IndexedDB, heure de
   // lecture, et **aucune exception** quand le réseau manque.
-  const { etat, rafraichir } = useGnLecture<EtatDuCompte>('compte', async () => {
-    const moi = await api.auth.session(auth.person?.id ?? null)
+  const temoin = useSessionWitness()
+  const { etat, rafraichir } = useGnLecture<EtatDuCompte>('compte', async (garde) => {
+    let moi = await api.auth.session(auth.person?.id ?? null)
+    // `/auth/me` ne rend jamais 401 : un jeton d'accès expiré — un quart d'heure —
+    // y répond « personne », alors que la session de quatre-vingt-dix jours tient.
+    // Une rotation, une relecture, comme le fait le store du site ; sans elle,
+    // l'application se croit déconnectée le lendemain matin.
+    if (!moi && (garde?.connectee || temoin.value) && (await api.refreshSession())) {
+      moi = await api.auth.session(auth.person?.id ?? null)
+    }
     return etatDuCompte(moi)
   })
 

@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import type { SegmentDeChoix } from '~/components/guide-nego/GnSegmente.vue'
 import type { ChoixDeTheme } from '~/utils/guide-nego/theme'
+import { momentDeLecture } from '~/utils/guide-nego/connexion'
+import { tailleLisible } from '~/utils/guide-nego/place'
 
 /**
- * Le thème, le compte, **« Mon accès »** et la déconnexion. 0c apportera le
- * reste — thématiques, téléchargements.
+ * Écran 11 — « Profil et réglages ». En tête, le nom et le pays avec l'avatar ;
+ * puis « Mon suivi », « Affichage », « Application », et le compte avec sa
+ * déconnexion, tels que 0b les a posés. Les notifications par thématique
+ * viennent avec leur centre, à l'étape 3b.
  *
  * LA LIGNE « MON ACCÈS » PORTE L'ÉTAT, JAMAIS UN RÔLE. La maquette écrit
  * « Négociatrice — réseau » en second rang : cette formule est genrée et ne se
@@ -14,18 +18,69 @@ import type { ChoixDeTheme } from '~/utils/guide-nego/theme'
 definePageMeta({ layout: 'guide-nego' })
 defineI18nRoute(false)
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { choix, choisir } = useGnTheme()
 const session = useGnSession()
 const acces = useGnAcces()
+const thematiques = useGnThematiques()
+const pays = useGnPays()
+const connexion = useGnConnexion()
+const { place, mesurer } = useGnPlace()
 const { momentLisible } = useGnMomentLecture()
 
 const confirmation = ref(false)
 
-onMounted(() => {
+onMounted(async () => {
   session.relireAuRetourAuPremierPlan()
-  void session.assurer()
+  void mesurer()
+  await session.assurer()
+  if (!session.connectee.value) return
   void acces.assurer()
+  void thematiques.assurer()
+  void pays.assurer()
+})
+
+const compte = session.compte
+const nomComplet = computed(() => [compte.value.prenom, compte.value.nom].filter(Boolean).join(' '))
+const titre = computed(() =>
+  session.connectee.value && nomComplet.value ? nomComplet.value : t('guide-nego.reglages.titre'),
+)
+const sousTitre = computed(() =>
+  session.connectee.value ? (pays.nomDuPays(compte.value.paysId) ?? undefined) : undefined,
+)
+const avatarDuTitre = computed(() =>
+  session.connectee.value ? { prenom: compte.value.prenom, nom: compte.value.nom } : undefined,
+)
+
+/**
+ * Les noms croisés avec le vocabulaire gardé ; **le nombre** quand le vocabulaire
+ * n'a jamais été lu — jamais une liste de codes bruts (FR-022).
+ */
+const valeurDesThematiques = computed(() => {
+  const codes = thematiques.mesCodes.value
+  if (codes.length === 0) return t('guide-nego.reglages.suivi.aucune-thematique')
+  const { noms } = thematiques.resumeDe(codes)
+  if (noms.length === codes.length) return noms.join(', ')
+  return t('guide-nego.reglages.suivi.nombre-de-thematiques', { count: codes.length }, codes.length)
+})
+
+const valeurDesTelechargements = computed(() =>
+  place.value
+    ? t('guide-nego.reglages.suivi.telechargements-place', {
+        place: tailleLisible(place.value.utilise, locale.value),
+      })
+    : t('guide-nego.reglages.suivi.telechargements-vide'),
+)
+
+/** L'heure du téléphone, sans fuseau (écart 32) : une information, pas une action. */
+const derniereSynchronisation = computed(() => {
+  const luA = connexion.etat.value.luA
+  if (!luA) return t('guide-nego.reglages.application.jamais')
+  const moment = momentDeLecture(luA, new Date(), locale.value)
+  return t(`guide-nego.reglages.application.moment.${moment.quand}`, {
+    heure: moment.heure,
+    jour: moment.quand === 'avant' ? moment.jour : '',
+  })
 })
 
 /**
@@ -57,10 +112,37 @@ useHead({ title: t('guide-nego.reglages.titre') })
 
 <template>
   <GnEcran
-    :titre="t('guide-nego.reglages.titre')"
+    :titre="titre"
+    :sous-titre="sousTitre"
+    :avatar-du-titre="avatarDuTitre"
     retour="/guide-nego/ressources"
     :onglets="false"
   >
+    <template v-if="session.connectee.value">
+      <GnEnteteGroupe :titre="t('guide-nego.reglages.suivi.titre')" />
+      <GnLigneReglage
+        :libelle="t('guide-nego.reglages.suivi.thematiques')"
+        :valeur="valeurDesThematiques"
+        picto="filter"
+        vers="/guide-nego/thematiques"
+      />
+      <GnLigneReglage
+        :libelle="t('guide-nego.reglages.suivi.telechargements')"
+        :valeur="valeurDesTelechargements"
+        picto="download"
+        vers="/guide-nego/ressources/telechargements"
+      />
+      <!-- L'état, et non un rôle : « Négociatrice — réseau » de la maquette est
+           genré et ne se reprend pas (SC-006). -->
+      <GnLigneReglage
+        :libelle="t('guide-nego.reglages.compte.acces')"
+        :valeur="t(`guide-nego.acces.etat.${acces.acces.value.state}`)"
+        picto="lock"
+        vers="/guide-nego/ressources/acces"
+        derniere
+      />
+    </template>
+
     <GnEnteteGroupe :titre="t('guide-nego.reglages.affichage')" />
     <section class="gn-reglages__bloc">
       <h3 class="gn-reglages__libelle">{{ t('guide-nego.reglages.theme.libelle') }}</h3>
@@ -72,6 +154,19 @@ useHead({ title: t('guide-nego.reglages.titre') })
       <p class="gn-reglages__aide">{{ t('guide-nego.reglages.theme.aide') }}</p>
     </section>
 
+    <GnEnteteGroupe :titre="t('guide-nego.reglages.application.titre')" />
+    <GnLigneReglage
+      :libelle="t('guide-nego.reglages.application.a-propos')"
+      picto="info"
+      vers="/guide-nego/ressources/a-propos"
+    />
+    <GnLigneReglage
+      :libelle="t('guide-nego.reglages.application.synchronisation')"
+      :valeur="derniereSynchronisation"
+      picto="sync"
+      derniere
+    />
+
     <!-- Le compte. Rien ici ne s'affiche quand personne n'est connecté : ce
          serait proposer de se déconnecter d'un compte qu'on n'a pas. -->
     <template v-if="session.connectee.value">
@@ -80,14 +175,6 @@ useHead({ title: t('guide-nego.reglages.titre') })
         :libelle="session.compte.value.adresse ?? t('guide-nego.reglages.compte.sans-adresse')"
         :valeur="appareil ?? undefined"
         picto="user"
-      />
-      <!-- L'état, et non un rôle : « Négociatrice — réseau » de la maquette est
-           genré et ne se reprend pas (SC-006). -->
-      <GnLigneReglage
-        :libelle="t('guide-nego.reglages.compte.acces')"
-        :valeur="t(`guide-nego.acces.etat.${acces.acces.value.state}`)"
-        picto="lock"
-        vers="/guide-nego/ressources/acces"
         derniere
       />
       <p v-if="luA" class="gn-reglages__aide">
@@ -98,6 +185,9 @@ useHead({ title: t('guide-nego.reglages.titre') })
         <GnBouton variante="secondaire" picto="logout" @clic="confirmation = true">
           {{ t('guide-nego.reglages.compte.deconnexion') }}
         </GnBouton>
+        <p class="gn-reglages__aide gn-reglages__aide--centree">
+          {{ t('guide-nego.reglages.compte.telechargements-restent') }}
+        </p>
       </div>
 
       <GnConfirmation
@@ -150,5 +240,9 @@ useHead({ title: t('guide-nego.reglages.titre') })
   color: var(--gn-texte-2);
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
+}
+
+[data-app="guide-nego"] .gn-reglages__aide--centree {
+  text-align: center;
 }
 </style>
