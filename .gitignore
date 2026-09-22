@@ -47,3 +47,6 @@ frontend/i18n/locales/.generated/
 
 # Bloc-notes personnel, hors du dépôt.
 docs/note.md
+
+# Matériaux d’essai (PDF du guide) — jamais commités
+.essais/

@@ -6,6 +6,7 @@
 
 - **Le PDF réel du guide de la CdP30**, fourni par le commanditaire. Ses droits sont acquis par l'IFDD ([donnees-lecteur.md](../../docs/AppNego/design/donnees-lecteur.md)).
 - **Le sommaire de référence**, pages 8 à 88, et le passage de la page 59, tous deux dans `donnees-lecteur.md` : ils servent d'étalon.
+- **Le fichier reçu le 22/09** : `.essais/guide-cdp30.pdf` — *Guide des négociations, édition 2025, CdP30*, **90 pages, 2,9 Mo** (et non 92 pages et 9 Mo comme la maquette l'annonçait), SHA-256 `9af73eb2…34164eb`. Les mesures de R2 se rapportent donc à 2,9 Mo.
 - **Il ne se commite pas.** Le PDF reste hors du dépôt, sous `.essais/` (ignoré par Git). Les résultats — grille, mesures, extraits courts — se commitent dans ce fichier.
 
 ## Le montage
@@ -19,7 +20,25 @@
 
 ## La grille
 
-Chaque critère se juge sur les **pages témoins** : 8 et 9 (sommaire), 14, 21, 26, 59 et 60 (texte courant et italiques), une page à tableau et une page à note de bas de page repérées au premier passage, et 88 (bibliographie).
+Chaque critère se juge sur des **pages témoins**, choisies d'après une première lecture du fichier :
+
+| Page | Ce qu'elle éprouve |
+|---|---|
+| 6 et 7 | Le sommaire imprimé, à confronter aux signets du PDF ; ses titres en italique gras ne sont **pas** des termes |
+| 9 | Un tableau à trois colonnes, avec des puces |
+| 11 | Une note de bas de page ; le pied « © GUIDE DES NÉGOCIATIONS… » et son numéro, sur chaque page |
+| 12 | *Global Goal on Adaptation*, *Global Stocktake*, *New Collective Quantified Goal* : les vrais termes anglais en italique |
+| 13 | Une frise dessinée : une figure, à rendre en bloc `origine` |
+| 14 | Quatre encadrés côte à côte (CdP29, CRP19, CRA6, SB61) |
+| 15 et 47 | **Du texte sur deux colonnes** suivi d'une liste pleine largeur |
+| 21 à 25 | Des tableaux sur plusieurs pages |
+| 48 | Des encadrés en pointillés et une liste en anglais en italique |
+| 50 à 64 | Des tableaux « Questions de négociations / Points de convergence / Points de divergence » |
+| 59 | 3.6.1 GGA, la page du lecteur de la maquette |
+| 66 et 67 | Le tableau des sigles, où l'anglais est entre parenthèses et **pas** en italique |
+| 88 | La bibliographie, pleine d'adresses coupées sur deux lignes |
+
+**Déjà vu à la lecture** : la couche de texte perd le trait d'union d'un mot coupé en fin de ligne — « Convention-cadre » y devient « Conventioncadre », « socio-économiques » « socioéconomiques ». La règle des césures de R7 doit donc **réinsérer** un tiret attesté, et pas seulement en retirer.
 
 | # | Critère | Comment on le juge | Seuil | Résultat |
 |---|---|---|---|---|
