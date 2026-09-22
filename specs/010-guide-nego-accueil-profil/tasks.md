@@ -192,26 +192,26 @@ l'application reçoivent la même version ; modifier un texte sans lever sa vers
 
 **⚠️ Cette phase touche `programme` et `kernel` : la faire seule.**
 
-- [ ] T067 [US4] Créer `backend/crates/kernel/src/legal/` : les quatre fichiers Markdown — politique et conditions, `fr` et `en` —, chacun portant sa version et sa date d'entrée en vigueur en tête
-- [ ] T068 [US4] Écrire le module `backend/crates/kernel/src/legal/mod.rs` : embarquement par `include_str!`, lecture de l'en-tête, accès par clé et par langue avec **repli sur le français**, et l'empreinte du corps
-- [ ] T069 [P] [US4] Test « l'empreinte est figée par version » dans `backend/crates/kernel/tests/legal_empreinte.rs` : modifier un texte sans lever sa version fait diverger l'empreinte et **échouer le test**, avec le nom du fichier
-- [ ] T070 [P] [US4] Test « la grammaire close couvre les fichiers réels » dans `backend/crates/kernel/tests/legal_grammaire.rs` : rendre les quatre fichiers et **échouer sur toute construction inconnue** — tableau, note de bas de page, image, bloc de code —, en nommant la ligne
-- [ ] T071 [P] [US4] Test « une version par texte, pas par langue » dans `backend/crates/kernel/tests/legal_versions.rs` : les deux langues d'un texte déclarent la même version
-- [ ] T072 [US4] Écrire `backend/crates/api/src/routes/legal.rs` : `GET /legal/{cle}` publique, corps **sérialisé une fois au montage**, `ETag`, `404` sur clé inconnue, et la langue servie annoncée
-- [ ] T073 [US4] Annoter la route pour OpenAPI et l'inscrire au registre de `backend/crates/api/src/openapi.rs` — **sans bloc `security`**, c'est une route publique ; déclarer la forme `LegalText` dans `frontend/app/types/platform.ts`
-- [ ] T074 [US4] Retirer `privacy_policy_version` de `backend/crates/kernel/src/config.rs` — le champ brut, son défaut, sa validation et `ProgrammeConfig.privacy_policy_version` — et la ligne `PRIVACY_POLICY_VERSION` de `.env.example`
-- [ ] T075 [US4] Faire lire la version depuis `kernel::legal` dans `backend/crates/modules/programme/src/service/registration.rs:122` — **une ligne**, la signature d'`exiger_le_consentement` ne bouge pas
-- [ ] T076 [US4] Réécrire le commentaire de doctrine de `backend/crates/modules/programme/src/repo/consents.rs:26-31` : la version ne vient plus de la configuration
-- [ ] T077 [US4] Vérifier qu'aucune ligne existante d'`identity.consents` n'est réécrite — les preuves sous `2026-01` restent telles quelles
-- [ ] T078 [P] [US4] Créer `frontend/app/components/guide-nego/GnTexteLong.vue` : rendu de la grammaire close, tout le reste échappé ; et son test `frontend/tests/guide-nego/texte-long.test.ts`
-- [ ] T079 [P] [US4] Ajouter `GnTexteLong` à la planche dans `frontend/app/components/guide-nego/planche/PlancheComposantsSurfaces.vue`, dans les deux thèmes
-- [ ] T080 [US4] Écrire `frontend/app/composables/guide-nego/useGnTextes.ts` : lecture par `useGnLecture`, garde par texte, heure de lecture
-- [ ] T081 [US4] Écrire `frontend/app/pages/guide-nego/ressources/a-propos.vue` : édition, étiquette de source, paragraphe de confidentialité, groupe des textes — **et aucun interrupteur d'accord** (écart 40) ; **l'écran et ses textes se lisent sans compte** (FR-037)
-- [ ] T082 [US4] Écrire `frontend/app/pages/guide-nego/ressources/textes/[cle].vue` : le texte entier, sa version, son heure de lecture hors connexion
-- [ ] T082 bis [US4] Porter les quatre états de `frontend/app/pages/guide-nego/ressources/a-propos.vue` et de `frontend/app/pages/guide-nego/ressources/textes/[cle].vue` : chargement, vide, erreur, accès refusé
-- [ ] T083 [US4] Écrire les licences dans `frontend/i18n/locales/{fr,en}/pages/guide-nego.a-propos.json` — police et bibliothèques embarquées, **aucun accord demandé**
-- [ ] T084 [P] [US4] Écrire `frontend/i18n/locales/fr/pages/guide-nego.a-propos.json` et `guide-nego.textes.json`, plus leurs jumeaux `en`
-- [ ] T085 [US4] Ajouter `mesTextes` / `texte(cle)` à `frontend/app/composables/api/guide-nego.ts`, puis `make openapi` et `make check-api-contract`
+- [X] T067 [US4] Créer `backend/crates/kernel/src/legal/` : les quatre fichiers Markdown — politique et conditions, `fr` et `en` —, chacun portant sa version et sa date d'entrée en vigueur en tête — *livré le 22/09 **en attente du texte de l'IFDD** : un en-tête (`etat: en_attente`, `version: 2026-01`), aucun corps. Aucun texte n'est écrit par un outil ; voir `legal/LISEZMOI.md`*
+- [X] T068 [US4] Écrire le module `backend/crates/kernel/src/legal/mod.rs` : embarquement par `include_str!`, lecture de l'en-tête, accès par clé et par langue avec **repli sur le français**, et l'empreinte du corps
+- [X] T069 [P] [US4] Test « l'empreinte est figée par version » dans `backend/crates/kernel/tests/legal_empreinte.rs` : modifier un texte sans lever sa version fait diverger l'empreinte et **échouer le test**, avec le nom du fichier
+- [X] T070 [P] [US4] Test « la grammaire close couvre les fichiers réels » dans `backend/crates/kernel/tests/legal_grammaire.rs` : rendre les quatre fichiers et **échouer sur toute construction inconnue** — tableau, note de bas de page, image, bloc de code —, en nommant la ligne
+- [X] T071 [P] [US4] Test « une version par texte, pas par langue » dans `backend/crates/kernel/tests/legal_versions.rs` : les deux langues d'un texte déclarent la même version
+- [X] T072 [US4] Écrire `backend/crates/api/src/routes/legal.rs` : `GET /legal/{cle}` publique, corps **sérialisé une fois au montage**, `ETag`, `404` sur clé inconnue, et la langue servie annoncée
+- [X] T073 [US4] Annoter la route pour OpenAPI et l'inscrire au registre de `backend/crates/api/src/openapi.rs` — **sans bloc `security`**, c'est une route publique ; déclarer la forme `LegalText` dans `frontend/app/types/platform.ts`
+- [X] T074 [US4] Retirer `privacy_policy_version` de `backend/crates/kernel/src/config.rs` — le champ brut, son défaut, sa validation et `ProgrammeConfig.privacy_policy_version` — et la ligne `PRIVACY_POLICY_VERSION` de `.env.example`
+- [X] T075 [US4] Faire lire la version depuis `kernel::legal` dans `backend/crates/modules/programme/src/service/registration.rs:122` — **une ligne**, la signature d'`exiger_le_consentement` ne bouge pas
+- [X] T076 [US4] Réécrire le commentaire de doctrine de `backend/crates/modules/programme/src/repo/consents.rs:26-31` : la version ne vient plus de la configuration
+- [X] T077 [US4] Vérifier qu'aucune ligne existante d'`identity.consents` n'est réécrite — les preuves sous `2026-01` restent telles quelles — *vérifié le 22/09 : aucun code n'écrit dans `identity.consents` hors de l'inscription ; la base locale n'en porte aucune ligne*
+- [X] T078 [P] [US4] Créer `frontend/app/components/guide-nego/GnTexteLong.vue` : rendu de la grammaire close, tout le reste échappé ; et son test `frontend/tests/guide-nego/texte-long.test.ts`
+- [X] T079 [P] [US4] Ajouter `GnTexteLong` à la planche dans `frontend/app/components/guide-nego/planche/PlancheComposantsSurfaces.vue`, dans les deux thèmes
+- [X] T080 [US4] Écrire `frontend/app/composables/guide-nego/useGnTextes.ts` : lecture par `useGnLecture`, garde par texte, heure de lecture
+- [X] T081 [US4] Écrire `frontend/app/pages/guide-nego/ressources/a-propos.vue` : édition, étiquette de source, paragraphe de confidentialité, groupe des textes — **et aucun interrupteur d'accord** (écart 40) ; **l'écran et ses textes se lisent sans compte** (FR-037)
+- [X] T082 [US4] Écrire `frontend/app/pages/guide-nego/ressources/textes/[cle].vue` : le texte entier, sa version, son heure de lecture hors connexion
+- [X] T082 bis [US4] Porter les quatre états de `frontend/app/pages/guide-nego/ressources/a-propos.vue` et de `frontend/app/pages/guide-nego/ressources/textes/[cle].vue` : chargement, vide, erreur, accès refusé — *« vide » est le texte en préparation par l'IFDD ; « accès refusé » est sans objet, ces écrans se lisent sans compte (FR-037)*
+- [X] T083 [US4] Écrire les licences dans `frontend/i18n/locales/{fr,en}/pages/guide-nego.a-propos.json` — police et bibliothèques embarquées, **aucun accord demandé**
+- [X] T084 [P] [US4] Écrire `frontend/i18n/locales/fr/pages/guide-nego.a-propos.json` et `guide-nego.textes.json`, plus leurs jumeaux `en`
+- [X] T085 [US4] Ajouter `mesTextes` / `texte(cle)` à `frontend/app/composables/api/guide-nego.ts`, puis `make openapi` et `make check-api-contract` — *`texte(cle)` seulement : les deux lignes d'« À propos » lisent chacune leur texte, une méthode qui rendrait les deux ne servirait à rien*
 
 **Checkpoint** : une seule source de textes, et deux contrôles qui mordent. **Commit.**
 

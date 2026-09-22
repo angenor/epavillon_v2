@@ -39,7 +39,7 @@ pub fn empreinte_des_codes<'a>(codes: impl IntoIterator<Item = &'a str>) -> Stri
     let mut codes: Vec<&str> = codes.into_iter().collect();
     codes.sort_unstable();
     codes.dedup();
-    super::empreinte::de(&codes.join("\n"))
+    kernel::empreinte::de(&codes.join("\n"))
 }
 
 #[cfg(test)]

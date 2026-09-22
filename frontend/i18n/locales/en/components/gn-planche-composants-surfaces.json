@@ -80,5 +80,9 @@
   "theme-sombre": "Dark",
   "jauge": "Gauge",
   "jauge-propos": "Space used on the phone: a 6 px bar, accent on pale grey, and always the figure written out.",
-  "jauge-note": "Top to bottom: almost empty; two thirds full; and a browser that does not tell the free space — the bar goes, the figure stays. When it measures nothing at all, the screen says so in words and the gauge does not appear."
+  "jauge-note": "Top to bottom: almost empty; two thirds full; and a browser that does not tell the free space — the bar goes, the figure stays. When it measures nothing at all, the screen says so in words and the gauge does not appear.",
+  "texte-long": "Long text",
+  "texte-long-propos": "Privacy policy and terms of use, served by the API. The grammar is closed: level 2 and 3 headings, paragraphs, lists, links, emphasis.",
+  "texte-long-exemple": "## Section heading\n\nA paragraph with **bold**, *italics* and a [link](https://www.ifdd.francophonie.org).\n\n### Subheading\n\n- a bullet\n- another bullet\n\n1. a number\n2. another",
+  "texte-long-note": "Nothing is injected as HTML. A table, a footnote, an image or a code block fail the API check before reaching this point: a text that would not render does not build."
 }

@@ -230,6 +230,7 @@ export {
   reinitialiserLesThematiques,
   suivreDesThematiques,
 } from './negotiation-themes'
+export { texteJuridique } from './legal'
 export {
   changerLeModeDAdmission,
   codeDInvitation,

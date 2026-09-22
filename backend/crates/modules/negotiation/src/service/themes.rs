@@ -20,10 +20,10 @@ use kernel::context::RequestContext;
 use kernel::error::{ApiError, ErrorCode, Result};
 use uuid::Uuid;
 
-use crate::domain::empreinte;
 use crate::domain::themes::{empreinte_des_codes, MyThemes};
 use crate::repo::themes;
 use crate::state::NegotiationState;
+use kernel::empreinte;
 
 pub async fn mes_thematiques(state: &NegotiationState, person_id: Uuid) -> Result<MyThemes> {
     let mut conn = state.pool().acquire().await?;

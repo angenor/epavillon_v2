@@ -211,13 +211,6 @@ struct Raw {
     #[serde(with = "humantime_serde", default = "minutes_5")]
     analytics_refresh_debounce: Duration,
 
-    /// Version de la politique de confidentialité opposée à qui consent, écrite
-    /// dans `identity.consents.policy_version`. C'est un réglage
-    /// d'exploitation : la mettre en base la rendrait modifiable par migration
-    /// seulement, et une preuve de consentement doit nommer le texte accepté.
-    #[serde(default = "default_privacy_policy_version")]
-    privacy_policy_version: String,
-
     #[serde(default)]
     otel_exporter_otlp_endpoint: String,
     #[serde(default = "default_service_name")]
@@ -253,9 +246,6 @@ fn default_service_name() -> String {
 }
 fn default_rust_log() -> String {
     "info".to_owned()
-}
-fn default_privacy_policy_version() -> String {
-    "2026-01".to_owned()
 }
 fn default_lockout_threshold() -> u16 {
     5
@@ -362,7 +352,6 @@ pub struct Config {
     pub auth: AuthConfig,
     pub org: OrgConfig,
     pub event: EventConfig,
-    pub programme: ProgrammeConfig,
     pub analytics: AnalyticsConfig,
     pub media: MediaConfig,
     pub engagement: EngagementConfig,
@@ -418,14 +407,6 @@ pub struct EventConfig {
 pub struct AnalyticsConfig {
     pub refresh_interval: Duration,
     pub refresh_debounce: Duration,
-}
-
-/// Réglages du module Programmation. Une seule clé : la version de la politique
-/// de confidentialité que porte la preuve d'un consentement recueilli au
-/// formulaire d'inscription (B5, R22).
-#[derive(Debug, Clone)]
-pub struct ProgrammeConfig {
-    pub privacy_policy_version: String,
 }
 
 /// Où le module Média dépose les octets. Deux implémentations, choisies par la
@@ -791,15 +772,6 @@ impl Config {
             )));
         }
 
-        // Vide, la preuve de consentement ne nommerait aucun texte : une
-        // colonne NOT NULL remplie d'une chaîne vide est une preuve qui
-        // n'oppose rien.
-        if raw.privacy_policy_version.trim().is_empty() {
-            return Err(invalid(
-                "PRIVACY_POLICY_VERSION est vide : une preuve de consentement doit nommer le texte accepté.",
-            ));
-        }
-
         let media_storage = match raw.media_storage.as_str() {
             "s3" => MediaStorage::S3,
             "filesystem" => MediaStorage::Filesystem,
@@ -913,9 +885,6 @@ impl Config {
             },
             event: EventConfig {
                 call_autoclose_interval: raw.event_call_autoclose_interval,
-            },
-            programme: ProgrammeConfig {
-                privacy_policy_version: raw.privacy_policy_version.trim().to_owned(),
             },
             analytics: AnalyticsConfig {
                 refresh_interval: raw.analytics_refresh_interval,

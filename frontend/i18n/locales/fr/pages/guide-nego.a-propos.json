@@ -1,0 +1,26 @@
+{
+  "titre": "À propos",
+  "sous-titre": "Guide Négo — {edition}",
+  "sous-titre-sans-edition": "Guide Négo",
+  "version": "Version {version}",
+  "editeur": "Guide Négo est éditée par l'Institut de la Francophonie pour le développement durable (IFDD), organe subsidiaire de l'Organisation internationale de la Francophonie. Elle accompagne les négociatrices et négociateurs francophones aux conférences climat.",
+  "source": "Sessions de négociation : elles seront reprises du calendrier officiel de la CCNUCC.",
+  "confidentialite": {
+    "titre": "Confidentialité",
+    "texte": "Les favoris et les téléchargements restent sur ce téléphone. Vos thématiques, et les accords que vous donnez, suivent votre compte : c'est celui de l'ePavillon de la Francophonie."
+  },
+  "textes": {
+    "titre": "Textes",
+    "en-preparation": "Texte en préparation par l'IFDD",
+    "version": "Version {version}",
+    "chargement": "Lecture…",
+    "illisible": "Pas encore lu sur cet appareil"
+  },
+  "licences": {
+    "titre": "Licences",
+    "police": "Police Atkinson Hyperlegible Next",
+    "police-licence": "SIL Open Font License 1.1",
+    "bibliotheques": "Vue, Nuxt, Vue Router, Vue I18n, Pinia, ofetch",
+    "bibliotheques-licence": "Licence MIT"
+  }
+}

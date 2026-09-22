@@ -298,6 +298,25 @@ const IMAGE_ABSENTE = assetUrl('/guide-nego/icones/absente.png')
     </GnPlancheSection>
 
     <GnPlancheSection
+      :titre="t('gn-planche-composants-surfaces.texte-long')"
+      :propos="t('gn-planche-composants-surfaces.texte-long-propos')"
+    >
+      <div class="gn-planche-composants__themes">
+        <div
+          v-for="theme in THEMES"
+          :key="theme"
+          class="gn-planche-composants__theme"
+          data-app="guide-nego"
+          :data-theme="theme"
+        >
+          <span class="gn-planche-composants__legende">{{ t(`gn-planche-composants-surfaces.theme-${theme}`) }}</span>
+          <GnTexteLong :markdown="t('gn-planche-composants-surfaces.texte-long-exemple')" />
+        </div>
+      </div>
+      <p class="gn-planche-note">{{ t('gn-planche-composants-surfaces.texte-long-note') }}</p>
+    </GnPlancheSection>
+
+    <GnPlancheSection
       :titre="t('gn-planche-composants-surfaces.picto')"
       :propos="t('gn-planche-composants-surfaces.picto-propos')"
     >

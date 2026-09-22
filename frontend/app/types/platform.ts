@@ -79,3 +79,26 @@ export interface ResolvedFeatureFlag {
   /** Le verdict POUR L'APPELANT. Hors session, seul un déploiement complet ouvre. */
   is_enabled: boolean
 }
+
+/**
+ * `GET /legal/{cle}` — la politique de confidentialité (`privacy`) ou les
+ * conditions d'utilisation (`terms`), **une source pour le site et pour Guide
+ * Négo**. Le texte est embarqué dans l'API (`kernel::legal`).
+ *
+ * `pending` : l'IFDD n'a pas encore fourni le texte ; ni corps ni date, et la
+ * version reste `2026-01`. `published` : le corps en Markdown, dans une grammaire
+ * close, et la date d'entrée en vigueur pour version.
+ */
+export type LegalTextKey = 'privacy' | 'terms'
+
+export interface LegalText {
+  key: LegalTextKey
+  /** La langue SERVIE : le français quand la demandée manque. */
+  locale: string
+  status: 'pending' | 'published'
+  /** Celle qu'un consentement enregistre. */
+  version: string
+  /** `AAAA-MM-JJ` ; nulle tant que le texte est en attente. */
+  effective_date: string | null
+  body: string | null
+}

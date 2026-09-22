@@ -18,6 +18,7 @@ import type {
   MyThemes,
   RedeemResult,
 } from '~/types/negotiation'
+import type { LegalText, LegalTextKey } from '~/types/platform'
 import type { AvecEmpreinte } from './http'
 import type {
   PasswordResetRequestResult,
@@ -168,5 +169,13 @@ export function createGuideNegoApi({
         }),
         empreinte,
       ),
+
+    /**
+     * Un texte qui engage — la même route que le site, donc le même texte et la
+     * même version. Sans session. Tant que l'IFDD ne l'a pas fourni, il part
+     * « en attente », sans corps.
+     */
+    texte: (cle: LegalTextKey): Promise<LegalText> =>
+      call(`/legal/${cle}`, (m) => m.texteJuridique(cle)),
   }
 }

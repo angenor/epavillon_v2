@@ -36,8 +36,16 @@ aucun accord, n'ont pas de version opposable, et vivent dans les traductions de 
 | En-tête de réponse | `ETag` — même mécanique que partout ailleurs |
 | Clé inconnue | `404` |
 
-`LegalText` porte la clé, la langue servie, la version, la date d'entrée en vigueur et le corps en
-Markdown. Le corps est **sérialisé une fois au montage**, comme le document OpenAPI : un texte embarqué
+`LegalText` porte la clé, la langue servie, **l'état**, la version, la date d'entrée en vigueur et le
+corps en Markdown.
+
+**Tant que l'IFDD n'a pas fourni un texte, il est « en attente »** (arbitré le 22/09) : l'en-tête du
+fichier le déclare (`etat: en_attente`), il n'a **aucun corps**, la route rend `status: "pending"` avec
+`body` et `effective_date` nuls, et l'écran affiche « Texte en préparation par l'IFDD ». **Aucun texte
+n'est écrit par un outil** : il serait servi publiquement, et chaque inscription sur le site
+enregistrerait un accord à un texte que personne à l'IFDD n'a lu. La version reste `2026-01`, celle que
+l'inscription enregistrait déjà. Quand le texte arrive (`etat: publie`), **sa date d'entrée en vigueur
+devient sa version**, et le test d'empreinte oblige à la lever. Le corps est **sérialisé une fois au montage**, comme le document OpenAPI : un texte embarqué
 ne change pas entre deux démarrages.
 
 **Le site et l'application appellent la même route.** C'est ce qui garantit qu'ils opposent le même texte

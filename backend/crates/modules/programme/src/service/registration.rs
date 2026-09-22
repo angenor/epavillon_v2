@@ -119,7 +119,7 @@ pub async fn sinscrire(
             personne,
             &sensibles,
             payload.sensitive_data_consent,
-            state.config().programme.privacy_policy_version.as_str(),
+            kernel::legal::version("privacy"),
             ip,
         )
         .await?;

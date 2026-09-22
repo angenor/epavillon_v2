@@ -1,0 +1,22 @@
+{
+  "privacy": "Politique de confidentialité",
+  "terms": "Conditions d'utilisation",
+  "version": "Version {version}",
+  "en-vigueur": "En vigueur depuis le {date} — version {version}",
+  "lu": "Lu {moment}",
+  "chargement": "Lecture du texte",
+  "en-preparation": {
+    "titre": "Texte en préparation par l'IFDD",
+    "texte": "Ce texte n'est pas encore publié. Il paraîtra ici dès que l'IFDD l'aura fourni, et restera lisible sans réseau une fois lu."
+  },
+  "erreur": {
+    "titre": "Le texte n'a pas pu être lu",
+    "texte": "Il n'a encore jamais été reçu sur cet appareil. Il se lira dès le retour du réseau.",
+    "reessayer": "Réessayer"
+  },
+  "inconnu": {
+    "titre": "Ce texte n'existe pas",
+    "texte": "Guide Négo sert deux textes : la politique de confidentialité et les conditions d'utilisation.",
+    "retour": "Revenir à « À propos »"
+  }
+}

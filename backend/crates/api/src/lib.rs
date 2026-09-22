@@ -50,7 +50,8 @@ pub fn build_app(
         // montés inconditionnellement. Un module démonté ne doit pas emporter la
         // liste des pays du formulaire d'inscription avec lui.
         .configure(routes::reference::configurer)
-        .configure(routes::platform::configurer);
+        .configure(routes::platform::configurer)
+        .configure(routes::legal::configurer);
 
     // Servie partout sauf en production, où le document décrirait la totalité
     // de la surface d'appel à qui sonde le port.

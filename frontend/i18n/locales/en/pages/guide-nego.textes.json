@@ -1,0 +1,22 @@
+{
+  "privacy": "Privacy policy",
+  "terms": "Terms of use",
+  "version": "Version {version}",
+  "en-vigueur": "In force since {date} — version {version}",
+  "lu": "Read {moment}",
+  "chargement": "Reading the text",
+  "en-preparation": {
+    "titre": "Text being prepared by the IFDD",
+    "texte": "This text is not published yet. It will appear here as soon as the IFDD provides it, and stay readable offline once read."
+  },
+  "erreur": {
+    "titre": "The text could not be read",
+    "texte": "It has never been received on this device. It will be read as soon as the network returns.",
+    "reessayer": "Try again"
+  },
+  "inconnu": {
+    "titre": "This text does not exist",
+    "texte": "Guide Négo serves two texts: the privacy policy and the terms of use.",
+    "retour": "Back to “About”"
+  }
+}

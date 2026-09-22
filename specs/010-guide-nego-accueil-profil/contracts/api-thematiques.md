@@ -92,7 +92,7 @@ Le scénario que cela ferme, et qui n'a rien d'improbable en COP :
 
 **La comparaison porte sur les 32 caractères hexadécimaux** que l'API a émis, `W/` et suffixe de
 relais retirés — Apache ajoute « -br » ou « -gzip » à l'`ETag` quand il compresse. Une seule fonction
-compare, pour `If-Match` comme pour `If-None-Match` : `negotiation::domain::empreinte::correspond`.
+compare, pour `If-Match` comme pour `If-None-Match` : `kernel::empreinte::correspond` (dans `negotiation` jusqu’au 22/09).
 Les réponses qui portent une empreinte sont `Cache-Control: private, no-cache`.
 
 **Ce que fait l'application sur `412`** : elle **abandonne** l'intention — elle ne la rejoue pas, ne

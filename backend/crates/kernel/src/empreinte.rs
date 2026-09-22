@@ -1,5 +1,6 @@
 //! L'empreinte d'un état — et **la seule façon de comparer celle qu'on nous
-//! présente**, en `If-Match` comme en `If-None-Match`.
+//! présente**, en `If-Match` comme en `If-None-Match`, pour toutes les routes
+//! qui en portent une : l'accès et les thématiques de Guide Négo, les textes.
 //!
 //! Un relais qui compresse réécrit l'`ETag` : Apache y ajoute « -gzip » ou
 //! « -br » par défaut (`DeflateAlterETag`, `BrotliAlterETag`), nginx l'affaiblit
@@ -14,7 +15,7 @@ const LONGUEUR: usize = 32;
 /// 16 octets de `token_hash` en hexadécimal, entre guillemets comme l'exige
 /// l'en-tête `ETag`.
 pub fn de(texte: &str) -> String {
-    let octets = kernel::crypto::token_hash(texte);
+    let octets = crate::crypto::token_hash(texte);
     let mut hexa = String::with_capacity(LONGUEUR + 2);
     hexa.push('"');
     for octet in &octets[..LONGUEUR / 2] {

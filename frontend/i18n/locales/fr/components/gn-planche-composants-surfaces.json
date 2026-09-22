@@ -80,5 +80,9 @@
   "theme-sombre": "Sombre",
   "jauge": "Jauge",
   "jauge-propos": "La place occupée sur le téléphone : un trait de 6 px, accent sur gris pâle, et toujours le nombre écrit.",
-  "jauge-note": "De haut en bas : presque vide ; aux deux tiers ; et un navigateur qui ne dit pas la place libre — le trait disparaît, le nombre reste. Quand il ne mesure rien du tout, l'écran le dit en toutes lettres et la jauge ne paraît pas."
+  "jauge-note": "De haut en bas : presque vide ; aux deux tiers ; et un navigateur qui ne dit pas la place libre — le trait disparaît, le nombre reste. Quand il ne mesure rien du tout, l'écran le dit en toutes lettres et la jauge ne paraît pas.",
+  "texte-long": "Texte long",
+  "texte-long-propos": "Politique de confidentialité et conditions d'utilisation, servies par l'API. La grammaire est close : titres de niveau 2 et 3, paragraphes, listes, liens, emphase.",
+  "texte-long-exemple": "## Titre de section\n\nUn paragraphe avec du **gras**, de l'*italique* et un [lien](https://www.ifdd.francophonie.org).\n\n### Sous-titre\n\n- une puce\n- une autre puce\n\n1. un numéro\n2. un autre",
+  "texte-long-note": "Rien n'est injecté en HTML. Un tableau, une note de bas de page, une image ou un bloc de code font échouer le contrôle de l'API avant d'arriver ici : un texte qui ne se rendrait pas ne se construit pas."
 }

@@ -2307,6 +2307,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/legal/{cle}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `LegalText` — la politique de confidentialité (`privacy`) ou les conditions d'utilisation (`terms`), **la même source pour le site et pour Guide Négo**. Sans session.
+         *
+         *     La langue suit `Accept-Language`, **avec repli sur le français** ; `locale` et `Content-Language` disent la langue servie. `version` est celle qu'un consentement enregistre.
+         *
+         *     Tant que l'IFDD n'a pas fourni le texte : `status: "pending"`, `body` et `effective_date` nuls, et la version reste `2026-01`. Publié : `status: "published"`, le corps en Markdown dans une grammaire close, et **la date d'entrée en vigueur pour version**.
+         *
+         *     `ETag` sur le corps rendu, `304` sur `If-None-Match`.
+         */
+        get: operations["legal_texte"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/media/assets": {
         parameters: {
             query?: never;
@@ -2555,6 +2580,7 @@ export interface paths {
         get?: never;
         put?: never;
         /**
+         * Empreinte faible et courte, entre guillemets comme l'exige l'en-tête.
          * @description `CreateAccessRequestPayload` → `AccessRequestView` — demander l'accès aux modules réservés, quand le mode d'admission exige une approbation.
          *
          *     `space_id` absent vaut une demande de portée globale. Le message est facultatif : il aide l'administrateur à reconnaître une délégation qu'il attend.
@@ -9854,6 +9880,45 @@ export interface operations {
                 };
             };
             /** @description Jeton non configuré : la route n'est pas montée */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    legal_texte: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description privacy ou terms */
+                cle: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description LegalText */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Rien n'a changé depuis l'empreinte présentée */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Clé inconnue */
             404: {
                 headers: {
                     [name: string]: unknown;

@@ -24,12 +24,14 @@
 //! Multiplier les finalités multiplierait les lignes de preuve sans que personne
 //! l'ait demandé, et rendrait le retrait ingérable — retirer lequel ?
 //!
-//! # La version de la politique vient de la configuration
+//! # La version de la politique est celle que l'API sert
 //!
 //! `policy_version` est `NOT NULL` : une preuve qui ne nomme pas le texte
-//! accepté n'oppose rien. Elle vient de `PRIVACY_POLICY_VERSION`, réglage
-//! d'exploitation comme le seuil de verrouillage de B1 — la mettre en base la
-//! rendrait modifiable par migration seulement.
+//! accepté n'oppose rien. Elle vient de `kernel::legal`, qui embarque le texte
+//! et le sert par `GET /legal/privacy` — au site comme à Guide Négo. Elle venait
+//! d'un réglage d'environnement, `PRIVACY_POLICY_VERSION`, qui pouvait nommer
+//! une version dont personne ne produisait le texte. Les preuves déjà écrites
+//! sous `2026-01` ne sont pas réécrites : c'est un historique.
 
 use kernel::error::Result;
 use sqlx::postgres::PgConnection;

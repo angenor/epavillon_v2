@@ -40,10 +40,10 @@ pub fn contexte_de(requete: &HttpRequest, acteur: Uuid) -> RequestContext {
 /// personne : aucun cache partagé ne la garde, et le navigateur la revalide.
 pub const PERSONNEL: (HeaderName, &str) = (CACHE_CONTROL, "private, no-cache");
 
-/// `If-None-Match` désigne-t-il l'état courant ? Voir `domain::empreinte`.
+/// `If-None-Match` désigne-t-il l'état courant ? Voir `kernel::empreinte`.
 pub fn inchange(requete: &HttpRequest, empreinte: &str) -> bool {
     entete(requete, actix_web::http::header::IF_NONE_MATCH.as_str())
-        .is_some_and(|presentee| crate::domain::empreinte::correspond(&presentee, empreinte))
+        .is_some_and(|presentee| kernel::empreinte::correspond(&presentee, empreinte))
 }
 
 pub fn entete(requete: &HttpRequest, nom: &str) -> Option<String> {

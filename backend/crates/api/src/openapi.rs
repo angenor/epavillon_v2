@@ -41,12 +41,13 @@ pub struct ApiErrorBody {
         crate::routes::reference::langues,
         crate::routes::reference::termes,
         crate::routes::platform::drapeaux,
+        crate::routes::legal::texte,
     ),
     components(schemas(ApiErrorBody)),
     tags(
         (name = "Exploitation", description = "Vivacité et santé. `/ready` ne divulgue rien ; `/health` porte des chiffres et se protège comme une donnée."),
         (name = "Référentiel", description = "Pays, langues, vocabulaires administrables. Transverse à tous les modules, sans session : un formulaire d'inscription en a besoin avant qu'un compte existe."),
-        (name = "Plateforme", description = "Les drapeaux de fonctionnalité, résolus pour qui demande. Lus par le routage du site à la première navigation."),
+        (name = "Plateforme", description = "Les drapeaux de fonctionnalité, résolus pour qui demande — lus par le routage du site à la première navigation — et les textes qui engagent, une source pour le site et pour Guide Négo."),
     )
 )]
 struct ApiRoutes;

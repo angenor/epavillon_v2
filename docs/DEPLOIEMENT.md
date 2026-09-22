@@ -452,7 +452,7 @@ compresse ses réponses en brotli**, et Apache, réglé par défaut
 (`BrotliAlterETag` / `DeflateAlterETag AddSuffix`), ajoute alors « -br » ou
 « -gzip » à l'`ETag`. L'empreinte revient ainsi réécrite en `If-Match`. L'API
 n'en compare que les 32 caractères hexadécimaux qu'elle a émis
-(`negotiation::domain::empreinte`), `W/` et suffixe de relais retirés : c'est
+(`kernel::empreinte`), `W/` et suffixe de relais retirés : c'est
 elle qui compare ce qui a du sens, puisqu'on ne tient pas la configuration de
 l'hébergeur. Mais ni le développement ni la recette ne compressent : **seul ce
 geste, par cette adresse, prouve que la comparaison tient** — un échec rendrait

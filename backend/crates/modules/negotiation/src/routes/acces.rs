@@ -71,7 +71,7 @@ pub(crate) async fn mon_acces(
     // peut pas se tromper ; un « modifié depuis » le pourrait, et un 304 fautif
     // laisserait ouverts, sur le téléphone, les modules d'un accès retiré.
     let corps = serde_json::to_string(&etat).map_err(kernel::error::ApiError::internal)?;
-    let empreinte = crate::domain::empreinte::de(&corps);
+    let empreinte = kernel::empreinte::de(&corps);
 
     if crate::routes::inchange(&requete, &empreinte) {
         return Ok(HttpResponse::NotModified()

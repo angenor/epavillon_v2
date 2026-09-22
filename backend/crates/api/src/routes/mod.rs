@@ -10,5 +10,6 @@
 //! à en dépendre.
 
 pub mod health;
+pub mod legal;
 pub mod platform;
 pub mod reference;
