@@ -78,16 +78,9 @@ export function lireToutesLesGardes(): Promise<LectureGardee<unknown>[]> {
   )
 }
 
-/**
- * Vide les données lues, sauf les clés à `garder`. La coquille et la file ne sont
- * pas touchées : un choix pas encore envoyé ne se perd pas en libérant de la place.
- */
-export async function viderLesGardes(garder: readonly string[] = []): Promise<void> {
-  const cles = await executer<IDBValidKey[]>(LECTURES, 'readonly', (magasin) => magasin.getAllKeys())
-  for (const cle of cles ?? []) {
-    if (typeof cle === 'string' && garder.includes(cle)) continue
-    await executer(LECTURES, 'readwrite', (magasin) => magasin.delete(cle))
-  }
+/** Vide les données lues. La coquille et la file ne sont pas touchées. */
+export async function viderLesGardes(): Promise<void> {
+  await executer(LECTURES, 'readwrite', (magasin) => magasin.clear())
 }
 
 /** Le magasin des écritures, tel que `file.ts` l'attend. */

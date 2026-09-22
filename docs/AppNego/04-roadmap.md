@@ -191,6 +191,12 @@ Hors périmètre : indexation par l'IA, quiz, proposition de documents par les m
 Critère : le guide est publié en une journée et lu en salle sans réseau.
 ```
 
+> **Reporté de 0c (22/09)** : le bouton « Libérer » de « Mes téléchargements », son scénario — la
+> place affichée diminue une fois le geste confirmé — et FR-024 de 0c. **Il ne libère que les
+> documents téléchargés, jamais les lectures.** Ranger les documents là où leur suppression se mesure
+> — un cache dédié, dont l'effacement se voit aussitôt dans l'estimation du navigateur, et non
+> IndexedDB, que Chrome ne rend qu'au compactage (mesuré le 22/09).
+
 ### Étape 2 — FAQ et lexique
 
 ```

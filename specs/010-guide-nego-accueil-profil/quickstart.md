@@ -151,7 +151,7 @@ Sans compte, l'écran s'ouvre aussi, et invite à créer un compte ou à se conn
 | Deux chemins | L'avatar de « Ma journée » et la ligne de l'onglet Ressources mènent au même écran |
 | Mon suivi | « Mes thématiques » (valeur : les thématiques suivies) · « Mes téléchargements » · « Mon accès » (livré en 0b, **état jamais rôle**) |
 | Mes téléchargements | Aucun document gardé, et la place occupée réelle |
-| Libérer | La confirmation dit ce qui part et ce qui reste lisible sans réseau ; la place diminue |
+| Libérer | **Absent à cette étape** : il ne vise que les documents, qui arrivent à l'étape 1 |
 | Affichage | Le thème garde ses trois valeurs et **reste propre à l'appareil** — vérifier sur un second navigateur |
 | Dernière synchronisation | L'heure, **sans fuseau** (écart 32), et ce n'est pas une action |
 | Notifications par thématique | **Absent** — étape 3b |

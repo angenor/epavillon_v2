@@ -10,13 +10,5 @@
     "mesure": "Measuring space used",
     "impossible": "This browser does not tell how much space Guide Négo uses: it cannot be measured on this device.",
     "aide": "The app itself and what it has already read, so that it opens offline."
-  },
-  "liberer": {
-    "bouton": "Free up space",
-    "question": "Free up space on this phone?",
-    "phrase": "Lists already read will be erased: they will be read again when the network returns. The app stays, with your account and the choices not yet sent — it will still open offline.",
-    "action": "Free up",
-    "retour": "Cancel",
-    "faite": "Space freed"
   }
 }

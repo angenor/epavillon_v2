@@ -10,13 +10,5 @@
     "mesure": "Mesure de la place occupée",
     "impossible": "Ce navigateur ne dit pas la place que Guide Négo occupe : elle ne peut pas être mesurée sur cet appareil.",
     "aide": "L'application elle-même et ce qu'elle a déjà lu, pour s'ouvrir sans réseau."
-  },
-  "liberer": {
-    "bouton": "Libérer de la place",
-    "question": "Libérer de la place sur ce téléphone ?",
-    "phrase": "Les listes déjà lues seront effacées : elles se reliront au retour du réseau. L'application reste, avec votre compte et les choix pas encore envoyés — elle s'ouvrira toujours sans réseau.",
-    "action": "Libérer",
-    "retour": "Annuler",
-    "faite": "Place libérée"
   }
 }

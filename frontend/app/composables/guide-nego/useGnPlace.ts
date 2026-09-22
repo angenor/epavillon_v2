@@ -1,13 +1,11 @@
 /**
- * La place occupée sur le téléphone : la mesurer, et la libérer.
+ * La place occupée sur le téléphone.
  *
  * La mesure est l'estimation du navigateur, seule à compter l'ensemble — coquille,
  * données lues, documents à venir. Là où elle manque, `place` reste nulle et l'écran
- * le dit (R8). La libération vide les données lues, et à partir de l'étape 1 les
- * documents ; **la coquille reste**, comme ce qui permet de l'ouvrir sans réseau.
+ * le dit (R8). Libérer viendra avec les documents, à l'étape 1, et ne visera qu'eux.
  */
-import { viderLesGardes } from '~/utils/guide-nego/garde'
-import { GARDES_DE_LA_COQUILLE, placeDe, type Place } from '~/utils/guide-nego/place'
+import { placeDe, type Place } from '~/utils/guide-nego/place'
 
 export function useGnPlace() {
   const place = ref<Place | null>(null)
@@ -22,10 +20,5 @@ export function useGnPlace() {
     mesuree.value = true
   }
 
-  async function liberer(): Promise<void> {
-    await viderLesGardes(GARDES_DE_LA_COQUILLE)
-    await mesurer()
-  }
-
-  return { place: readonly(place), mesuree: readonly(mesuree), mesurer, liberer }
+  return { place: readonly(place), mesuree: readonly(mesuree), mesurer }
 }

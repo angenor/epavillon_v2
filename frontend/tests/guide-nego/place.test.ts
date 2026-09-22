@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { GARDES_DE_LA_COQUILLE, partOccupee, placeDe, tailleLisible } from '../../app/utils/guide-nego/place.ts'
+import { partOccupee, placeDe, tailleLisible } from '../../app/utils/guide-nego/place.ts'
 import { etatDuCompte } from '../../app/utils/guide-nego/compte.ts'
 
 // `Intl` sépare le nombre de l'unité par une espace insécable, et c'est juste.
@@ -27,14 +27,6 @@ test('la part occupée se borne, et se tait quand la place libre est inconnue', 
   assert.equal(partOccupee({ utilise: 0, libre: 0 }), 0)
   assert.equal(partOccupee({ utilise: 7, libre: null }), null)
   assert.deepEqual(placeDe({ usage: 120, quota: 100 }), { utilise: 120, libre: 0 }, 'jamais une place négative')
-})
-
-/**
- * Libérer ne touche ni au drapeau ni au compte : sans eux, l'application ouverte
- * sans réseau se croirait fermée, ou déconnectée.
- */
-test('la libération garde ce qui ouvre l’application sans réseau', () => {
-  assert.deepEqual([...GARDES_DE_LA_COQUILLE].sort(), ['compte', 'drapeaux'])
 })
 
 test('le compte gardé porte son pays, pour que le profil le nomme sans réseau', () => {

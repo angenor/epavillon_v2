@@ -7,6 +7,9 @@
  * négociation. L'écran montre malgré tout la place réelle — la coquille et les
  * données lues comptent déjà (FR-023).
  *
+ * **Pas de bouton « Libérer »** : il ne videra que les documents, et il n'y en a
+ * pas. Un geste sans effet trompe (principe XII). Il vient à l'étape 1.
+ *
  * **Rien ici ne demande de compte** : ce qui est téléchargé vit sur le téléphone, pas
  * sur le compte. L'état « accès refusé » est donc sans objet, et c'est voulu.
  */
@@ -14,23 +17,9 @@ definePageMeta({ layout: 'guide-nego' })
 defineI18nRoute(false)
 
 const { t } = useI18n()
-const { place, mesuree, mesurer, liberer } = useGnPlace()
-
-const confirmation = ref(false)
-const liberation = ref(false)
-const liberee = ref(false)
+const { place, mesuree, mesurer } = useGnPlace()
 
 onMounted(() => void mesurer())
-
-async function libererLaPlace(): Promise<void> {
-  liberation.value = true
-  try {
-    await liberer()
-    liberee.value = true
-  } finally {
-    liberation.value = false
-  }
-}
 
 useHead({ title: t('guide-nego.telechargements.titre') })
 </script>
@@ -58,26 +47,8 @@ useHead({ title: t('guide-nego.telechargements.titre') })
       <template v-else>
         <GnJauge :place="place" />
         <p class="gn-telechargements__aide">{{ t('guide-nego.telechargements.place.aide') }}</p>
-        <GnBouton variante="secondaire" :chargement="liberation" @clic="confirmation = true">
-          {{ t('guide-nego.telechargements.liberer.bouton') }}
-        </GnBouton>
       </template>
     </div>
-
-    <GnConfirmation
-      v-model="confirmation"
-      :question="t('guide-nego.telechargements.liberer.question')"
-      :phrase="t('guide-nego.telechargements.liberer.phrase')"
-      :action="t('guide-nego.telechargements.liberer.action')"
-      :retour="t('guide-nego.telechargements.liberer.retour')"
-      @confirmer="libererLaPlace"
-    />
-
-    <GnMessageEphemere
-      v-if="liberee"
-      :texte="t('guide-nego.telechargements.liberer.faite')"
-      @fini="liberee = false"
-    />
   </GnEcran>
 </template>
 

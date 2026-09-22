@@ -165,7 +165,7 @@ frontend/app/
 │   └── guide-nego/
 │       ├── useGnThematiques.ts    # NOUVEAU
 │       ├── useGnTextes.ts         # NOUVEAU
-│       ├── useGnPlace.ts          # NOUVEAU — mesure et libération
+│       ├── useGnPlace.ts          # NOUVEAU — la mesure ; la libération vient avec les documents (étape 1)
 │       └── useGnConnexion.ts      # + écoute de « online », qui manquait
 ├── utils/guide-nego/
 │   ├── garde.ts                   # + magasin « ecritures »

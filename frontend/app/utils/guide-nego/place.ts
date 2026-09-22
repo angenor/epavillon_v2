@@ -1,17 +1,13 @@
 /**
- * La place que Guide Négo occupe sur le téléphone, et ce qu'on peut en libérer.
+ * La place que Guide Négo occupe sur le téléphone.
  *
  * Tout est pur ici : la mesure vient du navigateur, injectée, pour que le repli —
  * « on ne peut pas mesurer sur cet appareil », jamais un zéro faux — se teste sans lui.
+ *
+ * **Rien ne se libère à cette étape.** Le geste ne videra que les documents
+ * téléchargés, qui arrivent à l'étape 1 — jamais les lectures, qui pèsent quelques
+ * dizaines de kilo-octets et font marcher l'application sans réseau.
  */
-
-/**
- * **Ce que la libération ne touche jamais**, en plus de la coquille et de la file :
- * le drapeau et le compte. Sans le drapeau gardé, l'application ouverte sans réseau
- * se croirait fermée ; sans le compte, elle se croirait déconnectée. La libération
- * rendrait inutilisable en salle exactement ce qu'elle promet de garder.
- */
-export const GARDES_DE_LA_COQUILLE = ['drapeaux', 'compte'] as const
 
 export interface Place {
   /** Octets occupés : coquille, données lues, documents à venir. */

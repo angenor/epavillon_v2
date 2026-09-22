@@ -89,7 +89,7 @@ Depuis son avatar ou depuis l'onglet Ressources, Aïssatou ouvre « Profil et r�
 2. **Given** le profil, **When** on le parcourt, **Then** il porte le groupe « Mon suivi » — « Mes thématiques » avec les thématiques suivies en valeur, « Mes téléchargements » avec le nombre de documents gardés et la place occupée, « Mon accès » livré à l'étape 0b —, le groupe « Affichage » avec le thème, le groupe « Application » avec l'entrée « À propos » et la ligne « Dernière synchronisation », puis la déconnexion.
 3. **Given** « Mes thématiques », **When** la personne l'ouvre, **Then** elle retrouve l'écran de choix, ses thématiques cochées, et revient au profil une fois sa modification validée.
 4. **Given** aucun document gardé — ce qui est le cas à cette étape —, **When** elle ouvre « Mes téléchargements », **Then** l'écran dit qu'aucun document n'est gardé sur ce téléphone et à quelle étape ils arriveront, et montre malgré tout la place occupée par l'application sur l'appareil.
-5. **Given** de la place occupée, **When** elle demande de la libérer, **Then** une confirmation dit ce qui sera effacé et ce qui restera lisible hors connexion, et la place affichée diminue une fois le geste confirmé.
+5. ~~**Given** de la place occupée, **When** elle demande de la libérer, **Then** une confirmation dit ce qui sera effacé et ce qui restera lisible hors connexion, et la place affichée diminue une fois le geste confirmé.~~ **Passé à l'étape 1** (22/09, écart inscrit ci-dessous) : le geste ne libère que les documents téléchargés, et il n'y en a pas encore.
 6. **Given** le réglage du thème livré à l'étape 0a, **When** il paraît dans le groupe « Affichage », **Then** ses trois valeurs — Clair, Sombre, Système — fonctionnent comme avant, et ce réglage reste propre à cet appareil.
 7. **Given** la ligne « Dernière synchronisation », **When** on la lit, **Then** elle porte l'heure de la dernière lecture réussie sans fuseau, selon l'écart 32, et n'est pas une action.
 8. **Given** le profil d'une personne admise, **When** on lit la ligne « Mon accès », **Then** elle porte l'état de son accès, jamais un rôle genré — comme tranché à l'étape 0b.
@@ -170,7 +170,7 @@ Depuis le profil, Aïssatou ouvre « À propos ». Elle y lit qui édite l'appli
 - **FR-021** : L'écran DOIT porter le nom et le pays de la personne, puis les groupes « Mon suivi », « Affichage » et « Application », et la déconnexion en pied, sans défaire ce que l'étape 0b y a posé.
 - **FR-022** : La ligne « Mes thématiques » DOIT montrer les thématiques suivies en valeur et ouvrir leur modification.
 - **FR-023** : La ligne « Mes téléchargements » DOIT montrer le nombre de documents gardés et la place occupée sur l'appareil ; tant que les documents n'existent pas, elle DOIT dire son état vide et montrer malgré tout la place occupée par l'application.
-- **FR-024** : Une personne DOIT pouvoir libérer la place occupée, après une confirmation qui dit ce qui sera effacé et ce qui restera lisible sans réseau.
+- **FR-024** : ~~Une personne DOIT pouvoir libérer la place occupée, après une confirmation qui dit ce qui sera effacé et ce qui reste lisible sans réseau.~~ **Passé à l'étape 1** : libérer ne vise que les documents téléchargés, jamais les lectures ; à cette étape il n'y a rien à libérer, donc **aucun bouton**.
 - **FR-025** : Le réglage du thème DOIT rester celui de l'étape 0a — Clair, Sombre, Système — et rester propre à l'appareil.
 - **FR-026** : La ligne « Dernière synchronisation » DOIT porter l'heure de la dernière lecture réussie sans fuseau, et n'être qu'une information.
 - **FR-027** : Le profil DOIT s'afficher sans réseau, avec l'heure de sa dernière lecture.
@@ -235,7 +235,7 @@ Rien n'est à ajouter pour « Ma journée » à cette étape : ses blocs sont vi
 - **SC-007** : Aucun libellé de thématique n'apparaît dans un fichier de traduction ni dans le code — la recherche le prouve.
 - **SC-008** : Le site et l'application reçoivent le même texte et la même version pour la politique de confidentialité et les conditions d'utilisation ; un texte modifié sans nouvelle version fait échouer le contrôle.
 - **SC-009** : Tout accord consigné porte la version servie par l'API, et non une valeur de configuration.
-- **SC-010** : La place occupée affichée correspond à ce que l'appareil rapporte, à l'unité affichée près, et diminue après une libération.
+- **SC-010** : La place occupée affichée correspond à ce que l'appareil rapporte, à l'unité affichée près. *Sa diminution après une libération passe à l'étape 1, avec les documents.*
 - **SC-011** : Chaque bloc vide de « Ma journée » dit ce qui manque et à quel moment cela viendra ; aucun ne reste en chargement.
 - **SC-012** : Aucun composant ni jeton du site n'est employé sous le dossier de Guide Négo, et chaque composant nouveau figure sur la page interne des composants.
 
@@ -247,8 +247,9 @@ Rien n'est à ajouter pour « Ma journée » à cette étape : ses blocs sont vi
 - **Les trois interrupteurs d'accord ne sont pas livrés** — écart 40, arbitré le 22/09. Aucun n'a d'effet à cette étape : la mesure d'usage n'existe pas, les notifications viennent à 3b, l'annuaire après le MVP. Chacun paraîtra avec l'étape qui lui donne un effet ; le moyen de consigner et de relire un accord, lui, est livré ici.
 - **Un éditeur de textes pourra venir plus tard** derrière la même route publique, sans rien défaire de ce qui est livré.
 - **La cloche des notifications n'est pas livrée.** La maquette la dessine dans l'en-tête de « Ma journée » avec son compteur ; elle arrive avec le centre de notifications, à l'étape 3b, de même que le groupe « Notifications par thématique » du profil.
-- **Le fuseau du sous-titre de « Ma journée »** est celui de l'édition en cours quand il y en a une, et celui de l'appareil sinon. Les heures de lecture — « lu à », « Synchronisé à », « Dernière synchronisation » — n'en portent pas, comme l'écart 32 le tranche.
+- **Le sous-titre de « Ma journée » ne porte que le jour** (révisé le 22/09, [R11](research.md)) : le fuseau de l'appareil, nommé, trompe ; celui du lieu de l'édition vient en 3a. Les heures de lecture — « lu à 11:35 » — n'en portent jamais (écart 32).
 - **« Mes téléchargements » s'ouvre sur son état vide** : les documents arrivent à l'étape 1. La place occupée, elle, est réelle dès maintenant — la coquille et les données lues en occupent déjà.
+- **Pas de bouton « Libérer » à cette étape — écart inscrit le 22/09, arbitré par le commanditaire.** Le geste ne videra que les documents téléchargés (étape 1), **jamais les lectures** : elles pèsent quelques dizaines de kilo-octets, et ce sont elles — l'accès, les thématiques, le vocabulaire, demain l'agenda du jour — qui font marcher l'application sans réseau. À cette étape il n'y a donc rien à libérer, et un geste sans effet trompe (constitution, XII), comme les interrupteurs d'accord. Le scénario 5 du récit 3 et FR-024 passent à l'étape 1, qui rangera les documents là où leur suppression se mesure.
 - **L'écran des thématiques sert deux fois** : première entrée et modification. C'est le même écran, avec ou sans l'indicateur d'étapes.
 - **L'avatar** est celui du compte de l'ePavillon quand il existe, et les initiales de la personne sinon.
 - **Les pages `/confidentialite` et `/conditions-utilisation` du site** restent à construire côté ePavillon, sur la route livrée ici. Cette étape ne les fait pas, mais ne laisse plus le texte manquant.
