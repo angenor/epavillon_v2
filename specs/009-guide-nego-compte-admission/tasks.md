@@ -244,15 +244,16 @@ recevoir le courriel ; recommencer en mode « les deux » avec un code juste.
 **Épreuve indépendante** : sans accès, ouvrir chaque module réservé ; puis lire « Mon accès » dans
 chacun des cinq états.
 
-- [ ] T097 [P] [US5] Créer `frontend/app/components/guide-nego/GnVerrou.vue` — titre du module, mention réservée, liste de ce qui s'y trouve, rappel de ce qui reste ouvert, deux sorties. **Le seul composant nouveau de l'étape**
-- [ ] T098 [US5] Poser le verrou dans `frontend/app/pages/guide-nego/echanges.vue`, d'après la **permission effective** lue de `me/access` par `useGnAcces`, jamais d'un état retenu côté client
-- [ ] T099 [US5] Sans compte, faire mener le verrou d'abord à `compte.vue` ou `connexion.vue`, **puis** à `code.vue` — enchaînement dans `frontend/app/components/guide-nego/GnVerrou.vue` (après T097)
-- [ ] T100 [P] [US5] Créer `frontend/app/pages/guide-nego/ressources/acces.vue` — les cinq états, la date, **ce que l'accès ouvre** (une COP nommée ou tout Guide Négo), l'appartenance au réseau ; hors connexion, l'état lu avec son heure
-- [ ] T101 [US5] Ajouter la ligne « Mon accès » à `frontend/app/pages/guide-nego/ressources/reglages.vue`
-- [ ] T102 [P] [US5] i18n `fr` et `en` : `pages/guide-nego.acces.json`, `components/gn-verrou.json`
-- [ ] T103 [P] [US5] Ajouter `GnVerrou` à `frontend/app/components/guide-nego/planche/PlancheComposantsSurfaces.vue` et **le retirer des absents** de `frontend/i18n/locales/{fr,en}/components/gn-planche-composants.json`
-- [ ] T103 bis [P] [US5] **Prouver FR-008 et SC-006** : aucun champ, libellé ni réponse d'API de ce périmètre ne porte le genre — balayage de `frontend/app/pages/guide-nego/`, `frontend/i18n/locales/*/pages/guide-nego.*.json` et des réponses de `contracts/` ; le résultat s'écrit dans le journal de `docs/AppNego/progress.md`
-- [ ] T103 ter [P] [US5] Test : un client qui **prétend** avoir l'accès ne l'obtient pas — le verrou suit `me/access`, jamais un état retenu côté client (FR-032) — `frontend/tests/guide-nego/verrou.test.ts`
+- [X] T097 [P] [US5] Créer `frontend/app/components/guide-nego/GnVerrou.vue` — titre du module, mention réservée, liste de ce qui s'y trouve, rappel de ce qui reste ouvert, deux sorties. **Le seul composant nouveau de l'étape**
+- [X] T098 [US5] Poser le verrou dans `frontend/app/pages/guide-nego/echanges.vue`, d'après la **permission effective** lue de `me/access` par `useGnAcces`, jamais d'un état retenu côté client
+- [X] T099 [US5] Sans compte, faire mener le verrou d'abord à `compte.vue` ou `connexion.vue`, **puis** à `code.vue` — enchaînement dans `frontend/app/components/guide-nego/GnVerrou.vue` (après T097). *Trois sorties dans ce seul cas, deux sinon : écart 39.*
+- [X] T100 [P] [US5] Créer `frontend/app/pages/guide-nego/ressources/acces.vue` — les cinq états, la date, **ce que l'accès ouvre** (une COP nommée ou tout Guide Négo), l'appartenance au réseau ; hors connexion, l'état lu avec son heure
+- [X] T101 [US5] Ajouter la ligne « Mon accès » à `frontend/app/pages/guide-nego/ressources/reglages.vue`
+- [X] T102 [P] [US5] i18n `fr` et `en` : `pages/guide-nego.acces.json`, `components/gn-verrou.json`
+- [X] T103 [P] [US5] Ajouter `GnVerrou` à `frontend/app/components/guide-nego/planche/PlancheComposantsSurfaces.vue` et **le retirer des absents** de `frontend/i18n/locales/{fr,en}/components/gn-planche-composants.json`
+- [X] T103 bis [P] [US5] **Prouver FR-008 et SC-006** : aucun champ, libellé ni réponse d'API de ce périmètre ne porte le genre — balayage de `frontend/app/pages/guide-nego/`, `frontend/i18n/locales/*/pages/guide-nego.*.json` et des réponses de `contracts/` ; le résultat s'écrit dans le journal de `docs/AppNego/progress.md`
+- [X] T103 ter [P] [US5] Test : un client qui **prétend** avoir l'accès ne l'obtient pas — le verrou suit `me/access`, jamais un état retenu côté client (FR-032) — `frontend/tests/guide-nego/verrou.test.ts`
+- [X] T103 quater [US5] **La section « Guide Négo » du menu du back-office se masque sans la permission globale** — champ `permission` sur `NavSection`, lu **une fois** par `frontend/app/layouts/admin.vue`, jamais page par page. Les autres sections n'en déclarent aucune. *Demandé le 22/09 : sans lui, un administrateur d'événement voyait trois entrées menant à trois « accès refusé » (SC-008).*
 
 **Point de contrôle** : § 5 du quickstart. **Vérifier qu'aucun écran de ce parcours ne demande ni n'affiche un genre.**
 

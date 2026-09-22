@@ -1,5 +1,13 @@
 {
   "titre": "Exchanges",
+  "sous-titre": "Francophone negotiators' network",
+  "verrou": {
+    "propos": "The network channels, the directory, questions to the experts and the reserved documents open with the code you received in your WhatsApp group or from IFDD.",
+    "canaux": "Channels by topic and by cohort",
+    "annuaire": "Network directory",
+    "experts": "Questions to IFDD experts",
+    "reste-ouvert": "Without a code, all the rest of Guide Négo stays open: documents, FAQ, glossary, negotiation sessions, Francophonie meetings and Francophonie Pavilion."
+  },
   "vide": {
     "titre": "No exchange yet",
     "texte": "Francophone network channels and questions to IFDD experts will appear here.",

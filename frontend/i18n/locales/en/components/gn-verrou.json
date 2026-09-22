@@ -1,0 +1,13 @@
+{
+  "titre": "For negotiators only",
+  "sortie": {
+    "compte": "Create my account",
+    "connexion": "I already have an account — Sign in",
+    "code": "Enter my invitation code",
+    "demande": "Request access from IFDD",
+    "attente": "See my request"
+  },
+  "visiteur": "Continue as a visitor",
+  "ouvert": "Your access has just opened.",
+  "recharger": "Open the module"
+}

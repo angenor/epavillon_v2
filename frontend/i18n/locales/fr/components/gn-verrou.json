@@ -1,0 +1,13 @@
+{
+  "titre": "Réservé aux négociatrices et négociateurs",
+  "sortie": {
+    "compte": "Créer mon compte",
+    "connexion": "J'ai déjà un compte — Me connecter",
+    "code": "Saisir mon code d'invitation",
+    "demande": "Demander l'accès à l'IFDD",
+    "attente": "Voir ma demande"
+  },
+  "visiteur": "Continuer en visiteur",
+  "ouvert": "Votre accès vient de s'ouvrir.",
+  "recharger": "Ouvrir le module"
+}

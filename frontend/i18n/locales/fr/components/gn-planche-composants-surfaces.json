@@ -4,13 +4,11 @@
   "marque-remplace": "Remplacé par le Guide des négociations — CdP31",
   "marque-synchronise": "Synchronisé à 11:35",
   "marque-note": "Le mot vient du nom de l'état, jamais de l'écran qui le pose : on ne peut donc pas écrire « Annulée » d'une couleur qui dit autre chose. Les quarante-deux états sont en section 6.",
-
   "chargement": "Chargement",
   "chargement-propos": "L'arc quand on ignore ce qui vient, le squelette quand la forme de la liste est déjà connue.",
   "chargement-arc": "Arc — 20 px et 24 px",
   "chargement-squelette": "Squelette — la dernière ligne est plus courte, comme une vraie liste",
   "chargement-note": "Un arc, et non un disque qui tourne : sous « réduire les animations » tout s'immobilise, et seul un quart de cercle ouvert reste reconnaissable à l'arrêt. La section 7 le montre.",
-
   "vide": "État vide",
   "vide-propos": "Ce qu'il n'y a pas, et quand ça revient. Une sortie, s'il y en a une.",
   "vide-titre": "Aucune session ne suit vos thématiques aujourd'hui",
@@ -18,7 +16,6 @@
   "vide-sortie": "Voir toutes les sessions",
   "vide-sans-titre": "Aucun message dans ce canal",
   "vide-sans-texte": "Les échanges s'ouvrent à l'arrivée de votre groupe.",
-
   "erreur": "État d'erreur",
   "erreur-propos": "Ce qui a échoué, puis ce qui reste vrai — en salle, la phrase qui sauve n'est pas l'échec mais l'heure des données encore affichées.",
   "erreur-titre": "Lecture impossible",
@@ -29,7 +26,6 @@
   "erreur-une-texte": "Ce document n'a pas été gardé hors connexion.",
   "erreur-sans-titre": "Réseau absent",
   "erreur-sans-texte": "La lecture continue hors connexion. Tout ce qui est gardé reste lisible.",
-
   "ephemere": "Message éphémère",
   "ephemere-propos": "Six secondes, puis il s'efface : il ne porte donc jamais seul une information. Ce qu'il annonce se lit aussi sur l'écran ou dans l'en-tête.",
   "ephemere-avec": "Montrer un message avec action",
@@ -38,7 +34,6 @@
   "ephemere-action": "Voir",
   "ephemere-texte-sans": "Document gardé hors connexion.",
   "ephemere-note": "Il apparaît en bas de l'écran, par-dessus tout le reste : la planche ne peut pas le montrer en place, il faut l'appeler. Il s'efface seul au bout de six secondes, durée lue sur le jeton.",
-
   "feuille": "Feuille basse",
   "feuille-propos": "Elle monte du bas et couvre l'écran : une planche ne peut pas la laisser ouverte. Poignée, filet fort, options de 56 px, « Annuler » en bas.",
   "feuille-options": "Ouvrir une feuille d'options",
@@ -54,7 +49,6 @@
   "motif-retirer": "Retirer mon signalement",
   "filtre-adaptation": "Adaptation",
   "filtre-genre": "Genre",
-
   "confirmation": "Boîte de confirmation",
   "confirmation-propos": "Elle interrompt et n'attend qu'une décision. Le retour à gauche, l'action à droite ; le focus se pose sur le retour, pour qu'une touche Entrée trop vite venue ne détruise rien.",
   "confirmation-simple": "Ouvrir une confirmation simple",
@@ -68,7 +62,14 @@
   "confirmation-phrase-rouge": "Il disparaîtra pour tout le canal. Cela ne se défait pas.",
   "confirmation-retirer": "Retirer mon message",
   "confirmation-garder": "Le garder",
-
+  "verrou": "Verrou de module réservé",
+  "verrou-propos": "Cadenas 40, titre, phrase, liste bordée de ce qui est fermé, rappel de ce qui reste ouvert, et les sorties. Le titre et le sous-titre de l'écran restent visibles au-dessus.",
+  "verrou-phrase": "Les canaux du réseau, l'annuaire, les questions aux expertes et experts et les documents réservés s'ouvrent avec le code reçu dans votre groupe WhatsApp ou de l'IFDD.",
+  "verrou-canaux": "Canaux par thématique et par promotion",
+  "verrou-annuaire": "Annuaire du réseau",
+  "verrou-experts": "Questions aux expertes et experts de l'IFDD",
+  "verrou-reste": "Sans code, tout le reste de Guide Négo reste ouvert : documents, FAQ, lexique, sessions de négociation, Réunions et Pavillon de la Francophonie.",
+  "verrou-note": "La sortie principale change avec le mode d'admission et l'état du compte : créer son compte, saisir son code, demander l'accès, ou revoir une demande en attente. Sur cette planche, elle montre ce que votre propre compte verrait.",
   "picto": "Pictogrammes",
   "picto-propos": "Les cinquante-sept symboles et leurs six tailles.",
   "picto-note": "La section 4 les montre déjà, un par un, avec leur nom et leurs tailles. Les redessiner ici donnerait deux planches à tenir accordées pour une seule famille de symboles."

@@ -1,0 +1,41 @@
+{
+  "titre": "My access",
+  "chargement": "Reading your access",
+  "etat": {
+    "visitor": "Visitor",
+    "pending": "Request pending",
+    "granted": "Access open",
+    "rejected": "Request not granted",
+    "revoked": "Access revoked"
+  },
+  "propos": {
+    "visitor": "You are reading Guide Négo without reserved access. The three agendas, the glossary, the FAQ and the public documents stay open.",
+    "pending": "Your request has reached IFDD. The answer will come by email; you can close the app, nothing is lost.",
+    "granted": "The reserved modules are open on this account, on all your devices.",
+    "rejected": "Your request was not granted. If you belong to a francophone network, ask it for the current code: it opens the modules right away.",
+    "revoked": "IFDD has revoked your access to the reserved modules. The rest of Guide Négo stays open."
+  },
+  "hors-connexion": "Offline — state read {moment}.",
+  "ouvre": {
+    "titre": "What your access opens",
+    "tout": "All of Guide Négo"
+  },
+  "admise-le": "Opened on",
+  "par-le-code": "Through the code",
+  "reseaux": {
+    "titre": "Networks",
+    "aide": "Your membership comes from the code you entered. It opens nothing more at this stage: it will serve the reserved channels."
+  },
+  "demande": {
+    "titre": "My request",
+    "envoyee": "Sent",
+    "approved": "Approved on",
+    "rejected": "Declined on",
+    "cancelled": "Withdrawn on",
+    "motif": "Reason"
+  },
+  "saisir": "Enter my invitation code",
+  "demander": "Request access from IFDD",
+  "voir-ma-demande": "See my request",
+  "ma-journee": "Go to my day"
+}

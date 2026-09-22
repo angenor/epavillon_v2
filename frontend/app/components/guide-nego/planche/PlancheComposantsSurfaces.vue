@@ -2,8 +2,8 @@
 import type { OptionDeFeuille } from '~/components/guide-nego/GnFeuilleBasse.vue'
 /**
  * Section 5, quatrième lot : ce qui s'affiche à la place du contenu ou par-dessus lui —
- * marque d'état, chargement, état vide, erreur, message éphémère, feuille basse, boîte
- * de confirmation.
+ * marque d'état, chargement, état vide, **verrou d'un module réservé**, erreur, message
+ * éphémère, feuille basse, boîte de confirmation.
  *
  * Les trois dernières se téléportent dans `#gn-portail` et couvrent l'écran : sur une
  * planche, elles ne peuvent pas rester ouvertes. Chacune a donc son bouton d'ouverture,
@@ -227,6 +227,24 @@ const genre = ref(false)
         :retour="t('gn-planche-composants-surfaces.confirmation-garder')"
         @confirmer="derniereConfirmation = t('gn-planche-composants-surfaces.confirmation-retirer')"
       />
+    </GnPlancheSection>
+
+    <GnPlancheSection
+      :titre="t('gn-planche-composants-surfaces.verrou')"
+      :propos="t('gn-planche-composants-surfaces.verrou-propos')"
+    >
+      <div class="gn-planche-composants__cadre gn-planche-composants__vitrine">
+        <GnVerrou
+          :propos="t('gn-planche-composants-surfaces.verrou-phrase')"
+          :contenus="[
+            t('gn-planche-composants-surfaces.verrou-canaux'),
+            t('gn-planche-composants-surfaces.verrou-annuaire'),
+            t('gn-planche-composants-surfaces.verrou-experts'),
+          ]"
+          :reste-ouvert="t('gn-planche-composants-surfaces.verrou-reste')"
+        />
+      </div>
+      <p class="gn-planche-note">{{ t('gn-planche-composants-surfaces.verrou-note') }}</p>
     </GnPlancheSection>
 
     <GnPlancheSection

@@ -18,6 +18,20 @@ export interface NavItem {
 export interface NavSection {
   labelKey: string
   items: NavItem[]
+  /**
+   * Permission exigée **sur la portée globale** pour que la section paraisse.
+   *
+   * Absente — le cas de toutes les sections sauf une —, la section s'affiche à
+   * tout administrateur : le périmètre y est celui de l'édition choisie, et
+   * chaque écran le fait respecter pour son compte.
+   *
+   * Présente, elle est lue **une fois par le layout**, jamais page par page :
+   * un menu qui afficherait une entrée pour la faire refuser ensuite dirait à
+   * la personne qu'il existe quelque chose qu'elle ne peut pas voir (SC-008).
+   * Ce n'est pas un contrôle d'accès — l'API garde ses routes de toute façon —,
+   * c'est ce qu'on montre.
+   */
+  permission?: string
 }
 
 export interface BreadcrumbItem {

@@ -12,6 +12,7 @@
     "titre": "Account",
     "sans-adresse": "Signed in",
     "lu-a": "Read {moment}",
+    "acces": "My access",
     "deconnexion": "Sign out",
     "creer": "Create my account",
     "se-connecter": "Sign in",

@@ -4,13 +4,11 @@
   "marque-remplace": "Replaced by the Negotiations Guide — COP31",
   "marque-synchronise": "Synced at 11:35",
   "marque-note": "The word comes from the status name, never from the screen that places it: one cannot write “Cancelled” in a colour that says something else. All forty-two statuses are in section 6.",
-
   "chargement": "Loading",
   "chargement-propos": "The arc when what is coming is unknown, the skeleton when the shape of the list is already known.",
   "chargement-arc": "Arc — 20 px and 24 px",
   "chargement-squelette": "Skeleton — the last line is shorter, like a real list",
   "chargement-note": "An arc, not a spinning disc: under “reduce motion” everything freezes, and only an open quarter circle stays recognisable at a standstill. Section 7 shows it.",
-
   "vide": "Empty state",
   "vide-propos": "What is not there, and when it comes back. One exit, if there is one.",
   "vide-titre": "No session matches your topics today",
@@ -18,7 +16,6 @@
   "vide-sortie": "See all sessions",
   "vide-sans-titre": "No message in this channel",
   "vide-sans-texte": "Discussions open when your group arrives.",
-
   "erreur": "Error state",
   "erreur-propos": "What failed, then what remains true — in the room, the sentence that saves you is not the failure but the time of the data still on screen.",
   "erreur-titre": "Could not be read",
@@ -29,7 +26,6 @@
   "erreur-une-texte": "This document was not kept offline.",
   "erreur-sans-titre": "No network",
   "erreur-sans-texte": "Reading continues offline. Everything kept stays readable.",
-
   "ephemere": "Transient message",
   "ephemere-propos": "Six seconds, then it fades: it therefore never carries information on its own. What it announces can also be read on the screen or in the header.",
   "ephemere-avec": "Show a message with an action",
@@ -38,7 +34,6 @@
   "ephemere-action": "See",
   "ephemere-texte-sans": "Document kept offline.",
   "ephemere-note": "It appears at the bottom of the screen, above everything else: the board cannot show it in place, it has to be summoned. It fades by itself after six seconds, a duration read from the token.",
-
   "feuille": "Bottom sheet",
   "feuille-propos": "It rises from the bottom and covers the screen: a board cannot leave it open. Handle, firm rule, 56 px options, “Cancel” at the bottom.",
   "feuille-options": "Open an options sheet",
@@ -54,7 +49,6 @@
   "motif-retirer": "Withdraw my report",
   "filtre-adaptation": "Adaptation",
   "filtre-genre": "Gender",
-
   "confirmation": "Confirmation box",
   "confirmation-propos": "It interrupts and waits only for a decision. Back on the left, the action on the right; focus lands on Back, so that an over-eager Enter destroys nothing.",
   "confirmation-simple": "Open a plain confirmation",
@@ -68,7 +62,14 @@
   "confirmation-phrase-rouge": "It will disappear for the whole channel. This cannot be undone.",
   "confirmation-retirer": "Withdraw my message",
   "confirmation-garder": "Keep it",
-
+  "verrou": "Restricted module lock",
+  "verrou-propos": "40 px padlock, title, sentence, bordered list of what is closed, reminder of what stays open, and the exits. The screen's title and subtitle stay visible above.",
+  "verrou-phrase": "The network channels, the directory, questions to the experts and the reserved documents open with the code you received in your WhatsApp group or from IFDD.",
+  "verrou-canaux": "Channels by topic and by cohort",
+  "verrou-annuaire": "Network directory",
+  "verrou-experts": "Questions to IFDD experts",
+  "verrou-reste": "Without a code, all the rest of Guide Négo stays open: documents, FAQ, glossary, negotiation sessions, Francophonie meetings and Francophonie Pavilion.",
+  "verrou-note": "The main exit changes with the admission mode and the account's state: create an account, enter a code, request access, or go back to a pending request. On this board it shows what your own account would see.",
   "picto": "Pictograms",
   "picto-propos": "The fifty-seven symbols and their six sizes.",
   "picto-note": "Section 4 already shows them one by one, with their names and sizes. Redrawing them here would leave two boards to keep in tune for a single family of symbols."

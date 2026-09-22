@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { EffectivePermission } from '~/types/identity'
 import type { NavSection } from '~/types/navigation'
 
 /**
@@ -29,6 +30,14 @@ import type { NavSection } from '~/types/navigation'
  * ne se distinguent qu'à la lecture. Les pictogrammes reprennent ceux du guide,
  * dont le calendrier pour les événements et l'horloge pour la programmation.
  *
+ * UNE SECTION PEUT EXIGER UNE PERMISSION GLOBALE — une seule le fait, celle de
+ * Guide Négo. Elle est lue ICI, une fois, et non page par page : un menu qui
+ * afficherait ses trois entrées pour les faire refuser ensuite dirait à un
+ * administrateur d'édition qu'il existe quelque chose qu'il ne peut pas voir
+ * (SC-008). Les autres sections n'en déclarent aucune et paraissent toujours :
+ * leur périmètre est celui de l'édition choisie, que chaque écran fait
+ * respecter.
+ *
  * LE COMPTE CONNECTÉ VIT AU PIED DE LA COLONNE, avec la déconnexion. L'en-tête du
  * back-office n'en portait aucune trace : pour se déconnecter, il fallait repasser
  * par le site public. Et savoir SOUS QUEL COMPTE on arbitre n'est pas un confort
@@ -39,6 +48,7 @@ import type { NavSection } from '~/types/navigation'
 const { t } = useI18n()
 const localePath = useLocalePath()
 const route = useRoute()
+const api = useApi()
 const adminScope = useAdminScopeStore()
 const auth = useAuthStore()
 
@@ -75,6 +85,11 @@ const sections: NavSection[] = [
     // ces trois écrans commandent l'entrée d'une AUTRE application, réservée
     // aux administrateurs de la plateforme entière. Les mêler aux messages
     // d'incident du site ferait croire qu'ils partagent son périmètre.
+    //
+    // **La seule section qui exige une permission**, et sur la portée GLOBALE :
+    // un administrateur d'une seule édition n'a aucun espace de négociation à
+    // tenir, et ses trois écrans lui répondraient « accès refusé ».
+    permission: 'negotiation.space.manage',
     labelKey: 'nav.admin.sections.guideNego',
     items: [
       { labelKey: 'nav.admin.negotiationCodes', to: '/admin/negociations/codes', icon: 'lock' },
@@ -102,6 +117,24 @@ const breadcrumb = computed(() => route.meta.breadcrumb ?? [])
 // le sélecteur en a besoin avant que la page ait fini de se rendre, et chaque
 // écran le rechargerait sinon pour son propre compte.
 await adminScope.ensureLoaded()
+
+// Les permissions effectives, pour les sections qui en exigent une. Lues APRÈS
+// le périmètre, qui a déjà résolu la session : `auth.person` est donc connu.
+const { data: granted } = await useAsyncData<EffectivePermission[]>(
+  'admin-nav-permissions',
+  async () => (auth.person ? api.identity.permissions(auth.person.id) : []),
+  { default: () => [] },
+)
+
+/**
+ * **Une section sans permission déclarée paraît toujours** : c'est le cas de
+ * toutes sauf celle de Guide Négo. `hasPermission` sans identifiant d'édition
+ * n'accepte qu'une attribution `global` — exactement la garde que l'API
+ * applique à ses douze routes.
+ */
+const sectionsVisibles = computed(() =>
+  sections.filter((section) => !section.permission || hasPermission(granted.value, section.permission)),
+)
 </script>
 
 <template>
@@ -109,7 +142,7 @@ await adminScope.ensureLoaded()
     <a class="skip-link" href="#contenu-admin">{{ t('common.a11y.skipToContent') }}</a>
 
     <UiSideNav
-      :sections="sections"
+      :sections="sectionsVisibles"
       :label="t('nav.admin.sidebar.label')"
       :open="isSidebarOpen"
       @close="isSidebarOpen = false"

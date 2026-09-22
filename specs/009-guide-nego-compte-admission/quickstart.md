@@ -169,6 +169,11 @@ SELECT event_type FROM platform.outbox_events ORDER BY created_at DESC LIMIT 3;
 1. Sans accès, ouvrir un module réservé : titre du module, « Réservé aux négociatrices et
    négociateurs », ce qui s'y trouve, le rappel de ce qui reste ouvert, **deux sorties**.
 2. Sans compte, le verrou mène d'abord à la création de compte, **puis** au code.
+2 bis. **Le verrou suit le mode d'admission**, et sa sortie change sans mise en ligne :
+   - mode « code seul » et mode « les deux » → il mène à la **saisie du code** ;
+   - mode « approbation seule » → il mène à la **demande**, et ne propose aucun code (FR-022) ;
+   - une demande **déjà en attente** → il ramène à cette demande, jamais à une saisie.
+   Basculer le mode au back-office pendant l'essai et rouvrir le module : la sortie a changé.
 3. « Mon accès » dans chacun des cinq états — visiteuse, en attente, admise, refusée, retirée — dit
    ce qu'il faut, **avec ce que l'accès ouvre** : une COP nommée, ou tout Guide Négo.
 4. **Réseau coupé** : « Mon accès » s'ouvre et affiche l'état **lu**, avec son heure.

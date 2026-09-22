@@ -3,8 +3,13 @@ import type { SegmentDeChoix } from '~/components/guide-nego/GnSegmente.vue'
 import type { ChoixDeTheme } from '~/utils/guide-nego/theme'
 
 /**
- * Le thème, le compte et la déconnexion. « Mon accès » s'y ajoute avec le récit
- * du verrou (US5) ; 0c apportera le reste.
+ * Le thème, le compte, **« Mon accès »** et la déconnexion. 0c apportera le
+ * reste — thématiques, téléchargements.
+ *
+ * LA LIGNE « MON ACCÈS » PORTE L'ÉTAT, JAMAIS UN RÔLE. La maquette écrit
+ * « Négociatrice — réseau » en second rang : cette formule est genrée et ne se
+ * reprend pas (SC-006). Ce qui s'affiche est l'état d'accès, le même mot que
+ * l'écran vers lequel la ligne mène.
  */
 definePageMeta({ layout: 'guide-nego' })
 defineI18nRoute(false)
@@ -12,6 +17,7 @@ defineI18nRoute(false)
 const { t } = useI18n()
 const { choix, choisir } = useGnTheme()
 const session = useGnSession()
+const acces = useGnAcces()
 const { momentLisible } = useGnMomentLecture()
 
 const confirmation = ref(false)
@@ -19,6 +25,7 @@ const confirmation = ref(false)
 onMounted(() => {
   session.relireAuRetourAuPremierPlan()
   void session.assurer()
+  void acces.assurer()
 })
 
 /**
@@ -73,6 +80,15 @@ useHead({ title: t('guide-nego.reglages.titre') })
         :libelle="session.compte.value.adresse ?? t('guide-nego.reglages.compte.sans-adresse')"
         :valeur="appareil ?? undefined"
         picto="user"
+      />
+      <!-- L'état, et non un rôle : « Négociatrice — réseau » de la maquette est
+           genré et ne se reprend pas (SC-006). -->
+      <GnLigneReglage
+        :libelle="t('guide-nego.reglages.compte.acces')"
+        :valeur="t(`guide-nego.acces.etat.${acces.acces.value.state}`)"
+        picto="lock"
+        vers="/guide-nego/ressources/acces"
+        derniere
       />
       <p v-if="luA" class="gn-reglages__aide">
         {{ t('guide-nego.reglages.compte.lu-a', { moment: luA }) }}

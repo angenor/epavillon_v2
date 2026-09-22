@@ -1,0 +1,41 @@
+{
+  "titre": "Mon accès",
+  "chargement": "Lecture de votre accès",
+  "etat": {
+    "visitor": "Visiteuse ou visiteur",
+    "pending": "Demande en attente",
+    "granted": "Accès ouvert",
+    "rejected": "Demande non retenue",
+    "revoked": "Accès retiré"
+  },
+  "propos": {
+    "visitor": "Vous lisez Guide Négo sans accès réservé. Les trois agendas, le lexique, la FAQ et les documents publics restent ouverts.",
+    "pending": "Votre demande est transmise à l'IFDD. La réponse vous arrivera par courriel ; vous pouvez fermer l'application, rien n'est perdu.",
+    "granted": "Les modules réservés sont ouverts sur ce compte, sur tous vos appareils.",
+    "rejected": "Votre demande n'a pas été retenue. Si vous faites partie d'un réseau francophone, demandez-lui le code en cours : il ouvre les modules aussitôt.",
+    "revoked": "L'IFDD a retiré votre accès aux modules réservés. Le reste de Guide Négo demeure ouvert."
+  },
+  "hors-connexion": "Hors connexion — état lu {moment}.",
+  "ouvre": {
+    "titre": "Ce que votre accès ouvre",
+    "tout": "Guide Négo en entier"
+  },
+  "admise-le": "Ouvert le",
+  "par-le-code": "Par le code",
+  "reseaux": {
+    "titre": "Réseaux",
+    "aide": "Votre appartenance vient du code que vous avez saisi. Elle n'ouvre rien de plus à cette étape : elle servira les canaux réservés."
+  },
+  "demande": {
+    "titre": "Ma demande",
+    "envoyee": "Envoyée",
+    "approved": "Admise le",
+    "rejected": "Refusée le",
+    "cancelled": "Annulée le",
+    "motif": "Motif"
+  },
+  "saisir": "Saisir mon code d'invitation",
+  "demander": "Demander l'accès à l'IFDD",
+  "voir-ma-demande": "Voir ma demande",
+  "ma-journee": "Aller à ma journée"
+}

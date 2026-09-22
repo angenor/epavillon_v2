@@ -1,5 +1,13 @@
 {
   "titre": "Échanges",
+  "sous-titre": "Réseau des négociatrices et négociateurs",
+  "verrou": {
+    "propos": "Les canaux du réseau, l'annuaire, les questions aux expertes et experts et les documents réservés s'ouvrent avec le code reçu dans votre groupe WhatsApp ou de l'IFDD.",
+    "canaux": "Canaux par thématique et par promotion",
+    "annuaire": "Annuaire du réseau",
+    "experts": "Questions aux expertes et experts de l'IFDD",
+    "reste-ouvert": "Sans code, tout le reste de Guide Négo reste ouvert : documents, FAQ, lexique, sessions de négociation, Réunions et Pavillon de la Francophonie."
+  },
   "vide": {
     "titre": "Aucun échange pour l'instant",
     "texte": "Les canaux du réseau francophone et les questions aux expertes et experts de l'IFDD paraîtront ici.",
