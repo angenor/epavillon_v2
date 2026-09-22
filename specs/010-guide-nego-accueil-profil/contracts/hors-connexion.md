@@ -18,6 +18,12 @@
 | Profil et réglages | Le nom, le pays, les thématiques suivies, l'accès | Celles déjà posées en 0b, plus `mes-thematiques` |
 | À propos | L'écran et ses textes déjà lus | `texte-privacy`, `texte-terms` |
 
+**Le vocabulaire se lit à la première ouverture en ligne, avec le drapeau, et va dans la garde comme
+lui** : dix termes, une lecture publique qui ne demande même pas de session. La ligne « Mes thématiques »
+du profil a ainsi toujours ses noms, y compris sur un appareil qui n'a jamais ouvert l'écran des
+thématiques — sans quoi elle devrait se rabattre sur un simple compte, « 2 thématiques suivies ». Ce
+repli reste écrit, pour le cas où la toute première ouverture se ferait sans réseau.
+
 Chaque écran porte l'heure de sa lecture. Le format est celui de l'écart 32 : heure du téléphone, sans
 fuseau — « à 11:35 », « hier à 23:10 », « le 11 nov. à 23:10 ».
 
