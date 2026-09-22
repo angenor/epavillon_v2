@@ -54,6 +54,21 @@ pub struct NetworkTermView {
     pub label: String,
 }
 
+/// Un réseau et **le nombre de personnes qui en font partie** (SC-007).
+///
+/// Ce compte n'est pas la somme des usages des codes qui le donnent : une même
+/// personne peut entrer avec deux codes, et l'appartenance survit à la
+/// révocation du code qui l'a apportée. Le déduire de `used_count` donnerait un
+/// chiffre faux dès la première de ces deux situations.
+#[derive(Debug, Clone, Serialize)]
+pub struct NetworkSummary {
+    pub id: Uuid,
+    pub code: String,
+    pub label: String,
+    /// Appartenances vivantes, personnes distinctes.
+    pub members_count: i64,
+}
+
 /// `InvitationCodeListScreen` — l'écran de la liste en une réponse.
 ///
 /// `spaces` porte les espaces de négociation offerts au filtre **et au
@@ -64,7 +79,7 @@ pub struct InvitationCodeListScreen {
     pub rows: Vec<InvitationCodeRow>,
     pub total: i64,
     pub spaces: Vec<SpaceOption>,
-    pub networks: Vec<NetworkTermView>,
+    pub networks: Vec<NetworkSummary>,
 }
 
 #[derive(Debug, Clone, Serialize)]

@@ -14,7 +14,7 @@
   "creer-mon-compte": "Create my account",
   "me-connecter": "I already have an account — Sign in",
   "attente": {
-    "titre": "Pending",
+    "titre": "Request pending",
     "envoyee": "Sent {moment}",
     "nom": "On behalf of {nom}",
     "pays": "From {pays}",

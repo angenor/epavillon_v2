@@ -252,7 +252,14 @@ export function codesDInvitation(filtres?: {
     )
   }
 
-  return { rows: lignes, total: lignes.length, spaces: ESPACES, networks: [RESEAU] }
+  return {
+    rows: lignes,
+    total: lignes.length,
+    spaces: ESPACES,
+    // Le compte des appartenances n'est pas la somme des usages : trois personnes
+    // sont entrées par deux codes différents du même réseau.
+    networks: [{ ...RESEAU, members_count: 14 }],
+  }
 }
 
 export function codeDInvitation(codeId: string): InvitationCodeDetail | null {

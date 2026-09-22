@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { InvitationCodeRow } from '~/types/admin-negotiation'
+import type { InvitationCodeRow, NetworkSummary } from '~/types/admin-negotiation'
 import type { EffectivePermission } from '~/types/identity'
 import type { TableColumn } from '~/types/ui'
 import type { TimeZoneName } from '~/types/shared'
@@ -89,6 +89,14 @@ const { data: screen, status, error, refresh } = await useAsyncData(
 const rows = computed<InvitationCodeRow[]>(() => screen.value?.rows ?? [])
 const filtered = computed(() => Boolean(filters.value.etat || filters.value.espace || filters.value.q))
 
+/**
+ * **Le compte des appartenances, pas celui des usages** (SC-007). Une personne
+ * peut entrer avec deux codes, et son appartenance survit à la révocation du
+ * code qui l'a apportée : sommer les `used_count` donnerait un autre chiffre, et
+ * le faux. Il reste donc hors du tableau, qui est celui des codes.
+ */
+const networks = computed<NetworkSummary[]>(() => screen.value?.networks ?? [])
+
 const columns = computed<TableColumn[]>(() => [
   { key: 'code', label: t('admin.negociations.codes.list.columns.code'), width: '9rem' },
   { key: 'label', label: t('admin.negociations.codes.list.columns.label') },
@@ -163,6 +171,14 @@ function openCode(row: InvitationCodeRow): void {
           <p class="mt-1 max-w-(--measure) text-text-muted">
             {{ t('admin.negociations.codes.list.subtitle') }}
           </p>
+          <ul v-if="networks.length" class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+            <li v-for="network in networks" :key="network.id" class="text-text-muted">
+              {{ network.label }} —
+              <strong class="font-semibold text-text">
+                {{ t('admin.negociations.codes.list.members', { count: network.members_count }) }}
+              </strong>
+            </li>
+          </ul>
         </div>
         <UiButton icon="plus" :to="localePath('/admin/negociations/codes/nouveau')">
           {{ t('admin.negociations.codes.list.new') }}

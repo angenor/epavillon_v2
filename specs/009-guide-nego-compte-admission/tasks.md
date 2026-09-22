@@ -261,18 +261,18 @@ chacun des cinq états.
 
 ## Phase 8 : Recette
 
-- [ ] T104 [P] Vérifier que les fichiers de `frontend/i18n/locales/en/` portent **exactement** les clés de leurs jumeaux `fr/`, aucune manquante ni en trop ; toute chaîne restée en dur dans `app/pages/guide-nego/` est assumée et justifiée une par une
-- [ ] T105 **Répéter `specs/009-guide-nego-compte-admission/migration.sql` sur une copie de la base**, données comprises, puis **recomparer les schémas** (T012) : c'est ce contrôle qui a rattrapé le seul oubli du 16/09
-- [ ] T106 [P] Mesurer au navigateur à 320, 360 et 390 px, en clair et en sombre, les huit écrans de `frontend/app/pages/guide-nego/` contre `docs/AppNego/design/ecrans/02-socle.html` : aucun débordement horizontal, cibles de 48 px, anneau de focus visible
-- [ ] T107 [P] Vérifier les mots de `design/lexique.md` : « Code d'invitation » — jamais « clé », « jeton » ni « mot de passe » —, « Demande en attente », « Réservé aux négociatrices et négociateurs »
-- [ ] T108 **Non-régression du site, sur la version construite** : accueil, back-office et `/negociations` inchangés ; `frontend/app/pages/auth/*.vue` fonctionnent **sans** objet `client` ; aucun service worker ni manifeste après une visite du site seul
-- [ ] T109 `npm run check:guide-nego`, `test:guide-nego`, `typecheck`, `cargo test -p negotiation`, `make check-api-contract`, `npm run verifier-garde:guide-nego`
-- [ ] T110 `make check-safe` au vert — **API arrêtée** : les tests d'`identity` se sont montrés sensibles à une activité concurrente sur la base le 21/09
-- [ ] T111 Dérouler le [quickstart](quickstart.md) au navigateur, § 1 à § 8, **chronomètre en main sur le parcours compte → code → entrée** : le relevé va au journal de `docs/AppNego/progress.md` (SC-001)
-- [ ] T111 bis Vérifier que le back-office restitue **le compte des appartenances au réseau**, et pas seulement les usages par code (SC-007) — `frontend/app/pages/admin/negociations/codes/index.vue`
-- [ ] T111 ter [P] Test : **un envoi de courriel qui échoue n'annule pas la décision** — la demande reste admise, le travail se rejoue (SC-011) — `negotiation/tests/courriel_echec_decision_tient.rs`
+- [X] T104 [P] Vérifier que les fichiers de `frontend/i18n/locales/en/` portent **exactement** les clés de leurs jumeaux `fr/`, aucune manquante ni en trop ; toute chaîne restée en dur dans `app/pages/guide-nego/` est assumée et justifiée une par une
+- [X] T105 **Répéter `specs/009-guide-nego-compte-admission/migration.sql` sur une copie de la base**, données comprises, puis **recomparer les schémas** (T012) : c'est ce contrôle qui a rattrapé le seul oubli du 16/09
+- [X] T106 [P] Mesurer au navigateur à 320, 360 et 390 px, en clair et en sombre, les huit écrans de `frontend/app/pages/guide-nego/` contre `docs/AppNego/design/ecrans/02-socle.html` : aucun débordement horizontal, cibles de 48 px, anneau de focus visible
+- [X] T107 [P] Vérifier les mots de `design/lexique.md` : « Code d'invitation » — jamais « clé », « jeton » ni « mot de passe » —, « Demande en attente », « Réservé aux négociatrices et négociateurs »
+- [X] T108 **Non-régression du site, sur la version construite** : accueil, back-office et `/negociations` inchangés ; `frontend/app/pages/auth/*.vue` fonctionnent **sans** objet `client` ; aucun service worker ni manifeste après une visite du site seul
+- [X] T109 `npm run check:guide-nego`, `test:guide-nego`, `typecheck`, `cargo test -p negotiation`, `make check-api-contract`, `npm run verifier-garde:guide-nego`
+- [X] T110 `make check-safe` au vert — **API arrêtée** : les tests d'`identity` se sont montrés sensibles à une activité concurrente sur la base le 21/09
+- [X] T111 Dérouler le [quickstart](quickstart.md) au navigateur, § 1 à § 8, **chronomètre en main sur le parcours compte → code → entrée** : le relevé va au journal de `docs/AppNego/progress.md` (SC-001)
+- [X] T111 bis Vérifier que le back-office restitue **le compte des appartenances au réseau**, et pas seulement les usages par code (SC-007) — `frontend/app/pages/admin/negociations/codes/index.vue`
+- [X] T111 ter [P] Test : **un envoi de courriel qui échoue n'annule pas la décision** — la demande reste admise, le travail se rejoue (SC-011) — `negotiation/tests/courriel_echec_decision_tient.rs`
 - [ ] T112 Dérouler § 9 **sur un Android réel puis un iPhone** : l'installation, le retour du courriel sur les deux systèmes, `client_kind` après une nuit, et § 2 en 3G lente
-- [ ] T113 Mettre à jour `docs/AppNego/progress.md` — la ligne d'état 0b, le journal du jour, et un ADR si quelque chose s'est tranché en chemin
+- [X] T113 Mettre à jour `docs/AppNego/progress.md` — la ligne d'état 0b, le journal du jour, et un ADR si quelque chose s'est tranché en chemin
 
 ---
 

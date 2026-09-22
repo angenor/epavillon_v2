@@ -3,6 +3,7 @@
     "title": "Codes d'invitation",
     "subtitle": "Ce qui ouvre les modules réservés de Guide Négo. Un code circule dans un groupe WhatsApp, recopié à la main : il est partagé, jamais nominatif.",
     "new": "Créer un code",
+    "members": "aucun membre | {count} membre | {count} membres",
     "caption": "Codes d'invitation de Guide Négo, les plus récents en tête.",
     "forbidden": {
       "scope": "Administrer Guide Négo, sur la plateforme entière",

@@ -3,6 +3,7 @@
     "title": "Invitation codes",
     "subtitle": "What opens the reserved modules of Guide Négo. A code travels through a WhatsApp group, copied by hand: it is shared, never personal.",
     "new": "Create a code",
+    "members": "no members | {count} member | {count} members",
     "caption": "Guide Négo invitation codes, most recent first.",
     "forbidden": {
       "scope": "Administer Guide Négo, across the whole platform",

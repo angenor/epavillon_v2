@@ -121,3 +121,79 @@ async fn lappartenance_ne_se_double_pas() {
     );
     assert_eq!(commun::reseaux(&bac, decor.person_id).await.len(), 1);
 }
+
+/// **SC-007 : l'IFDD peut dire combien de personnes appartiennent au réseau.**
+///
+/// Le chiffre ne se déduit pas des usages des codes. Ici deux codes donnent le
+/// même réseau et une personne entre par les deux : sommer les `used_count`
+/// annoncerait trois membres pour deux, et le jour où l'un des codes est
+/// révoqué, un de moins — alors que l'appartenance, elle, n'a pas bougé.
+#[tokio::test]
+async fn le_back_office_compte_les_appartenances_et_non_les_usages() {
+    let bac = Bac::monter().await;
+    let decor = commun::decor(&bac).await;
+
+    let second = commun::semer(
+        &bac,
+        Graine {
+            code: "NEGO-777",
+            libelle: "Réseau des négociatrices — relais",
+            space_id: Some(decor.space_id),
+            network_term_id: Some(decor.network_term_id),
+            ..Graine::default()
+        },
+    )
+    .await;
+
+    let ecran = commun::liste_des_codes(&bac).await;
+    let reseau = ecran
+        .networks
+        .iter()
+        .find(|n| n.code == "women_negotiators")
+        .expect("le réseau est offert au filtre");
+    assert_eq!(reseau.members_count, 0, "personne n'est encore entré");
+
+    commun::saisir(&bac, decor.person_id, &decor.code, None).await;
+    commun::saisir(&bac, decor.person_id, "NEGO-777", None).await;
+
+    let autre = commun::personne(&bac, "fatou.sow@example.org").await;
+    commun::saisir(&bac, autre, "NEGO-777", None).await;
+
+    let ecran = commun::liste_des_codes(&bac).await;
+    let reseau = ecran
+        .networks
+        .iter()
+        .find(|n| n.code == "women_negotiators")
+        .expect("le réseau est offert au filtre");
+
+    let usages: i32 = ecran
+        .rows
+        .iter()
+        .filter(|r| {
+            r.network
+                .as_ref()
+                .is_some_and(|n| n.code == "women_negotiators")
+        })
+        .map(|r| r.used_count)
+        .sum();
+
+    assert_eq!(reseau.members_count, 2, "deux personnes, trois usages");
+    assert_eq!(
+        usages, 3,
+        "la somme des usages dirait trois : ce n'est pas le compte"
+    );
+
+    // Et la révocation d'un code ne retire aucune appartenance.
+    commun::revoquer_le_code(&bac, decor.admin_id, second, Some("relais fermé")).await;
+
+    let ecran = commun::liste_des_codes(&bac).await;
+    let reseau = ecran
+        .networks
+        .iter()
+        .find(|n| n.code == "women_negotiators")
+        .expect("le réseau reste offert");
+    assert_eq!(
+        reseau.members_count, 2,
+        "l'appartenance survit au code qui l'a donnée"
+    );
+}

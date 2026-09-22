@@ -491,6 +491,23 @@ pub async fn creer_un_code(
     .expect("création du code")
 }
 
+/// L'écran de la liste des codes, tel que la route le rend : les lignes, les
+/// espaces et **les réseaux avec leur compte de membres**.
+pub async fn liste_des_codes(bac: &Bac) -> negotiation::domain::admin::InvitationCodeListScreen {
+    use negotiation::repo::codes::{Filtre, LISTE_LIMITE_DEFAUT};
+
+    negotiation::service::admin_codes::liste(
+        &bac.state,
+        &Filtre {
+            limit: LISTE_LIMITE_DEFAUT,
+            ..Filtre::default()
+        },
+        "fr",
+    )
+    .await
+    .expect("liste des codes")
+}
+
 pub async fn revoquer_le_code(
     bac: &Bac,
     acteur: Uuid,

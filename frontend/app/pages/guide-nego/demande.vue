@@ -12,7 +12,7 @@ import { APRES_LE_CODE } from '~/utils/guide-nego/parcours'
  *
  * **L'ÉCRAN D'ATTENTE NE PROMET RIEN D'AUTRE QUE CE QU'IL SAIT** (FR-025). Il
  * dit le nom, l'heure d'envoi, que la réponse arrive par courriel, et ce qui
- * reste lisible en attendant — l'agenda des trois programmes, le lexique, la
+ * reste lisible en attendant — les trois agendas, le lexique, la
  * Francophonie. Il offre deux sorties : aller lire, ou saisir un code si on en
  * reçoit un entre-temps.
  *

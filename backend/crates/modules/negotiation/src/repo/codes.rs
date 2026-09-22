@@ -13,7 +13,7 @@ use time::OffsetDateTime;
 use uuid::Uuid;
 
 use crate::domain::access::AccessScopeView;
-use crate::domain::admin::{InvitationCodeRow, NetworkTermView, SpaceOption};
+use crate::domain::admin::{InvitationCodeRow, NetworkSummary, NetworkTermView, SpaceOption};
 
 /// Un code, avec son état déjà calculé.
 #[derive(Debug, Clone)]
@@ -351,14 +351,22 @@ pub async fn espaces(conn: &mut PgConnection, locale: &str) -> Result<Vec<SpaceO
         .collect())
 }
 
-/// Les réseaux qu'un code peut faire rejoindre. **Lus dans la taxonomie**, et
-/// jamais écrits dans un fichier de traduction : un administrateur les modifie
-/// depuis le back-office des vocabulaires.
-pub async fn reseaux(conn: &mut PgConnection, locale: &str) -> Result<Vec<NetworkTermView>> {
+/// Les réseaux qu'un code peut faire rejoindre, **avec le nombre de personnes
+/// qui en font partie** (SC-007). **Lus dans la taxonomie**, et jamais écrits
+/// dans un fichier de traduction : un administrateur les modifie depuis le
+/// back-office des vocabulaires.
+///
+/// Le compte se lit dans les appartenances vivantes, et non dans les usages des
+/// codes : `ix_network_memberships_network` est fait pour lui.
+pub async fn reseaux(conn: &mut PgConnection, locale: &str) -> Result<Vec<NetworkSummary>> {
     let lignes = sqlx::query!(
         r#"SELECT t.id                                      AS "id!",
                   t.code                                    AS "code!",
-                  COALESCE(platform.t(t.label, $1), t.code) AS "label!"
+                  COALESCE(platform.t(t.label, $1), t.code) AS "label!",
+                  (SELECT count(*)
+                     FROM negotiation.network_memberships m
+                    WHERE m.network_term_id = t.id
+                      AND m.left_at IS NULL)                AS "members_count!"
              FROM reference.taxonomy_terms t
             WHERE t.taxonomy_code = 'negotiation_network' AND t.is_active
             ORDER BY t.sort_order, t.code"#,
@@ -369,10 +377,11 @@ pub async fn reseaux(conn: &mut PgConnection, locale: &str) -> Result<Vec<Networ
 
     Ok(lignes
         .into_iter()
-        .map(|l| NetworkTermView {
+        .map(|l| NetworkSummary {
             id: l.id,
             code: l.code,
             label: l.label,
+            members_count: l.members_count,
         })
         .collect())
 }

@@ -14,7 +14,7 @@
   "creer-mon-compte": "Créer mon compte",
   "me-connecter": "J'ai déjà un compte — Me connecter",
   "attente": {
-    "titre": "En attente",
+    "titre": "Demande en attente",
     "envoyee": "Envoyée {moment}",
     "nom": "Au nom de {nom}",
     "pays": "Depuis {pays}",

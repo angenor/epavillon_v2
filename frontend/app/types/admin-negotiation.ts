@@ -37,6 +37,18 @@ export interface NetworkTermView {
   label: string
 }
 
+/**
+ * Un réseau et **le nombre de personnes qui en font partie** (SC-007).
+ *
+ * Ce compte ne se déduit pas des usages des codes : une même personne peut
+ * entrer avec deux codes, et l'appartenance survit à la révocation du code qui
+ * l'a apportée.
+ */
+export interface NetworkSummary extends NetworkTermView {
+  /** Appartenances vivantes, personnes distinctes. */
+  members_count: number
+}
+
 export interface SpaceOption {
   id: Uuid
   name: string
@@ -74,7 +86,7 @@ export interface InvitationCodeListScreen {
   rows: InvitationCodeRow[]
   total: number
   spaces: SpaceOption[]
-  networks: NetworkTermView[]
+  networks: NetworkSummary[]
 }
 
 /**
