@@ -82,6 +82,7 @@ import { createAdminOrganizationsApi } from './api/admin-organizations'
 import { createInvitationApi } from './api/invitation'
 import { createAdminUsersApi } from './api/admin-users'
 import { createAdminIncidentsApi } from './api/admin-incidents'
+import { createAdminNegotiationsApi } from './api/admin-negotiations'
 import { createOrganizationWorkspaceApi } from './api/organization-workspace'
 import { createHomeApi } from './api/home'
 import { createAdminShowcaseApi } from './api/admin-showcase'
@@ -822,6 +823,14 @@ export function useApi() {
     // tant que l'API n'existe pas. Ce paramètre disparaît au prompt B6.
     // -----------------------------------------------------------------------
     adminIncidents: createAdminIncidentsApi(deps),
+
+    /**
+     * Le back-office de l'admission de Guide Négo — codes, usages, demandes,
+     * mode. **Aucun périmètre d'édition** : ces routes exigent la portée
+     * globale, et un espace de négociation n'appartient à aucune édition (voir
+     * `api/admin-negotiations.ts`).
+     */
+    adminNegotiations: createAdminNegotiationsApi(deps),
 
     // -----------------------------------------------------------------------
     // Messages d'incident — la part PUBLIQUE (B9)

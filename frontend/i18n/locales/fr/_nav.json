@@ -42,7 +42,8 @@
     "sections": {
       "programme": "Programmation",
       "referential": "Référentiels",
-      "operations": "Exploitation"
+      "operations": "Exploitation",
+      "guideNego": "Guide Négo"
     },
     "sidebar": {
       "collapse": "Réduire la navigation",
@@ -56,7 +57,10 @@
       "empty": "Aucun événement n'est ouvert à votre compte.",
       "hint": "Les listes de cette section ne montrent que l'événement sélectionné."
     },
-    "backToSite": "Retour au site public"
+    "backToSite": "Retour au site public",
+    "negotiationCodes": "Codes d'invitation",
+    "negotiationRequests": "Demandes d'accès",
+    "negotiationAdmission": "Mode d'admission"
   },
   "breadcrumb": {
     "label": "Fil d'Ariane",

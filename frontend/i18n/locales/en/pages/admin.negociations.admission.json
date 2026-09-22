@@ -1,0 +1,38 @@
+{
+  "title": "Admission mode",
+  "subtitle": "How people enter the reserved modules of Guide Négo. The change takes effect at the next attempt, with no deployment.",
+  "forbidden": {
+    "scope": "Administer Guide Négo, across the whole platform",
+    "description": "The admission mode is reserved for platform-wide administrators. An account scoped to a single event has no access to it."
+  },
+  "current": "Current mode",
+  "choose": "Choose the admission mode",
+  "modes": {
+    "code": {
+      "label": "Code only",
+      "description": "A valid code opens the modules right away. Nobody has anything to decide."
+    },
+    "approval": {
+      "label": "Approval only",
+      "description": "The app no longer asks for a code: everyone files a request, and you decide."
+    },
+    "code_and_approval": {
+      "label": "Code and approval",
+      "description": "The code is asked for, but it does not open: it opens a request carrying it, and you decide knowing who holds the code."
+    }
+  },
+  "effects": {
+    "title": "What the person will see",
+    "offersCode": "The code field is offered to them.",
+    "noCode": "The code field disappears from their journey.",
+    "codeOpens": "A valid code opens the modules immediately.",
+    "needsApproval": "They wait for your answer, which reaches them by email."
+  },
+  "pendingWarning": "{count} request is pending. Changing the mode does not cancel it: it still has to be decided. | {count} request is pending. Changing the mode does not cancel it: it still has to be decided. | {count} requests are pending. Changing the mode does not cancel them: they still have to be decided.",
+  "queueLink": "See the requests",
+  "save": "Save the mode",
+  "saved": "Mode saved. The next person who tries to enter will see it.",
+  "error": {
+    "NEGOTIATION_ADMISSION_MODE_INVALID": "This mode does not exist."
+  }
+}

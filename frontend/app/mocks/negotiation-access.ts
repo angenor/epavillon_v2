@@ -13,7 +13,13 @@
  * Rien ici ne nomme ni ne suppose un genre (SC-006).
  */
 
-import type { AccessStateView, RedeemResult } from '~/types/negotiation'
+import type {
+  AccessRequestView,
+  AccessStateView,
+  AdmissionMode,
+  CreateAccessRequestPayload,
+  RedeemResult,
+} from '~/types/negotiation'
 
 /** Les deux codes du semis de développement, et eux seuls. */
 const CODE_DU_RESEAU = 'NEGO001'
@@ -110,5 +116,51 @@ export function saisirUnCode(code: string): RedeemResult {
     granted: etatCourant.granted,
     networks: [...etatCourant.networks],
     request: null,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Demander l'accès
+// ---------------------------------------------------------------------------
+
+/**
+ * Le mode d'admission du jeu. Il se règle depuis le back-office simulé, et
+ * l'application le relit à chaque lecture de son accès — exactement comme
+ * l'API le relit à chaque tentative (SC-002).
+ */
+export function reglerLeModeDAdmission(valeur: AdmissionMode): void {
+  etatCourant = { ...etatCourant, admission_mode: valeur }
+}
+
+/**
+ * Ouvre une demande. **Une seule en attente** : la rouvrir rend la même, comme
+ * l'index partiel de la base le fait.
+ */
+export function demanderLAcces(charge: CreateAccessRequestPayload): AccessRequestView {
+  if (etatCourant.request?.status === 'pending') return etatCourant.request
+
+  const demande: AccessRequestView = {
+    id: `0199b003-0000-7000-8000-${Date.now().toString(16).padStart(12, '0').slice(-12)}`,
+    status: 'pending',
+    submitted_at: new Date().toISOString(),
+    decided_at: null,
+    decision_reason: null,
+  }
+
+  void charge
+  etatCourant = { ...etatCourant, state: 'pending', request: demande }
+  return demande
+}
+
+/**
+ * La personne retire sa demande — « annulée », son propre fait. « Révoquée »
+ * est réservé à un accès qu'on retire, et ne qualifie jamais une demande.
+ */
+export function annulerSaDemande(requestId: string): void {
+  if (etatCourant.request?.id !== requestId) return
+  etatCourant = {
+    ...etatCourant,
+    state: etatCourant.granted ? 'granted' : 'visitor',
+    request: { ...etatCourant.request, status: 'cancelled', decided_at: new Date().toISOString() },
   }
 }

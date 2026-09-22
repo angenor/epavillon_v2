@@ -42,7 +42,8 @@
     "sections": {
       "programme": "Programme",
       "referential": "Reference data",
-      "operations": "Operations"
+      "operations": "Operations",
+      "guideNego": "Guide Négo"
     },
     "sidebar": {
       "collapse": "Collapse navigation",
@@ -56,7 +57,10 @@
       "empty": "No event is open to your account.",
       "hint": "Lists in this section only show the selected event."
     },
-    "backToSite": "Back to the public site"
+    "backToSite": "Back to the public site",
+    "negotiationCodes": "Invitation codes",
+    "negotiationRequests": "Access requests",
+    "negotiationAdmission": "Admission mode"
   },
   "breadcrumb": {
     "label": "Breadcrumb",

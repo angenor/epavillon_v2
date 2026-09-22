@@ -45,6 +45,11 @@ async fn main() {
             std::process::exit(1);
         });
 
+    // Une copie de plus, prise avant que `courrier` ne soit consommé par
+    // `engagement` : l'ordre des lignes ci-dessous n'a pas à commander qui
+    // envoie des courriels.
+    let courrier_negociation = courrier.clone();
+
     let consommateurs = ConsumerRegistry::new()
         .register(TelemetryConsumer)
         // `programme` reçoit l'annonce de publication de `event` et rend
@@ -85,11 +90,15 @@ async fn main() {
         // s'empileraient sans erreur, sans trace, et sans que rien ne les
         // exécute jamais.
         .register_all(analytics::job_handlers(db.clone(), &config))
-        // Guide Négo 0b : monté vide, et c'est délibéré. La chaîne qui purge
-        // les essais de code d'invitation s'y branche dès que `jobs/purge.rs`
-        // existe — la ligne posée maintenant évite qu'on l'oublie alors, et un
-        // gestionnaire de plus n'aura rien à modifier ici.
-        .register_all(negotiation::job_handlers(db.clone(), &config));
+        // Guide Négo 0b : les deux courriels de décision — admise, refusée —
+        // et la purge des essais de code. Le mailer est le même qu'ailleurs,
+        // donc enveloppé : liste de suppression et journal d'expédition
+        // s'appliquent à ces messages sans qu'ils en sachent rien.
+        .register_all(negotiation::job_handlers(
+            db.clone(),
+            &config,
+            courrier_negociation,
+        ));
 
     // Les travaux récurrents se replanifient eux-mêmes ; le démarrage ne fait
     // que **réarmer** la chaîne, au cas où sa dernière occurrence serait morte
@@ -192,6 +201,19 @@ async fn armer_les_recurrents(db: &Db, config: &Config) {
         .await?
         {
             armees.push("rafraîchissement des projections");
+        }
+        // Huitième chaîne, celle de Guide Négo : les essais de code au-delà de
+        // quatre-vingt-dix jours. Assez pour lire une série d'échecs pendant
+        // une COP, trop court pour que la table devienne un journal de
+        // fréquentation — ce que le modèle annonce, et que cette ligne rend
+        // vrai.
+        if negotiation::jobs::purge::planifier(
+            &mut tx,
+            negotiation::jobs::purge::prochaine_occurrence(maintenant),
+        )
+        .await?
+        {
+            armees.push("purge des essais de code");
         }
 
         tx.commit().await?;

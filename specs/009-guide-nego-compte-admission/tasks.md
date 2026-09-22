@@ -173,26 +173,26 @@ qu'il n'ouvre plus **et que les accès tiennent**, puis retirer un accès.
 
 ### Tests
 
-- [ ] T067 [P] [US3] Test : **un administrateur d'ÉVÉNEMENT ne voit rien du back-office de Guide Négo**, sur les DOUZE routes de `contracts/api-admin.md` — sept sur les codes, deux sur le mode d'admission, trois sur les demandes —, URL forgée comprise : le refus est le même que pour un identifiant inexistant (SC-008). La garde est `negotiation.space.manage` **sur la portée globale** (`Requires<SpaceManage>`), **jamais `RequiresAnyScope`** — le rôle `admin` porte cette permission et s'attribue aussi sur un événement, et la route paraîtrait gardée — `negotiation/tests/perimetre_url_forgee.rs`
-- [ ] T068 [P] [US3] Test : **révoquer un code ne retire aucun accès déjà accordé** (ADR-006) — `negotiation/tests/revocation_ne_retire_pas.rs`
-- [ ] T069 [P] [US3] Test : un accès retiré cesse d'ouvrir dès la lecture suivante de `me/access` — `negotiation/tests/retrait_acces.rs`
-- [ ] T070 [P] [US3] Test : **aucune permission sur la portée globale donne un refus explicite**, jamais une liste vide — `negotiation/tests/perimetre_vide_refuse.rs`. *`administered_events()` n'est pas appelée par ce module* : elle ne rend que des portées `event`, quand un code porte `global` ou `negotiation_space`
-- [ ] T070 bis [P] [US3] Test : **toute écriture de `negotiation` laisse son auteur** — création, révocation, retrait d'accès et décision retrouvés dans `platform.audit_log` avec leur `actor_id` (FR-046, principe VII) — `negotiation/tests/toute_ecriture_laisse_son_auteur.rs`
+- [X] T067 [P] [US3] Test : **un administrateur d'ÉVÉNEMENT ne voit rien du back-office de Guide Négo**, sur les DOUZE routes de `contracts/api-admin.md` — sept sur les codes, deux sur le mode d'admission, trois sur les demandes —, URL forgée comprise : le refus est le même que pour un identifiant inexistant (SC-008). La garde est `negotiation.space.manage` **sur la portée globale** (`Requires<SpaceManage>`), **jamais `RequiresAnyScope`** — le rôle `admin` porte cette permission et s'attribue aussi sur un événement, et la route paraîtrait gardée — `negotiation/tests/perimetre_url_forgee.rs`
+- [X] T068 [P] [US3] Test : **révoquer un code ne retire aucun accès déjà accordé** (ADR-006) — `negotiation/tests/revocation_ne_retire_pas.rs`
+- [X] T069 [P] [US3] Test : un accès retiré cesse d'ouvrir dès la lecture suivante de `me/access` — `negotiation/tests/retrait_acces.rs`
+- [X] T070 [P] [US3] Test : **aucune permission sur la portée globale donne un refus explicite**, jamais une liste vide — `negotiation/tests/perimetre_vide_refuse.rs`. *`administered_events()` n'est pas appelée par ce module* : elle ne rend que des portées `event`, quand un code porte `global` ou `negotiation_space`
+- [X] T070 bis [P] [US3] Test : **toute écriture de `negotiation` laisse son auteur** — création, révocation, retrait d'accès et décision retrouvés dans `platform.audit_log` avec leur `actor_id` (FR-046, principe VII) — `negotiation/tests/toute_ecriture_laisse_son_auteur.rs`
 
 ### Back
 
-- [ ] T071 [P] [US3] `negotiation/src/repo/uses.rs` : usages d'un code par `v_invitation_code_uses`, avec l'état réel de l'accès
-- [ ] T072 [US3] `negotiation/src/service/admin_codes.rs` : engendrer le code (**huit caractères, tirets compris**, exemple `NEGO-024`, alphabet sans `0/O` ni `1/I/L`), créer, révoquer, retirer un accès, retirer tous les accès d'un code — **chaque écriture ouverte par `Db::write(&ctx)`**, jamais une connexion nue
-- [ ] T073 [US3] `negotiation/src/routes/admin_codes.rs` : les sept routes sous `/api/admin/negotiation/invitation-codes`, toutes derrière **`Requires<SpaceManage>`** — portée globale, et **ni `RequiresAnyScope` ni `Perimeter`**
-- [ ] T074 [US3] `make openapi`
+- [X] T071 [P] [US3] `negotiation/src/repo/uses.rs` : usages d'un code par `v_invitation_code_uses`, avec l'état réel de l'accès
+- [X] T072 [US3] `negotiation/src/service/admin_codes.rs` : engendrer le code (**huit caractères, tirets compris**, exemple `NEGO-024`, alphabet sans `0/O` ni `1/I/L`), créer, révoquer, retirer un accès, retirer tous les accès d'un code — **chaque écriture ouverte par `Db::write(&ctx)`**, jamais une connexion nue
+- [X] T073 [US3] `negotiation/src/routes/admin_codes.rs` : les sept routes sous `/api/admin/negotiation/invitation-codes`, toutes derrière **`Requires<SpaceManage>`** — portée globale, et **ni `RequiresAnyScope` ni `Perimeter`**
+- [X] T074 [US3] `make openapi`
 
 ### Client
 
-- [ ] T075 [P] [US3] Créer `frontend/app/pages/admin/negociations/codes/index.vue` — liste, filtres d'URL en français (`etat`, `espace`, `q`), pagination, **quatre états d'écran**, sur le modèle de `admin/incidents/index.vue`
-- [ ] T076 [P] [US3] Créer `frontend/app/pages/admin/negociations/codes/nouveau.vue` — libellé, **portée : une COP précise ou Guide Négo en entier**, quota, validité, appartenance au réseau ; le code engendré est montré
-- [ ] T077 [US3] Créer `frontend/app/pages/admin/negociations/codes/[id].vue` — détail, usages, révocation et retraits, chacun derrière une confirmation
-- [ ] T078 [P] [US3] i18n `fr` et `en` : `pages/admin.negociations.codes.json`
-- [ ] T079 [P] [US3] Ajouter l'entrée de navigation du back-office et sa clé dans `_nav.json`
+- [X] T075 [P] [US3] Créer `frontend/app/pages/admin/negociations/codes/index.vue` — liste, filtres d'URL en français (`etat`, `espace`, `q`), pagination, **quatre états d'écran**, sur le modèle de `admin/incidents/index.vue`
+- [X] T076 [P] [US3] Créer `frontend/app/pages/admin/negociations/codes/nouveau.vue` — libellé, **portée : une COP précise ou Guide Négo en entier**, quota, validité, appartenance au réseau ; le code engendré est montré
+- [X] T077 [US3] Créer `frontend/app/pages/admin/negociations/codes/[id].vue` — détail, usages, révocation et retraits, chacun derrière une confirmation
+- [X] T078 [P] [US3] i18n `fr` et `en` : `pages/admin.negociations.codes.json`
+- [X] T079 [P] [US3] Ajouter l'entrée de navigation du back-office et sa clé dans `_nav.json`
 
 **Point de contrôle** : § 3 du quickstart. **Le critère de sortie est tenu.**
 
@@ -207,31 +207,31 @@ recevoir le courriel ; recommencer en mode « les deux » avec un code juste.
 
 ### Tests
 
-- [ ] T080 [P] [US4] Test : **le changement de mode prend effet à la tentative suivante**, sans redémarrage — `negotiation/tests/mode_admission.rs`
-- [ ] T081 [P] [US4] Test : une seule demande en attente — deux envois simultanés ne font qu'une ligne, et le conflit sort traduit en français — `negotiation/tests/demande_unique.rs`
-- [ ] T082 [P] [US4] Test : une demande tranchée ne se retranche pas ; la transition est refusée **par le trigger** — `negotiation/tests/transition_demande.rs`
-- [ ] T083 [P] [US4] Test : admettre écrit l'état, l'accès, l'événement **et met le courriel en file, dans une seule transaction** ; rien ne part si elle échoue — `negotiation/tests/decision_transaction.rs`
-- [ ] T084 [P] [US4] Test : en mode `code_and_approval`, un code juste **n'ouvre pas** — il ouvre une demande portant ce code — `negotiation/tests/mode_les_deux.rs`
-- [ ] T084 bis [P] [US4] Test : **une demande en attente survit à un changement de mode** et reste traitable (FR-029) — `negotiation/tests/mode_change_demande_survit.rs`
+- [X] T080 [P] [US4] Test : **le changement de mode prend effet à la tentative suivante**, sans redémarrage — `negotiation/tests/mode_admission.rs`
+- [X] T081 [P] [US4] Test : une seule demande en attente — deux envois simultanés ne font qu'une ligne, et le conflit sort traduit en français — `negotiation/tests/demande_unique.rs`
+- [X] T082 [P] [US4] Test : une demande tranchée ne se retranche pas ; la transition est refusée **par le trigger** — `negotiation/tests/transition_demande.rs`
+- [X] T083 [P] [US4] Test : admettre écrit l'état, l'accès, l'événement **et met le courriel en file, dans une seule transaction** ; rien ne part si elle échoue — `negotiation/tests/decision_transaction.rs`
+- [X] T084 [P] [US4] Test : en mode `code_and_approval`, un code juste **n'ouvre pas** — il ouvre une demande portant ce code — `negotiation/tests/mode_les_deux.rs`
+- [X] T084 bis [P] [US4] Test : **une demande en attente survit à un changement de mode** et reste traitable (FR-029) — `negotiation/tests/mode_change_demande_survit.rs`
 
 ### Back
 
-- [ ] T085 [P] [US4] `negotiation/src/repo/requests.rs` : créer, lire, lister par périmètre, trancher
-- [ ] T086 [US4] `negotiation/src/service/requests.rs` : demander, **annuler** ; et `service/admin_requests.rs` : admettre, refuser — accès, réseau, événement et courriel dans **une transaction ouverte par `Db::write(&ctx)`**
-- [ ] T087 [P] [US4] `negotiation/src/mail.rs` : les deux modèles — demande admise, demande refusée avec son motif — **dans ce crate**, jamais un appel vers `identity`
-- [ ] T088 [P] [US4] `negotiation/src/jobs/emails.rs` : les deux `JobHandler`, montés par `job_handlers()`
-- [ ] T089 [US4] `negotiation/src/routes/acces.rs` : `POST` et `DELETE /api/negotiation/access-requests`
-- [ ] T090 [US4] `negotiation/src/routes/admin_requests.rs` et `admin_admission.rs` : la file, les deux décisions, `GET` et `PUT` du mode
-- [ ] T091 [US4] `negotiation/src/jobs/purge.rs` : purge des essais au-delà de 90 jours, **et brancher sa chaîne récurrente** dans `backend/crates/worker/src/main.rs` (laissée ouverte par T020)
-- [ ] T092 [US4] `make openapi`
+- [X] T085 [P] [US4] `negotiation/src/repo/requests.rs` : créer, lire, lister par périmètre, trancher
+- [X] T086 [US4] `negotiation/src/service/requests.rs` : demander, **annuler** ; et `service/admin_requests.rs` : admettre, refuser — accès, réseau, événement et courriel dans **une transaction ouverte par `Db::write(&ctx)`**
+- [X] T087 [P] [US4] `negotiation/src/mail.rs` : les deux modèles — demande admise, demande refusée avec son motif — **dans ce crate**, jamais un appel vers `identity`
+- [X] T088 [P] [US4] `negotiation/src/jobs/emails.rs` : les deux `JobHandler`, montés par `job_handlers()`
+- [X] T089 [US4] `negotiation/src/routes/acces.rs` : `POST` et `DELETE /api/negotiation/access-requests`
+- [X] T090 [US4] `negotiation/src/routes/admin_requests.rs` et `admin_admission.rs` : la file, les deux décisions, `GET` et `PUT` du mode
+- [X] T091 [US4] `negotiation/src/jobs/purge.rs` : purge des essais au-delà de 90 jours, **et brancher sa chaîne récurrente** dans `backend/crates/worker/src/main.rs` (laissée ouverte par T020)
+- [X] T092 [US4] `make openapi`
 
 ### Client
 
-- [ ] T093 bis [US4] En mode `approval`, **faire disparaître la saisie de code du parcours** — `frontend/app/pages/guide-nego/code.vue` et l'enchaînement depuis `GnVerrou.vue` proposent la demande à la place (FR-022)
-- [ ] T093 [US4] Créer `frontend/app/pages/guide-nego/demande.vue` — nom, pays, **heure d'envoi avec son fuseau**, « En attente », l'annonce du courriel, le rappel de ce qui reste lisible, et les deux sorties
-- [ ] T094 [P] [US4] Créer `frontend/app/pages/admin/negociations/demandes/index.vue` — la file, admettre et refuser avec motif
-- [ ] T095 [P] [US4] Créer `frontend/app/pages/admin/negociations/admission.vue` — les trois modes, et ce que chacun produit pour la personne qui entre
-- [ ] T096 [P] [US4] i18n `fr` et `en` : `pages/guide-nego.demande.json`, `admin.negociations.demandes.json`, `admin.negociations.admission.json`
+- [X] T093 bis [US4] En mode `approval`, **faire disparaître la saisie de code du parcours** — `frontend/app/pages/guide-nego/code.vue` et l'enchaînement depuis `GnVerrou.vue` proposent la demande à la place (FR-022). *`code.vue` est fait ; `GnVerrou.vue` naît en T098 (phase 7) et proposera la demande par `useGnAcces().demandePossibleMaintenant`, déjà exposé.*
+- [X] T093 [US4] Créer `frontend/app/pages/guide-nego/demande.vue` — nom, pays, **heure d'envoi avec son fuseau**, « En attente », l'annonce du courriel, le rappel de ce qui reste lisible, et les deux sorties
+- [X] T094 [P] [US4] Créer `frontend/app/pages/admin/negociations/demandes/index.vue` — la file, admettre et refuser avec motif
+- [X] T095 [P] [US4] Créer `frontend/app/pages/admin/negociations/admission.vue` — les trois modes, et ce que chacun produit pour la personne qui entre
+- [X] T096 [P] [US4] i18n `fr` et `en` : `pages/guide-nego.demande.json`, `admin.negociations.demandes.json`, `admin.negociations.admission.json`
 
 **Point de contrôle** : § 4 du quickstart.
 

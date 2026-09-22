@@ -11,7 +11,12 @@
  * Les routes du module `negotiation` — l'accès, le code d'invitation — s'ajoutent
  * ici avec le récit qui les demande.
  */
-import type { AccessStateView, RedeemResult } from '~/types/negotiation'
+import type {
+  AccessRequestView,
+  AccessStateView,
+  CreateAccessRequestPayload,
+  RedeemResult,
+} from '~/types/negotiation'
 import type {
   PasswordResetRequestResult,
   RegisterPayload,
@@ -43,7 +48,12 @@ type Mocks = typeof import('~/mocks')
 /** Les deux primitives de `useApi()` dont ce bloc a besoin. */
 export interface Primitives {
   call: <T>(path: string, fromMocks: (m: Mocks) => T | Promise<T>) => Promise<T>
-  send: <T>(path: string, body: object, fromMocks: (m: Mocks) => T | Promise<T>) => Promise<T>
+  send: <T>(
+    path: string,
+    body: object,
+    fromMocks: (m: Mocks) => T | Promise<T>,
+    method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+  ) => Promise<T>
 }
 
 export function createGuideNegoApi({
@@ -89,5 +99,28 @@ export function createGuideNegoApi({
         code,
         device_id: appareilDeclare().device_id,
       }, (m) => m.saisirUnCode(code)),
+
+    /**
+     * Demander l'accès, quand le mode d'admission exige une approbation.
+     *
+     * **Une seule demande en attente par personne et par portée**, et c'est la
+     * base qui le tient : deux appareils qui envoient ensemble ne produisent
+     * qu'une ligne, et le second reçoit un conflit traduit en français.
+     */
+    demanderLAcces: (charge: CreateAccessRequestPayload = {}): Promise<AccessRequestView> =>
+      send('/negotiation/access-requests', charge, (m) => m.demanderLAcces(charge)),
+
+    /**
+     * Retirer sa demande — « **annulée** », son propre fait, ce qui arrive
+     * quand on reçoit un code et qu'on entre par lui. « Révoquée » est réservé
+     * à un accès qu'un administrateur retire (FR-026).
+     */
+    annulerSaDemande: (requestId: string): Promise<void> =>
+      send(
+        `/negotiation/access-requests/${requestId}`,
+        {},
+        (m) => m.annulerSaDemande(requestId),
+        'DELETE',
+      ),
   }
 }

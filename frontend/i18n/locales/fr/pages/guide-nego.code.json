@@ -15,6 +15,9 @@
   "sans-compte": "Le code s'ajoute à un compte. Créez le vôtre ou connectez-vous, puis revenez le saisir.",
   "creer-mon-compte": "Créer mon compte",
   "me-connecter": "J'ai déjà un compte — Me connecter",
+  "sur-approbation": "L'accès se demande à l'IFDD en ce moment : le code d'invitation n'ouvre rien tant que ce réglage tient.",
+  "demander-lacces": "Demander l'accès à l'IFDD",
+  "voir-ma-demande": "Voir ma demande",
   "pas-de-code": {
     "titre": "Vous n'avez pas de code ?",
     "propos": "Demandez-le dans votre groupe, ou à l'IFDD lors de l'atelier préparatoire."

@@ -1,0 +1,46 @@
+{
+  "titre": "Access request",
+  "sous-titre": "For negotiators only",
+  "etape": "Step 2 of 3 — Request",
+  "propos": "Access to the reserved modules is granted by IFDD. Send your request: the answer will reach you by email.",
+  "message": {
+    "libelle": "A word for IFDD",
+    "aide": "Optional. Say where you come from — a delegation, a workshop, a network: that is what will let them recognise you.",
+    "indication": "I am taking part in the Dakar preparatory workshop."
+  },
+  "envoyer": "Send my request",
+  "hors-connexion": "Sending a request needs the network. Nothing has been sent yet.",
+  "sans-compte": "A request is attached to an account. Create yours or sign in, then come back.",
+  "creer-mon-compte": "Create my account",
+  "me-connecter": "I already have an account — Sign in",
+  "attente": {
+    "titre": "Pending",
+    "envoyee": "Sent {moment}",
+    "nom": "On behalf of {nom}",
+    "pays": "From {pays}",
+    "courriel": "The answer will reach you by email. You can close the app: nothing is lost.",
+    "reste-lisible": "In the meantime, the three agendas — negotiation sessions, Francophonie meetings, Francophonie Pavilion —, the glossary and the Francophonie pages stay readable, offline included.",
+    "ma-journee": "Go to my day",
+    "jai-un-code": "I received a code — Enter it",
+    "annuler": "Withdraw my request"
+  },
+  "annulation": {
+    "question": "Withdraw your request?",
+    "phrase": "You can file another one later, or enter directly with a code if you receive one.",
+    "action": "Withdraw my request",
+    "retour": "Keep my request"
+  },
+  "refusee": {
+    "titre": "Request not granted",
+    "motif": "Reason given: {motif}",
+    "sans-motif": "No reason was given.",
+    "suite": "If you belong to a francophone network, ask it for the current code: it opens the modules right away.",
+    "jai-un-code": "I have a code — Enter it",
+    "redemander": "File a new request"
+  },
+  "deja-admise": {
+    "titre": "You already have access",
+    "propos": "The reserved modules are open: there is nothing to request.",
+    "continuer": "Continue"
+  }
+}

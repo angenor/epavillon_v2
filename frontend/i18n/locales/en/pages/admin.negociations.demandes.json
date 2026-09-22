@@ -1,0 +1,78 @@
+{
+  "title": "Access requests",
+  "subtitle": "People asking to enter the reserved modules, when the admission mode requires approval.",
+  "caption": "Guide Négo access requests, oldest pending first.",
+  "forbidden": {
+    "scope": "Administer Guide Négo, across the whole platform",
+    "description": "Access requests are reserved for platform-wide administrators. An account scoped to a single event has no access to them."
+  },
+  "pending": "{count} pending request | {count} pending request | {count} pending requests",
+  "columns": {
+    "person": "Person",
+    "country": "Country",
+    "scope": "Request for",
+    "code": "Code presented",
+    "submittedAt": "Sent on",
+    "state": "State",
+    "actions": "Actions"
+  },
+  "scope": {
+    "global": "All of Guide Négo",
+    "space": "{name}"
+  },
+  "noCountry": "Not given",
+  "noCode": "None",
+  "message": "Message: {message}",
+  "state": {
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Declined",
+    "cancelled": "Withdrawn"
+  },
+  "decided": "Decided on {date} by {author}",
+  "reason": "Reason: {reason}",
+  "filters": {
+    "label": "Queue filters",
+    "state": "State",
+    "allStates": "All requests",
+    "shown": "{shown} request shown of {total} | {shown} request shown of {total} | {shown} requests shown of {total}",
+    "reset": "Clear filters"
+  },
+  "actions": {
+    "approve": "Approve",
+    "reject": "Decline"
+  },
+  "confirm": {
+    "approve": {
+      "title": "Approve {name}?",
+      "question": "The reserved modules will open at their next opening of the app, and an email will tell them so.",
+      "network": "The code they presented also grants network membership.",
+      "confirm": "Approve",
+      "cancel": "Cancel"
+    },
+    "reject": {
+      "title": "Decline {name}'s request?",
+      "question": "An email will tell them so. The reason you write will be quoted as is.",
+      "reason": "Reason (optional)",
+      "reasonHint": "It is the only thing the person will read to understand.",
+      "confirm": "Decline",
+      "cancel": "Cancel"
+    }
+  },
+  "empty": {
+    "title": "No request",
+    "description": "Nobody is waiting for an answer. That is the normal situation as long as admission is by code only."
+  },
+  "noResults": {
+    "title": "No matching request",
+    "description": "None of the {total} requests match this filter.",
+    "action": "Clear filters"
+  },
+  "result": {
+    "approved": "Request approved.",
+    "rejected": "Request declined."
+  },
+  "error": {
+    "NEGOTIATION_ACCESS_REQUEST_DECIDED": "This request has just been decided by someone else."
+  }
+}

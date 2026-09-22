@@ -1,0 +1,176 @@
+{
+  "list": {
+    "title": "Codes d'invitation",
+    "subtitle": "Ce qui ouvre les modules réservés de Guide Négo. Un code circule dans un groupe WhatsApp, recopié à la main : il est partagé, jamais nominatif.",
+    "new": "Créer un code",
+    "caption": "Codes d'invitation de Guide Négo, les plus récents en tête.",
+    "forbidden": {
+      "scope": "Administrer Guide Négo, sur la plateforme entière",
+      "description": "Les codes d'invitation, les demandes d'accès et le mode d'admission sont réservés aux administrateurs de la plateforme entière. Un compte rattaché à un seul événement n'y a pas accès."
+    },
+    "columns": {
+      "code": "Code",
+      "label": "Libellé",
+      "scope": "Portée",
+      "uses": "Entrées",
+      "validity": "Validité",
+      "state": "État",
+      "author": "Créé par"
+    },
+    "uses": {
+      "unlimited": "{count} sur un nombre illimité",
+      "limited": "{used} sur {max}"
+    },
+    "validity": {
+      "from": "À partir du {date}",
+      "until": "Jusqu'au {date}",
+      "between": "Du {from} au {until}",
+      "always": "Sans terme"
+    },
+    "scope": {
+      "global": "Guide Négo en entier",
+      "space": "{name}"
+    },
+    "network": "Donne l'appartenance au réseau",
+    "filters": {
+      "label": "Filtres de la liste",
+      "search": "Chercher un code ou un libellé",
+      "state": "État",
+      "space": "Portée",
+      "allStates": "Tous les états",
+      "allSpaces": "Toutes les portées",
+      "shown": "{shown} code affiché sur {total} | {shown} code affiché sur {total} | {shown} codes affichés sur {total}",
+      "reset": "Effacer les filtres"
+    },
+    "empty": {
+      "title": "Aucun code d'invitation",
+      "description": "Personne ne peut encore entrer dans les modules réservés. Créez un code, puis diffusez-le dans le groupe concerné."
+    },
+    "noResults": {
+      "title": "Aucun code ne correspond",
+      "description": "Aucun des {total} codes ne correspond à ces filtres.",
+      "action": "Effacer les filtres"
+    }
+  },
+  "state": {
+    "active": "Actif",
+    "revoked": "Révoqué",
+    "expired": "Terminé",
+    "not_yet_valid": "Pas encore ouvert",
+    "exhausted": "Épuisé"
+  },
+  "form": {
+    "title": "Créer un code d'invitation",
+    "subtitle": "Le code est engendré par la plateforme : huit caractères, sans les lettres et les chiffres qui se confondent à la lecture.",
+    "label": {
+      "label": "Libellé",
+      "hint": "Ce qui permettra de le retrouver dans la liste : le groupe, l'atelier, le réseau.",
+      "placeholder": "Réseau des négociatrices — COP31"
+    },
+    "scope": {
+      "label": "Ce que le code ouvre",
+      "hint": "Un espace de négociation précis, ou Guide Négo en entier.",
+      "global": "Guide Négo en entier",
+      "space": "Un espace de négociation"
+    },
+    "space": {
+      "label": "Espace de négociation",
+      "placeholder": "Choisir un espace"
+    },
+    "network": {
+      "label": "Appartenance au réseau",
+      "hint": "Facultatif. L'appartenance vient du code utilisé, et de rien d'autre.",
+      "none": "Aucune"
+    },
+    "maxUses": {
+      "label": "Nombre d'entrées",
+      "hint": "Laisser vide pour un code sans limite.",
+      "placeholder": "120"
+    },
+    "validFrom": { "label": "Ouvre le", "hint": "Laisser vide pour ouvrir aussitôt." },
+    "validUntil": { "label": "Ferme le", "hint": "Laisser vide pour un code sans terme." },
+    "submit": "Créer le code",
+    "cancel": "Annuler",
+    "created": {
+      "title": "Code créé",
+      "description": "Diffusez-le dans le groupe concerné. Il reste lisible dans la liste.",
+      "copy": "Copier le code",
+      "copied": "Copié",
+      "back": "Retour à la liste",
+      "detail": "Ouvrir la fiche"
+    },
+    "error": {
+      "label": "Donnez un libellé au code.",
+      "space": "Choisissez un espace de négociation.",
+      "max_uses": "Le nombre d'entrées doit être supérieur à zéro.",
+      "valid_until": "La date de fermeture doit être postérieure à celle d'ouverture."
+    }
+  },
+  "detail": {
+    "title": "Code {code}",
+    "createdBy": "Créé le {date} par {author}",
+    "createdOn": "Créé le {date}",
+    "revokedBy": "Révoqué le {date} par {author}",
+    "revokedOn": "Révoqué le {date}",
+    "reason": "Motif : {reason}",
+    "grantedUses": "{count} accès encore ouvert | {count} accès encore ouvert | {count} accès encore ouverts",
+    "revoke": "Révoquer le code",
+    "revokeAll": "Retirer tous les accès",
+    "uses": {
+      "title": "Qui est entré avec ce code",
+      "caption": "Personnes entrées avec ce code, accès ouverts en tête.",
+      "columns": {
+        "person": "Personne",
+        "usedAt": "Entrée le",
+        "access": "Accès",
+        "actions": "Actions"
+      },
+      "active": "Ouvert",
+      "revoked": "Retiré le {date}",
+      "revoke": "Retirer l'accès",
+      "empty": {
+        "title": "Personne n'est encore entré",
+        "description": "Ce code n'a ouvert aucun accès pour l'instant."
+      }
+    },
+    "notFound": {
+      "title": "Code introuvable",
+      "description": "Ce code d'invitation n'existe pas, ou il a été supprimé.",
+      "action": "Retour à la liste"
+    }
+  },
+  "confirm": {
+    "revoke": {
+      "title": "Révoquer ce code ?",
+      "question": "Le code cessera d'ouvrir dès la tentative suivante.",
+      "keeps": "Les {count} accès déjà accordé restent ouverts : les retirer est un autre geste. | Les {count} accès déjà accordé restent ouverts : les retirer est un autre geste. | Les {count} accès déjà accordés restent ouverts : les retirer est un autre geste.",
+      "keepsNone": "Aucun accès n'a encore été accordé par ce code.",
+      "reason": "Motif (facultatif)",
+      "reasonHint": "Ce que vous écrirez ici sera lu par la prochaine personne qui ouvre cette fiche.",
+      "confirm": "Révoquer",
+      "cancel": "Annuler"
+    },
+    "revokeAccess": {
+      "title": "Retirer l'accès de {name} ?",
+      "question": "Les modules réservés se refermeront dès sa prochaine ouverture de l'application.",
+      "reason": "Motif (facultatif)",
+      "confirm": "Retirer l'accès",
+      "cancel": "Annuler"
+    },
+    "revokeAll": {
+      "title": "Retirer tous les accès de ce code ?",
+      "question": "Les {count} personne entrée avec ce code perdra son accès. | Les {count} personne entrée avec ce code perdra son accès. | Les {count} personnes entrées avec ce code perdront leur accès.",
+      "warning": "Ce geste suit une fuite de code : il ne remplace pas la révocation, il la complète.",
+      "reason": "Motif (facultatif)",
+      "confirm": "Retirer tous les accès",
+      "cancel": "Annuler"
+    }
+  },
+  "result": {
+    "revoked": "Code révoqué.",
+    "accessRevoked": "Accès retiré.",
+    "accessAlreadyRevoked": "Cet accès avait déjà été retiré.",
+    "allRevoked": "{count} accès retiré. | {count} accès retiré. | {count} accès retirés.",
+    "noneRevoked": "Aucun accès à retirer : ils étaient déjà tous tombés."
+  }
+}

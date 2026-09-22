@@ -112,3 +112,23 @@ export interface RedeemResult {
   networks: NetworkView[]
   request: AccessRequestView | null
 }
+
+// ---------------------------------------------------------------------------
+// Demander l'accès
+// ---------------------------------------------------------------------------
+
+/**
+ * `POST /api/negotiation/access-requests` — ce que l'écran de demande envoie.
+ *
+ * `space_id` absent vaut une demande de portée globale : à cette étape l'espace
+ * réservé n'en a qu'un, et l'écran n'a rien à choisir.
+ *
+ * **Une seule demande en attente par personne et par portée**, et c'est la base
+ * qui le tient : deux appareils qui envoient ensemble ne produisent qu'une
+ * ligne, et le second reçoit `NEGOTIATION_ACCESS_REQUEST_PENDING`.
+ */
+export interface CreateAccessRequestPayload {
+  space_id?: Uuid | null
+  /** Facultatif : il aide l'IFDD à reconnaître une délégation qu'elle attend. */
+  message?: string | null
+}

@@ -1,0 +1,78 @@
+{
+  "title": "Demandes d'accès",
+  "subtitle": "Les personnes qui demandent à entrer dans les modules réservés, quand le mode d'admission exige une approbation.",
+  "caption": "Demandes d'accès à Guide Négo, les plus anciennes en attente d'abord.",
+  "forbidden": {
+    "scope": "Administrer Guide Négo, sur la plateforme entière",
+    "description": "Les demandes d'accès sont réservées aux administrateurs de la plateforme entière. Un compte rattaché à un seul événement n'y a pas accès."
+  },
+  "pending": "{count} demande en attente | {count} demande en attente | {count} demandes en attente",
+  "columns": {
+    "person": "Personne",
+    "country": "Pays",
+    "scope": "Demande pour",
+    "code": "Code présenté",
+    "submittedAt": "Envoyée le",
+    "state": "État",
+    "actions": "Actions"
+  },
+  "scope": {
+    "global": "Guide Négo en entier",
+    "space": "{name}"
+  },
+  "noCountry": "Non renseigné",
+  "noCode": "Aucun",
+  "message": "Message : {message}",
+  "state": {
+    "pending": "En attente",
+    "approved": "Admise",
+    "rejected": "Refusée",
+    "cancelled": "Annulée"
+  },
+  "decided": "Tranchée le {date} par {author}",
+  "reason": "Motif : {reason}",
+  "filters": {
+    "label": "Filtres de la file",
+    "state": "État",
+    "allStates": "Toutes les demandes",
+    "shown": "{shown} demande affichée sur {total} | {shown} demande affichée sur {total} | {shown} demandes affichées sur {total}",
+    "reset": "Effacer les filtres"
+  },
+  "actions": {
+    "approve": "Admettre",
+    "reject": "Refuser"
+  },
+  "confirm": {
+    "approve": {
+      "title": "Admettre {name} ?",
+      "question": "Les modules réservés s'ouvriront à sa prochaine ouverture de l'application, et un courriel le lui annoncera.",
+      "network": "Le code qu'elle a présenté donne aussi l'appartenance au réseau.",
+      "confirm": "Admettre",
+      "cancel": "Annuler"
+    },
+    "reject": {
+      "title": "Refuser la demande de {name} ?",
+      "question": "Un courriel le lui annoncera. Le motif que vous écrirez y sera repris tel quel.",
+      "reason": "Motif (facultatif)",
+      "reasonHint": "C'est la seule chose que la personne lira pour comprendre.",
+      "confirm": "Refuser",
+      "cancel": "Annuler"
+    }
+  },
+  "empty": {
+    "title": "Aucune demande",
+    "description": "Personne n'attend de réponse. C'est la situation normale tant que l'admission se fait par code seul."
+  },
+  "noResults": {
+    "title": "Aucune demande ne correspond",
+    "description": "Aucune des {total} demandes ne correspond à ce filtre.",
+    "action": "Effacer les filtres"
+  },
+  "result": {
+    "approved": "Demande admise.",
+    "rejected": "Demande refusée."
+  },
+  "error": {
+    "NEGOTIATION_ACCESS_REQUEST_DECIDED": "Cette demande vient d'être tranchée par quelqu'un d'autre."
+  }
+}

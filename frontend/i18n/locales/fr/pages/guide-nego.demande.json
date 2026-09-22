@@ -1,0 +1,46 @@
+{
+  "titre": "Demande d'accès",
+  "sous-titre": "Réservé aux négociatrices et négociateurs",
+  "etape": "Étape 2 sur 3 — Demande",
+  "propos": "L'accès aux modules réservés est accordé par l'IFDD. Envoyez votre demande : la réponse vous arrivera par courriel.",
+  "message": {
+    "libelle": "Un mot pour l'IFDD",
+    "aide": "Facultatif. Dites d'où vous venez — une délégation, un atelier, un réseau : c'est ce qui permettra de vous reconnaître.",
+    "indication": "Je participe à l'atelier préparatoire de Dakar."
+  },
+  "envoyer": "Envoyer ma demande",
+  "hors-connexion": "L'envoi d'une demande demande le réseau. Rien n'est envoyé pour l'instant.",
+  "sans-compte": "La demande s'attache à un compte. Créez le vôtre ou connectez-vous, puis revenez.",
+  "creer-mon-compte": "Créer mon compte",
+  "me-connecter": "J'ai déjà un compte — Me connecter",
+  "attente": {
+    "titre": "En attente",
+    "envoyee": "Envoyée {moment}",
+    "nom": "Au nom de {nom}",
+    "pays": "Depuis {pays}",
+    "courriel": "La réponse vous arrivera par courriel. Vous pouvez fermer l'application : rien n'est perdu.",
+    "reste-lisible": "En attendant, les trois agendas — sessions de négociation, réunions de la Francophonie, Pavillon de la Francophonie —, le lexique et les pages de la Francophonie restent lisibles, hors connexion comprise.",
+    "ma-journee": "Aller à ma journée",
+    "jai-un-code": "J'ai reçu un code — Le saisir",
+    "annuler": "Retirer ma demande"
+  },
+  "annulation": {
+    "question": "Retirer votre demande ?",
+    "phrase": "Vous pourrez en refaire une plus tard, ou entrer directement avec un code si vous en recevez un.",
+    "action": "Retirer ma demande",
+    "retour": "Garder ma demande"
+  },
+  "refusee": {
+    "titre": "Demande non retenue",
+    "motif": "Motif indiqué : {motif}",
+    "sans-motif": "Aucun motif n'a été indiqué.",
+    "suite": "Si vous faites partie d'un réseau francophone, demandez-lui le code en cours : il ouvre les modules aussitôt.",
+    "jai-un-code": "J'ai un code — Le saisir",
+    "redemander": "Faire une nouvelle demande"
+  },
+  "deja-admise": {
+    "titre": "Vous avez déjà l'accès",
+    "propos": "Les modules réservés sont ouverts : il n'y a rien à demander.",
+    "continuer": "Continuer"
+  }
+}

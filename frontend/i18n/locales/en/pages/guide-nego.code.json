@@ -15,6 +15,9 @@
   "sans-compte": "A code is added to an account. Create yours or sign in, then come back to enter it.",
   "creer-mon-compte": "Create my account",
   "me-connecter": "I already have an account — Sign in",
+  "sur-approbation": "Access is granted by IFDD at the moment: an invitation code opens nothing while this setting holds.",
+  "demander-lacces": "Request access from IFDD",
+  "voir-ma-demande": "See my request",
   "pas-de-code": {
     "titre": "No code yet?",
     "propos": "Ask for it in your group, or from IFDD at the preparatory workshop."

@@ -3,3 +3,4 @@ pub mod attempts;
 pub mod codes;
 pub mod requests;
 pub mod settings;
+pub mod uses;

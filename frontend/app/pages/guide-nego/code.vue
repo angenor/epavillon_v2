@@ -17,6 +17,12 @@ import type { RedeemResult } from '~/types/negotiation'
  * **Hors connexion, la saisie se refuse et le dit** (FR-019). Rien n'est mis en
  * file : un accès n'est pas un signalement, on ne peut pas l'annoncer avant de
  * l'avoir obtenu.
+ *
+ * **En mode « approbation seule », le champ DISPARAÎT** et la demande prend sa
+ * place (FR-022). Le désactiver en le laissant visible donnerait un formulaire
+ * qu'on ne peut pas remplir sans savoir pourquoi — et la personne chercherait
+ * un code qui n'ouvrirait rien. Ce n'est pas la même chose que l'absence de
+ * réseau, où le champ reste et où l'écran dit ce qui manque.
  */
 definePageMeta({ layout: 'guide-nego' })
 defineI18nRoute(false)
@@ -126,6 +132,20 @@ useHead({ title: t('guide-nego.code.titre') })
       </div>
     </template>
 
+    <!-- Mode « approbation seule » : le code n'ouvre rien, la demande prend sa
+         place. Le champ disparaît plutôt que d'être désactivé (FR-022). -->
+    <template v-else-if="!acces.codeOffert.value">
+      <GnLigneInformation :texte="t('guide-nego.code.sur-approbation')" />
+      <div class="gn-code__sorties">
+        <GnBouton variante="principal" vers="/guide-nego/demande">
+          {{ t('guide-nego.code.demander-lacces') }}
+        </GnBouton>
+        <GnBouton variante="discret" :vers="APRES_LE_CODE">
+          {{ t('guide-nego.code.plus-tard') }}
+        </GnBouton>
+      </div>
+    </template>
+
     <template v-else>
       <form novalidate @submit.prevent="envoyer">
         <GnChamp
@@ -162,8 +182,18 @@ useHead({ title: t('guide-nego.code.titre') })
         />
 
         <div class="gn-code__sorties">
+          <!-- Mode « les deux » : le code était juste, une demande s'est
+               ouverte. La suite est l'écran d'attente, jamais « Continuer » —
+               qui laisserait croire que les modules sont ouverts. -->
           <GnBouton
-            v-if="entree"
+            v-if="resultat?.issue === 'pending_approval'"
+            variante="principal"
+            vers="/guide-nego/demande"
+          >
+            {{ t('guide-nego.code.voir-ma-demande') }}
+          </GnBouton>
+          <GnBouton
+            v-else-if="entree"
             variante="principal"
             @clic="continuer"
           >
@@ -185,12 +215,18 @@ useHead({ title: t('guide-nego.code.titre') })
         </div>
       </form>
 
-      <!-- « Vous n'avez pas de code ? » — la demande à l'IFDD arrive avec US4
-           (T093) ; l'aide dit dès maintenant où le code se trouve. -->
+      <!-- « Vous n'avez pas de code ? » — et, quand le mode l'accepte, la
+           demande à l'IFDD. En mode « code seul », elle n'apparaît pas :
+           personne ne la traiterait, et la réponse promise ne viendrait pas. -->
       <GnEnteteGroupe :titre="t('guide-nego.code.pas-de-code.titre')" picto="info" />
       <p class="gn-code__propos gn-code__propos--discret">
         {{ t('guide-nego.code.pas-de-code.propos') }}
       </p>
+      <div v-if="acces.demandePossibleMaintenant.value" class="gn-code__sorties">
+        <GnBouton variante="secondaire" vers="/guide-nego/demande">
+          {{ t('guide-nego.code.demander-lacces') }}
+        </GnBouton>
+      </div>
     </template>
   </GnEcran>
 </template>

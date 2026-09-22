@@ -652,6 +652,258 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/negotiation/access-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `AccessRequestQueue` — la file des demandes d'accès : nom, pays, heure d'envoi, code éventuel et message.
+         *
+         *     Les demandes **en attente viennent en tête**, et dans l'ordre où elles se sont formées : une file se traite par le début.
+         *
+         *     `pending` compte les demandes en attente **tous filtres confondus** — c'est la pastille du menu, et elle ne doit pas tomber à zéro parce qu'on regarde les refusées.
+         *
+         *     Le code affiché est celui que la demande portait en mode « code et approbation » : il a été reconnu, il n'a pas suffi à ouvrir, et c'est ce que l'administrateur lit d'abord.
+         */
+        get: operations["admin_negotiation_demandes_file"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/access-requests/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `DecideAccessRequestPayload` — admet une demande.
+         *
+         *     **Une seule transaction** : l'état de la demande, l'attribution du rôle `negotiator` avec la portée demandée, l'appartenance au réseau si la demande portait un code qui en ouvrait un, l'inscription à l'annuaire de l'espace, et le courriel mis en file. Rien ne part si elle échoue (FR-027, FR-028).
+         *
+         *     L'événement `negotiation.access_request.approved` est émis **par la base**, dans la même transaction.
+         *
+         *     Une demande déjà tranchée sort en `NEGOTIATION_ACCESS_REQUEST_DECIDED` : la transition est refusée par le trigger du modèle, l'API la traduit.
+         */
+        post: operations["admin_negotiation_demandes_admettre"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/access-requests/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `DecideAccessRequestPayload` — refuse une demande, avec un motif facultatif.
+         *
+         *     Le motif est **repris tel quel** dans le courriel : c'est la seule chose que la personne lira pour comprendre. Sans motif, le message ne fait pas semblant d'en avoir un — il dit ce qui reste possible, demander le code en cours à son réseau.
+         *
+         *     Un refus n'est pas définitif : une nouvelle demande est **une nouvelle ligne**, ce qui conserve l'historique des décisions.
+         */
+        post: operations["admin_negotiation_demandes_refuser"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/admission": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `AdmissionSettings` — le mode d'admission courant, et les trois valeurs offertes.
+         *
+         *     Chaque option porte ce qu'elle produit **en faits** : la saisie d'un code est-elle proposée (`offers_code`), un code juste ouvre-t-il aussitôt (`code_opens`), un administrateur doit-il trancher (`needs_approval`). L'écran compose sa phrase à partir de là, par ses fichiers de traduction, comme tout écran du site : rendre ici du texte français donnerait deux catalogues pour un même écran.
+         */
+        get: operations["admin_negotiation_admission_lire"];
+        /**
+         * @description `UpdateAdmissionModePayload` → `AdmissionSettings` — bascule le mode d'admission.
+         *
+         *     **Prend effet à la tentative suivante**, sans mise en ligne : la valeur vit dans `platform.settings` et se relit à chaque saisie de code, sans cache.
+         *
+         *     Une demande déjà en attente **survit à la bascule** et reste traitable (FR-029) : changer le mode ne touche à aucune demande.
+         *
+         *     Une valeur hors des trois sort en `NEGOTIATION_ADMISSION_MODE_INVALID`, qui désigne le champ `mode` — l'écran la pose sous le sélecteur, pas en bandeau de panne.
+         */
+        put: operations["admin_negotiation_admission_ecrire"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/invitation-codes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `InvitationCodeListScreen` — la liste des codes d'invitation, avec les espaces et les réseaux dont le filtre et le formulaire de création ont besoin.
+         *
+         *     L'état de chaque code — `active`, `revoked`, `expired`, `not_yet_valid`, `exhausted` — est **dérivé par `negotiation.v_invitation_codes`**, la même expression qui refuse un code à l'application : deux calculs séparés divergeraient au premier oubli de `valid_from`.
+         *
+         *     **Le code est rendu en clair** : c'est un secret partagé, recopié à la main depuis WhatsApp, pas un secret nominatif (FR-037).
+         *
+         *     Filtres : `etat`, `espace` (un identifiant d'espace ou le mot `global`), `q` (cherche dans le libellé **et** dans le code sous sa forme normalisée).
+         */
+        get: operations["admin_negotiation_codes_lister"];
+        put?: never;
+        /**
+         * @description `CreateInvitationCodePayload` → `InvitationCodeRow` — crée un code.
+         *
+         *     **Le code est engendré par l'API**, jamais choisi : huit caractères tirets compris, sur un alphabet sans `0/O` ni `1/I/L`, parce qu'il se recopie à l'œil. Laisser un administrateur l'écrire produirait des codes devinables sur une porte que rien d'autre ne protège.
+         *
+         *     La portée ne peut valoir que `global` — Guide Négo en entier — ou `negotiation_space` avec son identifiant : les deux `allowed_scopes` du rôle `negotiator`. La base le refuse deux fois, par `ck_invitation_codes_scope` puis par `tg_check_role_scope` à l'attribution.
+         *
+         *     Le code est rendu en clair, pour être diffusé aussitôt.
+         */
+        post: operations["admin_negotiation_codes_creer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/invitation-codes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `InvitationCodeDetail` — la fiche d'un code, code en clair compris, avec le nombre d'accès **encore ouverts** qu'il a accordés.
+         *
+         *     Ce nombre est ce qu'un administrateur doit lire **avant** de révoquer : la révocation n'en retire aucun (ADR-006), et c'est un second geste.
+         */
+        get: operations["admin_negotiation_codes_fiche"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/invitation-codes/{id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `ReasonPayload` → `InvitationCodeRow` — révoque un code.
+         *
+         *     **Ne retire aucun accès déjà accordé** (ADR-006, FR-039) : le code cesse d'ouvrir dès la tentative suivante, et le réseau déjà entré garde le sien. Retirer les accès est un second geste, et une autre route.
+         *
+         *     La date et l'auteur sont conservés. Révoquer deux fois ne réécrit ni l'une ni l'autre : la fiche revient telle quelle.
+         *
+         *     Un code révoqué **reste retrouvable** par sa forme normalisée : c'est ce qui permet de répondre « révoqué le 8 novembre » au lieu de « code inconnu », et de ne pas envoyer la personne chercher une faute de frappe qu'elle n'a pas faite.
+         */
+        post: operations["admin_negotiation_codes_revoquer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/invitation-codes/{id}/revoke-all-access": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `ReasonPayload` → `RevokeAllAccessResult` — retire en un geste les accès de **toutes** les personnes entrées par ce code.
+         *
+         *     C'est le geste d'un code compromis, et il **suit** la révocation sans la remplacer : révoquer ferme la porte, retirer sort ceux qui sont déjà entrés. L'écran demande confirmation.
+         *
+         *     `revoked` compte les accès qui viennent réellement de tomber : ceux déjà retirés ne sont pas touchés.
+         */
+        post: operations["admin_negotiation_codes_retirer_tous_les_acces"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/invitation-codes/{id}/uses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `InvitationCodeUsesScreen` — qui est entré avec ce code, quand, et si son accès tient encore.
+         *
+         *     L'état de l'accès est **lu dans `identity.role_assignments`** par `negotiation.v_invitation_code_uses` : la table des usages n'en porte aucune copie, parce que deux vérités divergent toujours un jour.
+         *
+         *     Les accès encore ouverts viennent en tête.
+         */
+        get: operations["admin_negotiation_codes_usages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/invitation-codes/{id}/uses/{person_id}/revoke-access": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `ReasonPayload` → `RevokeAllAccessResult` — retire l'accès d'**une** personne entrée par ce code.
+         *
+         *     L'attribution retirée est celle de la portée du code, et d'elle seule : une personne admise sur la COP31 par ce code et sur Guide Négo entier par un autre ne perd que le premier.
+         *
+         *     L'accès cesse d'ouvrir **dès la lecture suivante** de `me/access` (FR-041), et « Mon accès » le dit. `revoked` vaut 0 si elle n'avait pas d'accès en cours : deux administrateurs peuvent agir à la seconde près, et ce n'est pas une erreur.
+         */
+        post: operations["admin_negotiation_codes_retirer_un_acces"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/notifications/broadcast": {
         parameters: {
             query?: never;
@@ -2288,6 +2540,56 @@ export interface paths {
         put: operations["adhesion_decision"];
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/negotiation/access-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `CreateAccessRequestPayload` → `AccessRequestView` — demander l'accès aux modules réservés, quand le mode d'admission exige une approbation.
+         *
+         *     `space_id` absent vaut une demande de portée globale. Le message est facultatif : il aide l'administrateur à reconnaître une délégation qu'il attend.
+         *
+         *     **Une seule demande en attente par personne et par portée**, et c'est la base qui le tient : deux appareils qui l'envoient ensemble ne produisent qu'une ligne, et le conflit sort en `NEGOTIATION_ACCESS_REQUEST_PENDING`. Le code **traduit** ce refus, il ne le prévient pas par une lecture préalable qu'une seconde requête contournerait.
+         *
+         *     Une personne qui détient déjà l'accès reçoit un conflit : elle recevrait sinon un courriel pour un droit acquis, et la file porterait une décision sans objet.
+         */
+        post: operations["negotiation_demander_lacces"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/negotiation/access-requests/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * @description La personne retire sa demande — ce qui arrive quand elle reçoit un code et entre par lui.
+         *
+         *     La demande passe à `cancelled`, qui se dit **« annulée »** à l'écran : c'est son propre fait. « Révoquée » est réservé à un accès qu'on retire, et ne qualifie jamais une demande (FR-026).
+         *
+         *     **Aucun courriel ne part** : `tg_access_request_event()` n'émet que pour `approved` et `rejected`, et c'est voulu — personne n'a rien à recevoir pour une demande que son auteur vient de refermer.
+         *
+         *     Une demande déjà tranchée sort en `NEGOTIATION_ACCESS_REQUEST_DECIDED` ; la demande d'un autre compte se refuse **comme une demande inexistante**.
+         */
+        delete: operations["negotiation_annuler_sa_demande"];
         options?: never;
         head?: never;
         patch?: never;
@@ -6061,6 +6363,622 @@ export interface operations {
             };
         };
     };
+    admin_negotiation_demandes_file: {
+        parameters: {
+            query?: {
+                /** @description pending, approved, rejected ou cancelled */
+                etat?: string;
+                /** @description Défaut 25, maximum 100 */
+                limit?: number;
+                /** @description Décalage */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description AccessRequestQueue */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans `negotiation.space.manage` **sur la portée globale** */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_demandes_admettre: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Demande d'accès */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Demande admise */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans la permission sur la portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Demande inexistante */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Demande déjà tranchée */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_demandes_refuser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Demande d'accès */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Demande refusée */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans la permission sur la portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Demande inexistante */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Demande déjà tranchée */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_admission_lire: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description AdmissionSettings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans `negotiation.space.manage` **sur la portée globale** */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_admission_ecrire: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description AdmissionSettings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans la permission sur la portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Mode inconnu */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_codes_lister: {
+        parameters: {
+            query?: {
+                /** @description État dérivé : active, revoked, expired, not_yet_valid, exhausted */
+                etat?: string;
+                /** @description Identifiant d'espace, ou « global » */
+                espace?: string;
+                /** @description Cherche dans le libellé et dans le code */
+                q?: string;
+                /** @description Défaut 25, maximum 100 */
+                limit?: number;
+                /** @description Décalage */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description InvitationCodeListScreen */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans `negotiation.space.manage` **sur la portée globale** — un administrateur d'une seule édition en fait partie */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_codes_creer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description InvitationCodeRow */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans la permission sur la portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Espace de négociation inexistant */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Libellé vide, quota nul, période inversée, réseau inconnu */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_codes_fiche: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Code d'invitation */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description InvitationCodeDetail */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans la permission sur la portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Code inexistant */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_codes_revoquer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Code d'invitation */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description InvitationCodeRow */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans la permission sur la portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Code inexistant */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_codes_retirer_tous_les_acces: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Code d'invitation */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description RevokeAllAccessResult */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans la permission sur la portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_codes_usages: {
+        parameters: {
+            query?: {
+                /** @description Défaut 25, maximum 100 */
+                limit?: number;
+                /** @description Décalage */
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Code d'invitation */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description InvitationCodeUsesScreen */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans la permission sur la portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Code inexistant */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_codes_retirer_un_acces: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Code d'invitation */
+                id: string;
+                /** @description Personne dont l'accès est retiré */
+                person_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description RevokeAllAccessResult */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans la permission sur la portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     engagement_diffuser_une_annonce: {
         parameters: {
             query?: never;
@@ -9525,6 +10443,96 @@ export interface operations {
             };
             /** @description ORG_MEMBERSHIP_IS_INVITATION ou ORG_MEMBERSHIP_NOT_PENDING */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_demander_lacces: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description AccessRequestView */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Demande déjà en attente, ou accès déjà détenu */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_annuler_sa_demande: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Demande d'accès */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Demande annulée */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Demande inexistante, ou celle d'un autre compte — indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Demande déjà tranchée */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

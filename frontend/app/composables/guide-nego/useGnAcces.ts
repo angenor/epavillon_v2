@@ -15,10 +15,12 @@
  * accès ne se met pas en file, on ne peut pas l'annoncer avant de l'avoir
  * obtenu.
  */
-import type { AccessStateView, RedeemResult } from '~/types/negotiation'
+import type { AccessRequestView, AccessStateView, RedeemResult } from '~/types/negotiation'
 import {
   ACCES_VISITEUSE,
   accesOuvert,
+  codeOffertParLeMode,
+  demandePossible,
   etatDAcces,
   saisiePossible,
 } from '~/utils/guide-nego/acces'
@@ -43,6 +45,19 @@ export function useGnAcces() {
   /** La saisie exige le réseau — et le mode doit l'accepter. */
   const saisieDeCodePossible = computed(() =>
     saisiePossible(etat.value.valeur, connexion.etat.value.enLigne),
+  )
+
+  /**
+   * **Le mode propose-t-il un code ?** À ne pas confondre avec la ligne
+   * au-dessus : celle-ci dit ce qui est faisable maintenant, celle-là ce que le
+   * mode offre. Les confondre ferait disparaître le champ à chaque tunnel au
+   * lieu de le désactiver en le disant (FR-022, FR-019).
+   */
+  const codeOffert = computed(() => codeOffertParLeMode(etat.value.valeur))
+
+  /** La demande est-elle proposée ? Elle prend la place du code en « approbation ». */
+  const demandePossibleMaintenant = computed(() =>
+    demandePossible(etat.value.valeur, connexion.etat.value.enLigne),
   )
 
   async function assurer(): Promise<void> {
@@ -72,6 +87,25 @@ export function useGnAcces() {
   }
 
   /**
+   * Demander l'accès. L'état est relu ensuite : l'écran d'attente doit montrer
+   * la demande qui vient d'être ouverte, pas celle d'avant.
+   */
+  async function demanderLAcces(message?: string | null): Promise<AccessRequestView> {
+    const demandeOuverte = await api.guideNego.demanderLAcces({ message: message || null })
+    await rafraichir()
+    return demandeOuverte
+  }
+
+  /**
+   * Retirer sa demande — « **annulée** », son propre fait (FR-026). Ce qui
+   * arrive quand on reçoit un code et qu'on entre par lui.
+   */
+  async function annulerSaDemande(requestId: string): Promise<void> {
+    await api.guideNego.annulerSaDemande(requestId)
+    await rafraichir()
+  }
+
+  /**
    * Relit au retour au premier plan : un accès accordé ou retiré depuis le
    * back-office se voit à la réouverture, sans que rien ne soit à toucher
    * (FR-041).
@@ -95,9 +129,13 @@ export function useGnAcces() {
     luA,
     pret,
     saisieDeCodePossible,
+    codeOffert,
+    demandePossibleMaintenant,
     assurer,
     rafraichir,
     saisirLeCode,
+    demanderLAcces,
+    annulerSaDemande,
     relireAuRetourAuPremierPlan,
   }
 }

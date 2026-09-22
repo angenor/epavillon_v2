@@ -26,10 +26,12 @@ use actix_web::web::ServiceConfig;
 use kernel::config::Config;
 use kernel::db::Db;
 use kernel::jobs::JobHandler;
+use kernel::mail::Mailer;
 use std::sync::Arc;
 
 pub mod domain;
 pub mod jobs;
+pub mod mail;
 pub mod repo;
 pub mod routes;
 pub mod service;
@@ -50,9 +52,14 @@ pub fn routes(cfg: &mut ServiceConfig) {
 /// **Des routes plates, jamais un `web::scope("/admin")`** : le préfixe
 /// d'administration est partagé avec cinq autres modules, et deux scopes du même
 /// préfixe ne se complètent pas — un scope ici rendrait muettes leurs routes.
-pub fn admin_routes(_cfg: &mut ServiceConfig) {}
+pub fn admin_routes(cfg: &mut ServiceConfig) {
+    routes::admin_codes::configurer(cfg);
+    routes::admin_requests::configurer(cfg);
+    routes::admin_admission::configurer(cfg);
+}
 
-/// Les travaux différés du module.
+/// Les travaux différés du module : les deux courriels de décision, et la
+/// purge des essais de code.
 ///
 /// **C'est ce seul geste qui fait écouter la file « negotiation ».**
 /// `JobRegistry::queues()` est construite à partir des files que les
@@ -60,7 +67,16 @@ pub fn admin_routes(_cfg: &mut ServiceConfig) {}
 /// travail déposé dans une file inécoutée s'empile sans erreur, sans trace, et
 /// sans que rien ne l'exécute jamais.
 ///
-/// La liste est vide tant que la purge des essais de code n'est pas écrite.
-pub fn job_handlers(_db: Db, _config: &Config) -> Vec<Arc<dyn JobHandler>> {
-    Vec::new()
+/// Les trois déclarent la file par défaut : aucun déclencheur du modèle ne les
+/// dépose ailleurs.
+pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc<dyn JobHandler>> {
+    let url = config.app_public_url.clone();
+    vec![
+        Arc::new(jobs::emails::SendApprovedEmail::new(
+            mailer.clone(),
+            url.clone(),
+        )),
+        Arc::new(jobs::emails::SendRejectedEmail::new(mailer, url)),
+        Arc::new(jobs::purge::PurgeInvitationAttempts::new(db)),
+    ]
 }

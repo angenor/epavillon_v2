@@ -59,3 +59,34 @@ pub async fn limite_dessais(conn: &mut PgConnection) -> Result<LimiteDEssais> {
             .unwrap_or(defaut.verrou_minutes),
     })
 }
+
+/// Bascule le mode d'admission.
+///
+/// **`INSERT … ON CONFLICT` plutôt qu'`UPDATE`** : une base dont le semis n'a
+/// pas été rejoué n'a pas la ligne, et un `UPDATE` y échouerait en silence —
+/// l'écran dirait « enregistré » et la tentative suivante lirait toujours
+/// l'ancien mode.
+///
+/// `updated_by` est posé explicitement : `platform.settings` ne porte pas de
+/// déclencheur d'audit, et sans cette colonne la bascule serait le seul geste
+/// du back-office dont on ignorerait l'auteur (FR-046).
+pub async fn ecrire_le_mode(
+    conn: &mut PgConnection,
+    mode: AdmissionMode,
+    acteur: uuid::Uuid,
+) -> Result<()> {
+    sqlx::query!(
+        "INSERT INTO platform.settings (key, value, description, updated_by)
+         VALUES ($1, to_jsonb($2::text),
+                 'Mode d''admission de Guide Négo : code, approval ou code_and_approval.', $3)
+         ON CONFLICT (key) DO UPDATE
+             SET value = EXCLUDED.value, updated_by = EXCLUDED.updated_by",
+        CLE_MODE,
+        mode.as_db(),
+        acteur
+    )
+    .execute(conn)
+    .await?;
+
+    Ok(())
+}

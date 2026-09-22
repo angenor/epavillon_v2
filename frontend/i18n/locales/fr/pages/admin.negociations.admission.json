@@ -1,0 +1,38 @@
+{
+  "title": "Mode d'admission",
+  "subtitle": "Comment on entre dans les modules réservés de Guide Négo. Le changement prend effet à la tentative suivante, sans mise en ligne.",
+  "forbidden": {
+    "scope": "Administrer Guide Négo, sur la plateforme entière",
+    "description": "Le mode d'admission est réservé aux administrateurs de la plateforme entière. Un compte rattaché à un seul événement n'y a pas accès."
+  },
+  "current": "Mode en cours",
+  "choose": "Choisir le mode d'admission",
+  "modes": {
+    "code": {
+      "label": "Code seul",
+      "description": "Un code juste ouvre les modules aussitôt. Personne n'a rien à trancher."
+    },
+    "approval": {
+      "label": "Approbation seule",
+      "description": "L'application ne propose plus de code : chaque personne fait une demande, et vous la tranchez."
+    },
+    "code_and_approval": {
+      "label": "Code et approbation",
+      "description": "Le code est demandé, mais il n'ouvre pas : il ouvre une demande qui le porte, et vous tranchez en sachant qui détient le code."
+    }
+  },
+  "effects": {
+    "title": "Ce que la personne verra",
+    "offersCode": "Le champ de saisie du code lui est proposé.",
+    "noCode": "Le champ de saisie du code disparaît de son parcours.",
+    "codeOpens": "Un code juste ouvre les modules immédiatement.",
+    "needsApproval": "Elle attend votre réponse, qui lui arrive par courriel."
+  },
+  "pendingWarning": "{count} demande est en attente. Changer de mode ne l'annule pas : elle reste à trancher. | {count} demande est en attente. Changer de mode ne l'annule pas : elle reste à trancher. | {count} demandes sont en attente. Changer de mode ne les annule pas : elles restent à trancher.",
+  "queueLink": "Voir les demandes",
+  "save": "Enregistrer le mode",
+  "saved": "Mode enregistré. La prochaine personne qui essaie d'entrer le verra.",
+  "error": {
+    "NEGOTIATION_ADMISSION_MODE_INVALID": "Ce mode n'existe pas."
+  }
+}

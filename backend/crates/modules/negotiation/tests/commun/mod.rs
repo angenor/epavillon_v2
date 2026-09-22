@@ -452,3 +452,261 @@ pub async fn mon_acces(bac: &Bac, person_id: Uuid) -> negotiation::domain::acces
         .await
         .expect("lecture de l'accès")
 }
+
+// ---------------------------------------------------------------------------
+// Le back-office : créer, révoquer, retirer, trancher
+// ---------------------------------------------------------------------------
+
+/// Créer un code comme la route le fait. Le libellé suffit : la portée et le
+/// réseau se passent quand le test les regarde.
+pub async fn creer_un_code(
+    bac: &Bac,
+    acteur: Uuid,
+    libelle: &str,
+    space_id: Option<Uuid>,
+    reseau: Option<&str>,
+) -> negotiation::domain::admin::InvitationCodeRow {
+    use negotiation::domain::admin::{CreateInvitationCodePayload, ScopePayload};
+
+    let scope = match space_id {
+        Some(id) => ScopePayload::NegotiationSpace { id },
+        None => ScopePayload::Global,
+    };
+
+    negotiation::service::admin_codes::creer(
+        &bac.state,
+        &bac.ctx(acteur),
+        acteur,
+        &CreateInvitationCodePayload {
+            label: libelle.to_owned(),
+            scope,
+            grants_network: reseau.map(str::to_owned),
+            max_uses: None,
+            valid_from: None,
+            valid_until: None,
+        },
+        "fr",
+    )
+    .await
+    .expect("création du code")
+}
+
+pub async fn revoquer_le_code(
+    bac: &Bac,
+    acteur: Uuid,
+    code_id: Uuid,
+    motif: Option<&str>,
+) -> Option<negotiation::domain::admin::InvitationCodeRow> {
+    negotiation::service::admin_codes::revoquer(
+        &bac.state,
+        &bac.ctx(acteur),
+        acteur,
+        code_id,
+        motif,
+        "fr",
+    )
+    .await
+    .expect("révocation du code")
+}
+
+pub async fn retirer_lacces(
+    bac: &Bac,
+    acteur: Uuid,
+    code_id: Uuid,
+    person_id: Uuid,
+    motif: Option<&str>,
+) -> bool {
+    negotiation::service::admin_codes::retirer_un_acces(
+        &bac.state,
+        &bac.ctx(acteur),
+        acteur,
+        code_id,
+        person_id,
+        motif,
+    )
+    .await
+    .expect("retrait de l'accès")
+}
+
+pub async fn retirer_tous_les_acces(bac: &Bac, acteur: Uuid, code_id: Uuid) -> i64 {
+    negotiation::service::admin_codes::retirer_tous_les_acces(
+        &bac.state,
+        &bac.ctx(acteur),
+        acteur,
+        code_id,
+        Some("code compromis"),
+    )
+    .await
+    .expect("retrait de tous les accès")
+    .revoked
+}
+
+/// Les usages d'un code, tels que l'écran du back-office les lit.
+pub async fn usages_du_code(
+    bac: &Bac,
+    code_id: Uuid,
+) -> negotiation::domain::admin::InvitationCodeUsesScreen {
+    negotiation::service::admin_codes::usages(&bac.state, code_id, 100, 0)
+        .await
+        .expect("lecture des usages")
+}
+
+/// Les écritures tracées pour **une ligne précise**, avec l'auteur que
+/// `Db::write` a posé. C'est ce qui prouve FR-046 : la trace ne demande aucun
+/// code, seulement d'écrire par la bonne porte.
+///
+/// Le filtre porte sur la ligne et non sur la table : le décor sème lui-même en
+/// SQL nu, et ses insertions sont anonymes à bon droit.
+pub async fn traces(bac: &Bac, table: &str, entity_id: Uuid) -> Vec<(String, Option<Uuid>)> {
+    sqlx::query!(
+        r#"SELECT a.action AS "action!", a.actor_id
+             FROM platform.audit_log a
+            WHERE a.entity_table = $1 AND a.entity_id = $2
+            ORDER BY a.occurred_at"#,
+        table,
+        entity_id
+    )
+    .fetch_all(bac.pool())
+    .await
+    .expect("lecture de l'audit")
+    .into_iter()
+    .map(|l| (l.action, l.actor_id))
+    .collect()
+}
+
+/// L'attribution de rôle qui ouvre l'espace à cette personne, quelle que soit
+/// son issue : c'est la ligne dont on relit la trace.
+pub async fn attribution_de(bac: &Bac, person_id: Uuid, space_id: Option<Uuid>) -> Uuid {
+    sqlx::query_scalar!(
+        "SELECT id FROM identity.role_assignments
+          WHERE person_id = $1 AND role_code = 'negotiator'
+            AND scope_id IS NOT DISTINCT FROM $2
+          ORDER BY granted_at DESC LIMIT 1",
+        person_id,
+        space_id
+    )
+    .fetch_one(bac.pool())
+    .await
+    .expect("attribution introuvable")
+}
+
+// ---------------------------------------------------------------------------
+// Les demandes d'accès
+// ---------------------------------------------------------------------------
+
+/// Demander l'accès, comme la route le fait.
+pub async fn demander(
+    bac: &Bac,
+    person_id: Uuid,
+    space_id: Option<Uuid>,
+    message: Option<&str>,
+) -> kernel::error::Result<negotiation::domain::access::AccessRequestView> {
+    use negotiation::domain::requests::CreateAccessRequestPayload;
+
+    negotiation::service::requests::demander(
+        &bac.state,
+        &bac.ctx(person_id),
+        person_id,
+        &CreateAccessRequestPayload {
+            space_id,
+            message: message.map(str::to_owned),
+        },
+    )
+    .await
+}
+
+pub async fn annuler_sa_demande(
+    bac: &Bac,
+    person_id: Uuid,
+    request_id: Uuid,
+) -> kernel::error::Result<()> {
+    negotiation::service::requests::annuler(&bac.state, &bac.ctx(person_id), person_id, request_id)
+        .await
+}
+
+pub async fn admettre(
+    bac: &Bac,
+    acteur: Uuid,
+    request_id: Uuid,
+    motif: Option<&str>,
+) -> kernel::error::Result<()> {
+    negotiation::service::admin_requests::admettre(
+        &bac.state,
+        &bac.ctx(acteur),
+        acteur,
+        request_id,
+        motif,
+        "fr",
+    )
+    .await
+}
+
+pub async fn refuser(
+    bac: &Bac,
+    acteur: Uuid,
+    request_id: Uuid,
+    motif: Option<&str>,
+) -> kernel::error::Result<()> {
+    negotiation::service::admin_requests::refuser(
+        &bac.state,
+        &bac.ctx(acteur),
+        acteur,
+        request_id,
+        motif,
+        "fr",
+    )
+    .await
+}
+
+/// La file du back-office, sans filtre.
+pub async fn file_des_demandes(bac: &Bac) -> negotiation::domain::requests::AccessRequestQueue {
+    negotiation::service::admin_requests::file(
+        &bac.state,
+        &negotiation::repo::requests::FiltreDemandes {
+            etat: None,
+            limit: 100,
+            offset: 0,
+        },
+        "fr",
+    )
+    .await
+    .expect("lecture de la file")
+}
+
+/// Le mode d'admission tel que le back-office le bascule — par le service,
+/// pas par un UPDATE : c'est le chemin dont SC-002 dépend.
+pub async fn basculer_le_mode(
+    bac: &Bac,
+    acteur: Uuid,
+    mode: &str,
+) -> kernel::error::Result<negotiation::domain::admission::AdmissionSettings> {
+    negotiation::service::admission::ecrire(&bac.state, &bac.ctx(acteur), acteur, mode).await
+}
+
+/// Les travaux de courriel en file, avec leur tâche et leur destinataire.
+/// C'est ce qui prouve qu'un envoi naît dans la transaction de la décision.
+pub async fn courriels_en_file(bac: &Bac) -> Vec<(String, String)> {
+    sqlx::query!(
+        r#"SELECT j.task AS "task!", (j.payload ->> 'to') AS "destinataire?"
+             FROM platform.jobs j
+            WHERE j.task LIKE 'negotiation.%'
+            ORDER BY j.created_at"#
+    )
+    .fetch_all(bac.pool())
+    .await
+    .expect("lecture de la file de travaux")
+    .into_iter()
+    .map(|l| (l.task, l.destinataire.unwrap_or_default()))
+    .collect()
+}
+
+/// L'état d'une demande, lu en base.
+pub async fn etat_de_la_demande(bac: &Bac, request_id: Uuid) -> String {
+    sqlx::query_scalar!(
+        r#"SELECT status::text AS "status!" FROM negotiation.access_requests WHERE id = $1"#,
+        request_id
+    )
+    .fetch_one(bac.pool())
+    .await
+    .expect("lecture de l'état de la demande")
+}

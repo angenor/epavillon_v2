@@ -71,6 +71,18 @@ const sections: NavSection[] = [
     ],
   },
   {
+    // Guide Négo a sa propre section, et non une entrée dans « Exploitation » :
+    // ces trois écrans commandent l'entrée d'une AUTRE application, réservée
+    // aux administrateurs de la plateforme entière. Les mêler aux messages
+    // d'incident du site ferait croire qu'ils partagent son périmètre.
+    labelKey: 'nav.admin.sections.guideNego',
+    items: [
+      { labelKey: 'nav.admin.negotiationCodes', to: '/admin/negociations/codes', icon: 'lock' },
+      { labelKey: 'nav.admin.negotiationRequests', to: '/admin/negociations/demandes', icon: 'inbox' },
+      { labelKey: 'nav.admin.negotiationAdmission', to: '/admin/negociations/admission', icon: 'sliders' },
+    ],
+  },
+  {
     labelKey: 'nav.admin.sections.operations',
     items: [
       { labelKey: 'nav.admin.incidents', to: '/admin/incidents', icon: 'broadcast' },

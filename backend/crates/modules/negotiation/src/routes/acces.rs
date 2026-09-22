@@ -18,7 +18,8 @@ use kernel::context::RequestContext;
 use kernel::error::Result;
 use serde::Deserialize;
 
-use crate::service::{access, redeem};
+use crate::domain::requests::CreateAccessRequestPayload;
+use crate::service::{access, redeem, requests};
 use crate::state::NegotiationState;
 
 pub fn configurer(cfg: &mut web::ServiceConfig) {
@@ -26,6 +27,11 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
         .route(
             "/negotiation/invitation-codes/redeem",
             web::post().to(saisir_un_code),
+        )
+        .route("/negotiation/access-requests", web::post().to(demander))
+        .route(
+            "/negotiation/access-requests/{id}",
+            web::delete().to(annuler_sa_demande),
         );
 }
 
@@ -129,4 +135,58 @@ fn empreinte_de(corps: &str) -> String {
         hexa.push_str(&format!("{octet:02x}"));
     }
     format!("\"{hexa}\"")
+}
+
+#[utoipa::path(
+    post,
+    description = "`CreateAccessRequestPayload` → `AccessRequestView` — demander l'accès aux modules réservés, quand le mode d'admission exige une approbation.\n\n`space_id` absent vaut une demande de portée globale. Le message est facultatif : il aide l'administrateur à reconnaître une délégation qu'il attend.\n\n**Une seule demande en attente par personne et par portée**, et c'est la base qui le tient : deux appareils qui l'envoient ensemble ne produisent qu'une ligne, et le conflit sort en `NEGOTIATION_ACCESS_REQUEST_PENDING`. Le code **traduit** ce refus, il ne le prévient pas par une lecture préalable qu'une seconde requête contournerait.\n\nUne personne qui détient déjà l'accès reçoit un conflit : elle recevrait sinon un courriel pour un droit acquis, et la file porterait une décision sans objet.",
+    path = "/negotiation/access-requests",
+    tag = "Guide Négo — accès",
+    operation_id = "negotiation_demander_lacces",
+    request_body = Object,
+    responses(
+        (status = 201, description = "AccessRequestView", body = Object),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 409, description = "Demande déjà en attente, ou accès déjà détenu", body = crate::routes::openapi::ApiErrorBody),
+    ),
+    security(("session" = []))
+)]
+pub(crate) async fn demander(
+    state: web::Data<NegotiationState>,
+    requete: HttpRequest,
+    acteur: Actor,
+    charge: Option<web::Json<CreateAccessRequestPayload>>,
+) -> Result<HttpResponse> {
+    let contexte = crate::routes::contexte_de(&requete, acteur.0);
+    let charge = charge.map(web::Json::into_inner).unwrap_or_default();
+
+    let demande = requests::demander(&state, &contexte, acteur.0, &charge).await?;
+    Ok(HttpResponse::Created().json(demande))
+}
+
+#[utoipa::path(
+    delete,
+    description = "La personne retire sa demande — ce qui arrive quand elle reçoit un code et entre par lui.\n\nLa demande passe à `cancelled`, qui se dit **« annulée »** à l'écran : c'est son propre fait. « Révoquée » est réservé à un accès qu'on retire, et ne qualifie jamais une demande (FR-026).\n\n**Aucun courriel ne part** : `tg_access_request_event()` n'émet que pour `approved` et `rejected`, et c'est voulu — personne n'a rien à recevoir pour une demande que son auteur vient de refermer.\n\nUne demande déjà tranchée sort en `NEGOTIATION_ACCESS_REQUEST_DECIDED` ; la demande d'un autre compte se refuse **comme une demande inexistante**.",
+    path = "/negotiation/access-requests/{id}",
+    tag = "Guide Négo — accès",
+    operation_id = "negotiation_annuler_sa_demande",
+    params(("id" = Uuid, Path, description = "Demande d'accès")),
+    responses(
+        (status = 204, description = "Demande annulée"),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Demande inexistante, ou celle d'un autre compte — indiscernables", body = crate::routes::openapi::ApiErrorBody),
+        (status = 409, description = "Demande déjà tranchée", body = crate::routes::openapi::ApiErrorBody),
+    ),
+    security(("session" = []))
+)]
+pub(crate) async fn annuler_sa_demande(
+    state: web::Data<NegotiationState>,
+    requete: HttpRequest,
+    acteur: Actor,
+    chemin: web::Path<uuid::Uuid>,
+) -> Result<HttpResponse> {
+    let contexte = crate::routes::contexte_de(&requete, acteur.0);
+    requests::annuler(&state, &contexte, acteur.0, chemin.into_inner()).await?;
+
+    Ok(HttpResponse::NoContent().finish())
 }

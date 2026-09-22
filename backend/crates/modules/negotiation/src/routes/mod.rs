@@ -1,4 +1,7 @@
 pub mod acces;
+pub mod admin_admission;
+pub mod admin_codes;
+pub mod admin_requests;
 pub mod openapi;
 
 use actix_web::{HttpMessage, HttpRequest};

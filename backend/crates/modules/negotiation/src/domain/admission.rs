@@ -7,6 +7,7 @@
 //! indexée par clé primaire, sur un geste rare.
 
 use kernel::error::{ApiError, Result};
+use serde::{Deserialize, Serialize};
 
 pub const CLE_MODE: &str = "negotiation.admission_mode";
 pub const CLE_ESSAIS: &str = "negotiation.invitation_attempts";
@@ -89,6 +90,74 @@ impl Default for LimiteDEssais {
             max: 5,
             fenetre_minutes: 15,
             verrou_minutes: 15,
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Le réglage, tel que le back-office le lit et l'écrit
+// ---------------------------------------------------------------------------
+
+/// Les trois valeurs, dans l'ordre où l'écran les propose.
+pub const MODES: [AdmissionMode; 3] = [
+    AdmissionMode::Code,
+    AdmissionMode::Approval,
+    AdmissionMode::CodeAndApproval,
+];
+
+/// Ce qu'un mode produit **pour la personne qui entre**, en faits et non en
+/// phrases : l'écran du back-office compose son texte à partir de là, par ses
+/// fichiers de traduction, comme tout écran du site (FR-045).
+///
+/// Rendre ici une phrase française donnerait deux catalogues pour un même
+/// écran, et le second se périmerait au premier changement de vocabulaire.
+#[derive(Debug, Clone, Copy, Serialize)]
+pub struct AdmissionModeOption {
+    pub mode: &'static str,
+    /// La saisie d'un code est-elle proposée dans ce mode ? Fausse en
+    /// « approbation seule » : l'application fait alors disparaître le champ
+    /// du parcours (FR-022).
+    pub offers_code: bool,
+    /// Un code juste ouvre-t-il aussitôt ?
+    pub code_opens: bool,
+    /// Un administrateur doit-il trancher ?
+    pub needs_approval: bool,
+}
+
+/// `AdmissionSettings` — ce que rend `GET /admin/negotiation/admission`.
+#[derive(Debug, Clone, Serialize)]
+pub struct AdmissionSettings {
+    pub mode: &'static str,
+    pub options: Vec<AdmissionModeOption>,
+}
+
+/// `UpdateAdmissionModePayload` — la bascule.
+#[derive(Debug, Clone, Deserialize)]
+pub struct UpdateAdmissionModePayload {
+    pub mode: String,
+}
+
+impl AdmissionMode {
+    /// Le champ de saisie d'un code est-il proposé ?
+    pub fn offre_la_saisie(self) -> bool {
+        self != Self::Approval
+    }
+
+    pub fn option(self) -> AdmissionModeOption {
+        AdmissionModeOption {
+            mode: self.as_db(),
+            offers_code: self.offre_la_saisie(),
+            code_opens: self.ouvre_aussitot(),
+            needs_approval: !self.ouvre_aussitot(),
+        }
+    }
+}
+
+impl AdmissionSettings {
+    pub fn composer(courant: AdmissionMode) -> Self {
+        Self {
+            mode: courant.as_db(),
+            options: MODES.iter().map(|m| m.option()).collect(),
         }
     }
 }

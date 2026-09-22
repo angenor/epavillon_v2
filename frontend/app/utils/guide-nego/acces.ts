@@ -73,3 +73,34 @@ export function accesLisibleHorsConnexion(
 ): { etat: AccessStateView; luA: string | null } {
   return { etat: etat ?? ACCES_VISITEUSE, luA }
 }
+
+/**
+ * La demande d'accès est-elle proposée ?
+ *
+ * **Dès que le mode exige une approbation** — « approbation seule » et « code
+ * et approbation » —, et jamais quand l'accès est déjà ouvert ou qu'une demande
+ * attend déjà : il n'y a alors rien à demander (FR-024).
+ *
+ * En mode « code seul », elle ne l'est pas non plus : l'entrée passe par le
+ * code, et offrir une demande que personne ne traiterait laisserait attendre
+ * une réponse qui ne viendrait pas.
+ */
+export function demandePossible(etat: AccessStateView | null, enLigne: boolean): boolean {
+  if (!enLigne) return false
+  if (!etat) return false
+  if (etat.state === 'granted' || etat.state === 'pending') return false
+  return etat.admission_mode !== 'code'
+}
+
+/**
+ * Le parcours propose-t-il la saisie d'un code **dans ce mode** ?
+ *
+ * FR-022 : en « approbation seule », le champ disparaît du parcours et la
+ * demande prend sa place. À la différence de `saisiePossible`, cette fonction
+ * ne regarde pas le réseau : elle dit ce que le MODE offre, pas ce qui est
+ * faisable à l'instant. Les confondre ferait disparaître le champ à chaque
+ * tunnel, au lieu de le désactiver en le disant.
+ */
+export function codeOffertParLeMode(etat: AccessStateView | null): boolean {
+  return etat?.admission_mode !== 'approval'
+}
