@@ -62,7 +62,7 @@ L'onglet Accueil s'appelle « Ma journée ». Il rassemble ce qui concerne la pe
 
 **Acceptance Scenarios**
 
-1. **Given** une personne connectée, **When** elle ouvre l'onglet Accueil, **Then** l'écran est titré « Ma journée » et sous-titré par la date du jour et le fuseau employé.
+1. **Given** une personne connectée, **When** elle ouvre l'onglet Accueil, **Then** l'écran est titré « Ma journée » et sous-titré par le jour — « Jeudi 12 novembre » — ; le fuseau, nommé d'après le lieu de l'édition, vient avec les heures de sessions à l'étape 3a.
 2. **Given** « Ma journée » sans aucune donnée, **When** l'écran s'affiche, **Then** les blocs paraissent dans cet ordre — prochaine session de négociation, changements du jour, aujourd'hui vos trois agendas, documents récents, accès au lexique — et chacun des quatre premiers porte son état vide propre : un titre, ce qui manque, quand cela reviendra, et une sortie quand il y en a une.
 3. **Given** un bloc vide, **When** on le lit, **Then** rien n'y évoque une erreur, un échec ou une indisponibilité du service.
 4. **Given** « Ma journée », **When** on regarde l'en-tête, **Then** l'avatar de la personne y figure à gauche et ouvre « Profil et réglages », le bouton « Aa » ouvre le lexique, et aucune cloche de notifications n'y paraît — elle vient à l'étape 3b.
@@ -155,7 +155,7 @@ Depuis le profil, Aïssatou ouvre « À propos ». Elle y lit qui édite l'appli
 
 ### « Ma journée »
 
-- **FR-012** : L'onglet Accueil DOIT porter l'écran « Ma journée », titré ainsi et sous-titré par la date du jour et le fuseau employé.
+- **FR-012** : L'onglet Accueil DOIT porter l'écran « Ma journée », titré ainsi et sous-titré par le jour, recalculé au retour au premier plan. Le fuseau n'y est pas nommé à cette étape : celui de l'appareil trompe, et celui de l'édition vient en 3a ([R11](research.md)).
 - **FR-013** : L'écran DOIT présenter ses blocs dans un ordre fixe : prochaine session de négociation, changements du jour, aujourd'hui vos trois agendas, documents récents, accès au lexique.
 - **FR-014** : Chaque bloc dont le module n'est pas encore livré DOIT afficher son propre état vide — ce qui manque, quand cela reviendra, et une sortie quand il y en a une — et NE DOIT en aucun cas afficher une erreur, disparaître, ni rester en chargement.
 - **FR-015** : Chaque ligne de « Ma journée » DOIT porter son agenda d'origine ; le mot « Programme » employé seul NE DOIT paraître ni à l'écran ni dans les noms exposés par l'API.

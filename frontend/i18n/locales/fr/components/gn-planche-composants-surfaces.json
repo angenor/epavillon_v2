@@ -72,5 +72,10 @@
   "verrou-note": "La sortie principale change avec le mode d'admission et l'état du compte : créer son compte, saisir son code, demander l'accès, ou revoir une demande en attente. Sur cette planche, elle montre ce que votre propre compte verrait.",
   "picto": "Pictogrammes",
   "picto-propos": "Les cinquante-sept symboles et leurs six tailles.",
-  "picto-note": "La section 4 les montre déjà, un par un, avec leur nom et leurs tailles. Les redessiner ici donnerait deux planches à tenir accordées pour une seule famille de symboles."
+  "picto-note": "La section 4 les montre déjà, un par un, avec leur nom et leurs tailles. Les redessiner ici donnerait deux planches à tenir accordées pour une seule famille de symboles.",
+  "avatar": "Avatar",
+  "avatar-propos": "Le compte en 40 px, en tête de « Ma journée ». Il ouvre « Profil et réglages » par une cible de 48 px.",
+  "avatar-note": "De gauche à droite : les initiales ; l'image du compte ; une image qui ne se charge pas, comme hors connexion — elle rend les initiales, jamais un rond vide ; et un compte sans nom lu, qui montre la silhouette.",
+  "theme-clair": "Clair",
+  "theme-sombre": "Sombre"
 }

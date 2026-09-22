@@ -83,3 +83,15 @@ export function compteLisibleHorsConnexion(
 ): { etat: EtatDuCompte; luA: string | null } {
   return { etat: etat ?? COMPTE_DECONNECTE, luA }
 }
+
+/**
+ * « AD » pour Awa Diallo. Les accents restent — « ÉT » pour Émilie Traoré — :
+ * ce sont des lettres, pas des fautes. Vide sans nom lu : l'avatar montre alors
+ * la silhouette, jamais deux points d'interrogation.
+ */
+export function initialesDe(prenom: string | null, nom: string | null): string {
+  return [prenom, nom]
+    .map((partie) => partie?.trim().charAt(0) ?? '')
+    .join('')
+    .toLocaleUpperCase('fr')
+}

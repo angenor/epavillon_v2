@@ -264,8 +264,16 @@ Les nouvelles méthodes de 0c, elles, vont dans `composables/api/guide-nego.ts`,
 
 ## R11 — Le fuseau du sous-titre de « Ma journée »
 
-**Décision : à cette étape, la date du jour dans le fuseau de l'appareil, nommé. L'étape 3a apportera
-celui de l'édition.**
+**Décision, révisée par le commanditaire le 22/09 : à cette étape, le sous-titre ne porte que le jour —
+« Jeudi 12 novembre » —, sans fuseau nommé. L'étape 3a apportera celui du lieu de l'édition.**
+
+*Pourquoi pas le fuseau de l'appareil, d'abord retenu* : nommé, il trompe. Son identifiant dit
+« Istanbul » à Antalya, « Lome » et « Ndjamena » sans accent, « Douala » pour Yaoundé ; le nom long
+du moteur dit « heure moyenne de Greenwich » à Dakar. En 3a, le nom viendra du lieu de l'édition,
+selon la règle du site : `edition.city` d'abord (`composables/useDateTime.ts`).
+
+**« Aujourd'hui » se recalcule au retour au premier plan** : une application restée en mémoire ne doit
+pas ouvrir le lendemain sur la journée de la veille.
 
 La spécification prévoit le fuseau de l'édition en cours « quand il y en a une ». Vérification faite,
 il n'existe **ni fonction ni vue d'édition courante** : `event.v_public_editions` porte un

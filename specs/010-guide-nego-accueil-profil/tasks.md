@@ -143,17 +143,17 @@ hors connexion, sans jamais ressembler à une panne.
 
 **Test indépendant** : ouvrir l'onglet Accueil sur un compte neuf, en ligne puis en mode avion.
 
-- [ ] T046 [P] [US2] Créer `frontend/app/components/guide-nego/GnAvatar.vue` — 40 px, rayon 24, initiales 15/700, image du compte quand elle existe — et son `frontend/i18n/locales/{fr,en}/components/gn-avatar.json`
-- [ ] T047 [P] [US2] Ajouter `GnAvatar` à la planche dans `frontend/app/components/guide-nego/planche/PlancheComposantsSurfaces.vue`, dans les deux thèmes, et le retirer de la liste « Ce qui n'est pas montré ici »
-- [ ] T048 [US2] Ajouter la prop d'avatar à `frontend/app/components/guide-nego/GnEntete.vue`, exclusive du bouton retour, et la relayer depuis `frontend/app/components/guide-nego/GnEcran.vue` — aucune page n'instancie `GnEntete` directement
-- [ ] T049 [US2] Composer les cinq blocs de `frontend/app/pages/guide-nego/index.vue` dans l'ordre fixe — prochaine session de négociation, changements du jour, aujourd'hui vos trois agendas, documents récents, accès au lexique
-- [ ] T050 [US2] Donner à chacun des quatre premiers blocs de `frontend/app/pages/guide-nego/index.vue` **son** `GnEtatVide` : ce qui manque, quand cela reviendra, une sortie quand il y en a une — jamais une erreur, jamais un chargement qui dure
-- [ ] T051 [US2] Poser dans `frontend/app/pages/guide-nego/index.vue` le titre « Ma journée » et le sous-titre — date du jour et fuseau de l'appareil, nommé ([research.md § R11](research.md))
-- [ ] T052 [US2] Porter l'état sans compte de `frontend/app/pages/guide-nego/index.vue` : l'écran s'ouvre et invite à créer un compte ou à se connecter, sans avatar
-- [ ] T053 [US2] Vérifier le comportement hors connexion de `frontend/app/pages/guide-nego/index.vue` : bandeau « Hors connexion — lu à … », compteur « connus à … », et passage à « Synchronisé à … » au retour du réseau **sans rechargement**
-- [ ] T054 [P] [US2] Écrire `frontend/i18n/locales/fr/pages/guide-nego.accueil.json` complété et son jumeau `en` — les cinq blocs, leurs états vides, l'accès au lexique
-- [ ] T055 [P] [US2] Test dans `frontend/tests/guide-nego/ma-journee.test.ts` : les cinq blocs paraissent dans l'ordre, chacun avec son état vide, et **aucun message d'erreur** quand rien n'est disponible
-- [ ] T056 [US2] Vérifier que `frontend/i18n/locales/{fr,en}/pages/guide-nego.accueil.json` et `guide-nego.thematiques.json` n'emploient **ni « Programme » seul, ni « Thème »** — le mot reste légitime ailleurs, dans les réglages d'affichage et sur la planche, où il désigne l'apparence
+- [X] T046 [P] [US2] Créer `frontend/app/components/guide-nego/GnAvatar.vue` — 40 px, rayon 24, initiales 15/700, image du compte quand elle existe, **et les initiales sur une erreur de chargement**, pas seulement en l'absence d'image — et son `frontend/i18n/locales/{fr,en}/components/gn-avatar.json`
+- [X] T047 [P] [US2] Ajouter `GnAvatar` à la planche dans `frontend/app/components/guide-nego/planche/PlancheComposantsSurfaces.vue`, dans les deux thèmes, et le retirer de la liste « Ce qui n'est pas montré ici »
+- [X] T048 [US2] Ajouter la prop d'avatar à `frontend/app/components/guide-nego/GnEntete.vue`, exclusive du bouton retour, et la relayer depuis `frontend/app/components/guide-nego/GnEcran.vue` — aucune page n'instancie `GnEntete` directement
+- [X] T049 [US2] Composer les cinq blocs de `frontend/app/pages/guide-nego/index.vue` dans l'ordre fixe — prochaine session de négociation, changements du jour, aujourd'hui vos trois agendas, documents récents, accès au lexique
+- [X] T050 [US2] Donner à chacun des quatre premiers blocs de `frontend/app/pages/guide-nego/index.vue` **son état vide en UNE ligne sous son en-tête de groupe** — ce qui manque, et quand cela viendra —, comme la maquette le fait pour les Réunions de la Francophonie ; **pas quatre `GnEtatVide`**, faits pour un écran entier, et qui à la suite feraient l'écran d'une panne
+- [X] T051 [US2] Poser dans `frontend/app/pages/guide-nego/index.vue` le titre « Ma journée » et le sous-titre — **le jour seul**, recalculé au retour au premier plan ; aucun fuseau nommé à cette étape ([research.md § R11](research.md))
+- [X] T052 [US2] Porter l'état sans compte de `frontend/app/pages/guide-nego/index.vue` : l'écran s'ouvre et invite à créer un compte ou à se connecter, sans avatar
+- [X] T053 [US2] Vérifier le comportement hors connexion de `frontend/app/pages/guide-nego/index.vue` : bandeau « Hors connexion — lu à … », compteur « connus à … », et passage à « Synchronisé à … » au retour du réseau **sans rechargement**
+- [X] T054 [P] [US2] Écrire `frontend/i18n/locales/fr/pages/guide-nego.accueil.json` complété et son jumeau `en` — les cinq blocs, leurs états vides, l'accès au lexique
+- [X] T055 [P] [US2] Test dans `frontend/tests/guide-nego/ma-journee.test.ts` : les cinq blocs paraissent dans l'ordre, chacun avec son état vide, et **aucun message d'erreur** quand rien n'est disponible
+- [X] T056 [US2] Vérifier que `frontend/i18n/locales/{fr,en}/pages/guide-nego.accueil.json` et `guide-nego.thematiques.json` n'emploient **ni « Programme » seul, ni « Thème »** — le mot reste légitime ailleurs, dans les réglages d'affichage et sur la planche, où il désigne l'apparence
 
 **Checkpoint** : le cadre des étapes 1, 3a, 4 et 5 est posé. **Commit.**
 

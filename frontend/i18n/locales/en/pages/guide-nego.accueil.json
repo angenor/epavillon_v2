@@ -1,7 +1,31 @@
 {
   "titre": "My day",
-  "vide": {
-    "titre": "Nothing to show yet",
-    "texte": "Negotiation sessions, Francophonie meetings and Francophonie Pavilion activities for the day will appear here, each with its own source."
+  "sans-compte": {
+    "texte": "Create your account or sign in: your themes and your documents will follow you from one device to another.",
+    "creer-mon-compte": "Create my account",
+    "me-connecter": "I already have an account — Sign in"
+  },
+  "blocs": {
+    "prochaine-session": {
+      "titre": "Your next negotiation session",
+      "vide": "Nothing yet. It will appear here as soon as the official session calendar is in the app."
+    },
+    "changements": {
+      "titre": "Today's changes",
+      "mis-a-jour": "updated {moment}",
+      "connus": "known {moment}",
+      "vide": "No change reported. Moved rooms and cancelled sessions will appear here with the network's reports."
+    },
+    "trois-agendas": {
+      "titre": "Today, your three agendas",
+      "vide": "Nothing today. Negotiation sessions, Francophonie meetings and the Francophonie Pavilion will appear here, each under its own name."
+    },
+    "documents": {
+      "titre": "Recent documents",
+      "vide": "No document opened. The ones you read will appear here, readable offline once downloaded."
+    },
+    "lexique": {
+      "ouvrir": "Open the English-French glossary"
+    }
   }
 }

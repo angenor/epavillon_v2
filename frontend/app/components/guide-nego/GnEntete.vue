@@ -3,18 +3,27 @@
  * L'en-tête d'écran. Le bouton « Aa » ouvre le lexique depuis n'importe où : un terme
  * anglais se cherche en salle, sans revenir en arrière.
  *
- * Ni notifications ni avatar à cette étape — ils viennent avec leurs écrans (0b, 3b).
+ * **L'avatar et le retour s'excluent** : un écran d'onglet porte l'avatar, qui ouvre
+ * le profil ; un écran secondaire porte le retour. La cloche vient avec 3b.
  */
+export interface AvatarDEntete {
+  prenom: string | null
+  nom: string | null
+  image?: string | null
+}
+
 withDefaults(
   defineProps<{
     titre: string
     sousTitre?: string
     /** Écran secondaire : un retour remplace le titre d'onglet. */
     retour?: string
+    /** Écran d'onglet, personne connectée. Ignoré quand un retour est donné. */
+    avatar?: AvatarDEntete
     /** Vrai sur le lexique lui-même : le bouton dit où l'on est. */
     lexiqueOuvert?: boolean
   }>(),
-  { sousTitre: undefined, retour: undefined, lexiqueOuvert: false },
+  { sousTitre: undefined, retour: undefined, avatar: undefined, lexiqueOuvert: false },
 )
 
 const { t } = useI18n()
@@ -26,6 +35,13 @@ const { t } = useI18n()
       <NuxtLink v-if="retour" :to="retour" class="gn-entete__bouton" :aria-label="t('gn-entete.retour')">
         <GnPicto nom="back" />
       </NuxtLink>
+      <GnAvatar
+        v-else-if="avatar"
+        :prenom="avatar.prenom"
+        :nom="avatar.nom"
+        :image="avatar.image"
+        vers="/guide-nego/ressources/reglages"
+      />
       <!-- Emplacement de la ligne de connexion : « Synchronisé à » ou « Hors connexion ». -->
       <div class="gn-entete__connexion"><slot name="connexion" /></div>
       <NuxtLink

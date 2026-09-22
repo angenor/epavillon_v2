@@ -52,7 +52,8 @@ export type MomentLecture =
   | { quand: 'hier'; heure: string }
   | { quand: 'avant'; heure: string; jour: string }
 
-const jourCivil = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
+export const jourCivil = (date: Date) =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
 
 /**
  * « à 14:05 » le jour même, « hier à 23:10 », puis « le 11 nov. à 23:10 » : une heure

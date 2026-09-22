@@ -1,7 +1,31 @@
 {
   "titre": "Ma journée",
-  "vide": {
-    "titre": "Rien à afficher pour l'instant",
-    "texte": "Les sessions de négociation, les réunions de la Francophonie et les activités du Pavillon de la Francophonie du jour paraîtront ici, chacune avec son origine."
+  "sans-compte": {
+    "texte": "Créez votre compte ou connectez-vous : vos thématiques et vos documents vous suivront d'un appareil à l'autre.",
+    "creer-mon-compte": "Créer mon compte",
+    "me-connecter": "J'ai déjà un compte — Me connecter"
+  },
+  "blocs": {
+    "prochaine-session": {
+      "titre": "Votre prochaine session de négociation",
+      "vide": "Rien pour l'instant. Elle paraîtra ici dès que le calendrier officiel des sessions sera dans l'application."
+    },
+    "changements": {
+      "titre": "Changements du jour",
+      "mis-a-jour": "mis à jour {moment}",
+      "connus": "connus {moment}",
+      "vide": "Aucun changement signalé. Les salles déplacées et les sessions annulées paraîtront ici avec les signalements du réseau."
+    },
+    "trois-agendas": {
+      "titre": "Aujourd'hui, vos trois agendas",
+      "vide": "Rien aujourd'hui. Les Sessions de négociation, les Réunions de la Francophonie et le Pavillon de la Francophonie paraîtront ici, chacun sous son nom."
+    },
+    "documents": {
+      "titre": "Documents récents",
+      "vide": "Aucun document ouvert. Ceux que vous lirez paraîtront ici, lisibles sans réseau une fois téléchargés."
+    },
+    "lexique": {
+      "ouvrir": "Ouvrir le lexique anglais-français"
+    }
   }
 }

@@ -72,6 +72,25 @@ const { t } = useI18n()
   font-weight: var(--gn-graisse-demi-gras);
 }
 
+/* Clair et sombre côte à côte. Le conteneur porte `data-app` pour que le sombre s'y
+   applique, et hérite donc du cadre de l'application, que ces déclarations reprennent. */
+[data-app="guide-nego"] .gn-planche-composants__themes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--gn-espace-8);
+}
+
+[data-app="guide-nego"] .gn-planche-composants__theme {
+  min-height: 0;
+  width: auto;
+  overflow-x: visible;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gn-espace-8);
+  padding: var(--gn-espace-12);
+  border: var(--gn-filet-1) solid var(--gn-filet);
+}
+
 /* Le cadre de référence : 360 px, largeur sur laquelle les mesures ont été arrêtées. */
 [data-app="guide-nego"] .gn-planche-composants__cadre {
   width: min(100%, var(--gn-cadre-largeur));

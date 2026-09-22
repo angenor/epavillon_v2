@@ -97,11 +97,9 @@ useHead({ title: t('guide-nego.thematiques.titre') })
     :retour="retour"
     :onglets="false"
   >
-    <GnEtapes
-      v-if="premiereEntree && !compteManquant"
-      :courante="3"
-      :libelle="t('guide-nego.thematiques.etape')"
-    />
+    <div v-if="premiereEntree && !compteManquant" class="gn-themes__etapes">
+      <GnEtapes :courante="3" :libelle="t('guide-nego.thematiques.etape')" />
+    </div>
 
     <!-- Accès refusé : les thématiques suivent le compte, pas l'appareil. -->
     <template v-if="compteManquant">
@@ -211,7 +209,12 @@ useHead({ title: t('guide-nego.thematiques.titre') })
 </template>
 
 <style>
+[data-app="guide-nego"] .gn-themes__etapes {
+  padding-top: var(--gn-espace-16);
+}
+
 [data-app="guide-nego"] .gn-themes__aide {
+  padding-top: var(--gn-espace-12);
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
   color: var(--gn-texte-2);

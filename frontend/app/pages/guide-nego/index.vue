@@ -6,13 +6,44 @@ import {
   poserCle,
 } from '~/utils/guide-nego/stockage'
 import { propositionAFaire } from '~/utils/guide-nego/thematiques'
+import { BLOCS_DE_MA_JOURNEE, jourLisible } from '~/utils/guide-nego/journee'
 
+/**
+ * Écrans 07 et 08 — « Ma journée », l'accueil quotidien.
+ *
+ * **Un cadre, et il ne lit rien.** Les cinq blocs sont vides à cette étape, parce
+ * que les modules qui les rempliront viennent en 1, 3a, 3b, 4 et 5. Chaque bloc vide
+ * tient en **une ligne** sous son en-tête de groupe — ce qui manque, et quand cela
+ * viendra —, comme la maquette le fait pour les Réunions de la Francophonie : quatre
+ * états vides d'écran entier, à la suite, feraient l'écran d'une panne.
+ */
 definePageMeta({ layout: 'guide-nego' })
 defineI18nRoute(false)
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const session = useGnSession()
+const connexion = useGnConnexion()
 const thematiques = useGnThematiques()
+const { aujourdhui } = useGnAujourdhui()
+const { momentLisible } = useGnMomentLecture()
+
+const BLOCS_VIDES = BLOCS_DE_MA_JOURNEE.filter((bloc) => bloc !== 'lexique')
+
+const sousTitre = computed(() => jourLisible(aujourdhui.value, locale.value))
+
+const compte = session.compte
+const sansCompte = computed(() => session.pret.value && !session.connectee.value)
+const avatar = computed(() =>
+  session.connectee.value ? { prenom: compte.value.prenom, nom: compte.value.nom } : undefined,
+)
+
+/** « mis à jour à 11:35 » en ligne, « connus à 11:35 » sans réseau (FR-017). */
+const noteDesChangements = computed(() => {
+  const moment = momentLisible(connexion.etat.value.luA)
+  if (!moment) return undefined
+  const cle = connexion.etat.value.enLigne ? 'mis-a-jour' : 'connus'
+  return t(`guide-nego.accueil.blocs.changements.${cle}`, { moment })
+})
 
 /**
  * **Le choix des thématiques se propose une fois, et ne retient personne.**
@@ -42,6 +73,7 @@ async function proposerLesThematiques(): Promise<void> {
 // La première venue passe par l'écran d'ouverture ; ensuite, l'accueil s'ouvre seul.
 onMounted(() => {
   if (!lireCle(CLE_OUVERTURE_VUE)) return void navigateTo('/guide-nego/ouverture', { replace: true })
+  session.relireAuRetourAuPremierPlan()
   void proposerLesThematiques()
 })
 
@@ -49,11 +81,66 @@ useHead({ title: t('guide-nego.accueil.titre') })
 </script>
 
 <template>
-  <GnEcran :titre="t('guide-nego.accueil.titre')">
-    <GnEtatVide
-      picto="calendar"
-      :titre="t('guide-nego.accueil.vide.titre')"
-      :texte="t('guide-nego.accueil.vide.texte')"
-    />
+  <GnEcran :titre="t('guide-nego.accueil.titre')" :sous-titre="sousTitre" :avatar="avatar">
+    <!-- Sans compte, l'écran s'ouvre quand même : il invite, il ne bloque pas. -->
+    <template v-if="sansCompte">
+      <p class="gn-journee__invitation">{{ t('guide-nego.accueil.sans-compte.texte') }}</p>
+      <div class="gn-journee__sorties">
+        <GnBouton variante="principal" vers="/guide-nego/compte">
+          {{ t('guide-nego.accueil.sans-compte.creer-mon-compte') }}
+        </GnBouton>
+        <GnBouton variante="discret" vers="/guide-nego/connexion">
+          {{ t('guide-nego.accueil.sans-compte.me-connecter') }}
+        </GnBouton>
+      </div>
+    </template>
+
+    <section v-for="bloc in BLOCS_VIDES" :key="bloc" class="gn-journee__bloc">
+      <GnEnteteGroupe
+        :titre="t(`guide-nego.accueil.blocs.${bloc}.titre`)"
+        :note="bloc === 'changements' ? noteDesChangements : undefined"
+      />
+      <p class="gn-journee__vide">{{ t(`guide-nego.accueil.blocs.${bloc}.vide`) }}</p>
+    </section>
+
+    <div class="gn-journee__lexique">
+      <GnBouton variante="secondaire" vers="/guide-nego/lexique">
+        <span class="gn-journee__aa" aria-hidden="true">Aa</span>
+        {{ t('guide-nego.accueil.blocs.lexique.ouvrir') }}
+      </GnBouton>
+    </div>
   </GnEcran>
 </template>
+
+<style>
+[data-app="guide-nego"] .gn-journee__invitation {
+  padding-top: var(--gn-espace-16);
+  font-size: var(--gn-taille-17);
+  line-height: var(--gn-interligne-17);
+  max-width: var(--gn-mesure-lecture);
+}
+
+[data-app="guide-nego"] .gn-journee__sorties {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gn-espace-8);
+  padding-top: var(--gn-espace-12);
+}
+
+[data-app="guide-nego"] .gn-journee__vide {
+  padding-block: 10px;
+  font-size: var(--gn-taille-17);
+  line-height: var(--gn-interligne-17);
+  color: var(--gn-texte-2);
+}
+
+[data-app="guide-nego"] .gn-journee__lexique {
+  padding-block: var(--gn-espace-16);
+}
+
+/* « Aa » est un glyphe de bouton, hors échelle de texte (écarts 8 et 9). */
+[data-app="guide-nego"] .gn-journee__aa {
+  font-size: 18px;
+  line-height: 1;
+}
+</style>

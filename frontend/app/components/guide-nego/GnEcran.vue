@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { AvatarDEntete } from '~/components/guide-nego/GnEntete.vue'
 /**
  * Le cadre commun : en-tête, contenu, et la barre d'onglets quand l'écran en porte une.
  * Un écran secondaire — lexique, réglages — donne un `retour` et se passe d'onglets.
@@ -11,10 +12,12 @@ withDefaults(
     titre: string
     sousTitre?: string
     retour?: string
+    /** Relayé à l'en-tête : aucune page n'instancie `GnEntete` directement. */
+    avatar?: AvatarDEntete
     onglets?: boolean
     lexiqueOuvert?: boolean
   }>(),
-  { sousTitre: undefined, retour: undefined, onglets: true, lexiqueOuvert: false },
+  { sousTitre: undefined, retour: undefined, avatar: undefined, onglets: true, lexiqueOuvert: false },
 )
 
 const { echangesOuverts } = useGnDrapeaux()
@@ -38,7 +41,13 @@ watch(
 
 <template>
   <div class="gn-ecran" :class="{ 'gn-ecran--sans-onglets': !onglets }">
-    <GnEntete :titre="titre" :sous-titre="sousTitre" :retour="retour" :lexique-ouvert="lexiqueOuvert">
+    <GnEntete
+      :titre="titre"
+      :sous-titre="sousTitre"
+      :retour="retour"
+      :avatar="avatar"
+      :lexique-ouvert="lexiqueOuvert"
+    >
       <template #connexion>
         <slot name="connexion">
           <GnLigneConnexion :en-ligne="etat.enLigne" :lu-a="etat.luA" />

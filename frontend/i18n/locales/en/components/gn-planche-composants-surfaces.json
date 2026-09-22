@@ -72,5 +72,10 @@
   "verrou-note": "The main exit changes with the admission mode and the account's state: create an account, enter a code, request access, or go back to a pending request. On this board it shows what your own account would see.",
   "picto": "Pictograms",
   "picto-propos": "The fifty-seven symbols and their six sizes.",
-  "picto-note": "Section 4 already shows them one by one, with their names and sizes. Redrawing them here would leave two boards to keep in tune for a single family of symbols."
+  "picto-note": "Section 4 already shows them one by one, with their names and sizes. Redrawing them here would leave two boards to keep in tune for a single family of symbols.",
+  "avatar": "Avatar",
+  "avatar-propos": "The account at 40 px, at the top of “My day”. It opens “Profile and settings” through a 48 px target.",
+  "avatar-note": "Left to right: initials; the account image; an image that fails to load, as when offline — it falls back to initials, never an empty circle; and an account with no name read, which shows the silhouette.",
+  "theme-clair": "Light",
+  "theme-sombre": "Dark"
 }

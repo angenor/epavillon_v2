@@ -43,6 +43,11 @@ const motifs = computed<OptionDeFeuille[]>(() => [
 
 const adaptation = ref(true)
 const genre = ref(false)
+
+const THEMES = ['clair', 'sombre'] as const
+const IMAGE = assetUrl('/guide-nego/icones/180.png')
+// Une adresse qui ne répond pas : c'est ce que voit un téléphone sans réseau.
+const IMAGE_ABSENTE = assetUrl('/guide-nego/icones/absente.png')
 </script>
 
 <template>
@@ -245,6 +250,30 @@ const genre = ref(false)
         />
       </div>
       <p class="gn-planche-note">{{ t('gn-planche-composants-surfaces.verrou-note') }}</p>
+    </GnPlancheSection>
+
+    <GnPlancheSection
+      :titre="t('gn-planche-composants-surfaces.avatar')"
+      :propos="t('gn-planche-composants-surfaces.avatar-propos')"
+    >
+      <div class="gn-planche-composants__themes">
+        <div
+          v-for="theme in THEMES"
+          :key="theme"
+          class="gn-planche-composants__theme"
+          data-app="guide-nego"
+          :data-theme="theme"
+        >
+          <span class="gn-planche-composants__legende">{{ t(`gn-planche-composants-surfaces.theme-${theme}`) }}</span>
+          <div class="gn-planche-composants__rangee">
+            <GnAvatar prenom="Awa" nom="Diallo" />
+            <GnAvatar prenom="Émilie" nom="Traoré" :image="IMAGE" />
+            <GnAvatar prenom="Awa" nom="Diallo" :image="IMAGE_ABSENTE" />
+            <GnAvatar :prenom="null" :nom="null" />
+          </div>
+        </div>
+      </div>
+      <p class="gn-planche-note">{{ t('gn-planche-composants-surfaces.avatar-note') }}</p>
     </GnPlancheSection>
 
     <GnPlancheSection
