@@ -176,9 +176,9 @@ La bibliothèque de documents de Guide Négo. Maquette : 03-documents.html et 04
 Toute personne, même sans compte, cherche et filtre les documents publics par type,
 thématique et COP ; un document concerne zéro ou plusieurs thématiques ; il est un fichier
 ou un lien externe, jamais les deux. La fiche montre résumé, version, date, éditeur, et le
-bandeau « Remplacé par… » qui mène au document à jour. Avec un compte : favori,
-téléchargement pour lire sans réseau avec sa progression, « Mes documents » et la place
-occupée, tout retirer en un geste. Les documents réservés demandent l'accès négociateur et
+bandeau « Remplacé par… » qui mène au document à jour. Toute personne, même sans compte,
+télécharge un document public pour le lire sans réseau avec sa progression ; avec un
+compte, le favori ; « Mes documents » et la place occupée, tout retirer en un geste. Les documents réservés demandent l'accès négociateur et
 s'effacent du téléphone à la déconnexion. Le lecteur : page en lecture, barre repliée et
 dépliée, sommaire, recherche dans le document (occurrence courante et autres), progression
 et reprise à la dernière page lue, taille du texte, thème ; un terme anglais touché ouvre
@@ -190,6 +190,11 @@ poser et retirer une note de correction sur une page.
 Hors périmètre : indexation par l'IA, quiz, proposition de documents par les membres.
 Critère : le guide est publié en une journée et lu en salle sans réseau.
 ```
+
+> **Corrigé le 22/09** : ce prompt réservait le téléchargement au compte. Un document public se
+> télécharge sans compte — sinon une déléguée sans compte lit le guide avec du réseau, jamais en
+> salle, contre ADR-003 ; un téléchargement ne crée rien sur le serveur. Le favori reste au compte.
+> Écart 41 de 05-design.md.
 
 > **Reporté de 0c (22/09)** : le bouton « Libérer » de « Mes téléchargements », son scénario — la
 > place affichée diminue une fois le geste confirmé — et FR-024 de 0c. **Il ne libère que les
