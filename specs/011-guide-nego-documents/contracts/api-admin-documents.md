@@ -56,7 +56,7 @@ Le champ `FileField` du back-office s'en charge, puis appelle `PUT …/file`.
 | `NEGOTIATION_DOCUMENT_SOURCE_MISSING` | 422 | « Déposez un fichier ou indiquez un lien avant de publier. » — traduit de `ck_documents_published_has_source` |
 | `NEGOTIATION_DOCUMENT_NOT_READY` | 409 | « L'extraction n'est pas terminée. Attendez-la, ou choisissez « ouvrir tel quel ». » |
 | `NEGOTIATION_DOCUMENT_FILE_LOCKED` | 409 | « Le fichier d'un document publié ne change pas. Publiez une nouvelle version. » |
-| `NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED` | 409 | « Ce document est déjà remplacé par « {titre} ». » — traduit de `ux_documents_supersedes` |
+| `NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED` | 409 | « Ce document est déjà remplacé par la version {version}. » — traduit de `ux_documents_supersedes`. La version et non le titre : une nouvelle version garde le titre |
 | `NEGOTIATION_DOCUMENT_SUPERSEDE_CYCLE` | 409 | « Ce remplacement formerait une boucle. » |
 | `NEGOTIATION_DOCUMENT_UNKNOWN_THEME` | 400 | « Cette thématique n'existe pas : {code}. » |
 | `NEGOTIATION_DOCUMENT_UNKNOWN_TYPE` | 400 | « Ce type de document n'existe pas. » — traduit de `tg_check_term_taxonomy` |

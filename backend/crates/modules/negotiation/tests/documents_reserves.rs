@@ -71,7 +71,7 @@ async fn poser_resume_et_thematiques(
         "themes": themes,
     }))
     .expect("entrée partielle");
-    admin_documents::modifier(&bac.state, &bac.ctx(admin), id, &entree, "fr")
+    admin_documents::modifier(&bac.state, &bac.ctx(admin), id, &entree)
         .await
         .expect("résumé et thématiques posés");
 }
@@ -155,7 +155,7 @@ async fn poser_une_note(bac: &Bac, auteur: Uuid, id: Uuid, texte: &str) {
 async fn lien_en_brouillon(bac: &Bac, admin: Uuid) -> Uuid {
     let mut e = entree("Bulletin réservé en préparation", true);
     e.external_url = Some(Some(URL_RESERVEE.to_owned()));
-    admin_documents::creer(&bac.state, &bac.ctx(admin), &e, "fr")
+    admin_documents::creer(&bac.state, &bac.ctx(admin), &e)
         .await
         .expect("création du lien en brouillon")
 }

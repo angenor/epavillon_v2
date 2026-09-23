@@ -21,11 +21,11 @@ fn refus<T: std::fmt::Debug>(r: Result<T>) -> ApiError {
 }
 
 async fn creer_avec(bac: &Bac, auteur: Uuid, v: Value) -> Result<Uuid> {
-    admin::creer(&bac.state, &bac.ctx(auteur), &saisie(v), "fr").await
+    admin::creer(&bac.state, &bac.ctx(auteur), &saisie(v)).await
 }
 
 async fn modifier(bac: &Bac, auteur: Uuid, id: Uuid, v: Value) -> Result<()> {
-    admin::modifier(&bac.state, &bac.ctx(auteur), id, &saisie(v), "fr").await
+    admin::modifier(&bac.state, &bac.ctx(auteur), id, &saisie(v)).await
 }
 
 async fn la_fiche(bac: &Bac, personne: Uuid, id: Uuid) -> AdminDocument {
@@ -149,15 +149,10 @@ async fn une_seconde_nouvelle_version_est_refusee_en_nommant_la_premiere() {
     let premiere = admin::nouvelle_version(&bac.state, &bac.ctx(ifdd), id, "fr")
         .await
         .expect("première nouvelle version");
-    // Renommée, elle se distingue de l'original, qui porte le même titre.
-    modifier(
-        &bac,
-        ifdd,
-        premiere,
-        json!({ "title": { "fr": "Guide des négociations 2026", "en": "Negotiations guide 2026" } }),
-    )
-    .await
-    .expect("titre de la première");
+    // Elle garde le titre de l'original : seule sa version la distingue.
+    modifier(&bac, ifdd, premiere, json!({ "version": "2026" }))
+        .await
+        .expect("version de la première");
 
     let err = refus(admin::nouvelle_version(&bac.state, &bac.ctx(ifdd), id, "fr").await);
     assert_eq!(
@@ -167,7 +162,7 @@ async fn une_seconde_nouvelle_version_est_refusee_en_nommant_la_premiere() {
     );
     assert_eq!(
         err.message,
-        "Ce document est déjà remplacé par « Guide des négociations 2026 »."
+        "Ce document est déjà remplacé par la version 2026."
     );
     assert_eq!(err.field.as_deref(), Some("supersedes_id"));
     assert_eq!(documents_en_base(&bac).await, 2, "aucun brouillon de plus");

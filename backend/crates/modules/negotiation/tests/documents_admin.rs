@@ -27,11 +27,11 @@ fn refus<T: std::fmt::Debug>(r: Result<T>) -> ApiError {
 }
 
 async fn creer_avec(bac: &Bac, auteur: Uuid, v: Value) -> Result<Uuid> {
-    admin::creer(&bac.state, &bac.ctx(auteur), &saisie(v), "fr").await
+    admin::creer(&bac.state, &bac.ctx(auteur), &saisie(v)).await
 }
 
 async fn modifier(bac: &Bac, auteur: Uuid, id: Uuid, v: Value) -> Result<()> {
-    admin::modifier(&bac.state, &bac.ctx(auteur), id, &saisie(v), "fr").await
+    admin::modifier(&bac.state, &bac.ctx(auteur), id, &saisie(v)).await
 }
 
 async fn fiche(bac: &Bac, personne: Uuid, id: Uuid) -> Result<AdminDocument> {
@@ -340,7 +340,7 @@ async fn un_fichier_et_un_lien_ensemble_sont_refuses() {
 
     let mut e = entree("Bulletin des négociations", false);
     e.external_url = Some(Some("https://enb.iisd.org/cop30".to_owned()));
-    let lien = admin::creer(&bac.state, &bac.ctx(ifdd), &e, "fr")
+    let lien = admin::creer(&bac.state, &bac.ctx(ifdd), &e)
         .await
         .expect("lien en brouillon");
     let asset = objet_pdf(&bac, ifdd, PETIT, "ready").await;
@@ -437,11 +437,11 @@ async fn un_second_successeur_est_refuse_en_nommant_le_premier() {
     let successeur = creer_avec(
         &bac,
         ifdd,
-        json!({ "title": { "fr": "Guide 2025" }, "type": "negotiation_guide", "supersedes_id": ancien }),
+        json!({ "title": { "fr": "Guide 2025" }, "type": "negotiation_guide", "version": "2025", "supersedes_id": ancien }),
     )
     .await
     .expect("successeur");
-    let attendu = "Ce document est déjà remplacé par « Guide 2025 ».";
+    let attendu = "Ce document est déjà remplacé par la version 2025.";
 
     let err = refus(
         creer_avec(

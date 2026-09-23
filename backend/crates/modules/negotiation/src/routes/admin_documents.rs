@@ -169,7 +169,7 @@ pub(crate) async fn creer(
 ) -> Result<HttpResponse> {
     let ctx = crate::routes::contexte_de(&requete, acteur.person_id);
     let locale = crate::routes::locale_de(&requete);
-    let id = service::creer(&state, &ctx, &entree, &locale).await?;
+    let id = service::creer(&state, &ctx, &entree).await?;
     let droits = service::droits(&state, acteur.person_id).await?;
     let fiche = service::fiche(&state, &droits, id, &locale).await?;
     Ok(HttpResponse::Created().json(fiche))
@@ -227,8 +227,7 @@ pub(crate) async fn modifier(
 ) -> Result<HttpResponse> {
     let id = chemin.into_inner();
     let ctx = crate::routes::contexte_de(&requete, acteur.person_id);
-    let locale = crate::routes::locale_de(&requete);
-    service::modifier(&state, &ctx, id, &entree, &locale).await?;
+    service::modifier(&state, &ctx, id, &entree).await?;
     rendre_la_fiche(&state, &requete, acteur.person_id, id).await
 }
 

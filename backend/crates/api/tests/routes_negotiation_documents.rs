@@ -136,7 +136,7 @@ fn entree(titre: &str, restreint: bool, lien: Option<&str>) -> Value {
 
 async fn brouillon(bac: &Bac, entree: Value) -> Uuid {
     let entree = serde_json::from_value(entree).expect("entrée de document");
-    admin::creer(&bac.etat.negotiation, &bac.ctx(bac.admin), &entree, "fr")
+    admin::creer(&bac.etat.negotiation, &bac.ctx(bac.admin), &entree)
         .await
         .expect("création du brouillon")
 }

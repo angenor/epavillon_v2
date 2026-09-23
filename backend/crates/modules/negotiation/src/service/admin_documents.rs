@@ -195,12 +195,11 @@ async fn verifier_la_cop(conn: &mut sqlx::PgConnection, cop: Option<Uuid>) -> Re
     Ok(())
 }
 
-/// Le refus d'un second remplaçant nomme celui qui existe déjà.
+/// Le refus d'un second remplaçant nomme celui qui existe déjà, par sa version.
 async fn nommer_le_successeur(
     state: &NegotiationState,
     erreur: ApiError,
     remplace: Option<Uuid>,
-    locale: &str,
 ) -> ApiError {
     if erreur.code != ErrorCode::NegotiationDocumentAlreadySuperseded {
         return erreur;
@@ -211,16 +210,16 @@ async fn nommer_le_successeur(
     let Ok(mut conn) = state.pool().acquire().await else {
         return erreur;
     };
-    match documents::successeur_direct(&mut conn, ancien, locale).await {
-        Ok(Some(titre)) => deja_remplace(&titre),
+    match documents::version_du_successeur(&mut conn, ancien).await {
+        Ok(Some(version)) => deja_remplace(&version),
         _ => erreur,
     }
 }
 
-fn deja_remplace(titre: &str) -> ApiError {
+fn deja_remplace(version: &str) -> ApiError {
     ApiError::with_message(
         ErrorCode::NegotiationDocumentAlreadySuperseded,
-        format!("Ce document est déjà remplacé par « {titre} »."),
+        format!("Ce document est déjà remplacé par la version {version}."),
     )
     .field("supersedes_id")
 }
@@ -229,7 +228,6 @@ pub async fn creer(
     state: &NegotiationState,
     ctx: &RequestContext,
     entree: &AdminDocumentInput,
-    locale: &str,
 ) -> Result<Uuid> {
     let auteur = ctx.actor_id.ok_or_else(ApiError::unauthenticated)?;
     let title = entree
@@ -278,7 +276,7 @@ pub async fn creer(
     .await;
     let id = match resultat {
         Ok(id) => id,
-        Err(e) => return Err(nommer_le_successeur(state, e, remplace, locale).await),
+        Err(e) => return Err(nommer_le_successeur(state, e, remplace).await),
     };
     if let Some(themes) = &entree.themes {
         document_themes::remplacer(&mut tx, id, themes).await?;
@@ -292,7 +290,6 @@ pub async fn modifier(
     ctx: &RequestContext,
     id: Uuid,
     entree: &AdminDocumentInput,
-    locale: &str,
 ) -> Result<()> {
     if let Some(t) = &entree.title {
         texte_valide(t, "title")?;
@@ -337,7 +334,7 @@ pub async fn modifier(
     )
     .await;
     if let Err(e) = resultat {
-        return Err(nommer_le_successeur(state, e, entree.supersedes_id.flatten(), locale).await);
+        return Err(nommer_le_successeur(state, e, entree.supersedes_id.flatten()).await);
     }
     if let Some(themes) = &entree.themes {
         document_themes::remplacer(&mut tx, id, themes).await?;
@@ -471,8 +468,8 @@ pub async fn nouvelle_version(
         .ok_or_else(introuvable)?;
     // Avant l'écriture : sa version recopiée heurterait l'unicité du slug avant
     // celle du successeur, et le refus ne nommerait pas le remplaçant.
-    if let Some(titre) = documents::successeur_direct(&mut tx, id, locale).await? {
-        return Err(deja_remplace(&titre));
+    if let Some(version) = documents::version_du_successeur(&mut tx, id).await? {
+        return Err(deja_remplace(&version));
     }
     let version = format!("{} (nouvelle version)", ancienne.version);
     match documents::nouvelle_version(&mut tx, id, &version, auteur).await {
@@ -480,7 +477,7 @@ pub async fn nouvelle_version(
             tx.commit().await?;
             Ok(nouveau)
         }
-        Err(e) => Err(nommer_le_successeur(state, e, Some(id), locale).await),
+        Err(e) => Err(nommer_le_successeur(state, e, Some(id)).await),
     }
 }
 

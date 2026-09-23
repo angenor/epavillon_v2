@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT version FROM negotiation.documents WHERE supersedes_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "version",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "version"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8be325ab93b9aec0af1bd1a486eb12eb60764f1cf9d086a883712dee9d11cd01"
+}

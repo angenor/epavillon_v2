@@ -652,17 +652,13 @@ pub async fn nouvelle_version(
 
 /// Le successeur direct d'un document, quel que soit son état : c'est lui que
 /// nomme le refus d'un second remplaçant.
-pub async fn successeur_direct(
-    conn: &mut PgConnection,
-    id: Uuid,
-    locale: &str,
-) -> Result<Option<String>> {
-    let titre = sqlx::query_scalar!(
-        r#"SELECT platform.t(title, $2) AS "titre!" FROM negotiation.documents WHERE supersedes_id = $1"#,
-        id,
-        locale
+/// La version du remplaçant direct : une nouvelle version garde le titre, qui ne le distingue pas.
+pub async fn version_du_successeur(conn: &mut PgConnection, id: Uuid) -> Result<Option<String>> {
+    let version = sqlx::query_scalar!(
+        "SELECT version FROM negotiation.documents WHERE supersedes_id = $1",
+        id
     )
     .fetch_optional(conn)
     .await?;
-    Ok(titre)
+    Ok(version)
 }

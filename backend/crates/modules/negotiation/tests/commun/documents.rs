@@ -208,7 +208,6 @@ pub async fn creer(bac: &Bac, admin: Uuid, titre: &str, restreint: bool) -> Uuid
         &bac.state,
         &bac.ctx(admin),
         &entree(titre, restreint),
-        "fr",
     )
     .await
     .expect("création du brouillon")
@@ -239,7 +238,7 @@ pub async fn fichier_publie(bac: &Bac, admin: Uuid, titre: &str, restreint: bool
 pub async fn lien_publie(bac: &Bac, admin: Uuid, titre: &str, url: &str, restreint: bool) -> Uuid {
     let mut e = entree(titre, restreint);
     e.external_url = Some(Some(url.to_owned()));
-    let id = negotiation::service::admin_documents::creer(&bac.state, &bac.ctx(admin), &e, "fr")
+    let id = negotiation::service::admin_documents::creer(&bac.state, &bac.ctx(admin), &e)
         .await
         .expect("création du lien");
     negotiation::service::admin_documents::publier(&bac.state, &bac.ctx(admin), id)

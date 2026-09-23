@@ -684,12 +684,12 @@ function texteValide(texte: I18nText, champ: string): void {
   if (!texte.fr?.trim()) throw invalide('Le texte en français est obligatoire.', champ)
 }
 
-/** Le refus d'un second remplaçant nomme celui qui existe déjà. */
-const dejaRemplace = (successeurDirect: Fiche, langue: string) =>
+/** Le refus d'un second remplaçant nomme celui qui existe déjà, par sa version : le titre ne change pas. */
+const dejaRemplace = (successeurDirect: Fiche) =>
   refus(
     'NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED',
     409,
-    `Ce document est déjà remplacé par « ${resolveI18nText(successeurDirect.title, langue)} ».`,
+    `Ce document est déjà remplacé par la version ${successeurDirect.version}.`,
     'supersedes_id',
   )
 
@@ -709,7 +709,7 @@ function appliquer(f: Fiche, e: AdminDocumentInput, langue: string): void {
   const url = e.external_url === undefined ? f.external_url : e.external_url
   if (url && f.asset_id) throw lesDeux()
   const autre = e.supersedes_id ? fiches.find((x) => x.supersedes_id === e.supersedes_id && x.id !== f.id) : undefined
-  if (autre) throw dejaRemplace(autre, langue)
+  if (autre) throw dejaRemplace(autre)
   const inconnue = e.themes?.find((code) => !THEMES[code])
   if (inconnue !== undefined) {
     throw refus('NEGOTIATION_DOCUMENT_UNKNOWN_THEME', 400, `Cette thématique n'existe pas : ${inconnue}.`, 'themes')
@@ -812,7 +812,7 @@ export function depublierLeDocument(id: Uuid, langue = 'fr'): AdminDocument {
 export function nouvelleVersion(id: Uuid, langue = 'fr'): AdminDocument {
   const a = ficheOuRefus(id)
   const deja = fiches.find((x) => x.supersedes_id === id)
-  if (deja) throw dejaRemplace(deja, langue)
+  if (deja) throw dejaRemplace(deja)
   const { title, summary, type, themes, cop, publisher, locale, restricted, rag_eligible } = structuredClone(a)
   const cree = creerUnDocument(
     {

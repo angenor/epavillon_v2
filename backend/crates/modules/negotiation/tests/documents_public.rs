@@ -53,7 +53,7 @@ async fn garnir_et_publier(bac: &Bac, admin: Uuid, id: Uuid, octets: &[u8]) {
 }
 
 async fn fichier_publie_avec(bac: &Bac, admin: Uuid, e: AdminDocumentInput, pdf: &[u8]) -> Uuid {
-    let id = admin_documents::creer(&bac.state, &bac.ctx(admin), &e, "fr")
+    let id = admin_documents::creer(&bac.state, &bac.ctx(admin), &e)
         .await
         .expect("création du brouillon");
     garnir_et_publier(bac, admin, id, pdf).await;
@@ -62,7 +62,7 @@ async fn fichier_publie_avec(bac: &Bac, admin: Uuid, e: AdminDocumentInput, pdf:
 
 /// Un lien publié : sans extraction, c'est le document le moins coûteux.
 async fn lien_publie_avec(bac: &Bac, admin: Uuid, e: AdminDocumentInput) -> Uuid {
-    let id = admin_documents::creer(&bac.state, &bac.ctx(admin), &e, "fr")
+    let id = admin_documents::creer(&bac.state, &bac.ctx(admin), &e)
         .await
         .expect("création du lien");
     admin_documents::publier(&bac.state, &bac.ctx(admin), id)
@@ -76,7 +76,7 @@ async fn lien_remplacant(bac: &Bac, admin: Uuid, ancien: Uuid, titre: &str) -> U
     let mut e = entree(titre, false);
     e.external_url = Some(Some(format!("https://unfccc.int/{}", Uuid::now_v7())));
     e.supersedes_id = Some(Some(ancien));
-    admin_documents::creer(&bac.state, &bac.ctx(admin), &e, "fr")
+    admin_documents::creer(&bac.state, &bac.ctx(admin), &e)
         .await
         .expect("création du remplaçant")
 }
@@ -371,7 +371,6 @@ async fn la_bibliotheque_cite_ses_cop_par_leur_libelle_et_leur_ville() {
         &bac.state,
         &bac.ctx(ifdd),
         &lien_de("Bulletin de Bakou", Some(bakou)),
-        "fr",
     )
     .await
     .expect("brouillon");

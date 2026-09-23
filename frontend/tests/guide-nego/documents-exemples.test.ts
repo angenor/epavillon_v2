@@ -264,13 +264,13 @@ test('une seconde nouvelle version est refusée en nommant le premier remplaçan
   const premiere = m.nouvelleVersion(D.auNomDeMaDelegation)
   assert.equal(premiere.supersedes?.id, D.auNomDeMaDelegation)
   assert.equal(premiere.version, 'Deuxième édition (nouvelle version)')
-  m.modifierLeDocument(premiere.id, { title: { fr: 'Au nom de ma délégation, troisième édition', en: 'On behalf of my delegation, third edition' } })
+  m.modifierLeDocument(premiere.id, { version: 'Troisième édition' })
 
   const fr = refus(() => m.nouvelleVersion(D.auNomDeMaDelegation))
   assert.deepEqual([fr.code, fr.status, fr.field], ['NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED', 409, 'supersedes_id'])
-  assert.equal(fr.message, 'Ce document est déjà remplacé par « Au nom de ma délégation, troisième édition ».')
+  assert.equal(fr.message, 'Ce document est déjà remplacé par la version Troisième édition.')
   const en = refus(() => m.nouvelleVersion(D.auNomDeMaDelegation, 'en'))
-  assert.equal(en.message, 'Ce document est déjà remplacé par « On behalf of my delegation, third edition ».')
+  assert.equal(en.message, fr.message, 'le catalogue de l’API est français')
 
   const autre = m.creerUnDocument({ title: { fr: 'Concurrent' }, type: 'report' })
   const parPatch = refus(() => m.modifierLeDocument(autre.id, { supersedes_id: D.auNomDeMaDelegation }))

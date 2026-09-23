@@ -775,7 +775,7 @@ async fn chaque_route_des_documents_refuse_ladministrateur_dune_edition_meme_sur
     // le plus de vraisemblance.
     let mut e = entree("Guide de la COP31", false);
     e.cop = Some(Some(edition));
-    let brouillon = admin_documents::creer(&bac.state, &bac.ctx(ifdd), &e, "fr")
+    let brouillon = admin_documents::creer(&bac.state, &bac.ctx(ifdd), &e)
         .await
         .expect("création du brouillon");
     let cop: Option<Uuid> =
