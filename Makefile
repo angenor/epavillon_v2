@@ -163,7 +163,7 @@ assert-db:
 # ---------------------------------------------------------------------------
 check-front: check-api-contract check-guide-nego
 	@if [ -d frontend ]; then \
-	   cd frontend && npm run typecheck && npm run build; \
+	   cd frontend && npm run --silent test:site && npm run typecheck && npm run build; \
 	 else echo 'frontend/ absent — rien à vérifier (prompt A0.1)'; fi
 
 # SQLx vérifie ses requêtes À LA COMPILATION : DATABASE_URL doit être renseignée

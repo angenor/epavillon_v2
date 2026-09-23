@@ -132,7 +132,7 @@
     "reviewerPlaceholder": "Choisir un membre du comité",
     "workload": "{count} dossier en charge | {count} dossier en charge | {count} dossiers en charge",
     "dueAt": "Échéance de la revue",
-    "dueAtHint": "Heure de {zone}. Laissée vide, aucune échéance n'est fixée.",
+    "dueAtHint": "À l'{zone}. Laissée vide, aucune échéance n'est fixée.",
     "submit": "Affecter",
     "noCommittee": "Cette édition n'a pas de comité de sélection constitué.",
     "success": "Aucun dossier affecté | Un dossier affecté | {count} dossiers affectés"

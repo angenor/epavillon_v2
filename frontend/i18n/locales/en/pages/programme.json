@@ -31,7 +31,7 @@
     "details": "See details"
   },
   "calendar": {
-    "zoneNotice": "Times are shown in {zone} time, the event's own.",
+    "zoneNotice": "Times are shown in {zone}, the event's own.",
     "noEvent": "No activity on this day."
   },
   "detail": {

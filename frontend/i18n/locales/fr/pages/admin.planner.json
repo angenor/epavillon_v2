@@ -67,7 +67,7 @@
     "orDrag": "ou glissez la carte dans la grille"
   },
   "calendar": {
-    "zoneNotice": "Horaires affichés à l'heure de {zone}.",
+    "zoneNotice": "Horaires affichés à l'{zone}.",
     "hint": "Glissez un bloc pour le déplacer, étirez son bord pour changer sa durée.",
     "viewLabel": "Période affichée",
     "view": {

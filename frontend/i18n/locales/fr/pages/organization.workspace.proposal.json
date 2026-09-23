@@ -91,7 +91,7 @@
     "reportMissing": "Le compte rendu de cette activité n'a pas encore été déposé.",
     "reminders": {
       "title": "Calendrier des rappels",
-      "description": "Quatre rappels partent avant l'activité, et ils sont cumulés : chaque inscrit les reçoit tous les quatre. Les heures sont celles de {zone}.",
+      "description": "Quatre rappels partent avant l'activité, et ils sont cumulés : chaque inscrit les reçoit tous les quatre. Les heures sont données à l'{zone}.",
       "offset": {
         "days": "{count} jour avant | {count} jour avant | {count} jours avant",
         "hours": "{count} heure avant | {count} heure avant | {count} heures avant",

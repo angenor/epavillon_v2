@@ -60,6 +60,7 @@ const emit = defineEmits<{
 
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
+const { zoneOf } = useDateTime()
 const { isLive } = useLiveSession()
 
 const sessionById = computed(() => new Map(props.sessions.map((session) => [session.id, session])))
@@ -145,7 +146,7 @@ function onViewChange(view: { startDate?: Date }): void {
   <div>
     <p class="mb-2 text-sm text-text-muted">
       {{ t('programme.calendar.zoneNotice', {
-        zone: props.zoneLabel || props.timezone,
+        zone: zoneOf(props.zoneLabel || props.timezone),
       }) }}
     </p>
 

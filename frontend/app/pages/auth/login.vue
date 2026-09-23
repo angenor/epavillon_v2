@@ -143,7 +143,7 @@ const failure = computed<{ intent: 'danger' | 'warning'; title: string; message:
 </script>
 
 <template>
-  <AuthScreen :continue-to="'/'">
+  <AuthScreen :continue-to="redirectTo">
     <AuthCard
       :title="t('auth.login.title')"
       :description="isMfaStep ? undefined : t('auth.login.description')"

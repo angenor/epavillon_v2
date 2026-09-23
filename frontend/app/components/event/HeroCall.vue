@@ -54,7 +54,7 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), { tone: 'surface' })
 
 const { t } = useI18n()
-const { date, dateTime } = useDateTime()
+const { date, dateTime, zoneOf } = useDateTime()
 
 const phase = computed<CallPhase | null>(() => (props.call ? callPhase(props.call) : null))
 const deadline = computed(() => (props.call ? effectiveDeadline(props.call) : null))
@@ -159,7 +159,7 @@ const countdownClass = computed(() => {
       <dd class="mt-1 text-sm" :class="valueClass">
         {{ phase === 'upcoming' ? opensLabel : deadlineLabel }}
         <span class="block text-xs" :class="mutedClass">
-          {{ t('common.datetime.zoneOf', { zone: zoneName }) }}
+          {{ zoneOf(zoneName) }}
         </span>
       </dd>
 

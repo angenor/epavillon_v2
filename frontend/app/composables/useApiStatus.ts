@@ -56,3 +56,14 @@ export function useSessionWitness() {
     path: '/',
   })
 }
+
+/**
+ * Vrai quand le rendu serveur a laissé passer une page réservée sans avoir pu
+ * trancher la session. Rien de ce que la page lirait au serveur ne vaudrait :
+ * sans personne, ses permissions seraient vides et l'écran dirait « accès
+ * refusé ». `app.vue` rend donc un chargement, et la page ne se rend que dans le
+ * navigateur, une fois le jeton tourné.
+ */
+export function useSessionDeferred() {
+  return useState('auth:deferred', () => false)
+}

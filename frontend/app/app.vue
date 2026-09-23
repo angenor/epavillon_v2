@@ -10,11 +10,20 @@
  *  · poser les attributs `lang` / `dir` et les liens alternatifs de langue ;
  *  · choisir le layout. Le layout `public` est le défaut ; une page passe au
  *    back-office avec `definePageMeta({ layout: 'admin' })`.
+ *
+ * Une page réservée que le serveur n'a pas pu rendre faute de session tranchée
+ * (`useSessionDeferred`) se rend après le montage, et non à l'hydratation : le
+ * HTML du serveur et le premier rendu du navigateur restent le même chargement.
  */
 const { t } = useI18n()
 const route = useRoute()
 const preferences = usePreferencesStore()
 const localeHead = useLocaleHead()
+const deferred = useSessionDeferred()
+
+onMounted(() => {
+  deferred.value = false
+})
 
 const layoutName = computed(() => {
   const declared = route.meta.layout
@@ -35,7 +44,10 @@ useHead(() => ({
 </script>
 
 <template>
-  <NuxtLayout :name="layoutName">
+  <main v-if="deferred" class="mx-auto w-full max-w-5xl px-4 py-16">
+    <UiLoadingState variant="text" :lines="6" :label="t('common.states.loading.label')" />
+  </main>
+  <NuxtLayout v-else :name="layoutName">
     <NuxtPage />
   </NuxtLayout>
 </template>

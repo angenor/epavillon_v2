@@ -27,11 +27,11 @@
 interface Props {
   /** Laisser passer une personne connectée ? Faux partout sauf vérification. */
   allowAuthenticated?: boolean
-  /** Destination du bouton « Continuer » de l'état « déjà connecté ». */
+  /** Destination du bouton « Continuer » de l'état « déjà connecté », déjà localisée. */
   continueTo?: string
 }
 
-const props = withDefaults(defineProps<Props>(), { allowAuthenticated: false, continueTo: '/' })
+const props = withDefaults(defineProps<Props>(), { allowAuthenticated: false, continueTo: undefined })
 
 const { t } = useI18n()
 const auth = useAuthStore()

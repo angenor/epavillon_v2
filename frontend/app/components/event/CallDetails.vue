@@ -45,7 +45,7 @@ const props = defineProps<Props>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
-const { date, dateTime } = useDateTime()
+const { date, dateTime, zoneOf } = useDateTime()
 
 const phase = computed<CallPhase | null>(() => (props.call ? callPhase(props.call) : null))
 const deadline = computed(() => (props.call ? effectiveDeadline(props.call) : null))
@@ -104,7 +104,7 @@ const resultsLabel = computed(() =>
         <dd class="mt-1 text-sm text-text">
           {{ phase === 'upcoming' ? opensLabel : deadlineLabel }}
           <span class="block text-xs text-text-muted">
-            {{ t('common.datetime.zoneOf', { zone: props.edition.city ?? props.edition.timezone }) }}
+            {{ zoneOf(props.edition.city ?? props.edition.timezone) }}
           </span>
           <!-- La prolongation ne remplace pas l'échéance annoncée : elle s'ajoute. -->
           <span v-if="originalDeadlineLabel" class="mt-1 block text-xs text-text-muted">

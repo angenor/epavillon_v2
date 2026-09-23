@@ -14,6 +14,7 @@
     "verifier-garde:guide-nego": "node scripts/guide-nego-verifier-garde.mjs",
     "icones:guide-nego": "node scripts/guide-nego-icones.mjs",
     "test:guide-nego": "node --test \"tests/guide-nego/*.test.ts\"",
+    "test:site": "node --test \"tests/site/*.test.ts\"",
     "postinstall": "nuxt prepare"
   },
   "dependencies": {

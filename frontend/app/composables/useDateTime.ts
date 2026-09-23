@@ -1,4 +1,4 @@
-import type { DateInput } from '~/utils/datetime'
+import type { DateInput, ZoneFormula } from '~/utils/datetime'
 import type { TimeZoneName } from '~/types/shared'
 
 /**
@@ -21,6 +21,10 @@ export function useDateTime() {
   })
 
   const base = (timeZone: TimeZoneName) => ({ timeZone, locale: intlLocale.value })
+
+  /** Chaque formule qui nomme la ville a sa jumelle élidée : « heure d'Antalya ». */
+  const withZone = (formula: ZoneFormula, params: Record<string, string> & { zone: string }) =>
+    t(zoneFormulaKey(formula, params.zone), params)
 
   return {
     intlLocale,
@@ -45,7 +49,7 @@ export function useDateTime() {
     ) => {
       const time = formatTime(value, base(timeZone))
       if (!time) return ''
-      return t('common.datetime.timeWithZone', {
+      return withZone('timeWithZone', {
         time,
         zone: zoneLabel?.trim() || timeZoneCityLabel(timeZone),
       })
@@ -72,16 +76,16 @@ export function useDateTime() {
       const parts = timeRangeParts(start, end, { ...base(timeZone), zoneLabel })
       if (!parts) return ''
       if (!parts.end) {
-        return t('common.datetime.timeWithZone', { time: parts.start, zone: parts.zone })
+        return withZone('timeWithZone', { time: parts.start, zone: parts.zone })
       }
       if (parts.sameDay) {
-        return t('common.datetime.timeRangeWithZone', {
+        return withZone('timeRangeWithZone', {
           start: parts.start,
           end: parts.end,
           zone: parts.zone,
         })
       }
-      return t('common.datetime.timeRangeWithZone', {
+      return withZone('timeRangeWithZone', {
         start: t('common.datetime.dayAndTime', { date: parts.startDate, time: parts.start }),
         end: t('common.datetime.dayAndTime', { date: parts.endDate ?? '', time: parts.end }),
         zone: parts.zone,
@@ -118,7 +122,7 @@ export function useDateTime() {
     ) => {
       const parts = timeRangeParts(start, end, { ...base(timeZone), zoneLabel })
       if (!parts) return ''
-      const zone = t('common.datetime.zoneOf', { zone: parts.zone })
+      const zone = withZone('zoneOf', { zone: parts.zone })
       const offset = t('common.datetime.zoneOffsetShort', {
         offset: timeZoneOffsetShort({ ...base(timeZone), at: start ?? undefined }),
       })
@@ -151,6 +155,9 @@ export function useDateTime() {
 
     /** « heure de Belém » — le suffixe seul, quand l'heure est déjà affichée. */
     zoneLabel: (timeZone: TimeZoneName, zoneLabel?: string) =>
-      t('common.datetime.zoneOf', { zone: zoneLabel?.trim() || timeZoneCityLabel(timeZone) }),
+      withZone('zoneOf', { zone: zoneLabel?.trim() || timeZoneCityLabel(timeZone) }),
+
+    /** « heure d'Antalya » — quand seul le nom du lieu est connu. */
+    zoneOf: (zone: string) => withZone('zoneOf', { zone }),
   }
 }

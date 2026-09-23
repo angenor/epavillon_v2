@@ -22,14 +22,15 @@ import type { Person } from '~/types/identity'
 
 interface Props {
   person: Person
-  /** Où mène « Continuer ». L'accueil par défaut. */
+  /** Où mène « Continuer », chemin déjà localisé. L'accueil par défaut. */
   continueTo?: string
 }
 
-const props = withDefaults(defineProps<Props>(), { continueTo: '/' })
+const props = defineProps<Props>()
 
 const { t } = useI18n()
 const localePath = useLocalePath()
+const destination = computed(() => props.continueTo ?? localePath('/'))
 const auth = useAuthStore()
 
 const isSigningOut = ref(false)
@@ -59,7 +60,7 @@ async function signOut(): Promise<void> {
 
     <div class="mt-5 grid gap-2">
       <UiButton
-        :to="localePath(props.continueTo)"
+        :to="destination"
         variant="primary"
         block
         icon-trailing="arrow-right"

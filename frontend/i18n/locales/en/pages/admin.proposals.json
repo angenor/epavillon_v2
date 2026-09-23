@@ -132,7 +132,7 @@
     "reviewerPlaceholder": "Pick a committee member",
     "workload": "{count} submission assigned | {count} submission assigned | {count} submissions assigned",
     "dueAt": "Review deadline",
-    "dueAtHint": "{zone} time. Left empty, no deadline is set.",
+    "dueAtHint": "{zone}. Left empty, no deadline is set.",
     "submit": "Assign",
     "noCommittee": "This edition has no selection committee yet.",
     "success": "No submission assigned | One submission assigned | {count} submissions assigned"

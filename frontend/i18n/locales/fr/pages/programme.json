@@ -31,7 +31,7 @@
     "details": "Voir le détail"
   },
   "calendar": {
-    "zoneNotice": "Les créneaux sont affichés à l'heure de {zone}, celle de l'événement.",
+    "zoneNotice": "Les créneaux sont affichés à l'{zone}, celle de l'événement.",
     "noEvent": "Aucune activité ce jour-là."
   },
   "detail": {

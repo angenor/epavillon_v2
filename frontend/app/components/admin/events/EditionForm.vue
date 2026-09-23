@@ -261,9 +261,7 @@ function chooseTimezone(zone: string): void {
 
 const zoneLabel = computed(() => {
   const option = props.options.timezones.find((entry) => entry.value === form.value.timezone)
-  return t('common.datetime.zoneOf', {
-    zone: option?.city ?? timeZoneCityLabel(form.value.timezone),
-  })
+  return zoneOf(option?.city ?? timeZoneCityLabel(form.value.timezone))
 })
 
 // ---------------------------------------------------------------------------
@@ -360,14 +358,14 @@ const draft = useLocalDraft({
   },
 })
 
-const { dateTime } = useDateTime()
+const { dateTime, zoneOf } = useDateTime()
 const draftNotice = computed(() => {
   const found = draft.found.value
   if (!found) return null
   const zone = Intl.DateTimeFormat().resolvedOptions().timeZone
   return t('admin.event.form.draft.found', {
     date: dateTime(found.savedAt, zone),
-    zone: t('common.datetime.zoneOf', { zone: timeZoneCityLabel(zone) }),
+    zone: zoneOf(timeZoneCityLabel(zone)),
   })
 })
 

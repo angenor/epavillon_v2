@@ -56,7 +56,7 @@ const emit = defineEmits<{ save: [payload: EditionCallPayload] }>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
-const { date, dateTime } = useDateTime()
+const { date, dateTime, zoneOf } = useDateTime()
 
 const call = computed(() => props.detail.call)
 const edition = computed(() => props.detail.edition)
@@ -376,7 +376,7 @@ watch(
               {{ t('admin.event.tabs.callTab.summary.dailyWindow', {
                 start: dailyValue(call.daily_start_time),
                 end: dailyValue(call.daily_end_time),
-                zone: zoneCity,
+                zone: zoneOf(zoneCity),
               }) }}
             </dd>
           </div>
@@ -545,7 +545,7 @@ watch(
             :model-value="wall.opens_at"
             with-time
             :label="t('admin.event.tabs.callTab.form.opensAt')"
-            :timezone-label="t('common.datetime.zoneOf', { zone: zoneCity })"
+            :timezone-label="zoneOf(zoneCity)"
             :error="errorOf('opens_at')"
             required
             @update:model-value="(next: string) => setWall('opens_at', next)"
@@ -554,7 +554,7 @@ watch(
             :model-value="wall.closes_at"
             with-time
             :label="t('admin.event.tabs.callTab.form.closesAt')"
-            :timezone-label="t('common.datetime.zoneOf', { zone: zoneCity })"
+            :timezone-label="zoneOf(zoneCity)"
             :min="wall.opens_at || undefined"
             :error="errorOf('closes_at')"
             required
@@ -565,7 +565,7 @@ watch(
             with-time
             :label="t('admin.event.tabs.callTab.form.extendedUntil')"
             :hint="t('admin.event.tabs.callTab.form.extendedHint')"
-            :timezone-label="t('common.datetime.zoneOf', { zone: zoneCity })"
+            :timezone-label="zoneOf(zoneCity)"
             :min="wall.closes_at || undefined"
             :error="errorOf('extended_until')"
             @update:model-value="(next: string) => setWall('extended_until', next)"

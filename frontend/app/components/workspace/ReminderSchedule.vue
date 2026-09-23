@@ -34,7 +34,7 @@ interface Props {
 const props = defineProps<Props>()
 
 const { t } = useI18n()
-const { dateTime } = useDateTime()
+const { dateTime, zoneOf } = useDateTime()
 
 /** Le fuseau se nomme par sa ville, comme partout ailleurs sur la plateforme. */
 const zone = computed(() => props.zoneLabel?.trim() || timeZoneCityLabel(props.timezone))
@@ -67,7 +67,7 @@ function stateOf(slot: ReminderSlot): 'sent' | 'pending' | 'skipped' {
       {{ t('organization.workspace.proposal.sessions.reminders.title') }}
     </h4>
     <p class="mt-1 max-w-(--measure) text-sm text-text-muted">
-      {{ t('organization.workspace.proposal.sessions.reminders.description', { zone }) }}
+      {{ t('organization.workspace.proposal.sessions.reminders.description', { zone: zoneOf(zone) }) }}
     </p>
 
     <p v-if="props.reminders.length === 0" class="mt-3 text-sm text-text-subtle">

@@ -58,7 +58,7 @@ const props = defineProps<Props>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
-const { date, dateTime } = useDateTime()
+const { date, dateTime, zoneOf } = useDateTime()
 
 const zone = computed(() => props.edition.timezone)
 
@@ -139,7 +139,7 @@ onBeforeUnmount(() => {
       <p class="mt-4 text-sm text-text-secondary">
         {{ t('proposal.form.confirmation.submittedAt', { datetime: submittedLabel }) }}
         <span class="block text-text-muted">
-          {{ t('common.datetime.zoneOf', { zone: props.edition.city ?? props.edition.timezone }) }}
+          {{ zoneOf(props.edition.city ?? props.edition.timezone) }}
         </span>
       </p>
     </div>
