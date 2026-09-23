@@ -142,6 +142,14 @@ pub async fn exiger_le_droit(
             Ok(None)
         }
 
+        Garde::FichierPrive { permission, .. } => {
+            if !cross::document_de_negociation_existe(pool, porteuse.owner_id).await? {
+                return Err(ApiError::not_found());
+            }
+            refuser_sauf(has_permission(pool, acteur, permission, Scope::Global).await?)?;
+            Ok(None)
+        }
+
         // Un refus déclaré, avec son motif dans la trace : le distinguer d'une
         // garde oubliée est le seul intérêt de cette variante.
         Garde::Fermee { motif } => Err(ApiError::not_found().detail(motif)),

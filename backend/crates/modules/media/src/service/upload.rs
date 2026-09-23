@@ -40,6 +40,7 @@ use utoipa::ToSchema;
 use uuid::Uuid;
 
 use crate::domain::asset::{Asset, QuotaSnapshot, UploadVerdict};
+use crate::domain::guards::{garde_pour, Garde};
 use crate::domain::{keys, rules};
 use crate::repo::{assets, quotas};
 use crate::service::authz::{self, Porteuse};
@@ -112,7 +113,15 @@ pub async fn annoncer(
         None => None,
     };
 
-    let bucket = assets::bucket_par_defaut(state.pool()).await?;
+    let garde = garde_de(porteuse);
+    if let Some(refus) = refus_de_garde(garde, &declaration.mime_type) {
+        return Ok(refus);
+    }
+    let bucket = if garde.is_some_and(Garde::impose_le_prive) {
+        assets::bucket_prive(state.pool()).await?
+    } else {
+        assets::bucket_par_defaut(state.pool()).await?
+    };
 
     // **L'empreinte d'abord** (FR-012) : si le contenu est déjà là, rien d'autre
     // n'a d'importance — ni le poids, ni le quota, puisque rien ne sera écrit.
@@ -216,7 +225,27 @@ pub async fn deposer(
         }
     }
 
-    let bucket = assets::bucket_par_defaut(state.pool()).await?;
+    let garde = garde_de(porteuse);
+    if let Some(refus) = refus_de_garde(garde, &metadonnees.mime_type) {
+        return Err(erreur_du_verdict(refus));
+    }
+
+    // **Un objet privé ne touche jamais le bucket ouvert au web** (R4) : le
+    // bucket se choisit avant le premier octet, et la garde peut imposer le privé.
+    let visibilite = if garde.is_some_and(Garde::impose_le_prive) {
+        "private".to_owned()
+    } else {
+        metadonnees
+            .visibility
+            .clone()
+            .unwrap_or_else(|| "public".to_owned())
+    };
+    let bucket = if visibilite == "private" {
+        assets::bucket_prive(state.pool()).await?
+    } else {
+        assets::bucket_par_defaut(state.pool()).await?
+    };
+    let stockage = state.stockage(&bucket);
     let jeton = Uuid::now_v7();
     let cle_temporaire = keys::cle_temporaire(jeton);
 
@@ -225,8 +254,7 @@ pub async fn deposer(
     let mesure = crate::service::stream::Mesure::nouvelle(state.config().media.max_upload_bytes);
     let flux_mesure = mesure.envelopper(flux);
 
-    let ecrits = match state
-        .storage()
+    let ecrits = match stockage
         .put_stream(&cle_temporaire, &metadonnees.mime_type, flux_mesure)
         .await
     {
@@ -234,14 +262,14 @@ pub async fn deposer(
         Err(erreur) => {
             // **Rien ne traîne** : ce qui a été reçu est retiré du stockage, et
             // aucune description n'est écrite (FR-017, T056).
-            let _ = state.storage().delete(&cle_temporaire).await;
+            let _ = stockage.delete(&cle_temporaire).await;
             return Err(mesure.erreur_ou(erreur));
         }
     };
 
     let (empreinte, octets) = mesure.resultat();
     let nettoyer = |erreur: ApiError| async {
-        let _ = state.storage().delete(&cle_temporaire).await;
+        let _ = stockage.delete(&cle_temporaire).await;
         erreur
     };
 
@@ -271,7 +299,7 @@ pub async fn deposer(
     // **La déduplication, et c'est ici qu'elle se joue.**
     if let Some(existant) = assets::par_empreinte(&mut tx, &empreinte, &bucket).await? {
         tx.rollback().await?;
-        let _ = state.storage().delete(&cle_temporaire).await;
+        let _ = stockage.delete(&cle_temporaire).await;
         let asset = assets::par_id(state.pool(), existant)
             .await?
             .ok_or_else(|| ApiError::internal("objet dédupliqué introuvable après lecture"))?;
@@ -294,10 +322,7 @@ pub async fn deposer(
         original_filename: Some(metadonnees.filename.clone()),
         owner_person_id: Some(acteur),
         owner_organization_id: organisation,
-        visibility: metadonnees
-            .visibility
-            .clone()
-            .unwrap_or_else(|| "public".to_owned()),
+        visibility: visibilite,
         alt_text: metadonnees.alt_text.clone(),
         caption: metadonnees.caption.clone(),
         credit: metadonnees.credit.clone(),
@@ -312,8 +337,8 @@ pub async fn deposer(
     // base**, et un temporaire orphelin ne l'est pas — il resterait sur le
     // disque pour toujours, ce qui est exactement le défaut de la v1 que ce
     // schéma corrige.
-    if let Err(erreur) = state.storage().rename(&cle_temporaire, &cle).await {
-        let _ = state.storage().delete(&cle_temporaire).await;
+    if let Err(erreur) = stockage.rename(&cle_temporaire, &cle).await {
+        let _ = stockage.delete(&cle_temporaire).await;
         return Err(ApiError::from(erreur));
     }
 
@@ -324,7 +349,7 @@ pub async fn deposer(
             tx.rollback().await?;
             // Le refus de la base — quota atteint, entre autres — laisse
             // l'objet sur le stockage : on le retire, puis on traduit.
-            let _ = state.storage().delete(&cle).await;
+            let _ = stockage.delete(&cle).await;
             return Err(traduire(erreur, state, organisation).await);
         }
     };
@@ -442,6 +467,26 @@ async fn refus_de_quota(
     let mut refus = verdict_refuse(ErrorCode::MediaQuotaExceeded, None, None);
     refus.quota = quotas::etat(state.pool(), organisation).await?;
     Ok(Some(refus))
+}
+
+fn garde_de(porteuse: Option<Porteuse<'_>>) -> Option<Garde> {
+    porteuse.and_then(|p| garde_pour(p.owner_schema, p.owner_table))
+}
+
+/// Le type refusé par une garde qui porte ses propres types — un fichier que la
+/// table blanche ne décrit pas, faute de rôle.
+fn refus_de_garde(garde: Option<Garde>, mime_type: &str) -> Option<UploadVerdict> {
+    let types = garde?.types_admis()?;
+    (!types.contains(&mime_type)).then(|| {
+        verdict_refuse(
+            ErrorCode::MediaMimeNotAllowed,
+            Some("file"),
+            Some(format!(
+                "type « {mime_type} » reçu ; accepté : {}",
+                types.join(", ")
+            )),
+        )
+    })
 }
 
 fn verdict_refuse(code: ErrorCode, champ: Option<&str>, detail: Option<String>) -> UploadVerdict {

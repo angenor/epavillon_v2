@@ -67,6 +67,16 @@ pub enum Garde {
     /// l'accès.
     PermissionGlobale { permission: &'static str },
 
+    /// La permission, sur la portée globale, pour un fichier qui n'illustre pas
+    /// l'entité mais **est** sa donnée : des types fermés, et un dépôt toujours
+    /// privé, dans le bucket fermé au web. L'entité le désigne par sa propre
+    /// colonne, pas par `media.attachments` : aucune ligne de la table blanche
+    /// ne le décrit, et c'est donc la garde qui porte les types.
+    FichierPrive {
+        permission: &'static str,
+        types: &'static [&'static str],
+    },
+
     /// **Refus explicite, et le motif est écrit.**
     ///
     /// Ce n'est pas une garde oubliée : c'est une garde qui ne peut pas encore
@@ -82,7 +92,8 @@ pub enum Garde {
 /// la conception avait relevés : `075_programme_sessions.sql` et
 /// `125_training.sql` en sèment chacun un que le plan n'avait pas vus. Les
 /// omettre aurait laissé deux portes sans garde — exactement ce que ce fichier
-/// existe pour empêcher.
+/// existe pour empêcher. S'y ajoute le PDF des documents de négociation, que
+/// la table blanche ne décrit pas : il n'est pas rattaché, il est la donnée.
 const TABLE: &[((&str, &str), Garde)] = &[
     (
         ("org", "organizations"),
@@ -129,6 +140,15 @@ const TABLE: &[((&str, &str), Garde)] = &[
         },
     ),
     (
+        // Le PDF d'un document de Guide Négo (specs/011 R5). Portée globale :
+        // pour Guide Négo, « son périmètre » veut dire toute la plateforme.
+        ("negotiation", "documents"),
+        Garde::FichierPrive {
+            permission: "negotiation.document.publish",
+            types: &["application/pdf"],
+        },
+    ),
+    (
         ("training", "trainings"),
         Garde::Fermee {
             motif: "Le module Formations ne déclare aucune permission dans le modèle : \
@@ -137,6 +157,22 @@ const TABLE: &[((&str, &str), Garde)] = &[
         },
     ),
 ];
+
+impl Garde {
+    /// Les types que la garde admet seule, sans rôle. `None` : c'est la ligne de
+    /// `attachable_roles` qui les dit.
+    pub fn types_admis(self) -> Option<&'static [&'static str]> {
+        match self {
+            Garde::FichierPrive { types, .. } => Some(types),
+            _ => None,
+        }
+    }
+
+    /// Vrai : l'objet est déposé privé, quoi que dise la demande.
+    pub fn impose_le_prive(self) -> bool {
+        matches!(self, Garde::FichierPrive { .. })
+    }
+}
 
 /// La garde d'un couple (schéma, table). `None` **refuse** : une combinaison
 /// non déclarée n'est jamais autorisée par défaut.
@@ -158,7 +194,7 @@ mod tests {
 
     #[test]
     fn une_combinaison_inconnue_est_refusee_et_non_autorisee() {
-        assert!(garde_pour("negotiation", "documents").is_none());
+        assert!(garde_pour("negotiation", "spaces").is_none());
         assert!(garde_pour("org", "memberships").is_none());
         // Le schéma existe, la table aussi, mais le couple n'est pas déclaré.
         assert!(garde_pour("event", "rooms").is_none());
@@ -181,6 +217,24 @@ mod tests {
                 "{schema}.{table} sans garde"
             );
         }
+    }
+
+    /// Le PDF d'un document de négociation : la permission de publier, un PDF
+    /// seul, et toujours privé — un document réservé ne touche jamais le
+    /// bucket ouvert au web.
+    #[test]
+    fn un_document_de_negociation_est_un_pdf_prive_garde_par_la_publication() {
+        let garde = garde_pour("negotiation", "documents").expect("garde déclarée");
+        assert_eq!(
+            garde,
+            Garde::FichierPrive {
+                permission: "negotiation.document.publish",
+                types: &["application/pdf"],
+            }
+        );
+        assert_eq!(garde.types_admis(), Some(&["application/pdf"][..]));
+        assert!(garde.impose_le_prive());
+        assert!(!garde_pour("event", "events").unwrap().impose_le_prive());
     }
 
     /// Aucun doublon : deux lignes pour un même couple rendraient la première,

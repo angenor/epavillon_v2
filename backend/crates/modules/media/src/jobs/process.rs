@@ -49,7 +49,7 @@ use crate::domain::{duration, imaging, variants};
 use crate::repo::assets::{self, AObjetTraiter};
 use crate::repo::renditions::{self, DeclinaisonPrete};
 use crate::scan::Scanner;
-use crate::storage::ObjectStore;
+use crate::storage::Entrepots;
 
 /// Le nom de la tâche, tel que le déclencheur du modèle l'écrit. Toute
 /// divergence rendrait le travail sans gestionnaire — et le worker le dirait,
@@ -63,15 +63,15 @@ pub const QUEUE: &str = "media";
 
 pub struct ProcessAsset {
     db: Db,
-    storage: Arc<dyn ObjectStore>,
+    entrepots: Entrepots,
     scanner: Arc<dyn Scanner>,
 }
 
 impl ProcessAsset {
-    pub fn new(db: Db, storage: Arc<dyn ObjectStore>, scanner: Arc<dyn Scanner>) -> Self {
+    pub fn new(db: Db, entrepots: Entrepots, scanner: Arc<dyn Scanner>) -> Self {
         Self {
             db,
-            storage,
+            entrepots,
             scanner,
         }
     }
@@ -130,7 +130,8 @@ impl ProcessAsset {
         // **Une seule copie des octets, partagée** : le relevé et les trois
         // redimensionnements tournent chacun sur une tâche bloquante, et leur
         // donner chacun sa copie tiendrait quatre fois l'image en mémoire.
-        let octets = Arc::new(self.storage.get(&objet.object_key).await?);
+        let stockage = self.entrepots.du_bucket(&objet.bucket);
+        let octets = Arc::new(stockage.get(&objet.object_key).await?);
 
         // ------------------------------------------------------------------
         // L'analyse. `none` rend « non pris en charge » et son nom, jamais
@@ -261,7 +262,8 @@ impl ProcessAsset {
                 };
 
             let poids = faite.octets.len() as i64;
-            self.storage
+            self.entrepots
+                .du_bucket(&objet.bucket)
                 .put(&cle, mime_de(format), faite.octets)
                 .await?;
 

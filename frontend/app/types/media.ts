@@ -464,7 +464,8 @@ export interface UploadPayload {
   file: Blob
   filename: string
   mimeType: string
-  altText: I18nText
+  /** Exigé pour une image ; un document n'en a pas. */
+  altText?: I18nText
   ownerSchema?: string
   ownerTable?: string
   ownerId?: Uuid

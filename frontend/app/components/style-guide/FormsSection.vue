@@ -54,6 +54,9 @@ const zoneOptions: SelectOption[] = [
   { value: 'Asia/Riyadh', label: 'Riyad', description: 'Asia/Riyadh · UTC+03:00' },
 ]
 
+const fichierVide = ref<string | null>(null)
+const fichierRetenu = ref<string | null>('0192f000-0000-7000-8000-000000000011')
+
 const search = ref('')
 const searchResults = ref<number | null>(null)
 const searching = ref(false)
@@ -319,6 +322,28 @@ function toggleSwitchWithWork(): void {
           :model-value="false"
           disabled
           :label="t('style-guide.forms.switches.disabled')"
+        />
+      </div>
+    </StyleGuideDemo>
+
+    <!-- FICHIER -->
+    <StyleGuideDemo
+      :title="t('style-guide.forms.file.title')"
+      :note="t('style-guide.forms.file.note')"
+    >
+      <div class="grid gap-5 md:grid-cols-2">
+        <MediaFileField
+          v-model:asset-id="fichierVide"
+          :label="t('style-guide.forms.file.label')"
+          :types="['application/pdf']"
+          :max-byte-size="52428800"
+        />
+        <MediaFileField
+          v-model:asset-id="fichierRetenu"
+          :label="t('style-guide.forms.file.label')"
+          :types="['application/pdf']"
+          :current="{ filename: 'guide-des-negociations-cdp30.pdf', byteSize: 2884088 }"
+          :hint="t('style-guide.forms.file.hint')"
         />
       </div>
     </StyleGuideDemo>

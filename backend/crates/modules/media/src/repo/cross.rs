@@ -19,6 +19,7 @@
 //! | `programme.sessions` | quelle organisation anime la séance visée |
 //! | `identity.people` | l'objet vise-t-il la personne connectée |
 //! | `content.highlights` | à quelle édition se rattache le contenu visé |
+//! | `negotiation.documents` | le document de négociation visé existe-t-il |
 //!
 //! Rien d'autre. Une lecture ajoutée hors de cette liste appartient à ce
 //! fichier, ou elle n'appartient pas à ce module.
@@ -132,6 +133,17 @@ pub async fn personne_existe(pool: &PgPool, person_id: Uuid) -> Result<bool> {
     let existe = sqlx::query_scalar!(
         r#"SELECT EXISTS (SELECT 1 FROM identity.people p WHERE p.id = $1) AS "existe!""#,
         person_id
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(existe)
+}
+
+/// Le document de négociation visé existe-t-il ?
+pub async fn document_de_negociation_existe(pool: &PgPool, document_id: Uuid) -> Result<bool> {
+    let existe = sqlx::query_scalar!(
+        r#"SELECT EXISTS (SELECT 1 FROM negotiation.documents d WHERE d.id = $1) AS "existe!""#,
+        document_id
     )
     .fetch_one(pool)
     .await?;

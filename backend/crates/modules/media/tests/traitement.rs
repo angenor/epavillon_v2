@@ -299,7 +299,7 @@ async fn un_objet_en_quarantaine_nest_servi_par_rien_et_ne_se_rattache_pas() {
     let gestionnaires: Vec<Arc<dyn JobHandler>> =
         vec![Arc::new(media::jobs::process::ProcessAsset::new(
             bac.db(),
-            bac.state.storage().clone(),
+            bac.state.entrepots().clone(),
             Arc::new(MoteurQuiTrouve),
         ))];
     let issues = commun::executer_les_travaux(&bac, &gestionnaires).await;

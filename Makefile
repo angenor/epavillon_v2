@@ -270,8 +270,11 @@ garage-init:
 	@$(GARAGE) key import --yes -n epavillon-dev $(S3_KEY_ID) $(S3_KEY_SECRET) > /dev/null || true
 	@$(GARAGE) bucket allow --read --write epavillon --key $(S3_KEY_ID)
 	@$(GARAGE) bucket website --allow epavillon > /dev/null
+	@# Le bucket privé des documents réservés : jamais ouvert au web, seule l'API le lit.
+	@$(GARAGE) bucket create epavillon-prive || true
+	@$(GARAGE) bucket allow --read --write epavillon-prive --key $(S3_KEY_ID)
 	@$(MAKE) --no-print-directory media-base-url
-	@echo 'Garage : bucket « epavillon » ouvert à la clé du .env — rien à recopier.'
+	@echo 'Garage : buckets « epavillon » (lisible par le web) et « epavillon-prive » (fermé) ouverts à la clé du .env.'
 
 # Pointe `media.public_base_url` sur le relais local. `down -v` recharge le
 # modèle, qui porte la valeur de PRODUCTION (docs/database/050_media.sql § 8) —
@@ -285,3 +288,4 @@ media-base-url:
 
 garage-info:
 	@$(GARAGE) bucket info epavillon
+	@$(GARAGE) bucket info epavillon-prive

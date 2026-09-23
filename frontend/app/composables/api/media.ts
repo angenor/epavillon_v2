@@ -66,7 +66,7 @@ export function createMediaApi({ call, sendForm }: Pick<ApiTransport, 'call' | '
       if (payload.role) form.append('role', payload.role)
       // Une DONNÉE multilingue, transmise comme telle : `platform.i18n_text` est
       // ce que la colonne porte, et une chaîne nue y perdrait l'anglais.
-      form.append('alt_text', JSON.stringify(payload.altText))
+      if (payload.altText) form.append('alt_text', JSON.stringify(payload.altText))
       // EN DERNIER, toujours. Voir l'en-tête.
       form.append('file', payload.file, payload.filename)
 
@@ -106,7 +106,7 @@ function simulerLeDepot(payload: UploadPayload): UploadedAsset {
     scan_engine: null,
     scanned_at: now,
     scan_details: null,
-    alt_text: payload.altText,
+    alt_text: payload.altText ?? null,
     caption: null,
     credit: null,
     license_code: null,

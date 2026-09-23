@@ -46,7 +46,9 @@
 CREATE TYPE media.asset_visibility AS ENUM (
     'public',         -- servi sans authentification (bannières, logos, galeries)
     'authenticated',  -- réservé aux comptes connectés
-    'private'         -- URL signée à durée limitée (documents de négociation)
+    'private'         -- déposé dans le bucket privé (« media.private_bucket »), fermé au
+                      -- web : jamais servi par une adresse, seule l'API le lit après
+                      -- avoir vérifié l'accès (documents de négociation, specs/011 R4)
 );
 
 CREATE TYPE media.asset_status AS ENUM (
@@ -237,6 +239,30 @@ $$;
 
 COMMENT ON FUNCTION media.object_url(text, text) IS
     'Compose l''URL publique depuis le point d''accès courant (platform.settings « media.public_base_url »).';
+
+-- Où est un objet, et s'il est prêt. Contrat de lecture offert aux autres
+-- modules, comme `object_url()` : `negotiation` y lit le PDF qu'il extrait et
+-- sert, sans jamais toucher à `media.assets` (specs/011 R4). Un objet supprimé
+-- n'a plus d'adresse.
+CREATE OR REPLACE FUNCTION media.object_location(p_asset_id uuid)
+RETURNS TABLE (
+    bucket     text,
+    object_key text,
+    status     media.asset_status,
+    byte_size  bigint,
+    mime_type  text
+)
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT a.bucket, a.object_key, a.status, a.byte_size, a.mime_type
+      FROM media.assets a
+     WHERE a.id = p_asset_id
+       AND a.deleted_at IS NULL;
+$$;
+
+COMMENT ON FUNCTION media.object_location(uuid) IS
+    'Bucket, clé, état, poids et type d''un objet non supprimé. Contrat de lecture des autres modules : ils ne lisent jamais media.assets.';
 
 -- -----------------------------------------------------------------------------
 -- 3. Variantes
@@ -888,6 +914,8 @@ INSERT INTO platform.settings (key, value, description) VALUES
     ('media.public_base_url', '"https://media.epavillonclimatique.francophonie.org"',
      'Point d''accès public du stockage objet. Seule valeur à changer lors d''une migration Garage -> cloud.'),
     ('media.default_bucket', '"epavillon"', 'Bucket par défaut des nouveaux téléversements.'),
+    ('media.private_bucket', '"epavillon-prive"',
+     'Bucket des objets de visibilité private. Fermé au web : seule l''API les lit, après avoir vérifié l''accès.'),
     ('media.orphan_retention_days', '30', 'Ancienneté minimale avant qu''un objet non rattaché soit proposé à la purge.')
 ON CONFLICT (key) DO NOTHING;
 

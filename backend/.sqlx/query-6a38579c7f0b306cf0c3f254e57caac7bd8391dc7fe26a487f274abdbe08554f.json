@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM negotiation.documents d WHERE d.id = $1) AS \"existe!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "existe!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "6a38579c7f0b306cf0c3f254e57caac7bd8391dc7fe26a487f274abdbe08554f"
+}

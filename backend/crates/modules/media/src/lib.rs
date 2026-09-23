@@ -74,13 +74,13 @@ pub fn routes(cfg: &mut ServiceConfig) {
 /// ils posent leur propre occurrence suivante, et le démarrage du worker réarme
 /// la chaîne.
 pub fn job_handlers(db: Db, config: &Config) -> Vec<Arc<dyn JobHandler>> {
-    let storage = crate::storage::build(&config.media);
+    let entrepots = crate::storage::Entrepots::new(&config.media);
     let scanner = crate::scan::build(&config.media);
 
     vec![
         Arc::new(jobs::process::ProcessAsset::new(
             db.clone(),
-            storage.clone(),
+            entrepots.clone(),
             scanner,
         )),
         // Les deux récurrents. Ils déclarent la MÊME file que le traitement :
@@ -89,7 +89,7 @@ pub fn job_handlers(db: Db, config: &Config) -> Vec<Arc<dyn JobHandler>> {
         // jour.
         Arc::new(jobs::purge::PurgeAssets::new(
             db.clone(),
-            storage,
+            entrepots,
             config.media.purge_interval,
         )),
         Arc::new(jobs::reconcile::ReconcileQuotas::new(

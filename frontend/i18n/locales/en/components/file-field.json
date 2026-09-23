@@ -1,0 +1,15 @@
+{
+  "types": "Accepted types: {types}",
+  "max": "{max} at most",
+  "empty": "No file",
+  "sending": "Uploading {name} — {size}",
+  "actions": {
+    "choose": "Choose a file",
+    "replace": "Replace",
+    "remove": "Remove"
+  },
+  "errors": {
+    "mimeRejected": "This file type is not accepted here.",
+    "tooLarge": "This file exceeds {max}, the maximum size for this slot."
+  }
+}

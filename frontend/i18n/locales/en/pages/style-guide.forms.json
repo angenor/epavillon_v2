@@ -65,6 +65,12 @@
     "loading": "Publish to the programme",
     "disabled": "Save the session (unavailable)"
   },
+  "file": {
+    "title": "File",
+    "note": "The same upload as images — type checked before sending, the API message shown as is — without cropping or alternative text, which a document does not have. The uploaded file is named with its size; the screen attaches it.",
+    "label": "Document file",
+    "hint": "locked once the document is published"
+  },
   "dates": {
     "title": "Dates and times",
     "note": "The native control opens the system calendar: localised, keyboard-navigable, usable with a thumb. But it knows nothing of time zones — it returns wall-clock time, without offset. The event's time zone therefore stays visible INSIDE the field: whoever types 14:30 must know that means 14:30 in Belém, not at home.",

@@ -37,12 +37,11 @@ use kernel::events::{self, DomainEvent};
 use kernel::jobs::{self, ClaimedJob, JobHandler, NewJob};
 use serde_json::json;
 use sqlx::postgres::PgConnection;
-use std::sync::Arc;
 use std::time::Duration;
 use time::OffsetDateTime;
 
 use crate::repo::{assets, renditions};
-use crate::storage::ObjectStore;
+use crate::storage::Entrepots;
 
 pub const PURGE_ASSETS: &str = "media.purge_assets";
 
@@ -54,15 +53,15 @@ const PAR_PASSAGE: i64 = 200;
 
 pub struct PurgeAssets {
     db: Db,
-    storage: Arc<dyn ObjectStore>,
+    entrepots: Entrepots,
     intervalle: Duration,
 }
 
 impl PurgeAssets {
-    pub fn new(db: Db, storage: Arc<dyn ObjectStore>, intervalle: Duration) -> Self {
+    pub fn new(db: Db, entrepots: Entrepots, intervalle: Duration) -> Self {
         Self {
             db,
-            storage,
+            entrepots,
             intervalle,
         }
     }
@@ -123,10 +122,11 @@ impl PurgeAssets {
         let declinaisons = renditions::cles_de(&mut tx, objet.id).await?;
         tx.commit().await?;
 
+        let stockage = self.entrepots.du_bucket(&objet.bucket);
         for cle in &declinaisons {
-            self.storage.delete(cle).await?;
+            stockage.delete(cle).await?;
         }
-        self.storage.delete(&objet.object_key).await?;
+        stockage.delete(&objet.object_key).await?;
 
         let mut tx = self.db.write(&job.context()).await?;
         renditions::effacer_de(&mut tx, objet.id).await?;

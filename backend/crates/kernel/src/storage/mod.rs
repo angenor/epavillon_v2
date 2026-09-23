@@ -29,8 +29,9 @@ use crate::error::{ApiError, ErrorCode};
 use actix_web::web::Bytes;
 use async_trait::async_trait;
 use futures_util::Stream;
+use std::collections::HashMap;
 use std::pin::Pin;
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 
 pub mod filesystem;
 pub mod s3;
@@ -118,5 +119,62 @@ pub fn build(cfg: &crate::config::MediaConfig) -> Arc<dyn ObjectStore> {
             Arc::new(filesystem::FilesystemStore::new(&cfg.fs_root))
         }
         crate::config::MediaStorage::S3 => Arc::new(s3::S3Store::new(&cfg.s3)),
+    }
+}
+
+/// Un stockage par bucket. Celui de la configuration sert son bucket ; un autre
+/// — le bucket privé, fermé au web (specs/011 R4) — reçoit le sien au premier
+/// usage : mêmes identifiants, autre bucket, ou un sous-dossier du même nom sur
+/// le système de fichiers.
+#[derive(Clone)]
+pub struct Entrepots {
+    cfg: crate::config::MediaConfig,
+    defaut: Arc<dyn ObjectStore>,
+    autres: Arc<RwLock<HashMap<String, Arc<dyn ObjectStore>>>>,
+}
+
+impl Entrepots {
+    pub fn new(cfg: &crate::config::MediaConfig) -> Self {
+        Self {
+            cfg: cfg.clone(),
+            defaut: build(cfg),
+            autres: Arc::default(),
+        }
+    }
+
+    /// Le stockage du bucket de la configuration.
+    pub fn defaut(&self) -> &Arc<dyn ObjectStore> {
+        &self.defaut
+    }
+
+    pub fn du_bucket(&self, bucket: &str) -> Arc<dyn ObjectStore> {
+        if bucket == self.cfg.s3.bucket {
+            return self.defaut.clone();
+        }
+        if let Some(stockage) = self
+            .autres
+            .read()
+            .expect("verrou des stockages")
+            .get(bucket)
+        {
+            return stockage.clone();
+        }
+        let stockage: Arc<dyn ObjectStore> = match self.cfg.storage {
+            crate::config::MediaStorage::Filesystem => {
+                let racine = std::path::Path::new(&self.cfg.fs_root).join(bucket);
+                Arc::new(filesystem::FilesystemStore::new(&racine.to_string_lossy()))
+            }
+            crate::config::MediaStorage::S3 => {
+                let mut s3 = self.cfg.s3.clone();
+                s3.bucket = bucket.to_owned();
+                Arc::new(s3::S3Store::new(&s3))
+            }
+        };
+        self.autres
+            .write()
+            .expect("verrou des stockages")
+            .entry(bucket.to_owned())
+            .or_insert(stockage)
+            .clone()
     }
 }

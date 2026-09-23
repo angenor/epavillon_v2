@@ -17,7 +17,7 @@
 //! réglages. Aucune requête d'ici ne rend une clé nue : c'est la promesse du
 //! modèle, celle qui rend une migration de stockage indolore (FR-021).
 
-use kernel::error::Result;
+use kernel::error::{ApiError, Result};
 use sqlx::postgres::PgConnection;
 use sqlx::PgPool;
 use time::OffsetDateTime;
@@ -272,6 +272,19 @@ pub async fn bucket_par_defaut(pool: &PgPool) -> Result<String> {
     Ok(valeur.unwrap_or_else(|| "epavillon".to_owned()))
 }
 
+/// Le bucket des objets `private`, fermé au web : seule l'API les lit, après
+/// avoir vérifié l'accès (specs/011 R4). Sans réglage, le dépôt est refusé
+/// plutôt que de poser un objet privé dans le bucket public.
+pub async fn bucket_prive(pool: &PgPool) -> Result<String> {
+    sqlx::query_scalar!(
+        "SELECT s.value #>> '{}' FROM platform.settings s WHERE s.key = 'media.private_bucket'"
+    )
+    .fetch_optional(pool)
+    .await?
+    .flatten()
+    .ok_or_else(|| ApiError::internal("réglage media.private_bucket absent"))
+}
+
 /// L'instant courant de la **base**, qui date la clé d'objet.
 ///
 /// L'horloge du processus et celle de la base peuvent différer de quelques
@@ -299,6 +312,7 @@ pub async fn maintenant(pool: &PgPool) -> Result<OffsetDateTime> {
 #[derive(Debug, Clone)]
 pub struct AObjetTraiter {
     pub id: Uuid,
+    pub bucket: String,
     pub object_key: String,
     pub mime_type: String,
     pub status: String,
@@ -309,7 +323,7 @@ pub struct AObjetTraiter {
 /// le travail n'a simplement plus d'objet.
 pub async fn pour_traitement(pool: &PgPool, asset_id: Uuid) -> Result<Option<AObjetTraiter>> {
     let ligne = sqlx::query!(
-        r#"SELECT id, object_key, mime_type, status::text AS "status!"
+        r#"SELECT id, bucket, object_key, mime_type, status::text AS "status!"
              FROM media.assets
             WHERE id = $1 AND deleted_at IS NULL"#,
         asset_id
@@ -319,6 +333,7 @@ pub async fn pour_traitement(pool: &PgPool, asset_id: Uuid) -> Result<Option<AOb
 
     Ok(ligne.map(|l| AObjetTraiter {
         id: l.id,
+        bucket: l.bucket,
         object_key: l.object_key,
         mime_type: l.mime_type,
         status: l.status,

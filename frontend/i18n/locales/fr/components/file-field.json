@@ -1,0 +1,15 @@
+{
+  "types": "Types acceptés : {types}",
+  "max": "{max} au plus",
+  "empty": "Aucun fichier",
+  "sending": "Envoi de {name} — {size}",
+  "actions": {
+    "choose": "Choisir un fichier",
+    "replace": "Remplacer",
+    "remove": "Retirer"
+  },
+  "errors": {
+    "mimeRejected": "Ce type de fichier n'est pas accepté pour cet emplacement.",
+    "tooLarge": "Ce fichier dépasse {max}, le poids maximal de cet emplacement."
+  }
+}

@@ -71,6 +71,13 @@ $GARAGE bucket allow --read --write epavillon --key "$cle"
 $GARAGE bucket website --allow epavillon >/dev/null
 echo 'Garage : bucket « epavillon » ouvert à la clé de .env.prod, et lisible par le web.'
 
+# Le bucket privé (media.private_bucket) : les documents réservés de Guide Négo.
+# JAMAIS de `bucket website --allow` ici : seule l'API le lit, après avoir
+# vérifié l'accès. L'ouvrir au web rendrait public tout document réservé.
+$GARAGE bucket create epavillon-prive 2>/dev/null || true
+$GARAGE bucket allow --read --write epavillon-prive --key "$cle"
+echo 'Garage : bucket « epavillon-prive » ouvert à la clé de .env.prod, fermé au web.'
+
 # L'adresse publique des objets suit celle du SITE : `<APP_PUBLIC_URL>/media`,
 # servi par le relais `media-proxy` que l'Apache du VPS atteint sous ce chemin.
 # Rien à demander à l'OIF — ni entrée DNS, ni certificat —, et la valeur suit le

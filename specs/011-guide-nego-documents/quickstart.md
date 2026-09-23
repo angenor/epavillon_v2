@@ -10,6 +10,18 @@ Ce qui prouve, de bout en bout, que le guide se publie en une journée et se lit
   - **jamais `make check` ni `down -v`**.
 - **Le bucket privé** : `make garage-init`, qui le crée sans l'ouvrir au web.
   - Contrôle : `curl -I <base média>/epavillon-prive/<clé>` doit rendre une erreur, pas l'objet.
+- **La dette de R4** : avant la bascule, aucun objet `private` ne doit rester dans un bucket ouvert. La requête doit rendre **0** ; sinon, déplacer ces objets avant la mise en ligne.
+
+  ```sql
+  SELECT count(*) AS objets_prives_dans_un_bucket_ouvert
+    FROM media.assets a
+   WHERE a.visibility = 'private'
+     AND a.purged_at IS NULL
+     AND a.bucket <> (SELECT s.value #>> '{}' FROM platform.settings s
+                       WHERE s.key = 'media.private_bucket');
+  ```
+
+  Jouée en local le 23/09 : **0** (cinq objets, tous publics).
 - **PDFium** : `make pdfium`, puis `PDFIUM_LIB_PATH` renseigné dans `.env`.
 - **Les services** :
   - `cargo run -p api` et `cargo run -p worker` ;

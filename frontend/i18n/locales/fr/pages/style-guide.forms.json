@@ -65,6 +65,12 @@
     "loading": "Publier dans la programmation",
     "disabled": "Enregistrer la séance (indisponible)"
   },
+  "file": {
+    "title": "Fichier",
+    "note": "Le même dépôt que les images — type contrôlé avant l'envoi, message de l'API tel quel — sans recadrage ni texte alternatif, qu'un document n'a pas. Le fichier déposé est nommé avec son poids ; c'est l'écran qui le rattache.",
+    "label": "Fichier du document",
+    "hint": "figé une fois le document publié"
+  },
   "dates": {
     "title": "Dates et heures",
     "note": "Le contrôle natif ouvre le calendrier du système : localisé, navigable au clavier, utilisable au doigt. Mais il ne connaît pas les fuseaux — il rend une heure de mur, sans décalage. Le fuseau de l'événement reste donc visible DANS le champ : la personne qui saisit 14:30 doit savoir que c'est 14:30 à Belém, pas chez elle.",
