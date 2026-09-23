@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM negotiation.documents\n          WHERE id = $1 AND published_at IS NULL AND unpublished_at IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "44371da8ca3bc0ff8798e0596444459f998db7d7bfd75032ea18fe0d743b1d22"
+}

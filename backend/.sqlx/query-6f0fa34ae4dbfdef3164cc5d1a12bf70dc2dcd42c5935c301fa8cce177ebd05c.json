@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (s.value #>> '{}') AS \"valeur?\" FROM platform.settings s\n            WHERE s.key = 'media.private_bucket'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "valeur?",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "6f0fa34ae4dbfdef3164cc5d1a12bf70dc2dcd42c5935c301fa8cce177ebd05c"
+}

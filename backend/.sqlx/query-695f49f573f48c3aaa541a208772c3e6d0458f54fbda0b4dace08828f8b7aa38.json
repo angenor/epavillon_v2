@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM negotiation.document_bookmarks WHERE person_id = $1 AND document_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "695f49f573f48c3aaa541a208772c3e6d0458f54fbda0b4dace08828f8b7aa38"
+}

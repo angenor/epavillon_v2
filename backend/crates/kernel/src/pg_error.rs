@@ -139,6 +139,10 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
         ("23505", "ux_invitation_codes_normalized") => {
             ApiError::new(NegotiationInvitationCodeDuplicate).field("code")
         }
+        // Le service nomme le successeur quand il le peut ; ceci est le repli.
+        ("23505", "ux_documents_supersedes") => {
+            ApiError::new(NegotiationDocumentAlreadySuperseded).field("supersedes_id")
+        }
 
         ("23505", _) => ApiError::new(Conflict),
 
@@ -149,6 +153,21 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
             ApiError::new(IdentityRoleScopeMismatch).field("scope_id")
         }
         ("23514", "ck_role_assignment_revocation") => ApiError::new(IdentityRoleRevocationInvalid),
+        // Documents de Guide Négo : les deux moitiés de l'ancien « fichier OU
+        // lien », la boucle de remplacement et la page d'une note, que des
+        // déclencheurs nomment comme des contraintes.
+        ("23514", "ck_documents_source_at_most_one") => {
+            ApiError::new(NegotiationDocumentSourceBoth).field("external_url")
+        }
+        ("23514", "ck_documents_published_has_source") => {
+            ApiError::new(NegotiationDocumentSourceMissing)
+        }
+        ("23514", "ck_documents_supersede_cycle") => {
+            ApiError::new(NegotiationDocumentSupersedeCycle).field("supersedes_id")
+        }
+        ("23514", "ck_correction_notes_page_exists") => {
+            ApiError::new(NegotiationCorrectionPageUnknown).field("page_index")
+        }
         // **NE DOIT JAMAIS REMONTER**, et le déclarer est le seul moyen de
         // s'apercevoir qu'elle l'a fait : le service de saisie d'un code
         // traduit cette violation en issue `exhausted`, rendue en 200 avec son

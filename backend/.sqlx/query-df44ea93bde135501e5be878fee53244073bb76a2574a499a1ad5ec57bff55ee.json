@@ -1,0 +1,282 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT d.id, d.slug::text AS \"slug!\", d.title::jsonb AS \"title!\", platform.t(d.title, $2) AS \"title_resolu!\",\n                  d.summary::jsonb AS summary, t.code AS \"type_code!\", d.event_id, d.version, d.issued_on,\n                  d.publisher, d.locale_code, d.asset_id, d.external_url::text AS external_url,\n                  d.is_restricted, d.is_rag_eligible, d.published_at, d.unpublished_at,\n                  d.created_at, d.updated_at,\n                  a.id AS \"remplace_id?\", platform.t(a.title, $2) AS remplace_titre, a.version AS \"remplace_version?\",\n                  s.id AS \"successeur_id?\", platform.t(s.title, $2) AS successeur_titre,\n                  s.version AS \"successeur_version?\"\n             FROM negotiation.documents d\n             JOIN reference.taxonomy_terms t ON t.id = d.document_type_term_id\n             LEFT JOIN negotiation.documents a ON a.id = d.supersedes_id\n             LEFT JOIN negotiation.documents s ON s.supersedes_id = d.id\n            WHERE $1::uuid IS NULL OR d.id = $1\n            ORDER BY d.updated_at DESC, d.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "title!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "title_resolu!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "summary",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "type_code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "version",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "issued_on",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "issued_on"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "publisher",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "publisher"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "locale_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "locale_code"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "asset_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "asset_id"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "external_url",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
+        "name": "is_restricted",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "is_restricted"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "is_rag_eligible",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "is_rag_eligible"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "unpublished_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "unpublished_at"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "remplace_id?",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "remplace_titre",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 21,
+        "name": "remplace_version?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
+        "name": "successeur_id?",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 23,
+        "name": "successeur_titre",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 24,
+        "name": "successeur_version?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "version"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null,
+      null,
+      null,
+      false,
+      true,
+      false,
+      true,
+      true,
+      false,
+      true,
+      null,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      null,
+      false,
+      false,
+      null,
+      false
+    ]
+  },
+  "hash": "df44ea93bde135501e5be878fee53244073bb76a2574a499a1ad5ec57bff55ee"
+}

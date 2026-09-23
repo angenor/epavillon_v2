@@ -48,6 +48,7 @@ pub use state::NegotiationState;
 pub fn routes(cfg: &mut ServiceConfig) {
     routes::acces::configurer(cfg);
     routes::themes::configurer(cfg);
+    routes::documents::configurer(cfg);
 }
 
 /// Le back-office de l'admission.
@@ -59,6 +60,7 @@ pub fn admin_routes(cfg: &mut ServiceConfig) {
     routes::admin_codes::configurer(cfg);
     routes::admin_requests::configurer(cfg);
     routes::admin_admission::configurer(cfg);
+    routes::admin_documents::configurer(cfg);
 }
 
 /// Les travaux différés du module : les deux courriels de décision, la purge

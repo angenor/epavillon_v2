@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.documents\n             (id, slug, title, summary, document_type_term_id, event_id, version, issued_on,\n              publisher, locale_code, supersedes_id, is_restricted, is_rag_eligible, external_url,\n              uploaded_by)\n         VALUES ($1,\n                 (platform.slugify(platform.t($2::jsonb::platform.i18n_text, 'fr')) || '-'\n                  || substr(replace($15::text, '-', ''), 25, 8))::platform.slug,\n                 $2::jsonb::platform.i18n_text, $3::jsonb::platform.i18n_text, $4, $5, $6, $7,\n                 $8, $9, $10, $11, $12, $13::text::platform.url, $14)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb",
+        "Jsonb",
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Date",
+        "Text",
+        "Text",
+        "Uuid",
+        "Bool",
+        "Bool",
+        "Text",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f10552bab2b04b13ce596e37bd0173580581628c7cfa813cc5aa6453cf6333a9"
+}

@@ -1,7 +1,9 @@
 pub mod access;
 pub mod admin;
+pub mod admin_documents;
 pub mod admission;
 pub mod code;
+pub mod documents;
 pub mod extraction;
 pub mod permissions;
 pub mod redeem;

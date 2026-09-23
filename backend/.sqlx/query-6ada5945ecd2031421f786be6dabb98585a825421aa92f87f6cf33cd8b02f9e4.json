@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.correction_notes\n            SET withdrawn_at = COALESCE(withdrawn_at, now()),\n                withdrawn_by = COALESCE(withdrawn_by, $2)\n          WHERE id = $1\n         RETURNING document_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "document_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.correction_notes",
+            "name": "document_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "6ada5945ecd2031421f786be6dabb98585a825421aa92f87f6cf33cd8b02f9e4"
+}

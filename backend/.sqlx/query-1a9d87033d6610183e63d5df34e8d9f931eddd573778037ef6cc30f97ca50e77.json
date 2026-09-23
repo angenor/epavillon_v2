@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.documents SET published_at = NULL, unpublished_at = now()\n          WHERE id = $1 AND published_at IS NOT NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1a9d87033d6610183e63d5df34e8d9f931eddd573778037ef6cc30f97ca50e77"
+}

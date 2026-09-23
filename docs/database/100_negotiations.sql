@@ -1000,6 +1000,11 @@ CREATE INDEX ix_document_renditions_asset ON negotiation.document_renditions (as
 CREATE TRIGGER tg_document_renditions_updated_at BEFORE UPDATE ON negotiation.document_renditions
     FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
 
+-- Audité, bien que le worker y écrive surtout : le choix « tel quel » de
+-- l'administratrice vit ici, et c'est une décision éditoriale.
+CREATE TRIGGER tg_document_renditions_audit AFTER INSERT OR UPDATE OR DELETE ON negotiation.document_renditions
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit('document_id');
+
 COMMENT ON TABLE negotiation.document_renditions IS
     'L''extraction d''un document fichier : son état, son verdict, son sommaire, et le choix « ouvrir tel quel ». Une ligne par document.';
 
@@ -1013,7 +1018,11 @@ CREATE TABLE negotiation.document_pages (
     blocks            jsonb    NOT NULL DEFAULT '[]',
     -- La concaténation du texte des blocs : rien ne se cherche qui ne s'affiche pas.
     plain_text        text     NOT NULL DEFAULT '',
-    search_vector     tsvector GENERATED ALWAYS AS (to_tsvector('french', plain_text)) STORED,
+    -- Sans accents : sinon « progres » ne trouve pas « progrès », les deux mots
+    -- n'ayant pas la même racine. La requête s'écrit de même.
+    search_vector     tsvector GENERATED ALWAYS AS (
+        to_tsvector('french', platform.immutable_unaccent(plain_text))
+    ) STORED,
     -- L'image de la page, dans le bucket privé.
     image_key         text,
     image_bytes       integer  CHECK (image_bytes IS NULL OR image_bytes > 0),

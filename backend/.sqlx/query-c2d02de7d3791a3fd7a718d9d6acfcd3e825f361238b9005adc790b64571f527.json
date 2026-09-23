@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT passage, body AS \"body!: Value\", created_at, withdrawn_at, withdrawn_by\n             FROM negotiation.correction_notes WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "passage",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.correction_notes",
+            "name": "passage"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "body!: Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "negotiation.correction_notes",
+            "name": "body"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.correction_notes",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "withdrawn_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.correction_notes",
+            "name": "withdrawn_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "withdrawn_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.correction_notes",
+            "name": "withdrawn_by"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "c2d02de7d3791a3fd7a718d9d6acfcd3e825f361238b9005adc790b64571f527"
+}

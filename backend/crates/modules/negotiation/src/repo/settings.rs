@@ -90,3 +90,15 @@ pub async fn ecrire_le_mode(
 
     Ok(())
 }
+
+/// Le bucket fermé au web où vivent les PDF et les images de page.
+pub async fn bucket_prive(conn: &mut PgConnection) -> Result<String> {
+    sqlx::query_scalar!(
+        r#"SELECT (s.value #>> '{}') AS "valeur?" FROM platform.settings s
+            WHERE s.key = 'media.private_bucket'"#
+    )
+    .fetch_optional(conn)
+    .await?
+    .flatten()
+    .ok_or_else(|| kernel::error::ApiError::internal("réglage media.private_bucket absent"))
+}

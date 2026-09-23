@@ -25,7 +25,7 @@ Famille `/negotiation`, crate `negotiation`. **Lecture publique, écriture gard�
   - `cop`, l'identifiant de l'édition, ou `null` ;
   - `issued_on`, `published_at`, `publisher`, `locale` ;
   - `source` : `"file"` ou `"link"` ;
-  - `external_url`, pour un lien ;
+  - `external_url`, pour un lien — `null` pour un réservé sans accès : l'adresse d'un lien est son contenu (SC-007) ;
   - `link_host`, par exemple `enb.iisd.org` ;
   - `restricted` et `accessible` ;
   - `page_count`, `reading_bytes` et `mode` (`"reflow"` ou `"as_is"`), pour un fichier ;

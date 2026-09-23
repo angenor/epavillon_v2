@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT platform.t(title, $2) AS \"titre!\" FROM negotiation.documents WHERE supersedes_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "titre!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "ecb6c29fa2a14192cd1abfc6331d3cc3fd3ef06565af7870ef82da91790de13c"
+}

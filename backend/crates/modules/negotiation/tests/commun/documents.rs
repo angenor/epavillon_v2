@@ -165,3 +165,85 @@ pub async fn pages(bac: &Bac, document: Uuid) -> Vec<(i32, String, Option<String
     .collect()
 }
 
+// -----------------------------------------------------------------------------
+// Les profils et les documents publiés
+// -----------------------------------------------------------------------------
+
+/// Une administratrice de la plateforme entière : elle publie, et ne corrige pas.
+pub async fn administratrice(bac: &Bac, email: &str) -> Uuid {
+    let p = super::personne(bac, email).await;
+    super::attribuer(bac, p, "admin", "global", None).await;
+    p
+}
+
+/// Une personne qui a l'accès négociateur de Guide Négo.
+pub async fn negociatrice(bac: &Bac, email: &str) -> Uuid {
+    let p = super::personne(bac, email).await;
+    super::attribuer(bac, p, "negotiator", "global", None).await;
+    p
+}
+
+/// Un expert : il pose et retire les notes, et ne publie rien.
+pub async fn expert(bac: &Bac, email: &str) -> Uuid {
+    let p = super::personne(bac, email).await;
+    super::attribuer(bac, p, "expert", "global", None).await;
+    p
+}
+
+pub fn entree(
+    titre: &str,
+    restreint: bool,
+) -> negotiation::domain::admin_documents::AdminDocumentInput {
+    serde_json::from_value(serde_json::json!({
+        "title": { "fr": titre },
+        "type": "negotiation_guide",
+        "restricted": restreint,
+    }))
+    .expect("entrée de document")
+}
+
+/// Un brouillon créé par le service, comme au back-office.
+pub async fn creer(bac: &Bac, admin: Uuid, titre: &str, restreint: bool) -> Uuid {
+    negotiation::service::admin_documents::creer(
+        &bac.state,
+        &bac.ctx(admin),
+        &entree(titre, restreint),
+        "fr",
+    )
+    .await
+    .expect("création du brouillon")
+}
+
+/// Un document fichier publié : brouillon, PDF déposé dans le bucket privé,
+/// fichier attaché, extraction passée, publication.
+pub async fn fichier_publie(bac: &Bac, admin: Uuid, titre: &str, restreint: bool) -> Uuid {
+    let id = creer(bac, admin, titre, restreint).await;
+    let asset = objet_pdf(bac, admin, PETIT, "ready").await;
+    negotiation::service::admin_documents::attacher_le_fichier(
+        &bac.state,
+        &bac.ctx(admin),
+        id,
+        asset,
+    )
+    .await
+    .expect("fichier attaché");
+    let issues = passer_lextraction(bac).await;
+    assert!(issues.iter().all(Result::is_ok), "{issues:?}");
+    negotiation::service::admin_documents::publier(&bac.state, &bac.ctx(admin), id)
+        .await
+        .expect("publication");
+    id
+}
+
+/// Un lien externe publié.
+pub async fn lien_publie(bac: &Bac, admin: Uuid, titre: &str, url: &str, restreint: bool) -> Uuid {
+    let mut e = entree(titre, restreint);
+    e.external_url = Some(Some(url.to_owned()));
+    let id = negotiation::service::admin_documents::creer(&bac.state, &bac.ctx(admin), &e, "fr")
+        .await
+        .expect("création du lien");
+    negotiation::service::admin_documents::publier(&bac.state, &bac.ctx(admin), id)
+        .await
+        .expect("publication du lien");
+    id
+}

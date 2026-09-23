@@ -1,0 +1,238 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT d.id, d.slug::text AS \"slug!\", d.version,\n                  platform.t(d.title, $1) AS \"title!\", platform.t(d.summary, $1) AS summary,\n                  t.code AS \"type_code!\",\n                  COALESCE((SELECT array_agg(tt.code ORDER BY et.sort_order, tt.code)\n                              FROM reference.entity_terms et\n                              JOIN reference.taxonomy_terms tt ON tt.id = et.term_id\n                             WHERE et.entity_schema = 'negotiation' AND et.entity_table = 'documents'\n                               AND et.entity_id = d.id AND tt.taxonomy_code = 'negotiation_theme'\n                               AND tt.is_active), '{}') AS \"themes!\",\n                  d.event_id, d.issued_on, d.published_at AS \"published_at!\", d.publisher,\n                  d.locale_code, d.asset_id, d.external_url::text AS external_url, d.is_restricted,\n                  r.asset_id AS \"rendu_asset?\", r.status::text AS \"rendu_status?\", r.page_count,\n                  r.reading_bytes, r.serve_as_is AS \"serve_as_is?\", r.extracted_at\n             FROM negotiation.documents d\n             JOIN reference.taxonomy_terms t ON t.id = d.document_type_term_id\n             LEFT JOIN negotiation.document_renditions r ON r.document_id = d.id\n            WHERE d.published_at IS NOT NULL\n            ORDER BY d.published_at DESC, d.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "version",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "title!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "summary",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "type_code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "themes!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "issued_on",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "issued_on"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "published_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "publisher",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "publisher"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "locale_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "locale_code"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "asset_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "asset_id"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "external_url",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 14,
+        "name": "is_restricted",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "is_restricted"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "rendu_asset?",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "asset_id"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "rendu_status?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 17,
+        "name": "page_count",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "page_count"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "reading_bytes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "reading_bytes"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "serve_as_is?",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "serve_as_is"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "extracted_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "extracted_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false,
+      null,
+      null,
+      false,
+      null,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      null,
+      false,
+      false,
+      null,
+      true,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "3a04c1f1a4e7e5738ef6246d16fc3f3dfd3507a73116b5d092f2ba62802a5489"
+}

@@ -310,6 +310,78 @@ DROP TRIGGER IF EXISTS tg_document_renditions_updated_at ON negotiation.document
 CREATE TRIGGER tg_document_renditions_updated_at BEFORE UPDATE ON negotiation.document_renditions
     FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
 
+-- L'audit sait désormais lire une autre clé que `id` (010_platform.sql).
+CREATE OR REPLACE FUNCTION platform.tg_audit()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = platform, pg_temp
+AS $$
+DECLARE
+    v_old      jsonb;
+    v_new      jsonb;
+    v_changed  text[];
+    v_entity   uuid;
+    v_actor    uuid;
+    v_label    text;
+BEGIN
+    IF TG_OP = 'INSERT' THEN
+        v_new := to_jsonb(NEW);
+    ELSIF TG_OP = 'UPDATE' THEN
+        v_old := to_jsonb(OLD);
+        v_new := to_jsonb(NEW);
+        SELECT array_agg(key ORDER BY key) INTO v_changed
+        FROM jsonb_each(v_new)
+        WHERE v_new -> key IS DISTINCT FROM v_old -> key;
+        -- Aucune modification effective : ne pas polluer le journal.
+        IF v_changed IS NULL THEN
+            RETURN NULL;
+        END IF;
+    ELSE
+        v_old := to_jsonb(OLD);
+    END IF;
+
+    -- La clé de l'entité est `id`, sauf quand le déclencheur en nomme une autre :
+    -- une table clé par la ligne qu'elle prolonge (document_renditions).
+    v_entity := COALESCE(v_new ->> COALESCE(TG_ARGV[0], 'id'),
+                         v_old ->> COALESCE(TG_ARGV[0], 'id'))::uuid;
+    v_actor  := platform.current_actor_id();
+
+    -- `actor_label` est dénormalisée pour rester lisible APRÈS anonymisation
+    -- RGPD, et l'écriture est le seul instant où le nom existe encore : le lire
+    -- plus tard par jointure rendrait « Utilisateur anonymisé » pour toutes les
+    -- décisions passées d'une personne qui a exercé son droit à l'effacement.
+    -- Le coût est une lecture par clé primaire sur une écriture déjà auditée.
+    IF v_actor IS NOT NULL THEN
+        SELECT p.display_name INTO v_label FROM identity.people p WHERE p.id = v_actor;
+    END IF;
+
+    INSERT INTO platform.audit_log (
+        actor_id, actor_label, request_id, entity_schema, entity_table, entity_id,
+        action, changed_fields, old_data, new_data
+    )
+    VALUES (
+        v_actor,
+        v_label,
+        platform.current_request_id(),
+        TG_TABLE_SCHEMA,
+        TG_TABLE_NAME,
+        v_entity,
+        lower(TG_OP),
+        v_changed,
+        v_old,
+        v_new
+    );
+
+    RETURN NULL; -- trigger AFTER : la valeur de retour est ignorée
+END;
+$$;
+
+-- Audité, bien que le worker y écrive surtout : le choix « tel quel » de
+-- l'administratrice vit ici, et c'est une décision éditoriale.
+DROP TRIGGER IF EXISTS tg_document_renditions_audit ON negotiation.document_renditions;
+CREATE TRIGGER tg_document_renditions_audit AFTER INSERT OR UPDATE OR DELETE ON negotiation.document_renditions
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit('document_id');
 
 COMMENT ON TABLE negotiation.document_renditions IS
     'L''extraction d''un document fichier : son état, son verdict, son sommaire, et le choix « ouvrir tel quel ». Une ligne par document.';
@@ -324,7 +396,11 @@ CREATE TABLE IF NOT EXISTS negotiation.document_pages (
     blocks            jsonb    NOT NULL DEFAULT '[]',
     -- La concaténation du texte des blocs : rien ne se cherche qui ne s'affiche pas.
     plain_text        text     NOT NULL DEFAULT '',
-    search_vector     tsvector GENERATED ALWAYS AS (to_tsvector('french', plain_text)) STORED,
+    -- Sans accents : sinon « progres » ne trouve pas « progrès », les deux mots
+    -- n'ayant pas la même racine. La requête s'écrit de même.
+    search_vector     tsvector GENERATED ALWAYS AS (
+        to_tsvector('french', platform.immutable_unaccent(plain_text))
+    ) STORED,
     -- L'image de la page, dans le bucket privé.
     image_key         text,
     image_bytes       integer  CHECK (image_bytes IS NULL OR image_bytes > 0),
@@ -332,6 +408,11 @@ CREATE TABLE IF NOT EXISTS negotiation.document_pages (
     has_origin_block  boolean  NOT NULL DEFAULT false,
     PRIMARY KEY (document_id, page_index)
 );
+
+-- Une base migrée avant que la recherche ignore les accents garde l'ancienne
+-- expression : on la remplace, ce qui recalcule le vecteur.
+ALTER TABLE negotiation.document_pages ALTER COLUMN search_vector
+    SET EXPRESSION AS (to_tsvector('french', platform.immutable_unaccent(plain_text)));
 
 CREATE INDEX IF NOT EXISTS ix_document_pages_search ON negotiation.document_pages USING gin (search_vector);
 

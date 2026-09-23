@@ -1,0 +1,66 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH RECURSIVE chaine(origine, id, rang) AS (\n               SELECT d.id, s.id, 1\n                 FROM negotiation.documents d\n                 JOIN negotiation.documents s ON s.supersedes_id = d.id AND s.published_at IS NOT NULL\n               UNION ALL\n               SELECT c.origine, s.id, c.rang + 1\n                 FROM chaine c\n                 JOIN negotiation.documents s ON s.supersedes_id = c.id AND s.published_at IS NOT NULL\n                WHERE c.rang < 50\n           )\n           SELECT DISTINCT ON (c.origine)\n                  c.origine AS \"origine!\", s.id AS \"id!\", platform.t(s.title, $1) AS \"title!\",\n                  s.published_at AS \"published_at!\", r.page_count\n             FROM chaine c\n             JOIN negotiation.documents s ON s.id = c.id\n             LEFT JOIN negotiation.document_renditions r ON r.document_id = s.id AND r.asset_id = s.asset_id\n            ORDER BY c.origine, c.rang DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "origine!",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "title!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "published_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "page_count",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "page_count"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      false,
+      null,
+      true,
+      true
+    ]
+  },
+  "hash": "54d58048263291b243ea4e072af645435a06c222b1a6ba4c6ded4b481a17890b"
+}

@@ -1,7 +1,10 @@
 pub mod access;
 pub mod admin_codes;
+pub mod admin_documents;
 pub mod admin_requests;
 pub mod admission;
+pub mod corrections;
+pub mod documents;
 pub mod redeem;
 pub mod requests;
 pub mod themes;

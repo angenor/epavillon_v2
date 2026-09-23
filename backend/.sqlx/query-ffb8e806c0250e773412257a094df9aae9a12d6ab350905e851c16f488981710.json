@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM reference.entity_terms et\n          USING reference.taxonomy_terms t\n          WHERE t.id = et.term_id AND t.taxonomy_code = $2\n            AND et.entity_schema = 'negotiation' AND et.entity_table = 'documents'\n            AND et.entity_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ffb8e806c0250e773412257a094df9aae9a12d6ab350905e851c16f488981710"
+}

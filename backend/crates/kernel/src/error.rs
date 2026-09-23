@@ -251,6 +251,34 @@ codes! {
     NegotiationThemesStale => "NEGOTIATION_THEMES_STALE", StatusCode::PRECONDITION_FAILED,
         "Vos thématiques ont changé sur un autre appareil. Elles ont été relues.";
 
+    // --- Guide Négo, documents (étape 1) --------------------------------------
+    NegotiationDocumentNotFound => "NEGOTIATION_DOCUMENT_NOT_FOUND", StatusCode::NOT_FOUND,
+        "Ce document n'existe pas, ou n'est plus publié.";
+    NegotiationDocumentRestricted => "NEGOTIATION_DOCUMENT_RESTRICTED", StatusCode::FORBIDDEN,
+        "Ce document est réservé aux négociatrices et négociateurs. Saisissez votre code d'invitation pour l'ouvrir.";
+    NegotiationDocumentNotReadable => "NEGOTIATION_DOCUMENT_NOT_READABLE", StatusCode::CONFLICT,
+        "Ce document ne se lit pas dans l'application : ouvrez-le dans le navigateur.";
+    NegotiationDocumentSourceBoth => "NEGOTIATION_DOCUMENT_SOURCE_BOTH", StatusCode::UNPROCESSABLE_ENTITY,
+        "Un document est un fichier ou un lien, jamais les deux.";
+    NegotiationDocumentSourceMissing => "NEGOTIATION_DOCUMENT_SOURCE_MISSING", StatusCode::UNPROCESSABLE_ENTITY,
+        "Déposez un fichier ou indiquez un lien avant de publier.";
+    NegotiationDocumentNotReady => "NEGOTIATION_DOCUMENT_NOT_READY", StatusCode::CONFLICT,
+        "L'extraction n'est pas terminée. Attendez-la, ou choisissez « ouvrir tel quel ».";
+    NegotiationDocumentFileLocked => "NEGOTIATION_DOCUMENT_FILE_LOCKED", StatusCode::CONFLICT,
+        "Le fichier d'un document publié ne change pas. Publiez une nouvelle version.";
+    NegotiationDocumentAlreadySuperseded => "NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED", StatusCode::CONFLICT,
+        "Ce document est déjà remplacé par un autre.";
+    NegotiationDocumentSupersedeCycle => "NEGOTIATION_DOCUMENT_SUPERSEDE_CYCLE", StatusCode::CONFLICT,
+        "Ce remplacement formerait une boucle.";
+    NegotiationDocumentUnknownTheme => "NEGOTIATION_DOCUMENT_UNKNOWN_THEME", StatusCode::BAD_REQUEST,
+        "Cette thématique n'existe pas.";
+    NegotiationDocumentUnknownType => "NEGOTIATION_DOCUMENT_UNKNOWN_TYPE", StatusCode::BAD_REQUEST,
+        "Ce type de document n'existe pas.";
+    NegotiationDocumentPublishedUndeletable => "NEGOTIATION_DOCUMENT_PUBLISHED_UNDELETABLE", StatusCode::CONFLICT,
+        "Un document publié ne se supprime pas : dépubliez-le.";
+    NegotiationCorrectionPageUnknown => "NEGOTIATION_CORRECTION_PAGE_UNKNOWN", StatusCode::UNPROCESSABLE_ENTITY,
+        "Cette page n'existe pas dans le document.";
+
     // MAIL_RELAY_UNREACHABLE n'est PAS ici : il ne franchit aucune réponse
     // HTTP. Il vit dans `mail.rs`, d'où il part vers `platform.jobs.last_error`.
 }

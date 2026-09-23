@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO reference.entity_terms (entity_schema, entity_table, entity_id, term_id, role, sort_order)\n         SELECT entity_schema, entity_table, $2, term_id, role, sort_order\n           FROM reference.entity_terms\n          WHERE entity_schema = 'negotiation' AND entity_table = 'documents' AND entity_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ae2dde53e37c5a4807a832c01322d8ddb47aceca548257466672b1233b87e0c6"
+}

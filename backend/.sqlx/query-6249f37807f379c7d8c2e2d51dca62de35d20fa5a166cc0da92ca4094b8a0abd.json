@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.documents\n             (id, space_id, slug, title, summary, document_type_term_id, track_term_id, event_id,\n              version, publisher, locale_code, supersedes_id, is_restricted, is_rag_eligible, uploaded_by)\n         SELECT $2, d.space_id, d.slug, d.title, d.summary, d.document_type_term_id, d.track_term_id,\n                d.event_id, $3, d.publisher, d.locale_code, d.id, d.is_restricted, d.is_rag_eligible, $4\n           FROM negotiation.documents d WHERE d.id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6249f37807f379c7d8c2e2d51dca62de35d20fa5a166cc0da92ca4094b8a0abd"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.document_pages (document_id, page_index, label)\n         SELECT $1, i, i::text FROM generate_series(1, $2::int) AS i",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "97d887ec489207bdd89f7f47db1405251380ea7fc8e6bd6d2ae82b087890d32b"
+}

@@ -187,7 +187,10 @@ BEGIN
         v_old := to_jsonb(OLD);
     END IF;
 
-    v_entity := COALESCE(v_new ->> 'id', v_old ->> 'id')::uuid;
+    -- La clé de l'entité est `id`, sauf quand le déclencheur en nomme une autre :
+    -- une table clé par la ligne qu'elle prolonge (document_renditions).
+    v_entity := COALESCE(v_new ->> COALESCE(TG_ARGV[0], 'id'),
+                         v_old ->> COALESCE(TG_ARGV[0], 'id'))::uuid;
     v_actor  := platform.current_actor_id();
 
     -- `actor_label` est dénormalisée pour rester lisible APRÈS anonymisation

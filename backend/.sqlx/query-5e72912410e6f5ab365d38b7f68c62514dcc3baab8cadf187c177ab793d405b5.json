@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH pose AS (\n               INSERT INTO reference.entity_terms (entity_schema, entity_table, entity_id, term_id, sort_order)\n               SELECT 'negotiation', 'documents', $1, t.id, c.rang::smallint\n                 FROM unnest($3::text[]) WITH ORDINALITY AS c(code, rang)\n                 JOIN reference.taxonomy_terms t\n                   ON t.code = c.code AND t.taxonomy_code = $2 AND t.is_active\n               ON CONFLICT DO NOTHING\n               RETURNING term_id\n           )\n           SELECT count(*) AS \"n!\" FROM pose",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "5e72912410e6f5ab365d38b7f68c62514dcc3baab8cadf187c177ab793d405b5"
+}

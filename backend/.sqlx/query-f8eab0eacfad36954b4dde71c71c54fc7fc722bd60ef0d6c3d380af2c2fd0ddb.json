@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT negotiation.register_document_download($1) AS fait",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "fait",
+        "type_info": "Void",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "f8eab0eacfad36954b4dde71c71c54fc7fc722bd60ef0d6c3d380af2c2fd0ddb"
+}

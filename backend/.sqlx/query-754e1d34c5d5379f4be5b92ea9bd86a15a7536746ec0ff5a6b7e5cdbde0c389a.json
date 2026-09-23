@@ -1,0 +1,48 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT code AS \"code!\", platform.t(label, $2) AS \"label!\", sort_order AS \"sort_order!\"\n             FROM reference.taxonomy_terms\n            WHERE taxonomy_code = $1 AND is_active\n            ORDER BY sort_order, code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "label!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "sort_order!",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "sort_order"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false
+    ]
+  },
+  "hash": "754e1d34c5d5379f4be5b92ea9bd86a15a7536746ec0ff5a6b7e5cdbde0c389a"
+}

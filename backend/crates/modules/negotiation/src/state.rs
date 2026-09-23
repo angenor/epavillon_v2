@@ -2,6 +2,7 @@
 
 use kernel::config::Config;
 use kernel::db::Db;
+use kernel::storage::Entrepots;
 use sqlx::PgPool;
 use std::sync::Arc;
 
@@ -9,11 +10,23 @@ use std::sync::Arc;
 pub struct NegotiationState {
     db: Db,
     config: Arc<Config>,
+    /// Le PDF et les images de page d'un document vivent dans le bucket privé :
+    /// l'API les sert elle-même, après avoir vérifié l'accès.
+    entrepots: Entrepots,
 }
 
 impl NegotiationState {
     pub fn new(db: Db, config: Arc<Config>) -> Self {
-        Self { db, config }
+        let entrepots = Entrepots::new(&config.media);
+        Self {
+            db,
+            config,
+            entrepots,
+        }
+    }
+
+    pub fn entrepots(&self) -> &Entrepots {
+        &self.entrepots
     }
 
     pub fn db(&self) -> &Db {

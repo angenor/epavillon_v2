@@ -143,34 +143,34 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
 
 **Objectif** : les contrats servis, avant les écrans. Toutes les routes sont dans le crate `negotiation`, plates, comme celles de 0b.
 
-- [ ] T038 Ajouter les treize codes d'erreur ([api-documents.md](contracts/api-documents.md), [api-admin-documents.md](contracts/api-admin-documents.md)) au catalogue de `backend/crates/kernel/src/error.rs`, et les traductions des contraintes (`ck_documents_source_at_most_one`, `ck_documents_published_has_source`, `ux_documents_supersedes`, le cycle, la taxonomie, la page) dans `backend/crates/kernel/src/pg_error.rs`
-- [ ] T039 Déclarer les permissions `DOCUMENT_PUBLISH`, `CORRECTION_POST` et `CORRECTION_WITHDRAW`, avec leurs `PermissionSpec`, dans `backend/crates/modules/negotiation/src/domain/permissions.rs`
-- [ ] T040 [P] Écrire `backend/crates/modules/negotiation/src/repo/document_themes.rs` sur le patron de `programme/src/repo/themes.rs:100-150` : couple `('negotiation','documents')` en littéral, taxonomie `negotiation_theme` et `is_active` vérifiés à l'écriture, code refusé nommé (`NEGOTIATION_DOCUMENT_UNKNOWN_THEME`), lecture qui écarte les termes désactivés, effacement des liens dans la transaction appelante (R16)
-- [ ] T041 [P] Écrire `backend/crates/modules/negotiation/src/repo/documents.rs` :
+- [X] T038 Ajouter les treize codes d'erreur ([api-documents.md](contracts/api-documents.md), [api-admin-documents.md](contracts/api-admin-documents.md)) au catalogue de `backend/crates/kernel/src/error.rs`, et les traductions des contraintes (`ck_documents_source_at_most_one`, `ck_documents_published_has_source`, `ux_documents_supersedes`, le cycle, la taxonomie, la page) dans `backend/crates/kernel/src/pg_error.rs`
+- [X] T039 Déclarer les permissions `DOCUMENT_PUBLISH`, `CORRECTION_POST` et `CORRECTION_WITHDRAW`, avec leurs `PermissionSpec`, dans `backend/crates/modules/negotiation/src/domain/permissions.rs`
+- [X] T040 [P] Écrire `backend/crates/modules/negotiation/src/repo/document_themes.rs` sur le patron de `programme/src/repo/themes.rs:100-150` : couple `('negotiation','documents')` en littéral, taxonomie `negotiation_theme` et `is_active` vérifiés à l'écriture, code refusé nommé (`NEGOTIATION_DOCUMENT_UNKNOWN_THEME`), lecture qui écarte les termes désactivés, effacement des liens dans la transaction appelante (R16)
+- [X] T041 [P] Écrire `backend/crates/modules/negotiation/src/repo/documents.rs` :
   - brouillon, modification, source, publication, dépublication, nouvelle version, suppression d'un brouillon (avec ses liens de thématiques) ;
   - la liste publique **selon l'accès** ;
   - le bout publié de la chaîne de remplacement, par requête récursive (R18).
-- [ ] T042 [P] Écrire `backend/crates/modules/negotiation/src/repo/corrections.rs` (poser, retirer — idempotent —, lister les vivantes de tous les documents publiés, lister toutes celles d'un document) et `backend/crates/modules/negotiation/src/repo/bookmarks.rs` (lister, poser, retirer, tous idempotents)
-- [ ] T043 Écrire `backend/crates/modules/negotiation/src/service/documents.rs` (lectures publiques, recherche dans le texte sans passage pour un réservé inaccessible, compteur) et `service/admin_documents.rs` :
+- [X] T042 [P] Écrire `backend/crates/modules/negotiation/src/repo/corrections.rs` (poser, retirer — idempotent —, lister les vivantes de tous les documents publiés, lister toutes celles d'un document) et `backend/crates/modules/negotiation/src/repo/bookmarks.rs` (lister, poser, retirer, tous idempotents)
+- [X] T043 Écrire `backend/crates/modules/negotiation/src/service/documents.rs` (lectures publiques, recherche dans le texte sans passage pour un réservé inaccessible, compteur) et `service/admin_documents.rs` :
   - fichier figé une fois publié ;
   - publication conditionnée à l'extraction ou au mode « tel quel » ;
   - mise en file de l'extraction dans la transaction de `PUT …/file`.
-- [ ] T044 Écrire `backend/crates/modules/negotiation/src/service/corrections.rs` : poser et retirer, en portée globale, chaque écriture par `Db::write`
-- [ ] T045 Écrire les routes publiques dans `backend/crates/modules/negotiation/src/routes/documents.rs` : liste et recherche, forme lisible, image de page servie par `kernel::storage`, notes, compteur, favoris ([api-documents.md](contracts/api-documents.md)). Chaque lecture listée porte son `ETag` et répond `304` par `routes::inchange()`, avec `Cache-Control` selon l'accès
-- [ ] T046 Écrire les routes d'administration dans `backend/crates/modules/negotiation/src/routes/admin_documents.rs` ([api-admin-documents.md](contracts/api-admin-documents.md)), dont la variante d'image de page et le PDF d'origine. Les lectures ouvertes à `publish` **ou** `correction.post` se testent dans le gestionnaire
-- [ ] T047 Monter les deux fichiers de routes dans `backend/crates/modules/negotiation/src/lib.rs` (`routes()` et `admin_routes()`), puis `make openapi` et `make check-api-contract`
-- [ ] T048 [P] Tests sur base réelle, `backend/crates/modules/negotiation/tests/documents_public.rs` : chemin nominal, `304`, remplacement (brouillon ignoré, chaîne de trois), dépublié absent et `404`, favoris idempotents, compteur sans compte
-- [ ] T049 [P] Tests sur base réelle, `backend/crates/modules/negotiation/tests/documents_reserves.rs` (**SC-007**) : sans compte, avec un compte sans accès et par identifiant forgé, la liste masque résumé et thématiques, `reading`, `image` et `downloads` rendent `403`, la recherche ne rend ni page ni extrait
-- [ ] T050 [P] Tests sur base réelle, `backend/crates/modules/negotiation/tests/documents_admin.rs` :
+- [X] T044 Écrire `backend/crates/modules/negotiation/src/service/corrections.rs` : poser et retirer, en portée globale, chaque écriture par `Db::write`
+- [X] T045 Écrire les routes publiques dans `backend/crates/modules/negotiation/src/routes/documents.rs` : liste et recherche, forme lisible, image de page servie par `kernel::storage`, notes, compteur, favoris ([api-documents.md](contracts/api-documents.md)). Chaque lecture listée porte son `ETag` et répond `304` par `routes::inchange()`, avec `Cache-Control` selon l'accès
+- [X] T046 Écrire les routes d'administration dans `backend/crates/modules/negotiation/src/routes/admin_documents.rs` ([api-admin-documents.md](contracts/api-admin-documents.md)), dont la variante d'image de page et le PDF d'origine. Les lectures ouvertes à `publish` **ou** `correction.post` se testent dans le gestionnaire
+- [X] T047 Monter les deux fichiers de routes dans `backend/crates/modules/negotiation/src/lib.rs` (`routes()` et `admin_routes()`), puis `make openapi` et `make check-api-contract`
+- [X] T048 [P] Tests sur base réelle, `backend/crates/modules/negotiation/tests/documents_public.rs` : chemin nominal, `304`, remplacement (brouillon ignoré, chaîne de trois), dépublié absent et `404`, favoris idempotents, compteur sans compte
+- [X] T049 [P] Tests sur base réelle, `backend/crates/modules/negotiation/tests/documents_reserves.rs` (**SC-007**) : sans compte, avec un compte sans accès et par identifiant forgé, la liste masque résumé et thématiques, `reading`, `image` et `downloads` rendent `403`, la recherche ne rend ni page ni extrait
+- [X] T050 [P] Tests sur base réelle, `backend/crates/modules/negotiation/tests/documents_admin.rs` :
   - brouillon, dépôt, extraction sur `fixtures/petit.pdf`, aperçu, publication, nouvelle version, dépublication ;
   - chaque invariant traduit ;
   - suppression d'un brouillon et de ses liens `entity_terms` ;
   - audit.
-- [ ] T051 [P] Tests sur base réelle, `backend/crates/modules/negotiation/tests/corrections.rs` : l'expert lit l'aperçu, pose et retire une note, **mais ne publie ni ne modifie** ; l'administrateur publie **mais ne pose pas** de note ; page inconnue refusée ; retrait gardé en historique
-- [ ] T052 Étendre `backend/crates/modules/negotiation/tests/perimetre_url_forgee.rs` et `perimetre_vide_refuse.rs` aux nouvelles routes d'administration : chacune déclare sa garde, et un administrateur d'événement ne passe pas
-- [ ] T053 [P] Tests HTTP de bout en bout dans `backend/crates/api/tests/routes_negotiation_documents.rs` : `ETag`/`304`, `Cache-Control`, image servie, `403` d'un réservé
-- [ ] T054 [P] Écrire les types `frontend/app/types/negotiation-documents.ts` et `frontend/app/types/admin-negotiation-documents.ts`, nommés comme les contrats, et les jeux d'exemple `frontend/app/mocks/negotiation-documents.ts`, qui reprennent les cinq documents de la maquette
-- [ ] T055 Écrire `frontend/app/composables/api/guide-nego-documents.ts` et `frontend/app/composables/api/admin-negotiation-documents.ts`, puis les brancher dans `frontend/app/composables/useApi.ts`, qui ne gagne que le branchement. `make check-api-contract` au vert
+- [X] T051 [P] Tests sur base réelle, `backend/crates/modules/negotiation/tests/corrections.rs` : l'expert lit l'aperçu, pose et retire une note, **mais ne publie ni ne modifie** ; l'administrateur publie **mais ne pose pas** de note ; page inconnue refusée ; retrait gardé en historique
+- [X] T052 Étendre `backend/crates/modules/negotiation/tests/perimetre_url_forgee.rs` et `perimetre_vide_refuse.rs` aux nouvelles routes d'administration : chacune déclare sa garde, et un administrateur d'événement ne passe pas
+- [X] T053 [P] Tests HTTP de bout en bout dans `backend/crates/api/tests/routes_negotiation_documents.rs` : `ETag`/`304`, `Cache-Control`, image servie, `403` d'un réservé
+- [X] T054 [P] Écrire les types `frontend/app/types/negotiation-documents.ts` et `frontend/app/types/admin-negotiation-documents.ts`, nommés comme les contrats, et les jeux d'exemple `frontend/app/mocks/negotiation-documents.ts`, qui reprennent les cinq documents de la maquette
+- [X] T055 Écrire `frontend/app/composables/api/guide-nego-documents.ts` et `frontend/app/composables/api/admin-negotiation-documents.ts`, puis les brancher dans `frontend/app/composables/useApi.ts`, qui ne gagne que le branchement. `make check-api-contract` au vert
 
 **Checkpoint** : les contrats sont servis et testés, SC-007 prouvé. **Commit.**
 
