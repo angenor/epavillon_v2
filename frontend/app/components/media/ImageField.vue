@@ -74,13 +74,17 @@ const emit = defineEmits<{
 }>()
 
 const { t, locale } = useI18n()
-const api = useApi()
+const {
+  enCours: busy,
+  echec: failure,
+  accept,
+  accepte: accepted,
+  deposer,
+} = useDepotMedia({ motifs: () => props.rule?.allowed_mime_prefixes ?? [], repli: 'image/*' })
 
 const input = ref<HTMLInputElement | null>(null)
 const chosen = ref<File | null>(null)
 const altText = ref<I18nText | null>(null)
-const busy = ref(false)
-const failure = ref<string | null>(null)
 
 /** L'objet déposé pendant cette session d'écran, pas encore rattaché. */
 const uploaded = ref<AttachedImage | null>(null)
@@ -103,22 +107,6 @@ const aspectRatio = computed<number | null>(() => {
   const value = Number(declared)
   return Number.isFinite(value) && value > 0 ? value : null
 })
-
-const accept = computed(() => {
-  const prefixes = props.rule?.allowed_mime_prefixes ?? []
-  return prefixes.length > 0 ? prefixes.join(',') : 'image/*'
-})
-
-/** Le type est-il accepté ? Même règle que la base : `*` y vaut « n'importe quoi ». */
-function accepted(mime: string): boolean {
-  const prefixes = props.rule?.allowed_mime_prefixes ?? []
-  if (prefixes.length === 0) return mime.startsWith('image/')
-  return prefixes.some((pattern) => {
-    const [head, tail] = pattern.split('*')
-    if (tail === undefined) return mime === pattern
-    return mime.startsWith(head ?? '') && mime.endsWith(tail)
-  })
-}
 
 function pick(): void {
   failure.value = null
@@ -155,39 +143,32 @@ async function upload(result: {
 }): Promise<void> {
   const description = altText.value
   if (!description?.fr) return
-  busy.value = true
-  failure.value = null
-  try {
-    const asset = await api.media.upload({
-      file: result.blob,
-      filename: result.filename,
-      mimeType: result.mimeType,
-      altText: description,
-      role: props.role,
-      ownerSchema: props.owner?.schema,
-      ownerTable: props.owner?.table,
-      ownerId: props.owner?.id,
-    })
-    // LES DIMENSIONS VIENNENT DE L'ÉDITEUR, pas de la réponse : la base les
-    // renseigne au traitement, et l'aperçu ne peut pas attendre le worker.
-    uploaded.value = {
-      asset_id: asset.id,
-      url: asset.url,
-      width: result.width,
-      height: result.height,
-      alt_text: asset.alt_text ?? description,
-      caption: null,
-      credit: null,
-      sources: asset.sources,
-    }
-    emit('update:assetId', asset.id)
-    emit('update:image', uploaded.value)
-    cancelEditing()
-  } catch (thrown) {
-    failure.value = apiErrorMessage(thrown, t)
-  } finally {
-    busy.value = false
+  const asset = await deposer({
+    file: result.blob,
+    filename: result.filename,
+    mimeType: result.mimeType,
+    altText: description,
+    role: props.role,
+    ownerSchema: props.owner?.schema,
+    ownerTable: props.owner?.table,
+    ownerId: props.owner?.id,
+  })
+  if (!asset) return
+  // LES DIMENSIONS VIENNENT DE L'ÉDITEUR, pas de la réponse : la base les
+  // renseigne au traitement, et l'aperçu ne peut pas attendre le worker.
+  uploaded.value = {
+    asset_id: asset.id,
+    url: asset.url,
+    width: result.width,
+    height: result.height,
+    alt_text: asset.alt_text ?? description,
+    caption: null,
+    credit: null,
+    sources: asset.sources,
   }
+  emit('update:assetId', asset.id)
+  emit('update:image', uploaded.value)
+  cancelEditing()
 }
 
 function clear(): void {
