@@ -118,6 +118,7 @@ const emit = defineEmits<{
 
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
+const { zoneOf } = useDateTime()
 
 const sessionById = computed(() => new Map(props.sessions.map((session) => [session.id, session])))
 
@@ -391,7 +392,7 @@ function onViewChange(view: { startDate?: Date; view?: string }): void {
   <div class="min-w-0">
     <div class="mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
       <p class="text-sm text-text-muted">
-        {{ t('admin.planner.calendar.zoneNotice', { zone: props.zoneLabel || props.timezone }) }}
+        {{ t('admin.planner.calendar.zoneNotice', { zone: zoneOf(props.zoneLabel || props.timezone) }) }}
       </p>
 
       <!-- LE JOUR POUR POSER, LA SEMAINE POUR VOIR L'ÉQUILIBRE. Deux boutons

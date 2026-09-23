@@ -46,7 +46,7 @@ const emit = defineEmits<{ goTo: [step: ProposalFormStep] }>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
-const { dateTime } = useDateTime()
+const { dateTime, zoneOf } = useDateTime()
 
 const nextSteps = computed(() => submissionStepLines(tr(props.call.submission_next_steps)))
 
@@ -298,7 +298,7 @@ const durationLabel = computed(() =>
           <dd class="text-text">
             {{ startLabel }}
             <span class="block text-text-muted">
-              {{ t('common.datetime.zoneOf', { zone: props.edition.city ?? props.edition.timezone }) }}
+              {{ zoneOf(props.edition.city ?? props.edition.timezone) }}
             </span>
           </dd>
         </div>

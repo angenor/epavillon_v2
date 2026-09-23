@@ -31,7 +31,7 @@ const props = defineProps<Props>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
-const { date, dateTime } = useDateTime()
+const { date, dateTime, zoneOf } = useDateTime()
 
 const deadline = computed(() => effectiveDeadline(props.call))
 const countdown = useCountdown(deadline)
@@ -70,7 +70,7 @@ const isExpired = computed(() => Boolean(countdown.value?.expired))
 
     <p class="mt-1 font-bold text-text">{{ deadlineLabel }}</p>
     <p class="text-sm text-text-muted">
-      {{ t('common.datetime.zoneOf', { zone: zoneLabel }) }}
+      {{ zoneOf(zoneLabel) }}
     </p>
 
     <p v-if="originalDeadlineLabel" class="mt-1 text-sm text-text-muted">

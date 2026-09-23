@@ -67,7 +67,7 @@
     "orDrag": "or drag the card onto the grid"
   },
   "calendar": {
-    "zoneNotice": "Times shown in {zone} local time.",
+    "zoneNotice": "Times shown in {zone}.",
     "hint": "Drag a block to move it, stretch its edge to change its duration.",
     "viewLabel": "Displayed period",
     "view": {

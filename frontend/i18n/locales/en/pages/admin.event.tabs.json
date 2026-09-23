@@ -261,7 +261,7 @@
       "perOrganizationNone": "No cap per organization",
       "verifiedOnly": "Restricted to verified organizations",
       "duration": "Duration from {min} to {max} min, {default} min by default",
-      "dailyWindow": "Pavilion open from {start} to {end}, {zone} time",
+      "dailyWindow": "Pavilion open from {start} to {end}, {zone}",
       "speakers": "From {min} to {max} speakers",
       "guidelines": "Submission guidelines",
       "nextSteps": "What happens after sending"

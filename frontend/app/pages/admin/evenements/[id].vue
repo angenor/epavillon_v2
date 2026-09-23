@@ -70,7 +70,7 @@ definePageMeta({
 
 const { t } = useI18n()
 const { tr } = useI18nText()
-const { date, dateTime } = useDateTime()
+const { date, dateTime, zoneOf } = useDateTime()
 const api = useApi()
 const auth = useAuthStore()
 const adminScope = useAdminScopeStore()
@@ -558,9 +558,7 @@ const periodLabel = computed(() => {
             >
               <span>{{ periodLabel }}</span>
               <span>
-                {{ t('common.datetime.zoneOf', {
-                  zone: detail.edition.city ?? detail.edition.timezone,
-                }) }}
+                {{ zoneOf(detail.edition.city ?? detail.edition.timezone) }}
               </span>
               <span v-if="detail.edition.city">
                 {{ detail.edition.city
@@ -631,9 +629,7 @@ const periodLabel = computed(() => {
           <p class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-text-secondary">
             <span>{{ periodLabel }}</span>
             <span class="text-text-subtle">
-              {{ t('common.datetime.zoneOf', {
-                zone: detail.edition.city ?? detail.edition.timezone,
-              }) }}
+              {{ zoneOf(detail.edition.city ?? detail.edition.timezone) }}
             </span>
             <span v-if="detail.edition.city">
               {{ detail.edition.city

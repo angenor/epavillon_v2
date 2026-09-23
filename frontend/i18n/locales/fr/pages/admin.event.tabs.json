@@ -261,7 +261,7 @@
       "perOrganizationNone": "Aucun plafond par organisation",
       "verifiedOnly": "Réservé aux organisations vérifiées",
       "duration": "Durée de {min} à {max} min, {default} min par défaut",
-      "dailyWindow": "Pavillon ouvert de {start} à {end}, heure de {zone}",
+      "dailyWindow": "Pavillon ouvert de {start} à {end}, {zone}",
       "speakers": "De {min} à {max} intervenants",
       "guidelines": "Consignes de dépôt",
       "nextSteps": "Ce qui se passe après l'envoi"

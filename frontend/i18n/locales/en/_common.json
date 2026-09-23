@@ -95,10 +95,13 @@
     "relativeSoon": "Soon",
     "timeRange": "{start} — {end}",
     "timeRangeWithZone": "{start} — {end}, {zone} time",
+    "timeRangeWithZoneElided": "{start} — {end}, {zone} time",
     "timeRangeFull": "{start} — {end} ({zone}, {offset})",
     "timeFull": "{time} ({zone}, {offset})",
     "timeWithZone": "{time}, {zone} time",
+    "timeWithZoneElided": "{time}, {zone} time",
     "zoneOf": "{zone} time",
+    "zoneOfElided": "{zone} time",
     "zoneOffset": "UTC{offset}",
     "zoneOffsetShort": "UTC{offset}"
   },

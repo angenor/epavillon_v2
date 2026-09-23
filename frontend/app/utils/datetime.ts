@@ -167,6 +167,22 @@ export function timeZoneCityLabel(timeZone: TimeZoneName): string {
   return segment.replace(/_/g, ' ')
 }
 
+/**
+ * « heure d'Antalya », « heure de Belém » : le français élide devant une voyelle.
+ * Le « h » n'est pas compté — muet ou aspiré, le nom seul ne le dit pas.
+ */
+export function zoneElides(zone: string): boolean {
+  const initiale = zone.trim().normalize('NFD').charAt(0).toLowerCase()
+  return initiale !== '' && 'aeiou'.includes(initiale)
+}
+
+export type ZoneFormula = 'timeWithZone' | 'timeRangeWithZone' | 'zoneOf'
+
+/** La clé de `common.datetime` à employer : chaque formule a sa jumelle élidée. */
+export function zoneFormulaKey(formula: ZoneFormula, zone: string): string {
+  return `common.datetime.${formula}${zoneElides(zone) ? 'Elided' : ''}`
+}
+
 /** Deux instants tombent-ils le même jour civil dans ce fuseau ? */
 export function isSameDayInZone(
   a: DateInput | null | undefined,

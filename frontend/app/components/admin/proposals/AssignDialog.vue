@@ -42,6 +42,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const { zoneOf } = useDateTime()
 
 const reviewerId = ref('')
 const dueDate = ref('')
@@ -114,7 +115,7 @@ function submit(): void {
         <UiDatePicker
           v-model="dueDate"
           :label="t('admin.proposals.assign.dueAt')"
-          :hint="t('admin.proposals.assign.dueAtHint', { zone: props.zoneLabel })"
+          :hint="t('admin.proposals.assign.dueAtHint', { zone: zoneOf(props.zoneLabel) })"
           :timezone-label="props.zoneLabel"
           block
           :disabled="props.busy"
