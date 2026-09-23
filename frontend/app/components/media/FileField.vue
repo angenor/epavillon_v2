@@ -23,8 +23,10 @@ const props = withDefaults(
     maxByteSize?: number | null
     hint?: string
     disabled?: boolean
+    /** Faux quand aucune route ne détache le fichier : il se remplace, il ne se retire pas. */
+    removable?: boolean
   }>(),
-  { current: null, owner: null, maxByteSize: null, hint: undefined },
+  { current: null, owner: null, maxByteSize: null, hint: undefined, removable: true },
 )
 
 const emit = defineEmits<{
@@ -44,6 +46,7 @@ const enVol = ref<{ filename: string; byteSize: number } | null>(null)
 
 const affiche = computed(() => {
   if (!props.assetId) return null
+  if (!props.removable) return props.current
   return envoye.value ?? props.current
 })
 
@@ -146,7 +149,7 @@ function retirer(): void {
         {{ affiche ? t('file-field.actions.replace') : t('file-field.actions.choose') }}
       </UiButton>
       <UiButton
-        v-if="props.assetId"
+        v-if="props.assetId && props.removable"
         variant="ghost"
         size="sm"
         icon="trash"

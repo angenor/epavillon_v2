@@ -393,6 +393,10 @@
      grand écran, 67,8 px sur mobile. */
   --nav-height: 4.3125rem;
 
+  /* L'en-tête du back-office sur grand écran, bordure comprise : ce qui s'y colle
+     en dessous (la barre de pages de l'aperçu) se cale sur cette valeur. */
+  --admin-header-height: 3.4375rem;
+
   /* -- Polices -- */
   --font-sans: var(--ifdd-police-1);
   --font-display: var(--ifdd-police-2);

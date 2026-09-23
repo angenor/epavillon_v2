@@ -44,7 +44,7 @@ Les deux lectures ouvertes à l'une **ou** l'autre permission se testent dans le
 
 ## Dépôt du PDF (garde média, pas une route nouvelle)
 
-`POST /media/assets` avec `owner_schema=negotiation`, `owner_table=documents`, `owner_id=<brouillon>`, `role=source`, un fichier `application/pdf`. La garde exige `negotiation.document.publish` et impose `visibility=private`, donc le bucket privé (R4).
+`POST /media/assets` avec `owner_schema=negotiation`, `owner_table=documents`, `owner_id=<brouillon>`, sans rôle — `media.attachment_role` n'en a aucun pour une source, et la garde n'en demande pas —, un fichier `application/pdf`. La garde exige `negotiation.document.publish` et impose `visibility=private`, donc le bucket privé (R4).
 
 Le champ `FileField` du back-office s'en charge, puis appelle `PUT …/file`.
 

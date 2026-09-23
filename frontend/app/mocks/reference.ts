@@ -596,11 +596,14 @@ export const taxonomyTerms = [
   term(TERM.mediaOrg, 'organization_type', 'media', { fr: 'Média', en: 'Media' }, 70),
 
   // Types de document
-  term(TERM.negotiationGuide, 'document_type', 'negotiation_guide', { fr: 'Guide de négociation', en: 'Negotiation guide' }, 10),
+  term(TERM.negotiationGuide, 'document_type', 'negotiation_guide', { fr: 'Guide', en: 'Guide' }, 10),
+  term(TERM.summary, 'document_type', 'summary', { fr: 'Résumé', en: 'Summary' }, 15),
   term(TERM.technicalNote, 'document_type', 'technical_note', { fr: 'Note technique', en: 'Technical note' }, 20),
+  term(TERM.bulletin, 'document_type', 'bulletin', { fr: 'Bulletin', en: 'Bulletin' }, 25),
   term(TERM.relevantDocument, 'document_type', 'relevant_document', { fr: 'Document de référence', en: 'Reference document' }, 30),
   term(TERM.presentation, 'document_type', 'presentation', { fr: 'Présentation', en: 'Presentation' }, 40),
   term(TERM.report, 'document_type', 'report', { fr: 'Rapport', en: 'Report' }, 50),
+  term(TERM.otherDocument, 'document_type', 'other', { fr: 'Autre', en: 'Other' }, 90),
 
   // Canaux d'acquisition
   term(TERM.ifddWebsite, 'referral_source', 'ifdd_website', { fr: "Site web de l'IFDD", en: 'IFDD website' }, 10),

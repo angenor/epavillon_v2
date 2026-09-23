@@ -1,0 +1,165 @@
+{
+  "newTitle": "New document",
+  "newSubtitle": "The document starts as a draft. Its PDF is uploaded afterwards, from its record; nothing shows in Guide Négo before publication.",
+  "cancel": "Cancel",
+  "backToList": "Back to documents",
+  "readonly": "You are reading this record without being able to edit it: only document publishing opens editing.",
+  "vocabularyError": "Document types, themes or COPs could not be loaded. The lists stay empty until they are.",
+  "forbidden": {
+    "scope": "Publish Guide Négo documents, or post correction notes on them, across the whole platform",
+    "scopePublish": "Publish Guide Négo documents, across the whole platform",
+    "description": "Guide Négo documents are reserved for platform-wide administrators and experts. An account attached to a single event has no access."
+  },
+  "sections": {
+    "description": "Title and summary",
+    "classification": "Classification",
+    "source": "Source",
+    "sourceHint": "A document is either an uploaded PDF or a link to an outside page, never both.",
+    "publication": "Distribution"
+  },
+  "title": {
+    "fr": "Title in French",
+    "en": "Title in English",
+    "enHint": "Optional. Without it, the French title is shown."
+  },
+  "summary": {
+    "fr": "Summary in French",
+    "en": "Summary in English"
+  },
+  "type": {
+    "label": "Document type",
+    "placeholder": "Choose a type"
+  },
+  "themes": {
+    "label": "Themes",
+    "hint": "Several allowed."
+  },
+  "cop": {
+    "label": "COP",
+    "hint": "Optional. The COP the document relates to, one at most.",
+    "none": "No COP",
+    "unknown": "An edition no longer served"
+  },
+  "version": {
+    "label": "Version",
+    "hint": "On creation, leaving it empty gives “1”."
+  },
+  "issuedOn": {
+    "label": "Document date",
+    "hint": "The date the document itself bears, not the date it was published here."
+  },
+  "publisher": {
+    "label": "Publisher",
+    "placeholder": "UNFCCC Secretariat"
+  },
+  "locale": {
+    "label": "Document language",
+    "hint": "The language the document is written in."
+  },
+  "file": {
+    "label": "PDF",
+    "afterCreate": "The PDF can be uploaded once the draft is saved: the file is stored with its document, which must exist first.",
+    "locked": "The file of a published document no longer changes. For a new file, publish a new version.",
+    "linkFilled": "A link is set: clear it to upload a PDF.",
+    "attaching": "Attaching the file to the document…",
+    "unnamed": "Unnamed file",
+    "linkSaved": "A link is saved: clear it, save the record, then upload the PDF."
+  },
+  "link": {
+    "label": "External link",
+    "placeholder": "https://",
+    "hint": "The address of an outside page, if the document is not an uploaded PDF.",
+    "fileAttached": "A PDF is uploaded: the document is that file, and the link stays empty.",
+    "locked": "The source of a published document no longer changes. Publish a new version."
+  },
+  "supersedes": {
+    "label": "Replaces",
+    "hint": "Optional. The published document this one replaces: readers of the old one will be pointed here.",
+    "placeholder": "Search a published document",
+    "none": "Replaces no document",
+    "version": "Version {version}"
+  },
+  "access": {
+    "label": "Who can read it",
+    "restricted": "Restricted",
+    "restrictedHint": "Only people admitted to Guide Négo's restricted modules.",
+    "public": "Public",
+    "publicHint": "Anyone who opens Guide Négo."
+  },
+  "rag": {
+    "label": "Offer this document to the assistant",
+    "hint": "Only takes effect with the assistant, which does not exist yet. Only a document chosen here will be given to it."
+  },
+  "submit": {
+    "create": "Create the draft",
+    "save": "Save"
+  },
+  "error": {
+    "title": "Give the document a French title.",
+    "type": "Choose the document type.",
+    "version": "Give the document a version number."
+  },
+  "detail": {
+    "title": "Document record",
+    "version": "Version {version}",
+    "updated": "updated on {date}",
+    "published": "Published on {date}",
+    "unpublished": "Unpublished on {date}",
+    "zoned": "{date}, {zone}",
+    "supersedes": "Replaces:",
+    "supersededBy": "Replaced by:",
+    "link": "{title} (version {version})",
+    "actions": {
+      "preview": "Preview",
+      "pdf": "Original PDF",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "newVersion": "Publish a new version",
+      "delete": "Delete the draft"
+    },
+    "extraction": {
+      "title": "Extraction",
+      "none": "No file uploaded: nothing to extract. A document that is a link does not need it.",
+      "polling": "Checked again every few seconds",
+      "pages": "Pages",
+      "extractedAt": "Extracted on",
+      "reflowable": "Readable form",
+      "reflowYes": "Yes, the text reflows on screen",
+      "reflowNo": "No, the document opens as pages",
+      "failed": "The extraction failed",
+      "asIs": "Open as is",
+      "asIsHint": "The document opens as images of its pages, without a readable form. Changes without republishing.",
+      "retry": "Retry the extraction",
+      "stopped": "Checking has stopped: the state shown may be out of date.",
+      "reload": "Check again"
+    },
+    "confirm": {
+      "cancel": "Cancel",
+      "unpublish": {
+        "title": "Unpublish this document?",
+        "question": "It will disappear from Guide Négo right away. Its record stays here, and it can be republished.",
+        "confirm": "Unpublish"
+      },
+      "delete": {
+        "title": "Delete this draft?",
+        "question": "The draft and its themes will be erased. This cannot be undone.",
+        "confirm": "Delete"
+      }
+    },
+    "result": {
+      "saved": "Changes saved.",
+      "attached": "PDF attached. The extraction is starting.",
+      "retried": "Extraction restarted.",
+      "asIsOn": "The document now opens as is.",
+      "asIsOff": "The document opens in readable form again.",
+      "published": "Document published.",
+      "unpublished": "Document unpublished.",
+      "newVersion": "New version created as a draft. Enter its version number, then upload its file.",
+      "extractionReady": "Extraction ready."
+    },
+    "notFound": {
+      "title": "Document not found",
+      "description": "This document does not exist, or it has been deleted."
+    }
+  }
+}

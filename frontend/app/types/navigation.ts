@@ -1,5 +1,7 @@
 /** Types de navigation partagés par les deux layouts. */
 
+import type { PermissionCode } from './shared'
+
 export interface NavItem {
   /** Clé i18n du libellé — jamais le libellé lui-même. */
   labelKey: string
@@ -13,25 +15,20 @@ export interface NavItem {
   /** Compteur poussé à droite de l'entrée — ce qui attend d'être traité. Il vient
    *  toujours d'un décompte de l'API, jamais d'une valeur écrite en dur. */
   count?: number
+  /**
+   * L'une de ces permissions, **sur la portée globale**, fait paraître l'entrée.
+   * Absente, l'entrée paraît à tout administrateur : le périmètre est celui de
+   * l'édition choisie, que chaque écran fait respecter. Lue une fois par le
+   * layout, pour ne pas montrer ce qu'un écran refuserait (SC-008) ; l'API
+   * garde ses routes de toute façon.
+   */
+  permissions?: PermissionCode[]
 }
 
 export interface NavSection {
   labelKey: string
+  /** Une section dont aucune entrée ne paraît disparaît. */
   items: NavItem[]
-  /**
-   * Permission exigée **sur la portée globale** pour que la section paraisse.
-   *
-   * Absente — le cas de toutes les sections sauf une —, la section s'affiche à
-   * tout administrateur : le périmètre y est celui de l'édition choisie, et
-   * chaque écran le fait respecter pour son compte.
-   *
-   * Présente, elle est lue **une fois par le layout**, jamais page par page :
-   * un menu qui afficherait une entrée pour la faire refuser ensuite dirait à
-   * la personne qu'il existe quelque chose qu'elle ne peut pas voir (SC-008).
-   * Ce n'est pas un contrôle d'accès — l'API garde ses routes de toute façon —,
-   * c'est ce qu'on montre.
-   */
-  permission?: string
 }
 
 export interface BreadcrumbItem {

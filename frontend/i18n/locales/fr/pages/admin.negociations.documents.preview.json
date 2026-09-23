@@ -1,0 +1,99 @@
+{
+  "title": "Aperçu",
+  "titleOf": "Aperçu — {title}",
+  "subtitle": "Chaque page, son image à côté du texte recomposé : ordre de lecture, en-têtes absents, notes, tableaux en page d'origine, césures, termes anglais marqués.",
+  "back": "Retour à la fiche",
+  "breadcrumb": {
+    "document": "Fiche du document",
+    "preview": "Aperçu"
+  },
+  "forbidden": {
+    "scope": "Publier les documents de négociation, ou y poser des notes de correction, sur la plateforme entière",
+    "description": "L'aperçu des documents de Guide Négo est réservé aux personnes qui publient les documents et aux experts qui les corrigent. Un compte rattaché à un seul événement n'y a pas accès."
+  },
+  "error": {
+    "title": "L'aperçu n'a pas pu être chargé"
+  },
+  "notReady": {
+    "title": "Pas encore de pages à feuilleter",
+    "description": "Extraction : {state}. Les pages paraîtront ici dès qu'elle sera prête.",
+    "noFile": "Ce document n'a pas de fichier PDF : il n'y a rien à extraire. Déposez-le depuis la fiche.",
+    "action": "Ouvrir la fiche"
+  },
+  "verdict": {
+    "title": "Verdict",
+    "label": "Verdict de l'extraction",
+    "reflowable": "Se recompose",
+    "notReflowable": "Ne se recompose pas",
+    "modeAsIs": "Ouvert tel quel",
+    "modeReflow": "Lu recomposé",
+    "failed": "L'extraction a échoué",
+    "pages": "Pages",
+    "readingBytes": "Forme lisible",
+    "extractedAt": "Extraite",
+    "extractedAtValue": "{date}, {time}",
+    "extractor": "Outil d'extraction",
+    "unknown": "—"
+  },
+  "asIs": {
+    "label": "Ouvrir tel quel",
+    "hint": "Le document entier se lit en pages d'origine, sans taille de texte, termes touchables ni recherche dans le texte. Ce choix se change sans republier.",
+    "readOnly": "Seule une personne qui publie les documents peut changer ce choix.",
+    "failed": "Le mode de lecture n'a pas changé"
+  },
+  "quality": {
+    "title": "Indicateurs",
+    "pages": "Pages",
+    "pagesWithText": "Pages avec texte",
+    "pagesWithOrigin": "Pages d'origine",
+    "tables": "Tableaux",
+    "figures": "Figures",
+    "notes": "Notes",
+    "headings": "Titres",
+    "outlineEntries": "Entrées du sommaire",
+    "outlineSource": "Sommaire tiré",
+    "fromBookmarks": "des signets",
+    "fromHeadings": "des titres",
+    "thinItalics": "Italiques maigres",
+    "terms": "Termes marqués",
+    "hyphensKept": "Césures gardées",
+    "hyphensJoined": "Césures recollées"
+  },
+  "outline": {
+    "title": "Sommaire repéré",
+    "empty": "Aucun sommaire repéré dans ce document.",
+    "page": "p. {label}"
+  },
+  "pager": {
+    "label": "Feuilleter les pages",
+    "previous": "Page précédente",
+    "next": "Page suivante",
+    "select": "Page",
+    "option": "{index} — p. {label}",
+    "position": "Page {index} sur {total}",
+    "printed": "numéro imprimé {label}",
+    "keyboard": "Les flèches ← → tournent les pages."
+  },
+  "image": {
+    "title": "Page d'origine",
+    "alt": "Image de la page {label} du document",
+    "offline": "Les images des pages ne viennent que de l'API. Le jeu d'exemple n'en sert pas.",
+    "missing": "L'image de cette page n'a pas été gardée.",
+    "failed": "L'image de cette page n'a pas pu être chargée."
+  },
+  "reading": {
+    "title": "Forme lisible",
+    "empty": "Aucun texte n'a été tiré de cette page.",
+    "legend": "Repères",
+    "italic": "italique",
+    "term": "terme anglais marqué",
+    "notes": "Notes de la page"
+  },
+  "origin": {
+    "table": "Tableau",
+    "figure": "Figure",
+    "hint": "Rendu en page d'origine dans le lecteur.",
+    "see": "Voir la page d'origine",
+    "text": "Texte de la zone"
+  }
+}

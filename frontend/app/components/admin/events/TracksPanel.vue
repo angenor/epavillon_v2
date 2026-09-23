@@ -372,12 +372,13 @@ function periodLabel(track: EditionTrack): string {
         />
 
         <!-- LA LISTE ENVOYÉE REMPLACE CELLE DU FIL : décocher retire vraiment. -->
-        <AdminShowcaseThemePicker
+        <AdminThemePicker
           v-if="props.detail.available_themes.length > 0"
           :model-value="draft.theme_codes"
           :themes="props.detail.available_themes"
           :label="t('admin.event.tabs.tracksTab.form.themes')"
           :hint="t('admin.event.tabs.tracksTab.form.themesHint')"
+          :preview-label="t('admin.showcase.form.themes.preview')"
           @update:model-value="(next: TaxonomyTermCode[]) => (draft!.theme_codes = next)"
         />
 

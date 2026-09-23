@@ -1,0 +1,59 @@
+{
+  "title": "Documents",
+  "subtitle": "Les guides, notes et documents de référence que Guide Négo met entre les mains des négociatrices et négociateurs. Un document publié ne change plus : on publie une nouvelle version.",
+  "new": "Nouveau document",
+  "caption": "Documents de Guide Négo, les derniers modifiés en tête.",
+  "forbidden": {
+    "scope": "Publier ou corriger les documents de Guide Négo, sur la plateforme entière",
+    "description": "Les documents de Guide Négo sont réservés à qui les publie ou les relit. Un compte rattaché à un seul événement n'y a pas accès."
+  },
+  "columns": {
+    "title": "Titre",
+    "type": "Type",
+    "version": "Version",
+    "state": "État",
+    "source": "Source",
+    "extraction": "Extraction",
+    "updated": "Mis à jour"
+  },
+  "supersedes": "Remplace « {title} », version {version}",
+  "supersededBy": "Remplacé par « {title} », version {version}",
+  "pages": "aucune page | {count} page | {count} pages",
+  "filters": {
+    "label": "Filtres de la liste",
+    "search": "Chercher un titre",
+    "state": "État",
+    "type": "Type",
+    "allStates": "Tous les états",
+    "allTypes": "Tous les types"
+  },
+  "empty": {
+    "title": "Aucun document",
+    "description": "Guide Négo n'a encore aucun document à montrer. Créez un brouillon, déposez son PDF ou indiquez son lien, puis publiez-le.",
+    "reader": "Aucun document n'a encore été déposé. Ils paraîtront ici dès qu'une personne chargée de la publication les aura créés."
+  },
+  "noResults": {
+    "title": "Aucun document ne correspond",
+    "description": "Aucun des {total} documents ne correspond à ces filtres.",
+    "action": "Effacer les filtres"
+  },
+  "state": {
+    "draft": "Brouillon",
+    "published": "Publié",
+    "unpublished": "Dépublié"
+  },
+  "extraction": {
+    "pending": "En file",
+    "extracting": "En cours",
+    "ready": "Prête",
+    "failed": "Échouée",
+    "asIs": "Ouvert tel quel",
+    "none": "Aucun fichier"
+  },
+  "source": {
+    "file": "PDF",
+    "link": "Lien",
+    "none": "Sans source"
+  },
+  "restricted": "Réservé"
+}

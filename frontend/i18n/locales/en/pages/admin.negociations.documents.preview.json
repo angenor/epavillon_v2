@@ -1,0 +1,99 @@
+{
+  "title": "Preview",
+  "titleOf": "Preview — {title}",
+  "subtitle": "Every page, its image beside the reflowed text: reading order, missing headers, notes, tables shown as original page, hyphenation, marked English terms.",
+  "back": "Back to the record",
+  "breadcrumb": {
+    "document": "Document record",
+    "preview": "Preview"
+  },
+  "forbidden": {
+    "scope": "Publish negotiation documents, or post correction notes on them, across the whole platform",
+    "description": "The preview of Guide Négo documents is reserved for the people who publish documents and for the experts who correct them. An account attached to a single event has no access to it."
+  },
+  "error": {
+    "title": "The preview could not be loaded"
+  },
+  "notReady": {
+    "title": "No pages to browse yet",
+    "description": "Extraction: {state}. The pages will appear here as soon as it is ready.",
+    "noFile": "This document has no PDF file: there is nothing to extract. Upload it from the record.",
+    "action": "Open the record"
+  },
+  "verdict": {
+    "title": "Verdict",
+    "label": "Extraction verdict",
+    "reflowable": "Reflows",
+    "notReflowable": "Does not reflow",
+    "modeAsIs": "Opened as is",
+    "modeReflow": "Read reflowed",
+    "failed": "The extraction failed",
+    "pages": "Pages",
+    "readingBytes": "Readable form",
+    "extractedAt": "Extracted",
+    "extractedAtValue": "{date}, {time}",
+    "extractor": "Extraction tool",
+    "unknown": "—"
+  },
+  "asIs": {
+    "label": "Open as is",
+    "hint": "The whole document reads as original pages, without text size, tappable terms or text search. This choice changes without republishing.",
+    "readOnly": "Only a person who publishes documents can change this choice.",
+    "failed": "The reading mode did not change"
+  },
+  "quality": {
+    "title": "Indicators",
+    "pages": "Pages",
+    "pagesWithText": "Pages with text",
+    "pagesWithOrigin": "Original pages",
+    "tables": "Tables",
+    "figures": "Figures",
+    "notes": "Notes",
+    "headings": "Headings",
+    "outlineEntries": "Outline entries",
+    "outlineSource": "Outline taken",
+    "fromBookmarks": "from bookmarks",
+    "fromHeadings": "from headings",
+    "thinItalics": "Thin italics",
+    "terms": "Marked terms",
+    "hyphensKept": "Hyphens kept",
+    "hyphensJoined": "Hyphens joined"
+  },
+  "outline": {
+    "title": "Detected outline",
+    "empty": "No outline was detected in this document.",
+    "page": "p. {label}"
+  },
+  "pager": {
+    "label": "Browse the pages",
+    "previous": "Previous page",
+    "next": "Next page",
+    "select": "Page",
+    "option": "{index} — p. {label}",
+    "position": "Page {index} of {total}",
+    "printed": "printed number {label}",
+    "keyboard": "The ← → arrows turn the pages."
+  },
+  "image": {
+    "title": "Original page",
+    "alt": "Image of page {label} of the document",
+    "offline": "Page images only come from the API. The sample data does not serve any.",
+    "missing": "The image of this page was not kept.",
+    "failed": "The image of this page could not be loaded."
+  },
+  "reading": {
+    "title": "Readable form",
+    "empty": "No text was taken from this page.",
+    "legend": "Marks",
+    "italic": "italic",
+    "term": "marked English term",
+    "notes": "Page notes"
+  },
+  "origin": {
+    "table": "Table",
+    "figure": "Figure",
+    "hint": "Shown as original page in the reader.",
+    "see": "See the original page",
+    "text": "Text of the area"
+  }
+}

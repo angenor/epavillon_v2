@@ -30,13 +30,12 @@ import type { NavSection } from '~/types/navigation'
  * ne se distinguent qu'à la lecture. Les pictogrammes reprennent ceux du guide,
  * dont le calendrier pour les événements et l'horloge pour la programmation.
  *
- * UNE SECTION PEUT EXIGER UNE PERMISSION GLOBALE — une seule le fait, celle de
- * Guide Négo. Elle est lue ICI, une fois, et non page par page : un menu qui
- * afficherait ses trois entrées pour les faire refuser ensuite dirait à un
+ * UNE ENTRÉE PEUT EXIGER L'UNE DE PLUSIEURS PERMISSIONS GLOBALES — c'est le cas
+ * de celles de Guide Négo. Elles sont lues ICI, une fois, et non page par page : un
+ * menu qui afficherait une entrée pour la faire refuser ensuite dirait à un
  * administrateur d'édition qu'il existe quelque chose qu'il ne peut pas voir
- * (SC-008). Les autres sections n'en déclarent aucune et paraissent toujours :
- * leur périmètre est celui de l'édition choisie, que chaque écran fait
- * respecter.
+ * (SC-008). Une section dont aucune entrée ne paraît disparaît : un expert ne
+ * voit de Guide Négo que ses documents, un administrateur d'édition rien.
  *
  * LE COMPTE CONNECTÉ VIT AU PIED DE LA COLONNE, avec la déconnexion. L'en-tête du
  * back-office n'en portait aucune trace : pour se déconnecter, il fallait repasser
@@ -82,19 +81,35 @@ const sections: NavSection[] = [
   },
   {
     // Guide Négo a sa propre section, et non une entrée dans « Exploitation » :
-    // ces trois écrans commandent l'entrée d'une AUTRE application, réservée
-    // aux administrateurs de la plateforme entière. Les mêler aux messages
-    // d'incident du site ferait croire qu'ils partagent son périmètre.
-    //
-    // **La seule section qui exige une permission**, et sur la portée GLOBALE :
-    // un administrateur d'une seule édition n'a aucun espace de négociation à
-    // tenir, et ses trois écrans lui répondraient « accès refusé ».
-    permission: 'negotiation.space.manage',
+    // ces écrans commandent une AUTRE application, sur la portée GLOBALE. Les
+    // mêler aux messages d'incident du site ferait croire qu'ils partagent son
+    // périmètre.
     labelKey: 'nav.admin.sections.guideNego',
     items: [
-      { labelKey: 'nav.admin.negotiationCodes', to: '/admin/negociations/codes', icon: 'lock' },
-      { labelKey: 'nav.admin.negotiationRequests', to: '/admin/negociations/demandes', icon: 'inbox' },
-      { labelKey: 'nav.admin.negotiationAdmission', to: '/admin/negociations/admission', icon: 'sliders' },
+      {
+        labelKey: 'nav.admin.negotiationCodes',
+        to: '/admin/negociations/codes',
+        icon: 'lock',
+        permissions: ['negotiation.space.manage'],
+      },
+      {
+        labelKey: 'nav.admin.negotiationRequests',
+        to: '/admin/negociations/demandes',
+        icon: 'inbox',
+        permissions: ['negotiation.space.manage'],
+      },
+      {
+        labelKey: 'nav.admin.negotiationAdmission',
+        to: '/admin/negociations/admission',
+        icon: 'sliders',
+        permissions: ['negotiation.space.manage'],
+      },
+      {
+        labelKey: 'nav.admin.negotiationDocuments',
+        to: '/admin/negociations/documents',
+        icon: 'document',
+        permissions: ['negotiation.document.publish', 'negotiation.correction.post'],
+      },
     ],
   },
   {
@@ -118,7 +133,7 @@ const breadcrumb = computed(() => route.meta.breadcrumb ?? [])
 // écran le rechargerait sinon pour son propre compte.
 await adminScope.ensureLoaded()
 
-// Les permissions effectives, pour les sections qui en exigent une. Lues APRÈS
+// Les permissions effectives, pour les entrées qui en exigent une. Lues APRÈS
 // le périmètre, qui a déjà résolu la session : `auth.person` est donc connu.
 const { data: granted } = await useAsyncData<EffectivePermission[]>(
   'admin-nav-permissions',
@@ -126,14 +141,16 @@ const { data: granted } = await useAsyncData<EffectivePermission[]>(
   { default: () => [] },
 )
 
-/**
- * **Une section sans permission déclarée paraît toujours** : c'est le cas de
- * toutes sauf celle de Guide Négo. `hasPermission` sans identifiant d'édition
- * n'accepte qu'une attribution `global` — exactement la garde que l'API
- * applique à ses douze routes.
- */
+/** Sans identifiant d'édition, `hasPermission` n'accepte qu'une attribution `global` : la garde de l'API. */
 const sectionsVisibles = computed(() =>
-  sections.filter((section) => !section.permission || hasPermission(granted.value, section.permission)),
+  sections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter(
+        (item) => !item.permissions || item.permissions.some((code) => hasPermission(granted.value, code)),
+      ),
+    }))
+    .filter((section) => section.items.length > 0),
 )
 </script>
 
@@ -224,7 +241,7 @@ const sectionsVisibles = computed(() =>
       <UiMockDataBanner />
 
       <header
-        class="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-surface-raised px-4 py-3 sm:px-6"
+        class="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-surface-raised px-4 py-3 sm:px-6 lg:min-h-(--admin-header-height)"
       >
         <button
           type="button"

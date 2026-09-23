@@ -60,7 +60,8 @@
     "backToSite": "Back to the public site",
     "negotiationCodes": "Invitation codes",
     "negotiationRequests": "Access requests",
-    "negotiationAdmission": "Admission mode"
+    "negotiationAdmission": "Admission mode",
+    "negotiationDocuments": "Documents"
   },
   "breadcrumb": {
     "label": "Breadcrumb",

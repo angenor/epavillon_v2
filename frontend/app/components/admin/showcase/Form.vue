@@ -416,13 +416,14 @@ const broadcastState = computed(() => showcaseBroadcastStateOf(values.value, now
                seule entrée ne pose pas de question, il en fait perdre le sens. -->
         </div>
 
-        <AdminShowcaseThemePicker
+        <AdminThemePicker
           v-if="props.screen.available_themes.length"
           v-model="values.theme_codes"
           class="mt-5"
           :themes="props.screen.available_themes"
           :label="t('admin.showcase.form.themes.label')"
           :hint="t('admin.showcase.form.themes.hint')"
+          :preview-label="t('admin.showcase.form.themes.preview')"
         />
       </fieldset>
 

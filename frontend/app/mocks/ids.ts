@@ -133,6 +133,9 @@ export const TERM = {
   relevantDocument: uuid('7011', 72),
   presentation: uuid('7011', 73),
   report: uuid('7011', 74),
+  summary: uuid('7011', 75),
+  bulletin: uuid('7011', 76),
+  otherDocument: uuid('7011', 77),
   // referral_source
   ifddWebsite: uuid('7011', 80),
   ifddLinkedin: uuid('7011', 81),

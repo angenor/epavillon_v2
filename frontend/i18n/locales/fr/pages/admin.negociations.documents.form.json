@@ -1,0 +1,165 @@
+{
+  "newTitle": "Nouveau document",
+  "newSubtitle": "Le document naît en brouillon. Son PDF se dépose ensuite, depuis sa fiche ; rien n'est visible dans Guide Négo avant la publication.",
+  "cancel": "Annuler",
+  "backToList": "Retour aux documents",
+  "readonly": "Vous lisez cette fiche sans pouvoir la modifier : seule la publication des documents ouvre la modification.",
+  "vocabularyError": "Les types, les thématiques ou les COP n'ont pas pu être chargés. Les listes restent vides tant qu'ils manquent.",
+  "forbidden": {
+    "scope": "Publier des documents de Guide Négo, ou y poser des notes de correction, sur la plateforme entière",
+    "scopePublish": "Publier des documents de Guide Négo, sur la plateforme entière",
+    "description": "Les documents de Guide Négo sont réservés aux administrateurs de la plateforme entière et aux experts. Un compte rattaché à un seul événement n'y a pas accès."
+  },
+  "sections": {
+    "description": "Titre et résumé",
+    "classification": "Classement",
+    "source": "Source",
+    "sourceHint": "Un document est un PDF déposé ou un lien vers une page extérieure, jamais les deux.",
+    "publication": "Diffusion"
+  },
+  "title": {
+    "fr": "Titre en français",
+    "en": "Titre en anglais",
+    "enHint": "Facultatif. Sans lui, le titre français s'affiche."
+  },
+  "summary": {
+    "fr": "Résumé en français",
+    "en": "Résumé en anglais"
+  },
+  "type": {
+    "label": "Type de document",
+    "placeholder": "Choisir un type"
+  },
+  "themes": {
+    "label": "Thématiques",
+    "hint": "Plusieurs possibles."
+  },
+  "cop": {
+    "label": "COP",
+    "hint": "Facultatif. La COP que le document concerne, au plus une.",
+    "none": "Aucune COP",
+    "unknown": "Une édition qui n'est plus servie"
+  },
+  "version": {
+    "label": "Version",
+    "hint": "À la création, laisser vide donne « 1 »."
+  },
+  "issuedOn": {
+    "label": "Date du document",
+    "hint": "La date portée par le document lui-même, pas celle de sa publication ici."
+  },
+  "publisher": {
+    "label": "Éditeur",
+    "placeholder": "Secrétariat de la CCNUCC"
+  },
+  "locale": {
+    "label": "Langue du document",
+    "hint": "La langue dans laquelle le document est écrit."
+  },
+  "file": {
+    "label": "PDF",
+    "afterCreate": "Le PDF se dépose une fois le brouillon enregistré : le fichier est gardé avec son document, qui doit d'abord exister.",
+    "locked": "Le fichier d'un document publié ne change plus. Pour un nouveau fichier, publiez une nouvelle version.",
+    "linkFilled": "Un lien est indiqué : videz-le pour déposer un PDF.",
+    "attaching": "Rattachement du fichier au document…",
+    "unnamed": "Fichier sans nom",
+    "linkSaved": "Un lien est enregistré : videz-le, enregistrez la fiche, puis déposez le PDF."
+  },
+  "link": {
+    "label": "Lien externe",
+    "placeholder": "https://",
+    "hint": "L'adresse d'une page extérieure, si le document n'est pas un PDF déposé.",
+    "fileAttached": "Un PDF est déposé : le document est ce fichier, le lien reste vide.",
+    "locked": "La source d'un document publié ne change plus. Publiez une nouvelle version."
+  },
+  "supersedes": {
+    "label": "Remplace",
+    "hint": "Facultatif. Le document publié que celui-ci remplace : les lecteurs de l'ancien seront renvoyés vers lui.",
+    "placeholder": "Chercher un document publié",
+    "none": "Ne remplace aucun document",
+    "version": "Version {version}"
+  },
+  "access": {
+    "label": "Qui peut le lire",
+    "restricted": "Réservé",
+    "restrictedHint": "Aux seules personnes entrées dans les modules réservés de Guide Négo.",
+    "public": "Public",
+    "publicHint": "À toute personne qui ouvre Guide Négo."
+  },
+  "rag": {
+    "label": "Proposer ce document à l'assistant",
+    "hint": "Ne prend effet qu'avec l'assistant, qui n'existe pas encore. Seul un document choisi ici lui sera confié."
+  },
+  "submit": {
+    "create": "Créer le brouillon",
+    "save": "Enregistrer"
+  },
+  "error": {
+    "title": "Donnez un titre en français au document.",
+    "type": "Choisissez le type du document.",
+    "version": "Donnez un numéro de version au document."
+  },
+  "detail": {
+    "title": "Fiche du document",
+    "version": "Version {version}",
+    "updated": "modifié le {date}",
+    "published": "Publié le {date}",
+    "unpublished": "Dépublié le {date}",
+    "zoned": "{date}, {zone}",
+    "supersedes": "Remplace :",
+    "supersededBy": "Remplacé par :",
+    "link": "{title} (version {version})",
+    "actions": {
+      "preview": "Aperçu",
+      "pdf": "PDF d'origine",
+      "publish": "Publier",
+      "unpublish": "Dépublier",
+      "newVersion": "Publier une nouvelle version",
+      "delete": "Supprimer le brouillon"
+    },
+    "extraction": {
+      "title": "Extraction",
+      "none": "Aucun fichier déposé : rien à extraire. Un document qui est un lien n'en a pas besoin.",
+      "polling": "Relue toutes les quelques secondes",
+      "pages": "Pages",
+      "extractedAt": "Extraite le",
+      "reflowable": "Forme lisible",
+      "reflowYes": "Oui, le texte se recompose à l'écran",
+      "reflowNo": "Non, le document s'ouvre en pages",
+      "failed": "L'extraction a échoué",
+      "asIs": "Ouvrir tel quel",
+      "asIsHint": "Le document s'ouvre en images de ses pages, sans forme lisible. Se change sans republier.",
+      "retry": "Relancer l'extraction",
+      "stopped": "La relecture s'est arrêtée : l'état affiché n'est peut-être plus le bon.",
+      "reload": "Relire"
+    },
+    "confirm": {
+      "cancel": "Annuler",
+      "unpublish": {
+        "title": "Dépublier ce document ?",
+        "question": "Il disparaîtra de Guide Négo dès maintenant. Sa fiche reste ici, et il pourra être republié.",
+        "confirm": "Dépublier"
+      },
+      "delete": {
+        "title": "Supprimer ce brouillon ?",
+        "question": "Le brouillon et ses thématiques seront effacés. Ce geste ne se défait pas.",
+        "confirm": "Supprimer"
+      }
+    },
+    "result": {
+      "saved": "Modifications enregistrées.",
+      "attached": "PDF rattaché. L'extraction commence.",
+      "retried": "Extraction relancée.",
+      "asIsOn": "Le document s'ouvre désormais tel quel.",
+      "asIsOff": "Le document s'ouvre de nouveau en forme lisible.",
+      "published": "Document publié.",
+      "unpublished": "Document dépublié.",
+      "newVersion": "Nouvelle version créée en brouillon. Saisissez son numéro de version, puis déposez son fichier.",
+      "extractionReady": "Extraction prête."
+    },
+    "notFound": {
+      "title": "Document introuvable",
+      "description": "Ce document n'existe pas, ou il a été supprimé."
+    }
+  }
+}

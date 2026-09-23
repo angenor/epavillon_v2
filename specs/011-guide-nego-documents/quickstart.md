@@ -48,6 +48,13 @@ La grille d'[essai-extraction.md](essai-extraction.md) est remplie, ses mesures 
 6. Elle bascule un document en « ouvrir tel quel », puis revient au mode recomposé, **sans republier**.
 7. Un administrateur **d'événement** ouvre `/admin/negociations/documents`, puis forge l'adresse d'un document : il ne voit rien.
 
+**Déroulé le 23/09 (T062)**, au navigateur piloté, API et worker branchés, sur le vrai guide (90 pages, 2,9 Mo) :
+
+- **Dépôt → « Prête » : 35 s**, relecture de la fiche comprise ; forme lisible 3,6 Mo, 17 tableaux et 7 figures en page d'origine, 43 notes, 78 entrées de sommaire.
+- **Feuilletage** : 89 tournes de page au clavier en **4 s**, image chargée à chaque page. L'outil ne compte pas dans les dix minutes de SC-001 bis : elles laissent 6,7 s de lecture par page.
+- **Métadonnées, enregistrement, publication** : une minute au navigateur piloté. Le temps d'une personne reste à relever par l'IFDD à la recette de clôture ; rien, côté machine, n'approche les quinze minutes de SC-001.
+- Étapes 4 à 7 conformes : lien publié, fichier refusé (`NEGOTIATION_DOCUMENT_FILE_LOCKED`, message tel quel) ; second remplaçant refusé en nommant le premier ; « tel quel » aller et retour, date de publication inchangée ; l'administrateur d'une édition reçoit 403 sur les douze routes et « Accès refusé » à l'écran, l'expert lit tout et n'écrit rien.
+
 ## § 2 — Trouver sans compte (récit 2)
 
 1. Sans compte, ouvrir « Documents de négociation » : titre, compte, recherche, trois filtres.

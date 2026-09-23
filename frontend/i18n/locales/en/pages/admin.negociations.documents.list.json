@@ -1,0 +1,59 @@
+{
+  "title": "Documents",
+  "subtitle": "The guides, notes and reference documents Guide Négo puts in negotiators' hands. A published document never changes: publish a new version instead.",
+  "new": "New document",
+  "caption": "Guide Négo documents, most recently updated first.",
+  "forbidden": {
+    "scope": "Publish or correct Guide Négo documents, across the whole platform",
+    "description": "Guide Négo documents are reserved for the people who publish or review them. An account attached to a single event has no access."
+  },
+  "columns": {
+    "title": "Title",
+    "type": "Type",
+    "version": "Version",
+    "state": "Status",
+    "source": "Source",
+    "extraction": "Extraction",
+    "updated": "Updated"
+  },
+  "supersedes": "Replaces “{title}”, version {version}",
+  "supersededBy": "Replaced by “{title}”, version {version}",
+  "pages": "no pages | {count} page | {count} pages",
+  "filters": {
+    "label": "List filters",
+    "search": "Search a title",
+    "state": "Status",
+    "type": "Type",
+    "allStates": "All statuses",
+    "allTypes": "All types"
+  },
+  "empty": {
+    "title": "No documents",
+    "description": "Guide Négo has no documents to show yet. Create a draft, upload its PDF or enter its link, then publish it.",
+    "reader": "No document has been added yet. They will appear here as soon as someone in charge of publishing creates them."
+  },
+  "noResults": {
+    "title": "No matching documents",
+    "description": "None of the {total} documents match these filters.",
+    "action": "Clear filters"
+  },
+  "state": {
+    "draft": "Draft",
+    "published": "Published",
+    "unpublished": "Unpublished"
+  },
+  "extraction": {
+    "pending": "Queued",
+    "extracting": "In progress",
+    "ready": "Ready",
+    "failed": "Failed",
+    "asIs": "Opened as is",
+    "none": "No file"
+  },
+  "source": {
+    "file": "PDF",
+    "link": "Link",
+    "none": "No source"
+  },
+  "restricted": "Restricted"
+}

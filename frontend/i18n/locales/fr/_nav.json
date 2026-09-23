@@ -60,7 +60,8 @@
     "backToSite": "Retour au site public",
     "negotiationCodes": "Codes d'invitation",
     "negotiationRequests": "Demandes d'accès",
-    "negotiationAdmission": "Mode d'admission"
+    "negotiationAdmission": "Mode d'admission",
+    "negotiationDocuments": "Documents"
   },
   "breadcrumb": {
     "label": "Fil d'Ariane",

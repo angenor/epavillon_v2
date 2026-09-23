@@ -182,9 +182,9 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
 
 **Test indépendant** : publier le guide et un lien externe en chronométrant, feuilleter l'aperçu, basculer « ouvrir tel quel », puis constater que l'ancien guide renvoie au nouveau ([quickstart.md § 1](quickstart.md)).
 
-- [ ] T056 [P] [US1] Créer les traductions `frontend/i18n/locales/fr/pages/admin.negotiation-documents.list.json`, `.form.json` et `.preview.json`, et leurs `en/`
-- [ ] T057 [US1] Écrire `frontend/app/pages/admin/negociations/documents/index.vue` avec les composants `ui/` : état (brouillon, publié, dépublié), type, version, remplacement, extraction ; quatre états ; `UiForbiddenState` sans la permission
-- [ ] T058 [US1] Écrire le formulaire partagé `frontend/app/components/admin/negotiation/DocumentForm.vue` :
+- [X] T056 [P] [US1] Créer les traductions `frontend/i18n/locales/fr/pages/admin.negociations.documents.list.json`, `.form.json` et `.preview.json`, et leurs `en/` — nommées comme celles des codes (`admin.negociations.*`)
+- [X] T057 [US1] Écrire `frontend/app/pages/admin/negociations/documents/index.vue` avec les composants `ui/` : état (brouillon, publié, dépublié), type, version, remplacement, extraction ; quatre états ; `UiForbiddenState` sans la permission
+- [X] T058 [US1] Écrire le formulaire partagé `frontend/app/components/admin/negotiation/DocumentForm.vue` :
   - titre et résumé fr/en ;
   - type et thématiques, lus au vocabulaire, jamais écrits dans le code ;
   - COP, parmi les éditions servies par la lecture publique des éditions ;
@@ -193,16 +193,16 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
   - « remplace… », parmi les documents publiés ;
   - réservé ou public ;
   - marqueur de l'assistant décoché par défaut, avec « ne prend effet qu'avec l'assistant ».
-- [ ] T059 [US1] Écrire `frontend/app/pages/admin/negociations/documents/nouveau.vue`, qui crée le brouillon, et `[id].vue` : modification, dépôt puis `PUT …/file`, état de l'extraction relu jusqu'à `ready` ou `failed`, relance, publier, dépublier, « Publier une nouvelle version », supprimer un brouillon. Messages d'erreur de l'API affichés tels quels
-- [ ] T060 [US1] Écrire `frontend/app/pages/admin/negociations/documents/[id]/apercu.vue` :
+- [X] T059 [US1] Écrire `frontend/app/pages/admin/negociations/documents/nouveau.vue`, qui crée le brouillon, et `[id]/index.vue` (un `[id].vue` ferait de l'aperçu une route enfant) : modification, dépôt puis `PUT …/file`, état de l'extraction relu jusqu'à `ready` ou `failed`, relance, publier, dépublier, « Publier une nouvelle version », supprimer un brouillon. Messages d'erreur de l'API affichés tels quels
+- [X] T060 [US1] Écrire `frontend/app/pages/admin/negociations/documents/[id]/apercu.vue` :
   - page par page, l'image à gauche et la forme lisible à droite ;
   - le verdict et les indicateurs en tête ;
   - le sommaire repéré ;
   - « ouvrir tel quel » ;
   - navigation au clavier (← →) ;
   - colonnes empilées sur tablette.
-- [ ] T061 [US1] Ajouter l'entrée « Documents » au menu de Guide Négo dans `frontend/app/layouts/admin.vue`, visible à qui détient `negotiation.document.publish` **ou** `negotiation.correction.post`
-- [ ] T062 [US1] Dérouler [quickstart.md § 1](quickstart.md) au navigateur sur le vrai guide, chronométrer (SC-001 et SC-001 bis), et consigner les mesures
+- [X] T061 [US1] Ajouter l'entrée « Documents » au menu de Guide Négo dans `frontend/app/layouts/admin.vue`, visible à qui détient `negotiation.document.publish` **ou** `negotiation.correction.post`
+- [X] T062 [US1] Dérouler [quickstart.md § 1](quickstart.md) au navigateur sur le vrai guide, chronométrer (SC-001 et SC-001 bis), et consigner les mesures
 
 **Checkpoint** : le guide est publiable par le back-office. **Commit.**
 
