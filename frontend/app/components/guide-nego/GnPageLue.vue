@@ -2,6 +2,7 @@
 import type { ImageDePage } from '~/composables/guide-nego/useGnLecteur'
 import type { Block, ReadingMode, ReadingPage, Span } from '~/types/negotiation-documents'
 import { blocsDeLaPage } from '~/utils/guide-nego/forme-lisible'
+import { surligner, type Champ, type Occurrence, type SegmentSurligne } from '~/utils/guide-nego/lecteur'
 
 /**
  * Une page du lecteur — maquette 04 · 01. Le texte recomposé à la largeur de l'écran,
@@ -9,11 +10,20 @@ import { blocsDeLaPage } from '~/utils/guide-nego/forme-lisible'
  * manque laisse le texte, et une ligne dit pourquoi — le réseau absent, ou un échec
  * qui se réessaie.
  */
-const props = defineProps<{
-  page: ReadingPage
-  mode: ReadingMode
-  imageDe: (page: ReadingPage) => Promise<ImageDePage>
-}>()
+const props = withDefaults(
+  defineProps<{
+    page: ReadingPage
+    mode: ReadingMode
+    imageDe: (page: ReadingPage) => Promise<ImageDePage>
+    /** Les occurrences cherchées sur cette page. */
+    surlignages?: Occurrence[]
+    /** L'occurrence courante, si elle est sur cette page : seule cette page se recalcule au suivant. */
+    courant?: Occurrence | null
+  }>(),
+  { surlignages: () => [], courant: null },
+)
+
+defineEmits<{ terme: [texte: string] }>()
 
 const { t } = useI18n()
 
@@ -69,11 +79,16 @@ function reessayer(): void {
   void chargerLImage()
 }
 
-const classesDuSegment = (s: Span) => ({
-  'gn-page-lue__italique': s.italic,
-  'gn-page-lue__gras': s.bold,
-  'gn-page-lue__terme': s.term,
-})
+const estCourant = (o: Occurrence) =>
+  !!props.courant && o.bloc === props.courant.bloc && o.champ === props.courant.champ && o.debut === props.courant.debut
+
+function segments(rang: number, champ: Champ, spans: Span[] | undefined): SegmentSurligne[] {
+  const ici = props.surlignages.filter((s) => s.bloc === rang && s.champ === champ)
+  return surligner(spans ?? [], ici.map((o) => ({ debut: o.debut, fin: o.fin, courant: estCourant(o) })))
+}
+
+// Le texte replié d'un tableau s'ouvre quand l'occurrence courante s'y trouve.
+const texteOuvert = (rang: number) => props.courant?.bloc === rang && props.courant.champ === 'text'
 
 const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
 </script>
@@ -93,11 +108,11 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
 
     <template v-for="(bloc, rang) in blocs" v-else :key="rang">
       <component :is="balisesDeTitre[bloc.level]" v-if="bloc.kind === 'heading'" :class="`gn-page-lue__titre-${bloc.level}`">
-        <span v-for="(s, i) in bloc.spans" :key="i" :class="classesDuSegment(s)">{{ s.text }}</span>
+        <GnSegmentsLus :segments="segments(rang, 'spans', bloc.spans)" @terme="$emit('terme', $event)" />
       </component>
 
       <p v-else-if="bloc.kind === 'paragraph'" class="gn-page-lue__paragraphe">
-        <span v-for="(s, i) in bloc.spans" :key="i" :class="classesDuSegment(s)">{{ s.text }}</span>
+        <GnSegmentsLus :segments="segments(rang, 'spans', bloc.spans)" @terme="$emit('terme', $event)" />
       </p>
 
       <p
@@ -107,18 +122,18 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
       >
         <span class="gn-page-lue__puce" aria-hidden="true">{{ bloc.marker }}</span>
         <span>
-          <span v-for="(s, i) in bloc.spans" :key="i" :class="classesDuSegment(s)">{{ s.text }}</span>
+          <GnSegmentsLus :segments="segments(rang, 'spans', bloc.spans)" @terme="$emit('terme', $event)" />
         </span>
       </p>
 
       <p v-else-if="bloc.kind === 'note'" class="gn-page-lue__note">
         <sup class="gn-page-lue__appel">{{ bloc.mark }}</sup>
-        <span v-for="(s, i) in bloc.spans" :key="i" :class="classesDuSegment(s)">{{ s.text }}</span>
+        <GnSegmentsLus :segments="segments(rang, 'spans', bloc.spans)" @terme="$emit('terme', $event)" />
       </p>
 
       <div v-else-if="bloc.kind === 'origin'" class="gn-page-lue__origine">
         <p v-if="bloc.caption?.length" class="gn-page-lue__legende">
-          <span v-for="(s, i) in bloc.caption" :key="i" :class="classesDuSegment(s)">{{ s.text }}</span>
+          <GnSegmentsLus :segments="segments(rang, 'caption', bloc.caption)" @terme="$emit('terme', $event)" />
         </p>
         <button
           type="button"
@@ -138,10 +153,10 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
           @echec="etatDeLImage = 'echec'"
           @reessayer="reessayer"
         />
-        <details v-if="bloc.text?.length" class="gn-page-lue__texte-origine" @click.stop>
+        <details v-if="bloc.text?.length" class="gn-page-lue__texte-origine" :open="texteOuvert(rang) || undefined" @click.stop>
           <summary>{{ t(`gn-page-lue.texte.${bloc.reason}`) }}</summary>
           <p>
-            <span v-for="(s, i) in bloc.text" :key="i" :class="classesDuSegment(s)">{{ s.text }}</span>
+            <GnSegmentsLus :segments="segments(rang, 'text', bloc.text)" @terme="$emit('terme', $event)" />
           </p>
         </details>
       </div>
@@ -200,22 +215,6 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
   font-weight: var(--gn-graisse-demi-gras);
 }
 
-[data-app="guide-nego"] .gn-page-lue__italique {
-  font-style: italic;
-}
-
-[data-app="guide-nego"] .gn-page-lue__gras {
-  font-weight: var(--gn-graisse-gras);
-}
-
-/* Le terme anglais : italique souligné, comme la maquette. Il deviendra touchable avec la feuille du lexique. */
-[data-app="guide-nego"] .gn-page-lue__terme {
-  text-decoration: underline;
-  text-decoration-thickness: var(--gn-filet-2);
-  text-decoration-color: var(--gn-accent);
-  text-underline-offset: var(--gn-espace-4);
-}
-
 [data-app="guide-nego"] .gn-page-lue__note {
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
@@ -266,8 +265,6 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
   text-underline-offset: var(--gn-espace-4);
   cursor: pointer;
 }
-
-
 
 [data-app="guide-nego"] .gn-page-lue__texte-origine summary {
   min-height: var(--gn-cible);

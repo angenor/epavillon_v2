@@ -1,0 +1,8 @@
+{
+  "groupe": "Matches in the document",
+  "rang": "Match {rang} of {total}",
+  "expression": "“{expression}”",
+  "precedente": "Previous match",
+  "suivante": "Next match",
+  "fermer": "Close search"
+}

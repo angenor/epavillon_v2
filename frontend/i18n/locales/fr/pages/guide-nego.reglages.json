@@ -8,6 +8,10 @@
     "sombre": "Sombre",
     "systeme": "Système"
   },
+  "taille": {
+    "libelle": "Taille du texte des documents",
+    "aide": "Vaut pour tous les documents, et se règle aussi dans le lecteur."
+  },
   "compte": {
     "titre": "Compte",
     "sans-adresse": "Compte connecté",

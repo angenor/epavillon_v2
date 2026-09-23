@@ -26,8 +26,10 @@ const props = withDefaults(
     titre: string
     sousTitre?: string
     options?: OptionDeFeuille[]
+    /** Le bouton qui referme : « Annuler » par défaut ; « Fermer » quand rien n'est à annuler. */
+    fermeture?: string
   }>(),
-  { sousTitre: undefined, options: () => [] },
+  { sousTitre: undefined, options: () => [], fermeture: undefined },
 )
 
 const emit = defineEmits<{ choisir: [OptionDeFeuille] }>()
@@ -94,7 +96,7 @@ const derniere = computed(() => props.options.length - 1)
           <slot />
 
           <GnBouton variante="secondaire" @clic="fermer">
-            {{ t('gn-feuille-basse.annuler') }}
+            {{ fermeture ?? t('gn-feuille-basse.annuler') }}
           </GnBouton>
         </div>
       </div>

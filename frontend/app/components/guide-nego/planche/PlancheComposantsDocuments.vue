@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import type { ImageDePage } from '~/composables/guide-nego/useGnLecteur'
-import type { LibraryDocument, ReadingPage } from '~/types/negotiation-documents'
+import type { Passage } from '~/utils/guide-nego/lecteur'
+import type { LibraryDocument, OutlineEntry, ReadingPage } from '~/types/negotiation-documents'
 /**
  * Section 5, cinquième lot : la bibliothèque de documents — ligne de document, feuille
- * de filtre, bandeau « Remplacé par… », progression, barre de lecture, page lue. Les spécimens sont les cinq documents de la
+ * de filtre, bandeau « Remplacé par… », progression, barre de lecture, page lue, sommaire,
+ * occurrence. Les spécimens sont les cinq documents de la
  * maquette 03 ; leurs libellés de type viennent d'ici, comme ils viendraient de l'API.
  */
 const { t } = useI18n()
@@ -27,6 +29,26 @@ const pageLue = computed<ReadingPage>(() => ({
     { kind: 'note', mark: '1', spans: [{ text: k('page-note') }] },
   ],
 }))
+// La recherche, le sommaire en panneau et les réglages : ce que la barre de lecture ouvre.
+const rechercheDeSpecimen = ref(k('occurrence-expression'))
+const passagesDeSpecimen = computed<Passage[]>(() =>
+  [18, 59].map((page, rang) => ({
+    page,
+    bloc: rang,
+    champ: 'spans',
+    debut: 0,
+    fin: 0,
+    etiquette: String(page),
+    section: k(rang ? 'panneau-section-ici' : 'panneau-section'),
+    extrait: { avant: k('panneau-avant'), trouve: rechercheDeSpecimen.value, apres: k('panneau-apres') },
+  })),
+)
+const pagesDeSpecimen = computed<ReadingPage[]>(() =>
+  [47, 57, 59, 60, 61, 62].map((index) => ({ index, label: String(index), blocks: [] })),
+)
+const panneauOuvert = ref(false)
+const reglagesOuverts = ref(false)
+
 const sansImage = async (): Promise<ImageDePage> => 'hors-connexion'
 
 function specimen(id: string, champs: Partial<LibraryDocument>): LibraryDocument {
@@ -126,6 +148,45 @@ function compterPour(brouillon: string[]): number {
 
 const LECTEUR_ACTIONS: Array<'sommaire' | 'rechercher' | 'reglages'> = ['sommaire', 'rechercher', 'reglages']
 const lectureDepliee = ref(true)
+
+function entree(cle: string, level: 1 | 2 | 3, page: number, children: OutlineEntry[] = []): OutlineEntry {
+  return { title: k(`sommaire-${cle}`), level, page_index: page, children }
+}
+
+const sommaire = computed<OutlineEntry[]>(() => {
+  const enCours = entree('3-6-1', 3, 59)
+  return [
+    entree('2', 1, 26, [entree('2-1', 2, 26), entree('2-2', 2, 31)]),
+    entree('3', 1, 47, [
+      entree('3-5', 2, 57),
+      entree('3-6', 2, 59, [enCours, entree('3-6-2', 3, 60), entree('3-6-3', 3, 61)]),
+      entree('3-7', 2, 62),
+    ]),
+    entree('annexes', 1, 65, [entree('annexe-1', 2, 65), entree('annexe-2', 2, 70)]),
+  ]
+})
+const sommaireEnCours = computed(() => sommaire.value[1]?.children[1]?.children[0] ?? null)
+// Par rang : le sommaire se recompose au changement de langue, ses entrées avec lui.
+const chapitresOuverts = ref(new Set<number>([1]))
+const sommaireDepliees = computed<ReadonlySet<OutlineEntry>>(
+  () => new Set(sommaire.value.filter((_, rang) => chapitresOuverts.value.has(rang))),
+)
+const sommairePage = ref<number | null>(null)
+const etiquetteDePage = (index: number) => String(index)
+
+function basculerSommaire(chapitre: OutlineEntry) {
+  const rang = sommaire.value.indexOf(chapitre)
+  const ouverts = new Set(chapitresOuverts.value)
+  if (!ouverts.delete(rang)) ouverts.add(rang)
+  chapitresOuverts.value = ouverts
+}
+
+const OCCURRENCES = 5
+const occurrence = ref(3)
+const occurrenceOuverte = ref(true)
+const occurrenceDecalee = (pas: number) => {
+  occurrence.value = ((occurrence.value - 1 + pas + OCCURRENCES) % OCCURRENCES) + 1
+}
 
 const choixLisible = computed(() =>
   choixDeType.value.length === 0
@@ -293,10 +354,74 @@ const choixLisible = computed(() =>
       </div>
       <p class="gn-planche-note">{{ k('page-note-planche') }}</p>
     </GnPlancheSection>
+
+    <GnPlancheSection :titre="k('sommaire')" :propos="k('sommaire-propos')">
+      <div class="gn-planche-composants__cadre gn-planche-cadre-sommaire">
+        <ul class="gn-sommaire-liste" role="list">
+          <GnLigneSommaire
+            v-for="(chapitre, rang) in sommaire"
+            :key="rang"
+            :entree="chapitre"
+            :etiquette-de="etiquetteDePage"
+            :en-cours="sommaireEnCours"
+            :depliees="sommaireDepliees"
+            @aller="sommairePage = $event"
+            @basculer="basculerSommaire"
+          />
+        </ul>
+      </div>
+      <p class="gn-planche-valeur" role="status">
+        {{ sommairePage === null ? k('sommaire-aucun') : t('gn-planche-composants-documents.sommaire-aller', { page: sommairePage }) }}
+      </p>
+      <p class="gn-planche-note">{{ k('sommaire-note') }}</p>
+    </GnPlancheSection>
+
+    <GnPlancheSection :titre="k('occurrence')" :propos="k('occurrence-propos')">
+      <div class="gn-planche-composants__cadre gn-planche-composants__vitrine">
+        <GnOccurrence
+          v-if="occurrenceOuverte"
+          :rang="occurrence"
+          :total="OCCURRENCES"
+          :expression="k('occurrence-expression')"
+          @precedente="occurrenceDecalee(-1)"
+          @suivante="occurrenceDecalee(1)"
+          @fermer="occurrenceOuverte = false"
+        />
+        <GnBouton v-else variante="secondaire" @clic="occurrenceOuverte = true">{{ k('occurrence-rouvrir') }}</GnBouton>
+        <span class="gn-planche-composants__legende">{{ k('occurrence-seule') }}</span>
+        <GnOccurrence :rang="1" :total="1" :expression="k('occurrence-expression')" />
+      </div>
+      <p class="gn-planche-note">{{ k('occurrence-note') }}</p>
+    </GnPlancheSection>
+
+    <GnPlancheSection :titre="k('panneau')" :propos="k('panneau-propos')">
+      <div class="gn-planche-composants__cadre">
+        <GnLecteurRecherche
+          v-model:expression="rechercheDeSpecimen"
+          :passages="rechercheDeSpecimen ? passagesDeSpecimen : []"
+          :pages="92"
+          :ici="1"
+        />
+      </div>
+      <div class="gn-planche-composants__cadre gn-planche-composants__vitrine">
+        <GnBouton variante="secondaire" @clic="panneauOuvert = true">{{ k('panneau-sommaire') }}</GnBouton>
+        <GnBouton variante="secondaire" @clic="reglagesOuverts = true">{{ k('panneau-reglages') }}</GnBouton>
+      </div>
+      <GnPanneauLecteur v-model="panneauOuvert" :titre="k('panneau-titre')" :sous-titre="k('panneau-sous-titre')">
+        <GnLecteurSommaire :sommaire="sommaire" :pages="pagesDeSpecimen" :page-en-cours="59" @aller="panneauOuvert = false" />
+      </GnPanneauLecteur>
+      <GnReglagesLecture v-model="reglagesOuverts" />
+      <p class="gn-planche-note">{{ k('panneau-note') }}</p>
+    </GnPlancheSection>
   </div>
 </template>
 
 <style>
+[data-app="guide-nego"] .gn-planche-cadre-sommaire {
+  border: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: 0;
+}
+
 /* La barre est en position fixe : le cadre transformé devient son bloc conteneur, comme
    pour la barre d'onglets, et elle s'y pose sur le texte comme sur l'écran réel. */
 [data-app="guide-nego"] .gn-planche-cadre-lecture {

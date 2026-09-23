@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import type { LibraryDocument } from '~/types/negotiation-documents'
-import { lireTaille } from '~/utils/guide-nego/appareil-lecture'
 import { sectionDeLaPage } from '~/utils/guide-nego/forme-lisible'
 import { tailleLisible } from '~/utils/guide-nego/place'
-import { lireCle, poserCle } from '~/utils/guide-nego/stockage'
+import { chercherDansLeDocument, pagesCherchees, passageDeLaPage, type Occurrence } from '~/utils/guide-nego/lecteur'
 
 /**
- * Le lecteur — maquette 04, écrans 01 à 03 et 12. Sans barre d'onglets : une ligne
- * d'en-tête, le texte, la barre de lecture en bas. Sommaire, recherche et réglages
- * viennent à la phase suivante : la barre n'offre pas encore ce qui ne marche pas.
+ * Le lecteur — maquette 04. Sans barre d'onglets : une ligne d'en-tête, le texte, la
+ * barre de lecture en bas, et ce qu'elle ouvre — sommaire, recherche, réglages. « Tel
+ * quel », il n'y a ni recherche ni taille de texte (FR-037).
  */
 // Le lecteur tient lui-même sa position — la page de reprise : ni le routeur ni le
 // navigateur ne la recalent après lui.
@@ -33,7 +32,21 @@ const document = computed<LibraryDocument | null>(() => documentDe(id.value))
 const titre = computed(() => document.value?.title ?? t('guide-nego.lecteur.titre'))
 const enLigne = computed(() => connexion.etat.value.enLigne)
 
-const taille = lireTaille({ lire: lireCle, poser: poserCle })
+const { taille } = useGnTailleDeLecture()
+
+const elementDeLaPage = (index: number) => window.document.getElementById(`page-${index}`)
+
+/** Aller en tête d'une page, sans animation : l'observateur ne voit pas défiler les pages voisines. */
+function allerALaPage(index: number): Promise<void> {
+  return lecteur.sauter(index, () => elementDeLaPage(index)?.scrollIntoView({ block: 'start', behavior: 'instant' }))
+}
+
+// Une autre taille recompose le texte : on reste sur la page qu'on lisait (FR-042).
+watch(taille, async () => {
+  const page = pageEnCours.value
+  await nextTick()
+  await allerALaPage(page)
+})
 
 onMounted(() => {
   void relireLaBibliotheque()
@@ -127,10 +140,110 @@ const texteDeReprise = computed(() => {
 
 const barreDepliee = ref(false)
 
+type Action = 'sommaire' | 'rechercher' | 'reglages'
+const actions = computed<Action[]>(() => {
+  const lue = lecture.value
+  if (!lue || lue.mode === 'as_is') return lue?.outline.length ? ['sommaire'] : []
+  return [...(lue.outline.length ? (['sommaire'] as const) : []), 'rechercher', 'reglages']
+})
+
+const sommaireOuvert = ref(false)
+const rechercheOuverte = ref(false)
+const reglagesOuverts = ref(false)
+
+function agir(action: Action): void {
+  barreDepliee.value = false
+  if (action === 'sommaire') sommaireOuvert.value = true
+  else if (action === 'rechercher') rechercheOuverte.value = true
+  else reglagesOuverts.value = true
+}
+
+async function allerAuChapitre(index: number): Promise<void> {
+  sommaireOuvert.value = false
+  repriseAffichee.value = false
+  await nextTick()
+  await allerALaPage(index)
+  // Le focus suit le saut : sans lui, le prochain Tab repartirait du haut du document.
+  elementDeLaPage(index)?.focus({ preventScroll: true })
+}
+
+// --- La recherche dans le document -------------------------------------------
+
+const expression = ref('')
+const rangCourant = ref<number | null>(null)
+// Cherché à chaque frappe, sur l'index du document : pas de liste périmée qui se touche.
+const passages = computed(() => (lecture.value ? chercherDansLeDocument(lecture.value, expression.value) : []))
+watch(expression, () => (rangCourant.value = null))
+
+const ici = computed(() => passageDeLaPage(passages.value, pageEnCours.value))
+const passageCourant = computed(() => (rangCourant.value === null ? null : (passages.value[rangCourant.value] ?? null)))
+
+// Construits une fois par recherche ; passer d'une occurrence à l'autre ne touche que deux pages.
+const surlignagesParPage = computed(() => {
+  const parPage = new Map<number, Occurrence[]>()
+  for (const p of passages.value) {
+    const liste = parPage.get(p.page) ?? []
+    liste.push(p)
+    parPage.set(p.page, liste)
+  }
+  return parPage
+})
+
+async function allerAuPassage(rang: number): Promise<void> {
+  rechercheOuverte.value = false
+  repriseAffichee.value = false
+  rangCourant.value = rang
+  const passage = passages.value[rang]
+  if (!passage) return
+  await nextTick()
+  const courante = window.document.querySelector<HTMLElement>('[data-occurrence-courante]')
+  // Un tableau refermé à la main ne se rouvre pas par `:open` : sa valeur n'a pas changé.
+  courante?.closest('details')?.setAttribute('open', '')
+  await lecteur.sauter(passage.page, () =>
+    courante
+      ? courante.scrollIntoView({ block: 'start', behavior: 'instant' })
+      : elementDeLaPage(passage.page)?.scrollIntoView({ block: 'start', behavior: 'instant' }),
+  )
+  courante?.focus({ preventScroll: true })
+}
+
+// D'un bout à l'autre, comme la recherche d'un navigateur.
+function allerDe(pas: number): void {
+  const total = passages.value.length
+  if (rangCourant.value === null || !total) return
+  void allerAuPassage((rangCourant.value + pas + total) % total)
+}
+const allerAuPrecedent = () => allerDe(-1)
+const allerAuSuivant = () => allerDe(1)
+
+// Échap referme la barre d'occurrence, quand aucune feuille ni panneau ne l'a pris.
+function auClavier(evenement: KeyboardEvent): void {
+  if (evenement.key === 'Escape' && !evenement.defaultPrevented && rangCourant.value !== null) rangCourant.value = null
+}
+onMounted(() => window.addEventListener('keydown', auClavier))
+onBeforeUnmount(() => window.removeEventListener('keydown', auClavier))
+
+// --- Le terme anglais touché -------------------------------------------------
+
+const terme = ref<string | null>(null)
+const termeOuvert = computed({
+  get: () => terme.value !== null,
+  set: (ouvert: boolean) => {
+    if (!ouvert) terme.value = null
+  },
+})
+
+/** Les pages où le terme paraît : un fait du document, jamais une définition inventée. */
+const pagesDuTerme = computed(() => {
+  if (!terme.value || !lecture.value) return ''
+  const etiquettes = [...new Set(chercherDansLeDocument(lecture.value, terme.value).map((p) => p.etiquette))]
+  return new Intl.ListFormat(locale.value, { type: 'conjunction' }).format(etiquettes)
+})
+
 /** Un toucher sur le texte bascule la barre ; un toucher sur un lien ou un bouton fait ce qu'il dit. */
 function basculerLaBarre(evenement: MouseEvent): void {
   const cible = evenement.target as Element | null
-  if (cible?.closest('a, button, summary, details')) return
+  if (cible?.closest('a, button, summary, details, [role="button"]')) return
   barreDepliee.value = !barreDepliee.value
 }
 
@@ -183,7 +296,7 @@ watch(article, (element) => {
   redimension = new ResizeObserver(() => {
     if (element.clientWidth === largeur) return
     largeur = element.clientWidth
-    window.document.getElementById(`page-${pageEnCours.value}`)?.scrollIntoView({ block: 'start' })
+    void allerALaPage(pageEnCours.value)
   })
   redimension.observe(element)
 })
@@ -268,9 +381,17 @@ useHead({ title: titre })
           :key="page.index"
           :ref="(element) => suivreLaPage(element as Element | null, page.index)"
           class="gn-lecteur__page"
+          tabindex="-1"
         >
           <p class="gn-lecteur__repere">{{ t('guide-nego.lecteur.page', { page: page.label }) }}</p>
-          <GnPageLue :page="page" :mode="lecture.mode" :image-de="imageDe" />
+          <GnPageLue
+            :page="page"
+            :mode="lecture.mode"
+            :image-de="imageDe"
+            :surlignages="rangCourant === null ? undefined : surlignagesParPage.get(page.index)"
+            :courant="passageCourant?.page === page.index ? passageCourant : null"
+            @terme="terme = $event"
+          />
         </section>
       </article>
 
@@ -287,8 +408,53 @@ useHead({ title: titre })
         :total="total"
         :etiquette="pageCourante?.label"
         :section="section"
-        :actions="[]"
+        :actions="actions"
+        @action="agir"
       />
+      <GnOccurrence
+        v-if="rangCourant !== null && passages.length && !barreDepliee"
+        class="gn-lecteur__occurrence"
+        :rang="rangCourant + 1"
+        :total="passages.length"
+        :expression="expression"
+        @precedente="allerAuPrecedent"
+        @suivante="allerAuSuivant"
+        @fermer="rangCourant = null"
+      />
+
+      <GnPanneauLecteur
+        v-model="sommaireOuvert"
+        :titre="t('guide-nego.lecteur.sommaire.titre')"
+        :sous-titre="t('guide-nego.lecteur.sommaire.sous-titre', { titre, pages: total })"
+      >
+        <GnLecteurSommaire
+          :sommaire="lecture.outline"
+          :pages="lecture.pages"
+          :page-en-cours="pageEnCours"
+          @aller="allerAuChapitre"
+        />
+      </GnPanneauLecteur>
+
+      <GnPanneauLecteur v-model="rechercheOuverte" :titre="t('guide-nego.lecteur.recherche.titre')">
+        <GnLecteurRecherche
+          v-model:expression="expression"
+          :passages="passages"
+          :pages="pagesCherchees(lecture)"
+          :ici="ici"
+          @aller="allerAuPassage"
+        />
+      </GnPanneauLecteur>
+
+      <GnReglagesLecture v-model="reglagesOuverts" />
+
+      <GnFeuilleBasse v-model="termeOuvert" :titre="terme ?? ''" :fermeture="t('guide-nego.lecteur.terme.revenir')">
+        <div class="gn-lecteur__terme">
+          <p>{{ t('guide-nego.lecteur.terme.lexique') }}</p>
+          <p v-if="pagesDuTerme" class="gn-lecteur__terme-pages">
+            {{ t('guide-nego.lecteur.terme.pages', { pages: pagesDuTerme }) }}
+          </p>
+        </div>
+      </GnFeuilleBasse>
     </template>
   </GnEcran>
 </template>
@@ -359,6 +525,31 @@ useHead({ title: titre })
   text-decoration-line: var(--gn-action-sur-titre-trait);
   text-underline-offset: var(--gn-espace-4);
   cursor: pointer;
+}
+
+/* Au-dessus de la barre repliée, comme la ligne de reprise (04 · 06). */
+[data-app="guide-nego"] .gn-lecteur__occurrence {
+  position: fixed;
+  bottom: calc(var(--gn-barre-lecture-repliee) + var(--gn-jauge) + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  width: min(100%, var(--gn-colonne-largeur));
+}
+
+[data-app="guide-nego"] .gn-lecteur__terme {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gn-espace-8);
+  padding-bottom: var(--gn-espace-16);
+  font-size: var(--gn-taille-17);
+  line-height: var(--gn-interligne-17);
+}
+
+[data-app="guide-nego"] .gn-lecteur__terme-pages {
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+  color: var(--gn-texte-2);
 }
 
 [data-app="guide-nego"] .gn-lecteur__attente {

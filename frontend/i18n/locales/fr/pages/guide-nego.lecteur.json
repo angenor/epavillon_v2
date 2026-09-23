@@ -34,5 +34,17 @@
     "titre": "Le document ne s'ouvre pas",
     "texte": "La lecture a échoué. Rien n'a été effacé.",
     "reessayer": "Réessayer"
+  },
+  "sommaire": {
+    "titre": "Sommaire",
+    "sous-titre": "{titre} · {pages} pages"
+  },
+  "recherche": {
+    "titre": "Rechercher dans le document"
+  },
+  "terme": {
+    "lexique": "La traduction et la définition de ce terme viendront avec le lexique anglais-français.",
+    "pages": "Dans ce document : p. {pages}.",
+    "revenir": "Revenir au texte"
   }
 }

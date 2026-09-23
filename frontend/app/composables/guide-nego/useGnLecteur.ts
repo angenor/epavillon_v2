@@ -157,7 +157,8 @@ export function useGnLecteur(id: Ref<string>) {
 
   function observateurDesPages(): IntersectionObserver | null {
     if (observateur || typeof IntersectionObserver === 'undefined') return observateur
-    // La bande du haut de l'écran : la page qui l'occupe est celle qu'on lit.
+    // Une ligne au tiers de l'écran : la page qui la traverse est celle qu'on lit. Une bande
+    // plus large verrait aussi la fin de la page d'avant, et la dirait en cours.
     observateur = new IntersectionObserver(
       (entrees) => {
         for (const entree of entrees) {
@@ -168,7 +169,7 @@ export function useGnLecteur(id: Ref<string>) {
         }
         if (suivi.value && visibles.size) pageEnCours.value = Math.min(...visibles)
       },
-      { rootMargin: '0px 0px -60% 0px' },
+      { rootMargin: '-35% 0px -64% 0px' },
     )
     return observateur
   }
@@ -246,6 +247,17 @@ export function useGnLecteur(id: Ref<string>) {
     ouvrir,
     imageDe,
     suivreLaPage,
+    /**
+     * Un saut — sommaire, passage, taille, rotation : l'observateur verrait passer les
+     * pages voisines ; la page atteinte se pose, et se note comme une lecture.
+     */
+    async sauter(index: number, defiler: () => void): Promise<void> {
+      suivi.value = false
+      defiler()
+      await new Promise((fin) => requestAnimationFrame(() => requestAnimationFrame(fin)))
+      suivi.value = true
+      pageEnCours.value = index
+    },
     /** L'écran est recalé sur la page de reprise, ou au début : la page lue se suit désormais. */
     commencerLeSuivi: () => {
       suivi.value = true

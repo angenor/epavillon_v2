@@ -1,0 +1,14 @@
+{
+  "titre": "Réglages de lecture",
+  "taille": {
+    "libelle": "Taille du texte"
+  },
+  "theme": {
+    "libelle": "Thème",
+    "clair": "Clair",
+    "sombre": "Sombre",
+    "systeme": "Système"
+  },
+  "aide": "S'applique à tous les documents. Aussi dans votre profil.",
+  "fermer": "Fermer"
+}

@@ -8,6 +8,10 @@
     "sombre": "Dark",
     "systeme": "System"
   },
+  "taille": {
+    "libelle": "Document text size",
+    "aide": "Applies to every document, and can also be set in the reader."
+  },
   "compte": {
     "titre": "Account",
     "sans-adresse": "Signed in",

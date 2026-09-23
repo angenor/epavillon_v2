@@ -1,0 +1,12 @@
+{
+  "libelle": "Search the document",
+  "passages": "{count} passage | {count} passage | {count} passages",
+  "compte": "{passages} in {pages} — on this phone",
+  "aucun": "No passage for “{expression}” in {pages}.",
+  "lieu": "p. {page} · {section}",
+  "page": "p. {page}",
+  "ici": " — you are here",
+  "pages": "{count} page | {count} page | {count} pages",
+  "trop-court": "Type at least two letters.",
+  "affiner": "Only the first {n} passages are listed: refine the search."
+}

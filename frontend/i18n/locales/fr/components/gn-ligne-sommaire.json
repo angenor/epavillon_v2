@@ -1,0 +1,6 @@
+{
+  "page": "page",
+  "parties": "aucune sous-partie | {count} sous-partie | {count} sous-parties",
+  "deplier": "Déplier « {titre} », {parties}",
+  "replier": "Replier « {titre} »"
+}

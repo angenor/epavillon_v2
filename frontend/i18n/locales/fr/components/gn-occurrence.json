@@ -1,0 +1,8 @@
+{
+  "groupe": "Occurrences dans le document",
+  "rang": "Occurrence {rang} sur {total}",
+  "expression": "« {expression} »",
+  "precedente": "Occurrence précédente",
+  "suivante": "Occurrence suivante",
+  "fermer": "Fermer la recherche"
+}

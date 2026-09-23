@@ -292,12 +292,12 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
 
 **Test indépendant** : [quickstart.md § 3](quickstart.md), étapes 5 à 7.
 
-- [ ] T090 [P] [US4] Créer `frontend/app/components/guide-nego/GnLigneSommaire.vue` (`composants.md:72-74`) et `GnOccurrence.vue` (« Occurrence 3 sur 5 », précédente, suivante, fermer)
-- [ ] T091 [P] [US4] Écrire la recherche dans le document dans `frontend/app/utils/guide-nego/lecteur.ts` : normalisation des accents et de la casse, passages avec page, section et extrait, décompte « n passages dans N pages », passage de la page en cours. Test de rapidité : cent pages en moins d'une seconde (SC-009), dans `frontend/tests/guide-nego/recherche.test.ts`
-- [ ] T092 [US4] Ajouter à `lire.vue` le sommaire (chapitres repliables, section en cours, saut de page) et la recherche avec ses occurrences, le surlignage plein de l'occurrence courante et le clair des autres
-- [ ] T093 [US4] Ajouter à `lire.vue` la feuille « Réglages » : taille Normale 17, Grande 20, Très grande 24, interligne 1,5, titres fixes, par `GnSegmente` ; le thème **par `useGnTheme` de 0a**, pas un second réglage ; « S'applique à tous les documents. Aussi dans votre profil. » La page en cours est conservée au changement de taille
-- [ ] T094 [US4] Ajouter à `lire.vue` la feuille du terme touché (`GnFeuilleBasse`), titrée du terme, **sans traduction ni définition**, avec la phrase qui dit qu'elles viennent avec le lexique, et « Revenir au texte »
-- [ ] T095 [US4] Vérifier le lecteur à 320, 360 et 390 px, dans les deux thèmes et les trois tailles, sans défilement horizontal (SC-010)
+- [X] T090 [P] [US4] Créer `frontend/app/components/guide-nego/GnLigneSommaire.vue` (`composants.md:72-74`) et `GnOccurrence.vue` (« Occurrence 3 sur 5 », précédente, suivante, fermer)
+- [X] T091 [P] [US4] Écrire la recherche dans le document dans `frontend/app/utils/guide-nego/lecteur.ts` : normalisation des accents et de la casse, passages avec page, section et extrait, décompte « n passages dans N pages », passage de la page en cours. Test de rapidité : cent pages en moins d'une seconde (SC-009), dans `frontend/tests/guide-nego/recherche.test.ts`
+- [X] T092 [US4] Ajouter à `lire.vue` le sommaire (chapitres repliables, section en cours, saut de page) et la recherche avec ses occurrences, le surlignage plein de l'occurrence courante et le clair des autres
+- [X] T093 [US4] Ajouter à `lire.vue` la feuille « Réglages » : taille Normale 17, Grande 20, Très grande 24, interligne 1,5, titres fixes, par `GnSegmente` ; le thème **par `useGnTheme` de 0a**, pas un second réglage ; « S'applique à tous les documents. Aussi dans votre profil. » La page en cours est conservée au changement de taille
+- [X] T094 [US4] Ajouter à `lire.vue` la feuille du terme touché (`GnFeuilleBasse`), titrée du terme, **sans traduction ni définition**, avec la phrase qui dit qu'elles viennent avec le lexique, et « Revenir au texte »
+- [X] T095 [US4] Vérifier le lecteur à 320, 360 et 390 px, dans les deux thèmes et les trois tailles, sans défilement horizontal (SC-010)
 
 **Checkpoint** : le lecteur est complet. **Commit.**
 

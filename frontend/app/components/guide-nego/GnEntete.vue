@@ -26,6 +26,8 @@ withDefaults(
     lexiqueOuvert?: boolean
     /** Le lecteur : une seule ligne, le titre en petit entre le retour et « Aa » (04 · 01). */
     compact?: boolean
+    /** Un retour qui referme ce qui est posé sur l'écran — le sommaire du lecteur — au lieu d'y naviguer. */
+    retourBouton?: boolean
   }>(),
   {
     sousTitre: undefined,
@@ -34,8 +36,11 @@ withDefaults(
     avatarDuTitre: undefined,
     lexiqueOuvert: false,
     compact: false,
+    retourBouton: false,
   },
 )
+
+defineEmits<{ retour: [] }>()
 
 const { t } = useI18n()
 </script>
@@ -43,7 +48,10 @@ const { t } = useI18n()
 <template>
   <header class="gn-entete" :class="{ 'gn-entete--compact': compact }">
     <div class="gn-entete__barre">
-      <NuxtLink v-if="retour" :to="retour" class="gn-entete__bouton" :aria-label="t('gn-entete.retour')">
+      <button v-if="retourBouton" type="button" class="gn-entete__bouton" :aria-label="t('gn-entete.retour')" @click="$emit('retour')">
+        <GnPicto nom="back" />
+      </button>
+      <NuxtLink v-else-if="retour" :to="retour" class="gn-entete__bouton" :aria-label="t('gn-entete.retour')">
         <GnPicto nom="back" />
       </NuxtLink>
       <GnAvatar
@@ -99,6 +107,10 @@ const { t } = useI18n()
 
 [data-app="guide-nego"] .gn-entete__bouton {
   flex: none;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
   width: var(--gn-bouton-aa);
   height: var(--gn-bouton-aa);
   display: flex;

@@ -31,16 +31,35 @@ const lignePage = computed(() =>
 const part = computed(() => (props.total > 0 ? partLue(props.page, props.total) : null))
 const actionsVisibles = computed(() => depliee.value && props.actions.length > 0)
 
+const barre = useTemplateRef<HTMLElement>('barre')
+
+// Un défilement replie la barre — sauf quand le focus y est : c'est le clavier qui la parcourt.
 function replier() {
-  if (depliee.value) depliee.value = false
+  if (depliee.value && !barre.value?.contains(document.activeElement)) depliee.value = false
 }
+
+/** Au clavier, la ligne de page est le bouton qui déplie : le toucher au centre n'y existe pas. */
+let focaliser = false
+function basculer() {
+  focaliser = !depliee.value
+  depliee.value = !depliee.value
+}
+// Les actions ne sont dessinées qu'une fois le parent passé : le focus les attend.
+watch(
+  actionsVisibles,
+  (visibles) => {
+    if (visibles && focaliser) barre.value?.querySelector<HTMLElement>('.gn-barre-lecture__action')?.focus()
+    focaliser = false
+  },
+  { flush: 'post' },
+)
 
 onMounted(() => window.addEventListener('scroll', replier, { passive: true }))
 onBeforeUnmount(() => window.removeEventListener('scroll', replier))
 </script>
 
 <template>
-  <div class="gn-barre-lecture">
+  <div ref="barre" class="gn-barre-lecture">
     <div v-if="actionsVisibles" class="gn-barre-lecture__actions" role="group" :aria-label="t('gn-barre-lecture.actions')">
       <button
         v-for="action in actions"
@@ -53,7 +72,18 @@ onBeforeUnmount(() => window.removeEventListener('scroll', replier))
         <span>{{ t(`gn-barre-lecture.${action}`) }}</span>
       </button>
     </div>
-    <p class="gn-barre-lecture__ligne">
+    <button
+      v-if="actions.length"
+      type="button"
+      class="gn-barre-lecture__ligne gn-barre-lecture__ligne--bouton"
+      :aria-expanded="depliee"
+      :aria-label="t('gn-barre-lecture.outils', { page: lignePage })"
+      @click="basculer"
+    >
+      <span class="gn-barre-lecture__page">{{ lignePage }}</span>
+      <span v-if="section" class="gn-barre-lecture__section">{{ section }}</span>
+    </button>
+    <p v-else class="gn-barre-lecture__ligne">
       <span class="gn-barre-lecture__page">{{ lignePage }}</span>
       <span v-if="section" class="gn-barre-lecture__section">{{ section }}</span>
     </p>
@@ -118,6 +148,16 @@ onBeforeUnmount(() => window.removeEventListener('scroll', replier))
   gap: var(--gn-espace-12);
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
+}
+
+[data-app="guide-nego"] .gn-barre-lecture__ligne--bouton {
+  inline-size: 100%;
+  border: none;
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  text-align: start;
+  cursor: pointer;
 }
 
 [data-app="guide-nego"] .gn-barre-lecture__page {

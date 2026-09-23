@@ -34,5 +34,17 @@
     "titre": "The document does not open",
     "texte": "Reading failed. Nothing was erased.",
     "reessayer": "Try again"
+  },
+  "sommaire": {
+    "titre": "Contents",
+    "sous-titre": "{titre} · {pages} pages"
+  },
+  "recherche": {
+    "titre": "Search the document"
+  },
+  "terme": {
+    "lexique": "The translation and definition of this term will come with the English-French glossary.",
+    "pages": "In this document: p. {pages}.",
+    "revenir": "Back to the text"
   }
 }

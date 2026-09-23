@@ -3,5 +3,6 @@
   "actions": "Reading tools",
   "sommaire": "Contents",
   "rechercher": "Search",
-  "reglages": "Settings"
+  "reglages": "Settings",
+  "outils": "{page} — reading tools: contents, search, settings"
 }

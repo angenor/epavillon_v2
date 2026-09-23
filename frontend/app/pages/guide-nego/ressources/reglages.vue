@@ -153,6 +153,11 @@ useHead({ title: t('guide-nego.reglages.titre') })
       />
       <p class="gn-reglages__aide">{{ t('guide-nego.reglages.theme.aide') }}</p>
     </section>
+    <section class="gn-reglages__bloc">
+      <h3 class="gn-reglages__libelle">{{ t('guide-nego.reglages.taille.libelle') }}</h3>
+      <GnChoixTailleLecture :libelle="t('guide-nego.reglages.taille.libelle')" />
+      <p class="gn-reglages__aide">{{ t('guide-nego.reglages.taille.aide') }}</p>
+    </section>
 
     <GnEnteteGroupe :titre="t('guide-nego.reglages.application.titre')" />
     <GnLigneReglage

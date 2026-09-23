@@ -1,0 +1,12 @@
+{
+  "libelle": "Rechercher dans le document",
+  "passages": "{count} passage | {count} passage | {count} passages",
+  "compte": "{passages} dans {pages} — sans réseau",
+  "aucun": "Aucun passage pour « {expression} » dans {pages}.",
+  "lieu": "p. {page} · {section}",
+  "page": "p. {page}",
+  "ici": " — vous êtes ici",
+  "pages": "{count} page | {count} page | {count} pages",
+  "trop-court": "Tapez au moins deux lettres.",
+  "affiner": "Seuls les {n} premiers passages sont listés : précisez la recherche."
+}

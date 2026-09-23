@@ -79,13 +79,14 @@ function aplatir(entrees: OutlineEntry[]): OutlineEntry[] {
 }
 
 /**
- * La section du pied de page : la dernière entrée de niveau 1 ou 2 ouverte avant la
- * page. « 3.6 Adaptation » et non « 3.6.1 » : le pied dit où l'on est, pas le détail.
+ * La section d'une page : la dernière entrée ouverte avant elle, jusqu'au niveau dit.
+ * Le pied s'arrête au niveau 2 — « 3.6 Adaptation » et non « 3.6.1 » : il dit où l'on
+ * est, pas le détail ; un passage trouvé, lui, dit sa sous-partie.
  */
-export function sectionDeLaPage(sommaire: OutlineEntry[], index: number): OutlineEntry | null {
+export function sectionDeLaPage(sommaire: OutlineEntry[], index: number, niveau = 2): OutlineEntry | null {
   let trouvee: OutlineEntry | null = null
   for (const entree of aplatir(sommaire)) {
-    if (entree.level <= 2 && entree.page_index <= index) trouvee = entree
+    if (entree.level <= niveau && entree.page_index <= index) trouvee = entree
   }
   return trouvee
 }
