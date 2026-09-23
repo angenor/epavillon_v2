@@ -18,7 +18,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const auth = useAuthStore()
   await auth.ensureLoaded()
 
-  if (auth.isAuthenticated) return
+  if (authGuardOutcome(auth) === 'allow') {
+    if (import.meta.server && !auth.isAuthenticated) useSessionDeferred().value = true
+    return
+  }
 
   const localePath = useLocalePath()
   return navigateTo({

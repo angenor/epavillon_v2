@@ -106,8 +106,17 @@ export const useAuthStore = defineStore('auth', () => {
    * Charge la personne connectée, une seule fois. Idempotent : les middlewares,
    * le layout et les pages l'appellent tous sans se coordonner.
    */
+  let inFlight: Promise<void> | null = null
+
   async function ensureLoaded(): Promise<void> {
-    if (isResolved.value || isLoading.value) return
+    if (isResolved.value) return
+    // Un second appelant attend le chargement en cours : rendre la main avant la
+    // fin lui ferait lire une session non tranchée.
+    inFlight ??= load().finally(() => (inFlight = null))
+    return inFlight
+  }
+
+  async function load(): Promise<void> {
     isLoading.value = true
     loadError.value = null
     try {
