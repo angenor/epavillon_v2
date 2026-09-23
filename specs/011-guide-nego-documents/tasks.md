@@ -34,14 +34,14 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
 
 **Objectif** : confirmer ou renverser R1 et R2 sur le vrai guide, `.essais/guide-cdp30.pdf` (90 pages, 2,9 Mo). **Rien du modèle, de l'API ni des écrans ne s'écrit avant la conclusion, relue avec le commanditaire.**
 
-- [ ] T001 Créer la branche `011-guide-nego-documents` depuis `main`
-- [ ] T002 Ajouter la cible `make pdfium` au `Makefile` : elle télécharge le binaire PDFium du poste (macOS arm64, Linux x64) depuis `bblanchon/pdfium-binaries`, version épinglée, dans `.outils/pdfium/`, ignoré par Git. Ajouter `PDFIUM_LIB_PATH` à `.env.example`, avec une ligne qui dit d'où il vient
-- [ ] T003 Ajouter `pdfium-render` (MIT ou Apache-2.0, version épinglée) en dépendance **de développement** de `backend/crates/modules/negotiation/Cargo.toml` : elle ne sert qu'à l'exemple, jusqu'à la décision
-- [ ] T004 Écrire `backend/crates/modules/negotiation/examples/essai_extraction.rs` :
+- [X] T001 Créer la branche `011-guide-nego-documents` depuis `main`
+- [X] T002 Ajouter la cible `make pdfium` au `Makefile` : elle télécharge le binaire PDFium du poste (macOS arm64, Linux x64) depuis `bblanchon/pdfium-binaries`, version épinglée, dans `.outils/pdfium/`, ignoré par Git. Ajouter `PDFIUM_LIB_PATH` à `.env.example`, avec une ligne qui dit d'où il vient
+- [X] T003 Ajouter `pdfium-render` (MIT ou Apache-2.0, version épinglée) en dépendance **de développement** de `backend/crates/modules/negotiation/Cargo.toml` : elle ne sert qu'à l'exemple, jusqu'à la décision
+- [X] T004 Écrire `backend/crates/modules/negotiation/examples/essai_extraction.rs` :
   - il lit le PDF donné en argument ;
   - il sort, par page, les segments avec leur police (nom, graisse, italique), leur cadre et l'étiquette de la page, ainsi que les signets ;
   - il écrit `.essais/sortie/brut.json` et une image JPEG par page, à 1080 px et en qualité 75, dans `.essais/sortie/pages/`
-- [ ] T005 Compléter l'exemple d'une première version des règles de [R7](research.md) :
+- [X] T005 Compléter l'exemple d'une première version des règles de [R7](research.md) :
   - colonnes par abscisse ;
   - en-têtes et pieds répétés ;
   - notes en petit corps ;
@@ -51,15 +51,15 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
   - titres.
 
   Il écrit `.essais/sortie/forme-lisible.json` et `.essais/sortie/rapport.md`
-- [ ] T006 Lancer l'essai sur `.essais/guide-cdp30.pdf` et remplir la grille d'[essai-extraction.md](essai-extraction.md) sur les pages témoins nommées : les huit critères et les six mesures, avec des extraits courts
-- [ ] T007 **Seulement si un critère échoue avec PDFium** : rejouer le même contrôle avec pdfplumber et pypdfium2, par un script jetable sous `.essais/`, et consigner la comparaison dans `essai-extraction.md`
-- [ ] T008 Écrire la conclusion d'`essai-extraction.md` :
+- [X] T006 Lancer l'essai sur `.essais/guide-cdp30.pdf` et remplir la grille d'[essai-extraction.md](essai-extraction.md) sur les pages témoins nommées : les huit critères et les six mesures, avec des extraits courts
+- [X] T007 *(sans objet : aucun critère n'échoue)* **Seulement si un critère échoue avec PDFium** : rejouer le même contrôle avec pdfplumber et pypdfium2, par un script jetable sous `.essais/`, et consigner la comparaison dans `essai-extraction.md`
+- [X] T008 Écrire la conclusion d'`essai-extraction.md` :
   - l'issue A, B ou C ;
   - ce que garde le téléphone ([R2](research.md)) ;
   - les règles de R7 ajustées.
 
   Reporter les changements dans [research.md](research.md) (R1, R2, R7), et dans [plan.md](plan.md) si l'issue est B ou C
-- [ ] T009 **Relire la conclusion avec le commanditaire** et attendre son accord. Sur l'issue B, faire valider le coût du service d'ADR-004 avant la phase 2. Consigner la dépendance retenue dans `docs/progression/decisions/`
+- [X] T009 **Relire la conclusion avec le commanditaire** et attendre son accord. Sur l'issue B, faire valider le coût du service d'ADR-004 avant la phase 2. Consigner la dépendance retenue dans `docs/progression/decisions/` *(fait dans [ADR-021](../../docs/AppNego/adr/021-pdfium-dans-le-worker.md) : les décisions de Guide Négo vivent dans `docs/AppNego/adr/`, constitution § « Le suivi de Guide Négo »)*
 
 **Checkpoint** : l'issue est écrite et acceptée. **Commit** (l'exemple, `make pdfium`, la grille remplie ; jamais le PDF).
 

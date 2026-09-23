@@ -48,7 +48,7 @@ ReadingPage {
 | `paragraph` | `spans` | Paragraphe recomposé |
 | `list_item` | `spans`, `depth` (0 à 2), `marker` (« • », « 1. », « a) ») | Élément de liste |
 | `note` | `spans`, `mark` (« 1 ») | Note de bas de page, rendue en fin de page |
-| `origin` | `reason` : `"table"` ou `"figure"`, `caption?` : `spans` | « Voir la page d'origine », qui ouvre l'image de la page ; hors connexion, si l'image n'est pas gardée : « Page d'origine disponible avec le réseau » |
+| `origin` | `reason` : `"table"` ou `"figure"`, `caption?` : `spans`, `text?` : `spans` | « Voir la page d'origine », qui ouvre l'image de la page ; hors connexion, si l'image n'est pas gardée : « Page d'origine disponible avec le réseau ». `text` est le texte de la zone dans l'ordre du flux, **affiché replié** sous ce lien : il rend un tableau cherchable, et lisible à plat (ajout de l'essai, 23/09) |
 
 ## Les segments
 
@@ -67,7 +67,7 @@ Span {
 
 - Les `index` des pages sont contigus de 1 à `page_count`.
 - Le `page_index` d'une entrée du sommaire existe.
-- La concaténation des `spans[].text` d'une page, blocs `note` compris, **est** `document_pages.plain_text`. Rien ne se cherche qui ne s'affiche pas.
+- La concaténation des `spans[].text` d'une page, blocs `note` et `text` des blocs `origin` compris, **est** `document_pages.plain_text`. Rien ne se cherche qui ne s'affiche pas.
 - Le texte n'est jamais modifié par une note de correction : les notes arrivent par une autre lecture ([api-documents.md](api-documents.md)) et se posent par-dessus.
 
 ## Tests

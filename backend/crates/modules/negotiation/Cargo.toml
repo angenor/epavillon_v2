@@ -25,6 +25,10 @@ uuid.workspace = true
 
 [dev-dependencies]
 kernel = { workspace = true, features = ["testing"] }
+# L'essai d'extraction seulement (`examples/essai_extraction.rs`), jusqu'à la
+# décision de specs/011 : PDFium ne passe en dépendance normale qu'après.
+image.workspace = true
+pdfium-render.workspace = true
 serde_json.workspace = true
 sqlx.workspace = true
 time.workspace = true

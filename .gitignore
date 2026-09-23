@@ -50,3 +50,6 @@ docs/note.md
 
 # Matériaux d’essai (PDF du guide) — jamais commités
 .essais/
+
+# Outils natifs téléchargés par le Makefile (`make pdfium`)
+.outils/

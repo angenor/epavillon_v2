@@ -66,6 +66,12 @@ futures-util = "0.3"
 # une dépendance système invisible à `cargo`, absente le jour du déploiement, et
 # qu'aucun test ne signale.
 image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp", "gif"] }
+# Extraction des PDF de Guide Négo (étape 1) : texte, police et cadre de chaque
+# segment, signets, étiquettes de page et rendu en image. PDFium est chargé à
+# l'exécution depuis `PDFIUM_LIB_PATH` (`make pdfium`) : version épinglée sur
+# l'API chromium/7881 que ce binaire vise. PyMuPDF, meilleur extracteur, est
+# sous AGPL (research.md R1 de specs/011).
+pdfium-render = { version = "=0.9.4", default-features = false, features = ["pdfium_7881", "image_025", "thread_safe"] }
 # La signature SigV4 du stockage objet, écrite ici plutôt que déléguée à
 # `aws-sdk-s3` et à sa quarantaine de crates (B6, R8). Minuscule, RustCrypto,
 # même famille que `sha2` déjà déclarée.

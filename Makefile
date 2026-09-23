@@ -41,7 +41,8 @@ S3_KEY_SECRET ?= $(shell sed -n 's/^S3_SECRET_ACCESS_KEY=//p' $(ENV_FILE) 2>/dev
 MEDIA_PROXY_PORT ?= $(shell sed -n 's/^MEDIA_PROXY_PORT=//p' $(ENV_FILE) 2>/dev/null | tail -1)
 
 .PHONY: help check check-db check-db-safe assert-db assert-init-logs check-front check-back \
-        up down wait-db logs-db garage-init garage-info media-base-url openapi check-api-contract check-guide-nego
+        up down wait-db logs-db garage-init garage-info media-base-url openapi check-api-contract check-guide-nego \
+        pdfium
 
 # `make` tout court affiche l'aide et ne détruit rien : la première cible d'un
 # Makefile est celle qu'on exécute par mégarde, et `check` efface la base.
@@ -58,6 +59,7 @@ help:
 	@echo '  make garage-init    layout, bucket et clé S3 — rejoué tout seul par check-db'
 	@echo '  make media-base-url URL publique des médias → relais local (refait par garage-init)'
 	@echo '  make garage-info    état du bucket'
+	@echo '  make pdfium         bibliothèque PDFium du poste, dans .outils/pdfium/'
 	@echo '  make logs-db        journaux PostgreSQL'
 
 check: check-db check-front check-back
@@ -226,6 +228,26 @@ check-api-contract:
 sqlx-prepare:
 	@cd backend && cargo sqlx prepare --workspace -- --all-targets \
 	 || { echo 'ÉCHEC : `cargo install sqlx-cli --no-default-features --features postgres` puis `make up`.'; exit 1; }
+
+# ---------------------------------------------------------------------------
+# PDFium — l'extraction des documents de Guide Négo
+# ---------------------------------------------------------------------------
+
+# Épinglée sur l'API que vise `pdfium-render` 0.9 (chromium/7881) : un binaire
+# plus récent peut renommer un symbole, et l'échec n'arrive qu'au chargement.
+PDFIUM_VERSION ?= 7881
+
+pdfium:
+	@case "$$(uname -s)-$$(uname -m)" in \
+	   Darwin-arm64) plateforme=mac-arm64 ;; \
+	   Linux-x86_64) plateforme=linux-x64 ;; \
+	   *) echo "ÉCHEC : poste $$(uname -s)-$$(uname -m) non prévu — macOS arm64 ou Linux x64."; exit 1 ;; \
+	 esac; \
+	 rm -rf .outils/pdfium && mkdir -p .outils/pdfium && \
+	 curl -fsSL "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F$(PDFIUM_VERSION)/pdfium-$$plateforme.tgz" \
+	   | tar -xz -C .outils/pdfium \
+	   || { echo 'ÉCHEC : téléchargement de PDFium impossible.'; exit 1; }
+	@echo 'PDFium chromium/$(PDFIUM_VERSION) → .outils/pdfium/lib (PDFIUM_LIB_PATH du .env).'
 
 # ---------------------------------------------------------------------------
 # Stockage objet

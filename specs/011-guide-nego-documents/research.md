@@ -4,16 +4,17 @@
 
 Ce fichier tranche ce que la spécification a laissé ouvert, et ce que la relecture du commanditaire du 22/09 a confié au plan. Chaque décision porte son *pourquoi*, et ce qui a été écarté.
 
-**Une décision reste conditionnelle** : l'outil d'extraction (R1) et, avec lui, ce que garde le téléphone (R2). Elles se confirment par l'essai sur le vrai guide, **première phase de l'étape** ([essai-extraction.md](essai-extraction.md)). Le reste du plan ne dépend de l'essai que par ces deux points, et chaque issue de l'essai a sa suite écrite.
+**L'essai du 23/09 a rendu l'issue A** ([essai-extraction.md](essai-extraction.md)) : R1 est confirmé, R7 ajusté, et **R2 maintenu par le commanditaire** bien que la copie pèse plus que le PDF ([ADR-021](../../docs/AppNego/adr/021-pdfium-dans-le-worker.md)).
 
 ---
 
-## R1 — L'outil d'extraction : PDFium dans le worker Rust, sous réserve de l'essai
+## R1 — L'outil d'extraction : PDFium dans le worker Rust
 
-**Décision pressentie** : **PDFium**, par la caisse `pdfium-render`, appelé par un travail différé du worker Rust. Rien de Python à cette étape.
+**Décision, confirmée par l'essai (issue A)** : **PDFium**, par la caisse `pdfium-render` 0.9.4 et le binaire chromium/7881, appelé par un travail différé du worker Rust. Rien de Python à cette étape. Sur le vrai guide, les huit critères tiennent, et l'extraction complète prend 1,8 s.
 
 **Pourquoi.**
 - **Il rend ce que l'essai doit vérifier.** Par caractère ou par segment : le texte, la **police** (nom, graisse, drapeau italique), et le **cadre** (position, donc les colonnes). Par document : le **sommaire** du PDF (signets) et les **étiquettes de page** (« 59 » imprimé contre l'indice 63 du fichier). Par page : un **rendu en image**, qui sert l'aperçu page par page (FR-005) et le mode « ouvrir tel quel » (FR-005 bis) sans bibliothèque de plus.
+- **Vu à l'essai** : la graisse qu'il rend est inutilisable (220, 235…), le gras se lit au nom de la police ; le trait d'union de fin de ligne arrive en U+0002, jamais perdu ; les filets et les pointillés des encadrés arrivent comme objets graphiques, ce qui suffit à repérer tableaux et figures. Le guide n'a ni signets ni étiquettes : R7 s'en passe.
 - **Licences compatibles.** `pdfium-render` est MIT ou Apache-2.0. PDFium est BSD-3 ou Apache-2.0. Les binaires précompilés (`bblanchon/pdfium-binaries`) héritent de ces licences.
 - **Aucune porte nouvelle.** Le worker existe, sa file de travaux aussi (`kernel/src/jobs.rs`, patron `negotiation/src/jobs/emails.rs`). L'extraction relève du domaine des négociations : la forme lisible, ses pages et les notes posées dessus sont des notions de `negotiation`, pas de l'assistant.
 
@@ -55,13 +56,15 @@ Ce coût serait avancé, pas perdu : l'étape 7 monte ce service de toute façon
 
 ## R2 — Ce que garde le téléphone : la forme lisible, plus les seules pages d'origine utiles
 
+> **Mesuré le 23/09, tranché le jour même par le commanditaire : on garde tout** ([ADR-021](../../docs/AppNego/adr/021-pdfium-dans-le-worker.md)). Le vrai guide pèse **2,9 Mo**, pas 9. Sa forme lisible pèse **74 Ko** compressée. Mais **19 pages sur 90** portent un tableau ou une figure, et leurs images pèsent **4,1 Mo** (217 Ko chacune en moyenne, 1080 px, JPEG 75) : la copie décrite ci-dessous pèse donc **4,2 Mo, plus que le PDF**. Le seuil du tiers n'est pas atteint (21 %). Les trois voies sont dans la conclusion d'[essai-extraction.md](essai-extraction.md). **Retenue** : la copie telle qu'écrite, pour que le guide se lise **en entier** sans réseau (SC-002), avec un encodage des images plus léger, à régler en phase 4 (environ 3 Mo).
+
 **Décision pressentie** :
 - **Document recomposé** : on garde **la forme lisible**, c'est-à-dire le texte recomposé en JSON compressé. On y ajoute **les images des seules pages qui portent un bloc non recomposable** (tableau, figure) : le lecteur y renvoie par « Voir la page d'origine ».
 - **Document « tel quel »** : on garde **les images de toutes ses pages**.
 - **Le PDF lui-même ne va jamais sur le téléphone.**
 
 **Pourquoi.**
-- Sur un réseau de COP, trente fois moins lourd compte : quelques centaines de kilo-octets de texte, contre 9 Mo de PDF.
+- Sur un réseau de COP, le poids compte : 74 Ko de texte, contre 2,9 Mo de PDF — mais les pages d'origine en ajoutent 4,1.
 - Le PDF n'apporterait rien au lecteur, qui ne l'affiche pas.
 - Les images de page, que l'extraction produit déjà pour l'aperçu, rendent ce que le texte perd, **là seulement où il le perd**.
 
@@ -163,21 +166,24 @@ Un PDF réservé, déposé aujourd'hui, serait donc lisible par quiconque obtien
 
 ## R7 — La forme lisible : ce que fait le traitement après PDFium
 
-**Décision** : un traitement écrit en Rust, pur et testé sur des pages d'essai, ordonne ce que PDFium rend. Ses règles, qui sont celles que l'essai vérifie :
+**Décision** : un traitement écrit en Rust, pur et testé sur des pages d'essai, ordonne ce que PDFium rend. **Ses règles ont été ajustées par l'essai du 23/09** sur le vrai guide ([essai-extraction.md](essai-extraction.md)), qui les a toutes éprouvées :
 
-| Critère | Règle |
+| Critère | Règle ajustée |
 |---|---|
-| **Ordre de lecture** | Les lignes se groupent en colonnes par leur abscisse, puis se lisent colonne par colonne, de haut en bas |
-| **En-têtes et pieds** | Une ligne qui revient au même endroit sur au moins la moitié des pages, au numéro près, est écartée |
-| **Notes** | Un bloc en petit corps sous le dernier paragraphe devient une `note`, rendue en fin de page |
-| **Tableaux et figures** | Une zone de filets, de cellules alignées ou d'image devient un bloc `origine` qui renvoie à l'image de la page (R2) |
-| **Césures** | « négo-⏎ciation » se recolle quand la ligne suivante commence par une minuscule. Un vrai tiret (« États-⏎Unis ») est gardé si le mot recollé n'est pas attesté ailleurs dans le document |
-| **Italiques** | Un segment italique devient un `terme` touchable (FR-043). L'essai compte les faux termes (titres d'ouvrages, emphase) ; au-delà de 20 %, on ne marque que les italiques **en anglais**, reconnus par un test de mots vides anglais |
-| **Titres** | Un corps plus grand ou une graisse forte, confrontés au sommaire du PDF, deviennent un `titre` de niveau 1 à 3 |
-| **Sommaire** | Les signets du PDF. À défaut, les titres repérés. À défaut, pas de sommaire, et l'aperçu le dit |
-| **Pages** | L'étiquette imprimée quand le PDF la porte, l'indice sinon. « Page 59 sur 92 » compte les **pages du document**, pas celles du fichier |
+| **Ordre de lecture** | L'ordre du flux que rend PDFium. Une ligne écrite **après** une ligne qu'elle surplombe, dans les mêmes abscisses, est flottante : les flottantes voisines forment une zone, replacée à sa hauteur. Les marges ne comptent pas, car un pied non écarté ouvre souvent le flux. **Le regroupement en colonnes par abscisse n'a pas servi** : il n'est pas écrit |
+| **En-têtes et pieds** | Une ligne dans les 12 % du haut ou du bas, au même texte à un nombre près — une suite de chiffres vaut un joker —, à 4 pt près en hauteur, sur **trois pages et le cinquième du document** au moins (et non la moitié). Le numéro écarté devient l'étiquette de la page |
+| **Notes** | Sous le **filet court et isolé** qui part de la marge gauche, dans le bas de page — le bord d'un aplat n'en est pas un (p. 51, 59). La marge gauche est l'abscisse où commencent le plus de lignes, pas la plus petite : une puce peut déborder (p. 77). Sans filet, les lignes en petit corps qui ferment la page. Une note commence par sa marque. L'appel devient un chiffre en exposant (« ¹ ») |
+| **Tableaux et figures** | **Tableau** : deux filets fins horizontaux et deux verticaux au moins, qui se touchent. **Figure** : une image de plus de 40 pt, ou une zone flottante qui porte un aplat autre que son simple cadre. **Encadré** : une zone flottante sans dessin, recomposée à sa place. Les pointillés — des centaines d'images d'un point (1 088 sur la p. 59) — sont ignorés |
+| **Césures** | Le trait d'union de fin de ligne arrive en U+0002. Il se **garde**, sauf si le mot recollé est attesté en milieu de ligne ailleurs dans le document, et pas le mot à tiret. La condition « la ligne suivante commence par une minuscule » tombe. Une adresse coupée se recolle sans blanc |
+| **Italiques** | Au-delà de 20 % de faux, seul l'italique **maigre** reconnu anglais : un mot vide anglais, ou deux mots capitalisés au moins, sans accent ni mot vide français ; ni chiffre ni guillemet ; douze mots au plus. Le gras italique est un titre, jamais un terme |
+| **Titres** | Un corps d'au moins 1,25 fois le texte courant ; ou une ligne toute en gras, plus grande ou numérotée ; ou une ligne courte toute en gras qui ne finit pas une phrase. Niveau 1 dès 1,4 fois le texte ; sinon la profondeur du numéro (« 3.6.1. » → 3, « A.2. » → 2, « II. » → 2) ; 3 sans numéro. Les lignes consécutives de même corps se fondent en un titre. **Une page à points de conduite est un sommaire imprimé** : ni titres ni termes |
+| **Sommaire** | Les signets s'il y en a. Sinon les titres de niveau 1 et 2, et ceux de niveau 3 qui sont numérotés |
+| **Pages** | L'étiquette du PDF s'il la porte ; sinon le numéro imprimé, lu dans le pied écarté ; sinon l'indice |
+| **Paragraphes** *(nouveau)* | Un paragraphe se ferme sur un écart de plus de 1,25 interligne ; sur une ligne qui s'arrête avant la marge droite en finissant une phrase (3 pt quand la page est justifiée, 1,5 corps sinon) ; sur une puce ; sur le retour à la marge d'un retrait suspendu, comme en bibliographie |
 
-Le résultat porte un **verdict** : recomposable ou non, avec ses indicateurs (part des pages avec du texte, colonnes détectées, blocs `origine`). L'aperçu les affiche.
+Le résultat porte un **verdict** : recomposable ou non, avec ses indicateurs (part des pages avec du texte, blocs `origin` par raison, notes, titres repérés). L'aperçu les affiche.
+
+**Un bloc `origin` porte le texte de sa zone** (`text`), ajouté au contrat par l'essai : 10 % du texte du guide, dont tout le tableau des sigles, échapperait sinon à la recherche ([forme-lisible.md](contracts/forme-lisible.md)).
 
 La grammaire est close, comme celle de `GnTexteLong` : aucun HTML ne traverse ([forme-lisible.md](contracts/forme-lisible.md)).
 
