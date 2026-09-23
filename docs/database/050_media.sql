@@ -843,6 +843,45 @@ COMMENT ON FUNCTION media.reconcile_storage_quotas() IS
 -- fichier retiré d'une page restait sur le disque pour toujours. Ici, l'absence
 -- de rattachement est une information de première classe.
 -- -----------------------------------------------------------------------------
+-- Les colonnes qui désignent un objet SANS passer par `media.attachments` : le
+-- PDF d'un document de négociation est la donnée du document, pas une
+-- illustration rattachée. Chaque module y déclare les siennes, comme il déclare
+-- ses références d'organisation à `org.organization_references`. Un objet ainsi
+-- désigné n'est jamais orphelin.
+CREATE TABLE media.asset_references (
+    ref_schema  text NOT NULL,
+    ref_table   text NOT NULL,
+    ref_column  text NOT NULL,
+    PRIMARY KEY (ref_schema, ref_table, ref_column)
+);
+
+COMMENT ON TABLE media.asset_references IS
+    'Colonnes des autres modules qui désignent un objet directement. media.find_orphan_assets() les consulte : un objet désigné n''est pas orphelin.';
+
+CREATE OR REPLACE FUNCTION media.is_asset_referenced(p_asset_id uuid)
+RETURNS boolean
+LANGUAGE plpgsql
+STABLE
+AS $$
+DECLARE
+    r record;
+    v_designe boolean;
+BEGIN
+    FOR r IN SELECT * FROM media.asset_references LOOP
+        EXECUTE format('SELECT EXISTS (SELECT 1 FROM %I.%I WHERE %I = $1)',
+                       r.ref_schema, r.ref_table, r.ref_column)
+            INTO v_designe USING p_asset_id;
+        IF v_designe THEN
+            RETURN true;
+        END IF;
+    END LOOP;
+    RETURN false;
+END;
+$$;
+
+COMMENT ON FUNCTION media.is_asset_referenced(uuid) IS
+    'Vrai si une colonne déclarée dans media.asset_references désigne l''objet.';
+
 CREATE OR REPLACE FUNCTION media.find_orphan_assets(p_min_age_days integer DEFAULT 30)
 RETURNS TABLE (
     asset_id        uuid,
@@ -868,11 +907,12 @@ AS $$
       AND a.deleted_at IS NULL
       AND a.created_at < now() - make_interval(days => p_min_age_days)
       AND NOT EXISTS (SELECT 1 FROM media.attachments t WHERE t.asset_id = a.id)
+      AND NOT media.is_asset_referenced(a.id)
     ORDER BY a.byte_size DESC;
 $$;
 
 COMMENT ON FUNCTION media.find_orphan_assets(integer) IS
-    'Objets prêts, non rattachés depuis N jours : candidats à la purge. Réponse à la contrainte d''espace disque du VPS.';
+    'Objets prêts, ni rattachés ni désignés (media.asset_references) depuis N jours : candidats à la purge. Réponse à la contrainte d''espace disque du VPS.';
 
 -- Suppression logique avec fenêtre de rétention : l'objet reste récupérable
 -- pendant la période indiquée avant que le worker ne l'efface du stockage.

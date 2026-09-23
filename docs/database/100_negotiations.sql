@@ -800,12 +800,15 @@ CREATE TABLE negotiation.documents (
     -- Chaînage des versions : on ne remplace jamais un document cité ailleurs.
     supersedes_id         uuid        REFERENCES negotiation.documents(id) ON DELETE SET NULL,
 
-    -- XOR STRUCTUREL : soit un objet stocké (Garage/S3 via le module media),
-    -- soit un lien externe. Jamais les deux, jamais aucun des deux.
+    -- SOURCE : soit un objet stocké (Garage/S3 via le module media), soit un
+    -- lien externe. Jamais les deux ; exactement un dès la publication — un
+    -- brouillon naît sans source, et son PDF se dépose ensuite (Guide Négo R5).
     asset_id              uuid        CONSTRAINT xmod_fk_documents_asset
                                       REFERENCES media.assets(id) ON DELETE RESTRICT,
     external_url          platform.url,
-    external_publisher    text,       -- ex. « Secrétariat de la CCNUCC »
+    -- Qui a produit le document, qu'il soit fichier ou lien : « Secrétariat de
+    -- la CCNUCC », « OIF/IFDD ».
+    publisher             text,
     cover_asset_id        uuid        CONSTRAINT xmod_fk_documents_cover
                                       REFERENCES media.assets(id) ON DELETE SET NULL,
 
@@ -814,8 +817,9 @@ CREATE TABLE negotiation.documents (
     download_count        integer     NOT NULL DEFAULT 0,
     -- Éligibilité et état d'indexation pour le RAG de l'assistant négociateur :
     -- les embeddings (pgvector) vivent dans le module `tool`, ce module ne
-    -- publie que le signal d'indexation.
-    is_rag_eligible       boolean     NOT NULL DEFAULT true,
+    -- publie que le signal d'indexation. Faux par défaut : seul ce qu'un humain
+    -- a choisi est lu par l'assistant (ADR-011 de Guide Négo).
+    is_rag_eligible       boolean     NOT NULL DEFAULT false,
     rag_indexed_at        timestamptz,
     migrated_from_v1      boolean     NOT NULL DEFAULT false,
     uploaded_by           uuid        CONSTRAINT xmod_fk_documents_uploader
@@ -825,12 +829,25 @@ CREATE TABLE negotiation.documents (
             coalesce(title ->> 'fr', '')   || ' ' ||
             coalesce(title ->> 'en', '')   || ' ' ||
             coalesce(summary ->> 'fr', '') || ' ' ||
-            coalesce(external_publisher, ''))
+            coalesce(publisher, ''))
     ) STORED,
     created_at            timestamptz NOT NULL DEFAULT now(),
     updated_at            timestamptz NOT NULL DEFAULT now(),
 
-    CONSTRAINT ck_documents_source_xor CHECK (num_nonnulls(asset_id, external_url) = 1),
+    -- Guide Négo, étape 1. Ces trois colonnes closent la table : elles sont
+    -- arrivées par ALTER sur une base en service.
+    -- La COP que le document concerne, au plus une.
+    event_id              uuid        CONSTRAINT xmod_fk_documents_event
+                                      REFERENCES event.events(id) ON DELETE RESTRICT,
+    -- La date du document lui-même, distincte de sa publication sur la plateforme.
+    issued_on             date,
+    -- Posée au retrait, effacée à la republication : distingue un document
+    -- retiré d'un brouillon jamais publié.
+    unpublished_at        timestamptz,
+
+    CONSTRAINT ck_documents_source_at_most_one CHECK (num_nonnulls(asset_id, external_url) <= 1),
+    CONSTRAINT ck_documents_published_has_source
+        CHECK (published_at IS NULL OR num_nonnulls(asset_id, external_url) = 1),
     CONSTRAINT ck_documents_not_self_superseding CHECK (supersedes_id IS DISTINCT FROM id)
 );
 
@@ -845,6 +862,11 @@ CREATE INDEX ix_documents_track     ON negotiation.documents (track_term_id) WHE
 CREATE INDEX ix_documents_search    ON negotiation.documents USING gin (search_vector);
 CREATE INDEX ix_documents_rag_queue ON negotiation.documents (created_at)
     WHERE is_rag_eligible AND rag_indexed_at IS NULL AND published_at IS NOT NULL;
+CREATE INDEX ix_documents_event     ON negotiation.documents (event_id) WHERE event_id IS NOT NULL;
+-- Un document n'a qu'un successeur : sans quoi « le document à jour » serait
+-- deux documents.
+CREATE UNIQUE INDEX ux_documents_supersedes ON negotiation.documents (supersedes_id)
+    WHERE supersedes_id IS NOT NULL;
 
 CREATE TRIGGER tg_documents_updated_at BEFORE UPDATE ON negotiation.documents
     FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
@@ -855,10 +877,48 @@ CREATE TRIGGER tg_documents_check_track BEFORE INSERT OR UPDATE OF track_term_id
 CREATE TRIGGER tg_documents_audit AFTER INSERT OR UPDATE OR DELETE ON negotiation.documents
     FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
 
+-- Un remplacement ne boucle jamais : si A remplace B qui remplace A, « le
+-- document à jour » n'existe plus. La chaîne se remonte depuis le document
+-- remplacé ; y retrouver le document écrit est une boucle.
+CREATE OR REPLACE FUNCTION negotiation.tg_documents_no_supersede_cycle()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF NEW.supersedes_id IS NOT NULL AND EXISTS (
+        WITH RECURSIVE chaine(id) AS (
+            SELECT NEW.supersedes_id
+            UNION
+            SELECT d.supersedes_id
+              FROM negotiation.documents d
+              JOIN chaine c ON c.id = d.id
+             WHERE d.supersedes_id IS NOT NULL
+        )
+        SELECT 1 FROM chaine WHERE id = NEW.id
+    ) THEN
+        RAISE EXCEPTION 'Le document % remplacerait, même de loin, un document qui le remplace', NEW.id
+            USING ERRCODE = 'check_violation', CONSTRAINT = 'ck_documents_supersede_cycle';
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER tg_documents_no_supersede_cycle
+    BEFORE INSERT OR UPDATE OF supersedes_id ON negotiation.documents
+    FOR EACH ROW EXECUTE FUNCTION negotiation.tg_documents_no_supersede_cycle();
+
 COMMENT ON TABLE negotiation.documents IS
-    'Documents d''aide : fichier stocké OU lien externe, jamais les deux (ck_documents_source_xor). Versionnés, typés par taxonomie, indexés plein texte.';
-COMMENT ON CONSTRAINT ck_documents_source_xor ON negotiation.documents IS
-    'Corrige la v1 où `file_url` accueillait indifféremment une URL de stockage et un lien tiers, rendant purge et indexation impossibles à automatiser.';
+    'Documents d''aide : fichier stocké OU lien externe, jamais les deux, exactement un une fois publié. Versionnés, typés par taxonomie, indexés plein texte. Thématiques par reference.entity_terms (negotiation_theme).';
+COMMENT ON CONSTRAINT ck_documents_source_at_most_one ON negotiation.documents IS
+    'Jamais un fichier ET un lien. Corrige la v1 où `file_url` accueillait indifféremment une URL de stockage et un lien tiers, rendant purge et indexation impossibles à automatiser.';
+COMMENT ON CONSTRAINT ck_documents_published_has_source ON negotiation.documents IS
+    'Un brouillon peut naître sans source — son PDF se dépose avec lui pour propriétaire ; un document publié en a exactement une.';
+COMMENT ON COLUMN negotiation.documents.event_id IS
+    'La COP que le document concerne, au plus une. NULL : il ne se rattache à aucune édition.';
+COMMENT ON COLUMN negotiation.documents.unpublished_at IS
+    'Date du retrait. published_at NULL et unpublished_at posé : dépublié ; les deux NULL : brouillon.';
+COMMENT ON FUNCTION negotiation.tg_documents_no_supersede_cycle() IS
+    'Refuse un remplacement qui bouclerait (ck_documents_supersede_cycle) : le bout publié de la chaîne doit exister.';
 
 -- Incrément du compteur de téléchargements. Les statistiques fines (qui, quand,
 -- depuis où) relèvent du module analytics, pas de cette colonne.
@@ -882,6 +942,146 @@ CREATE TABLE negotiation.document_bookmarks (
 
 CREATE INDEX ix_document_bookmarks_document ON negotiation.document_bookmarks (document_id);
 CREATE INDEX ix_document_bookmarks_recent   ON negotiation.document_bookmarks (person_id, created_at DESC);
+
+-- -----------------------------------------------------------------------------
+-- 5 bis. La forme lisible d'un document — Guide Négo, étape 1
+--
+-- Le lecteur de Guide Négo recompose le texte du PDF publié : l'extraction le
+-- découpe en pages de blocs typés (grammaire close, sans HTML), repère le
+-- sommaire, et rend une image de chaque page, déposée dans le bucket privé.
+-- Tout vit ici, page par page : la recherche dans le texte, l'ancre des notes
+-- de correction, et un seul corps servi au téléphone
+-- (specs/011-guide-nego-documents, R3, R6, R7).
+-- -----------------------------------------------------------------------------
+
+CREATE TYPE negotiation.rendition_status AS ENUM ('pending', 'extracting', 'ready', 'failed');
+
+COMMENT ON TYPE negotiation.rendition_status IS
+    'pending → extracting → ready | failed. Relancer l''extraction ramène à pending.';
+
+CREATE TABLE negotiation.document_renditions (
+    document_id     uuid        PRIMARY KEY REFERENCES negotiation.documents(id) ON DELETE CASCADE,
+    -- Le fichier extrait : un autre fichier donne une autre extraction.
+    asset_id        uuid        NOT NULL CONSTRAINT xmod_fk_document_renditions_asset
+                                REFERENCES media.assets(id) ON DELETE RESTRICT,
+    status          negotiation.rendition_status NOT NULL DEFAULT 'pending',
+    -- Pages du document, pas du fichier.
+    page_count      integer     CHECK (page_count IS NULL OR page_count > 0),
+    -- Sommaire, en grammaire close : titre, niveau, page, enfants.
+    outline         jsonb,
+    -- Le verdict : le texte se recompose-t-il ?
+    is_reflowable   boolean,
+    -- Les indicateurs du verdict : pages avec texte, blocs d'origine, termes…
+    quality         jsonb,
+    -- Le choix de l'administratrice : lire en pages d'origine. Il se change sans
+    -- republier le fichier.
+    serve_as_is     boolean     NOT NULL DEFAULT false,
+    -- Poids de la copie que garde le téléphone : le texte, et les images des
+    -- seules pages à tableau ou figure (ADR-021). C'est la taille annoncée.
+    reading_bytes   bigint      CHECK (reading_bytes IS NULL OR reading_bytes >= 0),
+    -- Outil et version, pour savoir quoi réextraire le jour où ils changent.
+    extractor       text,
+    failure_reason  text,
+    attempts        integer     NOT NULL DEFAULT 0 CHECK (attempts >= 0),
+    extracted_at    timestamptz,
+    created_at      timestamptz NOT NULL DEFAULT now(),
+    updated_at      timestamptz NOT NULL DEFAULT now(),
+
+    CONSTRAINT ck_document_renditions_ready  CHECK (status <> 'ready' OR page_count > 0),
+    CONSTRAINT ck_document_renditions_failed CHECK (status <> 'failed' OR failure_reason IS NOT NULL)
+);
+
+CREATE INDEX ix_document_renditions_asset ON negotiation.document_renditions (asset_id);
+
+CREATE TRIGGER tg_document_renditions_updated_at BEFORE UPDATE ON negotiation.document_renditions
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
+
+COMMENT ON TABLE negotiation.document_renditions IS
+    'L''extraction d''un document fichier : son état, son verdict, son sommaire, et le choix « ouvrir tel quel ». Une ligne par document.';
+
+CREATE TABLE negotiation.document_pages (
+    document_id       uuid     NOT NULL REFERENCES negotiation.documents(id) ON DELETE CASCADE,
+    -- De 1 au nombre de pages : clé de la progression et des notes.
+    page_index        integer  NOT NULL CHECK (page_index > 0),
+    -- L'étiquette imprimée, « 59 ».
+    label             text     NOT NULL,
+    -- Les blocs de la page, en grammaire close ; vide en mode « tel quel ».
+    blocks            jsonb    NOT NULL DEFAULT '[]',
+    -- La concaténation du texte des blocs : rien ne se cherche qui ne s'affiche pas.
+    plain_text        text     NOT NULL DEFAULT '',
+    search_vector     tsvector GENERATED ALWAYS AS (to_tsvector('french', plain_text)) STORED,
+    -- L'image de la page, dans le bucket privé.
+    image_key         text,
+    image_bytes       integer  CHECK (image_bytes IS NULL OR image_bytes > 0),
+    -- Un tableau ou une figure : l'image de la page part avec la copie gardée.
+    has_origin_block  boolean  NOT NULL DEFAULT false,
+    PRIMARY KEY (document_id, page_index)
+);
+
+CREATE INDEX ix_document_pages_search ON negotiation.document_pages USING gin (search_vector);
+
+COMMENT ON TABLE negotiation.document_pages IS
+    'La forme lisible d''un document, page par page. Une nouvelle extraction remplace toutes les lignes du document, dans une transaction.';
+
+-- La note d'un expert sur un passage dépassé. Elle se pose PAR-DESSUS le texte,
+-- sans jamais le modifier, et ne se supprime pas : un retrait se date.
+CREATE TABLE negotiation.correction_notes (
+    id            uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    -- Seul un brouillon se supprime ; ses notes partent avec lui.
+    document_id   uuid        NOT NULL REFERENCES negotiation.documents(id) ON DELETE CASCADE,
+    page_index    integer     NOT NULL,
+    -- L'extrait cité du passage visé ; NULL : la note vaut pour la page.
+    passage       text,
+    body          platform.i18n_text NOT NULL,
+    author_id     uuid        NOT NULL CONSTRAINT xmod_fk_correction_notes_author
+                              REFERENCES identity.people(id) ON DELETE RESTRICT,
+    created_at    timestamptz NOT NULL DEFAULT now(),
+    withdrawn_at  timestamptz,
+    withdrawn_by  uuid        CONSTRAINT xmod_fk_correction_notes_withdrawer
+                              REFERENCES identity.people(id) ON DELETE RESTRICT,
+
+    CONSTRAINT ck_correction_notes_withdrawal CHECK ((withdrawn_at IS NULL) = (withdrawn_by IS NULL))
+);
+
+CREATE INDEX ix_correction_notes_live ON negotiation.correction_notes (document_id, page_index)
+    WHERE withdrawn_at IS NULL;
+
+-- La page visée existe : une note sans ancre ne se lirait nulle part.
+CREATE OR REPLACE FUNCTION negotiation.tg_correction_notes_page_exists()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM negotiation.document_pages p
+         WHERE p.document_id = NEW.document_id AND p.page_index = NEW.page_index
+    ) THEN
+        RAISE EXCEPTION 'La page % du document % n''existe pas', NEW.page_index, NEW.document_id
+            USING ERRCODE = 'check_violation', CONSTRAINT = 'ck_correction_notes_page_exists';
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER tg_correction_notes_page_exists
+    BEFORE INSERT OR UPDATE OF document_id, page_index ON negotiation.correction_notes
+    FOR EACH ROW EXECUTE FUNCTION negotiation.tg_correction_notes_page_exists();
+
+CREATE TRIGGER tg_correction_notes_audit AFTER INSERT OR UPDATE OR DELETE ON negotiation.correction_notes
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
+
+COMMENT ON TABLE negotiation.correction_notes IS
+    'Notes de correction d''un expert, posées sur une page sans modifier le texte. Jamais supprimées : un retrait se date (withdrawn_at, withdrawn_by).';
+COMMENT ON COLUMN negotiation.correction_notes.passage IS
+    'L''extrait cité du passage visé, retrouvé dans le texte à l''affichage ; NULL, ou introuvable : la note se pose en tête de page.';
+
+-- Le PDF d'un document et le fichier extrait sont la donnée, pas une
+-- illustration : sans cette déclaration, le média les tiendrait pour orphelins.
+INSERT INTO media.asset_references (ref_schema, ref_table, ref_column) VALUES
+    ('negotiation', 'documents',           'asset_id'),
+    ('negotiation', 'documents',           'cover_asset_id'),
+    ('negotiation', 'document_renditions', 'asset_id')
+ON CONFLICT DO NOTHING;
 
 -- -----------------------------------------------------------------------------
 -- 6. Canaux d'échange temps réel  (correction D4)
@@ -1166,7 +1366,9 @@ INSERT INTO identity.permissions (code, label, module_code) VALUES
     ('negotiation.space.manage',    '{"fr":"Administrer un espace de négociation","en":"Manage a negotiation space"}', 'negotiation'),
     ('negotiation.meeting.manage',  '{"fr":"Gérer les réunions de négociation","en":"Manage negotiation meetings"}',   'negotiation'),
     ('negotiation.document.publish','{"fr":"Publier un document d''aide","en":"Publish a support document"}',          'negotiation'),
-    ('negotiation.channel.moderate','{"fr":"Modérer les canaux d''échange","en":"Moderate discussion channels"}',      'negotiation')
+    ('negotiation.channel.moderate','{"fr":"Modérer les canaux d''échange","en":"Moderate discussion channels"}',      'negotiation'),
+    ('negotiation.correction.post', '{"fr":"Poser une note de correction","en":"Post a correction note"}',            'negotiation'),
+    ('negotiation.correction.withdraw','{"fr":"Retirer une note de correction","en":"Withdraw a correction note"}',   'negotiation')
 ON CONFLICT (code) DO NOTHING;
 
 -- Rôle attribuable à la portée `negotiation_space` : anime un espace donné sans
@@ -1176,6 +1378,19 @@ INSERT INTO identity.roles (code, label, description, allowed_scopes, is_system)
      '{"fr":"Animateur d''espace","en":"Space lead"}',
      '{"fr":"Anime un espace de négociation : réunions, documents, canaux","en":"Runs a negotiation space: meetings, documents, channels"}',
      '{negotiation_space}', false)
+ON CONFLICT (code) DO NOTHING;
+
+-- L'EXPERT corrige le fond, pas la forme : il pose et retire les notes de
+-- correction de Guide Négo (étape 1), et ni ne publie ni ne modifie un
+-- document. Portée globale : une note vaut pour tous les lecteurs. Les étapes 2
+-- (valider une entrée du lexique), 7 (valider une réponse de l'assistant) et 8
+-- (relire un quiz) y ajouteront leurs permissions. `admin` ne reçoit pas les
+-- siennes : corriger le fond relève de l'expert.
+INSERT INTO identity.roles (code, label, description, allowed_scopes, is_system) VALUES
+    ('expert',
+     '{"fr":"Expert","en":"Expert"}',
+     '{"fr":"Corrige le fond des contenus de Guide Négo : notes de correction sur les documents","en":"Corrects the substance of Guide Négo content: correction notes on documents"}',
+     '{global}', true)
 ON CONFLICT (code) DO NOTHING;
 
 INSERT INTO identity.role_permissions (role_code, permission_code) VALUES
@@ -1188,7 +1403,9 @@ INSERT INTO identity.role_permissions (role_code, permission_code) VALUES
     ('admin',      'negotiation.meeting.manage'),
     ('admin',      'negotiation.document.publish'),
     ('admin',      'negotiation.channel.moderate'),
-    ('trainer',    'negotiation.space.access')
+    ('trainer',    'negotiation.space.access'),
+    ('expert',     'negotiation.correction.post'),
+    ('expert',     'negotiation.correction.withdraw')
 ON CONFLICT DO NOTHING;
 
 -- Les trois valeurs de l'ex-ENUM `session_category_v2` deviennent trois lignes :

@@ -25,8 +25,8 @@ Une réunion de la Francophonie peut aussi être une activité du Pavillon : c'e
 
 | Besoin | Existe déjà | À ajouter au SQL |
 |---|---|---|
-| Documents | `negotiation.documents` (version, `supersedes_id`, fichier ou lien, réservé ou non, marqueur « utilisable par l'IA »), `negotiation.document_bookmarks`, `media.assets` | Plusieurs thématiques par document, par `reference.entity_terms` |
-| Thématiques | Taxonomie `negotiation_track` dans `reference.taxonomy_terms` | Le suivi d'une thématique par une personne |
+| Documents | `negotiation.documents` (version, `supersedes_id`, fichier ou lien, réservé ou non, marqueur « utilisable par l'IA »), `negotiation.document_bookmarks`, `media.assets` | Plusieurs thématiques par document, par `reference.entity_terms` ; la forme lisible, les pages et les notes de correction (fait à l'étape 1, [data-model](../../specs/011-guide-nego-documents/data-model.md)) |
+| Thématiques | Taxonomie `negotiation_theme` dans `reference.taxonomy_terms` (0c) — `negotiation_track` est la filière d'un espace, pas une thématique | Le suivi d'une thématique par une personne (fait en 0c, `negotiation.theme_subscriptions`) |
 | FAQ, lexique, parcours « Ma première COP » | Rien | Tout — avec date de vérification et état de publication |
 | Sessions et réunions | `negotiation.meetings`, `negotiation.meeting_registrations` | Salle, point de l'ordre du jour, état « déplacée », origine (officielle ou réseau), heure de dernière lecture, accès ouvert ou limité, titre d'origine en anglais, lien vers une activité du Pavillon |
 | Signalements | Rien | Tout — le signalement ne modifie jamais la ligne officielle |

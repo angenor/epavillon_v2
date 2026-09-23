@@ -99,3 +99,56 @@ async fn sans_la_permission_globale_le_depot_est_refuse_comme_un_inexistant() {
         .expect_err("un document inexistant");
     assert_eq!(inexistant.code, ErrorCode::NotFound);
 }
+
+/// Le PDF d'un document est la donnée du document : désigné par sa colonne et
+/// non rattaché, il ne doit jamais paraître orphelin — il serait en tête de la
+/// liste, le plus lourd, et sa purge casserait le document publié.
+#[tokio::test]
+async fn le_pdf_designe_par_un_document_nest_pas_un_orphelin() {
+    let bac = Bac::monter().await;
+    let document = document(&bac).await;
+    let ifdd = administratrice_globale(&bac).await;
+    let pdf = commun::document_pdf();
+    let mut autre = commun::document_pdf();
+    autre.octets.extend_from_slice(b"% autre\n");
+
+    let designe = commun::deposer(&bac, ifdd, &pdf, pour_le_document(&pdf, document))
+        .await
+        .expect("PDF du document")
+        .asset
+        .id;
+    let seul = commun::deposer(&bac, ifdd, &autre, pour_le_document(&autre, document))
+        .await
+        .expect("PDF abandonné")
+        .asset
+        .id;
+    sqlx::query(
+        "UPDATE negotiation.documents SET external_url = NULL, asset_id = $2 WHERE id = $1",
+    )
+    .bind(document)
+    .bind(designe)
+    .execute(bac.pool())
+    .await
+    .expect("le document désigne son PDF");
+    sqlx::query(
+        "UPDATE media.assets SET status = 'ready', scan_verdict = 'clean',
+                created_at = now() - interval '40 days'
+          WHERE id = ANY($1)",
+    )
+    .bind(vec![designe, seul])
+    .execute(bac.pool())
+    .await
+    .expect("vieillir les objets");
+
+    let orphelins: Vec<Uuid> = media::repo::assets::orphelins(bac.pool(), 30)
+        .await
+        .expect("orphelins")
+        .into_iter()
+        .map(|o| o.asset_id)
+        .collect();
+    assert!(
+        !orphelins.contains(&designe),
+        "le PDF désigné n'est pas orphelin"
+    );
+    assert!(orphelins.contains(&seul), "le PDF abandonné l'est");
+}

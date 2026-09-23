@@ -337,8 +337,10 @@ INSERT INTO reference.taxonomy_terms (taxonomy_code, code, label, sort_order) VA
     ('negotiation_track', 'desertification', '{"fr":"Désertification (CNULCD)","en":"Desertification (UNCCD)"}', 30),
 
     -- Types de document
-    ('document_type', 'negotiation_guide',   '{"fr":"Guide de négociation","en":"Negotiation guide"}', 10),
+    ('document_type', 'negotiation_guide',   '{"fr":"Guide","en":"Guide"}', 10),
+    ('document_type', 'summary',             '{"fr":"Résumé","en":"Summary"}', 15),
     ('document_type', 'technical_note',      '{"fr":"Note technique","en":"Technical note"}', 20),
+    ('document_type', 'bulletin',            '{"fr":"Bulletin","en":"Bulletin"}', 25),
     ('document_type', 'relevant_document',   '{"fr":"Document de référence","en":"Reference document"}', 30),
     ('document_type', 'presentation',        '{"fr":"Présentation","en":"Presentation"}', 40),
     ('document_type', 'report',              '{"fr":"Rapport","en":"Report"}', 50),

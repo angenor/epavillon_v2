@@ -91,8 +91,8 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
 
 **⚠️ La base se migre, elle ne se recharge pas.** Le volume n'est jamais détruit.
 
-- [ ] T019 Ajouter les termes `summary` (« Résumé » / « Summary ») et `bulletin` (« Bulletin ») à la taxonomie `document_type`, et relire le libellé fr de `negotiation_guide` (« Guide »), dans `docs/database/020_reference.sql`
-- [ ] T020 Modifier `negotiation.documents` dans `docs/database/100_negotiations.sql` ([data-model.md § 1](data-model.md)) :
+- [X] T019 Ajouter les termes `summary` (« Résumé » / « Summary ») et `bulletin` (« Bulletin ») à la taxonomie `document_type`, et relire le libellé fr de `negotiation_guide` (« Guide »), dans `docs/database/020_reference.sql`
+- [X] T020 Modifier `negotiation.documents` dans `docs/database/100_negotiations.sql` ([data-model.md § 1](data-model.md)) :
   - `ck_documents_source_xor` se dédouble en `ck_documents_source_at_most_one` et `ck_documents_published_has_source` ;
   - `event_id` avec `xmod_fk_documents_event` et son index partiel ;
   - `issued_on`, `unpublished_at` ;
@@ -102,14 +102,14 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
   - le déclencheur `tg_documents_no_supersede_cycle` et sa fonction.
 
   Mettre à jour les `COMMENT ON`
-- [ ] T021 Ajouter dans `docs/database/100_negotiations.sql` l'ENUM `negotiation.rendition_status` et la table `negotiation.document_renditions`, avec ses contraintes, son déclencheur `updated_at` et ses commentaires ([data-model.md § 4-5](data-model.md))
-- [ ] T022 Ajouter dans `docs/database/100_negotiations.sql` la table `negotiation.document_pages`, avec sa PK, son vecteur généré, l'index GIN `ix_document_pages_search` et ses commentaires ([§ 6](data-model.md))
-- [ ] T023 Ajouter dans `docs/database/100_negotiations.sql` la table `negotiation.correction_notes`, avec ses `xmod_fk_*`, `ck_correction_notes_withdrawal`, `ix_correction_notes_live`, le déclencheur `tg_correction_notes_page_exists`, l'audit et les commentaires ([§ 7](data-model.md))
-- [ ] T024 Semer dans `docs/database/100_negotiations.sql` les permissions `negotiation.correction.post` et `negotiation.correction.withdraw`, le rôle `expert` (`allowed_scopes {global}`) et ses liens, en `ON CONFLICT DO NOTHING`. Le commentaire du rôle nomme les étapes 2, 7 et 8 ([§ 8](data-model.md))
-- [ ] T025 Écrire `specs/011-guide-nego-documents/migration.sql`, rejouable, dans `BEGIN … COMMIT`, sur le patron de `specs/010-guide-nego-accueil-profil/migration.sql` : `IF NOT EXISTS`, `DROP … IF EXISTS` puis `CREATE`, `DO $$ … duplicate_object`, renommage gardé par un test d'existence, `ON CONFLICT DO NOTHING`
-- [ ] T026 Jouer la migration **deux fois** sur la base locale. Comparer ensuite `pg_dump --schema-only` au modèle chargé sur une base jetable, après tri. Vérifier que `platform.cross_module_fk_report` reste vide
-- [ ] T027 Consigner le changement dans `docs/progression/modele.md`. Corriger [02-domaine.md](../../docs/AppNego/02-domaine.md) l.29, qui cite encore `negotiation_track` pour les thématiques
-- [ ] T028 `make sqlx-prepare`, puis `cargo test -p negotiation`, `-p media` et `-p identity` au vert : les gabarits de test se rechargent depuis le SQL
+- [X] T021 Ajouter dans `docs/database/100_negotiations.sql` l'ENUM `negotiation.rendition_status` et la table `negotiation.document_renditions`, avec ses contraintes, son déclencheur `updated_at` et ses commentaires ([data-model.md § 4-5](data-model.md))
+- [X] T022 Ajouter dans `docs/database/100_negotiations.sql` la table `negotiation.document_pages`, avec sa PK, son vecteur généré, l'index GIN `ix_document_pages_search` et ses commentaires ([§ 6](data-model.md))
+- [X] T023 Ajouter dans `docs/database/100_negotiations.sql` la table `negotiation.correction_notes`, avec ses `xmod_fk_*`, `ck_correction_notes_withdrawal`, `ix_correction_notes_live`, le déclencheur `tg_correction_notes_page_exists`, l'audit et les commentaires ([§ 7](data-model.md))
+- [X] T024 Semer dans `docs/database/100_negotiations.sql` les permissions `negotiation.correction.post` et `negotiation.correction.withdraw`, le rôle `expert` (`allowed_scopes {global}`) et ses liens, en `ON CONFLICT DO NOTHING`. Le commentaire du rôle nomme les étapes 2, 7 et 8 ([§ 8](data-model.md))
+- [X] T025 Écrire `specs/011-guide-nego-documents/migration.sql`, rejouable, dans `BEGIN … COMMIT`, sur le patron de `specs/010-guide-nego-accueil-profil/migration.sql` : `IF NOT EXISTS`, `DROP … IF EXISTS` puis `CREATE`, `DO $$ … duplicate_object`, renommage gardé par un test d'existence, `ON CONFLICT DO NOTHING`
+- [X] T026 Jouer la migration **deux fois** sur la base locale. Comparer ensuite `pg_dump --schema-only` au modèle chargé sur une base jetable, après tri. Vérifier que `platform.cross_module_fk_report` reste vide
+- [X] T027 Consigner le changement dans `docs/progression/modele.md`. Corriger [02-domaine.md](../../docs/AppNego/02-domaine.md) l.29, qui cite encore `negotiation_track` pour les thématiques
+- [X] T028 `make sqlx-prepare`, puis `cargo test -p negotiation`, `-p media` et `-p identity` au vert : les gabarits de test se rechargent depuis le SQL
 
 **Checkpoint** : le modèle est en base, migré sans destruction. **Commit.**
 
