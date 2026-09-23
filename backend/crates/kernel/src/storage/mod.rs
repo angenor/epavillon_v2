@@ -25,10 +25,10 @@
 //! est déjà connu (R10). Sans `rename`, il faudrait relire et réécrire les deux
 //! cents mégaoctets d'un fond vidéo pour le déplacer.
 
+use crate::error::{ApiError, ErrorCode};
 use actix_web::web::Bytes;
 use async_trait::async_trait;
 use futures_util::Stream;
-use kernel::error::{ApiError, ErrorCode};
 use std::pin::Pin;
 use std::sync::Arc;
 
@@ -112,11 +112,11 @@ pub trait ObjectStore: Send + Sync {
 }
 
 /// Construit le stockage choisi par la configuration.
-pub fn build(cfg: &kernel::config::MediaConfig) -> Arc<dyn ObjectStore> {
+pub fn build(cfg: &crate::config::MediaConfig) -> Arc<dyn ObjectStore> {
     match cfg.storage {
-        kernel::config::MediaStorage::Filesystem => {
+        crate::config::MediaStorage::Filesystem => {
             Arc::new(filesystem::FilesystemStore::new(&cfg.fs_root))
         }
-        kernel::config::MediaStorage::S3 => Arc::new(s3::S3Store::new(&cfg.s3)),
+        crate::config::MediaStorage::S3 => Arc::new(s3::S3Store::new(&cfg.s3)),
     }
 }

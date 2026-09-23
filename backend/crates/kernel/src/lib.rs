@@ -19,6 +19,7 @@ pub mod legal;
 pub mod mail;
 pub mod net;
 pub mod pg_error;
+pub mod storage;
 pub mod telemetry;
 pub mod tokens;
 

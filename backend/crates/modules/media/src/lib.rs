@@ -31,7 +31,9 @@ pub mod routes;
 pub mod scan;
 pub mod service;
 pub mod state;
-pub mod storage;
+
+/// Le contrat de stockage vit dans `kernel`, que `negotiation` lit aussi.
+pub use kernel::storage;
 
 pub use state::MediaState;
 

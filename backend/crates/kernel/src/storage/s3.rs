@@ -5,10 +5,10 @@
 //! jamais dans le nom d'hôte. Un stockage en nom d'hôte exigerait un certificat
 //! générique et une entrée DNS par bucket, pour aucun gain.
 
+use crate::config::S3Config;
 use actix_web::web::Bytes;
 use async_trait::async_trait;
 use futures_util::StreamExt;
-use kernel::config::S3Config;
 use time::OffsetDateTime;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
