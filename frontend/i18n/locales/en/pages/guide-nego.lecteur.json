@@ -1,0 +1,38 @@
+{
+  "titre": "Document",
+  "chargement": "Opening the document",
+  "hors-connexion": "Only downloaded documents open.",
+  "page": "Page {page}",
+  "reprise": {
+    "texte": "Resuming at page {page} — read {moment}.",
+    "sans-moment": "Resuming at page {page}.",
+    "debut": "Start"
+  },
+  "absent": {
+    "titre": "This document is not on your phone",
+    "pages": "{count} page | {count} page | {count} pages",
+    "texte": "“{titre}” ({details}) has not been downloaded, and there is no network. It will download as soon as the network returns if you ask for it now.",
+    "texte-sans-details": "“{titre}” has not been downloaded, and there is no network. It will download as soon as the network returns if you ask for it now.",
+    "texte-inconnu": "This document has not been downloaded, and there is no network. It will open when the network returns.",
+    "lisible": "Readable now: {titre}, downloaded.",
+    "telecharger": "Download to read offline",
+    "telecharger-au-retour": "Download when the network returns",
+    "en-attente": "The download will start when the network returns.",
+    "lire": "Read {titre}",
+    "issue": {
+      "place": "The phone does not have enough space for this document. Free some in “My downloads”.",
+      "panne": "The download was interrupted: nothing half-kept. Try again.",
+      "refus": "This document cannot be downloaded: it is no longer published, or access is missing."
+    }
+  },
+  "introuvable": {
+    "titre": "This document is not in the library",
+    "texte": "It was removed, or the address is wrong.",
+    "sortie": "See the library"
+  },
+  "erreur": {
+    "titre": "The document does not open",
+    "texte": "Reading failed. Nothing was erased.",
+    "reessayer": "Try again"
+  }
+}

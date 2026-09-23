@@ -267,20 +267,20 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
 
 **Test indépendant** : [quickstart.md § 3](quickstart.md), étapes 1 à 4 et 8.
 
-- [ ] T082 [P] [US3] Créer les traductions `frontend/i18n/locales/fr/pages/guide-nego.lecteur.json` et `en/`
-- [ ] T083 [P] [US3] Écrire le rendu de la forme lisible dans `frontend/app/utils/guide-nego/forme-lisible.ts` : blocs et segments en grammaire close, `kind` inconnu ignoré, `term` repéré, avec `frontend/tests/guide-nego/forme-lisible.test.ts`
-- [ ] T084 [P] [US3] Créer `frontend/app/components/guide-nego/GnBarreLecture.vue` (`composants.md:157-159` : repliée 32 px plus une progression de 6 px, dépliée 68 px ; un toucher au centre bascule, défiler replie ; **sans « Marquer »**, écart 42) et `GnProgression.vue` (barre de téléchargement de 6 px)
-- [ ] T085 [US3] Écrire `frontend/app/composables/guide-nego/useGnLecteur.ts` : la forme lisible lue **dans le cache d'abord**, par `useGnCopies().lireLaCopie()` qui vérifie la copie entière avant de la rendre, le réseau ensuite ; une image vidée depuis (`imageDeLaCopie` nulle) se relit au réseau, et sans réseau la page s'affiche avec son texte et une ligne qui le dit — **jamais une page blanche** ; le repérage de la page en cours par observateur d'intersection ; la progression écrite au plus toutes les deux secondes ; la reprise pour la même version
-- [ ] T086 [US3] Écrire `frontend/app/pages/guide-nego/ressources/documents/[id]/lire.vue`, sans barre d'onglets :
+- [X] T082 [P] [US3] Créer les traductions `frontend/i18n/locales/fr/pages/guide-nego.lecteur.json` et `en/`
+- [X] T083 [P] [US3] Écrire le rendu de la forme lisible dans `frontend/app/utils/guide-nego/forme-lisible.ts` : blocs et segments en grammaire close, `kind` inconnu ignoré, `term` repéré, avec `frontend/tests/guide-nego/forme-lisible.test.ts`
+- [X] T084 [P] [US3] Créer `frontend/app/components/guide-nego/GnBarreLecture.vue` (`composants.md:157-159` : repliée 32 px plus une progression de 6 px, dépliée 68 px ; un toucher au centre bascule, défiler replie ; **sans « Marquer »**, écart 42) et `GnProgression.vue` (barre de téléchargement de 6 px)
+- [X] T085 [US3] Écrire `frontend/app/composables/guide-nego/useGnLecteur.ts` : la forme lisible lue **dans le cache d'abord**, par `useGnCopies().lireLaCopie()` qui vérifie la copie entière avant de la rendre, le réseau ensuite ; une image vidée depuis (`imageDeLaCopie` nulle) se relit au réseau, et sans réseau la page s'affiche avec son texte et une ligne qui le dit — **jamais une page blanche** ; le repérage de la page en cours par observateur d'intersection ; la progression écrite au plus toutes les deux secondes ; la reprise pour la même version
+- [X] T086 [US3] Écrire `frontend/app/pages/guide-nego/ressources/documents/[id]/lire.vue`, sans barre d'onglets :
   - l'en-tête d'une ligne ;
   - le texte recomposé, avec ses repères de page ;
   - le pied « Page n sur N · section » ;
   - « Reprise à la page n — lue … » et « Début » ;
   - le mode « tel quel » en images de page empilées ;
   - « Voir la page d'origine » sur un bloc `origine`, avec « Page d'origine disponible avec le réseau » si l'image n'est pas gardée.
-- [ ] T087 [US3] Écrire l'état « Ce document n'est pas sur votre téléphone » dans `lire.vue` : pages, taille, « Télécharger au retour du réseau », et un document lisible maintenant s'il y en a un
-- [ ] T088 [US3] Brancher la progression du téléchargement (« Téléchargement — n % », « x Mo sur y Mo », « Annuler ») et « Retirer du téléphone — n Mo » dans la fiche `[id].vue`
-- [ ] T089 [US3] Dérouler [quickstart.md § 3](quickstart.md) étapes 1 à 4 et 8 **sur la version construite**, en mode avion, application fermée puis rouverte, sans compte (SC-002, SC-003)
+- [X] T087 [US3] Écrire l'état « Ce document n'est pas sur votre téléphone » dans `lire.vue` : pages, taille, « Télécharger au retour du réseau », et un document lisible maintenant s'il y en a un
+- [X] T088 [US3] *(fait en phase 8 avec la fiche ; la barre passe par `GnProgression`)* Brancher la progression du téléchargement (« Téléchargement — n % », « x Mo sur y Mo », « Annuler ») et « Retirer du téléphone — n Mo » dans la fiche `[id].vue`
+- [X] T089 [US3] *(23/09, navigateur sans interface ; l'étape 8 avec le guide, seul fichier de la base locale — sa copie retirée hors connexion)* Dérouler [quickstart.md § 3](quickstart.md) étapes 1 à 4 et 8 **sur la version construite**, en mode avion, application fermée puis rouverte, sans compte (SC-002, SC-003)
 
 **Checkpoint** : le guide se lit en salle sans réseau. **Critère de sortie atteint sur poste. Commit.**
 

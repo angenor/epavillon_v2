@@ -24,15 +24,24 @@ withDefaults(
     avatarDuTitre?: AvatarDEntete
     /** Vrai sur le lexique lui-même : le bouton dit où l'on est. */
     lexiqueOuvert?: boolean
+    /** Le lecteur : une seule ligne, le titre en petit entre le retour et « Aa » (04 · 01). */
+    compact?: boolean
   }>(),
-  { sousTitre: undefined, retour: undefined, avatar: undefined, avatarDuTitre: undefined, lexiqueOuvert: false },
+  {
+    sousTitre: undefined,
+    retour: undefined,
+    avatar: undefined,
+    avatarDuTitre: undefined,
+    lexiqueOuvert: false,
+    compact: false,
+  },
 )
 
 const { t } = useI18n()
 </script>
 
 <template>
-  <header class="gn-entete">
+  <header class="gn-entete" :class="{ 'gn-entete--compact': compact }">
     <div class="gn-entete__barre">
       <NuxtLink v-if="retour" :to="retour" class="gn-entete__bouton" :aria-label="t('gn-entete.retour')">
         <GnPicto nom="back" />
@@ -44,8 +53,9 @@ const { t } = useI18n()
         :image="avatar.image"
         vers="/guide-nego/ressources/reglages"
       />
+      <h1 v-if="compact" class="gn-entete__titre-compact">{{ titre }}</h1>
       <!-- Emplacement de la ligne de connexion : « Synchronisé à » ou « Hors connexion ». -->
-      <div class="gn-entete__connexion"><slot name="connexion" /></div>
+      <div v-else class="gn-entete__connexion"><slot name="connexion" /></div>
       <NuxtLink
         to="/guide-nego/lexique"
         class="gn-entete__bouton gn-entete__aa"
@@ -56,12 +66,12 @@ const { t } = useI18n()
         Aa
       </NuxtLink>
     </div>
-    <div v-if="avatarDuTitre" class="gn-entete__identite">
+    <div v-if="!compact && avatarDuTitre" class="gn-entete__identite">
       <GnAvatar grand :prenom="avatarDuTitre.prenom" :nom="avatarDuTitre.nom" :image="avatarDuTitre.image" />
       <h1 class="gn-entete__titre">{{ titre }}</h1>
     </div>
-    <h1 v-else class="gn-entete__titre">{{ titre }}</h1>
-    <p v-if="sousTitre" class="gn-entete__sous-titre">{{ sousTitre }}</p>
+    <h1 v-else-if="!compact" class="gn-entete__titre">{{ titre }}</h1>
+    <p v-if="sousTitre && !compact" class="gn-entete__sous-titre">{{ sousTitre }}</p>
   </header>
 </template>
 
@@ -131,6 +141,23 @@ const { t } = useI18n()
   line-height: var(--gn-interligne-28);
   font-weight: var(--gn-graisse-gras);
   color: var(--gn-titre);
+}
+
+[data-app="guide-nego"] .gn-entete--compact {
+  padding-bottom: var(--gn-espace-8);
+  border-bottom-width: var(--gn-filet-1);
+  border-bottom-color: var(--gn-filet);
+}
+
+[data-app="guide-nego"] .gn-entete__titre-compact {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+  font-weight: var(--gn-graisse-demi-gras);
+  color: var(--gn-texte-2);
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
 [data-app="guide-nego"] .gn-entete__sous-titre {

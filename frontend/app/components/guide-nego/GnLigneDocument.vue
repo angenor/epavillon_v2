@@ -95,9 +95,7 @@ const texteDeProgression = computed(() =>
           <GnChargement :taille="20" decoratif />
           {{ texteDeProgression }}
         </span>
-        <span v-if="pourcentage" class="gn-ligne-document__piste" aria-hidden="true">
-          <span class="gn-ligne-document__part" :style="{ inlineSize: `${pourcentage.part * 100}%` }" />
-        </span>
+        <GnProgression :part="pourcentage?.part ?? null" decoratif />
       </span>
     </span>
     <GnPicto v-if="!indisponible" nom="chevron" :taille="24" class="gn-ligne-document__chevron" />
@@ -199,18 +197,6 @@ const texteDeProgression = computed(() =>
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
   font-weight: var(--gn-graisse-gras);
-}
-
-[data-app="guide-nego"] .gn-ligne-document__piste {
-  display: block;
-  block-size: var(--gn-jauge);
-  background: var(--gn-jauge-fond);
-}
-
-[data-app="guide-nego"] .gn-ligne-document__part {
-  display: block;
-  block-size: 100%;
-  background: var(--gn-accent);
 }
 
 [data-app="guide-nego"] .gn-ligne-document__chevron {

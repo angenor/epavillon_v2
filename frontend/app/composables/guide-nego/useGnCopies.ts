@@ -34,6 +34,7 @@ import {
   type Reconciliation,
 } from '~/utils/guide-nego/copies'
 import { lireEnPersonne } from '~/utils/guide-nego/effacements'
+import { estUneFormeLisible } from '~/utils/guide-nego/forme-lisible'
 import { magasinATelecharger, magasinDesCopies } from '~/utils/guide-nego/garde'
 import { lireCle, poserCle } from '~/utils/guide-nego/stockage'
 
@@ -357,35 +358,39 @@ export function useGnCopies() {
     const r = await enSerie(() => appliquerLaReconciliation(depots(), servis)).catch(
       (): Reconciliation => ({ aEffacer: [], aDeplacer: [], autreVersion: [] }),
     )
-    oublierLesVersionsDisparues({ lire: lireCle, poser: poserCle }, bibliotheque.documents)
+    // La version d'une copie encore gardée garde sa reprise, même si la liste en nomme une autre.
+    oublierLesVersionsDisparues({ lire: lireCle, poser: poserCle }, [...bibliotheque.documents, ...copies.value])
     await recharger()
     return r
   }
 
   /**
-   * La forme lisible gardée, **si la copie est entière**. Sinon la copie se retire et
-   * le lecteur la traite en « non téléchargée », plutôt que d'ouvrir une page blanche.
+   * La forme lisible gardée, **si la copie est entière** et se lit. Sinon la copie se
+   * retire et le lecteur la traite en « non téléchargée », plutôt que d'ouvrir une page
+   * blanche — ou de la dire téléchargée ailleurs.
    */
-  async function lireLaCopie(id: string): Promise<DocumentReading | null> {
+  async function lireLaCopie(id: string): Promise<{ lecture: DocumentReading; reserve: boolean } | null> {
     const copie = await magasinDesCopies.lireUne(id)
     if (!copie) return null
-    const lue = await enSerie(async () => {
+    const lecture = await enSerie(async () => {
       const d = depots()
-      if (!(await copieIntacte(d, copie))) {
-        await retirerUneCopie(d, id)
-        return null
-      }
-      return (await d.caches.ouvrir(cacheDe(copie.reserve))).lire(copie.cles[0] as string)
+      const lue = (await copieIntacte(d, copie))
+        ? await (await d.caches.ouvrir(cacheDe(copie.reserve))).lire(copie.cles[0] as string)
+        : null
+      const forme: unknown = lue ? await lue.json().catch(() => null) : null
+      if (estUneFormeLisible(forme)) return forme
+      await retirerUneCopie(d, id)
+      return null
     }).catch(() => null)
-    if (!lue) {
+    if (!lecture) {
       await recharger()
       return null
     }
-    return (await lue.json()) as DocumentReading
+    return { lecture, reserve: copie.reserve }
   }
 
   /** L'image gardée d'une page ; nulle si le navigateur l'a vidée depuis. */
-  async function imageDeLaCopie(copie: Copie, chemin: string): Promise<Blob | null> {
+  async function imageDeLaCopie(copie: Pick<Copie, 'reserve'>, chemin: string): Promise<Blob | null> {
     const reponse = await (await depots().caches.ouvrir(cacheDe(copie.reserve))).lire(cleDe(chemin))
     return reponse ? reponse.blob() : null
   }

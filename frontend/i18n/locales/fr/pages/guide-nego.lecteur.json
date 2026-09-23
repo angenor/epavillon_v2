@@ -1,0 +1,38 @@
+{
+  "titre": "Document",
+  "chargement": "Ouverture du document",
+  "hors-connexion": "Seuls les documents téléchargés s'ouvrent.",
+  "page": "Page {page}",
+  "reprise": {
+    "texte": "Reprise à la page {page} — lue {moment}.",
+    "sans-moment": "Reprise à la page {page}.",
+    "debut": "Début"
+  },
+  "absent": {
+    "titre": "Ce document n'est pas sur votre téléphone",
+    "pages": "{count} page | {count} page | {count} pages",
+    "texte": "« {titre} » ({details}) n'a pas été téléchargé, et le réseau est absent. Il se téléchargera dès le retour du réseau si vous le demandez maintenant.",
+    "texte-sans-details": "« {titre} » n'a pas été téléchargé, et le réseau est absent. Il se téléchargera dès le retour du réseau si vous le demandez maintenant.",
+    "texte-inconnu": "Ce document n'a pas été téléchargé, et le réseau est absent. Il s'ouvrira au retour du réseau.",
+    "lisible": "Lisible maintenant : {titre}, téléchargé.",
+    "telecharger": "Télécharger pour lire sans réseau",
+    "telecharger-au-retour": "Télécharger au retour du réseau",
+    "en-attente": "Le téléchargement partira au retour du réseau.",
+    "lire": "Lire {titre}",
+    "issue": {
+      "place": "Le téléphone n'a pas assez de place pour ce document. Libérez-en dans « Mes téléchargements ».",
+      "panne": "Le téléchargement s'est interrompu : rien n'a été gardé à moitié. Réessayez.",
+      "refus": "Ce document ne peut pas être téléchargé : il n'est plus publié, ou l'accès manque."
+    }
+  },
+  "introuvable": {
+    "titre": "Ce document n'est pas dans la bibliothèque",
+    "texte": "Il a été retiré, ou l'adresse est inexacte.",
+    "sortie": "Voir la bibliothèque"
+  },
+  "erreur": {
+    "titre": "Le document ne s'ouvre pas",
+    "texte": "La lecture a échoué. Rien n'a été effacé.",
+    "reessayer": "Réessayer"
+  }
+}

@@ -403,9 +403,7 @@ useHead({ title: computed(() => document.value?.title ?? t('guide-nego.document.
             </span>
             <span class="gn-fiche__avancement-octets">{{ avancement.octets }}</span>
           </span>
-          <span v-if="avancement.part !== null" class="gn-fiche__piste" aria-hidden="true">
-            <span class="gn-fiche__part" :style="{ inlineSize: `${avancement.part * 100}%` }" />
-          </span>
+          <GnProgression :part="avancement.part" decoratif />
         </div>
 
         <p v-else-if="principal === 'attente'" class="gn-fiche__avancement gn-fiche__avancement-titre" role="status">
@@ -731,18 +729,6 @@ useHead({ title: computed(() => document.value?.title ?? t('guide-nego.document.
   color: var(--gn-texte-2);
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
-}
-
-[data-app="guide-nego"] .gn-fiche__piste {
-  display: block;
-  block-size: var(--gn-jauge);
-  background: var(--gn-jauge-fond);
-}
-
-[data-app="guide-nego"] .gn-fiche__part {
-  display: block;
-  block-size: 100%;
-  background: var(--gn-accent);
 }
 
 [data-app="guide-nego"] .gn-fiche__sorties-compte {

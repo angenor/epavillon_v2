@@ -19,6 +19,8 @@ withDefaults(
     lexiqueOuvert?: boolean
     /** Relayé au bandeau hors connexion, pour un écran qui n'est pas tout entier lisible sans réseau. */
     ceQuiSeLit?: string
+    /** Relayé à l'en-tête : le lecteur n'a qu'une ligne d'en-tête. */
+    compact?: boolean
   }>(),
   {
     sousTitre: undefined,
@@ -28,6 +30,7 @@ withDefaults(
     onglets: true,
     lexiqueOuvert: false,
     ceQuiSeLit: undefined,
+    compact: false,
   },
 )
 
@@ -59,6 +62,7 @@ watch(
       :avatar="avatar"
       :avatar-du-titre="avatarDuTitre"
       :lexique-ouvert="lexiqueOuvert"
+      :compact="compact"
     >
       <template #connexion>
         <slot name="connexion">

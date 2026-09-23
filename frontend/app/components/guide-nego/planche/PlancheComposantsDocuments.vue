@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { LibraryDocument } from '~/types/negotiation-documents'
+import type { ImageDePage } from '~/composables/guide-nego/useGnLecteur'
+import type { LibraryDocument, ReadingPage } from '~/types/negotiation-documents'
 /**
  * Section 5, cinquième lot : la bibliothèque de documents — ligne de document, feuille
- * de filtre, bandeau « Remplacé par… ». Les spécimens sont les cinq documents de la
+ * de filtre, bandeau « Remplacé par… », progression, barre de lecture, page lue. Les spécimens sont les cinq documents de la
  * maquette 03 ; leurs libellés de type viennent d'ici, comme ils viendraient de l'API.
  */
 const { t } = useI18n()
@@ -10,6 +11,23 @@ const { t } = useI18n()
 const k = (cle: string) => t(`gn-planche-composants-documents.${cle}`)
 
 const VERS = '/guide-nego/ressources/documents'
+
+// Chaque sorte de bloc, et une page d'origine qui n'est pas sur le téléphone.
+const pageLue = computed<ReadingPage>(() => ({
+  index: 59,
+  label: '59',
+  blocks: [
+    { kind: 'heading', level: 2, spans: [{ text: k('page-titre') }] },
+    {
+      kind: 'paragraph',
+      spans: [{ text: k('page-avant-terme') }, { text: 'global goal on adaptation', italic: true, term: true }, { text: k('page-apres-terme') }],
+    },
+    { kind: 'list_item', depth: 0, marker: '•', spans: [{ text: k('page-element') }] },
+    { kind: 'origin', reason: 'table', text: [{ text: k('page-tableau') }] },
+    { kind: 'note', mark: '1', spans: [{ text: k('page-note') }] },
+  ],
+}))
+const sansImage = async (): Promise<ImageDePage> => 'hors-connexion'
 
 function specimen(id: string, champs: Partial<LibraryDocument>): LibraryDocument {
   return {
@@ -105,6 +123,9 @@ function compterPour(brouillon: string[]): number {
   const retenues = optionsDeType.value.filter((o) => brouillon.length === 0 || brouillon.includes(o.valeur))
   return retenues.reduce((somme, o) => somme + o.compte, 0)
 }
+
+const LECTEUR_ACTIONS: Array<'sommaire' | 'rechercher' | 'reglages'> = ['sommaire', 'rechercher', 'reglages']
+const lectureDepliee = ref(true)
 
 const choixLisible = computed(() =>
   choixDeType.value.length === 0
@@ -211,5 +232,96 @@ const choixLisible = computed(() =>
       </div>
       <p class="gn-planche-note">{{ k('bandeau-note') }}</p>
     </GnPlancheSection>
+
+    <GnPlancheSection
+      :titre="k('progression')"
+      :propos="k('progression-propos')"
+    >
+      <div class="gn-planche-composants__cadre gn-planche-composants__vitrine">
+        <span class="gn-planche-composants__legende">{{ k('progression-connue') }}</span>
+        <GnProgression :part="0.35" :libelle="k('progression-libelle')" />
+        <span class="gn-planche-composants__legende">{{ k('progression-inconnue') }}</span>
+        <GnProgression :part="null" :libelle="k('progression-libelle')" />
+      </div>
+      <p class="gn-planche-note">{{ k('progression-note') }}</p>
+    </GnPlancheSection>
+
+    <GnPlancheSection
+      :titre="k('lecture')"
+      :propos="k('lecture-propos')"
+    >
+      <span class="gn-planche-composants__legende">{{ k('lecture-repliee') }}</span>
+      <div class="gn-planche-composants__cadre gn-planche-cadre-lecture">
+        <div class="gn-planche-cadre-lecture__page">
+          <p class="gn-planche-cadre-lecture__titre">{{ k('lecture-section') }}</p>
+          <p>{{ k('lecture-texte') }}</p>
+        </div>
+        <GnBarreLecture :page="59" :total="92" :section="k('lecture-section')" :actions="LECTEUR_ACTIONS" />
+      </div>
+
+      <span class="gn-planche-composants__legende">{{ k('lecture-depliee') }}</span>
+      <div class="gn-planche-composants__cadre gn-planche-cadre-lecture">
+        <div class="gn-planche-cadre-lecture__page" @click="lectureDepliee = !lectureDepliee">
+          <p class="gn-planche-cadre-lecture__titre">{{ k('lecture-section') }}</p>
+          <p>{{ k('lecture-texte') }}</p>
+        </div>
+        <GnBarreLecture
+          v-model:depliee="lectureDepliee"
+          :page="59"
+          :total="92"
+          :section="k('lecture-section')"
+          :actions="LECTEUR_ACTIONS"
+        />
+      </div>
+      <div class="gn-planche-composants__cadre">
+        <GnBouton variante="secondaire" @clic="lectureDepliee = !lectureDepliee">{{ k('lecture-basculer') }}</GnBouton>
+      </div>
+      <p class="gn-planche-note">{{ k('lecture-note') }}</p>
+    </GnPlancheSection>
+
+    <GnPlancheSection :titre="k('page')" :propos="k('page-propos')">
+      <div class="gn-planche-composants__cadre">
+        <GnPageLue :page="pageLue" mode="reflow" :image-de="sansImage" />
+      </div>
+      <span class="gn-planche-composants__legende">{{ k('image-attente') }}</span>
+      <div class="gn-planche-composants__cadre">
+        <GnImageDePage etat="attente" :adresse="null" :libelle="k('image-libelle')" :attente="k('image-hors')" />
+      </div>
+      <span class="gn-planche-composants__legende">{{ k('image-echec') }}</span>
+      <div class="gn-planche-composants__cadre">
+        <GnImageDePage etat="echec" :adresse="null" :libelle="k('image-libelle')" :attente="k('image-hors')" />
+      </div>
+      <p class="gn-planche-note">{{ k('page-note-planche') }}</p>
+    </GnPlancheSection>
   </div>
 </template>
+
+<style>
+/* La barre est en position fixe : le cadre transformé devient son bloc conteneur, comme
+   pour la barre d'onglets, et elle s'y pose sur le texte comme sur l'écran réel. */
+[data-app="guide-nego"] .gn-planche-cadre-lecture {
+  position: relative;
+  transform: translateZ(0);
+  block-size: 220px;
+  overflow: hidden;
+  border: var(--gn-filet-1) solid var(--gn-filet);
+}
+
+[data-app="guide-nego"] .gn-planche-cadre-lecture__page {
+  padding: var(--gn-espace-12) var(--gn-marge-ecran);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gn-espace-12);
+}
+
+[data-app="guide-nego"] .gn-planche-cadre-lecture__page p {
+  margin: 0;
+}
+
+[data-app="guide-nego"] .gn-planche-cadre-lecture__titre {
+  color: var(--gn-titre);
+  font-size: var(--gn-taille-24);
+  line-height: var(--gn-interligne-24);
+  font-weight: var(--gn-graisse-gras);
+}
+</style>
