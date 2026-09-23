@@ -21,6 +21,19 @@ COPY . .
 ENV SQLX_OFFLINE=true
 RUN cargo build --release --locked -p api -p worker
 
+# PDFium, que le worker charge pour extraire les documents de Guide Négo.
+# Épinglé sur l'API que vise `pdfium-render` 0.9 (chromium/7881), comme
+# `make pdfium` : un binaire plus récent peut renommer un symbole.
+FROM debian:bookworm-slim AS pdfium
+ARG PDFIUM_VERSION=7881
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates curl \
+ && rm -rf /var/lib/apt/lists/* \
+ && case "$(uname -m)" in x86_64) plateforme=linux-x64 ;; aarch64) plateforme=linux-arm64 ;; *) exit 1 ;; esac \
+ && mkdir -p /opt/pdfium \
+ && curl -fsSL "https://github.com/bblanchon/pdfium-binaries/releases/download/chromium%2F${PDFIUM_VERSION}/pdfium-${plateforme}.tgz" \
+    | tar -xz -C /opt/pdfium
+
 FROM debian:bookworm-slim AS runtime
 
 # Les racines de certification du système. `lettre` embarque les siennes par
@@ -36,6 +49,8 @@ USER epavillon
 
 COPY --from=build /src/target/release/api /usr/local/bin/api
 COPY --from=build /src/target/release/worker /usr/local/bin/worker
+COPY --from=pdfium /opt/pdfium/lib /opt/pdfium/lib
+ENV PDFIUM_LIB_PATH=/opt/pdfium/lib
 
 EXPOSE 8080
 CMD ["api"]

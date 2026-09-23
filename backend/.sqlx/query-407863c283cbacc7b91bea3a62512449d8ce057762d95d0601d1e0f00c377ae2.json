@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.documents (slug, title, document_type_term_id)\n           SELECT $1::text::platform.slug, '{\"fr\":\"Guide d''essai\"}'::jsonb::platform.i18n_text, t.id\n             FROM reference.taxonomy_terms t\n            WHERE t.taxonomy_code = 'document_type' AND t.code = 'negotiation_guide'\n           RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "407863c283cbacc7b91bea3a62512449d8ce057762d95d0601d1e0f00c377ae2"
+}

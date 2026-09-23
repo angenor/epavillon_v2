@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT payload->>'attente' AS \"attente\", run_at > now() AS \"plus_tard!\"\n             FROM platform.jobs\n            WHERE task = 'negotiation.document.extract' AND status = 'queued'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "attente",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "plus_tard!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "6f71c25331040a433de56959066489f69500d51ad517714300b8bac4c4c3d17f"
+}

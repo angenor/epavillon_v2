@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.document_renditions SET serve_as_is = $2 WHERE document_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9cf58af97ff5fe861f65eac4ecce716468e7fd15403ef746fc33bb53a0bdc3e2"
+}

@@ -119,21 +119,21 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
 
 **Objectif** : [R6](research.md) et [R7](research.md), et la forme de [forme-lisible.md](contracts/forme-lisible.md). Elle sert l'aperçu (US1) et le lecteur (US3, US4).
 
-- [ ] T029 Passer `pdfium-render` en dépendance normale de `backend/crates/modules/negotiation/Cargo.toml`, derrière le chargement de `PDFIUM_LIB_PATH`. Ajouter la bibliothèque à l'image du worker (`backend/Dockerfile` ou son équivalent dans `ops/`)
-- [ ] T030 [P] Écrire les types de la forme lisible — `ReadingPage`, `Block`, `Span`, `OutlineEntry` — dans `backend/crates/modules/negotiation/src/domain/extraction/forme.rs`, sérialisés comme le contrat
-- [ ] T031 [P] Écrire les règles pures de R7, ajustées par l'essai, **un fichier par règle**, sous `backend/crates/modules/negotiation/src/domain/extraction/` : `colonnes.rs`, `entetes.rs`, `notes.rs`, `origine.rs`, `cesures.rs`, `termes.rs`, `titres.rs`, `sommaire.rs`, `pages.rs`. Chacune a ses tests unitaires sur des segments construits à la main
-- [ ] T032 Écrire l'assemblage dans `backend/crates/modules/negotiation/src/domain/extraction/mod.rs` : segments PDFium → règles → pages, sommaire, verdict et indicateurs (`quality`), poids de la copie (`reading_bytes`)
-- [ ] T033 Écrire `backend/crates/modules/negotiation/src/repo/document_pages.rs` : remplacer toutes les pages d'un document dans une transaction, lire la forme lisible entière, et `backend/crates/modules/negotiation/src/repo/renditions.rs` pour l'état
-- [ ] T034 Écrire le travail `negotiation.document.extract` dans `backend/crates/modules/negotiation/src/jobs/extract.rs` :
+- [X] T029 Passer `pdfium-render` en dépendance normale de `backend/crates/modules/negotiation/Cargo.toml`, derrière le chargement de `PDFIUM_LIB_PATH`. Ajouter la bibliothèque à l'image du worker (`backend/Dockerfile` ou son équivalent dans `ops/`)
+- [X] T030 [P] Écrire les types de la forme lisible — `ReadingPage`, `Block`, `Span`, `OutlineEntry` — dans `backend/crates/modules/negotiation/src/domain/extraction/forme.rs`, sérialisés comme le contrat
+- [X] T031 [P] Écrire les règles pures de R7, ajustées par l'essai, **un fichier par règle**, sous `backend/crates/modules/negotiation/src/domain/extraction/` : `colonnes.rs`, `entetes.rs`, `notes.rs`, `origine.rs`, `cesures.rs`, `termes.rs`, `titres.rs`, `sommaire.rs`, `pages.rs`. Chacune a ses tests unitaires sur des segments construits à la main *(fait : `colonnes.rs` est devenu `ordre.rs` — l'essai a montré que l'ordre du flux fait foi, seules les formes flottantes se replacent ; s'y ajoutent `lignes.rs`, `decoupage.rs` et `blocs.rs`)*
+- [X] T032 Écrire l'assemblage dans `backend/crates/modules/negotiation/src/domain/extraction/mod.rs` : segments PDFium → règles → pages, sommaire, verdict et indicateurs (`quality`), poids de la copie (`reading_bytes`)
+- [X] T033 Écrire `backend/crates/modules/negotiation/src/repo/document_pages.rs` : remplacer toutes les pages d'un document dans une transaction, lire la forme lisible entière, et `backend/crates/modules/negotiation/src/repo/renditions.rs` pour l'état
+- [X] T034 Écrire le travail `negotiation.document.extract` dans `backend/crates/modules/negotiation/src/jobs/extract.rs` :
   - il lit `media.object_location()` ;
   - tant que l'objet n'est pas prêt, il se replanifie avec un délai croissant ;
   - `quarantined` ou `failed` le font conclure « échec », avec un motif lisible ;
   - sinon il lit l'objet par `kernel::storage`, extrait le texte, rend les images de page et les dépose dans le bucket privé sous `documents/<id>/pages/<n>.jpg`, puis écrit les pages et l'état.
 
   Il écrit par `Db::write`, avec pour acteur la personne qui a attaché le fichier
-- [ ] T035 Enregistrer le travail dans `negotiation::job_handlers` (`backend/crates/modules/negotiation/src/jobs/mod.rs`) et dans `backend/crates/worker/src/main.rs`
-- [ ] T036 Commiter un petit PDF de test, `backend/crates/modules/negotiation/tests/fixtures/petit.pdf` (quatre pages : deux colonnes, un pied répété, une note, un italique anglais, un tableau, un mot coupé), et écrire `backend/crates/modules/negotiation/tests/extraction.rs` : la forme produite respecte les invariants de [forme-lisible.md](contracts/forme-lisible.md), et chaque règle y est vérifiée
-- [ ] T037 Mesurer l'extraction du vrai guide par le travail, sur un poste de développement. Elle doit durer moins d'une minute pour 90 pages ; consigner la mesure dans `essai-extraction.md`
+- [X] T035 Enregistrer le travail dans `negotiation::job_handlers` (`backend/crates/modules/negotiation/src/jobs/mod.rs`) et dans `backend/crates/worker/src/main.rs`
+- [X] T036 *(fabriqué par `examples/fabriquer_petit_pdf.rs` ; le travail entier est éprouvé par `tests/extraction_travail.rs`)* Commiter un petit PDF de test, `backend/crates/modules/negotiation/tests/fixtures/petit.pdf` (quatre pages : deux colonnes, un pied répété, une note, un italique anglais, un tableau, un mot coupé), et écrire `backend/crates/modules/negotiation/tests/extraction.rs` : la forme produite respecte les invariants de [forme-lisible.md](contracts/forme-lisible.md), et chaque règle y est vérifiée
+- [X] T037 Mesurer l'extraction du vrai guide par le travail, sur un poste de développement. Elle doit durer moins d'une minute pour 90 pages ; consigner la mesure dans `essai-extraction.md`
 
 **Checkpoint** : un PDF attaché devient des pages en base, et des images dans le bucket privé. **Commit.**
 

@@ -986,6 +986,10 @@ CREATE TABLE negotiation.document_renditions (
     extracted_at    timestamptz,
     created_at      timestamptz NOT NULL DEFAULT now(),
     updated_at      timestamptz NOT NULL DEFAULT now(),
+    -- La dernière demande d'extraction : seul son travail écrit ici. Une
+    -- relance en pose une nouvelle, et le travail d'une demande antérieure ne
+    -- peut plus conclure par-dessus — ni laisser publier avant la relance.
+    request_id      uuid        NOT NULL DEFAULT platform.uuid_v7(),
 
     CONSTRAINT ck_document_renditions_ready  CHECK (status <> 'ready' OR page_count > 0),
     CONSTRAINT ck_document_renditions_failed CHECK (status <> 'failed' OR failure_reason IS NOT NULL)

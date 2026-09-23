@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.document_renditions (document_id, asset_id, request_id)\n         VALUES ($1, $2, $3)\n         ON CONFLICT (document_id) DO UPDATE\n            SET asset_id = EXCLUDED.asset_id,\n                request_id = EXCLUDED.request_id,\n                status = 'pending',\n                page_count = NULL,\n                outline = NULL,\n                is_reflowable = NULL,\n                quality = NULL,\n                reading_bytes = NULL,\n                extractor = NULL,\n                failure_reason = NULL,\n                extracted_at = NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4a082aa152b19942b6c15d8d73dfe154359ec834285907a2c79545de6806e7ff"
+}

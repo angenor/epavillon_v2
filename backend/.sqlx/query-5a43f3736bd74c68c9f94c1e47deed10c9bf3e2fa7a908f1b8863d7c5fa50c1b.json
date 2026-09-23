@@ -1,0 +1,155 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT asset_id, status::text AS \"status!\", page_count, outline, is_reflowable, quality,\n                  serve_as_is, reading_bytes, extractor, failure_reason, attempts, extracted_at\n             FROM negotiation.document_renditions\n            WHERE document_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "asset_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "asset_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "page_count",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "page_count"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "outline",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "outline"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "is_reflowable",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "is_reflowable"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "quality",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "quality"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "serve_as_is",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "serve_as_is"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "reading_bytes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "reading_bytes"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "extractor",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "extractor"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "failure_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "failure_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "attempts",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "attempts"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "extracted_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "extracted_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "5a43f3736bd74c68c9f94c1e47deed10c9bf3e2fa7a908f1b8863d7c5fa50c1b"
+}

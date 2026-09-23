@@ -1,0 +1,71 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT status::text AS \"status!\", page_count, failure_reason, is_reflowable, reading_bytes\n             FROM negotiation.document_renditions WHERE document_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "page_count",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "page_count"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "failure_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "failure_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "is_reflowable",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "is_reflowable"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "reading_bytes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "reading_bytes"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "a4a2bc9110d2d2dc780334881e98269d140b7cc33d641acffca9a14778b49dd8"
+}

@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT status::text AS \"status!\" FROM platform.jobs\n            WHERE task = 'negotiation.document.extract'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "d4926f15dc13097a65bc2973aa6dd41109e354b5053b51665418d046fe2d4c3d"
+}

@@ -32,6 +32,7 @@ use std::sync::Arc;
 pub mod domain;
 pub mod jobs;
 pub mod mail;
+pub mod pdf;
 pub mod repo;
 pub mod routes;
 pub mod service;
@@ -60,8 +61,8 @@ pub fn admin_routes(cfg: &mut ServiceConfig) {
     routes::admin_admission::configurer(cfg);
 }
 
-/// Les travaux différés du module : les deux courriels de décision, et la
-/// purge des essais de code.
+/// Les travaux différés du module : les deux courriels de décision, la purge
+/// des essais de code, et l'extraction des documents.
 ///
 /// **C'est ce seul geste qui fait écouter la file « negotiation ».**
 /// `JobRegistry::queues()` est construite à partir des files que les
@@ -69,7 +70,7 @@ pub fn admin_routes(cfg: &mut ServiceConfig) {
 /// travail déposé dans une file inécoutée s'empile sans erreur, sans trace, et
 /// sans que rien ne l'exécute jamais.
 ///
-/// Les trois déclarent la file par défaut : aucun déclencheur du modèle ne les
+/// Les quatre déclarent la file par défaut : aucun déclencheur du modèle ne les
 /// dépose ailleurs.
 pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc<dyn JobHandler>> {
     let url = config.app_public_url.clone();
@@ -79,6 +80,11 @@ pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc
             url.clone(),
         )),
         Arc::new(jobs::emails::SendRejectedEmail::new(mailer, url)),
-        Arc::new(jobs::purge::PurgeInvitationAttempts::new(db)),
+        Arc::new(jobs::purge::PurgeInvitationAttempts::new(db.clone())),
+        Arc::new(jobs::extract::ExtractDocument::new(
+            db,
+            kernel::storage::Entrepots::new(&config.media),
+            config.negotiation.pdfium_lib_path.clone(),
+        )),
     ]
 }

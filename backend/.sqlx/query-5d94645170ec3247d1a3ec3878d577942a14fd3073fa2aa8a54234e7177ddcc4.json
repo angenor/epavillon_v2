@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT image_key AS \"image_key!\"\n             FROM negotiation.document_pages\n            WHERE document_id = $1 AND image_key IS NOT NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "image_key!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_pages",
+            "name": "image_key"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "5d94645170ec3247d1a3ec3878d577942a14fd3073fa2aa8a54234e7177ddcc4"
+}

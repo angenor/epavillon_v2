@@ -8,4 +8,5 @@
 //! a aucun à cette étape.
 
 pub mod emails;
+pub mod extract;
 pub mod purge;

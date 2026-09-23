@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE platform.jobs SET attempts = max_attempts\n          WHERE task = 'negotiation.document.extract'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "052d2fa2d250613b79e4d9670ac53e05b56fb52dfa75a7df294a8e0c29c989c7"
+}

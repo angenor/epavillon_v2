@@ -65,6 +65,7 @@ Chaque critère se juge sur des **pages témoins**, choisies d'après une premi�
 | Poids moyen d'une image de page (1080 px, JPEG 75) | 247 936 octets — **242 Ko** (1080 × 1527 px) ; 217 Ko sur les seules pages à bloc `origin` |
 | **Poids de la copie gardée** selon R2 : forme lisible, plus les pages à bloc `origine` | 74 Ko + 4 124 842 octets = **4,2 Mo — plus lourd que le PDF** (2,9 Mo). Mesuré à titre d'indication : environ 3,1 Mo en JPEG 4:2:0 de qualité 60, 2,8 Mo en PNG de 16 couleurs |
 | Durée de l'extraction, images comprises, sur un poste de développement | **1,8 s** en version optimisée (texte 0,23 s, images 1,56 s), sur un Mac M ; 18 s en version de débogage. Le budget d'une minute est tenu de très loin |
+| **Par le travail** (T037, 23/09) : lecture dans le bucket privé, règles du crate, 90 images déposées, pages écrites | **19,2 s en compilation de débogage** (`le_vrai_guide_sextrait_en_moins_dune_minute`, test ignoré par défaut) ; le worker de production, optimisé, fait de l'ordre de 2 s. **Copie gardée : 3 753 338 octets** — 297 Ko de forme lisible et 3,46 Mo d'images des 19 pages d'origine, en JPEG qualité 60 |
 
 ## La conclusion
 

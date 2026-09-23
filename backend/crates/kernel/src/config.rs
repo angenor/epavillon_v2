@@ -196,6 +196,11 @@ struct Raw {
     #[serde(with = "humantime_serde", default = "hours_24")]
     engagement_partition_interval: Duration,
 
+    /// Dossier de la bibliothèque PDFium, que seul le worker charge. Vide : les
+    /// documents de Guide Négo ne s'extraient pas, et leur travail le dit.
+    #[serde(default)]
+    pdfium_lib_path: String,
+
     #[serde(default = "default_duplicate_score_threshold")]
     org_duplicate_score_threshold: u16,
     #[serde(default = "default_duplicate_scan_batch")]
@@ -355,6 +360,7 @@ pub struct Config {
     pub analytics: AnalyticsConfig,
     pub media: MediaConfig,
     pub engagement: EngagementConfig,
+    pub negotiation: NegotiationConfig,
     pub mail: MailConfig,
     pub telemetry: TelemetryConfig,
 }
@@ -468,6 +474,13 @@ pub struct MediaConfig {
 #[derive(Debug, Clone)]
 pub struct EngagementConfig {
     pub partition_interval: Duration,
+}
+
+/// Réglages du module Négociations.
+#[derive(Debug, Clone)]
+pub struct NegotiationConfig {
+    /// Le dossier de PDFium, qui extrait les documents de Guide Négo.
+    pub pdfium_lib_path: Option<String>,
 }
 
 /// Une durée par valeur de `identity.token_purpose`. Aucun appelant ne pose
@@ -910,6 +923,9 @@ impl Config {
             },
             engagement: EngagementConfig {
                 partition_interval: raw.engagement_partition_interval,
+            },
+            negotiation: NegotiationConfig {
+                pdfium_lib_path: Some(raw.pdfium_lib_path).filter(|c| !c.trim().is_empty()),
             },
             mail: MailConfig {
                 transport,

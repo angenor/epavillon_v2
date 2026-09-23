@@ -277,6 +277,18 @@ fn racine_media_jetable() -> String {
 /// Configuration minimale d'un test, passée par **la même validation qu'au
 /// démarrage** : un test ne doit pas pouvoir s'appuyer sur un réglage que la
 /// production refuserait. Seule la base change d'un test à l'autre.
+/// `PDFIUM_LIB_PATH` s'il est posé, sinon `.outils/pdfium/lib` à la racine du
+/// dépôt, en chemin absolu : un test tourne depuis le dossier de son crate.
+fn chemin_pdfium() -> String {
+    match std::env::var("PDFIUM_LIB_PATH") {
+        Ok(c) if std::path::Path::new(&c).is_absolute() => c,
+        _ => std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../../.outils/pdfium/lib")
+            .to_string_lossy()
+            .into_owned(),
+    }
+}
+
 pub fn test_config(database_url: &str) -> crate::config::Config {
     // 43 signes de base64 sans remplissage : les 32 octets que la clé Ed25519
     // exige. Fixe, pour qu'un jeton émis dans un test se vérifie dans le même.
@@ -303,6 +315,9 @@ pub fn test_config(database_url: &str) -> crate::config::Config {
         // délivrabilité n'est pas montée et le test qui la frappe lirait un 404
         // sans savoir si c'est le montage ou le chemin qui manque.
         "mail_webhook_token": "jeton-webhook-de-test",
+        // La bibliothèque que `make pdfium` dépose : l'extraction des documents
+        // s'éprouve sur le vrai moteur, pas sur une imitation.
+        "pdfium_lib_path": chemin_pdfium(),
     });
 
     crate::config::Config::from_figment(Figment::from(Serialized::defaults(valeurs)))

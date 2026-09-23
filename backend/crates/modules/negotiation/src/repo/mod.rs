@@ -1,6 +1,9 @@
 pub mod access;
 pub mod attempts;
 pub mod codes;
+pub mod document_pages;
+pub mod objets;
+pub mod renditions;
 pub mod requests;
 pub mod settings;
 pub mod themes;

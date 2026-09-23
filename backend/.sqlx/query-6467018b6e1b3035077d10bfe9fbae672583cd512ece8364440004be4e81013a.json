@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT page_index, label, image_key, has_origin_block\n           FROM negotiation.document_pages WHERE document_id = $1 ORDER BY page_index",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "page_index",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_pages",
+            "name": "page_index"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_pages",
+            "name": "label"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "image_key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_pages",
+            "name": "image_key"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "has_origin_block",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_pages",
+            "name": "has_origin_block"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "6467018b6e1b3035077d10bfe9fbae672583cd512ece8364440004be4e81013a"
+}

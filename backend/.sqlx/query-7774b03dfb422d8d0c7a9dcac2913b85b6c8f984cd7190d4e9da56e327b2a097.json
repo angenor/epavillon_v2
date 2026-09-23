@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.document_renditions\n            SET status = 'failed', failure_reason = $4\n          WHERE document_id = $1 AND asset_id = $2 AND request_id = $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7774b03dfb422d8d0c7a9dcac2913b85b6c8f984cd7190d4e9da56e327b2a097"
+}

@@ -246,23 +246,24 @@ COMMENT ON FUNCTION media.object_url(text, text) IS
 -- n'a plus d'adresse.
 CREATE OR REPLACE FUNCTION media.object_location(p_asset_id uuid)
 RETURNS TABLE (
-    bucket     text,
-    object_key text,
-    status     media.asset_status,
-    byte_size  bigint,
-    mime_type  text
+    bucket            text,
+    object_key        text,
+    status            media.asset_status,
+    byte_size         bigint,
+    mime_type         text,
+    original_filename text
 )
 LANGUAGE sql
 STABLE
 AS $$
-    SELECT a.bucket, a.object_key, a.status, a.byte_size, a.mime_type
+    SELECT a.bucket, a.object_key, a.status, a.byte_size, a.mime_type, a.original_filename
       FROM media.assets a
      WHERE a.id = p_asset_id
        AND a.deleted_at IS NULL;
 $$;
 
 COMMENT ON FUNCTION media.object_location(uuid) IS
-    'Bucket, clé, état, poids et type d''un objet non supprimé. Contrat de lecture des autres modules : ils ne lisent jamais media.assets.';
+    'Bucket, clé, état, poids, type et nom d''origine d''un objet non supprimé. Contrat de lecture des autres modules : ils ne lisent jamais media.assets.';
 
 -- -----------------------------------------------------------------------------
 -- 3. Variantes

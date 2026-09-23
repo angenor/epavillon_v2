@@ -41,25 +41,28 @@ INSERT INTO platform.settings (key, value, description) VALUES
      'Bucket des objets de visibilité private. Fermé au web : seule l''API les lit, après avoir vérifié l''accès.')
 ON CONFLICT (key) DO NOTHING;
 
+-- Le type rendu a gagné une colonne : il faut retirer l'ancienne signature.
+DROP FUNCTION IF EXISTS media.object_location(uuid);
 CREATE OR REPLACE FUNCTION media.object_location(p_asset_id uuid)
 RETURNS TABLE (
-    bucket     text,
-    object_key text,
-    status     media.asset_status,
-    byte_size  bigint,
-    mime_type  text
+    bucket            text,
+    object_key        text,
+    status            media.asset_status,
+    byte_size         bigint,
+    mime_type         text,
+    original_filename text
 )
 LANGUAGE sql
 STABLE
 AS $$
-    SELECT a.bucket, a.object_key, a.status, a.byte_size, a.mime_type
+    SELECT a.bucket, a.object_key, a.status, a.byte_size, a.mime_type, a.original_filename
       FROM media.assets a
      WHERE a.id = p_asset_id
        AND a.deleted_at IS NULL;
 $$;
 
 COMMENT ON FUNCTION media.object_location(uuid) IS
-    'Bucket, clé, état, poids et type d''un objet non supprimé. Contrat de lecture des autres modules : ils ne lisent jamais media.assets.';
+    'Bucket, clé, état, poids, type et nom d''origine d''un objet non supprimé. Contrat de lecture des autres modules : ils ne lisent jamais media.assets.';
 -- -----------------------------------------------------------------------------
 -- 2. media — un objet désigné par une colonne n'est pas orphelin
 -- -----------------------------------------------------------------------------
@@ -288,16 +291,25 @@ CREATE TABLE IF NOT EXISTS negotiation.document_renditions (
     extracted_at    timestamptz,
     created_at      timestamptz NOT NULL DEFAULT now(),
     updated_at      timestamptz NOT NULL DEFAULT now(),
+    -- La dernière demande d'extraction : seul son travail écrit ici. Une
+    -- relance en pose une nouvelle, et le travail d'une demande antérieure ne
+    -- peut plus conclure par-dessus — ni laisser publier avant la relance.
+    request_id      uuid        NOT NULL DEFAULT platform.uuid_v7(),
 
     CONSTRAINT ck_document_renditions_ready  CHECK (status <> 'ready' OR page_count > 0),
     CONSTRAINT ck_document_renditions_failed CHECK (status <> 'failed' OR failure_reason IS NOT NULL)
 );
+
+-- Une base migrée avant la garde des demandes n'a pas la colonne.
+ALTER TABLE negotiation.document_renditions
+    ADD COLUMN IF NOT EXISTS request_id uuid NOT NULL DEFAULT platform.uuid_v7();
 
 CREATE INDEX IF NOT EXISTS ix_document_renditions_asset ON negotiation.document_renditions (asset_id);
 
 DROP TRIGGER IF EXISTS tg_document_renditions_updated_at ON negotiation.document_renditions;
 CREATE TRIGGER tg_document_renditions_updated_at BEFORE UPDATE ON negotiation.document_renditions
     FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
+
 
 COMMENT ON TABLE negotiation.document_renditions IS
     'L''extraction d''un document fichier : son état, son verdict, son sommaire, et le choix « ouvrir tel quel ». Une ligne par document.';

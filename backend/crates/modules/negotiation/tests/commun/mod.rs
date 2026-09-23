@@ -15,6 +15,8 @@
 
 #![allow(dead_code)]
 
+pub mod documents;
+
 use kernel::config::Config;
 use kernel::context::RequestContext;
 use kernel::testing::TestDb;

@@ -1,0 +1,88 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT page_index, label, blocks, image_key, image_bytes, has_origin_block\n             FROM negotiation.document_pages\n            WHERE document_id = $1\n            ORDER BY page_index",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "page_index",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_pages",
+            "name": "page_index"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_pages",
+            "name": "label"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "blocks",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_pages",
+            "name": "blocks"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "image_key",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_pages",
+            "name": "image_key"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "image_bytes",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_pages",
+            "name": "image_bytes"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "has_origin_block",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_pages",
+            "name": "has_origin_block"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "d114ca62cad5d91777da36e44dfa908f14b6cadb97ef39974dfbc9cd9e37c68f"
+}
