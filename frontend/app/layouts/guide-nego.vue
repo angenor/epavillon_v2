@@ -64,6 +64,8 @@ const gardePrete = ref(false)
 const { assurerLeVocabulaire } = useGnThematiques()
 // Ce qui a été choisi sans réseau repart d'ici — et de nulle part ailleurs.
 const { partir, avis } = useGnFile()
+// Les téléchargements demandés sans réseau partagent ses déclencheurs, pas sa file.
+const copies = useGnCopies()
 
 // Un choix abandonné ou refusé se dit là où la personne se trouve quand le réseau
 // revient (FR-009 bis) ; l'écran qui l'a pris le redit en place, et on ne l'y double pas.
@@ -79,12 +81,15 @@ watch(avis, (suite) => {
 function relire() {
   void rafraichir()
   void partir()
+  void copies.partir()
 }
 
 // Trois déclencheurs, tous nécessaires : un téléphone rouvert le lendemain n'émet pas
 // d'`online`, et une application restée ouverte ne se réouvre pas.
 function auRetourAuPremierPlan() {
-  if (document.visibilityState === 'visible') void partir()
+  if (document.visibilityState !== 'visible') return
+  void partir()
+  void copies.partir()
 }
 
 onMounted(() => {
@@ -93,6 +98,12 @@ onMounted(() => {
   enregistrerLaGarde()
   void assurerLeVocabulaire()
   void partir()
+  // Le navigateur a pu vider une copie depuis la dernière ouverture : elle redevient
+  // « non téléchargée » avant qu'un écran ne la montre, puis ce qui attend repart.
+  void copies
+    .verifier()
+    .then(() => copies.partir())
+    .catch(() => undefined)
 })
 
 onBeforeUnmount(() => {

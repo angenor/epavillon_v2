@@ -292,7 +292,12 @@ export function useApi() {
      * écran (voir `api/guide-nego.ts`).
      */
     guideNego: createGuideNegoApi({ auth, call, send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
-    guideNegoDocuments: createGuideNegoDocumentsApi({ call, send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
+    guideNegoDocuments: createGuideNegoDocumentsApi({
+      call,
+      send,
+      ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS),
+      ressource: (chemin, signal) => (http.isConfigured.value ? http.flux(chemin, signal) : Promise.resolve(null)),
+    }),
 
     home: createHomeApi(deps),
     adminShowcase: createAdminShowcaseApi(deps),

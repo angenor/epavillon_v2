@@ -13,7 +13,7 @@ Il complète celui de 0c (`specs/010-guide-nego-accueil-profil/contracts/hors-co
 | **Idem pour un document réservé** | Cache **`gn-documents-reserves`** | Idem | Les mêmes, **plus la déconnexion et la perte d'accès** |
 | La fiche de chaque copie : version, `reading_etag`, date, place, réservé ou non, pages d'origine gardées | IndexedDB `guide-nego` **v3**, magasin **`copies`** | Identifiant du document | En même temps que la copie |
 | Les téléchargements demandés sans réseau | Magasin **`a-telecharger`** | Identifiant du document | Au succès, à l'annulation, à la déconnexion pour un réservé |
-| Taille du texte, progression, documents ouverts, derniers ouverts | `localStorage`, avec `try/catch` | `gn-lecture-taille`, `gn-lecture-progression`, `gn-documents-ouverts`, `gn-documents-recents` | Jamais par « Tout retirer » ; la progression d'une version disparue s'oublie à la relecture de la liste |
+| Taille du texte, progression, documents ouverts, derniers ouverts | `localStorage`, avec `try/catch` | `gn.lecture-taille`, `gn.lecture-progression`, `gn.documents-ouverts`, `gn.documents-recents` — le préfixe `gn.` de toutes les clés de Guide Négo (`stockage.ts`) | Jamais par « Tout retirer » ; la progression d'une version disparue s'oublie à la relecture de la liste |
 
 Les caches ne portent **pas** le préfixe `gn-coquille-`. Le ménage du service worker ne les touche pas, et ils survivent à un déploiement (ADR-019). Le test `sw-garde` gagne le cas nommé.
 
@@ -26,14 +26,20 @@ Les caches ne portent **pas** le préfixe `gn-coquille-`. Le ménage du service 
 5. Une annulation (`AbortController`) ou une coupure ne laisse **aucune** entrée.
 6. `a-telecharger` part sur les déclencheurs de la file de 0c : ouverture, `online`, retour au premier plan. Ce n'est **pas** la file de 0c : ce sont des lectures, sans compte et sans empreinte à protéger.
 
+7. **Au premier téléchargement**, `navigator.storage.persist()` est demandé, dans le geste de la personne. Sans ce droit, le navigateur peut effacer les copies quand le téléphone manque de place, sans rien dire. L'issue se garde (`gn.stockage-persistant`) et se redemande tant qu'elle est refusée ; refusée, « Mes documents » le dit.
+
 Il n'y a pas de compte exigé, sauf pour un réservé, qui demande l'accès.
+
+## Une copie est-elle là ?
+
+**À chaque ouverture** de l'application, avant qu'un écran ne montre les copies : chaque fiche de `copies` se vérifie contre son cache. Une copie dont une entrée manque — le navigateur l'a vidée — redevient « non téléchargée » : ses autres entrées et sa fiche s'effacent. Une entrée qu'aucune fiche ne désigne s'efface aussi. Le lecteur ne lit une copie qu'après l'avoir vérifiée entière, et ne montre **jamais** une page blanche : une image vidée en cours de lecture se relit au réseau, ou la page s'affiche avec son texte et le dit.
 
 ## Une copie est-elle la bonne ?
 
 À chaque lecture réussie de la liste :
 - une copie dont le `reading_etag` diffère de celui servi est une copie **d'une autre version du fichier**. Cela n'arrive pas pour un document publié, dont le fichier est figé (FR-007) : on ne retélécharge rien en silence, et la fiche dit « Remplacé par… » si c'est le cas ;
 - une copie d'un document **absent** de la liste (dépublié) s'efface ;
-- une copie d'un document devenu réservé, alors que la personne n'a pas l'accès, s'efface (FR-034).
+- une copie d'un document devenu réservé, alors que la personne n'a pas l'accès, s'efface (FR-034) ; avec l'accès, elle passe dans `gn-documents-reserves`, qui s'efface à la déconnexion.
 
 ## Les effacements
 
@@ -42,7 +48,8 @@ Il n'y a pas de compte exigé, sauf pour un réservé, qui demande l'accès.
 | « Tout retirer du téléphone » | Les deux caches, `copies`, `a-telecharger` | Les lectures, les réglages, la progression, la file de 0c |
 | « Retirer du téléphone » sur une fiche | Les entrées de ce document dans son cache, et sa ligne `copies` | Le reste |
 | **Déconnexion** | `gn-documents-reserves` entier, les lignes `copies` et `a-telecharger` réservées ; **puis** la file de 0c, **puis** la fermeture de session (`useGnSession.ts`) | Les copies publiques |
-| Accès perdu, lu par `useGnAcces` | Comme la déconnexion, sans fermer la session | Les copies publiques |
+| Accès perdu, lu par `useGnAcces` ; session finie ailleurs, lue par `useGnSession` | Comme la déconnexion, sans fermer la session | Les copies publiques |
+| Le navigateur a vidé une copie, vu à l'ouverture | Ce qui reste de cette copie, et sa fiche | Les autres copies |
 | API injoignable, `/auth/refresh` en panne | **Rien** — reprise 1 de 0c | Tout |
 
 **La place** : `useGnPlace` relit l'estimation **après** l'effacement. La baisse est immédiate pour Cache Storage (SC-005).

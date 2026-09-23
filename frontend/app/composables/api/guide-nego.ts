@@ -19,7 +19,7 @@ import type {
   RedeemResult,
 } from '~/types/negotiation'
 import type { LegalText, LegalTextKey } from '~/types/platform'
-import type { AvecEmpreinte } from './http'
+import type { AppelsEtiquetes, AvecEmpreinte } from './etiquete'
 import type {
   PasswordResetRequestResult,
   RegisterPayload,
@@ -57,17 +57,9 @@ export interface Primitives {
     fromMocks: (m: Mocks) => T | Promise<T>,
     method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE',
   ) => Promise<T>
-  /** Les deux appels qui rendent l'empreinte de l'état, et eux seuls. */
-  lireEtiquete: <T>(
-    path: string,
-    fromMocks: (m: Mocks) => AvecEmpreinte<T> | Promise<AvecEmpreinte<T>>,
-  ) => Promise<AvecEmpreinte<T>>
-  ecrireEtiquete: <T>(
-    path: string,
-    body: object,
-    fromMocks: (m: Mocks) => AvecEmpreinte<T> | Promise<AvecEmpreinte<T>>,
-    siCorrespond?: string | null,
-  ) => Promise<AvecEmpreinte<T>>
+  /** Les appels qui rendent l'empreinte de l'état ; `lireEtiquete` sait aussi la relecture conditionnelle. */
+  lireEtiquete: AppelsEtiquetes['lireEtiquete']
+  ecrireEtiquete: AppelsEtiquetes['ecrireEtiquete']
 }
 
 export function createGuideNegoApi({

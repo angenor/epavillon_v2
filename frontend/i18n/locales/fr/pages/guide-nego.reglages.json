@@ -18,11 +18,11 @@
     "se-connecter": "Me connecter",
     "confirmation": {
       "question": "Me déconnecter de cet appareil ?",
-      "phrase": "Vos autres appareils restent connectés. Ce qui a été téléchargé pour la lecture hors connexion reste sur ce téléphone.",
+      "phrase": "Vos autres appareils restent connectés. Les documents publics téléchargés restent sur ce téléphone ; les documents réservés s'effacent.",
       "action": "Me déconnecter",
       "retour": "Annuler"
     },
-    "telechargements-restent": "Vos téléchargements restent sur le téléphone."
+    "telechargements-restent": "Les documents publics téléchargés restent sur le téléphone ; les documents réservés s'effacent."
   },
   "suivi": {
     "titre": "Mon suivi",

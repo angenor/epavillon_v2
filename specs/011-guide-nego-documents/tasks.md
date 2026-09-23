@@ -212,21 +212,23 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
 
 **Objectif** : [hors-connexion.md](contracts/hors-connexion.md) et [R11](research.md)-[R12](research.md). Elle conditionne les récits 2, 3 et 5 côté client.
 
-- [ ] T063 Apprendre à `lireEtiquete` d'envoyer `If-None-Match` et de rendre « inchangé » sur `304`, dans `frontend/app/composables/api/http.ts`, sans changer ses appelants de 0c ; ajouter son test dans `frontend/tests/guide-nego/`
-- [ ] T064 Monter la base `guide-nego` à la version 3 dans `frontend/app/utils/guide-nego/garde.ts` : magasins `copies` et `a-telecharger`, repli en mémoire, aucune fonction qui lève
-- [ ] T065 Écrire la logique pure des copies dans `frontend/app/utils/guide-nego/copies.ts` : les deux caches `gn-documents-publics` et `gn-documents-reserves`, les clés, la réconciliation avec la liste (dépublié, devenu réservé sans accès), les effacements de [hors-connexion.md](contracts/hors-connexion.md) § Les effacements
-- [ ] T066 Écrire `frontend/app/composables/guide-nego/useGnCopies.ts` :
+- [X] T063 Apprendre à `lireEtiquete` d'envoyer `If-None-Match` et de rendre « inchangé » sur `304`, sans changer ses appelants de 0c ; ajouter son test dans `frontend/tests/guide-nego/` — les appels étiquetés sortent de `http.ts` dans `composables/api/etiquete.ts`, testable sans Nuxt
+- [X] T064 Monter la base `guide-nego` à la version 3 dans `frontend/app/utils/guide-nego/garde.ts` : magasins `copies` et `a-telecharger`, repli en mémoire, aucune fonction qui lève
+- [X] T065 Écrire la logique pure des copies dans `frontend/app/utils/guide-nego/copies.ts` : les deux caches `gn-documents-publics` et `gn-documents-reserves`, les clés, la réconciliation avec la liste (dépublié, devenu réservé sans accès), les effacements de [hors-connexion.md](contracts/hors-connexion.md) § Les effacements
+- [X] T066 Écrire `frontend/app/composables/guide-nego/useGnCopies.ts` :
   - télécharger en flux avec progression sur `Content-Length`, **sans rien écrire avant le dernier octet** ;
   - annuler par `AbortController` ;
   - écrire la copie dans le cache du bon côté, puis dans `copies` ;
   - envoyer le compteur une fois ;
   - retirer un document, tout retirer.
-- [ ] T067 Écrire la file de téléchargements demandés sans réseau, dans `frontend/app/utils/guide-nego/a-telecharger.ts` et `useGnCopies`, branchée sur les déclencheurs de `frontend/app/layouts/guide-nego.vue` (ouverture, `online`, `visibilitychange`), distincte de la file d'écritures de 0c
-- [ ] T068 Brancher l'effacement des réservés dans `frontend/app/composables/guide-nego/useGnSession.ts`, **avant** la vidange de la file et la fermeture de session ; et dans `useGnAcces.ts`, à la lecture d'un accès perdu. **Rien sur une API injoignable**
-- [ ] T069 Écrire les réglages de l'appareil dans `frontend/app/utils/guide-nego/appareil-lecture.ts` : taille du texte, progression par document et version, documents ouverts (pour « Nouveau »), derniers ouverts ; `localStorage` protégé par `try/catch`
-- [ ] T070 Mettre à jour les textes de déconnexion dans `frontend/i18n/locales/{fr,en}/pages/guide-nego.reglages.json` : ce qui reste (les publics) et ce qui s'efface (les réservés)
-- [ ] T071 [P] Tests sans navigateur dans `frontend/tests/guide-nego/`, sur de faux `caches` et un faux IndexedDB — `copies.test.ts`, `deconnexion-reserves.test.ts`, `a-telecharger.test.ts`, `nouveau.test.ts` — couvrant les neuf cas de [hors-connexion.md](contracts/hors-connexion.md) § Tests
-- [ ] T072 [P] Ajouter à `frontend/tests/guide-nego/sw-garde.test.ts` le cas nommé : le ménage du service worker laisse `gn-documents-*`
+- [X] T067 Écrire la file de téléchargements demandés sans réseau, dans `frontend/app/utils/guide-nego/a-telecharger.ts` et `useGnCopies`, branchée sur les déclencheurs de `frontend/app/layouts/guide-nego.vue` (ouverture, `online`, `visibilitychange`), distincte de la file d'écritures de 0c
+- [X] T068 Brancher l'effacement des réservés dans `frontend/app/composables/guide-nego/useGnSession.ts`, **avant** la vidange de la file et la fermeture de session ; et dans `useGnAcces.ts`, à la lecture d'un accès perdu. **Rien sur une API injoignable** — les deux enchaînements vivent dans `utils/guide-nego/effacements.ts`, et la session finie ailleurs efface aussi
+- [X] T069 Écrire les réglages de l'appareil dans `frontend/app/utils/guide-nego/appareil-lecture.ts` : taille du texte, progression par document et version, documents ouverts (pour « Nouveau »), derniers ouverts ; `localStorage` protégé par `try/catch`
+- [X] T070 Mettre à jour les textes de déconnexion dans `frontend/i18n/locales/{fr,en}/pages/guide-nego.reglages.json` : ce qui reste (les publics) et ce qui s'efface (les réservés)
+- [X] T071 [P] Tests sans navigateur dans `frontend/tests/guide-nego/`, sur de faux `caches` et un faux IndexedDB — `copies.test.ts`, `deconnexion-reserves.test.ts`, `a-telecharger.test.ts`, `nouveau.test.ts` — couvrant les neuf cas de [hors-connexion.md](contracts/hors-connexion.md) § Tests
+- [X] T072 [P] Ajouter à `frontend/tests/guide-nego/sw-garde.test.ts` le cas nommé : le ménage du service worker laisse `gn-documents-*`
+
+- [X] T072 bis Deux exigences du commanditaire (23/09) : `navigator.storage.persist()` demandé au premier téléchargement, dans le geste de la personne, et son issue gardée (`gn.stockage-persistant`), redemandée tant qu'elle est refusée ; **à chaque ouverture**, les copies se vérifient contre les caches — une copie que le navigateur a vidée, même en partie, redevient « non téléchargée », et une entrée orpheline s'efface (`verifierLesCopies`, appelé par `layouts/guide-nego.vue`)
 
 **Checkpoint** : un document se garde, s'efface et survit à un déploiement, prouvé sans navigateur. **Commit.**
 
@@ -242,7 +244,7 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
 - [ ] T074 [P] [US2] Écrire la logique pure de la bibliothèque dans `frontend/app/utils/guide-nego/documents.ts` : filtres combinés, compteurs par valeur, « Afficher n documents », recherche sur titre, résumé et éditeur **sans accents ni casse**, « Nouveau » (moins de sept jours **et** jamais ouvert), marques d'une ligne, avec `frontend/tests/guide-nego/documents.test.ts`
 - [ ] T075 [P] [US2] Créer `frontend/app/components/guide-nego/GnLigneDocument.vue` (`composants.md:41-44`) et `GnFeuilleFiltre.vue` (`composants.md:145-147`), sur `GnMarqueEtat`, `GnPilule` et `GnFeuilleBasse`, avec leurs traductions de composant
 - [ ] T076 [P] [US2] Créer `frontend/app/components/guide-nego/GnBandeauRemplace.vue` (`composants.md:185-187`), tout le bandeau étant la cible
-- [ ] T077 [US2] Écrire `frontend/app/composables/guide-nego/useGnDocuments.ts` : la liste par `useGnLecture` (clé `documents`) avec son empreinte, la réconciliation des copies à chaque lecture réussie, la recherche dans le texte en ligne
+- [ ] T077 [US2] Écrire `frontend/app/composables/guide-nego/useGnDocuments.ts` : la liste par `useGnLecture` (clé `documents`) avec son empreinte, relue par `relireLaBibliotheque` (`If-None-Match`, un `304` garde la liste) ; `useGnCopies().rapprocher()` à chaque lecture réussie ; la recherche dans le texte en ligne
 - [ ] T078 [US2] Écrire `frontend/app/pages/guide-nego/ressources/documents/index.vue` : titre et compte, recherche, trois filtres, liste, « n nouveaux », vide après filtre avec « Retirer les filtres », hors connexion avec « n lisible(s) maintenant » et les deux libellés de ligne, quatre états
 - [ ] T079 [US2] Écrire `frontend/app/pages/guide-nego/ressources/documents/[id].vue` :
   - les six états de la fiche : non téléchargé, remplacé, en cours, téléchargé, lien, réservé ;
@@ -268,7 +270,7 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
 - [ ] T082 [P] [US3] Créer les traductions `frontend/i18n/locales/fr/pages/guide-nego.lecteur.json` et `en/`
 - [ ] T083 [P] [US3] Écrire le rendu de la forme lisible dans `frontend/app/utils/guide-nego/forme-lisible.ts` : blocs et segments en grammaire close, `kind` inconnu ignoré, `term` repéré, avec `frontend/tests/guide-nego/forme-lisible.test.ts`
 - [ ] T084 [P] [US3] Créer `frontend/app/components/guide-nego/GnBarreLecture.vue` (`composants.md:157-159` : repliée 32 px plus une progression de 6 px, dépliée 68 px ; un toucher au centre bascule, défiler replie ; **sans « Marquer »**, écart 42) et `GnProgression.vue` (barre de téléchargement de 6 px)
-- [ ] T085 [US3] Écrire `frontend/app/composables/guide-nego/useGnLecteur.ts` : la forme lisible lue **dans le cache d'abord**, le réseau ensuite ; le repérage de la page en cours par observateur d'intersection ; la progression écrite au plus toutes les deux secondes ; la reprise pour la même version
+- [ ] T085 [US3] Écrire `frontend/app/composables/guide-nego/useGnLecteur.ts` : la forme lisible lue **dans le cache d'abord**, par `useGnCopies().lireLaCopie()` qui vérifie la copie entière avant de la rendre, le réseau ensuite ; une image vidée depuis (`imageDeLaCopie` nulle) se relit au réseau, et sans réseau la page s'affiche avec son texte et une ligne qui le dit — **jamais une page blanche** ; le repérage de la page en cours par observateur d'intersection ; la progression écrite au plus toutes les deux secondes ; la reprise pour la même version
 - [ ] T086 [US3] Écrire `frontend/app/pages/guide-nego/ressources/documents/[id]/lire.vue`, sans barre d'onglets :
   - l'en-tête d'une ligne ;
   - le texte recomposé, avec ses repères de page ;
@@ -315,7 +317,8 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
   - `GnJauge` : place utilisée et libre, jamais un faux zéro ;
   - « Favoris », avec leur rappel, et l'invitation à se connecter sans compte ;
   - « Tout retirer du téléphone » par `GnConfirmation` (aplat rouge assombri, écart 33), qui nomme les documents et la place ;
-  - la place relue après l'effacement.
+  - la place relue après l'effacement ;
+  - si `useGnCopies().persistance` vaut `refusee` : une ligne qui dit que le téléphone peut effacer les copies quand il manque de place, et qu'il faudra les retélécharger (exigence du 23/09).
 - [ ] T099 [US5] Mettre à jour la ligne « Mes téléchargements » du profil (`frontend/app/pages/guide-nego/ressources/reglages.vue`) : nombre de documents gardés et leur place, qui mène à « Mes documents »
 - [ ] T100 [US5] Remplir le bloc « Documents récents » de « Ma journée » (`frontend/app/pages/guide-nego/index.vue`, `utils/guide-nego/journee.ts`) avec les derniers ouverts sur l'appareil et leur dernière page lue ; son état vide reste pour un appareil neuf
 - [ ] T101 [US5] Corriger le paragraphe de confidentialité de « À propos » dans `frontend/i18n/locales/{fr,en}/pages/guide-nego.a-propos.json` : les téléchargements restent sur le téléphone ; thématiques, favoris et accords suivent le compte

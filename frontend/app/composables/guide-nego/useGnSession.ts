@@ -19,6 +19,7 @@
  */
 import type { LoginResult } from '~/types/auth'
 import { appareilDeclare } from '~/utils/guide-nego/appareil'
+import { deconnecterDansLOrdre, relireEtEffacer } from '~/utils/guide-nego/effacements'
 import { ecrireGarde, magasinDesEcritures } from '~/utils/guide-nego/garde'
 import {
   COMPTE_DECONNECTE,
@@ -37,13 +38,20 @@ export function useGnSession() {
   const temoin = useSessionWitness()
   // Rotation du jeton quand `/auth/me` répond « personne » ; une API muette
   // lève, et la garde reste — voir `relireLeCompte`.
+  // Une session finie ailleurs vaut déconnexion ici : les réservés s'effacent. Sans
+  // compte, personne n'a accès aux réservés : effacer ne retire jamais rien de dû.
   const { etat, rafraichir } = useGnLecture<EtatDuCompte>('compte', (garde) =>
-    relireLeCompte({
-      lire: () => api.auth.session(auth.person?.id ?? null),
-      tourner: () => api.rotation(),
-      gardeConnectee: garde?.connectee ?? false,
-      temoin: Boolean(temoin.value),
-    }),
+    relireEtEffacer(
+      () =>
+        relireLeCompte({
+          lire: () => api.auth.session(auth.person?.id ?? null),
+          tourner: () => api.rotation(),
+          gardeConnectee: garde?.connectee ?? false,
+          temoin: Boolean(temoin.value),
+        }),
+      (lu) => !lu.connectee,
+      effacerLesCopiesReservees,
+    ),
   )
 
   const compte = computed<EtatDuCompte>(() => etat.value.valeur ?? COMPTE_DECONNECTE)
@@ -106,12 +114,16 @@ export function useGnSession() {
    * ouverts. L'état gardé est réécrit tout de suite — sans cela, la prochaine
    * ouverture hors connexion afficherait un compte dont on vient de sortir.
    *
-   * **La file se vide d'abord** : ce qu'une personne a choisi sans réseau ne
-   * part pas sous le compte de la suivante, sur un téléphone partagé au stand.
+   * **Les réservés s'effacent d'abord, puis la file se vide** : ni un document
+   * réservé ni un choix fait sans réseau ne restent à la personne suivante, sur un
+   * téléphone partagé au stand. Les documents publics restent (SC-006).
    */
   async function deconnecter(): Promise<void> {
-    await magasinDesEcritures.vider()
-    await auth.signOut()
+    await deconnecterDansLOrdre({
+      effacerLesReserves: effacerLesCopiesReservees,
+      viderLaFile: () => magasinDesEcritures.vider(),
+      fermerLaSession: () => auth.signOut(),
+    })
     const maintenant = new Date().toISOString()
     etat.value = {
       ...etat.value,

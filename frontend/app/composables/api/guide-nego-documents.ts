@@ -29,11 +29,15 @@ import type { Primitives } from './guide-nego'
 import type { AvecEmpreinte } from './http'
 import type { ApiTransport } from './proposal-review'
 
-type Deps = Pick<ApiTransport, 'call' | 'send'> & Pick<Primitives, 'lireEtiquete'>
+type Deps = Pick<ApiTransport, 'call' | 'send'> &
+  Pick<Primitives, 'lireEtiquete'> & {
+    /** La réponse brute, lue en flux ; nulle sans API — le jeu d'exemple ne sert ni flux ni image. */
+    ressource: (chemin: string, signal?: AbortSignal) => Promise<Response | null>
+  }
 
 const exemples = () => import('~/mocks/negotiation-documents')
 
-export function createGuideNegoDocumentsApi({ call, send, lireEtiquete }: Deps) {
+export function createGuideNegoDocumentsApi({ call, send, lireEtiquete, ressource }: Deps) {
   // Hors ligne, le jeu d'exemple résout ses textes dans la langue qu'`Accept-Language` porterait.
   const { $i18n } = useNuxtApp()
   const langue = (): string => String($i18n.locale.value)
@@ -63,6 +67,23 @@ export function createGuideNegoDocumentsApi({ call, send, lireEtiquete }: Deps) 
       lireEtiquete(`/negotiation/documents/${documentId}/reading`, async () =>
         (await exemples()).lectureDuDocument(documentId),
       ),
+
+    /**
+     * Relire la bibliothèque sans la recevoir si rien n'a changé : `304`, et
+     * l'appelant garde ce qu'il a.
+     */
+    relireLaBibliotheque: (empreinte: string | null) =>
+      lireEtiquete(
+        '/negotiation/documents',
+        async () => (await exemples()).bibliothequeDeDocuments(langue()),
+        empreinte,
+      ),
+
+    /** Le chemin de la forme lisible : la clé de sa copie. */
+    cheminDeLaLecture: (documentId: Uuid): string => `/negotiation/documents/${documentId}/reading`,
+
+    /** Une ressource à télécharger — la forme lisible ou une image —, en flux. */
+    ressource,
 
     /** Le chemin de l'image d'une page, `index` à partir de 1. */
     imageDePage: (documentId: Uuid, index: number): string =>

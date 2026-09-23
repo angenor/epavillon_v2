@@ -24,15 +24,20 @@ import {
   etatDAcces,
   saisiePossible,
 } from '~/utils/guide-nego/acces'
+import { relireEtEffacer } from '~/utils/guide-nego/effacements'
 
 export function useGnAcces() {
   const api = useApi()
   const connexion = useGnConnexion()
 
-  const { etat, rafraichir } = useGnLecture<AccessStateView>('acces', async () => {
-    const lu = await api.guideNego.acces()
-    return etatDAcces(lu)
-  })
+  // L'accès perdu efface les réservés gardés (FR-034) — sur une réponse seulement.
+  const { etat, rafraichir } = useGnLecture<AccessStateView>('acces', () =>
+    relireEtEffacer(
+      async () => etatDAcces(await api.guideNego.acces()),
+      (lu) => !accesOuvert(lu),
+      effacerLesCopiesReservees,
+    ),
+  )
 
   const acces = computed<AccessStateView>(() => etat.value.valeur ?? ACCES_VISITEUSE)
   const ouvert = computed(() => accesOuvert(etat.value.valeur))

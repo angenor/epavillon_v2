@@ -18,11 +18,11 @@
     "se-connecter": "Sign in",
     "confirmation": {
       "question": "Sign out of this device?",
-      "phrase": "Your other devices stay signed in. Anything downloaded for offline reading stays on this phone.",
+      "phrase": "Your other devices stay signed in. Downloaded public documents stay on this phone; restricted documents are erased.",
       "action": "Sign out",
       "retour": "Cancel"
     },
-    "telechargements-restent": "Your downloads stay on the phone."
+    "telechargements-restent": "Downloaded public documents stay on the phone; restricted documents are erased."
   },
   "suivi": {
     "titre": "What I follow",

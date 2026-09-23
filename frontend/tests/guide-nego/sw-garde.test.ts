@@ -145,6 +145,18 @@ test('le ménage ne touche QUE les caches de la coquille', async () => {
   assert.deepEqual([...caches_.keys()].sort(), ['autre-application', 'gn-coquille-v2', 'gn-documents'])
 })
 
+test('un déploiement laisse les documents téléchargés : gn-documents-publics et gn-documents-reserves', async () => {
+  const caches_ = new Map([
+    ['gn-coquille-v1', { contenu: new Map() }],
+    ['gn-documents-publics', { contenu: new Map([['https://api/negotiation/documents/g/reading', '{}']]) }],
+    ['gn-documents-reserves', { contenu: new Map([['https://api/negotiation/documents/r/reading', '{}']]) }],
+  ])
+  const sw = monter('v2', caches_)
+  await sw.declencher('activate')
+  assert.deepEqual([...caches_.keys()].sort(), ['gn-documents-publics', 'gn-documents-reserves'])
+  assert.equal(caches_.get('gn-documents-publics')?.contenu.size, 1, 'rien n’est vidé dedans')
+})
+
 test('la version en attente ne prend la main que si la page le demande', async () => {
   const sw = monter('v2')
   assert.equal(sw.priseDeMain(), false)
