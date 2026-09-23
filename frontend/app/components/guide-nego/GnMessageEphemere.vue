@@ -73,8 +73,10 @@ function agir() {
   padding-inline: var(--gn-espace-8);
   border: none;
   background: none;
-  color: var(--gn-vif-jaune);
+  color: var(--gn-action-sur-titre);
   font-weight: var(--gn-graisse-gras);
+  text-decoration-line: var(--gn-action-sur-titre-trait);
+  text-underline-offset: var(--gn-espace-4);
 }
 
 @keyframes gn-ephemere-entre {

@@ -4,14 +4,19 @@
  * rappeler. Il dit ce qui reste lisible — l'important n'est pas la panne, c'est que
  * tout ce qui est là se lit quand même.
  */
-const props = defineProps<{ luA: string | null }>()
+const props = defineProps<{
+  luA: string | null
+  /** Ce qui reste lisible, quand l'écran n'est pas tout entier lisible sans réseau. */
+  ceQuiSeLit?: string
+}>()
 
 const { t } = useI18n()
 const { momentLisible } = useGnMomentLecture()
 
 const texte = computed(() => {
   const moment = momentLisible(props.luA)
-  return moment ? t('gn-connexion.bandeau', { moment }) : t('gn-connexion.bandeau-sans-heure')
+  const suite = props.ceQuiSeLit ?? t('gn-connexion.tout-se-lit')
+  return moment ? t('gn-connexion.bandeau', { moment, suite }) : t('gn-connexion.bandeau-sans-heure', { suite })
 })
 </script>
 

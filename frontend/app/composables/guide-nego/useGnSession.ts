@@ -20,7 +20,7 @@
 import type { LoginResult } from '~/types/auth'
 import { appareilDeclare } from '~/utils/guide-nego/appareil'
 import { deconnecterDansLOrdre, relireEtEffacer } from '~/utils/guide-nego/effacements'
-import { ecrireGarde, magasinDesEcritures } from '~/utils/guide-nego/garde'
+import { CLE_LECTURE_FAVORIS, ecrireGarde, magasinDesEcritures, supprimerGarde } from '~/utils/guide-nego/garde'
 import {
   COMPTE_DECONNECTE,
   reconnexionAReclamer,
@@ -124,6 +124,7 @@ export function useGnSession() {
       viderLaFile: () => magasinDesEcritures.vider(),
       fermerLaSession: () => auth.signOut(),
     })
+    await supprimerGarde(CLE_LECTURE_FAVORIS)
     const maintenant = new Date().toISOString()
     etat.value = {
       ...etat.value,

@@ -1,0 +1,41 @@
+{
+  "titre": "Documents de négociation",
+  "sous-titre": {
+    "ligne": "{documents} · {telecharges}",
+    "documents": "{count} document | {count} document | {count} documents",
+    "telecharges": "aucun téléchargé | {count} téléchargé | {count} téléchargés",
+    "lisibles": "aucun lisible maintenant | {count} lisible maintenant | {count} lisibles maintenant"
+  },
+  "hors-connexion": "Seuls les documents téléchargés s'ouvrent.",
+  "recherche": "Rechercher un titre, un mot du texte",
+  "filtres": {
+    "choisi": "{nom} : {valeur}",
+    "types": { "pilule": "Type", "titre": "Type de document", "tous": "tous les types" },
+    "themes": { "pilule": "Thématique", "titre": "Thématique", "tous": "toutes les thématiques" },
+    "cops": { "pilule": "COP", "titre": "COP", "tous": "toutes les COP" }
+  },
+  "groupe": {
+    "tous": "Tous les documents",
+    "resultats": "Résultats",
+    "sur": "{n} sur {total}",
+    "nouveaux": "{count} nouveau | {count} nouveau | {count} nouveaux",
+    "connus": "connus {moment}"
+  },
+  "vide-filtre": {
+    "titre": "Aucun document pour {criteres}",
+    "recherche": "« {recherche} »",
+    "texte": "La bibliothèque compte {count} document. | La bibliothèque compte {count} document. | La bibliothèque compte {count} documents.",
+    "retirer": "Retirer les filtres"
+  },
+  "chargement": "Lecture de la bibliothèque",
+  "vide": {
+    "titre": "Aucun document publié pour l'instant",
+    "texte": "Les guides, notes et résumés de l'IFDD paraîtront ici dès leur publication. La liste se relit à chaque ouverture de cet écran."
+  },
+  "erreur": {
+    "titre": "La bibliothèque n'a pas pu être lue",
+    "texte": "Rien n'a encore été lu sur ce téléphone. Le serveur n'a pas répondu : réessayez dans un instant.",
+    "texte-hors-connexion": "Rien n'a encore été lu sur ce téléphone, et le réseau manque. La liste se lira au retour du réseau.",
+    "reessayer": "Réessayer"
+  }
+}

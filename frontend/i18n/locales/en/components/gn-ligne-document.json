@@ -1,0 +1,13 @@
+{
+  "pages": "{count} pages | {count} page | {count} pages",
+  "editeur-annee": "{editeur}, {annee}",
+  "page-web": "Web page",
+  "trouve": "Page {page} — {extrait}",
+  "telechargement": "Downloading — {part}",
+  "telechargement-en-cours": "Downloading",
+  "marque": {
+    "remplace": "Replaced by {titre}",
+    "lien-reseau": "External link — network needed",
+    "non-telecharge": "Not downloaded — available when the network returns"
+  }
+}

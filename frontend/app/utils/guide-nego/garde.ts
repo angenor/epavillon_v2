@@ -125,6 +125,13 @@ export function lireToutesLesGardes(): Promise<LectureGardee<unknown>[]> {
   )
 }
 
+/** Les favoris du compte : la déconnexion les efface de ce téléphone. */
+export const CLE_LECTURE_FAVORIS = 'mes-favoris'
+
+export async function supprimerGarde(cle: string): Promise<void> {
+  await executer(LECTURES, 'readwrite', (magasin) => magasin.delete(cle))
+}
+
 /** Vide les données lues. La coquille et la file ne sont pas touchées. */
 export async function viderLesGardes(): Promise<void> {
   await executer(LECTURES, 'readwrite', (magasin) => magasin.clear())

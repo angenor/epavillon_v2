@@ -1,0 +1,86 @@
+{
+  "titre": "Document",
+  "sous-titre": "{type} · {editeur}",
+  "pages": "{count} pages | {count} page | {count} pages",
+  "marque": {
+    "lien-reseau": "External link — network needed",
+    "non-telecharge": "Not downloaded — available when the network returns"
+  },
+  "lien": "Opens in the browser — network needed, nothing is kept on the phone",
+  "thematiques": {
+    "titre": "Themes",
+    "aucune": "None: this document runs across all negotiations."
+  },
+  "details": {
+    "titre": "Details",
+    "version": "Version",
+    "date": "Date",
+    "editeur": "Publisher",
+    "langue": "Language",
+    "cop": "COP",
+    "adresse": "Address",
+    "ajoute": "Added"
+  },
+  "telecharge": "Downloaded. Readable offline.",
+  "en-attente": "No network: the download will start when it returns, even if the app has been closed.",
+  "progression": {
+    "part": "Downloading — {part}",
+    "sans-part": "Downloading",
+    "octets": "{recus} of {total}",
+    "recus": "{recus} received"
+  },
+  "action": {
+    "telecharger": "Download to read offline",
+    "telecharger-au-retour": "Download when the network returns",
+    "reessayer": "Retry the download",
+    "a-jour": "Open the current document",
+    "telecharger-quand-meme": "Download this version anyway",
+    "lire": "Read",
+    "lire-cette-version": "Read this version",
+    "retirer": "Remove from phone — {taille}",
+    "retirer-sans-taille": "Remove from phone",
+    "navigateur": "Open in the browser",
+    "favori": "Favourite",
+    "partager": "Share",
+    "annuler": "Cancel the download",
+    "annuler-demande": "Cancel the request"
+  },
+  "issue": {
+    "place": "This phone is out of space: {taille} must be free.",
+    "place-sans-taille": "This phone is out of space to keep this document.",
+    "place-sortie": "My downloads",
+    "panne": "The network dropped during the download. Nothing is kept half-way.",
+    "refus": "This document is no longer available, or your access does not open it."
+  },
+  "retirer": {
+    "question": "Remove this document from the phone?",
+    "phrase": "It will no longer be readable offline. You can download it again.",
+    "action": "Remove"
+  },
+  "favori": {
+    "titre": "Favourites follow your account",
+    "texte": "Create an account or sign in to find this document in your favourites on all your devices. Downloading does not require one.",
+    "creer": "Create my account",
+    "connexion": "I already have an account — Sign in"
+  },
+  "partage": {
+    "copie": "Link to this page copied.",
+    "echec": "Copy the link: {adresse}"
+  },
+  "verrou": {
+    "propos": "The summary, themes and download open with the code shared in your WhatsApp or IFDD group.",
+    "reste-ouvert": "No other document in the library is open to all. | The other document in the library stays open to all. | The {n} other documents in the library stay open to all."
+  },
+  "vide": {
+    "titre": "This document is not in the library",
+    "texte": "It has been withdrawn, or the address is wrong.",
+    "texte-hors-connexion": "The list kept on this phone does not include it yet. It will show when the network returns.",
+    "sortie": "See the library"
+  },
+  "erreur": {
+    "titre": "The library could not be read",
+    "texte": "Nothing has been read on this phone yet. Check the network, then try again.",
+    "sortie": "Try again"
+  },
+  "hors-connexion": "This document only opens with a network, or once downloaded."
+}

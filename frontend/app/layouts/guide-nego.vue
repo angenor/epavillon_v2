@@ -66,6 +66,8 @@ const { assurerLeVocabulaire } = useGnThematiques()
 const { partir, avis } = useGnFile()
 // Les téléchargements demandés sans réseau partagent ses déclencheurs, pas sa file.
 const copies = useGnCopies()
+// Inscrit l'expéditeur des favoris : un favori posé hier sans réseau repart à l'ouverture.
+useGnFavoris()
 
 // Un choix abandonné ou refusé se dit là où la personne se trouve quand le réseau
 // revient (FR-009 bis) ; l'écran qui l'a pris le redit en place, et on ne l'y double pas.
@@ -91,6 +93,18 @@ function auRetourAuPremierPlan() {
   void partir()
   void copies.partir()
 }
+
+// Un Wi-Fi saturé laisse le navigateur « en ligne » : c'est une lecture réussie qui dit
+// le retour du réseau, sans événement `online`. Ce qui attendait part alors aussi.
+const connexion = useGnConnexion()
+watch(
+  () => connexion.etat.value.enLigne,
+  (enLigne, avant) => {
+    if (!enLigne || avant !== false) return
+    void partir()
+    void copies.partir()
+  },
+)
 
 onMounted(() => {
   window.addEventListener('online', relire)

@@ -36,7 +36,24 @@ export function reponseDe(erreur: unknown): Reponse {
 // `useState`, que le rendu serveur sérialise. Ils vivent au niveau du module, sur le
 // client seulement — le serveur n'a ni IndexedDB ni réseau à rattraper.
 const expediteurs = new Map<string, Expediteur>()
+// Une clé par objet — `favori-<id>` : un seul expéditeur sert toute la famille.
+const familles = new Map<string, Expediteur>()
 let file: File | null = null
+
+function expediteurDe(cle: string): Expediteur | undefined {
+  return expediteurs.get(cle) ?? [...familles].find(([prefixe]) => cle.startsWith(prefixe))?.[1]
+}
+
+function expediteur(envoyer: (intention: Intention) => Promise<unknown>, relire?: () => Promise<void> | void): Expediteur {
+  return {
+    envoyer: (intention) =>
+      envoyer(intention).then(
+        (): Reponse => ({ statut: 'succes' }),
+        (erreur: unknown) => reponseDe(erreur),
+      ),
+    relire,
+  }
+}
 
 export function useGnFile() {
   const session = useGnSession()
@@ -45,7 +62,7 @@ export function useGnFile() {
   if (import.meta.client && !file) {
     file = creerFile({
       magasin: magasinDesEcritures,
-      expediteurs: (cle) => expediteurs.get(cle),
+      expediteurs: expediteurDe,
       personne: () => session.compte.value.id,
       signaler: (suite) => (avis.value = suite),
     })
@@ -61,14 +78,16 @@ export function useGnFile() {
     envoyer: (intention: Intention) => Promise<unknown>,
     relire?: () => Promise<void> | void,
   ): void {
-    expediteurs.set(cle, {
-      envoyer: (intention) =>
-        envoyer(intention).then(
-          (): Reponse => ({ statut: 'succes' }),
-          (erreur: unknown) => reponseDe(erreur),
-        ),
-      relire,
-    })
+    expediteurs.set(cle, expediteur(envoyer, relire))
+  }
+
+  /** Comme `inscrire`, pour toutes les clés qui commencent par `prefixe`. */
+  function inscrireFamille(
+    prefixe: string,
+    envoyer: (intention: Intention) => Promise<unknown>,
+    relire?: () => Promise<void> | void,
+  ): void {
+    familles.set(prefixe, expediteur(envoyer, relire))
   }
 
   function poser(cle: string, corps: unknown, empreinte: string | null): Promise<void> {
@@ -92,6 +111,7 @@ export function useGnFile() {
     avis,
     effacerLAvis: () => (avis.value = null),
     inscrire,
+    inscrireFamille,
     poser,
     partir,
   }

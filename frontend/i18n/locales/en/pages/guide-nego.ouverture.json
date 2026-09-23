@@ -3,7 +3,7 @@
   "sous-titre": "The app for Francophone negotiators",
   "sans-compte": {
     "titre": "No account, right away",
-    "documents": "Negotiation documents",
+    "documents": "Negotiation documents, to read offline",
     "faq": "FAQ",
     "lexique": "English-French glossary",
     "sessions": "Today's negotiation sessions",
@@ -12,7 +12,7 @@
   "avec-compte": {
     "titre": "With an account",
     "thematiques": "Your topics and alerts",
-    "favoris": "Favourites, downloads, quizzes",
+    "favoris": "Favourites, quizzes",
     "inscriptions": "Registrations for the Francophonie Pavilion"
   },
   "avec-code": {

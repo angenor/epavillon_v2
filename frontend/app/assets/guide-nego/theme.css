@@ -54,6 +54,8 @@
   --gn-accent: var(--gn-charte-vert-fonce);
   --gn-accent-inv: var(--gn-charte-blanc);             /* texte sur action principale */
   --gn-sur-titre: var(--gn-charte-blanc);              /* texte sur un aplat `titre` : message éphémère, segment actif */
+  --gn-action-sur-titre: var(--gn-vif-jaune);          /* l'action d'un aplat `titre` : « Annuler » d'un message éphémère */
+  --gn-action-sur-titre-trait: none;
   --gn-danger-texte: var(--gn-charte-blanc);           /* texte sur un aplat `danger` */
   --gn-bulle-envoyee: var(--gn-charte-vert-tres-fonce);
   --gn-bulle-envoyee-texte: var(--gn-charte-blanc);
@@ -181,6 +183,8 @@
   --gn-accent: var(--gn-nuance-sombre-vert);
   --gn-accent-inv: var(--gn-nuance-sombre-fond);
   --gn-sur-titre: var(--gn-nuance-sombre-fond);        /* en sombre l'aplat `titre` devient clair : le texte passe foncé */
+  --gn-action-sur-titre: var(--gn-nuance-sombre-fond); /* le jaune ne tient pas sur l'aplat clair : l'action se souligne */
+  --gn-action-sur-titre-trait: underline;
   --gn-danger-texte: var(--gn-nuance-sombre-fond);     /* le rouge sombre est clair : le texte devient foncé */
   --gn-filet: var(--gn-nuance-sombre-vert-filet);
   --gn-filet-fort: var(--gn-nuance-sombre-vert-filet);

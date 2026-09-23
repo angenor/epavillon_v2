@@ -1,0 +1,86 @@
+{
+  "titre": "Document",
+  "sous-titre": "{type} · {editeur}",
+  "pages": "{count} page | {count} page | {count} pages",
+  "marque": {
+    "lien-reseau": "Lien externe — réseau nécessaire",
+    "non-telecharge": "Non téléchargé — disponible au retour du réseau"
+  },
+  "lien": "S'ouvre dans le navigateur — réseau nécessaire, rien n'est gardé sur le téléphone",
+  "thematiques": {
+    "titre": "Thématiques",
+    "aucune": "Aucune : ce document traverse toutes les négociations."
+  },
+  "details": {
+    "titre": "Détails",
+    "version": "Version",
+    "date": "Date",
+    "editeur": "Éditeur",
+    "langue": "Langue",
+    "cop": "COP",
+    "adresse": "Adresse",
+    "ajoute": "Ajouté"
+  },
+  "telecharge": "Téléchargé. Lisible sans connexion.",
+  "en-attente": "Pas de réseau : le téléchargement partira à son retour, même si l'application a été fermée.",
+  "progression": {
+    "part": "Téléchargement — {part}",
+    "sans-part": "Téléchargement en cours",
+    "octets": "{recus} sur {total}",
+    "recus": "{recus} reçus"
+  },
+  "action": {
+    "telecharger": "Télécharger pour lire sans réseau",
+    "telecharger-au-retour": "Télécharger au retour du réseau",
+    "reessayer": "Réessayer le téléchargement",
+    "a-jour": "Ouvrir le document à jour",
+    "telecharger-quand-meme": "Télécharger quand même cette version",
+    "lire": "Lire",
+    "lire-cette-version": "Lire cette version",
+    "retirer": "Retirer du téléphone — {taille}",
+    "retirer-sans-taille": "Retirer du téléphone",
+    "navigateur": "Ouvrir dans le navigateur",
+    "favori": "Favori",
+    "partager": "Partager",
+    "annuler": "Annuler le téléchargement",
+    "annuler-demande": "Annuler la demande"
+  },
+  "issue": {
+    "place": "La place manque sur ce téléphone : il faut {taille} de libre.",
+    "place-sans-taille": "La place manque sur ce téléphone pour garder ce document.",
+    "place-sortie": "Mes téléchargements",
+    "panne": "Le réseau est tombé pendant le téléchargement. Rien n'est gardé à moitié.",
+    "refus": "Ce document n'est plus disponible, ou votre accès ne l'ouvre pas."
+  },
+  "retirer": {
+    "question": "Retirer ce document du téléphone ?",
+    "phrase": "Il ne se lira plus sans réseau. Vous pourrez le télécharger de nouveau.",
+    "action": "Retirer"
+  },
+  "favori": {
+    "titre": "Les favoris suivent votre compte",
+    "texte": "Créez un compte ou connectez-vous pour retrouver ce document en favori sur tous vos appareils. Le téléchargement, lui, n'en demande pas.",
+    "creer": "Créer mon compte",
+    "connexion": "J'ai déjà un compte — Me connecter"
+  },
+  "partage": {
+    "copie": "Adresse de la fiche copiée.",
+    "echec": "Copiez l'adresse : {adresse}"
+  },
+  "verrou": {
+    "propos": "Le résumé, les thématiques et le téléchargement s'ouvrent avec le code reçu dans votre groupe WhatsApp ou de l'IFDD.",
+    "reste-ouvert": "Aucun autre document de la bibliothèque n'est ouvert à tous. | L'autre document de la bibliothèque reste ouvert à tous. | Les {n} autres documents de la bibliothèque restent ouverts à tous."
+  },
+  "vide": {
+    "titre": "Ce document n'est pas dans la bibliothèque",
+    "texte": "Il a été retiré, ou l'adresse est inexacte.",
+    "texte-hors-connexion": "La liste gardée sur ce téléphone ne le porte pas encore. Il s'affichera au retour du réseau.",
+    "sortie": "Voir la bibliothèque"
+  },
+  "erreur": {
+    "titre": "La bibliothèque n'a pas pu être lue",
+    "texte": "Rien n'a encore été lu sur ce téléphone. Vérifiez le réseau, puis réessayez.",
+    "sortie": "Réessayer"
+  },
+  "hors-connexion": "Ce document ne s'ouvre qu'avec le réseau, ou une fois téléchargé."
+}

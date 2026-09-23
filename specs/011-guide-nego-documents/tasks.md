@@ -240,13 +240,13 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
 
 **Test indépendant** : [quickstart.md § 2](quickstart.md).
 
-- [ ] T073 [P] [US2] Créer les traductions `frontend/i18n/locales/fr/pages/guide-nego.documents.json` et `guide-nego.document.json`, et leurs `en/`. **Aucun libellé de type, de thématique ni de COP**
-- [ ] T074 [P] [US2] Écrire la logique pure de la bibliothèque dans `frontend/app/utils/guide-nego/documents.ts` : filtres combinés, compteurs par valeur, « Afficher n documents », recherche sur titre, résumé et éditeur **sans accents ni casse**, « Nouveau » (moins de sept jours **et** jamais ouvert), marques d'une ligne, avec `frontend/tests/guide-nego/documents.test.ts`
-- [ ] T075 [P] [US2] Créer `frontend/app/components/guide-nego/GnLigneDocument.vue` (`composants.md:41-44`) et `GnFeuilleFiltre.vue` (`composants.md:145-147`), sur `GnMarqueEtat`, `GnPilule` et `GnFeuilleBasse`, avec leurs traductions de composant
-- [ ] T076 [P] [US2] Créer `frontend/app/components/guide-nego/GnBandeauRemplace.vue` (`composants.md:185-187`), tout le bandeau étant la cible
-- [ ] T077 [US2] Écrire `frontend/app/composables/guide-nego/useGnDocuments.ts` : la liste par `useGnLecture` (clé `documents`) avec son empreinte, relue par `relireLaBibliotheque` (`If-None-Match`, un `304` garde la liste) ; `useGnCopies().rapprocher()` à chaque lecture réussie ; la recherche dans le texte en ligne
-- [ ] T078 [US2] Écrire `frontend/app/pages/guide-nego/ressources/documents/index.vue` : titre et compte, recherche, trois filtres, liste, « n nouveaux », vide après filtre avec « Retirer les filtres », hors connexion avec « n lisible(s) maintenant » et les deux libellés de ligne, quatre états
-- [ ] T079 [US2] Écrire `frontend/app/pages/guide-nego/ressources/documents/[id].vue` :
+- [X] T073 [P] [US2] Créer les traductions `frontend/i18n/locales/fr/pages/guide-nego.documents.json` et `guide-nego.document.json`, et leurs `en/`. **Aucun libellé de type, de thématique ni de COP**
+- [X] T074 [P] [US2] Écrire la logique pure de la bibliothèque dans `frontend/app/utils/guide-nego/documents.ts` : filtres combinés, compteurs par valeur, « Afficher n documents », recherche sur titre, résumé et éditeur **sans accents ni casse**, « Nouveau » (moins de sept jours **et** jamais ouvert), marques d'une ligne, avec `frontend/tests/guide-nego/documents.test.ts`
+- [X] T075 [P] [US2] Créer `frontend/app/components/guide-nego/GnLigneDocument.vue` (`composants.md:41-44`) et `GnFeuilleFiltre.vue` (`composants.md:145-147`), sur `GnMarqueEtat`, `GnPilule` et `GnFeuilleBasse`, avec leurs traductions de composant
+- [X] T076 [P] [US2] Créer `frontend/app/components/guide-nego/GnBandeauRemplace.vue` (`composants.md:185-187`), tout le bandeau étant la cible
+- [X] T077 [US2] Écrire `frontend/app/composables/guide-nego/useGnDocuments.ts` : la liste par `useGnLecture` (clé `documents`) avec son empreinte, relue par `relireLaBibliotheque` (`If-None-Match`, un `304` garde la liste) ; `useGnCopies().rapprocher()` à chaque lecture réussie ; la recherche dans le texte en ligne
+- [X] T078 [US2] Écrire `frontend/app/pages/guide-nego/ressources/documents/index.vue` : titre et compte, recherche, trois filtres, liste, « n nouveaux », vide après filtre avec « Retirer les filtres », hors connexion avec « n lisible(s) maintenant » et les deux libellés de ligne, quatre états
+- [X] T079 [US2] Écrire `frontend/app/pages/guide-nego/ressources/documents/[id]/index.vue` (et non `[id].vue` : `[id]/lire.vue` vient à côté) :
   - les six états de la fiche : non téléchargé, remplacé, en cours, téléchargé, lien, réservé ;
   - thématiques ou « Aucune » ;
   - détails avec la COP ;
@@ -254,8 +254,8 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
   - « Partager » par le partage du téléphone, repli : copier l'adresse ;
   - « Télécharger pour lire sans réseau » **sans compte** ;
   - le verrou de 0b (`GnVerrou`) sur un réservé.
-- [ ] T080 [US2] Relier « Documents de négociation » depuis `frontend/app/pages/guide-nego/ressources/index.vue`
-- [ ] T081 [US2] Corriger l'écran « 02 Ouverture » (écart 41) dans `frontend/i18n/locales/{fr,en}/pages/guide-nego.ouverture.json` : `avec-compte.favoris` → « Favoris, quiz », et le groupe « sans compte » annonce « Documents de négociation, à lire sans réseau »
+- [X] T080 [US2] Relier « Documents de négociation » depuis `frontend/app/pages/guide-nego/ressources/index.vue`
+- [X] T081 [US2] Corriger l'écran « 02 Ouverture » (écart 41) dans `frontend/i18n/locales/{fr,en}/pages/guide-nego.ouverture.json` : `avec-compte.favoris` → « Favoris, quiz », et le groupe « sans compte » annonce « Documents de négociation, à lire sans réseau »
 
 **Checkpoint** : sans compte, on trouve, on filtre, on lit une fiche, y compris hors connexion. **Commit.**
 
@@ -310,7 +310,7 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
 **Test indépendant** : [quickstart.md § 5](quickstart.md).
 
 - [ ] T096 [P] [US5] Créer les traductions `frontend/i18n/locales/fr/pages/guide-nego.mes-documents.json` et `en/`
-- [ ] T097 [US5] Écrire `frontend/app/composables/guide-nego/useGnFavoris.ts` : lecture par `useGnLecture` (clé `mes-favoris`) ; pose et retrait par la file de 0c (clé `favori-<id>`, corps = état voulu, sans `If-Match`) ; effacement de la garde des favoris à la déconnexion
+- [X] T097 [US5] *(fait en phase 8 : « Favori » de la fiche en a besoin ; la file de 0c sert la famille de clés `favori-` par `inscrireFamille`)* Écrire `frontend/app/composables/guide-nego/useGnFavoris.ts` : lecture par `useGnLecture` (clé `mes-favoris`) ; pose et retrait par la file de 0c (clé `favori-<id>`, corps = état voulu, sans `If-Match`) ; effacement de la garde des favoris à la déconnexion
 - [ ] T098 [US5] Transformer `frontend/app/pages/guide-nego/ressources/telechargements.vue` en « Mes documents » :
   - l'en-tête « n téléchargé(s) · n favori(s) » ;
   - « Sur le téléphone » avec la place et les dates ;

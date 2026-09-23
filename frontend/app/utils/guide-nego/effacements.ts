@@ -5,6 +5,7 @@
  * déconnexion efface **avant** de fermer la session, et une relecture n'efface que
  * sur une réponse. Une API muette lève avant, et rien ne s'efface (reprise 1 de 0c).
  */
+import type { IssueDeRotation } from '../rotation.ts'
 
 export interface EtapesDeDeconnexion {
   effacerLesReserves(): Promise<void>
@@ -31,4 +32,23 @@ export async function relireEtEffacer<T>(
   const lu = await lire()
   if (perdu(lu)) await effacer().catch(() => undefined)
   return lu
+}
+
+/**
+ * Le jeton d'accès vit un quart d'heure, et une lecture publique faite sans lui ne
+ * reçoit pas de 401 : elle passe pour anonyme, et les réservés d'une personne qui a
+ * l'accès y paraissent fermés. Quand la réponse a cet air-là, le jeton tourne et la
+ * lecture se refait une fois. Une rotation sans réponse ne conclut rien : elle lève,
+ * et rien ne s'applique ni ne s'efface.
+ */
+export async function lireEnPersonne<T>(
+  lire: () => Promise<T>,
+  sembleAnonyme: (lu: T) => boolean,
+  tourner: () => Promise<IssueDeRotation>,
+): Promise<T> {
+  const lu = await lire()
+  if (!sembleAnonyme(lu)) return lu
+  const issue = await tourner()
+  if (issue === 'injoignable') throw new Error('rotation sans réponse')
+  return issue === 'renouvelee' ? lire() : lu
 }

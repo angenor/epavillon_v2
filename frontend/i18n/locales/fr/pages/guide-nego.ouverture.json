@@ -3,7 +3,7 @@
   "sous-titre": "L'application des négociatrices et négociateurs francophones",
   "sans-compte": {
     "titre": "Sans compte, tout de suite",
-    "documents": "Documents de négociation",
+    "documents": "Documents de négociation, à lire sans réseau",
     "faq": "FAQ",
     "lexique": "Lexique anglais-français",
     "sessions": "Sessions de négociation du jour",
@@ -12,7 +12,7 @@
   "avec-compte": {
     "titre": "Avec un compte",
     "thematiques": "Vos thématiques et vos alertes",
-    "favoris": "Favoris, téléchargements, quiz",
+    "favoris": "Favoris, quiz",
     "inscriptions": "Inscriptions au Pavillon de la Francophonie"
   },
   "avec-code": {

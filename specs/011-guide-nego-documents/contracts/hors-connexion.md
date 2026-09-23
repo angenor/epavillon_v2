@@ -41,6 +41,8 @@ Il n'y a pas de compte exigé, sauf pour un réservé, qui demande l'accès.
 - une copie d'un document **absent** de la liste (dépublié) s'efface ;
 - une copie d'un document devenu réservé, alors que la personne n'a pas l'accès, s'efface (FR-034) ; avec l'accès, elle passe dans `gn-documents-reserves`, qui s'efface à la déconnexion.
 
+**Une liste lue sans jeton n'a pas autorité.** Le jeton d'accès vit un quart d'heure, et la liste, publique, ne rend pas de 401 sans lui : elle se sert alors comme à une visiteuse. Si elle montre fermé un réservé alors que ce téléphone sait la personne connectée et son accès ouvert, le jeton tourne et la liste se relit une fois ; une rotation sans réponse n'applique rien (`lireEnPersonne`). Même règle pour le 403 d'un téléchargement réservé. **La liste gardée porte la personne** pour qui elle a été servie : après une déconnexion, ses réservés se lisent comme l'API les servirait sans accès.
+
 ## Les effacements
 
 | Geste ou événement | Effacé | Jamais effacé |

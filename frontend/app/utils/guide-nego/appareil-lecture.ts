@@ -81,13 +81,17 @@ export function oublierLesVersionsDisparues(stockage: Stockage, servies: Array<{
   if (Object.keys(restantes).length !== Object.keys(toutes).length) ecrireJson(stockage, CLE_PROGRESSION, restantes)
 }
 
+/** Sa fiche ouverte, un document n'est plus « Nouveau » ; il n'entre pas pour autant dans les récents. */
+export function marquerVu(stockage: Stockage, id: string, a: string): void {
+  const ouverts = lireJson<Record<string, string>>(stockage, CLE_OUVERTS, {})
+  if (ouverts[id]) return
+  ouverts[id] = a
+  ecrireJson(stockage, CLE_OUVERTS, ouverts)
+}
+
 /** Ouvrir un document le marque ouvert, et le range en tête des derniers ouverts. */
 export function noterOuverture(stockage: Stockage, id: string, a: string): void {
-  const ouverts = lireJson<Record<string, string>>(stockage, CLE_OUVERTS, {})
-  if (!ouverts[id]) {
-    ouverts[id] = a
-    ecrireJson(stockage, CLE_OUVERTS, ouverts)
-  }
+  marquerVu(stockage, id, a)
   const recents = lireJson<Recent[]>(stockage, CLE_RECENTS, []).filter((r) => r.id !== id)
   ecrireJson(stockage, CLE_RECENTS, [{ id, a }, ...recents].slice(0, RECENTS_GARDES))
 }

@@ -15,6 +15,9 @@ export interface EtatLecture<T> {
 
 const DELAI_MS = 5000
 
+// Les lectures en vol, par clé : une promesse ne va pas dans un `useState`.
+const enVol = new Map<string, Promise<void>>()
+
 function avecDelai<T>(promesse: Promise<T>): Promise<T> {
   return new Promise((resolve, reject) => {
     const minuterie = setTimeout(() => reject(new Error('délai dépassé')), DELAI_MS)
@@ -40,8 +43,21 @@ export function useGnLecture<T>(cle: string, lire: (garde: T | null) => Promise<
   }))
   const connexion = useGnConnexion()
 
-  async function rafraichir(): Promise<void> {
-    if (etat.value.enCours) return
+  function rafraichir(): Promise<void> {
+    const courante = enVol.get(cle)
+    if (courante) return courante
+    const lecture = lireUneFois().finally(() => enVol.delete(cle))
+    enVol.set(cle, lecture)
+    return lecture
+  }
+
+  /** Après une écriture : une lecture partie avant elle rendrait l'état d'avant. */
+  async function relire(): Promise<void> {
+    await enVol.get(cle)
+    await rafraichir()
+  }
+
+  async function lireUneFois(): Promise<void> {
     etat.value.enCours = true
 
     if (!etat.value.pret) {
@@ -64,5 +80,5 @@ export function useGnLecture<T>(cle: string, lire: (garde: T | null) => Promise<
     }
   }
 
-  return { etat, rafraichir }
+  return { etat, rafraichir, relire }
 }

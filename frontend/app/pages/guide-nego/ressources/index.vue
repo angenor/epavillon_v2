@@ -12,10 +12,10 @@ useHead({ title: t('guide-nego.ressources.titre') })
     :titre="t('guide-nego.ressources.titre')"
     :sous-titre="t('guide-nego.ressources.sous-titre')"
   >
-    <GnEtatVide
+    <GnLigneReglage
+      :libelle="t('guide-nego.ressources.documents')"
       picto="doc"
-      :titre="t('guide-nego.ressources.vide.titre')"
-      :texte="t('guide-nego.ressources.vide.texte')"
+      vers="/guide-nego/ressources/documents"
     />
     <GnLigneReglage
       :libelle="t('guide-nego.ressources.profil')"

@@ -17,6 +17,8 @@ withDefaults(
     avatarDuTitre?: AvatarDEntete
     onglets?: boolean
     lexiqueOuvert?: boolean
+    /** Relayé au bandeau hors connexion, pour un écran qui n'est pas tout entier lisible sans réseau. */
+    ceQuiSeLit?: string
   }>(),
   {
     sousTitre: undefined,
@@ -25,6 +27,7 @@ withDefaults(
     avatarDuTitre: undefined,
     onglets: true,
     lexiqueOuvert: false,
+    ceQuiSeLit: undefined,
   },
 )
 
@@ -63,7 +66,7 @@ watch(
         </slot>
       </template>
     </GnEntete>
-    <GnBandeauConnexion v-if="bandeau" :lu-a="etat.luA" />
+    <GnBandeauConnexion v-if="bandeau" :lu-a="etat.luA" :ce-qui-se-lit="ceQuiSeLit" />
     <main class="gn-ecran__contenu">
       <slot />
     </main>

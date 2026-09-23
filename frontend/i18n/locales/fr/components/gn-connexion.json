@@ -7,7 +7,8 @@
   "synchronise": "Synchronisé {moment}",
   "hors-connexion": "Hors connexion",
   "hors-connexion-lu": "Hors connexion — lu {moment}",
-  "bandeau": "Hors connexion — lu {moment}. Tout ce qui est ici se lit sans réseau.",
-  "bandeau-sans-heure": "Hors connexion. Tout ce qui est ici se lit sans réseau.",
+  "bandeau": "Hors connexion — lu {moment}. {suite}",
+  "bandeau-sans-heure": "Hors connexion. {suite}",
+  "tout-se-lit": "Tout ce qui est ici se lit sans réseau.",
   "prete": "Prête hors connexion"
 }

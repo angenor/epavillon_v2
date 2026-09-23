@@ -1,0 +1,41 @@
+{
+  "titre": "Negotiation documents",
+  "sous-titre": {
+    "ligne": "{documents} · {telecharges}",
+    "documents": "{count} documents | {count} document | {count} documents",
+    "telecharges": "none downloaded | {count} downloaded | {count} downloaded",
+    "lisibles": "none readable now | {count} readable now | {count} readable now"
+  },
+  "hors-connexion": "Only downloaded documents open.",
+  "recherche": "Search a title, a word in the text",
+  "filtres": {
+    "choisi": "{nom}: {valeur}",
+    "types": { "pilule": "Type", "titre": "Document type", "tous": "all types" },
+    "themes": { "pilule": "Theme", "titre": "Theme", "tous": "all themes" },
+    "cops": { "pilule": "COP", "titre": "COP", "tous": "all COPs" }
+  },
+  "groupe": {
+    "tous": "All documents",
+    "resultats": "Results",
+    "sur": "{n} of {total}",
+    "nouveaux": "{count} new | {count} new | {count} new",
+    "connus": "known {moment}"
+  },
+  "vide-filtre": {
+    "titre": "No document for {criteres}",
+    "recherche": "“{recherche}”",
+    "texte": "The library holds {count} documents. | The library holds {count} document. | The library holds {count} documents.",
+    "retirer": "Clear filters"
+  },
+  "chargement": "Reading the library",
+  "vide": {
+    "titre": "No document published yet",
+    "texte": "IFDD guides, notes and summaries will appear here as soon as they are published. The list is read again each time this screen opens."
+  },
+  "erreur": {
+    "titre": "The library could not be read",
+    "texte": "Nothing has been read on this phone yet. The server did not answer: try again in a moment.",
+    "texte-hors-connexion": "Nothing has been read on this phone yet, and there is no network. The list will be read when the network returns.",
+    "reessayer": "Try again"
+  }
+}

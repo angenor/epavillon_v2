@@ -33,6 +33,7 @@ import {
   type Persistance,
   type Reconciliation,
 } from '~/utils/guide-nego/copies'
+import { lireEnPersonne } from '~/utils/guide-nego/effacements'
 import { magasinATelecharger, magasinDesCopies } from '~/utils/guide-nego/garde'
 import { lireCle, poserCle } from '~/utils/guide-nego/stockage'
 
@@ -92,6 +93,8 @@ function enSerie<T>(travail: () => Promise<T>): Promise<T> {
 const copies = ref<Copie[]>([])
 const progressions = ref<Record<string, Progression>>({})
 const persistance = ref<Persistance | null>(null)
+/** Les documents demandés sans réseau, qui partiront à son retour. */
+const enAttente = ref<string[]>([])
 const enCours = new Map<string, { controleur: AbortController; reserve: boolean; fin: Promise<IssueDeTelechargement> }>()
 let file: FileATelecharger | null = null
 // La bibliothèque relue juste avant que la file ne parte : ce qu'elle sert fait foi.
@@ -101,6 +104,7 @@ let generationDesReserves = 0
 
 async function recharger(): Promise<void> {
   copies.value = (await magasinDesCopies.lire()) ?? copies.value
+  enAttente.value = ((await magasinATelecharger.lire()) ?? []).map((d) => d.id)
 }
 
 /**
@@ -143,7 +147,13 @@ async function lireEnEntier(reponse: Response, recu: (octets: number) => void): 
 
 export function useGnCopies() {
   const api = useApi().guideNegoDocuments
+  const { rotation } = useApi()
   const connexion = useGnConnexion()
+  const session = useGnSession()
+  const acces = useGnAcces()
+  // Un réservé refusé à une personne dont ce téléphone sait l'accès ouvert : le jeton
+  // d'accès a expiré, et une lecture publique ne reçoit pas de 401 pour le dire.
+  const accesConnu = () => session.connectee.value && acces.ouvert.value
   const baseDeLApi = String(useRuntimeConfig().public.apiBase ?? '')
   const cleDe = (chemin: string): string => cleDeCopie(chemin, baseDeLApi, window.location.href)
 
@@ -156,7 +166,12 @@ export function useGnCopies() {
 
   /** `compter` : faux pour les images quand seule la forme lisible annonçait sa taille. */
   async function lireLaRessource(chemin: string, signal: AbortSignal, id: string, compter: boolean) {
-    const reponse = await api.ressource(chemin, signal)
+    let reponse = await api.ressource(chemin, signal)
+    if (reponse?.status === 403 && accesConnu()) {
+      const issue = await rotation()
+      if (issue === 'injoignable') return { refus: false }
+      if (issue === 'renouvelee') reponse = await api.ressource(chemin, signal)
+    }
     if (!reponse) return null
     if (!reponse.ok) return { refus: reponse.status < 500 && !STATUTS_DE_PANNE.has(reponse.status) }
     const annoncee = Number(reponse.headers.get('content-length'))
@@ -292,6 +307,7 @@ export function useGnCopies() {
     }
     if (!connexion.etat.value.enLigne) {
       await file?.demander(demande)
+      await recharger()
       await persistee
       return 'en-attente'
     }
@@ -304,6 +320,7 @@ export function useGnCopies() {
   async function annuler(id: string): Promise<void> {
     enCours.get(id)?.controleur.abort()
     await magasinATelecharger.retirer(id).catch(() => undefined)
+    await recharger()
   }
 
   async function retirer(id: string): Promise<void> {
@@ -381,7 +398,11 @@ export function useGnCopies() {
   async function partir(): Promise<void> {
     if (!file || !connexion.etat.value.enLigne) return
     if (!((await magasinATelecharger.lire()) ?? []).length) return
-    const servie = await api.bibliotheque().catch(() => null)
+    const servie = await lireEnPersonne(
+      () => api.bibliotheque(),
+      (lu) => accesConnu() && lu.valeur.documents.some((d) => d.restricted && !d.accessible),
+      rotation,
+    ).catch(() => null)
     if (!servie) return
     await rapprocher(servie.valeur)
     servisPourLaFile = new Map(servie.valeur.documents.map((d) => [d.id, d]))
@@ -393,6 +414,7 @@ export function useGnCopies() {
     progressions: readonly(progressions),
     /** Nul tant qu'aucun téléchargement ne l'a demandée ; « refusée » se dit dans « Mes documents ». */
     persistance: readonly(persistance),
+    enAttente: readonly(enAttente),
     recharger,
     telecharger,
     annuler,

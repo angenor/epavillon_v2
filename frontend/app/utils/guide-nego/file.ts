@@ -124,6 +124,8 @@ export interface DependancesFile {
 
 export function creerFile(deps: DependancesFile): File {
   let departEnCours: Promise<Suite[]> | null = null
+  // Posé ou remplacé pendant un départ : le départ suivant le prend aussitôt.
+  let aRejouer = false
 
   const expediteurDe = (cle: string) =>
     typeof deps.expediteurs === 'function' ? deps.expediteurs(cle) : deps.expediteurs.get(cle)
@@ -161,6 +163,12 @@ export function creerFile(deps: DependancesFile): File {
       suites.push(suite)
 
       if (sort === 'reportee') continue
+      // Un choix posé pendant l'envoi a pris la place de celui-ci : il reste, et repart.
+      const gardee = await deps.magasin.lireUne(intention.cle).catch(() => intention)
+      if (gardee && JSON.stringify(gardee.corps) !== JSON.stringify(intention.corps)) {
+        aRejouer = true
+        continue
+      }
       try {
         await deps.magasin.retirer(intention.cle)
       } catch {
@@ -179,10 +187,20 @@ export function creerFile(deps: DependancesFile): File {
   }
 
   return {
-    poser: (nouvelle) => poserUneIntention(deps.magasin, nouvelle),
+    async poser(nouvelle) {
+      if (departEnCours) aRejouer = true
+      await poserUneIntention(deps.magasin, nouvelle)
+    },
     partir() {
       if (departEnCours) return departEnCours
-      departEnCours = envoyerTout().finally(() => (departEnCours = null))
+      departEnCours = (async () => {
+        const suites = await envoyerTout()
+        while (aRejouer) {
+          aRejouer = false
+          suites.push(...(await envoyerTout()))
+        }
+        return suites
+      })().finally(() => (departEnCours = null))
       return departEnCours
     },
     async vider() {

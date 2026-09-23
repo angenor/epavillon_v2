@@ -2,9 +2,9 @@
 /**
  * Section 5 — les composants livrés à l'étape 0a, dans toutes leurs variantes.
  *
- * La section est découpée en quatre lots — cadre, commandes, saisie, surfaces — pour
+ * La section est découpée en lots — cadre, commandes, saisie, surfaces, documents — pour
  * qu'une étape ajoute les siens sans rouvrir les autres, et pour qu'aucun fichier
- * n'approche la limite de mille lignes. Les classes communes aux quatre vivent ici.
+ * n'approche la limite de mille lignes. Les classes communes aux lots vivent ici.
  *
  * Rien n'est dessiné à la main : ce qui n'est pas livré n'est pas montré, et la note
  * finale dit lesquels manquent. Une planche qui simule un composant ment deux fois —
@@ -27,6 +27,7 @@ const { t } = useI18n()
       <GnPlancheComposantsCommandes />
       <GnPlancheComposantsSaisie />
       <GnPlancheComposantsSurfaces />
+      <GnPlancheComposantsDocuments />
 
       <GnPlancheSection :titre="t('gn-planche-composants.absents')">
         <p class="gn-planche-note">{{ t('gn-planche-composants.absents-propos') }}</p>
