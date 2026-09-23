@@ -22,7 +22,9 @@
     },
     "documents": {
       "titre": "Documents récents",
-      "vide": "Aucun document ouvert. Ceux que vous lirez paraîtront ici, lisibles sans réseau une fois téléchargés."
+      "vide": "Aucun document ouvert. Ceux que vous lirez paraîtront ici, lisibles sans réseau une fois téléchargés.",
+      "lu": "lu {moment}",
+      "lu-page": "lu {moment}, p. {page}"
     },
     "lexique": {
       "ouvrir": "Ouvrir le lexique anglais-français"

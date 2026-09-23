@@ -54,6 +54,8 @@ Il n'y a pas de compte exigé, sauf pour un réservé, qui demande l'accès.
 | Le navigateur a vidé une copie, vu à l'ouverture | Ce qui reste de cette copie, et sa fiche | Les autres copies |
 | API injoignable, `/auth/refresh` en panne | **Rien** — reprise 1 de 0c | Tout |
 
+**Un cache se vide entrée par entrée avant d'être supprimé.** Chrome ne rend la place d'un cache supprimé qu'une fois la page déchargée, celle d'une entrée supprimée aussitôt : sans cela, la place mesurée après « Tout retirer » ne baisse pas (SC-005, mesuré le 23/09). Pour la même raison, savoir si une entrée existe passe par `cache.keys(cle)`, jamais par une réponse lue et laissée sans être consommée.
+
 **La place** : `useGnPlace` relit l'estimation **après** l'effacement. La baisse est immédiate pour Cache Storage (SC-005).
 
 ## Les textes qui changent

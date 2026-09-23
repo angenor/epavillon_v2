@@ -2,6 +2,7 @@
 import type { SegmentDeChoix } from '~/components/guide-nego/GnSegmente.vue'
 import type { ChoixDeTheme } from '~/utils/guide-nego/theme'
 import { momentDeLecture } from '~/utils/guide-nego/connexion'
+import { placeDesCopies } from '~/utils/guide-nego/mes-documents'
 import { tailleLisible } from '~/utils/guide-nego/place'
 
 /**
@@ -25,14 +26,14 @@ const acces = useGnAcces()
 const thematiques = useGnThematiques()
 const pays = useGnPays()
 const connexion = useGnConnexion()
-const { place, mesurer } = useGnPlace()
+const copies = useGnCopies()
 const { momentLisible } = useGnMomentLecture()
 
 const confirmation = ref(false)
 
 onMounted(async () => {
   session.relireAuRetourAuPremierPlan()
-  void mesurer()
+  void copies.recharger().catch(() => undefined)
   await session.assurer()
   if (!session.connectee.value) return
   void acces.assurer()
@@ -64,13 +65,12 @@ const valeurDesThematiques = computed(() => {
   return t('guide-nego.reglages.suivi.nombre-de-thematiques', { count: codes.length }, codes.length)
 })
 
-const valeurDesTelechargements = computed(() =>
-  place.value
-    ? t('guide-nego.reglages.suivi.telechargements-place', {
-        place: tailleLisible(place.value.utilise, locale.value),
-      })
-    : t('guide-nego.reglages.suivi.telechargements-vide'),
-)
+const valeurDesTelechargements = computed(() => {
+  const n = copies.copies.value.length
+  if (!n) return t('guide-nego.reglages.suivi.telechargements-vide')
+  const place = tailleLisible(placeDesCopies(copies.copies.value), locale.value)
+  return t('guide-nego.reglages.suivi.telechargements-place', { count: n, place }, n)
+})
 
 /** L'heure du téléphone, sans fuseau (écart 32) : une information, pas une action. */
 const derniereSynchronisation = computed(() => {
@@ -130,7 +130,7 @@ useHead({ title: t('guide-nego.reglages.titre') })
         :libelle="t('guide-nego.reglages.suivi.telechargements')"
         :valeur="valeurDesTelechargements"
         picto="download"
-        vers="/guide-nego/ressources/telechargements"
+        vers="/guide-nego/ressources/mes-documents"
       />
       <!-- L'état, et non un rôle : « Négociatrice — réseau » de la maquette est
            genré et ne se reprend pas (SC-006). -->

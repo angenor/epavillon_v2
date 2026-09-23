@@ -34,7 +34,7 @@
     "aucune-thematique": "Aucune thématique suivie",
     "nombre-de-thematiques": "{count} thématique suivie | {count} thématique suivie | {count} thématiques suivies",
     "telechargements": "Mes téléchargements",
-    "telechargements-place": "Aucun document · {place} sur le téléphone",
+    "telechargements-place": "{count} document · {place} | {count} document · {place} | {count} documents · {place}",
     "telechargements-vide": "Aucun document gardé"
   },
   "application": {

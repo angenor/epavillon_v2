@@ -55,8 +55,10 @@ test('« Tout retirer » laisse les lectures, la progression et les autres cache
   const stockage = fauxStockage()
   noterProgression(stockage, 'guide', '2025', 59, '2026-11-12T10:00:00Z')
 
+  const publics = noms.get(CACHE_PUBLICS)
   await toutRetirer(depots)
 
+  assert.equal(publics?.size, 0, 'entrée par entrée : Chrome ne rend la place d’un cache supprimé qu’au rechargement')
   assert.deepEqual([...noms.keys()], ['gn-coquille-v7'])
   assert.deepEqual(await depots.copies.lire(), [])
   assert.deepEqual(await depots.aTelecharger.lire(), [])

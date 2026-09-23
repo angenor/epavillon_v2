@@ -34,7 +34,7 @@
     "aucune-thematique": "No theme followed",
     "nombre-de-thematiques": "{count} theme followed | {count} theme followed | {count} themes followed",
     "telechargements": "My downloads",
-    "telechargements-place": "No document · {place} on the phone",
+    "telechargements-place": "{count} document · {place} | {count} document · {place} | {count} documents · {place}",
     "telechargements-vide": "No document kept"
   },
   "application": {

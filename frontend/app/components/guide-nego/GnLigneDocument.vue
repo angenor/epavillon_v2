@@ -3,18 +3,36 @@ import type { LibraryDocument } from '~/types/negotiation-documents'
 import { ETAT_DE_LA_MARQUE, type MarqueDeLigne } from '~/utils/guide-nego/documents'
 import { tailleLisible } from '~/utils/guide-nego/place'
 
-const props = defineProps<{
-  document: LibraryDocument
-  /** Libellé du type, déjà résolu depuis le vocabulaire servi par l'API — jamais un fichier i18n. */
-  type: string
-  marques: MarqueDeLigne[]
-  /** Chemin de la fiche. */
-  vers: string
-  /** Téléchargement en cours : octets reçus et total (nul si inconnu). */
-  progression?: { recus: number; total: number | null } | null
-  /** La recherche a trouvé le mot dans le texte, pas dans le titre : l'étiquette imprimée et l'extrait. */
-  trouve?: { page: string; extrait: string } | null
-}>()
+export type MorceauDeMeta = 'pages' | 'taille' | 'origine' | 'editeur'
+
+const props = withDefaults(
+  defineProps<{
+    document: LibraryDocument
+    /** Libellé du type, déjà résolu depuis le vocabulaire servi par l'API — jamais un fichier i18n. Absent, la ligne s'ouvre sur le titre. */
+    type?: string
+    marques: MarqueDeLigne[]
+    /** Chemin de la fiche. */
+    vers: string
+    /** Téléchargement en cours : octets reçus et total (nul si inconnu). */
+    progression?: { recus: number; total: number | null } | null
+    /** La recherche a trouvé le mot dans le texte, pas dans le titre : l'étiquette imprimée et l'extrait. */
+    trouve?: { page: string; extrait: string } | null
+    /** Ce que dit la ligne sous le titre, dans cet ordre. */
+    morceaux?: readonly MorceauDeMeta[]
+    /** La place de la copie gardée, qui compte ses images, plutôt que celle annoncée par la liste. */
+    octets?: number | null
+    /** Ajouté en fin de ligne : « téléchargé hier à 18:05 », « lu hier à 18:05, p. 14 ». */
+    precision?: string
+  }>(),
+  {
+    type: undefined,
+    progression: null,
+    trouve: null,
+    morceaux: () => ['pages', 'taille', 'origine'],
+    octets: undefined,
+    precision: undefined,
+  },
+)
 
 const { t, locale } = useI18n()
 
@@ -45,14 +63,17 @@ const meta = computed(() => {
     d.publisher && annee
       ? t('gn-ligne-document.editeur-annee', { editeur: d.publisher, annee })
       : (d.publisher ?? annee)
+  const octets = props.octets === undefined ? d.reading_bytes : props.octets
+  const valeurs: Record<MorceauDeMeta, string | null> = {
+    pages: d.page_count === null ? null : t('gn-ligne-document.pages', { count: d.page_count }, d.page_count),
+    taille: octets === null ? null : tailleLisible(octets, locale.value),
+    origine,
+    editeur: d.publisher,
+  }
   const morceaux = estLien.value
-    ? [t('gn-ligne-document.page-web'), origine]
-    : [
-        d.page_count === null ? null : t('gn-ligne-document.pages', { count: d.page_count }, d.page_count),
-        d.reading_bytes === null ? null : tailleLisible(d.reading_bytes, locale.value),
-        origine,
-      ]
-  return morceaux.filter((m): m is string => !!m).join(' · ')
+    ? [t('gn-ligne-document.page-web'), ...props.morceaux.filter((m) => m === 'origine' || m === 'editeur').map((m) => valeurs[m])]
+    : props.morceaux.map((m) => valeurs[m])
+  return [...morceaux, props.precision].filter((m): m is string => !!m).join(' · ')
 })
 
 const pourcentage = computed(() => {
@@ -74,7 +95,7 @@ const texteDeProgression = computed(() =>
   <NuxtLink :to="vers" class="gn-ligne-document" :class="{ 'gn-ligne-document--indisponible': indisponible }">
     <GnPicto :nom="estLien ? 'external' : 'doc'" :taille="24" class="gn-ligne-document__picto" />
     <span class="gn-ligne-document__corps">
-      <span class="gn-ligne-document__type">{{ type }}</span>
+      <span v-if="type" class="gn-ligne-document__type">{{ type }}</span>
       <span class="gn-ligne-document__titre" :class="{ 'gn-ligne-document__titre--eteint': eteint }">
         {{ document.title }}
       </span>

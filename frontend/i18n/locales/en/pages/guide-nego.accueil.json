@@ -22,7 +22,9 @@
     },
     "documents": {
       "titre": "Recent documents",
-      "vide": "No document opened. The ones you read will appear here, readable offline once downloaded."
+      "vide": "No document opened. The ones you read will appear here, readable offline once downloaded.",
+      "lu": "read {moment}",
+      "lu-page": "read {moment}, p. {page}"
     },
     "lexique": {
       "ouvrir": "Open the English-French glossary"

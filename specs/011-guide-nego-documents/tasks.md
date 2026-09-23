@@ -309,9 +309,9 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
 
 **Test indépendant** : [quickstart.md § 5](quickstart.md).
 
-- [ ] T096 [P] [US5] Créer les traductions `frontend/i18n/locales/fr/pages/guide-nego.mes-documents.json` et `en/`
+- [X] T096 [P] [US5] Créer les traductions `frontend/i18n/locales/fr/pages/guide-nego.mes-documents.json` et `en/`
 - [X] T097 [US5] *(fait en phase 8 : « Favori » de la fiche en a besoin ; la file de 0c sert la famille de clés `favori-` par `inscrireFamille`)* Écrire `frontend/app/composables/guide-nego/useGnFavoris.ts` : lecture par `useGnLecture` (clé `mes-favoris`) ; pose et retrait par la file de 0c (clé `favori-<id>`, corps = état voulu, sans `If-Match`) ; effacement de la garde des favoris à la déconnexion
-- [ ] T098 [US5] Transformer `frontend/app/pages/guide-nego/ressources/telechargements.vue` en « Mes documents » :
+- [X] T098 [US5] Transformer `frontend/app/pages/guide-nego/ressources/telechargements.vue` en « Mes documents » *(renommée `mes-documents.vue`, pour que la page et sa traduction portent le même nom ; l'adresse suit)* :
   - l'en-tête « n téléchargé(s) · n favori(s) » ;
   - « Sur le téléphone » avec la place et les dates ;
   - `GnJauge` : place utilisée et libre, jamais un faux zéro ;
@@ -319,10 +319,10 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
   - « Tout retirer du téléphone » par `GnConfirmation` (aplat rouge assombri, écart 33), qui nomme les documents et la place ;
   - la place relue après l'effacement ;
   - si `useGnCopies().persistance` vaut `refusee` : une ligne qui dit que le téléphone peut effacer les copies quand il manque de place, et qu'il faudra les retélécharger (exigence du 23/09).
-- [ ] T099 [US5] Mettre à jour la ligne « Mes téléchargements » du profil (`frontend/app/pages/guide-nego/ressources/reglages.vue`) : nombre de documents gardés et leur place, qui mène à « Mes documents »
-- [ ] T100 [US5] Remplir le bloc « Documents récents » de « Ma journée » (`frontend/app/pages/guide-nego/index.vue`, `utils/guide-nego/journee.ts`) avec les derniers ouverts sur l'appareil et leur dernière page lue ; son état vide reste pour un appareil neuf
-- [ ] T101 [US5] Corriger le paragraphe de confidentialité de « À propos » dans `frontend/i18n/locales/{fr,en}/pages/guide-nego.a-propos.json` : les téléchargements restent sur le téléphone ; thématiques, favoris et accords suivent le compte
-- [ ] T102 [US5] Dérouler [quickstart.md § 5](quickstart.md) **sur la version construite** : favori sans réseau, second appareil, tout retirer et la place qui baisse (SC-005), déconnexion (SC-006), accès retiré, API coupée qui n'efface rien, copie dépubliée
+- [X] T099 [US5] Mettre à jour la ligne « Mes téléchargements » du profil (`frontend/app/pages/guide-nego/ressources/reglages.vue`) : nombre de documents gardés et leur place, qui mène à « Mes documents »
+- [X] T100 [US5] Remplir le bloc « Documents récents » de « Ma journée » (`frontend/app/pages/guide-nego/index.vue`, `utils/guide-nego/journee.ts`) avec les derniers ouverts sur l'appareil et leur dernière page lue ; son état vide reste pour un appareil neuf
+- [X] T101 [US5] Corriger le paragraphe de confidentialité de « À propos » dans `frontend/i18n/locales/{fr,en}/pages/guide-nego.a-propos.json` : les téléchargements restent sur le téléphone ; thématiques, favoris et accords suivent le compte
+- [ ] T102 [US5] Dérouler [quickstart.md § 5](quickstart.md) **sur la version construite** : favori sans réseau, second appareil, tout retirer et la place qui baisse (SC-005), déconnexion (SC-006), accès retiré, API coupée qui n'efface rien, copie dépubliée *(23/09 : déroulé sauf les étapes qui demandent un compte avec l'accès négociateur — la copie réservée, la déconnexion qui l'efface, l'accès retiré ; aucun compte de recette n'a cet accès, et l'ouvrir attend l'accord du commanditaire)*
 
 **Checkpoint** : la place se maîtrise, et les réservés ne restent pas. **Commit.**
 

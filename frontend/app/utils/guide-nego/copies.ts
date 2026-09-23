@@ -72,6 +72,8 @@ export function magasinEnMemoire<T extends { id: string }>(): Magasin<T> {
 /** Ce que le code attend de Cache Storage — des clés en adresses, pas en `Request`. */
 export interface CacheDeDocuments {
   lire(cle: string): Promise<Response | null>
+  /** Sans lire le corps : une réponse lue et gardée retient ses octets, même son cache supprimé. */
+  contient(cle: string): Promise<boolean>
   poser(cle: string, reponse: Response): Promise<void>
   retirer(cle: string): Promise<void>
   cles(): Promise<string[]>
@@ -138,10 +140,18 @@ export async function retirerUneCopie(depots: Depots, id: string): Promise<void>
   await depots.aTelecharger.retirer(id)
 }
 
+// Entrée par entrée d'abord : Chrome ne rend la place d'un cache supprimé qu'une fois
+// la page déchargée, celle d'une entrée aussitôt (SC-005).
+async function viderLeCache(depots: Depots, nom: string): Promise<void> {
+  const cache = await depots.caches.ouvrir(nom)
+  for (const cle of await cache.cles()) await cache.retirer(cle)
+  await depots.caches.supprimer(nom)
+}
+
 /** « Tout retirer » : les documents seulement — ni les lectures, ni les réglages, ni la file de 0c. */
 export async function toutRetirer(depots: Depots): Promise<void> {
-  await depots.caches.supprimer(CACHE_PUBLICS)
-  await depots.caches.supprimer(CACHE_RESERVES)
+  await viderLeCache(depots, CACHE_PUBLICS)
+  await viderLeCache(depots, CACHE_RESERVES)
   await depots.copies.vider()
   await depots.aTelecharger.vider()
 }
@@ -153,7 +163,7 @@ export async function toutRetirer(depots: Depots): Promise<void> {
 export async function effacerLesReserves(depots: Depots): Promise<void> {
   // Le cache d'abord : c'est lui qui rend un réservé lisible. Une fiche restée faute
   // d'avoir pu lire le magasin tombera à la prochaine vérification, sans son cache.
-  await depots.caches.supprimer(CACHE_RESERVES)
+  await viderLeCache(depots, CACHE_RESERVES)
   for (const copie of (await depots.copies.lire()) ?? []) {
     if (copie.reserve) await depots.copies.retirer(copie.id)
   }
@@ -226,7 +236,7 @@ async function deplacer(avant: CacheDeDocuments, apres: CacheDeDocuments, cles: 
 export async function copieIntacte(depots: Depots, copie: Copie): Promise<boolean> {
   const cache = await depots.caches.ouvrir(cacheDe(copie.reserve))
   for (const cle of copie.cles) {
-    if (!(await cache.lire(cle))) return false
+    if (!(await cache.contient(cle))) return false
   }
   return true
 }

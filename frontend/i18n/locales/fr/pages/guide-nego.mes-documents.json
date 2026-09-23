@@ -1,0 +1,49 @@
+{
+  "titre": "Mes documents",
+  "resume": {
+    "telecharges": "Aucun téléchargé | {count} téléchargé | {count} téléchargés",
+    "favoris": "aucun favori | {count} favori | {count} favoris"
+  },
+  "chargement": "Lecture de ce qui est gardé sur le téléphone",
+  "illisible": {
+    "titre": "La bibliothèque n'est pas encore lue",
+    "texte": "Les titres des documents viennent de la bibliothèque, qui ne s'est jamais lue sur ce téléphone. Elle se lira au retour du réseau.",
+    "sortie": "Ouvrir la bibliothèque",
+    "texte-en-ligne": "Les titres des documents viennent de la bibliothèque, qui n'a pas pu se lire. Ouvrez-la pour réessayer."
+  },
+  "telephone": {
+    "titre": "Sur le téléphone",
+    "garde": "téléchargé {moment}",
+    "vide": "Aucun document téléchargé. Un document se télécharge depuis sa fiche, pour se lire sans réseau ; il reste sur ce téléphone, pas sur votre compte.",
+    "vers-la-bibliotheque": "Ouvrir la bibliothèque",
+    "mesure": "Mesure de la place occupée",
+    "impossible": "Ce navigateur ne dit pas la place que Guide Négo occupe : elle ne peut pas être mesurée sur cet appareil.",
+    "persistance-refusee": "Ce téléphone n'a pas accordé de garder les documents à coup sûr : s'il manque de place, il peut les effacer. Il faudra alors les télécharger de nouveau.",
+    "orphelines": "Et {count} document qui n'est plus dans la bibliothèque : il s'effacera à sa prochaine lecture. | Et {count} document qui n'est plus dans la bibliothèque : il s'effacera à sa prochaine lecture. | Et {count} documents qui ne sont plus dans la bibliothèque : ils s'effaceront à sa prochaine lecture."
+  },
+  "favoris": {
+    "titre": "Favoris",
+    "rappel": "Un favori se lit sans réseau seulement s'il est aussi téléchargé.",
+    "vide": "Aucun favori. Touchez « Favori » sur la fiche d'un document pour le retrouver ici, sur tous vos appareils.",
+    "sans-compte": "Les favoris suivent votre compte d'un appareil à l'autre. Créez un compte ou connectez-vous pour en poser ; les téléchargements, eux, n'en demandent pas.",
+    "creer": "Créer mon compte",
+    "connexion": "J'ai déjà un compte — Me connecter",
+    "pas-encore-lus": "Vos favoris ne sont pas encore lus sur ce téléphone. Ils se liront au retour du réseau."
+  },
+  "tout-retirer": {
+    "bouton": "Tout retirer du téléphone",
+    "reste": "La bibliothèque et vos favoris restent.",
+    "reste-sans-compte": "La bibliothèque reste.",
+    "question": "Retirer {count} document du téléphone ? | Retirer {count} document du téléphone ? | Retirer {count} documents du téléphone ?",
+    "document": "{titre} ({taille})",
+    "un": "{document} ne se lira plus sans réseau. Il reste dans la bibliothèque, et vos favoris ne changent pas.",
+    "un-sans-compte": "{document} ne se lira plus sans réseau. Il reste dans la bibliothèque.",
+    "plusieurs": "{documents} ne se liront plus sans réseau : {taille} en tout. Ils restent dans la bibliothèque, et vos favoris ne changent pas.",
+    "plusieurs-sans-compte": "{documents} ne se liront plus sans réseau : {taille} en tout. Ils restent dans la bibliothèque.",
+    "action": "Retirer",
+    "fait": "Document retiré du téléphone. | Document retiré du téléphone. | Documents retirés du téléphone.",
+    "orphelines": "{count} document qui n'est plus dans la bibliothèque ({taille}) | {count} document qui n'est plus dans la bibliothèque ({taille}) | {count} documents qui ne sont plus dans la bibliothèque ({taille})",
+    "attente": "Le téléchargement demandé de {documents} est annulé aussi. | Le téléchargement demandé de {documents} est annulé aussi. | Les téléchargements demandés de {documents} sont annulés aussi.",
+    "echec": "Le téléphone n'a pas pu tout retirer. Fermez les autres onglets de Guide Négo, puis réessayez."
+  }
+}

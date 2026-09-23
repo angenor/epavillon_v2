@@ -28,7 +28,12 @@ export function useGnFavoris() {
   const api = useApi().guideNegoDocuments
   const session = useGnSession()
   const file = useGnFile()
-  const enFile = useState<Record<string, boolean>>('gn-favoris-en-file', () => ({}))
+  // Par personne : un choix de A encore dans la file ne s'affiche pas chez B.
+  const enFileParPersonne = useState<Record<string, Record<string, boolean>>>('gn-favoris-en-file', () => ({}))
+  const enFile = computed(() => enFileParPersonne.value[session.compte.value.id ?? ''] ?? {})
+  function poserEnFile(personne: string, choix: Record<string, boolean>): void {
+    enFileParPersonne.value = { ...enFileParPersonne.value, [personne]: choix }
+  }
 
   const lecture = useGnLecture<FavorisLus>(CLE_LECTURE_FAVORIS, async () => {
     const personne = session.compte.value.id
@@ -45,17 +50,22 @@ export function useGnFavoris() {
 
   async function relireLaFile(): Promise<void> {
     const personne = session.compte.value.id
+    if (!personne) return
     const intentions = await magasinDesEcritures.lire().catch(() => [])
-    enFile.value = Object.fromEntries(
+    poserEnFile(personne, Object.fromEntries(
       intentions
         .filter((i) => i.personne === personne && i.cle.startsWith(PREFIXE))
         .map((i) => [i.cle.slice(PREFIXE.length), (i.corps as FavoriVoulu).favori]),
-    )
+    ))
   }
 
-  const favoris = computed<ReadonlySet<string>>(() => {
+  const lusPourMoi = computed(() => {
     const lus = lecture.etat.value.valeur
-    const ids = new Set(lus && lus.personne === session.compte.value.id ? lus.ids : [])
+    return lus && lus.personne === session.compte.value.id ? lus : null
+  })
+
+  const favoris = computed<ReadonlySet<string>>(() => {
+    const ids = new Set(lusPourMoi.value?.ids ?? [])
     for (const [id, voulu] of Object.entries(enFile.value)) {
       if (voulu) ids.add(id)
       else ids.delete(id)
@@ -84,9 +94,10 @@ export function useGnFavoris() {
 
   /** Le choix s'affiche tout de suite ; la file l'envoie quand elle peut. */
   async function basculer(id: string): Promise<void> {
-    if (!session.compte.value.id) return
+    const personne = session.compte.value.id
+    if (!personne) return
     const voulu = !favoris.value.has(id)
-    enFile.value = { ...enFile.value, [id]: voulu }
+    poserEnFile(personne, { ...enFile.value, [id]: voulu })
     await file.poser(`${PREFIXE}${id}`, { favori: voulu } satisfies FavoriVoulu, null)
     await file.partir()
     await relireLaFile()
@@ -95,6 +106,8 @@ export function useGnFavoris() {
   return {
     favoris,
     pret: computed(() => lecture.etat.value.pret),
+    /** Lus au moins une fois pour cette personne : sinon, un ensemble vide ne veut pas dire « aucun ». */
+    connus: computed(() => lusPourMoi.value !== null),
     luA: computed(() => lecture.etat.value.luA),
     assurer,
     basculer,

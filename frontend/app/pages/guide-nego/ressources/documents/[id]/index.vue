@@ -380,7 +380,7 @@ useHead({ title: computed(() => document.value?.title ?? t('guide-nego.document.
         <div v-if="issue" class="gn-fiche__issue" role="alert">
           <GnPicto nom="warn" :taille="20" class="gn-fiche__issue-picto" />
           <span class="gn-fiche__issue-texte">{{ texteDeLIssue }}</span>
-          <NuxtLink v-if="issue === 'place'" to="/guide-nego/ressources/telechargements" class="gn-fiche__issue-sortie">
+          <NuxtLink v-if="issue === 'place'" to="/guide-nego/ressources/mes-documents" class="gn-fiche__issue-sortie">
             {{ t('guide-nego.document.issue.place-sortie') }}
           </NuxtLink>
         </div>

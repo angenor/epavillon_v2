@@ -1,0 +1,49 @@
+{
+  "titre": "My documents",
+  "resume": {
+    "telecharges": "None downloaded | {count} downloaded | {count} downloaded",
+    "favoris": "no favourite | {count} favourite | {count} favourites"
+  },
+  "chargement": "Reading what is kept on the phone",
+  "illisible": {
+    "titre": "The library has not been read yet",
+    "texte": "Document titles come from the library, which has never been read on this phone. It will be read when the network returns.",
+    "sortie": "Open the library",
+    "texte-en-ligne": "Document titles come from the library, which could not be read. Open it to try again."
+  },
+  "telephone": {
+    "titre": "On the phone",
+    "garde": "downloaded {moment}",
+    "vide": "No document downloaded. A document is downloaded from its page, to be read without a network; it stays on this phone, not on your account.",
+    "vers-la-bibliotheque": "Open the library",
+    "mesure": "Measuring the space used",
+    "impossible": "This browser does not tell how much space Guide Négo uses: it cannot be measured on this device.",
+    "persistance-refusee": "This phone has not agreed to keep documents for sure: if it runs out of space, it may erase them. You will then need to download them again.",
+    "orphelines": "And {count} document that is no longer in the library: it will be erased the next time the library is read. | And {count} document that is no longer in the library: it will be erased the next time the library is read. | And {count} documents that are no longer in the library: they will be erased the next time the library is read."
+  },
+  "favoris": {
+    "titre": "Favourites",
+    "rappel": "A favourite can be read without a network only if it is also downloaded.",
+    "vide": "No favourite. Tap “Favourite” on a document's page to find it here, on all your devices.",
+    "sans-compte": "Favourites follow your account from one device to another. Create an account or sign in to add some; downloads do not need one.",
+    "creer": "Create my account",
+    "connexion": "I already have an account — Sign in",
+    "pas-encore-lus": "Your favourites have not been read on this phone yet. They will be read when the network returns."
+  },
+  "tout-retirer": {
+    "bouton": "Remove everything from the phone",
+    "reste": "The library and your favourites stay.",
+    "reste-sans-compte": "The library stays.",
+    "question": "Remove {count} document from the phone? | Remove {count} document from the phone? | Remove {count} documents from the phone?",
+    "document": "{titre} ({taille})",
+    "un": "{document} will no longer be readable without a network. It stays in the library, and your favourites do not change.",
+    "un-sans-compte": "{document} will no longer be readable without a network. It stays in the library.",
+    "plusieurs": "{documents} will no longer be readable without a network: {taille} in all. They stay in the library, and your favourites do not change.",
+    "plusieurs-sans-compte": "{documents} will no longer be readable without a network: {taille} in all. They stay in the library.",
+    "action": "Remove",
+    "fait": "Document removed from the phone. | Document removed from the phone. | Documents removed from the phone.",
+    "orphelines": "{count} document that is no longer in the library ({taille}) | {count} document that is no longer in the library ({taille}) | {count} documents that are no longer in the library ({taille})",
+    "attente": "The requested download of {documents} is cancelled too. | The requested download of {documents} is cancelled too. | The requested downloads of {documents} are cancelled too.",
+    "echec": "The phone could not remove everything. Close the other Guide Négo tabs, then try again."
+  }
+}

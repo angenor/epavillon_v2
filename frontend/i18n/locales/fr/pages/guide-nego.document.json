@@ -48,7 +48,7 @@
   "issue": {
     "place": "La place manque sur ce téléphone : il faut {taille} de libre.",
     "place-sans-taille": "La place manque sur ce téléphone pour garder ce document.",
-    "place-sortie": "Mes téléchargements",
+    "place-sortie": "Mes documents",
     "panne": "Le réseau est tombé pendant le téléchargement. Rien n'est gardé à moitié.",
     "refus": "Ce document n'est plus disponible, ou votre accès ne l'ouvre pas."
   },

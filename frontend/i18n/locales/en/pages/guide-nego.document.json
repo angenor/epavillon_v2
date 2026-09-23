@@ -48,7 +48,7 @@
   "issue": {
     "place": "This phone is out of space: {taille} must be free.",
     "place-sans-taille": "This phone is out of space to keep this document.",
-    "place-sortie": "My downloads",
+    "place-sortie": "My documents",
     "panne": "The network dropped during the download. Nothing is kept half-way.",
     "refus": "This document is no longer available, or your access does not open it."
   },

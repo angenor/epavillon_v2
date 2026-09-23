@@ -5,6 +5,8 @@
  * le tient sans navigateur, et chaque étape qui remplit un bloc (1, 3a, 3b, 4, 5) le
  * trouve à sa place.
  */
+import type { LibraryDocument } from '~/types/negotiation-documents'
+import type { Progression, Recent } from './appareil-lecture.ts'
 import { jourCivil } from './connexion.ts'
 
 export const BLOCS_DE_MA_JOURNEE = [
@@ -32,4 +34,32 @@ export function jourLisible(date: Date, locale: string): string {
 
 export function memeJour(a: Date, b: Date): boolean {
   return jourCivil(a) === jourCivil(b)
+}
+
+export interface DocumentRecent {
+  document: LibraryDocument
+  /** La page notée pour la version servie ; nulle si aucune, ou pour une autre version. */
+  page: number | null
+  /** Instant ISO de la dernière lecture : l'ouverture, ou la dernière page notée si elle est plus tardive. */
+  lu: string
+}
+
+/**
+ * Les derniers ouverts sur ce téléphone, croisés avec la bibliothèque gardée : un
+ * document dépublié n'y est plus, il ne paraît plus. Un réservé fermé à la personne
+ * ne paraît pas : sur un téléphone partagé, il dirait ce qu'une autre a lu.
+ */
+export function documentsRecents(
+  recents: readonly Recent[],
+  documents: readonly LibraryDocument[],
+  progressionDe: (id: string, version: string) => Progression | null,
+): DocumentRecent[] {
+  const parId = new Map(documents.map((d) => [d.id, d]))
+  return recents.flatMap((recent) => {
+    const document = parId.get(recent.id)
+    if (!document || (document.restricted && !document.accessible)) return []
+    const progression = progressionDe(document.id, document.version)
+    const lu = progression && progression.a > recent.a ? progression.a : recent.a
+    return [{ document, page: progression?.page ?? null, lu }]
+  })
 }

@@ -6,16 +6,17 @@ import {
   poserCle,
 } from '~/utils/guide-nego/stockage'
 import { propositionAFaire } from '~/utils/guide-nego/thematiques'
-import { BLOCS_DE_MA_JOURNEE, jourLisible } from '~/utils/guide-nego/journee'
+import { lireProgression, lireRecents, type Recent } from '~/utils/guide-nego/appareil-lecture'
+import { marquesDeLigne } from '~/utils/guide-nego/documents'
+import { BLOCS_DE_MA_JOURNEE, documentsRecents, jourLisible } from '~/utils/guide-nego/journee'
 
 /**
  * Écrans 07 et 08 — « Ma journée », l'accueil quotidien.
  *
- * **Un cadre, et il ne lit rien.** Les cinq blocs sont vides à cette étape, parce
- * que les modules qui les rempliront viennent en 1, 3a, 3b, 4 et 5. Chaque bloc vide
- * tient en **une ligne** sous son en-tête de groupe — ce qui manque, et quand cela
- * viendra —, comme la maquette le fait pour les Réunions de la Francophonie : quatre
- * états vides d'écran entier, à la suite, feraient l'écran d'une panne.
+ * Chaque bloc que son module ne remplit pas encore tient en **une ligne** sous son
+ * en-tête — ce qui manque, et quand cela viendra : quatre états vides d'écran entier,
+ * à la suite, feraient l'écran d'une panne. « Documents récents » se remplit depuis
+ * le téléphone, sans réseau ; il reste vide sur un appareil neuf.
  */
 definePageMeta({ layout: 'guide-nego' })
 defineI18nRoute(false)
@@ -26,8 +27,33 @@ const connexion = useGnConnexion()
 const thematiques = useGnThematiques()
 const { aujourdhui } = useGnAujourdhui()
 const { momentLisible } = useGnMomentLecture()
+const bibliotheque = useGnDocuments()
 
-const BLOCS_VIDES = BLOCS_DE_MA_JOURNEE.filter((bloc) => bloc !== 'lexique')
+const BLOCS = BLOCS_DE_MA_JOURNEE.filter((bloc) => bloc !== 'lexique')
+const stockage = { lire: lireCle, poser: poserCle }
+
+const recents = ref<Recent[]>([])
+
+const lignesDeDocuments = computed(() => {
+  const enLigne = connexion.etat.value.enLigne
+  return documentsRecents(recents.value, bibliotheque.documents.value, (id, version) =>
+    lireProgression(stockage, id, version),
+  ).map(({ document, page, lu }) => {
+    const moment = momentLisible(lu) ?? ''
+    return {
+      document,
+      marques: marquesDeLigne(document, {
+        telecharge: bibliotheque.telecharges.value.has(document.id),
+        nouveau: bibliotheque.nouveaux.value.has(document.id),
+        enLigne,
+      }),
+      precision:
+        page === null
+          ? t('guide-nego.accueil.blocs.documents.lu', { moment })
+          : t('guide-nego.accueil.blocs.documents.lu-page', { moment, page }),
+    }
+  })
+})
 
 const sousTitre = computed(() => jourLisible(aujourdhui.value, locale.value))
 
@@ -74,6 +100,8 @@ async function proposerLesThematiques(): Promise<void> {
 onMounted(() => {
   if (!lireCle(CLE_OUVERTURE_VUE)) return void navigateTo('/guide-nego/ouverture', { replace: true })
   session.relireAuRetourAuPremierPlan()
+  recents.value = lireRecents(stockage)
+  void bibliotheque.rafraichir()
   void proposerLesThematiques()
 })
 
@@ -95,12 +123,23 @@ useHead({ title: t('guide-nego.accueil.titre') })
       </div>
     </template>
 
-    <section v-for="bloc in BLOCS_VIDES" :key="bloc" class="gn-journee__bloc">
+    <section v-for="bloc in BLOCS" :key="bloc" class="gn-journee__bloc">
       <GnEnteteGroupe
         :titre="t(`guide-nego.accueil.blocs.${bloc}.titre`)"
         :note="bloc === 'changements' ? noteDesChangements : undefined"
       />
-      <p class="gn-journee__vide">{{ t(`guide-nego.accueil.blocs.${bloc}.vide`) }}</p>
+      <ul v-if="bloc === 'documents' && lignesDeDocuments.length" role="list">
+        <li v-for="ligne in lignesDeDocuments" :key="ligne.document.id">
+          <GnLigneDocument
+            :document="ligne.document"
+            :marques="ligne.marques"
+            :vers="`/guide-nego/ressources/documents/${ligne.document.id}`"
+            :morceaux="['pages', 'editeur']"
+            :precision="ligne.precision"
+          />
+        </li>
+      </ul>
+      <p v-else-if="bloc !== 'documents' || bibliotheque.etat.value.pret" class="gn-journee__vide">{{ t(`guide-nego.accueil.blocs.${bloc}.vide`) }}</p>
     </section>
 
     <div class="gn-journee__lexique">

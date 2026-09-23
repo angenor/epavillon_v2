@@ -16,6 +16,7 @@ export function fauxCaches(options: { refuserAuPut?: number } = {}) {
     const entrees = noms.get(nom)!
     return {
       lire: async (cle) => entrees.get(cle)?.clone() ?? null,
+      contient: async (cle) => entrees.has(cle),
       poser: async (cle, reponse) => {
         puts += 1
         if (options.refuserAuPut === puts) throw new Error('QuotaExceededError')

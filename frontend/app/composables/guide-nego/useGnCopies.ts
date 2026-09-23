@@ -51,6 +51,7 @@ const STATUTS_DE_PANNE = new Set([408, 425, 429])
 
 const CACHE_MUET: CacheDeDocuments = {
   lire: async () => null,
+  contient: async () => false,
   poser: async () => {
     throw new Error('Cache Storage indisponible')
   },
@@ -67,6 +68,7 @@ function cachesDuNavigateur(): LesCaches {
       if (!cache) return CACHE_MUET
       return {
         lire: async (cle) => (await cache.match(cle).catch(() => undefined)) ?? null,
+        contient: async (cle) => (await cache.keys(cle).catch(() => [])).length > 0,
         poser: (cle, reponse) => cache.put(cle, reponse),
         retirer: async (cle) => void (await cache.delete(cle).catch(() => false)),
         cles: async () => (await cache.keys().catch(() => [])).map((requete) => requete.url),
@@ -102,6 +104,8 @@ let file: FileATelecharger | null = null
 let servisPourLaFile = new Map<string, LibraryDocument>()
 // Avance à chaque effacement des réservés : une copie réservée lue avant ne s'écrit plus.
 let generationDesReserves = 0
+// Avance à chaque « Tout retirer » : un téléchargement parti avant ne s'écrit plus.
+let generationDesCopies = 0
 
 async function recharger(): Promise<void> {
   copies.value = (await magasinDesCopies.lire()) ?? copies.value
@@ -188,6 +192,7 @@ export function useGnCopies() {
     const { id, reserve } = demande
     const signal = controleur.signal
     const generation = generationDesReserves
+    const generationGardee = generationDesCopies
     progressions.value = { ...progressions.value, [id]: { recus: 0, total: demande.octets } }
     const imagesComptees = demande.octets !== null
     try {
@@ -244,7 +249,9 @@ export function useGnCopies() {
       }
       // Sous le verrou, et au dernier moment : ni annulé, ni réservé effacé entre-temps.
       const gardee = await enSerie(async (): Promise<IssueDeTelechargement> => {
-        if (signal.aborted || (reserve && generation !== generationDesReserves)) return 'annule'
+        if (signal.aborted || generationGardee !== generationDesCopies || (reserve && generation !== generationDesReserves)) {
+          return 'annule'
+        }
         return (await garderUneCopie(depots(), copie, entrees)) ? 'reussi' : 'place'
       })
       if (gardee !== 'reussi') return gardee
@@ -330,10 +337,13 @@ export function useGnCopies() {
     await recharger()
   }
 
-  async function toutRetirer(): Promise<void> {
+  /** Vrai si plus rien n'est gardé : un magasin bloqué laisse des copies, et l'écran doit le dire. */
+  async function toutRetirer(): Promise<boolean> {
+    generationDesCopies += 1
     for (const { controleur } of enCours.values()) controleur.abort()
     await enSerie(() => toutRetirerDesDepots(depots())).catch(() => undefined)
-    await recharger()
+    await recharger().catch(() => undefined)
+    return copies.value.length === 0
   }
 
   /**
