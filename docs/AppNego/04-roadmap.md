@@ -202,6 +202,62 @@ Critère : le guide est publié en une journée et lu en salle sans réseau.
 > — un cache dédié, dont l'effacement se voit aussitôt dans l'estimation du navigateur, et non
 > IndexedDB, que Chrome ne rend qu'au compactage (mesuré le 22/09).
 
+### Étape 1b — Le lecteur montre le PDF d'origine
+
+Décidé par le commanditaire le 24/09, après l'étape 1 : on lit le document tel que l'IFDD l'a mis en page. Le texte extrait reste, pour chercher et, plus tard, pour l'assistant et le lexique. **L'étape 1 n'est pas fusionnée dans `main` avant ce cycle** : le lecteur recomposé ne part jamais en production. La branche de ce cycle part de `011-guide-nego-documents`.
+
+```
+/speckit-specify
+Le lecteur de Guide Négo montre le PDF d'origine. Décision du commanditaire le 24/09 : on
+lit le document tel que l'IFDD l'a mis en page — pages, colonnes, tableaux, figures —, et
+non un texte recomposé. Ce cycle remplace le lecteur livré à l'étape 1
+(specs/011-guide-nego-documents, récits 3, 4, 5 et 6) ; la publication, la bibliothèque et
+la fiche ne changent pas.
+Lire : le document s'ouvre sur ses pages d'origine, nettes à tout grossissement. On passe
+d'une page à l'autre en faisant défiler ; la page tient d'abord toute la largeur de
+l'écran ; on agrandit d'un pincement ou d'un double toucher. Le numéro de page est celui
+du document (« Page 59 sur 92 ») et le lecteur reprend à la dernière page lue. En ligne,
+la première page paraît sans attendre le fichier entier. Le texte se sélectionne et se
+copie.
+Un second mode, « Texte agrandi », garde le lecteur de l'étape 1 pour qui lit mal une page
+A4 réduite à la largeur d'un téléphone : taille du texte de 17 à 24 px, termes anglais
+touchables. On passe d'un mode à l'autre sur la même page ; le mode choisi reste sur le
+téléphone. Il n'est offert que si le texte s'est bien extrait, et ses tableaux et figures
+renvoient à la page du PDF.
+Le texte extrait sert aussi, sans être lu tel quel : la recherche dans le document, hors
+connexion — nombre de passages et de pages, chaque passage avec sa page et un extrait, et
+le passage repéré sur la page du PDF —, la recherche « un mot du texte » de la
+bibliothèque, et le sommaire, qui mène à la page.
+Hors connexion : la copie gardée est le PDF et le texte extrait ; les images de pages
+gardées à l'étape 1 disparaissent. La copie reste entière ou absente. La place,
+« Libérer », l'effacement des documents réservés à la déconnexion et au retrait d'accès,
+« Remplacé par… » et la dépublication se comportent comme à l'étape 1.
+Notes de correction d'un expert : posées sur une page, et sur un passage quand il est
+cité ; le lecteur les signale en marge, à la hauteur du passage quand il le retrouve sur
+la page, et les déplie sans cacher la page. Elles paraissent sur la copie gardée sans
+retélécharger, dans les deux modes.
+Ce qui disparaît : le mode « tel quel » de l'étape 1, puisque tout document s'ouvre sur ses
+pages ; un document dont le texte ne s'extrait pas s'ouvre de même, sans « Texte agrandi »,
+sans recherche ni sommaire.
+Thème sombre : l'interface du lecteur suit le thème ; la page reste celle du document.
+Maquette : docs/AppNego/design/ecrans/04-lecteur.html pour la barre de lecture, le
+sommaire, la recherche, la note et la reprise ; sa page de texte recomposé devient le mode
+« Texte agrandi », et la page du PDF est l'affichage par défaut — écart à inscrire dans
+docs/AppNego/05-design.md.
+Critère : le guide téléchargé se lit en mode avion sur un Android de milieu de gamme et
+sur un iPhone, pages nettes à tout grossissement, sans saccade sur ses 90 pages ; une
+recherche mène au passage sur sa page.
+```
+
+**Pour `/speckit-plan`, en plus du prompt commun :**
+
+- **Le rendu** : pdf.js (`pdfjs-dist`, Apache-2.0) dans le client est le candidat — rendu vectoriel, couche de texte, chargement par plages. Dépendance d'ampleur : un ADR, qui remplace « Le PDF ne va jamais sur le téléphone » d'[ADR-021](adr/021-pdfium-dans-le-worker.md). Le paquet et son worker entrent dans la garde de la coquille (`modules/guide-nego-garde.ts`), et l'essai en mode avion le prouve. Le visionneur du téléphone est écarté : hors de l'application, une application installée sur iPhone n'en revient pas proprement, et les notes n'y paraissent pas.
+- **La mémoire** : ne rendre que les pages visibles et leurs voisines ; plafonner la taille des canevas, que l'iPhone limite. Mesurer sur le vrai guide, sur un Android de milieu de gamme.
+- **Le service du PDF** : public par le média, réservé par l'API depuis le bucket privé ; les deux acceptent les requêtes par plage, et l'accès se vérifie à chaque requête.
+- **Repérer un passage sur la page** (recherche, note) : par la couche de texte de pdf.js, ou par les positions que PDFium rend déjà à l'extraction — le plan dit laquelle, et ce qui manque.
+- **Le back-office** garde l'aperçu page par page : il vérifie désormais ce qui sert à la recherche, au sommaire et au mode « Texte agrandi ». Le choix « Ouvrir tel quel » disparaît.
+- **Rien à migrer** : l'étape 1 n'est pas en production, aucune copie recomposée n'existe hors des postes d'essai.
+
 ### Étape 2 — FAQ et lexique
 
 ```
