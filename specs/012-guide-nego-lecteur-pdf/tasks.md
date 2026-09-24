@@ -59,13 +59,13 @@ description: "Tâches de l'étape 1b — le lecteur montre le PDF d'origine"
 
 **Objectif** : « ouvrir tel quel » devient le choix « Texte agrandi », et une fonction porte la règle ([data-model.md](data-model.md)).
 
-- [ ] T011 Dans `docs/database/100_negotiations.sql`, `negotiation.document_renditions` :
+- [X] T011 Dans `docs/database/100_negotiations.sql`, `negotiation.document_renditions` :
   - `serve_as_is boolean NOT NULL DEFAULT false` devient `large_text_choice boolean NULL`, avec son `COMMENT ON` (« NULL = suit le verdict de l'extraction ; vrai ou faux = choix de l'administratrice, arbitré le 24/09 ») ;
   - le commentaire de `reading_bytes` dit « octets du PDF + octets du JSON de lecture — la copie gardée depuis l'étape 1b »
-- [ ] T012 Dans le même fichier, écrire `negotiation.document_reading_modes(p_document_id uuid)` — `STABLE`, `SECURITY INVOKER`, rend `has_text` et `large_text` selon [data-model.md § 2](data-model.md) —, avec son `COMMENT ON`. Réécrire les `COMMENT ON` de `image_key`, `image_bytes` et `has_origin_block` : « aperçu du back-office — jamais servi au téléphone depuis l'étape 1b »
-- [ ] T013 Écrire `specs/012-guide-nego-lecteur-pdf/migration.sql`, **rejouable**, dans une transaction, à jouer **après** celle de l'étape 1 : renommage conditionnel de la colonne, `DROP NOT NULL`, `DROP DEFAULT`, `UPDATE … SET large_text_choice = NULL`, `CREATE OR REPLACE FUNCTION`, commentaires
-- [ ] T014 Jouer la migration **deux fois** sur la base locale, **sans la détruire**. Comparer le schéma avec un chargement de `docs/database/` dans une base **jetable** — jamais `make check`. Vérifier les quatre cas de la fonction par une requête : verdict vrai, verdict faux, choix contraire, sans texte malgré un choix vrai
-- [ ] T015 Consigner le changement dans `docs/progression/modele.md` (ADR-017). Commit de la phase
+- [X] T012 Dans le même fichier, écrire `negotiation.document_reading_modes(p_document_id uuid)` — `STABLE`, `SECURITY INVOKER`, rend `has_text` et `large_text` selon [data-model.md § 2](data-model.md) —, avec son `COMMENT ON`. Réécrire les `COMMENT ON` de `image_key`, `image_bytes` et `has_origin_block` : « aperçu du back-office — jamais servi au téléphone depuis l'étape 1b »
+- [X] T013 Écrire `specs/012-guide-nego-lecteur-pdf/migration.sql`, **rejouable**, dans une transaction, à jouer **après** celle de l'étape 1 : renommage conditionnel de la colonne, `DROP NOT NULL`, `DROP DEFAULT`, `UPDATE … SET large_text_choice = NULL`, `CREATE OR REPLACE FUNCTION`, commentaires
+- [X] T014 Jouer la migration **deux fois** sur la base locale, **sans la détruire**. Comparer le schéma avec un chargement de `docs/database/` dans une base **jetable** — jamais `make check`. Vérifier les quatre cas de la fonction par une requête : verdict vrai, verdict faux, choix contraire, sans texte malgré un choix vrai
+- [X] T015 Consigner le changement dans `docs/progression/modele.md` (ADR-017). Commit de la phase
 
 ---
 

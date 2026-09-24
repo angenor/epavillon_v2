@@ -973,11 +973,12 @@ CREATE TABLE negotiation.document_renditions (
     is_reflowable   boolean,
     -- Les indicateurs du verdict : pages avec texte, blocs d'origine, termes…
     quality         jsonb,
-    -- Le choix de l'administratrice : lire en pages d'origine. Il se change sans
-    -- republier le fichier.
-    serve_as_is     boolean     NOT NULL DEFAULT false,
-    -- Poids de la copie que garde le téléphone : le texte, et les images des
-    -- seules pages à tableau ou figure (ADR-021). C'est la taille annoncée.
+    -- Proposer « Texte agrandi » au téléphone. NULL : suit le verdict
+    -- (is_reflowable) ; vrai ou faux : le choix de l'administratrice, qui se
+    -- change sans republier. La règle vit dans document_reading_modes().
+    large_text_choice boolean,
+    -- Poids de la copie que garde le téléphone : le PDF et la forme lisible
+    -- servie (ADR-022). C'est la taille annoncée.
     reading_bytes   bigint      CHECK (reading_bytes IS NULL OR reading_bytes >= 0),
     -- Outil et version, pour savoir quoi réextraire le jour où ils changent.
     extractor       text,
@@ -1000,13 +1001,17 @@ CREATE INDEX ix_document_renditions_asset ON negotiation.document_renditions (as
 CREATE TRIGGER tg_document_renditions_updated_at BEFORE UPDATE ON negotiation.document_renditions
     FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
 
--- Audité, bien que le worker y écrive surtout : le choix « tel quel » de
+-- Audité, bien que le worker y écrive surtout : le choix « Texte agrandi » de
 -- l'administratrice vit ici, et c'est une décision éditoriale.
 CREATE TRIGGER tg_document_renditions_audit AFTER INSERT OR UPDATE OR DELETE ON negotiation.document_renditions
     FOR EACH ROW EXECUTE FUNCTION platform.tg_audit('document_id');
 
 COMMENT ON TABLE negotiation.document_renditions IS
-    'L''extraction d''un document fichier : son état, son verdict, son sommaire, et le choix « ouvrir tel quel ». Une ligne par document.';
+    'L''extraction d''un document fichier : son état, son verdict, son sommaire, et le choix « Texte agrandi ». Une ligne par document.';
+COMMENT ON COLUMN negotiation.document_renditions.large_text_choice IS
+    'Proposer « Texte agrandi » au téléphone. NULL = suit le verdict de l''extraction (is_reflowable) ; vrai ou faux = choix de l''administratrice, qui se change sans republier (arbitré le 24/09). Une relance d''extraction le garde. Lu par negotiation.document_reading_modes().';
+COMMENT ON COLUMN negotiation.document_renditions.reading_bytes IS
+    'Octets du PDF + octets du JSON de lecture : la copie gardée depuis l''étape 1b (ADR-022). Calculé à la fin de l''extraction ; c''est la taille annoncée sur la fiche.';
 
 CREATE TABLE negotiation.document_pages (
     document_id       uuid     NOT NULL REFERENCES negotiation.documents(id) ON DELETE CASCADE,
@@ -1014,7 +1019,7 @@ CREATE TABLE negotiation.document_pages (
     page_index        integer  NOT NULL CHECK (page_index > 0),
     -- L'étiquette imprimée, « 59 ».
     label             text     NOT NULL,
-    -- Les blocs de la page, en grammaire close ; vide en mode « tel quel ».
+    -- Les blocs de la page, en grammaire close : la matière de « Texte agrandi ».
     blocks            jsonb    NOT NULL DEFAULT '[]',
     -- La concaténation du texte des blocs : rien ne se cherche qui ne s'affiche pas.
     plain_text        text     NOT NULL DEFAULT '',
@@ -1023,10 +1028,10 @@ CREATE TABLE negotiation.document_pages (
     search_vector     tsvector GENERATED ALWAYS AS (
         to_tsvector('french', platform.immutable_unaccent(plain_text))
     ) STORED,
-    -- L'image de la page, dans le bucket privé.
+    -- L'image de la page, dans le bucket privé : l'aperçu du back-office.
     image_key         text,
     image_bytes       integer  CHECK (image_bytes IS NULL OR image_bytes > 0),
-    -- Un tableau ou une figure : l'image de la page part avec la copie gardée.
+    -- Un tableau ou une figure : « Texte agrandi » y renvoie à la page d'origine.
     has_origin_block  boolean  NOT NULL DEFAULT false,
     PRIMARY KEY (document_id, page_index)
 );
@@ -1035,6 +1040,36 @@ CREATE INDEX ix_document_pages_search ON negotiation.document_pages USING gin (s
 
 COMMENT ON TABLE negotiation.document_pages IS
     'La forme lisible d''un document, page par page. Une nouvelle extraction remplace toutes les lignes du document, dans une transaction.';
+COMMENT ON COLUMN negotiation.document_pages.image_key IS
+    'Image de la page dans le bucket privé : aperçu du back-office — jamais servi au téléphone depuis l''étape 1b (ADR-022).';
+COMMENT ON COLUMN negotiation.document_pages.image_bytes IS
+    'Poids de l''image de la page : aperçu du back-office — jamais servi au téléphone depuis l''étape 1b.';
+COMMENT ON COLUMN negotiation.document_pages.has_origin_block IS
+    'La page porte un tableau ou une figure : « Texte agrandi » y renvoie à la page d''origine, et l''aperçu du back-office la montre. Aperçu du back-office — jamais d''image servie au téléphone depuis l''étape 1b.';
+
+-- Ce que le téléphone peut offrir d'un document : la recherche et le sommaire
+-- s'il a du texte, « Texte agrandi » si ce texte est proposé. Écrite une fois,
+-- lue par la liste, la lecture et l'aperçu : la règle ne se recopie pas.
+CREATE OR REPLACE FUNCTION negotiation.document_reading_modes(p_document_id uuid)
+RETURNS TABLE (has_text boolean, large_text boolean)
+LANGUAGE sql
+STABLE
+SECURITY INVOKER
+AS $$
+    WITH texte AS (
+        SELECT EXISTS (
+            SELECT 1 FROM negotiation.document_pages p
+             WHERE p.document_id = p_document_id AND p.plain_text <> ''
+        ) AS present
+    )
+    SELECT t.present,
+           t.present AND coalesce(r.large_text_choice, r.is_reflowable, false)
+      FROM texte t
+      LEFT JOIN negotiation.document_renditions r ON r.document_id = p_document_id;
+$$;
+
+COMMENT ON FUNCTION negotiation.document_reading_modes(uuid) IS
+    'has_text : une page au moins a du texte (recherche, sommaire). large_text : has_text ET coalesce(large_text_choice, is_reflowable, false) — « Texte agrandi » offert. Toujours une ligne, fausse pour un document sans extraction.';
 
 -- La note d'un expert sur un passage dépassé. Elle se pose PAR-DESSUS le texte,
 -- sans jamais le modifier, et ne se supprime pas : un retrait se date.
