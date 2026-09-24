@@ -87,5 +87,13 @@
   "panneau-reglages": "Ouvrir les réglages de lecture",
   "panneau-titre": "Sommaire",
   "panneau-sous-titre": "Guide des négociations — CdP31 · 92 pages",
-  "panneau-note": "Le panneau se referme par sa flèche ou Échap ; le texte dessous n'a pas bougé."
+  "panneau-note": "Le panneau se referme par sa flèche ou Échap ; le texte dessous n'a pas bougé.",
+  "note": "Note de correction",
+  "note-propos": "Posée par un expert sur un passage dépassé : filet de 3 px à gauche, dans la marge, triangle et libellé 15/700 en rouge Dépassé, ligne repliée de 48 px. Dépliée, une boîte bordée de 1 px porte le texte en 17 et la signature en 15 gris, au bouclier vert.",
+  "note-repliee": "Repliée, sur le passage visé",
+  "note-depliee": "Dépliée",
+  "note-tete": "Sans passage, ou passage introuvable : en tête de page",
+  "note-texte": "Les 100 indicateurs du GGA ont été adoptés à la CdP30. À la CdP31, la négociation porte sur leur mise en œuvre et sur le financement de leur suivi.",
+  "note-auteur": "Dr Koffi Mensah",
+  "note-note": "Le texte du guide n'est jamais modifié : la note se pose par-dessus, et disparaît d'elle-même quand l'expert la retire."
 }

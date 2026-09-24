@@ -4,8 +4,8 @@ import type { Passage } from '~/utils/guide-nego/lecteur'
 import type { LibraryDocument, OutlineEntry, ReadingPage } from '~/types/negotiation-documents'
 /**
  * Section 5, cinquième lot : la bibliothèque de documents — ligne de document, feuille
- * de filtre, bandeau « Remplacé par… », progression, barre de lecture, page lue, sommaire,
- * occurrence. Les spécimens sont les cinq documents de la
+ * de filtre, bandeau « Remplacé par… », progression, barre de lecture, page lue, note de
+ * correction, sommaire, occurrence. Les spécimens sont les cinq documents de la
  * maquette 03 ; leurs libellés de type viennent d'ici, comme ils viendraient de l'API.
  */
 const { t } = useI18n()
@@ -181,6 +181,10 @@ function basculerSommaire(chapitre: OutlineEntry) {
   chapitresOuverts.value = ouverts
 }
 
+const noteDeSpecimen = computed(() => [
+  { id: 'specimen-note', body: k('note-texte'), author_name: k('note-auteur'), posted_at: '2026-11-10T09:00:00Z' },
+])
+
 const OCCURRENCES = 5
 const occurrence = ref(3)
 const occurrenceOuverte = ref(true)
@@ -355,6 +359,27 @@ const choixLisible = computed(() =>
       <p class="gn-planche-note">{{ k('page-note-planche') }}</p>
     </GnPlancheSection>
 
+    <GnPlancheSection :titre="k('note')" :propos="k('note-propos')">
+      <span class="gn-planche-composants__legende">{{ k('note-repliee') }}</span>
+      <div class="gn-planche-composants__cadre gn-planche-cadre-note">
+        <GnNoteCorrection :notes="noteDeSpecimen">
+          <p>{{ k('lecture-texte') }}</p>
+        </GnNoteCorrection>
+      </div>
+      <span class="gn-planche-composants__legende">{{ k('note-depliee') }}</span>
+      <div class="gn-planche-composants__cadre gn-planche-cadre-note">
+        <GnNoteCorrection :notes="noteDeSpecimen" depliee>
+          <p>{{ k('lecture-texte') }}</p>
+        </GnNoteCorrection>
+      </div>
+      <span class="gn-planche-composants__legende">{{ k('note-tete') }}</span>
+      <div class="gn-planche-composants__cadre gn-planche-cadre-note">
+        <GnNoteCorrection :notes="noteDeSpecimen" />
+        <p>{{ k('lecture-texte') }}</p>
+      </div>
+      <p class="gn-planche-note">{{ k('note-note') }}</p>
+    </GnPlancheSection>
+
     <GnPlancheSection :titre="k('sommaire')" :propos="k('sommaire-propos')">
       <div class="gn-planche-composants__cadre gn-planche-cadre-sommaire">
         <ul class="gn-sommaire-liste" role="list">
@@ -417,6 +442,20 @@ const choixLisible = computed(() =>
 </template>
 
 <style>
+/* La note déborde dans la marge de l'écran : le cadre la lui rend. */
+[data-app="guide-nego"] .gn-planche-cadre-note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gn-espace-12);
+  padding-inline: var(--gn-marge-ecran);
+  font-size: var(--gn-taille-17);
+  line-height: var(--gn-interligne-17);
+}
+
+[data-app="guide-nego"] .gn-planche-cadre-note p {
+  margin: 0;
+}
+
 [data-app="guide-nego"] .gn-planche-cadre-sommaire {
   border: var(--gn-filet-1) solid var(--gn-filet);
   border-bottom: 0;

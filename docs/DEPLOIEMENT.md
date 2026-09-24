@@ -644,10 +644,10 @@ Rien à redémarrer entre 3 et 4 : le drapeau se lit à chaque ouverture.
 
 ---
 
-## 15. Mettre en ligne 0a, 0b et 0c (22/09)
+## 15. Mettre en ligne 0a, 0b, 0c et l'étape 1 (22/09, complété le 24/09)
 
-Une seule mise en ligne porte les trois premières étapes de Guide Négo : le code de la branche, et
-**trois migrations**. Préparée ici, **pas encore exécutée**. Le drapeau reste éteint pendant toute
+Une seule mise en ligne porte les quatre premières étapes de Guide Négo : le code de la branche, et
+**quatre migrations**. Préparée ici, **pas encore exécutée**. Le drapeau reste éteint pendant toute
 la mise en ligne : le site ne voit que ce qui le touche (§ 3 ci-dessous), l'application ne s'ouvre
 qu'à la recette sur téléphones (§ 4).
 
@@ -658,8 +658,9 @@ qu'à la recette sur téléphones (§ 4).
 | 1 | `specs/008-guide-nego-coquille/migration.sql` | Une ligne : le drapeau `guide_nego.enabled`, éteint. Sans elle, la bascule du § 14 rend `UPDATE 0` |
 | 2 | `specs/009-guide-nego-compte-admission/migration.sql` | `identity.sessions` dit d'où vient la session (site ou application) ; le vocabulaire des réseaux ; les codes d'invitation, leurs usages, les demandes d'accès, les appartenances ; deux réglages d'admission |
 | 3 | `specs/010-guide-nego-accueil-profil/migration.sql` | Le vocabulaire des thématiques et ses dix termes ; `negotiation.theme_subscriptions` ; `identity.sessions.replaced_by`, qui distingue une réponse de rotation perdue d'un vol (ADR-020) |
+| 4 | `specs/011-guide-nego-documents/migration.sql` | Les documents : le réglage `media.private_bucket` et le registre des colonnes qui désignent un objet ; deux types de document et le libellé « Guide » ; les documents, leur extraction, leurs pages, les notes de correction ; le rôle `expert` et ses deux permissions |
 
-Les trois sont **rejouables** : un second passage ne crée rien, ne perd rien, n'échoue pas.
+Les quatre sont **rejouables** : un second passage ne crée rien, ne perd rien, n'échoue pas.
 
 **Aucun réglage à ajouter à `.env.prod`.** Les deux réglages nouveaux ont un défaut, et ce défaut
 est la valeur voulue :
@@ -672,6 +673,20 @@ est la valeur voulue :
 Ne les écrire que pour s'écarter du défaut. `PRIVACY_POLICY_VERSION` disparaît : encore posée dans
 `.env.prod`, elle est sans effet — la version vient désormais du texte servi par l'API.
 
+**L'étape 1 ajoute deux choses hors de la base**, déjà dans le dépôt :
+
+- **Le bucket privé** `epavillon-prive`, qui garde les PDF et les pages des documents réservés.
+  `ops/init-garage-prod.sh` le crée, ouvert à la clé de l'API et **fermé au web** ; il est
+  rejouable, on le relance tel quel. Sans lui, le premier dépôt d'un PDF échoue.
+- **PDFium dans l'image du worker** (ADR-021) : le `Dockerfile` l'installe et pose
+  `PDFIUM_LIB_PATH=/opt/pdfium/lib`. **Ne pas écrire `PDFIUM_LIB_PATH` dans `.env.prod`** : le
+  fichier d'environnement l'emporte sur l'image, et le chemin du poste de développement y ferait
+  échouer toute extraction.
+
+**La dette de R4 doit être nulle avant la bascule** — aucun objet privé ne doit rester dans le
+bucket ouvert au web. La requête est dans [la recette de l'étape 1](../specs/011-guide-nego-documents/quickstart.md)
+(« Préalables ») ; elle doit rendre **0**, sinon déplacer ces objets avant la mise en ligne.
+
 ### 1. Répéter sur une copie de la production — la veille
 
 ```bash
@@ -681,7 +696,7 @@ psql postgres://postgres:dev@localhost:5442/postgres -c 'CREATE DATABASE copie_p
 gunzip -c sauvegardes/epavillon-AAAAMMJJ-HHMMSS.sql.gz | psql "$COPIE"
 
 for passage in 1 2; do          # deux passages : le second ne doit rien changer
-  for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil; do
+  for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents; do
     psql "$COPIE" -v ON_ERROR_STOP=1 -f "specs/$etape/migration.sql" || exit 1
   done
 done
@@ -711,7 +726,11 @@ SELECT (SELECT count(*) FROM platform.feature_flags  WHERE key = 'guide_nego.ena
        (SELECT count(*) FROM platform.settings       WHERE key IN ('negotiation.admission_mode',
                                                                    'negotiation.invitation_attempts'))  AS reglages,     -- 2
        (SELECT count(*) FROM reference.taxonomy_terms WHERE taxonomy_code = 'negotiation_network')      AS reseaux,      -- 1
-       (SELECT count(*) FROM reference.taxonomy_terms WHERE taxonomy_code = 'negotiation_theme')        AS thematiques;  -- 10
+       (SELECT count(*) FROM reference.taxonomy_terms WHERE taxonomy_code = 'negotiation_theme')        AS thematiques,  -- 10
+       (SELECT count(*) FROM platform.settings       WHERE key = 'media.private_bucket')                AS bucket_prive, -- 1
+       (SELECT count(*) FROM reference.taxonomy_terms WHERE taxonomy_code = 'document_type'
+                                                        AND code IN ('summary', 'bulletin'))            AS types_doc,    -- 2
+       (SELECT count(*) FROM identity.role_permissions WHERE role_code = 'expert')                      AS expert;       -- 2
 ```
 
 ### 2. Le jour de la mise en ligne
@@ -723,7 +742,7 @@ Dans l'ordre du § 13, chaque étape pour sa raison :
 3. **Déposer les migrations** hors du dossier synchronisé, renommées — elles s'appellent toutes
    `migration.sql` :
    ```bash
-   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil; do
+   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents; do
      scp "specs/$etape/migration.sql" "root@<serveur>:/root/epavillon-migrations/$etape.sql"
    done
    ```
@@ -733,9 +752,10 @@ Dans l'ordre du § 13, chaque étape pour sa raison :
    COMPOSE="docker compose --env-file .env.prod -f ops/docker-compose.prod.yml"
    $COMPOSE build api worker front
    ```
+   Puis **le bucket privé**, avant de migrer : `ops/init-garage-prod.sh` (rejouable).
 5. **Migrer, puis redémarrer aussitôt** :
    ```bash
-   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil; do
+   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents; do
      $COMPOSE exec -T postgres psql -U postgres -d epavillon -v ON_ERROR_STOP=1 \
        < /root/epavillon-migrations/$etape.sql || break
    done
@@ -777,6 +797,15 @@ compte d'administration.
 - [ ] **Le back-office.** En administrateur : la liste des propositions, celle des utilisateurs,
       puis `/v2/admin/negociations` — nouveau en 0b, les codes d'invitation. Y **créer le code**
       qui servira au § 4.
+- [ ] **Les médias.** Le dépôt d'une image a changé de chemin à l'étape 1. En administrateur,
+      « Modifier l'édition » : déposer une image dans un emplacement, la voir s'afficher, puis
+      **Annuler** — rien n'est rattaché. Les images de l'accueil et de la fiche d'édition
+      s'affichent toujours.
+- [ ] **Le bucket privé est fermé au web.** `curl -I <APP_PUBLIC_URL>/media/epavillon-prive/x`
+      rend une erreur, jamais un objet.
+- [ ] **Le guide se publie.** En administrateur, `/v2/admin/negociations/documents` : créer le
+      guide, déposer le PDF, attendre « Prête » — c'est la preuve que le worker charge PDFium —,
+      feuilleter l'aperçu, publier. Il servira au § 4.
 - [ ] **Guide Négo reste fermée** : `/v2/guide-nego/` sert « bientôt disponible ».
 
 Un point qui échoue et ne se corrige pas sur place : `./deploy.sh restore <sauvegarde de l'étape 1>`
@@ -784,8 +813,8 @@ ramène la base d'avant les migrations, puis redéployer la version précédente
 
 ### 4. La recette sur téléphones réels — une seule séance
 
-Ce qu'aucun poste de travail ne peut éprouver, pour les trois étapes à la fois : l'appareil réel de
-0a (T071), T112 de 0b, T096 à T098 de 0c. **Deux jours de suite** — deux points exigent une nuit ;
+Ce qu'aucun poste de travail ne peut éprouver, pour les quatre étapes à la fois : l'appareil réel de
+0a (T071), T112 de 0b, T096 à T098 de 0c, T116 de l'étape 1. **Deux jours de suite** — deux points exigent une nuit ;
 on les prépare en fin de première journée.
 
 **Avant** : le drapeau ouvert (§ 14, `UPDATE 1`) ; le code créé au back-office (§ 3) ; un Android,
@@ -806,8 +835,10 @@ navigateur hors connexion.
 - [ ] En débit bridé, saisir le code : « Code reconnu », accès ouvert. Un code faux : message distinct.
 - [ ] En débit bridé, choisir ses thématiques ; « Ma journée » s'ouvre.
 - [ ] Mode avion : changer ses thématiques — le choix s'affiche aussitôt.
+- [ ] En débit bridé, **télécharger le guide** depuis sa fiche : la progression avance, la copie
+      paraît dans « Mes documents » avec sa place.
 - [ ] **Préparer la nuit** : toujours en mode avion, changer encore ses thématiques, noter lesquelles,
-      fermer l'application.
+      lire le guide jusqu'à une page notée, fermer l'application.
 
 **Premier jour — iPhone**
 
@@ -819,9 +850,13 @@ navigateur hors connexion.
 - [ ] Mode avion, relancer depuis l'icône : tout s'ouvre, bandeau une fois, « lu à … » dans
       l'en-tête ; la police rend « œ », « Œ », « É ».
 - [ ] Thème « Sombre », fermer, rouvrir en mode avion : sombre d'emblée, sans éclair.
+- [ ] Avec le réseau, télécharger le guide ; en mode avion, le lire jusqu'à une page notée.
 
 **Le lendemain matin**
 
+- [ ] Les deux téléphones, **encore en mode avion** : ouvrir le guide — « Reprise à la page … »,
+      sommaire, recherche sans accent. C'est le critère de sortie de l'étape 1 : le guide se lit en
+      salle, sans réseau, après une nuit de veille.
 - [ ] Android : **rendre le réseau sans ouvrir l'application**, puis l'ouvrir. Le choix de la veille
       part — c'est le départ à l'ouverture qui l'attrape, aucun `online` n'ayant été émis. En base,
       les thématiques notées la veille, en une écriture.

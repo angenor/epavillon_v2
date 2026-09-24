@@ -2,33 +2,33 @@
   "titre": "My documents",
   "resume": {
     "telecharges": "None downloaded | {count} downloaded | {count} downloaded",
-    "favoris": "no favourite | {count} favourite | {count} favourites"
+    "favoris": "no favourites | {count} favourite | {count} favourites"
   },
   "chargement": "Reading what is kept on the phone",
   "illisible": {
-    "titre": "The library has not been read yet",
-    "texte": "Document titles come from the library, which has never been read on this phone. It will be read when the network returns.",
+    "titre": "The library has not been loaded yet",
+    "texte": "Document titles come from the library, which has never been loaded on this phone. It will load when the network returns.",
     "sortie": "Open the library",
-    "texte-en-ligne": "Document titles come from the library, which could not be read. Open it to try again."
+    "texte-en-ligne": "Document titles come from the library, which could not be loaded. Open it to try again."
   },
   "telephone": {
     "titre": "On the phone",
     "garde": "downloaded {moment}",
-    "vide": "No document downloaded. A document is downloaded from its page, to be read without a network; it stays on this phone, not on your account.",
+    "vide": "No documents downloaded. A document is downloaded from its page, to read offline; it stays on this phone, not on your account.",
     "vers-la-bibliotheque": "Open the library",
     "mesure": "Measuring the space used",
-    "impossible": "This browser does not tell how much space Guide Négo uses: it cannot be measured on this device.",
-    "persistance-refusee": "This phone has not agreed to keep documents for sure: if it runs out of space, it may erase them. You will then need to download them again.",
-    "orphelines": "And {count} document that is no longer in the library: it will be erased the next time the library is read. | And {count} document that is no longer in the library: it will be erased the next time the library is read. | And {count} documents that are no longer in the library: they will be erased the next time the library is read."
+    "impossible": "This browser does not report how much space Guide Négo uses: it cannot be measured on this device.",
+    "persistance-refusee": "This phone has not granted permanent storage for documents: if it runs out of space, it may erase them. You will then need to download them again.",
+    "orphelines": "And {count} document that is no longer in the library: it will be erased the next time the library is refreshed. | And {count} document that is no longer in the library: it will be erased the next time the library is refreshed. | And {count} documents that are no longer in the library: they will be erased the next time the library is refreshed."
   },
   "favoris": {
     "titre": "Favourites",
     "rappel": "A favourite can be read without a network only if it is also downloaded.",
-    "vide": "No favourite. Tap “Favourite” on a document's page to find it here, on all your devices.",
+    "vide": "No favourites. Tap “Favourite” on a document's page to find it here, on all your devices.",
     "sans-compte": "Favourites follow your account from one device to another. Create an account or sign in to add some; downloads do not need one.",
     "creer": "Create my account",
     "connexion": "I already have an account — Sign in",
-    "pas-encore-lus": "Your favourites have not been read on this phone yet. They will be read when the network returns."
+    "pas-encore-lus": "Your favourites have not been loaded on this phone yet. They will load when the network returns."
   },
   "tout-retirer": {
     "bouton": "Remove everything from the phone",

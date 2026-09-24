@@ -3,8 +3,8 @@
   "newSubtitle": "The document starts as a draft. Its PDF is uploaded afterwards, from its record; nothing shows in Guide Négo before publication.",
   "cancel": "Cancel",
   "backToList": "Back to documents",
-  "readonly": "You are reading this record without being able to edit it: only document publishing opens editing.",
-  "vocabularyError": "Document types, themes or COPs could not be loaded. The lists stay empty until they are.",
+  "readonly": "You are reading this record without being able to edit it: only the right to publish documents allows editing.",
+  "vocabularyError": "Document types, themes or COPs could not be loaded. The lists stay empty until they load.",
   "forbidden": {
     "scope": "Publish Guide Négo documents, or post correction notes on them, across the whole platform",
     "scopePublish": "Publish Guide Négo documents, across the whole platform",
@@ -38,11 +38,11 @@
     "label": "COP",
     "hint": "Optional. The COP the document relates to, one at most.",
     "none": "No COP",
-    "unknown": "An edition no longer served"
+    "unknown": "An edition no longer available"
   },
   "version": {
     "label": "Version",
-    "hint": "On creation, leaving it empty gives “1”."
+    "hint": "Leave empty when creating to use “1”."
   },
   "issuedOn": {
     "label": "Document date",
@@ -59,7 +59,7 @@
   "file": {
     "label": "PDF",
     "afterCreate": "The PDF can be uploaded once the draft is saved: the file is stored with its document, which must exist first.",
-    "locked": "The file of a published document no longer changes. For a new file, publish a new version.",
+    "locked": "A published document's file can no longer be changed. To use a new file, publish a new version.",
     "linkFilled": "A link is set: clear it to upload a PDF.",
     "attaching": "Attaching the file to the document…",
     "unnamed": "Unnamed file",
@@ -70,12 +70,12 @@
     "placeholder": "https://",
     "hint": "The address of an outside page, if the document is not an uploaded PDF.",
     "fileAttached": "A PDF is uploaded: the document is that file, and the link stays empty.",
-    "locked": "The source of a published document no longer changes. Publish a new version."
+    "locked": "A published document's source can no longer be changed. Publish a new version."
   },
   "supersedes": {
     "label": "Replaces",
-    "hint": "Optional. The published document this one replaces: readers of the old one will be pointed here.",
-    "placeholder": "Search a published document",
+    "hint": "Optional. The published document this one replaces: readers of the old one will be directed to this one.",
+    "placeholder": "Search for a published document",
     "none": "Replaces no document",
     "version": "Version {version}"
   },
@@ -87,8 +87,8 @@
     "publicHint": "Anyone who opens Guide Négo."
   },
   "rag": {
-    "label": "Offer this document to the assistant",
-    "hint": "Only takes effect with the assistant, which does not exist yet. Only a document chosen here will be given to it."
+    "label": "Make this document available to the assistant",
+    "hint": "Only takes effect with the assistant, which does not exist yet. Only documents selected here will be shared with it."
   },
   "submit": {
     "create": "Create the draft",
@@ -120,7 +120,7 @@
     "extraction": {
       "title": "Extraction",
       "none": "No file uploaded: nothing to extract. A document that is a link does not need it.",
-      "polling": "Checked again every few seconds",
+      "polling": "Refreshed every few seconds",
       "pages": "Pages",
       "extractedAt": "Extracted on",
       "reflowable": "Readable form",
@@ -128,10 +128,10 @@
       "reflowNo": "No, the document opens as pages",
       "failed": "The extraction failed",
       "asIs": "Open as is",
-      "asIsHint": "The document opens as images of its pages, without a readable form. Changes without republishing.",
+      "asIsHint": "The document opens as images of its pages, without a readable form. Can be changed without republishing.",
       "retry": "Retry the extraction",
-      "stopped": "Checking has stopped: the state shown may be out of date.",
-      "reload": "Check again"
+      "stopped": "Automatic refresh has stopped: the state shown may be out of date.",
+      "reload": "Refresh"
     },
     "confirm": {
       "cancel": "Cancel",

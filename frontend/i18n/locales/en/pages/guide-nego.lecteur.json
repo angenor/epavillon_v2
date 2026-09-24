@@ -1,10 +1,10 @@
 {
   "titre": "Document",
   "chargement": "Opening the document",
-  "hors-connexion": "Only downloaded documents open.",
+  "hors-connexion": "Only downloaded documents can be opened.",
   "page": "Page {page}",
   "reprise": {
-    "texte": "Resuming at page {page} — read {moment}.",
+    "texte": "Resuming at page {page} — last read {moment}.",
     "sans-moment": "Resuming at page {page}.",
     "debut": "Start"
   },
@@ -21,17 +21,17 @@
     "lire": "Read {titre}",
     "issue": {
       "place": "The phone does not have enough space for this document. Free some in “My downloads”.",
-      "panne": "The download was interrupted: nothing half-kept. Try again.",
-      "refus": "This document cannot be downloaded: it is no longer published, or access is missing."
+      "panne": "The download was interrupted: no partial copy was kept. Try again.",
+      "refus": "This document cannot be downloaded: it is no longer published, or you do not have access."
     }
   },
   "introuvable": {
     "titre": "This document is not in the library",
-    "texte": "It was removed, or the address is wrong.",
+    "texte": "It has been withdrawn, or the address is wrong.",
     "sortie": "See the library"
   },
   "erreur": {
-    "titre": "The document does not open",
+    "titre": "The document cannot be opened",
     "texte": "Reading failed. Nothing was erased.",
     "reessayer": "Try again"
   },

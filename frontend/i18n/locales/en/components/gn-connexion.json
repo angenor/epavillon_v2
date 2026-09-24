@@ -7,8 +7,8 @@
   "synchronise": "Synced {moment}",
   "hors-connexion": "Offline",
   "hors-connexion-lu": "Offline — read {moment}",
-  "bandeau": "Offline — read {moment}. {suite}",
+  "bandeau": "Offline — last updated {moment}. {suite}",
   "bandeau-sans-heure": "Offline. {suite}",
-  "tout-se-lit": "Everything here reads without a network.",
+  "tout-se-lit": "Everything here can be read offline.",
   "prete": "Ready offline"
 }

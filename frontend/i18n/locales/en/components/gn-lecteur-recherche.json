@@ -1,8 +1,8 @@
 {
   "libelle": "Search the document",
   "passages": "{count} passage | {count} passage | {count} passages",
-  "compte": "{passages} in {pages} — on this phone",
-  "aucun": "No passage for “{expression}” in {pages}.",
+  "compte": "{passages} in {pages} — offline",
+  "aucun": "No passages found for “{expression}” in {pages}.",
   "lieu": "p. {page} · {section}",
   "page": "p. {page}",
   "ici": " — you are here",

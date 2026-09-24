@@ -346,14 +346,14 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
 
 ## Phase 13 : Recette et finitions
 
-- [ ] T108 [P] Ajouter les huit composants nouveaux à la planche, `frontend/app/components/guide-nego/planche/`, dans les deux thèmes, et retirer « ligne de document » de la note « absents » (`frontend/i18n/locales/fr/components/gn-planche-composants.json`)
-- [ ] T109 [P] Relire toutes les traductions `en/` de l'étape
-- [ ] T110 Vérifier par `grep` qu'aucun libellé de type, de thématique ni de COP n'apparaît dans `frontend/i18n` ni `frontend/app` (SC-011), puis lancer `npm run check:guide-nego` : bornage, aucun composant du site, aucun fichier de plus de mille lignes
-- [ ] T111 Vérifier les quatre états et les tailles 320, 360 et 390 px de la bibliothèque, de la fiche, de « Mes documents » et du lecteur, dans les deux thèmes (SC-010)
-- [ ] T112 Non-régression du site : dépôt d'une image par `ImageField`, médias publics affichés, `make check-api-contract` à zéro route en attente
-- [ ] T113 Dérouler [quickstart.md](quickstart.md) en entier sur la version construite et l'API réelle, et consigner les écarts
-- [ ] T114 `make check-safe`, **API arrêtée** — jamais `make check`
-- [ ] T115 Mettre à jour [docs/AppNego/progress.md](../../docs/AppNego/progress.md) (ligne de l'étape et journal) et, si le déploiement change (bucket privé, PDFium dans le worker, migration), le § 15 de [docs/DEPLOIEMENT.md](../../docs/DEPLOIEMENT.md)
+- [X] T108 [P] *(24/09 : sept y étaient depuis les phases 8 à 10 ; `GnNoteCorrection` ajoutée, repliée, dépliée et en tête de page ; « ligne de document » n'était déjà plus dans la note « absents »)* Ajouter les huit composants nouveaux à la planche, `frontend/app/components/guide-nego/planche/`, dans les deux thèmes, et retirer « ligne de document » de la note « absents » (`frontend/i18n/locales/fr/components/gn-planche-composants.json`)
+- [X] T109 [P] Relire toutes les traductions `en/` de l'étape *(24/09 : 31 paires concordent clé pour clé ; 77 corrections d'anglais dans 15 fichiers, surtout le calque « read » pour « lu » au sens de chargé, et « offline » partout pour « sans réseau »)*
+- [X] T110 *(24/09 : aucun libellé dans le code ni dans les écrans ; seules les planches en portent, comme spécimens — thématiques de 0a, types de la phase 8 —, exception déjà consignée)* Vérifier par `grep` qu'aucun libellé de type, de thématique ni de COP n'apparaît dans `frontend/i18n` ni `frontend/app` (SC-011), puis lancer `npm run check:guide-nego` : bornage, aucun composant du site, aucun fichier de plus de mille lignes
+- [X] T111 *(24/09 : aucun débordement sur 30 mesures — cinq écrans, trois largeurs, deux thèmes —, ni en « Très grande » à 320 px ; vide, erreur et accès refusé vus)* Vérifier les quatre états et les tailles 320, 360 et 390 px de la bibliothèque, de la fiche, de « Mes documents » et du lecteur, dans les deux thèmes (SC-010)
+- [X] T112 *(24/09 : dépôt d'une vignette par `ImageField` en 201 dans le bucket public, servie par le relais, puis « Annuler » sans rien rattacher ; les médias de l'accueil et de la fiche d'édition chargés ; contrat : toutes les formes définies)* Non-régression du site : dépôt d'une image par `ImageField`, médias publics affichés, `make check-api-contract` à zéro route en attente
+- [X] T113 *(24/09 : § 1 déroulé le 23/09 et inchangé ; § 2 sécurité — 403 sans compte et sans accès, recherche sans page ni extrait du réservé, relais média 404 sur le PDF réservé — ; § 3 hors réseau ; § 4 le jour même ; § 5 en partie, voir T102 ; § 6 par T111 et T112. Écarts consignés dans progress.md)* Dérouler [quickstart.md](quickstart.md) en entier sur la version construite et l'API réelle, et consigner les écarts
+- [X] T114 `make check-safe`, **API arrêtée** — jamais `make check` *(24/09 : au vert, 1 306 tests Rust, aucun échec)*
+- [X] T115 Mettre à jour [docs/AppNego/progress.md](../../docs/AppNego/progress.md) (ligne de l'étape et journal) et, si le déploiement change (bucket privé, PDFium dans le worker, migration), le § 15 de [docs/DEPLOIEMENT.md](../../docs/DEPLOIEMENT.md)
 - [ ] T116 **Sur appareil réel, hors poste** : installer sur un Android et un iPhone, télécharger le guide en 3G bridée, le lire en mode avion après une nuit de veille. C'est la preuve du critère de sortie, avec T112 de 0b
 
 ---

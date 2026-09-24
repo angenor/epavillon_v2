@@ -21,7 +21,7 @@
   "pages": "no pages | {count} page | {count} pages",
   "filters": {
     "label": "List filters",
-    "search": "Search a title",
+    "search": "Search by title",
     "state": "Status",
     "type": "Type",
     "allStates": "All statuses",
@@ -30,7 +30,7 @@
   "empty": {
     "title": "No documents",
     "description": "Guide Négo has no documents to show yet. Create a draft, upload its PDF or enter its link, then publish it.",
-    "reader": "No document has been added yet. They will appear here as soon as someone in charge of publishing creates them."
+    "reader": "No documents have been added yet. They will appear here as soon as someone in charge of publishing creates them."
   },
   "noResults": {
     "title": "No matching documents",

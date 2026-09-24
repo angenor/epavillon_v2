@@ -37,7 +37,7 @@
   },
   "asIs": {
     "label": "Open as is",
-    "hint": "The whole document reads as original pages, without text size, tappable terms or text search. This choice changes without republishing.",
+    "hint": "The whole document reads as original pages, without text size, tappable terms or text search. This choice can be changed without republishing.",
     "readOnly": "Only a person who publishes documents can change this choice.",
     "failed": "The reading mode did not change"
   },
@@ -57,7 +57,7 @@
     "thinItalics": "Thin italics",
     "terms": "Marked terms",
     "hyphensKept": "Hyphens kept",
-    "hyphensJoined": "Hyphens joined"
+    "hyphensJoined": "Hyphenated words rejoined"
   },
   "outline": {
     "title": "Detected outline",
@@ -72,7 +72,7 @@
     "option": "{index} — p. {label}",
     "position": "Page {index} of {total}",
     "printed": "printed number {label}",
-    "keyboard": "The ← → arrows turn the pages."
+    "keyboard": "Use the ← → keys to turn pages."
   },
   "image": {
     "title": "Original page",
@@ -83,7 +83,7 @@
   },
   "reading": {
     "title": "Readable form",
-    "empty": "No text was taken from this page.",
+    "empty": "No text was extracted from this page.",
     "legend": "Marks",
     "italic": "italic",
     "term": "marked English term",
@@ -94,17 +94,17 @@
     "figure": "Figure",
     "hint": "Shown as original page in the reader.",
     "see": "See the original page",
-    "text": "Text of the area"
+    "text": "Text in this area"
   },
   "notes": {
     "title": "Correction notes",
-    "subtitle": "A note sits on top of the text without changing it. It appears in the app, downloaded copies included, from the next library refresh.",
+    "subtitle": "A note sits on top of the text without changing it. It appears in the app, downloaded copies included, at the next library refresh.",
     "error": "The notes could not be loaded",
     "readOnly": "Only experts post and withdraw notes. You see them here as the app shows them.",
     "here": "On this page · {count}",
-    "hereEmpty": "No note on this page.",
+    "hereEmpty": "No notes on this page.",
     "elsewhere": "Elsewhere in the document · {count}",
-    "elsewhereEmpty": "No note on the other pages.",
+    "elsewhereEmpty": "No notes on the other pages.",
     "goTo": "Go to p. {label}",
     "withdrawn": "Withdrawn",
     "pageTop": "Top of the page — no passage targeted",

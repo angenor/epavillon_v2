@@ -3,13 +3,13 @@
   "sous-titre": "{type} · {editeur}",
   "pages": "{count} pages | {count} page | {count} pages",
   "marque": {
-    "lien-reseau": "External link — network needed",
+    "lien-reseau": "External link — connection required",
     "non-telecharge": "Not downloaded — available when the network returns"
   },
   "lien": "Opens in the browser — network needed, nothing is kept on the phone",
   "thematiques": {
     "titre": "Themes",
-    "aucune": "None: this document runs across all negotiations."
+    "aucune": "None: this document covers all negotiations."
   },
   "details": {
     "titre": "Details",
@@ -46,11 +46,11 @@
     "annuler-demande": "Cancel the request"
   },
   "issue": {
-    "place": "This phone is out of space: {taille} must be free.",
-    "place-sans-taille": "This phone is out of space to keep this document.",
+    "place": "Not enough space on this phone: {taille} needs to be free.",
+    "place-sans-taille": "There is not enough space on this phone to keep this document.",
     "place-sortie": "My documents",
-    "panne": "The network dropped during the download. Nothing is kept half-way.",
-    "refus": "This document is no longer available, or your access does not open it."
+    "panne": "The network dropped during the download. No partial copy is kept.",
+    "refus": "This document is no longer available, or your access does not cover it."
   },
   "retirer": {
     "question": "Remove this document from the phone?",
@@ -68,7 +68,7 @@
     "echec": "Copy the link: {adresse}"
   },
   "verrou": {
-    "propos": "The summary, themes and download open with the code shared in your WhatsApp or IFDD group.",
+    "propos": "The summary, themes and download are unlocked with the code shared in your WhatsApp or IFDD group.",
     "reste-ouvert": "No other document in the library is open to all. | The other document in the library stays open to all. | The {n} other documents in the library stay open to all."
   },
   "vide": {
@@ -78,9 +78,9 @@
     "sortie": "See the library"
   },
   "erreur": {
-    "titre": "The library could not be read",
-    "texte": "Nothing has been read on this phone yet. Check the network, then try again.",
+    "titre": "The library could not be loaded",
+    "texte": "Nothing has been loaded on this phone yet. Check the network, then try again.",
     "sortie": "Try again"
   },
-  "hors-connexion": "This document only opens with a network, or once downloaded."
+  "hors-connexion": "This document can only be opened online, or once downloaded."
 }

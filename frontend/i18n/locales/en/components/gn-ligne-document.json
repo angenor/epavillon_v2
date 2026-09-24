@@ -7,7 +7,7 @@
   "telechargement-en-cours": "Downloading",
   "marque": {
     "remplace": "Replaced by {titre}",
-    "lien-reseau": "External link — network needed",
+    "lien-reseau": "External link — connection required",
     "non-telecharge": "Not downloaded — available when the network returns"
   }
 }
