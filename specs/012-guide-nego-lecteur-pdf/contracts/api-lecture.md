@@ -14,12 +14,14 @@ Ce contrat **modifie** [api-documents.md](../../011-guide-nego-documents/contrac
 | Sans `Range` | `200`, corps entier, `Content-Length` — c'est le téléchargement de la copie |
 | `Range: bytes=a-b`, `bytes=a-`, `bytes=-n` | `206`, `Content-Range: bytes a-b/total`, `Content-Length` de la plage. Une seule plage ; plusieurs plages → la première seule, comme le permet la RFC 9110 |
 | Plage hors du fichier | `416`, `Content-Range: bytes */total`, code **`NEGOTIATION_DOCUMENT_RANGE_INVALID`** (nouveau) |
-| `If-None-Match` égal à l'empreinte | `304` |
-| En-têtes, toujours | `Content-Type: application/pdf` · `Accept-Ranges: bytes` · `ETag: "<asset_id>"` (fort : un fichier publié ne change jamais en place) · `Content-Disposition: inline` · **aucun `Content-Encoding`** |
+| `If-None-Match` égal à l'empreinte | `304`. La comparaison passe par `kernel::empreinte` : `W/` et suffixe de relais (« -br », « -gzip ») retirés, comme pour les autres empreintes (DEPLOIEMENT.md § 11) |
+| En-têtes, toujours | `Content-Type: application/pdf` · `Accept-Ranges: bytes` · `ETag: "<asset_id>"` (fort : un fichier publié ne change jamais en place) · `Content-Disposition: inline` · **`Content-Encoding: identity`** et **`Cache-Control: …, no-transform`** : le relais institutionnel compresse ses réponses (mesuré le 22/09), et une réponse partielle compressée fait renoncer pdf.js aux plages |
 | Cache | Public : `Cache-Control: private, max-age=3600, no-transform`. Réservé : `Cache-Control: private, no-store, no-transform` (FR-029) |
 | Lecture du stockage | `kernel::storage::ObjectStore::get_range` (nouveau), jamais l'objet entier pour une plage |
 
 Le compteur de téléchargements reste `POST …/downloads`, envoyé par le client une fois la copie gardée ; la route du fichier ne compte rien, puisque pdf.js l'appelle par dizaines de morceaux.
+
+**À travers le relais** : la vérification 4 du § 11 de DEPLOIEMENT.md — une requête par plage par l'adresse institutionnelle rend `206` sans `Content-Encoding` autre qu'`identity`.
 
 **Origine croisée (poste de développement)** : le contrôle d'origine accepte `Range` et `If-None-Match` en préflight et expose `Content-Range`, `Accept-Ranges`, `Content-Length`, `ETag`. En production, site et API partagent l'hôte.
 
@@ -90,7 +92,7 @@ Aucun. `NEGOTIATION_DOCUMENT_NOT_READY` garde son sens.
 
 ## Tests exigés (sur base réelle)
 
-- **Plages** : `206` et `Content-Range` justes pour `a-b`, `a-`, `-n` ; `200` sans `Range` ; `416` au-delà ; `304` sur l'empreinte ; aucun `Content-Encoding` ; `Accept-Ranges` présent ; `HEAD` sans corps.
+- **Plages** : `206` et `Content-Range` justes pour `a-b`, `a-`, `-n` ; `200` sans `Range` ; `416` au-delà ; `304` sur l'empreinte, y compris suffixée « -br » ; `Content-Encoding: identity` et `no-transform` sur chaque réponse, `Accept-Encoding: br, gzip` envoyé ; `Accept-Ranges` présent ; `HEAD` sans corps.
 - **Réservé, à chaque morceau** : sans session, session sans accès, adresse forgée d'un brouillon, document dépublié entre deux morceaux — `403` ou `404`, jamais un octet (SC-009).
 - **Cache** : `no-store` pour un réservé, jamais pour un public.
 - **Liste et lecture** : `has_text`, `large_text` pour les quatre cas de la fonction ; `mode` et `image` absents.

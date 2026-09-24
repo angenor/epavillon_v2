@@ -27,10 +27,15 @@ Chaque décision porte son **pourquoi** et ce qui a été **écarté**. Les renv
 - **`vue-pdf-embed`** rend toutes les pages, ce qu'on ne peut pas faire sur 90 pages. **`@tato30/vue-pdf`** laisse la mémoire et le zoom à notre charge.
 - **Le build moderne** : il faudrait deux livraisons, ou exclure tout iPhone sous iOS 26.2.
 
-**Le plancher des appareils.** Le legacy exige **Safari 18** (iOS 18, disponible depuis l'iPhone XS) et **Chrome 125**. Un Android 8 ou 9 reste à Chrome 138 et passe.
-- Un iPhone bloqué en iOS 16 ou 17 — iPhone 8 et X — **n'affiche pas les pages**.
-- Le lecteur le détecte à l'ouverture, par l'échec du chargement de pdf.js ou d'un rendu. Il ouvre alors « Texte agrandi » si le document l'offre, et le dit en une ligne. Sinon, il dit que ce téléphone n'affiche pas les pages de ce document.
-- **Point à porter au commanditaire** ; voir *Points ouverts*.
+**Le plancher des appareils** (arbitré par le commanditaire le 24/09).
+- **Il se mesure, il ne se déduit pas.** La documentation du legacy annonce **Safari 18** et **Chrome 125** ; l'essai dit ce qu'il exige réellement, et le fait tourner dans un **simulateur iOS 16** (Xcode) — l'iPhone 8 et le X s'y arrêtent. Ce public achète souvent des iPhone d'occasion : que ces téléphones soient rares reste à prouver. Un Android 8 ou 9 reste à Chrome 138 et passe.
+- **La bascule se décide par détection des fonctions**, jamais par la version lue dans l'identifiant du navigateur. `charger.ts` vérifie, avant de charger pdf.js, la liste des fonctions que l'essai a trouvées nécessaires et qu'aucun polyfill ne couvre — module ES dans un `Worker`, `OffscreenCanvas` si pdf.js l'exige, `structuredClone`, etc. ; puis un échec de chargement ou de premier rendu mène au même repli. Un test simule l'absence de chacune (R14).
+- **Une seconde sécurité, qui ne dépend d'aucune mesure** (arbitré le 24/09). La mesure ne dit que **combien** de téléphones basculeront ; la bascule, elle, doit marcher dans tous les cas. `utils/guide-nego/pdf/bascule.ts`, pur, surveille le premier rendu : une erreur de pdf.js, ou une première page non dessinée dans le délai, rend `bascule`.
+  - Délai réglable : **8 s sur une copie gardée**, **20 s en ligne**, où le réseau compte et où SC-003 tolère 8 s de chargement en « 3G lente ».
+  - Le lecteur passe alors à « Texte agrandi », avec la même ligne que la détection. L'événement est **compté sur le téléphone** (`gn.lecture-bascules` : nombre, dernière cause, dernière date), pour la recette. Les pages ne se réessaient qu'**à l'ouverture suivante** du document : la décision vit dans l'instance du lecteur, pas dans le stockage.
+  - Un test simule les deux cas : erreur, et délai dépassé.
+- **Le repli** : « Texte agrandi » si le document l'offre, avec une ligne qui le dit ; sinon un écran qui dit que ce téléphone ne peut pas afficher ce document. **Jamais le visionneur du téléphone.**
+- **Si aucun iPhone ancien ni aucun simulateur n'est disponible** pour l'essai, la grille le dit et renvoie à T084 : rien n'est bloqué, puisque la seconde sécurité tient sans mesure.
 
 ---
 
@@ -43,15 +48,16 @@ Chaque décision porte son **pourquoi** et ce qui a été **écarté**. Les renv
 | Défilement des 90 pages, CPU bridé ×4, profil mobile | Aucune tâche longue de plus de 100 ms pendant le geste ; aucune page blanche plus d'une seconde après l'arrêt | SC-001, SC-002 |
 | Mémoire après un aller-retour complet | Stable : les canevas sont libérés (`width = height = 0`) et le tas ne croît pas d'un tour à l'autre | Edge case mémoire, FR-010 |
 | Grossissement ×4 sur le tableau des sigles | Net en moins d'une seconde après le geste, sans erreur de canevas | FR-004, SC-002 |
-| Première page en ligne, réseau « 3G lente » | Moins de 8 s ; les requêtes sont des `206` de 256 Ko | FR-009, SC-003 |
-| Dix expressions du guide | Chaque passage repéré sur sa page par la couche de texte (R7) | SC-004 |
+| Première page en ligne | Moins de 3 s sur un réseau ordinaire, moins de 8 s en « 3G lente » ; les requêtes sont des `206` de 256 Ko | FR-009, SC-003 |
+| Passages retrouvés sur la page (R7) | Taux mesuré sur le vrai guide, **recherches et notes séparément** — cinquante expressions, dix passages de note, choisis avec césures, ligatures et colonnes | SC-004, FR-032 |
+| Version d'iOS réellement exigée | Mesurée : simulateur iOS 16, puis 17 et 18 ; la liste des fonctions manquantes relevée pour la détection | R1 |
 | Couche de texte, page 59 | Sélection d'un paragraphe à deux colonnes, collé dans l'ordre | SC-006 |
 | Hors connexion | Le travailleur de pdf.js, ses `wasm` et ses polices sont servis par la coquille, **y compris le XHR synchrone qu'émet le travailleur** — vérifié sous Chrome, **à vérifier sous WebKit** | FR-043 |
 | Polices et images du guide | `pdffonts` et `pdfimages -list` : polices non incorporées, JPEG 2000, JBIG2, polices CID | R4 |
 
 **Où.**
 - Chrome sur poste, en émulation mobile, pour les mesures.
-- Safari du Mac, puis le simulateur iOS s'il est installé, pour WebKit.
+- Safari du Mac, puis les **simulateurs iOS 16, 17 et 18** de Xcode, pour WebKit et pour le plancher réel (R1).
 - **Sur appareil réel** : un Android de milieu de gamme et un iPhone, par le commanditaire, sur une construction servie, comme T112. Ce qui ne se fait pas sur poste est écrit tel quel dans la grille.
 
 **Les issues.**
@@ -76,11 +82,12 @@ Chaque décision porte son **pourquoi** et ce qui a été **écarté**. Les renv
   - `Range: bytes=a-b` rend `206` avec `Content-Range` ;
   - sans `Range`, `200` et `Content-Length` : c'est le téléchargement de la copie ;
   - une plage hors du fichier rend `416`, avec un code nouveau ;
-  - toujours `Accept-Ranges: bytes`, jamais de `Content-Encoding`, toujours `Cache-Control: no-transform`. pdf.js coupe les plages en silence si la réponse est compressée ;
+  - toujours `Accept-Ranges: bytes`, `Content-Encoding: identity` et `Cache-Control: …, no-transform`. pdf.js coupe les plages en silence si la réponse est compressée, et **le relais institutionnel compresse ses réponses** (mesuré le 22/09) ;
   - `ETag` fort, tiré de l'identifiant du fichier : un fichier publié ne change jamais en place (FR-007 de l'étape 1).
 - **`kernel::storage` gagne `get_range(key, debut, fin)`**, qui s'appuie sur le `GetObject` avec `Range` de S3, et sur le système de fichiers pour les tests. `head` existe déjà pour la taille.
 - **En local**, le site et l'API sont sur deux origines. Le contrôle d'origine maison (`api/src/lib.rs:252`) accepte l'en-tête `Range` en préflight et expose `Content-Range`, `Accept-Ranges` et `Content-Length`. En production, le site et l'API partagent l'hôte.
-- **Apache** ne compresse pas `application/pdf` sous `/v2/api/`. La configuration de Debian ne le fait pas, mais on le vérifie au § 15 de DEPLOIEMENT.md.
+- **Le relais institutionnel** compresse ses réponses en brotli. Apache respecte `no-transform` ; **le relais se vérifie le jour du branchement** : vérification 4 du § 11 de DEPLOIEMENT.md, une requête par plage qui doit rendre `206` sans `Content-Encoding`. Un échec se règle chez l'hébergeur.
+- **`If-None-Match` à travers le relais** : il suffixe l'`ETag` (« -br »). La route compare par `kernel::empreinte`, qui retire déjà `W/` et le suffixe.
 
 **Écarté.**
 - **Servir le public par le média**, comme la feuille de route l'envisageait : il faudrait une seconde copie dans le bucket public, à déplacer chaque fois qu'un document passe de public à réservé. Ce serait un invariant de plus pour un gain nul, avec quelques dizaines de documents et des lectures par morceaux de 256 Ko.
@@ -96,6 +103,7 @@ Chaque décision porte son **pourquoi** et ce qui a été **écarté**. Les renv
 
 **Décision.**
 - **Le module et son travailleur** s'importent depuis un utilitaire de Guide Négo : `pdf.min.mjs` dynamiquement, `pdf.worker.min.mjs` par `?url`. Ils entrent dans la garde par le manifeste, sans rien écrire de plus.
+- **Aucune compression sur la route**, relais compris : voir R3 et le § 11 de DEPLOIEMENT.md.
 - **Les ressources désignées par adresse** sont copiées au build dans `public/guide-nego/pdfjs/`, par un module Nuxt, `modules/guide-nego-pdfjs.ts`, sous une adresse stable, et ajoutées à `FICHIERS_PUBLICS` :
   - `wasm/qcms_bg.wasm` et `iccs/` : les couleurs ;
   - `wasm/openjpeg.wasm` : le JPEG 2000 ;
@@ -111,7 +119,9 @@ Chaque décision porte son **pourquoi** et ce qui a été **écarté**. Les renv
 | Polices standard | environ 200 Ko |
 
   L'installation reste en tout ou rien : `addAll`, ADR-019.
-- **La feuille de style de `pdf_viewer.css`** déclare des variables sur `:root` et des sélecteurs globaux, que la constitution interdit (XIII) et que `check:guide-nego` refuse. Le module en écrit donc au build une **copie bornée** : chaque sélecteur est préfixé par `[data-app="guide-nego"]`, et `:root` devient la borne. Le contrôle vérifie la copie comme toute autre feuille.
+- **La feuille de style de `pdf_viewer.css`** déclare des variables sur `:root` et des sélecteurs globaux, que la constitution interdit (XIII) et que `check:guide-nego` refuse. Une **fonction pure**, `bornerLaFeuille(css)` dans `frontend/guide-nego/feuille-pdfjs.ts`, en écrit une **copie bornée** : chaque sélecteur est préfixé par `[data-app="guide-nego"]`, et `:root` devient la borne.
+  - **La construction et le contrôle l'appellent tous deux.** `check:guide-nego` engendre lui-même la feuille avant de la vérifier : il ne dépend pas de l'ordre des commandes.
+  - Un test échoue si la feuille engendrée par le contrôle diffère de celle que produit la construction.
 - **`FICHIERS_PUBLICS` et le test `liste-de-garde`** gagnent les chemins de `pdfjs/`, et **`verifier-garde:guide-nego`** prouve qu'ils sont servis.
 
 **Écarté.**
@@ -178,15 +188,28 @@ Chaque décision porte son **pourquoi** et ce qui a été **écarté**. Les renv
 
 **Décision.**
 - **Le repérage se fait sur le téléphone, par la couche de texte** que pdf.js pose sur chaque page rendue. Rien ne s'ajoute au modèle.
-- **Un utilitaire pur**, `utils/guide-nego/pdf/reperer.ts`, prend les chaînes de la couche (`textContentItemsStr`) et un texte cherché. Il replie les deux par `replier()` de l'étape 1, qui existe (sans accents, sans casse, blancs réduits), et rend les intervalles de caractères par élément. Le composant les change en rectangles par `Range.getClientRects()` sur les éléments de la couche, **en pourcentage de la page**, pour qu'ils suivent le grossissement sans recalcul.
+- **Le texte de pdf.js n'est pas celui de PDFium.** Il faut donc normaliser les deux côtés avant de comparer, par **une fonction pure**, `normaliserPourReperer`, dans `utils/guide-nego/pdf/normaliser.ts`, testée cas par cas :
+
+| Cas | PDFium (forme lisible, index) | pdf.js (couche de texte) | Normalisé |
+|---|---|---|---|
+| Césure de fin de ligne | `U+0002` entre les deux moitiés | trait d'union en fin d'élément, ou rien | le mot recollé, sans trait |
+| Ligatures | `ﬁ`, `ﬂ`, `ﬀ`, `ﬃ`, `ﬄ` possibles | décomposées ou non, selon `disableNormalization` | `fi`, `fl`, `ff`, `ffi`, `ffl` |
+| Espaces | insécable `U+00A0`, fine `U+202F` | idem, ou espace ordinaire | une espace ordinaire, blancs réduits |
+| Apostrophes et guillemets | `’` ou `'` | `’` ou `'` | `'` ; `«` `»` `“` `”` → `"` |
+| Découpage | blocs et `spans` | fragments de ligne, `hasEOL` | chaîne continue, avec une **table de correspondance** vers l'élément et le caractère d'origine |
+| Accents, casse | — | — | comme `replier()` de l'étape 1, qu'elle prolonge |
+
+- **Un utilitaire pur**, `utils/guide-nego/pdf/reperer.ts`, prend les chaînes de la couche (`textContentItemsStr`) et un texte cherché. Il normalise les deux, cherche, puis ramène l'intervalle trouvé aux éléments et caractères d'origine par la table. Le composant en fait des rectangles par `Range.getClientRects()` sur les éléments de la couche, **en pourcentage de la page**, pour qu'ils suivent le grossissement sans recalcul. L'index de recherche de l'étape 1 passe par la même normalisation, pour que ses extraits se retrouvent tels quels.
 - **Un passage de recherche** se repère par son **contexte** : l'extrait de l'index de l'étape 1, quelques mots avant et après.
   - À défaut, par l'expression seule **si elle est unique sur la page**.
   - Sinon, toutes les occurrences de la page sont marquées en clair, et le lecteur dit qu'il ne peut pas marquer celle-ci. Jamais un autre endroit n'est marqué plein (FR-015).
-- **Le passage d'une note** : ses premiers mots, puis le passage entier. Introuvable, la note va en tête de page (FR-032).
+- **Le passage d'une note** : le passage entier, puis ses premiers mots. Introuvable, la note va en tête de page, **sans rien perdre** : texte, signature et passage cité restent lisibles dans la note dépliée (FR-032).
+- **L'essai mesure le taux** de passages retrouvés sur le vrai guide, recherches et notes séparément ([essai-lecteur.md](essai-lecteur.md)).
 - **Un renvoi « Tableau » de « Texte agrandi »** : le texte du bloc `origin`, s'il en a, repère l'endroit. Sinon, la page s'ouvre en haut.
 - **La liste des passages** reste celle de l'étape 1 (`chercherDansLeDocument` sur la forme lisible), avec ou sans réseau. On ne demande pas le texte de chaque page à pdf.js pour chercher : ce serait 90 pages décodées à chaque recherche.
 
 **Écarté.**
+- **Comparer sans normaliser**, ou par la seule `replier()` : une césure ou une ligature suffit à perdre un passage.
 - **`PDFFindController`** : il cherche dans tout le document par pdf.js, qui ne connaît ni les sections ni l'index replié de l'étape 1. Il aurait donné deux listes de passages, qui ne concorderaient pas.
 - **Garder les positions de PDFium en base** : cela coûterait une colonne de coordonnées par segment, un contrat de plus et une migration, pour une précision que la couche de texte donne déjà sur la page affichée. **À rouvrir** si l'essai montre que la couche de pdf.js ne retrouve pas les passages du guide.
 
@@ -281,7 +304,9 @@ Chaque décision porte son **pourquoi** et ce qui a été **écarté**. Les renv
 | Réservé refusé **à chaque morceau** — sans session, session sans accès, adresse forgée, brouillon | Même fichier (SC-009) |
 | La règle « Texte agrandi » : verdict, choix, pas de texte | `negotiation/tests/documents_admin.rs` et un test SQL de la fonction |
 | `get_range` | `kernel` sur le stockage de fichiers de test |
-| Repérage : contexte, expression unique, ambiguïté, césure, accents, élément coupé | `frontend/tests/guide-nego/reperer.test.ts` |
+| Normalisation : césure `U+0002` et trait d'union de fin de ligne, ligatures, insécables, apostrophes et guillemets, fragments et table de correspondance | `frontend/tests/guide-nego/normaliser.test.ts` |
+| Repérage : contexte, expression unique, ambiguïté, élément coupé | `frontend/tests/guide-nego/reperer.test.ts` |
+| Bascule : chaque fonction manquante simulée mène au repli ; un échec de premier rendu aussi | `frontend/tests/guide-nego/charger.test.ts` |
 | Copie : format 2, effacement d'un format ancien, entière ou absente avec le PDF | `copies.test.ts` étendu |
 | Mode, annonce unique | `appareil-lecture` dans `stockage.test.ts` ou un fichier neuf |
 | Garde : les chemins `pdfjs/` sont dans la liste | `liste-de-garde.test.ts`, `sw-garde.test.ts` |
@@ -292,5 +317,5 @@ Chaque décision porte son **pourquoi** et ce qui a été **écarté**. Les renv
 
 ## Points ouverts
 
-- **Le plancher des appareils (R1)** : un iPhone en iOS 16 ou 17 ne peut pas afficher les pages. Le plan lui ouvre « Texte agrandi » quand le document l'offre, et sinon lui dit que ce téléphone n'affiche pas ce document. **À confirmer par le commanditaire**, avec la part de ces téléphones dans les délégations si elle est connue.
+- **Le plancher des appareils (R1)** : le repli est tranché le 24/09 ; la version réellement exigée se mesure à l'essai, simulateur iOS 16 compris.
 - **WebKit hors connexion (R2, issue B)** : se tranche par l'essai.

@@ -19,7 +19,8 @@ Le lecteur montre les pages du guide telles que l'IFDD les a mises en page : il 
 - **Une route de l'API sert le PDF, par plages, à chaque morceau après vérification de l'accès.** Tous les PDF de documents sont dans le bucket privé, publics compris. `kernel::storage` apprend à lire une plage ([R3](research.md)).
 - **La coquille garde pdf.js.** Le travailleur y entre par le manifeste de Vite, les `wasm` et les polices par un module qui les copie. La feuille du visionneur y entre en copie bornée à `[data-app="guide-nego"]` ([R4](research.md)).
 - **La copie gardée passe au format 2 : le PDF et la lecture, sans images.** Une copie d'un format ancien s'efface ([R5](research.md)).
-- **Le passage se repère sur la page par la couche de texte de pdf.js.** Rien ne s'ajoute au modèle pour cela ([R7](research.md)).
+- **Le passage se repère sur la page par la couche de texte de pdf.js**, après une normalisation des deux textes par une fonction pure testée : césures, ligatures, insécables, apostrophes, fragments. L'essai mesure le taux de passages retrouvés. Rien ne s'ajoute au modèle ([R7](research.md)).
+- **Le relais compresse** : la route du PDF pose `Content-Encoding: identity` et `no-transform`, et le jour du branchement vérifie un `206` sans compression à travers le relais (§ 11 de DEPLOIEMENT.md, [R3](research.md)).
 - **« Texte agrandi » est le lecteur de l'étape 1**, sorti de la page dans son composant. Son choix prend la place de « Marquer » dans la barre ([R8](research.md), [R9](research.md)).
 - **Dans le modèle, « ouvrir tel quel » devient un choix qui suit par défaut le verdict de l'extraction.** Une fonction SQL porte la règle ([R11](research.md)).
 
@@ -43,7 +44,7 @@ Le lecteur montre les pages du guide telles que l'IFDD les a mises en page : il 
 - `node --test` côté client : repérage, copie de format 2, mode et annonce, garde ;
 - l'essai sur le vrai guide, puis la recette sur la version construite, puis les appareils réels.
 
-**Plateforme cible** : PWA installée, Android avec Chrome 125 ou plus, iPhone en iOS 18 ou plus ([R1](research.md), point ouvert pour iOS 16 et 17). Référence de 360 px, sans réseau.
+**Plateforme cible** : PWA installée, sur Android et iPhone. Le plancher annoncé par pdf.js est Chrome 125 et Safari 18 ; **le plancher réel se mesure à l'essai**, simulateur iOS 16 compris. Un téléphone en dessous lit « Texte agrandi », par détection des fonctions manquantes ([R1](research.md), arbitré le 24/09). Référence de 360 px, sans réseau.
 
 **Type de projet** : application web installable, adossée à l'API du monolithe modulaire.
 
@@ -127,7 +128,8 @@ specs/012-guide-nego-lecteur-pdf/
 docs/database/100_negotiations.sql   ~ large_text_choice · + document_reading_modes()
 docs/AppNego/adr/022-…md             + pdf.js dans le client (phase 1)
 docs/AppNego/adr/021-…md             ~ statut : sa dernière règle remplacée par 022
-docs/DEPLOIEMENT.md § 15             ~ migration 1b, Apache sans compression du PDF, relance d'extraction
+docs/DEPLOIEMENT.md § 11             ~ vérification 4 : un 206 sans compression à travers le relais (fait le 24/09)
+docs/DEPLOIEMENT.md § 15             ~ migration 1b, relance d'extraction
 
 backend/crates/
 ├── kernel/src/storage/              ~ mod.rs, s3.rs, filesystem : + get_range
@@ -147,9 +149,12 @@ frontend/
 ├── package.json                     + pdfjs-dist (exacte)
 ├── modules/guide-nego-pdfjs.ts      + copie wasm/iccs/standard_fonts → public/guide-nego/pdfjs/,
 │                                      feuille du visionneur bornée
+├── guide-nego/feuille-pdfjs.ts     + bornerLaFeuille(), appelée par la construction ET par check:guide-nego
 ├── guide-nego/liste-de-garde.ts     ~ FICHIERS_PUBLICS + pdfjs/
 ├── app/utils/guide-nego/
 │   ├── pdf/charger.ts               + pdf.js legacy, travailleur ?url, polyfill, options
+│   ├── pdf/bascule.ts               + seconde sécurité : erreur ou délai du premier rendu (pur)
+│   ├── pdf/normaliser.ts            + césures, ligatures, insécables, apostrophes, table de correspondance (pur)
 │   ├── pdf/reperer.ts               + repérage d'un passage dans la couche de texte (pur)
 │   ├── copies.ts                    ~ FORMAT_DE_COPIE = 2, sans images
 │   └── appareil-lecture.ts          ~ mode, annonce
@@ -166,7 +171,7 @@ frontend/
 ├── app/types/                       ~ negotiation-documents · admin-negotiation-documents
 ├── i18n/locales/{fr,en}/            ~ guide-nego.lecteur, gn-barre-lecture, gn-reglages-lecture,
 │                                      admin.negotiation-documents ; + gn-choix-mode, gn-marge-note
-└── tests/guide-nego/                + reperer · ~ copies, liste-de-garde, sw-garde, stockage
+└── tests/guide-nego/                + normaliser · reperer · charger · bascule · feuille-pdfjs · gestes · ~ copies, liste-de-garde, sw-garde, stockage
 ```
 
 **Structure Decision** : le serveur ne change que dans `negotiation` et `kernel`. Côté client, pdf.js n'entre que par `utils/guide-nego/pdf/charger.ts` : un seul point d'entrée, que la garde suit par le manifeste. Le back-office ne charge pas pdf.js ; son aperçu garde les images de PDFium ([R11](research.md)).
@@ -179,13 +184,13 @@ frontend/
 
 | # | Phase | Ce qu'elle livre | Pourquoi là |
 |---|---|---|---|
-| 1 | **L'essai** | Le prototype jetable sur le vrai guide, [essai-lecteur.md](essai-lecteur.md) rempli, l'issue A, B ou C, l'**ADR-022**. **Relu avec le commanditaire**, avec le point ouvert d'iOS 16 et 17 | Tout le cycle repose sur la tenue de pdf.js sur un téléphone. Rien ne s'écrit avant |
+| 1 | **L'essai** | Le prototype jetable sur le vrai guide, [essai-lecteur.md](essai-lecteur.md) rempli : fluidité, mémoire, netteté, taux de passages retrouvés (recherches et notes), **version d'iOS réellement exigée** — simulateurs iOS 16, 17, 18 — et liste des fonctions à détecter. L'issue A, B ou C, l'**ADR-022**. **Relu avec le commanditaire** | Tout le cycle repose sur la tenue de pdf.js sur un téléphone. Rien ne s'écrit avant |
 | 2 | **Le modèle** | `100_negotiations.sql`, `migration.sql` rejouable, `docs/progression/modele.md` | Rien du métier avant le SQL |
-| 3 | **Les plages et l'API** | `get_range`, la route du fichier et ses tests, la lecture sans image, `has_text`/`large_text`, `…/large-text`, `reading_bytes`, le motif du mot de passe, `make openapi`, `check-api-contract` | Le client a besoin d'un contrat servi |
-| 4 | **pdf.js dans la coquille** | `pdfjs-dist`, `modules/guide-nego-pdfjs.ts`, `charger.ts` et son polyfill, la feuille bornée, la garde et ses tests, `verifier-garde` | La preuve hors connexion précède tout écran |
+| 3 | **Les plages et l'API** | `get_range`, la route du fichier — `Content-Encoding: identity`, `no-transform`, empreinte comparée sans suffixe de relais — et ses tests, la lecture sans image, `has_text`/`large_text`, `…/large-text`, `reading_bytes`, le motif du mot de passe, `make openapi`, `check-api-contract` | Le client a besoin d'un contrat servi |
+| 4 | **pdf.js dans la coquille** | `pdfjs-dist`, `modules/guide-nego-pdfjs.ts`, `charger.ts` — polyfill, **détection des fonctions manquantes** et son test qui simule leur absence —, la feuille bornée, la garde et ses tests, `verifier-garde` | La preuve hors connexion précède tout écran |
 | 5 | **La copie, format 2** | `copies.ts`, `useGnCopies`, l'effacement des formats anciens, le remplacement de la seule lecture, les tests | US1 et US2 lisent la copie |
-| 6 | **US1 — Lire les pages** | `GnLecteurPages`, les gestes, le pied, la reprise, le thème, l'appareil trop ancien, `lire.vue` réorganisée, `GnLecteurTexte` extrait **sans changement de comportement** | Le critère de sortie |
-| 7 | **US2 — Trouver** | `reperer.ts` et ses tests, le passage marqué sur la page, le sommaire vers la page, la fiche d'un document sans texte | L'autre moitié du critère |
+| 6 | **US1 — Lire les pages** | `GnLecteurPages`, les gestes, le pied, la reprise, le thème, le repli d'un téléphone qui n'affiche pas les pages (FR-012 bis), `lire.vue` réorganisée, `GnLecteurTexte` extrait **sans changement de comportement** | Le critère de sortie |
+| 7 | **US2 — Trouver** | `normaliser.ts` et `reperer.ts`, fonctions pures, et leurs tests cas par cas ; l'index de l'étape 1 passé par la même normalisation ; le passage marqué sur la page, le sommaire vers la page, la fiche d'un document sans texte | L'autre moitié du critère |
 | 8 | **US3 — « Texte agrandi »** | `GnChoixMode` dans la barre et la feuille, `sliders`, l'annonce unique, le renvoi « Tableau », le mode gardé | S'appuie sur 6 |
 | 9 | **US5 — Les notes en marge** | `GnMargeNote`, le panneau non modal | S'appuie sur 6 et 7 |
 | 10 | **US6 — Le back-office** | `PreviewVerdict`, l'en-tête de l'aperçu, le motif d'échec | Indépendant des phases 6 à 9, placé après pour la continuité |

@@ -60,7 +60,7 @@ Passer d'un mode à l'autre garde l'index de page. Le mode choisi vit en `localS
 | Chargement | `GnChargement` jusqu'à la première page rendue ; en ligne, la première page paraît avant le fichier entier |
 | Pas sur le téléphone, sans réseau | Écran de l'étape 1, inchangé |
 | Page non encore reçue, réseau tombé | La page dit qu'il faut le réseau et propose « Télécharger au retour du réseau » |
-| Appareil qui n'affiche pas les pages | « Texte agrandi » s'il est offert, avec une ligne qui le dit ; sinon `GnEtatErreur` qui dit que ce téléphone n'affiche pas ce document |
+| Appareil qui n'affiche pas les pages | Décidé par **détection des fonctions manquantes** — jamais par l'identifiant du navigateur —, **ou par la seconde sécurité** : erreur de pdf.js, ou première page non dessinée en 8 s sur une copie gardée (20 s en ligne), réglable. L'événement est compté sur le téléphone (`gn.lecture-bascules`), et les pages ne se réessaient qu'à l'ouverture suivante. « Texte agrandi » s'il est offert, avec une ligne qui le dit ; sinon `GnEtatErreur` qui dit que ce téléphone ne peut pas afficher ce document. Jamais le visionneur du téléphone |
 | Réservé sans accès, 404, erreur | Étape 1, inchangés |
 
 ## Accessibilité

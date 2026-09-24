@@ -446,6 +446,19 @@ fasse.
    Ouvrir « Mes thématiques » en ligne, passer en mode avion, changer une
    thématique, revenir en ligne : le choix doit être enregistré, **sans** le
    message « Vos thématiques ont changé sur un autre appareil ».
+4. **Le PDF d'un document se lit par morceaux à travers le relais** (étape 1b
+   de Guide Négo). Une requête par plage sur la route du fichier d'un document
+   public publié, par l'adresse institutionnelle :
+
+   ```bash
+   curl -s -D - -o /dev/null -H 'Accept-Encoding: br, gzip' -H 'Range: bytes=0-262143' \
+     "https://<adresse institutionnelle>/v2/api/negotiation/documents/<id>/file"
+   ```
+
+   doit rendre **`206`**, `Content-Range: bytes 0-262143/<taille>`,
+   `Accept-Ranges: bytes`, et **aucun `Content-Encoding`** autre qu'`identity`.
+   Puis le guide s'ouvre dans Guide Négo, première page avant le fichier
+   entier.
 
 La troisième vérification tient à un détail mesuré le 22/09 : **ce relais
 compresse ses réponses en brotli**, et Apache, réglé par défaut
@@ -458,6 +471,15 @@ l'hébergeur. Mais ni le développement ni la recette ne compressent : **seul ce
 geste, par cette adresse, prouve que la comparaison tient** — un échec rendrait
 `412` à chaque choix fait sans réseau, et abandonnerait l'intention avec un
 message faux.
+
+La quatrième tient au même relais : **une réponse partielle compressée casse
+le chargement par morceaux**. pdf.js renonce aux plages dès qu'une réponse
+porte un `Content-Encoding`, et relit alors le fichier entier avant la
+première page. L'API pose donc `Content-Encoding: identity` et
+`Cache-Control: no-transform` sur la route du fichier, qu'Apache respecte ;
+seule cette requête, par cette adresse, prouve que le relais les respecte
+aussi. Un échec se règle chez l'hébergeur (exclure `application/pdf` de la
+compression), pas dans l'application.
 
 ---
 

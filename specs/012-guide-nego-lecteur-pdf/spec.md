@@ -16,6 +16,7 @@
 |---|---|
 | La spec que ce cycle modifie | [specs/011-guide-nego-documents/spec.md](../011-guide-nego-documents/spec.md). **Ce cycle remplace ses récits 3, 4, 5 et 6 pour ce qui touche la lecture** ; la publication (récit 1), la bibliothèque et la fiche (récit 2), les favoris, « Mes documents » et l'effacement (récit 5, hors contenu de la copie) ne changent pas. Le détail est dans *Ce que ce cycle change dans la spec 011* |
 | Les écrans | [04-lecteur.html](../../docs/AppNego/design/ecrans/04-lecteur.html) pour la barre de lecture repliée et dépliée, le sommaire, la recherche, les réglages (« 07 Réglages »), la note et la reprise. **Sa page de texte recomposé devient le mode « Texte agrandi » ; la page du PDF est l'affichage par défaut**, qu'aucune maquette ne dessine ; le choix du mode prend dans « 02 Barre dépliée » l'emplacement de « Marquer » — écarts 43 et 44 de [05-design.md](../../docs/AppNego/05-design.md) |
+| Les arbitrages du 24/09, après le plan | Un téléphone qui ne peut pas afficher les pages ouvre « Texte agrandi », avec une ligne qui le dit ; un document sans texte utilisable dit que ce téléphone ne peut pas l'afficher. **Jamais le visionneur du téléphone.** La bascule se décide par détection des fonctions manquantes, jamais par la version du navigateur ; le seuil réel se mesure à l'essai, simulateur iOS 16 compris — ce public achète souvent des iPhone d'occasion |
 | Les arbitrages du 24/09 | (1) **« Texte agrandi » remplace « Ouvrir tel quel »** : par défaut il suit le verdict de l'extraction donné à l'aperçu — proposé si le texte s'est bien recomposé, retiré sinon —, et l'administratrice change ce choix sans republier ; la recherche et le sommaire restent dans tous les cas. (2) **Le choix du mode se voit** : « Pages · Texte » occupe dans la barre dépliée la place laissée libre par « Marquer », et reste aussi dans « Réglages » ; « Aa » n'ouvre que le lexique (ADR-018), donc le bouton des réglages s'appelle « Réglages » et son pictogramme ne ressemble pas à « Aa » ; au premier document ouvert sur un écran étroit, une ligne dit une seule fois que « Texte agrandi » existe. (3) **La copie gardée porte un numéro de format** : une copie d'un format ancien s'efface et le document redevient « Non téléchargé » — pour les copies de l'étape 1, et pour tout changement de copie à venir |
 | Le système de design | [01-systeme.html](../../docs/AppNego/design/ecrans/01-systeme.html) — « 4 quater » Lecteur — et [design/passation/](../../docs/AppNego/design/passation/). Un composant qui manque se crée ici et s'ajoute à la page interne des composants |
 | Les mots employés à l'écran | [design/lexique.md](../../docs/AppNego/design/lexique.md) — dont « Hors connexion — lu à… », sans fuseau (écart 32) |
@@ -119,7 +120,7 @@ Aïssatou télécharge le guide : la fiche annonce 3,2 Mo, ce que la copie occup
 
 **Acceptance Scenarios**
 
-1. **Given** un document téléchargé, **When** on regarde ce que garde le téléphone, **Then** c'est le PDF et le texte extrait — le texte seulement s'il s'est extrait —, et rien d'autre : aucune image de page.
+1. **Given** un document téléchargé, **When** on regarde ce que garde le téléphone, **Then** c'est le PDF et la lecture — le texte extrait, réduit aux numéros imprimés des pages quand le texte ne s'est pas extrait —, et rien d'autre : aucune image de page.
 2. **Given** la fiche d'un document, **When** on lit sa taille, **Then** elle est celle de la copie gardée, PDF et texte compris, et « Mes documents » compte la même.
 3. **Given** un téléchargement interrompu — réseau perdu, place manquante, annulation —, **When** on regarde le téléphone, **Then** la copie est entière ou absente : jamais un PDF sans son texte, ni un texte sans son PDF, ni un fichier tronqué.
 4. **Given** la place, « Libérer », « Tout retirer du téléphone », l'effacement des réservés à la déconnexion et au retrait d'accès, « Remplacé par… » et la dépublication, **When** on les emploie, **Then** ils se comportent comme à l'étape 1 sur la nouvelle copie, et la place baisse d'au moins la taille des copies retirées.
@@ -178,9 +179,11 @@ Mariam publie le guide de la CdP31. L'aperçu lui montre chaque page d'origine e
 - **Le réseau tombe pendant la lecture en ligne d'un document non téléchargé.** Les pages déjà affichées restent à l'écran ; les autres disent qu'il faut le réseau et proposent « Télécharger au retour du réseau ».
 - **Un document réservé est lu en ligne quand la session expire.** Le lecteur se ferme sur le verrou à la prochaine lecture de l'accès, comme à l'étape 1 ; les pages en ligne ne s'obtiennent plus.
 - **Une recherche qui trouve une expression à cheval sur deux colonnes ou deux pages.** Le lecteur marque ce qu'il retrouve sur la page de l'occurrence ; s'il ne retrouve rien, il le dit (récit 2, scénario 3).
+- **Le texte de la page diffère du texte extrait** — césure en fin de ligne, ligature, espace insécable, apostrophe courbe ou droite, mot coupé en fragments. Les deux textes sont normalisés avant d'être comparés ; un passage de note qui reste introuvable place la note en tête de page, sans rien perdre de la note.
 - **Un passage de note qui figure deux fois sur la page.** La note se signale à la hauteur de la première occurrence.
 - **Le numéro imprimé diffère de la position** — couverture et pages liminaires non numérotées, chiffres romains. Le pied porte le numéro imprimé ; une page sans numéro imprimé porte sa position.
 - **Un document au texte partiellement extrait** — quelques pages scannées au milieu. Il s'ouvre sur ses pages ; la recherche ne couvre que les pages dont le texte s'est extrait, et le dit ; « Texte agrandi » suit le verdict de l'extraction et le choix de l'administratrice.
+- **Un téléphone trop ancien pour afficher les pages** — un iPhone 8 ou X resté en iOS 16, s'il se confirme à l'essai. Il lit « Texte agrandi » quand le document l'offre, et le lecteur le dit ; sinon l'écran dit que ce téléphone ne peut pas afficher ce document (FR-012 bis).
 - **Le téléphone manque de mémoire** — un Android d'entrée de gamme. Le lecteur ne garde prêtes que les pages proches de celle qu'on lit ; il ne se ferme pas et ne recharge pas l'application au milieu du document.
 - **Le téléphone n'a plus de place pour une copie.** Comme à l'étape 1 : le téléchargement échoue proprement, dit la place qui manque et renvoie à « Mes documents ».
 - **Le texte copié depuis un document réservé.** La copie se fait comme pour un public : la personne a l'accès, et ce qu'elle en fait relève d'elle.
@@ -201,6 +204,7 @@ Mariam publie le guide de la CdP31. L'aperçu lui montre chaque page d'origine e
 - **FR-010** : Le lecteur NE DOIT garder prêtes que les pages proches de celle qu'on lit, pour tenir la mémoire d'un téléphone de milieu de gamme sur un document de cent pages, sans fermeture ni rechargement.
 - **FR-011** : L'interface du lecteur — barre, pied, feuilles, fond autour des pages — DOIT suivre le thème de l'application ; la page du document NE DOIT jamais être recolorée.
 - **FR-012** : Le lecteur DOIT tourner dans l'application, sans renvoyer au visionneur du téléphone ni à une autre application.
+- **FR-012 bis** : Un téléphone qui ne peut pas afficher les pages DOIT ouvrir « Texte agrandi » quand le document l'offre, avec une ligne qui le dit, et sinon dire que ce téléphone ne peut pas afficher ce document. Ce cas DOIT se décider par la détection des fonctions manquantes, jamais par la version lue dans l'identifiant du navigateur. **Une seconde sécurité, qui ne dépend d'aucune mesure** (arbitré le 24/09) : si le moteur des pages lève une erreur, ou si la première page n'est pas dessinée dans un délai réglable — 8 s par défaut sur une copie gardée —, le lecteur DOIT basculer de même, avec la même ligne ; l'événement DOIT être compté sur le téléphone pour la recette, et les pages ne se réessaient qu'à l'ouverture suivante du document.
 
 ### Chercher et naviguer
 
@@ -224,7 +228,7 @@ Mariam publie le guide de la CdP31. L'aperçu lui montre chaque page d'origine e
 
 ### Garder
 
-- **FR-025** : La copie gardée DOIT contenir le PDF et le texte extrait — le PDF seul si le texte ne s'est pas extrait —, et aucune image de page.
+- **FR-025** : La copie gardée DOIT contenir le PDF et la lecture — le texte extrait, réduit aux numéros imprimés des pages quand le texte ne s'est pas extrait, pour que « Page 59 sur 92 » se lise hors connexion —, et aucune image de page.
 - **FR-026** : La copie gardée DOIT être entière ou absente ; une interruption NE DOIT laisser ni fichier tronqué ni moitié de copie lisible.
 - **FR-027** : La taille annoncée sur la fiche et comptée dans « Mes documents » DOIT être celle de la copie gardée.
 - **FR-028** : La place, « Libérer », « Tout retirer du téléphone », l'effacement des réservés à la déconnexion et au retrait d'accès, « Remplacé par… », la dépublication et le téléchargement au retour du réseau DOIVENT se comporter comme à l'étape 1.
@@ -256,8 +260,8 @@ Mariam publie le guide de la CdP31. L'aperçu lui montre chaque page d'origine e
 
 ### Key Entities
 
-- **Fichier d'un document** : le PDF publié, sa taille, son nombre de pages, les numéros imprimés de ses pages, son sommaire, son texte extrait page par page, le verdict de l'extraction et **le choix d'offrir ou non « Texte agrandi »**. Il ne porte plus d'images de page ni de mode « tel quel ».
-- **Copie gardée** : le PDF et le texte extrait d'un document, sur un appareil, avec son numéro de format, sa date et sa place. Entière ou absente. Propre à l'appareil.
+- **Fichier d'un document** : le PDF publié, sa taille, son nombre de pages, les numéros imprimés de ses pages, son sommaire, son texte extrait page par page, le verdict de l'extraction et **le choix d'offrir ou non « Texte agrandi »**. Il garde ses images de page pour l'aperçu du back-office seul, et ne porte plus de mode « tel quel ».
+- **Copie gardée** : le PDF et la lecture d'un document, sur un appareil, avec son numéro de format, sa date et sa place. Entière ou absente. Propre à l'appareil.
 - **Progression de lecture** : la dernière page lue d'une version, commune aux deux modes. Propre à l'appareil.
 - **Réglage de lecture** : le mode — « Pages » ou « Texte agrandi » —, la taille du texte, et si la ligne qui annonce « Texte agrandi » a été vue. Propre à l'appareil, pour tous les documents.
 - **Note de correction** : inchangée — page, passage cité facultatif, texte, auteur, date, retrait.
@@ -269,9 +273,9 @@ Le SQL se modifie d'abord, par une migration rejouable qui ne détruit pas la ba
 | Changement | Ce qu'il faut | Où |
 |---|---|---|
 | Le choix « ouvrir tel quel » | Devient le choix de proposer « Texte agrandi », posé par défaut d'après le verdict de l'extraction — nom, sens et défaut changent | `100_negotiations.sql` |
-| Les images de page | Ne se produisent plus ; ce qui les portait tombe, et les images déjà déposées se purgent | `100_negotiations.sql` et le bucket privé |
+| Les images de page | **Restent pour l'aperçu du back-office seul** : l'extraction les produit encore, l'administratrice et l'expert les voient à côté du texte ; elles ne partent plus jamais vers le téléphone, et la route qui les lui servait disparaît | Commentaires de `100_negotiations.sql` |
 | Le poids de la copie gardée | Se recalcule : PDF et texte extrait | `100_negotiations.sql` |
-| La position du texte sur la page | Pour marquer un passage trouvé ou cité, le lecteur doit le retrouver sur la page : par le texte que le rendu de la page porte déjà, ou par des positions tirées à l'extraction. **Le plan tranche**, et dit ce qui manque au modèle | Au plan |
+| La position du texte sur la page | **Rien** : le lecteur retrouve le passage dans le texte que pdf.js pose sur la page affichée, après normalisation des deux textes (plan, R7) | Rien |
 | Les numéros imprimés des pages | Existent depuis l'étape 1 | Rien |
 
 Ne s'ajoutent **pas** au modèle : le mode de lecture choisi, propre à l'appareil.
