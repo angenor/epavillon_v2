@@ -9,9 +9,13 @@
 import { readdirSync, readFileSync, statSync, existsSync } from 'node:fs'
 import { join, relative, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { engendrerLaFeuille, FEUILLE_ENGENDREE, REGLE_DE_DIMENSIONNEMENT } from '../guide-nego/feuille-pdfjs.ts'
 
 const FRONT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const BORNE = '[data-app="guide-nego"]'
+
+// Engendrée ici même : le contrôle ne dépend pas d'une construction préalable.
+const feuillePdfjs = engendrerLaFeuille(FRONT)
 
 const DOSSIERS = [
   'app/pages/guide-nego',
@@ -21,7 +25,7 @@ const DOSSIERS = [
   'app/assets/guide-nego',
   'guide-nego',
 ]
-const FICHIERS = ['app/layouts/guide-nego.vue', 'modules/guide-nego-garde.ts']
+const FICHIERS = ['app/layouts/guide-nego.vue', 'modules/guide-nego-garde.ts', 'modules/guide-nego-pdfjs.ts']
 
 function parcourir(dossier) {
   if (!existsSync(dossier)) return []
@@ -100,7 +104,8 @@ for (const fichier of fichiers) {
   const contenu = readFileSync(fichier, 'utf8')
   const lignes = contenu.split('\n').length
 
-  if (lignes > 1000) signaler(fichier, `${lignes} lignes — la limite est de 1000`)
+  const engendre = relative(FRONT, fichier) === FEUILLE_ENGENDREE
+  if (lignes > 1000 && !engendre) signaler(fichier, `${lignes} lignes — la limite est de 1000`)
 
   if (/from\s+['"]~\/components\/(?!guide-nego\/)/.test(contenu)) {
     signaler(fichier, 'importe un composant du site')
@@ -124,6 +129,11 @@ for (const fichier of fichiers) {
       verifierBornage(fichier, bloc[1])
     }
   }
+}
+
+// ADR-022 : sans elle, la couche de texte de pdf.js dérive d'une ligne ou plus.
+if (!feuillePdfjs.trimEnd().endsWith(REGLE_DE_DIMENSIONNEMENT)) {
+  signaler(join(FRONT, FEUILLE_ENGENDREE), 'la feuille de pdf.js ne se termine pas par la règle content-box sous .pdfViewer')
 }
 
 const PROGRAMME_SEUL = /\bprogrammes?\b(?!\s+(officiel|de la CCNUCC))/i

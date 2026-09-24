@@ -43,6 +43,8 @@ export default defineNuxtConfig({
   // CSS dans app/assets/css/design-tokens.css.
   vite: {
     plugins: [tailwindcss()],
+    // Le travailleur de pdf.js est un module (Guide Négo, ADR-022) : même format à la construction qu'en développement.
+    worker: { format: 'es' },
   },
 
   typescript: {

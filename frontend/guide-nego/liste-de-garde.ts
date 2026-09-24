@@ -4,6 +4,9 @@
  * Vit à côté de `sw.modele.js` et non sous `modules/`, que Nuxt balaie pour y trouver
  * des modules. `modules/guide-nego-garde.ts` l'appelle, `tests/guide-nego/` l'éprouve.
  */
+import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 export interface EntreeDeManifeste {
   file?: string
@@ -17,6 +20,33 @@ export interface EntreeDeManifeste {
 
 export type ManifesteDeConstruction = Record<string, EntreeDeManifeste>
 
+/** Le paquet de pdf.js, tel que l'installe `npm`. */
+export const RACINE_PDFJS = join(dirname(fileURLToPath(import.meta.url)), '../node_modules/pdfjs-dist')
+
+export const VERSION_PDFJS: string = JSON.parse(readFileSync(join(RACINE_PDFJS, 'package.json'), 'utf8')).version
+
+/**
+ * Sous `public/guide-nego/`, là où `modules/guide-nego-pdfjs.ts` copie les ressources.
+ * La version dans le chemin : même adresse, même contenu — la coquille les reprend
+ * d'un déploiement du site à l'autre, comme les fichiers à empreinte.
+ */
+export const DOSSIER_PDFJS = `pdfjs/${VERSION_PDFJS}`
+
+/**
+ * Ce que pdf.js lit par adresse (ADR-022, R4) : ni `cmaps/` ni `jbig2` (le guide n'en a
+ * pas, T002), jamais `quickjs`. Les dossiers se prennent en entier, polices Liberation comprises.
+ */
+export const RESSOURCES_PDFJS = ['wasm/qcms_bg.wasm', 'wasm/openjpeg.wasm', 'iccs/', 'standard_fonts/']
+
+/** Les fichiers des ressources de pdf.js, relatifs au paquet : la copie et la garde lisent la même liste. */
+export function fichiersPdfjs(racine: string = RACINE_PDFJS): string[] {
+  const lister = (chemin: string): string[] =>
+    statSync(join(racine, chemin)).isDirectory()
+      ? readdirSync(join(racine, chemin)).flatMap((nom) => lister(`${chemin.replace(/\/$/, '')}/${nom}`))
+      : [chemin]
+  return RESSOURCES_PDFJS.flatMap(lister).sort()
+}
+
 /** Ce dont la garde a besoin, en plus des fichiers de construction. */
 export const FICHIERS_PUBLICS = [
   './',
@@ -26,6 +56,7 @@ export const FICHIERS_PUBLICS = [
   'icones/192-masque.png',
   'icones/512-masque.png',
   'icones/180.png',
+  ...fichiersPdfjs().map((fichier) => `${DOSSIER_PDFJS}/${fichier}`),
 ]
 
 /** La mise en page, les pages, et le paquet de la locale servie. L'entrée est à part. */
@@ -68,6 +99,31 @@ export function fichiersDeConstruction(manifeste: ManifesteDeConstruction): stri
   }
 
   return [...fichiers].sort()
+}
+
+/**
+ * Les fichiers qu'un paquet désigne par `new URL('…', import.meta.url)`. Le travailleur
+ * de pdf.js en est un : Vite le construit à part et ne le nomme pas dans son manifeste.
+ */
+export function fichiersDesignes(contenuDuPaquet: string): string[] {
+  const motif = /new URL\(\s*[`'"]([\w.-]+\.\w+)[`'"]\s*,\s*import\.meta\.url\s*\)/g
+  return [...contenuDuPaquet.matchAll(motif)].map((trouve) => trouve[1]!)
+}
+
+/** Ajoute aux fichiers gardés ceux qu'ils désignent, de proche en proche. `lire` rend `null` pour un fichier absent. */
+export function avecLesFichiersDesignes(fichiers: string[], lire: (fichier: string) => string | null): string[] {
+  const gardes = new Set(fichiers)
+  const aLire = fichiers.filter((fichier) => fichier.endsWith('.js'))
+  while (aLire.length > 0) {
+    const contenu = lire(aLire.pop()!)
+    if (contenu === null) continue
+    for (const designe of fichiersDesignes(contenu)) {
+      if (gardes.has(designe) || lire(designe) === null) continue
+      gardes.add(designe)
+      if (designe.endsWith('.js')) aLire.push(designe)
+    }
+  }
+  return [...gardes].sort()
 }
 
 /**

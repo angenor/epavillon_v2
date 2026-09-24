@@ -1,9 +1,18 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { existsSync, readdirSync } from 'node:fs'
+import { join } from 'node:path'
 import {
+  avecLesFichiersDesignes,
+  DOSSIER_PDFJS,
   empreinteDesMessages,
+  FICHIERS_PUBLICS,
   fichiersDeConstruction,
+  fichiersDesignes,
+  fichiersPdfjs,
   listeDeGarde,
+  RACINE_PDFJS,
+  VERSION_PDFJS,
   type ManifesteDeConstruction,
 } from '../../guide-nego/liste-de-garde.ts'
 
@@ -85,4 +94,56 @@ test('toutes les adresses de la liste sont relatives au service worker', () => {
 
 test('le dossier de construction s’écrit sans barres superflues', () => {
   assert.ok(listeDeGarde(['a.js'], '_nuxt', 'abc123').includes('../_nuxt/a.js'))
+})
+
+test('les ressources de pdf.js sont gardées, calculées depuis le paquet', () => {
+  const pdfjs = FICHIERS_PUBLICS.filter((f) => f.startsWith('pdfjs/'))
+  assert.deepEqual(pdfjs, fichiersPdfjs().map((f) => `${DOSSIER_PDFJS}/${f}`))
+  assert.equal(DOSSIER_PDFJS, `pdfjs/${VERSION_PDFJS}`)
+  assert.match(VERSION_PDFJS, /^\d+\.\d+\.\d+$/)
+  for (const attendu of ['wasm/qcms_bg.wasm', 'wasm/openjpeg.wasm', 'iccs/CGATS001Compat-v2-micro.icc']) {
+    assert.ok(fichiersPdfjs().includes(attendu), attendu)
+  }
+  for (const fichier of fichiersPdfjs()) assert.ok(existsSync(join(RACINE_PDFJS, fichier)), fichier)
+})
+
+test('les polices standard sont toutes là, Liberation comprises', () => {
+  const polices = readdirSync(join(RACINE_PDFJS, 'standard_fonts')).map((f) => `standard_fonts/${f}`)
+  assert.deepEqual(fichiersPdfjs().filter((f) => f.startsWith('standard_fonts/')), polices.sort())
+  assert.equal(polices.filter((f) => /Liberation.*\.ttf$/.test(f)).length, 4)
+})
+
+test('ni cmaps, ni jbig2, ni quickjs', () => {
+  assert.ok(!fichiersPdfjs().some((f) => /cmaps|jbig2|quickjs/.test(f)))
+})
+
+test('les ressources de pdf.js sont relatives au service worker, comme le reste', () => {
+  const liste = listeDeGarde([], '/_nuxt/', 'abc123')
+  assert.ok(liste.includes(`${DOSSIER_PDFJS}/wasm/qcms_bg.wasm`))
+  assert.ok(liste.every((adresse) => !adresse.startsWith('/')))
+})
+
+test('un fichier désigné par new URL(…, import.meta.url) se lit, guillemets ou accents graves', () => {
+  const minifie = 'new Worker(new URL(``+new URL(`travailleur-yfzTHH_n.js`,import.meta.url).href,``+import.meta.url),{type:`module`})'
+  assert.deepEqual(fichiersDesignes(minifie), ['travailleur-yfzTHH_n.js'])
+  assert.deepEqual(fichiersDesignes('new URL("a.wasm", import.meta.url)'), ['a.wasm'])
+  assert.deepEqual(fichiersDesignes('new URL("./ailleurs/a.js", location.href)'), [])
+})
+
+test('le travailleur, que le manifeste ne nomme pas, entre dans la garde avec ce qu’il désigne', () => {
+  const paquets: Record<string, string> = {
+    'lecteur.js': 'x=new Worker(new URL(`travailleur.js`,import.meta.url),{type:`module`})',
+    'travailleur.js': 'y=new URL(`profil.icc`,import.meta.url)',
+    'profil.icc': '…',
+    'autre.css': 'new URL(`jamais.js`,import.meta.url)',
+  }
+  const lire = (fichier: string) => paquets[fichier] ?? null
+  assert.deepEqual(avecLesFichiersDesignes(['autre.css', 'lecteur.js'], lire), [
+    'autre.css',
+    'lecteur.js',
+    'profil.icc',
+    'travailleur.js',
+  ])
+  const seul = (f: string) => (f === 'a.js' ? 'new URL(`absent.js`,import.meta.url)' : null)
+  assert.deepEqual(avecLesFichiersDesignes(['a.js'], seul), ['a.js'], 'un fichier absent n’entre pas')
 })

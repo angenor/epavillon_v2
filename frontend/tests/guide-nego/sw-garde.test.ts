@@ -18,8 +18,11 @@ const LISTE = [
   './',
   'manifest.webmanifest',
   'icones/192.png',
+  'pdfjs/6.3.289/wasm/qcms_bg.wasm',
+  'pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf',
   '../_i18n/abc123/fr/messages.json',
   '../_nuxt/entry.hash.js',
+  '../_nuxt/travailleur.hash.js',
   '../_nuxt/Atkinson.hash.woff2',
 ]
 
@@ -102,7 +105,10 @@ test('déploiement suivant : les fichiers de construction se reprennent, le rest
       {
         contenu: new Map([
           [absolu('../_nuxt/entry.hash.js'), 'v1'],
+          [absolu('../_nuxt/travailleur.hash.js'), 'v1'],
           [absolu('../_nuxt/Atkinson.hash.woff2'), 'v1'],
+          [absolu('pdfjs/6.3.289/wasm/qcms_bg.wasm'), 'v1'],
+          [absolu('pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf'), 'v1'],
           [absolu('./'), 'v1'],
         ]),
       },
@@ -162,4 +168,34 @@ test('la version en attente ne prend la main que si la page le demande', async (
   assert.equal(sw.priseDeMain(), false)
   await sw.declencher('message')
   assert.equal(sw.priseDeMain(), true)
+})
+
+test('un déploiement du site ne fait pas reprendre pdf.js : sa version est dans le chemin', async () => {
+  const anciens = new Map([
+    [
+      'gn-coquille-v1',
+      {
+        contenu: new Map(
+          [
+            'pdfjs/6.3.289/wasm/qcms_bg.wasm',
+            'pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf',
+            '../_nuxt/travailleur.hash.js',
+          ].map((adresse) => [absolu(adresse), 'v1']),
+        ),
+      },
+    ],
+  ])
+  const sw = monter('v2', anciens)
+  await sw.declencher('install')
+  assert.ok(!sw.demandees.some((a) => a.includes('/pdfjs/') || a.includes('travailleur')), 'rien de pdf.js redemandé')
+  assert.equal(sw.caches_.get('gn-coquille-v2')?.contenu.get(absolu('pdfjs/6.3.289/wasm/qcms_bg.wasm')), 'v1')
+})
+
+test('une autre version de pdf.js est une autre adresse : elle se demande', async () => {
+  const anciens = new Map([
+    ['gn-coquille-v1', { contenu: new Map([[absolu('pdfjs/6.2.0/wasm/qcms_bg.wasm'), 'ancienne']]) }],
+  ])
+  const sw = monter('v2', anciens)
+  await sw.declencher('install')
+  assert.ok(sw.demandees.includes(absolu('pdfjs/6.3.289/wasm/qcms_bg.wasm')))
 })

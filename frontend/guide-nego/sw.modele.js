@@ -33,8 +33,11 @@ const PORTEE = new URL('./', self.location).href
 /** Les adresses gardées, absolues, pour les comparer à celles des requêtes. */
 const GARDEES = new Set(LISTE.map((adresse) => new URL(adresse, self.location).href))
 
-/** Les fichiers de construction portent une empreinte dans leur nom : même adresse, même contenu. */
-const estFichierDeConstruction = (adresse) => adresse.includes('/_nuxt/')
+/**
+ * Même adresse, même contenu : les fichiers de construction portent une empreinte dans
+ * leur nom, les ressources de pdf.js sa version dans leur chemin.
+ */
+const estFichierDeConstruction = (adresse) => adresse.includes('/_nuxt/') || adresse.includes('/guide-nego/pdfjs/')
 
 async function cachesDeLaCoquille() {
   const cles = await caches.keys()

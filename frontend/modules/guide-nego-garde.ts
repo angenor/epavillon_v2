@@ -2,6 +2,7 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from
 import { dirname, join } from 'node:path'
 import { createResolver, defineNuxtModule } from '@nuxt/kit'
 import {
+  avecLesFichiersDesignes,
   empreinteDesMessages,
   fichiersDeConstruction,
   listeDeGarde,
@@ -71,7 +72,11 @@ export default defineNuxtModule({
     })
 
     nuxt.hook('build:manifest', (manifeste) => {
-      const fichiers = fichiersDeConstruction(manifeste as ManifesteDeConstruction)
+      const construction = nuxt.options.app.buildAssetsDir
+      const dossierClient = join(nuxt.options.buildDir, 'dist/client', construction.replace(/^\/+|\/+$/g, ''))
+      const lire = (fichier: string) =>
+        existsSync(join(dossierClient, fichier)) ? readFileSync(join(dossierClient, fichier), 'utf8') : null
+      const fichiers = avecLesFichiersDesignes(fichiersDeConstruction(manifeste as ManifesteDeConstruction), lire)
 
       if (fichiers.length === 0) {
         throw new Error(
@@ -80,8 +85,6 @@ export default defineNuxtModule({
         )
       }
 
-      const construction = nuxt.options.app.buildAssetsDir
-      const dossierClient = join(nuxt.options.buildDir, 'dist/client', construction.replace(/^\/+|\/+$/g, ''))
       const liste = listeDeGarde(fichiers, construction, empreinteDansLesPaquets(dossierClient, fichiers))
 
       const source = readFileSync(modele, 'utf8')
