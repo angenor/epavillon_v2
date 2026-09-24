@@ -18,11 +18,17 @@ const props = withDefaults(
     courant?: Occurrence | null
     /** Les notes vivantes posées sur cette page. */
     notes?: CorrectionNote[]
+    /** Un tableau ou une figure renvoie à sa page du PDF, si ce téléphone l'affiche. */
+    renvois?: boolean
   }>(),
-  { surlignages: () => [], courant: null, notes: () => [] },
+  { surlignages: () => [], courant: null, notes: () => [], renvois: false },
 )
 
-defineEmits<{ terme: [texte: string] }>()
+const emit = defineEmits<{ terme: [texte: string]; renvoi: [page: number, texte: string] }>()
+
+/** Ce qui repère le tableau sur sa page : sa légende, sinon le début de son texte. */
+const texteDuBloc = (bloc: Extract<Block, { kind: 'origin' }>): string =>
+  (bloc.caption?.length ? bloc.caption : (bloc.text ?? [])).map((s) => s.text).join('')
 
 const { t } = useI18n()
 
@@ -63,11 +69,11 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
       v-bind="enveloppes[rang]?.attributs"
     >
       <component :is="balisesDeTitre[bloc.level]" v-if="bloc.kind === 'heading'" :class="`gn-page-lue__titre-${bloc.level}`">
-        <GnSegmentsLus :segments="segments(rang, 'spans', bloc.spans)" @terme="$emit('terme', $event)" />
+        <GnSegmentsLus :segments="segments(rang, 'spans', bloc.spans)" @terme="emit('terme', $event)" />
       </component>
 
       <p v-else-if="bloc.kind === 'paragraph'" class="gn-page-lue__paragraphe">
-        <GnSegmentsLus :segments="segments(rang, 'spans', bloc.spans)" @terme="$emit('terme', $event)" />
+        <GnSegmentsLus :segments="segments(rang, 'spans', bloc.spans)" @terme="emit('terme', $event)" />
       </p>
 
       <p
@@ -77,23 +83,32 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
       >
         <span class="gn-page-lue__puce" aria-hidden="true">{{ bloc.marker }}</span>
         <span>
-          <GnSegmentsLus :segments="segments(rang, 'spans', bloc.spans)" @terme="$emit('terme', $event)" />
+          <GnSegmentsLus :segments="segments(rang, 'spans', bloc.spans)" @terme="emit('terme', $event)" />
         </span>
       </p>
 
       <p v-else-if="bloc.kind === 'note'" class="gn-page-lue__note">
         <sup class="gn-page-lue__appel">{{ bloc.mark }}</sup>
-        <GnSegmentsLus :segments="segments(rang, 'spans', bloc.spans)" @terme="$emit('terme', $event)" />
+        <GnSegmentsLus :segments="segments(rang, 'spans', bloc.spans)" @terme="emit('terme', $event)" />
       </p>
 
       <div v-else-if="bloc.kind === 'origin'" class="gn-page-lue__origine">
+        <button
+          v-if="props.renvois"
+          type="button"
+          class="gn-page-lue__renvoi"
+          @click.stop="emit('renvoi', page.index, texteDuBloc(bloc))"
+        >
+          <GnPicto nom="doc" :taille="20" />
+          {{ t(`gn-page-lue.renvoi.${bloc.reason}`, { page: page.label }) }}
+        </button>
         <p v-if="bloc.caption?.length" class="gn-page-lue__legende">
-          <GnSegmentsLus :segments="segments(rang, 'caption', bloc.caption)" @terme="$emit('terme', $event)" />
+          <GnSegmentsLus :segments="segments(rang, 'caption', bloc.caption)" @terme="emit('terme', $event)" />
         </p>
         <details v-if="bloc.text?.length" class="gn-page-lue__texte-origine" :open="texteOuvert(rang) || undefined" @click.stop>
           <summary>{{ t(`gn-page-lue.texte.${bloc.reason}`) }}</summary>
           <p>
-            <GnSegmentsLus :segments="segments(rang, 'text', bloc.text)" @terme="$emit('terme', $event)" />
+            <GnSegmentsLus :segments="segments(rang, 'text', bloc.text)" @terme="emit('terme', $event)" />
           </p>
         </details>
       </div>
@@ -181,6 +196,24 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
   padding: var(--gn-espace-12);
   border: var(--gn-filet-1) solid var(--gn-filet);
   border-radius: var(--gn-rayon-4);
+}
+
+[data-app="guide-nego"] .gn-page-lue__renvoi {
+  align-self: flex-start;
+  min-height: var(--gn-cible);
+  display: flex;
+  align-items: center;
+  gap: var(--gn-espace-8);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--gn-accent);
+  font: inherit;
+  font-size: var(--gn-taille-15);
+  font-weight: var(--gn-graisse-gras);
+  text-decoration: underline;
+  text-underline-offset: var(--gn-espace-4);
+  cursor: pointer;
 }
 
 [data-app="guide-nego"] .gn-page-lue__legende {

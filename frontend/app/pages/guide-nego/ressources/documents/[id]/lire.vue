@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CorrectionNote, LibraryDocument } from '~/types/negotiation-documents'
-import { compterUneBascule } from '~/utils/guide-nego/appareil-lecture'
+import { compterUneBascule, modeDuDocument, type ModeDeLecture } from '~/utils/guide-nego/appareil-lecture'
 import { sectionDeLaPage } from '~/utils/guide-nego/forme-lisible'
 import { tailleLisible } from '~/utils/guide-nego/place'
 import { chercherDansLeDocument, pagesCherchees, passageAReperer, passageDeLaPage, type Occurrence } from '~/utils/guide-nego/lecteur'
@@ -15,7 +15,7 @@ import GnLecteurPages from '~/components/guide-nego/GnLecteurPages.client.vue'
 /**
  * Le lecteur — maquette 04. Sans barre d'onglets : une ligne d'en-tête, les pages
  * d'origine (ADR-022) ou « Texte agrandi », la barre de lecture en bas, et ce qu'elle
- * ouvre — sommaire, recherche, réglages.
+ * ouvre — sommaire, recherche, choix du mode, réglages.
  */
 // Le lecteur tient lui-même sa position — la page de reprise : ni le routeur ni le
 // navigateur ne la recalent après lui.
@@ -63,8 +63,14 @@ const attente = ref<EtatDAttente | null>(null)
 let lAttente: ReturnType<typeof creerLAttente> | null = null
 const plages = ref<{ recu: number; demande: number }>({ recu: 0, demande: 0 })
 
+// Le mode gardé vaut pour tous les documents ; celui qui n'offre pas « Texte agrandi » s'ouvre en pages (FR-021).
+const modeDeLecture = useGnModeDeLecture()
+const texteOffert = computed(() => !!lecture.value?.large_text)
+const modeDuLecteur = computed(() => modeDuDocument(modeDeLecture.mode.value, texteOffert.value))
+const modeVoulu = computed<ModeDeLecture>(() => modeDuLecteur.value.mode)
+
 const modeAffiche = computed<'attente' | 'texte' | 'pages'>(() => {
-  if (bascule.value !== null) return 'texte'
+  if (bascule.value !== null || modeVoulu.value === 'texte') return 'texte'
   return attente.value?.mode ?? 'pages'
 })
 
@@ -82,7 +88,11 @@ function commencerLaLecture(): void {
   reseauPerdu.value = false
   plages.value = { recu: 0, demande: 0 }
   pageDeDepart.value = reprise.value?.index ?? 1
-  if (etat.value.etat !== 'pret' || etat.value.source !== 'reseau') return
+  demarrerLAttente()
+}
+
+function demarrerLAttente(): void {
+  if (etat.value.etat !== 'pret' || etat.value.source !== 'reseau' || modeVoulu.value !== 'pages') return
   // La forme lisible est déjà arrivée : les 3 s se comptent depuis l'ouverture, pas depuis elle.
   const delai = Math.max(0, DELAI_DES_SORTIES_MS - lecteur.ouvertDepuis())
   lAttente = creerLAttente({ minuterie, delai, surChangement: (e) => (attente.value = e) })
@@ -122,6 +132,46 @@ function lireLeTexteEnAttendant(): void {
 
 function resterSurLeTexte(): void {
   lAttente?.resterSurLeTexte()
+}
+
+/** Passer d'un mode à l'autre garde la page (FR-020) ; les pages ne se chargent qu'en mode « Pages ». */
+async function choisirLeMode(nouveau: ModeDeLecture, page = pageEnCours.value): Promise<void> {
+  annonceDuTexte.value = false
+  if (nouveau === modeVoulu.value) return
+  modeDeLecture.choisir(nouveau)
+  if (nouveau === 'pages') {
+    pageDeDepart.value = page
+    demarrerLAttente()
+    return
+  }
+  lAttente?.arreter()
+  lAttente = null
+  attente.value = null
+  await nextTick()
+  await allerALaPage(page)
+}
+
+const modeChoisi = computed({ get: () => modeVoulu.value, set: (mode: ModeDeLecture) => void choisirLeMode(mode) })
+
+// Un renvoi « Tableau — page 59 » : les pages, à l'endroit du tableau s'il se repère, sinon en haut.
+const endroit = ref<PassageCherche | null>(null)
+function allerAuTableau(page: number, texte: string): void {
+  const debut = texte.split(/\s+/u).filter(Boolean).slice(0, 8).join(' ')
+  endroit.value = debut ? { page, contexte: { avant: '', apres: '' }, expression: debut } : null
+  void choisirLeMode('pages', page)
+}
+
+// FR-020 bis : une fois par téléphone, que « Texte agrandi » existe ; FR-021 : qu'il manque ici.
+const annonceDuTexte = ref(false)
+const limiteFermee = ref(false)
+const annonceBasse = computed(() => {
+  if (barreDepliee.value || rangCourant.value !== null || bascule.value !== null) return null
+  if (modeDuLecteur.value.limite && !limiteFermee.value) return 'limite'
+  return annonceDuTexte.value ? 'texte-agrandi' : null
+})
+function fermerLAnnonce(): void {
+  limiteFermee.value = true
+  annonceDuTexte.value = false
 }
 
 function auRetourDuReseau(): void {
@@ -201,6 +251,10 @@ const uneImage = () => new Promise((fin) => requestAnimationFrame(() => requestA
 
 watch(lecture, async (lue) => {
   if (!lue) return
+  if (modeDeLecture.annoncer(lue.large_text)) {
+    annonceDuTexte.value = true
+    modeDeLecture.noterLAnnonceVue()
+  }
   repriseAffichee.value = !!reprise.value
   commencerLaLecture()
   // En « Pages », le suivi commence à la première page dessinée, à sa place.
@@ -226,6 +280,8 @@ onBeforeUnmount(() => GESTES.forEach((g) => window.removeEventListener(g, noterL
 watch(pageEnCours, (page) => {
   if (aDefile.value && reprise.value && page !== reprise.value.index) repriseAffichee.value = false
 })
+// L'annonce se ferme au premier geste.
+watch(aDefile, (geste) => geste && fermerLAnnonce())
 
 function repartirDuDebut(): void {
   repriseAffichee.value = false
@@ -247,19 +303,26 @@ const texteDeReprise = computed(() => {
 
 const barreDepliee = ref(false)
 
-type Action = 'sommaire' | 'rechercher' | 'reglages'
+type Action = 'sommaire' | 'rechercher' | 'mode' | 'reglages'
 // Sans texte extrait, ni sommaire ni recherche (FR-018) ; les réglages portent au moins le thème.
+// Le choix du mode tient l'emplacement de « Marquer » (écart 43), là où les deux modes existent.
+const modeOffert = computed(() => texteOffert.value && bascule.value === null)
 const actions = computed<Action[]>(() => {
   const lue = lecture.value
   if (!lue?.has_text) return ['reglages']
-  return [...(lue.outline.length ? (['sommaire'] as const) : []), 'rechercher', 'reglages']
+  return [
+    ...(lue.outline.length ? (['sommaire'] as const) : []),
+    'rechercher',
+    ...(modeOffert.value ? (['mode'] as const) : []),
+    'reglages',
+  ]
 })
 
 const sommaireOuvert = ref(false)
 const rechercheOuverte = ref(false)
 const reglagesOuverts = ref(false)
 
-function agir(action: Action): void {
+function agir(action: Exclude<Action, 'mode'>): void {
   barreDepliee.value = false
   if (action === 'sommaire') sommaireOuvert.value = true
   else if (action === 'rechercher') rechercheOuverte.value = true
@@ -510,19 +573,22 @@ useHead({ title: titre })
         :passage-courant="passageCourant"
         :notes-par-page="notesParPage"
         :suivre-la-page="suivreLaPage"
+        :renvois="bascule === null"
         @terme="terme = $event"
         @basculer="basculerLaBarre"
         @redimension="allerALaPage(pageEnCours)"
+        @renvoi="allerAuTableau"
       />
 
       <GnLecteurPages
-        v-if="sourceDuPdf && bascule === null"
+        v-if="sourceDuPdf && bascule === null && modeVoulu === 'pages'"
         ref="pages"
         :key="cleDesPages"
         :source="sourceDuPdf"
         :page-initiale="pageDeDepart"
         :cachee="modeAffiche !== 'pages'"
         :passage="passageAMarquer"
+        :endroit="endroit"
         @page="lecteur.poserLaPage"
         @premiere-page="surLaPremierePage"
         @plages="surLesPlages"
@@ -556,8 +622,12 @@ useHead({ title: titre })
           {{ t('guide-nego.lecteur.reprise.debut') }}
         </button>
       </p>
+      <div v-if="annonceBasse" class="gn-lecteur__annonce">
+        <GnAnnonce :texte="t(`guide-nego.lecteur.annonce.${annonceBasse}`)" @fermer="fermerLAnnonce" />
+      </div>
       <GnBarreLecture
         v-model:depliee="barreDepliee"
+        v-model:mode="modeChoisi"
         :page="pageEnCours"
         :total="total"
         :etiquette="pageCourante?.label"
@@ -600,7 +670,7 @@ useHead({ title: titre })
         />
       </GnPanneauLecteur>
 
-      <GnReglagesLecture v-model="reglagesOuverts" />
+      <GnReglagesLecture v-model="reglagesOuverts" v-model:mode="modeChoisi" :texte-offert="modeOffert" />
 
       <GnFeuilleBasse v-model="termeOuvert" :titre="terme ?? ''" :fermeture="t('guide-nego.lecteur.terme.revenir')">
         <div class="gn-lecteur__terme">
@@ -652,6 +722,17 @@ useHead({ title: titre })
   text-decoration-line: var(--gn-action-sur-titre-trait);
   text-underline-offset: var(--gn-espace-4);
   cursor: pointer;
+}
+
+/* Au-dessus de la barre repliée : en « Pages », le visionneur fixé couvrirait le haut de l'écran. */
+[data-app="guide-nego"] .gn-lecteur__annonce {
+  position: fixed;
+  bottom: calc(var(--gn-barre-lecture-repliee) + var(--gn-jauge) + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  width: calc(min(100%, var(--gn-colonne-largeur)) - 2 * var(--gn-marge-ecran));
+  border-top: var(--gn-filet-1) solid var(--gn-filet);
 }
 
 /* Au-dessus de la barre repliée, comme la ligne de reprise (04 · 06). */

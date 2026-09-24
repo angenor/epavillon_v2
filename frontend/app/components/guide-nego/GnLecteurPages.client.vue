@@ -31,8 +31,10 @@ const props = withDefaults(
     cachee?: boolean
     /** Le passage de la recherche à marquer sur sa page ; `null` efface les marques. */
     passage?: PassageCherche | null
+    /** Un endroit à amener à l'écran sans le marquer : le tableau d'un renvoi de « Texte agrandi ». */
+    endroit?: PassageCherche | null
   }>(),
-  { cachee: false, passage: null },
+  { cachee: false, passage: null, endroit: null },
 )
 
 const emit = defineEmits<{
@@ -119,6 +121,8 @@ interface Marques {
   autres: Intervalle[]
   /** Le passage n'a pas encore été amené à l'écran. */
   aAmener: boolean
+  /** Faux pour un endroit : il se repère, il ne se marque pas. */
+  montrer: boolean
 }
 let marques: Marques | null = null
 const ROGNURE_DU_HAUT = 0.25
@@ -178,25 +182,30 @@ function poserLesMarques(): void {
       const haut = r.top + r.height * ROGNURE_DU_HAUT
       const hauteur = r.height * (1 - ROGNURE_DU_HAUT)
       const marque = window.document.createElement('div')
-      marque.className = courant ? 'gn-lecteur-pages__marque gn-lecteur-pages__marque--courant' : 'gn-lecteur-pages__marque'
+      marque.className = !marques.montrer
+        ? 'gn-lecteur-pages__marque gn-lecteur-pages__marque--repere'
+        : courant
+          ? 'gn-lecteur-pages__marque gn-lecteur-pages__marque--courant'
+          : 'gn-lecteur-pages__marque'
       // En pourcentage de la page : la marque suit le grossissement sans être recalculée.
       marque.style.left = `${((r.left - cadre.left) / cadre.width) * 100}%`
       marque.style.top = `${((haut - cadre.top) / cadre.height) * 100}%`
       marque.style.width = `${(r.width / cadre.width) * 100}%`
       marque.style.height = `${(hauteur / cadre.height) * 100}%`
       calque.append(marque)
-      if (courant) premiere ??= marque
+      if (courant || !marques.montrer) premiere ??= marque
     }
   }
   // Dans la page, pas dans la couche de texte : isolée, elle empêcherait la marque de se fondre au dessin.
   page.append(calque)
   if (marques.aAmener) {
     marques.aAmener = false
-    premiere?.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' })
+    // Un passage se lit dans sa phrase ; un tableau, depuis son début.
+    premiere?.scrollIntoView({ block: marques.montrer ? 'center' : 'start', inline: 'nearest', behavior: 'instant' })
   }
 }
 
-async function repererLePassage(passage: PassageCherche | null): Promise<void> {
+async function repererLePassage(passage: PassageCherche | null, montrer = true): Promise<void> {
   const jeton = (demande += 1)
   marques = null
   effacerLesMarques()
@@ -204,15 +213,16 @@ async function repererLePassage(passage: PassageCherche | null): Promise<void> {
   const pages = await textesDesPages(pagesAInterroger(passage.page, viewer.pagesCount))
   if (jeton !== demande || !viewer) return
   const reperage = repererPassage(pages, passage)
-  emit('reperage', reperage.issue)
-  if (reperage.issue === 'introuvable') {
+  if (montrer) emit('reperage', reperage.issue)
+  // Un endroit qui n'est pas sûr ne se devine pas : la page s'ouvre en haut.
+  if (reperage.issue === 'introuvable' || (!montrer && reperage.issue === 'ambigu')) {
     viewer.currentPageNumber = passage.page
     return
   }
   marques =
     reperage.issue === 'trouve'
-      ? { page: reperage.page, courant: reperage.courant, autres: reperage.autres, aAmener: true }
-      : { page: reperage.page, courant: null, autres: reperage.occurrences, aAmener: false }
+      ? { page: reperage.page, courant: reperage.courant, autres: montrer ? reperage.autres : [], aAmener: true, montrer }
+      : { page: reperage.page, courant: null, autres: reperage.occurrences, aAmener: false, montrer }
   viewer.currentPageNumber = reperage.page
   // La couche déjà dessinée ne le sera pas de nouveau : on marque tout de suite.
   poserLesMarques()
@@ -221,6 +231,10 @@ async function repererLePassage(passage: PassageCherche | null): Promise<void> {
 watch(
   () => props.passage,
   (passage) => void repererLePassage(passage),
+)
+watch(
+  () => props.endroit,
+  (endroit) => void repererLePassage(endroit, false),
 )
 
 function perdreLeReseau(): void {
@@ -265,6 +279,7 @@ onMounted(async () => {
     largeur = viewer.currentScale
     viewer.currentPageNumber = Math.min(Math.max(1, props.pageInitiale), viewer.pagesCount)
     if (props.passage) void repererLePassage(props.passage)
+    else if (props.endroit) void repererLePassage(props.endroit, false)
   })
   // Une page éloignée perd sa couche ; revenue, elle la redessine, et ses marques avec.
   bus.on('textlayerrendered', ({ pageNumber }: { pageNumber: number }) => {
@@ -378,6 +393,12 @@ defineExpose({
 
 [data-app="guide-nego"] .gn-lecteur-pages__marque--courant {
   opacity: 1;
+}
+
+[data-app="guide-nego"] .gn-lecteur-pages__marque--repere {
+  visibility: hidden;
+  /* La première ligne du tableau reste lisible sous le bord de l'écran. */
+  scroll-margin-top: var(--gn-espace-24);
 }
 
 /* Une page que le réseau n'a pas amenée le dit, au lieu de rester blanche. */

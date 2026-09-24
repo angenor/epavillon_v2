@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ModeDeLecture } from '~/utils/guide-nego/appareil-lecture'
 import type { Passage } from '~/utils/guide-nego/lecteur'
 import type { LibraryDocument, OutlineEntry, ReadingPage } from '~/types/negotiation-documents'
 /**
@@ -146,7 +147,8 @@ function compterPour(brouillon: string[]): number {
   return retenues.reduce((somme, o) => somme + o.compte, 0)
 }
 
-const LECTEUR_ACTIONS: Array<'sommaire' | 'rechercher' | 'reglages'> = ['sommaire', 'rechercher', 'reglages']
+const LECTEUR_ACTIONS: Array<'sommaire' | 'rechercher' | 'mode' | 'reglages'> = ['sommaire', 'rechercher', 'mode', 'reglages']
+const modePlanche = ref<ModeDeLecture>('pages')
 const lectureDepliee = ref(true)
 
 function entree(cle: string, level: 1 | 2 | 3, page: number, children: OutlineEntry[] = []): OutlineEntry {
@@ -332,6 +334,7 @@ const choixLisible = computed(() =>
         </div>
         <GnBarreLecture
           v-model:depliee="lectureDepliee"
+          v-model:mode="modePlanche"
           :page="59"
           :total="92"
           :section="k('lecture-section')"
@@ -426,7 +429,7 @@ const choixLisible = computed(() =>
       <GnPanneauLecteur v-model="panneauOuvert" :titre="k('panneau-titre')" :sous-titre="k('panneau-sous-titre')">
         <GnLecteurSommaire :sommaire="sommaire" :pages="pagesDeSpecimen" :page-en-cours="59" @aller="panneauOuvert = false" />
       </GnPanneauLecteur>
-      <GnReglagesLecture v-model="reglagesOuverts" />
+      <GnReglagesLecture v-model="reglagesOuverts" v-model:mode="modePlanche" texte-offert />
       <p class="gn-planche-note">{{ k('panneau-note') }}</p>
     </GnPlancheSection>
   </div>

@@ -16,6 +16,8 @@ export const CLE_RECENTS = 'gn.documents-recents'
 /** L'issue de `navigator.storage.persist()` : « Mes documents » dit un refus. */
 export const CLE_PERSISTANCE = 'gn.stockage-persistant'
 export const CLE_BASCULES = 'gn.lecture-bascules'
+export const CLE_MODE = 'gn.lecture-mode'
+export const CLE_MODE_ANNONCE = 'gn.lecture-mode-annonce'
 
 export interface Stockage {
   lire(cle: string): string | null
@@ -129,3 +131,34 @@ export function compterUneBascule(stockage: Stockage, cause: CauseDeBascule, a: 
   ecrireJson(stockage, CLE_BASCULES, compte)
   return compte
 }
+
+/** « Pages », le PDF d'origine, ou « Texte agrandi » : un choix pour tous les documents (FR-021). */
+export type ModeDeLecture = 'pages' | 'texte'
+
+export const lireMode = (stockage: Stockage): ModeDeLecture => (stockage.lire(CLE_MODE) === 'texte' ? 'texte' : 'pages')
+
+export const poserMode = (stockage: Stockage, mode: ModeDeLecture): void => stockage.poser(CLE_MODE, mode)
+
+/**
+ * Le mode d'un document : le mode gardé, sauf si « Texte agrandi » n'y est pas offert.
+ * `limite` : le document s'ouvre en pages malgré le choix, et doit le dire. Le choix gardé,
+ * lui, ne change pas.
+ */
+export function modeDuDocument(garde: ModeDeLecture, texteOffert: boolean): { mode: ModeDeLecture; limite: boolean } {
+  if (garde === 'texte' && !texteOffert) return { mode: 'pages', limite: true }
+  return { mode: garde, limite: false }
+}
+
+/** Au-delà, l'écran n'est plus celui d'un téléphone : la page A4 s'y lit sans aide. */
+const LARGEUR_ETROITE = 600
+
+/** FR-020 bis : une fois par téléphone, au premier document qui offre « Texte agrandi », en portrait étroit. */
+export function annoncerLeTexteAgrandi(
+  stockage: Stockage,
+  texteOffert: boolean,
+  { largeur, hauteur }: { largeur: number; hauteur: number },
+): boolean {
+  return texteOffert && largeur < LARGEUR_ETROITE && hauteur > largeur && stockage.lire(CLE_MODE_ANNONCE) !== '1'
+}
+
+export const noterLAnnonceVue = (stockage: Stockage): void => stockage.poser(CLE_MODE_ANNONCE, '1')

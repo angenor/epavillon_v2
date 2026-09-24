@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { partLue } from '~/utils/guide-nego/forme-lisible'
+import type { ModeDeLecture } from '~/utils/guide-nego/appareil-lecture'
 import type { NomDePicto } from '~/utils/guide-nego/pictogrammes'
 
-type Action = 'sommaire' | 'rechercher' | 'reglages'
+type Action = 'sommaire' | 'rechercher' | 'mode' | 'reglages'
 
 /**
  * La barre du lecteur, en bas, à portée de pouce. Le toucher au centre de la page est
  * capté par l'écran, qui bascule `depliee` ; la barre ne fait que se replier au défilement.
- * Pas de « Marquer » (écart 42) : un bouton sans effet n'apparaît pas.
+ * Pas de « Marquer » (écart 42) : un bouton sans effet n'apparaît pas. Son emplacement
+ * porte le choix « Pages · Texte » (écart 43), et « Réglages » ne ressemble pas au « Aa »
+ * de l'en-tête (écart 44).
  */
 const props = defineProps<{
   page: number
@@ -19,11 +22,13 @@ const props = defineProps<{
 }>()
 
 const depliee = defineModel<boolean>('depliee', { default: false })
-const emit = defineEmits<{ action: [Action] }>()
+/** Le mode lu, si l'action `mode` est offerte. */
+const mode = defineModel<ModeDeLecture>('mode', { default: 'pages' })
+const emit = defineEmits<{ action: [Exclude<Action, 'mode'>] }>()
 
 const { t } = useI18n()
 
-const PICTOS: Record<Action, NomDePicto> = { sommaire: 'toc', rechercher: 'search', reglages: 'text-size' }
+const PICTOS: Record<Exclude<Action, 'mode'>, NomDePicto> = { sommaire: 'toc', rechercher: 'search', reglages: 'sliders' }
 
 const lignePage = computed(() =>
   t('gn-barre-lecture.page', { page: props.etiquette ?? String(props.page), total: props.total }),
@@ -48,7 +53,7 @@ function basculer() {
 watch(
   actionsVisibles,
   (visibles) => {
-    if (visibles && focaliser) barre.value?.querySelector<HTMLElement>('.gn-barre-lecture__action')?.focus()
+    if (visibles && focaliser) barre.value?.querySelector<HTMLElement>('.gn-barre-lecture__action, .gn-choix-mode__segment')?.focus()
     focaliser = false
   },
   { flush: 'post' },
@@ -61,16 +66,13 @@ onBeforeUnmount(() => window.removeEventListener('scroll', replier))
 <template>
   <div ref="barre" class="gn-barre-lecture">
     <div v-if="actionsVisibles" class="gn-barre-lecture__actions" role="group" :aria-label="t('gn-barre-lecture.actions')">
-      <button
-        v-for="action in actions"
-        :key="action"
-        type="button"
-        class="gn-barre-lecture__action"
-        @click="emit('action', action)"
-      >
-        <GnPicto :nom="PICTOS[action]" :taille="26" />
-        <span>{{ t(`gn-barre-lecture.${action}`) }}</span>
-      </button>
+      <template v-for="action in actions" :key="action">
+        <GnChoixMode v-if="action === 'mode'" v-model="mode" variante="barre" />
+        <button v-else type="button" class="gn-barre-lecture__action" @click="emit('action', action)">
+          <GnPicto :nom="PICTOS[action]" :taille="26" />
+          <span>{{ t(`gn-barre-lecture.${action}`) }}</span>
+        </button>
+      </template>
     </div>
     <button
       v-if="actions.length"

@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import type { SegmentDeChoix } from '~/components/guide-nego/GnSegmente.vue'
+import type { ModeDeLecture } from '~/utils/guide-nego/appareil-lecture'
 import type { ChoixDeTheme } from '~/utils/guide-nego/theme'
 
 /**
  * Les réglages de lecture — maquette 04 · 07. Le thème est celui de 0a, pas un second
- * réglage : le changer ici change l'application entière.
+ * réglage : le changer ici change l'application entière. La taille ne vaut que pour
+ * « Texte agrandi » : une page du PDF garde la sienne.
  */
+const props = withDefaults(defineProps<{ texteOffert?: boolean }>(), { texteOffert: false })
 const ouverte = defineModel<boolean>({ required: true })
+const mode = defineModel<ModeDeLecture>('mode', { default: 'pages' })
 
 const { t } = useI18n()
 const { choix, choisir: choisirLeTheme } = useGnTheme()
@@ -26,13 +30,17 @@ const themeChoisi = computed({
 <template>
   <GnFeuilleBasse v-model="ouverte" :titre="t('gn-reglages-lecture.titre')" :fermeture="t('gn-reglages-lecture.fermer')">
     <div class="gn-reglages-lecture">
-      <div class="gn-reglages-lecture__reglage">
-        <h3 class="gn-reglages-lecture__libelle">{{ t('gn-reglages-lecture.taille.libelle') }}</h3>
-        <GnChoixTailleLecture :libelle="t('gn-reglages-lecture.taille.libelle')" />
+      <div v-if="props.texteOffert" class="gn-reglages-lecture__reglage">
+        <h3 class="gn-reglages-lecture__libelle">{{ t('gn-reglages-lecture.mode.libelle') }}</h3>
+        <GnChoixMode v-model="mode" />
       </div>
       <div class="gn-reglages-lecture__reglage">
         <h3 class="gn-reglages-lecture__libelle">{{ t('gn-reglages-lecture.theme.libelle') }}</h3>
         <GnSegmente v-model="themeChoisi" :segments="segmentsDeTheme" :libelle="t('gn-reglages-lecture.theme.libelle')" />
+      </div>
+      <div v-if="mode === 'texte' && props.texteOffert" class="gn-reglages-lecture__reglage">
+        <h3 class="gn-reglages-lecture__libelle">{{ t('gn-reglages-lecture.taille.libelle') }}</h3>
+        <GnChoixTailleLecture :libelle="t('gn-reglages-lecture.taille.libelle')" />
       </div>
       <p class="gn-reglages-lecture__aide">{{ t('gn-reglages-lecture.aide') }}</p>
     </div>

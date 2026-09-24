@@ -2,5 +2,9 @@
   "texte": {
     "table": "The table's text",
     "figure": "The figure's text"
+  },
+  "renvoi": {
+    "table": "Table — page {page}",
+    "figure": "Figure — page {page}"
   }
 }

@@ -1,5 +1,8 @@
 {
   "titre": "Reading settings",
+  "mode": {
+    "libelle": "Reading mode"
+  },
   "taille": {
     "libelle": "Text size"
   },

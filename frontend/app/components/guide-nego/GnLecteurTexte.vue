@@ -15,9 +15,16 @@ const props = defineProps<{
   passageCourant: Occurrence | null
   notesParPage: Map<number, CorrectionNote[]>
   suivreLaPage: (element: Element | null, index: number) => void
+  /** Les tableaux et figures renvoient à leur page du PDF. */
+  renvois: boolean
 }>()
 
-const emit = defineEmits<{ terme: [texte: string]; basculer: [evenement: MouseEvent]; redimension: [] }>()
+const emit = defineEmits<{
+  terme: [texte: string]
+  basculer: [evenement: MouseEvent]
+  redimension: []
+  renvoi: [page: number, texte: string]
+}>()
 
 const { t } = useI18n()
 
@@ -60,7 +67,9 @@ onBeforeUnmount(() => redimension?.disconnect())
         :surlignages="props.surlignagesParPage?.get(page.index)"
         :courant="props.passageCourant?.page === page.index ? props.passageCourant : null"
         :notes="props.notesParPage.get(page.index)"
+        :renvois="props.renvois"
         @terme="emit('terme', $event)"
+        @renvoi="(index, texte) => emit('renvoi', index, texte)"
       />
     </section>
   </article>

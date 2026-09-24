@@ -58,5 +58,9 @@
   "sans-reseau": {
     "texte": "Des pages demandent le réseau.",
     "telecharger": "Télécharger au retour du réseau"
+  },
+  "annonce": {
+    "texte-agrandi": "« Texte agrandi » recompose ce document à la largeur de l'écran : touchez la barre du bas, puis « Texte ».",
+    "limite": "Ce document se lit sur ses pages : « Texte agrandi » n'y est pas offert. Votre choix reste pour les autres."
   }
 }

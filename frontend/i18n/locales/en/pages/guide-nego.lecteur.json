@@ -58,5 +58,9 @@
   "sans-reseau": {
     "texte": "Some pages need the network.",
     "telecharger": "Download when back online"
+  },
+  "annonce": {
+    "texte-agrandi": "“Large text” reflows this document to the width of the screen: tap the bottom bar, then “Text”.",
+    "limite": "This document is read on its pages: “Large text” is not offered here. Your choice stays for the others."
   }
 }
