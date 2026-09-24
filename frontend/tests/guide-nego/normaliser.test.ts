@@ -57,7 +57,7 @@ test('le second temps écarte puces, numéros de liste et appels de note seuls s
   const sans = normaliserPourReperer(['progression (linéaire ou par paliers).', '▪', ' ', 'L’élargissement de'], { sansMarques: true })
   assert.match(avec.texte, /paliers\)\.▪l'e/u)
   assert.match(sans.texte, /paliers\)\.l'elargissement/u)
-  for (const marque of ['•', '◦', '■', '', '5.', '12', 'a)', ' 15 ']) {
+  for (const marque of ['•', '◦', '■', 'o', '', '5.', '12', 'a)', ' 15 ']) {
     assert.equal(normaliserPourReperer(['avant', marque, 'après'], { sansMarques: true }).texte, 'avantapres', `« ${marque} » écarté`)
   }
 })

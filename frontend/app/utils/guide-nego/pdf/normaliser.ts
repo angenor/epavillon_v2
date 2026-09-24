@@ -21,8 +21,9 @@ export interface TexteNormalise {
 const ECARTEES = new Set(['-', '"'])
 
 // Ce que PDFium omet et que pdf.js garde, seul sur son élément : une puce (Wingdings
-// compris, en zone privée), un numéro de liste, un appel de note.
-const MARQUE = /^\s*(?:[▪•◦‣·■□●○--]|\d{1,3}\.?|[a-z]\))\s*$/u
+// compris, en zone privée ; « o », la puce de second niveau de Word), un numéro de
+// liste, un appel de note.
+const MARQUE = /^\s*(?:[▪•◦‣·■□●○o--]|\d{1,3}\.?|[a-z]\))\s*$/u
 
 export function normaliserPourReperer(chaines: readonly string[], options: { sansMarques?: boolean } = {}): TexteNormalise {
   let texte = ''
@@ -43,3 +44,10 @@ export function normaliserPourReperer(chaines: readonly string[], options: { san
 }
 
 export const normaliserLeCherche = (texte: string): string => normaliserPourReperer([texte]).texte
+
+/** Les débuts de chaque occurrence, sans chevauchement. */
+export function occurrences(texte: string, cherche: string): number[] {
+  const trouvees: number[] = []
+  for (let i = texte.indexOf(cherche); i !== -1; i = texte.indexOf(cherche, i + cherche.length)) trouvees.push(i)
+  return trouvees
+}

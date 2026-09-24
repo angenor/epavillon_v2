@@ -318,9 +318,9 @@ async function allerAuPassage(rang: number): Promise<void> {
   const passage = passages.value[rang]
   if (!passage) return
   await nextTick()
-  if (modeAffiche.value === 'pages') {
+  if (modeAffiche.value === 'pages' && lecture.value) {
     reperage.value = null
-    passageAMarquer.value = passageAReperer(passage)
+    passageAMarquer.value = passageAReperer(lecture.value, passage)
     return
   }
   const courante = window.document.querySelector<HTMLElement>('[data-occurrence-courante]')

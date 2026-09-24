@@ -57,6 +57,28 @@ test('une expression répétée sans contexte est ambiguë : toutes en clair, au
   assert.equal(r.occurrences.length, 2)
 })
 
+test('le rang départage une expression répétée, en dernier recours', () => {
+  const pages = [{ page: 62, chaines: ['Pertes et Préjudices', 'Des progrès sur les', ' ', 'pertes et préjudices', ' (P&P).'] }]
+  const r = trouve(pages, 62, 'pertes et préjudices', { avant: 'Des progrès sur les ', apres: '' })
+  assert.equal(r.page, 62)
+  const titre = repererPassage(pages, { page: 62, contexte: sansContexte, expression: 'Pertes et Préjudices', rang: { occurrence: 0, total: 2 } })
+  assert.equal(titre.issue, 'trouve')
+  if (titre.issue !== 'trouve') return
+  assert.deepEqual(titre.courant.debut, { element: 0, caractere: 0 })
+  assert.equal(titre.autres.length, 1, 'l’autre occurrence, en clair')
+})
+
+test('le rang se tait si les deux textes ne comptent pas autant d’occurrences, ou sur une autre page', () => {
+  const pages = [
+    { page: 62, chaines: ['mise en œuvre', ' ', 'et mise en œuvre', ' ', 'puis mise en œuvre'] },
+    { page: 63, chaines: ['Rien ici.'] },
+  ]
+  const autantMoins = repererPassage(pages, { page: 62, contexte: sansContexte, expression: 'mise en œuvre', rang: { occurrence: 0, total: 2 } })
+  assert.equal(autantMoins.issue, 'ambigu')
+  const voisine = repererPassage(pages, { page: 63, contexte: sansContexte, expression: 'mise en œuvre', rang: { occurrence: 0, total: 3 } })
+  assert.equal(voisine.issue, 'ambigu', 'le rang compte les occurrences de la page de l’index, pas de sa voisine')
+})
+
 test('un passage à cheval sur deux éléments, coupé par une césure', () => {
   const r = trouve([{ page: 56, chaines: PAGE_56 }], 56, 'phase post-négociation axée', {
     avant: 'de passer à une ',
@@ -181,6 +203,20 @@ test('p. 79 : « Autres³⁷ » se retrouve au premier temps, que le second perd
     expression: 'et les « Autres³⁷',
   })
   assert.equal(sansAppel.issue, 'introuvable')
+})
+
+test('p. 39 : la puce « o » de second niveau, seule sur son élément', () => {
+  const pages = [
+    {
+      page: 39,
+      chaines: [' ', "de l'Accord de Paris.", 'o', ' ', 'Le', ' ', 'renforcement des capacités', '.', 'o', ' ', 'Une combinaison de ces éléments.'],
+    },
+  ]
+  const r = trouve(pages, 39, 'renforcement des capacités', {
+    avant: "Un soutien aux questions liées à l'article 6 de l'Accord de Paris. Le ",
+    apres: '. Une combinaison',
+  })
+  assert.deepEqual(r.courant.debut, { element: 6, caractere: 0 })
 })
 
 test('9 → 10 : le passage est sur la page suivante de celle de l’index', () => {

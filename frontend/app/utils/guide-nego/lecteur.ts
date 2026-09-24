@@ -7,6 +7,7 @@
  */
 import type { Block, DocumentReading, Span } from '~/types/negotiation-documents'
 import { blocsDeLaPage, sectionDeLaPage } from './forme-lisible.ts'
+import { normaliserLeCherche, normaliserPourReperer, occurrences } from './pdf/normaliser.ts'
 import type { PassageCherche } from './pdf/reperer.ts'
 import { replier } from './repli.ts'
 
@@ -108,12 +109,24 @@ export function chercherDansLeDocument(lecture: DocumentReading, expression: str
   return passages
 }
 
-/** Le passage à repérer sur la page du PDF : l'extrait, sans les points de suspension ajoutés ici. */
-export function passageAReperer(passage: Passage): PassageCherche {
+/** Le rang du passage parmi les occurrences de son expression sur sa page, comptées comme sur la couche de pdf.js. */
+function rangSurLaPage(lecture: DocumentReading, passage: Passage): PassageCherche['rang'] {
+  const champs = indexer(lecture).filter((c) => c.page === passage.page)
+  const { texte, table } = normaliserPourReperer(champs.map((c) => c.texte))
+  const element = champs.findIndex((c) => c.bloc === passage.bloc && c.champ === passage.champ)
+  const debut = table.findIndex((t) => t.element === element && t.caractere >= passage.debut)
+  const trouvees = occurrences(texte, normaliserLeCherche(passage.extrait.trouve))
+  const occurrence = trouvees.indexOf(debut)
+  return occurrence === -1 ? undefined : { occurrence, total: trouvees.length }
+}
+
+/** Le passage à repérer sur la page du PDF : l'extrait, sans les points de suspension ajoutés ici, et son rang. */
+export function passageAReperer(lecture: DocumentReading, passage: Passage): PassageCherche {
   return {
     page: passage.page,
     contexte: { avant: passage.extrait.avant.replace(/^… /u, ''), apres: passage.extrait.apres.replace(/ …$/u, '') },
     expression: passage.extrait.trouve,
+    rang: rangSurLaPage(lecture, passage),
   }
 }
 

@@ -146,7 +146,20 @@ test('l’extrait d’un passage se retrouve sur la couche de texte de pdf.js, d
   for (const expression of ['accorder', 'capitaux supplémentaires au-delà', 'montants de 758']) {
     const [p] = chercherDansLeDocument(doc, expression)
     assert.ok(p)
-    const r = repererPassage([{ page: 1, chaines: couche }], passageAReperer(p))
+    const r = repererPassage([{ page: 1, chaines: couche }], passageAReperer(doc, p))
     assert.equal(r.issue, 'trouve', expression)
   }
+})
+
+test('le passage à repérer porte son rang parmi les occurrences de sa page', () => {
+  const doc = lecture([
+    page(1, [
+      { kind: 'heading', level: 3, spans: [{ text: 'Pertes et Préjudices' }] },
+      { kind: 'paragraph', spans: [{ text: 'Des progrès sur les pertes et préjudices (P&P).' }] },
+    ]),
+  ])
+  const [titre, texte] = chercherDansLeDocument(doc, 'pertes et prejudices')
+  assert.ok(titre && texte)
+  assert.deepEqual(passageAReperer(doc, titre).rang, { occurrence: 0, total: 2 })
+  assert.deepEqual(passageAReperer(doc, texte).rang, { occurrence: 1, total: 2 })
 })

@@ -2,7 +2,7 @@
  * Retrouver sur la page du PDF un passage de la recherche (R7, ADR-022). Le passage
  * vient de la forme lisible ; la page, des éléments de la couche de texte de pdf.js.
  */
-import { normaliserLeCherche, normaliserPourReperer, type Position, type TexteNormalise } from './normaliser.ts'
+import { normaliserLeCherche, normaliserPourReperer, occurrences, type Position, type TexteNormalise } from './normaliser.ts'
 
 export interface PageDeTexte {
   page: number
@@ -21,6 +21,11 @@ export interface PassageCherche {
   /** Les mots qui l'entourent dans la forme lisible : l'extrait de la recherche. */
   contexte: { avant: string; apres: string }
   expression: string
+  /**
+   * Le rang de l'expression parmi ses occurrences sur la page de la forme lisible. Une
+   * note n'en a pas : le passage cité n'est qu'un texte.
+   */
+  rang?: { occurrence: number; total: number }
 }
 
 export type Reperage =
@@ -33,19 +38,14 @@ export function pagesAInterroger(page: number, total: number): number[] {
   return [page, page + 1, page - 1].filter((p) => p >= 1 && p <= total)
 }
 
-function occurrences(texte: string, cherche: string): number[] {
-  const trouvees: number[] = []
-  for (let i = texte.indexOf(cherche); i !== -1; i = texte.indexOf(cherche, i + cherche.length)) trouvees.push(i)
-  return trouvees
-}
-
 function intervalle({ table }: TexteNormalise, debut: number, longueur: number): Intervalle {
   const derniere = table[debut + longueur - 1] as Position
   return { debut: table[debut] as Position, fin: { element: derniere.element, caractere: derniere.caractere + 1 } }
 }
 
 /**
- * Le contexte d'abord, puis l'expression si elle est seule sur la page. Chaque page se lit
+ * Le contexte d'abord, puis l'expression si elle est seule sur la page, puis son rang si
+ * les deux textes en comptent autant sur la page de l'index. Chaque page se lit
  * en deux temps : telle quelle, puis sans puces, numéros ni appels de note — le second
  * temps seul perdrait « Autres³⁷ ». Jamais un autre endroit marqué plein (FR-015).
  */
@@ -81,6 +81,12 @@ export function repererPassage(pages: readonly PageDeTexte[], cherche: PassageCh
     if (!trouvees.length) continue
     const liste = trouvees.map((i) => intervalle(normalise, i, expression.length))
     if (liste.length === 1) return { issue: 'trouve', page, courant: liste[0] as Intervalle, autres: [] }
+    // Mesuré sur les 43 ambigus du guide : les deux ordres de lecture concordent, le rang les place tous.
+    const rang = cherche.rang
+    if (rang && page === cherche.page && liste.length === rang.total) {
+      const autres = liste.filter((_, i) => i !== rang.occurrence)
+      return { issue: 'trouve', page, courant: liste[rang.occurrence] as Intervalle, autres }
+    }
     return { issue: 'ambigu', page, occurrences: liste }
   }
   return { issue: 'introuvable' }
