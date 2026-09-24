@@ -35,9 +35,9 @@ description: "Tâches de l'étape 1b — le lecteur montre le PDF d'origine"
 **Objectif** : confirmer R1, R2 et R7 sur le vrai guide, `.essais/guide-cdp30.pdf` (90 pages, 2,9 Mo). **Rien du modèle, de l'API ni des écrans ne s'écrit avant la conclusion, relue avec le commanditaire.**
 
 - [ ] T001 **Par le commanditaire ou avec lui — ne bloque rien** : installer Xcode et les environnements de simulateur **iOS 16, 17 et 18** sur le poste (absents au 24/09 : `xcrun simctl` introuvable). Il faut une session App Store et plusieurs dizaines de Go : vérifier d'abord la place libre, vider `backend/target/debug/incremental` s'il le faut, **demander avant de redémarrer Docker**. Sans simulateur ni iPhone ancien, la grille le dit et renvoie à T084
-- [ ] T002 Relever les caractéristiques du guide — `pdffonts`, `pdfimages -list`, `qpdf --check` — dans la section « Le fichier » de `specs/012-guide-nego-lecteur-pdf/essai-lecteur.md` : polices non incorporées, polices CID, JPEG 2000, JBIG2, linéarisation
-- [ ] T003 Ajouter `pdfjs-dist` en **version exacte** (6.3.x) à `F/package.json`, `npm install`, et consigner la version dans `essai-lecteur.md`
-- [ ] T004 Écrire le prototype jetable `F/app/pages/guide-nego/essai-pdf.vue` (`ssr: false`, hors menu) :
+- [X] T002 Relever les caractéristiques du guide — `pdffonts`, `pdfimages -list`, `qpdf --check` — dans la section « Le fichier » de `specs/012-guide-nego-lecteur-pdf/essai-lecteur.md` : polices non incorporées, polices CID, JPEG 2000, JBIG2, linéarisation
+- [X] T003 Ajouter `pdfjs-dist` en **version exacte** (6.3.x) à `F/package.json`, `npm install`, et consigner la version dans `essai-lecteur.md`
+- [ ] T004 *(commencé le 24/09 : prototype et banc rangés hors de Git dans `.essais/lecteur-1b/`, voir son `LISEZMOI.md`)* Écrire le prototype jetable `F/app/pages/guide-nego/essai-pdf.vue` (`ssr: false`, hors menu) :
   - pdf.js legacy par import dynamique, travailleur par `?url` ;
   - `PDFViewer`, `EventBus`, `PDFLinkService`, `TouchManager` relié à `updateScale` ;
   - échelle `page-width`, plafond de quatre fois la largeur ;

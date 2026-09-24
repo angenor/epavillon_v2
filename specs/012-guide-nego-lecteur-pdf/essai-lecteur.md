@@ -15,10 +15,10 @@
 
 | Question | Outil | Résultat |
 |---|---|---|
-| Polices non incorporées | `pdffonts` | … |
-| Polices CID (cMaps nécessaires ?) | `pdffonts` | … |
-| Images JPEG 2000, JBIG2 | `pdfimages -list` | … |
-| Linéarisé | `qpdf --check` | … |
+| Polices non incorporées | `pdffonts` | **Aucune** : 25 polices, toutes incorporées en sous-ensemble (Times New Roman, Arial, Calibri, Aptos, Cambria Math, Symbol, Wingdings, Courier New). Les polices standard de pdf.js ne servent pas à ce guide ; elles restent pour d'autres documents |
+| Polices CID (cMaps nécessaires ?) | `pdffonts` | 13 polices CID TrueType en `Identity-H`, **toutes avec leur table Unicode** (`uni yes`) : les cMaps ne sont pas nécessaires |
+| Images JPEG 2000, JBIG2 | `pdfimages -list` | **Aucune** ; ni ICC ni CMYK : RVB et gris seulement. Aucun `wasm` de pdf.js ne sert à ce guide. **Mais 28 273 images**, dont 27 484 de 6 × 1 ou 1 × 6 pixels, chacune avec son masque : les pointillés d'un tableau dessinés par Word, **1 300 à 2 400 par page sur les pages 50 à 64**, dont 2 176 sur la page 59. C'est le cas le plus dur pour le rendu, mesuré à part |
+| Linéarisé | `pdfinfo` (`qpdf` absent du poste) | **Non** (`Optimized: no`). PDF 1.7 balisé (`Tagged: yes`), produit par Word pour Microsoft 365, 90 pages A4 |
 
 ## La grille
 
