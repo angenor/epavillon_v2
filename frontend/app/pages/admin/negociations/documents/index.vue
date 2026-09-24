@@ -135,6 +135,11 @@ const columns = computed<TableColumn[]>(() => [
   { key: 'updated', label: t('admin.negociations.documents.list.columns.updated'), hideBelow: 'xl', width: '12rem' },
 ])
 
+// Tous les documents s'ouvrent sur leurs pages : seul le mode de secours manquant mérite d'être dit.
+function sansTexteAgrandi(extraction: ExtractionState): boolean {
+  return extraction.status === 'ready' && !extraction.large_text
+}
+
 function extractionPages(extraction: ExtractionState): string {
   return extraction.page_count === null
     ? ''
@@ -297,13 +302,13 @@ function openDocument(row: AdminDocumentRow): void {
                 :label="t(`admin.negociations.documents.list.extraction.${row.extraction.status}`)"
               />
               <span
-                v-if="row.extraction.serve_as_is || row.extraction.page_count !== null"
+                v-if="sansTexteAgrandi(row.extraction) || row.extraction.page_count !== null"
                 class="mt-1 block text-sm text-text-muted"
               >
-                <template v-if="row.extraction.serve_as_is">
-                  {{ t('admin.negociations.documents.list.extraction.asIs') }}
+                <template v-if="sansTexteAgrandi(row.extraction)">
+                  {{ t('admin.negociations.documents.list.extraction.withoutLargeText') }}
                 </template>
-                <template v-if="row.extraction.serve_as_is && row.extraction.page_count !== null"> · </template>
+                <template v-if="sansTexteAgrandi(row.extraction) && row.extraction.page_count !== null"> · </template>
                 {{ extractionPages(row.extraction) }}
               </span>
             </template>

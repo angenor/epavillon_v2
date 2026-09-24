@@ -252,12 +252,13 @@ const relancer = () =>
     annonceUneExtraction.value = resultat.value !== null && extractionEnCours.value
   })
 
-const telQuel = (valeur: boolean) =>
-  agir('asIs', async () => {
-    document.value = await api.adminNegotiationDocuments.ouvrirTelQuel(documentId.value, valeur)
-    return valeur
-      ? t('admin.negociations.documents.form.detail.result.asIsOn')
-      : t('admin.negociations.documents.form.detail.result.asIsOff')
+const texteAgrandi = (choix: boolean | null) =>
+  agir('largeText', async () => {
+    document.value = await api.adminNegotiationDocuments.choisirLeTexteAgrandi(documentId.value, choix)
+    if (choix === null) return t('admin.negociations.documents.form.detail.result.largeTextVerdict')
+    return choix
+      ? t('admin.negociations.documents.form.detail.result.largeTextOn')
+      : t('admin.negociations.documents.form.detail.result.largeTextOff')
   })
 
 const publier = () =>
@@ -443,11 +444,11 @@ const supprimer = () =>
               :can-publish="canPublish"
               :file-locked="document.file_locked"
               :retrying="geste === 'retry'"
-              :toggling-as-is="geste === 'asIs'"
+              :saving-large-text="geste === 'largeText'"
               :polling-stopped="relectureArretee"
               :timezone="timezone"
               @retry="relancer"
-              @update:as-is="telQuel"
+              @update:large-text-choice="texteAgrandi"
               @reload="reprendreLaRelecture"
             />
           </aside>

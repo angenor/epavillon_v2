@@ -123,12 +123,10 @@
       "polling": "Refreshed every few seconds",
       "pages": "Pages",
       "extractedAt": "Extracted on",
-      "reflowable": "Readable form",
-      "reflowYes": "Yes, the text reflows on screen",
-      "reflowNo": "No, the document opens as pages",
+      "reflowable": "Reflowed text",
+      "reflowYes": "Yes: “Large text” offered by default",
+      "reflowNo": "No: “Large text” withheld by default",
       "failed": "The extraction failed",
-      "asIs": "Open as is",
-      "asIsHint": "The document opens as images of its pages, without a readable form. Can be changed without republishing.",
       "retry": "Retry the extraction",
       "stopped": "Automatic refresh has stopped: the state shown may be out of date.",
       "reload": "Refresh"
@@ -150,12 +148,13 @@
       "saved": "Changes saved.",
       "attached": "PDF attached. The extraction is starting.",
       "retried": "Extraction restarted.",
-      "asIsOn": "The document now opens as is.",
-      "asIsOff": "The document opens in readable form again.",
       "published": "Document published.",
       "unpublished": "Document unpublished.",
       "newVersion": "New version created as a draft. Enter its version number, then upload its file.",
-      "extractionReady": "Extraction ready."
+      "extractionReady": "Extraction ready.",
+      "largeTextOn": "“Large text” is now offered.",
+      "largeTextOff": "“Large text” is no longer offered.",
+      "largeTextVerdict": "“Large text” follows the extraction verdict again."
     },
     "notFound": {
       "title": "Document not found",

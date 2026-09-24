@@ -109,22 +109,22 @@ function retry(): void {
   void refreshPreview()
 }
 
-// « Ouvrir tel quel » — `send` n'est jamais rejoué : un échec se dit, il ne se retente pas seul.
+// « Texte agrandi » — `send` n'est jamais rejoué : un échec se dit, il ne se retente pas seul.
 const extraction = computed(() => preview.value?.extraction ?? doc.value?.extraction ?? null)
-const savingAsIs = ref(false)
-const asIsError = ref<string | null>(null)
+const savingLargeText = ref(false)
+const largeTextError = ref<string | null>(null)
 
-async function setServeAsIs(value: boolean): Promise<void> {
-  if (savingAsIs.value) return
-  savingAsIs.value = true
-  asIsError.value = null
+async function setLargeTextChoice(choice: boolean | null): Promise<void> {
+  if (savingLargeText.value) return
+  savingLargeText.value = true
+  largeTextError.value = null
   try {
-    doc.value = await api.adminNegotiationDocuments.ouvrirTelQuel(id.value, value)
+    doc.value = await api.adminNegotiationDocuments.choisirLeTexteAgrandi(id.value, choice)
     await refreshPreview()
   } catch (error) {
-    asIsError.value = apiErrorMessage(error, t)
+    largeTextError.value = apiErrorMessage(error, t)
   } finally {
-    savingAsIs.value = false
+    savingLargeText.value = false
   }
 }
 
@@ -272,9 +272,9 @@ const notReadyMessage = computed(() => {
           :quality="preview.quality"
           :extractor="preview.extractor"
           :can-publish="doc?.can_publish ?? false"
-          :saving="savingAsIs"
-          :save-error="asIsError"
-          @update:serve-as-is="setServeAsIs"
+          :saving="savingLargeText"
+          :save-error="largeTextError"
+          @update:large-text-choice="setLargeTextChoice"
         />
 
         <UiEmptyState

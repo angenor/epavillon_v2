@@ -47,8 +47,8 @@
     "extracting": "En cours",
     "ready": "Prête",
     "failed": "Échouée",
-    "asIs": "Ouvert tel quel",
-    "none": "Aucun fichier"
+    "none": "Aucun fichier",
+    "withoutLargeText": "Sans « Texte agrandi »"
   },
   "source": {
     "file": "PDF",

@@ -47,8 +47,8 @@
     "extracting": "In progress",
     "ready": "Ready",
     "failed": "Failed",
-    "asIs": "Opened as is",
-    "none": "No file"
+    "none": "No file",
+    "withoutLargeText": "Without “Large text”"
   },
   "source": {
     "file": "PDF",

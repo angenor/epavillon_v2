@@ -7,7 +7,7 @@ const props = defineProps<{
   canPublish: boolean
   fileLocked: boolean
   retrying: boolean
-  togglingAsIs: boolean
+  savingLargeText: boolean
   /** La relecture périodique a renoncé après plusieurs échecs. */
   pollingStopped: boolean
   timezone: TimeZoneName
@@ -16,7 +16,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   retry: []
   reload: []
-  'update:asIs': [value: boolean]
+  'update:largeTextChoice': [choice: boolean | null]
 }>()
 
 const { t } = useI18n()
@@ -39,9 +39,9 @@ const relancable = computed(() => props.canPublish && !props.fileLocked && props
           :label="t(`admin.negociations.documents.list.extraction.${props.extraction.status}`)"
         />
         <UiBadge
-          v-if="props.extraction.serve_as_is"
-          intent="info"
-          :label="t('admin.negociations.documents.list.extraction.asIs')"
+          v-if="props.extraction.status === 'ready' && !props.extraction.large_text"
+          intent="neutral"
+          :label="t('admin.negociations.documents.list.extraction.withoutLargeText')"
         />
         <span v-if="enCours && !props.pollingStopped" class="flex items-center gap-2 text-sm text-text-muted" aria-live="polite">
           <UiSpinner />
@@ -97,13 +97,12 @@ const relancable = computed(() => props.canPublish && !props.fileLocked && props
         :message="props.extraction.failure_reason ?? undefined"
       />
 
-      <UiSwitch
-        v-if="props.canPublish"
-        :model-value="props.extraction.serve_as_is"
-        :label="t('admin.negociations.documents.form.detail.extraction.asIs')"
-        :hint="t('admin.negociations.documents.form.detail.extraction.asIsHint')"
-        :loading="props.togglingAsIs"
-        @update:model-value="(valeur: boolean) => emit('update:asIs', valeur)"
+      <AdminNegotiationLargeTextChoice
+        v-if="props.extraction.status === 'ready'"
+        :extraction="props.extraction"
+        :can-publish="props.canPublish"
+        :saving="props.savingLargeText"
+        @update:choice="(choix: boolean | null) => emit('update:largeTextChoice', choix)"
       />
 
       <UiButton v-if="relancable" variant="secondary" icon="refresh" :loading="props.retrying" @click="emit('retry')">

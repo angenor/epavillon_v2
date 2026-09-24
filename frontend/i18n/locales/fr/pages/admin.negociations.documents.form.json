@@ -123,12 +123,10 @@
       "polling": "Relue toutes les quelques secondes",
       "pages": "Pages",
       "extractedAt": "Extraite le",
-      "reflowable": "Forme lisible",
-      "reflowYes": "Oui, le texte se recompose à l'écran",
-      "reflowNo": "Non, le document s'ouvre en pages",
+      "reflowable": "Texte recomposé",
+      "reflowYes": "Oui : « Texte agrandi » proposé par défaut",
+      "reflowNo": "Non : « Texte agrandi » retiré par défaut",
       "failed": "L'extraction a échoué",
-      "asIs": "Ouvrir tel quel",
-      "asIsHint": "Le document s'ouvre en images de ses pages, sans forme lisible. Se change sans republier.",
       "retry": "Relancer l'extraction",
       "stopped": "La relecture s'est arrêtée : l'état affiché n'est peut-être plus le bon.",
       "reload": "Relire"
@@ -150,12 +148,13 @@
       "saved": "Modifications enregistrées.",
       "attached": "PDF rattaché. L'extraction commence.",
       "retried": "Extraction relancée.",
-      "asIsOn": "Le document s'ouvre désormais tel quel.",
-      "asIsOff": "Le document s'ouvre de nouveau en forme lisible.",
       "published": "Document publié.",
       "unpublished": "Document dépublié.",
       "newVersion": "Nouvelle version créée en brouillon. Saisissez son numéro de version, puis déposez son fichier.",
-      "extractionReady": "Extraction prête."
+      "extractionReady": "Extraction prête.",
+      "largeTextOn": "« Texte agrandi » est désormais proposé.",
+      "largeTextOff": "« Texte agrandi » n'est plus proposé.",
+      "largeTextVerdict": "« Texte agrandi » suit de nouveau le verdict de l'extraction."
     },
     "notFound": {
       "title": "Document introuvable",

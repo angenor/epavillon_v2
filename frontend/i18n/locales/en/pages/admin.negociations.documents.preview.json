@@ -1,7 +1,7 @@
 {
   "title": "Preview",
   "titleOf": "Preview — {title}",
-  "subtitle": "Every page, its image beside the reflowed text: reading order, missing headers, notes, tables shown as original page, hyphenation, marked English terms.",
+  "subtitle": "The phone shows each original page. The reflowed text, shown here page by page next to its image, serves search, the table of contents and “Large text”: reading order, headers removed, notes, tables, hyphenation, English terms marked.",
   "back": "Back to the record",
   "breadcrumb": {
     "document": "Document record",
@@ -25,21 +25,15 @@
     "label": "Extraction verdict",
     "reflowable": "Reflows",
     "notReflowable": "Does not reflow",
-    "modeAsIs": "Opened as is",
-    "modeReflow": "Read reflowed",
     "failed": "The extraction failed",
     "pages": "Pages",
-    "readingBytes": "Readable form",
+    "readingBytes": "Kept copy (PDF and text)",
     "extractedAt": "Extracted",
     "extractedAtValue": "{date}, {time}",
     "extractor": "Extraction tool",
-    "unknown": "—"
-  },
-  "asIs": {
-    "label": "Open as is",
-    "hint": "The whole document reads as original pages, without text size, tappable terms or text search. This choice can be changed without republishing.",
-    "readOnly": "Only a person who publishes documents can change this choice.",
-    "failed": "The reading mode did not change"
+    "unknown": "—",
+    "largeTextOffered": "“Large text” offered",
+    "largeTextWithheld": "“Large text” not offered"
   },
   "quality": {
     "title": "Indicators",
@@ -132,5 +126,8 @@
       "cancel": "Cancel",
       "confirm": "Withdraw the note"
     }
+  },
+  "largeText": {
+    "failed": "The “Large text” choice did not change"
   }
 }

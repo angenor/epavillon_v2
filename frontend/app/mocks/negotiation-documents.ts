@@ -160,25 +160,33 @@ interface Fiche {
 
 type Note = AdminCorrectionNote
 
-const extraite = (pages: number, octets: number, le: IsoDateTime): ExtractionState => ({
-  status: 'ready',
-  page_count: pages,
-  is_reflowable: true,
-  serve_as_is: false,
-  failure_reason: null,
-  reading_bytes: octets,
-  extracted_at: le,
-})
+/** La règle de `negotiation.document_reading_modes()` : ici, toute extraction prête a du texte. */
+const avecLesModes = (e: Omit<ExtractionState, 'has_text' | 'large_text'>): ExtractionState => {
+  const has_text = e.status === 'ready'
+  return { ...e, has_text, large_text: has_text && (e.large_text_choice ?? e.is_reflowable ?? false) }
+}
 
-const enFile = (): ExtractionState => ({
-  status: 'pending',
-  page_count: null,
-  is_reflowable: null,
-  serve_as_is: false,
-  failure_reason: null,
-  reading_bytes: null,
-  extracted_at: null,
-})
+const extraite = (pages: number, octets: number, le: IsoDateTime): ExtractionState =>
+  avecLesModes({
+    status: 'ready',
+    page_count: pages,
+    is_reflowable: true,
+    large_text_choice: null,
+    failure_reason: null,
+    reading_bytes: octets,
+    extracted_at: le,
+  })
+
+const enFile = (): ExtractionState =>
+  avecLesModes({
+    status: 'pending',
+    page_count: null,
+    is_reflowable: null,
+    large_text_choice: null,
+    failure_reason: null,
+    reading_bytes: null,
+    extracted_at: null,
+  })
 
 /** Un PDF déposé et extrait : `n` numérote l'objet média, `pages` et `octets` la forme lisible. */
 const pdf = (n: number, nom: string, pages: number, octets: number, le: IsoDateTime) => ({
@@ -784,7 +792,7 @@ export function relancerLExtraction(id: Uuid): void {
 export function choisirLeTexteAgrandi(id: Uuid, choice: boolean | null, langue = 'fr'): AdminDocument {
   const f = ficheOuRefus(id)
   if (!f.extraction) throw invalide("Ce document n'a pas encore de fichier extrait.", 'choice')
-  f.extraction = { ...f.extraction, large_text_choice: choice }
+  f.extraction = avecLesModes({ ...f.extraction, large_text_choice: choice })
   f.updated_at = maintenant()
   return vue(f, langue)
 }

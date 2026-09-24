@@ -12,7 +12,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-defineEmits<{ 'update:serveAsIs': [value: boolean] }>()
+defineEmits<{ 'update:largeTextChoice': [choice: boolean | null] }>()
 
 const { t, locale } = useI18n()
 const { date, timeWithZone } = useDateTime()
@@ -112,12 +112,12 @@ const indicators = computed(() => {
             "
           />
           <UiBadge
-            :intent="extraction.serve_as_is ? 'info' : 'neutral'"
+            :intent="extraction.large_text ? 'info' : 'neutral'"
             :label="
               t(
-                extraction.serve_as_is
-                  ? 'admin.negociations.documents.preview.verdict.modeAsIs'
-                  : 'admin.negociations.documents.preview.verdict.modeReflow',
+                extraction.large_text
+                  ? 'admin.negociations.documents.preview.verdict.largeTextOffered'
+                  : 'admin.negociations.documents.preview.verdict.largeTextWithheld',
               )
             "
           />
@@ -125,26 +125,18 @@ const indicators = computed(() => {
       </div>
 
       <div v-if="extraction" class="w-full max-w-md">
-        <UiSwitch
-          :model-value="extraction.serve_as_is"
-          :label="t('admin.negociations.documents.preview.asIs.label')"
-          :hint="
-            t(
-              canPublish
-                ? 'admin.negociations.documents.preview.asIs.hint'
-                : 'admin.negociations.documents.preview.asIs.readOnly',
-            )
-          "
-          :disabled="!canPublish"
-          :loading="saving"
-          @update:model-value="(value: boolean) => $emit('update:serveAsIs', value)"
+        <AdminNegotiationLargeTextChoice
+          :extraction="extraction"
+          :can-publish="canPublish"
+          :saving="saving"
+          @update:choice="(choice: boolean | null) => $emit('update:largeTextChoice', choice)"
         />
         <UiAlert
           v-if="saveError"
           class="mt-3"
           intent="danger"
           compact
-          :title="t('admin.negociations.documents.preview.asIs.failed')"
+          :title="t('admin.negociations.documents.preview.largeText.failed')"
           :message="saveError"
         />
       </div>

@@ -1,7 +1,7 @@
 {
   "title": "Aperçu",
   "titleOf": "Aperçu — {title}",
-  "subtitle": "Chaque page, son image à côté du texte recomposé : ordre de lecture, en-têtes absents, notes, tableaux en page d'origine, césures, termes anglais marqués.",
+  "subtitle": "Le téléphone montre chaque page d'origine. Le texte recomposé, ici page par page à côté de son image, sert à la recherche, au sommaire et à « Texte agrandi » : ordre de lecture, en-têtes absents, notes, tableaux, césures, termes anglais marqués.",
   "back": "Retour à la fiche",
   "breadcrumb": {
     "document": "Fiche du document",
@@ -25,21 +25,15 @@
     "label": "Verdict de l'extraction",
     "reflowable": "Se recompose",
     "notReflowable": "Ne se recompose pas",
-    "modeAsIs": "Ouvert tel quel",
-    "modeReflow": "Lu recomposé",
     "failed": "L'extraction a échoué",
     "pages": "Pages",
-    "readingBytes": "Forme lisible",
+    "readingBytes": "Copie gardée (PDF et texte)",
     "extractedAt": "Extraite",
     "extractedAtValue": "{date}, {time}",
     "extractor": "Outil d'extraction",
-    "unknown": "—"
-  },
-  "asIs": {
-    "label": "Ouvrir tel quel",
-    "hint": "Le document entier se lit en pages d'origine, sans taille de texte, termes touchables ni recherche dans le texte. Ce choix se change sans republier.",
-    "readOnly": "Seule une personne qui publie les documents peut changer ce choix.",
-    "failed": "Le mode de lecture n'a pas changé"
+    "unknown": "—",
+    "largeTextOffered": "« Texte agrandi » proposé",
+    "largeTextWithheld": "« Texte agrandi » non proposé"
   },
   "quality": {
     "title": "Indicateurs",
@@ -132,5 +126,8 @@
       "cancel": "Annuler",
       "confirm": "Retirer la note"
     }
+  },
+  "largeText": {
+    "failed": "Le choix « Texte agrandi » n'a pas changé"
   }
 }

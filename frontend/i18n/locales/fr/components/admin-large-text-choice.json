@@ -1,0 +1,9 @@
+{
+  "label": "Proposer « Texte agrandi »",
+  "byVerdictOn": "Par défaut, selon le verdict : proposé, le texte se recompose bien.",
+  "byVerdictOff": "Par défaut, selon le verdict : non proposé, le texte se recompose mal.",
+  "chosen": "Choisi à la main.",
+  "backToVerdict": "Revenir au verdict",
+  "noText": "Aucun texte n'a été extrait de ce document : « Texte agrandi » ne peut pas être proposé, et la recherche et le sommaire sont absents aussi.",
+  "readOnly": "Seule une personne qui publie les documents peut changer ce choix."
+}
