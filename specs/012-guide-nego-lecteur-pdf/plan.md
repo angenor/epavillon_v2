@@ -14,7 +14,8 @@ Le lecteur montre les pages du guide telles que l'IFDD les a mises en page : il 
 
 **L'approche, en une phrase par pièce.**
 
-- **Le risque d'abord.** Un prototype jetable lit le vrai guide avant tout code. Il mesure la fluidité, la mémoire, la netteté, le repérage et le hors-connexion sous WebKit. L'ADR-022 s'écrit sur son résultat ([R2](research.md), [essai-lecteur.md](essai-lecteur.md)).
+- **Le risque d'abord.** Un prototype jetable a lu le vrai guide avant tout code : issue A, le 24/09. [ADR-022](../../docs/AppNego/adr/022-pdfjs-dans-le-client.md) consigne le résultat et quatre décisions du commanditaire ([R2](research.md), [R15](research.md), [essai-lecteur.md](essai-lecteur.md)).
+- **En ligne, un transport de plages écrit ici** nourrit pdf.js et sait ce qui est demandé et reçu : l'attente montre sa progression, offre le texte au bout de 3 s, et la bascule ne compte jamais le réseau ([R15](research.md)).
 - **pdf.js, build legacy, et son visionneur de pages** (`PDFViewer`). Le visionneur gère déjà la virtualisation, le plafond des canevas d'iOS et le redessin net de la zone visible. On n'en réécrit rien ([R1](research.md)).
 - **Une route de l'API sert le PDF, par plages, à chaque morceau après vérification de l'accès.** Tous les PDF de documents sont dans le bucket privé, publics compris. `kernel::storage` apprend à lire une plage ([R3](research.md)).
 - **La coquille garde pdf.js.** Le travailleur y entre par le manifeste de Vite, les `wasm` et les polices par un module qui les copie. La feuille du visionneur y entre en copie bornée à `[data-app="guide-nego"]` ([R4](research.md)).
@@ -44,20 +45,20 @@ Le lecteur montre les pages du guide telles que l'IFDD les a mises en page : il 
 - `node --test` côté client : repérage, copie de format 2, mode et annonce, garde ;
 - l'essai sur le vrai guide, puis la recette sur la version construite, puis les appareils réels.
 
-**Plateforme cible** : PWA installée, sur Android et iPhone. Le plancher annoncé par pdf.js est Chrome 125 et Safari 18 ; **le plancher réel se mesure à l'essai**, simulateur iOS 16 compris. Un téléphone en dessous lit « Texte agrandi », par détection des fonctions manquantes ([R1](research.md), arbitré le 24/09). Référence de 360 px, sans réseau.
+**Plateforme cible** : PWA installée, sur Android et iPhone. **Plancher déduit à l'essai : iOS 16.4**, `Promise.withResolvers` étant remplacé dans la page et dans le travailleur ; la mesure sur téléphone reste à T084. Un téléphone en dessous lit « Texte agrandi », par détection des fonctions manquantes ([R1](research.md), [R15](research.md)). Référence de 360 px, sans réseau.
 
 **Type de projet** : application web installable, adossée à l'API du monolithe modulaire.
 
 **Objectifs de performance** :
 - défilement des 90 pages sans tâche longue de plus de 100 ms ;
 - page nette moins d'une seconde après le geste ;
-- première page en ligne en moins de 3 s sur un réseau ordinaire, 8 s en « 3G lente » ;
+- première page en ligne en moins de 3 s sur un réseau ordinaire, et en moins de 8 s depuis une copie gardée ; en « 3G lente », **le texte se lit en moins de 5 s** et la page du PDF suit (23 à 28 s pour le guide, accepté — SC-003 revu) ;
 - passages rendus en moins d'une seconde hors connexion ;
 - mémoire stable sur trois allers-retours (SC-001 à SC-004).
 
 **Contraintes** :
 - préfixe `/v2`, portée du service worker bornée à `guide-nego/` ;
-- coquille alourdie d'environ 1,1 Mo compressé, installée en tout ou rien ;
+- coquille alourdie d'environ 1,3 Mo compressé (polices standard toutes gardées), installée en tout ou rien ;
 - aucun sélecteur de feuille de style hors de `[data-app="guide-nego"]` ;
 - aucun fichier de plus de mille lignes ;
 - **jamais `make check`**.
@@ -65,7 +66,7 @@ Le lecteur montre les pages du guide telles que l'IFDD les a mises en page : il 
 **Échelle et périmètre** :
 - **Routes** : 1 nouvelle (`GET` et `HEAD` du fichier), 3 changées, 1 supprimée, 1 renommée au back-office.
 - **Base** : 1 colonne changée, 1 fonction.
-- **Composants** : 4 nouveaux dans Guide Négo, et 1 pictogramme.
+- **Composants** : 5 nouveaux dans Guide Négo, et 1 pictogramme.
 - **Client** : un module Nuxt nouveau ; la page du lecteur réorganisée ; le téléchargement et les copies changés.
 
 ---
@@ -149,19 +150,22 @@ frontend/
 ├── package.json                     + pdfjs-dist (exacte)
 ├── modules/guide-nego-pdfjs.ts      + copie wasm/iccs/standard_fonts → public/guide-nego/pdfjs/,
 │                                      feuille du visionneur bornée
-├── guide-nego/feuille-pdfjs.ts     + bornerLaFeuille(), appelée par la construction ET par check:guide-nego
+├── guide-nego/feuille-pdfjs.ts     + bornerLaFeuille(), appelée par la construction ET par check:guide-nego ; + la règle content-box sous .pdfViewer
 ├── guide-nego/liste-de-garde.ts     ~ FICHIERS_PUBLICS + pdfjs/
 ├── app/utils/guide-nego/
-│   ├── pdf/charger.ts               + pdf.js legacy, travailleur ?url, polyfill, options
-│   ├── pdf/bascule.ts               + seconde sécurité : erreur ou délai du premier rendu (pur)
+│   ├── pdf/charger.ts               + pdf.js legacy, détection, options (disableAutoFetch)
+│   ├── pdf/remplacements.ts         + Promise.withResolvers, itérateur de flux — page et travailleur (pur)
+│   ├── pdf/travailleur.ts           + amorce du travailleur : remplacements, puis pdf.worker
+│   ├── pdf/transport.ts             + transport de plages : demandé, reçu, en route (PDFDataRangeTransport)
+│   ├── pdf/bascule.ts               + seconde sécurité : erreur, ou 8 s de travail sans plage en route (pur)
 │   ├── pdf/normaliser.ts            + césures, ligatures, insécables, apostrophes, table de correspondance (pur)
-│   ├── pdf/reperer.ts               + repérage d'un passage dans la couche de texte (pur)
+│   ├── pdf/reperer.ts               + repérage en deux temps, page puis ±1 (pur)
 │   ├── copies.ts                    ~ FORMAT_DE_COPIE = 2, sans images
 │   └── appareil-lecture.ts          ~ mode, annonce
 ├── app/composables/guide-nego/      ~ useGnLecteur (source PDF, mode) · useGnCopies (PDF en flux)
 ├── app/composables/api/             ~ guide-nego-documents (fichier, sans image) ·
 │                                      admin-negotiation-documents (large-text)
-├── app/components/guide-nego/       + GnLecteurPages.client · GnLecteurTexte · GnChoixMode · GnMargeNote
+├── app/components/guide-nego/       + GnLecteurPages.client · GnLecteurTexte · GnChoixMode · GnMargeNote · GnAttentePages
 │                                    ~ GnBarreLecture (4 emplacements, sliders) · GnReglagesLecture
 │                                    ~ GnPageLue (renvoi « Tableau », sans image) − GnImageDePage
 ├── app/assets/guide-nego/pictogrammes.svg  + gn-sliders
@@ -171,7 +175,7 @@ frontend/
 ├── app/types/                       ~ negotiation-documents · admin-negotiation-documents
 ├── i18n/locales/{fr,en}/            ~ guide-nego.lecteur, gn-barre-lecture, gn-reglages-lecture,
 │                                      admin.negotiation-documents ; + gn-choix-mode, gn-marge-note
-└── tests/guide-nego/                + normaliser · reperer · charger · bascule · feuille-pdfjs · gestes · ~ copies, liste-de-garde, sw-garde, stockage
+└── tests/guide-nego/                + normaliser · reperer · charger · remplacements · transport · bascule · feuille-pdfjs · gestes · ~ copies, liste-de-garde, sw-garde, stockage
 ```
 
 **Structure Decision** : le serveur ne change que dans `negotiation` et `kernel`. Côté client, pdf.js n'entre que par `utils/guide-nego/pdf/charger.ts` : un seul point d'entrée, que la garde suit par le manifeste. Le back-office ne charge pas pdf.js ; son aperçu garde les images de PDFium ([R11](research.md)).
@@ -184,12 +188,12 @@ frontend/
 
 | # | Phase | Ce qu'elle livre | Pourquoi là |
 |---|---|---|---|
-| 1 | **L'essai** | Le prototype jetable sur le vrai guide, [essai-lecteur.md](essai-lecteur.md) rempli : fluidité, mémoire, netteté, taux de passages retrouvés (recherches et notes), **version d'iOS réellement exigée** — simulateurs iOS 16, 17, 18 — et liste des fonctions à détecter. L'issue A, B ou C, l'**ADR-022**. **Relu avec le commanditaire** | Tout le cycle repose sur la tenue de pdf.js sur un téléphone. Rien ne s'écrit avant |
+| 1 | **L'essai** ✅ 24/09, issue A | Le prototype jetable sur le vrai guide, [essai-lecteur.md](essai-lecteur.md) rempli : fluidité, mémoire, netteté, taux de passages retrouvés (recherches et notes), **version d'iOS réellement exigée** — simulateurs iOS 16, 17, 18 — et liste des fonctions à détecter. L'issue A, B ou C, l'**ADR-022**. **Relu avec le commanditaire** | Tout le cycle repose sur la tenue de pdf.js sur un téléphone. Rien ne s'écrit avant |
 | 2 | **Le modèle** | `100_negotiations.sql`, `migration.sql` rejouable, `docs/progression/modele.md` | Rien du métier avant le SQL |
 | 3 | **Les plages et l'API** | `get_range`, la route du fichier — `Content-Encoding: identity`, `no-transform`, empreinte comparée sans suffixe de relais — et ses tests, la lecture sans image, `has_text`/`large_text`, `…/large-text`, `reading_bytes`, le motif du mot de passe, `make openapi`, `check-api-contract` | Le client a besoin d'un contrat servi |
 | 4 | **pdf.js dans la coquille** | `pdfjs-dist`, `modules/guide-nego-pdfjs.ts`, `charger.ts` — polyfill, **détection des fonctions manquantes** et son test qui simule leur absence —, la feuille bornée, la garde et ses tests, `verifier-garde` | La preuve hors connexion précède tout écran |
 | 5 | **La copie, format 2** | `copies.ts`, `useGnCopies`, l'effacement des formats anciens, le remplacement de la seule lecture, les tests | US1 et US2 lisent la copie |
-| 6 | **US1 — Lire les pages** | `GnLecteurPages`, les gestes, le pied, la reprise, le thème, le repli d'un téléphone qui n'affiche pas les pages (FR-012 bis), `lire.vue` réorganisée, `GnLecteurTexte` extrait **sans changement de comportement** | Le critère de sortie |
+| 6 | **US1 — Lire les pages** | `GnLecteurPages`, les gestes, le pied, la reprise, le thème, **l'attente en ligne et ses deux sorties** (FR-009 bis), le repli d'un téléphone qui n'affiche pas les pages (FR-012 bis), `lire.vue` réorganisée, `GnLecteurTexte` extrait **sans changement de comportement** | Le critère de sortie |
 | 7 | **US2 — Trouver** | `normaliser.ts` et `reperer.ts`, fonctions pures, et leurs tests cas par cas ; l'index de l'étape 1 passé par la même normalisation ; le passage marqué sur la page, le sommaire vers la page, la fiche d'un document sans texte | L'autre moitié du critère |
 | 8 | **US3 — « Texte agrandi »** | `GnChoixMode` dans la barre et la feuille, `sliders`, l'annonce unique, le renvoi « Tableau », le mode gardé | S'appuie sur 6 |
 | 9 | **US5 — Les notes en marge** | `GnMargeNote`, le panneau non modal | S'appuie sur 6 et 7 |
@@ -207,6 +211,7 @@ US4 (la copie) se livre en phase 5 : c'est de la plomberie, et elle conditionne 
 
 - Le guide lu en mode avion, après une nuit, sur un **Android de milieu de gamme** et un **iPhone réels** : c'est la preuve du critère.
 - Le téléphone bridé en 3G réelle.
+- Le plancher iOS 16.4 sur un iPhone 8 ou X, et un iPhone sous 16.4 qui bascule.
 
 Les deux se font par le commanditaire, au § 15 de DEPLOIEMENT.md, avec T112 (0b) et T116 (étape 1).
 

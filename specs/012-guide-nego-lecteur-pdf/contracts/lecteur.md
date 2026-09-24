@@ -52,15 +52,17 @@ Passer d'un mode à l'autre garde l'index de page. Le mode choisi vit en `localS
 | `GnLecteurTexte` | Le rendu recomposé de l'étape 1, sorti de la page |
 | `GnChoixMode` | Deux segments « Pages · Texte », 48 px, dans la barre et dans la feuille |
 | `GnMargeNote` | Filet de 3 px, triangle, cible de 48 px ; déplié en panneau non modal de 40 % de la hauteur au plus |
+| `GnAttentePages` | L'attente de la première page en ligne : jauge « reçu sur demandé », puis au bout de 3 s « Lire le texte en attendant » et « Télécharger pour lire sans réseau » (FR-009 bis) |
 
 ## États
 
 | État | Rendu |
 |---|---|
-| Chargement | `GnChargement` jusqu'à la première page rendue ; en ligne, la première page paraît avant le fichier entier |
+| Chargement, copie gardée | `GnChargement` jusqu'à la première page rendue |
+| Chargement en ligne | `GnAttentePages` : la forme lisible se lit d'abord, puis le PDF par le transport de plages. La jauge montre les octets reçus sur les octets demandés, et suit les demandes nouvelles de pdf.js. **Au bout de 3 s sans page**, deux boutons : « Lire le texte en attendant », si `large_text`, qui ouvre `GnLecteurTexte` à la même page, et « Télécharger pour lire sans réseau », le téléchargement de l'étape 1. Quand la page est prête, elle prend la place du texte, **sauf si la personne a touché « Rester sur le texte »** (ou changé de mode elle-même) ; la décision vit dans l'instance du lecteur, le mode gardé ne change pas |
 | Pas sur le téléphone, sans réseau | Écran de l'étape 1, inchangé |
 | Page non encore reçue, réseau tombé | La page dit qu'il faut le réseau et propose « Télécharger au retour du réseau » |
-| Appareil qui n'affiche pas les pages | Décidé par **détection des fonctions manquantes** — jamais par l'identifiant du navigateur —, **ou par la seconde sécurité** : erreur de pdf.js, ou première page non dessinée en 8 s sur une copie gardée (20 s en ligne), réglable. L'événement est compté sur le téléphone (`gn.lecture-bascules`), et les pages ne se réessaient qu'à l'ouverture suivante. « Texte agrandi » s'il est offert, avec une ligne qui le dit ; sinon `GnEtatErreur` qui dit que ce téléphone ne peut pas afficher ce document. Jamais le visionneur du téléphone |
+| Appareil qui n'affiche pas les pages | Décidé par **détection des fonctions manquantes** — jamais par l'identifiant du navigateur —, **ou par la seconde sécurité** : erreur de pdf.js, ou première page non dessinée après 8 s de travail de pdf.js, réglable — **le délai ne court que lorsqu'aucune plage demandée n'est en route** : le réseau lent ne fait jamais basculer (arbitré après l'essai). L'événement est compté sur le téléphone (`gn.lecture-bascules`), et les pages ne se réessaient qu'à l'ouverture suivante. « Texte agrandi » s'il est offert, avec une ligne qui le dit ; sinon `GnEtatErreur` qui dit que ce téléphone ne peut pas afficher ce document. Jamais le visionneur du téléphone |
 | Réservé sans accès, 404, erreur | Étape 1, inchangés |
 
 ## Accessibilité

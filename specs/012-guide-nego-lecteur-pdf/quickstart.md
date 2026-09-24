@@ -31,7 +31,7 @@ Avec la session du compte admis, le réservé rend `206` et `Cache-Control: priv
 
 ## § 3 — Lire en ligne, sans compte
 
-1. Ouvrir le guide sans le télécharger, réseau bridé en « 3G lente » : la première page paraît avant le fichier entier (onglet Réseau : des `206`).
+1. Ouvrir le guide sans le télécharger, réseau ordinaire : la première page paraît en moins de 3 s, avant le fichier entier (onglet Réseau : la lecture, puis des `206` de 256 Ko, jamais un `200` du PDF). Puis en « 3G lente » : la jauge avance ; au bout de 3 s, « Lire le texte en attendant » et « Télécharger pour lire sans réseau » ; le texte s'ouvre à la même page en moins de 5 s après l'ouverture ; la page du PDF prend sa place quand elle arrive (23 à 28 s pour le guide), **sauf** après « Rester sur le texte ». Le lecteur ne bascule jamais pendant l'attente du réseau (`gn.lecture-bascules` inchangé).
 2. La page tient la largeur ; défiler jusqu'à la page 61 ; le pied suit (« Page 61 sur 90 · … »).
 3. Pincer sur le tableau des sigles jusqu'au plus fort : net après le geste ; double toucher : retour à la largeur.
 4. Toucher une fois : la barre se déplie sur quatre emplacements ; toucher deux fois vite : grossit, sans déplier.

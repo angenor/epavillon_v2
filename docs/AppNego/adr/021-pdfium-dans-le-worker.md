@@ -1,6 +1,6 @@
 # ADR-021 — PDFium dans le worker, et le téléphone garde tout
 
-**Statut** : accepté — 23/09/2026, après l'essai d'extraction sur le vrai guide de la CdP30 ; la copie gardée tranchée par le commanditaire. **Confirme** R1 et R2 de [specs/011-guide-nego-documents/research.md](../../../specs/011-guide-nego-documents/research.md) ; **précise** [ADR-004](004-rust-en-facade-python-au-sidecar.md) pour l'étape 1.
+**Statut** : accepté — 23/09/2026 ; **sa règle « le PDF ne va jamais sur le téléphone » est remplacée par [ADR-022](022-pdfjs-dans-le-client.md)** le 24/09/2026 — le lecteur montre le PDF d'origine, et la copie gardée le porte. L'extraction par PDFium, dans le worker, reste en vigueur. Accepté le 23/09/2026, après l'essai d'extraction sur le vrai guide de la CdP30 ; la copie gardée tranchée par le commanditaire. **Confirme** R1 et R2 de [specs/011-guide-nego-documents/research.md](../../../specs/011-guide-nego-documents/research.md) ; **précise** [ADR-004](004-rust-en-facade-python-au-sidecar.md) pour l'étape 1.
 
 ## Contexte
 
@@ -12,7 +12,7 @@ L'essai ([essai-extraction.md](../../../specs/011-guide-nego-documents/essai-ext
 
 - **L'extraction se fait par PDFium**, au travers de `pdfium-render` 0.9.4 (MIT ou Apache-2.0), avec le binaire chromium/7881 de `bblanchon/pdfium-binaries` (BSD-3 ou Apache-2.0), versions épinglées l'une sur l'autre. **Dans le worker seulement** : l'API sert, elle n'extrait pas. La bibliothèque native se charge depuis `PDFIUM_LIB_PATH` ; `make pdfium` l'installe sur un poste.
 - **Aucun service Python à l'étape 1.** ADR-004 reste la voie de l'assistant (étape 7).
-- **Le téléphone garde la forme lisible et les images des pages à tableau ou à figure** (R2 tel qu'écrit), pour que le guide se lise **en entier** sans réseau. Le PDF ne va jamais sur le téléphone.
+- **Le téléphone garde la forme lisible et les images des pages à tableau ou à figure** (R2 tel qu'écrit), pour que le guide se lise **en entier** sans réseau. Le PDF ne va jamais sur le téléphone. *(Remplacé par ADR-022 : la copie gardée porte le PDF et la forme lisible, sans images.)*
 
 ## Conséquences
 

@@ -56,4 +56,10 @@
 - **B** — WebKit hors connexion sans `wasm` : `wasmUrl` à `null` hors connexion ; dire ce que le guide y perd.
 - **C** — mémoire ou fluidité insuffisantes : réglages baissés et remesurés, ou retour au commanditaire.
 
-**Issue proposée : A**, à relire avec le commanditaire (T010). WebKit sert hors connexion le travailleur, par XHR synchrone comme par fetch : ce n'est pas B. La mémoire et la fluidité tiennent : ce n'est pas C. Un seul seuil n'est pas atteint : la première page en 3G lente. Il ne dépend pas de pdf.js mais du guide, dont la couverture pèse à elle seule 8 s de ce débit. Il demande une décision du commanditaire, pas un autre moteur. ADR-022 devra reprendre les trois défauts ci-dessus, le repérage en deux temps et le plancher iOS déduit.
+**Issue retenue : A**, par le commanditaire le 24/09, avec quatre décisions consignées dans [ADR-022](../../docs/AppNego/adr/022-pdfjs-dans-le-client.md) :
+1. **Réseau très lent** : les ~25 s de la première page sont acceptées, mais l'attente se voit — progression, puis au bout de 3 s « Lire le texte en attendant » et « Télécharger pour lire sans réseau ». La bascule ne compte jamais le réseau. SC-003 réécrit : 8 s sur un réseau ordinaire et depuis une copie gardée ; une première lecture par le texte en moins de 5 s sur un réseau très lent. Une couverture allégée est écartée.
+2. **iOS 16.4 à 17.3** : `Promise.withResolvers` remplacé dans la page et dans le travailleur ; en dessous de 16.4, « Texte agrandi ».
+3. **Les polices standard** sont toutes gardées, Liberation comprises.
+4. **Les trois défauts** vont au plan et à l'ADR.
+
+**Vérifié après la relecture** : un transport de plages écrit ici (`PDFDataRangeTransport`) marche avec pdf.js 6.3 sur le vrai guide, aux mêmes temps (1,36 s en réseau ordinaire, 28,2 s en 3G lente), et dit ce qui est demandé et reçu — 1 280 Ko sur 1 280 à la première page. Il porte la jauge et le délai de bascule. **Une précision sur les 25 s** : la 3G lente amène 960 Ko à 1,3 Mo avant la première page, dont la photo (396 Ko). Le reste est surtout la table des objets en fin de fichier, les polices et le surplus des morceaux ; les allers-retours n'en font qu'environ 5 s.

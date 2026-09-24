@@ -31,7 +31,7 @@ Chaque décision porte son **pourquoi** et ce qui a été **écarté**. Les renv
 - **Il se mesure, il ne se déduit pas.** La documentation du legacy annonce **Safari 18** et **Chrome 125** ; l'essai dit ce qu'il exige réellement, et le fait tourner dans un **simulateur iOS 16** (Xcode) — l'iPhone 8 et le X s'y arrêtent. Ce public achète souvent des iPhone d'occasion : que ces téléphones soient rares reste à prouver. Un Android 8 ou 9 reste à Chrome 138 et passe.
 - **La bascule se décide par détection des fonctions**, jamais par la version lue dans l'identifiant du navigateur. `charger.ts` vérifie, avant de charger pdf.js, la liste des fonctions que l'essai a trouvées nécessaires et qu'aucun polyfill ne couvre — module ES dans un `Worker`, `OffscreenCanvas` si pdf.js l'exige, `structuredClone`, etc. ; puis un échec de chargement ou de premier rendu mène au même repli. Un test simule l'absence de chacune (R14).
 - **Une seconde sécurité, qui ne dépend d'aucune mesure** (arbitré le 24/09). La mesure ne dit que **combien** de téléphones basculeront ; la bascule, elle, doit marcher dans tous les cas. `utils/guide-nego/pdf/bascule.ts`, pur, surveille le premier rendu : une erreur de pdf.js, ou une première page non dessinée dans le délai, rend `bascule`.
-  - Délai réglable : **8 s sur une copie gardée**, **20 s en ligne**, où le réseau compte et où SC-003 tolère 8 s de chargement en « 3G lente ».
+  - Délai réglable : **8 s**. *(Revu après l'essai, R15 : le délai ne compte que le travail de pdf.js — en ligne, il ne court que lorsqu'aucune plage demandée n'est en route. Les « 20 s en ligne » d'origine auraient basculé une personne en 3G lente avant l'arrivée de la page, qui met 23 à 28 s.)*
   - Le lecteur passe alors à « Texte agrandi », avec la même ligne que la détection. L'événement est **compté sur le téléphone** (`gn.lecture-bascules` : nombre, dernière cause, dernière date), pour la recette. Les pages ne se réessaient qu'**à l'ouverture suivante** du document : la décision vit dans l'instance du lecteur, pas dans le stockage.
   - Un test simule les deux cas : erreur, et délai dépassé.
 - **Le repli** : « Texte agrandi » si le document l'offre, avec une ligne qui le dit ; sinon un écran qui dit que ce téléphone ne peut pas afficher ce document. **Jamais le visionneur du téléphone.**
@@ -109,7 +109,7 @@ Chaque décision porte son **pourquoi** et ce qui a été **écarté**. Les renv
   - `wasm/openjpeg.wasm` : le JPEG 2000 ;
   - `standard_fonts/` : les quatorze polices standard, qu'Android ne remplace pas.
 - `cmaps/` (1,6 Mo) et `jbig2.wasm` n'entrent **que si l'essai les trouve dans le guide** ; `quickjs` jamais.
-- **La coquille grossit d'environ 1,1 Mo compressé.**
+- **La coquille grossit d'environ 1,1 Mo compressé.** *(Mesuré à l'essai : **1,3 Mo**, les quatre polices Liberation pesant 356 Ko ; gardées, arbitré le 24/09 — R15.)*
 
 | Fichier | Poids compressé |
 |---|---|
@@ -199,7 +199,7 @@ Chaque décision porte son **pourquoi** et ce qui a été **écarté**. Les renv
 | Découpage | blocs et `spans` | fragments de ligne, `hasEOL` | chaîne continue, avec une **table de correspondance** vers l'élément et le caractère d'origine |
 | Accents, casse | — | — | comme `replier()` de l'étape 1, qu'elle prolonge |
 
-- **Un utilitaire pur**, `utils/guide-nego/pdf/reperer.ts`, prend les chaînes de la couche (`textContentItemsStr`) et un texte cherché. Il normalise les deux, cherche, puis ramène l'intervalle trouvé aux éléments et caractères d'origine par la table. Le composant en fait des rectangles par `Range.getClientRects()` sur les éléments de la couche, **en pourcentage de la page**, pour qu'ils suivent le grossissement sans recalcul. L'index de recherche de l'étape 1 passe par la même normalisation, pour que ses extraits se retrouvent tels quels.
+- **Un utilitaire pur**, `utils/guide-nego/pdf/reperer.ts`, prend les chaînes de la couche (*à l'essai : les éléments de `getTextContent()`, pdf.js 6 ne publiant plus `textContentItemsStr` — R15*) et un texte cherché. Il normalise les deux, cherche, puis ramène l'intervalle trouvé aux éléments et caractères d'origine par la table. Le composant en fait des rectangles par `Range.getClientRects()` sur les éléments de la couche, **en pourcentage de la page**, pour qu'ils suivent le grossissement sans recalcul. L'index de recherche de l'étape 1 passe par la même normalisation, pour que ses extraits se retrouvent tels quels.
 - **Un passage de recherche** se repère par son **contexte** : l'extrait de l'index de l'étape 1, quelques mots avant et après.
   - À défaut, par l'expression seule **si elle est unique sur la page**.
   - Sinon, toutes les occurrences de la page sont marquées en clair, et le lecteur dit qu'il ne peut pas marquer celle-ci. Jamais un autre endroit n'est marqué plein (FR-015).
@@ -305,8 +305,11 @@ Chaque décision porte son **pourquoi** et ce qui a été **écarté**. Les renv
 | La règle « Texte agrandi » : verdict, choix, pas de texte | `negotiation/tests/documents_admin.rs` et un test SQL de la fonction |
 | `get_range` | `kernel` sur le stockage de fichiers de test |
 | Normalisation : césure `U+0002` et trait d'union de fin de ligne, ligatures, insécables, apostrophes et guillemets, fragments et table de correspondance | `frontend/tests/guide-nego/normaliser.test.ts` |
-| Repérage : contexte, expression unique, ambiguïté, élément coupé | `frontend/tests/guide-nego/reperer.test.ts` |
-| Bascule : chaque fonction manquante simulée mène au repli ; un échec de premier rendu aussi | `frontend/tests/guide-nego/charger.test.ts` |
+| Repérage : contexte, expression unique, ambiguïté, élément coupé ; **les deux temps et la page voisine, avec chaque cas manqué à l'essai** (R15) | `frontend/tests/guide-nego/reperer.test.ts` |
+| Bascule : chaque fonction manquante simulée mène au repli ; un échec de premier rendu aussi ; **le délai ne court pas tant qu'une plage est en route** | `frontend/tests/guide-nego/charger.test.ts`, `bascule.test.ts` |
+| **Remplacements** : `Promise.withResolvers` et l'itérateur de flux absents, dans un contexte de page et dans un contexte de travailleur | `frontend/tests/guide-nego/remplacements.test.ts` |
+| **Transport de plages** : demandé, reçu, en route ; la progression | `frontend/tests/guide-nego/transport.test.ts` |
+| **Feuille bornée** : la règle `content-box` sous `.pdfViewer` présente | `check:guide-nego` |
 | Copie : format 2, effacement d'un format ancien, entière ou absente avec le PDF | `copies.test.ts` étendu |
 | Mode, annonce unique | `appareil-lecture` dans `stockage.test.ts` ou un fichier neuf |
 | Garde : les chemins `pdfjs/` sont dans la liste | `liste-de-garde.test.ts`, `sw-garde.test.ts` |
@@ -315,7 +318,20 @@ Chaque décision porte son **pourquoi** et ce qui a été **écarté**. Les renv
 
 ---
 
+## R15 — Ce que l'essai a changé (24/09, issue A)
+
+Le détail et les chiffres sont dans [essai-lecteur.md](essai-lecteur.md) ; les décisions dans [ADR-022](../../docs/AppNego/adr/022-pdfjs-dans-le-client.md).
+
+- **La lecture en ligne passe par un transport de plages écrit ici** (`PDFDataRangeTransport`), avec `disableAutoFetch`. Par défaut, pdf.js gardait le flux de la première requête et lisait le guide entier (2,8 Mo) avant la première page. Le transport a été essayé sur le vrai guide : 1,36 s en réseau ordinaire, 28,2 s en « 3G lente », comme les plages de pdf.js, mais il sait ce qui est demandé et reçu (1 280 Ko sur 1 280 à la première page). Il nourrit la **progression** (FR-009 bis) et le **délai de bascule** (FR-012 bis). Il fait `HEAD` pour la taille, puis `GET` avec `Range` et la session. Le téléchargement de la copie reste un fichier entier (R5).
+- **La forme lisible se lit avant le PDF** (~74 Ko compressés) : « Lire le texte en attendant » est prêt en moins de 5 s même en « 3G lente » (SC-003).
+- **Sur un réseau très lent, la première page du guide met 23 à 28 s**, accepté par le commanditaire. En morceaux de 64 Ko : 23,4 s contre 28,2 s, pour deux fois plus de requêtes, chacune vérifiant l'accès (R3). **On garde 256 Ko.** Le guide linéarisé est pire (47 s).
+- **Plancher iOS déduit : 16.4**, avec `Promise.withResolvers` remplacé **dans la page et dans le travailleur**. Le travailleur s'amorce par un petit module qui pose les remplacements puis importe celui de pdf.js ; la garde le suit comme le reste (R4), et `verifier-garde` le prouve. **Détection** (FR-012 bis) : les blocs `static {}` de classe par une sonde de syntaxe, le module dans un `Worker`, `structuredClone`, `Path2D`. Les autres fonctions récentes (`Math.sumPrecise`, `Float16Array`, `OffscreenCanvas`, `URL.parse`, `Uint8Array.fromBase64`…) n'empêchent pas l'affichage : elles ont été retirées une à une à l'essai.
+- **Le dimensionnement** : `[data-app="guide-nego"] .pdfViewer, [data-app="guide-nego"] .pdfViewer * { box-sizing: content-box }` s'ajoute à la feuille bornée, et `check:guide-nego` refuse une feuille qui ne l'a pas. Sa spécificité l'emporte sur `[data-app="guide-nego"] *` de `base.css`, et la couche de base de Tailwind le cède à toute règle hors couche.
+- **Le repérage** lit `getTextContent()` et marque par les éléments de `.textLayer` sans enfant, dans le même ordre (49 sur 49 à l'essai). Il cherche **en deux temps** — tel quel, puis sans les éléments qui ne sont qu'une puce, un numéro de liste ou un appel de note —, sur la page, puis la suivante, puis la précédente. Les cas de l'essai deviennent des tests : la puce `▪` (p. 16), le numéro `5.` (p. 48), les appels `15` (p. 56) et `18` (p. 68), l'exposant « Autres³⁷ » que le second temps perd (p. 79), et les deux passages de la page voisine (9 → 10, 13 → 12).
+- **Les polices standard** restent toutes, Liberation comprises (0,35 Mo) : un autre document peut ne pas embarquer ses polices.
+
 ## Points ouverts
 
-- **Le plancher des appareils (R1)** : le repli est tranché le 24/09 ; la version réellement exigée se mesure à l'essai, simulateur iOS 16 compris.
-- **WebKit hors connexion (R2, issue B)** : se tranche par l'essai.
+- ~~**Le plancher des appareils (R1)**~~ : **déduit à l'essai, iOS 16.4** (R15) ; la mesure sur un vrai téléphone reste à T084.
+- ~~**WebKit hors connexion (R2, issue B)**~~ : **tranché, ce n'est pas B** — sous WebKit 26.6, serveurs arrêtés, le travailleur lit un fichier gardé par XHR synchrone et par fetch, de quelque façon qu'on le charge.
+- **La réinitialisation générale du site atteint Guide Négo** (préface de Tailwind, et `base.css` qui la reprend) : contraire à FR-026 de 0a, inscrite aux points ouverts de `progress.md`, non corrigée à cette étape.
