@@ -334,11 +334,11 @@ description: "Tâches de l'étape 1 — la bibliothèque de documents et le lect
 
 **Test indépendant** : [quickstart.md § 4](quickstart.md).
 
-- [ ] T103 [US6] Ajouter la pose et le retrait des notes à `frontend/app/pages/admin/negociations/documents/[id]/apercu.vue` : choisir la page, sélectionner un passage dans la forme lisible (l'extrait cité), écrire le texte fr, et en en facultatif ; la liste des notes vivantes et retirées en marge, avec auteurs et dates ; boutons selon `correction.post` et `correction.withdraw`
-- [ ] T104 [P] [US6] Créer `frontend/app/components/guide-nego/GnNoteCorrection.vue` (`composants.md:201-203`) : filet de 3 px, triangle rouge (écart 20 élargi), ligne repliée de 48 px « Note de correction — passage dépassé », boîte dépliée signée « Nom, expert IFDD — date »
-- [ ] T105 [US6] Écrire la lecture des notes dans `useGnDocuments.ts` (clé `corrections`, empreinte) et leur ancrage dans `frontend/app/utils/guide-nego/forme-lisible.ts` : l'extrait cité retrouvé dans les segments de la page, sinon la tête de page. Test : ancrage trouvé, et repli en tête
-- [ ] T106 [US6] Poser les notes dans `lire.vue` par-dessus le texte, **sans le modifier**, sur la copie gardée comme en ligne
-- [ ] T107 [US6] Dérouler [quickstart.md § 4](quickstart.md) : une note posée paraît sans retéléchargement, reste en mode avion, et disparaît une fois retirée (SC-008)
+- [X] T103 [US6] *(le panneau vit dans `components/admin/negotiation/PreviewNotes.vue`, posé sous la forme lisible)* Ajouter la pose et le retrait des notes à `frontend/app/pages/admin/negociations/documents/[id]/apercu.vue` : choisir la page, sélectionner un passage dans la forme lisible (l'extrait cité), écrire le texte fr, et en en facultatif ; la liste des notes vivantes et retirées en marge, avec auteurs et dates ; boutons selon `correction.post` et `correction.withdraw`
+- [X] T104 [P] [US6] Créer `frontend/app/components/guide-nego/GnNoteCorrection.vue` (`composants.md:201-203`) : filet de 3 px, triangle rouge (écart 20 élargi), ligne repliée de 48 px « Note de correction — passage dépassé », boîte dépliée signée « Nom, expert IFDD — date »
+- [X] T105 [US6] *(le repli sans accents sort de `lecteur.ts` dans `repli.ts`, que les deux partagent sans import circulaire)* Écrire la lecture des notes dans `useGnDocuments.ts` (clé `corrections`, empreinte) et leur ancrage dans `frontend/app/utils/guide-nego/forme-lisible.ts` : l'extrait cité retrouvé dans les segments de la page, sinon la tête de page. Test : ancrage trouvé, et repli en tête
+- [X] T106 [US6] Poser les notes dans `lire.vue` par-dessus le texte, **sans le modifier**, sur la copie gardée comme en ligne
+- [X] T107 [US6] Dérouler [quickstart.md § 4](quickstart.md) : une note posée paraît sans retéléchargement, reste en mode avion, et disparaît une fois retirée (SC-008) *(24/09, sur la version construite, API sur 8081 liée à `localhost:3001` : le port 3000 était pris par un autre projet)*
 
 **Checkpoint** : un passage dépassé se corrige sans republier. **Commit.**
 

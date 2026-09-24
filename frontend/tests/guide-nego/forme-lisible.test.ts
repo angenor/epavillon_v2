@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import type { DocumentReading, OutlineEntry, ReadingPage } from '../../app/types/negotiation-documents.ts'
-import { blocsDeLaPage, estUneFormeLisible, pageDeReprise, partLue, sectionDeLaPage } from '../../app/utils/guide-nego/forme-lisible.ts'
+import { ancrerLesNotes, blocDuPassage, blocsDeLaPage, estUneFormeLisible, pageDeReprise, partLue, sectionDeLaPage } from '../../app/utils/guide-nego/forme-lisible.ts'
 
 const page = (blocks: unknown[], index = 59): ReadingPage => ({ index, label: String(index), blocks: blocks as ReadingPage['blocks'] })
 
@@ -97,4 +97,48 @@ test('une copie d’une autre forme ne s’ouvre pas : elle se retélécharge', 
   assert.equal(estUneFormeLisible({ ...bonne, pages: [{ index: '1' }] }), false)
   assert.equal(estUneFormeLisible(null), false)
   assert.equal(estUneFormeLisible('{"version":"1.0"}'), false)
+})
+
+// --- L'ancrage des notes de correction (FR-047) ------------------------------
+
+const page59 = blocsDeLaPage(
+  page([
+    { kind: 'heading', level: 3, spans: [{ text: '3.6.1 Objectif mondial' }] },
+    {
+      kind: 'paragraph',
+      spans: [
+        { text: "L'enjeu principal est la finalisation et l'adoption des 100 indicateurs du " },
+        { text: 'GGA', term: true },
+        { text: ', afin de permettre un suivi précis.' },
+      ],
+    },
+    { kind: 'paragraph', spans: [{ text: 'Les négociations portent également sur les PNA.' }] },
+  ]),
+)
+
+test('l’extrait cité s’ancre sur son bloc, sans accents ni casse ni blancs doublés', () => {
+  assert.equal(blocDuPassage(page59, 'adoption des 100 indicateurs du GGA'), 1)
+  assert.equal(blocDuPassage(page59, 'LES  NEGOCIATIONS portent'), 2)
+})
+
+test('un extrait à cheval sur deux blocs s’ancre au premier', () => {
+  assert.equal(blocDuPassage(page59, 'un suivi précis.\n\nLes négociations portent'), 1)
+})
+
+test('introuvable ou absent, l’extrait laisse la note en tête de page, sans erreur', () => {
+  assert.equal(blocDuPassage(page59, 'les indicateurs ont été adoptés à la CdP30'), null)
+  assert.equal(blocDuPassage(page59, null), null)
+  assert.equal(blocDuPassage(page59, '   '), null)
+})
+
+test('les notes d’une page se rangent par bloc, et en tête celles qu’aucun bloc ne porte', () => {
+  const notes = [
+    { id: 'a', passage: 'finalisation et l’adoption' },
+    { id: 'b', passage: null },
+    { id: 'c', passage: 'suivi précis' },
+    { id: 'd', passage: 'passage disparu' },
+  ]
+  const { enTete, parBloc } = ancrerLesNotes(page59, notes)
+  assert.deepEqual(enTete.map((n) => n.id), ['b', 'd'])
+  assert.deepEqual([...parBloc.entries()].map(([rang, ns]) => [rang, ns.map((n) => n.id)]), [[1, ['a', 'c']]])
 })

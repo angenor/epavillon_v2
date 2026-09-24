@@ -11,6 +11,9 @@ import type { EffectivePermission } from '~/types/identity'
  * permissions n'est détenue.
  *
  * Seule la page courante se rend : le guide en compte 92.
+ *
+ * L'expert y pose ses notes de correction, sur la page feuilletée et le passage
+ * sélectionné dans la forme lisible.
  */
 
 definePageMeta({
@@ -186,6 +189,7 @@ watch(imageSrc, () => {
 })
 
 const imageFrame = ref<HTMLElement | null>(null)
+const readingBox = ref<HTMLElement | null>(null)
 
 function showOrigin(): void {
   imageFrame.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -369,7 +373,6 @@ const notReadyMessage = computed(() => {
                 </div>
               </figure>
 
-              <!-- Les notes de correction (phase 12) se poseront sous cette colonne. -->
               <article class="min-w-0">
                 <header class="mb-2 flex flex-wrap items-baseline justify-between gap-2">
                   <h2 class="text-sm font-semibold tracking-caps text-text-muted uppercase">
@@ -383,7 +386,7 @@ const notReadyMessage = computed(() => {
                     </em>
                   </p>
                 </header>
-                <div class="rounded-lg border border-border bg-surface-raised p-4 sm:p-6">
+                <div ref="readingBox" class="rounded-lg border border-border bg-surface-raised p-4 sm:p-6">
                   <AdminNegotiationPreviewBlocks
                     v-if="current.blocks.length"
                     :key="current.index"
@@ -394,6 +397,14 @@ const notReadyMessage = computed(() => {
                     {{ t('admin.negociations.documents.preview.reading.empty') }}
                   </p>
                 </div>
+                <AdminNegotiationPreviewNotes
+                  class="mt-8"
+                  :document-id="id"
+                  :page="current"
+                  :labels="labels"
+                  :source="readingBox"
+                  @go="goTo"
+                />
               </article>
             </div>
           </section>

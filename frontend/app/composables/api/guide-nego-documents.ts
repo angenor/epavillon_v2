@@ -89,9 +89,13 @@ export function createGuideNegoDocumentsApi({ call, send, lireEtiquete, ressourc
     imageDePage: (documentId: Uuid, index: number): string =>
       `/negotiation/documents/${documentId}/pages/${index}/image`,
 
-    /** Les notes vivantes de tous les documents publiés, en une lecture. */
-    notesDeCorrection: (): Promise<AvecEmpreinte<CorrectionNoteList>> =>
-      lireEtiquete('/negotiation/documents/corrections', async () => (await exemples()).notesDeCorrection(langue())),
+    /** Les notes vivantes de tous les documents publiés, en une lecture ; `304` si rien n'a changé. */
+    notesDeCorrection: (empreinte: string | null) =>
+      lireEtiquete<CorrectionNoteList>(
+        '/negotiation/documents/corrections',
+        async () => (await exemples()).notesDeCorrection(langue()),
+        empreinte,
+      ),
 
     /**
      * Compter un téléchargement **réussi**. Sans compte, et rien de la personne

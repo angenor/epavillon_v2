@@ -95,5 +95,42 @@
     "hint": "Shown as original page in the reader.",
     "see": "See the original page",
     "text": "Text of the area"
+  },
+  "notes": {
+    "title": "Correction notes",
+    "subtitle": "A note sits on top of the text without changing it. It appears in the app, downloaded copies included, from the next library refresh.",
+    "error": "The notes could not be loaded",
+    "readOnly": "Only experts post and withdraw notes. You see them here as the app shows them.",
+    "here": "On this page · {count}",
+    "hereEmpty": "No note on this page.",
+    "elsewhere": "Elsewhere in the document · {count}",
+    "elsewhereEmpty": "No note on the other pages.",
+    "goTo": "Go to p. {label}",
+    "withdrawn": "Withdrawn",
+    "pageTop": "Top of the page — no passage targeted",
+    "quote": "“{text}”",
+    "en": "EN",
+    "postedBy": "Posted by {name}, {date}",
+    "withdrawnBy": "Withdrawn by {name}, {date}",
+    "zoned": "{date}, {zone}",
+    "withdraw": "Withdraw the note",
+    "form": {
+      "title": "Post a note — page {index}, p. {label}",
+      "passage": "Targeted passage",
+      "noPassage": "Select a passage in the readable text above. Without a selection, the note goes at the top of the page.",
+      "clearPassage": "Target the top of the page",
+      "bodyFr": "Note text, in French",
+      "bodyEn": "Note text, in English",
+      "bodyEnHint": "Optional. Without it, the app shows the French text.",
+      "frRequired": "The French text of the note is required.",
+      "submit": "Post the note",
+      "posted": "Note posted. It will appear in the app at the next library refresh."
+    },
+    "confirm": {
+      "title": "Withdraw this note?",
+      "description": "It will disappear from the app, downloaded copies included, at their next refresh. The note stays here, with who posted it, who withdrew it and when.",
+      "cancel": "Cancel",
+      "confirm": "Withdraw the note"
+    }
   }
 }

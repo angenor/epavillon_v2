@@ -95,5 +95,42 @@
     "hint": "Rendu en page d'origine dans le lecteur.",
     "see": "Voir la page d'origine",
     "text": "Texte de la zone"
+  },
+  "notes": {
+    "title": "Notes de correction",
+    "subtitle": "Une note se pose par-dessus le texte, sans le modifier. Elle paraît dans l'application, copies téléchargées comprises, dès la relecture suivante de la bibliothèque.",
+    "error": "Les notes n'ont pas pu être chargées",
+    "readOnly": "Seuls les experts posent et retirent des notes. Vous les voyez ici telles que l'application les montre.",
+    "here": "Sur cette page · {count}",
+    "hereEmpty": "Aucune note sur cette page.",
+    "elsewhere": "Ailleurs dans le document · {count}",
+    "elsewhereEmpty": "Aucune note sur les autres pages.",
+    "goTo": "Aller à la p. {label}",
+    "withdrawn": "Retirée",
+    "pageTop": "Tête de page — aucun passage visé",
+    "quote": "« {text} »",
+    "en": "EN",
+    "postedBy": "Posée par {name}, {date}",
+    "withdrawnBy": "Retirée par {name}, {date}",
+    "zoned": "{date}, {zone}",
+    "withdraw": "Retirer la note",
+    "form": {
+      "title": "Poser une note — page {index}, p. {label}",
+      "passage": "Passage visé",
+      "noPassage": "Sélectionnez un passage dans la forme lisible ci-dessus. Sans sélection, la note se pose en tête de page.",
+      "clearPassage": "Viser la tête de page",
+      "bodyFr": "Texte de la note, en français",
+      "bodyEn": "Texte de la note, en anglais",
+      "bodyEnHint": "Facultatif. Sans lui, l'application affiche le français.",
+      "frRequired": "Le texte de la note en français est obligatoire.",
+      "submit": "Poser la note",
+      "posted": "Note posée. Elle paraîtra dans l'application à la prochaine relecture de la bibliothèque."
+    },
+    "confirm": {
+      "title": "Retirer cette note ?",
+      "description": "Elle disparaîtra de l'application, copies téléchargées comprises, à leur prochaine relecture. La note reste ici, avec qui l'a posée, qui l'a retirée et quand.",
+      "cancel": "Annuler",
+      "confirm": "Retirer la note"
+    }
   }
 }

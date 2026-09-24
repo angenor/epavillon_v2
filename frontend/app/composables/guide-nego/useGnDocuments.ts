@@ -9,10 +9,13 @@
  * déconnexion, les réservés s'y lisent comme l'API les servirait à qui n'a pas
  * l'accès.
  *
+ * Les notes de correction se relisent avec la liste, par leur propre empreinte : une
+ * note posée paraît sur la copie gardée sans la retélécharger (FR-050).
+ *
  * La recherche dans le texte ne se fait qu'en ligne : hors connexion, on cherche
  * dans les titres, résumés et éditeurs gardés.
  */
-import type { DocumentLibrary, LibraryDocument, PageHit } from '~/types/negotiation-documents'
+import type { CorrectionNote, DocumentLibrary, LibraryDocument, PageHit } from '~/types/negotiation-documents'
 import { estInchange } from '~/composables/api/etiquete'
 import { estNouveau, marquerVu } from '~/utils/guide-nego/appareil-lecture'
 import { pourUneAutrePersonne } from '~/utils/guide-nego/documents'
@@ -25,6 +28,13 @@ interface BibliothequeGardee {
   /** Les titres arrivent résolus : une autre langue ne se relit pas sous la même empreinte. */
   langue: string
   /** Nulle sans compte. */
+  personne: string | null
+}
+
+interface NotesGardees {
+  notes: CorrectionNote[]
+  empreinte: string | null
+  langue: string
   personne: string | null
 }
 
@@ -61,7 +71,24 @@ export function useGnDocuments() {
     return suivante
   })
 
-  watch(locale, () => void lecture.rafraichir())
+  const lectureDesNotes = useGnLecture<NotesGardees>('corrections', async (garde) => {
+    await Promise.all([session.assurer(), acces.assurer()])
+    const langue = String(locale.value)
+    const qui = personne()
+    const connue = garde?.langue === langue && garde.personne === qui ? garde : null
+    const lu = await api.notesDeCorrection(connue?.empreinte ?? null)
+    if (!estInchange(lu)) return { notes: lu.valeur.notes, empreinte: lu.empreinte, langue, personne: qui }
+    if (connue) return { ...connue, empreinte: lu.empreinte }
+    throw new Error('304 sans notes gardées')
+  })
+
+  // Après la liste : sa lecture a fait tourner le jeton, et les notes d'un réservé ne vont qu'à qui a l'accès.
+  async function rafraichir(): Promise<void> {
+    await lecture.rafraichir()
+    await lectureDesNotes.rafraichir()
+  }
+
+  watch(locale, () => void rafraichir())
 
   const bibliotheque = computed<DocumentLibrary | null>(() => {
     const garde = lecture.etat.value.valeur
@@ -86,6 +113,15 @@ export function useGnDocuments() {
 
   const documentDe = (id: string): LibraryDocument | null => documents.value.find((d) => d.id === id) ?? null
 
+  // Gardées pour une autre personne, les notes d'un réservé ne se lisent plus.
+  const notes = computed<CorrectionNote[]>(() => {
+    const garde = lectureDesNotes.etat.value.valeur
+    if (!garde) return []
+    if (!garde.personne || garde.personne === personne()) return garde.notes
+    return garde.notes.filter((n) => documentDe(n.document_id)?.restricted === false)
+  })
+  const notesDe = (id: string): CorrectionNote[] => notes.value.filter((n) => n.document_id === id)
+
   const dansLeTexte = ref<Map<string, PageHit | null> | null>(null)
   let derniere = 0
 
@@ -104,13 +140,15 @@ export function useGnDocuments() {
 
   return {
     etat: lecture.etat,
-    rafraichir: lecture.rafraichir,
+    rafraichir,
     bibliotheque,
     documents,
     telecharges,
     nouveaux,
     marquerCommeVu,
     documentDe,
+    /** Les notes vivantes d'un document, lues avec la liste et gardées comme elle. */
+    notesDe,
     /** Par document trouvé, sa première page — nulle pour un réservé sans accès. */
     dansLeTexte: readonly(dansLeTexte),
     chercherDansLeTexte,

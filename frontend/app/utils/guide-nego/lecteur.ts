@@ -7,6 +7,7 @@
  */
 import type { Block, DocumentReading, Span } from '~/types/negotiation-documents'
 import { blocsDeLaPage, sectionDeLaPage } from './forme-lisible.ts'
+import { replier } from './repli.ts'
 
 /** Où se lit un texte dans un bloc : ses segments, ou, pour une origine, sa légende et son texte. */
 export type Champ = 'spans' | 'caption' | 'text'
@@ -26,36 +27,6 @@ export interface Passage extends Occurrence {
   etiquette: string
   section: string | null
   extrait: { avant: string; trouve: string; apres: string }
-}
-
-// « CO₂ » se tape « co2 », « Paris–Nairobi » « paris-nairobi » : NFKD ramène exposants
-// et indices, la table le reste.
-const REMPLACEMENTS: Record<string, string> = { œ: 'oe', æ: 'ae', '’': "'", '–': '-', '—': '-', '‑': '-', '‐': '-' }
-
-/**
- * Le texte replié, et pour chacune de ses lettres la position de la lettre d'origine.
- * Les blancs se réduisent à une espace : une double espace d'extraction ne cache rien.
- */
-export function replier(texte: string): { replie: string; origine: number[] } {
-  let replie = ''
-  const origine: number[] = []
-  for (let i = 0; i < texte.length; i += 1) {
-    const lettre = texte[i] as string
-    if (/\s/u.test(lettre)) {
-      if (!replie.endsWith(' ')) {
-        replie += ' '
-        origine.push(i)
-      }
-      continue
-    }
-    const basse = lettre.toLowerCase()
-    const pliee = REMPLACEMENTS[basse] ?? basse.normalize('NFKD').replace(/\p{M}/gu, '')
-    for (const c of pliee) {
-      replie += c
-      origine.push(i)
-    }
-  }
-  return { replie, origine }
 }
 
 export const expressionRepliee = (expression: string): string => replier(expression.trim()).replie

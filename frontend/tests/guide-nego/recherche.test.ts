@@ -5,9 +5,9 @@ import {
   chercherDansLeDocument,
   passageDeLaPage,
   pagesCherchees,
-  replier,
   surligner,
 } from '../../app/utils/guide-nego/lecteur.ts'
+import { replier } from '../../app/utils/guide-nego/repli.ts'
 
 const PHRASE =
   "La CdP30 représente une étape stratégique pour finaliser les éléments clés permettant un suivi robuste des progrès collectifs en matière d'adaptation."

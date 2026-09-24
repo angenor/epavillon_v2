@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { LibraryDocument } from '~/types/negotiation-documents'
+import type { CorrectionNote, LibraryDocument } from '~/types/negotiation-documents'
 import { sectionDeLaPage } from '~/utils/guide-nego/forme-lisible'
 import { tailleLisible } from '~/utils/guide-nego/place'
 import { chercherDansLeDocument, pagesCherchees, passageDeLaPage, type Occurrence } from '~/utils/guide-nego/lecteur'
@@ -19,7 +19,7 @@ const route = useRoute()
 const id = computed(() => String(route.params.id ?? ''))
 const versLaFiche = computed(() => `/guide-nego/ressources/documents/${id.value}`)
 
-const { documents, documentDe, rafraichir: relireLaBibliotheque } = useGnDocuments()
+const { documents, documentDe, notesDe, rafraichir: relireLaBibliotheque } = useGnDocuments()
 const copies = useGnCopies()
 const connexion = useGnConnexion()
 const session = useGnSession()
@@ -86,6 +86,12 @@ watch([() => acces.ouvert.value, () => session.connectee.value], ([ouvert, conne
 
 const total = computed(() => lecture.value?.page_count ?? 0)
 const pageCourante = computed(() => lecture.value?.pages.find((p) => p.index === pageEnCours.value) ?? null)
+// Lues avec la liste, pas avec la copie : une note posée ou retirée ne demande aucun retéléchargement.
+const notesParPage = computed(() => {
+  const parPage = new Map<number, CorrectionNote[]>()
+  for (const note of notesDe(id.value)) parPage.set(note.page_index, [...(parPage.get(note.page_index) ?? []), note])
+  return parPage
+})
 const section = computed(() =>
   lecture.value ? (sectionDeLaPage(lecture.value.outline, pageEnCours.value)?.title ?? null) : null,
 )
@@ -390,6 +396,7 @@ useHead({ title: titre })
             :image-de="imageDe"
             :surlignages="rangCourant === null ? undefined : surlignagesParPage.get(page.index)"
             :courant="passageCourant?.page === page.index ? passageCourant : null"
+            :notes="notesParPage.get(page.index)"
             @terme="terme = $event"
           />
         </section>

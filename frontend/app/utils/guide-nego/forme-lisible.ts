@@ -7,6 +7,7 @@
  * formé s'ignorent au lieu de casser la page.
  */
 import type { Block, DocumentReading, OutlineEntry, ReadingPage, Span } from '~/types/negotiation-documents'
+import { replier } from './repli.ts'
 
 const estObjet = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null
 
@@ -99,3 +100,40 @@ export function pageDeReprise(lecture: DocumentReading, notee: number | null): R
 
 /** La part lue, de 0 à 1 : la page en cours sur le total. */
 export const partLue = (index: number, total: number): number => (total > 0 ? Math.min(1, index / total) : 0)
+
+const texteDe = (spans: Span[] | undefined): string => (spans ?? []).map((s) => s.text).join('')
+const texteDuBloc = (bloc: Block): string =>
+  bloc.kind === 'origin' ? `${texteDe(bloc.caption)} ${texteDe(bloc.text)}` : texteDe(bloc.spans)
+
+const replie = (texte: string): string => replier(texte).replie.trim()
+
+/**
+ * Le rang du bloc qui porte l'extrait cité d'une note, ou nul : la tête de page.
+ * Un extrait choisi à cheval sur deux blocs s'ancre au premier, par sa première ligne.
+ */
+export function blocDuPassage(blocs: Block[], passage: string | null): number | null {
+  if (!passage) return null
+  const textes = blocs.map((b) => replie(texteDuBloc(b)))
+  const premiereLigne = passage.split(/\n/).find((l) => l.trim()) ?? ''
+  for (const cherche of [replie(passage), replie(premiereLigne)]) {
+    if (!cherche) continue
+    const rang = textes.findIndex((t) => t.includes(cherche))
+    if (rang >= 0) return rang
+  }
+  return null
+}
+
+/** Les notes d'une page, rangées par bloc ; celles qu'aucun bloc ne porte vont en tête. */
+export function ancrerLesNotes<N extends { passage: string | null }>(
+  blocs: Block[],
+  notes: N[],
+): { enTete: N[]; parBloc: Map<number, N[]> } {
+  const enTete: N[] = []
+  const parBloc = new Map<number, N[]>()
+  for (const note of notes) {
+    const rang = blocDuPassage(blocs, note.passage)
+    if (rang === null) enTete.push(note)
+    else parBloc.set(rang, [...(parBloc.get(rang) ?? []), note])
+  }
+  return { enTete, parBloc }
+}

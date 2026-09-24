@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import type { ImageDePage } from '~/composables/guide-nego/useGnLecteur'
-import type { Block, ReadingMode, ReadingPage, Span } from '~/types/negotiation-documents'
-import { blocsDeLaPage } from '~/utils/guide-nego/forme-lisible'
+import type { Block, CorrectionNote, ReadingMode, ReadingPage, Span } from '~/types/negotiation-documents'
+import { ancrerLesNotes, blocsDeLaPage } from '~/utils/guide-nego/forme-lisible'
 import { surligner, type Champ, type Occurrence, type SegmentSurligne } from '~/utils/guide-nego/lecteur'
+import GnNoteCorrection from './GnNoteCorrection.vue'
 
 /**
  * Une page du lecteur — maquette 04 · 01. Le texte recomposé à la largeur de l'écran,
  * ou, « tel quel », l'image de la page. **Jamais une page blanche** : une image qui
  * manque laisse le texte, et une ligne dit pourquoi — le réseau absent, ou un échec
  * qui se réessaie.
+ *
+ * Les notes de correction bordent le bloc qui porte leur extrait, ou la tête de la
+ * page : le texte, lui, se rend tel qu'il a été téléchargé.
  */
 const props = withDefaults(
   defineProps<{
@@ -19,8 +23,10 @@ const props = withDefaults(
     surlignages?: Occurrence[]
     /** L'occurrence courante, si elle est sur cette page : seule cette page se recalcule au suivant. */
     courant?: Occurrence | null
+    /** Les notes vivantes posées sur cette page. */
+    notes?: CorrectionNote[]
   }>(),
-  { surlignages: () => [], courant: null },
+  { surlignages: () => [], courant: null, notes: () => [] },
 )
 
 defineEmits<{ terme: [texte: string] }>()
@@ -29,6 +35,17 @@ const { t } = useI18n()
 
 const blocs = computed<Block[]>(() => blocsDeLaPage(props.page))
 const telQuel = computed(() => props.mode === 'as_is')
+// « Tel quel », aucun bloc ne s'affiche : toutes les notes vont en tête de page.
+const ancrees = computed(() => ancrerLesNotes(telQuel.value ? [] : blocs.value, props.notes))
+// Un bloc sans note garde une enveloppe neutre (`display: contents`) : rien ne bouge.
+const enveloppes = computed(() =>
+  blocs.value.map((_, rang) => {
+    const notes = ancrees.value.parBloc.get(rang)
+    return notes
+      ? { composant: GnNoteCorrection, attributs: { notes } }
+      : { composant: 'div', attributs: { class: 'gn-page-lue__bloc' } }
+  }),
+)
 
 type EtatDeLImage = 'aucune' | 'attente' | 'chargee' | 'hors-connexion' | 'echec'
 const etatDeLImage = ref<EtatDeLImage>('aucune')
@@ -95,6 +112,8 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
 
 <template>
   <div ref="racine" class="gn-page-lue">
+    <GnNoteCorrection v-if="ancrees.enTete.length" :notes="ancrees.enTete" />
+
     <GnImageDePage
       v-if="telQuel"
       :etat="etatDeLImage"
@@ -106,7 +125,13 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
       @reessayer="reessayer"
     />
 
-    <template v-for="(bloc, rang) in blocs" v-else :key="rang">
+    <component
+      :is="enveloppes[rang]?.composant"
+      v-for="(bloc, rang) in blocs"
+      v-else
+      :key="rang"
+      v-bind="enveloppes[rang]?.attributs"
+    >
       <component :is="balisesDeTitre[bloc.level]" v-if="bloc.kind === 'heading'" :class="`gn-page-lue__titre-${bloc.level}`">
         <GnSegmentsLus :segments="segments(rang, 'spans', bloc.spans)" @terme="$emit('terme', $event)" />
       </component>
@@ -160,7 +185,7 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
           </p>
         </details>
       </div>
-    </template>
+    </component>
   </div>
 </template>
 
@@ -172,6 +197,10 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
   font-size: var(--gn-taille-lecture, var(--gn-taille-17));
   line-height: 1.5;
   color: var(--gn-texte);
+}
+
+[data-app="guide-nego"] .gn-page-lue__bloc {
+  display: contents;
 }
 
 /* Les titres ne suivent pas la taille du texte (R14). */
