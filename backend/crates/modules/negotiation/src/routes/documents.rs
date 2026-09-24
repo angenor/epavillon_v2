@@ -243,8 +243,27 @@ pub(crate) async fn fichier(
     if avec_corps {
         return Ok(reponse.body(servi.octets));
     }
-    // Un HEAD annonce la longueur qu'aurait le corps, sans l'envoyer.
-    Ok(reponse.no_chunking(longueur).finish())
+    // Un HEAD annonce la longueur qu'aurait le corps : actix l'écrit d'après le corps, qu'il
+    // n'envoie pas. Une longueur posée à la main serait remplacée par zéro.
+    Ok(reponse.body(CorpsAnnonce(longueur)))
+}
+
+/// Un corps qui dit sa taille et ne contient rien : ce que rend un `HEAD`.
+struct CorpsAnnonce(u64);
+
+impl actix_web::body::MessageBody for CorpsAnnonce {
+    type Error = std::convert::Infallible;
+
+    fn size(&self) -> actix_web::body::BodySize {
+        actix_web::body::BodySize::Sized(self.0)
+    }
+
+    fn poll_next(
+        self: std::pin::Pin<&mut Self>,
+        _: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Option<Result<actix_web::web::Bytes, Self::Error>>> {
+        std::task::Poll::Ready(None)
+    }
 }
 
 fn poser(reponse: &mut HttpResponse, nom: actix_web::http::header::HeaderName, valeur: &str) {

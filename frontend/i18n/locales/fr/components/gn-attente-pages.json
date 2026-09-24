@@ -1,0 +1,10 @@
+{
+  "titre": "La première page arrive",
+  "recus": "{recu} reçus sur {demande}",
+  "demande": "Demande de la première page…",
+  "lent": "Le réseau est lent. Vous pouvez lire le texte du document en attendant, ou le télécharger pour le lire sans réseau.",
+  "lire-le-texte": "Lire le texte en attendant",
+  "telecharger": "Télécharger pour lire sans réseau",
+  "page-arrive": "La page d'origine arrive, elle prendra la place du texte.",
+  "rester": "Rester sur le texte"
+}

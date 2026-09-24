@@ -1,8 +1,4 @@
 {
-  "image": "Page {page} of the original document",
-  "page-avec-le-reseau": "Page {page}: its image is not on this phone. It will appear once you are online.",
-  "origine-avec-le-reseau": "Original page available online",
-  "voir": "See the original page",
   "texte": {
     "table": "The table's text",
     "figure": "The figure's text"

@@ -1,8 +1,4 @@
 {
-  "image": "Page {page} du document d'origine",
-  "page-avec-le-reseau": "Page {page} : son image n'est pas sur le téléphone. Elle s'affichera avec le réseau.",
-  "origine-avec-le-reseau": "Page d'origine disponible avec le réseau",
-  "voir": "Voir la page d'origine",
   "texte": {
     "table": "Le texte du tableau",
     "figure": "Le texte de la figure"

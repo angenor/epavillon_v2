@@ -6,6 +6,7 @@
  * ne sont ni des lectures ni des copies (R11). Tout passe par un `Stockage` injecté
  * — celui de `stockage.ts` en usage, qui ne lève pas en navigation privée.
  */
+import type { CauseDeBascule } from './pdf/bascule.ts'
 
 // Préfixées `gn.`, comme toutes les clés de Guide Négo (`stockage.ts`).
 export const CLE_TAILLE = 'gn.lecture-taille'
@@ -14,6 +15,7 @@ export const CLE_OUVERTS = 'gn.documents-ouverts'
 export const CLE_RECENTS = 'gn.documents-recents'
 /** L'issue de `navigator.storage.persist()` : « Mes documents » dit un refus. */
 export const CLE_PERSISTANCE = 'gn.stockage-persistant'
+export const CLE_BASCULES = 'gn.lecture-bascules'
 
 export interface Stockage {
   lire(cle: string): string | null
@@ -107,4 +109,23 @@ export function estNouveau(stockage: Stockage, document: { id: string; published
   if (!Number.isFinite(publie)) return false
   const recent = maintenant.getTime() - publie < JOURS_NOUVEAU * 24 * 60 * 60 * 1000
   return recent && !lireJson<Record<string, string>>(stockage, CLE_OUVERTS, {})[document.id]
+}
+
+/** Les bascules du lecteur sur le texte (FR-012 bis) : compter seulement, jamais relu pour décider. */
+export interface CompteDesBascules {
+  nombre: number
+  cause: CauseDeBascule
+  a: string
+}
+
+export function lireLesBascules(stockage: Stockage): CompteDesBascules | null {
+  const { nombre, cause, a } = lireJson<Partial<Record<keyof CompteDesBascules, unknown>>>(stockage, CLE_BASCULES, {})
+  const lisible = typeof nombre === 'number' && Number.isInteger(nombre) && nombre > 0 && typeof a === 'string'
+  return lisible && (cause === 'erreur' || cause === 'delai') ? { nombre, cause, a } : null
+}
+
+export function compterUneBascule(stockage: Stockage, cause: CauseDeBascule, a: string): CompteDesBascules {
+  const compte = { nombre: (lireLesBascules(stockage)?.nombre ?? 0) + 1, cause, a }
+  ecrireJson(stockage, CLE_BASCULES, compte)
+  return compte
 }

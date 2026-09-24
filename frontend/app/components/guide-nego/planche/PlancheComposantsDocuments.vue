@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { ImageDePage } from '~/composables/guide-nego/useGnLecteur'
 import type { Passage } from '~/utils/guide-nego/lecteur'
 import type { LibraryDocument, OutlineEntry, ReadingPage } from '~/types/negotiation-documents'
 /**
@@ -49,7 +48,6 @@ const pagesDeSpecimen = computed<ReadingPage[]>(() =>
 const panneauOuvert = ref(false)
 const reglagesOuverts = ref(false)
 
-const sansImage = async (): Promise<ImageDePage> => 'hors-connexion'
 
 function specimen(id: string, champs: Partial<LibraryDocument>): LibraryDocument {
   return {
@@ -73,7 +71,8 @@ function specimen(id: string, champs: Partial<LibraryDocument>): LibraryDocument
     accessible: true,
     page_count: null,
     reading_bytes: null,
-    mode: 'reflow',
+    has_text: true,
+    large_text: true,
     superseded_by: null,
     reading_etag: null,
     ...champs,
@@ -108,7 +107,8 @@ const bulletin = computed(() =>
     source: 'link',
     publisher: 'IISD',
     link_host: 'enb.iisd.org',
-    mode: null,
+    has_text: false,
+    large_text: false,
   }),
 )
 const delegation = computed(() =>
@@ -346,17 +346,8 @@ const choixLisible = computed(() =>
 
     <GnPlancheSection :titre="k('page')" :propos="k('page-propos')">
       <div class="gn-planche-composants__cadre">
-        <GnPageLue :page="pageLue" mode="reflow" :image-de="sansImage" />
+        <GnPageLue :page="pageLue" />
       </div>
-      <span class="gn-planche-composants__legende">{{ k('image-attente') }}</span>
-      <div class="gn-planche-composants__cadre">
-        <GnImageDePage etat="attente" :adresse="null" :libelle="k('image-libelle')" :attente="k('image-hors')" />
-      </div>
-      <span class="gn-planche-composants__legende">{{ k('image-echec') }}</span>
-      <div class="gn-planche-composants__cadre">
-        <GnImageDePage etat="echec" :adresse="null" :libelle="k('image-libelle')" :attente="k('image-hors')" />
-      </div>
-      <p class="gn-planche-note">{{ k('page-note-planche') }}</p>
     </GnPlancheSection>
 
     <GnPlancheSection :titre="k('note')" :propos="k('note-propos')">

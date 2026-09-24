@@ -1,13 +1,20 @@
 <script setup lang="ts">
 import type { CorrectionNote, LibraryDocument } from '~/types/negotiation-documents'
+import { compterUneBascule } from '~/utils/guide-nego/appareil-lecture'
 import { sectionDeLaPage } from '~/utils/guide-nego/forme-lisible'
 import { tailleLisible } from '~/utils/guide-nego/place'
 import { chercherDansLeDocument, pagesCherchees, passageDeLaPage, type Occurrence } from '~/utils/guide-nego/lecteur'
+import { creerLAttente, DELAI_DES_SORTIES_MS, type EtatDAttente } from '~/utils/guide-nego/pdf/attente'
+import type { CauseDeBascule } from '~/utils/guide-nego/pdf/bascule'
+import type { Minuterie } from '~/utils/guide-nego/pdf/gestes'
+import type { SuiviDesPlages } from '~/utils/guide-nego/pdf/transport'
+import { lireCle, poserCle } from '~/utils/guide-nego/stockage'
+import GnLecteurPages from '~/components/guide-nego/GnLecteurPages.client.vue'
 
 /**
- * Le lecteur — maquette 04. Sans barre d'onglets : une ligne d'en-tête, le texte, la
- * barre de lecture en bas, et ce qu'elle ouvre — sommaire, recherche, réglages. « Tel
- * quel », il n'y a ni recherche ni taille de texte (FR-037).
+ * Le lecteur — maquette 04. Sans barre d'onglets : une ligne d'en-tête, les pages
+ * d'origine (ADR-022) ou « Texte agrandi », la barre de lecture en bas, et ce qu'elle
+ * ouvre — sommaire, recherche, réglages.
  */
 // Le lecteur tient lui-même sa position — la page de reprise : ni le routeur ni le
 // navigateur ne la recalent après lui.
@@ -26,7 +33,7 @@ const session = useGnSession()
 const acces = useGnAcces()
 const { momentLisible } = useGnMomentLecture()
 const lecteur = useGnLecteur(id)
-const { etat, lecture, reprise, pageEnCours, imageDe, suivreLaPage } = lecteur
+const { etat, lecture, reprise, pageEnCours, suivreLaPage } = lecteur
 
 const document = computed<LibraryDocument | null>(() => documentDe(id.value))
 const titre = computed(() => document.value?.title ?? t('guide-nego.lecteur.titre'))
@@ -36,8 +43,97 @@ const { taille } = useGnTailleDeLecture()
 
 const elementDeLaPage = (index: number) => window.document.getElementById(`page-${index}`)
 
+// --- Les pages, ou « Texte agrandi » -------------------------------------------
+
+const pages = ref<InstanceType<typeof GnLecteurPages> | null>(null)
+const sourceDuPdf = computed(() => (etat.value.etat === 'pret' ? etat.value.pdf : null))
+const minuterie: Minuterie = {
+  planifier: (fn, ms) => setTimeout(fn, ms),
+  annuler: (poignee) => clearTimeout(poignee as ReturnType<typeof setTimeout>),
+}
+
+/** Ce téléphone n'affiche pas les pages : « Texte agrandi » s'il est offert, sinon le dire (FR-012 bis). */
+const bascule = ref<CauseDeBascule | 'indisponible' | null>(null)
+const annonceFermee = ref(false)
+const impossible = computed(() => bascule.value !== null && !lecture.value?.large_text)
+
+// En ligne, l'attente de la première page se voit, et offre le texte au bout de 3 s (FR-009 bis).
+const attente = ref<EtatDAttente | null>(null)
+let lAttente: ReturnType<typeof creerLAttente> | null = null
+const plages = ref<{ recu: number; demande: number }>({ recu: 0, demande: 0 })
+
+const modeAffiche = computed<'attente' | 'texte' | 'pages'>(() => {
+  if (bascule.value !== null) return 'texte'
+  return attente.value?.mode ?? 'pages'
+})
+
+// Le réseau tombé sur des pages non reçues ; revenu, le visionneur repart de la page lue.
+const reseauPerdu = ref(false)
+const cleDesPages = ref(0)
+const pageDeDepart = ref(1)
+
+function commencerLaLecture(): void {
+  lAttente?.arreter()
+  lAttente = null
+  attente.value = null
+  bascule.value = null
+  annonceFermee.value = false
+  reseauPerdu.value = false
+  plages.value = { recu: 0, demande: 0 }
+  pageDeDepart.value = reprise.value?.index ?? 1
+  if (etat.value.etat !== 'pret' || etat.value.source !== 'reseau') return
+  // La forme lisible est déjà arrivée : les 3 s se comptent depuis l'ouverture, pas depuis elle.
+  const delai = Math.max(0, DELAI_DES_SORTIES_MS - lecteur.ouvertDepuis())
+  lAttente = creerLAttente({ minuterie, delai, surChangement: (e) => (attente.value = e) })
+  attente.value = lAttente.etat()
+  lAttente.demarrer()
+}
+
+function surLesPlages(suivi: SuiviDesPlages): void {
+  plages.value = { recu: suivi.recu, demande: suivi.demande }
+}
+
+function surLaPremierePage(): void {
+  const avant = modeAffiche.value
+  lAttente?.pagePrete()
+  if (avant !== 'pages' && modeAffiche.value === 'pages') pages.value?.allerALaPage(pageEnCours.value)
+  if (avant === 'attente' || avant === 'pages') lecteur.commencerLeSuivi()
+}
+
+function surLaBascule(cause: CauseDeBascule | 'indisponible'): void {
+  // Seule la seconde sécurité se compte : la détection, elle, est sûre d'elle.
+  if (cause !== 'indisponible') compterUneBascule({ lire: lireCle, poser: poserCle }, cause, new Date().toISOString())
+  lAttente?.arreter()
+  bascule.value = cause
+  void nextTick().then(() => {
+    elementDeLaPage(pageEnCours.value)?.scrollIntoView({ block: 'start', behavior: 'instant' })
+    lecteur.commencerLeSuivi()
+  })
+}
+
+function lireLeTexteEnAttendant(): void {
+  lAttente?.lireLeTexte()
+  void nextTick().then(() => {
+    elementDeLaPage(pageEnCours.value)?.scrollIntoView({ block: 'start', behavior: 'instant' })
+    lecteur.commencerLeSuivi()
+  })
+}
+
+function resterSurLeTexte(): void {
+  lAttente?.resterSurLeTexte()
+}
+
+function auRetourDuReseau(): void {
+  pageDeDepart.value = pageEnCours.value
+  reseauPerdu.value = false
+  cleDesPages.value += 1
+}
+
+onBeforeUnmount(() => lAttente?.arreter())
+
 /** Aller en tête d'une page, sans animation : l'observateur ne voit pas défiler les pages voisines. */
 function allerALaPage(index: number): Promise<void> {
+  if (modeAffiche.value === 'pages') return lecteur.sauter(index, () => pages.value?.allerALaPage(index))
   return lecteur.sauter(index, () => elementDeLaPage(index)?.scrollIntoView({ block: 'start', behavior: 'instant' }))
 }
 
@@ -105,6 +201,9 @@ const uneImage = () => new Promise((fin) => requestAnimationFrame(() => requestA
 watch(lecture, async (lue) => {
   if (!lue) return
   repriseAffichee.value = !!reprise.value
+  commencerLaLecture()
+  // En « Pages », le suivi commence à la première page dessinée, à sa place.
+  if (modeAffiche.value !== 'texte') return
   await nextTick()
   // La police chargée recompose le texte : un recalage fait avant glisserait de plusieurs écrans.
   await window.document.fonts?.ready
@@ -130,7 +229,8 @@ watch(pageEnCours, (page) => {
 function repartirDuDebut(): void {
   repriseAffichee.value = false
   lecteur.oublierLaReprise()
-  window.scrollTo({ top: 0 })
+  if (modeAffiche.value === 'pages') void allerALaPage(1)
+  else window.scrollTo({ top: 0 })
 }
 
 const texteDeReprise = computed(() => {
@@ -147,9 +247,10 @@ const texteDeReprise = computed(() => {
 const barreDepliee = ref(false)
 
 type Action = 'sommaire' | 'rechercher' | 'reglages'
+// Sans texte extrait, ni sommaire ni recherche (FR-018) ; les réglages portent au moins le thème.
 const actions = computed<Action[]>(() => {
   const lue = lecture.value
-  if (!lue || lue.mode === 'as_is') return lue?.outline.length ? ['sommaire'] : []
+  if (!lue?.has_text) return ['reglages']
   return [...(lue.outline.length ? (['sommaire'] as const) : []), 'rechercher', 'reglages']
 })
 
@@ -202,6 +303,8 @@ async function allerAuPassage(rang: number): Promise<void> {
   const passage = passages.value[rang]
   if (!passage) return
   await nextTick()
+  // Le passage marqué sur la page du PDF vient avec le récit 2 ; d'ici là, sa page s'ouvre.
+  if (modeAffiche.value === 'pages') return allerALaPage(passage.page)
   const courante = window.document.querySelector<HTMLElement>('[data-occurrence-courante]')
   // Un tableau refermé à la main ne se rouvre pas par `:open` : sa valeur n'a pas changé.
   courante?.closest('details')?.setAttribute('open', '')
@@ -291,23 +394,6 @@ async function telechargerAuRetour(): Promise<void> {
   }
 }
 
-// Une rotation de l'écran recompose le texte : on reste sur la page qu'on lisait.
-const article = ref<HTMLElement | null>(null)
-let largeur = 0
-let redimension: ResizeObserver | null = null
-watch(article, (element) => {
-  redimension?.disconnect()
-  if (!element || typeof ResizeObserver === 'undefined') return
-  largeur = element.clientWidth
-  redimension = new ResizeObserver(() => {
-    if (element.clientWidth === largeur) return
-    largeur = element.clientWidth
-    void allerALaPage(pageEnCours.value)
-  })
-  redimension.observe(element)
-})
-onBeforeUnmount(() => redimension?.disconnect())
-
 useHead({ title: titre })
 </script>
 
@@ -373,34 +459,75 @@ useHead({ title: titre })
       @sortie="lecteur.ouvrir()"
     />
 
+    <GnEtatErreur
+      v-else-if="lecture && impossible"
+      :titre="t('guide-nego.lecteur.impossible.titre')"
+      :texte="t('guide-nego.lecteur.impossible.texte')"
+      :sortie="t('guide-nego.lecteur.impossible.sortie')"
+      :sortie-vers="versLaFiche"
+    />
+
     <template v-else-if="lecture">
-      <article
-        ref="article"
-        class="gn-lecteur"
-        :class="{ 'gn-lecteur--tel-quel': lecture.mode === 'as_is' }"
-        :style="{ '--gn-taille-lecture': `${taille}px` }"
-        @click="basculerLaBarre"
-      >
-        <section
-          v-for="page in lecture.pages"
-          :id="`page-${page.index}`"
-          :key="page.index"
-          :ref="(element) => suivreLaPage(element as Element | null, page.index)"
-          class="gn-lecteur__page"
-          tabindex="-1"
-        >
-          <p class="gn-lecteur__repere">{{ t('guide-nego.lecteur.page', { page: page.label }) }}</p>
-          <GnPageLue
-            :page="page"
-            :mode="lecture.mode"
-            :image-de="imageDe"
-            :surlignages="rangCourant === null ? undefined : surlignagesParPage.get(page.index)"
-            :courant="passageCourant?.page === page.index ? passageCourant : null"
-            :notes="notesParPage.get(page.index)"
-            @terme="terme = $event"
-          />
-        </section>
-      </article>
+      <GnAnnonce
+        v-if="bascule !== null && !annonceFermee"
+        :texte="t('guide-nego.lecteur.bascule')"
+        @fermer="annonceFermee = true"
+      />
+
+      <GnAttentePages
+        v-if="modeAffiche === 'attente'"
+        :recu="plages.recu"
+        :demande="plages.demande"
+        :sorties="attente?.sorties"
+        :texte-offert="lecture.large_text"
+        @lire-le-texte="lireLeTexteEnAttendant"
+        @telecharger="telechargerAuRetour"
+      />
+
+      <GnLecteurTexte
+        v-if="modeAffiche === 'texte'"
+        :lecture="lecture"
+        :taille="taille"
+        :surlignages-par-page="rangCourant === null ? null : surlignagesParPage"
+        :passage-courant="passageCourant"
+        :notes-par-page="notesParPage"
+        :suivre-la-page="suivreLaPage"
+        @terme="terme = $event"
+        @basculer="basculerLaBarre"
+        @redimension="allerALaPage(pageEnCours)"
+      />
+
+      <GnLecteurPages
+        v-if="sourceDuPdf && bascule === null"
+        ref="pages"
+        :key="cleDesPages"
+        :source="sourceDuPdf"
+        :page-initiale="pageDeDepart"
+        :cachee="modeAffiche !== 'pages'"
+        @page="lecteur.poserLaPage"
+        @premiere-page="surLaPremierePage"
+        @plages="surLesPlages"
+        @bascule="surLaBascule"
+        @basculer-la-barre="barreDepliee = !barreDepliee"
+        @reseau-perdu="reseauPerdu = true"
+        @reseau-revenu="auRetourDuReseau"
+      />
+
+      <GnAttentePages
+        v-if="modeAffiche === 'texte' && attente && !attente.pagePrete && !attente.resteSurLeTexte && !barreDepliee"
+        variante="ligne"
+        :recu="plages.recu"
+        :demande="plages.demande"
+        @rester="resterSurLeTexte"
+      />
+
+      <p v-if="reseauPerdu && modeAffiche === 'pages' && !barreDepliee" class="gn-lecteur__reprise" role="status">
+        <GnPicto nom="wifi-off" :taille="20" />
+        <span class="gn-lecteur__reprise-texte">{{ t('guide-nego.lecteur.sans-reseau.texte') }}</span>
+        <button v-if="!enAttente" type="button" class="gn-lecteur__debut" @click="telechargerAuRetour">
+          {{ t('guide-nego.lecteur.sans-reseau.telecharger') }}
+        </button>
+      </p>
 
       <p v-if="repriseAffichee && reprise && !barreDepliee" class="gn-lecteur__reprise" role="status">
         <GnPicto nom="bookmark" :taille="20" />
@@ -467,34 +594,6 @@ useHead({ title: titre })
 </template>
 
 <style>
-[data-app="guide-nego"] .gn-lecteur {
-  display: flex;
-  flex-direction: column;
-  gap: var(--gn-espace-24);
-  /* La barre et la ligne de reprise, fixées en bas, ne cachent jamais la fin du texte. */
-  padding-block: var(--gn-espace-16)
-    calc(var(--gn-barre-onglets) + var(--gn-espace-48) + env(safe-area-inset-bottom));
-  overflow-wrap: break-word;
-}
-
-[data-app="guide-nego"] .gn-lecteur__page {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: var(--gn-espace-12);
-  scroll-margin-top: var(--gn-espace-16);
-}
-
-/* Le repère de page est invisible (R14) : l'observateur le suit, un lecteur d'écran le dit. */
-[data-app="guide-nego"] .gn-lecteur__repere {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
 /* Au-dessus de la barre repliée (32 + 6 px), comme la maquette 04 · 03. */
 [data-app="guide-nego"] .gn-lecteur__reprise {
   position: fixed;

@@ -94,6 +94,33 @@ export function brancherLeTransport(
     signalerLEchec(nouvelle)
   }
 
+  /** Le corps, compté au fil du flux : sur un réseau lent, un morceau met des secondes à venir. */
+  async function lireEnComptant(reponse: Response): Promise<Uint8Array> {
+    if (!reponse.body) {
+      const tout = new Uint8Array(await reponse.arrayBuffer())
+      recu += tout.byteLength
+      return tout
+    }
+    const lecteur = reponse.body.getReader()
+    const morceaux: Uint8Array[] = []
+    let total = 0
+    for (;;) {
+      const { done, value } = await lecteur.read()
+      if (done) break
+      morceaux.push(value)
+      total += value.byteLength
+      recu += value.byteLength
+      signaler()
+    }
+    const tout = new Uint8Array(total)
+    let decalage = 0
+    for (const morceau of morceaux) {
+      tout.set(morceau, decalage)
+      decalage += morceau.byteLength
+    }
+    return tout
+  }
+
   async function lireLaPlage(debut: number, fin: number) {
     let octets: Uint8Array
     try {
@@ -105,7 +132,7 @@ export function brancherLeTransport(
       if (reponse.status !== 206) {
         throw new ErreurDeReseau(`plage ${debut}-${fin - 1} : ${reponse.status}`, reponse.status)
       }
-      octets = new Uint8Array(await reponse.arrayBuffer())
+      octets = await lireEnComptant(reponse)
       if (octets.byteLength !== fin - debut) {
         throw new ErreurDeReseau(`plage ${debut}-${fin - 1} : ${octets.byteLength} octets reçus`, reponse.status)
       }
@@ -116,7 +143,6 @@ export function brancherLeTransport(
       return
     }
     enRoute--
-    recu += octets.byteLength
     signaler()
     // Hors du `try` : une erreur de pdf.js n'est pas une erreur de réseau.
     transport.onDataRange(debut, octets)

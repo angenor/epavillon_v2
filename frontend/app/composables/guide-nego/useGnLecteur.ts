@@ -1,23 +1,24 @@
 /**
- * Le lecteur : la forme lisible **gardée d'abord**, le réseau ensuite (R14).
+ * Le lecteur : la copie **gardée d'abord**, le réseau ensuite (R14). Elle ne se lit
+ * qu'entière (`lireLaCopie` la vérifie) : une copie que le navigateur a vidée
+ * redevient « non téléchargée », et sans réseau l'écran dit que le document n'est pas
+ * sur le téléphone — **jamais une page blanche**.
  *
- * La copie ne se lit qu'entière (`lireLaCopie` la vérifie) : une copie que le
- * navigateur a vidée redevient « non téléchargée », et sans réseau l'écran dit que
- * le document n'est pas sur le téléphone — **jamais une page blanche**. Une image
- * vidée depuis se relit au réseau ; sans réseau, sa page garde son texte et le dit.
- *
- * La page en cours se repère par un observateur d'intersection, et s'écrit sur le
- * téléphone au plus toutes les deux secondes, par document et par version.
+ * Deux sources pour les pages (ADR-022) : les octets du PDF gardé, ou la route du
+ * fichier lue par plages. La page en cours vient de l'observateur en « Texte agrandi »,
+ * du visionneur en « Pages » ; elle s'écrit au plus toutes les deux secondes, par
+ * document et par version, commune aux deux modes.
  */
-import type { DocumentReading, ReadingPage } from '~/types/negotiation-documents'
+import type { DocumentReading } from '~/types/negotiation-documents'
 import { ApiRequestError, normalizeApiError } from '~/utils/api-error'
 import { lireProgression, noterOuverture, noterProgression } from '~/utils/guide-nego/appareil-lecture'
 import { estUneFormeLisible, pageDeReprise } from '~/utils/guide-nego/forme-lisible'
+import type { SourceDuDocument } from '~/utils/guide-nego/pdf/charger'
 import { lireCle, poserCle } from '~/utils/guide-nego/stockage'
 
 export type EtatDuLecteur =
   | { etat: 'chargement' }
-  | { etat: 'pret'; lecture: DocumentReading; source: 'copie' | 'reseau' }
+  | { etat: 'pret'; lecture: DocumentReading; source: 'copie' | 'reseau'; pdf: SourceDuDocument }
   /** Pas de copie entière, et pas de réseau pour lire. */
   | { etat: 'absent' }
   | { etat: 'reserve' }
@@ -26,9 +27,6 @@ export type EtatDuLecteur =
   | { etat: 'introuvable' }
   /** L'API a refusé autrement : son message, tel quel. */
   | { etat: 'erreur'; message: string | null }
-
-/** Ce que rend la demande d'une image : son adresse, ou pourquoi elle manque. */
-export type ImageDePage = { adresse: string } | 'hors-connexion' | 'echec'
 
 export interface Reprise {
   index: number
@@ -47,13 +45,13 @@ export function useGnLecteur(id: Ref<string>) {
   const connexion = useGnConnexion()
   const session = useGnSession()
   const acces = useGnAcces()
-  // Côté public ou réservé de la copie lue : ses images vivent dans le cache du même côté.
-  let reserveDeLaCopie: boolean | null = null
 
   const etat = ref<EtatDuLecteur>({ etat: 'chargement' })
   const lecture = computed(() => (etat.value.etat === 'pret' ? etat.value.lecture : null))
   const reprise = ref<Reprise | null>(null)
   const pageEnCours = ref(1)
+  /** L'instant de l'ouverture : l'attente de la première page se compte depuis lui (FR-009 bis). */
+  let ouvertA = 0
 
   async function lireAuReseau(): Promise<DocumentReading> {
     try {
@@ -82,14 +80,13 @@ export function useGnLecteur(id: Ref<string>) {
 
   async function ouvrir(): Promise<void> {
     etat.value = { etat: 'chargement' }
+    ouvertA = performance.now()
     reprise.value = null
     suivi.value = false
-    reserveDeLaCopie = null
     const gardee = await copies.lireLaCopie(id.value).catch(() => null)
     try {
       if (gardee) {
-        reserveDeLaCopie = gardee.reserve
-        pret(gardee.lecture, 'copie')
+        pret(gardee.lecture, 'copie', { octets: gardee.pdf })
         return
       }
       if (!connexion.etat.value.enLigne) {
@@ -97,53 +94,20 @@ export function useGnLecteur(id: Ref<string>) {
         return
       }
       const lue = await lireAuReseau()
-      if (estUneFormeLisible(lue)) pret(lue, 'reseau')
+      if (estUneFormeLisible(lue)) pret(lue, 'reseau', { adresse: api.adresseDuFichier(id.value) })
       else etat.value = { etat: 'erreur', message: null }
     } catch (erreur) {
       etat.value = etatDuRefus(erreur)
     }
   }
 
-  function pret(lue: DocumentReading, source: 'copie' | 'reseau'): void {
+  function pret(lue: DocumentReading, source: 'copie' | 'reseau', pdf: SourceDuDocument): void {
     const notee = lireProgression(stockage, id.value, lue.version)
     const page = pageDeReprise(lue, notee?.page ?? null)
     reprise.value = page && notee ? { index: page.index, label: page.label, a: notee.a } : null
     pageEnCours.value = page?.index ?? 1
     noterOuverture(stockage, id.value, new Date().toISOString())
-    etat.value = { etat: 'pret', lecture: lue, source }
-  }
-
-  // --- Les images de page -------------------------------------------------------
-
-  const adressesLocales: string[] = []
-
-  function adresseLocale(image: Blob): { adresse: string } {
-    const adresse = URL.createObjectURL(image)
-    adressesLocales.push(adresse)
-    return { adresse }
-  }
-
-  /** Au réseau par l'API : l'image d'un réservé se refuse sans 401 quand le jeton a expiré. */
-  async function imageAuReseau(chemin: string): Promise<ImageDePage> {
-    try {
-      let reponse = await api.ressource(chemin)
-      if (reponse?.status === 403 && session.connectee.value && acces.ouvert.value && (await rotation()) === 'renouvelee') {
-        reponse = await api.ressource(chemin)
-      }
-      return reponse?.ok ? adresseLocale(await reponse.blob()) : 'echec'
-    } catch {
-      return connexion.etat.value.enLigne ? 'echec' : 'hors-connexion'
-    }
-  }
-
-  /** L'image d'une page : gardée si elle l'est, au réseau sinon. */
-  async function imageDe(page: ReadingPage): Promise<ImageDePage> {
-    if (!page.image) return 'echec'
-    if (reserveDeLaCopie !== null) {
-      const gardee = await copies.imageDeLaCopie({ reserve: reserveDeLaCopie }, page.image).catch(() => null)
-      if (gardee) return adresseLocale(gardee)
-    }
-    return connexion.etat.value.enLigne ? imageAuReseau(page.image) : 'hors-connexion'
+    etat.value = { etat: 'pret', lecture: lue, source, pdf }
   }
 
   // --- La page en cours ---------------------------------------------------------
@@ -234,7 +198,6 @@ export function useGnLecteur(id: Ref<string>) {
     window.removeEventListener('pagehide', noterSiEnAttente)
     cancelAnimationFrame(attenteDuBas)
     observateur?.disconnect()
-    for (const adresse of adressesLocales) URL.revokeObjectURL(adresse)
   })
 
   watch(id, () => void ouvrir())
@@ -245,8 +208,13 @@ export function useGnLecteur(id: Ref<string>) {
     reprise: readonly(reprise),
     pageEnCours: readonly(pageEnCours),
     ouvrir,
-    imageDe,
+    /** Depuis combien de millisecondes le document s'ouvre. */
+    ouvertDepuis: () => performance.now() - ouvertA,
     suivreLaPage,
+    /** En « Pages », le visionneur dit la page en cours ; elle se note comme une lecture. */
+    poserLaPage(index: number): void {
+      if (suivi.value) pageEnCours.value = index
+    },
     /**
      * Un saut — sommaire, passage, taille, rotation : l'observateur verrait passer les
      * pages voisines ; la page atteinte se pose, et se note comme une lecture.

@@ -1,24 +1,17 @@
 <script setup lang="ts">
-import type { ImageDePage } from '~/composables/guide-nego/useGnLecteur'
-import type { Block, CorrectionNote, ReadingMode, ReadingPage, Span } from '~/types/negotiation-documents'
+import type { Block, CorrectionNote, ReadingPage, Span } from '~/types/negotiation-documents'
 import { ancrerLesNotes, blocsDeLaPage } from '~/utils/guide-nego/forme-lisible'
 import { surligner, type Champ, type Occurrence, type SegmentSurligne } from '~/utils/guide-nego/lecteur'
 import GnNoteCorrection from './GnNoteCorrection.vue'
 
 /**
- * Une page du lecteur — maquette 04 · 01. Le texte recomposé à la largeur de l'écran,
- * ou, « tel quel », l'image de la page. **Jamais une page blanche** : une image qui
- * manque laisse le texte, et une ligne dit pourquoi — le réseau absent, ou un échec
- * qui se réessaie.
- *
- * Les notes de correction bordent le bloc qui porte leur extrait, ou la tête de la
- * page : le texte, lui, se rend tel qu'il a été téléchargé.
+ * Une page de « Texte agrandi » — maquette 04 · 01 : le texte recomposé à la largeur de
+ * l'écran. Les notes de correction bordent le bloc qui porte leur extrait, ou la tête
+ * de la page : le texte, lui, se rend tel qu'il a été téléchargé.
  */
 const props = withDefaults(
   defineProps<{
     page: ReadingPage
-    mode: ReadingMode
-    imageDe: (page: ReadingPage) => Promise<ImageDePage>
     /** Les occurrences cherchées sur cette page. */
     surlignages?: Occurrence[]
     /** L'occurrence courante, si elle est sur cette page : seule cette page se recalcule au suivant. */
@@ -34,9 +27,7 @@ defineEmits<{ terme: [texte: string] }>()
 const { t } = useI18n()
 
 const blocs = computed<Block[]>(() => blocsDeLaPage(props.page))
-const telQuel = computed(() => props.mode === 'as_is')
-// « Tel quel », aucun bloc ne s'affiche : toutes les notes vont en tête de page.
-const ancrees = computed(() => ancrerLesNotes(telQuel.value ? [] : blocs.value, props.notes))
+const ancrees = computed(() => ancrerLesNotes(blocs.value, props.notes))
 // Un bloc sans note garde une enveloppe neutre (`display: contents`) : rien ne bouge.
 const enveloppes = computed(() =>
   blocs.value.map((_, rang) => {
@@ -46,55 +37,6 @@ const enveloppes = computed(() =>
       : { composant: 'div', attributs: { class: 'gn-page-lue__bloc' } }
   }),
 )
-
-type EtatDeLImage = 'aucune' | 'attente' | 'chargee' | 'hors-connexion' | 'echec'
-const etatDeLImage = ref<EtatDeLImage>('aucune')
-const adresse = ref<string | null>(null)
-/** Les rangs des blocs d'origine ouverts : deux tableaux sur une page s'ouvrent chacun. */
-const ouverts = ref(new Set<number>())
-
-async function chargerLImage(): Promise<void> {
-  if (etatDeLImage.value === 'attente' || etatDeLImage.value === 'chargee') return
-  etatDeLImage.value = 'attente'
-  const image = await props.imageDe(props.page)
-  if (typeof image === 'string') {
-    etatDeLImage.value = image
-    return
-  }
-  adresse.value = image.adresse
-  etatDeLImage.value = 'chargee'
-}
-
-// « Tel quel », l'image se demande quand la page approche : cent pages ne partent pas d'un coup.
-const racine = ref<HTMLElement | null>(null)
-let approche: IntersectionObserver | null = null
-onMounted(() => {
-  if (!telQuel.value || !racine.value) return
-  if (typeof IntersectionObserver === 'undefined') return void chargerLImage()
-  approche = new IntersectionObserver(
-    (entrees) => {
-      if (!entrees.some((e) => e.isIntersecting)) return
-      approche?.disconnect()
-      void chargerLImage()
-    },
-    { rootMargin: '100% 0px' },
-  )
-  approche.observe(racine.value)
-})
-onBeforeUnmount(() => approche?.disconnect())
-
-function basculerLOrigine(rang: number): void {
-  const suivants = new Set(ouverts.value)
-  if (suivants.has(rang)) suivants.delete(rang)
-  else suivants.add(rang)
-  ouverts.value = suivants
-  if (suivants.has(rang)) void chargerLImage()
-}
-
-function reessayer(): void {
-  etatDeLImage.value = 'aucune'
-  void chargerLImage()
-}
 
 const estCourant = (o: Occurrence) =>
   !!props.courant && o.bloc === props.courant.bloc && o.champ === props.courant.champ && o.debut === props.courant.debut
@@ -111,24 +53,12 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
 </script>
 
 <template>
-  <div ref="racine" class="gn-page-lue">
+  <div class="gn-page-lue">
     <GnNoteCorrection v-if="ancrees.enTete.length" :notes="ancrees.enTete" />
-
-    <GnImageDePage
-      v-if="telQuel"
-      :etat="etatDeLImage"
-      :adresse="adresse"
-      :libelle="t('gn-page-lue.image', { page: page.label })"
-      :attente="t('gn-page-lue.page-avec-le-reseau', { page: page.label })"
-      pleine
-      @echec="etatDeLImage = 'echec'"
-      @reessayer="reessayer"
-    />
 
     <component
       :is="enveloppes[rang]?.composant"
       v-for="(bloc, rang) in blocs"
-      v-else
       :key="rang"
       v-bind="enveloppes[rang]?.attributs"
     >
@@ -160,24 +90,6 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
         <p v-if="bloc.caption?.length" class="gn-page-lue__legende">
           <GnSegmentsLus :segments="segments(rang, 'caption', bloc.caption)" @terme="$emit('terme', $event)" />
         </p>
-        <button
-          type="button"
-          class="gn-page-lue__voir"
-          :aria-expanded="ouverts.has(rang)"
-          @click.stop="basculerLOrigine(rang)"
-        >
-          <GnPicto nom="doc" :taille="20" />
-          {{ t('gn-page-lue.voir') }}
-        </button>
-        <GnImageDePage
-          v-if="ouverts.has(rang)"
-          :etat="etatDeLImage"
-          :adresse="adresse"
-          :libelle="t('gn-page-lue.image', { page: page.label })"
-          :attente="t('gn-page-lue.origine-avec-le-reseau')"
-          @echec="etatDeLImage = 'echec'"
-          @reessayer="reessayer"
-        />
         <details v-if="bloc.text?.length" class="gn-page-lue__texte-origine" :open="texteOuvert(rang) || undefined" @click.stop>
           <summary>{{ t(`gn-page-lue.texte.${bloc.reason}`) }}</summary>
           <p>
@@ -275,24 +187,6 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
   color: var(--gn-texte-2);
-}
-
-[data-app="guide-nego"] .gn-page-lue__voir {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--gn-espace-8);
-  align-self: flex-start;
-  min-height: var(--gn-cible);
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--gn-accent);
-  font: inherit;
-  font-size: var(--gn-taille-17);
-  font-weight: var(--gn-graisse-gras);
-  text-decoration: underline;
-  text-underline-offset: var(--gn-espace-4);
-  cursor: pointer;
 }
 
 [data-app="guide-nego"] .gn-page-lue__texte-origine summary {

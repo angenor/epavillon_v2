@@ -8,8 +8,7 @@ mod commun;
 use actix_web::body::MessageBody;
 use actix_web::dev::{Service as _, ServiceResponse};
 use actix_web::http::header::{
-    HeaderMap, ACCEPT_RANGES, CACHE_CONTROL, CONTENT_ENCODING, CONTENT_LENGTH, CONTENT_RANGE,
-    CONTENT_TYPE, ETAG,
+    HeaderMap, ACCEPT_RANGES, CACHE_CONTROL, CONTENT_ENCODING, CONTENT_RANGE, CONTENT_TYPE, ETAG,
 };
 use actix_web::http::StatusCode;
 use actix_web::test::{call_service, init_service, read_body, TestRequest};
@@ -29,6 +28,8 @@ const ACTEUR: &str = "x-essai-acteur";
 struct Reponse {
     statut: StatusCode,
     entetes: HeaderMap,
+    /// La longueur qu'actix écrira en `Content-Length`, tirée du corps.
+    taille_annoncee: Option<u64>,
     corps: Vec<u8>,
 }
 
@@ -52,9 +53,14 @@ impl Reponse {
 async fn lire_la_reponse<B: MessageBody>(reponse: ServiceResponse<B>) -> Reponse {
     let statut = reponse.status();
     let entetes = reponse.headers().clone();
+    let taille_annoncee = match reponse.response().body().size() {
+        actix_web::body::BodySize::Sized(n) => Some(n),
+        _ => None,
+    };
     Reponse {
         statut,
         entetes,
+        taille_annoncee,
         corps: read_body(reponse).await.to_vec(),
     }
 }
@@ -250,8 +256,8 @@ async fn head_rend_les_entetes_sans_le_corps() {
     assert_eq!(tete.statut, StatusCode::OK);
     assert!(tete.corps.is_empty(), "HEAD : aucun corps");
     assert_eq!(
-        tete.entete(CONTENT_LENGTH),
-        Some(total.to_string().as_str()),
+        tete.taille_annoncee,
+        Some(total as u64),
         "la taille, que le lecteur lit avant la première plage"
     );
     jamais_compresse(&tete, "HEAD");
@@ -262,6 +268,7 @@ async fn head_rend_les_entetes_sans_le_corps() {
     );
     assert_eq!(partielle.statut, StatusCode::PARTIAL_CONTENT);
     assert!(partielle.corps.is_empty());
+    assert_eq!(partielle.taille_annoncee, Some(100));
     assert_eq!(
         partielle.entete(CONTENT_RANGE),
         Some(format!("bytes 0-99/{total}").as_str())

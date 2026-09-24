@@ -184,45 +184,45 @@ description: "Tâches de l'étape 1b — le lecteur montre le PDF d'origine"
 
 **Test indépendant** : [quickstart § 3 et § 4](quickstart.md), points 1 à 4.
 
-- [ ] T044 [US1] Extraire de `F/app/pages/guide-nego/ressources/documents/[id]/lire.vue` le rendu recomposé — `GnPageLue`, surlignages et occurrences, feuille du terme, notes par bloc — dans `F/app/components/guide-nego/GnLecteurTexte.vue`, **sans changement de comportement**. Vérifier au navigateur que « Texte agrandi » se lit comme avant sur un document en mode texte
-- [ ] T045 [US1] Écrire `F/app/components/guide-nego/GnLecteurPages.client.vue`, sur `charger.ts` :
+- [X] T044 [US1] Extraire de `F/app/pages/guide-nego/ressources/documents/[id]/lire.vue` le rendu recomposé — `GnPageLue`, surlignages et occurrences, feuille du terme, notes par bloc — dans `F/app/components/guide-nego/GnLecteurTexte.vue`, **sans changement de comportement**. Vérifier au navigateur que « Texte agrandi » se lit comme avant sur un document en mode texte
+- [X] T045 *(la feuille bornée importée ; visionneur fixe sous l'en-tête, qui part du haut de la zone de contenu ; `maxCanvasPixels` par défaut)* [US1] Écrire `F/app/components/guide-nego/GnLecteurPages.client.vue`, sur `charger.ts` :
   - conteneur `position: absolute`, `PDFViewer`, `EventBus`, `PDFLinkService` (lien externe dans un nouvel onglet) ;
   - échelle `page-width`, plafond de quatre fois la largeur, `maxCanvasPixels` par défaut (l'essai tient sans le baisser) ;
   - `loadingTask.destroy()` au démontage ;
   - la feuille `pdfjs-viewer.css` importée ;
   - fond autour des pages sur les rôles de Guide Négo, page jamais recolorée (FR-011)
-- [ ] T046 [US1] Dans `GnLecteurPages`, les gestes du [contrat](contracts/lecteur.md) :
+- [X] T046 *(fonctions pures dans `gestes.ts` ; toucher lu sur `click`, pincement par `TouchManager` → `updateScale` autour du point)* [US1] Dans `GnLecteurPages`, les gestes du [contrat](contracts/lecteur.md) :
   - pincement par `TouchManager` → `updateScale({ scaleFactor, origin })` ;
   - double toucher (moins de 300 ms, moins de 24 px) qui double l'échelle autour du point, et revient à la largeur au-delà ;
   - toucher simple émis **après** 300 ms sans second toucher ;
   - l'appui long laissé à la sélection.
 
   Les gestes vivent dans une fonction pure `F/app/utils/guide-nego/pdf/gestes.ts`
-- [ ] T047 [P] [US1] Écrire `F/tests/guide-nego/gestes.test.ts` : toucher, double toucher, deux touchers éloignés, toucher suivi d'un pincement, plafond et retour à la largeur
-- [ ] T048 [US1] Dans `F/app/composables/guide-nego/useGnLecteur.ts` :
+- [X] T047 [P] [US1] Écrire `F/tests/guide-nego/gestes.test.ts` : toucher, double toucher, deux touchers éloignés, toucher suivi d'un pincement, plafond et retour à la largeur
+- [X] T048 *(`poserLaPage` pour le mode « Pages », `ouvertDepuis` pour l'attente)* [US1] Dans `F/app/composables/guide-nego/useGnLecteur.ts` :
   - la source du PDF — octets de la copie, sinon `adresseDuFichier(id)` en ligne, sinon l'état `absent` de l'étape 1 ;
   - la page en cours alimentée par `pagechanging` ;
   - la progression écrite toutes les deux secondes, commune aux deux modes ;
   - la reprise « Reprise à la page 59 — … » et « Début » ;
   - supprimer `imageDe` et les URL d'objet d'image
-- [ ] T049 [US1] Réorganiser `lire.vue` : l'état, le mode (`pages` par défaut), `GnLecteurPages` ou `GnLecteurTexte`, le pied `GnBarreLecture` avec le numéro imprimé tiré de la lecture (repli sur la position), le recalage à la rotation par `page-width` en gardant la page. Supprimer la classe `gn-lecteur--tel-quel` et le mode « tel quel ». Vérifier `wc -l` sous 1000
-- [ ] T050 [US1] Le repli d'un téléphone qui n'affiche pas les pages (FR-012 bis), par deux voies qui mènent au même écran :
+- [X] T049 *(`lire.vue` : 702 lignes)* [US1] Réorganiser `lire.vue` : l'état, le mode (`pages` par défaut), `GnLecteurPages` ou `GnLecteurTexte`, le pied `GnBarreLecture` avec le numéro imprimé tiré de la lecture (repli sur la position), le recalage à la rotation par `page-width` en gardant la page. Supprimer la classe `gn-lecteur--tel-quel` et le mode « tel quel ». Vérifier `wc -l` sous 1000
+- [X] T050 *(`GnAnnonce` créé ici ; seule la seconde sécurité se compte, la détection non)* [US1] Le repli d'un téléphone qui n'affiche pas les pages (FR-012 bis), par deux voies qui mènent au même écran :
   - **la détection** : `charger.ts` rend `indisponible` ;
   - **la seconde sécurité, sans mesure** : `F/app/utils/guide-nego/pdf/bascule.ts`, pur, surveille le premier rendu et rend `bascule` sur une erreur de pdf.js ou une première page non dessinée après **8 s de travail** — réglable. **Le délai ne court que tant que le transport n'a aucune plage en route** (`enAttenteDuReseau` faux), et se suspend dès qu'une part : le réseau lent ne fait jamais basculer (ADR-022). Sur une copie gardée, il court depuis l'ouverture.
 
   Le lecteur ouvre alors `GnLecteurTexte` quand `large_text` est vrai, avec la ligne `GnAnnonce` ; sinon `GnEtatErreur` « Ce téléphone ne peut pas afficher ce document ». Jamais le visionneur du téléphone. L'événement est compté dans `gn.lecture-bascules` (nombre, dernière cause, date) par `appareil-lecture.ts`. Les pages ne se réessaient qu'à l'ouverture suivante du document : la décision vit dans l'instance du lecteur.
   - Test `F/tests/guide-nego/bascule.test.ts`, avec une horloge simulée : erreur, délai dépassé, rendu à temps ; **30 s d'attente du réseau puis rendu en 2 s : pas de bascule** ; une plage qui part suspend le délai, qui reprend où il en était ; le compteur augmente ; rien n'est relu du stockage pour décider
-- [ ] T050 bis [US1] L'attente en ligne (FR-009 bis), `F/app/components/guide-nego/GnAttentePages.vue` :
+- [X] T050 bis *(les 3 s se comptent depuis l'ouverture ; le transport compte le reçu au fil du flux)* [US1] L'attente en ligne (FR-009 bis), `F/app/components/guide-nego/GnAttentePages.vue` :
   - la forme lisible se lit **avant** le PDF ;
   - une jauge « reçu sur demandé », tirée de `transport.progression`, en `role="progressbar"`, qui suit les demandes nouvelles ;
   - **au bout de 3 s sans page** : « Lire le texte en attendant » (si `large_text` ; ouvre `GnLecteurTexte` à la page de reprise) et « Télécharger pour lire sans réseau » (le téléchargement de l'étape 1) ;
   - en lisant le texte en attendant, une ligne « La page arrive » avec « Rester sur le texte » ; la page du PDF prend la place du texte quand elle est dessinée, **sauf** si la personne a touché « Rester sur le texte » ou changé de mode elle-même. La décision vit dans l'instance du lecteur, le mode gardé ne change pas.
 
   La logique est une fonction pure, `F/app/utils/guide-nego/pdf/attente.ts` (3 s, choix de rester, page prête), testée dans `F/tests/guide-nego/attente.test.ts` avec une horloge simulée
-- [ ] T051 [US1] La page non encore reçue quand le réseau tombe : un état par page qui dit qu'il faut le réseau, avec « Télécharger au retour du réseau » (file `a-telecharger` de l'étape 1). Les pages déjà affichées restent
-- [ ] T052 [P] [US1] Supprimer `F/app/components/guide-nego/GnImageDePage.vue` et ses emplois ; retirer de `GnPageLue.vue` le chargement d'image (l.68-83, 117-126) et le bouton « voir » des blocs `origin` (l.159-187), que T063 remplace par le renvoi
-- [ ] T053 [P] [US1] Textes d'interface en `fr` et `en` : `F/i18n/locales/{fr,en}/pages/guide-nego.lecteur.json` (repli, page non reçue, ligne de reprise inchangée) et `F/i18n/locales/{fr,en}/components/gn-attente-pages.json` (jauge, « Lire le texte en attendant », « Télécharger pour lire sans réseau », « La page arrive », « Rester sur le texte ») ; retirer les clés du mode « tel quel »
-- [ ] T054 [US1] Vérifier au navigateur, **sur la version construite**, le [quickstart § 3](quickstart.md) et le § 4, points 1 à 4, dont le mode avion après fermeture, **et la « 3G lente »** : texte lisible en moins de 5 s, page qui prend sa place, aucune bascule. **Et FR-029** : un réservé lu en ligne sans téléchargement, puis déconnexion, puis mode avion — aucune de ses pages ne s'affiche. L'onglet Réseau montre `no-store`, et le travailleur de pdf.js est détruit au démontage. Commit de la phase
+- [X] T051 *(chaque page non reçue le dit sur la page même ; une ligne propose « Télécharger au retour du réseau » ; au retour, le visionneur repart de la page lue)* [US1] La page non encore reçue quand le réseau tombe : un état par page qui dit qu'il faut le réseau, avec « Télécharger au retour du réseau » (file `a-telecharger` de l'étape 1). Les pages déjà affichées restent
+- [X] T052 [P] [US1] Supprimer `F/app/components/guide-nego/GnImageDePage.vue` et ses emplois ; retirer de `GnPageLue.vue` le chargement d'image (l.68-83, 117-126) et le bouton « voir » des blocs `origin` (l.159-187), que T063 remplace par le renvoi
+- [X] T053 [P] [US1] Textes d'interface en `fr` et `en` : `F/i18n/locales/{fr,en}/pages/guide-nego.lecteur.json` (repli, page non reçue, ligne de reprise inchangée) et `F/i18n/locales/{fr,en}/components/gn-attente-pages.json` (jauge, « Lire le texte en attendant », « Télécharger pour lire sans réseau », « La page arrive », « Rester sur le texte ») ; retirer les clés du mode « tel quel »
+- [ ] T054 *(24/09, sur la version construite, Chromium en profil Android : § 3 points 1 à 4 et 6, § 4 points 1 à 4, 3G lente derrière un relais qui compresse, bascule par détection — tout tient. **Reste FR-029 au navigateur** : aucun compte négociateur utilisable sans modifier la base locale ; la route le garantit par `no-store` et ses tests)* [US1] Vérifier au navigateur, **sur la version construite**, le [quickstart § 3](quickstart.md) et le § 4, points 1 à 4, dont le mode avion après fermeture, **et la « 3G lente »** : texte lisible en moins de 5 s, page qui prend sa place, aucune bascule. **Et FR-029** : un réservé lu en ligne sans téléchargement, puis déconnexion, puis mode avion — aucune de ses pages ne s'affiche. L'onglet Réseau montre `no-store`, et le travailleur de pdf.js est détruit au démontage. Commit de la phase
 
 **Point de contrôle** : le critère de sortie, lecture comprise, tient sur poste.
 
@@ -301,7 +301,7 @@ description: "Tâches de l'étape 1b — le lecteur montre le PDF d'origine"
 
 - [X] T074 *(fait en phase 3 : le contrôle du contrat l'exige dès que `…/as-is` disparaît)* [US6] Dans `F/app/composables/api/admin-negotiation-documents.ts` : `ouvrirTelQuel` devient `choisirLeTexteAgrandi(id, choice: boolean | null)` sur `PUT …/large-text`
 - [X] T075 *(avancée après la phase 4, avant la 5 : elle ne dépend que de la phase 3 ; l'interrupteur vit dans `LargeTextChoice.vue`, partagé par l'aperçu et la fiche)* [US6] Dans `F/app/components/admin/negotiation/PreviewVerdict.vue` : l'interrupteur « Ouvrir tel quel » devient « Proposer « Texte agrandi » » (`UiSwitch`), qui montre le choix effectif, avec « par défaut, selon le verdict : … » et « Revenir au verdict » quand un choix est posé. Il est désactivé et le dit quand `has_text` est faux
-- [ ] T076 *(code fait ; reste la vérification du quickstart § 1 au navigateur, menée avec l'API à jour de la phase 6)* [US6] Dans `F/app/pages/admin/negociations/documents/[id]/apercu.vue` : un en-tête qui dit que le lecteur montre la page d'origine et que le texte sert à la recherche, au sommaire et à « Texte agrandi » (FR-036) ; le motif d'échec affiché pour un `failed`, dont le PDF protégé. Textes dans `F/i18n/locales/{fr,en}/pages/admin.negociations.documents.preview.json`. Vérifier le quickstart § 1. Commit de la phase
+- [X] T076 *(vérifié au navigateur le 24/09 avec le compte d'administration de démonstration : verdict, choix à la main, « Revenir au verdict »)* [US6] Dans `F/app/pages/admin/negociations/documents/[id]/apercu.vue` : un en-tête qui dit que le lecteur montre la page d'origine et que le texte sert à la recherche, au sommaire et à « Texte agrandi » (FR-036) ; le motif d'échec affiché pour un `failed`, dont le PDF protégé. Textes dans `F/i18n/locales/{fr,en}/pages/admin.negociations.documents.preview.json`. Vérifier le quickstart § 1. Commit de la phase
 
 ---
 

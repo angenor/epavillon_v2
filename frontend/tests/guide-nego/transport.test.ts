@@ -112,15 +112,44 @@ test('l’abandon par pdf.js coupe ce qui est en route, sans compter d’erreur'
   assert.equal(suivi.erreur, null)
 })
 
-test('chaque changement est signalé', async () => {
+test('chaque changement est signalé : la demande, le reçu, la fin', async () => {
   const { appels, recuperer } = fauxReseau()
   const { transport } = fauxTransport()
-  const vus: number[] = []
-  brancherLeTransport(transport, ADRESSE, { recuperer, surChangement: (s) => vus.push(s.enRoute) })
+  const vus: { enRoute: number; recu: number }[] = []
+  brancherLeTransport(transport, ADRESSE, { recuperer, surChangement: (s) => vus.push({ enRoute: s.enRoute, recu: s.recu }) })
   transport.requestDataRange(0, 10)
   appels[0]!.repondre(plage(10))
   await attendre()
-  assert.deepEqual(vus, [1, 0])
+  await attendre()
+  assert.deepEqual(vus[0], { enRoute: 1, recu: 0 })
+  assert.deepEqual(vus.at(-1), { enRoute: 0, recu: 10 })
+  assert.ok(vus.every((v, i) => i === 0 || v.recu >= vus[i - 1]!.recu), 'le reçu ne recule jamais')
+})
+
+test('le reçu avance au fil du flux, avant la fin du morceau', async () => {
+  const { appels, recuperer } = fauxReseau()
+  const { transport, recus } = fauxTransport()
+  const suivi = brancherLeTransport(transport, ADRESSE, { recuperer })
+  let pousser!: (morceau: Uint8Array | null) => void
+  const flux = new ReadableStream<Uint8Array>({
+    start(controle) {
+      pousser = (morceau) => (morceau ? controle.enqueue(morceau) : controle.close())
+    },
+  })
+  transport.requestDataRange(0, 10)
+  appels[0]!.repondre(new Response(flux, { status: 206 }))
+  pousser(new Uint8Array(4))
+  await attendre()
+  await attendre()
+  assert.equal(suivi.recu, 4, 'quatre octets arrivés sur dix')
+  assert.equal(suivi.enAttenteDuReseau, true)
+  assert.equal(recus.length, 0, 'pdf.js ne reçoit le morceau qu’entier')
+  pousser(new Uint8Array(6))
+  pousser(null)
+  for (let i = 0; i < 5; i++) await attendre()
+  assert.equal(suivi.recu, 10)
+  assert.equal(suivi.enAttenteDuReseau, false)
+  assert.equal(recus.length, 1)
 })
 
 test('la taille se lit par HEAD, avec la session', async () => {
