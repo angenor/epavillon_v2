@@ -54,7 +54,9 @@ fn extraction(r: Option<&Rendu>, asset_id: Option<Uuid>) -> Option<ExtractionSta
             status: r.status.clone(),
             page_count: r.page_count,
             is_reflowable: r.is_reflowable,
-            serve_as_is: r.serve_as_is,
+            large_text_choice: r.large_text_choice,
+            has_text: r.has_text,
+            large_text: r.large_text,
             failure_reason: r.failure_reason.clone(),
             reading_bytes: r.reading_bytes,
             extracted_at: r.extracted_at,
@@ -398,20 +400,22 @@ pub async fn relancer_lextraction(
     Ok(())
 }
 
-pub async fn ouvrir_tel_quel(
+/// Proposer « Texte agrandi », ou non, ou rendre la main au verdict (`None`).
+/// Se change sans republier : le téléphone suit à la lecture de la liste.
+pub async fn choisir_le_texte_agrandi(
     state: &NegotiationState,
     ctx: &RequestContext,
     id: Uuid,
-    tel_quel: bool,
+    choix: Option<bool>,
 ) -> Result<()> {
     let mut tx = state.db().write(ctx).await?;
     documents::verrouiller(&mut tx, id)
         .await?
         .ok_or_else(introuvable)?;
-    if !renditions::poser_tel_quel(&mut tx, id, tel_quel).await? {
+    if !renditions::poser_le_choix_texte_agrandi(&mut tx, id, choix).await? {
         return Err(ApiError::validation(
             "Ce document n'a pas encore de fichier extrait.",
-            "serve_as_is",
+            "choice",
         ));
     }
     tx.commit().await?;

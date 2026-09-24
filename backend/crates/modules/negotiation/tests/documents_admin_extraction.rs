@@ -1,10 +1,12 @@
 //! **Le back-office face à l'extraction, par les services** : relancer
-//! l'extraction, « ouvrir tel quel », et ce que ce choix change à la
+//! l'extraction, proposer « Texte agrandi », et ce que ce choix change à la
 //! publication, à la lecture et à l'audit.
 
 mod commun;
 
 use commun::documents::{administratrice, creer, objet_pdf, passer_lextraction, rendu, PETIT};
+
+const PROTEGE: &[u8] = include_bytes!("fixtures/protege.pdf");
 use commun::{traces, Bac};
 use kernel::error::{ApiError, ErrorCode, Result};
 use negotiation::domain::admin_documents::AdminDocument;
@@ -13,8 +15,7 @@ use negotiation::service::documents as public;
 use serde_json::{json, Value};
 use uuid::Uuid;
 
-const PAS_PRETE: &str =
-    "L'extraction n'est pas terminée. Attendez-la, ou choisissez « ouvrir tel quel ».";
+const PAS_PRETE: &str = "L'extraction n'est pas terminée. Attendez-la avant de publier.";
 
 fn refus<T: std::fmt::Debug>(r: Result<T>) -> ApiError {
     r.expect_err("un refus était attendu")
@@ -36,8 +37,8 @@ async fn deposer(bac: &Bac, auteur: Uuid, id: Uuid, statut: &str) -> Uuid {
     asset
 }
 
-async fn tel_quel(bac: &Bac, auteur: Uuid, id: Uuid, oui: bool) -> Result<()> {
-    admin::ouvrir_tel_quel(&bac.state, &bac.ctx(auteur), id, oui).await
+async fn choisir(bac: &Bac, auteur: Uuid, id: Uuid, choix: Option<bool>) -> Result<()> {
+    admin::choisir_le_texte_agrandi(&bac.state, &bac.ctx(auteur), id, choix).await
 }
 
 async fn publier(bac: &Bac, auteur: Uuid, id: Uuid) -> Result<()> {
@@ -69,14 +70,14 @@ async fn demande_en_cours(bac: &Bac, id: Uuid) -> Uuid {
     .expect("demande d'extraction")
 }
 
-/// Les traces où `serve_as_is` a changé : l'autrice et la valeur posée.
-async fn traces_du_tel_quel(bac: &Bac, id: Uuid) -> Vec<(Option<Uuid>, Value)> {
+/// Les traces où `large_text_choice` a changé : l'autrice et la valeur posée.
+async fn traces_du_choix(bac: &Bac, id: Uuid) -> Vec<(Option<Uuid>, Value)> {
     sqlx::query_as(
-        "SELECT actor_id, new_data -> 'serve_as_is'
+        "SELECT actor_id, new_data -> 'large_text_choice'
            FROM platform.audit_log
           WHERE entity_schema = 'negotiation' AND entity_table = 'document_renditions'
             AND (new_data ->> 'document_id')::uuid = $1
-            AND action = 'update' AND 'serve_as_is' = ANY (changed_fields)
+            AND action = 'update' AND 'large_text_choice' = ANY (changed_fields)
           ORDER BY occurred_at, id",
     )
     .bind(id)
@@ -86,91 +87,92 @@ async fn traces_du_tel_quel(bac: &Bac, id: Uuid) -> Vec<(Option<Uuid>, Value)> {
 }
 
 // -----------------------------------------------------------------------------
-// « Ouvrir tel quel »
+// Proposer « Texte agrandi »
 // -----------------------------------------------------------------------------
 
 #[tokio::test]
-async fn ouvrir_tel_quel_attend_un_fichier_extrait_puis_se_publie_et_se_defait_sans_republier() {
+async fn le_choix_texte_agrandi_attend_un_fichier_extrait_et_se_change_sans_republier() {
     let bac = Bac::monter().await;
     let ifdd = administratrice(&bac, "ifdd@example.org").await;
     let id = creer(&bac, ifdd, "Guide des négociations", false).await;
 
-    let err = refus(tel_quel(&bac, ifdd, id, true).await);
+    let err = refus(choisir(&bac, ifdd, id, Some(false)).await);
     assert_eq!(err.code, ErrorCode::ValidationFailed, "{err}");
-    assert_eq!(err.field.as_deref(), Some("serve_as_is"));
+    assert_eq!(err.field.as_deref(), Some("choice"));
     assert_eq!(
         err.message,
         "Ce document n'a pas encore de fichier extrait."
     );
     assert_eq!(rendus_en_base(&bac, id).await, 0);
-    let err = refus(tel_quel(&bac, ifdd, Uuid::now_v7(), true).await);
+    let err = refus(choisir(&bac, ifdd, Uuid::now_v7(), Some(false)).await);
     assert_eq!(err.code, ErrorCode::NegotiationDocumentNotFound, "{err}");
 
     deposer(&bac, ifdd, id, "ready").await;
     passer_lextraction(&bac).await;
-    let recompose = la_fiche(&bac, ifdd, id)
+    let du_verdict = la_fiche(&bac, ifdd, id)
         .await
         .extraction
         .expect("extraction");
-    assert_eq!(recompose.status, "ready");
-    assert!(
-        !recompose.serve_as_is,
-        "recomposé tant qu'elle n'a rien choisi"
-    );
+    assert_eq!(du_verdict.status, "ready");
+    assert_eq!(du_verdict.large_text_choice, None, "aucun choix posé");
+    assert!(du_verdict.has_text);
+    assert!(du_verdict.large_text, "le verdict le propose");
 
-    tel_quel(&bac, ifdd, id, true)
+    choisir(&bac, ifdd, id, Some(false))
         .await
-        .expect("tel quel, une fois le fichier extrait");
+        .expect("retiré, une fois le fichier extrait");
     let choisi = la_fiche(&bac, ifdd, id).await;
     assert_eq!(choisi.state, "draft", "le choix ne publie rien");
     let extraction = choisi.extraction.expect("extraction");
-    assert!(extraction.serve_as_is);
+    assert_eq!(extraction.large_text_choice, Some(false));
+    assert!(!extraction.large_text);
     assert_eq!(extraction.status, "ready", "le verdict reste");
     assert_eq!(extraction.is_reflowable, Some(true));
     let apercu = admin::apercu(&bac.state, id).await.expect("aperçu");
-    assert!(apercu.extraction.is_some_and(|e| e.serve_as_is));
+    assert!(apercu
+        .extraction
+        .is_some_and(|e| e.large_text_choice == Some(false) && !e.large_text));
 
-    publier(&bac, ifdd, id).await.expect("publication tel quel");
+    publier(&bac, ifdd, id)
+        .await
+        .expect("publication sans « Texte agrandi »");
     let publie = la_fiche(&bac, ifdd, id).await;
     assert_eq!(publie.state, "published");
-    assert!(publie.extraction.is_some_and(|e| e.serve_as_is));
-    let (lecture, empreinte_tel_quel, _) = public::lecture(&bac.state, None, id)
+    let (lecture, empreinte_retire, _) = public::lecture(&bac.state, None, id)
         .await
         .expect("lecture");
-    assert_eq!(lecture.mode, "as_is");
+    assert!(lecture.has_text && !lecture.large_text);
     assert_eq!(lecture.pages.len(), 4);
-    assert!(
-        lecture.pages.iter().all(|p| p.image.is_some()),
-        "tel quel, chaque page se lit en image"
-    );
 
-    tel_quel(&bac, ifdd, id, false)
+    choisir(&bac, ifdd, id, None)
         .await
-        .expect("retour au recomposé, document publié");
+        .expect("rendu au verdict, document publié");
     let apres = la_fiche(&bac, ifdd, id).await;
     assert_eq!(apres.state, "published");
     assert_eq!(apres.published_at, publie.published_at, "sans republier");
-    assert!(apres.extraction.is_some_and(|e| !e.serve_as_is));
-    let (lecture, empreinte_recomposee, _) = public::lecture(&bac.state, None, id)
+    assert!(apres
+        .extraction
+        .is_some_and(|e| e.large_text_choice.is_none() && e.large_text));
+    let (lecture, empreinte_verdict, _) = public::lecture(&bac.state, None, id)
         .await
         .expect("lecture");
-    assert_eq!(lecture.mode, "reflow");
+    assert!(lecture.large_text);
     assert_ne!(
-        empreinte_recomposee, empreinte_tel_quel,
+        empreinte_verdict, empreinte_retire,
         "le téléphone doit voir que sa copie n'est plus la bonne"
     );
 }
 
-/// « Tel quel » lit les images de la dernière extraction : sans elle, rien ne
-/// se publie.
+/// Le choix suit le document, pas son fichier ; la publication exige toujours
+/// une extraction prête.
 #[tokio::test]
-async fn ouvrir_tel_quel_ne_publie_pas_un_fichier_dont_lextraction_a_echoue() {
+async fn le_choix_ne_publie_pas_un_fichier_dont_lextraction_a_echoue() {
     let bac = Bac::monter().await;
     let ifdd = administratrice(&bac, "ifdd@example.org").await;
     let id = creer(&bac, ifdd, "Rapport de session", false).await;
     deposer(&bac, ifdd, id, "ready").await;
     passer_lextraction(&bac).await;
-    tel_quel(&bac, ifdd, id, true).await.expect("tel quel");
+    choisir(&bac, ifdd, id, Some(false)).await.expect("retiré");
 
     deposer(&bac, ifdd, id, "quarantined").await;
     let en_attente = la_fiche(&bac, ifdd, id)
@@ -178,8 +180,9 @@ async fn ouvrir_tel_quel_ne_publie_pas_un_fichier_dont_lextraction_a_echoue() {
         .extraction
         .expect("extraction");
     assert_eq!(en_attente.status, "pending");
-    assert!(
-        en_attente.serve_as_is,
+    assert_eq!(
+        en_attente.large_text_choice,
+        Some(false),
         "le choix suit le document, pas son fichier"
     );
     let err = refus(publier(&bac, ifdd, id).await);
@@ -191,7 +194,7 @@ async fn ouvrir_tel_quel_ne_publie_pas_un_fichier_dont_lextraction_a_echoue() {
     assert_eq!(
         err.code,
         ErrorCode::NegotiationDocumentNotReady,
-        "les pages du fichier précédent ne tiennent pas lieu d'images : {err}"
+        "les pages du fichier précédent ne tiennent pas lieu d'extraction : {err}"
     );
     assert_eq!(err.message, PAS_PRETE);
     assert_eq!(la_fiche(&bac, ifdd, id).await.state, "draft");
@@ -200,31 +203,37 @@ async fn ouvrir_tel_quel_ne_publie_pas_un_fichier_dont_lextraction_a_echoue() {
     passer_lextraction(&bac).await;
     publier(&bac, ifdd, id)
         .await
-        .expect("un fichier extrait se publie tel quel");
+        .expect("un fichier extrait se publie");
     let publie = la_fiche(&bac, ifdd, id).await;
     assert_eq!(publie.state, "published");
-    assert!(publie.extraction.is_some_and(|e| e.serve_as_is));
+    assert!(publie
+        .extraction
+        .is_some_and(|e| e.large_text_choice == Some(false)));
 }
 
 #[tokio::test]
-async fn le_choix_tel_quel_laisse_une_trace_au_nom_de_qui_la_fait() {
+async fn le_choix_texte_agrandi_laisse_une_trace_au_nom_de_qui_le_fait() {
     let bac = Bac::monter().await;
     let ifdd = administratrice(&bac, "ifdd@example.org").await;
     let collegue = administratrice(&bac, "collegue@example.org").await;
     let id = creer(&bac, ifdd, "Guide des négociations", false).await;
     deposer(&bac, ifdd, id, "ready").await;
     passer_lextraction(&bac).await;
-    assert!(traces_du_tel_quel(&bac, id).await.is_empty());
+    assert!(traces_du_choix(&bac, id).await.is_empty());
 
-    tel_quel(&bac, collegue, id, true).await.expect("tel quel");
-    tel_quel(&bac, collegue, id, true)
+    choisir(&bac, collegue, id, Some(false))
+        .await
+        .expect("retiré");
+    choisir(&bac, collegue, id, Some(false))
         .await
         .expect("le même choix, rejoué");
-    tel_quel(&bac, ifdd, id, false).await.expect("recomposé");
+    choisir(&bac, ifdd, id, None)
+        .await
+        .expect("rendu au verdict");
 
     assert_eq!(
-        traces_du_tel_quel(&bac, id).await,
-        [(Some(collegue), json!(true)), (Some(ifdd), json!(false))],
+        traces_du_choix(&bac, id).await,
+        [(Some(collegue), json!(false)), (Some(ifdd), Value::Null)],
         "une trace par changement, chacune au nom de qui l'a fait"
     );
 }
@@ -232,18 +241,46 @@ async fn le_choix_tel_quel_laisse_une_trace_au_nom_de_qui_la_fait() {
 /// Le journal se lit par entité : une trace sans identifiant ne ressort pas
 /// dans l'historique du document.
 #[tokio::test]
-async fn la_trace_du_choix_tel_quel_se_rattache_a_son_document() {
+async fn la_trace_du_choix_se_rattache_a_son_document() {
     let bac = Bac::monter().await;
     let ifdd = administratrice(&bac, "ifdd@example.org").await;
     let id = creer(&bac, ifdd, "Guide des négociations", false).await;
     deposer(&bac, ifdd, id, "ready").await;
     passer_lextraction(&bac).await;
-    tel_quel(&bac, ifdd, id, true).await.expect("tel quel");
+    choisir(&bac, ifdd, id, Some(true)).await.expect("proposé");
 
     let par_entite = traces(&bac, "document_renditions", id).await;
     assert!(
         par_entite.contains(&("update".to_owned(), Some(ifdd))),
         "{par_entite:?}"
+    );
+}
+
+/// Un PDF protégé ne s'extrait pas, et l'aperçu doit dire pourquoi : sans quoi
+/// l'administratrice recommencerait le dépôt du même fichier.
+#[tokio::test]
+async fn un_pdf_protege_par_mot_de_passe_echoue_et_le_dit() {
+    let bac = Bac::monter().await;
+    let ifdd = administratrice(&bac, "ifdd@example.org").await;
+    let id = creer(&bac, ifdd, "Rapport protégé", false).await;
+    let asset = objet_pdf(&bac, ifdd, PROTEGE, "ready").await;
+    admin::attacher_le_fichier(&bac.state, &bac.ctx(ifdd), id, asset)
+        .await
+        .expect("fichier attaché");
+    passer_lextraction(&bac).await;
+
+    let etat = rendu(&bac, id).await;
+    assert_eq!(etat.status, "failed");
+    let motif = etat.failure_reason.expect("un motif");
+    assert!(
+        motif.contains("mot de passe"),
+        "le motif nomme la protection : {motif}"
+    );
+    let apercu = admin::apercu(&bac.state, id).await.expect("aperçu");
+    assert_eq!(
+        apercu.extraction.and_then(|e| e.failure_reason).as_deref(),
+        Some(motif.as_str()),
+        "l'aperçu montre ce motif"
     );
 }
 
@@ -267,7 +304,7 @@ async fn relancer_lextraction_repart_de_zero_sur_un_brouillon_et_se_refuse_une_f
 
     deposer(&bac, ifdd, id, "ready").await;
     passer_lextraction(&bac).await;
-    tel_quel(&bac, ifdd, id, true).await.expect("tel quel");
+    choisir(&bac, ifdd, id, Some(false)).await.expect("retiré");
     let premiere = demande_en_cours(&bac, id).await;
 
     relancer(&bac, ifdd, id)
@@ -280,9 +317,10 @@ async fn relancer_lextraction_repart_de_zero_sur_un_brouillon_et_se_refuse_une_f
     assert_eq!(relancee.status, "pending");
     assert_eq!(relancee.page_count, None, "le verdict précédent s'efface");
     assert!(relancee.extracted_at.is_none());
-    assert!(
-        relancee.serve_as_is,
-        "la relance garde le choix « tel quel »"
+    assert_eq!(
+        relancee.large_text_choice,
+        Some(false),
+        "la relance garde le choix « Texte agrandi »"
     );
     assert_ne!(demande_en_cours(&bac, id).await, premiere);
     let err = refus(publier(&bac, ifdd, id).await);

@@ -15,7 +15,10 @@ pub struct Rendu {
     pub outline: Option<Value>,
     pub is_reflowable: Option<bool>,
     pub quality: Option<Value>,
-    pub serve_as_is: bool,
+    /// NULL : suit le verdict. La règle est dans `document_reading_modes()`.
+    pub large_text_choice: Option<bool>,
+    pub has_text: bool,
+    pub large_text: bool,
     pub reading_bytes: Option<i64>,
     pub extractor: Option<String>,
     pub failure_reason: Option<String>,
@@ -25,10 +28,12 @@ pub struct Rendu {
 
 pub async fn lire(conn: &mut PgConnection, document_id: Uuid) -> Result<Option<Rendu>> {
     let ligne = sqlx::query!(
-        r#"SELECT asset_id, status::text AS "status!", page_count, outline, is_reflowable, quality,
-                  serve_as_is, reading_bytes, extractor, failure_reason, attempts, extracted_at
-             FROM negotiation.document_renditions
-            WHERE document_id = $1"#,
+        r#"SELECT r.asset_id, r.status::text AS "status!", r.page_count, r.outline, r.is_reflowable,
+                  r.quality, r.large_text_choice, m.has_text AS "has_text!", m.large_text AS "large_text!",
+                  r.reading_bytes, r.extractor, r.failure_reason, r.attempts, r.extracted_at
+             FROM negotiation.document_renditions r
+             CROSS JOIN LATERAL negotiation.document_reading_modes(r.document_id) m
+            WHERE r.document_id = $1"#,
         document_id
     )
     .fetch_optional(conn)
@@ -40,7 +45,9 @@ pub async fn lire(conn: &mut PgConnection, document_id: Uuid) -> Result<Option<R
         outline: l.outline,
         is_reflowable: l.is_reflowable,
         quality: l.quality,
-        serve_as_is: l.serve_as_is,
+        large_text_choice: l.large_text_choice,
+        has_text: l.has_text,
+        large_text: l.large_text,
         reading_bytes: l.reading_bytes,
         extractor: l.extractor,
         failure_reason: l.failure_reason,
@@ -51,7 +58,7 @@ pub async fn lire(conn: &mut PgConnection, document_id: Uuid) -> Result<Option<R
 
 /// Demande une extraction pour ce fichier : l'état repart de `pending`, le
 /// verdict précédent s'efface, et seul le travail de cette demande pourra
-/// conclure. Le choix « tel quel » de l'administratrice est gardé : il ne
+/// conclure. Le choix « Texte agrandi » de l'administratrice est gardé : il ne
 /// dépend pas du fichier.
 pub async fn demander(
     conn: &mut PgConnection,
@@ -110,7 +117,6 @@ pub struct Verdict<'a> {
     pub outline: &'a Value,
     pub is_reflowable: bool,
     pub quality: &'a Value,
-    pub reading_bytes: i64,
     pub extractor: &'a str,
 }
 
@@ -124,16 +130,15 @@ pub async fn reussir(
     let faite = sqlx::query!(
         "UPDATE negotiation.document_renditions
             SET status = 'ready', page_count = $3, outline = $4, is_reflowable = $5,
-                quality = $6, reading_bytes = $7, extractor = $8,
+                quality = $6, extractor = $7,
                 failure_reason = NULL, extracted_at = now()
-          WHERE document_id = $1 AND asset_id = $2 AND request_id = $9",
+          WHERE document_id = $1 AND asset_id = $2 AND request_id = $8",
         document_id,
         asset_id,
         v.page_count,
         v.outline,
         v.is_reflowable,
         v.quality,
-        v.reading_bytes,
         v.extractor,
         demande
     )
@@ -163,15 +168,28 @@ pub async fn echouer(
     Ok(())
 }
 
-pub async fn poser_tel_quel(
+/// La taille annoncée de la copie gardée : le PDF et la lecture servie.
+pub async fn poser_le_poids(conn: &mut PgConnection, document_id: Uuid, octets: i64) -> Result<()> {
+    sqlx::query!(
+        "UPDATE negotiation.document_renditions SET reading_bytes = $2 WHERE document_id = $1",
+        document_id,
+        octets
+    )
+    .execute(conn)
+    .await?;
+    Ok(())
+}
+
+/// `None` rend la main au verdict de l'extraction.
+pub async fn poser_le_choix_texte_agrandi(
     conn: &mut PgConnection,
     document_id: Uuid,
-    tel_quel: bool,
+    choix: Option<bool>,
 ) -> Result<bool> {
     let faite = sqlx::query!(
-        "UPDATE negotiation.document_renditions SET serve_as_is = $2 WHERE document_id = $1",
+        "UPDATE negotiation.document_renditions SET large_text_choice = $2 WHERE document_id = $1",
         document_id,
-        tel_quel
+        choix
     )
     .execute(conn)
     .await?;

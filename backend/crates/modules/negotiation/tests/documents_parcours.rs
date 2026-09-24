@@ -3,8 +3,9 @@
 
 mod commun;
 
-use commun::documents::{administratrice, fichier_publie, lien_publie};
+use commun::documents::{administratrice, fichier_publie, lien_publie, PETIT};
 use commun::Bac;
+use negotiation::domain::documents::serialiser_la_lecture;
 use negotiation::service::documents as public;
 
 #[tokio::test]
@@ -34,7 +35,7 @@ async fn un_fichier_publie_se_liste_et_se_lit() {
         .unwrap();
     assert_eq!(g.source, "file");
     assert_eq!(g.page_count, Some(4));
-    assert_eq!(g.mode, Some("reflow"));
+    assert!(g.has_text && g.large_text);
     assert!(g.reading_etag.is_some());
     let l = bibliotheque.documents.iter().find(|d| d.id == enb).unwrap();
     assert_eq!(l.link_host.as_deref(), Some("enb.iisd.org"));
@@ -44,15 +45,15 @@ async fn un_fichier_publie_se_liste_et_se_lit() {
         .expect("lecture");
     assert_eq!(lecture.page_count, 4);
     assert_eq!(
-        lecture.pages.iter().filter(|p| p.image.is_some()).count(),
-        1,
-        "seule la page du tableau garde son image"
+        g.reading_bytes,
+        Some((PETIT.len() + serialiser_la_lecture(&lecture).len()) as i64),
+        "la taille annoncée est celle de la copie : le PDF et la lecture servie"
     );
 
-    let image = public::image(&bac.state, None, guide, 3)
+    let entier = public::lire_le_fichier(&bac.state, None, guide, None, true)
         .await
-        .expect("image");
-    assert!(image.octets.starts_with(&[0xFF, 0xD8]));
+        .expect("le fichier entier");
+    assert_eq!(entier.octets, PETIT, "le PDF déposé, octet pour octet");
 
     let trouve = public::rechercher(&bac.state, None, "negociations reprennent")
         .await

@@ -108,6 +108,31 @@ impl ObjectStore for FilesystemStore {
         })
     }
 
+    async fn get_range(&self, key: &str, debut: u64, fin: u64) -> StorageResult<Vec<u8>> {
+        use tokio::io::{AsyncReadExt, AsyncSeekExt};
+        let chemin = self.chemin(key)?;
+        let introuvable = |e: std::io::Error| match e.kind() {
+            std::io::ErrorKind::NotFound => StorageError::NotFound(key.to_owned()),
+            _ => StorageError::Unavailable(e.to_string()),
+        };
+        let mut fichier = tokio::fs::File::open(&chemin).await.map_err(introuvable)?;
+        let taille = fichier.metadata().await.map_err(introuvable)?.len();
+        if debut >= taille || fin < debut {
+            return Err(StorageError::Rejected {
+                statut: 416,
+                corps: format!("plage {debut}-{fin} hors d'un objet de {taille} octets"),
+            });
+        }
+        let fin = fin.min(taille - 1);
+        fichier
+            .seek(std::io::SeekFrom::Start(debut))
+            .await
+            .map_err(introuvable)?;
+        let mut octets = vec![0_u8; (fin - debut + 1) as usize];
+        fichier.read_exact(&mut octets).await.map_err(introuvable)?;
+        Ok(octets)
+    }
+
     async fn head(&self, key: &str) -> StorageResult<ObjectInfo> {
         let chemin = self.chemin(key)?;
         let meta = tokio::fs::metadata(&chemin)
@@ -161,6 +186,57 @@ mod tests {
                 "« {cle} » aurait dû être refusée"
             );
         }
+    }
+
+    struct Dossier(PathBuf);
+
+    impl Drop for Dossier {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+
+    async fn stockage_de_dix_octets() -> (FilesystemStore, Dossier) {
+        let dossier =
+            std::env::temp_dir().join(format!("epavillon-plage-{}", uuid::Uuid::new_v4().simple()));
+        let store = FilesystemStore::new(&dossier.to_string_lossy());
+        store
+            .put("doc/guide.pdf", "application/pdf", b"0123456789".to_vec())
+            .await
+            .expect("dépôt");
+        (store, Dossier(dossier))
+    }
+
+    #[tokio::test]
+    async fn une_plage_rend_ses_octets_bornes_comprises() {
+        let (store, _dossier) = stockage_de_dix_octets().await;
+        let lire = |a, b| store.get_range("doc/guide.pdf", a, b);
+        assert_eq!(lire(0, 3).await.unwrap(), b"0123");
+        assert_eq!(lire(6, 9).await.unwrap(), b"6789");
+        assert_eq!(lire(9, 9).await.unwrap(), b"9");
+        assert_eq!(lire(4, 4).await.unwrap(), b"4");
+    }
+
+    #[tokio::test]
+    async fn une_fin_au_dela_s_arrete_au_dernier_octet() {
+        let (store, _dossier) = stockage_de_dix_octets().await;
+        assert_eq!(
+            store.get_range("doc/guide.pdf", 7, 500).await.unwrap(),
+            b"789"
+        );
+    }
+
+    #[tokio::test]
+    async fn un_debut_au_dela_est_refuse() {
+        let (store, _dossier) = stockage_de_dix_octets().await;
+        assert!(matches!(
+            store.get_range("doc/guide.pdf", 10, 12).await,
+            Err(StorageError::Rejected { statut: 416, .. })
+        ));
+        assert!(matches!(
+            store.get_range("doc/absent.pdf", 0, 1).await,
+            Err(StorageError::NotFound(_))
+        ));
     }
 
     #[test]

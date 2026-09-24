@@ -23,7 +23,7 @@ import type {
   AdminDocumentPreview,
   AttachFileInput,
   CorrectionNoteInput,
-  ServeAsIsInput,
+  LargeTextChoiceInput,
 } from '~/types/admin-negotiation-documents'
 import type { Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
@@ -87,13 +87,13 @@ export function createAdminNegotiationDocumentsApi({ call, send }: Deps) {
         (await exemples()).relancerLExtraction(documentId),
       ),
 
-    /** « Ouvrir tel quel » : se change sans republier. */
-    ouvrirTelQuel: (documentId: Uuid, telQuel: boolean): Promise<AdminDocument> => {
-      const corps: ServeAsIsInput = { serve_as_is: telQuel }
+    /** Proposer « Texte agrandi » ; `null` rend la main au verdict. Se change sans republier. */
+    choisirLeTexteAgrandi: (documentId: Uuid, choice: boolean | null): Promise<AdminDocument> => {
+      const corps: LargeTextChoiceInput = { choice }
       return send(
-        `/admin/negotiation/documents/${documentId}/as-is`,
+        `/admin/negotiation/documents/${documentId}/large-text`,
         corps,
-        async () => (await exemples()).ouvrirTelQuel(documentId, telQuel, langue()),
+        async () => (await exemples()).choisirLeTexteAgrandi(documentId, choice, langue()),
         'PUT',
       )
     },

@@ -32,7 +32,11 @@ pub struct ExtractionState {
     pub status: String,
     pub page_count: Option<i32>,
     pub is_reflowable: Option<bool>,
-    pub serve_as_is: bool,
+    /// NULL : suit le verdict ; vrai ou faux : le choix de l'administratrice.
+    pub large_text_choice: Option<bool>,
+    pub has_text: bool,
+    /// « Texte agrandi » offert, choix et verdict appliqués.
+    pub large_text: bool,
     pub failure_reason: Option<String>,
     pub reading_bytes: Option<i64>,
     #[serde(with = "time::serde::rfc3339::option")]
@@ -153,9 +157,11 @@ pub struct AttachFileInput {
     pub asset_id: Uuid,
 }
 
+/// `null` rend la main au verdict de l'extraction.
 #[derive(Debug, Clone, Deserialize)]
-pub struct ServeAsIsInput {
-    pub serve_as_is: bool,
+#[serde(deny_unknown_fields)]
+pub struct LargeTextChoiceInput {
+    pub choice: Option<bool>,
 }
 
 /// `AdminDocumentPreview` — le verdict, le sommaire, et chaque page : ses blocs

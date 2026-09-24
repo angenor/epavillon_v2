@@ -16,7 +16,7 @@ use kernel::error::{ApiError, Result};
 use uuid::Uuid;
 
 use crate::domain::admin_documents::{
-    AdminDocumentInput, AttachFileInput, CorrectionNoteInput, ServeAsIsInput,
+    AdminDocumentInput, AttachFileInput, CorrectionNoteInput, LargeTextChoiceInput,
 };
 use crate::domain::permissions::{
     CorrectionPost, CorrectionWithdraw, DocumentPublish, CORRECTION_WITHDRAW,
@@ -47,8 +47,8 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
             web::post().to(relancer),
         )
         .route(
-            "/admin/negotiation/documents/{id}/as-is",
-            web::put().to(tel_quel),
+            "/admin/negotiation/documents/{id}/large-text",
+            web::put().to(texte_agrandi),
         )
         .route(
             "/admin/negotiation/documents/{id}/publish",
@@ -346,10 +346,10 @@ pub(crate) async fn relancer(
 
 #[utoipa::path(
     put,
-    description = "`{ serve_as_is }` → `AdminDocument` — « ouvrir tel quel » : le document se lit en pages d'origine. Se change sans republier.",
-    path = "/admin/negotiation/documents/{id}/as-is",
+    description = "`LargeTextChoiceInput` → `AdminDocument` — proposer « Texte agrandi » au téléphone : `true`, `false`, ou `null` pour suivre le verdict de l'extraction. Se change sans republier.",
+    path = "/admin/negotiation/documents/{id}/large-text",
     tag = "Back-office — documents",
-    operation_id = "admin_negotiation_document_tel_quel",
+    operation_id = "admin_negotiation_document_texte_agrandi",
     params(("id" = Uuid, Path, description = "Identifiant du document")),
     request_body = Object,
     responses(
@@ -360,16 +360,16 @@ pub(crate) async fn relancer(
     ),
     security(("session" = []))
 )]
-pub(crate) async fn tel_quel(
+pub(crate) async fn texte_agrandi(
     state: web::Data<NegotiationState>,
     requete: HttpRequest,
     acteur: Requires<DocumentPublish>,
     chemin: web::Path<Uuid>,
-    entree: web::Json<ServeAsIsInput>,
+    entree: web::Json<LargeTextChoiceInput>,
 ) -> Result<HttpResponse> {
     let id = chemin.into_inner();
     let ctx = crate::routes::contexte_de(&requete, acteur.person_id);
-    service::ouvrir_tel_quel(&state, &ctx, id, entree.serve_as_is).await?;
+    service::choisir_le_texte_agrandi(&state, &ctx, id, entree.choice).await?;
     rendre_la_fiche(&state, &requete, acteur.person_id, id).await
 }
 

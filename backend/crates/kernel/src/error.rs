@@ -258,12 +258,14 @@ codes! {
         "Ce document est réservé aux négociatrices et négociateurs. Saisissez votre code d'invitation pour l'ouvrir.";
     NegotiationDocumentNotReadable => "NEGOTIATION_DOCUMENT_NOT_READABLE", StatusCode::CONFLICT,
         "Ce document ne se lit pas dans l'application : ouvrez-le dans le navigateur.";
+    NegotiationDocumentRangeInvalid => "NEGOTIATION_DOCUMENT_RANGE_INVALID", StatusCode::RANGE_NOT_SATISFIABLE,
+        "La partie demandée du document n'existe pas.";
     NegotiationDocumentSourceBoth => "NEGOTIATION_DOCUMENT_SOURCE_BOTH", StatusCode::UNPROCESSABLE_ENTITY,
         "Un document est un fichier ou un lien, jamais les deux.";
     NegotiationDocumentSourceMissing => "NEGOTIATION_DOCUMENT_SOURCE_MISSING", StatusCode::UNPROCESSABLE_ENTITY,
         "Déposez un fichier ou indiquez un lien avant de publier.";
     NegotiationDocumentNotReady => "NEGOTIATION_DOCUMENT_NOT_READY", StatusCode::CONFLICT,
-        "L'extraction n'est pas terminée. Attendez-la, ou choisissez « ouvrir tel quel ».";
+        "L'extraction n'est pas terminée. Attendez-la avant de publier.";
     NegotiationDocumentFileLocked => "NEGOTIATION_DOCUMENT_FILE_LOCKED", StatusCode::CONFLICT,
         "Le fichier d'un document publié ne change pas. Publiez une nouvelle version.";
     NegotiationDocumentAlreadySuperseded => "NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED", StatusCode::CONFLICT,

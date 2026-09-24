@@ -1,7 +1,7 @@
 //! **Le travail d'extraction, de bout en bout** : l'objet est lu dans le bucket
 //! privé, la forme lisible va en base page par page, et les images de page
 //! retournent dans le bucket privé. Les pages, données dérivées, ne sont pas
-//! auditées ; l'état d'extraction l'est, puisque le choix « tel quel » y vit :
+//! auditées ; l'état d'extraction l'est, puisque le choix « Texte agrandi » y vit :
 //! le travail écrit au nom de la personne qui a attaché le fichier.
 
 mod commun;
@@ -295,7 +295,6 @@ async fn un_travail_commence_avant_la_relance_ne_conclut_pas() {
         outline: &serde_json::json!([]),
         is_reflowable: true,
         quality: &serde_json::json!({}),
-        reading_bytes: 1,
         extractor: "essai",
     };
     assert!(

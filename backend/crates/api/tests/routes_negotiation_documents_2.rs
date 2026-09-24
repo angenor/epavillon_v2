@@ -351,7 +351,7 @@ async fn code_du_refus<B: actix_web::body::MessageBody>(
 /// La session facultative arrive jusqu'au compteur : sans elle, la négociatrice
 /// serait refusée comme une visiteuse.
 #[actix_web::test]
-async fn la_negociatrice_telecharge_le_reserve_et_revalide_son_image_en_prive() {
+async fn la_negociatrice_telecharge_le_reserve_et_revalide_son_fichier_en_prive() {
     let bac = Bac::monter().await;
     let (_, reserve) = fichiers_publies(&bac).await;
     let app = test::init_service(api::build_app(&bac.etat)).await;
@@ -388,21 +388,21 @@ async fn la_negociatrice_telecharge_le_reserve_et_revalide_son_image_en_prive() 
     assert!(test::read_body(compte).await.is_empty());
     assert_eq!(bac.telechargements(reserve).await, 1);
 
-    let image = format!("/api/negotiation/documents/{reserve}/pages/3/image");
-    let servie = test::call_service(&app, get(&image, Some(&negociatrice)).to_request()).await;
-    assert_eq!(servie.status(), StatusCode::OK);
+    let fichier = format!("/api/negotiation/documents/{reserve}/file");
+    let morceau = || get(&fichier, Some(&negociatrice)).insert_header(("Range", "bytes=0-1023"));
+    let servie = test::call_service(&app, morceau().to_request()).await;
+    assert_eq!(servie.status(), StatusCode::PARTIAL_CONTENT);
     let cache = cache_de(&servie);
-    assert!(
-        cache
-            .as_deref()
-            .is_some_and(|c| c.starts_with("private, max-age=")),
-        "{cache:?}"
+    assert_eq!(
+        cache.as_deref(),
+        Some("private, no-store, no-transform"),
+        "un réservé ne reste dans aucun cache"
     );
     let empreinte = etag_de(&servie);
 
     let inchangee = test::call_service(
         &app,
-        get(&image, Some(&negociatrice))
+        morceau()
             .insert_header((IF_NONE_MATCH, empreinte.clone()))
             .to_request(),
     )
@@ -633,7 +633,7 @@ async fn les_favoris_dun_compte_ne_paraissent_pas_chez_lautre() {
 /// Un brouillon extrait a ses images dans le bucket : le back-office les sert,
 /// la route publique non, même à la négociatrice qui forge l'adresse.
 #[actix_web::test]
-async fn limage_dun_brouillon_se_sert_au_back_office_et_jamais_au_public() {
+async fn limage_dun_brouillon_se_sert_au_back_office_et_son_fichier_jamais_au_public() {
     let bac = Bac::monter().await;
     let brouillon = brouillon_extrait(&bac, "Note réservée en préparation", true).await;
     let app = test::init_service(api::build_app(&bac.etat)).await;
@@ -654,7 +654,7 @@ async fn limage_dun_brouillon_se_sert_au_back_office_et_jamais_au_public() {
     assert!(test::read_body(apercu).await.starts_with(&[0xFF, 0xD8]));
 
     for cookie in [None, Some(negociatrice.as_str())] {
-        for chemin in ["pages/3/image", "reading"] {
+        for chemin in ["file", "reading"] {
             let uri = format!("/api/negotiation/documents/{brouillon}/{chemin}");
             let reponse = test::call_service(&app, get(&uri, cookie).to_request()).await;
             assert_eq!(reponse.status(), StatusCode::NOT_FOUND, "{chemin}");
@@ -669,26 +669,48 @@ async fn limage_dun_brouillon_se_sert_au_back_office_et_jamais_au_public() {
     // Témoin : publié, la même adresse s'ouvre à la négociatrice, donc le 404
     // tenait à la seule publication.
     publier(&bac, brouillon).await;
-    let image = |index: i32| format!("/api/negotiation/documents/{brouillon}/pages/{index}/image");
-    let servie = test::call_service(&app, get(&image(3), Some(&negociatrice)).to_request()).await;
-    assert_eq!(servie.status(), StatusCode::OK);
-    assert!(test::read_body(servie).await.starts_with(&[0xFF, 0xD8]));
-    let hors_du_document =
-        test::call_service(&app, get(&image(99), Some(&negociatrice)).to_request()).await;
-    assert_eq!(hors_du_document.status(), StatusCode::NOT_FOUND);
-    assert_eq!(code_du_refus(hors_du_document).await, "NOT_FOUND");
+    let fichier = format!("/api/negotiation/documents/{brouillon}/file");
+    let servi = test::call_service(
+        &app,
+        get(&fichier, Some(&negociatrice))
+            .insert_header(("Range", "bytes=0-1023"))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(servi.status(), StatusCode::PARTIAL_CONTENT);
+    assert!(test::read_body(servi).await.starts_with(b"%PDF"));
+    let image_publique = test::call_service(
+        &app,
+        get(
+            &format!("/api/negotiation/documents/{brouillon}/pages/3/image"),
+            Some(&negociatrice),
+        )
+        .to_request(),
+    )
+    .await;
+    assert_eq!(
+        image_publique.status(),
+        StatusCode::NOT_FOUND,
+        "publié, son image ne va toujours pas au téléphone"
+    );
 
-    // Sans l'accès, le refus passe avant l'index de page : une page absente ne
-    // dit rien de plus qu'une page présente.
+    // Sans l'accès, le refus passe avant la plage : une plage hors du fichier
+    // ne dit rien de plus qu'une plage dedans.
     let lecteur = se_connecter!(app, SANS_ACCES);
     for cookie in [None, Some(lecteur.as_str())] {
-        for index in [3, 99] {
-            let reponse = test::call_service(&app, get(&image(index), cookie).to_request()).await;
-            assert_eq!(reponse.status(), StatusCode::FORBIDDEN, "page {index}");
+        for plage in ["bytes=0-1023", "bytes=999999999-"] {
+            let reponse = test::call_service(
+                &app,
+                get(&fichier, cookie)
+                    .insert_header(("Range", plage))
+                    .to_request(),
+            )
+            .await;
+            assert_eq!(reponse.status(), StatusCode::FORBIDDEN, "{plage}");
             assert_eq!(
                 code_du_refus(reponse).await,
                 "NEGOTIATION_DOCUMENT_RESTRICTED",
-                "page {index}"
+                "{plage}"
             );
         }
     }

@@ -781,10 +781,10 @@ export function relancerLExtraction(id: Uuid): void {
 }
 
 /** Toute extraction du document se règle, prête ou non : c'est le recours quand elle échoue. */
-export function ouvrirTelQuel(id: Uuid, serveAsIs: boolean, langue = 'fr'): AdminDocument {
+export function choisirLeTexteAgrandi(id: Uuid, choice: boolean | null, langue = 'fr'): AdminDocument {
   const f = ficheOuRefus(id)
-  if (!f.extraction) throw invalide("Ce document n'a pas encore de fichier extrait.", 'serve_as_is')
-  f.extraction = { ...f.extraction, serve_as_is: serveAsIs }
+  if (!f.extraction) throw invalide("Ce document n'a pas encore de fichier extrait.", 'choice')
+  f.extraction = { ...f.extraction, large_text_choice: choice }
   f.updated_at = maintenant()
   return vue(f, langue)
 }

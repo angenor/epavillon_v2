@@ -291,6 +291,23 @@ impl ObjectStore for S3Store {
             .map_err(|e| StorageError::Unavailable(e.to_string()))
     }
 
+    async fn get_range(&self, key: &str, debut: u64, fin: u64) -> StorageResult<Vec<u8>> {
+        let reponse = self
+            .appeler(
+                reqwest::Method::GET,
+                key,
+                None,
+                &[("range", format!("bytes={debut}-{fin}"))],
+            )
+            .await?;
+        let reponse = Self::verifier(reponse, key).await?;
+        reponse
+            .bytes()
+            .await
+            .map(|o| o.to_vec())
+            .map_err(|e| StorageError::Unavailable(e.to_string()))
+    }
+
     async fn head(&self, key: &str) -> StorageResult<ObjectInfo> {
         let reponse = self.appeler(reqwest::Method::HEAD, key, None, &[]).await?;
         let reponse = Self::verifier(reponse, key).await?;

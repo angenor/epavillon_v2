@@ -2,7 +2,8 @@
  * Les lectures publiques des documents de Guide Négo, et la forme lisible que
  * le lecteur affiche. Champ pour champ comme `negotiation/src/domain/documents.rs`
  * et `domain/extraction/forme.rs` ; contrats dans
- * `specs/011-guide-nego-documents/contracts/api-documents.md` et `forme-lisible.md`.
+ * `specs/011-guide-nego-documents/contracts/api-documents.md` et `forme-lisible.md`,
+ * modifiés à l'étape 1b par `specs/012-guide-nego-lecteur-pdf/contracts/api-lecture.md`.
  *
  * Les titres et résumés arrivent **résolus** dans la langue demandée : ce sont
  * des chaînes, pas des `I18nText`.
@@ -11,8 +12,6 @@
 import type { IsoDate, IsoDateTime, Uuid } from './shared'
 
 export type DocumentSource = 'file' | 'link'
-
-export type ReadingMode = 'reflow' | 'as_is'
 
 // ---------------------------------------------------------------------------
 // La bibliothèque — `GET /negotiation/documents`
@@ -52,8 +51,12 @@ export interface LibraryDocument {
   restricted: boolean
   accessible: boolean
   page_count: number | null
+  /** Le PDF et la forme lisible : la taille annoncée de la copie gardée. */
   reading_bytes: number | null
-  mode: ReadingMode | null
+  /** Une page au moins a du texte : recherche et sommaire. */
+  has_text: boolean
+  /** « Texte agrandi » offert. */
+  large_text: boolean
   /** Le bout publié de la chaîne de remplacement. */
   superseded_by: Successor | null
   /** Une copie gardée dont l'empreinte diffère est celle d'un autre fichier. */
@@ -114,10 +117,11 @@ export interface PageHit {
 export interface DocumentReading {
   id: Uuid
   version: string
-  mode: ReadingMode
+  has_text: boolean
+  large_text: boolean
   /** Pages du document, pas du fichier. */
   page_count: number
-  /** Vide si aucun sommaire n'a été repéré, et en mode `as_is`. */
+  /** Vide si aucun sommaire n'a été repéré. */
   outline: OutlineEntry[]
   pages: ReadingPage[]
 }
@@ -135,9 +139,7 @@ export interface ReadingPage {
   index: number
   /** L'étiquette imprimée, « 59 ». */
   label: string
-  /** Chemin d'API, relatif à la base : en `as_is`, et sur les pages d'origine. */
-  image?: string
-  /** Vide en mode `as_is`. */
+  /** Vide pour une page sans texte : la page reste, pour son numéro imprimé. */
   blocks: Block[]
 }
 

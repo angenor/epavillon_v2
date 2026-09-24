@@ -41,7 +41,9 @@ pub struct RenduLu {
     pub status: String,
     pub page_count: Option<i32>,
     pub reading_bytes: Option<i64>,
-    pub serve_as_is: bool,
+    pub large_text_choice: Option<bool>,
+    pub has_text: bool,
+    pub large_text: bool,
     pub extracted_at: Option<OffsetDateTime>,
 }
 
@@ -66,10 +68,12 @@ pub async fn publies(conn: &mut PgConnection, locale: &str) -> Result<Vec<Publie
                   d.event_id, d.issued_on, d.published_at AS "published_at!", d.publisher,
                   d.locale_code, d.asset_id, d.external_url::text AS external_url, d.is_restricted,
                   r.asset_id AS "rendu_asset?", r.status::text AS "rendu_status?", r.page_count,
-                  r.reading_bytes, r.serve_as_is AS "serve_as_is?", r.extracted_at
+                  r.reading_bytes, r.large_text_choice, r.extracted_at,
+                  m.has_text AS "has_text!", m.large_text AS "large_text!"
              FROM negotiation.documents d
              JOIN reference.taxonomy_terms t ON t.id = d.document_type_term_id
              LEFT JOIN negotiation.document_renditions r ON r.document_id = d.id
+             CROSS JOIN LATERAL negotiation.document_reading_modes(d.id) m
             WHERE d.published_at IS NOT NULL
             ORDER BY d.published_at DESC, d.id"#,
         locale
@@ -99,7 +103,9 @@ pub async fn publies(conn: &mut PgConnection, locale: &str) -> Result<Vec<Publie
                 status: l.rendu_status.unwrap_or_default(),
                 page_count: l.page_count,
                 reading_bytes: l.reading_bytes,
-                serve_as_is: l.serve_as_is.unwrap_or(false),
+                large_text_choice: l.large_text_choice,
+                has_text: l.has_text,
+                large_text: l.large_text,
                 extracted_at: l.extracted_at,
             }),
         })
@@ -275,9 +281,11 @@ async fn lisible(
     let ligne = sqlx::query!(
         r#"SELECT d.id, d.version, d.is_restricted, d.asset_id, d.external_url::text AS external_url,
                   r.asset_id AS "rendu_asset?", r.status::text AS "rendu_status?", r.page_count,
-                  r.reading_bytes, r.serve_as_is AS "serve_as_is?", r.extracted_at, r.outline
+                  r.reading_bytes, r.large_text_choice, r.extracted_at, r.outline,
+                  m.has_text AS "has_text!", m.large_text AS "large_text!"
              FROM negotiation.documents d
              LEFT JOIN negotiation.document_renditions r ON r.document_id = d.id
+             CROSS JOIN LATERAL negotiation.document_reading_modes(d.id) m
             WHERE d.id = $1 AND (d.published_at IS NOT NULL OR NOT $2)"#,
         id,
         publie_seulement
@@ -296,7 +304,9 @@ async fn lisible(
             status: l.rendu_status.unwrap_or_default(),
             page_count: l.page_count,
             reading_bytes: l.reading_bytes,
-            serve_as_is: l.serve_as_is.unwrap_or(false),
+            large_text_choice: l.large_text_choice,
+            has_text: l.has_text,
+            large_text: l.large_text,
             extracted_at: l.extracted_at,
         }),
     }))

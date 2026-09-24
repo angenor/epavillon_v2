@@ -24,7 +24,7 @@ Les deux lectures ouvertes à l'une **ou** l'autre permission se testent dans le
 | `PATCH /admin/negotiation/documents/{id}` | publish | `AdminDocumentInput` partiel → `AdminDocument` | Titres, résumé, type, thématiques (remplacement en bloc), COP, version, date, éditeur, langue, remplace, réservé, marqueur, lien externe |
 | `PUT /admin/negotiation/documents/{id}/file` | publish | `{ asset_id }` → `AdminDocument` | Attache le PDF déposé par la garde média, et met l'extraction en file dans la même transaction. Refusé sur un document publié : `NEGOTIATION_DOCUMENT_FILE_LOCKED` |
 | `POST /admin/negotiation/documents/{id}/extraction` | publish | → `202` | Relance l'extraction |
-| `PUT /admin/negotiation/documents/{id}/as-is` | publish | `{ serve_as_is: bool }` → `AdminDocument` | « Ouvrir tel quel », sans republier |
+| `PUT /admin/negotiation/documents/{id}/large-text` | publish | `{ choice: bool \| null }` → `AdminDocument` | Proposer « Texte agrandi », sans republier — **remplace `…/as-is` depuis l'étape 1b** ([api-lecture.md](../../012-guide-nego-lecteur-pdf/contracts/api-lecture.md)) |
 | `POST /admin/negotiation/documents/{id}/publish` | publish | → `AdminDocument` | Exige une source, et pour un fichier une extraction `ready` ou « tel quel » avec images : sinon `NEGOTIATION_DOCUMENT_NOT_READY` |
 | `POST /admin/negotiation/documents/{id}/unpublish` | publish | → `AdminDocument` | Pose `unpublished_at` |
 | `POST /admin/negotiation/documents/{id}/new-version` | publish | → `AdminDocument` | Brouillon prérempli, désigné comme remplaçant ; version à saisir |

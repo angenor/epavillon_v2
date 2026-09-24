@@ -8,7 +8,9 @@
 //!
 //! Le décor passe par les services du module, comme le back-office.
 
-use actix_web::http::header::{ACCEPT_LANGUAGE, CACHE_CONTROL, CONTENT_TYPE, ETAG, IF_NONE_MATCH};
+use actix_web::http::header::{
+    ACCEPT_LANGUAGE, CACHE_CONTROL, CONTENT_ENCODING, CONTENT_TYPE, ETAG, IF_NONE_MATCH,
+};
 use actix_web::http::StatusCode;
 use actix_web::test;
 use api::state::AppState;
@@ -480,15 +482,20 @@ async fn un_fichier_public_se_lit_et_se_compte_sans_session_avec_ses_empreintes_
     let empreinte = etag_de(&lecture);
     let corps: Value = test::read_body_json(lecture).await;
     assert_eq!(corps["id"], json!(guide));
-    assert_eq!(corps["mode"], "reflow");
+    assert_eq!(
+        (corps["has_text"].clone(), corps["large_text"].clone()),
+        (json!(true), json!(true))
+    );
+    assert!(corps.get("mode").is_none(), "« mode » a disparu");
     assert_eq!(corps["page_count"], 4);
-    let adresse = corps["pages"]
-        .as_array()
-        .expect("pages")
-        .iter()
-        .find_map(|p| p["image"].as_str())
-        .expect("une page garde son image")
-        .to_owned();
+    assert!(
+        corps["pages"]
+            .as_array()
+            .expect("pages")
+            .iter()
+            .all(|p| p.get("image").is_none()),
+        "aucune image de page ne va plus au téléphone"
+    );
 
     let inchange = test::call_service(
         &app,
@@ -510,51 +517,73 @@ async fn un_fichier_public_se_lit_et_se_compte_sans_session_avec_ses_empreintes_
     assert_eq!(d["source"], "file");
     assert_eq!(d["reading_etag"].as_str(), Some(empreinte.as_str()));
 
-    // L'adresse annoncée par la lecture est celle que l'API sert, sous `/api`.
-    assert_eq!(
-        adresse,
-        format!("/negotiation/documents/{guide}/pages/3/image")
-    );
-    let chemin_image = format!("/api{adresse}");
-    let image = test::call_service(&app, get(&chemin_image, None).to_request()).await;
-    assert_eq!(image.status(), StatusCode::OK);
-    assert_eq!(entete(&image, CONTENT_TYPE).as_deref(), Some("image/jpeg"));
-    let cache_image = cache_de(&image);
-    assert!(
-        cache_image
-            .as_deref()
-            .is_some_and(|c| c.starts_with("public, max-age=")),
-        "{cache_image:?}"
-    );
-    let empreinte_image = etag_de(&image);
-    assert!(
-        test::read_body(image).await.starts_with(&[0xFF, 0xD8]),
-        "un JPEG"
-    );
-
-    let image_inchangee = test::call_service(
+    // Le PDF, par plage, à travers toute l'application : jamais compressé.
+    let fichier = format!("/api/negotiation/documents/{guide}/file");
+    let morceau = test::call_service(
         &app,
-        get(&chemin_image, None)
-            .insert_header((IF_NONE_MATCH, empreinte_image.clone()))
+        get(&fichier, None)
+            .insert_header(("Range", "bytes=0-99"))
+            .insert_header(("Accept-Encoding", "br, gzip"))
             .to_request(),
     )
     .await;
-    assert_eq!(image_inchangee.status(), StatusCode::NOT_MODIFIED);
-    assert_eq!(etag_de(&image_inchangee), empreinte_image);
-    assert_eq!(cache_de(&image_inchangee), cache_image);
-    assert!(test::read_body(image_inchangee).await.is_empty());
+    assert_eq!(morceau.status(), StatusCode::PARTIAL_CONTENT);
+    assert_eq!(
+        entete(&morceau, CONTENT_TYPE).as_deref(),
+        Some("application/pdf")
+    );
+    assert_eq!(
+        entete(&morceau, CONTENT_ENCODING).as_deref(),
+        Some("identity")
+    );
+    assert_eq!(
+        cache_de(&morceau).as_deref(),
+        Some("private, max-age=3600, no-transform")
+    );
+    let empreinte_fichier = etag_de(&morceau);
+    let octets = test::read_body(morceau).await;
+    assert_eq!(octets.len(), 100);
+    assert!(octets.starts_with(b"%PDF"), "un PDF");
 
-    let hors_du_document = test::call_service(
+    let fichier_inchange = test::call_service(
+        &app,
+        get(&fichier, None)
+            .insert_header(("Range", "bytes=0-99"))
+            .insert_header((IF_NONE_MATCH, empreinte_fichier.clone()))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(fichier_inchange.status(), StatusCode::NOT_MODIFIED);
+    assert_eq!(etag_de(&fichier_inchange), empreinte_fichier);
+    assert!(test::read_body(fichier_inchange).await.is_empty());
+
+    let hors_du_fichier = test::call_service(
+        &app,
+        get(&fichier, None)
+            .insert_header(("Range", "bytes=999999999-"))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(hors_du_fichier.status(), StatusCode::RANGE_NOT_SATISFIABLE);
+    assert_eq!(
+        code_du_refus(hors_du_fichier).await,
+        "NEGOTIATION_DOCUMENT_RANGE_INVALID"
+    );
+
+    let route_retiree = test::call_service(
         &app,
         get(
-            &format!("/api/negotiation/documents/{guide}/pages/99/image"),
+            &format!("/api/negotiation/documents/{guide}/pages/3/image"),
             None,
         )
         .to_request(),
     )
     .await;
-    assert_eq!(hors_du_document.status(), StatusCode::NOT_FOUND);
-    assert_eq!(code_du_refus(hors_du_document).await, "NOT_FOUND");
+    assert_eq!(
+        route_retiree.status(),
+        StatusCode::NOT_FOUND,
+        "l'image publique d'une page n'est plus servie"
+    );
 
     // Le téléchargement se compte sans aucun compte.
     let telecharge = test::call_service(
@@ -577,7 +606,7 @@ async fn un_reserve_rend_403_sans_session_ou_sans_acces_et_souvre_a_la_negociatr
     let (_, reserve) = fichiers_publies(&bac).await;
     let app = test::init_service(api::build_app(&bac.etat)).await;
     let lecture = format!("/api/negotiation/documents/{reserve}/reading");
-    let image = format!("/api/negotiation/documents/{reserve}/pages/3/image");
+    let fichier = format!("/api/negotiation/documents/{reserve}/file");
     let telechargement = format!("/api/negotiation/documents/{reserve}/downloads");
 
     // La négociatrice l'ouvre, et rien ne se garde dans un cache partagé.
@@ -598,26 +627,27 @@ async fn un_reserve_rend_403_sans_session_ou_sans_acces_et_souvre_a_la_negociatr
     assert_eq!(etag_de(&inchangee), empreinte);
     assert_eq!(cache_de(&inchangee).as_deref(), Some("private, no-cache"));
 
-    let image_ouverte =
-        test::call_service(&app, get(&image, Some(&negociatrice)).to_request()).await;
-    assert_eq!(image_ouverte.status(), StatusCode::OK);
+    let fichier_ouvert = test::call_service(
+        &app,
+        get(&fichier, Some(&negociatrice))
+            .insert_header(("Range", "bytes=0-99"))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(fichier_ouvert.status(), StatusCode::PARTIAL_CONTENT);
     assert_eq!(
-        entete(&image_ouverte, CONTENT_TYPE).as_deref(),
-        Some("image/jpeg")
+        cache_de(&fichier_ouvert).as_deref(),
+        Some("private, no-store, no-transform"),
+        "un réservé ne reste dans aucun cache"
     );
-    assert!(
-        cache_de(&image_ouverte).is_some_and(|c| c.starts_with("private")),
-        "{:?}",
-        cache_de(&image_ouverte)
-    );
-    let empreinte_image = etag_de(&image_ouverte);
+    let empreinte_fichier = etag_de(&fichier_ouvert);
 
-    // Sans session : lecture, image et téléchargement refusés, copie présentée ou non.
+    // Sans session : lecture, fichier et téléchargement refusés, copie présentée ou non.
     for requete in [
         get(&lecture, None),
         get(&lecture, None).insert_header((IF_NONE_MATCH, empreinte.clone())),
-        get(&image, None),
-        get(&image, None).insert_header((IF_NONE_MATCH, empreinte_image.clone())),
+        get(&fichier, None).insert_header(("Range", "bytes=0-99")),
+        get(&fichier, None).insert_header((IF_NONE_MATCH, empreinte_fichier.clone())),
         test::TestRequest::post().uri(&telechargement),
     ] {
         let reponse = test::call_service(&app, requete.to_request()).await;
@@ -632,7 +662,7 @@ async fn un_reserve_rend_403_sans_session_ou_sans_acces_et_souvre_a_la_negociatr
     let lecteur = se_connecter!(app, SANS_ACCES);
     for requete in [
         get(&lecture, Some(&lecteur)),
-        get(&image, Some(&lecteur)),
+        get(&fichier, Some(&lecteur)).insert_header(("Range", "bytes=0-99")),
         test::TestRequest::post()
             .uri(&telechargement)
             .insert_header(("cookie", lecteur.clone())),
@@ -781,7 +811,7 @@ async fn un_lien_ne_se_lit_pas_et_un_document_inconnu_ou_non_publie_est_introuva
     let non_publie = brouillon(&bac, entree("Brouillon", false, None)).await;
     let app = test::init_service(api::build_app(&bac.etat)).await;
 
-    for chemin in ["reading", "pages/1/image"] {
+    for chemin in ["reading", "file"] {
         let uri = format!("/api/negotiation/documents/{enb}/{chemin}");
         let lien = test::call_service(&app, get(&uri, None).to_request()).await;
         assert_eq!(lien.status(), StatusCode::CONFLICT, "{chemin}");
@@ -795,10 +825,7 @@ async fn un_lien_ne_se_lit_pas_et_un_document_inconnu_ou_non_publie_est_introuva
     for id in [non_publie, Uuid::now_v7()] {
         for requete in [
             get(&format!("/api/negotiation/documents/{id}/reading"), None),
-            get(
-                &format!("/api/negotiation/documents/{id}/pages/1/image"),
-                None,
-            ),
+            get(&format!("/api/negotiation/documents/{id}/file"), None),
             test::TestRequest::post().uri(&format!("/api/negotiation/documents/{id}/downloads")),
         ] {
             let reponse = test::call_service(&app, requete.to_request()).await;

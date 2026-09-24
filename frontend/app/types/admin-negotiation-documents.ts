@@ -27,7 +27,11 @@ export interface ExtractionState {
   status: ExtractionStatus
   page_count: number | null
   is_reflowable: boolean | null
-  serve_as_is: boolean
+  /** `null` : suit le verdict ; vrai ou faux : le choix de l'administratrice. */
+  large_text_choice: boolean | null
+  has_text: boolean
+  /** « Texte agrandi » offert, choix et verdict appliqués. */
+  large_text: boolean
   failure_reason: string | null
   reading_bytes: number | null
   extracted_at: IsoDateTime | null
@@ -129,9 +133,9 @@ export interface AttachFileInput {
   asset_id: Uuid
 }
 
-/** `PUT …/as-is` — « ouvrir tel quel ». */
-export interface ServeAsIsInput {
-  serve_as_is: boolean
+/** `PUT …/large-text` — `null` rend la main au verdict de l'extraction. */
+export interface LargeTextChoiceInput {
+  choice: boolean | null
 }
 
 // ---------------------------------------------------------------------------

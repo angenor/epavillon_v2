@@ -2,14 +2,20 @@
 //! facultatif : ce que voit une personne dépend de son accès négociateur.
 //! Chaque lecture listée porte son empreinte et répond `304`.
 
-use actix_web::http::header::{CACHE_CONTROL, CONTENT_TYPE, ETAG};
-use actix_web::{web, HttpMessage, HttpRequest, HttpResponse};
+use actix_web::http::header::{
+    ACCEPT_RANGES, CACHE_CONTROL, CONTENT_DISPOSITION, CONTENT_ENCODING, CONTENT_RANGE,
+    CONTENT_TYPE, ETAG, RANGE,
+};
+use actix_web::http::StatusCode;
+use actix_web::{web, HttpMessage, HttpRequest, HttpResponse, ResponseError};
 use kernel::auth::Actor;
 use kernel::context::RequestContext;
-use kernel::error::Result;
+use kernel::error::{ApiError, ErrorCode, Result};
 use serde::Deserialize;
 use uuid::Uuid;
 
+use crate::domain::documents::serialiser_la_lecture;
+use crate::domain::plage::Plage;
 use crate::service::documents as service;
 use crate::state::NegotiationState;
 
@@ -20,10 +26,8 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
             "/negotiation/documents/{id}/reading",
             web::get().to(lecture),
         )
-        .route(
-            "/negotiation/documents/{id}/pages/{index}/image",
-            web::get().to(image),
-        )
+        .route("/negotiation/documents/{id}/file", web::get().to(fichier))
+        .route("/negotiation/documents/{id}/file", web::head().to(fichier))
         .route(
             "/negotiation/documents/{id}/downloads",
             web::post().to(telecharge),
@@ -125,7 +129,7 @@ pub(crate) async fn notes(
 
 #[utoipa::path(
     get,
-    description = "`DocumentReading` — la forme lisible entière : pages, sommaire, mode. Son empreinte est figée tant que le fichier, son extraction et le mode ne changent pas ; les notes n'y sont pas. Réservé sans accès : **403**. Lien externe : **409**.",
+    description = "`DocumentReading` — la forme lisible entière : pages, sommaire, `has_text` et `large_text`. Son empreinte est figée tant que le fichier, son extraction et le choix « Texte agrandi » ne changent pas ; les notes n'y sont pas. Réservé sans accès : **403**. Lien externe : **409**.",
     path = "/negotiation/documents/{id}/reading",
     tag = "Guide Négo — documents",
     operation_id = "negotiation_document_lecture",
@@ -156,34 +160,97 @@ pub(crate) async fn lecture(
     Ok(HttpResponse::Ok()
         .insert_header((ETAG, empreinte))
         .insert_header((CACHE_CONTROL, cache))
-        .json(lecture))
+        .content_type("application/json")
+        .body(serialiser_la_lecture(&lecture)))
 }
 
 #[utoipa::path(
     get,
-    description = "L'image JPEG d'une page, lue dans le bucket privé et servie par l'API après vérification de l'accès. Figée : son empreinte ne change qu'avec le fichier.",
-    path = "/negotiation/documents/{id}/pages/{index}/image",
+    description = "Le PDF d'un document fichier publié, **entier ou par plage** : `Range: bytes=a-b`, `a-` ou `-n` rend **206** et `Content-Range` ; sans `Range`, **200**, le fichier entier (le téléchargement de la copie). Une plage hors du fichier : **416**. `HEAD` rend les mêmes en-têtes sans corps.\n\n**L'accès se vérifie à chaque requête**, morceau compris. Jamais compressé (`Content-Encoding: identity`, `no-transform`) : une réponse partielle compressée fait renoncer le lecteur aux plages. `ETag` fort, **304** sur `If-None-Match`. Réservé : `no-store`.",
+    path = "/negotiation/documents/{id}/file",
     tag = "Guide Négo — documents",
-    operation_id = "negotiation_document_image",
+    operation_id = "negotiation_document_fichier",
     params(
         ("id" = Uuid, Path, description = "Identifiant du document"),
-        ("index" = i32, Path, description = "Page du document, à partir de 1"),
+        ("Range" = Option<String>, Header, description = "Une plage d'octets : bytes=a-b, bytes=a- ou bytes=-n"),
     ),
     responses(
-        (status = 200, description = "image/jpeg", content_type = "image/jpeg"),
+        (status = 200, description = "application/pdf, le fichier entier", content_type = "application/pdf"),
+        (status = 206, description = "application/pdf, la plage demandée", content_type = "application/pdf"),
         (status = 304, description = "Rien n'a changé"),
         (status = 403, description = "Document réservé", body = crate::routes::openapi::ApiErrorBody),
-        (status = 404, description = "Document ou page inconnus", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Document inconnu ou non publié", body = crate::routes::openapi::ApiErrorBody),
+        (status = 409, description = "Un lien ne se lit pas dans l'application", body = crate::routes::openapi::ApiErrorBody),
+        (status = 416, description = "La plage demandée est hors du fichier", body = crate::routes::openapi::ApiErrorBody),
     )
 )]
-pub(crate) async fn image(
+pub(crate) async fn fichier(
     state: web::Data<NegotiationState>,
     requete: HttpRequest,
-    chemin: web::Path<(Uuid, i32)>,
+    chemin: web::Path<Uuid>,
 ) -> Result<HttpResponse> {
-    let (id, index) = chemin.into_inner();
-    let image = service::image(&state, personne(&requete), id, index).await?;
-    Ok(servir_image(&requete, image))
+    let entete_plage = crate::routes::entete(&requete, RANGE.as_str());
+    let avec_corps = requete.method() != actix_web::http::Method::HEAD;
+    let servi = service::lire_le_fichier(
+        &state,
+        personne(&requete),
+        chemin.into_inner(),
+        entete_plage.as_deref(),
+        avec_corps,
+    )
+    .await?;
+    let cache = if servi.reserve {
+        "private, no-store, no-transform"
+    } else {
+        "private, max-age=3600, no-transform"
+    };
+    if let Some(r) = inchange(&requete, &servi.empreinte, cache) {
+        return Ok(r);
+    }
+
+    let (statut, longueur, bornes) = match servi.plage {
+        Plage::HorsDuFichier => {
+            let mut refus =
+                ApiError::new(ErrorCode::NegotiationDocumentRangeInvalid).error_response();
+            poser(
+                &mut refus,
+                CONTENT_RANGE,
+                &format!("bytes */{}", servi.taille),
+            );
+            poser(&mut refus, ACCEPT_RANGES, "bytes");
+            poser(&mut refus, CACHE_CONTROL, cache);
+            poser(&mut refus, CONTENT_ENCODING, "identity");
+            return Ok(refus);
+        }
+        Plage::Entier => (StatusCode::OK, servi.taille, None),
+        Plage::Partie { debut, fin } => (
+            StatusCode::PARTIAL_CONTENT,
+            fin - debut + 1,
+            Some(format!("bytes {debut}-{fin}/{}", servi.taille)),
+        ),
+    };
+    let mut reponse = HttpResponse::build(statut);
+    reponse
+        .insert_header((CONTENT_TYPE, "application/pdf"))
+        .insert_header((ACCEPT_RANGES, "bytes"))
+        .insert_header((ETAG, servi.empreinte))
+        .insert_header((CONTENT_DISPOSITION, "inline"))
+        .insert_header((CONTENT_ENCODING, "identity"))
+        .insert_header((CACHE_CONTROL, cache));
+    if let Some(bornes) = bornes {
+        reponse.insert_header((CONTENT_RANGE, bornes));
+    }
+    if avec_corps {
+        return Ok(reponse.body(servi.octets));
+    }
+    // Un HEAD annonce la longueur qu'aurait le corps, sans l'envoyer.
+    Ok(reponse.no_chunking(longueur).finish())
+}
+
+fn poser(reponse: &mut HttpResponse, nom: actix_web::http::header::HeaderName, valeur: &str) {
+    if let Ok(valeur) = actix_web::http::header::HeaderValue::from_str(valeur) {
+        reponse.headers_mut().insert(nom, valeur);
+    }
 }
 
 /// Une image de page, avec son empreinte et son cache : privé pour un réservé.

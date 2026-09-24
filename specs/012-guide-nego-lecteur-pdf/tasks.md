@@ -75,52 +75,52 @@ description: "Tâches de l'étape 1b — le lecteur montre le PDF d'origine"
 
 ### Le stockage
 
-- [ ] T016 Ajouter `get_range(&self, key, debut: u64, fin: u64) -> Result<Vec<u8>>` au trait `ObjectStore` de `backend/crates/kernel/src/storage/mod.rs`, et son implémentation dans `storage/s3.rs` (`GetObject` avec `Range: bytes=debut-fin`, signé par `sigv4.rs`) et dans `storage/filesystem.rs` (lecture positionnée)
-- [ ] T017 [P] Tester `get_range` dans `kernel` sur le stockage de fichiers : début, fin, dernier octet, plage d'un octet, plage au-delà de la taille
+- [X] T016 Ajouter `get_range(&self, key, debut: u64, fin: u64) -> Result<Vec<u8>>` au trait `ObjectStore` de `backend/crates/kernel/src/storage/mod.rs`, et son implémentation dans `storage/s3.rs` (`GetObject` avec `Range: bytes=debut-fin`, signé par `sigv4.rs`) et dans `storage/filesystem.rs` (lecture positionnée)
+- [X] T017 [P] Tester `get_range` dans `kernel` sur le stockage de fichiers : début, fin, dernier octet, plage d'un octet, plage au-delà de la taille
 
 ### La route du fichier
 
-- [ ] T018 [P] Ajouter le code `NEGOTIATION_DOCUMENT_RANGE_INVALID` (416, « La partie demandée du document n'existe pas. ») à `backend/crates/kernel/src/error.rs`
-- [ ] T019 [P] Écrire `neg/src/domain/plage.rs` : l'analyse pure de l'en-tête `Range` — `bytes=a-b`, `bytes=a-`, `bytes=-n`, plusieurs plages (la première seule), forme invalide (ignorée, rend `200`), hors du fichier (`416`) — avec ses tests unitaires dans le fichier
-- [ ] T020 Dans `neg/src/service/documents.rs`, écrire `lire_le_fichier(id, plage, acteur)` :
+- [X] T018 [P] Ajouter le code `NEGOTIATION_DOCUMENT_RANGE_INVALID` (416, « La partie demandée du document n'existe pas. ») à `backend/crates/kernel/src/error.rs`
+- [X] T019 [P] Écrire `neg/src/domain/plage.rs` : l'analyse pure de l'en-tête `Range` — `bytes=a-b`, `bytes=a-`, `bytes=-n`, plusieurs plages (la première seule), forme invalide (ignorée, rend `200`), hors du fichier (`416`) — avec ses tests unitaires dans le fichier
+- [X] T020 Dans `neg/src/service/documents.rs`, écrire `lire_le_fichier(id, plage, acteur)` :
   - passe par `lisible()` **à chaque appel** ;
   - lit la taille par `head`, puis `get_range` ou `get` ;
   - rend les octets, la taille, l'`asset_id` pour l'empreinte, et le caractère réservé
-- [ ] T021 Dans `neg/src/routes/documents.rs`, ajouter `GET` et `HEAD /negotiation/documents/{id}/file`, avec le contrat complet :
+- [X] T021 Dans `neg/src/routes/documents.rs`, ajouter `GET` et `HEAD /negotiation/documents/{id}/file`, avec le contrat complet :
   - `200` ou `206` et `Content-Range`, `416` et `Content-Range: bytes */total` ;
   - `Accept-Ranges: bytes`, `ETag` fort, `Content-Disposition: inline` ;
   - **`Content-Encoding: identity`** ;
   - `Cache-Control` : `private, max-age=3600, no-transform` pour un public, `private, no-store, no-transform` pour un réservé ;
   - `304` sur `If-None-Match`, comparé par `kernel::empreinte`, suffixe de relais retiré ;
   - l'annotation OpenAPI
-- [ ] T022 Supprimer la route publique `GET /negotiation/documents/{id}/pages/{index}/image` de `neg/src/routes/documents.rs`, et la lecture d'image publique de `neg/src/service/documents.rs` (`lire_image`). La route **admin** reste
-- [ ] T023 Dans `backend/crates/api/src/lib.rs` (contrôle d'origine maison) : accepter `Range` et `If-None-Match` en préflight, et exposer `Content-Range`, `Accept-Ranges`, `Content-Length` et `ETag`
+- [X] T022 Supprimer la route publique `GET /negotiation/documents/{id}/pages/{index}/image` de `neg/src/routes/documents.rs`, et la lecture d'image publique de `neg/src/service/documents.rs` (`lire_image`). La route **admin** reste
+- [X] T023 Dans `backend/crates/api/src/lib.rs` (contrôle d'origine maison) : accepter `Range` et `If-None-Match` en préflight, et exposer `Content-Range`, `Accept-Ranges`, `Content-Length` et `ETag`
 
 ### La lecture et la liste
 
-- [ ] T024 Dans `neg/src/repo/renditions.rs` : `large_text_choice` remplace `serve_as_is`, en lecture comme en écriture (`poser_tel_quel` devient `poser_le_choix_texte_agrandi`, `Option<bool>`). La relance d'extraction (`demander`) garde le choix. Lecture de `negotiation.document_reading_modes()`
-- [ ] T025 Dans `neg/src/service/documents.rs` et `neg/src/domain/documents.rs` :
+- [X] T024 Dans `neg/src/repo/renditions.rs` : `large_text_choice` remplace `serve_as_is`, en lecture comme en écriture (`poser_tel_quel` devient `poser_le_choix_texte_agrandi`, `Option<bool>`). La relance d'extraction (`demander`) garde le choix. Lecture de `negotiation.document_reading_modes()`
+- [X] T025 Dans `neg/src/service/documents.rs` et `neg/src/domain/documents.rs` :
   - `DocumentReading` perd `mode` et `pages[].image`, et gagne `has_text` et `large_text` ;
   - `DocumentLibrary` (et `DocumentTextHits`) perd `mode`, et gagne `has_text` et `large_text` ;
   - l'empreinte de lecture prend `large_text_choice` à la place de `serve_as_is`
-- [ ] T026 Écrire **une seule fois**, dans `neg/src/domain/documents.rs`, la sérialisation de `DocumentReading`, employée par l'API (T025) et par le worker. Dans `neg/src/jobs/extract.rs` : `reading_bytes` = `byte_size` du PDF + taille de cette sérialisation. Le motif d'échec nomme un PDF **protégé par mot de passe**, distingué de l'erreur générique dans `neg/src/pdf.rs:59`
-- [ ] T027 Dans `neg/src/routes/admin_documents.rs` et `neg/src/service/admin_documents.rs` : `PUT …/{id}/as-is` devient `PUT …/{id}/large-text`, avec `{ choice: bool | null }`, `Db::write(&ctx)` et la garde `Requires<DocumentPublish>` inchangée. L'aperçu rend `extraction.large_text_choice`, `has_text` et `large_text`
+- [X] T026 Écrire **une seule fois**, dans `neg/src/domain/documents.rs`, la sérialisation de `DocumentReading`, employée par l'API (T025) et par le worker. Dans `neg/src/jobs/extract.rs` : `reading_bytes` = `byte_size` du PDF + taille de cette sérialisation. Le motif d'échec nomme un PDF **protégé par mot de passe**, distingué de l'erreur générique dans `neg/src/pdf.rs:59`
+- [X] T027 Dans `neg/src/routes/admin_documents.rs` et `neg/src/service/admin_documents.rs` : `PUT …/{id}/as-is` devient `PUT …/{id}/large-text`, avec `{ choice: bool | null }`, `Db::write(&ctx)` et la garde `Requires<DocumentPublish>` inchangée. L'aperçu rend `extraction.large_text_choice`, `has_text` et `large_text`
 
 ### Les tests sur base réelle
 
-- [ ] T028 [P] Écrire `neg/tests/documents_fichier.rs` :
+- [X] T028 [P] Écrire `neg/tests/documents_fichier.rs` :
   - `206` et `Content-Range` pour `a-b`, `a-`, `-n` ; `200` sans `Range` ; `416` ;
   - `304`, y compris avec une empreinte suffixée « -br » ;
   - `HEAD` sans corps ;
   - `Content-Encoding: identity` et `no-transform` sur chaque réponse, `Accept-Encoding: br, gzip` envoyé ;
   - `Accept-Ranges`, `no-store` pour un réservé et jamais pour un public
-- [ ] T029 [P] Dans `neg/tests/documents_fichier.rs`, le réservé **à chaque morceau** : sans session, session sans accès, adresse forgée d'un brouillon, document dépublié entre deux morceaux — `403` ou `404`, jamais un octet (SC-009)
-- [ ] T030 [P] Adapter `neg/tests/documents_public_lecture.rs` et `neg/tests/documents_reserves.rs` :
+- [X] T029 [P] Dans `neg/tests/documents_fichier.rs`, le réservé **à chaque morceau** : sans session, session sans accès, adresse forgée d'un brouillon, document dépublié entre deux morceaux — `403` ou `404`, jamais un octet (SC-009)
+- [X] T030 [P] Adapter `neg/tests/documents_public_lecture.rs` et `neg/tests/documents_reserves.rs` :
   - `mode` et `image` absents ;
   - `has_text` et `large_text` dans les quatre cas ;
   - la route d'image publique rend `404`
-- [ ] T031 [P] Ajouter à `neg/tests/documents_admin_extraction.rs` — **pas** à `documents_admin.rs`, qui compte 865 lignes — le choix `large-text` : `true`, `false`, `null` ; la relance qui garde le choix ; l'URL forgée d'un administrateur d'événement refusée ; l'audit qui porte l'auteur ; le motif du PDF protégé
-- [ ] T032 `make openapi`, puis `make check-api-contract`. Adapter `F/app/types/negotiation-documents.ts` (`ReadingMode` supprimé, `has_text` et `large_text` ajoutés, `ReadingPage.image` supprimé) et `F/app/types/admin-negotiation-documents.ts` (`serve_as_is` → `large_text_choice`, `ServeAsIsInput` → `LargeTextChoiceInput`). `cargo test -p negotiation -p kernel`. Commit de la phase
+- [X] T031 [P] Ajouter à `neg/tests/documents_admin_extraction.rs` — **pas** à `documents_admin.rs`, qui compte 865 lignes — le choix `large-text` : `true`, `false`, `null` ; la relance qui garde le choix ; l'URL forgée d'un administrateur d'événement refusée ; l'audit qui porte l'auteur ; le motif du PDF protégé
+- [X] T032 `make openapi`, puis `make check-api-contract`. Adapter `F/app/types/negotiation-documents.ts` (`ReadingMode` supprimé, `has_text` et `large_text` ajoutés, `ReadingPage.image` supprimé) et `F/app/types/admin-negotiation-documents.ts` (`serve_as_is` → `large_text_choice`, `ServeAsIsInput` → `LargeTextChoiceInput`). `cargo test -p negotiation -p kernel`. Commit de la phase
 
 ---
 
@@ -299,7 +299,7 @@ description: "Tâches de l'étape 1b — le lecteur montre le PDF d'origine"
 
 **Test indépendant** : [quickstart § 1](quickstart.md).
 
-- [ ] T074 [US6] Dans `F/app/composables/api/admin-negotiation-documents.ts` : `ouvrirTelQuel` devient `choisirLeTexteAgrandi(id, choice: boolean | null)` sur `PUT …/large-text`
+- [X] T074 *(fait en phase 3 : le contrôle du contrat l'exige dès que `…/as-is` disparaît)* [US6] Dans `F/app/composables/api/admin-negotiation-documents.ts` : `ouvrirTelQuel` devient `choisirLeTexteAgrandi(id, choice: boolean | null)` sur `PUT …/large-text`
 - [ ] T075 [US6] Dans `F/app/components/admin/negotiation/PreviewVerdict.vue` : l'interrupteur « Ouvrir tel quel » devient « Proposer « Texte agrandi » » (`UiSwitch`), qui montre le choix effectif, avec « par défaut, selon le verdict : … » et « Revenir au verdict » quand un choix est posé. Il est désactivé et le dit quand `has_text` est faux
 - [ ] T076 [US6] Dans `F/app/pages/admin/negociations/documents/[id]/apercu.vue` : un en-tête qui dit que le lecteur montre la page d'origine et que le texte sert à la recherche, au sommaire et à « Texte agrandi » (FR-036) ; le motif d'échec affiché pour un `failed`, dont le PDF protégé. Textes dans `F/i18n/locales/{fr,en}/pages/admin.negociations.documents.preview.json`. Vérifier le quickstart § 1. Commit de la phase
 

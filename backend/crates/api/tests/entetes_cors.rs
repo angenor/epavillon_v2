@@ -83,7 +83,7 @@ async fn un_prealable_est_repondu_sans_atteindre_la_route() {
     // rare est précisément celui qu'on oublie : son absence n'a été vue que le
     // 05/09, par un écran qui ne pouvait plus enregistrer.
     let methodes = entete(&reponse, ACCESS_CONTROL_ALLOW_METHODS).unwrap_or_default();
-    for verbe in ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"] {
+    for verbe in ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"] {
         assert!(
             methodes.contains(verbe),
             "`{verbe}` manque aux méthodes annoncées : le navigateur refusera le préalable, \
@@ -121,8 +121,9 @@ async fn une_reponse_ordinaire_porte_les_entetes_et_expose_lidentifiant() {
     );
     assert_eq!(
         entete(&reponse, ACCESS_CONTROL_EXPOSE_HEADERS).as_deref(),
-        Some("X-Request-Id, ETag"),
-        "sans cette ligne le navigateur cache l'identifiant — et l'empreinte — au code du site"
+        Some("X-Request-Id, ETag, Content-Range, Accept-Ranges, Content-Length"),
+        "sans cette ligne le navigateur cache l'identifiant, l'empreinte et les bornes d'un morceau \
+         de PDF au code du site"
     );
 }
 

@@ -44,8 +44,10 @@ pub struct LibraryDocument {
     pub accessible: bool,
     pub page_count: Option<i32>,
     pub reading_bytes: Option<i64>,
-    /// `reflow` ou `as_is`, pour un fichier lisible.
-    pub mode: Option<&'static str>,
+    /// Une page au moins a du texte : recherche et sommaire.
+    pub has_text: bool,
+    /// « Texte agrandi » offert.
+    pub large_text: bool,
     pub superseded_by: Option<Successor>,
     /// L'empreinte de la forme lisible : la copie gardée est-elle la bonne ?
     pub reading_etag: Option<String>,
@@ -109,7 +111,8 @@ pub struct PageHit {
 pub struct DocumentReading {
     pub id: Uuid,
     pub version: String,
-    pub mode: &'static str,
+    pub has_text: bool,
+    pub large_text: bool,
     pub page_count: i32,
     pub outline: Value,
     pub pages: Vec<ReadingPage>,
@@ -119,10 +122,7 @@ pub struct DocumentReading {
 pub struct ReadingPage {
     pub index: i32,
     pub label: String,
-    /// Le chemin d'API de l'image, relatif à la base : présent en « tel quel »,
-    /// et sur les seules pages d'origine en mode recomposé.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub image: Option<String>,
+    /// Vides pour une page sans texte : la page reste, pour son numéro imprimé.
     pub blocks: Value,
 }
 
@@ -165,23 +165,29 @@ pub fn hote(url: &str) -> Option<String> {
     (!hote.is_empty()).then(|| hote.to_lowercase())
 }
 
-/// Le chemin public de l'image d'une page, que le téléphone garde tel quel.
-pub fn chemin_image(document_id: Uuid, index: i32) -> String {
-    format!("/negotiation/documents/{document_id}/pages/{index}/image")
-}
-
 /// L'empreinte de la forme lisible : figée tant que le fichier, son extraction
-/// et le mode ne changent pas. Les notes n'y sont pas.
+/// et le choix « Texte agrandi » ne changent pas. Les notes n'y sont pas.
 pub fn empreinte_de_lecture(
     document_id: Uuid,
     asset_id: Uuid,
     extrait_le: OffsetDateTime,
-    tel_quel: bool,
+    texte_agrandi: Option<bool>,
 ) -> String {
     kernel::empreinte::de(&format!(
-        "{document_id}:{asset_id}:{}:{tel_quel}",
+        "{document_id}:{asset_id}:{}:{texte_agrandi:?}",
         extrait_le.unix_timestamp_nanos()
     ))
+}
+
+/// Les octets de la lecture servie. Écrits ici seulement : l'API les envoie,
+/// et le worker en tire `reading_bytes`, la taille annoncée de la copie.
+pub fn serialiser_la_lecture(lecture: &DocumentReading) -> Vec<u8> {
+    serde_json::to_vec(lecture).expect("une lecture se sérialise toujours")
+}
+
+/// L'empreinte du fichier : un fichier publié ne change jamais en place.
+pub fn empreinte_du_fichier(asset_id: Uuid) -> String {
+    kernel::empreinte::de(&format!("fichier:{asset_id}"))
 }
 
 #[cfg(test)]

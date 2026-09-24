@@ -57,7 +57,13 @@ impl LecteurPdf {
         let document = self
             .pdfium
             .load_pdf_from_byte_slice(octets, None)
-            .map_err(|e| format!("le fichier ne s'ouvre pas comme un PDF : {e}"))?;
+            .map_err(|e| match e {
+                PdfiumError::PdfiumLibraryInternalError(PdfiumInternalError::PasswordError) => {
+                    "il est protégé par un mot de passe ; retirez la protection, puis déposez-le de nouveau"
+                        .to_owned()
+                }
+                e => format!("le fichier ne s'ouvre pas comme un PDF : {e}"),
+            })?;
         match document.pages().len() as usize {
             0 => Err("il ne contient aucune page".into()),
             n if n > PAGES_MAX => Err(format!(

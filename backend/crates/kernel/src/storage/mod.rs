@@ -95,6 +95,12 @@ pub trait ObjectStore: Send + Sync {
 
     async fn get(&self, key: &str) -> StorageResult<Vec<u8>>;
 
+    /// Les octets `debut..=fin`, bornes comprises. Une fin au-delà de l'objet
+    /// s'arrête à son dernier octet, comme S3 ; un début au-delà est refusé
+    /// (416). Le lecteur de PDF lit par morceaux : relire l'objet entier pour
+    /// chacun coûterait le fichier à chaque page.
+    async fn get_range(&self, key: &str, debut: u64, fin: u64) -> StorageResult<Vec<u8>>;
+
     async fn head(&self, key: &str) -> StorageResult<ObjectInfo>;
 
     /// Idempotente : supprimer ce qui n'existe pas est un succès. La purge se

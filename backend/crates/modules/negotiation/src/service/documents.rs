@@ -2,8 +2,8 @@
 //! pour personne : compter un téléchargement, poser un favori.
 //!
 //! **Réservé** veut dire : la liste montre le document à tous, mais sans son
-//! résumé ni ses thématiques pour qui n'a pas l'accès ; la forme lisible, les
-//! images, le téléchargement et les passages trouvés lui sont refusés (R10).
+//! résumé ni ses thématiques pour qui n'a pas l'accès ; la forme lisible, le
+//! fichier, le téléchargement et les passages trouvés lui sont refusés (R10).
 
 use std::collections::{BTreeSet, HashMap};
 
@@ -15,14 +15,16 @@ use time::OffsetDateTime;
 use uuid::Uuid;
 
 use crate::domain::documents::{
-    chemin_image, empreinte_de_lecture, hote, CorrectionNote, CorrectionNoteList,
+    empreinte_de_lecture, empreinte_du_fichier, hote, CorrectionNote, CorrectionNoteList,
     DocumentBookmarkList, DocumentLibrary, DocumentReading, DocumentTextHits, LibraryDocument,
     LibraryVocabulary, PageHit, ReadingPage, Successor, TextHit,
 };
 use crate::domain::permissions::SPACE_ACCESS;
+use crate::domain::plage::{self, Plage};
 use crate::repo::documents::{self, Lisible};
-use crate::repo::{bookmarks, corrections, document_pages, settings};
+use crate::repo::{bookmarks, corrections, document_pages, objets, settings};
 use crate::state::NegotiationState;
+use sqlx::postgres::PgConnection;
 
 /// L'accès négociateur, sur la portée globale : la règle de 0b.
 pub async fn a_lacces(state: &NegotiationState, personne: Option<Uuid>) -> Result<bool> {
@@ -80,10 +82,11 @@ pub async fn bibliotheque(
                 accessible: visible,
                 page_count: rendu.and_then(|r| r.page_count),
                 reading_bytes: rendu.and_then(|r| r.reading_bytes),
-                mode: rendu.map(|r| if r.serve_as_is { "as_is" } else { "reflow" }),
+                has_text: rendu.is_some_and(|r| r.has_text),
+                large_text: rendu.is_some_and(|r| r.large_text),
                 reading_etag: rendu.and_then(|r| {
                     r.extracted_at
-                        .map(|e| empreinte_de_lecture(d.id, r.asset_id, e, r.serve_as_is))
+                        .map(|e| empreinte_de_lecture(d.id, r.asset_id, e, r.large_text_choice))
                 }),
                 superseded_by: bouts.get(&d.id).map(|s| Successor {
                     id: s.id,
@@ -200,6 +203,34 @@ async fn lisible(state: &NegotiationState, personne: Option<Uuid>, id: Uuid) -> 
     Ok(doc)
 }
 
+/// La forme lisible entière, telle que l'API la sert et que le worker la pèse.
+pub(crate) async fn forme_lisible(
+    conn: &mut PgConnection,
+    id: Uuid,
+    version: &str,
+    outline: Option<Value>,
+    has_text: bool,
+    large_text: bool,
+) -> Result<DocumentReading> {
+    let pages = document_pages::lire(conn, id).await?;
+    Ok(DocumentReading {
+        id,
+        version: version.to_owned(),
+        has_text,
+        large_text,
+        page_count: pages.len() as i32,
+        outline: outline.unwrap_or(Value::Array(vec![])),
+        pages: pages
+            .into_iter()
+            .map(|p| ReadingPage {
+                index: p.index,
+                label: p.label,
+                blocks: p.blocks,
+            })
+            .collect(),
+    })
+}
+
 /// La forme lisible entière, et son empreinte figée.
 pub async fn lecture(
     state: &NegotiationState,
@@ -208,42 +239,70 @@ pub async fn lecture(
 ) -> Result<(DocumentReading, String, bool)> {
     let doc = lisible(state, personne, id).await?;
     let rendu = doc.rendu.as_ref().expect("rendu vérifié");
-    let tel_quel = rendu.serve_as_is;
     let mut conn = state.pool().acquire().await?;
-    let pages = document_pages::lire(&mut conn, id).await?;
-    let lecture = DocumentReading {
+    let lecture = forme_lisible(
+        &mut conn,
         id,
-        version: doc.version.clone(),
-        mode: if tel_quel { "as_is" } else { "reflow" },
-        page_count: pages.len() as i32,
-        outline: if tel_quel {
-            Value::Array(vec![])
-        } else {
-            doc.outline.clone().unwrap_or(Value::Array(vec![]))
-        },
-        pages: pages
-            .into_iter()
-            .map(|p| ReadingPage {
-                index: p.index,
-                label: p.label,
-                image: (tel_quel || p.has_origin_block)
-                    .then(|| chemin_image(id, p.index))
-                    .filter(|_| p.image_key.is_some()),
-                blocks: if tel_quel {
-                    Value::Array(vec![])
-                } else {
-                    p.blocks
-                },
-            })
-            .collect(),
-    };
+        &doc.version,
+        doc.outline.clone(),
+        rendu.has_text,
+        rendu.large_text,
+    )
+    .await?;
     let empreinte = empreinte_de_lecture(
         id,
         rendu.asset_id,
         rendu.extracted_at.unwrap_or(OffsetDateTime::UNIX_EPOCH),
-        tel_quel,
+        rendu.large_text_choice,
     );
     Ok((lecture, empreinte, doc.restricted))
+}
+
+/// Ce que la route du fichier sert : une plage, le fichier entier, ou le refus
+/// d'une plage hors du fichier.
+pub struct FichierServi {
+    pub taille: u64,
+    pub plage: Plage,
+    /// Vide pour un `HEAD` et pour une plage hors du fichier.
+    pub octets: Vec<u8>,
+    pub empreinte: String,
+    pub reserve: bool,
+}
+
+/// Le PDF d'un document lisible, entier ou par plage. **L'accès se vérifie à
+/// chaque appel** : pdf.js en fait des dizaines par lecture, et un accès retiré
+/// entre deux morceaux doit arrêter le suivant.
+pub async fn lire_le_fichier(
+    state: &NegotiationState,
+    personne: Option<Uuid>,
+    id: Uuid,
+    entete_plage: Option<&str>,
+    avec_corps: bool,
+) -> Result<FichierServi> {
+    let doc = lisible(state, personne, id).await?;
+    let asset_id = doc.asset_id.ok_or_else(introuvable)?;
+    let mut conn = state.pool().acquire().await?;
+    let objet = objets::emplacement(&mut conn, asset_id)
+        .await?
+        .ok_or_else(introuvable)?;
+    drop(conn);
+    let stockage = state.entrepots().du_bucket(&objet.bucket);
+    let taille = stockage.head(&objet.object_key).await?.byte_size.max(0) as u64;
+    let plage = plage::analyser(entete_plage, taille);
+    let octets = match (avec_corps, plage) {
+        (false, _) | (_, Plage::HorsDuFichier) => vec![],
+        (true, Plage::Entier) => stockage.get(&objet.object_key).await?,
+        (true, Plage::Partie { debut, fin }) => {
+            stockage.get_range(&objet.object_key, debut, fin).await?
+        }
+    };
+    Ok(FichierServi {
+        taille,
+        plage,
+        octets,
+        empreinte: empreinte_du_fichier(asset_id),
+        reserve: doc.restricted,
+    })
 }
 
 pub struct ImageDePage {
@@ -275,18 +334,9 @@ async fn lire_image(
     })
 }
 
-pub async fn image(
-    state: &NegotiationState,
-    personne: Option<Uuid>,
-    id: Uuid,
-    index: i32,
-) -> Result<ImageDePage> {
-    let doc = lisible(state, personne, id).await?;
-    lire_image(state, id, index, doc.restricted).await
-}
-
-/// L'image d'une page pour l'aperçu du back-office, brouillon compris. La
-/// garde est celle de la route.
+/// L'image d'une page pour l'aperçu du back-office, brouillon compris : le
+/// téléphone ne reçoit plus d'image depuis l'étape 1b. La garde est celle de
+/// la route.
 pub async fn image_de_lapercu(
     state: &NegotiationState,
     id: Uuid,

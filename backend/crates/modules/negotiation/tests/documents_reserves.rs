@@ -2,7 +2,7 @@
 //!
 //! Chaque refus est essayé de trois façons : sans compte, avec un compte sans
 //! accès, et par identifiant forgé. La liste le montre, sans son résumé, ses
-//! thématiques ni, pour un lien, son adresse ; sa lecture, ses images et son
+//! thématiques ni, pour un lien, son adresse ; sa lecture, son fichier et son
 //! téléchargement rendent `403` ; la recherche le nomme sans le citer ; ses
 //! notes restent à qui a l'accès ; le back-office reste fermé à qui ne publie
 //! ni ne corrige. Chaque refus a son témoin : le même geste, servi.
@@ -112,7 +112,12 @@ async fn scene(bac: &Bac) -> Scene {
     }
 }
 
-/// Le code du refus ; `ImageDePage` n'est pas `Debug`, d'où le `match`.
+/// Un morceau du PDF, comme pdf.js le demande.
+async fn morceau(bac: &Bac, personne: Option<Uuid>, id: Uuid) -> Result<public::FichierServi> {
+    public::lire_le_fichier(&bac.state, personne, id, Some("bytes=0-1023"), true).await
+}
+
+/// Le code du refus ; `FichierServi` n'est pas `Debug`, d'où le `match`.
 fn refus<T>(issue: Result<T>, quoi: &str) -> ErrorCode {
     match issue {
         Ok(_) => panic!("{quoi} : refus attendu, la réponse a été servie"),
@@ -238,7 +243,7 @@ async fn la_bibliotheque_montre_le_reserve_sans_son_resume_ni_ses_thematiques() 
 }
 
 #[tokio::test]
-async fn lecture_image_et_telechargement_dun_reserve_rendent_403_sans_acces() {
+async fn lecture_fichier_et_telechargement_dun_reserve_rendent_403_sans_acces() {
     let bac = Bac::monter().await;
     let s = scene(&bac).await;
     let avant = telechargements(&bac, s.reserve).await;
@@ -250,9 +255,9 @@ async fn lecture_image_et_telechargement_dun_reserve_rendent_403_sans_acces() {
             "{qui} : lecture"
         );
         assert_eq!(
-            refus(public::image(&bac.state, personne, s.reserve, 3).await, qui),
+            refus(morceau(&bac, personne, s.reserve).await, qui),
             ErrorCode::NegotiationDocumentRestricted,
-            "{qui} : image"
+            "{qui} : fichier"
         );
         assert_eq!(
             refus(
@@ -272,13 +277,13 @@ async fn lecture_image_et_telechargement_dun_reserve_rendent_403_sans_acces() {
             !reserve,
             "{qui} : le public se sert `Cache-Control: public`"
         );
-        let image = public::image(&bac.state, personne, s.public, 3)
+        let servi = morceau(&bac, personne, s.public)
             .await
-            .expect("l'image du public se sert");
-        assert!(image.octets.starts_with(&[0xFF, 0xD8]));
+            .expect("le fichier du public se sert");
+        assert!(servi.octets.starts_with(b"%PDF"));
         assert!(
-            !image.reservee,
-            "{qui} : l'image du public se sert `public`"
+            !servi.reserve,
+            "{qui} : le fichier du public se garde en cache"
         );
     }
     assert_eq!(
@@ -292,11 +297,11 @@ async fn lecture_image_et_telechargement_dun_reserve_rendent_403_sans_acces() {
         .expect("avec l'accès, la lecture s'ouvre");
     assert_eq!(lecture.page_count, 4);
     assert!(reserve, "la route en tire `Cache-Control: private`");
-    let image = public::image(&bac.state, Some(s.negociatrice), s.reserve, 3)
+    let servi = morceau(&bac, Some(s.negociatrice), s.reserve)
         .await
-        .expect("avec l'accès, l'image se sert");
-    assert!(image.octets.starts_with(&[0xFF, 0xD8]));
-    assert!(image.reservee, "la route en tire `Cache-Control: private`");
+        .expect("avec l'accès, le fichier se sert");
+    assert!(servi.octets.starts_with(b"%PDF"));
+    assert!(servi.reserve, "la route en tire `no-store`");
     public::compter_un_telechargement(&bac.state, Some(s.negociatrice), s.reserve)
         .await
         .expect("avec l'accès, le téléchargement se compte");
@@ -308,8 +313,8 @@ async fn un_identifiant_forge_nouvre_rien() {
     let bac = Bac::monter().await;
     let s = scene(&bac).await;
 
-    // Un brouillon réservé, extrait : ses images existent dans le bucket, et la
-    // route publique ne doit pas les servir, même avec l'accès.
+    // Un brouillon réservé, extrait : son PDF existe dans le bucket, et la
+    // route publique ne doit pas le servir, même avec l'accès.
     let brouillon = creer(&bac, s.ifdd, "Note réservée en préparation", true).await;
     let asset = objet_pdf(&bac, s.ifdd, PETIT, "ready").await;
     admin_documents::attacher_le_fichier(&bac.state, &bac.ctx(s.ifdd), brouillon, asset)
@@ -352,9 +357,9 @@ async fn un_identifiant_forge_nouvre_rien() {
                 "{contexte} : lecture"
             );
             assert_eq!(
-                refus(public::image(&bac.state, personne, id, 3).await, &contexte),
+                refus(morceau(&bac, personne, id).await, &contexte),
                 ErrorCode::NegotiationDocumentNotFound,
-                "{contexte} : image"
+                "{contexte} : fichier"
             );
             assert_eq!(
                 refus(
@@ -368,16 +373,17 @@ async fn un_identifiant_forge_nouvre_rien() {
     }
 
     // L'identifiant réel, tapé à la main par qui n'a pas l'accès : le refus
-    // passe avant l'index de page, qui ne dit donc rien du document.
+    // passe avant la plage, qui ne dit donc rien de la taille du fichier.
     for (qui, personne) in s.sans_acces() {
-        for index in [1, 3, 99] {
+        for plage in ["bytes=0-99", "bytes=-1", "bytes=999999999-"] {
             assert_eq!(
                 refus(
-                    public::image(&bac.state, personne, s.reserve, index).await,
+                    public::lire_le_fichier(&bac.state, personne, s.reserve, Some(plage), true)
+                        .await,
                     qui
                 ),
                 ErrorCode::NegotiationDocumentRestricted,
-                "{qui} : image {index}"
+                "{qui} : {plage}"
             );
         }
     }
@@ -394,9 +400,9 @@ async fn un_identifiant_forge_nouvre_rien() {
         (lecture.id, lecture.page_count, reserve),
         (brouillon, 4, true)
     );
-    public::image(&bac.state, Some(s.negociatrice), brouillon, 3)
+    morceau(&bac, Some(s.negociatrice), brouillon)
         .await
-        .expect("publié, son image se sert");
+        .expect("publié, son fichier se sert");
     assert_eq!(
         refus(
             public::lecture(&bac.state, Some(s.visiteuse), brouillon).await,
@@ -654,9 +660,9 @@ async fn un_lien_reserve_ne_livre_son_adresse_qua_qui_a_lacces() {
             "{qui} : lecture"
         );
         assert_eq!(
-            refus(public::image(&bac.state, personne, lien, 1).await, qui),
+            refus(morceau(&bac, personne, lien).await, qui),
             ErrorCode::NegotiationDocumentRestricted,
-            "{qui} : image"
+            "{qui} : fichier"
         );
         assert_eq!(
             refus(

@@ -809,23 +809,6 @@ export interface paths {
         patch: operations["admin_negotiation_document_modifier"];
         trace?: never;
     };
-    "/admin/negotiation/documents/{id}/as-is": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** @description `{ serve_as_is }` → `AdminDocument` — « ouvrir tel quel » : le document se lit en pages d'origine. Se change sans republier. */
-        put: operations["admin_negotiation_document_tel_quel"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/admin/negotiation/documents/{id}/corrections": {
         parameters: {
             query?: never;
@@ -872,6 +855,23 @@ export interface paths {
         get: operations["admin_negotiation_document_pdf"];
         /** @description `{ asset_id }` → `AdminDocument` — attache le PDF déposé avec ce document pour propriétaire, et met son extraction en file dans la même transaction. Refusé sur un document déjà publié. */
         put: operations["admin_negotiation_document_fichier"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/documents/{id}/large-text": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description `LargeTextChoiceInput` → `AdminDocument` — proposer « Texte agrandi » au téléphone : `true`, `false`, ou `null` pour suivre le verdict de l'extraction. Se change sans republier. */
+        put: operations["admin_negotiation_document_texte_agrandi"];
         post?: never;
         delete?: never;
         options?: never;
@@ -2887,15 +2887,19 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/negotiation/documents/{id}/pages/{index}/image": {
+    "/negotiation/documents/{id}/file": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** @description L'image JPEG d'une page, lue dans le bucket privé et servie par l'API après vérification de l'accès. Figée : son empreinte ne change qu'avec le fichier. */
-        get: operations["negotiation_document_image"];
+        /**
+         * @description Le PDF d'un document fichier publié, **entier ou par plage** : `Range: bytes=a-b`, `a-` ou `-n` rend **206** et `Content-Range` ; sans `Range`, **200**, le fichier entier (le téléchargement de la copie). Une plage hors du fichier : **416**. `HEAD` rend les mêmes en-têtes sans corps.
+         *
+         *     **L'accès se vérifie à chaque requête**, morceau compris. Jamais compressé (`Content-Encoding: identity`, `no-transform`) : une réponse partielle compressée fait renoncer le lecteur aux plages. `ETag` fort, **304** sur `If-None-Match`. Réservé : `no-store`.
+         */
+        get: operations["negotiation_document_fichier"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2911,7 +2915,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description `DocumentReading` — la forme lisible entière : pages, sommaire, mode. Son empreinte est figée tant que le fichier, son extraction et le mode ne changent pas ; les notes n'y sont pas. Réservé sans accès : **403**. Lien externe : **409**. */
+        /** @description `DocumentReading` — la forme lisible entière : pages, sommaire, `has_text` et `large_text`. Son empreinte est figée tant que le fichier, son extraction et le choix « Texte agrandi » ne changent pas ; les notes n'y sont pas. Réservé sans accès : **403**. Lien externe : **409**. */
         get: operations["negotiation_document_lecture"];
         put?: never;
         post?: never;
@@ -4602,9 +4606,10 @@ export interface components {
          *     - `NEGOTIATION_DOCUMENT_NOT_FOUND` (404) — Ce document n'existe pas, ou n'est plus publié.
          *     - `NEGOTIATION_DOCUMENT_RESTRICTED` (403) — Ce document est réservé aux négociatrices et négociateurs. Saisissez votre code d'invitation pour l'ouvrir.
          *     - `NEGOTIATION_DOCUMENT_NOT_READABLE` (409) — Ce document ne se lit pas dans l'application : ouvrez-le dans le navigateur.
+         *     - `NEGOTIATION_DOCUMENT_RANGE_INVALID` (416) — La partie demandée du document n'existe pas.
          *     - `NEGOTIATION_DOCUMENT_SOURCE_BOTH` (422) — Un document est un fichier ou un lien, jamais les deux.
          *     - `NEGOTIATION_DOCUMENT_SOURCE_MISSING` (422) — Déposez un fichier ou indiquez un lien avant de publier.
-         *     - `NEGOTIATION_DOCUMENT_NOT_READY` (409) — L'extraction n'est pas terminée. Attendez-la, ou choisissez « ouvrir tel quel ».
+         *     - `NEGOTIATION_DOCUMENT_NOT_READY` (409) — L'extraction n'est pas terminée. Attendez-la avant de publier.
          *     - `NEGOTIATION_DOCUMENT_FILE_LOCKED` (409) — Le fichier d'un document publié ne change pas. Publiez une nouvelle version.
          *     - `NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED` (409) — Ce document est déjà remplacé par un autre.
          *     - `NEGOTIATION_DOCUMENT_SUPERSEDE_CYCLE` (409) — Ce remplacement formerait une boucle.
@@ -4618,7 +4623,7 @@ export interface components {
              * @description Code stable. Le renommer est un changement majeur.
              * @enum {string}
              */
-            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "INTERNAL" | "SERVICE_UNAVAILABLE" | "IDENTITY_SESSION_EXPIRED" | "IDENTITY_SESSION_REVOKED" | "IDENTITY_REFRESH_REUSED" | "IDENTITY_ORIGIN_REJECTED" | "IDENTITY_PASSWORD_TOO_WEAK" | "IDENTITY_EMAIL_ALREADY_USED" | "IDENTITY_ACCOUNT_ALREADY_EXISTS" | "IDENTITY_ROLE_WINDOW_INVALID" | "IDENTITY_ROLE_SCOPE_MISMATCH" | "IDENTITY_ROLE_REVOCATION_INVALID" | "IDENTITY_UNKNOWN_REFERENCE" | "IDENTITY_PRIVACY_WRONG_ACTION" | "ORG_NOT_MANAGER" | "ORG_MEMBERSHIP_IS_INVITATION" | "ORG_MEMBERSHIP_NOT_PENDING" | "ORG_LAST_MANAGER" | "ORG_MERGE_FIELD_NOT_ARBITRABLE" | "ORG_MERGE_GLOBAL_SCOPE_REQUIRED" | "ORG_MERGE_SAME_ORGANIZATION" | "ORG_DOMAIN_VERIFICATION_REQUIRED" | "ORG_NAME_IS_DERIVED" | "ORG_UNKNOWN_REFERENCE" | "ORG_INVITATION_NOT_YOURS" | "EVENT_GLOBAL_SCOPE_REQUIRED" | "EVENT_CRITERION_HAS_SCORES" | "EVENT_UNKNOWN_REFERENCE" | "PROPOSAL_NOT_EDITABLE" | "PROPOSAL_SPEAKER_IDENTITY_LOCKED" | "PROPOSAL_REVIEW_NOT_ASSIGNED" | "PROPOSAL_UNKNOWN_TERM" | "PROPOSAL_TEXT_TOO_LONG" | "PROPOSAL_UNKNOWN_REFERENCE" | "SESSION_DERIVED_FIELD" | "SESSION_UNKNOWN_REFERENCE" | "SESSION_TRACK_EVENT_MISMATCH" | "REGISTRATION_NOT_ACCEPTED" | "REGISTRATION_ANSWER_INVALID" | "REGISTRATION_CONSENT_REQUIRED" | "REGISTRATION_ACCOUNT_REQUIRED" | "REGISTRATION_LOCKED" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_MIME_NOT_ALLOWED" | "MEDIA_TOO_LARGE" | "MEDIA_ASPECT_RATIO" | "MEDIA_ROLE_NOT_DECLARED" | "MEDIA_ROLE_EXCLUSIVE" | "MEDIA_ASSET_NOT_SERVABLE" | "MEDIA_ALT_TEXT_REQUIRED" | "MEDIA_ASSET_IN_USE" | "MEDIA_UPLOAD_INCOMPLETE" | "MEDIA_STORAGE_UNAVAILABLE" | "ENGAGEMENT_REMINDER_OFFSETS_INVALID" | "ENGAGEMENT_REMINDER_SCOPE_INVALID" | "ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN" | "ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN" | "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN" | "LIVE_INCIDENT_SCOPE_TARGET_MISMATCH" | "LIVE_INCIDENT_WINDOW_INVALID" | "LIVE_INCIDENT_NOT_PUBLISHED" | "NEGOTIATION_ACCESS_REQUEST_PENDING" | "NEGOTIATION_ACCESS_REQUEST_DECIDED" | "NEGOTIATION_INVITATION_CODE_DUPLICATE" | "NEGOTIATION_ADMISSION_MODE_INVALID" | "NEGOTIATION_SPACE_UNKNOWN" | "NEGOTIATION_THEMES_EMPTY" | "NEGOTIATION_THEME_UNKNOWN" | "NEGOTIATION_THEMES_STALE" | "NEGOTIATION_DOCUMENT_NOT_FOUND" | "NEGOTIATION_DOCUMENT_RESTRICTED" | "NEGOTIATION_DOCUMENT_NOT_READABLE" | "NEGOTIATION_DOCUMENT_SOURCE_BOTH" | "NEGOTIATION_DOCUMENT_SOURCE_MISSING" | "NEGOTIATION_DOCUMENT_NOT_READY" | "NEGOTIATION_DOCUMENT_FILE_LOCKED" | "NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED" | "NEGOTIATION_DOCUMENT_SUPERSEDE_CYCLE" | "NEGOTIATION_DOCUMENT_UNKNOWN_THEME" | "NEGOTIATION_DOCUMENT_UNKNOWN_TYPE" | "NEGOTIATION_DOCUMENT_PUBLISHED_UNDELETABLE" | "NEGOTIATION_CORRECTION_PAGE_UNKNOWN";
+            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "INTERNAL" | "SERVICE_UNAVAILABLE" | "IDENTITY_SESSION_EXPIRED" | "IDENTITY_SESSION_REVOKED" | "IDENTITY_REFRESH_REUSED" | "IDENTITY_ORIGIN_REJECTED" | "IDENTITY_PASSWORD_TOO_WEAK" | "IDENTITY_EMAIL_ALREADY_USED" | "IDENTITY_ACCOUNT_ALREADY_EXISTS" | "IDENTITY_ROLE_WINDOW_INVALID" | "IDENTITY_ROLE_SCOPE_MISMATCH" | "IDENTITY_ROLE_REVOCATION_INVALID" | "IDENTITY_UNKNOWN_REFERENCE" | "IDENTITY_PRIVACY_WRONG_ACTION" | "ORG_NOT_MANAGER" | "ORG_MEMBERSHIP_IS_INVITATION" | "ORG_MEMBERSHIP_NOT_PENDING" | "ORG_LAST_MANAGER" | "ORG_MERGE_FIELD_NOT_ARBITRABLE" | "ORG_MERGE_GLOBAL_SCOPE_REQUIRED" | "ORG_MERGE_SAME_ORGANIZATION" | "ORG_DOMAIN_VERIFICATION_REQUIRED" | "ORG_NAME_IS_DERIVED" | "ORG_UNKNOWN_REFERENCE" | "ORG_INVITATION_NOT_YOURS" | "EVENT_GLOBAL_SCOPE_REQUIRED" | "EVENT_CRITERION_HAS_SCORES" | "EVENT_UNKNOWN_REFERENCE" | "PROPOSAL_NOT_EDITABLE" | "PROPOSAL_SPEAKER_IDENTITY_LOCKED" | "PROPOSAL_REVIEW_NOT_ASSIGNED" | "PROPOSAL_UNKNOWN_TERM" | "PROPOSAL_TEXT_TOO_LONG" | "PROPOSAL_UNKNOWN_REFERENCE" | "SESSION_DERIVED_FIELD" | "SESSION_UNKNOWN_REFERENCE" | "SESSION_TRACK_EVENT_MISMATCH" | "REGISTRATION_NOT_ACCEPTED" | "REGISTRATION_ANSWER_INVALID" | "REGISTRATION_CONSENT_REQUIRED" | "REGISTRATION_ACCOUNT_REQUIRED" | "REGISTRATION_LOCKED" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_MIME_NOT_ALLOWED" | "MEDIA_TOO_LARGE" | "MEDIA_ASPECT_RATIO" | "MEDIA_ROLE_NOT_DECLARED" | "MEDIA_ROLE_EXCLUSIVE" | "MEDIA_ASSET_NOT_SERVABLE" | "MEDIA_ALT_TEXT_REQUIRED" | "MEDIA_ASSET_IN_USE" | "MEDIA_UPLOAD_INCOMPLETE" | "MEDIA_STORAGE_UNAVAILABLE" | "ENGAGEMENT_REMINDER_OFFSETS_INVALID" | "ENGAGEMENT_REMINDER_SCOPE_INVALID" | "ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN" | "ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN" | "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN" | "LIVE_INCIDENT_SCOPE_TARGET_MISMATCH" | "LIVE_INCIDENT_WINDOW_INVALID" | "LIVE_INCIDENT_NOT_PUBLISHED" | "NEGOTIATION_ACCESS_REQUEST_PENDING" | "NEGOTIATION_ACCESS_REQUEST_DECIDED" | "NEGOTIATION_INVITATION_CODE_DUPLICATE" | "NEGOTIATION_ADMISSION_MODE_INVALID" | "NEGOTIATION_SPACE_UNKNOWN" | "NEGOTIATION_THEMES_EMPTY" | "NEGOTIATION_THEME_UNKNOWN" | "NEGOTIATION_THEMES_STALE" | "NEGOTIATION_DOCUMENT_NOT_FOUND" | "NEGOTIATION_DOCUMENT_RESTRICTED" | "NEGOTIATION_DOCUMENT_NOT_READABLE" | "NEGOTIATION_DOCUMENT_RANGE_INVALID" | "NEGOTIATION_DOCUMENT_SOURCE_BOTH" | "NEGOTIATION_DOCUMENT_SOURCE_MISSING" | "NEGOTIATION_DOCUMENT_NOT_READY" | "NEGOTIATION_DOCUMENT_FILE_LOCKED" | "NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED" | "NEGOTIATION_DOCUMENT_SUPERSEDE_CYCLE" | "NEGOTIATION_DOCUMENT_UNKNOWN_THEME" | "NEGOTIATION_DOCUMENT_UNKNOWN_TYPE" | "NEGOTIATION_DOCUMENT_PUBLISHED_UNDELETABLE" | "NEGOTIATION_CORRECTION_PAGE_UNKNOWN";
             /** @description Message français, affichable tel quel. */
             message: string;
             /** @description Champ fautif, quand le refus en désigne un. */
@@ -7326,60 +7331,6 @@ export interface operations {
             };
         };
     };
-    admin_negotiation_document_tel_quel: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Identifiant du document */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": Record<string, never>;
-            };
-        };
-        responses: {
-            /** @description AdminDocument */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>;
-                };
-            };
-            /** @description Sans la permission de publier */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiError"];
-                };
-            };
-            /** @description Document inconnu */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiError"];
-                };
-            };
-            /** @description Aucun fichier extrait */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiError"];
-                };
-            };
-        };
-    };
     admin_negotiation_document_notes: {
         parameters: {
             query?: never;
@@ -7626,6 +7577,60 @@ export interface operations {
                 };
             };
             /** @description Fichier inconnu, pas un PDF, ou lien déjà posé */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_document_texte_agrandi: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du document */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description AdminDocument */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Sans la permission de publier */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Document inconnu */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Aucun fichier extrait */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -11937,27 +11942,37 @@ export interface operations {
             };
         };
     };
-    negotiation_document_image: {
+    negotiation_document_fichier: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Une plage d'octets : bytes=a-b, bytes=a- ou bytes=-n */
+                Range?: string | null;
+            };
             path: {
                 /** @description Identifiant du document */
                 id: string;
-                /** @description Page du document, à partir de 1 */
-                index: number;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description image/jpeg */
+            /** @description application/pdf, le fichier entier */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "image/jpeg": unknown;
+                    "application/pdf": unknown;
+                };
+            };
+            /** @description application/pdf, la plage demandée */
+            206: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": unknown;
                 };
             };
             /** @description Rien n'a changé */
@@ -11976,8 +11991,26 @@ export interface operations {
                     "application/json": components["schemas"]["ApiError"];
                 };
             };
-            /** @description Document ou page inconnus */
+            /** @description Document inconnu ou non publié */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Un lien ne se lit pas dans l'application */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description La plage demandée est hors du fichier */
+            416: {
                 headers: {
                     [name: string]: unknown;
                 };

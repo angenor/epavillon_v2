@@ -1,18 +1,17 @@
 //! **La forme lisible servie au téléphone** : ses pages et son sommaire dans la
-//! grammaire de `contracts/forme-lisible.md`, le mode « tel quel », l'empreinte
-//! qui dit si la copie gardée est la bonne, et l'image d'une page — par les
-//! services, sur base réelle.
+//! grammaire de `contracts/forme-lisible.md`, le choix « Texte agrandi », et
+//! l'empreinte qui dit si la copie gardée est la bonne — par les services, sur
+//! base réelle. Le PDF lui-même a ses tests dans `documents_fichier.rs`.
 
 mod commun;
 
 use commun::documents::{
-    administratrice, demander_lextraction, entrepots, fichier_publie, pages as pages_en_base,
-    passer_lextraction, BUCKET_PRIVE,
+    administratrice, demander_lextraction, fichier_publie, passer_lextraction,
 };
 use commun::Bac;
-use negotiation::domain::documents::{chemin_image, DocumentReading};
+use negotiation::domain::documents::DocumentReading;
 use negotiation::service::{admin_documents, documents as public};
-use serde_json::{json, Value};
+use serde_json::Value;
 use uuid::Uuid;
 
 // -----------------------------------------------------------------------------
@@ -26,8 +25,8 @@ async fn lire(bac: &Bac, id: Uuid) -> (DocumentReading, String) {
     (lecture, empreinte)
 }
 
-/// Ce que la liste annonce de la forme lisible : son mode et son empreinte.
-async fn annonce(bac: &Bac, id: Uuid) -> (Option<&'static str>, Option<String>) {
+/// Ce que la liste annonce de la forme lisible : texte, « Texte agrandi », empreinte.
+async fn annonce(bac: &Bac, id: Uuid) -> (bool, bool, Option<String>) {
     let (bib, _) = public::bibliotheque(&bac.state, None, "fr")
         .await
         .expect("bibliothèque");
@@ -36,7 +35,19 @@ async fn annonce(bac: &Bac, id: Uuid) -> (Option<&'static str>, Option<String>) 
         .into_iter()
         .find(|d| d.id == id)
         .expect("document listé");
-    (d.mode, d.reading_etag)
+    (d.has_text, d.large_text, d.reading_etag)
+}
+
+async fn choisir(bac: &Bac, admin: Uuid, id: Uuid, choix: Option<bool>) {
+    admin_documents::choisir_le_texte_agrandi(&bac.state, &bac.ctx(admin), id, choix)
+        .await
+        .expect("choix « Texte agrandi »");
+}
+
+/// Ce que la lecture offre : texte, « Texte agrandi ».
+async fn modes(bac: &Bac, id: Uuid) -> (bool, bool) {
+    let (lecture, _) = lire(bac, id).await;
+    (lecture.has_text, lecture.large_text)
 }
 
 /// Le texte de chaque page, tel que la recherche l'indexe.
@@ -123,7 +134,7 @@ fn entrees(sommaire: &Value, acc: &mut Vec<(String, u64, i64)>) {
 }
 
 // -----------------------------------------------------------------------------
-// Le mode recomposé
+// La forme lisible
 // -----------------------------------------------------------------------------
 
 #[tokio::test]
@@ -138,7 +149,8 @@ async fn la_lecture_rend_la_forme_lisible_et_une_empreinte_figee() {
     assert!(!reserve);
     assert_eq!(lecture.id, guide);
     assert_eq!(lecture.version, "1");
-    assert_eq!(lecture.mode, "reflow");
+    assert!(lecture.has_text, "le petit PDF a du texte");
+    assert!(lecture.large_text, "et son verdict le dit recomposable");
     assert_eq!(lecture.page_count, 4);
     let index: Vec<i32> = lecture.pages.iter().map(|p| p.index).collect();
     assert_eq!(index, [1, 2, 3, 4], "des pages contiguës de 1 à page_count");
@@ -165,17 +177,30 @@ async fn la_lecture_rend_la_forme_lisible_et_une_empreinte_figee() {
             a_plat(texte),
             "page {i} : rien ne se cherche qui ne s'affiche pas"
         );
-        let origine = blocs.iter().any(est_origine);
-        assert_eq!(
-            page.image.as_deref(),
-            origine.then(|| chemin_image(guide, *i)).as_deref(),
-            "page {i} : l'image, sur les seules pages à bloc d'origine"
-        );
     }
     assert!(
-        lecture.pages.iter().any(|p| p.image.is_some()),
+        lecture
+            .pages
+            .iter()
+            .any(|p| blocs(p).iter().any(est_origine)),
         "le petit PDF porte un tableau"
     );
+    let servie = serde_json::to_value(&lecture).expect("sérialisation");
+    for page in servie["pages"].as_array().unwrap() {
+        let mut cles: Vec<&str> = page
+            .as_object()
+            .unwrap()
+            .keys()
+            .map(String::as_str)
+            .collect();
+        cles.sort_unstable();
+        assert_eq!(
+            cles,
+            ["blocks", "index", "label"],
+            "aucune image de page ne va plus au téléphone"
+        );
+    }
+    assert!(servie.get("mode").is_none(), "« mode » a disparu");
 
     let mut sommaire = Vec::new();
     entrees(&lecture.outline, &mut sommaire);
@@ -199,79 +224,86 @@ async fn la_lecture_rend_la_forme_lisible_et_une_empreinte_figee() {
     assert_eq!(encore, empreinte, "figée tant que rien ne change");
     assert_eq!(
         annonce(&bac, guide).await,
-        (Some("reflow"), Some(empreinte)),
-        "la liste annonce l'empreinte que la lecture rend"
+        (true, true, Some(empreinte)),
+        "la liste annonce ce que la lecture rend"
     );
 }
 
 // -----------------------------------------------------------------------------
-// Le mode « tel quel »
+// Le choix « Texte agrandi »
 // -----------------------------------------------------------------------------
 
 #[tokio::test]
-async fn ouvert_tel_quel_le_document_ne_se_lit_quen_images() {
+async fn le_choix_texte_agrandi_suit_le_verdict_puis_le_choix() {
     let bac = Bac::monter().await;
     let ifdd = administratrice(&bac, "ifdd@example.org").await;
     let guide = fichier_publie(&bac, ifdd, "Guide des négociations", false).await;
-    let (recompose, recomposee) = lire(&bac, guide).await;
-    let sans_image = recompose
-        .pages
-        .iter()
-        .find(|p| p.image.is_none())
-        .expect("une page sans image en mode recomposé")
-        .index;
+    let (recompose, du_verdict) = lire(&bac, guide).await;
+    assert_eq!(
+        modes(&bac, guide).await,
+        (true, true),
+        "verdict vrai, sans choix"
+    );
 
-    admin_documents::ouvrir_tel_quel(&bac.state, &bac.ctx(ifdd), guide, true)
-        .await
-        .expect("tel quel");
-
-    let (tel_quel, empreinte) = lire(&bac, guide).await;
-    assert_eq!(tel_quel.mode, "as_is");
-    assert_eq!(tel_quel.page_count, 4);
-    assert_eq!(tel_quel.outline, json!([]), "ni sommaire");
-    let index: Vec<i32> = tel_quel.pages.iter().map(|p| p.index).collect();
-    assert_eq!(index, [1, 2, 3, 4]);
-    for (p, r) in tel_quel.pages.iter().zip(&recompose.pages) {
-        assert_eq!(p.label, r.label, "page {} : son étiquette", p.index);
-        assert_eq!(p.blocks, json!([]), "page {} : aucun bloc", p.index);
+    choisir(&bac, ifdd, guide, Some(false)).await;
+    let (retire, empreinte) = lire(&bac, guide).await;
+    assert_eq!(
+        (retire.has_text, retire.large_text),
+        (true, false),
+        "choix contraire au verdict"
+    );
+    assert_eq!(retire.pages.len(), recompose.pages.len());
+    for (p, r) in retire.pages.iter().zip(&recompose.pages) {
         assert_eq!(
-            p.image.as_deref(),
-            Some(chemin_image(guide, p.index).as_str()),
-            "page {} : une image sur chaque page",
+            p.blocks, r.blocks,
+            "page {} : le texte reste, pour la recherche",
             p.index
         );
     }
-    let servie = serde_json::to_value(&tel_quel).expect("sérialisation");
-    for page in servie["pages"].as_array().unwrap() {
-        let mut cles: Vec<&str> = page
-            .as_object()
-            .unwrap()
-            .keys()
-            .map(String::as_str)
-            .collect();
-        cles.sort_unstable();
-        assert_eq!(cles, ["blocks", "image", "index", "label"]);
-    }
+    assert_eq!(retire.outline, recompose.outline, "le sommaire reste");
+    assert_ne!(empreinte, du_verdict, "la copie gardée n'est plus la bonne");
+    assert_eq!(annonce(&bac, guide).await, (true, false, Some(empreinte)));
 
-    assert_ne!(
-        empreinte, recomposee,
-        "une autre forme lisible : la copie gardée n'est plus la bonne"
-    );
+    choisir(&bac, ifdd, guide, None).await;
+    let (_, reprise) = lire(&bac, guide).await;
+    assert_eq!(modes(&bac, guide).await, (true, true));
+    assert_eq!(reprise, du_verdict, "rendue au verdict : la même empreinte");
+
+    sqlx::query(
+        "UPDATE negotiation.document_renditions SET is_reflowable = false WHERE document_id = $1",
+    )
+    .bind(guide)
+    .execute(bac.pool())
+    .await
+    .expect("verdict faux");
     assert_eq!(
-        annonce(&bac, guide).await,
-        (Some("as_is"), Some(empreinte.clone()))
+        modes(&bac, guide).await,
+        (true, false),
+        "verdict faux, sans choix"
     );
-    let image = public::image(&bac.state, None, guide, sans_image)
+    choisir(&bac, ifdd, guide, Some(true)).await;
+    assert_eq!(
+        modes(&bac, guide).await,
+        (true, true),
+        "le choix l'emporte sur le verdict"
+    );
+
+    sqlx::query("UPDATE negotiation.document_pages SET plain_text = '' WHERE document_id = $1")
+        .bind(guide)
+        .execute(bac.pool())
         .await
-        .expect("l'image d'une page sans bloc d'origine");
-    assert!(image.octets.starts_with(&[0xFF, 0xD8]), "un JPEG");
+        .expect("pages sans texte");
+    assert_eq!(
+        modes(&bac, guide).await,
+        (false, false),
+        "sans texte, ni recherche ni « Texte agrandi », quel que soit le choix"
+    );
 
     let traces = sqlx::query_scalar::<_, Option<Uuid>>(
         "SELECT actor_id FROM platform.audit_log
           WHERE entity_schema = 'negotiation' AND entity_table = 'document_renditions'
             AND new_data ->> 'document_id' = $1::text
-            AND 'serve_as_is' = ANY (changed_fields)
-            AND (new_data ->> 'serve_as_is')::boolean",
+            AND 'large_text_choice' = ANY (changed_fields)",
     )
     .bind(guide)
     .fetch_all(bac.pool())
@@ -279,20 +311,8 @@ async fn ouvert_tel_quel_le_document_ne_se_lit_quen_images() {
     .expect("journal d'audit");
     assert_eq!(
         traces,
-        [Some(ifdd)],
-        "le choix « tel quel » laisse une trace à son nom"
-    );
-
-    admin_documents::ouvrir_tel_quel(&bac.state, &bac.ctx(ifdd), guide, false)
-        .await
-        .expect("retour au mode recomposé");
-    let (retour, reprise) = lire(&bac, guide).await;
-    assert_eq!(retour.mode, "reflow");
-    assert_eq!(retour.outline, recompose.outline);
-    assert!(retour.pages.iter().all(|p| !blocs(p).is_empty()));
-    assert_eq!(
-        reprise, recomposee,
-        "la même forme lisible, la même empreinte"
+        [Some(ifdd); 3],
+        "chaque choix « Texte agrandi » laisse une trace à son nom"
     );
 }
 
@@ -327,65 +347,10 @@ async fn lempreinte_de_lecture_distingue_les_documents_et_suit_lextraction() {
         reextrait, du_guide,
         "une nouvelle extraction change l'empreinte"
     );
-    assert_eq!(annonce(&bac, guide).await.1, Some(reextrait));
+    assert_eq!(annonce(&bac, guide).await.2, Some(reextrait));
     assert_eq!(
         lire(&bac, jumeau).await.1,
         du_jumeau,
         "l'autre document ne bouge pas"
     );
-}
-
-// -----------------------------------------------------------------------------
-// L'image d'une page
-// -----------------------------------------------------------------------------
-
-#[tokio::test]
-async fn limage_dune_page_se_lit_dans_le_bucket_prive() {
-    let bac = Bac::monter().await;
-    let ifdd = administratrice(&bac, "ifdd@example.org").await;
-    let guide = fichier_publie(&bac, ifdd, "Guide des négociations", false).await;
-    let en_base = pages_en_base(&bac, guide).await;
-    let (lecture, _) = lire(&bac, guide).await;
-    let origine = lecture
-        .pages
-        .iter()
-        .find(|p| p.image.is_some())
-        .expect("une page à image")
-        .index;
-    let autre = if origine == 1 { 2 } else { 1 };
-
-    let image = public::image(&bac.state, None, guide, origine)
-        .await
-        .expect("image");
-    assert!(image.octets.starts_with(&[0xFF, 0xD8]), "un JPEG");
-    assert!(!image.reservee, "public : cache partagé permis");
-    let cle = en_base
-        .iter()
-        .find(|p| p.0 == origine)
-        .and_then(|p| p.2.clone())
-        .expect("la clé de l'image en base");
-    let stockee = entrepots(&bac)
-        .du_bucket(BUCKET_PRIVE)
-        .get(&cle)
-        .await
-        .expect("l'objet dans le bucket privé");
-    assert_eq!(
-        image.octets, stockee,
-        "l'image de cette page, et d'aucune autre"
-    );
-
-    let voisine = public::image(&bac.state, None, guide, autre)
-        .await
-        .expect("image d'une autre page");
-    assert_ne!(voisine.octets, image.octets);
-    assert_ne!(
-        voisine.empreinte, image.empreinte,
-        "une empreinte par image"
-    );
-
-    let hors = public::image(&bac.state, None, guide, 99)
-        .await
-        .err()
-        .expect("une page qui n'existe pas");
-    assert_eq!(hors.code.status().as_u16(), 404);
 }

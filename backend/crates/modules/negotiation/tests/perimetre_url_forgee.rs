@@ -218,7 +218,11 @@ const ROUTES_DOCUMENTS: [(&str, &str, &str); 17] = [
         "/admin/negotiation/documents/{id}/extraction",
         PUBLIER,
     ),
-    ("put", "/admin/negotiation/documents/{id}/as-is", PUBLIER),
+    (
+        "put",
+        "/admin/negotiation/documents/{id}/large-text",
+        PUBLIER,
+    ),
     ("post", "/admin/negotiation/documents/{id}/publish", PUBLIER),
     (
         "post",
@@ -694,7 +698,7 @@ fn corps(verbe: &str, motif: &str, cibles: &Cibles) -> Option<Value> {
         ("put", "/admin/negotiation/documents/{id}/file") => {
             Some(json!({ "asset_id": cibles.asset }))
         }
-        ("put", "/admin/negotiation/documents/{id}/as-is") => Some(json!({ "serve_as_is": true })),
+        ("put", "/admin/negotiation/documents/{id}/large-text") => Some(json!({ "choice": false })),
         ("post", "/admin/negotiation/documents/{id}/corrections") => {
             Some(json!({ "page_index": 1, "body": { "fr": "Forgée" } }))
         }

@@ -44,14 +44,18 @@ use crate::middleware::origin::normaliser;
 /// code ne sert à rien : Guide Négo la lit pour la renvoyer en `If-Match`, et
 /// sans elle un choix pris hors connexion repartirait sans garde d'ancienneté,
 /// c'est-à-dire en écrasant en silence un choix plus récent fait ailleurs.
-const EXPOSES: &str = "X-Request-Id, ETag";
+///
+/// **Les trois en-têtes de plage s'y ajoutent en 1b** : le lecteur de PDF lit
+/// le fichier par morceaux, et sans `Content-Range` il ne saurait pas où tombe
+/// celui qu'il reçoit.
+const EXPOSES: &str = "X-Request-Id, ETag, Content-Range, Accept-Ranges, Content-Length";
 
 /// **`PATCH` en fait partie, et son oubli a coûté une panne.** Un verbe absent
 /// de cette ligne n'échoue pas à l'appel : le navigateur refuse le PRÉALABLE, et
 /// l'écran ne voit qu'un échec réseau sans code — exactement ce qu'il affiche
 /// quand l'API est éteinte. La liste doit donc porter TOUS les verbes que les
 /// routes servent, y compris celui qu'une seule route emploie.
-const METHODES: &str = "GET, POST, PUT, PATCH, DELETE, OPTIONS";
+const METHODES: &str = "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS";
 
 /// Dix minutes. Assez pour qu'une navigation ne repaye pas le préalable à
 /// chaque appel, assez court pour qu'un changement de configuration se voie

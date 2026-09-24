@@ -19,9 +19,11 @@ use sqlx::postgres::PgConnection;
 use time::{Duration, OffsetDateTime};
 use uuid::Uuid;
 
+use crate::domain::documents::serialiser_la_lecture;
 use crate::domain::extraction::{self, forme::Block, Extraction};
 use crate::pdf::LecteurPdf;
-use crate::repo::{document_pages, objets, renditions};
+use crate::repo::{document_pages, documents, objets, renditions};
+use crate::service::documents as service;
 
 pub const EXTRACT_DOCUMENT: &str = "negotiation.document.extract";
 
@@ -275,14 +277,17 @@ impl ExtractDocument {
         let extraction = match texte {
             Ok(brut) => extraction::extraire(&brut),
             // Le texte ne se tire pas, les pages se rendent : le document se
-            // lira « tel quel », et l'aperçu le dit.
+            // lit sur ses pages, sans « Texte agrandi », et l'aperçu le dit.
             Err(motif) => {
                 tracing::warn!(document = %c.document_id, %motif, "texte illisible, pages rendues");
                 sans_texte(cles.len())
             }
         };
 
-        match self.conclure(job, c, &extraction, &tailles, &cles).await {
+        match self
+            .conclure(job, c, &extraction, &tailles, &cles, objet.byte_size)
+            .await
+        {
             Ok(true) => {}
             // Le fichier ou la demande a changé pendant l'extraction : elle ne
             // vaut plus rien.
@@ -314,17 +319,9 @@ impl ExtractDocument {
         extraction: &Extraction,
         tailles: &[i32],
         cles: &[String],
+        octets_du_pdf: i64,
     ) -> Result<bool> {
         let pages = pages_a_ecrire(extraction, tailles, cles)?;
-        let forme: i64 = pages
-            .iter()
-            .map(|p| p.blocks.to_string().len() as i64)
-            .sum();
-        let origines: i64 = pages
-            .iter()
-            .filter(|p| p.has_origin_block)
-            .filter_map(|p| p.image_bytes.map(i64::from))
-            .sum();
         let outline = serde_json::to_value(&extraction.outline)
             .map_err(|e| ApiError::internal(format!("sommaire : {e}")))?;
         let quality = serde_json::to_value(&extraction.quality)
@@ -342,7 +339,6 @@ impl ExtractDocument {
                 outline: &outline,
                 is_reflowable: extraction.is_reflowable,
                 quality: &quality,
-                reading_bytes: forme + origines,
                 extractor: &format!(
                     "pdfium-render 0.9.4 / pdfium chromium-7881 / règles {}",
                     env!("CARGO_PKG_VERSION")
@@ -354,6 +350,26 @@ impl ExtractDocument {
             tx.rollback().await?;
             return Ok(false);
         }
+        // La lecture pesée est celle que l'API servira, relue dans cette
+        // transaction : la règle « Texte agrandi » y vient de la base.
+        let doc = documents::quelconque(&mut tx, c.document_id)
+            .await?
+            .ok_or_else(|| ApiError::internal("document disparu pendant l'extraction"))?;
+        let rendu = doc
+            .rendu
+            .as_ref()
+            .ok_or_else(|| ApiError::internal("extraction disparue pendant sa conclusion"))?;
+        let lecture = service::forme_lisible(
+            &mut tx,
+            c.document_id,
+            &doc.version,
+            doc.outline.clone(),
+            rendu.has_text,
+            rendu.large_text,
+        )
+        .await?;
+        let poids = octets_du_pdf + serialiser_la_lecture(&lecture).len() as i64;
+        renditions::poser_le_poids(&mut tx, c.document_id, poids).await?;
         tx.commit().await?;
         Ok(true)
     }

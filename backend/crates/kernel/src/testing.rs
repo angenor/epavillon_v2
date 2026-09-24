@@ -216,8 +216,13 @@ async fn supprimer_modeles_perimes(admin: &mut PgConnection, courant: &str) {
     }
 }
 
+const SEMIS_DE_DEVELOPPEMENT_COUPE: &str = "SET epavillon.seed_dev = 'off'";
+
 fn empreinte_du_schema() -> String {
     let mut hacheur = Sha256::new();
+    // Changer la façon de charger change le modèle : un modèle construit
+    // autrement ne doit pas resservir.
+    hacheur.update(SEMIS_DE_DEVELOPPEMENT_COUPE.as_bytes());
     for fichier in fichiers_sql() {
         hacheur.update(fichier.file_name().unwrap_or_default().as_encoded_bytes());
         hacheur.update(std::fs::read(&fichier).unwrap_or_default());
@@ -245,6 +250,12 @@ fn fichiers_sql() -> Vec<PathBuf> {
 /// fragile (research.md § R15).
 async fn charger_schema(url_modele: &str) -> Result<(), String> {
     let mut conn = connecter(url_modele).await;
+    // Le conteneur de développement pose `epavillon.seed_dev = on` pour tout le
+    // serveur : sans ce retrait, le modèle recevrait les codes d'invitation de
+    // démonstration, et les tests qui sèment les leurs entreraient en conflit.
+    conn.execute(SEMIS_DE_DEVELOPPEMENT_COUPE)
+        .await
+        .map_err(|e| format!("semis de développement : {e}"))?;
     for fichier in fichiers_sql() {
         let sql = std::fs::read_to_string(&fichier)
             .map_err(|e| format!("lecture de {} : {e}", fichier.display()))?;

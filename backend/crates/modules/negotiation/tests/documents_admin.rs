@@ -404,7 +404,7 @@ async fn publier_avant_que_lextraction_soit_prete_est_refuse() {
     assert_eq!(err.code, ErrorCode::NegotiationDocumentNotReady, "{err}");
     assert_eq!(
         err.message,
-        "L'extraction n'est pas terminée. Attendez-la, ou choisissez « ouvrir tel quel »."
+        "L'extraction n'est pas terminée. Attendez-la avant de publier."
     );
     assert_eq!(la_fiche(&bac, ifdd, en_attente).await.state, "draft");
 

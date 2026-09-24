@@ -248,7 +248,7 @@ async fn la_bibliotheque_rend_les_documents_publies_resolus_dans_la_langue_deman
     assert!(!d.restricted && d.accessible);
     assert_eq!(d.page_count, Some(4));
     assert!(d.reading_bytes.is_some_and(|o| o > 0));
-    assert_eq!(d.mode, Some("reflow"));
+    assert!(d.has_text && d.large_text);
     assert!(d.superseded_by.is_none());
     assert!(d.reading_etag.is_some());
     let b = dans(&fr, bulletin).expect("le lien est listé");
@@ -715,13 +715,10 @@ async fn un_document_depublie_quitte_la_liste_et_ne_se_lit_plus() {
     let bac = Bac::monter().await;
     let ifdd = administratrice(&bac, "ifdd@example.org").await;
     let guide = fichier_publie(&bac, ifdd, "Guide des négociations", false).await;
-    let (lecture, _, _) = public::lecture(&bac.state, None, guide).await.unwrap();
-    let index = lecture
-        .pages
-        .iter()
-        .find(|p| p.image.is_some())
-        .unwrap()
-        .index;
+    public::lire_le_fichier(&bac.state, None, guide, Some("bytes=0-99"), true)
+        .await
+        .map(|_| ())
+        .expect("publié, son fichier se sert");
     let cite = |t: &DocumentTextHits| t.hits.iter().any(|h| h.document_id == guide);
     let avant = public::rechercher(&bac.state, None, "negociations reprennent")
         .await
@@ -741,8 +738,13 @@ async fn un_document_depublie_quitte_la_liste_et_ne_se_lit_plus() {
     assert_eq!(e.code, ErrorCode::NegotiationDocumentNotFound);
     assert_eq!(e.code.status().as_u16(), 404);
     assert_eq!(
-        refus(public::image(&bac.state, None, guide, index).await),
-        ErrorCode::NegotiationDocumentNotFound
+        refus(
+            public::lire_le_fichier(&bac.state, None, guide, Some("bytes=0-99"), true)
+                .await
+                .map(|_| ())
+        ),
+        ErrorCode::NegotiationDocumentNotFound,
+        "ni son fichier, morceau compris"
     );
 
     let apres = public::rechercher(&bac.state, None, "negociations reprennent")
@@ -773,7 +775,7 @@ async fn un_lien_externe_se_liste_mais_ne_se_lit_pas_dans_lapplication() {
     );
     assert_eq!(l.link_host.as_deref(), Some("enb.iisd.org"));
     assert!(l.page_count.is_none() && l.reading_bytes.is_none());
-    assert!(l.mode.is_none() && l.reading_etag.is_none());
+    assert!(!l.has_text && !l.large_text && l.reading_etag.is_none());
 
     let e = public::lecture(&bac.state, None, enb)
         .await
@@ -781,7 +783,11 @@ async fn un_lien_externe_se_liste_mais_ne_se_lit_pas_dans_lapplication() {
     assert_eq!(e.code, ErrorCode::NegotiationDocumentNotReadable);
     assert_eq!(e.code.status().as_u16(), 409);
     assert_eq!(
-        refus(public::image(&bac.state, None, enb, 1).await),
+        refus(
+            public::lire_le_fichier(&bac.state, None, enb, None, true)
+                .await
+                .map(|_| ())
+        ),
         ErrorCode::NegotiationDocumentNotReadable
     );
 }
