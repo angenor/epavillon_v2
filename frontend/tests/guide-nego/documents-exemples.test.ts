@@ -158,13 +158,19 @@ test('la recherche exige tous les mots, dans n’importe quel ordre, sans les vo
   assert.equal(refus(() => m.rechercherDansLesDocuments('   ')).field, 'q')
 })
 
-test('un document ouvert tel quel reste trouvable : le mode change la lecture, pas le texte cherché', () => {
+test('sans « Texte agrandi », un document reste trouvable : le choix ne retire pas le texte cherché', () => {
   assert.deepEqual(pagesTrouvees('Belem financement', D.noteBilanCop30), [1])
-  m.ouvrirTelQuel(D.noteBilanCop30, true)
-  const lecture = m.lectureDuDocument(D.noteBilanCop30).valeur
-  assert.equal(lecture.mode, 'as_is')
-  assert.deepEqual(lecture.pages[0]?.blocks, [])
+  const avant = m.lectureDuDocument(D.noteBilanCop30).valeur
+  assert.equal(avant.large_text, true)
+  m.choisirLeTexteAgrandi(D.noteBilanCop30, false)
+  const lecture = m.lectureDuDocument(D.noteBilanCop30)
+  assert.equal(lecture.valeur.large_text, false)
+  assert.equal(lecture.valeur.has_text, true)
+  assert.deepEqual(lecture.valeur.pages, avant.pages, 'les pages gardent leur texte')
+  assert.notEqual(lecture.empreinte, m.lectureDuDocument(D.guideCop31).empreinte)
   assert.deepEqual(pagesTrouvees('Belem financement', D.noteBilanCop30), [1])
+  m.choisirLeTexteAgrandi(D.noteBilanCop30, null)
+  assert.equal(m.lectureDuDocument(D.noteBilanCop30).valeur.large_text, true, 'rendu au verdict')
 })
 
 test('un réservé se dit trouvé, sans page ni extrait, tant que l’accès manque', () => {

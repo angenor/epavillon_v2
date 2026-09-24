@@ -62,7 +62,8 @@ export function estUneFormeLisible(v: unknown): v is DocumentReading {
   if (!estObjet(v)) return false
   return (
     typeof v.version === 'string' &&
-    (v.mode === 'reflow' || v.mode === 'as_is') &&
+    typeof v.has_text === 'boolean' &&
+    typeof v.large_text === 'boolean' &&
     Array.isArray(v.pages) &&
     v.pages.length > 0 &&
     v.pages.every((p) => estObjet(p) && typeof p.index === 'number' && typeof p.label === 'string')

@@ -159,22 +159,22 @@ description: "Tâches de l'étape 1b — le lecteur montre le PDF d'origine"
 
 **Test indépendant** : télécharger le guide, couper au milieu, reprendre, comparer la place annoncée et mesurée, simuler une fiche sans `format` et la voir s'effacer.
 
-- [ ] T039 [US4] Dans `F/app/utils/guide-nego/copies.ts` :
+- [X] T039 *(règle 6 : à version égale, une autre empreinte ne peut venir que du choix « Texte agrandi » — un document publié ne change ni de fichier ni d'extraction —, d'où `lectureARelire` et `remplacerLaLecture`)* [US4] Dans `F/app/utils/guide-nego/copies.ts` :
   - `FORMAT_DE_COPIE = 2`, et `format` dans la fiche `Copie` ;
   - `pages_images` et `mode` supprimés ; `cles` = `[lecture, pdf]` ;
   - `verifierLesCopies` efface toute fiche sans `format` ou d'un autre format, entrées comprises ;
   - `copieIntacte` exige les deux entrées ;
   - la réconciliation : une empreinte de lecture qui change pour la **même version** ne remplace que l'entrée de lecture (règle 6)
-- [ ] T040 [US4] Dans `F/app/composables/guide-nego/useGnCopies.ts`, `executer()` :
+- [X] T040 [US4] Dans `F/app/composables/guide-nego/useGnCopies.ts`, `executer()` :
   - lit `…/reading` puis `…/file` (sans `Range`, `200`) en flux ;
   - calcule la progression sur la somme des `Content-Length` ;
   - n'écrit qu'une fois tout reçu, sous `enSerie`, fiche en dernier ;
   - ne lit plus aucune image.
 
   `lireLaCopie` rend la lecture et les octets du PDF ; supprimer `imageDeLaCopie`
-- [ ] T041 [P] [US4] Dans `F/app/composables/api/guide-nego-documents.ts` : `cheminDuFichier(id)` et `adresseDuFichier(id)` (absolue, pour pdf.js) ; supprimer `imageDePage`
-- [ ] T042 [P] [US4] Étendre `F/tests/guide-nego/copies.test.ts` selon [copie-gardee.md § Tests](contracts/copie-gardee.md) : format 2 ; coupure pendant le PDF ; fiche sans `format` et de format 1 effacées ; choix changé qui ne remplace que la lecture ; réservés effacés avec leur PDF. Adapter `deconnexion-reserves.test.ts`, `mes-documents.test.ts` et `documents-exemples.test.ts`
-- [ ] T043 [US4] Adapter les exemples hors ligne — `F/app/mocks/negotiation-documents.ts` et les fichiers qu'il importe, à repérer par `grep -rln "reading\|as_is" F/app/mocks` : plus de `mode`, plus d'`image`, `has_text` et `large_text`. Copier `neg/tests/fixtures/petit.pdf` dans `F/public/gn-exemples/documents/` et le servir comme fichier des documents d'exemple, pour que l'application lise des pages sans API. `npm run test:guide-nego`, `npm run typecheck`. Commit de la phase
+- [X] T041 [P] [US4] Dans `F/app/composables/api/guide-nego-documents.ts` : `cheminDuFichier(id)` et `adresseDuFichier(id)` (absolue, pour pdf.js) ; supprimer `imageDePage`
+- [X] T042 [P] [US4] Étendre `F/tests/guide-nego/copies.test.ts` selon [copie-gardee.md § Tests](contracts/copie-gardee.md) : format 2 ; coupure pendant le PDF ; fiche sans `format` et de format 1 effacées ; choix changé qui ne remplace que la lecture ; réservés effacés avec leur PDF. Adapter `deconnexion-reserves.test.ts`, `mes-documents.test.ts` et `documents-exemples.test.ts`
+- [X] T043 [US4] Adapter les exemples hors ligne — `F/app/mocks/negotiation-documents.ts` et les fichiers qu'il importe, à repérer par `grep -rln "reading\|as_is" F/app/mocks` : plus de `mode`, plus d'`image`, `has_text` et `large_text`. Copier `neg/tests/fixtures/petit.pdf` dans `F/public/gn-exemples/documents/` et le servir comme fichier des documents d'exemple, pour que l'application lise des pages sans API. `npm run test:guide-nego`, `npm run typecheck`. Commit de la phase
 
 ---
 

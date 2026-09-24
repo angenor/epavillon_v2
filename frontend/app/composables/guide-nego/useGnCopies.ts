@@ -19,8 +19,11 @@ import {
   copieIntacte,
   demanderLaPersistance,
   effacerLesReserves,
+  FORMAT_DE_COPIE,
   garderUneCopie,
+  RECONCILIATION_VIDE,
   relireLaPersistance,
+  remplacerLaLecture,
   retirerUneCopie,
   toutRetirer as toutRetirerDesDepots,
   verifierLesCopies,
@@ -169,8 +172,11 @@ export function useGnCopies() {
     progressions.value = { ...progressions.value, [id]: { ...courante, recus } }
   }
 
-  /** `compter` : faux pour les images quand seule la forme lisible annonçait sa taille. */
-  async function lireLaRessource(chemin: string, signal: AbortSignal, id: string, compter: boolean) {
+  /**
+   * Une ressource en entier, comptée dans la progression. Sans taille annoncée par la
+   * liste, chaque réponse ajoute la sienne au total : la lecture, puis le PDF.
+   */
+  async function lireLaRessource(chemin: string, signal: AbortSignal, id: string, totalAnnonce: boolean) {
     let reponse = await api.ressource(chemin, signal)
     if (reponse?.status === 403 && accesConnu()) {
       const issue = await rotation()
@@ -179,13 +185,23 @@ export function useGnCopies() {
     }
     if (!reponse) return null
     if (!reponse.ok) return { refus: reponse.status < 500 && !STATUTS_DE_PANNE.has(reponse.status) }
-    const annoncee = Number(reponse.headers.get('content-length'))
-    const courante = progressions.value[id]
-    if (compter && courante && courante.total === null && annoncee > 0) {
-      progressions.value = { ...progressions.value, [id]: { ...courante, total: annoncee } }
-    }
-    const octets = await lireEnEntier(reponse, (n) => compter && avancer(id, n))
+    ajouterAuTotal(id, totalAnnonce ? 0 : Number(reponse.headers.get('content-length')))
+    const octets = await lireEnEntier(reponse, (n) => avancer(id, n))
     return { octets, reponse }
+  }
+
+  function ajouterAuTotal(id: string, octets: number): void {
+    const courante = progressions.value[id]
+    if (!courante || !(octets > 0)) return
+    progressions.value = { ...progressions.value, [id]: { ...courante, total: (courante.total ?? 0) + octets } }
+  }
+
+  /** Sans API, le PDF des documents d'exemple : un fichier du site, lu en entier. */
+  async function lireLePdfDExemple(signal: AbortSignal, id: string): Promise<Uint8Array<ArrayBuffer>> {
+    const reponse = await fetch(api.adresseDuFichier(id), { signal })
+    if (!reponse.ok) throw new Error(`PDF d'exemple : ${reponse.status}`)
+    ajouterAuTotal(id, Number(reponse.headers.get('content-length')))
+    return lireEnEntier(reponse, (n) => avancer(id, n))
   }
 
   async function executer(demande: DemandeDeTelechargement, controleur: AbortController): Promise<IssueDeTelechargement> {
@@ -194,14 +210,14 @@ export function useGnCopies() {
     const generation = generationDesReserves
     const generationGardee = generationDesCopies
     progressions.value = { ...progressions.value, [id]: { recus: 0, total: demande.octets } }
-    const imagesComptees = demande.octets !== null
+    const totalAnnonce = demande.octets !== null
     try {
       const chemin = api.cheminDeLaLecture(id)
-      const lue = await lireLaRessource(chemin, signal, id, true)
+      const lue = await lireLaRessource(chemin, signal, id, totalAnnonce)
       let octets: Uint8Array<ArrayBuffer>
       let empreinte: string | null
       if (lue === null) {
-        // Sans API : la forme lisible du jeu d'exemple, sans images.
+        // Sans API : la forme lisible du jeu d'exemple.
         const exemple = await api.lecture(id)
         octets = new TextEncoder().encode(JSON.stringify(exemple.valeur))
         empreinte = exemple.empreinte
@@ -211,8 +227,19 @@ export function useGnCopies() {
         octets = lue.octets
         empreinte = lue.reponse.headers.get('etag')
       }
-
       const lecture = JSON.parse(new TextDecoder().decode(octets)) as DocumentReading
+
+      // Le fichier entier, jamais une plage : `cache.put` refuse un 206.
+      const cheminDuPdf = api.cheminDuFichier(id)
+      let pdf: Uint8Array<ArrayBuffer>
+      if (lue === null) {
+        pdf = await lireLePdfDExemple(signal, id)
+      } else {
+        const fichier = await lireLaRessource(cheminDuPdf, signal, id, totalAnnonce)
+        if (!fichier || 'refus' in fichier) return fichier?.refus ? 'refus' : 'panne'
+        pdf = fichier.octets
+      }
+
       const entrees: Entree[] = [
         {
           cle: cleDe(chemin),
@@ -220,32 +247,20 @@ export function useGnCopies() {
             headers: { 'Content-Type': 'application/json', ...(empreinte ? { ETag: empreinte } : {}) },
           }),
         },
+        {
+          cle: cleDe(cheminDuPdf),
+          reponse: new Response(pdf, { headers: { 'Content-Type': 'application/pdf' } }),
+        },
       ]
-      // L'API ne pose `image` que sur les pages d'origine, et sur toutes en « tel quel ».
-      const pagesAImage = lue === null ? [] : lecture.pages.filter((page) => page.image)
-      let taille = octets.byteLength
-      for (const page of pagesAImage) {
-        const image = await lireLaRessource(page.image as string, signal, id, imagesComptees)
-        if (!image || 'refus' in image) return image?.refus ? 'refus' : 'panne'
-        taille += image.octets.byteLength
-        entrees.push({
-          cle: cleDe(page.image as string),
-          reponse: new Response(image.octets, {
-            headers: { 'Content-Type': image.reponse.headers.get('content-type') ?? 'image/jpeg' },
-          }),
-        })
-      }
-
       const copie: Copie = {
         id,
+        format: FORMAT_DE_COPIE,
         version: lecture.version,
         reading_etag: empreinte,
-        mode: lecture.mode,
         reserve,
         gardee_a: new Date().toISOString(),
-        octets: taille,
-        cles: entrees.map((e) => e.cle),
-        pages_images: pagesAImage.map((page) => page.index),
+        octets: octets.byteLength + pdf.byteLength,
+        cles: [entrees[0]!.cle, entrees[1]!.cle],
       }
       // Sous le verrou, et au dernier moment : ni annulé, ni réservé effacé entre-temps.
       const gardee = await enSerie(async (): Promise<IssueDeTelechargement> => {
@@ -361,13 +376,15 @@ export function useGnCopies() {
   async function rapprocher(bibliotheque: DocumentLibrary): Promise<Reconciliation> {
     const servis = bibliotheque.documents.map((d) => ({
       id: d.id,
+      version: d.version,
       restricted: d.restricted,
       accessible: d.accessible,
       reading_etag: d.reading_etag,
     }))
     const r = await enSerie(() => appliquerLaReconciliation(depots(), servis)).catch(
-      (): Reconciliation => ({ aEffacer: [], aDeplacer: [], autreVersion: [] }),
+      (): Reconciliation => ({ ...RECONCILIATION_VIDE }),
     )
+    for (const id of r.lectureARelire) await relireLaLecture(id)
     // La version d'une copie encore gardée garde sa reprise, même si la liste en nomme une autre.
     oublierLesVersionsDisparues({ lire: lireCle, poser: poserCle }, [...bibliotheque.documents, ...copies.value])
     await recharger()
@@ -375,34 +392,52 @@ export function useGnCopies() {
   }
 
   /**
-   * La forme lisible gardée, **si la copie est entière** et se lit. Sinon la copie se
-   * retire et le lecteur la traite en « non téléchargée », plutôt que d'ouvrir une page
-   * blanche — ou de la dire téléchargée ailleurs.
+   * Le choix « Texte agrandi » a changé : la lecture seule se relit, le PDF gardé ne
+   * bouge pas (règle 6). Sans réseau ou sur un refus, la copie reste telle qu'elle est.
    */
-  async function lireLaCopie(id: string): Promise<{ lecture: DocumentReading; reserve: boolean } | null> {
+  async function relireLaLecture(id: string): Promise<void> {
+    const chemin = api.cheminDeLaLecture(id)
+    const lue = await api.ressource(chemin).catch(() => null)
+    if (!lue?.ok) return
+    const octets = new Uint8Array(await lue.arrayBuffer())
+    const empreinte = lue.headers.get('etag')
+    await enSerie(() =>
+      remplacerLaLecture(depots(), id, {
+        reponse: new Response(octets, {
+          headers: { 'Content-Type': 'application/json', ...(empreinte ? { ETag: empreinte } : {}) },
+        }),
+        octets: octets.byteLength,
+        empreinte,
+      }),
+    ).catch(() => false)
+  }
+
+  /**
+   * La forme lisible et les octets du PDF gardés, **si la copie est entière** et se
+   * lit. Sinon la copie se retire et le lecteur la traite en « non téléchargée »,
+   * plutôt que d'ouvrir une page blanche — ou de la dire téléchargée ailleurs.
+   */
+  async function lireLaCopie(
+    id: string,
+  ): Promise<{ lecture: DocumentReading; pdf: Uint8Array<ArrayBuffer>; reserve: boolean } | null> {
     const copie = await magasinDesCopies.lireUne(id)
     if (!copie) return null
-    const lecture = await enSerie(async () => {
+    const lue = await enSerie(async () => {
       const d = depots()
-      const lue = (await copieIntacte(d, copie))
-        ? await (await d.caches.ouvrir(cacheDe(copie.reserve))).lire(copie.cles[0] as string)
-        : null
-      const forme: unknown = lue ? await lue.json().catch(() => null) : null
-      if (estUneFormeLisible(forme)) return forme
+      if (await copieIntacte(d, copie)) {
+        const cache = await d.caches.ouvrir(cacheDe(copie.reserve))
+        const forme: unknown = await (await cache.lire(copie.cles[0]))?.json().catch(() => null)
+        const pdf = await (await cache.lire(copie.cles[1]))?.arrayBuffer().catch(() => null)
+        if (estUneFormeLisible(forme) && pdf) return { lecture: forme, pdf: new Uint8Array(pdf) }
+      }
       await retirerUneCopie(d, id)
       return null
     }).catch(() => null)
-    if (!lecture) {
+    if (!lue) {
       await recharger()
       return null
     }
-    return { lecture, reserve: copie.reserve }
-  }
-
-  /** L'image gardée d'une page ; nulle si le navigateur l'a vidée depuis. */
-  async function imageDeLaCopie(copie: Pick<Copie, 'reserve'>, chemin: string): Promise<Blob | null> {
-    const reponse = await (await depots().caches.ouvrir(cacheDe(copie.reserve))).lire(cleDe(chemin))
-    return reponse ? reponse.blob() : null
+    return { ...lue, reserve: copie.reserve }
   }
 
   /**
@@ -438,7 +473,6 @@ export function useGnCopies() {
     verifier,
     rapprocher,
     lireLaCopie,
-    imageDeLaCopie,
     partir,
   }
 }

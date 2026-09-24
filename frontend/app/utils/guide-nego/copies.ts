@@ -12,7 +12,13 @@
  *
  * Tout est injecté — caches, magasins — pour que chaque règle se prouve sur des faux.
  */
-import type { ReadingMode } from '~/types/negotiation-documents'
+
+/**
+ * Le format du contenu d'une copie. Une copie d'un autre format s'efface à la
+ * vérification, sans migration (FR-031) : changer ce que garde une copie monte ce nombre.
+ * 2 : la forme lisible et le PDF entier, sans image de page (ADR-022).
+ */
+export const FORMAT_DE_COPIE = 2
 
 export const CACHE_PUBLICS = 'gn-documents-publics'
 export const CACHE_RESERVES = 'gn-documents-reserves'
@@ -31,18 +37,17 @@ export function cleDeCopie(chemin: string, baseDeLApi: string, adresseDeLaPage: 
 
 export interface Copie {
   id: string
+  format: number
   version: string
-  /** L'empreinte de la forme lisible gardée : une autre, c'est un autre fichier. */
+  /** L'empreinte de la forme lisible gardée : elle suit le fichier et le choix « Texte agrandi ». */
   reading_etag: string | null
-  mode: ReadingMode
   reserve: boolean
   /** Instant ISO du dernier octet reçu. */
   gardee_a: string
+  /** La forme lisible et le PDF. */
   octets: number
-  /** Clés de cache : la forme lisible d'abord, puis les images gardées. */
-  cles: string[]
-  /** Pages dont l'image est gardée. */
-  pages_images: number[]
+  /** Clés de cache : la forme lisible, puis le PDF. */
+  cles: [string, string]
 }
 
 /**
@@ -175,6 +180,7 @@ export async function effacerLesReserves(depots: Depots): Promise<void> {
 /** Ce que la bibliothèque dit d'un document, pour juger sa copie. */
 export interface DocumentServi {
   id: string
+  version: string
   restricted: boolean
   accessible: boolean
   reading_etag: string | null
@@ -185,13 +191,20 @@ export interface Reconciliation {
   aEffacer: string[]
   /** Passé de public à réservé, ou l'inverse, lisible : ses entrées changent de cache. */
   aDeplacer: string[]
-  /** Une autre empreinte : un autre fichier. Rien ne se retélécharge en silence. */
+  /** Une autre version : un autre fichier. Rien ne se retélécharge en silence. */
   autreVersion: string[]
+  /**
+   * Même version, autre empreinte : le choix « Texte agrandi » a changé. Un document
+   * publié ne change ni de fichier ni d'extraction ; seule la lecture se relit (règle 6).
+   */
+  lectureARelire: string[]
 }
+
+export const RECONCILIATION_VIDE: Reconciliation = { aEffacer: [], aDeplacer: [], autreVersion: [], lectureARelire: [] }
 
 export function reconcilier(copies: Copie[], documents: DocumentServi[]): Reconciliation {
   const servis = new Map(documents.map((d) => [d.id, d]))
-  const r: Reconciliation = { aEffacer: [], aDeplacer: [], autreVersion: [] }
+  const r: Reconciliation = { aEffacer: [], aDeplacer: [], autreVersion: [], lectureARelire: [] }
   for (const copie of copies) {
     const servi = servis.get(copie.id)
     if (!servi || (servi.restricted && !servi.accessible)) {
@@ -200,7 +213,7 @@ export function reconcilier(copies: Copie[], documents: DocumentServi[]): Reconc
     }
     if (servi.restricted !== copie.reserve) r.aDeplacer.push(copie.id)
     if (servi.reading_etag && copie.reading_etag && servi.reading_etag !== copie.reading_etag) {
-      r.autreVersion.push(copie.id)
+      ;(servi.version === copie.version ? r.lectureARelire : r.autreVersion).push(copie.id)
     }
   }
   return r
@@ -230,10 +243,35 @@ async function deplacer(avant: CacheDeDocuments, apres: CacheDeDocuments, cles: 
 }
 
 /**
+ * La lecture d'une copie remplacée, son PDF gardé : le choix « Texte agrandi » a
+ * changé (règle 6). La place se recompte ; rien ne s'écrit si la copie a disparu.
+ */
+export async function remplacerLaLecture(
+  depots: Depots,
+  id: string,
+  lecture: { reponse: Response; octets: number; empreinte: string | null },
+): Promise<boolean> {
+  const copie = await depots.copies.lireUne(id)
+  if (!copie || copie.format !== FORMAT_DE_COPIE) return false
+  const cache = await depots.caches.ouvrir(cacheDe(copie.reserve))
+  const ancienne = await cache.lire(copie.cles[0])
+  if (!ancienne) return false
+  const avant = (await ancienne.arrayBuffer()).byteLength
+  await cache.poser(copie.cles[0], lecture.reponse)
+  await depots.copies.poser({
+    ...copie,
+    reading_etag: lecture.empreinte,
+    octets: copie.octets - avant + lecture.octets,
+  })
+  return true
+}
+
+/**
  * Toutes les entrées d'une copie sont-elles encore là ? Le navigateur a pu en
  * vider une partie : sans elles, le lecteur montrerait une page blanche.
  */
 export async function copieIntacte(depots: Depots, copie: Copie): Promise<boolean> {
+  if (copie.format !== FORMAT_DE_COPIE || copie.cles.length !== 2) return false
   const cache = await depots.caches.ouvrir(cacheDe(copie.reserve))
   for (const cle of copie.cles) {
     if (!(await cache.contient(cle))) return false
@@ -242,8 +280,9 @@ export async function copieIntacte(depots: Depots, copie: Copie): Promise<boolea
 }
 
 /**
- * À chaque ouverture : une copie incomplète redevient « non téléchargée », et une
- * entrée que plus aucune fiche ne désigne s'efface. Rend les documents perdus.
+ * À chaque ouverture : une copie incomplète ou d'un format ancien redevient « non
+ * téléchargée », et une entrée que plus aucune fiche ne désigne s'efface. Rend les
+ * documents perdus.
  */
 export async function verifierLesCopies(depots: Depots): Promise<string[]> {
   const perdues: string[] = []

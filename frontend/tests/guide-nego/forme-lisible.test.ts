@@ -90,10 +90,11 @@ test('la part lue', () => {
 })
 
 test('une copie d’une autre forme ne s’ouvre pas : elle se retélécharge', () => {
-  const bonne = { version: '1.0', mode: 'reflow', page_count: 1, outline: [], pages: [{ index: 1, label: '1', blocks: [] }] }
+  const bonne = { version: '1.0', has_text: true, large_text: true, page_count: 1, outline: [], pages: [{ index: 1, label: '1', blocks: [] }] }
   assert.equal(estUneFormeLisible(bonne), true)
   assert.equal(estUneFormeLisible({ ...bonne, pages: [] }), false, 'sans page, ce serait une page blanche')
-  assert.equal(estUneFormeLisible({ ...bonne, mode: 'pdf' }), false)
+  const { has_text: _t, large_text: _l, ...formatUn } = bonne
+  assert.equal(estUneFormeLisible({ ...formatUn, mode: 'reflow' }), false, 'la forme de l’étape 1 ne s’ouvre plus')
   assert.equal(estUneFormeLisible({ ...bonne, pages: [{ index: '1' }] }), false)
   assert.equal(estUneFormeLisible(null), false)
   assert.equal(estUneFormeLisible('{"version":"1.0"}'), false)

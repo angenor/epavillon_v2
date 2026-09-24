@@ -361,16 +361,13 @@ export function reinitialiserLesDocuments(): void {
 
 const fiche = (id: Uuid): Fiche | undefined => fiches.find((f) => f.id === id)
 const publiee = (id: Uuid): Fiche | undefined => fiches.find((f) => f.id === id && f.published_at !== null)
-const telQuel = (f: Fiche): boolean => f.extraction?.serve_as_is ?? false
 const prete = (f: Fiche): boolean => f.extraction?.status === 'ready'
 
 // ---------------------------------------------------------------------------
 // La forme lisible
 // ---------------------------------------------------------------------------
 
-const cheminImage = (id: Uuid, index: number): string => `/negotiation/documents/${id}/pages/${index}/image`
-
-/** Les pages recomposées, avant le choix du mode : ce que l'extraction a gardé, et ce que la recherche lit. */
+/** Les pages recomposées : ce que l'extraction a gardé, et ce que la recherche lit. */
 function pagesExtraites(f: Fiche): { outline: OutlineEntry[]; pages: ReadingPage[] } {
   const guide = f.id === DOCUMENT_NEGO.guideCop31
   const outline = guide ? SOMMAIRE_DU_GUIDE : [entree(f.title.fr, 1, 1)]
@@ -380,26 +377,25 @@ function pagesExtraites(f: Fiche): { outline: OutlineEntry[]; pages: ReadingPage
     const titres = titresDeLaPage(outline, index).filter((b) => !(guide && index === 59 && b.level === 3))
     const propres = guide ? PAGES_DU_GUIDE[index] : index === 1 && f.summary ? [para(s(f.summary.fr))] : undefined
     const blocks = [...titres, ...(propres ?? [para(s(`Texte de démonstration, page ${index}.`))])]
-    const origine = blocks.some((b) => b.kind === 'origin')
-    return { index, label: String(index), ...(origine ? { image: cheminImage(f.id, index) } : {}), blocks }
+    return { index, label: String(index), blocks }
   })
   return { outline, pages }
 }
 
 function empreinteDeLecture(f: Fiche): string | null {
-  return prete(f) ? empreinte([f.id, f.asset_id, f.extraction?.extracted_at, telQuel(f)]) : null
+  return prete(f) ? empreinte([f.id, f.asset_id, f.extraction?.extracted_at, f.extraction?.large_text_choice]) : null
 }
 
 function lectureDe(f: Fiche): DocumentReading {
   const { outline, pages } = pagesExtraites(f)
-  const tel = telQuel(f)
   return {
     id: f.id,
     version: f.version,
-    mode: tel ? 'as_is' : 'reflow',
+    has_text: f.extraction?.has_text ?? false,
+    large_text: f.extraction?.large_text ?? false,
     page_count: pages.length,
-    outline: tel ? [] : outline,
-    pages: tel ? pages.map((p) => ({ index: p.index, label: p.label, image: cheminImage(f.id, p.index), blocks: [] })) : pages,
+    outline,
+    pages,
   }
 }
 
@@ -466,7 +462,8 @@ function enBibliotheque(f: Publiee, acces: boolean, langue: string): LibraryDocu
     accessible: ouvert,
     page_count: rendu?.page_count ?? null,
     reading_bytes: rendu?.reading_bytes ?? null,
-    mode: rendu ? (rendu.serve_as_is ? 'as_is' : 'reflow') : null,
+    has_text: rendu?.has_text ?? false,
+    large_text: rendu?.large_text ?? false,
     superseded_by: successeur(f, langue),
     reading_etag: rendu ? empreinteDeLecture(f) : null,
   }
@@ -868,7 +865,8 @@ export function apercuDuDocument(id: Uuid): AdminDocumentPreview {
     outline,
     pages: pages.map((p) => {
       const origine = p.blocks.some((b) => b.kind === 'origin')
-      const image = origine || telQuel(f) ? `/admin/negotiation/documents/${f.id}/pages/${p.index}/image` : null
+      // L'extraction rend l'image de chaque page, pour l'aperçu seul.
+      const image = `/admin/negotiation/documents/${f.id}/pages/${p.index}/image`
       return { index: p.index, label: p.label, blocks: p.blocks, image, has_origin_block: origine }
     }),
   }

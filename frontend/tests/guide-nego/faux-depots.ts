@@ -1,4 +1,5 @@
 import {
+  FORMAT_DE_COPIE,
   magasinEnMemoire,
   type CacheDeDocuments,
   type Copie,
@@ -43,22 +44,24 @@ export function fauxDepots(options: { refuserAuPut?: number } = {}) {
 
 export const reponse = (corps = '{}') => new Response(corps, { headers: { 'Content-Type': 'application/json' } })
 
-/** Une copie et ses entrées : la forme lisible, puis une image par page d'origine. */
-export function copieDe(id: string, options: { reserve?: boolean; images?: number[]; etag?: string } = {}) {
+/** Une copie de format 2 et ses entrées : la forme lisible, puis le PDF. */
+export function copieDe(id: string, options: { reserve?: boolean; etag?: string; version?: string } = {}) {
   const lecture = `https://api.test/negotiation/documents/${id}/reading`
-  const images = (options.images ?? []).map((i) => `https://api.test/negotiation/documents/${id}/pages/${i}/image`)
+  const pdf = `https://api.test/negotiation/documents/${id}/file`
   const copie: Copie = {
     id,
-    version: '2025',
+    format: FORMAT_DE_COPIE,
+    version: options.version ?? '2025',
     reading_etag: options.etag ?? `"${id}-1"`,
-    mode: 'reflow',
     reserve: options.reserve ?? false,
     gardee_a: '2026-11-12T08:00:00.000Z',
     octets: 1000,
-    cles: [lecture, ...images],
-    pages_images: options.images ?? [],
+    cles: [lecture, pdf],
   }
-  const entrees = copie.cles.map((cle) => ({ cle, reponse: reponse() }))
+  const entrees = [
+    { cle: lecture, reponse: reponse() },
+    { cle: pdf, reponse: new Response(new Uint8Array(998), { headers: { 'Content-Type': 'application/pdf' } }) },
+  ]
   return { copie, entrees }
 }
 

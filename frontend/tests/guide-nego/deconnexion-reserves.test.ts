@@ -6,8 +6,8 @@ import { copieDe, fauxDepots } from './faux-depots.ts'
 
 async function telephoneAvecDeuxCopies() {
   const outils = fauxDepots()
-  const publique = copieDe('guide', { images: [18] })
-  const reservee = copieDe('resume', { reserve: true, images: [2] })
+  const publique = copieDe('guide')
+  const reservee = copieDe('resume', { reserve: true })
   await garderUneCopie(outils.depots, publique.copie, publique.entrees)
   await garderUneCopie(outils.depots, reservee.copie, reservee.entrees)
   await outils.depots.aTelecharger.poser({ id: 'note-reservee', reserve: true, octets: null, demande_a: '2026-11-12T09:00:00Z' })
@@ -18,8 +18,8 @@ async function telephoneAvecDeuxCopies() {
 test('la déconnexion efface les réservés, et garde les publics', async () => {
   const { depots, noms, clesDe, publique } = await telephoneAvecDeuxCopies()
   await effacerLesReserves(depots)
-  assert.equal(noms.has(CACHE_RESERVES), false)
-  assert.deepEqual(clesDe(CACHE_PUBLICS), publique.copie.cles.sort())
+  assert.equal(noms.has(CACHE_RESERVES), false, 'la lecture et le PDF du réservé partent ensemble')
+  assert.deepEqual(clesDe(CACHE_PUBLICS), [...publique.copie.cles].sort())
   assert.deepEqual((await depots.copies.lire()).map((c) => c.id), ['guide'])
   assert.deepEqual((await depots.aTelecharger.lire()).map((d) => d.id), ['bulletin'])
 })

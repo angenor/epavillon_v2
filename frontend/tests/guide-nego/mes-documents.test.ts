@@ -8,14 +8,13 @@ const doc = (id: string) => ({ id, title: id }) as LibraryDocument
 
 const copie = (id: string, gardee_a: string, octets: number): Copie => ({
   id,
+  format: 2,
   version: '1.0',
   reading_etag: null,
-  mode: 'reflow',
   reserve: false,
   gardee_a,
   octets,
-  cles: [],
-  pages_images: [],
+  cles: [`${id}/reading`, `${id}/file`],
 })
 
 test('sur le téléphone : le dernier gardé d’abord, et seulement ce que la bibliothèque nomme', () => {

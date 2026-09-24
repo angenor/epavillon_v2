@@ -10,9 +10,8 @@
  * les notes et les favoris la gardent pour la relecture ; la forme lisible, pour
  * savoir si la copie gardée sur le téléphone est la bonne (`reading_etag`).
  *
- * LES IMAGES DE PAGE NE SONT PAS DU JSON : la méthode rend le chemin d'API,
- * relatif à la base — le même que `ReadingPage.image`, et la clé sous laquelle
- * le cache des copies les garde.
+ * LE PDF N'EST PAS DU JSON : `cheminDuFichier` rend le chemin d'API, clé de sa copie
+ * gardée ; `adresseDuFichier`, l'adresse absolue que pdf.js lit par plages (ADR-022).
  *
  * Le jeu d'exemple se charge à la demande, comme les autres : branchée,
  * l'application ne l'embarque pas.
@@ -31,11 +30,14 @@ import type { ApiTransport } from './proposal-review'
 
 type Deps = Pick<ApiTransport, 'call' | 'send'> &
   Pick<Primitives, 'lireEtiquete'> & {
-    /** La réponse brute, lue en flux ; nulle sans API — le jeu d'exemple ne sert ni flux ni image. */
+    /** La réponse brute, lue en flux ; nulle sans API — le jeu d'exemple ne sert pas de flux. */
     ressource: (chemin: string, signal?: AbortSignal) => Promise<Response | null>
   }
 
 const exemples = () => import('~/mocks/negotiation-documents')
+
+/** Sans API, tous les documents d'exemple se lisent sur ce petit PDF, servi par le site. */
+const PDF_D_EXEMPLE = '/gn-exemples/documents/petit.pdf'
 
 export function createGuideNegoDocumentsApi({ call, send, lireEtiquete, ressource }: Deps) {
   // Hors ligne, le jeu d'exemple résout ses textes dans la langue qu'`Accept-Language` porterait.
@@ -82,12 +84,18 @@ export function createGuideNegoDocumentsApi({ call, send, lireEtiquete, ressourc
     /** Le chemin de la forme lisible : la clé de sa copie. */
     cheminDeLaLecture: (documentId: Uuid): string => `/negotiation/documents/${documentId}/reading`,
 
-    /** Une ressource à télécharger — la forme lisible ou une image —, en flux. */
+    /** Une ressource à télécharger — la forme lisible ou le PDF —, en flux. */
     ressource,
 
-    /** Le chemin de l'image d'une page, `index` à partir de 1. */
-    imageDePage: (documentId: Uuid, index: number): string =>
-      `/negotiation/documents/${documentId}/pages/${index}/image`,
+    /** Le chemin du PDF : la clé de sa copie gardée. */
+    cheminDuFichier: (documentId: Uuid): string => `/negotiation/documents/${documentId}/file`,
+
+    /** L'adresse absolue du PDF, que pdf.js lit par plages ; sans API, le PDF d'exemple. */
+    adresseDuFichier: (documentId: Uuid): string => {
+      const base = String(useRuntimeConfig().public.apiBase ?? '').replace(/\/$/, '')
+      const adresse = base ? `${base}/negotiation/documents/${documentId}/file` : assetUrl(PDF_D_EXEMPLE)
+      return new URL(adresse, window.location.href).href
+    },
 
     /** Les notes vivantes de tous les documents publiés, en une lecture ; `304` si rien n'a changé. */
     notesDeCorrection: (empreinte: string | null) =>
