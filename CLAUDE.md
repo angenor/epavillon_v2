@@ -365,6 +365,12 @@ Interfaces locales : Mailpit `http://localhost:8025` (courriels capturés) · Ja
 
 **Attention** : le schéma n'est chargé qu'au premier démarrage du conteneur. Après toute modification d'un fichier de `docs/database/`, détruire le volume (`down -v`) — sinon la base garde l'ancien schéma sans le dire.
 
+### Clés d'API
+
+**OpenRouter** porte tous les appels d'IA de Guide Négo — Gemini pour rédiger, voyage-4 pour vectoriser ([ADR-005](docs/AppNego/adr/005-openrouter-et-embedding-versionne.md)). **La clé est dans `.env`, sous `OPENROUTER_API_KEY`** ; la production aura la sienne dans `.env.prod`. Aucun code ne la lit encore : le service qui en aura besoin la lit depuis l'environnement, comme un secret — jamais journalisée, jamais renvoyée dans une erreur, jamais exposée au front (aucun préfixe `NUXT_PUBLIC_`). Ce que l'IA produit n'est publié qu'après validation humaine.
+
+**Une clé ne s'écrit que dans `.env` ou `.env.prod`** : ni dans le code, ni dans un test, un document, un journal ou un message de commit. `.env` est ignoré par Git ; `.env.example` porte le nom de la variable, vide.
+
 ---
 
 ## Ce qu'il ne faut pas faire
@@ -377,6 +383,7 @@ Interfaces locales : Mailpit `http://localhost:8025` (courriels capturés) · Ja
 - Tester un rôle par son nom plutôt qu'une permission.
 - Oublier le filtrage par périmètre d'administration sur une liste du back-office.
 - Écrire une couleur, une date ou un libellé en dur.
+- Écrire une clé d'API ou un mot de passe ailleurs que dans `.env` ou `.env.prod`.
 - Réécrire un composant, une méthode d'API ou un utilitaire qui existe déjà, au lieu de l'étendre.
 - Noyer une réponse ou un fichier sous les commentaires et les explications.
 - Appliquer à Guide Négo le guide de style ou les composants du site.
