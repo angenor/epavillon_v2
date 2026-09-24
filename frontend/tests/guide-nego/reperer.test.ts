@@ -1,6 +1,12 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { pagesAInterroger, repererPassage, type Intervalle, type PageDeTexte } from '../../app/utils/guide-nego/pdf/reperer.ts'
+import {
+  pagesAInterroger,
+  repererLaNote,
+  repererPassage,
+  type Intervalle,
+  type PageDeTexte,
+} from '../../app/utils/guide-nego/pdf/reperer.ts'
 
 const sansContexte = { avant: '', apres: '' }
 
@@ -255,4 +261,87 @@ test('13 → 12 : le passage est sur la page précédente, pas sur la frise de l
   assert.equal(r.page, 12)
   assert.deepEqual(r.courant.debut, { element: 0, caractere: 66 })
   assert.deepEqual(r.courant.fin, { element: 4, caractere: 6 })
+})
+
+// --- Le passage cité d'une note (R10, FR-032) : ses morceaux, tels que pdf.js rend le guide ---
+
+const PAGE_78 = [
+  'auquel le lecteur est invité à se référer.',
+  'Sur la base de l’ensemble de ces rapports, tous accessibles en ligne',
+  '33',
+  ', le Rapport de',
+  'synthèse afférent au sixième Rapport d’évaluation (',
+  'disponible en anglais uniquement',
+  ') a',
+  'été',
+  ' ',
+  'publié',
+  ' ',
+  'en',
+  ' ',
+  'mars',
+  ' ',
+  '2023',
+  '34',
+  '.',
+  ' ',
+  'Ce',
+]
+
+const PAGE_73 = [
+  'dans la pratique.',
+  'Ces principes ne s’appliquent pas uniquement aux',
+  ' ',
+  'personnes qui président',
+  ', mais à l’ensemble',
+  'des participants et participantes. En veillant à ce que chaque personne soit consciente des',
+]
+
+function noteLue(page: PageDeTexte, passage: string | null): string | null {
+  const r = repererLaNote(page, passage)
+  return r ? lu(page.chaines, r) : null
+}
+
+test('note p. 78 : le passage entier, appels de note compris', () => {
+  const passage =
+    'Sur la base de l’ensemble de ces rapports, tous accessibles en ligne³³, le Rapport de synthèse afférent au sixième Rapport d’évaluation ( disponible en anglais uniquement ) a été publié en mars 202334.'
+  assert.equal(
+    noteLue({ page: 78, chaines: PAGE_78 }, passage),
+    PAGE_78.slice(1, 18).join(''),
+    'du premier mot au point final, sur dix-sept éléments',
+  )
+})
+
+test('note p. 5 : la ligature « ﬁ » et le titre en italique sur son élément', () => {
+  const chaines = [
+    'Compte tenu de l’environnement essentiellement anglophone des négociations, ici retranscrites',
+    'en français, un index des sigles et acronymes utilisés, indiquant leur équivalent en anglais,',
+    'ﬁgurent',
+    ' ',
+    'en annexe du',
+    ' ',
+    'Guide',
+    '. Lorsqu’il est fait référence aux documents issus des négociations,',
+  ]
+  const passage =
+    'Compte tenu de l’environnement essentiellement anglophone des négociations, ici retranscrites en français, un index des sigles et acronymes utilisés, indiquant leur équivalent en anglais, figurent en annexe du  Guide .'
+  assert.equal(noteLue({ page: 5, chaines }, passage), `${chaines.slice(0, 7).join('')}.`)
+})
+
+test('note p. 73 : un passage cité que la page ne porte pas en entier se place par ses huit premiers mots', () => {
+  const passage = 'Ces principes ne s’appliquent pas uniquement aux personnes qui président, mais à tous les délégués.'
+  assert.equal(noteLue({ page: 73, chaines: PAGE_73 }, passage), 'Ces principes ne s’appliquent pas uniquement aux personnes')
+})
+
+test('note : un passage répété sur la page se place à sa première occurrence', () => {
+  const chaines = ['Les Parties se réunissent.', ' ', 'Plus bas, les Parties se réunissent', ' ', 'encore.']
+  const r = repererLaNote({ page: 12, chaines }, 'les Parties se réunissent')
+  assert.deepEqual(r?.debut, { element: 0, caractere: 0 })
+})
+
+test('note : sans passage, ou introuvable, pas de hauteur — la note va en tête de page', () => {
+  const page = { page: 73, chaines: PAGE_73 }
+  assert.equal(repererLaNote(page, null), null)
+  assert.equal(repererLaNote(page, '   '), null)
+  assert.equal(repererLaNote(page, 'Un passage que la page ne porte nulle part, pas même ses premiers mots.'), null)
 })

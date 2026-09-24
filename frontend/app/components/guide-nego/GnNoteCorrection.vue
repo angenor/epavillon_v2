@@ -15,6 +15,9 @@ const props = withDefaults(
   { depliee: false },
 )
 
+/** En marge de la page du PDF, replier la note ferme le panneau qui la porte. */
+const emit = defineEmits<{ basculer: [id: string, ouverte: boolean] }>()
+
 const { t } = useI18n()
 const { date } = useDateTime()
 
@@ -27,6 +30,7 @@ function basculer(id: string): void {
   const suivantes = new Set(ouvertes.value)
   if (!suivantes.delete(id)) suivantes.add(id)
   ouvertes.value = suivantes
+  emit('basculer', id, suivantes.has(id))
 }
 
 const signature = (note: Pick<CorrectionNote, 'author_name' | 'posted_at'>) =>

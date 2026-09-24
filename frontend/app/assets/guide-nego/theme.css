@@ -169,6 +169,7 @@
   /* Sur la page du PDF, qui garde ses couleurs dans les deux thèmes : jamais redéfinis en sombre. */
   --gn-page-passage: var(--gn-charte-jaune-de-charte);
   --gn-page-passage-autre-opacite: 0.35;
+  --gn-page-note: var(--gn-charte-rouge);
 
   color: var(--gn-texte);
   background: var(--gn-fond);

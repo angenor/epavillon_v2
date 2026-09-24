@@ -91,3 +91,22 @@ export function repererPassage(pages: readonly PageDeTexte[], cherche: PassageCh
   }
   return { issue: 'introuvable' }
 }
+
+const MOTS_DE_TETE = 8
+
+/**
+ * Le passage cité d'une note, sur sa seule page : entier, puis par ses huit premiers mots
+ * (10 sur 10 à l'essai). Répété, il se place à sa première occurrence ; introuvable, la
+ * note va en tête de page (FR-032).
+ */
+export function repererLaNote(page: PageDeTexte, passage: string | null): Intervalle | null {
+  const mots = passage?.trim().split(/\s+/) ?? []
+  if (!passage || !mots[0]) return null
+  const essais = mots.length > MOTS_DE_TETE ? [passage, mots.slice(0, MOTS_DE_TETE).join(' ')] : [passage]
+  for (const expression of essais) {
+    const r = repererPassage([page], { page: page.page, contexte: { avant: '', apres: '' }, expression })
+    if (r.issue === 'trouve') return r.courant
+    if (r.issue === 'ambigu') return r.occurrences[0] ?? null
+  }
+  return null
+}

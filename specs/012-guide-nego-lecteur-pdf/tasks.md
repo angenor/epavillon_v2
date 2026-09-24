@@ -281,15 +281,15 @@ description: "Tâches de l'étape 1b — le lecteur montre le PDF d'origine"
 
 **Test indépendant** : [quickstart § 6](quickstart.md).
 
-- [ ] T071 [US5] Écrire `F/app/components/guide-nego/GnMargeNote.vue` :
+- [X] T071 [US5] Écrire `F/app/components/guide-nego/GnMargeNote.vue` :
   - filet rouge de 3 px au bord gauche de la page, triangle, cible de 48 px, `aria-expanded` ;
   - positionné **en pourcentage** de la page ;
   - dépliée : un panneau **non modal**, sans voile, en bas de l'écran, 40 % de la hauteur au plus, qui reprend le contenu de `GnNoteCorrection` — texte, signature « Nom, expert IFDD — date », bouclier ;
   - le lecteur fait défiler pour garder le passage dans la moitié haute.
 
   Textes dans `F/i18n/locales/{fr,en}/components/gn-marge-note.json`
-- [ ] T072 [US5] Dans `GnLecteurPages`, à `textlayerrendered` : pour chaque note de la page (`notesDe(id)`), `repererPassage` sur le passage entier puis ses premiers mots ; `GnMargeNote` à la hauteur trouvée, sinon en tête de page. La note introuvable ne perd **ni** son texte **ni** son passage cité (FR-032)
-- [ ] T073 [US5] Vérifier que les notes viennent toujours de la liste relue, pas de la copie : posées ou retirées après le téléchargement, elles paraissent ou disparaissent dans les deux modes sans retéléchargement. Vérifier le quickstart § 6. Commit de la phase
+- [X] T072 [US5] Dans `GnLecteurPages`, à `textlayerrendered` : pour chaque note de la page (`notesDe(id)`), `repererPassage` sur le passage entier puis ses premiers mots ; `GnMargeNote` à la hauteur trouvée, sinon en tête de page. La note introuvable ne perd **ni** son texte **ni** son passage cité (FR-032)
+- [X] T073 [US5] Vérifier que les notes viennent toujours de la liste relue, pas de la copie : posées ou retirées après le téléchargement, elles paraissent ou disparaissent dans les deux modes sans retéléchargement. Vérifier le quickstart § 6. Commit de la phase
 
 ---
 

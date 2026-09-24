@@ -2,11 +2,13 @@
 import '~/assets/guide-nego/pdfjs-viewer.css'
 import type { PDFDocumentLoadingTask } from 'pdfjs-dist/legacy/build/pdf.min.mjs'
 import type { PDFViewer } from 'pdfjs-dist/legacy/web/pdf_viewer.mjs'
+import type { CorrectionNote } from '~/types/negotiation-documents'
 import { chargerPdfjs, ouvrirLeDocument, type SourceDuDocument } from '~/utils/guide-nego/pdf/charger'
 import { creerLaSurveillance, type CauseDeBascule } from '~/utils/guide-nego/pdf/bascule'
 import { bornerLEchelle, creerLeLecteurDeGestes, echelleApresDoubleToucher, type Minuterie } from '~/utils/guide-nego/pdf/gestes'
 import {
   pagesAInterroger,
+  repererLaNote,
   repererPassage,
   type Intervalle,
   type PageDeTexte,
@@ -33,8 +35,12 @@ const props = withDefaults(
     passage?: PassageCherche | null
     /** Un endroit à amener à l'écran sans le marquer : le tableau d'un renvoi de « Texte agrandi ». */
     endroit?: PassageCherche | null
+    /** Lues avec la liste, pas avec la copie (FR-034). */
+    notesParPage?: Map<number, CorrectionNote[]>
+    /** La barre dépliée recouvre le bas de l'écran : une note ouverte se replie. */
+    recouverte?: boolean
   }>(),
-  { cachee: false, passage: null, endroit: null },
+  { cachee: false, passage: null, endroit: null, notesParPage: () => new Map(), recouverte: false },
 )
 
 const emit = defineEmits<{
@@ -128,15 +134,23 @@ let marques: Marques | null = null
 const ROGNURE_DU_HAUT = 0.25
 let demande = 0
 
+const textes = new Map<number, Promise<PageDeTexte>>()
+
 async function textesDesPages(numeros: number[]): Promise<PageDeTexte[]> {
   const pdf = viewer?.pdfDocument
   if (!pdf) return []
   const lues = await Promise.allSettled(
-    numeros.map(async (page) => {
+    numeros.map((page) => {
+      const deja = textes.get(page)
+      if (deja) return deja
       // Lu comme la couche affichée : sans normalisation, et sans les éléments vides qu'elle n'affiche pas.
-      const contenu = await (await pdf.getPage(page)).getTextContent({ disableNormalization: true })
-      const chaines = contenu.items.flatMap((item) => ('str' in item && item.str !== '' ? [item.str] : []))
-      return { page, chaines }
+      const lue = pdf
+        .getPage(page)
+        .then((p) => p.getTextContent({ disableNormalization: true }))
+        .then((contenu) => ({ page, chaines: contenu.items.flatMap((item) => ('str' in item && item.str !== '' ? [item.str] : [])) }))
+      textes.set(page, lue)
+      lue.catch(() => textes.delete(page))
+      return lue
     }),
   )
   return lues.flatMap((l) => (l.status === 'fulfilled' ? [l.value] : []))
@@ -237,6 +251,93 @@ watch(
   (endroit) => void repererLePassage(endroit, false),
 )
 
+// --- Les notes de correction, en marge (R10, FR-032 à FR-035) ---------------------
+
+interface NoteAncree {
+  note: CorrectionNote
+  haut: number
+  hauteur: number | null
+  decalage: number
+  retrouve: boolean
+}
+const ancrees = shallowRef(new Map<number, NoteAncree[]>())
+const hotes = shallowRef(new Map<number, HTMLElement>())
+const noteOuverte = ref<string | null>(null)
+
+function poserSur<V>(carte: Map<number, V>, page: number, valeur: V | null): Map<number, V> {
+  const suivante = new Map(carte)
+  if (valeur === null) suivante.delete(page)
+  else suivante.set(page, valeur)
+  return suivante
+}
+
+/** Rien n'est écrit sur la page : un calque à côté de la couche de texte, que pdf.js retire en la redessinant. */
+async function placerLesNotes(numero: number): Promise<void> {
+  const notes = props.notesParPage.get(numero) ?? []
+  const div: HTMLDivElement | undefined = viewer?.getPageView(numero - 1)?.div
+  if (!notes.length) {
+    hotes.value.get(numero)?.remove()
+    hotes.value = poserSur(hotes.value, numero, null)
+    ancrees.value = poserSur(ancrees.value, numero, null)
+    return
+  }
+  const [texte] = await textesDesPages([numero])
+  const couche = div?.querySelector<HTMLElement>('.textLayer')
+  if (!div || !couche?.childElementCount) return
+  const feuilles = [...couche.querySelectorAll('span[role="presentation"]')]
+  const cadre = couche.getBoundingClientRect()
+  let enTete = 0
+  const liste = notes.map((note): NoteAncree => {
+    const intervalle = texte ? repererLaNote(texte, note.passage) : null
+    const lignes = intervalle ? rectangles(feuilles, intervalle) : []
+    const premiere = lignes[0]
+    if (!premiere) return { note, haut: 0, hauteur: null, decalage: enTete++, retrouve: false }
+    const bas = Math.max(...lignes.map((r) => r.bottom))
+    return {
+      note,
+      haut: ((premiere.top - cadre.top) / cadre.height) * 100,
+      hauteur: ((bas - premiere.top) / cadre.height) * 100,
+      decalage: 0,
+      retrouve: true,
+    }
+  })
+  let hote = hotes.value.get(numero)
+  if (hote?.parentElement !== div) {
+    hote = window.document.createElement('div')
+    hote.className = 'gn-lecteur-pages__notes'
+    div.append(hote)
+  }
+  ancrees.value = poserSur(ancrees.value, numero, liste)
+  hotes.value = poserSur(hotes.value, numero, hote)
+}
+
+function placerToutesLesNotes(): void {
+  if (!viewer?.pdfDocument) return
+  const pages = new Set([...props.notesParPage.keys(), ...ancrees.value.keys()])
+  for (const page of pages) if (page >= 1 && page <= viewer.pagesCount) void placerLesNotes(page)
+}
+
+watch(() => props.notesParPage, placerToutesLesNotes)
+watch(
+  () => props.recouverte,
+  (recouverte) => {
+    if (recouverte) noteOuverte.value = null
+  },
+)
+
+async function basculerLaNote(id: string): Promise<void> {
+  noteOuverte.value = noteOuverte.value === id ? null : id
+  if (!noteOuverte.value) return
+  await nextTick()
+  // Le panneau couvre le bas : le passage remonte dans la moitié haute, la page reste visible (FR-033).
+  const cadre = conteneur.value?.getBoundingClientRect()
+  const signal = conteneur.value?.querySelector(`[data-note="${id}"]`)?.getBoundingClientRect()
+  if (!cadre || !signal || !conteneur.value) return
+  if (signal.top >= cadre.top && signal.bottom <= cadre.top + cadre.height / 2) return
+  conteneur.value.scrollBy({ top: signal.top - (cadre.top + cadre.height * HAUT_DU_PASSAGE), behavior: 'instant' })
+}
+const HAUT_DU_PASSAGE = 0.15
+
 function perdreLeReseau(): void {
   // La seconde sécurité ne sanctionne jamais le réseau.
   surveillance.arreter()
@@ -284,6 +385,7 @@ onMounted(async () => {
   // Une page éloignée perd sa couche ; revenue, elle la redessine, et ses marques avec.
   bus.on('textlayerrendered', ({ pageNumber }: { pageNumber: number }) => {
     if (marques?.page === pageNumber) poserLesMarques()
+    if (props.notesParPage.has(pageNumber) || ancrees.value.has(pageNumber)) void placerLesNotes(pageNumber)
   })
   bus.on('pagechanging', ({ pageNumber }: { pageNumber: number }) => emit('page', pageNumber))
   bus.on('pagerendered', ({ error }: { error: unknown }) => {
@@ -352,6 +454,21 @@ defineExpose({
       <div class="pdfViewer" />
     </div>
   </div>
+  <template v-for="[page, liste] in ancrees" :key="page">
+    <Teleport v-if="hotes.get(page)" :to="hotes.get(page)">
+      <GnMargeNote
+        v-for="a in liste"
+        :key="a.note.id"
+        :note="a.note"
+        :haut="a.haut"
+        :hauteur="a.hauteur"
+        :decalage="a.decalage"
+        :retrouve="a.retrouve"
+        :ouverte="noteOuverte === a.note.id"
+        @basculer="basculerLaNote(a.note.id)"
+      />
+    </Teleport>
+  </template>
 </template>
 
 <style>
@@ -381,6 +498,14 @@ defineExpose({
 [data-app="guide-nego"] .gn-lecteur-pages__marques {
   position: absolute;
   inset: 0;
+  pointer-events: none;
+}
+
+/* Au-dessus de la couche de texte : seul le signal de la note reçoit le toucher. */
+[data-app="guide-nego"] .gn-lecteur-pages__notes {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
   pointer-events: none;
 }
 

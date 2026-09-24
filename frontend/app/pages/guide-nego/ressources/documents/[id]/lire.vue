@@ -589,6 +589,8 @@ useHead({ title: titre })
         :cachee="modeAffiche !== 'pages'"
         :passage="passageAMarquer"
         :endroit="endroit"
+        :notes-par-page="notesParPage"
+        :recouverte="barreDepliee"
         @page="lecteur.poserLaPage"
         @premiere-page="surLaPremierePage"
         @plages="surLesPlages"
