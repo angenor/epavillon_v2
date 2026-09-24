@@ -4,7 +4,33 @@
  */
 // « CO₂ » se tape « co2 », « Paris–Nairobi » « paris-nairobi » : NFKD ramène exposants
 // et indices, la table le reste.
-const REMPLACEMENTS: Record<string, string> = { œ: 'oe', æ: 'ae', '’': "'", '–': '-', '—': '-', '‑': '-', '‐': '-' }
+// U+0002 : le trait d'union que PDFium marque en fin de ligne ; U+00AD : une coupure possible, qui ne s'écrit pas.
+const REMPLACEMENTS: Record<string, string> = {
+  œ: 'oe',
+  æ: 'ae',
+  '’': "'",
+  '‘': "'",
+  'ʼ': "'",
+  '«': '"',
+  '»': '"',
+  '“': '"',
+  '”': '"',
+  '„': '"',
+  '–': '-',
+  '—': '-',
+  '―': '-',
+  '‒': '-',
+  '‑': '-',
+  '‐': '-',
+  '\u0002': '-',
+  '\u00ad': '',
+}
+
+/** Une lettre repliée : sans accent ni casse, apostrophes, guillemets et tirets ramenés à un seul signe. */
+export function plierLettre(lettre: string): string {
+  const basse = lettre.toLowerCase()
+  return REMPLACEMENTS[basse] ?? basse.normalize('NFKD').replace(/\p{M}/gu, '')
+}
 
 /**
  * Le texte replié, et pour chacune de ses lettres la position de la lettre d'origine.
@@ -22,9 +48,7 @@ export function replier(texte: string): { replie: string; origine: number[] } {
       }
       continue
     }
-    const basse = lettre.toLowerCase()
-    const pliee = REMPLACEMENTS[basse] ?? basse.normalize('NFKD').replace(/\p{M}/gu, '')
-    for (const c of pliee) {
+    for (const c of plierLettre(lettre)) {
       replie += c
       origine.push(i)
     }

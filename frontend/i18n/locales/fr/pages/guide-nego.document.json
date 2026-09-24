@@ -7,6 +7,7 @@
     "non-telecharge": "Non téléchargé — disponible au retour du réseau"
   },
   "lien": "S'ouvre dans le navigateur — réseau nécessaire, rien n'est gardé sur le téléphone",
+  "sans-texte": "Se lit sur ses pages. Son texte n'a pas pu être extrait : il ne se cherche pas.",
   "thematiques": {
     "titre": "Thématiques",
     "aucune": "Aucune : ce document traverse toutes les négociations."

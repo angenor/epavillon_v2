@@ -340,6 +340,12 @@ useHead({ title: computed(() => document.value?.title ?? t('guide-nego.document.
 
         <template v-else>
           <GnEtiquette v-if="estLien" class="gn-fiche__lien" picto="wifi-off" :texte="t('guide-nego.document.lien')" />
+          <GnEtiquette
+            v-else-if="document.source === 'file' && !document.has_text"
+            class="gn-fiche__lien"
+            picto="doc"
+            :texte="t('guide-nego.document.sans-texte')"
+          />
 
           <p v-if="document.summary" class="gn-fiche__resume" :class="{ 'gn-fiche__resume--eteint': remplacant }">
             {{ document.summary }}

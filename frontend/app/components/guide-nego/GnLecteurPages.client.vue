@@ -5,6 +5,14 @@ import type { PDFViewer } from 'pdfjs-dist/legacy/web/pdf_viewer.mjs'
 import { chargerPdfjs, ouvrirLeDocument, type SourceDuDocument } from '~/utils/guide-nego/pdf/charger'
 import { creerLaSurveillance, type CauseDeBascule } from '~/utils/guide-nego/pdf/bascule'
 import { bornerLEchelle, creerLeLecteurDeGestes, echelleApresDoubleToucher, type Minuterie } from '~/utils/guide-nego/pdf/gestes'
+import {
+  pagesAInterroger,
+  repererPassage,
+  type Intervalle,
+  type PageDeTexte,
+  type PassageCherche,
+  type Reperage,
+} from '~/utils/guide-nego/pdf/reperer'
 import { ErreurDeReseau, type SuiviDesPlages } from '~/utils/guide-nego/pdf/transport'
 
 /**
@@ -21,8 +29,10 @@ const props = withDefaults(
      * page, invisible. Retiré du rendu, il calculerait la largeur de page sur zéro.
      */
     cachee?: boolean
+    /** Le passage de la recherche à marquer sur sa page ; `null` efface les marques. */
+    passage?: PassageCherche | null
   }>(),
-  { cachee: false },
+  { cachee: false, passage: null },
 )
 
 const emit = defineEmits<{
@@ -34,6 +44,7 @@ const emit = defineEmits<{
   basculerLaBarre: []
   reseauPerdu: []
   reseauRevenu: []
+  reperage: [issue: Reperage['issue']]
 }>()
 
 const { t } = useI18n()
@@ -100,6 +111,118 @@ function mesurerLeHaut(): void {
 
 let taille: ResizeObserver | null = null
 
+// --- Le passage cherché, marqué sur sa page (R7, FR-014, FR-015) ---------------
+
+interface Marques {
+  page: number
+  courant: Intervalle | null
+  autres: Intervalle[]
+  /** Le passage n'a pas encore été amené à l'écran. */
+  aAmener: boolean
+}
+let marques: Marques | null = null
+const ROGNURE_DU_HAUT = 0.25
+let demande = 0
+
+async function textesDesPages(numeros: number[]): Promise<PageDeTexte[]> {
+  const pdf = viewer?.pdfDocument
+  if (!pdf) return []
+  const lues = await Promise.allSettled(
+    numeros.map(async (page) => {
+      // Lu comme la couche affichée : sans normalisation, et sans les éléments vides qu'elle n'affiche pas.
+      const contenu = await (await pdf.getPage(page)).getTextContent({ disableNormalization: true })
+      const chaines = contenu.items.flatMap((item) => ('str' in item && item.str !== '' ? [item.str] : []))
+      return { page, chaines }
+    }),
+  )
+  return lues.flatMap((l) => (l.status === 'fulfilled' ? [l.value] : []))
+}
+
+function effacerLesMarques(): void {
+  conteneur.value?.querySelectorAll('.gn-lecteur-pages__marques').forEach((m) => m.remove())
+}
+
+/** Les rectangles d'un intervalle, un par élément de la couche : un rectangle par ligne, sans doublon. */
+function rectangles(feuilles: Element[], { debut, fin }: Intervalle): DOMRect[] {
+  const liste: DOMRect[] = []
+  for (let e = debut.element; e <= fin.element; e += 1) {
+    const texte = feuilles[e]?.firstChild
+    if (!texte || texte.nodeType !== Node.TEXT_NODE) continue
+    const plage = window.document.createRange()
+    plage.setStart(texte, e === debut.element ? debut.caractere : 0)
+    plage.setEnd(texte, e === fin.element ? fin.caractere : (texte.textContent ?? '').length)
+    for (const r of plage.getClientRects()) if (r.width > 0 && r.height > 0) liste.push(r)
+  }
+  return liste
+}
+
+function poserLesMarques(): void {
+  if (!marques || !viewer) return
+  const page: HTMLDivElement | undefined = viewer.getPageView(marques.page - 1)?.div
+  const couche = page?.querySelector<HTMLElement>('.textLayer')
+  if (!page || !couche?.childElementCount) return
+  effacerLesMarques()
+  const feuilles = [...couche.querySelectorAll('span[role="presentation"]')]
+  const cadre = couche.getBoundingClientRect()
+  const calque = window.document.createElement('div')
+  calque.className = 'gn-lecteur-pages__marques'
+  let premiere: HTMLElement | null = null
+  const aPoser: Array<[Intervalle, boolean]> = [
+    ...marques.autres.map((i): [Intervalle, boolean] => [i, false]),
+    ...(marques.courant ? [[marques.courant, true] as [Intervalle, boolean]] : []),
+  ]
+  for (const [intervalle, courant] of aPoser) {
+    for (const r of rectangles(feuilles, intervalle)) {
+      // La couche, calée sur une police de substitution, monte un peu au-dessus du dessin :
+      // sans rognure, la marque mord sur la ligne du dessus dans un tableau serré.
+      const haut = r.top + r.height * ROGNURE_DU_HAUT
+      const hauteur = r.height * (1 - ROGNURE_DU_HAUT)
+      const marque = window.document.createElement('div')
+      marque.className = courant ? 'gn-lecteur-pages__marque gn-lecteur-pages__marque--courant' : 'gn-lecteur-pages__marque'
+      // En pourcentage de la page : la marque suit le grossissement sans être recalculée.
+      marque.style.left = `${((r.left - cadre.left) / cadre.width) * 100}%`
+      marque.style.top = `${((haut - cadre.top) / cadre.height) * 100}%`
+      marque.style.width = `${(r.width / cadre.width) * 100}%`
+      marque.style.height = `${(hauteur / cadre.height) * 100}%`
+      calque.append(marque)
+      if (courant) premiere ??= marque
+    }
+  }
+  // Dans la page, pas dans la couche de texte : isolée, elle empêcherait la marque de se fondre au dessin.
+  page.append(calque)
+  if (marques.aAmener) {
+    marques.aAmener = false
+    premiere?.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' })
+  }
+}
+
+async function repererLePassage(passage: PassageCherche | null): Promise<void> {
+  const jeton = (demande += 1)
+  marques = null
+  effacerLesMarques()
+  if (!passage || !viewer?.pdfDocument) return
+  const pages = await textesDesPages(pagesAInterroger(passage.page, viewer.pagesCount))
+  if (jeton !== demande || !viewer) return
+  const reperage = repererPassage(pages, passage)
+  emit('reperage', reperage.issue)
+  if (reperage.issue === 'introuvable') {
+    viewer.currentPageNumber = passage.page
+    return
+  }
+  marques =
+    reperage.issue === 'trouve'
+      ? { page: reperage.page, courant: reperage.courant, autres: reperage.autres, aAmener: true }
+      : { page: reperage.page, courant: null, autres: reperage.occurrences, aAmener: false }
+  viewer.currentPageNumber = reperage.page
+  // La couche déjà dessinée ne le sera pas de nouveau : on marque tout de suite.
+  poserLesMarques()
+}
+
+watch(
+  () => props.passage,
+  (passage) => void repererLePassage(passage),
+)
+
 function perdreLeReseau(): void {
   // La seconde sécurité ne sanctionne jamais le réseau.
   surveillance.arreter()
@@ -141,6 +264,11 @@ onMounted(async () => {
     viewer.currentScaleValue = 'page-width'
     largeur = viewer.currentScale
     viewer.currentPageNumber = Math.min(Math.max(1, props.pageInitiale), viewer.pagesCount)
+    if (props.passage) void repererLePassage(props.passage)
+  })
+  // Une page éloignée perd sa couche ; revenue, elle la redessine, et ses marques avec.
+  bus.on('textlayerrendered', ({ pageNumber }: { pageNumber: number }) => {
+    if (marques?.page === pageNumber) poserLesMarques()
   })
   bus.on('pagechanging', ({ pageNumber }: { pageNumber: number }) => emit('page', pageNumber))
   bus.on('pagerendered', ({ error }: { error: unknown }) => {
@@ -232,6 +360,24 @@ defineExpose({
   /* Le pincement et le double toucher sont ceux du lecteur, pas ceux du navigateur. */
   touch-action: pan-x pan-y;
   -webkit-overflow-scrolling: touch;
+}
+
+/* Le cadre de la couche de texte ; les marques laissent passer sélection et appui long. */
+[data-app="guide-nego"] .gn-lecteur-pages__marques {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+[data-app="guide-nego"] .gn-lecteur-pages__marque {
+  position: absolute;
+  background: var(--gn-page-passage);
+  mix-blend-mode: multiply;
+  opacity: var(--gn-page-passage-autre-opacite);
+}
+
+[data-app="guide-nego"] .gn-lecteur-pages__marque--courant {
+  opacity: 1;
 }
 
 /* Une page que le réseau n'a pas amenée le dit, au lieu de rester blanche. */

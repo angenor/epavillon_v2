@@ -166,6 +166,10 @@
   --gn-courbe-sortie: cubic-bezier(0.2, 0, 0, 1);
   --gn-courbe-standard: cubic-bezier(0.4, 0, 0.2, 1);
 
+  /* Sur la page du PDF, qui garde ses couleurs dans les deux thèmes : jamais redéfinis en sombre. */
+  --gn-page-passage: var(--gn-charte-jaune-de-charte);
+  --gn-page-passage-autre-opacite: 0.35;
+
   color: var(--gn-texte);
   background: var(--gn-fond);
   font-family: var(--gn-police);

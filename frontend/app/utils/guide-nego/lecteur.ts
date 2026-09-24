@@ -7,6 +7,7 @@
  */
 import type { Block, DocumentReading, Span } from '~/types/negotiation-documents'
 import { blocsDeLaPage, sectionDeLaPage } from './forme-lisible.ts'
+import type { PassageCherche } from './pdf/reperer.ts'
 import { replier } from './repli.ts'
 
 /** Où se lit un texte dans un bloc : ses segments, ou, pour une origine, sa légende et son texte. */
@@ -105,6 +106,15 @@ export function chercherDansLeDocument(lecture: DocumentReading, expression: str
     }
   }
   return passages
+}
+
+/** Le passage à repérer sur la page du PDF : l'extrait, sans les points de suspension ajoutés ici. */
+export function passageAReperer(passage: Passage): PassageCherche {
+  return {
+    page: passage.page,
+    contexte: { avant: passage.extrait.avant.replace(/^… /u, ''), apres: passage.extrait.apres.replace(/ …$/u, '') },
+    expression: passage.extrait.trouve,
+  }
 }
 
 /** « Vous êtes ici » : le premier passage de la page en cours, s'il y en a un. */

@@ -3,10 +3,12 @@ import assert from 'node:assert/strict'
 import type { DocumentReading, ReadingPage } from '../../app/types/negotiation-documents.ts'
 import {
   chercherDansLeDocument,
+  passageAReperer,
   passageDeLaPage,
   pagesCherchees,
   surligner,
 } from '../../app/utils/guide-nego/lecteur.ts'
+import { repererPassage } from '../../app/utils/guide-nego/pdf/reperer.ts'
 import { replier } from '../../app/utils/guide-nego/repli.ts'
 
 const PHRASE =
@@ -126,4 +128,25 @@ test('une lettre seule ne cherche rien : elle trouverait tout le document', () =
   const doc = lecture([page(1, [{ kind: 'paragraph', spans: [{ text: 'adaptation' }] }])])
   assert.deepEqual(chercherDansLeDocument(doc, 'a'), [])
   assert.equal(chercherDansLeDocument(doc, 'ad').length, 1)
+})
+
+test('apostrophes, guillemets, ligatures et traits de PDFium se replient comme pour le repérage', () => {
+  const doc = lecture([
+    page(1, [{ kind: 'paragraph', spans: [{ text: 'Avant que l‘ordre du jour, aﬁn de “Responding” au\u0002delà.' }] }]),
+  ])
+  assert.equal(chercherDansLeDocument(doc, "l'ordre").length, 1)
+  assert.equal(chercherDansLeDocument(doc, 'afin de "responding"').length, 1)
+  assert.equal(chercherDansLeDocument(doc, 'au-delà')[0]?.extrait.trouve, 'au\u0002delà')
+})
+
+test('l’extrait d’un passage se retrouve sur la couche de texte de pdf.js, découpée autrement', () => {
+  const texte = 'Les Parties devront s’accorder sur la mobilisation de capitaux supplémentaires au-delà des montants de 758 millions.'
+  const doc = lecture([page(1, [{ kind: 'paragraph', spans: [{ text: texte }] }])])
+  const couche = ['Les Parties devront s’accorder sur la mobilisation de capitaux supplémentaires au-', 'delà des montants', ' ', 'de 758 millions.']
+  for (const expression of ['accorder', 'capitaux supplémentaires au-delà', 'montants de 758']) {
+    const [p] = chercherDansLeDocument(doc, expression)
+    assert.ok(p)
+    const r = repererPassage([{ page: 1, chaines: couche }], passageAReperer(p))
+    assert.equal(r.issue, 'trouve', expression)
+  }
 })

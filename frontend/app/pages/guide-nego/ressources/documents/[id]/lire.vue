@@ -3,9 +3,10 @@ import type { CorrectionNote, LibraryDocument } from '~/types/negotiation-docume
 import { compterUneBascule } from '~/utils/guide-nego/appareil-lecture'
 import { sectionDeLaPage } from '~/utils/guide-nego/forme-lisible'
 import { tailleLisible } from '~/utils/guide-nego/place'
-import { chercherDansLeDocument, pagesCherchees, passageDeLaPage, type Occurrence } from '~/utils/guide-nego/lecteur'
+import { chercherDansLeDocument, pagesCherchees, passageAReperer, passageDeLaPage, type Occurrence } from '~/utils/guide-nego/lecteur'
 import { creerLAttente, DELAI_DES_SORTIES_MS, type EtatDAttente } from '~/utils/guide-nego/pdf/attente'
 import type { CauseDeBascule } from '~/utils/guide-nego/pdf/bascule'
+import type { PassageCherche, Reperage } from '~/utils/guide-nego/pdf/reperer'
 import type { Minuterie } from '~/utils/guide-nego/pdf/gestes'
 import type { SuiviDesPlages } from '~/utils/guide-nego/pdf/transport'
 import { lireCle, poserCle } from '~/utils/guide-nego/stockage'
@@ -285,6 +286,20 @@ watch(expression, () => (rangCourant.value = null))
 const ici = computed(() => passageDeLaPage(passages.value, pageEnCours.value))
 const passageCourant = computed(() => (rangCourant.value === null ? null : (passages.value[rangCourant.value] ?? null)))
 
+// En « Pages », le passage se repère sur la couche de texte ; fermer la recherche efface les marques.
+const passageAMarquer = ref<PassageCherche | null>(null)
+const reperage = ref<Reperage['issue'] | null>(null)
+watch(rangCourant, (rang) => {
+  if (rang !== null) return
+  passageAMarquer.value = null
+  reperage.value = null
+})
+const remarqueDuPassage = computed(() =>
+  modeAffiche.value === 'pages' && (reperage.value === 'ambigu' || reperage.value === 'introuvable')
+    ? t(`guide-nego.lecteur.recherche.${reperage.value}`)
+    : undefined,
+)
+
 // Construits une fois par recherche ; passer d'une occurrence à l'autre ne touche que deux pages.
 const surlignagesParPage = computed(() => {
   const parPage = new Map<number, Occurrence[]>()
@@ -303,8 +318,11 @@ async function allerAuPassage(rang: number): Promise<void> {
   const passage = passages.value[rang]
   if (!passage) return
   await nextTick()
-  // Le passage marqué sur la page du PDF vient avec le récit 2 ; d'ici là, sa page s'ouvre.
-  if (modeAffiche.value === 'pages') return allerALaPage(passage.page)
+  if (modeAffiche.value === 'pages') {
+    reperage.value = null
+    passageAMarquer.value = passageAReperer(passage)
+    return
+  }
   const courante = window.document.querySelector<HTMLElement>('[data-occurrence-courante]')
   // Un tableau refermé à la main ne se rouvre pas par `:open` : sa valeur n'a pas changé.
   courante?.closest('details')?.setAttribute('open', '')
@@ -504,6 +522,7 @@ useHead({ title: titre })
         :source="sourceDuPdf"
         :page-initiale="pageDeDepart"
         :cachee="modeAffiche !== 'pages'"
+        :passage="passageAMarquer"
         @page="lecteur.poserLaPage"
         @premiere-page="surLaPremierePage"
         @plages="surLesPlages"
@@ -511,6 +530,7 @@ useHead({ title: titre })
         @basculer-la-barre="barreDepliee = !barreDepliee"
         @reseau-perdu="reseauPerdu = true"
         @reseau-revenu="auRetourDuReseau"
+        @reperage="reperage = $event"
       />
 
       <GnAttentePages
@@ -551,6 +571,7 @@ useHead({ title: titre })
         :rang="rangCourant + 1"
         :total="passages.length"
         :expression="expression"
+        :remarque="remarqueDuPassage"
         @precedente="allerAuPrecedent"
         @suivante="allerAuSuivant"
         @fermer="rangCourant = null"

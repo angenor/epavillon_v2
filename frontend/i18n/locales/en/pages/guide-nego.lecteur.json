@@ -40,7 +40,9 @@
     "sous-titre": "{titre} · {pages} pages"
   },
   "recherche": {
-    "titre": "Search the document"
+    "titre": "Search the document",
+    "ambigu": "These words appear several times on this page: none is singled out.",
+    "introuvable": "The passage is on this page, but it cannot be marked here."
   },
   "terme": {
     "lexique": "The translation and definition of this term will come with the English-French glossary.",

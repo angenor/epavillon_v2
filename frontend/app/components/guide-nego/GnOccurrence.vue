@@ -9,6 +9,8 @@ const props = defineProps<{
   rang: number
   total: number
   expression: string
+  /** Ce que le lecteur n'a pas pu faire du passage : le marquer, ou le distinguer des autres (FR-015). */
+  remarque?: string
 }>()
 
 const emit = defineEmits<{ precedente: []; suivante: []; fermer: [] }>()
@@ -23,6 +25,7 @@ const seule = computed(() => props.total <= 1)
     <p class="gn-occurrence__texte" aria-live="polite">
       <span class="gn-occurrence__rang">{{ t('gn-occurrence.rang', { rang, total }) }}</span>
       <span class="gn-occurrence__expression">{{ t('gn-occurrence.expression', { expression }) }}</span>
+      <span v-if="remarque" class="gn-occurrence__remarque">{{ remarque }}</span>
     </p>
     <button
       v-if="!seule"
@@ -82,6 +85,11 @@ const seule = computed(() => props.total <= 1)
 [data-app="guide-nego"] .gn-occurrence__expression {
   overflow-wrap: anywhere;
   color: var(--gn-texte-2);
+}
+
+[data-app="guide-nego"] .gn-occurrence__remarque {
+  padding-block-end: var(--gn-espace-4);
+  color: var(--gn-texte);
 }
 
 [data-app="guide-nego"] .gn-occurrence__bouton {
