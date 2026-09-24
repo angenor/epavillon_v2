@@ -82,18 +82,20 @@ test('un paquet qui ne parle pas des traductions ne rend aucune empreinte', () =
 })
 
 test('toutes les adresses de la liste sont relatives au service worker', () => {
-  const liste = listeDeGarde(['gn.hash.js'], '/_nuxt/', '465112eb')
+  const liste = listeDeGarde(['gn.hash.js'], '/_nuxt/', '465112eb', 'b1d')
   for (const adresse of liste) {
     assert.ok(!adresse.startsWith('/'), `${adresse} ne doit pas partir de la racine`)
   }
   assert.ok(liste.includes('../_nuxt/gn.hash.js'))
   assert.ok(liste.includes('../_i18n/465112eb/fr/messages.json'))
+  assert.ok(liste.includes('../_nuxt/builds/meta/b1d.json'), 'le manifeste de cette construction')
+  assert.ok(liste.includes('../_nuxt/builds/latest.json'))
   assert.ok(liste.includes('./'), 'la page vide sert toute navigation')
   assert.ok(liste.includes('manifest.webmanifest'))
 })
 
 test('le dossier de construction s’écrit sans barres superflues', () => {
-  assert.ok(listeDeGarde(['a.js'], '_nuxt', 'abc123').includes('../_nuxt/a.js'))
+  assert.ok(listeDeGarde(['a.js'], '_nuxt', 'abc123', 'b1d').includes('../_nuxt/a.js'))
 })
 
 test('les ressources de pdf.js sont gardées, calculées depuis le paquet', () => {
@@ -118,7 +120,7 @@ test('ni cmaps, ni jbig2, ni quickjs', () => {
 })
 
 test('les ressources de pdf.js sont relatives au service worker, comme le reste', () => {
-  const liste = listeDeGarde([], '/_nuxt/', 'abc123')
+  const liste = listeDeGarde([], '/_nuxt/', 'abc123', 'b1d')
   assert.ok(liste.includes(`${DOSSIER_PDFJS}/wasm/qcms_bg.wasm`))
   assert.ok(liste.every((adresse) => !adresse.startsWith('/')))
 })

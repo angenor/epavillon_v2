@@ -144,17 +144,24 @@ export function empreinteDesMessages(contenuDuPaquet: string, locale = 'fr'): st
   return contenuDuPaquet.match(motif)?.[1] ?? null
 }
 
-/** Des adresses RELATIVES au service worker : le préfixe `/v2/` reste sans objet. */
+/**
+ * Des adresses RELATIVES au service worker : le préfixe `/v2/` reste sans objet. Le
+ * manifeste de construction de Nuxt en fait partie : sans lui, chaque navigation hors
+ * connexion écrit une erreur (NUXT_E5002).
+ */
 export function listeDeGarde(
   fichiers: string[],
   dossierDeConstruction: string,
   empreinte: string,
+  idDeConstruction: string,
   locale = 'fr',
 ): string[] {
   const construction = dossierDeConstruction.replace(/^\/+|\/+$/g, '')
   return [
     ...FICHIERS_PUBLICS,
     `../_i18n/${empreinte}/${locale}/messages.json`,
+    `../${construction}/builds/meta/${idDeConstruction}.json`,
+    `../${construction}/builds/latest.json`,
     ...fichiers.map((fichier) => `../${construction}/${fichier}`),
   ]
 }

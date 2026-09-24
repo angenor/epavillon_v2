@@ -85,10 +85,11 @@ export default defineNuxtModule({
         )
       }
 
-      const liste = listeDeGarde(fichiers, construction, empreinteDansLesPaquets(dossierClient, fichiers))
+      const idDeConstruction = String(nuxt.options.runtimeConfig.app.buildId)
+      const liste = listeDeGarde(fichiers, construction, empreinteDansLesPaquets(dossierClient, fichiers), idDeConstruction)
 
       const source = readFileSync(modele, 'utf8')
-        .replace("'__VERSION__'", JSON.stringify(nuxt.options.runtimeConfig.app.buildId))
+        .replace("'__VERSION__'", JSON.stringify(idDeConstruction))
         .replace('__LISTE__', JSON.stringify(liste, null, 2))
 
       mkdirSync(dossier, { recursive: true })

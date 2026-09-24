@@ -39,6 +39,13 @@ const GARDEES = new Set(LISTE.map((adresse) => new URL(adresse, self.location).h
  */
 const estFichierDeConstruction = (adresse) => adresse.includes('/_nuxt/') || adresse.includes('/guide-nego/pdfjs/')
 
+/**
+ * Le manifeste que Nuxt relit d'heure en heure, l'heure dans l'adresse, pour savoir si
+ * une version plus récente est en ligne. Il change sous la même adresse : repris d'une
+ * version précédente, il annoncerait une mise à jour, et Nuxt rechargerait la page.
+ */
+const estLeDernierManifeste = (adresse) => adresse.pathname.endsWith('/builds/latest.json')
+
 async function cachesDeLaCoquille() {
   const cles = await caches.keys()
   return cles.filter((cle) => cle.startsWith(PREFIXE) && cle !== CACHE)
@@ -57,7 +64,8 @@ async function garderTout(cache) {
   for (const adresse of GARDEES) {
     // Une installation interrompue par le réseau reprend où elle s'était arrêtée.
     if (await cache.match(adresse)) continue
-    const reprise = estFichierDeConstruction(adresse) ? await trouverDansLesAnciens(anciens, adresse) : null
+    const reprenable = estFichierDeConstruction(adresse) && !estLeDernierManifeste(new URL(adresse))
+    const reprise = reprenable ? await trouverDansLesAnciens(anciens, adresse) : null
     if (reprise) await cache.put(adresse, reprise)
     else aDemander.push(adresse)
   }
@@ -102,6 +110,17 @@ async function cacheDAbord(requete, adresse) {
   return fetch(requete)
 }
 
+/** Le réseau d'abord ; sans lui, la copie de cette version, que rien ne réécrit. */
+async function reseauDAbord(requete, adresse) {
+  try {
+    return await fetch(requete)
+  } catch (erreur) {
+    const garde = await caches.match(adresse, { cacheName: CACHE })
+    if (garde) return garde
+    throw erreur
+  }
+}
+
 self.addEventListener('fetch', (evenement) => {
   const requete = evenement.request
   if (requete.method !== 'GET') return
@@ -112,6 +131,11 @@ self.addEventListener('fetch', (evenement) => {
   if (requete.mode === 'navigate') {
     if (!adresse.href.startsWith(PORTEE)) return
     evenement.respondWith(cacheDAbord(requete, PORTEE))
+    return
+  }
+
+  if (estLeDernierManifeste(adresse)) {
+    evenement.respondWith(reseauDAbord(requete, `${adresse.origin}${adresse.pathname}`))
     return
   }
 

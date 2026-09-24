@@ -24,6 +24,8 @@ const LISTE = [
   '../_nuxt/entry.hash.js',
   '../_nuxt/travailleur.hash.js',
   '../_nuxt/Atkinson.hash.woff2',
+  '../_nuxt/builds/meta/v1.json',
+  '../_nuxt/builds/latest.json',
 ]
 
 interface FauxCache {
@@ -34,6 +36,7 @@ function monter(version: string, caches_ = new Map<string, FauxCache>()) {
   const demandees: string[] = []
   const ecouteurs = new Map<string, (evenement: unknown) => void>()
   let priseDeMain = false
+  const reseau = { enLigne: true }
 
   const cacheApi = {
     keys: async () => [...caches_.keys()],
@@ -52,7 +55,8 @@ function monter(version: string, caches_ = new Map<string, FauxCache>()) {
         },
       }
     },
-    match: async () => undefined,
+    match: async (adresse: string, options?: { cacheName?: string }) =>
+      caches_.get(options?.cacheName ?? '')?.contenu.get(String(adresse)),
   }
 
   const contexte = {
@@ -63,7 +67,10 @@ function monter(version: string, caches_ = new Map<string, FauxCache>()) {
       clients: { claim: async () => undefined },
     },
     caches: cacheApi,
-    fetch: async (requete: { url: string }) => `réseau:${requete.url}`,
+    fetch: async (requete: { url: string }) => {
+      if (!reseau.enLigne) throw new TypeError('Failed to fetch')
+      return `réseau:${requete.url}`
+    },
     Request: class {
       url: string
       constructor(url: string) {
@@ -86,7 +93,14 @@ function monter(version: string, caches_ = new Map<string, FauxCache>()) {
     await attendu
   }
 
-  return { caches_, demandees, declencher, priseDeMain: () => priseDeMain }
+  /** Une requête de la page : ce que le service worker répond, ou `null` s'il laisse passer. */
+  const servir = async (url: string): Promise<unknown> => {
+    let reponse: Promise<unknown> | null = null
+    ecouteurs.get('fetch')?.({ request: { method: 'GET', mode: 'cors', url }, respondWith: (p: Promise<unknown>) => (reponse = p) })
+    return reponse
+  }
+
+  return { caches_, demandees, declencher, servir, reseau, priseDeMain: () => priseDeMain }
 }
 
 const absolu = (adresse: string) => new URL(adresse, 'https://exemple.org/v2/guide-nego/sw.js').href
@@ -110,6 +124,7 @@ test('déploiement suivant : les fichiers de construction se reprennent, le rest
           [absolu('pdfjs/6.3.289/wasm/qcms_bg.wasm'), 'v1'],
           [absolu('pdfjs/6.3.289/standard_fonts/LiberationSans-Regular.ttf'), 'v1'],
           [absolu('./'), 'v1'],
+          [absolu('../_nuxt/builds/latest.json'), 'v1'],
         ]),
       },
     ],
@@ -118,10 +133,16 @@ test('déploiement suivant : les fichiers de construction se reprennent, le rest
   await sw.declencher('install')
 
   // Un nom à empreinte ne change pas de contenu : on ne le redemande pas.
-  assert.ok(!sw.demandees.some((a) => a.includes('_nuxt')), 'aucun fichier de construction redemandé')
-  // La page vide, les traductions, le manifeste et les icônes changent sous la même adresse.
+  assert.ok(
+    !sw.demandees.some((a) => a.includes('_nuxt') && !a.includes('/builds/')),
+    'aucun fichier de construction redemandé',
+  )
+  // La page vide, les traductions, le manifeste et les icônes changent sous la même adresse ;
+  // le manifeste de construction de Nuxt aussi : il porte l'identifiant de la version.
   assert.deepEqual(sw.demandees.sort(), [
     absolu('../_i18n/abc123/fr/messages.json'),
+    absolu('../_nuxt/builds/latest.json'),
+    absolu('../_nuxt/builds/meta/v1.json'),
     absolu('./'),
     absolu('icones/192.png'),
     absolu('manifest.webmanifest'),
@@ -198,4 +219,23 @@ test('une autre version de pdf.js est une autre adresse : elle se demande', asyn
   const sw = monter('v2', anciens)
   await sw.declencher('install')
   assert.ok(sw.demandees.includes(absolu('pdfjs/6.3.289/wasm/qcms_bg.wasm')))
+})
+
+test('le manifeste de construction de Nuxt se garde : hors connexion, il répond sans erreur', async () => {
+  const sw = monter('v1')
+  await sw.declencher('install')
+  sw.reseau.enLigne = false
+  assert.equal(await sw.servir(absolu('../_nuxt/builds/meta/v1.json')), `réseau:${absolu('../_nuxt/builds/meta/v1.json')}`)
+})
+
+test('latest.json : le réseau d’abord, la copie de cette version ensuite, jamais réécrite', async () => {
+  const sw = monter('v1')
+  await sw.declencher('install')
+  const garde = sw.caches_.get('gn-coquille-v1')?.contenu.get(absolu('../_nuxt/builds/latest.json'))
+  // Nuxt le relit d'heure en heure avec l'heure dans l'adresse.
+  const adresse = `${absolu('../_nuxt/builds/latest.json')}?1727200000000`
+  assert.equal(await sw.servir(adresse), `réseau:${adresse}`, 'en ligne, la version publiée')
+  assert.equal(sw.caches_.get('gn-coquille-v1')?.contenu.get(absolu('../_nuxt/builds/latest.json')), garde, 'la copie gardée ne change pas')
+  sw.reseau.enLigne = false
+  assert.equal(await sw.servir(adresse), garde, 'hors connexion, celle de cette version : aucune mise à jour annoncée')
 })
