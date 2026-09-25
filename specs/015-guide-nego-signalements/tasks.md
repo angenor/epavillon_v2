@@ -12,12 +12,12 @@
 
 ## Phase 1 — Le modèle (bloquant)
 
-- [ ] T001 Écrire dans `docs/database/100_negotiations.sql` : ENUM `negotiation.report_status`, tables `session_reports` (dont `proposed_day`, `published_at`, `ck_session_reports_decision`, aucun déclencheur d'outbox), `network_meetings`, `network_agenda_entries`, colonne `theme_subscriptions.notify_changes`, fonctions `negotiation.change_recipients()` et `negotiation.network_recipients()`, contraintes, index, `xmod_fk_*`, gardes de vocabulaire, audit, commentaires français — data-model § 1 à 4
-- [ ] T002 Semer la permission `negotiation.report.validate` (portée globale) et l'attribuer au rôle `admin`, à côté des permissions de `negotiation` dans `docs/database/100_negotiations.sql` — data-model § 5
-- [ ] T003 Semer les quatre `engagement.notification_types` dans `docs/database/110_engagement.sql` — data-model § 6
-- [ ] T004 Écrire `specs/015-guide-nego-signalements/migration.sql`, rejouable, dans une transaction (patron `specs/014-guide-nego-sessions-agenda/migration.sql`)
-- [ ] T005 Sauvegarder `epavillon_dev2`, jouer la migration deux fois, comparer à une base jetable chargée depuis `docs/database/` (puis la supprimer) ; `cargo build -p negotiation -p engagement`
-- [ ] T006 Une ligne dans `docs/progression/modele.md`
+- [x] T001 Écrire dans `docs/database/100_negotiations.sql` : ENUM `negotiation.report_status`, tables `session_reports` (dont `proposed_day`, `published_at`, `ck_session_reports_decision`, aucun déclencheur d'outbox), `network_meetings`, `network_agenda_entries`, colonne `theme_subscriptions.notify_changes`, fonctions `negotiation.change_recipients()` et `negotiation.network_recipients()`, contraintes, index, `xmod_fk_*`, gardes de vocabulaire, audit, commentaires français — data-model § 1 à 4
+- [x] T002 Semer la permission `negotiation.report.validate` (portée globale) et l'attribuer au rôle `admin`, à côté des permissions de `negotiation` dans `docs/database/100_negotiations.sql` — data-model § 5
+- [x] T003 Semer les quatre `engagement.notification_types` dans `docs/database/110_engagement.sql` — data-model § 6
+- [x] T004 Écrire `specs/015-guide-nego-signalements/migration.sql`, rejouable, dans une transaction (patron `specs/014-guide-nego-sessions-agenda/migration.sql`)
+- [x] T005 Sauvegarder `epavillon_dev2`, jouer la migration deux fois, comparer à une base jetable chargée depuis `docs/database/` (puis la supprimer) ; `cargo build -p negotiation -p engagement`
+- [x] T006 Une ligne dans `docs/progression/modele.md`
 
 **Commit** : « feat(guide-nego): étape 3b, phase 1 — le modèle des signalements ».
 
