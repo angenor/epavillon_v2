@@ -2,5 +2,7 @@
   "anglais": "Original English title",
   "traduction": "Machine translation",
   "mon-groupe": "My group",
-  "sans-thematique": "Thematic area not specified"
+  "sans-thematique": "Thematic area not specified",
+  "chevauche": "Overlaps {heures} — {titre}",
+  "rappel": "Reminder 15 minutes before"
 }

@@ -1,0 +1,31 @@
+{
+  "titre": "Mon agenda",
+  "chargement": "Lecture de votre agenda",
+  "jour": "{jour} — {zone}",
+  "section": "Sessions de négociation",
+  "hors-connexion": "Les changements survenus depuis ne sont pas ici.",
+  "sans-compte": {
+    "titre": "Votre agenda suit votre compte",
+    "texte": "Connectez-vous pour suivre des sessions de négociation et les retrouver sur tous vos appareils.",
+    "connexion": "Me connecter",
+    "creer": "Créer mon compte"
+  },
+  "sans-edition": {
+    "titre": "Aucune COP climat à venir",
+    "texte": "Les sessions de négociation paraîtront ici dès qu'une COP climat sera annoncée."
+  },
+  "jamais-lu": {
+    "titre": "Votre agenda n'a pas encore été lu sur cet appareil",
+    "texte": "Il se lira dès le retour du réseau, puis restera lisible sans connexion."
+  },
+  "erreur": {
+    "titre": "Votre agenda n'a pas pu être lu",
+    "texte": "Le serveur n'a pas répondu. Rien n'a encore été gardé sur cet appareil.",
+    "reessayer": "Réessayer"
+  },
+  "vide": {
+    "titre": "Votre agenda est vide",
+    "texte": "Ouvrez une session de négociation et touchez « Ajouter à mon agenda » : elle paraîtra ici, jour par jour, et se relira sans connexion.",
+    "sortie": "Voir les sessions de négociation"
+  }
+}

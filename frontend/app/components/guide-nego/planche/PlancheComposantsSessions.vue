@@ -109,6 +109,18 @@ const lignes = computed<{ session: OfficialSession; etat: EtatAffiche; thematiqu
   },
 ])
 
+const adaptation = computed(() => lignes.value[1]!.session)
+const fonds = computed(() =>
+  specimen('fonds', {
+    title_en: 'Informal consultations on the Adaptation Fund',
+    title_fr: k('fonds'),
+    start_at: le12('11:00'),
+    end_at: le12('12:30'),
+    venue: k('salle-2'),
+    theme: 'finance',
+  }),
+)
+
 const retiree = computed(() =>
   specimen('retiree', { status: 'cancelled', cancelled: { at: le12('07:10'), reason: 'removed' } }),
 )
@@ -138,6 +150,36 @@ const reportee = computed(() =>
           :mon-groupe="l.monGroupe ?? false"
           :vers="VERS"
         />
+      </div>
+
+      <span class="gn-planche-composants__legende">{{ k('agenda') }}</span>
+      <div class="gn-planche-composants__vitrine">
+        <GnLigneSession
+          forme="agenda"
+          :session="adaptation"
+          etat="en-cours"
+          :fuseau="FUSEAU"
+          :ville="VILLE"
+          :thematique="k('thematique-adaptation')"
+          :chevauche="[fonds]"
+          rappel
+          :vers="VERS"
+        />
+        <GnLigneSession
+          forme="agenda"
+          :session="fonds"
+          etat="prevue"
+          :fuseau="FUSEAU"
+          :ville="VILLE"
+          :thematique="k('thematique-finance')"
+          :chevauche="[adaptation]"
+          :vers="VERS"
+        />
+      </div>
+
+      <span class="gn-planche-composants__legende">{{ k('rappel') }}</span>
+      <div class="gn-planche-composants__vitrine">
+        <GnBandeauRappel :session="lignes[2]!.session" :fuseau="FUSEAU" :ville="VILLE" />
       </div>
 
       <span class="gn-planche-composants__legende">{{ k('etats') }}</span>

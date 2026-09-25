@@ -2,5 +2,7 @@
   "anglais": "Titre anglais d'origine",
   "traduction": "Traduction automatique",
   "mon-groupe": "Mon groupe",
-  "sans-thematique": "Thématique non précisée"
+  "sans-thematique": "Thématique non précisée",
+  "chevauche": "Chevauche {heures} — {titre}",
+  "rappel": "Rappel 15 minutes avant"
 }

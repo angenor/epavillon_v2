@@ -9,6 +9,8 @@ export const CLE_OUVERTURE_VUE = 'gn.ouverture-vue'
 export const CLE_GARDE_ANNONCEE = 'gn.garde-annoncee'
 /** L'écran de premier choix des thématiques a été proposé sur cet appareil. */
 export const CLE_THEMATIQUES_PROPOSEES = 'gn.thematiques-proposees'
+/** Le rappel d'une session a été montré ; la valeur est son début, qu'un déplacement change. */
+export const cleRappelVu = (sessionId: string) => `gn.rappel.vu.${sessionId}`
 
 // Stockage refusé, une clé vit le temps de la visite : sans elle, « Continuer en
 // visiteur » ramènerait à l'ouverture, en boucle.

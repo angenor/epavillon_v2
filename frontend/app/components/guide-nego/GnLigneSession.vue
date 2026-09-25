@@ -22,8 +22,13 @@ const props = withDefaults(
     /** Une coordination d'un groupe que la personne a coché. */
     monGroupe?: boolean
     vers: string
+    /** « Mon agenda » (09 · 3a) : titre seul, salle et thématique sur une ligne, ni type ni accès. */
+    forme?: 'liste' | 'agenda'
+    /** Les sessions suivies qui la chevauchent : une marque par session, qui la nomme. */
+    chevauche?: readonly OfficialSession[]
+    rappel?: boolean
   }>(),
-  { ville: null, thematique: null, monGroupe: false },
+  { ville: null, thematique: null, monGroupe: false, forme: 'liste', chevauche: () => [], rappel: false },
 )
 
 const { t, locale } = useI18n()
@@ -54,6 +59,17 @@ const rattachement = computed(() => {
   return props.thematique ?? t('gn-ligne-session.sans-thematique')
 })
 
+const agenda = computed(() => props.forme === 'agenda')
+
+const marquesDeChevauchement = computed(() =>
+  props.chevauche.map((autre) => {
+    const debutAutre = time(autre.start_at, props.fuseau)
+    const heures = autre.end_at ? `${debutAutre}–${time(autre.end_at, props.fuseau)}` : debutAutre
+    const titreAutre = (locale.value === 'fr' ? autre.title_fr : null) ?? autre.title_en
+    return { id: autre.id, texte: t('gn-ligne-session.chevauche', { heures, titre: titreAutre }) }
+  }),
+)
+
 const annulee = computed(() => props.etat === 'annulee')
 const terminee = computed(() => props.etat === 'terminee')
 </script>
@@ -76,25 +92,38 @@ const terminee = computed(() => props.etat === 'terminee')
     </span>
 
     <span class="gn-ligne-session__corps">
-      <span v-if="type" class="gn-ligne-session__type">{{ type }}</span>
+      <span v-if="type && !agenda" class="gn-ligne-session__type">{{ type }}</span>
       <span class="gn-ligne-session__titre">{{ titre }}</span>
-      <span v-if="traduit" class="gn-ligne-session__anglais" lang="en">
-        <abbr class="gn-ligne-session__en" :title="t('gn-ligne-session.anglais')">EN</abbr>
-        {{ session.title_en }}
-      </span>
-      <span v-if="traduit" class="gn-ligne-session__traduction">
-        <GnPicto nom="translate" :taille="18" />
-        {{ t('gn-ligne-session.traduction') }}
-      </span>
-      <span v-if="session.venue || session.open_access !== null" class="gn-ligne-session__lieu">
+      <template v-if="traduit && !agenda">
+        <span class="gn-ligne-session__anglais" lang="en">
+          <abbr class="gn-ligne-session__en" :title="t('gn-ligne-session.anglais')">EN</abbr>
+          {{ session.title_en }}
+        </span>
+        <span class="gn-ligne-session__traduction">
+          <GnPicto nom="translate" :taille="18" />
+          {{ t('gn-ligne-session.traduction') }}
+        </span>
+      </template>
+      <span v-if="agenda" class="gn-ligne-session__lieu">
         <span v-if="session.venue" class="gn-ligne-session__salle">{{ session.venue }}</span>
-        <GnMarqueEtat
-          v-if="session.open_access !== null"
-          :etat="session.open_access ? 'ouverte' : 'acces-limite'"
-        />
+        <span class="gn-ligne-session__thematique">{{ rattachement }}</span>
       </span>
-      <span class="gn-ligne-session__thematique">{{ rattachement }}</span>
-      <GnEtatSession :session="session" :etat="etat" :fuseau="fuseau" />
+      <template v-else>
+        <span v-if="session.venue || session.open_access !== null" class="gn-ligne-session__lieu">
+          <span v-if="session.venue" class="gn-ligne-session__salle">{{ session.venue }}</span>
+          <GnMarqueEtat
+            v-if="session.open_access !== null"
+            :etat="session.open_access ? 'ouverte' : 'acces-limite'"
+          />
+        </span>
+        <span class="gn-ligne-session__thematique">{{ rattachement }}</span>
+      </template>
+      <GnEtatSession v-if="!agenda || etat !== 'prevue'" :session="session" :etat="etat" :fuseau="fuseau" />
+      <GnMarqueEtat v-for="m in marquesDeChevauchement" :key="m.id" etat="chevauche" :libelle="m.texte" />
+      <span v-if="rappel" class="gn-ligne-session__rappel">
+        <GnPicto nom="bell" :taille="16" />
+        {{ t('gn-ligne-session.rappel') }}
+      </span>
     </span>
 
     <GnPicto nom="chevron" :taille="24" class="gn-ligne-session__chevron" />
@@ -226,6 +255,15 @@ const terminee = computed(() => props.etat === 'terminee')
   line-height: var(--gn-interligne-20);
   font-weight: var(--gn-graisse-gras);
   color: var(--gn-accent);
+}
+
+[data-app="guide-nego"] .gn-ligne-session__rappel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+  color: var(--gn-texte-2);
 }
 
 [data-app="guide-nego"] .gn-ligne-session__chevron {

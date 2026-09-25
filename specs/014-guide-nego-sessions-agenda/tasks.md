@@ -139,10 +139,10 @@ Chemins relatifs au dossier ; `neg/` = `backend/crates/modules/negotiation/`, `f
 
 ## Phase 9 — US4 : Mon agenda, le rappel, « Ma journée » (P2)
 
-- [ ] T057 [US4] Écrire `fe/app/pages/guide-nego/negociations/agenda.vue` : bande des jours, section « Sessions de négociation » et compteur, lignes (titre fr, salle, thématique, état hors « Prévue », « Rappel 15 minutes avant »), chevauchements, annulées barrées ; états chargement, vide, sans compte, hors connexion ; textes dans `fe/i18n/locales/{fr,en}/pages/guide-nego.negociations-agenda.json`
-- [ ] T058 [US4] Écrire `useGnRappel` et `GnBandeauRappel` (vérification chaque minute et au retour au premier plan, une fois par session, refermable) dans `fe/app/composables/guide-nego/useGnRappel.ts` et `fe/app/components/guide-nego/GnBandeauRappel.vue`, monté dans `fe/app/layouts/guide-nego.vue` ; textes `gn-rappel.json` ; ajouté à la planche
-- [ ] T059 [US4] Remplir **le seul** bloc `prochaine-session` de « Ma journée » dans `fe/app/pages/guide-nego/index.vue` (agenda, sinon thématiques, sinon la ligne vide actuelle ; heure avec fuseau, titre fr et anglais, salle) ; `fe/tests/guide-nego/ma-journee.test.ts` reste vert
-- [ ] T060 [US4] Vérifier au navigateur contre la partie « Mon agenda » de `09-signaler-et-mon-agenda.html` et le bloc de `02-socle.html`, quickstart § 7 et § 8
+- [x] T057 [US4] Écrire `fe/app/pages/guide-nego/negociations/agenda.vue` : bande des jours, section « Sessions de négociation » et compteur, lignes (titre fr, salle, thématique, état hors « Prévue », « Rappel 15 minutes avant »), chevauchements, annulées barrées ; états chargement, vide, sans compte, hors connexion ; textes dans `fe/i18n/locales/{fr,en}/pages/guide-nego.negociations-agenda.json`
+- [x] T058 [US4] Écrire `useGnRappel` et `GnBandeauRappel` (vérification chaque minute et au retour au premier plan, une fois par session, refermable) dans `fe/app/composables/guide-nego/useGnRappel.ts` et `fe/app/components/guide-nego/GnBandeauRappel.vue`, monté dans `fe/app/layouts/guide-nego.vue` ; textes `gn-rappel.json` ; ajouté à la planche
+- [x] T059 [US4] Remplir **le seul** bloc `prochaine-session` de « Ma journée » dans `fe/app/pages/guide-nego/index.vue` (agenda, sinon thématiques, sinon la ligne vide actuelle ; heure avec fuseau, titre fr et anglais, salle) ; `fe/tests/guide-nego/ma-journee.test.ts` reste vert
+- [x] T060 [US4] Vérifier au navigateur contre la partie « Mon agenda » de `09-signaler-et-mon-agenda.html` et le bloc de `02-socle.html`, quickstart § 7 et § 8
 
 **Commit** : « feat(guide-nego): étape 3a, phase 9 — Mon agenda, le rappel et Ma journée ».
 

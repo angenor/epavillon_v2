@@ -24,5 +24,10 @@
   "type-plenary": "Plenary",
   "valeurs": "Changed value — time and room of a moved session, cyan arrow before the new one; the current time on the yellow fill; an unchanged value alone",
   "valeur-heure": "Thursday 12 November · Antalya time (UTC+3)",
-  "valeur-batiment": "Building B"
+  "valeur-batiment": "Building B",
+  "agenda": "“My agenda” line — title only, room and thematic area on one line, overlap in dark yellow on both lines, reminder set",
+  "rappel": "Reminder banner — at the top of the screen, app open, dismissible; no sound, no notification",
+  "fonds": "Informal consultations on the Adaptation Fund",
+  "salle-2": "Room 2",
+  "thematique-finance": "Finance"
 }

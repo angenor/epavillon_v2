@@ -24,5 +24,10 @@
   "type-plenary": "Plénière",
   "valeurs": "Valeur changée — heure et salle d'une déplacée, flèche cyan devant la nouvelle ; l'heure en cours sur l'aplat jaune ; une valeur inchangée seule",
   "valeur-heure": "Jeudi 12 novembre · heure d'Antalya (UTC+3)",
-  "valeur-batiment": "Bâtiment B"
+  "valeur-batiment": "Bâtiment B",
+  "agenda": "Ligne de « Mon agenda » — titre seul, salle et thématique sur une ligne, chevauchement en jaune foncé sur les deux lignes, rappel armé",
+  "rappel": "Bandeau du rappel — en tête d'écran, application ouverte, refermable ; ni son ni notification",
+  "fonds": "Consultations informelles sur le Fonds pour l'adaptation",
+  "salle-2": "Salle 2",
+  "thematique-finance": "Finance"
 }
