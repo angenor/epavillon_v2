@@ -1,0 +1,205 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, is_enabled, reader, archive_name, archive_first_day,\n                  live_url::text AS live_url, time_correction_minutes,\n                  official_programme_url::text AS \"official_programme_url!\",\n                  interval_seconds, missed_threshold, missed_reads,\n                  negotiation.import_is_serving(event_id) AS \"serving!\",\n                  last_success_at, last_attempt_at, last_error, failing_since, last_change_count\n             FROM negotiation.official_imports WHERE event_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "is_enabled",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "is_enabled"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "reader",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "reader"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "archive_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "archive_name"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "archive_first_day",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "archive_first_day"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "live_url",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "time_correction_minutes",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "time_correction_minutes"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "official_programme_url!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "interval_seconds",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "interval_seconds"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "missed_threshold",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "missed_threshold"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "missed_reads",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "missed_reads"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "serving!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "last_success_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "last_success_at"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "last_attempt_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "last_attempt_at"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "last_error",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "last_error"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "failing_since",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "failing_since"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "last_change_count",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "last_change_count"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      null,
+      false,
+      null,
+      false,
+      false,
+      false,
+      null,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "a4ad4bedc314511a006c7d4e7bb0b04a86e38de18ea3b5011c5497a2dd8376b6"
+}

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.agenda_items\n            SET theme_term_id = $2,\n                theme_set_by = CASE WHEN $2::uuid IS NULL THEN NULL ELSE $3::uuid END,\n                theme_set_at = CASE WHEN $2::uuid IS NULL THEN NULL ELSE now() END\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "34c2affc64c554227ee755ec6202f955850a156c44c3d412f3be26dda19dfb5e"
+}

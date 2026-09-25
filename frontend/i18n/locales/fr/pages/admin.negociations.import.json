@@ -1,0 +1,97 @@
+{
+  "title": "Import des sessions officielles",
+  "subtitle": "Les sessions de négociation lues à la source officielle de la CCNUCC, pour l'édition choisie. La source fait foi : aucune session ne se modifie ici.",
+  "edition": "Édition",
+  "noEdition": {
+    "title": "Aucune COP climat",
+    "description": "Aucune édition de la série des COP climat n'existe encore. Créez-la dans les événements."
+  },
+  "forbidden": {
+    "scope": "Administrer Guide Négo, sur la plateforme entière",
+    "description": "L'import des sessions officielles est réservé aux administrateurs de la plateforme entière. Un compte rattaché à un seul événement n'y a pas accès."
+  },
+  "switch": {
+    "label": "Import allumé",
+    "hint": "Allumé, l'import lit la source et l'application affiche les sessions. Éteint, l'affichage est coupé aussitôt."
+  },
+  "state": {
+    "serving": "Servi",
+    "cut": "Coupé",
+    "disabled": "Éteint"
+  },
+  "cut": {
+    "disabled": "L'import est éteint : l'application n'affiche aucune session officielle.",
+    "neverRead": "L'import est allumé, mais aucune lecture n'a encore réussi : l'affichage reste coupé.",
+    "unreachable": "La source n'a pas répondu assez de fois d'affilée : l'application affiche « Lecture impossible » et renvoie au programme officiel."
+  },
+  "status": {
+    "title": "État",
+    "moment": "{date}, {time}",
+    "never": "Jamais",
+    "lastSuccess": "Dernière lecture réussie",
+    "lastAttempt": "Dernière tentative",
+    "missed": "Lectures manquées d'affilée",
+    "missedValue": "{count} sur un seuil de {threshold}",
+    "changes": "Écarts de la dernière lecture",
+    "sessions": "Sessions importées",
+    "withoutTheme": "Points de l'ordre du jour sans thématique",
+    "withoutThemeLink": "Rattacher les points",
+    "error": "Dernière erreur",
+    "failingSince": "La source ne répond plus depuis le {moment}."
+  },
+  "readNow": {
+    "action": "Lire maintenant",
+    "hint": "Une lecture de plus, tout de suite. La cadence ne change pas.",
+    "done": "Lecture demandée. L'état se met à jour dans quelques secondes."
+  },
+  "settings": {
+    "title": "Réglage",
+    "reader": "Lecteur",
+    "readers": {
+      "archive": {
+        "label": "Jeu archivé",
+        "description": "Un relevé réel d'une COP passée, rejoué sur les dates choisies. Pour la recette, et tant que l'accès à la source n'est pas ouvert."
+      },
+      "live": {
+        "label": "Source officielle",
+        "description": "Le calendrier de conférence de la CCNUCC, lu à l'adresse indiquée."
+      }
+    },
+    "archive": "Jeu archivé",
+    "firstDay": "Premier jour de l'archive",
+    "firstDayHint": "Le premier jour du jeu est posé sur cette date, heure locale gardée, dans le fuseau de l'édition ({zone}). Vide : les dates d'origine.",
+    "correction": "Correction horaire, en minutes",
+    "correctionHint": "Ajoutée aux heures de la source : la CCNUCC publie l'heure locale moins une heure.",
+    "liveUrl": "Adresse de la source",
+    "liveUrlHint": "Le JSON du calendrier de conférence.",
+    "programmeUrl": "Adresse du programme officiel",
+    "programmeUrlHint": "Le lien offert aux utilisateurs quand l'affichage est coupé.",
+    "interval": "Intervalle entre deux lectures, en secondes",
+    "intervalHint": "De 60 secondes à un jour (86 400). Pris en compte dès la lecture suivante.",
+    "threshold": "Seuil de lectures manquées",
+    "thresholdHint": "De 1 à 100. Atteint, l'affichage se coupe. Pris en compte dès la lecture suivante.",
+    "save": "Enregistrer le réglage",
+    "saved": "Réglage enregistré."
+  },
+  "journal": {
+    "title": "Journal des lectures",
+    "caption": "Les vingt dernières lectures, la plus récente d'abord",
+    "empty": "Aucune lecture pour l'instant.",
+    "columns": {
+      "startedAt": "Lecture",
+      "outcome": "Issue",
+      "sessions": "Sessions",
+      "changes": "Écarts",
+      "origin": "Origine",
+      "error": "Erreur"
+    },
+    "outcomes": {
+      "success": "Réussie",
+      "failure": "Manquée"
+    },
+    "origins": {
+      "manual": "Manuelle",
+      "chain": "Cadence"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "title": "Agenda items",
+  "subtitle": "The agenda items cited by the official sessions. Assign each to a theme: its sessions inherit it on the app's next read.",
+  "edition": "Edition",
+  "withoutTheme": "No item without a theme. | {count} item without a theme. | {count} items without a theme.",
+  "noEdition": {
+    "title": "No climate COP",
+    "description": "No edition of the climate COP series exists yet."
+  },
+  "empty": {
+    "title": "No item yet",
+    "description": "Items appear with the import's first successful read."
+  },
+  "importLink": "Open the import",
+  "forbidden": {
+    "scope": "Administer Guide Négo, platform-wide",
+    "description": "Agenda items are reserved for platform-wide administrators. An account attached to a single event cannot access them."
+  },
+  "row": {
+    "theme": "Theme of item {code}",
+    "none": "Theme not specified",
+    "sessions": "No session | {count} session | {count} sessions",
+    "setAt": "Assigned on {date}",
+    "saved": "Saved"
+  }
+}

@@ -61,7 +61,8 @@ impl JobHandler for ImportOfficialSessions {
             let mut conn = self.db.pool().acquire().await?;
             depot::reglage(&mut conn, charge.event_id).await?
         };
-        let Some(reglage) = reglage.filter(|r| r.is_enabled) else {
+        // « Lire maintenant » lit même éteint : l'affichage, lui, reste coupé.
+        let Some(reglage) = reglage.filter(|r| r.is_enabled || charge.manuel) else {
             tracing::info!(event_id = %charge.event_id, "import éteint : ni lecture ni suivante");
             return Ok(());
         };
@@ -366,6 +367,21 @@ pub async fn poser_maintenant(
         return Ok(true);
     }
     poser(conn, event_id, interval_seconds, courant + 1).await
+}
+
+/// « Lire maintenant » : une lecture à sa propre clé, qui ne replanifie pas —
+/// deux appels font deux lectures, et la chaîne reste unique (R7).
+pub async fn poser_manuel(conn: &mut PgConnection, event_id: Uuid, request_id: &str) -> Result<()> {
+    jobs::enqueue(
+        conn,
+        NewJob::new(
+            IMPORT_OFFICIAL_SESSIONS,
+            json!({ "event_id": event_id, "manuel": true }),
+        )
+        .idempotent(format!("import:{event_id}:manuel:{request_id}")),
+    )
+    .await?;
+    Ok(())
 }
 
 /// Au démarrage du worker : chaque import allumé retrouve sa chaîne.

@@ -1,4 +1,5 @@
 pub mod access;
+pub mod admin_import;
 pub mod agenda;
 pub mod attempts;
 pub mod bookmarks;

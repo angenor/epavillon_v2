@@ -6,7 +6,7 @@
  * Toute heure est un instant ISO 8601 en UTC ; le fuseau de la COP voyage à part.
  */
 
-import type { I18nText, IsoDateTime, Uuid } from './shared'
+import type { I18nText, IsoDate, IsoDateTime, Uuid } from './shared'
 
 // ---------------------------------------------------------------------------
 // `GET /negotiation/sessions?edition=`
@@ -88,4 +88,79 @@ export interface MyAgendaEntry {
 
 export interface AgendaEntryPayload {
   remind: boolean
+}
+
+// ---------------------------------------------------------------------------
+// Back-office — `GET`/`PUT /admin/negotiation/import?edition=`
+// ---------------------------------------------------------------------------
+
+export type ImportReader = 'archive' | 'live'
+
+export interface OfficialImportAdmin {
+  edition: { slug: string; name: I18nText; timezone: string }
+  enabled: boolean
+  reader: ImportReader
+  archive_name: string | null
+  /** AAAA-MM-JJ : le premier jour de l'archive est posé sur ce jour. */
+  archive_first_day: IsoDate | null
+  /** Les jeux archivés présents dans le binaire. */
+  archives: string[]
+  live_url: string | null
+  time_correction_minutes: number
+  official_programme_url: string
+  interval_seconds: number
+  missed_threshold: number
+  missed_reads: number
+  /** `negotiation.import_is_serving()` — la règle de coupure, lue et non recopiée. */
+  serving: boolean
+  last_success_at: IsoDateTime | null
+  last_attempt_at: IsoDateTime | null
+  last_error: string | null
+  failing_since: IsoDateTime | null
+  last_change_count: number | null
+  session_count: number
+  agenda_items_without_theme: number
+  /** Les vingt dernières lectures, la plus récente d'abord. */
+  runs: ImportRun[]
+}
+
+export interface ImportRun {
+  started_at: IsoDateTime
+  outcome: 'success' | 'failure'
+  error: string | null
+  session_count: number | null
+  change_count: number | null
+  /** « Lire maintenant », et non la chaîne récurrente. */
+  manual: boolean
+}
+
+export type UpdateOfficialImportPayload = Pick<
+  OfficialImportAdmin,
+  | 'enabled'
+  | 'reader'
+  | 'archive_name'
+  | 'archive_first_day'
+  | 'live_url'
+  | 'time_correction_minutes'
+  | 'official_programme_url'
+  | 'interval_seconds'
+  | 'missed_threshold'
+>
+
+// ---------------------------------------------------------------------------
+// Back-office — `GET /admin/negotiation/agenda-items?edition=` · `PUT …/{id}`
+// ---------------------------------------------------------------------------
+
+export interface AgendaItemAdmin {
+  id: Uuid
+  code: string
+  title: string
+  /** Code `negotiation_theme` ; son libellé vient du vocabulaire. */
+  theme: string | null
+  session_count: number
+  theme_set_at: IsoDateTime | null
+}
+
+export interface AgendaItemThemePayload {
+  theme: string | null
 }

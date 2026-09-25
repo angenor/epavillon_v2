@@ -28,7 +28,8 @@ type OfficialImportAdmin = {
   session_count: number
   agenda_items_without_theme: number
   runs: { started_at: string; outcome: 'success' | 'failure'; error: string | null;
-          session_count: number | null; change_count: number | null }[]   // les 20 dernières
+          session_count: number | null; change_count: number | null;
+          manual: boolean }[]                                              // les 20 dernières
 }
 ```
 
@@ -40,7 +41,8 @@ Corps : `enabled`, `reader`, `archive_name`, `archive_first_day`, `live_url`, `t
 - **Allumer** pose la première lecture dans la même transaction (clé d'idempotence par créneau) ;
   **éteindre** coupe l'affichage aussitôt — la règle est lue, pas recopiée.
 - Le seuil et l'intervalle valent dès la lecture suivante (FR-017, US2 sc. 6).
-- `reader = 'live'` sans `live_url`, `archive_name` absent des `archives`, intervalle < 60 s ou seuil < 1 →
+- `reader = 'live'` sans `live_url`, `archive_name` absent des `archives`, intervalle hors de 60 s à 86 400 s ou seuil hors de 1 à 100
+  (le produit des deux tient dans l'`integer` de `import_is_serving`) →
   `400 NEGOTIATION_IMPORT_CONFIG_INVALID`, le message nomme le champ.
 
 ## `POST /admin/negotiation/import/read?edition={slug}`

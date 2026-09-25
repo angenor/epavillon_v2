@@ -73,6 +73,11 @@ pub struct ApiErrorBody {
         crate::routes::admin_documents::notes,
         crate::routes::admin_documents::poser_une_note,
         crate::routes::admin_documents::retirer_une_note,
+        crate::routes::admin_import::etat,
+        crate::routes::admin_import::regler,
+        crate::routes::admin_import::lire_maintenant,
+        crate::routes::admin_import::points,
+        crate::routes::admin_import::rattacher,
     ),
     components(schemas(ApiErrorBody)),
     tags(
@@ -80,6 +85,7 @@ pub struct ApiErrorBody {
         (name = "Guide Négo — documents", description = "La bibliothèque de documents, leur forme lisible, les images de page, les notes de correction, le compteur et les favoris. Lecture ouverte à tous ; un document réservé ne livre son contenu qu'à qui a l'accès négociateur."),
         (name = "Guide Négo — sessions officielles", description = "Les sessions de négociation lues à la source officielle, en une réponse par édition ; les groupes de négociation suivis ; « Mon agenda ». Lecture des sessions ouverte à tous ; groupes et agenda demandent un compte."),
         (name = "Back-office — documents", description = "Publier un document en une journée : brouillon, PDF, extraction, aperçu page par page, publication, nouvelle version ; et les notes de correction de l'expert. Portée globale."),
+        (name = "Back-office — sessions officielles", description = "L'import des sessions de négociation d'une édition — interrupteur, lecteur, cadence, santé, journal, « Lire maintenant » — et le rattachement des points de l'ordre du jour aux thématiques. Portée globale. Aucune route ne modifie une session : la source fait foi."),
         (name = "Back-office — admission", description = "Les codes d'invitation, leurs usages, les demandes d'accès et le mode d'admission. Réservé aux administrateurs de la plateforme entière : `negotiation.space.manage` **sur la portée globale**. Un administrateur d'une seule édition n'y voit rien — aucun espace de négociation n'est rattaché à un événement."),
     )
 )]

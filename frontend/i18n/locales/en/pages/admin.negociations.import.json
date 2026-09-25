@@ -1,0 +1,97 @@
+{
+  "title": "Official session import",
+  "subtitle": "Negotiation sessions read from the official UNFCCC source, for the chosen edition. The source is authoritative: no session is edited here.",
+  "edition": "Edition",
+  "noEdition": {
+    "title": "No climate COP",
+    "description": "No edition of the climate COP series exists yet. Create it under events."
+  },
+  "forbidden": {
+    "scope": "Administer Guide Négo, platform-wide",
+    "description": "The official session import is reserved for platform-wide administrators. An account attached to a single event cannot access it."
+  },
+  "switch": {
+    "label": "Import on",
+    "hint": "On, the import reads the source and the app shows the sessions. Off, the display is cut at once."
+  },
+  "state": {
+    "serving": "Serving",
+    "cut": "Cut",
+    "disabled": "Off"
+  },
+  "cut": {
+    "disabled": "The import is off: the app shows no official session.",
+    "neverRead": "The import is on, but no read has succeeded yet: the display stays cut.",
+    "unreachable": "The source failed to answer too many times in a row: the app shows “Reading unavailable” and links to the official programme."
+  },
+  "status": {
+    "title": "Status",
+    "moment": "{date}, {time}",
+    "never": "Never",
+    "lastSuccess": "Last successful read",
+    "lastAttempt": "Last attempt",
+    "missed": "Consecutive missed reads",
+    "missedValue": "{count} of a threshold of {threshold}",
+    "changes": "Changes in the last read",
+    "sessions": "Imported sessions",
+    "withoutTheme": "Agenda items without a theme",
+    "withoutThemeLink": "Assign the items",
+    "error": "Last error",
+    "failingSince": "The source has not answered since {moment}."
+  },
+  "readNow": {
+    "action": "Read now",
+    "hint": "One more read, right away. The schedule does not change.",
+    "done": "Read requested. The status updates within a few seconds."
+  },
+  "settings": {
+    "title": "Settings",
+    "reader": "Reader",
+    "readers": {
+      "archive": {
+        "label": "Archived set",
+        "description": "A real capture from a past COP, replayed on the chosen dates. For acceptance testing, and until access to the source opens."
+      },
+      "live": {
+        "label": "Official source",
+        "description": "The UNFCCC conference calendar, read at the given address."
+      }
+    },
+    "archive": "Archived set",
+    "firstDay": "First day of the archive",
+    "firstDayHint": "The set's first day is moved to this date, local time kept, in the edition's time zone ({zone}). Empty: the original dates.",
+    "correction": "Time correction, in minutes",
+    "correctionHint": "Added to the source's times: the UNFCCC publishes local time minus one hour.",
+    "liveUrl": "Source address",
+    "liveUrlHint": "The conference calendar JSON.",
+    "programmeUrl": "Official programme address",
+    "programmeUrlHint": "The link offered to users when the display is cut.",
+    "interval": "Interval between reads, in seconds",
+    "intervalHint": "From 60 seconds to one day (86,400). Applies from the next read.",
+    "threshold": "Missed-read threshold",
+    "thresholdHint": "From 1 to 100. Once reached, the display is cut. Applies from the next read.",
+    "save": "Save settings",
+    "saved": "Settings saved."
+  },
+  "journal": {
+    "title": "Read log",
+    "caption": "The last twenty reads, most recent first",
+    "empty": "No read yet.",
+    "columns": {
+      "startedAt": "Read",
+      "outcome": "Outcome",
+      "sessions": "Sessions",
+      "changes": "Changes",
+      "origin": "Origin",
+      "error": "Error"
+    },
+    "outcomes": {
+      "success": "Succeeded",
+      "failure": "Missed"
+    },
+    "origins": {
+      "manual": "Manual",
+      "chain": "Schedule"
+    }
+  }
+}

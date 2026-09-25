@@ -61,7 +61,9 @@
     "negotiationCodes": "Invitation codes",
     "negotiationRequests": "Access requests",
     "negotiationAdmission": "Admission mode",
-    "negotiationDocuments": "Documents"
+    "negotiationDocuments": "Documents",
+    "negotiationImport": "Session import",
+    "negotiationAgenda": "Agenda items"
   },
   "breadcrumb": {
     "label": "Breadcrumb",

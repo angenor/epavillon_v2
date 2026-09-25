@@ -110,6 +110,18 @@ const sections: NavSection[] = [
         icon: 'document',
         permissions: ['negotiation.document.publish', 'negotiation.correction.post'],
       },
+      {
+        labelKey: 'nav.admin.negotiationImport',
+        to: '/admin/negociations/import',
+        icon: 'refresh',
+        permissions: ['negotiation.space.manage'],
+      },
+      {
+        labelKey: 'nav.admin.negotiationAgenda',
+        to: '/admin/negociations/ordre-du-jour',
+        icon: 'list',
+        permissions: ['negotiation.space.manage'],
+      },
     ],
   },
   {
