@@ -6,6 +6,7 @@ pub mod corrections;
 pub mod document_pages;
 pub mod document_themes;
 pub mod documents;
+pub mod import;
 pub mod objets;
 pub mod renditions;
 pub mod requests;

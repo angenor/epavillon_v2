@@ -1,0 +1,167 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.id AS \"id!\", m.source_key AS \"source_key!\", m.start_at AS \"start_at!\", m.end_at, m.venue_label,\n                  m.title_original AS \"title_original!\", t.code AS \"type_code?\",\n                  m.is_open_access, a.code AS \"point?\", m.status::text AS \"status!\",\n                  m.cancellation_reason, m.absent_reads AS \"absent_reads!\", m.group_term_id\n             FROM negotiation.meetings m\n             LEFT JOIN reference.taxonomy_terms t ON t.id = m.meeting_type_term_id\n             LEFT JOIN negotiation.agenda_items a ON a.id = m.agenda_item_id\n            WHERE m.event_id = $1 AND m.source_key IS NOT NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "source_key!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "source_key"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "start_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "start_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "end_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "end_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "venue_label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "venue_label"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "title_original!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "title_original"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "type_code?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "is_open_access",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "is_open_access"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "point?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.agenda_items",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "cancellation_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "cancellation_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "absent_reads!",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "absent_reads"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "group_term_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "group_term_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      null,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "925124a1bd444b35c99402ec1af906d7d3138e38ee21dcc993412a02f164a99a"
+}

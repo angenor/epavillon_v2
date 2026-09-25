@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.official_imports\n            SET missed_reads = LEAST(missed_reads + 1, 32767),\n                failing_since = COALESCE(failing_since, $2),\n                last_error = $3, last_attempt_at = $2\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b9b8d3472b94948129108eeee96ac02339310902d2f260fcb56437071081dba7"
+}

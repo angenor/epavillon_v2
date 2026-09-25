@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.document_renditions SET large_text_choice = $2 WHERE document_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "93f058369e316d33d11344799fe6bd6f0a5b172bb8d7d1eaf10cc692d3c73f7c"
+}

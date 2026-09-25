@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT DISTINCT m.title_original AS \"titre!\"\n             FROM negotiation.meetings m\n            WHERE m.event_id = $1 AND m.source_key IS NOT NULL\n              AND NOT EXISTS (SELECT 1 FROM negotiation.title_translations t\n                               WHERE t.source_text = m.title_original)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "titre!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "title_original"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "9195f943e35c68b0f98b30a3438618f8567f44558ae4778e384ae7b9a900a53c"
+}

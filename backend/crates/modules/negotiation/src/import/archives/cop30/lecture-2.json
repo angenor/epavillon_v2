@@ -1,0 +1,1755 @@
+[
+ {
+  "id": "651031",
+  "title": "EIG Coordination Meeting",
+  "date": [
+   {
+    "value": "2025-11-17T08:00:00",
+    "end_value": "2025-11-17T09:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 05"
+   }
+  ],
+  "typeofevent": [
+   "Coordination meetings"
+  ],
+  "access": [
+   {
+    "value": "1"
+   }
+  ],
+  "body": [],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/eig-coordination-meeting-41",
+  "time": "08:00"
+ },
+ {
+  "id": "651738",
+  "title": "YOUNGO Morning Coordination Meeting",
+  "date": [
+   {
+    "value": "2025-11-17T08:00:00",
+    "end_value": "2025-11-17T09:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Side Event Room 7"
+   }
+  ],
+  "typeofevent": [
+   "Coordination meetings"
+  ],
+  "access": [
+   {
+    "value": "1"
+   }
+  ],
+  "body": [],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/youngo-morning-coordination-meeting-0",
+  "time": "08:00"
+ },
+ {
+  "id": "654012",
+  "title": "Grulac Coordination",
+  "date": [
+   {
+    "value": "2025-11-17T13:00:00",
+    "end_value": "2025-11-17T14:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 13"
+   }
+  ],
+  "typeofevent": [
+   "Coordination meetings"
+  ],
+  "access": [
+   {
+    "value": "1"
+   }
+  ],
+  "body": [],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/grulac-coordination-7",
+  "time": "13:00"
+ },
+ {
+  "id": "652989",
+  "title": "LMDC Daily Coordination Meeting",
+  "date": [
+   {
+    "value": "2025-11-17T17:00:00",
+    "end_value": "2025-11-17T18:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 12"
+   }
+  ],
+  "typeofevent": [
+   "Coordination meetings"
+  ],
+  "access": [
+   {
+    "value": "1"
+   }
+  ],
+  "body": [],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/lmdc-daily-coordination-meeting-42",
+  "time": "17:00"
+ },
+ {
+  "id": "654217",
+  "title": "CMP 5 Matters relating to the clean development mechanism - Informal consultation",
+  "date": [
+   {
+    "value": "2025-11-17T09:00:00",
+    "end_value": "2025-11-17T10:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 14"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties serving as the meeting of the Parties to the Kyoto Protocol (CMP)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cmp-5-matters-relating-to-the-clean-development-mechanism-informal-consultation-5",
+  "time": "09:00"
+ },
+ {
+  "id": "651056",
+  "title": "COP  8 (f)/ CMA 10 (f)  Compilation and synthesis of, and summary report on the in-session workshop on, biennial communications of information related to Article 9, paragraph 5, of the Paris Agreement - Informal consultation",
+  "date": [
+   {
+    "value": "2025-11-17T09:00:00",
+    "end_value": "2025-11-17T10:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 09"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties (COP)",
+   "Conference of the Parties serving as the meeting of the Parties to the Paris Agreement (CMA)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cop-8-f/cma-10-f-compilation-and-synthesis-of-and-summary-report-on-the-in-session-workshop-on-11",
+  "time": "09:00"
+ },
+ {
+  "id": "654205",
+  "title": "COP Presidency Consultation on NDC, BTRs, Art. 9.1 and UTM",
+  "date": [
+   {
+    "value": "2025-11-17T09:00:00",
+    "end_value": "2025-11-17T11:30:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 22"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "1"
+   }
+  ],
+  "body": [
+   "Conference of the Parties serving as the meeting of the Parties to the Kyoto Protocol (CMP)",
+   "Conference of the Parties serving as the meeting of the Parties to the Paris Agreement (CMA)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cop-presidency-consultation-on-ndc-btrs-art-91-and-utm-6",
+  "time": "09:00"
+ },
+ {
+  "id": "654019",
+  "title": "COP 5 Reporting from Parties not included in Annex I to the Convention: Term, composition and terms of reference of the Consultative Group of Experts - Informal consultation",
+  "date": [
+   {
+    "value": "2025-11-17T09:00:00",
+    "end_value": "2025-11-17T09:15:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 15"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties (COP)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cop-5-reporting-from-parties-not-included-in-annex-i-to-the-convention-term-composition-and-terms-of",
+  "time": "09:00"
+ },
+ {
+  "id": "654137",
+  "title": "High-level segment (HLS) of COP 30",
+  "date": [
+   {
+    "value": "2025-11-17T09:00:00",
+    "end_value": "2025-11-17T12:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Plenary -  Amazonas"
+   }
+  ],
+  "typeofevent": [
+   "Plenary"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties (COP)"
+  ],
+  "linktowebcast": [
+   {
+    "uri": "https://grandreserva.unfccc.int/virtual-meetings/f9fd739a-4789-4672-8d8d-ddd43332a64e/attend/ondemand",
+    "title": null,
+    "options": []
+   }
+  ],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "1"
+   }
+  ],
+  "url": "https://unfccc.int/event/high-level-segment-hls-of-cop-30-0",
+  "time": "09:00"
+ },
+ {
+  "id": "654020",
+  "title": "COP 9 (c)/CMA 11 (b) Review of the functions of the Climate Technology Centre. - Informal consultation",
+  "date": [
+   {
+    "value": "2025-11-17T09:00:00",
+    "end_value": "2025-11-17T10:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 21"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties (COP)",
+   "Conference of the Parties serving as the meeting of the Parties to the Paris Agreement (CMA)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cop-9-c/cma-11-b-review-of-the-functions-of-the-climate-technology-centre-informal-consultation",
+  "time": "09:00"
+ },
+ {
+  "id": "654007",
+  "title": "CMA 8 (a) Global goal on adaptation  - Informal consultation",
+  "date": [
+   {
+    "value": "2025-11-17T09:00:00",
+    "end_value": "2025-11-17T09:30:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 01"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties serving as the meeting of the Parties to the Paris Agreement (CMA)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cma-8-a-global-goal-on-adaptation-informal-consultation-2",
+  "time": "09:00"
+ },
+ {
+  "id": "651865",
+  "title": "CMA 10 (h) United Arab Emirates dialogue on implementing the outcomes of the global stocktake, referred to in paragraph 97 of decision 1/CMA.5- Informal consultation",
+  "date": [
+   {
+    "value": "2025-11-17T09:00:00",
+    "end_value": "2025-11-17T10:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 20"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties serving as the meeting of the Parties to the Paris Agreement (CMA)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cma-10-h-united-arab-emirates-dialogue-on-implementing-the-outcomes-of-the-global-stocktake-referred-2",
+  "time": "09:00"
+ },
+ {
+  "id": "654218",
+  "title": "CMA 15 (a) Implementation of the guidance on cooperative approaches referred to in Article 6, paragraph 2, of the Paris Agreement - Informal consultation",
+  "date": [
+   {
+    "value": "2025-11-17T10:00:00",
+    "end_value": "2025-11-17T11:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 14"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties serving as the meeting of the Parties to the Paris Agreement (CMA)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cma-15-a-implementation-of-the-guidance-on-cooperative-approaches-referred-to-in-article-6-paragraph-1",
+  "time": "10:00"
+ },
+ {
+  "id": "651075",
+  "title": "CMA 10 (g ) Sharm el-Sheikh dialogue on the scope of Article 2, paragraph 1(c), of the Paris Agreement and its complementarity with Article 9 of the Paris Agreement  - Informal consultation",
+  "date": [
+   {
+    "value": "2025-11-17T10:00:00",
+    "end_value": "2025-11-17T11:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 09"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties serving as the meeting of the Parties to the Paris Agreement (CMA)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cma-10-g-sharm-el-sheikh-dialogue-on-the-scope-of-article-2-paragraph-1c-of-the-paris-agreement-and-3",
+  "time": "10:00"
+ },
+ {
+  "id": "654247",
+  "title": "COP 14 Gender and climate change - Informal consultation",
+  "date": [
+   {
+    "value": "2025-11-17T10:00:00",
+    "end_value": "2025-11-17T11:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 19"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties (COP)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cop-14-gender-and-climate-change-informal-consultation",
+  "time": "10:00"
+ },
+ {
+  "id": "652229",
+  "title": "CMP 9  Report of the Compliance Committee - Contact group",
+  "date": [
+   {
+    "value": "2025-11-17T11:00:00",
+    "end_value": "2025-11-17T12:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 12"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties serving as the meeting of the Parties to the Kyoto Protocol (CMP)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cmp-9-report-of-the-compliance-committee-contact-group",
+  "time": "11:00"
+ },
+ {
+  "id": "654224",
+  "title": "Presidency Information Session: Kickstarting the Second Week",
+  "date": [
+   {
+    "value": "2025-11-17T11:30:00",
+    "end_value": "2025-11-17T12:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 22"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "1"
+   }
+  ],
+  "body": [],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/presidency-information-session-kickstarting-the-second-week",
+  "time": "11:30"
+ },
+ {
+  "id": "654101",
+  "title": "COP Presidency Consultation on Mountains and Climate Change",
+  "date": [
+   {
+    "value": "2025-11-17T13:30:00",
+    "end_value": "2025-11-17T14:30:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 17"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cop-presidency-consultation-on-mountains-and-climate-change",
+  "time": "13:30"
+ },
+ {
+  "id": "654011",
+  "title": "COP 6 (c) National Adaptation Plans - Informal Consultation",
+  "date": [
+   {
+    "value": "2025-11-17T14:00:00",
+    "end_value": "2025-11-17T15:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 01"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties (COP)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cop-6-c-national-adaptation-plans-informal-consultation-0",
+  "time": "14:00"
+ },
+ {
+  "id": "654328",
+  "title": "Mutirao Mobilization for the Belem package",
+  "date": [
+   {
+    "value": "2025-11-17T14:00:00",
+    "end_value": "2025-11-17T16:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 22"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "1"
+   }
+  ],
+  "body": [],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/mutirao-mobilization-for-the-belem-package",
+  "time": "14:00"
+ },
+ {
+  "id": "654207",
+  "title": "CMA 5 United Arab Emirates just transition work programme - Contact group",
+  "date": [
+   {
+    "value": "2025-11-17T15:00:00",
+    "end_value": "2025-11-17T17:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 19"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties serving as the meeting of the Parties to the Paris Agreement (CMA)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cma-5-united-arab-emirates-just-transition-work-programme-contact-group-4",
+  "time": "15:00"
+ },
+ {
+  "id": "654215",
+  "title": "Presidency Consultation on Cooperation with other international organizations",
+  "date": [
+   {
+    "value": "2025-11-17T16:00:00",
+    "end_value": "2025-11-17T17:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 03"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties (COP)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/presidency-consultation-on-cooperation-with-other-international-organizations",
+  "time": "16:00"
+ },
+ {
+  "id": "654386",
+  "title": "CMA: CMA 7 ETF / ETF",
+  "date": [
+   {
+    "value": "2025-11-17T18:00:00",
+    "end_value": "2025-11-17T18:30:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 16"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties serving as the meeting of the Parties to the Paris Agreement (CMA)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cma-cma-7-etf/etf",
+  "time": "18:00"
+ },
+ {
+  "id": "654407",
+  "title": "COP 6 (c) National Adaptation Plans - Informal Consultation",
+  "date": [
+   {
+    "value": "2025-11-17T19:00:00",
+    "end_value": "2025-11-17T20:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 01"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties (COP)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cop-6-c-national-adaptation-plans-informal-consultation-4",
+  "time": "19:00"
+ },
+ {
+  "id": "652781",
+  "title": "Adaptation Fund High Level Contributor Dialogue",
+  "date": [
+   {
+    "value": "2025-11-17T09:30:00",
+    "end_value": "2025-11-17T11:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Special event room - Madeira"
+   }
+  ],
+  "typeofevent": [
+   "Presidency event"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/adaptation-fund-high-level-contributor-dialogue-0",
+  "time": "09:30"
+ },
+ {
+  "id": "654208",
+  "title": "COP 30 Presidency Press Briefing",
+  "date": [
+   {
+    "value": "2025-11-17T13:00:00",
+    "end_value": "2025-11-17T14:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Press Conference 1"
+   }
+  ],
+  "typeofevent": [
+   "Press conferences"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [],
+  "linktowebcast": [
+   {
+    "uri": "https://grandreserva.unfccc.int/virtual-meetings/e72f6c04-f792-4ba0-a4cb-da1706c7bab3/attend/ondemand",
+    "title": null,
+    "options": []
+   }
+  ],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "1"
+   }
+  ],
+  "url": "https://unfccc.int/event/cop-30-presidency-press-briefing-2",
+  "time": "13:00"
+ },
+ {
+  "id": "652457",
+  "title": "GIZ, ICD, ClimateNet: How high-integrity carbon markets can foster climate ambition by incentivizing carbon removals",
+  "date": [
+   {
+    "value": "2025-11-17T10:30:00",
+    "end_value": "2025-11-17T12:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Side Event Room 5"
+   }
+  ],
+  "typeofevent": [
+   "Side events"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/giz-icd-climatenet-how-high-integrity-carbon-markets-can-foster-climate-ambition-by-incentivizing",
+  "time": "10:30"
+ },
+ {
+  "id": "654343",
+  "title": "African Group of Negotiator Meeting with the Minister",
+  "date": [
+   {
+    "value": "2025-11-18T08:00:00",
+    "end_value": "2025-11-18T09:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 14"
+   }
+  ],
+  "typeofevent": [
+   "Coordination meetings"
+  ],
+  "access": [
+   {
+    "value": "1"
+   }
+  ],
+  "body": [],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/african-group-of-negotiator-meeting-with-the-minister",
+  "time": "08:00"
+ },
+ {
+  "id": "654555",
+  "title": "AGN Gender Coordination",
+  "date": [
+   {
+    "value": "2025-11-18T14:00:00",
+    "end_value": "2025-11-18T15:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Bilateral Room 9"
+   }
+  ],
+  "typeofevent": [
+   "Coordination meetings"
+  ],
+  "access": [
+   {
+    "value": "1"
+   }
+  ],
+  "body": [],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/agn-gender-coordination-0",
+  "time": "14:00"
+ },
+ {
+  "id": "651739",
+  "title": "YOUNGO Morning Coordination Meeting",
+  "date": [
+   {
+    "value": "2025-11-18T08:00:00",
+    "end_value": "2025-11-18T09:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Side Event Room 7"
+   }
+  ],
+  "typeofevent": [
+   "Coordination meetings"
+  ],
+  "access": [
+   {
+    "value": "1"
+   }
+  ],
+  "body": [],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/youngo-morning-coordination-meeting-1",
+  "time": "08:00"
+ },
+ {
+  "id": "650456",
+  "title": "Youth-led Climate Forum - Closure- Mandated event",
+  "date": [
+   {
+    "value": "2025-11-18T09:00:00",
+    "end_value": "2025-11-18T12:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Plenary - Tocantins"
+   }
+  ],
+  "typeofevent": [
+   "Mandated events"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [],
+  "linktowebcast": [
+   {
+    "uri": "https://grandreserva.unfccc.int/virtual-meetings/81691914-4853-4302-b91a-82fbc568bc00/attend/ondemand",
+    "title": null,
+    "options": []
+   }
+  ],
+  "keywords": [
+   "youth"
+  ],
+  "topic": [
+   "Youth engagement"
+  ],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "1"
+   }
+  ],
+  "url": "https://unfccc.int/event/youth-led-climate-forum-closure-mandated-event-0",
+  "time": "09:00"
+ },
+ {
+  "id": "650428",
+  "title": "Baku High-Level Dialogue on Adaptation- Mandated event",
+  "date": [
+   {
+    "value": "2025-11-18T09:00:00",
+    "end_value": "2025-11-18T10:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 19"
+   }
+  ],
+  "typeofevent": [
+   "Mandated events"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [],
+  "linktowebcast": [
+   {
+    "uri": "https://grandreserva.unfccc.int/virtual-meetings/a2c9c4ab-cac1-4171-a701-eab0e2eed6af/attend/ondemand",
+    "title": null,
+    "options": []
+   }
+  ],
+  "keywords": [
+   "Adaptation"
+  ],
+  "topic": [
+   "Adaptation"
+  ],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "1"
+   }
+  ],
+  "url": "https://unfccc.int/event/baku-high-level-dialogue-on-adaptation-mandated-event-0",
+  "time": "09:00"
+ },
+ {
+  "id": "654149",
+  "title": "High-level segment (HLS) of COP 30",
+  "date": [
+   {
+    "value": "2025-11-18T09:00:00",
+    "end_value": "2025-11-18T12:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Plenary -  Amazonas"
+   }
+  ],
+  "typeofevent": [
+   "Plenary"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties (COP)"
+  ],
+  "linktowebcast": [
+   {
+    "uri": "https://grandreserva.unfccc.int/virtual-meetings/72220aa2-2c1a-4073-9a2d-f4221f81ebff/attend/ondemand",
+    "title": null,
+    "options": []
+   }
+  ],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "1"
+   }
+  ],
+  "url": "https://unfccc.int/event/high-level-segment-hls-of-cop-30-2",
+  "time": "09:00"
+ },
+ {
+  "id": "654006",
+  "title": "CMA 8 (a) Global goal on adaptation  - Informal consultation",
+  "date": [
+   {
+    "value": "2025-11-18T10:00:00",
+    "end_value": "2025-11-18T11:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 01"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties serving as the meeting of the Parties to the Paris Agreement (CMA)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cma-8-a-global-goal-on-adaptation-informal-consultation-1",
+  "time": "10:00"
+ },
+ {
+  "id": "654022",
+  "title": "CMA 7  Reporting and review pursuant to Article 13 of the Paris Agreement: Provision of financial and technical support to developing country Parties for reporting and capacity-building - Informal consultation",
+  "date": [
+   {
+    "value": "2025-11-18T11:00:00",
+    "end_value": "2025-11-18T12:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 15"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties serving as the meeting of the Parties to the Paris Agreement (CMA)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cma-7-reporting-and-review-pursuant-to-article-13-of-the-paris-agreement-provision-of-financial-and-0",
+  "time": "11:00"
+ },
+ {
+  "id": "654214",
+  "title": "CMA 8 (a) Global goal on adaptation  - Informal consultation",
+  "date": [
+   {
+    "value": "2025-11-18T13:00:00",
+    "end_value": "2025-11-18T14:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 01"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties serving as the meeting of the Parties to the Paris Agreement (CMA)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cma-8-a-global-goal-on-adaptation-informal-consultation-3",
+  "time": "13:00"
+ },
+ {
+  "id": "654441",
+  "title": "CMA 15 (a) Implementation of the guidance on cooperative approaches referred to in Article 6, paragraph 2, of the Paris Agreement - Informal consultation",
+  "date": [
+   {
+    "value": "2025-11-18T15:10:00",
+    "end_value": "2025-11-18T16:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 14"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties serving as the meeting of the Parties to the Paris Agreement (CMA)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cma-15-a-implementation-of-the-guidance-on-cooperative-approaches-referred-to-in-article-6-paragraph-4",
+  "time": "15:10"
+ },
+ {
+  "id": "654010",
+  "title": "COP 6 (c) National Adaptation Plans - Informal Consultation",
+  "date": [
+   {
+    "value": "2025-11-18T16:00:00",
+    "end_value": "2025-11-18T17:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 03"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties (COP)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cop-6-c-national-adaptation-plans-informal-consultation",
+  "time": "16:00"
+ },
+ {
+  "id": "654483",
+  "title": "Presidency Consultation on Cooperation with other international organizations",
+  "date": [
+   {
+    "value": "2025-11-18T17:00:00",
+    "end_value": "2025-11-18T18:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 08"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties (COP)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/presidency-consultation-on-cooperation-with-other-international-organizations-0",
+  "time": "17:00"
+ },
+ {
+  "id": "652988",
+  "title": "LMDC Daily Coordination Meeting",
+  "date": [
+   {
+    "value": "2025-11-18T17:00:00",
+    "end_value": "2025-11-18T18:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 12"
+   }
+  ],
+  "typeofevent": [
+   "Coordination meetings"
+  ],
+  "access": [
+   {
+    "value": "1"
+   }
+  ],
+  "body": [],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/lmdc-daily-coordination-meeting-41",
+  "time": "17:00"
+ },
+ {
+  "id": "654598",
+  "title": "COP  8 (c)/CMA 10 (b) Report of the Green Climate Fund to the Conference of the Parties and guidance to the Green Climate Fund /  COP 8 (d)/CMA 10 (c) Report of the Global Environment Facility to the Conference of the Parties and guidance to the Global Environment Facility - Informal consultation",
+  "date": [
+   {
+    "value": "2025-11-18T21:00:00",
+    "end_value": "2025-11-18T22:59:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 09"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties (COP)",
+   "Conference of the Parties serving as the meeting of the Parties to the Paris Agreement (CMA)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cop-8-c/cma-10-b-report-of-the-green-climate-fund-to-the-conference-of-the-parties-and-guidance-to-14",
+  "time": "21:00"
+ },
+ {
+  "id": "654603",
+  "title": "CMP 5 Matters relating to the clean development mechanism - Informal consultation",
+  "date": [
+   {
+    "value": "2025-11-18T22:00:00",
+    "end_value": "2025-11-18T22:59:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 14"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties serving as the meeting of the Parties to the Kyoto Protocol (CMP)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cmp-5-matters-relating-to-the-clean-development-mechanism-informal-consultation-8",
+  "time": "22:00"
+ },
+ {
+  "id": "654601",
+  "title": "CMA 15 (b) Report of the Supervisory Body and guidance for the mechanism established by Article 6, paragraph 4, of the Paris Agreement - Informal consultation",
+  "date": [
+   {
+    "value": "2025-11-18T20:00:00",
+    "end_value": "2025-11-18T22:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 14"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties serving as the meeting of the Parties to the Paris Agreement (CMA)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cma-15-b-report-of-the-supervisory-body-and-guidance-for-the-mechanism-established-by-article-6-7",
+  "time": "20:00"
+ },
+ {
+  "id": "652447",
+  "title": "Executive Secretary’s Townhall Meeting with Observers",
+  "date": [
+   {
+    "value": "2025-11-18T10:30:00",
+    "end_value": "2025-11-18T12:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 14"
+   }
+  ],
+  "typeofevent": [
+   "Coordination meetings"
+  ],
+  "access": [
+   {
+    "value": "1"
+   }
+  ],
+  "body": [],
+  "linktowebcast": [
+   {
+    "uri": "https://grandreserva.unfccc.int/virtual-meetings/5f704f7e-35ea-408c-bebc-44368a91bd5d/attend/ondemand",
+    "title": null,
+    "options": []
+   }
+  ],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "1"
+   }
+  ],
+  "url": "https://unfccc.int/event/executive-secretary-s-townhall-meeting-with-observers",
+  "time": "10:30"
+ },
+ {
+  "id": "654423",
+  "title": "** POSTPONED ** COP 12/ CMA 14/ CMP 8 Matters relating to the forum on the impact of the implementation of response measures serving the Convention, the Kyoto Protocol and the Paris Agreement - Informal consultation",
+  "date": [
+   {
+    "value": "2025-11-18T10:00:00",
+    "end_value": "2025-11-18T11:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 18"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties (COP)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cop-12/cma-14/cmp-8-matters-relating-to-the-forum-on-the-impact-of-the-implementation-of-response-1",
+  "time": "10:00"
+ },
+ {
+  "id": "654417",
+  "title": "CANCELLED - CMA 11 (c) Technology implementation programme - Informal Consultation",
+  "date": [
+   {
+    "value": "2025-11-18T11:00:00",
+    "end_value": "2025-11-18T12:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 21"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties serving as the meeting of the Parties to the Paris Agreement (CMA)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/event/cma-11-c-technology-implementation-programme-informal-consultation-1",
+  "time": "11:00"
+ },
+ {
+  "id": "699001",
+  "title": "CMA 8 (a) Global goal on adaptation  - Informal consultation",
+  "date": [
+   {
+    "value": "2025-11-18T18:00:00",
+    "end_value": "2025-11-18T19:00:00"
+   }
+  ],
+  "room": [
+   {
+    "value": "Meeting Room 02"
+   }
+  ],
+  "typeofevent": [
+   "Negotiations"
+  ],
+  "access": [
+   {
+    "value": "0"
+   }
+  ],
+  "body": [
+   "Conference of the Parties serving as the meeting of the Parties to the Paris Agreement (CMA)"
+  ],
+  "linktowebcast": [],
+  "keywords": [],
+  "topic": [],
+  "maintextbody": [],
+  "haswebcast": [
+   {
+    "value": "0"
+   }
+  ],
+  "url": "https://unfccc.int/cop30/schedule",
+  "time": "18:00"
+ }
+]

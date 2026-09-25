@@ -1,0 +1,169 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.asset_id, r.status::text AS \"status!\", r.page_count, r.outline, r.is_reflowable,\n                  r.quality, r.large_text_choice, m.has_text AS \"has_text!\", m.large_text AS \"large_text!\",\n                  r.reading_bytes, r.extractor, r.failure_reason, r.attempts, r.extracted_at\n             FROM negotiation.document_renditions r\n             CROSS JOIN LATERAL negotiation.document_reading_modes(r.document_id) m\n            WHERE r.document_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "asset_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "asset_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "page_count",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "page_count"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "outline",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "outline"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "is_reflowable",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "is_reflowable"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "quality",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "quality"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "large_text_choice",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "large_text_choice"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "has_text!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "large_text!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "reading_bytes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "reading_bytes"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "extractor",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "extractor"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "failure_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "failure_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "attempts",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "attempts"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "extracted_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "extracted_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null,
+      null,
+      true,
+      true,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "46d92c5646416cb16bc89e120225adaaae131e0692a9493b9363d62e2f185ef1"
+}

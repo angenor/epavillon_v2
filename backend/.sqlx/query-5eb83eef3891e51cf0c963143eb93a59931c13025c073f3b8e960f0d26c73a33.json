@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.official_imports\n            SET missed_reads = 0, failing_since = NULL, last_error = NULL,\n                last_success_at = $2, last_attempt_at = $2, last_change_count = $3\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5eb83eef3891e51cf0c963143eb93a59931c13025c073f3b8e960f0d26c73a33"
+}

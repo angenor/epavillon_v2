@@ -1,0 +1,165 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT d.id, d.version, d.is_restricted, d.asset_id, d.external_url::text AS external_url,\n                  r.asset_id AS \"rendu_asset?\", r.status::text AS \"rendu_status?\", r.page_count,\n                  r.reading_bytes, r.large_text_choice, r.extracted_at, r.outline,\n                  m.has_text AS \"has_text!\", m.large_text AS \"large_text!\"\n             FROM negotiation.documents d\n             LEFT JOIN negotiation.document_renditions r ON r.document_id = d.id\n             CROSS JOIN LATERAL negotiation.document_reading_modes(d.id) m\n            WHERE d.id = $1 AND (d.published_at IS NOT NULL OR NOT $2)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "version",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "version"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "is_restricted",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "is_restricted"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "asset_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.documents",
+            "name": "asset_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "external_url",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "rendu_asset?",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "asset_id"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "rendu_status?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "page_count",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "page_count"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "reading_bytes",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "reading_bytes"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "large_text_choice",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "large_text_choice"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "extracted_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "extracted_at"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "outline",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "negotiation.document_renditions",
+            "name": "outline"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "has_text!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
+        "name": "large_text!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      null,
+      false,
+      null,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "155240a2118f7d4602477b396f5ffcdad7392f0c06b36f31c3d8b24c10053c16"
+}

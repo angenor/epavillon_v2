@@ -1,0 +1,133 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT i.id, i.event_id, i.is_enabled, i.reader, i.archive_name, i.archive_first_day,\n                  i.live_url::text AS live_url, i.time_correction_minutes, i.interval_seconds,\n                  e.slug::text AS \"slug!\", e.timezone::text AS \"timezone!\"\n             FROM negotiation.official_imports i\n             JOIN event.events e ON e.id = i.event_id\n            WHERE i.event_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "is_enabled",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "is_enabled"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "reader",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "reader"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "archive_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "archive_name"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "archive_first_day",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "archive_first_day"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "live_url",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "time_correction_minutes",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "time_correction_minutes"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "interval_seconds",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "interval_seconds"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "timezone!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      null,
+      false,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "f85de9b898e218cf725071de78a3a7788e46fc0099868ba23b9250fd8f856ba1"
+}
