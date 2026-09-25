@@ -4,7 +4,7 @@
 
 **Created**: 2026-09-25
 
-**Status**: Draft
+**Status**: Draft — trois questions tranchées le 25/09 (voir *Clarifications*)
 
 **Input**: Étape 3b de [docs/AppNego/04-roadmap.md](../../docs/AppNego/04-roadmap.md) : les signalements sur les sessions de négociation (ADR-010), par-dessus l'agenda livré à l'étape 3a — signaler depuis une fiche ou une réunion non annoncée depuis la liste, en trois gestes, hors connexion, réservé aux négociatrices ; validation en un geste par un administrateur depuis son téléphone, avec « Annuler » six secondes, ou refus motivé ; encart sans nom d'auteur par-dessus la donnée officielle, retiré quand la source rattrape ; « Mes signalements » ; notifications d'un changement sur une session suivie, dans l'application et par courriel ; centre de notifications et réglage par thématique. Critère : un signalement envoyé hors connexion part au retour du réseau ; validé, il s'affiche par-dessus la donnée officielle, et la personne qui suit la session est prévenue.
 
@@ -20,6 +20,15 @@
 | Les décisions | [ADR-010](../../docs/AppNego/adr/010-un-signalement-se-pose-par-dessus.md) un signalement se pose par-dessus · [ADR-009](../../docs/AppNego/adr/009-la-source-officielle-fait-foi.md) · [ADR-008](../../docs/AppNego/adr/008-trois-agendas-jamais-confondus.md) · [ADR-003](../../docs/AppNego/adr/003-tout-ce-qui-se-lit-se-lit-hors-connexion.md) · [ADR-014](../../docs/AppNego/adr/014-whatsapp-est-remplace-a-terme.md) (pas de notification poussée avant Capacitor) |
 | Les principes | Constitution : XI, XII (un signalement ne modifie jamais la donnée officielle), XIII |
 | Ce qui est déjà livré | 0b l'accès négociateur et les courriels de décision ; 0c « Mes thématiques », la file d'écritures, le profil (sans notifications, écart 40) ; 3a l'import, la liste, la fiche, « Mon agenda », les changements constatés par l'import |
+
+## Clarifications
+
+### Session 2026-09-25 — tranché le 25/09 par l'orchestrateur, pour le commanditaire
+
+- Q : Qui décide qu'un courriel part ? → R : **L'interrupteur « Notifications » d'« À propos »** : allumé par défaut, enregistré comme consentement avec la version du texte servi ; éteint, plus aucun courriel, l'application prévient toujours. **L'écart 40 se referme pour lui seul** ; « Mesures d'usage » et « Annuaire du réseau » restent non livrés.
+- Q : Que règle une ligne de thématique du profil ? → R : **Elle élargit, elle ne coupe jamais** : allumée, elle ajoute les changements de toutes les sessions de la thématique hors de mon agenda et les réunions non annoncées validées de la thématique ; **éteinte par défaut**. Les sessions de mon agenda préviennent toujours.
+- Q : Comment une réunion non annoncée cesse-t-elle de s'afficher ? → R : **Retrait d'un geste par l'administration, et d'office à la fin de son jour** ; aucun rapprochement automatique avec la source.
+- Retouches des décisions prises seul : « Autre chose » se retire aussi d'office quand la session est terminée ; dans la liste et « Mon agenda », le repère n'est jamais la couleur seule — losange violet, mot court « Signalé », libellé lisible par les lecteurs d'écran.
 
 **Hors périmètre** : les notifications poussées (écran verrouillé, 4a) ; les files de validation autres que les signalements (11-validation 1b à 1e, 1g) ; la preuve jointe (photo) ; la modération des échanges ; les consentements « Mesures d'usage » et « Annuaire du réseau » (écart 40 : sans effet à cette étape).
 
@@ -108,7 +117,7 @@ Aïssatou retrouve ses signalements, du plus récent au plus ancien, chacun « E
 **Acceptance Scenarios**:
 
 1. **Given** des signalements, **Then** « Mes signalements » les liste avec leur état, leur heure et, s'ils sont non retenus, le motif ; on y accède depuis le message d'envoi et depuis le profil.
-2. **Given** un réglage coupé, **Then** la notification qu'il couvre ne part pas (FR-031).
+2. **Given** l'interrupteur « Notifications » éteint, **Then** plus aucun courriel, l'application prévient toujours ; **Given** la ligne « Adaptation » allumée, **Then** un changement d'une session d'Adaptation hors de l'agenda prévient aussi.
 
 ---
 
@@ -141,7 +150,7 @@ Aïssatou retrouve ses signalements, du plus récent au plus ancien, chacun « E
 
 - **FR-009** : Valider et refuser DOIVENT être réservés à une permission propre, sur la portée globale ; l'écran vit dans Guide Négo, avec son design, et n'apparaît qu'à qui la porte.
 - **FR-010** : La file DOIT montrer, pour chaque signalement à traiter : l'autrice (nom, pays), le motif, la valeur proposée, la précision, l'heure, la session et ce que dit la source officielle à cet instant avec son heure de lecture ; les plus anciens d'abord ; puis les traités du jour.
-- **FR-011** : « Valider » DOIT agir en un geste et offrir « Annuler » six secondes ; annulé, le signalement redevient à traiter et **aucune notification liée ne part, jamais**.
+- **FR-011** : « Valider » DOIT agir en un geste et offrir « Annuler » six secondes ; annulé, le signalement redevient à traiter et **aucune notification liée ne part, jamais**. La validation ne devient publique qu'à sa publication, une trentaine de secondes plus tard ; le message le dit (« Validé. Affiché dans une minute au plus. »).
 - **FR-012** : « Ne pas retenir » DOIT demander un motif parmi trois et une précision facultative ; l'autrice voit l'un et l'autre.
 - **FR-013** : La validation NE DOIT PAS se mettre en file hors connexion : sans réseau, le geste est refusé et le dit.
 - **FR-014** : L'historique DOIT dire qui a signalé, qui a validé ou refusé, et quand (ADR-010) ; il n'est lu qu'au back-office et par l'administration.
@@ -150,24 +159,24 @@ Aïssatou retrouve ses signalements, du plus récent au plus ancien, chacun « E
 
 - **FR-015** : Un signalement NE DOIT JAMAIS modifier une session importée ni ses changements constatés (principe XII) ; il est un objet à part, lié à la session.
 - **FR-016** : Un changement validé DOIT s'afficher sur la fiche dans un encart violet, sous l'état officiel et au-dessus de « Source officielle » : « Signalé par le réseau — validé par l'IFDD à HH:MM », le motif et la valeur proposée, la précision — **sans nom d'auteur**.
-- **FR-017** : La liste et « Mon agenda » DOIVENT marquer la ligne d'une session qui porte un encart d'un signe violet « signalé par le réseau » ; aucun texte d'encart dans la liste.
+- **FR-017** : La liste et « Mon agenda » DOIVENT marquer la ligne d'une session qui porte un encart d'un repère **pictogramme + mot + couleur** — losange violet et « Signalé », avec un libellé complet pour les lecteurs d'écran (« Signalé par le réseau, validé par l'IFDD à HH:MM ») ; aucun texte d'encart dans la liste.
 - **FR-018** : Une réunion non annoncée validée DOIT paraître dans la liste de son jour, à son heure, marquée « Non annoncée — signalée par le réseau, validée à HH:MM », avec sa fiche ; elle n'est jamais présentée comme une session officielle, et peut s'ajouter à « Mon agenda ».
 - **FR-019** : L'encart DOIT se retirer seul quand l'import lit une valeur qui le rattrape — session annulée pour « annulée », même heure de début pour « l'heure a changé », même salle pour « la salle a changé » ; « Autre chose » ne se rattrape pas automatiquement.
-- **FR-020** : L'encart DOIT cesser de s'afficher quand la session est terminée ; l'administration PEUT retirer un encart à tout moment.
-- **FR-021** : Une réunion non annoncée DOIT cesser de s'afficher quand l'administration la retire, ou à la fin de son jour.
+- **FR-020** : Tout encart — « Autre chose » compris — DOIT cesser de s'afficher d'office quand la session est terminée ; l'administration PEUT retirer un encart à tout moment.
+- **FR-021** : Une réunion non annoncée DOIT cesser de s'afficher quand l'administration la retire d'un geste, ou d'office à la fin de son jour dans le fuseau de la COP ; aucun rapprochement automatique avec la source.
 - **FR-022** : Coupure : les encarts sur les sessions officielles disparaissent avec elles ; les réunions non annoncées validées restent, avec « Le signalement du réseau ne vient pas du programme officiel : il reste affiché. »
 - **FR-023** : Hors connexion, encarts et réunions non annoncées lus DOIVENT rester lisibles avec l'heure de lecture ; ce qui a été validé après ne s'affiche pas.
 
 ### Notifier
 
 - **FR-024** : Un changement d'heure, de salle ou une annulation constaté par l'import sur une session DOIT produire une notification pour chaque personne qui la suit (dans « Mon agenda »).
-- **FR-025** : Un signalement validé DOIT produire la même notification, marquée « signalé par le réseau », pour les personnes qui suivent la session ; une réunion non annoncée validée, pour les personnes qui suivent sa thématique.
+- **FR-025** : Un signalement validé DOIT produire la même notification, marquée « signalé par le réseau », pour les personnes qui suivent la session ; une réunion non annoncée validée, pour les personnes dont la ligne de sa thématique est allumée (FR-031).
 - **FR-026** : L'autrice DOIT être prévenue dans l'application de la décision sur son signalement (validé, non retenu).
 - **FR-027** : Le centre de notifications DOIT s'ouvrir par la cloche de l'en-tête (compteur jaune des non lues) : liste par jour, texte, origine et heure, non lue en gras avec un carré jaune, un toucher ouvre la fiche et marque lu, « Tout marquer comme lu », état vide, hors connexion avec l'heure de lecture.
 - **FR-028** : Une notification DOIT commencer par l'état (« Déplacée — », « Annulée — ») et finir par l'agenda d'origine (« Sessions de négociation »).
 - **FR-029** : Plusieurs changements rapprochés sur une même session NE DOIVENT produire qu'un courriel, qui dit l'état final.
-- **FR-030** : Le courriel DOIT partir pour les changements de sessions suivies [NEEDS CLARIFICATION: quel accord gouverne le courriel — l'interrupteur « Notifications » d'« À propos », un réglage du profil, ou toujours ?].
-- **FR-031** : Le profil DOIT porter « Notifications par thématique » : une ligne par thématique suivie [NEEDS CLARIFICATION: que règle une ligne de thématique — les sessions de cette thématique hors de mon agenda, ou aussi celles de mon agenda ?].
+- **FR-030** : Le courriel DOIT partir pour les notifications de changement (FR-024, FR-025) **si et seulement si** l'interrupteur « Notifications » d'« À propos » est allumé — allumé par défaut, enregistré comme consentement avec la version du texte servi ; son effet est dit sous l'interrupteur. La décision sur un signalement (FR-026) ne part pas par courriel.
+- **FR-031** : Le profil DOIT porter « Notifications par thématique » : une ligne par thématique suivie, **éteinte par défaut** ; allumée, elle ajoute les changements de toutes les sessions de cette thématique et les réunions non annoncées validées de cette thématique. Elle ne coupe jamais les sessions de « Mon agenda ».
 - **FR-032** : Aucune notification poussée ; aucun texte ne promet une alerte téléphone fermé.
 
 ### Ce qui vaut pour toute l'étape
@@ -178,7 +187,7 @@ Aïssatou retrouve ses signalements, du plus récent au plus ancien, chacun « E
 
 ### Key Entities
 
-- **Signalement** : autrice, session (ou réunion non annoncée), motif, valeur proposée, précision, référence client, état (envoyé, validé, non retenu), décideur, motif de refus, heures ; instantané de la source à la décision ; retrait (rattrapé, terminé, retiré) et son heure.
+- **Signalement** : autrice, session (ou réunion non annoncée), motif, valeur proposée, précision, référence client, état (envoyé, validé, non retenu), décideur, motif de refus, heures ; instantané de la source à la décision ; heure de publication ; retrait (rattrapé, retiré) et son heure — la fin de la session se calcule.
 - **Réunion non annoncée** : quoi, où, quand, jour, thématique, née d'un signalement validé, d'origine « réseau », distincte des sessions officielles.
 - **Notification** : destinataire, type, texte, lien vers la fiche, lue ou non, clé de regroupement par session.
 - **Réglage de notification** : par personne et thématique, et l'accord aux notifications.
@@ -192,7 +201,7 @@ Aïssatou retrouve ses signalements, du plus récent au plus ancien, chacun « E
 - **SC-003** : Après validation, la ligne officielle et ses changements constatés sont identiques, octet pour octet, à ce qu'ils étaient avant.
 - **SC-004** : Valider puis annuler dans les six secondes n'envoie aucune notification ni courriel.
 - **SC-005** : Une personne qui suit une session reçoit la notification d'un changement importé ou validé dans la minute qui suit.
-- **SC-006** : Deux changements sur une même session en dix minutes produisent un seul courriel.
+- **SC-006** : Deux changements sur une même session dans la même tranche de dix minutes produisent un seul courriel par personne.
 - **SC-007** : L'encart d'un changement se retire à la première lecture de l'import qui le rattrape.
 - **SC-008** : Aucun nom d'autrice n'est lisible par une personne sans la permission de valider.
 - **SC-009** : Le centre de notifications, « Mes signalements », les encarts et les réunions non annoncées se relisent hors connexion avec leur heure de lecture.
