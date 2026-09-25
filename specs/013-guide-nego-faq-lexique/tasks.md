@@ -122,12 +122,12 @@ description: "Tâches de l'étape 2 — FAQ, parcours « Ma première COP » et 
 
 **Test indépendant** : quickstart § 2 étape 5.
 
-- [ ] T049 [US5] Routes et service des retours et signalements (`PUT …/feedback` avec l'ouverture `from_feedback`, `POST …/reports` avec `client_ref` et plafond, `GET /negotiation/me/faq-feedback`) dans `routes/savoir.rs`, `service/savoir_retours.rs` ; tests `tests/savoir_retours.rs` (rejeu, plafond 429, une voix, motifs requis)
-- [ ] T050 [US5] File des experts, part « signalements » : `repo/savoir_file.rs`, `service/savoir_file.rs`, `routes/admin_file.rs` (`GET /admin/negotiation/queue?kind=reports`, `…/reports/{id}/close`) ; test d'anonymat qui cherche l'identifiant et le nom de l'auteur dans chaque réponse, fiche FAQ du back-office comprise (SC-009) ; test : clore avec `revised`, `confirmed` ou `dismissed` laisse `faq_entries` identique, même `updated_at` (FR-018) ; URL forgée
-- [ ] T051 [P] [US5] Créer `GnRetourUtile.vue` (« Oui / Non », « Merci. » et coche verte) sur la planche
-- [ ] T052 [US5] Feuilles « Qu'est-ce qui manque ? » et « Dépassé ou faux » dans `ressources/faq/[id].vue` (via `GnFeuilleBasse`, `GnCase`, `GnZoneTexte`), écritures par la file de 0c, sans compte → connexion puis retour à l'entrée
-- [ ] T053 [US5] `components/admin/negotiation/QueueItem.vue` et `pages/admin/negociations/file/index.vue`, onglet « Signalements », groupés par entrée, clôture avec issue
-- [ ] T054 [US5] i18n ; vérifier quickstart § 2 étape 5
+- [x] T049 [US5] Routes et service des retours et signalements (`PUT …/feedback` avec l'ouverture `from_feedback`, `POST …/reports` avec `client_ref` et plafond, `GET /negotiation/me/faq-feedback`) dans `routes/savoir.rs`, `service/savoir_retours.rs` ; tests `tests/savoir_retours.rs` (rejeu, plafond 429, une voix, motifs requis)
+- [x] T050 [US5] File des experts, part « signalements » : `repo/savoir_file.rs`, `service/savoir_file.rs`, `routes/admin_file.rs` (`GET /admin/negotiation/queue?kind=reports`, `…/reports/{id}/close`) ; test d'anonymat qui cherche l'identifiant et le nom de l'auteur dans chaque réponse, fiche FAQ du back-office comprise (SC-009) ; test : clore avec `revised`, `confirmed` ou `dismissed` laisse `faq_entries` identique, même `updated_at` (FR-018) ; URL forgée
+- [x] T051 [P] [US5] Créer `GnRetourUtile.vue` (« Oui / Non », « Merci. » et coche verte) sur la planche
+- [x] T052 [US5] Feuilles « Qu'est-ce qui manque ? » et « Dépassé ou faux » dans `ressources/faq/[id].vue` (via `GnFeuilleBasse`, `GnCase`, `GnZoneTexte`), écritures par la file de 0c, sans compte → connexion puis retour à l'entrée
+- [x] T053 [US5] `components/admin/negotiation/QueueItem.vue` et `pages/admin/negociations/file/index.vue`, onglet « Signalements », groupés par entrée, clôture avec issue
+- [x] T054 [US5] i18n ; vérifier quickstart § 2 étape 5
 
 ---
 

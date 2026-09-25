@@ -37,3 +37,28 @@ export const PLUS_TARD = '/guide-nego'
 export function apresLaConnexion(accesOuvert: boolean): string {
   return accesOuvert ? PLUS_TARD : APRES_LE_COMPTE
 }
+
+/** Au-delà d'une heure, la personne ne se souvient plus d'où elle venait. */
+const RETOUR_VALIDE_MS = 60 * 60 * 1000
+
+/**
+ * Un geste réservé au compte — retour sur la FAQ, signalement — mène à la connexion,
+ * parfois par la création du compte et la confirmation de l'adresse : l'écran d'origine
+ * est gardé sur le téléphone, pour y revenir ensuite.
+ */
+export function retourAGarder(chemin: string, maintenant: number): string {
+  return JSON.stringify({ chemin, a: maintenant })
+}
+
+/** Seul un chemin de Guide Négo, récent, ramène : jamais une adresse extérieure. */
+export function retourALire(brut: string | null, maintenant: number): string | null {
+  if (!brut) return null
+  try {
+    const { chemin, a } = JSON.parse(brut) as { chemin?: unknown; a?: unknown }
+    if (typeof chemin !== 'string' || typeof a !== 'number') return null
+    if (!chemin.startsWith('/guide-nego/') || chemin.includes('//') || chemin.includes('\\')) return null
+    return maintenant - a >= 0 && maintenant - a < RETOUR_VALIDE_MS ? chemin : null
+  } catch {
+    return null
+  }
+}

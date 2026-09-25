@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.faq_reports (entry_id, reporter_id, client_ref, from_feedback)\n         VALUES ($1, $2, platform.uuid_v7(), true)\n         ON CONFLICT (entry_id, reporter_id) WHERE from_feedback DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5b15600793883b077e93f96e1d33353c8eeededed010ba7bcf3fd44fa0a522fe"
+}

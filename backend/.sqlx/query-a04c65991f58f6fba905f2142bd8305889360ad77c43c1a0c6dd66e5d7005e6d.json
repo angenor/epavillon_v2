@@ -1,0 +1,109 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.faq_reports\n              SET status = 'closed', outcome = $2, handled_by = $3, handled_at = now()\n            WHERE id = $1\n        RETURNING id, reasons, from_feedback, details, status::text AS \"status!\", outcome,\n                  created_at, handled_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_reports",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "reasons",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_reports",
+            "name": "reasons"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "from_feedback",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_reports",
+            "name": "from_feedback"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "details",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_reports",
+            "name": "details"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "outcome",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_reports",
+            "name": "outcome"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_reports",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "handled_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_reports",
+            "name": "handled_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      null,
+      true,
+      false,
+      true
+    ]
+  },
+  "hash": "a04c65991f58f6fba905f2142bd8305889360ad77c43c1a0c6dd66e5d7005e6d"
+}

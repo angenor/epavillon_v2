@@ -4,14 +4,38 @@
   "a-revoir": "Un expert relit cette réponse",
   "sources": "Sources",
   "liees": "Questions liées",
-  "aidee": "Cette réponse vous a-t-elle aidée ?",
-  "oui": "Oui",
-  "non": "Non",
   "depasse": "Dépassé ou faux",
-  "bientot": "Bientôt : vous pourrez dire si la réponse vous a aidée, ou la signaler aux experts.",
   "absente": {
     "titre": "Cette question n'est pas dans la FAQ",
     "texte": "Elle a peut-être été retirée, ou son adresse est incomplète.",
     "sortie": "Revenir à la FAQ"
+  },
+  "manque": {
+    "titre": "Qu'est-ce qui manque ?",
+    "too_vague": "Trop vague",
+    "off_topic": "Ne répond pas à ma question",
+    "outdated": "Dépassée ou fausse",
+    "experts": "Part chez les experts de l'IFDD"
+  },
+  "anonyme": "Votre retour est anonyme.",
+  "signaler": {
+    "texte": "Un expert de l'IFDD relit la réponse. Elle reste affichée jusqu'à sa décision.",
+    "motifs": "Ce qui ne va pas",
+    "motif": {
+      "rule_changed": "La règle a changé",
+      "wrong": "C'est faux",
+      "source_mismatch": "La source ne dit pas cela"
+    },
+    "precision": "Précisez, si vous le souhaitez",
+    "indication": "Ce qui a changé, où vous l'avez lu.",
+    "envoyer": "Envoyer",
+    "envoye": "Merci. Un expert de l'IFDD relira cette réponse.",
+    "garde": "Merci. Votre signalement partira au retour du réseau."
+  },
+  "compte": {
+    "titre": "Votre avis passe par un compte",
+    "texte": "Créez un compte ou connectez-vous pour dire si une réponse vous a aidée, ou la signaler. Vous reviendrez ensuite à cette question.",
+    "creer": "Créer mon compte",
+    "connexion": "J'ai déjà un compte — Me connecter"
   }
 }

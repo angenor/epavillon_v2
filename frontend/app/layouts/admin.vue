@@ -128,6 +128,12 @@ const sections: NavSection[] = [
         icon: 'list-ordered',
         permissions: ['negotiation.knowledge.publish', 'negotiation.knowledge.review'],
       },
+      {
+        labelKey: 'admin.negociations.file.nav',
+        to: '/admin/negociations/file',
+        icon: 'shield-check',
+        permissions: ['negotiation.knowledge.review'],
+      },
     ],
   },
   {

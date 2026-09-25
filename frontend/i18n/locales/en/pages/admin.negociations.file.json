@@ -1,0 +1,63 @@
+{
+  "nav": "Expert queue",
+  "title": "Expert queue",
+  "subtitle": "What negotiators have flagged, oldest first. Each item is closed with its outcome.",
+  "loading": "Loading the expert queue",
+  "tabs": {
+    "label": "Kinds of pending items",
+    "reports": "Reports",
+    "questions": "Questions",
+    "proposals": "Proposed terms"
+  },
+  "forbidden": {
+    "scope": "Review Guide Négo knowledge, across the whole platform",
+    "description": "The expert queue is reserved for Guide Négo experts. Writing or publishing knowledge does not give access to it."
+  },
+  "empty": {
+    "title": "No pending reports",
+    "description": "Answers reported as outdated or wrong will appear here."
+  },
+  "zoned": "{date}, {zone}",
+  "received": "Received on {date}",
+  "details": "“{text}”",
+  "fromFeedback": "From “Was this answer helpful?” — Outdated or wrong",
+  "reason": {
+    "rule_changed": "The rule has changed",
+    "wrong": "It is wrong",
+    "source_mismatch": "The source does not say that"
+  },
+  "item": {
+    "verified": "Verified on {date}",
+    "notVerified": "Verification not dated",
+    "open": "Open the entry",
+    "helpful": "Yes, helpful",
+    "notHelpful": "No",
+    "feedback": {
+      "too_vague": "Too vague",
+      "off_topic": "Off topic",
+      "outdated": "Outdated or wrong"
+    },
+    "reports": "{count} open report | {count} open reports"
+  },
+  "outcome": {
+    "revised": "Answer corrected",
+    "confirmed": "Answer confirmed",
+    "dismissed": "Report dismissed"
+  },
+  "close": {
+    "label": "Close:",
+    "title": "Close this report?",
+    "question": {
+      "revised": "The answer has been corrected: the report will be closed with this outcome.",
+      "confirmed": "The answer is still correct: the report will be closed with this outcome.",
+      "dismissed": "The report calls for no action: it will be dismissed."
+    },
+    "notice": "Closing a report does not change the entry. To correct it or mark it “To review”, open the entry.",
+    "cancel": "Cancel",
+    "done": {
+      "revised": "Report closed: answer corrected.",
+      "confirmed": "Report closed: answer confirmed.",
+      "dismissed": "Report dismissed."
+    }
+  }
+}

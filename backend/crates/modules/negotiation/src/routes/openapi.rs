@@ -55,6 +55,9 @@ pub struct ApiErrorBody {
         crate::routes::savoir::poser_un_favori,
         crate::routes::savoir::retirer_un_favori,
         crate::routes::savoir::lire_une_entree,
+        crate::routes::savoir::voter,
+        crate::routes::savoir::signaler,
+        crate::routes::savoir::mes_voix,
         crate::routes::admin_documents::lister,
         crate::routes::admin_documents::creer,
         crate::routes::admin_documents::fiche,
@@ -97,14 +100,17 @@ pub struct ApiErrorBody {
         crate::routes::admin_savoir::modifier_etape,
         crate::routes::admin_savoir::supprimer_etape,
         crate::routes::admin_savoir::ordonner,
+        crate::routes::admin_file::file,
+        crate::routes::admin_file::clore_un_signalement,
     ),
     components(schemas(ApiErrorBody)),
     tags(
         (name = "Guide Négo — accès", description = "Entrer dans les modules réservés : le code d'invitation, l'état de son propre accès, la demande à trancher."),
         (name = "Guide Négo — documents", description = "La bibliothèque de documents, leur forme lisible, les images de page, les notes de correction, le compteur et les favoris. Lecture ouverte à tous ; un document réservé ne livre son contenu qu'à qui a l'accès négociateur."),
-        (name = "Guide Négo — savoir", description = "La FAQ, le parcours « Ma première COP » et le lexique, en un paquet que le téléphone garde et relit par différence. Lecture ouverte à tous ; les termes favoris demandent une session."),
+        (name = "Guide Négo — savoir", description = "La FAQ, le parcours « Ma première COP » et le lexique, en un paquet que le téléphone garde et relit par différence. Lecture ouverte à tous ; les termes favoris, les retours et les signalements demandent une session."),
         (name = "Back-office — documents", description = "Publier un document en une journée : brouillon, PDF, extraction, aperçu page par page, publication, nouvelle version ; et les notes de correction de l'expert. Portée globale."),
         (name = "Back-office — savoir", description = "La FAQ, le lexique et le parcours « Ma première COP » : rédiger, dater la vérification (l'expert seul), publier, mettre « À revoir », dépublier, ordonner. Portée globale ; lecture ouverte à qui publie ou vérifie."),
+        (name = "Back-office — file des experts", description = "Ce qui attend un expert : les signalements « Dépassé ou faux » groupés par entrée, à clore avec une issue. Aucun auteur n'est rendu. `negotiation.knowledge.review`, portée globale."),
         (name = "Back-office — admission", description = "Les codes d'invitation, leurs usages, les demandes d'accès et le mode d'admission. Réservé aux administrateurs de la plateforme entière : `negotiation.space.manage` **sur la portée globale**. Un administrateur d'une seule édition n'y voit rien — aucun espace de négociation n'est rattaché à un événement."),
     )
 )]

@@ -1,0 +1,67 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.faq_feedback (entry_id, person_id, helpful, missing_reason)\n         VALUES ($1, $2, $3, $4)\n         ON CONFLICT (entry_id, person_id)\n         DO UPDATE SET helpful = EXCLUDED.helpful, missing_reason = EXCLUDED.missing_reason\n         RETURNING entry_id, helpful, missing_reason, updated_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "entry_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_feedback",
+            "name": "entry_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "helpful",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_feedback",
+            "name": "helpful"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "missing_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_feedback",
+            "name": "missing_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_feedback",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Bool",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "6e3458e62e71458f6aa719b645499fe767568dfae12acbe60a130672a38a21a5"
+}

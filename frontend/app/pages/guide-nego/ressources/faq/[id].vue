@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import type { FaqEntry } from '~/types/negotiation-savoir'
+import type { OptionDeFeuille } from '~/components/guide-nego/GnFeuilleBasse.vue'
+import type { FaqEntry, FaqMissingReason, FaqReportReason } from '~/types/negotiation-savoir'
 import { lectureACompter, liees } from '~/utils/guide-nego/faq'
-import { CLE_FAQ_LUES, lireCle, poserCle } from '~/utils/guide-nego/stockage'
+import { retourAGarder } from '~/utils/guide-nego/parcours'
+import { CLE_FAQ_LUES, CLE_RETOUR_APRES_CONNEXION, lireCle, poserCle } from '~/utils/guide-nego/stockage'
 
 /**
  * Une entrée de la FAQ — maquette 05, écran 02 —, lue dans le savoir gardé. Une
  * entrée « à revoir » reste lisible, avec sa date et la ligne de relecture (FR-019 bis).
- * Retours et signalements sont posés, inactifs, jusqu'au récit 5. Public.
+ * Retours et signalements (maquette 02b, 02c) demandent un compte : sans lui, le geste
+ * mène à la connexion, qui ramène ici. Public.
  */
 definePageMeta({ layout: 'guide-nego' })
 defineI18nRoute(false)
@@ -16,6 +19,7 @@ const route = useRoute()
 const savoir = useGnSavoir()
 const connexion = useGnConnexion()
 const api = useApi().guideNegoSavoir
+const retours = useGnRetoursFaq()
 
 const FAQ = '/guide-nego/ressources/faq'
 const retour = ref(FAQ)
@@ -24,6 +28,7 @@ onMounted(() => {
   const avant: unknown = window.history.state?.back
   if (typeof avant === 'string' && avant !== route.fullPath) retour.value = avant
   void savoir.assurer()
+  void retours.assurer()
 })
 
 const id = computed(() => String(route.params.id ?? ''))
@@ -51,6 +56,62 @@ watch(
   },
   { immediate: true },
 )
+
+const voix = computed(() => (entree.value ? retours.voixSur(entree.value.id) : null))
+const feuilleCompte = ref(false)
+const feuilleManque = ref(false)
+const feuilleSignaler = ref(false)
+const MOTIFS: FaqReportReason[] = ['rule_changed', 'wrong', 'source_mismatch']
+const motifs = reactive<Record<FaqReportReason, boolean>>({ rule_changed: false, wrong: false, source_mismatch: false })
+const precision = ref('')
+const choisis = computed(() => MOTIFS.filter((m) => motifs[m]))
+const message = ref<{ texte: string; rang: number } | null>(null)
+
+const manques = computed<OptionDeFeuille[]>(() => [
+  { valeur: 'too_vague', libelle: t('guide-nego.faq-entree.manque.too_vague') },
+  { valeur: 'off_topic', libelle: t('guide-nego.faq-entree.manque.off_topic') },
+  {
+    valeur: 'outdated',
+    libelle: t('guide-nego.faq-entree.manque.outdated'),
+    detail: t('guide-nego.faq-entree.manque.experts'),
+    detailPicto: 'shield-check',
+  },
+])
+
+/** Sans compte, la feuille propose de se connecter ; l'entrée est gardée pour y revenir. */
+function avecUnCompte(): boolean {
+  if (retours.connectee.value) return true
+  poserCle(CLE_RETOUR_APRES_CONNEXION, retourAGarder(route.fullPath, Date.now()))
+  feuilleCompte.value = true
+  return false
+}
+
+function oui(): void {
+  if (entree.value && avecUnCompte()) void retours.voter(entree.value.id, true)
+}
+
+function non(): void {
+  if (avecUnCompte()) feuilleManque.value = true
+}
+
+function manque(option: OptionDeFeuille): void {
+  if (entree.value) void retours.voter(entree.value.id, false, option.valeur as FaqMissingReason)
+}
+
+function ouvrirLeSignalement(): void {
+  if (!avecUnCompte()) return
+  for (const m of MOTIFS) motifs[m] = false
+  precision.value = ''
+  feuilleSignaler.value = true
+}
+
+async function envoyer(): Promise<void> {
+  if (!entree.value || !choisis.value.length) return
+  feuilleSignaler.value = false
+  await retours.signaler(entree.value.id, choisis.value, precision.value)
+  const cle = connexion.etat.value.enLigne ? 'envoye' : 'garde'
+  message.value = { texte: t(`guide-nego.faq-entree.signaler.${cle}`), rang: (message.value?.rang ?? 0) + 1 }
+}
 
 useHead({ title: computed(() => entree.value?.question ?? t('guide-nego.faq-entree.titre')) })
 </script>
@@ -100,15 +161,10 @@ useHead({ title: computed(() => entree.value?.question ?? t('guide-nego.faq-entr
       </section>
 
       <div class="gn-faq-entree__retour">
-        <p class="gn-faq-entree__aidee">{{ t('guide-nego.faq-entree.aidee') }}</p>
-        <div class="gn-faq-entree__boutons">
-          <GnBouton variante="secondaire" largeur="demie" desactive aria-describedby="gn-faq-entree-bientot">{{ t('guide-nego.faq-entree.oui') }}</GnBouton>
-          <GnBouton variante="secondaire" largeur="demie" desactive aria-describedby="gn-faq-entree-bientot">{{ t('guide-nego.faq-entree.non') }}</GnBouton>
-        </div>
-        <GnBouton variante="secondaire" picto="warn" desactive aria-describedby="gn-faq-entree-bientot" class="gn-faq-entree__signaler">
+        <GnRetourUtile :merci="voix !== null" @oui="oui" @non="non" />
+        <GnBouton variante="secondaire" picto="warn" class="gn-faq-entree__signaler" @clic="ouvrirLeSignalement">
           {{ t('guide-nego.faq-entree.depasse') }}
         </GnBouton>
-        <p id="gn-faq-entree-bientot" class="gn-faq-entree__bientot">{{ t('guide-nego.faq-entree.bientot') }}</p>
       </div>
 
       <section v-if="questionsLiees.length">
@@ -120,6 +176,56 @@ useHead({ title: computed(() => entree.value?.question ?? t('guide-nego.faq-entr
         </ul>
       </section>
     </article>
+
+    <GnFeuilleBasse
+      v-model="feuilleManque"
+      :titre="t('guide-nego.faq-entree.manque.titre')"
+      :options="manques"
+      @choisir="manque"
+    >
+      <p class="gn-faq-entree__anonyme">{{ t('guide-nego.faq-entree.anonyme') }}</p>
+    </GnFeuilleBasse>
+
+    <GnFeuilleBasse
+      v-model="feuilleSignaler"
+      :titre="t('guide-nego.faq-entree.depasse')"
+      :sous-titre="t('guide-nego.faq-entree.signaler.texte')"
+      picto="warn"
+      picto-danger
+    >
+      <fieldset class="gn-faq-entree__motifs">
+        <legend class="gn-hors-ecran">{{ t('guide-nego.faq-entree.signaler.motifs') }}</legend>
+        <GnCase
+          v-for="(m, rang) in MOTIFS"
+          :key="m"
+          v-model="motifs[m]"
+          :libelle="t(`guide-nego.faq-entree.signaler.motif.${m}`)"
+          :derniere="rang === MOTIFS.length - 1"
+        />
+      </fieldset>
+      <GnZoneTexte
+        v-model="precision"
+        :libelle="t('guide-nego.faq-entree.signaler.precision')"
+        :indication="t('guide-nego.faq-entree.signaler.indication')"
+        :maximum="600"
+      />
+      <GnBouton picto="send" :desactive="!choisis.length" @clic="envoyer">
+        {{ t('guide-nego.faq-entree.signaler.envoyer') }}
+      </GnBouton>
+    </GnFeuilleBasse>
+
+    <GnFeuilleBasse
+      v-model="feuilleCompte"
+      :titre="t('guide-nego.faq-entree.compte.titre')"
+      :sous-titre="t('guide-nego.faq-entree.compte.texte')"
+    >
+      <div class="gn-faq-entree__compte">
+        <GnBouton vers="/guide-nego/compte" picto="user">{{ t('guide-nego.faq-entree.compte.creer') }}</GnBouton>
+        <GnBouton variante="secondaire" vers="/guide-nego/connexion">{{ t('guide-nego.faq-entree.compte.connexion') }}</GnBouton>
+      </div>
+    </GnFeuilleBasse>
+
+    <GnMessageEphemere v-if="message" :key="message.rang" :texte="message.texte" @fini="message = null" />
   </GnEcran>
 </template>
 
@@ -155,25 +261,26 @@ useHead({ title: computed(() => entree.value?.question ?? t('guide-nego.faq-entr
   padding-block: var(--gn-espace-16);
 }
 
-[data-app="guide-nego"] .gn-faq-entree__aidee {
-  color: var(--gn-titre);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  font-weight: var(--gn-graisse-gras);
-}
-
-[data-app="guide-nego"] .gn-faq-entree__boutons {
-  display: flex;
-  gap: var(--gn-espace-8);
-}
-
 [data-app="guide-nego"] .gn-faq-entree__signaler .gn-picto {
   color: var(--gn-danger);
 }
 
-[data-app="guide-nego"] .gn-faq-entree__bientot {
+[data-app="guide-nego"] .gn-faq-entree__anonyme {
   color: var(--gn-texte-2);
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
+}
+
+[data-app="guide-nego"] .gn-faq-entree__motifs {
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+[data-app="guide-nego"] .gn-faq-entree__compte {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gn-espace-8);
 }
 </style>

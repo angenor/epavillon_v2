@@ -4,14 +4,38 @@
   "a-revoir": "An expert is reviewing this answer",
   "sources": "Sources",
   "liees": "Related questions",
-  "aidee": "Did this answer help you?",
-  "oui": "Yes",
-  "non": "No",
   "depasse": "Outdated or wrong",
-  "bientot": "Coming soon: you will be able to say whether the answer helped, or report it to the experts.",
   "absente": {
     "titre": "This question is not in the FAQ",
     "texte": "It may have been removed, or its address is incomplete.",
     "sortie": "Back to the FAQ"
+  },
+  "manque": {
+    "titre": "What is missing?",
+    "too_vague": "Too vague",
+    "off_topic": "Does not answer my question",
+    "outdated": "Outdated or wrong",
+    "experts": "Goes to the IFDD experts"
+  },
+  "anonyme": "Your feedback is anonymous.",
+  "signaler": {
+    "texte": "An IFDD expert reviews the answer. It stays displayed until their decision.",
+    "motifs": "What is wrong",
+    "motif": {
+      "rule_changed": "The rule has changed",
+      "wrong": "It is wrong",
+      "source_mismatch": "The source does not say that"
+    },
+    "precision": "Add details, if you wish",
+    "indication": "What changed, where you read it.",
+    "envoyer": "Send",
+    "envoye": "Thank you. An IFDD expert will review this answer.",
+    "garde": "Thank you. Your report will be sent when the network is back."
+  },
+  "compte": {
+    "titre": "Your feedback needs an account",
+    "texte": "Create an account or sign in to say whether an answer helped you, or to report it. You will then come back to this question.",
+    "creer": "Create my account",
+    "connexion": "I already have an account — Sign in"
   }
 }

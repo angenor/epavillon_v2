@@ -1,0 +1,145 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.id, r.entry_id, r.reasons, r.from_feedback, r.details,\n                  r.status::text AS \"status!\", r.outcome, r.created_at, r.handled_at,\n                  platform.t(f.question, $1) AS \"question!\", f.status::text AS \"entry_status!\",\n                  f.verified_on\n             FROM negotiation.faq_reports r\n             JOIN negotiation.faq_entries f ON f.id = r.entry_id\n            WHERE r.status = 'open'\n            ORDER BY r.created_at, r.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_reports",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "entry_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_reports",
+            "name": "entry_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "reasons",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_reports",
+            "name": "reasons"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "from_feedback",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_reports",
+            "name": "from_feedback"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "details",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_reports",
+            "name": "details"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "outcome",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_reports",
+            "name": "outcome"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_reports",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "handled_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_reports",
+            "name": "handled_at"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "question!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "entry_status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "verified_on",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_entries",
+            "name": "verified_on"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      null,
+      true,
+      false,
+      true,
+      null,
+      null,
+      true
+    ]
+  },
+  "hash": "c3e00e26fd3ff36a20ac9dc8a0f6acc83dc20f1abb0a47ff16db4a5e388f5504"
+}

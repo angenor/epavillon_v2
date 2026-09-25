@@ -1,0 +1,63 @@
+{
+  "nav": "File des experts",
+  "title": "File des experts",
+  "subtitle": "Ce que les négociatrices et négociateurs ont fait remonter, du plus ancien au plus récent. Chaque élément se clôt avec son issue.",
+  "loading": "Chargement de la file des experts",
+  "tabs": {
+    "label": "Sortes d'éléments en attente",
+    "reports": "Signalements",
+    "questions": "Questions",
+    "proposals": "Termes proposés"
+  },
+  "forbidden": {
+    "scope": "Vérifier le savoir de Guide Négo, sur la plateforme entière",
+    "description": "La file des experts est réservée aux experts de Guide Négo. Rédiger ou publier le savoir n'y donne pas accès."
+  },
+  "empty": {
+    "title": "Aucun signalement en attente",
+    "description": "Les réponses signalées comme dépassées ou fausses apparaîtront ici."
+  },
+  "zoned": "{date}, {zone}",
+  "received": "Reçu le {date}",
+  "details": "« {text} »",
+  "fromFeedback": "Depuis « Cette réponse vous a-t-elle aidée ? » — Dépassée ou fausse",
+  "reason": {
+    "rule_changed": "La règle a changé",
+    "wrong": "C'est faux",
+    "source_mismatch": "La source ne dit pas cela"
+  },
+  "item": {
+    "verified": "Vérifiée le {date}",
+    "notVerified": "Vérification non datée",
+    "open": "Ouvrir l'entrée",
+    "helpful": "Oui, utile",
+    "notHelpful": "Non",
+    "feedback": {
+      "too_vague": "Trop vague",
+      "off_topic": "À côté de la question",
+      "outdated": "Dépassée ou fausse"
+    },
+    "reports": "{count} signalement ouvert | {count} signalements ouverts"
+  },
+  "outcome": {
+    "revised": "Réponse corrigée",
+    "confirmed": "Réponse confirmée",
+    "dismissed": "Signalement écarté"
+  },
+  "close": {
+    "label": "Clore :",
+    "title": "Clore ce signalement ?",
+    "question": {
+      "revised": "La réponse a été corrigée : le signalement sera clos avec cette issue.",
+      "confirmed": "La réponse reste juste : le signalement sera clos avec cette issue.",
+      "dismissed": "Le signalement ne demande rien : il sera écarté."
+    },
+    "notice": "Clore un signalement ne modifie pas l'entrée. Pour la corriger ou la mettre « À revoir », ouvrez l'entrée.",
+    "cancel": "Annuler",
+    "done": {
+      "revised": "Signalement clos : réponse corrigée.",
+      "confirmed": "Signalement clos : réponse confirmée.",
+      "dismissed": "Signalement écarté."
+    }
+  }
+}

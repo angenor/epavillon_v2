@@ -3,9 +3,17 @@
  *
  * Un seul paquet, public, relu par différence : avec le `served_at` de la lecture
  * gardée, l'API ne rend que ce qui a changé ; avec son empreinte, un `304` si rien
- * n'a bougé. Les termes favoris, eux, demandent une session.
+ * n'a bougé. Termes favoris, retours et signalements, eux, demandent une session.
  */
-import type { KnowledgeBundle, MyGlossaryFavorites } from '~/types/negotiation-savoir'
+import type {
+  FaqFeedback,
+  FaqFeedbackInput,
+  FaqReportInput,
+  FaqReportReceipt,
+  KnowledgeBundle,
+  MyFaqFeedback,
+  MyGlossaryFavorites,
+} from '~/types/negotiation-savoir'
 import type { IsoDateTime, Uuid } from '~/types/shared'
 import type { Primitives } from './guide-nego'
 import type { AvecEmpreinte } from './http'
@@ -59,5 +67,21 @@ export function createGuideNegoSavoirApi({ lireEtiquete, send }: Deps) {
         async () => (await exemples()).retirerUnTermeFavori(entryId),
         'DELETE',
       ),
+
+    /** « Cette réponse vous a-t-elle aidée ? » : la dernière voix compte. */
+    voterSurUneEntree: (entryId: Uuid, entree: FaqFeedbackInput): Promise<FaqFeedback> =>
+      send(
+        `/negotiation/faq/${entryId}/feedback`,
+        entree,
+        async () => (await exemples()).voterSurUneEntree(entryId, entree),
+        'PUT',
+      ),
+
+    /** « Dépassé ou faux ». Rejoué avec le même `client_ref` : le même reçu. */
+    signalerUneEntree: (entryId: Uuid, entree: FaqReportInput): Promise<FaqReportReceipt> =>
+      send(`/negotiation/faq/${entryId}/reports`, entree, async () => (await exemples()).signalerUneEntree(entryId, entree)),
+
+    mesRetoursSurLaFaq: (): Promise<AvecEmpreinte<MyFaqFeedback>> =>
+      lireEtiquete('/negotiation/me/faq-feedback', async () => (await exemples()).mesRetoursSurLaFaq()),
   }
 }

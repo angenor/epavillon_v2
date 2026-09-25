@@ -1,6 +1,7 @@
 pub mod access;
 pub mod admin;
 pub mod admin_documents;
+pub mod admin_file;
 pub mod admin_savoir;
 pub mod admission;
 pub mod code;
@@ -11,4 +12,5 @@ pub mod plage;
 pub mod redeem;
 pub mod requests;
 pub mod savoir;
+pub mod savoir_retours;
 pub mod themes;

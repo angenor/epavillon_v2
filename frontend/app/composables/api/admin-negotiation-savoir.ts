@@ -12,6 +12,7 @@ import type {
   AdminFaqEntry,
   AdminFaqInput,
   AdminFaqList,
+  AdminFaqReport,
   AdminFaqVerifyInput,
   AdminGlossaryEntry,
   AdminGlossaryInput,
@@ -22,6 +23,7 @@ import type {
   AdminPathwayOrderInput,
   AdminPathwayStepInput,
 } from '~/types/admin-negotiation-savoir'
+import type { AdminFaqReportCloseInput, ExpertQueue, ExpertQueueKind } from '~/types/admin-negotiation-queue'
 import type { Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
 
@@ -156,5 +158,18 @@ export function createAdminNegotiationSavoirApi({ call, send }: Deps) {
 
     ordonnerParcours: (entree: AdminPathwayOrderInput): Promise<AdminPathway> =>
       send('/admin/negotiation/pathway/order', entree, async () => (await exemples()).ordonner(entree), 'PUT'),
+
+    // --- File des experts ------------------------------------------------
+    /** L'expert seul : `negotiation.knowledge.review`. */
+    fileDesExperts: (kind: ExpertQueueKind = 'reports'): Promise<ExpertQueue> =>
+      call('/admin/negotiation/queue', async () => (await exemples()).fileDesExperts(kind), { kind }),
+
+    /** Ne modifie jamais l'entrée. Déjà clos : `NEGOTIATION_QUEUE_ITEM_CLOSED`. */
+    cloreUnSignalement: (id: Uuid, entree: AdminFaqReportCloseInput): Promise<AdminFaqReport> =>
+      send(
+        `/admin/negotiation/queue/reports/${id}/close`,
+        entree,
+        async () => (await exemples()).cloreUnSignalement(id, entree),
+      ),
   }
 }

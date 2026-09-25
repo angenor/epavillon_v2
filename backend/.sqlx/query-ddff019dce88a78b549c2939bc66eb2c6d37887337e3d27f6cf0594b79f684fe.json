@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (SELECT count(*) FROM negotiation.faq_reports WHERE status = 'open') AS \"reports!\",\n                  (SELECT count(*) FROM negotiation.expert_questions WHERE status = 'pending') AS \"questions!\",\n                  (SELECT count(*) FROM negotiation.glossary_proposals WHERE status = 'pending') AS \"proposals!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "reports!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "questions!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "proposals!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "ddff019dce88a78b549c2939bc66eb2c6d37887337e3d27f6cf0594b79f684fe"
+}

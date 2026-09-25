@@ -128,3 +128,47 @@ export interface KnowledgeRemoved {
 export interface MyGlossaryFavorites {
   entry_ids: Uuid[]
 }
+
+// ---------------------------------------------------------------------------
+// Retours et signalements — `PUT /negotiation/faq/{id}/feedback`,
+// `POST /negotiation/faq/{id}/reports`, `GET /negotiation/me/faq-feedback`
+// ---------------------------------------------------------------------------
+
+/** Après « Non ». `outdated` ouvre aussi un signalement chez les experts. */
+export type FaqMissingReason = 'too_vague' | 'off_topic' | 'outdated'
+
+export interface FaqFeedbackInput {
+  helpful: boolean
+  /** Seulement après « Non ». */
+  missing_reason?: FaqMissingReason | null
+}
+
+/** La voix de la personne sur une entrée : la dernière compte. */
+export interface FaqFeedback {
+  entry_id: Uuid
+  helpful: boolean
+  missing_reason: FaqMissingReason | null
+  updated_at: IsoDateTime
+}
+
+export interface MyFaqFeedback {
+  feedback: FaqFeedback[]
+}
+
+export type FaqReportReason = 'rule_changed' | 'wrong' | 'source_mismatch'
+
+export interface FaqReportInput {
+  /** Choisie par le téléphone : un envoi rejoué ne crée pas de second signalement. */
+  client_ref: Uuid
+  /** Au moins un. */
+  reasons: FaqReportReason[]
+  /** 600 caractères au plus. */
+  details?: string | null
+}
+
+export interface FaqReportReceipt {
+  id: Uuid
+  entry_id: Uuid
+  client_ref: Uuid
+  created_at: IsoDateTime
+}

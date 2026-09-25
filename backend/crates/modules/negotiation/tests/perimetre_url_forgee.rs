@@ -171,14 +171,16 @@ async fn ladministrateur_dune_edition_ne_passe_aucune_garde() {
 
 const ADMIN_DOCUMENTS: &str = include_str!("../src/routes/admin_documents.rs");
 const ADMIN_SAVOIR: &str = include_str!("../src/routes/admin_savoir.rs");
+const ADMIN_FILE: &str = include_str!("../src/routes/admin_file.rs");
 const LIB: &str = include_str!("../src/lib.rs");
 
 const ADMIN_ROUTES: &str = "pubfnadmin_routes(cfg:&mutServiceConfig)";
-const CINQ_FICHIERS: &str = "routes::admin_codes::configurer(cfg);\
+const SIX_FICHIERS: &str = "routes::admin_codes::configurer(cfg);\
      routes::admin_requests::configurer(cfg);\
      routes::admin_admission::configurer(cfg);\
      routes::admin_documents::configurer(cfg);\
-     routes::admin_savoir::configurer(cfg);";
+     routes::admin_savoir::configurer(cfg);\
+     routes::admin_file::configurer(cfg);";
 
 #[test]
 fn chaque_configurer_du_back_office_ne_monte_que_ses_routes() {
@@ -188,6 +190,7 @@ fn chaque_configurer_du_back_office_ne_monte_que_ses_routes() {
         ADMIN_ADMISSION,
         ADMIN_DOCUMENTS,
         ADMIN_SAVOIR,
+        ADMIN_FILE,
     ] {
         let ecarts = ecarts_de_montage(source);
         assert!(
@@ -197,8 +200,8 @@ fn chaque_configurer_du_back_office_ne_monte_que_ses_routes() {
     }
     assert_eq!(
         bloc(LIB, ADMIN_ROUTES),
-        CINQ_FICHIERS,
-        "le back-office ne se compose que des cinq fichiers contrôlés"
+        SIX_FICHIERS,
+        "le back-office ne se compose que des six fichiers contrôlés"
     );
 }
 
@@ -251,7 +254,7 @@ fn le_controle_releve_chaque_autre_maniere_de_monter_une_route() {
         1,
     );
     assert_ne!(lib_mutante, LIB);
-    assert_ne!(bloc(&lib_mutante, ADMIN_ROUTES), CINQ_FICHIERS);
+    assert_ne!(bloc(&lib_mutante, ADMIN_ROUTES), SIX_FICHIERS);
 }
 
 #[test]

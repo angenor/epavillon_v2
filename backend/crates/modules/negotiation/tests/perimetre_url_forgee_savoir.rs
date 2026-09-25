@@ -334,3 +334,96 @@ async fn chaque_route_du_savoir_refuse_ladministrateur_dune_edition_et_le_compte
         .iter()
         .any(|e| e["id"] == json!(reelles.faq)));
 }
+
+// ---------------------------------------------------------------------------
+// La file des experts : `Requires<KnowledgeReview>`, et rien d'autre
+// ---------------------------------------------------------------------------
+
+const ADMIN_FILE: &str = include_str!("../src/routes/admin_file.rs");
+
+const ROUTES_FILE: [(&str, &str); 2] = [
+    ("get", "/admin/negotiation/queue"),
+    ("post", "/admin/negotiation/queue/reports/{id}/close"),
+];
+
+#[test]
+fn chaque_route_de_la_file_exige_de_verifier() {
+    let montees = routes_montees(ADMIN_FILE);
+    assert_eq!(montees.len(), ROUTES_FILE.len(), "{montees:?}");
+    let signatures = signatures(ADMIN_FILE);
+    for (verbe, chemin) in ROUTES_FILE {
+        let (_, _, gestionnaire) = montees
+            .iter()
+            .find(|(v, c, _)| v == verbe && c == chemin)
+            .unwrap_or_else(|| panic!("{verbe} {chemin} n'est pas montée"));
+        let (_, signature) = signatures
+            .iter()
+            .find(|(nom, _)| nom == gestionnaire)
+            .expect("gestionnaire du fichier");
+        assert!(
+            signature.contains(VERIFIER)
+                && !signature.contains(PUBLIER)
+                && !signature.contains(LIRE),
+            "{verbe} {chemin} doit exiger {VERIFIER}, seul"
+        );
+    }
+    let code = sans_commentaires(ADMIN_FILE);
+    for piege in ["RequiresAnyScope", "Perimeter", "_anywhere", "Scope::"] {
+        assert!(!code.contains(piege), "la file emprunte {piege}");
+    }
+}
+
+#[tokio::test]
+async fn la_file_refuse_ladministrateur_dune_edition_la_publieuse_et_le_compte_sans_role() {
+    let bac = Bac::monter().await;
+    let ifdd = administratrice(&bac, "ifdd@example.org").await;
+    let experte = expert(&bac, "experte@example.org").await;
+    let admin_cop = personne(&bac, "admin.cop31@example.org").await;
+    let sans_role = personne(&bac, "sans.role@example.org").await;
+    let edition = une_edition(&bac, "cop31-file").await;
+    attribuer(&bac, admin_cop, "admin", "event", Some(edition)).await;
+
+    let faq = entree_faq(&bac, experte, "Qui préside ?", "published").await;
+    let reel: Uuid = sqlx::query_scalar(
+        "INSERT INTO negotiation.faq_reports (entry_id, reporter_id, client_ref, reasons)
+         VALUES ($1, $2, gen_random_uuid(), ARRAY['wrong']) RETURNING id",
+    )
+    .bind(faq)
+    .bind(sans_role)
+    .fetch_one(bac.pool())
+    .await
+    .expect("signalement");
+
+    let app = crate::back_office!(bac);
+    for (verbe, motif) in ROUTES_FILE {
+        for id in [reel, Uuid::now_v7()] {
+            let uri = motif.replace("{id}", &id.to_string());
+            let corps = (verbe == "post").then(|| json!({ "outcome": "dismissed" }));
+            for qui in [admin_cop, ifdd, sans_role] {
+                let (statut, r) = frapper(
+                    &app,
+                    appel(verbe, &uri, Some(qui), corps.clone()).to_request(),
+                )
+                .await;
+                assert_eq!(
+                    (statut, r["code"].as_str()),
+                    (StatusCode::FORBIDDEN, Some("FORBIDDEN")),
+                    "{verbe} {uri} : {qui} ne passe pas"
+                );
+            }
+            let (statut, _) = frapper(&app, appel(verbe, &uri, None, corps).to_request()).await;
+            assert_eq!(
+                statut,
+                StatusCode::UNAUTHORIZED,
+                "{verbe} {uri} sans session"
+            );
+        }
+    }
+    let ouvert: String =
+        sqlx::query_scalar("SELECT status::text FROM negotiation.faq_reports WHERE id = $1")
+            .bind(reel)
+            .fetch_one(bac.pool())
+            .await
+            .unwrap();
+    assert_eq!(ouvert, "open", "aucun refus n'a clos");
+}

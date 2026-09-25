@@ -16,7 +16,12 @@ import type {
   GlossaryEntry,
   GlossaryFamily,
   KnowledgeBundle,
+  FaqFeedback,
+  FaqFeedbackInput,
+  FaqReportInput,
+  FaqReportReceipt,
   KnowledgeSource,
+  MyFaqFeedback,
   MyGlossaryFavorites,
   PathwayGroup,
   PathwayLink,
@@ -285,4 +290,54 @@ export function poserUnTermeFavori(id: Uuid): void {
 
 export function retirerUnTermeFavori(id: Uuid): void {
   favoris = favoris.filter((f) => f.entry_id !== id)
+}
+
+// ---------------------------------------------------------------------------
+// Retours et signalements — une voix par entrée, un reçu par `client_ref`
+// ---------------------------------------------------------------------------
+
+let voix: FaqFeedback[] = []
+let recus: FaqReportReceipt[] = []
+
+function faqServie(id: Uuid): void {
+  if (!FAQ.some((e) => e.id === id)) {
+    throw new ApiRequestError(
+      { code: 'NEGOTIATION_FAQ_NOT_FOUND', message: "Cette question n'existe pas, ou n'est plus publiée." },
+      404,
+    )
+  }
+}
+
+export function voterSurUneEntree(id: Uuid, entree: FaqFeedbackInput): FaqFeedback {
+  faqServie(id)
+  const v: FaqFeedback = {
+    entry_id: id,
+    helpful: entree.helpful,
+    missing_reason: entree.helpful ? null : (entree.missing_reason ?? null),
+    updated_at: new Date().toISOString(),
+  }
+  voix = [...voix.filter((x) => x.entry_id !== id), v]
+  return v
+}
+
+export function signalerUneEntree(id: Uuid, entree: FaqReportInput): FaqReportReceipt {
+  const deja = recus.find((r) => r.client_ref === entree.client_ref)
+  if (deja) return deja
+  faqServie(id)
+  if (!entree.reasons.length) {
+    throw new ApiRequestError({ code: 'NEGOTIATION_REPORT_REASON_REQUIRED', message: 'Choisissez au moins une raison.' }, 422)
+  }
+  const recu: FaqReportReceipt = {
+    id: crypto.randomUUID(),
+    entry_id: id,
+    client_ref: entree.client_ref,
+    created_at: new Date().toISOString(),
+  }
+  recus = [...recus, recu]
+  return recu
+}
+
+export function mesRetoursSurLaFaq(): Etiquete<MyFaqFeedback> {
+  const feedback = [...voix].sort((a, b) => (a.entry_id < b.entry_id ? -1 : 1))
+  return { valeur: { feedback }, empreinte: empreinte(feedback.map((v) => [v.entry_id, v.helpful, v.missing_reason])) }
 }

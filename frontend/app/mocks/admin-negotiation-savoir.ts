@@ -23,6 +23,12 @@ import type {
   AdminPathwayOrderInput,
   AdminPathwayStepInput,
 } from '~/types/admin-negotiation-savoir'
+import type {
+  AdminFaqReportCloseInput,
+  ExpertQueue,
+  ExpertQueueKind,
+  ExpertQueueReportGroup,
+} from '~/types/admin-negotiation-queue'
 import type { KnowledgeSource } from '~/types/negotiation-savoir'
 import type { FiltreFaq, FiltreLexique } from '~/composables/api/admin-negotiation-savoir'
 import type { ApiErrorCode } from '~/types/api-error'
@@ -141,6 +147,16 @@ let faq: Faq[] = [
           status: 'open',
           outcome: null,
           created_at: '2026-09-24T15:12:00Z',
+          handled_at: null,
+        },
+        {
+          id: '00000000-0013-7000-8000-e00000000002',
+          reasons: [],
+          from_feedback: true,
+          details: null,
+          status: 'open',
+          outcome: null,
+          created_at: '2026-09-23T09:40:00Z',
           handled_at: null,
         },
       ],
@@ -400,6 +416,48 @@ export function supprimerFaq(id: Uuid): void {
   const e = faqOuRefus(id)
   if (e.first_published_at) throw indelebile()
   faq = faq.filter((x) => x.id !== id).map((x) => ({ ...x, related_ids: x.related_ids.filter((r) => r !== id) }))
+}
+
+// ---------------------------------------------------------------------------
+// File des experts
+// ---------------------------------------------------------------------------
+
+const ISSUES: AdminFaqReportCloseInput['outcome'][] = ['revised', 'confirmed', 'dismissed']
+
+export function fileDesExperts(kind: ExpertQueueKind): ExpertQueue {
+  if (kind !== 'reports') throw invalide("Cette sorte d'éléments n'est pas encore servie.", 'kind')
+  const groupes: ExpertQueueReportGroup[] = faq
+    .map((e) => ({
+      e,
+      ouverts: e.reports
+        .filter((r) => r.status === 'open')
+        .sort((a, b) => a.created_at.localeCompare(b.created_at)),
+    }))
+    .filter(({ ouverts }) => ouverts.length > 0)
+    .sort((a, b) => (a.ouverts[0]?.created_at ?? '').localeCompare(b.ouverts[0]?.created_at ?? ''))
+    .map(({ e, ouverts }) => ({
+      entry: { id: e.id, question: resolveI18nText(e.question, 'fr'), status: e.status, verified_on: e.verified_on },
+      feedback: { ...e.feedback },
+      reports: structuredClone(ouverts),
+    }))
+  return {
+    kind,
+    counts: { reports: groupes.reduce((n, g) => n + g.reports.length, 0), questions: 0, proposals: 0 },
+    reports: groupes,
+  }
+}
+
+/** Ne touche jamais l'entrée. */
+export function cloreUnSignalement(id: Uuid, entree: AdminFaqReportCloseInput): AdminFaqReport {
+  if (!ISSUES.includes(entree.outcome)) throw invalide("L'issue du signalement est inconnue.", 'outcome')
+  const signalement = faq.flatMap((e) => e.reports).find((r) => r.id === id)
+  if (!signalement) throw refus('NOT_FOUND', 404, "Ce signalement n'existe pas.")
+  if (signalement.status === 'closed')
+    throw refus('NEGOTIATION_QUEUE_ITEM_CLOSED', 409, 'Cet élément de la file a déjà été traité.')
+  signalement.status = 'closed'
+  signalement.outcome = entree.outcome
+  signalement.handled_at = maintenant()
+  return structuredClone(signalement)
 }
 
 // ---------------------------------------------------------------------------

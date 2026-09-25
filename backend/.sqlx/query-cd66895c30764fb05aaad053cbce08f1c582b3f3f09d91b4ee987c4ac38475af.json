@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"n!\" FROM negotiation.faq_reports\n            WHERE reporter_id = $1 AND NOT from_feedback\n              AND created_at >= (date_trunc('day', now() AT TIME ZONE 'Europe/Paris')\n                                 AT TIME ZONE 'Europe/Paris')",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "cd66895c30764fb05aaad053cbce08f1c582b3f3f09d91b4ee987c4ac38475af"
+}

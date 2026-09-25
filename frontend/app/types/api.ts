@@ -1410,6 +1410,40 @@ export interface paths {
         patch: operations["admin_negotiation_pathway_etape_modifier"];
         trace?: never;
     };
+    "/admin/negotiation/queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `ExpertQueue` — les signalements ouverts, groupés par entrée de FAQ, le plus ancien d'abord, avec les retours « Oui / Non » comptés ; et ce qui attend, par sorte. **Aucun auteur.** Seule la sorte `reports` est servie à ce jour. */
+        get: operations["admin_negotiation_file"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/queue/reports/{id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `AdminFaqReportCloseInput` → `AdminFaqReport` — clôt le signalement avec son issue : `revised`, `confirmed` ou `dismissed`. **L'entrée n'est jamais modifiée** : la corriger ou la mettre « À revoir » passe par sa fiche. Déjà clos : **409**. */
+        post: operations["admin_negotiation_file_clore_un_signalement"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/notifications/broadcast": {
         parameters: {
             query?: never;
@@ -3222,6 +3256,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/negotiation/faq/{id}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description `FaqFeedbackInput` → `FaqFeedback` — « Cette réponse vous a-t-elle aidée ? ». Une voix par personne et par entrée : la dernière écrase la précédente. `missing_reason` (`too_vague`, `off_topic`, `outdated`) après « Non » seulement ; `outdated` ouvre aussi, une fois par personne et par entrée, un signalement `from_feedback` dans la file des experts. L'entrée n'est jamais modifiée. */
+        put: operations["negotiation_retour_sur_une_entree_de_faq"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/negotiation/faq/{id}/read": {
         parameters: {
             query?: never;
@@ -3233,6 +3284,23 @@ export interface paths {
         put?: never;
         /** @description Compte une lecture de l'entrée de FAQ, pour le jour de Paris, sans rien retenir de qui lit. Le téléphone l'envoie une fois par entrée et par jour. Entrée inconnue ou en brouillon : **204** quand même, rien n'est compté. */
         post: operations["negotiation_lire_une_entree_de_faq"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/negotiation/faq/{id}/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `FaqReportInput` → `FaqReportReceipt` — « Dépassé ou faux » : un à trois motifs (`rule_changed`, `wrong`, `source_mismatch`), une précision de 600 caractères au plus. Rejoué avec le même `client_ref` : **200** et le même reçu. Vingt par personne et par jour de Paris, au-delà **429**. Rejoint la file des experts, anonyme ; l'entrée n'est jamais modifiée. */
+        post: operations["negotiation_signaler_une_entree_de_faq"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3344,6 +3412,23 @@ export interface paths {
         post?: never;
         /** @description Retire un favori. **Idempotent**, même s'il n'existe pas. */
         delete: operations["negotiation_retirer_un_favori"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/negotiation/me/faq-feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `MyFaqFeedback` — les voix de la personne connectée sur les entrées servies, pour réafficher « Merci. ». `ETag` et **304**. */
+        get: operations["negotiation_mes_retours_sur_la_faq"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -9779,6 +9864,119 @@ export interface operations {
             };
         };
     };
+    admin_negotiation_file: {
+        parameters: {
+            query?: {
+                /** @description `reports` (défaut) */
+                kind?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ExpertQueue */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans la permission de vérifier */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sorte inconnue */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_file_clore_un_signalement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du signalement */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description AdminFaqReport */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Sans la permission de vérifier */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Signalement inconnu */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Déjà clos */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Issue inconnue */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     engagement_diffuser_une_annonce: {
         parameters: {
             query?: never;
@@ -13621,6 +13819,60 @@ export interface operations {
             };
         };
     };
+    negotiation_retour_sur_une_entree_de_faq: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de l'entrée de FAQ */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description FaqFeedback */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Entrée inconnue ou en brouillon */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Motif inconnu, ou motif après « Oui » */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     negotiation_lire_une_entree_de_faq: {
         parameters: {
             query?: never;
@@ -13639,6 +13891,78 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    negotiation_signaler_une_entree_de_faq: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de l'entrée de FAQ */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Rejeu : le reçu d'origine */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description FaqReportReceipt */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Entrée inconnue ou en brouillon */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Aucun motif, motif inconnu, précision trop longue */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Plafond du jour atteint */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
             };
         };
     };
@@ -13848,6 +14172,42 @@ export interface operations {
         responses: {
             /** @description Retiré */
             204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_mes_retours_sur_la_faq: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MyFaqFeedback */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Rien n'a changé depuis l'empreinte présentée */
+            304: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -1,7 +1,8 @@
 //! Le paquet du savoir, **à travers HTTP** : monté sous `/api`, ouvert sans
 //! session, son `ETag` public qui suit la langue, le `304` — même derrière un
 //! relais qui suffixe l'empreinte —, et `since` illisible. Puis les termes
-//! favoris : la session exigée, leur `ETag` privé et leur `304`.
+//! favoris : la session exigée, leur `ETag` privé et leur `304`. Enfin les
+//! retours et signalements : `401` sans session, `201` puis `200` au rejeu.
 
 use actix_web::http::header::{ACCEPT_LANGUAGE, CACHE_CONTROL, ETAG, IF_NONE_MATCH, VARY};
 use actix_web::http::StatusCode;
@@ -267,4 +268,121 @@ async fn une_lecture_de_faq_se_compte_sans_session() {
         StatusCode::NO_CONTENT,
         "inconnue : 204 quand même"
     );
+}
+
+macro_rules! connecter {
+    ($app:expr) => {{
+    let connexion = test::call_service(
+        $app,
+        test::TestRequest::post()
+            .uri("/api/auth/login")
+            .set_json(json!({
+                "email": LECTRICE,
+                "password": MOT_DE_PASSE,
+                "remember_me": false,
+                "client": { "kind": "app", "device_id": "9f2c-appareil", "platform": "android" },
+            }))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(connexion.status(), StatusCode::OK);
+    connexion
+        .response()
+        .cookies()
+        .find(|c| c.name() == "epavillon_at")
+        .map(|c| format!("{}={}", c.name(), c.value()))
+        .expect("cookie d'accès")
+    }};
+}
+
+#[actix_web::test]
+async fn retours_et_signalements_demandent_une_session_et_se_rejouent() {
+    let base = TestDb::new().await;
+    compte(&base).await;
+    let faq: Uuid = sqlx::query_scalar(
+        r#"INSERT INTO negotiation.faq_entries
+               (section_term_id, question, answer, status, verified_on, verified_by)
+           SELECT t.id, '{"fr":"Qui préside ?"}', '{"fr":"La présidence."}', 'published',
+                  current_date, p.id
+             FROM reference.taxonomy_terms t, identity.people p
+            WHERE t.taxonomy_code = 'faq_section' AND t.code = 'first_cop'
+           RETURNING id"#,
+    )
+    .fetch_one(base.pool())
+    .await
+    .expect("insertion de l'entrée");
+    let etat = AppState::new(base.db(), kernel::testing::test_config(base.url()))
+        .await
+        .expect("état de l'application");
+    let app = test::init_service(api::build_app(&etat)).await;
+    let retour = format!("/api/negotiation/faq/{faq}/feedback");
+    let signalement = format!("/api/negotiation/faq/{faq}/reports");
+    let voix = "/api/negotiation/me/faq-feedback";
+    let corps_signalement = json!({ "client_ref": Uuid::now_v7(), "reasons": ["wrong"] });
+
+    for requete in [
+        test::TestRequest::put()
+            .uri(&retour)
+            .set_json(json!({ "helpful": true })),
+        test::TestRequest::post()
+            .uri(&signalement)
+            .set_json(corps_signalement.clone()),
+        test::TestRequest::get().uri(voix),
+    ] {
+        let r = test::call_service(&app, requete.to_request()).await;
+        assert_eq!(r.status(), StatusCode::UNAUTHORIZED);
+    }
+
+    let cookie = connecter!(&app);
+    let vote = test::call_service(
+        &app,
+        test::TestRequest::put()
+            .uri(&retour)
+            .insert_header(("cookie", cookie.clone()))
+            .set_json(json!({ "helpful": false, "missing_reason": "too_vague" }))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(vote.status(), StatusCode::OK);
+
+    let mut recus = Vec::new();
+    for attendu in [StatusCode::CREATED, StatusCode::OK] {
+        let r = test::call_service(
+            &app,
+            test::TestRequest::post()
+                .uri(&signalement)
+                .insert_header(("cookie", cookie.clone()))
+                .set_json(corps_signalement.clone())
+                .to_request(),
+        )
+        .await;
+        assert_eq!(r.status(), attendu);
+        let corps: Value = test::read_body_json(r).await;
+        recus.push(corps["id"].clone());
+    }
+    assert_eq!(recus[0], recus[1], "le rejeu rend le même reçu");
+
+    let lues = test::call_service(
+        &app,
+        test::TestRequest::get()
+            .uri(voix)
+            .insert_header(("cookie", cookie.clone()))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(lues.status(), StatusCode::OK);
+    assert_eq!(entete(&lues, CACHE_CONTROL), "private, no-cache");
+    let empreinte = entete(&lues, ETAG);
+    let corps: Value = test::read_body_json(lues).await;
+    assert_eq!(corps["feedback"][0]["missing_reason"], "too_vague");
+    let inchange = test::call_service(
+        &app,
+        test::TestRequest::get()
+            .uri(voix)
+            .insert_header(("cookie", cookie))
+            .insert_header((IF_NONE_MATCH, empreinte))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(inchange.status(), StatusCode::NOT_MODIFIED);
 }

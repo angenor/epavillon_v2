@@ -1,5 +1,6 @@
 //! Les routes du savoir : le paquet que le téléphone garde et le compte des
-//! lectures, ouverts à tous, et les termes favoris de la personne connectée.
+//! lectures, ouverts à tous ; les termes favoris, les retours et les
+//! signalements de la personne connectée.
 
 use actix_web::http::header::{HeaderValue, CACHE_CONTROL, ETAG, VARY};
 use actix_web::{web, HttpMessage, HttpRequest, HttpResponse};
@@ -10,9 +11,11 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::domain::savoir::lire_since;
+use crate::domain::savoir_retours::{FaqFeedbackInput, FaqReportInput};
 use crate::service::savoir_favoris;
 use crate::service::savoir_lectures;
 use crate::service::savoir_paquet as service;
+use crate::service::savoir_retours;
 use crate::state::NegotiationState;
 
 const PUBLIC: &str = "public, no-cache";
@@ -23,6 +26,9 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
             "/negotiation/faq/{id}/read",
             web::post().to(lire_une_entree),
         )
+        .route("/negotiation/faq/{id}/feedback", web::put().to(voter))
+        .route("/negotiation/faq/{id}/reports", web::post().to(signaler))
+        .route("/negotiation/me/faq-feedback", web::get().to(mes_voix))
         .route("/negotiation/me/glossary-favorites", web::get().to(favoris))
         .route(
             "/negotiation/me/glossary-favorites/{entry_id}",
@@ -183,4 +189,98 @@ pub(crate) async fn lire_une_entree(
         });
     savoir_lectures::compter_une_lecture(&state, &ctx, chemin.into_inner()).await?;
     Ok(HttpResponse::NoContent().finish())
+}
+
+#[utoipa::path(
+    put,
+    description = "`FaqFeedbackInput` → `FaqFeedback` — « Cette réponse vous a-t-elle aidée ? ». Une voix par personne et par entrée : la dernière écrase la précédente. `missing_reason` (`too_vague`, `off_topic`, `outdated`) après « Non » seulement ; `outdated` ouvre aussi, une fois par personne et par entrée, un signalement `from_feedback` dans la file des experts. L'entrée n'est jamais modifiée.",
+    path = "/negotiation/faq/{id}/feedback",
+    tag = "Guide Négo — savoir",
+    operation_id = "negotiation_retour_sur_une_entree_de_faq",
+    params(("id" = Uuid, Path, description = "Identifiant de l'entrée de FAQ")),
+    request_body = Object,
+    responses(
+        (status = 200, description = "FaqFeedback", body = Object),
+        (status = 401, description = "Aucune session", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Entrée inconnue ou en brouillon", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "Motif inconnu, ou motif après « Oui »", body = crate::routes::openapi::ApiErrorBody),
+    ),
+    security(("session" = []))
+)]
+pub(crate) async fn voter(
+    state: web::Data<NegotiationState>,
+    requete: HttpRequest,
+    acteur: Actor,
+    chemin: web::Path<Uuid>,
+    entree: web::Json<FaqFeedbackInput>,
+) -> Result<HttpResponse> {
+    let ctx = crate::routes::contexte_de(&requete, acteur.0);
+    let voix = savoir_retours::voter(&state, &ctx, acteur.0, chemin.into_inner(), &entree).await?;
+    Ok(HttpResponse::Ok().json(voix))
+}
+
+#[utoipa::path(
+    post,
+    description = "`FaqReportInput` → `FaqReportReceipt` — « Dépassé ou faux » : un à trois motifs (`rule_changed`, `wrong`, `source_mismatch`), une précision de 600 caractères au plus. Rejoué avec le même `client_ref` : **200** et le même reçu. Vingt par personne et par jour de Paris, au-delà **429**. Rejoint la file des experts, anonyme ; l'entrée n'est jamais modifiée.",
+    path = "/negotiation/faq/{id}/reports",
+    tag = "Guide Négo — savoir",
+    operation_id = "negotiation_signaler_une_entree_de_faq",
+    params(("id" = Uuid, Path, description = "Identifiant de l'entrée de FAQ")),
+    request_body = Object,
+    responses(
+        (status = 201, description = "FaqReportReceipt", body = Object),
+        (status = 200, description = "Rejeu : le reçu d'origine", body = Object),
+        (status = 401, description = "Aucune session", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Entrée inconnue ou en brouillon", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "Aucun motif, motif inconnu, précision trop longue", body = crate::routes::openapi::ApiErrorBody),
+        (status = 429, description = "Plafond du jour atteint", body = crate::routes::openapi::ApiErrorBody),
+    ),
+    security(("session" = []))
+)]
+pub(crate) async fn signaler(
+    state: web::Data<NegotiationState>,
+    requete: HttpRequest,
+    acteur: Actor,
+    chemin: web::Path<Uuid>,
+    entree: web::Json<FaqReportInput>,
+) -> Result<HttpResponse> {
+    let ctx = crate::routes::contexte_de(&requete, acteur.0);
+    let (recu, nouveau) =
+        savoir_retours::signaler(&state, &ctx, acteur.0, chemin.into_inner(), &entree).await?;
+    Ok(if nouveau {
+        HttpResponse::Created().json(recu)
+    } else {
+        HttpResponse::Ok().json(recu)
+    })
+}
+
+#[utoipa::path(
+    get,
+    description = "`MyFaqFeedback` — les voix de la personne connectée sur les entrées servies, pour réafficher « Merci. ». `ETag` et **304**.",
+    path = "/negotiation/me/faq-feedback",
+    tag = "Guide Négo — savoir",
+    operation_id = "negotiation_mes_retours_sur_la_faq",
+    responses(
+        (status = 200, description = "MyFaqFeedback", body = Object),
+        (status = 304, description = "Rien n'a changé depuis l'empreinte présentée"),
+        (status = 401, description = "Aucune session", body = crate::routes::openapi::ApiErrorBody),
+    ),
+    security(("session" = []))
+)]
+pub(crate) async fn mes_voix(
+    state: web::Data<NegotiationState>,
+    requete: HttpRequest,
+    acteur: Actor,
+) -> Result<HttpResponse> {
+    let (voix, empreinte) = savoir_retours::mes_voix(&state, acteur.0).await?;
+    if crate::routes::inchange(&requete, &empreinte) {
+        return Ok(HttpResponse::NotModified()
+            .insert_header((ETAG, empreinte))
+            .insert_header(crate::routes::PERSONNEL)
+            .finish());
+    }
+    Ok(HttpResponse::Ok()
+        .insert_header((ETAG, empreinte))
+        .insert_header(crate::routes::PERSONNEL)
+        .json(voix))
 }

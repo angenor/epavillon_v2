@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { apresLaConnexion } from '~/utils/guide-nego/parcours'
-import { CLE_OUVERTURE_VUE, poserCle } from '~/utils/guide-nego/stockage'
+import { apresLaConnexion, retourALire } from '~/utils/guide-nego/parcours'
+import { CLE_OUVERTURE_VUE, CLE_RETOUR_APRES_CONNEXION, lireCle, poserCle } from '~/utils/guide-nego/stockage'
 
 /**
  * Écran 03b — se connecter.
@@ -47,7 +47,9 @@ async function envoyer(): Promise<void> {
         // Connectée, la personne a passé la porte : l'ouverture ne se montre plus.
         poserCle(CLE_OUVERTURE_VUE)
         await acces.rafraichir()
-        await navigateTo(apresLaConnexion(acces.ouvert.value))
+        const retour = retourALire(lireCle(CLE_RETOUR_APRES_CONNEXION), Date.now())
+        poserCle(CLE_RETOUR_APRES_CONNEXION, '')
+        await navigateTo(retour ?? apresLaConnexion(acces.ouvert.value))
         break
       case 'email_unverified':
         adresseAConfirmer.value = issue.email
