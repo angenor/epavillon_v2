@@ -1,14 +1,21 @@
 //! Le paquet du savoir, **à travers HTTP** : monté sous `/api`, ouvert sans
-//! session, son `ETag` public qui suit la langue, le `304`, et `since` illisible.
+//! session, son `ETag` public qui suit la langue, le `304` — même derrière un
+//! relais qui suffixe l'empreinte —, et `since` illisible. Puis les termes
+//! favoris : la session exigée, leur `ETag` privé et leur `304`.
 
 use actix_web::http::header::{ACCEPT_LANGUAGE, CACHE_CONTROL, ETAG, IF_NONE_MATCH, VARY};
 use actix_web::http::StatusCode;
 use actix_web::test;
 use api::state::AppState;
+use kernel::crypto::Passwords;
 use kernel::testing::TestDb;
-use serde_json::Value;
+use serde_json::{json, Value};
+use uuid::Uuid;
 
 const PAQUET: &str = "/api/negotiation/knowledge";
+const FAVORIS: &str = "/api/negotiation/me/glossary-favorites";
+const MOT_DE_PASSE: &str = "Belem2027!";
+const LECTRICE: &str = "lectrice@example.org";
 
 fn entete<B>(
     reponse: &actix_web::dev::ServiceResponse<B>,
@@ -100,4 +107,142 @@ async fn le_paquet_est_public_porte_son_empreinte_et_rend_304() {
     assert_eq!(illisible.status(), StatusCode::UNPROCESSABLE_ENTITY);
     let corps: Value = test::read_body_json(illisible).await;
     assert_eq!(corps["field"], "since");
+}
+
+#[actix_web::test]
+async fn une_empreinte_suffixee_par_un_relais_rend_encore_304() {
+    let base = TestDb::new().await;
+    let etat = AppState::new(base.db(), kernel::testing::test_config(base.url()))
+        .await
+        .expect("état de l'application");
+    let app = test::init_service(api::build_app(&etat)).await;
+
+    let entier = test::call_service(&app, test::TestRequest::get().uri(PAQUET).to_request()).await;
+    let empreinte = entete(&entier, ETAG);
+    let nu = empreinte.trim_matches('"');
+
+    for presentee in [format!("W/\"{nu}-br\""), format!("\"{nu}-gzip\"")] {
+        let reponse = test::call_service(
+            &app,
+            test::TestRequest::get()
+                .uri(PAQUET)
+                .insert_header((IF_NONE_MATCH, presentee.clone()))
+                .to_request(),
+        )
+        .await;
+        assert_eq!(reponse.status(), StatusCode::NOT_MODIFIED, "{presentee}");
+        assert_eq!(entete(&reponse, ETAG), empreinte);
+    }
+}
+
+async fn compte(base: &TestDb) {
+    let empreinte = Passwords::new()
+        .expect("Argon2id")
+        .hash(MOT_DE_PASSE)
+        .expect("empreinte");
+    let person_id: Uuid = sqlx::query_scalar(
+        "INSERT INTO identity.people (primary_email, first_name, last_name, email_verified_at)
+         VALUES ($1::text::platform.email, 'Awa', 'Diallo', now())
+         RETURNING id",
+    )
+    .bind(LECTRICE)
+    .fetch_one(base.pool())
+    .await
+    .expect("insertion de la personne");
+    sqlx::query(
+        "INSERT INTO identity.accounts (person_id, provider, password_hash, password_changed_at)
+         VALUES ($1, 'password', $2, now())",
+    )
+    .bind(person_id)
+    .bind(&empreinte)
+    .execute(base.pool())
+    .await
+    .expect("insertion du compte");
+}
+
+async fn terme_publie(base: &TestDb) -> Uuid {
+    sqlx::query_scalar(
+        r#"INSERT INTO negotiation.glossary_entries
+               (slug, family_term_id, term, translation, definition, status)
+           SELECT '', id, 'Contact group', '{"fr":"traduction"}', '{"fr":"définition"}', 'published'
+             FROM reference.taxonomy_terms
+            WHERE taxonomy_code = 'glossary_family' AND code = 'meetings'
+           RETURNING id"#,
+    )
+    .fetch_one(base.pool())
+    .await
+    .expect("insertion du terme")
+}
+
+#[actix_web::test]
+async fn les_termes_favoris_demandent_une_session_et_rendent_304() {
+    let base = TestDb::new().await;
+    compte(&base).await;
+    let groupe = terme_publie(&base).await;
+    let etat = AppState::new(base.db(), kernel::testing::test_config(base.url()))
+        .await
+        .expect("état de l'application");
+    let app = test::init_service(api::build_app(&etat)).await;
+
+    let anonyme =
+        test::call_service(&app, test::TestRequest::get().uri(FAVORIS).to_request()).await;
+    assert_eq!(anonyme.status(), StatusCode::UNAUTHORIZED);
+
+    let connexion = test::call_service(
+        &app,
+        test::TestRequest::post()
+            .uri("/api/auth/login")
+            .set_json(json!({
+                "email": LECTRICE,
+                "password": MOT_DE_PASSE,
+                "remember_me": false,
+                "client": { "kind": "app", "device_id": "9f2c-appareil", "platform": "android" },
+            }))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(connexion.status(), StatusCode::OK);
+    let cookie = connexion
+        .response()
+        .cookies()
+        .find(|c| c.name() == "epavillon_at")
+        .map(|c| format!("{}={}", c.name(), c.value()))
+        .expect("cookie d'accès");
+
+    let pose = test::call_service(
+        &app,
+        test::TestRequest::put()
+            .uri(&format!("{FAVORIS}/{groupe}"))
+            .insert_header(("cookie", cookie.clone()))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(pose.status(), StatusCode::NO_CONTENT);
+
+    let liste = test::call_service(
+        &app,
+        test::TestRequest::get()
+            .uri(FAVORIS)
+            .insert_header(("cookie", cookie.clone()))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(liste.status(), StatusCode::OK);
+    assert_eq!(entete(&liste, CACHE_CONTROL), "private, no-cache");
+    let empreinte = entete(&liste, ETAG);
+    let corps: Value = test::read_body_json(liste).await;
+    assert_eq!(corps["entry_ids"], json!([groupe]));
+
+    let inchange = test::call_service(
+        &app,
+        test::TestRequest::get()
+            .uri(FAVORIS)
+            .insert_header(("cookie", cookie))
+            .insert_header((IF_NONE_MATCH, empreinte.clone()))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(inchange.status(), StatusCode::NOT_MODIFIED);
+    assert_eq!(entete(&inchange, ETAG), empreinte);
+    assert_eq!(entete(&inchange, CACHE_CONTROL), "private, no-cache");
 }

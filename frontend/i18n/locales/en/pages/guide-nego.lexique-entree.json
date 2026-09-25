@@ -1,0 +1,25 @@
+{
+  "titre": "Glossary term",
+  "chargement": "Reading the term",
+  "entendu": "Heard in the room",
+  "sigle": "Acronym",
+  "sources": "Sources",
+  "page": "p. {page}",
+  "pages": "pp. {de}–{a}",
+  "lies": "Related terms",
+  "favori": "Favourite",
+  "partager": "Share",
+  "partage": {
+    "copie": "Link to the term copied.",
+    "echec": "Copy the link: {adresse}"
+  },
+  "absent": {
+    "titre": "This term is not in the glossary",
+    "texte": "It may have been removed, or its address is incomplete. Look for it in the glossary.",
+    "sortie": "Search the glossary"
+  },
+  "erreur": {
+    "titre": "The glossary is not on this phone yet",
+    "texte": "It is saved the first time the app opens with a connection. Connect once: it will then work offline."
+  }
+}

@@ -21,6 +21,10 @@ withDefaults(
     ceQuiSeLit?: string
     /** Relayé à l'en-tête : le lecteur n'a qu'une ligne d'en-tête. */
     compact?: boolean
+    /** Relayés à l'en-tête : la croix du lexique, et l'en-tête d'un terme. */
+    fermer?: boolean
+    surtitre?: string
+    terme?: boolean
   }>(),
   {
     sousTitre: undefined,
@@ -31,6 +35,9 @@ withDefaults(
     lexiqueOuvert: false,
     ceQuiSeLit: undefined,
     compact: false,
+    fermer: false,
+    surtitre: undefined,
+    terme: false,
   },
 )
 
@@ -63,6 +70,9 @@ watch(
       :avatar-du-titre="avatarDuTitre"
       :lexique-ouvert="lexiqueOuvert"
       :compact="compact"
+      :fermer="fermer"
+      :surtitre="surtitre"
+      :terme="terme"
     >
       <template #connexion>
         <slot name="connexion">

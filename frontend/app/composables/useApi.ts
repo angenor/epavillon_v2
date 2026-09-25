@@ -300,7 +300,7 @@ export function useApi() {
       ressource: (chemin, signal) => (http.isConfigured.value ? http.flux(chemin, signal) : Promise.resolve(null)),
     }),
 
-    guideNegoSavoir: createGuideNegoSavoirApi(creerAppelsEtiquetes(http, MOCK_LATENCY_MS)),
+    guideNegoSavoir: createGuideNegoSavoirApi({ send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
     home: createHomeApi(deps),
     adminShowcase: createAdminShowcaseApi(deps),
 

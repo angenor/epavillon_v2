@@ -9,7 +9,7 @@
  * peuvent diverger.
  */
 import type { GlossaryEntry } from '../../types/negotiation-savoir.ts'
-import { plierLettre } from './repli.ts'
+import { plierLettre, replier } from './repli.ts'
 
 // Ce que `unaccent` fait autrement que NFKD, relevé sur la base : lettres barrées,
 // ligatures, et exposants, indices et fractions, que la base efface ou espace.
@@ -151,4 +151,56 @@ export function grouperParLettre(lexique: readonly GlossaryEntry[]): GroupeDeLet
   return [...groupes.entries()]
     .sort(([a], [b]) => (a === '#' ? 1 : b === '#' ? -1 : a < b ? -1 : 1))
     .map(([lettre, entrees]) => ({ lettre, entrees }))
+}
+
+/** « GGA — global goal on adaptation » : le sigle devant, quand il existe. */
+export const intituleDe = (entree: Pick<GlossaryEntry, 'term' | 'acronym'>): string =>
+  entree.acronym ? `${entree.acronym} — ${entree.term}` : entree.term
+
+/** La première phrase d'une définition : ce que montrent les résultats. */
+export function premierePhrase(texte: string): string {
+  const fin = /[.!?…](?=\s|$)/u.exec(texte)
+  return fin ? texte.slice(0, fin.index + 1) : texte
+}
+
+export interface Morceau {
+  texte: string
+  marque: boolean
+}
+
+/** Le texte découpé autour de chaque apparition de la saisie, sans tenir compte des accents ni de la casse. */
+export function morceauxSurlignes(texte: string, saisie: string): Morceau[] {
+  const cherche = replier(saisie).replie.trim()
+  if (!cherche) return [{ texte, marque: false }]
+  const { replie, origine } = replier(texte)
+  const morceaux: Morceau[] = []
+  let depuis = 0
+  let position = replie.indexOf(cherche)
+  while (position !== -1) {
+    const debut = origine[position] as number
+    const fin = (origine[position + cherche.length - 1] as number) + 1
+    if (debut > depuis) morceaux.push({ texte: texte.slice(depuis, debut), marque: false })
+    morceaux.push({ texte: texte.slice(debut, fin), marque: true })
+    depuis = fin
+    position = replie.indexOf(cherche, position + cherche.length)
+  }
+  if (depuis < texte.length) morceaux.push({ texte: texte.slice(depuis), marque: false })
+  return morceaux
+}
+
+export const DERNIERS_CONSULTES = 5
+
+/** L'entrée ouverte passe en tête ; cinq au plus. */
+export const derniersApres = (derniers: readonly string[], id: string): string[] =>
+  [id, ...derniers.filter((d) => d !== id)].slice(0, DERNIERS_CONSULTES)
+
+/** Une liste d'identifiants lue sur le téléphone : ce qui n'en est pas une vaut une liste vide. */
+export function idsLus(brut: string | null): string[] {
+  if (!brut) return []
+  try {
+    const lu: unknown = JSON.parse(brut)
+    return Array.isArray(lu) ? lu.filter((v): v is string => typeof v === 'string') : []
+  } catch {
+    return []
+  }
 }

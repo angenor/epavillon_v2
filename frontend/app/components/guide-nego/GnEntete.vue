@@ -28,6 +28,12 @@ withDefaults(
     compact?: boolean
     /** Un retour qui referme ce qui est posé sur l'écran — le sommaire du lecteur — au lieu d'y naviguer. */
     retourBouton?: boolean
+    /** Le retour est une croix : l'écran se referme sur celui d'où l'on venait (le lexique). */
+    fermer?: boolean
+    /** Au-dessus du titre, en petit gris : la famille d'un terme du lexique. */
+    surtitre?: string
+    /** Le titre est un terme anglais : en italique, sa traduction en sous-titre plus grand. */
+    terme?: boolean
   }>(),
   {
     sousTitre: undefined,
@@ -37,6 +43,9 @@ withDefaults(
     lexiqueOuvert: false,
     compact: false,
     retourBouton: false,
+    fermer: false,
+    surtitre: undefined,
+    terme: false,
   },
 )
 
@@ -51,8 +60,8 @@ const { t } = useI18n()
       <button v-if="retourBouton" type="button" class="gn-entete__bouton" :aria-label="t('gn-entete.retour')" @click="$emit('retour')">
         <GnPicto nom="back" />
       </button>
-      <NuxtLink v-else-if="retour" :to="retour" class="gn-entete__bouton" :aria-label="t('gn-entete.retour')">
-        <GnPicto nom="back" />
+      <NuxtLink v-else-if="retour" :to="retour" class="gn-entete__bouton" :aria-label="t(fermer ? 'gn-entete.fermer' : 'gn-entete.retour')">
+        <GnPicto :nom="fermer ? 'close' : 'back'" />
       </NuxtLink>
       <GnAvatar
         v-else-if="avatar"
@@ -78,8 +87,11 @@ const { t } = useI18n()
       <GnAvatar grand :prenom="avatarDuTitre.prenom" :nom="avatarDuTitre.nom" :image="avatarDuTitre.image" />
       <h1 class="gn-entete__titre">{{ titre }}</h1>
     </div>
-    <h1 v-else-if="!compact" class="gn-entete__titre">{{ titre }}</h1>
-    <p v-if="sousTitre && !compact" class="gn-entete__sous-titre">{{ sousTitre }}</p>
+    <p v-if="surtitre && !compact" class="gn-entete__surtitre">{{ surtitre }}</p>
+    <h1 v-if="!compact && !avatarDuTitre" class="gn-entete__titre" :class="{ 'gn-entete__titre--terme': terme }" :lang="terme ? 'en' : undefined">
+      {{ titre }}
+    </h1>
+    <p v-if="sousTitre && !compact" class="gn-entete__sous-titre" :class="{ 'gn-entete__sous-titre--terme': terme }">{{ sousTitre }}</p>
   </header>
 </template>
 
@@ -170,6 +182,23 @@ const { t } = useI18n()
   color: var(--gn-texte-2);
   text-align: center;
   overflow-wrap: anywhere;
+}
+
+[data-app="guide-nego"] .gn-entete__surtitre {
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+  font-weight: var(--gn-graisse-gras);
+  color: var(--gn-texte-2);
+}
+
+[data-app="guide-nego"] .gn-entete__titre--terme {
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
+[data-app="guide-nego"] .gn-entete__sous-titre.gn-entete__sous-titre--terme {
+  font-size: var(--gn-taille-20);
+  line-height: var(--gn-interligne-20);
 }
 
 [data-app="guide-nego"] .gn-entete__sous-titre {

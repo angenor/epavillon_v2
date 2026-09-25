@@ -17,10 +17,12 @@ import type {
   GlossaryFamily,
   KnowledgeBundle,
   KnowledgeSource,
+  MyGlossaryFavorites,
   PathwayGroup,
   PathwayLink,
   PathwayStep,
 } from '~/types/negotiation-savoir'
+import { ApiRequestError } from '~/utils/api-error'
 import { resolveI18nText } from '~/utils/i18n-text'
 import { slugDe } from '~/utils/guide-nego/lexique'
 import { DOCUMENT_NEGO, empreinte } from './negotiation-documents'
@@ -256,4 +258,31 @@ export function paquetDuSavoir(langue = 'fr', since: IsoDateTime | null = null):
     removed: { faq: [], glossary: [] },
   }
   return { valeur, empreinte: empreinte([langue, FAQ, LEXIQUE, PARCOURS, faq_sections, glossary_families]) }
+}
+
+// ---------------------------------------------------------------------------
+// Les termes favoris — plus récent d'abord, comme l'API
+// ---------------------------------------------------------------------------
+
+let favoris: { entry_id: Uuid; created_at: IsoDateTime }[] = []
+
+export function mesTermesFavoris(): Etiquete<MyGlossaryFavorites> {
+  const entry_ids = [...favoris]
+    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at) || (a.entry_id < b.entry_id ? -1 : 1))
+    .map((f) => f.entry_id)
+  return { valeur: { entry_ids }, empreinte: empreinte(entry_ids) }
+}
+
+export function poserUnTermeFavori(id: Uuid): void {
+  if (!LEXIQUE.some((e) => e.id === id)) {
+    throw new ApiRequestError(
+      { code: 'NEGOTIATION_GLOSSARY_NOT_FOUND', message: "Ce terme n'existe pas, ou n'est plus publié." },
+      404,
+    )
+  }
+  if (!favoris.some((f) => f.entry_id === id)) favoris = [...favoris, { entry_id: id, created_at: new Date().toISOString() }]
+}
+
+export function retirerUnTermeFavori(id: Uuid): void {
+  favoris = favoris.filter((f) => f.entry_id !== id)
 }

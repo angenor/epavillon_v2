@@ -76,15 +76,15 @@ description: "Tâches de l'étape 2 — FAQ, parcours « Ma première COP » et 
 
 **But** : le critère de sortie. **Test indépendant** : quickstart § 1.
 
-- [ ] T024 [P] [US1] Créer `frontend/app/components/guide-nego/GnLigneTerme.vue` (terme en italique, traduction, première phrase, surlignage) et l'ajouter à la planche `components/guide-nego/planche/`
-- [ ] T025 [P] [US1] Créer `GnRailAlphabet.vue` (toucher et glisser, lettres vides grisées, lettre en cours, 44 px de cible) et l'ajouter à la planche
-- [ ] T026 [US1] Remplacer `frontend/app/pages/guide-nego/lexique.vue` : champ actif, « N entrées, sans réseau », derniers consultés (`localStorage`), résultats à la frappe, « vous cherchiez peut-être », « aussi dans les traductions », « aucun résultat » avec « Proposer » (désactivé jusqu'à US7) et « Parcourir la liste », résolution de `?terme=` ([resolution-lexique.md](contracts/resolution-lexique.md)), quatre états, fermeture vers l'écran d'origine
-- [ ] T027 [US1] Créer `frontend/app/pages/guide-nego/lexique/[slug].vue` : famille, terme, traduction, définition, « Entendu en salle », sigle, sources, termes liés, « Favori », « Partager » (partage du téléphone, sinon copie du lien)
-- [ ] T028 [US1] Créer `frontend/app/pages/guide-nego/lexique/liste.vue` : groupes par lettre et comptes, rail, filtres par famille (`GnPilule`)
-- [ ] T029 [US1] Écrire les routes des favoris (`GET /negotiation/me/glossary-favorites`, `PUT`/`DELETE …/{entry_id}`) dans `backend/crates/modules/negotiation/src/routes/savoir.rs` et son service, avec `tests/savoir_favoris.rs` ; `make openapi`, puis leurs méthodes dans `composables/api/guide-nego-savoir.ts`
-- [ ] T030 [US1] Écrire `frontend/app/composables/guide-nego/useGnFavorisLexique.ts` (local sans compte, file de 0c en famille `lexique.favori.<id>` avec compte, fusion à la connexion — R7) et `frontend/app/pages/guide-nego/lexique/favoris.vue` ; l'accès depuis le lexique
-- [ ] T031 [US1] i18n `frontend/i18n/locales/{fr,en}/pages/guide-nego.lexique.json`, `guide-nego.lexique-entree.json`, `guide-nego.lexique-liste.json`, `guide-nego.lexique-favoris.json`
-- [ ] T032 [US1] Vérifier au navigateur, hors connexion, quickstart § 1 étapes 1 à 6 à 360 px, deux thèmes ; `npm run check:guide-nego`
+- [x] T024 [P] [US1] Créer `frontend/app/components/guide-nego/GnLigneTerme.vue` (terme en italique, traduction, première phrase, surlignage) et l'ajouter à la planche `components/guide-nego/planche/`
+- [x] T025 [P] [US1] Créer `GnRailAlphabet.vue` (toucher et glisser, lettres vides grisées, lettre en cours, 44 px de cible) et l'ajouter à la planche
+- [x] T026 [US1] Remplacer `frontend/app/pages/guide-nego/lexique.vue` : champ actif, « N entrées, sans réseau », derniers consultés (`localStorage`), résultats à la frappe, « vous cherchiez peut-être », « aussi dans les traductions », « aucun résultat » avec « Proposer » (désactivé jusqu'à US7) et « Parcourir la liste », résolution de `?terme=` ([resolution-lexique.md](contracts/resolution-lexique.md)), quatre états, fermeture vers l'écran d'origine
+- [x] T027 [US1] Créer `frontend/app/pages/guide-nego/lexique/[slug].vue` : famille, terme, traduction, définition, « Entendu en salle », sigle, sources, termes liés, « Favori », « Partager » (partage du téléphone, sinon copie du lien)
+- [x] T028 [US1] Créer `frontend/app/pages/guide-nego/lexique/liste.vue` : groupes par lettre et comptes, rail, filtres par famille (`GnPilule`)
+- [x] T029 [US1] Écrire les routes des favoris (`GET /negotiation/me/glossary-favorites`, `PUT`/`DELETE …/{entry_id}`) dans `backend/crates/modules/negotiation/src/routes/savoir.rs` et son service, avec `tests/savoir_favoris.rs` ; `make openapi`, puis leurs méthodes dans `composables/api/guide-nego-savoir.ts`
+- [x] T030 [US1] Écrire `frontend/app/composables/guide-nego/useGnFavorisLexique.ts` (local sans compte, file de 0c en famille `lexique.favori.<id>` avec compte, fusion à la connexion — R7) et `frontend/app/pages/guide-nego/lexique/favoris.vue` ; l'accès depuis le lexique
+- [x] T031 [US1] i18n `frontend/i18n/locales/{fr,en}/pages/guide-nego.lexique.json`, `guide-nego.lexique-entree.json`, `guide-nego.lexique-liste.json`, `guide-nego.lexique-favoris.json`
+- [x] T032 [US1] Vérifier au navigateur, hors connexion, quickstart § 1 étapes 1 à 6 à 360 px, deux thèmes ; `npm run check:guide-nego`
 
 ---
 

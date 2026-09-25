@@ -1,0 +1,25 @@
+{
+  "titre": "Terme du lexique",
+  "chargement": "Lecture du terme",
+  "entendu": "Entendu en salle",
+  "sigle": "Sigle",
+  "sources": "Sources",
+  "page": "p. {page}",
+  "pages": "p. {de} à {a}",
+  "lies": "Termes liés",
+  "favori": "Favori",
+  "partager": "Partager",
+  "partage": {
+    "copie": "Adresse du terme copiée.",
+    "echec": "Copiez l'adresse : {adresse}"
+  },
+  "absent": {
+    "titre": "Ce terme n'est pas dans le lexique",
+    "texte": "Il a peut-être été retiré, ou son adresse est incomplète. Cherchez-le dans le lexique.",
+    "sortie": "Chercher dans le lexique"
+  },
+  "erreur": {
+    "titre": "Le lexique n'est pas encore sur ce téléphone",
+    "texte": "Il se garde à la première ouverture avec le réseau. Reconnectez-vous une fois : il se lira ensuite sans réseau."
+  }
+}

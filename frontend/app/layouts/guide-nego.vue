@@ -68,6 +68,9 @@ const { partir, avis } = useGnFile()
 const copies = useGnCopies()
 // Inscrit l'expéditeur des favoris : un favori posé hier sans réseau repart à l'ouverture.
 useGnFavoris()
+useGnFavorisLexique()
+// Le savoir se garde dès l'ouverture : le lexique se lit sans réseau même jamais ouvert (FR-002).
+const savoir = useGnSavoir()
 
 // Un choix abandonné ou refusé se dit là où la personne se trouve quand le réseau
 // revient (FR-009 bis) ; l'écran qui l'a pris le redit en place, et on ne l'y double pas.
@@ -82,6 +85,7 @@ watch(avis, (suite) => {
 // c'est elle qui met à jour « Synchronisé à » — sans recharger la page.
 function relire() {
   void rafraichir()
+  void savoir.rafraichir()
   void partir()
   void copies.partir()
 }
@@ -111,6 +115,7 @@ onMounted(() => {
   document.addEventListener('visibilitychange', auRetourAuPremierPlan)
   enregistrerLaGarde()
   void assurerLeVocabulaire()
+  void savoir.assurer()
   void partir()
   // Le navigateur a pu vider une copie depuis la dernière ouverture : elle redevient
   // « non téléchargée » avant qu'un écran ne la montre, puis ce qui attend repart.

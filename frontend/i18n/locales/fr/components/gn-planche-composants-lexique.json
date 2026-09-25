@@ -1,0 +1,16 @@
+{
+  "ligne": "Ligne de terme",
+  "ligne-propos": "Terme anglais en italique 17/600, sigle devant quand il existe ; traduction 17 ; dans les résultats, la première phrase de la définition 15 gris. La saisie se marque en gras souligné. Toute la ligne est la cible.",
+  "ligne-liste": "Liste et derniers consultés",
+  "ligne-resultat": "Résultat, la saisie « brack » marquée",
+  "ligne-favori": "Mes termes favoris",
+  "bracketed-traduction": "texte entre crochets",
+  "bracketed-definition": "Un passage entre crochets n'a pas encore fait l'objet d'un accord : il est en cours de négociation. Les crochets se lèvent un à un.",
+  "gga-traduction": "objectif mondial en matière d'adaptation",
+  "gga-definition": "Objectif de l'Accord de Paris visant à élever l'adaptation au niveau de l'atténuation. À la CdP30, l'enjeu était l'adoption de cent indicateurs.",
+  "rail": "Rail alphabétique",
+  "rail-propos": "Colonne de 24 px au bord droit, 26 lettres 15/700, interligne 20 ; la cible s'étend à 44 px vers le contenu. Toucher ou glisser le doigt saute au groupe ; une lettre vide est grise et mène au groupe suivant ; la lettre en cours porte un filet de 3 px.",
+  "rail-choisie": "Lettre choisie : {lettre}",
+  "lie": "Pilule de terme lié",
+  "lie-propos": "La pilule de filtre, en lien : elle ouvre l'entrée et ne bascule rien."
+}

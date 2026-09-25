@@ -164,6 +164,12 @@ pub struct Removed {
     pub glossary: Vec<Uuid>,
 }
 
+/// `MyGlossaryFavorites` — les termes favoris de la personne connectée.
+#[derive(Debug, Clone, Serialize)]
+pub struct MyGlossaryFavorites {
+    pub entry_ids: Vec<Uuid>,
+}
+
 /// `since` tel que le téléphone le renvoie : le `served_at` d'une lecture.
 pub fn lire_since(brut: &str) -> Result<OffsetDateTime> {
     OffsetDateTime::parse(brut.trim(), &time::format_description::well_known::Rfc3339)

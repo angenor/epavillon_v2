@@ -2,7 +2,7 @@
 /**
  * Section 5 — les composants livrés à l'étape 0a, dans toutes leurs variantes.
  *
- * La section est découpée en lots — cadre, commandes, saisie, surfaces, documents, lecteur du PDF — pour
+ * La section est découpée en lots — cadre, commandes, saisie, surfaces, documents, lecteur du PDF, lexique — pour
  * qu'une étape ajoute les siens sans rouvrir les autres, et pour qu'aucun fichier
  * n'approche la limite de mille lignes. Les classes communes aux lots vivent ici.
  *
@@ -29,6 +29,7 @@ const { t } = useI18n()
       <GnPlancheComposantsSurfaces />
       <GnPlancheComposantsDocuments />
       <GnPlancheComposantsLecteurPdf />
+      <GnPlancheComposantsLexique />
 
       <GnPlancheSection :titre="t('gn-planche-composants.absents')">
         <p class="gn-planche-note">{{ t('gn-planche-composants.absents-propos') }}</p>

@@ -9,6 +9,12 @@ export const CLE_OUVERTURE_VUE = 'gn.ouverture-vue'
 export const CLE_GARDE_ANNONCEE = 'gn.garde-annoncee'
 /** L'écran de premier choix des thématiques a été proposé sur cet appareil. */
 export const CLE_THEMATIQUES_PROPOSEES = 'gn.thematiques-proposees'
+/** Les derniers termes ouverts, cinq au plus. */
+export const CLE_LEXIQUE_DERNIERS = 'gn.lexique.derniers'
+/** Les termes favoris de ce téléphone : ceux posés sans compte, et le reflet du compte. */
+export const CLE_LEXIQUE_FAVORIS = 'gn.lexique.favoris'
+/** La personne dont les favoris sans compte ont déjà rejoint le compte (R7). */
+export const CLE_LEXIQUE_FAVORIS_FUSIONNES = 'gn.lexique.favoris-fusionnes'
 
 // Stockage refusé, une clé vit le temps de la visite : sans elle, « Continuer en
 // visiteur » ramènerait à l'ouverture, en boucle.

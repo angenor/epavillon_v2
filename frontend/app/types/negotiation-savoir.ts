@@ -120,3 +120,11 @@ export interface KnowledgeRemoved {
   faq: Uuid[]
   glossary: Uuid[]
 }
+
+// ---------------------------------------------------------------------------
+// Les termes favoris — `GET /negotiation/me/glossary-favorites`
+// ---------------------------------------------------------------------------
+
+export interface MyGlossaryFavorites {
+  entry_ids: Uuid[]
+}

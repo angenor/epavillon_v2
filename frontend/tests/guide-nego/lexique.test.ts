@@ -2,7 +2,18 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import type { GlossaryEntry } from '../../app/types/negotiation-savoir.ts'
-import { grouperParLettre, lettreDe, normaliserTerme, resoudreLeTerme, slugDe } from '../../app/utils/guide-nego/lexique.ts'
+import {
+  derniersApres,
+  grouperParLettre,
+  idsLus,
+  intituleDe,
+  lettreDe,
+  morceauxSurlignes,
+  normaliserTerme,
+  premierePhrase,
+  resoudreLeTerme,
+  slugDe,
+} from '../../app/utils/guide-nego/lexique.ts'
 
 // Les mêmes chaînes passent à `platform.normalize_label` dans `savoir_normalisation.rs`.
 const CAS = JSON.parse(
@@ -75,4 +86,40 @@ test('regroupement par lettre, les chiffres et signes à la fin', () => {
     ['4', '2'],
   )
   assert.equal(lettreDe('Écart'), 'E')
+})
+
+test('l’intitulé porte le sigle devant le terme', () => {
+  assert.equal(intituleDe({ term: 'global goal on adaptation', acronym: 'GGA' }), 'GGA — global goal on adaptation')
+  assert.equal(intituleDe({ term: 'huddle', acronym: null }), 'huddle')
+})
+
+test('la première phrase s’arrête au premier point suivi d’un blanc', () => {
+  assert.equal(premierePhrase('Un passage. Les crochets se lèvent.'), 'Un passage.')
+  assert.equal(premierePhrase('Sans point final'), 'Sans point final')
+})
+
+test('le surlignage ignore accents et casse et rend le texte d’origine', () => {
+  const morceaux = morceauxSurlignes('Plénière informelle de bilan', 'pleniere')
+  assert.deepEqual(morceaux, [
+    { texte: 'Plénière', marque: true },
+    { texte: ' informelle de bilan', marque: false },
+  ])
+  assert.equal(morceaux.map((m) => m.texte).join(''), 'Plénière informelle de bilan')
+  assert.deepEqual(morceauxSurlignes('contact group', ''), [{ texte: 'contact group', marque: false }])
+  assert.deepEqual(
+    morceauxSurlignes('bis, ter, alt', 't').filter((m) => m.marque).length,
+    2,
+  )
+})
+
+test('les derniers consultés : l’ouvert en tête, sans doublon, cinq au plus', () => {
+  assert.deepEqual(derniersApres(['a', 'b', 'c'], 'b'), ['b', 'a', 'c'])
+  assert.deepEqual(derniersApres(['a', 'b', 'c', 'd', 'e'], 'f'), ['f', 'a', 'b', 'c', 'd'])
+})
+
+test('une liste gardée illisible vaut une liste vide', () => {
+  assert.deepEqual(idsLus(null), [])
+  assert.deepEqual(idsLus('{'), [])
+  assert.deepEqual(idsLus('{"a":1}'), [])
+  assert.deepEqual(idsLus('["a",2,"b"]'), ['a', 'b'])
 })

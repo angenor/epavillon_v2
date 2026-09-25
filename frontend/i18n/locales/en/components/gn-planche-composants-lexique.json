@@ -1,0 +1,16 @@
+{
+  "ligne": "Term row",
+  "ligne-propos": "English term in italics 17/600, acronym first when there is one; translation 17; in results, the first sentence of the definition 15 grey. The typed text is marked bold and underlined. The whole row is the target.",
+  "ligne-liste": "List and recently viewed",
+  "ligne-resultat": "Result, “brack” marked",
+  "ligne-favori": "My favourite terms",
+  "bracketed-traduction": "texte entre crochets",
+  "bracketed-definition": "A bracketed passage has not been agreed yet: it is still under negotiation. Brackets are lifted one by one.",
+  "gga-traduction": "objectif mondial en matière d'adaptation",
+  "gga-definition": "Paris Agreement goal raising adaptation to the level of mitigation. At COP30, the stake was adopting a hundred indicators.",
+  "rail": "Alphabet rail",
+  "rail-propos": "24 px column on the right edge, 26 letters 15/700, line height 20; the target extends to 44 px towards the content. Tap or slide to jump to a group; an empty letter is grey and leads to the next group; the current letter has a 3 px rule.",
+  "rail-choisie": "Chosen letter: {lettre}",
+  "lie": "Related-term pill",
+  "lie-propos": "The filter pill, as a link: it opens the entry and toggles nothing."
+}

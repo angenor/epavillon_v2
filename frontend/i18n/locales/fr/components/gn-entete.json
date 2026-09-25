@@ -1,5 +1,6 @@
 {
   "retour": "Revenir à l'écran précédent",
   "lexique": "Ouvrir le lexique anglais-français",
-  "lexique-ouvert": "Lexique anglais-français — vous y êtes"
+  "lexique-ouvert": "Lexique anglais-français — vous y êtes",
+  "fermer": "Fermer le lexique et revenir à l'écran d'origine"
 }
