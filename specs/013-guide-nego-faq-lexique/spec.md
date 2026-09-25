@@ -194,7 +194,7 @@ En « Texte agrandi », Aïssatou touche *global goal on adaptation* : la feuill
 
 ### User Story 9 — Le back-office tient la FAQ, le parcours et le lexique (Priority: P1)
 
-Mariam, administratrice, rédige une entrée de FAQ, lui rattache deux sources dont une page du guide, trois questions liées, et la publie ; le Dr Koffi Mensah, expert, la relit et date sa vérification. Il traite la file : deux signalements « Dépassé ou faux » sur la même entrée — il la met « à revoir », corrige la réponse, redate la vérification ; une question d'Aïssatou — il répond, puis la promeut en FAQ en retirant ce qui pourrait l'identifier ; un terme proposé — il le définit et le publie.
+Mariam, administratrice, rédige une entrée de FAQ, lui rattache deux sources dont une page du guide et trois questions liées ; le Dr Koffi Mensah, expert, la relit, date sa vérification, et Mariam la publie. Il traite la file : deux signalements « Dépassé ou faux » sur la même entrée — il la met « à revoir », corrige la réponse, redate la vérification ; une question d'Aïssatou — il répond, puis la promeut en FAQ en retirant ce qui pourrait l'identifier ; un terme proposé — il le définit et le publie.
 
 **Why this priority** : sans contenu publié, rien ne se lit ; les trois écrans du téléphone en dépendent. Le chargement des données d'essai sert le poste local seulement.
 
@@ -292,7 +292,7 @@ Mariam, administratrice, rédige une entrée de FAQ, lui rattache deux sources d
 
 - **FR-035** : Le back-office DOIT permettre de rédiger, publier, dépublier et mettre « À revoir » les entrées de FAQ et du lexique, de tenir les groupes et étapes du parcours, et de dater la vérification d'une entrée de FAQ ; la date et le nom de l'expert qui vérifie DOIVENT être gardés.
 - **FR-036** : La file des experts DOIT rassembler les signalements « Dépassé ou faux », les réponses « Dépassée ou fausse », les questions en attente et les termes proposés ; chaque élément DOIT se clore avec une issue, gardée avec son auteur et sa date.
-- **FR-037** : Répondre à une question, la promouvoir en FAQ, traiter un signalement et traiter un terme proposé DOIVENT être réservés au rôle `expert` et aux administrateurs de Guide Négo ; rédiger et publier DOIT l'être aux mêmes ; chaque permission DOIT être vérifiée avec sa portée, par l'API, adresse forgée comprise.
+- **FR-037** : Dater une vérification, répondre à une question, la promouvoir en FAQ, traiter un signalement et traiter un terme proposé DOIVENT être réservés au rôle `expert` ; rédiger, publier, dépublier et mettre « À revoir » DOIVENT l'être au rôle `expert` et aux administrateurs de Guide Négo ; chaque permission DOIT être vérifiée avec sa portée, par l'API, adresse forgée comprise (plan, R10).
 - **FR-038** : Les rubriques de la FAQ et les familles du lexique DOIVENT être des données — vocabulaires semés en base —, jamais des traductions.
 - **FR-039** : Le contenu de production DOIT venir du back-office ; les données d'essai de `donnees-savoir.md` et `donnees-lexique.md` DOIVENT se charger sur un poste local par un script rejouable, jamais en production.
 
