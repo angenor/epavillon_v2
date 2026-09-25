@@ -9,7 +9,7 @@ Tout s'écrit d'abord dans `docs/database/`, section **§10 Savoir** de `100_neg
 | `faq_section` | `first_cop` « Ma première COP », `process` « Le processus », `negotiating_groups` « Les groupes de négociation », `on_site` « Sur place » | `label`, `icon` (nom du pictogramme de Guide Négo), `sort_order` |
 | `glossary_family` | `meetings` « Réunions », `texts` « Textes », `themes` « Thématiques » | `label`, `sort_order` |
 
-Semés dans `020_reference.sql` et dans la migration (`ON CONFLICT DO NOTHING`). Gardés en base par `negotiation.tg_check_term_taxonomy()`.
+Semés dans `020_reference.sql` et dans la migration (`ON CONFLICT DO NOTHING`). **Référencés par identifiant**, comme `theme_subscriptions.theme_term_id` : `uuid REFERENCES reference.taxonomy_terms(id)`, gardé par `negotiation.tg_check_term_taxonomy('<colonne>', '<taxonomie>')`, qui lit un `uuid`. L'API parle en codes (`section_code`, `family_code`, `theme_code`) et fait la correspondance, comme `repo/themes.rs`.
 
 ## ENUM — machines à états
 
@@ -28,7 +28,7 @@ Transitions de `knowledge_status` : `draft → published` (vérification datée 
 
 | Colonne | Type | Règle |
 |---|---|---|
-| `section_code` | text | vocabulaire `faq_section` |
+| `section_term_id` | uuid | → `reference.taxonomy_terms`, vocabulaire `faq_section` |
 | `question`, `answer` | i18n_text | `fr` requis |
 | `status` | knowledge_status | défaut `draft` |
 | `verified_on` | date | requis dès `published` ou `to_review` — `ck_faq_entries_verified` |
@@ -85,7 +85,7 @@ Déclencheur : touche `updated_at` du parent.
 |---|---|---|
 | `asker_id` | uuid | `xmod_fk_expert_questions_asker` ; jamais rendu au back-office |
 | `client_ref` | uuid | `ux_expert_questions_client_ref (asker_id, client_ref)` |
-| `theme_code` | text | vocabulaire `negotiation_theme` |
+| `theme_term_id` | uuid | → `reference.taxonomy_terms`, vocabulaire `negotiation_theme` |
 | `body` | text | 1 à 600 caractères |
 | `consent_to_faq` | boolean | |
 | `status` | question_status | `pending` |
@@ -123,8 +123,8 @@ Déclencheur AFTER : passage à `answered` → `platform.emit_event('negotiation
 
 | Colonne | Type | Règle |
 |---|---|---|
-| `slug` | text | **désignation stable** ; `ux_glossary_entries_slug` ; `ck_glossary_entries_slug` `^[a-z0-9]+(-[a-z0-9]+)*$` ; posé à l'insertion depuis `term` par déclencheur s'il est vide, jamais recalculé |
-| `family_code` | text | vocabulaire `glossary_family` |
+| `slug` | text | **désignation stable** ; `ux_glossary_entries_slug` ; `ck_glossary_entries_slug` `^[a-z0-9]+(-[a-z0-9]+)*$` ; posé à l'insertion par `platform.slugify(term)` (existe) s'il est vide, jamais recalculé |
+| `family_term_id` | uuid | → `reference.taxonomy_terms`, vocabulaire `glossary_family` |
 | `term` | text | terme anglais, tel qu'il s'écrit |
 | `acronym` | text | « GGA », facultatif |
 | `variants` | text[] | écritures admises : « bracketed », « brackets » |
@@ -153,7 +153,7 @@ Comme `faq_related`, sur `glossary_entries`.
 
 ## Fonctions
 
-- `negotiation.glossary_resolve(p_text text) RETURNS uuid`, `STABLE` — publiée seulement ; ordre : `term_norm`, `acronym_norm`, `variants_norm`, `slug` (R6).
+- `negotiation.glossary_resolve(p_text text) RETURNS uuid`, `STABLE` — entrées `status <> 'draft'` ; ordre : `term_norm`, `acronym_norm`, `variants_norm`, `slug` (R6).
 - `negotiation.knowledge_fingerprint() RETURNS text` — `max(updated_at)` et nombre de lignes de chaque table du paquet, et le jour courant.
 - `negotiation.tg_touch_knowledge_parent()` — déclencheur générique des tables enfants.
 - `negotiation.tg_glossary_slug()` — pose `slug` et `variants_norm`.

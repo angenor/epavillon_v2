@@ -25,7 +25,7 @@ most_read[]         identifiants d'entrées de FAQ, trois au plus
 removed             { faq[], glossary[] }   — vide si complete
 ```
 
-`status` vaut `published` ou `to_review` : les brouillons ne sortent jamais. `sources[]` : `{ document_id?, document_title?, external_title?, external_url?, section_label?, page_from?, page_to?, quote? }` — le titre du document est joint pour la lecture sans la bibliothèque.
+`status` vaut `published` ou `to_review` : les brouillons ne sortent jamais. `related_ids` porte **tous** les liens, publiés ou non : le téléphone les filtre sur les entrées qu'il a, puisqu'une différence ne renvoie pas le parent quand une entrée liée change d'état. `sources[]` : `{ document_id?, document_title?, external_title?, external_url?, section_label?, page_from?, page_to?, quote? }` — le titre du document est joint pour la lecture sans la bibliothèque.
 
 ## Lectures et retours sur la FAQ
 
@@ -61,7 +61,7 @@ removed             { faq[], glossary[] }   — vide si complete
 
 ## Codes d'erreur nouveaux
 
-`NEGOTIATION_FAQ_NOT_FOUND` 404 · `NEGOTIATION_GLOSSARY_NOT_FOUND` 404 · `NEGOTIATION_PATHWAY_STEP_NOT_FOUND` 404 · `NEGOTIATION_REPORT_LIMIT` 429 · `NEGOTIATION_PROPOSAL_LIMIT` 429 · `NEGOTIATION_GLOSSARY_TERM_EXISTS` 409 · `NEGOTIATION_REPORT_REASON_REQUIRED` 422 · plus ceux du back-office. Messages en français au catalogue de `kernel/src/error.rs`, section « Guide Négo, savoir (étape 2) ».
+`NEGOTIATION_FAQ_NOT_FOUND` 404 · `NEGOTIATION_GLOSSARY_NOT_FOUND` 404 · `NEGOTIATION_PATHWAY_STEP_NOT_FOUND` 404 · `NEGOTIATION_REPORT_LIMIT` 429 · `NEGOTIATION_PROPOSAL_LIMIT` 429 · `NEGOTIATION_GLOSSARY_TERM_EXISTS` 409 · `NEGOTIATION_REPORT_REASON_REQUIRED` 422 · `NEGOTIATION_TEXT_TOO_LONG` 422 (600 caractères) · plus les neuf du back-office — dix-sept en tout. Messages en français au catalogue de `kernel/src/error.rs`, section « Guide Négo, savoir (étape 2) ».
 
 ## Côté téléphone
 

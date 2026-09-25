@@ -63,7 +63,7 @@ Le téléphone ne questionne jamais le serveur pour chercher dans la FAQ ou le l
 
 ## R6 — La désignation stable et la résolution d'un texte
 
-**Désignation** : `slug`, posé **une fois** à la création depuis le terme anglais — `platform.normalize_label(term)` dont les espaces deviennent des tirets : `contact-group`, `bracketed-text`, `global-goal-on-adaptation`. Unique, jamais recalculé quand le terme est corrigé ; l'administratrice ne le modifie pas. Il sert d'adresse : `/guide-nego/lexique/contact-group`.
+**Désignation** : `slug`, posé **une fois** à la création depuis le terme anglais par `platform.slugify(term)`, qui existe : `contact-group`, `bracketed-text`, `global-goal-on-adaptation`. Unique, jamais recalculé quand le terme est corrigé ; l'administratrice ne le modifie pas. Il sert d'adresse : `/guide-nego/lexique/contact-group`.
 
 **Résolution d'un texte vers une entrée**, dans cet ordre, sur les formes normalisées (même règle des deux côtés : minuscules, sans accents, tout ce qui n'est ni lettre ni chiffre devient une espace, espaces réduites) :
 1. le terme ;
@@ -123,7 +123,7 @@ Les lectures du back-office ouvertes à l'une **ou** l'autre passent par un extr
 
 ## R11 — Les courriels
 
-**Décision** : deux travaux dans `platform.jobs`, file « negotiation », mis en file dans la transaction qui les cause, idempotents, sur le patron de `jobs/emails.rs` de 0b : `negotiation.send_question_answered` (à la réponse d'une question) et `negotiation.send_term_published` (à chaque auteur d'une proposition acceptée, quand l'entrée qui en naît est publiée). Gabarits dans `mail.rs`, `fr` et `en` selon la langue du compte, lien vers `/guide-nego/ressources/faq/mes-questions` ou `/guide-nego/lexique/<slug>`. **Enregistrés dans `job_handlers()`**, sinon ils ne tournent jamais.
+**Décision** : deux travaux dans `platform.jobs`, **file par défaut** comme les quatre travaux existants (une file que personne n'écoute s'empile sans erreur), mis en file dans la transaction qui les cause, idempotents, sur le patron de `jobs/emails.rs` de 0b : `negotiation.expert_question.answered_email` (à la réponse d'une question, clé `question_id`) et `negotiation.glossary_proposal.published_email` (à chaque auteur d'une proposition acceptée, quand l'entrée qui en naît est publiée, clé `(proposal_id, person_id)` : une republication ne renvoie rien). Gabarits dans `mail.rs`, `fr` et `en` selon la langue du compte, lien vers `/guide-nego/ressources/faq/mes-questions` ou `/guide-nego/lexique/<slug>`. **Enregistrés dans `job_handlers()`**, sinon ils ne tournent jamais.
 
 ## R12 — « Les plus lues »
 
@@ -141,7 +141,7 @@ La maquette dessine l'écran « 09 Recherche » mais pas le chemin qui y mène. 
 
 ## R15 — Les données d'essai
 
-**Décision** : un fichier SQL rejouable, `specs/013-guide-nego-faq-lexique/donnees-essai.sql`, écrit à la main depuis `donnees-savoir.md` et `donnees-lexique.md` : quatre rubriques de FAQ publiées dont une entrée complète, les autres en brouillon si leur réponse manque ; 19 termes, les cinq « rédigés » sans source en brouillon ; 18 étapes en quatre groupes. `INSERT … ON CONFLICT DO NOTHING`, joué par `psql -v ON_ERROR_STOP=1 -f`. **Hors de `docs/database/`** : il ne part jamais en production.
+**Décision** : un fichier SQL rejouable, `specs/013-guide-nego-faq-lexique/donnees-essai.sql`, écrit à la main depuis `donnees-savoir.md` et `donnees-lexique.md` : quatre rubriques de FAQ publiées dont une entrée complète, les autres en brouillon si leur réponse manque ; 19 termes, les quatre « rédigés » sans source en brouillon — 15 publiés ; 18 étapes en quatre groupes. `INSERT … ON CONFLICT DO NOTHING`, joué par `psql -v ON_ERROR_STOP=1 -f`. **Hors de `docs/database/`** : il ne part jamais en production.
 
 **Le vérificateur** : l'entrée publiée « Vérifié le » demande un vérificateur ; le script prend le premier compte portant le rôle `expert`, et s'arrête avec un message clair s'il n'y en a pas.
 
@@ -156,4 +156,4 @@ Comme aux étapes 0b à 1b : `specs/013-guide-nego-faq-lexique/migration.sql`, r
 - `useApi.ts` (905 lignes) : deux lignes de montage ; les méthodes vont dans `composables/api/guide-nego-savoir.ts` et `admin-negotiation-savoir.ts`.
 - Types : `types/negotiation-savoir.ts`.
 - Mocks : `mocks/negotiation-savoir.ts`, tiré des mêmes données d'essai.
-- i18n : un fichier par écran, `pages/guide-nego.faq.json`, `guide-nego.faq-entree.json`, `guide-nego.question.json`, `guide-nego.parcours.json`, `guide-nego.lexique.json` (existe), `guide-nego.lexique-entree.json`, `guide-nego.lexique-liste.json`, `guide-nego.recherche.json` ; back-office `admin.negotiation.faq.json`, `.lexique.json`, `.parcours.json`, `.file.json`.
+- i18n : un fichier par écran, `pages/guide-nego.faq.json`, `guide-nego.faq-entree.json`, `guide-nego.question.json`, `guide-nego.parcours.json`, `guide-nego.lexique.json` (existe), `guide-nego.lexique-entree.json`, `guide-nego.lexique-liste.json`, `guide-nego.recherche.json` ; back-office `admin.negociations.faq.json`, `.lexique.json`, `.parcours.json`, `.file.json`.

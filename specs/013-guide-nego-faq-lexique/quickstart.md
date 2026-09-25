@@ -12,8 +12,8 @@ Sur la **version construite**, au navigateur, à 360 px, thème clair puis sombr
 ## 1. Le lexique hors connexion — critère de sortie (récit 1)
 
 1. Ouvrir Guide Négo avec le réseau, puis passer hors connexion (outils du navigateur) et recharger.
-2. Depuis « Ma journée », Ressources et un document : « Aa » ouvre le lexique, champ actif, « 19 entrées, sans réseau ». La croix ramène à l'écran d'origine.
-3. Taper `contact grup` → *contact group* en tête, en moins d'une seconde. `groupe de contact` → la même entrée, « Aussi dans les traductions françaises ». `braketed` → « Vous cherchiez peut-être : *bracketed text* ». `GGA` → *global goal on adaptation*. `placeholder text` → « 0 entrée sur 19 », « Proposer ».
+2. Depuis « Ma journée », Ressources et un document : « Aa » ouvre le lexique, champ actif, « 15 entrées, sans réseau » (les quatre termes « rédigés » restent en brouillon). La croix ramène à l'écran d'origine.
+3. Taper `contact grup` → *contact group* en tête, en moins d'une seconde. `groupe de contact` → la même entrée, « Aussi dans les traductions françaises ». `braketed` → « Vous cherchiez peut-être : *bracketed text* ». `GGA` → *global goal on adaptation*. `placeholder text` → « 0 entrée sur 15 », « Proposer ».
 4. Ouvrir *contact group* : famille, traduction, définition, « Entendu en salle », sources, termes liés (chacun s'ouvre). Favori ; retrouver l'entrée dans « Mes termes favoris ».
 5. Liste : lettres et comptes, rail (toucher, glisser), lettres vides grisées, filtre « Réunions ».
 6. `/guide-nego/lexique?terme=Contact%20Group` ouvre `/guide-nego/lexique/contact-group` ; `?terme=GGA` ouvre l'entrée du GGA ; `?terme=foo` tombe sur « aucun résultat ».

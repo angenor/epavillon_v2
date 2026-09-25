@@ -34,7 +34,7 @@ Une négociatrice trouve *contact group* sans réseau en tapant « contact grup 
 **Dépendances principales** : Actix Web, SQLx vérifié, PostgreSQL 17 (`pg_trgm`, `unaccent` déjà chargés), Nuxt 4, TailwindCSS v4. **Aucune dépendance nouvelle**, ni côté serveur ni côté client.
 
 **Stockage** :
-- **PostgreSQL**, `negotiation` : 14 tables, 4 ENUM, 4 fonctions, 2 permissions ; `reference` : 2 vocabulaires ([data-model.md](data-model.md)).
+- **PostgreSQL**, `negotiation` : 15 tables, 4 ENUM, 5 fonctions, 2 permissions ; `reference` : 2 vocabulaires ([data-model.md](data-model.md)).
 - **Sur l'appareil** : garde `savoir` dans IndexedDB (`lectures`, sans nouvelle version de la base) ; file d'écritures de 0c ; `localStorage` pour les coches et favoris sans compte, les derniers termes consultés, les lectures comptées du jour.
 
 **Tests** :
@@ -51,7 +51,7 @@ Une négociatrice trouve *contact group* sans réseau en tapant « contact grup 
 **Échelle et périmètre** :
 - **Application** : 14 écrans ou feuilles — FAQ, rubrique, entrée, « Qu'est-ce qui manque », « Dépassé ou faux », question, question envoyée, « Mes questions », parcours, lexique (ouverture, recherche, aucun résultat), liste, entrée, favoris, proposer un terme, recherche globale — et la feuille du lecteur.
 - **Back-office** : 6 écrans — FAQ (liste, fiche), lexique (liste, fiche), parcours, file.
-- **Routes** : 14 publiques ou personnelles, 30 d'administration.
+- **Routes** : 14 publiques ou personnelles, 32 d'administration.
 - **Composants nouveaux** : `GnLigneQuestion`, `GnSource`, `GnRetourUtile`, `GnEtapeParcours`, `GnLigneTerme`, `GnRailAlphabet`, `GnGroupeResultats`, `GnFeuilleTerme`, `GnLoupe` — sur la planche.
 - **Volume** : quelques centaines d'entrées au plus.
 
@@ -71,7 +71,7 @@ Une négociatrice trouve *contact group* sans réseau en tapant « contact grup 
 | **VI — SQLx vérifié, pas d'ORM** | ✅ | Requêtes statiques ; la différence `since` est une requête écrite, pas composée |
 | **VII — Contexte d'écriture** | ✅ | `Db::write(&ctx)` sur chaque écriture ; test de l'auteur dans l'audit sur une écriture publique et une du back-office |
 | **VIII — Invariants non réimplémentés** | ✅ | En base et traduits : vérification avant publication, entrée publiée non supprimable, source à une cible, lien d'étape cohérent, promotion sans consentement, proposition unique par terme en attente, `client_ref` unique. Le service ne compte que les plafonds |
-| **IX — Erreurs à code stable** | ✅ | Treize codes nouveaux, section « Guide Négo, savoir (étape 2) » du catalogue |
+| **IX — Erreurs à code stable** | ✅ | Dix-sept codes nouveaux, section « Guide Négo, savoir (étape 2) » du catalogue |
 | **X — Tests sur base réelle** | ✅ | Chaque route : nominal, URL forgée, invariant traduit ; anonymat relu dans chaque réponse de la file |
 | **XI — Hors connexion d'abord** | ✅ | Le paquet entier dans la garde, l'heure de lecture affichée ; toutes les écritures par la file de 0c, une seule fois |
 | **XII — Confiance** | ✅ | « Vérifié le » obligatoire pour publier ; « À revoir » dit qu'un expert relit ; un signalement ne modifie jamais l'entrée ; la résolution d'un terme n'est jamais approchée ; rien d'IA |
@@ -105,7 +105,7 @@ docs/database/
 ├── 020_reference.sql          + faq_section, glossary_family
 └── 100_negotiations.sql       + §10 Savoir ; §9 : deux permissions
 
-backend/crates/kernel/src/error.rs              + 13 codes
+backend/crates/kernel/src/error.rs              + 17 codes
 backend/crates/modules/negotiation/
 ├── src/domain/permissions.rs   + KnowledgePublish, KnowledgeReview
 ├── src/domain/savoir.rs        formes, validation, empreinte

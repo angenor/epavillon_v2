@@ -21,7 +21,7 @@ Les lectures des listes et des fiches sont ouvertes à l'une **ou** l'autre (ext
 | `PATCH /admin/negotiation/faq/{id}` | publish | `AdminFaqInput` partiel → `AdminFaqEntry` | Sources et liées remplacées en bloc |
 | `POST /admin/negotiation/faq/{id}/verify` | review | `{ verified_on? }` → `AdminFaqEntry` | Défaut : aujourd'hui, fuseau de Paris ; pose `verified_by` ; une entrée « À revoir » revient `published` |
 | `POST /admin/negotiation/faq/{id}/publish` | publish | → `AdminFaqEntry` | Sans vérification : `NEGOTIATION_FAQ_UNVERIFIED` (traduit de `ck_faq_entries_verified`) |
-| `POST /admin/negotiation/faq/{id}/to-review` | publish ou review | → `AdminFaqEntry` | Reste visible (tranché le 25/09) |
+| `POST /admin/negotiation/faq/{id}/to-review` | publish | → `AdminFaqEntry` | Reste visible (tranché le 25/09) |
 | `POST /admin/negotiation/faq/{id}/unpublish` | publish | → `AdminFaqEntry` | Revient `draft` |
 | `DELETE /admin/negotiation/faq/{id}` | publish | → `204` | Jamais publiée seulement : sinon `NEGOTIATION_KNOWLEDGE_PUBLISHED_UNDELETABLE` |
 
@@ -44,13 +44,17 @@ Mêmes routes sous `/admin/negotiation/glossary`, sans `verify` : `GET` (liste, 
 |---|---|---|---|
 | `GET /admin/negotiation/queue` | review | `?kind=reports|questions|proposals` → `ExpertQueue` | Les plus anciens d'abord ; comptes par sorte. **Aucun auteur** (R9) |
 | `POST /admin/negotiation/queue/reports/{id}/close` | review | `{ outcome }` → `AdminFaqReport` | `revised | confirmed | dismissed` |
-| `POST /admin/negotiation/queue/questions/{id}/answer` | review | `{ answer }` → `AdminQuestion` | Met en file `negotiation.send_question_answered` dans la même transaction (R11) |
+| `POST /admin/negotiation/queue/questions/{id}/answer` | review | `{ answer }` → `AdminQuestion` | Met en file `negotiation.expert_question.answered_email` dans la même transaction (R11) |
 | `POST /admin/negotiation/queue/questions/{id}/promote` | review | → `AdminFaqEntry` | Brouillon de FAQ né de la question et de la réponse ; `status = added_to_faq`. Sans consentement : `NEGOTIATION_QUESTION_NO_CONSENT` |
 | `POST /admin/negotiation/queue/proposals/{id}/accept` | review | `AdminGlossaryInput` → `AdminGlossaryEntry` | Crée l'entrée en brouillon ; les auteurs reçoivent leur courriel **à sa publication** |
 | `POST /admin/negotiation/queue/proposals/{id}/reject` | review | `{ reason }` → `AdminProposal` | |
 | `GET /admin/negotiation/queue/proposals/{id}` | review | → `AdminProposal` | Contextes des auteurs, sans les auteurs ; entrées proches par `similarity` (R5) |
 
 Élément déjà traité : `NEGOTIATION_QUEUE_ITEM_CLOSED` (409).
+
+## Codes d'erreur du back-office
+
+`NEGOTIATION_FAQ_UNVERIFIED` 422 (`ck_faq_entries_verified`) · `NEGOTIATION_KNOWLEDGE_PUBLISHED_UNDELETABLE` 409 · `NEGOTIATION_GLOSSARY_SLUG_TAKEN` 409 · `NEGOTIATION_QUESTION_NO_CONSENT` 422 (`ck_expert_questions_promotion`) · `NEGOTIATION_QUEUE_ITEM_CLOSED` 409 · `NEGOTIATION_SOURCE_TARGET_INVALID` 422 (`ck_knowledge_sources_owner`, `ck_knowledge_sources_target`) · `NEGOTIATION_PATHWAY_LINK_INVALID` 422 (`ck_pathway_steps_link`) · `NEGOTIATION_PATHWAY_GROUP_NOT_EMPTY` 409 · `NEGOTIATION_RELATED_SELF` 422 (`ck_faq_related_not_self` et son pendant du lexique). Avec les huit de [api-savoir.md](api-savoir.md) : **dix-sept codes**.
 
 ## Écrans
 
