@@ -18,9 +18,9 @@ const DELAI_MS = 5000
 // Les lectures en vol, par clé : une promesse ne va pas dans un `useState`.
 const enVol = new Map<string, Promise<void>>()
 
-function avecDelai<T>(promesse: Promise<T>): Promise<T> {
+function avecDelai<T>(promesse: Promise<T>, delai: number): Promise<T> {
   return new Promise((resolve, reject) => {
-    const minuterie = setTimeout(() => reject(new Error('délai dépassé')), DELAI_MS)
+    const minuterie = setTimeout(() => reject(new Error('délai dépassé')), delai)
     promesse.then(resolve, reject).finally(() => clearTimeout(minuterie))
   })
 }
@@ -39,6 +39,8 @@ export function useGnLecture<T>(
   options: {
     /** La clé de garde, quand elle dépend d'une autre lecture (`sessions:<édition>`) ; nulle, rien ne se garde. */
     cleDeGarde?: () => Promise<string | null>
+    /** Une réponse lourde — toute la COP, ~150 Ko sur un réseau de salle — a droit à plus de 5 s. */
+    delaiMs?: number
   } = {},
 ) {
   const etat = useState<EtatLecture<T>>(`gn-lecture-${cle}`, () => ({
@@ -77,7 +79,7 @@ export function useGnLecture<T>(
     }
 
     try {
-      const valeur = await avecDelai(lire(etat.value.valeur))
+      const valeur = await avecDelai(lire(etat.value.valeur), options.delaiMs ?? DELAI_MS)
       const luA = new Date().toISOString()
       etat.value = { valeur, luA, source: 'reseau', pret: true, enCours: false }
       connexion.noterReussite(luA)

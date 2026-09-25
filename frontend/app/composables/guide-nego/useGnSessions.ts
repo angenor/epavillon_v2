@@ -41,6 +41,7 @@ export function useGnSessions() {
       }
     },
     {
+      delaiMs: 15_000,
       cleDeGarde: async () => {
         const gardee = await edition.gardee()
         return gardee ? cleDesSessions(gardee.slug) : null

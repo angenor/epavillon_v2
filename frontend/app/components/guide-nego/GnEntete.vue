@@ -64,6 +64,8 @@ const { t } = useI18n()
       <h1 v-if="compact" class="gn-entete__titre-compact">{{ titre }}</h1>
       <!-- Emplacement de la ligne de connexion : « Synchronisé à » ou « Hors connexion ». -->
       <div v-else class="gn-entete__connexion"><slot name="connexion" /></div>
+      <!-- Un accès propre à l'écran, à côté de « Aa » : « Mon agenda » sur les sessions. -->
+      <slot name="action" />
       <NuxtLink
         to="/guide-nego/lexique"
         class="gn-entete__bouton gn-entete__aa"

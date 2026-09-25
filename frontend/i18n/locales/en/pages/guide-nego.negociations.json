@@ -1,7 +1,44 @@
 {
   "titre": "Negotiation sessions",
+  "sous-titre": "{edition} — {ville}",
+  "mon-agenda": "My agenda",
+  "chargement": "Reading the negotiation sessions",
+  "injoignable": "Online — official schedule unreachable",
+  "hors-connexion": "Changes made since then are not shown here.",
+  "filtre": {
+    "libelle": "Filter the sessions",
+    "miennes": "My thematic areas",
+    "toutes": "All"
+  },
+  "compteur": "{count} sessions | {count} session | {count} sessions",
+  "compteur-sur": "{n} of {total}",
+  "sans-thematique": "Choose your thematic areas: “My thematic areas” will then show only the sessions that concern you.",
+  "choisir-thematiques": "Choose my thematic areas",
+  "source": "Official source",
+  "source-lue": "Official source — read {moment}",
+  "jour": "{jour} — {zone}",
+  "lien-ccnucc": "Official UNFCCC schedule",
   "vide": {
-    "titre": "No session yet",
-    "texte": "The official schedule of negotiation sessions will appear here day by day. Once read, it can be read again without a connection."
+    "titre": "No session announced yet",
+    "texte": "The official UNFCCC schedule does not list any negotiation session for this COP yet. They will appear here day by day, and can be read again offline."
+  },
+  "vide-miennes": {
+    "titre-aujourdhui": "No session for your thematic areas today",
+    "titre-ce-jour": "No session for your thematic areas that day",
+    "prochain": "Next session in your thematic areas: {quand}, {heure}.",
+    "aucun-prochain": "No other session in your thematic areas is announced for this COP.",
+    "autres": "No other session that day. | One session takes place that day in other thematic areas. | {count} sessions take place that day in other thematic areas.",
+    "voir-toutes": "See all sessions",
+    "modifier": "Edit my thematic areas"
+  },
+  "sans-edition": {
+    "titre": "No upcoming climate COP",
+    "texte": "Negotiation sessions will appear here as soon as a climate COP is announced."
+  },
+  "erreur": {
+    "titre": "The sessions could not be read",
+    "texte": "The server did not respond. Nothing has been saved on this device yet.",
+    "texte-hors-connexion": "Offline, and the list has never been read on this device. It will be read as soon as the network is back.",
+    "reessayer": "Try again"
   }
 }

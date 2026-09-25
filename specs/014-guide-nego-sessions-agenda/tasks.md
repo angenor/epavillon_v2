@@ -114,14 +114,14 @@ Chemins relatifs au dossier ; `neg/` = `backend/crates/modules/negotiation/`, `f
 
 **But** : écran 07 et ses quatre variantes. **Test indépendant** : quickstart § 1, 2, 4, 5.
 
-- [ ] T046 [P] [US1] Créer `GnBandeJours` (défilement horizontal, jour choisi, jour courant, jours passés) dans `fe/app/components/guide-nego/GnBandeJours.vue`, textes `fe/i18n/locales/{fr,en}/components/gn-bande-jours.json`
-- [ ] T047 [P] [US1] Créer `GnEtatSession` (pictogramme + mot + couleur pour les cinq états, « Déplacée — était à … », « Annulée à … », et selon `cancelled.reason` « retirée du programme officiel » ou « reportée par la source ») dans `fe/app/components/guide-nego/GnEtatSession.vue`, textes `gn-etat-session.json`
-- [ ] T048 [US1] Créer `GnLigneSession` (heures en 20 px, type, titre fr, « EN » + titre anglais + « Traduction automatique », salle, accès, thématique ou « Thématique non précisée » ou « Mon groupe », état, chevron) dans `fe/app/components/guide-nego/GnLigneSession.vue`, textes `gn-ligne-session.json`
-- [ ] T049 [P] [US1] Créer `GnLectureImpossible` (« Lecture impossible », depuis quand, lien vers le programme officiel, « Réessayer ») dans `fe/app/components/guide-nego/GnLectureImpossible.vue`, textes `gn-lecture-impossible.json`
-- [ ] T050 [US1] Remplacer `fe/app/pages/guide-nego/negociations.vue` par `fe/app/pages/guide-nego/negociations/index.vue` : en-tête, bande, filtre « Mes thématiques / Toutes » et compteur, étiquette « Source officielle — lu à », liste, lien de pied, états chargement, vide (FR-011), coupé, hors connexion avec bandeau de première ouverture, accès « Mon agenda » ; textes dans `fe/i18n/locales/{fr,en}/pages/guide-nego.negociations.json`
-- [ ] T051 [US1] Ajouter le bloc « Mon groupe de négociation » à `fe/app/pages/guide-nego/thematiques.vue` (cases, vocabulaire `negotiation_group` lu comme les thématiques, file), textes dans `guide-nego.thematiques.json`
-- [ ] T052 [US1] Ajouter les quatre composants à la planche (`fe/app/components/guide-nego/planche/`), dans une section « Sessions »
-- [ ] T053 [US1] Vérifier au navigateur, version construite, 360 px, clair et sombre, l'écran contre `docs/AppNego/design/ecrans/07-sessions.html`, et quickstart § 1, 2, 4, 5
+- [x] T046 [P] [US1] Créer `GnBandeJours` (défilement horizontal, jour choisi, jour courant, jours passés) dans `fe/app/components/guide-nego/GnBandeJours.vue`, textes `fe/i18n/locales/{fr,en}/components/gn-bande-jours.json`
+- [x] T047 [P] [US1] Créer `GnEtatSession` (pictogramme + mot + couleur pour les cinq états, « Déplacée — était à … », « Annulée à … », et selon `cancelled.reason` « retirée du programme officiel » ou « reportée par la source ») dans `fe/app/components/guide-nego/GnEtatSession.vue`, textes `gn-etat-session.json`
+- [x] T048 [US1] Créer `GnLigneSession` (heures en 20 px, type, titre fr, « EN » + titre anglais + « Traduction automatique », salle, accès, thématique ou « Thématique non précisée » ou « Mon groupe », état, chevron) dans `fe/app/components/guide-nego/GnLigneSession.vue`, textes `gn-ligne-session.json`
+- [x] T049 [P] [US1] Créer `GnLectureImpossible` (« Lecture impossible », depuis quand, lien vers le programme officiel, « Réessayer ») dans `fe/app/components/guide-nego/GnLectureImpossible.vue`, textes `gn-lecture-impossible.json`
+- [x] T050 [US1] Remplacer `fe/app/pages/guide-nego/negociations.vue` par `fe/app/pages/guide-nego/negociations/index.vue` : en-tête, bande, filtre « Mes thématiques / Toutes » et compteur, étiquette « Source officielle — lu à », liste, lien de pied, états chargement, vide (FR-011), coupé, hors connexion avec bandeau de première ouverture, accès « Mon agenda » ; textes dans `fe/i18n/locales/{fr,en}/pages/guide-nego.negociations.json`
+- [x] T051 [US1] Ajouter le bloc « Mon groupe de négociation » à `fe/app/pages/guide-nego/thematiques.vue` (cases, vocabulaire `negotiation_group` lu comme les thématiques, file), textes dans `guide-nego.thematiques.json`
+- [x] T052 [US1] Ajouter les quatre composants à la planche (`fe/app/components/guide-nego/planche/`), dans une section « Sessions »
+- [x] T053 [US1] Vérifier au navigateur, version construite, 360 px, clair et sombre, l'écran contre `docs/AppNego/design/ecrans/07-sessions.html`, et quickstart § 1, 2, 4, 5
 
 **Commit** : « feat(guide-nego): étape 3a, phase 7 — la liste des sessions de négociation ».
 

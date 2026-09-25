@@ -69,6 +69,9 @@ watch(
           <GnLigneConnexion :en-ligne="etat.enLigne" :lu-a="etat.luA" />
         </slot>
       </template>
+      <template v-if="$slots.action" #action>
+        <slot name="action" />
+      </template>
     </GnEntete>
     <GnBandeauConnexion v-if="bandeau" :lu-a="etat.luA" :ce-qui-se-lit="ceQuiSeLit" />
     <main class="gn-ecran__contenu">

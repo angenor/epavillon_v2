@@ -1,7 +1,44 @@
 {
   "titre": "Sessions de négociation",
+  "sous-titre": "{edition} — {ville}",
+  "mon-agenda": "Mon agenda",
+  "chargement": "Lecture des sessions de négociation",
+  "injoignable": "En ligne — programme officiel injoignable",
+  "hors-connexion": "Les changements survenus depuis ne sont pas ici.",
+  "filtre": {
+    "libelle": "Filtrer les sessions",
+    "miennes": "Mes thématiques",
+    "toutes": "Toutes"
+  },
+  "compteur": "{count} session | {count} session | {count} sessions",
+  "compteur-sur": "{n} sur {total}",
+  "sans-thematique": "Choisissez vos thématiques : « Mes thématiques » ne montrera que les sessions qui vous concernent.",
+  "choisir-thematiques": "Choisir mes thématiques",
+  "source": "Source officielle",
+  "source-lue": "Source officielle — lu {moment}",
+  "jour": "{jour} — {zone}",
+  "lien-ccnucc": "Programme officiel de la CCNUCC",
   "vide": {
-    "titre": "Aucune session pour l'instant",
-    "texte": "Le calendrier officiel des sessions de négociation paraîtra ici jour par jour. Une fois lu, il se relit sans connexion."
+    "titre": "Aucune session annoncée pour l'instant",
+    "texte": "Le programme officiel de la CCNUCC n'annonce encore aucune session de négociation pour cette COP. Elles paraîtront ici jour par jour, et se reliront sans connexion."
+  },
+  "vide-miennes": {
+    "titre-aujourdhui": "Aucune session pour vos thématiques aujourd'hui",
+    "titre-ce-jour": "Aucune session pour vos thématiques ce jour-là",
+    "prochain": "Prochaine session de vos thématiques : {quand}, {heure}.",
+    "aucun-prochain": "Aucune autre session de vos thématiques n'est annoncée pour cette COP.",
+    "autres": "Aucune autre session ce jour. | Une session a lieu ce jour sur d'autres thématiques. | {count} sessions ont lieu ce jour sur d'autres thématiques.",
+    "voir-toutes": "Voir toutes les sessions",
+    "modifier": "Modifier mes thématiques"
+  },
+  "sans-edition": {
+    "titre": "Aucune COP climat à venir",
+    "texte": "Les sessions de négociation paraîtront ici dès qu'une COP climat sera annoncée."
+  },
+  "erreur": {
+    "titre": "Les sessions n'ont pas pu être lues",
+    "texte": "Le serveur n'a pas répondu. Rien n'a encore été gardé sur cet appareil.",
+    "texte-hors-connexion": "Hors connexion, et la liste n'a encore jamais été lue sur cet appareil. Elle se lira dès le retour du réseau.",
+    "reessayer": "Réessayer"
   }
 }

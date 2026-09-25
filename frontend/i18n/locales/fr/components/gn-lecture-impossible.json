@@ -1,0 +1,14 @@
+{
+  "titre": "Lecture impossible",
+  "titre-suspendu": "Affichage suspendu",
+  "sans-reponse-depuis": "Le programme officiel de la CCNUCC n'a pas répondu depuis {depuis}. Nous n'affichons pas les sessions plutôt que de vous montrer une liste qui a pu changer. Le programme officiel fait foi.",
+  "sans-reponse": "Le programme officiel de la CCNUCC ne répond pas. Nous n'affichons pas les sessions plutôt que de vous montrer une liste qui a pu changer. Le programme officiel fait foi.",
+  "suspendu": "Consultez le programme officiel de la CCNUCC : c'est lui qui fait foi. L'affichage des sessions de négociation est suspendu ici.",
+  "depuis": {
+    "aujourdhui": "{heure}",
+    "hier": "hier, {heure}",
+    "avant": "le {jour} à {heure}"
+  },
+  "lien-ccnucc": "Programme officiel de la CCNUCC",
+  "reessayer": "Réessayer"
+}

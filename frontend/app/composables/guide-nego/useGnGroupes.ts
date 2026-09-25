@@ -18,6 +18,8 @@ import {
 
 export const VOCABULAIRE_GROUPES = 'negotiation_group'
 const CLE = 'mes-groupes'
+/** La clé de file de l'écran des thématiques, qui lit ses avis. */
+export const CLE_FILE_GROUPES = CLE
 
 /** Le même état que les thématiques : des codes triés, et l'empreinte lue. */
 export type EtatDesGroupes = EtatDesThematiques

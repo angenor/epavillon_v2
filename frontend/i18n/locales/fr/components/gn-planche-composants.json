@@ -4,5 +4,5 @@
   "etats-communs": "États communs : repos · pressé (fond fond-2) · focus (anneau de 3 px à 2 px du bord) · désactivé (texte gris sur gris pâle, jamais de transparence) · chargement (arc qui tourne, ou squelette). Chaque composant est montré en clair ; le sombre applique les jetons de la table 1.",
   "interactif": "Le pressé et le focus ne se figent pas sur une planche : appuyez sur une commande pour voir l'un, parcourez la section à la tabulation pour voir l'autre.",
   "absents": "Ce qui n'est pas montré ici",
-  "absents-propos": "La maquette dessine aussi une ligne de session, une ligne d'activité, une bulle de message, une citation de source, une carte de notification et la marque de rôle posée sur l'avatar. Aucun n'est livré à ce jour : ils arrivent avec l'écran qui les emploie. Les dessiner à la main donnerait une planche qui ment, et une planche qui ment est pire que rien."
+  "absents-propos": "La maquette dessine aussi une ligne d'activité, une bulle de message, une citation de source, une carte de notification et la marque de rôle posée sur l'avatar. Aucun n'est livré à ce jour : ils arrivent avec l'écran qui les emploie. Les dessiner à la main donnerait une planche qui ment, et une planche qui ment est pire que rien."
 }

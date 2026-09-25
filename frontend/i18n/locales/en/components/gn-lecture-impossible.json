@@ -1,0 +1,14 @@
+{
+  "titre": "Unable to read",
+  "titre-suspendu": "Display suspended",
+  "sans-reponse-depuis": "The official UNFCCC schedule has not responded since {depuis}. We are not showing the sessions rather than show you a list that may have changed. The official schedule is authoritative.",
+  "sans-reponse": "The official UNFCCC schedule is not responding. We are not showing the sessions rather than show you a list that may have changed. The official schedule is authoritative.",
+  "suspendu": "Check the official UNFCCC schedule: it is authoritative. The display of negotiation sessions is suspended here.",
+  "depuis": {
+    "aujourdhui": "{heure}",
+    "hier": "yesterday, {heure}",
+    "avant": "{jour} at {heure}"
+  },
+  "lien-ccnucc": "Official UNFCCC schedule",
+  "reessayer": "Try again"
+}
