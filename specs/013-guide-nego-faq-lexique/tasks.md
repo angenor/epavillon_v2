@@ -62,13 +62,13 @@ description: "Tâches de l'étape 2 — FAQ, parcours « Ma première COP » et 
 **But** : le savoir gardé, fusionné, cherché et résolu, prouvé sans navigateur.
 
 - [x] T016 [P] Écrire `frontend/app/types/negotiation-savoir.ts` depuis [api-savoir.md](contracts/api-savoir.md)
-- [ ] T017 [P] Écrire `frontend/app/mocks/negotiation-savoir.ts` depuis les mêmes données d'essai que T007 (19 termes dont *contact group*, l'entrée de FAQ complète, le parcours)
-- [ ] T018 Écrire `frontend/app/composables/api/guide-nego-savoir.ts` (**le paquet seulement**, par `lireEtiquete` avec `since` ; chaque méthode d'écriture s'ajoute dans la tâche qui livre sa route, sinon `check-api-contract` la refuse) et la monter dans `frontend/app/composables/useApi.ts` (une ligne)
-- [ ] T019 [P] Écrire `frontend/app/utils/guide-nego/savoir.ts::fusionner(garde, difference)` (dont le filtrage de `related_ids` sur les entrées présentes) et son test `frontend/tests/guide-nego/savoir.test.ts`
-- [ ] T020 [P] Écrire `frontend/app/utils/guide-nego/recherche-floue.ts` (index préparé, quatre rangs, Damerau-Levenshtein bornée, « vous cherchiez peut-être », « aussi dans les traductions ») et `frontend/tests/guide-nego/recherche-floue.test.ts` (les 19 termes avec une faute ou en français : dans les trois premiers — SC-003 ; 500 entrées sous 16 ms par requête)
-- [ ] T021 [P] Écrire `frontend/app/utils/guide-nego/lexique.ts` (`normaliserTerme`, `resoudreLeTerme`, regroupement par lettre) et `frontend/tests/guide-nego/lexique.test.ts`, dont vingt chaînes communes avec un test Rust qui les passe à `platform.normalize_label` (`backend/crates/modules/negotiation/tests/savoir_normalisation.rs`)
-- [ ] T022 Écrire `frontend/app/composables/guide-nego/useGnSavoir.ts` sur `useGnLecture('savoir', …)` : garde, relecture à l'ouverture avec réseau, `since`, fusion, index de recherche préparé une fois
-- [ ] T023 `npm run typecheck`, `npm run test:guide-nego`, `make check-api-contract`
+- [x] T017 [P] Écrire `frontend/app/mocks/negotiation-savoir.ts` depuis les mêmes données d'essai que T007 (19 termes dont *contact group*, l'entrée de FAQ complète, le parcours)
+- [x] T018 Écrire `frontend/app/composables/api/guide-nego-savoir.ts` (**le paquet seulement**, par `lireEtiquete` avec `since` ; chaque méthode d'écriture s'ajoute dans la tâche qui livre sa route, sinon `check-api-contract` la refuse) et la monter dans `frontend/app/composables/useApi.ts` (une ligne)
+- [x] T019 [P] Écrire `frontend/app/utils/guide-nego/savoir.ts::fusionner(garde, difference)` (dont le filtrage de `related_ids` sur les entrées présentes) et son test `frontend/tests/guide-nego/savoir.test.ts`
+- [x] T020 [P] Écrire `frontend/app/utils/guide-nego/recherche-floue.ts` (index préparé, quatre rangs, Damerau-Levenshtein bornée, « vous cherchiez peut-être », « aussi dans les traductions ») et `frontend/tests/guide-nego/recherche-floue.test.ts` (les 19 termes avec une faute ou en français : dans les trois premiers — SC-003 ; 500 entrées sous 16 ms par requête)
+- [x] T021 [P] Écrire `frontend/app/utils/guide-nego/lexique.ts` (`normaliserTerme`, `resoudreLeTerme`, regroupement par lettre) et `frontend/tests/guide-nego/lexique.test.ts`, dont vingt chaînes communes avec un test Rust qui les passe à `platform.normalize_label` (`backend/crates/modules/negotiation/tests/savoir_normalisation.rs`)
+- [x] T022 Écrire `frontend/app/composables/guide-nego/useGnSavoir.ts` sur `useGnLecture('savoir', …)` : garde, relecture à l'ouverture avec réseau, `since`, fusion, index de recherche préparé une fois
+- [x] T023 `npm run typecheck`, `npm run test:guide-nego`, `make check-api-contract`
 
 ---
 

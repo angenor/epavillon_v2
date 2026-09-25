@@ -76,6 +76,7 @@ import { createAdminShowcaseApi } from './api/admin-showcase'
 import { createMediaApi } from './api/media'
 import { createGuideNegoApi } from './api/guide-nego'
 import { createGuideNegoDocumentsApi } from './api/guide-nego-documents'
+import { createGuideNegoSavoirApi } from './api/guide-nego-savoir'
 import { createAdminNegotiationDocumentsApi } from './api/admin-negotiation-documents'
 import { createAuthApi } from './api/auth'
 
@@ -299,6 +300,7 @@ export function useApi() {
       ressource: (chemin, signal) => (http.isConfigured.value ? http.flux(chemin, signal) : Promise.resolve(null)),
     }),
 
+    guideNegoSavoir: createGuideNegoSavoirApi(creerAppelsEtiquetes(http, MOCK_LATENCY_MS)),
     home: createHomeApi(deps),
     adminShowcase: createAdminShowcaseApi(deps),
 

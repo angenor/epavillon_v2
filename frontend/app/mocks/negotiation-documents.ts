@@ -120,7 +120,7 @@ const lesDeux = () =>
   refus('NEGOTIATION_DOCUMENT_SOURCE_BOTH', 422, 'Un document est un fichier ou un lien, jamais les deux.', 'external_url')
 
 /** Une empreinte stable : le même état donne la même chaîne. */
-function empreinte(valeur: unknown): string {
+export function empreinte(valeur: unknown): string {
   let h = 5381
   for (const c of JSON.stringify(valeur)) h = ((h << 5) + h + c.charCodeAt(0)) | 0
   return `"${(h >>> 0).toString(16)}"`

@@ -1,0 +1,22 @@
+[
+  { "texte": "Contact Group", "attendu": "contact group" },
+  { "texte": "  contact   group  ", "attendu": "contact group" },
+  { "texte": "Contact-Group", "attendu": "contact group" },
+  { "texte": "GGA", "attendu": "gga" },
+  { "texte": "L&D", "attendu": "l d" },
+  { "texte": "ad ref.", "attendu": "ad ref" },
+  { "texte": "PP / OP", "attendu": "pp op" },
+  { "texte": "co-facilitators", "attendu": "co facilitators" },
+  { "texte": "Négociations", "attendu": "negociations" },
+  { "texte": "cœur du texte", "attendu": "coeur du texte" },
+  { "texte": "ŒUVRE", "attendu": "oeuvre" },
+  { "texte": "Ægir", "attendu": "aegir" },
+  { "texte": "l’Accord de Paris", "attendu": "l accord de paris" },
+  { "texte": "décision 1/CP.21", "attendu": "decision 1 cp 21" },
+  { "texte": "« informal informals »", "attendu": "informal informals" },
+  { "texte": "", "attendu": "" },
+  { "texte": "Straße", "attendu": "strasse" },
+  { "texte": "CO₂", "attendu": "co" },
+  { "texte": "Łódź", "attendu": "lodz" },
+  { "texte": "São Tomé-et-Príncipe", "attendu": "sao tome et principe" }
+]
