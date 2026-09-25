@@ -66,6 +66,21 @@ async fn lecture_2_porte_quatre_ecarts_et_garde_les_valeurs_precedentes() {
 }
 
 #[tokio::test]
+async fn a_sa_premiere_absence_la_disparue_garde_la_derniere_lecture_ou_elle_figurait() {
+    let bac = Bac::monter().await;
+    bac.lire().await;
+    bac.lire().await;
+    let derniere = bac.etat().await.last_success_at.expect("réussie");
+    bac.jeu("cop30/lecture-2").await;
+    bac.lire().await;
+    bac.lire().await;
+
+    let disparue = bac.session("654364").await.expect("jamais effacée");
+    assert!(disparue.first_read_at < derniere);
+    assert_eq!(disparue.last_read_at, derniere);
+}
+
+#[tokio::test]
 async fn la_disparue_est_annulee_a_la_seconde_absence_puis_revient_si_elle_reparait() {
     let bac = Bac::monter().await;
     bac.lire().await;

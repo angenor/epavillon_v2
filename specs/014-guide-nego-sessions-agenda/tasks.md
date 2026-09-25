@@ -55,10 +55,10 @@ Chemins relatifs au dossier ; `neg/` = `backend/crates/modules/negotiation/`, `f
 
 **But** : une traduction par titre, avec modèle et date ; sans clé, l'anglais seul. Aucun test n'appelle OpenRouter.
 
-- [ ] T021 [US2] Définir le trait `Traducteur` et le client OpenRouter (modèle lu dans `ai.drafting_model`, lots de 40, réponse JSON alignée, clé jamais journalisée ni renvoyée dans une erreur) dans `neg/src/import/traduction.rs` — research R11
-- [ ] T022 [US2] Lire `OPENROUTER_API_KEY` depuis l'environnement dans `NegotiationConfig` (`backend/crates/kernel/src/config.rs`), transmise à `job_handlers(db, &config, …)` ; absente → aucun travail de traduction posé ; `.env.example` porte déjà le nom
-- [ ] T023 [US2] Écrire le travail `negotiation.translate_session_titles` (titres sans traduction, un appel par lot, écrit `title_translations`, échec → fin sans écrire) dans `neg/src/jobs/traduction.rs` ; l'import le pose quand des titres manquent (`neg/src/jobs/import.rs`) ; l'inscrire dans `job_handlers()`
-- [ ] T024 [P] [US2] Test avec un traducteur fixe : un titre partagé par deux sessions → une traduction ; titre anglais changé → nouvelle traduction ; échec → rien d'écrit ; sans clé → rien de posé (SC-010), dans `neg/tests/traduction_titres.rs`
+- [x] T021 [US2] Définir le trait `Traducteur` et le client OpenRouter (modèle lu dans `ai.drafting_model`, lots de 40, réponse JSON alignée, clé jamais journalisée ni renvoyée dans une erreur) dans `neg/src/import/traduction.rs` — research R11
+- [x] T022 [US2] Lire `OPENROUTER_API_KEY` depuis l'environnement dans `NegotiationConfig` (`backend/crates/kernel/src/config.rs`), transmise à `job_handlers(db, &config, …)` ; absente → aucun travail de traduction posé ; `.env.example` porte déjà le nom
+- [x] T023 [US2] Écrire le travail `negotiation.translate_session_titles` (titres sans traduction, un appel par lot, écrit `title_translations`, échec → fin sans écrire) dans `neg/src/jobs/traduction.rs` ; l'import le pose quand des titres manquent (`neg/src/jobs/import.rs`) ; l'inscrire dans `job_handlers()`
+- [x] T024 [P] [US2] Test avec un traducteur fixe : un titre partagé par deux sessions → une traduction ; titre anglais changé → nouvelle traduction ; échec → rien d'écrit ; sans clé → rien de posé (SC-010), dans `neg/tests/traduction_titres.rs`
 
 **Commit** : « feat(guide-nego): étape 3a, phase 3 — la traduction automatique des titres ».
 

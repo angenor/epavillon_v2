@@ -1,6 +1,6 @@
 //! **SC-001** — la première lecture écrit toutes les sessions retenues du jeu
-//! archivé, avec leur origine ; une seconde lecture identique n'écrit que leur
-//! dernière lecture, sans aucun écart.
+//! archivé, avec leur origine ; une seconde lecture identique n'écrit aucune
+//! session, et ne laisse donc aucune ligne d'audit.
 
 mod importation;
 
@@ -10,7 +10,7 @@ use time::macros::datetime;
 
 async fn instantane(bac: &Bac) -> Value {
     sqlx::query_scalar::<_, Value>(
-        "SELECT jsonb_agg(to_jsonb(m) - 'last_read_at' - 'updated_at' ORDER BY m.source_key)
+        "SELECT jsonb_agg(to_jsonb(m) ORDER BY m.source_key)
            FROM negotiation.meetings m WHERE m.event_id = $1",
     )
     .bind(bac.edition)
@@ -114,11 +114,12 @@ async fn la_premiere_lecture_ecrit_les_sessions_retenues_avec_leur_origine() {
 }
 
 #[tokio::test]
-async fn une_seconde_lecture_identique_n_ecrit_que_la_derniere_lecture() {
+async fn une_seconde_lecture_identique_n_ecrit_aucune_session() {
     let bac = Bac::monter().await;
     bac.lire().await;
     let avant = instantane(&bac).await;
-    let premiere = bac.session("654006").await.expect("session");
+    let audit_avant = audit_des_sessions(&bac).await;
+    let premiere = bac.etat().await.last_success_at;
 
     bac.lire().await;
 
@@ -134,24 +135,25 @@ async fn une_seconde_lecture_identique_n_ecrit_que_la_derniere_lecture() {
         .await,
         0
     );
+    assert_eq!(instantane(&bac).await, avant, "aucune colonne ne bouge");
     assert_eq!(
-        instantane(&bac).await,
-        avant,
-        "aucune autre colonne ne bouge"
+        audit_des_sessions(&bac).await,
+        audit_avant,
+        "aucune ligne d'audit de meetings"
     );
-    let champs: Vec<String> = sqlx::query_scalar(
-        "SELECT DISTINCT unnest(changed_fields) FROM platform.audit_log
-          WHERE entity_schema = 'negotiation' AND entity_table = 'meetings' AND action = 'update'
-          ORDER BY 1",
+    let etat = bac.etat().await;
+    assert!(etat.last_success_at > premiere, "l'heure servie avance ici");
+    assert_eq!(etat.last_change_count, Some(0));
+}
+
+async fn audit_des_sessions(bac: &Bac) -> i64 {
+    sqlx::query_scalar::<_, i64>(
+        "SELECT count(*) FROM platform.audit_log
+          WHERE entity_schema = 'negotiation' AND entity_table = 'meetings'",
     )
-    .fetch_all(bac.pool())
+    .fetch_one(bac.pool())
     .await
-    .expect("audit");
-    assert_eq!(champs, ["last_read_at", "updated_at"]);
-    let seconde = bac.session("654006").await.expect("session");
-    assert!(seconde.last_read_at > premiere.last_read_at);
-    assert_eq!(seconde.first_read_at, premiere.first_read_at);
-    assert_eq!(bac.etat().await.last_change_count, Some(0));
+    .expect("audit")
 }
 
 #[tokio::test]

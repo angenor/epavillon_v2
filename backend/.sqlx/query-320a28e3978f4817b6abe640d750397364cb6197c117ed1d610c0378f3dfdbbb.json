@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM platform.jobs\n                           WHERE task = $1 AND status IN ('queued', 'running')\n                             AND starts_with(idempotency_key, $2)) AS \"existe!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "existe!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "320a28e3978f4817b6abe640d750397364cb6197c117ed1d610c0378f3dfdbbb"
+}

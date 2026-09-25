@@ -12,4 +12,5 @@ pub mod renditions;
 pub mod requests;
 pub mod settings;
 pub mod themes;
+pub mod traductions;
 pub mod uses;

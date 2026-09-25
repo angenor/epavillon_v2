@@ -81,16 +81,22 @@ impl Bac {
             .expect("écriture du test");
     }
 
-    /// Un passage du travail, comme le worker le ferait.
+    /// Un passage du travail, comme le worker le ferait — sans clé de
+    /// traduction.
     pub async fn lire(&self) -> ClaimedJob {
-        self.passer(false).await
+        self.passer(false, false).await
     }
 
     pub async fn lire_a_la_main(&self) -> ClaimedJob {
-        self.passer(true).await
+        self.passer(true, false).await
     }
 
-    async fn passer(&self, manuel: bool) -> ClaimedJob {
+    /// Un passage avec une clé de traduction : l'import pose la traduction.
+    pub async fn lire_en_traduisant(&self) -> ClaimedJob {
+        self.passer(false, true).await
+    }
+
+    async fn passer(&self, manuel: bool, traduire: bool) -> ClaimedJob {
         let travail = ClaimedJob {
             id: Uuid::now_v7(),
             queue: "default".into(),
@@ -99,7 +105,7 @@ impl Bac {
             attempts: 1,
             max_attempts: 5,
         };
-        ImportOfficialSessions::new(self.base.db())
+        ImportOfficialSessions::new(self.base.db(), traduire)
             .run(&travail)
             .await
             .expect("le travail d'import réussit toujours côté file");

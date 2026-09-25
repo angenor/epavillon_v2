@@ -201,6 +201,11 @@ struct Raw {
     #[serde(default)]
     pdfium_lib_path: String,
 
+    /// Clé d'OpenRouter (ADR-005). Vide : les titres des sessions officielles
+    /// restent en anglais seul.
+    #[serde(default)]
+    openrouter_api_key: Option<Secret>,
+
     #[serde(default = "default_duplicate_score_threshold")]
     org_duplicate_score_threshold: u16,
     #[serde(default = "default_duplicate_scan_batch")]
@@ -481,6 +486,8 @@ pub struct EngagementConfig {
 pub struct NegotiationConfig {
     /// Le dossier de PDFium, qui extrait les documents de Guide Négo.
     pub pdfium_lib_path: Option<String>,
+    /// Absente : aucune traduction de titre n'est demandée (FR-024).
+    pub openrouter_api_key: Option<Secret>,
 }
 
 /// Une durée par valeur de `identity.token_purpose`. Aucun appelant ne pose
@@ -513,7 +520,8 @@ impl TokenTtls {
 /// Enveloppe un secret pour qu'il ne parte pas dans une trace : `Debug` ne rend
 /// que sa longueur. Les TROIS secrets de la configuration passent par là —
 /// l'URL de base porte un mot de passe au même titre que les deux autres.
-#[derive(Clone)]
+#[derive(Clone, Deserialize)]
+#[serde(transparent)]
 pub struct Secret(String);
 
 impl Secret {
@@ -926,6 +934,10 @@ impl Config {
             },
             negotiation: NegotiationConfig {
                 pdfium_lib_path: Some(raw.pdfium_lib_path).filter(|c| !c.trim().is_empty()),
+                openrouter_api_key: raw
+                    .openrouter_api_key
+                    .map(|c| Secret(c.0.trim().to_owned()))
+                    .filter(|c| !c.0.is_empty()),
             },
             mail: MailConfig {
                 transport,

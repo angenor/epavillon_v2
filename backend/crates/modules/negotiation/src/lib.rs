@@ -65,8 +65,8 @@ pub fn admin_routes(cfg: &mut ServiceConfig) {
 }
 
 /// Les travaux différés du module : les deux courriels de décision, la purge
-/// des essais de code, l'extraction des documents, et l'import des sessions
-/// officielles.
+/// des essais de code, l'extraction des documents, l'import des sessions
+/// officielles et la traduction de leurs titres.
 ///
 /// **C'est ce seul geste qui fait écouter la file « negotiation ».**
 /// `JobRegistry::queues()` est construite à partir des files que les
@@ -74,10 +74,11 @@ pub fn admin_routes(cfg: &mut ServiceConfig) {
 /// travail déposé dans une file inécoutée s'empile sans erreur, sans trace, et
 /// sans que rien ne l'exécute jamais.
 ///
-/// Les cinq déclarent la file par défaut : aucun déclencheur du modèle ne les
+/// Les six déclarent la file par défaut : aucun déclencheur du modèle ne les
 /// dépose ailleurs.
 pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc<dyn JobHandler>> {
     let url = config.app_public_url.clone();
+    let traducteur = traducteur(config);
     vec![
         Arc::new(jobs::emails::SendApprovedEmail::new(
             mailer.clone(),
@@ -90,6 +91,24 @@ pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc
             kernel::storage::Entrepots::new(&config.media),
             config.negotiation.pdfium_lib_path.clone(),
         )),
-        Arc::new(jobs::import::ImportOfficialSessions::new(db)),
+        Arc::new(jobs::import::ImportOfficialSessions::new(
+            db.clone(),
+            traducteur.is_some(),
+        )),
+        Arc::new(jobs::traduction::TranslateSessionTitles::new(
+            db, traducteur,
+        )),
     ]
+}
+
+/// Sans clé, ou client impossible à construire : aucune traduction.
+fn traducteur(config: &Config) -> Option<Arc<dyn import::traduction::Traducteur>> {
+    let cle = config.negotiation.openrouter_api_key.clone()?;
+    match import::traduction::OpenRouter::new(cle) {
+        Ok(client) => Some(Arc::new(client)),
+        Err(e) => {
+            tracing::error!(erreur = %e, "client de traduction indisponible");
+            None
+        }
+    }
 }

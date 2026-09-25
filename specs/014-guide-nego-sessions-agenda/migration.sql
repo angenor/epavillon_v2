@@ -225,7 +225,7 @@ COMMENT ON COLUMN negotiation.meetings.source_url IS
 COMMENT ON COLUMN negotiation.meetings.title_original IS
     'Titre anglais tel que lu, préfixe « CANCELLED » ou « POSTPONED » retiré : il FAIT FOI. `title` en reçoit la copie sous "fr" et "en" — le domaine i18n_text exige "fr", et aucun texte humain ne le traduit ; la traduction automatique vit dans title_translations.';
 COMMENT ON COLUMN negotiation.meetings.last_read_at IS
-    'Dernière lecture réussie où la session figurait à la source.';
+    'Dernière lecture réussie où la session figurait à la source — exacte seulement quand la ligne est écrite pour une autre raison (apparition, écart, reparution, première absence, groupe re-résolu) : une session lue sans écart n''est pas réécrite, sinon l''audit de meetings gagnerait une ligne par session et par lecture. Tant que absent_reads = 0, l''heure de lecture servie est official_imports.last_success_at ; au-delà, c''est cette colonne.';
 COMMENT ON COLUMN negotiation.meetings.meeting_type_term_id IS
     'Type de réunion (negotiation_meeting_type), résolu à l''import par les metadata du vocabulaire.';
 COMMENT ON COLUMN negotiation.meetings.group_term_id IS

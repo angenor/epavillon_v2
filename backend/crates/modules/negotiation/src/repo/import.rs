@@ -327,7 +327,9 @@ pub async fn modifier(
     Ok(())
 }
 
-/// Absente d'une lecture réussie ; `annuler` à la deuxième de suite.
+/// Absente d'une lecture réussie ; `annuler` à la deuxième de suite. À la
+/// première, la dernière lecture où elle figurait est la réussite précédente,
+/// que `noter_reussite` n'a pas encore remplacée.
 pub async fn noter_absence(
     conn: &mut PgConnection,
     id: Uuid,
@@ -337,7 +339,13 @@ pub async fn noter_absence(
 ) -> Result<()> {
     sqlx::query!(
         r#"UPDATE negotiation.meetings
-              SET absent_reads = $2,
+              SET absent_reads = $2::smallint,
+                  last_read_at = CASE WHEN $2::smallint = 1
+                                      THEN COALESCE((SELECT i.last_success_at
+                                                       FROM negotiation.official_imports i
+                                                      WHERE i.event_id = meetings.event_id),
+                                                    last_read_at)
+                                      ELSE last_read_at END,
                   status = CASE WHEN $3 THEN 'cancelled'::negotiation.meeting_status ELSE status END,
                   cancellation_reason = CASE WHEN $3 THEN 'removed' ELSE cancellation_reason END,
                   cancelled_at = CASE WHEN $3 THEN $4 ELSE cancelled_at END
@@ -377,41 +385,24 @@ pub async fn noter_changements(
     Ok(())
 }
 
-/// Les sessions lues sans écart : leur dernière lecture, en une requête.
-pub async fn marquer_lues(
-    conn: &mut PgConnection,
-    ids: &[Uuid],
-    lu_a: OffsetDateTime,
-) -> Result<()> {
-    if ids.is_empty() {
-        return Ok(());
-    }
-    sqlx::query!(
-        "UPDATE negotiation.meetings SET last_read_at = $2 WHERE id = ANY($1)",
-        ids,
-        lu_a
-    )
-    .execute(conn)
-    .await?;
-    Ok(())
-}
-
 /// Le groupe re-résolu, sans écart ni changement : une dénomination ajoutée
 /// au vocabulaire rattache les coordinations déjà importées.
 pub async fn rattacher_groupes(
     conn: &mut PgConnection,
     rattachements: &[(Uuid, Option<Uuid>)],
+    lu_a: OffsetDateTime,
 ) -> Result<()> {
     if rattachements.is_empty() {
         return Ok(());
     }
     let (ids, groupes): (Vec<Uuid>, Vec<Option<Uuid>>) = rattachements.iter().copied().unzip();
     sqlx::query!(
-        "UPDATE negotiation.meetings m SET group_term_id = u.groupe
+        "UPDATE negotiation.meetings m SET group_term_id = u.groupe, last_read_at = $3
            FROM unnest($1::uuid[], $2::uuid[]) AS u(id, groupe)
           WHERE m.id = u.id",
         &ids,
-        &groupes as &[Option<Uuid>]
+        &groupes as &[Option<Uuid>],
+        lu_a
     )
     .execute(conn)
     .await?;
@@ -503,8 +494,8 @@ pub async fn purger_journal(conn: &mut PgConnection, import_id: Uuid) -> Result<
     Ok(supprimes)
 }
 
-/// Les titres de l'édition qu'aucune traduction ne couvre encore — ce que le
-/// travail de traduction (phase 3, T023) prendra.
+/// Les titres de l'édition qu'aucune traduction ne couvre encore : ce que le
+/// travail de traduction prend.
 pub async fn titres_sans_traduction(
     conn: &mut PgConnection,
     event_id: Uuid,

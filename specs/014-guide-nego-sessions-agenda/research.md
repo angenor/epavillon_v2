@@ -134,7 +134,7 @@ du worker réarme la chaîne au démarrage pour chaque import allumé.
 
 **Écriture** : une transaction par lecture — sessions, points d'ordre du jour,
 changements, compteurs, journal. Comparaison champ par champ sur la forme pivot ; une ligne sans
-écart n'est pas touchée, seul `last_read_at` avance (en une requête pour toutes).
+écart n'est pas touchée, pas même `last_read_at` (corrigé en phase 3 : l'audit en aurait fait une ligne par session et par lecture).
 
 **Disparition** : `absent_reads + 1` à chaque lecture réussie où la session manque ; à 2, `cancelled`
 avec `cancellation_reason = 'removed'` (tranché le 25/09). Reparue, le compteur retombe à 0 ;

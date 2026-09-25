@@ -22,6 +22,7 @@ use crate::import::comparaison::{comparer, Ecart, Etat, Fiche, Motif};
 use crate::import::denominations::{Vocabulaires, COORDINATION};
 use crate::import::reel::LecteurReel;
 use crate::import::source::{AnnulationSource, EchecLecture, SessionLue, SourceOfficielle};
+use crate::jobs::traduction;
 use crate::repo::import::{self as depot, Ecriture, Lecture, Origine, Reglage};
 
 pub const IMPORT_OFFICIAL_SESSIONS: &str = "negotiation.import_official_sessions";
@@ -35,11 +36,13 @@ struct Charge {
 
 pub struct ImportOfficialSessions {
     db: Db,
+    /// Faux sans clé d'OpenRouter : aucun travail de traduction n'est posé.
+    traduire: bool,
 }
 
 impl ImportOfficialSessions {
-    pub fn new(db: Db) -> Self {
-        Self { db }
+    pub fn new(db: Db, traduire: bool) -> Self {
+        Self { db, traduire }
     }
 }
 
@@ -77,7 +80,7 @@ impl JobHandler for ImportOfficialSessions {
 
         let mut tx = self.db.write(&job.context()).await?;
         let issue = match lues {
-            Ok(lues) => ecrire(&mut tx, &reglage, &lecture, lues).await?,
+            Ok(lues) => ecrire(&mut tx, &reglage, &lecture, lues, self.traduire).await?,
             Err(e) => Err(e),
         };
         match &issue {
@@ -146,6 +149,7 @@ async fn ecrire(
     r: &Reglage,
     lecture: &Lecture,
     lues: Vec<SessionLue>,
+    traduire: bool,
 ) -> Result<std::result::Result<i32, EchecLecture>> {
     let vocabulaires = depot::vocabulaires(tx).await?;
     let retenues = retenir(&vocabulaires, lues);
@@ -235,27 +239,27 @@ async fn ecrire(
         .iter()
         .map(|&i| (retenues[i].lue.cle.as_str(), retenues[i].groupe))
         .collect();
+    // Une session sans écart n'est pas réécrite, pas même sa dernière lecture :
+    // l'audit de `meetings` en ferait une ligne par session et par lecture.
     let presentes: HashSet<Uuid> = comparaison.presentes.iter().copied().collect();
-    let mut sans_ecart = Vec::new();
-    let mut rattachements = Vec::new();
-    for b in base
+    let rattachements: Vec<(Uuid, Option<Uuid>)> = base
         .iter()
         .filter(|b| presentes.contains(&b.id) && !ecrites.contains(&b.id))
-    {
-        sans_ecart.push(b.id);
-        let groupe = groupes.get(b.cle.as_str()).copied().flatten();
-        if groupes_en_base.get(&b.id).copied().flatten() != groupe {
-            rattachements.push((b.id, groupe));
-        }
-    }
-    depot::marquer_lues(tx, &sans_ecart, lu_a).await?;
-    depot::rattacher_groupes(tx, &rattachements).await?;
+        .filter_map(|b| {
+            let groupe = groupes.get(b.cle.as_str()).copied().flatten();
+            (groupes_en_base.get(&b.id).copied().flatten() != groupe).then_some((b.id, groupe))
+        })
+        .collect();
+    depot::rattacher_groupes(tx, &rattachements, lu_a).await?;
     depot::noter_reussite(tx, r.id, touchees, lu_a).await?;
 
-    // T023 (phase 3) : poser ici le travail de traduction quand cette liste
-    // n'est pas vide.
-    let a_traduire = depot::titres_sans_traduction(tx, r.event_id).await?;
-    tracing::debug!(titres = a_traduire.len(), "titres sans traduction");
+    if traduire
+        && !depot::titres_sans_traduction(tx, r.event_id)
+            .await?
+            .is_empty()
+    {
+        traduction::poser(tx, r.event_id, creneau(lu_a, r.interval_seconds)).await?;
+    }
 
     Ok(Ok(touchees))
 }

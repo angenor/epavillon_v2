@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.meetings\n              SET absent_reads = $2::smallint,\n                  last_read_at = CASE WHEN $2::smallint = 1\n                                      THEN COALESCE((SELECT i.last_success_at\n                                                       FROM negotiation.official_imports i\n                                                      WHERE i.event_id = meetings.event_id),\n                                                    last_read_at)\n                                      ELSE last_read_at END,\n                  status = CASE WHEN $3 THEN 'cancelled'::negotiation.meeting_status ELSE status END,\n                  cancellation_reason = CASE WHEN $3 THEN 'removed' ELSE cancellation_reason END,\n                  cancelled_at = CASE WHEN $3 THEN $4 ELSE cancelled_at END\n            WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2",
+        "Bool",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "064c982b0510476003c903c32070a26c3ca4b50153cbed5991e3122c5a1a38e8"
+}

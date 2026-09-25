@@ -43,7 +43,7 @@ cinq premières dès que `source_key` est posé.
 | `source_url` | `platform.url` | « Voir l'original » |
 | `title_original` | `text` | Titre anglais tel que lu — **fait foi** (FR-022). `title` en reçoit la copie sous `fr` et `en` |
 | `first_read_at` | `timestamptz` | Première lecture |
-| `last_read_at` | `timestamptz` | Dernière lecture **où elle figurait** |
+| `last_read_at` | `timestamptz` | Dernière lecture **où elle figurait** — écrite seulement avec un écart, une reparution, la première absence ou un groupe re-résolu (sinon une ligne d'audit par session et par lecture) ; servie : `official_imports.last_success_at` tant que `absent_reads = 0` |
 | `meeting_type_term_id` | `uuid` → `taxonomy_terms` | Gardé `negotiation_meeting_type` |
 | `group_term_id` | `uuid` → `taxonomy_terms` | Gardé `negotiation_group` ; seulement pour une coordination |
 | `agenda_item_id` | `uuid` → `negotiation.agenda_items` | Point de l'ordre du jour ; nul = « Hors ordre du jour officiel » |
