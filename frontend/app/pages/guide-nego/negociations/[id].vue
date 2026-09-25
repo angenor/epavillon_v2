@@ -468,9 +468,10 @@ useHead({ title: titre })
   overflow-wrap: anywhere;
 }
 
-/* Le terme anglais ouvre le lexique : la ligne reste basse, la cible déborde en hauteur. */
+/* Le terme anglais ouvre le lexique : la ligne reste basse, la cible déborde en hauteur
+   jusqu'à 48 px (ligne de 22 px + 2 × 13). */
 [data-app="guide-nego"] .gn-session__terme {
-  padding-block: 12px;
+  padding-block: 13px;
   color: inherit;
   font-style: italic;
   text-decoration: underline;

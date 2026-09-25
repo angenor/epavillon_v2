@@ -150,11 +150,11 @@ Chemins relatifs au dossier ; `neg/` = `backend/crates/modules/negotiation/`, `f
 
 ## Phase 10 — Recette et finitions
 
-- [ ] T061 Dérouler `quickstart.md` en entier sur la version construite, à 360 px, clair et sombre, chronométrer SC-005 (salle et heure de la prochaine session en moins de dix secondes), et corriger ce qui est trouvé
-- [ ] T062 [P] Inscrire l'écart 45 (titres traduits sans relecture, décision du 25/09) et la ligne sous l'interrupteur du rappel dans `docs/AppNego/05-design.md`
-- [ ] T063 [P] Ajouter au § 15 de `docs/DEPLOIEMENT.md` les essais sur appareil réel : liste en mode avion (Android, iPhone), bandeau du rappel application ouverte, `migration.sql` de 3a dans l'ordre des migrations
-- [ ] T064 Relire les traductions `en` des fichiers i18n nouveaux, clé pour clé avec `fr`
-- [ ] T065 Ajouter une ligne de trois phrases au plus par phase dans `docs/AppNego/progress.md` et mettre à jour la ligne d'état « 3a »
+- [x] T061 Dérouler `quickstart.md` en entier sur la version construite, à 360 px, clair et sombre, chronométrer SC-005 (salle et heure de la prochaine session en moins de dix secondes), et corriger ce qui est trouvé
+- [x] T062 [P] Inscrire l'écart 45 (titres traduits sans relecture, décision du 25/09) et la ligne sous l'interrupteur du rappel dans `docs/AppNego/05-design.md`
+- [x] T063 [P] Ajouter au § 15 de `docs/DEPLOIEMENT.md` les essais sur appareil réel : liste en mode avion (Android, iPhone), bandeau du rappel application ouverte, `migration.sql` de 3a dans l'ordre des migrations
+- [x] T064 Relire les traductions `en` des fichiers i18n nouveaux, clé pour clé avec `fr`
+- [x] T065 Ajouter une ligne de trois phrases au plus par phase dans `docs/AppNego/progress.md` et mettre à jour la ligne d'état « 3a »
 
 **Commit** : « feat(guide-nego): étape 3a, phase 10 — recette et finitions ».
 

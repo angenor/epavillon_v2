@@ -8,7 +8,7 @@
   "blocs": {
     "prochaine-session": {
       "titre": "Your next negotiation session",
-      "vide": "Nothing yet. It will appear here as soon as the official session calendar is in the app.",
+      "vide": "Nothing yet. Add a session to your agenda, or choose your themes.",
       "quand": "{jour} — {zone}",
       "mon-agenda": "My agenda"
     },
