@@ -109,9 +109,10 @@ export function appliquerIntention(
   maintenant: Date,
 ): MyAgenda {
   const autres = agenda.entries.filter((e) => e.session_id !== sessionId)
-  if (!intention.garder) return { entries: autres }
+  if (!intention.garder) return { ...agenda, entries: autres }
   const existante = agenda.entries.find((e) => e.session_id === sessionId)
   return {
+    ...agenda,
     entries: [
       ...autres,
       { session_id: sessionId, remind: intention.remind, added_at: existante?.added_at ?? maintenant.toISOString() },

@@ -38,6 +38,7 @@ function specimen(id: string, champs: Partial<OfficialSession>): OfficialSession
     cancelled: null,
     source_url: null,
     read_at: le12('11:35'),
+    network_reports: [],
     ...champs,
   }
 }

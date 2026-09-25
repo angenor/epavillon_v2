@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.session_reports SET withdrawn_at = now(), withdrawal = 'admin'\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d8aad73b9f7bbbd2a4462f7a1fe5ab7ebe7753cce162ea855934047ab02df3ed"
+}

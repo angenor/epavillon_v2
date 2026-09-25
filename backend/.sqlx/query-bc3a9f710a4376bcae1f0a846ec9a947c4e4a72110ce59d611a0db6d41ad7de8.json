@@ -1,0 +1,317 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.id, r.client_ref, r.reason, r.what, r.proposed_start, r.proposed_venue,\n                  r.proposed_day, r.detail, r.status::text AS \"status!\",\n                  r.submitted_at, r.decided_at, r.reject_reason, r.reject_detail, r.published_at,\n                  r.withdrawn_at,\n                  m.id AS \"session_id?\", m.title_original AS \"title_en?\",\n                  tr.text_fr AS \"title_fr?\", m.start_at AS \"start_at?\", m.end_at AS session_end,\n                  m.venue_label, m.status::text AS \"session_status?\",\n                  CASE WHEN m.absent_reads = 0 THEN coalesce(i.last_success_at, m.last_read_at)\n                       ELSE m.last_read_at END AS source_read_at,\n                  a.display_name AS \"author_name!\",\n                  platform.t(pays.name, $3) AS country,\n                  d.display_name AS \"decided_by?\",\n                  coalesce((r.decided_at AT TIME ZONE e.timezone::text)::date\n                           = (now() AT TIME ZONE e.timezone::text)::date, false) AS \"du_jour!\"\n             FROM negotiation.session_reports r\n             JOIN event.events e ON e.id = r.event_id\n             JOIN identity.people a ON a.id = r.author_id\n             LEFT JOIN reference.countries pays ON pays.id = a.country_id\n             LEFT JOIN identity.people d ON d.id = r.decided_by\n             LEFT JOIN negotiation.meetings m ON m.id = r.meeting_id\n             LEFT JOIN negotiation.official_imports i ON i.event_id = r.event_id\n             LEFT JOIN negotiation.title_translations tr ON tr.source_text = m.title_original\n            WHERE ($1::uuid IS NULL OR r.event_id = $1)\n              AND ($2::uuid IS NULL OR r.id = $2)\n              AND ($2::uuid IS NOT NULL OR r.status = 'submitted'\n                   OR (r.decided_at AT TIME ZONE e.timezone::text)::date\n                      = (now() AT TIME ZONE e.timezone::text)::date)\n            ORDER BY r.submitted_at, r.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.session_reports",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "client_ref",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.session_reports",
+            "name": "client_ref"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.session_reports",
+            "name": "reason"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "what",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.session_reports",
+            "name": "what"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "proposed_start",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.session_reports",
+            "name": "proposed_start"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "proposed_venue",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.session_reports",
+            "name": "proposed_venue"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "proposed_day",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "negotiation.session_reports",
+            "name": "proposed_day"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "detail",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.session_reports",
+            "name": "detail"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "submitted_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.session_reports",
+            "name": "submitted_at"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "decided_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.session_reports",
+            "name": "decided_at"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "reject_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.session_reports",
+            "name": "reject_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "reject_detail",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.session_reports",
+            "name": "reject_detail"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.session_reports",
+            "name": "published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "withdrawn_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.session_reports",
+            "name": "withdrawn_at"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "session_id?",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "title_en?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "title_original"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "title_fr?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.title_translations",
+            "name": "text_fr"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "start_at?",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "start_at"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "session_end",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "end_at"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "venue_label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "venue_label"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "session_status?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 22,
+        "name": "source_read_at",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 23,
+        "name": "author_name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 24,
+        "name": "country",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 25,
+        "name": "decided_by?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 26,
+        "name": "du_jour!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      null,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      false,
+      false,
+      true,
+      true,
+      null,
+      null,
+      true,
+      null,
+      true,
+      null
+    ]
+  },
+  "hash": "bc3a9f710a4376bcae1f0a846ec9a947c4e4a72110ce59d611a0db6d41ad7de8"
+}

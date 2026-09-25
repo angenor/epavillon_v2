@@ -1,5 +1,6 @@
 pub mod access;
 pub mod admin_import;
+pub mod admin_reports;
 pub mod agenda;
 pub mod attempts;
 pub mod bookmarks;
@@ -11,6 +12,8 @@ pub mod documents;
 pub mod groups;
 pub mod import;
 pub mod objets;
+pub mod publication;
+pub mod rattrapage;
 pub mod renditions;
 pub mod reports;
 pub mod requests;

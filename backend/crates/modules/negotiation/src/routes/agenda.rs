@@ -1,4 +1,5 @@
-//! « Mon agenda » — trois routes, chacune idempotente.
+//! « Mon agenda » — les sessions officielles et les réunions non annoncées ;
+//! chaque geste est idempotent.
 
 use actix_web::http::header::ETAG;
 use actix_web::{web, HttpRequest, HttpResponse};
@@ -19,12 +20,20 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
         .route(
             "/negotiation/me/agenda/{session_id}",
             web::delete().to(retirer_une_session),
+        )
+        .route(
+            "/negotiation/me/agenda/network/{id}",
+            web::put().to(garder_une_reunion_du_reseau),
+        )
+        .route(
+            "/negotiation/me/agenda/network/{id}",
+            web::delete().to(retirer_une_reunion_du_reseau),
         );
 }
 
 #[utoipa::path(
     get,
-    description = "`MyAgenda` — les sessions officielles que la personne connectée garde : identifiant, rappel, date d'ajout. Les sessions elles-mêmes se lisent dans `OfficialSessions`.\n\n`remind` est **effectif** : faux dès que la session est annulée, quel que soit ce qui est enregistré. `ETag` et **304**.",
+    description = "`MyAgenda` — les sessions officielles que la personne connectée garde : identifiant, rappel, date d'ajout ; et, dans `network_entries`, les réunions non annoncées gardées. Les unes et les autres se lisent dans `OfficialSessions`.\n\n`remind` est **effectif** : faux dès que la session est annulée, quel que soit ce qui est enregistré. `ETag` et **304**.",
     path = "/negotiation/me/agenda",
     tag = "Guide Négo — sessions officielles",
     operation_id = "negotiation_mon_agenda",
@@ -106,5 +115,57 @@ pub(crate) async fn retirer_une_session(
 ) -> Result<HttpResponse> {
     let ctx = crate::routes::contexte_de(&requete, acteur.0);
     service::retirer(&state, &ctx, acteur.0, chemin.into_inner()).await?;
+    Ok(HttpResponse::NoContent().finish())
+}
+
+#[utoipa::path(
+    put,
+    description = "`AgendaEntryPayload` — garder une réunion non annoncée dans l'agenda, ou changer son rappel. **Idempotent**.\n\nRéunion inconnue, pas encore publiée ou retirée : **404** `NEGOTIATION_SESSION_UNKNOWN`.",
+    path = "/negotiation/me/agenda/network/{id}",
+    tag = "Guide Négo — sessions officielles",
+    operation_id = "negotiation_garder_une_reunion_du_reseau",
+    params(("id" = Uuid, Path, description = "Identifiant de la réunion non annoncée")),
+    request_body = Object,
+    responses(
+        (status = 204, description = "Gardée"),
+        (status = 401, description = "Aucune session", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Réunion inconnue, non publiée ou retirée", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "Corps malformé", body = crate::routes::openapi::ApiErrorBody),
+    ),
+    security(("session" = []))
+)]
+pub(crate) async fn garder_une_reunion_du_reseau(
+    state: web::Data<NegotiationState>,
+    requete: HttpRequest,
+    acteur: Actor,
+    chemin: web::Path<Uuid>,
+    charge: web::Json<AgendaEntryPayload>,
+) -> Result<HttpResponse> {
+    let ctx = crate::routes::contexte_de(&requete, acteur.0);
+    service::poser_reunion(&state, &ctx, acteur.0, chemin.into_inner(), charge.remind).await?;
+    Ok(HttpResponse::NoContent().finish())
+}
+
+#[utoipa::path(
+    delete,
+    description = "Retire une réunion non annoncée de l'agenda. **Idempotent**, même si elle n'y était pas.",
+    path = "/negotiation/me/agenda/network/{id}",
+    tag = "Guide Négo — sessions officielles",
+    operation_id = "negotiation_retirer_une_reunion_du_reseau",
+    params(("id" = Uuid, Path, description = "Identifiant de la réunion non annoncée")),
+    responses(
+        (status = 204, description = "Retirée"),
+        (status = 401, description = "Aucune session", body = crate::routes::openapi::ApiErrorBody),
+    ),
+    security(("session" = []))
+)]
+pub(crate) async fn retirer_une_reunion_du_reseau(
+    state: web::Data<NegotiationState>,
+    requete: HttpRequest,
+    acteur: Actor,
+    chemin: web::Path<Uuid>,
+) -> Result<HttpResponse> {
+    let ctx = crate::routes::contexte_de(&requete, acteur.0);
+    service::retirer_reunion(&state, &ctx, acteur.0, chemin.into_inner()).await?;
     Ok(HttpResponse::NoContent().finish())
 }

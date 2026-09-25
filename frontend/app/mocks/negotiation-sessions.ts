@@ -26,6 +26,7 @@ const base = {
   cancelled: null,
   source_url: 'https://unfccc.int/cop31',
   read_at: LU_A,
+  network_reports: [],
 }
 
 const SESSIONS: OfficialSession[] = [
@@ -127,6 +128,7 @@ export function sessionsOfficielles(): AvecEmpreinte<OfficialSessions> {
       read_at: LU_A,
       server_time: new Date().toISOString(),
       sessions: SESSIONS.map((s) => ({ ...s })),
+      network_meetings: [],
     },
     empreinte: '"sessions-exemple"',
   }
@@ -147,7 +149,7 @@ export function suivreDesGroupes(codes: string[]): AvecEmpreinte<MyGroups> {
 export function monAgenda(): AvecEmpreinte<MyAgenda> {
   const annulees = new Set(SESSIONS.filter((s) => s.status === 'cancelled').map((s) => s.id))
   const entries = agenda.map((e) => ({ ...e, remind: e.remind && !annulees.has(e.session_id) }))
-  return { valeur: { entries }, empreinte: `"${entries.map((e) => `${e.session_id}:${e.remind}`).join('.')}"` }
+  return { valeur: { entries, network_entries: [] }, empreinte: `"${entries.map((e) => `${e.session_id}:${e.remind}`).join('.')}"` }
 }
 
 export function garderUneSession(sessionId: string, remind: boolean): void {

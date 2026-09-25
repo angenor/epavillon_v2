@@ -62,6 +62,9 @@ const ADMIN_DEMANDES: &str = include_str!("../src/routes/admin_requests.rs");
 const ADMIN_ADMISSION: &str = include_str!("../src/routes/admin_admission.rs");
 /// Même garde : l'import et l'ordre du jour (3a), éprouvés dans `perimetre_import.rs`.
 const ADMIN_IMPORT: &str = include_str!("../src/routes/admin_import.rs");
+/// La validation des signalements (3b), sous sa propre permission, éprouvée
+/// en HTTP dans `validation.rs`.
+const ADMIN_SIGNALEMENTS: &str = include_str!("../src/routes/admin_reports.rs");
 
 /// Les douze routes, telles que `contracts/api-admin.md` les énumère.
 const ROUTES: [&str; 12] = [
@@ -337,7 +340,8 @@ const FICHIERS_CONTROLES: &str = "routes::admin_codes::configurer(cfg);\
      routes::admin_requests::configurer(cfg);\
      routes::admin_admission::configurer(cfg);\
      routes::admin_documents::configurer(cfg);\
-     routes::admin_import::configurer(cfg);";
+     routes::admin_import::configurer(cfg);\
+     routes::admin_reports::configurer(cfg);";
 
 /// Ce qui monte une porte sans passer par `.route(…)`.
 const AUTRES_MONTAGES: [&str; 7] = [
@@ -445,6 +449,7 @@ fn chaque_configurer_du_back_office_ne_monte_que_ses_routes() {
         ADMIN_ADMISSION,
         ADMIN_DOCUMENTS,
         ADMIN_IMPORT,
+        ADMIN_SIGNALEMENTS,
     ] {
         let ecarts = ecarts_de_montage(source);
         assert!(
@@ -455,7 +460,7 @@ fn chaque_configurer_du_back_office_ne_monte_que_ses_routes() {
     assert_eq!(
         bloc(LIB, ADMIN_ROUTES),
         FICHIERS_CONTROLES,
-        "le back-office ne se compose que des cinq fichiers contrôlés"
+        "le back-office ne se compose que des six fichiers contrôlés"
     );
 }
 
@@ -885,4 +890,15 @@ async fn chaque_route_des_documents_refuse_ladministrateur_dune_edition_meme_sur
             Some("NEGOTIATION_DOCUMENT_NOT_FOUND")
         )
     );
+}
+
+#[test]
+fn chaque_route_des_signalements_exige_sa_permission_sur_la_portee_globale() {
+    let source = sans_commentaires(ADMIN_SIGNALEMENTS);
+    assert_eq!(source.matches(".route(").count(), 5);
+    assert_eq!(
+        source.matches("pub(crate) async fn ").count(),
+        source.matches("Requires<ReportValidate>").count(),
+    );
+    assert!(!source.contains("RequiresAnyScope") && !source.contains("Perimeter"));
 }

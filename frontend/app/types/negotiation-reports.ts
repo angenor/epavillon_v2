@@ -67,3 +67,43 @@ export interface MyReport {
 export interface MyReports {
   reports: MyReport[]
 }
+
+// ---------------------------------------------------------------------------
+// Back-office — `GET /admin/negotiation/reports?edition=` et les décisions
+// ---------------------------------------------------------------------------
+
+/** Ce que dit la source officielle à l'instant, avec son heure de lecture. */
+export interface ReportSourceNow {
+  status: 'scheduled' | 'cancelled'
+  start_at: IsoDateTime
+  end_at: IsoDateTime | null
+  venue: string | null
+  read_at: IsoDateTime | null
+}
+
+/**
+ * `status` est celui de la base : `validated` dès la validation ;
+ * `published_at` dit si c'est affiché.
+ */
+export interface ReportQueueItem extends MyReport {
+  author: { name: string; country: string | null }
+  /** `null` pour une réunion non annoncée. */
+  source_now: ReportSourceNow | null
+  /** Nom du décideur — lu au back-office seulement. */
+  decided_by: string | null
+  published_at: IsoDateTime | null
+  withdrawn_at: IsoDateTime | null
+}
+
+export interface ReportQueue {
+  /** Les plus anciens d'abord. */
+  pending: ReportQueueItem[]
+  /** Tranchés aujourd'hui (fuseau de la COP), le plus récent d'abord. */
+  decided_today: ReportQueueItem[]
+}
+
+export interface RejectPayload {
+  reason: RejectReason
+  /** 600 caractères au plus. */
+  detail?: string
+}

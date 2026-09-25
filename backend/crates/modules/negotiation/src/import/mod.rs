@@ -6,6 +6,7 @@ pub mod archive;
 pub mod ccnucc;
 pub mod comparaison;
 pub mod denominations;
+pub mod rattrapage;
 pub mod reel;
 pub mod source;
 pub mod traduction;

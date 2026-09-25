@@ -4,8 +4,10 @@
 
 use serde::Serialize;
 use serde_json::Value;
-use time::OffsetDateTime;
+use time::{Date, OffsetDateTime};
 use uuid::Uuid;
+
+use crate::domain::reports::ReportReason;
 
 /// `OfficialSessions` — ce que `GET /negotiation/sessions?edition=` rend.
 #[derive(Debug, Clone, Serialize)]
@@ -22,6 +24,9 @@ pub struct OfficialSessions {
     #[serde(with = "time::serde::rfc3339")]
     pub server_time: OffsetDateTime,
     pub sessions: Vec<OfficialSession>,
+    /// Servies aussi quand l'affichage est coupé : elles ne viennent pas de la
+    /// source (FR-022).
+    pub network_meetings: Vec<NetworkMeeting>,
 }
 
 impl OfficialSessions {
@@ -81,6 +86,34 @@ pub struct OfficialSession {
     pub source_url: Option<String>,
     #[serde(with = "time::serde::rfc3339")]
     pub read_at: OffsetDateTime,
+    /// Publiés, non retirés, session non terminée. Aucun nom d'autrice.
+    pub network_reports: Vec<NetworkReport>,
+}
+
+/// L'encart « Signalé par le réseau » d'une session (FR-016).
+#[derive(Debug, Clone, Serialize)]
+pub struct NetworkReport {
+    pub reason: ReportReason,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub proposed_start: Option<OffsetDateTime>,
+    pub proposed_venue: Option<String>,
+    pub detail: Option<String>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub validated_at: OffsetDateTime,
+}
+
+/// Une réunion non annoncée : jamais une session officielle (R2).
+#[derive(Debug, Clone, Serialize)]
+pub struct NetworkMeeting {
+    pub id: Uuid,
+    pub title: String,
+    pub venue: Option<String>,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub start_at: Option<OffsetDateTime>,
+    pub day: Date,
+    pub theme: Option<String>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub validated_at: OffsetDateTime,
 }
 
 /// « Déplacée » : la valeur d'avant, champ par champ.

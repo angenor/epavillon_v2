@@ -24,6 +24,7 @@ use crate::import::reel::LecteurReel;
 use crate::import::source::{AnnulationSource, EchecLecture, SessionLue, SourceOfficielle};
 use crate::jobs::traduction;
 use crate::repo::import::{self as depot, Ecriture, Lecture, Origine, Reglage};
+use crate::repo::rattrapage;
 
 pub const IMPORT_OFFICIAL_SESSIONS: &str = "negotiation.import_official_sessions";
 
@@ -252,6 +253,9 @@ async fn ecrire(
         })
         .collect();
     depot::rattacher_groupes(tx, &rattachements, lu_a).await?;
+    // Sur l'état écrit, absences comprises : une session disparue et annulée
+    // rattrape un signalement « annulée » (R7).
+    rattrapage::appliquer(tx, r.event_id, lu_a).await?;
     depot::noter_reussite(tx, r.id, touchees, lu_a).await?;
 
     if traduire

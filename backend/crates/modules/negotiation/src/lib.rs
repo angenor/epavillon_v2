@@ -33,6 +33,7 @@ pub mod domain;
 pub mod import;
 pub mod jobs;
 pub mod mail;
+pub mod notifications;
 pub mod pdf;
 pub mod repo;
 pub mod routes;
@@ -57,7 +58,8 @@ pub fn routes(cfg: &mut ServiceConfig) {
     routes::reports::configurer(cfg);
 }
 
-/// Le back-office : l'admission, les documents, l'import des sessions.
+/// Le back-office : l'admission, les documents, l'import des sessions, la
+/// validation des signalements.
 ///
 /// **Des routes plates, jamais un `web::scope("/admin")`** : le préfixe
 /// d'administration est partagé avec cinq autres modules, et deux scopes du même
@@ -68,11 +70,13 @@ pub fn admin_routes(cfg: &mut ServiceConfig) {
     routes::admin_admission::configurer(cfg);
     routes::admin_documents::configurer(cfg);
     routes::admin_import::configurer(cfg);
+    routes::admin_reports::configurer(cfg);
 }
 
 /// Les travaux différés du module : les deux courriels de décision, la purge
 /// des essais de code, l'extraction des documents, l'import des sessions
-/// officielles et la traduction de leurs titres.
+/// officielles, la traduction de leurs titres et la publication des
+/// signalements validés.
 ///
 /// **C'est ce seul geste qui fait écouter la file « negotiation ».**
 /// `JobRegistry::queues()` est construite à partir des files que les
@@ -80,7 +84,7 @@ pub fn admin_routes(cfg: &mut ServiceConfig) {
 /// travail déposé dans une file inécoutée s'empile sans erreur, sans trace, et
 /// sans que rien ne l'exécute jamais.
 ///
-/// Les six déclarent la file par défaut : aucun déclencheur du modèle ne les
+/// Les sept déclarent la file par défaut : aucun déclencheur du modèle ne les
 /// dépose ailleurs.
 pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc<dyn JobHandler>> {
     let url = config.app_public_url.clone();
@@ -102,8 +106,10 @@ pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc
             traducteur.is_some(),
         )),
         Arc::new(jobs::traduction::TranslateSessionTitles::new(
-            db, traducteur,
+            db.clone(),
+            traducteur,
         )),
+        Arc::new(jobs::publish::PublishReport::new(db)),
     ]
 }
 

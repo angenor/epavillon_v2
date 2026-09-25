@@ -1,0 +1,100 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT n.id, n.title, n.venue, n.start_at, n.day, t.code AS \"theme?\", n.validated_at\n             FROM negotiation.network_meetings n\n             JOIN negotiation.session_reports r ON r.id = n.report_id\n             JOIN event.events e ON e.id = n.event_id\n             LEFT JOIN reference.taxonomy_terms t ON t.id = n.theme_term_id\n            WHERE n.event_id = $1 AND n.withdrawn_at IS NULL AND r.published_at IS NOT NULL\n              AND n.day >= (now() AT TIME ZONE e.timezone::text)::date\n            ORDER BY n.day, n.start_at NULLS LAST, n.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.network_meetings",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.network_meetings",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "venue",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.network_meetings",
+            "name": "venue"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "start_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.network_meetings",
+            "name": "start_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "day",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "negotiation.network_meetings",
+            "name": "day"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "theme?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "validated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.network_meetings",
+            "name": "validated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "e2cbb2f3634e5898d7c96b0cf89f33e9f92c925b496f3719035e47d2b0ac7db4"
+}

@@ -2,6 +2,7 @@ pub mod access;
 pub mod admin;
 pub mod admin_documents;
 pub mod admin_import;
+pub mod admin_reports;
 pub mod admission;
 pub mod agenda;
 pub mod code;

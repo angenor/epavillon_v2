@@ -5,11 +5,14 @@
 use kernel::error::Result;
 use serde_json::Value;
 use sqlx::postgres::PgConnection;
+use std::collections::HashMap;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
+use crate::domain::reports::ReportReason;
 use crate::domain::sessions::{
-    Annulation, Groupe, OfficialSession, PointDuJour, Precedent, StatutDeSession, TypeDeSession,
+    Annulation, Groupe, NetworkMeeting, NetworkReport, OfficialSession, PointDuJour, Precedent,
+    StatutDeSession, TypeDeSession,
 };
 
 pub struct EditionImportee {
@@ -160,6 +163,81 @@ pub async fn sessions(
             },
             source_url: l.source_url,
             read_at: l.read_at,
+            network_reports: Vec::new(),
+        })
+        .collect())
+}
+
+/// Les encarts affichés, par session : publiés, non retirés, session non
+/// terminée — fin lue, sinon fin de son jour dans le fuseau de la COP (R7).
+pub async fn encarts(
+    conn: &mut PgConnection,
+    event_id: Uuid,
+) -> Result<HashMap<Uuid, Vec<NetworkReport>>> {
+    let lignes = sqlx::query!(
+        r#"SELECT r.meeting_id AS "meeting_id!", r.reason, r.proposed_start, r.proposed_venue,
+                  r.detail, r.decided_at AS "validated_at!"
+             FROM negotiation.session_reports r
+             JOIN negotiation.meetings m ON m.id = r.meeting_id
+             JOIN event.events e ON e.id = r.event_id
+            WHERE r.event_id = $1 AND r.published_at IS NOT NULL AND r.withdrawn_at IS NULL
+              AND coalesce(m.end_at,
+                           ((m.start_at AT TIME ZONE e.timezone::text)::date + 1)::timestamp
+                               AT TIME ZONE e.timezone::text) > now()
+            ORDER BY r.decided_at, r.id"#,
+        event_id
+    )
+    .fetch_all(conn)
+    .await?;
+
+    let mut par_session: HashMap<Uuid, Vec<NetworkReport>> = HashMap::new();
+    for l in lignes {
+        let Some(reason) = ReportReason::from_db(&l.reason) else {
+            continue;
+        };
+        par_session
+            .entry(l.meeting_id)
+            .or_default()
+            .push(NetworkReport {
+                reason,
+                proposed_start: l.proposed_start,
+                proposed_venue: l.proposed_venue,
+                detail: l.detail,
+                validated_at: l.validated_at,
+            });
+    }
+    Ok(par_session)
+}
+
+/// Les réunions non annoncées publiées, non retirées, dont le jour n'est pas
+/// passé dans le fuseau de la COP.
+pub async fn reunions_du_reseau(
+    conn: &mut PgConnection,
+    event_id: Uuid,
+) -> Result<Vec<NetworkMeeting>> {
+    let lignes = sqlx::query!(
+        r#"SELECT n.id, n.title, n.venue, n.start_at, n.day, t.code AS "theme?", n.validated_at
+             FROM negotiation.network_meetings n
+             JOIN negotiation.session_reports r ON r.id = n.report_id
+             JOIN event.events e ON e.id = n.event_id
+             LEFT JOIN reference.taxonomy_terms t ON t.id = n.theme_term_id
+            WHERE n.event_id = $1 AND n.withdrawn_at IS NULL AND r.published_at IS NOT NULL
+              AND n.day >= (now() AT TIME ZONE e.timezone::text)::date
+            ORDER BY n.day, n.start_at NULLS LAST, n.id"#,
+        event_id
+    )
+    .fetch_all(conn)
+    .await?;
+    Ok(lignes
+        .into_iter()
+        .map(|l| NetworkMeeting {
+            id: l.id,
+            title: l.title,
+            venue: l.venue,
+            start_at: l.start_at,
+            day: l.day,
+            theme: l.theme,
+            validated_at: l.validated_at,
         })
         .collect())
 }

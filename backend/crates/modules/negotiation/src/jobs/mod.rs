@@ -10,5 +10,6 @@
 pub mod emails;
 pub mod extract;
 pub mod import;
+pub mod publish;
 pub mod purge;
 pub mod traduction;

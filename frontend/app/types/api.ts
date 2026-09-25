@@ -1196,6 +1196,103 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/negotiation/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `ReportQueue` — les signalements à traiter de l'édition, **les plus anciens d'abord**, puis ceux tranchés aujourd'hui (fuseau de la COP), le plus récent d'abord.
+         *
+         *     Chaque élément porte l'autrice (nom, pays), la session, et `source_now` : ce que dit la source officielle à l'instant, avec son heure de lecture. `status` est celui de la base : `validated` dès la validation, `published_at` dit si c'est affiché.
+         */
+        get: operations["admin_negotiation_reports_file"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/reports/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `RejectPayload` → `ReportQueueItem` — « Ne pas retenir », avec l'un des trois motifs et une précision facultative (600 caractères). L'autrice voit l'un et l'autre, et reçoit un avis. Déjà tranché : **409**. */
+        post: operations["admin_negotiation_reports_refuser"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/reports/{id}/undo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description → `ReportQueueItem` — annule une validation **tant que rien n'est publié**, sans borne de temps : le signalement redevient à traiter, et la publication posée ne fera rien. Rejoué, rend l'état sans rien écrire.
+         *
+         *     Déjà publié, refusé, ou heurtant un nouveau signalement en attente de la même autrice : **409** `NEGOTIATION_REPORT_UNDO_EXPIRED`.
+         */
+        post: operations["admin_negotiation_reports_annuler"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/reports/{id}/validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description → `ReportQueueItem` — valide le signalement : `status: 'validated'`, `published_at: null`. Écrit le décideur, l'heure et la source du moment ; pose la publication **trente secondes plus tard**, horloge de la base.
+         *
+         *     **Rien n'est public avant la publication** : ni l'encart, ni la réunion non annoncée, ni « Validé » chez l'autrice, ni un avis. Déjà tranché : **409**.
+         */
+        post: operations["admin_negotiation_reports_valider"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/reports/{id}/withdraw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description → `ReportQueueItem` — retire un encart affiché, ou la réunion non annoncée née du signalement. Idempotent. Pas encore affiché : **409** — c'est l'annulation qui convient. */
+        post: operations["admin_negotiation_reports_retirer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/notifications/broadcast": {
         parameters: {
             query?: never;
@@ -3068,7 +3165,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * @description `MyAgenda` — les sessions officielles que la personne connectée garde : identifiant, rappel, date d'ajout. Les sessions elles-mêmes se lisent dans `OfficialSessions`.
+         * @description `MyAgenda` — les sessions officielles que la personne connectée garde : identifiant, rappel, date d'ajout ; et, dans `network_entries`, les réunions non annoncées gardées. Les unes et les autres se lisent dans `OfficialSessions`.
          *
          *     `remind` est **effectif** : faux dès que la session est annulée, quel que soit ce qui est enregistré. `ETag` et **304**.
          */
@@ -3076,6 +3173,28 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/negotiation/me/agenda/network/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * @description `AgendaEntryPayload` — garder une réunion non annoncée dans l'agenda, ou changer son rappel. **Idempotent**.
+         *
+         *     Réunion inconnue, pas encore publiée ou retirée : **404** `NEGOTIATION_SESSION_UNKNOWN`.
+         */
+        put: operations["negotiation_garder_une_reunion_du_reseau"];
+        post?: never;
+        /** @description Retire une réunion non annoncée de l'agenda. **Idempotent**, même si elle n'y était pas. */
+        delete: operations["negotiation_retirer_une_reunion_du_reseau"];
         options?: never;
         head?: never;
         patch?: never;
@@ -8745,6 +8864,305 @@ export interface operations {
             };
         };
     };
+    admin_negotiation_reports_file: {
+        parameters: {
+            query: {
+                /** @description Slug de l'édition */
+                edition: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ReportQueue */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans `negotiation.report.validate` **sur la portée globale** */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Édition inconnue */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_reports_refuser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du signalement */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description ReportQueueItem */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Motif inconnu ou précision trop longue — le champ est nommé */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans la permission sur la portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Signalement inconnu */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Déjà tranché */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_reports_annuler: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du signalement */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ReportQueueItem */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans la permission sur la portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Signalement inconnu */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Trop tard : déjà affiché */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_reports_valider: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du signalement */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ReportQueueItem */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans la permission sur la portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Signalement inconnu */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Déjà tranché */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_reports_retirer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du signalement */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ReportQueueItem */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans la permission sur la portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Signalement inconnu */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Rien d'affiché à retirer */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     engagement_diffuser_une_annonce: {
         parameters: {
             query?: never;
@@ -12685,6 +13103,88 @@ export interface operations {
             };
             /** @description Rien n'a changé depuis l'empreinte présentée */
             304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_garder_une_reunion_du_reseau: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la réunion non annoncée */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Gardée */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Réunion inconnue, non publiée ou retirée */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Corps malformé */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_retirer_une_reunion_du_reseau: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la réunion non annoncée */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Retirée */
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };

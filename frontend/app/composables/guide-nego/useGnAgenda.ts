@@ -25,7 +25,7 @@ interface AgendaLu {
   empreinte: string | null
 }
 
-const VIDE: MyAgenda = { entries: [] }
+const VIDE: MyAgenda = { entries: [], network_entries: [] }
 
 export function useGnAgenda() {
   const api = useApi().negotiationSessions

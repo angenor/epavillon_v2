@@ -9,12 +9,23 @@ use uuid::Uuid;
 #[derive(Debug, Clone, Serialize)]
 pub struct MyAgenda {
     pub entries: Vec<AgendaEntry>,
+    /// Les réunions non annoncées gardées (3b).
+    pub network_entries: Vec<NetworkAgendaEntry>,
 }
 
 impl MyAgenda {
     pub fn empreinte(&self) -> String {
-        kernel::empreinte::de(&serde_json::to_string(&self.entries).unwrap_or_default())
+        kernel::empreinte::de(&serde_json::to_string(self).unwrap_or_default())
     }
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct NetworkAgendaEntry {
+    pub network_meeting_id: Uuid,
+    /// Effectif : faux dès que la réunion est retirée.
+    pub remind: bool,
+    #[serde(with = "time::serde::rfc3339")]
+    pub added_at: OffsetDateTime,
 }
 
 #[derive(Debug, Clone, Serialize)]
