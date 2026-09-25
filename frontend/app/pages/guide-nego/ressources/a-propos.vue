@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { LegalTextKey } from '~/types/platform'
-import { editionDuGuide, type EditionGardee } from '~/utils/guide-nego/edition'
 
 /**
  * Écran 12 — « À propos ». **Il n'affirme que ce qui est vrai aujourd'hui** :
@@ -16,12 +15,9 @@ definePageMeta({ layout: 'guide-nego' })
 defineI18nRoute(false)
 
 const { t } = useI18n()
-const api = useApi()
 const config = useRuntimeConfig()
 
-const edition = useGnLecture<EditionGardee | null>('edition', async () =>
-  editionDuGuide(await api.events.publicList()),
-)
+const edition = useGnEdition()
 const textes: Record<LegalTextKey, ReturnType<typeof useGnTexte>> = {
   privacy: useGnTexte('privacy'),
   terms: useGnTexte('terms'),

@@ -100,11 +100,11 @@ Chemins relatifs au dossier ; `neg/` = `backend/crates/modules/negotiation/`, `f
 
 ## Phase 6 — La plomberie client (bloquant pour 7 à 9)
 
-- [ ] T041 Écrire le client `fe/app/composables/api/negotiation-sessions.ts` (sessions, groupes, agenda) et **la seule ligne de montage** dans `fe/app/composables/useApi.ts`
-- [ ] T042 Ajouter `slug`, `timezone` et `city` à l'édition gardée dans `fe/app/utils/guide-nego/edition.ts` et à ce qui la sert
-- [ ] T043 [P] Écrire les règles pures de `fe/app/utils/guide-nego/sessions.ts` (état affiché, jours de la bande dans le fuseau de la COP, jour choisi FR-003, tri FR-005, filtre FR-006 — une coordination sans groupe seulement sous « Toutes » —, état vide et prochain créneau FR-011) et leurs tests dans `fe/tests/guide-nego/sessions.test.ts`
-- [ ] T044 [P] Écrire les règles pures de `fe/app/utils/guide-nego/agenda.ts` (chevauchements FR-033, prochaine session FR-036, rappel dû FR-034 — jamais sur une annulée, FR-035) et leurs tests dans `fe/tests/guide-nego/agenda.test.ts`
-- [ ] T045 Écrire `useGnSessions` (clé `sessions:<edition>`, réponse coupée qui remplace la copie — FR-039), `useGnGroupes` (clé `mes-groupes`, file avec `If-Match`), `useGnAgenda` (clé `mon-agenda`, garde réécrite aussitôt, `PUT`/`DELETE` en file) dans `fe/app/composables/guide-nego/`
+- [x] T041 Écrire le client `fe/app/composables/api/negotiation-sessions.ts` (sessions, groupes, agenda) et **la seule ligne de montage** dans `fe/app/composables/useApi.ts`
+- [x] T042 Ajouter `slug`, `timezone` et `city` à l'édition gardée dans `fe/app/utils/guide-nego/edition.ts` et à ce qui la sert
+- [x] T043 [P] Écrire les règles pures de `fe/app/utils/guide-nego/sessions.ts` (état affiché, jours de la bande dans le fuseau de la COP, jour choisi FR-003, tri FR-005, filtre FR-006 — une coordination sans groupe seulement sous « Toutes » —, état vide et prochain créneau FR-011) et leurs tests dans `fe/tests/guide-nego/sessions.test.ts`
+- [x] T044 [P] Écrire les règles pures de `fe/app/utils/guide-nego/agenda.ts` (chevauchements FR-033, prochaine session FR-036, rappel dû FR-034 — jamais sur une annulée, FR-035) et leurs tests dans `fe/tests/guide-nego/agenda.test.ts`
+- [x] T045 Écrire `useGnSessions` (clé `sessions:<edition>`, réponse coupée qui remplace la copie — FR-039), `useGnGroupes` (clé `mes-groupes`, file avec `If-Match`), `useGnAgenda` (clé `mon-agenda`, garde réécrite aussitôt, `PUT`/`DELETE` en file) dans `fe/app/composables/guide-nego/`
 
 **Commit** : « feat(guide-nego): étape 3a, phase 6 — la plomberie des sessions côté application ».
 
