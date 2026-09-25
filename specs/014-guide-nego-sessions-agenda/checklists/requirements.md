@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [x] No [NEEDS CLARIFICATION] markers remain — trois, tranchés le 25/09
+- [x] No [NEEDS CLARIFICATION] markers remain — trois marqueurs, quatre questions tranchées le 25/09
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)

@@ -28,7 +28,7 @@
 
 - Q : Comment l'application sait-elle quel est le groupe de la personne ? → R : **Les groupes de négociation sont un vocabulaire en base**, comme les thématiques, semé des groupes réels (Groupe africain, PMA, G77 et Chine, AOSIS, Groupe arabe, LMDC, AILAC, UE, GIE, BASIC…). Ils se cochent sur l'écran « Mes thématiques » et suivent le compte. Aucun groupe coché : toutes les coordinations passent le filtre. Un titre de la source se rattache à un groupe par les dénominations du terme, jamais par une liste écrite dans le code.
 - Q : Qui attribue une thématique à une session ? → R : **L'IFDD rattache une fois par COP chaque point de l'ordre du jour à une thématique**, au back-office ; les sessions de ce point en héritent. Une session sans thématique passe le filtre, marquée « Thématique non précisée ».
-- Q : La fiche montre-t-elle les documents de Guide Négo ? → R : **Non en 3a** : seulement les documents de la source officielle.
+- Q : La fiche montre-t-elle les documents de Guide Négo ? → R : **Non en 3a**. Seuls ceux de la source officielle étaient admis — et elle n'en donne aucun (FR-029, constaté après la réponse).
 - Q : Que fait « Me rappeler 15 minutes avant » sans notification ? → R : **Accepté tel que proposé** (FR-034) : le bandeau n'existe que dans l'application ouverte, et la ligne sous l'interrupteur le dit.
 - Retouche d'une décision prise seul : une session n'est déclarée « Annulée — retirée du programme officiel » qu'**absente de deux lectures réussies de suite** ; une liste partielle ne l'annule pas d'un coup.
 - Le type de réunion se relie au lexique **par le texte anglais du terme** (« contact group »), comme le lecteur : le lexique le résout vers son entrée ; aucun identifiant de l'étape 2 n'est requis.
@@ -71,7 +71,7 @@ L'IFDD allume l'import d'un interrupteur du back-office, pour une COP. Un travai
 1. **Given** l'import éteint, **When** une personne ouvre l'onglet, **Then** aucune session ne s'affiche et l'écran renvoie au programme officiel de la CCNUCC.
 2. **Given** l'import allumé sur l'archive d'une COP passée, **When** la première lecture réussit, **Then** toutes ses sessions officielles sont écrites, chacune avec son origine, son lien vers l'original et l'heure de lecture.
 3. **Given** une seconde lecture de la même archive, **Then** aucune session n'est réécrite, seule l'heure de dernière lecture avance, et l'état de l'import compte zéro écart.
-4. **Given** une archive où une session change d'heure, une autre de salle, une troisième disparaît et une quatrième apparaît, **When** elle est lue, **Then** exactement ces quatre écarts s'écrivent, l'ancienne valeur est gardée pour l'affichage « avant → après », et l'état de l'import compte quatre écarts.
+4. **Given** une archive où une session change d'heure, une autre de salle, une troisième disparaît et une quatrième apparaît, **When** elle est lue, **Then** exactement ces quatre sessions sont touchées — l'ancienne heure et l'ancienne salle gardées pour l'affichage « avant → après », la nouvelle écrite, la disparue comptée absente —, et l'état de l'import compte quatre écarts (un écart = une session touchée).
 5. **Given** la source injoignable ou illisible, **When** les lectures manquées d'affilée atteignent le seuil, **Then** l'application affiche « Lecture impossible — le programme officiel de la CCNUCC n'a pas répondu depuis 06:40 », ne montre plus aucune session officielle, même passée, et renvoie au programme officiel ; **When** une lecture réussit de nouveau, **Then** l'affichage revient seul.
 6. **Given** l'administratrice change le seuil, **Then** il vaut dès la lecture suivante, sans redéploiement.
 
@@ -79,7 +79,7 @@ L'IFDD allume l'import d'un interrupteur du back-office, pour une COP. Un travai
 
 ### User Story 3 — La fiche d'une session dit ce qui a changé et d'où cela vient (Priority: P2)
 
-Aïssatou touche la ligne « Genre et changements climatiques ». La fiche donne le titre français et l'anglais, l'état, puis, sous « Source officielle · lu à 11:35 », l'heure (ancienne barrée → nouvelle, avec le jour et le fuseau), la salle (de même), le type de réunion avec son terme anglais, le point de l'ordre du jour, l'accès et la thématique ; les documents liés ; le lien « Voir l'original sur le programme officiel de la CCNUCC ».
+Aïssatou touche la ligne « Genre et changements climatiques ». La fiche donne le titre français et l'anglais, l'état, puis, sous « Source officielle · lu à 11:35 », l'heure (ancienne barrée → nouvelle, avec le jour et le fuseau), la salle (de même), le type de réunion avec son terme anglais, le point de l'ordre du jour, l'accès et la thématique ; le lien « Voir l'original sur le programme officiel de la CCNUCC ».
 
 **Why this priority**: la liste suffit pour se rendre en salle ; la fiche sert à comprendre un changement et à préparer.
 
@@ -88,10 +88,9 @@ Aïssatou touche la ligne « Genre et changements climatiques ». La fiche donne
 **Acceptance Scenarios**:
 
 1. **Given** une session déplacée, **Then** les lignes « Heure » et « Salle » montrent l'ancienne valeur barrée et la nouvelle ; une ligne inchangée montre sa seule valeur.
-2. **Given** un type de réunion qui a son entrée au lexique, **When** Aïssatou touche son terme anglais, **Then** la feuille du lexique s'ouvre sur cette entrée ; un type sans entrée n'est pas touchable.
+2. **Given** un type de réunion, **When** Aïssatou touche son terme anglais, **Then** le lexique s'ouvre sur ce terme.
 3. **Given** une session hors de l'ordre du jour officiel, **Then** la ligne dit « Hors ordre du jour officiel ».
-4. **Given** aucune pièce liée, **Then** la fiche dit « Aucun document lié. »
-5. **Given** une session annulée, **Then** « Ajouter à mon agenda » est désactivé.
+4. **Given** une session annulée, **Then** « Ajouter à mon agenda » est désactivé.
 
 ---
 
@@ -132,8 +131,10 @@ Dans la salle plénière, le réseau tombe. Aïssatou rouvre l'onglet : la liste
 
 ### Edge Cases
 
+- La source marque une session reportée (« POSTPONED ») sans nouvelle heure : elle passe « Annulée », avec la mention « reportée par la source ».
+- Une coordination d'observateurs (organisations de jeunesse, d'entreprises…) ou un événement parallèle : jamais importés.
 - Une session disparaît de la source sans être annulée : elle n'est pas effacée ; absente de deux lectures réussies de suite, elle passe « Annulée » avec la mention qu'elle a été retirée du programme officiel, et l'heure de ce constat.
-- Un titre de coordination qui ne se rattache à aucun groupe connu : la session reste une coordination sans groupe, qui passe le filtre comme une session sans thématique.
+- Une coordination dont le titre ne se rattache à aucun groupe de négociation connu : elle ne se distingue pas d'une coordination d'observateurs, et **n'est pas importée**. Un groupe réel manquant s'ajoute au vocabulaire, en base.
 - Une session déplacée deux fois : la marque montre la valeur précédente ; tout l'historique des écarts est gardé.
 - Une session sans heure de fin à la source : la ligne ne montre que le début ; elle passe « Terminée » à la fin du jour.
 - Une session qui franchit minuit : elle appartient au jour de son début, dans le fuseau de la COP.
@@ -166,7 +167,8 @@ Dans la salle plénière, le réseau tombe. Aïssatou rouvre l'onglet : la liste
 
 ### L'import
 
-- **FR-012** : Un travail récurrent DOIT lire la source officielle d'une COP, comparer à ce qui est en base, et n'écrire que les écarts : session apparue, disparue, changée (heure, salle, titre, type, accès, point de l'ordre du jour, documents liés, état).
+- **FR-012** : Un travail récurrent DOIT lire la source officielle d'une COP, comparer à ce qui est en base, et n'écrire que les écarts : session apparue, disparue, changée (heure, salle, titre, type, accès, point de l'ordre du jour, état).
+- **FR-012a** : L'import NE DOIT retenir que les réunions de négociation — négociations, plénières, événements mandatés, consultations de la présidence, coordinations d'un groupe de négociation de Parties — et écarter les événements parallèles, conférences de presse, autres événements de la présidence et coordinations d'observateurs. Le tri se fait par les données des vocabulaires, jamais par une liste du code.
 - **FR-013** : Chaque session importée DOIT porter son origine (la source officielle), son identifiant à la source, son lien vers l'original, l'heure de sa première et de sa dernière lecture.
 - **FR-014** : Chaque changement d'heure ou de salle DOIT garder la valeur précédente, datée, pour l'affichage « avant → après » ; l'historique des écarts d'une session est gardé.
 - **FR-015** : Une session qui disparaît de la source NE DOIT PAS être effacée : absente de **deux lectures réussies de suite**, elle passe « Annulée », avec la mention qu'elle a été retirée du programme officiel et l'heure du constat ; absente d'une seule, elle ne change pas.
@@ -182,14 +184,13 @@ Dans la salle plénière, le réseau tombe. Aïssatou rouvre l'onglet : la liste
 - **FR-022** : Le titre anglais d'origine DOIT être gardé tel que la source le donne, toujours affiché, et faire foi.
 - **FR-023** : Chaque titre anglais DOIT recevoir une seule traduction française automatique, gardée avec le modèle qui l'a produite et sa date, et refaite seulement si le titre anglais change. Elle s'affiche marquée « Traduction automatique », sans relecture humaine (décision du 25/09, écart au principe XII inscrit).
 - **FR-024** : Sans traduction — service indisponible, clé absente, échec —, le titre anglais DOIT s'afficher seul, sans mention de traduction ; l'import ne s'arrête pas pour autant.
-- **FR-025** : Un titre qui n'a rien à traduire (nom d'un groupe, par exemple) PEUT s'afficher seul.
 
 ### La fiche
 
-- **FR-026** : La fiche DOIT montrer le titre français et l'anglais, l'état, puis sous « Source officielle · lu à <heure> » : l'heure avec le jour et le fuseau, la salle, le type de réunion avec son terme anglais, le point de l'ordre du jour ou « Hors ordre du jour officiel », l'accès, la thématique ; puis les documents liés et leur nombre, ou « Aucun document lié. » ; puis « Voir l'original sur le programme officiel de la CCNUCC ».
+- **FR-026** : La fiche DOIT montrer le titre français et l'anglais, l'état, puis sous « Source officielle · lu à <heure> » : l'heure avec le jour et le fuseau, la salle, le type de réunion avec son terme anglais, le point de l'ordre du jour ou « Hors ordre du jour officiel », l'accès, la thématique ; puis « Voir l'original sur le programme officiel de la CCNUCC ».
 - **FR-027** : Une ligne changée DOIT montrer l'ancienne valeur barrée et la nouvelle ; une ligne inchangée sa seule valeur.
-- **FR-028** : Le terme anglais du type de réunion DOIT ouvrir la feuille du lexique en lui passant ce texte (« contact group »), comme le lecteur le fait pour un terme touché ; le lexique le résout vers son entrée. Le terme anglais d'un type est une donnée du vocabulaire.
-- **FR-029** : Les documents liés sont ceux que donne la source officielle ; chacun ouvre le document sur le site de la CCNUCC. Aucun document de Guide Négo n'est rattaché à une session à cette étape.
+- **FR-028** : Le terme anglais du type de réunion DOIT ouvrir le lexique à l'adresse `/guide-nego/lexique?terme=<texte anglais>` (« contact group ») ; le lexique de l'étape 2 le résout sur le téléphone, sans réseau. Tant que l'étape 2 n'est pas fusionnée, l'adresse mène à un lexique vide — admis. Le terme anglais d'un type est une donnée du vocabulaire.
+- **FR-029** : **La source officielle ne lie aucun document à une session** — constaté le 25/09 sur les données réelles de la COP29 et de la COP30. La fiche n'a donc pas de section « Documents liés » à cette étape ; elle viendra avec une source qui les porte. Aucun document de Guide Négo n'est rattaché à une session (Q3).
 
 ### Mon agenda et le rappel
 
@@ -209,7 +210,7 @@ Dans la salle plénière, le réseau tombe. Aïssatou rouvre l'onglet : la liste
 
 ### Back-office
 
-- **FR-040** : Le back-office de Guide Négo DOIT porter l'écran de l'import : l'interrupteur, le choix de la COP et de la source, le seuil de lectures manquées, l'état et le journal (FR-019) ; et la liste des points de l'ordre du jour de la COP, chacun rattaché ou non à une thématique, le nombre de points sans thématique étant affiché. Il est réservé aux administrateurs de toute la plateforme, comme les autres écrans de Guide Négo.
+- **FR-040** : Le back-office de Guide Négo DOIT porter l'écran de l'import de la COP que sert l'application : l'interrupteur, le choix de la source, le seuil de lectures manquées, l'état et le journal (FR-019) ; et la liste des points de l'ordre du jour de la COP, chacun rattaché ou non à une thématique, le nombre de points sans thématique étant affiché. Il est réservé aux administrateurs de toute la plateforme, comme les autres écrans de Guide Négo.
 - **FR-041** : Le back-office NE DOIT PAS permettre de modifier une session officielle : la source fait foi ; les corrections viendront par les signalements (3b).
 
 ### Ce qui vaut pour toute l'étape
@@ -234,7 +235,7 @@ Dans la salle plénière, le réseau tombe. Aïssatou rouvre l'onglet : la liste
 ### Measurable Outcomes
 
 - **SC-001** : Sur les données archivées, l'import écrit toutes les sessions de l'archive ; une seconde lecture identique n'écrit aucune session.
-- **SC-002** : Une archive portant quatre changements produit exactement quatre écarts, et chacun s'affiche « avant → après ».
+- **SC-002** : Une archive portant quatre changements produit exactement quatre écarts (sessions touchées) ; l'heure et la salle changées s'affichent « avant → après ».
 - **SC-003** : Source injoignable, l'affichage se coupe à la lecture qui atteint le seuil, et plus aucune session officielle n'est servie ; il revient à la première lecture réussie.
 - **SC-004** : Import éteint, aucune session n'est servie et l'écran renvoie au programme officiel.
 - **SC-005** : Une négociatrice trouve la salle et l'heure de sa prochaine session en moins de dix secondes depuis l'ouverture de l'application.
@@ -248,7 +249,7 @@ Dans la salle plénière, le réseau tombe. Aïssatou rouvre l'onglet : la liste
 ## Assumptions
 
 - **Une COP à la fois** : l'import vise une édition, qui donne le lieu et le fuseau ; les sessions s'y rattachent.
-- **La source réelle** n'est pas documentée (ADR-009) ; son lecteur se configure quand l'accord du secrétariat sera obtenu. Le mécanisme s'éprouve sur l'archive d'une COP passée, rangée dans le dépôt.
+- **La source réelle**, non documentée (ADR-009), est le calendrier de conférence du site de la CCNUCC : une réponse JSON par COP, sans champ d'état ni document, le point de l'ordre du jour et la nature de la réunion dans le titre, derrière une protection anti-robot qui refuse un client sans navigateur ([research R2](research.md)). Son lecteur est écrit sur ce format et se branchera quand l'accord du secrétariat ouvrira un accès. Le mécanisme s'éprouve sur l'archive réelle de la COP30, rangée dans le dépôt.
 - **Réglages par défaut** : une lecture toutes les cinq minutes pendant la COP, seuil de trois lectures manquées d'affilée — réglable au back-office.
 - **« Déplacée »** désigne une session dont l'heure ou la salle a changé depuis sa première lecture ; elle le reste jusqu'à sa fin.
 - **Le lexique** est construit en parallèle (étape 2) ; le type de réunion lui passe son texte anglais, qu'il résout. D'ici là, la feuille s'ouvre comme dans le lecteur.
