@@ -381,3 +381,88 @@ INSERT INTO reference.taxonomy_terms (taxonomy_code, code, label, sort_order) VA
     ('negotiation_theme', 'agriculture',     '{"fr":"Agriculture","en":"Agriculture"}', 90),
     ('negotiation_theme', 'technology',      '{"fr":"Technologie","en":"Technology"}', 100)
 ON CONFLICT (taxonomy_code, code) DO NOTHING;
+
+-- -----------------------------------------------------------------------------
+-- 5 bis. Guide Négo — les sessions de négociation (étape 3a)
+--
+-- Deux vocabulaires lus par l'import de la source officielle
+-- (specs/014-guide-nego-sessions-agenda, R4). Le tri et le rattachement des
+-- réunions de la CCNUCC se font par leur `metadata`, jamais par une liste
+-- écrite dans le code :
+--
+--   negotiation_meeting_type
+--     source_categories    catégories de la source (`typeofevent`, lues dans le
+--                          calendrier de la COP30) qui admettent ce type. Une
+--                          réunion dont la catégorie n'est admise par aucun type
+--                          est écartée : événements parallèles, conférences de
+--                          presse, la plupart des événements de la présidence.
+--     denominations        fragments de titre qui désignent ce type.
+--     requires_title_match le type n'admet que les titres qui le nomment, même
+--                          dans une catégorie qui l'accepte.
+--     default_for          catégories dont c'est le type quand aucun titre ne
+--                          nomme un autre type.
+--   negotiation_group
+--     denominations        noms et sigles sous lesquels la source nomme le
+--                          groupe, relevés dans les titres réels (COP29, COP30).
+--
+-- Chaînes comparées après normalisation — minuscules, sans accents ni
+-- ponctuation — et EN MOTS ENTIERS : « EIG » est dans « Sovereign » et « LDC »
+-- dans « LLDCs », qui ne sont ni l'un ni l'autre. L'ordre de `sort_order` est
+-- aussi l'ordre de résolution des types : le plus précis d'abord (« informal
+-- informal consultations » contient « informal consultations »).
+--
+-- `label.en` des types est le terme passé au lexique. Libellés fr/en : des
+-- données, jamais un fichier i18n. is_system : aucun écran ne les modifie.
+-- -----------------------------------------------------------------------------
+INSERT INTO reference.taxonomies (code, label, description, is_multi_select, is_hierarchical, is_system) VALUES
+    ('negotiation_meeting_type', '{"fr":"Types de réunion de négociation","en":"Negotiation meeting types"}', '{"fr":"Nature d''une session officielle : plénière, groupe de contact, consultations informelles…","en":"Nature of an official session: plenary, contact group, informal consultations…"}', false, false, true),
+    ('negotiation_group',        '{"fr":"Groupes de négociation","en":"Negotiating groups"}',             '{"fr":"Groupes de Parties qui se coordonnent pendant une COP : Groupe africain, PMA, G77 et Chine…","en":"Party groupings that coordinate during a COP: African Group, LDCs, G77 and China…"}', true, false, true)
+ON CONFLICT (code) DO NOTHING;
+
+INSERT INTO reference.taxonomy_terms (taxonomy_code, code, label, description, sort_order, metadata) VALUES
+    ('negotiation_meeting_type', 'plenary', '{"fr":"Plénière","en":"Plenary"}', NULL, 10,
+     '{"source_categories":["Plenary"],"denominations":["plenary","plenaries"],"requires_title_match":false,"default_for":["Plenary"]}'),
+    ('negotiation_meeting_type', 'heads_of_delegation', '{"fr":"Chefs de délégation","en":"Heads of delegation"}', NULL, 20,
+     '{"source_categories":["Negotiations"],"denominations":["hods","hod","heads of delegation","head of delegation"],"requires_title_match":false,"default_for":[]}'),
+    ('negotiation_meeting_type', 'presidency_consultation', '{"fr":"Consultation de la présidence","en":"Presidency consultation"}', NULL, 30,
+     '{"source_categories":["Negotiations","Presidency event"],"denominations":["presidency consultation","presidency consultations"],"requires_title_match":true,"default_for":[]}'),
+    ('negotiation_meeting_type', 'informal_informals', '{"fr":"Aparté","en":"Informal informals"}', NULL, 40,
+     '{"source_categories":["Negotiations"],"denominations":["informal informal","informal informals","informal-informal","informal-informals"],"requires_title_match":false,"default_for":[]}'),
+    ('negotiation_meeting_type', 'informal_consultations', '{"fr":"Consultations informelles","en":"Informal consultations"}', NULL, 50,
+     '{"source_categories":["Negotiations"],"denominations":["informal consultation","informal consultations"],"requires_title_match":false,"default_for":[]}'),
+    ('negotiation_meeting_type', 'contact_group', '{"fr":"Groupe de contact","en":"Contact group"}', NULL, 60,
+     '{"source_categories":["Negotiations"],"denominations":["contact group","contact groups"],"requires_title_match":false,"default_for":[]}'),
+    ('negotiation_meeting_type', 'mandated_event', '{"fr":"Événement mandaté","en":"Mandated event"}', NULL, 70,
+     '{"source_categories":["Mandated events"],"denominations":["mandated event","mandated events"],"requires_title_match":false,"default_for":["Mandated events"]}'),
+    ('negotiation_meeting_type', 'group_coordination', '{"fr":"Coordination de groupe","en":"Group coordination"}', NULL, 80,
+     '{"source_categories":["Coordination meetings"],"denominations":[],"requires_title_match":false,"default_for":["Coordination meetings"]}'),
+    ('negotiation_meeting_type', 'negotiation_other', '{"fr":"Autre réunion de négociation","en":"Other negotiation meeting"}', NULL, 90,
+     '{"source_categories":["Negotiations"],"denominations":[],"requires_title_match":false,"default_for":["Negotiations"]}'),
+
+    ('negotiation_group', 'african_group', '{"fr":"Groupe africain","en":"African Group"}', '{"fr":"Groupe africain des négociateurs (AGN)","en":"African Group of Negotiators (AGN)"}', 10,
+     '{"denominations":["African Group","African Group of Negotiators","AGN"]}'),
+    ('negotiation_group', 'ldc', '{"fr":"PMA","en":"LDCs"}', '{"fr":"Groupe des pays les moins avancés","en":"Least Developed Countries Group"}', 20,
+     '{"denominations":["LDC","LDCs","Least Developed Countries"]}'),
+    ('negotiation_group', 'g77_china', '{"fr":"G77 et Chine","en":"G77 and China"}', '{"fr":"Groupe des 77 et la Chine","en":"Group of 77 and China"}', 30,
+     '{"denominations":["G77 & China","G77 and China","G77","Group of 77"]}'),
+    ('negotiation_group', 'aosis', '{"fr":"AOSIS","en":"AOSIS"}', '{"fr":"Alliance des petits États insulaires","en":"Alliance of Small Island States"}', 40,
+     '{"denominations":["AOSIS","Alliance of Small Island States","SIDS","Small Island Developing States"]}'),
+    ('negotiation_group', 'arab_group', '{"fr":"Groupe arabe","en":"Arab Group"}', NULL, 50,
+     '{"denominations":["Arab Group","Arab Group of Negotiators"]}'),
+    ('negotiation_group', 'lmdc', '{"fr":"LMDC","en":"LMDC"}', '{"fr":"Pays en développement animés du même esprit","en":"Like-Minded Developing Countries"}', 60,
+     '{"denominations":["LMDC","LMDCs","Like-Minded Developing Countries"]}'),
+    ('negotiation_group', 'ailac', '{"fr":"AILAC","en":"AILAC"}', '{"fr":"Association indépendante de l''Amérique latine et des Caraïbes","en":"Independent Association of Latin America and the Caribbean"}', 70,
+     '{"denominations":["AILAC"]}'),
+    ('negotiation_group', 'eu', '{"fr":"Union européenne","en":"European Union"}', NULL, 80,
+     '{"denominations":["EU","European Union"]}'),
+    ('negotiation_group', 'eig', '{"fr":"GIE","en":"EIG"}', '{"fr":"Groupe de l''intégrité environnementale","en":"Environmental Integrity Group"}', 90,
+     '{"denominations":["EIG","Environmental Integrity Group"]}'),
+    ('negotiation_group', 'basic', '{"fr":"BASIC","en":"BASIC"}', '{"fr":"Brésil, Afrique du Sud, Inde et Chine","en":"Brazil, South Africa, India and China"}', 100,
+     '{"denominations":["BASIC"]}'),
+    ('negotiation_group', 'umbrella_group', '{"fr":"Groupe de l''Ombrelle","en":"Umbrella Group"}', NULL, 110,
+     '{"denominations":["Umbrella Group"]}'),
+    ('negotiation_group', 'alba', '{"fr":"ALBA","en":"ALBA"}', '{"fr":"Alliance bolivarienne pour les peuples de notre Amérique","en":"Bolivarian Alliance for the Peoples of Our America"}', 120,
+     '{"denominations":["ALBA"]}'),
+    ('negotiation_group', 'grulac', '{"fr":"GRULAC","en":"GRULAC"}', '{"fr":"Groupe des États d''Amérique latine et des Caraïbes","en":"Group of Latin American and Caribbean States"}', 130,
+     '{"denominations":["GRULAC"]}')
+ON CONFLICT (taxonomy_code, code) DO NOTHING;

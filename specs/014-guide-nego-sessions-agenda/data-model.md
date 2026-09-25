@@ -41,7 +41,7 @@ cinq premières dès que `source_key` est posé.
 |---|---|---|
 | `source_key` | `text` | Identifiant de la session **à la source**. `UNIQUE (event_id, source_key)` |
 | `source_url` | `platform.url` | « Voir l'original » |
-| `title_original` | `text` | Titre anglais tel que lu — **fait foi** (FR-022). `title` reçoit `{"en": title_original}` |
+| `title_original` | `text` | Titre anglais tel que lu — **fait foi** (FR-022). `title` en reçoit la copie sous `fr` et `en` |
 | `first_read_at` | `timestamptz` | Première lecture |
 | `last_read_at` | `timestamptz` | Dernière lecture **où elle figurait** |
 | `meeting_type_term_id` | `uuid` → `taxonomy_terms` | Gardé `negotiation_meeting_type` |
@@ -55,8 +55,9 @@ cinq premières dès que `source_key` est posé.
 `kind = 'negotiation_session'`, `space_id` = l'espace `climat` (lu par son slug), `slug =
 <slug de l'édition>-<source_key>`, `format = 'onsite'` (sinon `ck_meetings_online_access` refuse),
 `is_ifdd_organized = false` (FR-021), `timezone` = celui de l'édition, `status = 'scheduled'`,
-`title = {"en": title_original}`. Le `CHECK` des colonnes de source se nomme
-`ck_meetings_source_complete`.
+`title = {"fr": title_original, "en": title_original}` — le domaine `i18n_text` exige `fr` (corrigé en
+phase 1). Le `CHECK` des colonnes de source se nomme `ck_meetings_source_complete` ; il exige aussi
+`event_id`, sans quoi l'unicité `(event_id, source_key)` ne tiendrait pas.
 
 **Contraintes retouchées** :
 

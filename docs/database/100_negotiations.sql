@@ -620,6 +620,45 @@ CREATE TYPE negotiation.meeting_kind AS ENUM (
 CREATE TYPE negotiation.meeting_format AS ENUM ('onsite', 'online', 'hybrid');
 CREATE TYPE negotiation.meeting_status AS ENUM ('draft', 'scheduled', 'ongoing', 'completed', 'cancelled');
 
+-- 3.0 — Les points de l'ordre du jour d'une COP (Guide Négo, étape 3a)
+--
+-- La source officielle ne les publie pas à part : l'import les extrait du titre
+-- des sessions (« SBI 12 (a) … - Informal consultation ») et les crée à la
+-- première lecture qui les cite. Leur rattachement à une thématique est un
+-- travail de l'IFDD, au back-office : un point n'est donc jamais supprimé par
+-- l'import, même quand plus aucune session ne le cite.
+CREATE TABLE negotiation.agenda_items (
+    id              uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    event_id        uuid        NOT NULL CONSTRAINT xmod_fk_agenda_items_event
+                                REFERENCES event.events(id) ON DELETE RESTRICT,
+    code            text        NOT NULL,
+    title           text        NOT NULL,
+    theme_term_id   uuid        REFERENCES reference.taxonomy_terms(id) ON DELETE RESTRICT,
+    theme_set_by    uuid        CONSTRAINT xmod_fk_agenda_items_theme_setter
+                                REFERENCES identity.people(id) ON DELETE SET NULL,
+    theme_set_at    timestamptz,
+    first_read_at   timestamptz NOT NULL,
+    CONSTRAINT ux_agenda_items_code UNIQUE (event_id, code)
+);
+
+CREATE INDEX ix_agenda_items_theme ON negotiation.agenda_items (theme_term_id) WHERE theme_term_id IS NOT NULL;
+
+CREATE TRIGGER tg_agenda_items_audit AFTER INSERT OR UPDATE OR DELETE ON negotiation.agenda_items
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
+CREATE TRIGGER tg_agenda_items_check_theme
+    BEFORE INSERT OR UPDATE OF theme_term_id ON negotiation.agenda_items
+    FOR EACH ROW EXECUTE FUNCTION negotiation.tg_check_term_taxonomy(
+        'theme_term_id', 'negotiation_theme');
+
+COMMENT ON TABLE negotiation.agenda_items IS
+    'Points de l''ordre du jour d''une COP, extraits du titre des sessions par l''import. Jamais supprimés par lui : leur thématique est posée à la main par l''IFDD.';
+COMMENT ON COLUMN negotiation.agenda_items.code IS
+    'Code tel que lu dans le titre de la session : « SBI 12 (a) », « CMA 8 ». Unique par édition.';
+COMMENT ON COLUMN negotiation.agenda_items.title IS
+    'Intitulé anglais, extrait du titre de la première session qui cite le point.';
+COMMENT ON COLUMN negotiation.agenda_items.theme_term_id IS
+    'Thématique (negotiation_theme), posée au back-office. Les sessions du point en héritent : c''est ce qui les montre en premier à qui suit la thématique.';
+
 CREATE TABLE negotiation.meetings (
     id                    uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
     space_id              uuid        NOT NULL REFERENCES negotiation.spaces(id) ON DELETE CASCADE,
@@ -628,7 +667,9 @@ CREATE TABLE negotiation.meetings (
     title                 platform.i18n_text NOT NULL,
     description           platform.i18n_text,
     start_at              timestamptz NOT NULL,
-    end_at                timestamptz NOT NULL,
+    -- Nulle seulement pour une session importée : la source en publie sans fin
+    -- annoncée (ck_meetings_imported_end).
+    end_at                timestamptz,
     timezone              platform.timezone_name NOT NULL DEFAULT 'UTC',
     format                negotiation.meeting_format NOT NULL DEFAULT 'online',
     venue_label           text,
@@ -657,9 +698,29 @@ CREATE TABLE negotiation.meetings (
                                       REFERENCES identity.people(id) ON DELETE SET NULL,
     created_at            timestamptz NOT NULL DEFAULT now(),
     updated_at            timestamptz NOT NULL DEFAULT now(),
+    -- Session officielle importée (Guide Négo, étape 3a) : toutes nulles pour
+    -- une réunion saisie à la main, les cinq premières exigées dès que
+    -- `source_key` est posé (ck_meetings_source_complete).
+    source_key            text,
+    source_url            platform.url,
+    title_original        text,
+    first_read_at         timestamptz,
+    last_read_at          timestamptz,
+    meeting_type_term_id  uuid        REFERENCES reference.taxonomy_terms(id) ON DELETE RESTRICT,
+    group_term_id         uuid        REFERENCES reference.taxonomy_terms(id) ON DELETE RESTRICT,
+    agenda_item_id        uuid        REFERENCES negotiation.agenda_items(id) ON DELETE RESTRICT,
+    is_open_access        boolean,
+    absent_reads          smallint    NOT NULL DEFAULT 0,
+    cancelled_at          timestamptz,
 
     CONSTRAINT ux_meetings_slug UNIQUE (space_id, slug),
-    CONSTRAINT ck_meetings_period CHECK (end_at > start_at),
+    CONSTRAINT ck_meetings_period CHECK (end_at IS NULL OR end_at > start_at),
+    -- Une réunion saisie à la main a toujours une fin : l'étape 4 n'hérite pas
+    -- de la tolérance faite à la source.
+    CONSTRAINT ck_meetings_imported_end CHECK (source_key IS NOT NULL OR end_at IS NOT NULL),
+    CONSTRAINT ck_meetings_source_complete
+        CHECK (source_key IS NULL OR (event_id IS NOT NULL AND source_url IS NOT NULL
+            AND title_original IS NOT NULL AND first_read_at IS NOT NULL AND last_read_at IS NOT NULL)),
     CONSTRAINT ck_meetings_registration_window
         CHECK (registration_opens_at IS NULL OR registration_closes_at IS NULL
             OR registration_closes_at > registration_opens_at),
@@ -668,10 +729,17 @@ CREATE TABLE negotiation.meetings (
     CONSTRAINT ck_meetings_online_access
         CHECK (status = 'draft' OR format = 'onsite'
             OR live_meeting_id IS NOT NULL OR external_url IS NOT NULL),
+    -- Une session importée peut n'avoir pas de salle à la source : on n'en
+    -- invente pas.
     CONSTRAINT ck_meetings_onsite_venue
-        CHECK (status = 'draft' OR format = 'online' OR venue_label IS NOT NULL),
+        CHECK (status = 'draft' OR format = 'online' OR venue_label IS NOT NULL OR source_key IS NOT NULL),
     CONSTRAINT ck_meetings_cancellation
         CHECK (status <> 'cancelled' OR cancellation_reason IS NOT NULL),
+    -- L'import écrit un code, jamais un libellé : « CANCELLED » à la source,
+    -- « POSTPONED » à la source, ou disparue de deux lectures de suite.
+    CONSTRAINT ck_meetings_import_cancellation
+        CHECK (source_key IS NULL OR cancellation_reason IS NULL
+            OR cancellation_reason IN ('source', 'postponed', 'removed')),
     -- Une même salle Zoom ne peut pas héberger deux réunions qui se chevauchent.
     --
     -- Ce blocage est volontaire et ne contredit pas la règle du module
@@ -691,16 +759,50 @@ CREATE INDEX ix_meetings_agenda   ON negotiation.meetings (space_id, start_at DE
     WHERE status IN ('scheduled', 'ongoing');
 CREATE INDEX ix_meetings_kind     ON negotiation.meetings (kind, start_at DESC);
 CREATE INDEX ix_meetings_upcoming ON negotiation.meetings (start_at) WHERE status = 'scheduled';
+CREATE UNIQUE INDEX ux_meetings_source ON negotiation.meetings (event_id, source_key)
+    WHERE source_key IS NOT NULL;
+CREATE INDEX ix_meetings_event_day ON negotiation.meetings (event_id, start_at)
+    WHERE kind = 'negotiation_session';
 
 CREATE TRIGGER tg_meetings_updated_at BEFORE UPDATE ON negotiation.meetings
     FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
 CREATE TRIGGER tg_meetings_audit AFTER INSERT OR UPDATE OR DELETE ON negotiation.meetings
     FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
+CREATE TRIGGER tg_meetings_check_type
+    BEFORE INSERT OR UPDATE OF meeting_type_term_id ON negotiation.meetings
+    FOR EACH ROW EXECUTE FUNCTION negotiation.tg_check_term_taxonomy(
+        'meeting_type_term_id', 'negotiation_meeting_type');
+CREATE TRIGGER tg_meetings_check_group
+    BEFORE INSERT OR UPDATE OF group_term_id ON negotiation.meetings
+    FOR EACH ROW EXECUTE FUNCTION negotiation.tg_check_term_taxonomy(
+        'group_term_id', 'negotiation_group');
 
 COMMENT ON TABLE negotiation.meetings IS
     'Événements d''un espace de négociation : sessions officielles, concertations francophones, ateliers, formations, innovation. Unifie les deux tables jumelles de la v1.';
 COMMENT ON COLUMN negotiation.meetings.kind IS
     'ENUM fermé assumé : chaque valeur engage un parcours applicatif distinct (contrairement aux filières, ouvertes par taxonomie).';
+COMMENT ON COLUMN negotiation.meetings.end_at IS
+    'Nulle seulement pour une session importée sans fin annoncée à la source ; toute autre réunion en a une (ck_meetings_imported_end).';
+COMMENT ON COLUMN negotiation.meetings.source_key IS
+    'Identifiant de la session à la source officielle ; nul pour une réunion saisie à la main. Unique par édition (ux_meetings_source).';
+COMMENT ON COLUMN negotiation.meetings.source_url IS
+    'La fiche de la session à la source : « Voir l''original ».';
+COMMENT ON COLUMN negotiation.meetings.title_original IS
+    'Titre anglais tel que lu, préfixe « CANCELLED » ou « POSTPONED » retiré : il FAIT FOI. `title` en reçoit la copie sous "fr" et "en" — le domaine i18n_text exige "fr", et aucun texte humain ne le traduit ; la traduction automatique vit dans title_translations.';
+COMMENT ON COLUMN negotiation.meetings.last_read_at IS
+    'Dernière lecture réussie où la session figurait à la source.';
+COMMENT ON COLUMN negotiation.meetings.meeting_type_term_id IS
+    'Type de réunion (negotiation_meeting_type), résolu à l''import par les metadata du vocabulaire.';
+COMMENT ON COLUMN negotiation.meetings.group_term_id IS
+    'Groupe de négociation (negotiation_group) d''une coordination, re-résolu à chaque lecture ; nul si le titre n''en nomme aucun.';
+COMMENT ON COLUMN negotiation.meetings.agenda_item_id IS
+    'Point de l''ordre du jour ; nul = « Hors ordre du jour officiel ». La session hérite de sa thématique.';
+COMMENT ON COLUMN negotiation.meetings.is_open_access IS
+    'Ouverte (vrai) ou à accès limité (faux), selon la source.';
+COMMENT ON COLUMN negotiation.meetings.absent_reads IS
+    'Lectures réussies de suite où la session manquait à la source. À 2, elle passe cancelled (motif removed) ; reparue, le compteur retombe à 0.';
+COMMENT ON COLUMN negotiation.meetings.cancelled_at IS
+    'Heure du constat de l''annulation par l''import.';
 
 -- Publication d'un événement de domaine à l'annulation : le module engagement
 -- prévient les inscrits sans que ce module connaisse l'email.
@@ -709,6 +811,11 @@ RETURNS trigger
 LANGUAGE plpgsql
 AS $$
 BEGIN
+    -- Une session importée n'émet rien : ses « inscrits » n'existent pas, et
+    -- l'avis de changement viendra des signalements (étape 3b).
+    IF NEW.source_key IS NOT NULL THEN
+        RETURN NULL;
+    END IF;
     IF NEW.status IS DISTINCT FROM OLD.status AND NEW.status IN ('scheduled', 'cancelled') THEN
         PERFORM platform.emit_event(
             'negotiation', 'meeting', NEW.id,
@@ -781,6 +888,217 @@ $$;
 CREATE TRIGGER tg_meeting_registrations_count
     AFTER INSERT OR UPDATE OF status OR DELETE ON negotiation.meeting_registrations
     FOR EACH ROW EXECUTE FUNCTION negotiation.tg_sync_registered_count();
+
+-- -----------------------------------------------------------------------------
+-- 4 bis. L'import de la source officielle — Guide Négo, étape 3a
+--
+-- Les sessions de négociation d'une COP ne se saisissent pas : un travail lit le
+-- calendrier de conférence de la CCNUCC, compare à ce qu'il a déjà lu et
+-- n'écrit que les écarts (specs/014-guide-nego-sessions-agenda, R2, R5, R7).
+-- La source fait foi ; ce qui en vient porte son origine et son heure de
+-- lecture, dans negotiation.meetings.
+-- -----------------------------------------------------------------------------
+
+-- L'import d'une édition : son interrupteur, son lecteur et son état de santé.
+CREATE TABLE negotiation.official_imports (
+    id                      uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    event_id                uuid        NOT NULL CONSTRAINT xmod_fk_official_imports_event
+                                        REFERENCES event.events(id) ON DELETE RESTRICT,
+    is_enabled              boolean     NOT NULL DEFAULT false,
+    reader                  text        NOT NULL DEFAULT 'archive',
+    archive_name            text,
+    archive_first_day       date,
+    live_url                platform.url,
+    time_correction_minutes smallint    NOT NULL DEFAULT 60,
+    official_programme_url  platform.url NOT NULL,
+    interval_seconds        integer     NOT NULL DEFAULT 300,
+    missed_threshold        smallint    NOT NULL DEFAULT 3,
+    missed_reads            smallint    NOT NULL DEFAULT 0,
+    last_success_at         timestamptz,
+    last_attempt_at         timestamptz,
+    last_error              text,
+    last_change_count       integer,
+    failing_since           timestamptz,
+    updated_by              uuid        CONSTRAINT xmod_fk_official_imports_updater
+                                        REFERENCES identity.people(id) ON DELETE SET NULL,
+    updated_at              timestamptz NOT NULL DEFAULT now(),
+    CONSTRAINT ux_official_imports_event UNIQUE (event_id),
+    CONSTRAINT ck_official_imports_reader    CHECK (reader IN ('archive', 'live')),
+    CONSTRAINT ck_official_imports_interval  CHECK (interval_seconds >= 60),
+    CONSTRAINT ck_official_imports_threshold CHECK (missed_threshold >= 1),
+    CONSTRAINT ck_official_imports_missed    CHECK (missed_reads >= 0)
+);
+
+CREATE TRIGGER tg_official_imports_updated_at BEFORE UPDATE ON negotiation.official_imports
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
+CREATE TRIGGER tg_official_imports_audit AFTER INSERT OR UPDATE OR DELETE ON negotiation.official_imports
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
+
+COMMENT ON TABLE negotiation.official_imports IS
+    'L''import des sessions officielles d''une édition : interrupteur, lecteur, cadence, et santé de la source. Une ligne par édition.';
+COMMENT ON COLUMN negotiation.official_imports.reader IS
+    'archive = un jeu archivé embarqué (recette, et tant que l''accès à la source manque) ; live = le JSON du calendrier de conférence, par HTTP.';
+COMMENT ON COLUMN negotiation.official_imports.archive_name IS
+    'Le fichier du jeu archivé que lit le lecteur archive.';
+COMMENT ON COLUMN negotiation.official_imports.archive_first_day IS
+    'Pose le premier jour de l''archive sur ce jour, heure murale gardée, dans le fuseau de l''édition : l''archive se rejoue sur une autre COP, ou sur aujourd''hui pour la recette.';
+COMMENT ON COLUMN negotiation.official_imports.time_correction_minutes IS
+    'Minutes ajoutées aux heures naïves de la source avant de les lire dans le fuseau de l''édition : la CCNUCC publie l''heure locale moins une heure (constaté sur la COP29 et la COP30).';
+COMMENT ON COLUMN negotiation.official_imports.official_programme_url IS
+    'Le renvoi « Programme officiel de la CCNUCC », offert quand l''affichage est coupé.';
+COMMENT ON COLUMN negotiation.official_imports.missed_threshold IS
+    'Lectures manquées d''affilée au-delà desquelles l''affichage se coupe (negotiation.import_is_serving).';
+COMMENT ON COLUMN negotiation.official_imports.missed_reads IS
+    'Lectures manquées d''affilée : source injoignable, délai dépassé, contenu illisible, ou aucune réunion retenue. Retombe à zéro à la première réussite.';
+COMMENT ON COLUMN negotiation.official_imports.failing_since IS
+    'Heure de la première lecture manquée de la série en cours : « la source n''a pas répondu depuis 06:40 ». Nulle dès qu''une lecture réussit.';
+COMMENT ON COLUMN negotiation.official_imports.last_change_count IS
+    'Sessions touchées par la dernière lecture réussie.';
+
+-- Le journal des lectures, purgé au-delà de 30 jours par le travail d'import.
+CREATE TABLE negotiation.import_runs (
+    id              uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    import_id       uuid        NOT NULL REFERENCES negotiation.official_imports(id) ON DELETE CASCADE,
+    started_at      timestamptz NOT NULL DEFAULT now(),
+    finished_at     timestamptz,
+    outcome         text        NOT NULL,
+    error           text,
+    session_count   integer,
+    change_count    integer,
+    is_manual       boolean     NOT NULL DEFAULT false,
+    CONSTRAINT ck_import_runs_outcome CHECK (outcome IN ('success', 'failure'))
+);
+
+CREATE INDEX ix_import_runs_import ON negotiation.import_runs (import_id, started_at DESC);
+
+COMMENT ON TABLE negotiation.import_runs IS
+    'Journal des lectures de la source officielle, une ligne par lecture. Purgé au-delà de 30 jours par le travail d''import ; pas d''audit, c''est déjà un journal.';
+COMMENT ON COLUMN negotiation.import_runs.change_count IS
+    'Sessions touchées par la lecture — apparues, changées, absentes, reparues —, et non lignes de meeting_changes.';
+COMMENT ON COLUMN negotiation.import_runs.is_manual IS
+    'Lecture demandée par « Lire maintenant » : elle ne replanifie pas la chaîne.';
+
+-- L'historique des écarts constatés entre deux lectures.
+CREATE TABLE negotiation.meeting_changes (
+    id              uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    meeting_id      uuid        NOT NULL REFERENCES negotiation.meetings(id) ON DELETE CASCADE,
+    field           text        NOT NULL,
+    old_value       jsonb,
+    new_value       jsonb,
+    detected_at     timestamptz NOT NULL,
+    import_run_id   uuid        REFERENCES negotiation.import_runs(id) ON DELETE SET NULL,
+    CONSTRAINT ck_meeting_changes_field
+        CHECK (field IN ('start', 'end', 'venue', 'title', 'type', 'access', 'agenda_item', 'status'))
+);
+
+CREATE INDEX ix_meeting_changes_meeting ON negotiation.meeting_changes (meeting_id, detected_at DESC);
+
+COMMENT ON TABLE negotiation.meeting_changes IS
+    'Écarts constatés par l''import, champ par champ. « Déplacée » s''en déduit (un changement start, end ou venue) : aucun état stocké ne se désynchronise de l''heure. Pas d''audit, c''est déjà un journal.';
+COMMENT ON COLUMN negotiation.meeting_changes.field IS
+    'Liste close du code de l''import, pas un vocabulaire : un champ de plus est une évolution du comparateur.';
+COMMENT ON COLUMN negotiation.meeting_changes.detected_at IS
+    'Heure de la lecture qui a vu l''écart.';
+COMMENT ON COLUMN negotiation.meeting_changes.import_run_id IS
+    'La lecture qui a vu l''écart. Mise à nul quand le journal est purgé : l''écart, lui, reste.';
+
+-- Une traduction par titre anglais, partagée par les sessions de même titre.
+CREATE TABLE negotiation.title_translations (
+    source_text     text        PRIMARY KEY,
+    text_fr         text        NOT NULL,
+    model           text        NOT NULL,
+    translated_at   timestamptz NOT NULL DEFAULT now()
+);
+
+COMMENT ON TABLE negotiation.title_translations IS
+    'Traduction automatique des titres de sessions officielles, une par titre anglais. ÉCART AU PRINCIPE XII, décidé par le commanditaire le 25/09 : publiée SANS relecture humaine, bornée aux titres de sessions officielles (une COP en compte des centaines par jour), toujours affichée sous le titre anglais — qui fait foi — et marquée « Traduction automatique ». Pas d''audit : c''est le travail qui écrit, et le modèle est noté.';
+COMMENT ON COLUMN negotiation.title_translations.source_text IS
+    'Le titre anglais exact, tel que gardé dans meetings.title_original : un titre changé à la source appelle une nouvelle traduction.';
+COMMENT ON COLUMN negotiation.title_translations.model IS
+    'Le modèle d''OpenRouter qui l''a produite (réglage ai.drafting_model au moment de la traduction).';
+
+-- La règle de coupure, en un seul endroit : la route publique et le back-office
+-- la lisent, aucun code ne la réécrit.
+CREATE OR REPLACE FUNCTION negotiation.import_is_serving(p_event_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT coalesce((
+        SELECT i.is_enabled
+           AND i.last_success_at IS NOT NULL
+           AND i.missed_reads < i.missed_threshold
+           AND now() - i.last_success_at
+               < make_interval(secs => i.missed_threshold * i.interval_seconds + 60)
+          FROM negotiation.official_imports i
+         WHERE i.event_id = p_event_id
+    ), false);
+$$;
+
+COMMENT ON FUNCTION negotiation.import_is_serving(uuid) IS
+    'Vrai si les sessions importées de l''édition peuvent s''afficher : import allumé, au moins une lecture réussie, moins de missed_threshold lectures manquées d''affilée, ET dernière réussite plus récente que missed_threshold × interval_seconds + 60 s — un worker arrêté ne manque aucune lecture, et ne doit pas laisser servir une liste périmée. Faux sans ligne d''import.';
+
+-- -----------------------------------------------------------------------------
+-- 4 ter. « Mon groupe » et « Mon agenda » — Guide Négo, étape 3a
+-- -----------------------------------------------------------------------------
+
+-- Les groupes de négociation suivis : même patron que theme_subscriptions.
+-- Aucun groupe suivi : toutes les coordinations passent le filtre.
+CREATE TABLE negotiation.group_subscriptions (
+    id              uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    person_id       uuid        NOT NULL CONSTRAINT xmod_fk_group_subscriptions_person
+                                REFERENCES identity.people(id) ON DELETE CASCADE,
+    group_term_id   uuid        NOT NULL REFERENCES reference.taxonomy_terms(id) ON DELETE RESTRICT,
+    followed_at     timestamptz NOT NULL DEFAULT now(),
+    left_at         timestamptz,
+    CONSTRAINT ck_group_subscriptions_period CHECK (left_at IS NULL OR left_at >= followed_at)
+);
+
+CREATE UNIQUE INDEX ux_group_subscriptions_active
+    ON negotiation.group_subscriptions (person_id, group_term_id) WHERE left_at IS NULL;
+CREATE INDEX ix_group_subscriptions_group
+    ON negotiation.group_subscriptions (group_term_id, followed_at DESC) WHERE left_at IS NULL;
+
+CREATE TRIGGER tg_group_subscriptions_audit
+    AFTER INSERT OR UPDATE OR DELETE ON negotiation.group_subscriptions
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
+CREATE TRIGGER tg_group_subscriptions_check_group
+    BEFORE INSERT OR UPDATE OF group_term_id ON negotiation.group_subscriptions
+    FOR EACH ROW EXECUTE FUNCTION negotiation.tg_check_term_taxonomy(
+        'group_term_id', 'negotiation_group');
+
+COMMENT ON TABLE negotiation.group_subscriptions IS
+    'Groupes de négociation qu''une personne suit (« Mon groupe »). N''ouvre aucun droit : commande les coordinations qu''on lui montre. Même patron que theme_subscriptions.';
+COMMENT ON COLUMN negotiation.group_subscriptions.left_at IS
+    'Un suivi se ferme, il ne se supprime pas ; l''index unique ne porte que sur le suivi vivant.';
+
+-- « Mon agenda » : les sessions officielles qu'une personne garde. Pas une
+-- inscription (meeting_registrations) : suivre une session officielle n'engage
+-- aucune place, sans capacité ni liste d'attente. Aucune contrainte de
+-- chevauchement : deux sessions à la même heure se gardent (règle n° 2).
+CREATE TABLE negotiation.agenda_entries (
+    person_id       uuid        NOT NULL CONSTRAINT xmod_fk_agenda_entries_person
+                                REFERENCES identity.people(id) ON DELETE CASCADE,
+    meeting_id      uuid        NOT NULL REFERENCES negotiation.meetings(id) ON DELETE CASCADE,
+    remind_before   interval,
+    added_at        timestamptz NOT NULL DEFAULT now(),
+    updated_at      timestamptz NOT NULL DEFAULT now(),
+    PRIMARY KEY (person_id, meeting_id),
+    CONSTRAINT ck_agenda_entries_remind
+        CHECK (remind_before IS NULL OR remind_before = interval '15 minutes')
+);
+
+CREATE INDEX ix_agenda_entries_meeting ON negotiation.agenda_entries (meeting_id);
+
+CREATE TRIGGER tg_agenda_entries_updated_at BEFORE UPDATE ON negotiation.agenda_entries
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
+CREATE TRIGGER tg_agenda_entries_audit AFTER INSERT OR UPDATE OR DELETE ON negotiation.agenda_entries
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit('meeting_id');
+
+COMMENT ON TABLE negotiation.agenda_entries IS
+    'Sessions officielles gardées dans « Mon agenda ». Le retrait supprime la ligne. Pas une inscription : aucune place engagée, aucun refus pour chevauchement.';
+COMMENT ON COLUMN negotiation.agenda_entries.remind_before IS
+    'Rappel dans l''application ouverte : nul = aucun, sinon 15 minutes, seule valeur offerte. Sans effet sur une session annulée.';
 
 -- -----------------------------------------------------------------------------
 -- 5. Documents d'aide à la négociation  (correction D3)

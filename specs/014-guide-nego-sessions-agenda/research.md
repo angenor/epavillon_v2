@@ -82,7 +82,7 @@ format réel, fautes et décalage compris.
 **Décision** : `reference.taxonomy_terms.metadata` porte, pour `negotiation_meeting_type`,
 `source_categories` (les `typeofevent` qui l'admettent) et `denominations` (fragments de titre) ; pour
 `negotiation_group`, `denominations` (noms et sigles : « G77 & China », « LMDC », « AGN »…). Chaînes
-comparées après normalisation (minuscules, sans accents ni ponctuation).
+comparées après normalisation (minuscules, sans accents ni ponctuation), **en mots entiers** : « EIG » est dans « Sovereign », « LDC » dans « LLDCs ».
 
 Résolution d'une entrée :
 1. sa catégorie n'est admise par aucun type → **écartée** ;
