@@ -755,6 +755,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/negotiation/agenda-items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `AgendaItemAdmin[]` — les points de l'ordre du jour de l'édition, ceux sans thématique d'abord, puis par code. `theme` est un code du vocabulaire `negotiation_theme`. */
+        get: operations["admin_negotiation_agenda_items"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/agenda-items/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description `AgendaItemThemePayload` → `AgendaItemAdmin` — rattache un point à une thématique, ou l'en détache (`null`). Les sessions du point en héritent à la lecture : rien n'est recopié sur elles. */
+        put: operations["admin_negotiation_agenda_item_rattacher"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/negotiation/corrections/{note_id}/withdraw": {
         parameters: {
             query?: never;
@@ -1151,6 +1185,55 @@ export interface paths {
         put?: never;
         /** @description `AdminGlossaryEntry` — revient au brouillon ; le téléphone le retire à sa relecture. */
         post: operations["admin_negotiation_glossary_depublier"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `OfficialImportAdmin` — le réglage de l'import de l'édition, sa santé et le journal des vingt dernières lectures.
+         *
+         *     `serving` est lu de `negotiation.import_is_serving()`, la règle de coupure écrite une seule fois. `archives` énumère les jeux archivés embarqués dans le binaire. Une édition sans import se lit avec les valeurs par défaut, éteinte.
+         */
+        get: operations["admin_negotiation_import_lire"];
+        /**
+         * @description `UpdateOfficialImportPayload` → `OfficialImportAdmin` — pose le réglage entier, et crée la ligne d'import si elle manque.
+         *
+         *     **Allumer** pose la première lecture dans la même transaction ; **éteindre** coupe l'affichage aussitôt. Le seuil et l'intervalle valent dès la lecture suivante.
+         *
+         *     Un réglage incomplet — lecteur `live` sans adresse, jeu archivé inconnu, intervalle hors de 60 s à un jour, seuil hors de 1 à 100 — sort en `NEGOTIATION_IMPORT_CONFIG_INVALID`, qui nomme le champ.
+         */
+        put: operations["admin_negotiation_import_regler"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/import/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description « Lire maintenant » — pose une lecture immédiate à sa propre clé, **sans replanifier** : deux appels font deux lectures, et la chaîne récurrente reste unique.
+         *
+         *     Import éteint, la lecture a lieu et l'affichage reste coupé.
+         */
+        post: operations["admin_negotiation_import_lire_maintenant"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3382,6 +3465,49 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/negotiation/me/agenda": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `MyAgenda` — les sessions officielles que la personne connectée garde : identifiant, rappel, date d'ajout. Les sessions elles-mêmes se lisent dans `OfficialSessions`.
+         *
+         *     `remind` est **effectif** : faux dès que la session est annulée, quel que soit ce qui est enregistré. `ETag` et **304**.
+         */
+        get: operations["negotiation_mon_agenda"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/negotiation/me/agenda/{session_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * @description `AgendaEntryPayload` — garder une session dans l'agenda, ou changer son rappel. **Idempotent**. Aucun refus pour chevauchement.
+         *
+         *     Session inconnue ou non importée : **404**. Annulée et absente de l'agenda : **409** ; déjà dans l'agenda, le geste passe. `remind: true` sur une annulée s'enregistre désarmé.
+         */
+        put: operations["negotiation_garder_une_session"];
+        post?: never;
+        /** @description Retire une session de l'agenda. **Idempotent**, même si elle n'y était pas. */
+        delete: operations["negotiation_retirer_une_session"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/negotiation/me/bookmarks": {
         parameters: {
             query?: never;
@@ -3469,6 +3595,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/negotiation/me/groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `MyGroups` — les groupes de négociation que la personne connectée suit : des codes du vocabulaire `negotiation_group`, jamais de libellés, et l'empreinte de cet état. Aucun groupe : `200` et une liste vide.
+         *
+         *     `ETag` calculé sur les codes triés ; **304** sur `If-None-Match`.
+         */
+        get: operations["negotiation_mes_groupes"];
+        /**
+         * @description `GroupsPayload` → `MyGroups` — remplacer **en bloc** la liste des groupes suivis. La liste vide est permise : « aucun groupe » est un choix. Rejouer le même corps n'écrit rien de plus.
+         *
+         *     `If-Match` porte l'empreinte de l'état sur lequel le choix a été pris ; différente de l'état courant : **412**, aucune écriture. Un code inconnu est refusé en le nommant.
+         */
+        put: operations["negotiation_suivre_des_groupes"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/negotiation/me/themes": {
         parameters: {
             query?: never;
@@ -3492,6 +3644,31 @@ export interface paths {
          *     Les suivis absents de la liste sont **fermés**, jamais supprimés. Un code inconnu, ou d'un autre vocabulaire, est refusé en nommant le code. Un terme retiré du vocabulaire reste à qui le suivait et ne se choisit plus.
          */
         put: operations["negotiation_suivre_des_thematiques"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/negotiation/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `OfficialSessions` — toutes les sessions de négociation officielles de l'édition, en une réponse : chaque fiche se lit hors connexion dès la première lecture.
+         *
+         *     `state` dit si l'import sert : **coupé** (`cut`), `sessions` est vide quel que soit l'âge des lignes en base, et `cut_reason` dit pourquoi — `disabled` (import éteint ou jamais lu) ou `unreachable` (source muette au-delà du seuil). `official_programme_url` renvoie alors au programme officiel.
+         *
+         *     Chaque session porte son titre anglais, qui fait foi, et sa traduction automatique quand elle existe ; `previous` n'existe que si l'heure ou la salle a changé ; `read_at` est la dernière lecture où elle figurait.
+         *
+         *     `ETag` sur le corps, heure du serveur exclue ; **304** sur `If-None-Match`.
+         */
+        get: operations["negotiation_sessions"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -5091,13 +5268,20 @@ export interface components {
          *     - `NEGOTIATION_PATHWAY_LINK_INVALID` (422) — Le lien de l'étape ne correspond pas à sa cible.
          *     - `NEGOTIATION_PATHWAY_GROUP_NOT_EMPTY` (409) — Ce groupe porte encore des étapes : déplacez-les avant de le supprimer.
          *     - `NEGOTIATION_RELATED_SELF` (422) — Une entrée ne peut pas être liée à elle-même.
+         *     - `NEGOTIATION_EDITION_UNKNOWN` (404) — Cette édition n'existe pas, ou ne reçoit pas les sessions officielles.
+         *     - `NEGOTIATION_SESSION_UNKNOWN` (404) — Cette session de négociation n'existe pas.
+         *     - `NEGOTIATION_SESSION_CANCELLED` (409) — Cette session est annulée : elle ne s'ajoute plus à l'agenda.
+         *     - `NEGOTIATION_GROUP_UNKNOWN` (400) — Ce groupe de négociation n'existe pas.
+         *     - `NEGOTIATION_GROUPS_STALE` (412) — Vos groupes ont changé sur un autre appareil. Ils ont été relus.
+         *     - `NEGOTIATION_IMPORT_CONFIG_INVALID` (400) — Ce réglage de l'import est incomplet.
+         *     - `NEGOTIATION_AGENDA_ITEM_UNKNOWN` (404) — Ce point de l'ordre du jour n'existe pas.
          */
         ApiError: {
             /**
              * @description Code stable. Le renommer est un changement majeur.
              * @enum {string}
              */
-            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "INTERNAL" | "SERVICE_UNAVAILABLE" | "IDENTITY_SESSION_EXPIRED" | "IDENTITY_SESSION_REVOKED" | "IDENTITY_REFRESH_REUSED" | "IDENTITY_ORIGIN_REJECTED" | "IDENTITY_PASSWORD_TOO_WEAK" | "IDENTITY_EMAIL_ALREADY_USED" | "IDENTITY_ACCOUNT_ALREADY_EXISTS" | "IDENTITY_ROLE_WINDOW_INVALID" | "IDENTITY_ROLE_SCOPE_MISMATCH" | "IDENTITY_ROLE_REVOCATION_INVALID" | "IDENTITY_UNKNOWN_REFERENCE" | "IDENTITY_PRIVACY_WRONG_ACTION" | "ORG_NOT_MANAGER" | "ORG_MEMBERSHIP_IS_INVITATION" | "ORG_MEMBERSHIP_NOT_PENDING" | "ORG_LAST_MANAGER" | "ORG_MERGE_FIELD_NOT_ARBITRABLE" | "ORG_MERGE_GLOBAL_SCOPE_REQUIRED" | "ORG_MERGE_SAME_ORGANIZATION" | "ORG_DOMAIN_VERIFICATION_REQUIRED" | "ORG_NAME_IS_DERIVED" | "ORG_UNKNOWN_REFERENCE" | "ORG_INVITATION_NOT_YOURS" | "EVENT_GLOBAL_SCOPE_REQUIRED" | "EVENT_CRITERION_HAS_SCORES" | "EVENT_UNKNOWN_REFERENCE" | "PROPOSAL_NOT_EDITABLE" | "PROPOSAL_SPEAKER_IDENTITY_LOCKED" | "PROPOSAL_REVIEW_NOT_ASSIGNED" | "PROPOSAL_UNKNOWN_TERM" | "PROPOSAL_TEXT_TOO_LONG" | "PROPOSAL_UNKNOWN_REFERENCE" | "SESSION_DERIVED_FIELD" | "SESSION_UNKNOWN_REFERENCE" | "SESSION_TRACK_EVENT_MISMATCH" | "REGISTRATION_NOT_ACCEPTED" | "REGISTRATION_ANSWER_INVALID" | "REGISTRATION_CONSENT_REQUIRED" | "REGISTRATION_ACCOUNT_REQUIRED" | "REGISTRATION_LOCKED" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_MIME_NOT_ALLOWED" | "MEDIA_TOO_LARGE" | "MEDIA_ASPECT_RATIO" | "MEDIA_ROLE_NOT_DECLARED" | "MEDIA_ROLE_EXCLUSIVE" | "MEDIA_ASSET_NOT_SERVABLE" | "MEDIA_ALT_TEXT_REQUIRED" | "MEDIA_ASSET_IN_USE" | "MEDIA_UPLOAD_INCOMPLETE" | "MEDIA_STORAGE_UNAVAILABLE" | "ENGAGEMENT_REMINDER_OFFSETS_INVALID" | "ENGAGEMENT_REMINDER_SCOPE_INVALID" | "ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN" | "ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN" | "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN" | "LIVE_INCIDENT_SCOPE_TARGET_MISMATCH" | "LIVE_INCIDENT_WINDOW_INVALID" | "LIVE_INCIDENT_NOT_PUBLISHED" | "NEGOTIATION_ACCESS_REQUEST_PENDING" | "NEGOTIATION_ACCESS_REQUEST_DECIDED" | "NEGOTIATION_INVITATION_CODE_DUPLICATE" | "NEGOTIATION_ADMISSION_MODE_INVALID" | "NEGOTIATION_SPACE_UNKNOWN" | "NEGOTIATION_THEMES_EMPTY" | "NEGOTIATION_THEME_UNKNOWN" | "NEGOTIATION_THEMES_STALE" | "NEGOTIATION_DOCUMENT_NOT_FOUND" | "NEGOTIATION_DOCUMENT_RESTRICTED" | "NEGOTIATION_DOCUMENT_NOT_READABLE" | "NEGOTIATION_DOCUMENT_RANGE_INVALID" | "NEGOTIATION_DOCUMENT_SOURCE_BOTH" | "NEGOTIATION_DOCUMENT_SOURCE_MISSING" | "NEGOTIATION_DOCUMENT_NOT_READY" | "NEGOTIATION_DOCUMENT_FILE_LOCKED" | "NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED" | "NEGOTIATION_DOCUMENT_SUPERSEDE_CYCLE" | "NEGOTIATION_DOCUMENT_UNKNOWN_THEME" | "NEGOTIATION_DOCUMENT_UNKNOWN_TYPE" | "NEGOTIATION_DOCUMENT_PUBLISHED_UNDELETABLE" | "NEGOTIATION_CORRECTION_PAGE_UNKNOWN" | "NEGOTIATION_FAQ_NOT_FOUND" | "NEGOTIATION_GLOSSARY_NOT_FOUND" | "NEGOTIATION_PATHWAY_STEP_NOT_FOUND" | "NEGOTIATION_REPORT_LIMIT" | "NEGOTIATION_PROPOSAL_LIMIT" | "NEGOTIATION_GLOSSARY_TERM_EXISTS" | "NEGOTIATION_REPORT_REASON_REQUIRED" | "NEGOTIATION_TEXT_TOO_LONG" | "NEGOTIATION_FAQ_UNVERIFIED" | "NEGOTIATION_KNOWLEDGE_PUBLISHED_UNDELETABLE" | "NEGOTIATION_GLOSSARY_SLUG_TAKEN" | "NEGOTIATION_QUESTION_NO_CONSENT" | "NEGOTIATION_QUEUE_ITEM_CLOSED" | "NEGOTIATION_SOURCE_TARGET_INVALID" | "NEGOTIATION_PATHWAY_LINK_INVALID" | "NEGOTIATION_PATHWAY_GROUP_NOT_EMPTY" | "NEGOTIATION_RELATED_SELF";
+            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "INTERNAL" | "SERVICE_UNAVAILABLE" | "IDENTITY_SESSION_EXPIRED" | "IDENTITY_SESSION_REVOKED" | "IDENTITY_REFRESH_REUSED" | "IDENTITY_ORIGIN_REJECTED" | "IDENTITY_PASSWORD_TOO_WEAK" | "IDENTITY_EMAIL_ALREADY_USED" | "IDENTITY_ACCOUNT_ALREADY_EXISTS" | "IDENTITY_ROLE_WINDOW_INVALID" | "IDENTITY_ROLE_SCOPE_MISMATCH" | "IDENTITY_ROLE_REVOCATION_INVALID" | "IDENTITY_UNKNOWN_REFERENCE" | "IDENTITY_PRIVACY_WRONG_ACTION" | "ORG_NOT_MANAGER" | "ORG_MEMBERSHIP_IS_INVITATION" | "ORG_MEMBERSHIP_NOT_PENDING" | "ORG_LAST_MANAGER" | "ORG_MERGE_FIELD_NOT_ARBITRABLE" | "ORG_MERGE_GLOBAL_SCOPE_REQUIRED" | "ORG_MERGE_SAME_ORGANIZATION" | "ORG_DOMAIN_VERIFICATION_REQUIRED" | "ORG_NAME_IS_DERIVED" | "ORG_UNKNOWN_REFERENCE" | "ORG_INVITATION_NOT_YOURS" | "EVENT_GLOBAL_SCOPE_REQUIRED" | "EVENT_CRITERION_HAS_SCORES" | "EVENT_UNKNOWN_REFERENCE" | "PROPOSAL_NOT_EDITABLE" | "PROPOSAL_SPEAKER_IDENTITY_LOCKED" | "PROPOSAL_REVIEW_NOT_ASSIGNED" | "PROPOSAL_UNKNOWN_TERM" | "PROPOSAL_TEXT_TOO_LONG" | "PROPOSAL_UNKNOWN_REFERENCE" | "SESSION_DERIVED_FIELD" | "SESSION_UNKNOWN_REFERENCE" | "SESSION_TRACK_EVENT_MISMATCH" | "REGISTRATION_NOT_ACCEPTED" | "REGISTRATION_ANSWER_INVALID" | "REGISTRATION_CONSENT_REQUIRED" | "REGISTRATION_ACCOUNT_REQUIRED" | "REGISTRATION_LOCKED" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_MIME_NOT_ALLOWED" | "MEDIA_TOO_LARGE" | "MEDIA_ASPECT_RATIO" | "MEDIA_ROLE_NOT_DECLARED" | "MEDIA_ROLE_EXCLUSIVE" | "MEDIA_ASSET_NOT_SERVABLE" | "MEDIA_ALT_TEXT_REQUIRED" | "MEDIA_ASSET_IN_USE" | "MEDIA_UPLOAD_INCOMPLETE" | "MEDIA_STORAGE_UNAVAILABLE" | "ENGAGEMENT_REMINDER_OFFSETS_INVALID" | "ENGAGEMENT_REMINDER_SCOPE_INVALID" | "ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN" | "ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN" | "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN" | "LIVE_INCIDENT_SCOPE_TARGET_MISMATCH" | "LIVE_INCIDENT_WINDOW_INVALID" | "LIVE_INCIDENT_NOT_PUBLISHED" | "NEGOTIATION_ACCESS_REQUEST_PENDING" | "NEGOTIATION_ACCESS_REQUEST_DECIDED" | "NEGOTIATION_INVITATION_CODE_DUPLICATE" | "NEGOTIATION_ADMISSION_MODE_INVALID" | "NEGOTIATION_SPACE_UNKNOWN" | "NEGOTIATION_THEMES_EMPTY" | "NEGOTIATION_THEME_UNKNOWN" | "NEGOTIATION_THEMES_STALE" | "NEGOTIATION_DOCUMENT_NOT_FOUND" | "NEGOTIATION_DOCUMENT_RESTRICTED" | "NEGOTIATION_DOCUMENT_NOT_READABLE" | "NEGOTIATION_DOCUMENT_RANGE_INVALID" | "NEGOTIATION_DOCUMENT_SOURCE_BOTH" | "NEGOTIATION_DOCUMENT_SOURCE_MISSING" | "NEGOTIATION_DOCUMENT_NOT_READY" | "NEGOTIATION_DOCUMENT_FILE_LOCKED" | "NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED" | "NEGOTIATION_DOCUMENT_SUPERSEDE_CYCLE" | "NEGOTIATION_DOCUMENT_UNKNOWN_THEME" | "NEGOTIATION_DOCUMENT_UNKNOWN_TYPE" | "NEGOTIATION_DOCUMENT_PUBLISHED_UNDELETABLE" | "NEGOTIATION_CORRECTION_PAGE_UNKNOWN" | "NEGOTIATION_FAQ_NOT_FOUND" | "NEGOTIATION_GLOSSARY_NOT_FOUND" | "NEGOTIATION_PATHWAY_STEP_NOT_FOUND" | "NEGOTIATION_REPORT_LIMIT" | "NEGOTIATION_PROPOSAL_LIMIT" | "NEGOTIATION_GLOSSARY_TERM_EXISTS" | "NEGOTIATION_REPORT_REASON_REQUIRED" | "NEGOTIATION_TEXT_TOO_LONG" | "NEGOTIATION_FAQ_UNVERIFIED" | "NEGOTIATION_KNOWLEDGE_PUBLISHED_UNDELETABLE" | "NEGOTIATION_GLOSSARY_SLUG_TAKEN" | "NEGOTIATION_QUESTION_NO_CONSENT" | "NEGOTIATION_QUEUE_ITEM_CLOSED" | "NEGOTIATION_SOURCE_TARGET_INVALID" | "NEGOTIATION_PATHWAY_LINK_INVALID" | "NEGOTIATION_PATHWAY_GROUP_NOT_EMPTY" | "NEGOTIATION_RELATED_SELF" | "NEGOTIATION_EDITION_UNKNOWN" | "NEGOTIATION_SESSION_UNKNOWN" | "NEGOTIATION_SESSION_CANCELLED" | "NEGOTIATION_GROUP_UNKNOWN" | "NEGOTIATION_GROUPS_STALE" | "NEGOTIATION_IMPORT_CONFIG_INVALID" | "NEGOTIATION_AGENDA_ITEM_UNKNOWN";
             /** @description Message français, affichable tel quel. */
             message: string;
             /** @description Champ fautif, quand le refus en désigne un. */
@@ -7505,6 +7689,119 @@ export interface operations {
             };
         };
     };
+    admin_negotiation_agenda_items: {
+        parameters: {
+            query: {
+                /** @description Slug de l'édition */
+                edition: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description AgendaItemAdmin[] */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans la permission sur la portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Édition inconnue */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_agenda_item_rattacher: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du point */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description AgendaItemAdmin */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Thématique inconnue */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans la permission sur la portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Point inconnu */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     admin_negotiation_retirer_une_note: {
         parameters: {
             query?: never;
@@ -9135,6 +9432,167 @@ export interface operations {
                 };
             };
             /** @description Terme inconnu */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_import_lire: {
+        parameters: {
+            query: {
+                /** @description Slug de l'édition */
+                edition: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OfficialImportAdmin */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans `negotiation.space.manage` **sur la portée globale** */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Édition inconnue */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_import_regler: {
+        parameters: {
+            query: {
+                /** @description Slug de l'édition */
+                edition: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description OfficialImportAdmin */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Réglage incomplet */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans la permission sur la portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Édition inconnue */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_import_lire_maintenant: {
+        parameters: {
+            query: {
+                /** @description Slug de l'édition */
+                edition: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Lecture posée */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans la permission sur la portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Édition inconnue, ou sans import */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -14083,6 +14541,133 @@ export interface operations {
             };
         };
     };
+    negotiation_mon_agenda: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MyAgenda */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Rien n'a changé depuis l'empreinte présentée */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_garder_une_session: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la session */
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Gardée */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Session inconnue ou non importée */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Session annulée, absente de l'agenda */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Corps malformé */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_retirer_une_session: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la session */
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Retirée */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     negotiation_mes_favoris: {
         parameters: {
             query?: never;
@@ -14329,6 +14914,102 @@ export interface operations {
             };
         };
     };
+    negotiation_mes_groupes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MyGroups */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Rien n'a changé depuis l'empreinte présentée */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_suivre_des_groupes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description MyGroups */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Groupe inconnu — le message nomme le code */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description L'état a changé depuis l'empreinte présentée en If-Match */
+            412: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Corps malformé */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     negotiation_mes_thematiques: {
         parameters: {
             query?: never;
@@ -14416,6 +15097,45 @@ export interface operations {
             };
             /** @description Corps malformé */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_sessions: {
+        parameters: {
+            query: {
+                /** @description Slug de l'édition */
+                edition: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OfficialSessions */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Rien n'a changé depuis l'empreinte présentée */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Édition inconnue, ou sans import */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

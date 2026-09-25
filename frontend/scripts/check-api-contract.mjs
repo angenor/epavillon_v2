@@ -37,8 +37,9 @@ if (!existsSync(CONTRAT)) {
 }
 const contrat = readFileSync(CONTRAT, 'utf8')
 
-/** `/proposals/{id}/reviews` et `/proposals/${id}/reviews` deviennent la même chose. */
-const normaliser = (p) => p.replace(/\{[^}]*\}|\$\{[^}]*\}/g, '{}').replace(/\/+$/, '')
+/** `/proposals/{id}/reviews` et `/proposals/${id}/reviews` deviennent la même chose ; une écriture porte parfois sa requête dans l'adresse. */
+const normaliser = (p) =>
+  p.replace(/\{[^}]*\}|\$\{[^}]*\}/g, '{}').replace(/\?.*$/, '').replace(/\/+$/, '')
 
 // --- 1. Les chemins du contrat -----------------------------------------------
 const cheminsContrat = new Map()

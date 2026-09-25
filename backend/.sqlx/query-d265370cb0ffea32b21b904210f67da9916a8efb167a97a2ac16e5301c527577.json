@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.meetings\n              SET start_at = $2, end_at = $3, venue_label = $4,\n                  title = jsonb_build_object('fr', $5::text, 'en', $5::text)::platform.i18n_text,\n                  title_original = $5, meeting_type_term_id = $6, group_term_id = $7,\n                  agenda_item_id = $8, is_open_access = $9,\n                  status = $10::text::negotiation.meeting_status,\n                  cancellation_reason = $11,\n                  cancelled_at = CASE WHEN $10::text <> 'cancelled' THEN NULL\n                                      WHEN status = 'cancelled' THEN cancelled_at\n                                      ELSE $12::timestamptz END,\n                  absent_reads = 0, last_read_at = $12\n            WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Timestamptz",
+        "Text",
+        "Text",
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Bool",
+        "Text",
+        "Text",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d265370cb0ffea32b21b904210f67da9916a8efb167a97a2ac16e5301c527577"
+}

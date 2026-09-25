@@ -79,6 +79,28 @@ test('un refus définitif retire l’entrée et le dit', async () => {
   }
 })
 
+test('un refus relit l’état vrai : ce qui s’affichait déjà se défait', async () => {
+  const magasin = magasinEnMemoire()
+  await magasin.poser({ ...intention, cle: 'agenda-s1', corps: { garder: true, remind: false } })
+  let relectures = 0
+  const file = creerFile({
+    magasin,
+    expediteurs: new Map([
+      [
+        'agenda-s1',
+        {
+          envoyer: async () => ({ statut: 'refus' as const, code: 409, message: 'Cette session est annulée.' }),
+          relire: () => void relectures++,
+        },
+      ],
+    ]),
+    personne: () => 'awa',
+  })
+  assert.equal((await file.partir())[0]?.sort, 'refusee')
+  assert.deepEqual(await magasin.lire(), [], 'le 409 abandonne l’intention')
+  assert.equal(relectures, 1)
+})
+
 test('la décision, code par code', () => {
   assert.equal(decider({ statut: 'succes' }), 'envoyee')
   assert.equal(decider({ statut: 'panne' }), 'reportee')

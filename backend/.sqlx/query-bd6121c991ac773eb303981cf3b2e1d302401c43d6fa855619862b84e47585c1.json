@@ -1,0 +1,88 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT started_at, outcome, error, session_count, change_count, is_manual\n           FROM negotiation.import_runs\n          WHERE import_id = $1\n          ORDER BY started_at DESC, id DESC\n          LIMIT 20",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "started_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.import_runs",
+            "name": "started_at"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "outcome",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.import_runs",
+            "name": "outcome"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "error",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.import_runs",
+            "name": "error"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "session_count",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.import_runs",
+            "name": "session_count"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "change_count",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.import_runs",
+            "name": "change_count"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "is_manual",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.import_runs",
+            "name": "is_manual"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "bd6121c991ac773eb303981cf3b2e1d302401c43d6fa855619862b84e47585c1"
+}

@@ -53,7 +53,7 @@ export interface Suite {
 
 export interface Expediteur {
   envoyer(intention: Intention): Promise<Reponse>
-  /** Relire l'état vrai — après un 412, et après un succès. */
+  /** Relire l'état vrai — après un succès, un 412 ou un refus. */
   relire?(): Promise<void> | void
 }
 
@@ -174,12 +174,11 @@ export function creerFile(deps: DependancesFile): File {
       } catch {
         /* L'entrée repartira ; le remplacement en bloc rend le rejeu sûr. */
       }
-      if (sort === 'perimee' || sort === 'envoyee') {
-        try {
-          await expediteur.relire?.()
-        } catch {
-          /* La relecture a ses propres gardes. */
-        }
+      // Après un refus aussi : ce qui s'affichait déjà (un ajout à l'agenda) doit se défaire.
+      try {
+        await expediteur.relire?.()
+      } catch {
+        /* La relecture a ses propres gardes. */
       }
       if (sort === 'perimee' || sort === 'refusee') deps.signaler?.(suite)
     }

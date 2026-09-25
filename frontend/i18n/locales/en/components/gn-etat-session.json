@@ -1,0 +1,19 @@
+{
+  "annulee": {
+    "source": "Cancelled at {heure}",
+    "removed": "Cancelled at {heure} — removed from the official schedule",
+    "postponed": "Cancelled at {heure} — postponed by the source"
+  },
+  "annulee-sans-heure": {
+    "source": "Cancelled",
+    "removed": "Cancelled — removed from the official schedule",
+    "postponed": "Cancelled — postponed by the source"
+  },
+  "deplacee": {
+    "heure-salle": "Moved — was at {heure}, {salle}",
+    "heure": "Moved — was at {heure}",
+    "salle": "Moved — previous room: {salle}",
+    "jour": "Moved — was on {jour} at {heure}",
+    "jour-salle": "Moved — was on {jour} at {heure}, {salle}"
+  }
+}

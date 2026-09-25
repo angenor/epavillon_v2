@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM negotiation.import_runs\n          WHERE import_id = $1 AND started_at < now() - interval '30 days'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f2c892a244f2a27861eb57a8c7fb9b0fddf6e87097be4e7b9ca4bf8c90ef9114"
+}

@@ -27,5 +27,9 @@
     "texte": "Les thématiques suivent votre compte d'un appareil à l'autre. Créez le vôtre ou connectez-vous pour les choisir.",
     "creer-mon-compte": "Créer mon compte",
     "me-connecter": "J'ai déjà un compte — Me connecter"
+  },
+  "groupes": {
+    "titre": "Mon groupe de négociation",
+    "aide": "Les réunions de coordination de vos groupes passent le filtre « Mes thématiques » et portent « Mon groupe ». Sans groupe coché, toutes les coordinations passent."
   }
 }

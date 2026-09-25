@@ -18,9 +18,9 @@ const DELAI_MS = 5000
 // Les lectures en vol, par clé : une promesse ne va pas dans un `useState`.
 const enVol = new Map<string, Promise<void>>()
 
-function avecDelai<T>(promesse: Promise<T>): Promise<T> {
+function avecDelai<T>(promesse: Promise<T>, delai: number): Promise<T> {
   return new Promise((resolve, reject) => {
-    const minuterie = setTimeout(() => reject(new Error('délai dépassé')), DELAI_MS)
+    const minuterie = setTimeout(() => reject(new Error('délai dépassé')), delai)
     promesse.then(resolve, reject).finally(() => clearTimeout(minuterie))
   })
 }
@@ -33,7 +33,16 @@ function avecDelai<T>(promesse: Promise<T>): Promise<T> {
  * la garde en place, avec son heure. `lire` reçoit ce qui est gardé, pour compléter une
  * réponse partielle.
  */
-export function useGnLecture<T>(cle: string, lire: (garde: T | null) => Promise<T>) {
+export function useGnLecture<T>(
+  cle: string,
+  lire: (garde: T | null) => Promise<T>,
+  options: {
+    /** La clé de garde, quand elle dépend d'une autre lecture (`sessions:<édition>`) ; nulle, rien ne se garde. */
+    cleDeGarde?: () => Promise<string | null>
+    /** Une réponse lourde — toute la COP, ~150 Ko sur un réseau de salle — a droit à plus de 5 s. */
+    delaiMs?: number
+  } = {},
+) {
   const etat = useState<EtatLecture<T>>(`gn-lecture-${cle}`, () => ({
     valeur: null,
     luA: null,
@@ -59,9 +68,10 @@ export function useGnLecture<T>(cle: string, lire: (garde: T | null) => Promise<
 
   async function lireUneFois(): Promise<void> {
     etat.value.enCours = true
+    const cleGardee = options.cleDeGarde ? await options.cleDeGarde() : cle
 
-    if (!etat.value.pret) {
-      const garde = await lireGarde<T>(cle)
+    if (!etat.value.pret && cleGardee) {
+      const garde = await lireGarde<T>(cleGardee)
       if (garde && etat.value.source === 'aucune') {
         etat.value = { ...etat.value, valeur: garde.valeur, luA: garde.lu_a, source: 'garde', pret: true }
         connexion.noterLecture(garde.lu_a)
@@ -69,11 +79,13 @@ export function useGnLecture<T>(cle: string, lire: (garde: T | null) => Promise<
     }
 
     try {
-      const valeur = await avecDelai(lire(etat.value.valeur))
+      const valeur = await avecDelai(lire(etat.value.valeur), options.delaiMs ?? DELAI_MS)
       const luA = new Date().toISOString()
       etat.value = { valeur, luA, source: 'reseau', pret: true, enCours: false }
       connexion.noterReussite(luA)
-      await ecrireGarde({ cle, valeur, lu_a: luA, empreinte: null })
+      // Résolue de nouveau : la lecture a pu changer ce dont la clé dépend.
+      const cleEcrite = options.cleDeGarde ? await options.cleDeGarde() : cle
+      if (cleEcrite) await ecrireGarde({ cle: cleEcrite, valeur, lu_a: luA, empreinte: null })
     } catch {
       etat.value = { ...etat.value, pret: true, enCours: false }
       connexion.noterEchec()

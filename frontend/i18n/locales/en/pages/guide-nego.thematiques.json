@@ -27,5 +27,9 @@
     "texte": "Themes follow your account from one device to another. Create yours or sign in to pick them.",
     "creer-mon-compte": "Create my account",
     "me-connecter": "I already have an account — Sign in"
+  },
+  "groupes": {
+    "titre": "My negotiating group",
+    "aide": "Coordination meetings of your groups pass the “My thematic areas” filter and are marked “My group”. With no group ticked, all coordination meetings pass."
   }
 }

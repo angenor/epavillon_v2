@@ -1,0 +1,70 @@
+{
+  "titre": "Session de négociation",
+  "fil": "Sessions de négociation · {type}",
+  "fil-sans-type": "Sessions de négociation",
+  "anglais": "Titre anglais d'origine",
+  "traduction": "Traduction automatique",
+  "chargement": "Lecture de la session",
+  "hors-connexion": "Les changements survenus depuis ne sont pas ici.",
+  "sortie": "Voir les sessions de négociation",
+  "source": {
+    "titre": "Source officielle",
+    "lu": "lu {moment}"
+  },
+  "cle": {
+    "heure": "Heure",
+    "salle": "Salle",
+    "type": "Type",
+    "ordre-du-jour": "Ordre du jour",
+    "acces": "Accès",
+    "thematique": "Thématique"
+  },
+  "plage": "{debut}–{fin}",
+  "plage-jour": "{jour}, {plage}",
+  "heure-precision": "{jour} · {zone} ({decalage})",
+  "salle-inconnue": "Salle non annoncée",
+  "terme": "{terme} — ouvrir dans le lexique",
+  "ordre-du-jour": "{code} — {intitule}",
+  "hors-ordre-du-jour": "Hors ordre du jour officiel",
+  "mon-groupe": "Mon groupe — {groupe}",
+  "sans-thematique": "Thématique non précisée",
+  "origine": "Source officielle",
+  "origine-lue": "Source officielle — lu {moment}",
+  "original": "Voir l'original sur le programme officiel de la CCNUCC",
+  "rappel": {
+    "libelle": "Me rappeler 15 minutes avant",
+    "hors-agenda": "Ajoutez d'abord la session à votre agenda.",
+    "annulee": "Session annulée : aucun rappel.",
+    "phrase": "Le rappel paraît en tête de Guide Négo quand l'application est ouverte, sans sonnerie ni notification."
+  },
+  "agenda": {
+    "ajouter": "Ajouter à mon agenda",
+    "dedans": "Dans mon agenda",
+    "ajoutee": "Ajoutée à votre agenda.",
+    "retiree": "Retirée de votre agenda.",
+    "annuler": "Annuler"
+  },
+  "compte": {
+    "titre": "L'agenda suit votre compte",
+    "texte": "Créez un compte ou connectez-vous pour garder cette session dans votre agenda, sur tous vos appareils. La fiche, elle, se lit sans compte.",
+    "creer": "Créer mon compte",
+    "connexion": "J'ai déjà un compte — Me connecter"
+  },
+  "sans-edition": {
+    "titre": "Aucune COP climat à venir",
+    "texte": "Les sessions de négociation paraîtront ici dès qu'une COP climat sera annoncée."
+  },
+  "jamais-lue": {
+    "titre": "Sessions pas encore lues sur ce téléphone",
+    "texte": "Les sessions de négociation n'avaient pas été lues avant la perte du réseau. Elles se liront au retour de la connexion, puis resteront lisibles sans elle."
+  },
+  "erreur": {
+    "titre": "Les sessions n'ont pas pu être lues",
+    "texte": "Le serveur de Guide Négo n'a pas répondu. Réessayez dans un instant.",
+    "reessayer": "Réessayer"
+  },
+  "inconnue": {
+    "titre": "Session introuvable",
+    "texte": "Cette session ne figure pas parmi les sessions de négociation de cette COP."
+  }
+}

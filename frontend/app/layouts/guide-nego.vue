@@ -71,6 +71,8 @@ useGnFavoris()
 useGnFavorisLexique()
 // Le savoir se garde dès l'ouverture : le lexique se lit sans réseau même jamais ouvert (FR-002).
 const savoir = useGnSavoir()
+// Le rappel vit ici pour paraître sur tout écran ; il inscrit aussi l'expéditeur de l'agenda.
+const { rappel, fuseau: fuseauDuRappel, ville: villeDuRappel, fermer: fermerLeRappel } = useGnRappel()
 
 // Un choix abandonné ou refusé se dit là où la personne se trouve quand le réseau
 // revient (FR-009 bis) ; l'écran qui l'a pris le redit en place, et on ne l'y double pas.
@@ -197,6 +199,13 @@ async function enregistrerLaGarde() {
 
 <template>
   <div data-app="guide-nego" :data-theme="affiche">
+    <GnBandeauRappel
+      v-if="rappel"
+      :session="rappel"
+      :fuseau="fuseauDuRappel"
+      :ville="villeDuRappel"
+      @fermer="fermerLeRappel()"
+    />
     <slot />
     <div id="gn-portail" />
     <GnMessageEphemere

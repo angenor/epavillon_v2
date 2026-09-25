@@ -19,6 +19,8 @@ export const CLE_LEXIQUE_FAVORIS_FUSIONNES = 'gn.lexique.favoris-fusionnes'
 export const CLE_FAQ_LUES = 'gn.faq.lues'
 /** L'écran où revenir après la connexion, quand un geste réservé au compte y a mené. */
 export const CLE_RETOUR_APRES_CONNEXION = 'gn.retour-apres-connexion'
+/** Le rappel d'une session a été montré ; la valeur est son début, qu'un déplacement change. */
+export const cleRappelVu = (sessionId: string) => `gn.rappel.vu.${sessionId}`
 
 // Stockage refusé, une clé vit le temps de la visite : sans elle, « Continuer en
 // visiteur » ramènerait à l'ouverture, en boucle.

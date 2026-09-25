@@ -56,3 +56,6 @@ docs/note.md
 
 # Outils natifs téléchargés par le Makefile (`make pdfium`)
 .outils/
+
+# Captures brutes de la source de la CCNUCC : jamais versionnées (dépôt public, accord en cours)
+.sources-ccnucc/

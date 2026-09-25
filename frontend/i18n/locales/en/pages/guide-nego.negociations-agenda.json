@@ -1,0 +1,31 @@
+{
+  "titre": "My agenda",
+  "chargement": "Reading your agenda",
+  "jour": "{jour} — {zone}",
+  "section": "Negotiation sessions",
+  "hors-connexion": "Changes made since then are not shown here.",
+  "sans-compte": {
+    "titre": "Your agenda follows your account",
+    "texte": "Sign in to follow negotiation sessions and find them on all your devices.",
+    "connexion": "Sign in",
+    "creer": "Create my account"
+  },
+  "sans-edition": {
+    "titre": "No upcoming climate COP",
+    "texte": "Negotiation sessions will appear here as soon as a climate COP is announced."
+  },
+  "jamais-lu": {
+    "titre": "Your agenda has not been read on this device yet",
+    "texte": "It will be read as soon as the network is back, then stay readable offline."
+  },
+  "erreur": {
+    "titre": "Your agenda could not be read",
+    "texte": "The server did not respond. Nothing has been kept on this device yet.",
+    "reessayer": "Try again"
+  },
+  "vide": {
+    "titre": "Your agenda is empty",
+    "texte": "Open a negotiation session and tap “Add to my agenda”: it will appear here, day by day, and stay readable offline.",
+    "sortie": "See negotiation sessions"
+  }
+}

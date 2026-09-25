@@ -18,6 +18,8 @@ async-trait.workspace = true
 image.workspace = true
 # Le worker seul la charge, depuis `PDFIUM_LIB_PATH` ; l'API ne l'appelle pas.
 pdfium-render.workspace = true
+regex.workspace = true
+reqwest.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 sqlx.workspace = true

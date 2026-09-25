@@ -1,0 +1,26 @@
+{
+  "title": "Ordre du jour",
+  "subtitle": "Les points de l'ordre du jour cités par les sessions officielles. Rattachez chacun à une thématique : ses sessions en héritent à la lecture suivante de l'application.",
+  "edition": "Édition",
+  "withoutTheme": "Aucun point sans thématique. | {count} point sans thématique. | {count} points sans thématique.",
+  "noEdition": {
+    "title": "Aucune COP climat",
+    "description": "Aucune édition de la série des COP climat n'existe encore."
+  },
+  "empty": {
+    "title": "Aucun point pour l'instant",
+    "description": "Les points apparaissent à la première lecture réussie de l'import."
+  },
+  "importLink": "Ouvrir l'import",
+  "forbidden": {
+    "scope": "Administrer Guide Négo, sur la plateforme entière",
+    "description": "L'ordre du jour est réservé aux administrateurs de la plateforme entière. Un compte rattaché à un seul événement n'y a pas accès."
+  },
+  "row": {
+    "theme": "Thématique du point {code}",
+    "none": "Thématique non précisée",
+    "sessions": "Aucune session | {count} session | {count} sessions",
+    "setAt": "Rattaché le {date}",
+    "saved": "Enregistré"
+  }
+}

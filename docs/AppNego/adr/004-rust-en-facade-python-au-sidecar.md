@@ -16,3 +16,4 @@ L'IA vit dans un service Python (FastAPI), **interne et jamais exposé**. L'API 
 - Le service ne lit aucun schéma métier : documents et transcriptions lui arrivent par la file d'événements, avec leur référence de stockage.
 - Les réponses en flux traversent l'API Rust.
 - Une panne du service d'IA ne touche ni les documents, ni les agendas, ni les échanges.
+- **Exception du 25/09/2026** : tant que le service Python n'existe pas, les titres des sessions de négociation (étape 3a) se traduisent depuis le worker Rust, par OpenRouter, clé lue dans l'environnement.

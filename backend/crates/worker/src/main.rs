@@ -215,6 +215,11 @@ async fn armer_les_recurrents(db: &Db, config: &Config) {
         {
             armees.push("purge des essais de code");
         }
+        // Une chaîne par import allumé : la lecture de la source officielle
+        // d'une édition, toutes les `interval_seconds`.
+        if negotiation::jobs::import::armer(&mut tx, maintenant).await? > 0 {
+            armees.push("import des sessions officielles");
+        }
 
         tx.commit().await?;
         Ok::<_, kernel::error::ApiError>(armees)

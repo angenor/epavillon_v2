@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (h AT TIME ZONE $2) AS \"instant!\"\n             FROM unnest($1::timestamp[]) WITH ORDINALITY AS u(h, n)\n            ORDER BY n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "instant!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "TimestampArray",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "51de0c5fe9fb2e49a460639d858023e1af67ebd57cdd41903e5c57ecd17dd5bf"
+}

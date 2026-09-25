@@ -559,6 +559,26 @@ END
 $$;
 
 -- -----------------------------------------------------------------------------
+-- 6 ter. Guide Négo — le modèle de rédaction et l'import de la COP31 (étape 3a)
+--
+-- Le modèle qui rédige est un réglage (ADR-005) : le changer tient en une ligne,
+-- sans redéploiement. Il est lu à chaque traduction de titres.
+--
+-- L'import de la COP31 est semé ÉTEINT, sur le lecteur archivé : l'allumer est
+-- un geste du back-office. Sur une base sans cette édition, rien n'est posé.
+-- -----------------------------------------------------------------------------
+INSERT INTO platform.settings (key, value, description, is_secret) VALUES
+    ('ai.drafting_model', '"google/gemini-2.5-flash"',
+     'Modèle d''OpenRouter qui rédige — traduction des titres de sessions officielles, et plus tard l''assistant (ADR-005). La clé, elle, vit dans l''environnement (OPENROUTER_API_KEY), jamais ici.', false)
+ON CONFLICT (key) DO NOTHING;
+
+INSERT INTO negotiation.official_imports (event_id, is_enabled, reader, official_programme_url)
+SELECT e.id, false, 'archive', 'https://unfccc.int/cop31/schedule'
+  FROM event.events e
+ WHERE e.slug = 'cop31'
+ON CONFLICT (event_id) DO NOTHING;
+
+-- -----------------------------------------------------------------------------
 -- 7. Contrôle de conformité des frontières de modules
 --
 -- Doit retourner zéro ligne. Toute FK inter-modules mal nommée est signalée ici

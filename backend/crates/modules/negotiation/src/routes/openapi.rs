@@ -30,6 +30,12 @@ pub struct ApiErrorBody {
         crate::routes::acces::annuler_sa_demande,
         crate::routes::themes::mes_thematiques,
         crate::routes::themes::suivre_des_thematiques,
+        crate::routes::sessions::sessions,
+        crate::routes::groups::mes_groupes,
+        crate::routes::groups::suivre_des_groupes,
+        crate::routes::agenda::mon_agenda,
+        crate::routes::agenda::garder_une_session,
+        crate::routes::agenda::retirer_une_session,
         crate::routes::admin_codes::lister,
         crate::routes::admin_codes::creer,
         crate::routes::admin_codes::fiche,
@@ -102,6 +108,11 @@ pub struct ApiErrorBody {
         crate::routes::admin_savoir::ordonner,
         crate::routes::admin_file::file,
         crate::routes::admin_file::clore_un_signalement,
+        crate::routes::admin_import::etat,
+        crate::routes::admin_import::regler,
+        crate::routes::admin_import::lire_maintenant,
+        crate::routes::admin_import::points,
+        crate::routes::admin_import::rattacher,
     ),
     components(schemas(ApiErrorBody)),
     tags(
@@ -111,6 +122,8 @@ pub struct ApiErrorBody {
         (name = "Back-office — documents", description = "Publier un document en une journée : brouillon, PDF, extraction, aperçu page par page, publication, nouvelle version ; et les notes de correction de l'expert. Portée globale."),
         (name = "Back-office — savoir", description = "La FAQ, le lexique et le parcours « Ma première COP » : rédiger, dater la vérification (l'expert seul), publier, mettre « À revoir », dépublier, ordonner. Portée globale ; lecture ouverte à qui publie ou vérifie."),
         (name = "Back-office — file des experts", description = "Ce qui attend un expert : les signalements « Dépassé ou faux » groupés par entrée, à clore avec une issue. Aucun auteur n'est rendu. `negotiation.knowledge.review`, portée globale."),
+        (name = "Guide Négo — sessions officielles", description = "Les sessions de négociation lues à la source officielle, en une réponse par édition ; les groupes de négociation suivis ; « Mon agenda ». Lecture des sessions ouverte à tous ; groupes et agenda demandent un compte."),
+        (name = "Back-office — sessions officielles", description = "L'import des sessions de négociation d'une édition — interrupteur, lecteur, cadence, santé, journal, « Lire maintenant » — et le rattachement des points de l'ordre du jour aux thématiques. Portée globale. Aucune route ne modifie une session : la source fait foi."),
         (name = "Back-office — admission", description = "Les codes d'invitation, leurs usages, les demandes d'accès et le mode d'admission. Réservé aux administrateurs de la plateforme entière : `negotiation.space.manage` **sur la portée globale**. Un administrateur d'une seule édition n'y voit rien — aucun espace de négociation n'est rattaché à un événement."),
     )
 )]

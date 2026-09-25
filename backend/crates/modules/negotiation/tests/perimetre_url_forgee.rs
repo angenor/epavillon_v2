@@ -47,6 +47,8 @@ use negotiation::domain::permissions::SPACE_MANAGE;
 const ADMIN_CODES: &str = include_str!("../src/routes/admin_codes.rs");
 const ADMIN_DEMANDES: &str = include_str!("../src/routes/admin_requests.rs");
 const ADMIN_ADMISSION: &str = include_str!("../src/routes/admin_admission.rs");
+/// Même garde : l'import et l'ordre du jour (3a), éprouvés dans `perimetre_import.rs`.
+const ADMIN_IMPORT: &str = include_str!("../src/routes/admin_import.rs");
 
 /// Les douze routes, telles que `contracts/api-admin.md` les énumère.
 const ROUTES: [&str; 12] = [
@@ -64,8 +66,8 @@ const ROUTES: [&str; 12] = [
     "/admin/negotiation/admission",
 ];
 
-fn sources() -> [&'static str; 3] {
-    [ADMIN_CODES, ADMIN_DEMANDES, ADMIN_ADMISSION]
+fn sources() -> [&'static str; 4] {
+    [ADMIN_CODES, ADMIN_DEMANDES, ADMIN_ADMISSION, ADMIN_IMPORT]
 }
 
 #[test]
@@ -84,7 +86,10 @@ fn les_douze_routes_sont_declarees() {
         .map(|source| sans_commentaires(source).matches(".route(").count())
         .iter()
         .sum();
-    assert_eq!(montees, 12, "douze routes, pas une de plus");
+    assert_eq!(
+        montees, 17,
+        "douze routes et les cinq de l'import, pas une de plus"
+    );
 }
 
 #[test]
@@ -175,12 +180,13 @@ const ADMIN_FILE: &str = include_str!("../src/routes/admin_file.rs");
 const LIB: &str = include_str!("../src/lib.rs");
 
 const ADMIN_ROUTES: &str = "pubfnadmin_routes(cfg:&mutServiceConfig)";
-const SIX_FICHIERS: &str = "routes::admin_codes::configurer(cfg);\
+const FICHIERS_CONTROLES: &str = "routes::admin_codes::configurer(cfg);\
      routes::admin_requests::configurer(cfg);\
      routes::admin_admission::configurer(cfg);\
      routes::admin_documents::configurer(cfg);\
      routes::admin_savoir::configurer(cfg);\
-     routes::admin_file::configurer(cfg);";
+     routes::admin_file::configurer(cfg);\
+     routes::admin_import::configurer(cfg);";
 
 #[test]
 fn chaque_configurer_du_back_office_ne_monte_que_ses_routes() {
@@ -191,6 +197,7 @@ fn chaque_configurer_du_back_office_ne_monte_que_ses_routes() {
         ADMIN_DOCUMENTS,
         ADMIN_SAVOIR,
         ADMIN_FILE,
+        ADMIN_IMPORT,
     ] {
         let ecarts = ecarts_de_montage(source);
         assert!(
@@ -200,8 +207,8 @@ fn chaque_configurer_du_back_office_ne_monte_que_ses_routes() {
     }
     assert_eq!(
         bloc(LIB, ADMIN_ROUTES),
-        SIX_FICHIERS,
-        "le back-office ne se compose que des six fichiers contrôlés"
+        FICHIERS_CONTROLES,
+        "le back-office ne se compose que des sept fichiers contrôlés"
     );
 }
 
@@ -254,7 +261,7 @@ fn le_controle_releve_chaque_autre_maniere_de_monter_une_route() {
         1,
     );
     assert_ne!(lib_mutante, LIB);
-    assert_ne!(bloc(&lib_mutante, ADMIN_ROUTES), SIX_FICHIERS);
+    assert_ne!(bloc(&lib_mutante, ADMIN_ROUTES), FICHIERS_CONTROLES);
 }
 
 #[test]

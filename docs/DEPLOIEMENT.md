@@ -666,10 +666,10 @@ Rien à redémarrer entre 3 et 4 : le drapeau se lit à chaque ouverture.
 
 ---
 
-## 15. Mettre en ligne 0a, 0b, 0c, l'étape 1 et l'étape 1b (22/09, complété les 24 et 25/09)
+## 15. Mettre en ligne 0a, 0b, 0c, les étapes 1, 1b et 3a (22/09, complété les 24 et 25/09)
 
-Une seule mise en ligne porte les cinq premières étapes de Guide Négo : le code de la branche, et
-**cinq migrations**. Préparée ici, **pas encore exécutée**. Le drapeau reste éteint pendant toute
+Une seule mise en ligne porte les six premières étapes de Guide Négo : le code de la branche, et
+**six migrations**. Préparée ici, **pas encore exécutée**. Le drapeau reste éteint pendant toute
 la mise en ligne : le site ne voit que ce qui le touche (§ 3 ci-dessous), l'application ne s'ouvre
 qu'à la recette sur téléphones (§ 4).
 
@@ -682,8 +682,9 @@ qu'à la recette sur téléphones (§ 4).
 | 3 | `specs/010-guide-nego-accueil-profil/migration.sql` | Le vocabulaire des thématiques et ses dix termes ; `negotiation.theme_subscriptions` ; `identity.sessions.replaced_by`, qui distingue une réponse de rotation perdue d'un vol (ADR-020) |
 | 4 | `specs/011-guide-nego-documents/migration.sql` | Les documents : le réglage `media.private_bucket` et le registre des colonnes qui désignent un objet ; deux types de document et le libellé « Guide » ; les documents, leur extraction, leurs pages, les notes de correction ; le rôle `expert` et ses deux permissions |
 | 5 | `specs/012-guide-nego-lecteur-pdf/migration.sql` | Le lecteur montre le PDF d'origine : « ouvrir tel quel » devient le choix « Texte agrandi » (`large_text_choice`), la règle des deux modes écrite une fois (`negotiation.document_reading_modes`), les images de pages réservées à l'aperçu du back-office. **Aucune ligne semée** |
+| 6 | `specs/014-guide-nego-sessions-agenda/migration.sql` | Les sessions de négociation (3a) : vocabulaires des types de réunion et des groupes ; points de l'ordre du jour ; colonnes de la source sur `negotiation.meetings` ; l'import, son journal, les écarts, les traductions de titres ; « Mon groupe » et « Mon agenda ». Sème le réglage `ai.drafting_model` et **l'import de la COP31, éteint**. Indépendante de celle de l'étape 2 : si l'étape 2 part dans la même mise en ligne, sa migration passe avant, dans l'ordre des numéros |
 
-Les cinq sont **rejouables** : un second passage ne crée rien, ne perd rien, n'échoue pas.
+Les six sont **rejouables** : un second passage ne crée rien, ne perd rien, n'échoue pas.
 
 **Aucun réglage à ajouter à `.env.prod`.** Les deux réglages nouveaux ont un défaut, et ce défaut
 est la valeur voulue :
@@ -723,6 +724,26 @@ Ne les écrire que pour s'écarter du défaut. `PRIVACY_POLICY_VERSION` dispara�
   ```
   ou « Relancer l'extraction » sur sa fiche du back-office ; la fiche repasse par « Prête ».
 
+**L'étape 3a ajoute deux choses hors de la base :**
+
+- **`OPENROUTER_API_KEY` dans `.env.prod`**, la clé de production (CLAUDE.md, « Clés d'API ») : le
+  worker la lit pour traduire les titres des sessions. Sans elle, l'import tourne et les titres
+  s'affichent en anglais seul, sans « Traduction automatique » — rien ne casse.
+- **L'import reste éteint.** Le lecteur de la source réelle est écrit mais branché sur rien tant
+  que l'accord du secrétariat de la CCNUCC manque ; le lecteur archivé rejoue la COP30. **Ne
+  l'allumer en production que le temps de la recette sur téléphones** (§ 4), puis l'éteindre et
+  retirer ce qu'il a écrit :
+  ```sql
+  BEGIN;
+  DELETE FROM negotiation.meetings m USING event.events e
+   WHERE e.id = m.event_id AND e.slug = 'cop31' AND m.source_key IS NOT NULL;  -- agenda et écarts suivent
+  DELETE FROM negotiation.agenda_items a USING event.events e WHERE e.id = a.event_id AND e.slug = 'cop31';
+  DELETE FROM negotiation.import_runs;
+  UPDATE negotiation.official_imports SET is_enabled = false, missed_reads = 0, last_success_at = NULL,
+         last_attempt_at = NULL, last_error = NULL, last_change_count = NULL, failing_since = NULL;
+  COMMIT;
+  ```
+
 **La dette de R4 doit être nulle avant la bascule** — aucun objet privé ne doit rester dans le
 bucket ouvert au web. La requête est dans [la recette de l'étape 1](../specs/011-guide-nego-documents/quickstart.md)
 (« Préalables ») ; elle doit rendre **0**, sinon déplacer ces objets avant la mise en ligne.
@@ -736,7 +757,7 @@ psql postgres://postgres:dev@localhost:5442/postgres -c 'CREATE DATABASE copie_p
 gunzip -c sauvegardes/epavillon-AAAAMMJJ-HHMMSS.sql.gz | psql "$COPIE"
 
 for passage in 1 2; do          # deux passages : le second ne doit rien changer
-  for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf; do
+  for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf 014-guide-nego-sessions-agenda; do
     psql "$COPIE" -v ON_ERROR_STOP=1 -f "specs/$etape/migration.sql" || exit 1
   done
 done
@@ -770,7 +791,11 @@ SELECT (SELECT count(*) FROM platform.feature_flags  WHERE key = 'guide_nego.ena
        (SELECT count(*) FROM platform.settings       WHERE key = 'media.private_bucket')                AS bucket_prive, -- 1
        (SELECT count(*) FROM reference.taxonomy_terms WHERE taxonomy_code = 'document_type'
                                                         AND code IN ('summary', 'bulletin'))            AS types_doc,    -- 2
-       (SELECT count(*) FROM identity.role_permissions WHERE role_code = 'expert')                      AS expert;       -- 2
+       (SELECT count(*) FROM identity.role_permissions WHERE role_code = 'expert')                      AS expert,       -- 2
+       (SELECT count(*) FROM reference.taxonomy_terms WHERE taxonomy_code = 'negotiation_meeting_type') AS types_reunion, -- 9
+       (SELECT count(*) FROM reference.taxonomy_terms WHERE taxonomy_code = 'negotiation_group')        AS groupes,      -- 13
+       (SELECT count(*) FROM platform.settings       WHERE key = 'ai.drafting_model')                   AS modele_ia,    -- 1
+       (SELECT count(*) FROM negotiation.official_imports WHERE NOT is_enabled)                          AS import_eteint; -- 1 (0 sans l'édition cop31)
 ```
 
 ### 2. Le jour de la mise en ligne
@@ -782,7 +807,7 @@ Dans l'ordre du § 13, chaque étape pour sa raison :
 3. **Déposer les migrations** hors du dossier synchronisé, renommées — elles s'appellent toutes
    `migration.sql` :
    ```bash
-   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf; do
+   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf 014-guide-nego-sessions-agenda; do
      scp "specs/$etape/migration.sql" "root@<serveur>:/root/epavillon-migrations/$etape.sql"
    done
    ```
@@ -795,7 +820,7 @@ Dans l'ordre du § 13, chaque étape pour sa raison :
    Puis **le bucket privé**, avant de migrer : `ops/init-garage-prod.sh` (rejouable).
 5. **Migrer, puis redémarrer aussitôt** :
    ```bash
-   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf; do
+   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf 014-guide-nego-sessions-agenda; do
      $COMPOSE exec -T postgres psql -U postgres -d epavillon -v ON_ERROR_STOP=1 \
        < /root/epavillon-migrations/$etape.sql || break
    done
@@ -859,7 +884,7 @@ ramène la base d'avant les migrations, puis redéployer la version précédente
 
 ### 4. La recette sur téléphones réels — une seule séance
 
-Ce qu'aucun poste de travail ne peut éprouver, pour les cinq étapes à la fois : l'appareil réel de
+Ce qu'aucun poste de travail ne peut éprouver, pour les six étapes à la fois : l'appareil réel de
 0a (T071), T112 de 0b, T096 à T098 de 0c, T116 de l'étape 1, T084 de l'étape 1b. **Deux jours de suite** — deux points exigent une nuit ;
 on les prépare en fin de première journée.
 
@@ -943,6 +968,28 @@ l'appareil et la version du système.
 - [ ] **iPhone seulement** : noter la version d'iOS. Dès iOS 16.4 — l'iPhone 8 et le X sont en
       16.7 — le document s'ouvre **sur ses pages** : c'est le seuil qu'ADR-022 a déduit sans
       appareil, et que cette ligne vérifie. En dessous, il s'ouvre en « Texte agrandi » et le dit.
+
+**Les sessions de négociation (étape 3a)** — sur l'Android puis sur l'iPhone. Avant : au
+back-office, « Négociations → Import », lecteur archivé `cop30/lecture-1`, premier jour de
+l'archive = **aujourd'hui**, allumé ; « Lire maintenant ». Après : l'éteindre et nettoyer (§ 15,
+« L'étape 3a ajoute… »).
+
+- [ ] **La liste en mode avion.** Avec le réseau, ouvrir « Négociations » ; puis mode avion,
+      relancer depuis l'icône : chaque jour de la bande, une fiche **jamais ouverte**, « Mon
+      agenda » s'affichent, avec « Hors connexion — lu à … ».
+- [ ] **L'agenda sans réseau.** En mode avion, « Ajouter à mon agenda » sur une fiche : la session
+      paraît aussitôt dans « Mon agenda ». Réseau rendu, application ouverte : **une** ligne —
+      `SELECT count(*) FROM negotiation.agenda_entries WHERE person_id = :p AND meeting_id = :m;` → 1.
+- [ ] **L'interrupteur au doigt.** Sur une session de l'agenda, « Me rappeler 15 minutes avant »
+      bascule au premier toucher et revient au second. Sur le poste, il bascule au toucher émulé ;
+      seul l'outil de navigation automatisé le manquait, parce qu'il clique hors de l'écran sans
+      faire défiler (constaté le 25/09).
+- [ ] **Le bandeau du rappel, application ouverte.** Premier jour de l'archive réglé pour qu'une
+      session commence dans vingt minutes ; l'ajouter, armer le rappel, garder l'application au
+      premier plan : à quinze minutes, le bandeau jaune paraît en tête, **une fois** ; aucun son,
+      aucune notification (écart 46). Refermer puis rouvrir l'application : il ne revient pas.
+- [ ] **Le fuseau.** Téléphone réglé sur un autre fuseau : les heures restent celles d'Antalya,
+      « heure d'Antalya ».
 
 Un écart se note dans `docs/AppNego/progress.md`, avec l'appareil et le système. Tout coché, T071,
 T112, T096, T097, T098, T116 et T084 le sont aussi dans leurs `tasks.md`.

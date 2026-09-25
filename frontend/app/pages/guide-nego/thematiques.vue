@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { CLE_FILE_THEMATIQUES, choixValidable } from '~/utils/guide-nego/thematiques'
+import { CLE_FILE_GROUPES } from '~/composables/guide-nego/useGnGroupes'
 
 /**
  * Écran 06 — « Mes thématiques ». **Un seul écran pour deux usages** : le
@@ -20,17 +21,20 @@ definePageMeta({ layout: 'guide-nego' })
 defineI18nRoute(false)
 
 const { t } = useI18n()
+const route = useRoute()
 const session = useGnSession()
 const connexion = useGnConnexion()
 const thematiques = useGnThematiques()
+const groupes = useGnGroupes()
 const { avis, effacerLAvis } = useGnFile()
 
 const choix = ref<Set<string>>(new Set())
+const choixGroupes = ref<Set<string>>(new Set())
 const envoi = ref(false)
 
 onMounted(async () => {
   await session.assurer()
-  if (session.connectee.value) await thematiques.assurer()
+  if (session.connectee.value) await Promise.all([thematiques.assurer(), groupes.assurer()])
   else await thematiques.assurerLeVocabulaire()
 })
 
@@ -38,13 +42,18 @@ onMounted(async () => {
 // chaque relecture — c'est ainsi qu'un choix fait sur un autre appareil
 // s'impose ici, sans message d'échec (FR-006).
 watch(thematiques.mesCodes, (codes) => (choix.value = new Set(codes)), { immediate: true })
+watch(groupes.mesCodes, (codes) => (choixGroupes.value = new Set(codes)), { immediate: true })
 
 /** Sans compte, rien ne se choisit : les thématiques suivent le compte (FR-010). */
 const compteManquant = computed(() => session.pret.value && !session.connectee.value)
 
 /** Premier passage tant que rien n'est suivi : l'écran porte alors ses étapes. */
 const premiereEntree = computed(() => thematiques.mesCodes.value.length === 0)
-const retour = computed(() => (premiereEntree.value ? '/guide-nego' : '/guide-nego/ressources/reglages'))
+const depuisLesSessions = computed(() => route.query.depuis === 'negociations')
+const retour = computed(() => {
+  if (depuisLesSessions.value) return '/guide-nego/negociations'
+  return premiereEntree.value ? '/guide-nego' : '/guide-nego/ressources/reglages'
+})
 
 const chargement = computed(() => !thematiques.vocabulairePret.value)
 const aucuneProposee = computed(
@@ -57,12 +66,23 @@ const validable = computed(() => choixValidable(codesChoisis.value))
 const resume = computed(() => thematiques.resumeDe(codesChoisis.value))
 
 /** L'avis de la file ne concerne cet écran que s'il porte sa clé. */
-const perimee = computed(
-  () => avis.value?.cle === CLE_FILE_THEMATIQUES && avis.value.sort === 'perimee',
+const CLES_DE_L_ECRAN = [CLE_FILE_THEMATIQUES, CLE_FILE_GROUPES]
+const perimee = computed(() => !!avis.value && CLES_DE_L_ECRAN.includes(avis.value.cle) && avis.value.sort === 'perimee')
+const refusee = computed(() => !!avis.value && CLES_DE_L_ECRAN.includes(avis.value.cle) && avis.value.sort === 'refusee')
+
+/** Aucun groupe coché est un choix : toutes les coordinations passent alors le filtre. */
+const groupesProposes = computed(() => groupes.groupes.value)
+const groupesChanges = computed(
+  () => [...choixGroupes.value].sort().join(',') !== [...groupes.mesCodes.value].sort().join(','),
 )
-const refusee = computed(
-  () => avis.value?.cle === CLE_FILE_THEMATIQUES && avis.value.sort === 'refusee',
-)
+
+function basculerGroupe(code: string, coche: boolean): void {
+  const prochain = new Set(choixGroupes.value)
+  if (coche) prochain.add(code)
+  else prochain.delete(code)
+  choixGroupes.value = prochain
+  effacerLAvis()
+}
 
 function basculer(code: string, coche: boolean): void {
   const prochain = new Set(choix.value)
@@ -78,13 +98,14 @@ async function valider(): Promise<void> {
   envoi.value = true
   try {
     await thematiques.enregistrer(codesChoisis.value)
+    if (groupesChanges.value && !perimee.value && !refusee.value) await groupes.enregistrer(choixGroupes.value)
   } finally {
     envoi.value = false
   }
   // Un choix périmé laisse la personne sur l'écran : elle vient de recevoir
   // l'état vrai et doit pouvoir le regarder avant de décider.
   if (perimee.value || refusee.value) return
-  await navigateTo(premier ? '/guide-nego' : '/guide-nego/ressources/reglages')
+  await navigateTo(depuisLesSessions.value ? '/guide-nego/negociations' : premier ? '/guide-nego' : '/guide-nego/ressources/reglages')
 }
 
 useHead({ title: t('guide-nego.thematiques.titre') })
@@ -162,6 +183,21 @@ useHead({ title: t('guide-nego.thematiques.titre') })
           />
         </div>
 
+        <section v-if="groupesProposes.length" class="gn-themes__groupes" aria-labelledby="gn-themes-groupes">
+          <h2 id="gn-themes-groupes" class="gn-themes__groupes-titre">{{ t('guide-nego.thematiques.groupes.titre') }}</h2>
+          <p class="gn-themes__aide">{{ t('guide-nego.thematiques.groupes.aide') }}</p>
+          <div class="gn-themes__liste">
+            <GnCase
+              v-for="(groupe, index) in groupesProposes"
+              :key="groupe.code"
+              :libelle="groupes.nomDe(groupe.code) ?? groupe.code"
+              :model-value="choixGroupes.has(groupe.code)"
+              :derniere="index === groupesProposes.length - 1"
+              @update:model-value="basculerGroupe(groupe.code, $event)"
+            />
+          </div>
+        </section>
+
         <!-- Le message du 412 vient de l'API : elle seule sait ce qui a changé. -->
         <p v-if="perimee || refusee" class="gn-themes__avis" role="status">
           <GnPicto nom="refresh" :taille="20" />
@@ -226,6 +262,17 @@ useHead({ title: t('guide-nego.thematiques.titre') })
   flex-direction: column;
   border-top: var(--gn-filet-1) solid var(--gn-filet);
   margin-top: var(--gn-espace-12);
+}
+
+[data-app="guide-nego"] .gn-themes__groupes {
+  padding-top: var(--gn-entre-blocs);
+}
+
+[data-app="guide-nego"] .gn-themes__groupes-titre {
+  font-size: var(--gn-taille-20);
+  line-height: var(--gn-interligne-20);
+  font-weight: var(--gn-graisse-gras);
+  color: var(--gn-titre);
 }
 
 [data-app="guide-nego"] .gn-themes__avis {

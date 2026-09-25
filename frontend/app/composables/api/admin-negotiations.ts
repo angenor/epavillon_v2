@@ -37,10 +37,17 @@ import type {
   RevokeAllAccessResult,
 } from '~/types/admin-negotiation'
 import type { AdmissionMode } from '~/types/negotiation'
+import type {
+  AgendaItemAdmin,
+  OfficialImportAdmin,
+  UpdateOfficialImportPayload,
+} from '~/types/negotiation-sessions'
 import type { Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
 
 type Deps = Pick<ApiTransport, 'call' | 'callOrNull' | 'send'>
+
+const exemplesDeLImport = () => import('~/mocks/admin-negotiation-import')
 
 /** Les filtres d'URL de la liste, **nommés en français** comme l'API les lit. */
 export interface FiltresDeCodes {
@@ -134,5 +141,41 @@ export function createAdminNegotiationsApi({ call, callOrNull, send }: Deps) {
     /** LA BASCULE. **Prend effet à la tentative suivante**, sans mise en ligne. */
     changerLeMode: (mode: AdmissionMode): Promise<AdmissionSettings> =>
       send('/admin/negotiation/admission', { mode }, (m) => m.changerLeModeDAdmission(mode), 'PUT'),
+
+    /** L'IMPORT DES SESSIONS OFFICIELLES d'une édition : réglage, santé, journal. */
+    importOfficiel: (edition: string): Promise<OfficialImportAdmin> =>
+      call('/admin/negotiation/import', async () => (await exemplesDeLImport()).etatDeLImport(edition), {
+        edition,
+      }),
+
+    /** Le réglage entier. **Allumer pose la première lecture** ; éteindre coupe aussitôt. */
+    reglerLImport: (edition: string, reglage: UpdateOfficialImportPayload): Promise<OfficialImportAdmin> =>
+      send(
+        `/admin/negotiation/import?edition=${encodeURIComponent(edition)}`,
+        reglage,
+        async () => (await exemplesDeLImport()).reglerLImport(edition, reglage),
+        'PUT',
+      ),
+
+    /** « LIRE MAINTENANT » : une lecture de plus, sans replanifier la chaîne. */
+    lireMaintenant: (edition: string): Promise<void> =>
+      send(`/admin/negotiation/import/read?edition=${encodeURIComponent(edition)}`, {}, async () => {
+        await exemplesDeLImport()
+      }),
+
+    /** L'ORDRE DU JOUR : les points sans thématique d'abord. */
+    pointsDeLOrdreDuJour: (edition: string): Promise<AgendaItemAdmin[]> =>
+      call('/admin/negotiation/agenda-items', async () => (await exemplesDeLImport()).points(edition), {
+        edition,
+      }),
+
+    /** RATTACHER un point à une thématique, ou l'en détacher (`null`). */
+    rattacherUnPoint: (pointId: Uuid, theme: string | null): Promise<AgendaItemAdmin> =>
+      send(
+        `/admin/negotiation/agenda-items/${pointId}`,
+        { theme },
+        async () => (await exemplesDeLImport()).rattacher(pointId, theme),
+        'PUT',
+      ),
   }
 }

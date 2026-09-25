@@ -1,0 +1,70 @@
+{
+  "titre": "Negotiation session",
+  "fil": "Negotiation sessions · {type}",
+  "fil-sans-type": "Negotiation sessions",
+  "anglais": "Original English title",
+  "traduction": "Machine translation",
+  "chargement": "Reading the session",
+  "hors-connexion": "Changes made since then are not shown here.",
+  "sortie": "See negotiation sessions",
+  "source": {
+    "titre": "Official source",
+    "lu": "read {moment}"
+  },
+  "cle": {
+    "heure": "Time",
+    "salle": "Room",
+    "type": "Type",
+    "ordre-du-jour": "Agenda item",
+    "acces": "Access",
+    "thematique": "Theme"
+  },
+  "plage": "{debut}–{fin}",
+  "plage-jour": "{jour}, {plage}",
+  "heure-precision": "{jour} · {zone} ({decalage})",
+  "salle-inconnue": "Room not announced",
+  "terme": "{terme} — open in the glossary",
+  "ordre-du-jour": "{code} — {intitule}",
+  "hors-ordre-du-jour": "Outside the official agenda",
+  "mon-groupe": "My group — {groupe}",
+  "sans-thematique": "Theme not specified",
+  "origine": "Official source",
+  "origine-lue": "Official source — read {moment}",
+  "original": "See the original on the official UNFCCC programme",
+  "rappel": {
+    "libelle": "Remind me 15 minutes before",
+    "hors-agenda": "First add the session to your agenda.",
+    "annulee": "Session cancelled: no reminder.",
+    "phrase": "The reminder appears at the top of Guide Négo while the app is open, with no sound or notification."
+  },
+  "agenda": {
+    "ajouter": "Add to my agenda",
+    "dedans": "In my agenda",
+    "ajoutee": "Added to your agenda.",
+    "retiree": "Removed from your agenda.",
+    "annuler": "Undo"
+  },
+  "compte": {
+    "titre": "Your agenda follows your account",
+    "texte": "Create an account or sign in to keep this session in your agenda on all your devices. The session itself can be read without an account.",
+    "creer": "Create my account",
+    "connexion": "I already have an account — Sign in"
+  },
+  "sans-edition": {
+    "titre": "No upcoming climate COP",
+    "texte": "Negotiation sessions will appear here once the next COP is announced."
+  },
+  "jamais-lue": {
+    "titre": "Sessions not yet read on this phone",
+    "texte": "The negotiation sessions had not been read before the network was lost. They will be read when the connection returns, then stay readable without it."
+  },
+  "erreur": {
+    "titre": "The sessions could not be read",
+    "texte": "The Guide Négo server did not respond. Try again in a moment.",
+    "reessayer": "Try again"
+  },
+  "inconnue": {
+    "titre": "Session not found",
+    "texte": "This session is not among the negotiation sessions of this COP."
+  }
+}

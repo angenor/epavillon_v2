@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.official_imports\n               (event_id, is_enabled, reader, archive_name, archive_first_day, live_url,\n                time_correction_minutes, official_programme_url, interval_seconds,\n                missed_threshold, updated_by)\n           VALUES ($1, $2, $3, $4, $5, $6::text::platform.url, $7, $8::text::platform.url,\n                   $9, $10, $11)\n           ON CONFLICT (event_id) DO UPDATE\n              SET is_enabled = EXCLUDED.is_enabled, reader = EXCLUDED.reader,\n                  archive_name = EXCLUDED.archive_name,\n                  archive_first_day = EXCLUDED.archive_first_day,\n                  live_url = EXCLUDED.live_url,\n                  time_correction_minutes = EXCLUDED.time_correction_minutes,\n                  official_programme_url = EXCLUDED.official_programme_url,\n                  interval_seconds = EXCLUDED.interval_seconds,\n                  missed_threshold = EXCLUDED.missed_threshold,\n                  updated_by = EXCLUDED.updated_by",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bool",
+        "Text",
+        "Text",
+        "Date",
+        "Text",
+        "Int2",
+        "Text",
+        "Int4",
+        "Int2",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ff3e8f21b606e581ddd01bf63483223f5a670553adae240fb53152de58783566"
+}

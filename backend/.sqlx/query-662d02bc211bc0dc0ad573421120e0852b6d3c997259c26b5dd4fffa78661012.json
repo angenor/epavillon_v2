@@ -1,0 +1,83 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT a.id AS \"id!\", a.code AS \"code!\", a.title AS \"title!\", t.code AS \"theme?\",\n                  a.theme_set_at, (SELECT count(*) FROM negotiation.meetings m\n                                    WHERE m.agenda_item_id = a.id) AS \"sessions!\"\n             FROM negotiation.agenda_items a\n             LEFT JOIN reference.taxonomy_terms t ON t.id = a.theme_term_id\n            WHERE a.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.agenda_items",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.agenda_items",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "title!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.agenda_items",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "theme?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "theme_set_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.agenda_items",
+            "name": "theme_set_at"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "sessions!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      true,
+      false,
+      true,
+      null
+    ]
+  },
+  "hash": "662d02bc211bc0dc0ad573421120e0852b6d3c997259c26b5dd4fffa78661012"
+}

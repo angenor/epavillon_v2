@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (SELECT count(*) FROM negotiation.meetings\n                    WHERE event_id = $1 AND source_key IS NOT NULL) AS \"sessions!\",\n                  (SELECT count(*) FROM negotiation.agenda_items\n                    WHERE event_id = $1 AND theme_term_id IS NULL) AS \"sans_theme!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "sessions!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "sans_theme!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "3a4b2a57cbc2b479c89c2f6ebac55a21d2fe59d220aabbcfc45a916eb4ee4672"
+}

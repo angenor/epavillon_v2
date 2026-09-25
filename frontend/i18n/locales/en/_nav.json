@@ -64,7 +64,9 @@
     "negotiationDocuments": "Documents",
     "negotiationFaq": "FAQ",
     "negotiationGlossary": "Glossary",
-    "negotiationPathway": "Pathway"
+    "negotiationPathway": "Pathway",
+    "negotiationImport": "Session import",
+    "negotiationAgenda": "Agenda items"
   },
   "breadcrumb": {
     "label": "Breadcrumb",

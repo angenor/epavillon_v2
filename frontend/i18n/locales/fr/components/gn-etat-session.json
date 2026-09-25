@@ -1,0 +1,19 @@
+{
+  "annulee": {
+    "source": "Annulée à {heure}",
+    "removed": "Annulée à {heure} — retirée du programme officiel",
+    "postponed": "Annulée à {heure} — reportée par la source"
+  },
+  "annulee-sans-heure": {
+    "source": "Annulée",
+    "removed": "Annulée — retirée du programme officiel",
+    "postponed": "Annulée — reportée par la source"
+  },
+  "deplacee": {
+    "heure-salle": "Déplacée — était à {heure}, {salle}",
+    "heure": "Déplacée — était à {heure}",
+    "salle": "Déplacée — ancienne salle : {salle}",
+    "jour": "Déplacée — était le {jour} à {heure}",
+    "jour-salle": "Déplacée — était le {jour} à {heure}, {salle}"
+  }
+}

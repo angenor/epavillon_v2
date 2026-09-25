@@ -134,6 +134,18 @@ const sections: NavSection[] = [
         icon: 'shield-check',
         permissions: ['negotiation.knowledge.review'],
       },
+      {
+        labelKey: 'nav.admin.negotiationImport',
+        to: '/admin/negociations/import',
+        icon: 'refresh',
+        permissions: ['negotiation.space.manage'],
+      },
+      {
+        labelKey: 'nav.admin.negotiationAgenda',
+        to: '/admin/negociations/ordre-du-jour',
+        icon: 'list',
+        permissions: ['negotiation.space.manage'],
+      },
     ],
   },
   {
