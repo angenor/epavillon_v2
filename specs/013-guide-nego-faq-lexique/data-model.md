@@ -29,7 +29,7 @@ Transitions de `knowledge_status` : `draft → published` (vérification datée 
 | Colonne | Type | Règle |
 |---|---|---|
 | `section_term_id` | uuid | → `reference.taxonomy_terms`, vocabulaire `faq_section` |
-| `question`, `answer` | i18n_text | `fr` requis |
+| `question`, `answer` | i18n_text | `fr` requis ; `answer` NULL en brouillon, requise dès `published` — `ck_faq_entries_answer` |
 | `status` | knowledge_status | défaut `draft` |
 | `verified_on` | date | requis dès `published` ou `to_review` — `ck_faq_entries_verified` |
 | `verified_by` | uuid | `xmod_fk_faq_entries_verifier`, requis avec `verified_on` |
@@ -132,7 +132,7 @@ Déclencheur AFTER : passage à `answered` → `platform.emit_event('negotiation
 | `heard_in_room` | text | la phrase entendue, en anglais |
 | `status` | knowledge_status | |
 | `first_published_at` | timestamptz | comme la FAQ : interdit la suppression |
-| `term_norm` | text GENERATED | `platform.normalize_label(term)`, index `gin_trgm_ops` et index b-tree |
+| `term_norm` | text GENERATED | `platform.normalize_label(term)`, index `gin_trgm_ops` et index unique `ux_glossary_entries_term_norm` (résolution sans ambiguïté) |
 | `acronym_norm` | text GENERATED | `platform.normalize_label(acronym)` |
 | `variants_norm` | text[] | tenu par déclencheur (une colonne générée ne prend pas de fonction sur tableau), index `gin` |
 | `created_at`, `updated_at`, `created_by` | | |

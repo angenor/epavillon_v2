@@ -5,6 +5,7 @@ Sur la **version construite**, au navigateur, à 360 px, thème clair puis sombr
 ## 0. Préparer
 
 1. Migrer sans détruire : `psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f specs/013-guide-nego-faq-lexique/migration.sql`, **deux fois** ; comparer `pg_dump --schema-only` avec une base jetable chargée depuis `docs/database/` (§ 13 de DEPLOIEMENT.md). Jamais `down -v`.
+   - La base jetable, dans le même conteneur, puis supprimée : `createdb epavillon_jetable_013`, `docs/database/*.sql` joués dans l'ordre par `psql -v ON_ERROR_STOP=1`, `pg_dump --schema-only --no-owner --no-privileges` des deux bases, lignes triées, `diff`, puis `dropdb`. Écarts attendus et sans rapport : la partition de courriels du mois à venir, les parenthèses des `CHECK` et les alias de la vue de santé.
 2. Un compte `expert`, un compte `admin`, un compte admis par code (négociatrice), un compte sans accès.
 3. Charger les données d'essai : `psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f specs/013-guide-nego-faq-lexique/donnees-essai.sql`, deux fois — le second passage n'ajoute rien.
 4. `npm run build` puis servir la version construite ; API sur 8095.

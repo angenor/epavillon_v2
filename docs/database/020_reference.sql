@@ -283,7 +283,12 @@ INSERT INTO reference.taxonomies (code, label, description, is_multi_select, is_
     -- coexistent avec un homonyme sous `activity_theme` : la clé est
     -- (taxonomy_code, code), et c'est voulu. is_system : le vocabulaire commande
     -- les alertes de Guide Négo, aucun écran ne le modifie.
-    ('negotiation_theme',  '{"fr":"Thématiques de négociation","en":"Negotiation themes"}', '{"fr":"Filières suivies par une négociatrice ou un négociateur : adaptation, finance, genre…","en":"Tracks followed by a negotiator: adaptation, finance, gender…"}', true, false, true)
+    ('negotiation_theme',  '{"fr":"Thématiques de négociation","en":"Negotiation themes"}', '{"fr":"Filières suivies par une négociatrice ou un négociateur : adaptation, finance, genre…","en":"Tracks followed by a negotiator: adaptation, finance, gender…"}', true, false, true),
+    -- Rubriques de la FAQ et familles du lexique de Guide Négo (étape 2).
+    -- is_system : l'application les désigne par leur code, et la rubrique porte
+    -- le nom de son pictogramme dans `icon`.
+    ('faq_section',        '{"fr":"Rubriques de la FAQ","en":"FAQ sections"}', '{"fr":"Rubriques de la FAQ de Guide Négo","en":"Guide Négo FAQ sections"}', false, false, true),
+    ('glossary_family',    '{"fr":"Familles du lexique","en":"Glossary families"}', '{"fr":"Filtres du lexique de Guide Négo : réunions, textes, thématiques","en":"Guide Négo glossary filters: meetings, texts, themes"}', false, false, true)
 ON CONFLICT (code) DO NOTHING;
 
 INSERT INTO reference.taxonomy_terms (taxonomy_code, code, label, sort_order) VALUES
@@ -380,4 +385,16 @@ INSERT INTO reference.taxonomy_terms (taxonomy_code, code, label, sort_order) VA
     ('negotiation_theme', 'just_transition', '{"fr":"Transition juste","en":"Just transition"}', 80),
     ('negotiation_theme', 'agriculture',     '{"fr":"Agriculture","en":"Agriculture"}', 90),
     ('negotiation_theme', 'technology',      '{"fr":"Technologie","en":"Technology"}', 100)
+ON CONFLICT (taxonomy_code, code) DO NOTHING;
+
+-- Rubriques de la FAQ de Guide Négo, dans l'ordre de la maquette. `icon` nomme un
+-- pictogramme de l'application (frontend/app/utils/guide-nego/pictogrammes.ts).
+INSERT INTO reference.taxonomy_terms (taxonomy_code, code, label, icon, sort_order) VALUES
+    ('faq_section',     'first_cop',          '{"fr":"Ma première COP","en":"My first COP"}',                  'star', 10),
+    ('faq_section',     'process',            '{"fr":"Le processus","en":"The process"}',                      'toc',  20),
+    ('faq_section',     'negotiating_groups', '{"fr":"Les groupes de négociation","en":"Negotiating groups"}', 'user', 30),
+    ('faq_section',     'on_site',            '{"fr":"Sur place","en":"On site"}',                             'pin',  40),
+    ('glossary_family', 'meetings',           '{"fr":"Réunions","en":"Meetings"}',                             NULL,   10),
+    ('glossary_family', 'texts',              '{"fr":"Textes","en":"Texts"}',                                  NULL,   20),
+    ('glossary_family', 'themes',             '{"fr":"Thématiques","en":"Themes"}',                            NULL,   30)
 ON CONFLICT (taxonomy_code, code) DO NOTHING;
