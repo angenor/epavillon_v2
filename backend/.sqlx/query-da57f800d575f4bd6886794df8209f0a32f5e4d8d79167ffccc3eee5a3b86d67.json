@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT d.id, d.slug::text AS \"slug!\", d.version,\n                  platform.t(d.title, $1) AS \"title!\", platform.t(d.summary, $1) AS summary,\n                  t.code AS \"type_code!\",\n                  COALESCE((SELECT array_agg(tt.code ORDER BY et.sort_order, tt.code)\n                              FROM reference.entity_terms et\n                              JOIN reference.taxonomy_terms tt ON tt.id = et.term_id\n                             WHERE et.entity_schema = 'negotiation' AND et.entity_table = 'documents'\n                               AND et.entity_id = d.id AND tt.taxonomy_code = 'negotiation_theme'\n                               AND tt.is_active), '{}') AS \"themes!\",\n                  d.event_id, d.issued_on, d.published_at AS \"published_at!\", d.publisher,\n                  d.locale_code, d.asset_id, d.external_url::text AS external_url, d.is_restricted,\n                  r.asset_id AS \"rendu_asset?\", r.status::text AS \"rendu_status?\", r.page_count,\n                  r.reading_bytes, r.serve_as_is AS \"serve_as_is?\", r.extracted_at\n             FROM negotiation.documents d\n             JOIN reference.taxonomy_terms t ON t.id = d.document_type_term_id\n             LEFT JOIN negotiation.document_renditions r ON r.document_id = d.id\n            WHERE d.published_at IS NOT NULL\n            ORDER BY d.published_at DESC, d.id",
+  "query": "SELECT d.id, d.slug::text AS \"slug!\", d.version,\n                  platform.t(d.title, $1) AS \"title!\", platform.t(d.summary, $1) AS summary,\n                  t.code AS \"type_code!\",\n                  COALESCE((SELECT array_agg(tt.code ORDER BY et.sort_order, tt.code)\n                              FROM reference.entity_terms et\n                              JOIN reference.taxonomy_terms tt ON tt.id = et.term_id\n                             WHERE et.entity_schema = 'negotiation' AND et.entity_table = 'documents'\n                               AND et.entity_id = d.id AND tt.taxonomy_code = 'negotiation_theme'\n                               AND tt.is_active), '{}') AS \"themes!\",\n                  d.event_id, d.issued_on, d.published_at AS \"published_at!\", d.publisher,\n                  d.locale_code, d.asset_id, d.external_url::text AS external_url, d.is_restricted,\n                  r.asset_id AS \"rendu_asset?\", r.status::text AS \"rendu_status?\", r.page_count,\n                  r.reading_bytes, r.large_text_choice, r.extracted_at,\n                  m.has_text AS \"has_text!\", m.large_text AS \"large_text!\"\n             FROM negotiation.documents d\n             JOIN reference.taxonomy_terms t ON t.id = d.document_type_term_id\n             LEFT JOIN negotiation.document_renditions r ON r.document_id = d.id\n             CROSS JOIN LATERAL negotiation.document_reading_modes(d.id) m\n            WHERE d.published_at IS NOT NULL\n            ORDER BY d.published_at DESC, d.id",
   "describe": {
     "columns": [
       {
@@ -184,12 +184,12 @@
       },
       {
         "ordinal": 19,
-        "name": "serve_as_is?",
+        "name": "large_text_choice",
         "type_info": "Bool",
         "origin": {
           "Table": {
             "table": "negotiation.document_renditions",
-            "name": "serve_as_is"
+            "name": "large_text_choice"
           }
         }
       },
@@ -203,6 +203,18 @@
             "name": "extracted_at"
           }
         }
+      },
+      {
+        "ordinal": 21,
+        "name": "has_text!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 22,
+        "name": "large_text!",
+        "type_info": "Bool",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -230,9 +242,11 @@
       null,
       true,
       true,
-      false,
-      true
+      true,
+      true,
+      null,
+      null
     ]
   },
-  "hash": "3a04c1f1a4e7e5738ef6246d16fc3f3dfd3507a73116b5d092f2ba62802a5489"
+  "hash": "da57f800d575f4bd6886794df8209f0a32f5e4d8d79167ffccc3eee5a3b86d67"
 }

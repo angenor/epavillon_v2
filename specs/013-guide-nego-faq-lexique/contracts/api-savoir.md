@@ -6,8 +6,8 @@ Routes plates `/negotiation/...`, crate `negotiation`. Formes TypeScript dans `f
 
 | Verbe et chemin | Garde | Réponse | Notes |
 |---|---|---|---|
-| `GET /negotiation/knowledge` | aucune | `KnowledgeBundle` | Tout le publié, `complete: true`. `ETag` = `negotiation.knowledge_fingerprint()` ; `If-None-Match` → `304` ; `Cache-Control: public, no-cache` |
-| `GET /negotiation/knowledge?since=<served_at>` | aucune | `KnowledgeBundle` | `complete: false` : entrées changées depuis `since − 5 min`, identifiants sortis dans `removed`. Parcours, vocabulaires et `most_read` toujours entiers (R2) |
+| `GET /negotiation/knowledge` | aucune | `KnowledgeBundle` | Tout le publié, `complete: true`, textes dans la langue demandée. `ETag` = `negotiation.knowledge_fingerprint()` et la langue ; `Vary: Accept-Language` ; `If-None-Match` → `304` ; `Cache-Control: public, no-cache` |
+| `GET /negotiation/knowledge?since=<served_at>` | aucune | `KnowledgeBundle` | `complete: false` : entrées changées depuis `since − 5 min`, identifiants sortis dans `removed` (seulement les entrées déjà publiées une fois : un brouillon jamais servi n'a rien à retirer). Parcours, vocabulaires et `most_read` toujours entiers (R2) |
 
 `KnowledgeBundle` :
 
@@ -21,11 +21,12 @@ glossary[]          { id, slug, family_code, term, acronym, variants[], translat
                       definition, heard_in_room, sources[], related_ids[], status, updated_at }
 pathway             { groups[] { id, label, sort_order,
                       steps[] { id, label, detail, origin_label, link, sort_order } } }
-most_read[]         identifiants d'entrées de FAQ, trois au plus
+                    link : { kind: document | faq | glossary, target_id, page, section, label } | null
+most_read[]         identifiants d'entrées de FAQ, trois au plus : lectures des 30 derniers jours (jour de Paris), puis editorial_rank
 removed             { faq[], glossary[] }   — vide si complete
 ```
 
-`status` vaut `published` ou `to_review` : les brouillons ne sortent jamais. `related_ids` porte **tous** les liens, publiés ou non : le téléphone les filtre sur les entrées qu'il a, puisqu'une différence ne renvoie pas le parent quand une entrée liée change d'état. `sources[]` : `{ document_id?, document_title?, external_title?, external_url?, section_label?, page_from?, page_to?, quote? }` — le titre du document est joint pour la lecture sans la bibliothèque.
+`status` vaut `published` ou `to_review` : les brouillons ne sortent jamais. `related_ids` porte **tous** les liens, publiés ou non : le téléphone les filtre sur les entrées qu'il a, puisqu'une différence ne renvoie pas le parent quand une entrée liée change d'état. `sources[]` : `{ document_id?, document_title?, external_title?, external_url?, section_label?, page_from?, page_to?, quote? }` — le titre du document est joint pour la lecture sans la bibliothèque ; une clé nulle est omise.
 
 ## Lectures et retours sur la FAQ
 

@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.document_renditions\n            SET status = 'ready', page_count = $3, outline = $4, is_reflowable = $5,\n                quality = $6, extractor = $7,\n                failure_reason = NULL, extracted_at = now()\n          WHERE document_id = $1 AND asset_id = $2 AND request_id = $8",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Int4",
+        "Jsonb",
+        "Bool",
+        "Jsonb",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4cdc37d6c56d370f659aa04c836da5a830fed331021b4a0aaa2b2135dd40e1f7"
+}

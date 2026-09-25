@@ -16,6 +16,7 @@
 #![allow(dead_code)]
 
 pub mod documents;
+pub mod savoir;
 
 use kernel::config::Config;
 use kernel::context::RequestContext;

@@ -49,6 +49,7 @@ pub fn routes(cfg: &mut ServiceConfig) {
     routes::acces::configurer(cfg);
     routes::themes::configurer(cfg);
     routes::documents::configurer(cfg);
+    routes::savoir::configurer(cfg);
 }
 
 /// Le back-office de l'admission.

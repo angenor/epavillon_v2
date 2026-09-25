@@ -5,6 +5,7 @@ pub mod admin_documents;
 pub mod admin_requests;
 pub mod documents;
 pub mod openapi;
+pub mod savoir;
 pub mod themes;
 
 use actix_web::http::header::{HeaderName, CACHE_CONTROL};

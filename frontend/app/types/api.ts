@@ -2952,6 +2952,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/negotiation/knowledge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `KnowledgeBundle` — la FAQ, le parcours et le lexique publiés (`published` et `to_review`), les deux vocabulaires et « les plus lues », dans la langue demandée. `complete: true`.
+         *
+         *     Avec `since` (le `served_at` d'une lecture précédente) : les entrées changées depuis `since − 5 min`, et dans `removed` celles qui ne sont plus publiées ; `complete: false`. Parcours, vocabulaires et `most_read` reviennent entiers.
+         *
+         *     `ETag` calculé par `negotiation.knowledge_fingerprint()` et la langue ; **304** sur `If-None-Match`. `Cache-Control: public, no-cache`.
+         */
+        get: operations["negotiation_knowledge"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/negotiation/me/access": {
         parameters: {
             query?: never;
@@ -4617,13 +4640,30 @@ export interface components {
          *     - `NEGOTIATION_DOCUMENT_UNKNOWN_TYPE` (400) — Ce type de document n'existe pas.
          *     - `NEGOTIATION_DOCUMENT_PUBLISHED_UNDELETABLE` (409) — Un document publié ne se supprime pas : dépubliez-le.
          *     - `NEGOTIATION_CORRECTION_PAGE_UNKNOWN` (422) — Cette page n'existe pas dans le document.
+         *     - `NEGOTIATION_FAQ_NOT_FOUND` (404) — Cette question n'existe pas, ou n'est plus publiée.
+         *     - `NEGOTIATION_GLOSSARY_NOT_FOUND` (404) — Ce terme n'existe pas, ou n'est plus publié.
+         *     - `NEGOTIATION_PATHWAY_STEP_NOT_FOUND` (404) — Cette étape du parcours n'existe pas, ou n'est plus publiée.
+         *     - `NEGOTIATION_REPORT_LIMIT` (429) — Vous avez envoyé beaucoup de signalements aujourd'hui. Réessayez demain.
+         *     - `NEGOTIATION_PROPOSAL_LIMIT` (429) — Vous avez proposé beaucoup de termes aujourd'hui. Réessayez demain.
+         *     - `NEGOTIATION_GLOSSARY_TERM_EXISTS` (409) — Ce terme est déjà dans le lexique.
+         *     - `NEGOTIATION_REPORT_REASON_REQUIRED` (422) — Choisissez au moins une raison.
+         *     - `NEGOTIATION_TEXT_TOO_LONG` (422) — Ce texte dépasse 600 caractères.
+         *     - `NEGOTIATION_FAQ_UNVERIFIED` (422) — Une réponse ne se publie qu'avec la date de sa vérification par un expert.
+         *     - `NEGOTIATION_KNOWLEDGE_PUBLISHED_UNDELETABLE` (409) — Une entrée déjà publiée ne se supprime pas : dépubliez-la.
+         *     - `NEGOTIATION_GLOSSARY_SLUG_TAKEN` (409) — Un terme du lexique s'écrit déjà ainsi.
+         *     - `NEGOTIATION_QUESTION_NO_CONSENT` (422) — La personne qui a posé cette question n'a pas accepté qu'elle rejoigne la FAQ.
+         *     - `NEGOTIATION_QUEUE_ITEM_CLOSED` (409) — Cet élément de la file a déjà été traité.
+         *     - `NEGOTIATION_SOURCE_TARGET_INVALID` (422) — Une source est un document de la bibliothèque ou une référence extérieure titrée, jamais les deux.
+         *     - `NEGOTIATION_PATHWAY_LINK_INVALID` (422) — Le lien de l'étape ne correspond pas à sa cible.
+         *     - `NEGOTIATION_PATHWAY_GROUP_NOT_EMPTY` (409) — Ce groupe porte encore des étapes : déplacez-les avant de le supprimer.
+         *     - `NEGOTIATION_RELATED_SELF` (422) — Une entrée ne peut pas être liée à elle-même.
          */
         ApiError: {
             /**
              * @description Code stable. Le renommer est un changement majeur.
              * @enum {string}
              */
-            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "INTERNAL" | "SERVICE_UNAVAILABLE" | "IDENTITY_SESSION_EXPIRED" | "IDENTITY_SESSION_REVOKED" | "IDENTITY_REFRESH_REUSED" | "IDENTITY_ORIGIN_REJECTED" | "IDENTITY_PASSWORD_TOO_WEAK" | "IDENTITY_EMAIL_ALREADY_USED" | "IDENTITY_ACCOUNT_ALREADY_EXISTS" | "IDENTITY_ROLE_WINDOW_INVALID" | "IDENTITY_ROLE_SCOPE_MISMATCH" | "IDENTITY_ROLE_REVOCATION_INVALID" | "IDENTITY_UNKNOWN_REFERENCE" | "IDENTITY_PRIVACY_WRONG_ACTION" | "ORG_NOT_MANAGER" | "ORG_MEMBERSHIP_IS_INVITATION" | "ORG_MEMBERSHIP_NOT_PENDING" | "ORG_LAST_MANAGER" | "ORG_MERGE_FIELD_NOT_ARBITRABLE" | "ORG_MERGE_GLOBAL_SCOPE_REQUIRED" | "ORG_MERGE_SAME_ORGANIZATION" | "ORG_DOMAIN_VERIFICATION_REQUIRED" | "ORG_NAME_IS_DERIVED" | "ORG_UNKNOWN_REFERENCE" | "ORG_INVITATION_NOT_YOURS" | "EVENT_GLOBAL_SCOPE_REQUIRED" | "EVENT_CRITERION_HAS_SCORES" | "EVENT_UNKNOWN_REFERENCE" | "PROPOSAL_NOT_EDITABLE" | "PROPOSAL_SPEAKER_IDENTITY_LOCKED" | "PROPOSAL_REVIEW_NOT_ASSIGNED" | "PROPOSAL_UNKNOWN_TERM" | "PROPOSAL_TEXT_TOO_LONG" | "PROPOSAL_UNKNOWN_REFERENCE" | "SESSION_DERIVED_FIELD" | "SESSION_UNKNOWN_REFERENCE" | "SESSION_TRACK_EVENT_MISMATCH" | "REGISTRATION_NOT_ACCEPTED" | "REGISTRATION_ANSWER_INVALID" | "REGISTRATION_CONSENT_REQUIRED" | "REGISTRATION_ACCOUNT_REQUIRED" | "REGISTRATION_LOCKED" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_MIME_NOT_ALLOWED" | "MEDIA_TOO_LARGE" | "MEDIA_ASPECT_RATIO" | "MEDIA_ROLE_NOT_DECLARED" | "MEDIA_ROLE_EXCLUSIVE" | "MEDIA_ASSET_NOT_SERVABLE" | "MEDIA_ALT_TEXT_REQUIRED" | "MEDIA_ASSET_IN_USE" | "MEDIA_UPLOAD_INCOMPLETE" | "MEDIA_STORAGE_UNAVAILABLE" | "ENGAGEMENT_REMINDER_OFFSETS_INVALID" | "ENGAGEMENT_REMINDER_SCOPE_INVALID" | "ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN" | "ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN" | "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN" | "LIVE_INCIDENT_SCOPE_TARGET_MISMATCH" | "LIVE_INCIDENT_WINDOW_INVALID" | "LIVE_INCIDENT_NOT_PUBLISHED" | "NEGOTIATION_ACCESS_REQUEST_PENDING" | "NEGOTIATION_ACCESS_REQUEST_DECIDED" | "NEGOTIATION_INVITATION_CODE_DUPLICATE" | "NEGOTIATION_ADMISSION_MODE_INVALID" | "NEGOTIATION_SPACE_UNKNOWN" | "NEGOTIATION_THEMES_EMPTY" | "NEGOTIATION_THEME_UNKNOWN" | "NEGOTIATION_THEMES_STALE" | "NEGOTIATION_DOCUMENT_NOT_FOUND" | "NEGOTIATION_DOCUMENT_RESTRICTED" | "NEGOTIATION_DOCUMENT_NOT_READABLE" | "NEGOTIATION_DOCUMENT_RANGE_INVALID" | "NEGOTIATION_DOCUMENT_SOURCE_BOTH" | "NEGOTIATION_DOCUMENT_SOURCE_MISSING" | "NEGOTIATION_DOCUMENT_NOT_READY" | "NEGOTIATION_DOCUMENT_FILE_LOCKED" | "NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED" | "NEGOTIATION_DOCUMENT_SUPERSEDE_CYCLE" | "NEGOTIATION_DOCUMENT_UNKNOWN_THEME" | "NEGOTIATION_DOCUMENT_UNKNOWN_TYPE" | "NEGOTIATION_DOCUMENT_PUBLISHED_UNDELETABLE" | "NEGOTIATION_CORRECTION_PAGE_UNKNOWN";
+            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "INTERNAL" | "SERVICE_UNAVAILABLE" | "IDENTITY_SESSION_EXPIRED" | "IDENTITY_SESSION_REVOKED" | "IDENTITY_REFRESH_REUSED" | "IDENTITY_ORIGIN_REJECTED" | "IDENTITY_PASSWORD_TOO_WEAK" | "IDENTITY_EMAIL_ALREADY_USED" | "IDENTITY_ACCOUNT_ALREADY_EXISTS" | "IDENTITY_ROLE_WINDOW_INVALID" | "IDENTITY_ROLE_SCOPE_MISMATCH" | "IDENTITY_ROLE_REVOCATION_INVALID" | "IDENTITY_UNKNOWN_REFERENCE" | "IDENTITY_PRIVACY_WRONG_ACTION" | "ORG_NOT_MANAGER" | "ORG_MEMBERSHIP_IS_INVITATION" | "ORG_MEMBERSHIP_NOT_PENDING" | "ORG_LAST_MANAGER" | "ORG_MERGE_FIELD_NOT_ARBITRABLE" | "ORG_MERGE_GLOBAL_SCOPE_REQUIRED" | "ORG_MERGE_SAME_ORGANIZATION" | "ORG_DOMAIN_VERIFICATION_REQUIRED" | "ORG_NAME_IS_DERIVED" | "ORG_UNKNOWN_REFERENCE" | "ORG_INVITATION_NOT_YOURS" | "EVENT_GLOBAL_SCOPE_REQUIRED" | "EVENT_CRITERION_HAS_SCORES" | "EVENT_UNKNOWN_REFERENCE" | "PROPOSAL_NOT_EDITABLE" | "PROPOSAL_SPEAKER_IDENTITY_LOCKED" | "PROPOSAL_REVIEW_NOT_ASSIGNED" | "PROPOSAL_UNKNOWN_TERM" | "PROPOSAL_TEXT_TOO_LONG" | "PROPOSAL_UNKNOWN_REFERENCE" | "SESSION_DERIVED_FIELD" | "SESSION_UNKNOWN_REFERENCE" | "SESSION_TRACK_EVENT_MISMATCH" | "REGISTRATION_NOT_ACCEPTED" | "REGISTRATION_ANSWER_INVALID" | "REGISTRATION_CONSENT_REQUIRED" | "REGISTRATION_ACCOUNT_REQUIRED" | "REGISTRATION_LOCKED" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_MIME_NOT_ALLOWED" | "MEDIA_TOO_LARGE" | "MEDIA_ASPECT_RATIO" | "MEDIA_ROLE_NOT_DECLARED" | "MEDIA_ROLE_EXCLUSIVE" | "MEDIA_ASSET_NOT_SERVABLE" | "MEDIA_ALT_TEXT_REQUIRED" | "MEDIA_ASSET_IN_USE" | "MEDIA_UPLOAD_INCOMPLETE" | "MEDIA_STORAGE_UNAVAILABLE" | "ENGAGEMENT_REMINDER_OFFSETS_INVALID" | "ENGAGEMENT_REMINDER_SCOPE_INVALID" | "ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN" | "ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN" | "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN" | "LIVE_INCIDENT_SCOPE_TARGET_MISMATCH" | "LIVE_INCIDENT_WINDOW_INVALID" | "LIVE_INCIDENT_NOT_PUBLISHED" | "NEGOTIATION_ACCESS_REQUEST_PENDING" | "NEGOTIATION_ACCESS_REQUEST_DECIDED" | "NEGOTIATION_INVITATION_CODE_DUPLICATE" | "NEGOTIATION_ADMISSION_MODE_INVALID" | "NEGOTIATION_SPACE_UNKNOWN" | "NEGOTIATION_THEMES_EMPTY" | "NEGOTIATION_THEME_UNKNOWN" | "NEGOTIATION_THEMES_STALE" | "NEGOTIATION_DOCUMENT_NOT_FOUND" | "NEGOTIATION_DOCUMENT_RESTRICTED" | "NEGOTIATION_DOCUMENT_NOT_READABLE" | "NEGOTIATION_DOCUMENT_RANGE_INVALID" | "NEGOTIATION_DOCUMENT_SOURCE_BOTH" | "NEGOTIATION_DOCUMENT_SOURCE_MISSING" | "NEGOTIATION_DOCUMENT_NOT_READY" | "NEGOTIATION_DOCUMENT_FILE_LOCKED" | "NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED" | "NEGOTIATION_DOCUMENT_SUPERSEDE_CYCLE" | "NEGOTIATION_DOCUMENT_UNKNOWN_THEME" | "NEGOTIATION_DOCUMENT_UNKNOWN_TYPE" | "NEGOTIATION_DOCUMENT_PUBLISHED_UNDELETABLE" | "NEGOTIATION_CORRECTION_PAGE_UNKNOWN" | "NEGOTIATION_FAQ_NOT_FOUND" | "NEGOTIATION_GLOSSARY_NOT_FOUND" | "NEGOTIATION_PATHWAY_STEP_NOT_FOUND" | "NEGOTIATION_REPORT_LIMIT" | "NEGOTIATION_PROPOSAL_LIMIT" | "NEGOTIATION_GLOSSARY_TERM_EXISTS" | "NEGOTIATION_REPORT_REASON_REQUIRED" | "NEGOTIATION_TEXT_TOO_LONG" | "NEGOTIATION_FAQ_UNVERIFIED" | "NEGOTIATION_KNOWLEDGE_PUBLISHED_UNDELETABLE" | "NEGOTIATION_GLOSSARY_SLUG_TAKEN" | "NEGOTIATION_QUESTION_NO_CONSENT" | "NEGOTIATION_QUEUE_ITEM_CLOSED" | "NEGOTIATION_SOURCE_TARGET_INVALID" | "NEGOTIATION_PATHWAY_LINK_INVALID" | "NEGOTIATION_PATHWAY_GROUP_NOT_EMPTY" | "NEGOTIATION_RELATED_SELF";
             /** @description Message français, affichable tel quel. */
             message: string;
             /** @description Champ fautif, quand le refus en désigne un. */
@@ -12109,6 +12149,45 @@ export interface operations {
                 };
             };
             /** @description Code vide ou corps malformé */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_knowledge: {
+        parameters: {
+            query?: {
+                /** @description `served_at` d'une lecture précédente, en RFC 3339 */
+                since?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description KnowledgeBundle */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Rien n'a changé depuis l'empreinte présentée */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description `since` illisible */
             422: {
                 headers: {
                     [name: string]: unknown;

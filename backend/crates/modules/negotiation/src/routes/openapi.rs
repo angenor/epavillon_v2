@@ -50,6 +50,7 @@ pub struct ApiErrorBody {
         crate::routes::documents::favoris,
         crate::routes::documents::poser_un_favori,
         crate::routes::documents::retirer_un_favori,
+        crate::routes::savoir::paquet,
         crate::routes::admin_documents::lister,
         crate::routes::admin_documents::creer,
         crate::routes::admin_documents::fiche,
@@ -72,6 +73,7 @@ pub struct ApiErrorBody {
     tags(
         (name = "Guide Négo — accès", description = "Entrer dans les modules réservés : le code d'invitation, l'état de son propre accès, la demande à trancher."),
         (name = "Guide Négo — documents", description = "La bibliothèque de documents, leur forme lisible, les images de page, les notes de correction, le compteur et les favoris. Lecture ouverte à tous ; un document réservé ne livre son contenu qu'à qui a l'accès négociateur."),
+        (name = "Guide Négo — savoir", description = "La FAQ, le parcours « Ma première COP » et le lexique, en un paquet que le téléphone garde et relit par différence. Lecture ouverte à tous."),
         (name = "Back-office — documents", description = "Publier un document en une journée : brouillon, PDF, extraction, aperçu page par page, publication, nouvelle version ; et les notes de correction de l'expert. Portée globale."),
         (name = "Back-office — admission", description = "Les codes d'invitation, leurs usages, les demandes d'accès et le mode d'admission. Réservé aux administrateurs de la plateforme entière : `negotiation.space.manage` **sur la portée globale**. Un administrateur d'une seule édition n'y voit rien — aucun espace de négociation n'est rattaché à un événement."),
     )

@@ -1,0 +1,54 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT code AS \"code!\", platform.t(label, $1) AS \"label!\", icon,\n                  sort_order::int AS \"sort_order!\"\n             FROM reference.taxonomy_terms\n            WHERE taxonomy_code = 'faq_section' AND is_active\n            ORDER BY sort_order, code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "label!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "icon",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "icon"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "sort_order!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      true,
+      null
+    ]
+  },
+  "hash": "ccb72e3c194b52fcb6ec5749499c03cde33382e0866194f2ddcfe0b7a4e939d3"
+}

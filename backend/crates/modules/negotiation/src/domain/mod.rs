@@ -9,4 +9,5 @@ pub mod permissions;
 pub mod plage;
 pub mod redeem;
 pub mod requests;
+pub mod savoir;
 pub mod themes;

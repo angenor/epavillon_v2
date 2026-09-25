@@ -1,0 +1,111 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(s.faq_entry_id, s.glossary_entry_id) AS \"entree!\",\n                  s.document_id, platform.t(d.title, $1) AS document_title,\n                  s.external_title, s.external_url::text AS external_url, s.section_label,\n                  s.page_from, s.page_to, s.quote\n             FROM negotiation.knowledge_sources s\n             LEFT JOIN negotiation.documents d ON d.id = s.document_id\n            WHERE s.faq_entry_id = ANY($2::uuid[]) OR s.glossary_entry_id = ANY($3::uuid[])\n            ORDER BY s.sort_order, s.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "entree!",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "document_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.knowledge_sources",
+            "name": "document_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "document_title",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "external_title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.knowledge_sources",
+            "name": "external_title"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "external_url",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "section_label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.knowledge_sources",
+            "name": "section_label"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "page_from",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "negotiation.knowledge_sources",
+            "name": "page_from"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "page_to",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "negotiation.knowledge_sources",
+            "name": "page_to"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "quote",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.knowledge_sources",
+            "name": "quote"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "UuidArray",
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      null,
+      true,
+      null,
+      true,
+      null,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "818575b68606f6390bb4c900f7b4b00edd3fc66e43a1f1326572b19fc92f8039"
+}

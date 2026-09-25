@@ -9,6 +9,7 @@ pub mod documents;
 pub mod objets;
 pub mod renditions;
 pub mod requests;
+pub mod savoir_paquet;
 pub mod settings;
 pub mod themes;
 pub mod uses;

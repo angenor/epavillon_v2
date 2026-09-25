@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT d.id, d.version, d.is_restricted, d.asset_id, d.external_url::text AS external_url,\n                  r.asset_id AS \"rendu_asset?\", r.status::text AS \"rendu_status?\", r.page_count,\n                  r.reading_bytes, r.serve_as_is AS \"serve_as_is?\", r.extracted_at, r.outline\n             FROM negotiation.documents d\n             LEFT JOIN negotiation.document_renditions r ON r.document_id = d.id\n            WHERE d.id = $1 AND (d.published_at IS NOT NULL OR NOT $2)",
+  "query": "SELECT d.id, d.version, d.is_restricted, d.asset_id, d.external_url::text AS external_url,\n                  r.asset_id AS \"rendu_asset?\", r.status::text AS \"rendu_status?\", r.page_count,\n                  r.reading_bytes, r.large_text_choice, r.extracted_at, r.outline,\n                  m.has_text AS \"has_text!\", m.large_text AS \"large_text!\"\n             FROM negotiation.documents d\n             LEFT JOIN negotiation.document_renditions r ON r.document_id = d.id\n             CROSS JOIN LATERAL negotiation.document_reading_modes(d.id) m\n            WHERE d.id = $1 AND (d.published_at IS NOT NULL OR NOT $2)",
   "describe": {
     "columns": [
       {
@@ -94,12 +94,12 @@
       },
       {
         "ordinal": 9,
-        "name": "serve_as_is?",
+        "name": "large_text_choice",
         "type_info": "Bool",
         "origin": {
           "Table": {
             "table": "negotiation.document_renditions",
-            "name": "serve_as_is"
+            "name": "large_text_choice"
           }
         }
       },
@@ -124,6 +124,18 @@
             "name": "outline"
           }
         }
+      },
+      {
+        "ordinal": 12,
+        "name": "has_text!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
+        "name": "large_text!",
+        "type_info": "Bool",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -138,14 +150,16 @@
       false,
       true,
       null,
-      true,
+      false,
       null,
       true,
       true,
       true,
       true,
-      true
+      true,
+      null,
+      null
     ]
   },
-  "hash": "7c3ab44d80b5901e47b5e9c837ac462062e7ce5ead69208b8bb157df79ee8774"
+  "hash": "155240a2118f7d4602477b396f5ffcdad7392f0c06b36f31c3d8b24c10053c16"
 }

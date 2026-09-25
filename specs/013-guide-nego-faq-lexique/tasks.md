@@ -47,13 +47,13 @@ description: "Tâches de l'étape 2 — FAQ, parcours « Ma première COP » et 
 
 **But** : `GET /negotiation/knowledge` servi, entier et par différence, testé.
 
-- [ ] T009 Ajouter les dix-sept codes au catalogue `backend/crates/kernel/src/error.rs`, section « Guide Négo, savoir (étape 2) » ([api-savoir.md § Codes](contracts/api-savoir.md), [api-admin-savoir.md](contracts/api-admin-savoir.md)) ; traduire les contraintes du §10 là où l'étape 1 traduit les siennes
-- [ ] T010 [P] Ajouter `KnowledgePublish` et `KnowledgeReview` à `backend/crates/modules/negotiation/src/domain/permissions.rs`
-- [ ] T011 [P] Écrire les formes et la validation du savoir dans `backend/crates/modules/negotiation/src/domain/savoir.rs` (paquet, entrées, sources, parcours, `removed`)
-- [ ] T012 Écrire `backend/crates/modules/negotiation/src/repo/savoir_paquet.rs` : lecture du publié entier, différence depuis `since − 5 min` avec `removed`, « les plus lues » sur 30 jours avec repli sur `editorial_rank`, empreinte par `negotiation.knowledge_fingerprint()`
-- [ ] T013 Écrire `service/savoir_paquet.rs` et `routes/savoir.rs` (`GET /negotiation/knowledge`, `ETag`, `If-None-Match` → `304` par `routes::inchange()`, `Cache-Control: public, no-cache`, `served_at`) ; monter dans `src/lib.rs`, ajouter à `routes/openapi.rs`
-- [ ] T014 Écrire le harnais `backend/crates/modules/negotiation/tests/commun/savoir.rs` (fabriques : entrée de FAQ, terme, étape, expert) et `tests/savoir_paquet.rs` : brouillon jamais servi, `to_review` servi, `since` rend le changé et `removed`, chevauchement, enfant modifié qui fait partir le parent, `304`, une entrée publiée non supprimable (code traduit), `glossary_resolve` dans ses quatre ordres
-- [ ] T015 `make openapi`, `cargo test -p negotiation`
+- [x] T009 Ajouter les dix-sept codes au catalogue `backend/crates/kernel/src/error.rs`, section « Guide Négo, savoir (étape 2) » ([api-savoir.md § Codes](contracts/api-savoir.md), [api-admin-savoir.md](contracts/api-admin-savoir.md)) ; traduire les contraintes du §10 là où l'étape 1 traduit les siennes
+- [x] T010 [P] Ajouter `KnowledgePublish` et `KnowledgeReview` à `backend/crates/modules/negotiation/src/domain/permissions.rs`
+- [x] T011 [P] Écrire les formes et la validation du savoir dans `backend/crates/modules/negotiation/src/domain/savoir.rs` (paquet, entrées, sources, parcours, `removed`)
+- [x] T012 Écrire `backend/crates/modules/negotiation/src/repo/savoir_paquet.rs` : lecture du publié entier, différence depuis `since − 5 min` avec `removed`, « les plus lues » sur 30 jours avec repli sur `editorial_rank`, empreinte par `negotiation.knowledge_fingerprint()`
+- [x] T013 Écrire `service/savoir_paquet.rs` et `routes/savoir.rs` (`GET /negotiation/knowledge`, `ETag`, `If-None-Match` → `304` par `routes::inchange()`, `Cache-Control: public, no-cache`, `served_at`) ; monter dans `src/lib.rs`, ajouter à `routes/openapi.rs`
+- [x] T014 Écrire le harnais `backend/crates/modules/negotiation/tests/commun/savoir.rs` (fabriques : entrée de FAQ, terme, étape, expert) et `tests/savoir_paquet.rs` : brouillon jamais servi, `to_review` servi, `since` rend le changé et `removed`, chevauchement, enfant modifié qui fait partir le parent, `304`, une entrée publiée non supprimable (code traduit), `glossary_resolve` dans ses quatre ordres
+- [x] T015 `make openapi`, `cargo test -p negotiation`
 
 ---
 
@@ -61,7 +61,7 @@ description: "Tâches de l'étape 2 — FAQ, parcours « Ma première COP » et 
 
 **But** : le savoir gardé, fusionné, cherché et résolu, prouvé sans navigateur.
 
-- [ ] T016 [P] Écrire `frontend/app/types/negotiation-savoir.ts` depuis [api-savoir.md](contracts/api-savoir.md)
+- [x] T016 [P] Écrire `frontend/app/types/negotiation-savoir.ts` depuis [api-savoir.md](contracts/api-savoir.md)
 - [ ] T017 [P] Écrire `frontend/app/mocks/negotiation-savoir.ts` depuis les mêmes données d'essai que T007 (19 termes dont *contact group*, l'entrée de FAQ complète, le parcours)
 - [ ] T018 Écrire `frontend/app/composables/api/guide-nego-savoir.ts` (**le paquet seulement**, par `lireEtiquete` avec `since` ; chaque méthode d'écriture s'ajoute dans la tâche qui livre sa route, sinon `check-api-contract` la refuse) et la monter dans `frontend/app/composables/useApi.ts` (une ligne)
 - [ ] T019 [P] Écrire `frontend/app/utils/guide-nego/savoir.ts::fusionner(garde, difference)` (dont le filtrage de `related_ids` sur les entrées présentes) et son test `frontend/tests/guide-nego/savoir.test.ts`

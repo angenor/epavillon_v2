@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT f.id\n             FROM negotiation.faq_entries f\n             LEFT JOIN LATERAL (\n                  SELECT sum(r.count) AS lectures\n                    FROM negotiation.faq_reads r\n                   WHERE r.entry_id = f.id\n                     AND r.day > (now() AT TIME ZONE 'Europe/Paris')::date - 30\n             ) l ON true\n            WHERE f.status <> 'draft'\n              AND (l.lectures IS NOT NULL OR f.editorial_rank IS NOT NULL)\n            ORDER BY l.lectures DESC NULLS LAST, f.editorial_rank NULLS LAST, f.id\n            LIMIT 3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_entries",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "dc75a9c4706eb9b91dbb20afadbc142d5dddb418e94e22e6b3b214febf16734b"
+}
