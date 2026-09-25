@@ -11,6 +11,7 @@ pub mod groups;
 pub mod permissions;
 pub mod plage;
 pub mod redeem;
+pub mod reports;
 pub mod requests;
 pub mod sessions;
 pub mod themes;

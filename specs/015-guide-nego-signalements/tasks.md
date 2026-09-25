@@ -23,17 +23,17 @@
 
 ## Phase 2 — Signaler, côté API (US1)
 
-- [ ] T007 [US1] Ajouter les six codes au catalogue `backend/crates/kernel/src/error.rs`
-- [ ] T008 [US1] Écrire `POST /negotiation/reports` (garde `negotiation.space.access` globale ; `client_ref` rejoué → `200` même signalement ; doublon en attente → `409` ; validation des champs par motif) et `GET /negotiation/me/reports` (ETag) dans `neg/src/{domain,repo,service,routes}/reports.rs`
-- [ ] T009 [US1] Ajouter `can_validate_reports` à `GET /negotiation/me/access` (`neg/src/domain/access.rs` et son service) ; déclarer la permission dans `neg/src/domain/permissions.rs`
-- [ ] T010 [US1] Monter, déclarer à l'OpenAPI, `make openapi` ; formes TS dans `fe/app/types/negotiation-reports.ts` (ré-exportées par `fe/app/types/index.ts`)
-- [ ] T011 [P] [US1] Tests sur base réelle `neg/tests/signalements.rs` : nominal par motif, réunion non annoncée, rejeu `client_ref` (une ligne, `200`), doublon `409`, sans accès `403`, sans compte `401`, précision > 600 refusée, audit
+- [x] T007 [US1] Ajouter les six codes au catalogue `backend/crates/kernel/src/error.rs`
+- [x] T008 [US1] Écrire `POST /negotiation/reports` (garde `negotiation.space.access` globale ; `client_ref` rejoué → `200` même signalement ; doublon en attente → `409` ; validation des champs par motif) et `GET /negotiation/me/reports` (ETag) dans `neg/src/{domain,repo,service,routes}/reports.rs`
+- [x] T009 [US1] Ajouter `can_validate_reports` à `GET /negotiation/me/access` (`neg/src/domain/access.rs` et son service) ; déclarer la permission dans `neg/src/domain/permissions.rs`
+- [x] T010 [US1] Monter, déclarer à l'OpenAPI, `make openapi` ; formes TS dans `fe/app/types/negotiation-reports.ts` (ré-exportées par `fe/app/types/index.ts`)
+- [x] T011 [P] [US1] Tests sur base réelle `neg/tests/signalements.rs` : nominal par motif, réunion non annoncée, rejeu `client_ref` (une ligne, `200`), doublon `409`, sans accès `403`, sans compte `401`, précision > 600 refusée, audit
 
 **Commit** : « feat(guide-nego): étape 3b, phase 2 — signaler, côté API ».
 
 ## Phase 3 — Valider et afficher, côté API (US2, US3)
 
-- [ ] T011a [US2] Déclarer d'abord les constantes d'événements et de travaux dans `backend/crates/contracts/src/negotiation.rs` (quatre événements, `negotiation.report.publish`, `negotiation.session_change_email`)
+- [x] T011a [US2] (fait en phase 2) Déclarer d'abord les constantes d'événements et de travaux dans `backend/crates/contracts/src/negotiation.rs` (quatre événements, `negotiation.report.publish`, `negotiation.session_change_email`)
 - [ ] T012 [US2] Écrire la file et les décisions (`GET /admin/negotiation/reports`, `POST …/validate`, `…/undo`, `…/reject`, `…/withdraw`), montées dans `admin_routes()`, sous `Requires<ReportValidate>` globale, dans `neg/src/{domain,repo,service,routes}/admin_reports.rs` ; `source_now`, `source_snapshot`, `decided_by` ; valider **ne rend rien public** et pose la publication (T013) ; annuler = `UPDATE … WHERE status='validated' AND published_at IS NULL` sans borne de temps, sinon `409` ; retirer — research R3
 - [ ] T013 [US2] Écrire le travail `negotiation.report.publish` dans `neg/src/jobs/publish.rs` : `run_at = now() + 30 s` calculé par la base, clé `publish:<report>:<decided_at>` ; dans une transaction, `SELECT … FOR UPDATE`, n'agit que si `validated`, même `decided_at`, `published_at` nul, non retiré ; pose `published_at`, crée la `network_meeting`, émet `report.published` / `network_meeting.published` et `report.decided`, pose les courriels (T021) ; rejoué, ne fait rien ; inscrit dans `job_handlers()`. Le refus émet `report.decided` directement
 - [ ] T014 [US3] Étendre `GET /negotiation/sessions` : `network_reports` par session (validés, non retirés, session non terminée) et `network_meetings` (**publiées**, non retirées, jour non passé) **servies aussi quand l'affichage est coupé** ; `network_reports` : **publiés** seulement ; « Mes signalements » montre `submitted` tant que rien n'est publié — `neg/src/repo/sessions.rs`, `domain/sessions.rs` ; aucun nom d'autrice

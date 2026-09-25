@@ -3164,6 +3164,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/negotiation/me/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `MyReports` — les signalements de la personne connectée sur l'édition, plus récent d'abord.
+         *
+         *     `status` vaut `validated` **seulement une fois publié** ; entre la validation et la publication, il reste `submitted`. Aucun nom de décideur. `ETag` et **304**.
+         */
+        get: operations["negotiation_mes_signalements"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/negotiation/me/themes": {
         parameters: {
             query?: never;
@@ -3188,6 +3209,31 @@ export interface paths {
          */
         put: operations["negotiation_suivre_des_thematiques"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/negotiation/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `ReportPayload` → `MyReport` — signaler un changement sur une session officielle, ou une réunion non annoncée (`reason = 'unannounced'`, sans session). Réservé à l'accès négociateur, portée globale.
+         *
+         *     `time`, `venue`, `cancelled`, `other` exigent `session_id`, une session importée de l'édition ; `unannounced` exige `what` et `day` (AAAA-MM-JJ). Un champ étranger au motif est ignoré. `detail` : 600 caractères au plus.
+         *
+         *     **Rejoué avec le même `client_ref`** : **200** et le même signalement, jamais une seconde ligne. Un signalement de la même personne attend déjà sur cette session : **409**.
+         *
+         *     Rien n'est rendu public ici : la session officielle ne change pas, et aucun avis ne part.
+         */
+        post: operations["negotiation_signaler"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4801,13 +4847,19 @@ export interface components {
          *     - `NEGOTIATION_GROUPS_STALE` (412) — Vos groupes ont changé sur un autre appareil. Ils ont été relus.
          *     - `NEGOTIATION_IMPORT_CONFIG_INVALID` (400) — Ce réglage de l'import est incomplet.
          *     - `NEGOTIATION_AGENDA_ITEM_UNKNOWN` (404) — Ce point de l'ordre du jour n'existe pas.
+         *     - `NEGOTIATION_REPORT_FORBIDDEN` (403) — Signaler un changement est réservé aux personnes qui ont l'accès négociateur.
+         *     - `NEGOTIATION_REPORT_DUPLICATE` (409) — Vous avez déjà signalé cette session : votre signalement est en cours de vérification.
+         *     - `NEGOTIATION_REPORT_INVALID` (400) — Ce signalement est incomplet.
+         *     - `NEGOTIATION_REPORT_UNKNOWN` (404) — Ce signalement n'existe pas.
+         *     - `NEGOTIATION_REPORT_ALREADY_DECIDED` (409) — Ce signalement a déjà été tranché.
+         *     - `NEGOTIATION_REPORT_UNDO_EXPIRED` (409) — Trop tard pour annuler : le signalement est déjà affiché.
          */
         ApiError: {
             /**
              * @description Code stable. Le renommer est un changement majeur.
              * @enum {string}
              */
-            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "INTERNAL" | "SERVICE_UNAVAILABLE" | "IDENTITY_SESSION_EXPIRED" | "IDENTITY_SESSION_REVOKED" | "IDENTITY_REFRESH_REUSED" | "IDENTITY_ORIGIN_REJECTED" | "IDENTITY_PASSWORD_TOO_WEAK" | "IDENTITY_EMAIL_ALREADY_USED" | "IDENTITY_ACCOUNT_ALREADY_EXISTS" | "IDENTITY_ROLE_WINDOW_INVALID" | "IDENTITY_ROLE_SCOPE_MISMATCH" | "IDENTITY_ROLE_REVOCATION_INVALID" | "IDENTITY_UNKNOWN_REFERENCE" | "IDENTITY_PRIVACY_WRONG_ACTION" | "ORG_NOT_MANAGER" | "ORG_MEMBERSHIP_IS_INVITATION" | "ORG_MEMBERSHIP_NOT_PENDING" | "ORG_LAST_MANAGER" | "ORG_MERGE_FIELD_NOT_ARBITRABLE" | "ORG_MERGE_GLOBAL_SCOPE_REQUIRED" | "ORG_MERGE_SAME_ORGANIZATION" | "ORG_DOMAIN_VERIFICATION_REQUIRED" | "ORG_NAME_IS_DERIVED" | "ORG_UNKNOWN_REFERENCE" | "ORG_INVITATION_NOT_YOURS" | "EVENT_GLOBAL_SCOPE_REQUIRED" | "EVENT_CRITERION_HAS_SCORES" | "EVENT_UNKNOWN_REFERENCE" | "PROPOSAL_NOT_EDITABLE" | "PROPOSAL_SPEAKER_IDENTITY_LOCKED" | "PROPOSAL_REVIEW_NOT_ASSIGNED" | "PROPOSAL_UNKNOWN_TERM" | "PROPOSAL_TEXT_TOO_LONG" | "PROPOSAL_UNKNOWN_REFERENCE" | "SESSION_DERIVED_FIELD" | "SESSION_UNKNOWN_REFERENCE" | "SESSION_TRACK_EVENT_MISMATCH" | "REGISTRATION_NOT_ACCEPTED" | "REGISTRATION_ANSWER_INVALID" | "REGISTRATION_CONSENT_REQUIRED" | "REGISTRATION_ACCOUNT_REQUIRED" | "REGISTRATION_LOCKED" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_MIME_NOT_ALLOWED" | "MEDIA_TOO_LARGE" | "MEDIA_ASPECT_RATIO" | "MEDIA_ROLE_NOT_DECLARED" | "MEDIA_ROLE_EXCLUSIVE" | "MEDIA_ASSET_NOT_SERVABLE" | "MEDIA_ALT_TEXT_REQUIRED" | "MEDIA_ASSET_IN_USE" | "MEDIA_UPLOAD_INCOMPLETE" | "MEDIA_STORAGE_UNAVAILABLE" | "ENGAGEMENT_REMINDER_OFFSETS_INVALID" | "ENGAGEMENT_REMINDER_SCOPE_INVALID" | "ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN" | "ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN" | "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN" | "LIVE_INCIDENT_SCOPE_TARGET_MISMATCH" | "LIVE_INCIDENT_WINDOW_INVALID" | "LIVE_INCIDENT_NOT_PUBLISHED" | "NEGOTIATION_ACCESS_REQUEST_PENDING" | "NEGOTIATION_ACCESS_REQUEST_DECIDED" | "NEGOTIATION_INVITATION_CODE_DUPLICATE" | "NEGOTIATION_ADMISSION_MODE_INVALID" | "NEGOTIATION_SPACE_UNKNOWN" | "NEGOTIATION_THEMES_EMPTY" | "NEGOTIATION_THEME_UNKNOWN" | "NEGOTIATION_THEMES_STALE" | "NEGOTIATION_DOCUMENT_NOT_FOUND" | "NEGOTIATION_DOCUMENT_RESTRICTED" | "NEGOTIATION_DOCUMENT_NOT_READABLE" | "NEGOTIATION_DOCUMENT_RANGE_INVALID" | "NEGOTIATION_DOCUMENT_SOURCE_BOTH" | "NEGOTIATION_DOCUMENT_SOURCE_MISSING" | "NEGOTIATION_DOCUMENT_NOT_READY" | "NEGOTIATION_DOCUMENT_FILE_LOCKED" | "NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED" | "NEGOTIATION_DOCUMENT_SUPERSEDE_CYCLE" | "NEGOTIATION_DOCUMENT_UNKNOWN_THEME" | "NEGOTIATION_DOCUMENT_UNKNOWN_TYPE" | "NEGOTIATION_DOCUMENT_PUBLISHED_UNDELETABLE" | "NEGOTIATION_CORRECTION_PAGE_UNKNOWN" | "NEGOTIATION_EDITION_UNKNOWN" | "NEGOTIATION_SESSION_UNKNOWN" | "NEGOTIATION_SESSION_CANCELLED" | "NEGOTIATION_GROUP_UNKNOWN" | "NEGOTIATION_GROUPS_STALE" | "NEGOTIATION_IMPORT_CONFIG_INVALID" | "NEGOTIATION_AGENDA_ITEM_UNKNOWN";
+            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "INTERNAL" | "SERVICE_UNAVAILABLE" | "IDENTITY_SESSION_EXPIRED" | "IDENTITY_SESSION_REVOKED" | "IDENTITY_REFRESH_REUSED" | "IDENTITY_ORIGIN_REJECTED" | "IDENTITY_PASSWORD_TOO_WEAK" | "IDENTITY_EMAIL_ALREADY_USED" | "IDENTITY_ACCOUNT_ALREADY_EXISTS" | "IDENTITY_ROLE_WINDOW_INVALID" | "IDENTITY_ROLE_SCOPE_MISMATCH" | "IDENTITY_ROLE_REVOCATION_INVALID" | "IDENTITY_UNKNOWN_REFERENCE" | "IDENTITY_PRIVACY_WRONG_ACTION" | "ORG_NOT_MANAGER" | "ORG_MEMBERSHIP_IS_INVITATION" | "ORG_MEMBERSHIP_NOT_PENDING" | "ORG_LAST_MANAGER" | "ORG_MERGE_FIELD_NOT_ARBITRABLE" | "ORG_MERGE_GLOBAL_SCOPE_REQUIRED" | "ORG_MERGE_SAME_ORGANIZATION" | "ORG_DOMAIN_VERIFICATION_REQUIRED" | "ORG_NAME_IS_DERIVED" | "ORG_UNKNOWN_REFERENCE" | "ORG_INVITATION_NOT_YOURS" | "EVENT_GLOBAL_SCOPE_REQUIRED" | "EVENT_CRITERION_HAS_SCORES" | "EVENT_UNKNOWN_REFERENCE" | "PROPOSAL_NOT_EDITABLE" | "PROPOSAL_SPEAKER_IDENTITY_LOCKED" | "PROPOSAL_REVIEW_NOT_ASSIGNED" | "PROPOSAL_UNKNOWN_TERM" | "PROPOSAL_TEXT_TOO_LONG" | "PROPOSAL_UNKNOWN_REFERENCE" | "SESSION_DERIVED_FIELD" | "SESSION_UNKNOWN_REFERENCE" | "SESSION_TRACK_EVENT_MISMATCH" | "REGISTRATION_NOT_ACCEPTED" | "REGISTRATION_ANSWER_INVALID" | "REGISTRATION_CONSENT_REQUIRED" | "REGISTRATION_ACCOUNT_REQUIRED" | "REGISTRATION_LOCKED" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_MIME_NOT_ALLOWED" | "MEDIA_TOO_LARGE" | "MEDIA_ASPECT_RATIO" | "MEDIA_ROLE_NOT_DECLARED" | "MEDIA_ROLE_EXCLUSIVE" | "MEDIA_ASSET_NOT_SERVABLE" | "MEDIA_ALT_TEXT_REQUIRED" | "MEDIA_ASSET_IN_USE" | "MEDIA_UPLOAD_INCOMPLETE" | "MEDIA_STORAGE_UNAVAILABLE" | "ENGAGEMENT_REMINDER_OFFSETS_INVALID" | "ENGAGEMENT_REMINDER_SCOPE_INVALID" | "ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN" | "ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN" | "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN" | "LIVE_INCIDENT_SCOPE_TARGET_MISMATCH" | "LIVE_INCIDENT_WINDOW_INVALID" | "LIVE_INCIDENT_NOT_PUBLISHED" | "NEGOTIATION_ACCESS_REQUEST_PENDING" | "NEGOTIATION_ACCESS_REQUEST_DECIDED" | "NEGOTIATION_INVITATION_CODE_DUPLICATE" | "NEGOTIATION_ADMISSION_MODE_INVALID" | "NEGOTIATION_SPACE_UNKNOWN" | "NEGOTIATION_THEMES_EMPTY" | "NEGOTIATION_THEME_UNKNOWN" | "NEGOTIATION_THEMES_STALE" | "NEGOTIATION_DOCUMENT_NOT_FOUND" | "NEGOTIATION_DOCUMENT_RESTRICTED" | "NEGOTIATION_DOCUMENT_NOT_READABLE" | "NEGOTIATION_DOCUMENT_RANGE_INVALID" | "NEGOTIATION_DOCUMENT_SOURCE_BOTH" | "NEGOTIATION_DOCUMENT_SOURCE_MISSING" | "NEGOTIATION_DOCUMENT_NOT_READY" | "NEGOTIATION_DOCUMENT_FILE_LOCKED" | "NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED" | "NEGOTIATION_DOCUMENT_SUPERSEDE_CYCLE" | "NEGOTIATION_DOCUMENT_UNKNOWN_THEME" | "NEGOTIATION_DOCUMENT_UNKNOWN_TYPE" | "NEGOTIATION_DOCUMENT_PUBLISHED_UNDELETABLE" | "NEGOTIATION_CORRECTION_PAGE_UNKNOWN" | "NEGOTIATION_EDITION_UNKNOWN" | "NEGOTIATION_SESSION_UNKNOWN" | "NEGOTIATION_SESSION_CANCELLED" | "NEGOTIATION_GROUP_UNKNOWN" | "NEGOTIATION_GROUPS_STALE" | "NEGOTIATION_IMPORT_CONFIG_INVALID" | "NEGOTIATION_AGENDA_ITEM_UNKNOWN" | "NEGOTIATION_REPORT_FORBIDDEN" | "NEGOTIATION_REPORT_DUPLICATE" | "NEGOTIATION_REPORT_INVALID" | "NEGOTIATION_REPORT_UNKNOWN" | "NEGOTIATION_REPORT_ALREADY_DECIDED" | "NEGOTIATION_REPORT_UNDO_EXPIRED";
             /** @description Message français, affichable tel quel. */
             message: string;
             /** @description Champ fautif, quand le refus en désigne un. */
@@ -12941,6 +12993,54 @@ export interface operations {
             };
         };
     };
+    negotiation_mes_signalements: {
+        parameters: {
+            query: {
+                /** @description Slug de l'édition */
+                edition: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MyReports */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Rien n'a changé depuis l'empreinte présentée */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Édition inconnue */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     negotiation_mes_thematiques: {
         parameters: {
             query?: never;
@@ -13028,6 +13128,84 @@ export interface operations {
             };
             /** @description Corps malformé */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_signaler: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description MyReport — référence déjà reçue */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description MyReport */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Champ requis manquant ou invalide — le champ est nommé */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans accès négociateur */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Édition ou session inconnue */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Un signalement attend déjà sur cette session */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

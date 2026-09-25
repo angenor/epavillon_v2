@@ -297,6 +297,20 @@ codes! {
     NegotiationAgendaItemUnknown => "NEGOTIATION_AGENDA_ITEM_UNKNOWN", StatusCode::NOT_FOUND,
         "Ce point de l'ordre du jour n'existe pas.";
 
+    // --- Guide Négo, signalements (3b) ----------------------------------------
+    NegotiationReportForbidden => "NEGOTIATION_REPORT_FORBIDDEN", StatusCode::FORBIDDEN,
+        "Signaler un changement est réservé aux personnes qui ont l'accès négociateur.";
+    NegotiationReportDuplicate => "NEGOTIATION_REPORT_DUPLICATE", StatusCode::CONFLICT,
+        "Vous avez déjà signalé cette session : votre signalement est en cours de vérification.";
+    NegotiationReportInvalid => "NEGOTIATION_REPORT_INVALID", StatusCode::BAD_REQUEST,
+        "Ce signalement est incomplet.";
+    NegotiationReportUnknown => "NEGOTIATION_REPORT_UNKNOWN", StatusCode::NOT_FOUND,
+        "Ce signalement n'existe pas.";
+    NegotiationReportAlreadyDecided => "NEGOTIATION_REPORT_ALREADY_DECIDED", StatusCode::CONFLICT,
+        "Ce signalement a déjà été tranché.";
+    NegotiationReportUndoExpired => "NEGOTIATION_REPORT_UNDO_EXPIRED", StatusCode::CONFLICT,
+        "Trop tard pour annuler : le signalement est déjà affiché.";
+
     // MAIL_RELAY_UNREACHABLE n'est PAS ici : il ne franchit aucune réponse
     // HTTP. Il vit dans `mail.rs`, d'où il part vers `platform.jobs.last_error`.
 }

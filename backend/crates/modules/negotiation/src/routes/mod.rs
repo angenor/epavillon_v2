@@ -8,6 +8,7 @@ pub mod agenda;
 pub mod documents;
 pub mod groups;
 pub mod openapi;
+pub mod reports;
 pub mod sessions;
 pub mod themes;
 

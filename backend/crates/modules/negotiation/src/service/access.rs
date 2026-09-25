@@ -6,10 +6,12 @@
 //! première qui l'oublierait afficherait « visiteuse » à une personne dont
 //! l'accès vient d'être retiré.
 
+use kernel::auth::{has_permission, Scope};
 use kernel::error::Result;
 
 use crate::domain::access::MyAccess;
-use crate::repo::{access, settings};
+use crate::domain::permissions::REPORT_VALIDATE;
+use crate::repo::{access, reports, settings};
 use crate::state::NegotiationState;
 
 pub async fn mon_acces(
@@ -32,5 +34,10 @@ pub async fn mon_acces(
         None => access::a_ete_retire(&mut conn, person_id).await?,
     };
 
-    Ok(MyAccess::composer(mode, accorde, retire, reseaux, demande))
+    let mut etat = MyAccess::composer(mode, accorde, retire, reseaux, demande);
+    if has_permission(state.pool(), person_id, REPORT_VALIDATE, Scope::Global).await? {
+        etat.can_validate_reports = true;
+        etat.reports_to_review = Some(reports::a_relire(&mut conn).await?);
+    }
+    Ok(etat)
 }

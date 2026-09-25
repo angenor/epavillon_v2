@@ -106,6 +106,10 @@ pub struct MyAccess {
     /// La demande la plus récente, quelle que soit son issue : l'écran
     /// d'attente s'y retrouve, et « Mon accès » y lit le motif d'un refus.
     pub request: Option<AccessRequestView>,
+    /// `negotiation.report.validate`, portée globale (R6).
+    pub can_validate_reports: bool,
+    /// Signalements en attente, toutes éditions ; nul sans la permission.
+    pub reports_to_review: Option<i64>,
 }
 
 impl MyAccess {
@@ -142,6 +146,8 @@ impl MyAccess {
             granted: accorde,
             networks,
             request,
+            can_validate_reports: false,
+            reports_to_review: None,
         }
     }
 }

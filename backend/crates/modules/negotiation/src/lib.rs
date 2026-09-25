@@ -42,7 +42,8 @@ pub mod state;
 pub use state::NegotiationState;
 
 /// Ce que l'application appelle : l'accès, les thématiques et les groupes
-/// suivis, les documents, les sessions officielles et « Mon agenda ».
+/// suivis, les documents, les sessions officielles, « Mon agenda » et les
+/// signalements.
 ///
 /// Les chemins sont plats et vivent sous `/negotiation` — aucun autre module
 /// n'y dépose, il n'y a donc rien à composer côté API.
@@ -53,6 +54,7 @@ pub fn routes(cfg: &mut ServiceConfig) {
     routes::sessions::configurer(cfg);
     routes::groups::configurer(cfg);
     routes::agenda::configurer(cfg);
+    routes::reports::configurer(cfg);
 }
 
 /// Le back-office : l'admission, les documents, l'import des sessions.

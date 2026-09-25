@@ -12,6 +12,7 @@ pub const SPACE_MANAGE: &str = "negotiation.space.manage";
 pub const DOCUMENT_PUBLISH: &str = "negotiation.document.publish";
 pub const CORRECTION_POST: &str = "negotiation.correction.post";
 pub const CORRECTION_WITHDRAW: &str = "negotiation.correction.withdraw";
+pub const REPORT_VALIDATE: &str = "negotiation.report.validate";
 
 /// Entrer dans l'espace réservé. C'est ce que le code d'invitation ouvre.
 pub struct SpaceAccess;
@@ -41,4 +42,10 @@ impl PermissionSpec for CorrectionPost {
 pub struct CorrectionWithdraw;
 impl PermissionSpec for CorrectionWithdraw {
     const CODE: &'static str = CORRECTION_WITHDRAW;
+}
+
+/// Valider, refuser, retirer un signalement du réseau (3b). Portée globale.
+pub struct ReportValidate;
+impl PermissionSpec for ReportValidate {
+    const CODE: &'static str = REPORT_VALIDATE;
 }

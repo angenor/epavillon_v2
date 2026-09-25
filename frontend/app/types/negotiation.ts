@@ -76,6 +76,10 @@ export interface AccessStateView {
   granted: GrantedAccess | null
   networks: NetworkView[]
   request: AccessRequestView | null
+  /** `negotiation.report.validate`, portée globale. */
+  can_validate_reports: boolean
+  /** Signalements en attente, toutes éditions ; `null` sans la permission. */
+  reports_to_review: number | null
 }
 
 // ---------------------------------------------------------------------------

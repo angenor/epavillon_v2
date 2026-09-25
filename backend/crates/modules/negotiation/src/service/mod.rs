@@ -9,6 +9,7 @@ pub mod corrections;
 pub mod documents;
 pub mod groups;
 pub mod redeem;
+pub mod reports;
 pub mod requests;
 pub mod sessions;
 pub mod themes;

@@ -108,3 +108,61 @@ pub struct InvitationCodeRevoked {
     /// dit à l'administrateur ce qu'il lui reste éventuellement à retirer.
     pub granted_uses: i32,
 }
+
+// ---------------------------------------------------------------------------
+// Signalements et notifications — étape 3b
+// ---------------------------------------------------------------------------
+
+pub const AGGREGATE_MEETING: &str = "meeting";
+pub const AGGREGATE_SESSION_REPORT: &str = "session_report";
+pub const AGGREGATE_NETWORK_MEETING: &str = "network_meeting";
+
+/// Émis par l'import : une session suivie a changé d'heure, de salle, ou est annulée.
+pub const MEETING_CHANGED: &str = "negotiation.meeting.changed";
+/// Émis par le travail de publication, jamais à la validation.
+pub const REPORT_PUBLISHED: &str = "negotiation.report.published";
+pub const NETWORK_MEETING_PUBLISHED: &str = "negotiation.network_meeting.published";
+/// Pour l'autrice : publié, ou refusé.
+pub const REPORT_DECIDED: &str = "negotiation.report.decided";
+
+/// Travail posé à la validation, `run_at = now() + 30 s` calculé par la base.
+pub const JOB_REPORT_PUBLISH: &str = "negotiation.report.publish";
+/// Un travail par destinataire et par tranche de dix minutes.
+pub const JOB_SESSION_CHANGE_EMAIL: &str = "negotiation.session_change_email";
+
+/// Texte bilingue d'un avis.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct NotificationText {
+    pub fr: String,
+    pub en: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct NotificationSubject {
+    pub schema: String,
+    pub table: String,
+    pub id: Uuid,
+}
+
+/// Charge commune `notification` : le module émetteur a calculé les
+/// destinataires et composé l'avis ; `engagement` l'écrit sans rien savoir de
+/// ses règles (research R8).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct Notification {
+    pub type_code: String,
+    pub recipients: Vec<Uuid>,
+    pub title: NotificationText,
+    pub body: NotificationText,
+    pub link_path: String,
+    pub subject: NotificationSubject,
+    pub group_key: Option<String>,
+    /// Remplace titre, corps et variables de l'avis non lu de même clé.
+    pub replace: bool,
+    pub variables: serde_json::Value,
+}
+
+/// Enveloppe d'un événement porteur d'avis : la charge vit sous `notification`.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct WithNotification {
+    pub notification: Notification,
+}

@@ -12,6 +12,7 @@ pub mod groups;
 pub mod import;
 pub mod objets;
 pub mod renditions;
+pub mod reports;
 pub mod requests;
 pub mod sessions;
 pub mod settings;
