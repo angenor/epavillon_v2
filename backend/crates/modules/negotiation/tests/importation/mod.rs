@@ -162,7 +162,8 @@ impl Bac {
                FROM negotiation.meeting_changes c
                JOIN negotiation.meetings m ON m.id = c.meeting_id
               WHERE m.event_id = $1 AND m.source_key = $2
-              ORDER BY c.detected_at, c.id",
+              ORDER BY c.detected_at,
+                       array_position(ARRAY['start','end','venue','title','type','access','agenda_item','status'], c.field)",
         )
         .bind(self.edition)
         .bind(cle)

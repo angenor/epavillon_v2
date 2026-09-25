@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (m.status = 'cancelled') AS \"annulee!\",\n                  EXISTS (SELECT 1 FROM negotiation.agenda_entries e\n                           WHERE e.person_id = $1 AND e.meeting_id = m.id) AS \"dans_lagenda!\"\n             FROM negotiation.meetings m\n            WHERE m.id = $2 AND m.kind = 'negotiation_session' AND m.source_key IS NOT NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "annulee!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "dans_lagenda!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "10c65ac1300a663b3e0ad7bd559eb6bb9020be8bd1cf4006dadd1066eb0a25f0"
+}

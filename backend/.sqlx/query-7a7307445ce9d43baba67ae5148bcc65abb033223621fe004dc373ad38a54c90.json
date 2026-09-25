@@ -1,0 +1,104 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT e.id AS \"event_id!\", e.slug::text AS \"slug!\", e.timezone::text AS \"timezone!\",\n                  e.city, i.official_programme_url::text AS \"official_programme_url!\",\n                  i.is_enabled, i.last_success_at, i.failing_since,\n                  negotiation.import_is_serving(e.id) AS \"serving!\"\n             FROM event.events e\n             JOIN negotiation.official_imports i ON i.event_id = e.id\n            WHERE e.slug::text = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "event_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "timezone!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "city",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "city"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "official_programme_url!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "is_enabled",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "is_enabled"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "last_success_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "last_success_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "failing_since",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.official_imports",
+            "name": "failing_since"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "serving!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null,
+      true,
+      null,
+      false,
+      true,
+      true,
+      null
+    ]
+  },
+  "hash": "7a7307445ce9d43baba67ae5148bcc65abb033223621fe004dc373ad38a54c90"
+}

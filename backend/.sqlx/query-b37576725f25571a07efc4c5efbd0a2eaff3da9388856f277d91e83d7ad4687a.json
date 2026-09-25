@@ -1,0 +1,255 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.id,\n                  m.title_original AS \"title_en!\",\n                  tr.text_fr AS \"title_fr?\",\n                  m.start_at, m.end_at, m.venue_label,\n                  p.changed_at AS \"changed_at?\",\n                  CASE WHEN p.has_start THEN (p.old_start #>> '{}')::timestamptz\n                       ELSE m.start_at END AS \"prev_start!\",\n                  CASE WHEN p.has_end THEN (p.old_end #>> '{}')::timestamptz\n                       ELSE m.end_at END AS \"prev_end?\",\n                  CASE WHEN p.has_venue THEN p.old_venue #>> '{}'\n                       ELSE m.venue_label END AS \"prev_venue?\",\n                  ty.code AS \"type_code?\", ty.label::jsonb AS \"type_label?: Value\",\n                  ty.label ->> 'en' AS \"type_en?\",\n                  g.code AS \"group_code?\", g.label::jsonb AS \"group_label?: Value\",\n                  th.code AS \"theme?\",\n                  a.code AS \"point_code?\", a.title AS \"point_title?\",\n                  m.is_open_access,\n                  (m.status = 'cancelled') AS \"annulee!\",\n                  m.cancelled_at, m.cancellation_reason,\n                  m.source_url::text AS source_url,\n                  CASE WHEN m.absent_reads = 0 THEN coalesce($2, m.last_read_at)\n                       ELSE m.last_read_at END AS \"read_at!\"\n             FROM negotiation.meetings m\n             LEFT JOIN negotiation.title_translations tr ON tr.source_text = m.title_original\n             LEFT JOIN reference.taxonomy_terms ty ON ty.id = m.meeting_type_term_id\n             LEFT JOIN reference.taxonomy_terms g ON g.id = m.group_term_id\n             LEFT JOIN negotiation.agenda_items a ON a.id = m.agenda_item_id\n             LEFT JOIN reference.taxonomy_terms th ON th.id = a.theme_term_id\n             LEFT JOIN LATERAL (\n                   SELECT max(c.detected_at) AS changed_at,\n                          bool_or(c.field = 'start') AS has_start,\n                          bool_or(c.field = 'end') AS has_end,\n                          bool_or(c.field = 'venue') AS has_venue,\n                          (array_agg(c.old_value ORDER BY c.detected_at DESC, c.id DESC)\n                              FILTER (WHERE c.field = 'start'))[1] AS old_start,\n                          (array_agg(c.old_value ORDER BY c.detected_at DESC, c.id DESC)\n                              FILTER (WHERE c.field = 'end'))[1] AS old_end,\n                          (array_agg(c.old_value ORDER BY c.detected_at DESC, c.id DESC)\n                              FILTER (WHERE c.field = 'venue'))[1] AS old_venue\n                     FROM negotiation.meeting_changes c\n                    WHERE c.meeting_id = m.id AND c.field IN ('start', 'end', 'venue')\n             ) p ON true\n            WHERE m.event_id = $1\n              AND m.kind = 'negotiation_session'\n              AND m.source_key IS NOT NULL\n            ORDER BY m.start_at, m.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "title_en!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "title_original"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "title_fr?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.title_translations",
+            "name": "text_fr"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "start_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "start_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "end_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "end_at"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "venue_label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "venue_label"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "changed_at?",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "prev_start!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "prev_end?",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "prev_venue?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "type_code?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "type_label?: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "type_en?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
+        "name": "group_code?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "group_label?: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 15,
+        "name": "theme?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "point_code?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.agenda_items",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "point_title?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.agenda_items",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "is_open_access",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "is_open_access"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "annulee!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 20,
+        "name": "cancelled_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "cancelled_at"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "cancellation_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "cancellation_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
+        "name": "source_url",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 23,
+        "name": "read_at!",
+        "type_info": "Timestamptz",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      false,
+      true,
+      true,
+      null,
+      null,
+      null,
+      null,
+      false,
+      null,
+      null,
+      false,
+      null,
+      false,
+      false,
+      false,
+      true,
+      null,
+      true,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "b37576725f25571a07efc4c5efbd0a2eaff3da9388856f277d91e83d7ad4687a"
+}

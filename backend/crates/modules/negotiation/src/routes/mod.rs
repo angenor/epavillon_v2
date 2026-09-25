@@ -3,8 +3,11 @@ pub mod admin_admission;
 pub mod admin_codes;
 pub mod admin_documents;
 pub mod admin_requests;
+pub mod agenda;
 pub mod documents;
+pub mod groups;
 pub mod openapi;
+pub mod sessions;
 pub mod themes;
 
 use actix_web::http::header::{HeaderName, CACHE_CONTROL};

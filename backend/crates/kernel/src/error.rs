@@ -281,6 +281,22 @@ codes! {
     NegotiationCorrectionPageUnknown => "NEGOTIATION_CORRECTION_PAGE_UNKNOWN", StatusCode::UNPROCESSABLE_ENTITY,
         "Cette page n'existe pas dans le document.";
 
+    // --- Guide Négo, sessions de négociation (étape 3a) -----------------------
+    NegotiationEditionUnknown => "NEGOTIATION_EDITION_UNKNOWN", StatusCode::NOT_FOUND,
+        "Cette édition n'existe pas, ou ne reçoit pas les sessions officielles.";
+    NegotiationSessionUnknown => "NEGOTIATION_SESSION_UNKNOWN", StatusCode::NOT_FOUND,
+        "Cette session de négociation n'existe pas.";
+    NegotiationSessionCancelled => "NEGOTIATION_SESSION_CANCELLED", StatusCode::CONFLICT,
+        "Cette session est annulée : elle ne s'ajoute plus à l'agenda.";
+    NegotiationGroupUnknown => "NEGOTIATION_GROUP_UNKNOWN", StatusCode::BAD_REQUEST,
+        "Ce groupe de négociation n'existe pas.";
+    NegotiationGroupsStale => "NEGOTIATION_GROUPS_STALE", StatusCode::PRECONDITION_FAILED,
+        "Vos groupes ont changé sur un autre appareil. Ils ont été relus.";
+    NegotiationImportConfigInvalid => "NEGOTIATION_IMPORT_CONFIG_INVALID", StatusCode::BAD_REQUEST,
+        "Ce réglage de l'import est incomplet.";
+    NegotiationAgendaItemUnknown => "NEGOTIATION_AGENDA_ITEM_UNKNOWN", StatusCode::NOT_FOUND,
+        "Ce point de l'ordre du jour n'existe pas.";
+
     // MAIL_RELAY_UNREACHABLE n'est PAS ici : il ne franchit aucune réponse
     // HTTP. Il vit dans `mail.rs`, d'où il part vers `platform.jobs.last_error`.
 }

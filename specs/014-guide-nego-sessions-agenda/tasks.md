@@ -68,16 +68,16 @@ Chemins relatifs au dossier ; `neg/` = `backend/crates/modules/negotiation/`, `f
 
 **But** : `contracts/api-sessions.md` servi, engendré, testé.
 
-- [ ] T025 Ajouter les sept codes stables et leurs messages français au catalogue dans `backend/crates/kernel/src/error.rs`
-- [ ] T026 [US1] Écrire les formes rendues `OfficialSessions`, `OfficialSession` dans `neg/src/domain/sessions.rs`, et le dépôt de lecture (sessions de l'édition, traduction, précédent, type, groupe, thématique par le point d'ordre du jour, fuseau de l'édition, `import_is_serving`) dans `neg/src/repo/sessions.rs`
-- [ ] T027 [US1] Écrire `GET /negotiation/sessions?edition=` (publique, `ETag` et `304`, liste vide quand coupé) dans `neg/src/service/sessions.rs` et `neg/src/routes/sessions.rs`
-- [ ] T028 [P] [US1] Écrire `GET`/`PUT /negotiation/me/groups` sur le patron exact des thématiques de 0c (`neg/src/{domain,repo,service,routes}/themes.rs`) dans `neg/src/{domain,repo,service,routes}/groups.rs`
-- [ ] T029 [US4] Écrire `GET /negotiation/me/agenda`, `PUT` et `DELETE /negotiation/me/agenda/{session_id}` (idempotents, `404`, `409` sur annulée absente, rappel désarmé sur annulée ; `GET` rend `remind` effectif — faux pour une session annulée) dans `neg/src/{domain,repo,service,routes}/agenda.rs`
-- [ ] T030 Monter les routes dans `neg/src/routes/mod.rs` et `neg/src/lib.rs`, les déclarer dans `neg/src/routes/openapi.rs`, lancer `make openapi` pour régénérer `fe/app/types/api.ts`
-- [ ] T030a Écrire les formes `OfficialSessions`, `OfficialSession`, `MyGroups`, `MyAgenda` dans `fe/app/types/negotiation-sessions.ts`, ré-exportées par `fe/app/types/index.ts`, pour que `make check-api-contract` passe dès cette phase
-- [ ] T031 [P] [US1] Test : import éteint → `state: cut`, `disabled`, liste vide (SC-004) ; coupé → liste vide même avec des lignes en base ; servi → formes du contrat, `previous` sur la déplacée, `theme` hérité du point, `304` sur `If-None-Match`, dans `neg/tests/sessions_public.rs`
-- [ ] T032 [P] [US1] Tests des groupes : nominal, `412` périmé, code inconnu `422`, liste vide permise, audit, dans `neg/tests/groupes.rs`
-- [ ] T033 [P] [US4] Tests de l'agenda : ajout, rejeu idempotent, retrait idempotent, `404`, `409`, rappel sur annulée, rappel effectif faux après annulation par l'import, sans compte `401`, audit, aucun refus pour chevauchement, dans `neg/tests/agenda.rs`
+- [x] T025 Ajouter les sept codes stables et leurs messages français au catalogue dans `backend/crates/kernel/src/error.rs`
+- [x] T026 [US1] Écrire les formes rendues `OfficialSessions`, `OfficialSession` dans `neg/src/domain/sessions.rs`, et le dépôt de lecture (sessions de l'édition, traduction, précédent, type, groupe, thématique par le point d'ordre du jour, fuseau de l'édition, `import_is_serving`) dans `neg/src/repo/sessions.rs`
+- [x] T027 [US1] Écrire `GET /negotiation/sessions?edition=` (publique, `ETag` et `304`, liste vide quand coupé) dans `neg/src/service/sessions.rs` et `neg/src/routes/sessions.rs`
+- [x] T028 [P] [US1] Écrire `GET`/`PUT /negotiation/me/groups` sur le patron exact des thématiques de 0c (`neg/src/{domain,repo,service,routes}/themes.rs`) dans `neg/src/{domain,repo,service,routes}/groups.rs`
+- [x] T029 [US4] Écrire `GET /negotiation/me/agenda`, `PUT` et `DELETE /negotiation/me/agenda/{session_id}` (idempotents, `404`, `409` sur annulée absente, rappel désarmé sur annulée ; `GET` rend `remind` effectif — faux pour une session annulée) dans `neg/src/{domain,repo,service,routes}/agenda.rs`
+- [x] T030 Monter les routes dans `neg/src/routes/mod.rs` et `neg/src/lib.rs`, les déclarer dans `neg/src/routes/openapi.rs`, lancer `make openapi` pour régénérer `fe/app/types/api.ts`
+- [x] T030a Écrire les formes `OfficialSessions`, `OfficialSession`, `MyGroups`, `MyAgenda` dans `fe/app/types/negotiation-sessions.ts`, ré-exportées par `fe/app/types/index.ts`, pour que `make check-api-contract` passe dès cette phase
+- [x] T031 [P] [US1] Test : import éteint → `state: cut`, `disabled`, liste vide (SC-004) ; coupé → liste vide même avec des lignes en base ; servi → formes du contrat, `previous` sur la déplacée, `theme` hérité du point, `304` sur `If-None-Match`, dans `neg/tests/sessions_public.rs`
+- [x] T032 [P] [US1] Tests des groupes : nominal, `412` périmé, code inconnu `422`, liste vide permise, audit, dans `neg/tests/groupes.rs`
+- [x] T033 [P] [US4] Tests de l'agenda : ajout, rejeu idempotent, retrait idempotent, `404`, `409`, rappel sur annulée, rappel effectif faux après annulation par l'import, sans compte `401`, audit, aucun refus pour chevauchement, dans `neg/tests/agenda.rs`
 
 **Commit** : « feat(guide-nego): étape 3a, phase 4 — l'API des sessions, des groupes et de l'agenda ».
 

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.group_subscriptions (person_id, group_term_id)\n         SELECT $1, t\n           FROM unnest($2::uuid[]) AS t\n          WHERE NOT EXISTS (\n                SELECT 1 FROM negotiation.group_subscriptions s\n                 WHERE s.person_id = $1 AND s.group_term_id = t AND s.left_at IS NULL\n          )",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "341ddb37807149678201d780d44b5777da51fb92aa7f727f8a045a6c77939bf7"
+}

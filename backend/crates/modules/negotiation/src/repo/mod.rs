@@ -1,4 +1,5 @@
 pub mod access;
+pub mod agenda;
 pub mod attempts;
 pub mod bookmarks;
 pub mod codes;
@@ -6,10 +7,12 @@ pub mod corrections;
 pub mod document_pages;
 pub mod document_themes;
 pub mod documents;
+pub mod groups;
 pub mod import;
 pub mod objets;
 pub mod renditions;
 pub mod requests;
+pub mod sessions;
 pub mod settings;
 pub mod themes;
 pub mod traductions;
