@@ -551,7 +551,7 @@ function extrait(texte: string, cherchees: Set<string>): string {
 /**
  * Tous les mots de la requête, où qu'ils soient dans la page, comme
  * `websearch_to_tsquery`. Le texte cherché est celui des pages extraites, quel
- * que soit le mode : « ouvrir tel quel » change la lecture, pas l'index.
+ * que soit le mode : « Texte agrandi » change la lecture, pas l'index.
  */
 export function rechercherDansLesDocuments(q: string): DocumentTextHits {
   const requete = q.trim()
@@ -798,7 +798,7 @@ export function publierLeDocument(id: Uuid, langue = 'fr'): AdminDocument {
   const f = ficheOuRefus(id)
   if (f.published_at) return vue(f, langue)
   if (f.asset_id && !prete(f)) {
-    throw refus('NEGOTIATION_DOCUMENT_NOT_READY', 409, "L'extraction n'est pas terminée. Attendez-la, ou choisissez « ouvrir tel quel ».")
+    throw refus('NEGOTIATION_DOCUMENT_NOT_READY', 409, "L'extraction n'est pas terminée. Attendez-la avant de publier.")
   }
   if (!f.asset_id && !f.external_url) {
     throw refus('NEGOTIATION_DOCUMENT_SOURCE_MISSING', 422, 'Déposez un fichier ou indiquez un lien avant de publier.')

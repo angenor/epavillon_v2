@@ -1,6 +1,6 @@
 {
   "titre": "The first page is on its way",
-  "recus": "{recu} received of {demande}",
+  "recus": "{recu} of {demande} received",
   "demande": "Requesting the first page…",
   "lent": "The network is slow. You can read the document's text while you wait, or download it to read offline.",
   "lire-le-texte": "Read the text while waiting",

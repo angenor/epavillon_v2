@@ -7,7 +7,7 @@
     "non-telecharge": "Not downloaded — available when the network returns"
   },
   "lien": "Opens in the browser — network needed, nothing is kept on the phone",
-  "sans-texte": "Read on its pages. Its text could not be extracted, so it cannot be searched.",
+  "sans-texte": "Opens as pages. Its text could not be extracted, so it cannot be searched.",
   "thematiques": {
     "titre": "Themes",
     "aucune": "None: this document covers all negotiations."

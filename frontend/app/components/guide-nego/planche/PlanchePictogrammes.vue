@@ -1,20 +1,12 @@
 <script setup lang="ts">
+import { NOMS_DE_PICTO as SYMBOLES } from '~/utils/guide-nego/pictogrammes'
+
 /**
- * Section 4 — les 57 symboles du sprite, avec leur nom.
+ * Section 4 — les symboles du sprite, avec leur nom.
  *
  * Les noms sont des identifiants techniques, pas des textes d'interface : ils ne
  * passent pas par les traductions, et s'écrivent sans le préfixe `gn-` du sprite.
  */
-const SYMBOLES = [
-  'home', 'nego', 'franco', 'res', 'wifi-off', 'search', 'bell', 'user', 'filter',
-  'back', 'chevron', 'chev-down', 'chev-up', 'toc', 'text-size', 'bookmark', 'external',
-  'close', 'more', 'flag', 'calendar', 'download', 'share', 'send', 'lock', 'unlock',
-  'doc', 'play', 'quiz', 'clock', 'pin', 'sync', 'info', 'warn', 'star', 'check',
-  'live', 'moved', 'diamond', 'circle', 'check-circle', 'x-circle', 'refresh',
-  'shield-check', 'shield', 'translate', 'sun', 'eye', 'plus', 'minus', 'chat', 'moon',
-  'logout', 'paperclip', 'reply', 'copy', 'pause',
-] as const
-
 const TAILLES = [16, 18, 20, 24, 26, 40] as const
 
 const TEINTES = ['--gn-picto', '--gn-picto-secondaire', '--gn-picto-document', '--gn-attention', '--gn-danger'] as const

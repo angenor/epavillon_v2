@@ -666,10 +666,10 @@ Rien à redémarrer entre 3 et 4 : le drapeau se lit à chaque ouverture.
 
 ---
 
-## 15. Mettre en ligne 0a, 0b, 0c et l'étape 1 (22/09, complété le 24/09)
+## 15. Mettre en ligne 0a, 0b, 0c, l'étape 1 et l'étape 1b (22/09, complété les 24 et 25/09)
 
-Une seule mise en ligne porte les quatre premières étapes de Guide Négo : le code de la branche, et
-**quatre migrations**. Préparée ici, **pas encore exécutée**. Le drapeau reste éteint pendant toute
+Une seule mise en ligne porte les cinq premières étapes de Guide Négo : le code de la branche, et
+**cinq migrations**. Préparée ici, **pas encore exécutée**. Le drapeau reste éteint pendant toute
 la mise en ligne : le site ne voit que ce qui le touche (§ 3 ci-dessous), l'application ne s'ouvre
 qu'à la recette sur téléphones (§ 4).
 
@@ -681,8 +681,9 @@ qu'à la recette sur téléphones (§ 4).
 | 2 | `specs/009-guide-nego-compte-admission/migration.sql` | `identity.sessions` dit d'où vient la session (site ou application) ; le vocabulaire des réseaux ; les codes d'invitation, leurs usages, les demandes d'accès, les appartenances ; deux réglages d'admission |
 | 3 | `specs/010-guide-nego-accueil-profil/migration.sql` | Le vocabulaire des thématiques et ses dix termes ; `negotiation.theme_subscriptions` ; `identity.sessions.replaced_by`, qui distingue une réponse de rotation perdue d'un vol (ADR-020) |
 | 4 | `specs/011-guide-nego-documents/migration.sql` | Les documents : le réglage `media.private_bucket` et le registre des colonnes qui désignent un objet ; deux types de document et le libellé « Guide » ; les documents, leur extraction, leurs pages, les notes de correction ; le rôle `expert` et ses deux permissions |
+| 5 | `specs/012-guide-nego-lecteur-pdf/migration.sql` | Le lecteur montre le PDF d'origine : « ouvrir tel quel » devient le choix « Texte agrandi » (`large_text_choice`), la règle des deux modes écrite une fois (`negotiation.document_reading_modes`), les images de pages réservées à l'aperçu du back-office. **Aucune ligne semée** |
 
-Les quatre sont **rejouables** : un second passage ne crée rien, ne perd rien, n'échoue pas.
+Les cinq sont **rejouables** : un second passage ne crée rien, ne perd rien, n'échoue pas.
 
 **Aucun réglage à ajouter à `.env.prod`.** Les deux réglages nouveaux ont un défaut, et ce défaut
 est la valeur voulue :
@@ -705,6 +706,23 @@ Ne les écrire que pour s'écarter du défaut. `PRIVACY_POLICY_VERSION` dispara�
   fichier d'environnement l'emporte sur l'image, et le chemin du poste de développement y ferait
   échouer toute extraction.
 
+**L'étape 1b ajoute deux choses hors de la base**, déjà dans le dépôt :
+
+- **pdf.js dans l'image du site** (ADR-022). `pdfjs-dist` est une dépendance du front, installée
+  par `npm ci` ; la construction en copie les fichiers lus par adresse — travailleur, polices,
+  `wasm`, profils de couleur — sous `/v2/guide-nego/pdfjs/6.3.289/`, que la coquille garde pour le
+  mode avion. Rien à installer à part. Contrôle après le redémarrage :
+  `curl -sI https://<domaine>/v2/guide-nego/pdfjs/6.3.289/pdf.worker.min.mjs` rend `200`.
+- **La relance d'extraction des documents publiés avant la migration 5**, pour recalculer
+  `reading_bytes`, la place annoncée d'une copie (PDF et texte). En production, **aucun ne l'est** :
+  le guide se publie au § 3, après les migrations, et son extraction est déjà celle de 1b. Sur une
+  base de recette qui en porte, pour chaque document publié :
+  ```bash
+  curl -X POST -b <cookie d'administration> -H 'Origin: <APP_PUBLIC_URL>' \
+    "<APP_PUBLIC_URL>/v2/api/admin/negotiation/documents/<id>/extraction"
+  ```
+  ou « Relancer l'extraction » sur sa fiche du back-office ; la fiche repasse par « Prête ».
+
 **La dette de R4 doit être nulle avant la bascule** — aucun objet privé ne doit rester dans le
 bucket ouvert au web. La requête est dans [la recette de l'étape 1](../specs/011-guide-nego-documents/quickstart.md)
 (« Préalables ») ; elle doit rendre **0**, sinon déplacer ces objets avant la mise en ligne.
@@ -718,7 +736,7 @@ psql postgres://postgres:dev@localhost:5442/postgres -c 'CREATE DATABASE copie_p
 gunzip -c sauvegardes/epavillon-AAAAMMJJ-HHMMSS.sql.gz | psql "$COPIE"
 
 for passage in 1 2; do          # deux passages : le second ne doit rien changer
-  for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents; do
+  for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf; do
     psql "$COPIE" -v ON_ERROR_STOP=1 -f "specs/$etape/migration.sql" || exit 1
   done
 done
@@ -764,7 +782,7 @@ Dans l'ordre du § 13, chaque étape pour sa raison :
 3. **Déposer les migrations** hors du dossier synchronisé, renommées — elles s'appellent toutes
    `migration.sql` :
    ```bash
-   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents; do
+   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf; do
      scp "specs/$etape/migration.sql" "root@<serveur>:/root/epavillon-migrations/$etape.sql"
    done
    ```
@@ -777,7 +795,7 @@ Dans l'ordre du § 13, chaque étape pour sa raison :
    Puis **le bucket privé**, avant de migrer : `ops/init-garage-prod.sh` (rejouable).
 5. **Migrer, puis redémarrer aussitôt** :
    ```bash
-   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents; do
+   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf; do
      $COMPOSE exec -T postgres psql -U postgres -d epavillon -v ON_ERROR_STOP=1 \
        < /root/epavillon-migrations/$etape.sql || break
    done
@@ -785,7 +803,9 @@ Dans l'ordre du § 13, chaque étape pour sa raison :
    ```
    Une migration qui échoue arrête la boucle, et sa transaction est annulée : la base reste dans
    l'état de l'étape précédente. Ne pas redémarrer ; lire l'erreur.
-6. **Santé et garde** : `./deploy.sh sante`, puis la garde du § 6, point 4.
+6. **Santé et garde** : `./deploy.sh sante`, puis la garde du § 6, point 4, et la
+   **vérification 4 du § 11** : le PDF se lit par morceaux à travers le relais — `206`, sans
+   `Content-Encoding`. Elle se déroule une fois le guide publié (§ 3).
 7. **Recomparer** le schéma de production au modèle, puis la requête des lignes semées (§ 1
    ci-dessus). `GET /v2/api/platform/feature-flags` doit rendre `guide_nego.enabled` — éteint.
 
@@ -827,7 +847,11 @@ compte d'administration.
       rend une erreur, jamais un objet.
 - [ ] **Le guide se publie.** En administrateur, `/v2/admin/negociations/documents` : créer le
       guide, déposer le PDF, attendre « Prête » — c'est la preuve que le worker charge PDFium —,
-      feuilleter l'aperçu, publier. Il servira au § 4.
+      feuilleter l'aperçu, publier. L'aperçu propose « Texte agrandi », coché par défaut ;
+      « Ouvrir tel quel » n'y est plus. Il servira au § 4.
+- [ ] **Le PDF passe le relais par morceaux** : la vérification 4 du § 11, sur le guide publié.
+- [ ] **Une note de correction** : avec un compte d'expert, poser une note sur un passage de la
+      page 59 du guide et une note sans passage sur la page 60 — elles serviront au § 4.
 - [ ] **Guide Négo reste fermée** : `/v2/guide-nego/` sert « bientôt disponible ».
 
 Un point qui échoue et ne se corrige pas sur place : `./deploy.sh restore <sauvegarde de l'étape 1>`
@@ -835,12 +859,13 @@ ramène la base d'avant les migrations, puis redéployer la version précédente
 
 ### 4. La recette sur téléphones réels — une seule séance
 
-Ce qu'aucun poste de travail ne peut éprouver, pour les quatre étapes à la fois : l'appareil réel de
-0a (T071), T112 de 0b, T096 à T098 de 0c, T116 de l'étape 1. **Deux jours de suite** — deux points exigent une nuit ;
+Ce qu'aucun poste de travail ne peut éprouver, pour les cinq étapes à la fois : l'appareil réel de
+0a (T071), T112 de 0b, T096 à T098 de 0c, T116 de l'étape 1, T084 de l'étape 1b. **Deux jours de suite** — deux points exigent une nuit ;
 on les prépare en fin de première journée.
 
-**Avant** : le drapeau ouvert (§ 14, `UPDATE 1`) ; le code créé au back-office (§ 3) ; un Android,
-un iPhone, deux adresses électroniques qu'on relève sur le téléphone ; un débit bridé — sur Android,
+**Avant** : le drapeau ouvert (§ 14, `UPDATE 1`) ; le code créé au back-office (§ 3) ; un Android
+**de milieu de gamme**, un iPhone — **si possible un iPhone 8 ou X**, le plus ancien que l'étape 1b
+vise ; deux adresses électroniques qu'on relève sur le téléphone ; un débit bridé — sur Android,
 Chrome relié à `chrome://inspect` d'un poste, profil « 3G lente » ; à défaut, le téléphone réglé sur
 la 3G seule. L'application s'installe depuis `https://<domaine>/v2/guide-nego/` — **avec la barre
 finale** : sans elle, l'adresse est hors de la portée du service worker et tombe sur l'erreur du
@@ -888,5 +913,36 @@ navigateur hors connexion.
 - [ ] Les deux téléphones : ouverts sans réseau puis rendus au réseau, « Synchronisé à … » sans
       recharger.
 
+**Le lecteur du PDF (étape 1b, T084)** — sur l'Android de milieu de gamme, puis sur l'iPhone ; les
+points marqués d'une nuit se font le lendemain matin, avec ceux du dessus. Pour chacun, noter
+l'appareil et la version du système.
+
+- [ ] **Fluidité sur les 90 pages.** Guide téléchargé, mode avion : défiler de la page 1 à la
+      page 90 puis revenir, d'un trait. Aucune saccade qui se voit, aucune page blanche qui
+      dure plus d'un instant ; le pied suit (« Page 61 sur 90 · … »). Pincer sur le tableau des
+      sigles jusqu'au plus fort : net une fois le geste fini ; double toucher : retour à la largeur.
+- [ ] **La première page en ligne, sur réseau lent.** Débit bridé, guide **non** téléchargé :
+      l'ouvrir. La jauge avance ; au bout de trois secondes paraissent ses deux sorties :
+  - [ ] « Lire le texte en attendant » : le texte s'ouvre à la même page, en moins de cinq
+        secondes après l'ouverture ; la page du PDF prend sa place quand elle arrive. Refaire,
+        et choisir « Rester sur le texte » : on y reste.
+  - [ ] « Télécharger pour lire sans réseau » : le téléchargement part, la copie paraît dans
+        « Mes documents ».
+- [ ] **La bascule vers « Texte agrandi ».** À la page 59, toucher la page, puis « Texte » dans la
+      barre : la même page, recomposée. « Réglages » : le mode, le thème, les trois tailles.
+      Revenir à « Pages » : la page 59. Fermer, rouvrir un autre document : il s'ouvre dans le
+      dernier mode choisi.
+- [ ] **La note en marge** — les deux notes posées au § 3, bibliothèque relue avec le réseau, puis
+      mode avion. Page 59 : filet rouge et triangle au bord de la page, à la hauteur du
+      paragraphe ; page 60 : en tête. Toucher le triangle : texte et signature en bas de l'écran,
+      le passage reste visible au-dessus ; la ligne ou la croix replie. En « Texte agrandi », la
+      note borde le paragraphe.
+- [ ] **La recherche hors connexion.** Mode avion, **après une nuit** : « Rechercher »
+      « progrès collectifs » — les passages et leurs pages ; en choisir un : sa page s'ouvre, le
+      passage surligné à sa place. Chercher sans accent (« negociation ») : mêmes résultats.
+- [ ] **iPhone seulement** : noter la version d'iOS. Dès iOS 16.4 — l'iPhone 8 et le X sont en
+      16.7 — le document s'ouvre **sur ses pages** : c'est le seuil qu'ADR-022 a déduit sans
+      appareil, et que cette ligne vérifie. En dessous, il s'ouvre en « Texte agrandi » et le dit.
+
 Un écart se note dans `docs/AppNego/progress.md`, avec l'appareil et le système. Tout coché, T071,
-T112, T096, T097 et T098 le sont aussi dans leurs `tasks.md`.
+T112, T096, T097, T098, T116 et T084 le sont aussi dans leurs `tasks.md`.

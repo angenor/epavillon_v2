@@ -1,0 +1,11 @@
+{
+  "choix": "Reading mode choice",
+  "choix-propos": "Two buttons with aria-pressed: the one being read is pressed. In the expanded bar it takes the place of “Mark” (gap 43), and it opens the “Settings” sheet.",
+  "choix-barre": "In the expanded bar — “Pages” selected",
+  "choix-feuille": "In “Settings” — “Text” selected",
+  "pages": "Original page and margin notes",
+  "pages-propos": "The page reader on the small sample PDF: pinch or double-tap to zoom. Page 1, a note level with its passage; page 2, a note without a passage, at the top of the page.",
+  "pages-note": "Tap the triangle: the note opens at the bottom of the screen, with no overlay, and the page stays readable above it. The line or the cross collapses it.",
+  "note-texte": "The next global stocktake takes place in 2028: this passage dates from COP28.",
+  "note-auteur": "Dr Koffi Mensah"
+}

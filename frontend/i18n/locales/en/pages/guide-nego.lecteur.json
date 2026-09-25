@@ -41,26 +41,26 @@
   },
   "recherche": {
     "titre": "Search the document",
-    "ambigu": "These words appear several times on this page: none is singled out.",
-    "introuvable": "The passage is on this page, but it cannot be marked here."
+    "ambigu": "These words appear several times on this page, so no single match is highlighted.",
+    "introuvable": "The passage is on this page, but it cannot be highlighted."
   },
   "terme": {
     "lexique": "The translation and definition of this term will come with the English-French glossary.",
     "pages": "In this document: p. {pages}.",
     "revenir": "Back to the text"
   },
-  "bascule": "This phone cannot display this document's pages: it opens in “Large text”.",
+  "bascule": "This phone cannot display this document's pages, so it opens in “Large text”.",
   "impossible": {
     "titre": "This phone cannot display this document",
     "texte": "Its pages cannot be displayed on this phone, and the document does not offer “Large text”. You can read it on another device.",
-    "sortie": "Back to the document"
+    "sortie": "Back to document details"
   },
   "sans-reseau": {
-    "texte": "Some pages need the network.",
+    "texte": "Some pages need a connection.",
     "telecharger": "Download when back online"
   },
   "annonce": {
     "texte-agrandi": "“Large text” reflows this document to the width of the screen: tap the bottom bar, then “Text”.",
-    "limite": "This document is read on its pages: “Large text” is not offered here. Your choice stays for the others."
+    "limite": "This document can only be read as pages: “Large text” is not offered here. Your setting still applies to other documents."
   }
 }

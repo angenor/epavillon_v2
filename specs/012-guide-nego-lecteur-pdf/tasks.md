@@ -307,14 +307,14 @@ description: "Tâches de l'étape 1b — le lecteur montre le PDF d'origine"
 
 ## Phase 11 : Recette et finitions
 
-- [ ] T077 [P] Ajouter à la planche `F/app/pages/guide-nego/composants.vue` : `GnChoixMode` (les deux états), `GnMargeNote` (repliée, dépliée, en tête de page), le pictogramme `sliders`, et une vignette de `GnLecteurPages` sur le petit PDF d'exemple
-- [ ] T078 [P] Relire les traductions `en` nouvelles ou changées par un sous-agent : concordance clé pour clé, et aucun calque
-- [ ] T079 [P] Vérifier SC-011 et le lexique : aucun libellé de vocabulaire dans le code, « Texte agrandi » et « Réglages » partout, aucun reste de « tel quel » (`grep -rn "as_is\|serve_as_is\|tel quel\|tel-quel" F/app backend/crates`)
-- [ ] T080 Dérouler [quickstart.md](quickstart.md), § 1 à § 8, **sur la version construite** : lecteur, barre, feuille, annonce et note dépliée à 320, 360 et 390 px, clair et sombre, en « Très grande » ; non-régression du site — accueil, média, édition
-- [ ] T081 Dans [DEPLOIEMENT.md](../../docs/DEPLOIEMENT.md) § 15 : la migration de 1b à la suite de celle de l'étape 1 ; la relance d'extraction des documents publiés (`POST …/extraction`), pour recalculer `reading_bytes` ; `pdfjs-dist` dans l'image du site ; la vérification 4 du § 11, **déjà inscrite le 24/09**, à dérouler le jour du branchement
-- [ ] T082 `make check-safe`, **API arrêtée**
-- [ ] T083 Mettre à jour [docs/AppNego/progress.md](../../docs/AppNego/progress.md) : la ligne 1b et le journal du jour ; ce qui reste sur appareil réel. Commit de la phase
-- [ ] T084 **Sur appareil réel, par le commanditaire** : le guide lu en mode avion après une nuit sur un Android de milieu de gamme et sur un iPhone, pages nettes, sans saccade, une recherche qui mène au passage ; si possible un iPhone 8 ou X. Avec T112 (0b) et T116 (étape 1)
+- [X] T077 [P] Ajouter à la planche `F/app/pages/guide-nego/composants.vue` : `GnChoixMode` (les deux états), `GnMargeNote` (repliée, dépliée, en tête de page), le pictogramme `sliders`, et une vignette de `GnLecteurPages` sur le petit PDF d'exemple
+- [X] T078 [P] Relire les traductions `en` nouvelles ou changées par un sous-agent : concordance clé pour clé, et aucun calque
+- [X] T079 [P] Vérifier SC-011 et le lexique : aucun libellé de vocabulaire dans le code, « Texte agrandi » et « Réglages » partout, aucun reste de « tel quel » (`grep -rn "as_is\|serve_as_is\|tel quel\|tel-quel" F/app backend/crates`)
+- [X] T080 Dérouler [quickstart.md](quickstart.md), § 1 à § 8, **sur la version construite** : lecteur, barre, feuille, annonce et note dépliée à 320, 360 et 390 px, clair et sombre, en « Très grande » ; non-régression du site — accueil, média, édition
+- [X] T081 Dans [DEPLOIEMENT.md](../../docs/DEPLOIEMENT.md) § 15 : la migration de 1b à la suite de celle de l'étape 1 ; la relance d'extraction des documents publiés (`POST …/extraction`), pour recalculer `reading_bytes` ; `pdfjs-dist` dans l'image du site ; la vérification 4 du § 11, **déjà inscrite le 24/09**, à dérouler le jour du branchement
+- [X] T082 `make check-safe`, **API arrêtée**
+- [X] T083 Mettre à jour [docs/AppNego/progress.md](../../docs/AppNego/progress.md) : la ligne 1b et le journal du jour ; ce qui reste sur appareil réel. Commit de la phase
+- [ ] T084 *(la liste à cocher est au § 15.4 de DEPLOIEMENT.md, « Le lecteur du PDF »)* **Sur appareil réel, par le commanditaire** : le guide lu en mode avion après une nuit sur un Android de milieu de gamme et sur un iPhone, pages nettes, sans saccade, une recherche qui mène au passage ; si possible un iPhone 8 ou X. Avec T112 (0b) et T116 (étape 1)
 
 ---
 

@@ -1,7 +1,7 @@
 {
   "title": "Preview",
   "titleOf": "Preview — {title}",
-  "subtitle": "The phone shows each original page. The reflowed text, shown here page by page next to its image, serves search, the table of contents and “Large text”: reading order, headers removed, notes, tables, hyphenation, English terms marked.",
+  "subtitle": "The phone shows each original page. The reflowed text, shown here page by page next to its image, is used for search, the table of contents and “Large text”: reading order, headers removed, notes, tables, hyphenation, English terms marked.",
   "back": "Back to the record",
   "breadcrumb": {
     "document": "Document record",
@@ -27,7 +27,7 @@
     "notReflowable": "Does not reflow",
     "failed": "The extraction failed",
     "pages": "Pages",
-    "readingBytes": "Kept copy (PDF and text)",
+    "readingBytes": "Stored copy (PDF and text)",
     "extractedAt": "Extracted",
     "extractedAtValue": "{date}, {time}",
     "extractor": "Extraction tool",

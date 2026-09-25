@@ -1,7 +1,7 @@
 {
   "label": "Offer “Large text”",
-  "byVerdictOn": "By default, following the verdict: offered, the text reflows well.",
-  "byVerdictOff": "By default, following the verdict: not offered, the text reflows poorly.",
+  "byVerdictOn": "Default from the verdict: offered, because the text reflows well.",
+  "byVerdictOff": "Default from the verdict: not offered, because the text reflows poorly.",
   "chosen": "Chosen manually.",
   "backToVerdict": "Back to the verdict",
   "noText": "No text was extracted from this document: “Large text” cannot be offered, and search and the table of contents are unavailable too.",

@@ -1,0 +1,11 @@
+{
+  "choix": "Choix du mode",
+  "choix-propos": "Deux boutons à aria-pressed : celui qu'on lit est enfoncé. Il prend dans la barre dépliée l'emplacement de « Marquer » (écart 43) et ouvre la feuille « Réglages ».",
+  "choix-barre": "Dans la barre dépliée — « Pages » choisi",
+  "choix-feuille": "Dans « Réglages » — « Texte » choisi",
+  "pages": "Page d'origine et notes en marge",
+  "pages-propos": "Le lecteur de pages sur le petit PDF d'exemple : pincer ou toucher deux fois pour grossir. Page 1, une note à la hauteur de son passage ; page 2, une note sans passage, en tête de page.",
+  "pages-note": "Touchez le triangle : la note se déplie en bas de l'écran, sans voile, et la page reste lisible au-dessus. La ligne ou la croix la replie.",
+  "note-texte": "Le bilan mondial suivant se tient en 2028 : ce passage date de la CdP28.",
+  "note-auteur": "Dr Koffi Mensah"
+}

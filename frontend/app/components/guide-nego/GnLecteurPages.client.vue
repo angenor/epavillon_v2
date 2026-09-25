@@ -39,8 +39,10 @@ const props = withDefaults(
     notesParPage?: Map<number, CorrectionNote[]>
     /** La barre dépliée recouvre le bas de l'écran : une note ouverte se replie. */
     recouverte?: boolean
+    /** Dans le cadre de la planche, qui l'enferme par un `transform` : il part du haut du cadre. */
+    vignette?: boolean
   }>(),
-  { cachee: false, passage: null, endroit: null, notesParPage: () => new Map(), recouverte: false },
+  { cachee: false, passage: null, endroit: null, notesParPage: () => new Map(), recouverte: false, vignette: false },
 )
 
 const emit = defineEmits<{
@@ -448,7 +450,7 @@ defineExpose({
   <div
     class="gn-lecteur-pages"
     :class="{ 'gn-lecteur-pages--sans-reseau': reseauPerdu, 'gn-lecteur-pages--cachee': props.cachee }"
-    :style="{ '--gn-lecteur-haut': `${haut}px`, '--gn-page-sans-reseau': JSON.stringify(t('gn-lecteur-pages.page-sans-reseau')) }"
+    :style="{ '--gn-lecteur-haut': props.vignette ? '0px' : `${haut}px`, '--gn-page-sans-reseau': JSON.stringify(t('gn-lecteur-pages.page-sans-reseau')) }"
   >
     <div ref="conteneur" class="gn-lecteur-pages__conteneur" @click="auClic">
       <div class="pdfViewer" />

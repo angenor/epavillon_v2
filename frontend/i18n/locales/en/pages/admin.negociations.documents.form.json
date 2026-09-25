@@ -125,7 +125,7 @@
       "extractedAt": "Extracted on",
       "reflowable": "Reflowed text",
       "reflowYes": "Yes: “Large text” offered by default",
-      "reflowNo": "No: “Large text” withheld by default",
+      "reflowNo": "No: “Large text” not offered by default",
       "failed": "The extraction failed",
       "retry": "Retry the extraction",
       "stopped": "Automatic refresh has stopped: the state shown may be out of date.",
