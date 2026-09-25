@@ -56,7 +56,7 @@ types de notification.
 | Principe | Verdict | Comment |
 |---|---|---|
 | **I — Modèle d'abord** | ✅ | SQL dans `docs/database/` puis `migration.sql` rejouable ; ligne dans `docs/progression/modele.md` |
-| **II — Frontières** | ✅ | `negotiation` émet, `engagement` consomme par l'outbox et lit en SQL (patron de `repo/cross.rs`) ; aucune arête entre crates |
+| **II — Frontières** | ✅ | `negotiation` calcule les destinataires et compose l'avis ; `engagement` écrit les avis reçus par une branche générique, sans lire ni appeler `negotiation` ; aucune arête entre crates |
 | **III — `xmod_fk_*`** | ✅ | auteur, décideur, édition, personne des agendas |
 | **IV — Outbox** | ✅ | quatre événements ; courriels par travail posé dans la transaction |
 | **V — Permission et portée** | ✅ | `negotiation.report.validate` globale ; signaler : `negotiation.space.access` globale |
@@ -87,7 +87,7 @@ backend/crates/modules/negotiation/src/
 ├── jobs/publish.rs · jobs/change_email.rs
 ├── mail.rs                            # + gabarits de changement
 └── tests/                             # signalements_*, validation_*, rattrapage, notifications_*
-backend/crates/modules/engagement/src/{consumers/notifications.rs, repo/cross.rs}
+backend/crates/modules/engagement/src/{consumers/notifications.rs, repo/notifications.rs, routes/notifications.rs}   # branche générique, replace, filtre module
 backend/crates/kernel/src/error.rs     # + six codes
 frontend/app/
 ├── pages/guide-nego/negociations/{index,[id],agenda}.vue   # étendus

@@ -94,30 +94,38 @@ disparition rattrape un signalement « annulée »). Rattrapé → `withdrawn_at
 La fin (`ended`) se calcule à l'affichage : `end_at` passé (sinon fin du jour dans le fuseau), sans
 écrire. Retrait par l'administration → `withdrawal = 'admin'`.
 
-## R8 — Notifications : l'outbox vers `engagement`, sans arête entre crates
+## R8 — Notifications : `negotiation` décide, `engagement` écrit (retouche du go, 25/09)
 
-**Décision** : `negotiation` émet des événements (`kernel::events::emit`) ; le consommateur
-`engagement.notifications` gagne une branche par type `negotiation.*`. **La règle « qui prévenir » vit
-une seule fois**, en SQL : `negotiation.change_recipients(meeting_id)` et
-`negotiation.network_recipients(network_meeting_id)` dans `100_negotiations.sql`, appelées par le
-consommateur (`engagement/src/repo/cross.rs`) **et** par le travail de courriel. Constantes
-dans `backend/crates/contracts/src/negotiation.rs`. Types semés dans `engagement.notification_types` :
+**Décision** : **`negotiation` calcule qui prévenir** — par ses fonctions `negotiation.change_recipients()`
+et `negotiation.network_recipients()`, dans sa transaction — et **compose l'avis** (titre et corps
+FR/EN, lien, sujet, clé de regroupement). Il émet par `platform.emit_event()` un événement qui porte la
+liste des destinataires et ce contenu. Le consommateur d'`engagement` ne connaît aucune règle de
+Guide Négo : une **branche générique** écrit un avis `in_app` par destinataire pour tout événement qui
+porte une charge `notification` (forme ci-dessous), après `canal_autorise`. Il n'appelle rien de
+`negotiation`, ne lit aucune de ses tables. Les courriels partent de `negotiation`, par sa file de
+travaux (R9).
 
-| Type | Émis par | Destinataires |
-|---|---|---|
-| `negotiation.meeting.changed` | l'import (changement `start`, `venue`, ou annulation) | agenda + thématique allumée |
-| `negotiation.report.published` | le travail de publication (R3), changement | agenda + thématique allumée |
-| `negotiation.network_meeting.published` | le travail de publication, réunion non annoncée | thématique allumée |
-| `negotiation.report.decided` | la décision (validé / non retenu) | l'autrice |
+Charge commune (dans `contracts`) :
 
-`in_app` seulement pour le consommateur (il n'envoie pas de courriel, R9). Regroupement : `group_key =
-'<type>:<id>:<jour>'` — plusieurs changements du jour d'un même type sur une session, une ligne non
-lue, **dont le titre et les variables sont remplacés par l'état final** (option `remplacer` de
-`notifications::ecrire`) ; `report.decided` n'a pas de clé. Le titre et le corps sont composés par le
-consommateur à partir des variables (état, titre de session, heure, salle) ; `subject_schema =
-negotiation`, `subject_table` = `meetings`, `network_meetings` ou `session_reports`, `subject_id`.
+```text
+notification: { type_code, recipients: [uuid], title: i18n, body: i18n, link_path,
+                subject: {schema, table, id}, group_key | null, replace: bool, variables }
+```
 
-**`critical`** n'est pas employé : un réglage doit pouvoir couper.
+Types semés dans `engagement.notification_types` (la clé du type est l'`event_type`) :
+`negotiation.meeting.changed`, `negotiation.report.published`, `negotiation.network_meeting.published`,
+`negotiation.report.decided` — `module_code = 'negotiation'`, `{in_app}`, `normal`.
+
+Regroupement : `group_key = '<type>:<id>:<jour>'` ; `replace: true` remplace titre, corps et variables
+de la ligne non lue par l'état final (option ajoutée à `notifications::ecrire`) ; `report.decided`
+sans clé.
+
+**La cloche filtre par origine, génériquement** : `GET /notifications` gagne `module`, comparé à
+`notification_types.module_code`, une donnée qui existe déjà. Rien de Guide Négo n'est écrit dans
+`engagement`.
+
+**Écarté** : faire lire à `engagement` les tables ou les fonctions de `negotiation` — une dépendance
+d'un module vers un autre (principes II à IV).
 
 ## R9 — Le courriel : un par session et par fenêtre, relu au moment de partir
 
@@ -126,7 +134,7 @@ base** au moment d'envoyer, contrairement à 0b : c'est l'état final qu'il doit
 changement, `negotiation` pose **un travail par destinataire** (`negotiation.session_change_email`, clé
 `email:<cible>:<fenêtre>:<personne>`, fenêtre = tranche fixe de 10 min, `run_at` = fin de la tranche) :
 les changements d'une même tranche tombent dans un seul courriel, et un échec ne renvoie pas aux autres.
-Le travail relit l'état courant, **ne compte que les signalements publiés (`published_at`)**, vérifie
+Les destinataires viennent des mêmes fonctions de `negotiation`. Le travail relit l'état courant, **ne compte que les signalements publiés (`published_at`)**, vérifie
 l'accord (R10) et envoie, gardé par le `GardedMailer`. Heures avec le fuseau de la COP. Réunion non
 annoncée : même travail, clé sur la réunion.
 
@@ -154,7 +162,8 @@ toucherait un modèle partagé pour un seul usage.
 ## R12 — Le centre de notifications réutilise les routes d'`engagement`
 
 `GET /notifications`, `POST /notifications/read` existent ; **`GET /notifications` gagne un filtre
-`module`** (préfixe du type) : la cloche de Guide Négo ne compte pas les avis du site. Côté application : `composables/api/notifications.ts`
+`module`** (par `notification_types.module_code`, R8) : la cloche de Guide Négo ne compte pas les avis
+du site. Côté application : `composables/api/notifications.ts`
 (nouveau, pour ne pas grossir `useApi.ts`), `useGnNotifications` (garde `notifications`, 50 dernières,
 heure de lecture), marquer lu par la file, **une intention par notification** (`lu:<id>`) — la file garde une intention
 par clé, un lot écraserait le précédent. La cloche vit dans l'emplacement `action` de

@@ -67,8 +67,8 @@ Aucune colonne de source : ce n'est pas une session officielle. Audit.
 `negotiation.change_recipients(meeting_id uuid) RETURNS SETOF uuid` : personnes de `agenda_entries` sur
 la session ∪ personnes dont un suivi actif de la thématique de la session (par son point de l'ordre du
 jour) a `notify_changes`. `negotiation.network_recipients(network_meeting_id uuid)` :
-`network_agenda_entries` ∪ thématique allumée. STABLE. Appelées par `engagement` et par le travail de
-courriel.
+`network_agenda_entries` ∪ thématique allumée. STABLE. Appelées **par `negotiation` seul** — l'import, le travail de publication, le travail de
+courriel ; `engagement` reçoit la liste dans l'événement (R8).
 
 ## 4. Colonnes ajoutées
 
