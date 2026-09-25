@@ -21,5 +21,8 @@
   "type-group_coordination": "Coordination de groupe",
   "type-informal_consultations": "Consultations informelles",
   "type-contact_group": "Groupe de contact",
-  "type-plenary": "Plénière"
+  "type-plenary": "Plénière",
+  "valeurs": "Valeur changée — heure et salle d'une déplacée, flèche cyan devant la nouvelle ; l'heure en cours sur l'aplat jaune ; une valeur inchangée seule",
+  "valeur-heure": "Jeudi 12 novembre · heure d'Antalya (UTC+3)",
+  "valeur-batiment": "Bâtiment B"
 }

@@ -21,5 +21,8 @@
   "type-group_coordination": "Group coordination",
   "type-informal_consultations": "Informal consultations",
   "type-contact_group": "Contact group",
-  "type-plenary": "Plenary"
+  "type-plenary": "Plenary",
+  "valeurs": "Changed value — time and room of a moved session, cyan arrow before the new one; the current time on the yellow fill; an unchanged value alone",
+  "valeur-heure": "Thursday 12 November · Antalya time (UTC+3)",
+  "valeur-batiment": "Building B"
 }

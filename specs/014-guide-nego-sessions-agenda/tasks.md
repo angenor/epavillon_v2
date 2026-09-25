@@ -129,9 +129,9 @@ Chemins relatifs au dossier ; `neg/` = `backend/crates/modules/negotiation/`, `f
 
 ## Phase 8 — US3 : la fiche (P2)
 
-- [ ] T054 [P] [US3] Créer `GnValeurChangee` (ancienne valeur barrée → nouvelle, ou valeur seule) dans `fe/app/components/guide-nego/GnValeurChangee.vue`, textes `gn-valeur-changee.json`, ajouté à la planche
-- [ ] T055 [US3] Écrire `fe/app/pages/guide-nego/negociations/[id].vue` : titres, état (annulée : motif et heure du constat), « Source officielle · lu à », heure avec jour et fuseau, salle, type avec terme anglais touchable qui ouvre `/guide-nego/lexique?terme=<texte anglais>` (research R10 ; aucun code de lexique), ordre du jour ou « Hors ordre du jour officiel », accès, thématique, lien vers l'original (pas de section de documents : FR-029), « Ajouter à mon agenda » / « Dans mon agenda » (désactivé si annulée ; sans compte → connexion), interrupteur du rappel et sa phrase ; états chargement, jamais lue hors connexion, coupé, inconnue ; textes dans `fe/i18n/locales/{fr,en}/pages/guide-nego.negociations-fiche.json`
-- [ ] T056 [US3] Vérifier au navigateur contre `08-detail-de-session.html` (variantes 1a à 1d, sans l'encart de signalement), quickstart § 6
+- [x] T054 [P] [US3] Créer `GnValeurChangee` (ancienne valeur barrée → nouvelle, ou valeur seule) dans `fe/app/components/guide-nego/GnValeurChangee.vue`, textes `gn-valeur-changee.json`, ajouté à la planche
+- [x] T055 [US3] Écrire `fe/app/pages/guide-nego/negociations/[id].vue` : titres, état (annulée : motif et heure du constat), « Source officielle · lu à », heure avec jour et fuseau, salle, type avec terme anglais touchable qui ouvre `/guide-nego/lexique?terme=<texte anglais>` (research R10 ; aucun code de lexique), ordre du jour ou « Hors ordre du jour officiel », accès, thématique, lien vers l'original (pas de section de documents : FR-029), « Ajouter à mon agenda » / « Dans mon agenda » (désactivé si annulée ; sans compte → connexion), interrupteur du rappel et sa phrase ; états chargement, jamais lue hors connexion, coupé, inconnue ; textes dans `fe/i18n/locales/{fr,en}/pages/guide-nego.negociations-fiche.json`
+- [x] T056 [US3] Vérifier au navigateur contre `08-detail-de-session.html` (variantes 1a à 1d, sans l'encart de signalement), quickstart § 6
 
 **Commit** : « feat(guide-nego): étape 3a, phase 8 — la fiche d'une session ».
 

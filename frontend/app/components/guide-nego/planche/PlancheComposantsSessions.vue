@@ -147,6 +147,14 @@ const reportee = computed(() =>
         <GnEtatSession :session="reportee" etat="annulee" :fuseau="FUSEAU" />
       </div>
 
+      <span class="gn-planche-composants__legende">{{ k('valeurs') }}</span>
+      <div class="gn-planche-composants__vitrine">
+        <GnValeurChangee valeur="15:00–16:30" avant="11:30–13:00" :precision="k('valeur-heure')" />
+        <GnValeurChangee :valeur="k('salle-9')" :avant="k('salle-3')" :precision="k('valeur-batiment')" forte />
+        <GnValeurChangee valeur="10:00–12:00" :precision="k('valeur-heure')" maintenant />
+        <GnValeurChangee :valeur="k('salle-4')" forte eteinte />
+      </div>
+
       <span class="gn-planche-composants__legende">{{ k('coupure') }}</span>
       <div class="gn-planche-composants__vitrine">
         <GnLectureImpossible raison="unreachable" :depuis="le12('06:40')" programme="https://unfccc.int" />
