@@ -1,15 +1,17 @@
-//! Les routes du savoir : le paquet que le téléphone garde, ouvert à tous, et
-//! les termes favoris de la personne connectée.
+//! Les routes du savoir : le paquet que le téléphone garde et le compte des
+//! lectures, ouverts à tous, et les termes favoris de la personne connectée.
 
 use actix_web::http::header::{HeaderValue, CACHE_CONTROL, ETAG, VARY};
-use actix_web::{web, HttpRequest, HttpResponse};
+use actix_web::{web, HttpMessage, HttpRequest, HttpResponse};
 use kernel::auth::Actor;
+use kernel::context::RequestContext;
 use kernel::error::Result;
 use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::domain::savoir::lire_since;
 use crate::service::savoir_favoris;
+use crate::service::savoir_lectures;
 use crate::service::savoir_paquet as service;
 use crate::state::NegotiationState;
 
@@ -17,6 +19,7 @@ const PUBLIC: &str = "public, no-cache";
 
 pub fn configurer(cfg: &mut web::ServiceConfig) {
     cfg.route("/negotiation/knowledge", web::get().to(paquet))
+        .route("/negotiation/faq/{id}/read", web::post().to(lire_une_entree))
         .route("/negotiation/me/glossary-favorites", web::get().to(favoris))
         .route(
             "/negotiation/me/glossary-favorites/{entry_id}",
@@ -148,5 +151,33 @@ pub(crate) async fn retirer_un_favori(
 ) -> Result<HttpResponse> {
     let ctx = crate::routes::contexte_de(&requete, acteur.0);
     savoir_favoris::retirer_un_favori(&state, &ctx, acteur.0, chemin.into_inner()).await?;
+    Ok(HttpResponse::NoContent().finish())
+}
+
+#[utoipa::path(
+    post,
+    description = "Compte une lecture de l'entrée de FAQ, pour le jour de Paris, sans rien retenir de qui lit. Le téléphone l'envoie une fois par entrée et par jour. Entrée inconnue ou en brouillon : **204** quand même, rien n'est compté.",
+    path = "/negotiation/faq/{id}/read",
+    tag = "Guide Négo — savoir",
+    operation_id = "negotiation_lire_une_entree_de_faq",
+    params(("id" = Uuid, Path, description = "Identifiant de l'entrée de FAQ")),
+    responses((status = 204, description = "Lecture comptée, ou ignorée")),
+)]
+pub(crate) async fn lire_une_entree(
+    state: web::Data<NegotiationState>,
+    requete: HttpRequest,
+    chemin: web::Path<Uuid>,
+) -> Result<HttpResponse> {
+    let ctx = requete
+        .extensions()
+        .get::<RequestContext>()
+        .cloned()
+        .unwrap_or_else(|| {
+            RequestContext::new(
+                RequestContext::generated_request_id(),
+                crate::routes::locale_de(&requete),
+            )
+        });
+    savoir_lectures::compter_une_lecture(&state, &ctx, chemin.into_inner()).await?;
     Ok(HttpResponse::NoContent().finish())
 }

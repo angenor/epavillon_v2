@@ -15,6 +15,8 @@ export const CLE_LEXIQUE_DERNIERS = 'gn.lexique.derniers'
 export const CLE_LEXIQUE_FAVORIS = 'gn.lexique.favoris'
 /** La personne dont les favoris sans compte ont déjà rejoint le compte (R7). */
 export const CLE_LEXIQUE_FAVORIS_FUSIONNES = 'gn.lexique.favoris-fusionnes'
+/** Les entrées de FAQ déjà comptées aujourd'hui sur ce téléphone (R12). */
+export const CLE_FAQ_LUES = 'gn.faq.lues'
 
 // Stockage refusé, une clé vit le temps de la visite : sans elle, « Continuer en
 // visiteur » ramènerait à l'ouverture, en boucle.

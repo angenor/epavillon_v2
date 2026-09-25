@@ -25,6 +25,7 @@ withDefaults(
     fermer?: boolean
     surtitre?: string
     terme?: boolean
+    titreLong?: boolean
   }>(),
   {
     sousTitre: undefined,
@@ -38,6 +39,7 @@ withDefaults(
     fermer: false,
     surtitre: undefined,
     terme: false,
+    titreLong: false,
   },
 )
 
@@ -73,7 +75,9 @@ watch(
       :fermer="fermer"
       :surtitre="surtitre"
       :terme="terme"
+      :titre-long="titreLong"
     >
+      <template v-if="$slots.pied" #pied><slot name="pied" /></template>
       <template #connexion>
         <slot name="connexion">
           <GnLigneConnexion :en-ligne="etat.enLigne" :lu-a="etat.luA" />

@@ -1,0 +1,17 @@
+{
+  "titre": "FAQ question",
+  "chargement": "Loading the answer",
+  "a-revoir": "An expert is reviewing this answer",
+  "sources": "Sources",
+  "liees": "Related questions",
+  "aidee": "Did this answer help you?",
+  "oui": "Yes",
+  "non": "No",
+  "depasse": "Outdated or wrong",
+  "bientot": "Coming soon: you will be able to say whether the answer helped, or report it to the experts.",
+  "absente": {
+    "titre": "This question is not in the FAQ",
+    "texte": "It may have been removed, or its address is incomplete.",
+    "sortie": "Back to the FAQ"
+  }
+}

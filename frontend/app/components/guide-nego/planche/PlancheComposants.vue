@@ -30,6 +30,7 @@ const { t } = useI18n()
       <GnPlancheComposantsDocuments />
       <GnPlancheComposantsLecteurPdf />
       <GnPlancheComposantsLexique />
+      <GnPlancheComposantsFaq />
 
       <GnPlancheSection :titre="t('gn-planche-composants.absents')">
         <p class="gn-planche-note">{{ t('gn-planche-composants.absents-propos') }}</p>

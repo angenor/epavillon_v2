@@ -246,3 +246,25 @@ async fn les_termes_favoris_demandent_une_session_et_rendent_304() {
     assert_eq!(entete(&inchange, ETAG), empreinte);
     assert_eq!(entete(&inchange, CACHE_CONTROL), "private, no-cache");
 }
+
+#[actix_web::test]
+async fn une_lecture_de_faq_se_compte_sans_session() {
+    let base = TestDb::new().await;
+    let etat = AppState::new(base.db(), kernel::testing::test_config(base.url()))
+        .await
+        .expect("état de l'application");
+    let app = test::init_service(api::build_app(&etat)).await;
+
+    let lue = test::call_service(
+        &app,
+        test::TestRequest::post()
+            .uri(&format!("/api/negotiation/faq/{}/read", Uuid::now_v7()))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(
+        lue.status(),
+        StatusCode::NO_CONTENT,
+        "inconnue : 204 quand même"
+    );
+}

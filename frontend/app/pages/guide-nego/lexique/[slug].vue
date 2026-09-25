@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { GlossaryEntry, KnowledgeSource } from '~/types/negotiation-savoir'
+import { destinationDe } from '~/utils/guide-nego/faq'
 import { intituleDe } from '~/utils/guide-nego/lexique'
 
 /**
@@ -55,8 +56,10 @@ function libelleDeSource(source: KnowledgeSource): string {
   return [titre, source.section_label, pages].filter(Boolean).join(', ')
 }
 
-const versLaSource = (source: KnowledgeSource): string | null =>
-  source.document_id ? `/guide-nego/ressources/documents/${source.document_id}` : (source.external_url ?? null)
+const versLaSource = (source: KnowledgeSource): string | null => {
+  const destination = destinationDe(source)
+  return destination ? ('interne' in destination ? destination.interne : destination.externe) : null
+}
 
 const message = ref<{ texte: string; rang: number } | null>(null)
 const annoncer = (texte: string) => (message.value = { texte, rang: (message.value?.rang ?? 0) + 1 })

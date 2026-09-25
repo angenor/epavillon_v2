@@ -1,0 +1,17 @@
+{
+  "titre": "Question de la FAQ",
+  "chargement": "Lecture de la réponse",
+  "a-revoir": "Un expert relit cette réponse",
+  "sources": "Sources",
+  "liees": "Questions liées",
+  "aidee": "Cette réponse vous a-t-elle aidée ?",
+  "oui": "Oui",
+  "non": "Non",
+  "depasse": "Dépassé ou faux",
+  "bientot": "Bientôt : vous pourrez dire si la réponse vous a aidée, ou la signaler aux experts.",
+  "absente": {
+    "titre": "Cette question n'est pas dans la FAQ",
+    "texte": "Elle a peut-être été retirée, ou son adresse est incomplète.",
+    "sortie": "Revenir à la FAQ"
+  }
+}

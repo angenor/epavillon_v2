@@ -47,6 +47,10 @@ export function createGuideNegoSavoirApi({ lireEtiquete, send }: Deps) {
         'PUT',
       ),
 
+    /** Compteur des « plus lues », sans auteur ; hors file : une lecture perdue ne coûte rien (R12). */
+    lireUneEntreeDeFaq: (entryId: Uuid): Promise<void> =>
+      send(`/negotiation/faq/${entryId}/read`, {}, () => undefined),
+
     /** Idempotent, même si le favori n'existe pas. */
     retirerUnTermeFavori: (entryId: Uuid): Promise<void> =>
       send(

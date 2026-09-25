@@ -54,6 +54,7 @@ pub struct ApiErrorBody {
         crate::routes::savoir::favoris,
         crate::routes::savoir::poser_un_favori,
         crate::routes::savoir::retirer_un_favori,
+        crate::routes::savoir::lire_une_entree,
         crate::routes::admin_documents::lister,
         crate::routes::admin_documents::creer,
         crate::routes::admin_documents::fiche,

@@ -1,0 +1,10 @@
+{
+  "titre": "Rubrique de la FAQ",
+  "chargement": "Lecture de la rubrique",
+  "compte": "Aucune réponse | 1 réponse | {count} réponses",
+  "vide": {
+    "titre": "Aucune réponse dans cette rubrique",
+    "texte": "Elle n'existe pas, ou ses réponses ne sont pas encore publiées.",
+    "sortie": "Revenir à la FAQ"
+  }
+}

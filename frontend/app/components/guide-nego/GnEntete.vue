@@ -34,6 +34,8 @@ withDefaults(
     surtitre?: string
     /** Le titre est un terme anglais : en italique, sa traduction en sous-titre plus grand. */
     terme?: boolean
+    /** Une question de FAQ : le titre descend à 24, une phrase entière y tient. */
+    titreLong?: boolean
   }>(),
   {
     sousTitre: undefined,
@@ -46,6 +48,7 @@ withDefaults(
     fermer: false,
     surtitre: undefined,
     terme: false,
+    titreLong: false,
   },
 )
 
@@ -88,10 +91,11 @@ const { t } = useI18n()
       <h1 class="gn-entete__titre">{{ titre }}</h1>
     </div>
     <p v-if="surtitre && !compact" class="gn-entete__surtitre">{{ surtitre }}</p>
-    <h1 v-if="!compact && !avatarDuTitre" class="gn-entete__titre" :class="{ 'gn-entete__titre--terme': terme }" :lang="terme ? 'en' : undefined">
+    <h1 v-if="!compact && !avatarDuTitre" class="gn-entete__titre" :class="{ 'gn-entete__titre--terme': terme, 'gn-entete__titre--long': titreLong }" :lang="terme ? 'en' : undefined">
       {{ titre }}
     </h1>
     <p v-if="sousTitre && !compact" class="gn-entete__sous-titre" :class="{ 'gn-entete__sous-titre--terme': terme }">{{ sousTitre }}</p>
+    <slot name="pied" />
   </header>
 </template>
 
@@ -189,6 +193,11 @@ const { t } = useI18n()
   line-height: var(--gn-interligne-15);
   font-weight: var(--gn-graisse-gras);
   color: var(--gn-texte-2);
+}
+
+[data-app="guide-nego"] .gn-entete__titre--long {
+  font-size: var(--gn-taille-24);
+  line-height: var(--gn-interligne-24);
 }
 
 [data-app="guide-nego"] .gn-entete__titre--terme {

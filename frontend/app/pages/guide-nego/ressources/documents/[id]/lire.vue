@@ -33,7 +33,11 @@ const connexion = useGnConnexion()
 const session = useGnSession()
 const acces = useGnAcces()
 const { momentLisible } = useGnMomentLecture()
-const lecteur = useGnLecteur(id)
+const pageCitee = computed(() => {
+  const page = Number(Array.isArray(route.query.page) ? route.query.page[0] : route.query.page)
+  return Number.isInteger(page) && page > 0 ? page : null
+})
+const lecteur = useGnLecteur(id, pageCitee)
 const { etat, lecture, reprise, pageEnCours, suivreLaPage } = lecteur
 
 const document = computed<LibraryDocument | null>(() => documentDe(id.value))
@@ -87,7 +91,7 @@ function commencerLaLecture(): void {
   annonceFermee.value = false
   reseauPerdu.value = false
   plages.value = { recu: 0, demande: 0 }
-  pageDeDepart.value = reprise.value?.index ?? 1
+  pageDeDepart.value = pageEnCours.value
   demarrerLAttente()
 }
 
@@ -262,7 +266,7 @@ watch(lecture, async (lue) => {
   await nextTick()
   // La police chargée recompose le texte : un recalage fait avant glisserait de plusieurs écrans.
   await window.document.fonts?.ready
-  if (reprise.value) window.document.getElementById(`page-${reprise.value.index}`)?.scrollIntoView({ block: 'start' })
+  if (pageEnCours.value > 1) elementDeLaPage(pageEnCours.value)?.scrollIntoView({ block: 'start' })
   else window.scrollTo({ top: 0 })
   await uneImage()
   lecteur.commencerLeSuivi()

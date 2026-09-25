@@ -18,6 +18,11 @@ useHead({ title: t('guide-nego.ressources.titre') })
       vers="/guide-nego/ressources/documents"
     />
     <GnLigneReglage
+      :libelle="t('guide-nego.ressources.faq')"
+      picto="quiz"
+      vers="/guide-nego/ressources/faq"
+    />
+    <GnLigneReglage
       :libelle="t('guide-nego.ressources.mes-documents')"
       picto="download"
       vers="/guide-nego/ressources/mes-documents"

@@ -38,7 +38,8 @@ export interface Reprise {
 const stockage = { lire: lireCle, poser: poserCle }
 const INTERVALLE_DE_NOTE_MS = 2000
 
-export function useGnLecteur(id: Ref<string>) {
+/** `pageCitee` : une source de la FAQ ouvre le document à sa page, sans ligne de reprise. */
+export function useGnLecteur(id: Ref<string>, pageCitee: Ref<number | null> = ref(null)) {
   const api = useApi().guideNegoDocuments
   const { rotation } = useApi()
   const copies = useGnCopies()
@@ -102,10 +103,11 @@ export function useGnLecteur(id: Ref<string>) {
   }
 
   function pret(lue: DocumentReading, source: 'copie' | 'reseau', pdf: SourceDuDocument): void {
+    const citee = lue.pages.find((p) => p.index === pageCitee.value)
     const notee = lireProgression(stockage, id.value, lue.version)
     const page = pageDeReprise(lue, notee?.page ?? null)
-    reprise.value = page && notee ? { index: page.index, label: page.label, a: notee.a } : null
-    pageEnCours.value = page?.index ?? 1
+    reprise.value = !citee && page && notee ? { index: page.index, label: page.label, a: notee.a } : null
+    pageEnCours.value = citee?.index ?? page?.index ?? 1
     noterOuverture(stockage, id.value, new Date().toISOString())
     etat.value = { etat: 'pret', lecture: lue, source, pdf }
   }

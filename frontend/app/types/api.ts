@@ -2925,6 +2925,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/negotiation/faq/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Compte une lecture de l'entrée de FAQ, pour le jour de Paris, sans rien retenir de qui lit. Le téléphone l'envoie une fois par entrée et par jour. Entrée inconnue ou en brouillon : **204** quand même, rien n'est compté. */
+        post: operations["negotiation_lire_une_entree_de_faq"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/negotiation/invitation-codes/redeem": {
         parameters: {
             query?: never;
@@ -12149,6 +12166,27 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ApiError"];
                 };
+            };
+        };
+    };
+    negotiation_lire_une_entree_de_faq: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de l'entrée de FAQ */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Lecture comptée, ou ignorée */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

@@ -92,13 +92,13 @@ description: "Tâches de l'étape 2 — FAQ, parcours « Ma première COP » et 
 
 **Test indépendant** : quickstart § 2, étapes 1 à 4.
 
-- [ ] T033 [P] [US2] Créer `GnLigneQuestion.vue` (question, bouclier « Vérifié le … ») et `GnSource.vue` (citation en retrait ou ligne de document qui s'ouvre), sur la planche
-- [ ] T034 [US2] Créer `frontend/app/pages/guide-nego/ressources/faq/index.vue` : compte, ligne de synchronisation, recherche à la frappe (R4 sur question puis réponse), rubriques et comptes, ligne du parcours et sa progression (lue par `useGnParcours` si présent, sinon masquée jusqu'à US3), « Les plus lues », « Poser une question à un expert » ; quatre états
-- [ ] T035 [US2] Créer `ressources/faq/rubrique/[code].vue` et `ressources/faq/[id].vue` : rubrique, question, « Vérifié le », réponse, « Un expert relit cette réponse » si `to_review` (FR-019 bis), sources (document ouvert à la page citée, ou écran « pas sur votre téléphone »), questions liées, emplacements de « Cette réponse vous a-t-elle aidée ? » et « Dépassé ou faux » (actifs à US5)
-- [ ] T036 [US2] `POST /negotiation/faq/{id}/read` (route, service, test dans `tests/savoir_lectures.rs`) et son appel une fois par entrée, par jour et par téléphone (R12)
-- [ ] T037 [US2] Relier Ressources à la FAQ dans `frontend/app/pages/guide-nego/ressources/index.vue`
-- [ ] T038 [US2] i18n `guide-nego.faq.json`, `guide-nego.faq-entree.json`, `guide-nego.faq-rubrique.json`
-- [ ] T039 [US2] Vérifier au navigateur quickstart § 2 étapes 1 à 3 ; `npm run check:guide-nego`
+- [x] T033 [P] [US2] Créer `GnLigneQuestion.vue` (question, bouclier « Vérifié le … ») et `GnSource.vue` (citation en retrait ou ligne de document qui s'ouvre), sur la planche
+- [x] T034 [US2] Créer `frontend/app/pages/guide-nego/ressources/faq/index.vue` : compte, ligne de synchronisation, recherche à la frappe (R4 sur question puis réponse), rubriques et comptes, ligne du parcours et sa progression (lue par `useGnParcours` si présent, sinon masquée jusqu'à US3), « Les plus lues », « Poser une question à un expert » ; quatre états
+- [x] T035 [US2] Créer `ressources/faq/rubrique/[code].vue` et `ressources/faq/[id].vue` : rubrique, question, « Vérifié le », réponse, « Un expert relit cette réponse » si `to_review` (FR-019 bis), sources (document ouvert à la page citée, ou écran « pas sur votre téléphone »), questions liées, emplacements de « Cette réponse vous a-t-elle aidée ? » et « Dépassé ou faux » (actifs à US5)
+- [x] T036 [US2] `POST /negotiation/faq/{id}/read` (route, service, test dans `tests/savoir_lectures.rs`) et son appel une fois par entrée, par jour et par téléphone (R12)
+- [x] T037 [US2] Relier Ressources à la FAQ dans `frontend/app/pages/guide-nego/ressources/index.vue`
+- [x] T038 [US2] i18n `guide-nego.faq.json`, `guide-nego.faq-entree.json`, `guide-nego.faq-rubrique.json`
+- [x] T039 [US2] Vérifier au navigateur quickstart § 2 étapes 1 à 3 ; `npm run check:guide-nego`
 
 ---
 
@@ -182,6 +182,7 @@ description: "Tâches de l'étape 2 — FAQ, parcours « Ma première COP » et 
 - [ ] T073 Dérouler [quickstart.md](quickstart.md) en entier sur la **version construite**, à 360 px, clair et sombre ; corriger ce qu'il trouve
 - [ ] T074 Ajouter les essais sur appareil réel de l'étape 2 à la liste du § 15 de `docs/DEPLOIEMENT.md` (lexique en mode avion, rail au doigt, partage, clavier ouvert à « Aa »)
 - [ ] T075 Vérifier que les fichiers touchés restent sous mille lignes (`useApi.ts`, `lire.vue`, `error.rs`, `tests/commun/mod.rs`, `tests/perimetre_url_forgee.rs`)
+- [ ] T077 Corriger `/guide-nego` sans barre finale, qui ne se recharge pas hors connexion (hors de la portée `/guide-nego/` du service worker) : la faire servir hors connexion — redirection vers `/guide-nego/` ou portée élargie, sans toucher au site —, avec un essai qui le prouve (demandé par l'orchestrateur le 25/09)
 - [ ] T076 `make check-safe` sous le verrou du protocole ; ligne d'état de l'étape dans `docs/AppNego/progress.md`
 
 ---

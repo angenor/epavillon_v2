@@ -1,0 +1,20 @@
+{
+  "titre": "FAQ",
+  "compte": "Aucune réponse vérifiée | {count} réponse vérifiée par les experts de l'IFDD | {count} réponses vérifiées par les experts de l'IFDD",
+  "champ": "Poser une question en vos mots",
+  "chargement": "Lecture de la FAQ",
+  "trouvees": "Aucune réponse sur {total} | 1 réponse sur {total} | {count} réponses sur {total}",
+  "aucune": "Aucune réponse ne parle de « {saisie} ». Essayez d'autres mots, ou parcourez les rubriques.",
+  "rubriques": "Rubriques",
+  "plus-lues": "Les plus lues",
+  "expert": "Poser une question à un expert",
+  "expert-bientot": "Bientôt : les experts de l'IFDD répondront ici à vos questions.",
+  "erreur": {
+    "titre": "La FAQ n'est pas encore sur ce téléphone",
+    "texte": "Elle se garde à la première ouverture avec le réseau. Reconnectez-vous une fois : elle se lira ensuite sans réseau."
+  },
+  "vide": {
+    "titre": "Aucune réponse publiée pour l'instant",
+    "texte": "Les experts de l'IFDD vérifient les premières réponses. Elles paraîtront ici, lisibles sans réseau."
+  }
+}
