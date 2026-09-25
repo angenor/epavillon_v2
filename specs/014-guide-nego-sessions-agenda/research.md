@@ -63,7 +63,7 @@ forme pivot, enrichie par la résolution (R4).
 **Décision** : `backend/crates/modules/negotiation/src/import/archives/cop30/` — le JSON réel de la
 COP30, **réduit aux réunions que l'import retient** (négociations, plénières, événements mandatés,
 consultations de la présidence, coordinations de Parties) et **aux 17 et 18 novembre 2025** — une
-centaine d'entrées, sous 80 Ko —, tel quel dans sa forme : `lecture-1.json`. `lecture-2.json` en
+réduit à **quelques dizaines de réunions** (dont un cas « POSTPONED », une coordination de groupe reconnu et une non reconnue), structure et clés intactes —, tel quel dans sa forme : `lecture-1.json`. `lecture-2.json` en
 diffère de quatre écarts (une session avancée, une changée de salle, une disparue, une nouvelle,
 reconstituée et dite telle). Un fichier `injoignable` fait échouer la lecture. Le back-office choisit
 le fichier (`archive_name`) ; `archive_first_day` **translate les jours** de l'archive, en gardant
@@ -73,8 +73,9 @@ pour la recette.
 **Pourquoi** : SC-001 à SC-003 se prouvent en changeant de fichier ; le lecteur est éprouvé sur le
 format réel, fautes et décalage compris.
 
-**Risque dit à l'orchestrateur** : même réduit, c'est une reproduction de données de la CCNUCC dans un
-dépôt poussé sur GitHub ; les conditions demandent un accord écrit, en cours.
+**Le dépôt est public** (go du 25/09) : le jeu versionné se borne à ce que les tests exigent, son
+`LISEZMOI.md` dit la source et l'accord du secrétariat en cours ; les captures brutes vivent dans
+`.sources-ccnucc/`, **ignoré par Git**.
 
 ## R4 — Trier et rattacher : les données des vocabulaires
 
@@ -90,7 +91,7 @@ Résolution d'une entrée :
    catégorie (`plenary` pour « Plenary », `mandated_event`, `negotiation_other` pour « Negotiations ») ;
 3. un type marqué `requires_title_match` (la consultation de la présidence, dans une catégorie de
    338 événements dont la plupart ne négocient rien) n'admet que les titres qui le nomment ;
-4. une coordination n'est retenue que si son titre se résout dans `negotiation_group`.
+4. une coordination est toujours retenue ; son groupe est le terme de `negotiation_group` que son titre nomme, sinon nul — **re-résolu à chaque lecture**, sans compter comme écart ni s'afficher comme changement : une dénomination ajoutée au vocabulaire rattache les coordinations déjà importées (retouche du go, 25/09).
 
 Vocabulaire des types : `plenary`, `contact_group`, `informal_consultations`, `informal_informals`,
 `heads_of_delegation`, `presidency_consultation`, `mandated_event`, `group_coordination`,
@@ -182,7 +183,7 @@ l'import suivant le reposera — pas de boucle d'essais.
 Un trait `Traducteur` isole l'appel ; les tests emploient un traducteur fixe. **Aucun test n'appelle
 OpenRouter** (SC-010).
 
-**Écart à `03-api.md` l. 37**, qui prévoyait un appel de Rust vers le service d'IA en Python : ce
+**Écart à `03-api.md` l. 37**, inscrit comme exception datée du 25/09 dans ADR-004 : qui prévoyait un appel de Rust vers le service d'IA en Python : ce
 service n'existe pas encore (étape 7). L'appel direct depuis le worker ne crée aucune route ni
 service (principe XIV tenu) ; il se déplacera derrière le service d'IA quand celui-ci naîtra.
 
