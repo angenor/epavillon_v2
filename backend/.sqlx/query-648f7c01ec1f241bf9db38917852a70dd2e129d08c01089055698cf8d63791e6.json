@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.faq_entries\n             (section_term_id, question, answer, editorial_rank, created_by)\n         VALUES ($1, $2::jsonb::platform.i18n_text, $3::jsonb::platform.i18n_text, $4, $5)\n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_entries",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb",
+        "Jsonb",
+        "Int2",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "648f7c01ec1f241bf9db38917852a70dd2e129d08c01089055698cf8d63791e6"
+}

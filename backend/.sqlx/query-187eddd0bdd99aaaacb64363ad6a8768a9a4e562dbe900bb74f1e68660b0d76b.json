@@ -1,0 +1,107 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT f.id, t.code AS \"section_code!\", platform.t(f.question, $1) AS \"question!\",\n                  f.status::text AS \"status!\", f.verified_on, f.answer IS NOT NULL AS \"has_answer!\",\n                  f.first_published_at, f.updated_at,\n                  (SELECT count(*) FROM negotiation.faq_reports r\n                    WHERE r.entry_id = f.id AND r.status = 'open') AS \"open_reports!\"\n             FROM negotiation.faq_entries f\n             JOIN reference.taxonomy_terms t ON t.id = f.section_term_id\n             LEFT JOIN LATERAL (SELECT platform.normalize_label($2) AS n) q ON true\n            WHERE ($2::text IS NULL OR q.n IS NULL\n                   OR f.question_norm LIKE '%' || q.n || '%' OR f.question_norm % q.n)\n              AND ($3::text IS NULL OR t.code = $3)\n              AND ($4::text IS NULL OR f.status::text = $4)\n            ORDER BY CASE WHEN q.n IS NULL THEN 0 ELSE similarity(f.question_norm, q.n) END DESC,\n                     t.sort_order, f.updated_at DESC, f.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_entries",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "section_code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "question!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "verified_on",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_entries",
+            "name": "verified_on"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "has_answer!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "first_published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_entries",
+            "name": "first_published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_entries",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "open_reports!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      null,
+      true,
+      null,
+      true,
+      false,
+      null
+    ]
+  },
+  "hash": "187eddd0bdd99aaaacb64363ad6a8768a9a4e562dbe900bb74f1e68660b0d76b"
+}

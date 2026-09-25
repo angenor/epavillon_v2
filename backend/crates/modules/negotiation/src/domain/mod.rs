@@ -1,6 +1,7 @@
 pub mod access;
 pub mod admin;
 pub mod admin_documents;
+pub mod admin_savoir;
 pub mod admission;
 pub mod code;
 pub mod documents;

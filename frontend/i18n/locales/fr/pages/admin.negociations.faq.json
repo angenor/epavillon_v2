@@ -1,0 +1,170 @@
+{
+  "state": {
+    "draft": "Brouillon",
+    "published": "Publiée",
+    "to_review": "À revoir"
+  },
+  "list": {
+    "title": "Questions fréquentes",
+    "subtitle": "Les réponses que Guide Négo sert aux négociatrices et négociateurs. Une réponse ne se publie qu'une fois sa vérification datée par un expert.",
+    "new": "Nouvelle entrée",
+    "caption": "Entrées de la FAQ de Guide Négo, les dernières modifiées en tête.",
+    "forbidden": {
+      "scope": "Rédiger ou vérifier le savoir de Guide Négo, sur la plateforme entière",
+      "description": "La FAQ, le lexique et le parcours de Guide Négo sont réservés aux administrateurs de la plateforme entière et aux experts. Un compte rattaché à un seul événement n'y a pas accès."
+    },
+    "columns": {
+      "question": "Question",
+      "section": "Rubrique",
+      "status": "État",
+      "verified": "Vérifiée le",
+      "reports": "Signalements"
+    },
+    "filters": {
+      "label": "Filtres de la liste",
+      "search": "Chercher une question",
+      "section": "Rubrique",
+      "state": "État",
+      "allSections": "Toutes les rubriques",
+      "allStates": "Tous les états"
+    },
+    "empty": {
+      "title": "Aucune entrée",
+      "description": "La FAQ de Guide Négo est vide. Rédigez une première entrée : elle naît en brouillon.",
+      "reader": "Aucune entrée n'a encore été rédigée."
+    },
+    "noResults": {
+      "title": "Aucune entrée ne correspond",
+      "description": "Aucune entrée ne répond à ces filtres.",
+      "action": "Effacer les filtres"
+    },
+    "noAnswer": "Sans réponse",
+    "notVerified": "Non vérifiée",
+    "openReports": "aucun signalement ouvert | {count} signalement ouvert | {count} signalements ouverts"
+  },
+  "form": {
+    "readonly": "Vous consultez cette entrée : seule une personne chargée de la publication la modifie.",
+    "vocabularyError": "Les rubriques ou la liste des entrées n'ont pas pu être chargées.",
+    "sections": {
+      "question": "Question et réponse"
+    },
+    "section": {
+      "label": "Rubrique",
+      "placeholder": "Choisir une rubrique"
+    },
+    "question": {
+      "fr": "Question, en français",
+      "en": "Question, en anglais"
+    },
+    "enHint": "Sans traduction, le français s'affiche.",
+    "answer": {
+      "fr": "Réponse, en français",
+      "en": "Réponse, en anglais",
+      "hint": "Facultative en brouillon, exigée pour publier."
+    },
+    "rank": {
+      "label": "Rang éditorial",
+      "hint": "Ordonne les « plus lues » tant que les lectures manquent. Vide : hors classement."
+    },
+    "related": {
+      "label": "Questions liées",
+      "hint": "Proposées sous la réponse, dans cet ordre.",
+      "placeholder": "Chercher une question"
+    },
+    "save": "Enregistrer",
+    "create": "Créer le brouillon",
+    "error": {
+      "section": "Choisissez une rubrique.",
+      "question": "La question en français est requise.",
+      "answer": "Une réponse en anglais demande sa version française.",
+      "rank": "Le rang est un nombre entier positif.",
+      "source": "Chaque source nomme un document de la bibliothèque ou porte un titre."
+    }
+  },
+  "detail": {
+    "crumb": "Entrée",
+    "newTitle": "Nouvelle entrée de la FAQ",
+    "newSubtitle": "L'entrée naît en brouillon. Elle se publie une fois sa réponse écrite et sa vérification datée par un expert.",
+    "cancel": "Annuler",
+    "backToList": "Retour à la FAQ",
+    "forbidden": {
+      "scopePublish": "Rédiger le savoir de Guide Négo, sur la plateforme entière"
+    },
+    "notFound": {
+      "title": "Entrée introuvable",
+      "description": "Cette entrée n'existe pas, ou a été supprimée."
+    },
+    "verifiedBy": "Vérifiée le {date} par {name}",
+    "verified": "Vérifiée le {date}",
+    "notVerified": "Vérification non datée",
+    "updated": "Modifiée le {date}",
+    "firstPublished": "Publiée pour la première fois le {date}",
+    "zoned": "{date}, {zone}",
+    "actions": {
+      "publish": "Publier",
+      "toReview": "Mettre « À revoir »",
+      "unpublish": "Dépublier",
+      "delete": "Supprimer",
+      "verify": "Dater la vérification"
+    },
+    "result": {
+      "saved": "Entrée enregistrée.",
+      "verified": "Vérification datée.",
+      "published": "Entrée publiée.",
+      "toReview": "Entrée mise « À revoir » : elle reste visible, avec sa mention.",
+      "unpublished": "Entrée dépubliée : elle revient en brouillon."
+    },
+    "verify": {
+      "title": "Vérification",
+      "description": "L'expert date la vérification de la réponse. Une entrée « À revoir » revient publiée.",
+      "date": "Vérifiée le",
+      "hint": "Vide : aujourd'hui, heure de Paris."
+    },
+    "confirm": {
+      "cancel": "Annuler",
+      "unpublish": {
+        "title": "Dépublier cette entrée ?",
+        "question": "Elle disparaîtra de Guide Négo et reviendra en brouillon.",
+        "confirm": "Dépublier"
+      },
+      "delete": {
+        "title": "Supprimer ce brouillon ?",
+        "question": "Le brouillon et ses sources seront effacés. Ce geste ne s'annule pas.",
+        "confirm": "Supprimer"
+      }
+    },
+    "feedback": {
+      "title": "Retours des lecteurs",
+      "helpful": "Oui, utile",
+      "notHelpful": "Non",
+      "reasons": "Motifs des « Non »",
+      "reason": {
+        "too_vague": "Trop vague",
+        "off_topic": "À côté de la question",
+        "outdated": "Dépassée ou fausse"
+      }
+    },
+    "reports": {
+      "title": "Signalements",
+      "empty": "Aucun signalement.",
+      "status": {
+        "open": "Ouvert",
+        "closed": "Clos"
+      },
+      "outcome": {
+        "revised": "Réponse révisée",
+        "confirmed": "Réponse confirmée",
+        "dismissed": "Écarté"
+      },
+      "reason": {
+        "rule_changed": "La règle a changé",
+        "wrong": "Réponse fausse",
+        "source_mismatch": "La source ne dit pas cela"
+      },
+      "fromFeedback": "Venu d'un « Non » : dépassée ou fausse",
+      "details": "« {text} »",
+      "created": "Reçu le {date}",
+      "handled": "Traité le {date}"
+    }
+  }
+}

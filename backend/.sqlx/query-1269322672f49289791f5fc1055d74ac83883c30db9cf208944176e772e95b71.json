@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT g.id, g.term AS \"label!\", g.status::text AS \"status!\"\n             FROM negotiation.glossary_related r\n             JOIN negotiation.glossary_entries g ON g.id = r.related_id\n            WHERE r.entry_id = $1\n            ORDER BY r.sort_order, g.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "label!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "term"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "1269322672f49289791f5fc1055d74ac83883c30db9cf208944176e772e95b71"
+}

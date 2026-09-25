@@ -78,6 +78,7 @@ import { createGuideNegoApi } from './api/guide-nego'
 import { createGuideNegoDocumentsApi } from './api/guide-nego-documents'
 import { createGuideNegoSavoirApi } from './api/guide-nego-savoir'
 import { createAdminNegotiationDocumentsApi } from './api/admin-negotiation-documents'
+import { createAdminNegotiationSavoirApi } from './api/admin-negotiation-savoir'
 import { createAuthApi } from './api/auth'
 
 // `ForbiddenError` vit désormais dans `utils/api-error.ts`, avec les deux autres
@@ -765,6 +766,7 @@ export function useApi() {
      */
     adminNegotiations: createAdminNegotiationsApi(deps),
     adminNegotiationDocuments: createAdminNegotiationDocumentsApi(deps),
+    adminNegotiationSavoir: createAdminNegotiationSavoirApi(deps),
 
     // -----------------------------------------------------------------------
     // Messages d'incident — la part PUBLIQUE (B9)

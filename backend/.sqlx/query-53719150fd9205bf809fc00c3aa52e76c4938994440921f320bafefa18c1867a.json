@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.pathway_groups (label, is_published, sort_order)\n         VALUES ($1::jsonb::platform.i18n_text, $2,\n                 (SELECT COALESCE(max(sort_order) + 1, 0) FROM negotiation.pathway_groups))\n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.pathway_groups",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Jsonb",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "53719150fd9205bf809fc00c3aa52e76c4938994440921f320bafefa18c1867a"
+}

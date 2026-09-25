@@ -1,0 +1,136 @@
+{
+  "state": {
+    "draft": "Brouillon",
+    "published": "Publié",
+    "to_review": "À revoir"
+  },
+  "list": {
+    "title": "Lexique",
+    "subtitle": "Les termes entendus en salle de négociation, leur traduction et leur définition, tels que Guide Négo les sert.",
+    "new": "Nouveau terme",
+    "caption": "Termes du lexique de Guide Négo, par ordre alphabétique.",
+    "forbidden": {
+      "scope": "Rédiger ou vérifier le savoir de Guide Négo, sur la plateforme entière",
+      "description": "La FAQ, le lexique et le parcours de Guide Négo sont réservés aux administrateurs de la plateforme entière et aux experts. Un compte rattaché à un seul événement n'y a pas accès."
+    },
+    "columns": {
+      "term": "Terme",
+      "translation": "Traduction",
+      "family": "Famille",
+      "status": "État",
+      "updated": "Modifié le"
+    },
+    "filters": {
+      "label": "Filtres de la liste",
+      "search": "Chercher un terme, un sigle, une traduction",
+      "family": "Famille",
+      "state": "État",
+      "allFamilies": "Toutes les familles",
+      "allStates": "Tous les états"
+    },
+    "empty": {
+      "title": "Aucun terme",
+      "description": "Le lexique de Guide Négo est vide. Ajoutez un premier terme : il naît en brouillon.",
+      "reader": "Aucun terme n'a encore été rédigé."
+    },
+    "noResults": {
+      "title": "Aucun terme ne correspond",
+      "description": "Aucun terme ne répond à ces filtres.",
+      "action": "Effacer les filtres"
+    }
+  },
+  "form": {
+    "readonly": "Vous consultez ce terme : seule une personne chargée de la publication le modifie.",
+    "vocabularyError": "Les familles ou la liste des termes n'ont pas pu être chargées.",
+    "sections": {
+      "term": "Le terme"
+    },
+    "family": {
+      "label": "Famille",
+      "placeholder": "Choisir une famille"
+    },
+    "term": {
+      "label": "Terme anglais",
+      "hint": "Tel qu'il s'écrit dans les textes. Sa désignation stable en est tirée à la création, et ne change plus."
+    },
+    "acronym": {
+      "label": "Sigle",
+      "placeholder": "GGA"
+    },
+    "variants": {
+      "label": "Variantes",
+      "hint": "Les autres écritures reconnues à la recherche, une par ligne."
+    },
+    "translation": {
+      "fr": "Traduction, en français",
+      "en": "Traduction, en anglais"
+    },
+    "enHint": "Sans traduction, le français s'affiche.",
+    "definition": {
+      "fr": "Définition, en français",
+      "en": "Définition, en anglais"
+    },
+    "heardInRoom": {
+      "label": "Entendu en salle",
+      "hint": "Une phrase telle qu'on l'entend, en anglais.",
+      "placeholder": "We still have three brackets in paragraph 12."
+    },
+    "related": {
+      "label": "Termes liés",
+      "hint": "Proposés sous la définition, dans cet ordre.",
+      "placeholder": "Chercher un terme"
+    },
+    "save": "Enregistrer",
+    "create": "Créer le brouillon",
+    "error": {
+      "family": "Choisissez une famille.",
+      "term": "Le terme est requis.",
+      "translation": "La traduction en français est requise.",
+      "definition": "La définition en français est requise.",
+      "source": "Chaque source nomme un document de la bibliothèque ou porte un titre."
+    }
+  },
+  "detail": {
+    "crumb": "Terme",
+    "newTitle": "Nouveau terme du lexique",
+    "newSubtitle": "Le terme naît en brouillon ; il paraît dans Guide Négo une fois publié.",
+    "cancel": "Annuler",
+    "backToList": "Retour au lexique",
+    "forbidden": {
+      "scopePublish": "Rédiger le savoir de Guide Négo, sur la plateforme entière"
+    },
+    "notFound": {
+      "title": "Terme introuvable",
+      "description": "Ce terme n'existe pas, ou a été supprimé."
+    },
+    "slug": "Désignation :",
+    "updated": "Modifié le {date}",
+    "firstPublished": "Publié pour la première fois le {date}",
+    "zoned": "{date}, {zone}",
+    "actions": {
+      "publish": "Publier",
+      "toReview": "Mettre « À revoir »",
+      "unpublish": "Dépublier",
+      "delete": "Supprimer"
+    },
+    "result": {
+      "saved": "Terme enregistré.",
+      "published": "Terme publié.",
+      "toReview": "Terme mis « À revoir » : il reste visible, avec sa mention.",
+      "unpublished": "Terme dépublié : il revient en brouillon."
+    },
+    "confirm": {
+      "cancel": "Annuler",
+      "unpublish": {
+        "title": "Dépublier ce terme ?",
+        "question": "Il disparaîtra de Guide Négo et reviendra en brouillon.",
+        "confirm": "Dépublier"
+      },
+      "delete": {
+        "title": "Supprimer ce brouillon ?",
+        "question": "Le brouillon et ses sources seront effacés. Ce geste ne s'annule pas.",
+        "confirm": "Supprimer"
+      }
+    }
+  }
+}

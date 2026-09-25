@@ -118,7 +118,7 @@ pub struct AdminDocumentFile {
 }
 
 /// Un champ qui distingue « absent » (`None`) de « vidé » (`Some(None)`).
-fn champ<'de, D, T>(d: D) -> Result<Option<Option<T>>, D::Error>
+pub(crate) fn champ<'de, D, T>(d: D) -> Result<Option<Option<T>>, D::Error>
 where
     D: Deserializer<'de>,
     T: Deserialize<'de>,

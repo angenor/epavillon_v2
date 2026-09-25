@@ -19,7 +19,10 @@ const PUBLIC: &str = "public, no-cache";
 
 pub fn configurer(cfg: &mut web::ServiceConfig) {
     cfg.route("/negotiation/knowledge", web::get().to(paquet))
-        .route("/negotiation/faq/{id}/read", web::post().to(lire_une_entree))
+        .route(
+            "/negotiation/faq/{id}/read",
+            web::post().to(lire_une_entree),
+        )
         .route("/negotiation/me/glossary-favorites", web::get().to(favoris))
         .route(
             "/negotiation/me/glossary-favorites/{entry_id}",

@@ -1,0 +1,113 @@
+{
+  "title": "“My first COP” pathway",
+  "subtitle": "The steps Guide Négo offers to tick off, group by group. A step already ticked is not deleted: it is unpublished.",
+  "readonly": "You are viewing the pathway: only a person in charge of publishing can edit it.",
+  "forbidden": {
+    "scope": "Write or verify Guide Négo knowledge, across the whole platform",
+    "description": "The Guide Négo FAQ, glossary and pathway are reserved for platform-wide administrators and experts. An account attached to a single event has no access."
+  },
+  "empty": {
+    "title": "No groups",
+    "description": "The pathway has no group yet. Create one, then add steps to it."
+  },
+  "published": "Published",
+  "unpublished": "Unpublished",
+  "publish": "Publish",
+  "unpublish": "Unpublish",
+  "delete": "Delete",
+  "up": "Move up",
+  "down": "Move down",
+  "cancel": "Cancel",
+  "save": "Save",
+  "group": {
+    "new": "New group",
+    "rename": "Rename",
+    "steps": "no steps | {count} step | {count} steps",
+    "empty": "This group has no steps yet.",
+    "renameTitle": "Rename the group",
+    "newTitle": "New group",
+    "label": {
+      "fr": "Label, in French",
+      "en": "Label, in English"
+    },
+    "published": "Published on creation",
+    "error": {
+      "label": "The French label is required."
+    }
+  },
+  "step": {
+    "new": "Add a step",
+    "edit": "Edit",
+    "move": "Move",
+    "originShort": "Origin: {origin}",
+    "checks": "ticked by no account | ticked by {count} account | ticked by {count} accounts",
+    "editTitle": "Edit the step",
+    "newTitle": "New step",
+    "moveTitle": "Move the step",
+    "moveTarget": "To group",
+    "moveTargetPlaceholder": "Choose a group",
+    "moveHint": "The step goes to the end of the group.",
+    "moveConfirm": "Move",
+    "label": {
+      "fr": "Label, in French",
+      "en": "Label, in English"
+    },
+    "detail": {
+      "fr": "Detail, in French",
+      "en": "Detail, in English",
+      "hint": "Optional: “African Group 8:00, LDCs 13:00”."
+    },
+    "origin": {
+      "fr": "Origin, in French",
+      "en": "Origin, in English",
+      "hint": "Optional: where the step comes from, “Francophonie meetings”."
+    },
+    "link": {
+      "legend": "Step link",
+      "label": "Link",
+      "none": "No link",
+      "kind": {
+        "document": "Document",
+        "faq": "FAQ question",
+        "glossary": "Glossary term"
+      },
+      "target": "Target",
+      "targetPlaceholder": "Search",
+      "page": "Page",
+      "section": "Section",
+      "sectionPlaceholder": "chapter 3",
+      "textFr": "Link text, in French",
+      "textEn": "Link text, in English",
+      "textHint": "Optional: “Guide, chapter 3”.",
+      "unknownTarget": "target not found",
+      "pageShort": "p. {page}",
+      "summary": "{kind}: {target}"
+    },
+    "published": "Published on creation",
+    "publishedHint": "Otherwise, it waits as a draft.",
+    "save": "Save",
+    "create": "Add",
+    "error": {
+      "label": "The French label is required.",
+      "target": "Choose the link target, or remove the link."
+    },
+    "targetsError": "The documents, questions or terms could not be loaded."
+  },
+  "result": {
+    "ordered": "Order saved.",
+    "groupSaved": "Group saved.",
+    "groupCreated": "Group created.",
+    "published": "Published.",
+    "unpublished": "Unpublished.",
+    "stepSaved": "Step saved.",
+    "stepCreated": "Step added.",
+    "moved": "Step moved.",
+    "groupDeleted": "Group deleted.",
+    "stepDeleted": "Step deleted."
+  },
+  "confirm": {
+    "groupTitle": "Delete this group?",
+    "stepTitle": "Delete this step?",
+    "question": "“{label}” will be erased. This cannot be undone."
+  }
+}

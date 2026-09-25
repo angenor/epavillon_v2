@@ -45,14 +45,14 @@ const MIS_A_JOUR: IsoDateTime = '2026-09-24T08:00:00Z'
 const VERIFIEE_LE = '2026-09-24'
 const CHEVAUCHEMENT_MS = 5 * 60 * 1000
 
-const RUBRIQUES: { code: string; label: I18nText; icon: string; sort_order: number }[] = [
+export const RUBRIQUES: { code: string; label: I18nText; icon: string; sort_order: number }[] = [
   { code: 'first_cop', label: { fr: 'Ma première COP', en: 'My first COP' }, icon: 'star', sort_order: 10 },
   { code: 'process', label: { fr: 'Le processus', en: 'The process' }, icon: 'toc', sort_order: 20 },
   { code: 'negotiating_groups', label: { fr: 'Les groupes de négociation', en: 'Negotiating groups' }, icon: 'user', sort_order: 30 },
   { code: 'on_site', label: { fr: 'Sur place', en: 'On site' }, icon: 'pin', sort_order: 40 },
 ]
 
-const FAMILLES: { code: string; label: I18nText; sort_order: number }[] = [
+export const FAMILLES: { code: string; label: I18nText; sort_order: number }[] = [
   { code: 'meetings', label: { fr: 'Réunions', en: 'Meetings' }, sort_order: 10 },
   { code: 'texts', label: { fr: 'Textes', en: 'Texts' }, sort_order: 20 },
   { code: 'themes', label: { fr: 'Thématiques', en: 'Themes' }, sort_order: 30 },
@@ -66,7 +66,7 @@ const pages = (de: number, a = de) => ({ page_from: de, page_to: a })
 const exterieure = (titre: string, de: number, a = de): KnowledgeSource => ({ external_title: titre, ...pages(de, a) })
 const duGuide = (de: number, a = de): KnowledgeSource => ({ ...GUIDE, ...pages(de, a) })
 
-const FAQ: FaqEntry[] = [
+export const FAQ: FaqEntry[] = [
   {
     id: SAVOIR.faqComplete,
     section_code: 'process',
@@ -163,7 +163,7 @@ const TERMES: Terme[] = [
     'The GST outcome must guide the next NDCs.', [duGuide(26)], [17]],
 ]
 
-const LEXIQUE: GlossaryEntry[] = TERMES.map(
+export const LEXIQUE: GlossaryEntry[] = TERMES.map(
   ([n, famille, term, acronym, variants, translation, definition, heard_in_room, sources, lies]) => ({
     id: id('a', n),
     slug: slugDe(term),
@@ -221,7 +221,7 @@ const GROUPES: [n: number, label: string, etapes: Etape[]][] = [
   ]],
 ]
 
-const PARCOURS: PathwayGroup[] = GROUPES.map(([n, label, etapes]) => ({
+export const PARCOURS: PathwayGroup[] = GROUPES.map(([n, label, etapes]) => ({
   id: id('b', n),
   label,
   sort_order: n * 10,

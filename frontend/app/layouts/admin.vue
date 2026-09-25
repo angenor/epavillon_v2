@@ -110,6 +110,24 @@ const sections: NavSection[] = [
         icon: 'document',
         permissions: ['negotiation.document.publish', 'negotiation.correction.post'],
       },
+      {
+        labelKey: 'nav.admin.negotiationFaq',
+        to: '/admin/negociations/faq',
+        icon: 'info',
+        permissions: ['negotiation.knowledge.publish', 'negotiation.knowledge.review'],
+      },
+      {
+        labelKey: 'nav.admin.negotiationGlossary',
+        to: '/admin/negociations/lexique',
+        icon: 'list',
+        permissions: ['negotiation.knowledge.publish', 'negotiation.knowledge.review'],
+      },
+      {
+        labelKey: 'nav.admin.negotiationPathway',
+        to: '/admin/negociations/parcours',
+        icon: 'list-ordered',
+        permissions: ['negotiation.knowledge.publish', 'negotiation.knowledge.review'],
+      },
     ],
   },
   {

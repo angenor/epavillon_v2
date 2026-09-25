@@ -61,7 +61,10 @@
     "negotiationCodes": "Codes d'invitation",
     "negotiationRequests": "Demandes d'accès",
     "negotiationAdmission": "Mode d'admission",
-    "negotiationDocuments": "Documents"
+    "negotiationDocuments": "Documents",
+    "negotiationFaq": "FAQ",
+    "negotiationGlossary": "Lexique",
+    "negotiationPathway": "Parcours"
   },
   "breadcrumb": {
     "label": "Fil d'Ariane",

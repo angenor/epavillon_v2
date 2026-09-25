@@ -1,5 +1,6 @@
-//! **Chaque garde du back-office des documents laisse passer qui détient son
-//! geste, et lui seul** — `contracts/api-admin-documents.md`, « Qui peut quoi ».
+//! **Chaque garde du back-office des documents et du savoir laisse passer qui
+//! détient son geste, et lui seul** — `contracts/api-admin-documents.md` et
+//! `contracts/api-admin-savoir.md` (013), « Qui peut quoi ».
 //!
 //! `perimetre_url_forgee.rs` montre que tout le monde est refusé ; un refus
 //! universel y passerait aussi. Ici, chaque garde est éprouvée dans les deux
@@ -339,4 +340,121 @@ async fn chaque_garde_decriture_laisse_passer_qui_detient_son_geste_et_lui_seul(
             "{qui}"
         );
     }
+}
+
+/// Le savoir : l'administratrice rédige et publie, mais ne date pas une
+/// vérification ; qui ne sait que vérifier lit et date, et ne rédige pas.
+#[tokio::test]
+async fn le_savoir_ouvre_chaque_geste_a_qui_le_detient_et_a_lui_seul() {
+    use negotiation::domain::permissions::{KNOWLEDGE_PUBLISH, KNOWLEDGE_REVIEW};
+
+    let bac = Bac::monter().await;
+    let ifdd = administratrice(&bac, "ifdd@example.org").await;
+    let relectrice = expert(&bac, "experte@example.org").await;
+    let verifie_seul = un_seul_geste(
+        &bac,
+        "verifie@example.org",
+        "essai_verifie",
+        KNOWLEDGE_REVIEW,
+    )
+    .await;
+    let rien = personne(&bac, "rien@example.org").await;
+    for (qui, attendus) in [
+        (ifdd, [true, false]),
+        (relectrice, [true, true]),
+        (verifie_seul, [false, true]),
+        (rien, [false, false]),
+    ] {
+        for (permission, attendu) in [KNOWLEDGE_PUBLISH, KNOWLEDGE_REVIEW]
+            .into_iter()
+            .zip(attendus)
+        {
+            assert_eq!(
+                peut(&bac, qui, permission).await,
+                attendu,
+                "{qui} : {permission}"
+            );
+        }
+    }
+    let app = back_office!(bac);
+    let refus = (StatusCode::FORBIDDEN, Some("FORBIDDEN"));
+
+    let creation = "/admin/negotiation/faq";
+    let question = json!({ "section_code": "first_cop", "question": { "fr": "Que faire le premier jour ?" },
+                           "answer": { "fr": "Retirer son badge." } });
+    for qui in [verifie_seul, rien] {
+        let (statut, corps) = frapper(
+            &app,
+            appel("post", creation, qui, Some(question.clone())).to_request(),
+        )
+        .await;
+        assert_eq!(
+            (statut, corps["code"].as_str()),
+            refus,
+            "{qui} ne rédige pas"
+        );
+    }
+    let (statut, cree) = frapper(
+        &app,
+        appel("post", creation, ifdd, Some(question)).to_request(),
+    )
+    .await;
+    assert_eq!(statut, StatusCode::CREATED, "{cree}");
+    let entree: Uuid = serde_json::from_value(cree["id"].clone()).expect("identifiant");
+
+    let verifier = format!("/admin/negotiation/faq/{entree}/verify");
+    let (statut, corps) = frapper(
+        &app,
+        appel("post", &verifier, ifdd, Some(json!({}))).to_request(),
+    )
+    .await;
+    assert_eq!(
+        (statut, corps["code"].as_str()),
+        refus,
+        "l'administratrice ne date pas"
+    );
+    for qui in [verifie_seul, relectrice] {
+        let (statut, corps) = frapper(
+            &app,
+            appel("post", &verifier, qui, Some(json!({}))).to_request(),
+        )
+        .await;
+        assert_eq!(statut, StatusCode::OK, "{corps}");
+    }
+
+    let publier = format!("/admin/negotiation/faq/{entree}/publish");
+    let (statut, corps) = frapper(
+        &app,
+        appel("post", &publier, verifie_seul, None).to_request(),
+    )
+    .await;
+    assert_eq!(
+        (statut, corps["code"].as_str()),
+        refus,
+        "vérifier ne publie pas"
+    );
+    let (statut, corps) = frapper(&app, appel("post", &publier, ifdd, None).to_request()).await;
+    assert_eq!(
+        (statut, corps["status"].as_str()),
+        (StatusCode::OK, Some("published"))
+    );
+
+    // Lire : l'un ou l'autre ; ni l'un ni l'autre, non.
+    for (qui, publie, verifie) in [(ifdd, true, false), (verifie_seul, false, true)] {
+        let (statut, liste) = frapper(&app, appel("get", creation, qui, None).to_request()).await;
+        assert_eq!(statut, StatusCode::OK);
+        assert_eq!(
+            (
+                liste["can_publish"].as_bool(),
+                liste["can_review"].as_bool()
+            ),
+            (Some(publie), Some(verifie))
+        );
+    }
+    let (statut, corps) = frapper(
+        &app,
+        appel("get", "/admin/negotiation/pathway", rien, None).to_request(),
+    )
+    .await;
+    assert_eq!((statut, corps["code"].as_str()), refus);
 }

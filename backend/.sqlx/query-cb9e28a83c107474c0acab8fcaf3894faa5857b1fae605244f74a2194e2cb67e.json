@@ -1,0 +1,117 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT g.id, g.slug, t.code AS \"family_code!\", g.term, g.acronym,\n                  platform.t(g.translation, $1) AS \"translation!\", g.status::text AS \"status!\",\n                  g.first_published_at, g.updated_at\n             FROM negotiation.glossary_entries g\n             JOIN reference.taxonomy_terms t ON t.id = g.family_term_id\n             LEFT JOIN LATERAL (SELECT platform.normalize_label($2) AS n) q ON true\n            WHERE ($2::text IS NULL OR q.n IS NULL\n                   OR g.term_norm LIKE '%' || q.n || '%' OR g.term_norm % q.n\n                   OR g.acronym_norm = q.n OR q.n = ANY (g.variants_norm))\n              AND ($3::text IS NULL OR t.code = $3)\n              AND ($4::text IS NULL OR g.status::text = $4)\n            ORDER BY CASE WHEN q.n IS NULL THEN 0 ELSE similarity(g.term_norm, q.n) END DESC,\n                     g.term_norm, g.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "slug",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "slug"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "family_code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "term",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "term"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "acronym",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "acronym"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "translation!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "first_published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "first_published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      null,
+      null,
+      true,
+      false
+    ]
+  },
+  "hash": "cb9e28a83c107474c0acab8fcaf3894faa5857b1fae605244f74a2194e2cb67e"
+}

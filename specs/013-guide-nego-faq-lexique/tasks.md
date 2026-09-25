@@ -106,15 +106,15 @@ description: "Tâches de l'étape 2 — FAQ, parcours « Ma première COP » et 
 
 **Test indépendant** : quickstart § 6.
 
-- [ ] T040 [US9] Écrire `repo/savoir_faq.rs`, `repo/savoir_lexique.rs`, `repo/savoir_parcours.rs` et `service/savoir_admin.rs` : liste (`q` par trigramme), fiche, création, modification (sources et liés en bloc), `verify`, `publish`, `to-review`, `unpublish`, suppression d'un brouillon, parcours et ordre ([api-admin-savoir.md](contracts/api-admin-savoir.md))
-- [ ] T041 [US9] Écrire `routes/admin_savoir.rs` avec l'extracteur `LectureSavoir` (publish **ou** review, patron de `LectureDocuments`) ; monter, `openapi.rs`
-- [ ] T042 [US9] Tests `tests/savoir_admin.rs` : chaque route nominale, `NEGOTIATION_FAQ_UNVERIFIED`, suppression refusée d'un publié, `slug` jamais accepté en entrée, `verify` refusé à `admin` ; ajouter les nouvelles routes à `tests/perimetre_url_forgee.rs`
-- [ ] T043 [US9] `frontend/app/types/admin-negotiation-savoir.ts` et `frontend/app/composables/api/admin-negotiation-savoir.ts` (routes de T041 seulement ; celles de la file s'ajoutent en T050, T056, T069), montée dans `useApi.ts` (une ligne)
-- [ ] T044 [P] [US9] Composants `frontend/app/components/admin/negotiation/{FaqForm,GlossaryForm,SourcesField}.vue` sur `ui/` ; `SourcesField` choisit un document de la bibliothèque (section, pages) ou une référence extérieure, avec citation
-- [ ] T045 [US9] Pages `frontend/app/pages/admin/negociations/faq/{index,[id]}.vue` et `lexique/{index,[id]}.vue` : filtres, états, actions selon les permissions lues comme `documents/index.vue`
-- [ ] T046 [US9] `components/admin/negotiation/PathwayEditor.vue` et `pages/admin/negociations/parcours/index.vue` : groupes, étapes, complément, ordre, publication
-- [ ] T047 [US9] Entrées « FAQ », « Lexique », « Parcours » et « File des experts » dans `frontend/app/layouts/admin.vue`, gardées par les deux permissions ; i18n `admin.negociations.faq.json`, `.lexique.json`, `.parcours.json`, `.file.json`
-- [ ] T048 [US9] Vérifier quickstart § 6 étapes 1 à 3 ; `make openapi`, `cargo test -p negotiation`, `npm run typecheck`
+- [x] T040 [US9] Écrire `repo/savoir_faq.rs`, `repo/savoir_lexique.rs`, `repo/savoir_parcours.rs` et `service/savoir_admin.rs` : liste (`q` par trigramme), fiche, création, modification (sources et liés en bloc), `verify`, `publish`, `to-review`, `unpublish`, suppression d'un brouillon, parcours et ordre ([api-admin-savoir.md](contracts/api-admin-savoir.md))
+- [x] T041 [US9] Écrire `routes/admin_savoir.rs` avec l'extracteur `LectureSavoir` (publish **ou** review, patron de `LectureDocuments`) ; monter, `openapi.rs`
+- [x] T042 [US9] Tests `tests/savoir_admin.rs` : chaque route nominale, `NEGOTIATION_FAQ_UNVERIFIED`, suppression refusée d'un publié, `slug` jamais accepté en entrée, `verify` refusé à `admin` ; ajouter les nouvelles routes à `tests/perimetre_url_forgee.rs`
+- [x] T043 [US9] `frontend/app/types/admin-negotiation-savoir.ts` et `frontend/app/composables/api/admin-negotiation-savoir.ts` (routes de T041 seulement ; celles de la file s'ajoutent en T050, T056, T069), montée dans `useApi.ts` (une ligne)
+- [x] T044 [P] [US9] Composants `frontend/app/components/admin/negotiation/{FaqForm,GlossaryForm,SourcesField}.vue` sur `ui/` ; `SourcesField` choisit un document de la bibliothèque (section, pages) ou une référence extérieure, avec citation
+- [x] T045 [US9] Pages `frontend/app/pages/admin/negociations/faq/{index,[id]}.vue` et `lexique/{index,[id]}.vue` : filtres, états, actions selon les permissions lues comme `documents/index.vue`
+- [x] T046 [US9] `components/admin/negotiation/PathwayEditor.vue` et `pages/admin/negociations/parcours/index.vue` : groupes, étapes, complément, ordre, publication
+- [x] T047 [US9] Entrées « FAQ », « Lexique », « Parcours » (« File des experts » vient avec sa page, T053) dans `frontend/app/layouts/admin.vue`, gardées par les deux permissions ; i18n `admin.negociations.faq.json`, `.lexique.json`, `.parcours.json` (`.file.json` en T053)
+- [x] T048 [US9] Vérifier quickstart § 6 étapes 1 à 3 ; `make openapi`, `cargo test -p negotiation`, `npm run typecheck`
 
 ---
 

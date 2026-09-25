@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (now() AT TIME ZONE 'Europe/Paris')::date AS \"d!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "d!",
+        "type_info": "Date",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "97fad39bc5d973f96b7670eb1828367bd58771b89c048005c08ac134b65df49c"
+}

@@ -62,6 +62,7 @@ pub fn admin_routes(cfg: &mut ServiceConfig) {
     routes::admin_requests::configurer(cfg);
     routes::admin_admission::configurer(cfg);
     routes::admin_documents::configurer(cfg);
+    routes::admin_savoir::configurer(cfg);
 }
 
 /// Les travaux différés du module : les deux courriels de décision, la purge
