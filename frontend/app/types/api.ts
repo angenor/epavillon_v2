@@ -2579,7 +2579,7 @@ export interface paths {
         };
         /**
          * Le détail d'une séance publiée.
-         * @description `{ session, speakers, organizations }` — la séance **publiée** désignée par son adresse d'URL dans son édition, avec ses intervenants et ses organisations. **Une adresse inconnue et une séance non publiée rendent le même 404** : distinguer les deux dirait au public qu'une séance existe sans être encore annoncée.
+         * @description `PublicSessionDetail` — `{ session, speakers, organizations }` : la séance **publiée** désignée par son adresse d'URL dans son édition (une ligne de `PublicScheduleRow`), ses intervenants (`PublicSessionSpeaker[]` : nom d'affichage, fonction, organisation, biographie — **ni identifiant de personne, ni confirmation, ni présence**) et ses organisations (`SessionOrganization[]`, avec `name`, `acronym`, `country_code`, `country`). **Une adresse inconnue et une séance non publiée rendent le même 404** : distinguer les deux dirait au public qu'une séance existe sans être encore annoncée.
          */
         get: operations["programmation_seance_publique"];
         put?: never;
@@ -4796,6 +4796,8 @@ export interface paths {
         /**
          * « Mes inscriptions », annulations comprises.
          * @description `Registration[]` — ce à quoi la personne **connectée** est inscrite, annulations comprises. L'identifiant de personne que le front envoie encore est **ignoré** : l'API lit sa propre session.
+         *
+         *     `ETag` sur le corps, **304** sur `If-None-Match` ; `Cache-Control: private, no-cache`.
          */
         get: operations["inscriptions_les_miennes"];
         put?: never;
@@ -4856,6 +4858,10 @@ export interface paths {
         /**
          * La programmation d'une édition.
          * @description `PublicScheduleRow[]` — `programme.v_public_schedule`, **telle quelle**, et **sans session**. Une ligne = un bloc du calendrier : salle, organisation avec son sigle et son pays, journées spéciales, thématiques avec libellé et couleur, image de couverture — celle de la séance, **à défaut celle du dossier d'origine** —, état temporel calculé en base, nombre d'inscrits. Une édition dont le programme n'est pas paru rend une liste **vide**, jamais une erreur. **`event_id` est facultative** : absente, ce sont les séances `upcoming` et `ongoing` de TOUTES les éditions, dans l'ordre du temps — ce que compose l'accueil, qui n'a pas d'édition à nommer. La lecture est alors plafonnée.
+         *
+         *     Chaque ligne porte aussi les conditions d'inscription (`waitlist_enabled`, `registration_required`, `registration_opens_at`, `registration_closes_at`, `waitlisted_count`), `listing_changed_at`, `language_codes` — **la seule donnée tirée du dossier**, nulle sans dossier — et **une rediffusion au plus** (`replay_url`, `replay_duration_seconds`), seulement disponible.
+         *
+         *     `ETag` sur le corps ; **304** sur `If-None-Match`.
          */
         get: operations["programmation_publique"];
         put?: never;
@@ -17537,6 +17543,13 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
+            /** @description Rien n'a changé depuis l'empreinte présentée */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Aucune session, ou session close */
             401: {
                 headers: {
@@ -17665,6 +17678,13 @@ export interface operations {
                 content: {
                     "application/json": Record<string, never>;
                 };
+            };
+            /** @description Rien n'a changé depuis l'empreinte présentée */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

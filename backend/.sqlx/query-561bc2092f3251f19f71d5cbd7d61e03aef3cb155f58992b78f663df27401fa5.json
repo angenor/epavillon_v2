@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object(\n                      'session_id', so.session_id,\n                      'organization_id', so.organization_id,\n                      'role', so.role,\n                      'sort_order', so.sort_order,\n                      'added_at', so.added_at,\n                      'name', o.legal_name,\n                      'acronym', o.acronym,\n                      'country_code', c.iso2,\n                      'country', c.name) AS \"ligne!\"\n             FROM programme.session_organizations so\n             JOIN org.organizations o ON o.id = so.organization_id\n             LEFT JOIN reference.countries c ON c.id = o.country_id\n            WHERE so.session_id = $1\n            ORDER BY so.role = 'lead' DESC, so.sort_order",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ligne!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "561bc2092f3251f19f71d5cbd7d61e03aef3cb155f58992b78f663df27401fa5"
+}

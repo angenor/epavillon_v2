@@ -4,7 +4,7 @@
 //! publiée est publique. C'est le pendant, côté séances, des éditions publiques
 //! de B3.
 
-use actix_web::{web, HttpResponse};
+use actix_web::{web, HttpRequest, HttpResponse};
 use kernel::error::Result;
 use serde::Deserialize;
 use uuid::Uuid;
@@ -39,7 +39,7 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
 /// La programmation d'une édition.
 #[utoipa::path(
     get,
-    description = "`PublicScheduleRow[]` — `programme.v_public_schedule`, **telle quelle**, et **sans session**. Une ligne = un bloc du calendrier : salle, organisation avec son sigle et son pays, journées spéciales, thématiques avec libellé et couleur, image de couverture — celle de la séance, **à défaut celle du dossier d'origine** —, état temporel calculé en base, nombre d'inscrits. Une édition dont le programme n'est pas paru rend une liste **vide**, jamais une erreur. **`event_id` est facultative** : absente, ce sont les séances `upcoming` et `ongoing` de TOUTES les éditions, dans l'ordre du temps — ce que compose l'accueil, qui n'a pas d'édition à nommer. La lecture est alors plafonnée.",
+    description = "`PublicScheduleRow[]` — `programme.v_public_schedule`, **telle quelle**, et **sans session**. Une ligne = un bloc du calendrier : salle, organisation avec son sigle et son pays, journées spéciales, thématiques avec libellé et couleur, image de couverture — celle de la séance, **à défaut celle du dossier d'origine** —, état temporel calculé en base, nombre d'inscrits. Une édition dont le programme n'est pas paru rend une liste **vide**, jamais une erreur. **`event_id` est facultative** : absente, ce sont les séances `upcoming` et `ongoing` de TOUTES les éditions, dans l'ordre du temps — ce que compose l'accueil, qui n'a pas d'édition à nommer. La lecture est alors plafonnée.\n\nChaque ligne porte aussi les conditions d'inscription (`waitlist_enabled`, `registration_required`, `registration_opens_at`, `registration_closes_at`, `waitlisted_count`), `listing_changed_at`, `language_codes` — **la seule donnée tirée du dossier**, nulle sans dossier — et **une rediffusion au plus** (`replay_url`, `replay_duration_seconds`), seulement disponible.\n\n`ETag` sur le corps ; **304** sur `If-None-Match`.",
     path = "/schedule",
     tag = "Programmation publique",
     operation_id = "programmation_publique",
@@ -47,9 +47,13 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
         ("event_id" = Option<Uuid>, Query, description = "Édition dont on lit le programme. Absente : les séances à venir de toutes les éditions"),
         ("limit" = Option<i64>, Query, description = "Plafond du nombre de lignes (défaut 50, maximum 200)"),
     ),
-    responses((status = 200, description = "PublicScheduleRow[]", body = Object))
+    responses(
+        (status = 200, description = "PublicScheduleRow[]", body = Object),
+        (status = 304, description = "Rien n'a changé depuis l'empreinte présentée"),
+    )
 )]
 pub(crate) async fn programmation(
+    requete: HttpRequest,
     state: web::Data<ProgrammeState>,
     demande: web::Query<EditionDemandee>,
 ) -> Result<HttpResponse> {
@@ -62,13 +66,13 @@ pub(crate) async fn programmation(
     let lignes =
         public_schedule::programmation(state.pool(), demande.event_id.map(EventId), limite).await?;
 
-    Ok(HttpResponse::Ok().json(lignes))
+    crate::routes::json_revalide(&requete, &lignes, "public, no-cache")
 }
 
 /// Le détail d'une séance publiée.
 #[utoipa::path(
     get,
-    description = "`{ session, speakers, organizations }` — la séance **publiée** désignée par son adresse d'URL dans son édition, avec ses intervenants et ses organisations. **Une adresse inconnue et une séance non publiée rendent le même 404** : distinguer les deux dirait au public qu'une séance existe sans être encore annoncée.",
+    description = "`PublicSessionDetail` — `{ session, speakers, organizations }` : la séance **publiée** désignée par son adresse d'URL dans son édition (une ligne de `PublicScheduleRow`), ses intervenants (`PublicSessionSpeaker[]` : nom d'affichage, fonction, organisation, biographie — **ni identifiant de personne, ni confirmation, ni présence**) et ses organisations (`SessionOrganization[]`, avec `name`, `acronym`, `country_code`, `country`). **Une adresse inconnue et une séance non publiée rendent le même 404** : distinguer les deux dirait au public qu'une séance existe sans être encore annoncée.",
     path = "/events/{event_id}/sessions/{slug}",
     tag = "Programmation publique",
     operation_id = "programmation_seance_publique",

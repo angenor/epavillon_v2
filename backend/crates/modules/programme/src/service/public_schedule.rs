@@ -24,6 +24,8 @@ use crate::domain::sessions::PublicScheduleRow;
 use crate::repo::{public_schedule, session_parts};
 
 /// La page publique d'une séance : elle, ses intervenants, ses organisations.
+/// Les deux listes sont les lectures **publiques** de `session_parts`, jamais
+/// celles du back-office.
 #[derive(Debug, Clone, Serialize, ToSchema)]
 pub struct SeancePublique {
     pub session: PublicScheduleRow,
@@ -54,8 +56,8 @@ pub async fn seance(pool: &PgPool, event_id: EventId, slug: &str) -> Result<Sean
     let id = SessionId::from(session.id);
 
     Ok(SeancePublique {
-        speakers: session_parts::intervenants(pool, id).await?,
-        organizations: session_parts::organisations(pool, id).await?,
+        speakers: session_parts::intervenants_publics(pool, id).await?,
+        organizations: session_parts::organisations_publiques(pool, id).await?,
         session,
     })
 }

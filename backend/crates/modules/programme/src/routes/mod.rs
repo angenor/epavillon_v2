@@ -14,9 +14,40 @@ pub mod sessions;
 pub mod submission;
 pub mod workspace;
 
-use actix_web::{HttpMessage, HttpRequest};
+use actix_web::http::header::{ContentType, CACHE_CONTROL, ETAG, IF_NONE_MATCH};
+use actix_web::{HttpMessage, HttpRequest, HttpResponse};
 use kernel::context::RequestContext;
+use kernel::error::{ApiError, Result};
+use serde::Serialize;
 use uuid::Uuid;
+
+/// `200` portant l'empreinte du corps, ou `304` quand `If-None-Match` la
+/// désigne : Guide Négo relit ces listes à chaque retour de réseau.
+pub fn json_revalide<T: Serialize>(
+    requete: &HttpRequest,
+    corps: &T,
+    cache: &'static str,
+) -> Result<HttpResponse> {
+    let texte = serde_json::to_string(corps).map_err(ApiError::internal)?;
+    let empreinte = kernel::empreinte::de(&texte);
+    let inchange = requete
+        .headers()
+        .get(IF_NONE_MATCH)
+        .and_then(|v| v.to_str().ok())
+        .is_some_and(|presentee| kernel::empreinte::correspond(presentee, &empreinte));
+
+    if inchange {
+        return Ok(HttpResponse::NotModified()
+            .insert_header((ETAG, empreinte))
+            .insert_header((CACHE_CONTROL, cache))
+            .finish());
+    }
+    Ok(HttpResponse::Ok()
+        .insert_header((ETAG, empreinte))
+        .insert_header((CACHE_CONTROL, cache))
+        .content_type(ContentType::json())
+        .body(texte))
+}
 
 /// La langue négociée par l'intergiciel, qui résout les textes du modèle.
 /// Repli sur le français, comme `platform.t()`.
