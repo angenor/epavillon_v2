@@ -111,9 +111,27 @@ EXCEPTION
     WHEN duplicate_object THEN NULL;
 END;
 $$;
+-- Nommé report_status jusqu'au 26/09 : 3b prend ce nom pour les signalements de
+-- sessions. On ne renomme que le nôtre, reconnu à sa valeur 'open'.
 DO $$
 BEGIN
-    CREATE TYPE negotiation.report_status AS ENUM ('open', 'closed');
+    IF EXISTS (
+        SELECT 1 FROM pg_type t
+        JOIN pg_namespace n ON n.oid = t.typnamespace
+        JOIN pg_enum e ON e.enumtypid = t.oid
+        WHERE n.nspname = 'negotiation' AND t.typname = 'report_status' AND e.enumlabel = 'open'
+    ) AND NOT EXISTS (
+        SELECT 1 FROM pg_type t
+        JOIN pg_namespace n ON n.oid = t.typnamespace
+        WHERE n.nspname = 'negotiation' AND t.typname = 'faq_report_status'
+    ) THEN
+        ALTER TYPE negotiation.report_status RENAME TO faq_report_status;
+    END IF;
+END;
+$$;
+DO $$
+BEGIN
+    CREATE TYPE negotiation.faq_report_status AS ENUM ('open', 'closed');
 EXCEPTION
     WHEN duplicate_object THEN NULL;
 END;
@@ -125,7 +143,7 @@ COMMENT ON TYPE negotiation.question_status IS
     'pending → answered → added_to_faq (promotion, seulement avec le consentement de l''auteure).';
 COMMENT ON TYPE negotiation.proposal_status IS
     'pending → accepted (une entrée du lexique en naît, en brouillon) | rejected (motif requis).';
-COMMENT ON TYPE negotiation.report_status IS
+COMMENT ON TYPE negotiation.faq_report_status IS
     'open → closed, avec l''issue (revised, confirmed, dismissed), l''expert et la date.';
 
 -- Posée au premier passage visible, jamais effacée : c'est elle qui interdit la
@@ -468,7 +486,7 @@ CREATE TABLE IF NOT EXISTS negotiation.faq_reports (
     reasons         text[]      NOT NULL DEFAULT '{}',
     from_feedback   boolean     NOT NULL DEFAULT false,
     details         text,
-    status          negotiation.report_status NOT NULL DEFAULT 'open',
+    status          negotiation.faq_report_status NOT NULL DEFAULT 'open',
     outcome         text,
     handled_by      uuid        CONSTRAINT xmod_fk_faq_reports_handler
                                 REFERENCES identity.people(id) ON DELETE RESTRICT,

@@ -1826,7 +1826,7 @@ ON CONFLICT (slug) DO NOTHING;
 CREATE TYPE negotiation.knowledge_status AS ENUM ('draft', 'published', 'to_review');
 CREATE TYPE negotiation.question_status  AS ENUM ('pending', 'answered', 'added_to_faq');
 CREATE TYPE negotiation.proposal_status  AS ENUM ('pending', 'accepted', 'rejected');
-CREATE TYPE negotiation.report_status    AS ENUM ('open', 'closed');
+CREATE TYPE negotiation.faq_report_status AS ENUM ('open', 'closed');
 
 COMMENT ON TYPE negotiation.knowledge_status IS
     'draft → published (la FAQ exige une vérification datée) ; published ⇄ to_review ; published | to_review → draft (dépublier). to_review reste servi au téléphone, avec sa mention (tranché le 25/09).';
@@ -1834,7 +1834,7 @@ COMMENT ON TYPE negotiation.question_status IS
     'pending → answered → added_to_faq (promotion, seulement avec le consentement de l''auteure).';
 COMMENT ON TYPE negotiation.proposal_status IS
     'pending → accepted (une entrée du lexique en naît, en brouillon) | rejected (motif requis).';
-COMMENT ON TYPE negotiation.report_status IS
+COMMENT ON TYPE negotiation.faq_report_status IS
     'open → closed, avec l''issue (revised, confirmed, dismissed), l''expert et la date.';
 
 -- Posée au premier passage visible, jamais effacée : c'est elle qui interdit la
@@ -2158,7 +2158,7 @@ CREATE TABLE negotiation.faq_reports (
     reasons         text[]      NOT NULL DEFAULT '{}',
     from_feedback   boolean     NOT NULL DEFAULT false,
     details         text,
-    status          negotiation.report_status NOT NULL DEFAULT 'open',
+    status          negotiation.faq_report_status NOT NULL DEFAULT 'open',
     outcome         text,
     handled_by      uuid        CONSTRAINT xmod_fk_faq_reports_handler
                                 REFERENCES identity.people(id) ON DELETE RESTRICT,

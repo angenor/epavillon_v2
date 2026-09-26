@@ -176,3 +176,5 @@ compte, et sans session `platform.is_feature_enabled()` n'ouvre qu'à 100 %.
 **Conséquence d'exploitation** : aucune. La ligne s'insère à la main sur une base montée
 (`ON CONFLICT (key) DO NOTHING`) ; pas de `down -v`. Le suivi de l'étape vit dans
 `docs/AppNego/progress.md` (ADR-017).
+
+- **26/09/2026 — Guide Négo, étape 2** : `negotiation.report_status` (signalements de la FAQ) devient `negotiation.faq_report_status`, pour laisser le nom à 3b (signalements de sessions). La migration `specs/013-guide-nego-faq-lexique/migration.sql` renomme seulement le type qui porte la valeur `open` ; jouée deux fois sur `epavillon`.
