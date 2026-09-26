@@ -111,7 +111,7 @@ Aïssatou tape « contact » dans « Rechercher » : « 5 résultats, dans tout 
 
 1. **Given** l'écran « Rechercher », **When** on tape au moins deux caractères, **Then** les résultats paraissent groupés — « Lexique », « FAQ », « Documents » — chaque groupe avec son compte, le mot cherché marqué dans chaque résultat.
 2. **Given** les résultats, **When** on lit l'en-tête, **Then** il donne le nombre total et dit si la recherche a porté sur ce qui est sur le téléphone seulement ou aussi sur le serveur.
-3. **Given** n'importe quelle recherche, **When** on lit l'écran, **Then** une ligne dit ce que la recherche ne couvre pas encore : les sessions de négociation, les réunions de la Francophonie et le Pavillon.
+3. **Given** n'importe quelle recherche, **When** on lit l'écran, **Then** une ligne dit ce que la recherche ne couvre pas encore : les réunions de la Francophonie et le Pavillon ; les sessions de négociation y sont depuis la fusion de 3a.
 4. **Given** aucune connexion, **When** on cherche, **Then** le lexique et la FAQ sont couverts en entier, les documents par leur titre, leur résumé et le texte des copies gardées ; l'écran dit que le texte des documents non téléchargés n'a pas été cherché.
 5. **Given** un résultat, **When** on le touche, **Then** il ouvre l'entrée du lexique, l'entrée de FAQ, ou le document au passage trouvé.
 6. **Given** une recherche sans résultat, **When** on lit l'écran, **Then** il le dit, et propose de soumettre le terme au lexique.
@@ -338,7 +338,7 @@ Le SQL se modifie d'abord, par une migration rejouable qui ne détruit pas la ba
 - **SC-007** : Un signalement, un retour, une question ou un terme proposé hors connexion arrive exactement une fois dans le back-office après le retour du réseau.
 - **SC-008** : Aucune personne sans accès négociateur ne peut poser une question, et aucune personne sans le rôle requis ne peut lire la file des experts ni publier — les tests d'intégration le prouvent, adresse forgée comprise.
 - **SC-009** : Aucun écran de la file des experts ne montre le nom ou le compte de l'auteur d'un retour, d'un signalement, ou d'une question promue.
-- **SC-010** : La recherche globale rend les trois groupes pour « contact » avec et sans réseau, et dit dans les deux cas ce qu'elle ne couvre pas.
+- **SC-010** : La recherche globale rend les groupes Lexique, FAQ et Documents pour « contact », et les sessions de négociation quand l'agenda en porte, avec et sans réseau, et dit dans les deux cas ce qu'elle ne couvre pas.
 - **SC-011** : Depuis n'importe quel écran de Guide Négo, le lexique s'ouvre en un toucher.
 - **SC-012** : Les écrans sont fidèles à la maquette à 360 px, en thème clair et sombre, aux écarts inscrits près.
 
