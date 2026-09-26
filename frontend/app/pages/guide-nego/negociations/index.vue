@@ -10,6 +10,13 @@ import {
   sessionsDuJour,
   type Suivis,
 } from '~/utils/guide-nego/sessions'
+import {
+  joursAvecReunions,
+  lignesDuJour,
+  repereSignale,
+  reunionPasseLeFiltre,
+  reunionsParJour,
+} from '~/utils/guide-nego/signalements'
 
 /**
  * Écran 07 — les sessions de négociation officielles, un jour à la fois. Rien d'autre :
@@ -17,13 +24,14 @@ import {
  *
  * **Coupée, la source se montre coupée** (FR-039, principe XII) : « Lecture impossible »
  * ou « Affichage suspendu », et aucune session à côté — jamais « aucune session ».
+ * Les réunions non annoncées, elles, restent : elles ne viennent pas de la source (FR-022).
  */
 definePageMeta({ layout: 'guide-nego' })
 defineI18nRoute(false)
 
 type Filtre = 'miennes' | 'toutes'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { dayLong, zoneOf, timeWithZone } = useDateTime()
 const { momentLisible } = useGnMomentLecture()
 const connexion = useGnConnexion()
@@ -79,7 +87,12 @@ const jourChoisi = useState<string | null>('gn-sessions-jour', () => null)
 const filtreChoisi = useState<Filtre | null>('gn-sessions-filtre', () => null)
 
 const aujourdhui = computed(() => dayKeyInZone(maintenant.value, fuseau.value))
-const jours = computed(() => (servie.value ? joursDeLaBande(servie.value.sessions, fuseau.value) : []))
+const reunions = lecture.reunionsDuReseau
+const jours = computed(() =>
+  servie.value
+    ? joursAvecReunions(joursDeLaBande(servie.value.sessions, fuseau.value), reunions.value, maintenant.value, fuseau.value)
+    : [],
+)
 const jour = computed<string>({
   get: () => {
     const choisi = jourChoisi.value
@@ -114,20 +127,48 @@ const compteur = computed(() => {
   return t('guide-nego.negociations.compteur', { count: n }, n)
 })
 
+const reunionsFiltrees = computed(() =>
+  filtre.value === 'toutes' ? reunions.value : reunions.value.filter((r) => reunionPasseLeFiltre(r, suivis.value.thematiques)),
+)
+const nomDeThematique = (code: string | null) => (code ? (thematiques.nomDe(code) ?? null) : null)
+
 const lignes = computed(() =>
-  affichees.value.map((s) => ({
-    session: s,
-    etat: etatAffiche(s, maintenant.value, fuseau.value),
-    thematique: s.theme ? (thematiques.nomDe(s.theme) ?? null) : null,
-    monGroupe: estDeMonGroupe(s, suivis.value.groupes),
-  })),
+  lignesDuJour(affichees.value, reunionsFiltrees.value, jour.value, maintenant.value, fuseau.value).map((l) =>
+    l.genre === 'session'
+      ? {
+          cle: l.session.id,
+          session: l.session,
+          reunion: null,
+          etat: etatAffiche(l.session, maintenant.value, fuseau.value),
+          thematique: nomDeThematique(l.session.theme),
+          monGroupe: estDeMonGroupe(l.session, suivis.value.groupes),
+          signale: repereSignale(l.session, maintenant.value, fuseau.value, locale.value)?.heure ?? null,
+          vers: `/guide-nego/negociations/${l.session.id}`,
+        }
+      : {
+          cle: l.reunion.id,
+          session: null,
+          reunion: l.reunion,
+          etat: undefined,
+          thematique: nomDeThematique(l.reunion.theme),
+          monGroupe: false,
+          signale: null,
+          vers: `/guide-nego/negociations/reseau/${l.reunion.id}`,
+        },
+  ),
 )
 
-const legendeDuJour = computed(() => {
-  if (!jour.value) return ''
+/** Source coupée : les réunions du réseau à venir, par jour, sous la phrase de la maquette (07 · 1c). */
+const reunionsDeLaCoupure = computed(() =>
+  reunionsParJour(reunions.value, maintenant.value, fuseau.value).map((j) => ({ ...j, legende: legende(j.jour) })),
+)
+
+function legende(unJour: string): string {
   const zone = ville.value ?? fuseau.value.split('/').pop()?.replace(/_/g, ' ') ?? ''
-  return t('guide-nego.negociations.jour', { jour: dayLong(`${jour.value}T12:00:00Z`, 'UTC'), zone: zoneOf(zone) })
-})
+  return t('guide-nego.negociations.jour', { jour: dayLong(`${unJour}T12:00:00Z`, 'UTC'), zone: zoneOf(zone) })
+}
+
+const legendeDuJour = computed(() => (jour.value ? legende(jour.value) : ''))
 
 const lueA = computed(() => {
   const moment = momentLisible(servie.value?.luA ?? null)
@@ -192,14 +233,32 @@ useHead({ title: t('guide-nego.negociations.titre') })
       :texte="t('guide-nego.negociations.sans-edition.texte')"
     />
 
-    <GnLectureImpossible
-      v-else-if="coupee"
-      :raison="coupee.raison"
-      :depuis="coupee.depuis"
-      :programme="coupee.programme"
-      :en-cours="relecture"
-      @reessayer="relire()"
-    />
+    <template v-else-if="coupee">
+      <GnLectureImpossible
+        :raison="coupee.raison"
+        :depuis="coupee.depuis"
+        :programme="coupee.programme"
+        :en-cours="relecture"
+        @reessayer="relire()"
+      >
+        <template v-if="reunionsDeLaCoupure.length" #default>
+          <GnPicto nom="info" :taille="18" />
+          {{ t('guide-nego.negociations.reseau-garde') }}
+        </template>
+      </GnLectureImpossible>
+      <template v-for="j in reunionsDeLaCoupure" :key="j.jour">
+        <p class="gn-sessions__jour">{{ j.legende }}</p>
+        <GnLigneSession
+          v-for="r in j.reunions"
+          :key="r.id"
+          :reunion="r"
+          :fuseau="fuseau"
+          :ville="ville"
+          :thematique="nomDeThematique(r.theme)"
+          :vers="`/guide-nego/negociations/reseau/${r.id}`"
+        />
+      </template>
+    </template>
 
     <GnEtatErreur
       v-else-if="!servie"
@@ -249,14 +308,16 @@ useHead({ title: t('guide-nego.negociations.titre') })
       <div v-if="lignes.length" class="gn-sessions__liste">
         <GnLigneSession
           v-for="l in lignes"
-          :key="l.session.id"
+          :key="l.cle"
           :session="l.session"
+          :reunion="l.reunion"
           :etat="l.etat"
           :fuseau="fuseau"
           :ville="ville"
           :thematique="l.thematique"
           :mon-groupe="l.monGroupe"
-          :vers="`/guide-nego/negociations/${l.session.id}`"
+          :signale="l.signale"
+          :vers="l.vers"
         />
       </div>
 

@@ -3,6 +3,7 @@ import type { ReportPayload } from '~/types/negotiation-reports'
 import type { OfficialSession } from '~/types/negotiation-sessions'
 import { dayKeyInZone } from '~/utils/datetime'
 import { estDeMonGroupe, etatAffiche } from '~/utils/guide-nego/sessions'
+import { encartsAffiches } from '~/utils/guide-nego/signalements'
 import { adresseDeLaSortie, sortieDuVerrou } from '~/utils/guide-nego/verrou'
 
 /**
@@ -73,6 +74,8 @@ const ville = computed(() => servie.value?.ville ?? undefined)
 
 const etatSession = computed(() => (session.value ? etatAffiche(session.value, maintenant.value, fuseau.value) : null))
 const annulee = computed(() => etatSession.value === 'annulee')
+/** Par-dessus la donnée officielle, jamais à sa place (ADR-010). */
+const encarts = computed(() => (session.value ? encartsAffiches(session.value, maintenant.value, fuseau.value) : []))
 
 /** En anglais, la traduction française n'a rien à faire à l'écran. */
 const traduit = computed(() => (locale.value === 'fr' ? (session.value?.title_fr ?? null) : null))
@@ -282,6 +285,13 @@ useHead({ title: titre })
         <div class="gn-session__etat">
           <GnEtatSession v-if="etatSession" :session="session" :etat="etatSession" :fuseau="fuseau" />
         </div>
+        <GnEncartSignalement
+          v-for="(e, i) in encarts"
+          :key="`${e.validated_at}-${i}`"
+          :signalement="e"
+          :fuseau="fuseau"
+          :ville="ville"
+        />
       </div>
 
       <div class="gn-session__corps">

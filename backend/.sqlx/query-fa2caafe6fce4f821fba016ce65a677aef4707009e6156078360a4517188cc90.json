@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT r.id, r.client_ref, r.reason, r.what, r.proposed_start, r.proposed_venue,\n                  r.proposed_day, r.detail, r.status::text AS \"status!\",\n                  r.submitted_at, r.decided_at, r.reject_reason, r.reject_detail, r.published_at,\n                  r.withdrawn_at,\n                  m.id AS \"session_id?\", m.title_original AS \"title_en?\",\n                  tr.text_fr AS \"title_fr?\", m.start_at AS \"start_at?\", m.end_at AS session_end,\n                  m.venue_label, m.status::text AS \"session_status?\",\n                  CASE WHEN m.absent_reads = 0 THEN coalesce(i.last_success_at, m.last_read_at)\n                       ELSE m.last_read_at END AS source_read_at,\n                  a.display_name AS \"author_name!\",\n                  platform.t(pays.name, $3) AS country,\n                  d.display_name AS \"decided_by?\",\n                  coalesce((r.decided_at AT TIME ZONE e.timezone::text)::date\n                           = (now() AT TIME ZONE e.timezone::text)::date, false) AS \"du_jour!\"\n             FROM negotiation.session_reports r\n             JOIN event.events e ON e.id = r.event_id\n             JOIN identity.people a ON a.id = r.author_id\n             LEFT JOIN reference.countries pays ON pays.id = a.country_id\n             LEFT JOIN identity.people d ON d.id = r.decided_by\n             LEFT JOIN negotiation.meetings m ON m.id = r.meeting_id\n             LEFT JOIN negotiation.official_imports i ON i.event_id = r.event_id\n             LEFT JOIN negotiation.title_translations tr ON tr.source_text = m.title_original\n            WHERE ($1::uuid IS NULL OR r.event_id = $1)\n              AND ($2::uuid IS NULL OR r.id = $2)\n              AND ($2::uuid IS NOT NULL OR r.status = 'submitted'\n                   OR (r.decided_at AT TIME ZONE e.timezone::text)::date\n                      = (now() AT TIME ZONE e.timezone::text)::date)\n            ORDER BY r.submitted_at, r.id",
+  "query": "SELECT r.id, r.client_ref, r.reason, r.what, r.proposed_start, r.proposed_venue,\n                  r.proposed_day, r.detail, r.status::text AS \"status!\",\n                  r.submitted_at, r.decided_at, r.reject_reason, r.reject_detail, r.published_at,\n                  r.withdrawn_at,\n                  m.id AS \"session_id?\", m.title_original AS \"title_en?\",\n                  tr.text_fr AS \"title_fr?\", m.start_at AS \"start_at?\", m.end_at AS session_end,\n                  m.venue_label, m.status::text AS \"session_status?\",\n                  th.code AS \"theme?\", nm.id AS \"network_meeting_id?\",\n                  CASE WHEN m.absent_reads = 0 THEN coalesce(i.last_success_at, m.last_read_at)\n                       ELSE m.last_read_at END AS source_read_at,\n                  a.display_name AS \"author_name!\",\n                  platform.t(pays.name, $3) AS country,\n                  d.display_name AS \"decided_by?\",\n                  coalesce((r.decided_at AT TIME ZONE e.timezone::text)::date\n                           = (now() AT TIME ZONE e.timezone::text)::date, false) AS \"du_jour!\"\n             FROM negotiation.session_reports r\n             JOIN event.events e ON e.id = r.event_id\n             JOIN identity.people a ON a.id = r.author_id\n             LEFT JOIN reference.countries pays ON pays.id = a.country_id\n             LEFT JOIN identity.people d ON d.id = r.decided_by\n             LEFT JOIN negotiation.meetings m ON m.id = r.meeting_id\n             LEFT JOIN negotiation.official_imports i ON i.event_id = r.event_id\n             LEFT JOIN negotiation.title_translations tr ON tr.source_text = m.title_original\n             LEFT JOIN reference.taxonomy_terms th ON th.id = r.theme_term_id\n             LEFT JOIN negotiation.network_meetings nm\n                    ON nm.id = r.network_meeting_id AND nm.withdrawn_at IS NULL\n            WHERE ($1::uuid IS NULL OR r.event_id = $1)\n              AND ($2::uuid IS NULL OR r.id = $2)\n              AND ($2::uuid IS NOT NULL OR r.status = 'submitted'\n                   OR (r.decided_at AT TIME ZONE e.timezone::text)::date\n                      = (now() AT TIME ZONE e.timezone::text)::date)\n            ORDER BY r.submitted_at, r.id",
   "describe": {
     "columns": [
       {
@@ -237,12 +237,34 @@
       },
       {
         "ordinal": 22,
+        "name": "theme?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 23,
+        "name": "network_meeting_id?",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.network_meetings",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 24,
         "name": "source_read_at",
         "type_info": "Timestamptz",
         "origin": "Expression"
       },
       {
-        "ordinal": 23,
+        "ordinal": 25,
         "name": "author_name!",
         "type_info": "Text",
         "origin": {
@@ -253,13 +275,13 @@
         }
       },
       {
-        "ordinal": 24,
+        "ordinal": 26,
         "name": "country",
         "type_info": "Text",
         "origin": "Expression"
       },
       {
-        "ordinal": 25,
+        "ordinal": 27,
         "name": "decided_by?",
         "type_info": "Text",
         "origin": {
@@ -270,7 +292,7 @@
         }
       },
       {
-        "ordinal": 26,
+        "ordinal": 28,
         "name": "du_jour!",
         "type_info": "Bool",
         "origin": "Expression"
@@ -306,6 +328,8 @@
       true,
       true,
       null,
+      false,
+      false,
       null,
       true,
       null,
@@ -313,5 +337,5 @@
       null
     ]
   },
-  "hash": "bc3a9f710a4376bcae1f0a846ec9a947c4e4a72110ce59d611a0db6d41ad7de8"
+  "hash": "fa2caafe6fce4f821fba016ce65a677aef4707009e6156078360a4517188cc90"
 }

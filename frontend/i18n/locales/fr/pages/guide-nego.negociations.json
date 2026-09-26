@@ -41,5 +41,6 @@
     "texte-hors-connexion": "Hors connexion, et la liste n'a encore jamais été lue sur cet appareil. Elle se lira dès le retour du réseau.",
     "reessayer": "Réessayer"
   },
-  "non-annoncee": "Signaler une réunion non annoncée"
+  "non-annoncee": "Signaler une réunion non annoncée",
+  "reseau-garde": "Le signalement du réseau ci-dessous ne vient pas du programme officiel : il reste affiché."
 }

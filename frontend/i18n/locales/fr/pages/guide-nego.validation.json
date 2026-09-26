@@ -1,0 +1,94 @@
+{
+  "role": "Administration",
+  "liste": {
+    "titre": "Validation",
+    "sous-titre": "Rien à traiter | {count} à traiter | {count} à traiter",
+    "signalements": "Signalements",
+    "signalements-detail": "Changements et réunions non annoncées signalés par le réseau"
+  },
+  "titre": "Signalements",
+  "sous-titre": "{attente} · {traites}",
+  "a-traiter": "Rien à traiter | {count} à traiter | {count} à traiter",
+  "traites": "aucun traité aujourd'hui | {count} traité aujourd'hui | {count} traités aujourd'hui",
+  "chargement": "Lecture des signalements",
+  "entete": "{auteur} · {motif} · {heure}",
+  "auteur-pays": "{nom}, {pays}",
+  "motif": {
+    "cancelled": "La session est annulée",
+    "time": "L'heure a changé",
+    "venue": "La salle a changé",
+    "other": "Autre chose",
+    "unannounced": "Réunion non annoncée"
+  },
+  "propose-heure": "Nouvelle heure proposée : {heure}",
+  "propose-salle": "Nouvelle salle proposée : {salle}",
+  "session": "{titre} — {quand}",
+  "session-salle": "{titre} — {quand}, {salle}",
+  "reunion-quand": "{jour}, {heure}",
+  "source": {
+    "titre": "Source officielle, lue {moment}",
+    "titre-sans-heure": "Source officielle",
+    "prevue": "Prévue à {plage}",
+    "prevue-salle": "Prévue à {plage}, {salle}",
+    "annulee": "Annulée",
+    "hors-source": "Hors programme officiel : réunion signalée par le réseau."
+  },
+  "ne-pas-retenir": "Ne pas retenir",
+  "valider": "Valider",
+  "retirer": "Retirer",
+  "a-traiter-titre": "À traiter",
+  "traites-titre": "Traités aujourd'hui",
+  "etat": {
+    "non-retenu": "Non retenu à {heure}",
+    "valide": "Validé à {heure}",
+    "en-publication": "Validé à {heure} — affiché dans une minute au plus",
+    "retire": "Retiré à {heure}"
+  },
+  "par": "Par {nom}",
+  "refus-motif": "Motif : {motif}",
+  "refus": {
+    "source_maintains": "La source officielle la maintient",
+    "already_known": "Déjà pris en compte",
+    "not_precise": "Pas assez précis"
+  },
+  "feuille": {
+    "sous-titre": "{nom} verra le motif.",
+    "motifs": "Motif",
+    "precision": "Précision",
+    "facultatif": "Facultatif.",
+    "revenir": "Revenir",
+    "confirmer": "Ne pas retenir"
+  },
+  "valide": "Validé. Affiché dans une minute au plus.",
+  "annuler": "Annuler",
+  "annulee": "Validation annulée : le signalement est de nouveau à traiter.",
+  "non-retenu": "Non retenu. L'autrice ou l'auteur verra le motif.",
+  "retire": "Retiré : il n'est plus affiché.",
+  "confirmer-retrait": {
+    "question": "Retirer ce signalement ?",
+    "phrase": "Il cessera aussitôt d'être affiché à toutes et tous. Ce retrait ne s'annule pas.",
+    "action": "Retirer"
+  },
+  "hors-connexion": "Hors connexion : valider, refuser et retirer demandent le réseau. Aucune décision ne part d'ici.",
+  "hors-connexion-geste": "Hors connexion : la décision n'est pas partie. Elle se prend en ligne.",
+  "panne": "Le serveur de Guide Négo n'a pas répondu : la décision n'est pas partie. Réessayez.",
+  "vide": {
+    "titre": "Aucun signalement à traiter",
+    "texte": "Les signalements du réseau paraîtront ici, les plus anciens d'abord."
+  },
+  "jamais-lue": {
+    "titre": "La file se lit en ligne",
+    "texte": "Les signalements à traiter ne sont pas gardés sur l'appareil : une décision doit se prendre sur ce que dit la source à l'instant."
+  },
+  "erreur": {
+    "titre": "Les signalements n'ont pas pu être lus",
+    "texte": "Le serveur de Guide Négo n'a pas répondu.",
+    "reessayer": "Réessayer"
+  },
+  "refuse": {
+    "titre": "Réservé à l'administration",
+    "texte": "Valider les signalements du réseau demande une permission que votre compte ne porte pas.",
+    "sortie": "Revenir aux ressources"
+  },
+  "hors-connexion-bandeau": "La file lue reste affichée ; aucune décision ne part sans réseau."
+}

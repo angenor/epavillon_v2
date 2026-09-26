@@ -55,7 +55,7 @@ pub(crate) async fn signaler(
 
 #[utoipa::path(
     get,
-    description = "`MyReports` — les signalements de la personne connectée sur l'édition, plus récent d'abord.\n\n`status` vaut `validated` **seulement une fois publié** ; entre la validation et la publication, il reste `submitted`. Aucun nom de décideur. `ETag` et **304**.",
+    description = "`MyReports` — les signalements de la personne connectée sur l'édition, plus récent d'abord.\n\n`status` vaut `validated` **seulement une fois publié** ; entre la validation et la publication, il reste `submitted`. Aucun nom de décideur. Une réunion non annoncée porte `theme` (code de thématique) et, publiée et non retirée, `network_meeting_id`. `ETag` et **304**.",
     path = "/negotiation/me/reports",
     tag = "Guide Négo — signalements",
     operation_id = "negotiation_mes_signalements",

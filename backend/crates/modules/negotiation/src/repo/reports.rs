@@ -98,10 +98,15 @@ pub async fn lister(
                   (r.published_at IS NOT NULL) AS "publie!",
                   r.submitted_at, r.decided_at, r.reject_reason, r.reject_detail,
                   m.id AS "session_id?", m.title_original AS "title_en?",
-                  tr.text_fr AS "title_fr?", m.start_at AS "start_at?", m.venue_label
+                  tr.text_fr AS "title_fr?", m.start_at AS "start_at?", m.venue_label,
+                  th.code AS "theme?", nm.id AS "network_meeting_id?"
              FROM negotiation.session_reports r
              LEFT JOIN negotiation.meetings m ON m.id = r.meeting_id
              LEFT JOIN negotiation.title_translations tr ON tr.source_text = m.title_original
+             LEFT JOIN reference.taxonomy_terms th ON th.id = r.theme_term_id
+             LEFT JOIN negotiation.network_meetings nm
+                    ON nm.id = r.network_meeting_id AND nm.withdrawn_at IS NULL
+                   AND r.published_at IS NOT NULL
             WHERE r.author_id = $1
               AND ($2::uuid IS NULL OR r.client_ref = $2)
               AND ($3::uuid IS NULL OR r.event_id = $3)
@@ -136,6 +141,8 @@ pub async fn lister(
                 proposed_start: l.proposed_start,
                 proposed_venue: l.proposed_venue,
                 day: l.proposed_day,
+                theme: l.theme,
+                network_meeting_id: l.network_meeting_id,
                 detail: l.detail,
                 status,
                 submitted_at: l.submitted_at,

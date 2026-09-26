@@ -192,6 +192,10 @@ pub struct MyReport {
     pub proposed_start: Option<OffsetDateTime>,
     pub proposed_venue: Option<String>,
     pub day: Option<Date>,
+    /// Code `negotiation_theme` d'une réunion non annoncée.
+    pub theme: Option<String>,
+    /// La réunion née du signalement, une fois publiée et tant qu'elle n'est pas retirée.
+    pub network_meeting_id: Option<Uuid>,
     pub detail: Option<String>,
     pub status: MyReportStatus,
     #[serde(with = "time::serde::rfc3339")]

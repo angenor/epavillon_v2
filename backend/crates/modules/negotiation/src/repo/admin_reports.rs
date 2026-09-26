@@ -42,6 +42,7 @@ pub async fn lister(
                   m.id AS "session_id?", m.title_original AS "title_en?",
                   tr.text_fr AS "title_fr?", m.start_at AS "start_at?", m.end_at AS session_end,
                   m.venue_label, m.status::text AS "session_status?",
+                  th.code AS "theme?", nm.id AS "network_meeting_id?",
                   CASE WHEN m.absent_reads = 0 THEN coalesce(i.last_success_at, m.last_read_at)
                        ELSE m.last_read_at END AS source_read_at,
                   a.display_name AS "author_name!",
@@ -57,6 +58,9 @@ pub async fn lister(
              LEFT JOIN negotiation.meetings m ON m.id = r.meeting_id
              LEFT JOIN negotiation.official_imports i ON i.event_id = r.event_id
              LEFT JOIN negotiation.title_translations tr ON tr.source_text = m.title_original
+             LEFT JOIN reference.taxonomy_terms th ON th.id = r.theme_term_id
+             LEFT JOIN negotiation.network_meetings nm
+                    ON nm.id = r.network_meeting_id AND nm.withdrawn_at IS NULL
             WHERE ($1::uuid IS NULL OR r.event_id = $1)
               AND ($2::uuid IS NULL OR r.id = $2)
               AND ($2::uuid IS NOT NULL OR r.status = 'submitted'
@@ -104,6 +108,8 @@ pub async fn lister(
                         proposed_start: l.proposed_start,
                         proposed_venue: l.proposed_venue,
                         day: l.proposed_day,
+                        theme: l.theme,
+                        network_meeting_id: l.network_meeting_id,
                         detail: l.detail,
                         status: statut(&l.status),
                         submitted_at: l.submitted_at,

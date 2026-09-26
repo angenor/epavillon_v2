@@ -41,5 +41,6 @@
     "texte-hors-connexion": "Offline, and the list has never been read on this device. It will be read as soon as the network is back.",
     "reessayer": "Try again"
   },
-  "non-annoncee": "Report an unannounced meeting"
+  "non-annoncee": "Report an unannounced meeting",
+  "reseau-garde": "The network report below does not come from the official programme: it stays on display."
 }

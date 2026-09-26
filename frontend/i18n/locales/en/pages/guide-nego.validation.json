@@ -1,0 +1,94 @@
+{
+  "role": "Administration",
+  "liste": {
+    "titre": "Validation",
+    "sous-titre": "Nothing to review | {count} to review | {count} to review",
+    "signalements": "Reports",
+    "signalements-detail": "Changes and unannounced meetings reported by the network"
+  },
+  "titre": "Reports",
+  "sous-titre": "{attente} · {traites}",
+  "a-traiter": "Nothing to review | {count} to review | {count} to review",
+  "traites": "none handled today | {count} handled today | {count} handled today",
+  "chargement": "Reading reports",
+  "entete": "{auteur} · {motif} · {heure}",
+  "auteur-pays": "{nom}, {pays}",
+  "motif": {
+    "cancelled": "The session is cancelled",
+    "time": "The time has changed",
+    "venue": "The room has changed",
+    "other": "Something else",
+    "unannounced": "Unannounced meeting"
+  },
+  "propose-heure": "Proposed new time: {heure}",
+  "propose-salle": "Proposed new room: {salle}",
+  "session": "{titre} — {quand}",
+  "session-salle": "{titre} — {quand}, {salle}",
+  "reunion-quand": "{jour}, {heure}",
+  "source": {
+    "titre": "Official source, read {moment}",
+    "titre-sans-heure": "Official source",
+    "prevue": "Scheduled at {plage}",
+    "prevue-salle": "Scheduled at {plage}, {salle}",
+    "annulee": "Cancelled",
+    "hors-source": "Not in the official programme: meeting reported by the network."
+  },
+  "ne-pas-retenir": "Do not accept",
+  "valider": "Confirm",
+  "retirer": "Withdraw",
+  "a-traiter-titre": "To review",
+  "traites-titre": "Handled today",
+  "etat": {
+    "non-retenu": "Not accepted at {heure}",
+    "valide": "Confirmed at {heure}",
+    "en-publication": "Confirmed at {heure} — displayed within a minute",
+    "retire": "Withdrawn at {heure}"
+  },
+  "par": "By {nom}",
+  "refus-motif": "Reason: {motif}",
+  "refus": {
+    "source_maintains": "The official source maintains it",
+    "already_known": "Already taken into account",
+    "not_precise": "Not precise enough"
+  },
+  "feuille": {
+    "sous-titre": "{nom} will see the reason.",
+    "motifs": "Reason",
+    "precision": "Details",
+    "facultatif": "Optional.",
+    "revenir": "Go back",
+    "confirmer": "Do not accept"
+  },
+  "valide": "Confirmed. Displayed within a minute.",
+  "annuler": "Undo",
+  "annulee": "Confirmation undone: the report is back in the queue.",
+  "non-retenu": "Not accepted. The author will see the reason.",
+  "retire": "Withdrawn: it is no longer displayed.",
+  "confirmer-retrait": {
+    "question": "Withdraw this report?",
+    "phrase": "It will stop being displayed to everyone at once. This cannot be undone.",
+    "action": "Withdraw"
+  },
+  "hors-connexion": "Offline: confirming, rejecting and withdrawing need the network. No decision leaves from here.",
+  "hors-connexion-geste": "Offline: the decision was not sent. Decisions are taken online.",
+  "panne": "The Guide Négo server did not respond: the decision was not sent. Try again.",
+  "vide": {
+    "titre": "No report to review",
+    "texte": "Network reports will appear here, oldest first."
+  },
+  "jamais-lue": {
+    "titre": "The queue is read online",
+    "texte": "Reports to review are not kept on the device: a decision must rest on what the source says right now."
+  },
+  "erreur": {
+    "titre": "Reports could not be read",
+    "texte": "The Guide Négo server did not respond.",
+    "reessayer": "Try again"
+  },
+  "refuse": {
+    "titre": "Reserved for administration",
+    "texte": "Confirming network reports requires a permission your account does not hold.",
+    "sortie": "Back to resources"
+  },
+  "hors-connexion-bandeau": "The queue already read stays on screen; no decision leaves without the network."
+}

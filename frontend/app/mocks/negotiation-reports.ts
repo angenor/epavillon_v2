@@ -27,7 +27,6 @@ const R = (n: number) => `01937a00-0000-7000-8000-0000000009${String(n).padStart
 interface Exemple extends ReportQueueItem {
   /** Déposé par la personne connectée : il paraît dans « Mes signalements ». */
   mien: boolean
-  theme: string | null
   reunion_id: string | null
 }
 
@@ -43,6 +42,8 @@ function exemple(n: number, champs: Partial<Exemple> & Pick<Exemple, 'reason' | 
     proposed_start: null,
     proposed_venue: null,
     day: null,
+    theme: null,
+    network_meeting_id: null,
     detail: null,
     status: 'submitted',
     decided_at: null,
@@ -54,7 +55,6 @@ function exemple(n: number, champs: Partial<Exemple> & Pick<Exemple, 'reason' | 
     published_at: null,
     withdrawn_at: null,
     mien: false,
-    theme: null,
     reunion_id: null,
     ...champs,
   }
@@ -157,6 +157,8 @@ function champsCommuns(s: Exemple): MyReport {
     proposed_start: s.proposed_start,
     proposed_venue: s.proposed_venue,
     day: s.day,
+    theme: s.theme,
+    network_meeting_id: affiche(s) ? s.reunion_id : null,
     detail: s.detail,
     status: s.status,
     submitted_at: s.submitted_at,

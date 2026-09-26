@@ -432,6 +432,76 @@ async fn mes_signalements_ne_disent_valide_quune_fois_publie() {
 }
 
 #[tokio::test]
+async fn la_reunion_non_annoncee_dit_sa_thematique_et_sa_fiche_une_fois_publiee() {
+    let d = monter().await;
+    let app = application!(d.etat.clone(), d.bac.base.db());
+    let admin = personne(&d.bac, "ifdd@example.org", Some("admin")).await;
+    let (statut, cree, _) = frapper!(
+        &app,
+        envoyer(
+            Some(d.awa),
+            json!({
+                "client_ref": Uuid::now_v7(), "edition": "cop31", "reason": "unannounced",
+                "what": "Aparté Afrique", "day": "2026-11-10", "theme": "finance"
+            }),
+        ),
+    );
+    assert_eq!(statut, StatusCode::CREATED, "{cree}");
+    assert_eq!(cree["theme"], "finance");
+    assert_eq!(cree["network_meeting_id"], Value::Null);
+
+    let id = Uuid::parse_str(cree["id"].as_str().expect("id")).expect("uuid");
+    let reunion: Uuid = sqlx::query_scalar(
+        "INSERT INTO negotiation.network_meetings (event_id, report_id, title, day, validated_at)
+         VALUES ($1, $2, 'Aparté Afrique', '2026-11-10', now()) RETURNING id",
+    )
+    .bind(d.bac.edition)
+    .bind(id)
+    .fetch_one(d.bac.pool())
+    .await
+    .expect("réunion");
+    sqlx::query(
+        "UPDATE negotiation.session_reports
+            SET status = 'validated', decided_by = $2, decided_at = now(), source_snapshot = '{}',
+                network_meeting_id = $3
+          WHERE id = $1",
+    )
+    .bind(id)
+    .bind(admin)
+    .bind(reunion)
+    .execute(d.bac.pool())
+    .await
+    .expect("validation");
+    let (_, liste, _) = frapper!(&app, lire(d.awa, "/negotiation/me/reports?edition=cop31"));
+    assert_eq!(
+        liste["reports"][0]["network_meeting_id"],
+        Value::Null,
+        "rien avant la publication"
+    );
+
+    sqlx::query("UPDATE negotiation.session_reports SET published_at = now() WHERE id = $1")
+        .bind(id)
+        .execute(d.bac.pool())
+        .await
+        .expect("publication");
+    let (_, liste, _) = frapper!(&app, lire(d.awa, "/negotiation/me/reports?edition=cop31"));
+    assert_eq!(liste["reports"][0]["network_meeting_id"], reunion.to_string());
+    assert_eq!(liste["reports"][0]["theme"], "finance");
+
+    sqlx::query("UPDATE negotiation.network_meetings SET withdrawn_at = now() WHERE id = $1")
+        .bind(reunion)
+        .execute(d.bac.pool())
+        .await
+        .expect("retrait");
+    let (_, liste, _) = frapper!(&app, lire(d.awa, "/negotiation/me/reports?edition=cop31"));
+    assert_eq!(
+        liste["reports"][0]["network_meeting_id"],
+        Value::Null,
+        "retirée, plus de fiche"
+    );
+}
+
+#[tokio::test]
 async fn lecriture_porte_son_autrice_et_sa_requete() {
     let d = monter().await;
     let app = application!(d.etat.clone(), d.bac.base.db());

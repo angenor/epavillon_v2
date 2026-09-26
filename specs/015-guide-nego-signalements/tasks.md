@@ -76,10 +76,10 @@
 
 ## Phase 7 — US2, US3 : valider et afficher (écrans)
 
-- [ ] T032 [US3] Créer `GnEncartSignalement` (violet, losange, « Signalé par le réseau — validé par l'IFDD à … », motif, valeur, précision ; jamais de nom) et la prop `signale` de `GnLigneSession` (losange + « Signalé » + libellé complet) ; rendu d'une réunion non annoncée dans `GnLigneSession` ; planche
-- [ ] T033 [US3] Poser l'encart sur la fiche, le repère et les réunions non annoncées dans la liste (y compris coupée, avec la phrase de la maquette) et dans « Mon agenda » (ajout d'une réunion non annoncée à l'agenda, T015a) ; fiche `fe/app/pages/guide-nego/negociations/reseau/[id].vue`
-- [ ] T034 [US2] Écran `fe/app/pages/guide-nego/validation/signalements.vue` (cartes, source du moment, « Valider » → « Validé. Affiché dans une minute au plus. » + `GnMessageEphemere` « Annuler » six secondes, feuille « Ne pas retenir » à trois motifs, « Retirer », traités du jour, vide, sans réseau) ; entrée « Signalements » dans Ressources si `can_validate_reports`
-- [ ] T035 Vérifier au navigateur : quickstart § 2 et § 3
+- [x] T032 [US3] Créer `GnEncartSignalement` (violet, losange, « Signalé par le réseau — validé par l'IFDD à … », motif, valeur, précision ; jamais de nom) et la prop `signale` de `GnLigneSession` (losange + « Signalé » + libellé complet) ; rendu d'une réunion non annoncée dans `GnLigneSession` ; planche
+- [x] T033 [US3] Poser l'encart sur la fiche, le repère et les réunions non annoncées dans la liste (y compris coupée, avec la phrase de la maquette) et dans « Mon agenda » (ajout d'une réunion non annoncée à l'agenda, T015a) ; fiche `fe/app/pages/guide-nego/negociations/reseau/[id].vue`
+- [x] T034 [US2] Écran `fe/app/pages/guide-nego/validation/signalements.vue` (cartes, source du moment, « Valider » → « Validé. Affiché dans une minute au plus. » + `GnMessageEphemere` « Annuler » six secondes, feuille « Ne pas retenir » à trois motifs, « Retirer », traités du jour, vide, sans réseau) ; entrée « Signalements » dans Ressources si `can_validate_reports`
+- [x] T035 Vérifier au navigateur : quickstart § 2 et § 3
 
 **Commit** : « feat(guide-nego): étape 3b, phase 7 — valider et afficher par-dessus ».
 

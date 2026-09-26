@@ -3311,7 +3311,7 @@ export interface paths {
         /**
          * @description `MyReports` — les signalements de la personne connectée sur l'édition, plus récent d'abord.
          *
-         *     `status` vaut `validated` **seulement une fois publié** ; entre la validation et la publication, il reste `submitted`. Aucun nom de décideur. `ETag` et **304**.
+         *     `status` vaut `validated` **seulement une fois publié** ; entre la validation et la publication, il reste `submitted`. Aucun nom de décideur. Une réunion non annoncée porte `theme` (code de thématique) et, publiée et non retirée, `network_meeting_id`. `ETag` et **304**.
          */
         get: operations["negotiation_mes_signalements"];
         put?: never;

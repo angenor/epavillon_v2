@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT r.id, r.client_ref, r.reason, r.what, r.proposed_start, r.proposed_venue,\n                  r.proposed_day, r.detail, r.status::text AS \"status!\",\n                  (r.published_at IS NOT NULL) AS \"publie!\",\n                  r.submitted_at, r.decided_at, r.reject_reason, r.reject_detail,\n                  m.id AS \"session_id?\", m.title_original AS \"title_en?\",\n                  tr.text_fr AS \"title_fr?\", m.start_at AS \"start_at?\", m.venue_label\n             FROM negotiation.session_reports r\n             LEFT JOIN negotiation.meetings m ON m.id = r.meeting_id\n             LEFT JOIN negotiation.title_translations tr ON tr.source_text = m.title_original\n            WHERE r.author_id = $1\n              AND ($2::uuid IS NULL OR r.client_ref = $2)\n              AND ($3::uuid IS NULL OR r.event_id = $3)\n            ORDER BY r.submitted_at DESC, r.id DESC",
+  "query": "SELECT r.id, r.client_ref, r.reason, r.what, r.proposed_start, r.proposed_venue,\n                  r.proposed_day, r.detail, r.status::text AS \"status!\",\n                  (r.published_at IS NOT NULL) AS \"publie!\",\n                  r.submitted_at, r.decided_at, r.reject_reason, r.reject_detail,\n                  m.id AS \"session_id?\", m.title_original AS \"title_en?\",\n                  tr.text_fr AS \"title_fr?\", m.start_at AS \"start_at?\", m.venue_label,\n                  th.code AS \"theme?\", nm.id AS \"network_meeting_id?\"\n             FROM negotiation.session_reports r\n             LEFT JOIN negotiation.meetings m ON m.id = r.meeting_id\n             LEFT JOIN negotiation.title_translations tr ON tr.source_text = m.title_original\n             LEFT JOIN reference.taxonomy_terms th ON th.id = r.theme_term_id\n             LEFT JOIN negotiation.network_meetings nm\n                    ON nm.id = r.network_meeting_id AND nm.withdrawn_at IS NULL\n                   AND r.published_at IS NOT NULL\n            WHERE r.author_id = $1\n              AND ($2::uuid IS NULL OR r.client_ref = $2)\n              AND ($3::uuid IS NULL OR r.event_id = $3)\n            ORDER BY r.submitted_at DESC, r.id DESC",
   "describe": {
     "columns": [
       {
@@ -201,6 +201,28 @@
             "name": "venue_label"
           }
         }
+      },
+      {
+        "ordinal": 19,
+        "name": "theme?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "network_meeting_id?",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.network_meetings",
+            "name": "id"
+          }
+        }
       }
     ],
     "parameters": {
@@ -229,8 +251,10 @@
       true,
       false,
       false,
-      true
+      true,
+      false,
+      false
     ]
   },
-  "hash": "b1ff9f0111845d2f7884e7e9e57150b9d12c5bb1ee0f0092794804ccf18ea90e"
+  "hash": "a59bb42fc8d4d36d79ec7867551ac48d66751eba64c03f1a2026ffd108da062e"
 }

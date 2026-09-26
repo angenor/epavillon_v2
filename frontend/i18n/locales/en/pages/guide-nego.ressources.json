@@ -3,5 +3,7 @@
   "sous-titre": "Everything here reads offline",
   "documents": "Negotiation documents",
   "profil": "Profile and settings",
-  "mes-documents": "My documents"
+  "mes-documents": "My documents",
+  "validation": "Validation",
+  "validation-compteur": "{count} to review"
 }

@@ -19,6 +19,7 @@ const compte = useGnSession()
 const edition = useGnEdition()
 const lecture = useGnSessions()
 const signalements = useGnSignalements()
+const thematiques = useGnThematiques()
 
 const k = (cle: string, params: Record<string, unknown> = {}, n?: number) =>
   n === undefined ? t(`guide-nego.signalements.${cle}`, params) : t(`guide-nego.signalements.${cle}`, params, n)
@@ -41,6 +42,7 @@ onMounted(async () => {
   if (!compte.connectee.value) return
   signalements.assurer()
   void lecture.rafraichir()
+  void thematiques.assurerLeVocabulaire()
   await relire()
 })
 
@@ -85,7 +87,9 @@ function vue(ligne: LigneSignalement) {
     const quand = moment(session.start_at)
     rappel = session.venue ? k('rappel', { titre, quand, salle: session.venue }) : k('rappel-sans-salle', { titre, quand })
   } else {
-    rappel = [s.proposed_venue, s.proposed_start ? time(s.proposed_start, fuseau.value) : null].filter(Boolean).join(' — ')
+    const lieu = [s.proposed_venue, s.proposed_start ? time(s.proposed_start, fuseau.value) : null].filter(Boolean).join(' — ')
+    const thematique = s.theme ? thematiques.nomDe(s.theme) : null
+    rappel = [lieu, thematique].filter(Boolean).join(' · ')
   }
 
   return {
@@ -100,7 +104,11 @@ function vue(ligne: LigneSignalement) {
     etat: k(`etat.${etat.cle}`, { moment: moment(etat.a) }),
     refus: etat.motif ? k('refus', { motif: k(`refus-motif.${etat.motif}`) }) : null,
     precisionDuRefus: etat.precision,
-    vers: session ? `/guide-nego/negociations/${session.id}?depuis=signalements` : null,
+    vers: session
+      ? `/guide-nego/negociations/${session.id}?depuis=signalements`
+      : s.network_meeting_id
+        ? `/guide-nego/negociations/reseau/${s.network_meeting_id}`
+        : null,
   }
 }
 

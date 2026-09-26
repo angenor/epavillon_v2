@@ -8,7 +8,7 @@
  */
 import type { Notification, NotificationFeed } from '~/types/engagement'
 import type { MyReport, ReportPayload, ReportQueue, ReportQueueItem, ReportReason, RejectReason } from '~/types/negotiation-reports'
-import type { NetworkMeeting, NetworkReport, OfficialSession } from '~/types/negotiation-sessions'
+import type { MyAgenda, NetworkMeeting, NetworkReport, OfficialSession } from '~/types/negotiation-sessions'
 import { dayKeyInZone, formatTime, instantFromWallClock } from '../datetime.ts'
 import { finEffective, lendemain } from './sessions.ts'
 import type { NomDEtat } from './etats.ts'
@@ -218,6 +218,28 @@ export function lignesDuJour(
   ].sort((a, b) => debut(a) - debut(b) || (a.genre === b.genre ? 0 : a.genre === 'session' ? -1 : 1))
 }
 
+/** « Mes thématiques » : comme une session, une réunion sans thématique passe toujours. */
+export const reunionPasseLeFiltre = (reunion: NetworkMeeting, thematiques: readonly string[]) =>
+  reunion.theme === null || thematiques.includes(reunion.theme)
+
+/** Les réunions gardées dans « Mon agenda » ; une entrée sans réunion lue est tue. */
+export function reunionsDeLAgenda(agenda: MyAgenda, reunions: readonly NetworkMeeting[]): NetworkMeeting[] {
+  const suivies = new Set((agenda.network_entries ?? []).map((e) => e.network_meeting_id))
+  return reunions.filter((r) => suivies.has(r.id))
+}
+
+export interface JourDeReunions {
+  jour: string
+  reunions: NetworkMeeting[]
+}
+
+/** Source coupée : les réunions encore à venir, par jour. */
+export function reunionsParJour(reunions: readonly NetworkMeeting[], maintenant: Date, fuseau: string): JourDeReunions[] {
+  const jours = new Map<string, NetworkMeeting[]>()
+  for (const r of reunionsVisibles(reunions, maintenant, fuseau)) jours.set(r.day, [...(jours.get(r.day) ?? []), r])
+  return [...jours].sort(([a], [b]) => a.localeCompare(b)).map(([jour, liste]) => ({ jour, reunions: liste }))
+}
+
 // ---------------------------------------------------------------------------
 // « Mes signalements » (FR-006, FR-008)
 // ---------------------------------------------------------------------------
@@ -246,6 +268,8 @@ export function signalementEnAttente(enFile: SignalementEnFile, session: MyRepor
     proposed_start: c.proposed_start ?? null,
     proposed_venue: c.proposed_venue ?? null,
     day: c.day ?? null,
+    theme: c.theme ?? null,
+    network_meeting_id: null,
     detail: c.detail ?? null,
     status: 'submitted',
     submitted_at: enFile.prise_a,
@@ -301,6 +325,17 @@ export function signalementEnCours(sessionId: string, lignes: readonly LigneSign
 // ---------------------------------------------------------------------------
 // La file de validation — en ligne seulement (FR-013)
 // ---------------------------------------------------------------------------
+
+export type EtatDuTraite = 'non-retenu' | 'en-publication' | 'valide' | 'retire'
+
+/** La marque d'un signalement tranché ; seul un signalement affiché se retire. */
+export function etatDuTraite(item: ReportQueueItem): EtatDuTraite {
+  if (item.status === 'rejected') return 'non-retenu'
+  if (item.withdrawn_at) return 'retire'
+  return item.published_at ? 'valide' : 'en-publication'
+}
+
+export const peutSeRetirer = (item: ReportQueueItem) => etatDuTraite(item) === 'valide'
 
 /** La file après une décision : un élément revenu à `submitted` (annulé) reprend sa place. */
 export function apresDecision(file: ReportQueue, element: ReportQueueItem): ReportQueue {

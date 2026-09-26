@@ -31,5 +31,13 @@
   "salle-2": "Room 2",
   "thematique-finance": "Finance",
   "signaler": "“Report a change” sheet: reason, then details",
-  "signaler-ouvrir": "Report a change"
+  "signaler-ouvrir": "Report a change",
+  "reseau": "Reported by the network — “Reported” marker on a session carrying a notice (diamond, word, colour); unannounced meetings, with and without a time; the same in “My agenda”",
+  "encart": "Notice of a confirmed report — purple frame, no name: room change, cancellation",
+  "encart-salle": "The screen in room 3 still shows 11:30: it is indeed 15:00 in room 9, building B.",
+  "encart-annulee": "The co-facilitators closed the meeting: the text goes straight to the plenary tomorrow.",
+  "aparte": "Side meeting on adaptation indicators",
+  "couloir": "Building B corridor",
+  "point-sahel": "Sahel women negotiators' check-in",
+  "reseau-garde": "The network report below does not come from the official programme: it stays on display."
 }

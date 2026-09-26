@@ -4,5 +4,9 @@
   "mon-groupe": "Mon groupe",
   "sans-thematique": "Thématique non précisée",
   "chevauche": "Chevauche {heures} — {titre}",
-  "rappel": "Rappel 15 minutes avant"
+  "rappel": "Rappel 15 minutes avant",
+  "sans-heure": "Heure non précisée",
+  "non-annoncee": "Non annoncée — signalée par le réseau, validée à {heure}",
+  "signale": "Signalé",
+  "signale-entendu": "Signalé par le réseau, validé par l'IFDD à {heure}"
 }

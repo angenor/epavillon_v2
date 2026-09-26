@@ -54,6 +54,10 @@ export interface MyReport {
   proposed_start: IsoDateTime | null
   proposed_venue: string | null
   day: IsoDate | null
+  /** Code `negotiation_theme` d'une réunion non annoncée. */
+  theme: string | null
+  /** La réunion née du signalement, publiée et non retirée : sa fiche. */
+  network_meeting_id: Uuid | null
   detail: string | null
   /** `validated` seulement une fois publié ; avant, `submitted`. */
   status: 'submitted' | 'validated' | 'rejected'

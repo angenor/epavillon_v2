@@ -1,0 +1,30 @@
+{
+  "titre": "Réunion non annoncée",
+  "fil": "Sessions de négociation · Signalée par le réseau",
+  "chargement": "Lecture de la réunion",
+  "hors-connexion": "Les changements survenus depuis ne sont pas ici.",
+  "sortie": "Voir les sessions de négociation",
+  "intertitre": "Signalée par le réseau",
+  "cle": {
+    "heure": "Heure",
+    "lieu": "Lieu",
+    "thematique": "Thématique"
+  },
+  "heure-precision": "{jour} · {zone} ({decalage})",
+  "sans-heure": "Heure non précisée",
+  "sans-lieu": "Lieu non précisé",
+  "sans-thematique": "Thématique non précisée",
+  "phrase": "Cette réunion ne figure pas au programme officiel de la CCNUCC. Un membre du réseau l'a signalée ; l'IFDD l'a vérifiée avant de l'afficher.",
+  "agenda": {
+    "ajouter": "Ajouter à mon agenda",
+    "dedans": "Dans mon agenda",
+    "ajoutee": "Ajoutée à votre agenda.",
+    "retiree": "Retirée de votre agenda.",
+    "annuler": "Annuler"
+  },
+  "compte": "Créez un compte ou connectez-vous pour garder cette réunion dans votre agenda. La fiche, elle, se lit sans compte.",
+  "inconnue": {
+    "titre": "Réunion introuvable",
+    "texte": "Cette réunion n'est plus affichée : l'IFDD l'a retirée, ou sa journée est passée."
+  }
+}

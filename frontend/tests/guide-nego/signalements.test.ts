@@ -10,6 +10,7 @@ import {
   avecLesLectures,
   debutDeTri,
   encartsAffiches,
+  etatDuTraite,
   finDuJour,
   idsNonLues,
   joursAvecReunions,
@@ -18,7 +19,10 @@ import {
   notificationsParJour,
   referenceClient,
   repereSignale,
+  reunionPasseLeFiltre,
+  reunionsDeLAgenda,
   reunionsDuJour,
+  reunionsParJour,
   signalementEnAttente,
   signalementEnCours,
   texteDeLEtat,
@@ -54,6 +58,8 @@ const rapport = (client_ref: string, submitted_at: string, extra: Partial<MyRepo
   proposed_start: null,
   proposed_venue: null,
   day: null,
+  theme: null,
+  network_meeting_id: null,
   detail: null,
   status: 'submitted',
   submitted_at,
@@ -195,6 +201,35 @@ test('file de validation : validé passe aux traités, annulé reprend sa place'
   const annule = apresDecision(apres, item('a', '2027-11-10T09:00:00Z'))
   assert.deepEqual(annule.pending.map((r) => r.id), ['a', 'b'])
   assert.deepEqual(annule.decided_today, [])
+})
+
+test('traités : non retenu, en publication, validé, retiré', () => {
+  const item = (champs: Partial<ReportQueueItem>): ReportQueueItem => ({
+    ...rapport('x', '2027-11-10T09:00:00Z', { status: 'validated' }),
+    author: { name: 'A', country: null },
+    source_now: null,
+    decided_by: 'IFDD',
+    published_at: null,
+    withdrawn_at: null,
+    ...champs,
+  })
+  assert.equal(etatDuTraite(item({ status: 'rejected' })), 'non-retenu')
+  assert.equal(etatDuTraite(item({})), 'en-publication')
+  assert.equal(etatDuTraite(item({ published_at: '2027-11-10T09:01:00Z' })), 'valide')
+  assert.equal(etatDuTraite(item({ published_at: '2027-11-10T09:01:00Z', withdrawn_at: '2027-11-10T10:00:00Z' })), 'retire')
+})
+
+test('réunions : filtre des thématiques, agenda, et par jour quand la source est coupée', () => {
+  const r1 = { ...reunion('r1', '2027-11-11', null), theme: 'finance' }
+  const r2 = reunion('r2', '2027-11-10', '2027-11-10T15:00:00Z')
+  const passee = reunion('r0', '2027-11-09', null)
+  assert.equal(reunionPasseLeFiltre(r1, ['adaptation']), false)
+  assert.equal(reunionPasseLeFiltre(r1, ['finance']), true)
+  assert.equal(reunionPasseLeFiltre(r2, []), true, 'sans thématique, elle passe')
+  const agenda = { entries: [], network_entries: [{ network_meeting_id: 'r1', remind: false, added_at: '2027-11-10T09:00:00Z' }] }
+  assert.deepEqual(reunionsDeLAgenda(agenda, [r1, r2]).map((r) => r.id), ['r1'])
+  const jours = reunionsParJour([r1, r2, passee], a('2027-11-10T13:00:00Z'), BELEM)
+  assert.deepEqual(jours.map((j) => j.jour), ['2027-11-10', '2027-11-11'])
 })
 
 const avis = (id: string, created_at: string, read_at: string | null = null): Notification => ({

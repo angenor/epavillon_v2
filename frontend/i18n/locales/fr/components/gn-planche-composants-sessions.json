@@ -31,5 +31,13 @@
   "salle-2": "Salle 2",
   "thematique-finance": "Finance",
   "signaler": "Feuille « Signaler un changement » : motif, puis précision",
-  "signaler-ouvrir": "Signaler un changement"
+  "signaler-ouvrir": "Signaler un changement",
+  "reseau": "Signalé par le réseau — repère « Signalé » d'une session qui porte un encart (losange, mot, couleur) ; réunions non annoncées, avec et sans heure ; la même dans « Mon agenda »",
+  "encart": "Encart d'un signalement validé — cadre violet, sans nom : changement de salle, annulation",
+  "encart-salle": "L'écran de la salle 3 affiche encore 11:30 : c'est bien 15:00 en salle 9, bâtiment B.",
+  "encart-annulee": "Les co-facilitateurs ont levé la séance : le texte passe directement en plénière demain.",
+  "aparte": "Aparté sur les indicateurs d'adaptation",
+  "couloir": "Couloir du bâtiment B",
+  "point-sahel": "Point des négociatrices du Sahel",
+  "reseau-garde": "Le signalement du réseau ci-dessous ne vient pas du programme officiel : il reste affiché."
 }
