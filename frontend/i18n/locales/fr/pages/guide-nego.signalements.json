@@ -1,0 +1,48 @@
+{
+  "titre": "Mes signalements",
+  "sous-titre": "{edition} — {count} signalement | {edition} — {count} signalement | {edition} — {count} signalements",
+  "chargement": "Lecture de vos signalements",
+  "le": "{jour} à {heure}",
+  "motif": {
+    "cancelled": "La session est annulée",
+    "time": "L'heure a changé",
+    "venue": "La salle a changé",
+    "other": "Autre chose",
+    "unannounced": "Réunion non annoncée"
+  },
+  "propose-heure": "Nouvelle heure proposée : {heure}",
+  "propose-salle": "Nouvelle salle proposée : {salle}",
+  "rappel": "{titre} — {quand}, {salle}",
+  "rappel-sans-salle": "{titre} — {quand}",
+  "etat": {
+    "en-attente": "Envoyé — partira au retour du réseau",
+    "envoye": "Envoyé à {moment}",
+    "valide": "Validé à {moment}",
+    "non-retenu": "Non retenu à {moment}"
+  },
+  "refus": "Motif : {motif}",
+  "refus-motif": {
+    "source_maintains": "La source officielle la maintient.",
+    "already_known": "Déjà pris en compte.",
+    "not_precise": "Pas assez précis."
+  },
+  "pied": "Un signalement validé s'affiche à toutes et tous, par-dessus la donnée officielle, sans votre nom.",
+  "vide": {
+    "titre": "Aucun signalement",
+    "texte": "Depuis la fiche d'une session, « Signaler un changement » ; depuis le bas de la liste d'un jour, « Signaler une réunion non annoncée »."
+  },
+  "sans-compte": {
+    "titre": "Vos signalements suivent votre compte",
+    "texte": "Signaler est réservé aux négociatrices et négociateurs. Connectez-vous pour retrouver les vôtres.",
+    "connexion": "Me connecter"
+  },
+  "jamais-lu": {
+    "titre": "Pas encore lus sur cet appareil",
+    "texte": "Vos signalements s'afficheront au retour du réseau."
+  },
+  "erreur": {
+    "titre": "Lecture impossible",
+    "texte": "Vos signalements n'ont pas pu être lus.",
+    "reessayer": "Réessayer"
+  }
+}

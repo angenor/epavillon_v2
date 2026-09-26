@@ -1,0 +1,18 @@
+{
+  "titre": "Signaler un changement",
+  "rappel": "{titre} — {heure}, {salle}",
+  "rappel-sans-salle": "{titre} — {heure}",
+  "motif": {
+    "cancelled": "La session est annulée",
+    "time": "L'heure a changé",
+    "venue": "La salle a changé",
+    "other": "Autre chose"
+  },
+  "heure": "Nouvelle heure",
+  "heure-aide": "Facultatif — {zone}.",
+  "salle": "Nouvelle salle",
+  "facultatif": "Facultatif.",
+  "precision": "Précision",
+  "bouclier": "Un administrateur vérifie avant d'afficher. Votre nom n'apparaît pas aux autres.",
+  "envoyer": "Envoyer"
+}

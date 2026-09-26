@@ -16,13 +16,14 @@ export function createNotificationsApi({ call, send }: Deps) {
     filGuideNego: (): Promise<NotificationFeed> =>
       call('/notifications?module=negotiation&limit=50', async () => (await exemples()).filDeNotifications(50)),
 
-    /**
-     * **Toujours des identifiants explicites** : sans liste, l'API marque lues toutes
-     * les notifications de la personne, celles du site comprises.
-     */
     marquerLues: async (ids: Uuid[]): Promise<void> => {
       if (ids.length === 0) return
       await send('/notifications/read', { ids }, async () => (await exemples()).marquerLues(ids))
+    },
+
+    /** Toutes les non lues **de Guide Négo** : le filtre `module` laisse celles du site non lues. */
+    toutMarquerGuideNego: async (): Promise<void> => {
+      await send('/notifications/read?module=negotiation', {}, async () => (await exemples()).toutMarquer())
     },
   }
 }

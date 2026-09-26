@@ -3,8 +3,9 @@
  * gardées sous `notifications` avec l'heure de lecture.
  *
  * **Marquer lu passe par la file, une intention par notification** (`lu:<id>`) : la
- * file garde une entrée par clé, et un lot écraserait le précédent. Ce qui attend
- * compte déjà comme lu, pour que la cloche ne remonte pas sous les doigts.
+ * file garde une entrée par clé, et un lot écraserait le précédent. « Tout marquer »
+ * est une seule intention (`lu:tout`), filtrée par module côté API ; elle porte les
+ * identifiants vus pour l'affichage d'ici là. Ce qui attend compte déjà comme lu.
  */
 import type { NotificationFeed } from '~/types/engagement'
 import { ApiRequestError, normalizeApiError } from '~/utils/api-error'
@@ -23,6 +24,12 @@ interface NotificationsLues {
 }
 
 const VIDE: NotificationFeed = { items: [], unread_count: 0 }
+const CLE_TOUT_MARQUER = `${PREFIXE_FILE_LU}tout`
+
+interface MarquageEnFile {
+  ids: string[]
+  tout?: boolean
+}
 
 export function useGnNotifications() {
   const api = useApi().notifications
@@ -60,7 +67,7 @@ export function useGnNotifications() {
       ...luesParPersonne.value,
       [personne]: intentions
         .filter((i) => i.personne === personne && i.cle.startsWith(PREFIXE_FILE_LU))
-        .map((i) => i.cle.slice(PREFIXE_FILE_LU.length)),
+        .flatMap((i) => (i.corps as MarquageEnFile).ids),
     }
   }
 
@@ -77,8 +84,9 @@ export function useGnNotifications() {
   file.inscrireFamille(
     PREFIXE_FILE_LU,
     async (intention) => {
-      const { ids } = intention.corps as { ids: string[] }
-      await api.marquerLues(ids)
+      const { ids, tout } = intention.corps as MarquageEnFile
+      if (tout) await api.toutMarquerGuideNego()
+      else await api.marquerLues(ids)
       await appliquer(ids)
     },
     relireLaFile,
@@ -90,7 +98,7 @@ export function useGnNotifications() {
     void lecture.rafraichir()
   }
 
-  async function marquer(ids: string[]): Promise<void> {
+  async function marquer(ids: string[], tout = false): Promise<void> {
     const personne = session.compte.value.id
     if (!personne || ids.length === 0) return
     luesParPersonne.value = {
@@ -98,7 +106,8 @@ export function useGnNotifications() {
       [personne]: [...new Set([...(luesParPersonne.value[personne] ?? []), ...ids])],
     }
     await appliquer(ids)
-    for (const id of ids) await file.poser(`${PREFIXE_FILE_LU}${id}`, { ids: [id] }, null)
+    if (tout) await file.poser(CLE_TOUT_MARQUER, { ids, tout: true } satisfies MarquageEnFile, null)
+    else for (const id of ids) await file.poser(`${PREFIXE_FILE_LU}${id}`, { ids: [id] } satisfies MarquageEnFile, null)
     await file.partir()
     await relireLaFile()
   }
@@ -115,7 +124,7 @@ export function useGnNotifications() {
     assurer,
     rafraichir: lecture.rafraichir,
     marquerLue: (id: string) => marquer(feed.value.items.some((n) => n.id === id && !n.read_at) ? [id] : []),
-    /** Une intention par notification non lue de la liste — jamais un marquage sans identifiants. */
-    toutMarquer: () => marquer(idsNonLues(feed.value.items)),
+    /** Une seule intention, filtrée par module : les avis du site restent non lus. */
+    toutMarquer: () => marquer(idsNonLues(feed.value.items), true),
   }
 }

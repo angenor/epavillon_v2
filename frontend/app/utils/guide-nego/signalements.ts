@@ -7,10 +7,12 @@
  * d'une session terminée ni la réunion d'un jour passé.
  */
 import type { Notification, NotificationFeed } from '~/types/engagement'
-import type { MyReport, ReportPayload, ReportQueue, ReportQueueItem, RejectReason } from '~/types/negotiation-reports'
+import type { MyReport, ReportPayload, ReportQueue, ReportQueueItem, ReportReason, RejectReason } from '~/types/negotiation-reports'
 import type { NetworkMeeting, NetworkReport, OfficialSession } from '~/types/negotiation-sessions'
 import { dayKeyInZone, formatTime, instantFromWallClock } from '../datetime.ts'
 import { finEffective, lendemain } from './sessions.ts'
+import type { NomDEtat } from './etats.ts'
+import type { NomDePicto } from './pictogrammes.ts'
 
 export const CLE_LECTURE_MES_SIGNALEMENTS = 'mes-signalements'
 export const PREFIXE_FILE_SIGNALEMENT = 'signalement:'
@@ -37,6 +39,88 @@ export function referenceClient(): string {
   o[8] = (o[8]! & 0x3f) | 0x80
   const h = Array.from(o, (x) => x.toString(16).padStart(2, '0')).join('')
   return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`
+}
+
+// ---------------------------------------------------------------------------
+// La saisie (FR-003, FR-004)
+// ---------------------------------------------------------------------------
+
+export type MotifDeChangement = Exclude<ReportReason, 'unannounced'>
+
+export const MOTIFS_DE_CHANGEMENT: readonly MotifDeChangement[] = ['cancelled', 'time', 'venue', 'other']
+
+/** Pictogramme et couleur d'un motif, comme la maquette 09 ; « Autre chose » garde le gris des pictogrammes. */
+export const DESSIN_DU_MOTIF: Record<ReportReason, { picto: NomDePicto; teinte: NomDEtat | null }> = {
+  cancelled: { picto: 'close', teinte: 'annulee' },
+  time: { picto: 'moved', teinte: 'deplacee' },
+  venue: { picto: 'pin', teinte: 'deplacee' },
+  other: { picto: 'info', teinte: null },
+  unannounced: { picto: 'diamond', teinte: 'non-annoncee' },
+}
+
+export const PRECISION_MAX = 600
+
+const rempli = (texte: string | null | undefined) => {
+  const t = texte?.trim()
+  return t ? t : undefined
+}
+
+/** « HH:MM » du jour `AAAA-MM-JJ`, dans le fuseau de la COP ; vide ou illisible : rien. */
+export function heureDuJour(jour: string, heure: string, fuseau: string): string | undefined {
+  if (!/^\d{2}:\d{2}$/.test(heure.trim())) return undefined
+  return instantFromWallClock(`${jour} ${heure.trim()}`, fuseau) ?? undefined
+}
+
+export interface SaisieDeChangement {
+  heure: string
+  salle: string
+  precision: string
+}
+
+/** Le corps d'un changement, hors `client_ref` et `edition` ; la valeur proposée ne suit que son motif. */
+export function corpsDuChangement(
+  motif: MotifDeChangement,
+  saisie: SaisieDeChangement,
+  session: Pick<OfficialSession, 'id' | 'start_at'>,
+  fuseau: string,
+): Omit<ReportPayload, 'client_ref' | 'edition'> {
+  const proposed_start = motif === 'time' ? heureDuJour(dayKeyInZone(session.start_at, fuseau), saisie.heure, fuseau) : undefined
+  const proposed_venue = motif === 'venue' ? rempli(saisie.salle) : undefined
+  return {
+    reason: motif,
+    session_id: session.id,
+    ...(proposed_start ? { proposed_start } : {}),
+    ...(proposed_venue ? { proposed_venue } : {}),
+    ...(rempli(saisie.precision) ? { detail: rempli(saisie.precision) } : {}),
+  }
+}
+
+export interface SaisieDeReunion {
+  quoi: string
+  ou: string
+  quand: string
+  /** `null` : « Autre », ou rien de choisi. */
+  thematique: string | null
+}
+
+/** `null` tant que « Quoi » est vide : c'est le seul champ requis. */
+export function corpsDeLaReunion(
+  saisie: SaisieDeReunion,
+  jour: string,
+  fuseau: string,
+): Omit<ReportPayload, 'client_ref' | 'edition'> | null {
+  const what = rempli(saisie.quoi)
+  if (!what) return null
+  const proposed_start = heureDuJour(jour, saisie.quand, fuseau)
+  const proposed_venue = rempli(saisie.ou)
+  return {
+    reason: 'unannounced',
+    what,
+    day: jour,
+    theme: saisie.thematique,
+    ...(proposed_start ? { proposed_start } : {}),
+    ...(proposed_venue ? { proposed_venue } : {}),
+  }
 }
 
 // ---------------------------------------------------------------------------

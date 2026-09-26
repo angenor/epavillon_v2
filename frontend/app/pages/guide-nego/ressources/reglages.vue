@@ -132,6 +132,11 @@ useHead({ title: t('guide-nego.reglages.titre') })
         picto="download"
         vers="/guide-nego/ressources/mes-documents"
       />
+      <GnLigneReglage
+        :libelle="t('guide-nego.reglages.suivi.signalements')"
+        picto="flag"
+        vers="/guide-nego/negociations/signalements"
+      />
       <!-- L'état, et non un rôle : « Négociatrice — réseau » de la maquette est
            genré et ne se reprend pas (SC-006). -->
       <GnLigneReglage

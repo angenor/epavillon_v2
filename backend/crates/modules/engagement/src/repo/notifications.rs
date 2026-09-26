@@ -162,19 +162,24 @@ pub async fn fil(
 }
 
 /// Marque des notifications lues — **les siennes, et uniquement**. Sans `ids` :
-/// toutes.
+/// toutes, du module s'il est donné (même filtre que `fil`).
 pub async fn marquer_lues(
     conn: &mut PgConnection,
     person_id: Uuid,
     ids: Option<&[Uuid]>,
+    module: Option<&str>,
 ) -> Result<u64> {
     let marquees = sqlx::query!(
-        "UPDATE engagement.notifications
+        "UPDATE engagement.notifications n
             SET read_at = now()
           WHERE person_id = $1 AND read_at IS NULL
-            AND ($2::uuid[] IS NULL OR id = ANY($2))",
+            AND ($2::uuid[] IS NULL OR id = ANY($2))
+            AND ($3::text IS NULL OR EXISTS (
+                    SELECT 1 FROM engagement.notification_types nt
+                     WHERE nt.code = n.type_code AND nt.module_code = $3))",
         person_id,
-        ids
+        ids,
+        module
     )
     .execute(conn)
     .await?

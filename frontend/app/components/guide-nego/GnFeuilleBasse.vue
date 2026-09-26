@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { NomDEtat } from '~/utils/guide-nego/etats'
+import { couleurDEtat } from '~/utils/guide-nego/etats'
 import type { NomDePicto } from '~/utils/guide-nego/pictogrammes'
 /**
  * La feuille qui monte du bas : menus du « ⋯ » et du long-appui, motifs de signalement,
@@ -19,6 +21,10 @@ export interface OptionDeFeuille {
   picto?: NomDePicto
   /** Une option destructrice : rouge, et toujours suivie d'une boîte de confirmation. */
   dangereuse?: boolean
+  /** Le pictogramme prend la couleur de cet état (motifs de signalement). */
+  teinte?: NomDEtat
+  /** L'option mène à une étape suivante dans la même feuille : chevron, et la feuille reste ouverte. */
+  suite?: boolean
 }
 
 const props = withDefaults(
@@ -48,7 +54,7 @@ function fermer() {
 
 function choisir(option: OptionDeFeuille) {
   emit('choisir', option)
-  fermer()
+  if (!option.suite) fermer()
 }
 
 const derniere = computed(() => props.options.length - 1)
@@ -87,8 +93,14 @@ const derniere = computed(() => props.options.length - 1)
                 }"
                 @click="choisir(option)"
               >
-                <GnPicto v-if="option.picto" :nom="option.picto" :taille="24" />
-                {{ option.libelle }}
+                <GnPicto
+                  v-if="option.picto"
+                  :nom="option.picto"
+                  :taille="24"
+                  :style="option.teinte ? { color: couleurDEtat(option.teinte) } : undefined"
+                />
+                <span class="gn-feuille-basse__libelle">{{ option.libelle }}</span>
+                <GnPicto v-if="option.suite" nom="chevron" :taille="24" class="gn-feuille-basse__suite" />
               </button>
             </li>
           </ul>
@@ -188,7 +200,16 @@ const derniere = computed(() => props.options.length - 1)
 }
 
 [data-app="guide-nego"] .gn-feuille-basse__option > .gn-picto {
+  flex: none;
   color: var(--gn-picto);
+}
+
+[data-app="guide-nego"] .gn-feuille-basse__libelle {
+  flex: 1;
+}
+
+[data-app="guide-nego"] .gn-feuille-basse__option > .gn-feuille-basse__suite {
+  color: var(--gn-texte-2);
 }
 
 /* Écart 33 : un texte et un pictogramme rouges gardent la couleur de charte ; seul l'aplat s'assombrit. */

@@ -6,7 +6,9 @@ use kernel::error::Result;
 use serde::Serialize;
 
 use crate::routes::contexte_de;
-use crate::service::notifications::{self, ArchivagePayload, FilQuery, MarquagePayload};
+use crate::service::notifications::{
+    self, ArchivagePayload, FilQuery, FiltreModule, MarquagePayload,
+};
 use crate::state::EngagementState;
 
 pub fn configurer(cfg: &mut web::ServiceConfig) {
@@ -55,10 +57,13 @@ pub(crate) async fn lire(
 /// Marquer lues.
 #[utoipa::path(
     post,
-    description = "`{ marked }` — sans `ids`, **toutes** les non lues de la personne. Les siennes, et uniquement : le filtre porte sur le compte de l'appelant, jamais sur la seule liste d'identifiants reçue.",
+    description = "`{ marked }` — sans `ids`, **toutes** les non lues de la personne, **du module** si `module` est donné. Les siennes, et uniquement : le filtre porte sur le compte de l'appelant, jamais sur la seule liste d'identifiants reçue.",
     path = "/notifications/read",
     tag = "Notifications",
     operation_id = "engagement_marquer_notifications_lues",
+    params(
+        ("module" = Option<String>, Query, description = "Module d'origine du type (`notification_types.module_code`) — le même filtre que `GET /notifications`"),
+    ),
     request_body = MarquagePayload,
     responses(
         (status = 200, description = "{ marked }", body = Object),
@@ -70,11 +75,14 @@ pub(crate) async fn marquer_lues(
     state: web::Data<EngagementState>,
     Actor(acteur): Actor,
     requete: HttpRequest,
+    filtre: web::Query<FiltreModule>,
     payload: Option<web::Json<MarquagePayload>>,
 ) -> Result<HttpResponse> {
     let ctx = contexte_de(&requete, acteur);
     let payload = payload.map(|p| p.into_inner()).unwrap_or_default();
-    let marked = notifications::marquer_lues(&state, &ctx, acteur, &payload).await?;
+    let marked =
+        notifications::marquer_lues(&state, &ctx, acteur, &payload, filtre.module.as_deref())
+            .await?;
     Ok(HttpResponse::Ok().json(Compte { marked }))
 }
 

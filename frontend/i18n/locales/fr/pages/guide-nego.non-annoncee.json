@@ -1,0 +1,28 @@
+{
+  "titre": "Signaler une réunion non annoncée",
+  "fil": "Sessions de négociation · {jour}",
+  "chargement": "Lecture de votre accès",
+  "propos": "Aparté, consultations restreintes : ce qui ne figure pas au programme officiel.",
+  "quoi": "Quoi",
+  "quoi-requis": "Dites en quelques mots de quelle réunion il s'agit.",
+  "ou": "Où",
+  "quand": "Quand",
+  "quand-aide": "Quand : {zone}.",
+  "thematique": "Thématique",
+  "autre": "Autre",
+  "bouclier": "Un administrateur vérifie avant d'afficher. La réunion apparaîtra « Non annoncée — signalée par le réseau ».",
+  "envoyer": "Envoyer",
+  "annuler": "Annuler",
+  "refuse": "Le signalement n'a pas pu être envoyé. Réessayez.",
+  "envoye": {
+    "titre": "Signalement envoyé.",
+    "texte": "Vérification en cours. Rien ne s'affiche avant qu'un administrateur l'ait validé.",
+    "voir": "Voir mes signalements",
+    "retour": "Retour aux sessions"
+  },
+  "verrou": {
+    "propos": "Signaler une réunion non annoncée est réservé aux négociatrices et négociateurs.",
+    "reste": "Les sessions de négociation restent lisibles sans code.",
+    "retour": "Retour aux sessions"
+  }
+}

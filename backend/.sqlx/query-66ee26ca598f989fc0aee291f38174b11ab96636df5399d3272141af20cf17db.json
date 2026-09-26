@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE engagement.notifications n\n            SET read_at = now()\n          WHERE person_id = $1 AND read_at IS NULL\n            AND ($2::uuid[] IS NULL OR id = ANY($2))\n            AND ($3::text IS NULL OR EXISTS (\n                    SELECT 1 FROM engagement.notification_types nt\n                     WHERE nt.code = n.type_code AND nt.module_code = $3))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "66ee26ca598f989fc0aee291f38174b11ab96636df5399d3272141af20cf17db"
+}

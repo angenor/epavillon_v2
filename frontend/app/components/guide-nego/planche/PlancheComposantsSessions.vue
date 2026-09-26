@@ -125,6 +125,8 @@ const fonds = computed(() =>
 const retiree = computed(() =>
   specimen('retiree', { status: 'cancelled', cancelled: { at: le12('07:10'), reason: 'removed' } }),
 )
+const feuilleSignaler = ref(false)
+
 const reportee = computed(() =>
   specimen('reportee', { status: 'cancelled', cancelled: { at: le12('08:45'), reason: 'postponed' } }),
 )
@@ -196,6 +198,18 @@ const reportee = computed(() =>
         <GnValeurChangee :valeur="k('salle-9')" :avant="k('salle-3')" :precision="k('valeur-batiment')" forte />
         <GnValeurChangee valeur="10:00–12:00" :precision="k('valeur-heure')" maintenant />
         <GnValeurChangee :valeur="k('salle-4')" forte eteinte />
+      </div>
+
+      <span class="gn-planche-composants__legende">{{ k('signaler') }}</span>
+      <div class="gn-planche-composants__vitrine">
+        <GnBouton variante="secondaire" picto="flag" @clic="feuilleSignaler = true">{{ k('signaler-ouvrir') }}</GnBouton>
+        <GnFeuilleSignaler
+          v-model="feuilleSignaler"
+          :session="lignes[2]!.session"
+          :fuseau="FUSEAU"
+          :ville="VILLE"
+          @envoyer="feuilleSignaler = false"
+        />
       </div>
 
       <span class="gn-planche-composants__legende">{{ k('coupure') }}</span>

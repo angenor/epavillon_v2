@@ -3508,7 +3508,7 @@ export interface paths {
         put?: never;
         /**
          * Marquer lues.
-         * @description `{ marked }` — sans `ids`, **toutes** les non lues de la personne. Les siennes, et uniquement : le filtre porte sur le compte de l'appelant, jamais sur la seule liste d'identifiants reçue.
+         * @description `{ marked }` — sans `ids`, **toutes** les non lues de la personne, **du module** si `module` est donné. Les siennes, et uniquement : le filtre porte sur le compte de l'appelant, jamais sur la seule liste d'identifiants reçue.
          */
         post: operations["engagement_marquer_notifications_lues"];
         delete?: never;
@@ -5182,7 +5182,7 @@ export interface components {
             bounce_kind?: string | null;
             detail?: string | null;
         };
-        /** @description Ce qu'un marquage vise. Sans `ids` : tout. */
+        /** @description Ce qu'un marquage vise. Sans `ids` : tout — du module, s'il est donné. */
         MarquagePayload: {
             ids?: string[] | null;
         };
@@ -14059,7 +14059,10 @@ export interface operations {
     };
     engagement_marquer_notifications_lues: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Module d'origine du type (`notification_types.module_code`) — le même filtre que `GET /notifications` */
+                module?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;

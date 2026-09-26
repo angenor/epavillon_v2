@@ -88,10 +88,18 @@ pub async fn fil(
     })
 }
 
-/// Ce qu'un marquage vise. Sans `ids` : tout.
+/// Ce qu'un marquage vise. Sans `ids` : tout — du module, s'il est donné.
 #[derive(Debug, Clone, Default, Deserialize, ToSchema)]
 pub struct MarquagePayload {
     pub ids: Option<Vec<Uuid>>,
+}
+
+/// Le `?module=` du marquage : le même filtre que la liste et le compte, sans quoi
+/// « tout marquer » de Guide Négo marquerait lus les avis du site.
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct FiltreModule {
+    #[serde(default)]
+    pub module: Option<String>,
 }
 
 pub async fn marquer_lues(
@@ -99,9 +107,11 @@ pub async fn marquer_lues(
     ctx: &RequestContext,
     acteur: Uuid,
     payload: &MarquagePayload,
+    module: Option<&str>,
 ) -> Result<u64> {
     let mut tx = state.db().write(ctx).await?;
-    let marquees = notifications::marquer_lues(&mut tx, acteur, payload.ids.as_deref()).await?;
+    let marquees =
+        notifications::marquer_lues(&mut tx, acteur, payload.ids.as_deref(), module).await?;
     tx.commit().await?;
     Ok(marquees)
 }

@@ -221,3 +221,47 @@ async fn le_filtre_module_trie_la_liste_et_le_compte_programme_inchange() {
         "la branche de programme écrit toujours le libellé du type"
     );
 }
+
+#[tokio::test]
+async fn tout_marquer_dun_module_laisse_les_avis_du_site_non_lus() {
+    let bac = Bac::monter().await;
+    let t = commun::terrain(&bac).await;
+    let personne = t.inscrits[0];
+
+    sqlx::query!(
+        "UPDATE programme.sessions
+            SET starts_at = starts_at + interval '1 hour', ends_at = ends_at + interval '1 hour'
+          WHERE id = $1",
+        t.seance
+    )
+    .execute(bac.pool())
+    .await
+    .expect("séance déplacée");
+    commun::relayer(&bac, "programme.session.rescheduled").await;
+    emettre(&bac, avis(vec![personne], "Déplacée — CMA 8", None)).await;
+    commun::relayer(&bac, "negotiation.").await;
+
+    let marquees = notifications::marquer_lues(
+        &bac.state,
+        &bac.ctx(),
+        personne,
+        &notifications::MarquagePayload { ids: None },
+        Some("negotiation"),
+    )
+    .await
+    .expect("marquage");
+    assert_eq!(marquees, 1);
+
+    let nego = notifications::fil(&bac.state, personne, &fil(Some("negotiation")))
+        .await
+        .expect("fil");
+    assert_eq!(nego.unread_count, 0);
+    let prog = notifications::fil(&bac.state, personne, &fil(Some("programme")))
+        .await
+        .expect("fil");
+    assert_eq!(
+        (prog.unread_count, prog.items[0].read_at.is_none()),
+        (1, true),
+        "l'avis du site reste non lu"
+    );
+}

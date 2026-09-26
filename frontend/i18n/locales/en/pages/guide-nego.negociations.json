@@ -40,5 +40,6 @@
     "texte": "The server did not respond. Nothing has been saved on this device yet.",
     "texte-hors-connexion": "Offline, and the list has never been read on this device. It will be read as soon as the network is back.",
     "reessayer": "Try again"
-  }
+  },
+  "non-annoncee": "Report an unannounced meeting"
 }

@@ -269,6 +269,11 @@ useHead({ title: t('guide-nego.negociations.titre') })
           {{ t('guide-nego.negociations.vide-miennes.modifier') }}
         </GnBouton>
       </div>
+
+      <NuxtLink :to="{ path: '/guide-nego/negociations/non-annoncee', query: { jour } }" class="gn-sessions__non-annoncee">
+        <GnPicto nom="flag" :taille="20" />
+        {{ t('guide-nego.negociations.non-annoncee') }}
+      </NuxtLink>
     </template>
 
     <a
@@ -407,6 +412,21 @@ useHead({ title: t('guide-nego.negociations.titre') })
 
 [data-app="guide-nego"] .gn-sessions__vide .gn-vide {
   align-items: center;
+}
+
+[data-app="guide-nego"] .gn-sessions__non-annoncee {
+  width: fit-content;
+  min-height: var(--gn-cible);
+  margin-top: var(--gn-espace-8);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gn-accent);
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+  font-weight: var(--gn-graisse-gras);
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 [data-app="guide-nego"] .gn-sessions__programme {

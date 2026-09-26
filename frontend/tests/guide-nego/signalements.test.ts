@@ -5,6 +5,8 @@ import type { MyReport, ReportQueueItem } from '../../app/types/negotiation-repo
 import type { NetworkMeeting, NetworkReport } from '../../app/types/negotiation-sessions.ts'
 import {
   apresDecision,
+  corpsDeLaReunion,
+  corpsDuChangement,
   avecLesLectures,
   debutDeTri,
   encartsAffiches,
@@ -231,4 +233,43 @@ test('notifications : groupées par jour dans le fuseau de la COP', () => {
       ['2027-11-10', ['a', 'c']],
     ],
   )
+})
+
+test('le corps d’un changement ne garde que la valeur de son motif, dans le fuseau de la COP', () => {
+  const s = { id: 's1', start_at: '2026-11-12T13:00:00Z' }
+  const saisie = { heure: '15:30', salle: '  Salle 9 ', precision: ' ' }
+  assert.deepEqual(corpsDuChangement('venue', saisie, s, 'Europe/Istanbul'), {
+    reason: 'venue',
+    session_id: 's1',
+    proposed_venue: 'Salle 9',
+  })
+  assert.deepEqual(corpsDuChangement('time', saisie, s, 'Europe/Istanbul'), {
+    reason: 'time',
+    session_id: 's1',
+    proposed_start: '2026-11-12T12:30:00.000Z',
+  })
+  assert.deepEqual(corpsDuChangement('cancelled', { heure: '', salle: '', precision: 'Écran éteint' }, s, 'UTC'), {
+    reason: 'cancelled',
+    session_id: 's1',
+    detail: 'Écran éteint',
+  })
+})
+
+test('une réunion non annoncée exige « Quoi », le reste est facultatif', () => {
+  const vide = { quoi: '  ', ou: 'Couloir', quand: '16:30', thematique: 'adaptation' }
+  assert.equal(corpsDeLaReunion(vide, '2026-11-12', 'UTC'), null)
+  assert.deepEqual(corpsDeLaReunion({ ...vide, quoi: 'Aparté' }, '2026-11-12', 'UTC'), {
+    reason: 'unannounced',
+    what: 'Aparté',
+    day: '2026-11-12',
+    theme: 'adaptation',
+    proposed_start: '2026-11-12T16:30:00.000Z',
+    proposed_venue: 'Couloir',
+  })
+  assert.deepEqual(corpsDeLaReunion({ quoi: 'Aparté', ou: '', quand: '', thematique: null }, '2026-11-12', 'UTC'), {
+    reason: 'unannounced',
+    what: 'Aparté',
+    day: '2026-11-12',
+    theme: null,
+  })
 })

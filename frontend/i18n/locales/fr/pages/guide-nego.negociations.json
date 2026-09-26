@@ -40,5 +40,6 @@
     "texte": "Le serveur n'a pas répondu. Rien n'a encore été gardé sur cet appareil.",
     "texte-hors-connexion": "Hors connexion, et la liste n'a encore jamais été lue sur cet appareil. Elle se lira dès le retour du réseau.",
     "reessayer": "Réessayer"
-  }
+  },
+  "non-annoncee": "Signaler une réunion non annoncée"
 }

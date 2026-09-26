@@ -91,3 +91,7 @@ export function marquerLues(ids: string[]): { marked: number } {
   }
   return { marked }
 }
+
+export function toutMarquer(): { marked: number } {
+  return marquerLues(tous().filter((n) => !n.read_at).map((n) => n.id))
+}

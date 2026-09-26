@@ -66,11 +66,11 @@
 
 ## Phase 6 — US1 : signaler (écrans)
 
-- [ ] T027a [US1] Créer `GnFeuilleSignaler` (quatre motifs à pictogramme, précision facultative 600, valeur proposée pour l'heure et la salle, bouclier, « Envoyer » actif d'emblée, « Annuler ») dans `fe/app/components/guide-nego/GnFeuilleSignaler.vue`, textes `gn-feuille-signaler.json`, planche
-- [ ] T028 [US1] Fiche `fe/app/pages/guide-nego/negociations/[id].vue` : « Signaler un changement » (sans accès → accès), message éphémère « Signalement envoyé. Vérification en cours. » + « Voir », ligne « Votre signalement — envoyé à … »
-- [ ] T029 [US1] Écran `fe/app/pages/guide-nego/negociations/non-annoncee.vue` (Quoi requis, Où, Quand, thématique) et lien en bas de la liste `negociations/index.vue`
-- [ ] T030 [US1] Écran « Mes signalements » `fe/app/pages/guide-nego/negociations/signalements.vue` (trois états + en attente d'envoi, motif de refus, vide, hors connexion) ; lien depuis le profil
-- [ ] T031 [US1] Vérifier au navigateur, version construite, 360 px, clair et sombre : quickstart § 1
+- [x] T027a [US1] Créer `GnFeuilleSignaler` (quatre motifs à pictogramme, précision facultative 600, valeur proposée pour l'heure et la salle, bouclier, « Envoyer » actif d'emblée, « Annuler ») dans `fe/app/components/guide-nego/GnFeuilleSignaler.vue`, textes `gn-feuille-signaler.json`, planche
+- [x] T028 [US1] Fiche `fe/app/pages/guide-nego/negociations/[id].vue` : « Signaler un changement » (sans accès → accès), message éphémère « Signalement envoyé. Vérification en cours. » + « Voir », ligne « Votre signalement — envoyé à … »
+- [x] T029 [US1] Écran `fe/app/pages/guide-nego/negociations/non-annoncee.vue` (Quoi requis, Où, Quand, thématique) et lien en bas de la liste `negociations/index.vue`
+- [x] T030 [US1] Écran « Mes signalements » `fe/app/pages/guide-nego/negociations/signalements.vue` (trois états + en attente d'envoi, motif de refus, vide, hors connexion) ; lien depuis le profil
+- [x] T031 [US1] Vérifier au navigateur, version construite, 360 px, clair et sombre : quickstart § 1
 
 **Commit** : « feat(guide-nego): étape 3b, phase 6 — signaler ».
 

@@ -66,5 +66,14 @@
   "inconnue": {
     "titre": "Session not found",
     "texte": "This session is not among the negotiation sessions of this COP."
+  },
+  "signaler": {
+    "bouton": "Report a change",
+    "envoye": "Report sent. Being checked.",
+    "voir": "View",
+    "en-cours": "Your report — sent at {heure}, being checked",
+    "refuse": "The report could not be sent. Please try again.",
+    "reserve": "Reporting a change is reserved for negotiators. The session page itself can be read without an account.",
+    "fermer": "Close"
   }
 }
