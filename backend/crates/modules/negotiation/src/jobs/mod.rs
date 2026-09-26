@@ -11,6 +11,7 @@ pub mod change_email;
 pub mod emails;
 pub mod extract;
 pub mod import;
+pub mod promotion_email;
 pub mod publish;
 pub mod purge;
 pub mod traduction;

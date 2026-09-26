@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM negotiation.meeting_registrations\n                           WHERE meeting_id = $1 AND person_id = $2 AND status = 'registered')\n                  AS \"inscrite!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "inscrite!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "b5b253610c8001099e3aad4779370dc6e91f19f06c9a9e08d307fe4d243495fa"
+}

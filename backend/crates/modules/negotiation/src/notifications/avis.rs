@@ -5,6 +5,7 @@
 //! (SC-008). Les heures arrivent déjà dans le fuseau de la COP.
 
 use contracts::negotiation::{Notification, NotificationSubject, NotificationText};
+use serde::{Deserialize, Serialize};
 use time::Date;
 use uuid::Uuid;
 
@@ -13,7 +14,8 @@ use crate::domain::reports::ReportReason;
 const SIGNATURE_FR: &str = "Sessions de négociation";
 const SIGNATURE_EN: &str = "Negotiation sessions";
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum Etat {
     Deplacee,
     Annulee,
@@ -21,6 +23,10 @@ pub enum Etat {
     NonAnnoncee,
     /// « Autre chose » : le réseau signale, sans valeur à afficher.
     Signalee,
+    /// Réunion de la Francophonie : format ou lieu changé.
+    LieuChange,
+    /// Réunion de la Francophonie : place obtenue depuis la liste d'attente.
+    Inscrite,
 }
 
 impl Etat {
@@ -41,6 +47,8 @@ impl Etat {
             Self::SalleChangee => "Salle changée",
             Self::NonAnnoncee => "Non annoncée",
             Self::Signalee => "Signalée",
+            Self::LieuChange => "Lieu changé",
+            Self::Inscrite => "Inscrite",
         }
     }
 
@@ -51,6 +59,8 @@ impl Etat {
             Self::SalleChangee => "Room changed",
             Self::NonAnnoncee => "Unannounced",
             Self::Signalee => "Reported",
+            Self::LieuChange => "Venue changed",
+            Self::Inscrite => "Registered",
         }
     }
 }
@@ -235,6 +245,95 @@ pub fn refuse(sujet: Sujet<'_>, motif: &str) -> Texte {
     )
 }
 
+const REUNIONS_FR: &str = "Réunions de la Francophonie";
+const REUNIONS_EN: &str = "Francophonie meetings";
+
+/// Ce qu'un avis de réunion de la Francophonie dit d'elle, après écriture.
+pub struct Reunion<'a> {
+    pub sujet: Sujet<'a>,
+    pub jour: Date,
+    /// « HH:MM », dans le fuseau de la COP.
+    pub debut: &'a str,
+    pub ville: Option<&'a str>,
+    pub fuseau: &'a str,
+    pub format: &'a str,
+    pub lieu: Option<&'a str>,
+    pub motif: Option<&'a str>,
+}
+
+/// « 10 novembre à 14:00 (heure d'Antalya) » ; sans ville, le nom du fuseau.
+fn quand(r: &Reunion<'_>) -> (String, String) {
+    let (zone_fr, zone_en) = match r.ville {
+        Some(v) => (heure_de(v), format!("{v} time")),
+        None => (r.fuseau.to_owned(), r.fuseau.to_owned()),
+    };
+    (
+        format!("{} à {} ({zone_fr})", jour_fr(r.jour), r.debut),
+        format!("{} at {} ({zone_en})", jour_en(r.jour), r.debut),
+    )
+}
+
+/// « en ligne », « Salle 4 », « Salle 4 et en ligne ».
+pub(crate) fn lieu(format: &str, lieu: Option<&str>) -> (String, String) {
+    match (format, lieu) {
+        ("online", _) => ("en ligne".into(), "online".into()),
+        ("hybrid", Some(l)) => (format!("{l} et en ligne"), format!("{l} and online")),
+        ("hybrid", None) => ("sur place et en ligne".into(), "on site and online".into()),
+        (_, Some(l)) => (l.to_owned(), l.to_owned()),
+        (_, None) => ("sur place".into(), "on site".into()),
+    }
+}
+
+fn reunion(fr: String, en: String) -> Texte {
+    (
+        texte(fr, en),
+        texte(REUNIONS_FR.to_owned(), REUNIONS_EN.to_owned()),
+    )
+}
+
+/// Annulée, déplacée, lieu changé : l'état d'abord, puis ce qui vaut désormais.
+pub fn changement_de_reunion(etat: Etat, r: &Reunion<'_>) -> Texte {
+    let (sujet_fr, sujet_en) = (r.sujet.fr, r.sujet.en);
+    let (quand_fr, quand_en) = quand(r);
+    let (ou_fr, ou_en) = lieu(r.format, r.lieu);
+    let (fr, en) = match etat {
+        Etat::Annulee => match r.motif {
+            Some(m) => (
+                format!("Annulée — {sujet_fr}, {quand_fr} : {m}"),
+                format!("Cancelled — {sujet_en}, {quand_en}: {m}"),
+            ),
+            None => (
+                format!("Annulée — {sujet_fr}, {quand_fr}."),
+                format!("Cancelled — {sujet_en}, {quand_en}."),
+            ),
+        },
+        Etat::LieuChange => (
+            format!("Lieu changé — {sujet_fr}, {quand_fr} : {ou_fr}."),
+            format!("Venue changed — {sujet_en}, {quand_en}: {ou_en}."),
+        ),
+        _ => (
+            format!("Déplacée — {sujet_fr}, désormais le {quand_fr}, {ou_fr}."),
+            format!("Moved — {sujet_en}, now on {quand_en}, {ou_en}."),
+        ),
+    };
+    reunion(fr, en)
+}
+
+/// La place obtenue depuis la liste d'attente.
+pub fn place_obtenue(r: &Reunion<'_>) -> Texte {
+    let (quand_fr, quand_en) = quand(r);
+    reunion(
+        format!(
+            "Inscrite — {}, {quand_fr}. Une place s'est libérée : elle est à vous.",
+            r.sujet.fr
+        ),
+        format!(
+            "Registered — {}, {quand_en}. A place has become available: it is yours.",
+            r.sujet.en
+        ),
+    )
+}
+
 /// `<type>:<id>:<jour>` : les avis d'une même cible et d'un même jour se
 /// remplacent (research R8).
 pub fn cle_du_jour(type_code: &str, id: Uuid, jour: Date) -> String {
@@ -355,6 +454,39 @@ mod tests {
             corps.fr
         );
         assert!(corps.en.contains("November 10 at 14:00"), "{}", corps.en);
+    }
+
+    fn reunion(format: &'static str, lieu: Option<&'static str>) -> Reunion<'static> {
+        Reunion {
+            sujet: SUJET,
+            jour: date!(2026 - 11 - 10),
+            debut: "14:00",
+            ville: Some("Antalya"),
+            fuseau: "Europe/Istanbul",
+            format,
+            lieu,
+            motif: Some("Reportée."),
+        }
+    }
+
+    #[test]
+    fn la_reunion_commence_par_letat_et_finit_par_son_agenda() {
+        for (etat, debut) in [
+            (Etat::Annulee, "Annulée — "),
+            (Etat::Deplacee, "Déplacée — "),
+            (Etat::LieuChange, "Lieu changé — "),
+        ] {
+            let (titre, corps) = changement_de_reunion(etat, &reunion("online", None));
+            assert!(titre.fr.starts_with(debut), "{}", titre.fr);
+            assert!(titre.fr.contains("10 novembre à 14:00 (heure d'Antalya)"));
+            assert_eq!(corps.fr, "Réunions de la Francophonie");
+        }
+        let (titre, _) = changement_de_reunion(Etat::Annulee, &reunion("online", None));
+        assert!(titre.fr.ends_with(": Reportée."), "{}", titre.fr);
+        let (titre, _) = place_obtenue(&reunion("hybrid", Some("Salle 4")));
+        assert!(titre.fr.starts_with("Inscrite — "), "{}", titre.fr);
+        assert_eq!(lieu("hybrid", Some("Salle 4")).0, "Salle 4 et en ligne");
+        assert_eq!(lieu("onsite", None).0, "sur place");
     }
 
     #[test]

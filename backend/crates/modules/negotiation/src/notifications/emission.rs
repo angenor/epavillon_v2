@@ -39,7 +39,7 @@ fn sujet(t: &Tenu) -> Sujet<'_> {
     }
 }
 
-async fn emettre(
+pub(crate) async fn emettre(
     conn: &mut PgConnection,
     aggregate_type: &str,
     aggregate_id: Uuid,

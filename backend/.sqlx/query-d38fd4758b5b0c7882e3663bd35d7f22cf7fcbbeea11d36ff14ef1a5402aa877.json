@@ -1,0 +1,115 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(m.title::jsonb->>'fr', m.title::jsonb->>'en') AS \"title_fr!\",\n                  COALESCE(m.title::jsonb->>'en', m.title::jsonb->>'fr') AS \"title_en!\",\n                  m.status::text AS \"status!\",\n                  (m.start_at AT TIME ZONE m.timezone::text)::date AS \"jour!\",\n                  to_char(m.start_at AT TIME ZONE m.timezone::text, 'HH24:MI') AS \"debut!\",\n                  to_char(m.end_at AT TIME ZONE m.timezone::text, 'HH24:MI') AS fin,\n                  m.format::text AS \"format!\", m.venue_label, m.cancellation_reason, e.city,\n                  m.timezone::text AS \"fuseau!\",\n                  (now() AT TIME ZONE m.timezone::text)::date AS \"aujourdhui!\"\n             FROM negotiation.meetings m\n             JOIN event.events e ON e.id = m.event_id\n            WHERE m.id = $1\n              AND m.kind IN ('preparatory_workshop', 'francophone_consultation')\n              AND m.source_key IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "title_fr!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "title_en!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "jour!",
+        "type_info": "Date",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "debut!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "fin",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "format!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "venue_label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "venue_label"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "cancellation_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "cancellation_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "city",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "city"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "fuseau!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "aujourdhui!",
+        "type_info": "Date",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      true,
+      true,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "d38fd4758b5b0c7882e3663bd35d7f22cf7fcbbeea11d36ff14ef1a5402aa877"
+}

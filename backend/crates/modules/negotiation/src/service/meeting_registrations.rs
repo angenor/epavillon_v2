@@ -92,12 +92,18 @@ pub async fn desinscrire(
     inscriptions::desinscrire(&mut tx, meeting_id, person_id).await?;
     if reunion.programmee {
         let promues = inscriptions::promouvoir(&mut tx, meeting_id).await?;
-        prevenir_des_promotions(meeting_id, &promues);
+        prevenir_des_promotions(&mut tx, meeting_id, &promues).await?;
     }
     tx.commit().await?;
     Ok(())
 }
 
-/// T017 : l'avis et le courriel de chaque personne promue partiront d'ici, dans
-/// la transaction de la promotion. Rien n'est émis à la phase 2.
-pub(crate) fn prevenir_des_promotions(_meeting_id: Uuid, _promues: &[Uuid]) {}
+/// Dans la transaction de la promotion : si elle est annulée, personne n'est
+/// prévenu d'une place qu'il n'a pas.
+pub(crate) async fn prevenir_des_promotions(
+    conn: &mut sqlx::PgConnection,
+    meeting_id: Uuid,
+    promues: &[Uuid],
+) -> Result<()> {
+    crate::notifications::reunions::promotions(conn, meeting_id, promues).await
+}

@@ -32,9 +32,9 @@
 
 ## Phase 4 — Prévenir — US2, US3
 
-- [ ] T016 [US3] Constantes des deux événements dans `backend/crates/contracts/src/negotiation.rs` ; annulation et changement d'heure ou de lieu d'une réunion publiée (ancienne et nouvelle valeur comparées par le service à l'écriture) → destinataires par `meeting_audience()`, avis par `neg/src/notifications/avis.rs`, événement `negotiation.francophone_meeting.changed` avec la charge `notification`, courriels par une **cible nouvelle `FrancophoneMeeting`** du travail `neg/src/jobs/change_email.rs` avec sa propre composition dans `mail.rs` (lien `/guide-nego/francophonie/reunions/<id>`, titre i18n, heure, lieu, motif) — research R8
-- [ ] T017 [US2] Place obtenue depuis la liste d'attente (désinscription ou capacité relevée) → `negotiation.meeting_registration.promoted` pour chaque personne promue, courriel par un **travail distinct** (clé `promotion:<meeting>:<personne>`) selon l'accord
-- [ ] T018 [P] Tests `neg/tests/reunions_avis.rs` : destinataires, charge émise, courriel posé, accord éteint, aucun avis pour un brouillon
+- [x] T016 [US3] Constantes des deux événements dans `backend/crates/contracts/src/negotiation.rs` ; annulation et changement d'heure ou de lieu d'une réunion publiée (ancienne et nouvelle valeur comparées par le service à l'écriture) → destinataires par `meeting_audience()`, avis par `neg/src/notifications/avis.rs`, événement `negotiation.francophone_meeting.changed` avec la charge `notification`, courriels par une **cible nouvelle `FrancophoneMeeting`** du travail `neg/src/jobs/change_email.rs` avec sa propre composition dans `mail.rs` (lien `/guide-nego/francophonie/reunions/<id>`, titre i18n, heure, lieu, motif) — research R8
+- [x] T017 [US2] Place obtenue depuis la liste d'attente (désinscription ou capacité relevée) → `negotiation.meeting_registration.promoted` pour chaque personne promue, courriel par un **travail distinct** (clé `promotion:<meeting>:<personne>`) selon l'accord
+- [x] T018 [P] Tests `neg/tests/reunions_avis.rs` : destinataires, charge émise, courriel posé, accord éteint, aucun avis pour un brouillon
 
 ## Phase 5 — Plomberie client
 

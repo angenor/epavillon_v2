@@ -80,7 +80,8 @@ pub fn admin_routes(cfg: &mut ServiceConfig) {
 /// Les travaux différés du module : les deux courriels de décision, la purge
 /// des essais de code, l'extraction des documents, l'import des sessions
 /// officielles, la traduction de leurs titres, la publication des
-/// signalements validés et le courriel d'un changement.
+/// signalements validés, le courriel d'un changement et celui d'une place
+/// obtenue à une réunion de la Francophonie.
 ///
 /// **C'est ce seul geste qui fait écouter la file « negotiation ».**
 /// `JobRegistry::queues()` est construite à partir des files que les
@@ -88,7 +89,7 @@ pub fn admin_routes(cfg: &mut ServiceConfig) {
 /// travail déposé dans une file inécoutée s'empile sans erreur, sans trace, et
 /// sans que rien ne l'exécute jamais.
 ///
-/// Les huit déclarent la file par défaut : aucun déclencheur du modèle ne les
+/// Les neuf déclarent la file par défaut : aucun déclencheur du modèle ne les
 /// dépose ailleurs.
 pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc<dyn JobHandler>> {
     let url = config.app_public_url.clone();
@@ -103,6 +104,11 @@ pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc
             url.clone(),
         )),
         Arc::new(jobs::change_email::SessionChangeEmail::new(
+            db.clone(),
+            mailer.clone(),
+            url.clone(),
+        )),
+        Arc::new(jobs::promotion_email::MeetingPromotionEmail::new(
             db.clone(),
             mailer,
             url,

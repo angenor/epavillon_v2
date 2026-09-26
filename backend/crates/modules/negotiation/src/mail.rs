@@ -17,8 +17,8 @@
 
 use kernel::mail::OutgoingMail;
 
-use crate::notifications::avis::{heure_de, jour_en, jour_fr, Etat};
-use crate::repo::courriel::{EtatReunion, EtatSession, SignalementPublie};
+use crate::notifications::avis::{heure_de, jour_en, jour_fr, lieu, Etat};
+use crate::repo::courriel::{EtatReunion, EtatSession, ReunionFrancophone, SignalementPublie};
 
 /// Les deux langues servies. Toute autre valeur de `preferred_locale` retombe
 /// sur le français, comme `platform.t()`.
@@ -275,7 +275,7 @@ pub fn changement_de_session(
             .iter()
             .map(|r| ligne_signalement(r, ville, &s.fuseau, en)),
     );
-    avis_par_courriel(e, etat, titre, &lignes, chemin)
+    avis_par_courriel(e, etat, titre, &lignes, chemin, &SESSIONS)
 }
 
 pub fn reunion_non_annoncee(e: &Envoi<'_>, r: &EtatReunion, chemin: &str) -> OutgoingMail {
@@ -305,8 +305,108 @@ pub fn reunion_non_annoncee(e: &Envoi<'_>, r: &EtatReunion, chemin: &str) -> Out
     } else {
         "Signalée par le réseau et validée par l'IFDD.".to_owned()
     });
-    avis_par_courriel(e, Etat::NonAnnoncee, &r.titre, &lignes, chemin)
+    avis_par_courriel(e, Etat::NonAnnoncee, &r.titre, &lignes, chemin, &SESSIONS)
 }
+
+// ---------------------------------------------------------------------------
+// Réunions de la Francophonie (étape 4) : l'état final, relu au départ.
+// ---------------------------------------------------------------------------
+
+fn titre_de(r: &ReunionFrancophone, en: bool) -> &str {
+    if en {
+        &r.title_en
+    } else {
+        &r.title_fr
+    }
+}
+
+fn horaire_et_lieu(r: &ReunionFrancophone, en: bool) -> Vec<String> {
+    let jour = if en { jour_en(r.jour) } else { jour_fr(r.jour) };
+    let plage = match &r.fin {
+        Some(fin) => format!("{}–{fin}", r.debut),
+        None => r.debut.clone(),
+    };
+    let zone = fuseau(r.ville.as_deref(), &r.fuseau, en);
+    let (ou_fr, ou_en) = lieu(&r.format, r.lieu.as_deref());
+    if en {
+        vec![
+            format!("Time: {jour}, {plage}{zone}"),
+            format!("Where: {ou_en}"),
+        ]
+    } else {
+        vec![
+            format!("Horaire : {jour}, {plage}{zone}"),
+            format!("Lieu : {ou_fr}"),
+        ]
+    }
+}
+
+pub fn changement_de_reunion(
+    e: &Envoi<'_>,
+    r: &ReunionFrancophone,
+    etat: Etat,
+    chemin: &str,
+) -> OutgoingMail {
+    let en = en_anglais(e.locale);
+    let lignes = if etat == Etat::Annulee {
+        let mut l = vec![if en {
+            "The meeting will not take place.".to_owned()
+        } else {
+            "La réunion n'aura pas lieu.".to_owned()
+        }];
+        if let Some(m) = &r.motif {
+            l.push(if en {
+                format!("Reason: {m}")
+            } else {
+                format!("Motif : {m}")
+            });
+        }
+        l
+    } else {
+        horaire_et_lieu(r, en)
+    };
+    avis_par_courriel(e, etat, titre_de(r, en), &lignes, chemin, &REUNIONS)
+}
+
+pub fn place_obtenue(e: &Envoi<'_>, r: &ReunionFrancophone, chemin: &str) -> OutgoingMail {
+    let en = en_anglais(e.locale);
+    let mut lignes = vec![if en {
+        "A place has become available: it is yours.".to_owned()
+    } else {
+        "Une place s'est libérée : elle est à vous.".to_owned()
+    }];
+    lignes.extend(horaire_et_lieu(r, en));
+    avis_par_courriel(
+        e,
+        Etat::Inscrite,
+        titre_de(r, en),
+        &lignes,
+        chemin,
+        &REUNIONS,
+    )
+}
+
+/// Pourquoi la personne reçoit ce courriel, et de quel agenda il vient.
+struct Pied {
+    pourquoi_fr: &'static str,
+    pourquoi_en: &'static str,
+    agenda_fr: &'static str,
+    agenda_en: &'static str,
+}
+
+const SESSIONS: Pied = Pied {
+    pourquoi_fr: "vous suivez cette session dans Guide Négo",
+    pourquoi_en: "you follow this session in Guide Négo",
+    agenda_fr: "Sessions de négociation",
+    agenda_en: "Negotiation sessions",
+};
+
+const REUNIONS: Pied = Pied {
+    pourquoi_fr: "votre inscription à cette réunion est enregistrée dans Guide Négo",
+    pourquoi_en: "your registration for this meeting is recorded in Guide Négo",
+    agenda_fr: "Réunions de la Francophonie",
+    agenda_en: "Francophonie meetings",
+};
 
 fn avis_par_courriel(
     e: &Envoi<'_>,
@@ -314,6 +414,7 @@ fn avis_par_courriel(
     titre: &str,
     lignes: &[String],
     chemin: &str,
+    pied: &Pied,
 ) -> OutgoingMail {
     let en = en_anglais(e.locale);
     let lien = format!("{}{chemin}", e.app_public_url.trim_end_matches('/'));
@@ -322,11 +423,13 @@ fn avis_par_courriel(
             format!("{} — {titre}", etat.en()),
             format!(
                 "Hello,\n\n{} — {titre}\n\n{}\n\nOpen the page:\n\n{lien}\n\n\
-                 You receive this email because you follow this session in Guide Négo. \
+                 You receive this email because {}. \
                  To stop these emails: Guide Négo, About, Notifications.\n\n\
-                 Negotiation sessions — Guide Négo, IFDD",
+                 {} — Guide Négo, IFDD",
                 etat.en(),
                 lignes.join("\n"),
+                pied.pourquoi_en,
+                pied.agenda_en,
             ),
         )
     } else {
@@ -334,11 +437,13 @@ fn avis_par_courriel(
             format!("{} — {titre}", etat.fr()),
             format!(
                 "Bonjour,\n\n{} — {titre}\n\n{}\n\nOuvrir la fiche :\n\n{lien}\n\n\
-                 Vous recevez ce courriel parce que vous suivez cette session dans Guide Négo. \
+                 Vous recevez ce courriel parce que {}. \
                  Pour ne plus en recevoir : Guide Négo, À propos, Notifications.\n\n\
-                 Sessions de négociation — Guide Négo, IFDD",
+                 {} — Guide Négo, IFDD",
                 etat.fr(),
                 lignes.join("\n"),
+                pied.pourquoi_fr,
+                pied.agenda_fr,
             ),
         )
     };

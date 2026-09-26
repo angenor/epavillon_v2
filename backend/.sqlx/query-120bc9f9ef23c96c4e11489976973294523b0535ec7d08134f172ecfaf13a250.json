@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT $2 IN (SELECT negotiation.meeting_audience($1)) AS \"dedans!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "dedans!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "120bc9f9ef23c96c4e11489976973294523b0535ec7d08134f172ecfaf13a250"
+}

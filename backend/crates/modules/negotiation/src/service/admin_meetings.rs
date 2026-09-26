@@ -13,6 +13,8 @@ use crate::domain::admin_meetings::{
     FrancophoneMeetingInput, PavilionActivityOption,
 };
 use crate::domain::sessions::EditionServie;
+use crate::notifications::avis::Etat;
+use crate::notifications::reunions;
 use crate::repo::admin_meetings::{self as repo, Avant, Origine, Saisie};
 use crate::repo::meetings::{self, invalide};
 use crate::repo::{cross, import, meeting_registrations};
@@ -193,31 +195,34 @@ pub async fn modifier(
     };
     if relevee {
         let promues = meeting_registrations::promouvoir(&mut tx, id).await?;
-        prevenir_des_promotions(id, &promues);
+        prevenir_des_promotions(&mut tx, id, &promues).await?;
     }
-    if avant.status == "scheduled" && change_dheure_ou_de_lieu(&avant, &s) {
-        prevenir_dun_changement(id, &avant, &s);
+    if avant.status == "scheduled" {
+        if let Some(etat) = changement(&avant, &s) {
+            reunions::changement(&mut tx, id, etat).await?;
+        }
     }
     let reunion = une(&mut tx, id).await?;
     tx.commit().await?;
     Ok(reunion)
 }
 
-fn change_dheure_ou_de_lieu(avant: &Avant, s: &Saisie) -> bool {
-    avant.start_at != s.start_at
-        || avant.end_at != Some(s.end_at)
-        || avant.format != s.format
-        || avant.venue != s.venue
+/// Comparés à l'écriture, jamais lus dans `meeting_changes`, qui appartient à
+/// l'import (R8). L'heure prime sur le lieu ; le reste ne prévient pas.
+fn changement(avant: &Avant, s: &Saisie) -> Option<Etat> {
+    // La base garde la microseconde : un corps plus fin ne vaut pas un changement.
+    let autre = |a: time::OffsetDateTime, b: time::OffsetDateTime| {
+        (a - b).abs() >= time::Duration::microseconds(1)
+    };
+    let fin_changee = avant.end_at.is_none_or(|fin| autre(fin, s.end_at));
+    if autre(avant.start_at, s.start_at) || fin_changee {
+        Some(Etat::Deplacee)
+    } else if avant.format != s.format || avant.venue != s.venue {
+        Some(Etat::LieuChange)
+    } else {
+        None
+    }
 }
-
-/// T016 : l'avis et le courriel du changement d'heure ou de lieu d'une réunion
-/// publiée partiront d'ici (`meeting_audience()`), l'ancienne et la nouvelle
-/// valeur en main. Rien n'est émis à la phase 3.
-fn prevenir_dun_changement(_meeting_id: Uuid, _avant: &Avant, _apres: &Saisie) {}
-
-/// T016 : l'avis et le courriel de l'annulation, motif compris, partiront d'ici
-/// vers les inscrites et la liste d'attente. Rien n'est émis à la phase 3.
-fn prevenir_de_lannulation(_meeting_id: Uuid, _motif: &str) {}
 
 /// Idempotent sur une réunion déjà publiée ; une annulée ne se republie pas.
 pub async fn publier(
@@ -252,7 +257,7 @@ pub async fn annuler(
     if avant.status != "cancelled" {
         repo::annuler(&mut tx, id, motif).await?;
         if avant.status != "draft" {
-            prevenir_de_lannulation(id, motif);
+            reunions::changement(&mut tx, id, Etat::Annulee).await?;
         }
     }
     let reunion = une(&mut tx, id).await?;
