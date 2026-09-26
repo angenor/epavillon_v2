@@ -13,6 +13,7 @@ pub async fn mon_agenda(state: &NegotiationState, person_id: Uuid) -> Result<MyA
     let mut conn = state.pool().acquire().await?;
     Ok(MyAgenda {
         entries: agenda::lister(&mut conn, person_id).await?,
+        network_entries: agenda::lister_reseau(&mut conn, person_id).await?,
     })
 }
 
@@ -44,6 +45,35 @@ pub async fn retirer(
 ) -> Result<()> {
     let mut tx = state.db().write(ctx).await?;
     agenda::retirer(&mut tx, person_id, session_id).await?;
+    tx.commit().await?;
+    Ok(())
+}
+
+/// Une réunion non annoncée : publiée et non retirée, sinon inconnue.
+pub async fn poser_reunion(
+    state: &NegotiationState,
+    ctx: &RequestContext,
+    person_id: Uuid,
+    network_meeting_id: Uuid,
+    rappel: bool,
+) -> Result<()> {
+    let mut tx = state.db().write(ctx).await?;
+    if !agenda::reunion_affichee(&mut tx, network_meeting_id).await? {
+        return Err(ApiError::new(ErrorCode::NegotiationSessionUnknown));
+    }
+    agenda::poser_reunion(&mut tx, person_id, network_meeting_id, rappel).await?;
+    tx.commit().await?;
+    Ok(())
+}
+
+pub async fn retirer_reunion(
+    state: &NegotiationState,
+    ctx: &RequestContext,
+    person_id: Uuid,
+    network_meeting_id: Uuid,
+) -> Result<()> {
+    let mut tx = state.db().write(ctx).await?;
+    agenda::retirer_reunion(&mut tx, person_id, network_meeting_id).await?;
     tx.commit().await?;
     Ok(())
 }

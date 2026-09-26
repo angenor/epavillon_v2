@@ -1,0 +1,11 @@
+{
+  "tete": "Signalé par le réseau — validé par l'IFDD à {heure}",
+  "motif": {
+    "cancelled": "Annulée",
+    "time": "L'heure a changé",
+    "venue": "La salle a changé",
+    "other": "Autre changement"
+  },
+  "heure": "Nouvelle heure : {heure}",
+  "salle": "Nouvelle salle : {salle}"
+}

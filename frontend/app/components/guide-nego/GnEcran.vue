@@ -7,7 +7,7 @@ import type { AvatarDEntete } from '~/components/guide-nego/GnEntete.vue'
  * Les zones sûres et les marges viennent de `.gn-ecran` (mesures.css) ; rien ici ne
  * les redit.
  */
-withDefaults(
+const props = withDefaults(
   defineProps<{
     titre: string
     sousTitre?: string
@@ -28,6 +28,8 @@ withDefaults(
     titreLong?: boolean
     /** Relayé à l'en-tête : la loupe, sur les écrans racines des onglets. */
     loupe?: boolean
+    /** « Ma journée » et les onglets : la cloche, pour une personne connectée. */
+    cloche?: boolean
   }>(),
   {
     sousTitre: undefined,
@@ -43,10 +45,17 @@ withDefaults(
     terme: false,
     titreLong: false,
     loupe: false,
+    cloche: false,
   },
 )
 
 const { echangesOuverts } = useGnDrapeaux()
+const session = useGnSession()
+const notifications = useGnNotifications()
+const avecCloche = computed(() => props.cloche && session.connectee.value)
+onMounted(() => {
+  if (props.cloche) void session.assurer().then(notifications.assurer)
+})
 const { etat, marquerBandeauVu } = useGnConnexion()
 
 // Le bandeau se montre une fois par épisode : l'écran qui le montre le marque vu et le
@@ -87,8 +96,12 @@ watch(
           <GnLigneConnexion :en-ligne="etat.enLigne" :lu-a="etat.luA" />
         </slot>
       </template>
-      <template v-if="$slots.action" #action>
+      <template v-if="$slots['sous-titre-action']" #sous-titre-action>
+        <slot name="sous-titre-action" />
+      </template>
+      <template v-if="$slots.action || avecCloche" #action>
         <slot name="action" />
+        <GnCloche v-if="avecCloche" :non-lues="notifications.nonLues.value" />
       </template>
     </GnEntete>
     <GnBandeauConnexion v-if="bandeau" :lu-a="etat.luA" :ce-qui-se-lit="ceQuiSeLit" />

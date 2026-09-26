@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT $2 IN (SELECT negotiation.change_recipients($1)) AS \"suit!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "suit!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "3ce63b757fae04f5a40ef342add6a3ecc338aa03581a4ea395173d753c5ac6f4"
+}

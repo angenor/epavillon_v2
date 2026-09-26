@@ -14,6 +14,7 @@ pub const CORRECTION_POST: &str = "negotiation.correction.post";
 pub const CORRECTION_WITHDRAW: &str = "negotiation.correction.withdraw";
 pub const KNOWLEDGE_PUBLISH: &str = "negotiation.knowledge.publish";
 pub const KNOWLEDGE_REVIEW: &str = "negotiation.knowledge.review";
+pub const REPORT_VALIDATE: &str = "negotiation.report.validate";
 
 /// Entrer dans l'espace réservé. C'est ce que le code d'invitation ouvre.
 pub struct SpaceAccess;
@@ -57,4 +58,10 @@ impl PermissionSpec for KnowledgePublish {
 pub struct KnowledgeReview;
 impl PermissionSpec for KnowledgeReview {
     const CODE: &'static str = KNOWLEDGE_REVIEW;
+}
+
+/// Valider, refuser, retirer un signalement du réseau (3b). Portée globale.
+pub struct ReportValidate;
+impl PermissionSpec for ReportValidate {
+    const CODE: &'static str = REPORT_VALIDATE;
 }

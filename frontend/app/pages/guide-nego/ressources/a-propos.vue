@@ -7,7 +7,8 @@ import type { LegalTextKey } from '~/types/platform'
  * obtenu, ce qui reste sur le téléphone et ce qui suit le compte — sans nommer
  * d'hébergeur, sans restitutions, qui n'existent pas.
  *
- * **Aucun interrupteur d'accord** (écart 40) : aucun n'aurait d'effet. Les textes
+ * **Un seul interrupteur d'accord**, « Notifications » — le courriel (3b) ; les deux
+ * autres de la maquette n'auraient pas d'effet (écart 40). Les textes
  * qui engagent viennent de l'API, comme au site ; tant que l'IFDD ne les a pas
  * fournis, la ligne le dit. L'écran se lit sans compte (FR-037).
  */
@@ -18,12 +19,19 @@ const { t } = useI18n()
 const config = useRuntimeConfig()
 
 const edition = useGnEdition()
+const session = useGnSession()
+const reglage = useGnReglageNotifications()
+const courriel = computed({
+  get: () => reglage.courriel.value,
+  set: (allume: boolean) => void reglage.reglerLeCourriel(allume),
+})
 const textes: Record<LegalTextKey, ReturnType<typeof useGnTexte>> = {
   privacy: useGnTexte('privacy'),
   terms: useGnTexte('terms'),
 }
 
 onMounted(() => {
+  void session.assurer().then(reglage.assurer)
   void edition.rafraichir()
   void textes.privacy.rafraichir()
   void textes.terms.rafraichir()
@@ -65,6 +73,16 @@ useHead({ title: t('guide-nego.a-propos.titre') })
 
     <GnEnteteGroupe :titre="t('guide-nego.a-propos.confidentialite.titre')" />
     <p class="gn-a-propos__paragraphe">{{ t('guide-nego.a-propos.confidentialite.texte') }}</p>
+
+    <template v-if="session.connectee.value">
+      <GnEnteteGroupe :titre="t('guide-nego.a-propos.consentements.titre')" />
+      <GnInterrupteur
+        v-model="courriel"
+        :libelle="t('guide-nego.a-propos.consentements.notifications')"
+        :detail="t('guide-nego.a-propos.consentements.notifications-effet')"
+        derniere
+      />
+    </template>
 
     <GnEnteteGroupe :titre="t('guide-nego.a-propos.textes.titre')" />
     <GnLigneReglage

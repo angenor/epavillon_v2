@@ -78,6 +78,8 @@ import { createGuideNegoApi } from './api/guide-nego'
 import { createGuideNegoDocumentsApi } from './api/guide-nego-documents'
 import { createGuideNegoSavoirApi } from './api/guide-nego-savoir'
 import { createNegotiationSessionsApi } from './api/negotiation-sessions'
+import { createNegotiationReportsApi } from './api/negotiation-reports'
+import { createNotificationsApi } from './api/notifications'
 import { createAdminNegotiationDocumentsApi } from './api/admin-negotiation-documents'
 import { createAdminNegotiationSavoirApi } from './api/admin-negotiation-savoir'
 import { createAuthApi } from './api/auth'
@@ -302,6 +304,8 @@ export function useApi() {
       ressource: (chemin, signal) => (http.isConfigured.value ? http.flux(chemin, signal) : Promise.resolve(null)),
     }),
     negotiationSessions: createNegotiationSessionsApi({ send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
+    negotiationReports: createNegotiationReportsApi({ call, send }),
+    notifications: createNotificationsApi({ call, send }),
 
     guideNegoSavoir: createGuideNegoSavoirApi({ send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
     home: createHomeApi(deps),

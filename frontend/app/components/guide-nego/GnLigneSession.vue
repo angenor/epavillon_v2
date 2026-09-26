@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { OfficialSession } from '~/types/negotiation-sessions'
+import type { NetworkMeeting, OfficialSession } from '~/types/negotiation-sessions'
 import type { EtatAffiche } from '~/utils/guide-nego/sessions'
 import { morceauxSurlignes } from '~/utils/guide-nego/lexique'
 
@@ -10,11 +10,16 @@ import { morceauxSurlignes } from '~/utils/guide-nego/lexique'
  *
  * Les heures se lisent dans le fuseau de la COP ; l'écran le nomme une fois au-dessus
  * de la liste, et la ligne le redit à qui l'écoute.
+ *
+ * Une réunion non annoncée (`reunion`) prend la même ligne, sans type, ni titre anglais,
+ * ni accès : elle ne se présente jamais comme une session officielle (FR-018).
  */
 const props = withDefaults(
   defineProps<{
-    session: OfficialSession
-    etat: EtatAffiche
+    /** Une session officielle, ou bien une réunion non annoncée : l'une des deux. */
+    session?: OfficialSession | null
+    reunion?: NetworkMeeting | null
+    etat?: EtatAffiche
     fuseau: string
     /** Le nom du lieu pour « heure d'Antalya » ; à défaut, celui du fuseau. */
     ville?: string | null
@@ -28,40 +33,69 @@ const props = withDefaults(
     /** Les sessions suivies qui la chevauchent : une marque par session, qui la nomme. */
     chevauche?: readonly OfficialSession[]
     rappel?: boolean
+    /** L'heure de validation du dernier encart affiché (« HH:MM ») : le repère « Signalé ». */
+    signale?: string | null
     /** La saisie de la recherche globale, marquée dans les titres. */
     surligne?: string
   }>(),
-  { ville: null, thematique: null, monGroupe: false, forme: 'liste', chevauche: () => [], rappel: false, surligne: '' },
+  {
+    session: null,
+    reunion: null,
+    etat: 'prevue',
+    ville: null,
+    thematique: null,
+    monGroupe: false,
+    forme: 'liste',
+    chevauche: () => [],
+    rappel: false,
+    signale: null,
+    surligne: '',
+  },
 )
 
 const { t, locale } = useI18n()
 const { time, timeRange } = useDateTime()
 const { tr } = useI18nText()
 
-const debut = computed(() => time(props.session.start_at, props.fuseau))
-const fin = computed(() => (props.session.end_at ? time(props.session.end_at, props.fuseau) : null))
+const debutIso = computed(() => props.session?.start_at ?? props.reunion?.start_at ?? null)
+const finIso = computed(() => props.session?.end_at ?? null)
+const debut = computed(() => (debutIso.value ? time(debutIso.value, props.fuseau) : null))
+const fin = computed(() => (finIso.value ? time(finIso.value, props.fuseau) : null))
 const ancienneHeure = computed(() => {
-  const avant = props.session.previous
+  const avant = props.session?.previous
   if (props.etat !== 'deplacee' || !avant) return null
   const ancienne = time(avant.start_at, props.fuseau)
   return ancienne !== debut.value ? ancienne : null
 })
 const heuresEntendues = computed(() =>
-  timeRange(props.session.start_at, props.session.end_at, props.fuseau, props.ville ?? undefined),
+  debutIso.value
+    ? timeRange(debutIso.value, finIso.value, props.fuseau, props.ville ?? undefined)
+    : t('gn-ligne-session.sans-heure'),
 )
 
 /** En anglais, la traduction française n'a rien à faire à l'écran. */
-const traduit = computed(() => (locale.value === 'fr' ? props.session.title_fr : null))
-const titre = computed(() => morceauxSurlignes(traduit.value ?? props.session.title_en, props.surligne))
-const anglais = computed(() => morceauxSurlignes(props.session.title_en, props.surligne))
+const traduit = computed(() => (locale.value === 'fr' ? (props.session?.title_fr ?? null) : null))
+const titreTexte = computed(() => props.reunion?.title ?? traduit.value ?? props.session?.title_en ?? '')
+const titre = computed(() => morceauxSurlignes(titreTexte.value, props.surligne))
+const anglais = computed(() => morceauxSurlignes(props.session?.title_en ?? '', props.surligne))
 
-const type = computed(() => (props.session.type ? tr(props.session.type.label) : null))
+const type = computed(() => (props.session?.type ? tr(props.session.type.label) : null))
 
 const rattachement = computed(() => {
   if (props.monGroupe) return t('gn-ligne-session.mon-groupe')
-  if (props.session.group) return tr(props.session.group.label)
+  if (props.session?.group) return tr(props.session.group.label)
   return props.thematique ?? t('gn-ligne-session.sans-thematique')
 })
+
+const salle = computed(() => props.session?.venue ?? props.reunion?.venue ?? null)
+const nonAnnoncee = computed(() =>
+  props.reunion
+    ? t('gn-ligne-session.non-annoncee', { heure: time(props.reunion.validated_at, props.fuseau) })
+    : null,
+)
+const signaleEntendu = computed(() =>
+  props.signale ? t('gn-ligne-session.signale-entendu', { heure: props.signale }) : null,
+)
 
 const agenda = computed(() => props.forme === 'agenda')
 
@@ -74,8 +108,8 @@ const marquesDeChevauchement = computed(() =>
   }),
 )
 
-const annulee = computed(() => props.etat === 'annulee')
-const terminee = computed(() => props.etat === 'terminee')
+const annulee = computed(() => !!props.session && props.etat === 'annulee')
+const terminee = computed(() => !!props.session && props.etat === 'terminee')
 </script>
 
 <template>
@@ -88,14 +122,31 @@ const terminee = computed(() => props.etat === 'terminee')
       <span class="gn-ligne-session__entendu">{{ heuresEntendues }}</span>
       <s v-if="ancienneHeure" class="gn-ligne-session__ancienne" aria-hidden="true">{{ ancienneHeure }}</s>
       <span
+        v-if="debut"
         class="gn-ligne-session__debut"
-        :class="{ 'gn-ligne-session__debut--en-cours': etat === 'en-cours' }"
+        :class="{ 'gn-ligne-session__debut--en-cours': session && etat === 'en-cours' }"
         aria-hidden="true"
       >{{ debut }}</span>
+      <span v-else class="gn-ligne-session__debut" aria-hidden="true">—</span>
       <span v-if="fin" class="gn-ligne-session__fin" aria-hidden="true">{{ fin }}</span>
     </span>
 
-    <span class="gn-ligne-session__corps">
+    <span v-if="reunion" class="gn-ligne-session__corps">
+      <span class="gn-ligne-session__titre">{{ titreTexte }}</span>
+      <span v-if="agenda" class="gn-ligne-session__lieu">
+        <span v-if="salle" class="gn-ligne-session__salle">{{ salle }}</span>
+        <span v-if="thematique" class="gn-ligne-session__thematique">{{ thematique }}</span>
+      </span>
+      <template v-else>
+        <span v-if="salle" class="gn-ligne-session__lieu">
+          <span class="gn-ligne-session__salle">{{ salle }}</span>
+        </span>
+        <span v-if="thematique" class="gn-ligne-session__thematique">{{ thematique }}</span>
+      </template>
+      <GnMarqueEtat etat="non-annoncee" :libelle="nonAnnoncee ?? undefined" />
+    </span>
+
+    <span v-else-if="session" class="gn-ligne-session__corps">
       <span v-if="type && !agenda" class="gn-ligne-session__type">{{ type }}</span>
       <span class="gn-ligne-session__titre">
         <template v-for="(m, i) in titre" :key="i"><mark v-if="m.marque">{{ m.texte }}</mark><template v-else>{{ m.texte }}</template></template>
@@ -125,6 +176,11 @@ const terminee = computed(() => props.etat === 'terminee')
         <span class="gn-ligne-session__thematique">{{ rattachement }}</span>
       </template>
       <GnEtatSession v-if="!agenda || etat !== 'prevue'" :session="session" :etat="etat" :fuseau="fuseau" />
+      <span v-if="signale" class="gn-ligne-session__signale">
+        <GnPicto nom="diamond" :taille="20" />
+        <span aria-hidden="true">{{ t('gn-ligne-session.signale') }}</span>
+        <span class="gn-hors-ecran">{{ signaleEntendu }}</span>
+      </span>
       <GnMarqueEtat v-for="m in marquesDeChevauchement" :key="m.id" etat="chevauche" :libelle="m.texte" />
       <span v-if="rappel" class="gn-ligne-session__rappel">
         <GnPicto nom="bell" :taille="16" />
@@ -270,6 +326,17 @@ const terminee = computed(() => props.etat === 'terminee')
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
   color: var(--gn-texte-2);
+}
+
+/* Le repère d'un encart : losange, mot, couleur — jamais la couleur seule (FR-017). */
+[data-app="guide-nego"] .gn-ligne-session__signale {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gn-reseau);
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-ligne-session__chevron {

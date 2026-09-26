@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import type { ReportPayload } from '~/types/negotiation-reports'
 import type { OfficialSession } from '~/types/negotiation-sessions'
 import { dayKeyInZone } from '~/utils/datetime'
 import { estDeMonGroupe, etatAffiche } from '~/utils/guide-nego/sessions'
+import { encartsAffiches } from '~/utils/guide-nego/signalements'
+import { adresseDeLaSortie, sortieDuVerrou } from '~/utils/guide-nego/verrou'
 
 /**
  * Écran 08 — la fiche d'une session officielle, lue dans la liste gardée : elle s'ouvre
@@ -23,6 +26,8 @@ const compte = useGnSession()
 const thematiques = useGnThematiques()
 const groupes = useGnGroupes()
 const agenda = useGnAgenda()
+const acces = useGnAcces()
+const signalements = useGnSignalements()
 const lecture = useGnSessions()
 const { affichage, etat, sansEdition } = lecture
 
@@ -53,6 +58,8 @@ onMounted(async () => {
   void relire()
   await compte.assurer()
   agenda.assurer()
+  signalements.assurer()
+  if (compte.connectee.value) void acces.assurer()
   await Promise.all([thematiques.assurerLeVocabulaire(), groupes.assurer()])
 })
 onBeforeUnmount(() => clearInterval(horloge))
@@ -67,6 +74,8 @@ const ville = computed(() => servie.value?.ville ?? undefined)
 
 const etatSession = computed(() => (session.value ? etatAffiche(session.value, maintenant.value, fuseau.value) : null))
 const annulee = computed(() => etatSession.value === 'annulee')
+/** Par-dessus la donnée officielle, jamais à sa place (ADR-010). */
+const encarts = computed(() => (session.value ? encartsAffiches(session.value, maintenant.value, fuseau.value) : []))
 
 /** En anglais, la traduction française n'a rien à faire à l'écran. */
 const traduit = computed(() => (locale.value === 'fr' ? (session.value?.title_fr ?? null) : null))
@@ -137,9 +146,9 @@ const detailDuRappel = computed(() => {
 })
 
 const feuilleCompte = ref(false)
-const message = ref<{ texte: string; action?: string; rang: number } | null>(null)
-const annoncer = (texte: string, action?: string) =>
-  (message.value = { texte, action, rang: (message.value?.rang ?? 0) + 1 })
+const message = ref<{ texte: string; action?: string; agir?: () => void; rang: number } | null>(null)
+const annoncer = (texte: string, action?: string, agir?: () => void) =>
+  (message.value = { texte, action, agir, rang: (message.value?.rang ?? 0) + 1 })
 let rappelAvantRetrait = false
 
 async function basculerAgenda(): Promise<void> {
@@ -150,7 +159,7 @@ async function basculerAgenda(): Promise<void> {
   if (dansLAgenda.value) {
     rappelAvantRetrait = rappel.value
     await agenda.retirer(id.value)
-    annoncer(k('agenda.retiree'), k('agenda.annuler'))
+    annoncer(k('agenda.retiree'), k('agenda.annuler'), annulerLeRetrait)
   } else {
     await agenda.ajouter(id.value)
     annoncer(k('agenda.ajoutee'))
@@ -161,6 +170,47 @@ function annulerLeRetrait(): void {
   message.value = null
   void agenda.ajouter(id.value, rappelAvantRetrait)
 }
+
+// --- Signaler (FR-001 à FR-008) ---------------------------------------------
+
+const feuilleSignaler = ref(false)
+const feuilleReservee = ref(false)
+const envoi = ref(false)
+const refus = ref<string | null>(null)
+
+const sortieReservee = computed(() => sortieDuVerrou(acces.acces.value, compte.connectee.value))
+
+async function ouvrirLeSignalement(): Promise<void> {
+  refus.value = null
+  if (compte.connectee.value) await acces.assurer()
+  if (compte.connectee.value && acces.ouvert.value) feuilleSignaler.value = true
+  else feuilleReservee.value = true
+}
+
+async function envoyerLeSignalement(corps: Omit<ReportPayload, 'client_ref' | 'edition'>): Promise<void> {
+  envoi.value = true
+  try {
+    const issue = await signalements.signaler(corps)
+    feuilleSignaler.value = false
+    if (issue.issue === 'refuse') refus.value = issue.message ?? k('signaler.refuse')
+    else annoncer(k(issue.issue === 'en-attente' ? 'signaler.en-file' : 'signaler.envoye'), k('signaler.voir'), () => void navigateTo(`/guide-nego/negociations/signalements?depuis=${id.value}`))
+  } finally {
+    envoi.value = false
+  }
+}
+
+// Un envoi reparti de la file et refusé se dit ici, où le layout se tait.
+watch(signalements.refus, (avis) => {
+  if (avis?.message) refus.value = avis.message
+})
+
+const monSignalement = computed(() => {
+  const ligne = signalements.enCoursSur(id.value)
+  if (!ligne) return null
+  return ligne.etat === 'en-attente'
+    ? k('signaler.en-attente')
+    : k('signaler.en-cours', { heure: time(ligne.signalement.submitted_at, fuseau.value) })
+})
 
 useHead({ title: titre })
 </script>
@@ -238,6 +288,13 @@ useHead({ title: titre })
         <div class="gn-session__etat">
           <GnEtatSession v-if="etatSession" :session="session" :etat="etatSession" :fuseau="fuseau" />
         </div>
+        <GnEncartSignalement
+          v-for="(e, i) in encarts"
+          :key="`${e.validated_at}-${i}`"
+          :signalement="e"
+          :fuseau="fuseau"
+          :ville="ville"
+        />
       </div>
 
       <div class="gn-session__corps">
@@ -291,6 +348,11 @@ useHead({ title: titre })
           </div>
         </dl>
 
+        <p v-if="monSignalement" class="gn-session__signalement">
+          <GnPicto nom="send" :taille="20" />
+          {{ monSignalement }}
+        </p>
+
         <p class="gn-session__origine">
           <GnPicto nom="check-circle" :taille="18" />
           {{ luA ? k('origine-lue', { moment: luA }) : k('origine') }}
@@ -332,7 +394,23 @@ useHead({ title: titre })
         >
           {{ k('agenda.ajouter') }}
         </GnBouton>
+        <p v-if="refus" class="gn-session__refus" role="alert">
+          <GnPicto nom="warn" :taille="20" />
+          {{ refus }}
+        </p>
+        <GnBouton variante="secondaire" picto="flag" @clic="ouvrirLeSignalement">
+          {{ k('signaler.bouton') }}
+        </GnBouton>
       </div>
+
+      <GnFeuilleSignaler
+        v-model="feuilleSignaler"
+        :session="session"
+        :fuseau="fuseau"
+        :ville="ville"
+        :envoi="envoi"
+        @envoyer="envoyerLeSignalement"
+      />
     </div>
 
     <GnFeuilleBasse v-model="feuilleCompte" :titre="k('compte.titre')" :sous-titre="k('compte.texte')">
@@ -342,12 +420,28 @@ useHead({ title: titre })
       </div>
     </GnFeuilleBasse>
 
+    <GnFeuilleBasse
+      v-model="feuilleReservee"
+      :titre="t('gn-verrou.titre')"
+      :sous-titre="k('signaler.reserve')"
+      :fermeture="k('signaler.fermer')"
+    >
+      <div class="gn-session__sorties-compte">
+        <GnBouton :vers="adresseDeLaSortie(sortieReservee)" :picto="sortieReservee === 'compte' ? 'user' : 'lock'">
+          {{ t(`gn-verrou.sortie.${sortieReservee}`) }}
+        </GnBouton>
+        <GnBouton v-if="sortieReservee === 'compte'" variante="secondaire" vers="/guide-nego/connexion">
+          {{ t('gn-verrou.sortie.connexion') }}
+        </GnBouton>
+      </div>
+    </GnFeuilleBasse>
+
     <GnMessageEphemere
       v-if="message"
       :key="message.rang"
       :texte="message.texte"
       :action="message.action"
-      @agir="annulerLeRetrait"
+      @agir="message.agir?.()"
       @fini="message = null"
     />
   </GnEcran>
@@ -546,6 +640,32 @@ useHead({ title: titre })
   gap: var(--gn-espace-8);
   border-top: var(--gn-filet-1) solid var(--gn-filet);
   background: var(--gn-fond);
+}
+
+[data-app="guide-nego"] .gn-session__signalement,
+[data-app="guide-nego"] .gn-session__refus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+  font-weight: var(--gn-graisse-gras);
+}
+
+[data-app="guide-nego"] .gn-session__signalement {
+  min-height: var(--gn-cible);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  color: var(--gn-etat-envoye);
+}
+
+[data-app="guide-nego"] .gn-session__refus {
+  align-items: flex-start;
+  color: var(--gn-danger);
+}
+
+[data-app="guide-nego"] .gn-session__refus .gn-picto,
+[data-app="guide-nego"] .gn-session__signalement .gn-picto {
+  flex: none;
 }
 
 [data-app="guide-nego"] .gn-session__sorties-compte {

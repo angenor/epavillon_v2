@@ -19,12 +19,22 @@ pub struct FollowedTheme {
 #[derive(Debug, Clone, Serialize)]
 pub struct MyThemes {
     pub themes: Vec<FollowedTheme>,
+    /// Les thématiques suivies dont on est prévenu des changements.
+    pub notify: Vec<String>,
 }
 
 impl MyThemes {
-    /// L'empreinte de **l'état**, pas de sa représentation.
+    /// L'empreinte de **l'état**, pas de sa représentation — `notify` compris,
+    /// sinon un autre appareil reçoit `304` et garde l'ancien réglage. Sans
+    /// thématique allumée, elle reste celle d'avant l'étape 3b.
     pub fn empreinte(&self) -> String {
-        empreinte_des_codes(self.themes.iter().map(|t| t.code.as_str()))
+        let allumees: Vec<String> = self.notify.iter().map(|c| format!("!{c}")).collect();
+        empreinte_des_codes(
+            self.themes
+                .iter()
+                .map(|t| t.code.as_str())
+                .chain(allumees.iter().map(String::as_str)),
+        )
     }
 }
 
@@ -53,5 +63,19 @@ mod tests {
         assert_eq!(a, b);
         assert_ne!(a, empreinte_des_codes(["adaptation"]));
         assert!(a.starts_with('"') && a.ends_with('"') && a.len() == 34);
+    }
+
+    #[test]
+    fn lempreinte_change_avec_notify() {
+        use super::{FollowedTheme, MyThemes};
+        let mes = |notify: &[&str]| MyThemes {
+            themes: vec![FollowedTheme {
+                code: "finance".into(),
+                followed_at: time::OffsetDateTime::UNIX_EPOCH,
+            }],
+            notify: notify.iter().map(|c| (*c).to_owned()).collect(),
+        };
+        assert_eq!(mes(&[]).empreinte(), empreinte_des_codes(["finance"]));
+        assert_ne!(mes(&["finance"]).empreinte(), mes(&[]).empreinte());
     }
 }

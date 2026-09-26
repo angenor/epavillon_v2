@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.theme_subscriptions s\n            SET notify_changes = (t.code = ANY($2::text[]))\n           FROM reference.taxonomy_terms t\n          WHERE t.id = s.theme_term_id\n            AND s.person_id = $1 AND s.left_at IS NULL\n            AND s.notify_changes IS DISTINCT FROM (t.code = ANY($2::text[]))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "42ff15dedda75252946f696ab46ff7cb40059460dd5ab026686e4e4faf4e1a9a"
+}

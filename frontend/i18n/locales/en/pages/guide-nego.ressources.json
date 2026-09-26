@@ -4,5 +4,7 @@
   "documents": "Negotiation documents",
   "profil": "Profile and settings",
   "mes-documents": "My documents",
-  "faq": "FAQ"
+  "faq": "FAQ",
+  "validation": "Validation",
+  "validation-compteur": "{count} to review"
 }

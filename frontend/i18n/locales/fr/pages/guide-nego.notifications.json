@@ -1,0 +1,29 @@
+{
+  "titre": "Notifications",
+  "chargement": "Lecture de vos notifications",
+  "non-lues": "{count} non lue | {count} non lue | {count} non lues",
+  "toutes-lues": "Tout est lu",
+  "tout-marquer": "Tout marquer comme lu",
+  "aujourdhui": "Aujourd'hui",
+  "hier": "Hier, {jour}",
+  "regler": "Régler les notifications par thématique",
+  "profil": "Profil",
+  "vide": {
+    "titre": "Aucune notification pour l'instant",
+    "texte": "Un changement d'heure, de salle ou une annulation sur une session de « Mon agenda » s'affichera ici."
+  },
+  "sans-compte": {
+    "titre": "Les notifications suivent votre compte",
+    "texte": "Connectez-vous pour retrouver les changements de vos sessions.",
+    "connexion": "Me connecter"
+  },
+  "jamais-lu": {
+    "titre": "Pas encore lues sur cet appareil",
+    "texte": "Vos notifications s'afficheront au retour du réseau."
+  },
+  "erreur": {
+    "titre": "Lecture impossible",
+    "texte": "Vos notifications n'ont pas pu être lues.",
+    "reessayer": "Réessayer"
+  }
+}

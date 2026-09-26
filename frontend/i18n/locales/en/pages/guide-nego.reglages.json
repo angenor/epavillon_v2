@@ -35,7 +35,8 @@
     "nombre-de-thematiques": "{count} theme followed | {count} theme followed | {count} themes followed",
     "telechargements": "My downloads",
     "telechargements-place": "{count} document · {place} | {count} document · {place} | {count} documents · {place}",
-    "telechargements-vide": "No document kept"
+    "telechargements-vide": "No document kept",
+    "signalements": "My reports"
   },
   "application": {
     "titre": "App",
@@ -47,5 +48,12 @@
       "hier": "Yesterday, {heure}",
       "avant": "{jour}, {heure}"
     }
+  },
+  "notifications": {
+    "titre": "Notifications by theme",
+    "agenda": "Sessions in “My agenda” always notify you. A theme switched on adds its other sessions.",
+    "detail": "Every session in this theme, even outside your agenda",
+    "choisir": "My themes",
+    "choisir-detail": "No theme followed: choose one to set its notifications"
   }
 }

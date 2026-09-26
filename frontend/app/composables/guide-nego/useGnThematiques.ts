@@ -89,9 +89,11 @@ export function useGnThematiques() {
    * de lecture et l'empreinte ne bougent pas — elles disent l'état du serveur,
    * pas ce qu'on veut lui écrire.
    */
-  async function appliquer(codes: string[]): Promise<void> {
+  async function appliquer(codes: string[], notify?: string[]): Promise<void> {
     const etat = suivis.etat.value
-    const valeur: EtatDesThematiques = { codes, empreinte: etat.valeur?.empreinte ?? null }
+    // Une thématique qu'on ne suit plus ne prévient plus : l'API fait de même.
+    const allumees = (notify ?? etat.valeur?.notify ?? []).filter((c) => codes.includes(c))
+    const valeur: EtatDesThematiques = { codes, notify: allumees, empreinte: etat.valeur?.empreinte ?? null }
     suivis.etat.value = { ...etat, valeur, pret: true }
     await ecrireGarde({
       cle: CLE_LECTURE_SUIVIS,
@@ -128,6 +130,10 @@ export function useGnThematiques() {
     vocabulaireLuA,
     vocabulaireLu,
     mesCodes,
+    /** « Notifications par thématique » : les suivies allumées (FR-031). */
+    notifiees: computed<string[]>(() => suivis.etat.value.valeur?.notify ?? []),
+    /** L'affichage immédiat d'un réglage parti dans la file — voir `useGnReglageNotifications`. */
+    appliquerLesNotifiees: (codes: string[]) => appliquer(mesCodes.value, codes),
     empreinte,
     pret,
     luA,

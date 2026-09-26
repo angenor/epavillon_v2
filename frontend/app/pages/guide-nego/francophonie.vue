@@ -11,6 +11,7 @@ useHead({ title: t('guide-nego.francophonie.titre') })
   <GnEcran
     :titre="t('guide-nego.francophonie.titre')"
     :sous-titre="t('guide-nego.francophonie.sous-titre')"
+    cloche
   >
     <GnEtatVide
       picto="franco"

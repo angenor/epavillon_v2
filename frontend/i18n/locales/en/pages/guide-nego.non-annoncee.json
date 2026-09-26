@@ -1,0 +1,28 @@
+{
+  "titre": "Report an unannounced meeting",
+  "fil": "Negotiation sessions · {jour}",
+  "chargement": "Reading your access",
+  "propos": "Side meetings, restricted consultations: what is not in the official schedule.",
+  "quoi": "What",
+  "quoi-requis": "Say in a few words which meeting this is.",
+  "ou": "Where",
+  "quand": "When",
+  "quand-aide": "When: {zone}.",
+  "thematique": "Theme",
+  "autre": "Other",
+  "bouclier": "An administrator checks before anything is shown. The meeting will appear as “Unannounced — reported by the network”.",
+  "envoyer": "Send",
+  "annuler": "Cancel",
+  "refuse": "The report could not be sent. Please try again.",
+  "envoye": {
+    "titre": "Report sent.",
+    "texte": "Being checked. Nothing is shown until an administrator has validated it.",
+    "voir": "View my reports",
+    "retour": "Back to sessions"
+  },
+  "verrou": {
+    "propos": "Reporting an unannounced meeting is reserved for negotiators.",
+    "reste": "Negotiation sessions remain readable without a code.",
+    "retour": "Back to sessions"
+  }
+}

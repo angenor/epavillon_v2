@@ -1,0 +1,30 @@
+{
+  "titre": "Unannounced meeting",
+  "fil": "Negotiation sessions · Reported by the network",
+  "chargement": "Reading the meeting",
+  "hors-connexion": "Changes made since are not shown here.",
+  "sortie": "See negotiation sessions",
+  "intertitre": "Reported by the network",
+  "cle": {
+    "heure": "Time",
+    "lieu": "Place",
+    "thematique": "Thematic area"
+  },
+  "heure-precision": "{jour} · {zone} ({decalage})",
+  "sans-heure": "Time not specified",
+  "sans-lieu": "Place not specified",
+  "sans-thematique": "Thematic area not specified",
+  "phrase": "This meeting is not in the official UNFCCC programme. A network member reported it; IFDD checked it before displaying it.",
+  "agenda": {
+    "ajouter": "Add to my agenda",
+    "dedans": "In my agenda",
+    "ajoutee": "Added to your agenda.",
+    "retiree": "Removed from your agenda.",
+    "annuler": "Undo"
+  },
+  "compte": "Create an account or sign in to keep this meeting in your agenda. The page itself can be read without an account.",
+  "inconnue": {
+    "titre": "Meeting not found",
+    "texte": "This meeting is no longer displayed: IFDD withdrew it, or its day is over."
+  }
+}

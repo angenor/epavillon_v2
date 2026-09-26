@@ -5,7 +5,7 @@ use kernel::error::Result;
 use sqlx::postgres::PgConnection;
 use uuid::Uuid;
 
-use crate::domain::agenda::AgendaEntry;
+use crate::domain::agenda::{AgendaEntry, NetworkAgendaEntry};
 
 pub async fn lister(conn: &mut PgConnection, person_id: Uuid) -> Result<Vec<AgendaEntry>> {
     let lignes = sqlx::query!(
@@ -90,6 +90,84 @@ pub async fn retirer(conn: &mut PgConnection, person_id: Uuid, meeting_id: Uuid)
         "DELETE FROM negotiation.agenda_entries WHERE person_id = $1 AND meeting_id = $2",
         person_id,
         meeting_id
+    )
+    .execute(conn)
+    .await?;
+    Ok(())
+}
+
+pub async fn lister_reseau(
+    conn: &mut PgConnection,
+    person_id: Uuid,
+) -> Result<Vec<NetworkAgendaEntry>> {
+    let lignes = sqlx::query!(
+        r#"SELECT e.network_meeting_id,
+                  (e.remind_before IS NOT NULL AND n.withdrawn_at IS NULL) AS "remind!",
+                  e.added_at
+             FROM negotiation.network_agenda_entries e
+             JOIN negotiation.network_meetings n ON n.id = e.network_meeting_id
+            WHERE e.person_id = $1
+            ORDER BY n.day, n.start_at NULLS LAST, e.network_meeting_id"#,
+        person_id
+    )
+    .fetch_all(conn)
+    .await?;
+    Ok(lignes
+        .into_iter()
+        .map(|l| NetworkAgendaEntry {
+            network_meeting_id: l.network_meeting_id,
+            remind: l.remind,
+            added_at: l.added_at,
+        })
+        .collect())
+}
+
+/// Une réunion non annoncée publiée et non retirée.
+pub async fn reunion_affichee(conn: &mut PgConnection, id: Uuid) -> Result<bool> {
+    Ok(sqlx::query_scalar!(
+        r#"SELECT EXISTS (
+               SELECT 1 FROM negotiation.network_meetings n
+                 JOIN negotiation.session_reports r ON r.id = n.report_id
+                WHERE n.id = $1 AND n.withdrawn_at IS NULL AND r.published_at IS NOT NULL
+           ) AS "existe!""#,
+        id
+    )
+    .fetch_one(conn)
+    .await?)
+}
+
+pub async fn poser_reunion(
+    conn: &mut PgConnection,
+    person_id: Uuid,
+    network_meeting_id: Uuid,
+    rappel: bool,
+) -> Result<()> {
+    sqlx::query!(
+        "INSERT INTO negotiation.network_agenda_entries (person_id, network_meeting_id, remind_before)
+         VALUES ($1, $2, CASE WHEN $3 THEN interval '15 minutes' END)
+         ON CONFLICT (person_id, network_meeting_id) DO UPDATE
+            SET remind_before = EXCLUDED.remind_before
+          WHERE negotiation.network_agenda_entries.remind_before
+                IS DISTINCT FROM EXCLUDED.remind_before",
+        person_id,
+        network_meeting_id,
+        rappel
+    )
+    .execute(conn)
+    .await?;
+    Ok(())
+}
+
+pub async fn retirer_reunion(
+    conn: &mut PgConnection,
+    person_id: Uuid,
+    network_meeting_id: Uuid,
+) -> Result<()> {
+    sqlx::query!(
+        "DELETE FROM negotiation.network_agenda_entries
+          WHERE person_id = $1 AND network_meeting_id = $2",
+        person_id,
+        network_meeting_id
     )
     .execute(conn)
     .await?;

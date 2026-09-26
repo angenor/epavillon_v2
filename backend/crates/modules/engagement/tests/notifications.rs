@@ -30,6 +30,7 @@ fn fil() -> FilQuery {
         unread_only: false,
         limit: None,
         before: None,
+        module: None,
     }
 }
 
@@ -253,6 +254,7 @@ async fn trois_faits_de_meme_cle_forment_une_ligne() {
         &bac.ctx(),
         terrain.inscrits[0],
         &notifications::MarquagePayload { ids: None },
+        None,
     )
     .await
     .expect("marquage");

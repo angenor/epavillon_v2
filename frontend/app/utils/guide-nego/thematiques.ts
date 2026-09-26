@@ -37,10 +37,12 @@ export interface ThematiqueGardee {
  */
 export interface EtatDesThematiques {
   codes: string[]
+  /** Les suivies dont on est prévenu (3b) ; absent d'une garde d'avant. */
+  notify?: string[]
   empreinte: string | null
 }
 
-export const AUCUNE_THEMATIQUE: EtatDesThematiques = { codes: [], empreinte: null }
+export const AUCUNE_THEMATIQUE: EtatDesThematiques = { codes: [], notify: [], empreinte: null }
 
 export function thematiquesGardees(termes: TaxonomyTerm[]): ThematiqueGardee[] {
   return termes
@@ -58,6 +60,7 @@ export function libelleDe(thematique: ThematiqueGardee, locale: string): string 
 export function etatDesThematiques(mes: MyThemes | null, empreinte: string | null): EtatDesThematiques {
   return {
     codes: [...new Set((mes?.themes ?? []).map((t) => t.code))].sort(),
+    notify: [...new Set(mes?.notify ?? [])].sort(),
     empreinte,
   }
 }

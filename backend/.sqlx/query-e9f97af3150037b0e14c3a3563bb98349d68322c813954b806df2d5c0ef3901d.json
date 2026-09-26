@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.network_meetings\n               (event_id, report_id, title, venue, start_at, day, theme_term_id, validated_at)\n           SELECT event_id, id, what, proposed_venue, proposed_start, proposed_day,\n                  theme_term_id, decided_at\n             FROM negotiation.session_reports WHERE id = $1\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.network_meetings",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "e9f97af3150037b0e14c3a3563bb98349d68322c813954b806df2d5c0ef3901d"
+}

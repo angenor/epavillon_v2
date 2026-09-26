@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * La loupe de l'en-tête, à gauche de « Aa », sur les écrans racines des onglets : elle
- * ouvre la recherche globale (écart 51 de 05-design.md — la maquette dessine l'écran,
+ * ouvre la recherche globale (écart 62 de 05-design.md — la maquette dessine l'écran,
  * pas le chemin qui y mène).
  */
 withDefaults(defineProps<{ ouverte?: boolean }>(), { ouverte: false })

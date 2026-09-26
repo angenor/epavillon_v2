@@ -60,5 +60,22 @@ export function createNegotiationSessionsApi({ send, lireEtiquete, ecrireEtiquet
         async () => (await exemples()).retirerUneSession(sessionId),
         'DELETE',
       ),
+
+    /** Une réunion non annoncée. Idempotent ; retirée ou non publiée : `404 NEGOTIATION_SESSION_UNKNOWN`. */
+    garderUneReunion: (id: Uuid, remind: boolean): Promise<void> =>
+      send(
+        `/negotiation/me/agenda/network/${id}`,
+        { remind },
+        async () => (await exemples()).garderUneReunion(id, remind),
+        'PUT',
+      ),
+
+    retirerUneReunion: (id: Uuid): Promise<void> =>
+      send(
+        `/negotiation/me/agenda/network/${id}`,
+        {},
+        async () => (await exemples()).retirerUneReunion(id),
+        'DELETE',
+      ),
   }
 }

@@ -50,6 +50,8 @@ const texte = computed(() => {
         {{ t('gn-lecture-impossible.reessayer') }}
       </GnBouton>
     </div>
+    <!-- Ce qui reste affiché malgré la coupure : les réunions signalées par le réseau (FR-022). -->
+    <p v-if="$slots.default" class="gn-lecture-impossible__garde"><slot /></p>
   </div>
 </template>
 
@@ -86,8 +88,19 @@ const texte = computed(() => {
   padding-block-start: var(--gn-espace-8);
 }
 
+[data-app="guide-nego"] .gn-lecture-impossible__garde {
+  padding-block-start: var(--gn-espace-8);
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: var(--gn-texte-2);
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+}
+
 /* Le pictogramme du bouton garde la couleur du bouton, pas le rouge de l'alerte. */
-[data-app="guide-nego"] .gn-lecture-impossible__sorties .gn-picto {
+[data-app="guide-nego"] .gn-lecture-impossible__sorties .gn-picto,
+[data-app="guide-nego"] .gn-lecture-impossible__garde .gn-picto {
   color: inherit;
 }
 </style>

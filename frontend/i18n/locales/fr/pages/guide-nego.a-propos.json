@@ -22,5 +22,10 @@
     "police-licence": "SIL Open Font License 1.1",
     "bibliotheques": "Vue, Nuxt, Vue Router, Vue I18n, Pinia, ofetch",
     "bibliotheques-licence": "Licence MIT"
+  },
+  "consentements": {
+    "titre": "Consentements",
+    "notifications": "Notifications",
+    "notifications-effet": "Les changements de vos sessions vous arrivent aussi par courriel. L'application vous prévient toujours."
   }
 }

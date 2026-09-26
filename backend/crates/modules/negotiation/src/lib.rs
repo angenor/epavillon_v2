@@ -33,6 +33,7 @@ pub mod domain;
 pub mod import;
 pub mod jobs;
 pub mod mail;
+pub mod notifications;
 pub mod pdf;
 pub mod repo;
 pub mod routes;
@@ -42,7 +43,8 @@ pub mod state;
 pub use state::NegotiationState;
 
 /// Ce que l'application appelle : l'accès, les thématiques et les groupes
-/// suivis, les documents, les sessions officielles et « Mon agenda ».
+/// suivis, les documents, les sessions officielles, « Mon agenda » et les
+/// signalements.
 ///
 /// Les chemins sont plats et vivent sous `/negotiation` — aucun autre module
 /// n'y dépose, il n'y a donc rien à composer côté API.
@@ -54,9 +56,12 @@ pub fn routes(cfg: &mut ServiceConfig) {
     routes::sessions::configurer(cfg);
     routes::groups::configurer(cfg);
     routes::agenda::configurer(cfg);
+    routes::reports::configurer(cfg);
+    routes::notifications::configurer(cfg);
 }
 
-/// Le back-office : l'admission, les documents, l'import des sessions.
+/// Le back-office : l'admission, les documents, l'import des sessions, la
+/// validation des signalements.
 ///
 /// **Des routes plates, jamais un `web::scope("/admin")`** : le préfixe
 /// d'administration est partagé avec cinq autres modules, et deux scopes du même
@@ -69,12 +74,14 @@ pub fn admin_routes(cfg: &mut ServiceConfig) {
     routes::admin_savoir::configurer(cfg);
     routes::admin_file::configurer(cfg);
     routes::admin_import::configurer(cfg);
+    routes::admin_reports::configurer(cfg);
 }
 
 /// Les travaux différés du module : les deux courriels de décision, celui de
 /// la réponse d'un expert et celui d'un terme proposé publié, la purge
 /// des essais de code, l'extraction des documents, l'import des sessions
-/// officielles et la traduction de leurs titres.
+/// officielles, la traduction de leurs titres, la publication des
+/// signalements validés et le courriel d'un changement.
 ///
 /// **C'est ce seul geste qui fait écouter la file « negotiation ».**
 /// `JobRegistry::queues()` est construite à partir des files que les
@@ -82,7 +89,7 @@ pub fn admin_routes(cfg: &mut ServiceConfig) {
 /// travail déposé dans une file inécoutée s'empile sans erreur, sans trace, et
 /// sans que rien ne l'exécute jamais.
 ///
-/// Les huit déclarent la file par défaut : aucun déclencheur du modèle ne les
+/// Les dix déclarent la file par défaut : aucun déclencheur du modèle ne les
 /// dépose ailleurs.
 pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc<dyn JobHandler>> {
     let url = config.app_public_url.clone();
@@ -100,7 +107,15 @@ pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc
             mailer.clone(),
             url.clone(),
         )),
-        Arc::new(jobs::emails::SendPublishedEmail::new(mailer, url)),
+        Arc::new(jobs::emails::SendPublishedEmail::new(
+            mailer.clone(),
+            url.clone(),
+        )),
+        Arc::new(jobs::change_email::SessionChangeEmail::new(
+            db.clone(),
+            mailer,
+            url,
+        )),
         Arc::new(jobs::purge::PurgeInvitationAttempts::new(db.clone())),
         Arc::new(jobs::extract::ExtractDocument::new(
             db.clone(),
@@ -112,8 +127,10 @@ pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc
             traducteur.is_some(),
         )),
         Arc::new(jobs::traduction::TranslateSessionTitles::new(
-            db, traducteur,
+            db.clone(),
+            traducteur,
         )),
+        Arc::new(jobs::publish::PublishReport::new(db)),
     ]
 }
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { OfficialSession } from '~/types/negotiation-sessions'
+import type { Notification } from '~/types/engagement'
+import type { NetworkMeeting, NetworkReport, OfficialSession } from '~/types/negotiation-sessions'
 import type { EtatAffiche } from '~/utils/guide-nego/sessions'
 
 /**
@@ -38,6 +39,7 @@ function specimen(id: string, champs: Partial<OfficialSession>): OfficialSession
     cancelled: null,
     source_url: null,
     read_at: le12('11:35'),
+    network_reports: [],
     ...champs,
   }
 }
@@ -124,6 +126,39 @@ const fonds = computed(() =>
 const retiree = computed(() =>
   specimen('retiree', { status: 'cancelled', cancelled: { at: le12('07:10'), reason: 'removed' } }),
 )
+const feuilleSignaler = ref(false)
+
+const encarts = computed<NetworkReport[]>(() => [
+  { reason: 'venue', proposed_start: null, proposed_venue: k('salle-9'), detail: k('encart-salle'), validated_at: le12('11:12') },
+  { reason: 'cancelled', proposed_start: null, proposed_venue: null, detail: k('encart-annulee'), validated_at: le12('11:38') },
+])
+
+const reunions = computed<NetworkMeeting[]>(() => [
+  { id: 'aparte', title: k('aparte'), venue: k('couloir'), start_at: le12('16:30'), day: '2026-11-12', theme: 'adaptation', validated_at: le12('11:12') },
+  { id: 'sans-heure', title: k('point-sahel'), venue: null, start_at: null, day: '2026-11-12', theme: null, validated_at: le12('11:20') },
+])
+
+const avis = (id: string, type_code: string, variables: Record<string, unknown>, heure: string, lue: boolean): Notification => ({
+  id,
+  type_code,
+  title: { fr: k(`notif-${id}`) },
+  body: { fr: k(`notif-${id}-corps`) },
+  variables,
+  link_path: VERS,
+  subject_schema: null,
+  subject_table: null,
+  subject_id: null,
+  group_count: 1,
+  read_at: lue ? le12('11:40') : null,
+  created_at: le12(heure),
+})
+
+const notifications = computed<Notification[]>(() => [
+  avis('aparte', 'negotiation.network_meeting.published', { reason: 'unannounced' }, '11:12', false),
+  avis('genre', 'negotiation.meeting.changed', { change: 'deplacee' }, '09:48', false),
+  avis('transition', 'negotiation.meeting.changed', { change: 'annulee' }, '09:30', true),
+])
+
 const reportee = computed(() =>
   specimen('reportee', { status: 'cancelled', cancelled: { at: le12('08:45'), reason: 'postponed' } }),
 )
@@ -150,6 +185,41 @@ const reportee = computed(() =>
           :mon-groupe="l.monGroupe ?? false"
           :vers="VERS"
         />
+      </div>
+
+      <span class="gn-planche-composants__legende">{{ k('reseau') }}</span>
+      <div class="gn-planche-composants__vitrine">
+        <GnLigneSession
+          :session="lignes[2]!.session"
+          :etat="lignes[2]!.etat"
+          :fuseau="FUSEAU"
+          :ville="VILLE"
+          :thematique="k('thematique-genre')"
+          signale="11:12"
+          :vers="VERS"
+        />
+        <GnLigneSession
+          v-for="r in reunions"
+          :key="r.id"
+          :reunion="r"
+          :fuseau="FUSEAU"
+          :ville="VILLE"
+          :thematique="r.theme ? k('thematique-adaptation') : null"
+          :vers="VERS"
+        />
+        <GnLigneSession
+          forme="agenda"
+          :reunion="reunions[0]"
+          :fuseau="FUSEAU"
+          :ville="VILLE"
+          :thematique="k('thematique-adaptation')"
+          :vers="VERS"
+        />
+      </div>
+
+      <span class="gn-planche-composants__legende">{{ k('encart') }}</span>
+      <div class="gn-planche-composants__vitrine">
+        <GnEncartSignalement v-for="e in encarts" :key="e.reason" :signalement="e" :fuseau="FUSEAU" :ville="VILLE" />
       </div>
 
       <span class="gn-planche-composants__legende">{{ k('agenda') }}</span>
@@ -197,9 +267,45 @@ const reportee = computed(() =>
         <GnValeurChangee :valeur="k('salle-4')" forte eteinte />
       </div>
 
+      <span class="gn-planche-composants__legende">{{ k('signaler') }}</span>
+      <div class="gn-planche-composants__vitrine">
+        <GnBouton variante="secondaire" picto="flag" @clic="feuilleSignaler = true">{{ k('signaler-ouvrir') }}</GnBouton>
+        <GnFeuilleSignaler
+          v-model="feuilleSignaler"
+          :session="lignes[2]!.session"
+          :fuseau="FUSEAU"
+          :ville="VILLE"
+          @envoyer="feuilleSignaler = false"
+        />
+      </div>
+
+      <span class="gn-planche-composants__legende">{{ k('cloche') }}</span>
+      <div class="gn-planche-composants__vitrine">
+        <div class="gn-planche-composants__rangee">
+          <GnCloche :non-lues="0" vers="#" />
+          <GnCloche :non-lues="3" vers="#" />
+          <GnCloche :non-lues="12" vers="#" />
+        </div>
+      </div>
+
+      <span class="gn-planche-composants__legende">{{ k('notifications') }}</span>
+      <div class="gn-planche-composants__vitrine">
+        <GnLigneNotification
+          v-for="(n, i) in notifications"
+          :key="n.id"
+          :notification="n"
+          :fuseau="FUSEAU"
+          :derniere="i === notifications.length - 1"
+        />
+      </div>
+
       <span class="gn-planche-composants__legende">{{ k('coupure') }}</span>
       <div class="gn-planche-composants__vitrine">
-        <GnLectureImpossible raison="unreachable" :depuis="le12('06:40')" programme="https://unfccc.int" />
+        <GnLectureImpossible raison="unreachable" :depuis="le12('06:40')" programme="https://unfccc.int">
+          <GnPicto nom="info" :taille="18" />
+          {{ k('reseau-garde') }}
+        </GnLectureImpossible>
+        <GnLigneSession :reunion="reunions[0]" :fuseau="FUSEAU" :ville="VILLE" :thematique="k('thematique-adaptation')" :vers="VERS" />
       </div>
       <div class="gn-planche-composants__vitrine">
         <GnLectureImpossible raison="disabled" programme="https://unfccc.int" />

@@ -37,7 +37,7 @@ useHead({ title: t('guide-nego.echanges.titre') })
 </script>
 
 <template>
-  <GnEcran :titre="t('guide-nego.echanges.titre')" :sous-titre="t('guide-nego.echanges.sous-titre')">
+  <GnEcran :titre="t('guide-nego.echanges.titre')" :sous-titre="t('guide-nego.echanges.sous-titre')" cloche>
     <!-- Sans accès, le verrou remplace le contenu — titre et sous-titre de
          l'écran restent visibles, comme la maquette les garde. -->
     <GnVerrou

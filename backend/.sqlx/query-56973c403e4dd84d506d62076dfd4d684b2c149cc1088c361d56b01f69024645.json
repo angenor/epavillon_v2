@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE engagement.notification_types SET is_active = false WHERE code = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "56973c403e4dd84d506d62076dfd4d684b2c149cc1088c361d56b01f69024645"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.session_reports\n            SET withdrawn_at = $2, withdrawal = 'caught_up'\n          WHERE id = ANY($1) AND withdrawn_at IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d54a3e534e306e6c80d188fdd1d79a890f115149eee6c512ef32c315091e89f4"
+}

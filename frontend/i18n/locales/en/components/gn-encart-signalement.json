@@ -1,0 +1,11 @@
+{
+  "tete": "Reported by the network — confirmed by IFDD at {heure}",
+  "motif": {
+    "cancelled": "Cancelled",
+    "time": "The time has changed",
+    "venue": "The room has changed",
+    "other": "Other change"
+  },
+  "heure": "New time: {heure}",
+  "salle": "New room: {salle}"
+}

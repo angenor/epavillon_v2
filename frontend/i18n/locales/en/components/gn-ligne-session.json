@@ -4,5 +4,9 @@
   "mon-groupe": "My group",
   "sans-thematique": "Thematic area not specified",
   "chevauche": "Overlaps {heures} — {titre}",
-  "rappel": "Reminder 15 minutes before"
+  "rappel": "Reminder 15 minutes before",
+  "sans-heure": "Time not specified",
+  "non-annoncee": "Unannounced — reported by the network, confirmed at {heure}",
+  "signale": "Reported",
+  "signale-entendu": "Reported by the network, confirmed by IFDD at {heure}"
 }

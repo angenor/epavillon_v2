@@ -7,14 +7,15 @@ use kernel::error::Result;
 use sqlx::postgres::PgConnection;
 use uuid::Uuid;
 
-use crate::domain::themes::FollowedTheme;
+use crate::domain::themes::{FollowedTheme, MyThemes};
 
 const TAXONOMIE: &str = "negotiation_theme";
 
 /// Les suivis vivants, dans l'ordre du vocabulaire.
-pub async fn suivis(conn: &mut PgConnection, person_id: Uuid) -> Result<Vec<FollowedTheme>> {
+pub async fn suivis(conn: &mut PgConnection, person_id: Uuid) -> Result<MyThemes> {
     let lignes = sqlx::query!(
-        r#"SELECT t.code AS "code!", s.followed_at AS "followed_at!"
+        r#"SELECT t.code AS "code!", s.followed_at AS "followed_at!",
+                  s.notify_changes AS "notify!"
              FROM negotiation.theme_subscriptions s
              JOIN reference.taxonomy_terms t ON t.id = s.theme_term_id
             WHERE s.person_id = $1 AND s.left_at IS NULL
@@ -24,13 +25,20 @@ pub async fn suivis(conn: &mut PgConnection, person_id: Uuid) -> Result<Vec<Foll
     .fetch_all(conn)
     .await?;
 
-    Ok(lignes
-        .into_iter()
-        .map(|l| FollowedTheme {
-            code: l.code,
-            followed_at: l.followed_at,
-        })
-        .collect())
+    Ok(MyThemes {
+        notify: lignes
+            .iter()
+            .filter(|l| l.notify)
+            .map(|l| l.code.clone())
+            .collect(),
+        themes: lignes
+            .into_iter()
+            .map(|l| FollowedTheme {
+                code: l.code,
+                followed_at: l.followed_at,
+            })
+            .collect(),
+    })
 }
 
 /// Sérialise les remplacements d'une même personne, **qu'elle ait des suivis ou
@@ -76,9 +84,9 @@ pub async fn termes(conn: &mut PgConnection, codes: &[String]) -> Result<Vec<Ter
         .collect())
 }
 
-/// Ferme les suivis vivants **absents** de la liste. Les autres ne sont pas
-/// touchés : leur `followed_at` ne bouge pas, et l'audit ne s'encombre pas
-/// d'une écriture sans changement.
+/// Ferme les suivis vivants **absents** de la liste, notification éteinte avec
+/// eux. Les autres ne sont pas touchés : leur `followed_at` ne bouge pas, et
+/// l'audit ne s'encombre pas d'une écriture sans changement.
 pub async fn fermer_les_autres(
     conn: &mut PgConnection,
     person_id: Uuid,
@@ -86,7 +94,7 @@ pub async fn fermer_les_autres(
 ) -> Result<u64> {
     let fait = sqlx::query!(
         "UPDATE negotiation.theme_subscriptions
-            SET left_at = now()
+            SET left_at = now(), notify_changes = false
           WHERE person_id = $1
             AND left_at IS NULL
             AND theme_term_id <> ALL($2::uuid[])",
@@ -118,4 +126,22 @@ pub async fn ouvrir_les_nouveaux(
     .execute(conn)
     .await?;
     Ok(fait.rows_affected())
+}
+
+/// Allume les suivis vivants de ces codes, éteint les autres ; n'écrit que ce
+/// qui change.
+pub async fn notifier(conn: &mut PgConnection, person_id: Uuid, codes: &[String]) -> Result<()> {
+    sqlx::query!(
+        "UPDATE negotiation.theme_subscriptions s
+            SET notify_changes = (t.code = ANY($2::text[]))
+           FROM reference.taxonomy_terms t
+          WHERE t.id = s.theme_term_id
+            AND s.person_id = $1 AND s.left_at IS NULL
+            AND s.notify_changes IS DISTINCT FROM (t.code = ANY($2::text[]))",
+        person_id,
+        codes
+    )
+    .execute(conn)
+    .await?;
+    Ok(())
 }

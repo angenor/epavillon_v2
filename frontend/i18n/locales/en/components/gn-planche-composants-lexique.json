@@ -14,7 +14,7 @@
   "lie": "Related-term pill",
   "lie-propos": "The filter pill, as a link: it opens the entry and toggles nothing.",
   "loupe": "Header magnifier",
-  "loupe-propos": "48 px, left of “Aa”, on the “My day” and “Resources” root screens only: it opens the global search. 24 px pictogram in the heading colour, unframed — the frame stays specific to “Aa” (deviation 51).",
+  "loupe-propos": "48 px, left of “Aa”, on the “My day” and “Resources” root screens only: it opens the global search. 24 px pictogram in the heading colour, unframed — the frame stays specific to “Aa” (deviation 62).",
   "groupe": "Result group",
   "groupe-propos": "The global search groups its results by content, in the order Glossary, FAQ, Documents, Sessions. Name in capitals and a named count on the right; rows are each content's own, the query marked in bold underline; beyond five, a link leads to the rest in the content's screen.",
   "groupe-lexique": "Glossary",

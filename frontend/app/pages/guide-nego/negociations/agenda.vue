@@ -1,17 +1,25 @@
 <script setup lang="ts">
 import { dayKeyInZone } from '~/utils/datetime'
 import { chevauchements, sessionsDeLAgenda } from '~/utils/guide-nego/agenda'
-import { estDeMonGroupe, etatAffiche, jourAOuvrir, joursDeLaBande, sessionsDuJour } from '~/utils/guide-nego/sessions'
+import { estDeMonGroupe, etatAffiche, jourAOuvrir, joursDeLaBande } from '~/utils/guide-nego/sessions'
+import {
+  joursAvecReunions,
+  lignesDuJour,
+  repereSignale,
+  reunionsDeLAgenda,
+  reunionsParJour,
+} from '~/utils/guide-nego/signalements'
 
 /**
  * Écran 09 · 3a — « Mon agenda » : les sessions de négociation suivies, un jour à la fois.
  * Un chevauchement se signale sur les deux lignes et ne s'empêche jamais (FR-033) ;
- * une annulée reste, barrée, sans rappel.
+ * une annulée reste, barrée, sans rappel. Les réunions non annoncées gardées s'y mêlent,
+ * et restent quand la source est coupée (FR-022).
  */
 definePageMeta({ layout: 'guide-nego' })
 defineI18nRoute(false)
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const { dayLong, zoneOf } = useDateTime()
 const k = (cle: string, params: Record<string, unknown> = {}) => t(`guide-nego.negociations-agenda.${cle}`, params)
 
@@ -57,9 +65,13 @@ const attente = computed(() => !compte.pret.value || ((!etat.value.pret || !agen
 
 const suivies = computed(() => sessionsDeLAgenda(agenda.agenda.value, servie.value?.sessions ?? []))
 const croisees = computed(() => chevauchements(suivies.value))
+const reunionsSuivies = computed(() => reunionsDeLAgenda(agenda.agenda.value, lecture.reunionsDuReseau.value))
+const nomDeThematique = (code: string | null) => (code ? (thematiques.nomDe(code) ?? null) : null)
 
 const aujourdhui = computed(() => dayKeyInZone(maintenant.value, fuseau.value))
-const jours = computed(() => joursDeLaBande(suivies.value, fuseau.value))
+const jours = computed(() =>
+  joursAvecReunions(joursDeLaBande(suivies.value, fuseau.value), reunionsSuivies.value, maintenant.value, fuseau.value),
+)
 const jourChoisi = useState<string | null>('gn-agenda-jour', () => null)
 const jour = computed<string>({
   get: () => {
@@ -71,25 +83,46 @@ const jour = computed<string>({
 })
 
 const lignes = computed(() =>
-  sessionsDuJour(suivies.value, jour.value, fuseau.value).map((s) => {
+  lignesDuJour(suivies.value, reunionsSuivies.value, jour.value, maintenant.value, fuseau.value).map((l) => {
+    if (l.genre === 'reseau') {
+      return {
+        cle: l.reunion.id,
+        session: null,
+        reunion: l.reunion,
+        etat: undefined,
+        thematique: nomDeThematique(l.reunion.theme),
+        monGroupe: false,
+        chevauche: [],
+        rappel: false,
+        signale: null,
+        vers: `/guide-nego/negociations/reseau/${l.reunion.id}?depuis=agenda`,
+      }
+    }
+    const s = l.session
     const etatDeLaSession = etatAffiche(s, maintenant.value, fuseau.value)
     return {
+      cle: s.id,
       session: s,
+      reunion: null,
       etat: etatDeLaSession,
-      thematique: s.theme ? (thematiques.nomDe(s.theme) ?? null) : null,
+      thematique: nomDeThematique(s.theme),
       monGroupe: estDeMonGroupe(s, groupes.mesCodes.value),
       chevauche: croisees.value.get(s.id) ?? [],
       rappel: etatDeLaSession !== 'annulee' && (agenda.entree(s.id)?.remind ?? false),
+      signale: repereSignale(s, maintenant.value, fuseau.value, locale.value)?.heure ?? null,
+      vers: `/guide-nego/negociations/${s.id}?depuis=agenda`,
     }
   }),
 )
 
-const sousTitre = computed(() => {
-  if (!jour.value) return undefined
+const reunionsDeLaCoupure = computed(() => reunionsParJour(reunionsSuivies.value, maintenant.value, fuseau.value))
+function legende(unJour: string): string {
   const zone = ville.value ?? fuseau.value.split('/').pop()?.replace(/_/g, ' ') ?? ''
-  const texte = k('jour', { jour: dayLong(`${jour.value}T12:00:00Z`, 'UTC'), zone: zoneOf(zone) })
+  const texte = k('jour', { jour: dayLong(`${unJour}T12:00:00Z`, 'UTC'), zone: zoneOf(zone) })
   return texte.charAt(0).toUpperCase() + texte.slice(1)
-})
+}
+
+const sousTitre = computed(() => (jour.value && !coupee.value ? legende(jour.value) : undefined))
 
 useHead({ title: k('titre') })
 </script>
@@ -115,14 +148,33 @@ useHead({ title: k('titre') })
       :texte="k('sans-edition.texte')"
     />
 
-    <GnLectureImpossible
-      v-else-if="coupee"
-      :raison="coupee.raison"
-      :depuis="coupee.depuis"
-      :programme="coupee.programme"
-      :en-cours="relecture"
-      @reessayer="relire()"
-    />
+    <template v-else-if="coupee">
+      <GnLectureImpossible
+        :raison="coupee.raison"
+        :depuis="coupee.depuis"
+        :programme="coupee.programme"
+        :en-cours="relecture"
+        @reessayer="relire()"
+      >
+        <template v-if="reunionsDeLaCoupure.length" #default>
+          <GnPicto nom="info" :taille="18" />
+          {{ t('guide-nego.negociations.reseau-garde') }}
+        </template>
+      </GnLectureImpossible>
+      <template v-for="j in reunionsDeLaCoupure" :key="j.jour">
+        <GnEnteteGroupe :titre="legende(j.jour)" :compteur="j.reunions.length" />
+        <GnLigneSession
+          v-for="r in j.reunions"
+          :key="r.id"
+          forme="agenda"
+          :reunion="r"
+          :fuseau="fuseau"
+          :ville="ville"
+          :thematique="nomDeThematique(r.theme)"
+          :vers="`/guide-nego/negociations/reseau/${r.id}?depuis=agenda`"
+        />
+      </template>
+    </template>
 
     <GnEtatVide
       v-else-if="(!servie || !agenda.connu.value) && !enLigne"
@@ -140,7 +192,7 @@ useHead({ title: k('titre') })
     />
 
     <GnEtatVide
-      v-else-if="!suivies.length"
+      v-else-if="!suivies.length && !reunionsSuivies.length"
       picto="calendar"
       :titre="k('vide.titre')"
       :texte="k('vide.texte')"
@@ -153,9 +205,10 @@ useHead({ title: k('titre') })
       <GnEnteteGroupe :titre="k('section')" :compteur="lignes.length" />
       <GnLigneSession
         v-for="l in lignes"
-        :key="l.session.id"
+        :key="l.cle"
         forme="agenda"
         :session="l.session"
+        :reunion="l.reunion"
         :etat="l.etat"
         :fuseau="fuseau"
         :ville="ville"
@@ -163,7 +216,8 @@ useHead({ title: k('titre') })
         :mon-groupe="l.monGroupe"
         :chevauche="l.chevauche"
         :rappel="l.rappel"
-        :vers="`/guide-nego/negociations/${l.session.id}?depuis=agenda`"
+        :signale="l.signale"
+        :vers="l.vers"
       />
     </template>
   </GnEcran>

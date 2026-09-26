@@ -26,6 +26,7 @@
  *   live.ts                    080_live.sql § 5 — les messages d'incident seuls
  *   negotiation.ts             100_negotiations.sql § 2 bis — l'admission seule
  *   negotiation-sessions.ts    100_negotiations.sql § 4 bis, 4 ter — sessions officielles, groupes, agenda
+ *   negotiation-reports.ts     100_negotiations.sql § 4 quater — signalements du réseau
  *   analytics.ts               130_analytics.sql — les projections du tableau de bord
  *   views.ts                   les cinq vues consommées telles quelles
  *
@@ -72,5 +73,6 @@ export type * from './engagement'
 export type * from './live'
 export type * from './negotiation'
 export type * from './negotiation-sessions'
+export type * from './negotiation-reports'
 export type * from './analytics'
 export type * from './views'

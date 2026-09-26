@@ -19,7 +19,7 @@ export const cleDesSessions = (slug: string) => `sessions:${slug}`
 const instant = (iso: string) => new Date(iso).getTime()
 
 /** Le lendemain d'une clé `AAAA-MM-JJ`, calculé sur le calendrier, pas sur 24 heures. */
-function lendemain(jour: string): string {
+export function lendemain(jour: string): string {
   const [a, m, j] = jour.split('-').map(Number) as [number, number, number]
   return new Date(Date.UTC(a, m - 1, j + 1)).toISOString().slice(0, 10)
 }

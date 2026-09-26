@@ -35,7 +35,8 @@
     "nombre-de-thematiques": "{count} thématique suivie | {count} thématique suivie | {count} thématiques suivies",
     "telechargements": "Mes téléchargements",
     "telechargements-place": "{count} document · {place} | {count} document · {place} | {count} documents · {place}",
-    "telechargements-vide": "Aucun document gardé"
+    "telechargements-vide": "Aucun document gardé",
+    "signalements": "Mes signalements"
   },
   "application": {
     "titre": "Application",
@@ -47,5 +48,12 @@
       "hier": "Hier, {heure}",
       "avant": "{jour}, {heure}"
     }
+  },
+  "notifications": {
+    "titre": "Notifications par thématique",
+    "agenda": "Les sessions de « Mon agenda » vous préviennent toujours. Une thématique allumée ajoute ses autres sessions.",
+    "detail": "Toutes les sessions de cette thématique, même hors de votre agenda",
+    "choisir": "Mes thématiques",
+    "choisir-detail": "Aucune thématique suivie : choisissez-en une pour régler ses notifications"
   }
 }

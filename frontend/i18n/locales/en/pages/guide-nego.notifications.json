@@ -1,0 +1,29 @@
+{
+  "titre": "Notifications",
+  "chargement": "Reading your notifications",
+  "non-lues": "{count} unread | {count} unread | {count} unread",
+  "toutes-lues": "All read",
+  "tout-marquer": "Mark all as read",
+  "aujourdhui": "Today",
+  "hier": "Yesterday, {jour}",
+  "regler": "Set notifications by theme",
+  "profil": "Profile",
+  "vide": {
+    "titre": "No notifications yet",
+    "texte": "A change of time, room or a cancellation on a session in “My agenda” will show here."
+  },
+  "sans-compte": {
+    "titre": "Notifications follow your account",
+    "texte": "Sign in to see the changes to your sessions.",
+    "connexion": "Sign in"
+  },
+  "jamais-lu": {
+    "titre": "Not read on this device yet",
+    "texte": "Your notifications will show when the network is back."
+  },
+  "erreur": {
+    "titre": "Unable to read",
+    "texte": "Your notifications could not be read.",
+    "reessayer": "Try again"
+  }
+}

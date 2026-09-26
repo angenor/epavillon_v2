@@ -37,6 +37,8 @@ export const accesVisiteuse: AccessStateView = {
   granted: null,
   networks: [],
   request: null,
+  can_validate_reports: false,
+  reports_to_review: null,
 }
 
 /**
@@ -90,6 +92,8 @@ export function saisirUnCode(code: string): RedeemResult {
     },
     networks: rejoint ? [...etatCourant.networks, RESEAU] : [...etatCourant.networks],
     request: null,
+    can_validate_reports: false,
+    reports_to_review: null,
   }
 
   if (deja) {

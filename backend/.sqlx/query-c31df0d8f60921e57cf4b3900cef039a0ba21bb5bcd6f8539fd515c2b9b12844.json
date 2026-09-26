@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT published_at, withdrawn_at, network_meeting_id\n             FROM negotiation.session_reports WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.session_reports",
+            "name": "published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "withdrawn_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.session_reports",
+            "name": "withdrawn_at"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "network_meeting_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.session_reports",
+            "name": "network_meeting_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "c31df0d8f60921e57cf4b3900cef039a0ba21bb5bcd6f8539fd515c2b9b12844"
+}

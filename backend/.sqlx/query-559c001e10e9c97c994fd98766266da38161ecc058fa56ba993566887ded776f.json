@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT is_granted FROM identity.current_consents WHERE person_id = $1 AND purpose = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "is_granted",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "identity.current_consents",
+            "name": "is_granted"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "559c001e10e9c97c994fd98766266da38161ecc058fa56ba993566887ded776f"
+}

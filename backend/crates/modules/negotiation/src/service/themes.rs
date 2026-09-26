@@ -20,15 +20,14 @@ use kernel::context::RequestContext;
 use kernel::error::{ApiError, ErrorCode, Result};
 use uuid::Uuid;
 
-use crate::domain::themes::{empreinte_des_codes, MyThemes};
+use crate::domain::themes::MyThemes;
 use crate::repo::themes;
 use crate::state::NegotiationState;
 use kernel::empreinte;
 
 pub async fn mes_thematiques(state: &NegotiationState, person_id: Uuid) -> Result<MyThemes> {
     let mut conn = state.pool().acquire().await?;
-    let suivis = themes::suivis(&mut conn, person_id).await?;
-    Ok(MyThemes { themes: suivis })
+    themes::suivis(&mut conn, person_id).await
 }
 
 pub struct Remplacement<'a> {
@@ -58,8 +57,7 @@ pub async fn remplacer(
 
     let avant = themes::suivis(&mut tx, r.person_id).await?;
     if let Some(attendue) = r.si_correspond {
-        let courante = empreinte_des_codes(avant.iter().map(|t| t.code.as_str()));
-        if !empreinte::correspond(attendue, &courante) {
+        if !empreinte::correspond(attendue, &avant.empreinte()) {
             tx.rollback().await?;
             return Err(ApiError::new(ErrorCode::NegotiationThemesStale));
         }
@@ -80,7 +78,7 @@ pub async fn remplacer(
     // choisir un qui n'est plus proposé.
     if let Some(retire) = termes
         .iter()
-        .find(|t| !t.is_active && !avant.iter().any(|a| a.code == t.code))
+        .find(|t| !t.is_active && !avant.themes.iter().any(|a| a.code == t.code))
     {
         tx.rollback().await?;
         return Err(ApiError::with_message(
@@ -96,6 +94,34 @@ pub async fn remplacer(
 
     let apres = themes::suivis(&mut tx, r.person_id).await?;
     tx.commit().await?;
+    Ok(apres)
+}
 
-    Ok(MyThemes { themes: apres })
+/// Les thématiques dont on est prévenu, **parmi celles suivies** ; la liste
+/// entière, donc idempotent. Vide : tout éteint.
+pub async fn notifier(
+    state: &NegotiationState,
+    ctx: &RequestContext,
+    person_id: Uuid,
+    codes: &[String],
+) -> Result<MyThemes> {
+    let codes: Vec<String> = codes.iter().map(|c| c.trim().to_owned()).collect();
+    let mut tx = state.db().write(ctx).await?;
+    themes::verrouiller(&mut tx, person_id).await?;
+    let avant = themes::suivis(&mut tx, person_id).await?;
+    if let Some(inconnu) = codes
+        .iter()
+        .find(|c| !avant.themes.iter().any(|t| &t.code == *c))
+    {
+        tx.rollback().await?;
+        return Err(ApiError::with_message(
+            ErrorCode::NegotiationThemeUnknown,
+            format!("La thématique « {inconnu} » n'est pas suivie."),
+        )
+        .field("codes"));
+    }
+    themes::notifier(&mut tx, person_id, &codes).await?;
+    let apres = themes::suivis(&mut tx, person_id).await?;
+    tx.commit().await?;
+    Ok(apres)
 }

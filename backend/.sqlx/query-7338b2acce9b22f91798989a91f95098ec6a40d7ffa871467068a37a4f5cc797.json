@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"n!\" FROM engagement.notifications n\n            WHERE person_id = $1 AND read_at IS NULL AND archived_at IS NULL\n              AND ($2::text IS NULL OR EXISTS (\n                      SELECT 1 FROM engagement.notification_types nt\n                       WHERE nt.code = n.type_code AND nt.module_code = $2))",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "7338b2acce9b22f91798989a91f95098ec6a40d7ffa871467068a37a4f5cc797"
+}

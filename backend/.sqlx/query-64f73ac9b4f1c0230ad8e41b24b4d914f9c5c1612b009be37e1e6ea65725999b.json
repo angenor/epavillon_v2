@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (\n               SELECT 1 FROM negotiation.meetings\n                WHERE id = $1 AND event_id = $2\n                  AND kind = 'negotiation_session' AND source_key IS NOT NULL\n           ) AS \"existe!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "existe!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "64f73ac9b4f1c0230ad8e41b24b4d914f9c5c1612b009be37e1e6ea65725999b"
+}

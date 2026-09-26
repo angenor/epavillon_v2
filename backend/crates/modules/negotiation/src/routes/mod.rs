@@ -4,13 +4,16 @@ pub mod admin_codes;
 pub mod admin_documents;
 pub mod admin_file;
 pub mod admin_import;
+pub mod admin_reports;
 pub mod admin_requests;
 pub mod admin_savoir;
 pub mod agenda;
 pub mod documents;
 pub mod groups;
+pub mod notifications;
 pub mod openapi;
 pub mod savoir;
+pub mod reports;
 pub mod sessions;
 pub mod themes;
 

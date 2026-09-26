@@ -7,6 +7,7 @@
  * session à côté d'un état coupé. L'écran dit « suspendu, voir le programme
  * officiel », jamais « aucune session ».
  */
+import type { NetworkMeeting, NetworkReport } from '~/types/negotiation-sessions'
 import { estInchange } from '~/composables/api/etiquete'
 import { ApiRequestError, normalizeApiError } from '~/utils/api-error'
 import {
@@ -56,9 +57,16 @@ export function useGnSessions() {
   })
 
   const sessions = computed(() => (affichage.value.etat === 'sert' ? affichage.value.sessions : []))
+  /** Les réunions non annoncées : servies **aussi quand la source est coupée** (FR-022). */
+  const reunionsDuReseau = computed<NetworkMeeting[]>(() => {
+    if (affichage.value.etat === 'inconnu') return []
+    return lecture.etat.value.valeur?.lues?.network_meetings ?? []
+  })
   /** Le fuseau de la COP : celui de la réponse, sinon celui de l'édition gardée. */
   const fuseau = computed<string | null>(() =>
-    affichage.value.etat === 'sert' ? affichage.value.fuseau : (edition.edition.value?.timezone ?? null),
+    affichage.value.etat === 'sert'
+      ? affichage.value.fuseau
+      : (lecture.etat.value.valeur?.lues?.edition.timezone ?? edition.edition.value?.timezone ?? null),
   )
   const ville = computed<string | null>(() =>
     affichage.value.etat === 'sert' ? affichage.value.ville : (edition.edition.value?.city ?? null),
@@ -76,12 +84,24 @@ export function useGnSessions() {
     return sessions.value.find((s) => s.id === id) ?? null
   }
 
+  /** Les encarts publiés d'une session ; `encartsAffiches` dit lesquels montrer à l'instant. */
+  function signalementsDe(id: string): NetworkReport[] {
+    return session(id)?.network_reports ?? []
+  }
+
+  function reunion(id: string) {
+    return reunionsDuReseau.value.find((r) => r.id === id) ?? null
+  }
+
   return {
     affichage,
     sessions,
     fuseau,
     ville,
     session,
+    signalementsDe,
+    reunionsDuReseau,
+    reunion,
     edition: edition.edition,
     sansEdition,
     /** L'état de la lecture : `luA` (heure du téléphone), `source`, `pret`, `enCours`. */

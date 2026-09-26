@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.network_agenda_entries (person_id, network_meeting_id, remind_before)\n         VALUES ($1, $2, CASE WHEN $3 THEN interval '15 minutes' END)\n         ON CONFLICT (person_id, network_meeting_id) DO UPDATE\n            SET remind_before = EXCLUDED.remind_before\n          WHERE negotiation.network_agenda_entries.remind_before\n                IS DISTINCT FROM EXCLUDED.remind_before",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a2c9593e6146a101693c5ceef292f0b6e90374feb016d088ee04a6859b9ae427"
+}

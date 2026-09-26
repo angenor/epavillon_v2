@@ -24,6 +24,8 @@ export interface OfficialSessions {
   server_time: IsoDateTime
   /** Vide quand `state = 'cut'`. */
   sessions: OfficialSession[]
+  /** Servies aussi quand `state = 'cut'` : elles ne viennent pas de la source. */
+  network_meetings: NetworkMeeting[]
 }
 
 export interface OfficialSession {
@@ -48,6 +50,31 @@ export interface OfficialSession {
   source_url: string | null
   /** Dernière lecture où elle figurait. */
   read_at: IsoDateTime
+  /** Publiés, non retirés, session non terminée. Jamais de nom d'autrice. */
+  network_reports: NetworkReport[]
+}
+
+/** L'encart « Signalé par le réseau — validé par l'IFDD à … ». */
+export interface NetworkReport {
+  reason: 'cancelled' | 'time' | 'venue' | 'other'
+  proposed_start: IsoDateTime | null
+  proposed_venue: string | null
+  detail: string | null
+  validated_at: IsoDateTime
+}
+
+/** Une réunion non annoncée, publiée : jamais une session officielle. */
+export interface NetworkMeeting {
+  id: Uuid
+  title: string
+  venue: string | null
+  /** `null` = sans heure. */
+  start_at: IsoDateTime | null
+  /** Jour de la liste, dans le fuseau de la COP. */
+  day: IsoDate
+  /** Code `negotiation_theme`. */
+  theme: string | null
+  validated_at: IsoDateTime
 }
 
 export interface OfficialSessionPrevious {
@@ -73,10 +100,20 @@ export interface GroupsPayload {
 
 // ---------------------------------------------------------------------------
 // `GET /negotiation/me/agenda` · `PUT`/`DELETE /negotiation/me/agenda/{session_id}`
+// · `PUT`/`DELETE /negotiation/me/agenda/network/{id}`
 // ---------------------------------------------------------------------------
 
 export interface MyAgenda {
   entries: MyAgendaEntry[]
+  /** Les réunions non annoncées gardées. */
+  network_entries: MyNetworkAgendaEntry[]
+}
+
+export interface MyNetworkAgendaEntry {
+  network_meeting_id: Uuid
+  /** Effectif : faux dès que la réunion est retirée. */
+  remind: boolean
+  added_at: IsoDateTime
 }
 
 export interface MyAgendaEntry {

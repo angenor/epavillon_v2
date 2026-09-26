@@ -1,0 +1,29 @@
+/**
+ * Le fil de notifications d'`engagement`, filtré par module d'origine : la cloche de
+ * Guide Négo ne compte pas les avis du site (R12).
+ */
+import type { NotificationFeed } from '~/types/engagement'
+import type { Uuid } from '~/types/shared'
+import type { Primitives } from './guide-nego'
+
+type Deps = Pick<Primitives, 'call' | 'send'>
+
+const exemples = () => import('~/mocks/notifications')
+
+export function createNotificationsApi({ call, send }: Deps) {
+  return {
+    /** Les 50 dernières de Guide Négo, et le compte de toutes ses non lues. */
+    filGuideNego: (): Promise<NotificationFeed> =>
+      call('/notifications?module=negotiation&limit=50', async () => (await exemples()).filDeNotifications(50)),
+
+    marquerLues: async (ids: Uuid[]): Promise<void> => {
+      if (ids.length === 0) return
+      await send('/notifications/read', { ids }, async () => (await exemples()).marquerLues(ids))
+    },
+
+    /** Toutes les non lues **de Guide Négo** : le filtre `module` laisse celles du site non lues. */
+    toutMarquerGuideNego: async (): Promise<void> => {
+      await send('/notifications/read?module=negotiation', {}, async () => (await exemples()).toutMarquer())
+    },
+  }
+}

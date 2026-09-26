@@ -1,7 +1,9 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import type { MyAgenda } from '../../app/types/negotiation-sessions.ts'
 import {
   appliquerIntention,
+  appliquerIntentionReseau,
   avecLaFile,
   chevauchements,
   prochaineSession,
@@ -90,4 +92,13 @@ test('une intention s’affiche aussitôt ; la dernière sur une session gagne',
 
   const vue = avecLaFile(lu, { b: { garder: true, remind: false }, a: { garder: false, remind: false } }, maintenant)
   assert.deepEqual(vue.entries.map((e) => e.session_id), ['b'])
+})
+
+test('réunion non annoncée : gardée à part, et une garde d’avant 3b ne casse rien', () => {
+  const maintenant = a('2027-11-10T10:00:00Z')
+  const ancienne = { entries: [{ session_id: 'a', remind: false, added_at: '2027-11-09T10:00:00Z' }] } as unknown as MyAgenda
+  const vue = avecLaFile(ancienne, {}, maintenant, { r: { garder: true, remind: true } })
+  assert.deepEqual(vue.network_entries, [{ network_meeting_id: 'r', remind: true, added_at: maintenant.toISOString() }])
+  assert.deepEqual(vue.entries.map((e) => e.session_id), ['a'], 'les sessions ne bougent pas')
+  assert.deepEqual(appliquerIntentionReseau(vue, 'r', { garder: false, remind: false }, maintenant).network_entries, [])
 })

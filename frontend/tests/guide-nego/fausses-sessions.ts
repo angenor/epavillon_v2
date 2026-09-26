@@ -21,6 +21,7 @@ export function session(id: string, start: string, end: string | null, extra: Pa
     cancelled: null,
     source_url: null,
     read_at: '2027-11-10T09:00:00Z',
+    network_reports: [],
     ...extra,
   }
 }

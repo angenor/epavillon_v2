@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, type_code, title, body, variables, link_path,\n                  subject_schema, subject_table, subject_id, group_count,\n                  read_at, created_at\n             FROM engagement.notifications\n            WHERE person_id = $1\n              AND archived_at IS NULL\n              AND ($2 = false OR read_at IS NULL)\n              AND ($3::timestamptz IS NULL OR created_at < $3)\n            ORDER BY created_at DESC\n            LIMIT $4",
+  "query": "SELECT id, type_code, title, body, variables, link_path,\n                  subject_schema, subject_table, subject_id, group_count,\n                  read_at, created_at\n             FROM engagement.notifications n\n            WHERE person_id = $1\n              AND archived_at IS NULL\n              AND ($2 = false OR read_at IS NULL)\n              AND ($3::timestamptz IS NULL OR created_at < $3)\n              AND ($5::text IS NULL OR EXISTS (\n                      SELECT 1 FROM engagement.notification_types nt\n                       WHERE nt.code = n.type_code AND nt.module_code = $5))\n            ORDER BY created_at DESC\n            LIMIT $4",
   "describe": {
     "columns": [
       {
@@ -141,7 +141,8 @@
         "Uuid",
         "Bool",
         "Timestamptz",
-        "Int8"
+        "Int8",
+        "Text"
       ]
     },
     "nullable": [
@@ -159,5 +160,5 @@
       false
     ]
   },
-  "hash": "4d5e685169e41b98bc73f03bd40060a8eec9d31085be9687ae43fac30ac55f97"
+  "hash": "209bcccf5d8d01111b2c115a7ef61327cea734cc602b4d6ddb9092a203d25bc6"
 }

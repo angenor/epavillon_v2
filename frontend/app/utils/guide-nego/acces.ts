@@ -18,6 +18,8 @@ export const ACCES_VISITEUSE: AccessStateView = {
   networks: [],
   granted: null,
   request: null,
+  can_validate_reports: false,
+  reports_to_review: null,
 }
 
 /**
@@ -35,6 +37,8 @@ export function etatDAcces(lu: AccessStateView | null): AccessStateView {
     granted: lu.granted ?? null,
     networks: lu.networks ?? [],
     request: lu.request ?? null,
+    can_validate_reports: lu.can_validate_reports ?? false,
+    reports_to_review: lu.reports_to_review ?? null,
   }
 }
 

@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT e.network_meeting_id,\n                  (e.remind_before IS NOT NULL AND n.withdrawn_at IS NULL) AS \"remind!\",\n                  e.added_at\n             FROM negotiation.network_agenda_entries e\n             JOIN negotiation.network_meetings n ON n.id = e.network_meeting_id\n            WHERE e.person_id = $1\n            ORDER BY n.day, n.start_at NULLS LAST, e.network_meeting_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "network_meeting_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.network_agenda_entries",
+            "name": "network_meeting_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "remind!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "added_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.network_agenda_entries",
+            "name": "added_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false
+    ]
+  },
+  "hash": "4f02b304dafd7790613d5781f8af0f7414f38f3e1d8c51d69d17e827b2487471"
+}

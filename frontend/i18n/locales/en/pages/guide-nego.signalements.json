@@ -1,0 +1,48 @@
+{
+  "titre": "My reports",
+  "sous-titre": "{edition} — {count} report | {edition} — {count} report | {edition} — {count} reports",
+  "chargement": "Reading your reports",
+  "le": "{jour} at {heure}",
+  "motif": {
+    "cancelled": "The session is cancelled",
+    "time": "The time has changed",
+    "venue": "The room has changed",
+    "other": "Something else",
+    "unannounced": "Unannounced meeting"
+  },
+  "propose-heure": "Proposed new time: {heure}",
+  "propose-salle": "Proposed new room: {salle}",
+  "rappel": "{titre} — {quand}, {salle}",
+  "rappel-sans-salle": "{titre} — {quand}",
+  "etat": {
+    "en-attente": "Sent — will leave when the network is back",
+    "envoye": "Sent at {moment}",
+    "valide": "Validated at {moment}",
+    "non-retenu": "Not accepted at {moment}"
+  },
+  "refus": "Reason: {motif}",
+  "refus-motif": {
+    "source_maintains": "The official source maintains it.",
+    "already_known": "Already taken into account.",
+    "not_precise": "Not precise enough."
+  },
+  "pied": "A validated report is shown to everyone, on top of the official data, without your name.",
+  "vide": {
+    "titre": "No reports",
+    "texte": "From a session page, “Report a change”; from the bottom of a day's list, “Report an unannounced meeting”."
+  },
+  "sans-compte": {
+    "titre": "Your reports follow your account",
+    "texte": "Reporting is reserved for negotiators. Sign in to find yours.",
+    "connexion": "Sign in"
+  },
+  "jamais-lu": {
+    "titre": "Not yet read on this device",
+    "texte": "Your reports will appear when the network is back."
+  },
+  "erreur": {
+    "titre": "Reading failed",
+    "texte": "Your reports could not be read.",
+    "reessayer": "Try again"
+  }
+}

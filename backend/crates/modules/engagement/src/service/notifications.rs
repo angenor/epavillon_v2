@@ -60,6 +60,10 @@ pub struct FilQuery {
     pub limit: Option<i64>,
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub before: Option<OffsetDateTime>,
+    /// Le module d'origine (`notification_types.module_code`) : la cloche de
+    /// Guide Négo ne compte que les siennes.
+    #[serde(default)]
+    pub module: Option<String>,
 }
 
 pub async fn fil(
@@ -74,6 +78,7 @@ pub async fn fil(
         requete.unread_only,
         limite,
         requete.before,
+        requete.module.as_deref(),
     )
     .await?;
 
@@ -83,10 +88,18 @@ pub async fn fil(
     })
 }
 
-/// Ce qu'un marquage vise. Sans `ids` : tout.
+/// Ce qu'un marquage vise. Sans `ids` : tout — du module, s'il est donné.
 #[derive(Debug, Clone, Default, Deserialize, ToSchema)]
 pub struct MarquagePayload {
     pub ids: Option<Vec<Uuid>>,
+}
+
+/// Le `?module=` du marquage : le même filtre que la liste et le compte, sans quoi
+/// « tout marquer » de Guide Négo marquerait lus les avis du site.
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct FiltreModule {
+    #[serde(default)]
+    pub module: Option<String>,
 }
 
 pub async fn marquer_lues(
@@ -94,9 +107,11 @@ pub async fn marquer_lues(
     ctx: &RequestContext,
     acteur: Uuid,
     payload: &MarquagePayload,
+    module: Option<&str>,
 ) -> Result<u64> {
     let mut tx = state.db().write(ctx).await?;
-    let marquees = notifications::marquer_lues(&mut tx, acteur, payload.ids.as_deref()).await?;
+    let marquees =
+        notifications::marquer_lues(&mut tx, acteur, payload.ids.as_deref(), module).await?;
     tx.commit().await?;
     Ok(marquees)
 }
@@ -283,6 +298,7 @@ pub async fn diffuser(
                     subject_table: None,
                     subject_id: None,
                     group_key: Some(cle.clone()),
+                    replace: false,
                 },
             )
             .await?;

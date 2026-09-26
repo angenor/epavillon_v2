@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM negotiation.network_agenda_entries\n          WHERE person_id = $1 AND network_meeting_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "44fa9d5498dbb4edcac93733b5c7d8d483257d84e9fcd87ed904d6a50e5f6d1d"
+}

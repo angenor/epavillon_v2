@@ -83,7 +83,7 @@ test('l’état lu garde les codes triés et l’empreinte', () => {
   )
   assert.deepEqual(etat.codes, ['adaptation', 'gender'])
   assert.equal(etat.empreinte, '"a1b2"')
-  assert.deepEqual(etatDesThematiques(null, null), { codes: [], empreinte: null })
+  assert.deepEqual(etatDesThematiques(null, null), { codes: [], notify: [], empreinte: null })
 })
 
 /**
