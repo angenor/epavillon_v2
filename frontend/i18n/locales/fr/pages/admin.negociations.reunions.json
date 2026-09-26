@@ -1,0 +1,190 @@
+{
+  "edition": "Édition",
+  "noEdition": {
+    "title": "Aucune COP climat",
+    "description": "Aucune édition de la série des COP climat n'existe encore. Créez-la dans les événements."
+  },
+  "forbidden": {
+    "scope": "Gérer les réunions de la Francophonie, sur la plateforme entière",
+    "description": "Les réunions de la Francophonie se gèrent sur la portée globale. Un compte rattaché à un seul événement n'y a pas accès."
+  },
+  "status": {
+    "draft": "Brouillon",
+    "scheduled": "Publiée",
+    "ongoing": "En cours",
+    "completed": "Terminée",
+    "cancelled": "Annulée"
+  },
+  "format": {
+    "onsite": "Sur place",
+    "online": "En ligne",
+    "hybrid": "Hybride"
+  },
+  "list": {
+    "title": "Réunions de la Francophonie",
+    "subtitle": "Ateliers et concertations proposés aux négociatrices et négociateurs pendant la COP. Un brouillon n'apparaît pas dans l'application.",
+    "new": "Nouvelle réunion",
+    "caption": "Réunions de l'édition, horaires à l'{zone}",
+    "columns": {
+      "title": "Réunion",
+      "when": "Date",
+      "format": "Format",
+      "seats": "Inscriptions",
+      "status": "État"
+    },
+    "noType": "Nature à préciser",
+    "noRegistration": "Sans inscription",
+    "seatsOpen": "Aucune inscrite, sans limite | 1 inscrite, sans limite | {count} inscrites, sans limite",
+    "seats": "{count} / {capacity} inscrites",
+    "waitlist": "aucune en attente | 1 en attente | {count} en attente",
+    "withWaitlist": "{seats} · {waitlist}",
+    "empty": {
+      "title": "Aucune réunion pour cette édition",
+      "description": "Créez la première : elle restera en brouillon jusqu'à sa publication."
+    }
+  },
+  "new": {
+    "title": "Nouvelle réunion",
+    "subtitle": "Pour {edition}. La réunion naît en brouillon ; vous la publierez depuis sa fiche.",
+    "cancel": "Retour à la liste"
+  },
+  "detail": {
+    "breadcrumb": "Fiche de la réunion",
+    "organizer": "organisée par {organizer}",
+    "publish": "Publier",
+    "publishHint": "Brouillon : invisible dans l'application. La publication porte sur la dernière version enregistrée.",
+    "publishRefused": "Publication refusée : {message}",
+    "cancel": "Annuler la réunion",
+    "cancelledTitle": "Réunion annulée",
+    "saved": "Modifications enregistrées.",
+    "published": "Réunion publiée : elle apparaît dans l'application.",
+    "cancelled": "Réunion annulée. Les inscrites voient le motif dans l'application.",
+    "backToList": "Retour à la liste",
+    "notFound": {
+      "title": "Réunion introuvable",
+      "description": "Cette réunion n'existe pas, ou a été supprimée."
+    }
+  },
+  "form": {
+    "sections": {
+      "what": "Nature et intitulé",
+      "when": "Date et lieu",
+      "registration": "Inscription",
+      "who": "Accès et organisation"
+    },
+    "type": {
+      "label": "Nature",
+      "hint": "Exigée pour publier.",
+      "placeholder": "Choisir une nature"
+    },
+    "title": "Titre",
+    "description": "Description",
+    "start": "Début",
+    "end": "Fin",
+    "format": "Format",
+    "venue": {
+      "label": "Lieu",
+      "hint": "Salle ou bâtiment. Exigé pour publier une réunion sur place ou hybride."
+    },
+    "link": {
+      "label": "Lien de visioconférence",
+      "hint": "Communiqué aux seules inscrites. Exigé pour publier une réunion en ligne ou hybride."
+    },
+    "registration": {
+      "label": "Inscription requise",
+      "hint": "Éteinte, la réunion est ouverte sans inscription à qui a l'accès."
+    },
+    "capacity": {
+      "label": "Capacité",
+      "hint": "Nombre de places. Vide : sans limite."
+    },
+    "waitlist": {
+      "label": "Liste d'attente",
+      "hint": "Une fois complète, les suivantes attendent une place qui se libère."
+    },
+    "window": {
+      "opens": "Ouverture des inscriptions",
+      "opensHint": "Facultative, à l'{zone}. Vide : ouvertes dès la publication.",
+      "closes": "Clôture des inscriptions",
+      "closesHint": "Facultative, à l'{zone}. Vide : jusqu'au début de la réunion."
+    },
+    "access": {
+      "label": "Accès",
+      "open": {
+        "label": "Ouvert",
+        "hint": "Toute personne qui a l'accès négociateur."
+      },
+      "limited": {
+        "label": "Limité",
+        "hint": "Un public désigné, annoncé dans l'application."
+      }
+    },
+    "audience": {
+      "label": "Public concerné",
+      "hint": "Par exemple : ministres et chefs de délégation."
+    },
+    "ifdd": {
+      "label": "Organisée par l'IFDD",
+      "hint": "Éteint, choisissez l'organisation qui la tient."
+    },
+    "organizer": {
+      "search": "Organisation",
+      "searchHint": "Nom, sigle ou ancien nom : toutes les dénominations sont cherchées.",
+      "searchError": "La recherche n'a pas abouti. Réessayez.",
+      "none": "Aucune organisation ne correspond.",
+      "choose": "Choisir",
+      "change": "Changer",
+      "unnamed": "Organisation retenue"
+    },
+    "errors": {
+      "title": "Le titre en français est obligatoire.",
+      "start": "Indiquez le début.",
+      "end": "Indiquez la fin.",
+      "period": "La fin doit suivre le début.",
+      "capacity": "La capacité est un nombre entier positif.",
+      "window": "La clôture doit suivre l'ouverture.",
+      "audience": "Indiquez le public concerné, en français au moins.",
+      "organizer": "Choisissez l'organisation, ou rallumez « Organisée par l'IFDD ».",
+      "summary": "Certains champs sont à reprendre."
+    },
+    "save": "Enregistrer",
+    "create": "Créer le brouillon"
+  },
+  "cancel": {
+    "title": "Annuler la réunion",
+    "question": "La réunion reste visible dans l'application, marquée annulée, avec votre motif.",
+    "people": "Aucune personne inscrite. | 1 personne inscrite ou en attente sera prévenue. | {count} personnes inscrites ou en attente seront prévenues.",
+    "reason": "Motif",
+    "reasonHint": "Montré tel quel aux inscrites.",
+    "reasonRequired": "Le motif est obligatoire.",
+    "keep": "Ne pas annuler",
+    "confirm": "Annuler la réunion"
+  },
+  "pavilion": {
+    "title": "Activité du Pavillon",
+    "hint": "La réunion peut prolonger une activité du Pavillon de la Francophonie de la même édition.",
+    "label": "Activité liée",
+    "placeholder": "Chercher une activité",
+    "none": "Aucune",
+    "when": "{date}, {zone}",
+    "empty": "Aucune activité du Pavillon n'est programmée pour cette édition.",
+    "saved": "Lien enregistré."
+  },
+  "registrants": {
+    "title": "Inscrites",
+    "at": "{date} à {time}, {zone}",
+    "registered": "Aucune inscrite | 1 inscrite | {count} inscrites",
+    "waitlisted": "Aucune en liste d'attente | 1 en liste d'attente | {count} en liste d'attente",
+    "noneRegistered": "Aucune inscrite pour l'instant.",
+    "columns": {
+      "position": "Rang",
+      "name": "Nom",
+      "country": "Pays",
+      "registeredAt": "Inscription"
+    },
+    "empty": {
+      "title": "Aucune inscrite",
+      "description": "Les inscriptions apparaîtront ici dès la publication."
+    }
+  }
+}

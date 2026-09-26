@@ -63,7 +63,8 @@
     "negotiationAdmission": "Mode d'admission",
     "negotiationDocuments": "Documents",
     "negotiationImport": "Import des sessions",
-    "negotiationAgenda": "Ordre du jour"
+    "negotiationAgenda": "Ordre du jour",
+    "negotiationMeetings": "Réunions"
   },
   "breadcrumb": {
     "label": "Fil d'Ariane",

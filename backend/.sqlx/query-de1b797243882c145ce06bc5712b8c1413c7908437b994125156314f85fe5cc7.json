@@ -1,0 +1,305 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.id, m.slug::text AS \"slug!\", e.slug::text AS \"edition!\",\n                  m.timezone::text AS \"timezone!\",\n                  t.code AS \"type_code?\", t.label::jsonb AS \"type_label?: Value\",\n                  m.title::jsonb AS \"title!: Value\", m.description::jsonb AS \"description?: Value\",\n                  m.start_at, m.end_at AS \"end_at!\", m.format::text AS \"format!\", m.venue_label,\n                  m.external_url::text AS \"external_url?\", m.capacity, m.waitlist_enabled,\n                  m.requires_registration, m.registration_opens_at, m.registration_closes_at,\n                  coalesce(m.is_open_access, true) AS \"open_access!\",\n                  m.access_audience::jsonb AS \"access_audience?: Value\",\n                  m.is_ifdd_organized, m.organizer_org_id, o.legal_name AS \"organizer_name?\",\n                  m.status::text AS \"status!\", m.cancellation_reason, m.pavilion_session_id,\n                  m.registered_count,\n                  (SELECT count(*) FROM negotiation.meeting_registrations r\n                    WHERE r.meeting_id = m.id AND r.status = 'waitlisted') AS \"waitlisted_count!\",\n                  m.updated_at\n             FROM negotiation.meetings m\n             JOIN event.events e ON e.id = m.event_id\n             LEFT JOIN reference.taxonomy_terms t ON t.id = m.francophone_type_term_id\n             LEFT JOIN org.organizations o ON o.id = org.resolve_organization(m.organizer_org_id)\n            WHERE m.kind IN ('preparatory_workshop', 'francophone_consultation')\n              AND m.source_key IS NULL\n              AND ($1::uuid IS NULL OR m.event_id = $1)\n              AND ($2::uuid IS NULL OR m.id = $2)\n            ORDER BY m.start_at, m.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "edition!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "timezone!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "type_code?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "type_label?: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "title!: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "description?: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "start_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "start_at"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "end_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "end_at"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "format!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "venue_label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "venue_label"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "external_url?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
+        "name": "capacity",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "capacity"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "waitlist_enabled",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "waitlist_enabled"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "requires_registration",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "requires_registration"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "registration_opens_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "registration_opens_at"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "registration_closes_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "registration_closes_at"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "open_access!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 19,
+        "name": "access_audience?: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 20,
+        "name": "is_ifdd_organized",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "is_ifdd_organized"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "organizer_org_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "organizer_org_id"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
+        "name": "organizer_name?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "org.organizations",
+            "name": "legal_name"
+          }
+        }
+      },
+      {
+        "ordinal": 23,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 24,
+        "name": "cancellation_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "cancellation_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 25,
+        "name": "pavilion_session_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "pavilion_session_id"
+          }
+        }
+      },
+      {
+        "ordinal": 26,
+        "name": "registered_count",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "registered_count"
+          }
+        }
+      },
+      {
+        "ordinal": 27,
+        "name": "waitlisted_count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 28,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null,
+      null,
+      false,
+      null,
+      null,
+      null,
+      false,
+      true,
+      null,
+      true,
+      null,
+      true,
+      false,
+      false,
+      true,
+      true,
+      null,
+      null,
+      false,
+      true,
+      false,
+      null,
+      true,
+      true,
+      false,
+      null,
+      false
+    ]
+  },
+  "hash": "de1b797243882c145ce06bc5712b8c1413c7908437b994125156314f85fe5cc7"
+}

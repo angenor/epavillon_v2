@@ -1,5 +1,6 @@
 pub mod access;
 pub mod admin_import;
+pub mod admin_meetings;
 pub mod admin_reports;
 pub mod agenda;
 pub mod attempts;
@@ -7,6 +8,7 @@ pub mod bookmarks;
 pub mod codes;
 pub mod corrections;
 pub mod courriel;
+pub mod cross;
 pub mod document_pages;
 pub mod document_themes;
 pub mod documents;

@@ -42,12 +42,22 @@ import type {
   OfficialImportAdmin,
   UpdateOfficialImportPayload,
 } from '~/types/negotiation-sessions'
+import type {
+  AdminFrancophoneMeeting,
+  AdminFrancophoneMeetings,
+  AdminMeetingRegistrations,
+  CancelMeetingPayload,
+  FrancophoneMeetingInput,
+  MeetingPavilionPayload,
+  PavilionActivityOption,
+} from '~/types/negotiation-meetings'
 import type { Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
 
 type Deps = Pick<ApiTransport, 'call' | 'callOrNull' | 'send'>
 
 const exemplesDeLImport = () => import('~/mocks/admin-negotiation-import')
+const exemplesDesReunions = () => import('~/mocks/admin-negotiation-meetings')
 
 /** Les filtres d'URL de la liste, **nommés en français** comme l'API les lit. */
 export interface FiltresDeCodes {
@@ -176,6 +186,55 @@ export function createAdminNegotiationsApi({ call, callOrNull, send }: Deps) {
         { theme },
         async () => (await exemplesDeLImport()).rattacher(pointId, theme),
         'PUT',
+      ),
+
+    /** LES RÉUNIONS DE LA FRANCOPHONIE d'une édition, brouillons compris. */
+    reunions: (edition: string): Promise<AdminFrancophoneMeetings> =>
+      call('/admin/negotiation/meetings', async () => (await exemplesDesReunions()).reunionsDeLEdition(edition), {
+        edition,
+      }),
+
+    reunion: (id: Uuid): Promise<AdminFrancophoneMeeting | null> =>
+      callOrNull(`/admin/negotiation/meetings/${id}`, async () => (await exemplesDesReunions()).uneReunion(id)),
+
+    /** Naît en brouillon : rien n'est visible dans l'application avant « Publier ». */
+    creerUneReunion: (entree: FrancophoneMeetingInput): Promise<AdminFrancophoneMeeting> =>
+      send('/admin/negotiation/meetings', entree, async () => (await exemplesDesReunions()).creer(entree)),
+
+    modifierUneReunion: (id: Uuid, entree: FrancophoneMeetingInput): Promise<AdminFrancophoneMeeting> =>
+      send(
+        `/admin/negotiation/meetings/${id}`,
+        entree,
+        async () => (await exemplesDesReunions()).modifier(id, entree),
+        'PUT',
+      ),
+
+    /** Un refus nomme le champ manquant (`field`) : l'écran le pointe. */
+    publierUneReunion: (id: Uuid): Promise<AdminFrancophoneMeeting> =>
+      send(`/admin/negotiation/meetings/${id}/publish`, {}, async () => (await exemplesDesReunions()).publier(id)),
+
+    annulerUneReunion: (id: Uuid, motif: string): Promise<AdminFrancophoneMeeting> =>
+      send(`/admin/negotiation/meetings/${id}/cancel`, { reason: motif } satisfies CancelMeetingPayload, async () =>
+        (await exemplesDesReunions()).annuler(id, motif),
+      ),
+
+    /** Lier la réunion à une activité du Pavillon, ou retirer le lien (`null`). */
+    lierAuPavillon: (id: Uuid, sessionId: Uuid | null): Promise<AdminFrancophoneMeeting> =>
+      send(
+        `/admin/negotiation/meetings/${id}/pavilion`,
+        { pavilion_session_id: sessionId } satisfies MeetingPavilionPayload,
+        async () => (await exemplesDesReunions()).lierAuPavillon(id, sessionId),
+        'PUT',
+      ),
+
+    inscritesALaReunion: (id: Uuid): Promise<AdminMeetingRegistrations> =>
+      call(`/admin/negotiation/meetings/${id}/registrations`, async () => (await exemplesDesReunions()).inscrites(id)),
+
+    activitesDuPavillon: (edition: string): Promise<PavilionActivityOption[]> =>
+      call(
+        '/admin/negotiation/pavilion-activities',
+        async () => (await exemplesDesReunions()).activitesDuPavillon(edition),
+        { edition },
       ),
   }
 }

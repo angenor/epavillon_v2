@@ -62,7 +62,7 @@ pub fn routes(cfg: &mut ServiceConfig) {
 }
 
 /// Le back-office : l'admission, les documents, l'import des sessions, la
-/// validation des signalements.
+/// validation des signalements, les réunions de la Francophonie.
 ///
 /// **Des routes plates, jamais un `web::scope("/admin")`** : le préfixe
 /// d'administration est partagé avec cinq autres modules, et deux scopes du même
@@ -74,6 +74,7 @@ pub fn admin_routes(cfg: &mut ServiceConfig) {
     routes::admin_documents::configurer(cfg);
     routes::admin_import::configurer(cfg);
     routes::admin_reports::configurer(cfg);
+    routes::admin_meetings::configurer(cfg);
 }
 
 /// Les travaux différés du module : les deux courriels de décision, la purge

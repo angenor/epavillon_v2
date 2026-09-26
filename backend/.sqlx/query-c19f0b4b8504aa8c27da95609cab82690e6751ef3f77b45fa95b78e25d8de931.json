@@ -1,0 +1,78 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT status::text AS \"status!\", capacity, start_at, end_at,\n                  format::text AS \"format!\", venue_label AS venue\n             FROM negotiation.meetings\n            WHERE id = $1\n              AND kind IN ('preparatory_workshop', 'francophone_consultation')\n              AND source_key IS NULL\n              FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "capacity",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "capacity"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "start_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "start_at"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "end_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "end_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "format!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "venue",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "venue_label"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      true,
+      false,
+      true,
+      null,
+      true
+    ]
+  },
+  "hash": "c19f0b4b8504aa8c27da95609cab82690e6751ef3f77b45fa95b78e25d8de931"
+}

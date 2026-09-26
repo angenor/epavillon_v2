@@ -1,0 +1,78 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.status::text AS \"status!\", p.id AS person_id,\n                  p.display_name AS \"name!\", pays.name::jsonb AS \"country?: Value\",\n                  r.registered_at, r.waitlist_position\n             FROM negotiation.meeting_registrations r\n             JOIN identity.people p ON p.id = r.person_id\n             LEFT JOIN reference.countries pays ON pays.id = p.country_id\n            WHERE r.meeting_id = $1 AND r.status <> 'cancelled'\n            ORDER BY r.waitlist_position NULLS FIRST, r.registered_at, p.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "identity.people",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "country?: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "registered_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meeting_registrations",
+            "name": "registered_at"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "waitlist_position",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meeting_registrations",
+            "name": "waitlist_position"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      false,
+      true,
+      null,
+      false,
+      true
+    ]
+  },
+  "hash": "dd9e1974a74fdc301ff5bce15c195002b72991481e69216f8788966d40603e61"
+}

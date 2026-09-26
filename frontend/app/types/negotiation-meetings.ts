@@ -85,3 +85,102 @@ export interface MeetingRegistrationState {
   status: MeetingRegistrationStatus
   waitlist_position: number | null
 }
+
+// ---------------------------------------------------------------------------
+// Back-office — `/admin/negotiation/meetings…` (`negotiation.meeting.manage`, portée globale)
+// ---------------------------------------------------------------------------
+
+/** `ongoing` et `completed` ne sont posés par aucun geste d'ici. */
+export type AdminMeetingStatus = 'draft' | 'scheduled' | 'ongoing' | 'completed' | 'cancelled'
+
+export interface AdminFrancophoneMeeting {
+  id: Uuid
+  slug: string
+  edition: string
+  /** Fuseau de l'édition, recopié à la saisie. */
+  timezone: string
+  /** Nul pour un brouillon sans nature. */
+  type: { code: string; label: I18nText } | null
+  title: I18nText
+  description: I18nText | null
+  start_at: IsoDateTime
+  end_at: IsoDateTime
+  format: FrancophoneMeetingFormat
+  venue: string | null
+  external_url: string | null
+  capacity: number | null
+  waitlist_enabled: boolean
+  requires_registration: boolean
+  registration_opens_at: IsoDateTime | null
+  registration_closes_at: IsoDateTime | null
+  open_access: boolean
+  access_audience: I18nText | null
+  is_ifdd_organized: boolean
+  organizer_org_id: Uuid | null
+  /** « IFDD » ou le nom de l'organisation. */
+  organizer: string
+  status: AdminMeetingStatus
+  cancellation_reason: string | null
+  pavilion_session_id: Uuid | null
+  registered_count: number
+  waitlisted_count: number
+  updated_at: IsoDateTime
+}
+
+/** `GET /admin/negotiation/meetings?edition=` — brouillons compris, par début. */
+export interface AdminFrancophoneMeetings {
+  edition: { slug: string; timezone: string; city: string | null }
+  meetings: AdminFrancophoneMeeting[]
+}
+
+/** Corps de `POST` et `PUT` ; `edition` n'est lue qu'à la création. */
+export interface FrancophoneMeetingInput {
+  edition?: string
+  type: string | null
+  title: I18nText
+  description: I18nText | null
+  start_at: IsoDateTime
+  end_at: IsoDateTime
+  format: FrancophoneMeetingFormat
+  venue: string | null
+  external_url: string | null
+  capacity: number | null
+  waitlist_enabled: boolean
+  requires_registration: boolean
+  registration_opens_at: IsoDateTime | null
+  registration_closes_at: IsoDateTime | null
+  open_access: boolean
+  access_audience: I18nText | null
+  is_ifdd_organized: boolean
+  organizer_org_id: Uuid | null
+}
+
+export interface CancelMeetingPayload {
+  reason: string
+}
+
+export interface MeetingPavilionPayload {
+  pavilion_session_id: Uuid | null
+}
+
+export interface AdminMeetingRegistrant {
+  person_id: Uuid
+  name: string
+  country: I18nText | null
+  registered_at: IsoDateTime
+  /** Posée pour la liste d'attente seulement. */
+  waitlist_position: number | null
+}
+
+/** `GET /admin/negotiation/meetings/{id}/registrations`. */
+export interface AdminMeetingRegistrations {
+  registered: AdminMeetingRegistrant[]
+  waitlisted: AdminMeetingRegistrant[]
+}
+
+/** `GET /admin/negotiation/pavilion-activities?edition=` — lu dans `programme.sessions`. */
+export interface PavilionActivityOption {
+  id: Uuid
+  title: I18nText
+  starts_at: IsoDateTime
+}

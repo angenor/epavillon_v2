@@ -107,10 +107,58 @@ pub fn refus(erreur: sqlx::Error) -> ApiError {
         (Some("23001"), Some("meeting_unavailable")) => ErrorCode::NegotiationMeetingUnavailable,
         (Some("23001"), Some("meeting_closed")) => ErrorCode::NegotiationMeetingClosed,
         (Some("23001"), Some("meeting_full")) => ErrorCode::NegotiationMeetingFull,
-        (Some("23514"), Some(c)) if c.starts_with("ck_meetings_") => {
-            return ApiError::new(ErrorCode::NegotiationMeetingInvalid).detail(c);
-        }
+        (Some("23514" | "23503"), Some(c)) => match champ_de(c) {
+            Some((champ, message)) => return invalide(champ, message),
+            None => return erreur.into(),
+        },
         _ => return erreur.into(),
     };
     ApiError::new(code)
+}
+
+/// `400 NEGOTIATION_MEETING_INVALID` qui nomme le champ.
+pub fn invalide(champ: &str, message: &str) -> ApiError {
+    ApiError::with_message(ErrorCode::NegotiationMeetingInvalid, message).field(champ)
+}
+
+/// La contrainte de la base → le champ du formulaire, et ce qu'on en dit.
+fn champ_de(contrainte: &str) -> Option<(&'static str, &'static str)> {
+    Some(match contrainte {
+        "ck_meetings_period" | "ck_meetings_imported_end" => {
+            ("end_at", "La fin de la réunion doit suivre son début.")
+        }
+        "ck_meetings_registration_window" => (
+            "registration_closes_at",
+            "La fermeture des inscriptions doit suivre leur ouverture.",
+        ),
+        "ck_meetings_online_access" => (
+            "external_url",
+            "Une réunion en ligne ou hybride demande un lien de connexion.",
+        ),
+        "ck_meetings_onsite_venue" => {
+            ("venue", "Une réunion sur place ou hybride demande un lieu.")
+        }
+        "ck_meetings_cancellation" => ("reason", "L'annulation demande un motif."),
+        "ck_meetings_francophone_type" | "ck_meetings_francophone_kind" => {
+            ("type", "La nature de la réunion est requise.")
+        }
+        "ck_meetings_francophone_event" => ("edition", "La réunion doit appartenir à une édition."),
+        "ck_meetings_access_audience" => (
+            "access_audience",
+            "Une réunion à accès limité dit à qui elle est ouverte.",
+        ),
+        "ck_meetings_pavilion_edition" | "xmod_fk_negotiation_meetings_pavilion_session" => (
+            "pavilion_session_id",
+            "Cette activité n'appartient pas au Pavillon de l'édition de la réunion.",
+        ),
+        "meetings_capacity_check" => ("capacity", "La capacité doit être d'au moins une place."),
+        "url_check" => (
+            "external_url",
+            "Le lien de connexion doit commencer par http:// ou https://.",
+        ),
+        "xmod_fk_negotiation_meetings_organizer" => {
+            ("organizer_org_id", "Cette organisation n'existe pas.")
+        }
+        _ => return None,
+    })
 }

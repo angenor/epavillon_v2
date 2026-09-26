@@ -122,6 +122,12 @@ const sections: NavSection[] = [
         icon: 'list',
         permissions: ['negotiation.space.manage'],
       },
+      {
+        labelKey: 'nav.admin.negotiationMeetings',
+        to: '/admin/negociations/reunions',
+        icon: 'calendar',
+        permissions: ['negotiation.meeting.manage'],
+      },
     ],
   },
   {

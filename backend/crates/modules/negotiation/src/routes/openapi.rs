@@ -94,6 +94,15 @@ pub struct ApiErrorBody {
         crate::routes::admin_reports::annuler,
         crate::routes::admin_reports::refuser,
         crate::routes::admin_reports::retirer,
+        crate::routes::admin_meetings::lister,
+        crate::routes::admin_meetings::creer,
+        crate::routes::admin_meetings::fiche,
+        crate::routes::admin_meetings::modifier,
+        crate::routes::admin_meetings::publier,
+        crate::routes::admin_meetings::annuler,
+        crate::routes::admin_meetings::lier_au_pavillon,
+        crate::routes::admin_meetings::inscrites,
+        crate::routes::admin_meetings::activites_du_pavillon,
     ),
     components(schemas(ApiErrorBody)),
     tags(
@@ -105,6 +114,7 @@ pub struct ApiErrorBody {
         (name = "Back-office — documents", description = "Publier un document en une journée : brouillon, PDF, extraction, aperçu page par page, publication, nouvelle version ; et les notes de correction de l'expert. Portée globale."),
         (name = "Back-office — sessions officielles", description = "L'import des sessions de négociation d'une édition — interrupteur, lecteur, cadence, santé, journal, « Lire maintenant » — et le rattachement des points de l'ordre du jour aux thématiques. Portée globale. Aucune route ne modifie une session : la source fait foi."),
         (name = "Back-office — signalements", description = "La file des signalements du réseau et les décisions : valider (publié trente secondes plus tard), annuler tant que rien n'est publié, ne pas retenir, retirer. `negotiation.report.validate` **sur la portée globale**. L'écran vit dans Guide Négo."),
+        (name = "Back-office — réunions de la Francophonie", description = "Saisir, publier, annuler une réunion de la Francophonie, la lier à une activité du Pavillon de la même édition, voir les inscrites et la liste d'attente. `negotiation.meeting.manage` **sur la portée globale**."),
         (name = "Back-office — admission", description = "Les codes d'invitation, leurs usages, les demandes d'accès et le mode d'admission. Réservé aux administrateurs de la plateforme entière : `negotiation.space.manage` **sur la portée globale**. Un administrateur d'une seule édition n'y voit rien — aucun espace de négociation n'est rattaché à un événement."),
     )
 )]

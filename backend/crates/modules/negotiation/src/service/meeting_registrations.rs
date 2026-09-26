@@ -100,4 +100,4 @@ pub async fn desinscrire(
 
 /// T017 : l'avis et le courriel de chaque personne promue partiront d'ici, dans
 /// la transaction de la promotion. Rien n'est émis à la phase 2.
-fn prevenir_des_promotions(_meeting_id: Uuid, _promues: &[Uuid]) {}
+pub(crate) fn prevenir_des_promotions(_meeting_id: Uuid, _promues: &[Uuid]) {}

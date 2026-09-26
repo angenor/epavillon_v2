@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.meetings SET status = 'scheduled' WHERE id = $1 AND status = 'draft'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "89e5b660f2afb7f448269d2c08b898c2301d6e395b132e549a14b6f462ed369a"
+}

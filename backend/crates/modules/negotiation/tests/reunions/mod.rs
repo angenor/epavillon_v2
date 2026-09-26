@@ -14,6 +14,7 @@ use uuid::Uuid;
 pub const ACTEUR: &str = "x-essai-acteur";
 pub const LIEN: &str = "https://visio.example.org/salle-secrete";
 
+#[allow(unused_macros)]
 macro_rules! application {
     ($d:expr) => {
         actix_web::test::init_service(
@@ -39,6 +40,39 @@ macro_rules! application {
                     srv.call(req)
                 })
                 .configure(negotiation::routes),
+        )
+        .await
+    };
+}
+
+/// Le back-office du module, seul, sur le même intergiciel d'acteur.
+#[allow(unused_macros)]
+macro_rules! administration {
+    ($d:expr) => {
+        actix_web::test::init_service(
+            actix_web::App::new()
+                .app_data(actix_web::web::Data::new($d.base.db()))
+                .app_data(actix_web::web::Data::new($d.etat.clone()))
+                .wrap_fn(|req, srv| {
+                    use actix_web::dev::Service as _;
+                    use actix_web::HttpMessage as _;
+                    let acteur = req
+                        .headers()
+                        .get($crate::reunions::ACTEUR)
+                        .and_then(|v| v.to_str().ok())
+                        .and_then(|v| uuid::Uuid::parse_str(v).ok());
+                    let ctx = kernel::context::RequestContext::new(
+                        kernel::context::RequestContext::generated_request_id(),
+                        "fr",
+                    );
+                    req.extensions_mut().insert(match acteur {
+                        Some(a) => ctx.with_actor(a),
+                        None => ctx,
+                    });
+                    srv.call(req)
+                })
+                .configure(negotiation::routes)
+                .configure(negotiation::admin_routes),
         )
         .await
     };
@@ -205,6 +239,22 @@ impl Decor {
             .expect("rôle");
         }
         id
+    }
+
+    /// Un rôle sur une portée : `("admin", "global", None)`,
+    /// `("admin", "event", Some(édition))`, `("space_lead", "negotiation_space", …)`.
+    pub async fn role(&self, personne: Uuid, role: &str, portee: &str, cible: Option<Uuid>) {
+        sqlx::query(
+            "INSERT INTO identity.role_assignments (person_id, role_code, scope_type, scope_id)
+             VALUES ($1, $2, $3::text::identity.scope_type, $4)",
+        )
+        .bind(personne)
+        .bind(role)
+        .bind(portee)
+        .bind(cible)
+        .execute(self.pool())
+        .await
+        .expect("rôle");
     }
 
     pub async fn organisation(&self, nom: &str) -> Uuid {

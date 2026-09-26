@@ -63,7 +63,8 @@
     "negotiationAdmission": "Admission mode",
     "negotiationDocuments": "Documents",
     "negotiationImport": "Session import",
-    "negotiationAgenda": "Agenda items"
+    "negotiationAgenda": "Agenda items",
+    "negotiationMeetings": "Meetings"
   },
   "breadcrumb": {
     "label": "Breadcrumb",
