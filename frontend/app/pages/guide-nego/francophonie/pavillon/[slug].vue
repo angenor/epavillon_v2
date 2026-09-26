@@ -1,7 +1,15 @@
 <script setup lang="ts">
 import type { PublicSessionSpeaker } from '~/types/programme/session'
+import type { IssueInscriptionPavillon } from '~/composables/guide-nego/useGnInscriptionsPavillon'
 import { dayKeyInZone } from '~/utils/datetime'
-import { etatDeLActivite, minutesDeRediffusion } from '~/utils/guide-nego/pavillon'
+import {
+  consentementRequis,
+  etatDeLActivite,
+  formulaireDUnGeste,
+  minutesDeRediffusion,
+  PREFIXE_FILE_INSCRIPTION_PAVILLON,
+  reponsesPreremplies,
+} from '~/utils/guide-nego/pavillon'
 
 /**
  * Écran 10 · 1d — la fiche d'une activité du Pavillon. Le détail lu tient lieu de source ;
@@ -20,6 +28,7 @@ const compte = useGnSession()
 const edition = useGnEdition()
 const pavillon = useGnPavillon()
 const inscriptions = useGnInscriptionsPavillon()
+const pays = useGnPays()
 
 const k = (cle: string, params: Record<string, unknown> = {}) => t(`guide-nego.pavillon-activite.${cle}`, params)
 
@@ -47,8 +56,12 @@ onMounted(async () => {
   void relire()
   await compte.assurer()
   inscriptions.assurer()
+  if (compte.connectee.value) void pays.assurer()
 })
-onBeforeUnmount(() => clearInterval(horloge))
+onBeforeUnmount(() => {
+  clearInterval(horloge)
+  ficheOuverte.value = null
+})
 
 const enLigne = computed(() => connexion.etat.value.enLigne)
 const attente = computed(() => !lecture.pret.value && !tentee.value)
@@ -135,6 +148,109 @@ const intervenants = computed(() =>
 
 const libelleAttente = (position: number | null) =>
   position ? t('gn-ligne-activite.attente-position', { position }) : undefined
+
+// --- S'inscrire (FR-006, FR-006a, FR-007) -----------------------------------
+
+const id = computed(() => activite.value?.id ?? null)
+// Le layout se tait sur un refus que cette fiche redit en place.
+const ficheOuverte = useState<string | null>('gn-fiche-pavillon-ouverte', () => null)
+watch(id, (valeur) => (ficheOuverte.value = valeur), { immediate: true })
+
+const bouton = computed(() => (id.value ? inscriptions.bouton(id.value, maintenant.value) : null))
+const aEnvoyer = computed(() => (id.value ? inscriptions.aEnvoyer(id.value) : false))
+const lecturePendante = computed(() => compte.connectee.value && !inscriptions.pret.value)
+const champs = computed(() => lecture.formulaire.value?.fields ?? [])
+const paysIso2 = computed(() => pays.iso2DuPays(compte.compte.value.paysId))
+const envoi = ref(false)
+const refus = ref<string | null>(null)
+const feuilleCompte = ref(false)
+const feuilleFormulaire = ref(false)
+const erreursDuFormulaire = ref<Record<string, string>>({})
+const refusDuFormulaire = ref<string | null>(null)
+
+const pasEncore = computed(() => {
+  const ouvre = bouton.value?.ouvreLe
+  if (!ouvre) return null
+  const f = fuseau.value
+  return k('inscription.pas-encore', { jour: dayLong(ouvre, f), heure: time(ouvre, f), zone: zoneLabel(f, ville.value) })
+})
+
+const message = ref<{ texte: string; action?: string; agir?: () => void; rang: number } | null>(null)
+const annoncer = (texte: string, action?: string, agir?: () => void) =>
+  (message.value = { texte, action, agir, rang: (message.value?.rang ?? 0) + 1 })
+
+function dire(issue: IssueInscriptionPavillon): void {
+  if (issue.issue === 'refusee') {
+    message.value = null
+    refus.value = issue.message ?? k('inscription.refusee')
+  } else if (issue.issue === 'inscrite') annoncer(k('inscription.faite'))
+  else if (issue.issue === 'liste-attente') annoncer(libelleAttente(issue.position) ?? t('gn-marque-etat.liste-attente'))
+  else if (issue.issue === 'en-attente') annoncer(k('inscription.en-file'))
+}
+
+async function envoyer(geste: () => Promise<IssueInscriptionPavillon>): Promise<IssueInscriptionPavillon> {
+  envoi.value = true
+  refus.value = null
+  try {
+    return await geste()
+  } finally {
+    envoi.value = false
+  }
+}
+
+async function inscrire(): Promise<void> {
+  const seance = id.value
+  if (!seance) return
+  if (!compte.connectee.value) {
+    feuilleCompte.value = true
+    return
+  }
+  if (compte.compte.value.paysId && !paysIso2.value) await pays.assurer().catch(() => undefined)
+  if (formulaireDUnGeste(champs.value, paysIso2.value)) {
+    dire(await envoyer(() => inscriptions.inscrire(seance, reponsesPreremplies(champs.value, paysIso2.value))))
+    return
+  }
+  erreursDuFormulaire.value = {}
+  refusDuFormulaire.value = null
+  feuilleFormulaire.value = true
+}
+
+async function envoyerLeFormulaire(reponses: Record<string, unknown>, consentement: boolean): Promise<void> {
+  const seance = id.value
+  if (!seance) return
+  erreursDuFormulaire.value = {}
+  refusDuFormulaire.value = null
+  const issue = await envoyer(() => inscriptions.inscrire(seance, reponses, consentement))
+  // Un refus qui nomme un champ se corrige dans la feuille, qui reste ouverte.
+  if (issue.issue === 'refusee' && issue.champ) {
+    const texte = issue.message ?? k('inscription.refusee')
+    refus.value = null
+    if (champs.value.some((c) => c.code === issue.champ)) erreursDuFormulaire.value = { [issue.champ]: texte }
+    else refusDuFormulaire.value = texte
+    return
+  }
+  feuilleFormulaire.value = false
+  dire(issue)
+}
+
+async function desinscrire(): Promise<void> {
+  const seance = id.value
+  if (!seance) return
+  const quitteLAttente = bouton.value?.libelle === 'liste-attente'
+  const reponses = { ...(inscriptions.inscription(seance)?.answers ?? {}) }
+  const issue = await envoyer(() => inscriptions.annuler(seance))
+  if (issue.issue === 'refusee') return dire(issue)
+  const cle = issue.issue === 'en-attente' ? 'en-file' : quitteLAttente ? 'attente-quittee' : 'faite'
+  annoncer(k(`desinscription.${cle}`), k('desinscription.annuler'), () => {
+    message.value = null
+    void envoyer(() => inscriptions.inscrire(seance, reponses, consentementRequis(champs.value, reponses))).then(dire)
+  })
+}
+
+// Un geste reparti de la file et refusé se dit ici, en mots clairs.
+watch(inscriptions.refus, (avis) => {
+  if (avis?.message && id.value && avis.cle === `${PREFIXE_FILE_INSCRIPTION_PAVILLON}${id.value}`) refus.value = avis.message
+})
 
 useHead({ title: titre })
 </script>
@@ -255,8 +371,82 @@ useHead({ title: titre })
           </li>
         </ul>
       </template>
-      <!-- Phase 4 : le bouton d'inscription se pose ici, en pied collant. -->
+
+      <div v-if="bouton || aEnvoyer || refus" class="gn-activite__actions">
+        <template v-if="bouton">
+          <GnBouton v-if="bouton.libelle === 'inscrire'" :chargement="envoi || lecturePendante" @clic="inscrire">
+            {{ k('inscription.inscrire') }}
+          </GnBouton>
+          <GnBouton
+            v-else-if="bouton.libelle === 'inscrite'"
+            variante="secondaire"
+            picto="check"
+            actif
+            :desactive="!bouton.geste"
+            :chargement="envoi"
+            @clic="desinscrire"
+          >
+            {{ t('gn-marque-etat.inscrite') }}
+          </GnBouton>
+          <template v-else-if="bouton.libelle === 'rejoindre-attente'">
+            <GnMarqueEtat etat="complet" />
+            <GnBouton variante="secondaire" picto="clock" :chargement="envoi || lecturePendante" @clic="inscrire">
+              {{ k('inscription.rejoindre-attente') }}
+            </GnBouton>
+          </template>
+          <template v-else-if="bouton.libelle === 'liste-attente'">
+            <GnMarqueEtat etat="liste-attente" :libelle="libelleAttente(bouton.position)" />
+            <GnBouton v-if="bouton.geste" variante="secondaire" :chargement="envoi" @clic="desinscrire">
+              {{ k('inscription.quitter-attente') }}
+            </GnBouton>
+          </template>
+          <GnMarqueEtat v-else-if="bouton.libelle === 'complet'" etat="complet" :libelle="k('inscription.complet')" />
+          <p v-else class="gn-activite__closes">
+            <GnPicto :nom="bouton.libelle === 'pas-encore' ? 'clock' : 'lock'" :taille="18" />
+            {{ bouton.libelle === 'pas-encore' ? pasEncore : k('inscription.closes') }}
+          </p>
+        </template>
+
+        <GnMarqueEtat v-if="aEnvoyer" etat="a-envoyer" :libelle="k('inscription.a-envoyer')" />
+        <p v-if="refus" class="gn-activite__refus" role="alert">
+          <GnPicto nom="warn" :taille="20" />
+          {{ refus }}
+        </p>
+      </div>
     </div>
+
+    <GnFormulaireInscription
+      v-model="feuilleFormulaire"
+      :champs="champs"
+      :titre="titre"
+      :pays-iso2="paysIso2"
+      :envoi="envoi"
+      :erreurs-serveur="erreursDuFormulaire"
+      :refus="refusDuFormulaire"
+      :attente="bouton?.libelle === 'rejoindre-attente'"
+      @envoyer="envoyerLeFormulaire"
+    />
+
+    <GnFeuilleBasse
+      v-model="feuilleCompte"
+      :titre="k('inscription.compte.titre')"
+      :sous-titre="k('inscription.compte.texte')"
+      :fermeture="k('inscription.fermer')"
+    >
+      <div class="gn-activite__sorties">
+        <GnBouton vers="/guide-nego/connexion" picto="user">{{ t('gn-verrou.sortie.connexion') }}</GnBouton>
+        <GnBouton variante="secondaire" vers="/guide-nego/compte">{{ t('gn-verrou.sortie.compte') }}</GnBouton>
+      </div>
+    </GnFeuilleBasse>
+
+    <GnMessageEphemere
+      v-if="message"
+      :key="message.rang"
+      :texte="message.texte"
+      :action="message.action"
+      @agir="message.agir?.()"
+      @fini="message = null"
+    />
   </GnEcran>
 </template>
 
@@ -270,10 +460,63 @@ useHead({ title: titre })
   padding-top: var(--gn-espace-16);
 }
 
-[data-app="guide-nego"] .gn-activite {
-  padding-bottom: var(--gn-espace-16);
+[data-app="guide-nego"] .gn-ecran__contenu:has(> .gn-activite) {
   display: flex;
   flex-direction: column;
+}
+
+[data-app="guide-nego"] .gn-activite {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+[data-app="guide-nego"] .gn-activite:not(:has(.gn-activite__actions)) {
+  padding-bottom: var(--gn-espace-16);
+}
+
+[data-app="guide-nego"] .gn-activite__actions {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  margin-inline: calc(-1 * var(--gn-marge-ecran));
+  padding: var(--gn-espace-16) var(--gn-marge-ecran) calc(var(--gn-espace-16) + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: var(--gn-espace-8);
+  border-top: var(--gn-filet-1) solid var(--gn-filet);
+  background: var(--gn-fond);
+}
+
+[data-app="guide-nego"] .gn-activite__closes,
+[data-app="guide-nego"] .gn-activite__refus {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+  font-weight: var(--gn-graisse-gras);
+  overflow-wrap: anywhere;
+}
+
+[data-app="guide-nego"] .gn-activite__closes {
+  color: var(--gn-texte-2);
+}
+
+[data-app="guide-nego"] .gn-activite__refus {
+  color: var(--gn-danger);
+}
+
+[data-app="guide-nego"] .gn-activite__closes .gn-picto,
+[data-app="guide-nego"] .gn-activite__refus .gn-picto {
+  flex: none;
+  margin-block-start: 1px;
+}
+
+[data-app="guide-nego"] .gn-activite__sorties {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gn-espace-8);
 }
 
 [data-app="guide-nego"] .gn-activite__marques {

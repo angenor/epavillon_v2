@@ -38,5 +38,13 @@ export function useGnPays() {
     return etat.value.valeur?.find((p) => p.id === id)?.iso2 ?? null
   }
 
-  return { assurer, nomDuPays, iso2DuPays }
+  /** Les pays connus, par nom dans la langue de l'écran : le choix d'un champ « pays ». */
+  const liste = computed(() =>
+    (etat.value.valeur ?? [])
+      .filter((p): p is PaysGarde & { iso2: string } => !!p.iso2)
+      .map((p) => ({ iso2: p.iso2, nom: p.nom[locale.value] ?? p.nom.fr ?? p.iso2 }))
+      .sort((a, b) => a.nom.localeCompare(b.nom, locale.value)),
+  )
+
+  return { assurer, nomDuPays, iso2DuPays, liste }
 }

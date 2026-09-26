@@ -42,5 +42,28 @@
     "titre": "Unable to read",
     "texte": "The activity could not be read. Check the connection, then try again.",
     "reessayer": "Try again"
+  },
+  "inscription": {
+    "inscrire": "Register",
+    "rejoindre-attente": "Join the waiting list",
+    "quitter-attente": "Leave the waiting list",
+    "complet": "Full — no waiting list",
+    "closes": "Registration closed",
+    "pas-encore": "Registration opens on {jour} at {heure}, {zone}",
+    "a-envoyer": "Will be sent when back online",
+    "faite": "Registration confirmed.",
+    "en-file": "Registration saved. It will be sent when back online.",
+    "refusee": "The registration could not be taken. Try again.",
+    "fermer": "Close",
+    "compte": {
+      "titre": "Registering needs an account",
+      "texte": "You register in your own name. The page itself can be read without an account."
+    }
+  },
+  "desinscription": {
+    "faite": "Registration cancelled.",
+    "attente-quittee": "You have left the waiting list.",
+    "en-file": "Cancellation saved. It will be sent when back online.",
+    "annuler": "Undo"
   }
 }

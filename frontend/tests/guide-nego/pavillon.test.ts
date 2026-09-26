@@ -8,6 +8,7 @@ import {
   appliquerIntentionPavillon,
   avecLaFilePavillon,
   boutonDInscriptionPavillon,
+  champsSansReponse,
   consentementRequis,
   etatDeLActivite,
   formulaireDUnGeste,
@@ -21,7 +22,9 @@ import {
   marqueDeLActivite,
   prochaineActivite,
   rediffusionsDeLaVeille,
+  reponsesDeLaSaisie,
   reponsesPreremplies,
+  saisieInitiale,
   veille,
 } from '../../app/utils/guide-nego/pavillon.ts'
 import { BELEM } from './fausses-sessions.ts'
@@ -232,6 +235,23 @@ test('le formulaire d’un geste : aucun champ obligatoire, ou le seul pays conn
   assert.deepEqual(reponsesPreremplies(simple, null), {})
   assert.equal(consentementRequis([champ('sante', 'long_text', false, true)], { sante: '' }), false)
   assert.equal(consentementRequis([champ('sante', 'long_text', false, true)], { sante: 'fauteuil' }), true)
+})
+
+test('le formulaire complet : saisie de départ, réponses au format de l’API, obligatoires manquants', () => {
+  const champs = [
+    champ('country', 'country', true),
+    champ('age', 'number', false),
+    champ('langues', 'multiple_choice', false),
+    champ('badge', 'boolean', false),
+    champ('motif', 'long_text', true),
+    { ...champ('ancien', 'text', true), is_active: false },
+  ]
+  const depart = saisieInitiale(champs, 'SN')
+  assert.deepEqual(depart, { country: 'SN', age: '', langues: [], badge: false, motif: '' })
+  const reponses = reponsesDeLaSaisie(champs, { ...depart, age: ' 42,5 ', motif: '  ' })
+  assert.deepEqual(reponses, { country: 'SN', age: 42.5, badge: false })
+  assert.deepEqual(champsSansReponse(champs, reponses), ['motif'])
+  assert.deepEqual(reponsesDeLaSaisie(champs, { ...depart, age: 'douze', langues: ['fr'] }).age, 'douze')
 })
 
 test('l’annulation vise la ligne vivante que le serveur connaît', () => {

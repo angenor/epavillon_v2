@@ -11,7 +11,7 @@
 import type { Registration, RegistrationResult } from '~/types/programme/registration'
 import type { ApiErrorCode } from '~/types/api-error'
 import { estInchange } from '~/composables/api/etiquete'
-import { formatDateTime, timeZoneCityLabel } from '~/utils/datetime'
+import { formatDateTime } from '~/utils/datetime'
 import { ApiRequestError, normalizeApiError } from '~/utils/api-error'
 import { ecrireGarde, magasinDesEcritures } from '~/utils/guide-nego/garde'
 import {
@@ -38,6 +38,8 @@ export interface IssueInscriptionPavillon {
   position: number | null
   /** Le message de l'API tel quel, ou la phrase de l'application pour une issue en 200. */
   message: string | null
+  /** Le champ du formulaire que le refus nomme (`422`). */
+  champ: string | null
 }
 
 const refus = (code: ApiErrorCode, status: number, message: string) => new ApiRequestError({ code, message }, status)
@@ -50,6 +52,7 @@ const introuvable = (erreur: unknown) => {
 export function useGnInscriptionsPavillon() {
   const api = useApi().pavillon
   const { t, locale } = useI18n()
+  const { zoneLabel } = useDateTime()
   const session = useGnSession()
   const edition = useGnEdition()
   const pavillon = useGnPavillon()
@@ -91,17 +94,17 @@ export function useGnInscriptionsPavillon() {
     avecLaFilePavillon(lu.value?.inscriptions ?? [], enFile.value, pavillon.activites.value, session.compte.value.id ?? '', new Date()),
   )
 
-  const ville = (fuseau: string) => edition.edition.value?.city ?? timeZoneCityLabel(fuseau)
+  const zone = (fuseau: string) => zoneLabel(fuseau, edition.edition.value?.city ?? undefined)
   const quand = (iso: string, fuseau: string) => formatDateTime(iso, { locale: locale.value, timeZone: fuseau })
 
   /** Complet, clos, pas encore ouvert : des issues en 200, dites comme un refus. */
   function refusDe(issue: RegistrationResult, fuseau: string): ApiRequestError | null {
     if (issue.status === 'full') return refus('CONFLICT', 409, t('gn-formulaire-inscription.issues.full'))
     if (issue.status === 'closed') {
-      return refus('CONFLICT', 409, t('gn-formulaire-inscription.issues.closed', { date: quand(issue.closed_at, fuseau), ville: ville(fuseau) }))
+      return refus('CONFLICT', 409, t('gn-formulaire-inscription.issues.closed', { date: quand(issue.closed_at, fuseau), zone: zone(fuseau) }))
     }
     if (issue.status === 'not_open_yet') {
-      return refus('CONFLICT', 409, t('gn-formulaire-inscription.issues.not_open_yet', { date: quand(issue.opens_at, fuseau), ville: ville(fuseau) }))
+      return refus('CONFLICT', 409, t('gn-formulaire-inscription.issues.not_open_yet', { date: quand(issue.opens_at, fuseau), zone: zone(fuseau) }))
     }
     return null
   }
@@ -159,14 +162,14 @@ export function useGnInscriptionsPavillon() {
 
   function issueApresEnvoi(sessionId: string): IssueInscriptionPavillon {
     const i = inscriptionDeLaSeance(lu.value?.inscriptions ?? [], sessionId)
-    if (i?.status === 'registered') return { issue: 'inscrite', position: null, message: null }
-    if (i?.status === 'waitlisted') return { issue: 'liste-attente', position: i.waitlist_position, message: null }
-    return { issue: 'annulee', position: null, message: null }
+    if (i?.status === 'registered') return { issue: 'inscrite', position: null, message: null, champ: null }
+    if (i?.status === 'waitlisted') return { issue: 'liste-attente', position: i.waitlist_position, message: null, champ: null }
+    return { issue: 'annulee', position: null, message: null, champ: null }
   }
 
   async function vouloir(sessionId: string, voulu: IntentionPavillon): Promise<IssueInscriptionPavillon> {
     const personne = session.compte.value.id
-    if (!personne) return { issue: 'refusee', position: null, message: null }
+    if (!personne) return { issue: 'refusee', position: null, message: null, champ: null }
 
     enFileParPersonne.value = { ...enFileParPersonne.value, [personne]: { ...enFile.value, [sessionId]: voulu } }
     await reecrireLaGarde(personne, (i) =>
@@ -177,8 +180,8 @@ export function useGnInscriptionsPavillon() {
     const suite = (await file.partir()).find((s) => s.cle === cle)
     await relireLaFile()
     if (suite?.sort === 'envoyee') return issueApresEnvoi(sessionId)
-    if (suite?.sort === 'refusee' || suite?.sort === 'perimee') return { issue: 'refusee', position: null, message: suite.message }
-    return { issue: 'en-attente', position: null, message: null }
+    if (suite?.sort === 'refusee' || suite?.sort === 'perimee') return { issue: 'refusee', position: null, message: suite.message, champ: suite.champ ?? null }
+    return { issue: 'en-attente', position: null, message: null, champ: null }
   }
 
   const inscription = (sessionId: string): Registration | null => inscriptionDeLaSeance(inscriptions.value, sessionId)

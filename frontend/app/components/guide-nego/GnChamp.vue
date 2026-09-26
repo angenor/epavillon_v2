@@ -20,7 +20,7 @@ const props = withDefaults(
     erreur?: string
     desactive?: boolean
     indication?: string
-    type?: 'text' | 'email' | 'password' | 'tel' | 'url' | 'number' | 'time'
+    type?: 'text' | 'email' | 'password' | 'tel' | 'url' | 'number' | 'time' | 'date'
   }>(),
   {
     aide: undefined,

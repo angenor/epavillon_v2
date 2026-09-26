@@ -1,7 +1,18 @@
 {
+  "titre": "Register",
+  "titre-attente": "Join the waiting list",
+  "obligatoire": "{libelle} (required)",
+  "requis": "This answer is required.",
+  "choisir": "Choose",
+  "pays-code": "The two-letter country code, for example SN.",
+  "consentement": "I agree to share this sensitive information",
+  "consentement-detail": "It is used only to organise the event, under the IFDD privacy policy.",
+  "consentement-requis": "Tick this box to share the sensitive information, or leave blank the question that asks for it.",
+  "envoyer": "Register",
+  "envoyer-attente": "Join the waiting list",
   "issues": {
     "full": "Full: no seats are left, and this activity has no waiting list.",
-    "closed": "Registration closed on {date}, {ville} time.",
-    "not_open_yet": "Registration opens on {date}, {ville} time."
+    "closed": "Registration closed on {date}, {zone}.",
+    "not_open_yet": "Registration opens on {date}, {zone}."
   }
 }

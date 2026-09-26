@@ -27,7 +27,7 @@ export type AvisDeFile = Suite
 export function reponseDe(erreur: unknown): Reponse {
   const normalisee = normalizeApiError(erreur)
   if (normalisee instanceof ApiRequestError) {
-    return { statut: 'refus', code: normalisee.status, message: normalisee.message }
+    return { statut: 'refus', code: normalisee.status, message: normalisee.message, champ: normalisee.field }
   }
   return { statut: 'panne' }
 }

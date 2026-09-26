@@ -11,6 +11,7 @@ import '~/assets/guide-nego/mesures.css'
 import '~/assets/guide-nego/base.css'
 import { CLE_GARDE_ANNONCEE, lireCle, poserCle } from '~/utils/guide-nego/stockage'
 import { PREFIXE_FILE_INSCRIPTION_REUNION } from '~/utils/guide-nego/reunions'
+import { PREFIXE_FILE_INSCRIPTION_PAVILLON } from '~/utils/guide-nego/pavillon'
 import { PREFIXE_FILE_SIGNALEMENT } from '~/utils/guide-nego/signalements'
 import { CLE_FILE_THEMATIQUES } from '~/utils/guide-nego/thematiques'
 
@@ -82,11 +83,14 @@ useGnReglageNotifications()
 const ECRAN_DE_LA_CLE: Record<string, string> = { [CLE_FILE_THEMATIQUES]: '/guide-nego/thematiques' }
 // Les fiches (session, réunion) et « réunion non annoncée » redisent en place leur refus.
 const ECRAN_DU_SIGNALEMENT = /^\/guide-nego\/negociations\/(?!agenda$|signalements$)[^/]+$/
+const ficheDuPavillon = useState<string | null>('gn-fiche-pavillon-ouverte', () => null)
 const ditEnPlace = (cle: string, chemin: string) =>
   chemin === ECRAN_DE_LA_CLE[cle] ||
   (cle.startsWith(PREFIXE_FILE_SIGNALEMENT) && ECRAN_DU_SIGNALEMENT.test(chemin)) ||
   (cle.startsWith(PREFIXE_FILE_INSCRIPTION_REUNION) &&
-    chemin === `/guide-nego/francophonie/reunions/${cle.slice(PREFIXE_FILE_INSCRIPTION_REUNION.length)}`)
+    chemin === `/guide-nego/francophonie/reunions/${cle.slice(PREFIXE_FILE_INSCRIPTION_REUNION.length)}`) ||
+  // L'adresse d'une activité porte son slug, la clé son identifiant : la fiche dit lequel elle montre.
+  (cle === `${PREFIXE_FILE_INSCRIPTION_PAVILLON}${ficheDuPavillon.value}` && chemin.startsWith('/guide-nego/francophonie/pavillon/'))
 const avisAnnonce = ref<{ texte: string; rang: number } | null>(null)
 watch(avis, (suite) => {
   if (!suite?.message || ditEnPlace(suite.cle, route.path.replace(/\/$/, ''))) return

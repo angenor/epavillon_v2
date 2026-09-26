@@ -233,6 +233,50 @@ export function consentementRequis(champs: readonly RegistrationFormField[], rep
   return champs.some((c) => c.is_sensitive && reponses[c.code] !== undefined && reponses[c.code] !== null && reponses[c.code] !== '')
 }
 
+/** Ce que la personne a saisi : un texte, une liste cochée, une case. */
+export type SaisieDuFormulaire = Record<string, string | string[] | boolean>
+
+export const champsAffiches = (champs: readonly RegistrationFormField[]) =>
+  champs.filter((c) => c.is_active).sort((a, b) => a.sort_order - b.sort_order || a.code.localeCompare(b.code))
+
+/** Le départ du formulaire : le pays du profil, une case décochée, une liste vide. */
+export function saisieInitiale(champs: readonly RegistrationFormField[], paysIso2: string | null): SaisieDuFormulaire {
+  const pays = reponsesPreremplies(champs, paysIso2)
+  return Object.fromEntries(
+    champsAffiches(champs).map((c): [string, string | string[] | boolean] => {
+      if (c.field_type === 'boolean') return [c.code, false]
+      if (c.field_type === 'multiple_choice') return [c.code, []]
+      return [c.code, typeof pays[c.code] === 'string' ? (pays[c.code] as string) : '']
+    }),
+  )
+}
+
+/**
+ * Les réponses telles que l'API les attend (`answers.rs`) : un texte vide ne part pas,
+ * un nombre part en nombre. Un nombre illisible part tel quel : le refus du serveur le dit.
+ */
+export function reponsesDeLaSaisie(champs: readonly RegistrationFormField[], saisie: SaisieDuFormulaire): Record<string, unknown> {
+  const reponses: Record<string, unknown> = {}
+  for (const c of champsAffiches(champs)) {
+    const v = saisie[c.code]
+    if (typeof v === 'boolean') reponses[c.code] = v
+    else if (Array.isArray(v)) {
+      if (v.length) reponses[c.code] = [...v]
+    } else if (typeof v === 'string' && v.trim()) {
+      const texte = v.trim()
+      const nombre = Number(texte.replace(',', '.'))
+      reponses[c.code] = c.field_type === 'number' && Number.isFinite(nombre) ? nombre : texte
+    }
+  }
+  return reponses
+}
+
+/** Les champs obligatoires restés sans réponse, dans l'ordre du formulaire. */
+export const champsSansReponse = (champs: readonly RegistrationFormField[], reponses: Record<string, unknown>) =>
+  champsAffiches(champs)
+    .filter((c) => c.is_required && !(c.code in reponses))
+    .map((c) => c.code)
+
 // ---------------------------------------------------------------------------
 // Mes inscriptions, et l'intention qui part dans la file (R3)
 // ---------------------------------------------------------------------------

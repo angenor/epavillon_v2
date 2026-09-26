@@ -30,8 +30,8 @@
 
 ## Phase 4 — US2 : s'inscrire
 
-- [ ] T014 [US2] `GnFormulaireInscription` (types de champ du modèle seulement, pays prérempli depuis le profil de 0c — uuid converti en ISO2 —, consentement d'une donnée sensible) ; bouton sur la fiche (M'inscrire, Inscrite, Rejoindre la liste d'attente, Liste d'attente — position N, Complet, closes, pas encore ouvertes, se désinscrire) ; sans compte → connexion
-- [ ] T015 [US2] Vérifier au navigateur : quickstart § 2
+- [x] T014 [US2] `GnFormulaireInscription` (types de champ du modèle seulement, pays prérempli depuis le profil de 0c — uuid converti en ISO2 —, consentement d'une donnée sensible) ; bouton sur la fiche (M'inscrire, Inscrite, Rejoindre la liste d'attente, Liste d'attente — position N, Complet, closes, pas encore ouvertes, se désinscrire) ; sans compte → connexion
+- [x] T015 [US2] Vérifier au navigateur : quickstart § 2
 
 ## Phase 5 — US3 : Ma journée
 

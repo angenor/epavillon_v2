@@ -42,5 +42,28 @@
     "titre": "Lecture impossible",
     "texte": "L'activité n'a pas pu être lue. Vérifiez la connexion, puis réessayez.",
     "reessayer": "Réessayer"
+  },
+  "inscription": {
+    "inscrire": "M'inscrire",
+    "rejoindre-attente": "Rejoindre la liste d'attente",
+    "quitter-attente": "Quitter la liste d'attente",
+    "complet": "Complet — pas de liste d'attente",
+    "closes": "Inscriptions closes",
+    "pas-encore": "Inscriptions ouvertes le {jour} à {heure}, {zone}",
+    "a-envoyer": "Partira au retour du réseau",
+    "faite": "Inscription confirmée.",
+    "en-file": "Inscription enregistrée. Elle partira au retour du réseau.",
+    "refusee": "L'inscription n'a pas pu être prise. Réessayez.",
+    "fermer": "Fermer",
+    "compte": {
+      "titre": "S'inscrire demande un compte",
+      "texte": "L'inscription se fait à votre nom. La fiche, elle, se lit sans compte."
+    }
+  },
+  "desinscription": {
+    "faite": "Désinscription faite.",
+    "attente-quittee": "Vous avez quitté la liste d'attente.",
+    "en-file": "Désinscription enregistrée. Elle partira au retour du réseau.",
+    "annuler": "Annuler"
   }
 }
