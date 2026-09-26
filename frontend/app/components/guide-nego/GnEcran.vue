@@ -26,6 +26,8 @@ withDefaults(
     surtitre?: string
     terme?: boolean
     titreLong?: boolean
+    /** Relayé à l'en-tête : la loupe, sur les écrans racines des onglets. */
+    loupe?: boolean
   }>(),
   {
     sousTitre: undefined,
@@ -40,6 +42,7 @@ withDefaults(
     surtitre: undefined,
     terme: false,
     titreLong: false,
+    loupe: false,
   },
 )
 
@@ -76,6 +79,7 @@ watch(
       :surtitre="surtitre"
       :terme="terme"
       :titre-long="titreLong"
+      :loupe="loupe"
     >
       <template v-if="$slots.pied" #pied><slot name="pied" /></template>
       <template #connexion>

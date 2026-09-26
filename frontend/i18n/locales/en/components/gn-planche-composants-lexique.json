@@ -12,5 +12,12 @@
   "rail-propos": "24 px column on the right edge, 26 letters 15/700, line height 20; the target extends to 44 px towards the content. Tap or slide to jump to a group; an empty letter is grey and leads to the next group; the current letter has a 3 px rule.",
   "rail-choisie": "Chosen letter: {lettre}",
   "lie": "Related-term pill",
-  "lie-propos": "The filter pill, as a link: it opens the entry and toggles nothing."
+  "lie-propos": "The filter pill, as a link: it opens the entry and toggles nothing.",
+  "loupe": "Header magnifier",
+  "loupe-propos": "48 px, left of “Aa”, on the “My day” and “Resources” root screens only: it opens the global search. 24 px pictogram in the heading colour, unframed — the frame stays specific to “Aa” (deviation 51).",
+  "groupe": "Result group",
+  "groupe-propos": "The global search groups its results by content, in the order Glossary, FAQ, Documents, Sessions. Name in capitals and a named count on the right; rows are each content's own, the query marked in bold underline; beyond five, a link leads to the rest in the content's screen.",
+  "groupe-lexique": "Glossary",
+  "groupe-compte": "7 entries",
+  "groupe-suite": "All 7 entries in the glossary"
 }

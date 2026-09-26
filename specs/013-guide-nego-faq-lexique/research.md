@@ -133,6 +133,8 @@ Les lectures du back-office ouvertes à l'une **ou** l'autre passent par un extr
 
 La maquette dessine l'écran « 09 Recherche » mais pas le chemin qui y mène. **Décision** : une loupe dans l'en-tête, à gauche de « Aa », sur les écrans racines des onglets (« Ma journée », « Ressources ») ; ailleurs, l'en-tête garde sa forme. Écart à inscrire dans 05-design.md. La ligne de ce qui n'est pas couvert : « Pas encore ici : les sessions de négociation, les réunions de la Francophonie et le Pavillon. »
 
+**Précisé à la phase 10 (26/09)** : l'étape 3a, fusionnée, garde l'agenda des sessions sur le téléphone. La recherche y ajoute un quatrième groupe, « Sessions de négociation », sur le jour que leur liste ouvrirait, avec leurs données gardées ; la ligne devient « Pas encore ici : les réunions de la Francophonie et le Pavillon. »
+
 **Les documents** : avec réseau, `GET /negotiation/documents?q=` de l'étape 1 (titre, résumé, texte) ; sans réseau, la bibliothèque gardée (titre, résumé, éditeur) et `chercherDansLeDocument` sur le texte des copies gardées, bornée à cinq passages par document.
 
 ## R14 — La feuille du lecteur

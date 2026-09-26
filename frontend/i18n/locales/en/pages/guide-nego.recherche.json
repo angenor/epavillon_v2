@@ -1,0 +1,44 @@
+{
+  "titre": "Search",
+  "champ": "Search the glossary, the FAQ, documents and sessions",
+  "indication": "A term, a question, a word from the guide",
+  "invite": "At least two letters: the glossary, the FAQ, documents and negotiation sessions.",
+  "pas-encore": "Not here yet: Francophonie meetings and the Pavilion.",
+  "chargement": "Searching",
+  "total": {
+    "serveur": "No results, across Guide Négo | {count} result, across Guide Négo — on this phone and the server | {count} results, across Guide Négo — on this phone and the server",
+    "telephone": "No results, on this phone | {count} result, on this phone only | {count} results, on this phone only"
+  },
+  "non-telecharges": "The text of documents not downloaded was not searched: that needs the network.",
+  "savoir-absent": "The glossary and the FAQ are not on this phone yet: they are kept the first time the app opens with the network.",
+  "lexique": {
+    "titre": "Glossary",
+    "compte": "{count} entry | {count} entry | {count} entries",
+    "suite": "All {count} entries in the glossary"
+  },
+  "faq": {
+    "titre": "FAQ",
+    "compte": "{count} answer | {count} answer | {count} answers",
+    "suite": "All {count} answers in the FAQ"
+  },
+  "documents": {
+    "titre": "Documents",
+    "passages": "{count} passage | {count} passage | {count} passages",
+    "documents": "{count} document | {count} document | {count} documents",
+    "les-deux": "{documents} · {passages}",
+    "page": "p. {page} — “{extrait}”",
+    "reserve": "Found in the text — restricted access",
+    "suite": "All {count} documents in the library"
+  },
+  "sessions": {
+    "titre": "Negotiation sessions",
+    "aujourdhui": "{count} today | {count} today | {count} today",
+    "le-jour": "{count} on {jour} | {count} on {jour} | {count} on {jour}"
+  },
+  "aucun": {
+    "titre": "No results for “{terme}”",
+    "texte": "Nothing in the glossary, the FAQ, documents or negotiation sessions. If it is a negotiation term, suggest it: an IFDD expert defines it and adds it to the glossary.",
+    "proposer": "Suggest “{terme}” for the glossary",
+    "bientot": "Term suggestions open soon."
+  }
+}

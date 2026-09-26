@@ -1,0 +1,44 @@
+{
+  "titre": "Rechercher",
+  "champ": "Chercher dans le lexique, la FAQ, les documents et les sessions",
+  "indication": "Un terme, une question, un mot du guide",
+  "invite": "Au moins deux lettres : le lexique, la FAQ, les documents et les sessions de négociation.",
+  "pas-encore": "Pas encore ici : les réunions de la Francophonie et le Pavillon.",
+  "chargement": "Recherche en cours",
+  "total": {
+    "serveur": "Aucun résultat, dans tout Guide Négo | {count} résultat, dans tout Guide Négo — sur le téléphone et le serveur | {count} résultats, dans tout Guide Négo — sur le téléphone et le serveur",
+    "telephone": "Aucun résultat, sur ce téléphone | {count} résultat, sur ce téléphone seulement | {count} résultats, sur ce téléphone seulement"
+  },
+  "non-telecharges": "Le texte des documents non téléchargés n'a pas été cherché : il faut le réseau.",
+  "savoir-absent": "Le lexique et la FAQ ne sont pas encore sur ce téléphone : ils se gardent à la première ouverture avec le réseau.",
+  "lexique": {
+    "titre": "Lexique",
+    "compte": "{count} entrée | {count} entrée | {count} entrées",
+    "suite": "Les {count} entrées dans le lexique"
+  },
+  "faq": {
+    "titre": "FAQ",
+    "compte": "{count} réponse | {count} réponse | {count} réponses",
+    "suite": "Les {count} réponses dans la FAQ"
+  },
+  "documents": {
+    "titre": "Documents",
+    "passages": "{count} passage | {count} passage | {count} passages",
+    "documents": "{count} document | {count} document | {count} documents",
+    "les-deux": "{documents} · {passages}",
+    "page": "p. {page} — « {extrait} »",
+    "reserve": "Trouvé dans le texte — accès réservé",
+    "suite": "Les {count} documents dans la bibliothèque"
+  },
+  "sessions": {
+    "titre": "Sessions de négociation",
+    "aujourdhui": "{count} aujourd'hui | {count} aujourd'hui | {count} aujourd'hui",
+    "le-jour": "{count} le {jour} | {count} le {jour} | {count} le {jour}"
+  },
+  "aucun": {
+    "titre": "Aucun résultat pour « {terme} »",
+    "texte": "Rien dans le lexique, la FAQ, les documents ni les sessions de négociation. Si c'est un terme de négociation, proposez-le : un expert de l'IFDD le définit et l'ajoute au lexique.",
+    "proposer": "Proposer « {terme} » au lexique",
+    "bientot": "La proposition de termes ouvre bientôt."
+  }
+}

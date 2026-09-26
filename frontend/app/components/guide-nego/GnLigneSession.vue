@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { OfficialSession } from '~/types/negotiation-sessions'
 import type { EtatAffiche } from '~/utils/guide-nego/sessions'
+import { morceauxSurlignes } from '~/utils/guide-nego/lexique'
 
 /**
  * Une session officielle dans la liste d'un jour (07 · 4 septies). Toute la ligne ouvre
@@ -27,8 +28,10 @@ const props = withDefaults(
     /** Les sessions suivies qui la chevauchent : une marque par session, qui la nomme. */
     chevauche?: readonly OfficialSession[]
     rappel?: boolean
+    /** La saisie de la recherche globale, marquée dans les titres. */
+    surligne?: string
   }>(),
-  { ville: null, thematique: null, monGroupe: false, forme: 'liste', chevauche: () => [], rappel: false },
+  { ville: null, thematique: null, monGroupe: false, forme: 'liste', chevauche: () => [], rappel: false, surligne: '' },
 )
 
 const { t, locale } = useI18n()
@@ -49,7 +52,8 @@ const heuresEntendues = computed(() =>
 
 /** En anglais, la traduction française n'a rien à faire à l'écran. */
 const traduit = computed(() => (locale.value === 'fr' ? props.session.title_fr : null))
-const titre = computed(() => traduit.value ?? props.session.title_en)
+const titre = computed(() => morceauxSurlignes(traduit.value ?? props.session.title_en, props.surligne))
+const anglais = computed(() => morceauxSurlignes(props.session.title_en, props.surligne))
 
 const type = computed(() => (props.session.type ? tr(props.session.type.label) : null))
 
@@ -93,11 +97,13 @@ const terminee = computed(() => props.etat === 'terminee')
 
     <span class="gn-ligne-session__corps">
       <span v-if="type && !agenda" class="gn-ligne-session__type">{{ type }}</span>
-      <span class="gn-ligne-session__titre">{{ titre }}</span>
+      <span class="gn-ligne-session__titre">
+        <template v-for="(m, i) in titre" :key="i"><mark v-if="m.marque">{{ m.texte }}</mark><template v-else>{{ m.texte }}</template></template>
+      </span>
       <template v-if="traduit && !agenda">
         <span class="gn-ligne-session__anglais" lang="en">
           <abbr class="gn-ligne-session__en" :title="t('gn-ligne-session.anglais')">EN</abbr>
-          {{ session.title_en }}
+          <template v-for="(m, i) in anglais" :key="i"><mark v-if="m.marque">{{ m.texte }}</mark><template v-else>{{ m.texte }}</template></template>
         </span>
         <span class="gn-ligne-session__traduction">
           <GnPicto nom="translate" :taille="18" />

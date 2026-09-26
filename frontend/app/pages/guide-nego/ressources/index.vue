@@ -11,6 +11,7 @@ useHead({ title: t('guide-nego.ressources.titre') })
   <GnEcran
     :titre="t('guide-nego.ressources.titre')"
     :sous-titre="t('guide-nego.ressources.sous-titre')"
+    loupe
   >
     <GnLigneReglage
       :libelle="t('guide-nego.ressources.documents')"

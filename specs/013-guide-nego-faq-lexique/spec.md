@@ -280,7 +280,7 @@ Mariam, administratrice, rédige une entrée de FAQ, lui rattache deux sources d
 ### Recherche globale
 
 - **FR-030** : L'écran « Rechercher » DOIT chercher à la fois dans le lexique, la FAQ et les documents, et rendre des groupes nommés et comptés, dans cet ordre, le mot cherché marqué.
-- **FR-031** : L'écran DOIT dire ce qu'il ne couvre pas encore — les sessions de négociation, les réunions de la Francophonie, le Pavillon — et, sans réseau, que le texte des documents non téléchargés n'a pas été cherché.
+- **FR-031** : L'écran DOIT dire ce qu'il ne couvre pas encore — les réunions de la Francophonie, le Pavillon ; les sessions de négociation, gardées par l'étape 3a, y sont depuis sa fusion (research R13) — et, sans réseau, que le texte des documents non téléchargés n'a pas été cherché.
 - **FR-032** : Sans réseau, la recherche globale DOIT couvrir le lexique et la FAQ en entier, les titres, résumés et éditeurs de la bibliothèque gardée, et le texte des copies gardées ; avec le réseau, elle DOIT couvrir aussi le texte de tous les documents accessibles à la personne.
 - **FR-033** : Un résultat DOIT ouvrir l'entrée du lexique, l'entrée de FAQ, ou le document au passage trouvé.
 

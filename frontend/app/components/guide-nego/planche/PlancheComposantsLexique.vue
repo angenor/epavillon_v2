@@ -1,7 +1,8 @@
 <script setup lang="ts">
 /**
  * Section 5, septième lot : le lexique (étape 2) — la ligne de terme sous ses trois
- * usages, le rail A–Z, et la pilule qui mène à un terme lié. Les spécimens sont ceux
+ * usages, le rail A–Z, la pilule qui mène à un terme lié, et la recherche globale :
+ * la loupe de l'en-tête et le groupe de résultats. Les spécimens sont ceux
  * de la maquette 06 ; leurs textes viennent d'ici, comme ils viendraient du savoir.
  */
 const { t } = useI18n()
@@ -47,6 +48,21 @@ const courante = ref<string | null>('C')
       <div class="gn-planche-composants__vitrine gn-planche-rail">
         <GnRailAlphabet :presentes="['A', 'B', 'C', 'G', 'H', 'I', 'L', 'N', 'P']" :courante="courante" @choisir="courante = $event" />
         <p class="gn-planche-note">{{ t('gn-planche-composants-lexique.rail-choisie', { lettre: courante }) }}</p>
+      </div>
+    </GnPlancheSection>
+
+    <GnPlancheSection :titre="k('loupe')" :propos="k('loupe-propos')">
+      <div class="gn-planche-composants__vitrine gn-planche-composants__rangee">
+        <GnLoupe />
+      </div>
+    </GnPlancheSection>
+
+    <GnPlancheSection :titre="k('groupe')" :propos="k('groupe-propos')">
+      <div class="gn-planche-composants__vitrine">
+        <GnGroupeResultats :titre="k('groupe-lexique')" :compte="k('groupe-compte')" :suite="{ libelle: k('groupe-suite'), vers: VERS }">
+          <li><GnLigneTerme :entree="bracketed" :vers="VERS" extrait surligne="text" /></li>
+          <li><GnLigneTerme :entree="gga" :vers="VERS" extrait /></li>
+        </GnGroupeResultats>
       </div>
     </GnPlancheSection>
 

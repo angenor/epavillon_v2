@@ -160,9 +160,9 @@ description: "Tâches de l'étape 2 — FAQ, parcours « Ma première COP » et 
 
 **Test indépendant** : quickstart § 5 étape 1.
 
-- [ ] T066 [P] [US4] Créer `GnGroupeResultats.vue` et `GnLoupe.vue` sur la planche ; ajouter la loupe à l'en-tête des écrans racines (« Ma journée », « Ressources ») par une prop de `GnEntete.vue` / `GnEcran.vue` (R13)
-- [ ] T067 [US4] `frontend/app/pages/guide-nego/recherche.vue` : deux caractères, groupes Lexique, FAQ, Documents avec comptes et mots marqués ; documents en ligne par `chercherDansLeTexte`, hors connexion par la bibliothèque gardée et `chercherDansLeDocument` sur les copies gardées (cinq passages au plus par document) ; ligne « Pas encore ici : … » ; mention hors connexion ; « aucun résultat » propose de soumettre au lexique
-- [ ] T068 [US4] i18n `guide-nego.recherche.json` ; inscrire l'écart de la loupe dans `docs/AppNego/05-design.md` ; vérifier quickstart § 5 étape 1
+- [x] T066 [P] [US4] Créer `GnGroupeResultats.vue` et `GnLoupe.vue` sur la planche ; ajouter la loupe à l'en-tête des écrans racines (« Ma journée », « Ressources ») par une prop de `GnEntete.vue` / `GnEcran.vue` (R13)
+- [x] T067 [US4] `frontend/app/pages/guide-nego/recherche.vue` : deux caractères, groupes Lexique, FAQ, Documents avec comptes et mots marqués ; documents en ligne par `chercherDansLeTexte`, hors connexion par la bibliothèque gardée et `chercherDansLeDocument` sur les copies gardées (cinq passages au plus par document) ; ligne « Pas encore ici : … » ; mention hors connexion ; « aucun résultat » propose de soumettre au lexique
+- [x] T068 [US4] i18n `guide-nego.recherche.json` ; inscrire l'écart de la loupe dans `docs/AppNego/05-design.md` ; vérifier quickstart § 5 étape 1
 
 ---
 

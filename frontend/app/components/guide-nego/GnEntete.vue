@@ -36,6 +36,8 @@ withDefaults(
     terme?: boolean
     /** Une question de FAQ : le titre descend à 24, une phrase entière y tient. */
     titreLong?: boolean
+    /** Écran racine d'un onglet : la loupe de la recherche globale, à gauche de « Aa » (R13). */
+    loupe?: boolean
   }>(),
   {
     sousTitre: undefined,
@@ -49,6 +51,7 @@ withDefaults(
     surtitre: undefined,
     terme: false,
     titreLong: false,
+    loupe: false,
   },
 )
 
@@ -78,6 +81,7 @@ const { t } = useI18n()
       <div v-else class="gn-entete__connexion"><slot name="connexion" /></div>
       <!-- Un accès propre à l'écran, à côté de « Aa » : « Mon agenda » sur les sessions. -->
       <slot name="action" />
+      <GnLoupe v-if="loupe" />
       <NuxtLink
         to="/guide-nego/lexique"
         class="gn-entete__bouton gn-entete__aa"
