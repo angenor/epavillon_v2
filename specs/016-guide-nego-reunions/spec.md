@@ -85,7 +85,7 @@ Le bloc « Aujourd'hui, vos trois agendas » porte la ligne « Sessions de négo
 ### Edge Cases
 
 - Réunion sans capacité : pas de « Complet », inscription toujours ouverte dans sa fenêtre.
-- Réunion sans fenêtre d'inscription, ou fenêtre close : l'écran dit que les inscriptions sont closes.
+- Réunion sans fenêtre d'inscription : inscription ouverte jusqu'au début ; fenêtre close ou réunion commencée : l'écran dit que les inscriptions sont closes.
 - Réunion déplacée ou modifiée après inscription : la fiche montre la nouvelle heure ; les inscrites en sont prévenues (FR-020).
 - Capacité abaissée sous le nombre d'inscrites : aucune inscription n'est retirée ; « Complet ».
 - Activité du Pavillon supprimée ou annulée : le lien disparaît (supprimée) ou reste avec l'état de l'activité (annulée), sans toucher la réunion.
@@ -123,7 +123,8 @@ Le bloc « Aujourd'hui, vos trois agendas » porte la ligne « Sessions de négo
 - **FR-016** : L'administration DOIT pouvoir saisir, modifier, publier, annuler (avec motif) une réunion, et la lier à une activité du Pavillon de la même édition ou retirer ce lien, avec les composants du back-office de l'ePavillon.
 - **FR-017** : Les écrans DOIVENT être réservés à la permission de gérer les réunions, sur la portée de l'espace de négociation, filtrés par périmètre (règle 8) ; une adresse forgée est refusée.
 - **FR-018** : L'administration DOIT voir, par réunion, les inscrites et la liste d'attente.
-- **FR-019** : Les chevauchements entre réunions ne sont jamais bloqués.
+- **FR-019** : Les chevauchements entre réunions ne sont jamais bloqués (la seule exception de la base vise les salles de visioconférence gérées, que cette étape n'emploie pas).
+- **FR-019a** : Relever ou retirer la capacité DOIT faire monter la liste d'attente d'elle-même ; une nouvelle venue ne passe jamais devant une liste d'attente non vide.
 
 ### Prévenir
 
