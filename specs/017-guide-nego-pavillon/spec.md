@@ -66,7 +66,7 @@ La ligne « Pavillon de la Francophonie » du bloc « trois agendas » montre le
 
 ### User Story 4 — Le scénario qui clôt le MVP (Priority: P1)
 
-Une négociatrice installe Guide Négo avec le code reçu sur WhatsApp, télécharge le guide, le lit en salle sans réseau, trouve *contact group* dans le lexique, voit les sessions de négociation du jour de ses thématiques avec leur heure de dernière lecture, et signale une annulation que l'administrateur valide depuis son téléphone. Il se joue de bout en bout sur la version construite, après fusion des étapes 2, 3a, 3b, 4 et 5.
+Une négociatrice installe Guide Négo avec le code reçu sur WhatsApp, télécharge le guide, le lit en salle sans réseau, trouve *contact group* dans le lexique, voit les sessions de négociation du jour de ses thématiques avec leur heure de dernière lecture, et signale une annulation que l'administrateur valide depuis son téléphone. Il se joue de bout en bout sur la version construite, une fois les étapes 2 et 4 fusionnées dans `main` et `main` fusionnée dans cette branche ; la personne qui suit la session est prévenue.
 
 ### Edge Cases
 
@@ -79,13 +79,13 @@ Une négociatrice installe Guide Négo avec le code reçu sur WhatsApp, téléch
 ## Requirements *(mandatory)*
 
 - **FR-001** : La section Pavillon DOIT commencer par le bloc de lieu (nom, adresse, lien vers le plan si connu), lu dans les lieux de l'édition.
-- **FR-002** : Elle DOIT montrer les activités publiées du jour, les rediffusions de la veille, et « Les jours suivants » jour par jour ; chaque ligne porte l'origine, l'heure (fuseau dit une fois, et dans le nom accessible), le titre, l'état de l'activité et une marque d'inscription ou de rediffusion.
+- **FR-002** : Elle DOIT montrer une bande des jours de toute l'édition (passés compris), les activités publiées du jour choisi, les rediffusions de la veille, et « Les jours suivants » ; chaque ligne porte l'origine, l'heure (fuseau dit une fois, et dans le nom accessible), le titre, l'état de l'activité et une marque d'inscription ou de rediffusion.
 - **FR-003** : Le Pavillon NE DOIT JAMAIS être filtré par « mes thématiques ».
 - **FR-004** : Le détail DOIT montrer l'heure avec jour et fuseau, le lieu, les organisateurs (noms), la langue quand elle est connue, les intervenantes et intervenants (nom, rôle), la rediffusion et sa durée.
 - **FR-005** : Les données viennent de l'API existante du programme ; ce qui manque (noms des intervenants et des organisations, rediffusion et durée, langue, liste d'attente, empreinte) se sert **dans le module existant**, à partir de données déjà en base — aucune table, aucune route parallèle, aucune copie ; **par ajouts seulement**, le site inchangé et prouvé par ses tests ; aucune donnée non publique aujourd'hui (coordonnées notamment) ne le devient.
 - **FR-006a** : Quand le formulaire d'inscription demande plus que le pays, il DOIT se rendre dans l'application avec les seuls types de champ que le modèle définit ; le pays est prérempli depuis le profil ; une donnée sensible demande son consentement.
 - **FR-012** : Aucune activité ne porte « Ajouter à mon agenda » (écart à inscrire).
-- **FR-006** : L'inscription DOIT passer par le mécanisme existant (`POST /sessions/{id}/registrations`, annulation, « mes inscriptions ») ; états Inscrite, Liste d'attente (position), Complet, Rediffusion ; hors connexion par la file d'écritures, une seule fois au retour.
+- **FR-006** : L'inscription DOIT passer par le mécanisme existant (`POST /sessions/{id}/registrations`, annulation, « mes inscriptions ») ; états Inscrite, Liste d'attente (position), Complet, Rediffusion, Sans inscription (activité qui n'en prend pas) ; aucun geste sur une activité annulée ou reportée ; hors connexion par la file d'écritures, une seule fois au retour.
 - **FR-007** : Les issues de refus (complet, clos, pas encore ouvert) DOIVENT se dire en mots clairs.
 - **FR-008** : L'étiquette « Se tient aussi au Pavillon » DOIT ouvrir le détail de l'activité liée.
 - **FR-009** : La ligne Pavillon de « Ma journée » DOIT montrer les activités du jour avec leur origine, ou la prochaine.
