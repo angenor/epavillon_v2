@@ -466,3 +466,24 @@ INSERT INTO reference.taxonomy_terms (taxonomy_code, code, label, description, s
     ('negotiation_group', 'grulac', '{"fr":"GRULAC","en":"GRULAC"}', '{"fr":"Groupe des États d''Amérique latine et des Caraïbes","en":"Group of Latin American and Caribbean States"}', 130,
      '{"denominations":["GRULAC"]}')
 ON CONFLICT (taxonomy_code, code) DO NOTHING;
+
+-- -----------------------------------------------------------------------------
+-- 5 ter. Guide Négo — les réunions de la Francophonie (étape 4)
+--
+-- Nature fine d'une réunion saisie par l'IFDD (specs/016-guide-nego-reunions,
+-- R2). Le `kind` fermé de negotiation.meetings porte le parcours applicatif ;
+-- ce vocabulaire porte ce que la personne lit. Correspondance gardée par
+-- negotiation.tg_check_meeting_francophone_kind :
+--   preparatory_workshop                          → kind preparatory_workshop
+--   negotiators_consultation, ministerial_consultation → kind francophone_consultation
+-- is_system : la correspondance lit ces codes.
+-- -----------------------------------------------------------------------------
+INSERT INTO reference.taxonomies (code, label, description, is_multi_select, is_hierarchical, is_system) VALUES
+    ('francophone_meeting_type', '{"fr":"Natures de réunion de la Francophonie","en":"Francophonie meeting types"}', '{"fr":"Nature d''une réunion organisée pour les négociatrices et négociateurs francophones : atelier préparatoire, concertation…","en":"Nature of a meeting held for Francophone negotiators: preparatory workshop, consultation…"}', false, false, true)
+ON CONFLICT (code) DO NOTHING;
+
+INSERT INTO reference.taxonomy_terms (taxonomy_code, code, label, sort_order) VALUES
+    ('francophone_meeting_type', 'preparatory_workshop',     '{"fr":"Atelier préparatoire","en":"Preparatory workshop"}', 10),
+    ('francophone_meeting_type', 'negotiators_consultation', '{"fr":"Concertation des négociatrices et négociateurs","en":"Negotiators'' consultation"}', 20),
+    ('francophone_meeting_type', 'ministerial_consultation', '{"fr":"Concertation ministérielle","en":"Ministerial consultation"}', 30)
+ON CONFLICT (taxonomy_code, code) DO NOTHING;
