@@ -11,5 +11,13 @@
   "iisd": "“On behalf of my delegation”, IISD",
   "contexte": "The negotiation context",
   "retour": "Feedback on an answer",
-  "retour-propos": "Question 15/700, two half-width secondary buttons. “Yes” → the row becomes “Thank you.” with the green check; “No” opens “What is missing?”."
+  "retour-propos": "Question 15/700, two half-width secondary buttons. “Yes” → the row becomes “Thank you.” with the green check; “No” opens “What is missing?”.",
+  "etape": "Pathway step",
+  "etape-propos": "24 px box, the whole row is the target. Ticked: filled box, grey label, never struck through. Below, a 15 grey detail, a 15/700 origin, or the “Read: …” 15/600 link.",
+  "etape-guide": "Choose my themes and read their sheets",
+  "etape-lire": "Guide, chapter 3",
+  "etape-atelier": "Attend the preparatory workshop for French-speaking negotiators",
+  "etape-origine": "Francophonie meetings",
+  "etape-coordination": "Attend my group's coordination",
+  "etape-detail": "African Group 8:00, LDCs 13:00"
 }

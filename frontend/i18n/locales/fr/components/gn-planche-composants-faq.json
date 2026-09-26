@@ -11,5 +11,13 @@
   "iisd": "« Au nom de ma délégation », IISD",
   "contexte": "Le contexte de négociation",
   "retour": "Retour sur une réponse",
-  "retour-propos": "Question 15/700, deux boutons secondaires demi-largeur. « Oui » → la ligne devient « Merci. » avec la coche verte ; « Non » ouvre « Qu'est-ce qui manque ? »."
+  "retour-propos": "Question 15/700, deux boutons secondaires demi-largeur. « Oui » → la ligne devient « Merci. » avec la coche verte ; « Non » ouvre « Qu'est-ce qui manque ? ».",
+  "etape": "Étape de parcours",
+  "etape-propos": "Case de 24 px, toute la ligne est la cible. Cochée : case pleine, libellé gris, jamais barré. Dessous, un détail 15 gris, une origine 15/700, ou la sortie « Lire : … » en lien 15/600.",
+  "etape-guide": "Choisir mes thématiques et lire leurs fiches",
+  "etape-lire": "Guide, chapitre 3",
+  "etape-atelier": "Assister à l'atelier préparatoire des négociateurs francophones",
+  "etape-origine": "Réunions de la Francophonie",
+  "etape-coordination": "Assister à la coordination de mon groupe",
+  "etape-detail": "Groupe africain 8:00, PMA 13:00"
 }

@@ -69,6 +69,7 @@ const copies = useGnCopies()
 // Inscrit l'expéditeur des favoris : un favori posé hier sans réseau repart à l'ouverture.
 useGnFavoris()
 useGnFavorisLexique()
+useGnParcours()
 useGnQuestions()
 // Le savoir se garde dès l'ouverture : le lexique se lit sans réseau même jamais ouvert (FR-002).
 const savoir = useGnSavoir()

@@ -148,11 +148,11 @@ description: "Tâches de l'étape 2 — FAQ, parcours « Ma première COP » et 
 
 **Test indépendant** : quickstart § 4.
 
-- [ ] T061 [US3] Routes `GET /negotiation/me/pathway`, `PUT`/`DELETE …/{step_id}` ; tests `tests/savoir_parcours.rs` (idempotence, étape inconnue 404)
-- [ ] T062 [P] [US3] Créer `GnEtapeParcours.vue` (case de 24 px, ligne entière cible, gris jamais barré, complément et lien « Lire : … ») sur la planche
-- [ ] T063 [US3] `frontend/app/composables/guide-nego/useGnParcours.ts` : local sans compte, file en famille `parcours.<step_id>` avec compte, fusion à la connexion, ligne « mises à jour depuis un autre appareil » quand la relecture diffère (R7)
-- [ ] T064 [US3] `frontend/app/pages/guide-nego/ressources/parcours.vue` : progression, prochaine étape, groupes « n sur N », bandeau hors connexion, pied ; liens vers document (section ou page), FAQ, lexique ; brancher la ligne du parcours de la FAQ (T034)
-- [ ] T065 [US3] i18n `guide-nego.parcours.json` ; vérifier quickstart § 4
+- [x] T061 [US3] Routes `GET /negotiation/me/pathway`, `PUT`/`DELETE …/{step_id}` ; tests `tests/savoir_parcours.rs` (idempotence, étape inconnue 404)
+- [x] T062 [P] [US3] Créer `GnEtapeParcours.vue` (case de 24 px, ligne entière cible, gris jamais barré, complément et lien « Lire : … ») sur la planche
+- [x] T063 [US3] `frontend/app/composables/guide-nego/useGnParcours.ts` : local sans compte, file en famille `parcours.<step_id>` avec compte, fusion à la connexion, ligne « mises à jour depuis un autre appareil » quand la relecture diffère (R7)
+- [x] T064 [US3] `frontend/app/pages/guide-nego/ressources/parcours.vue` : progression, prochaine étape, groupes « n sur N », bandeau hors connexion, pied ; liens vers document (section ou page), FAQ, lexique ; brancher la ligne du parcours de la FAQ (T034)
+- [x] T065 [US3] i18n `guide-nego.parcours.json` ; vérifier quickstart § 4
 
 ---
 

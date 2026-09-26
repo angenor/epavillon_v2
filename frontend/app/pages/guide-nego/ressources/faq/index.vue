@@ -6,8 +6,8 @@ import { NOMS_DE_PICTO, type NomDePicto } from '~/utils/guide-nego/pictogrammes'
  * La FAQ — maquette 05, écran 01. Tout se lit dans le savoir gardé : aucune frappe ne
  * questionne le réseau. Public : l'état « accès refusé » est sans objet.
  *
- * La ligne du parcours paraît avec son écran (récit 3). « Poser une question à un
- * expert » mène à son écran, qui pose lui-même le verrou sans l'accès.
+ * La ligne du parcours clôt les rubriques, avec son avancée. « Poser une question à
+ * un expert » mène à son écran, qui pose lui-même le verrou sans l'accès.
  */
 definePageMeta({ layout: 'guide-nego' })
 defineI18nRoute(false)
@@ -29,7 +29,12 @@ watch(saisie, (q) => {
   if (q !== lirePremier(route.query.q)) void router.replace({ query: q.trim() ? { q } : {} })
 })
 
-onMounted(() => void savoir.assurer())
+const parcours = useGnParcours()
+onMounted(() => {
+  void savoir.assurer()
+  void parcours.assurer()
+})
+const avance = computed(() => parcours.etat.value)
 
 const etat = computed(() => savoir.etat.value)
 const entrees = computed(() => savoir.faq.value)
@@ -120,6 +125,16 @@ useHead({ title: t('guide-nego.faq.titre') })
           >
             <span class="gn-faq__nombre">{{ r.compte }}</span>
           </GnLigneReglage>
+          <GnLigneReglage
+            v-if="avance.total"
+            :libelle="t('guide-nego.parcours.ligne')"
+            :valeur="t('guide-nego.parcours.faites', { faites: avance.faites, total: avance.total }, avance.faites)"
+            picto="star"
+            vers="/guide-nego/ressources/parcours"
+            class="gn-faq__parcours"
+          >
+            <template #sous><GnProgression :part="avance.faites / avance.total" decoratif /></template>
+          </GnLigneReglage>
         </section>
 
         <section v-if="savoir.plusLues.value.length">
@@ -164,6 +179,11 @@ useHead({ title: t('guide-nego.faq.titre') })
 
 [data-app="guide-nego"] .gn-faq__aucune {
   overflow-wrap: anywhere;
+}
+
+[data-app="guide-nego"] .gn-faq__parcours .gn-reglage__texte {
+  gap: var(--gn-espace-4);
+  padding-block: 10px;
 }
 
 [data-app="guide-nego"] .gn-faq__expert {

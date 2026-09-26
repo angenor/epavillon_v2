@@ -12,7 +12,7 @@
 import type { DocumentReading } from '~/types/negotiation-documents'
 import { ApiRequestError, normalizeApiError } from '~/utils/api-error'
 import { lireProgression, noterOuverture, noterProgression } from '~/utils/guide-nego/appareil-lecture'
-import { estUneFormeLisible, pageDeReprise } from '~/utils/guide-nego/forme-lisible'
+import { estUneFormeLisible, pageDeLaSection, pageDeReprise } from '~/utils/guide-nego/forme-lisible'
 import type { SourceDuDocument } from '~/utils/guide-nego/pdf/charger'
 import { lireCle, poserCle } from '~/utils/guide-nego/stockage'
 
@@ -38,8 +38,15 @@ export interface Reprise {
 const stockage = { lire: lireCle, poser: poserCle }
 const INTERVALLE_DE_NOTE_MS = 2000
 
-/** `pageCitee` : une source de la FAQ ouvre le document à sa page, sans ligne de reprise. */
-export function useGnLecteur(id: Ref<string>, pageCitee: Ref<number | null> = ref(null)) {
+/**
+ * `pageCitee` : une source de la FAQ ouvre le document à sa page, sans ligne de reprise.
+ * `sectionCitee` : une étape du parcours l'ouvre à sa section, trouvée dans le sommaire.
+ */
+export function useGnLecteur(
+  id: Ref<string>,
+  pageCitee: Ref<number | null> = ref(null),
+  sectionCitee: Ref<string | null> = ref(null),
+) {
   const api = useApi().guideNegoDocuments
   const { rotation } = useApi()
   const copies = useGnCopies()
@@ -103,7 +110,8 @@ export function useGnLecteur(id: Ref<string>, pageCitee: Ref<number | null> = re
   }
 
   function pret(lue: DocumentReading, source: 'copie' | 'reseau', pdf: SourceDuDocument): void {
-    const citee = lue.pages.find((p) => p.index === pageCitee.value)
+    const voulue = pageCitee.value ?? (sectionCitee.value ? pageDeLaSection(lue.outline, sectionCitee.value) : null)
+    const citee = lue.pages.find((p) => p.index === voulue)
     const notee = lireProgression(stockage, id.value, lue.version)
     const page = pageDeReprise(lue, notee?.page ?? null)
     reprise.value = !citee && page && notee ? { index: page.index, label: page.label, a: notee.a } : null

@@ -276,11 +276,13 @@ async fn la_file_des_questions_ne_rend_ni_lauteure_ni_lexpert() {
         .await
         .unwrap();
     let aissatou = negociatrice(&bac, "aissatou.anonyme@example.org").await;
-    sqlx::query("UPDATE identity.people SET first_name = 'Aissatoux', last_name = 'Diallox' WHERE id = $1")
-        .bind(aissatou)
-        .execute(bac.pool())
-        .await
-        .unwrap();
+    sqlx::query(
+        "UPDATE identity.people SET first_name = 'Aissatoux', last_name = 'Diallox' WHERE id = $1",
+    )
+    .bind(aissatou)
+    .execute(bac.pool())
+    .await
+    .unwrap();
     let mut ids = Vec::new();
     for (body, consentement) in [("Qui coordonne ?", true), ("Où dormir ?", false)] {
         let entree: MyQuestionInput = serde_json::from_value(json!({
@@ -297,17 +299,33 @@ async fn la_file_des_questions_ne_rend_ni_lauteure_ni_lexpert() {
         .iter()
         .map(Uuid::to_string)
         .chain(
-            ["Aissatoux", "Diallox", "aissatou.anonyme", "Koffiexpert", "Mensahx"].map(str::to_owned),
+            [
+                "Aissatoux",
+                "Diallox",
+                "aissatou.anonyme",
+                "Koffiexpert",
+                "Mensahx",
+            ]
+            .map(str::to_owned),
         )
         .collect();
     let app = crate::back_office!(bac);
 
-    let (statut, file) = http!(app, "get", "/admin/negotiation/queue?kind=questions", experte);
+    let (statut, file) = http!(
+        app,
+        "get",
+        "/admin/negotiation/queue?kind=questions",
+        experte
+    );
     assert_eq!(statut, StatusCode::OK, "{file}");
     assert_eq!(file["kind"], "questions");
     assert_eq!(file["counts"]["questions"], 2);
     let questions = file["questions"].as_array().expect("questions");
-    assert_eq!(questions[0]["id"], json!(ids[0]), "la plus ancienne d'abord");
+    assert_eq!(
+        questions[0]["id"],
+        json!(ids[0]),
+        "la plus ancienne d'abord"
+    );
     assert_eq!(questions[1]["consent_to_faq"], false);
     sans_trace(&file, &traces, "la file des questions");
 
@@ -321,7 +339,12 @@ async fn la_file_des_questions_ne_rend_ni_lauteure_ni_lexpert() {
     assert_eq!(statut, StatusCode::OK);
     sans_trace(&repondue, &traces, "la réponse");
 
-    let (_, file) = http!(app, "get", "/admin/negotiation/queue?kind=questions", experte);
+    let (_, file) = http!(
+        app,
+        "get",
+        "/admin/negotiation/queue?kind=questions",
+        experte
+    );
     assert_eq!(file["counts"]["questions"], 1);
     let dernieres = file["questions"].as_array().unwrap();
     assert_eq!(
@@ -343,7 +366,10 @@ async fn la_file_des_questions_ne_rend_ni_lauteure_ni_lexpert() {
     let (_, fiche) = http!(
         app,
         "get",
-        format!("/admin/negotiation/faq/{}", brouillon["id"].as_str().unwrap()),
+        format!(
+            "/admin/negotiation/faq/{}",
+            brouillon["id"].as_str().unwrap()
+        ),
         experte
     );
     sans_trace(&fiche, &traces, "la fiche du brouillon promu");

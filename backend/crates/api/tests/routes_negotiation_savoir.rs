@@ -406,22 +406,33 @@ async fn les_questions_demandent_lacces_negociateur_et_se_rejouent() {
 
     let r = test::call_service(
         &app,
-        test::TestRequest::post().uri(chemin).set_json(corps.clone()).to_request(),
+        test::TestRequest::post()
+            .uri(chemin)
+            .set_json(corps.clone())
+            .to_request(),
     )
     .await;
     assert_eq!(r.status(), StatusCode::UNAUTHORIZED);
 
     let cookie = connecter!(&app);
     for requete in [
-        test::TestRequest::post().uri(chemin).set_json(corps.clone()),
+        test::TestRequest::post()
+            .uri(chemin)
+            .set_json(corps.clone()),
         test::TestRequest::get().uri(chemin),
     ] {
         let r = test::call_service(
             &app,
-            requete.insert_header(("cookie", cookie.clone())).to_request(),
+            requete
+                .insert_header(("cookie", cookie.clone()))
+                .to_request(),
         )
         .await;
-        assert_eq!(r.status(), StatusCode::FORBIDDEN, "sans l'accès négociateur");
+        assert_eq!(
+            r.status(),
+            StatusCode::FORBIDDEN,
+            "sans l'accès négociateur"
+        );
     }
 
     sqlx::query(
@@ -474,4 +485,96 @@ async fn les_questions_demandent_lacces_negociateur_et_se_rejouent() {
     )
     .await;
     assert_eq!(inchange.status(), StatusCode::NOT_MODIFIED);
+}
+
+#[actix_web::test]
+async fn les_coches_du_parcours_demandent_une_session_et_rendent_304() {
+    const PARCOURS: &str = "/api/negotiation/me/pathway";
+    let base = TestDb::new().await;
+    compte(&base).await;
+    let badge: Uuid = sqlx::query_scalar(
+        r#"WITH g AS (INSERT INTO negotiation.pathway_groups (label, is_published)
+                      VALUES ('{"fr":"Le premier jour"}', true) RETURNING id)
+           INSERT INTO negotiation.pathway_steps (group_id, label, is_published)
+           SELECT id, '{"fr":"Retirer mon badge"}', true FROM g
+           RETURNING id"#,
+    )
+    .fetch_one(base.pool())
+    .await
+    .expect("insertion de l'étape");
+    let etat = AppState::new(base.db(), kernel::testing::test_config(base.url()))
+        .await
+        .expect("état de l'application");
+    let app = test::init_service(api::build_app(&etat)).await;
+
+    let anonyme = test::call_service(
+        &app,
+        test::TestRequest::put()
+            .uri(&format!("{PARCOURS}/{badge}"))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(anonyme.status(), StatusCode::UNAUTHORIZED);
+
+    let cookie = connecter!(&app);
+    for _ in 0..2 {
+        let pose = test::call_service(
+            &app,
+            test::TestRequest::put()
+                .uri(&format!("{PARCOURS}/{badge}"))
+                .insert_header(("cookie", cookie.clone()))
+                .to_request(),
+        )
+        .await;
+        assert_eq!(pose.status(), StatusCode::NO_CONTENT, "idempotent");
+    }
+
+    let inconnue = test::call_service(
+        &app,
+        test::TestRequest::put()
+            .uri(&format!("{PARCOURS}/{}", Uuid::now_v7()))
+            .insert_header(("cookie", cookie.clone()))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(inconnue.status(), StatusCode::NOT_FOUND);
+    let corps: Value = test::read_body_json(inconnue).await;
+    assert_eq!(corps["code"], "NEGOTIATION_PATHWAY_STEP_NOT_FOUND");
+
+    let liste = test::call_service(
+        &app,
+        test::TestRequest::get()
+            .uri(PARCOURS)
+            .insert_header(("cookie", cookie.clone()))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(liste.status(), StatusCode::OK);
+    assert_eq!(entete(&liste, CACHE_CONTROL), "private, no-cache");
+    let empreinte = entete(&liste, ETAG);
+    let corps: Value = test::read_body_json(liste).await;
+    assert_eq!(corps["step_ids"], json!([badge]));
+
+    let inchange = test::call_service(
+        &app,
+        test::TestRequest::get()
+            .uri(PARCOURS)
+            .insert_header(("cookie", cookie.clone()))
+            .insert_header((IF_NONE_MATCH, empreinte.clone()))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(inchange.status(), StatusCode::NOT_MODIFIED);
+
+    for _ in 0..2 {
+        let retrait = test::call_service(
+            &app,
+            test::TestRequest::delete()
+                .uri(&format!("{PARCOURS}/{badge}"))
+                .insert_header(("cookie", cookie.clone()))
+                .to_request(),
+        )
+        .await;
+        assert_eq!(retrait.status(), StatusCode::NO_CONTENT, "idempotent");
+    }
 }

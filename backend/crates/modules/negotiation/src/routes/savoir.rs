@@ -1,5 +1,5 @@
 //! Les routes du savoir : le paquet que le téléphone garde et le compte des
-//! lectures, ouverts à tous ; les termes favoris, les retours et les
+//! lectures, ouverts à tous ; les termes favoris, les coches du parcours, les retours et les
 //! signalements de la personne connectée ; ses questions aux experts, avec
 //! l'accès négociateur.
 
@@ -15,6 +15,7 @@ use crate::domain::permissions::SpaceAccess;
 use crate::domain::savoir::lire_since;
 use crate::domain::savoir_questions::MyQuestionInput;
 use crate::domain::savoir_retours::{FaqFeedbackInput, FaqReportInput};
+use crate::service::savoir_coches;
 use crate::service::savoir_favoris;
 use crate::service::savoir_lectures;
 use crate::service::savoir_paquet as service;
@@ -33,7 +34,10 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
         .route("/negotiation/faq/{id}/feedback", web::put().to(voter))
         .route("/negotiation/faq/{id}/reports", web::post().to(signaler))
         .route("/negotiation/me/faq-feedback", web::get().to(mes_voix))
-        .route("/negotiation/me/questions", web::post().to(poser_une_question))
+        .route(
+            "/negotiation/me/questions",
+            web::post().to(poser_une_question),
+        )
         .route("/negotiation/me/questions", web::get().to(mes_questions))
         .route("/negotiation/me/glossary-favorites", web::get().to(favoris))
         .route(
@@ -43,6 +47,15 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
         .route(
             "/negotiation/me/glossary-favorites/{entry_id}",
             web::delete().to(retirer_un_favori),
+        )
+        .route("/negotiation/me/pathway", web::get().to(mon_parcours))
+        .route(
+            "/negotiation/me/pathway/{step_id}",
+            web::put().to(cocher_une_etape),
+        )
+        .route(
+            "/negotiation/me/pathway/{step_id}",
+            web::delete().to(decocher_une_etape),
         );
 }
 
@@ -357,4 +370,84 @@ pub(crate) async fn mes_questions(
         .insert_header((ETAG, empreinte))
         .insert_header(crate::routes::PERSONNEL)
         .json(questions))
+}
+
+#[utoipa::path(
+    get,
+    description = "`MyPathway` — les étapes du parcours « Ma première COP » cochées par la personne connectée, parmi les étapes publiées d'un groupe publié. `ETag` et **304**.",
+    path = "/negotiation/me/pathway",
+    tag = "Guide Négo — savoir",
+    operation_id = "negotiation_mon_parcours",
+    responses(
+        (status = 200, description = "MyPathway", body = Object),
+        (status = 304, description = "Rien n'a changé depuis l'empreinte présentée"),
+        (status = 401, description = "Aucune session", body = crate::routes::openapi::ApiErrorBody),
+    ),
+    security(("session" = []))
+)]
+pub(crate) async fn mon_parcours(
+    state: web::Data<NegotiationState>,
+    requete: HttpRequest,
+    acteur: Actor,
+) -> Result<HttpResponse> {
+    let (coches, empreinte) = savoir_coches::coches(&state, acteur.0).await?;
+    if crate::routes::inchange(&requete, &empreinte) {
+        return Ok(HttpResponse::NotModified()
+            .insert_header((ETAG, empreinte))
+            .insert_header(crate::routes::PERSONNEL)
+            .finish());
+    }
+    Ok(HttpResponse::Ok()
+        .insert_header((ETAG, empreinte))
+        .insert_header(crate::routes::PERSONNEL)
+        .json(coches))
+}
+
+#[utoipa::path(
+    put,
+    description = "Coche une étape du parcours. **Idempotent** : le dernier geste reçu l'emporte. Étape inconnue ou non publiée : **404**.",
+    path = "/negotiation/me/pathway/{step_id}",
+    tag = "Guide Négo — savoir",
+    operation_id = "negotiation_cocher_une_etape",
+    params(("step_id" = Uuid, Path, description = "Identifiant de l'étape du parcours")),
+    responses(
+        (status = 204, description = "Cochée"),
+        (status = 401, description = "Aucune session", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Étape inconnue ou non publiée", body = crate::routes::openapi::ApiErrorBody),
+    ),
+    security(("session" = []))
+)]
+pub(crate) async fn cocher_une_etape(
+    state: web::Data<NegotiationState>,
+    requete: HttpRequest,
+    acteur: Actor,
+    chemin: web::Path<Uuid>,
+) -> Result<HttpResponse> {
+    let ctx = crate::routes::contexte_de(&requete, acteur.0);
+    savoir_coches::cocher(&state, &ctx, acteur.0, chemin.into_inner()).await?;
+    Ok(HttpResponse::NoContent().finish())
+}
+
+#[utoipa::path(
+    delete,
+    description = "Décoche une étape du parcours. **Idempotent**, même sur une étape retirée ou jamais cochée.",
+    path = "/negotiation/me/pathway/{step_id}",
+    tag = "Guide Négo — savoir",
+    operation_id = "negotiation_decocher_une_etape",
+    params(("step_id" = Uuid, Path, description = "Identifiant de l'étape du parcours")),
+    responses(
+        (status = 204, description = "Décochée"),
+        (status = 401, description = "Aucune session", body = crate::routes::openapi::ApiErrorBody),
+    ),
+    security(("session" = []))
+)]
+pub(crate) async fn decocher_une_etape(
+    state: web::Data<NegotiationState>,
+    requete: HttpRequest,
+    acteur: Actor,
+    chemin: web::Path<Uuid>,
+) -> Result<HttpResponse> {
+    let ctx = crate::routes::contexte_de(&requete, acteur.0);
+    savoir_coches::decocher(&state, &ctx, acteur.0, chemin.into_inner()).await?;
+    Ok(HttpResponse::NoContent().finish())
 }

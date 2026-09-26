@@ -152,14 +152,8 @@ pub(crate) async fn promouvoir_une_question(
     let locale = crate::routes::locale_de(&requete);
     let ctx = crate::routes::contexte_de(&requete, expert.person_id);
     let droits = droits(&state, expert.person_id).await?;
-    let entree = savoir_questions::promouvoir(
-        &state,
-        &ctx,
-        &droits,
-        chemin.into_inner(),
-        &entree,
-        &locale,
-    )
-    .await?;
+    let entree =
+        savoir_questions::promouvoir(&state, &ctx, &droits, chemin.into_inner(), &entree, &locale)
+            .await?;
     Ok(HttpResponse::Ok().json(entree))
 }

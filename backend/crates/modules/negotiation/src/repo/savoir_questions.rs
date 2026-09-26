@@ -79,7 +79,11 @@ pub async fn miennes(
 /// La part « questions » de la file : celles qui attendent, la plus ancienne
 /// d'abord ; puis celles répondues depuis trente jours et pas encore promues,
 /// la plus récente d'abord — c'est là que l'expert les promeut.
-pub async fn file(conn: &mut PgConnection, id: Option<Uuid>, locale: &str) -> Result<Vec<AdminQuestion>> {
+pub async fn file(
+    conn: &mut PgConnection,
+    id: Option<Uuid>,
+    locale: &str,
+) -> Result<Vec<AdminQuestion>> {
     Ok(sqlx::query_as!(
         AdminQuestion,
         r#"SELECT q.id, t.code AS "theme_code!",

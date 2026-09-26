@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.step_id FROM negotiation.pathway_checks c\n           JOIN negotiation.pathway_steps s ON s.id = c.step_id\n           JOIN negotiation.pathway_groups g ON g.id = s.group_id\n          WHERE c.person_id = $1 AND s.is_published AND g.is_published\n          ORDER BY c.step_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "step_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.pathway_checks",
+            "name": "step_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "45301f5ff4968c4d3870740b5154955f36857a9aaa99395fbd9f8a5fd499f386"
+}

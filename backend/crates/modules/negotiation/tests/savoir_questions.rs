@@ -6,15 +6,15 @@
 mod commun;
 
 use actix_web::http::StatusCode;
+use async_trait::async_trait;
 use commun::documents::{expert, negociatrice};
 use commun::http::{appel, frapper};
 use commun::{courriels_en_file, evenements, Bac};
 use kernel::error::ErrorCode;
+use kernel::mail::{MailError, Mailer, OutgoingMail};
 use negotiation::domain::savoir_questions::MyQuestionInput;
 use negotiation::jobs::emails::{mettre_en_file_reponse, SEND_ANSWERED_EMAIL};
 use negotiation::service::savoir_questions::{miennes, poser};
-use async_trait::async_trait;
-use kernel::mail::{MailError, Mailer, OutgoingMail};
 use serde_json::json;
 use std::sync::{Arc, Mutex};
 use uuid::Uuid;
@@ -131,7 +131,13 @@ async fn repondre_met_le_courriel_en_file_une_fois_et_laisse_levenement() {
 
     let (statut, r) = frapper(
         &app,
-        appel("post", &uri, Some(experte), Some(json!({ "answer": "Encore." }))).to_request(),
+        appel(
+            "post",
+            &uri,
+            Some(experte),
+            Some(json!({ "answer": "Encore." })),
+        )
+        .to_request(),
     )
     .await;
     assert_eq!(
@@ -140,9 +146,16 @@ async fn repondre_met_le_courriel_en_file_une_fois_et_laisse_levenement() {
     );
 
     let mut conn = bac.pool().acquire().await.unwrap();
-    mettre_en_file_reponse(&mut conn, id, "aissatou@example.org", "fr", "Aïssatou", "Qui ?")
-        .await
-        .expect("seconde mise en file ignorée");
+    mettre_en_file_reponse(
+        &mut conn,
+        id,
+        "aissatou@example.org",
+        "fr",
+        "Aïssatou",
+        "Qui ?",
+    )
+    .await
+    .expect("seconde mise en file ignorée");
     drop(conn);
     let courriels: Vec<_> = courriels_en_file(&bac)
         .await
@@ -151,7 +164,10 @@ async fn repondre_met_le_courriel_en_file_une_fois_et_laisse_levenement() {
         .collect();
     assert_eq!(
         courriels,
-        vec![(SEND_ANSWERED_EMAIL.to_owned(), "aissatou@example.org".to_owned())]
+        vec![(
+            SEND_ANSWERED_EMAIL.to_owned(),
+            "aissatou@example.org".to_owned()
+        )]
     );
     let boite = Arc::new(Boite::default());
     let gestionnaires = negotiation::job_handlers(bac.db(), &bac.config, boite.clone());
@@ -203,10 +219,20 @@ async fn promouvoir_donne_un_brouillon_sans_auteur_et_jamais_sans_consentement()
 
     let (statut, r) = frapper(
         &app,
-        appel("post", &promouvoir(avec), Some(experte), Some(rubrique.clone())).to_request(),
+        appel(
+            "post",
+            &promouvoir(avec),
+            Some(experte),
+            Some(rubrique.clone()),
+        )
+        .to_request(),
     )
     .await;
-    assert_eq!(statut, StatusCode::UNPROCESSABLE_ENTITY, "pas encore répondue : {r}");
+    assert_eq!(
+        statut,
+        StatusCode::UNPROCESSABLE_ENTITY,
+        "pas encore répondue : {r}"
+    );
 
     for id in [avec, sans] {
         let (statut, _) = frapper(
@@ -225,7 +251,13 @@ async fn promouvoir_donne_un_brouillon_sans_auteur_et_jamais_sans_consentement()
 
     let (statut, r) = frapper(
         &app,
-        appel("post", &promouvoir(sans), Some(experte), Some(rubrique.clone())).to_request(),
+        appel(
+            "post",
+            &promouvoir(sans),
+            Some(experte),
+            Some(rubrique.clone()),
+        )
+        .to_request(),
     )
     .await;
     assert_eq!(
@@ -245,7 +277,13 @@ async fn promouvoir_donne_un_brouillon_sans_auteur_et_jamais_sans_consentement()
 
     let (statut, entree) = frapper(
         &app,
-        appel("post", &promouvoir(avec), Some(experte), Some(rubrique.clone())).to_request(),
+        appel(
+            "post",
+            &promouvoir(avec),
+            Some(experte),
+            Some(rubrique.clone()),
+        )
+        .to_request(),
     )
     .await;
     assert_eq!(statut, StatusCode::OK, "{entree}");

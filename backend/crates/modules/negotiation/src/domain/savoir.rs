@@ -170,6 +170,12 @@ pub struct MyGlossaryFavorites {
     pub entry_ids: Vec<Uuid>,
 }
 
+/// `MyPathway` — les étapes publiées que la personne connectée a cochées.
+#[derive(Debug, Clone, Serialize)]
+pub struct MyPathway {
+    pub step_ids: Vec<Uuid>,
+}
+
 /// `since` tel que le téléphone le renvoie : le `served_at` d'une lecture.
 pub fn lire_since(brut: &str) -> Result<OffsetDateTime> {
     OffsetDateTime::parse(brut.trim(), &time::format_description::well_known::Rfc3339)

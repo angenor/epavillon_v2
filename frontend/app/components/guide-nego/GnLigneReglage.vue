@@ -5,6 +5,7 @@ import { NuxtLink } from '#components'
 /**
  * Une ligne de réglage : toute la ligne est la cible, jamais le seul chevron.
  * Sans `vers`, elle ne mène nulle part et porte sa commande en fin de ligne.
+ * `#sous` ajoute sous la valeur ce qu'elle ne sait pas écrire — une barre d'avancée.
  */
 withDefaults(
   defineProps<{
@@ -30,6 +31,7 @@ withDefaults(
     <span class="gn-reglage__texte">
       <span class="gn-reglage__libelle">{{ libelle }}</span>
       <span v-if="valeur" class="gn-reglage__valeur">{{ valeur }}</span>
+      <slot name="sous" />
     </span>
     <slot />
     <GnPicto v-if="vers" nom="chevron" class="gn-reglage__chevron" />

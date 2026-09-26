@@ -424,7 +424,11 @@ async fn la_file_refuse_ladministrateur_dune_edition_la_publieuse_et_le_compte_s
 
     let app = crate::back_office!(bac);
     for (verbe, motif) in ROUTES_FILE {
-        let reelle = if motif.contains("/questions/") { question } else { reel };
+        let reelle = if motif.contains("/questions/") {
+            question
+        } else {
+            reel
+        };
         for id in [reelle, Uuid::now_v7()] {
             let uri = motif.replace("{id}", &id.to_string());
             let corps = corps_de(motif);

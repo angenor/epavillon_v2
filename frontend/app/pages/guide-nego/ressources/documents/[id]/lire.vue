@@ -37,7 +37,11 @@ const pageCitee = computed(() => {
   const page = Number(Array.isArray(route.query.page) ? route.query.page[0] : route.query.page)
   return Number.isInteger(page) && page > 0 ? page : null
 })
-const lecteur = useGnLecteur(id, pageCitee)
+const sectionCitee = computed(() => {
+  const section = Array.isArray(route.query.section) ? route.query.section[0] : route.query.section
+  return typeof section === 'string' && section.trim() ? section : null
+})
+const lecteur = useGnLecteur(id, pageCitee, sectionCitee)
 const { etat, lecture, reprise, pageEnCours, suivreLaPage } = lecteur
 
 const document = computed<LibraryDocument | null>(() => documentDe(id.value))

@@ -3655,6 +3655,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/negotiation/me/pathway": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `MyPathway` — les étapes du parcours « Ma première COP » cochées par la personne connectée, parmi les étapes publiées d'un groupe publié. `ETag` et **304**. */
+        get: operations["negotiation_mon_parcours"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/negotiation/me/pathway/{step_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description Coche une étape du parcours. **Idempotent** : le dernier geste reçu l'emporte. Étape inconnue ou non publiée : **404**. */
+        put: operations["negotiation_cocher_une_etape"];
+        post?: never;
+        /** @description Décoche une étape du parcours. **Idempotent**, même sur une étape retirée ou jamais cochée. */
+        delete: operations["negotiation_decocher_une_etape"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/negotiation/me/questions": {
         parameters: {
             query?: never;
@@ -15179,6 +15214,111 @@ export interface operations {
             };
             /** @description Corps malformé */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_mon_parcours: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MyPathway */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Rien n'a changé depuis l'empreinte présentée */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_cocher_une_etape: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de l'étape du parcours */
+                step_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cochée */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Étape inconnue ou non publiée */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_decocher_une_etape: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de l'étape du parcours */
+                step_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Décochée */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

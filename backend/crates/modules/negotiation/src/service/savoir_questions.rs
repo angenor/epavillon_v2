@@ -94,11 +94,7 @@ pub async fn file(state: &NegotiationState, locale: &str) -> Result<Vec<AdminQue
     repo::file(&mut conn, None, locale).await
 }
 
-async fn relue(
-    conn: &mut sqlx::PgConnection,
-    id: Uuid,
-    locale: &str,
-) -> Result<AdminQuestion> {
+async fn relue(conn: &mut sqlx::PgConnection, id: Uuid, locale: &str) -> Result<AdminQuestion> {
     repo::file(conn, Some(id), locale)
         .await?
         .pop()

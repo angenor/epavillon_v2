@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (SELECT 1 FROM negotiation.pathway_steps s\n                            JOIN negotiation.pathway_groups g ON g.id = s.group_id\n                           WHERE s.id = $1 AND s.is_published AND g.is_published) AS \"existe!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "existe!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "29bc0ff3627ac8b7f5b0a2ce5929739dac9a12c979ac1ddccab2fc6b65b5152c"
+}

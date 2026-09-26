@@ -11,6 +11,7 @@ pub mod groups;
 pub mod redeem;
 pub mod requests;
 pub mod savoir_admin;
+pub mod savoir_coches;
 pub mod savoir_favoris;
 pub mod savoir_file;
 pub mod savoir_lectures;

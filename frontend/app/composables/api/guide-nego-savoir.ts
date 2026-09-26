@@ -3,7 +3,7 @@
  *
  * Un seul paquet, public, relu par différence : avec le `served_at` de la lecture
  * gardée, l'API ne rend que ce qui a changé ; avec son empreinte, un `304` si rien
- * n'a bougé. Termes favoris, retours et signalements, eux, demandent une session ;
+ * n'a bougé. Termes favoris, coches du parcours, retours et signalements demandent une session ;
  * les questions aux experts, l'accès négociateur.
  */
 import type {
@@ -14,6 +14,7 @@ import type {
   KnowledgeBundle,
   MyFaqFeedback,
   MyGlossaryFavorites,
+  MyPathway,
   MyQuestion,
   MyQuestionInput,
   MyQuestionList,
@@ -59,6 +60,17 @@ export function createGuideNegoSavoirApi({ lireEtiquete, send }: Deps) {
         async () => (await exemples()).poserUnTermeFavori(entryId),
         'PUT',
       ),
+
+    monParcours: (): Promise<AvecEmpreinte<MyPathway>> =>
+      lireEtiquete('/negotiation/me/pathway', async () => (await exemples()).monParcours()),
+
+    /** Idempotent : le dernier geste reçu l'emporte. Étape inconnue ou non publiée : 404. */
+    cocherUneEtape: (stepId: Uuid): Promise<void> =>
+      send(`/negotiation/me/pathway/${stepId}`, {}, async () => (await exemples()).cocherUneEtape(stepId), 'PUT'),
+
+    /** Idempotent, même sur une étape retirée. */
+    decocherUneEtape: (stepId: Uuid): Promise<void> =>
+      send(`/negotiation/me/pathway/${stepId}`, {}, async () => (await exemples()).decocherUneEtape(stepId), 'DELETE'),
 
     /** Compteur des « plus lues », sans auteur ; hors file : une lecture perdue ne coûte rien (R12). */
     lireUneEntreeDeFaq: (entryId: Uuid): Promise<void> =>

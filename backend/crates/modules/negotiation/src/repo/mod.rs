@@ -13,6 +13,7 @@ pub mod import;
 pub mod objets;
 pub mod renditions;
 pub mod requests;
+pub mod savoir_coches;
 pub mod savoir_faq;
 pub mod savoir_favoris;
 pub mod savoir_file;

@@ -23,6 +23,7 @@ import type {
   KnowledgeSource,
   MyFaqFeedback,
   MyGlossaryFavorites,
+  MyPathway,
   PathwayGroup,
   PathwayLink,
   PathwayStep,
@@ -290,6 +291,31 @@ export function poserUnTermeFavori(id: Uuid): void {
 
 export function retirerUnTermeFavori(id: Uuid): void {
   favoris = favoris.filter((f) => f.entry_id !== id)
+}
+
+// ---------------------------------------------------------------------------
+// Les coches du parcours — une ligne par étape, comme l'API
+// ---------------------------------------------------------------------------
+
+let coches: Uuid[] = []
+
+export function monParcours(): Etiquete<MyPathway> {
+  const step_ids = [...coches].sort()
+  return { valeur: { step_ids }, empreinte: empreinte(step_ids) }
+}
+
+export function cocherUneEtape(id: Uuid): void {
+  if (!PARCOURS.some((g) => g.steps.some((s) => s.id === id))) {
+    throw new ApiRequestError(
+      { code: 'NEGOTIATION_PATHWAY_STEP_NOT_FOUND', message: "Cette étape n'existe pas, ou n'est plus publiée." },
+      404,
+    )
+  }
+  if (!coches.includes(id)) coches = [...coches, id]
+}
+
+export function decocherUneEtape(id: Uuid): void {
+  coches = coches.filter((c) => c !== id)
 }
 
 // ---------------------------------------------------------------------------

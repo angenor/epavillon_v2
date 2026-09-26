@@ -129,6 +129,11 @@ export interface MyGlossaryFavorites {
   entry_ids: Uuid[]
 }
 
+/** `GET /negotiation/me/pathway` — les étapes publiées cochées par la personne connectée. */
+export interface MyPathway {
+  step_ids: Uuid[]
+}
+
 // ---------------------------------------------------------------------------
 // Retours et signalements — `PUT /negotiation/faq/{id}/feedback`,
 // `POST /negotiation/faq/{id}/reports`, `GET /negotiation/me/faq-feedback`
