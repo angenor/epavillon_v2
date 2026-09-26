@@ -121,7 +121,7 @@ Le bloc « Aujourd'hui, vos trois agendas » porte la ligne « Sessions de négo
 ### Back-office
 
 - **FR-016** : L'administration DOIT pouvoir saisir, modifier, publier, annuler (avec motif) une réunion, et la lier à une activité du Pavillon de la même édition ou retirer ce lien, avec les composants du back-office de l'ePavillon.
-- **FR-017** : Les écrans DOIVENT être réservés à la permission de gérer les réunions, sur la portée de l'espace de négociation, filtrés par périmètre (règle 8) ; une adresse forgée est refusée.
+- **FR-017** : Les écrans DOIVENT être réservés à la permission de gérer les réunions **sur la portée globale** (décision du 21/09 : pour Guide Négo, le périmètre est global) ; une adresse forgée est refusée ; un administrateur d'une seule édition est refusé.
 - **FR-018** : L'administration DOIT voir, par réunion, les inscrites et la liste d'attente.
 - **FR-019** : Les chevauchements entre réunions ne sont jamais bloqués (la seule exception de la base vise les salles de visioconférence gérées, que cette étape n'emploie pas).
 - **FR-019a** : Relever ou retirer la capacité DOIT faire monter la liste d'attente d'elle-même ; une nouvelle venue ne passe jamais devant une liste d'attente non vide.
@@ -147,7 +147,7 @@ Le bloc « Aujourd'hui, vos trois agendas » porte la ligne « Sessions de négo
 - **SC-003** : La capacité n'est jamais dépassée, même sous inscriptions simultanées.
 - **SC-004** : Aucune activité du Pavillon n'est modifiée par le lien.
 - **SC-005** : Liste et fiches se relisent hors connexion avec leur heure de lecture.
-- **SC-006** : Une adresse forgée du back-office est refusée à qui n'a pas la permission sur l'espace.
+- **SC-006** : Une adresse forgée du back-office est refusée à qui n'a pas la permission sur la portée globale.
 
 ## Assumptions
 

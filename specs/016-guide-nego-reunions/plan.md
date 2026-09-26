@@ -36,7 +36,7 @@ deux clés de garde, la file de 0c. Tests : `cargo test -p negotiation -p engage
 | II — Frontières | ✅ | `negotiation` lit `programme.sessions` et `live.meetings_public` en SQL (patron `live/repo/cross`), n'écrit que chez lui ; aucune arête entre crates |
 | III — `xmod_fk_*` | ✅ | `xmod_fk_negotiation_meetings_pavilion_session` (`ON DELETE SET NULL`) |
 | IV — Outbox | ✅ | avis par la charge `notification` (3b), courriels par la file de `negotiation` |
-| V — Permission et portée | ✅ | `meeting.manage` sur la portée de l'espace de la réunion (`require_permission`, ni `Requires` global ni `RequiresAnyScope` — R9) ; liste filtrée par `has_permission` sur l'espace ; inscription : `space.access` sur l'espace |
+| V — Permission et portée | ✅ | `Requires<MeetingManage>` sur la portée globale (décision du 21/09, jamais `RequiresAnyScope`) ; inscription : `space.access` globale (R9) |
 | VIII — Invariants en base | ✅ | capacité, fenêtre, liste d'attente, promotion : trigger et fonction ; le code traduit |
 | X — Base réelle | ✅ | concurrence sur la dernière place (SC-003), rejeu (SC-002), visio non servie |
 | XI — Hors connexion | ✅ | liste, fiches, inscriptions et liens des inscrites gardés ; inscription en file |

@@ -57,10 +57,9 @@ close, pas d'inscription requise) ; `409 NEGOTIATION_MEETING_UNAVAILABLE` (annul
 Se désinscrit (`cancelled`), promeut la première en attente **dans la même transaction**, prévient la
 personne promue (R8). Idempotent (`204`).
 
-## Back-office — `negotiation.meeting.manage` sur la portée de l'espace de la réunion (R9) ; adresse forgée → `404`
+## Back-office — `Requires<MeetingManage>` sur la portée globale (R9, décision du 21/09) ; jamais `RequiresAnyScope`
 
-- `GET /admin/negotiation/meetings?edition=` — liste (brouillons compris), filtrée par les espaces
-  administrés.
+- `GET /admin/negotiation/meetings?edition=` — liste (brouillons compris).
 - `POST /admin/negotiation/meetings` · `PUT /admin/negotiation/meetings/{id}` — corps : nature, titre,
   description, début, fin, format, lieu, `external_url`, capacité, liste d'attente, inscription requise,
   fenêtre, accès ouvert ou limité et public, organisée par l'IFDD ou organisation ; le serveur pose

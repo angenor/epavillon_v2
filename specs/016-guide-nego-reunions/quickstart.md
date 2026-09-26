@@ -7,7 +7,7 @@ ses propres PID.
 
 Base migrée ; API et worker ; comptes : administrateur `recette.docs.admin@example.org`, admise
 `p9-agenda-1790357034@exemple.test`, sans accès `p9b-sans-acces@exemple.test`, une seconde admise pour la
-liste d'attente, un compte `space_lead` de l'espace `climat` si la base en a un (sinon, le dire). Une activité du Pavillon existe dans l'édition `cop31` (sinon, la créer au back-office
+liste d'attente. Une activité du Pavillon existe dans l'édition `cop31` (sinon, la créer au back-office
 du site).
 
 ## 1. Saisir et publier (US3, SC-001)

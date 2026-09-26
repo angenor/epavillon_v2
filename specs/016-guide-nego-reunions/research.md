@@ -98,16 +98,13 @@ dans un changement. `tg_meeting_status_event` émet déjà `negotiation.meeting.
 une réunion saisie : aucun type n'est semé pour eux, `engagement` les ignore ; ils ne portent pas la
 charge `notification`.
 
-## R9 — La garde des permissions
+## R9 — La garde des permissions (retouche du go, 26/09)
 
-Back-office : résoudre réunion → espace, puis `require_permission(…, MEETING_MANAGE,
-Scope::NegotiationSpace(space_id))` — un administrateur global passe (la portée globale couvre),
-un `space_lead` de l'espace aussi ; **ni `Requires<…>` (global seul, exclut le `space_lead`), ni
-`RequiresAnyScope` (laisserait entrer un administrateur d'une seule édition, piège décrit dans
-`routes/admin_codes.rs`)**. Adresse forgée ou réunion absente : même `404`. Liste : `WHERE
-identity.has_permission($moi, 'negotiation.meeting.manage', 'negotiation_space', m.space_id)`. C'est la
-règle 8 pour les espaces, sans fonction nouvelle. Inscription : `negotiation.space.access` sur
-`Scope::NegotiationSpace(space_id)` (le global couvre).
+Back-office : **`Requires<MeetingManage>` sur la portée globale**, comme les douze routes de 0b —
+jamais `RequiresAnyScope` (le rôle `admin` porte `meeting.manage` et s'attribue aussi sur une édition).
+C'est la décision du commanditaire du 21/09 : pour Guide Négo, « son périmètre » veut dire global ; un
+test d'URL forgée le prouve. Confier un espace à un `space_lead` reste une spécification à part.
+Inscription : `negotiation.space.access` sur la portée globale, comme les documents réservés.
 
 ## R9 bis — Ce que pose le serveur à la saisie
 
