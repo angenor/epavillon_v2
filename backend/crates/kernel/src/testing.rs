@@ -48,7 +48,7 @@ impl TestDb {
             .expect("DATABASE_URL absente : les tests exigent une base réelle (principe X)");
         let url_admin = remplacer_base(&url_base, "postgres");
 
-        let modele = assurer_modele(&url_admin).await;
+        let modele = assurer_modele(&url_admin, &base_de(&url_base)).await;
 
         let nom = format!("epavillon_test_{}", Uuid::new_v4().simple());
         let mut admin = connecter(&url_admin).await;
@@ -131,6 +131,18 @@ impl Drop for TestDb {
     }
 }
 
+fn base_de(url: &str) -> String {
+    PgConnectOptions::from_str(url)
+        .expect("DATABASE_URL illisible")
+        .get_database()
+        .unwrap_or("postgres")
+        .chars()
+        .filter(|c| c.is_ascii_alphanumeric() || *c == '_')
+        .take(24)
+        .collect::<String>()
+        .to_ascii_lowercase()
+}
+
 fn remplacer_base(url: &str, base: &str) -> String {
     let options = PgConnectOptions::from_str(url)
         .expect("DATABASE_URL illisible")
@@ -144,8 +156,10 @@ async fn connecter(url: &str) -> PgConnection {
         .expect("connexion d'administration")
 }
 
-async fn assurer_modele(url_admin: &str) -> String {
-    let modele = format!("{PREFIXE_MODELE}{}", empreinte_du_schema());
+async fn assurer_modele(url_admin: &str, base: &str) -> String {
+    // Le nom porte la base de développement : deux branches au SQL différent
+    // partagent un même serveur, et chacune effaçait le modèle de l'autre.
+    let modele = format!("{PREFIXE_MODELE}{base}_{}", empreinte_du_schema());
     let mut admin = connecter(url_admin).await;
 
     sqlx::query("SELECT pg_advisory_lock($1)")
@@ -162,7 +176,7 @@ async fn assurer_modele(url_admin: &str) -> String {
             .expect("recherche de la base modèle");
 
     if !existe {
-        supprimer_modeles_perimes(&mut admin, &modele).await;
+        supprimer_modeles_perimes(&mut admin, base, &modele).await;
 
         admin
             .execute(AssertSqlSafe(format!(r#"CREATE DATABASE "{modele}""#)))
@@ -196,11 +210,14 @@ async fn assurer_modele(url_admin: &str) -> String {
 
 /// Les modèles d'une version antérieure du schéma n'ont plus de lecteur : les
 /// garder ferait grossir le cluster d'une base complète par modification du SQL.
-async fn supprimer_modeles_perimes(admin: &mut PgConnection, courant: &str) {
+/// Seuls ceux de la même base sont visés, et les anciens noms sans base.
+async fn supprimer_modeles_perimes(admin: &mut PgConnection, base: &str, courant: &str) {
     let anciens: Vec<String> = sqlx::query_scalar(
-        "SELECT datname FROM pg_database WHERE datname LIKE $1 AND datname <> $2",
+        "SELECT datname FROM pg_database
+          WHERE (datname ~ $1 OR datname ~ $2) AND datname <> $3",
     )
-    .bind(format!("{PREFIXE_MODELE}%"))
+    .bind(format!("^{PREFIXE_MODELE}{base}_[0-9a-f]{{12}}$"))
+    .bind(format!("^{PREFIXE_MODELE}[0-9a-f]{{12}}$"))
     .bind(courant)
     .fetch_all(&mut *admin)
     .await
