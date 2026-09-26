@@ -12,8 +12,8 @@ pub mod documents;
 pub mod groups;
 pub mod notifications;
 pub mod openapi;
-pub mod savoir;
 pub mod reports;
+pub mod savoir;
 pub mod sessions;
 pub mod themes;
 
