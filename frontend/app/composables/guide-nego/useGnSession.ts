@@ -20,6 +20,7 @@
 import type { LoginResult } from '~/types/auth'
 import { appareilDeclare } from '~/utils/guide-nego/appareil'
 import { CLE_LECTURE_AGENDA } from '~/utils/guide-nego/agenda'
+import { CLE_LECTURE_MES_INSCRIPTIONS_REUNIONS } from '~/utils/guide-nego/reunions'
 import {
   CLE_LECTURE_MES_SIGNALEMENTS,
   CLE_LECTURE_NOTIFICATIONS,
@@ -33,6 +34,11 @@ import {
   relireLeCompte,
   type EtatDuCompte,
 } from '~/utils/guide-nego/compte'
+
+/** Ce que le téléphone garde de réservé à la personne : copies réservées et liens de visio. Ne lève jamais. */
+export async function effacerCeQuiEstReserve(): Promise<void> {
+  await Promise.all([effacerLesCopiesReservees(), effacerLesLiensVisio()])
+}
 
 export function useGnSession() {
   const api = useApi()
@@ -56,7 +62,7 @@ export function useGnSession() {
           temoin: Boolean(temoin.value),
         }),
       (lu) => !lu.connectee,
-      effacerLesCopiesReservees,
+      effacerCeQuiEstReserve,
     ),
   )
 
@@ -126,12 +132,18 @@ export function useGnSession() {
    */
   async function deconnecter(): Promise<void> {
     await deconnecterDansLOrdre({
-      effacerLesReserves: effacerLesCopiesReservees,
+      effacerLesReserves: effacerCeQuiEstReserve,
       viderLaFile: () => magasinDesEcritures.vider(),
       fermerLaSession: () => auth.signOut(),
     })
     await supprimerGarde(CLE_LECTURE_FAVORIS)
-    for (const cle of [CLE_LECTURE_AGENDA, CLE_LECTURE_MES_SIGNALEMENTS, CLE_LECTURE_NOTIFICATIONS, CLE_LECTURE_REGLAGE_NOTIFICATIONS]) {
+    for (const cle of [
+      CLE_LECTURE_AGENDA,
+      CLE_LECTURE_MES_SIGNALEMENTS,
+      CLE_LECTURE_NOTIFICATIONS,
+      CLE_LECTURE_REGLAGE_NOTIFICATIONS,
+      CLE_LECTURE_MES_INSCRIPTIONS_REUNIONS,
+    ]) {
       await supprimerGarde(cle)
     }
     const maintenant = new Date().toISOString()

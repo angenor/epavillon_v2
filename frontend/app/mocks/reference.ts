@@ -522,6 +522,18 @@ export const taxonomies = [
     is_system: true,
     created_at: '2026-09-22T09:00:00Z',
   },
+  {
+    code: 'francophone_meeting_type',
+    label: { fr: 'Natures de réunion de la Francophonie', en: 'Francophonie meeting types' },
+    description: {
+      fr: 'Nature d\'une réunion organisée pour les négociatrices et négociateurs francophones : atelier préparatoire, concertation…',
+      en: 'Nature of a meeting held for Francophone negotiators: preparatory workshop, consultation…',
+    },
+    is_multi_select: false,
+    is_hierarchical: false,
+    is_system: true,
+    created_at: '2026-09-26T09:00:00Z',
+  },
 ] satisfies Taxonomy[]
 
 /** Fabrique un terme : tous partagent les mêmes valeurs administratives. */
@@ -638,6 +650,9 @@ export const taxonomyTerms = [
   term(TERM.negoJustTransition, 'negotiation_theme', 'just_transition', { fr: 'Transition juste', en: 'Just transition' }, 80),
   term(TERM.negoAgriculture, 'negotiation_theme', 'agriculture', { fr: 'Agriculture', en: 'Agriculture' }, 90),
   term(TERM.negoTechnology, 'negotiation_theme', 'technology', { fr: 'Technologie', en: 'Technology' }, 100),
+  term(TERM.francoWorkshop, 'francophone_meeting_type', 'preparatory_workshop', { fr: 'Atelier préparatoire', en: 'Preparatory workshop' }, 10),
+  term(TERM.francoNegotiators, 'francophone_meeting_type', 'negotiators_consultation', { fr: 'Concertation des négociatrices et négociateurs', en: "Negotiators' consultation" }, 20),
+  term(TERM.francoMinisterial, 'francophone_meeting_type', 'ministerial_consultation', { fr: 'Concertation ministérielle', en: 'Ministerial consultation' }, 30),
 ] satisfies TaxonomyTerm[]
 
 // ---------------------------------------------------------------------------

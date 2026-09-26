@@ -38,9 +38,9 @@
 
 ## Phase 5 — Plomberie client
 
-- [ ] T019 `fe/app/composables/api/negotiation-meetings.ts` et une ligne de montage dans `useApi.ts`
-- [ ] T020 [P] Règles `fe/app/utils/guide-nego/reunions.ts` et tests `fe/tests/guide-nego/reunions.test.ts` — contracts/client.md
-- [ ] T021 `useGnReunions` (garde `reunions:<slug>`) et `useGnInscriptionsReunions` (file, clé `inscription-reunion:<id>`, **`client_ref` neuf à chaque geste**, `409` → abandon et message ; garde `mes-inscriptions-reunions` : le lien visio en sort dès l'intention de désinscription, la clé entre dans la liste d'effacement de `useGnSession` à la déconnexion et au retrait d'accès) dans `fe/app/composables/guide-nego/` ; jeux d'exemple `fe/app/mocks/`
+- [x] T019 `fe/app/composables/api/negotiation-meetings.ts` et une ligne de montage dans `useApi.ts`
+- [x] T020 [P] Règles `fe/app/utils/guide-nego/reunions.ts` et tests `fe/tests/guide-nego/reunions.test.ts` — contracts/client.md
+- [x] T021 `useGnReunions` (garde `reunions:<slug>`) et `useGnInscriptionsReunions` (file, clé `inscription-reunion:<id>`, **`client_ref` neuf à chaque geste**, `409` → abandon et message ; garde `mes-inscriptions-reunions` : le lien visio en sort dès l'intention de désinscription, la clé entre dans la liste d'effacement de `useGnSession` à la déconnexion et au retrait d'accès) dans `fe/app/composables/guide-nego/` ; jeux d'exemple `fe/app/mocks/`
 
 ## Phase 6 — US1 : l'onglet et la fiche
 
