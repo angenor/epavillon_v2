@@ -19,6 +19,8 @@ export const PREFIXE_FILE_INSCRIPTION_PAVILLON = 'inscription-pavillon:'
 /** Une inscription posée sans réseau, que le serveur n'a pas encore numérotée. */
 export const PREFIXE_INSCRIPTION_LOCALE = 'locale:'
 
+export const cheminDeLActivite = (slug: string) => `/guide-nego/francophonie/pavillon/${encodeURIComponent(slug)}`
+
 const instant = (iso: string) => new Date(iso).getTime()
 
 type Activite = PublicScheduleRow

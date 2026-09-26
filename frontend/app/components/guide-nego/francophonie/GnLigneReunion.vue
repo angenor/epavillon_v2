@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import type { FrancophoneMeeting } from '~/types/negotiation-meetings'
 import type { EtatReunion } from '~/utils/guide-nego/reunions'
+import { cheminDeLActivite } from '~/utils/guide-nego/pavillon'
 
 /**
  * Une réunion de la Francophonie dans sa liste (10 · 1a) : une seule marque d'état.
  *
  * Le lien couvre toute la ligne par son pseudo-élément, et l'étiquette Pavillon passe
  * au-dessus : un lien dans un lien n'est pas du HTML, et un lecteur d'écran s'y perd.
+ * Elle ouvre l'activité liée si l'édition gardée la connaît, sinon la section Pavillon.
  */
 const props = withDefaults(
   defineProps<{
@@ -25,6 +27,7 @@ const props = withDefaults(
 const { t } = useI18n()
 const { intlLocale, time, timeRange, dayLong } = useDateTime()
 const { tr } = useI18nText()
+const pavillon = useGnPavillon()
 
 const jourCourt = computed(() =>
   new Intl.DateTimeFormat(intlLocale.value, { weekday: 'short', day: 'numeric', timeZone: props.fuseau }).format(
@@ -45,6 +48,11 @@ const lieu = computed(() => {
   if (r.format === 'online') return t('gn-ligne-reunion.en-ligne')
   if (!r.venue) return r.format === 'hybrid' ? t('gn-ligne-reunion.en-ligne') : t('gn-ligne-reunion.lieu-inconnu')
   return r.format === 'hybrid' ? t('gn-ligne-reunion.et-en-ligne', { lieu: r.venue }) : r.venue
+})
+
+const versPavillon = computed(() => {
+  const slug = pavillon.slugDeLActiviteLiee(props.reunion.pavilion_session_id)
+  return slug ? cheminDeLActivite(slug) : undefined
 })
 
 const accesLimite = computed(() => {
@@ -78,7 +86,7 @@ const accesLimite = computed(() => {
       </span>
       <GnMarqueEtat v-if="accesLimite" etat="acces-limite" :libelle="accesLimite" />
       <GnMarqueEtat :etat="etat" />
-      <GnEtiquettePavillon v-if="reunion.pavilion_session_id" class="gn-ligne-reunion__pavillon" />
+      <GnEtiquettePavillon v-if="reunion.pavilion_session_id" :vers="versPavillon" class="gn-ligne-reunion__pavillon" />
     </span>
 
     <GnPicto nom="chevron" :taille="24" class="gn-ligne-reunion__chevron" />

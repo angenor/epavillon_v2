@@ -23,6 +23,8 @@ export const DESSINS_D_ETAT = {
   annulee: { picto: 'x-circle' },
   terminee: { picto: 'check' },
   'non-annoncee': { picto: 'diamond' },
+  /* Activité du Pavillon : à une date que l'IFDD n'a pas encore redonnée */
+  reportee: { picto: 'calendar' },
 
   /* Accès à une session */
   ouverte: { picto: 'unlock', taille: 18 },

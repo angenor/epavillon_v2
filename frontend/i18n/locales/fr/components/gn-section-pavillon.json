@@ -1,4 +1,25 @@
 {
-  "titre": "Rien d'annoncé pour l'instant",
-  "texte": "Les activités du Pavillon de la Francophonie paraîtront ici."
+  "chargement": "Lecture des activités du Pavillon",
+  "aujourdhui": "Aujourd'hui",
+  "hier": "Hier — rediffusions",
+  "jour-vide": "Aucune activité ce jour-là au Pavillon.",
+  "suivants": "Les jours suivants",
+  "suivant": "{jour} — {count} activité | {jour} — {count} activité | {jour} — {count} activités",
+  "non-publie": {
+    "titre": "Rien d'annoncé pour l'instant",
+    "texte": "Les activités du Pavillon de la Francophonie paraîtront ici dès que l'IFDD en aura publié le déroulé."
+  },
+  "sans-edition": {
+    "titre": "Aucune COP à venir",
+    "texte": "Les activités du Pavillon de la Francophonie paraîtront ici quand la prochaine COP climat sera annoncée."
+  },
+  "jamais-lue": {
+    "titre": "Pas encore lues sur ce téléphone",
+    "texte": "Les activités du Pavillon se gardent pour le hors connexion à la première lecture. Reconnectez-vous une fois pour les lire."
+  },
+  "erreur": {
+    "titre": "Lecture impossible",
+    "texte": "Les activités du Pavillon n'ont pas pu être lues. Vérifiez la connexion, puis réessayez.",
+    "reessayer": "Réessayer"
+  }
 }

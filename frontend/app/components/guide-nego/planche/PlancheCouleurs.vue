@@ -102,6 +102,7 @@ const ETATS: readonly (readonly [string, string])[] = [
   ['--gn-etat-annulee', '--gn-danger'],
   ['--gn-etat-terminee', '--gn-terminee'],
   ['--gn-etat-non-annoncee', '--gn-reseau'],
+  ['--gn-etat-reportee', '--gn-information'],
   ['--gn-etat-ouverte', '--gn-succes'],
   ['--gn-etat-acces-limite', '--gn-attention'],
   ['--gn-etat-envoye', '--gn-information'],

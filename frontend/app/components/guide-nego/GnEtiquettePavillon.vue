@@ -3,7 +3,7 @@ import type { RouteLocationRaw } from 'vue-router'
 
 /**
  * « Se tient aussi au Pavillon » (01 · 4 decies) : l'étiquette bordée, avec l'épingle.
- * Touchée, elle ouvre la section Pavillon ; l'étape 5 lui passera l'activité elle-même.
+ * Touchée, elle ouvre l'activité liée (`vers`) ; à défaut, la section Pavillon.
  * La cible fait 48 px, le cadre dessiné reste celui d'une étiquette.
  */
 withDefaults(defineProps<{ vers?: RouteLocationRaw }>(), {

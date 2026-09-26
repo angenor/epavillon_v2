@@ -23,10 +23,10 @@
 
 ## Phase 3 — US1 : lire
 
-- [ ] T010 [US1] `GnBlocLieu`, `GnLigneActivite` ; `GnSectionPavillon.vue` réécrit (bloc de lieu, bande des jours de l'édition, Aujourd'hui, Hier — rediffusions, Les jours suivants, états) ; planche
-- [ ] T011 [US1] `pages/guide-nego/francophonie/pavillon/[slug].vue` (sans « Ajouter à mon agenda ») ; rediffusion ouvrable
-- [ ] T012 [US1] `GnEtiquettePavillon` reçoit `vers` = la fiche de l'activité liée, dans `GnLigneReunion.vue` et la fiche d'une réunion
-- [ ] T013 [US1] Vérifier au navigateur : quickstart § 1, § 3 (étiquette)
+- [x] T010 [US1] `GnBlocLieu`, `GnLigneActivite` ; `GnSectionPavillon.vue` réécrit (bloc de lieu, bande des jours de l'édition, Aujourd'hui, Hier — rediffusions, Les jours suivants, états) ; planche
+- [x] T011 [US1] `pages/guide-nego/francophonie/pavillon/[slug].vue` (sans « Ajouter à mon agenda ») ; rediffusion ouvrable
+- [x] T012 [US1] `GnEtiquettePavillon` reçoit `vers` = la fiche de l'activité liée, dans `GnLigneReunion.vue` et la fiche d'une réunion
+- [x] T013 [US1] Vérifier au navigateur : quickstart § 1, § 3 (étiquette)
 
 ## Phase 4 — US2 : s'inscrire
 

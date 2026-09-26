@@ -1,0 +1,46 @@
+{
+  "titre": "Activité du Pavillon",
+  "origine": "Pavillon de la Francophonie",
+  "chargement": "Lecture de l'activité",
+  "hors-connexion": "Les changements survenus depuis ne sont pas ici.",
+  "sortie": "Voir le Pavillon de la Francophonie",
+  "cle": {
+    "heure": "Heure",
+    "salle": "Salle",
+    "organisateurs": "Organisateurs",
+    "partenaires": "Partenaires",
+    "langue": "Langue",
+    "rediffusion": "Rediffusion"
+  },
+  "heure": "{jour}, {debut}–{fin}",
+  "heure-deux-jours": "{jour}, {debut} – {jourFin}, {fin}",
+  "fuseau": "{zone} ({decalage})",
+  "revoir": "Revoir",
+  "revoir-duree": "Revoir · {minutes} min",
+  "intervenants": "Intervenantes et intervenants",
+  "role": {
+    "speaker": "Intervention",
+    "moderator": "Modération",
+    "panelist": "Table ronde",
+    "keynote": "Conférence d'ouverture",
+    "facilitator": "Animation",
+    "interpreter": "Interprétation"
+  },
+  "jamais-lue": {
+    "titre": "Pas encore lue sur ce téléphone",
+    "texte": "Cette activité se garde pour le hors connexion à la première lecture du Pavillon. Reconnectez-vous une fois pour la lire."
+  },
+  "inconnue": {
+    "titre": "Activité introuvable",
+    "texte": "Elle a pu être retirée par l'IFDD, ou le lien est erroné."
+  },
+  "sans-edition": {
+    "titre": "Aucune COP à venir",
+    "texte": "Les activités du Pavillon de la Francophonie paraîtront quand la prochaine COP climat sera annoncée."
+  },
+  "erreur": {
+    "titre": "Lecture impossible",
+    "texte": "L'activité n'a pas pu être lue. Vérifiez la connexion, puis réessayez.",
+    "reessayer": "Réessayer"
+  }
+}

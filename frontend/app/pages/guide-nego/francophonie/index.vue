@@ -16,6 +16,8 @@ const router = useRouter()
 const connexion = useGnConnexion()
 const edition = useGnEdition()
 const reunions = useGnReunions()
+const pavillon = useGnPavillon()
+const jourDuPavillon = useState<string | null>('gn-pavillon-jour-affiche', () => null)
 
 const k = (cle: string, params: Record<string, unknown> = {}) => t(`guide-nego.francophonie.${cle}`, params)
 
@@ -34,9 +36,10 @@ const titre = computed(() => k(section.value === 'pavillon' ? 'titre-pavillon' :
 const sousTitre = computed(() => {
   const e = edition.edition.value
   if (section.value === 'pavillon') {
-    const fuseau = reunions.fuseau.value ?? e?.timezone
+    const fuseau = pavillon.fuseau.value ?? reunions.fuseau.value ?? e?.timezone
     if (!fuseau) return e?.libelle
-    const jour = dayLong(new Date(), fuseau)
+    const affiche = jourDuPavillon.value
+    const jour = affiche ? dayLong(`${affiche}T12:00:00Z`, 'UTC') : dayLong(new Date(), fuseau)
     const zone = zoneLabel(fuseau, reunions.ville.value ?? e?.city ?? undefined)
     return k('sous-titre-pavillon', { jour: jour.charAt(0).toLocaleUpperCase() + jour.slice(1), zone })
   }
@@ -45,7 +48,7 @@ const sousTitre = computed(() => {
   return t('guide-nego.francophonie.sous-titre-reunions', { edition: e.libelle, count: n }, n)
 })
 
-const luA = computed(() => (section.value === 'reunions' ? reunions.luA.value : connexion.etat.value.luA))
+const luA = computed(() => (section.value === 'reunions' ? reunions.luA.value : pavillon.luA.value))
 
 useHead({ title: titre })
 </script>

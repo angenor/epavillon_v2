@@ -9,6 +9,7 @@ const connexion = useGnConnexion()
 const session = useGnSession()
 const lecture = useGnReunions()
 const inscriptions = useGnInscriptionsReunions()
+const pavillon = useGnPavillon()
 
 const k = (cle: string, params: Record<string, unknown> = {}) => t(`guide-nego.francophonie.reunions.${cle}`, params)
 
@@ -21,6 +22,8 @@ async function relire(): Promise<void> {
   relecture.value = true
   try {
     await lecture.rafraichir()
+    // L'étiquette « Se tient aussi au Pavillon » ouvre l'activité liée : son slug vient de l'édition.
+    if (lecture.reunions.value.some((r) => r.pavilion_session_id)) void pavillon.rafraichir()
   } finally {
     relecture.value = false
     tentee.value = true

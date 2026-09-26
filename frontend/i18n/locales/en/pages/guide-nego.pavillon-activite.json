@@ -1,0 +1,46 @@
+{
+  "titre": "Pavilion activity",
+  "origine": "Francophonie Pavilion",
+  "chargement": "Reading the activity",
+  "hors-connexion": "Changes made since then are not shown here.",
+  "sortie": "See the Francophonie Pavilion",
+  "cle": {
+    "heure": "Time",
+    "salle": "Room",
+    "organisateurs": "Organisers",
+    "partenaires": "Partners",
+    "langue": "Language",
+    "rediffusion": "Replay"
+  },
+  "heure": "{jour}, {debut}–{fin}",
+  "heure-deux-jours": "{jour}, {debut} – {jourFin}, {fin}",
+  "fuseau": "{zone} ({decalage})",
+  "revoir": "Watch again",
+  "revoir-duree": "Watch again · {minutes} min",
+  "intervenants": "Speakers",
+  "role": {
+    "speaker": "Speaker",
+    "moderator": "Moderator",
+    "panelist": "Panellist",
+    "keynote": "Keynote speaker",
+    "facilitator": "Facilitator",
+    "interpreter": "Interpreter"
+  },
+  "jamais-lue": {
+    "titre": "Not read on this phone yet",
+    "texte": "This activity is kept for offline use after the first reading of the Pavilion. Reconnect once to read it."
+  },
+  "inconnue": {
+    "titre": "Activity not found",
+    "texte": "IFDD may have removed it, or the link is wrong."
+  },
+  "sans-edition": {
+    "titre": "No upcoming COP",
+    "texte": "Francophonie Pavilion activities will appear once the next climate COP is announced."
+  },
+  "erreur": {
+    "titre": "Unable to read",
+    "texte": "The activity could not be read. Check the connection, then try again.",
+    "reessayer": "Try again"
+  }
+}

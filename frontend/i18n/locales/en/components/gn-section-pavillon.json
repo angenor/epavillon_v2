@@ -1,4 +1,25 @@
 {
-  "titre": "Nothing announced yet",
-  "texte": "Francophonie Pavilion activities will appear here."
+  "chargement": "Reading Pavilion activities",
+  "aujourdhui": "Today",
+  "hier": "Yesterday — replays",
+  "jour-vide": "No activity at the Pavilion that day.",
+  "suivants": "The following days",
+  "suivant": "{jour} — {count} activity | {jour} — {count} activity | {jour} — {count} activities",
+  "non-publie": {
+    "titre": "Nothing announced yet",
+    "texte": "Francophonie Pavilion activities will appear here as soon as IFDD publishes the schedule."
+  },
+  "sans-edition": {
+    "titre": "No upcoming COP",
+    "texte": "Francophonie Pavilion activities will appear here once the next climate COP is announced."
+  },
+  "jamais-lue": {
+    "titre": "Not read on this phone yet",
+    "texte": "Pavilion activities are kept for offline use after the first reading. Reconnect once to read them."
+  },
+  "erreur": {
+    "titre": "Unable to read",
+    "texte": "Pavilion activities could not be read. Check the connection, then try again.",
+    "reessayer": "Try again"
+  }
 }

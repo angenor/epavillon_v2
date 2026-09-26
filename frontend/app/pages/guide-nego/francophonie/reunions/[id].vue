@@ -3,6 +3,7 @@ import type { FrancophoneMeeting } from '~/types/negotiation-meetings'
 import type { IssueDeLInscription } from '~/composables/guide-nego/useGnInscriptionsReunions'
 import { dayKeyInZone } from '~/utils/datetime'
 import { PREFIXE_FILE_INSCRIPTION_REUNION } from '~/utils/guide-nego/reunions'
+import { cheminDeLActivite } from '~/utils/guide-nego/pavillon'
 import { adresseDeLaSortie, sortieDuVerrou } from '~/utils/guide-nego/verrou'
 
 /**
@@ -25,6 +26,7 @@ const compte = useGnSession()
 const lecture = useGnReunions()
 const inscriptions = useGnInscriptionsReunions()
 const acces = useGnAcces()
+const pavillon = useGnPavillon()
 
 const k = (cle: string, params: Record<string, unknown> = {}) => t(`guide-nego.francophonie-reunion.${cle}`, params)
 
@@ -40,6 +42,7 @@ async function relire(): Promise<void> {
   relecture.value = true
   try {
     await lecture.rafraichir()
+    if (reunion.value?.pavilion_session_id) void pavillon.rafraichir()
   } finally {
     relecture.value = false
     tentee.value = true
@@ -93,6 +96,11 @@ const lieu = computed(() => {
     valeur: r.venue ?? k('lieu-inconnu'),
     precision: r.format === 'hybrid' ? k('aussi-en-ligne') : null,
   }
+})
+
+const versPavillon = computed(() => {
+  const slug = pavillon.slugDeLActiviteLiee(reunion.value?.pavilion_session_id ?? null)
+  return slug ? cheminDeLActivite(slug) : undefined
 })
 
 const lien = computed(() => inscriptions.lienVisio(id.value))
@@ -267,7 +275,7 @@ useHead({ title: titre })
         </div>
       </dl>
 
-      <GnEtiquettePavillon v-if="reunion.pavilion_session_id" class="gn-reunion__pavillon" />
+      <GnEtiquettePavillon v-if="reunion.pavilion_session_id" :vers="versPavillon" class="gn-reunion__pavillon" />
 
       <p v-if="description" class="gn-reunion__description">{{ description }}</p>
 

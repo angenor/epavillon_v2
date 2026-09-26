@@ -103,6 +103,7 @@
   --gn-etat-annulee: var(--gn-danger);
   --gn-etat-terminee: var(--gn-terminee);
   --gn-etat-non-annoncee: var(--gn-reseau);
+  --gn-etat-reportee: var(--gn-information);
   --gn-etat-ouverte: var(--gn-succes);
   --gn-etat-acces-limite: var(--gn-attention);
   --gn-etat-envoye: var(--gn-information);
