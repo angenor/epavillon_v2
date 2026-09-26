@@ -178,7 +178,7 @@ fn contexte<'a>(
 
 /// L'erreur rendue est **relue par l'exploitation** : elle porte le code stable
 /// et le statut, jamais l'adresse ni le corps renvoyé par le relais.
-async fn remettre(mailer: &dyn Mailer, message: &OutgoingMail) -> Result<()> {
+pub(crate) async fn remettre(mailer: &dyn Mailer, message: &OutgoingMail) -> Result<()> {
     use kernel::mail::MailError;
 
     mailer.send(message).await.map_err(|e| match e {

@@ -22,7 +22,8 @@ use crate::import::comparaison::{comparer, Ecart, Etat, Fiche, Motif};
 use crate::import::denominations::{Vocabulaires, COORDINATION};
 use crate::import::reel::LecteurReel;
 use crate::import::source::{AnnulationSource, EchecLecture, SessionLue, SourceOfficielle};
-use crate::jobs::traduction;
+use crate::jobs::{change_email, traduction};
+use crate::notifications::emission;
 use crate::repo::import::{self as depot, Ecriture, Lecture, Origine, Reglage};
 use crate::repo::rattrapage;
 
@@ -201,6 +202,7 @@ async fn ecrire(
     };
 
     let mut ecrites = HashSet::new();
+    let mut a_prevenir = Vec::new();
     for ecart in &comparaison.ecarts {
         match ecart {
             Ecart::Apparue { lue } => {
@@ -224,6 +226,7 @@ async fn ecrire(
                 depot::modifier(tx, *id, &ecriture(*lue), lu_a).await?;
                 depot::noter_changements(tx, *id, changements, lu_a, run_id).await?;
                 ecrites.insert(*id);
+                a_prevenir.extend(emission::etat_importe(changements).map(|e| (*id, e)));
             }
             Ecart::Absente {
                 id,
@@ -232,6 +235,7 @@ async fn ecrire(
             } => {
                 depot::noter_absence(tx, *id, *absences, !changements.is_empty(), lu_a).await?;
                 depot::noter_changements(tx, *id, changements, lu_a, run_id).await?;
+                a_prevenir.extend(emission::etat_importe(changements).map(|e| (*id, e)));
             }
         }
     }
@@ -257,6 +261,11 @@ async fn ecrire(
     // rattrape un signalement « annulée » (R7).
     rattrapage::appliquer(tx, r.event_id, lu_a).await?;
     depot::noter_reussite(tx, r.id, touchees, lu_a).await?;
+    for (id, etat) in a_prevenir {
+        if let Some(p) = emission::changement_importe(tx, id, etat).await? {
+            change_email::poser(tx, p.cible, p.id, &p.destinataires).await?;
+        }
+    }
 
     if traduire
         && !depot::titres_sans_traduction(tx, r.event_id)

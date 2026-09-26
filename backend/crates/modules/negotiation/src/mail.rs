@@ -17,6 +17,9 @@
 
 use kernel::mail::OutgoingMail;
 
+use crate::notifications::avis::{jour_en, jour_fr, Etat};
+use crate::repo::courriel::{EtatReunion, EtatSession, SignalementPublie};
+
 /// Les deux langues servies. Toute autre valeur de `preferred_locale` retombe
 /// sur le français, comme `platform.t()`.
 fn en_anglais(locale: &str) -> bool {
@@ -136,6 +139,214 @@ fn compose(ctx: &MailContext<'_>, subject: &str, text: String) -> OutgoingMail {
         to: ctx.to.to_owned(),
         locale: ctx.locale.to_owned(),
         subject: subject.to_owned(),
+        text,
+        html: None,
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Changement de session et réunion non annoncée (3b) — l'état final, relu au
+// moment de partir ; jamais l'autrice d'un signalement.
+// ---------------------------------------------------------------------------
+
+pub struct Envoi<'a> {
+    pub message_id: &'a str,
+    pub to: &'a str,
+    pub locale: &'a str,
+    pub app_public_url: &'a str,
+}
+
+/// L'état qui ouvre le sujet. `None` : rien de ce qui prévient n'a changé dans
+/// la tranche, aucun courriel.
+pub fn etat_de_session(s: &EtatSession) -> Option<Etat> {
+    let signale = |motif: &str| s.signalements.iter().any(|r| r.reason == motif);
+    let change = |champ: &str| s.changes.iter().any(|c| c == champ);
+    if (s.annulee && change("status")) || signale("cancelled") {
+        Some(Etat::Annulee)
+    } else if change("start") || signale("time") {
+        Some(Etat::Deplacee)
+    } else if change("venue") || signale("venue") {
+        Some(Etat::SalleChangee)
+    } else if signale("other") {
+        Some(Etat::Signalee)
+    } else {
+        None
+    }
+}
+
+/// « heure de Belém » ; sans ville connue, le nom du fuseau.
+fn fuseau(ville: Option<&str>, tz: &str, en: bool) -> String {
+    match (ville, en) {
+        (Some(v), false) => format!(", heure de {v}"),
+        (Some(v), true) => format!(", {v} time"),
+        (None, _) => format!(" ({tz})"),
+    }
+}
+
+fn ligne_signalement(r: &SignalementPublie, ville: Option<&str>, tz: &str, en: bool) -> String {
+    let detail = match (r.reason.as_str(), en) {
+        ("time", false) => r
+            .heure
+            .as_deref()
+            .map_or("l'heure a changé".to_owned(), |h| {
+                format!("nouvelle heure {h}{}", fuseau(ville, tz, false))
+            }),
+        ("time", true) => r
+            .heure
+            .as_deref()
+            .map_or("the time has changed".to_owned(), |h| {
+                format!("new time {h}{}", fuseau(ville, tz, true))
+            }),
+        ("venue", false) => r
+            .salle
+            .as_deref()
+            .map_or("la salle a changé".to_owned(), |s| {
+                format!("nouvelle salle : {s}")
+            }),
+        ("venue", true) => r
+            .salle
+            .as_deref()
+            .map_or("the room has changed".to_owned(), |s| {
+                format!("new room: {s}")
+            }),
+        ("cancelled", false) => "la session n'aura pas lieu".to_owned(),
+        ("cancelled", true) => "the session will not take place".to_owned(),
+        (_, false) => "voir la fiche de la session".to_owned(),
+        (_, true) => "see the session page".to_owned(),
+    };
+    if en {
+        format!("Reported by the network and validated by IFDD: {detail}.")
+    } else {
+        format!("Signalé par le réseau et validé par l'IFDD : {detail}.")
+    }
+}
+
+pub fn changement_de_session(
+    e: &Envoi<'_>,
+    s: &EtatSession,
+    etat: Etat,
+    chemin: &str,
+) -> OutgoingMail {
+    let en = en_anglais(e.locale);
+    let ville = s.ville.as_deref();
+    let titre = if en {
+        s.title_en.as_str()
+    } else {
+        s.title_fr.as_deref().unwrap_or(&s.title_en)
+    };
+    let mut lignes = Vec::new();
+    if s.annulee {
+        lignes.push(if en {
+            "The session will not take place.".to_owned()
+        } else {
+            "La session n'aura pas lieu.".to_owned()
+        });
+    } else {
+        let jour = if en { jour_en(s.jour) } else { jour_fr(s.jour) };
+        let plage = match &s.fin {
+            Some(fin) => format!("{}–{fin}", s.debut),
+            None => s.debut.clone(),
+        };
+        lignes.push(if en {
+            format!("Time: {jour}, {plage}{}", fuseau(ville, &s.fuseau, true))
+        } else {
+            format!(
+                "Horaire : {jour}, {plage}{}",
+                fuseau(ville, &s.fuseau, false)
+            )
+        });
+        if let Some(salle) = &s.salle {
+            lignes.push(if en {
+                format!("Room: {salle}")
+            } else {
+                format!("Salle : {salle}")
+            });
+        }
+    }
+    if !s.changes.is_empty() {
+        lignes.push(if en {
+            "Per the official source.".to_owned()
+        } else {
+            "Selon la source officielle.".to_owned()
+        });
+    }
+    lignes.extend(
+        s.signalements
+            .iter()
+            .map(|r| ligne_signalement(r, ville, &s.fuseau, en)),
+    );
+    avis_par_courriel(e, etat, titre, &lignes, chemin)
+}
+
+pub fn reunion_non_annoncee(e: &Envoi<'_>, r: &EtatReunion, chemin: &str) -> OutgoingMail {
+    let en = en_anglais(e.locale);
+    let mut quand = if en { jour_en(r.jour) } else { jour_fr(r.jour) };
+    if let Some(h) = &r.heure {
+        quand.push_str(&if en {
+            format!(" at {h}{}", fuseau(r.ville.as_deref(), &r.fuseau, true))
+        } else {
+            format!(" à {h}{}", fuseau(r.ville.as_deref(), &r.fuseau, false))
+        });
+    }
+    let mut lignes = vec![if en {
+        format!("When: {quand}")
+    } else {
+        format!("Quand : {quand}")
+    }];
+    if let Some(lieu) = &r.lieu {
+        lignes.push(if en {
+            format!("Where: {lieu}")
+        } else {
+            format!("Où : {lieu}")
+        });
+    }
+    lignes.push(if en {
+        "Reported by the network and validated by IFDD.".to_owned()
+    } else {
+        "Signalée par le réseau et validée par l'IFDD.".to_owned()
+    });
+    avis_par_courriel(e, Etat::NonAnnoncee, &r.titre, &lignes, chemin)
+}
+
+fn avis_par_courriel(
+    e: &Envoi<'_>,
+    etat: Etat,
+    titre: &str,
+    lignes: &[String],
+    chemin: &str,
+) -> OutgoingMail {
+    let en = en_anglais(e.locale);
+    let lien = format!("{}{chemin}", e.app_public_url.trim_end_matches('/'));
+    let (subject, text) = if en {
+        (
+            format!("{} — {titre}", etat.en()),
+            format!(
+                "Hello,\n\n{} — {titre}\n\n{}\n\nOpen the page:\n\n{lien}\n\n\
+                 You receive this email because you follow this session in Guide Négo. \
+                 To stop these emails: Guide Négo, About, Notifications.\n\n\
+                 Negotiation sessions — Guide Négo, IFDD",
+                etat.en(),
+                lignes.join("\n"),
+            ),
+        )
+    } else {
+        (
+            format!("{} — {titre}", etat.fr()),
+            format!(
+                "Bonjour,\n\n{} — {titre}\n\n{}\n\nOuvrir la fiche :\n\n{lien}\n\n\
+                 Vous recevez ce courriel parce que vous suivez cette session dans Guide Négo. \
+                 Pour ne plus en recevoir : Guide Négo, À propos, Notifications.\n\n\
+                 Sessions de négociation — Guide Négo, IFDD",
+                etat.fr(),
+                lignes.join("\n"),
+            ),
+        )
+    };
+    OutgoingMail {
+        message_id: e.message_id.to_owned(),
+        to: e.to.to_owned(),
+        locale: e.locale.to_owned(),
+        subject,
         text,
         html: None,
     }

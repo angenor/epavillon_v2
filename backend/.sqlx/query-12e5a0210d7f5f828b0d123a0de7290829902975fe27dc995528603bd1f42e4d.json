@@ -1,0 +1,94 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(m.title_original, m.title->>'fr') AS \"title_en!\", tr.text_fr AS \"title_fr?\",\n                  m.status::text = 'cancelled' AS \"annulee!\",\n                  (m.start_at AT TIME ZONE e.timezone::text)::date AS \"jour!\",\n                  to_char(m.start_at AT TIME ZONE e.timezone::text, 'HH24:MI') AS \"debut!\",\n                  to_char(m.end_at AT TIME ZONE e.timezone::text, 'HH24:MI') AS fin,\n                  m.venue_label, e.city, e.timezone::text AS \"fuseau!\"\n             FROM negotiation.meetings m\n             JOIN event.events e ON e.id = m.event_id\n             LEFT JOIN negotiation.title_translations tr ON tr.source_text = m.title_original\n            WHERE m.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "title_en!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "title_fr?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.title_translations",
+            "name": "text_fr"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "annulee!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "jour!",
+        "type_info": "Date",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "debut!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "fin",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "venue_label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "venue_label"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "city",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "city"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "fuseau!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      false,
+      null,
+      null,
+      null,
+      null,
+      true,
+      true,
+      null
+    ]
+  },
+  "hash": "12e5a0210d7f5f828b0d123a0de7290829902975fe27dc995528603bd1f42e4d"
+}

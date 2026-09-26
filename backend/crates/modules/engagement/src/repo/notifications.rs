@@ -38,6 +38,9 @@ pub struct NouvelleNotification<'a> {
     pub subject_table: Option<&'a str>,
     pub subject_id: Option<Uuid>,
     pub group_key: Option<String>,
+    /// Sur la ligne non lue de même clé : remplacer titre, corps et variables
+    /// par ceux-ci — l'avis dit l'état final — en plus d'incrémenter le compte.
+    pub replace: bool,
 }
 
 /// Écrit une notification, **ou incrémente celle qui porte la même clé** si elle
@@ -56,7 +59,13 @@ pub async fn ecrire(conn: &mut PgConnection, n: &NouvelleNotification<'_>) -> Re
            ON CONFLICT (person_id, group_key)
                WHERE group_key IS NOT NULL AND read_at IS NULL
                DO UPDATE SET group_count = engagement.notifications.group_count + 1,
-                             created_at  = now()
+                             created_at  = now(),
+                             title     = CASE WHEN $11 THEN EXCLUDED.title
+                                              ELSE engagement.notifications.title END,
+                             body      = CASE WHEN $11 THEN EXCLUDED.body
+                                              ELSE engagement.notifications.body END,
+                             variables = CASE WHEN $11 THEN EXCLUDED.variables
+                                              ELSE engagement.notifications.variables END
         RETURNING (xmax = 0) AS "cree!""#,
         n.person_id,
         n.type_code,
@@ -67,7 +76,8 @@ pub async fn ecrire(conn: &mut PgConnection, n: &NouvelleNotification<'_>) -> Re
         n.subject_schema,
         n.subject_table,
         n.subject_id,
-        n.group_key
+        n.group_key,
+        n.replace
     )
     .fetch_one(conn)
     .await?;
@@ -90,22 +100,27 @@ pub async fn fil(
     non_lues_seulement: bool,
     limite: i64,
     avant: Option<time::OffsetDateTime>,
+    module: Option<&str>,
 ) -> Result<Fil> {
     let lignes = sqlx::query!(
         r#"SELECT id, type_code, title, body, variables, link_path,
                   subject_schema, subject_table, subject_id, group_count,
                   read_at, created_at
-             FROM engagement.notifications
+             FROM engagement.notifications n
             WHERE person_id = $1
               AND archived_at IS NULL
               AND ($2 = false OR read_at IS NULL)
               AND ($3::timestamptz IS NULL OR created_at < $3)
+              AND ($5::text IS NULL OR EXISTS (
+                      SELECT 1 FROM engagement.notification_types nt
+                       WHERE nt.code = n.type_code AND nt.module_code = $5))
             ORDER BY created_at DESC
             LIMIT $4"#,
         person_id,
         non_lues_seulement,
         avant,
-        limite
+        limite,
+        module
     )
     .fetch_all(pool)
     .await?;
@@ -113,9 +128,13 @@ pub async fn fil(
     // Le compte porte sur **toutes** les non lues, pas sur la page : un badge
     // qui ne compterait que la page afficherait « 20 » pour toujours.
     let unread_count = sqlx::query_scalar!(
-        r#"SELECT count(*) AS "n!" FROM engagement.notifications
-            WHERE person_id = $1 AND read_at IS NULL AND archived_at IS NULL"#,
-        person_id
+        r#"SELECT count(*) AS "n!" FROM engagement.notifications n
+            WHERE person_id = $1 AND read_at IS NULL AND archived_at IS NULL
+              AND ($2::text IS NULL OR EXISTS (
+                      SELECT 1 FROM engagement.notification_types nt
+                       WHERE nt.code = n.type_code AND nt.module_code = $2))"#,
+        person_id,
+        module
     )
     .fetch_one(pool)
     .await?;

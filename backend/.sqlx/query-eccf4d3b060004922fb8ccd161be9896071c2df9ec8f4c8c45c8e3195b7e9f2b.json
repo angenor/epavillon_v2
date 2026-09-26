@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT $2 IN (SELECT negotiation.network_recipients($1)) AS \"suit!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "suit!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "eccf4d3b060004922fb8ccd161be9896071c2df9ec8f4c8c45c8e3195b7e9f2b"
+}

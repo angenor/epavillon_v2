@@ -11,9 +11,10 @@
 import type { FollowedTheme, MyThemes } from '~/types/negotiation'
 
 let suivies: FollowedTheme[] = []
+let allumees: string[] = []
 
 export function mesThematiques(): MyThemes {
-  return { themes: suivies.map((t) => ({ ...t })) }
+  return { themes: suivies.map((t) => ({ ...t })), notify: [...allumees] }
 }
 
 /** Remplacement en bloc, comme l'API : rejouer le même corps ne change rien. */
@@ -23,6 +24,14 @@ export function suivreDesThematiques(codes: string[]): MyThemes {
   suivies = voulus.map(
     (code) => deja.get(code) ?? { code, followed_at: new Date().toISOString() },
   )
+  allumees = allumees.filter((code) => voulus.includes(code))
+  return mesThematiques()
+}
+
+/** Les thématiques dont on est prévenu, parmi les suivies ; `null` : une n'est pas suivie. */
+export function notifierDesThematiques(codes: string[]): MyThemes | null {
+  if (codes.some((code) => !suivies.some((t) => t.code === code))) return null
+  allumees = suivies.map((t) => t.code).filter((code) => codes.includes(code))
   return mesThematiques()
 }
 
@@ -32,9 +41,11 @@ export function suivreDesThematiques(codes: string[]): MyThemes {
  * que hachée — rien ici n'a besoin d'être opaque.
  */
 export function empreinteDesThematiques(): string {
-  return `"${suivies.map((t) => t.code).sort().join('.')}"`
+  const codes = [...suivies.map((t) => t.code), ...allumees.map((c) => `!${c}`)]
+  return `"${codes.sort().join('.')}"`
 }
 
 export function reinitialiserLesThematiques(): void {
   suivies = []
+  allumees = []
 }

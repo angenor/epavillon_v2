@@ -33,8 +33,16 @@
 //! reviendrait à écrire quatorze résolutions sans destinataire prouvé (R23). Le
 //! quatrième avis du jalon — le rappel de séance — ne passe pas par ici : il
 //! part du travail différé, mis en file par la fonction du modèle.
+//!
+//! # Et une branche générique : l'émetteur a déjà tout résolu
+//!
+//! Un événement dont la charge porte `notification` (`contracts`,
+//! `WithNotification`) arrive avec ses destinataires et son texte : ce
+//! consommateur l'écrit sans rien connaître des règles du module émetteur, ni
+//! lire ses tables (Guide Négo, research R8 de l'étape 3b).
 
 use async_trait::async_trait;
+use contracts::negotiation::WithNotification;
 use kernel::db::Db;
 use kernel::error::Result;
 use kernel::events::{EventConsumer, OutboxEvent};
@@ -70,6 +78,9 @@ impl EventConsumer for NotificationsConsumer {
     }
 
     async fn handle(&self, conn: &mut PgConnection, event: &OutboxEvent) -> Result<()> {
+        if event.payload.get("notification").is_some() {
+            return self.generique(conn, event).await;
+        }
         let Some(type_code) = self.type_vise(event).await? else {
             return Ok(());
         };
@@ -121,6 +132,7 @@ impl EventConsumer for NotificationsConsumer {
                     // séance forment **une** ligne portant un compte, tant
                     // qu'elle n'est pas lue (FR-092).
                     group_key: Some(format!("{type_code}:{sujet}")),
+                    replace: false,
                 },
             )
             .await?;
@@ -131,6 +143,55 @@ impl EventConsumer for NotificationsConsumer {
 }
 
 impl NotificationsConsumer {
+    /// Un avis `in_app` par destinataire reçu, si le type est actif.
+    async fn generique(&self, conn: &mut PgConnection, event: &OutboxEvent) -> Result<()> {
+        let n = match serde_json::from_value::<WithNotification>(event.payload.clone()) {
+            Ok(w) => w.notification,
+            Err(e) => {
+                tracing::warn!(event_type = %event.event_type, erreur = %e, "avis illisible");
+                return Ok(());
+            }
+        };
+        if notifications::type_actif(self.db.pool(), &n.type_code)
+            .await?
+            .is_none()
+        {
+            return Ok(());
+        }
+        let title = serde_json::to_value(&n.title).unwrap_or_default();
+        let body = serde_json::to_value(&n.body).ok();
+        for &person_id in &n.recipients {
+            if !delivery::canal_autorise(
+                self.db.pool(),
+                person_id,
+                &n.type_code,
+                NotificationChannel::InApp.as_str(),
+            )
+            .await?
+            {
+                continue;
+            }
+            notifications::ecrire(
+                conn,
+                &notifications::NouvelleNotification {
+                    person_id,
+                    type_code: &n.type_code,
+                    title: title.clone(),
+                    body: body.clone(),
+                    variables: n.variables.clone(),
+                    link_path: Some(n.link_path.clone()),
+                    subject_schema: Some(&n.subject.schema),
+                    subject_table: Some(&n.subject.table),
+                    subject_id: Some(n.subject.id),
+                    group_key: n.group_key.clone(),
+                    replace: n.replace,
+                },
+            )
+            .await?;
+        }
+        Ok(())
+    }
+
     /// Le type d'avis visé par un événement : son code, ou l'exception écrite.
     async fn type_vise(&self, event: &OutboxEvent) -> Result<Option<String>> {
         if event.event_type.starts_with("programme.registration.") {

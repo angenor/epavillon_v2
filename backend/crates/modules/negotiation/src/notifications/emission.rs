@@ -2,8 +2,9 @@
 //! refuse. Aucun événement quand personne n'est à prévenir.
 
 use contracts::negotiation::{
-    WithNotification, AGGREGATE_NETWORK_MEETING, AGGREGATE_SCHEMA, AGGREGATE_SESSION_REPORT,
-    NETWORK_MEETING_PUBLISHED, REPORT_DECIDED, REPORT_PUBLISHED,
+    WithNotification, AGGREGATE_MEETING, AGGREGATE_NETWORK_MEETING, AGGREGATE_SCHEMA,
+    AGGREGATE_SESSION_REPORT, MEETING_CHANGED, NETWORK_MEETING_PUBLISHED, REPORT_DECIDED,
+    REPORT_PUBLISHED,
 };
 use kernel::error::Result;
 use kernel::events::{emit, DomainEvent};
@@ -12,8 +13,18 @@ use sqlx::postgres::PgConnection;
 use uuid::Uuid;
 
 use crate::domain::reports::ReportReason;
+use crate::import::comparaison::Changement;
+use crate::jobs::change_email::Cible as CibleCourriel;
 use crate::notifications::avis::{self, Cible, Detail, Etat, Origine, Sujet};
+use crate::repo::courriel;
 use crate::repo::publication::{self as depot, Tenu};
+
+/// Qui prévenir par courriel, et de quoi : ceux-là mêmes qui ont reçu l'avis.
+pub struct APrevenir {
+    pub cible: CibleCourriel,
+    pub id: Uuid,
+    pub destinataires: Vec<Uuid>,
+}
 
 const LIEN_MES_SIGNALEMENTS: &str = "/guide-nego/negociations/signalements";
 
@@ -55,9 +66,13 @@ async fn emettre(
 }
 
 /// L'encart ou la réunion non annoncée, à qui les suit.
-pub async fn publication(conn: &mut PgConnection, t: &Tenu, reunion: Option<Uuid>) -> Result<()> {
+pub async fn publication(
+    conn: &mut PgConnection,
+    t: &Tenu,
+    reunion: Option<Uuid>,
+) -> Result<Option<APrevenir>> {
     let Some(motif) = ReportReason::from_db(&t.reason) else {
-        return Ok(());
+        return Ok(None);
     };
     let etat = Etat::du_motif(motif);
     let detail = match motif {
@@ -79,9 +94,10 @@ pub async fn publication(conn: &mut PgConnection, t: &Tenu, reunion: Option<Uuid
 
     match (reunion, t.meeting_id) {
         (Some(id), _) => {
+            let destinataires = depot::destinataires_reunion(conn, id).await?;
             let notification = avis::notification(
                 NETWORK_MEETING_PUBLISHED,
-                depot::destinataires_reunion(conn, id).await?,
+                destinataires.clone(),
                 texte,
                 Cible {
                     table: "network_meetings",
@@ -98,12 +114,18 @@ pub async fn publication(conn: &mut PgConnection, t: &Tenu, reunion: Option<Uuid
                 NETWORK_MEETING_PUBLISHED,
                 notification,
             )
-            .await
+            .await?;
+            Ok(Some(APrevenir {
+                cible: CibleCourriel::NetworkMeeting,
+                id,
+                destinataires,
+            }))
         }
         (None, Some(session)) => {
+            let destinataires = depot::destinataires_session(conn, session).await?;
             let notification = avis::notification(
                 REPORT_PUBLISHED,
-                depot::destinataires_session(conn, session).await?,
+                destinataires.clone(),
                 texte,
                 Cible {
                     table: "meetings",
@@ -120,10 +142,87 @@ pub async fn publication(conn: &mut PgConnection, t: &Tenu, reunion: Option<Uuid
                 REPORT_PUBLISHED,
                 notification,
             )
-            .await
+            .await?;
+            Ok(Some(APrevenir {
+                cible: CibleCourriel::Meeting,
+                id: session,
+                destinataires,
+            }))
         }
-        (None, None) => Ok(()),
+        (None, None) => Ok(None),
     }
+}
+
+/// Ce qu'un changement lu à la source dit à qui suit la session : l'annulation
+/// d'abord, puis l'heure, puis la salle. `None` : rien qui prévienne.
+pub fn etat_importe(changements: &[Changement]) -> Option<Etat> {
+    let a = |champ: &str| changements.iter().any(|c| c.champ == champ);
+    let annulee = changements
+        .iter()
+        .any(|c| c.champ == "status" && c.apres["status"] == "cancelled");
+    if annulee {
+        Some(Etat::Annulee)
+    } else if a("start") {
+        Some(Etat::Deplacee)
+    } else if a("venue") {
+        Some(Etat::SalleChangee)
+    } else {
+        None
+    }
+}
+
+/// `negotiation.meeting.changed`, dans la transaction de la lecture. La
+/// session est relue après écriture : l'avis dit la nouvelle valeur.
+pub async fn changement_importe(
+    conn: &mut PgConnection,
+    meeting_id: Uuid,
+    etat: Etat,
+) -> Result<Option<APrevenir>> {
+    let Some(s) = courriel::session_pour_avis(conn, meeting_id).await? else {
+        return Ok(None);
+    };
+    let destinataires = depot::destinataires_session(conn, meeting_id).await?;
+    if destinataires.is_empty() {
+        return Ok(None);
+    }
+    let detail = match etat {
+        Etat::Deplacee => Detail::Heure {
+            heure: &s.heure,
+            ville: s.ville.as_deref(),
+        },
+        Etat::SalleChangee => s.salle.as_deref().map_or(Detail::Aucun, Detail::Salle),
+        _ => Detail::Aucun,
+    };
+    let sujet = Sujet {
+        fr: s.title_fr.as_deref().unwrap_or(&s.title_en),
+        en: &s.title_en,
+    };
+    let texte = avis::changement(etat, sujet, detail, Origine::Source);
+    let notification = avis::notification(
+        MEETING_CHANGED,
+        destinataires.clone(),
+        texte,
+        Cible {
+            table: "meetings",
+            id: meeting_id,
+            lien: CibleCourriel::Meeting.chemin(meeting_id),
+        },
+        Some(avis::cle_du_jour(MEETING_CHANGED, meeting_id, s.jour)),
+        json!({ "change": format!("{etat:?}").to_lowercase() }),
+    );
+    emettre(
+        conn,
+        AGGREGATE_MEETING,
+        meeting_id,
+        MEETING_CHANGED,
+        notification,
+    )
+    .await?;
+    Ok(Some(APrevenir {
+        cible: CibleCourriel::Meeting,
+        id: meeting_id,
+        destinataires,
+    }))
 }
 
 /// Pour l'autrice : publié, ou non retenu avec son motif.
@@ -152,4 +251,36 @@ pub async fn decision(conn: &mut PgConnection, t: &Tenu) -> Result<()> {
         notification,
     )
     .await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    fn c(champ: &'static str, apres: serde_json::Value) -> Changement {
+        Changement {
+            champ,
+            avant: json!(null),
+            apres,
+        }
+    }
+
+    #[test]
+    fn lannulation_prime_puis_lheure_puis_la_salle() {
+        let annulee = c(
+            "status",
+            json!({ "status": "cancelled", "reason": "removed" }),
+        );
+        let reparue = c("status", json!({ "status": "scheduled" }));
+        let heure = c("start", json!("2026-11-10T11:00:00Z"));
+        let salle = c("venue", json!("Salle 3"));
+        assert_eq!(
+            etat_importe(&[salle.clone(), heure.clone(), annulee]),
+            Some(Etat::Annulee)
+        );
+        assert_eq!(etat_importe(&[salle.clone(), heure]), Some(Etat::Deplacee));
+        assert_eq!(etat_importe(&[salle]), Some(Etat::SalleChangee));
+        assert_eq!(etat_importe(&[reparue, c("title", json!("x"))]), None);
+    }
 }

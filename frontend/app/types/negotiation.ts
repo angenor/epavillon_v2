@@ -156,6 +156,8 @@ export interface FollowedTheme {
 
 export interface MyThemes {
   themes: FollowedTheme[]
+  /** Thématiques suivies dont on est prévenu des changements (3b) ; entre dans l'empreinte. */
+  notify: string[]
 }
 
 /**
@@ -166,4 +168,22 @@ export interface MyThemes {
  */
 export interface ThemesPayload {
   codes: string[]
+}
+
+/** `PUT /negotiation/me/themes/notifications` — la liste entière, parmi les suivies ; vide : tout éteint. */
+export interface ThemeNotificationsPayload {
+  codes: string[]
+}
+
+/**
+ * `GET`/`PUT /negotiation/me/notifications` — l'accord « Notifications » d'« À propos ».
+ * Sans accord enregistré, `email` vaut `true`. `version` : la politique de confidentialité servie.
+ */
+export interface NotificationSettings {
+  email: boolean
+  version: string
+}
+
+export interface NotificationSettingsPayload {
+  email: boolean
 }

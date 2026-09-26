@@ -1,0 +1,49 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.reason,\n                  to_char(r.proposed_start AT TIME ZONE e.timezone::text, 'HH24:MI') AS heure,\n                  r.proposed_venue\n             FROM negotiation.session_reports r\n             JOIN event.events e ON e.id = r.event_id\n            WHERE r.meeting_id = $1 AND r.published_at >= $2 AND r.published_at < $3\n              AND r.withdrawn_at IS NULL\n            ORDER BY r.published_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.session_reports",
+            "name": "reason"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "heure",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "proposed_venue",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.session_reports",
+            "name": "proposed_venue"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      true
+    ]
+  },
+  "hash": "b0056996027bb8d3dc627a408ea5f9a56278937835f0c30ac6b61a38dda8553f"
+}

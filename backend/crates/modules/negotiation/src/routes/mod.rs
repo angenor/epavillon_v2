@@ -8,6 +8,7 @@ pub mod admin_requests;
 pub mod agenda;
 pub mod documents;
 pub mod groups;
+pub mod notifications;
 pub mod openapi;
 pub mod reports;
 pub mod sessions;

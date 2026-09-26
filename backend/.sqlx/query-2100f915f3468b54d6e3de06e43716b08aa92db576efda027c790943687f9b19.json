@@ -1,0 +1,78 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT nm.title, nm.day,\n                  to_char(nm.start_at AT TIME ZONE e.timezone::text, 'HH24:MI') AS heure,\n                  nm.venue, e.city, e.timezone::text AS \"fuseau!\"\n             FROM negotiation.network_meetings nm\n             JOIN event.events e ON e.id = nm.event_id\n             JOIN negotiation.session_reports r ON r.id = nm.report_id\n            WHERE nm.id = $1 AND nm.withdrawn_at IS NULL AND r.published_at IS NOT NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "title",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.network_meetings",
+            "name": "title"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "day",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "negotiation.network_meetings",
+            "name": "day"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "heure",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "venue",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.network_meetings",
+            "name": "venue"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "city",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "city"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "fuseau!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      true,
+      true,
+      null
+    ]
+  },
+  "hash": "2100f915f3468b54d6e3de06e43716b08aa92db576efda027c790943687f9b19"
+}

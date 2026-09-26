@@ -9,6 +9,7 @@ pub mod agenda;
 pub mod corrections;
 pub mod documents;
 pub mod groups;
+pub mod notifications;
 pub mod redeem;
 pub mod reports;
 pub mod requests;

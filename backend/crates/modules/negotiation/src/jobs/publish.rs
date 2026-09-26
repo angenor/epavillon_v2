@@ -17,6 +17,7 @@ use sqlx::postgres::PgConnection;
 use time::OffsetDateTime;
 use uuid::Uuid;
 
+use crate::jobs::change_email;
 use crate::notifications::emission;
 use crate::repo::publication as depot;
 
@@ -90,10 +91,10 @@ pub async fn publier(
         None => Some(depot::creer_reunion(conn, t.id).await?),
         Some(_) => None,
     };
-    emission::publication(conn, &t, reunion).await?;
+    if let Some(p) = emission::publication(conn, &t, reunion).await? {
+        change_email::poser(conn, p.cible, p.id, &p.destinataires).await?;
+    }
     emission::decision(conn, &t).await?;
-    // T021 (phase 4) : poser ici les courriels `negotiation.session_change_email`,
-    // un par destinataire, dans cette même transaction.
     Ok(Issue::Publie)
 }
 

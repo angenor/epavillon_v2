@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT DISTINCT field AS \"field!\" FROM negotiation.meeting_changes\n            WHERE meeting_id = $1 AND field IN ('start', 'venue', 'status')\n              AND detected_at >= $2 AND detected_at < $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "field!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meeting_changes",
+            "name": "field"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "d5630c39061cdd38ea50b6103b211eae21bdfa8508d3c9f17b35e6101cc37911"
+}

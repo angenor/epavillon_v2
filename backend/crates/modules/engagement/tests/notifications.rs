@@ -30,6 +30,7 @@ fn fil() -> FilQuery {
         unread_only: false,
         limit: None,
         before: None,
+        module: None,
     }
 }
 

@@ -3283,6 +3283,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/negotiation/me/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `NotificationSettings` — l'accord « Notifications » : `email` dit si les courriels de changement partent. **Sans accord enregistré, allumé.** `version` est celle de la politique de confidentialité servie (`GET /legal/privacy`). Éteint, l'application prévient toujours ; seul le courriel s'arrête. */
+        get: operations["negotiation_mon_reglage_de_notifications"];
+        /** @description `NotificationSettingsPayload` → `NotificationSettings` — allumer ou éteindre les courriels. Chaque bascule écrit une preuve dans les consentements, avec la version servie ; rejouer la même valeur n'écrit rien. */
+        put: operations["negotiation_regler_les_notifications"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/negotiation/me/reports": {
         parameters: {
             query?: never;
@@ -3327,6 +3345,27 @@ export interface paths {
          *     Les suivis absents de la liste sont **fermés**, jamais supprimés. Un code inconnu, ou d'un autre vocabulaire, est refusé en nommant le code. Un terme retiré du vocabulaire reste à qui le suivait et ne se choisit plus.
          */
         put: operations["negotiation_suivre_des_thematiques"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/negotiation/me/themes/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * @description `ThemeNotificationsPayload` → `MyThemes` — les thématiques dont la personne veut être prévenue des changements, **parmi celles qu'elle suit** ; la liste entière, jamais un delta. Vide : tout éteint. Une ligne allumée élargit, elle ne coupe jamais : les sessions de « Mon agenda » préviennent toujours. Quitter une thématique l'éteint avec elle.
+         *
+         *     `notify` entre dans l'empreinte de `GET /negotiation/me/themes`.
+         */
+        put: operations["negotiation_notifier_des_thematiques"];
         post?: never;
         delete?: never;
         options?: never;
@@ -13493,6 +13532,77 @@ export interface operations {
             };
         };
     };
+    negotiation_mon_reglage_de_notifications: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description NotificationSettings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_regler_les_notifications: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description NotificationSettings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Corps malformé */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     negotiation_mes_signalements: {
         parameters: {
             query: {
@@ -13619,6 +13729,57 @@ export interface operations {
             };
             /** @description L'état a changé depuis l'empreinte présentée en If-Match */
             412: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Corps malformé */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_notifier_des_thematiques: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description MyThemes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Thématique non suivie — le message nomme le code */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -13834,6 +13995,8 @@ export interface operations {
                 limit?: number;
                 /** @description Pagination : avant cet instant */
                 before?: string;
+                /** @description Module d'origine du type (`notification_types.module_code`) ; filtre la liste **et** le compte de non lues */
+                module?: string;
             };
             header?: never;
             path?: never;

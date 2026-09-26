@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.theme_subscriptions\n            SET left_at = now(), notify_changes = false\n          WHERE person_id = $1\n            AND left_at IS NULL\n            AND theme_term_id <> ALL($2::uuid[])",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "60b2d3b4c7f119f046f202e3244b655fba128492f2114e72ebb9ebea4e0733e3"
+}

@@ -9,6 +9,7 @@ pub mod code;
 pub mod documents;
 pub mod extraction;
 pub mod groups;
+pub mod notifications;
 pub mod permissions;
 pub mod plage;
 pub mod redeem;

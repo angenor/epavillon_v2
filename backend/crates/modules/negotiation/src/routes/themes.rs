@@ -9,6 +9,7 @@ use actix_web::{web, HttpRequest, HttpResponse};
 use kernel::auth::Actor;
 use kernel::error::Result;
 
+use crate::domain::notifications::ThemeNotificationsPayload;
 use crate::domain::themes::{MyThemes, ThemesPayload};
 use crate::service::themes::{self, Remplacement};
 use crate::state::NegotiationState;
@@ -18,6 +19,10 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
         .route(
             "/negotiation/me/themes",
             web::put().to(suivre_des_thematiques),
+        )
+        .route(
+            "/negotiation/me/themes/notifications",
+            web::put().to(notifier_des_thematiques),
         );
 }
 
@@ -88,6 +93,33 @@ pub(crate) async fn suivre_des_thematiques(
     )
     .await?;
 
+    let empreinte = mes.empreinte();
+    Ok(rendre(mes, empreinte))
+}
+
+#[utoipa::path(
+    put,
+    description = "`ThemeNotificationsPayload` → `MyThemes` — les thématiques dont la personne veut être prévenue des changements, **parmi celles qu'elle suit** ; la liste entière, jamais un delta. Vide : tout éteint. Une ligne allumée élargit, elle ne coupe jamais : les sessions de « Mon agenda » préviennent toujours. Quitter une thématique l'éteint avec elle.\n\n`notify` entre dans l'empreinte de `GET /negotiation/me/themes`.",
+    path = "/negotiation/me/themes/notifications",
+    tag = "Guide Négo — thématiques",
+    operation_id = "negotiation_notifier_des_thematiques",
+    request_body = Object,
+    responses(
+        (status = 200, description = "MyThemes", body = Object),
+        (status = 400, description = "Thématique non suivie — le message nomme le code", body = crate::routes::openapi::ApiErrorBody),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "Corps malformé", body = crate::routes::openapi::ApiErrorBody),
+    ),
+    security(("session" = []))
+)]
+pub(crate) async fn notifier_des_thematiques(
+    state: web::Data<NegotiationState>,
+    requete: HttpRequest,
+    acteur: Actor,
+    charge: web::Json<ThemeNotificationsPayload>,
+) -> Result<HttpResponse> {
+    let contexte = crate::routes::contexte_de(&requete, acteur.0);
+    let mes = themes::notifier(&state, &contexte, acteur.0, &charge.codes).await?;
     let empreinte = mes.empreinte();
     Ok(rendre(mes, empreinte))
 }

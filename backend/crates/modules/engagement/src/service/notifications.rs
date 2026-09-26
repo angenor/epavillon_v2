@@ -60,6 +60,10 @@ pub struct FilQuery {
     pub limit: Option<i64>,
     #[serde(default, with = "time::serde::rfc3339::option")]
     pub before: Option<OffsetDateTime>,
+    /// Le module d'origine (`notification_types.module_code`) : la cloche de
+    /// Guide Négo ne compte que les siennes.
+    #[serde(default)]
+    pub module: Option<String>,
 }
 
 pub async fn fil(
@@ -74,6 +78,7 @@ pub async fn fil(
         requete.unread_only,
         limite,
         requete.before,
+        requete.module.as_deref(),
     )
     .await?;
 
@@ -283,6 +288,7 @@ pub async fn diffuser(
                     subject_table: None,
                     subject_id: None,
                     group_key: Some(cle.clone()),
+                    replace: false,
                 },
             )
             .await?;

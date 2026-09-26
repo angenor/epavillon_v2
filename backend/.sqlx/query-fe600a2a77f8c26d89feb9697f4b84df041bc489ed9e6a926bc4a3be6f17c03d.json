@@ -1,0 +1,73 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(m.title_original, m.title->>'fr') AS \"title_en!\", tr.text_fr AS \"title_fr?\",\n                  to_char(m.start_at AT TIME ZONE e.timezone::text, 'HH24:MI') AS \"heure!\",\n                  m.venue_label, e.city, (now() AT TIME ZONE e.timezone::text)::date AS \"jour!\"\n             FROM negotiation.meetings m\n             JOIN event.events e ON e.id = m.event_id\n             LEFT JOIN negotiation.title_translations tr ON tr.source_text = m.title_original\n            WHERE m.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "title_en!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "title_fr?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.title_translations",
+            "name": "text_fr"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "heure!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "venue_label",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "venue_label"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "city",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "city"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "jour!",
+        "type_info": "Date",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      false,
+      null,
+      true,
+      true,
+      null
+    ]
+  },
+  "hash": "fe600a2a77f8c26d89feb9697f4b84df041bc489ed9e6a926bc4a3be6f17c03d"
+}

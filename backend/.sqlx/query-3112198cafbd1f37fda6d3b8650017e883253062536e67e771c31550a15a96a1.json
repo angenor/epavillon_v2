@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.code AS \"code!\", s.followed_at AS \"followed_at!\",\n                  s.notify_changes AS \"notify!\"\n             FROM negotiation.theme_subscriptions s\n             JOIN reference.taxonomy_terms t ON t.id = s.theme_term_id\n            WHERE s.person_id = $1 AND s.left_at IS NULL\n            ORDER BY t.sort_order, t.code",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "followed_at!",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.theme_subscriptions",
+            "name": "followed_at"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "notify!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.theme_subscriptions",
+            "name": "notify_changes"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "3112198cafbd1f37fda6d3b8650017e883253062536e67e771c31550a15a96a1"
+}

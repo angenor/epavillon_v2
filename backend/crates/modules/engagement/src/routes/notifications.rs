@@ -36,6 +36,7 @@ struct Archivees {
         ("unread_only" = Option<bool>, Query, description = "Ne rendre que les non lues"),
         ("limit" = Option<i64>, Query, description = "Taille de page, bornée à 100"),
         ("before" = Option<String>, Query, description = "Pagination : avant cet instant"),
+        ("module" = Option<String>, Query, description = "Module d'origine du type (`notification_types.module_code`) ; filtre la liste **et** le compte de non lues"),
     ),
     responses(
         (status = 200, description = "NotificationFeed", body = Object),

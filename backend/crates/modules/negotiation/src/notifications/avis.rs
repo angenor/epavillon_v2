@@ -32,7 +32,7 @@ impl Etat {
         }
     }
 
-    fn fr(self) -> &'static str {
+    pub fn fr(self) -> &'static str {
         match self {
             Self::Deplacee => "Déplacée",
             Self::Annulee => "Annulée",
@@ -42,7 +42,7 @@ impl Etat {
         }
     }
 
-    fn en(self) -> &'static str {
+    pub fn en(self) -> &'static str {
         match self {
             Self::Deplacee => "Moved",
             Self::Annulee => "Cancelled",
@@ -105,7 +105,7 @@ const MOIS_FR: [&str; 12] = [
     "décembre",
 ];
 
-fn jour_fr(jour: Date) -> String {
+pub(crate) fn jour_fr(jour: Date) -> String {
     format!(
         "{} {}",
         jour.day(),
@@ -113,7 +113,7 @@ fn jour_fr(jour: Date) -> String {
     )
 }
 
-fn jour_en(jour: Date) -> String {
+pub(crate) fn jour_en(jour: Date) -> String {
     format!("{} {}", jour.month(), jour.day())
 }
 

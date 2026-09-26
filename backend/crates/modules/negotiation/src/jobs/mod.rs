@@ -7,6 +7,7 @@
 //! justifierait que pour un effet appartenant à un **autre** module — il n'y en
 //! a aucun à cette étape.
 
+pub mod change_email;
 pub mod emails;
 pub mod extract;
 pub mod import;
