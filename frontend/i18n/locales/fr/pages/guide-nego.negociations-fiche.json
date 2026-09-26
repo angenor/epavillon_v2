@@ -70,8 +70,10 @@
   "signaler": {
     "bouton": "Signaler un changement",
     "envoye": "Signalement envoyé. Vérification en cours.",
+    "en-file": "Signalement enregistré. Il partira au retour du réseau.",
     "voir": "Voir",
     "en-cours": "Votre signalement — envoyé à {heure}, en vérification",
+    "en-attente": "Votre signalement — partira au retour du réseau",
     "refuse": "Le signalement n'a pas pu être envoyé. Réessayez.",
     "reserve": "Signaler un changement est réservé aux négociatrices et négociateurs. La fiche, elle, se lit sans compte.",
     "fermer": "Fermer"

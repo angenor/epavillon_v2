@@ -70,8 +70,10 @@
   "signaler": {
     "bouton": "Report a change",
     "envoye": "Report sent. Being checked.",
+    "en-file": "Report saved. It will be sent when the network returns.",
     "voir": "View",
     "en-cours": "Your report — sent at {heure}, being checked",
+    "en-attente": "Your report — will be sent when the network returns",
     "refuse": "The report could not be sent. Please try again.",
     "reserve": "Reporting a change is reserved for negotiators. The session page itself can be read without an account.",
     "fermer": "Close"

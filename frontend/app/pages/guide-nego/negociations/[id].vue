@@ -193,7 +193,7 @@ async function envoyerLeSignalement(corps: Omit<ReportPayload, 'client_ref' | 'e
     const issue = await signalements.signaler(corps)
     feuilleSignaler.value = false
     if (issue.issue === 'refuse') refus.value = issue.message ?? k('signaler.refuse')
-    else annoncer(k('signaler.envoye'), k('signaler.voir'), () => void navigateTo(`/guide-nego/negociations/signalements?depuis=${id.value}`))
+    else annoncer(k(issue.issue === 'en-attente' ? 'signaler.en-file' : 'signaler.envoye'), k('signaler.voir'), () => void navigateTo(`/guide-nego/negociations/signalements?depuis=${id.value}`))
   } finally {
     envoi.value = false
   }
@@ -206,7 +206,10 @@ watch(signalements.refus, (avis) => {
 
 const monSignalement = computed(() => {
   const ligne = signalements.enCoursSur(id.value)
-  return ligne ? k('signaler.en-cours', { heure: time(ligne.signalement.submitted_at, fuseau.value) }) : null
+  if (!ligne) return null
+  return ligne.etat === 'en-attente'
+    ? k('signaler.en-attente')
+    : k('signaler.en-cours', { heure: time(ligne.signalement.submitted_at, fuseau.value) })
 })
 
 useHead({ title: titre })

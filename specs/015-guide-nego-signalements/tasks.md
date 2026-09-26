@@ -94,11 +94,11 @@
 
 ## Phase 9 — Recette
 
-- [ ] T040 Dérouler `quickstart.md` en entier, version construite, 360 px, clair et sombre ; corriger
-- [ ] T041 [P] `docs/AppNego/05-design.md` : mettre à jour l'écart 40 (« Notifications » livré en 3b, les deux autres non) ; inscrire les écarts de 3b (« validé par l'IFDD » partout, entrée « Mes signalements » dans le profil, repère « Signalé » dans les listes)
-- [ ] T042 [P] § 15 de `docs/DEPLOIEMENT.md` : migration 015 dans l'ordre ; essais sur appareil réel (signaler en mode avion, valider au doigt avec « Annuler », cloche et centre, courriel reçu)
-- [ ] T043 i18n `en` contre `fr`, clé pour clé, sur les fichiers de 3b
-- [ ] T044 Une ligne au journal de `docs/AppNego/progress.md` ; la ligne d'état « 3b » est posée à la clôture ; écart pour « Validé. Affiché dans une minute au plus. »
+- [x] T040 Dérouler `quickstart.md` en entier, version construite, 360 px, clair et sombre ; corriger
+- [x] T041 [P] `docs/AppNego/05-design.md` : mettre à jour l'écart 40 (« Notifications » livré en 3b, les deux autres non) ; inscrire les écarts de 3b (« validé par l'IFDD » partout, entrée « Mes signalements » dans le profil, repère « Signalé » dans les listes)
+- [x] T042 [P] § 15 de `docs/DEPLOIEMENT.md` : migration 015 dans l'ordre ; essais sur appareil réel (signaler en mode avion, valider au doigt avec « Annuler », cloche et centre, courriel reçu)
+- [x] T043 i18n `en` contre `fr`, clé pour clé, sur les fichiers de 3b
+- [x] T044 Une ligne au journal de `docs/AppNego/progress.md` ; la ligne d'état « 3b » est posée à la clôture ; écart pour « Validé. Affiché dans une minute au plus. »
 
 **Commit** : « feat(guide-nego): étape 3b, phase 9 — recette et finitions ».
 

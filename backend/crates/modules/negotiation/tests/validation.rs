@@ -157,8 +157,11 @@ async fn valider_ne_rend_rien_public_avant_la_publication() {
         .as_str()
         .expect("titre")
         .starts_with("Déplacée — "));
-    let corps = avis["body"]["fr"].as_str().expect("corps");
-    assert!(corps.contains("signalé par le réseau") && corps.ends_with("Sessions de négociation"));
+    assert!(avis["title"]["fr"]
+        .as_str()
+        .expect("titre")
+        .contains("signalé par le réseau"));
+    assert_eq!(avis["body"]["fr"], "Sessions de négociation");
     assert_eq!(avis["replace"], true);
     assert_eq!(
         evenements[1].1["notification"]["recipients"],
@@ -363,9 +366,9 @@ async fn le_refus_donne_son_motif_a_lautrice() {
     assert_eq!(evenements[0].0, "negotiation.report.decided");
     let avis = &evenements[0].1["notification"];
     assert_eq!(avis["recipients"], json!([d.awa]));
-    assert!(avis["body"]["fr"]
+    assert!(avis["title"]["fr"]
         .as_str()
-        .expect("corps")
+        .expect("titre")
         .starts_with("Non retenu — "));
     assert_eq!(avis["group_key"], Value::Null);
 

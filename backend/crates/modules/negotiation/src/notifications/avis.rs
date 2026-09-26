@@ -1,6 +1,8 @@
-//! Le texte d'un avis, FR et EN. Il commence par l'état (« Déplacée — »), finit
-//! par « Sessions de négociation » (FR-028), et ne nomme jamais l'autrice d'un
-//! signalement (SC-008). Les heures arrivent déjà dans le fuseau de la COP.
+//! Le texte d'un avis, FR et EN. Le titre est la phrase entière, qui commence
+//! par l'état (« Déplacée — ») ; le corps est l'agenda d'origine, « Sessions de
+//! négociation » (FR-028) : le centre les lit comme « phrase » puis « origine ·
+//! heure » (maquette 02 · 10), sans redire l'état. Jamais le nom de l'autrice
+//! (SC-008). Les heures arrivent déjà dans le fuseau de la COP.
 
 use contracts::negotiation::{Notification, NotificationSubject, NotificationText};
 use time::Date;
@@ -105,6 +107,23 @@ const MOIS_FR: [&str; 12] = [
     "décembre",
 ];
 
+/// « heure d'Antalya », « heure de Belém » : même règle que `zoneElides()` du
+/// site — voyelle, accentuée ou non ; le « h » ne compte pas, le nom seul ne dit
+/// pas s'il est muet.
+pub(crate) fn heure_de(ville: &str) -> String {
+    let elide = ville
+        .trim_start()
+        .chars()
+        .next()
+        .and_then(|c| c.to_lowercase().next())
+        .is_some_and(|c| "aeiouàâäáãéèêëíìîïóòôöõúùûü".contains(c));
+    if elide {
+        format!("heure d'{ville}")
+    } else {
+        format!("heure de {ville}")
+    }
+}
+
 pub(crate) fn jour_fr(jour: Date) -> String {
     format!(
         "{} {}",
@@ -121,7 +140,7 @@ fn detail(etat: Etat, d: Detail<'_>) -> (String, String) {
     match d {
         Detail::Heure { heure, ville } => match ville {
             Some(v) => (
-                format!("nouvelle heure {heure} (heure de {v})"),
+                format!("nouvelle heure {heure} ({})", heure_de(v)),
                 format!("new time {heure} ({v} time)"),
             ),
             None => (
@@ -167,28 +186,29 @@ pub fn changement(etat: Etat, sujet: Sujet<'_>, d: Detail<'_>, origine: Origine)
         ),
         Origine::Source => (", selon la source officielle", ", per the official source"),
     };
+    phrase(
+        format!("{} — {}, {precision_fr}{origine_fr}.", etat.fr(), sujet.fr),
+        format!("{} — {}, {precision_en}{origine_en}.", etat.en(), sujet.en),
+    )
+}
+
+fn phrase(fr: String, en: String) -> Texte {
     (
-        texte(
-            format!("{} — {}", etat.fr(), sujet.fr),
-            format!("{} — {}", etat.en(), sujet.en),
-        ),
-        texte(
-            format!("{} — {precision_fr}{origine_fr}. {SIGNATURE_FR}", etat.fr()),
-            format!("{} — {precision_en}{origine_en}. {SIGNATURE_EN}", etat.en()),
-        ),
+        texte(fr, en),
+        texte(SIGNATURE_FR.to_owned(), SIGNATURE_EN.to_owned()),
     )
 }
 
 /// Pour l'autrice : son signalement est affiché.
 pub fn publie(sujet: Sujet<'_>) -> Texte {
-    (
-        texte(
-            format!("Validé — {}", sujet.fr),
-            format!("Validated — {}", sujet.en),
+    phrase(
+        format!(
+            "Validé — {} : votre signalement est affiché, sans votre nom.",
+            sujet.fr
         ),
-        texte(
-            format!("Validé — votre signalement est affiché, sans votre nom. {SIGNATURE_FR}"),
-            format!("Validated — your report is displayed, without your name. {SIGNATURE_EN}"),
+        format!(
+            "Validated — {}: your report is displayed, without your name.",
+            sujet.en
         ),
     )
 }
@@ -209,15 +229,9 @@ pub fn refuse(sujet: Sujet<'_>, motif: &str) -> Texte {
             "the report is not precise enough",
         ),
     };
-    (
-        texte(
-            format!("Non retenu — {}", sujet.fr),
-            format!("Not retained — {}", sujet.en),
-        ),
-        texte(
-            format!("Non retenu — {fr}. {SIGNATURE_FR}"),
-            format!("Not retained — {en}. {SIGNATURE_EN}"),
-        ),
+    phrase(
+        format!("Non retenu — {} : {fr}.", sujet.fr),
+        format!("Not retained — {}: {en}.", sujet.en),
     )
 }
 
@@ -296,16 +310,35 @@ mod tests {
             ),
         ] {
             let (titre, corps) = changement(etat, SUJET, d, Origine::Reseau);
-            assert!(titre.fr.starts_with(debut) && corps.fr.starts_with(debut));
-            assert!(corps.fr.ends_with("Sessions de négociation"));
-            assert!(corps.en.ends_with("Negotiation sessions"));
-            assert!(corps.fr.contains("signalé par le réseau"));
+            assert!(titre.fr.starts_with(debut), "{}", titre.fr);
+            assert_eq!(titre.fr.matches(debut).count(), 1, "{}", titre.fr);
+            assert!(titre.fr.contains("signalé par le réseau"));
+            assert_eq!(corps.fr, "Sessions de négociation");
+            assert_eq!(corps.en, "Negotiation sessions");
         }
     }
 
     #[test]
+    fn le_fuseau_elide_devant_une_voyelle() {
+        assert_eq!(heure_de("Antalya"), "heure d'Antalya");
+        assert_eq!(heure_de("Érevan"), "heure d'Érevan");
+        assert_eq!(heure_de("Belém"), "heure de Belém");
+        assert_eq!(heure_de("Hambourg"), "heure de Hambourg");
+        let (titre, _) = changement(
+            Etat::Deplacee,
+            SUJET,
+            Detail::Heure {
+                heure: "11:30",
+                ville: Some("Antalya"),
+            },
+            Origine::Source,
+        );
+        assert!(titre.fr.contains("(heure d'Antalya)"), "{}", titre.fr);
+    }
+
+    #[test]
     fn la_reunion_dit_son_jour_et_son_heure() {
-        let (_, corps) = changement(
+        let (corps, _) = changement(
             Etat::NonAnnoncee,
             SUJET,
             Detail::Reunion {

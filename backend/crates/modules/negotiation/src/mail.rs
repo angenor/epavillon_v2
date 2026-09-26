@@ -17,7 +17,7 @@
 
 use kernel::mail::OutgoingMail;
 
-use crate::notifications::avis::{jour_en, jour_fr, Etat};
+use crate::notifications::avis::{heure_de, jour_en, jour_fr, Etat};
 use crate::repo::courriel::{EtatReunion, EtatSession, SignalementPublie};
 
 /// Les deux langues servies. Toute autre valeur de `preferred_locale` retombe
@@ -174,10 +174,10 @@ pub fn etat_de_session(s: &EtatSession) -> Option<Etat> {
     }
 }
 
-/// « heure de Belém » ; sans ville connue, le nom du fuseau.
+/// « heure de Belém », « heure d'Antalya » ; sans ville connue, le nom du fuseau.
 fn fuseau(ville: Option<&str>, tz: &str, en: bool) -> String {
     match (ville, en) {
-        (Some(v), false) => format!(", heure de {v}"),
+        (Some(v), false) => format!(", {}", heure_de(v)),
         (Some(v), true) => format!(", {v} time"),
         (None, _) => format!(" ({tz})"),
     }

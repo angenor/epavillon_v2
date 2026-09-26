@@ -666,10 +666,10 @@ Rien à redémarrer entre 3 et 4 : le drapeau se lit à chaque ouverture.
 
 ---
 
-## 15. Mettre en ligne 0a, 0b, 0c, les étapes 1, 1b et 3a (22/09, complété les 24 et 25/09)
+## 15. Mettre en ligne 0a, 0b, 0c, les étapes 1, 1b, 3a et 3b (22/09, complété les 24, 25 et 26/09)
 
-Une seule mise en ligne porte les six premières étapes de Guide Négo : le code de la branche, et
-**six migrations**. Préparée ici, **pas encore exécutée**. Le drapeau reste éteint pendant toute
+Une seule mise en ligne porte les sept premières étapes de Guide Négo : le code de la branche, et
+**sept migrations**. Préparée ici, **pas encore exécutée**. Le drapeau reste éteint pendant toute
 la mise en ligne : le site ne voit que ce qui le touche (§ 3 ci-dessous), l'application ne s'ouvre
 qu'à la recette sur téléphones (§ 4).
 
@@ -683,8 +683,9 @@ qu'à la recette sur téléphones (§ 4).
 | 4 | `specs/011-guide-nego-documents/migration.sql` | Les documents : le réglage `media.private_bucket` et le registre des colonnes qui désignent un objet ; deux types de document et le libellé « Guide » ; les documents, leur extraction, leurs pages, les notes de correction ; le rôle `expert` et ses deux permissions |
 | 5 | `specs/012-guide-nego-lecteur-pdf/migration.sql` | Le lecteur montre le PDF d'origine : « ouvrir tel quel » devient le choix « Texte agrandi » (`large_text_choice`), la règle des deux modes écrite une fois (`negotiation.document_reading_modes`), les images de pages réservées à l'aperçu du back-office. **Aucune ligne semée** |
 | 6 | `specs/014-guide-nego-sessions-agenda/migration.sql` | Les sessions de négociation (3a) : vocabulaires des types de réunion et des groupes ; points de l'ordre du jour ; colonnes de la source sur `negotiation.meetings` ; l'import, son journal, les écarts, les traductions de titres ; « Mon groupe » et « Mon agenda ». Sème le réglage `ai.drafting_model` et **l'import de la COP31, éteint**. Indépendante de celle de l'étape 2 : si l'étape 2 part dans la même mise en ligne, sa migration passe avant, dans l'ordre des numéros |
+| 7 | `specs/015-guide-nego-signalements/migration.sql` | Les signalements du réseau (3b) : la colonne `notify_changes` sur `negotiation.theme_subscriptions` ; les signalements, les réunions non annoncées et leur agenda ; les deux fonctions qui disent qui prévenir. Sème la permission `negotiation.report.validate` (donnée au rôle `admin`) et **quatre types de notification**. Passe **après** celle de 3a, dont elle étend les tables |
 
-Les six sont **rejouables** : un second passage ne crée rien, ne perd rien, n'échoue pas.
+Les sept sont **rejouables** : un second passage ne crée rien, ne perd rien, n'échoue pas.
 
 **Aucun réglage à ajouter à `.env.prod`.** Les deux réglages nouveaux ont un défaut, et ce défaut
 est la valeur voulue :
@@ -735,6 +736,9 @@ Ne les écrire que pour s'écarter du défaut. `PRIVACY_POLICY_VERSION` dispara�
   retirer ce qu'il a écrit :
   ```sql
   BEGIN;
+  DELETE FROM negotiation.session_reports r USING event.events e
+   WHERE e.id = r.event_id AND e.slug = 'cop31';        -- 3b : réunions non annoncées et leur agenda suivent
+  DELETE FROM engagement.notifications WHERE type_code LIKE 'negotiation.%';
   DELETE FROM negotiation.meetings m USING event.events e
    WHERE e.id = m.event_id AND e.slug = 'cop31' AND m.source_key IS NOT NULL;  -- agenda et écarts suivent
   DELETE FROM negotiation.agenda_items a USING event.events e WHERE e.id = a.event_id AND e.slug = 'cop31';
@@ -757,7 +761,7 @@ psql postgres://postgres:dev@localhost:5442/postgres -c 'CREATE DATABASE copie_p
 gunzip -c sauvegardes/epavillon-AAAAMMJJ-HHMMSS.sql.gz | psql "$COPIE"
 
 for passage in 1 2; do          # deux passages : le second ne doit rien changer
-  for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf 014-guide-nego-sessions-agenda; do
+  for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf 014-guide-nego-sessions-agenda 015-guide-nego-signalements; do
     psql "$COPIE" -v ON_ERROR_STOP=1 -f "specs/$etape/migration.sql" || exit 1
   done
 done
@@ -795,7 +799,9 @@ SELECT (SELECT count(*) FROM platform.feature_flags  WHERE key = 'guide_nego.ena
        (SELECT count(*) FROM reference.taxonomy_terms WHERE taxonomy_code = 'negotiation_meeting_type') AS types_reunion, -- 9
        (SELECT count(*) FROM reference.taxonomy_terms WHERE taxonomy_code = 'negotiation_group')        AS groupes,      -- 13
        (SELECT count(*) FROM platform.settings       WHERE key = 'ai.drafting_model')                   AS modele_ia,    -- 1
-       (SELECT count(*) FROM negotiation.official_imports WHERE NOT is_enabled)                          AS import_eteint; -- 1 (0 sans l'édition cop31)
+       (SELECT count(*) FROM negotiation.official_imports WHERE NOT is_enabled)                          AS import_eteint, -- 1 (0 sans l'édition cop31)
+       (SELECT count(*) FROM identity.role_permissions WHERE permission_code = 'negotiation.report.validate') AS valider,   -- 1
+       (SELECT count(*) FROM engagement.notification_types WHERE code LIKE 'negotiation.%')              AS types_avis;   -- 4
 ```
 
 ### 2. Le jour de la mise en ligne
@@ -807,7 +813,7 @@ Dans l'ordre du § 13, chaque étape pour sa raison :
 3. **Déposer les migrations** hors du dossier synchronisé, renommées — elles s'appellent toutes
    `migration.sql` :
    ```bash
-   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf 014-guide-nego-sessions-agenda; do
+   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf 014-guide-nego-sessions-agenda 015-guide-nego-signalements; do
      scp "specs/$etape/migration.sql" "root@<serveur>:/root/epavillon-migrations/$etape.sql"
    done
    ```
@@ -820,7 +826,7 @@ Dans l'ordre du § 13, chaque étape pour sa raison :
    Puis **le bucket privé**, avant de migrer : `ops/init-garage-prod.sh` (rejouable).
 5. **Migrer, puis redémarrer aussitôt** :
    ```bash
-   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf 014-guide-nego-sessions-agenda; do
+   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf 014-guide-nego-sessions-agenda 015-guide-nego-signalements; do
      $COMPOSE exec -T postgres psql -U postgres -d epavillon -v ON_ERROR_STOP=1 \
        < /root/epavillon-migrations/$etape.sql || break
    done
@@ -884,7 +890,7 @@ ramène la base d'avant les migrations, puis redéployer la version précédente
 
 ### 4. La recette sur téléphones réels — une seule séance
 
-Ce qu'aucun poste de travail ne peut éprouver, pour les six étapes à la fois : l'appareil réel de
+Ce qu'aucun poste de travail ne peut éprouver, pour les sept étapes à la fois : l'appareil réel de
 0a (T071), T112 de 0b, T096 à T098 de 0c, T116 de l'étape 1, T084 de l'étape 1b. **Deux jours de suite** — deux points exigent une nuit ;
 on les prépare en fin de première journée.
 
@@ -990,6 +996,37 @@ l'archive = **aujourd'hui**, allumé ; « Lire maintenant ». Après : l'éteind
       aucune notification (écart 46). Refermer puis rouvrir l'application : il ne revient pas.
 - [ ] **Le fuseau.** Téléphone réglé sur un autre fuseau : les heures restent celles d'Antalya,
       « heure d'Antalya ».
+
+**Les signalements et les notifications (étape 3b)** — même séance, même import allumé. Il faut
+deux téléphones : sur l'un, un compte **admis** (négociatrice) qui a une session dans « Mon agenda » ;
+sur l'autre, un compte **administrateur** (permission de valider). Deux adresses relevées sur le
+téléphone. Après : signalements et notifications de recette retirés avec l'import (§ 15, « L'étape
+3a ajoute… »).
+
+- [ ] **Signaler en mode avion.** Téléphone admis en mode avion, fiche d'une session : « Signaler un
+      changement » → « La salle a changé » → une salle → « Envoyer ». La fiche dit « Votre
+      signalement — partira au retour du réseau » ; « Mes signalements » (profil) le montre
+      « Envoyé — partira au retour du réseau ». Rendre le réseau, application ouverte : **une**
+      ligne — `SELECT count(*) FROM negotiation.session_reports WHERE author_id = :p AND meeting_id = :m;` → 1.
+- [ ] **Valider au doigt, puis « Annuler ».** Téléphone administrateur, Ressources → « Validation »
+      → « Signalements » : « Valider » au doigt, puis « Annuler » dans les six secondes. La carte
+      revient « à traiter » ; **aucune** notification sur le téléphone admis, **aucun** courriel
+      dans la minute. Puis « Valider » sans annuler : « Validé. Affiché dans une minute au plus. »
+      (écart 51) ; l'encart violet paraît sur la fiche du téléphone admis.
+- [ ] **« Ne pas retenir » au doigt.** Sur un autre signalement : les trois motifs, la précision,
+      « Ne pas retenir » ; chez l'autrice, « Non retenu à … » et le motif.
+- [ ] **La cloche et le centre au doigt.** Téléphone admis : la cloche porte le compteur jaune ;
+      le centre s'ouvre, chaque ligne dit une phrase qui commence par l'état, puis « Sessions de
+      négociation · heure » (écart 59) ; un toucher ouvre la fiche et marque lu ; « Tout marquer
+      comme lu » ramène le compteur à zéro.
+- [ ] **Un courriel reçu.** Lire `cop30/lecture-2` au back-office : le changement d'une session de
+      l'agenda arrive **par courriel** sur le téléphone, dans les dix minutes, avec « heure
+      d'Antalya ». « À propos » → « Notifications » éteint, nouvelle lecture qui change une
+      session : la notification paraît, **aucun** courriel ; le rallumer.
+- [ ] **Hors connexion, relus.** Avec le réseau, ouvrir le centre, « Mes signalements », une fiche
+      qui porte un encart et une réunion non annoncée validée ; puis mode avion, relancer depuis
+      l'icône : tout se relit, avec « Hors connexion — lu à … », l'encart et la réunion (« Non
+      annoncée — signalée par le réseau, validée à … ») compris.
 
 Un écart se note dans `docs/AppNego/progress.md`, avec l'appareil et le système. Tout coché, T071,
 T112, T096, T097, T098, T116 et T084 le sont aussi dans leurs `tasks.md`.

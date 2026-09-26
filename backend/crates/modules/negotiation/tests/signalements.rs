@@ -485,7 +485,10 @@ async fn la_reunion_non_annoncee_dit_sa_thematique_et_sa_fiche_une_fois_publiee(
         .await
         .expect("publication");
     let (_, liste, _) = frapper!(&app, lire(d.awa, "/negotiation/me/reports?edition=cop31"));
-    assert_eq!(liste["reports"][0]["network_meeting_id"], reunion.to_string());
+    assert_eq!(
+        liste["reports"][0]["network_meeting_id"],
+        reunion.to_string()
+    );
     assert_eq!(liste["reports"][0]["theme"], "finance");
 
     sqlx::query("UPDATE negotiation.network_meetings SET withdrawn_at = now() WHERE id = $1")
