@@ -153,8 +153,7 @@ const terminee = computed(() => !!props.session && props.etat === 'terminee')
       </span>
       <template v-if="traduit && !agenda">
         <span class="gn-ligne-session__anglais" lang="en">
-          <abbr class="gn-ligne-session__en" :title="t('gn-ligne-session.anglais')">EN</abbr>
-          <template v-for="(m, i) in anglais" :key="i"><mark v-if="m.marque">{{ m.texte }}</mark><template v-else>{{ m.texte }}</template></template>
+          <abbr class="gn-ligne-session__en" :title="t('gn-ligne-session.anglais')">EN</abbr>{{ ' ' }}<template v-for="(m, i) in anglais" :key="i"><mark v-if="m.marque">{{ m.texte }}</mark><template v-else>{{ m.texte }}</template></template>
         </span>
         <span class="gn-ligne-session__traduction">
           <GnPicto nom="translate" :taille="18" />

@@ -20,7 +20,7 @@ definePageMeta({ layout: 'guide-nego' })
 defineI18nRoute(false)
 
 const MONTRES = 5
-const RACINES = ['/guide-nego', '/guide-nego/ressources']
+const RACINES = ['/guide-nego', '/guide-nego/', '/guide-nego/ressources']
 
 const { t } = useI18n()
 const route = useRoute()

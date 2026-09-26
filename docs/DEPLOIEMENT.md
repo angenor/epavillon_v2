@@ -898,9 +898,10 @@ on les prépare en fin de première journée.
 **de milieu de gamme**, un iPhone — **si possible un iPhone 8 ou X**, le plus ancien que l'étape 1b
 vise ; deux adresses électroniques qu'on relève sur le téléphone ; un débit bridé — sur Android,
 Chrome relié à `chrome://inspect` d'un poste, profil « 3G lente » ; à défaut, le téléphone réglé sur
-la 3G seule. L'application s'installe depuis `https://<domaine>/v2/guide-nego/` — **avec la barre
-finale** : sans elle, l'adresse est hors de la portée du service worker et tombe sur l'erreur du
-navigateur hors connexion.
+la 3G seule. L'application s'installe depuis `https://<domaine>/v2/guide-nego/`. Sans la barre
+finale, l'adresse est hors de la portée du service worker : le serveur et l'application y ramènent
+(redirection 301 gardée par le navigateur, T077 de l'étape 2) — à vérifier : ouvrir
+`/v2/guide-nego` avec le réseau, puis en mode avion, recharger ; l'application s'ouvre.
 
 **Premier jour — Android**
 
@@ -1027,6 +1028,39 @@ téléphone. Après : signalements et notifications de recette retirés avec l'i
       qui porte un encart et une réunion non annoncée validée ; puis mode avion, relancer depuis
       l'icône : tout se relit, avec « Hors connexion — lu à … », l'encart et la réunion (« Non
       annoncée — signalée par le réseau, validée à … ») compris.
+
+**La FAQ, le parcours et le lexique (étape 2)** — sur l'Android puis sur l'iPhone. Avant : les
+contenus de l'étape publiés au back-office (FAQ, parcours, lexique) ; un compte admis, un compte
+expert, une adresse relevée sur le téléphone ; le guide téléchargé sur chaque téléphone.
+
+- [ ] **Le lexique en mode avion.** Ouvrir l'application une fois avec le réseau ; mode avion,
+      relancer depuis l'icône. « Aa » depuis « Ma journée », Ressources et le lecteur : le lexique
+      s'ouvre, « N entrées, sans réseau ». `contact grup` → *contact group* en tête, **sans délai
+      perceptible** après la dernière frappe (SC-001) ; `GGA`, `groupe de contact`, `braketed`
+      trouvent leur entrée. La croix ramène à l'écran d'origine.
+- [ ] **Le clavier sorti à « Aa ».** Toucher « Aa » : le champ est actif **et le clavier du
+      téléphone monte** sans second toucher. iOS peut le refuser hors d'un geste : si le clavier
+      ne sort pas sur l'iPhone, le noter avec la version d'iOS.
+- [ ] **Le rail au doigt.** Liste du lexique : toucher une lettre saute à sa section ; **glisser
+      le doigt** le long du rail fait défiler lettre à lettre, sans saccade ; une lettre vide,
+      grisée, ne réagit pas. Même geste avec la taille de texte du système au plus grand.
+- [ ] **Partager.** Sur une entrée, « Partager » ouvre la feuille de partage du système, avec le
+      titre et le lien de l'entrée ; envoyé à soi-même, le lien ouvre l'entrée dans l'application
+      installée (Android) ou dans Safari (iPhone).
+- [ ] **La FAQ en mode avion.** Chaque rubrique, une entrée complète avec « Vérifié le … » ; sa
+      source ouvre le guide téléchargé à la page citée. « Dépassé ou faux » avec deux motifs :
+      « partira au retour du réseau » ; réseau rendu, **un** signalement dans la file des experts.
+- [ ] **Les coches du parcours entre deux téléphones.** Même compte sur les deux. Cocher trois
+      étapes sur l'Android, dont deux en mode avion ; réseau rendu : l'iPhone les montre à
+      l'ouverture. Décocher la même étape sur chacun, l'un après l'autre : le second à revenir
+      au réseau dit « mises à jour depuis un autre appareil » et montre l'état retenu — le
+      dernier geste.
+- [ ] **Les courriels.** Compte admis : poser une question à un expert ; l'expert y répond au
+      back-office — le courriel arrive **sur le téléphone**, son lien ouvre « Mes questions ».
+      Proposer un terme depuis « aucun résultat » ; l'expert le publie — le courriel arrive, son
+      lien ouvre l'entrée.
+- [ ] **La feuille du lecteur.** Guide téléchargé, « Texte agrandi », mode avion : toucher
+      *global goal on adaptation* — la feuille monte, « Ouvrir dans le lexique » mène à l'entrée.
 
 Un écart se note dans `docs/AppNego/progress.md`, avec l'appareil et le système. Tout coché, T071,
 T112, T096, T097, T098, T116 et T084 le sont aussi dans leurs `tasks.md`.

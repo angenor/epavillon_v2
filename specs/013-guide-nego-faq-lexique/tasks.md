@@ -179,10 +179,10 @@ description: "Tâches de l'étape 2 — FAQ, parcours « Ma première COP » et 
 
 ## Phase 12 : Recette et finitions
 
-- [ ] T073 Dérouler [quickstart.md](quickstart.md) en entier sur la **version construite**, à 360 px, clair et sombre ; corriger ce qu'il trouve
-- [ ] T074 Ajouter les essais sur appareil réel de l'étape 2 à la liste du § 15 de `docs/DEPLOIEMENT.md` (lexique en mode avion, rail au doigt, partage, clavier ouvert à « Aa »)
-- [ ] T075 Vérifier que les fichiers touchés restent sous mille lignes (`useApi.ts`, `lire.vue`, `error.rs`, `tests/commun/mod.rs`, `tests/perimetre_url_forgee.rs`)
-- [ ] T077 Corriger `/guide-nego` sans barre finale, qui ne se recharge pas hors connexion (hors de la portée `/guide-nego/` du service worker) : la faire servir hors connexion — redirection vers `/guide-nego/` ou portée élargie, sans toucher au site —, avec un essai qui le prouve (demandé par l'orchestrateur le 25/09)
+- [x] T073 Dérouler [quickstart.md](quickstart.md) en entier sur la **version construite**, à 360 px, clair et sombre ; corriger ce qu'il trouve
+- [x] T074 Ajouter les essais sur appareil réel de l'étape 2 à la liste du § 15 de `docs/DEPLOIEMENT.md` (lexique en mode avion, rail au doigt, partage, clavier ouvert à « Aa »)
+- [x] T075 Vérifier que les fichiers touchés restent sous mille lignes (`useApi.ts`, `lire.vue`, `error.rs`, `tests/commun/mod.rs`, `tests/perimetre_url_forgee.rs`)
+- [x] T077 Corriger `/guide-nego` sans barre finale, qui ne se recharge pas hors connexion (hors de la portée `/guide-nego/` du service worker) : la faire servir hors connexion — redirection vers `/guide-nego/` ou portée élargie, sans toucher au site —, avec un essai qui le prouve (demandé par l'orchestrateur le 25/09)
 - [ ] T076 `make check-safe` sous le verrou du protocole ; ligne d'état de l'étape dans `docs/AppNego/progress.md`
 
 ---
