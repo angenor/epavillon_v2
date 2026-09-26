@@ -35,7 +35,7 @@
 
 ## Phase 5 — US3 : Ma journée
 
-- [ ] T016 [US3] `GnJourneeLignePavillon.vue` réécrit ; vérifier au navigateur
+- [x] T016 [US3] `GnJourneeLignePavillon.vue` réécrit ; vérifier au navigateur
 
 ## Phase 6 — Recette
 

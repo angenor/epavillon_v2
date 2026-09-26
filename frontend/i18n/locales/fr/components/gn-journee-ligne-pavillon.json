@@ -1,4 +1,6 @@
 {
   "origine": "Pavillon de la Francophonie",
-  "vide": "Rien d'annoncé pour l'instant."
+  "vide": "Rien d'annoncé pour l'instant.",
+  "prochaine": "Rien aujourd'hui. Prochaine : {titre} — {jour}, {heure}",
+  "lieu": "{stand}, {salle}"
 }

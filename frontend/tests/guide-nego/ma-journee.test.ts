@@ -31,7 +31,7 @@ test('chaque bloc vide dit ce qui manque, sans un mot de panne', () => {
     const lignes = composant(locale, 'gn-journee-lignes')
     const pavillon = composant(locale, 'gn-journee-ligne-pavillon')
     const vides: Record<string, string[]> = {
-      'trois-agendas': [lignes['jamais-lue'], lignes.sessions.vide, lignes.reunions.vide, lignes.reunions.prochaine, pavillon.vide],
+      'trois-agendas': [lignes['jamais-lue'], lignes.sessions.vide, lignes.reunions.vide, lignes.reunions.prochaine, pavillon.vide, pavillon.prochaine],
     }
     for (const bloc of BLOCS_DE_MA_JOURNEE.filter((b) => b !== 'lexique')) {
       assert.ok(blocs[bloc]?.titre, `${locale} — ${bloc} : titre`)

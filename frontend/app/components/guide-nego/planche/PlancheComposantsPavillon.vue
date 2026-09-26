@@ -82,6 +82,18 @@ const lignes = computed<{ activite: PublicScheduleRow; etat: EtatActivite; marqu
           :vers="VERS"
         />
       </div>
+
+      <span class="gn-planche-composants__legende">{{ k('journee') }}</span>
+      <div class="gn-planche-composants__vitrine">
+        <GnLigneActivite
+          v-bind="lignes[2]!"
+          :lieu="k('journee-lieu')"
+          :fuseau="FUSEAU"
+          :ville="VILLE"
+          :vers="VERS"
+        />
+        <GnJourneeLigneVide picto="flag" :origine="t('gn-journee-ligne-pavillon.origine')" :texte="k('journee-prochaine')" :vers="VERS" />
+      </div>
     </GnPlancheSection>
   </div>
 </template>

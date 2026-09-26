@@ -15,9 +15,11 @@ const props = withDefaults(
     fuseau: string
     /** Le nom du lieu pour « heure d'Antalya » ; à défaut, celui du fuseau. */
     ville?: string | null
+    /** Où elle se tient, pour une ligne lue hors de la section Pavillon (« Ma journée »). */
+    lieu?: string | null
     vers: string
   }>(),
-  { ville: null },
+  { ville: null, lieu: null },
 )
 
 const { t } = useI18n()
@@ -63,6 +65,10 @@ const attente = computed(() => {
         <span class="gn-hors-ecran">{{ entendu }}</span>
         <span class="gn-ligne-activite__titre">{{ tr(activite.title) }}</span>
       </NuxtLink>
+      <span v-if="lieu" class="gn-ligne-activite__lieu">
+        <GnPicto nom="pin" :taille="18" />
+        {{ lieu }}
+      </span>
       <GnMarqueEtat :etat="etat" />
       <a
         v-if="rediffusion"
@@ -168,6 +174,20 @@ const attente = computed(() => {
   font-size: var(--gn-taille-17);
   line-height: var(--gn-interligne-17);
   font-weight: var(--gn-graisse-demi-gras);
+}
+
+[data-app="guide-nego"] .gn-ligne-activite__lieu {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: var(--gn-texte-2);
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+}
+
+[data-app="guide-nego"] .gn-ligne-activite__lieu .gn-picto {
+  flex: none;
+  margin-block-start: 2px;
 }
 
 /* La rediffusion s'ouvre d'ici : sa cible fait 48 px et passe au-dessus du lien de la ligne. */
