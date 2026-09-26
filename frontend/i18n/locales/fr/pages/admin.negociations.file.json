@@ -14,8 +14,14 @@
     "description": "La file des experts est réservée aux experts de Guide Négo. Rédiger ou publier le savoir n'y donne pas accès."
   },
   "empty": {
-    "title": "Aucun signalement en attente",
-    "description": "Les réponses signalées comme dépassées ou fausses apparaîtront ici."
+    "reports": {
+      "title": "Aucun signalement en attente",
+      "description": "Les réponses signalées comme dépassées ou fausses apparaîtront ici."
+    },
+    "questions": {
+      "title": "Aucune question n'attend.",
+      "description": "Les questions posées aux experts depuis Guide Négo apparaîtront ici, la plus ancienne d'abord."
+    }
   },
   "zoned": "{date}, {zone}",
   "received": "Reçu le {date}",
@@ -58,6 +64,39 @@
       "revised": "Signalement clos : réponse corrigée.",
       "confirmed": "Signalement clos : réponse confirmée.",
       "dismissed": "Signalement écarté."
+    }
+  },
+  "question": {
+    "sent": "Envoyée le {date}",
+    "answered": "Répondue le {date}",
+    "state": {
+      "pending": "En attente",
+      "answered": "Répondue",
+      "added_to_faq": "Ajoutée à la FAQ"
+    },
+    "consent": {
+      "yes": "Peut rejoindre la FAQ",
+      "no": "Ne rejoint pas la FAQ"
+    },
+    "answer": {
+      "label": "Votre réponse",
+      "hint": "La personne qui l'a posée reçoit un courriel ; la réponse se lit dans « Mes questions ».",
+      "required": "Écrivez une réponse.",
+      "submit": "Répondre",
+      "title": "Réponse envoyée",
+      "done": "Réponse envoyée. La personne qui l'a posée en est avertie par courriel."
+    },
+    "promote": {
+      "section": "Rubrique de la FAQ",
+      "placeholder": "Choisir une rubrique",
+      "noConsent": "La personne qui l'a posée n'a pas accepté qu'elle rejoigne la FAQ.",
+      "submit": "Promouvoir en FAQ",
+      "title": "Promouvoir cette question en FAQ ?",
+      "question": "Un brouillon de FAQ sera créé dans la rubrique choisie, avec cette question et sa réponse.",
+      "notice": "Le brouillon ne portera ni nom ni compte. Réécrivez-le avant de le publier : la question et la réponse sont reprises telles qu'elles ont été écrites.",
+      "confirm": "Créer le brouillon",
+      "done": "Brouillon de FAQ créé. Réécrivez-le avant de le publier.",
+      "open": "Ouvrir le brouillon"
     }
   }
 }

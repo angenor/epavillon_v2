@@ -135,12 +135,12 @@ description: "Tâches de l'étape 2 — FAQ, parcours « Ma première COP » et 
 
 **Test indépendant** : quickstart § 3.
 
-- [ ] T055 [US6] Routes et service `POST` et `GET /negotiation/me/questions` (`space.access`, `client_ref`) dans `routes/savoir.rs`, `service/savoir_questions.rs` ; tests `tests/savoir_questions.rs`
-- [ ] T056 [US6] File, part « questions » : `…/questions/{id}/answer` (met en file `negotiation.expert_question.answered_email`), `…/questions/{id}/promote` (brouillon sans auteur, `NEGOTIATION_QUESTION_NO_CONSENT`) ; tests d'anonymat et de promotion
-- [ ] T057 [US6] Travail `negotiation.expert_question.answered_email` (file par défaut, clé `question_id`) dans `backend/crates/modules/negotiation/src/jobs/emails.rs`, gabarit `fr`/`en` dans `src/mail.rs`, enregistré dans `lib.rs::job_handlers()` ; test de mise en file idempotente
-- [ ] T058 [US6] `frontend/app/composables/guide-nego/useGnQuestions.ts` (file de 0c, garde personnelle vidée à la déconnexion) ; pages `ressources/faq/question.vue` (formulaire, verrou `GnVerrou` sans accès, écran « Envoyé ») et `ressources/faq/mes-questions.vue`
-- [ ] T059 [US6] Onglet « Questions » de `pages/admin/negociations/file/index.vue` : répondre, promouvoir
-- [ ] T060 [US6] i18n `guide-nego.question.json`, `guide-nego.mes-questions.json` ; vérifier quickstart § 3 (courriels dans Mailpit)
+- [x] T055 [US6] Routes et service `POST` et `GET /negotiation/me/questions` (`space.access`, `client_ref`) dans `routes/savoir.rs`, `service/savoir_questions.rs` ; tests `tests/savoir_questions.rs`
+- [x] T056 [US6] File, part « questions » : `…/questions/{id}/answer` (met en file `negotiation.expert_question.answered_email`), `…/questions/{id}/promote` (brouillon sans auteur, `NEGOTIATION_QUESTION_NO_CONSENT`) ; tests d'anonymat et de promotion
+- [x] T057 [US6] Travail `negotiation.expert_question.answered_email` (file par défaut, clé `question_id`) dans `backend/crates/modules/negotiation/src/jobs/emails.rs`, gabarit `fr`/`en` dans `src/mail.rs`, enregistré dans `lib.rs::job_handlers()` ; test de mise en file idempotente
+- [x] T058 [US6] `frontend/app/composables/guide-nego/useGnQuestions.ts` (file de 0c, garde personnelle vidée à la déconnexion) ; pages `ressources/faq/question.vue` (formulaire, verrou `GnVerrou` sans accès, écran « Envoyé ») et `ressources/faq/mes-questions.vue`
+- [x] T059 [US6] Onglet « Questions » de `pages/admin/negociations/file/index.vue` : répondre, promouvoir
+- [x] T060 [US6] i18n `guide-nego.question.json`, `guide-nego.mes-questions.json` ; vérifier quickstart § 3 (courriels dans Mailpit)
 
 ---
 

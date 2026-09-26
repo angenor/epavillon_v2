@@ -1,16 +1,18 @@
-//! **La file des experts, part « signalements »**, en HTTP sur base réelle :
-//! groupée par entrée, le plus ancien d'abord ; close avec son issue sans
-//! toucher l'entrée (FR-018) ; et aucun auteur dans aucune réponse, fiche FAQ
-//! du back-office comprise (SC-009).
+//! **La file des experts, parts « signalements » et « questions »**, en HTTP
+//! sur base réelle : groupée par entrée, le plus ancien d'abord ; close avec son
+//! issue sans toucher l'entrée (FR-018) ; et aucun auteur dans aucune réponse,
+//! fiche FAQ du back-office et brouillon promu compris (SC-009).
 
 mod commun;
 
 use actix_web::http::StatusCode;
-use commun::documents::{administratrice, expert};
+use commun::documents::{administratrice, expert, negociatrice};
 use commun::http::{appel, frapper};
 use commun::savoir::entree_faq;
 use commun::{personne, Bac};
+use negotiation::domain::savoir_questions::MyQuestionInput;
 use negotiation::domain::savoir_retours::{FaqFeedbackInput, FaqReportInput};
+use negotiation::service::savoir_questions::poser;
 use negotiation::service::savoir_retours::{signaler, voter};
 use serde_json::{json, Value};
 use uuid::Uuid;
@@ -237,7 +239,7 @@ async fn la_file_refuse_ce_quelle_ne_sait_pas_faire_et_qui_ne_verifie_pas() {
     let (statut, _) = http!(
         app,
         "get",
-        "/admin/negotiation/queue?kind=questions",
+        "/admin/negotiation/queue?kind=proposals",
         experte
     );
     assert_eq!(statut, StatusCode::UNPROCESSABLE_ENTITY);
@@ -262,4 +264,87 @@ async fn la_file_refuse_ce_quelle_ne_sait_pas_faire_et_qui_ne_verifie_pas() {
         .await
         .unwrap();
     assert_eq!(ouvert, "open");
+}
+
+#[tokio::test]
+async fn la_file_des_questions_ne_rend_ni_lauteure_ni_lexpert() {
+    let bac = Bac::monter().await;
+    let experte = expert(&bac, "experte@example.org").await;
+    sqlx::query("UPDATE identity.people SET first_name = 'Koffiexpert', last_name = 'Mensahx' WHERE id = $1")
+        .bind(experte)
+        .execute(bac.pool())
+        .await
+        .unwrap();
+    let aissatou = negociatrice(&bac, "aissatou.anonyme@example.org").await;
+    sqlx::query("UPDATE identity.people SET first_name = 'Aissatoux', last_name = 'Diallox' WHERE id = $1")
+        .bind(aissatou)
+        .execute(bac.pool())
+        .await
+        .unwrap();
+    let mut ids = Vec::new();
+    for (body, consentement) in [("Qui coordonne ?", true), ("Où dormir ?", false)] {
+        let entree: MyQuestionInput = serde_json::from_value(json!({
+            "client_ref": Uuid::now_v7(), "theme_code": "adaptation",
+            "body": body, "consent_to_faq": consentement,
+        }))
+        .unwrap();
+        let (q, _) = poser(&bac.state, &bac.ctx(aissatou), aissatou, &entree, "fr")
+            .await
+            .expect("question");
+        ids.push(q.id);
+    }
+    let traces: Vec<String> = [aissatou, experte]
+        .iter()
+        .map(Uuid::to_string)
+        .chain(
+            ["Aissatoux", "Diallox", "aissatou.anonyme", "Koffiexpert", "Mensahx"].map(str::to_owned),
+        )
+        .collect();
+    let app = crate::back_office!(bac);
+
+    let (statut, file) = http!(app, "get", "/admin/negotiation/queue?kind=questions", experte);
+    assert_eq!(statut, StatusCode::OK, "{file}");
+    assert_eq!(file["kind"], "questions");
+    assert_eq!(file["counts"]["questions"], 2);
+    let questions = file["questions"].as_array().expect("questions");
+    assert_eq!(questions[0]["id"], json!(ids[0]), "la plus ancienne d'abord");
+    assert_eq!(questions[1]["consent_to_faq"], false);
+    sans_trace(&file, &traces, "la file des questions");
+
+    let (statut, repondue) = http!(
+        app,
+        "post",
+        format!("/admin/negotiation/queue/questions/{}/answer", ids[0]),
+        experte,
+        json!({ "answer": "Le coordinateur du groupe." })
+    );
+    assert_eq!(statut, StatusCode::OK);
+    sans_trace(&repondue, &traces, "la réponse");
+
+    let (_, file) = http!(app, "get", "/admin/negotiation/queue?kind=questions", experte);
+    assert_eq!(file["counts"]["questions"], 1);
+    let dernieres = file["questions"].as_array().unwrap();
+    assert_eq!(
+        (dernieres[0]["id"].clone(), dernieres[1]["status"].clone()),
+        (json!(ids[1]), json!("answered")),
+        "l'attente d'abord, puis la répondue à promouvoir"
+    );
+    sans_trace(&file, &traces, "la file après réponse");
+
+    let (statut, brouillon) = http!(
+        app,
+        "post",
+        format!("/admin/negotiation/queue/questions/{}/promote", ids[0]),
+        experte,
+        json!({ "section_code": "first_cop" })
+    );
+    assert_eq!(statut, StatusCode::OK, "{brouillon}");
+    sans_trace(&brouillon, &traces, "le brouillon promu");
+    let (_, fiche) = http!(
+        app,
+        "get",
+        format!("/admin/negotiation/faq/{}", brouillon["id"].as_str().unwrap()),
+        experte
+    );
+    sans_trace(&fiche, &traces, "la fiche du brouillon promu");
 }

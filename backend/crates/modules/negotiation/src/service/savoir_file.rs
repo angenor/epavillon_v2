@@ -12,6 +12,7 @@ use crate::domain::admin_savoir::AdminFaqReport;
 use crate::domain::savoir::KnowledgeStatus;
 use crate::repo::savoir_faq as faq;
 use crate::repo::savoir_file as repo;
+use crate::service::savoir_questions;
 use crate::state::NegotiationState;
 
 pub async fn file(
@@ -23,6 +24,15 @@ pub async fn file(
     let mut conn = state.pool().acquire().await?;
     let counts = repo::comptes(&mut conn).await?;
     let mut reports: Vec<ExpertQueueReportGroup> = Vec::new();
+    if kind == "questions" {
+        drop(conn);
+        return Ok(ExpertQueue {
+            kind,
+            counts,
+            reports,
+            questions: savoir_questions::file(state, locale).await?,
+        });
+    }
     for o in repo::ouverts(&mut conn, locale).await? {
         match reports.iter_mut().find(|g| g.entry.id == o.entry_id) {
             Some(groupe) => groupe.reports.push(o.report),
@@ -42,6 +52,7 @@ pub async fn file(
         kind,
         counts,
         reports,
+        questions: Vec::new(),
     })
 }
 

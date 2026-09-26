@@ -6,8 +6,8 @@ import { NOMS_DE_PICTO, type NomDePicto } from '~/utils/guide-nego/pictogrammes'
  * La FAQ — maquette 05, écran 01. Tout se lit dans le savoir gardé : aucune frappe ne
  * questionne le réseau. Public : l'état « accès refusé » est sans objet.
  *
- * La ligne du parcours paraît avec son écran (récit 3) ; « Poser une question à un
- * expert » s'active avec le sien (récit 6).
+ * La ligne du parcours paraît avec son écran (récit 3). « Poser une question à un
+ * expert » mène à son écran, qui pose lui-même le verrou sans l'accès.
  */
 definePageMeta({ layout: 'guide-nego' })
 defineI18nRoute(false)
@@ -17,6 +17,7 @@ const route = useRoute()
 const router = useRouter()
 const savoir = useGnSavoir()
 const connexion = useGnConnexion()
+const session = useGnSession()
 
 const lirePremier = (valeur: unknown): string => {
   const premier = Array.isArray(valeur) ? valeur[0] : valeur
@@ -132,10 +133,12 @@ useHead({ title: t('guide-nego.faq.titre') })
       </template>
 
       <div v-if="!chargement" class="gn-faq__expert">
-        <GnBouton variante="secondaire" picto="send" desactive aria-describedby="gn-faq-bientot">
+        <GnBouton variante="secondaire" picto="send" vers="/guide-nego/ressources/faq/question">
           {{ t('guide-nego.faq.expert') }}
         </GnBouton>
-        <p id="gn-faq-bientot" class="gn-faq__bientot">{{ t('guide-nego.faq.expert-bientot') }}</p>
+        <GnBouton v-if="session.connectee.value" variante="discret" vers="/guide-nego/ressources/faq/mes-questions">
+          {{ t('guide-nego.faq.mes-questions') }}
+        </GnBouton>
       </div>
     </div>
   </GnEcran>
@@ -149,8 +152,7 @@ useHead({ title: t('guide-nego.faq.titre') })
 }
 
 [data-app="guide-nego"] .gn-faq__nombre,
-[data-app="guide-nego"] .gn-faq__compte,
-[data-app="guide-nego"] .gn-faq__bientot {
+[data-app="guide-nego"] .gn-faq__compte {
   color: var(--gn-texte-2);
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);

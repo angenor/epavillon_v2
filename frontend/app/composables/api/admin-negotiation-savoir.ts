@@ -23,7 +23,14 @@ import type {
   AdminPathwayOrderInput,
   AdminPathwayStepInput,
 } from '~/types/admin-negotiation-savoir'
-import type { AdminFaqReportCloseInput, ExpertQueue, ExpertQueueKind } from '~/types/admin-negotiation-queue'
+import type {
+  AdminFaqReportCloseInput,
+  AdminQuestion,
+  AdminQuestionAnswerInput,
+  AdminQuestionPromoteInput,
+  ExpertQueue,
+  ExpertQueueKind,
+} from '~/types/admin-negotiation-queue'
 import type { Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
 
@@ -170,6 +177,22 @@ export function createAdminNegotiationSavoirApi({ call, send }: Deps) {
         `/admin/negotiation/queue/reports/${id}/close`,
         entree,
         async () => (await exemples()).cloreUnSignalement(id, entree),
+      ),
+
+    /** Met en file le courriel de l'auteure. Déjà répondue : `NEGOTIATION_QUEUE_ITEM_CLOSED`. */
+    repondreAUneQuestion: (id: Uuid, entree: AdminQuestionAnswerInput): Promise<AdminQuestion> =>
+      send(
+        `/admin/negotiation/queue/questions/${id}/answer`,
+        entree,
+        async () => (await exemples()).repondreAUneQuestion(id, entree),
+      ),
+
+    /** Brouillon de FAQ sans auteur. Sans consentement : `NEGOTIATION_QUESTION_NO_CONSENT`. */
+    promouvoirUneQuestion: (id: Uuid, entree: AdminQuestionPromoteInput): Promise<AdminFaqEntry> =>
+      send(
+        `/admin/negotiation/queue/questions/${id}/promote`,
+        entree,
+        async () => (await exemples()).promouvoirUneQuestion(id, entree),
       ),
   }
 }

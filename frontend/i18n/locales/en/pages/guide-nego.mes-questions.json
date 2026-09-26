@@ -1,0 +1,18 @@
+{
+  "titre": "My questions",
+  "compte": "No questions | 1 question | {count} questions",
+  "chargement": "Reading your questions",
+  "reste": "Without a code, the FAQ stays open to everyone.",
+  "attente-reseau": "Not sent yet: it leaves when the connection returns.",
+  "reponse": "Answer",
+  "signature": "{nom}, IFDD expert",
+  "signature-sans-nom": "An IFDD expert",
+  "erreur": {
+    "titre": "Your questions are not on this phone yet",
+    "texte": "They are kept on the first reading with a connection. Connect once: they will then read offline."
+  },
+  "vide": {
+    "titre": "No questions yet",
+    "texte": "A question the FAQ does not cover? IFDD experts answer it; the answer arrives here and by email."
+  }
+}

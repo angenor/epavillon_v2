@@ -42,10 +42,10 @@ Mêmes routes sous `/admin/negotiation/glossary`, sans `verify` : `GET` (liste, 
 
 | Verbe et chemin | Garde | Corps → réponse | Notes |
 |---|---|---|---|
-| `GET /admin/negotiation/queue` | review | `?kind=reports|questions|proposals` → `ExpertQueue` | Les plus anciens d'abord ; comptes par sorte. **Aucun auteur** (R9) |
+| `GET /admin/negotiation/queue` | review | `?kind=reports|questions|proposals` → `ExpertQueue` | Les plus anciens d'abord ; comptes par sorte. `questions` : celles en attente, puis celles répondues depuis trente jours et pas encore promues (c'est là qu'on les promeut). **Aucun auteur** (R9) |
 | `POST /admin/negotiation/queue/reports/{id}/close` | review | `{ outcome }` → `AdminFaqReport` | `revised | confirmed | dismissed` |
 | `POST /admin/negotiation/queue/questions/{id}/answer` | review | `{ answer }` → `AdminQuestion` | Met en file `negotiation.expert_question.answered_email` dans la même transaction (R11) |
-| `POST /admin/negotiation/queue/questions/{id}/promote` | review | → `AdminFaqEntry` | Brouillon de FAQ né de la question et de la réponse ; `status = added_to_faq`. Sans consentement : `NEGOTIATION_QUESTION_NO_CONSENT` |
+| `POST /admin/negotiation/queue/questions/{id}/promote` | review | `{ section_code }` → `AdminFaqEntry` | Brouillon de FAQ né de la question et de la réponse, dans la rubrique choisie (la question porte une thématique, pas une rubrique) ; `status = added_to_faq`. Sans consentement : `NEGOTIATION_QUESTION_NO_CONSENT` ; pas encore répondue : 422 ; déjà promue : 409 |
 | `POST /admin/negotiation/queue/proposals/{id}/accept` | review | `AdminGlossaryInput` → `AdminGlossaryEntry` | Crée l'entrée en brouillon ; les auteurs reçoivent leur courriel **à sa publication** |
 | `POST /admin/negotiation/queue/proposals/{id}/reject` | review | `{ reason }` → `AdminProposal` | |
 | `GET /admin/negotiation/queue/proposals/{id}` | review | → `AdminProposal` | Contextes des auteurs, sans les auteurs ; entrées proches par `similarity` (R5) |

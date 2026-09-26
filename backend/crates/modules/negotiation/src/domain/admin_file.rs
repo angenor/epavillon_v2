@@ -8,6 +8,7 @@ use uuid::Uuid;
 
 use crate::domain::admin_savoir::{AdminFaqFeedback, AdminFaqReport};
 use crate::domain::savoir::KnowledgeStatus;
+use crate::domain::savoir_questions::AdminQuestion;
 
 pub const ISSUES: [&str; 3] = ["revised", "confirmed", "dismissed"];
 
@@ -43,6 +44,7 @@ pub struct ExpertQueue {
     pub kind: &'static str,
     pub counts: ExpertQueueCounts,
     pub reports: Vec<ExpertQueueReportGroup>,
+    pub questions: Vec<AdminQuestion>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -51,13 +53,13 @@ pub struct AdminFaqReportCloseInput {
     pub outcome: String,
 }
 
-/// Sans `kind`, les signalements. Les questions et les termes proposés
-/// arrivent aux phases 8 et 11.
+/// Sans `kind`, les signalements. Les termes proposés arrivent à la phase 11.
 pub fn sorte(brut: Option<&str>) -> Result<&'static str> {
     match brut.unwrap_or("reports") {
         "reports" => Ok("reports"),
+        "questions" => Ok("questions"),
         _ => Err(ApiError::validation(
-            "Seule la sorte « reports » est servie pour l'instant.",
+            "Indiquez « reports » ou « questions ».",
             "kind",
         )),
     }
@@ -83,6 +85,7 @@ mod tests {
         }
         assert!(issue("deleted").is_err());
         assert_eq!(sorte(None).unwrap(), "reports");
+        assert_eq!(sorte(Some("questions")).unwrap(), "questions");
         assert!(sorte(Some("everything")).is_err());
     }
 }

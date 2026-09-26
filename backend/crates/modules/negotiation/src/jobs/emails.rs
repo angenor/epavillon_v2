@@ -1,4 +1,5 @@
-//! Les deux envois de courriel du module.
+//! Les envois de courriel du module : les deux décisions d'admission, et la
+//! réponse d'un expert à une question (étape 2).
 //!
 //! **La mise en file se fait dans la transaction de la décision** : si elle est
 //! annulée, le courriel ne naît pas. C'est la garantie de FR-028 — rien ne part
@@ -27,6 +28,7 @@ use crate::mail::{self, MailContext};
 
 pub const SEND_APPROVED_EMAIL: &str = "negotiation.access_request.approved_email";
 pub const SEND_REJECTED_EMAIL: &str = "negotiation.access_request.rejected_email";
+pub const SEND_ANSWERED_EMAIL: &str = "negotiation.expert_question.answered_email";
 
 #[derive(Debug, Deserialize)]
 struct Charge {
@@ -37,6 +39,8 @@ struct Charge {
     space_name: Option<String>,
     #[serde(default)]
     reason: Option<String>,
+    #[serde(default)]
+    question: Option<String>,
 }
 
 /// Met en file le courriel d'admission. La clé d'unicité porte la demande :
@@ -95,6 +99,34 @@ pub async fn mettre_en_file_refus(
     Ok(())
 }
 
+/// Met en file le courriel « un expert a répondu ». Une question ne se répond
+/// qu'une fois : la clé porte la question.
+pub async fn mettre_en_file_reponse(
+    conn: &mut PgConnection,
+    question_id: Uuid,
+    email: &str,
+    locale: &str,
+    first_name: &str,
+    question: &str,
+) -> Result<()> {
+    jobs::enqueue(
+        conn,
+        NewJob::new(
+            SEND_ANSWERED_EMAIL,
+            json!({
+                "to": email,
+                "locale": locale,
+                "first_name": first_name,
+                "question": question,
+            }),
+        )
+        .idempotent(format!("{SEND_ANSWERED_EMAIL}:{question_id}")),
+    )
+    .await?;
+
+    Ok(())
+}
+
 // ---------------------------------------------------------------------------
 
 pub struct SendApprovedEmail {
@@ -105,6 +137,37 @@ pub struct SendApprovedEmail {
 pub struct SendRejectedEmail {
     mailer: Arc<dyn Mailer>,
     app_public_url: String,
+}
+
+pub struct SendAnsweredEmail {
+    mailer: Arc<dyn Mailer>,
+    app_public_url: String,
+}
+
+impl SendAnsweredEmail {
+    pub fn new(mailer: Arc<dyn Mailer>, app_public_url: String) -> Self {
+        Self {
+            mailer,
+            app_public_url,
+        }
+    }
+}
+
+#[async_trait]
+impl JobHandler for SendAnsweredEmail {
+    fn task(&self) -> &'static str {
+        SEND_ANSWERED_EMAIL
+    }
+
+    async fn run(&self, job: &ClaimedJob) -> Result<()> {
+        let charge = lire(job)?;
+        let identifiant = job.id.to_string();
+        let message = mail::question_repondue(
+            &contexte(&identifiant, &charge, &self.app_public_url),
+            charge.question.as_deref().unwrap_or_default(),
+        );
+        remettre(self.mailer.as_ref(), &message).await
+    }
 }
 
 impl SendApprovedEmail {

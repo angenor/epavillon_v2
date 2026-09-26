@@ -71,7 +71,8 @@ pub fn admin_routes(cfg: &mut ServiceConfig) {
     routes::admin_import::configurer(cfg);
 }
 
-/// Les travaux différés du module : les deux courriels de décision, la purge
+/// Les travaux différés du module : les deux courriels de décision et celui de
+/// la réponse d'un expert, la purge
 /// des essais de code, l'extraction des documents, l'import des sessions
 /// officielles et la traduction de leurs titres.
 ///
@@ -81,7 +82,7 @@ pub fn admin_routes(cfg: &mut ServiceConfig) {
 /// travail déposé dans une file inécoutée s'empile sans erreur, sans trace, et
 /// sans que rien ne l'exécute jamais.
 ///
-/// Les six déclarent la file par défaut : aucun déclencheur du modèle ne les
+/// Les sept déclarent la file par défaut : aucun déclencheur du modèle ne les
 /// dépose ailleurs.
 pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc<dyn JobHandler>> {
     let url = config.app_public_url.clone();
@@ -91,7 +92,11 @@ pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc
             mailer.clone(),
             url.clone(),
         )),
-        Arc::new(jobs::emails::SendRejectedEmail::new(mailer, url)),
+        Arc::new(jobs::emails::SendRejectedEmail::new(
+            mailer.clone(),
+            url.clone(),
+        )),
+        Arc::new(jobs::emails::SendAnsweredEmail::new(mailer, url)),
         Arc::new(jobs::purge::PurgeInvitationAttempts::new(db.clone())),
         Arc::new(jobs::extract::ExtractDocument::new(
             db.clone(),

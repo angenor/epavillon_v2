@@ -172,3 +172,41 @@ export interface FaqReportReceipt {
   client_ref: Uuid
   created_at: IsoDateTime
 }
+
+// ---------------------------------------------------------------------------
+// Questions aux experts — `POST` et `GET /negotiation/me/questions`,
+// réservés à l'accès négociateur
+// ---------------------------------------------------------------------------
+
+export type ExpertQuestionStatus = 'pending' | 'answered' | 'added_to_faq'
+
+export interface MyQuestionInput {
+  /** Choisie par le téléphone : une question rejouée ne se pose qu'une fois. */
+  client_ref: Uuid
+  /** Un code du vocabulaire `negotiation_theme`. */
+  theme_code: string
+  /** 600 caractères au plus. */
+  body: string
+  /** « Ma question, anonymisée, pourra rejoindre la FAQ ». */
+  consent_to_faq: boolean
+}
+
+export interface MyQuestion {
+  id: Uuid
+  client_ref: Uuid
+  theme_code: string
+  theme_label: string
+  body: string
+  consent_to_faq: boolean
+  status: ExpertQuestionStatus
+  answer: string | null
+  /** Signe la réponse : « Nom, expert IFDD ». */
+  answered_by_name: string | null
+  answered_at: IsoDateTime | null
+  created_at: IsoDateTime
+}
+
+/** La plus récente d'abord. */
+export interface MyQuestionList {
+  questions: MyQuestion[]
+}

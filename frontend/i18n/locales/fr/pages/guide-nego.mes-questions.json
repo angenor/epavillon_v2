@@ -1,0 +1,18 @@
+{
+  "titre": "Mes questions",
+  "compte": "Aucune question | 1 question | {count} questions",
+  "chargement": "Lecture de vos questions",
+  "reste": "Sans code, la FAQ reste ouverte à tous.",
+  "attente-reseau": "Pas encore partie : elle part au retour de la connexion.",
+  "reponse": "Réponse",
+  "signature": "{nom}, expert IFDD",
+  "signature-sans-nom": "Un expert de l'IFDD",
+  "erreur": {
+    "titre": "Vos questions ne sont pas encore sur ce téléphone",
+    "texte": "Elles se gardent à la première lecture avec le réseau. Reconnectez-vous une fois : elles se liront ensuite sans réseau."
+  },
+  "vide": {
+    "titre": "Aucune question pour l'instant",
+    "texte": "Une question que la FAQ ne couvre pas ? Les experts de l'IFDD y répondent ; la réponse arrive ici et par courriel."
+  }
+}

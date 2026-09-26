@@ -1,4 +1,4 @@
-//! Les deux courriels de décision — **composés ici, et jamais ailleurs**.
+//! Les courriels du module — **composés ici, et jamais ailleurs**.
 //!
 //! Le texte appartient au module qui déclenche l'envoi. Le faire écrire par
 //! `identity` demanderait à ce crate une arête que le principe II interdit, et
@@ -121,6 +121,44 @@ pub fn demande_refusee(ctx: &MailContext<'_>, motif: Option<&str>) -> OutgoingMa
                  Si vous faites partie d'un réseau francophone de négociatrices et de \
                  négociateurs, demandez à votre groupe le code d'invitation en cours : il ouvre \
                  les modules aussitôt.\n\n\
+                 L'équipe ePavillon — IFDD",
+                prenom = ctx.first_name,
+            ),
+        )
+    };
+
+    compose(ctx, &subject, text)
+}
+
+/// Un expert a répondu. La réponse se lit dans « Mes questions », où elle
+/// porte son auteur et sa date : le courriel ne fait que prévenir.
+pub fn question_repondue(ctx: &MailContext<'_>, question: &str) -> OutgoingMail {
+    let lien = format!(
+        "{}/guide-nego/ressources/faq/mes-questions",
+        ctx.app_public_url.trim_end_matches('/')
+    );
+    let (subject, text) = if en_anglais(ctx.locale) {
+        (
+            "An expert has answered your question".to_owned(),
+            format!(
+                "Hello {prenom},\n\n\
+                 An IFDD expert has answered your question:\n\n\
+                 \"{question}\"\n\n\
+                 Read the answer in Guide Négo, under \"My questions\":\n\n\
+                 {lien}\n\n\
+                 The ePavillon team — IFDD",
+                prenom = ctx.first_name,
+            ),
+        )
+    } else {
+        (
+            "Un expert a répondu à votre question".to_owned(),
+            format!(
+                "Bonjour {prenom},\n\n\
+                 Un expert de l'IFDD a répondu à votre question :\n\n\
+                 « {question} »\n\n\
+                 Lisez la réponse dans Guide Négo, sous « Mes questions » :\n\n\
+                 {lien}\n\n\
                  L'équipe ePavillon — IFDD",
                 prenom = ctx.first_name,
             ),

@@ -25,6 +25,9 @@ import type {
 } from '~/types/admin-negotiation-savoir'
 import type {
   AdminFaqReportCloseInput,
+  AdminQuestion,
+  AdminQuestionAnswerInput,
+  AdminQuestionPromoteInput,
   ExpertQueue,
   ExpertQueueKind,
   ExpertQueueReportGroup,
@@ -38,6 +41,13 @@ import { normalizeLabelLike } from '~/utils/slug'
 import { slugDe } from '~/utils/guide-nego/lexique'
 import { FAQ, LEXIQUE, PARCOURS } from './negotiation-savoir'
 import { listeDesDocuments } from './negotiation-documents'
+import {
+  aPromouvoir,
+  marquerPromue,
+  questionsDeLaFile,
+  questionsEnAttente,
+  repondreAUneQuestion as repondre,
+} from './negotiation-questions'
 
 type Changement = 'publish' | 'to-review' | 'unpublish'
 
@@ -425,7 +435,7 @@ export function supprimerFaq(id: Uuid): void {
 const ISSUES: AdminFaqReportCloseInput['outcome'][] = ['revised', 'confirmed', 'dismissed']
 
 export function fileDesExperts(kind: ExpertQueueKind): ExpertQueue {
-  if (kind !== 'reports') throw invalide("Cette sorte d'éléments n'est pas encore servie.", 'kind')
+  if (kind === 'proposals') throw invalide("Cette sorte d'éléments n'est pas encore servie.", 'kind')
   const groupes: ExpertQueueReportGroup[] = faq
     .map((e) => ({
       e,
@@ -442,9 +452,26 @@ export function fileDesExperts(kind: ExpertQueueKind): ExpertQueue {
     }))
   return {
     kind,
-    counts: { reports: groupes.reduce((n, g) => n + g.reports.length, 0), questions: 0, proposals: 0 },
-    reports: groupes,
+    counts: {
+      reports: groupes.reduce((n, g) => n + g.reports.length, 0),
+      questions: questionsEnAttente(),
+      proposals: 0,
+    },
+    reports: kind === 'reports' ? groupes : [],
+    questions: kind === 'questions' ? questionsDeLaFile() : [],
   }
+}
+
+export function repondreAUneQuestion(id: Uuid, entree: AdminQuestionAnswerInput): AdminQuestion {
+  return repondre(id, entree.answer)
+}
+
+/** Brouillon sans auteur, dans la rubrique choisie. */
+export function promouvoirUneQuestion(id: Uuid, entree: AdminQuestionPromoteInput): AdminFaqEntry {
+  const { body, answer } = aPromouvoir(id)
+  const brouillon = creerFaq({ section_code: entree.section_code, question: fr(body), answer: fr(answer) })
+  marquerPromue(id)
+  return { ...brouillon, origin_question_id: id }
 }
 
 /** Ne touche jamais l'entrée. */

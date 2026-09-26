@@ -1500,10 +1500,44 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description `ExpertQueue` — les signalements ouverts, groupés par entrée de FAQ, le plus ancien d'abord, avec les retours « Oui / Non » comptés ; et ce qui attend, par sorte. **Aucun auteur.** Seule la sorte `reports` est servie à ce jour. */
+        /** @description `ExpertQueue` — par sorte. `reports` : les signalements ouverts, groupés par entrée de FAQ, le plus ancien d'abord, avec les retours « Oui / Non » comptés. `questions` : les questions en attente, la plus ancienne d'abord, puis celles répondues depuis trente jours et pas encore promues. Et ce qui attend, par sorte. **Aucun auteur.** */
         get: operations["admin_negotiation_file"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/queue/questions/{id}/answer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `AdminQuestionAnswerInput` → `AdminQuestion` — répond à une question en attente. Met en file, dans la même transaction, le courriel qui prévient son auteure ; la réponse paraît dans « Mes questions ». Déjà répondue : **409**. */
+        post: operations["admin_negotiation_file_repondre_a_une_question"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/queue/questions/{id}/promote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `AdminQuestionPromoteInput` → `AdminFaqEntry` — fait d'une question répondue un brouillon de FAQ dans la rubrique choisie : sa question et sa réponse, **sans auteur**, reliées par `origin_question_id` ; la question passe `added_to_faq`. L'expert réécrit le brouillon avant publication. Sans consentement : `NEGOTIATION_QUESTION_NO_CONSENT` ; pas encore répondue : **422** ; déjà promue : **409**. */
+        post: operations["admin_negotiation_file_promouvoir_une_question"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3615,6 +3649,24 @@ export interface paths {
          */
         put: operations["negotiation_suivre_des_groupes"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/negotiation/me/questions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `MyQuestionList` — les questions de la personne connectée, la plus récente d'abord, avec leur état et, une fois répondues, la réponse, son auteur et sa date. Réservé à l'accès négociateur. `ETag` et **304**. */
+        get: operations["negotiation_mes_questions"];
+        put?: never;
+        /** @description `MyQuestionInput` → `MyQuestion` — pose une question aux experts de l'IFDD : une thématique de négociation (`theme_code`), 600 caractères au plus, et le consentement à rejoindre la FAQ, anonymisée. Réservé à l'accès négociateur : sans lui, **403**. Rejouée avec le même `client_ref` : **200** et la même question. */
+        post: operations["negotiation_poser_une_question"];
         delete?: never;
         options?: never;
         head?: never;
@@ -10325,7 +10377,7 @@ export interface operations {
     admin_negotiation_file: {
         parameters: {
             query?: {
-                /** @description `reports` (défaut) */
+                /** @description `reports` (défaut) ou `questions` */
                 kind?: string;
             };
             header?: never;
@@ -10362,6 +10414,132 @@ export interface operations {
                 };
             };
             /** @description Sorte inconnue */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_file_repondre_a_une_question: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la question */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description AdminQuestion */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Sans la permission de vérifier */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Question inconnue */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Déjà répondue */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Réponse vide */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_file_promouvoir_une_question: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la question */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description AdminFaqEntry */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Sans la permission de vérifier */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Question inconnue */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Déjà promue */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans consentement, pas encore répondue, ou rubrique inconnue */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -15000,6 +15178,120 @@ export interface operations {
                 };
             };
             /** @description Corps malformé */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_mes_questions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MyQuestionList */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Rien n'a changé depuis l'empreinte présentée */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans l'accès négociateur */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_poser_une_question: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Rejeu : la question d'origine */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description MyQuestion */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Thématique inconnue */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Sans l'accès négociateur */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Question vide ou trop longue */
             422: {
                 headers: {
                     [name: string]: unknown;

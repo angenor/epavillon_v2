@@ -1,0 +1,135 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT q.id, q.client_ref, t.code AS \"theme_code!\",\n                  COALESCE(platform.t(t.label, $3), t.code) AS \"theme_label!\",\n                  q.body, q.consent_to_faq, q.status::text AS \"status!\", q.answer,\n                  CASE WHEN e.id IS NULL THEN NULL\n                       ELSE concat_ws(' ', e.first_name, e.last_name) END AS answered_by_name,\n                  q.answered_at, q.created_at\n             FROM negotiation.expert_questions q\n             JOIN reference.taxonomy_terms t ON t.id = q.theme_term_id\n             LEFT JOIN identity.people e ON e.id = q.answered_by\n            WHERE q.asker_id = $1 AND ($2::uuid IS NULL OR q.id = $2)\n            ORDER BY q.created_at DESC, q.id DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.expert_questions",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "client_ref",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.expert_questions",
+            "name": "client_ref"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "theme_code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "theme_label!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "body",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.expert_questions",
+            "name": "body"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "consent_to_faq",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.expert_questions",
+            "name": "consent_to_faq"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "answer",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.expert_questions",
+            "name": "answer"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "answered_by_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "answered_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.expert_questions",
+            "name": "answered_at"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.expert_questions",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null,
+      false,
+      false,
+      null,
+      true,
+      null,
+      true,
+      false
+    ]
+  },
+  "hash": "3f7ca552759e0417130f4c9b9277b360df602d3a15cb6ddb81155a7d55b15b73"
+}

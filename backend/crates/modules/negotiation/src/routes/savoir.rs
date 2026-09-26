@@ -1,20 +1,24 @@
 //! Les routes du savoir : le paquet que le téléphone garde et le compte des
 //! lectures, ouverts à tous ; les termes favoris, les retours et les
-//! signalements de la personne connectée.
+//! signalements de la personne connectée ; ses questions aux experts, avec
+//! l'accès négociateur.
 
 use actix_web::http::header::{HeaderValue, CACHE_CONTROL, ETAG, VARY};
 use actix_web::{web, HttpMessage, HttpRequest, HttpResponse};
-use kernel::auth::Actor;
+use kernel::auth::{Actor, Requires};
 use kernel::context::RequestContext;
 use kernel::error::Result;
 use serde::Deserialize;
 use uuid::Uuid;
 
+use crate::domain::permissions::SpaceAccess;
 use crate::domain::savoir::lire_since;
+use crate::domain::savoir_questions::MyQuestionInput;
 use crate::domain::savoir_retours::{FaqFeedbackInput, FaqReportInput};
 use crate::service::savoir_favoris;
 use crate::service::savoir_lectures;
 use crate::service::savoir_paquet as service;
+use crate::service::savoir_questions;
 use crate::service::savoir_retours;
 use crate::state::NegotiationState;
 
@@ -29,6 +33,8 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
         .route("/negotiation/faq/{id}/feedback", web::put().to(voter))
         .route("/negotiation/faq/{id}/reports", web::post().to(signaler))
         .route("/negotiation/me/faq-feedback", web::get().to(mes_voix))
+        .route("/negotiation/me/questions", web::post().to(poser_une_question))
+        .route("/negotiation/me/questions", web::get().to(mes_questions))
         .route("/negotiation/me/glossary-favorites", web::get().to(favoris))
         .route(
             "/negotiation/me/glossary-favorites/{entry_id}",
@@ -283,4 +289,72 @@ pub(crate) async fn mes_voix(
         .insert_header((ETAG, empreinte))
         .insert_header(crate::routes::PERSONNEL)
         .json(voix))
+}
+
+#[utoipa::path(
+    post,
+    description = "`MyQuestionInput` → `MyQuestion` — pose une question aux experts de l'IFDD : une thématique de négociation (`theme_code`), 600 caractères au plus, et le consentement à rejoindre la FAQ, anonymisée. Réservé à l'accès négociateur : sans lui, **403**. Rejouée avec le même `client_ref` : **200** et la même question.",
+    path = "/negotiation/me/questions",
+    tag = "Guide Négo — savoir",
+    operation_id = "negotiation_poser_une_question",
+    request_body = Object,
+    responses(
+        (status = 201, description = "MyQuestion", body = Object),
+        (status = 200, description = "Rejeu : la question d'origine", body = Object),
+        (status = 400, description = "Thématique inconnue", body = crate::routes::openapi::ApiErrorBody),
+        (status = 401, description = "Aucune session", body = crate::routes::openapi::ApiErrorBody),
+        (status = 403, description = "Sans l'accès négociateur", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "Question vide ou trop longue", body = crate::routes::openapi::ApiErrorBody),
+    ),
+    security(("session" = []))
+)]
+pub(crate) async fn poser_une_question(
+    state: web::Data<NegotiationState>,
+    requete: HttpRequest,
+    acces: Requires<SpaceAccess>,
+    entree: web::Json<MyQuestionInput>,
+) -> Result<HttpResponse> {
+    let locale = crate::routes::locale_de(&requete);
+    let ctx = crate::routes::contexte_de(&requete, acces.person_id);
+    let (question, nouvelle) =
+        savoir_questions::poser(&state, &ctx, acces.person_id, &entree, &locale).await?;
+    Ok(if nouvelle {
+        HttpResponse::Created().json(question)
+    } else {
+        HttpResponse::Ok().json(question)
+    })
+}
+
+#[utoipa::path(
+    get,
+    description = "`MyQuestionList` — les questions de la personne connectée, la plus récente d'abord, avec leur état et, une fois répondues, la réponse, son auteur et sa date. Réservé à l'accès négociateur. `ETag` et **304**.",
+    path = "/negotiation/me/questions",
+    tag = "Guide Négo — savoir",
+    operation_id = "negotiation_mes_questions",
+    responses(
+        (status = 200, description = "MyQuestionList", body = Object),
+        (status = 304, description = "Rien n'a changé depuis l'empreinte présentée"),
+        (status = 401, description = "Aucune session", body = crate::routes::openapi::ApiErrorBody),
+        (status = 403, description = "Sans l'accès négociateur", body = crate::routes::openapi::ApiErrorBody),
+    ),
+    security(("session" = []))
+)]
+pub(crate) async fn mes_questions(
+    state: web::Data<NegotiationState>,
+    requete: HttpRequest,
+    acces: Requires<SpaceAccess>,
+) -> Result<HttpResponse> {
+    let locale = crate::routes::locale_de(&requete);
+    let (questions, empreinte) =
+        savoir_questions::miennes(&state, acces.person_id, &locale).await?;
+    if crate::routes::inchange(&requete, &empreinte) {
+        return Ok(HttpResponse::NotModified()
+            .insert_header((ETAG, empreinte))
+            .insert_header(crate::routes::PERSONNEL)
+            .finish());
+    }
+    Ok(HttpResponse::Ok()
+        .insert_header((ETAG, empreinte))
+        .insert_header(crate::routes::PERSONNEL)
+        .json(questions))
 }

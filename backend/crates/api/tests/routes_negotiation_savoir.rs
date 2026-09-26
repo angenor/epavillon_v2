@@ -2,7 +2,8 @@
 //! session, son `ETag` public qui suit la langue, le `304` — même derrière un
 //! relais qui suffixe l'empreinte —, et `since` illisible. Puis les termes
 //! favoris : la session exigée, leur `ETag` privé et leur `304`. Enfin les
-//! retours et signalements : `401` sans session, `201` puis `200` au rejeu.
+//! retours et signalements : `401` sans session, `201` puis `200` au rejeu. Et
+//! les questions aux experts : `403` sans l'accès négociateur.
 
 use actix_web::http::header::{ACCEPT_LANGUAGE, CACHE_CONTROL, ETAG, IF_NONE_MATCH, VARY};
 use actix_web::http::StatusCode;
@@ -379,6 +380,94 @@ async fn retours_et_signalements_demandent_une_session_et_se_rejouent() {
         &app,
         test::TestRequest::get()
             .uri(voix)
+            .insert_header(("cookie", cookie))
+            .insert_header((IF_NONE_MATCH, empreinte))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(inchange.status(), StatusCode::NOT_MODIFIED);
+}
+
+#[actix_web::test]
+async fn les_questions_demandent_lacces_negociateur_et_se_rejouent() {
+    let base = TestDb::new().await;
+    compte(&base).await;
+    let etat = AppState::new(base.db(), kernel::testing::test_config(base.url()))
+        .await
+        .expect("état de l'application");
+    let app = test::init_service(api::build_app(&etat)).await;
+    let chemin = "/api/negotiation/me/questions";
+    let corps = json!({
+        "client_ref": Uuid::now_v7(),
+        "theme_code": "adaptation",
+        "body": "Qui coordonne mon groupe ?",
+        "consent_to_faq": true,
+    });
+
+    let r = test::call_service(
+        &app,
+        test::TestRequest::post().uri(chemin).set_json(corps.clone()).to_request(),
+    )
+    .await;
+    assert_eq!(r.status(), StatusCode::UNAUTHORIZED);
+
+    let cookie = connecter!(&app);
+    for requete in [
+        test::TestRequest::post().uri(chemin).set_json(corps.clone()),
+        test::TestRequest::get().uri(chemin),
+    ] {
+        let r = test::call_service(
+            &app,
+            requete.insert_header(("cookie", cookie.clone())).to_request(),
+        )
+        .await;
+        assert_eq!(r.status(), StatusCode::FORBIDDEN, "sans l'accès négociateur");
+    }
+
+    sqlx::query(
+        "INSERT INTO identity.role_assignments (person_id, role_code, scope_type)
+         SELECT id, 'negotiator', 'global' FROM identity.people WHERE primary_email = $1::text::platform.email",
+    )
+    .bind(LECTRICE)
+    .execute(base.pool())
+    .await
+    .expect("accès négociateur");
+
+    let mut ids = Vec::new();
+    for attendu in [StatusCode::CREATED, StatusCode::OK] {
+        let r = test::call_service(
+            &app,
+            test::TestRequest::post()
+                .uri(chemin)
+                .insert_header(("cookie", cookie.clone()))
+                .set_json(corps.clone())
+                .to_request(),
+        )
+        .await;
+        assert_eq!(r.status(), attendu);
+        let q: Value = test::read_body_json(r).await;
+        assert_eq!(q["status"], "pending");
+        ids.push(q["id"].clone());
+    }
+    assert_eq!(ids[0], ids[1], "le rejeu rend la même question");
+
+    let lues = test::call_service(
+        &app,
+        test::TestRequest::get()
+            .uri(chemin)
+            .insert_header(("cookie", cookie.clone()))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(lues.status(), StatusCode::OK);
+    assert_eq!(entete(&lues, CACHE_CONTROL), "private, no-cache");
+    let empreinte = entete(&lues, ETAG);
+    let liste: Value = test::read_body_json(lues).await;
+    assert_eq!(liste["questions"].as_array().map(Vec::len), Some(1));
+    let inchange = test::call_service(
+        &app,
+        test::TestRequest::get()
+            .uri(chemin)
             .insert_header(("cookie", cookie))
             .insert_header((IF_NONE_MATCH, empreinte))
             .to_request(),

@@ -14,8 +14,14 @@
     "description": "The expert queue is reserved for Guide Négo experts. Writing or publishing knowledge does not give access to it."
   },
   "empty": {
-    "title": "No pending reports",
-    "description": "Answers reported as outdated or wrong will appear here."
+    "reports": {
+      "title": "No pending reports",
+      "description": "Answers reported as outdated or wrong will appear here."
+    },
+    "questions": {
+      "title": "No question is waiting.",
+      "description": "Questions asked to the experts from Guide Négo will appear here, oldest first."
+    }
   },
   "zoned": "{date}, {zone}",
   "received": "Received on {date}",
@@ -58,6 +64,39 @@
       "revised": "Report closed: answer corrected.",
       "confirmed": "Report closed: answer confirmed.",
       "dismissed": "Report dismissed."
+    }
+  },
+  "question": {
+    "sent": "Sent on {date}",
+    "answered": "Answered on {date}",
+    "state": {
+      "pending": "Pending",
+      "answered": "Answered",
+      "added_to_faq": "Added to the FAQ"
+    },
+    "consent": {
+      "yes": "May join the FAQ",
+      "no": "Does not join the FAQ"
+    },
+    "answer": {
+      "label": "Your answer",
+      "hint": "The person who asked receives an email; the answer can be read in “My questions”.",
+      "required": "Write an answer.",
+      "submit": "Answer",
+      "title": "Answer sent",
+      "done": "Answer sent. The person who asked has been notified by email."
+    },
+    "promote": {
+      "section": "FAQ section",
+      "placeholder": "Choose a section",
+      "noConsent": "The person who asked did not agree to it joining the FAQ.",
+      "submit": "Promote to FAQ",
+      "title": "Promote this question to the FAQ?",
+      "question": "A FAQ draft will be created in the chosen section, with this question and its answer.",
+      "notice": "The draft will carry no name and no account. Rewrite it before publishing: the question and answer are taken as they were written.",
+      "confirm": "Create the draft",
+      "done": "FAQ draft created. Rewrite it before publishing.",
+      "open": "Open the draft"
     }
   }
 }

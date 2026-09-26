@@ -15,6 +15,7 @@ pub mod plage;
 pub mod redeem;
 pub mod requests;
 pub mod savoir;
+pub mod savoir_questions;
 pub mod savoir_retours;
 pub mod sessions;
 pub mod themes;

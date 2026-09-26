@@ -341,10 +341,25 @@ async fn chaque_route_du_savoir_refuse_ladministrateur_dune_edition_et_le_compte
 
 const ADMIN_FILE: &str = include_str!("../src/routes/admin_file.rs");
 
-const ROUTES_FILE: [(&str, &str); 2] = [
+const ROUTES_FILE: [(&str, &str); 4] = [
     ("get", "/admin/negotiation/queue"),
     ("post", "/admin/negotiation/queue/reports/{id}/close"),
+    ("post", "/admin/negotiation/queue/questions/{id}/answer"),
+    ("post", "/admin/negotiation/queue/questions/{id}/promote"),
 ];
+
+/// Un corps recevable pour chaque route : le refus doit venir de la garde.
+fn corps_de(motif: &str) -> Option<serde_json::Value> {
+    if motif.ends_with("/close") {
+        Some(json!({ "outcome": "dismissed" }))
+    } else if motif.ends_with("/answer") {
+        Some(json!({ "answer": "Réponse forgée." }))
+    } else if motif.ends_with("/promote") {
+        Some(json!({ "section_code": "first_cop" }))
+    } else {
+        None
+    }
+}
 
 #[test]
 fn chaque_route_de_la_file_exige_de_verifier() {
@@ -393,12 +408,26 @@ async fn la_file_refuse_ladministrateur_dune_edition_la_publieuse_et_le_compte_s
     .fetch_one(bac.pool())
     .await
     .expect("signalement");
+    let question: Uuid = sqlx::query_scalar(
+        "INSERT INTO negotiation.expert_questions
+             (asker_id, client_ref, theme_term_id, body, consent_to_faq)
+         SELECT $1, gen_random_uuid(), id, 'Qui coordonne ?', true
+           FROM reference.taxonomy_terms
+          WHERE taxonomy_code = 'negotiation_theme' AND is_active
+          LIMIT 1
+         RETURNING id",
+    )
+    .bind(sans_role)
+    .fetch_one(bac.pool())
+    .await
+    .expect("question");
 
     let app = crate::back_office!(bac);
     for (verbe, motif) in ROUTES_FILE {
-        for id in [reel, Uuid::now_v7()] {
+        let reelle = if motif.contains("/questions/") { question } else { reel };
+        for id in [reelle, Uuid::now_v7()] {
             let uri = motif.replace("{id}", &id.to_string());
-            let corps = (verbe == "post").then(|| json!({ "outcome": "dismissed" }));
+            let corps = corps_de(motif);
             for qui in [admin_cop, ifdd, sans_role] {
                 let (statut, r) = frapper(
                     &app,
@@ -426,4 +455,11 @@ async fn la_file_refuse_ladministrateur_dune_edition_la_publieuse_et_le_compte_s
             .await
             .unwrap();
     assert_eq!(ouvert, "open", "aucun refus n'a clos");
+    let attend: String =
+        sqlx::query_scalar("SELECT status::text FROM negotiation.expert_questions WHERE id = $1")
+            .bind(question)
+            .fetch_one(bac.pool())
+            .await
+            .unwrap();
+    assert_eq!(attend, "pending", "aucun refus n'a répondu");
 }

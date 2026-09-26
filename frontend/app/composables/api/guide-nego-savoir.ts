@@ -3,7 +3,8 @@
  *
  * Un seul paquet, public, relu par différence : avec le `served_at` de la lecture
  * gardée, l'API ne rend que ce qui a changé ; avec son empreinte, un `304` si rien
- * n'a bougé. Termes favoris, retours et signalements, eux, demandent une session.
+ * n'a bougé. Termes favoris, retours et signalements, eux, demandent une session ;
+ * les questions aux experts, l'accès négociateur.
  */
 import type {
   FaqFeedback,
@@ -13,6 +14,9 @@ import type {
   KnowledgeBundle,
   MyFaqFeedback,
   MyGlossaryFavorites,
+  MyQuestion,
+  MyQuestionInput,
+  MyQuestionList,
 } from '~/types/negotiation-savoir'
 import type { IsoDateTime, Uuid } from '~/types/shared'
 import type { Primitives } from './guide-nego'
@@ -26,6 +30,7 @@ export interface DepuisLaGarde {
 }
 
 const exemples = () => import('~/mocks/negotiation-savoir')
+const questions = () => import('~/mocks/negotiation-questions')
 
 const parametres = (depuis: DepuisLaGarde | null): string =>
   depuis ? `?since=${encodeURIComponent(depuis.since)}` : ''
@@ -83,5 +88,12 @@ export function createGuideNegoSavoirApi({ lireEtiquete, send }: Deps) {
 
     mesRetoursSurLaFaq: (): Promise<AvecEmpreinte<MyFaqFeedback>> =>
       lireEtiquete('/negotiation/me/faq-feedback', async () => (await exemples()).mesRetoursSurLaFaq()),
+
+    /** Rejouée avec le même `client_ref` : la même question. Sans l'accès : 403. */
+    poserUneQuestion: (entree: MyQuestionInput): Promise<MyQuestion> =>
+      send('/negotiation/me/questions', entree, async () => (await questions()).poserUneQuestion(entree)),
+
+    mesQuestions: (): Promise<AvecEmpreinte<MyQuestionList>> =>
+      lireEtiquete('/negotiation/me/questions', async () => (await questions()).mesQuestions()),
   }
 }

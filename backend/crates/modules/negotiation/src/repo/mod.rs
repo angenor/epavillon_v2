@@ -20,6 +20,7 @@ pub mod savoir_lectures;
 pub mod savoir_lexique;
 pub mod savoir_paquet;
 pub mod savoir_parcours;
+pub mod savoir_questions;
 pub mod savoir_retours;
 pub mod savoir_sources;
 pub mod sessions;
