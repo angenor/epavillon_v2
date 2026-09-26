@@ -1,0 +1,28 @@
+{
+  "titre": "Proposer un terme",
+  "texte": "Ouvert à tout compte. Un expert de l'IFDD le définit avant publication ; un courriel vous le dira.",
+  "terme": {
+    "libelle": "Terme anglais",
+    "aide": "Corrigez-le si besoin avant l'envoi.",
+    "requis": "Écrivez le terme.",
+    "long": "Le terme dépasse {maximum} caractères."
+  },
+  "deja": "« {terme} » est déjà dans le lexique.",
+  "ouvrir": "L'ouvrir",
+  "contexte": {
+    "libelle": "Où l'avez-vous entendu ?",
+    "indication": "La session, la phrase, ce que vous en avez compris."
+  },
+  "envoyer": "Proposer ce terme aux experts",
+  "compte": {
+    "texte": "Proposer un terme passe par un compte. Créez-en un ou connectez-vous : votre saisie est gardée, et vous reviendrez ici.",
+    "creer": "Créer mon compte",
+    "connexion": "J'ai déjà un compte — Me connecter"
+  },
+  "envoye": {
+    "titre": "Terme proposé",
+    "envoye": "« {terme} » est proposé aux experts. Un expert de l'IFDD le définit avant publication ; un courriel vous le dira.",
+    "garde": "« {terme} » partira aux experts au retour du réseau. Un expert de l'IFDD le définit avant publication ; un courriel vous le dira."
+  },
+  "fermer": "Fermer"
+}

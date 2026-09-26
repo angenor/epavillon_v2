@@ -38,7 +38,6 @@
   "aucun": {
     "titre": "No results for “{terme}”",
     "texte": "Nothing in the glossary, the FAQ, documents or negotiation sessions. If it is a negotiation term, suggest it: an IFDD expert defines it and adds it to the glossary.",
-    "proposer": "Suggest “{terme}” for the glossary",
-    "bientot": "Term suggestions open soon."
+    "proposer": "Suggest “{terme}” for the glossary"
   }
 }

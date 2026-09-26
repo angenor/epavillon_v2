@@ -1,24 +1,26 @@
 //! Les routes du savoir : le paquet que le téléphone garde et le compte des
-//! lectures, ouverts à tous ; les termes favoris, les coches du parcours, les retours et les
-//! signalements de la personne connectée ; ses questions aux experts, avec
-//! l'accès négociateur.
+//! lectures, ouverts à tous ; les termes favoris, les coches du parcours, les retours, les
+//! signalements et les termes proposés de la personne connectée ; ses questions aux experts,
+//! avec l'accès négociateur.
 
 use actix_web::http::header::{HeaderValue, CACHE_CONTROL, ETAG, VARY};
 use actix_web::{web, HttpMessage, HttpRequest, HttpResponse};
 use kernel::auth::{Actor, Requires};
 use kernel::context::RequestContext;
-use kernel::error::Result;
+use kernel::error::{ErrorCode, Result};
 use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::domain::permissions::SpaceAccess;
 use crate::domain::savoir::lire_since;
+use crate::domain::savoir_propositions::{IssueProposition, ProposalInput};
 use crate::domain::savoir_questions::MyQuestionInput;
 use crate::domain::savoir_retours::{FaqFeedbackInput, FaqReportInput};
 use crate::service::savoir_coches;
 use crate::service::savoir_favoris;
 use crate::service::savoir_lectures;
 use crate::service::savoir_paquet as service;
+use crate::service::savoir_propositions;
 use crate::service::savoir_questions;
 use crate::service::savoir_retours;
 use crate::state::NegotiationState;
@@ -39,6 +41,10 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
             web::post().to(poser_une_question),
         )
         .route("/negotiation/me/questions", web::get().to(mes_questions))
+        .route(
+            "/negotiation/glossary/proposals",
+            web::post().to(proposer_un_terme),
+        )
         .route("/negotiation/me/glossary-favorites", web::get().to(favoris))
         .route(
             "/negotiation/me/glossary-favorites/{entry_id}",
@@ -336,6 +342,47 @@ pub(crate) async fn poser_une_question(
     } else {
         HttpResponse::Ok().json(question)
     })
+}
+
+#[utoipa::path(
+    post,
+    description = "`ProposalInput` → `ProposalReceipt` — propose un terme au lexique : 200 caractères au plus, un contexte facultatif de 600 caractères au plus. Le même terme, à la casse, aux accents et à la ponctuation près, s'ajoute à la proposition qui attend. Rejoué avec le même `client_ref`, ou le même terme déjà proposé par la personne : **200** et le reçu d'origine. Déjà au lexique (publié ou « À revoir ») : **409** `NEGOTIATION_GLOSSARY_TERM_EXISTS`, dont le corps porte en plus le `slug` de l'entrée. Dix par personne et par jour de Paris, au-delà **429**. Rejoint la file des experts, anonyme.",
+    path = "/negotiation/glossary/proposals",
+    tag = "Guide Négo — savoir",
+    operation_id = "negotiation_proposer_un_terme",
+    request_body = Object,
+    responses(
+        (status = 201, description = "ProposalReceipt", body = Object),
+        (status = 200, description = "Rejeu : le reçu d'origine", body = Object),
+        (status = 401, description = "Aucune session", body = crate::routes::openapi::ApiErrorBody),
+        (status = 409, description = "Déjà au lexique : `{ code, message, slug }`", body = Object),
+        (status = 422, description = "Terme vide ou trop long, contexte trop long", body = crate::routes::openapi::ApiErrorBody),
+        (status = 429, description = "Plafond du jour atteint", body = crate::routes::openapi::ApiErrorBody),
+    ),
+    security(("session" = []))
+)]
+pub(crate) async fn proposer_un_terme(
+    state: web::Data<NegotiationState>,
+    requete: HttpRequest,
+    acteur: Actor,
+    entree: web::Json<ProposalInput>,
+) -> Result<HttpResponse> {
+    let ctx = crate::routes::contexte_de(&requete, acteur.0);
+    Ok(
+        match savoir_propositions::proposer(&state, &ctx, acteur.0, &entree).await? {
+            IssueProposition::Nouvelle(recu) => HttpResponse::Created().json(recu),
+            IssueProposition::Rejouee(recu) => HttpResponse::Ok().json(recu),
+            IssueProposition::DejaAuLexique { slug } => {
+                let code = ErrorCode::NegotiationGlossaryTermExists;
+                HttpResponse::Conflict().json(serde_json::json!({
+                    "code": code.as_str(),
+                    "message": code.message(),
+                    "slug": slug,
+                    "request_id": kernel::context::current_request_id(),
+                }))
+            }
+        },
+    )
 }
 
 #[utoipa::path(

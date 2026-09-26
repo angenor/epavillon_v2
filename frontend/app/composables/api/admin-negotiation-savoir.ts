@@ -25,6 +25,8 @@ import type {
 } from '~/types/admin-negotiation-savoir'
 import type {
   AdminFaqReportCloseInput,
+  AdminProposal,
+  AdminProposalRejectInput,
   AdminQuestion,
   AdminQuestionAnswerInput,
   AdminQuestionPromoteInput,
@@ -33,6 +35,8 @@ import type {
 } from '~/types/admin-negotiation-queue'
 import type { Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
+
+const propositions = () => import('~/mocks/negotiation-propositions')
 
 type Deps = Pick<ApiTransport, 'call' | 'send'>
 
@@ -193,6 +197,25 @@ export function createAdminNegotiationSavoirApi({ call, send }: Deps) {
         `/admin/negotiation/queue/questions/${id}/promote`,
         entree,
         async () => (await exemples()).promouvoirUneQuestion(id, entree),
+      ),
+
+    /** Contextes des auteurs, sans les auteurs ; entrées proches par similarité. */
+    propositionDeLaFile: (id: Uuid): Promise<AdminProposal> =>
+      call(`/admin/negotiation/queue/proposals/${id}`, async () => (await propositions()).proposition(id)),
+
+    /** Crée l'entrée en brouillon ; les auteurs reçoivent leur courriel à sa publication. */
+    accepterUneProposition: (id: Uuid, entree: AdminGlossaryInput): Promise<AdminGlossaryEntry> =>
+      send(
+        `/admin/negotiation/queue/proposals/${id}/accept`,
+        entree,
+        async () => (await exemples()).accepterUneProposition(id, entree),
+      ),
+
+    rejeterUneProposition: (id: Uuid, entree: AdminProposalRejectInput): Promise<AdminProposal> =>
+      send(
+        `/admin/negotiation/queue/proposals/${id}/reject`,
+        entree,
+        async () => (await propositions()).rejeterUneProposition(id, entree.reason),
       ),
   }
 }

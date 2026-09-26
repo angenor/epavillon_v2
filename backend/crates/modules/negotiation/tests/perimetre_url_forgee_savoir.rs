@@ -341,11 +341,14 @@ async fn chaque_route_du_savoir_refuse_ladministrateur_dune_edition_et_le_compte
 
 const ADMIN_FILE: &str = include_str!("../src/routes/admin_file.rs");
 
-const ROUTES_FILE: [(&str, &str); 4] = [
+const ROUTES_FILE: [(&str, &str); 7] = [
     ("get", "/admin/negotiation/queue"),
     ("post", "/admin/negotiation/queue/reports/{id}/close"),
     ("post", "/admin/negotiation/queue/questions/{id}/answer"),
     ("post", "/admin/negotiation/queue/questions/{id}/promote"),
+    ("get", "/admin/negotiation/queue/proposals/{id}"),
+    ("post", "/admin/negotiation/queue/proposals/{id}/accept"),
+    ("post", "/admin/negotiation/queue/proposals/{id}/reject"),
 ];
 
 /// Un corps recevable pour chaque route : le refus doit venir de la garde.
@@ -356,6 +359,13 @@ fn corps_de(motif: &str) -> Option<serde_json::Value> {
         Some(json!({ "answer": "Réponse forgée." }))
     } else if motif.ends_with("/promote") {
         Some(json!({ "section_code": "first_cop" }))
+    } else if motif.ends_with("/accept") {
+        Some(
+            json!({ "family_code": "meetings", "translation": { "fr": "Forgé" },
+                     "definition": { "fr": "Forgé" } }),
+        )
+    } else if motif.ends_with("/reject") {
+        Some(json!({ "reason": "Forgé." }))
     } else {
         None
     }
@@ -421,11 +431,23 @@ async fn la_file_refuse_ladministrateur_dune_edition_la_publieuse_et_le_compte_s
     .fetch_one(bac.pool())
     .await
     .expect("question");
+    let proposition: Uuid = sqlx::query_scalar(
+        "WITH p AS (INSERT INTO negotiation.glossary_proposals (term) VALUES ('Forged term')
+                    RETURNING id)
+         INSERT INTO negotiation.glossary_proposal_authors (proposal_id, person_id, client_ref)
+         SELECT id, $1, gen_random_uuid() FROM p RETURNING proposal_id",
+    )
+    .bind(sans_role)
+    .fetch_one(bac.pool())
+    .await
+    .expect("proposition");
 
     let app = crate::back_office!(bac);
     for (verbe, motif) in ROUTES_FILE {
         let reelle = if motif.contains("/questions/") {
             question
+        } else if motif.contains("/proposals/") {
+            proposition
         } else {
             reel
         };
@@ -466,4 +488,17 @@ async fn la_file_refuse_ladministrateur_dune_edition_la_publieuse_et_le_compte_s
             .await
             .unwrap();
     assert_eq!(attend, "pending", "aucun refus n'a répondu");
+    let (statut, brouillons): (String, i64) = sqlx::query_as(
+        "SELECT (SELECT status::text FROM negotiation.glossary_proposals WHERE id = $1),
+                (SELECT count(*) FROM negotiation.glossary_entries)",
+    )
+    .bind(proposition)
+    .fetch_one(bac.pool())
+    .await
+    .unwrap();
+    assert_eq!(
+        (statut.as_str(), brouillons),
+        ("pending", 0),
+        "aucun refus n'a tranché"
+    );
 }

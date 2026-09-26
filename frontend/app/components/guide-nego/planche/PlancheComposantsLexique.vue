@@ -24,6 +24,7 @@ const gga = computed(() => ({
 }))
 
 const courante = ref<string | null>('C')
+const touche = ref<string | null>(null)
 </script>
 
 <template>
@@ -64,6 +65,18 @@ const courante = ref<string | null>('C')
           <li><GnLigneTerme :entree="gga" :vers="VERS" extrait /></li>
         </GnGroupeResultats>
       </div>
+    </GnPlancheSection>
+
+    <GnPlancheSection :titre="k('feuille-terme')" :propos="k('feuille-terme-propos')">
+      <div class="gn-planche-composants__vitrine gn-planche-composants__rangee">
+        <GnBouton variante="secondaire" largeur="demie" @clic="touche = 'global goal on adaptation'">
+          {{ k('feuille-terme-present') }}
+        </GnBouton>
+        <GnBouton variante="secondaire" largeur="demie" @clic="touche = 'placeholder text'">
+          {{ k('feuille-terme-absent') }}
+        </GnBouton>
+      </div>
+      <GnFeuilleTerme v-model:terme="touche" :lecture="null" />
     </GnPlancheSection>
 
     <GnPlancheSection :titre="k('lie')" :propos="k('lie-propos')">

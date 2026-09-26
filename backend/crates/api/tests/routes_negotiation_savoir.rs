@@ -3,7 +3,8 @@
 //! relais qui suffixe l'empreinte —, et `since` illisible. Puis les termes
 //! favoris : la session exigée, leur `ETag` privé et leur `304`. Enfin les
 //! retours et signalements : `401` sans session, `201` puis `200` au rejeu. Et
-//! les questions aux experts : `403` sans l'accès négociateur.
+//! les questions aux experts : `403` sans l'accès négociateur. Et les termes
+//! proposés : `401` sans session, `201` puis `200`, `409` avec le `slug`.
 
 use actix_web::http::header::{ACCEPT_LANGUAGE, CACHE_CONTROL, ETAG, IF_NONE_MATCH, VARY};
 use actix_web::http::StatusCode;
@@ -577,4 +578,60 @@ async fn les_coches_du_parcours_demandent_une_session_et_rendent_304() {
         .await;
         assert_eq!(retrait.status(), StatusCode::NO_CONTENT, "idempotent");
     }
+}
+
+#[actix_web::test]
+async fn un_terme_propose_demande_une_session_et_rend_le_slug_sil_existe() {
+    let base = TestDb::new().await;
+    compte(&base).await;
+    terme_publie(&base).await;
+    let etat = AppState::new(base.db(), kernel::testing::test_config(base.url()))
+        .await
+        .expect("état de l'application");
+    let app = test::init_service(api::build_app(&etat)).await;
+    let chemin = "/api/negotiation/glossary/proposals";
+    let corps = json!({ "client_ref": Uuid::now_v7(), "term": "Bracketed text" });
+
+    let anonyme = test::call_service(
+        &app,
+        test::TestRequest::post()
+            .uri(chemin)
+            .set_json(corps.clone())
+            .to_request(),
+    )
+    .await;
+    assert_eq!(anonyme.status(), StatusCode::UNAUTHORIZED);
+
+    let cookie = connecter!(&app);
+    let mut recus = Vec::new();
+    for attendu in [StatusCode::CREATED, StatusCode::OK] {
+        let r = test::call_service(
+            &app,
+            test::TestRequest::post()
+                .uri(chemin)
+                .insert_header(("cookie", cookie.clone()))
+                .set_json(corps.clone())
+                .to_request(),
+        )
+        .await;
+        assert_eq!(r.status(), attendu);
+        let recu: Value = test::read_body_json(r).await;
+        recus.push(recu);
+    }
+    assert_eq!(recus[0], recus[1], "le rejeu rend le même reçu");
+
+    let existe = test::call_service(
+        &app,
+        test::TestRequest::post()
+            .uri(chemin)
+            .insert_header(("cookie", cookie))
+            .set_json(json!({ "client_ref": Uuid::now_v7(), "term": "CONTACT group" }))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(existe.status(), StatusCode::CONFLICT);
+    let refus: Value = test::read_body_json(existe).await;
+    assert_eq!(refus["code"], "NEGOTIATION_GLOSSARY_TERM_EXISTS");
+    assert_eq!(refus["slug"], "contact-group");
+    assert!(refus["message"].is_string() && refus["request_id"].is_string());
 }

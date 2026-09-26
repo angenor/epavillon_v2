@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.glossary_proposals\n            SET status = 'rejected', rejection_reason = $2, handled_by = $3, handled_at = now()\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "50f133136de6ed888544111293033e05ec099f641841ffebf917c900a4acef52"
+}

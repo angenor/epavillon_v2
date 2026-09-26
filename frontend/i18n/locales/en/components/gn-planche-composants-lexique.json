@@ -19,5 +19,9 @@
   "groupe-propos": "The global search groups its results by content, in the order Glossary, FAQ, Documents, Sessions. Name in capitals and a named count on the right; rows are each content's own, the query marked in bold underline; beyond five, a link leads to the rest in the content's screen.",
   "groupe-lexique": "Glossary",
   "groupe-compte": "7 entries",
-  "groupe-suite": "All 7 entries in the glossary"
+  "groupe-suite": "All 7 entries in the glossary",
+  "feuille-terme": "Touched term sheet",
+  "feuille-terme-propos": "The reader opens it when an italic English term is touched. It fills from the kept glossary, offline: family, term, translation, definition, pages of the document, “Open in the glossary”. When absent, it says so and offers to suggest it, in the “Suggest a term” sheet.",
+  "feuille-terme-present": "Term in the glossary",
+  "feuille-terme-absent": "Missing term"
 }

@@ -168,6 +168,45 @@ pub fn question_repondue(ctx: &MailContext<'_>, question: &str) -> OutgoingMail 
     compose(ctx, &subject, text)
 }
 
+/// Le terme proposé est publié. Le lien ouvre son entrée dans le lexique.
+pub fn terme_publie(ctx: &MailContext<'_>, term: &str, slug: &str) -> OutgoingMail {
+    let lien = format!(
+        "{}/guide-nego/lexique/{slug}",
+        ctx.app_public_url.trim_end_matches('/')
+    );
+    let (subject, text) = if en_anglais(ctx.locale) {
+        (
+            "The term you suggested is now in the glossary".to_owned(),
+            format!(
+                "Hello {prenom},\n\n\
+                 The term you suggested has been added to the Guide Négo glossary by an IFDD \
+                 expert:\n\n\
+                 \"{term}\"\n\n\
+                 Read its entry:\n\n\
+                 {lien}\n\n\
+                 The ePavillon team — IFDD",
+                prenom = ctx.first_name,
+            ),
+        )
+    } else {
+        (
+            "Le terme que vous avez proposé est au lexique".to_owned(),
+            format!(
+                "Bonjour {prenom},\n\n\
+                 Un expert de l'IFDD a ajouté au lexique de Guide Négo le terme que vous avez \
+                 proposé :\n\n\
+                 « {term} »\n\n\
+                 Lisez son entrée :\n\n\
+                 {lien}\n\n\
+                 L'équipe ePavillon — IFDD",
+                prenom = ctx.first_name,
+            ),
+        )
+    };
+
+    compose(ctx, &subject, text)
+}
+
 fn compose(ctx: &MailContext<'_>, subject: &str, text: String) -> OutgoingMail {
     OutgoingMail {
         message_id: ctx.message_id.to_owned(),

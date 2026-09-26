@@ -21,6 +21,10 @@
     "questions": {
       "title": "No question is waiting.",
       "description": "Questions asked to the experts from Guide Négo will appear here, oldest first."
+    },
+    "proposals": {
+      "title": "No suggested term is waiting.",
+      "description": "Terms suggested from Guide Négo will appear here, oldest first."
     }
   },
   "zoned": "{date}, {zone}",
@@ -97,6 +101,36 @@
       "confirm": "Create the draft",
       "done": "FAQ draft created. Rewrite it before publishing.",
       "open": "Open the draft"
+    }
+  },
+  "proposal": {
+    "sent": "Suggested on {date}",
+    "authors": "Suggested by {count} person | Suggested by {count} people",
+    "state": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "rejected": "Rejected"
+    },
+    "contexts": "Where it was heard",
+    "noContext": "No details.",
+    "nearby": "Close entries in the glossary",
+    "nearbyNone": "No close entry in the glossary.",
+    "accept": "Define and accept",
+    "open": "Open the entry born from the suggestion",
+    "rejected": "Rejected: {reason}",
+    "reject": {
+      "label": "Reason for rejection",
+      "hint": "It stays on record; the people who suggested the term are not notified.",
+      "required": "Give the reason for rejection.",
+      "submit": "Reject the suggestion",
+      "done": "Suggestion rejected."
+    },
+    "page": {
+      "crumb": "Suggested term",
+      "title": "Define “{term}”",
+      "intro": "The form creates the entry as a draft. The people who suggested the term receive an email when it is published.",
+      "notFound": "This suggestion does not exist.",
+      "back": "Back to the queue"
     }
   }
 }

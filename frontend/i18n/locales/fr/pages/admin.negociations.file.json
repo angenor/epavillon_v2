@@ -21,6 +21,10 @@
     "questions": {
       "title": "Aucune question n'attend.",
       "description": "Les questions posées aux experts depuis Guide Négo apparaîtront ici, la plus ancienne d'abord."
+    },
+    "proposals": {
+      "title": "Aucun terme proposé n'attend.",
+      "description": "Les termes proposés depuis Guide Négo apparaîtront ici, le plus ancien d'abord."
     }
   },
   "zoned": "{date}, {zone}",
@@ -97,6 +101,36 @@
       "confirm": "Créer le brouillon",
       "done": "Brouillon de FAQ créé. Réécrivez-le avant de le publier.",
       "open": "Ouvrir le brouillon"
+    }
+  },
+  "proposal": {
+    "sent": "Proposé le {date}",
+    "authors": "Proposé par {count} personne | Proposé par {count} personnes",
+    "state": {
+      "pending": "En attente",
+      "accepted": "Accepté",
+      "rejected": "Rejeté"
+    },
+    "contexts": "Où il a été entendu",
+    "noContext": "Sans précision.",
+    "nearby": "Entrées proches au lexique",
+    "nearbyNone": "Aucune entrée proche au lexique.",
+    "accept": "Définir et accepter",
+    "open": "Ouvrir l'entrée née de la proposition",
+    "rejected": "Rejeté : {reason}",
+    "reject": {
+      "label": "Motif du refus",
+      "hint": "Il reste au dossier ; les personnes qui ont proposé le terme n'en sont pas averties.",
+      "required": "Indiquez le motif du refus.",
+      "submit": "Rejeter la proposition",
+      "done": "Proposition rejetée."
+    },
+    "page": {
+      "crumb": "Terme proposé",
+      "title": "Définir « {term} »",
+      "intro": "Le formulaire crée l'entrée en brouillon. Les personnes qui ont proposé le terme reçoivent un courriel quand elle est publiée.",
+      "notFound": "Cette proposition n'existe pas.",
+      "back": "Revenir à la file"
     }
   }
 }

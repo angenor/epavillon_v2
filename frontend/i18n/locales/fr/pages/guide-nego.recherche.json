@@ -38,7 +38,6 @@
   "aucun": {
     "titre": "Aucun résultat pour « {terme} »",
     "texte": "Rien dans le lexique, la FAQ, les documents ni les sessions de négociation. Si c'est un terme de négociation, proposez-le : un expert de l'IFDD le définit et l'ajoute au lexique.",
-    "proposer": "Proposer « {terme} » au lexique",
-    "bientot": "La proposition de termes ouvre bientôt."
+    "proposer": "Proposer « {terme} » au lexique"
   }
 }

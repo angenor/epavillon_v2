@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT platform.normalize_label($1) AS normalisee,\n                  (SELECT slug FROM negotiation.glossary_entries\n                    WHERE id = negotiation.glossary_resolve($1)) AS au_lexique",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "normalisee",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "au_lexique",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "a8cf351da049e282e696dc9ecf36ce0672e78892dd9b470ccc4a0163547e9a11"
+}

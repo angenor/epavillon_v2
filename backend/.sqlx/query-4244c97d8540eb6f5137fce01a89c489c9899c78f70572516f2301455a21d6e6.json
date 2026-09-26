@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT status::text AS \"status!\", term\n             FROM negotiation.glossary_proposals WHERE id = $1 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "term",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_proposals",
+            "name": "term"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      false
+    ]
+  },
+  "hash": "4244c97d8540eb6f5137fce01a89c489c9899c78f70572516f2301455a21d6e6"
+}

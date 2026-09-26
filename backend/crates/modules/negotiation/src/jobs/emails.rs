@@ -1,5 +1,6 @@
-//! Les envois de courriel du module : les deux décisions d'admission, et la
-//! réponse d'un expert à une question (étape 2).
+//! Les envois de courriel du module : les deux décisions d'admission, la
+//! réponse d'un expert à une question et la publication d'un terme proposé
+//! (étape 2).
 //!
 //! **La mise en file se fait dans la transaction de la décision** : si elle est
 //! annulée, le courriel ne naît pas. C'est la garantie de FR-028 — rien ne part
@@ -29,6 +30,7 @@ use crate::mail::{self, MailContext};
 pub const SEND_APPROVED_EMAIL: &str = "negotiation.access_request.approved_email";
 pub const SEND_REJECTED_EMAIL: &str = "negotiation.access_request.rejected_email";
 pub const SEND_ANSWERED_EMAIL: &str = "negotiation.expert_question.answered_email";
+pub const SEND_PUBLISHED_EMAIL: &str = "negotiation.glossary_proposal.published_email";
 
 #[derive(Debug, Deserialize)]
 struct Charge {
@@ -41,6 +43,16 @@ struct Charge {
     reason: Option<String>,
     #[serde(default)]
     question: Option<String>,
+    #[serde(default)]
+    term: Option<String>,
+    #[serde(default)]
+    slug: Option<String>,
+}
+
+pub struct Destinataire<'a> {
+    pub email: &'a str,
+    pub locale: &'a str,
+    pub first_name: &'a str,
 }
 
 /// Met en file le courriel d'admission. La clé d'unicité porte la demande :
@@ -127,6 +139,35 @@ pub async fn mettre_en_file_reponse(
     Ok(())
 }
 
+/// Met en file le courriel « le terme que vous avez proposé est au lexique ».
+/// La clé porte la proposition et l'auteur : une republication ne renvoie rien.
+pub async fn mettre_en_file_publication(
+    conn: &mut PgConnection,
+    proposal_id: Uuid,
+    person_id: Uuid,
+    a: &Destinataire<'_>,
+    term: &str,
+    slug: &str,
+) -> Result<()> {
+    jobs::enqueue(
+        conn,
+        NewJob::new(
+            SEND_PUBLISHED_EMAIL,
+            json!({
+                "to": a.email,
+                "locale": a.locale,
+                "first_name": a.first_name,
+                "term": term,
+                "slug": slug,
+            }),
+        )
+        .idempotent(format!("{SEND_PUBLISHED_EMAIL}:{proposal_id}:{person_id}")),
+    )
+    .await?;
+
+    Ok(())
+}
+
 // ---------------------------------------------------------------------------
 
 pub struct SendApprovedEmail {
@@ -165,6 +206,38 @@ impl JobHandler for SendAnsweredEmail {
         let message = mail::question_repondue(
             &contexte(&identifiant, &charge, &self.app_public_url),
             charge.question.as_deref().unwrap_or_default(),
+        );
+        remettre(self.mailer.as_ref(), &message).await
+    }
+}
+
+pub struct SendPublishedEmail {
+    mailer: Arc<dyn Mailer>,
+    app_public_url: String,
+}
+
+impl SendPublishedEmail {
+    pub fn new(mailer: Arc<dyn Mailer>, app_public_url: String) -> Self {
+        Self {
+            mailer,
+            app_public_url,
+        }
+    }
+}
+
+#[async_trait]
+impl JobHandler for SendPublishedEmail {
+    fn task(&self) -> &'static str {
+        SEND_PUBLISHED_EMAIL
+    }
+
+    async fn run(&self, job: &ClaimedJob) -> Result<()> {
+        let charge = lire(job)?;
+        let identifiant = job.id.to_string();
+        let message = mail::terme_publie(
+            &contexte(&identifiant, &charge, &self.app_public_url),
+            charge.term.as_deref().unwrap_or_default(),
+            charge.slug.as_deref().unwrap_or_default(),
         );
         remettre(self.mailer.as_ref(), &message).await
     }

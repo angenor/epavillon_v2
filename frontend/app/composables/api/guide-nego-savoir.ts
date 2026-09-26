@@ -18,6 +18,8 @@ import type {
   MyQuestion,
   MyQuestionInput,
   MyQuestionList,
+  ProposalInput,
+  ProposalReceipt,
 } from '~/types/negotiation-savoir'
 import type { IsoDateTime, Uuid } from '~/types/shared'
 import type { Primitives } from './guide-nego'
@@ -32,6 +34,7 @@ export interface DepuisLaGarde {
 
 const exemples = () => import('~/mocks/negotiation-savoir')
 const questions = () => import('~/mocks/negotiation-questions')
+const propositions = () => import('~/mocks/negotiation-propositions')
 
 const parametres = (depuis: DepuisLaGarde | null): string =>
   depuis ? `?since=${encodeURIComponent(depuis.since)}` : ''
@@ -107,5 +110,9 @@ export function createGuideNegoSavoirApi({ lireEtiquete, send }: Deps) {
 
     mesQuestions: (): Promise<AvecEmpreinte<MyQuestionList>> =>
       lireEtiquete('/negotiation/me/questions', async () => (await questions()).mesQuestions()),
+
+    /** S'ajoute à la proposition en attente du même terme. Déjà au lexique : 409 avec son `slug`. */
+    proposerUnTerme: (entree: ProposalInput): Promise<ProposalReceipt> =>
+      send('/negotiation/glossary/proposals', entree, async () => (await propositions()).proposerUnTerme(entree)),
   }
 }

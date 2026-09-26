@@ -16,6 +16,7 @@ pub mod savoir_favoris;
 pub mod savoir_file;
 pub mod savoir_lectures;
 pub mod savoir_paquet;
+pub mod savoir_propositions;
 pub mod savoir_questions;
 pub mod savoir_retours;
 pub mod sessions;

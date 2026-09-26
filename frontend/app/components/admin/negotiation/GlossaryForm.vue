@@ -12,12 +12,14 @@ const props = withDefaults(
   defineProps<{
     /** Nul à la création. */
     entry: AdminGlossaryEntry | null
+    /** À la création : le terme d'une proposition de la file. */
+    initialTerm?: string
     readonly?: boolean
     submitting?: boolean
     failure?: DocumentFormFailure | null
     revision?: number
   }>(),
-  { readonly: false, submitting: false, failure: null, revision: 0 },
+  { initialTerm: '', readonly: false, submitting: false, failure: null, revision: 0 },
 )
 
 const emit = defineEmits<{ submit: [input: AdminGlossaryInput] }>()
@@ -54,7 +56,7 @@ interface Etat {
 function depuis(e: AdminGlossaryEntry | null): Etat {
   return {
     family: e?.family_code ?? '',
-    term: e?.term ?? '',
+    term: e?.term ?? props.initialTerm,
     acronym: e?.acronym ?? '',
     variants: (e?.variants ?? []).join('\n'),
     translationFr: e?.translation.fr ?? '',

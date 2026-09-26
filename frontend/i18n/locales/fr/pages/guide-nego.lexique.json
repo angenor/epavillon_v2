@@ -14,8 +14,7 @@
   "aucun": {
     "titre": "« {terme} » n'est pas encore dans le lexique",
     "texte": "Proposez-le : un expert de l'IFDD le définit et l'ajoute pour toutes et tous. Il vous sera signalé.",
-    "proposer": "Proposer « {terme} »",
-    "bientot": "La proposition de termes ouvre bientôt."
+    "proposer": "Proposer « {terme} »"
   },
   "vide": {
     "titre": "Le lexique est encore vide",

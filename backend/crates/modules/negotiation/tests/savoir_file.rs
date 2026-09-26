@@ -239,7 +239,7 @@ async fn la_file_refuse_ce_quelle_ne_sait_pas_faire_et_qui_ne_verifie_pas() {
     let (statut, _) = http!(
         app,
         "get",
-        "/admin/negotiation/queue?kind=proposals",
+        "/admin/negotiation/queue?kind=everything",
         experte
     );
     assert_eq!(statut, StatusCode::UNPROCESSABLE_ENTITY);

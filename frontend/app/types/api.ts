@@ -1500,10 +1500,61 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description `ExpertQueue` — par sorte. `reports` : les signalements ouverts, groupés par entrée de FAQ, le plus ancien d'abord, avec les retours « Oui / Non » comptés. `questions` : les questions en attente, la plus ancienne d'abord, puis celles répondues depuis trente jours et pas encore promues. Et ce qui attend, par sorte. **Aucun auteur.** */
+        /** @description `ExpertQueue` — par sorte. `reports` : les signalements ouverts, groupés par entrée de FAQ, le plus ancien d'abord, avec les retours « Oui / Non » comptés. `questions` : les questions en attente, la plus ancienne d'abord, puis celles répondues depuis trente jours et pas encore promues. `proposals` : les termes proposés en attente, le plus ancien d'abord, avec le contexte de chaque auteur et les entrées proches du lexique. Et ce qui attend, par sorte. **Aucun auteur.** */
         get: operations["admin_negotiation_file"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/queue/proposals/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `AdminProposal` — un terme proposé, quel que soit son statut : le contexte de chaque auteur, le plus ancien d'abord, **sans les auteurs** ; les entrées du lexique proches (`similarity` ≥ 0,4, tous statuts, cinq au plus) ; l'entrée née, une fois acceptée ; le motif, une fois refusée. */
+        get: operations["admin_negotiation_file_une_proposition"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/queue/proposals/{id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `AdminGlossaryInput` → `AdminGlossaryEntry` — accepte un terme proposé : l'entrée naît **en brouillon**, avec le terme de la proposition si `term` est absent. Ses auteurs reçoivent un courriel **à sa publication**, pas avant. Déjà tranchée : **409** ; un terme qui s'écrit déjà ainsi : `NEGOTIATION_GLOSSARY_SLUG_TAKEN`. */
+        post: operations["admin_negotiation_file_accepter_une_proposition"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/negotiation/queue/proposals/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `AdminProposalRejectInput` → `AdminProposal` — refuse un terme proposé, avec son motif. Motif vide : **422** ; déjà tranchée : **409**. */
+        post: operations["admin_negotiation_file_rejeter_une_proposition"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3418,6 +3469,23 @@ export interface paths {
         put?: never;
         /** @description `FaqReportInput` → `FaqReportReceipt` — « Dépassé ou faux » : un à trois motifs (`rule_changed`, `wrong`, `source_mismatch`), une précision de 600 caractères au plus. Rejoué avec le même `client_ref` : **200** et le même reçu. Vingt par personne et par jour de Paris, au-delà **429**. Rejoint la file des experts, anonyme ; l'entrée n'est jamais modifiée. */
         post: operations["negotiation_signaler_une_entree_de_faq"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/negotiation/glossary/proposals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description `ProposalInput` → `ProposalReceipt` — propose un terme au lexique : 200 caractères au plus, un contexte facultatif de 600 caractères au plus. Le même terme, à la casse, aux accents et à la ponctuation près, s'ajoute à la proposition qui attend. Rejoué avec le même `client_ref`, ou le même terme déjà proposé par la personne : **200** et le reçu d'origine. Déjà au lexique (publié ou « À revoir ») : **409** `NEGOTIATION_GLOSSARY_TERM_EXISTS`, dont le corps porte en plus le `slug` de l'entrée. Dix par personne et par jour de Paris, au-delà **429**. Rejoint la file des experts, anonyme. */
+        post: operations["negotiation_proposer_un_terme"];
         delete?: never;
         options?: never;
         head?: never;
@@ -10412,7 +10480,7 @@ export interface operations {
     admin_negotiation_file: {
         parameters: {
             query?: {
-                /** @description `reports` (défaut) ou `questions` */
+                /** @description `reports` (défaut), `questions` ou `proposals` */
                 kind?: string;
             };
             header?: never;
@@ -10449,6 +10517,173 @@ export interface operations {
                 };
             };
             /** @description Sorte inconnue */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_file_une_proposition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la proposition */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description AdminProposal */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Sans la permission de vérifier */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Proposition inconnue */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_file_accepter_une_proposition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la proposition */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description AdminGlossaryEntry */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Sans la permission de vérifier */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Proposition inconnue */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Déjà tranchée, ou terme déjà au lexique */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Texte, famille, source ou lié invalides */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_negotiation_file_rejeter_une_proposition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la proposition */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description AdminProposal */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Sans la permission de vérifier */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Proposition inconnue */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Déjà tranchée */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Motif vide */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -14618,6 +14853,75 @@ export interface operations {
                 };
             };
             /** @description Aucun motif, motif inconnu, précision trop longue */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Plafond du jour atteint */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    negotiation_proposer_un_terme: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Rejeu : le reçu d'origine */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description ProposalReceipt */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Déjà au lexique : `{ code, message, slug }` */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Terme vide ou trop long, contexte trop long */
             422: {
                 headers: {
                     [name: string]: unknown;

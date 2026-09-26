@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"n!\" FROM negotiation.glossary_proposal_authors\n            WHERE person_id = $1\n              AND created_at >= (date_trunc('day', now() AT TIME ZONE 'Europe/Paris')\n                                 AT TIME ZONE 'Europe/Paris')",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "83f5087537f21e4e88d5c80a6ed97924b008e1d2d1be984728ec12b5f592f9ff"
+}

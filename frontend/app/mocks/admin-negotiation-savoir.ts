@@ -48,6 +48,7 @@ import {
   questionsEnAttente,
   repondreAUneQuestion as repondre,
 } from './negotiation-questions'
+import { aAccepter, marquerAcceptee, propositionsDeLaFile, propositionsEnAttente } from './negotiation-propositions'
 
 type Changement = 'publish' | 'to-review' | 'unpublish'
 
@@ -435,7 +436,6 @@ export function supprimerFaq(id: Uuid): void {
 const ISSUES: AdminFaqReportCloseInput['outcome'][] = ['revised', 'confirmed', 'dismissed']
 
 export function fileDesExperts(kind: ExpertQueueKind): ExpertQueue {
-  if (kind === 'proposals') throw invalide("Cette sorte d'éléments n'est pas encore servie.", 'kind')
   const groupes: ExpertQueueReportGroup[] = faq
     .map((e) => ({
       e,
@@ -455,11 +455,20 @@ export function fileDesExperts(kind: ExpertQueueKind): ExpertQueue {
     counts: {
       reports: groupes.reduce((n, g) => n + g.reports.length, 0),
       questions: questionsEnAttente(),
-      proposals: 0,
+      proposals: propositionsEnAttente(),
     },
     reports: kind === 'reports' ? groupes : [],
     questions: kind === 'questions' ? questionsDeLaFile() : [],
+    proposals: kind === 'proposals' ? propositionsDeLaFile() : [],
   }
+}
+
+/** Le brouillon naît du formulaire du lexique ; le terme proposé tient lieu de terme absent. */
+export function accepterUneProposition(id: Uuid, entree: AdminGlossaryInput): AdminGlossaryEntry {
+  const term = aAccepter(id)
+  const brouillon = creerTerme({ ...entree, term: entree.term?.trim() || term })
+  marquerAcceptee(id, brouillon)
+  return brouillon
 }
 
 export function repondreAUneQuestion(id: Uuid, entree: AdminQuestionAnswerInput): AdminQuestion {

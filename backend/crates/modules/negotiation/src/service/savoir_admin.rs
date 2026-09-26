@@ -24,6 +24,7 @@ use crate::repo::savoir_faq as faq;
 use crate::repo::savoir_lexique as lexique;
 use crate::repo::savoir_parcours as parcours;
 use crate::repo::savoir_sources::{self as sources, Proprietaire};
+use crate::service::savoir_propositions;
 use crate::state::NegotiationState;
 
 pub struct Droits {
@@ -374,6 +375,19 @@ pub async fn creer_terme(
     ctx: &RequestContext,
     entree: &AdminGlossaryInput,
 ) -> Result<Uuid> {
+    let mut tx = state.db().write(ctx).await?;
+    let id = creer_terme_dans(&mut tx, ctx, entree).await?;
+    tx.commit().await?;
+    Ok(id)
+}
+
+/// Le brouillon, écrit dans la transaction de l'appelant : la création directe
+/// et l'acceptation d'un terme proposé.
+pub(crate) async fn creer_terme_dans(
+    conn: &mut PgConnection,
+    ctx: &RequestContext,
+    entree: &AdminGlossaryInput,
+) -> Result<Uuid> {
     let auteur = ctx.actor_id.ok_or_else(ApiError::unauthenticated)?;
     let term = entree
         .term
@@ -396,10 +410,9 @@ pub async fn creer_terme(
         .ok_or_else(|| ApiError::validation("La famille est obligatoire.", "family_code"))?;
     let variants = variantes(entree.variants.as_deref().unwrap_or_default());
 
-    let mut tx = state.db().write(ctx).await?;
-    let family_id = famille(&mut tx, code).await?;
+    let family_id = famille(conn, code).await?;
     let id = lexique::creer(
-        &mut tx,
+        conn,
         &lexique::Nouveau {
             family_id,
             term,
@@ -413,12 +426,11 @@ pub async fn creer_terme(
     )
     .await?;
     if let Some(s) = &entree.sources {
-        sources::remplacer(&mut tx, Proprietaire::Lexique(id), s).await?;
+        sources::remplacer(conn, Proprietaire::Lexique(id), s).await?;
     }
     if let Some(l) = &entree.related_ids {
-        lexique::remplacer_liees(&mut tx, id, l).await?;
+        lexique::remplacer_liees(conn, id, l).await?;
     }
-    tx.commit().await?;
     Ok(id)
 }
 
@@ -486,6 +498,9 @@ pub async fn changer_terme(
         .ok_or_else(terme_introuvable)?;
     let statut = arrivee(KnowledgeStatus::depuis(&depart), t)?;
     lexique::poser_le_statut(&mut tx, id, statut).await?;
+    if matches!(t, Transition::Publier) {
+        savoir_propositions::prevenir_les_auteurs(&mut tx, id).await?;
+    }
     tx.commit().await?;
     Ok(())
 }

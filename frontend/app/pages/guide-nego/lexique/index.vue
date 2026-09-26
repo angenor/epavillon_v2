@@ -76,6 +76,8 @@ const consultes = computed(() =>
 
 const vers = (e: GlossaryEntry) => `/guide-nego/lexique/${e.slug}`
 
+const proposition = ref(false)
+
 function ouvrirLePremier(): void {
   const premier = resultats.value.trouves[0]?.valeur
   if (premier) void navigateTo(vers(premier))
@@ -154,14 +156,15 @@ useHead({ title: t('guide-nego.lexique.titre') })
           <p class="gn-lexique__glyphe" aria-hidden="true">Aa</p>
           <h2 class="gn-lexique__aucun-titre">{{ t('guide-nego.lexique.aucun.titre', { terme: cherche }) }}</h2>
           <p class="gn-lexique__aucun-texte">{{ t('guide-nego.lexique.aucun.texte') }}</p>
-          <GnBouton picto="plus" desactive aria-describedby="gn-lexique-bientot">
+          <GnBouton picto="plus" @clic="proposition = true">
             {{ t('guide-nego.lexique.aucun.proposer', { terme: cherche }) }}
           </GnBouton>
-          <p id="gn-lexique-bientot" class="gn-lexique__bientot">{{ t('guide-nego.lexique.aucun.bientot') }}</p>
           <NuxtLink to="/guide-nego/lexique/liste" class="gn-lexique__parcourir">{{ t('guide-nego.lexique.parcourir') }}</NuxtLink>
         </div>
       </template>
     </div>
+
+    <GnFeuilleProposerTerme v-model="proposition" :terme="cherche" />
   </GnEcran>
 </template>
 
@@ -238,8 +241,7 @@ useHead({ title: t('guide-nego.lexique.titre') })
   overflow-wrap: anywhere;
 }
 
-[data-app="guide-nego"] .gn-lexique__aucun-texte,
-[data-app="guide-nego"] .gn-lexique__bientot {
+[data-app="guide-nego"] .gn-lexique__aucun-texte {
   color: var(--gn-texte-2);
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);

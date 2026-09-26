@@ -23,6 +23,8 @@ export const CLE_PARCOURS_FUSIONNE = 'gn.parcours-fusionne'
 export const CLE_FAQ_LUES = 'gn.faq.lues'
 /** L'écran où revenir après la connexion, quand un geste réservé au compte y a mené. */
 export const CLE_RETOUR_APRES_CONNEXION = 'gn.retour-apres-connexion'
+/** Le terme qu'une personne sans compte proposait, gardé le temps de se connecter. */
+export const CLE_TERME_PROPOSE = 'gn.terme-propose'
 /** Le rappel d'une session a été montré ; la valeur est son début, qu'un déplacement change. */
 export const cleRappelVu = (sessionId: string) => `gn.rappel.vu.${sessionId}`
 

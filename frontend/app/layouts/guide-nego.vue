@@ -71,6 +71,7 @@ useGnFavoris()
 useGnFavorisLexique()
 useGnParcours()
 useGnQuestions()
+useGnTermesProposes()
 // Le savoir se garde dès l'ouverture : le lexique se lit sans réseau même jamais ouvert (FR-002).
 const savoir = useGnSavoir()
 // Le rappel vit ici pour paraître sur tout écran ; il inscrit aussi l'expéditeur de l'agenda.

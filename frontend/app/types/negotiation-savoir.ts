@@ -215,3 +215,24 @@ export interface MyQuestion {
 export interface MyQuestionList {
   questions: MyQuestion[]
 }
+
+// ---------------------------------------------------------------------------
+// Termes proposés — `POST /negotiation/glossary/proposals`, tout compte
+// ---------------------------------------------------------------------------
+
+export interface ProposalInput {
+  /** Choisie par le téléphone : une proposition rejouée ne compte qu'une fois. */
+  client_ref: Uuid
+  /** 200 caractères au plus. */
+  term: string
+  /** « Où l'avez-vous entendu ? » — 600 caractères au plus. */
+  context?: string | null
+}
+
+/** Le terme d'une proposition déjà en attente, quand la personne s'y est ajoutée. */
+export interface ProposalReceipt {
+  id: Uuid
+  client_ref: Uuid
+  term: string
+  created_at: IsoDateTime
+}

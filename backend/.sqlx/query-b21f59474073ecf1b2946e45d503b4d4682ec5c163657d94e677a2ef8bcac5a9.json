@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.glossary_proposals\n            SET status = 'accepted', glossary_entry_id = $2, handled_by = $3, handled_at = now()\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b21f59474073ecf1b2946e45d503b4d4682ec5c163657d94e677a2ef8bcac5a9"
+}

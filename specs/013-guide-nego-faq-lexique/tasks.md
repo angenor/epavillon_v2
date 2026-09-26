@@ -170,10 +170,10 @@ description: "Tâches de l'étape 2 — FAQ, parcours « Ma première COP » et 
 
 **Test indépendant** : quickstart § 5 étapes 2 et 3.
 
-- [ ] T069 [US7] Route `POST /negotiation/glossary/proposals` (regroupement par `term_norm`, `NEGOTIATION_GLOSSARY_TERM_EXISTS`, plafond) ; file, part « propositions » : lecture avec entrées proches par `similarity`, `accept`, `reject` ; travail `negotiation.glossary_proposal.published_email` (file par défaut, clé `(proposal_id, person_id)`) mis en file à la **publication** d'une entrée née d'une proposition, gabarit `fr`/`en` dans `src/mail.rs`, enregistré dans `lib.rs::job_handlers()` ; tests `tests/savoir_propositions.rs` (regroupement, rejeu, anonymat, courriels)
-- [ ] T070 [US7] Feuille « Proposer un terme » (terme prérempli, contexte 600, sans compte → connexion en gardant la saisie) ouverte depuis « aucun résultat » du lexique et de la recherche globale ; onglet « Termes proposés » de la file au back-office
-- [ ] T071 [US8] Créer `frontend/app/components/guide-nego/GnFeuilleTerme.vue` (entrée résolue par `resoudreLeTerme`, pages du document, « Ouvrir dans le lexique », « Revenir au texte » ; sinon « pas encore dans le lexique » et « Proposer ») sur la planche, et y déplacer la feuille de `pages/guide-nego/ressources/documents/[id]/lire.vue`
-- [ ] T072 [US7] [US8] i18n ; vérifier quickstart § 5 étapes 2 et 3
+- [x] T069 [US7] Route `POST /negotiation/glossary/proposals` (regroupement par `term_norm`, `NEGOTIATION_GLOSSARY_TERM_EXISTS`, plafond) ; file, part « propositions » : lecture avec entrées proches par `similarity`, `accept`, `reject` ; travail `negotiation.glossary_proposal.published_email` (file par défaut, clé `(proposal_id, person_id)`) mis en file à la **publication** d'une entrée née d'une proposition, gabarit `fr`/`en` dans `src/mail.rs`, enregistré dans `lib.rs::job_handlers()` ; tests `tests/savoir_propositions.rs` (regroupement, rejeu, anonymat, courriels)
+- [x] T070 [US7] Feuille « Proposer un terme » (terme prérempli, contexte 600, sans compte → connexion en gardant la saisie) ouverte depuis « aucun résultat » du lexique et de la recherche globale ; onglet « Termes proposés » de la file au back-office
+- [x] T071 [US8] Créer `frontend/app/components/guide-nego/GnFeuilleTerme.vue` (entrée résolue par `resoudreLeTerme`, pages du document, « Ouvrir dans le lexique », « Revenir au texte » ; sinon « pas encore dans le lexique » et « Proposer ») sur la planche, et y déplacer la feuille de `pages/guide-nego/ressources/documents/[id]/lire.vue`
+- [x] T072 [US7] [US8] i18n ; vérifier quickstart § 5 étapes 2 et 3
 
 ---
 

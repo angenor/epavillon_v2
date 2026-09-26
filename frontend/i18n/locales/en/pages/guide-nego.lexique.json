@@ -14,8 +14,7 @@
   "aucun": {
     "titre": "“{terme}” is not in the glossary yet",
     "texte": "Suggest it: an IFDD expert will define it and add it for everyone. You will be notified.",
-    "proposer": "Suggest “{terme}”",
-    "bientot": "Suggesting terms opens soon."
+    "proposer": "Suggest “{terme}”"
   },
   "vide": {
     "titre": "The glossary is still empty",

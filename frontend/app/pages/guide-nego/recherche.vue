@@ -176,6 +176,8 @@ const compteDesSessions = computed(() => {
   return t('guide-nego.recherche.sessions.le-jour', { count: n, jour: dayLong(`${jour.value}T12:00:00Z`, 'UTC') }, n)
 })
 
+const proposition = ref(false)
+
 const total = computed(
   () => lexique.value.length + faq.value.length + lignesDeDocuments.value.length + sessionsDuJour.value.length,
 )
@@ -277,10 +279,9 @@ useHead({ title: t('guide-nego.recherche.titre') })
         <div v-if="total === 0" class="gn-recherche__aucun">
           <h2 class="gn-recherche__aucun-titre">{{ t('guide-nego.recherche.aucun.titre', { terme: cherche }) }}</h2>
           <p class="gn-recherche__aucun-texte">{{ t('guide-nego.recherche.aucun.texte') }}</p>
-          <GnBouton picto="plus" desactive aria-describedby="gn-recherche-bientot">
+          <GnBouton picto="plus" @clic="proposition = true">
             {{ t('guide-nego.recherche.aucun.proposer', { terme: cherche }) }}
           </GnBouton>
-          <p id="gn-recherche-bientot" class="gn-recherche__ligne">{{ t('guide-nego.recherche.aucun.bientot') }}</p>
         </div>
 
         <p v-if="telephoneSeul" class="gn-recherche__ligne">
@@ -291,6 +292,8 @@ useHead({ title: t('guide-nego.recherche.titre') })
 
       <p class="gn-recherche__ligne gn-recherche__pas-encore">{{ t('guide-nego.recherche.pas-encore') }}</p>
     </div>
+
+    <GnFeuilleProposerTerme v-model="proposition" :terme="cherche" />
   </GnEcran>
 </template>
 

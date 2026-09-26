@@ -19,5 +19,9 @@
   "groupe-propos": "La recherche globale range ses résultats par contenu, dans l'ordre Lexique, FAQ, Documents, Sessions. Nom en capitales et compte nommé à droite ; les lignes sont celles de chaque contenu, la saisie marquée en gras souligné ; au-delà de cinq, un lien mène à la suite dans l'écran du contenu.",
   "groupe-lexique": "Lexique",
   "groupe-compte": "7 entrées",
-  "groupe-suite": "Les 7 entrées dans le lexique"
+  "groupe-suite": "Les 7 entrées dans le lexique",
+  "feuille-terme": "Feuille du terme touché",
+  "feuille-terme-propos": "Le lecteur l'ouvre quand on touche un terme anglais en italique. Elle se remplit depuis le lexique gardé, sans réseau : famille, terme, traduction, définition, pages du document, « Ouvrir dans le lexique ». Absent, elle le dit et offre de le proposer, dans la feuille « Proposer un terme ».",
+  "feuille-terme-present": "Terme au lexique",
+  "feuille-terme-absent": "Terme absent"
 }

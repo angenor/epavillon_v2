@@ -21,8 +21,7 @@ const localePath = useLocalePath()
 
 useHead(() => ({ title: t('admin.negociations.file.title') }))
 
-// Les termes proposés (phase 11) s'ajoutent ici.
-const ONGLETS: ExpertQueueKind[] = ['reports', 'questions']
+const ONGLETS: ExpertQueueKind[] = ['reports', 'questions', 'proposals']
 
 const { data: granted, status: permissionStatus } = await useAsyncData<EffectivePermission[]>(
   'admin-negotiation-permissions',
@@ -64,7 +63,11 @@ function choisirOnglet(valeur: string): void {
 const chargement = computed(() => status.value === 'pending' && queue.value?.kind !== onglet.value)
 const groupes = computed(() => queue.value?.reports ?? [])
 const questions = computed(() => queue.value?.questions ?? [])
-const vide = computed(() => (onglet.value === 'questions' ? questions.value : groupes.value).length === 0)
+const propositions = computed(() => queue.value?.proposals ?? [])
+const vide = computed(
+  () =>
+    ({ reports: groupes.value, questions: questions.value, proposals: propositions.value })[onglet.value].length === 0,
+)
 
 const aClore = ref<{ reportId: Uuid; outcome: FaqReportOutcome } | null>(null)
 const cloture = ref(false)
@@ -145,6 +148,25 @@ function demanderPromotion(id: Uuid, sectionCode: string): void {
   resultat.value = null
   promue.value = null
   aPromouvoir.value = { id, sectionCode }
+}
+
+const enRejet = ref<Uuid | null>(null)
+const echecProposition = ref<{ id: Uuid; message: string } | null>(null)
+
+async function rejeter(id: Uuid, reason: string): Promise<void> {
+  if (enRejet.value) return
+  enRejet.value = id
+  echecProposition.value = null
+  resultat.value = null
+  try {
+    await api.adminNegotiationSavoir.rejeterUneProposition(id, { reason })
+    resultat.value = t('admin.negociations.file.proposal.reject.done')
+  } catch (erreur) {
+    echecProposition.value = { id, message: apiErrorMessage(erreur, t) }
+  } finally {
+    enRejet.value = null
+  }
+  await refresh()
 }
 
 async function promouvoir(): Promise<void> {
@@ -228,6 +250,17 @@ async function promouvoir(): Promise<void> {
                 :error="echecQuestion?.id === question.id ? echecQuestion.message : null"
                 @answer="repondre"
                 @promote="demanderPromotion"
+              />
+            </li>
+          </ul>
+
+          <ul v-else-if="onglet === 'proposals'" class="space-y-4">
+            <li v-for="proposition in propositions" :key="proposition.id">
+              <AdminNegotiationQueueProposal
+                :proposal="proposition"
+                :rejecting="enRejet === proposition.id"
+                :error="echecProposition?.id === proposition.id ? echecProposition.message : null"
+                @reject="rejeter"
               />
             </li>
           </ul>

@@ -44,11 +44,6 @@
     "ambigu": "These words appear several times on this page, so no single match is highlighted.",
     "introuvable": "The passage is on this page, but it cannot be highlighted."
   },
-  "terme": {
-    "lexique": "The translation and definition of this term will come with the English-French glossary.",
-    "pages": "In this document: p. {pages}.",
-    "revenir": "Back to the text"
-  },
   "bascule": "This phone cannot display this document's pages, so it opens in “Large text”.",
   "impossible": {
     "titre": "This phone cannot display this document",
