@@ -80,6 +80,8 @@ const accesLimite = computed(() => {
       <GnMarqueEtat :etat="etat" />
       <GnEtiquettePavillon v-if="reunion.pavilion_session_id" class="gn-ligne-reunion__pavillon" />
     </span>
+
+    <GnPicto nom="chevron" :taille="24" class="gn-ligne-reunion__chevron" />
   </div>
 </template>
 
@@ -181,6 +183,11 @@ const accesLimite = computed(() => {
   color: var(--gn-texte-2);
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
+}
+
+[data-app="guide-nego"] .gn-ligne-reunion__chevron {
+  flex: none;
+  color: var(--gn-picto-secondaire);
 }
 
 [data-app="guide-nego"] .gn-ligne-reunion__lieu .gn-picto {

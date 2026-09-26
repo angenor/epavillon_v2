@@ -11,6 +11,7 @@ use kernel::mail::Mailer;
 use serde::{Deserialize, Serialize};
 use sqlx::postgres::PgConnection;
 use std::sync::Arc;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 use crate::jobs::change_email::Cible;
@@ -25,8 +26,11 @@ struct Charge {
     person_id: Uuid,
 }
 
+/// Une clé par promotion : la même personne peut regagner une place à la même
+/// réunion après l'avoir quittée, et la clé ne se libère jamais.
 pub fn cle(meeting_id: Uuid, person_id: Uuid) -> String {
-    format!("promotion:{meeting_id}:{person_id}")
+    let instant = OffsetDateTime::now_utc().unix_timestamp_nanos();
+    format!("promotion:{meeting_id}:{person_id}:{instant}")
 }
 
 pub async fn poser(conn: &mut PgConnection, meeting_id: Uuid, person_id: Uuid) -> Result<()> {

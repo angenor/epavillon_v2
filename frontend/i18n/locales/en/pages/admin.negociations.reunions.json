@@ -128,7 +128,7 @@
       "hint": "Off, choose the organisation holding it."
     },
     "organizer": {
-      "search": "Organisation",
+      "search": "Organization",
       "searchHint": "Name, acronym or former name: every name is searched.",
       "searchError": "The search failed. Try again.",
       "none": "No organisation matches.",

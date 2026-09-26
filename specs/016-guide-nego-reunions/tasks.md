@@ -62,11 +62,11 @@
 
 ## Phase 9 — Recette
 
-- [ ] T031 Quickstart entier, version construite, 360 px, clair et sombre ; corriger
-- [ ] T032 [P] Écarts de l'étape dans `docs/AppNego/05-design.md` (à la suite du dernier numéro)
-- [ ] T033 [P] § 15 de `docs/DEPLOIEMENT.md` : migration 016 dans l'ordre ; essais sur appareil réel (s'inscrire en mode avion, lien visio hors connexion, liste d'attente)
-- [ ] T034 i18n `en` contre `fr`, clé pour clé
-- [ ] T035 Une ligne au journal de `docs/AppNego/progress.md` (la ligne d'état à la clôture)
+- [x] T031 Quickstart entier, version construite, 360 px, clair et sombre ; corriger
+- [x] T032 [P] Écarts de l'étape dans `docs/AppNego/05-design.md` (à la suite du dernier numéro)
+- [x] T033 [P] § 15 de `docs/DEPLOIEMENT.md` : migration 016 dans l'ordre ; essais sur appareil réel (s'inscrire en mode avion, lien visio hors connexion, liste d'attente)
+- [x] T034 i18n `en` contre `fr`, clé pour clé
+- [x] T035 Une ligne au journal de `docs/AppNego/progress.md` (la ligne d'état à la clôture)
 
 ## Dependencies
 

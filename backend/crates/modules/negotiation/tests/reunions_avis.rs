@@ -418,7 +418,13 @@ async fn se_desinscrire_previent_la_promue() {
 
     let poses = travaux(&d, COURRIEL_PLACE).await;
     assert_eq!(poses.len(), 1);
-    assert_eq!(poses[0].2, format!("promotion:{}:{}", s.reunion, s.bea));
+    assert!(
+        poses[0]
+            .2
+            .starts_with(&format!("promotion:{}:{}:", s.reunion, s.bea)),
+        "{}",
+        poses[0].2
+    );
     assert!(
         avis(&d, CHANGEE).await.is_empty(),
         "une place n'est pas un changement"
@@ -439,6 +445,23 @@ async fn se_desinscrire_previent_la_promue() {
         "{}",
         messages[0].text
     );
+}
+
+#[tokio::test]
+async fn une_seconde_promotion_a_la_meme_reunion_a_son_courriel() {
+    let d = Decor::monter().await;
+    let app = administration!(d);
+    let s = scene!(&d, &app);
+
+    frapper!(&app, desinscrire(Some(s.awa), s.reunion));
+    frapper!(&app, desinscrire(Some(s.bea), s.reunion));
+    frapper!(&app, inscrire(Some(s.awa), s.reunion, Uuid::now_v7()));
+    frapper!(&app, inscrire(Some(s.bea), s.reunion, Uuid::now_v7()));
+    let r = frapper!(&app, desinscrire(Some(s.awa), s.reunion));
+    assert!(r.statut.is_success(), "{}", r.brut);
+
+    assert_eq!(avis(&d, PROMUE).await.len(), 2);
+    assert_eq!(travaux(&d, COURRIEL_PLACE).await.len(), 2);
 }
 
 #[tokio::test]

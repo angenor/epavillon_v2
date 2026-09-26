@@ -109,7 +109,7 @@ const legende = computed(() => {
         <NuxtLink to="/guide-nego/negociations" class="gn-reunions__renvoi">{{ k('negociations') }}</NuxtLink>
       </template>
       <template #pavillon>
-        <NuxtLink :to="{ query: { section: 'pavillon' } }" class="gn-reunions__renvoi">{{ k('pavillon') }}</NuxtLink>
+        <NuxtLink :to="{ query: { section: 'pavillon' } }" class="gn-reunions__renvoi" aria-current="false">{{ k('pavillon') }}</NuxtLink>
       </template>
     </i18n-t>
   </div>
@@ -143,7 +143,7 @@ const legende = computed(() => {
 
 /* Dans la phrase, la cible déborde en hauteur jusqu'à 48 px (ligne de 22 px + 2 × 13). */
 [data-app="guide-nego"] .gn-reunions__renvoi {
-  padding-block: 13px;
+  padding-block: 14px;
   color: var(--gn-accent);
   font-weight: var(--gn-graisse-gras);
   text-decoration: underline;
