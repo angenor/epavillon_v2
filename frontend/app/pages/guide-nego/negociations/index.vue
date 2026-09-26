@@ -203,6 +203,7 @@ useHead({ title: t('guide-nego.negociations.titre') })
     :titre="t('guide-nego.negociations.titre')"
     :sous-titre="sousTitre"
     :ce-qui-se-lit="t('guide-nego.negociations.hors-connexion')"
+    cloche
   >
     <template #connexion>
       <span v-if="connexionCoupee" class="gn-sessions__injoignable">

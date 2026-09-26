@@ -4,7 +4,7 @@
  * anglais se cherche en salle, sans revenir en arrière.
  *
  * **L'avatar et le retour s'excluent** : un écran d'onglet porte l'avatar, qui ouvre
- * le profil ; un écran secondaire porte le retour. La cloche vient avec 3b.
+ * le profil ; un écran secondaire porte le retour. La cloche passe par l'emplacement `action`.
  */
 export interface AvatarDEntete {
   prenom: string | null
@@ -81,7 +81,12 @@ const { t } = useI18n()
       <h1 class="gn-entete__titre">{{ titre }}</h1>
     </div>
     <h1 v-else-if="!compact" class="gn-entete__titre">{{ titre }}</h1>
-    <p v-if="sousTitre && !compact" class="gn-entete__sous-titre">{{ sousTitre }}</p>
+    <div v-if="sousTitre && !compact && $slots['sous-titre-action']" class="gn-entete__ligne">
+      <p class="gn-entete__sous-titre">{{ sousTitre }}</p>
+      <!-- Une commande qui porte sur tout l'écran : « Tout marquer comme lu » (02 · 10). -->
+      <slot name="sous-titre-action" />
+    </div>
+    <p v-else-if="sousTitre && !compact" class="gn-entete__sous-titre">{{ sousTitre }}</p>
   </header>
 </template>
 
@@ -172,6 +177,14 @@ const { t } = useI18n()
   color: var(--gn-texte-2);
   text-align: center;
   overflow-wrap: anywhere;
+}
+
+[data-app="guide-nego"] .gn-entete__ligne {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  column-gap: var(--gn-espace-12);
 }
 
 [data-app="guide-nego"] .gn-entete__sous-titre {

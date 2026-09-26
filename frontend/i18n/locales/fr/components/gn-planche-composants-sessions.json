@@ -39,5 +39,13 @@
   "aparte": "Aparté sur les indicateurs d'adaptation",
   "couloir": "Couloir du bâtiment B",
   "point-sahel": "Point des négociatrices du Sahel",
-  "reseau-garde": "Le signalement du réseau ci-dessous ne vient pas du programme officiel : il reste affiché."
+  "reseau-garde": "Le signalement du réseau ci-dessous ne vient pas du programme officiel : il reste affiché.",
+  "cloche": "Cloche de l'en-tête — rien, 3 non lues, « 9+ » au-delà de neuf ; compteur jaune, cible de 48 px",
+  "notifications": "Ligne du centre de notifications — non lue en 600 avec le carré jaune, lue en graisse normale",
+  "notif-aparte": "Non annoncée — Aparté sur les indicateurs d'adaptation",
+  "notif-aparte-corps": "Non annoncée — 12 novembre à 16:30, couloir du bâtiment B, signalé par le réseau et validé par l'IFDD. Sessions de négociation",
+  "notif-genre": "Déplacée — Groupe de contact sur le plan d'action genre",
+  "notif-genre-corps": "Déplacée — nouvelle heure 15:00 (heure d'Antalya), selon la source officielle. Sessions de négociation",
+  "notif-transition": "Annulée — Consultations informelles sur la transition juste",
+  "notif-transition-corps": "Annulée — la session n'aura pas lieu, selon la source officielle. Sessions de négociation"
 }

@@ -39,5 +39,13 @@
   "aparte": "Side meeting on adaptation indicators",
   "couloir": "Building B corridor",
   "point-sahel": "Sahel women negotiators' check-in",
-  "reseau-garde": "The network report below does not come from the official programme: it stays on display."
+  "reseau-garde": "The network report below does not come from the official programme: it stays on display.",
+  "cloche": "Header bell — none, 3 unread, “9+” above nine; yellow counter, 48 px target",
+  "notifications": "Notification centre row — unread in 600 with the yellow square, read in regular weight",
+  "notif-aparte": "Unannounced — Side meeting on adaptation indicators",
+  "notif-aparte-corps": "Unannounced — November 12 at 16:30, building B corridor, reported by the network and validated by IFDD. Negotiation sessions",
+  "notif-genre": "Moved — Contact group on the gender action plan",
+  "notif-genre-corps": "Moved — new time 15:00 (Antalya time), per the official source. Negotiation sessions",
+  "notif-transition": "Cancelled — Informal consultations on the just transition",
+  "notif-transition-corps": "Cancelled — the session will not take place, per the official source. Negotiation sessions"
 }

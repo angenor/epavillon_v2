@@ -108,8 +108,8 @@ export function useGnNotifications() {
     await appliquer(ids)
     if (tout) await file.poser(CLE_TOUT_MARQUER, { ids, tout: true } satisfies MarquageEnFile, null)
     else for (const id of ids) await file.poser(`${PREFIXE_FILE_LU}${id}`, { ids: [id] } satisfies MarquageEnFile, null)
-    await file.partir()
-    await relireLaFile()
+    // Sans attendre le réseau : la fiche s'ouvre aussitôt, la lecture part quand elle peut.
+    void file.partir().finally(relireLaFile)
   }
 
   return {

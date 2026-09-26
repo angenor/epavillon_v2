@@ -48,5 +48,12 @@
       "hier": "Hier, {heure}",
       "avant": "{jour}, {heure}"
     }
+  },
+  "notifications": {
+    "titre": "Notifications par thématique",
+    "agenda": "Les sessions de « Mon agenda » vous préviennent toujours. Une thématique allumée ajoute ses autres sessions.",
+    "detail": "Toutes les sessions de cette thématique, même hors de votre agenda",
+    "choisir": "Mes thématiques",
+    "choisir-detail": "Aucune thématique suivie : choisissez-en une pour régler ses notifications"
   }
 }

@@ -48,5 +48,12 @@
       "hier": "Yesterday, {heure}",
       "avant": "{jour}, {heure}"
     }
+  },
+  "notifications": {
+    "titre": "Notifications by theme",
+    "agenda": "Sessions in “My agenda” always notify you. A theme switched on adds its other sessions.",
+    "detail": "Every session in this theme, even outside your agenda",
+    "choisir": "My themes",
+    "choisir-detail": "No theme followed: choose one to set its notifications"
   }
 }

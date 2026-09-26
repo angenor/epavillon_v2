@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Notification } from '~/types/engagement'
 import type { NetworkMeeting, NetworkReport, OfficialSession } from '~/types/negotiation-sessions'
 import type { EtatAffiche } from '~/utils/guide-nego/sessions'
 
@@ -137,6 +138,27 @@ const reunions = computed<NetworkMeeting[]>(() => [
   { id: 'sans-heure', title: k('point-sahel'), venue: null, start_at: null, day: '2026-11-12', theme: null, validated_at: le12('11:20') },
 ])
 
+const avis = (id: string, type_code: string, variables: Record<string, unknown>, heure: string, lue: boolean): Notification => ({
+  id,
+  type_code,
+  title: { fr: k(`notif-${id}`) },
+  body: { fr: k(`notif-${id}-corps`) },
+  variables,
+  link_path: VERS,
+  subject_schema: null,
+  subject_table: null,
+  subject_id: null,
+  group_count: 1,
+  read_at: lue ? le12('11:40') : null,
+  created_at: le12(heure),
+})
+
+const notifications = computed<Notification[]>(() => [
+  avis('aparte', 'negotiation.network_meeting.published', { reason: 'unannounced' }, '11:12', false),
+  avis('genre', 'negotiation.meeting.changed', { change: 'deplacee' }, '09:48', false),
+  avis('transition', 'negotiation.meeting.changed', { change: 'annulee' }, '09:30', true),
+])
+
 const reportee = computed(() =>
   specimen('reportee', { status: 'cancelled', cancelled: { at: le12('08:45'), reason: 'postponed' } }),
 )
@@ -254,6 +276,26 @@ const reportee = computed(() =>
           :fuseau="FUSEAU"
           :ville="VILLE"
           @envoyer="feuilleSignaler = false"
+        />
+      </div>
+
+      <span class="gn-planche-composants__legende">{{ k('cloche') }}</span>
+      <div class="gn-planche-composants__vitrine">
+        <div class="gn-planche-composants__rangee">
+          <GnCloche :non-lues="0" vers="#" />
+          <GnCloche :non-lues="3" vers="#" />
+          <GnCloche :non-lues="12" vers="#" />
+        </div>
+      </div>
+
+      <span class="gn-planche-composants__legende">{{ k('notifications') }}</span>
+      <div class="gn-planche-composants__vitrine">
+        <GnLigneNotification
+          v-for="(n, i) in notifications"
+          :key="n.id"
+          :notification="n"
+          :fuseau="FUSEAU"
+          :derniere="i === notifications.length - 1"
         />
       </div>
 

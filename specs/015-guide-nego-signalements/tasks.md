@@ -85,10 +85,10 @@
 
 ## Phase 8 — US4, US5 : notifier (écrans)
 
-- [ ] T036 [US4] Créer `GnCloche` (compteur jaune, 48 px, libellé) dans l'emplacement `action` de `GnEntete` (accueil et onglets) et `GnLigneNotification` ; planche
-- [ ] T037 [US4] Écran `fe/app/pages/guide-nego/notifications.vue` (par jour dans le fuseau de la COP, non lue en 600 + carré jaune, toucher → lu + fiche, « Tout marquer comme lu », vide, hors connexion)
-- [ ] T038 [US5] Profil `ressources/reglages.vue` : « Notifications par thématique » (une ligne par thématique suivie, éteinte par défaut) ; « À propos » : l'interrupteur « Notifications » (courriel) et sa phrase
-- [ ] T039 Vérifier au navigateur : quickstart § 4, § 5 (Mailpit)
+- [x] T036 [US4] Créer `GnCloche` (compteur jaune, 48 px, libellé) dans l'emplacement `action` de `GnEntete` (accueil et onglets) et `GnLigneNotification` ; planche
+- [x] T037 [US4] Écran `fe/app/pages/guide-nego/notifications.vue` (par jour dans le fuseau de la COP, non lue en 600 + carré jaune, toucher → lu + fiche, « Tout marquer comme lu », vide, hors connexion)
+- [x] T038 [US5] Profil `ressources/reglages.vue` : « Notifications par thématique » (une ligne par thématique suivie, éteinte par défaut) ; « À propos » : l'interrupteur « Notifications » (courriel) et sa phrase
+- [x] T039 Vérifier au navigateur : quickstart § 4, § 5 (Mailpit)
 
 **Commit** : « feat(guide-nego): étape 3b, phase 8 — notifier ».
 

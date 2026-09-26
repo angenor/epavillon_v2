@@ -381,3 +381,19 @@ export function notificationsParJour(items: readonly Notification[], fuseau: str
   }
   return [...jours].map(([jour, notifications]) => ({ jour, notifications }))
 }
+
+const CHANGEMENT_IMPORTE: Record<string, ReportReason> = { annulee: 'cancelled', deplacee: 'time', sallechangee: 'venue' }
+
+/** Le pictogramme d'un avis : le motif du changement, ou la décision sur son propre signalement. */
+export function dessinDeNotification(n: Notification): { picto: NomDePicto; teinte: NomDEtat | null } {
+  const v = n.variables
+  if (n.type_code === 'negotiation.report.decided') {
+    return v.status === 'rejected' ? { picto: 'x-circle', teinte: 'non-retenu' } : { picto: 'check-circle', teinte: 'valide' }
+  }
+  const motif = typeof v.change === 'string' ? CHANGEMENT_IMPORTE[v.change] : typeof v.reason === 'string' ? v.reason : undefined
+  if (motif && motif in DESSIN_DU_MOTIF) return DESSIN_DU_MOTIF[motif as ReportReason]
+  return n.type_code === 'negotiation.network_meeting.published' ? DESSIN_DU_MOTIF.unannounced : { picto: 'bell', teinte: null }
+}
+
+/** « 9+ » au-delà de neuf : la cloche garde sa largeur. */
+export const compteurDeCloche = (n: number) => (n > 9 ? '9+' : String(n))

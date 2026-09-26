@@ -6,7 +6,9 @@ import type { NetworkMeeting, NetworkReport } from '../../app/types/negotiation-
 import {
   apresDecision,
   corpsDeLaReunion,
+  compteurDeCloche,
   corpsDuChangement,
+  dessinDeNotification,
   avecLesLectures,
   debutDeTri,
   encartsAffiches,
@@ -307,4 +309,21 @@ test('une réunion non annoncée exige « Quoi », le reste est facultatif', () 
     day: '2026-11-12',
     theme: null,
   })
+})
+
+test('notifications : le pictogramme dit le motif, ou la décision', () => {
+  const de = (type_code: string, variables: Record<string, unknown>) => dessinDeNotification({ ...avis('x', '2027-11-10T12:00:00Z'), type_code, variables })
+  assert.equal(de('negotiation.meeting.changed', { change: 'annulee' }).teinte, 'annulee')
+  assert.equal(de('negotiation.meeting.changed', { change: 'sallechangee' }).picto, 'pin')
+  assert.equal(de('negotiation.report.published', { reason: 'time' }).picto, 'moved')
+  assert.equal(de('negotiation.network_meeting.published', {}).picto, 'diamond')
+  assert.equal(de('negotiation.report.decided', { status: 'rejected' }).teinte, 'non-retenu')
+  assert.equal(de('negotiation.report.decided', { status: 'published' }).teinte, 'valide')
+  assert.equal(de('autre.chose', {}).picto, 'bell')
+})
+
+test('cloche : neuf au plus, puis « 9+ »', () => {
+  assert.equal(compteurDeCloche(3), '3')
+  assert.equal(compteurDeCloche(9), '9')
+  assert.equal(compteurDeCloche(12), '9+')
 })

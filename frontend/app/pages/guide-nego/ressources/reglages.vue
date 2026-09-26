@@ -8,8 +8,8 @@ import { tailleLisible } from '~/utils/guide-nego/place'
 /**
  * Écran 11 — « Profil et réglages ». En tête, le nom et le pays avec l'avatar ;
  * puis « Mon suivi », « Affichage », « Application », et le compte avec sa
- * déconnexion, tels que 0b les a posés. Les notifications par thématique
- * viennent avec leur centre, à l'étape 3b.
+ * déconnexion, tels que 0b les a posés ; « Notifications par thématique »
+ * depuis 3b — une ligne allumée élargit, elle ne coupe jamais l'agenda (FR-031).
  *
  * LA LIGNE « MON ACCÈS » PORTE L'ÉTAT, JAMAIS UN RÔLE. La maquette écrit
  * « Négociatrice — réseau » en second rang : cette formule est genrée et ne se
@@ -27,9 +27,27 @@ const thematiques = useGnThematiques()
 const pays = useGnPays()
 const connexion = useGnConnexion()
 const copies = useGnCopies()
+const reglageNotifications = useGnReglageNotifications()
 const { momentLisible } = useGnMomentLecture()
 
 const confirmation = ref(false)
+
+/** Les suivies dont le nom est connu : jamais un code brut (FR-022). */
+const thematiquesNotifiables = computed(() =>
+  thematiques.mesCodes.value.flatMap((code) => {
+    const nom = thematiques.nomDe(code)
+    return nom ? [{ code, nom }] : []
+  }),
+)
+
+function notifiee(code: string): boolean {
+  return reglageNotifications.notifiees.value.includes(code)
+}
+
+function basculer(code: string, allumee: boolean): void {
+  const autres = reglageNotifications.notifiees.value.filter((c) => c !== code)
+  void reglageNotifications.notifierDesThematiques(allumee ? [...autres, code] : autres)
+}
 
 onMounted(async () => {
   session.relireAuRetourAuPremierPlan()
@@ -39,6 +57,7 @@ onMounted(async () => {
   void acces.assurer()
   void thematiques.assurer()
   void pays.assurer()
+  reglageNotifications.assurer()
 })
 
 const compte = session.compte
@@ -164,6 +183,30 @@ useHead({ title: t('guide-nego.reglages.titre') })
       <p class="gn-reglages__aide">{{ t('guide-nego.reglages.taille.aide') }}</p>
     </section>
 
+    <template v-if="session.connectee.value">
+      <GnEnteteGroupe :titre="t('guide-nego.reglages.notifications.titre')" />
+      <p class="gn-reglages__aide gn-reglages__aide--espacee">{{ t('guide-nego.reglages.notifications.agenda') }}</p>
+      <template v-if="thematiquesNotifiables.length">
+        <GnInterrupteur
+          v-for="(th, i) in thematiquesNotifiables"
+          :key="th.code"
+          :model-value="notifiee(th.code)"
+          :libelle="th.nom"
+          :detail="t('guide-nego.reglages.notifications.detail')"
+          :derniere="i === thematiquesNotifiables.length - 1"
+          @update:model-value="basculer(th.code, $event)"
+        />
+      </template>
+      <GnLigneReglage
+        v-else
+        :libelle="t('guide-nego.reglages.notifications.choisir')"
+        :valeur="t('guide-nego.reglages.notifications.choisir-detail')"
+        picto="filter"
+        vers="/guide-nego/thematiques"
+        derniere
+      />
+    </template>
+
     <GnEnteteGroupe :titre="t('guide-nego.reglages.application.titre')" />
     <GnLigneReglage
       :libelle="t('guide-nego.reglages.application.a-propos')"
@@ -250,6 +293,10 @@ useHead({ title: t('guide-nego.reglages.titre') })
   color: var(--gn-texte-2);
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
+}
+
+[data-app="guide-nego"] .gn-reglages__aide--espacee {
+  padding-top: var(--gn-espace-12);
 }
 
 [data-app="guide-nego"] .gn-reglages__aide--centree {

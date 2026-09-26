@@ -153,7 +153,7 @@ useHead({ title: t('guide-nego.accueil.titre') })
 </script>
 
 <template>
-  <GnEcran :titre="t('guide-nego.accueil.titre')" :sous-titre="sousTitre" :avatar="avatar">
+  <GnEcran :titre="t('guide-nego.accueil.titre')" :sous-titre="sousTitre" :avatar="avatar" cloche>
     <!-- Sans compte, l'écran s'ouvre quand même : il invite, il ne bloque pas. -->
     <template v-if="sansCompte">
       <p class="gn-journee__invitation">{{ t('guide-nego.accueil.sans-compte.texte') }}</p>
