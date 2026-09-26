@@ -666,10 +666,10 @@ Rien à redémarrer entre 3 et 4 : le drapeau se lit à chaque ouverture.
 
 ---
 
-## 15. Mettre en ligne 0a, 0b, 0c, les étapes 1, 1b, 3a, 3b et 4 (22/09, complété les 24, 25 et 26/09)
+## 15. Mettre en ligne 0a, 0b, 0c, les étapes 1, 1b, 3a, 3b, 4 et 5 (22/09, complété les 24, 25 et 26/09)
 
-Une seule mise en ligne porte les huit premières étapes de Guide Négo : le code de la branche, et
-**huit migrations**. Préparée ici, **pas encore exécutée**. Le drapeau reste éteint pendant toute
+Une seule mise en ligne porte les neuf premières étapes de Guide Négo : le code de la branche, et
+**neuf migrations**. Préparée ici, **pas encore exécutée**. Le drapeau reste éteint pendant toute
 la mise en ligne : le site ne voit que ce qui le touche (§ 3 ci-dessous), l'application ne s'ouvre
 qu'à la recette sur téléphones (§ 4).
 
@@ -685,8 +685,9 @@ qu'à la recette sur téléphones (§ 4).
 | 6 | `specs/014-guide-nego-sessions-agenda/migration.sql` | Les sessions de négociation (3a) : vocabulaires des types de réunion et des groupes ; points de l'ordre du jour ; colonnes de la source sur `negotiation.meetings` ; l'import, son journal, les écarts, les traductions de titres ; « Mon groupe » et « Mon agenda ». Sème le réglage `ai.drafting_model` et **l'import de la COP31, éteint**. Indépendante de celle de l'étape 2 : si l'étape 2 part dans la même mise en ligne, sa migration passe avant, dans l'ordre des numéros |
 | 7 | `specs/015-guide-nego-signalements/migration.sql` | Les signalements du réseau (3b) : la colonne `notify_changes` sur `negotiation.theme_subscriptions` ; les signalements, les réunions non annoncées et leur agenda ; les deux fonctions qui disent qui prévenir. Sème la permission `negotiation.report.validate` (donnée au rôle `admin`) et **quatre types de notification**. Passe **après** celle de 3a, dont elle étend les tables |
 | 8 | `specs/016-guide-nego-reunions/migration.sql` | Les réunions de la Francophonie (4) : le vocabulaire `francophone_meeting_type` et ses trois natures ; sur `negotiation.meetings`, la nature, le public d'un accès limité, le lien facultatif vers une activité du Pavillon (`ON DELETE SET NULL`), l'inscription requise et la liste d'attente ; sur `negotiation.meeting_registrations`, le rang d'attente et la référence du téléphone qui rend une inscription hors connexion unique ; la validation, la jauge et la promotion depuis l'attente. Sème **deux types de notification**. Aucune session importée n'est touchée. Passe **après** celle de 3b |
+| 9 | `specs/017-guide-nego-pavillon/migration.sql` | Le Pavillon de la Francophonie (5) : **aucune table**, un seul objet — la vue `programme.v_public_schedule` gagne neuf colonnes **en queue** (liste d'attente, inscription requise et sa fenêtre, nombre en attente, date du dernier changement, langues, rediffusion et sa durée). Celles que le site lit ne bougent pas. Aucune ligne semée. Passe **après** celle de l'étape 4 |
 
-Les huit sont **rejouables** : un second passage ne crée rien, ne perd rien, n'échoue pas.
+Les neuf sont **rejouables** : un second passage ne crée rien, ne perd rien, n'échoue pas.
 
 **Aucun réglage à ajouter à `.env.prod`.** Les deux réglages nouveaux ont un défaut, et ce défaut
 est la valeur voulue :
@@ -762,7 +763,7 @@ psql postgres://postgres:dev@localhost:5442/postgres -c 'CREATE DATABASE copie_p
 gunzip -c sauvegardes/epavillon-AAAAMMJJ-HHMMSS.sql.gz | psql "$COPIE"
 
 for passage in 1 2; do          # deux passages : le second ne doit rien changer
-  for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf 014-guide-nego-sessions-agenda 015-guide-nego-signalements 016-guide-nego-reunions; do
+  for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf 014-guide-nego-sessions-agenda 015-guide-nego-signalements 016-guide-nego-reunions 017-guide-nego-pavillon; do
     psql "$COPIE" -v ON_ERROR_STOP=1 -f "specs/$etape/migration.sql" || exit 1
   done
 done
@@ -815,7 +816,7 @@ Dans l'ordre du § 13, chaque étape pour sa raison :
 3. **Déposer les migrations** hors du dossier synchronisé, renommées — elles s'appellent toutes
    `migration.sql` :
    ```bash
-   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf 014-guide-nego-sessions-agenda 015-guide-nego-signalements 016-guide-nego-reunions; do
+   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf 014-guide-nego-sessions-agenda 015-guide-nego-signalements 016-guide-nego-reunions 017-guide-nego-pavillon; do
      scp "specs/$etape/migration.sql" "root@<serveur>:/root/epavillon-migrations/$etape.sql"
    done
    ```
@@ -828,7 +829,7 @@ Dans l'ordre du § 13, chaque étape pour sa raison :
    Puis **le bucket privé**, avant de migrer : `ops/init-garage-prod.sh` (rejouable).
 5. **Migrer, puis redémarrer aussitôt** :
    ```bash
-   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf 014-guide-nego-sessions-agenda 015-guide-nego-signalements 016-guide-nego-reunions; do
+   for etape in 008-guide-nego-coquille 009-guide-nego-compte-admission 010-guide-nego-accueil-profil 011-guide-nego-documents 012-guide-nego-lecteur-pdf 014-guide-nego-sessions-agenda 015-guide-nego-signalements 016-guide-nego-reunions 017-guide-nego-pavillon; do
      $COMPOSE exec -T postgres psql -U postgres -d epavillon -v ON_ERROR_STOP=1 \
        < /root/epavillon-migrations/$etape.sql || break
    done
@@ -891,6 +892,9 @@ compte d'administration.
       sans limite ; une à capacité 1 **avec** liste d'attente ; une à capacité 1 **sans** liste
       d'attente. Les publier. Un compte sans la permission : l'écran dit « Accès refusé », y compris
       sur l'adresse d'une fiche tapée à la main.
+- [ ] **La page « Programmations » du site (étape 5).** La vue du programme a gagné des colonnes :
+      `/v2/programmations?edition=cop31` s'affiche comme avant — bandeau, filtres, activités, nombre
+      d'inscrits —, sans erreur dans la console ; ouvrir le détail d'une activité et s'y inscrire.
 - [ ] **Guide Négo reste fermée** : `/v2/guide-nego/` sert « bientôt disponible ».
 
 Un point qui échoue et ne se corrige pas sur place : `./deploy.sh restore <sauvegarde de l'étape 1>`
@@ -898,7 +902,7 @@ ramène la base d'avant les migrations, puis redéployer la version précédente
 
 ### 4. La recette sur téléphones réels — une seule séance
 
-Ce qu'aucun poste de travail ne peut éprouver, pour les huit étapes à la fois : l'appareil réel de
+Ce qu'aucun poste de travail ne peut éprouver, pour les neuf étapes à la fois : l'appareil réel de
 0a (T071), T112 de 0b, T096 à T098 de 0c, T116 de l'étape 1, T084 de l'étape 1b. **Deux jours de suite** — deux points exigent une nuit ;
 on les prépare en fin de première journée.
 
@@ -1070,6 +1074,39 @@ COMMIT;
 - [ ] **Annuler au back-office.** Changer l'heure puis annuler, avec un motif, une réunion où les
       deux téléphones sont inscrits : l'avis « Déplacée » puis « Annulée » paraît, la fiche dit
       « Annulée » et le motif.
+
+**Le Pavillon de la Francophonie (étape 5)** — même séance, deux téléphones, deux comptes **admis**,
+sur une activité de la COP31 publiée et à venir. **Rien n'écrit la rediffusion** (`live.streams`) :
+le back-office du direct appartient à l'ePavillon et n'existe pas encore. Pour la recette, en poser une
+sur une activité passée, puis la retirer :
+```sql
+INSERT INTO live.streams (session_id, event_id, provider, kind, status, watch_url, replay_url, started_at, ended_at)
+SELECT s.id, s.event_id, 'youtube', 'replay', 'ended', :'url', :'url', s.starts_at, s.starts_at + interval '52 minutes'
+  FROM programme.sessions s WHERE s.slug = :'activite';
+-- après la séance
+DELETE FROM live.streams WHERE replay_url = :'url';
+```
+
+- [ ] **La section et la bande des jours au doigt.** Onglet « Francophonie » → « Pavillon » : le bloc de
+      lieu, puis la bande des jours ; chaque jour s'ouvre au premier toucher, le sous-titre dit le jour
+      affiché. « Les jours suivants » ouvre le jour qui suit. Aucun défilement horizontal, texte agrandi
+      compris. Un compte qui ne suit qu'une thématique voit **toutes** les activités.
+- [ ] **S'inscrire d'un geste.** Sur une activité qui ne demande que le pays : « M'inscrire » → « Inscrite »,
+      sans feuille. Toucher « Inscrite », se désinscrire, puis « Annuler » dans les six secondes : on reste inscrite.
+- [ ] **S'inscrire par formulaire.** Sur une activité à formulaire : la feuille s'ouvre, le pays est
+      prérempli, le clavier ne cache pas le champ touché ; une donnée sensible demande son accord.
+- [ ] **En mode avion.** Avec le réseau, ouvrir la section et une fiche ; mode avion, « M'inscrire » :
+      « Inscrite » et « Partira au retour du réseau ». Rendre le réseau, application ouverte : **une**
+      ligne — `SELECT count(*) FROM programme.registrations WHERE person_id = :p AND session_id = :s AND status <> 'cancelled';` → 1.
+      Relancer depuis l'icône en mode avion : la section et une fiche **jamais ouverte** se lisent,
+      avec « Hors connexion — lu à … ».
+- [ ] **Complet, liste d'attente.** Activité à une place avec liste d'attente : téléphone 1 prend la
+      place, téléphone 2 lit « Rejoindre la liste d'attente » → « Liste d'attente — position 1 ».
+- [ ] **La rediffusion s'ouvre.** Sur l'activité passée de la recette : « Rediffusion · 52 min » dans la
+      liste, « Revoir · 52 min » sur la fiche ; le toucher ouvre la vidéo (application YouTube ou
+      navigateur), et le retour ramène dans Guide Négo.
+- [ ] **« Ma journée ».** Le jour d'une activité : la ligne Pavillon montre l'heure, le titre, « stand,
+      salle » et « Inscrite » ; sans activité ce jour-là, « Rien aujourd'hui. Prochaine : … ».
 
 Un écart se note dans `docs/AppNego/progress.md`, avec l'appareil et le système. Tout coché, T071,
 T112, T096, T097, T098, T116 et T084 le sont aussi dans leurs `tasks.md`.

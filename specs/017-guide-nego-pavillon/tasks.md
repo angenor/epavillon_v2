@@ -39,9 +39,9 @@
 
 ## Phase 6 — Recette
 
-- [ ] T017 Quickstart § 0 à 4 et 6 ; la rediffusion de recette se pose **en SQL** dans `epavillon_dev2` (rien n'écrit `live.streams`) ; § 4 : `npm run typecheck`, `test:site`, `make check-api-contract`, et **la page `/programme` du site au navigateur (bloquant)**
-- [ ] T018 [P] Écarts dans `docs/AppNego/05-design.md` (pas d'agenda sur une activité ; bloc de lieu de la fiche ; bande des jours ; ce que la recette relève) ; Points ouverts de `progress.md` : **rien n'écrit `live.streams`** — sans outil de saisie, la rediffusion ne paraîtra pas en production
-- [ ] T019 [P] § 15 de `docs/DEPLOIEMENT.md` : migration 017 ; essais sur appareil réel
-- [ ] T020 i18n `en` contre `fr`
-- [ ] T021 **Le scénario qui clôt le MVP** (quickstart § 5) — seulement après fusion des étapes 2 et 4 dans `main` et de `main` dans cette branche ; sinon, noté pour la clôture
-- [ ] T022 Une ligne au journal de `docs/AppNego/progress.md`
+- [x] T017 Quickstart § 0 à 4 et 6 ; la rediffusion de recette se pose **en SQL** dans `epavillon_dev2` (rien n'écrit `live.streams`) ; § 4 : `npm run typecheck`, `test:site`, `make check-api-contract`, et **la page `/programme` du site au navigateur (bloquant)**
+- [x] T018 [P] Écarts dans `docs/AppNego/05-design.md` (pas d'agenda sur une activité ; bloc de lieu de la fiche ; bande des jours ; ce que la recette relève) ; Points ouverts de `progress.md` : **rien n'écrit `live.streams`** — sans outil de saisie, la rediffusion ne paraîtra pas en production
+- [x] T019 [P] § 15 de `docs/DEPLOIEMENT.md` : migration 017 ; essais sur appareil réel
+- [x] T020 i18n `en` contre `fr`
+- [x] T021 *(reportée : après fusion de l'étape 2 et de main dans 017)* **Le scénario qui clôt le MVP** (quickstart § 5) — seulement après fusion des étapes 2 et 4 dans `main` et de `main` dans cette branche ; sinon, noté pour la clôture
+- [x] T022 Une ligne au journal de `docs/AppNego/progress.md`
