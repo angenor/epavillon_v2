@@ -104,6 +104,14 @@ const lignes = computed<{ reunion: FrancophoneMeeting; etat: EtatReunion }[]>(()
         />
       </div>
 
+      <span class="gn-planche-composants__legende">{{ k('journee') }}</span>
+      <div class="gn-planche-composants__vitrine">
+        <GnLigneReunion :reunion="lignes[1]!.reunion" etat="inscrite" :fuseau="FUSEAU" :ville="VILLE" :jour="false" :vers="VERS" />
+        <GnJourneeLigneVide picto="nego" :origine="t('gn-journee-lignes.sessions.origine')" :texte="t('gn-journee-lignes.sessions.vide')" :vers="VERS" />
+        <GnJourneeLigneVide picto="franco" :origine="t('gn-journee-lignes.reunions.origine')" :texte="k('journee-prochaine')" :vers="VERS" />
+        <GnJourneeLignePavillon :maintenant="new Date()" />
+      </div>
+
       <span class="gn-planche-composants__legende">{{ k('etiquette') }}</span>
       <div class="gn-planche-composants__vitrine">
         <GnEtiquettePavillon />

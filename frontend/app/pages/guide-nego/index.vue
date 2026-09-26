@@ -187,6 +187,11 @@ useHead({ title: t('guide-nego.accueil.titre') })
           {{ t('guide-nego.accueil.blocs.prochaine-session.mon-agenda') }}
         </NuxtLink>
       </div>
+      <div v-else-if="bloc === 'trois-agendas'">
+        <GnJourneeLigneSessions :maintenant="maintenant" />
+        <GnJourneeLigneReunions :maintenant="maintenant" />
+        <GnJourneeLignePavillon :maintenant="maintenant" />
+      </div>
       <ul v-else-if="bloc === 'documents' && lignesDeDocuments.length" role="list">
         <li v-for="ligne in lignesDeDocuments" :key="ligne.document.id">
           <GnLigneDocument

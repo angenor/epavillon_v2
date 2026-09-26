@@ -16,8 +16,10 @@ const props = withDefaults(
     /** Le nom du lieu pour « heure d'Antalya » ; à défaut, celui du fuseau. */
     ville?: string | null
     vers: string
+    /** « Ma journée » ne redit pas le jour : il est dans le titre de l'écran. */
+    jour?: boolean
   }>(),
-  { ville: null },
+  { ville: null, jour: true },
 )
 
 const { t } = useI18n()
@@ -59,7 +61,7 @@ const accesLimite = computed(() => {
     :class="{ 'gn-ligne-reunion--annulee': etat === 'annulee', 'gn-ligne-reunion--terminee': etat === 'terminee' }"
   >
     <span class="gn-ligne-reunion__heures" aria-hidden="true">
-      <span class="gn-ligne-reunion__jour">{{ jourCourt }}</span>
+      <span v-if="jour" class="gn-ligne-reunion__jour">{{ jourCourt }}</span>
       <span class="gn-ligne-reunion__debut">{{ debut }}</span>
       <span class="gn-ligne-reunion__fin">{{ fin }}</span>
     </span>

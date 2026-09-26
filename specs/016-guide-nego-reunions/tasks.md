@@ -56,9 +56,9 @@
 
 ## Phase 8 — US4 : Ma journée, recherche
 
-- [ ] T028 [US4] Bloc « trois agendas » de `pages/guide-nego/index.vue` : `journee/GnJourneeLigneSessions.vue`, `GnJourneeLigneReunions.vue`, `GnJourneeLignePavillon.vue` (vide) ; `fe/tests/guide-nego/ma-journee.test.ts` vert
-- [ ] T029 [US4] Si `main` porte l'étape 2 : `git merge main` (conflits : `progress.md` garde les deux, `api.ts` par `make openapi`, SQL garde les deux sections), puis `reunionsTrouvees` dans `utils/guide-nego/recherche-globale.ts`, le groupe dans la page de recherche, la clé `pas-encore` ne nomme plus que le Pavillon ; sinon, noter la tâche pour la fusion
-- [ ] T030 [US4] Vérifier au navigateur : quickstart § 5
+- [x] T028 [US4] Bloc « trois agendas » de `pages/guide-nego/index.vue` : `journee/GnJourneeLigneSessions.vue`, `GnJourneeLigneReunions.vue`, `GnJourneeLignePavillon.vue` (vide) ; `fe/tests/guide-nego/ma-journee.test.ts` vert
+- [x] T029 [US4] (reportée à la fusion) Si `main` porte l'étape 2 : `git merge main` (conflits : `progress.md` garde les deux, `api.ts` par `make openapi`, SQL garde les deux sections), puis `reunionsTrouvees` dans `utils/guide-nego/recherche-globale.ts`, le groupe dans la page de recherche, la clé `pas-encore` ne nomme plus que le Pavillon ; sinon, noter la tâche pour la fusion
+- [x] T030 [US4] Vérifier au navigateur : quickstart § 5
 
 ## Phase 9 — Recette
 

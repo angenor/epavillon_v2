@@ -19,8 +19,7 @@
       "vide": "No change reported. Moved rooms and cancelled sessions will appear here with the network's reports."
     },
     "trois-agendas": {
-      "titre": "Today, your three agendas",
-      "vide": "Nothing today. Negotiation sessions, Francophonie meetings and the Francophonie Pavilion will appear here, each under its own name."
+      "titre": "Today, your three agendas"
     },
     "documents": {
       "titre": "Recent documents",

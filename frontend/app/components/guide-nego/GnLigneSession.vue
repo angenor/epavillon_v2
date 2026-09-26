@@ -34,6 +34,8 @@ const props = withDefaults(
     rappel?: boolean
     /** L'heure de validation du dernier encart affiché (« HH:MM ») : le repère « Signalé ». */
     signale?: string | null
+    /** L'agenda d'origine, dit au-dessus du titre quand la ligne côtoie les deux autres (ADR-008). */
+    origine?: string | null
   }>(),
   {
     session: null,
@@ -46,6 +48,7 @@ const props = withDefaults(
     chevauche: () => [],
     rappel: false,
     signale: null,
+    origine: null,
   },
 )
 
@@ -141,6 +144,7 @@ const terminee = computed(() => !!props.session && props.etat === 'terminee')
     </span>
 
     <span v-else-if="session" class="gn-ligne-session__corps">
+      <span v-if="origine" class="gn-ligne-session__type">{{ origine }}</span>
       <span v-if="type && !agenda" class="gn-ligne-session__type">{{ type }}</span>
       <span class="gn-ligne-session__titre">{{ titre }}</span>
       <template v-if="traduit && !agenda">
