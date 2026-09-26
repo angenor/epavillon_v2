@@ -323,6 +323,7 @@ mod tests {
         assert_eq!(heure_de("Antalya"), "heure d'Antalya");
         assert_eq!(heure_de("Érevan"), "heure d'Érevan");
         assert_eq!(heure_de("Belém"), "heure de Belém");
+        assert_eq!(heure_de("Istanbul"), "heure d'Istanbul");
         assert_eq!(heure_de("Hambourg"), "heure de Hambourg");
         let (titre, _) = changement(
             Etat::Deplacee,
