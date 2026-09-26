@@ -17,9 +17,9 @@
 
 ## Phase 2 — Plomberie client
 
-- [ ] T007 `fe/app/composables/api/pavillon.ts` (édition, lieux, détail par slug, formulaire, s'inscrire, annuler, mes inscriptions) + une ligne de montage dans `useApi.ts`
-- [ ] T008 [P] `fe/app/utils/guide-nego/pavillon.ts` + tests (bande des jours de toute l'édition, jour, veille, jours suivants dans le fuseau, états de l'activité, marque d'inscription ou de rediffusion, prochaine, ligne de « Ma journée », formulaire « d'un geste » ou non, **aucun filtre de thématique**)
-- [ ] T009 `useGnPavillon` (gardes `pavillon:<slug>`, `pavillon-activite:<édition>:<slug>`) et `useGnInscriptionsPavillon` (garde `mes-inscriptions-pavillon` ; intention `inscription-pavillon:<session_id>` ; dernière gagne ; inscription puis annulation pas encore parties → rien ; annulation : identifiant = ligne de la séance non annulée, lu au départ ; introuvable ou `404` → succès ; `RegistrationLocked` → refus dit ; issues `full`/`closed`/`not_open_yet` dites ; `RegistrationNotAccepted` → « Sans inscription ») ; `useGnPays` garde `iso2` ; jeux d'exemple
+- [x] T007 `fe/app/composables/api/pavillon.ts` (édition, lieux, détail par slug, formulaire, s'inscrire, annuler, mes inscriptions) + une ligne de montage dans `useApi.ts`
+- [x] T008 [P] `fe/app/utils/guide-nego/pavillon.ts` + tests (bande des jours de toute l'édition, jour, veille, jours suivants dans le fuseau, états de l'activité, marque d'inscription ou de rediffusion, prochaine, ligne de « Ma journée », formulaire « d'un geste » ou non, **aucun filtre de thématique**)
+- [x] T009 `useGnPavillon` (gardes `pavillon:<slug>`, `pavillon-activite:<édition>:<slug>`) et `useGnInscriptionsPavillon` (garde `mes-inscriptions-pavillon` ; intention `inscription-pavillon:<session_id>` ; dernière gagne ; inscription puis annulation pas encore parties → rien ; annulation : identifiant = ligne de la séance non annulée, lu au départ ; introuvable ou `404` → succès ; `RegistrationLocked` → refus dit ; issues `full`/`closed`/`not_open_yet` dites ; `RegistrationNotAccepted` → « Sans inscription ») ; `useGnPays` garde `iso2` ; jeux d'exemple
 
 ## Phase 3 — US1 : lire
 

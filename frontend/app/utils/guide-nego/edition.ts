@@ -16,6 +16,8 @@ export interface EditionGardee {
   /** Le fuseau de la COP : toute heure de session s'y lit. */
   timezone: string
   city: string | null
+  /** Ce que `GET /schedule?event_id=` attend (étape 5) ; absent d'une garde plus ancienne. */
+  id?: string
 }
 
 /** Une garde d'avant l'étape 3a n'a pas de `slug` : elle ne désigne aucune édition. */
@@ -23,10 +25,10 @@ export const editionComplete = (e: Partial<EditionGardee> | null | undefined): e
   typeof e?.slug === 'string' && typeof e.timezone === 'string'
 
 export function editionDuGuide(
-  editions: Pick<
+  editions: (Pick<
     PublicEditionRow,
     'series_kind' | 'temporal_state' | 'starts_at' | 'edition_label' | 'acronym' | 'slug' | 'timezone' | 'city'
-  >[],
+  > & { id?: string })[],
 ): EditionGardee | null {
   const retenue = editions
     .filter((e) => e.series_kind === 'cop_climate' && e.temporal_state !== 'past')
@@ -42,6 +44,7 @@ export function editionDuGuide(
         slug: retenue.slug,
         timezone: retenue.timezone,
         city: retenue.city,
+        ...(retenue.id ? { id: retenue.id } : {}),
       }
     : null
 }

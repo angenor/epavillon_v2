@@ -1,0 +1,7 @@
+{
+  "issues": {
+    "full": "Full: no seats are left, and this activity has no waiting list.",
+    "closed": "Registration closed on {date}, {ville} time.",
+    "not_open_yet": "Registration opens on {date}, {ville} time."
+  }
+}

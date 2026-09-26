@@ -1,0 +1,7 @@
+{
+  "issues": {
+    "full": "Complet : il ne reste aucune place, et cette activité n'a pas de liste d'attente.",
+    "closed": "Les inscriptions sont closes depuis le {date}, heure locale de {ville}.",
+    "not_open_yet": "Les inscriptions ouvriront le {date}, heure locale de {ville}."
+  }
+}

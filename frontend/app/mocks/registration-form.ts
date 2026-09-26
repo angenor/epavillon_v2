@@ -26,7 +26,7 @@
 import type { RegistrationForm, RegistrationFormField } from '~/types/programme/registration'
 import { EVENT, FORM_FIELD, REGISTRATION_FORM } from './ids'
 
-export const registrationForms = [
+export const registrationForms: RegistrationForm[] = [
   {
     id: REGISTRATION_FORM.default,
     code: 'default',
@@ -58,9 +58,9 @@ export const registrationForms = [
     created_at: '2026-07-20T10:00:00Z',
     updated_at: '2026-08-03T14:00:00Z',
   },
-] satisfies RegistrationForm[]
+]
 
-export const registrationFormFields = [
+export const registrationFormFields: RegistrationFormField[] = [
   // --- Formulaire par défaut de la plateforme ------------------------------
   {
     id: FORM_FIELD(1),
@@ -243,4 +243,4 @@ export const registrationFormFields = [
     sort_order: 70,
     is_active: false,
   },
-] satisfies RegistrationFormField[]
+]
