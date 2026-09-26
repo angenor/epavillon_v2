@@ -43,8 +43,8 @@ pub mod state;
 pub use state::NegotiationState;
 
 /// Ce que l'application appelle : l'accès, les thématiques et les groupes
-/// suivis, les documents, les sessions officielles, « Mon agenda » et les
-/// signalements.
+/// suivis, les documents, les sessions officielles, « Mon agenda », les
+/// signalements et les réunions de la Francophonie.
 ///
 /// Les chemins sont plats et vivent sous `/negotiation` — aucun autre module
 /// n'y dépose, il n'y a donc rien à composer côté API.
@@ -56,6 +56,8 @@ pub fn routes(cfg: &mut ServiceConfig) {
     routes::groups::configurer(cfg);
     routes::agenda::configurer(cfg);
     routes::reports::configurer(cfg);
+    routes::meetings::configurer(cfg);
+    routes::meeting_registrations::configurer(cfg);
     routes::notifications::configurer(cfg);
 }
 

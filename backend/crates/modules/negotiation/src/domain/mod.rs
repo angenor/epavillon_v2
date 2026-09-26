@@ -9,6 +9,8 @@ pub mod code;
 pub mod documents;
 pub mod extraction;
 pub mod groups;
+pub mod meeting_registrations;
+pub mod meetings;
 pub mod notifications;
 pub mod permissions;
 pub mod plage;

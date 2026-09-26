@@ -27,6 +27,7 @@
  *   negotiation.ts             100_negotiations.sql § 2 bis — l'admission seule
  *   negotiation-sessions.ts    100_negotiations.sql § 4 bis, 4 ter — sessions officielles, groupes, agenda
  *   negotiation-reports.ts     100_negotiations.sql § 4 quater — signalements du réseau
+ *   negotiation-meetings.ts    100_negotiations.sql § 4, 4 bis — réunions de la Francophonie, inscriptions
  *   analytics.ts               130_analytics.sql — les projections du tableau de bord
  *   views.ts                   les cinq vues consommées telles quelles
  *
@@ -74,5 +75,6 @@ export type * from './live'
 export type * from './negotiation'
 export type * from './negotiation-sessions'
 export type * from './negotiation-reports'
+export type * from './negotiation-meetings'
 export type * from './analytics'
 export type * from './views'

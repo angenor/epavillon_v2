@@ -16,12 +16,12 @@
 
 ## Phase 2 — Lire et s'inscrire (API) — US1, US2
 
-- [ ] T006 [US1] Six codes au catalogue `backend/crates/kernel/src/error.rs`
-- [ ] T007 [US1] `GET /negotiation/meetings?edition=` (publiques, publiées, ETag, **jamais le lien visio**) dans `neg/src/{domain,repo,service,routes}/meetings.rs`
-- [ ] T008 [US2] `GET /negotiation/me/meeting-registrations` (`Cache-Control: private, no-store`, empreinte par personne), `PUT` et `DELETE /negotiation/me/meeting-registrations/{id}` dans `neg/src/{domain,repo,service,routes}/meeting_registrations.rs` : garde `negotiation.space.access` sur la portée globale ; même `client_ref` → état courant ; ligne désinscrite + `client_ref` neuf → réinscription ; refus de la base traduits ; désinscription → `promote_meeting_waitlist()` dans la même transaction ; lien visio = `external_url` pour les inscrites, et pour toute admise si la réunion ne demande pas d'inscription (research R6)
-- [ ] T009 OpenAPI, `make openapi`, formes TS dans `fe/app/types/negotiation-meetings.ts` (ré-exportées)
-- [ ] T010 [P] [US1] Tests `neg/tests/reunions_lecture.rs` : brouillon absent, publiée présente, **aucun lien visio dans la réponse publique**, `304`
-- [ ] T011 [P] [US2] Tests `neg/tests/reunions_inscription.rs` : inscrite, complet → attente avec position, complet sans attente `409`, fenêtre close, annulée, rejeu `client_ref` (une ligne), **concurrence sur la dernière place** (SC-003), désinscription → promotion, désinscription puis réinscription (nouveau `client_ref`), nouvelle venue derrière une liste d'attente non vide, lien visio servi à l'inscrite seulement, `403`/`401`
+- [x] T006 [US1] Six codes au catalogue `backend/crates/kernel/src/error.rs`
+- [x] T007 [US1] `GET /negotiation/meetings?edition=` (publiques, publiées, ETag, **jamais le lien visio**) dans `neg/src/{domain,repo,service,routes}/meetings.rs`
+- [x] T008 [US2] `GET /negotiation/me/meeting-registrations` (`Cache-Control: private, no-store`, empreinte par personne), `PUT` et `DELETE /negotiation/me/meeting-registrations/{id}` dans `neg/src/{domain,repo,service,routes}/meeting_registrations.rs` : garde `negotiation.space.access` sur la portée globale ; même `client_ref` → état courant ; ligne désinscrite + `client_ref` neuf → réinscription ; refus de la base traduits ; désinscription → `promote_meeting_waitlist()` dans la même transaction ; lien visio = `external_url` pour les inscrites, et pour toute admise si la réunion ne demande pas d'inscription (research R6)
+- [x] T009 OpenAPI, `make openapi`, formes TS dans `fe/app/types/negotiation-meetings.ts` (ré-exportées)
+- [x] T010 [P] [US1] Tests `neg/tests/reunions_lecture.rs` : brouillon absent, publiée présente, **aucun lien visio dans la réponse publique**, `304`
+- [x] T011 [P] [US2] Tests `neg/tests/reunions_inscription.rs` : inscrite, complet → attente avec position, complet sans attente `409`, fenêtre close, annulée, rejeu `client_ref` (une ligne), **concurrence sur la dernière place** (SC-003), désinscription → promotion, désinscription puis réinscription (nouveau `client_ref`), nouvelle venue derrière une liste d'attente non vide, lien visio servi à l'inscrite seulement, `403`/`401`
 
 ## Phase 3 — Back-office — US3
 

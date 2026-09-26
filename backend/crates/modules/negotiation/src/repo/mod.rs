@@ -12,6 +12,8 @@ pub mod document_themes;
 pub mod documents;
 pub mod groups;
 pub mod import;
+pub mod meeting_registrations;
+pub mod meetings;
 pub mod notifications;
 pub mod objets;
 pub mod publication;

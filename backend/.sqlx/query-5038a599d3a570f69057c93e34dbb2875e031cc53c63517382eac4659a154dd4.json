@@ -1,0 +1,48 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT status::text AS \"status!\", waitlist_position, client_ref\n             FROM negotiation.meeting_registrations\n            WHERE meeting_id = $1 AND person_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "waitlist_position",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meeting_registrations",
+            "name": "waitlist_position"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "client_ref",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meeting_registrations",
+            "name": "client_ref"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      true,
+      true
+    ]
+  },
+  "hash": "5038a599d3a570f69057c93e34dbb2875e031cc53c63517382eac4659a154dd4"
+}

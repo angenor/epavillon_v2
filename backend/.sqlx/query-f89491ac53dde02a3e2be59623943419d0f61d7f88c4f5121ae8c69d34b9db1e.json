@@ -1,0 +1,37 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.meeting_registrations\n              SET status = 'registered', client_ref = $3\n            WHERE meeting_id = $1 AND person_id = $2\n           RETURNING status::text AS \"status!\", waitlist_position",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "waitlist_position",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meeting_registrations",
+            "name": "waitlist_position"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      true
+    ]
+  },
+  "hash": "f89491ac53dde02a3e2be59623943419d0f61d7f88c4f5121ae8c69d34b9db1e"
+}
