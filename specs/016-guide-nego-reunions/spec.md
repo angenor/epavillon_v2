@@ -4,7 +4,7 @@
 
 **Created**: 2026-09-26
 
-**Status**: Draft
+**Status**: Draft — quatre questions tranchées le 26/09 (voir *Clarifications*)
 
 **Input**: Étape 4 de [docs/AppNego/04-roadmap.md](../../docs/AppNego/04-roadmap.md) : les réunions de la Francophonie — atelier préparatoire, concertation des négociatrices et négociateurs, concertation ministérielle — dans l'onglet « Francophonie », sélecteur « Réunions · Pavillon » ; liste et détail (lieu, heure avec fuseau, visioconférence, accès limité, inscription : Inscrite, Liste d'attente, Complet, Terminée) ; lien facultatif « Se tient aussi au Pavillon », jamais une fusion ; lisible hors connexion ; réunions du jour dans « Ma journée » ; back-office : saisir, publier, annuler, lier. Critère : une réunion saisie par l'IFDD apparaît, avec son lien éventuel vers le Pavillon.
 
@@ -20,6 +20,16 @@
 | Les décisions | [ADR-008](../../docs/AppNego/adr/008-trois-agendas-jamais-confondus.md) trois agendas, un lien entre deux objets, jamais une fusion · [ADR-003](../../docs/AppNego/adr/003-tout-ce-qui-se-lit-se-lit-hors-connexion.md) — une inscription sans réseau part au retour |
 | Le partage de l'onglet | Protocole de la session : l'étape 4 construit la page, le sélecteur et la section Réunions ; la section Pavillon est **un seul composant**, laissé vide, que l'étape 5 remplit |
 | Ce qui existe | `negotiation.meetings` (natures `preparatory_workshop`, `francophone_consultation`), `negotiation.meeting_registrations` (inscrite, liste d'attente, annulée ; compteur tenu par la base), permission `negotiation.meeting.manage` ; les composants et la file d'écritures de 0c à 3b ; les marques d'état « Inscrite », « Liste d'attente », « Complet », « Terminée » |
+
+## Clarifications
+
+### Session 2026-09-26 — tranché le 26/09 par l'orchestrateur, pour le commanditaire
+
+- Q : Que veut dire « Accès limité » ? → R : **Une information** : tout le monde voit la réunion, toute personne admise peut s'inscrire, l'IFDD contrôle à l'entrée.
+- Q : Qui voit le lien de visioconférence ? → R : **Les seules personnes inscrites**, hors connexion compris ; une réunion sans inscription le montre à toute personne admise ; les autres voient « Réservé aux personnes inscrites ».
+- Q : La liste d'attente monte-t-elle d'elle-même ? → R : **Oui** : la première prend la place libérée, et en est prévenue dans l'application, et par courriel si son accord est allumé, par la mécanique de 3b.
+- Q : « Ma journée » ? → R : Le bloc « Aujourd'hui, vos trois agendas » porte les lignes **Sessions de négociation** et **Réunions de la Francophonie** ; **la ligne Pavillon est un composant à part, `GnJourneeLignePavillon.vue`, laissé vide**, que l'étape 5 remplit seule.
+- Décisions prises seul, acceptées : inscription réservée à l'accès négociateur, lecture publique ; « Terminée » ; la nature est une donnée ; lien au Pavillon par une clé `xmod_fk_` facultative `ON DELETE SET NULL` ; la table des inscriptions de `negotiation` avec le patron de liste d'attente du Pavillon ; le groupe de la recherche globale après fusion de `main` quand l'étape 2 y sera.
 
 **Hors périmètre** : la section Pavillon et ses activités (étape 5) ; la création de salles de visioconférence depuis le back-office (le lien se saisit) ; la présence et la rediffusion ; les notifications de changement d'une réunion (au-delà de ce que FR-020 dit) ; l'export vers le calendrier du téléphone.
 
@@ -53,7 +63,7 @@ Sur la fiche, Aïssatou touche « M'inscrire » : le bouton devient « Inscrite 
 1. **Given** une personne admise, **When** « M'inscrire », **Then** « Inscrite ».
 2. **Given** la réunion pleine, **Then** « Complet » et « Rejoindre la liste d'attente » ; rejoindre → « Liste d'attente ».
 3. **Given** sans réseau, **When** elle s'inscrit, **Then** l'état se voit aussitôt, part au retour du réseau, n'arrive qu'une fois ; si la réunion est devenue pleine, l'écran dit « Complet » et ce qu'il est advenu (liste d'attente ou non).
-4. **Given** une inscrite qui se désinscrit, **Then** sa place passe à la première de la liste d'attente [NEEDS CLARIFICATION: promotion automatique, prévenue comment ?].
+4. **Given** une inscrite qui se désinscrit, **Then** la première de la liste d'attente prend la place d'elle-même, et en est prévenue dans l'application et, si son accord est allumé, par courriel.
 5. **Given** une réunion terminée ou annulée, **Then** aucun geste d'inscription.
 6. **Given** sans compte ou sans accès négociateur, **Then** « M'inscrire » mène à la connexion ou à l'accès, sans perdre la fiche.
 
@@ -70,7 +80,7 @@ Au back-office de l'ePavillon, l'administration saisit une réunion (nature, tit
 
 ### User Story 4 — Les réunions du jour dans « Ma journée » (Priority: P2)
 
-Le bloc « Aujourd'hui, vos trois agendas » porte la ligne « Réunions de la Francophonie » : les réunions du jour avec leur heure et leur origine, ou « Rien aujourd'hui. Prochaine : <titre> — <jour>, <heure> ».
+Le bloc « Aujourd'hui, vos trois agendas » porte la ligne « Sessions de négociation » et la ligne « Réunions de la Francophonie » : les réunions du jour avec leur heure et leur origine, ou « Rien aujourd'hui. Prochaine : <titre> — <jour>, <heure> ».
 
 ### Edge Cases
 
@@ -99,8 +109,8 @@ Le bloc « Aujourd'hui, vos trois agendas » porte la ligne « Réunions de la F
 - **FR-008** : S'inscrire DOIT demander l'accès négociateur ; se désinscrire est toujours possible avant le début.
 - **FR-009** : La capacité, la fenêtre d'inscription et la liste d'attente DOIVENT être tenues par la base ; « Complet » se déduit de la capacité et des inscrites.
 - **FR-010** : Une inscription faite sans réseau DOIT se voir aussitôt, partir au retour, n'arriver qu'une fois grâce à une référence posée par le téléphone ; au retour, un refus (complet sans liste d'attente, close, annulée) se dit clairement.
-- **FR-011** : Le lien de visioconférence [NEEDS CLARIFICATION: visible de qui — les inscrites, les personnes admises, tout le monde ?].
-- **FR-012** : L'accès limité [NEEDS CLARIFICATION: informatif (tout le monde voit et peut s'inscrire, l'IFDD filtre à l'entrée) ou restrictif (seules des personnes désignées s'inscrivent) ?].
+- **FR-011** : Le lien de visioconférence DOIT n'être servi qu'aux personnes inscrites — gardé sur leur téléphone hors connexion ; pour une réunion sans inscription, à toute personne admise ; les autres lisent « Réservé aux personnes inscrites ». L'API ne le sert jamais à qui n'y a pas droit.
+- **FR-012** : L'accès limité DOIT être une information, avec son public (« ministres et chefs de délégation ») : il ne restreint ni la lecture ni l'inscription ; l'IFDD contrôle à l'entrée.
 - **FR-013** : Les états affichés DOIVENT être Prévue, Inscrite, Liste d'attente, Complet, Terminée, Annulée — un pictogramme, un mot, une couleur ; une seule marque par ligne (priorité : Annulée, Terminée, Inscrite, Liste d'attente, Complet, Prévue).
 
 ### Le lien au Pavillon
@@ -121,7 +131,7 @@ Le bloc « Aujourd'hui, vos trois agendas » porte la ligne « Réunions de la F
 
 ### « Ma journée » et recherche
 
-- **FR-021** : Le bloc « Aujourd'hui, vos trois agendas » DOIT porter la ligne « Réunions de la Francophonie » — les réunions du jour, ou « Rien aujourd'hui. Prochaine : … » ; les autres blocs ne changent pas.
+- **FR-021** : Le bloc « Aujourd'hui, vos trois agendas » DOIT porter la ligne « Sessions de négociation » (les sessions du jour de « Mon agenda », sinon de mes thématiques) et la ligne « Réunions de la Francophonie » — les réunions du jour, ou « Rien aujourd'hui. Prochaine : … » ; la ligne Pavillon est le composant `GnJourneeLignePavillon.vue`, laissé vide ; les autres blocs ne changent pas.
 - **FR-022** : La recherche globale DOIT gagner le groupe « Réunions de la Francophonie », et sa ligne « Pas encore ici » ne nommer plus que le Pavillon — dès que la recherche globale (étape 2) est dans `main`.
 
 ### Key Entities
