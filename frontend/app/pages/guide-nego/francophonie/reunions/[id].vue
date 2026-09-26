@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type { FrancophoneMeeting } from '~/types/negotiation-meetings'
+import type { IssueDeLInscription } from '~/composables/guide-nego/useGnInscriptionsReunions'
 import { dayKeyInZone } from '~/utils/datetime'
+import { PREFIXE_FILE_INSCRIPTION_REUNION } from '~/utils/guide-nego/reunions'
+import { adresseDeLaSortie, sortieDuVerrou } from '~/utils/guide-nego/verrou'
 
 /**
  * Écran 10 · 1b — la fiche d'une réunion de la Francophonie, lue dans la liste gardée :
@@ -21,6 +24,7 @@ const connexion = useGnConnexion()
 const compte = useGnSession()
 const lecture = useGnReunions()
 const inscriptions = useGnInscriptionsReunions()
+const acces = useGnAcces()
 
 const k = (cle: string, params: Record<string, unknown> = {}) => t(`guide-nego.francophonie-reunion.${cle}`, params)
 
@@ -47,6 +51,7 @@ onMounted(async () => {
   void relire()
   await compte.assurer()
   inscriptions.assurer()
+  if (compte.connectee.value) void acces.assurer()
 })
 onBeforeUnmount(() => clearInterval(horloge))
 
@@ -98,6 +103,67 @@ const accesLimite = computed(() => {
   return public_ ? k('acces-limite', { public: public_ }) : t('gn-marque-etat.acces-limite')
 })
 const description = computed(() => (reunion.value?.description ? tr(reunion.value.description) : null))
+
+// --- S'inscrire (FR-008 à FR-010) -------------------------------------------
+
+const bouton = computed(() => inscriptions.bouton(id.value, maintenant.value))
+const aEnvoyer = computed(() => inscriptions.aEnvoyer(id.value))
+const lecturePendante = computed(() => compte.connectee.value && !inscriptions.pret.value)
+const envoi = ref(false)
+const refus = ref<string | null>(null)
+const feuilleReservee = ref(false)
+const sortieReservee = computed(() => sortieDuVerrou(acces.acces.value, compte.connectee.value))
+
+const message = ref<{ texte: string; action?: string; agir?: () => void; rang: number } | null>(null)
+const annoncer = (texte: string, action?: string, agir?: () => void) =>
+  (message.value = { texte, action, agir, rang: (message.value?.rang ?? 0) + 1 })
+
+const libelleAttente = (position: number | null) =>
+  position ? k('inscription.attente-position', { position }) : t('gn-marque-etat.liste-attente')
+
+function dire(issue: IssueDeLInscription): void {
+  if (issue.issue === 'refusee') {
+    message.value = null
+    refus.value = issue.message ?? k('inscription.refusee')
+  } else if (issue.issue === 'inscrite') annoncer(k('inscription.faite'))
+  else if (issue.issue === 'liste-attente') annoncer(libelleAttente(issue.position))
+  else if (issue.issue === 'en-attente') annoncer(k('inscription.en-file'))
+}
+
+async function envoyer(geste: () => Promise<IssueDeLInscription>): Promise<IssueDeLInscription> {
+  envoi.value = true
+  refus.value = null
+  try {
+    return await geste()
+  } finally {
+    envoi.value = false
+  }
+}
+
+async function inscrire(): Promise<void> {
+  if (compte.connectee.value) await acces.assurer()
+  if (!compte.connectee.value || !acces.ouvert.value) {
+    feuilleReservee.value = true
+    return
+  }
+  dire(await envoyer(() => inscriptions.inscrire(id.value)))
+}
+
+async function desinscrire(): Promise<void> {
+  const quitteLAttente = bouton.value?.libelle === 'liste-attente'
+  const issue = await envoyer(() => inscriptions.desinscrire(id.value))
+  if (issue.issue === 'refusee') return dire(issue)
+  const cle = issue.issue === 'en-attente' ? 'en-file' : quitteLAttente ? 'attente-quittee' : 'faite'
+  annoncer(k(`desinscription.${cle}`), k('desinscription.annuler'), () => {
+    message.value = null
+    void envoyer(() => inscriptions.inscrire(id.value)).then(dire)
+  })
+}
+
+// Un geste reparti de la file et refusé se dit ici ; le layout se tait sur cette fiche.
+watch(inscriptions.refus, (avis) => {
+  if (avis?.message && avis.cle === `${PREFIXE_FILE_INSCRIPTION_REUNION}${id.value}`) refus.value = avis.message
+})
 
 useHead({ title: titre })
 </script>
@@ -204,7 +270,75 @@ useHead({ title: titre })
       <GnEtiquettePavillon v-if="reunion.pavilion_session_id" class="gn-reunion__pavillon" />
 
       <p v-if="description" class="gn-reunion__description">{{ description }}</p>
+
+      <div v-if="bouton" class="gn-reunion__actions">
+        <GnBouton
+          v-if="bouton.libelle === 'inscrire'"
+          :chargement="envoi || lecturePendante"
+          @clic="inscrire"
+        >
+          {{ k('inscription.inscrire') }}
+        </GnBouton>
+        <GnBouton
+          v-else-if="bouton.libelle === 'inscrite'"
+          variante="secondaire"
+          picto="check"
+          actif
+          :desactive="!bouton.geste"
+          :chargement="envoi"
+          @clic="desinscrire"
+        >
+          {{ t('gn-marque-etat.inscrite') }}
+        </GnBouton>
+        <template v-else-if="bouton.libelle === 'rejoindre-attente'">
+          <GnBouton variante="secondaire" picto="clock" :chargement="envoi || lecturePendante" @clic="inscrire">
+            {{ k('inscription.rejoindre-attente') }}
+          </GnBouton>
+        </template>
+        <template v-else-if="bouton.libelle === 'liste-attente'">
+          <GnMarqueEtat etat="liste-attente" :libelle="libelleAttente(bouton.position)" />
+          <GnBouton v-if="bouton.geste" variante="secondaire" :chargement="envoi" @clic="desinscrire">
+            {{ k('inscription.quitter-attente') }}
+          </GnBouton>
+        </template>
+        <GnMarqueEtat v-else-if="bouton.libelle === 'complet'" etat="complet" :libelle="k('inscription.complet')" />
+        <p v-else class="gn-reunion__closes">
+          <GnPicto nom="lock" :taille="18" />
+          {{ k('inscription.closes') }}
+        </p>
+
+        <GnMarqueEtat v-if="aEnvoyer" etat="a-envoyer" :libelle="k('inscription.a-envoyer')" />
+        <p v-if="refus" class="gn-reunion__refus" role="alert">
+          <GnPicto nom="warn" :taille="20" />
+          {{ refus }}
+        </p>
+      </div>
     </div>
+
+    <GnFeuilleBasse
+      v-model="feuilleReservee"
+      :titre="t('gn-verrou.titre')"
+      :sous-titre="k('inscription.reserve')"
+      :fermeture="k('inscription.fermer')"
+    >
+      <div class="gn-reunion__sorties">
+        <GnBouton :vers="adresseDeLaSortie(sortieReservee)" :picto="sortieReservee === 'compte' ? 'user' : 'lock'">
+          {{ t(`gn-verrou.sortie.${sortieReservee}`) }}
+        </GnBouton>
+        <GnBouton v-if="sortieReservee === 'compte'" variante="secondaire" vers="/guide-nego/connexion">
+          {{ t('gn-verrou.sortie.connexion') }}
+        </GnBouton>
+      </div>
+    </GnFeuilleBasse>
+
+    <GnMessageEphemere
+      v-if="message"
+      :key="message.rang"
+      :texte="message.texte"
+      :action="message.action"
+      @agir="message.agir?.()"
+      @fini="message = null"
+    />
   </GnEcran>
 </template>
 
@@ -218,9 +352,18 @@ useHead({ title: titre })
   padding-top: var(--gn-espace-16);
 }
 
-[data-app="guide-nego"] .gn-reunion {
+[data-app="guide-nego"] .gn-ecran__contenu:has(> .gn-reunion) {
   display: flex;
   flex-direction: column;
+}
+
+[data-app="guide-nego"] .gn-reunion {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+[data-app="guide-nego"] .gn-reunion:not(:has(.gn-reunion__actions)) {
   padding-bottom: var(--gn-espace-16);
 }
 
@@ -332,6 +475,49 @@ useHead({ title: titre })
   line-height: var(--gn-interligne-17);
   white-space: pre-line;
   overflow-wrap: anywhere;
+}
+
+[data-app="guide-nego"] .gn-reunion__actions {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  margin-inline: calc(-1 * var(--gn-marge-ecran));
+  padding: var(--gn-espace-16) var(--gn-marge-ecran) calc(var(--gn-espace-16) + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: var(--gn-espace-8);
+  border-top: var(--gn-filet-1) solid var(--gn-filet);
+  background: var(--gn-fond);
+}
+
+[data-app="guide-nego"] .gn-reunion__closes,
+[data-app="guide-nego"] .gn-reunion__refus {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+  font-weight: var(--gn-graisse-gras);
+}
+
+[data-app="guide-nego"] .gn-reunion__closes {
+  color: var(--gn-texte-2);
+}
+
+[data-app="guide-nego"] .gn-reunion__refus {
+  color: var(--gn-danger);
+}
+
+[data-app="guide-nego"] .gn-reunion__closes .gn-picto,
+[data-app="guide-nego"] .gn-reunion__refus .gn-picto {
+  flex: none;
+  margin-block-start: 1px;
+}
+
+[data-app="guide-nego"] .gn-reunion__sorties {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gn-espace-8);
 }
 
 [data-app="guide-nego"] .gn-reunion--annulee .gn-reunion__lieu {

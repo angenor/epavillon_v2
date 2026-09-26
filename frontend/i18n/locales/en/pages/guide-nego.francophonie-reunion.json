@@ -39,5 +39,25 @@
     "titre": "Reading failed",
     "texte": "The meeting could not be read. Check the connection, then try again.",
     "reessayer": "Try again"
+  },
+  "inscription": {
+    "inscrire": "Register",
+    "rejoindre-attente": "Join the waiting list",
+    "quitter-attente": "Leave the waiting list",
+    "attente-position": "Waiting list — position {position}",
+    "complet": "Full — no waiting list",
+    "closes": "Registration closed",
+    "a-envoyer": "Will be sent when the network returns",
+    "faite": "Registration confirmed.",
+    "en-file": "Registration saved. It will be sent when the network returns.",
+    "refusee": "The registration could not be taken. Try again.",
+    "reserve": "Registering is reserved for negotiators. The page itself can be read without an account.",
+    "fermer": "Close"
+  },
+  "desinscription": {
+    "faite": "Registration cancelled.",
+    "attente-quittee": "You have left the waiting list.",
+    "en-file": "Cancellation saved. It will be sent when the network returns.",
+    "annuler": "Undo"
   }
 }

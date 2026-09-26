@@ -10,6 +10,7 @@ import '~/assets/guide-nego/theme.css'
 import '~/assets/guide-nego/mesures.css'
 import '~/assets/guide-nego/base.css'
 import { CLE_GARDE_ANNONCEE, lireCle, poserCle } from '~/utils/guide-nego/stockage'
+import { PREFIXE_FILE_INSCRIPTION_REUNION } from '~/utils/guide-nego/reunions'
 import { PREFIXE_FILE_SIGNALEMENT } from '~/utils/guide-nego/signalements'
 import { CLE_FILE_THEMATIQUES } from '~/utils/guide-nego/thematiques'
 
@@ -79,10 +80,13 @@ useGnReglageNotifications()
 // Un choix abandonné ou refusé se dit là où la personne se trouve quand le réseau
 // revient (FR-009 bis) ; l'écran qui l'a pris le redit en place, et on ne l'y double pas.
 const ECRAN_DE_LA_CLE: Record<string, string> = { [CLE_FILE_THEMATIQUES]: '/guide-nego/thematiques' }
-// La fiche et « réunion non annoncée » redisent en place le refus d'un signalement.
+// Les fiches (session, réunion) et « réunion non annoncée » redisent en place leur refus.
 const ECRAN_DU_SIGNALEMENT = /^\/guide-nego\/negociations\/(?!agenda$|signalements$)[^/]+$/
 const ditEnPlace = (cle: string, chemin: string) =>
-  chemin === ECRAN_DE_LA_CLE[cle] || (cle.startsWith(PREFIXE_FILE_SIGNALEMENT) && ECRAN_DU_SIGNALEMENT.test(chemin))
+  chemin === ECRAN_DE_LA_CLE[cle] ||
+  (cle.startsWith(PREFIXE_FILE_SIGNALEMENT) && ECRAN_DU_SIGNALEMENT.test(chemin)) ||
+  (cle.startsWith(PREFIXE_FILE_INSCRIPTION_REUNION) &&
+    chemin === `/guide-nego/francophonie/reunions/${cle.slice(PREFIXE_FILE_INSCRIPTION_REUNION.length)}`)
 const avisAnnonce = ref<{ texte: string; rang: number } | null>(null)
 watch(avis, (suite) => {
   if (!suite?.message || ditEnPlace(suite.cle, route.path.replace(/\/$/, ''))) return

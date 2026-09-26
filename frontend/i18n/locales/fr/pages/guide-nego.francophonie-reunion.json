@@ -39,5 +39,25 @@
     "titre": "Lecture impossible",
     "texte": "La réunion n'a pas pu être lue. Vérifiez la connexion, puis réessayez.",
     "reessayer": "Réessayer"
+  },
+  "inscription": {
+    "inscrire": "M'inscrire",
+    "rejoindre-attente": "Rejoindre la liste d'attente",
+    "quitter-attente": "Quitter la liste d'attente",
+    "attente-position": "Liste d'attente — position {position}",
+    "complet": "Complet — pas de liste d'attente",
+    "closes": "Inscriptions closes",
+    "a-envoyer": "Partira au retour du réseau",
+    "faite": "Inscription confirmée.",
+    "en-file": "Inscription enregistrée. Elle partira au retour du réseau.",
+    "refusee": "L'inscription n'a pas pu être prise. Réessayez.",
+    "reserve": "S'inscrire est réservé aux négociatrices et négociateurs. La fiche, elle, se lit sans compte.",
+    "fermer": "Fermer"
+  },
+  "desinscription": {
+    "faite": "Désinscription faite.",
+    "attente-quittee": "Vous avez quitté la liste d'attente.",
+    "en-file": "Désinscription enregistrée. Elle partira au retour du réseau.",
+    "annuler": "Annuler"
   }
 }

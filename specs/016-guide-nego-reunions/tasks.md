@@ -51,8 +51,8 @@
 
 ## Phase 7 — US2 : s'inscrire
 
-- [ ] T026 [US2] Bouton d'inscription sur la fiche (« M'inscrire » → « Inscrite », « Rejoindre la liste d'attente », « Liste d'attente — position N », « Inscriptions closes », désinscription) ; sans compte ou sans accès → connexion ou accès ; refus au retour dits (R5)
-- [ ] T027 [US2] Vérifier au navigateur : quickstart § 3 et § 4 (Mailpit)
+- [x] T026 [US2] Bouton d'inscription sur la fiche (« M'inscrire » → « Inscrite », « Rejoindre la liste d'attente », « Liste d'attente — position N », « Inscriptions closes », désinscription) ; sans compte ou sans accès → connexion ou accès ; refus au retour dits (R5)
+- [x] T027 [US2] Vérifier au navigateur : quickstart § 3 et § 4 (Mailpit)
 
 ## Phase 8 — US4 : Ma journée, recherche
 
