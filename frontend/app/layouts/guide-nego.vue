@@ -70,6 +70,10 @@ const copies = useGnCopies()
 useGnFavoris()
 // Le rappel vit ici pour paraître sur tout écran ; il inscrit aussi l'expéditeur de l'agenda.
 const { rappel, fuseau: fuseauDuRappel, ville: villeDuRappel, fermer: fermerLeRappel } = useGnRappel()
+// Les expéditeurs des signalements, des lectures de notification et des réglages : ce qui attend repart à l'ouverture.
+useGnSignalements()
+useGnNotifications()
+useGnReglageNotifications()
 
 // Un choix abandonné ou refusé se dit là où la personne se trouve quand le réseau
 // revient (FR-009 bis) ; l'écran qui l'a pris le redit en place, et on ne l'y double pas.

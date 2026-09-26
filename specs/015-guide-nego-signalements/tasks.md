@@ -58,9 +58,9 @@
 
 ## Phase 5 — Plomberie client
 
-- [ ] T025 Client `fe/app/composables/api/negotiation-reports.ts` (signaler, mes signalements, file, décisions, réglages) et `fe/app/composables/api/notifications.ts` (liste, marquer lu) ; lignes de montage dans `fe/app/composables/useApi.ts`
-- [ ] T026 [P] Règles pures `fe/app/utils/guide-nego/signalements.ts` (encart affiché ou non : terminé, retiré ; repère ; libellé lecteur d'écran ; réunion non annoncée du jour et fin du jour dans le fuseau ; état local « en attente d'envoi ») et tests `fe/tests/guide-nego/signalements.test.ts`
-- [ ] T027 Composables `useGnSignalements` (file avec clé `signalement:<client_ref>`, garde `mes-signalements`, `409` abandonne et le dit), `useGnValidation` (en ligne seulement), `useGnNotifications` (garde `notifications`, filtre `module=negotiation`, marquer lu en file **une intention par notification** `lu:<id>`), `useGnReglageNotifications` dans `fe/app/composables/guide-nego/` ; `useGnSessions` expose `network_reports` et `network_meetings`, y compris en coupure
+- [x] T025 Client `fe/app/composables/api/negotiation-reports.ts` (signaler, mes signalements, file, décisions, réglages) et `fe/app/composables/api/notifications.ts` (liste, marquer lu) ; lignes de montage dans `fe/app/composables/useApi.ts`
+- [x] T026 [P] Règles pures `fe/app/utils/guide-nego/signalements.ts` (encart affiché ou non : terminé, retiré ; repère ; libellé lecteur d'écran ; réunion non annoncée du jour et fin du jour dans le fuseau ; état local « en attente d'envoi ») et tests `fe/tests/guide-nego/signalements.test.ts`
+- [x] T027 Composables `useGnSignalements` (file avec clé `signalement:<client_ref>`, garde `mes-signalements`, `409` abandonne et le dit), `useGnValidation` (en ligne seulement), `useGnNotifications` (garde `notifications`, filtre `module=negotiation`, marquer lu en file **une intention par notification** `lu:<id>`), `useGnReglageNotifications` dans `fe/app/composables/guide-nego/` ; `useGnSessions` expose `network_reports` et `network_meetings`, y compris en coupure
 
 **Commit** : « feat(guide-nego): étape 3b, phase 5 — la plomberie des signalements côté application ».
 

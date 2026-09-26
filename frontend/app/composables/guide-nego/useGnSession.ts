@@ -20,6 +20,11 @@
 import type { LoginResult } from '~/types/auth'
 import { appareilDeclare } from '~/utils/guide-nego/appareil'
 import { CLE_LECTURE_AGENDA } from '~/utils/guide-nego/agenda'
+import {
+  CLE_LECTURE_MES_SIGNALEMENTS,
+  CLE_LECTURE_NOTIFICATIONS,
+  CLE_LECTURE_REGLAGE_NOTIFICATIONS,
+} from '~/utils/guide-nego/signalements'
 import { deconnecterDansLOrdre, relireEtEffacer } from '~/utils/guide-nego/effacements'
 import { CLE_LECTURE_FAVORIS, ecrireGarde, magasinDesEcritures, supprimerGarde } from '~/utils/guide-nego/garde'
 import {
@@ -126,7 +131,9 @@ export function useGnSession() {
       fermerLaSession: () => auth.signOut(),
     })
     await supprimerGarde(CLE_LECTURE_FAVORIS)
-    await supprimerGarde(CLE_LECTURE_AGENDA)
+    for (const cle of [CLE_LECTURE_AGENDA, CLE_LECTURE_MES_SIGNALEMENTS, CLE_LECTURE_NOTIFICATIONS, CLE_LECTURE_REGLAGE_NOTIFICATIONS]) {
+      await supprimerGarde(cle)
+    }
     const maintenant = new Date().toISOString()
     etat.value = {
       ...etat.value,

@@ -11,6 +11,8 @@ import { etatAffiche } from './sessions.ts'
 export const CLE_LECTURE_AGENDA = 'mon-agenda'
 /** Une clé de file par session : deux intentions sur la même, la dernière gagne. */
 export const PREFIXE_FILE_AGENDA = 'agenda-'
+/** Ne commence pas par `agenda-` : la file choisit l'expéditeur par préfixe. */
+export const PREFIXE_FILE_AGENDA_RESEAU = 'reseau-agenda-'
 export const RAPPEL_AVANT_MS = 15 * 60_000
 
 /** Ce qui part dans la file : dans l'agenda (et le rappel voulu), ou retirée. */
@@ -120,11 +122,39 @@ export function appliquerIntention(
   }
 }
 
+/** Même règle pour une réunion non annoncée ; une garde d'avant 3b n'a pas `network_entries`. */
+export function appliquerIntentionReseau(
+  agenda: MyAgenda,
+  reunionId: string,
+  intention: IntentionAgenda,
+  maintenant: Date,
+): MyAgenda {
+  const entrees = agenda.network_entries ?? []
+  const autres = entrees.filter((e) => e.network_meeting_id !== reunionId)
+  if (!intention.garder) return { ...agenda, network_entries: autres }
+  const existante = entrees.find((e) => e.network_meeting_id === reunionId)
+  return {
+    ...agenda,
+    network_entries: [
+      ...autres,
+      { network_meeting_id: reunionId, remind: intention.remind, added_at: existante?.added_at ?? maintenant.toISOString() },
+    ],
+  }
+}
+
 /** L'agenda lu, plus les intentions encore dans la file : une lecture partie avant un envoi ne défait rien. */
 export function avecLaFile(
   agenda: MyAgenda,
   enFile: Readonly<Record<string, IntentionAgenda>>,
   maintenant: Date,
+  enFileReseau: Readonly<Record<string, IntentionAgenda>> = {},
 ): MyAgenda {
-  return Object.entries(enFile).reduce((a, [id, intention]) => appliquerIntention(a, id, intention, maintenant), agenda)
+  const sessions = Object.entries(enFile).reduce(
+    (a, [id, intention]) => appliquerIntention(a, id, intention, maintenant),
+    { ...agenda, network_entries: agenda.network_entries ?? [] },
+  )
+  return Object.entries(enFileReseau).reduce(
+    (a, [id, intention]) => appliquerIntentionReseau(a, id, intention, maintenant),
+    sessions,
+  )
 }

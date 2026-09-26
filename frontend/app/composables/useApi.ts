@@ -77,6 +77,8 @@ import { createMediaApi } from './api/media'
 import { createGuideNegoApi } from './api/guide-nego'
 import { createGuideNegoDocumentsApi } from './api/guide-nego-documents'
 import { createNegotiationSessionsApi } from './api/negotiation-sessions'
+import { createNegotiationReportsApi } from './api/negotiation-reports'
+import { createNotificationsApi } from './api/notifications'
 import { createAdminNegotiationDocumentsApi } from './api/admin-negotiation-documents'
 import { createAuthApi } from './api/auth'
 
@@ -300,6 +302,8 @@ export function useApi() {
       ressource: (chemin, signal) => (http.isConfigured.value ? http.flux(chemin, signal) : Promise.resolve(null)),
     }),
     negotiationSessions: createNegotiationSessionsApi({ send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
+    negotiationReports: createNegotiationReportsApi({ call, send }),
+    notifications: createNotificationsApi({ call, send }),
 
     home: createHomeApi(deps),
     adminShowcase: createAdminShowcaseApi(deps),

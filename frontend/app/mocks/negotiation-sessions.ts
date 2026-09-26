@@ -4,7 +4,15 @@
  * sans thématique, coordination rattachée ou non. Chargé à la demande.
  */
 import type { AvecEmpreinte } from '~/composables/api/etiquete'
-import type { MyAgenda, MyAgendaEntry, MyGroups, OfficialSession, OfficialSessions } from '~/types/negotiation-sessions'
+import type {
+  MyAgenda,
+  MyAgendaEntry,
+  MyGroups,
+  MyNetworkAgendaEntry,
+  OfficialSession,
+  OfficialSessions,
+} from '~/types/negotiation-sessions'
+import { encartsPublies, reunionsPubliees } from './negotiation-reports'
 
 const SLUG = 'cop31-belem-2027'
 const LU_A = '2027-11-10T09:00:00Z'
@@ -116,6 +124,13 @@ const SESSIONS: OfficialSession[] = [
 
 let groupes: string[] = []
 let agenda: MyAgendaEntry[] = []
+let agendaReseau: MyNetworkAgendaEntry[] = []
+
+/** Ce que « Mes signalements » dit d'une session, sans ses encarts. */
+export function sessionDExemple(id: string) {
+  const s = SESSIONS.find((x) => x.id === id)
+  return s ? { id: s.id, title_en: s.title_en, title_fr: s.title_fr, start_at: s.start_at, venue: s.venue } : null
+}
 
 export function sessionsOfficielles(): AvecEmpreinte<OfficialSessions> {
   return {
@@ -127,8 +142,8 @@ export function sessionsOfficielles(): AvecEmpreinte<OfficialSessions> {
       failing_since: null,
       read_at: LU_A,
       server_time: new Date().toISOString(),
-      sessions: SESSIONS.map((s) => ({ ...s })),
-      network_meetings: [],
+      sessions: SESSIONS.map((s) => ({ ...s, network_reports: encartsPublies(s.id) })),
+      network_meetings: reunionsPubliees(),
     },
     empreinte: '"sessions-exemple"',
   }
@@ -149,7 +164,10 @@ export function suivreDesGroupes(codes: string[]): AvecEmpreinte<MyGroups> {
 export function monAgenda(): AvecEmpreinte<MyAgenda> {
   const annulees = new Set(SESSIONS.filter((s) => s.status === 'cancelled').map((s) => s.id))
   const entries = agenda.map((e) => ({ ...e, remind: e.remind && !annulees.has(e.session_id) }))
-  return { valeur: { entries, network_entries: [] }, empreinte: `"${entries.map((e) => `${e.session_id}:${e.remind}`).join('.')}"` }
+  const publiees = new Set(reunionsPubliees().map((r) => r.id))
+  const network_entries = agendaReseau.map((e) => ({ ...e, remind: e.remind && publiees.has(e.network_meeting_id) }))
+  const empreinte = [...entries.map((e) => `${e.session_id}:${e.remind}`), ...network_entries.map((e) => `r${e.network_meeting_id}:${e.remind}`)]
+  return { valeur: { entries, network_entries }, empreinte: `"${empreinte.join('.')}"` }
 }
 
 export function garderUneSession(sessionId: string, remind: boolean): void {
@@ -162,4 +180,16 @@ export function garderUneSession(sessionId: string, remind: boolean): void {
 
 export function retirerUneSession(sessionId: string): void {
   agenda = agenda.filter((e) => e.session_id !== sessionId)
+}
+
+export function garderUneReunion(id: string, remind: boolean): void {
+  const existante = agendaReseau.find((e) => e.network_meeting_id === id)
+  agendaReseau = [
+    ...agendaReseau.filter((e) => e.network_meeting_id !== id),
+    { network_meeting_id: id, remind, added_at: existante?.added_at ?? new Date().toISOString() },
+  ]
+}
+
+export function retirerUneReunion(id: string): void {
+  agendaReseau = agendaReseau.filter((e) => e.network_meeting_id !== id)
 }
