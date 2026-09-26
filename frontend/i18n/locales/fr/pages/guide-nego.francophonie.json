@@ -1,8 +1,36 @@
 {
-  "titre": "Francophonie",
-  "sous-titre": "Réunions et Pavillon",
-  "vide": {
-    "titre": "Rien d'annoncé pour l'instant",
-    "texte": "Les réunions de la Francophonie et les activités du Pavillon de la Francophonie paraîtront ici, dans deux listes distinctes."
+  "sections": {
+    "libelle": "Section de l'onglet Francophonie",
+    "reunions": "Réunions",
+    "pavillon": "Pavillon"
+  },
+  "titre-reunions": "Réunions de la Francophonie",
+  "titre-pavillon": "Pavillon de la Francophonie",
+  "sous-titre-reunions": "{edition} | {edition} — un rendez-vous | {edition} — {count} rendez-vous",
+  "sous-titre-pavillon": "{jour} — {zone}",
+  "hors-connexion": "Les changements survenus depuis ne sont pas ici.",
+  "reunions": {
+    "chargement": "Lecture des réunions",
+    "fuseau": "{zone} ({decalage})",
+    "pied": "Les réunions officielles de la CCNUCC sont dans {negociations} ; les activités du stand, dans {pavillon}.",
+    "negociations": "Négociations",
+    "pavillon": "Pavillon",
+    "vide": {
+      "titre": "Aucune réunion annoncée",
+      "texte": "L'IFDD publie ici l'atelier préparatoire et les concertations de la Francophonie dès qu'ils sont arrêtés."
+    },
+    "sans-edition": {
+      "titre": "Aucune COP à venir",
+      "texte": "Les réunions de la Francophonie paraîtront ici quand la prochaine COP climat sera annoncée."
+    },
+    "jamais-lue": {
+      "titre": "Pas encore lues sur ce téléphone",
+      "texte": "Les réunions se gardent pour le hors connexion à la première lecture. Reconnectez-vous une fois pour les lire."
+    },
+    "erreur": {
+      "titre": "Lecture impossible",
+      "texte": "Les réunions n'ont pas pu être lues. Vérifiez la connexion, puis réessayez.",
+      "reessayer": "Réessayer"
+    }
   }
 }

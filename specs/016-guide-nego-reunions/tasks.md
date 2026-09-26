@@ -44,10 +44,10 @@
 
 ## Phase 6 — US1 : l'onglet et la fiche
 
-- [ ] T022 [US1] `pages/guide-nego/francophonie/index.vue` (remplace `francophonie.vue`) : `GnSegmente` deux segments, `?section=`, titre = nom complet, `GnSectionReunions` / `GnSectionPavillon` (état vide seulement)
-- [ ] T023 [US1] `GnLigneReunion`, `GnEtiquettePavillon`, `GnSectionReunions` (liste, une marque par ligne, accès limité, fuseau dit une fois au-dessus des heures et dans le nom accessible, pied de liste, états chargement / vide / hors connexion) ; planche
-- [ ] T024 [US1] `pages/guide-nego/francophonie/reunions/[id].vue` : heure avec jour et fuseau, lieu ou « En ligne », visioconférence (lien pour l'inscrite, sinon « Réservé aux personnes inscrites »), organisateur, nature, accès limité, description, étiquette Pavillon ; textes
-- [ ] T025 [US1] Vérifier au navigateur : quickstart § 2
+- [x] T022 [US1] `pages/guide-nego/francophonie/index.vue` (remplace `francophonie.vue`) : `GnSegmente` deux segments, `?section=`, titre = nom complet, `GnSectionReunions` / `GnSectionPavillon` (état vide seulement)
+- [x] T023 [US1] `GnLigneReunion`, `GnEtiquettePavillon`, `GnSectionReunions` (liste, une marque par ligne, accès limité, fuseau dit une fois au-dessus des heures et dans le nom accessible, pied de liste, états chargement / vide / hors connexion) ; planche
+- [x] T024 [US1] `pages/guide-nego/francophonie/reunions/[id].vue` : heure avec jour et fuseau, lieu ou « En ligne », visioconférence (lien pour l'inscrite, sinon « Réservé aux personnes inscrites »), organisateur, nature, accès limité, description, étiquette Pavillon ; textes
+- [x] T025 [US1] Vérifier au navigateur : quickstart § 2
 
 ## Phase 7 — US2 : s'inscrire
 
