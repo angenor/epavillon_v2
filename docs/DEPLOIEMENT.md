@@ -660,13 +660,14 @@ ouverte jusqu'à sa prochaine lecture réussie.
 3. **Basculer le drapeau**, les deux colonnes. **`UPDATE 1`, sinon s'arrêter** (ci-dessus).
 4. **Ouvrir `…/v2/guide-nego/` sur un téléphone réel**, l'installer, puis couper le réseau et la
    rouvrir. Le service worker et la garde ne se laissent pas éprouver depuis un poste de travail.
+   La liste complète est au § 15.4, étape 0a.
 
 Rien à redémarrer entre 3 et 4 : le drapeau se lit à chaque ouverture.
 
 
 ---
 
-## 15. Mettre en ligne 0a, 0b, 0c, les étapes 1, 1b, 3a et 3b (22/09, complété les 24, 25 et 26/09)
+## 15. Mettre en ligne les étapes 0a à 3b (22/09, complété les 24, 25 et 26/09)
 
 Une seule mise en ligne porte les huit premières étapes de Guide Négo : le code de la branche, et
 **huit migrations**. Préparée ici, **pas encore exécutée**. Le drapeau reste éteint pendant toute
@@ -686,7 +687,7 @@ qu'à la recette sur téléphones (§ 4).
 | 7 | `specs/014-guide-nego-sessions-agenda/migration.sql` | Les sessions de négociation (3a) : vocabulaires des types de réunion et des groupes ; points de l'ordre du jour ; colonnes de la source sur `negotiation.meetings` ; l'import, son journal, les écarts, les traductions de titres ; « Mon groupe » et « Mon agenda ». Sème le réglage `ai.drafting_model` et **l'import de la COP31, éteint**. Indépendante de celle de l'étape 2 : si l'étape 2 part dans la même mise en ligne, sa migration passe avant, dans l'ordre des numéros |
 | 8 | `specs/015-guide-nego-signalements/migration.sql` | Les signalements du réseau (3b) : la colonne `notify_changes` sur `negotiation.theme_subscriptions` ; les signalements, les réunions non annoncées et leur agenda ; les deux fonctions qui disent qui prévenir. Sème la permission `negotiation.report.validate` (donnée au rôle `admin`) et **quatre types de notification**. Passe **après** celle de 3a, dont elle étend les tables |
 
-Les sept sont **rejouables** : un second passage ne crée rien, ne perd rien, n'échoue pas.
+Les huit sont **rejouables** : un second passage ne crée rien, ne perd rien, n'échoue pas.
 
 **Aucun réglage à ajouter à `.env.prod`.** Les deux réglages nouveaux ont un défaut, et ce défaut
 est la valeur voulue :
@@ -889,179 +890,257 @@ compte d'administration.
 Un point qui échoue et ne se corrige pas sur place : `./deploy.sh restore <sauvegarde de l'étape 1>`
 ramène la base d'avant les migrations, puis redéployer la version précédente du code.
 
-### 4. La recette sur téléphones réels — une seule séance
+### 4. Les essais sur téléphones réels, à cocher
 
-Ce qu'aucun poste de travail ne peut éprouver, pour les sept étapes à la fois : l'appareil réel de
-0a (T071), T112 de 0b, T096 à T098 de 0c, T116 de l'étape 1, T084 de l'étape 1b. **Deux jours de suite** — deux points exigent une nuit ;
-on les prépare en fin de première journée.
+**La seule liste** des essais qu'aucun ordinateur ne peut remplacer, étape par étape, de 0a à 5.
+Elle se déroule par le commanditaire, sans l'équipe, sur deux jours de suite : plusieurs essais
+demandent une nuit. Les identifiants entre parenthèses renvoient aux tâches des `tasks.md`.
 
-**Avant** : le drapeau ouvert (§ 14, `UPDATE 1`) ; le code créé au back-office (§ 3) ; un Android
-**de milieu de gamme**, un iPhone — **si possible un iPhone 8 ou X**, le plus ancien que l'étape 1b
-vise ; deux adresses électroniques qu'on relève sur le téléphone ; un débit bridé — sur Android,
-Chrome relié à `chrome://inspect` d'un poste, profil « 3G lente » ; à défaut, le téléphone réglé sur
-la 3G seule. L'application s'installe depuis `https://<domaine>/v2/guide-nego/`. Sans la barre
-finale, l'adresse est hors de la portée du service worker : le serveur et l'application y ramènent
-(redirection 301 gardée par le navigateur, T077 de l'étape 2) — à vérifier : ouvrir
-`/v2/guide-nego` avec le réseau, puis en mode avion, recharger ; l'application s'ouvre.
+**Ce qu'il faut**
 
-**Premier jour — Android**
+- **Deux téléphones** : un Android **de milieu de gamme**, et un iPhone — **si possible un iPhone 8
+  ou X**, le plus ancien que l'étape 1b vise. Noter pour chacun le modèle et la version du système.
+- **L'adresse de la version en ligne**, avec sa barre finale : `https://<domaine>/v2/guide-nego/`.
+  C'est d'elle qu'on installe l'application.
+- **Deux adresses électroniques** qu'on lit sur les téléphones, une par téléphone : les comptes
+  s'y créent à l'étape 0b.
+- **Deux comptes déjà ouverts** : un compte **expert** (étapes 1b et 2) et un compte
+  **administrateur** (étape 3b, il valide les signalements).
+- **Ce que le § 3 a préparé** : le code d'invitation, le guide publié, les deux notes de l'expert
+  sur les pages 59 et 60. Et, au back-office : les contenus de l'étape 2 publiés (FAQ, parcours
+  « Ma première COP », lexique) ; l'import des sessions allumé — « Négociations → Import », lecteur
+  archivé `cop30/lecture-1`, premier jour de l'archive = **aujourd'hui**, puis « Lire maintenant ».
+- **Le drapeau ouvert** : § 14, la bascule doit rendre `UPDATE 1`.
+- **Un débit bridé** : sur Android, Chrome relié à `chrome://inspect` d'un ordinateur, profil
+  « 3G lente » ; à défaut, le téléphone réglé sur la 3G seule.
 
-- [ ] `guide-nego/installer`, installer, lancer depuis l'icône : plein écran, icône et nom justes.
-- [ ] « Continuer en visiteur » : le message « Prête hors connexion » paraît, sans visiter les onglets.
-- [ ] Débit bridé, application gardée : elle s'ouvre en moins de deux secondes sur la version gardée.
-      Couper le réseau pendant l'installation d'une nouvelle version : l'ancienne sert toujours.
-- [ ] Créer un compte **depuis l'application installée** ; le lien du courriel s'ouvre dans
-      l'application et enchaîne sur le code.
-- [ ] En débit bridé, saisir le code : « Code reconnu », accès ouvert. Un code faux : message distinct.
-- [ ] En débit bridé, choisir ses thématiques ; « Ma journée » s'ouvre.
-- [ ] Mode avion : changer ses thématiques — le choix s'affiche aussitôt.
-- [ ] En débit bridé, **télécharger le guide** depuis sa fiche : la progression avance, la copie
-      paraît dans « Mes documents » avec sa place.
-- [ ] **Préparer la nuit** : toujours en mode avion, changer encore ses thématiques, noter lesquelles,
-      lire le guide jusqu'à une page notée, fermer l'application.
+**Comment lire la liste**
 
-**Premier jour — iPhone**
+- Chaque case se fait **sur l'Android, puis sur l'iPhone** — sauf « Android seulement » ou
+  « iPhone seulement ».
+- « **Avant la nuit** » : se fait en fin de première journée, et se laisse tel quel. « **Le
+  lendemain** » : se fait le matin suivant, **téléphones restés en mode avion** sauf mention.
+- « **En base** » : une vérification à lancer sur le serveur (`./deploy.sh connect`, puis `psql`
+  comme au § 2). `:p` y désigne le compte essayé :
+  `SELECT id FROM identity.people WHERE primary_email = '<adresse>';`.
 
-- [ ] « Installer » mène aux étapes manuelles ; l'installation par Partager fonctionne.
-- [ ] Créer un compte depuis l'application installée ; le lien du courriel s'ouvre **dans Safari** et
-      dit « Adresse confirmée — retournez dans Guide Négo ». Revenir par le sélecteur
-      d'applications : l'application relit l'état du compte **seule** et passe au code.
-- [ ] Saisir le code, choisir ses thématiques, arriver sur « Ma journée ».
-- [ ] Mode avion, relancer depuis l'icône : tout s'ouvre, bandeau une fois, « lu à … » dans
-      l'en-tête ; la police rend « œ », « Œ », « É ».
-- [ ] Thème « Sombre », fermer, rouvrir en mode avion : sombre d'emblée, sans éclair.
-- [ ] Avec le réseau, télécharger le guide ; en mode avion, le lire jusqu'à une page notée.
+**L'ordre conseillé**
 
-**Le lendemain matin**
+1. **Premier jour, l'Android** : les étapes dans l'ordre, de 0a à 3b — chacune s'appuie sur la
+   précédente (l'application installée, puis le compte, le code, les thématiques, le guide gardé).
+2. **Premier jour, l'iPhone** : le même parcours.
+3. **Le soir** : les cases « Avant la nuit ».
+4. **Le lendemain matin** : les cases « Le lendemain ».
+5. **Après** : éteindre l'import et retirer ce qu'il a écrit — signalements et notifications de
+   recette compris — (« L'étape 3a ajoute… », en tête de ce § 15).
 
-- [ ] Les deux téléphones, **encore en mode avion** : ouvrir le guide — « Reprise à la page … »,
-      sommaire, recherche sans accent. C'est le critère de sortie de l'étape 1 : le guide se lit en
-      salle, sans réseau, après une nuit de veille.
-- [ ] Android : **rendre le réseau sans ouvrir l'application**, puis l'ouvrir. Le choix de la veille
-      part — c'est le départ à l'ouverture qui l'attrape, aucun `online` n'ayant été émis. En base,
-      les thématiques notées la veille, en une écriture.
-- [ ] Les deux téléphones : `client_kind` est resté `app` après la nuit —
+#### 0a — La coquille (T071)
+
+- [ ] **Installer (Android seulement).** Ouvrir `guide-nego/installer`, installer, lancer depuis
+      l'icône : l'application occupe tout l'écran, l'icône et le nom sont justes.
+- [ ] **Installer (iPhone seulement).** « Installer » mène aux étapes à suivre à la main ;
+      l'installation par le bouton Partager fonctionne.
+- [ ] **Prête sans réseau.** « Continuer en visiteur » : le message « Prête hors connexion » paraît,
+      sans avoir visité les onglets.
+- [ ] **L'adresse sans barre finale.** Ouvrir `https://<domaine>/v2/guide-nego` (sans `/` à la fin)
+      avec le réseau, puis passer en mode avion et recharger : l'application s'ouvre. Cette adresse
+      est hors de portée de la garde hors connexion ; le serveur y ramène par une redirection que
+      le navigateur retient. (T077 de l'étape 2)
+- [ ] **Relancer en mode avion.** Relancer depuis l'icône : tout s'ouvre, le bandeau jaune paraît
+      une fois, puis « lu à … » reste dans l'en-tête. Les lettres « œ », « Œ », « É » s'affichent bien.
+- [ ] **Le réseau revient.** Application ouverte sans réseau, rendre le réseau : « Synchronisé à … »
+      paraît, sans recharger.
+- [ ] **Thème sombre.** Choisir « Sombre », fermer, rouvrir en mode avion : l'écran est sombre
+      d'emblée, sans flash blanc.
+- [ ] **Sur réseau lent (Android seulement).** Débit bridé, application déjà installée : elle
+      s'ouvre en moins de deux secondes.
+- [ ] **Une mise à jour coupée (Android seulement).** Pendant qu'une nouvelle version de
+      l'application s'installe, couper le réseau : l'ancienne version sert toujours.
+- [ ] **La langue.** Téléphone réglé en anglais : Guide Négo s'affiche en français.
+
+#### 0b — Le compte et l'admission (T112)
+
+- [ ] **Créer un compte (Android seulement)** depuis l'application installée : le lien du courriel
+      s'ouvre dans l'application et enchaîne sur la saisie du code.
+- [ ] **Créer un compte (iPhone seulement)** depuis l'application installée : le lien du courriel
+      s'ouvre **dans Safari** et dit « Adresse confirmée — retournez dans Guide Négo ». Revenir à
+      l'application par le sélecteur d'applications : elle relit l'état du compte **toute seule** et
+      passe au code. C'est le moment qui casse le plus facilement.
+- [ ] **Un code sans réseau.** En mode avion, saisir un code : l'écran dit qu'il faut le réseau, et
+      n'annonce aucun accès.
+- [ ] **Le code.** En débit bridé sur l'Android, avec le réseau sur l'iPhone : un code faux donne
+      un message d'erreur ; le code du § 3 donne « Code reconnu », et l'accès s'ouvre.
+- [ ] **Le lendemain — la session a tenu.** L'application s'ouvre sans redemander de connexion.
+      En base :
       `SELECT client_kind, expires_at FROM identity.sessions WHERE person_id = :p AND revoked_at IS NULL;`
       → `app`, et une échéance à quatre-vingt-dix jours.
-- [ ] Les deux téléphones : ouverts sans réseau puis rendus au réseau, « Synchronisé à … » sans
-      recharger.
 
-**Le lecteur du PDF (étape 1b, T084)** — sur l'Android de milieu de gamme, puis sur l'iPhone ; les
-points marqués d'une nuit se font le lendemain matin, avec ceux du dessus. Pour chacun, noter
-l'appareil et la version du système.
+#### 0c — L'accueil et le profil (T096 à T098)
 
-- [ ] **Fluidité sur les 90 pages.** Guide téléchargé, mode avion : défiler de la page 1 à la
-      page 90 puis revenir, d'un trait. Aucune saccade qui se voit, aucune page blanche qui
-      dure plus d'un instant ; le pied suit (« Page 61 sur 90 · … »). Pincer sur le tableau des
-      sigles jusqu'au plus fort : net une fois le geste fini ; double toucher : retour à la largeur.
-- [ ] **La première page en ligne, sur réseau lent.** Débit bridé, guide **non** téléchargé :
-      l'ouvrir. La jauge avance ; au bout de trois secondes paraissent ses deux sorties :
-  - [ ] « Lire le texte en attendant » : le texte s'ouvre à la même page, en moins de cinq
-        secondes après l'ouverture ; la page du PDF prend sa place quand elle arrive. Refaire,
-        et choisir « Rester sur le texte » : on y reste.
+- [ ] **Choisir ses thématiques.** En débit bridé sur l'Android, avec le réseau sur l'iPhone :
+      choisir ses thématiques ; « Ma journée » s'ouvre.
+- [ ] **Les changer sans réseau.** En mode avion, changer ses thématiques : le nouveau choix
+      s'affiche aussitôt.
+- [ ] **Avant la nuit (Android seulement).** Toujours en mode avion, changer encore ses thématiques,
+      **noter lesquelles**, fermer l'application.
+- [ ] **Le lendemain (Android seulement).** **Rendre le réseau sans ouvrir l'application**, puis
+      l'ouvrir : le choix de la veille part tout seul. En base : les thématiques notées la veille,
+      en une seule écriture.
+
+#### 1 — Les documents (T116)
+
+- [ ] **Télécharger le guide.** En débit bridé sur l'Android, avec le réseau sur l'iPhone : depuis
+      la fiche du guide, « Télécharger ». La progression avance ; la copie paraît dans « Mes
+      documents », avec la place qu'elle prend.
+- [ ] **Avant la nuit.** En mode avion, lire le guide jusqu'à une page, **la noter**, fermer
+      l'application.
+- [ ] **Le lendemain — le guide se lit en salle.** Toujours en mode avion, ouvrir le guide :
+      « Reprise à la page … » (celle notée), le sommaire s'ouvre, une recherche sans accent trouve.
+      C'est la preuve que l'étape 1 est finie : le guide se lit sans réseau, après une nuit.
+
+**Les documents réservés** (T102, quickstart § 5 de `specs/011-…`, étapes 1, 4 et 5). Le compte
+admis par le code en 0b. Les deux dernières cases retirent l'accès : les faire **en fin de
+séance**, après 3b, ou redonner l'accès par un nouveau code.
+
+- [ ] **Préparer.** Au back-office, publier un document **réservé** (réservé aux négociatrices et
+      négociateurs). Le dépublier à la fin de la séance.
+- [ ] **Le télécharger.** Compte admis connecté : le document réservé paraît dans la bibliothèque ;
+      « Télécharger » — la copie paraît dans « Mes documents », à côté du guide.
+- [ ] **Le lire sans réseau.** Mode avion : le document réservé s'ouvre et se lit.
+- [ ] **Se déconnecter.** Avec le réseau, se déconnecter : le message nomme les documents réservés
+      qui vont partir. Après : le document réservé n'est plus lisible, le guide l'est toujours.
+- [ ] **Retirer l'accès.** Se reconnecter, retélécharger le document réservé. Au back-office de 0b,
+      retirer l'accès de ce compte. Rouvrir l'application avec le réseau : le document réservé
+      s'efface du téléphone.
+
+#### 1b — Le lecteur du PDF (T084)
+
+Noter l'appareil et la version du système pour chaque case.
+
+- [ ] **Fluide sur les 90 pages.** Guide téléchargé, mode avion : défiler de la page 1 à la page 90
+      puis revenir, d'un trait. Aucune saccade visible, aucune page blanche qui dure ; le bas de
+      l'écran suit (« Page 61 sur 90 · … »). Agrandir à deux doigts le tableau des sigles jusqu'au
+      maximum : il est net une fois le geste fini ; toucher deux fois : retour à la largeur.
+- [ ] **La première page, sur réseau lent.** Débit bridé, guide **non** téléchargé : l'ouvrir.
+      La jauge avance ; au bout de trois secondes, deux choix paraissent :
+  - [ ] « Lire le texte en attendant » : le texte s'ouvre à la même page, moins de cinq secondes
+        après l'ouverture ; la page du PDF prend sa place quand elle arrive. Refaire, et choisir
+        « Rester sur le texte » : on y reste.
   - [ ] « Télécharger pour lire sans réseau » : le téléchargement part, la copie paraît dans
         « Mes documents ».
-- [ ] **La bascule vers « Texte agrandi ».** À la page 59, toucher la page, puis « Texte » dans la
-      barre : la même page, recomposée. « Réglages » : le mode, le thème, les trois tailles.
-      Revenir à « Pages » : la page 59. Fermer, rouvrir un autre document : il s'ouvre dans le
-      dernier mode choisi.
-- [ ] **La note en marge** — les deux notes posées au § 3, bibliothèque relue avec le réseau, puis
-      mode avion. Page 59 : filet rouge et triangle au bord de la page, à la hauteur du
-      paragraphe ; page 60 : en tête. Toucher le triangle : texte et signature en bas de l'écran,
-      le passage reste visible au-dessus ; la ligne ou la croix replie. En « Texte agrandi », la
-      note borde le paragraphe.
-- [ ] **La recherche hors connexion.** Mode avion, **après une nuit** : « Rechercher »
-      « progrès collectifs » — les passages et leurs pages ; en choisir un : sa page s'ouvre, le
-      passage surligné à sa place. Chercher sans accent (« negociation ») : mêmes résultats.
-- [ ] **iPhone seulement** : noter la version d'iOS. Dès iOS 16.4 — l'iPhone 8 et le X sont en
-      16.7 — le document s'ouvre **sur ses pages** : c'est le seuil qu'ADR-022 a déduit sans
-      appareil, et que cette ligne vérifie. En dessous, il s'ouvre en « Texte agrandi » et le dit.
+- [ ] **Passer en « Texte agrandi ».** À la page 59, toucher la page, puis « Texte » dans la barre :
+      la même page, en texte. « Réglages » : le mode, le thème, les trois tailles. Revenir à
+      « Pages » : on est toujours à la page 59. Fermer, ouvrir un autre document : il s'ouvre dans
+      le dernier mode choisi.
+- [ ] **La note en marge** — les deux notes posées au § 3. Relire la bibliothèque avec le réseau,
+      puis mode avion. Page 59 : un trait rouge et un petit triangle au bord de la page, à la
+      hauteur du paragraphe ; page 60 : en haut de la page. Toucher le triangle : le texte et la
+      signature en bas de l'écran, le passage reste visible au-dessus ; la ligne ou la croix
+      referme. En
+      « Texte agrandi », la note borde le paragraphe.
+- [ ] **Le lendemain — chercher sans réseau.** Mode avion, **après une nuit** : « Rechercher »
+      « progrès collectifs » — les passages et leurs pages ; en toucher un : sa page s'ouvre, le
+      passage surligné. Chercher sans accent (« negociation ») : mêmes résultats.
+- [ ] **iPhone seulement — la version d'iOS.** La noter. Dès iOS 16.4 (l'iPhone 8 et le X sont en
+      16.7), le document s'ouvre **sur ses pages**. En dessous, il s'ouvre en « Texte agrandi » et
+      le dit. C'est le seuil qu'ADR-022 a déduit sans appareil : cette case le vérifie.
 
-**Les sessions de négociation (étape 3a)** — sur l'Android puis sur l'iPhone. Avant : au
-back-office, « Négociations → Import », lecteur archivé `cop30/lecture-1`, premier jour de
-l'archive = **aujourd'hui**, allumé ; « Lire maintenant ». Après : l'éteindre et nettoyer (§ 15,
-« L'étape 3a ajoute… »).
+#### 2 — La FAQ, le parcours et le lexique
 
-- [ ] **La liste en mode avion.** Avec le réseau, ouvrir « Négociations » ; puis mode avion,
-      relancer depuis l'icône : chaque jour de la bande, une fiche **jamais ouverte**, « Mon
-      agenda » s'affichent, avec « Hors connexion — lu à … ».
-- [ ] **L'agenda sans réseau.** En mode avion, « Ajouter à mon agenda » sur une fiche : la session
-      paraît aussitôt dans « Mon agenda ». Réseau rendu, application ouverte : **une** ligne —
-      `SELECT count(*) FROM negotiation.agenda_entries WHERE person_id = :p AND meeting_id = :m;` → 1.
-- [ ] **L'interrupteur au doigt.** Sur une session de l'agenda, « Me rappeler 15 minutes avant »
-      bascule au premier toucher et revient au second. Sur le poste, il bascule au toucher émulé ;
-      seul l'outil de navigation automatisé le manquait, parce qu'il clique hors de l'écran sans
-      faire défiler (constaté le 25/09).
-- [ ] **Le bandeau du rappel, application ouverte.** Premier jour de l'archive réglé pour qu'une
-      session commence dans vingt minutes ; l'ajouter, armer le rappel, garder l'application au
-      premier plan : à quinze minutes, le bandeau jaune paraît en tête, **une fois** ; aucun son,
-      aucune notification (écart 46). Refermer puis rouvrir l'application : il ne revient pas.
-- [ ] **Le fuseau.** Téléphone réglé sur un autre fuseau : les heures restent celles d'Antalya,
-      « heure d'Antalya ».
+Le compte admis de 0b, le compte expert, le guide téléchargé sur chaque téléphone.
 
-**Les signalements et les notifications (étape 3b)** — même séance, même import allumé. Il faut
-deux téléphones : sur l'un, un compte **admis** (négociatrice) qui a une session dans « Mon agenda » ;
-sur l'autre, un compte **administrateur** (permission de valider). Deux adresses relevées sur le
-téléphone. Après : signalements et notifications de recette retirés avec l'import (§ 15, « L'étape
-3a ajoute… »).
-
-- [ ] **Signaler en mode avion.** Téléphone admis en mode avion, fiche d'une session : « Signaler un
-      changement » → « La salle a changé » → une salle → « Envoyer ». La fiche dit « Votre
-      signalement — partira au retour du réseau » ; « Mes signalements » (profil) le montre
-      « Envoyé — partira au retour du réseau ». Rendre le réseau, application ouverte : **une**
-      ligne — `SELECT count(*) FROM negotiation.session_reports WHERE author_id = :p AND meeting_id = :m;` → 1.
-- [ ] **Valider au doigt, puis « Annuler ».** Téléphone administrateur, Ressources → « Validation »
-      → « Signalements » : « Valider » au doigt, puis « Annuler » dans les six secondes. La carte
-      revient « à traiter » ; **aucune** notification sur le téléphone admis, **aucun** courriel
-      dans la minute. Puis « Valider » sans annuler : « Validé. Affiché dans une minute au plus. »
-      (écart 51) ; l'encart violet paraît sur la fiche du téléphone admis.
-- [ ] **« Ne pas retenir » au doigt.** Sur un autre signalement : les trois motifs, la précision,
-      « Ne pas retenir » ; chez l'autrice, « Non retenu à … » et le motif.
-- [ ] **La cloche et le centre au doigt.** Téléphone admis : la cloche porte le compteur jaune ;
-      le centre s'ouvre, chaque ligne dit une phrase qui commence par l'état, puis « Sessions de
-      négociation · heure » (écart 59) ; un toucher ouvre la fiche et marque lu ; « Tout marquer
-      comme lu » ramène le compteur à zéro.
-- [ ] **Un courriel reçu.** Lire `cop30/lecture-2` au back-office : le changement d'une session de
-      l'agenda arrive **par courriel** sur le téléphone, dans les dix minutes, avec « heure
-      d'Antalya ». « À propos » → « Notifications » éteint, nouvelle lecture qui change une
-      session : la notification paraît, **aucun** courriel ; le rallumer.
-- [ ] **Hors connexion, relus.** Avec le réseau, ouvrir le centre, « Mes signalements », une fiche
-      qui porte un encart et une réunion non annoncée validée ; puis mode avion, relancer depuis
-      l'icône : tout se relit, avec « Hors connexion — lu à … », l'encart et la réunion (« Non
-      annoncée — signalée par le réseau, validée à … ») compris.
-
-**La FAQ, le parcours et le lexique (étape 2)** — sur l'Android puis sur l'iPhone. Avant : les
-contenus de l'étape publiés au back-office (FAQ, parcours, lexique) ; un compte admis, un compte
-expert, une adresse relevée sur le téléphone ; le guide téléchargé sur chaque téléphone.
-
-- [ ] **Le lexique en mode avion.** Ouvrir l'application une fois avec le réseau ; mode avion,
-      relancer depuis l'icône. « Aa » depuis « Ma journée », Ressources et le lecteur : le lexique
-      s'ouvre, « N entrées, sans réseau ». `contact grup` → *contact group* en tête, **sans délai
-      perceptible** après la dernière frappe (SC-001) ; `GGA`, `groupe de contact`, `braketed`
-      trouvent leur entrée. La croix ramène à l'écran d'origine.
-- [ ] **Le clavier sorti à « Aa ».** Toucher « Aa » : le champ est actif **et le clavier du
-      téléphone monte** sans second toucher. iOS peut le refuser hors d'un geste : si le clavier
-      ne sort pas sur l'iPhone, le noter avec la version d'iOS.
-- [ ] **Le rail au doigt.** Liste du lexique : toucher une lettre saute à sa section ; **glisser
-      le doigt** le long du rail fait défiler lettre à lettre, sans saccade ; une lettre vide,
-      grisée, ne réagit pas. Même geste avec la taille de texte du système au plus grand.
-- [ ] **Partager.** Sur une entrée, « Partager » ouvre la feuille de partage du système, avec le
-      titre et le lien de l'entrée ; envoyé à soi-même, le lien ouvre l'entrée dans l'application
-      installée (Android) ou dans Safari (iPhone).
-- [ ] **La FAQ en mode avion.** Chaque rubrique, une entrée complète avec « Vérifié le … » ; sa
-      source ouvre le guide téléchargé à la page citée. « Dépassé ou faux » avec deux motifs :
-      « partira au retour du réseau » ; réseau rendu, **un** signalement dans la file des experts.
-- [ ] **Les coches du parcours entre deux téléphones.** Même compte sur les deux. Cocher trois
-      étapes sur l'Android, dont deux en mode avion ; réseau rendu : l'iPhone les montre à
-      l'ouverture. Décocher la même étape sur chacun, l'un après l'autre : le second à revenir
-      au réseau dit « mises à jour depuis un autre appareil » et montre l'état retenu — le
-      dernier geste.
-- [ ] **Les courriels.** Compte admis : poser une question à un expert ; l'expert y répond au
+- [ ] **Le lexique sans réseau.** Ouvrir l'application une fois avec le réseau ; mode avion,
+      relancer depuis l'icône. « Aa » depuis « Ma journée », depuis Ressources et depuis le lecteur :
+      le lexique s'ouvre, « N entrées, sans réseau ». Taper `contact grup` : *contact group* vient en
+      tête, **sans attente perceptible** après la dernière lettre. `GGA`, `groupe de contact`,
+      `braketed` trouvent aussi leur entrée. La croix ramène à l'écran de départ.
+- [ ] **Le clavier sort tout seul.** Toucher « Aa » : le champ est prêt **et le clavier monte**
+      sans second toucher. Si le clavier ne sort pas sur l'iPhone, le noter avec la version d'iOS.
+- [ ] **L'alphabet au doigt.** Dans la liste du lexique : toucher une lettre saute à sa section ;
+      **glisser le doigt** le long des lettres fait défiler lettre à lettre, sans saccade ; une
+      lettre grisée ne réagit pas. Refaire avec la taille de texte du téléphone au plus grand.
+- [ ] **Partager.** Sur une entrée, « Partager » ouvre le partage du téléphone, avec le titre et le
+      lien. Envoyé à soi-même, le lien ouvre l'entrée dans l'application (Android) ou dans Safari
+      (iPhone).
+- [ ] **La FAQ sans réseau.** Mode avion : chaque rubrique, une entrée complète avec « Vérifié le … » ;
+      sa source ouvre le guide téléchargé à la page citée. « Dépassé ou faux » avec deux motifs :
+      « partira au retour du réseau ». Réseau rendu : **un** signalement dans la file des experts.
+- [ ] **Les coches du parcours, d'un téléphone à l'autre.** Le même compte sur les deux. Cocher
+      trois étapes sur l'Android, dont deux en mode avion ; réseau rendu : l'iPhone les montre à
+      l'ouverture. Décocher la même étape sur chacun, l'un après l'autre : le second à retrouver le
+      réseau dit « mises à jour depuis un autre appareil » et garde le dernier geste.
+- [ ] **Les courriels.** Compte admis : poser une question à un expert ; l'expert répond au
       back-office — le courriel arrive **sur le téléphone**, son lien ouvre « Mes questions ».
       Proposer un terme depuis « aucun résultat » ; l'expert le publie — le courriel arrive, son
       lien ouvre l'entrée.
-- [ ] **La feuille du lecteur.** Guide téléchargé, « Texte agrandi », mode avion : toucher
-      *global goal on adaptation* — la feuille monte, « Ouvrir dans le lexique » mène à l'entrée.
+- [ ] **Du lecteur au lexique.** Guide téléchargé, « Texte agrandi », mode avion : toucher
+      *global goal on adaptation* — un volet monte ; « Ouvrir dans le lexique » mène à l'entrée.
 
-Un écart se note dans `docs/AppNego/progress.md`, avec l'appareil et le système. Tout coché, T071,
-T112, T096, T097, T098, T116 et T084 le sont aussi dans leurs `tasks.md`.
+#### 3a — Les sessions de négociation
+
+L'import allumé (voir « Ce qu'il faut »).
+
+- [ ] **La liste sans réseau.** Avec le réseau, ouvrir « Négociations » ; puis mode avion, relancer
+      depuis l'icône : chaque jour de la bande, une fiche **jamais ouverte** et « Mon agenda »
+      s'affichent, avec « Hors connexion — lu à … ».
+- [ ] **L'agenda sans réseau.** En mode avion, « Ajouter à mon agenda » sur une fiche : la session
+      paraît aussitôt dans « Mon agenda ». Réseau rendu, application ouverte — en base, **une**
+      ligne : `SELECT count(*) FROM negotiation.agenda_entries WHERE person_id = :p AND meeting_id = :m;` → 1
+      (`:m` : la session, lue au back-office).
+- [ ] **L'interrupteur au doigt.** Sur une session de l'agenda, « Me rappeler 15 minutes avant »
+      bascule au premier toucher et revient au second. (Sur ordinateur, seul l'outil automatique le
+      manquait : il cliquait hors de l'écran — constaté le 25/09.)
+- [ ] **Le rappel, application ouverte.** Au back-office, régler le premier jour de l'archive pour
+      qu'une session commence dans vingt minutes ; l'ajouter à l'agenda, armer le rappel, garder
+      l'application à l'écran : à quinze minutes, le bandeau jaune paraît en haut, **une fois** ;
+      aucun son, aucune notification (écart 46). Fermer puis rouvrir : il ne revient pas.
+- [ ] **Le fuseau.** Téléphone réglé sur un autre fuseau horaire : les heures restent celles
+      d'Antalya, avec « heure d'Antalya ».
+- [ ] **Le lien du lexique.** Sur une fiche de session, le lien vers le lexique ouvre le lexique,
+      et non l'écran d'attente d'avant l'étape 2. (Journal du 25/09 : à vérifier une fois l'étape 2
+      en ligne.)
+
+#### 3b — Les signalements et les notifications
+
+L'import toujours allumé. Sur l'un des téléphones, le compte admis, avec une session dans « Mon
+agenda » ; sur l'autre, le compte administrateur.
+
+- [ ] **Signaler sans réseau.** Téléphone admis en mode avion, fiche d'une session : « Signaler un
+      changement » → « La salle a changé » → une salle → « Envoyer ». La fiche dit « Votre
+      signalement — partira au retour du réseau » ; « Mes signalements » (profil) le montre
+      « Envoyé — partira au retour du réseau ». Rendre le réseau, application ouverte — en base,
+      **une** ligne :
+      `SELECT count(*) FROM negotiation.session_reports WHERE author_id = :p AND meeting_id = :m;` → 1.
+- [ ] **Valider, puis « Annuler ».** Téléphone administrateur, Ressources → « Validation » →
+      « Signalements » : « Valider », puis « Annuler » dans les six secondes. La carte revient « à
+      traiter » ; **aucune** notification sur le téléphone admis, **aucun** courriel dans la minute.
+      Puis « Valider » sans annuler : « Validé. Affiché dans une minute au plus. » (écart 51) ;
+      l'encadré violet paraît sur la fiche, côté téléphone admis.
+- [ ] **« Ne pas retenir ».** Sur un autre signalement : les trois motifs, la précision, « Ne pas
+      retenir » ; chez l'autrice, « Non retenu à … » et le motif.
+- [ ] **La cloche et les notifications.** Téléphone admis : la cloche porte un compteur jaune ;
+      la liste s'ouvre, chaque ligne commence par ce qui a changé, puis « Sessions de négociation ·
+      heure » (écart 59) ; un toucher ouvre la fiche et marque la ligne lue ; « Tout marquer comme
+      lu » remet le compteur à zéro.
+- [ ] **Un courriel reçu.** Au back-office, lire `cop30/lecture-2` : le changement d'une session de
+      l'agenda arrive **par courriel** sur le téléphone, dans les dix minutes, avec « heure
+      d'Antalya ». Puis « À propos » → « Notifications » éteint, nouvelle lecture qui change une
+      session : la notification paraît, **aucun** courriel. Rallumer.
+- [ ] **Tout se relit sans réseau.** Avec le réseau, ouvrir les notifications, « Mes signalements »,
+      une fiche avec un encadré, et une réunion non annoncée validée ; puis mode avion, relancer
+      depuis l'icône : tout se relit, avec « Hors connexion — lu à … », l'encadré et la réunion
+      (« Non annoncée — signalée par le réseau, validée à … ») compris.
+
+#### 4 — Les réunions de la Francophonie — à compléter à la fusion de l'étape
+
+Aucun essai annoncé : l'étape n'est pas encore spécifiée.
+
+#### 5 — Le Pavillon de la Francophonie — à compléter à la fusion de l'étape
+
+Aucun essai annoncé : l'étape n'est pas encore spécifiée.
+
+#### Quand c'est fini
+
+Un écart se note dans le fichier de son étape, `docs/AppNego/progression/etapes/`, avec l'appareil et la version du système. Tout
+coché, on coche aussi T071 (`specs/008-…`), T112 (`specs/009-…`), T096 à T098 (`specs/010-…`),
+T116 et T102 (`specs/011-…`) et T084 (`specs/012-…`) dans leurs `tasks.md`.

@@ -18,7 +18,7 @@ Le dépôt porte aussi **Guide Négo**, l'application mobile des négociatrices 
 
 Ces quatre points remplacent la mémoire entre sessions. Le contexte se perd, le dépôt non.
 
-> **Si la session porte sur Guide Négo** — on lit **[docs/AppNego/progress.md](docs/AppNego/progress.md)**, et non `docs/PROGRESSION.md`, puis [docs/AppNego/04-roadmap.md](docs/AppNego/04-roadmap.md) pour l'étape en cours. On met à jour `progress.md` en partant.
+> **Si la session porte sur Guide Négo** — on lit le point central **[docs/AppNego/progress.md](docs/AppNego/progress.md)**, et non `docs/PROGRESSION.md`, puis le fichier de l'étape dans [docs/AppNego/progression/](docs/AppNego/progression/LISEZMOI.md) et [docs/AppNego/04-roadmap.md](docs/AppNego/04-roadmap.md) pour l'étape en cours. On met à jour en partant le point central, le fichier de l'étape et le journal du jour — le mode d'emploi est dans `progression/LISEZMOI.md`.
 > **On n'écrit ni dans `docs/PROGRESSION.md` ni dans `docs/progression/`.** Seule exception : une modification de `docs/database/` se consigne dans `docs/progression/modele.md`, puisque le modèle est commun (ADR-017).
 
 ---
@@ -86,7 +86,7 @@ Cette règle vaut pour les questions posées au commanditaire. Le reste du dép�
 | **À quoi l'interface doit ressembler — la référence qui fait autorité** | [docs/guide-de-style-epavillon.html](docs/guide-de-style-epavillon.html) : maquette complète écrite à la main, avec ses **quatorze règles d'usage** et ses décisions de conception. En cas de désaccord avec l'implémentation Vue, **c'est lui qui tranche** — sauf sur les thématiques, voir ci-dessous |
 | Ce que demandait le commanditaire, dans ses mots | [docs/historique/](docs/historique/) |
 | Guide Négo : de quoi il s'agit | [docs/AppNego/00-brief.md](docs/AppNego/00-brief.md) |
-| Où en est Guide Négo ? | [docs/AppNego/progress.md](docs/AppNego/progress.md) |
+| Où en est Guide Négo ? | Le point central [docs/AppNego/progress.md](docs/AppNego/progress.md), puis le fichier de l'étape dans [docs/AppNego/progression/](docs/AppNego/progression/LISEZMOI.md) |
 | L'étape de Guide Négo à construire, et son prompt Spec Kit | [docs/AppNego/04-roadmap.md](docs/AppNego/04-roadmap.md) |
 | Guide Négo : le métier, ce qui existe dans le modèle et ce qui manque | [docs/AppNego/02-domaine.md](docs/AppNego/02-domaine.md) |
 | À quoi l'application Guide Négo doit ressembler | [docs/AppNego/05-design.md](docs/AppNego/05-design.md) · [design/ecrans/](docs/AppNego/design/ecrans/) — la maquette, **qui fait foi** · [design/passation/](docs/AppNego/design/passation/) — jetons, thème, pictogrammes, composants, police |

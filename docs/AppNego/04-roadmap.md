@@ -8,7 +8,7 @@
 2. `/speckit-clarify` si la spécification porte des marqueurs de clarification.
 3. `/speckit-plan` avec le **prompt de plan commun** ci-dessous.
 4. `/speckit-tasks`, `/speckit-analyze`, puis `/speckit-implement`.
-5. `make check-safe` au vert, vérification au navigateur à 360 px contre la page de maquette, puis la ligne de [progress.md](progress.md).
+5. `make check-safe` au vert, vérification au navigateur à 360 px contre la page de maquette, puis le suivi : la ligne de l'étape au point central [progress.md](progress.md), son fichier dans [progression/etapes/](progression/LISEZMOI.md) et le journal du jour.
 
 Les spécifications continuent la numérotation de `specs/` : la première sera `008-…`.
 
