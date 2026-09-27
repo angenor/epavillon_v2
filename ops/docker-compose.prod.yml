@@ -47,6 +47,9 @@ services:
       # Cette adresse interne est lue par le seul serveur, jamais par le
       # navigateur, qui garde `/v2/api` — donc une seule origine et pas de CORS.
       NUXT_API_BASE_SERVER: http://api:8080/api
+      # Nuxt ne lit `runtimeConfig` qu'au démarrage : l'argument de construction ne
+      # suffit pas. Sans elle, le navigateur retombe sur les données simulées.
+      NUXT_PUBLIC_API_BASE: ${NUXT_PUBLIC_API_BASE:-/v2/api}
     ports:
       - "127.0.0.1:${FRONT_PORT:-3100}:3000"
 
