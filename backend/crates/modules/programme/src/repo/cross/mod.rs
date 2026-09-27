@@ -13,7 +13,7 @@
 //! elles se relisent en un fichier, et **c'est ici qu'un ajout se discute**.
 //! C'est le patron de B3, repris sans être réinventé.
 //!
-//! # Les seize lectures hors schéma autorisées
+//! # Les dix-sept lectures hors schéma autorisées
 //!
 //! | # | Lecture | Question de **ce** module |
 //! |---|---|---|
@@ -21,11 +21,11 @@
 //! | 2 | `event.calls_for_proposals` et `effective_deadline()` | « ce dépôt est-il recevable, jusqu'à quand, combien de revues, quel aveugle, quelles bornes ? » |
 //! | 3 | `event.review_criteria` et `max_weighted_score()` | « quelle grille note ce dossier, et sur combien ? » |
 //! | 4 | `event.call_reviewers` | « qui siège au comité de cet appel, et quelle est sa charge ? » |
-//! | 5 | `org.organizations` | « qui porte ce dossier, et est-elle vérifiée ? » |
+//! | 5 | `org.organizations`, `reference.countries` | « qui porte ce dossier, et est-elle vérifiée ? » ; nom, sigle et pays des organisations d'une séance publiée |
 //! | 6 | `org.memberships` | « cette personne peut-elle écrire au nom de l'organisation ? » |
-//! | 7 | `identity.people` | les intervenants, les auteurs de messages, les membres du comité |
+//! | 7 | `identity.people` | les intervenants, les auteurs de messages, les membres du comité ; **seul `display_name`** dans le détail public |
 //! | 8 | `reference.taxonomy_terms`, `terms_of()`, `term_badges()` | les thématiques, pour filtrer et pour afficher |
-//! | 9 | `media.assets` et `object_url()` | les pièces du dossier et leur adresse |
+//! | 9 | `media.assets` et `object_url()` | les pièces du dossier et leur adresse ; la durée d'une rediffusion (`duration_seconds`, par `v_public_schedule`) |
 //! | 10 | `analytics.mv_organization_scorecard` | l'historique de participation de l'organisation porteuse |
 //! | 11 | `platform.entity_history()`, par `programme.proposal_history()` | l'historique champ par champ |
 //! | 12 | `event.event_days` | « quelles colonnes de jours le planificateur affiche-t-il, et à quel jour cette séance se rattache-t-elle ? » |
@@ -33,6 +33,7 @@
 //! | 14 | `event.programme_tracks` | « quelles journées spéciales peut-on lui rattacher ? » |
 //! | 15 | `event.broadcast_channels` | « quel canal cette séance occupe-t-elle ? » |
 //! | 16 | `reference.countries.iso2`, `reference.taxonomy_terms.code` | les valeurs admises d'une réponse « pays » ou d'un champ adossé à une taxonomie |
+//! | 17 | `live.streams`, `live.build_embed_url()` — par `v_public_schedule` | « cette séance a-t-elle une rediffusion, où, et de quelle durée ? » (Guide Négo, étape 5) |
 //!
 //! Les cinq dernières sont arrivées avec B5 et vivent dans `cross/grille.rs`,
 //! **dans le même espace de noms** : le découpage est un fait de fichier — le

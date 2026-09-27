@@ -21,8 +21,8 @@
 | 2 — FAQ et lexique | 🟡 26/09/2026 | Fusionnée dans `main` (6d16b49) : *contact group* se trouve hors connexion, chaque réponse porte sa date de vérification ; reste l'appareil réel, § 15.4 de [DEPLOIEMENT.md](../DEPLOIEMENT.md) — [détail](progression/etapes/2-faq-lexique.md) |
 | 3a — Sessions : l'agenda et son import | 🟡 25/09/2026 | Fusionnée dans `main` (95f82e7), `make check-safe` au vert ; reste l'appareil réel — [détail](progression/etapes/3a-sessions-agenda.md) |
 | 3b — Sessions : signalements et notifications | 🟡 26/09/2026 | Fusionnée dans `main` (72b38cf) ; la suite Rust complète passera au `check-safe` de fin de MVP, puis l'appareil réel — [détail](progression/etapes/3b-signalements.md) |
-| 4 — Réunions de la Francophonie | ⏳ À faire | [détail](progression/etapes/4-reunions.md) |
-| 5 — Pavillon de la Francophonie | ⏳ À faire | API existante — [détail](progression/etapes/5-pavillon.md) |
+| 4 — Réunions de la Francophonie | 🟡 26/09/2026 | Fusionnée dans `main` (27adc35) ; reste l'appareil réel, § 15.4 de [DEPLOIEMENT.md](../DEPLOIEMENT.md) — [détail](progression/etapes/4-reunions.md) |
+| 5 — Pavillon de la Francophonie | 🟡 27/09/2026 | Fusionnée dans `main` (27adc35) ; reste l'appareil réel, § 15.4 de [DEPLOIEMENT.md](../DEPLOIEMENT.md) — [détail](progression/etapes/5-pavillon.md) |
 | 6 — Échanges | — | Après le MVP ; Capacitor d'abord |
 | 7 — Assistant IA | — | Après le MVP |
 | 8 — Formations et quiz | — | Après le MVP |
@@ -70,11 +70,14 @@ Une ligne chacun ; le détail, et les points levés, dans [`points-ouverts.md`](
 - [Étape 1 — deux contre-examens interrompus (23/09)](progression/points-ouverts.md#étape-1--deux-contre-examens-interrompus-2309) — Les tests passent ; à relancer pour la même assurance qu'ailleurs.
 - [Deux tests de `identity` sensibles à la concurrence](progression/points-ouverts.md#deux-tests-de-identity-sensibles-à-la-concurrence) — Un échec isolé le 21/09, API lancée ; à surveiller.
 - [`make check-safe` en fin de cycle seulement](progression/points-ouverts.md#make-check-safe-en-fin-de-cycle-seulement) — Entre-temps : `check:guide-nego`, `test:guide-nego`, `typecheck`.
+- [Étape 5 — rien n'écrit `live.streams`](progression/points-ouverts.md#étape-5--rien-nécrit-livestreams) — Sans outil de saisie, la rediffusion d'une activité ne paraîtra pas en production.
+- [Étape 5 — le back-office du site n'édite pas les formulaires d'inscription](progression/points-ouverts.md#étape-5--le-back-office-du-site-nédite-pas-les-formulaires-dinscription) — Une activité à formulaire complet ne se prépare qu'en base.
+- [Deux fuseaux sur un même écran](progression/points-ouverts.md#deux-fuseaux-sur-un-même-écran) — « Lu à » suit le téléphone, « validé à » la COP ; relevé à la recette de 5, non corrigé.
 
 ## Dernières nouvelles
 
+- 27/09 — Étapes 4 et 5 fusionnées dans `main` (27adc35) ; le scénario qui clôt le MVP est joué de bout en bout — [étape 5](progression/etapes/5-pavillon.md).
 - 27/09 — Les essais sur téléphones réels de 0a à 3b forment une seule liste à cocher, § 15.4 de [DEPLOIEMENT.md](../DEPLOIEMENT.md).
 - 27/09 — Le suivi devient ce point central et le dossier [`progression/`](progression/LISEZMOI.md), demandé le 26/09 — [journal](progression/journal/2026-09-27.md).
 - 26/09 — Étape 2 fusionnée dans `main` (6d16b49) et poussée ; le blocage des tests venait du contrôle de macOS sur chaque binaire neuf — [étape 2](progression/etapes/2-faq-lexique.md).
 - 26/09 — Étapes 3a puis 3b fusionnées dans `main` (95f82e7, 72b38cf) ; la suite Rust complète passera au `check-safe` de fin de MVP — [étape 3b](progression/etapes/3b-signalements.md).
-- 26/09 — Étape 2, phase 11 : « Proposer un terme » depuis le lexique, la recherche et le lecteur — [journal](progression/journal/2026-09-26.md).

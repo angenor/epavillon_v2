@@ -47,5 +47,6 @@
   "notif-genre": "Déplacée — Groupe de contact sur le plan d'action genre",
   "notif-genre-corps": "Déplacée — nouvelle heure 15:00 (heure d'Antalya), selon la source officielle. Sessions de négociation",
   "notif-transition": "Annulée — Consultations informelles sur la transition juste",
-  "notif-transition-corps": "Annulée — la session n'aura pas lieu, selon la source officielle. Sessions de négociation"
+  "notif-transition-corps": "Annulée — la session n'aura pas lieu, selon la source officielle. Sessions de négociation",
+  "journee": "Ligne de « Ma journée » — l'agenda d'origine au-dessus du titre"
 }

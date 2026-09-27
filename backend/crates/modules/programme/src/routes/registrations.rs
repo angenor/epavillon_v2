@@ -165,20 +165,23 @@ pub(crate) async fn liste_nominative(
 /// « Mes inscriptions », annulations comprises.
 #[utoipa::path(
     get,
-    description = "`Registration[]` — ce à quoi la personne **connectée** est inscrite, annulations comprises. L'identifiant de personne que le front envoie encore est **ignoré** : l'API lit sa propre session.",
+    description = "`Registration[]` — ce à quoi la personne **connectée** est inscrite, annulations comprises. L'identifiant de personne que le front envoie encore est **ignoré** : l'API lit sa propre session.\n\n`ETag` sur le corps, **304** sur `If-None-Match` ; `Cache-Control: private, no-cache`.",
     path = "/registrations/mine",
     tag = "Inscriptions",
     operation_id = "inscriptions_les_miennes",
     responses(
         (status = 200, description = "Registration[]", body = Object),
+        (status = 304, description = "Rien n'a changé depuis l'empreinte présentée"),
         (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
     )
 )]
 pub(crate) async fn les_miennes(
+    requete: HttpRequest,
     state: web::Data<ProgrammeState>,
     acteur: Actor,
 ) -> Result<HttpResponse> {
-    Ok(HttpResponse::Ok().json(registration::mes_inscriptions(&state, acteur.0).await?))
+    let inscriptions = registration::mes_inscriptions(&state, acteur.0).await?;
+    crate::routes::json_revalide(&requete, &inscriptions, "private, no-cache")
 }
 
 /// Annuler son inscription.

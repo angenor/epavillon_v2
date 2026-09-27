@@ -55,7 +55,14 @@ pub async fn programmation<'e>(
                   v.tracks AS "tracks!", v.cover,
                   v.temporal_state AS "temporal_state!",
                   v.registered_count AS "registered_count!",
-                  v.theme_codes AS "theme_codes!", v.themes AS "themes!"
+                  v.theme_codes AS "theme_codes!", v.themes AS "themes!",
+                  v.waitlist_enabled AS "waitlist_enabled!",
+                  v.registration_required AS "registration_required!",
+                  v.registration_opens_at, v.registration_closes_at,
+                  v.waitlisted_count AS "waitlisted_count!",
+                  v.listing_changed_at AS "listing_changed_at!",
+                  v.language_codes::text[] AS "language_codes?",
+                  v.replay_url, v.replay_duration_seconds
              FROM programme.v_public_schedule v
             WHERE ($1::uuid IS NULL OR v.event_id = $1)
               AND ($1::uuid IS NOT NULL OR v.temporal_state IN ('upcoming', 'ongoing'))
@@ -98,6 +105,15 @@ pub async fn programmation<'e>(
             registered_count: l.registered_count,
             theme_codes: l.theme_codes,
             themes: l.themes,
+            waitlist_enabled: l.waitlist_enabled,
+            registration_required: l.registration_required,
+            registration_opens_at: l.registration_opens_at,
+            registration_closes_at: l.registration_closes_at,
+            waitlisted_count: l.waitlisted_count,
+            listing_changed_at: l.listing_changed_at,
+            language_codes: l.language_codes,
+            replay_url: l.replay_url,
+            replay_duration_seconds: l.replay_duration_seconds,
         })
         .collect())
 }

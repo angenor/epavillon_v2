@@ -15,6 +15,7 @@ pub const CORRECTION_WITHDRAW: &str = "negotiation.correction.withdraw";
 pub const KNOWLEDGE_PUBLISH: &str = "negotiation.knowledge.publish";
 pub const KNOWLEDGE_REVIEW: &str = "negotiation.knowledge.review";
 pub const REPORT_VALIDATE: &str = "negotiation.report.validate";
+pub const MEETING_MANAGE: &str = "negotiation.meeting.manage";
 
 /// Entrer dans l'espace réservé. C'est ce que le code d'invitation ouvre.
 pub struct SpaceAccess;
@@ -64,4 +65,11 @@ impl PermissionSpec for KnowledgeReview {
 pub struct ReportValidate;
 impl PermissionSpec for ReportValidate {
     const CODE: &'static str = REPORT_VALIDATE;
+}
+
+/// Saisir, publier, annuler une réunion de la Francophonie (étape 4). Portée
+/// globale : `space_lead` la porte sur un espace, `admin` sur une édition.
+pub struct MeetingManage;
+impl PermissionSpec for MeetingManage {
+    const CODE: &'static str = MEETING_MANAGE;
 }

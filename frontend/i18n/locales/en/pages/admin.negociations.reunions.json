@@ -1,0 +1,190 @@
+{
+  "edition": "Edition",
+  "noEdition": {
+    "title": "No climate COP",
+    "description": "No edition of the climate COP series exists yet. Create it under events."
+  },
+  "forbidden": {
+    "scope": "Manage Francophonie meetings, platform-wide",
+    "description": "Francophonie meetings are managed at global scope. An account attached to a single event has no access."
+  },
+  "status": {
+    "draft": "Draft",
+    "scheduled": "Published",
+    "ongoing": "In progress",
+    "completed": "Over",
+    "cancelled": "Cancelled"
+  },
+  "format": {
+    "onsite": "On site",
+    "online": "Online",
+    "hybrid": "Hybrid"
+  },
+  "list": {
+    "title": "Francophonie meetings",
+    "subtitle": "Workshops and consultations offered to negotiators during the COP. A draft does not appear in the app.",
+    "new": "New meeting",
+    "caption": "Meetings of the edition, times in {zone}",
+    "columns": {
+      "title": "Meeting",
+      "when": "Date",
+      "format": "Format",
+      "seats": "Registrations",
+      "status": "Status"
+    },
+    "noType": "Type to be set",
+    "noRegistration": "No registration",
+    "seatsOpen": "No one registered, no limit | 1 registered, no limit | {count} registered, no limit",
+    "seats": "{count} / {capacity} registered",
+    "waitlist": "none waiting | 1 waiting | {count} waiting",
+    "withWaitlist": "{seats} · {waitlist}",
+    "empty": {
+      "title": "No meeting for this edition",
+      "description": "Create the first one: it stays a draft until you publish it."
+    }
+  },
+  "new": {
+    "title": "New meeting",
+    "subtitle": "For {edition}. The meeting starts as a draft; you publish it from its page.",
+    "cancel": "Back to the list"
+  },
+  "detail": {
+    "breadcrumb": "Meeting",
+    "organizer": "organised by {organizer}",
+    "publish": "Publish",
+    "publishHint": "Draft: not visible in the app. Publishing applies to the last saved version.",
+    "publishRefused": "Publication refused: {message}",
+    "cancel": "Cancel the meeting",
+    "cancelledTitle": "Meeting cancelled",
+    "saved": "Changes saved.",
+    "published": "Meeting published: it now appears in the app.",
+    "cancelled": "Meeting cancelled. Registrants see the reason in the app.",
+    "backToList": "Back to the list",
+    "notFound": {
+      "title": "Meeting not found",
+      "description": "This meeting does not exist, or has been deleted."
+    }
+  },
+  "form": {
+    "sections": {
+      "what": "Type and title",
+      "when": "Date and place",
+      "registration": "Registration",
+      "who": "Access and organiser"
+    },
+    "type": {
+      "label": "Type",
+      "hint": "Required to publish.",
+      "placeholder": "Choose a type"
+    },
+    "title": "Title",
+    "description": "Description",
+    "start": "Start",
+    "end": "End",
+    "format": "Format",
+    "venue": {
+      "label": "Venue",
+      "hint": "Room or building. Required to publish an on-site or hybrid meeting."
+    },
+    "link": {
+      "label": "Video conference link",
+      "hint": "Shared with registrants only. Required to publish an online or hybrid meeting."
+    },
+    "registration": {
+      "label": "Registration required",
+      "hint": "Off, the meeting is open without registration to anyone with access."
+    },
+    "capacity": {
+      "label": "Capacity",
+      "hint": "Number of seats. Empty: no limit."
+    },
+    "waitlist": {
+      "label": "Waiting list",
+      "hint": "Once full, the next people wait for a seat to free up."
+    },
+    "window": {
+      "opens": "Registration opens",
+      "opensHint": "Optional, in {zone}. Empty: open as soon as published.",
+      "closes": "Registration closes",
+      "closesHint": "Optional, in {zone}. Empty: until the meeting starts."
+    },
+    "access": {
+      "label": "Access",
+      "open": {
+        "label": "Open",
+        "hint": "Anyone with negotiator access."
+      },
+      "limited": {
+        "label": "Restricted",
+        "hint": "A designated audience, announced in the app."
+      }
+    },
+    "audience": {
+      "label": "Audience",
+      "hint": "For example: ministers and heads of delegation."
+    },
+    "ifdd": {
+      "label": "Organised by IFDD",
+      "hint": "Off, choose the organisation holding it."
+    },
+    "organizer": {
+      "search": "Organization",
+      "searchHint": "Name, acronym or former name: every name is searched.",
+      "searchError": "The search failed. Try again.",
+      "none": "No organisation matches.",
+      "choose": "Choose",
+      "change": "Change",
+      "unnamed": "Selected organisation"
+    },
+    "errors": {
+      "title": "The French title is required.",
+      "start": "Enter the start.",
+      "end": "Enter the end.",
+      "period": "The end must come after the start.",
+      "capacity": "Capacity is a positive whole number.",
+      "window": "Closing must come after opening.",
+      "audience": "Enter the audience, in French at least.",
+      "organizer": "Choose the organisation, or switch “Organised by IFDD” back on.",
+      "summary": "Some fields need attention."
+    },
+    "save": "Save",
+    "create": "Create the draft"
+  },
+  "cancel": {
+    "title": "Cancel the meeting",
+    "question": "The meeting stays visible in the app, marked cancelled, with your reason.",
+    "people": "No one registered. | 1 person registered or waiting will be notified. | {count} people registered or waiting will be notified.",
+    "reason": "Reason",
+    "reasonHint": "Shown as is to registrants.",
+    "reasonRequired": "The reason is required.",
+    "keep": "Keep the meeting",
+    "confirm": "Cancel the meeting"
+  },
+  "pavilion": {
+    "title": "Pavilion activity",
+    "hint": "The meeting can extend an activity of the Francophonie Pavilion in the same edition.",
+    "label": "Linked activity",
+    "placeholder": "Search an activity",
+    "none": "None",
+    "when": "{date}, {zone}",
+    "empty": "No Pavilion activity is scheduled for this edition.",
+    "saved": "Link saved."
+  },
+  "registrants": {
+    "title": "Registrants",
+    "at": "{date} at {time}, {zone}",
+    "registered": "No one registered | 1 registered | {count} registered",
+    "waitlisted": "No one on the waiting list | 1 on the waiting list | {count} on the waiting list",
+    "noneRegistered": "No one registered yet.",
+    "columns": {
+      "position": "Rank",
+      "name": "Name",
+      "country": "Country",
+      "registeredAt": "Registered"
+    },
+    "empty": {
+      "title": "No registrants",
+      "description": "Registrations will appear here once the meeting is published."
+    }
+  }
+}

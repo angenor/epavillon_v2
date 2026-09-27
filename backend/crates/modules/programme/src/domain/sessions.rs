@@ -300,4 +300,19 @@ pub struct PublicScheduleRow {
     pub theme_codes: Vec<String>,
     /// Les mêmes thématiques **pour afficher** — libellé traduit et couleur.
     pub themes: serde_json::Value,
+    // Ajouts de Guide Négo, étape 5 : en queue, comme dans la vue.
+    pub waitlist_enabled: bool,
+    pub registration_required: bool,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub registration_opens_at: Option<OffsetDateTime>,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub registration_closes_at: Option<OffsetDateTime>,
+    pub waitlisted_count: i64,
+    #[serde(with = "time::serde::rfc3339")]
+    pub listing_changed_at: OffsetDateTime,
+    /// Du dossier d'origine — la seule donnée qui en vienne. Nulle sans dossier.
+    pub language_codes: Option<Vec<String>>,
+    /// Une rediffusion au plus par séance, et seulement disponible.
+    pub replay_url: Option<String>,
+    pub replay_duration_seconds: Option<i32>,
 }

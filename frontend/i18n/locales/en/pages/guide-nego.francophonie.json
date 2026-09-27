@@ -1,8 +1,36 @@
 {
-  "titre": "Francophonie",
-  "sous-titre": "Meetings and Pavilion",
-  "vide": {
-    "titre": "Nothing announced yet",
-    "texte": "Francophonie meetings and Francophonie Pavilion activities will appear here, in two separate lists."
+  "sections": {
+    "libelle": "Francophonie tab section",
+    "reunions": "Meetings",
+    "pavillon": "Pavilion"
+  },
+  "titre-reunions": "Francophonie meetings",
+  "titre-pavillon": "Francophonie Pavilion",
+  "sous-titre-reunions": "{edition} | {edition} — one meeting | {edition} — {count} meetings",
+  "sous-titre-pavillon": "{jour} — {zone}",
+  "hors-connexion": "Changes made since then are not shown here.",
+  "reunions": {
+    "chargement": "Reading the meetings",
+    "fuseau": "{zone} ({decalage})",
+    "pied": "Official UNFCCC meetings are in {negociations}; stand activities, in {pavillon}.",
+    "negociations": "Negotiations",
+    "pavillon": "Pavilion",
+    "vide": {
+      "titre": "No meeting announced",
+      "texte": "IFDD publishes the preparatory workshop and the Francophonie consultations here as soon as they are set."
+    },
+    "sans-edition": {
+      "titre": "No upcoming COP",
+      "texte": "Francophonie meetings will appear here once the next climate COP is announced."
+    },
+    "jamais-lue": {
+      "titre": "Not yet read on this phone",
+      "texte": "Meetings are kept for offline use on first reading. Connect once to read them."
+    },
+    "erreur": {
+      "titre": "Reading failed",
+      "texte": "The meetings could not be read. Check the connection, then try again.",
+      "reessayer": "Try again"
+    }
   }
 }

@@ -1,0 +1,63 @@
+{
+  "titre": "Réunion de la Francophonie",
+  "origine": "Réunions de la Francophonie",
+  "chargement": "Lecture de la réunion",
+  "hors-connexion": "Les changements survenus depuis ne sont pas ici.",
+  "sortie": "Voir les réunions de la Francophonie",
+  "annulee-motif": "Motif : {motif}",
+  "cle": {
+    "heure": "Heure",
+    "lieu": "Lieu",
+    "visio": "Visioconférence",
+    "organisateur": "Organisateur",
+    "nature": "Nature",
+    "acces": "Accès"
+  },
+  "heure": "{jour}, {debut}–{fin}",
+  "heure-deux-jours": "{jour}, {debut} – {jourFin}, {fin}",
+  "fuseau": "{zone} ({decalage})",
+  "en-ligne": "En ligne",
+  "aussi-en-ligne": "Aussi en ligne",
+  "lieu-inconnu": "Lieu non annoncé",
+  "rejoindre": "Rejoindre à distance",
+  "reserve": "Réservé aux personnes inscrites",
+  "acces-limite": "Accès limité — {public}",
+  "lu": "Lu {moment}",
+  "jamais-lue": {
+    "titre": "Pas encore lue sur ce téléphone",
+    "texte": "Cette réunion se garde pour le hors connexion à la première lecture de la liste. Reconnectez-vous une fois pour la lire."
+  },
+  "inconnue": {
+    "titre": "Réunion introuvable",
+    "texte": "Elle a pu être retirée par l'IFDD, ou le lien est erroné."
+  },
+  "sans-edition": {
+    "titre": "Aucune COP à venir",
+    "texte": "Les réunions de la Francophonie paraîtront quand la prochaine COP climat sera annoncée."
+  },
+  "erreur": {
+    "titre": "Lecture impossible",
+    "texte": "La réunion n'a pas pu être lue. Vérifiez la connexion, puis réessayez.",
+    "reessayer": "Réessayer"
+  },
+  "inscription": {
+    "inscrire": "M'inscrire",
+    "rejoindre-attente": "Rejoindre la liste d'attente",
+    "quitter-attente": "Quitter la liste d'attente",
+    "attente-position": "Liste d'attente — position {position}",
+    "complet": "Complet — pas de liste d'attente",
+    "closes": "Inscriptions closes",
+    "a-envoyer": "Partira au retour du réseau",
+    "faite": "Inscription confirmée.",
+    "en-file": "Inscription enregistrée. Elle partira au retour du réseau.",
+    "refusee": "L'inscription n'a pas pu être prise. Réessayez.",
+    "reserve": "S'inscrire est réservé aux négociatrices et négociateurs. La fiche, elle, se lit sans compte.",
+    "fermer": "Fermer"
+  },
+  "desinscription": {
+    "faite": "Désinscription faite.",
+    "attente-quittee": "Vous avez quitté la liste d'attente.",
+    "en-file": "Désinscription enregistrée. Elle partira au retour du réseau.",
+    "annuler": "Annuler"
+  }
+}

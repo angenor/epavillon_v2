@@ -346,6 +346,20 @@ codes! {
     NegotiationReportUndoExpired => "NEGOTIATION_REPORT_UNDO_EXPIRED", StatusCode::CONFLICT,
         "Trop tard pour annuler : le signalement est déjà affiché.";
 
+    // --- Guide Négo, réunions de la Francophonie (étape 4) --------------------
+    NegotiationMeetingUnknown => "NEGOTIATION_MEETING_UNKNOWN", StatusCode::NOT_FOUND,
+        "Cette réunion n'existe pas.";
+    NegotiationMeetingForbidden => "NEGOTIATION_MEETING_FORBIDDEN", StatusCode::FORBIDDEN,
+        "S'inscrire à une réunion est réservé aux personnes qui ont l'accès négociateur.";
+    NegotiationMeetingFull => "NEGOTIATION_MEETING_FULL", StatusCode::CONFLICT,
+        "Complet — votre inscription n'a pas pu être prise.";
+    NegotiationMeetingClosed => "NEGOTIATION_MEETING_CLOSED", StatusCode::CONFLICT,
+        "Les inscriptions à cette réunion ne sont pas ouvertes.";
+    NegotiationMeetingUnavailable => "NEGOTIATION_MEETING_UNAVAILABLE", StatusCode::CONFLICT,
+        "Cette réunion n'accepte plus ce geste : elle est annulée ou a déjà commencé.";
+    NegotiationMeetingInvalid => "NEGOTIATION_MEETING_INVALID", StatusCode::BAD_REQUEST,
+        "Cette réunion est incomplète.";
+
     // MAIL_RELAY_UNREACHABLE n'est PAS ici : il ne franchit aucune réponse
     // HTTP. Il vit dans `mail.rs`, d'où il part vers `platform.jobs.last_error`.
 }

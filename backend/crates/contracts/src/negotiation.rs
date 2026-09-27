@@ -130,6 +130,19 @@ pub const JOB_REPORT_PUBLISH: &str = "negotiation.report.publish";
 /// Un travail par destinataire et par tranche de dix minutes.
 pub const JOB_SESSION_CHANGE_EMAIL: &str = "negotiation.session_change_email";
 
+// ---------------------------------------------------------------------------
+// Réunions de la Francophonie — étape 4
+// ---------------------------------------------------------------------------
+
+/// Annulation, ou changement d'heure, de fin, de format ou de lieu d'une
+/// réunion publiée ; émis par le service, charge `notification`.
+pub const FRANCOPHONE_MEETING_CHANGED: &str = "negotiation.francophone_meeting.changed";
+/// Une personne de la liste d'attente a pris une place libérée.
+pub const MEETING_REGISTRATION_PROMOTED: &str = "negotiation.meeting_registration.promoted";
+
+/// Un travail par personne promue, parti aussitôt.
+pub const JOB_MEETING_PROMOTION_EMAIL: &str = "negotiation.meeting_promotion_email";
+
 /// Texte bilingue d'un avis.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct NotificationText {

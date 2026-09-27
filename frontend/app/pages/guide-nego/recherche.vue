@@ -4,13 +4,21 @@ import type { FaqEntry, GlossaryEntry } from '~/types/negotiation-savoir'
 import { dayKeyInZone } from '~/utils/datetime'
 import { morceauxSurlignes } from '~/utils/guide-nego/lexique'
 import { chercherDansLeDocument, type Passage } from '~/utils/guide-nego/lecteur'
-import { documentsTrouves, rechercheLancee, sessionsTrouvees } from '~/utils/guide-nego/recherche-globale'
+import { cheminDeLActivite, etatDeLActivite } from '~/utils/guide-nego/pavillon'
+import {
+  activitesTrouvees,
+  documentsTrouves,
+  rechercheLancee,
+  reunionsTrouvees,
+  sessionsTrouvees,
+} from '~/utils/guide-nego/recherche-globale'
 import { etatAffiche, jourAOuvrir, joursDeLaBande } from '~/utils/guide-nego/sessions'
 
 /**
  * La recherche globale — maquette 02-socle, écran « 09 Recherche ». Lexique, FAQ,
- * documents, puis les sessions de négociation du jour que la liste ouvrirait ; les
- * réunions de la Francophonie et le Pavillon viennent avec leurs étapes.
+ * documents, les sessions de négociation du jour que la liste ouvrirait, puis les
+ * réunions de la Francophonie et les activités du Pavillon gardées — les trois agendas,
+ * chacun son groupe.
  *
  * Tout se cherche sur le téléphone, sauf le texte des documents : l'API le cherche dans
  * tous ceux qu'on peut lire ; sans elle, seules les copies gardées se lisent, et l'écran
@@ -32,6 +40,11 @@ const savoir = useGnSavoir()
 const docs = useGnDocuments()
 const copies = useGnCopies()
 const sessions = useGnSessions()
+const reunions = useGnReunions()
+const inscriptions = useGnInscriptionsReunions()
+const edition = useGnEdition()
+const pavillon = useGnPavillon()
+const inscriptionsPavillon = useGnInscriptionsPavillon()
 const thematiques = useGnThematiques()
 
 const origine = useState<string>('gn-recherche-origine', () => '/guide-nego')
@@ -56,8 +69,12 @@ onMounted(async () => {
   zone.value?.querySelector('input')?.focus()
   void docs.rafraichir()
   void sessions.rafraichir()
+  void reunions.rafraichir()
+  void pavillon.rafraichir()
   void copies.recharger()
   await compte.assurer()
+  inscriptions.assurer()
+  inscriptionsPavillon.assurer()
   void (compte.connectee.value ? thematiques.assurer() : thematiques.assurerLeVocabulaire())
   await savoir.assurer()
 })
@@ -132,6 +149,23 @@ const sessionsDuJour = computed(() =>
   servies.value ? sessionsTrouvees(servies.value.sessions, cherche.value, jour.value, fuseau.value) : [],
 )
 
+const reunionsDeLaRecherche = computed(() =>
+  reunionsTrouvees(reunions.reunions.value, cherche.value).map((reunion) => ({
+    reunion,
+    etat: inscriptions.etat(reunion.id, maintenant) ?? 'prevue',
+  })),
+)
+const fuseauDesReunions = computed(() => reunions.fuseau.value ?? 'UTC')
+
+const activitesDeLaRecherche = computed(() =>
+  activitesTrouvees(pavillon.activites.value, cherche.value).map((activite) => ({
+    activite,
+    etat: etatDeLActivite(activite, maintenant),
+    marque: inscriptionsPavillon.marque(activite.id, maintenant),
+  })),
+)
+const fuseauDuPavillon = computed(() => pavillon.fuseau.value ?? 'UTC')
+
 const lignesDeDocuments = computed(() =>
   documents.value.flatMap(({ document, passages }) =>
     passages.length
@@ -179,7 +213,13 @@ const compteDesSessions = computed(() => {
 const proposition = ref(false)
 
 const total = computed(
-  () => lexique.value.length + faq.value.length + lignesDeDocuments.value.length + sessionsDuJour.value.length,
+  () =>
+    lexique.value.length +
+    faq.value.length +
+    lignesDeDocuments.value.length +
+    sessionsDuJour.value.length +
+    reunionsDeLaRecherche.value.length +
+    activitesDeLaRecherche.value.length,
 )
 
 const chargement = computed(() => lancee.value && !savoir.etat.value.pret)
@@ -276,6 +316,38 @@ useHead({ title: t('guide-nego.recherche.titre') })
           </li>
         </GnGroupeResultats>
 
+        <GnGroupeResultats
+          v-if="reunionsDeLaRecherche.length"
+          :titre="t('guide-nego.recherche.reunions.titre')"
+          :compte="t('guide-nego.recherche.reunions.compte', { count: reunionsDeLaRecherche.length }, reunionsDeLaRecherche.length)"
+        >
+          <li v-for="l in reunionsDeLaRecherche" :key="l.reunion.id">
+            <GnLigneReunion
+              :reunion="l.reunion"
+              :etat="l.etat"
+              :fuseau="fuseauDesReunions"
+              :ville="reunions.ville.value"
+              :vers="`/guide-nego/francophonie/reunions/${l.reunion.id}`"
+            />
+          </li>
+        </GnGroupeResultats>
+
+        <GnGroupeResultats
+          v-if="activitesDeLaRecherche.length"
+          :titre="t('guide-nego.recherche.pavillon.titre')"
+          :compte="t('guide-nego.recherche.pavillon.compte', { count: activitesDeLaRecherche.length }, activitesDeLaRecherche.length)"
+        >
+          <li v-for="l in activitesDeLaRecherche" :key="l.activite.id">
+            <GnLigneActivite
+              v-bind="l"
+              jour
+              :fuseau="fuseauDuPavillon"
+              :ville="edition.edition.value?.city ?? null"
+              :vers="cheminDeLActivite(l.activite.slug)"
+            />
+          </li>
+        </GnGroupeResultats>
+
         <div v-if="total === 0" class="gn-recherche__aucun">
           <h2 class="gn-recherche__aucun-titre">{{ t('guide-nego.recherche.aucun.titre', { terme: cherche }) }}</h2>
           <p class="gn-recherche__aucun-texte">{{ t('guide-nego.recherche.aucun.texte') }}</p>
@@ -289,8 +361,6 @@ useHead({ title: t('guide-nego.recherche.titre') })
           {{ t('guide-nego.recherche.non-telecharges') }}
         </p>
       </template>
-
-      <p class="gn-recherche__ligne gn-recherche__pas-encore">{{ t('guide-nego.recherche.pas-encore') }}</p>
     </div>
 
     <GnFeuilleProposerTerme v-model="proposition" :terme="cherche" />
@@ -328,11 +398,6 @@ useHead({ title: t('guide-nego.recherche.titre') })
 [data-app="guide-nego"] .gn-recherche__ligne--filet {
   padding-top: var(--gn-espace-8);
   border-bottom: var(--gn-filet-3) solid var(--gn-filet-fort);
-}
-
-[data-app="guide-nego"] .gn-recherche__pas-encore {
-  margin-top: var(--gn-espace-16);
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
 }
 
 [data-app="guide-nego"] .gn-recherche__document {

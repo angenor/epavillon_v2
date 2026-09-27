@@ -93,6 +93,10 @@ export const TERM = {
   negoJustTransition: uuid('7012', 8),
   negoAgriculture: uuid('7012', 9),
   negoTechnology: uuid('7012', 10),
+  // francophone_meeting_type — étape 4 de Guide Négo
+  francoWorkshop: uuid('7013', 1),
+  francoNegotiators: uuid('7013', 2),
+  francoMinisterial: uuid('7013', 3),
   // faq_section et glossary_family — le savoir de Guide Négo
   faqFirstCop: uuid('7012', 11),
   faqProcess: uuid('7012', 12),

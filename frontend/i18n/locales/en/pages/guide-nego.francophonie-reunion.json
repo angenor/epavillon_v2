@@ -1,0 +1,63 @@
+{
+  "titre": "Francophonie meeting",
+  "origine": "Francophonie meetings",
+  "chargement": "Reading the meeting",
+  "hors-connexion": "Changes made since then are not shown here.",
+  "sortie": "See the Francophonie meetings",
+  "annulee-motif": "Reason: {motif}",
+  "cle": {
+    "heure": "Time",
+    "lieu": "Venue",
+    "visio": "Video conference",
+    "organisateur": "Organiser",
+    "nature": "Type",
+    "acces": "Access"
+  },
+  "heure": "{jour}, {debut}–{fin}",
+  "heure-deux-jours": "{jour}, {debut} – {jourFin}, {fin}",
+  "fuseau": "{zone} ({decalage})",
+  "en-ligne": "Online",
+  "aussi-en-ligne": "Also online",
+  "lieu-inconnu": "Venue not announced",
+  "rejoindre": "Join remotely",
+  "reserve": "Reserved for registered participants",
+  "acces-limite": "Restricted access — {public}",
+  "lu": "Read {moment}",
+  "jamais-lue": {
+    "titre": "Not yet read on this phone",
+    "texte": "This meeting is kept for offline use once the list has been read. Connect once to read it."
+  },
+  "inconnue": {
+    "titre": "Meeting not found",
+    "texte": "IFDD may have withdrawn it, or the link is wrong."
+  },
+  "sans-edition": {
+    "titre": "No upcoming COP",
+    "texte": "Francophonie meetings will appear once the next climate COP is announced."
+  },
+  "erreur": {
+    "titre": "Reading failed",
+    "texte": "The meeting could not be read. Check the connection, then try again.",
+    "reessayer": "Try again"
+  },
+  "inscription": {
+    "inscrire": "Register",
+    "rejoindre-attente": "Join the waiting list",
+    "quitter-attente": "Leave the waiting list",
+    "attente-position": "Waiting list — position {position}",
+    "complet": "Full — no waiting list",
+    "closes": "Registration closed",
+    "a-envoyer": "Will be sent when the network returns",
+    "faite": "Registration confirmed.",
+    "en-file": "Registration saved. It will be sent when the network returns.",
+    "refusee": "The registration could not be taken. Try again.",
+    "reserve": "Registering is reserved for negotiators. The page itself can be read without an account.",
+    "fermer": "Close"
+  },
+  "desinscription": {
+    "faite": "Registration cancelled.",
+    "attente-quittee": "You have left the waiting list.",
+    "en-file": "Cancellation saved. It will be sent when the network returns.",
+    "annuler": "Undo"
+  }
+}

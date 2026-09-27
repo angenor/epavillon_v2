@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.meetings SET status = 'cancelled', cancellation_reason = $2\n          WHERE id = $1 AND status <> 'cancelled'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "021ddd2295829d0fb82444bb3940c5a8cf3fc6c3ef2d3c959e19f0fec8480bea"
+}

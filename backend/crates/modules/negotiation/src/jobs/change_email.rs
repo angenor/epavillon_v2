@@ -20,6 +20,7 @@ use uuid::Uuid;
 
 use crate::jobs::emails::remettre;
 use crate::mail::{self, Envoi};
+use crate::notifications::avis::Etat;
 use crate::repo::courriel::{self as depot, TRANCHE_SECONDES};
 use crate::repo::notifications as reglage;
 
@@ -28,6 +29,8 @@ use crate::repo::notifications as reglage;
 pub enum Cible {
     Meeting,
     NetworkMeeting,
+    /// Réunion de la Francophonie saisie par l'IFDD (étape 4).
+    FrancophoneMeeting,
 }
 
 impl Cible {
@@ -35,6 +38,7 @@ impl Cible {
         match self {
             Self::Meeting => format!("/guide-nego/negociations/{id}"),
             Self::NetworkMeeting => format!("/guide-nego/negociations/reseau/{id}"),
+            Self::FrancophoneMeeting => format!("/guide-nego/francophonie/reunions/{id}"),
         }
     }
 }
@@ -45,6 +49,10 @@ struct Charge {
     id: Uuid,
     person_id: Uuid,
     tranche: i64,
+    /// Réunion de la Francophonie : le premier changement de la tranche. Une
+    /// annulation relue au départ l'emporte.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    etat: Option<Etat>,
 }
 
 pub fn cle(id: Uuid, tranche: i64, person_id: Uuid) -> String {
@@ -59,6 +67,32 @@ pub async fn poser(
     id: Uuid,
     destinataires: &[Uuid],
 ) -> Result<()> {
+    poser_charges(conn, cible, id, None, destinataires).await
+}
+
+pub async fn poser_reunion(
+    conn: &mut PgConnection,
+    id: Uuid,
+    etat: Etat,
+    destinataires: &[Uuid],
+) -> Result<()> {
+    poser_charges(
+        conn,
+        Cible::FrancophoneMeeting,
+        id,
+        Some(etat),
+        destinataires,
+    )
+    .await
+}
+
+async fn poser_charges(
+    conn: &mut PgConnection,
+    cible: Cible,
+    id: Uuid,
+    etat: Option<Etat>,
+    destinataires: &[Uuid],
+) -> Result<()> {
     if destinataires.is_empty() {
         return Ok(());
     }
@@ -71,6 +105,7 @@ pub async fn poser(
             id,
             person_id,
             tranche,
+            etat,
         })
         .map_err(|e| ApiError::internal(format!("charge de courriel : {e}")))?;
         jobs::enqueue(
@@ -165,6 +200,20 @@ async fn composer(
             Ok(depot::etat_reunion(conn, c.id)
                 .await?
                 .map(|r| mail::reunion_non_annoncee(&envoi, &r, &chemin)))
+        }
+        Cible::FrancophoneMeeting => {
+            if !depot::dans_laudience(conn, c.id, c.person_id).await? {
+                return Ok(None);
+            }
+            let Some(r) = depot::reunion_francophone(conn, c.id).await? else {
+                return Ok(None);
+            };
+            let etat = match r.status.as_str() {
+                "draft" => return Ok(None),
+                "cancelled" => Etat::Annulee,
+                _ => c.etat.unwrap_or(Etat::Deplacee),
+            };
+            Ok(Some(mail::changement_de_reunion(&envoi, &r, etat, &chemin)))
         }
     }
 }

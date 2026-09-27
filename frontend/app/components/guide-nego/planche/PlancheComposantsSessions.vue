@@ -247,6 +247,20 @@ const reportee = computed(() =>
         />
       </div>
 
+      <span class="gn-planche-composants__legende">{{ k('journee') }}</span>
+      <div class="gn-planche-composants__vitrine">
+        <GnLigneSession
+          forme="agenda"
+          :session="adaptation"
+          etat="en-cours"
+          :fuseau="FUSEAU"
+          :ville="VILLE"
+          :thematique="k('thematique-adaptation')"
+          :origine="t('gn-journee-lignes.sessions.origine')"
+          :vers="VERS"
+        />
+      </div>
+
       <span class="gn-planche-composants__legende">{{ k('rappel') }}</span>
       <div class="gn-planche-composants__vitrine">
         <GnBandeauRappel :session="lignes[2]!.session" :fuseau="FUSEAU" :ville="VILLE" />

@@ -19,8 +19,7 @@
       "vide": "Aucun changement signalé. Les salles déplacées et les sessions annulées paraîtront ici avec les signalements du réseau."
     },
     "trois-agendas": {
-      "titre": "Aujourd'hui, vos trois agendas",
-      "vide": "Rien aujourd'hui. Les Sessions de négociation, les Réunions de la Francophonie et le Pavillon de la Francophonie paraîtront ici, chacun sous son nom."
+      "titre": "Aujourd'hui, vos trois agendas"
     },
     "documents": {
       "titre": "Documents récents",

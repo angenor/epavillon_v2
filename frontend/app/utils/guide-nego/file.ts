@@ -39,7 +39,7 @@ export interface MagasinEcritures {
 /** Ce que l'envoi rend : la réponse de l'API, ou son silence. */
 export type Reponse =
   | { statut: 'succes' }
-  | { statut: 'refus'; code: number; message: string | null }
+  | { statut: 'refus'; code: number; message: string | null; champ?: string | null }
   | { statut: 'panne' }
 
 export type Sort = 'envoyee' | 'perimee' | 'refusee' | 'reportee' | 'ignoree'
@@ -49,6 +49,8 @@ export interface Suite {
   sort: Sort
   /** Le message de l'API, tel quel, quand elle a parlé. */
   message: string | null
+  /** Le champ que le refus nomme, pour le dire à côté de la saisie. */
+  champ?: string | null
 }
 
 export interface Expediteur {
@@ -159,6 +161,7 @@ export function creerFile(deps: DependancesFile): File {
         cle: intention.cle,
         sort,
         message: reponse.statut === 'refus' ? reponse.message : null,
+        ...(reponse.statut === 'refus' && reponse.champ ? { champ: reponse.champ } : {}),
       }
       suites.push(suite)
 

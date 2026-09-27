@@ -125,3 +125,23 @@ Les restitutions et leur partage par cercle : proposés, à confirmer par entret
 ## `make check-safe` en fin de cycle seulement
 
 `make check-safe` ne se lance plus qu'à la fin d'un cycle de travail, demandé le 21/09 : la porte complète (typecheck Nuxt, build et tests de tous les crates) coûte plusieurs minutes. Entre-temps : `npm run check:guide-nego`, `test:guide-nego`, `typecheck`.
+
+## Levé — le groupe Réunions de la Francophonie dans la recherche globale
+
+~~**À la fusion de l'étape 2 : groupe Réunions de la Francophonie dans la recherche globale (`reunionsTrouvees`), clé `pas-encore` réduite au Pavillon**~~ **Fait le 27/09** (T029 de l'étape 4).
+
+## Étape 5 — rien n'écrit `live.streams`
+
+**Étape 5 — rien n'écrit `live.streams`** : sans outil de saisie (le back-office du direct, qui appartient à l'ePavillon), la rediffusion d'une activité ne paraîtra pas en production. La recette l'a posée en SQL ; le § 15 de `DEPLOIEMENT.md` donne la requête pour la séance sur téléphones.
+
+## Étape 5 — le back-office du site n'édite pas les formulaires d'inscription
+
+**Étape 5 — le back-office du site n'édite pas les formulaires d'inscription** : une activité à formulaire complet (question de plus que le pays) ne se prépare aujourd'hui qu'en base.
+
+## Levé le 27/09 — étape 5, T021, le scénario qui clôt le MVP
+
+**Étape 5 — T021, le scénario qui clôt le MVP** (quickstart § 5 de `specs/017-guide-nego-pavillon/`), reporté : il se joue désormais (étape 2 et 016 fusionnées dans 017 le 27/09), sur la version construite à 360 px.
+
+## Deux fuseaux sur un même écran
+
+**Deux heures d'un même écran ne se lisent pas dans le même fuseau**, relevé par dev2 le 27/09 à la recette de l'étape 5, non corrigé : un téléphone réglé sur un autre fuseau que celui de la COP affiche « lu à » à son heure, mais « validé à » à l'heure de la COP.

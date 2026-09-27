@@ -132,6 +132,19 @@ export interface Registration {
 // ---------------------------------------------------------------------------
 
 /**
+ * Ce qu'une tentative d'inscription porte — `SessionRegisterPayload`. Connecté, ni
+ * `guest` ni identité dans les réponses : la personne vient de la session.
+ */
+export interface SessionRegisterPayload {
+  /** Clés = `code` des champs actifs ; une clé inconnue est refusée. */
+  answers: Record<string, unknown>
+  locale?: string | null
+  /** Exigé dès qu'une réponse est donnée à un champ sensible. */
+  sensitive_data_consent?: boolean
+  organization_id?: OrganizationId | null
+}
+
+/**
  * L'issue d'une tentative d'inscription — `RegistrationResult`.
  *
  * LES SIX ISSUES SORTENT EN 200. Arriver une minute après la clôture ou trouver

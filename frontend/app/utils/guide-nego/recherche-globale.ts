@@ -1,12 +1,15 @@
 /**
- * La recherche globale (récit 4) : ce qui se décide sans Nuxt — les sessions du jour
- * trouvées, et les documents trouvés par leur fiche ou par leur texte, en ligne comme
- * sur les copies gardées.
+ * La recherche globale (récit 4) : ce qui se décide sans Nuxt — les sessions du jour,
+ * les réunions de la Francophonie et les activités du Pavillon trouvées, et les documents trouvés par leur fiche
+ * ou par leur texte, en ligne comme sur les copies gardées.
  */
 import type { LibraryDocument, PageHit } from '~/types/negotiation-documents'
+import type { FrancophoneMeeting } from '~/types/negotiation-meetings'
+import type { PublicScheduleRow } from '~/types/views'
 import type { OfficialSession } from '~/types/negotiation-sessions'
 import { correspondALaRecherche } from './documents.ts'
 import { expressionRepliee, LONGUEUR_MINIMALE, type Passage } from './lecteur.ts'
+import { trierLesActivites } from './pavillon.ts'
 import { sessionsDuJour } from './sessions.ts'
 import { normalizeSearch } from '../proposal-list.ts'
 
@@ -27,6 +30,22 @@ export function sessionsTrouvees(
   return sessionsDuJour(sessions, jour, fuseau).filter((s) =>
     [s.title_en, s.title_fr, s.venue].some((c) => !!c && normalizeSearch(c).includes(cherche)),
   )
+}
+
+/** Les réunions de l'édition dont le titre, dans l'une de ses langues, ou le lieu contient la saisie. */
+export function reunionsTrouvees(reunions: readonly FrancophoneMeeting[], saisie: string): FrancophoneMeeting[] {
+  if (!rechercheLancee(saisie)) return []
+  const cherche = normalizeSearch(saisie)
+  return reunions.filter((r) =>
+    [...Object.values(r.title), r.venue].some((c) => !!c && normalizeSearch(c).includes(cherche)),
+  )
+}
+
+/** Les activités du Pavillon de l'édition dont le titre, dans l'une de ses langues, contient la saisie. */
+export function activitesTrouvees(activites: readonly PublicScheduleRow[], saisie: string): PublicScheduleRow[] {
+  if (!rechercheLancee(saisie)) return []
+  const cherche = normalizeSearch(saisie)
+  return trierLesActivites(activites.filter((a) => Object.values(a.title).some((c) => !!c && normalizeSearch(c).includes(cherche))))
 }
 
 export interface PassageTrouve {

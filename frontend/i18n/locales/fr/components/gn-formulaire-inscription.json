@@ -1,0 +1,18 @@
+{
+  "titre": "M'inscrire",
+  "titre-attente": "Rejoindre la liste d'attente",
+  "obligatoire": "{libelle} (obligatoire)",
+  "requis": "Cette réponse est obligatoire.",
+  "choisir": "Choisir",
+  "pays-code": "Le code du pays à deux lettres, par exemple SN.",
+  "consentement": "J'accepte de transmettre ces informations sensibles",
+  "consentement-detail": "Elles ne servent qu'à l'organisation de l'activité, selon la politique de confidentialité de l'IFDD.",
+  "consentement-requis": "Cochez cette case pour transmettre l'information sensible, ou laissez vide la question qui la demande.",
+  "envoyer": "M'inscrire",
+  "envoyer-attente": "Rejoindre la liste d'attente",
+  "issues": {
+    "full": "Complet : il ne reste aucune place, et cette activité n'a pas de liste d'attente.",
+    "closed": "Les inscriptions sont closes depuis le {date}, {zone}.",
+    "not_open_yet": "Les inscriptions ouvriront le {date}, {zone}."
+  }
+}

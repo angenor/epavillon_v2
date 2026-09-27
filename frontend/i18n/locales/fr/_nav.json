@@ -66,7 +66,8 @@
     "negotiationGlossary": "Lexique",
     "negotiationPathway": "Parcours",
     "negotiationImport": "Import des sessions",
-    "negotiationAgenda": "Ordre du jour"
+    "negotiationAgenda": "Ordre du jour",
+    "negotiationMeetings": "Réunions"
   },
   "breadcrumb": {
     "label": "Fil d'Ariane",

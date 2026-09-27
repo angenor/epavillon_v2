@@ -1,9 +1,8 @@
 {
   "titre": "Rechercher",
-  "champ": "Chercher dans le lexique, la FAQ, les documents et les sessions",
+  "champ": "Chercher dans le lexique, la FAQ, les documents, les sessions, les réunions et le Pavillon",
   "indication": "Un terme, une question, un mot du guide",
-  "invite": "Au moins deux lettres : le lexique, la FAQ, les documents et les sessions de négociation.",
-  "pas-encore": "Pas encore ici : les réunions de la Francophonie et le Pavillon.",
+  "invite": "Au moins deux lettres : le lexique, la FAQ, les documents, les sessions de négociation, les réunions et le Pavillon de la Francophonie.",
   "chargement": "Recherche en cours",
   "total": {
     "serveur": "Aucun résultat, dans tout Guide Négo | {count} résultat, dans tout Guide Négo — sur le téléphone et le serveur | {count} résultats, dans tout Guide Négo — sur le téléphone et le serveur",
@@ -35,9 +34,17 @@
     "aujourdhui": "{count} aujourd'hui | {count} aujourd'hui | {count} aujourd'hui",
     "le-jour": "{count} le {jour} | {count} le {jour} | {count} le {jour}"
   },
+  "reunions": {
+    "titre": "Réunions de la Francophonie",
+    "compte": "{count} réunion | {count} réunion | {count} réunions"
+  },
+  "pavillon": {
+    "titre": "Pavillon de la Francophonie",
+    "compte": "{count} activité | {count} activité | {count} activités"
+  },
   "aucun": {
     "titre": "Aucun résultat pour « {terme} »",
-    "texte": "Rien dans le lexique, la FAQ, les documents ni les sessions de négociation. Si c'est un terme de négociation, proposez-le : un expert de l'IFDD le définit et l'ajoute au lexique.",
+    "texte": "Rien dans le lexique, la FAQ, les documents, les sessions de négociation, les réunions ni le Pavillon de la Francophonie. Si c'est un terme de négociation, proposez-le : un expert de l'IFDD le définit et l'ajoute au lexique.",
     "proposer": "Proposer « {terme} » au lexique"
   }
 }

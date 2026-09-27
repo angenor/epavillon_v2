@@ -1086,3 +1086,112 @@ $$;
 
 COMMENT ON COLUMN live.streams.recording_asset_id IS
     'media.assets.id du replay archivé. FK xmod_fk_streams_recording_asset posée dès que le module média est présent.';
+
+-- -----------------------------------------------------------------------------
+-- Rediffusion dans la programmation publique (étape 5 de Guide Négo, spec 017)
+--
+-- programme.v_public_schedule naît dans 075, où live.streams n'existe pas
+-- encore : elle se REDÉFINIT ICI EN ENTIER, colonnes de 075 identiques et dans
+-- le même ordre (leurs commentaires y restent), avec deux colonnes en queue.
+-- Toute modification de la vue se reporte dans les deux fichiers.
+--
+-- UNE SEULE REDIFFUSION PAR SÉANCE (LATERAL … LIMIT 1) : une ligne de la vue est
+-- un bloc du calendrier, et deux rediffusions ne doivent jamais en faire deux.
+-- La principale d'abord, puis la plus récente.
+--
+-- Disponible = une ligne `replay` non annulée, ou un direct devenu consultable
+-- (`replay_url` posé) ; `replay_available_at` nul ou passé ; une adresse
+-- effective. L'adresse : `replay_url`, à défaut `watch_url`, à défaut l'URL
+-- d'intégration construite par live.build_embed_url().
+-- Durée en secondes : celle de l'enregistrement archivé (media.assets), de la
+-- ligne ou de son direct d'origine, à défaut la durée de diffusion constatée.
+-- La rediffusion est publique, comme le direct sur le site (tranché le 26/09).
+-- -----------------------------------------------------------------------------
+CREATE OR REPLACE VIEW programme.v_public_schedule AS
+SELECT
+    s.id,
+    s.event_id,
+    s.event_day_id,
+    s.proposal_id,
+    s.slug,
+    s.title,
+    s.summary,
+    s.starts_at,
+    s.ends_at,
+    s.timezone,
+    s.format,
+    s.status,
+    s.room_id,
+    r.name                AS room_name,
+    s.organization_id,
+    o.legal_name          AS organization_name,
+    o.acronym             AS organization_acronym,
+    c.iso2                AS organization_country_code,
+    c.name                AS organization_country,
+    s.is_streamed,
+    s.broadcast_channel_id,
+    s.capacity,
+    COALESCE((
+        SELECT jsonb_agg(jsonb_build_object(
+                   'slug', t.slug, 'title', t.title, 'color', t.color_hex, 'kind', t.kind)
+               ORDER BY st.sort_order, t.sort_order)
+        FROM programme.session_tracks st
+        JOIN event.programme_tracks t ON t.id = st.track_id
+        WHERE st.session_id = s.id AND t.published_at IS NOT NULL
+    ), '[]'::jsonb) AS tracks,
+    COALESCE(
+        media.attached_image('programme', 'sessions',  s.id,          'cover'),
+        media.attached_image('programme', 'proposals', s.proposal_id, 'cover')
+    ) AS cover,
+    CASE
+        WHEN s.status = 'cancelled'          THEN 'cancelled'
+        WHEN s.status = 'postponed'          THEN 'postponed'
+        WHEN now() < s.starts_at             THEN 'upcoming'
+        WHEN now() BETWEEN s.starts_at AND s.ends_at THEN 'ongoing'
+        ELSE 'past'
+    END AS temporal_state,
+    (SELECT count(*) FROM programme.registrations rg
+      WHERE rg.session_id = s.id AND rg.status IN ('registered', 'attended')) AS registered_count,
+    reference.terms_of('programme', 'sessions', s.id, 'activity_theme') AS theme_codes,
+    reference.term_badges('programme', 'sessions', s.id, 'activity_theme') AS themes,
+    s.waitlist_enabled,
+    s.registration_required,
+    s.registration_opens_at,
+    s.registration_closes_at,
+    (SELECT count(*) FROM programme.registrations rg
+      WHERE rg.session_id = s.id AND rg.status = 'waitlisted') AS waitlisted_count,
+    s.listing_changed_at,
+    p.language_codes,
+    rp.url              AS replay_url,
+    rp.duration_seconds AS replay_duration_seconds
+FROM programme.sessions s
+LEFT JOIN event.rooms r          ON r.id = s.room_id
+LEFT JOIN org.organizations o    ON o.id = s.organization_id
+LEFT JOIN reference.countries c  ON c.id = o.country_id
+LEFT JOIN programme.proposals p  ON p.id = s.proposal_id
+LEFT JOIN LATERAL (
+    SELECT COALESCE(ls.replay_url::text, ls.watch_url::text,
+                    live.build_embed_url(ls.provider, ls.embed_id)) AS url,
+           COALESCE(round(a.duration_seconds)::int,
+                    round(oa.duration_seconds)::int,
+                    round(extract(epoch FROM ls.ended_at - ls.started_at))::int,
+                    round(extract(epoch FROM og.ended_at - og.started_at))::int) AS duration_seconds
+      FROM live.streams ls
+      LEFT JOIN media.assets a  ON a.id  = ls.recording_asset_id
+      LEFT JOIN live.streams og ON og.id = ls.replay_of_id
+      LEFT JOIN media.assets oa ON oa.id = og.recording_asset_id
+     WHERE ls.session_id = s.id
+       AND ls.status <> 'cancelled'
+       AND (ls.kind = 'replay' OR ls.replay_url IS NOT NULL)
+       AND (ls.replay_available_at IS NULL OR ls.replay_available_at <= now())
+       AND COALESCE(ls.replay_url::text, ls.watch_url::text,
+                    live.build_embed_url(ls.provider, ls.embed_id)) IS NOT NULL
+     ORDER BY ls.is_primary DESC, ls.replay_available_at DESC NULLS LAST, ls.id DESC
+     LIMIT 1
+) rp ON true
+WHERE s.published_at IS NOT NULL;
+
+COMMENT ON COLUMN programme.v_public_schedule.replay_url IS
+    'Adresse de LA rediffusion disponible de la séance (une au plus), nulle sinon.';
+COMMENT ON COLUMN programme.v_public_schedule.replay_duration_seconds IS
+    'Durée de la rediffusion en secondes entières : enregistrement archivé, à défaut durée de diffusion constatée.';

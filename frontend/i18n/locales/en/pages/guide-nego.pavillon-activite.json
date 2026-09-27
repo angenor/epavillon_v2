@@ -1,0 +1,69 @@
+{
+  "titre": "Pavilion activity",
+  "origine": "Francophonie Pavilion",
+  "chargement": "Reading the activity",
+  "hors-connexion": "Changes made since then are not shown here.",
+  "sortie": "See the Francophonie Pavilion",
+  "cle": {
+    "heure": "Time",
+    "salle": "Room",
+    "organisateurs": "Organisers",
+    "partenaires": "Partners",
+    "langue": "Language",
+    "rediffusion": "Replay"
+  },
+  "heure": "{jour}, {debut}–{fin}",
+  "heure-deux-jours": "{jour}, {debut} – {jourFin}, {fin}",
+  "fuseau": "{zone} ({decalage})",
+  "revoir": "Watch again",
+  "revoir-duree": "Watch again · {minutes} min",
+  "intervenants": "Speakers",
+  "role": {
+    "speaker": "Speaker",
+    "moderator": "Moderator",
+    "panelist": "Panellist",
+    "keynote": "Keynote speaker",
+    "facilitator": "Facilitator",
+    "interpreter": "Interpreter"
+  },
+  "jamais-lue": {
+    "titre": "Not read on this phone yet",
+    "texte": "This activity is kept for offline use after the first reading of the Pavilion. Reconnect once to read it."
+  },
+  "inconnue": {
+    "titre": "Activity not found",
+    "texte": "IFDD may have removed it, or the link is wrong."
+  },
+  "sans-edition": {
+    "titre": "No upcoming COP",
+    "texte": "Francophonie Pavilion activities will appear once the next climate COP is announced."
+  },
+  "erreur": {
+    "titre": "Unable to read",
+    "texte": "The activity could not be read. Check the connection, then try again.",
+    "reessayer": "Try again"
+  },
+  "inscription": {
+    "inscrire": "Register",
+    "rejoindre-attente": "Join the waiting list",
+    "quitter-attente": "Leave the waiting list",
+    "complet": "Full — no waiting list",
+    "closes": "Registration closed",
+    "pas-encore": "Registration opens on {jour} at {heure}, {zone}",
+    "a-envoyer": "Will be sent when back online",
+    "faite": "Registration confirmed.",
+    "en-file": "Registration saved. It will be sent when back online.",
+    "refusee": "The registration could not be taken. Try again.",
+    "fermer": "Close",
+    "compte": {
+      "titre": "Registering needs an account",
+      "texte": "You register in your own name. The page itself can be read without an account."
+    }
+  },
+  "desinscription": {
+    "faite": "Registration cancelled.",
+    "attente-quittee": "You have left the waiting list.",
+    "en-file": "Cancellation saved. It will be sent when back online.",
+    "annuler": "Undo"
+  }
+}

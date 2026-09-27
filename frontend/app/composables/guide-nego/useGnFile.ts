@@ -29,7 +29,7 @@ export function reponseDe(erreur: unknown): Reponse {
   if (erreur instanceof ForbiddenError) return { statut: 'refus', code: 403, message: erreur.message }
   const normalisee = normalizeApiError(erreur)
   if (normalisee instanceof ApiRequestError) {
-    return { statut: 'refus', code: normalisee.status, message: normalisee.message }
+    return { statut: 'refus', code: normalisee.status, message: normalisee.message, champ: normalisee.field }
   }
   return { statut: 'panne' }
 }

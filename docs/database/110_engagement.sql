@@ -1056,6 +1056,8 @@ INSERT INTO engagement.notification_types (code, module_code, label, default_cha
     ('negotiation.report.published',    'negotiation', '{"fr":"Changement signalé par le réseau","en":"Change reported by the network"}', '{in_app}', 'normal',  '{}'),
     ('negotiation.network_meeting.published', 'negotiation', '{"fr":"Réunion non annoncée","en":"Unannounced meeting"}',    '{in_app}',    'normal',    '{}'),
     ('negotiation.report.decided',      'negotiation', '{"fr":"Décision sur votre signalement","en":"Decision on your report"}', '{in_app}',     'normal',    '{}'),
+    ('negotiation.francophone_meeting.changed', 'negotiation', '{"fr":"Réunion de la Francophonie modifiée","en":"Francophonie meeting changed"}', '{in_app}', 'normal', '{}'),
+    ('negotiation.meeting_registration.promoted', 'negotiation', '{"fr":"Place obtenue à une réunion","en":"Place secured at a meeting"}', '{in_app}', 'normal', '{}'),
     ('engagement.connection.requested', 'engagement',  '{"fr":"Demande de mise en relation","en":"Connection request"}',        '{in_app}',       'normal',    '{demandeur}'),
     ('engagement.connection.accepted',  'engagement',  '{"fr":"Mise en relation acceptée","en":"Connection accepted"}',         '{in_app}',       'normal',    '{destinataire}'),
     ('engagement.message.received',     'engagement',  '{"fr":"Nouveau message","en":"New message"}',                           '{in_app}',       'normal',    '{expediteur}'),

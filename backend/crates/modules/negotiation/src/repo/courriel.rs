@@ -226,3 +226,95 @@ pub async fn session_pour_avis(
         jour: l.jour,
     }))
 }
+
+// ---------------------------------------------------------------------------
+// Réunions de la Francophonie (étape 4) — relues après écriture, par l'avis
+// comme par le courriel.
+// ---------------------------------------------------------------------------
+
+pub struct ReunionFrancophone {
+    pub title_fr: String,
+    pub title_en: String,
+    pub status: String,
+    pub jour: Date,
+    pub debut: String,
+    pub fin: Option<String>,
+    pub format: String,
+    pub lieu: Option<String>,
+    pub motif: Option<String>,
+    pub ville: Option<String>,
+    pub fuseau: String,
+    /// Aujourd'hui dans le fuseau de la COP : le jour de la clé de regroupement.
+    pub aujourdhui: Date,
+}
+
+pub async fn reunion_francophone(
+    conn: &mut PgConnection,
+    id: Uuid,
+) -> Result<Option<ReunionFrancophone>> {
+    let ligne = sqlx::query!(
+        r#"SELECT COALESCE(m.title::jsonb->>'fr', m.title::jsonb->>'en') AS "title_fr!",
+                  COALESCE(m.title::jsonb->>'en', m.title::jsonb->>'fr') AS "title_en!",
+                  m.status::text AS "status!",
+                  (m.start_at AT TIME ZONE m.timezone::text)::date AS "jour!",
+                  to_char(m.start_at AT TIME ZONE m.timezone::text, 'HH24:MI') AS "debut!",
+                  to_char(m.end_at AT TIME ZONE m.timezone::text, 'HH24:MI') AS fin,
+                  m.format::text AS "format!", m.venue_label, m.cancellation_reason, e.city,
+                  m.timezone::text AS "fuseau!",
+                  (now() AT TIME ZONE m.timezone::text)::date AS "aujourdhui!"
+             FROM negotiation.meetings m
+             JOIN event.events e ON e.id = m.event_id
+            WHERE m.id = $1
+              AND m.kind IN ('preparatory_workshop', 'francophone_consultation')
+              AND m.source_key IS NULL"#,
+        id
+    )
+    .fetch_optional(conn)
+    .await?;
+    Ok(ligne.map(|l| ReunionFrancophone {
+        title_fr: l.title_fr,
+        title_en: l.title_en,
+        status: l.status,
+        jour: l.jour,
+        debut: l.debut,
+        fin: l.fin,
+        format: l.format,
+        lieu: l.venue_label,
+        motif: l.cancellation_reason,
+        ville: l.city,
+        fuseau: l.fuseau,
+        aujourdhui: l.aujourdhui,
+    }))
+}
+
+/// Inscrites et liste d'attente (`meeting_audience()`).
+pub async fn audience_reunion(conn: &mut PgConnection, id: Uuid) -> Result<Vec<Uuid>> {
+    Ok(sqlx::query_scalar!(
+        r#"SELECT p AS "p!" FROM negotiation.meeting_audience($1) AS p ORDER BY p"#,
+        id
+    )
+    .fetch_all(conn)
+    .await?)
+}
+
+pub async fn dans_laudience(conn: &mut PgConnection, id: Uuid, person: Uuid) -> Result<bool> {
+    Ok(sqlx::query_scalar!(
+        r#"SELECT $2 IN (SELECT negotiation.meeting_audience($1)) AS "dedans!""#,
+        id,
+        person
+    )
+    .fetch_one(conn)
+    .await?)
+}
+
+pub async fn inscrite(conn: &mut PgConnection, id: Uuid, person: Uuid) -> Result<bool> {
+    Ok(sqlx::query_scalar!(
+        r#"SELECT EXISTS (SELECT 1 FROM negotiation.meeting_registrations
+                           WHERE meeting_id = $1 AND person_id = $2 AND status = 'registered')
+                  AS "inscrite!""#,
+        id,
+        person
+    )
+    .fetch_one(conn)
+    .await?)
+}

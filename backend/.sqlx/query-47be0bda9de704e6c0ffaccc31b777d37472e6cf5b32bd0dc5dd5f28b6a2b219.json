@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p AS \"p!\" FROM negotiation.promote_meeting_waitlist($1) AS p",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "p!",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "47be0bda9de704e6c0ffaccc31b777d37472e6cf5b32bd0dc5dd5f28b6a2b219"
+}

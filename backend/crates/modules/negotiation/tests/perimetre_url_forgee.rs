@@ -52,6 +52,9 @@ const ADMIN_IMPORT: &str = include_str!("../src/routes/admin_import.rs");
 /// La validation des signalements (3b), sous sa propre permission, éprouvée
 /// en HTTP dans `validation.rs`.
 const ADMIN_SIGNALEMENTS: &str = include_str!("../src/routes/admin_reports.rs");
+/// Les réunions de la Francophonie (4), sous `MeetingManage`, éprouvées en HTTP
+/// dans `reunions_admin.rs`.
+const ADMIN_REUNIONS: &str = include_str!("../src/routes/admin_meetings.rs");
 
 /// Les douze routes, telles que `contracts/api-admin.md` les énumère.
 const ROUTES: [&str; 12] = [
@@ -190,7 +193,8 @@ const FICHIERS_CONTROLES: &str = "routes::admin_codes::configurer(cfg);\
      routes::admin_savoir::configurer(cfg);\
      routes::admin_file::configurer(cfg);\
      routes::admin_import::configurer(cfg);\
-     routes::admin_reports::configurer(cfg);";
+     routes::admin_reports::configurer(cfg);\
+     routes::admin_meetings::configurer(cfg);";
 
 #[test]
 fn chaque_configurer_du_back_office_ne_monte_que_ses_routes() {
@@ -203,6 +207,7 @@ fn chaque_configurer_du_back_office_ne_monte_que_ses_routes() {
         ADMIN_FILE,
         ADMIN_IMPORT,
         ADMIN_SIGNALEMENTS,
+        ADMIN_REUNIONS,
     ] {
         let ecarts = ecarts_de_montage(source);
         assert!(
@@ -213,7 +218,7 @@ fn chaque_configurer_du_back_office_ne_monte_que_ses_routes() {
     assert_eq!(
         bloc(LIB, ADMIN_ROUTES),
         FICHIERS_CONTROLES,
-        "le back-office ne se compose que des huit fichiers contrôlés"
+        "le back-office ne se compose que des neuf fichiers contrôlés"
     );
 }
 
@@ -295,6 +300,17 @@ fn chaque_route_des_signalements_exige_sa_permission_sur_la_portee_globale() {
     assert_eq!(
         source.matches("pub(crate) async fn ").count(),
         source.matches("Requires<ReportValidate>").count(),
+    );
+    assert!(!source.contains("RequiresAnyScope") && !source.contains("Perimeter"));
+}
+
+#[test]
+fn chaque_route_des_reunions_exige_sa_permission_sur_la_portee_globale() {
+    let source = sans_commentaires(ADMIN_REUNIONS);
+    assert_eq!(source.matches(".route(").count(), 9);
+    assert_eq!(
+        source.matches("pub(crate) async fn ").count(),
+        source.matches("Requires<MeetingManage>").count(),
     );
     assert!(!source.contains("RequiresAnyScope") && !source.contains("Perimeter"));
 }

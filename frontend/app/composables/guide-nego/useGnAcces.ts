@@ -30,12 +30,12 @@ export function useGnAcces() {
   const api = useApi()
   const connexion = useGnConnexion()
 
-  // L'accès perdu efface les réservés gardés (FR-034) — sur une réponse seulement.
+  // L'accès perdu efface les réservés gardés (FR-034) et les liens de visio (R6) — sur une réponse seulement.
   const { etat, rafraichir } = useGnLecture<AccessStateView>('acces', () =>
     relireEtEffacer(
       async () => etatDAcces(await api.guideNego.acces()),
       (lu) => !accesOuvert(lu),
-      effacerLesCopiesReservees,
+      effacerCeQuiEstReserve,
     ),
   )
 

@@ -79,6 +79,8 @@ import { createGuideNegoDocumentsApi } from './api/guide-nego-documents'
 import { createGuideNegoSavoirApi } from './api/guide-nego-savoir'
 import { createNegotiationSessionsApi } from './api/negotiation-sessions'
 import { createNegotiationReportsApi } from './api/negotiation-reports'
+import { createNegotiationMeetingsApi } from './api/negotiation-meetings'
+import { createPavillonApi } from './api/pavillon'
 import { createNotificationsApi } from './api/notifications'
 import { createAdminNegotiationDocumentsApi } from './api/admin-negotiation-documents'
 import { createAdminNegotiationSavoirApi } from './api/admin-negotiation-savoir'
@@ -305,6 +307,8 @@ export function useApi() {
     }),
     negotiationSessions: createNegotiationSessionsApi({ send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
     negotiationReports: createNegotiationReportsApi({ call, send }),
+    negotiationMeetings: createNegotiationMeetingsApi({ send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
+    pavillon: createPavillonApi({ callOrNull, send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
     notifications: createNotificationsApi({ call, send }),
 
     guideNegoSavoir: createGuideNegoSavoirApi({ send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),

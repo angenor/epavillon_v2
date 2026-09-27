@@ -127,6 +127,14 @@ export interface SessionSpeaker {
   created_at: IsoDateTime
 }
 
+/**
+ * Un intervenant du détail PUBLIC d'une séance : ni identifiant de personne,
+ * ni confirmation, ni présence — mais son nom d'affichage.
+ */
+export type PublicSessionSpeaker = Omit<SessionSpeaker, 'person_id' | 'confirmed_at' | 'attended'> & {
+  display_name: string
+}
+
 /** Table `programme.session_organizations` — `075` § 2 ter. */
 export interface SessionOrganization {
   session_id: SessionId
@@ -134,6 +142,11 @@ export interface SessionOrganization {
   role: OrganizationRole
   sort_order: number
   added_at: IsoDateTime
+  /** Détail public seulement : `org.organizations.legal_name`, sigle et pays. */
+  name?: string
+  acronym?: string | null
+  country_code?: string | null
+  country?: I18nText | null
 }
 
 // ---------------------------------------------------------------------------

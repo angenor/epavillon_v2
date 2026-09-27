@@ -1,11 +1,13 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import type { LibraryDocument } from '../../app/types/negotiation-documents.ts'
+import type { FrancophoneMeeting } from '../../app/types/negotiation-meetings.ts'
 import type { Passage } from '../../app/utils/guide-nego/lecteur.ts'
 import {
   documentsTrouves,
   PASSAGES_PAR_DOCUMENT,
   rechercheLancee,
+  reunionsTrouvees,
   sessionsTrouvees,
 } from '../../app/utils/guide-nego/recherche-globale.ts'
 import { BELEM, session } from './fausses-sessions.ts'
@@ -99,4 +101,44 @@ test('les sessions trouvées sont celles du jour, par titre anglais, traduction 
   assert.deepEqual(sessionsTrouvees(sessions, 'contact', '2027-11-12', BELEM).map((s) => s.id), ['a', 'c', 'b'])
   assert.deepEqual(sessionsTrouvees(sessions, 'contact', null, BELEM), [])
   assert.deepEqual(sessionsTrouvees(sessions, 'c', '2027-11-12', BELEM), [])
+})
+
+function reunion(id: string, title: FrancophoneMeeting['title'], venue: string | null): FrancophoneMeeting {
+  return {
+    id,
+    type: { code: 'preparatory_workshop', label: { fr: 'Atelier préparatoire' } },
+    title,
+    description: null,
+    start_at: '2027-11-12T13:00:00Z',
+    end_at: '2027-11-12T15:00:00Z',
+    format: 'onsite',
+    venue,
+    has_video: false,
+    organizer: 'IFDD',
+    open_access: true,
+    access_audience: null,
+    requires_registration: true,
+    capacity: null,
+    registered_count: 0,
+    waitlist_enabled: true,
+    registration_opens_at: null,
+    registration_closes_at: null,
+    status: 'scheduled',
+    cancellation_reason: null,
+    pavilion_session_id: null,
+  }
+}
+
+test('les réunions de la Francophonie se trouvent par leur titre, dans chaque langue, ou par leur lieu', () => {
+  const reunions = [
+    reunion('a', { fr: 'Atelier préparatoire sur l\'adaptation', en: 'Adaptation workshop' }, 'Salle 3'),
+    reunion('b', { fr: 'Concertation ministérielle' }, 'Pavillon de la Francophonie'),
+    reunion('c', { fr: 'Concertation des négociatrices' }, null),
+  ]
+  assert.deepEqual(reunionsTrouvees(reunions, 'adaptation').map((r) => r.id), ['a'])
+  assert.deepEqual(reunionsTrouvees(reunions, 'workshop').map((r) => r.id), ['a'])
+  assert.deepEqual(reunionsTrouvees(reunions, 'CONCERTATION').map((r) => r.id), ['b', 'c'])
+  assert.deepEqual(reunionsTrouvees(reunions, 'pavillon').map((r) => r.id), ['b'])
+  assert.deepEqual(reunionsTrouvees(reunions, 'ministerielle').map((r) => r.id), ['b'])
+  assert.deepEqual(reunionsTrouvees(reunions, 'a'), [])
 })

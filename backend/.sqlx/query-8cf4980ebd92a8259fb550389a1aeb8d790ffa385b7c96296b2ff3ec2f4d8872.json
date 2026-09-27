@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.meeting_registrations\n            SET status = 'cancelled'\n          WHERE meeting_id = $1 AND person_id = $2 AND status <> 'cancelled'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8cf4980ebd92a8259fb550389a1aeb8d790ffa385b7c96296b2ff3ec2f4d8872"
+}

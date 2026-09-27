@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.id, m.external_url::text AS \"url!\"\n             FROM negotiation.meetings m\n             LEFT JOIN negotiation.meeting_registrations r\n                    ON r.meeting_id = m.id AND r.person_id = $1\n            WHERE m.event_id = $2\n              AND m.kind IN ('preparatory_workshop', 'francophone_consultation')\n              AND m.source_key IS NULL AND m.status NOT IN ('draft', 'cancelled')\n              AND m.external_url IS NOT NULL\n              AND (NOT m.requires_registration OR r.status = 'registered')\n            ORDER BY m.start_at, m.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.meetings",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "url!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "e854bb8d491d64c0dd58fbe39af623ec9cabe77bb665824ea135bdc449210a5f"
+}

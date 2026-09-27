@@ -109,6 +109,69 @@ pub async fn organisations<'e>(
     Ok(lignes)
 }
 
+/// Les intervenants d'une séance **publiée**, pour le public —
+/// `PublicSessionSpeaker[]`.
+///
+/// Composé champ par champ, jamais `to_jsonb` : une colonne ajoutée à la table
+/// ou à `identity.people` deviendrait publique sans que personne l'ait décidé.
+/// Ni `person_id`, ni `confirmed_at`, ni `attended` (décision du 26/09).
+pub async fn intervenants_publics<'e>(
+    executor: impl PgExecutor<'e>,
+    session_id: SessionId,
+) -> Result<Vec<serde_json::Value>> {
+    let lignes = sqlx::query_scalar!(
+        r#"SELECT jsonb_build_object(
+                      'id', s.id,
+                      'session_id', s.session_id,
+                      'role', s.role,
+                      'job_title_snapshot', s.job_title_snapshot,
+                      'organization_snapshot', s.organization_snapshot,
+                      'bio', s.bio,
+                      'sort_order', s.sort_order,
+                      'created_at', s.created_at,
+                      'display_name', p.display_name) AS "ligne!"
+             FROM programme.session_speakers s
+             JOIN identity.people p ON p.id = s.person_id
+            WHERE s.session_id = $1
+            ORDER BY s.sort_order, s.created_at"#,
+        session_id.as_uuid()
+    )
+    .fetch_all(executor)
+    .await?;
+
+    Ok(lignes)
+}
+
+/// Les organisations d'une séance **publiée**, pour le public, avec nom, sigle
+/// et pays — ce que `v_public_schedule` montre déjà du porteur.
+pub async fn organisations_publiques<'e>(
+    executor: impl PgExecutor<'e>,
+    session_id: SessionId,
+) -> Result<Vec<serde_json::Value>> {
+    let lignes = sqlx::query_scalar!(
+        r#"SELECT jsonb_build_object(
+                      'session_id', so.session_id,
+                      'organization_id', so.organization_id,
+                      'role', so.role,
+                      'sort_order', so.sort_order,
+                      'added_at', so.added_at,
+                      'name', o.legal_name,
+                      'acronym', o.acronym,
+                      'country_code', c.iso2,
+                      'country', c.name) AS "ligne!"
+             FROM programme.session_organizations so
+             JOIN org.organizations o ON o.id = so.organization_id
+             LEFT JOIN reference.countries c ON c.id = o.country_id
+            WHERE so.session_id = $1
+            ORDER BY so.role = 'lead' DESC, so.sort_order"#,
+        session_id.as_uuid()
+    )
+    .fetch_all(executor)
+    .await?;
+
+    Ok(lignes)
+}
+
 /// Les rattachements d'une séance — `SessionTrack[]`.
 pub async fn fils<'e>(
     executor: impl PgExecutor<'e>,

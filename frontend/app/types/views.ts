@@ -44,7 +44,7 @@ import type { SeriesKind } from './event/series'
 import type { CallStatus } from './event/call'
 import type { AttachedImage } from './media'
 import type { HighlightId, HighlightPlacement } from './content'
-import type { SessionStatus } from './programme/session'
+import type { PublicSessionSpeaker, SessionOrganization, SessionStatus } from './programme/session'
 import type { ProposalStatus } from './programme/proposal'
 
 // ---------------------------------------------------------------------------
@@ -139,6 +139,25 @@ export interface PublicScheduleRow {
   theme_codes: TaxonomyTermCode[]
   /** Thématiques prêtes à afficher — `reference.term_badges()`. */
   themes: ScheduleThemeBadge[]
+  // Ajouts de Guide Négo, étape 5 — facultatifs : les jeux d'exemple du site ne les portent pas.
+  waitlist_enabled?: boolean
+  registration_required?: boolean
+  registration_opens_at?: IsoDateTime | null
+  registration_closes_at?: IsoDateTime | null
+  waitlisted_count?: number
+  listing_changed_at?: IsoDateTime | null
+  /** Du dossier d'origine, seule donnée qui en vienne ; nul sans dossier. */
+  language_codes?: string[] | null
+  /** Une rediffusion au plus par séance, et seulement disponible. */
+  replay_url?: string | null
+  replay_duration_seconds?: number | null
+}
+
+/** `GET /events/{id}/sessions/{slug}` — le détail public d'une séance publiée. */
+export interface PublicSessionDetail {
+  session: PublicScheduleRow
+  speakers: PublicSessionSpeaker[]
+  organizations: SessionOrganization[]
 }
 
 // ---------------------------------------------------------------------------

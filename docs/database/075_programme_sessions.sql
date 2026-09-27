@@ -797,12 +797,33 @@ SELECT
     -- se sont retrouvés figés dans le frontend de la v1. La vue agrégeait déjà
     -- complètement les fils de programmation ; l'asymétrie n'avait pas de raison.
     reference.terms_of('programme', 'sessions', s.id, 'activity_theme') AS theme_codes,
-    reference.term_badges('programme', 'sessions', s.id, 'activity_theme') AS themes
+    reference.term_badges('programme', 'sessions', s.id, 'activity_theme') AS themes,
+    -- Ajoutées par l'étape 5 de Guide Négo (spec 017), EN FIN DE LISTE : le site
+    -- lit cette vue, et CREATE OR REPLACE VIEW n'admet qu'un ajout en queue.
+    -- Conditions d'inscription d'une activité publiée : ce que le bouton dit
+    -- (« Rejoindre la liste d'attente », « closes », « pas encore ouvertes »).
+    s.waitlist_enabled,
+    s.registration_required,
+    s.registration_opens_at,
+    s.registration_closes_at,
+    (SELECT count(*) FROM programme.registrations rg
+      WHERE rg.session_id = s.id AND rg.status = 'waitlisted') AS waitlisted_count,
+    s.listing_changed_at,
+    -- LA SEULE COLONNE TIRÉE DU DOSSIER DE PROPOSITION. La langue d'une activité
+    -- est annoncée au public ; rien d'autre du dossier (coordonnées, pièces,
+    -- évaluation) ne l'est. Nulle quand l'IFDD programme sans dossier.
+    p.language_codes
 FROM programme.sessions s
 LEFT JOIN event.rooms r          ON r.id = s.room_id
 LEFT JOIN org.organizations o    ON o.id = s.organization_id
 LEFT JOIN reference.countries c  ON c.id = o.country_id
+LEFT JOIN programme.proposals p  ON p.id = s.proposal_id
 WHERE s.published_at IS NOT NULL;
+
+-- LA VUE SE REDÉFINIT EN ENTIER DANS 080_live.sql (§ « Rediffusion dans la
+-- programmation publique ») : elle y gagne, en fin de liste, `replay_url` et
+-- `replay_duration_seconds`, lus dans live.streams — qui n'existe pas encore ici.
+-- Toute modification de la vue se reporte dans les deux fichiers.
 
 COMMENT ON VIEW programme.v_public_schedule IS
     'Programmation publique prête à l''affichage (vue grille et vue calendrier), état temporel calculé en base.';

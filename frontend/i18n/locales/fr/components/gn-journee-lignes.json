@@ -1,0 +1,12 @@
+{
+  "jamais-lue": "Pas encore lues sur ce téléphone : elles paraîtront ici à la prochaine connexion.",
+  "sessions": {
+    "origine": "Sessions de négociation",
+    "vide": "Rien aujourd'hui dans votre agenda ni dans vos thématiques."
+  },
+  "reunions": {
+    "origine": "Réunions de la Francophonie",
+    "vide": "Rien aujourd'hui.",
+    "prochaine": "Rien aujourd'hui. Prochaine : {titre} — {jour}, {heure}"
+  }
+}

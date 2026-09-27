@@ -4,8 +4,8 @@
 -- réunions unifiées, documents d'aide, canaux d'échange temps réel.
 --
 -- Dépend de : 000_bootstrap, 010_platform, 020_reference, 030_identity,
---             040_organizations, ainsi que des modules `event`, `media` et
---             `live` (FK inter-modules nommées xmod_fk_*).
+--             040_organizations, ainsi que des modules `event`, `media`,
+--             `live` et `programme` (FK inter-modules nommées xmod_fk_*).
 --
 -- CADRAGE — « Espace où on publie : sessions de négociation ; documents d'aide
 -- (lien ou fichier uploadé) ; réunions Francophonie (session avec lien zoom) ;
@@ -715,6 +715,14 @@ CREATE TABLE negotiation.meetings (
     is_open_access        boolean,
     absent_reads          smallint    NOT NULL DEFAULT 0,
     cancelled_at          timestamptz,
+    -- Réunion de la Francophonie (Guide Négo, étape 4) : saisie par l'IFDD,
+    -- de kind preparatory_workshop ou francophone_consultation.
+    francophone_type_term_id uuid     REFERENCES reference.taxonomy_terms(id) ON DELETE RESTRICT,
+    access_audience       platform.i18n_text,
+    pavilion_session_id   uuid        CONSTRAINT xmod_fk_negotiation_meetings_pavilion_session
+                                      REFERENCES programme.sessions(id) ON DELETE SET NULL,
+    requires_registration boolean     NOT NULL DEFAULT true,
+    waitlist_enabled      boolean     NOT NULL DEFAULT true,
 
     CONSTRAINT ux_meetings_slug UNIQUE (space_id, slug),
     CONSTRAINT ck_meetings_period CHECK (end_at IS NULL OR end_at > start_at),
@@ -743,6 +751,29 @@ CREATE TABLE negotiation.meetings (
     CONSTRAINT ck_meetings_import_cancellation
         CHECK (source_key IS NULL OR cancellation_reason IS NULL
             OR cancellation_reason IN ('source', 'postponed', 'removed')),
+    -- Réunions de la Francophonie : ces quatre règles ne visent que les
+    -- réunions SAISIES de ces deux natures. Une session importée n'est jamais
+    -- touchée. La correspondance fine terme ↔ kind lit le code du terme : elle
+    -- vit dans tg_meetings_check_francophone_kind, qui lève sous le nom
+    -- ck_meetings_francophone_kind ; le CHECK du même nom n'en garde que la
+    -- partie qui se lit dans la ligne (un terme sur ces deux natures seulement).
+    CONSTRAINT ck_meetings_francophone_type
+        CHECK (source_key IS NOT NULL OR status = 'draft'
+            OR kind NOT IN ('preparatory_workshop', 'francophone_consultation')
+            OR francophone_type_term_id IS NOT NULL),
+    -- `event_id` est posé ON DELETE SET NULL : pour ces réunions, supprimer
+    -- l'édition est donc refusé par ce CHECK, et c'est voulu.
+    CONSTRAINT ck_meetings_francophone_event
+        CHECK (source_key IS NOT NULL
+            OR kind NOT IN ('preparatory_workshop', 'francophone_consultation')
+            OR event_id IS NOT NULL),
+    CONSTRAINT ck_meetings_francophone_kind
+        CHECK (francophone_type_term_id IS NULL
+            OR (source_key IS NULL AND kind IN ('preparatory_workshop', 'francophone_consultation'))),
+    CONSTRAINT ck_meetings_access_audience
+        CHECK (source_key IS NOT NULL
+            OR kind NOT IN ('preparatory_workshop', 'francophone_consultation')
+            OR (is_open_access IS NOT NULL AND (is_open_access OR access_audience IS NOT NULL))),
     -- Une même salle Zoom ne peut pas héberger deux réunions qui se chevauchent.
     --
     -- Ce blocage est volontaire et ne contredit pas la règle du module
@@ -766,6 +797,8 @@ CREATE UNIQUE INDEX ux_meetings_source ON negotiation.meetings (event_id, source
     WHERE source_key IS NOT NULL;
 CREATE INDEX ix_meetings_event_day ON negotiation.meetings (event_id, start_at)
     WHERE kind = 'negotiation_session';
+CREATE INDEX ix_meetings_francophonie ON negotiation.meetings (event_id, start_at)
+    WHERE kind IN ('preparatory_workshop', 'francophone_consultation') AND status <> 'draft';
 
 CREATE TRIGGER tg_meetings_updated_at BEFORE UPDATE ON negotiation.meetings
     FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
@@ -779,6 +812,66 @@ CREATE TRIGGER tg_meetings_check_group
     BEFORE INSERT OR UPDATE OF group_term_id ON negotiation.meetings
     FOR EACH ROW EXECUTE FUNCTION negotiation.tg_check_term_taxonomy(
         'group_term_id', 'negotiation_group');
+CREATE TRIGGER tg_meetings_check_francophone_type
+    BEFORE INSERT OR UPDATE OF francophone_type_term_id ON negotiation.meetings
+    FOR EACH ROW EXECUTE FUNCTION negotiation.tg_check_term_taxonomy(
+        'francophone_type_term_id', 'francophone_meeting_type');
+
+-- La nature dit le parcours : un atelier préparatoire est de kind
+-- preparatory_workshop, une concertation de kind francophone_consultation
+-- (specs/016-guide-nego-reunions, R9 bis). Un CHECK ne lit pas le code du
+-- terme : le refus porte le nom de contrainte ck_meetings_francophone_kind,
+-- que l'API traduit comme les autres.
+CREATE OR REPLACE FUNCTION negotiation.tg_check_meeting_francophone_kind()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_code text;
+BEGIN
+    IF NEW.francophone_type_term_id IS NULL THEN
+        RETURN NEW;
+    END IF;
+    SELECT t.code INTO v_code
+      FROM reference.taxonomy_terms t
+     WHERE t.id = NEW.francophone_type_term_id AND t.taxonomy_code = 'francophone_meeting_type';
+    -- Un terme d'une autre taxonomie est refusé par tg_meetings_check_francophone_type.
+    IF v_code IS NOT NULL AND NEW.kind IS DISTINCT FROM (CASE v_code
+            WHEN 'preparatory_workshop' THEN 'preparatory_workshop'
+            ELSE 'francophone_consultation' END)::negotiation.meeting_kind THEN
+        RAISE EXCEPTION 'La nature « % » ne correspond pas au type de réunion « % ».', v_code, NEW.kind
+            USING ERRCODE = 'check_violation', CONSTRAINT = 'ck_meetings_francophone_kind';
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER tg_meetings_check_francophone_kind
+    BEFORE INSERT OR UPDATE OF francophone_type_term_id, kind ON negotiation.meetings
+    FOR EACH ROW EXECUTE FUNCTION negotiation.tg_check_meeting_francophone_kind();
+
+-- Le lien au Pavillon ne vaut que pour une activité de la même édition (R7).
+-- Une lecture de `programme`, jamais une écriture.
+CREATE OR REPLACE FUNCTION negotiation.tg_check_meeting_pavilion_edition()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    IF NEW.pavilion_session_id IS NOT NULL AND NOT EXISTS (
+        SELECT 1 FROM programme.sessions s
+         WHERE s.id = NEW.pavilion_session_id AND s.event_id = NEW.event_id
+    ) THEN
+        RAISE EXCEPTION 'L''activité du Pavillon % n''appartient pas à l''édition de la réunion.',
+            NEW.pavilion_session_id
+            USING ERRCODE = 'check_violation', CONSTRAINT = 'ck_meetings_pavilion_edition';
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER tg_meetings_check_pavilion_edition
+    BEFORE INSERT OR UPDATE OF pavilion_session_id, event_id ON negotiation.meetings
+    FOR EACH ROW EXECUTE FUNCTION negotiation.tg_check_meeting_pavilion_edition();
 
 COMMENT ON TABLE negotiation.meetings IS
     'Événements d''un espace de négociation : sessions officielles, concertations francophones, ateliers, formations, innovation. Unifie les deux tables jumelles de la v1.';
@@ -801,11 +894,23 @@ COMMENT ON COLUMN negotiation.meetings.group_term_id IS
 COMMENT ON COLUMN negotiation.meetings.agenda_item_id IS
     'Point de l''ordre du jour ; nul = « Hors ordre du jour officiel ». La session hérite de sa thématique.';
 COMMENT ON COLUMN negotiation.meetings.is_open_access IS
-    'Ouverte (vrai) ou à accès limité (faux), selon la source.';
+    'Ouverte (vrai) ou à accès limité (faux) : selon la source pour une session importée, selon l''IFDD pour une réunion saisie — requise pour une réunion de la Francophonie (ck_meetings_access_audience). Une information, jamais une règle de lecture ni d''inscription.';
 COMMENT ON COLUMN negotiation.meetings.absent_reads IS
     'Lectures réussies de suite où la session manquait à la source. À 2, elle passe cancelled (motif removed) ; reparue, le compteur retombe à 0.';
 COMMENT ON COLUMN negotiation.meetings.cancelled_at IS
     'Heure du constat de l''annulation par l''import.';
+COMMENT ON COLUMN negotiation.meetings.francophone_type_term_id IS
+    'Nature d''une réunion de la Francophonie (francophone_meeting_type) ; requise hors brouillon (ck_meetings_francophone_type), accordée au kind (ck_meetings_francophone_kind). Nulle pour toute autre réunion.';
+COMMENT ON COLUMN negotiation.meetings.access_audience IS
+    'Public d''une réunion à accès limité, dit à la personne : « ministres et chefs de délégation ». Requis quand is_open_access est faux sur une réunion de la Francophonie.';
+COMMENT ON COLUMN negotiation.meetings.pavilion_session_id IS
+    'Activité du Pavillon liée, de la même édition (tg_meetings_check_pavilion_edition). Une clé, rien d''autre : l''activité supprimée, le lien tombe.';
+COMMENT ON COLUMN negotiation.meetings.requires_registration IS
+    'Faux : ni inscription, ni capacité, ni liste d''attente ; le lien de connexion est servi à toute personne admise.';
+COMMENT ON COLUMN negotiation.meetings.waitlist_enabled IS
+    'Vrai : une réunion complète met en liste d''attente. Faux : elle refuse (meeting_full).';
+COMMENT ON COLUMN negotiation.meetings.registered_count IS
+    'Inscrites (registered), tenu par tg_sync_registered_count en fin de ligne. Pour l''affichage seulement : la jauge se calcule par count(*) sous verrou, jamais sur ce compteur. Chaque inscription réécrit la réunion : son updated_at ne garde pas une édition au back-office.';
 
 -- Publication d'un événement de domaine à l'annulation : le module engagement
 -- prévient les inscrits sans que ce module connaisse l'email.
@@ -854,13 +959,178 @@ CREATE TABLE negotiation.meeting_registrations (
     attendance_minutes integer     CHECK (attendance_minutes IS NULL OR attendance_minutes >= 0),
     first_joined_at    timestamptz,
     note               text,
+    waitlist_position  integer,
+    client_ref         uuid,
+    -- Se réinscrire est un UPDATE de la même ligne : l'unicité reste totale.
     CONSTRAINT ux_meeting_registrations UNIQUE (meeting_id, person_id),
+    CONSTRAINT ux_meeting_registrations_client_ref UNIQUE (person_id, client_ref),
     CONSTRAINT ck_meeting_registrations_cancel
-        CHECK ((status = 'cancelled') = (cancelled_at IS NOT NULL))
+        CHECK ((status = 'cancelled') = (cancelled_at IS NOT NULL)),
+    CONSTRAINT ck_meeting_registrations_waitlist
+        CHECK ((status = 'waitlisted') = (waitlist_position IS NOT NULL))
 );
 
 CREATE INDEX ix_meeting_registrations_person ON negotiation.meeting_registrations (person_id, registered_at DESC);
 CREATE INDEX ix_meeting_registrations_active ON negotiation.meeting_registrations (meeting_id) WHERE status = 'registered';
+
+CREATE TRIGGER tg_meeting_registrations_audit AFTER INSERT OR UPDATE OR DELETE ON negotiation.meeting_registrations
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
+
+COMMENT ON COLUMN negotiation.meeting_registrations.waitlist_position IS
+    'Rang dans la liste d''attente, à partir de 1 ; posé si et seulement si la ligne est waitlisted (ck_meeting_registrations_waitlist). Recompacté par promote_meeting_waitlist.';
+COMMENT ON COLUMN negotiation.meeting_registrations.client_ref IS
+    'Référence du geste posée par le téléphone, neuve à chaque inscription ou réinscription : un envoi rejoué retrouve la ligne au lieu d''écrire deux fois (ux_meeting_registrations_client_ref).';
+
+-- La jauge, tenue en base (specs/016-guide-nego-reunions, R4).
+--
+-- Les contrôles ne portent que sur une ENTRÉE : un INSERT, ou cancelled →
+-- registered|waitlisted (réinscription). Se désinscrire n'est jamais contrôlé ;
+-- waitlisted → registered (promotion) non plus : une place obtenue après la
+-- fermeture des inscriptions reste obtenue.
+--
+-- La réunion est verrouillée (FOR UPDATE) et les places prises se comptent
+-- par count(*) : registered_count n'est tenu qu'en fin de ligne par un trigger
+-- AFTER, deux inscriptions simultanées y liraient la même valeur.
+--
+-- Les refus portent un nom de contrainte stable, que l'API traduit :
+--   meeting_unavailable  réunion non publiée, annulée ou commencée
+--   meeting_closed       inscription non demandée, ou hors de la fenêtre
+--   meeting_full         complet, sans liste d'attente
+CREATE OR REPLACE FUNCTION negotiation.tg_validate_meeting_registration()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_meeting negotiation.meetings%ROWTYPE;
+    v_taken   integer;
+BEGIN
+    IF NEW.status = 'cancelled' THEN
+        NEW.cancelled_at := COALESCE(NEW.cancelled_at, now());
+        NEW.waitlist_position := NULL;
+        RETURN NEW;
+    END IF;
+
+    IF TG_OP = 'UPDATE' AND OLD.status <> 'cancelled' THEN
+        IF NEW.status = 'registered' THEN
+            NEW.waitlist_position := NULL;
+        END IF;
+        RETURN NEW;
+    END IF;
+
+    SELECT * INTO v_meeting FROM negotiation.meetings WHERE id = NEW.meeting_id FOR UPDATE;
+
+    IF v_meeting.status IS DISTINCT FROM 'scheduled' OR now() >= v_meeting.start_at THEN
+        RAISE EXCEPTION 'meeting_unavailable : cette réunion n''accepte pas d''inscription (non publiée, annulée ou déjà commencée).'
+            USING ERRCODE = 'restrict_violation', CONSTRAINT = 'meeting_unavailable';
+    END IF;
+
+    IF NOT v_meeting.requires_registration
+       OR (v_meeting.registration_opens_at IS NOT NULL AND now() < v_meeting.registration_opens_at)
+       OR (v_meeting.registration_closes_at IS NOT NULL AND now() >= v_meeting.registration_closes_at) THEN
+        RAISE EXCEPTION 'meeting_closed : les inscriptions à cette réunion ne sont pas ouvertes.'
+            USING ERRCODE = 'restrict_violation', CONSTRAINT = 'meeting_closed';
+    END IF;
+
+    SELECT count(*) INTO v_taken
+      FROM negotiation.meeting_registrations r
+     WHERE r.meeting_id = NEW.meeting_id AND r.status = 'registered' AND r.id <> NEW.id;
+
+    -- Une liste d'attente non vide passe avant la nouvelle venue, même si une
+    -- place s'est libérée sans promotion encore.
+    IF (v_meeting.capacity IS NOT NULL AND v_taken >= v_meeting.capacity)
+       OR EXISTS (SELECT 1 FROM negotiation.meeting_registrations r
+                   WHERE r.meeting_id = NEW.meeting_id AND r.status = 'waitlisted' AND r.id <> NEW.id) THEN
+        IF NOT v_meeting.waitlist_enabled THEN
+            RAISE EXCEPTION 'meeting_full : cette réunion est complète.'
+                USING ERRCODE = 'restrict_violation', CONSTRAINT = 'meeting_full';
+        END IF;
+        NEW.status := 'waitlisted';
+        SELECT COALESCE(max(r.waitlist_position), 0) + 1 INTO NEW.waitlist_position
+          FROM negotiation.meeting_registrations r
+         WHERE r.meeting_id = NEW.meeting_id AND r.status = 'waitlisted';
+    ELSE
+        NEW.status := 'registered';
+        NEW.waitlist_position := NULL;
+    END IF;
+
+    NEW.cancelled_at := NULL;
+    IF TG_OP = 'UPDATE' THEN
+        NEW.registered_at := now();
+    END IF;
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER tg_meeting_registrations_validate
+    BEFORE INSERT OR UPDATE OF status ON negotiation.meeting_registrations
+    FOR EACH ROW EXECUTE FUNCTION negotiation.tg_validate_meeting_registration();
+
+-- Appelée à chaque désinscription et quand l'administration relève ou retire
+-- la capacité, dans la même transaction. Le paramètre `p_count` du patron de
+-- programme disparaît : les places libres se calculent ici, sous le verrou.
+CREATE OR REPLACE FUNCTION negotiation.promote_meeting_waitlist(p_meeting_id uuid)
+RETURNS SETOF uuid
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_capacity integer;
+    v_free     integer;
+BEGIN
+    SELECT m.capacity INTO v_capacity FROM negotiation.meetings m WHERE m.id = p_meeting_id FOR UPDATE;
+    IF NOT FOUND THEN
+        RETURN;
+    END IF;
+
+    IF v_capacity IS NOT NULL THEN
+        SELECT greatest(v_capacity - count(*), 0) INTO v_free
+          FROM negotiation.meeting_registrations r
+         WHERE r.meeting_id = p_meeting_id AND r.status = 'registered';
+    END IF;
+
+    -- LIMIT NULL : sans capacité, toute la liste passe.
+    RETURN QUERY
+    WITH suivantes AS (
+        SELECT r.id
+          FROM negotiation.meeting_registrations r
+         WHERE r.meeting_id = p_meeting_id AND r.status = 'waitlisted'
+         ORDER BY r.waitlist_position, r.registered_at
+         LIMIT v_free
+    )
+    UPDATE negotiation.meeting_registrations r
+       SET status = 'registered', waitlist_position = NULL
+      FROM suivantes s
+     WHERE r.id = s.id
+    RETURNING r.person_id;
+
+    WITH rangs AS (
+        SELECT r.id, row_number() OVER (ORDER BY r.waitlist_position, r.registered_at)::integer AS rang
+          FROM negotiation.meeting_registrations r
+         WHERE r.meeting_id = p_meeting_id AND r.status = 'waitlisted'
+    )
+    UPDATE negotiation.meeting_registrations r
+       SET waitlist_position = g.rang
+      FROM rangs g
+     WHERE r.id = g.id AND r.waitlist_position <> g.rang;
+END;
+$$;
+
+COMMENT ON FUNCTION negotiation.promote_meeting_waitlist(uuid) IS
+    'Promeut la liste d''attente dans l''ordre, autant que de places libres (capacity − count(registered) sous verrou ; toute la liste sans capacité), recompacte les rangs et rend les personnes promues — à prévenir.';
+
+-- Qui prévenir d'un changement d'une réunion de la Francophonie : lue par
+-- negotiation seul, comme change_recipients (R8).
+CREATE OR REPLACE FUNCTION negotiation.meeting_audience(p_meeting_id uuid)
+RETURNS SETOF uuid
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT r.person_id
+      FROM negotiation.meeting_registrations r
+     WHERE r.meeting_id = p_meeting_id AND r.status IN ('registered', 'waitlisted');
+$$;
+
+COMMENT ON FUNCTION negotiation.meeting_audience(uuid) IS
+    'Personnes à prévenir d''une annulation ou d''un changement de réunion : inscrites et en liste d''attente, désinscrites exclues.';
 
 -- Compteur dénormalisé maintenu par la base : la liste des réunions n'a plus à
 -- déclencher un COUNT(*) par ligne.
