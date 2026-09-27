@@ -1143,5 +1143,18 @@ DELETE FROM live.streams WHERE replay_url = :'url';
 - [ ] **« Ma journée ».** Le jour d'une activité : la ligne Pavillon montre l'heure, le titre, « stand,
       salle » et « Inscrite » ; sans activité ce jour-là, « Rien aujourd'hui. Prochaine : … ».
 
+**Le scénario qui clôt le MVP** — en dernier, d'une traite, sur chaque téléphone, avec un compte
+**neuf** et un code d'invitation créé pour la séance, envoyé au téléphone par WhatsApp. Joué au
+navigateur à 360 px le 27/09 ; jamais encore sur un appareil.
+
+- [ ] Le code reçu sur WhatsApp : installer Guide Négo, créer le compte, confirmer l'adresse depuis le
+      courriel **ouvert sur le téléphone**, saisir le code, choisir ses thématiques — « Ma journée ».
+- [ ] Télécharger le guide ; mode avion : le lire, puis trouver *contact group* dans le lexique et par
+      « Rechercher ».
+- [ ] Réseau rendu : les sessions de négociation du jour de ses thématiques, « lu à … ».
+- [ ] Signaler l'annulation d'une session ; **l'administrateur la valide depuis son téléphone** ;
+      l'encart paraît sur la fiche, et un troisième compte qui a la session dans « Mon agenda » voit
+      l'avis dans la cloche, puis reçoit le courriel.
+
 Un écart se note dans `docs/AppNego/progress.md`, avec l'appareil et le système. Tout coché, T071,
 T112, T096, T097, T098, T116 et T084 le sont aussi dans leurs `tasks.md`.

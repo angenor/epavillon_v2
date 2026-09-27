@@ -43,5 +43,5 @@
 - [x] T018 [P] Écarts dans `docs/AppNego/05-design.md` (pas d'agenda sur une activité ; bloc de lieu de la fiche ; bande des jours ; ce que la recette relève) ; Points ouverts de `progress.md` : **rien n'écrit `live.streams`** — sans outil de saisie, la rediffusion ne paraîtra pas en production
 - [x] T019 [P] § 15 de `docs/DEPLOIEMENT.md` : migration 017 ; essais sur appareil réel
 - [x] T020 i18n `en` contre `fr`
-- [x] T021 *(reportée : après fusion de l'étape 2 et de main dans 017)* **Le scénario qui clôt le MVP** (quickstart § 5) — seulement après fusion des étapes 2 et 4 dans `main` et de `main` dans cette branche ; sinon, noté pour la clôture
+- [x] T021 **Le scénario qui clôt le MVP** (quickstart § 5) — seulement après fusion des étapes 2 et 4 dans `main` et de `main` dans cette branche ; sinon, noté pour la clôture
 - [x] T022 Une ligne au journal de `docs/AppNego/progress.md`
