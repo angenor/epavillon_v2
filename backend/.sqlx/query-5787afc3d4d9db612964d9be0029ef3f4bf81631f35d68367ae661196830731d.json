@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.faq_entries SET status = $2::text::negotiation.knowledge_status WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5787afc3d4d9db612964d9be0029ef3f4bf81631f35d68367ae661196830731d"
+}

@@ -1,0 +1,127 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT q.id, t.code AS \"theme_code!\",\n                  COALESCE(platform.t(t.label, $2), t.code) AS \"theme_label!\",\n                  q.body, q.consent_to_faq, q.status::text AS \"status!\", q.answer,\n                  q.answered_at, q.faq_entry_id, q.created_at\n             FROM negotiation.expert_questions q\n             JOIN reference.taxonomy_terms t ON t.id = q.theme_term_id\n            WHERE CASE WHEN $1::uuid IS NULL\n                       THEN q.status = 'pending'\n                            OR (q.status = 'answered' AND q.answered_at > now() - interval '30 days')\n                       ELSE q.id = $1 END\n            ORDER BY q.status <> 'pending',\n                     CASE WHEN q.status = 'pending' THEN q.created_at END,\n                     q.answered_at DESC, q.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.expert_questions",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "theme_code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "theme_label!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "body",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.expert_questions",
+            "name": "body"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "consent_to_faq",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.expert_questions",
+            "name": "consent_to_faq"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "answer",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.expert_questions",
+            "name": "answer"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "answered_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.expert_questions",
+            "name": "answered_at"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "faq_entry_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.expert_questions",
+            "name": "faq_entry_id"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.expert_questions",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      false,
+      false,
+      null,
+      true,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "bd0c23a45a77ad3b0314c4d6b393d515b9b9d9b6c698e5a24a8bc8131c7d72a6"
+}

@@ -1,0 +1,22 @@
+{
+  "titre": "My first COP",
+  "en-etapes": "Pathway with no steps | Pathway in {count} step | Pathway in {count} steps",
+  "chargement": "Reading the pathway",
+  "faites": "{faites} step of {total} | {faites} step of {total} | {faites} steps of {total}",
+  "sur": "{faites} of {total}",
+  "prochaine": "Next: {groupe}",
+  "tout-coche": "All ticked",
+  "sur-le-telephone": "Your ticks stay on this phone.",
+  "ailleurs": "Your ticks were updated from another device.",
+  "document": "the document",
+  "pied": "Tick at your own pace: nothing is mandatory.",
+  "ligne": "“My first COP” pathway",
+  "erreur": {
+    "titre": "The pathway is not on this phone yet",
+    "texte": "It is kept the first time it opens with a connection. Connect once: it will then read offline."
+  },
+  "vide": {
+    "titre": "No step published yet",
+    "texte": "IFDD is preparing the first-timers' pathway. It will appear here, readable offline."
+  }
+}

@@ -12,11 +12,15 @@ withDefaults(
   defineProps<{
     libelle: string
     detail?: string
+    /** D'où vient la chose, en gras gris : « Réunions de la Francophonie ». */
+    origine?: string
+    /** Cochée, le libellé passe en gris — jamais barré : il doit se relire. */
+    attenue?: boolean
     desactive?: boolean
     /** La dernière d'une liste n'a pas de filet : le bloc s'achève de lui-même. */
     derniere?: boolean
   }>(),
-  { detail: undefined, desactive: false, derniere: false },
+  { detail: undefined, origine: undefined, attenue: false, desactive: false, derniere: false },
 )
 
 const coche = defineModel<boolean>({ default: false })
@@ -25,7 +29,7 @@ const coche = defineModel<boolean>({ default: false })
 <template>
   <label
     class="gn-case"
-    :class="{ 'gn-case--derniere': derniere, 'gn-case--desactive': desactive }"
+    :class="{ 'gn-case--derniere': derniere, 'gn-case--desactive': desactive, 'gn-case--attenue': attenue && coche }"
   >
     <input
       v-model="coche"
@@ -39,6 +43,7 @@ const coche = defineModel<boolean>({ default: false })
     <span class="gn-case__texte">
       <span class="gn-case__libelle">{{ libelle }}</span>
       <span v-if="detail" class="gn-case__detail">{{ detail }}</span>
+      <span v-if="origine" class="gn-case__origine">{{ origine }}</span>
     </span>
   </label>
 </template>
@@ -106,6 +111,17 @@ const coche = defineModel<boolean>({ default: false })
 [data-app="guide-nego"] .gn-case__detail {
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
+  color: var(--gn-texte-2);
+}
+
+[data-app="guide-nego"] .gn-case__origine {
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+  font-weight: var(--gn-graisse-gras);
+  color: var(--gn-texte-2);
+}
+
+[data-app="guide-nego"] .gn-case--attenue .gn-case__libelle {
   color: var(--gn-texte-2);
 }
 

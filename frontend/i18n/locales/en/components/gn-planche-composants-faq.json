@@ -1,0 +1,23 @@
+{
+  "ligne": "Question row",
+  "ligne-propos": "Question 17/600; below, the 16 checked shield and “Verified on …” 15/700 in green. An entry under review keeps its date, without the check, in grey. The whole row is the target.",
+  "question": "What is the difference between a contact group and informal consultations?",
+  "question-badge": "Where do I collect my badge?",
+  "source": "Source",
+  "source-propos": "With a quote: the passage indented, 3 px rule on the left, the reference 15/600 below; a document opens in the reader at the cited page. Without a quote: a document row. An external reference without an address leads nowhere.",
+  "guide": "Negotiations guide COP30",
+  "annexe": "annex A.3",
+  "citation": "Work carried out in informal consultations can, just like a contact group, lead to an agreed text (L document).",
+  "iisd": "“On behalf of my delegation”, IISD",
+  "contexte": "The negotiation context",
+  "retour": "Feedback on an answer",
+  "retour-propos": "Question 15/700, two half-width secondary buttons. “Yes” → the row becomes “Thank you.” with the green check; “No” opens “What is missing?”.",
+  "etape": "Pathway step",
+  "etape-propos": "24 px box, the whole row is the target. Ticked: filled box, grey label, never struck through. Below, a 15 grey detail, a 15/700 origin, or the “Read: …” 15/600 link.",
+  "etape-guide": "Choose my themes and read their sheets",
+  "etape-lire": "Guide, chapter 3",
+  "etape-atelier": "Attend the preparatory workshop for French-speaking negotiators",
+  "etape-origine": "Francophonie meetings",
+  "etape-coordination": "Attend my group's coordination",
+  "etape-detail": "African Group 8:00, LDCs 13:00"
+}

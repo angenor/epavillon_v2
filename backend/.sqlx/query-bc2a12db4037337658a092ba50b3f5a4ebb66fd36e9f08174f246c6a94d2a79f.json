@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.glossary_related (entry_id, related_id, sort_order)\n         SELECT $1, l.id, (l.rang - 1)::smallint\n           FROM unnest($2::uuid[]) WITH ORDINALITY AS l(id, rang)\n         ON CONFLICT DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "bc2a12db4037337658a092ba50b3f5a4ebb66fd36e9f08174f246c6a94d2a79f"
+}

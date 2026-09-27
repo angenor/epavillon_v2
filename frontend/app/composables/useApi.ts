@@ -76,11 +76,13 @@ import { createAdminShowcaseApi } from './api/admin-showcase'
 import { createMediaApi } from './api/media'
 import { createGuideNegoApi } from './api/guide-nego'
 import { createGuideNegoDocumentsApi } from './api/guide-nego-documents'
+import { createGuideNegoSavoirApi } from './api/guide-nego-savoir'
 import { createNegotiationSessionsApi } from './api/negotiation-sessions'
 import { createNegotiationReportsApi } from './api/negotiation-reports'
 import { createNegotiationMeetingsApi } from './api/negotiation-meetings'
 import { createNotificationsApi } from './api/notifications'
 import { createAdminNegotiationDocumentsApi } from './api/admin-negotiation-documents'
+import { createAdminNegotiationSavoirApi } from './api/admin-negotiation-savoir'
 import { createAuthApi } from './api/auth'
 
 // `ForbiddenError` vit désormais dans `utils/api-error.ts`, avec les deux autres
@@ -307,6 +309,7 @@ export function useApi() {
     negotiationMeetings: createNegotiationMeetingsApi({ send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
     notifications: createNotificationsApi({ call, send }),
 
+    guideNegoSavoir: createGuideNegoSavoirApi({ send, ...creerAppelsEtiquetes(http, MOCK_LATENCY_MS) }),
     home: createHomeApi(deps),
     adminShowcase: createAdminShowcaseApi(deps),
 
@@ -771,6 +774,7 @@ export function useApi() {
      */
     adminNegotiations: createAdminNegotiationsApi(deps),
     adminNegotiationDocuments: createAdminNegotiationDocumentsApi(deps),
+    adminNegotiationSavoir: createAdminNegotiationSavoirApi(deps),
 
     // -----------------------------------------------------------------------
     // Messages d'incident — la part PUBLIQUE (B9)

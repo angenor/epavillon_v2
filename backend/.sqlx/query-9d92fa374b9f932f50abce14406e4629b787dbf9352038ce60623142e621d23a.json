@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM negotiation.glossary_favorites WHERE person_id = $1 AND entry_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9d92fa374b9f932f50abce14406e4629b787dbf9352038ce60623142e621d23a"
+}

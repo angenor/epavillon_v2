@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.expert_questions\n             (asker_id, client_ref, theme_term_id, body, consent_to_faq)\n         VALUES ($1, $2, $3, $4, $5)\n         ON CONFLICT (asker_id, client_ref) DO NOTHING\n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.expert_questions",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "c5fe739d7ff27a42aa0e0c2bd42a679a88f6accd677f1aa057c87ddf5235bd36"
+}

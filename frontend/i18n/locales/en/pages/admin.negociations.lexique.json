@@ -1,0 +1,136 @@
+{
+  "state": {
+    "draft": "Draft",
+    "published": "Published",
+    "to_review": "To review"
+  },
+  "list": {
+    "title": "Glossary",
+    "subtitle": "The terms heard in negotiation rooms, with their translation and definition, as Guide Négo serves them.",
+    "new": "New term",
+    "caption": "Guide Négo glossary terms, in alphabetical order.",
+    "forbidden": {
+      "scope": "Write or verify Guide Négo knowledge, across the whole platform",
+      "description": "The Guide Négo FAQ, glossary and pathway are reserved for platform-wide administrators and experts. An account attached to a single event has no access."
+    },
+    "columns": {
+      "term": "Term",
+      "translation": "Translation",
+      "family": "Family",
+      "status": "Status",
+      "updated": "Modified on"
+    },
+    "filters": {
+      "label": "List filters",
+      "search": "Search a term, an acronym, a translation",
+      "family": "Family",
+      "state": "Status",
+      "allFamilies": "All families",
+      "allStates": "All statuses"
+    },
+    "empty": {
+      "title": "No terms",
+      "description": "The Guide Négo glossary is empty. Add a first term: it starts as a draft.",
+      "reader": "No term has been written yet."
+    },
+    "noResults": {
+      "title": "No matching term",
+      "description": "No term matches these filters.",
+      "action": "Clear filters"
+    }
+  },
+  "form": {
+    "readonly": "You are viewing this term: only a person in charge of publishing can edit it.",
+    "vocabularyError": "The families or the list of terms could not be loaded.",
+    "sections": {
+      "term": "The term"
+    },
+    "family": {
+      "label": "Family",
+      "placeholder": "Choose a family"
+    },
+    "term": {
+      "label": "English term",
+      "hint": "As written in the texts. Its stable identifier is derived from it at creation, and never changes."
+    },
+    "acronym": {
+      "label": "Acronym",
+      "placeholder": "GGA"
+    },
+    "variants": {
+      "label": "Variants",
+      "hint": "Other spellings recognised by search, one per line."
+    },
+    "translation": {
+      "fr": "Translation, in French",
+      "en": "Translation, in English"
+    },
+    "enHint": "Without a translation, the French text is shown.",
+    "definition": {
+      "fr": "Definition, in French",
+      "en": "Definition, in English"
+    },
+    "heardInRoom": {
+      "label": "Heard in the room",
+      "hint": "A sentence as it is heard, in English.",
+      "placeholder": "We still have three brackets in paragraph 12."
+    },
+    "related": {
+      "label": "Related terms",
+      "hint": "Suggested below the definition, in this order.",
+      "placeholder": "Search a term"
+    },
+    "save": "Save",
+    "create": "Create the draft",
+    "error": {
+      "family": "Choose a family.",
+      "term": "The term is required.",
+      "translation": "The French translation is required.",
+      "definition": "The French definition is required.",
+      "source": "Each source names a library document or carries a title."
+    }
+  },
+  "detail": {
+    "crumb": "Term",
+    "newTitle": "New glossary term",
+    "newSubtitle": "The term starts as a draft; it appears in Guide Négo once published.",
+    "cancel": "Cancel",
+    "backToList": "Back to the glossary",
+    "forbidden": {
+      "scopePublish": "Write Guide Négo knowledge, across the whole platform"
+    },
+    "notFound": {
+      "title": "Term not found",
+      "description": "This term does not exist, or has been deleted."
+    },
+    "slug": "Identifier:",
+    "updated": "Modified on {date}",
+    "firstPublished": "First published on {date}",
+    "zoned": "{date}, {zone}",
+    "actions": {
+      "publish": "Publish",
+      "toReview": "Mark “To review”",
+      "unpublish": "Unpublish",
+      "delete": "Delete"
+    },
+    "result": {
+      "saved": "Term saved.",
+      "published": "Term published.",
+      "toReview": "Term marked “To review”: it stays visible, with its notice.",
+      "unpublished": "Term unpublished: it is back to draft."
+    },
+    "confirm": {
+      "cancel": "Cancel",
+      "unpublish": {
+        "title": "Unpublish this term?",
+        "question": "It will disappear from Guide Négo and return to draft.",
+        "confirm": "Unpublish"
+      },
+      "delete": {
+        "title": "Delete this draft?",
+        "question": "The draft and its sources will be erased. This cannot be undone.",
+        "confirm": "Delete"
+      }
+    }
+  }
+}

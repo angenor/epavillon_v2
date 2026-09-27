@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.pathway_groups (label, is_published)\n           VALUES (jsonb_build_object('fr', $1::text)::platform.i18n_text, true)\n           RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.pathway_groups",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "ace6289212aa14e9d543a4a2f249c1e42f6e18ee1b3fd30c12164dd0f8a6c527"
+}

@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT f.entry_id, f.helpful, f.missing_reason, f.updated_at\n           FROM negotiation.faq_feedback f\n           JOIN negotiation.faq_entries e ON e.id = f.entry_id\n          WHERE f.person_id = $1 AND e.status <> 'draft'\n          ORDER BY f.entry_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "entry_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_feedback",
+            "name": "entry_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "helpful",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_feedback",
+            "name": "helpful"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "missing_reason",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_feedback",
+            "name": "missing_reason"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_feedback",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "3ada50c7188a7e1af3f291a9e516437862127ab135e25747f264ea55174bf97f"
+}

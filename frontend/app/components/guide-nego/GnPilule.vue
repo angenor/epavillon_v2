@@ -13,8 +13,10 @@ const props = withDefaults(
     desactive?: boolean
     /** Variante `chevron` seulement : la feuille de choix est ouverte. */
     ouverte?: boolean
+    /** Une pilule qui mène ailleurs — un terme lié — et ne bascule rien. */
+    vers?: string
   }>(),
-  { variante: 'filtre', desactive: false, ouverte: false },
+  { variante: 'filtre', desactive: false, ouverte: false, vers: undefined },
 )
 
 const emit = defineEmits<{ clic: [MouseEvent] }>()
@@ -27,7 +29,11 @@ function basculer(evenement: MouseEvent) {
 </script>
 
 <template>
+  <NuxtLink v-if="vers" :to="vers" class="gn-pilule gn-pilule--lien">
+    <slot />
+  </NuxtLink>
   <button
+    v-else
     type="button"
     class="gn-pilule"
     :class="[`gn-pilule--${variante}`, { 'gn-pilule--choisie': choisie }]"
@@ -69,6 +75,10 @@ function basculer(evenement: MouseEvent) {
   position: absolute;
   inset-inline: 0;
   inset-block: calc((var(--gn-filtre-hauteur) - var(--gn-cible)) / 2);
+}
+
+[data-app="guide-nego"] .gn-pilule--lien {
+  text-decoration: none;
 }
 
 [data-app="guide-nego"] .gn-pilule--choisie {

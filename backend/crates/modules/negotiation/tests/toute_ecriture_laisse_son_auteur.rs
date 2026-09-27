@@ -63,3 +63,49 @@ async fn creer_revoquer_et_retirer_nomment_leur_auteur() {
         "aucune écriture anonyme : une transaction ouverte hors de `Db::write` en produirait"
     );
 }
+
+#[tokio::test]
+async fn rediger_verifier_et_publier_le_savoir_nomment_leur_auteur() {
+    use negotiation::domain::admin_savoir::{AdminFaqInput, AdminFaqVerifyInput};
+    use negotiation::service::savoir_admin::{self as savoir, Transition};
+
+    let bac = Bac::monter().await;
+    let ifdd = commun::documents::administratrice(&bac, "ifdd@example.org").await;
+    let experte = commun::documents::expert(&bac, "experte@example.org").await;
+    let entree: AdminFaqInput = serde_json::from_value(serde_json::json!({
+        "section_code": "on_site",
+        "question": { "fr": "Où retirer son badge ?" },
+        "answer": { "fr": "Au centre d'accréditation." },
+        "sources": [{ "external_title": "Note logistique" }]
+    }))
+    .expect("entrée");
+
+    let id = savoir::creer_faq(&bac.state, &bac.ctx(ifdd), &entree)
+        .await
+        .expect("création");
+    savoir::verifier_faq(
+        &bac.state,
+        &bac.ctx(experte),
+        id,
+        &AdminFaqVerifyInput::default(),
+    )
+    .await
+    .expect("vérification");
+    savoir::changer_faq(&bac.state, &bac.ctx(ifdd), id, Transition::Publier)
+        .await
+        .expect("publication");
+
+    let sur_lentree = traces(&bac, "faq_entries", id).await;
+    assert_eq!(
+        sur_lentree.first(),
+        Some(&("insert".to_owned(), Some(ifdd)))
+    );
+    assert!(
+        sur_lentree.contains(&("update".to_owned(), Some(experte))),
+        "la vérification porte l'experte : {sur_lentree:?}"
+    );
+    assert!(
+        sur_lentree.iter().all(|(_, acteur)| acteur.is_some()),
+        "aucune écriture anonyme : {sur_lentree:?}"
+    );
+}

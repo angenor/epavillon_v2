@@ -21,6 +21,13 @@ const props = withDefaults(
     ceQuiSeLit?: string
     /** Relayé à l'en-tête : le lecteur n'a qu'une ligne d'en-tête. */
     compact?: boolean
+    /** Relayés à l'en-tête : la croix du lexique, et l'en-tête d'un terme. */
+    fermer?: boolean
+    surtitre?: string
+    terme?: boolean
+    titreLong?: boolean
+    /** Relayé à l'en-tête : la loupe, sur les écrans racines des onglets. */
+    loupe?: boolean
     /** « Ma journée » et les onglets : la cloche, pour une personne connectée. */
     cloche?: boolean
   }>(),
@@ -33,6 +40,11 @@ const props = withDefaults(
     lexiqueOuvert: false,
     ceQuiSeLit: undefined,
     compact: false,
+    fermer: false,
+    surtitre: undefined,
+    terme: false,
+    titreLong: false,
+    loupe: false,
     cloche: false,
   },
 )
@@ -72,7 +84,13 @@ watch(
       :avatar-du-titre="avatarDuTitre"
       :lexique-ouvert="lexiqueOuvert"
       :compact="compact"
+      :fermer="fermer"
+      :surtitre="surtitre"
+      :terme="terme"
+      :titre-long="titreLong"
+      :loupe="loupe"
     >
+      <template v-if="$slots.pied" #pied><slot name="pied" /></template>
       <template #connexion>
         <slot name="connexion">
           <GnLigneConnexion :en-ligne="etat.enLigne" :lu-a="etat.luA" />

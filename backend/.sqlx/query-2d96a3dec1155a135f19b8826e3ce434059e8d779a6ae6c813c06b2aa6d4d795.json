@@ -1,0 +1,157 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT g.id, g.slug, t.code AS \"family_code!\", g.term, g.acronym, g.variants,\n                  g.translation::jsonb AS \"translation!: Value\",\n                  g.definition::jsonb AS \"definition!: Value\", g.heard_in_room,\n                  g.status::text AS \"status!\", g.first_published_at, g.created_at, g.updated_at\n             FROM negotiation.glossary_entries g\n             JOIN reference.taxonomy_terms t ON t.id = g.family_term_id\n            WHERE g.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "slug",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "slug"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "family_code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "term",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "term"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "acronym",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "acronym"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "variants",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "variants"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "translation!: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "definition!: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "heard_in_room",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "heard_in_room"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "first_published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "first_published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      null,
+      null,
+      true,
+      null,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "2d96a3dec1155a135f19b8826e3ce434059e8d779a6ae6c813c06b2aa6d4d795"
+}

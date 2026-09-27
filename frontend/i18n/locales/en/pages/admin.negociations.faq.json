@@ -1,0 +1,170 @@
+{
+  "state": {
+    "draft": "Draft",
+    "published": "Published",
+    "to_review": "To review"
+  },
+  "list": {
+    "title": "Frequently asked questions",
+    "subtitle": "The answers Guide Négo gives negotiators. An answer is published only once an expert has dated its verification.",
+    "new": "New entry",
+    "caption": "Guide Négo FAQ entries, most recently modified first.",
+    "forbidden": {
+      "scope": "Write or verify Guide Négo knowledge, across the whole platform",
+      "description": "The Guide Négo FAQ, glossary and pathway are reserved for platform-wide administrators and experts. An account attached to a single event has no access."
+    },
+    "columns": {
+      "question": "Question",
+      "section": "Section",
+      "status": "Status",
+      "verified": "Verified on",
+      "reports": "Reports"
+    },
+    "filters": {
+      "label": "List filters",
+      "search": "Search a question",
+      "section": "Section",
+      "state": "Status",
+      "allSections": "All sections",
+      "allStates": "All statuses"
+    },
+    "empty": {
+      "title": "No entries",
+      "description": "The Guide Négo FAQ is empty. Write a first entry: it starts as a draft.",
+      "reader": "No entry has been written yet."
+    },
+    "noResults": {
+      "title": "No matching entry",
+      "description": "No entry matches these filters.",
+      "action": "Clear filters"
+    },
+    "noAnswer": "No answer",
+    "notVerified": "Not verified",
+    "openReports": "no open report | {count} open report | {count} open reports"
+  },
+  "form": {
+    "readonly": "You are viewing this entry: only a person in charge of publishing can edit it.",
+    "vocabularyError": "The sections or the list of entries could not be loaded.",
+    "sections": {
+      "question": "Question and answer"
+    },
+    "section": {
+      "label": "Section",
+      "placeholder": "Choose a section"
+    },
+    "question": {
+      "fr": "Question, in French",
+      "en": "Question, in English"
+    },
+    "enHint": "Without a translation, the French text is shown.",
+    "answer": {
+      "fr": "Answer, in French",
+      "en": "Answer, in English",
+      "hint": "Optional for a draft, required to publish."
+    },
+    "rank": {
+      "label": "Editorial rank",
+      "hint": "Orders the “most read” while reads are lacking. Empty: unranked."
+    },
+    "related": {
+      "label": "Related questions",
+      "hint": "Suggested below the answer, in this order.",
+      "placeholder": "Search a question"
+    },
+    "save": "Save",
+    "create": "Create the draft",
+    "error": {
+      "section": "Choose a section.",
+      "question": "The French question is required.",
+      "answer": "An English answer needs its French version.",
+      "rank": "The rank is a positive whole number.",
+      "source": "Each source names a library document or carries a title."
+    }
+  },
+  "detail": {
+    "crumb": "Entry",
+    "newTitle": "New FAQ entry",
+    "newSubtitle": "The entry starts as a draft. It can be published once its answer is written and an expert has dated its verification.",
+    "cancel": "Cancel",
+    "backToList": "Back to the FAQ",
+    "forbidden": {
+      "scopePublish": "Write Guide Négo knowledge, across the whole platform"
+    },
+    "notFound": {
+      "title": "Entry not found",
+      "description": "This entry does not exist, or has been deleted."
+    },
+    "verifiedBy": "Verified on {date} by {name}",
+    "verified": "Verified on {date}",
+    "notVerified": "Verification not dated",
+    "updated": "Modified on {date}",
+    "firstPublished": "First published on {date}",
+    "zoned": "{date}, {zone}",
+    "actions": {
+      "publish": "Publish",
+      "toReview": "Mark “To review”",
+      "unpublish": "Unpublish",
+      "delete": "Delete",
+      "verify": "Date the verification"
+    },
+    "result": {
+      "saved": "Entry saved.",
+      "verified": "Verification dated.",
+      "published": "Entry published.",
+      "toReview": "Entry marked “To review”: it stays visible, with its notice.",
+      "unpublished": "Entry unpublished: it is back to draft."
+    },
+    "verify": {
+      "title": "Verification",
+      "description": "The expert dates the verification of the answer. An entry “To review” returns to published.",
+      "date": "Verified on",
+      "hint": "Empty: today, Paris time."
+    },
+    "confirm": {
+      "cancel": "Cancel",
+      "unpublish": {
+        "title": "Unpublish this entry?",
+        "question": "It will disappear from Guide Négo and return to draft.",
+        "confirm": "Unpublish"
+      },
+      "delete": {
+        "title": "Delete this draft?",
+        "question": "The draft and its sources will be erased. This cannot be undone.",
+        "confirm": "Delete"
+      }
+    },
+    "feedback": {
+      "title": "Reader feedback",
+      "helpful": "Yes, helpful",
+      "notHelpful": "No",
+      "reasons": "Reasons given for “No”",
+      "reason": {
+        "too_vague": "Too vague",
+        "off_topic": "Off topic",
+        "outdated": "Outdated or wrong"
+      }
+    },
+    "reports": {
+      "title": "Reports",
+      "empty": "No reports.",
+      "status": {
+        "open": "Open",
+        "closed": "Closed"
+      },
+      "outcome": {
+        "revised": "Answer revised",
+        "confirmed": "Answer confirmed",
+        "dismissed": "Dismissed"
+      },
+      "reason": {
+        "rule_changed": "The rule has changed",
+        "wrong": "Wrong answer",
+        "source_mismatch": "The source does not say this"
+      },
+      "fromFeedback": "From a “No”: outdated or wrong",
+      "details": "“{text}”",
+      "created": "Received on {date}",
+      "handled": "Handled on {date}"
+    }
+  }
+}

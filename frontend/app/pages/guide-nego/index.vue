@@ -5,6 +5,7 @@ import {
   lireCle,
   poserCle,
 } from '~/utils/guide-nego/stockage'
+import { avecBarreFinale, sansBarreFinale } from '~/utils/guide-nego/barre-finale'
 import { propositionAFaire } from '~/utils/guide-nego/thematiques'
 import { lireProgression, lireRecents, type Recent } from '~/utils/guide-nego/appareil-lecture'
 import { marquesDeLigne } from '~/utils/guide-nego/documents'
@@ -20,7 +21,11 @@ import { etatAffiche } from '~/utils/guide-nego/sessions'
  * à la suite, feraient l'écran d'une panne. « Documents récents » se remplit depuis
  * le téléphone, sans réseau ; il reste vide sur un appareil neuf.
  */
-definePageMeta({ layout: 'guide-nego' })
+definePageMeta({
+  layout: 'guide-nego',
+  middleware: (to) =>
+    sansBarreFinale(to.path) ? navigateTo({ path: avecBarreFinale(to.path), query: to.query, hash: to.hash }, { replace: true }) : undefined,
+})
 defineI18nRoute(false)
 
 const { t, locale } = useI18n()
@@ -153,7 +158,7 @@ useHead({ title: t('guide-nego.accueil.titre') })
 </script>
 
 <template>
-  <GnEcran :titre="t('guide-nego.accueil.titre')" :sous-titre="sousTitre" :avatar="avatar" cloche>
+  <GnEcran :titre="t('guide-nego.accueil.titre')" :sous-titre="sousTitre" :avatar="avatar" loupe cloche>
     <!-- Sans compte, l'écran s'ouvre quand même : il invite, il ne bloque pas. -->
     <template v-if="sansCompte">
       <p class="gn-journee__invitation">{{ t('guide-nego.accueil.sans-compte.texte') }}</p>

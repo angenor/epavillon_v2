@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.faq_entries\n            SET verified_on = $2, verified_by = $3,\n                status = CASE WHEN status = 'to_review' THEN 'published' ELSE status END\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "bb189e3cb970886011465809f3f02025f96ebedb19fdc6873b7587e3d03ec71b"
+}

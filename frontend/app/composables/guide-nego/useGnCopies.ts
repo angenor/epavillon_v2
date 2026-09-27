@@ -440,6 +440,17 @@ export function useGnCopies() {
     return { ...lue, reserve: copie.reserve }
   }
 
+  /** La forme lisible gardée seule, pour chercher dans son texte : ni le PDF lu, ni la copie retirée si elle manque. */
+  async function lireLaFormeGardee(id: string): Promise<DocumentReading | null> {
+    const copie = await magasinDesCopies.lireUne(id)
+    if (!copie) return null
+    return enSerie(async () => {
+      const cache = await depots().caches.ouvrir(cacheDe(copie.reserve))
+      const forme: unknown = await (await cache.lire(copie.cles[0]))?.json().catch(() => null)
+      return estUneFormeLisible(forme) ? forme : null
+    }).catch(() => null)
+  }
+
   /**
    * Fait partir ce qui a été demandé sans réseau. La bibliothèque se relit d'abord :
    * un document dépublié ou devenu réservé depuis la demande part du bon côté, ou
@@ -473,6 +484,7 @@ export function useGnCopies() {
     verifier,
     rapprocher,
     lireLaCopie,
+    lireLaFormeGardee,
     partir,
   }
 }

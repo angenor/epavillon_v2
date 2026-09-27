@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.expert_questions\n            SET status = 'added_to_faq', faq_entry_id = $2\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "10e2ad038303500ea9f86c56e11401f010c10ec7f4030649e10e452b0658f9bb"
+}

@@ -1,0 +1,16 @@
+{
+  "titre": "My favourite terms",
+  "sous-titre": "No terms · available offline | {count} term · available offline | {count} terms · available offline",
+  "chargement": "Reading your favourites",
+  "rappel": "The “Favourite” button of an entry adds it here. The whole glossary already works offline; favourites help you find terms quickly.",
+  "sans-compte": "Without an account, your favourites stay on this phone. With an account, they follow you to your other devices.",
+  "vide": {
+    "titre": "No favourite terms",
+    "texte": "The “Favourite” button of an entry adds it here, to find it quickly, even offline.",
+    "sortie": "Browse the list"
+  },
+  "erreur": {
+    "titre": "The glossary is not on this phone yet",
+    "texte": "It is saved the first time the app opens with a connection. Connect once: your favourites will then work offline."
+  }
+}

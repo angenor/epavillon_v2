@@ -15,7 +15,7 @@
  * La recherche dans le texte ne se fait qu'en ligne : hors connexion, on cherche
  * dans les titres, résumés et éditeurs gardés.
  */
-import type { CorrectionNote, DocumentLibrary, LibraryDocument, PageHit } from '~/types/negotiation-documents'
+import type { CorrectionNote, DocumentLibrary, LibraryDocument, PageHit, TextHit } from '~/types/negotiation-documents'
 import { estInchange } from '~/composables/api/etiquete'
 import { estNouveau, marquerVu } from '~/utils/guide-nego/appareil-lecture'
 import { pourUneAutrePersonne } from '~/utils/guide-nego/documents'
@@ -123,6 +123,7 @@ export function useGnDocuments() {
   const notesDe = (id: string): CorrectionNote[] => notes.value.filter((n) => n.document_id === id)
 
   const dansLeTexte = ref<Map<string, PageHit | null> | null>(null)
+  const pagesTrouvees = ref<TextHit[] | null>(null)
   let derniere = 0
 
   /** Rend nul hors connexion ou pour une recherche trop courte : on cherche alors dans la liste seule. */
@@ -131,11 +132,13 @@ export function useGnDocuments() {
     const cherche = q.trim()
     if (cherche.length < LONGUEUR_MIN_TEXTE || !connexion.etat.value.enLigne) {
       dansLeTexte.value = null
+      pagesTrouvees.value = null
       return
     }
     const lu = await api.rechercherDansLeTexte(cherche).catch(() => null)
     if (demande !== derniere) return
     dansLeTexte.value = lu ? new Map(lu.hits.map((h) => [h.document_id, h.pages[0] ?? null])) : null
+    pagesTrouvees.value = lu?.hits ?? null
   }
 
   return {
@@ -151,6 +154,8 @@ export function useGnDocuments() {
     notesDe,
     /** Par document trouvé, sa première page — nulle pour un réservé sans accès. */
     dansLeTexte: readonly(dansLeTexte),
+    /** Toutes les pages trouvées, par document ; nul hors connexion ou si l'API n'a pas répondu. */
+    pagesTrouvees: readonly(pagesTrouvees),
     chercherDansLeTexte,
   }
 }

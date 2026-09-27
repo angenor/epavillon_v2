@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.glossary_entries\n               (slug, family_term_id, term, acronym, variants, translation, definition, status)\n           VALUES ('', $1, $2, $3, $4, '{\"fr\":\"traduction\"}', '{\"fr\":\"définition\"}',\n                   $5::text::negotiation.knowledge_status)\n           RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "TextArray",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "114acaae6aff42820f9c37480b799d74175cd6164d585567556a388fac7de500"
+}

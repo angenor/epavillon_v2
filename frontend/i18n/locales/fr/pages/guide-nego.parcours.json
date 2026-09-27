@@ -1,0 +1,22 @@
+{
+  "titre": "Ma première COP",
+  "en-etapes": "Parcours sans étape | Parcours en {count} étape | Parcours en {count} étapes",
+  "chargement": "Lecture du parcours",
+  "faites": "{faites} étape sur {total} | {faites} étape sur {total} | {faites} étapes sur {total}",
+  "sur": "{faites} sur {total}",
+  "prochaine": "Prochaine : {groupe}",
+  "tout-coche": "Tout est coché",
+  "sur-le-telephone": "Vos coches restent sur le téléphone.",
+  "ailleurs": "Vos coches ont été mises à jour depuis un autre appareil.",
+  "document": "le document",
+  "pied": "Cochez à votre rythme : rien n'est obligatoire.",
+  "ligne": "Parcours « Ma première COP »",
+  "erreur": {
+    "titre": "Le parcours n'est pas encore sur ce téléphone",
+    "texte": "Il se garde à la première ouverture avec le réseau. Reconnectez-vous une fois : il se lira ensuite sans réseau."
+  },
+  "vide": {
+    "titre": "Aucune étape publiée pour l'instant",
+    "texte": "L'IFDD prépare le parcours des primo-participants. Il paraîtra ici, lisible sans réseau."
+  }
+}

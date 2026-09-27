@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT proposal_id, context, created_at\n           FROM negotiation.glossary_proposal_authors\n          WHERE proposal_id = ANY($1)\n          ORDER BY created_at, client_ref",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "proposal_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_proposal_authors",
+            "name": "proposal_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "context",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_proposal_authors",
+            "name": "context"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_proposal_authors",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "01b426d1f98454c1a0c718e535db46731ae0dc1c75bfe0da0fd32ff47d5fbd38"
+}

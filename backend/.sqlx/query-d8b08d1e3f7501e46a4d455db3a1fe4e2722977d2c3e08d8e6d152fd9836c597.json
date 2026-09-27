@@ -1,0 +1,51 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) FILTER (WHERE helpful) AS \"helpful!\",\n                  count(*) FILTER (WHERE NOT helpful) AS \"not_helpful!\",\n                  count(*) FILTER (WHERE missing_reason = 'too_vague') AS \"too_vague!\",\n                  count(*) FILTER (WHERE missing_reason = 'off_topic') AS \"off_topic!\",\n                  count(*) FILTER (WHERE missing_reason = 'outdated') AS \"outdated!\"\n             FROM negotiation.faq_feedback\n            WHERE entry_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "helpful!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "not_helpful!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "too_vague!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "off_topic!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "outdated!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "d8b08d1e3f7501e46a4d455db3a1fe4e2722977d2c3e08d8e6d152fd9836c597"
+}

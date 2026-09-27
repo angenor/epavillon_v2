@@ -1,0 +1,149 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.id, s.group_id, s.label::jsonb AS \"label!: Value\",\n                  s.detail::jsonb AS \"detail: Value\", s.origin_label::jsonb AS \"origin_label: Value\",\n                  s.link_kind, COALESCE(s.link_document_id, s.link_faq_id, s.link_glossary_id) AS link_target,\n                  CASE s.link_kind WHEN 'document' THEN platform.t(d.title, $1)\n                                   WHEN 'faq' THEN platform.t(f.question, $1)\n                                   WHEN 'glossary' THEN g.term END AS target_label,\n                  s.link_page, s.link_section, s.link_label::jsonb AS \"link_label: Value\",\n                  s.sort_order, s.is_published,\n                  (SELECT count(*) FROM negotiation.pathway_checks c WHERE c.step_id = s.id) AS \"checks!\"\n             FROM negotiation.pathway_steps s\n             LEFT JOIN negotiation.documents d ON d.id = s.link_document_id\n             LEFT JOIN negotiation.faq_entries f ON f.id = s.link_faq_id\n             LEFT JOIN negotiation.glossary_entries g ON g.id = s.link_glossary_id\n            ORDER BY s.sort_order, s.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.pathway_steps",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "group_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.pathway_steps",
+            "name": "group_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "label!: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "detail: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "origin_label: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "link_kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.pathway_steps",
+            "name": "link_kind"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "link_target",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "target_label",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "link_page",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "negotiation.pathway_steps",
+            "name": "link_page"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "link_section",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.pathway_steps",
+            "name": "link_section"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "link_label: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "sort_order",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "negotiation.pathway_steps",
+            "name": "sort_order"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "is_published",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "negotiation.pathway_steps",
+            "name": "is_published"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "checks!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      null,
+      null,
+      true,
+      null,
+      null,
+      true,
+      true,
+      null,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "624aaaa403603e38f04a02434f25390d872068900c003c7e40491193bd909b50"
+}

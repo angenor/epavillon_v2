@@ -1,0 +1,33 @@
+{
+  "titre": "Ask an expert",
+  "sous-titre": "Reserved for the negotiators' network",
+  "chargement": "Reading your access",
+  "badge": "Negotiator access open",
+  "badge-reseau": "Negotiator access — {reseau}",
+  "propos": "IFDD experts read your question. If the answer can help others, it joins the FAQ, without your name.",
+  "thematique": "Theme",
+  "thematique-vide": "Choose a theme",
+  "champ": "Your question",
+  "indication": "In your own words, as you would ask a colleague.",
+  "consentement": "My question, anonymised, may join the FAQ",
+  "envoyer": "Send",
+  "sans-reseau": "Without a connection, the question leaves when the network returns.",
+  "mes-questions": "My questions",
+  "revenir": "Back to the FAQ",
+  "une-autre": "Ask another question",
+  "verrou": {
+    "propos": "Questions to IFDD experts open with the code received in your WhatsApp or IFDD group.",
+    "reste": "Without a code, the FAQ stays open to everyone. | Without a code, the FAQ and its verified answer stay open to everyone. | Without a code, the FAQ and its {count} verified answers stay open to everyone."
+  },
+  "envoyee": {
+    "titre": "Sent. An expert will answer as soon as possible; an email will let you know.",
+    "titre-attente": "No network: your question will leave when the connection returns, only once.",
+    "question": "Your question",
+    "thematique": "Theme",
+    "envoyee": "Sent",
+    "ecrite": "Written",
+    "etat": "Status",
+    "suite-faq": "The answer will arrive by email and in \"My questions\". If it helps others, it will join the FAQ, without your name.",
+    "suite": "The answer will arrive by email and in \"My questions\". It stays between you and the experts."
+  }
+}

@@ -1,8 +1,27 @@
 {
-  "titre": "Glossary",
-  "sous-titre": "English-French",
+  "titre": "English-French glossary",
+  "champ": "Search a term, in English or French",
+  "indication": "A word heard in the room",
+  "compte": "No entries, offline-ready | {count} entry, offline-ready | {count} entries, offline-ready",
+  "chargement": "Reading the glossary",
+  "derniers": "Recently viewed",
+  "parcourir": "Browse the list",
+  "favoris": "My favourite terms",
+  "peut-etre": "Did you mean:",
+  "trouves": "{count} entry. | {count} entry. | {count} entries.",
+  "traductions": "Also in the French translations.",
+  "sur": "{count} entries out of {total} | {count} entry out of {total} | {count} entries out of {total}",
+  "aucun": {
+    "titre": "“{terme}” is not in the glossary yet",
+    "texte": "Suggest it: an IFDD expert will define it and add it for everyone. You will be notified.",
+    "proposer": "Suggest “{terme}”"
+  },
   "vide": {
-    "titre": "The glossary is coming",
-    "texte": "Negotiation terms and their translations will be searchable here, offline too. The “Aa” button opens this screen from anywhere."
+    "titre": "The glossary is still empty",
+    "texte": "No term is published yet. IFDD experts fill it before each COP."
+  },
+  "erreur": {
+    "titre": "The glossary is not on this phone yet",
+    "texte": "It is saved the first time the app opens with a connection. Connect once: it will then work offline."
   }
 }

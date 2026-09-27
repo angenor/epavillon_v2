@@ -1,0 +1,17 @@
+{
+  "titre": "Lexique anglais-français",
+  "champ": "Chercher un terme, en anglais ou en français",
+  "indication": "Un mot entendu en salle",
+  "familles": "Familles de termes",
+  "chargement": "Lecture de la liste",
+  "compte": "Aucune entrée | {count} entrée | {count} entrées",
+  "aucune": "Aucune entrée dans cette famille.",
+  "vide": {
+    "titre": "Le lexique est encore vide",
+    "texte": "Aucun terme n'est publié pour l'instant. Les experts de l'IFDD l'alimentent avant chaque COP."
+  },
+  "erreur": {
+    "titre": "Le lexique n'est pas encore sur ce téléphone",
+    "texte": "Il se garde à la première ouverture avec le réseau. Reconnectez-vous une fois : il se lira ensuite sans réseau."
+  }
+}

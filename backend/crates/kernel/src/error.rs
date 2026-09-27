@@ -281,6 +281,41 @@ codes! {
     NegotiationCorrectionPageUnknown => "NEGOTIATION_CORRECTION_PAGE_UNKNOWN", StatusCode::UNPROCESSABLE_ENTITY,
         "Cette page n'existe pas dans le document.";
 
+    // --- Guide Négo, savoir (étape 2) -----------------------------------------
+    NegotiationFaqNotFound => "NEGOTIATION_FAQ_NOT_FOUND", StatusCode::NOT_FOUND,
+        "Cette question n'existe pas, ou n'est plus publiée.";
+    NegotiationGlossaryNotFound => "NEGOTIATION_GLOSSARY_NOT_FOUND", StatusCode::NOT_FOUND,
+        "Ce terme n'existe pas, ou n'est plus publié.";
+    NegotiationPathwayStepNotFound => "NEGOTIATION_PATHWAY_STEP_NOT_FOUND", StatusCode::NOT_FOUND,
+        "Cette étape du parcours n'existe pas, ou n'est plus publiée.";
+    NegotiationReportLimit => "NEGOTIATION_REPORT_LIMIT", StatusCode::TOO_MANY_REQUESTS,
+        "Vous avez envoyé beaucoup de signalements aujourd'hui. Réessayez demain.";
+    NegotiationProposalLimit => "NEGOTIATION_PROPOSAL_LIMIT", StatusCode::TOO_MANY_REQUESTS,
+        "Vous avez proposé beaucoup de termes aujourd'hui. Réessayez demain.";
+    NegotiationGlossaryTermExists => "NEGOTIATION_GLOSSARY_TERM_EXISTS", StatusCode::CONFLICT,
+        "Ce terme est déjà dans le lexique.";
+    NegotiationReportReasonRequired => "NEGOTIATION_REPORT_REASON_REQUIRED", StatusCode::UNPROCESSABLE_ENTITY,
+        "Choisissez au moins une raison.";
+    NegotiationTextTooLong => "NEGOTIATION_TEXT_TOO_LONG", StatusCode::UNPROCESSABLE_ENTITY,
+        "Ce texte dépasse 600 caractères.";
+    NegotiationFaqUnverified => "NEGOTIATION_FAQ_UNVERIFIED", StatusCode::UNPROCESSABLE_ENTITY,
+        "Une réponse ne se publie qu'avec la date de sa vérification par un expert.";
+    NegotiationKnowledgePublishedUndeletable => "NEGOTIATION_KNOWLEDGE_PUBLISHED_UNDELETABLE", StatusCode::CONFLICT,
+        "Une entrée déjà publiée ne se supprime pas : dépubliez-la.";
+    NegotiationGlossarySlugTaken => "NEGOTIATION_GLOSSARY_SLUG_TAKEN", StatusCode::CONFLICT,
+        "Un terme du lexique s'écrit déjà ainsi.";
+    NegotiationQuestionNoConsent => "NEGOTIATION_QUESTION_NO_CONSENT", StatusCode::UNPROCESSABLE_ENTITY,
+        "La personne qui a posé cette question n'a pas accepté qu'elle rejoigne la FAQ.";
+    NegotiationQueueItemClosed => "NEGOTIATION_QUEUE_ITEM_CLOSED", StatusCode::CONFLICT,
+        "Cet élément de la file a déjà été traité.";
+    NegotiationSourceTargetInvalid => "NEGOTIATION_SOURCE_TARGET_INVALID", StatusCode::UNPROCESSABLE_ENTITY,
+        "Une source est un document de la bibliothèque ou une référence extérieure titrée, jamais les deux.";
+    NegotiationPathwayLinkInvalid => "NEGOTIATION_PATHWAY_LINK_INVALID", StatusCode::UNPROCESSABLE_ENTITY,
+        "Le lien de l'étape ne correspond pas à sa cible.";
+    NegotiationPathwayGroupNotEmpty => "NEGOTIATION_PATHWAY_GROUP_NOT_EMPTY", StatusCode::CONFLICT,
+        "Ce groupe porte encore des étapes : déplacez-les avant de le supprimer.";
+    NegotiationRelatedSelf => "NEGOTIATION_RELATED_SELF", StatusCode::UNPROCESSABLE_ENTITY,
+        "Une entrée ne peut pas être liée à elle-même.";
     // --- Guide Négo, sessions de négociation (étape 3a) -----------------------
     NegotiationEditionUnknown => "NEGOTIATION_EDITION_UNKNOWN", StatusCode::NOT_FOUND,
         "Cette édition n'existe pas, ou ne reçoit pas les sessions officielles.";

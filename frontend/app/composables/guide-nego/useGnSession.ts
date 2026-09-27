@@ -27,7 +27,13 @@ import {
   CLE_LECTURE_REGLAGE_NOTIFICATIONS,
 } from '~/utils/guide-nego/signalements'
 import { deconnecterDansLOrdre, relireEtEffacer } from '~/utils/guide-nego/effacements'
-import { CLE_LECTURE_FAVORIS, ecrireGarde, magasinDesEcritures, supprimerGarde } from '~/utils/guide-nego/garde'
+import {
+  CLE_LECTURE_FAVORIS,
+  CLE_LECTURE_QUESTIONS,
+  ecrireGarde,
+  magasinDesEcritures,
+  supprimerGarde,
+} from '~/utils/guide-nego/garde'
 import {
   COMPTE_DECONNECTE,
   reconnexionAReclamer,
@@ -145,6 +151,11 @@ export function useGnSession() {
       CLE_LECTURE_MES_INSCRIPTIONS_REUNIONS,
     ]) {
       await supprimerGarde(cle)
+    }
+    // L'accès lu suit le compte : gardé, il rouvrirait les verrous à la personne suivante.
+    for (const cle of [CLE_LECTURE_QUESTIONS, 'acces']) {
+      await supprimerGarde(cle)
+      useState(`gn-lecture-${cle}`).value = { valeur: null, luA: null, source: 'aucune', pret: false, enCours: false }
     }
     const maintenant = new Date().toISOString()
     etat.value = {

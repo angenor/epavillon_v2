@@ -218,7 +218,7 @@ useHead({ title: titre })
 <template>
   <GnEcran
     :titre="titre"
-    :sous-titre="session ? fil : undefined"
+    :surtitre="session ? fil : undefined"
     :retour="retour"
     :onglets="false"
     :ce-qui-se-lit="k('hors-connexion')"

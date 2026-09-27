@@ -52,6 +52,7 @@ pub fn routes(cfg: &mut ServiceConfig) {
     routes::acces::configurer(cfg);
     routes::themes::configurer(cfg);
     routes::documents::configurer(cfg);
+    routes::savoir::configurer(cfg);
     routes::sessions::configurer(cfg);
     routes::groups::configurer(cfg);
     routes::agenda::configurer(cfg);
@@ -72,12 +73,15 @@ pub fn admin_routes(cfg: &mut ServiceConfig) {
     routes::admin_requests::configurer(cfg);
     routes::admin_admission::configurer(cfg);
     routes::admin_documents::configurer(cfg);
+    routes::admin_savoir::configurer(cfg);
+    routes::admin_file::configurer(cfg);
     routes::admin_import::configurer(cfg);
     routes::admin_reports::configurer(cfg);
     routes::admin_meetings::configurer(cfg);
 }
 
-/// Les travaux différés du module : les deux courriels de décision, la purge
+/// Les travaux différés du module : les deux courriels de décision, celui de
+/// la réponse d'un expert et celui d'un terme proposé publié, la purge
 /// des essais de code, l'extraction des documents, l'import des sessions
 /// officielles, la traduction de leurs titres, la publication des
 /// signalements validés, le courriel d'un changement et celui d'une place
@@ -89,7 +93,7 @@ pub fn admin_routes(cfg: &mut ServiceConfig) {
 /// travail déposé dans une file inécoutée s'empile sans erreur, sans trace, et
 /// sans que rien ne l'exécute jamais.
 ///
-/// Les neuf déclarent la file par défaut : aucun déclencheur du modèle ne les
+/// Les onze déclarent la file par défaut : aucun déclencheur du modèle ne les
 /// dépose ailleurs.
 pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc<dyn JobHandler>> {
     let url = config.app_public_url.clone();
@@ -100,6 +104,14 @@ pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc
             url.clone(),
         )),
         Arc::new(jobs::emails::SendRejectedEmail::new(
+            mailer.clone(),
+            url.clone(),
+        )),
+        Arc::new(jobs::emails::SendAnsweredEmail::new(
+            mailer.clone(),
+            url.clone(),
+        )),
+        Arc::new(jobs::emails::SendPublishedEmail::new(
             mailer.clone(),
             url.clone(),
         )),

@@ -1,0 +1,17 @@
+{
+  "titre": "English-French glossary",
+  "champ": "Search a term, in English or French",
+  "indication": "A word heard in the room",
+  "familles": "Term families",
+  "chargement": "Reading the list",
+  "compte": "No entries | {count} entry | {count} entries",
+  "aucune": "No entry in this family.",
+  "vide": {
+    "titre": "The glossary is still empty",
+    "texte": "No term is published yet. IFDD experts fill it before each COP."
+  },
+  "erreur": {
+    "titre": "The glossary is not on this phone yet",
+    "texte": "It is saved the first time the app opens with a connection. Connect once: it will then work offline."
+  }
+}

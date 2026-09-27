@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.pathway_steps SET\n             sort_order = CASE WHEN $2::uuid IS NOT NULL AND $2 <> group_id\n                               THEN (SELECT COALESCE(max(sort_order) + 1, 0)\n                                       FROM negotiation.pathway_steps WHERE group_id = $2)\n                               ELSE sort_order END,\n             group_id = COALESCE($2, group_id),\n             label = COALESCE($3::jsonb::platform.i18n_text, label),\n             detail = CASE WHEN $4 THEN $5::jsonb::platform.i18n_text ELSE detail END,\n             origin_label = CASE WHEN $6 THEN $7::jsonb::platform.i18n_text ELSE origin_label END,\n             link_kind = CASE WHEN $8 THEN $9 ELSE link_kind END,\n             link_document_id = CASE WHEN $8 THEN $10 ELSE link_document_id END,\n             link_page = CASE WHEN $8 THEN $11 ELSE link_page END,\n             link_section = CASE WHEN $8 THEN $12 ELSE link_section END,\n             link_faq_id = CASE WHEN $8 THEN $13 ELSE link_faq_id END,\n             link_glossary_id = CASE WHEN $8 THEN $14 ELSE link_glossary_id END,\n             link_label = CASE WHEN $8 THEN $15::jsonb::platform.i18n_text ELSE link_label END,\n             is_published = COALESCE($16, is_published)\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Jsonb",
+        "Bool",
+        "Jsonb",
+        "Bool",
+        "Jsonb",
+        "Bool",
+        "Text",
+        "Uuid",
+        "Int2",
+        "Text",
+        "Uuid",
+        "Uuid",
+        "Jsonb",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a18f88ccd3de9c2ded6758ded404236e5c6b0e5510b1af6965c2d20fa0dca8cd"
+}

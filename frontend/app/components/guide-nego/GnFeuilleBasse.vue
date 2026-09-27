@@ -21,6 +21,9 @@ export interface OptionDeFeuille {
   picto?: NomDePicto
   /** Une option destructrice : rouge, et toujours suivie d'une boîte de confirmation. */
   dangereuse?: boolean
+  /** Une seconde ligne, plus discrète, sous le libellé. */
+  detail?: string
+  detailPicto?: NomDePicto
   /** Le pictogramme prend la couleur de cet état (motifs de signalement). */
   teinte?: NomDEtat
   /** L'option mène à une étape suivante dans la même feuille : chevron, et la feuille reste ouverte. */
@@ -34,8 +37,11 @@ const props = withDefaults(
     options?: OptionDeFeuille[]
     /** Le bouton qui referme : « Annuler » par défaut ; « Fermer » quand rien n'est à annuler. */
     fermeture?: string
+    /** Devant le titre ; rouge avec `pictoDanger` (« Dépassé ou faux »). */
+    picto?: NomDePicto
+    pictoDanger?: boolean
   }>(),
-  { sousTitre: undefined, options: () => [], fermeture: undefined },
+  { sousTitre: undefined, options: () => [], fermeture: undefined, picto: undefined, pictoDanger: false },
 )
 
 const emit = defineEmits<{ choisir: [OptionDeFeuille] }>()
@@ -78,6 +84,12 @@ const derniere = computed(() => props.options.length - 1)
             class="gn-feuille-basse__titre"
             :class="{ 'gn-feuille-basse__titre--avec-sous-titre': sousTitre }"
           >
+            <GnPicto
+              v-if="picto"
+              :nom="picto"
+              :taille="24"
+              :class="{ 'gn-feuille-basse__titre-picto--danger': pictoDanger }"
+            />
             {{ titre }}
           </h2>
           <p v-if="sousTitre" class="gn-feuille-basse__sous-titre">{{ sousTitre }}</p>
@@ -99,7 +111,13 @@ const derniere = computed(() => props.options.length - 1)
                   :taille="24"
                   :style="option.teinte ? { color: couleurDEtat(option.teinte) } : undefined"
                 />
-                <span class="gn-feuille-basse__libelle">{{ option.libelle }}</span>
+                <span v-if="option.detail" class="gn-feuille-basse__libelle gn-feuille-basse__option-textes">
+                  {{ option.libelle }}
+                  <span class="gn-feuille-basse__option-detail">
+                    <GnPicto v-if="option.detailPicto" :nom="option.detailPicto" :taille="16" />{{ option.detail }}
+                  </span>
+                </span>
+                <span v-else class="gn-feuille-basse__libelle">{{ option.libelle }}</span>
                 <GnPicto v-if="option.suite" nom="chevron" :taille="24" class="gn-feuille-basse__suite" />
               </button>
             </li>
@@ -156,10 +174,18 @@ const derniere = computed(() => props.options.length - 1)
 }
 
 [data-app="guide-nego"] .gn-feuille-basse__titre {
+  display: flex;
+  align-items: center;
+  gap: var(--gn-espace-8);
   color: var(--gn-titre);
   font-size: var(--gn-taille-24);
   line-height: var(--gn-interligne-24);
   font-weight: var(--gn-graisse-gras);
+}
+
+[data-app="guide-nego"] .gn-feuille-basse__titre-picto--danger {
+  flex: none;
+  color: var(--gn-danger);
 }
 
 /* Avec un sous-titre, le titre descend d'un cran : les deux lignes forment un bloc. */
@@ -193,6 +219,23 @@ const derniere = computed(() => props.options.length - 1)
   line-height: var(--gn-interligne-17);
   font-weight: var(--gn-graisse-demi-gras);
   text-align: left;
+}
+
+[data-app="guide-nego"] .gn-feuille-basse__option-textes {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-block: var(--gn-espace-8);
+}
+
+[data-app="guide-nego"] .gn-feuille-basse__option-detail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--gn-texte-2);
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+  font-weight: var(--gn-graisse-regulier);
 }
 
 [data-app="guide-nego"] .gn-feuille-basse__option--derniere {
