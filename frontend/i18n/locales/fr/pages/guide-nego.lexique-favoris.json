@@ -1,0 +1,16 @@
+{
+  "titre": "Mes termes favoris",
+  "sous-titre": "Aucun terme · se lisent sans réseau | {count} terme · se lit sans réseau | {count} termes · se lisent sans réseau",
+  "chargement": "Lecture de vos favoris",
+  "rappel": "Le bouton « Favori » d'une entrée l'ajoute ici. Tout le lexique se lit déjà sans réseau ; les favoris servent à retrouver vite.",
+  "sans-compte": "Sans compte, vos favoris restent sur ce téléphone. Avec un compte, ils vous suivent sur vos autres appareils.",
+  "vide": {
+    "titre": "Aucun terme en favori",
+    "texte": "Le bouton « Favori » d'une entrée l'ajoute ici, pour la retrouver vite, même sans réseau.",
+    "sortie": "Parcourir la liste"
+  },
+  "erreur": {
+    "titre": "Le lexique n'est pas encore sur ce téléphone",
+    "texte": "Il se garde à la première ouverture avec le réseau. Reconnectez-vous une fois : vos favoris se liront ensuite sans réseau."
+  }
+}

@@ -28,6 +28,16 @@ withDefaults(
     compact?: boolean
     /** Un retour qui referme ce qui est posé sur l'écran — le sommaire du lecteur — au lieu d'y naviguer. */
     retourBouton?: boolean
+    /** Le retour est une croix : l'écran se referme sur celui d'où l'on venait (le lexique). */
+    fermer?: boolean
+    /** Au-dessus du titre, en petit gris : la famille d'un terme du lexique. */
+    surtitre?: string
+    /** Le titre est un terme anglais : en italique, sa traduction en sous-titre plus grand. */
+    terme?: boolean
+    /** Une question de FAQ : le titre descend à 24, une phrase entière y tient. */
+    titreLong?: boolean
+    /** Écran racine d'un onglet : la loupe de la recherche globale, à gauche de « Aa » (R13). */
+    loupe?: boolean
   }>(),
   {
     sousTitre: undefined,
@@ -37,6 +47,11 @@ withDefaults(
     lexiqueOuvert: false,
     compact: false,
     retourBouton: false,
+    fermer: false,
+    surtitre: undefined,
+    terme: false,
+    titreLong: false,
+    loupe: false,
   },
 )
 
@@ -51,8 +66,8 @@ const { t } = useI18n()
       <button v-if="retourBouton" type="button" class="gn-entete__bouton" :aria-label="t('gn-entete.retour')" @click="$emit('retour')">
         <GnPicto nom="back" />
       </button>
-      <NuxtLink v-else-if="retour" :to="retour" class="gn-entete__bouton" :aria-label="t('gn-entete.retour')">
-        <GnPicto nom="back" />
+      <NuxtLink v-else-if="retour" :to="retour" class="gn-entete__bouton" :aria-label="t(fermer ? 'gn-entete.fermer' : 'gn-entete.retour')">
+        <GnPicto :nom="fermer ? 'close' : 'back'" />
       </NuxtLink>
       <GnAvatar
         v-else-if="avatar"
@@ -66,6 +81,7 @@ const { t } = useI18n()
       <div v-else class="gn-entete__connexion"><slot name="connexion" /></div>
       <!-- Un accès propre à l'écran, à côté de « Aa » : « Mon agenda » sur les sessions. -->
       <slot name="action" />
+      <GnLoupe v-if="loupe" />
       <NuxtLink
         to="/guide-nego/lexique"
         class="gn-entete__bouton gn-entete__aa"
@@ -80,13 +96,17 @@ const { t } = useI18n()
       <GnAvatar grand :prenom="avatarDuTitre.prenom" :nom="avatarDuTitre.nom" :image="avatarDuTitre.image" />
       <h1 class="gn-entete__titre">{{ titre }}</h1>
     </div>
-    <h1 v-else-if="!compact" class="gn-entete__titre">{{ titre }}</h1>
+    <p v-if="surtitre && !compact" class="gn-entete__surtitre">{{ surtitre }}</p>
+    <h1 v-if="!compact && !avatarDuTitre" class="gn-entete__titre" :class="{ 'gn-entete__titre--terme': terme, 'gn-entete__titre--long': titreLong }" :lang="terme ? 'en' : undefined">
+      {{ titre }}
+    </h1>
     <div v-if="sousTitre && !compact && $slots['sous-titre-action']" class="gn-entete__ligne">
       <p class="gn-entete__sous-titre">{{ sousTitre }}</p>
       <!-- Une commande qui porte sur tout l'écran : « Tout marquer comme lu » (02 · 10). -->
       <slot name="sous-titre-action" />
     </div>
-    <p v-else-if="sousTitre && !compact" class="gn-entete__sous-titre">{{ sousTitre }}</p>
+    <p v-else-if="sousTitre && !compact" class="gn-entete__sous-titre" :class="{ 'gn-entete__sous-titre--terme': terme }">{{ sousTitre }}</p>
+    <slot name="pied" />
   </header>
 </template>
 
@@ -177,6 +197,28 @@ const { t } = useI18n()
   color: var(--gn-texte-2);
   text-align: center;
   overflow-wrap: anywhere;
+}
+
+[data-app="guide-nego"] .gn-entete__surtitre {
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+  font-weight: var(--gn-graisse-gras);
+  color: var(--gn-texte-2);
+}
+
+[data-app="guide-nego"] .gn-entete__titre--long {
+  font-size: var(--gn-taille-24);
+  line-height: var(--gn-interligne-24);
+}
+
+[data-app="guide-nego"] .gn-entete__titre--terme {
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
+[data-app="guide-nego"] .gn-entete__sous-titre.gn-entete__sous-titre--terme {
+  font-size: var(--gn-taille-20);
+  line-height: var(--gn-interligne-20);
 }
 
 [data-app="guide-nego"] .gn-entete__ligne {

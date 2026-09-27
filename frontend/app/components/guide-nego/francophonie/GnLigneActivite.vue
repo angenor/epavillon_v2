@@ -18,14 +18,21 @@ const props = withDefaults(
     /** Où elle se tient, pour une ligne lue hors de la section Pavillon (« Ma journée »). */
     lieu?: string | null
     vers: string
+    /** Hors du jour choisi (la recherche globale), la ligne dit son jour au-dessus de l'heure. */
+    jour?: boolean
   }>(),
-  { ville: null, lieu: null },
+  { ville: null, lieu: null, jour: false },
 )
 
 const { t } = useI18n()
-const { time, timeRange, dayLong } = useDateTime()
+const { intlLocale, time, timeRange, dayLong } = useDateTime()
 const { tr } = useI18nText()
 
+const jourCourt = computed(() =>
+  new Intl.DateTimeFormat(intlLocale.value, { weekday: 'short', day: 'numeric', timeZone: props.fuseau }).format(
+    new Date(props.activite.starts_at),
+  ),
+)
 const debut = computed(() => time(props.activite.starts_at, props.fuseau))
 const entendu = computed(() =>
   t('gn-ligne-activite.entendu', {
@@ -53,6 +60,7 @@ const attente = computed(() => {
     :class="{ 'gn-ligne-activite--terminee': etat === 'terminee', 'gn-ligne-activite--annulee': etat === 'annulee' }"
   >
     <span class="gn-ligne-activite__heures" aria-hidden="true">
+      <span v-if="jour" class="gn-ligne-activite__jour">{{ jourCourt }}</span>
       <span
         class="gn-ligne-activite__debut"
         :class="{ 'gn-ligne-activite__debut--en-cours': etat === 'en-cours' }"
@@ -134,7 +142,16 @@ const attente = computed(() => {
   flex: none;
   width: var(--gn-colonne-heure);
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
+}
+
+[data-app="guide-nego"] .gn-ligne-activite__jour {
+  color: var(--gn-texte-2);
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+  font-weight: var(--gn-graisse-gras);
+  font-variant-numeric: tabular-nums;
 }
 
 [data-app="guide-nego"] .gn-ligne-activite__debut {

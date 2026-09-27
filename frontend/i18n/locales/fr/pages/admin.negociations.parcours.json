@@ -1,0 +1,113 @@
+{
+  "title": "Parcours « Ma première COP »",
+  "subtitle": "Les étapes que Guide Négo propose de cocher, groupe par groupe. Une étape déjà cochée ne se supprime pas : elle se dépublie.",
+  "readonly": "Vous consultez le parcours : seule une personne chargée de la publication le modifie.",
+  "forbidden": {
+    "scope": "Rédiger ou vérifier le savoir de Guide Négo, sur la plateforme entière",
+    "description": "La FAQ, le lexique et le parcours de Guide Négo sont réservés aux administrateurs de la plateforme entière et aux experts. Un compte rattaché à un seul événement n'y a pas accès."
+  },
+  "empty": {
+    "title": "Aucun groupe",
+    "description": "Le parcours n'a encore aucun groupe. Créez-en un, puis ajoutez-y des étapes."
+  },
+  "published": "Publié",
+  "unpublished": "Non publié",
+  "publish": "Publier",
+  "unpublish": "Dépublier",
+  "delete": "Supprimer",
+  "up": "Monter",
+  "down": "Descendre",
+  "cancel": "Annuler",
+  "save": "Enregistrer",
+  "group": {
+    "new": "Nouveau groupe",
+    "rename": "Renommer",
+    "steps": "aucune étape | {count} étape | {count} étapes",
+    "empty": "Ce groupe n'a encore aucune étape.",
+    "renameTitle": "Renommer le groupe",
+    "newTitle": "Nouveau groupe",
+    "label": {
+      "fr": "Libellé, en français",
+      "en": "Libellé, en anglais"
+    },
+    "published": "Publié dès sa création",
+    "error": {
+      "label": "Le libellé en français est requis."
+    }
+  },
+  "step": {
+    "new": "Ajouter une étape",
+    "edit": "Modifier",
+    "move": "Déplacer",
+    "originShort": "Origine : {origin}",
+    "checks": "cochée par aucun compte | cochée par {count} compte | cochée par {count} comptes",
+    "editTitle": "Modifier l'étape",
+    "newTitle": "Nouvelle étape",
+    "moveTitle": "Déplacer l'étape",
+    "moveTarget": "Vers le groupe",
+    "moveTargetPlaceholder": "Choisir un groupe",
+    "moveHint": "L'étape se place en fin de groupe.",
+    "moveConfirm": "Déplacer",
+    "label": {
+      "fr": "Libellé, en français",
+      "en": "Libellé, en anglais"
+    },
+    "detail": {
+      "fr": "Précision, en français",
+      "en": "Précision, en anglais",
+      "hint": "Facultative : « Groupe africain 8:00, PMA 13:00 »."
+    },
+    "origin": {
+      "fr": "Origine, en français",
+      "en": "Origine, en anglais",
+      "hint": "Facultative : d'où vient l'étape, « Réunions de la Francophonie »."
+    },
+    "link": {
+      "legend": "Lien de l'étape",
+      "label": "Lien",
+      "none": "Aucun lien",
+      "kind": {
+        "document": "Document",
+        "faq": "Question de la FAQ",
+        "glossary": "Terme du lexique"
+      },
+      "target": "Cible",
+      "targetPlaceholder": "Chercher",
+      "page": "Page",
+      "section": "Section",
+      "sectionPlaceholder": "chapitre 3",
+      "textFr": "Texte du lien, en français",
+      "textEn": "Texte du lien, en anglais",
+      "textHint": "Facultatif : « Guide, chapitre 3 ».",
+      "unknownTarget": "cible introuvable",
+      "pageShort": "p. {page}",
+      "summary": "{kind} : {target}"
+    },
+    "published": "Publiée dès sa création",
+    "publishedHint": "Sinon, elle attend en brouillon.",
+    "save": "Enregistrer",
+    "create": "Ajouter",
+    "error": {
+      "label": "Le libellé en français est requis.",
+      "target": "Choisissez la cible du lien, ou retirez le lien."
+    },
+    "targetsError": "Les documents, questions ou termes n'ont pas pu être chargés."
+  },
+  "result": {
+    "ordered": "Ordre enregistré.",
+    "groupSaved": "Groupe enregistré.",
+    "groupCreated": "Groupe créé.",
+    "published": "Publié.",
+    "unpublished": "Dépublié.",
+    "stepSaved": "Étape enregistrée.",
+    "stepCreated": "Étape ajoutée.",
+    "moved": "Étape déplacée.",
+    "groupDeleted": "Groupe supprimé.",
+    "stepDeleted": "Étape supprimée."
+  },
+  "confirm": {
+    "groupTitle": "Supprimer ce groupe ?",
+    "stepTitle": "Supprimer cette étape ?",
+    "question": "« {label} » sera effacé. Ce geste ne s'annule pas."
+  }
+}

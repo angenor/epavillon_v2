@@ -534,6 +534,24 @@ export const taxonomies = [
     is_system: true,
     created_at: '2026-09-26T09:00:00Z',
   },
+  {
+    code: 'faq_section',
+    label: { fr: 'Rubriques de la FAQ', en: 'FAQ sections' },
+    description: null,
+    is_multi_select: false,
+    is_hierarchical: false,
+    is_system: true,
+    created_at: '2026-09-24T09:00:00Z',
+  },
+  {
+    code: 'glossary_family',
+    label: { fr: 'Familles du lexique', en: 'Glossary families' },
+    description: null,
+    is_multi_select: false,
+    is_hierarchical: false,
+    is_system: true,
+    created_at: '2026-09-24T09:00:00Z',
+  },
 ] satisfies Taxonomy[]
 
 /** Fabrique un terme : tous partagent les mêmes valeurs administratives. */
@@ -653,6 +671,15 @@ export const taxonomyTerms = [
   term(TERM.francoWorkshop, 'francophone_meeting_type', 'preparatory_workshop', { fr: 'Atelier préparatoire', en: 'Preparatory workshop' }, 10),
   term(TERM.francoNegotiators, 'francophone_meeting_type', 'negotiators_consultation', { fr: 'Concertation des négociatrices et négociateurs', en: "Negotiators' consultation" }, 20),
   term(TERM.francoMinisterial, 'francophone_meeting_type', 'ministerial_consultation', { fr: 'Concertation ministérielle', en: 'Ministerial consultation' }, 30),
+
+  // Le savoir de Guide Négo — même semis que 020_reference.sql
+  term(TERM.faqFirstCop, 'faq_section', 'first_cop', { fr: 'Ma première COP', en: 'My first COP' }, 10),
+  term(TERM.faqProcess, 'faq_section', 'process', { fr: 'Le processus', en: 'The process' }, 20),
+  term(TERM.faqNegotiatingGroups, 'faq_section', 'negotiating_groups', { fr: 'Les groupes de négociation', en: 'Negotiating groups' }, 30),
+  term(TERM.faqOnSite, 'faq_section', 'on_site', { fr: 'Sur place', en: 'On site' }, 40),
+  term(TERM.glossaryMeetings, 'glossary_family', 'meetings', { fr: 'Réunions', en: 'Meetings' }, 10),
+  term(TERM.glossaryTexts, 'glossary_family', 'texts', { fr: 'Textes', en: 'Texts' }, 20),
+  term(TERM.glossaryThemes, 'glossary_family', 'themes', { fr: 'Thématiques', en: 'Themes' }, 30),
 ] satisfies TaxonomyTerm[]
 
 // ---------------------------------------------------------------------------

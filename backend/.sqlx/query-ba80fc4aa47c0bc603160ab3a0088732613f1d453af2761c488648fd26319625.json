@@ -1,0 +1,118 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.id, s.group_id, platform.t(s.label, $1) AS \"label!\",\n                  platform.t(s.detail, $1) AS detail, platform.t(s.origin_label, $1) AS origin_label,\n                  s.link_kind, COALESCE(s.link_document_id, s.link_faq_id, s.link_glossary_id) AS link_target,\n                  s.link_page, s.link_section, platform.t(s.link_label, $1) AS link_label,\n                  s.sort_order::int AS \"sort_order!\"\n             FROM negotiation.pathway_steps s\n            WHERE s.is_published\n            ORDER BY s.sort_order, s.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.pathway_steps",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "group_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.pathway_steps",
+            "name": "group_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "label!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "detail",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "origin_label",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "link_kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.pathway_steps",
+            "name": "link_kind"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "link_target",
+        "type_info": "Uuid",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "link_page",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "negotiation.pathway_steps",
+            "name": "link_page"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "link_section",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.pathway_steps",
+            "name": "link_section"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "link_label",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "sort_order!",
+        "type_info": "Int4",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      null,
+      null,
+      true,
+      null,
+      true,
+      true,
+      null,
+      null
+    ]
+  },
+  "hash": "ba80fc4aa47c0bc603160ab3a0088732613f1d453af2761c488648fd26319625"
+}

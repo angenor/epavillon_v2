@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { NetworkMeeting, OfficialSession } from '~/types/negotiation-sessions'
 import type { EtatAffiche } from '~/utils/guide-nego/sessions'
+import { morceauxSurlignes } from '~/utils/guide-nego/lexique'
 
 /**
  * Une session officielle dans la liste d'un jour (07 · 4 septies). Toute la ligne ouvre
@@ -36,6 +37,8 @@ const props = withDefaults(
     signale?: string | null
     /** L'agenda d'origine, dit au-dessus du titre quand la ligne côtoie les deux autres (ADR-008). */
     origine?: string | null
+    /** La saisie de la recherche globale, marquée dans les titres. */
+    surligne?: string
   }>(),
   {
     session: null,
@@ -49,6 +52,7 @@ const props = withDefaults(
     rappel: false,
     signale: null,
     origine: null,
+    surligne: '',
   },
 )
 
@@ -74,7 +78,9 @@ const heuresEntendues = computed(() =>
 
 /** En anglais, la traduction française n'a rien à faire à l'écran. */
 const traduit = computed(() => (locale.value === 'fr' ? (props.session?.title_fr ?? null) : null))
-const titre = computed(() => props.reunion?.title ?? traduit.value ?? props.session?.title_en ?? '')
+const titreTexte = computed(() => props.reunion?.title ?? traduit.value ?? props.session?.title_en ?? '')
+const titre = computed(() => morceauxSurlignes(titreTexte.value, props.surligne))
+const anglais = computed(() => morceauxSurlignes(props.session?.title_en ?? '', props.surligne))
 
 const type = computed(() => (props.session?.type ? tr(props.session.type.label) : null))
 
@@ -129,7 +135,7 @@ const terminee = computed(() => !!props.session && props.etat === 'terminee')
     </span>
 
     <span v-if="reunion" class="gn-ligne-session__corps">
-      <span class="gn-ligne-session__titre">{{ titre }}</span>
+      <span class="gn-ligne-session__titre">{{ titreTexte }}</span>
       <span v-if="agenda" class="gn-ligne-session__lieu">
         <span v-if="salle" class="gn-ligne-session__salle">{{ salle }}</span>
         <span v-if="thematique" class="gn-ligne-session__thematique">{{ thematique }}</span>
@@ -146,11 +152,12 @@ const terminee = computed(() => !!props.session && props.etat === 'terminee')
     <span v-else-if="session" class="gn-ligne-session__corps">
       <span v-if="origine" class="gn-ligne-session__type">{{ origine }}</span>
       <span v-if="type && !agenda" class="gn-ligne-session__type">{{ type }}</span>
-      <span class="gn-ligne-session__titre">{{ titre }}</span>
+      <span class="gn-ligne-session__titre">
+        <template v-for="(m, i) in titre" :key="i"><mark v-if="m.marque">{{ m.texte }}</mark><template v-else>{{ m.texte }}</template></template>
+      </span>
       <template v-if="traduit && !agenda">
         <span class="gn-ligne-session__anglais" lang="en">
-          <abbr class="gn-ligne-session__en" :title="t('gn-ligne-session.anglais')">EN</abbr>
-          {{ session.title_en }}
+          <abbr class="gn-ligne-session__en" :title="t('gn-ligne-session.anglais')">EN</abbr>{{ ' ' }}<template v-for="(m, i) in anglais" :key="i"><mark v-if="m.marque">{{ m.texte }}</mark><template v-else>{{ m.texte }}</template></template>
         </span>
         <span class="gn-ligne-session__traduction">
           <GnPicto nom="translate" :taille="18" />

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.expert_questions\n            SET status = 'answered', answer = $2, answered_by = $3, answered_at = now()\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "951d796affc6e9d0816f55b3eb67336fc33eb55f3ce8768373755e5230ff4848"
+}

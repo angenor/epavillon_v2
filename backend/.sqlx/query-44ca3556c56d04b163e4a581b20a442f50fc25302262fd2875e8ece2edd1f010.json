@@ -1,0 +1,78 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.id AS proposal_id, g.id AS \"id!\", g.slug AS \"slug!\", g.term AS \"term!\",\n                  g.status AS \"status!\", g.similarite AS \"similarity!\"\n             FROM negotiation.glossary_proposals p\n             CROSS JOIN LATERAL (\n                   SELECT e.id, e.slug, e.term, e.status::text AS status,\n                          similarity(e.term_norm, p.term_norm) AS similarite\n                     FROM negotiation.glossary_entries e\n                    WHERE e.term_norm % p.term_norm\n                      AND similarity(e.term_norm, p.term_norm) >= 0.4\n                    ORDER BY similarite DESC, e.id\n                    LIMIT 5) g\n            WHERE p.id = ANY($1)\n            ORDER BY p.id, g.similarite DESC, g.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "proposal_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_proposals",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "slug!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "slug"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "term!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "term"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "similarity!",
+        "type_info": "Float4",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "44ca3556c56d04b163e4a581b20a442f50fc25302262fd2875e8ece2edd1f010"
+}

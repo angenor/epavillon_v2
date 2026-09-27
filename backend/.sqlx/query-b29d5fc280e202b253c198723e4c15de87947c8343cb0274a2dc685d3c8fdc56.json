@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.pathway_groups\n            SET label = COALESCE($2::jsonb::platform.i18n_text, label),\n                is_published = COALESCE($3, is_published)\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b29d5fc280e202b253c198723e4c15de87947c8343cb0274a2dc685d3c8fdc56"
+}

@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT f.entry_id FROM negotiation.glossary_favorites f\n           JOIN negotiation.glossary_entries e ON e.id = f.entry_id\n          WHERE f.person_id = $1 AND e.status <> 'draft'\n          ORDER BY f.created_at DESC, f.entry_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "entry_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_favorites",
+            "name": "entry_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "830fbe5c208c2760fb5ea8132f6f6444422b1f0f6a4daebf5058d4e05bd018a8"
+}

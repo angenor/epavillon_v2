@@ -1,0 +1,141 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT g.id, g.slug, t.code AS \"family_code!\", g.term, g.acronym, g.variants,\n                  platform.t(g.translation, $1) AS \"translation!\",\n                  platform.t(g.definition, $1) AS \"definition!\",\n                  g.heard_in_room, g.status::text AS \"status!\", g.updated_at,\n                  COALESCE((SELECT array_agg(r.related_id ORDER BY r.sort_order, r.related_id)\n                              FROM negotiation.glossary_related r\n                             WHERE r.entry_id = g.id), '{}') AS \"related_ids!: Vec<Uuid>\"\n             FROM negotiation.glossary_entries g\n             JOIN reference.taxonomy_terms t ON t.id = g.family_term_id\n            WHERE g.status <> 'draft'\n              AND ($2::timestamptz IS NULL OR g.updated_at >= $2)\n            ORDER BY g.term_norm, g.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "slug",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "slug"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "family_code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "term",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "term"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "acronym",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "acronym"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "variants",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "variants"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "translation!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "definition!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "heard_in_room",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "heard_in_room"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.glossary_entries",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "related_ids!: Vec<Uuid>",
+        "type_info": "UuidArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      null,
+      null,
+      true,
+      null,
+      false,
+      null
+    ]
+  },
+  "hash": "ff77dd57fba29c8fa1a4a1718994f7216e9708d6c0dd0c33feada8a33dedfe7c"
+}

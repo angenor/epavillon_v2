@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.glossary_entries SET\n             family_term_id = COALESCE($2, family_term_id),\n             term = COALESCE($3, term),\n             acronym = CASE WHEN $4 THEN $5 ELSE acronym END,\n             variants = COALESCE($6, variants),\n             translation = COALESCE($7::jsonb::platform.i18n_text, translation),\n             definition = COALESCE($8::jsonb::platform.i18n_text, definition),\n             heard_in_room = CASE WHEN $9 THEN $10 ELSE heard_in_room END\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Bool",
+        "Text",
+        "TextArray",
+        "Jsonb",
+        "Jsonb",
+        "Bool",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cc364473cb5c85b08d15a9b8019b8a6eca5418967f43c0106554083bf8a79726"
+}

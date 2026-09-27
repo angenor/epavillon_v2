@@ -1,0 +1,33 @@
+{
+  "titre": "Question à un expert",
+  "sous-titre": "Réservé au réseau des négociatrices et négociateurs",
+  "chargement": "Lecture de votre accès",
+  "badge": "Accès négociateur ouvert",
+  "badge-reseau": "Accès négociateur — {reseau}",
+  "propos": "Les experts de l'IFDD lisent votre question. Si la réponse peut servir à d'autres, elle rejoint la FAQ, sans votre nom.",
+  "thematique": "Thématique",
+  "thematique-vide": "Choisir une thématique",
+  "champ": "Votre question",
+  "indication": "En vos mots, comme vous la poseriez à une collègue.",
+  "consentement": "Ma question, anonymisée, pourra rejoindre la FAQ",
+  "envoyer": "Envoyer",
+  "sans-reseau": "Sans réseau, la question part au retour de la connexion.",
+  "mes-questions": "Mes questions",
+  "revenir": "Revenir à la FAQ",
+  "une-autre": "Poser une autre question",
+  "verrou": {
+    "propos": "Les questions aux experts de l'IFDD s'ouvrent avec le code reçu dans votre groupe WhatsApp ou de l'IFDD.",
+    "reste": "Sans code, la FAQ reste ouverte à tous. | Sans code, la FAQ et sa réponse vérifiée restent ouvertes à tous. | Sans code, la FAQ et ses {count} réponses vérifiées restent ouvertes à tous."
+  },
+  "envoyee": {
+    "titre": "Envoyé. Un expert vous répond dès que possible ; un courriel vous le dira.",
+    "titre-attente": "Pas de réseau : votre question partira au retour de la connexion, une seule fois.",
+    "question": "Votre question",
+    "thematique": "Thématique",
+    "envoyee": "Envoyée",
+    "ecrite": "Écrite",
+    "etat": "État",
+    "suite-faq": "La réponse arrivera par courriel et dans « Mes questions ». Si elle sert à d'autres, elle rejoindra la FAQ, sans votre nom.",
+    "suite": "La réponse arrivera par courriel et dans « Mes questions ». Elle reste entre vous et les experts."
+  }
+}

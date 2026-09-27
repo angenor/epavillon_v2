@@ -93,6 +93,21 @@ export function sectionDeLaPage(sommaire: OutlineEntry[], index: number, niveau 
   return trouvee
 }
 
+/**
+ * La page d'une section nommée, la première du sommaire qui la porte. « chapitre 3 »
+ * ne s'écrit pas dans un sommaire : à défaut du nom, son numéro — « 3. Les enjeux… ».
+ */
+export function pageDeLaSection(sommaire: OutlineEntry[], section: string): number | null {
+  const cherche = replier(section.trim()).replie
+  if (!cherche) return null
+  const entrees = aplatir(sommaire).map((e) => ({ titre: replier(e.title).replie, page: e.page_index }))
+  const nommee = entrees.find((e) => e.titre.includes(cherche))
+  if (nommee) return nommee.page
+  const numero = cherche.split(/\s+/).pop() ?? ''
+  if (!/\d/.test(numero)) return null
+  return entrees.find((e) => e.titre.startsWith(`${numero}.`) || e.titre.startsWith(`${numero} `))?.page ?? null
+}
+
 /** La page où reprendre : celle notée, si elle existe encore ; jamais la première. */
 export function pageDeReprise(lecture: DocumentReading, notee: number | null): ReadingPage | null {
   if (notee === null || notee <= 1) return null

@@ -1,0 +1,9 @@
+{
+  "titre": "Glossary",
+  "avec-sigle": "{traduction} ({sigle})",
+  "absent": "This term is not in the glossary yet. Suggest it: an IFDD expert defines it and adds it for everyone.",
+  "pages": "In this document: p. {pages}.",
+  "ouvrir": "Open in the glossary",
+  "proposer": "Suggest “{terme}”",
+  "revenir": "Back to the text"
+}

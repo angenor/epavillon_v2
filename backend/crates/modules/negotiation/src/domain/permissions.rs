@@ -12,6 +12,8 @@ pub const SPACE_MANAGE: &str = "negotiation.space.manage";
 pub const DOCUMENT_PUBLISH: &str = "negotiation.document.publish";
 pub const CORRECTION_POST: &str = "negotiation.correction.post";
 pub const CORRECTION_WITHDRAW: &str = "negotiation.correction.withdraw";
+pub const KNOWLEDGE_PUBLISH: &str = "negotiation.knowledge.publish";
+pub const KNOWLEDGE_REVIEW: &str = "negotiation.knowledge.review";
 pub const REPORT_VALIDATE: &str = "negotiation.report.validate";
 pub const MEETING_MANAGE: &str = "negotiation.meeting.manage";
 
@@ -43,6 +45,20 @@ impl PermissionSpec for CorrectionPost {
 pub struct CorrectionWithdraw;
 impl PermissionSpec for CorrectionWithdraw {
     const CODE: &'static str = CORRECTION_WITHDRAW;
+}
+
+/// Rédiger, publier, dépublier et mettre « À revoir » la FAQ, le parcours et
+/// le lexique.
+pub struct KnowledgePublish;
+impl PermissionSpec for KnowledgePublish {
+    const CODE: &'static str = KNOWLEDGE_PUBLISH;
+}
+
+/// Dater une vérification, traiter la file des experts : le geste de l'expert
+/// seul — `admin` ne l'a pas.
+pub struct KnowledgeReview;
+impl PermissionSpec for KnowledgeReview {
+    const CODE: &'static str = KNOWLEDGE_REVIEW;
 }
 
 /// Valider, refuser, retirer un signalement du réseau (3b). Portée globale.

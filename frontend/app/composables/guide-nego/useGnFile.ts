@@ -9,7 +9,7 @@
  * envoyer l'intention, et relire l'état vrai après. La file, elle, ne connaît aucun
  * écran — c'est ce qui la fera servir au parcours (étape 2) et aux signalements (3b).
  */
-import { ApiRequestError, normalizeApiError } from '~/utils/api-error'
+import { ApiRequestError, ForbiddenError, normalizeApiError } from '~/utils/api-error'
 import { magasinDesEcritures } from '~/utils/guide-nego/garde'
 import {
   creerFile,
@@ -25,6 +25,8 @@ export type AvisDeFile = Suite
 
 /** Traduit ce que l'envoi a levé. Un succès est un envoi qui n'a rien levé. */
 export function reponseDe(erreur: unknown): Reponse {
+  // Un droit perdu entre la pose et l'envoi est un refus, pas une panne à rejouer.
+  if (erreur instanceof ForbiddenError) return { statut: 'refus', code: 403, message: erreur.message }
   const normalisee = normalizeApiError(erreur)
   if (normalisee instanceof ApiRequestError) {
     return { statut: 'refus', code: normalisee.status, message: normalisee.message, champ: normalisee.field }

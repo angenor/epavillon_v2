@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO negotiation.faq_entries\n               (section_term_id, question, answer, status, verified_on, verified_by)\n           VALUES ($1, jsonb_build_object('fr', $2::text)::platform.i18n_text,\n                   CASE WHEN $4 THEN NULL\n                        ELSE jsonb_build_object('fr', 'Réponse à : ' || $2::text)::platform.i18n_text END,\n                   $3::text::negotiation.knowledge_status,\n                   CASE WHEN $4 THEN NULL ELSE current_date END,\n                   CASE WHEN $4 THEN NULL ELSE $5::uuid END)\n           RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_entries",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Bool",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "d71497fd69b1d920553bbcc419ae93df178f875197da3b2f77bc0a7a1daae935"
+}

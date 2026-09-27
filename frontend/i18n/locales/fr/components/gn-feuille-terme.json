@@ -1,0 +1,9 @@
+{
+  "titre": "Lexique",
+  "avec-sigle": "{traduction} ({sigle})",
+  "absent": "Ce terme n'est pas encore dans le lexique. Proposez-le : un expert de l'IFDD le définit et l'ajoute pour toutes et tous.",
+  "pages": "Dans ce document : p. {pages}.",
+  "ouvrir": "Ouvrir dans le lexique",
+  "proposer": "Proposer « {terme} »",
+  "revenir": "Revenir au texte"
+}

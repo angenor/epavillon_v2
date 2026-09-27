@@ -1,0 +1,28 @@
+{
+  "titre": "Suggest a term",
+  "texte": "Open to any account. An IFDD expert defines it before publication; an email will let you know.",
+  "terme": {
+    "libelle": "English term",
+    "aide": "Correct it if needed before sending.",
+    "requis": "Write the term.",
+    "long": "The term is longer than {maximum} characters."
+  },
+  "deja": "“{terme}” is already in the glossary.",
+  "ouvrir": "Open it",
+  "contexte": {
+    "libelle": "Where did you hear it?",
+    "indication": "The session, the sentence, what you understood."
+  },
+  "envoyer": "Suggest this term to the experts",
+  "compte": {
+    "texte": "Suggesting a term requires an account. Create one or sign in: what you typed is kept, and you will come back here.",
+    "creer": "Create my account",
+    "connexion": "I already have an account — Sign in"
+  },
+  "envoye": {
+    "titre": "Term suggested",
+    "envoye": "“{terme}” has been suggested to the experts. An IFDD expert defines it before publication; an email will let you know.",
+    "garde": "“{terme}” will be sent to the experts when the network is back. An IFDD expert defines it before publication; an email will let you know."
+  },
+  "fermer": "Close"
+}

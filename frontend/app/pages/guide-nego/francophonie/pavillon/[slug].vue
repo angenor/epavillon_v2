@@ -14,7 +14,7 @@ import {
 /**
  * Écran 10 · 1d — la fiche d'une activité du Pavillon. Le détail lu tient lieu de source ;
  * à défaut, la ligne de l'édition gardée ouvre la fiche sans réseau. Pas d'« Ajouter à mon
- * agenda » (FR-012). Le surtitre passe sous le titre, comme sur la fiche d'une réunion.
+ * agenda » (FR-012).
  */
 definePageMeta({ layout: 'guide-nego' })
 defineI18nRoute(false)
@@ -258,7 +258,7 @@ useHead({ title: titre })
 <template>
   <GnEcran
     :titre="titre"
-    :sous-titre="activite ? k('origine') : undefined"
+    :surtitre="activite ? k('origine') : undefined"
     :retour="retour"
     :onglets="false"
     :ce-qui-se-lit="k('hors-connexion')"

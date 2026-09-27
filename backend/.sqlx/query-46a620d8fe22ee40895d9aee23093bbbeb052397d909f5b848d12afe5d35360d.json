@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE negotiation.pathway_groups SET sort_order = $2 WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "46a620d8fe22ee40895d9aee23093bbbeb052397d909f5b848d12afe5d35360d"
+}

@@ -27,6 +27,7 @@ import {
   saisieInitiale,
   veille,
 } from '../../app/utils/guide-nego/pavillon.ts'
+import { activitesTrouvees } from '../../app/utils/guide-nego/recherche-globale.ts'
 import { BELEM } from './fausses-sessions.ts'
 
 const a = (iso: string) => new Date(iso)
@@ -292,4 +293,18 @@ test('le lieu : le stand de l’édition, sinon le premier lieu', () => {
   assert.equal(lieuDuPavillon([lieu('ligne', 'virtual'), lieu('stand', 'pavilion')])?.id, 'stand')
   assert.equal(lieuDuPavillon([lieu('ligne', 'virtual')])?.id, 'ligne')
   assert.equal(lieuDuPavillon([]), null)
+})
+
+test('la recherche globale trouve une activité par son titre, dans chaque langue, dans l\'ordre des heures', () => {
+  const activites = [
+    activite('b', '2027-11-13T13:00:00Z', '2027-11-13T14:00:00Z', { title: { fr: 'Finance climat et Francophonie' } }),
+    activite('a', '2027-11-12T13:00:00Z', '2027-11-12T14:00:00Z', {
+      title: { fr: 'Les océans et le climat', en: 'Oceans and climate' },
+    }),
+    activite('c', '2027-11-12T15:00:00Z', '2027-11-12T16:00:00Z', { title: { fr: 'Égalité des genres' }, room_name: 'Climat' }),
+  ]
+  assert.deepEqual(activitesTrouvees(activites, 'climat').map((x) => x.id), ['a', 'b'])
+  assert.deepEqual(activitesTrouvees(activites, 'OCEANS').map((x) => x.id), ['a'])
+  assert.deepEqual(activitesTrouvees(activites, 'egalite').map((x) => x.id), ['c'])
+  assert.deepEqual(activitesTrouvees(activites, 'c'), [])
 })

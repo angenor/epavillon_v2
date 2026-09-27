@@ -1,0 +1,20 @@
+{
+  "titre": "FAQ",
+  "compte": "No verified answers | {count} answer verified by IFDD experts | {count} answers verified by IFDD experts",
+  "champ": "Ask a question in your own words",
+  "chargement": "Loading the FAQ",
+  "trouvees": "No answers out of {total} | 1 answer out of {total} | {count} answers out of {total}",
+  "aucune": "No answer mentions “{saisie}”. Try other words, or browse the sections.",
+  "rubriques": "Sections",
+  "plus-lues": "Most read",
+  "expert": "Ask an expert",
+  "mes-questions": "My questions",
+  "erreur": {
+    "titre": "The FAQ is not on this phone yet",
+    "texte": "It is saved the first time you open it with a connection. Connect once: it will then read without a connection."
+  },
+  "vide": {
+    "titre": "No published answers yet",
+    "texte": "IFDD experts are verifying the first answers. They will appear here, readable offline."
+  }
+}

@@ -9,7 +9,7 @@ import {
   etatDAcces,
   saisiePossible,
 } from '../../app/utils/guide-nego/acces.ts'
-import { APRES_LE_COMPTE, PLUS_TARD, apresLaConnexion } from '../../app/utils/guide-nego/parcours.ts'
+import { APRES_LE_COMPTE, PLUS_TARD, apresLaConnexion, retourAGarder, retourALire } from '../../app/utils/guide-nego/parcours.ts'
 
 const ADMISE = {
   admission_mode: 'code' as const,
@@ -149,4 +149,16 @@ test('après la connexion, le code ne se demande qu’à qui n’est pas admis',
   assert.equal(apresLaConnexion(accesOuvert(ADMISE)), PLUS_TARD)
   assert.equal(apresLaConnexion(accesOuvert(ACCES_VISITEUSE)), APRES_LE_COMPTE)
   assert.equal(apresLaConnexion(accesOuvert(null)), APRES_LE_COMPTE, 'rien de lu : le parcours ordinaire')
+})
+
+/** FR-019 : sans compte, un retour sur la FAQ mène à la connexion, puis ramène à l'entrée. */
+test("le retour après la connexion ne ramène qu'à Guide Négo, et pas longtemps", () => {
+  const maintenant = 1_000_000_000
+  const garde = retourAGarder('/guide-nego/ressources/faq/abc', maintenant)
+  assert.equal(retourALire(garde, maintenant + 60_000), '/guide-nego/ressources/faq/abc')
+  assert.equal(retourALire(garde, maintenant + 2 * 60 * 60 * 1000), null, 'deux heures plus tard : oublié')
+  assert.equal(retourALire(retourAGarder('https://ailleurs.example/x', maintenant), maintenant), null)
+  assert.equal(retourALire(retourAGarder('/guide-nego//ailleurs.example', maintenant), maintenant), null)
+  assert.equal(retourALire('', maintenant), null)
+  assert.equal(retourALire('pas du json', maintenant), null)
 })

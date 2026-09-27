@@ -44,11 +44,6 @@
     "ambigu": "Ces mots reviennent plusieurs fois sur cette page : aucun endroit n'est désigné.",
     "introuvable": "Le passage est sur cette page, mais il ne peut pas y être marqué."
   },
-  "terme": {
-    "lexique": "La traduction et la définition de ce terme viendront avec le lexique anglais-français.",
-    "pages": "Dans ce document : p. {pages}.",
-    "revenir": "Revenir au texte"
-  },
   "bascule": "Ce téléphone n'affiche pas les pages de ce document : il s'ouvre en « Texte agrandi ».",
   "impossible": {
     "titre": "Ce téléphone ne peut pas afficher ce document",

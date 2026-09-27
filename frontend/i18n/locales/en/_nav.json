@@ -62,6 +62,9 @@
     "negotiationRequests": "Access requests",
     "negotiationAdmission": "Admission mode",
     "negotiationDocuments": "Documents",
+    "negotiationFaq": "FAQ",
+    "negotiationGlossary": "Glossary",
+    "negotiationPathway": "Pathway",
     "negotiationImport": "Session import",
     "negotiationAgenda": "Agenda items",
     "negotiationMeetings": "Meetings"

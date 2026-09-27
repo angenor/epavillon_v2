@@ -33,7 +33,15 @@ const connexion = useGnConnexion()
 const session = useGnSession()
 const acces = useGnAcces()
 const { momentLisible } = useGnMomentLecture()
-const lecteur = useGnLecteur(id)
+const pageCitee = computed(() => {
+  const page = Number(Array.isArray(route.query.page) ? route.query.page[0] : route.query.page)
+  return Number.isInteger(page) && page > 0 ? page : null
+})
+const sectionCitee = computed(() => {
+  const section = Array.isArray(route.query.section) ? route.query.section[0] : route.query.section
+  return typeof section === 'string' && section.trim() ? section : null
+})
+const lecteur = useGnLecteur(id, pageCitee, sectionCitee)
 const { etat, lecture, reprise, pageEnCours, suivreLaPage } = lecteur
 
 const document = computed<LibraryDocument | null>(() => documentDe(id.value))
@@ -87,7 +95,7 @@ function commencerLaLecture(): void {
   annonceFermee.value = false
   reseauPerdu.value = false
   plages.value = { recu: 0, demande: 0 }
-  pageDeDepart.value = reprise.value?.index ?? 1
+  pageDeDepart.value = pageEnCours.value
   demarrerLAttente()
 }
 
@@ -262,7 +270,7 @@ watch(lecture, async (lue) => {
   await nextTick()
   // La police chargée recompose le texte : un recalage fait avant glisserait de plusieurs écrans.
   await window.document.fonts?.ready
-  if (reprise.value) window.document.getElementById(`page-${reprise.value.index}`)?.scrollIntoView({ block: 'start' })
+  if (pageEnCours.value > 1) elementDeLaPage(pageEnCours.value)?.scrollIntoView({ block: 'start' })
   else window.scrollTo({ top: 0 })
   await uneImage()
   lecteur.commencerLeSuivi()
@@ -416,19 +424,6 @@ onBeforeUnmount(() => window.removeEventListener('keydown', auClavier))
 // --- Le terme anglais touché -------------------------------------------------
 
 const terme = ref<string | null>(null)
-const termeOuvert = computed({
-  get: () => terme.value !== null,
-  set: (ouvert: boolean) => {
-    if (!ouvert) terme.value = null
-  },
-})
-
-/** Les pages où le terme paraît : un fait du document, jamais une définition inventée. */
-const pagesDuTerme = computed(() => {
-  if (!terme.value || !lecture.value) return ''
-  const etiquettes = [...new Set(chercherDansLeDocument(lecture.value, terme.value).map((p) => p.etiquette))]
-  return new Intl.ListFormat(locale.value, { type: 'conjunction' }).format(etiquettes)
-})
 
 /** Un toucher sur le texte bascule la barre ; un toucher sur un lien ou un bouton fait ce qu'il dit. */
 function basculerLaBarre(evenement: MouseEvent): void {
@@ -674,14 +669,7 @@ useHead({ title: titre })
 
       <GnReglagesLecture v-model="reglagesOuverts" v-model:mode="modeChoisi" :texte-offert="modeOffert" />
 
-      <GnFeuilleBasse v-model="termeOuvert" :titre="terme ?? ''" :fermeture="t('guide-nego.lecteur.terme.revenir')">
-        <div class="gn-lecteur__terme">
-          <p>{{ t('guide-nego.lecteur.terme.lexique') }}</p>
-          <p v-if="pagesDuTerme" class="gn-lecteur__terme-pages">
-            {{ t('guide-nego.lecteur.terme.pages', { pages: pagesDuTerme }) }}
-          </p>
-        </div>
-      </GnFeuilleBasse>
+      <GnFeuilleTerme v-model:terme="terme" :lecture="lecture" />
     </template>
   </GnEcran>
 </template>
@@ -745,21 +733,6 @@ useHead({ title: titre })
   transform: translateX(-50%);
   z-index: 5;
   width: min(100%, var(--gn-colonne-largeur));
-}
-
-[data-app="guide-nego"] .gn-lecteur__terme {
-  display: flex;
-  flex-direction: column;
-  gap: var(--gn-espace-8);
-  padding-bottom: var(--gn-espace-16);
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
-}
-
-[data-app="guide-nego"] .gn-lecteur__terme-pages {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  color: var(--gn-texte-2);
 }
 
 [data-app="guide-nego"] .gn-lecteur__attente {

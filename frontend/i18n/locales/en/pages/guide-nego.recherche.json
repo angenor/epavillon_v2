@@ -1,0 +1,50 @@
+{
+  "titre": "Search",
+  "champ": "Search the glossary, the FAQ, documents, sessions, meetings and the Pavilion",
+  "indication": "A term, a question, a word from the guide",
+  "invite": "At least two letters: the glossary, the FAQ, documents, negotiation sessions, Francophonie meetings and the Francophonie Pavilion.",
+  "chargement": "Searching",
+  "total": {
+    "serveur": "No results, across Guide Négo | {count} result, across Guide Négo — on this phone and the server | {count} results, across Guide Négo — on this phone and the server",
+    "telephone": "No results, on this phone | {count} result, on this phone only | {count} results, on this phone only"
+  },
+  "non-telecharges": "The text of documents not downloaded was not searched: that needs the network.",
+  "savoir-absent": "The glossary and the FAQ are not on this phone yet: they are kept the first time the app opens with the network.",
+  "lexique": {
+    "titre": "Glossary",
+    "compte": "{count} entry | {count} entry | {count} entries",
+    "suite": "All {count} entries in the glossary"
+  },
+  "faq": {
+    "titre": "FAQ",
+    "compte": "{count} answer | {count} answer | {count} answers",
+    "suite": "All {count} answers in the FAQ"
+  },
+  "documents": {
+    "titre": "Documents",
+    "passages": "{count} passage | {count} passage | {count} passages",
+    "documents": "{count} document | {count} document | {count} documents",
+    "les-deux": "{documents} · {passages}",
+    "page": "p. {page} — “{extrait}”",
+    "reserve": "Found in the text — restricted access",
+    "suite": "All {count} documents in the library"
+  },
+  "sessions": {
+    "titre": "Negotiation sessions",
+    "aujourdhui": "{count} today | {count} today | {count} today",
+    "le-jour": "{count} on {jour} | {count} on {jour} | {count} on {jour}"
+  },
+  "reunions": {
+    "titre": "Francophonie meetings",
+    "compte": "{count} meeting | {count} meeting | {count} meetings"
+  },
+  "pavillon": {
+    "titre": "Francophonie Pavilion",
+    "compte": "{count} activity | {count} activity | {count} activities"
+  },
+  "aucun": {
+    "titre": "No results for “{terme}”",
+    "texte": "Nothing in the glossary, the FAQ, documents, negotiation sessions, Francophonie meetings or the Francophonie Pavilion. If it is a negotiation term, suggest it: an IFDD expert defines it and adds it to the glossary.",
+    "proposer": "Suggest “{terme}” for the glossary"
+  }
+}

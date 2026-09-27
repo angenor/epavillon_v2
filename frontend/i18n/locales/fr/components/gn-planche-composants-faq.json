@@ -1,0 +1,23 @@
+{
+  "ligne": "Ligne de question",
+  "ligne-propos": "Question 17/600 ; dessous, le bouclier coché 16 et « Vérifié le … » 15/700 en vert. Une entrée à revoir garde sa date, sans la coche, en gris. Toute la ligne est la cible.",
+  "question": "Quelle différence entre un groupe de contact et des consultations informelles ?",
+  "question-badge": "Où retirer mon badge ?",
+  "source": "Source",
+  "source-propos": "Avec citation : le passage en retrait, filet de 3 px à gauche, la référence 15/600 dessous ; un document s'ouvre dans le lecteur à la page citée. Sans citation : une ligne de document. Une référence extérieure sans adresse ne mène nulle part.",
+  "guide": "Guide des négociations CdP30",
+  "annexe": "annexe A.3",
+  "citation": "Le travail mené dans le cadre d'une consultation informelle peut, au même titre qu'un groupe de contact, aboutir à un texte convenu (document L).",
+  "iisd": "« Au nom de ma délégation », IISD",
+  "contexte": "Le contexte de négociation",
+  "retour": "Retour sur une réponse",
+  "retour-propos": "Question 15/700, deux boutons secondaires demi-largeur. « Oui » → la ligne devient « Merci. » avec la coche verte ; « Non » ouvre « Qu'est-ce qui manque ? ».",
+  "etape": "Étape de parcours",
+  "etape-propos": "Case de 24 px, toute la ligne est la cible. Cochée : case pleine, libellé gris, jamais barré. Dessous, un détail 15 gris, une origine 15/700, ou la sortie « Lire : … » en lien 15/600.",
+  "etape-guide": "Choisir mes thématiques et lire leurs fiches",
+  "etape-lire": "Guide, chapitre 3",
+  "etape-atelier": "Assister à l'atelier préparatoire des négociateurs francophones",
+  "etape-origine": "Réunions de la Francophonie",
+  "etape-coordination": "Assister à la coordination de mon groupe",
+  "etape-detail": "Groupe africain 8:00, PMA 13:00"
+}

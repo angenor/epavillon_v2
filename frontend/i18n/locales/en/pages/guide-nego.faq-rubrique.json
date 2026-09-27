@@ -1,0 +1,10 @@
+{
+  "titre": "FAQ section",
+  "chargement": "Loading the section",
+  "compte": "No answers | 1 answer | {count} answers",
+  "vide": {
+    "titre": "No answers in this section",
+    "texte": "It does not exist, or its answers are not published yet.",
+    "sortie": "Back to the FAQ"
+  }
+}

@@ -10,9 +10,6 @@ import { adresseDeLaSortie, sortieDuVerrou } from '~/utils/guide-nego/verrou'
  * Écran 10 · 1b — la fiche d'une réunion de la Francophonie, lue dans la liste gardée :
  * elle s'ouvre sans réseau avec ce qui a été lu. Le lien de visio ne vient que des
  * inscriptions de la personne (R6) ; la lecture publique n'en porte jamais.
- *
- * Le surtitre « Réunions de la Francophonie » passe sous le titre, comme le fil de la
- * fiche d'une session (écart 48) : `GnEntete` n'a pas de surtitre.
  */
 definePageMeta({ layout: 'guide-nego' })
 defineI18nRoute(false)
@@ -179,7 +176,7 @@ useHead({ title: titre })
 <template>
   <GnEcran
     :titre="titre"
-    :sous-titre="reunion ? k('origine') : undefined"
+    :surtitre="reunion ? k('origine') : undefined"
     :retour="retour"
     :onglets="false"
     :ce-qui-se-lit="k('hors-connexion')"

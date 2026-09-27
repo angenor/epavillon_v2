@@ -144,6 +144,12 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
             ApiError::new(NegotiationDocumentAlreadySuperseded).field("supersedes_id")
         }
 
+        // Le slug naît du terme : deux termes qui se normalisent pareil
+        // rendraient la résolution d'un texte ambiguë, et c'est le même refus.
+        ("23505", "ux_glossary_entries_term_norm") | ("23505", "ux_glossary_entries_slug") => {
+            ApiError::new(NegotiationGlossarySlugTaken).field("term")
+        }
+
         ("23505", _) => ApiError::new(Conflict),
 
         ("23514", "ck_role_assignment_window") => {
@@ -167,6 +173,32 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
         }
         ("23514", "ck_correction_notes_page_exists") => {
             ApiError::new(NegotiationCorrectionPageUnknown).field("page_index")
+        }
+        // --- Savoir de Guide Négo (étape 2) ---------------------------------
+        // Les deux premiers sont levés par un déclencheur qui se nomme comme
+        // une contrainte : une entrée publiée une fois se dépublie.
+        ("23514", "ck_faq_entries_undeletable") | ("23514", "ck_glossary_entries_undeletable") => {
+            ApiError::new(NegotiationKnowledgePublishedUndeletable)
+        }
+        ("23514", "ck_faq_entries_verified") | ("23514", "ck_faq_entries_verification_pair") => {
+            ApiError::new(NegotiationFaqUnverified).field("verified_on")
+        }
+        ("23514", "ck_faq_entries_answer") => ApiError::new(ValidationFailed).field("answer"),
+        ("23514", "ck_glossary_entries_term") | ("23514", "ck_glossary_entries_slug") => {
+            ApiError::new(ValidationFailed).field("term")
+        }
+        ("23514", "ck_expert_questions_promotion") => ApiError::new(NegotiationQuestionNoConsent),
+        ("23514", "ck_knowledge_sources_owner") | ("23514", "ck_knowledge_sources_target") => {
+            ApiError::new(NegotiationSourceTargetInvalid).field("sources")
+        }
+        ("23514", "ck_knowledge_sources_pages") => {
+            ApiError::new(ValidationFailed).field("page_to")
+        }
+        ("23514", "ck_pathway_steps_link") => {
+            ApiError::new(NegotiationPathwayLinkInvalid).field("link")
+        }
+        ("23514", "ck_faq_related_not_self") | ("23514", "ck_glossary_related_not_self") => {
+            ApiError::new(NegotiationRelatedSelf).field("related_ids")
         }
         // **NE DOIT JAMAIS REMONTER**, et le déclarer est le seul moyen de
         // s'apercevoir qu'elle l'a fait : le service de saisie d'un code
@@ -283,6 +315,15 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
         }
         ("23503", "xmod_fk_call_reviewers_person") => {
             ApiError::new(EventUnknownReference).field("person_id")
+        }
+        // Même contrainte pour un groupe supprimé qui porte des étapes et pour
+        // une étape posée dans un groupe inconnu ; seul le message les sépare.
+        ("23503", "pathway_steps_group_id_fkey") => {
+            if message.starts_with("insert or update") {
+                ApiError::new(ValidationFailed).field("group_id")
+            } else {
+                ApiError::new(NegotiationPathwayGroupNotEmpty)
+            }
         }
         // L'acteur vient de la session : s'il n'existe pas, ce n'est pas la
         // charge utile qui est en cause.

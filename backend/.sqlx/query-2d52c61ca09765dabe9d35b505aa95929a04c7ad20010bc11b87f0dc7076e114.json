@@ -1,0 +1,140 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT f.id, t.code AS \"section_code!\", f.question::jsonb AS \"question!: Value\",\n                  f.answer::jsonb AS \"answer: Value\", f.status::text AS \"status!\", f.verified_on,\n                  CASE WHEN p.id IS NULL THEN NULL\n                       ELSE concat_ws(' ', p.first_name, p.last_name) END AS verified_by_name,\n                  f.editorial_rank, f.origin_question_id, f.first_published_at,\n                  f.created_at, f.updated_at\n             FROM negotiation.faq_entries f\n             JOIN reference.taxonomy_terms t ON t.id = f.section_term_id\n             LEFT JOIN identity.people p ON p.id = f.verified_by\n            WHERE f.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_entries",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "section_code!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "reference.taxonomy_terms",
+            "name": "code"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "question!: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "answer: Value",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "verified_on",
+        "type_info": "Date",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_entries",
+            "name": "verified_on"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "verified_by_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "editorial_rank",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_entries",
+            "name": "editorial_rank"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "origin_question_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_entries",
+            "name": "origin_question_id"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "first_published_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_entries",
+            "name": "first_published_at"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_entries",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "negotiation.faq_entries",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      null,
+      null,
+      true,
+      null,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "2d52c61ca09765dabe9d35b505aa95929a04c7ad20010bc11b87f0dc7076e114"
+}
