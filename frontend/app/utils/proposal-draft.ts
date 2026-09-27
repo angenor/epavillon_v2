@@ -18,8 +18,8 @@
  *
  *   · `NOT NULL` de la table  → erreur. La base refuserait la ligne.
  *   · borne de l'appel        → erreur. `min_speakers`, `max_speakers`,
- *                               `allowed_formats` sont des données de l'appel ;
- *                               aucune ne doit être écrite en dur ici.
+ *                               `allowed_formats` (déduits du mode de l'édition) sont
+ *                               servis avec l'appel ; aucune ne s'écrit en dur ici.
  *   · absence regrettable     → avertissement. Un dossier sans résumé se dépose
  *                               et s'évalue mal ; le peindre en rouge
  *                               apprendrait à ignorer le rouge.

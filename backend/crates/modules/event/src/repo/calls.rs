@@ -36,14 +36,15 @@ pub async fn de_l_edition<'e>(
                   c.default_duration_minutes, c.min_duration_minutes, c.max_duration_minutes,
                   c.daily_start_time::text AS "daily_start_time!",
                   c.daily_end_time::text   AS "daily_end_time!",
-                  c.allowed_formats::text[] AS "allowed_formats!",
-                  c.required_reviews, c.blind_review,
+                  event.activity_formats(e.participation_mode)::text[] AS "allowed_formats!",
+                  c.required_reviews, c.uses_scoring_grid, c.blind_review,
                   c.guidelines_url::text AS "guidelines_url?",
                   c.submission_next_steps,
                   event.effective_deadline(c.id)  AS "effective_deadline!",
                   event.is_call_open(c.id)        AS "is_open!",
                   event.max_weighted_score(c.id)::float8 AS "max_weighted_score!"
              FROM event.calls_for_proposals c
+             JOIN event.events e ON e.id = c.event_id
             WHERE c.event_id = $1 AND c.status <> 'cancelled'"#,
         event_id.as_uuid()
     )
@@ -72,6 +73,7 @@ pub async fn de_l_edition<'e>(
         daily_end_time: l.daily_end_time,
         allowed_formats: l.allowed_formats,
         required_reviews: l.required_reviews,
+        uses_scoring_grid: l.uses_scoring_grid,
         blind_review: l.blind_review,
         guidelines_url: l.guidelines_url,
         submission_next_steps: l.submission_next_steps,
@@ -103,14 +105,15 @@ pub async fn par_id<'e>(
                   c.default_duration_minutes, c.min_duration_minutes, c.max_duration_minutes,
                   c.daily_start_time::text AS "daily_start_time!",
                   c.daily_end_time::text   AS "daily_end_time!",
-                  c.allowed_formats::text[] AS "allowed_formats!",
-                  c.required_reviews, c.blind_review,
+                  event.activity_formats(e.participation_mode)::text[] AS "allowed_formats!",
+                  c.required_reviews, c.uses_scoring_grid, c.blind_review,
                   c.guidelines_url::text AS "guidelines_url?",
                   c.submission_next_steps,
                   event.effective_deadline(c.id)  AS "effective_deadline!",
                   event.is_call_open(c.id)        AS "is_open!",
                   event.max_weighted_score(c.id)::float8 AS "max_weighted_score!"
              FROM event.calls_for_proposals c
+             JOIN event.events e ON e.id = c.event_id
             WHERE c.id = $1"#,
         call_id.as_uuid()
     )
@@ -139,6 +142,7 @@ pub async fn par_id<'e>(
         daily_end_time: l.daily_end_time,
         allowed_formats: l.allowed_formats,
         required_reviews: l.required_reviews,
+        uses_scoring_grid: l.uses_scoring_grid,
         blind_review: l.blind_review,
         guidelines_url: l.guidelines_url,
         submission_next_steps: l.submission_next_steps,
@@ -210,13 +214,12 @@ pub async fn inserer(
                 extended_until, results_expected_at, max_proposals_per_organization,
                 requires_verified_organization, min_speakers, max_speakers,
                 default_duration_minutes, min_duration_minutes, max_duration_minutes,
-                daily_start_time, daily_end_time, allowed_formats,
+                daily_start_time, daily_end_time, uses_scoring_grid,
                 required_reviews, blind_review, guidelines_url, created_by)
            VALUES ($1, $2, $3::jsonb, $4::jsonb, $5::text::event.call_status, $6, $7,
                    $8, $9, $10, $11, $12, $13, $14, $15, $16,
                    $17::text::time, $18::text::time,
-                   $19::text[]::event.participation_mode[],
-                   $20, $21, $22::text::platform.url, $23)
+                   $19, $20, $21, $22::text::platform.url, $23)
         RETURNING id"#,
         event_id.as_uuid(),
         p.code,
@@ -236,7 +239,7 @@ pub async fn inserer(
         p.max_duration_minutes,
         p.daily_start_time,
         p.daily_end_time,
-        &p.allowed_formats,
+        p.uses_scoring_grid,
         p.required_reviews,
         p.blind_review,
         p.guidelines_url,
@@ -290,7 +293,7 @@ pub async fn modifier(
                max_duration_minutes           = $16,
                daily_start_time               = $17::text::time,
                daily_end_time                 = $18::text::time,
-               allowed_formats                = $19::text[]::event.participation_mode[],
+               uses_scoring_grid              = $19,
                required_reviews               = $20,
                blind_review                   = $21,
                guidelines_url                 = $22::text::platform.url,
@@ -314,7 +317,7 @@ pub async fn modifier(
         p.max_duration_minutes,
         p.daily_start_time,
         p.daily_end_time,
-        &p.allowed_formats,
+        p.uses_scoring_grid,
         p.required_reviews,
         p.blind_review,
         p.guidelines_url,

@@ -24,7 +24,7 @@ async fn jeton_en_file(bac: &Bac) -> String {
     sqlx::query_scalar!(
         "SELECT payload ->> 'token' FROM platform.jobs
           WHERE task = 'identity.send_password_reset_email'
-          ORDER BY created_at DESC LIMIT 1"
+          ORDER BY created_at DESC, id DESC LIMIT 1"
     )
     .fetch_one(bac.base.pool())
     .await
@@ -324,7 +324,7 @@ async fn un_jeton_dune_autre_finalite_est_invalide() {
     let jeton = sqlx::query_scalar!(
         "SELECT payload ->> 'token' FROM platform.jobs
           WHERE task = 'identity.send_verification_email'
-          ORDER BY created_at DESC LIMIT 1"
+          ORDER BY created_at DESC, id DESC LIMIT 1"
     )
     .fetch_one(bac.base.pool())
     .await

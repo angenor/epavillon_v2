@@ -68,10 +68,12 @@ import type { BroadcastChannel, Room, Venue } from '~/types/event/venue'
 import type { EntityTerm } from '~/types/reference'
 import type { TaxonomyTermCode, Uuid } from '~/types/shared'
 import { EDITION_IMAGE_ROLES } from '~/types/media'
+import { activityFormats } from '../calls'
 import { coverAttachments } from '../covers'
 import { countries, entityTerms, taxonomyTerms } from '../reference'
 import { allSessions, sessionTracks } from '../sessions'
 import {
+  calls,
   channelRows,
   datesBetween,
   days,
@@ -301,6 +303,10 @@ export function saveEdition(payload: EditionFormPayload, actorId: Uuid | null): 
   })
 
   if (isCreation) editions.push(edition)
+  // L'API lit les formats de l'appel dans le mode de l'édition.
+  for (const call of calls.filter((c) => c.event_id === edition.id)) {
+    call.allowed_formats = activityFormats(edition.participation_mode)
+  }
 
   const plan = dayGenerationPlan(edition)
   const created = isCreation ? createDays(edition, plan.to_create) : createDays(edition, plan.to_create)

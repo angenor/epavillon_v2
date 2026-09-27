@@ -148,7 +148,8 @@ pub struct FicheAppel {
     pub daily_start_time: String,
     pub daily_end_time: String,
     pub allowed_formats: Vec<String>,
-    pub required_reviews: i16,
+    pub required_reviews: Option<i16>,
+    pub uses_scoring_grid: bool,
     pub blind_review: bool,
     pub guidelines_url: Option<String>,
     pub submission_next_steps: Option<serde_json::Value>,
@@ -164,18 +165,22 @@ pub async fn fiche_appel<'e>(
     call_id: Uuid,
 ) -> Result<Option<FicheAppel>> {
     let ligne = sqlx::query!(
-        r#"SELECT id, event_id, code, title, description, status::text AS "status!",
-                  opens_at, closes_at, extended_until,
-                  results_expected_at::text AS "results_expected_at_texte",
-                  max_proposals_per_organization, requires_verified_organization,
-                  min_speakers, max_speakers, default_duration_minutes,
-                  min_duration_minutes, max_duration_minutes,
-                  daily_start_time::text AS "daily_start_time!",
-                  daily_end_time::text AS "daily_end_time!",
-                  allowed_formats::text[] AS "allowed_formats!",
-                  required_reviews, blind_review,
-                  guidelines_url::text, submission_next_steps, created_by, created_at, updated_at
-             FROM event.calls_for_proposals WHERE id = $1"#,
+        r#"SELECT c.id, c.event_id, c.code, c.title, c.description,
+                  c.status::text AS "status!",
+                  c.opens_at, c.closes_at, c.extended_until,
+                  c.results_expected_at::text AS "results_expected_at_texte",
+                  c.max_proposals_per_organization, c.requires_verified_organization,
+                  c.min_speakers, c.max_speakers, c.default_duration_minutes,
+                  c.min_duration_minutes, c.max_duration_minutes,
+                  c.daily_start_time::text AS "daily_start_time!",
+                  c.daily_end_time::text AS "daily_end_time!",
+                  event.activity_formats(e.participation_mode)::text[] AS "allowed_formats!",
+                  c.required_reviews, c.uses_scoring_grid, c.blind_review,
+                  c.guidelines_url::text, c.submission_next_steps,
+                  c.created_by, c.created_at, c.updated_at
+             FROM event.calls_for_proposals c
+             JOIN event.events e ON e.id = c.event_id
+            WHERE c.id = $1"#,
         call_id
     )
     .fetch_optional(executor)
@@ -203,6 +208,7 @@ pub async fn fiche_appel<'e>(
         daily_end_time: l.daily_end_time,
         allowed_formats: l.allowed_formats,
         required_reviews: l.required_reviews,
+        uses_scoring_grid: l.uses_scoring_grid,
         blind_review: l.blind_review,
         guidelines_url: l.guidelines_url,
         submission_next_steps: l.submission_next_steps,

@@ -90,7 +90,7 @@ async fn la_reinitialisation_refuse_sans_consommer_le_jeton() {
     let jeton = sqlx::query_scalar!(
         "SELECT payload ->> 'token' FROM platform.jobs
           WHERE task = 'identity.send_password_reset_email'
-          ORDER BY created_at DESC LIMIT 1"
+          ORDER BY created_at DESC, id DESC LIMIT 1"
     )
     .fetch_one(bac.base.pool())
     .await

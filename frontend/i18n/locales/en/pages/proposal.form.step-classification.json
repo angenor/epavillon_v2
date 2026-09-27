@@ -15,11 +15,11 @@
   "formats": {
     "in_person": {
       "label": "In person",
-      "hint": "At the pavilion, no broadcast planned"
+      "hint": "At least one representative at the pavilion; other panellists may join online."
     },
     "online": {
       "label": "Online",
-      "hint": "No physical presence at the pavilion"
+      "hint": "All speakers take part remotely."
     },
     "hybrid": {
       "label": "Hybrid",

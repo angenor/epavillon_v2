@@ -21,7 +21,7 @@
 //!
 //! # Deux modes : `detailed` (la grille) et `quick` (une note sur 20)
 //!
-//! Une revue rapide ne garde aucune note par critère : les anciennes sont
+//! Un appel dont la grille est éteinte n'accepte que `quick`. Une revue rapide ne garde aucune note par critère : les anciennes sont
 //! effacées, sans quoi elles pèseraient encore sur l'élimination d'une revue
 //! repassée en détaillé.
 //!
@@ -346,6 +346,9 @@ async fn note_rapide(
 }
 
 /// La grille de l'appel du dossier — vide pour un dossier hors appel.
+///
+/// Une grille éteinte refuse le mode détaillé : ses critères, conservés en
+/// base, ne jugent plus rien.
 async fn grille_du_dossier(
     state: &ProgrammeState,
     dossier: ProposalId,
@@ -354,10 +357,21 @@ async fn grille_du_dossier(
         .await?
         .ok_or_else(ApiError::not_found)?;
 
-    match etat.call_id {
-        Some(call_id) => cross::grille_de_lappel(state.pool(), call_id).await,
-        None => Ok(Vec::new()),
+    let Some(call_id) = etat.call_id else {
+        return Ok(Vec::new());
+    };
+
+    let grille_en_usage = cross::regles_de_lappel(state.pool(), call_id)
+        .await?
+        .is_none_or(|r| r.uses_scoring_grid);
+    if !grille_en_usage {
+        return Err(ApiError::validation(
+            "La grille de critères est désactivée pour cet appel : l'évaluation se fait par la note sur 20.",
+            "mode",
+        ));
     }
+
+    cross::grille_de_lappel(state.pool(), call_id).await
 }
 
 /// Rapprocher les notes reçues de la grille — **et refuser un critère

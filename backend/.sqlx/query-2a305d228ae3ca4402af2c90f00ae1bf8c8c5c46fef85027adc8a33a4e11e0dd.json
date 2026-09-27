@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT c.id, c.event_id, c.code, c.title, c.description,\n                  c.status::text AS \"status!\",\n                  c.opens_at, c.closes_at, c.extended_until, c.results_expected_at,\n                  c.max_proposals_per_organization, c.requires_verified_organization,\n                  c.min_speakers, c.max_speakers,\n                  c.default_duration_minutes, c.min_duration_minutes, c.max_duration_minutes,\n                  c.daily_start_time::text AS \"daily_start_time!\",\n                  c.daily_end_time::text   AS \"daily_end_time!\",\n                  c.allowed_formats::text[] AS \"allowed_formats!\",\n                  c.required_reviews, c.blind_review,\n                  c.guidelines_url::text AS \"guidelines_url?\",\n                  c.submission_next_steps,\n                  event.effective_deadline(c.id)  AS \"effective_deadline!\",\n                  event.is_call_open(c.id)        AS \"is_open!\",\n                  event.max_weighted_score(c.id)::float8 AS \"max_weighted_score!\"\n             FROM event.calls_for_proposals c\n            WHERE c.event_id = $1 AND c.status <> 'cancelled'",
+  "query": "SELECT c.id, c.event_id, c.code, c.title, c.description,\n                  c.status::text AS \"status!\",\n                  c.opens_at, c.closes_at, c.extended_until, c.results_expected_at,\n                  c.max_proposals_per_organization, c.requires_verified_organization,\n                  c.min_speakers, c.max_speakers,\n                  c.default_duration_minutes, c.min_duration_minutes, c.max_duration_minutes,\n                  c.daily_start_time::text AS \"daily_start_time!\",\n                  c.daily_end_time::text   AS \"daily_end_time!\",\n                  event.activity_formats(e.participation_mode)::text[] AS \"allowed_formats!\",\n                  c.required_reviews, c.uses_scoring_grid, c.blind_review,\n                  c.guidelines_url::text AS \"guidelines_url?\",\n                  c.submission_next_steps,\n                  event.effective_deadline(c.id)  AS \"effective_deadline!\",\n                  event.is_call_open(c.id)        AS \"is_open!\",\n                  event.max_weighted_score(c.id)::float8 AS \"max_weighted_score!\"\n             FROM event.calls_for_proposals c\n             JOIN event.events e ON e.id = c.event_id\n            WHERE c.id = $1",
   "describe": {
     "columns": [
       {
@@ -216,6 +216,17 @@
       },
       {
         "ordinal": 21,
+        "name": "uses_scoring_grid",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "uses_scoring_grid"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
         "name": "blind_review",
         "type_info": "Bool",
         "origin": {
@@ -226,13 +237,13 @@
         }
       },
       {
-        "ordinal": 22,
+        "ordinal": 23,
         "name": "guidelines_url?",
         "type_info": "Text",
         "origin": "Expression"
       },
       {
-        "ordinal": 23,
+        "ordinal": 24,
         "name": "submission_next_steps",
         "type_info": "Jsonb",
         "origin": {
@@ -243,19 +254,19 @@
         }
       },
       {
-        "ordinal": 24,
+        "ordinal": 25,
         "name": "effective_deadline!",
         "type_info": "Timestamptz",
         "origin": "Expression"
       },
       {
-        "ordinal": 25,
+        "ordinal": 26,
         "name": "is_open!",
         "type_info": "Bool",
         "origin": "Expression"
       },
       {
-        "ordinal": 26,
+        "ordinal": 27,
         "name": "max_weighted_score!",
         "type_info": "Float8",
         "origin": "Expression"
@@ -287,6 +298,7 @@
       null,
       null,
       null,
+      true,
       false,
       false,
       null,
@@ -296,5 +308,5 @@
       null
     ]
   },
-  "hash": "34ee991368a75d765e2d0a889b2dd210e13241250e5a7345ad1f36ff9d9cf311"
+  "hash": "2a305d228ae3ca4402af2c90f00ae1bf8c8c5c46fef85027adc8a33a4e11e0dd"
 }

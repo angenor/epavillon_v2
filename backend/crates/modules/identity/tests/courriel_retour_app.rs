@@ -35,7 +35,7 @@ fn demande(client: ClientKind) -> RegisterRequest<'static> {
 async fn client_du_dernier_envoi(bac: &Bac, tache: &str) -> Option<String> {
     sqlx::query_scalar!(
         "SELECT payload ->> 'client' FROM platform.jobs
-          WHERE task = $1 ORDER BY created_at DESC LIMIT 1",
+          WHERE task = $1 ORDER BY created_at DESC, id DESC LIMIT 1",
         tache
     )
     .fetch_one(bac.base.pool())
@@ -60,7 +60,7 @@ async fn linscription_depuis_lapplication_retient_son_client() {
     // l'envoi du courriel et le clic.
     let sur_le_jeton = sqlx::query_scalar!(
         "SELECT payload ->> 'client' FROM identity.one_time_tokens
-          WHERE purpose = 'email_verification' ORDER BY created_at DESC LIMIT 1"
+          WHERE purpose = 'email_verification' ORDER BY created_at DESC, id DESC LIMIT 1"
     )
     .fetch_one(bac.base.pool())
     .await

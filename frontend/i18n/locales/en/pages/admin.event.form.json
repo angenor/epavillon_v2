@@ -81,6 +81,11 @@
     "in_person": "In person",
     "hybrid": "Hybrid"
   },
+  "modeHint": {
+    "online": "Submitters propose online activities.",
+    "in_person": "Submitters propose on-site activities: at least one representative present, other panellists may join online.",
+    "hybrid": "Submitters choose for each activity: on site or online."
+  },
   "localeTab": {
     "fr": "French",
     "en": "English",

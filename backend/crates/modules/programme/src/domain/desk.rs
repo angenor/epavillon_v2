@@ -154,7 +154,10 @@ pub struct FicheDEvaluation {
     pub transitions: Vec<LigneDeJournal>,
     pub history: Vec<EntreeDHistorique>,
 
+    /// Vide quand la grille de l'appel est éteinte.
     pub criteria: Vec<CritereAffiche>,
+    /// Faux : l'évaluation se fait par la seule note sur 20.
+    pub uses_scoring_grid: bool,
     pub max_weighted_score: f64,
     pub required_reviews: Option<i16>,
     pub blind_review: bool,

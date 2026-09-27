@@ -75,6 +75,7 @@
     "lastDay": "Dernier jour pour déposer",
     "action": "Déposer une proposition",
     "criteria": "Consulter les critères d'évaluation",
+    "edition": "Consulter la page de l'édition",
     "closed": {
       "title": "Aucun appel n'est ouvert en ce moment",
       "description": "Le prochain appel sera annoncé sur la page de l'édition concernée."

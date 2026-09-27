@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, call_id, code, label, description,\n                  max_score::float8 AS \"max_score!\", weight::float8 AS \"weight!\",\n                  is_knockout, sort_order\n             FROM event.review_criteria\n            WHERE call_id = $1\n            ORDER BY sort_order, code",
+  "query": "SELECT id, call_id, code, label, description,\n                      max_score::float8 AS \"max_score!\", weight::float8 AS \"weight!\",\n                      is_knockout, sort_order\n                 FROM event.review_criteria\n                WHERE call_id = $1\n                ORDER BY sort_order, code",
   "describe": {
     "columns": [
       {
@@ -110,5 +110,5 @@
       false
     ]
   },
-  "hash": "98ced24a8b768be627ee6e8a068b0e47e7ed4716073d20c43f60fda28b32782c"
+  "hash": "6f6435a1ced32d81fb4ee53509036f5bb8f40034e4cf2db7ac28bd4fd479484b"
 }

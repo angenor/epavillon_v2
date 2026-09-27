@@ -202,8 +202,10 @@ pub struct ReglesDeLAppel {
     /// terminer à l'heure de fermeture, pas après.
     pub daily_start_time: time::Time,
     pub daily_end_time: time::Time,
+    /// `event.activity_formats()` du mode de l'édition : l'appel n'a plus de formats propres.
     pub allowed_formats: Vec<String>,
-    pub required_reviews: i16,
+    pub required_reviews: Option<i16>,
+    pub uses_scoring_grid: bool,
     pub blind_review: bool,
     pub results_expected_at: Option<time::Date>,
 }
@@ -213,12 +215,15 @@ pub async fn regles_de_lappel<'e>(
     call_id: Uuid,
 ) -> Result<Option<ReglesDeLAppel>> {
     let ligne = sqlx::query!(
-        r#"SELECT id, event_id, min_speakers, max_speakers,
-                  min_duration_minutes, max_duration_minutes, default_duration_minutes,
-                  daily_start_time, daily_end_time,
-                  allowed_formats::text[] AS "allowed_formats!",
-                  required_reviews, blind_review, results_expected_at
-             FROM event.calls_for_proposals WHERE id = $1"#,
+        r#"SELECT c.id, c.event_id, c.min_speakers, c.max_speakers,
+                  c.min_duration_minutes, c.max_duration_minutes, c.default_duration_minutes,
+                  c.daily_start_time, c.daily_end_time,
+                  event.activity_formats(e.participation_mode)::text[] AS "allowed_formats!",
+                  c.required_reviews, c.uses_scoring_grid, c.blind_review,
+                  c.results_expected_at
+             FROM event.calls_for_proposals c
+             JOIN event.events e ON e.id = c.event_id
+            WHERE c.id = $1"#,
         call_id
     )
     .fetch_optional(executor)
@@ -236,6 +241,7 @@ pub async fn regles_de_lappel<'e>(
         daily_end_time: l.daily_end_time,
         allowed_formats: l.allowed_formats,
         required_reviews: l.required_reviews,
+        uses_scoring_grid: l.uses_scoring_grid,
         blind_review: l.blind_review,
         results_expected_at: l.results_expected_at,
     }))

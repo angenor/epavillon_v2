@@ -67,12 +67,8 @@ async fn enregistrer(
     acteur: Uuid,
     event_id: EventId,
     existant: Option<CallId>,
-    payload: EditionCallPayload,
+    mut payload: EditionCallPayload,
 ) -> Result<CallSaveResult> {
-    if let Some(refus) = refus_de_grille(&payload) {
-        return Ok(refus);
-    }
-
     let mut tx = state.db().write(ctx).await?;
 
     let avant = match existant {
@@ -80,20 +76,29 @@ async fn enregistrer(
         None => None,
     };
 
-    // **Le diff AVANT l'écriture de l'appel**, et le refus avec lui : un critère
-    // porteur de notes doit interdire l'enregistrement entier, pas seulement sa
-    // propre suppression.
-    let diff = match existant {
-        Some(id) => {
-            let existants = grille_existante(&mut tx, id).await?;
-            call::diff(&payload.criteria, &existants)
-        }
-        None => call::diff(&payload.criteria, &[]),
-    };
+    // Grille éteinte : on n'y touche pas, les critères saisis restent en base.
+    let diff = if payload.uses_scoring_grid {
+        let existants = match existant {
+            Some(id) => grille_existante(&mut tx, id).await?,
+            None => Vec::new(),
+        };
+        call::normaliser_codes(&mut payload.criteria, &existants);
 
-    if let Some(porteur) = diff.a_supprimer.iter().find(|c| c.score_count > 0) {
-        return Err(refus_de_critere_note(porteur));
-    }
+        if let Some(refus) = refus_de_grille(&payload) {
+            return Ok(refus);
+        }
+
+        // **Le diff AVANT l'écriture de l'appel**, et le refus avec lui : un
+        // critère porteur de notes doit interdire l'enregistrement entier, pas
+        // seulement sa propre suppression.
+        let diff = call::diff(&payload.criteria, &existants);
+        if let Some(porteur) = diff.a_supprimer.iter().find(|c| c.score_count > 0) {
+            return Err(refus_de_critere_note(porteur));
+        }
+        Some(diff)
+    } else {
+        None
+    };
 
     let call_id = match existant {
         None => match calls::inserer(&mut tx, event_id, &payload, acteur).await {
@@ -108,8 +113,10 @@ async fn enregistrer(
         },
     };
 
-    if let Err(e) = ecrire_la_grille(&mut tx, call_id, &payload, &diff).await {
-        return refus_de_base(e, &payload);
+    if let Some(diff) = &diff {
+        if let Err(e) = ecrire_la_grille(&mut tx, call_id, &payload, diff).await {
+            return refus_de_base(e, &payload);
+        }
     }
 
     annoncer(&mut tx, call_id, event_id, &payload, avant.as_ref()).await?;
@@ -122,7 +129,7 @@ async fn enregistrer(
         ok: true,
         call,
         errors: Vec::new(),
-        scores_affected: diff.scores_affected,
+        scores_affected: diff.is_some_and(|d| d.scores_affected),
     })
 }
 
@@ -174,7 +181,8 @@ async fn ecrire_la_grille(
 // Les refus que le service ajoute au modèle
 // -----------------------------------------------------------------------------
 
-/// Les deux règles de grille que la base ne porte pas.
+/// Les deux règles de grille que la base ne porte pas — **grille en usage
+/// seulement** : éteinte, une grille vide n'empêche aucune évaluation.
 ///
 /// **Une grille vide** n'est refusée par aucune contrainte : `review_criteria`
 /// n'a pas de cardinalité minimale, et elle ne doit pas en avoir — un appel
@@ -259,7 +267,10 @@ fn traduire(erreur: &sqlx::Error, payload: &EditionCallPayload) -> Option<Vec<Ca
             call::premier_code_en_double(&payload.criteria).unwrap_or(0),
         )]),
         Some("calls_for_proposals_code_check") => erreur_de_ligne(Required, "code"),
-        Some("review_criteria_code_check") => Some(vec![CallFormError::ligne(Required, 0)]),
+        Some("review_criteria_code_check") => Some(vec![CallFormError::ligne(
+            Required,
+            call::premier_code_invalide(&payload.criteria).unwrap_or(0),
+        )]),
         // **Une violation de DOMAINE ne nomme pas sa colonne** : le nom de
         // contrainte y est celui du domaine. Le nom de type, lui, est fiable.
         _ => erreur_de_ligne(Required, champ_du_domaine(erreur, payload)?),

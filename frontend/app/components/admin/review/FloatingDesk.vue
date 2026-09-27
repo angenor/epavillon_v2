@@ -19,6 +19,7 @@ import type { TabItem } from '~/types/ui'
 interface Props {
   referenceCode: string
   criteria: ReviewCriterion[]
+  usesScoringGrid: boolean
   maxWeightedScore: Numeric
   myReview: MyReview
   permissions: ReviewDeskPermissions
@@ -89,6 +90,7 @@ function onSave(payload: Omit<SaveReviewPayload, 'proposal_id'>): void {
     <AdminReviewScorePanel
       v-show="tab === 'mine'"
       :criteria="props.criteria"
+      :uses-scoring-grid="props.usesScoringGrid"
       :max-weighted-score="props.maxWeightedScore"
       :my-review="props.myReview"
       :permissions="props.permissions"
@@ -105,6 +107,7 @@ function onSave(payload: Omit<SaveReviewPayload, 'proposal_id'>): void {
       :peer-reviews="props.peerReviews"
       :committee="props.committee"
       :criteria="props.criteria"
+      :uses-scoring-grid="props.usesScoringGrid"
       :max-weighted-score="props.maxWeightedScore"
       :blind-veiled="props.blindVeiled"
       :veiled-count="props.veiledCount"

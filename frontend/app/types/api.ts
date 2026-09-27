@@ -3015,7 +3015,7 @@ export interface paths {
         };
         /**
          * L'appel à propositions d'une édition — **zéro ou un**.
-         * @description `PublicCall | null` — **zéro ou un, jamais un tableau** : `ux_calls_one_per_event` tient la cardinalité, et l'annulé est exclu. Zéro pour une COP sans pavillon, où l'IFDD n'envoie qu'un représentant. Porte sa GRILLE D'ÉVALUATION (`criteria`) : elle est publique par nature — une organisation qui prépare un dossier doit savoir sur quoi il sera jugé —, et la servir à part coûtait une seconde vague d'appels à la page qui l'affiche.
+         * @description `PublicCall | null` — **zéro ou un, jamais un tableau** : `ux_calls_one_per_event` tient la cardinalité, et l'annulé est exclu. Zéro pour une COP sans pavillon, où l'IFDD n'envoie qu'un représentant. Porte sa GRILLE D'ÉVALUATION (`criteria`) : elle est publique par nature — une organisation qui prépare un dossier doit savoir sur quoi il sera jugé —, et la servir à part coûtait une seconde vague d'appels à la page qui l'affiche. Vide quand la grille est éteinte (`uses_scoring_grid` faux). `allowed_formats` est le mode de participation de l'édition.
          */
         get: operations["appel_public"];
         put?: never;

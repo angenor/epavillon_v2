@@ -114,7 +114,7 @@ async fn aucune_ecriture_du_cycle_dadministration_ne_perd_son_auteur() {
         .expect("demande de lien");
     let jeton = sqlx::query_scalar!(
         "SELECT payload ->> 'token' FROM platform.jobs
-          WHERE task = 'identity.send_password_reset_email' ORDER BY created_at DESC LIMIT 1"
+          WHERE task = 'identity.send_password_reset_email' ORDER BY created_at DESC, id DESC LIMIT 1"
     )
     .fetch_one(bac.base.pool())
     .await

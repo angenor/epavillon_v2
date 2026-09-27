@@ -387,8 +387,8 @@ export type SubmitProposalResult =
       proposal_id: ProposalId
       reference_code: string
       submitted_at: IsoDateTime
-      /** Revues indépendantes attendues — `calls_for_proposals.required_reviews`. */
-      required_reviews: number
+      /** Revues visées — `calls_for_proposals.required_reviews` ; nul = aucun objectif. */
+      required_reviews: number | null
       /** Annonce des résultats — `calls_for_proposals.results_expected_at`. */
       results_expected_at: string | null
     }

@@ -607,6 +607,7 @@ function submit(): void {
         <UiSelect
           :model-value="form.participation_mode"
           :label="t('admin.event.form.fields.participationMode')"
+          :hint="t('admin.event.form.modeHint.' + form.participation_mode)"
           :options="modeOptions"
           required
           hide-optional

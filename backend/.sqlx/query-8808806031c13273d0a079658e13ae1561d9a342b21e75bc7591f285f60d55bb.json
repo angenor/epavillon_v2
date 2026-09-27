@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO event.calls_for_proposals\n               (event_id, code, title, status, opens_at, closes_at,\n                results_expected_at, required_reviews, blind_review)\n           VALUES ($1, 'principal',\n                   '{\"fr\":\"Appel à propositions\",\"en\":\"Call for proposals\"}'::jsonb,\n                   'open', now() - interval '1 day', now() + interval '30 days',\n                   date '2027-09-15', 2, true)\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8808806031c13273d0a079658e13ae1561d9a342b21e75bc7591f285f60d55bb"
+}

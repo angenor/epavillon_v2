@@ -299,7 +299,7 @@ export function resubmitProposal(payload: SaveDraftPayload): SubmitProposalResul
     proposal_id: proposalId,
     reference_code: stored.reference_code,
     submitted_at: now,
-    required_reviews: call?.required_reviews ?? 0,
+    required_reviews: call?.required_reviews ?? null,
     results_expected_at: call?.results_expected_at ?? null,
   }
 }

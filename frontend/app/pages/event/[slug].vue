@@ -95,6 +95,8 @@ const { data, status, error, refresh } = await useAsyncData(
       country: edition.country_name,
       call,
       criteria: call?.criteria ?? [],
+      // Grille éteinte : l'évaluation se fait sur 20, et le site n'en dit rien.
+      showCriteria: Boolean(call?.uses_scoring_grid && call.criteria.length > 0),
       // Seuls les fils PUBLIÉS sont montrés : `published_at` est ce qui ouvre la
       // page publique d'une journée spéciale, et une journée en préparation
       // n'engage pas encore l'IFDD.
@@ -170,7 +172,7 @@ useHead(() => ({
             :edition="data.edition"
             :tone="tone"
             :submit-to="localePath('proposal-form')"
-            criteria-href="#criteres"
+            :criteria-href="data.showCriteria ? '#criteres' : null"
           />
         </template>
       </EventHero>
@@ -206,7 +208,7 @@ useHead(() => ({
             :day-count="data.programmeDayCount"
           />
 
-          <EventCriteria :criteria="data.criteria" :call="data.call" />
+          <EventCriteria v-if="data.showCriteria" :criteria="data.criteria" :call="data.call" />
         </div>
       </div>
     </template>

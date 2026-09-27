@@ -76,8 +76,11 @@ pub struct EditionCallPayload {
     /// convertie : c'est l'heure d'ouverture d'un stand, pas un instant.
     pub daily_start_time: String,
     pub daily_end_time: String,
-    pub allowed_formats: Vec<String>,
-    pub required_reviews: i16,
+    #[serde(default)]
+    pub required_reviews: Option<i16>,
+    /// Éteinte, la grille existante est conservée telle quelle, jamais effacée.
+    #[serde(default = "grille_en_usage")]
+    pub uses_scoring_grid: bool,
     pub blind_review: bool,
     #[serde(default)]
     pub guidelines_url: Option<String>,
@@ -87,6 +90,10 @@ pub struct EditionCallPayload {
     pub submission_next_steps: Option<Value>,
     #[serde(default)]
     pub criteria: Vec<CriterionPayload>,
+}
+
+fn grille_en_usage() -> bool {
+    true
 }
 
 /// Contraintes nommées de `event.calls_for_proposals`, telles qu'elles refusent
@@ -279,6 +286,107 @@ pub fn premier_code_en_double(charge: &[CriterionPayload]) -> Option<usize> {
     None
 }
 
+// -----------------------------------------------------------------------------
+// Les codes de critère
+// -----------------------------------------------------------------------------
+
+const CODE_LONGUEUR_MAX: usize = 40;
+
+/// `^[a-z][a-z0-9_]*$` — la règle de `review_criteria_code_check`.
+pub fn code_valide(code: &str) -> bool {
+    let mut car = code.chars();
+    matches!(car.next(), Some('a'..='z')) && car.all(|c| matches!(c, 'a'..='z' | '0'..='9' | '_'))
+}
+
+/// Donne un code à toute ligne qui n'en a pas de valide : l'écran ne demande
+/// plus cet identifiant technique à l'administrateur.
+///
+/// Une ligne déjà enregistrée reprend son code en base — le diff se fait par
+/// code, et en dériver un nouveau du libellé la ferait supprimer puis recréer,
+/// notes comprises. Les autres le tirent de leur libellé, dédoublonné contre
+/// tous les codes de la charge.
+pub fn normaliser_codes(charge: &mut [CriterionPayload], existants: &[CritereExistant]) {
+    let code_en_base: HashMap<Uuid, &str> =
+        existants.iter().map(|c| (c.id, c.code.as_str())).collect();
+
+    for ligne in charge.iter_mut() {
+        if code_valide(&ligne.code) {
+            continue;
+        }
+        if let Some(code) = ligne.id.and_then(|id| code_en_base.get(&id)) {
+            ligne.code = (*code).to_owned();
+        }
+    }
+
+    let mut pris: std::collections::HashSet<String> = charge
+        .iter()
+        .filter(|l| code_valide(&l.code))
+        .map(|l| l.code.clone())
+        .collect();
+
+    for ligne in charge.iter_mut().filter(|l| !code_valide(&l.code)) {
+        let base = code_depuis_libelle(&ligne.label);
+        let mut code = base.clone();
+        let mut n = 2;
+        while pris.contains(&code) {
+            let suffixe = format!("_{n}");
+            let tronque = tronquer(&base, CODE_LONGUEUR_MAX - suffixe.len());
+            code = format!("{tronque}{suffixe}");
+            n += 1;
+        }
+        pris.insert(code.clone());
+        ligne.code = code;
+    }
+}
+
+/// Le rang de la première ligne dont le code viole `review_criteria_code_check`.
+pub fn premier_code_invalide(charge: &[CriterionPayload]) -> Option<usize> {
+    charge.iter().position(|l| !code_valide(&l.code))
+}
+
+fn code_depuis_libelle(label: &Value) -> String {
+    let texte = label
+        .get("fr")
+        .and_then(Value::as_str)
+        .filter(|t| !t.trim().is_empty())
+        .or_else(|| {
+            label
+                .as_object()?
+                .values()
+                .filter_map(Value::as_str)
+                .find(|t| !t.trim().is_empty())
+        })
+        .unwrap_or("");
+
+    let mut brut = String::with_capacity(texte.len());
+    for c in texte.chars().flat_map(char::to_lowercase) {
+        match kernel::texte::sans_accent(c) {
+            Some(s) => brut.push_str(s),
+            None if c.is_ascii_alphanumeric() => brut.push(c),
+            None => brut.push('_'),
+        }
+    }
+
+    let compacte = brut
+        .split('_')
+        .filter(|morceau| !morceau.is_empty())
+        .collect::<Vec<_>>()
+        .join("_");
+
+    let code = match compacte.chars().next() {
+        None => return "critere".to_owned(),
+        Some(c) if c.is_ascii_lowercase() => compacte,
+        Some(_) => format!("c_{compacte}"),
+    };
+
+    tronquer(&code, CODE_LONGUEUR_MAX)
+}
+
+/// Tout est ASCII à ce stade : couper à l'octet ne tranche aucun caractère.
+fn tronquer(code: &str, max: usize) -> String {
+    code[..code.len().min(max)].trim_end_matches('_').to_owned()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -375,5 +483,129 @@ mod tests {
     fn une_grille_sans_doublon_ne_designe_aucun_rang() {
         let charge = [critere("relevance", 5.0, 2.0), critere("impact", 5.0, 1.5)];
         assert_eq!(premier_code_en_double(&charge), None);
+    }
+
+    fn nouvelle(code: &str, libelle: Value) -> CriterionPayload {
+        CriterionPayload {
+            label: libelle,
+            ..critere(code, 5.0, 1.0)
+        }
+    }
+
+    fn codes(charge: &[CriterionPayload]) -> Vec<&str> {
+        charge.iter().map(|l| l.code.as_str()).collect()
+    }
+
+    #[test]
+    fn un_code_vide_se_derive_du_libelle_francais() {
+        let mut charge = [nouvelle(
+            "",
+            json!({ "fr": "Pertinence thématique & Impact", "en": "Relevance" }),
+        )];
+        normaliser_codes(&mut charge, &[]);
+        assert_eq!(codes(&charge), ["pertinence_thematique_impact"]);
+    }
+
+    #[test]
+    fn les_accents_tombent_et_la_casse_aussi() {
+        let mut charge = [nouvelle(
+            "",
+            json!({ "fr": "Qualité des intervenant·es — Façon Œuvre" }),
+        )];
+        normaliser_codes(&mut charge, &[]);
+        assert_eq!(codes(&charge), ["qualite_des_intervenant_es_facon_oeuvre"]);
+    }
+
+    #[test]
+    fn sans_francais_on_prend_la_premiere_langue_renseignee() {
+        let mut charge = [nouvelle("", json!({ "fr": "  ", "en": "Feasibility" }))];
+        normaliser_codes(&mut charge, &[]);
+        assert_eq!(codes(&charge), ["feasibility"]);
+    }
+
+    #[test]
+    fn un_libelle_qui_commence_par_un_chiffre_recoit_un_prefixe() {
+        let mut charge = [nouvelle("", json!({ "fr": "3 axes prioritaires" }))];
+        normaliser_codes(&mut charge, &[]);
+        assert_eq!(codes(&charge), ["c_3_axes_prioritaires"]);
+    }
+
+    #[test]
+    fn un_libelle_vide_donne_le_code_de_repli() {
+        let mut charge = [
+            nouvelle("", json!({ "fr": "!!!" })),
+            nouvelle("", json!({})),
+        ];
+        normaliser_codes(&mut charge, &[]);
+        assert_eq!(codes(&charge), ["critere", "critere_2"]);
+    }
+
+    #[test]
+    fn un_code_derive_ne_depasse_pas_quarante_caracteres() {
+        let long = "Un libellé extrêmement long qui décrit le critère en détail";
+        let mut charge = [
+            nouvelle("", json!({ "fr": long })),
+            nouvelle("", json!({ "fr": long })),
+        ];
+        normaliser_codes(&mut charge, &[]);
+        assert!(charge
+            .iter()
+            .all(|l| l.code.len() <= 40 && code_valide(&l.code)));
+        assert_ne!(charge[0].code, charge[1].code);
+        assert!(charge[1].code.ends_with("_2"));
+    }
+
+    #[test]
+    fn un_code_derive_evite_les_codes_deja_portes_par_la_charge() {
+        let mut charge = [
+            nouvelle("", json!({ "fr": "Impact" })),
+            nouvelle("impact", json!({ "fr": "Impact attendu" })),
+            nouvelle("", json!({ "fr": "Impact" })),
+        ];
+        normaliser_codes(&mut charge, &[]);
+        assert_eq!(codes(&charge), ["impact_2", "impact", "impact_3"]);
+    }
+
+    #[test]
+    fn un_code_invalide_est_remplace() {
+        let mut charge = [nouvelle("Pertinence!", json!({ "fr": "Pertinence" }))];
+        normaliser_codes(&mut charge, &[]);
+        assert_eq!(codes(&charge), ["pertinence"]);
+    }
+
+    #[test]
+    fn un_code_valide_est_garde_tel_quel() {
+        let mut charge = [nouvelle("relevance", json!({ "fr": "Pertinence" }))];
+        normaliser_codes(&mut charge, &[]);
+        assert_eq!(codes(&charge), ["relevance"]);
+    }
+
+    /// Sans cela, le diff par code supprimerait la ligne et en créerait une
+    /// autre — et un critère noté refuserait l'enregistrement entier.
+    #[test]
+    fn une_ligne_enregistree_sans_code_reprend_le_sien() {
+        let base = existant("relevance", 5.0, 2.0, 3);
+        let mut ligne = nouvelle("", json!({ "fr": "Pertinence renommée" }));
+        ligne.id = Some(base.id);
+        let mut charge = [ligne];
+        normaliser_codes(&mut charge, &[base]);
+        assert_eq!(codes(&charge), ["relevance"]);
+    }
+
+    #[test]
+    fn la_regle_du_code_suit_celle_de_la_base() {
+        assert!(code_valide("a"));
+        assert!(code_valide("impact_2"));
+        assert!(!code_valide(""));
+        assert!(!code_valide("_impact"));
+        assert!(!code_valide("2impact"));
+        assert!(!code_valide("Impact"));
+        assert!(!code_valide("impact-2"));
+    }
+
+    #[test]
+    fn le_premier_code_invalide_designe_son_rang() {
+        let charge = [critere("relevance", 5.0, 1.0), critere("", 5.0, 1.0)];
+        assert_eq!(premier_code_invalide(&charge), Some(1));
     }
 }

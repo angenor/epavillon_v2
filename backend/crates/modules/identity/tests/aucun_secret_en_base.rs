@@ -84,7 +84,7 @@ async fn ou_se_trouve(bac: &Bac, secret: &str) -> Vec<String> {
 async fn jeton_en_file(bac: &Bac, tache: &str) -> String {
     sqlx::query_scalar!(
         "SELECT payload ->> 'token' FROM platform.jobs
-          WHERE task = $1 ORDER BY created_at DESC LIMIT 1",
+          WHERE task = $1 ORDER BY created_at DESC, id DESC LIMIT 1",
         tache
     )
     .fetch_one(bac.base.pool())

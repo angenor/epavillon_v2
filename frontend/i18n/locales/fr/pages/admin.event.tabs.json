@@ -234,7 +234,7 @@
   },
   "callTab": {
     "title": "Appel à propositions",
-    "intro": "Une édition n'ouvre QU'UN SEUL appel — zéro s'il n'y a pas de pavillon. La grille de critères s'enregistre avec l'appel : un appel sans critère ne pourrait évaluer aucun dossier.",
+    "intro": "Une édition n'ouvre QU'UN SEUL appel — zéro s'il n'y a pas de pavillon. Le format des activités suit le mode de participation de l'édition.",
     "create": "Ouvrir un appel à propositions",
     "edit": "Modifier l'appel",
     "noPavilion": {
@@ -254,7 +254,9 @@
       "results": "Résultats annoncés pour le {date}",
       "proposals": "Aucun dossier déposé | {count} dossier déposé | {count} dossiers déposés",
       "maxScore": "Note maximale atteignable : {score}",
-      "reviews": "{count} revue indépendante exigée | {count} revue indépendante exigée | {count} revues indépendantes exigées",
+      "reviews": "{count} revue visée par dossier | {count} revue visée par dossier | {count} revues visées par dossier",
+      "reviewsNone": "Aucun objectif de revues",
+      "gridOff": "Sans grille de critères : note sur 20",
       "blind": "Évaluation en aveugle",
       "notBlind": "Notes des pairs visibles",
       "perOrganization": "Au plus {count} dossier par organisation | Au plus {count} dossier par organisation | Au plus {count} dossiers par organisation",
@@ -298,10 +300,12 @@
       "dailyStart": "Ouverture du pavillon",
       "dailyEnd": "Fermeture du pavillon",
       "dailyHint": "En heure locale de l'édition. Une proposition doit se TERMINER avant la fermeture — début et durée comprises.",
-      "allowedFormats": "Formats acceptés",
-      "requiredReviews": "Revues exigées avant décision",
+      "requiredReviews": "Revues visées par dossier",
+      "requiredReviewsHint": "Facultatif. Objectif d'avancement affiché au suivi des dossiers ; une activité peut être retenue sans aucune revue.",
       "blindReview": "Évaluation en aveugle",
       "blindReviewHint": "Un membre du comité ne voit les notes de ses pairs qu'après avoir soumis la sienne. Protège de l'effet d'ancrage.",
+      "usesScoringGrid": "Évaluer avec une grille de critères pondérés",
+      "usesScoringGridHint": "Désactivée, la grille n'apparaît ni sur le site public ni dans l'évaluation, qui se fait par une note sur 20. Les critères saisis sont conservés.",
       "guidelinesUrl": "Lien vers les consignes de dépôt",
       "nextStepsField": "Ce qui se passe après l'envoi",
       "nextStepsHint": "Montré au déposant juste avant l'envoi. Une étape par ligne ; laissé vide, le bloc n'apparaît pas.",
@@ -310,7 +314,6 @@
     "criteria": {
       "columns": {
         "label": "Critère",
-        "code": "Code",
         "maxScore": "Note max.",
         "weight": "Poids",
         "knockout": "Éliminatoire",

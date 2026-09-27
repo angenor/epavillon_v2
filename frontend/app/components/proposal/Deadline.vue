@@ -104,7 +104,7 @@ const isExpired = computed(() => Boolean(countdown.value?.expired))
         <dt class="text-text-subtle">{{ t('proposal.form.deadline.results') }}</dt>
         <dd class="text-text-secondary">{{ resultsLabel }}</dd>
       </div>
-      <div>
+      <div v-if="props.call.required_reviews !== null">
         <dt class="text-text-subtle">{{ t('proposal.form.deadline.reviews') }}</dt>
         <dd class="text-text-secondary">
           {{ t('proposal.form.deadline.reviewsValue', { count: props.call.required_reviews }, props.call.required_reviews) }}

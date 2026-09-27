@@ -108,7 +108,6 @@ const footerSections: { labelKey: string; items: NavItem[] }[] = [
     items: [
       { labelKey: 'nav.main.programme', to: '/programmations' },
       { labelKey: 'nav.main.call', to: '/#appel-a-propositions' },
-      { labelKey: 'nav.main.criteria', to: '/#criteres' },
     ],
   },
   {

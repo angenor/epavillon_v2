@@ -354,20 +354,22 @@ pub async fn canaux<'e>(
 /// l'appel autant de fois, pour les jeter ensuite.
 pub async fn appel(pool: &sqlx::PgPool, event_id: EventId) -> Result<Option<PublicCall>> {
     let ligne = sqlx::query!(
-        r#"SELECT id, event_id, code, title, description, status::text AS "status!",
-                  opens_at, closes_at, extended_until, results_expected_at,
-                  max_proposals_per_organization, requires_verified_organization,
-                  min_speakers, max_speakers,
-                  default_duration_minutes, min_duration_minutes, max_duration_minutes,
-                  daily_start_time::text AS "daily_start_time!",
-                  daily_end_time::text   AS "daily_end_time!",
-                  allowed_formats::text[] AS "allowed_formats!",
-                  required_reviews, blind_review,
-                  guidelines_url::text AS "guidelines_url?",
-                  submission_next_steps,
-                  created_by, created_at, updated_at
-             FROM event.calls_for_proposals
-            WHERE event_id = $1 AND status <> 'cancelled'"#,
+        r#"SELECT c.id, c.event_id, c.code, c.title, c.description,
+                  c.status::text AS "status!",
+                  c.opens_at, c.closes_at, c.extended_until, c.results_expected_at,
+                  c.max_proposals_per_organization, c.requires_verified_organization,
+                  c.min_speakers, c.max_speakers,
+                  c.default_duration_minutes, c.min_duration_minutes, c.max_duration_minutes,
+                  c.daily_start_time::text AS "daily_start_time!",
+                  c.daily_end_time::text   AS "daily_end_time!",
+                  event.activity_formats(e.participation_mode)::text[] AS "allowed_formats!",
+                  c.required_reviews, c.uses_scoring_grid, c.blind_review,
+                  c.guidelines_url::text AS "guidelines_url?",
+                  c.submission_next_steps,
+                  c.created_by, c.created_at, c.updated_at
+             FROM event.calls_for_proposals c
+             JOIN event.events e ON e.id = c.event_id
+            WHERE c.event_id = $1 AND c.status <> 'cancelled'"#,
         event_id.as_uuid()
     )
     .fetch_optional(pool)
@@ -375,18 +377,23 @@ pub async fn appel(pool: &sqlx::PgPool, event_id: EventId) -> Result<Option<Publ
 
     let Some(l) = ligne else { return Ok(None) };
 
-    let criteria = sqlx::query_as!(
-        PublicCriterion,
-        r#"SELECT id, call_id, code, label, description,
-                  max_score::float8 AS "max_score!", weight::float8 AS "weight!",
-                  is_knockout, sort_order
-             FROM event.review_criteria
-            WHERE call_id = $1
-            ORDER BY sort_order, code"#,
-        l.id
-    )
-    .fetch_all(pool)
-    .await?;
+    // Grille éteinte : ses critères restent en base mais ne jugent plus rien.
+    let criteria = if l.uses_scoring_grid {
+        sqlx::query_as!(
+            PublicCriterion,
+            r#"SELECT id, call_id, code, label, description,
+                      max_score::float8 AS "max_score!", weight::float8 AS "weight!",
+                      is_knockout, sort_order
+                 FROM event.review_criteria
+                WHERE call_id = $1
+                ORDER BY sort_order, code"#,
+            l.id
+        )
+        .fetch_all(pool)
+        .await?
+    } else {
+        Vec::new()
+    };
 
     Ok(Some(PublicCall {
         id: l.id,
@@ -410,6 +417,7 @@ pub async fn appel(pool: &sqlx::PgPool, event_id: EventId) -> Result<Option<Publ
         daily_end_time: l.daily_end_time,
         allowed_formats: l.allowed_formats,
         required_reviews: l.required_reviews,
+        uses_scoring_grid: l.uses_scoring_grid,
         blind_review: l.blind_review,
         guidelines_url: l.guidelines_url,
         submission_next_steps: l.submission_next_steps,

@@ -112,15 +112,21 @@ pub async fn ouvrir(
     let anteriors = cross::anteriors_affiches(&mut *tx, &ids_organisations).await?;
 
     // ---- La grille, et l'affectation du lecteur -----------------------------
+    let uses_scoring_grid = call.as_ref().is_some_and(|c| c.uses_scoring_grid);
     let (criteria, max_weighted_score, required_reviews, blind_review) = match proposal.call_id {
         Some(id) => (
-            cross::grille_de_lappel(&mut *tx, id)
-                .await?
-                .into_iter()
-                .map(|c| CritereAffiche::depuis(c, id))
-                .collect(),
+            // Éteinte, la grille reste en base mais ne s'offre plus à la notation.
+            if uses_scoring_grid {
+                cross::grille_de_lappel(&mut *tx, id)
+                    .await?
+                    .into_iter()
+                    .map(|c| CritereAffiche::depuis(c, id))
+                    .collect()
+            } else {
+                Vec::new()
+            },
             cross::note_pondere_maximale(&mut *tx, id).await?,
-            call.as_ref().map(|c| c.required_reviews),
+            call.as_ref().and_then(|c| c.required_reviews),
             call.as_ref().is_some_and(|c| c.blind_review),
         ),
         // Un dossier hors appel n'a ni grille ni aveugle : l'IFDD l'a créé
@@ -213,6 +219,7 @@ pub async fn ouvrir(
         transitions: journal,
         history,
         criteria,
+        uses_scoring_grid,
         max_weighted_score,
         required_reviews,
         blind_review,

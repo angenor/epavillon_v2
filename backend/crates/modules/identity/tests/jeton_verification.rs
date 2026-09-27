@@ -37,7 +37,7 @@ async fn inscrire(bac: &Bac, email: &str) -> String {
     sqlx::query_scalar!(
         "SELECT payload ->> 'token' FROM platform.jobs
           WHERE task = 'identity.send_verification_email'
-          ORDER BY created_at DESC LIMIT 1"
+          ORDER BY created_at DESC, id DESC LIMIT 1"
     )
     .fetch_one(bac.base.pool())
     .await
@@ -194,7 +194,7 @@ async fn un_lien_plus_recent_invalide_le_precedent() {
     let nouveau = sqlx::query_scalar!(
         "SELECT payload ->> 'token' FROM platform.jobs
           WHERE task = 'identity.send_verification_email'
-          ORDER BY created_at DESC LIMIT 1"
+          ORDER BY created_at DESC, id DESC LIMIT 1"
     )
     .fetch_one(bac.base.pool())
     .await

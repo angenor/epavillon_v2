@@ -85,7 +85,7 @@ pub async fn ecran(
             cross::echeance_effective(state.pool(), call_id).await?,
             cross::regles_de_lappel(state.pool(), call_id)
                 .await?
-                .map(|r| r.required_reviews),
+                .and_then(|r| r.required_reviews),
         ),
         None => (None, None),
     };

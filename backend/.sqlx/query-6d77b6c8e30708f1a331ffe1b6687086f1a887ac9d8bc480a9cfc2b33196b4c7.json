@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT c.id, c.event_id, c.code, c.title, c.description,\n                  c.status::text AS \"status!\",\n                  c.opens_at, c.closes_at, c.extended_until, c.results_expected_at,\n                  c.max_proposals_per_organization, c.requires_verified_organization,\n                  c.min_speakers, c.max_speakers,\n                  c.default_duration_minutes, c.min_duration_minutes, c.max_duration_minutes,\n                  c.daily_start_time::text AS \"daily_start_time!\",\n                  c.daily_end_time::text   AS \"daily_end_time!\",\n                  c.allowed_formats::text[] AS \"allowed_formats!\",\n                  c.required_reviews, c.blind_review,\n                  c.guidelines_url::text AS \"guidelines_url?\",\n                  c.submission_next_steps,\n                  event.effective_deadline(c.id)  AS \"effective_deadline!\",\n                  event.is_call_open(c.id)        AS \"is_open!\",\n                  event.max_weighted_score(c.id)::float8 AS \"max_weighted_score!\"\n             FROM event.calls_for_proposals c\n            WHERE c.id = $1",
+  "query": "SELECT c.id, c.event_id, c.code, c.title, c.description,\n                  c.status::text AS \"status!\",\n                  c.opens_at, c.closes_at, c.extended_until, c.results_expected_at,\n                  c.max_proposals_per_organization, c.requires_verified_organization,\n                  c.min_speakers, c.max_speakers,\n                  c.default_duration_minutes, c.min_duration_minutes, c.max_duration_minutes,\n                  c.daily_start_time::text AS \"daily_start_time!\",\n                  c.daily_end_time::text   AS \"daily_end_time!\",\n                  event.activity_formats(e.participation_mode)::text[] AS \"allowed_formats!\",\n                  c.required_reviews, c.uses_scoring_grid, c.blind_review,\n                  c.guidelines_url::text AS \"guidelines_url?\",\n                  c.submission_next_steps,\n                  event.effective_deadline(c.id)  AS \"effective_deadline!\",\n                  event.is_call_open(c.id)        AS \"is_open!\",\n                  event.max_weighted_score(c.id)::float8 AS \"max_weighted_score!\"\n             FROM event.calls_for_proposals c\n             JOIN event.events e ON e.id = c.event_id\n            WHERE c.event_id = $1 AND c.status <> 'cancelled'",
   "describe": {
     "columns": [
       {
@@ -216,6 +216,17 @@
       },
       {
         "ordinal": 21,
+        "name": "uses_scoring_grid",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "uses_scoring_grid"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
         "name": "blind_review",
         "type_info": "Bool",
         "origin": {
@@ -226,13 +237,13 @@
         }
       },
       {
-        "ordinal": 22,
+        "ordinal": 23,
         "name": "guidelines_url?",
         "type_info": "Text",
         "origin": "Expression"
       },
       {
-        "ordinal": 23,
+        "ordinal": 24,
         "name": "submission_next_steps",
         "type_info": "Jsonb",
         "origin": {
@@ -243,19 +254,19 @@
         }
       },
       {
-        "ordinal": 24,
+        "ordinal": 25,
         "name": "effective_deadline!",
         "type_info": "Timestamptz",
         "origin": "Expression"
       },
       {
-        "ordinal": 25,
+        "ordinal": 26,
         "name": "is_open!",
         "type_info": "Bool",
         "origin": "Expression"
       },
       {
-        "ordinal": 26,
+        "ordinal": 27,
         "name": "max_weighted_score!",
         "type_info": "Float8",
         "origin": "Expression"
@@ -287,6 +298,7 @@
       null,
       null,
       null,
+      true,
       false,
       false,
       null,
@@ -296,5 +308,5 @@
       null
     ]
   },
-  "hash": "83a7969fc4fd0b565749996877666df44ea59a2f331d50730ecee14171f5abf7"
+  "hash": "6d77b6c8e30708f1a331ffe1b6687086f1a887ac9d8bc480a9cfc2b33196b4c7"
 }

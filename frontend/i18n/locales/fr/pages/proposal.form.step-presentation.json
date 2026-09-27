@@ -33,7 +33,7 @@
     "detailed_presentationRequired": "La présentation détaillée est obligatoire."
   },
   "warnings": {
-    "expected_outcomesMissing": "Les résultats attendus pèsent dans la note du comité : le critère « impact » porte dessus.",
+    "expected_outcomesMissing": "Les résultats attendus pèsent dans la note du comité : un dossier qui ne dit pas ce qu'il produit se juge mal.",
     "target_audienceMissing": "Préciser les publics visés aide le comité à situer l'activité et à composer les journées thématiques."
   }
 }

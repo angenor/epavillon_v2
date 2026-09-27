@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT c.id, c.event_id, c.code,\n                  c.title AS \"title!: Value\", c.description AS \"description?: Value\",\n                  c.status::text AS \"status!\",\n                  c.opens_at, c.closes_at, c.extended_until, c.results_expected_at,\n                  c.max_proposals_per_organization, c.requires_verified_organization,\n                  c.min_speakers, c.max_speakers,\n                  c.default_duration_minutes, c.min_duration_minutes, c.max_duration_minutes,\n                  c.daily_start_time::text AS \"daily_start_time!\",\n                  c.daily_end_time::text   AS \"daily_end_time!\",\n                  c.allowed_formats::text[] AS \"allowed_formats!\",\n                  c.required_reviews, c.blind_review,\n                  c.guidelines_url::text AS \"guidelines_url?\",\n                  c.created_by, c.created_at, c.updated_at\n             FROM event.calls_for_proposals c\n            WHERE c.event_id = $1\n            ORDER BY c.opens_at\n            LIMIT 1",
+  "query": "SELECT c.id, c.event_id, c.code,\n                  c.title AS \"title!: Value\", c.description AS \"description?: Value\",\n                  c.status::text AS \"status!\",\n                  c.opens_at, c.closes_at, c.extended_until, c.results_expected_at,\n                  c.max_proposals_per_organization, c.requires_verified_organization,\n                  c.min_speakers, c.max_speakers,\n                  c.default_duration_minutes, c.min_duration_minutes, c.max_duration_minutes,\n                  c.daily_start_time::text AS \"daily_start_time!\",\n                  c.daily_end_time::text   AS \"daily_end_time!\",\n                  event.activity_formats(e.participation_mode)::text[] AS \"allowed_formats!\",\n                  c.required_reviews, c.uses_scoring_grid, c.blind_review,\n                  c.guidelines_url::text AS \"guidelines_url?\",\n                  c.created_by, c.created_at, c.updated_at\n             FROM event.calls_for_proposals c\n             JOIN event.events e ON e.id = c.event_id\n            WHERE c.event_id = $1\n            ORDER BY c.opens_at\n            LIMIT 1",
   "describe": {
     "columns": [
       {
@@ -216,6 +216,17 @@
       },
       {
         "ordinal": 21,
+        "name": "uses_scoring_grid",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "uses_scoring_grid"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
         "name": "blind_review",
         "type_info": "Bool",
         "origin": {
@@ -226,13 +237,13 @@
         }
       },
       {
-        "ordinal": 22,
+        "ordinal": 23,
         "name": "guidelines_url?",
         "type_info": "Text",
         "origin": "Expression"
       },
       {
-        "ordinal": 23,
+        "ordinal": 24,
         "name": "created_by",
         "type_info": "Uuid",
         "origin": {
@@ -243,7 +254,7 @@
         }
       },
       {
-        "ordinal": 24,
+        "ordinal": 25,
         "name": "created_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -254,7 +265,7 @@
         }
       },
       {
-        "ordinal": 25,
+        "ordinal": 26,
         "name": "updated_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -291,6 +302,7 @@
       null,
       null,
       null,
+      true,
       false,
       false,
       null,
@@ -299,5 +311,5 @@
       false
     ]
   },
-  "hash": "e07fd5067daa944f3b7585669e6295811bfe3f9b3065223114b8ff9f78213067"
+  "hash": "dac5e740592f79bf1d9f52061a92687941d2cf0d5b83c6e00d0ab25659961589"
 }

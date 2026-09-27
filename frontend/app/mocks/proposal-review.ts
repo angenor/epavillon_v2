@@ -294,11 +294,13 @@ export function reviewDesk(proposalId: Uuid, personId: Uuid | null): ReviewDeskS
   // liste : les deux écrans partagent le même tampon.
   const proposal = { ...base, status: sessionProposalStatus(proposalId) ?? base.status }
   const call = callsForProposals.find((entry) => entry.id === proposal.call_id) ?? null
-  const criteria = call
+  const grid = call
     ? reviewCriteria
         .filter((criterion) => criterion.call_id === call.id)
         .sort((a, b) => a.sort_order - b.sort_order)
     : []
+  // Grille éteinte : l'écran ne la reçoit plus, mais ses notes passées comptent encore.
+  const criteria = call?.uses_scoring_grid ? grid : []
 
   const now = Date.now()
   const assignments = assignmentsOf(proposalId)
@@ -450,7 +452,7 @@ export function reviewDesk(proposalId: Uuid, personId: Uuid | null): ReviewDeskS
    */
   const touched = [...sessionReviews.keys()].some((key) => key.startsWith(`${proposalId}:`))
   const scored = touched
-    ? refreshedAggregates(proposalReviews, criteria)
+    ? refreshedAggregates(proposalReviews, grid)
     : {
         average_score: proposal.average_score,
         weighted_score: proposal.weighted_score,
@@ -471,6 +473,7 @@ export function reviewDesk(proposalId: Uuid, personId: Uuid | null): ReviewDeskS
       .sort((a, b) => a.occurred_at.localeCompare(b.occurred_at)),
     history: proposalHistory(proposalId),
     criteria,
+    uses_scoring_grid: call?.uses_scoring_grid ?? false,
     max_weighted_score: call ? maxWeightedScoreOf(call.id) : 0,
     required_reviews: call?.required_reviews ?? null,
     blind_review: blindReview,
@@ -531,6 +534,9 @@ export function saveReview(
   // changement de pondération.
   // Une note rapide ne porte aucune note par critère : la base les efface.
   const quick = payload.mode === 'quick'
+  if (!quick && call !== null && !call.uses_scoring_grid) {
+    throw new Error("La grille de critères n'est pas en usage sur cet appel : notez sur 20.")
+  }
   if (quick && payload.submit && payload.score_out_of_20 === null) {
     throw new Error('Une note rapide ne se dépose pas sans note sur 20.')
   }

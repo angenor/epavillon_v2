@@ -591,7 +591,10 @@ export function useApi() {
         call(`/events/${eventId}/call`, (m) => {
           const found = m.callsForProposals.find((c) => c.event_id === eventId)
           if (!found) return null
-          return { ...found, criteria: m.reviewCriteria.filter((c) => c.call_id === found.id) }
+          const criteria = found.uses_scoring_grid
+            ? m.reviewCriteria.filter((c) => c.call_id === found.id)
+            : []
+          return { ...found, criteria }
         }),
     },
 

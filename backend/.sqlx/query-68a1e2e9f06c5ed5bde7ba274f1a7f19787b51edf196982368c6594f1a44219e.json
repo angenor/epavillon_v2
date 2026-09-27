@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE event.calls_for_proposals SET uses_scoring_grid = false WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "68a1e2e9f06c5ed5bde7ba274f1a7f19787b51edf196982368c6594f1a44219e"
+}

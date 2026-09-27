@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, event_id, min_speakers, max_speakers,\n                  min_duration_minutes, max_duration_minutes, default_duration_minutes,\n                  daily_start_time, daily_end_time,\n                  allowed_formats::text[] AS \"allowed_formats!\",\n                  required_reviews, blind_review, results_expected_at\n             FROM event.calls_for_proposals WHERE id = $1",
+  "query": "SELECT c.id, c.event_id, c.min_speakers, c.max_speakers,\n                  c.min_duration_minutes, c.max_duration_minutes, c.default_duration_minutes,\n                  c.daily_start_time, c.daily_end_time,\n                  event.activity_formats(e.participation_mode)::text[] AS \"allowed_formats!\",\n                  c.required_reviews, c.uses_scoring_grid, c.blind_review,\n                  c.results_expected_at\n             FROM event.calls_for_proposals c\n             JOIN event.events e ON e.id = c.event_id\n            WHERE c.id = $1",
   "describe": {
     "columns": [
       {
@@ -121,6 +121,17 @@
       },
       {
         "ordinal": 11,
+        "name": "uses_scoring_grid",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "uses_scoring_grid"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
         "name": "blind_review",
         "type_info": "Bool",
         "origin": {
@@ -131,7 +142,7 @@
         }
       },
       {
-        "ordinal": 12,
+        "ordinal": 13,
         "name": "results_expected_at",
         "type_info": "Date",
         "origin": {
@@ -158,10 +169,11 @@
       false,
       false,
       null,
+      true,
       false,
       false,
       true
     ]
   },
-  "hash": "22753a18b19739e673ca3e330805e8295144e8a44f63c01414d6844f1eed98b1"
+  "hash": "0dfc1558d7604a41ae1a3552d279ea58fae143c590f5382c6f4eb29af303bf3f"
 }

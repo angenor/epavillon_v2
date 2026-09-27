@@ -187,11 +187,11 @@ pub async fn appel_ouvert(bac: &Bac, event_id: Uuid) -> Uuid {
     let call_id = sqlx::query_scalar!(
         r#"INSERT INTO event.calls_for_proposals
                (event_id, code, title, status, opens_at, closes_at,
-                results_expected_at, required_reviews, blind_review, allowed_formats)
+                results_expected_at, required_reviews, blind_review)
            VALUES ($1, 'principal',
                    '{"fr":"Appel à propositions","en":"Call for proposals"}'::jsonb,
                    'open', now() - interval '1 day', now() + interval '30 days',
-                   date '2027-09-15', 2, true, '{online,in_person,hybrid}')
+                   date '2027-09-15', 2, true)
         RETURNING id"#,
         event_id
     )
@@ -424,7 +424,7 @@ pub fn brouillon(terrain: &Terrain, titre: &str) -> ProposalDraft {
         target_audiences: vec!["Ministères".to_owned()],
         theme_codes: vec!["adaptation".to_owned()],
         category_codes: vec!["results_sharing".to_owned()],
-        format: Some("hybrid".to_owned()),
+        format: Some("in_person".to_owned()),
         language_codes: vec!["fr".to_owned()],
         country_id: None,
         speakers: Vec::new(),

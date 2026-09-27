@@ -25,9 +25,9 @@ import type {
 import type { CallForProposals } from '~/types/event/call'
 import type { Uuid } from '~/types/shared'
 import { ApiRequestError } from '~/utils/api-error'
-import { DEFAULT_SUBMISSION_NEXT_STEPS } from '../calls'
+import { activityFormats, DEFAULT_SUBMISSION_NEXT_STEPS } from '../calls'
 import { seedDefaultCriteria } from '../criteria'
-import { calls, criteria, newId, reviewers } from './core'
+import { calls, criteria, editions, newId, reviewers } from './core'
 import { committeeOfCall, criterionRows, editionCall } from './detail'
 
 function validateCall(payload: EditionCallPayload): CallFormError[] {
@@ -71,9 +71,9 @@ function validateCall(payload: EditionCallPayload): CallFormError[] {
     push('code_taken', 'code')
   }
 
-  // Une grille vide n'évalue rien : `refresh_proposal_score()` ne pourrait poser
-  // aucune note, et le comité se retrouverait devant une fiche sans critère.
-  if (payload.criteria.length === 0) push('criteria_empty', 'criteria')
+  // Une grille en usage mais vide n'évalue rien : le comité se retrouverait devant
+  // une fiche sans critère. Éteinte, l'évaluation se fait sur 20 et s'en passe.
+  if (payload.uses_scoring_grid && payload.criteria.length === 0) push('criteria_empty', 'criteria')
 
   const seen = new Set<string>()
   payload.criteria.forEach((criterion, index) => {
@@ -130,8 +130,11 @@ export function saveCall(payload: EditionCallPayload, actorId: Uuid | null): Cal
       max_duration_minutes: 150,
       daily_start_time: '09:00:00',
       daily_end_time: '17:00:00',
-      allowed_formats: ['online', 'in_person', 'hybrid'],
-      required_reviews: 2,
+      allowed_formats: activityFormats(
+        editions.find((e) => e.id === payload.event_id)?.participation_mode ?? 'in_person',
+      ),
+      required_reviews: null,
+      uses_scoring_grid: true,
       blind_review: true,
       guidelines_url: null,
       submission_next_steps: null,
@@ -158,8 +161,8 @@ export function saveCall(payload: EditionCallPayload, actorId: Uuid | null): Cal
     max_duration_minutes: payload.max_duration_minutes,
     daily_start_time: payload.daily_start_time,
     daily_end_time: payload.daily_end_time,
-    allowed_formats: payload.allowed_formats,
     required_reviews: payload.required_reviews,
+    uses_scoring_grid: payload.uses_scoring_grid,
     blind_review: payload.blind_review,
     guidelines_url: payload.guidelines_url,
     submission_next_steps: payload.submission_next_steps ?? (existing ? null : DEFAULT_SUBMISSION_NEXT_STEPS),

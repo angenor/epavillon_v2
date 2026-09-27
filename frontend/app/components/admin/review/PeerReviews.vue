@@ -28,6 +28,8 @@ interface Props {
   peerReviews: PeerReview[]
   committee: CommitteeMemberProgress[]
   criteria: ReviewCriterion[]
+  /** Faux : grille éteinte, une revue détaillée d'avant se lit par sa seule note sur 20. */
+  usesScoringGrid: boolean
   maxWeightedScore: Numeric
   blindVeiled: boolean
   veiledCount: number
@@ -42,6 +44,11 @@ const { tr } = useI18nText()
 const { date } = useDateTime()
 
 const criterionById = computed(() => new Map(props.criteria.map((criterion) => [criterion.id, criterion])))
+
+/** Les notes dont le critère est encore servi — aucune quand la grille est éteinte. */
+function knownScores(entry: PeerReview): PeerReview['scores'] {
+  return entry.scores.filter((score) => criterionById.value.has(score.criterion_id))
+}
 
 /** Un seul détail ouvert à la fois : six critères par revue, trois revues. */
 const openDetail = ref<Uuid | null>(null)
@@ -89,20 +96,22 @@ const missing = computed(() => reviewsMissing(props.committee, props.requiredRev
               :intent="recommendationIntent(entry.review.recommendation)"
               :label="t(`admin.proposal.review.panel.recommendationValue.${entry.review.recommendation}`)"
             />
-            <UiBadge
-              v-if="entry.review.mode === 'quick'"
-              size="sm"
-              intent="neutral"
-              :label="t('admin.proposal.review.mode.quick')"
-            />
-            <span v-else class="text-sm text-text-subtle">
-              {{
-                t('admin.proposal.review.peers.weighted', {
-                  score: entry.review.weighted_score ?? '—',
-                  max: props.maxWeightedScore,
-                })
-              }}
-            </span>
+            <template v-if="props.usesScoringGrid">
+              <UiBadge
+                v-if="entry.review.mode === 'quick'"
+                size="sm"
+                intent="neutral"
+                :label="t('admin.proposal.review.mode.quick')"
+              />
+              <span v-else class="text-sm text-text-subtle">
+                {{
+                  t('admin.proposal.review.peers.weighted', {
+                    score: entry.review.weighted_score ?? '—',
+                    max: props.maxWeightedScore,
+                  })
+                }}
+              </span>
+            </template>
             <time v-if="entry.review.submitted_at" :datetime="entry.review.submitted_at" class="text-sm text-text-subtle">
               {{
                 t('admin.proposal.review.peers.submittedAt', {
@@ -131,7 +140,7 @@ const missing = computed(() => reviewsMissing(props.committee, props.requiredRev
                note surprend — rarement —, et le déplier d'office ferait de ce
                panneau six blocs de six lignes. -->
           <UiButton
-            v-if="entry.scores.length > 0"
+            v-if="knownScores(entry).length > 0"
             variant="ghost"
             size="sm"
             class="mt-2"
@@ -147,7 +156,7 @@ const missing = computed(() => reviewsMissing(props.committee, props.requiredRev
           </UiButton>
 
           <ul v-if="openDetail === entry.review.id" class="mt-2 flex flex-col divide-y divide-border-subtle text-sm">
-            <li v-for="score in entry.scores" :key="score.criterion_id" class="py-2">
+            <li v-for="score in knownScores(entry)" :key="score.criterion_id" class="py-2">
               <p class="flex items-baseline justify-between gap-3">
                 <span class="text-text-secondary">
                   {{ tr(criterionById.get(score.criterion_id)?.label) }}

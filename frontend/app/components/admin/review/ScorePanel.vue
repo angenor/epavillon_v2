@@ -35,6 +35,8 @@ import type { CriterionId, Numeric, TimeZoneName } from '~/types/shared'
 
 interface Props {
   criteria: ReviewCriterion[]
+  /** Faux : la grille est éteinte sur cet appel, on note sur 20 et rien d'autre. */
+  usesScoringGrid: boolean
   maxWeightedScore: Numeric
   myReview: MyReview
   permissions: ReviewDeskPermissions
@@ -73,6 +75,8 @@ const mode = ref<ReviewMode>(props.myReview.review?.mode ?? 'quick')
 onMounted(() => {
   if (!props.myReview.review) mode.value = rememberedMode()
 })
+// L'API refuse une revue détaillée quand la grille est éteinte.
+const activeMode = computed<ReviewMode>(() => (props.usesScoringGrid ? mode.value : 'quick'))
 
 function setMode(value: string): void {
   mode.value = value === 'detailed' ? 'detailed' : 'quick'
@@ -87,10 +91,11 @@ function setMode(value: string): void {
 const quickScore = ref<number | null>(quickScoreOf(props.myReview))
 const generalComment = ref(props.myReview.review?.comment ?? '')
 
+/** Grille éteinte, une revue détaillée d'avant l'extinction prête sa note globale. */
 function quickScoreOf(mine: MyReview): number | null {
-  return mine.review?.mode === 'quick' && mine.review.score_out_of_20 !== null
-    ? Number(mine.review.score_out_of_20)
-    : null
+  const review = mine.review
+  if (!review || review.score_out_of_20 === null) return null
+  return review.mode === 'quick' || !props.usesScoringGrid ? Number(review.score_out_of_20) : null
 }
 
 const scores = ref<Record<CriterionId, Numeric>>({ ...props.myReview.scores })
@@ -235,6 +240,7 @@ function save(submit: boolean): void {
       <UiAlert v-if="props.error" intent="danger" live :message="props.error" />
 
       <UiRadio
+        v-if="props.usesScoringGrid"
         :model-value="mode"
         :label="t('admin.proposal.review.mode.label')"
         :options="modeOptions"
@@ -243,7 +249,7 @@ function save(submit: boolean): void {
         @update:model-value="setMode"
       />
 
-      <template v-if="mode === 'quick'">
+      <template v-if="activeMode === 'quick'">
         <AdminReviewQuickScore
           :model-value="quickScore"
           :disabled="props.busy"

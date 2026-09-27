@@ -49,11 +49,12 @@ pub async fn appel(conn: &mut PgConnection, event_id: Uuid) -> Result<Option<Cal
                   c.default_duration_minutes, c.min_duration_minutes, c.max_duration_minutes,
                   c.daily_start_time::text AS "daily_start_time!",
                   c.daily_end_time::text   AS "daily_end_time!",
-                  c.allowed_formats::text[] AS "allowed_formats!",
-                  c.required_reviews, c.blind_review,
+                  event.activity_formats(e.participation_mode)::text[] AS "allowed_formats!",
+                  c.required_reviews, c.uses_scoring_grid, c.blind_review,
                   c.guidelines_url::text AS "guidelines_url?",
                   c.created_by, c.created_at, c.updated_at
              FROM event.calls_for_proposals c
+             JOIN event.events e ON e.id = c.event_id
             WHERE c.event_id = $1
             ORDER BY c.opens_at
             LIMIT 1"#,

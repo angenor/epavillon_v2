@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, event_id, code, title, description, status::text AS \"status!\",\n                  opens_at, closes_at, extended_until,\n                  results_expected_at::text AS \"results_expected_at_texte\",\n                  max_proposals_per_organization, requires_verified_organization,\n                  min_speakers, max_speakers, default_duration_minutes,\n                  min_duration_minutes, max_duration_minutes,\n                  daily_start_time::text AS \"daily_start_time!\",\n                  daily_end_time::text AS \"daily_end_time!\",\n                  allowed_formats::text[] AS \"allowed_formats!\",\n                  required_reviews, blind_review,\n                  guidelines_url::text, submission_next_steps, created_by, created_at, updated_at\n             FROM event.calls_for_proposals WHERE id = $1",
+  "query": "SELECT c.id, c.event_id, c.code, c.title, c.description,\n                  c.status::text AS \"status!\",\n                  c.opens_at, c.closes_at, c.extended_until,\n                  c.results_expected_at::text AS \"results_expected_at_texte\",\n                  c.max_proposals_per_organization, c.requires_verified_organization,\n                  c.min_speakers, c.max_speakers, c.default_duration_minutes,\n                  c.min_duration_minutes, c.max_duration_minutes,\n                  c.daily_start_time::text AS \"daily_start_time!\",\n                  c.daily_end_time::text AS \"daily_end_time!\",\n                  event.activity_formats(e.participation_mode)::text[] AS \"allowed_formats!\",\n                  c.required_reviews, c.uses_scoring_grid, c.blind_review,\n                  c.guidelines_url::text, c.submission_next_steps,\n                  c.created_by, c.created_at, c.updated_at\n             FROM event.calls_for_proposals c\n             JOIN event.events e ON e.id = c.event_id\n            WHERE c.id = $1",
   "describe": {
     "columns": [
       {
@@ -211,6 +211,17 @@
       },
       {
         "ordinal": 21,
+        "name": "uses_scoring_grid",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "event.calls_for_proposals",
+            "name": "uses_scoring_grid"
+          }
+        }
+      },
+      {
+        "ordinal": 22,
         "name": "blind_review",
         "type_info": "Bool",
         "origin": {
@@ -221,13 +232,13 @@
         }
       },
       {
-        "ordinal": 22,
+        "ordinal": 23,
         "name": "guidelines_url",
         "type_info": "Text",
         "origin": "Expression"
       },
       {
-        "ordinal": 23,
+        "ordinal": 24,
         "name": "submission_next_steps",
         "type_info": "Jsonb",
         "origin": {
@@ -238,7 +249,7 @@
         }
       },
       {
-        "ordinal": 24,
+        "ordinal": 25,
         "name": "created_by",
         "type_info": "Uuid",
         "origin": {
@@ -249,7 +260,7 @@
         }
       },
       {
-        "ordinal": 25,
+        "ordinal": 26,
         "name": "created_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -260,7 +271,7 @@
         }
       },
       {
-        "ordinal": 26,
+        "ordinal": 27,
         "name": "updated_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -297,6 +308,7 @@
       null,
       null,
       null,
+      true,
       false,
       false,
       null,
@@ -306,5 +318,5 @@
       false
     ]
   },
-  "hash": "9efe29b218a41c0adaf335215f5ba7fb0a9604274b383fb5d67fbfeaf0869fe0"
+  "hash": "889ed8e496a199fb0dce845ca82743dfdef992f76adac08ef7cd495589144932"
 }

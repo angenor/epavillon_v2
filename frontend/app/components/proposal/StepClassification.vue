@@ -19,9 +19,9 @@ import type { SelectOption } from '~/types/ui'
  * THÉMATIQUES ET CATÉGORIES SONT OBLIGATOIRES, une au moins de chaque, et
  * toutes deux à choix multiple (15/09).
  *
- * LES FORMATS PROPOSÉS SONT CEUX DE L'APPEL (`calls_for_proposals.allowed_formats`),
- * pas les trois valeurs de l'ENUM. Un appel qui n'en ouvre qu'un — le présentiel,
- * par défaut depuis le 15/09 — l'affiche sans rien faire choisir.
+ * LES FORMATS DÉCOULENT DU MODE DE L'ÉDITION (27/09), servis sous
+ * `call.allowed_formats` : hybride fait choisir entre présentiel et en ligne ;
+ * présentiel ou en ligne ne laisse qu'une valeur, affichée et posée d'office.
  *
  * TROIS THÉMATIQUES SUFFISENT. Le guide de style l'impose côté affichage — au-delà
  * de trois pastilles, une carte cesse d'informer — et c'est aussi vrai du fond :
@@ -77,7 +77,7 @@ const themeCount = computed(() => draft.value.theme_codes.length)
 // Format, langues
 // ---------------------------------------------------------------------------
 
-/** Les formats OUVERTS PAR L'APPEL, dans l'ordre de l'ENUM. */
+/** Les formats que permet le mode de l'édition. */
 const formatOptions = computed<SelectOption[]>(() =>
   props.call.allowed_formats.map((mode) => ({
     value: mode,
@@ -212,6 +212,9 @@ function toggleLanguage(code: string, selected: boolean): void {
         </p>
         <p class="text-sm text-text">
           {{ t(`proposal.form.step-classification.formats.${onlyFormat}.label`) }}
+        </p>
+        <p class="mt-0.5 text-sm text-text-muted">
+          {{ t(`proposal.form.step-classification.formats.${onlyFormat}.hint`) }}
         </p>
       </div>
 

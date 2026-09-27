@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT payload ->> 'token' FROM platform.jobs\n          WHERE task = 'identity.send_password_reset_email' ORDER BY created_at DESC LIMIT 1",
+  "query": "SELECT payload ->> 'client' FROM identity.one_time_tokens\n          WHERE purpose = 'email_verification' ORDER BY created_at DESC, id DESC LIMIT 1",
   "describe": {
     "columns": [
       {
@@ -17,5 +17,5 @@
       null
     ]
   },
-  "hash": "0c4d6c2d759745d3b2ec2fa617a557f4de1b65dc7caf7c3209db9ebff777eb64"
+  "hash": "e2df034180535aa88311f112062fa4e0b9f17ab58fceb47e1ffc5320ecd4ca49"
 }

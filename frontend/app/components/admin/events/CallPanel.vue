@@ -6,7 +6,6 @@ import type {
   EditionDetail,
 } from '~/types/admin-events'
 import type { CallStatus } from '~/types/event/call'
-import type { ParticipationMode } from '~/types/event/edition'
 import type { SelectOption } from '~/types/ui'
 
 /**
@@ -22,10 +21,12 @@ import type { SelectOption } from '~/types/ui'
  *
  * ── L'APPEL ET SA GRILLE S'ENREGISTRENT ENSEMBLE ────────────────────────────
  *
- * Un appel sans critère ne peut recevoir aucune évaluation :
- * `refresh_proposal_score()` n'aurait rien à pondérer, et le comité se retrouverait
- * devant une fiche vide. Deux enregistrements distincts laisseraient exister cet
- * état le temps d'un oubli, d'où un seul formulaire et un seul envoi.
+ * Un seul formulaire, un seul envoi. La grille est FACULTATIVE (27/09) : éteinte,
+ * elle disparaît du site public et l'évaluation se fait par la note sur 20 ; les
+ * critères saisis sont conservés pour le jour où on la rallume.
+ *
+ * Le format des activités n'est pas demandé ici : c'est le mode de participation
+ * de l'édition, déjà saisi sur sa fiche.
  *
  * ── CE QUI SE DIT AVANT D'ÊTRE FAIT ─────────────────────────────────────────
  *
@@ -64,7 +65,6 @@ const timezone = computed(() => edition.value.timezone)
 const zoneCity = computed(() => edition.value.city ?? timeZoneCityLabel(timezone.value))
 
 const STATUSES: CallStatus[] = ['draft', 'open', 'closed', 'under_review', 'published', 'cancelled']
-const MODES: ParticipationMode[] = ['in_person', 'hybrid', 'online']
 
 const statusOptions = computed<SelectOption[]>(() =>
   STATUSES.map((status) => ({
@@ -92,7 +92,6 @@ function openForm(): void {
   draft.value = current
     ? {
         ...current,
-        allowed_formats: [...current.allowed_formats],
         criteria: current.criteria.map((c) => ({ ...c })),
       }
     : {
@@ -117,9 +116,9 @@ function openForm(): void {
         max_duration_minutes: 150,
         daily_start_time: '09:00:00',
         daily_end_time: '17:00:00',
-        allowed_formats: ['in_person', 'hybrid', 'online'],
-        required_reviews: 2,
+        required_reviews: null,
         blind_review: true,
+        uses_scoring_grid: true,
         guidelines_url: null,
         submission_next_steps: null,
         // La grille par défaut du MODÈLE, lue et non recopiée : six lignes vides
@@ -150,15 +149,6 @@ function setDailyTime(key: 'daily_start_time' | 'daily_end_time', value: string)
 
 function dailyValue(value: string): string {
   return value.slice(0, 5)
-}
-
-function toggleFormat(mode: ParticipationMode, on: boolean): void {
-  if (!draft.value) return
-  const set = new Set(draft.value.allowed_formats)
-  if (on) set.add(mode)
-  else set.delete(mode)
-  // Au moins un format : un appel qui n'accepte rien ne peut recevoir aucun dossier.
-  draft.value.allowed_formats = set.size > 0 ? MODES.filter((m) => set.has(m)) : [mode]
 }
 
 // ---------------------------------------------------------------------------
@@ -225,6 +215,10 @@ const globalErrors = computed(() =>
 
 function submit(): void {
   if (draft.value) emit('save', { ...draft.value })
+}
+
+function setRequiredReviews(value: string): void {
+  if (draft.value) draft.value.required_reviews = value === '' ? null : Number(value)
 }
 
 /** Fermer le formulaire quand l'appel a effectivement changé et qu'aucune erreur ne reste. */
@@ -386,12 +380,20 @@ watch(
               {{ t('admin.event.tabs.callTab.form.sections.review') }}
             </dt>
             <dd class="mt-0.5 text-sm text-text">
-              {{ t('admin.event.tabs.callTab.summary.reviews', call.required_reviews) }}
+              {{
+                call.required_reviews
+                  ? t('admin.event.tabs.callTab.summary.reviews', call.required_reviews)
+                  : t('admin.event.tabs.callTab.summary.reviewsNone')
+              }}
             </dd>
             <dd class="text-sm text-text-muted">
-              {{ t('admin.event.tabs.callTab.summary.maxScore', {
-                score: call.max_weighted_score.toLocaleString('fr-FR'),
-              }) }}
+              {{
+                call.uses_scoring_grid
+                  ? t('admin.event.tabs.callTab.summary.maxScore', {
+                    score: call.max_weighted_score.toLocaleString('fr-FR'),
+                  })
+                  : t('admin.event.tabs.callTab.summary.gridOff')
+              }}
             </dd>
             <dd class="text-sm text-text-muted">
               {{ t('admin.event.tabs.callTab.summary.proposals', call.proposal_count) }}
@@ -421,7 +423,7 @@ watch(
       </UiCard>
 
       <!-- LA GRILLE, EN LECTURE ------------------------------------------------>
-      <UiCard :title="t('admin.event.tabs.callTab.form.sections.criteria')">
+      <UiCard v-if="call.uses_scoring_grid" :title="t('admin.event.tabs.callTab.form.sections.criteria')">
         <ul class="divide-y divide-border">
           <li
             v-for="criterion in call.criteria"
@@ -617,21 +619,6 @@ watch(
           :label="t('admin.event.tabs.callTab.form.requiresVerified')"
           @update:model-value="(next: boolean) => (draft!.requires_verified_organization = next)"
         />
-
-        <fieldset class="mt-4">
-          <legend class="mb-2 text-sm font-bold text-text">
-            {{ t('admin.event.tabs.callTab.form.allowedFormats') }}
-          </legend>
-          <div class="flex flex-wrap gap-4">
-            <UiCheckbox
-              v-for="mode in MODES"
-              :key="mode"
-              :model-value="draft.allowed_formats.includes(mode)"
-              :label="t('admin.event.form.mode.' + mode)"
-              @update:model-value="(next: boolean) => toggleFormat(mode, next)"
-            />
-          </div>
-        </fieldset>
       </fieldset>
 
       <fieldset class="rounded-lg border border-border bg-surface-raised p-5" :disabled="props.busy">
@@ -707,11 +694,12 @@ watch(
 
         <div class="mt-3 space-y-4">
           <UiInput
-            :model-value="draft.required_reviews"
+            :model-value="draft.required_reviews ?? ''"
             type="number"
-            :min="0"
+            :min="1"
             :label="t('admin.event.tabs.callTab.form.requiredReviews')"
-            @update:model-value="(next: string) => (draft!.required_reviews = Number(next))"
+            :hint="t('admin.event.tabs.callTab.form.requiredReviewsHint')"
+            @update:model-value="setRequiredReviews"
           />
           <UiSwitch
             :model-value="draft.blind_review"
@@ -728,101 +716,105 @@ watch(
           {{ t('admin.event.tabs.callTab.form.sections.criteria') }}
         </legend>
 
-        <p class="mb-4 max-w-(--measure) text-sm text-text-muted">
-          {{ t('admin.event.tabs.callTab.criteria.knockoutHint') }}
-        </p>
+        <UiSwitch
+          class="mt-3"
+          :model-value="draft.uses_scoring_grid"
+          :label="t('admin.event.tabs.callTab.form.usesScoringGrid')"
+          :hint="t('admin.event.tabs.callTab.form.usesScoringGridHint')"
+          @update:model-value="(next: boolean) => (draft!.uses_scoring_grid = next)"
+        />
 
-        <p v-if="draft.criteria.length === 0" class="rounded-md border border-danger-border bg-danger-surface p-3 text-sm text-danger">
-          {{ t('admin.event.tabs.callTab.criteria.empty') }}
-        </p>
+        <template v-if="draft.uses_scoring_grid">
+          <p class="my-4 max-w-(--measure) text-sm text-text-muted">
+            {{ t('admin.event.tabs.callTab.criteria.knockoutHint') }}
+          </p>
 
-        <ul v-else class="space-y-4">
-          <li
-            v-for="(criterion, index) in draft.criteria"
-            :key="criterion.id ?? `new-${index}`"
-            class="rounded-md border border-border p-4"
-          >
-            <div class="space-y-4">
-              <AdminEventsI18nField
-                :model-value="criterion.label"
-                :label="t('admin.event.tabs.callTab.criteria.columns.label')"
-                :error="criterionError(index)"
-                required
-                @update:model-value="(next) => (criterion.label = next ?? { fr: '' })"
-              />
+          <p v-if="draft.criteria.length === 0" class="rounded-md border border-danger-border bg-danger-surface p-3 text-sm text-danger">
+            {{ t('admin.event.tabs.callTab.criteria.empty') }}
+          </p>
 
-              <div class="grid gap-4 sm:grid-cols-4">
-                <UiInput
-                  :model-value="criterion.code"
-                  :label="t('admin.event.tabs.callTab.criteria.columns.code')"
+          <ul v-else class="space-y-4">
+            <li
+              v-for="(criterion, index) in draft.criteria"
+              :key="criterion.id ?? `new-${index}`"
+              class="rounded-md border border-border p-4"
+            >
+              <div class="space-y-4">
+                <AdminEventsI18nField
+                  :model-value="criterion.label"
+                  :label="t('admin.event.tabs.callTab.criteria.columns.label')"
+                  :error="criterionError(index)"
                   required
-                  @update:model-value="(next: string) => (criterion.code = next)"
+                  @update:model-value="(next) => (criterion.label = next ?? { fr: '' })"
                 />
-                <UiInput
-                  :model-value="criterion.max_score"
-                  type="number"
-                  :min="0.5"
-                  step="0.5"
-                  :label="t('admin.event.tabs.callTab.criteria.columns.maxScore')"
-                  @update:model-value="(next: string) => (criterion.max_score = Number(next))"
-                />
-                <UiInput
-                  :model-value="criterion.weight"
-                  type="number"
-                  :min="0.5"
-                  step="0.5"
-                  :label="t('admin.event.tabs.callTab.criteria.columns.weight')"
-                  @update:model-value="(next: string) => (criterion.weight = Number(next))"
-                />
-                <div class="flex items-end">
-                  <UiCheckbox
-                    :model-value="criterion.is_knockout"
-                    :label="t('admin.event.tabs.callTab.criteria.columns.knockout')"
-                    @update:model-value="(next: boolean) => (criterion.is_knockout = next)"
+
+                <div class="grid gap-4 sm:grid-cols-3">
+                  <UiInput
+                    :model-value="criterion.max_score"
+                    type="number"
+                    :min="0.5"
+                    step="0.5"
+                    :label="t('admin.event.tabs.callTab.criteria.columns.maxScore')"
+                    @update:model-value="(next: string) => (criterion.max_score = Number(next))"
                   />
+                  <UiInput
+                    :model-value="criterion.weight"
+                    type="number"
+                    :min="0.5"
+                    step="0.5"
+                    :label="t('admin.event.tabs.callTab.criteria.columns.weight')"
+                    @update:model-value="(next: string) => (criterion.weight = Number(next))"
+                  />
+                  <div class="flex items-end">
+                    <UiCheckbox
+                      :model-value="criterion.is_knockout"
+                      :label="t('admin.event.tabs.callTab.criteria.columns.knockout')"
+                      @update:model-value="(next: boolean) => (criterion.is_knockout = next)"
+                    />
+                  </div>
+                </div>
+
+                <!-- UN CRITÈRE DÉJÀ NOTÉ : le dire avant, pas après. -->
+                <UiAlert
+                  v-if="criterion.score_count > 0"
+                  intent="warning"
+                  compact
+                  :message="t('admin.event.tabs.callTab.criteria.scoredWarning')"
+                />
+
+                <div class="flex justify-end">
+                  <!-- UN CRITÈRE NOTÉ NE SE RETIRE PLUS : la clé est
+                       `ON DELETE CASCADE` et la base effacerait sans un mot
+                       l'argumentaire des évaluations rendues. L'API refuse en 422 ;
+                       le bouton s'éteint avant, plutôt que de laisser tenter. -->
+                  <UiButton
+                    variant="ghost"
+                    size="sm"
+                    icon="trash"
+                    :disabled="criterion.score_count > 0"
+                    @click="removeCriterion(index)"
+                  >
+                    {{ t('admin.event.tabs.callTab.criteria.remove') }}
+                  </UiButton>
                 </div>
               </div>
+            </li>
+          </ul>
 
-              <!-- UN CRITÈRE DÉJÀ NOTÉ : le dire avant, pas après. -->
-              <UiAlert
-                v-if="criterion.score_count > 0"
-                intent="warning"
-                compact
-                :message="t('admin.event.tabs.callTab.criteria.scoredWarning')"
-              />
-
-              <div class="flex justify-end">
-                <!-- UN CRITÈRE NOTÉ NE SE RETIRE PLUS : la clé est
-                     `ON DELETE CASCADE` et la base effacerait sans un mot
-                     l'argumentaire des évaluations rendues. L'API refuse en 422 ;
-                     le bouton s'éteint avant, plutôt que de laisser tenter. -->
-                <UiButton
-                  variant="ghost"
-                  size="sm"
-                  icon="trash"
-                  :disabled="criterion.score_count > 0"
-                  @click="removeCriterion(index)"
-                >
-                  {{ t('admin.event.tabs.callTab.criteria.remove') }}
-                </UiButton>
-              </div>
-            </div>
-          </li>
-        </ul>
-
-        <div class="mt-4 flex flex-wrap items-center gap-3 border-t border-border pt-4">
-          <UiButton variant="secondary" size="sm" icon="plus" @click="addCriterion">
-            {{ t('admin.event.tabs.callTab.criteria.add') }}
-          </UiButton>
-          <UiButton variant="ghost" size="sm" icon="refresh" @click="loadDefaultGrid">
-            {{ t('admin.event.tabs.callTab.criteria.loadDefault') }}
-          </UiButton>
-          <p class="ml-auto text-sm font-semibold text-text">
-            {{ t('admin.event.tabs.callTab.criteria.maxWeighted', {
-              score: draftMaxScore.toLocaleString('fr-FR'),
-            }) }}
-          </p>
-        </div>
+          <div class="mt-4 flex flex-wrap items-center gap-3 border-t border-border pt-4">
+            <UiButton variant="secondary" size="sm" icon="plus" @click="addCriterion">
+              {{ t('admin.event.tabs.callTab.criteria.add') }}
+            </UiButton>
+            <UiButton variant="ghost" size="sm" icon="refresh" @click="loadDefaultGrid">
+              {{ t('admin.event.tabs.callTab.criteria.loadDefault') }}
+            </UiButton>
+            <p class="ml-auto text-sm font-semibold text-text">
+              {{ t('admin.event.tabs.callTab.criteria.maxWeighted', {
+                score: draftMaxScore.toLocaleString('fr-FR'),
+              }) }}
+            </p>
+          </div>
+        </template>
       </fieldset>
 
       <div class="flex flex-wrap gap-3">

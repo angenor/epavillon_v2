@@ -111,29 +111,13 @@ fn liste(metadata: &Value, cle: &str) -> Vec<String> {
 pub fn normaliser(texte: &str) -> String {
     let mut sortie = String::with_capacity(texte.len());
     for c in texte.chars().flat_map(char::to_lowercase) {
-        match sans_accent(c) {
+        match kernel::texte::sans_accent(c) {
             Some(s) => sortie.push_str(s),
             None if c.is_alphanumeric() => sortie.push(c),
             None => sortie.push(' '),
         }
     }
     sortie.split_whitespace().collect::<Vec<_>>().join(" ")
-}
-
-fn sans_accent(c: char) -> Option<&'static str> {
-    Some(match c {
-        'à' | 'á' | 'â' | 'ã' | 'ä' | 'å' => "a",
-        'ç' => "c",
-        'è' | 'é' | 'ê' | 'ë' => "e",
-        'ì' | 'í' | 'î' | 'ï' => "i",
-        'ñ' => "n",
-        'ò' | 'ó' | 'ô' | 'õ' | 'ö' => "o",
-        'ù' | 'ú' | 'û' | 'ü' => "u",
-        'ý' | 'ÿ' => "y",
-        'œ' => "oe",
-        'æ' => "ae",
-        _ => return None,
-    })
 }
 
 /// En mots entiers : « eig » n'est pas dans « sovereign », ni « ldc » dans

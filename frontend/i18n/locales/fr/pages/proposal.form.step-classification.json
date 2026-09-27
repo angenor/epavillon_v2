@@ -15,11 +15,11 @@
   "formats": {
     "in_person": {
       "label": "En présentiel",
-      "hint": "Au pavillon, sans diffusion prévue"
+      "hint": "Au moins un représentant au pavillon ; les autres panélistes peuvent intervenir en ligne."
     },
     "online": {
       "label": "En ligne",
-      "hint": "Sans présence physique au pavillon"
+      "hint": "Tous les intervenants participent à distance."
     },
     "hybrid": {
       "label": "Hybride",

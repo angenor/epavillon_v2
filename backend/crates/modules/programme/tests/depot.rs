@@ -81,7 +81,7 @@ async fn le_parcours_nominal_garde_le_meme_numero() {
             // l'insertion, pas au dépôt.
             assert_eq!(reference_code, premier.reference_code);
             // Lus sur l'appel, jamais inventés.
-            assert_eq!(required_reviews, 2);
+            assert_eq!(required_reviews, Some(2));
             assert_eq!(results_expected_at.as_deref(), Some("2027-09-15"));
         }
         autre => panic!("attendu submitted, reçu {autre:?}"),
@@ -418,19 +418,17 @@ async fn la_plage_horaire_quotidienne_est_refusee_fin_comprise() {
 }
 
 #[tokio::test]
-async fn un_format_hors_de_ceux_de_lappel_est_refuse() {
+async fn un_format_autre_que_celui_de_ledition_est_refuse() {
     let bac = Bac::monter().await;
     let terrain = commun::terrain(&bac).await;
 
     sqlx::query!(
-        "UPDATE event.calls_for_proposals
-            SET allowed_formats = ARRAY['online']::event.participation_mode[]
-          WHERE id = $1",
-        terrain.appel
+        "UPDATE event.events SET participation_mode = 'online' WHERE id = $1",
+        terrain.edition
     )
     .execute(bac.pool())
     .await
-    .expect("l'appel n'accepte plus que le distanciel");
+    .expect("l'édition se tient désormais en ligne");
 
     let mut presentiel = complet(&terrain, "En présentiel");
     presentiel.format = Some("in_person".to_owned());
@@ -443,6 +441,38 @@ async fn un_format_hors_de_ceux_de_lappel_est_refuse() {
     )
     .await
     .expect_err("un cycle de webinaires ne reçoit pas de séance en présentiel");
+
+    assert_eq!(refus.field.as_deref(), Some("format"));
+}
+
+#[tokio::test]
+async fn une_edition_hybride_fait_choisir_entre_presentiel_et_en_ligne() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+
+    for format in ["in_person", "online"] {
+        let mut brouillon = complet(&terrain, &format!("Format {format}"));
+        brouillon.format = Some(format.to_owned());
+        draft_write::enregistrer(
+            &bac.state,
+            &bac.ctx(),
+            terrain.deposante,
+            commun::charge(&terrain, brouillon),
+        )
+        .await
+        .unwrap_or_else(|e| panic!("{format} admis sur une édition hybride : {e:?}"));
+    }
+
+    let mut hybride = complet(&terrain, "Format hybride");
+    hybride.format = Some("hybrid".to_owned());
+    let refus = draft_write::enregistrer(
+        &bac.state,
+        &bac.ctx(),
+        terrain.deposante,
+        commun::charge(&terrain, hybride),
+    )
+    .await
+    .expect_err("une activité n'est pas hybride : présentiel ou en ligne");
 
     assert_eq!(refus.field.as_deref(), Some("format"));
 }

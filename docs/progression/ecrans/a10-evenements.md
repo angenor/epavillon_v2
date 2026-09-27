@@ -115,3 +115,14 @@ Trois demandes du commanditaire sur le formulaire d'édition (création et modif
 **Vérifié** : `make check-front` ; au navigateur en données d'exemple, création et modification — recherche « belem » → Belém, remplissage Brésil/Belém puis Sénégal/Dakar, ville modifiée à la main conservée, « Aucun résultat », reprise et abandon du brouillon après rechargement, brouillon effacé après enregistrement.
 **Non vérifié** contre l'API réelle, ni à 375 px.
 
+
+## 27/09 — onglet « Appel à propositions » : trois demandes du commanditaire
+
+- **« Formats acceptés » retiré** : les formats d'activité se déduisent du mode de participation de l'édition, déjà saisi sur sa fiche, par `event.activity_formats()` — **hybride → le déposant choisit présentiel ou en ligne ; présentiel → présentiel seul** (au moins un représentant sur place, les autres panélistes peuvent intervenir en ligne) **; en ligne → en ligne seul**. Une activité n'est plus jamais « hybride ». Colonne `calls_for_proposals.allowed_formats` supprimée ; les lectures exposent toujours `allowed_formats`. La fiche d'édition dit sous le mode ce que verront les déposants ; l'aide des formats au dépôt est réécrite.
+- **« Revues visées par dossier »** (ex-« Revues exigées avant décision ») : facultatif, vide par défaut (`required_reviews` nullable, sans défaut). Ce n'était déjà pas un préalable à la décision (16/09) ; le libellé le laissait croire.
+- **Grille de critères pondérés facultative** : interrupteur `uses_scoring_grid`. Éteinte, la grille n'apparaît ni sur la page publique de l'édition (section et bouton « Voir les critères »), ni dans l'espace organisation, ni à l'évaluation — note sur 20 seule, l'API refuse une revue `detailed` (422 sur `mode`). Les critères saisis restent en base.
+- **Bug « Critère : ce champ est obligatoire »** alors que le libellé était rempli : la base refusait le **code** vide d'un critère ajouté, et l'erreur était rendue sur la ligne 0, sous le libellé. Le champ Code disparaît du formulaire ; l'API dérive le code du libellé (`normaliser_codes`, crate `event`) et une ligne déjà enregistrée garde le sien.
+- `sans_accent` déplacé dans `kernel::texte` (il était recopié entre `negotiation` et `event`).
+
+**Vérifié** : schéma rechargé dans une base jetable ; migration `ops/migrations/2026-09-27-appel-grille-facultative.sql` appliquée à l'ancien modèle → schéma `event` identique au nouveau ; `cargo clippy --workspace -D warnings`, `cargo test --workspace`, `make sqlx-prepare` et `make openapi` sur la base jetable ; `nuxi typecheck` à 0, `test:site` 8/8.
+Base locale migrée le 27/09 ; `make check-safe` vert. **Non vérifié** au navigateur. **Production à migrer** avec le même script.

@@ -33,7 +33,7 @@
     "detailed_presentationRequired": "The detailed presentation is required."
   },
   "warnings": {
-    "expected_outcomesMissing": "Expected outcomes weigh in the committee's score: the “impact” criterion is about them.",
+    "expected_outcomesMissing": "Expected outcomes weigh in the committee's score: a submission that does not say what it will produce is hard to assess.",
     "target_audienceMissing": "Stating the target audiences helps the committee place the activity and build thematic days."
   }
 }

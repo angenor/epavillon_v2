@@ -411,6 +411,7 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
         <AdminReviewFloatingDesk
           :reference-code="screen.proposal.reference_code"
           :criteria="screen.criteria"
+          :uses-scoring-grid="screen.uses_scoring_grid"
           :max-weighted-score="screen.max_weighted_score"
           :my-review="screen.my_review"
           :permissions="screen.permissions"

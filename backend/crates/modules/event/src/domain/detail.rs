@@ -194,8 +194,11 @@ pub struct EditionCall {
     /// l'heure.
     pub daily_start_time: String,
     pub daily_end_time: String,
+    /// Le mode de participation de l'édition, seul format accepté.
     pub allowed_formats: Vec<String>,
-    pub required_reviews: i16,
+    /// Objectif d'avancement, jamais un préalable à la décision. Nul : aucun.
+    pub required_reviews: Option<i16>,
+    pub uses_scoring_grid: bool,
     pub blind_review: bool,
     pub guidelines_url: Option<String>,
     pub submission_next_steps: Option<Value>,

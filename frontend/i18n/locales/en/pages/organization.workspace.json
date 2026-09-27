@@ -75,6 +75,7 @@
     "lastDay": "Last day to submit",
     "action": "Submit a proposal",
     "criteria": "Read the review criteria",
+    "edition": "View the edition page",
     "closed": {
       "title": "No call is open at the moment",
       "description": "The next call will be announced on the page of the edition concerned."

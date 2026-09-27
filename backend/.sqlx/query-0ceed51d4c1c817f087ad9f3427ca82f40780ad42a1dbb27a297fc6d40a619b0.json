@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE event.calls_for_proposals SET\n               code                           = $2,\n               title                          = $3::jsonb,\n               description                    = $4::jsonb,\n               status                         = $5::text::event.call_status,\n               opens_at                       = $6,\n               closes_at                      = $7,\n               extended_until                 = $8,\n               results_expected_at            = $9,\n               max_proposals_per_organization = $10,\n               requires_verified_organization = $11,\n               min_speakers                   = $12,\n               max_speakers                   = $13,\n               default_duration_minutes       = $14,\n               min_duration_minutes           = $15,\n               max_duration_minutes           = $16,\n               daily_start_time               = $17::text::time,\n               daily_end_time                 = $18::text::time,\n               uses_scoring_grid              = $19,\n               required_reviews               = $20,\n               blind_review                   = $21,\n               guidelines_url                 = $22::text::platform.url,\n               submission_next_steps          = $23::jsonb\n         WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Jsonb",
+        "Jsonb",
+        "Text",
+        "Timestamptz",
+        "Timestamptz",
+        "Timestamptz",
+        "Date",
+        "Int2",
+        "Bool",
+        "Int2",
+        "Int2",
+        "Int2",
+        "Int2",
+        "Int2",
+        "Text",
+        "Text",
+        "Bool",
+        "Int2",
+        "Bool",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0ceed51d4c1c817f087ad9f3427ca82f40780ad42a1dbb27a297fc6d40a619b0"
+}

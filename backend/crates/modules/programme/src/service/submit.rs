@@ -52,8 +52,9 @@ pub enum ResultatDeDepot {
         reference_code: String,
         #[serde(with = "time::serde::rfc3339")]
         submitted_at: OffsetDateTime,
-        /// Revues indépendantes attendues — **lu sur l'appel**.
-        required_reviews: i16,
+        /// Revues indépendantes attendues — **lu sur l'appel**. Nul : aucun
+        /// objectif fixé.
+        required_reviews: Option<i16>,
         /// Annonce des résultats — **lue sur l'appel**.
         results_expected_at: Option<String>,
     },

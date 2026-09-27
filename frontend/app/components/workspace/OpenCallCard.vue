@@ -70,7 +70,11 @@ const isOpen = computed(() => props.call !== null && !(countdown.value?.expired 
         variant="link"
         :to="localePath(`/evenements/${props.edition.slug}`)"
       >
-        {{ t('organization.workspace.openCall.criteria') }}
+        {{
+          props.call.uses_scoring_grid
+            ? t('organization.workspace.openCall.criteria')
+            : t('organization.workspace.openCall.edition')
+        }}
       </UiButton>
     </div>
   </UiCard>

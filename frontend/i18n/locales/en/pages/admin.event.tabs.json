@@ -234,7 +234,7 @@
   },
   "callTab": {
     "title": "Call for proposals",
-    "intro": "An edition opens ONLY ONE call — none if there is no pavilion. The criteria grid is saved with the call: a call without criteria could evaluate no proposal.",
+    "intro": "An edition opens ONLY ONE call — none if there is no pavilion. The activity format follows the edition's participation mode.",
     "create": "Open a call for proposals",
     "edit": "Edit call",
     "noPavilion": {
@@ -254,7 +254,9 @@
       "results": "Results announced for {date}",
       "proposals": "No proposal submitted | {count} proposal submitted | {count} proposals submitted",
       "maxScore": "Maximum achievable score: {score}",
-      "reviews": "{count} independent review required | {count} independent review required | {count} independent reviews required",
+      "reviews": "{count} review targeted per submission | {count} review targeted per submission | {count} reviews targeted per submission",
+      "reviewsNone": "No review target",
+      "gridOff": "No criteria grid: score out of 20",
       "blind": "Blind review",
       "notBlind": "Peer scores visible",
       "perOrganization": "At most {count} proposal per organization | At most {count} proposal per organization | At most {count} proposals per organization",
@@ -298,10 +300,12 @@
       "dailyStart": "Pavilion opening",
       "dailyEnd": "Pavilion closing",
       "dailyHint": "In local time of the edition. A proposal must END before closing — start plus duration included.",
-      "allowedFormats": "Accepted formats",
-      "requiredReviews": "Reviews required before decision",
+      "requiredReviews": "Target reviews per submission",
+      "requiredReviewsHint": "Optional. A progress target shown when tracking submissions; an activity can be accepted without any review.",
       "blindReview": "Blind review",
       "blindReviewHint": "A committee member sees peer scores only after submitting their own. Protects against anchoring.",
+      "usesScoringGrid": "Assess with a weighted criteria grid",
+      "usesScoringGridHint": "When off, the grid appears neither on the public site nor in the assessment, which uses a score out of 20. Existing criteria are kept.",
       "guidelinesUrl": "Link to submission guidelines",
       "nextStepsField": "What happens after sending",
       "nextStepsHint": "Shown to the submitter just before sending. One step per line; left empty, the block does not appear.",
@@ -310,7 +314,6 @@
     "criteria": {
       "columns": {
         "label": "Criterion",
-        "code": "Code",
         "maxScore": "Max score",
         "weight": "Weight",
         "knockout": "Knockout",

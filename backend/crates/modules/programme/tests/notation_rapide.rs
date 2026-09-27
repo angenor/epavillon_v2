@@ -220,3 +220,51 @@ async fn passer_en_rapide_efface_les_notes_par_critere() {
     .expect_err("une revue déposée garde sa note");
     assert_eq!(refus.field.as_deref(), Some("score_out_of_20"));
 }
+
+#[tokio::test]
+async fn une_grille_eteinte_refuse_le_mode_detaille_et_ne_montre_aucun_critere() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+    let comite = comite(&bac, &terrain).await;
+
+    sqlx::query!(
+        "UPDATE event.calls_for_proposals SET uses_scoring_grid = false WHERE id = $1",
+        terrain.appel
+    )
+    .execute(bac.pool())
+    .await
+    .expect("extinction de la grille");
+
+    let refus = review::enregistrer(
+        &bac.state,
+        &bac.ctx(),
+        &comite.premiere,
+        ProposalId(comite.dossier),
+        notation(&comite.criteres, 0.5, true),
+    )
+    .await
+    .expect_err("la grille éteinte ne note plus");
+    assert_eq!(refus.code, ErrorCode::ValidationFailed);
+    assert_eq!(refus.field.as_deref(), Some("mode"));
+
+    review::enregistrer(
+        &bac.state,
+        &bac.ctx(),
+        &comite.premiere,
+        ProposalId(comite.dossier),
+        notation_rapide(Some(12.0), true),
+    )
+    .await
+    .expect("la note sur 20 reste offerte");
+
+    let fiche = programme::service::desk::ouvrir(
+        &bac.state,
+        &bac.ctx(),
+        &comite.premiere,
+        ProposalId(comite.dossier),
+    )
+    .await
+    .expect("la fiche d'évaluation");
+    assert!(!fiche.uses_scoring_grid);
+    assert!(fiche.criteria.is_empty());
+}

@@ -253,8 +253,10 @@ export interface ReviewDeskScreen {
   history: ProposalHistoryEntry[]
 
   // --- L'évaluation, colonne de droite -------------------------------------
-  /** La grille de CET appel, dans l'ordre `sort_order`. */
+  /** La grille de CET appel, dans l'ordre `sort_order` ; vide quand elle est éteinte. */
   criteria: ReviewCriterion[]
+  /** `calls_for_proposals.uses_scoring_grid` ; faux hors appel. Faux : note sur 20 seulement. */
+  uses_scoring_grid: boolean
   /** `event.max_weighted_score()` — le dénominateur de la conversion sur 20. */
   max_weighted_score: Numeric
   /** `calls_for_proposals.required_reviews` : le dénominateur du « 2/3 ». */

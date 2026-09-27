@@ -59,9 +59,14 @@ export interface CallForProposals {
    *  fermeture — début plus durée comprise. */
   daily_start_time: string
   daily_end_time: string
+  /** `event.activity_formats()` du mode de l'édition — hybride : présentiel ou en ligne. Pas une colonne de l'appel. */
   allowed_formats: ParticipationMode[]
-  /** Nombre de revues indépendantes exigé avant décision. */
-  required_reviews: number
+  /** Nombre de revues visé par dossier : objectif d'avancement, jamais un
+   *  préalable à la décision. Nul = aucun objectif. */
+  required_reviews: number | null
+  /** Grille de critères pondérés en usage. Éteinte, `criteria` arrive vide et
+   *  l'évaluation se fait par la seule note sur 20. */
+  uses_scoring_grid: boolean
   /** Évaluation en aveugle : un révisionniste ne voit les notes des autres
    *  qu'après avoir soumis la sienne. */
   blind_review: boolean
@@ -104,7 +109,7 @@ export interface ReviewCriterion {
  * prépare un dossier doit savoir sur quoi il sera jugé. La demander à part
  * coûtait une seconde vague d'appels à une page qui tient déjà l'appel en main,
  * et faisait une exception dans un module dont toutes les lectures publiques
- * passent par `/events/{id}/…`.
+ * passent par `/events/{id}/…`. Vide quand `uses_scoring_grid` est faux.
  */
 export interface PublicCall extends CallForProposals {
   criteria: ReviewCriterion[]

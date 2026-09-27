@@ -81,6 +81,11 @@
     "in_person": "Sur place",
     "hybrid": "Hybride"
   },
+  "modeHint": {
+    "online": "Les déposants proposent des activités en ligne.",
+    "in_person": "Les déposants proposent des activités sur place : au moins un représentant présent, les autres panélistes peuvent intervenir en ligne.",
+    "hybrid": "Les déposants choisissent pour chaque activité : sur place ou en ligne."
+  },
   "localeTab": {
     "fr": "Français",
     "en": "Anglais",

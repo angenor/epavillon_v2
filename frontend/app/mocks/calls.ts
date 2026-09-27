@@ -14,8 +14,14 @@
  */
 
 import type { CallForProposals, CallReviewer } from '~/types/event/call'
+import type { ParticipationMode } from '~/types/event/edition'
 import type { I18nText } from '~/types/shared'
 import { CALL, EVENT, PERSON } from './ids'
+
+/** `event.activity_formats()` : une édition hybride fait choisir entre présentiel et en ligne. */
+export function activityFormats(mode: ParticipationMode): ParticipationMode[] {
+  return mode === 'hybrid' ? ['in_person', 'online'] : [mode]
+}
 
 /** Le défaut de `event.calls_for_proposals.submission_next_steps`. */
 export const DEFAULT_SUBMISSION_NEXT_STEPS: I18nText = {
@@ -56,8 +62,9 @@ export const callsForProposals = [
     max_duration_minutes: 150,
     daily_start_time: '09:00:00',
     daily_end_time: '17:00:00',
-    allowed_formats: ['in_person', 'hybrid', 'online'],
+    allowed_formats: activityFormats('hybrid'),
     required_reviews: 3,
+    uses_scoring_grid: true,
     // ÉVALUATION EN AVEUGLE — un membre du comité ne voit les notes de ses pairs
     // qu'APRÈS avoir soumis la sienne. C'est la valeur par défaut du modèle
     // (`060_events.sql` : `blind_review boolean NOT NULL DEFAULT true`) et ce que
@@ -109,8 +116,9 @@ export const callsForProposals = [
     max_duration_minutes: 150,
     daily_start_time: '09:00:00',
     daily_end_time: '17:00:00',
-    allowed_formats: ['in_person', 'hybrid', 'online'],
+    allowed_formats: activityFormats('hybrid'),
     required_reviews: 3,
+    uses_scoring_grid: true,
     blind_review: false,
     guidelines_url: 'https://www.ifdd.francophonie.org/cop30/appel-a-propositions',
     submission_next_steps: null,
@@ -144,8 +152,10 @@ export const callsForProposals = [
     max_duration_minutes: 150,
     daily_start_time: '09:00:00',
     daily_end_time: '17:00:00',
-    allowed_formats: ['in_person', 'hybrid'],
-    required_reviews: 2,
+    allowed_formats: activityFormats('hybrid'),
+    // Sans objectif de revues ni grille : les deux branches « éteintes » ont des données.
+    required_reviews: null,
+    uses_scoring_grid: false,
     blind_review: true,
     guidelines_url: null,
     submission_next_steps: null,

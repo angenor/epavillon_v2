@@ -21,6 +21,7 @@ pub mod net;
 pub mod pg_error;
 pub mod storage;
 pub mod telemetry;
+pub mod texte;
 pub mod tokens;
 
 #[cfg(feature = "testing")]

@@ -582,8 +582,10 @@ export interface EditionCall {
   /** Plage d'accueil du pavillon, `HH:MM:SS`, en heure LOCALE de l'édition. */
   daily_start_time: string
   daily_end_time: string
-  allowed_formats: ParticipationMode[]
-  required_reviews: number
+  /** Objectif d'avancement, jamais un préalable à la décision ; nul = aucun objectif. */
+  required_reviews: number | null
+  /** Éteinte, la grille n'apparaît nulle part et l'évaluation se fait sur 20. */
+  uses_scoring_grid: boolean
   blind_review: boolean
   guidelines_url: Url | null
   submission_next_steps: I18nText | null
@@ -628,8 +630,8 @@ export interface EditionCallPayload {
   max_duration_minutes: number
   daily_start_time: string
   daily_end_time: string
-  allowed_formats: ParticipationMode[]
-  required_reviews: number
+  required_reviews: number | null
+  uses_scoring_grid: boolean
   blind_review: boolean
   guidelines_url: Url | null
   /** Nul à la création : la base pose le circuit par défaut. */

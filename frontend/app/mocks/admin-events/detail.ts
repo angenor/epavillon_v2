@@ -227,9 +227,11 @@ export function editionCall(eventId: Uuid): EditionCall | null {
   const grid = criterionRows(call.id)
   const deadline = call.extended_until ?? call.closes_at
   const now = Date.now()
+  // Dérivé du mode de l'édition pour la lecture publique ; l'appel ne le porte plus.
+  const { allowed_formats: _derived, ...row } = call
 
   return {
-    ...call,
+    ...row,
     effective_deadline: deadline,
     // `event.is_call_open()` : le statut ET la fenêtre. Un appel « ouvert » dont
     // l'échéance est passée n'est pas ouvert, et c'est la fonction de la base qui

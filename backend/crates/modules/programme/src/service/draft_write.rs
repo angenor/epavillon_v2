@@ -526,9 +526,9 @@ fn non_vide(texte: &str) -> Option<&str> {
     (!coupe.is_empty()).then_some(coupe)
 }
 
-/// Le format doit être **admis par l'appel**. La colonne du dossier accepte les
-/// trois ; l'appel, lui, peut n'en offrir qu'un — un cycle de webinaires ne
-/// reçoit pas de séance en présentiel.
+/// Le format doit être **l'un de ceux que permet le mode de l'édition**
+/// (`event.activity_formats()`) : un cycle de webinaires ne reçoit pas de séance
+/// en présentiel, et une activité n'est jamais « hybride ».
 fn format_admis(brouillon: &ProposalDraft, regles: &ReglesDeLAppel) -> Result<String> {
     let format = brouillon.format.clone().unwrap_or_else(|| {
         regles
@@ -543,7 +543,7 @@ fn format_admis(brouillon: &ProposalDraft, regles: &ReglesDeLAppel) -> Result<St
     } else {
         Err(ApiError::with_message(
             ErrorCode::ValidationFailed,
-            "Cet appel n'accepte pas ce format d'activité.",
+            "Ce format d'activité n'est pas proposé pour le mode de participation de l'édition.",
         )
         .field("format"))
     }

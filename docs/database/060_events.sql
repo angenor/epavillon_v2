@@ -413,13 +413,22 @@ CREATE TABLE event.calls_for_proposals (
     -- planification, une fois les dossiers acceptés.
     daily_start_time  time        NOT NULL DEFAULT '09:00',
     daily_end_time    time        NOT NULL DEFAULT '17:00',
-    -- Présentiel seul par défaut depuis le 15/09 : un pavillon est un stand. Un
-    -- cycle de webinaires ouvre les autres formats explicitement.
-    allowed_formats   event.participation_mode[] NOT NULL DEFAULT '{in_person}',
+    -- PAS DE FORMATS ACCEPTÉS PROPRES À L'APPEL (retirés le 27/09). Les formats
+    -- d'activité se déduisent du mode de participation de l'édition, par
+    -- `event.activity_formats()` : le demander une seconde fois sur l'appel
+    -- donnait deux réponses à une même question. Les lectures l'exposent sous le
+    -- nom `allowed_formats`.
+    --
     -- Nombre de revues visé par dossier. Objectif d'avancement affiché au
     -- back-office, JAMAIS un préalable à la décision (arbitré le 16/09) : l'IFDD
-    -- retient parfois un dossier de partenaire sans l'évaluer.
-    required_reviews  smallint    NOT NULL DEFAULT 2 CHECK (required_reviews >= 0),
+    -- retient parfois un dossier de partenaire sans l'évaluer — sur ordre de la
+    -- directrice ou du spécialiste de programme. NUL PAR DÉFAUT depuis le 27/09 :
+    -- nul = aucun objectif affiché.
+    required_reviews  smallint    CHECK (required_reviews >= 0),
+    -- La grille de critères pondérés est FACULTATIVE (27/09). Éteinte, elle ne
+    -- s'affiche ni au site public ni à l'évaluation, qui se fait alors par la
+    -- seule note sur 20 ; les critères déjà saisis sont conservés, pas effacés.
+    uses_scoring_grid boolean     NOT NULL DEFAULT true,
     -- Les révisionnistes voient-ils les notes de leurs pairs avant d'avoir posé
     -- la leur ? Faux = évaluation en aveugle, pour éviter l'effet d'ancrage.
     blind_review      boolean     NOT NULL DEFAULT true,
@@ -481,6 +490,10 @@ COMMENT ON COLUMN event.calls_for_proposals.min_duration_minutes IS
     'Durée minimale acceptée pour une proposition de cet appel. Distincte du CHECK large de programme.proposals.duration_minutes, qui est un garde-fou de données.';
 COMMENT ON COLUMN event.calls_for_proposals.submission_next_steps IS
     'Ce qui se passe après l''envoi, affiché à la relecture du formulaire de dépôt. Une étape par ligne. Nul ou vide : le bloc ne s''affiche pas.';
+COMMENT ON COLUMN event.calls_for_proposals.uses_scoring_grid IS
+    'Grille de critères pondérés en usage. Faux : ni le site public ni l''évaluation ne la montrent, l''évaluation se fait par la note sur 20.';
+COMMENT ON COLUMN event.calls_for_proposals.required_reviews IS
+    'Nombre de revues visé par dossier : objectif d''avancement, jamais un préalable à la décision. Nul = aucun objectif.';
 COMMENT ON COLUMN event.calls_for_proposals.blind_review IS
     'Évaluation en aveugle : un révisionniste ne voit les notes des autres qu''après avoir soumis la sienne.';
 
@@ -493,6 +506,21 @@ STABLE
 AS $$
     SELECT COALESCE(extended_until, closes_at)
     FROM event.calls_for_proposals WHERE id = p_call_id;
+$$;
+
+-- Les formats qu'un déposant peut choisir, selon le mode de l'édition (27/09).
+-- Hybride : présentiel OU en ligne — l'activité elle-même n'est pas « hybride ».
+-- Présentiel : au moins un représentant sur place ; les autres panélistes
+-- peuvent intervenir à distance, sans que l'activité change de format.
+CREATE OR REPLACE FUNCTION event.activity_formats(p_mode event.participation_mode)
+RETURNS event.participation_mode[]
+LANGUAGE sql
+IMMUTABLE
+AS $$
+    SELECT CASE p_mode
+        WHEN 'hybrid' THEN ARRAY['in_person', 'online']::event.participation_mode[]
+        ELSE ARRAY[p_mode]
+    END;
 $$;
 
 CREATE OR REPLACE FUNCTION event.is_call_open(p_call_id uuid)

@@ -38,7 +38,7 @@ export type EventStatus =
 
 /**
  * ENUM `event.participation_mode`.
- * Partagé par les éditions, les appels (`allowed_formats`), les propositions et
+ * Partagé par les éditions (qui fixent le format des activités), les propositions et
  * les sessions : c'est le même vocabulaire d'un bout à l'autre de la chaîne.
  */
 export type ParticipationMode = 'online' | 'in_person' | 'hybrid'

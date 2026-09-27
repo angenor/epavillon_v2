@@ -45,13 +45,13 @@ interface Props {
   edition: EventEdition
   /** Destination du dépôt (écran A4). */
   submitTo: string
-  /** Ancre de la grille d'évaluation, sur cette même page. */
-  criteriaHref: string
+  /** Ancre de la grille d'évaluation, sur cette même page ; nulle quand l'appel n'en publie pas. */
+  criteriaHref?: string | null
   /** `glass` sur le bandeau photographique, `surface` sur l'en-tête sobre. */
   tone?: 'glass' | 'surface'
 }
 
-const props = withDefaults(defineProps<Props>(), { tone: 'surface' })
+const props = withDefaults(defineProps<Props>(), { tone: 'surface', criteriaHref: null })
 
 const { t } = useI18n()
 const { date, dateTime, zoneOf } = useDateTime()
@@ -188,6 +188,7 @@ const countdownClass = computed(() => {
         :label="t('event.public.call.submit')"
       />
       <UiButton
+        v-if="props.criteriaHref"
         :variant="glass ? 'glass' : 'secondary'"
         :to="props.criteriaHref"
         block
