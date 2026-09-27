@@ -670,7 +670,7 @@ Rien à redémarrer entre 3 et 4 : le drapeau se lit à chaque ouverture.
 ## 15. Mettre en ligne les étapes 0a à 5 (22/09, complété les 24, 25, 26 et 27/09)
 
 Une seule mise en ligne porte les dix premières étapes de Guide Négo : le code de la branche, et
-**dix migrations**. Préparée ici, **pas encore exécutée**. Le drapeau reste éteint pendant toute
+**dix migrations**. **Exécutée le 27/09/2026** (code `c2724eb`) : répétition sur une copie de la production (dix migrations deux fois, schéma et lignes semées conformes, dette de R4 à 0), sauvegarde `epavillon-20260927-120109.sql.gz`, construction en 14 min, bucket privé, dix migrations sans erreur, redémarrage ; santé, garde (341 adresses en 200) et schéma de production conformes au modèle ; le voisin est resté à 200 à chaque geste. **Restent** les vérifications du site du § 3, faites par le commanditaire, puis les téléphones du § 4. Le drapeau reste éteint pendant toute
 la mise en ligne : le site ne voit que ce qui le touche (§ 3 ci-dessous), l'application ne s'ouvre
 qu'à la recette sur téléphones (§ 4).
 
