@@ -76,8 +76,8 @@ Une ligne chacun ; le détail, et les points levés, dans [`points-ouverts.md`](
 
 ## Dernières nouvelles
 
+- 27/09 — **MVP clos côté code** : `make check-safe` complet au vert sur `main` (27adc35), 319 lots, 1 555 tests, aucun échec ; reste l'appareil réel, § 15.4 de [DEPLOIEMENT.md](../DEPLOIEMENT.md) — [journal](progression/journal/2026-09-27.md).
 - 27/09 — Étapes 4 et 5 fusionnées dans `main` (27adc35) ; le scénario qui clôt le MVP est joué de bout en bout — [étape 5](progression/etapes/5-pavillon.md).
 - 27/09 — Les essais sur téléphones réels de 0a à 3b forment une seule liste à cocher, § 15.4 de [DEPLOIEMENT.md](../DEPLOIEMENT.md).
 - 27/09 — Le suivi devient ce point central et le dossier [`progression/`](progression/LISEZMOI.md), demandé le 26/09 — [journal](progression/journal/2026-09-27.md).
 - 26/09 — Étape 2 fusionnée dans `main` (6d16b49) et poussée ; le blocage des tests venait du contrôle de macOS sur chaque binaire neuf — [étape 2](progression/etapes/2-faq-lexique.md).
-- 26/09 — Étapes 3a puis 3b fusionnées dans `main` (95f82e7, 72b38cf) ; la suite Rust complète passera au `check-safe` de fin de MVP — [étape 3b](progression/etapes/3b-signalements.md).
