@@ -76,8 +76,8 @@ Une ligne chacun ; le détail, et les points levés, dans [`points-ouverts.md`](
 
 ## Dernières nouvelles
 
+- 27/09 — **Guide Négo ouvert en production** : `guide_nego.enabled` allumé (les deux colonnes, `UPDATE 1`), l'écran d'ouverture s'affiche sur `/v2/guide-nego/` ; « Échanges » reste fermé. Restent les téléphones, § 15.4 de [DEPLOIEMENT.md](../DEPLOIEMENT.md).
 - 27/09 — **Étapes 0a à 5 en production** (c2724eb) : dix migrations jouées sans erreur, santé et garde conformes, drapeau `guide_nego.enabled` éteint ; restent le § 15.3 (site) et le § 15.4 (téléphones) de [DEPLOIEMENT.md](../DEPLOIEMENT.md).
 - 27/09 — **MVP clos côté code** : `make check-safe` complet au vert sur `main` (27adc35), 319 lots, 1 555 tests, aucun échec ; reste l'appareil réel, § 15.4 de [DEPLOIEMENT.md](../DEPLOIEMENT.md) — [journal](progression/journal/2026-09-27.md).
 - 27/09 — Étapes 4 et 5 fusionnées dans `main` (27adc35) ; le scénario qui clôt le MVP est joué de bout en bout — [étape 5](progression/etapes/5-pavillon.md).
 - 27/09 — Les essais sur téléphones réels de 0a à 3b forment une seule liste à cocher, § 15.4 de [DEPLOIEMENT.md](../DEPLOIEMENT.md).
-- 27/09 — Le suivi devient ce point central et le dossier [`progression/`](progression/LISEZMOI.md), demandé le 26/09 — [journal](progression/journal/2026-09-27.md).
