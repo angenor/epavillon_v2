@@ -125,4 +125,4 @@ Trois demandes du commanditaire sur le formulaire d'édition (création et modif
 - `sans_accent` déplacé dans `kernel::texte` (il était recopié entre `negotiation` et `event`).
 
 **Vérifié** : schéma rechargé dans une base jetable ; migration `ops/migrations/2026-09-27-appel-grille-facultative.sql` appliquée à l'ancien modèle → schéma `event` identique au nouveau ; `cargo clippy --workspace -D warnings`, `cargo test --workspace`, `make sqlx-prepare` et `make openapi` sur la base jetable ; `nuxi typecheck` à 0, `test:site` 8/8.
-Base locale migrée le 27/09 ; `make check-safe` vert. **Non vérifié** au navigateur. **Production à migrer** avec le même script.
+Base locale migrée le 27/09 ; `make check-safe` vert. **En production le 27/09**, schéma identique au modèle. **Non vérifié** au navigateur.

@@ -3,7 +3,7 @@
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
 ## Dernière mise à jour — 27 septembre 2026
-- 27/09 — Appel à propositions : formats déduits du mode de l'édition (hybride → présentiel ou en ligne), revues visées facultatives, grille de critères désactivable, bug du critère « obligatoire » corrigé. Production à migrer — [A10](progression/ecrans/a10-evenements.md).
+- 27/09 — Appel à propositions : formats déduits du mode de l'édition (hybride → présentiel ou en ligne), revues visées facultatives, grille de critères désactivable, bug du critère « obligatoire » corrigé. en production — [A10](progression/ecrans/a10-evenements.md).
 - 17/09 — L'équipe corrige un dossier déposé depuis sa fiche ou la liste ; la base exige des intervenants complets au dépôt. Migré et déployé — [A8](progression/ecrans/a8-evaluation.md).
 - 16/09 — L'évaluation passe dans une fenêtre flottante : facultative, ouverte à toute l'équipe, note sur 20 ou grille détaillée — [A8](progression/ecrans/a8-evaluation.md).
 - 16/09 — La production est migrée au modèle du jour, sans perte ; la méthode est au § 13 de [`DEPLOIEMENT.md`](DEPLOIEMENT.md).
@@ -38,7 +38,7 @@ Un écran = un fichier : ce qui a été livré, les écarts entre le modèle et 
 | A7 | Liste des propositions | ✅ 18/08 · révisé 15/09 | [écarts et vérifications](progression/ecrans/a7-propositions.md) |
 | A8 | Fiche d'évaluation | ✅ 18/08 · évaluation flottante 16/09 · en production · correction par l'équipe 17/09, en production | [écarts et vérifications](progression/ecrans/a8-evaluation.md) |
 | A9 | Planificateur de créneaux | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a9-planificateur.md) |
-| A10 | Gestion des événements | ✅ 18/08 · téléversement des visuels 26/08 · liste en rangées 16/09 · fuseau cherchable et brouillon local 16/09 · appel : formats, revues et grille facultatifs 27/09 | [écarts et vérifications](progression/ecrans/a10-evenements.md) |
+| A10 | Gestion des événements | ✅ 18/08 · téléversement des visuels 26/08 · liste en rangées 16/09 · fuseau cherchable et brouillon local 16/09 · appel : formats, revues et grille facultatifs 27/09 · en production | [écarts et vérifications](progression/ecrans/a10-evenements.md) |
 | A11 | Organisations et fusion | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a11-organisations-fusion.md) |
 | A12 | Utilisateurs et rôles | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a12-utilisateurs-roles.md) |
 | A13 | Messages d'incident | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a13-incidents.md) |
