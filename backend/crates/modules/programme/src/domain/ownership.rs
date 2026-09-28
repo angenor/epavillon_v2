@@ -7,6 +7,8 @@
 //! L'hypothèse de la spécification est tenue : **toute personne dont l'adhésion
 //! est active** peut corriger, renvoyer et retirer — ce que l'écran suppose
 //! déjà en rouvrant un dossier déposé deux mois plus tôt par une collègue.
+//! Une personne dont la demande attend le référent ne touche qu'à ses propres
+//! dossiers (arbitré le 28/09).
 //!
 //! **Elle est isolée ici, et nulle part ailleurs.** Si le commanditaire tranche
 //! autrement — seule la déposante, ou la déposante et les référents —, une
@@ -24,18 +26,33 @@ use kernel::error::{ApiError, Result};
 /// L'adhésion telle que `org.memberships` la porte, réduite à ce qui décide.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Adhesion {
-    /// `org.membership_status` : `pending`, `active` ou `revoked`.
+    /// `org.membership_status` vaut `active`.
     pub active: bool,
+    /// Demande d'adhésion que le référent n'a pas encore acceptée. Une
+    /// invitation en attente n'en est pas une : la personne n'a rien accepté.
+    pub en_attente: bool,
 }
 
-/// Cette personne peut-elle agir au nom de l'organisation porteuse ?
-///
-/// **L'adhésion en attente ne suffit pas.** Une demande d'adhésion non
-/// approuvée donnerait à quiconque connaît le nom d'une organisation le droit
-/// d'écrire en son nom — c'est le seul point où l'hypothèse ci-dessus ne fait
-/// aucun doute.
+/// Cette personne agit-elle au nom de **toute** l'organisation — tous ses
+/// dossiers, ses membres ?
 pub fn peut_agir(adhesion: Option<Adhesion>) -> bool {
     adhesion.is_some_and(|a| a.active)
+}
+
+/// Peut-elle déposer au nom de l'organisation ?
+///
+/// **Rejoindre ne bloque pas le dépôt** (arbitré le 28/09) : une demande en
+/// attente suffit. Le doublon d'organisation, que l'attente devait éviter,
+/// coûte plus cher qu'un dossier déposé par une personne que le référent
+/// n'a pas encore reconnue.
+pub fn peut_deposer(adhesion: Option<Adhesion>) -> bool {
+    adhesion.is_some_and(|a| a.active || a.en_attente)
+}
+
+/// Peut-elle agir sur **ce** dossier ? En attente de validation, seulement sur
+/// les siens : rejoindre ne doit pas ouvrir le travail des collègues.
+pub fn peut_agir_sur(adhesion: Option<Adhesion>, est_la_deposante: bool) -> bool {
+    peut_agir(adhesion) || (est_la_deposante && peut_deposer(adhesion))
 }
 
 /// Le refus correspondant.
@@ -44,8 +61,8 @@ pub fn peut_agir(adhesion: Option<Adhesion>) -> bool {
 /// principe IX : un dossier d'une organisation dont on n'est pas membre ne doit
 /// pas se distinguer d'un dossier inexistant. Un 403 dirait à qui forge une URL
 /// que le dossier existe.
-pub fn exiger(adhesion: Option<Adhesion>) -> Result<()> {
-    if peut_agir(adhesion) {
+pub fn exiger(autorise: bool) -> Result<()> {
+    if autorise {
         Ok(())
     } else {
         Err(ApiError::not_found())

@@ -18,11 +18,10 @@ import type { LoadFailure } from '~/utils/api-error'
  * rôle `org_member`, vérifiés par l'API (`identity.has_permission()`). Ici on
  * évite un écran vide et un aller-retour, rien de plus.
  *
- * ADHÉSION ACTIVE ET DEMANDE EN ATTENTE NE SE CONFONDENT PAS. `status = 'pending'`
- * signifie qu'un référent n'a pas encore accepté : la personne n'a pas le droit
- * d'agir au nom de l'organisation, et lui dire « c'est bon » serait lui promettre
- * un dépôt qui échouera. Les deux sont donc exposés séparément — l'un ouvre les
- * portes, l'autre explique pourquoi elles restent fermées.
+ * REJOINDRE NE BLOQUE PAS LE DÉPÔT (arbitré le 28/09). Une demande en attente du
+ * référent suffit pour déposer et suivre ses propres dossiers ; ceux des
+ * collègues restent fermés jusqu'à la validation. Une invitation en attente, elle,
+ * n'ouvre rien : la personne n'a pas encore accepté.
  */
 export const useMembershipStore = defineStore('membership', () => {
   const api = useApi()
@@ -35,12 +34,16 @@ export const useMembershipStore = defineStore('membership', () => {
   const loadedFor = ref<string | null>(null)
 
   const active = computed(() => entries.value.filter((e) => e.membership.status === 'active'))
-  const pending = computed(() => entries.value.filter((e) => e.membership.status === 'pending'))
+  /** Les organisations au nom desquelles elle peut déposer : actives, ou demandées. */
+  const submittable = computed(() =>
+    entries.value.filter(
+      (e) =>
+        e.membership.status === 'active' ||
+        (e.membership.status === 'pending' && e.membership.invited_at === null),
+    ),
+  )
 
-  /** Peut-elle agir au nom d'une organisation ? La seule question qui ouvre une porte. */
-  const hasActiveOrganization = computed(() => active.value.length > 0)
-  /** A-t-elle une demande en cours ? Ce qui explique une porte encore fermée. */
-  const hasPendingRequest = computed(() => pending.value.length > 0)
+  const hasSubmittableOrganization = computed(() => submittable.value.length > 0)
 
   /**
    * Charge les rattachements une fois par personne. Idempotent : la garde, la
@@ -84,9 +87,8 @@ export const useMembershipStore = defineStore('membership', () => {
   return {
     entries,
     active,
-    pending,
-    hasActiveOrganization,
-    hasPendingRequest,
+    submittable,
+    hasSubmittableOrganization,
     isLoading,
     loadError,
     ensureLoaded,

@@ -331,6 +331,11 @@ function actionsFor(
   })
 }
 
+/** Adhésion active, ou demande en attente du référent — pas une invitation. */
+function isOpen(m: Membership): boolean {
+  return m.status === 'active' || (m.status === 'pending' && m.invited_at === null)
+}
+
 /**
  * TOUT L'ÉCRAN D'ACCUEIL EN UNE RÉPONSE.
  *
@@ -347,12 +352,15 @@ export function workspaceOverview(
   if (!organization) return null
 
   const membership = allMemberships().find(
-    (m) => m.organization_id === organizationId && m.person_id === personId && m.status === 'active',
+    (m) => m.organization_id === organizationId && m.person_id === personId && isOpen(m),
   )
   if (!membership) return null
+  // En attente du référent : ses propres dossiers, et personne d'autre.
+  const ownOnly = membership.status !== 'active'
 
   const trackings = allProposals
     .filter((proposal) => proposal.organization_id === organizationId && proposal.deleted_at === null)
+    .filter((proposal) => !ownOnly || proposal.submitted_by === personId)
     .map((proposal) => trackingOf(proposal.id, at))
     .filter((tracking) => tracking !== null)
     // Le plus récemment touché en tête : c'est celui dont on vient s'occuper.
@@ -364,7 +372,9 @@ export function workspaceOverview(
     organization,
     membership,
     proposals: trackings,
-    members: membersOf(organizationId),
+    members: ownOnly
+      ? membersOf(organizationId).filter((member) => member.person.id === personId)
+      : membersOf(organizationId),
     actions: actionsFor(organizationId, membership, trackings, at),
     open_call: call,
     call_edition: call ? (events.find((e) => e.id === call.event_id) ?? null) : null,
@@ -387,15 +397,16 @@ export function proposalFile(
   const tracking = trackingOf(proposalId, at)
   if (!tracking) return null
   // L'accès se décide comme dans l'API : le dossier désigne l'organisation qui
-  // le porte, et le lecteur doit y avoir une adhésion active. Aucune
-  // organisation n'est demandée à l'appelant.
-  const member = allMemberships().some(
+  // le porte, et le lecteur doit y avoir une adhésion active — ou une demande
+  // en attente, pour ses propres dossiers.
+  const membership = allMemberships().find(
     (m) =>
       m.organization_id === tracking.proposal.organization_id &&
       m.person_id === personId &&
-      m.status === 'active',
+      isOpen(m),
   )
-  if (!member) return null
+  if (!membership) return null
+  if (membership.status !== 'active' && tracking.proposal.submitted_by !== personId) return null
 
   const comments = commentsWithSession()
     .filter(

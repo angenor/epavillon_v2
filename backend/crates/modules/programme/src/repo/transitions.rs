@@ -94,7 +94,9 @@ pub async fn offertes<'e>(
                          SELECT 1 FROM org.memberships m
                           WHERE m.organization_id = p.organization_id
                             AND m.person_id = $2
-                            AND m.status = 'active'))
+                            AND (m.status = 'active'
+                                 OR (m.status = 'pending' AND m.invited_at IS NULL
+                                     AND p.submitted_by = $2))))
                  OR (r.required_permission IS NOT NULL
                      AND identity.has_permission($2, r.required_permission, 'event', p.event_id))
               )

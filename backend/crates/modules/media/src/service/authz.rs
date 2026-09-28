@@ -91,6 +91,7 @@ pub async fn exiger_le_droit(
                 acteur,
                 permission,
                 dossier.organization_id,
+                dossier.deposant,
                 dossier.event_id,
             )
             .await?;
@@ -107,6 +108,7 @@ pub async fn exiger_le_droit(
                 acteur,
                 permission,
                 seance.organization_id,
+                seance.deposant,
                 seance.event_id,
             )
             .await?;
@@ -156,20 +158,23 @@ pub async fn exiger_le_droit(
     }
 }
 
-/// Adhésion **active** à l'organisation porteuse, **ou** permission sur
-/// l'édition. C'est la règle posée par B4 : une organisation n'administre rien,
-/// et son accès passe par l'adhésion, pas par un périmètre.
+/// Adhésion **active** à l'organisation porteuse — ou demande en attente, pour
+/// ses propres dossiers —, **ou** permission sur l'édition. C'est la règle posée
+/// par B4 : une organisation n'administre rien, et son accès passe par
+/// l'adhésion, pas par un périmètre.
 async fn acces_par_organisation_ou_edition(
     pool: &PgPool,
     acteur: Uuid,
     permission: &str,
     organization_id: Option<Uuid>,
+    deposant: Option<Uuid>,
     event_id: Uuid,
 ) -> Result<bool> {
     if let Some(organisation) = organization_id {
+        let sienne = deposant == Some(acteur);
         if cross::adhesion(pool, acteur, organisation)
             .await?
-            .is_some_and(|a| a.active)
+            .is_some_and(|a| a.active || (a.en_attente && sienne))
         {
             return Ok(true);
         }

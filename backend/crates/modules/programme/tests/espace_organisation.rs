@@ -326,16 +326,38 @@ async fn ladhesion_active_est_le_seul_droit_dentree() {
         "ni la liste de ses éditions — et `None`, jamais une liste vide : « aucun          dossier » et « ce n'est pas votre espace » ne se confondent pas"
     );
 
-    // **Une adhésion en attente ne suffit pas** : « active » est le mot du
-    // modèle, et un membre invité qui n'a pas répondu n'écrit rien.
-    let invitee = commun::personne(&bac, "invitee@example.org", "Ines", "Vitee").await;
-    commun::adherer(&bac, terrain.organisation, invitee, "pending").await;
+    // **Une demande en attente ouvre l'espace, borné à ses propres dossiers**
+    // (arbitré le 28/09) : le dossier de la collègue, ses membres et leurs
+    // demandes restent fermés tant que le référent n'a pas validé.
+    let nouvelle = commun::personne(&bac, "nouvelle@example.org", "Ines", "Vitee").await;
+    commun::adherer(&bac, terrain.organisation, nouvelle, "pending").await;
+    let espace = workspace::espace(&bac.state, nouvelle, terrain.organisation)
+        .await
+        .expect("pas de panne")
+        .expect("une demande en attente ouvre l'espace");
+    assert!(espace.proposals.is_empty(), "aucun dossier d'une collègue");
+    assert_eq!(
+        espace
+            .members
+            .iter()
+            .map(|m| m.person.id)
+            .collect::<Vec<_>>(),
+        vec![nouvelle],
+        "elle ne voit qu'elle-même parmi les membres"
+    );
     assert!(
-        workspace::espace(&bac.state, invitee, terrain.organisation)
+        espace
+            .actions
+            .iter()
+            .all(|a| a.kind != "membership_request"),
+        "sa propre demande ne lui est pas une demande à traiter"
+    );
+    assert!(
+        workspace::dossier(&bac.state, nouvelle, ProposalId(dossier))
             .await
             .expect("pas de panne")
             .is_none(),
-        "une adhésion en attente n'ouvre rien"
+        "le dossier d'une collègue reste fermé"
     );
 }
 

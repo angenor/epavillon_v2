@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT p.event_id, p.organization_id FROM programme.proposals p WHERE p.id = $1",
+  "query": "SELECT p.event_id, p.organization_id, p.submitted_by\n           FROM programme.proposals p WHERE p.id = $1",
   "describe": {
     "columns": [
       {
@@ -24,6 +24,17 @@
             "name": "organization_id"
           }
         }
+      },
+      {
+        "ordinal": 2,
+        "name": "submitted_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "submitted_by"
+          }
+        }
       }
     ],
     "parameters": {
@@ -33,8 +44,9 @@
     },
     "nullable": [
       false,
+      false,
       false
     ]
   },
-  "hash": "708990720d9937d6f37fe6477dc14193eb6f1bb84a2aee6ab30a217b118ffa6f"
+  "hash": "d90f0c910114c30a0c2cfcc10d20218030daa136bede0c87733a3cf77740fa1c"
 }

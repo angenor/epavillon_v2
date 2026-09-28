@@ -27,16 +27,16 @@
     "title": "Your address points to an organization",
     "description": "The domain {domain} belongs to {organization}.",
     "immediate": "You will be attached immediately: this domain has been verified by the organization.",
-    "approval": "A contact person at the organization will need to approve your request.",
+    "approval": "You can submit right away; a contact person will approve your request afterwards.",
     "actionImmediate": "Join this organization",
-    "actionRequest": "Request to join"
+    "actionRequest": "Join this organization"
   },
   "current": {
     "title": "Your affiliations",
     "primary": "Primary",
     "active": "Active affiliation",
     "pending": "Pending",
-    "pendingHint": "A contact person must approve your request. There is no need to send it again.",
+    "pendingHint": "You can already submit. A contact person still has to approve your request.",
     "roles": {
       "manager": "Contact person",
       "member": "Member",
@@ -46,11 +46,11 @@
   "confirm": {
     "title": "Join {organization}",
     "immediate": "Your email domain belongs to this organization: you will be attached immediately.",
-    "approval": "Your request will be sent to a contact person at the organization, who will approve or decline it.",
+    "approval": "You can submit right away. A contact person at the organization will approve your request afterwards.",
     "jobTitle": "Your role in this organization",
-    "jobTitleHint": "Optional, but this is what the person handling your request will read.",
+    "jobTitleHint": "The contact person will read it when approving your request.",
     "submitImmediate": "Join",
-    "submitRequest": "Send request"
+    "submitRequest": "Join"
   },
   "duplicate": {
     "title": "This organization may already exist",
@@ -72,8 +72,8 @@
       "description": "You can now submit an activity proposal on behalf of this organization."
     },
     "pending": {
-      "title": "Request sent to {organization}",
-      "description": "A contact person at the organization must approve it. You will receive an email as soon as they do."
+      "title": "You have joined {organization}",
+      "description": "You can already submit on its behalf. Once a contact person approves your request, you will also see your colleagues' proposals."
     },
     "created": {
       "title": "{organization} has been created",
@@ -85,7 +85,7 @@
   },
   "notices": {
     "alreadyMember": "You are already a member of {organization}.",
-    "alreadyRequested": "Your request to {organization} is already pending.",
+    "alreadyRequested": "You have already joined {organization}; a contact person still has to approve your request.",
     "nameTaken": "An organization already bears this name in this country. Here it is."
   },
   "states": {

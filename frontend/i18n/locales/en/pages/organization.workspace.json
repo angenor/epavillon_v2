@@ -6,8 +6,8 @@
     "hint": "You belong to several organizations: choose the one whose submissions you are tracking."
   },
   "membershipPending": {
-    "title": "Your membership has not been approved yet",
-    "description": "A contact at {organization} must approve your request. While it is pending, you cannot submit or track proposals on behalf of this organization.",
+    "title": "Your request is awaiting a contact person",
+    "description": "You can already submit and track your own proposals. Those of your colleagues at {organization} will appear once a contact person has approved your request.",
     "action": "View my memberships"
   },
   "actions": {

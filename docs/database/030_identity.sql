@@ -580,6 +580,11 @@ INSERT INTO identity.roles (code, label, description, allowed_scopes, is_system)
     ('programmer',    '{"fr":"Programmateur","en":"Programme manager"}',          '{"fr":"Planifie les créneaux et publie la programmation","en":"Schedules slots and publishes the programme"}', '{global,event}', true),
     ('org_manager',   '{"fr":"Référent d''organisation","en":"Organization manager"}', '{"fr":"Gère les membres et les soumissions de son organisation","en":"Manages members and submissions"}', '{organization}', false),
     ('org_member',    '{"fr":"Membre d''organisation","en":"Organization member"}',    NULL, '{organization}', false),
+    -- REJOINDRE NE BLOQUE PAS LE DÉPÔT (arbitré le 28/09). Tant que le référent
+    -- n'a pas validé la demande, la personne dépose et suit SES dossiers, sans
+    -- voir ceux de ses collègues : le rôle ne porte que le dépôt, et le module
+    -- programme borne l'accès aux dossiers dont elle est la déposante.
+    ('org_applicant', '{"fr":"Membre en attente de validation","en":"Member awaiting approval"}', '{"fr":"Dépose et suit ses propres dossiers en attendant l''accord d''un référent","en":"Submits and tracks their own proposals until a manager approves"}', '{organization}', false),
     ('negotiator',    '{"fr":"Négociateur","en":"Negotiator"}',                   '{"fr":"Accède à l''espace de négociation","en":"Access to the negotiation space"}', '{global,negotiation_space}', true),
     ('trainer',       '{"fr":"Formateur","en":"Trainer"}',                        NULL, '{global}', false),
     ('editor',        '{"fr":"Éditeur","en":"Editor"}',                           '{"fr":"Modère les publications des organisations","en":"Moderates organization publications"}', '{global}', false),
@@ -667,6 +672,7 @@ INSERT INTO identity.role_permissions (role_code, permission_code) VALUES
     ('programmer', 'analytics.dashboard.read'),
     ('org_manager', 'programme.proposal.submit'), ('org_manager', 'publication.article.write'),
     ('org_member', 'programme.proposal.submit'),
+    ('org_applicant', 'programme.proposal.submit'),
     ('negotiator', 'negotiation.space.access'),
     ('editor', 'publication.article.moderate'),
     ('standard', 'org.organization.read')

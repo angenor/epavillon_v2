@@ -27,16 +27,16 @@
     "title": "Votre adresse désigne une organisation",
     "description": "Le domaine {domain} appartient à {organization}.",
     "immediate": "Votre rattachement sera effectif immédiatement : ce domaine a été vérifié par l'organisation.",
-    "approval": "Un référent de l'organisation devra accepter votre demande.",
+    "approval": "Vous pourrez déposer tout de suite ; un référent validera ensuite votre demande.",
     "actionImmediate": "Rejoindre cette organisation",
-    "actionRequest": "Demander à la rejoindre"
+    "actionRequest": "Rejoindre cette organisation"
   },
   "current": {
     "title": "Vos rattachements",
     "primary": "Principale",
     "active": "Rattachement actif",
     "pending": "En attente",
-    "pendingHint": "Un référent doit accepter votre demande. Inutile de la renouveler.",
+    "pendingHint": "Vous pouvez déjà déposer. Un référent doit encore valider votre demande.",
     "roles": {
       "manager": "Référent",
       "member": "Membre",
@@ -46,11 +46,11 @@
   "confirm": {
     "title": "Rejoindre {organization}",
     "immediate": "Le domaine de votre adresse appartient à cette organisation : votre rattachement sera effectif immédiatement.",
-    "approval": "Votre demande sera transmise à un référent de l'organisation, qui l'acceptera ou la refusera.",
+    "approval": "Vous pourrez déposer tout de suite. Un référent de l'organisation validera ensuite votre demande.",
     "jobTitle": "Votre fonction dans cette organisation",
-    "jobTitleHint": "Facultatif, mais c'est ce que lira la personne qui traitera votre demande.",
+    "jobTitleHint": "Le référent la lira en validant votre demande.",
     "submitImmediate": "Rejoindre",
-    "submitRequest": "Envoyer la demande"
+    "submitRequest": "Rejoindre"
   },
   "duplicate": {
     "title": "Cette organisation existe peut-être déjà",
@@ -72,8 +72,8 @@
       "description": "Vous pouvez désormais déposer une proposition d'activité au nom de cette organisation."
     },
     "pending": {
-      "title": "Demande envoyée à {organization}",
-      "description": "Un référent de l'organisation doit l'accepter. Vous recevrez un courriel dès que ce sera fait."
+      "title": "Vous avez rejoint {organization}",
+      "description": "Vous pouvez déjà déposer en son nom. Quand un référent aura validé votre demande, vous verrez aussi les dossiers de vos collègues."
     },
     "created": {
       "title": "{organization} a été créée",
@@ -85,7 +85,7 @@
   },
   "notices": {
     "alreadyMember": "Vous êtes déjà membre de {organization}.",
-    "alreadyRequested": "Votre demande auprès de {organization} est déjà en attente.",
+    "alreadyRequested": "Vous avez déjà rejoint {organization} ; un référent doit encore valider votre demande.",
     "nameTaken": "Une organisation porte déjà ce nom dans ce pays. La voici."
   },
   "states": {

@@ -51,7 +51,8 @@ pub async fn dossier(state: &ProgrammeState, lecteur: Uuid, dossier: ProposalId)
 /// Les dossiers d'une organisation, **par l'une ou l'autre voie**.
 ///
 /// Membre actif : tous les dossiers de son organisation, toutes éditions
-/// confondues — elle n'administre rien, aucun périmètre ne la borne.
+/// confondues — elle n'administre rien, aucun périmètre ne la borne. Demande en
+/// attente : ses propres dossiers seulement.
 /// Back-office : les mêmes, **bornés au périmètre d'administration**. Une
 /// personne sans l'une ni l'autre reçoit le refus d'un dossier inexistant.
 pub async fn de_lorganisation(
@@ -80,7 +81,15 @@ pub async fn de_lorganisation(
     .await?;
 
     if !autorise || perimetre.is_empty() {
-        return Err(ApiError::not_found());
+        if !crate::domain::ownership::peut_deposer(adhesion) {
+            return Err(ApiError::not_found());
+        }
+        let fiches = proposals::de_lorganisation(state.pool(), organisation, None).await?;
+        return Ok(fiches
+            .into_iter()
+            .filter(|f| f.submitted_by == lecteur)
+            .map(|f| selon_la_voie(f, Acces::Organisation))
+            .collect());
     }
 
     // Périmètre global : aucune borne d'édition. Périmètre listé : la liste.

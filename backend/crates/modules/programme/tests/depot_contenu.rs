@@ -569,29 +569,66 @@ async fn plusieurs_categories_se_posent_et_se_relisent() {
 }
 
 #[tokio::test]
-async fn une_adhesion_en_attente_ne_permet_pas_de_deposer() {
-    // `pending` n'est pas `active` : une demande d'adhésion non approuvée
-    // donnerait à quiconque connaît le nom d'une organisation le droit d'écrire
-    // en son nom.
+async fn une_demande_en_attente_depose_mais_ne_touche_qua_ses_dossiers() {
+    // Rejoindre ne bloque pas le dépôt (arbitré le 28/09) ; le travail des
+    // collègues reste fermé tant que le référent n'a pas validé.
     let bac = Bac::monter().await;
     let terrain = commun::terrain(&bac).await;
 
-    let etrangere = commun::personne(&bac, "etrangere@example.org", "Fatou", "Ndiaye").await;
-    commun::adherer(&bac, terrain.organisation, etrangere, "pending").await;
-
-    let refus = draft_write::enregistrer(
+    let collegue = draft_write::enregistrer(
         &bac.state,
         &bac.ctx(),
-        etrangere,
-        commun::charge(&terrain, complet(&terrain, "Au nom d'une autre")),
+        terrain.deposante,
+        commun::charge(&terrain, complet(&terrain, "Dossier d'une collègue")),
     )
     .await
-    .expect_err("une adhésion en attente n'autorise rien");
+    .expect("dossier de la collègue");
 
-    // **Un `NOT_FOUND`, pas un `FORBIDDEN`** : un dossier d'une organisation
-    // dont on n'est pas membre ne doit pas se distinguer d'un dossier
-    // inexistant.
+    let nouvelle = commun::personne(&bac, "nouvelle@example.org", "Fatou", "Ndiaye").await;
+    commun::adherer(&bac, terrain.organisation, nouvelle, "pending").await;
+
+    let droit = sqlx::query_scalar!(
+        r#"SELECT identity.has_permission($1, 'programme.proposal.submit', 'organization', $2) AS "droit!""#,
+        nouvelle,
+        terrain.organisation
+    )
+    .fetch_one(bac.pool())
+    .await
+    .expect("lecture du droit");
+    assert!(droit, "la demande en attente porte le droit de déposer");
+
+    let sien = draft_write::enregistrer(
+        &bac.state,
+        &bac.ctx(),
+        nouvelle,
+        commun::charge(
+            &terrain,
+            complet(&terrain, "Au nom de l'organisation rejointe"),
+        ),
+    )
+    .await
+    .expect("une demande en attente suffit pour déposer");
+
+    let mut reprise = commun::charge(
+        &terrain,
+        complet(&terrain, "Réécrit par une nouvelle venue"),
+    );
+    reprise.proposal_id = Some(collegue.proposal_id);
+    let refus = draft_write::enregistrer(&bac.state, &bac.ctx(), nouvelle, reprise)
+        .await
+        .expect_err("le dossier d'une collègue reste fermé");
+    // **Un `NOT_FOUND`, pas un `FORBIDDEN`** : le dossier d'une collègue ne se
+    // distingue pas d'un dossier inexistant.
     assert_eq!(refus.code, ErrorCode::NotFound);
+
+    let visibles =
+        programme::service::detail::de_lorganisation(&bac.state, nouvelle, terrain.organisation)
+            .await
+            .expect("ses dossiers");
+    assert_eq!(
+        visibles.iter().map(|f| f.id).collect::<Vec<_>>(),
+        vec![sien.proposal_id]
+    );
 }
 
 #[tokio::test]

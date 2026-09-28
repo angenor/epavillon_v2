@@ -54,11 +54,13 @@ pub async fn enregistrer(
     let (regles, edition, existant) = contexte(state, acteur, &payload).await?;
     let porteur = porteur_du_dossier(&payload, existant.as_ref())?;
 
-    // L'adhésion active est vérifiée sur l'organisation PORTEUSE, résolue en
-    // base pour un dossier existant : le corps ne décide pas de qui peut
-    // écrire.
+    // L'adhésion est vérifiée sur l'organisation PORTEUSE, résolue en base pour
+    // un dossier existant : le corps ne décide pas de qui peut écrire.
     let adhesion = cross::adhesion(state.pool(), porteur, acteur).await?;
-    ownership::exiger(adhesion)?;
+    ownership::exiger(match existant.as_ref() {
+        Some(etat) => ownership::peut_agir_sur(adhesion, etat.submitted_by == acteur),
+        None => ownership::peut_deposer(adhesion),
+    })?;
 
     ecrire(
         state,
@@ -311,7 +313,10 @@ pub async fn abandonner(
         .await?
         .ok_or_else(ApiError::not_found)?;
     let adhesion = cross::adhesion(state.pool(), etat.organization_id, acteur).await?;
-    ownership::exiger(adhesion)?;
+    ownership::exiger(ownership::peut_agir_sur(
+        adhesion,
+        etat.submitted_by == acteur,
+    ))?;
     if etat.status != "draft" {
         return Err(ApiError::with_message(
             ErrorCode::ProposalNotEditable,

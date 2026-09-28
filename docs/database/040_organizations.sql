@@ -418,6 +418,10 @@ CREATE TRIGGER tg_memberships_sync_primary
 -- d'écriture (création, approbation, invitation acceptée) ne peuvent pas s'en
 -- souvenir chacun de leur côté.
 --
+-- UNE DEMANDE EN ATTENTE DONNE `org_applicant` (arbitré le 28/09) : rejoindre
+-- ne doit pas bloquer le dépôt. Une INVITATION en attente, elle, ne donne rien
+-- — la personne n'a encore rien accepté.
+--
 -- La portée est l'ORGANISATION : `has_permission()` ne l'accorde que là.
 CREATE OR REPLACE FUNCTION org.tg_sync_membership_role()
 RETURNS trigger
@@ -426,22 +430,25 @@ AS $$
 DECLARE
     v_role text;
 BEGIN
-    v_role := CASE WHEN NEW.role = 'manager' THEN 'org_manager' ELSE 'org_member' END;
+    v_role := CASE
+        WHEN NEW.status = 'active' AND NEW.role = 'manager' THEN 'org_manager'
+        WHEN NEW.status = 'active' THEN 'org_member'
+        WHEN NEW.status = 'pending' AND NEW.invited_at IS NULL THEN 'org_applicant'
+    END;
 
-    -- Une adhésion qui n'est plus active ne laisse aucun rôle derrière elle, et
-    -- un changement de rôle retire l'ancien : l'attribution est révoquée, jamais
-    -- supprimée — elle dit à quel titre la personne a siégé.
+    -- Un changement d'état ou de rôle retire l'ancien : l'attribution est
+    -- révoquée, jamais supprimée — elle dit à quel titre la personne a siégé.
     UPDATE identity.role_assignments
        SET revoked_at = now(),
            revoked_reason = 'Adhésion à l''organisation close ou modifiée'
      WHERE person_id = NEW.person_id
        AND scope_type = 'organization'
        AND scope_id = NEW.organization_id
-       AND role_code IN ('org_manager', 'org_member')
+       AND role_code IN ('org_manager', 'org_member', 'org_applicant')
        AND revoked_at IS NULL
-       AND (NEW.status <> 'active' OR role_code <> v_role);
+       AND role_code IS DISTINCT FROM v_role;
 
-    IF NEW.status = 'active' THEN
+    IF v_role IS NOT NULL THEN
         INSERT INTO identity.role_assignments
             (person_id, role_code, scope_type, scope_id, granted_by, note)
         VALUES (NEW.person_id, v_role, 'organization', NEW.organization_id,

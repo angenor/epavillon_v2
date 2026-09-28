@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT event_id, organization_id FROM programme.proposals\n          WHERE id = $1 AND deleted_at IS NULL",
+  "query": "SELECT event_id, organization_id, submitted_by FROM programme.proposals\n          WHERE id = $1 AND deleted_at IS NULL",
   "describe": {
     "columns": [
       {
@@ -24,6 +24,17 @@
             "name": "organization_id"
           }
         }
+      },
+      {
+        "ordinal": 2,
+        "name": "submitted_by",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposals",
+            "name": "submitted_by"
+          }
+        }
       }
     ],
     "parameters": {
@@ -33,8 +44,9 @@
     },
     "nullable": [
       false,
+      false,
       false
     ]
   },
-  "hash": "3f4c99fb82f063f422153e2a6577cc6f8fc3820398c8d549d5ba9009e038555c"
+  "hash": "8f6d41f41fe134274271acf2fd807aba00996ee74f8b1318ad4c55c21fdf41b0"
 }

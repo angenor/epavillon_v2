@@ -6,8 +6,8 @@
     "hint": "Vous appartenez à plusieurs organisations : choisissez celle dont vous suivez les dossiers."
   },
   "membershipPending": {
-    "title": "Votre rattachement n'est pas encore accepté",
-    "description": "Un référent de {organization} doit accepter votre demande. Tant qu'elle est en attente, vous ne pouvez ni déposer ni suivre de dossier au nom de cette organisation.",
+    "title": "Votre demande attend un référent",
+    "description": "Vous pouvez déjà déposer et suivre vos propres dossiers. Ceux de vos collègues de {organization} s'afficheront quand un référent aura accepté votre demande.",
     "action": "Voir mes rattachements"
   },
   "actions": {

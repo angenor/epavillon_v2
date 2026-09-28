@@ -131,15 +131,17 @@ pub struct EspaceOrganisation {
     pub call_edition: Option<FicheEdition>,
 }
 
-/// L'espace d'une organisation, **après contrôle de l'adhésion active**.
+/// L'espace d'une organisation, **après contrôle de l'adhésion**.
 pub async fn espace(
     state: &ProgrammeState,
     lecteur: Uuid,
     organisation: Uuid,
 ) -> Result<Option<EspaceOrganisation>> {
-    let Some(adhesion) = adhesion_active(state, lecteur, organisation).await? else {
+    let Some(adhesion) = adhesion_ouverte(state, lecteur, organisation).await? else {
         return Ok(None);
     };
+    // En attente du référent : ses dossiers, et personne d'autre.
+    let a_elle_seule = adhesion.status != "active";
 
     let Some(organization) = cross::fiche_organisation_complete(state.pool(), organisation).await?
     else {
@@ -149,10 +151,18 @@ pub async fn espace(
     let dossiers = proposals::de_lorganisation(state.pool(), organisation, None).await?;
     let mut proposals_suivis = Vec::with_capacity(dossiers.len());
     for dossier in dossiers {
+        if a_elle_seule && dossier.submitted_by != lecteur {
+            continue;
+        }
         proposals_suivis.push(suivre(state, dossier).await?);
     }
 
-    let membres = cross::adhesions_de_lorganisation(state.pool(), organisation).await?;
+    let membres: Vec<LigneDAdhesion> =
+        cross::adhesions_de_lorganisation(state.pool(), organisation)
+            .await?
+            .into_iter()
+            .filter(|m| !a_elle_seule || m.person_id == lecteur)
+            .collect();
     let ids: Vec<Uuid> = membres.iter().map(|m| m.person_id).collect();
     let personnes = cross::personnes_affichees(state.pool(), &ids).await?;
 
@@ -165,7 +175,9 @@ pub async fn espace(
         None => (None, None),
     };
 
-    let mut actions = actions_en_attente(&proposals_suivis, &membres, open_call.as_ref());
+    // Sa propre demande ne lui est pas une « demande à traiter ».
+    let membres_a_traiter: &[LigneDAdhesion] = if a_elle_seule { &[] } else { &membres };
+    let mut actions = actions_en_attente(&proposals_suivis, membres_a_traiter, open_call.as_ref());
     actions.extend(comptes_rendus_manquants(state, &proposals_suivis).await?);
 
     Ok(Some(EspaceOrganisation {
@@ -207,10 +219,10 @@ pub async fn dossier(
     let Some(etat) = proposals::etat(state.pool(), id).await? else {
         return Ok(None);
     };
-    if adhesion_active(state, lecteur, etat.organization_id)
-        .await?
-        .is_none()
-    {
+    let Some(adhesion) = adhesion_ouverte(state, lecteur, etat.organization_id).await? else {
+        return Ok(None);
+    };
+    if adhesion.status != "active" && etat.submitted_by != lecteur {
         return Ok(None);
     }
 
@@ -277,7 +289,7 @@ pub async fn editions(
     lecteur: Uuid,
     organisation: Uuid,
 ) -> Result<Option<Vec<FicheEdition>>> {
-    if adhesion_active(state, lecteur, organisation)
+    if adhesion_ouverte(state, lecteur, organisation)
         .await?
         .is_none()
     {
@@ -302,7 +314,9 @@ pub async fn editions(
 // Les gardes et la composition
 // -----------------------------------------------------------------------------
 
-/// **L'adhésion active, et rien d'autre.**
+/// **L'adhésion active, ou la demande en attente du référent.** Qui la reçoit
+/// en attente ne doit voir que ses propres dossiers : c'est à l'appelant de
+/// borner.
 ///
 /// Rend `None` plutôt qu'une erreur, et les trois lectures qui l'appellent
 /// rendent alors `200` avec un corps `null`. Une organisation dont on n'est pas
@@ -311,7 +325,7 @@ pub async fn editions(
 /// En 404, les trois écrans de l'espace organisation affichaient « une erreur
 /// est survenue » là où il fallait lire « vous n'avez pas d'espace ici », et
 /// c'est le contrat lui-même qui annonce `| null`.
-async fn adhesion_active(
+async fn adhesion_ouverte(
     state: &ProgrammeState,
     lecteur: Uuid,
     organisation: Uuid,
@@ -321,7 +335,8 @@ async fn adhesion_active(
         .into_iter()
         .find(|a| a.person_id == lecteur);
 
-    Ok(adhesion.filter(|a| a.status == "active"))
+    Ok(adhesion
+        .filter(|a| a.status == "active" || (a.status == "pending" && a.invited_at.is_none())))
 }
 
 /// Composer le suivi d'un dossier — **et lui retirer ce qui appartient au

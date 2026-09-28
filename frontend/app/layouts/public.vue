@@ -46,8 +46,8 @@ void auth.ensureLoaded()
  * Rattachée, elle va à son espace — ses dossiers, ce qui l'attend, ses membres.
  * Pas encore rattachée, elle va à l'écran de rattachement : lui ouvrir un espace
  * qui n'a ni dossier ni membre serait lui montrer une pièce vide et la laisser
- * chercher la porte. Une demande EN ATTENTE ne suffit pas — aucun référent n'a
- * accepté, et l'espace la refuserait.
+ * chercher la porte. Une demande en attente suffit : l'espace lui montre ses
+ * propres dossiers.
  *
  * Le store est déjà chargé pour la garde `requires-organization` : cette lecture
  * ne coûte aucun appel de plus.
@@ -56,7 +56,7 @@ const memberships = useMembershipStore()
 void memberships.ensureLoaded()
 
 const myOrganizationTo = computed(() =>
-  memberships.hasActiveOrganization ? '/mon-organisation' : '/rattachement-organisation',
+  memberships.hasSubmittableOrganization ? '/mon-organisation' : '/rattachement-organisation',
 )
 
 async function signOut(): Promise<void> {

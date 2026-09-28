@@ -75,3 +75,18 @@ Demande du commanditaire : la page, atteinte depuis le dépôt d'une proposition
 | Description, recherche vide, attente d'un référent en deux phrases chacune | Une phrase chacune |
 
 Vérifié au navigateur sur les données d'exemple (compte OSED), en 1280 et 375 px : rien ne déborde, le message d'exigence s'affiche une fois. `vue-tsc` sans erreur sur la page.
+
+## Rejoindre ne bloque plus le dépôt (28/09)
+
+[Décision du 28/09](../decisions/2026-09-28.md). Une demande en attente du référent donne le rôle `org_applicant`, qui ne porte que le dépôt ; l'API borne l'accès aux dossiers dont la personne est la déposante.
+
+| Où | Ce qui change |
+|---|---|
+| Écran de rattachement | Après « Rejoindre », message de réussite et « Reprendre où j'en étais » vers le dépôt, que la demande soit validée ou non. Textes de la fenêtre, du bandeau de domaine et de l'encart « Vos rattachements » réécrits |
+| Création d'organisation | Bouton **principal** quand la recherche ne trouve rien ; encadré avec bouton secondaire sous une liste de résultats (il était en bouton discret de barre d'outils) |
+| Garde `requires-organization`, lien « Mon organisation » | Passent avec une demande en attente (`useMembershipStore().submittable`) |
+| Espace organisation | Ouvert, avec un bandeau « Votre demande attend un référent » ; seuls ses dossiers et sa propre fiche de membre |
+
+Vérifié au navigateur sur les données d'exemple (Karim Ilboudo, demande en attente auprès de l'UJFC) : le dépôt s'ouvre avec l'UJFC en porteuse, l'espace affiche le bandeau, rejoindre l'IMRE mène à « Vous avez rejoint… » puis au dépôt. Non vérifié contre l'API au navigateur ; l'API est couverte par les tests `une_demande_en_attente_depose_mais_ne_touche_qua_ses_dossiers` et `ladhesion_active_est_le_seul_droit_dentree`.
+
+Le compteur « N membres » de l'espace ne compte que les membres validés : la personne en attente y lit « Aucun membre » à côté de sa propre fiche. Laissé tel quel.

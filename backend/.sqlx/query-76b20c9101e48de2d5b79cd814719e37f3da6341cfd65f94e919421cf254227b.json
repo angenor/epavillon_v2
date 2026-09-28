@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT m.status::text AS \"statut!\", m.role::text AS \"role!\"\n             FROM org.memberships m\n            WHERE m.person_id = $1 AND m.organization_id = $2",
+  "query": "SELECT m.status::text AS \"statut!\", m.role::text AS \"role!\",\n                  m.invited_at IS NULL AS \"demande!\"\n             FROM org.memberships m\n            WHERE m.person_id = $1 AND m.organization_id = $2",
   "describe": {
     "columns": [
       {
@@ -14,6 +14,12 @@
         "name": "role!",
         "type_info": "Text",
         "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "demande!",
+        "type_info": "Bool",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -24,8 +30,9 @@
     },
     "nullable": [
       null,
+      null,
       null
     ]
   },
-  "hash": "5c22062bd42f0348b32a7f1875c16021691b940458aa879255f788b8714353d9"
+  "hash": "76b20c9101e48de2d5b79cd814719e37f3da6341cfd65f94e919421cf254227b"
 }

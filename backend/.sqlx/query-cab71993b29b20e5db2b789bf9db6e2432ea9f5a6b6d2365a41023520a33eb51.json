@@ -1,12 +1,12 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT status::text AS \"status!\" FROM org.memberships\n            WHERE organization_id = $1 AND person_id = $2",
+  "query": "SELECT identity.has_permission($1, 'programme.proposal.submit', 'organization', $2) AS \"droit!\"",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
-        "name": "status!",
-        "type_info": "Text",
+        "name": "droit!",
+        "type_info": "Bool",
         "origin": "Expression"
       }
     ],
@@ -20,5 +20,5 @@
       null
     ]
   },
-  "hash": "e99ea7a00daccad42a23f4b10b575718d9a5453244d4c6af4743847dd3a91fc1"
+  "hash": "cab71993b29b20e5db2b789bf9db6e2432ea9f5a6b6d2365a41023520a33eb51"
 }

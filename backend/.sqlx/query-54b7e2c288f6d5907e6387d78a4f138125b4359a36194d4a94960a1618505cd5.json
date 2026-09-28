@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT organization_id FROM org.memberships\n          WHERE person_id = $1 AND status = 'active'\n          ORDER BY organization_id",
+  "query": "SELECT organization_id FROM org.memberships\n          WHERE person_id = $1\n            AND (status = 'active' OR (status = 'pending' AND invited_at IS NULL))\n          ORDER BY organization_id",
   "describe": {
     "columns": [
       {
@@ -24,5 +24,5 @@
       false
     ]
   },
-  "hash": "16f6db5707afe4dba0a283635878d4cf2275435f995300d7c1072c4ceef5c8b6"
+  "hash": "54b7e2c288f6d5907e6387d78a4f138125b4359a36194d4a94960a1618505cd5"
 }

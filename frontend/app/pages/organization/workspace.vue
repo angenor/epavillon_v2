@@ -70,7 +70,7 @@ const router = useRouter()
 
 await memberships.ensureLoaded()
 
-const activeOrganizations = computed(() => memberships.active)
+const activeOrganizations = computed(() => memberships.submittable)
 
 const currentOrganizationId = computed<Uuid | null>(() => {
   const requested = route.query.organisation
@@ -248,6 +248,14 @@ async function decide(membershipId: string, approved: boolean): Promise<void> {
     />
 
     <template v-else>
+      <UiAlert
+        v-if="overview.membership.status === 'pending'"
+        class="mt-10"
+        intent="info"
+        :title="t('organization.workspace.membershipPending.title')"
+        :message="t('organization.workspace.membershipPending.description', { organization: overview.organization.legal_name })"
+      />
+
       <WorkspaceActionList class="mt-10" :actions="overview.actions" :timezone="deadlineTimezone" />
 
       <section class="mt-12" aria-labelledby="workspace-proposals-title">

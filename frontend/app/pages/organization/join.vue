@@ -39,10 +39,10 @@ import type { Uuid } from '~/types/shared'
  *     intermédiaire montre côte à côte ce qui va être créé et ce qui existe. Il
  *     avertit, il ne refuse pas : un refus fait recommencer avec une autre
  *     orthographe, et le doublon devient alors introuvable.
- *  5. REJOINDRE N'EST PAS ENTRER. Sauf domaine vérifié, l'adhésion naît
- *     `pending` et un référent doit l'accepter. L'écran le dit avant le clic et
- *     après : laisser croire l'affaire réglée, c'est produire la demande en
- *     double la semaine suivante.
+ *  5. REJOINDRE NE BLOQUE PAS (arbitré le 28/09). Sauf domaine vérifié,
+ *     l'adhésion naît `pending` et un référent la valide ; en attendant, la
+ *     personne dépose et suit ses propres dossiers. L'écran reprend donc
+ *     l'action interrompue dans les deux cas.
  *
  * QUATRE ÉTATS, comme partout : chargement (référentiels), erreur (avec
  * reprise), vide (recherche infructueuse), accès refusé (session perdue en cours
@@ -466,20 +466,8 @@ function backToSearch(): void {
   actionError.value = null
 }
 
-/**
- * Où mène « Continuer » une fois l'affaire réglée.
- *
- * On reprend l'action interrompue — et SEULEMENT si elle est de nouveau
- * possible. Une demande restée `pending` ne donne aucun droit : y renvoyer
- * ferait rejouer la garde, qui ramènerait ici, et la personne tournerait en
- * rond sans comprendre. Dans ce cas on rentre à l'accueil, l'écran ayant déjà
- * expliqué ce qu'on attend.
- */
-const continueTo = computed(() => {
-  const target = requiredFor.value
-  if (target !== null && outcome.value?.kind !== 'pending') return target
-  return localePath('/')
-})
+/** Où mène « Continuer » : l'action interrompue, sinon l'accueil. */
+const continueTo = computed(() => requiredFor.value ?? localePath('/'))
 </script>
 
 <template>
@@ -515,7 +503,7 @@ const continueTo = computed(() => {
          reste à attendre. -->
     <section v-else-if="outcome" class="grid gap-5">
       <UiAlert
-        :intent="outcome.kind === 'pending' ? 'warning' : 'success'"
+        intent="success"
         live
         :title="t(`organization.join.outcome.${outcome.kind}.title`, { organization: outcome.organization.legal_name })"
         :message="t(`organization.join.outcome.${outcome.kind}.description`)"
@@ -526,7 +514,7 @@ const continueTo = computed(() => {
           variant="primary"
           size="lg"
           :to="continueTo"
-          :label="requiredFor !== null && outcome.kind !== 'pending'
+          :label="requiredFor !== null
             ? t('organization.join.outcome.resume')
             : t('organization.join.outcome.continue')"
         />
@@ -606,7 +594,7 @@ const continueTo = computed(() => {
           >
             <template #actions>
               <UiButton
-                variant="secondary"
+                variant="primary"
                 icon="plus"
                 :label="t('organization.join.empty.create')"
                 @click="startCreation()"
@@ -631,18 +619,19 @@ const continueTo = computed(() => {
             />
 
             <!-- Aucune de ces fiches n'est la bonne : c'est aussi une recherche
-                 infructueuse, et la création s'offre alors, en second rang. -->
-            <p class="border-t border-border pt-4 text-sm text-text-muted">
-              {{ t('organization.join.results.noneMine') }}
+                 infructueuse, et la création doit se voir sans chercher. -->
+            <div class="flex flex-col gap-3 rounded-md border border-border bg-surface-sunken px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <p class="text-sm font-semibold text-text">
+                {{ t('organization.join.results.noneMine') }}
+              </p>
               <UiButton
-                class="mt-2 sm:mt-0 sm:ml-2"
-                variant="ghost"
-                size="sm"
+                class="shrink-0 self-start sm:self-auto"
+                variant="secondary"
                 icon="plus"
                 :label="t('organization.join.empty.create')"
                 @click="startCreation()"
               />
-            </p>
+            </div>
           </template>
 
         </section>

@@ -139,11 +139,11 @@ pub(crate) async fn contexte_du_formulaire(
     acteur: Actor,
     demande: web::Query<OrganisationsDemandees>,
 ) -> Result<HttpResponse> {
-    // **Les organisations reçues sont recoupées avec les adhésions actives.**
+    // **Les organisations reçues sont recoupées avec celles où l'on dépose.**
     // Un client qui enverrait l'identifiant d'une organisation dont il n'est
     // pas membre lirait sinon son décompte de dossiers — mince, mais c'est une
     // fuite, et la lecture qui la referme existe déjà.
-    let siennes = cross::organisations_actives(state.pool(), acteur.0).await?;
+    let siennes = cross::organisations_de_depot(state.pool(), acteur.0).await?;
     let demandees = decouper(demande.organization_ids.as_deref());
     let retenues: Vec<Uuid> = if demandees.is_empty() {
         siennes

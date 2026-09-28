@@ -117,7 +117,7 @@ const {
   async () => {
     await memberships.ensureLoaded()
     const person = auth.person
-    const organizationIds = memberships.active.map((entry) => entry.organization.id)
+    const organizationIds = memberships.submittable.map((entry) => entry.organization.id)
 
     const empty: FormContext = {
       call: null,
@@ -211,7 +211,7 @@ const countryOptions = computed<SelectOption[]>(() =>
 
 const leadOrganization = computed<Organization | null>(
   () =>
-    memberships.active.find((entry) => entry.organization.id === draft.value.organization_id)
+    memberships.submittable.find((entry) => entry.organization.id === draft.value.organization_id)
       ?.organization ?? null,
 )
 
@@ -292,7 +292,7 @@ watch(
 )
 
 function blankDraft(openCall: CallForProposals): ProposalDraft {
-  const active = memberships.active
+  const active = memberships.submittable
   return emptyProposalDraft({
     organizationId: active.length === 1 ? active[0]?.organization.id : null,
     durationMinutes: openCall.default_duration_minutes,
@@ -825,7 +825,7 @@ const organizationSpaceTo = computed<string | null>(() =>
             <ProposalStepOrganizations
               v-if="currentStep === 'organizations'"
               v-model="draft"
-              :lead-candidates="memberships.active.map((entry) => entry.organization)"
+              :lead-candidates="memberships.submittable.map((entry) => entry.organization)"
               :issues="visibleIssuesOf('organizations')"
               :country-name-of="countryNameOf"
             />

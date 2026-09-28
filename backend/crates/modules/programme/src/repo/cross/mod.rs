@@ -547,8 +547,9 @@ pub async fn adhesion<'e>(
     organization_id: Uuid,
     person_id: Uuid,
 ) -> Result<Option<Adhesion>> {
-    let statut = sqlx::query_scalar!(
-        r#"SELECT status::text AS "status!" FROM org.memberships
+    let ligne = sqlx::query!(
+        r#"SELECT status::text AS "status!", invited_at IS NULL AS "demande!"
+             FROM org.memberships
             WHERE organization_id = $1 AND person_id = $2"#,
         organization_id,
         person_id
@@ -556,20 +557,22 @@ pub async fn adhesion<'e>(
     .fetch_optional(executor)
     .await?;
 
-    Ok(statut.map(|s| Adhesion {
-        active: s == "active",
+    Ok(ligne.map(|l| Adhesion {
+        active: l.status == "active",
+        en_attente: l.status == "pending" && l.demande,
     }))
 }
 
-/// Les organisations dont cette personne est membre **actif**. Ce que l'espace
-/// organisation liste, et ce que le formulaire de dépôt propose comme porteur.
-pub async fn organisations_actives<'e>(
+/// Les organisations au nom desquelles cette personne peut déposer : adhésion
+/// active, ou demande en attente du référent.
+pub async fn organisations_de_depot<'e>(
     executor: impl PgExecutor<'e>,
     person_id: Uuid,
 ) -> Result<Vec<Uuid>> {
     let ids = sqlx::query_scalar!(
         "SELECT organization_id FROM org.memberships
-          WHERE person_id = $1 AND status = 'active'
+          WHERE person_id = $1
+            AND (status = 'active' OR (status = 'pending' AND invited_at IS NULL))
           ORDER BY organization_id",
         person_id
     )

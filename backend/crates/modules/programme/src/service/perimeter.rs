@@ -121,8 +121,8 @@ pub enum Acces {
 
 /// Résoudre l'accès à un dossier, **par l'une ou l'autre voie**.
 ///
-/// « Accès au dossier » signifie : adhésion active à l'organisation porteuse,
-/// **ou** lecture générale dans le périmètre de l'édition. Les deux voies sont
+/// « Accès au dossier » signifie : adhésion active à l'organisation porteuse —
+/// ou demande en attente, pour ses propres dossiers —, **ou** lecture générale dans le périmètre de l'édition. Les deux voies sont
 /// distinctes et testées séparément — un membre d'organisation n'a aucun
 /// périmètre, et un administrateur détaché n'est membre d'aucune organisation.
 ///
@@ -136,7 +136,7 @@ pub async fn acces_au_dossier(
     dossier: ProposalId,
 ) -> Result<(EventId, Acces)> {
     let ligne = sqlx::query!(
-        "SELECT event_id, organization_id FROM programme.proposals
+        "SELECT event_id, organization_id, submitted_by FROM programme.proposals
           WHERE id = $1 AND deleted_at IS NULL",
         dossier.as_uuid()
     )
@@ -147,7 +147,7 @@ pub async fn acces_au_dossier(
     let edition = EventId::from(ligne.event_id);
 
     let adhesion = cross::adhesion(pool, ligne.organization_id, personne).await?;
-    if crate::domain::ownership::peut_agir(adhesion) {
+    if crate::domain::ownership::peut_agir_sur(adhesion, ligne.submitted_by == personne) {
         return Ok((edition, Acces::Organisation));
     }
 

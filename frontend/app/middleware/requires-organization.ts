@@ -23,21 +23,18 @@
  *   })
  *
  * CE N'EST PAS UN CONTRÔLE DE SÉCURITÉ — un middleware de navigation s'exécute
- * dans le navigateur. L'API refusera de toute façon un dépôt sans adhésion
- * active ni permission (`identity.has_permission`, rôle `org_member`). Ici on
- * évite qu'un formulaire de sept étapes se remplisse pour être rejeté à la fin.
+ * dans le navigateur. L'API refusera de toute façon un dépôt sans adhésion ni
+ * permission (`identity.has_permission`). Ici on évite qu'un formulaire de sept
+ * étapes se remplisse pour être rejeté à la fin.
  *
- * UNE DEMANDE EN ATTENTE NE PASSE PAS, et ce n'est pas une sévérité inutile :
- * `memberships.status = 'pending'` veut dire qu'aucun référent n'a encore
- * accepté. Laisser déposer dans cet état, c'est promettre un dossier qui sera
- * refusé à l'enregistrement. L'écran de rattachement montre alors la demande en
- * cours et explique ce qu'on attend — c'est une information, pas un mur muet.
+ * Une demande en attente du référent passe : rejoindre ne bloque pas le dépôt
+ * (arbitré le 28/09).
  */
 export default defineNuxtRouteMiddleware(async (to) => {
   const memberships = useMembershipStore()
   await memberships.ensureLoaded()
 
-  if (memberships.hasActiveOrganization) return
+  if (memberships.hasSubmittableOrganization) return
 
   const localePath = useLocalePath()
   return navigateTo({

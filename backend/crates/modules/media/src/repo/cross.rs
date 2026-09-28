@@ -32,6 +32,8 @@ use uuid::Uuid;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Adhesion {
     pub active: bool,
+    /// Demande que le référent n'a pas encore acceptée — pas une invitation.
+    pub en_attente: bool,
     /// Référent de la fiche — c'est le droit qu'exige le logo, qui engage la
     /// fiche publique.
     pub referent: bool,
@@ -44,7 +46,8 @@ pub async fn adhesion(
     organization_id: Uuid,
 ) -> Result<Option<Adhesion>> {
     let ligne = sqlx::query!(
-        r#"SELECT m.status::text AS "statut!", m.role::text AS "role!"
+        r#"SELECT m.status::text AS "statut!", m.role::text AS "role!",
+                  m.invited_at IS NULL AS "demande!"
              FROM org.memberships m
             WHERE m.person_id = $1 AND m.organization_id = $2"#,
         person_id,
@@ -55,6 +58,7 @@ pub async fn adhesion(
 
     Ok(ligne.map(|l| Adhesion {
         active: l.statut == "active",
+        en_attente: l.statut == "pending" && l.demande,
         referent: l.role == "manager",
     }))
 }
@@ -91,11 +95,14 @@ pub struct DossierVise {
     /// par déclencheur. Nulle pour une séance que l'IFDD a programmée
     /// directement, sans dossier.
     pub organization_id: Option<Uuid>,
+    /// Qui a déposé le dossier. Nul pour une séance.
+    pub deposant: Option<Uuid>,
 }
 
 pub async fn dossier(pool: &PgPool, proposal_id: Uuid) -> Result<Option<DossierVise>> {
     let ligne = sqlx::query!(
-        "SELECT p.event_id, p.organization_id FROM programme.proposals p WHERE p.id = $1",
+        "SELECT p.event_id, p.organization_id, p.submitted_by
+           FROM programme.proposals p WHERE p.id = $1",
         proposal_id
     )
     .fetch_optional(pool)
@@ -104,6 +111,7 @@ pub async fn dossier(pool: &PgPool, proposal_id: Uuid) -> Result<Option<DossierV
     Ok(ligne.map(|l| DossierVise {
         event_id: l.event_id,
         organization_id: Some(l.organization_id),
+        deposant: Some(l.submitted_by),
     }))
 }
 
@@ -125,6 +133,7 @@ pub async fn seance(pool: &PgPool, session_id: Uuid) -> Result<Option<DossierVis
     Ok(ligne.map(|l| DossierVise {
         event_id: l.event_id,
         organization_id: l.organization_id,
+        deposant: None,
     }))
 }
 
