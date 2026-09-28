@@ -543,20 +543,11 @@ const continueTo = computed(() => {
         <h1 class="font-display text-2xl leading-tight font-bold text-text sm:text-3xl">
           {{ t('organization.join.title') }}
         </h1>
+        <!-- Étape imposée : dire POUR QUOI faire, sinon elle se lit comme une tracasserie. -->
         <p class="mt-2 max-w-(--measure) text-text-muted">
-          {{ requiredFor !== null ? t('organization.join.required.description') : t('organization.join.description') }}
+          {{ requiredFor !== null ? requiredMessage : t('organization.join.description') }}
         </p>
       </header>
-
-      <!-- ÉTAPE IMPOSÉE — on arrive ici parce qu'une action l'exigeait. Le
-           bandeau dit LAQUELLE : « une organisation est nécessaire » sans dire
-           pour quoi faire se lit comme une tracasserie administrative. -->
-      <UiAlert
-        v-if="requiredFor !== null && step === 'search'"
-        intent="info"
-        :title="t('organization.join.required.title')"
-        :message="requiredMessage"
-      />
 
       <UiAlert
         v-if="actionError"
@@ -654,12 +645,6 @@ const continueTo = computed(() => {
             </p>
           </template>
 
-          <!-- Avant toute frappe : ce que l'écran attend, et pourquoi. Aucune
-               liste d'organisations n'est proposée — le référentiel compte des
-               centaines de fiches, et parcourir n'est pas chercher. -->
-          <p v-else class="rounded-md bg-surface-sunken px-4 py-3 text-sm text-text-muted">
-            {{ t('organization.join.search.idle') }}
-          </p>
         </section>
 
         <!-- LA PORTE DE SORTIE, et elle est explicite.
@@ -671,12 +656,12 @@ const continueTo = computed(() => {
              d'éviter. Le libellé change selon qu'on est passé ici de son plein
              gré ou qu'une action l'exigeait : dans le second cas, partir signifie
              renoncer à cette action, et il faut le dire. -->
-        <section class="border-t border-border pt-5">
+        <section class="flex flex-col gap-3 border-t border-border pt-5 sm:flex-row sm:items-center sm:justify-between">
           <p class="text-sm text-text-muted">
             {{ requiredFor !== null ? t('organization.join.skip.required') : t('organization.join.skip.description') }}
           </p>
           <UiButton
-            class="mt-3"
+            class="shrink-0 self-start sm:self-auto"
             variant="ghost"
             :to="localePath('/')"
             :label="requiredFor !== null ? t('organization.join.skip.giveUp') : t('organization.join.skip.action')"

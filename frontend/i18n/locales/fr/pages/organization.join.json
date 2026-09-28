@@ -1,11 +1,10 @@
 {
   "title": "Votre organisation",
-  "description": "Cherchez l'organisation au nom de laquelle vous interviendrez. Tapez son nom complet ou son sigle : les deux mènent à la même fiche.",
+  "description": "Trouvez l'organisation au nom de laquelle vous interviendrez.",
   "search": {
     "label": "Nom ou sigle de l'organisation",
     "placeholder": "Institut de la Francophonie, IFDD, ministère…",
-    "hint": "Deux lettres suffisent pour commencer.",
-    "idle": "Les résultats s'affichent dès la deuxième lettre saisie."
+    "hint": "Deux lettres suffisent pour commencer."
   },
   "results": {
     "count": "Aucune organisation trouvée | Une organisation trouvée | {count} organisations trouvées",
@@ -21,7 +20,7 @@
   },
   "empty": {
     "title": "Aucune organisation ne correspond à « {query} »",
-    "description": "Essayez le nom complet, ou seulement le sigle : la recherche interroge les deux, ainsi que les anciens noms. Si votre organisation n'est vraiment pas là, créez sa fiche.",
+    "description": "Essayez le nom complet ou le sigle. Si elle n'existe pas encore, créez sa fiche.",
     "create": "Créer une nouvelle organisation"
   },
   "domain": {
@@ -37,7 +36,7 @@
     "primary": "Principale",
     "active": "Rattachement actif",
     "pending": "En attente",
-    "pendingHint": "Un référent de cette organisation doit accepter votre demande. Inutile de la renouveler.",
+    "pendingHint": "Un référent doit accepter votre demande. Inutile de la renouveler.",
     "roles": {
       "manager": "Référent",
       "member": "Membre",
@@ -96,18 +95,16 @@
     "signIn": "Se connecter"
   },
   "required": {
-    "title": "Une organisation est nécessaire pour cette action",
-    "description": "Indiquez l'organisation au nom de laquelle vous agissez. Vous reprendrez ensuite là où vous en étiez.",
-    "generic": "L'action que vous avez demandée s'exerce au nom d'une organisation.",
+    "generic": "Cette action se fait au nom d'une organisation. Trouvez la vôtre, puis vous reprendrez où vous en étiez.",
     "reasons": {
-      "proposal": "Une proposition d'activité est toujours déposée au nom d'une organisation : c'est elle qui figure au programme et qui répond de l'activité.",
-      "organization-space": "L'espace organisation rassemble les dossiers déposés par votre structure."
+      "proposal": "Une proposition se dépose au nom d'une organisation. Trouvez la vôtre, puis vous reprendrez votre dépôt.",
+      "organization-space": "L'espace organisation rassemble les dossiers de votre structure. Trouvez-la pour y accéder."
     }
   },
   "skip": {
-    "description": "Vous n'avez pas d'organisation, ou vous préférez le faire plus tard ? Ce n'est pas obligatoire pour avoir un compte : vous pouvez suivre le programme et vous inscrire aux séances sans rattachement, et l'indiquer quand vous voudrez depuis votre profil.",
+    "description": "Pas d'organisation ? Ce n'est pas obligatoire : votre compte suffit pour suivre le programme et vous inscrire aux séances.",
     "action": "Je n'ai pas d'organisation pour l'instant",
-    "required": "Vous pouvez renoncer à cette action pour l'instant. Votre compte reste utilisable pour suivre le programme et vous inscrire aux séances ; vous pourrez revenir ici depuis votre profil.",
+    "required": "Pas d'organisation pour l'instant ? Votre compte reste utilisable pour suivre le programme.",
     "giveUp": "Renoncer pour l'instant"
   }
 }

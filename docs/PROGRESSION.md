@@ -2,12 +2,12 @@
 **Ce fichier est la mémoire du projet entre deux sessions Claude Code.** Toute session commence par le lire et se termine par le mettre à jour.
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
-## Dernière mise à jour — 27 septembre 2026
+## Dernière mise à jour — 28 septembre 2026
+- 28/09 — Rattachement à une organisation allégé : un seul message d'exigence, textes raccourcis — [A2](progression/ecrans/a2-organisation.md).
 - 27/09 — Appel à propositions : formats déduits du mode de l'édition (hybride → présentiel ou en ligne), revues visées facultatives, grille de critères désactivable, bug du critère « obligatoire » corrigé. en production — [A10](progression/ecrans/a10-evenements.md).
 - 17/09 — L'équipe corrige un dossier déposé depuis sa fiche ou la liste ; la base exige des intervenants complets au dépôt. Migré et déployé — [A8](progression/ecrans/a8-evaluation.md).
 - 16/09 — L'évaluation passe dans une fenêtre flottante : facultative, ouverte à toute l'équipe, note sur 20 ou grille détaillée — [A8](progression/ecrans/a8-evaluation.md).
 - 16/09 — La production est migrée au modèle du jour, sans perte ; la méthode est au § 13 de [`DEPLOIEMENT.md`](DEPLOIEMENT.md).
-- 16/09 — Fuseau cherché à la frappe dans le formulaire d'édition ([A10](progression/ecrans/a10-evenements.md)) ; le dépôt n'enregistre plus de dossier vide ([A4](progression/ecrans/a4-soumission.md)) ; vrais logos d'ePavillon — [journal](progression/journal/2026-09-16.md).
 
 ## État général
 | Domaine | État |
@@ -30,7 +30,7 @@ Un écran = un fichier : ce qui a été livré, les écarts entre le modèle et 
 | A0.3 | Données simulées | ✅ 16/08 | [écarts et vérifications](progression/ecrans/a0.3-donnees-simulees.md) |
 | A0.4 | Composants d'interface + page de guide de style | ✅ 16/08 · navigation latérale du back-office refondue 04/09 | [écarts et vérifications](progression/ecrans/a0.4-composants.md) |
 | A1 | Authentification | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a1-authentification.md) |
-| A2 | Rattachement à une organisation | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a2-organisation.md) |
+| A2 | Rattachement à une organisation | ✅ 17/08 · texte allégé 28/09 | [écarts et vérifications](progression/ecrans/a2-organisation.md) |
 | A3 | Page publique de l'événement | ✅ 17/08 · refondue 19/08 · corrigée 27/08 · bandeau de programmation 16/09 · en production | [écarts et vérifications](progression/ecrans/a3-evenement-public.md) |
 | A4 | Formulaire de soumission | ✅ 17/08 · ajusté 15/09 et 16/09 | [écarts et vérifications](progression/ecrans/a4-soumission.md) |
 | A5 | Espace organisation | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a5-espace-organisation.md) |

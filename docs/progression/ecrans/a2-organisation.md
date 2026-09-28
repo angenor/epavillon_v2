@@ -62,3 +62,16 @@ Un écran de recherche ne se prouve pas au rendu statique. Tout ce qui suit a é
 | **« facultatif » sur une barre de recherche** — « Nom ou sigle de l'organisation facultatif ». Un champ de recherche n'appartient à aucune soumission : il n'est ni obligatoire ni facultatif | `Ui FormField`, `UiSearchInput` | Propriété `hideOptional`, posée par `UiSearchInput`. Même famille que la correction d'A1 sur les champs en lecture seule |
 | **Le layout public affichait « Se connecter » à une personne connectée** — sur le premier écran du jalon qui exige de l'être | `layouts/public.vue` | La barre connaît la session : nom de la personne et bouton de déconnexion. Chargement non bloquant, pour ne pas retarder les pages publiques |
 | **`ACCOUNT(1)` valait exactement `DUPLICATE.osed`** : les deux familles d'identifiants simulés partageaient le préfixe `7007` | `mocks/ids.ts` | Comptes déplacés en `7009`. Aucune donnée n'en était fausse, mais le fichier promet qu'un identifiant croisé dans une console se retrouve par simple recherche |
+
+## Allègement du texte (28/09)
+
+Demande du commanditaire : la page, atteinte depuis le dépôt d'une proposition, était trop chargée en texte.
+
+| Avant | Après |
+|---|---|
+| Sous le titre « Indiquez l'organisation… », puis un encadré « Une organisation est nécessaire pour cette action » avec la raison en deux propositions | Une seule phrase sous le titre, qui porte la raison : « Une proposition se dépose au nom d'une organisation. Trouvez la vôtre, puis vous reprendrez votre dépôt. » Les clés `required.title` et `required.description` sont supprimées |
+| « Deux lettres suffisent pour commencer » sous le champ, puis « Les résultats s'affichent dès la deuxième lettre saisie » dans un bloc grisé | L'aide du champ seule ; `search.idle` supprimée |
+| Sortie en bas de page : trois lignes sur ce que le compte permet sans rattachement | Une ligne, bouton à droite en écran large |
+| Description, recherche vide, attente d'un référent en deux phrases chacune | Une phrase chacune |
+
+Vérifié au navigateur sur les données d'exemple (compte OSED), en 1280 et 375 px : rien ne déborde, le message d'exigence s'affiche une fois. `vue-tsc` sans erreur sur la page.

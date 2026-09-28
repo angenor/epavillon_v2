@@ -1,11 +1,10 @@
 {
   "title": "Your organization",
-  "description": "Search for the organization you will be representing. Type its full name or its acronym: both lead to the same record.",
+  "description": "Find the organization you will be representing.",
   "search": {
     "label": "Organization name or acronym",
     "placeholder": "Institut de la Francophonie, IFDD, ministry…",
-    "hint": "Two letters are enough to start.",
-    "idle": "Results appear as soon as you type the second letter."
+    "hint": "Two letters are enough to start."
   },
   "results": {
     "count": "No organization found | One organization found | {count} organizations found",
@@ -21,7 +20,7 @@
   },
   "empty": {
     "title": "No organization matches “{query}”",
-    "description": "Try the full name, or the acronym alone: the search covers both, as well as former names. If your organization really is not listed, create its record.",
+    "description": "Try the full name or the acronym. If it does not exist yet, create its record.",
     "create": "Create a new organization"
   },
   "domain": {
@@ -37,7 +36,7 @@
     "primary": "Primary",
     "active": "Active affiliation",
     "pending": "Pending",
-    "pendingHint": "A contact person at this organization must approve your request. There is no need to send it again.",
+    "pendingHint": "A contact person must approve your request. There is no need to send it again.",
     "roles": {
       "manager": "Contact person",
       "member": "Member",
@@ -96,18 +95,16 @@
     "signIn": "Sign in"
   },
   "required": {
-    "title": "An organization is required for this action",
-    "description": "Tell us which organization you are acting for. You will then pick up where you left off.",
-    "generic": "The action you requested is carried out on behalf of an organization.",
+    "generic": "This action is carried out on behalf of an organization. Find yours, then pick up where you left off.",
     "reasons": {
-      "proposal": "An activity proposal is always submitted on behalf of an organization: it appears in the programme and answers for the activity.",
-      "organization-space": "The organization workspace gathers the proposals submitted by your body."
+      "proposal": "A proposal is submitted on behalf of an organization. Find yours, then resume your submission.",
+      "organization-space": "The organization workspace gathers your body's proposals. Find it to get access."
     }
   },
   "skip": {
-    "description": "No organization, or you would rather do this later? It is not required to hold an account: you can follow the programme and register for sessions without any affiliation, and add one whenever you like from your profile.",
+    "description": "No organization? It is not required: your account is enough to follow the programme and register for sessions.",
     "action": "I do not have an organization for now",
-    "required": "You can give up on this action for now. Your account still works to follow the programme and register for sessions; you can come back here from your profile.",
+    "required": "No organization for now? Your account still works to follow the programme.",
     "giveUp": "Give up for now"
   }
 }
