@@ -3,11 +3,11 @@
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
 ## Dernière mise à jour — 29 septembre 2026
+- 29/09 — Chaque édition naît avec son lieu et sa salle : le planificateur place enfin dans le calendrier. En production — [A9](progression/ecrans/a9-planificateur.md), [décision](progression/decisions/2026-09-29.md).
 - 28/09 — Rejoindre une organisation ne bloque plus le dépôt : en attente du référent, on dépose et suit ses propres dossiers. En production, migrée le 29/09 — [A2](progression/ecrans/a2-organisation.md), [décision](progression/decisions/2026-09-28.md).
 - 28/09 — Rattachement à une organisation allégé : un seul message d'exigence, textes raccourcis — [A2](progression/ecrans/a2-organisation.md).
 - 27/09 — Appel à propositions : formats déduits du mode de l'édition (hybride → présentiel ou en ligne), revues visées facultatives, grille de critères désactivable, bug du critère « obligatoire » corrigé. en production — [A10](progression/ecrans/a10-evenements.md).
 - 17/09 — L'équipe corrige un dossier déposé depuis sa fiche ou la liste ; la base exige des intervenants complets au dépôt. Migré et déployé — [A8](progression/ecrans/a8-evaluation.md).
-- 16/09 — L'évaluation passe dans une fenêtre flottante : facultative, ouverte à toute l'équipe, note sur 20 ou grille détaillée — [A8](progression/ecrans/a8-evaluation.md).
 
 ## État général
 | Domaine | État |
@@ -37,7 +37,7 @@ Un écran = un fichier : ce qui a été livré, les écarts entre le modèle et 
 | A6 | Tableau de bord back-office | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a6-tableau-de-bord.md) |
 | A7 | Liste des propositions | ✅ 18/08 · révisé 15/09 | [écarts et vérifications](progression/ecrans/a7-propositions.md) |
 | A8 | Fiche d'évaluation | ✅ 18/08 · évaluation flottante 16/09 · en production · correction par l'équipe 17/09, en production | [écarts et vérifications](progression/ecrans/a8-evaluation.md) |
-| A9 | Planificateur de créneaux | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a9-planificateur.md) |
+| A9 | Planificateur de créneaux | ✅ 18/08 · stand par défaut 29/09, en production | [écarts et vérifications](progression/ecrans/a9-planificateur.md) |
 | A10 | Gestion des événements | ✅ 18/08 · téléversement des visuels 26/08 · liste en rangées 16/09 · fuseau cherchable et brouillon local 16/09 · appel : formats, revues et grille facultatifs 27/09 · en production | [écarts et vérifications](progression/ecrans/a10-evenements.md) |
 | A11 | Organisations et fusion | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a11-organisations-fusion.md) |
 | A12 | Utilisateurs et rôles | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a12-utilisateurs-roles.md) |

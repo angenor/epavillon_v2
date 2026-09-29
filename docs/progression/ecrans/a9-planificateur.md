@@ -61,3 +61,8 @@ pour éprouver le changement d'édition).
 reçu, appel effectué, message affiché), mais la nouvelle durée n'a pas pu être vérifiée — la simulation de souris en
 navigateur sans tête ne reproduit pas fidèlement le calcul de position de la bibliothèque. Et le chemin « publication qui
 aboutit » reste ouvert : les données simulées portent des conflits volontaires (écart n° 58).
+
+
+## Chaque édition a son stand (29/09)
+
+En production, une édition sans salle rendait le calendrier inutilisable : le dépôt partait sans salle et la séance revenait au panneau. Une édition naît désormais avec son lieu et sa salle ([décision](../decisions/2026-09-29.md)) ; si toutes ses salles venaient à être supprimées, l'écran le dit (« Cette édition n'a aucune salle… ») au lieu de renvoyer l'activité sans explication. Migré en production le 29/09 — [journal](../journal/2026-09-29.md).

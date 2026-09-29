@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM event.rooms\n          WHERE venue_id = $1 AND code IN ('stand', 'en-ligne', 'salle-principale')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f238a6162753dbd3a38f4e3b3fb34ed7544832ed298cdcb28f2221759cff9e43"
+}

@@ -169,6 +169,7 @@
   "error": {
     "schedule": "The slot could not be saved. The grid has been reloaded.",
     "save": "The changes could not be saved.",
-    "publish": "Publishing did not go through."
+    "publish": "Publishing did not go through.",
+    "noRoom": "This edition has no room: add one in the edition's “Venues and rooms” tab to place activities."
   }
 }

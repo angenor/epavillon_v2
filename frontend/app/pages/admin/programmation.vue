@@ -334,6 +334,11 @@ async function schedule(payload: {
   // phrase : « placée » ne se dit que la première fois, quand l'activité quitte
   // le panneau latéral.
   const wasUnplaced = unplaced.value.some((entry) => entry.id === payload.sessionId)
+  // Sans salle, le dépôt ramènerait l'activité au panneau sans rien dire.
+  if (wasUnplaced && payload.roomId === null) {
+    actionError.value = t('admin.planner.error.noRoom')
+    return
+  }
   busy.value = true
   actionError.value = null
   try {

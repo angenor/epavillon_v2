@@ -317,6 +317,46 @@ CREATE INDEX ix_rooms_venue ON event.rooms (venue_id);
 COMMENT ON COLUMN event.rooms.is_virtual IS
     'Une salle virtuelle accepte des sessions simultanées : programme.detect_conflicts() ne signale pas de double réservation dessus.';
 
+-- CHAQUE ÉDITION NAÎT AVEC SON LIEU ET SA SALLE (arbitré le 29/09). Une COP se
+-- tient dans une seule salle, le stand : personne ne devrait avoir à la déclarer
+-- pour planifier. Sans elle, le planificateur ne pouvait rien placer — une
+-- séance sans salle est, par définition, « à placer » (075) —, et la
+-- production l'a montré le 29/09 : l'activité déposée dans le calendrier
+-- revenait aussitôt au panneau. D'autres salles s'ajoutent au back-office.
+CREATE OR REPLACE FUNCTION event.tg_create_default_venue()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_venue uuid;
+BEGIN
+    IF NEW.participation_mode = 'online' THEN
+        INSERT INTO event.venues (event_id, name, kind)
+        VALUES (NEW.id, '{"fr":"En ligne","en":"Online"}', 'virtual')
+        RETURNING id INTO v_venue;
+        INSERT INTO event.rooms (venue_id, name, code, is_virtual, has_streaming)
+        VALUES (v_venue, '{"fr":"En ligne","en":"Online"}', 'en-ligne', true, true);
+    ELSIF NEW.has_pavilion THEN
+        INSERT INTO event.venues (event_id, name, kind)
+        VALUES (NEW.id, '{"fr":"Pavillon de la Francophonie","en":"Francophonie Pavilion"}', 'pavilion')
+        RETURNING id INTO v_venue;
+        INSERT INTO event.rooms (venue_id, name, code, has_streaming)
+        VALUES (v_venue, '{"fr":"Stand","en":"Stand"}', 'stand', true);
+    ELSE
+        INSERT INTO event.venues (event_id, name, kind)
+        VALUES (NEW.id, '{"fr":"Lieu principal","en":"Main venue"}', 'other')
+        RETURNING id INTO v_venue;
+        INSERT INTO event.rooms (venue_id, name, code)
+        VALUES (v_venue, '{"fr":"Salle principale","en":"Main room"}', 'salle-principale');
+    END IF;
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER tg_events_default_venue
+    AFTER INSERT ON event.events
+    FOR EACH ROW EXECUTE FUNCTION event.tg_create_default_venue();
+
 -- -----------------------------------------------------------------------------
 -- 4 bis. Canaux de diffusion
 --

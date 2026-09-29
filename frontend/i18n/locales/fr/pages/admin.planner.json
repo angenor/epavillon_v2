@@ -169,6 +169,7 @@
   "error": {
     "schedule": "Le créneau n'a pas pu être enregistré. La grille a été rechargée.",
     "save": "Les modifications n'ont pas pu être enregistrées.",
-    "publish": "La publication n'a pas abouti."
+    "publish": "La publication n'a pas abouti.",
+    "noRoom": "Cette édition n'a aucune salle : ajoutez-en une dans l'onglet « Lieux et salles » de l'édition pour placer des activités."
   }
 }

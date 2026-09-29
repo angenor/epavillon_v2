@@ -77,17 +77,24 @@ pub async fn jours_du_calendrier(bac: &Bac, event_id: Uuid) -> Vec<Uuid> {
     .expect("insertion des jours")
 }
 
-/// Le pavillon de la Francophonie.
+/// Le lieu de l'édition, **vidé de la salle qu'il reçoit à la naissance**
+/// (`tg_events_default_venue`) : chaque test pose exactement les siennes.
 pub async fn lieu(bac: &Bac, event_id: Uuid) -> Uuid {
-    sqlx::query_scalar!(
-        r#"INSERT INTO event.venues (event_id, name, kind)
-           VALUES ($1, '{"fr":"Pavillon de la Francophonie"}'::jsonb, 'pavilion')
-        RETURNING id"#,
-        event_id
+    let lieu = sqlx::query_scalar!("SELECT id FROM event.venues WHERE event_id = $1", event_id)
+        .fetch_one(bac.pool())
+        .await
+        .expect("le lieu de l'édition");
+
+    // Seule la salle par défaut part : un second appel garde celles du test.
+    sqlx::query!(
+        "DELETE FROM event.rooms
+          WHERE venue_id = $1 AND code IN ('stand', 'en-ligne', 'salle-principale')",
+        lieu
     )
-    .fetch_one(bac.pool())
+    .execute(bac.pool())
     .await
-    .expect("insertion du lieu")
+    .expect("retrait de la salle par défaut");
+    lieu
 }
 
 /// Une salle. **`is_virtual` décide de tout** : c'est de lui que le déclencheur

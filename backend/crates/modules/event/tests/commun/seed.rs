@@ -168,25 +168,23 @@ pub async fn enfants(bac: &Bac, event_id: Uuid) -> Enfants {
     .await
     .expect("insertion du fil");
 
-    let lieu = sqlx::query_scalar!(
-        r#"INSERT INTO event.venues (event_id, name, kind)
-           VALUES ($1, '{"fr":"Pavillon de la Francophonie"}'::jsonb, 'pavilion')
-        RETURNING id"#,
-        event_id
-    )
-    .fetch_one(bac.pool())
-    .await
-    .expect("insertion du lieu");
+    // L'édition naît avec son lieu et sa salle (`tg_events_default_venue`) : on
+    // les reprend plutôt que d'en poser un second.
+    let lieu = sqlx::query_scalar!("SELECT id FROM event.venues WHERE event_id = $1", event_id)
+        .fetch_one(bac.pool())
+        .await
+        .expect("le lieu de l'édition");
 
     let salle = sqlx::query_scalar!(
-        r#"INSERT INTO event.rooms (venue_id, name, code, capacity)
-           VALUES ($1, '{"fr":"Salle Baobab"}'::jsonb, 'baobab', 80)
+        r#"UPDATE event.rooms
+              SET name = '{"fr":"Salle Baobab"}'::jsonb, code = 'baobab', capacity = 80
+            WHERE venue_id = $1
         RETURNING id"#,
         lieu
     )
     .fetch_one(bac.pool())
     .await
-    .expect("insertion de la salle");
+    .expect("la salle de l'édition");
 
     // **Par défaut et actif** : c'est ce canal-là que le modèle affecte
     // automatiquement à une séance marquée diffusée.
