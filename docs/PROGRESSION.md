@@ -2,8 +2,8 @@
 **Ce fichier est la mémoire du projet entre deux sessions Claude Code.** Toute session commence par le lire et se termine par le mettre à jour.
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
-## Dernière mise à jour — 28 septembre 2026
-- 28/09 — Rejoindre une organisation ne bloque plus le dépôt : en attente du référent, on dépose et suit ses propres dossiers. Production à migrer — [A2](progression/ecrans/a2-organisation.md), [décision](progression/decisions/2026-09-28.md).
+## Dernière mise à jour — 29 septembre 2026
+- 28/09 — Rejoindre une organisation ne bloque plus le dépôt : en attente du référent, on dépose et suit ses propres dossiers. En production, migrée le 29/09 — [A2](progression/ecrans/a2-organisation.md), [décision](progression/decisions/2026-09-28.md).
 - 28/09 — Rattachement à une organisation allégé : un seul message d'exigence, textes raccourcis — [A2](progression/ecrans/a2-organisation.md).
 - 27/09 — Appel à propositions : formats déduits du mode de l'édition (hybride → présentiel ou en ligne), revues visées facultatives, grille de critères désactivable, bug du critère « obligatoire » corrigé. en production — [A10](progression/ecrans/a10-evenements.md).
 - 17/09 — L'équipe corrige un dossier déposé depuis sa fiche ou la liste ; la base exige des intervenants complets au dépôt. Migré et déployé — [A8](progression/ecrans/a8-evaluation.md).
@@ -18,7 +18,7 @@ Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état gén
 | Front | ✅ Raccordé à l'API depuis le 22/08 ; plus aucun écran ne lit d'exemples depuis le 27/08 ; ajustements d'écrans en septembre à la demande du commanditaire |
 | Outillage de la phase B | ✅ Spec Kit installé et constitution ratifiée en 1.0.0 le 20/08 — [B0](progression/ecrans/b0-constitution.md) |
 | API | ✅ B0 à B9 livrés ; `make check-api-contract` compte zéro route en attente — [`progression/api.md`](progression/api.md) |
-| Mise en ligne | ✅ La v2 tourne sous `/v2` depuis le 02/09, relayée par Apache ; production migrée au modèle du jour le 16/09 — [`DEPLOIEMENT.md`](DEPLOIEMENT.md) |
+| Mise en ligne | ✅ La v2 tourne sous `/v2` depuis le 02/09, relayée par Apache ; production migrée au modèle du jour, en dernier le 29/09 — [`DEPLOIEMENT.md`](DEPLOIEMENT.md) |
 
 ## Front — suivi des prompts
 Un écran = un fichier : ce qui a été livré, les écarts entre le modèle et l'interface, ce qui a été vérifié. Un écart se tranche, il ne se contourne pas. Les prompts sont dans [PROMPTS_DEVELOPPEMENT.md](PROMPTS_DEVELOPPEMENT.md).
@@ -30,7 +30,7 @@ Un écran = un fichier : ce qui a été livré, les écarts entre le modèle et 
 | A0.3 | Données simulées | ✅ 16/08 | [écarts et vérifications](progression/ecrans/a0.3-donnees-simulees.md) |
 | A0.4 | Composants d'interface + page de guide de style | ✅ 16/08 · navigation latérale du back-office refondue 04/09 | [écarts et vérifications](progression/ecrans/a0.4-composants.md) |
 | A1 | Authentification | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a1-authentification.md) |
-| A2 | Rattachement à une organisation | ✅ 17/08 · texte allégé 28/09 · rejoindre ne bloque plus le dépôt 28/09 | [écarts et vérifications](progression/ecrans/a2-organisation.md) |
+| A2 | Rattachement à une organisation | ✅ 17/08 · texte allégé 28/09 · rejoindre ne bloque plus le dépôt 28/09 · en production 29/09 | [écarts et vérifications](progression/ecrans/a2-organisation.md) |
 | A3 | Page publique de l'événement | ✅ 17/08 · refondue 19/08 · corrigée 27/08 · bandeau de programmation 16/09 · en production | [écarts et vérifications](progression/ecrans/a3-evenement-public.md) |
 | A4 | Formulaire de soumission | ✅ 17/08 · ajusté 15/09 et 16/09 | [écarts et vérifications](progression/ecrans/a4-soumission.md) |
 | A5 | Espace organisation | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a5-espace-organisation.md) |

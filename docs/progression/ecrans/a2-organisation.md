@@ -90,3 +90,5 @@ Vérifié au navigateur sur les données d'exemple (compte OSED), en 1280 et 375
 Vérifié au navigateur sur les données d'exemple (Karim Ilboudo, demande en attente auprès de l'UJFC) : le dépôt s'ouvre avec l'UJFC en porteuse, l'espace affiche le bandeau, rejoindre l'IMRE mène à « Vous avez rejoint… » puis au dépôt. Non vérifié contre l'API au navigateur ; l'API est couverte par les tests `une_demande_en_attente_depose_mais_ne_touche_qua_ses_dossiers` et `ladhesion_active_est_le_seul_droit_dentree`.
 
 Le compteur « N membres » de l'espace ne compte que les membres validés : la personne en attente y lit « Aucun membre » à côté de sa propre fiche. Laissé tel quel.
+
+**En production le 29/09** : code déployé le 28/09, base migrée le 29/09 — [journal](../journal/2026-09-29.md).

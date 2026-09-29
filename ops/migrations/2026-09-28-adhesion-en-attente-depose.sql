@@ -45,6 +45,12 @@ BEGIN
     RETURN NULL;
 END;
 $$;
--- Les demandes déjà en attente reçoivent le rôle, par le déclencheur.
-UPDATE org.memberships SET status = status WHERE status = 'pending' AND invited_at IS NULL;
+-- Les demandes déjà en attente reçoivent le rôle, comme le déclencheur le poserait,
+-- sans réécrire les adhésions (leur `updated_at` resterait sinon faussé).
+INSERT INTO identity.role_assignments (person_id, role_code, scope_type, scope_id, granted_by, note)
+SELECT m.person_id, 'org_applicant', 'organization', m.organization_id, NULL,
+       'Attribué avec l''adhésion à l''organisation'
+  FROM org.memberships m
+ WHERE m.status = 'pending' AND m.invited_at IS NULL
+ON CONFLICT DO NOTHING;
 COMMIT;
