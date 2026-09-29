@@ -17,12 +17,8 @@
   "filters": {
     "day": "Day",
     "theme": "Theme",
-    "format": "Format",
-    "room": "Room",
     "allDays": "All days",
     "allThemes": "All themes",
-    "allFormats": "All formats",
-    "allRooms": "All rooms",
     "total": "{count} activity | {count} activity | {count} activities",
     "filtered": "{count} of {total} activity | {count} of {total} activity | {count} of {total} activities"
   },

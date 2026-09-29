@@ -37,10 +37,6 @@ export interface ProgrammeFilterState {
   day: IsoDate | null
   /** Code de `reference.taxonomy_terms`, taxonomie `activity_theme`. */
   theme: TaxonomyTermCode | null
-  /** `event.participation_mode`. */
-  format: string | null
-  /** `event.rooms.id`. */
-  room: string | null
 }
 
 /** Une journée de programmation, telle que la vue grille et les filtres la voient. */

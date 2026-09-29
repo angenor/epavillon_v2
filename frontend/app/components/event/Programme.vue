@@ -159,8 +159,8 @@ async function select(eventId: string): Promise<void> {
   selectedId.value = eventId
   emit('update:edition', selectedEdition.value)
   // Les filtres appartiennent à un programme : les garder d'une édition à
-  // l'autre afficherait « aucun résultat » sur une salle qui n'existe pas ici.
-  filters.value = { day: null, theme: null, format: null, room: null }
+  // l'autre afficherait « aucun résultat » sur un jour qui n'existe pas ici.
+  filters.value = { day: null, theme: null }
   selectedSessionId.value = null
 }
 
@@ -185,8 +185,6 @@ const view = ref<ViewMode>(route.query.vue === 'calendrier' ? 'calendar' : 'grid
 const filters = ref<ProgrammeFilterState>({
   day: typeof route.query.jour === 'string' ? route.query.jour : null,
   theme: null,
-  format: null,
-  room: null,
 })
 const selectedSessionId = ref<string | null>(null)
 
@@ -225,8 +223,6 @@ const filtered = computed(() =>
   data.value.schedule.filter((session) => {
     if (filters.value.day && dayOf(session) !== filters.value.day) return false
     if (filters.value.theme && !session.theme_codes.includes(filters.value.theme)) return false
-    if (filters.value.format && session.format !== filters.value.format) return false
-    if (filters.value.room && session.room_id !== filters.value.room) return false
     return true
   }),
 )
@@ -290,27 +286,6 @@ const themeOptions = computed<SelectOption[]>(() => {
     ...[...seen.entries()]
       .map(([value, label]) => ({ value, label }))
       .sort((a, b) => a.label.localeCompare(b.label, locale.value)),
-  ]
-})
-
-const formatOptions = computed<SelectOption[]>(() => {
-  const present = [...new Set(data.value.schedule.map((session) => session.format))]
-  return [
-    allLabel('programme.filters.allFormats'),
-    ...present.map((value) => ({ value, label: t(`session-card.format.${value}`) })),
-  ]
-})
-
-const roomOptions = computed<SelectOption[]>(() => {
-  const seen = new Map<string, string>()
-  for (const session of data.value.schedule) {
-    if (session.room_id && session.room_name && !seen.has(session.room_id)) {
-      seen.set(session.room_id, tr(session.room_name))
-    }
-  }
-  return [
-    allLabel('programme.filters.allRooms'),
-    ...[...seen.entries()].map(([value, label]) => ({ value, label })),
   ]
 })
 
@@ -457,8 +432,6 @@ const period = computed(() =>
           class="mt-6"
           :days="dayOptions"
           :themes="themeOptions"
-          :formats="formatOptions"
-          :rooms="roomOptions"
           :result-count="filtered.length"
           :total-count="data.schedule.length"
         />
@@ -470,7 +443,7 @@ const period = computed(() =>
             :title="t('programme.empty.title')"
             :description="t('programme.empty.description')"
             :action-label="t('common.actions.reset')"
-            @action="filters = { day: null, theme: null, format: null, room: null }"
+            @action="filters = { day: null, theme: null }"
           />
 
           <EventProgrammeGrid

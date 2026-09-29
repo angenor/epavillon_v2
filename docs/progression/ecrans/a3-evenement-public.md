@@ -176,3 +176,5 @@ Demande du commanditaire, en deux temps : une première version réutilisait `Ev
 
 **Vérifié** : `make check-front` (contrat : toutes les formes définies), `cargo clippy -p event -p api --all-targets` sans avertissement, `cargo test -p event` et le test des routes publiques ; au navigateur, l'API réelle (COP31 à venir, sans programme) et les données d'exemple (PACO26 en cours choisie par défaut, bascule vers COP30 : image, titre, chiffres et adresse suivent), 1440 px clair et 375 px sombre, sans défilement horizontal.
 Après redémarrage de la machine : `cargo test -p programme -p event`, tout passe.
+
+**Filtres Format et Salle retirés (29/09)** : la programmation publique ne filtre plus que par jour et par thématique — [journal](../journal/2026-09-29.md).

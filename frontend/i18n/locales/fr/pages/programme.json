@@ -17,12 +17,8 @@
   "filters": {
     "day": "Jour",
     "theme": "Thématique",
-    "format": "Format",
-    "room": "Salle",
     "allDays": "Tous les jours",
     "allThemes": "Toutes les thématiques",
-    "allFormats": "Tous les formats",
-    "allRooms": "Toutes les salles",
     "total": "{count} activité | {count} activité | {count} activités",
     "filtered": "{count} activité sur {total} | {count} activité sur {total} | {count} activités sur {total}"
   },

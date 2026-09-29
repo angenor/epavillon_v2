@@ -3,7 +3,7 @@ import type { ProgrammeFilterState } from '~/types/event-programme'
 import type { SelectOption } from '~/types/ui'
 
 /**
- * FILTRES DE LA PROGRAMMATION — jour, thématique, format, salle.
+ * FILTRES DE LA PROGRAMMATION — jour, thématique.
  *
  * ILS SONT PARTAGÉS PAR LES DEUX VUES. C'est l'exigence du prompt, et ce n'est
  * pas un détail d'implémentation : quelqu'un qui a filtré sur « Adaptation » en
@@ -13,8 +13,7 @@ import type { SelectOption } from '~/types/ui'
  *
  * LES OPTIONS VIENNENT DES DONNÉES AFFICHÉES, jamais d'une liste écrite en dur :
  * les thématiques sont celles que porte ce programme (avec le libellé et la
- * couleur de `reference.taxonomy_terms`), les salles celles de cette édition,
- * les jours ceux qui portent au moins une activité. Un filtre qui propose une
+ * couleur de `reference.taxonomy_terms`), les jours ceux qui portent au moins une activité. Un filtre qui propose une
  * valeur ne ramenant rien fait perdre un clic à chaque fois.
  *
  * LES FILTRES ACTIFS SONT RAPPELÉS EN JETONS sous les listes : sur mobile, les
@@ -26,8 +25,6 @@ interface Props {
   modelValue: ProgrammeFilterState
   days: SelectOption[]
   themes: SelectOption[]
-  formats: SelectOption[]
-  rooms: SelectOption[]
   /** Nombre d'activités après filtrage — affiché à côté des filtres. */
   resultCount: number
   /** Nombre total, avant filtrage. */
@@ -46,14 +43,12 @@ function set(key: FilterKey, value: string | null): void {
 }
 
 function reset(): void {
-  emit('update:modelValue', { day: null, theme: null, format: null, room: null })
+  emit('update:modelValue', { day: null, theme: null })
 }
 
 const optionsByKey = computed<Record<FilterKey, SelectOption[]>>(() => ({
   day: props.days,
   theme: props.themes,
-  format: props.formats,
-  room: props.rooms,
 }))
 
 /** Jetons des filtres posés, avec le critère nommé : « Thématique : Adaptation ». */
@@ -73,7 +68,7 @@ const hasFilters = computed(() => activeChips.value.length > 0)
 
 <template>
   <div class="rounded-lg border border-border bg-surface-raised px-4 py-4">
-    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="grid gap-3 sm:grid-cols-2">
       <UiSelect
         :model-value="props.modelValue.day ?? ''"
         :options="props.days"
@@ -89,22 +84,6 @@ const hasFilters = computed(() => activeChips.value.length > 0)
         :disabled="!props.themes.length"
         hide-optional
         @update:model-value="set('theme', $event)"
-      />
-      <UiSelect
-        :model-value="props.modelValue.format ?? ''"
-        :options="props.formats"
-        :label="t('programme.filters.format')"
-        :disabled="!props.formats.length"
-        hide-optional
-        @update:model-value="set('format', $event)"
-      />
-      <UiSelect
-        :model-value="props.modelValue.room ?? ''"
-        :options="props.rooms"
-        :label="t('programme.filters.room')"
-        :disabled="!props.rooms.length"
-        hide-optional
-        @update:model-value="set('room', $event)"
       />
     </div>
 
