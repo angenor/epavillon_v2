@@ -91,6 +91,9 @@ interface Props {
   sessions: PlannerSession[]
   rooms: PlannerRoom[]
   days: PlannerDay[]
+  /** Heures de journée de l'édition (`HH:MM`) : le cadre de la grille. */
+  dayStartTime?: string | null
+  dayEndTime?: string | null
   timezone: TimeZoneName
   zoneLabel?: string
   /** Jour affiché (`AAAA-MM-JJ`), porté par l'URL de la page. */
@@ -179,18 +182,21 @@ const events = computed(() =>
 )
 
 /**
- * Bornes horaires, déduites du contenu du JOUR AFFICHÉ et non de la semaine
- * entière : ouvrir de minuit à minuit laisserait les deux tiers de la hauteur
- * vides sur une journée qui commence à 9 h.
+ * Bornes horaires : les heures de journée de l'édition, une heure de marge de
+ * chaque côté, identiques d'un jour à l'autre. Une séance posée hors de la
+ * plage l'élargit — la cacher serait pire qu'une grille plus haute.
  */
 const bounds = computed(() => {
-  const minutes = sessionsInView.value
-    .flatMap((session) => [
+  const start = props.dayStartTime ? toMinutes(props.dayStartTime) : null
+  const end = props.dayEndTime ? toMinutes(props.dayEndTime) : null
+  const edition = start !== null && end !== null && end > start ? [start, end] : [9 * 60, 19 * 60]
+  const minutes = [
+    ...edition,
+    ...sessionsInView.value.flatMap((session) => [
       toMinutes(wallClockInZone(session.starts_at, props.timezone).slice(11)),
       toMinutes(wallClockInZone(session.ends_at, props.timezone).slice(11)),
-    ])
-
-  if (!minutes.length) return { from: 8 * 60, to: 20 * 60 }
+    ]),
+  ]
   return {
     from: Math.max(0, Math.floor(Math.min(...minutes) / 60) * 60 - 60),
     to: Math.min(24 * 60, Math.ceil(Math.max(...minutes) / 60) * 60 + 60),

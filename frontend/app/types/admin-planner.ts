@@ -166,6 +166,9 @@ export interface PlannerScreen {
   zone_label: string | null
   /** La programmation est-elle déjà publique ? Change le libellé du bouton. */
   programme_published_at: IsoDateTime | null
+  /** Heures de journée de l'édition (`HH:MM`, dans son fuseau) : le cadre de la grille. */
+  day_start_time: string | null
+  day_end_time: string | null
 
   days: PlannerDay[]
   rooms: PlannerRoom[]

@@ -82,6 +82,24 @@ pub async fn salles_de_ledition<'e>(
         .collect())
 }
 
+/// Les heures de journée de l'édition, dans son fuseau : l'heure de son début
+/// et celle de sa fin, telles que la fiche de l'édition les saisit.
+pub async fn heures_de_ledition<'e>(
+    executor: impl PgExecutor<'e>,
+    event_id: EventId,
+) -> Result<Option<(String, String)>> {
+    let ligne = sqlx::query!(
+        r#"SELECT to_char(starts_at AT TIME ZONE timezone, 'HH24:MI') AS "debut!",
+                  to_char(ends_at AT TIME ZONE timezone, 'HH24:MI') AS "fin!"
+             FROM event.events WHERE id = $1"#,
+        event_id.as_uuid()
+    )
+    .fetch_optional(executor)
+    .await?;
+
+    Ok(ligne.map(|l| (l.debut, l.fin)))
+}
+
 /// La salle appartient-elle bien à cette édition ?
 ///
 /// Ni la base ni aucun déclencheur ne le vérifient — seul le fil de

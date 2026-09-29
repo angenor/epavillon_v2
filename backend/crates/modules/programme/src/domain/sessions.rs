@@ -197,6 +197,10 @@ pub struct PlannerScreen {
     pub zone_label: Option<String>,
     #[serde(with = "time::serde::rfc3339::option")]
     pub programme_published_at: Option<OffsetDateTime>,
+    /// Heure de début de journée de l'édition, `HH:MM` dans son fuseau.
+    pub day_start_time: Option<String>,
+    /// Heure de fin de journée de l'édition, `HH:MM` dans son fuseau.
+    pub day_end_time: Option<String>,
 
     pub days: Vec<PlannerDay>,
     pub rooms: Vec<PlannerRoom>,

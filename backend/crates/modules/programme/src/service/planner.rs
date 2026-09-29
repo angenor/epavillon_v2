@@ -81,6 +81,9 @@ async fn composer(conn: &mut PgConnection, event_id: EventId) -> Result<Option<P
     // **Une séance sans salle est au panneau, jamais dans la grille**, et
     // réciproquement : c'est la seule chose qui les distingue.
     let (placed, unplaced) = seances.into_iter().partition(|s| s.room_id.is_some());
+    let (day_start_time, day_end_time) = cross::heures_de_ledition(&mut *conn, event_id)
+        .await?
+        .unzip();
 
     Ok(Some(PlannerScreen {
         event_id: event_id.as_uuid(),
@@ -88,6 +91,8 @@ async fn composer(conn: &mut PgConnection, event_id: EventId) -> Result<Option<P
         timezone: edition.timezone,
         zone_label: edition.city,
         programme_published_at: edition.programme_published_at,
+        day_start_time,
+        day_end_time,
         days: cross::jours_de_ledition(&mut *conn, event_id).await?,
         rooms: cross::salles_de_ledition(&mut *conn, event_id).await?,
         tracks: cross::fils_de_ledition(&mut *conn, event_id).await?,

@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT to_char(starts_at AT TIME ZONE timezone, 'HH24:MI') AS \"debut!\",\n                  to_char(ends_at AT TIME ZONE timezone, 'HH24:MI') AS \"fin!\"\n             FROM event.events WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "debut!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "fin!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "9cebd37f49c651898ae457ea0bb36a236b64595e37c9cca687ec88f469caaffa"
+}

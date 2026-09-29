@@ -259,6 +259,8 @@ export function plannerScreen(eventId: Uuid): PlannerScreen | null {
     timezone: event.timezone,
     zone_label: event.city,
     programme_published_at: event.programme_published_at,
+    day_start_time: wallClockInZone(event.starts_at, event.timezone).slice(11, 16),
+    day_end_time: wallClockInZone(event.ends_at, event.timezone).slice(11, 16),
     days,
     rooms: eventRooms,
     tracks,

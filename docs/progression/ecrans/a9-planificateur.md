@@ -66,3 +66,5 @@ aboutit » reste ouvert : les données simulées portent des conflits volontaire
 ## Chaque édition a son stand (29/09)
 
 En production, une édition sans salle rendait le calendrier inutilisable : le dépôt partait sans salle et la séance revenait au panneau. Une édition naît désormais avec son lieu et sa salle ([décision](../decisions/2026-09-29.md)) ; si toutes ses salles venaient à être supprimées, l'écran le dit (« Cette édition n'a aucune salle… ») au lieu de renvoyer l'activité sans explication. Migré en production le 29/09 — [journal](../journal/2026-09-29.md).
+
+**Grille cadrée sur les heures de l'édition (29/09)** : début et fin de journée de l'édition ± 1 h, identiques chaque jour ; une activité hors plage l'élargit — [journal](../journal/2026-09-29.md).
