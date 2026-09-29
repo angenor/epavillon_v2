@@ -147,12 +147,12 @@ function toggle(): void {
   --slide-ease: cubic-bezier(0.4, -0.3, 0.6, 1.3);
   --easing: var(--slide-ease);
   --speed: 0.5s;
-  /* 8/3 de rapport : 60 px de large font 22,5 px de haut. Le dessin passe donc
+  /* Rapport 2/1 : 60 px de large font 30 px de haut. Le dessin passe donc
      SOUS les 44 px de `--target-min` ; c'est `.toggle::before` qui rétablit la
      cible tactile, invisible et centrée. Réduire le visuel ne doit pas réduire
      ce qu'on peut atteindre au doigt. */
   --width: 3.75rem;
-  --ar: 8 / 3;
+  --height: calc(var(--width) / 2);
   --ray: hsl(0 0% 100% / 0.5);
   --sun: hsl(47, 91%, 58%);
   --moon: hsl(212, 13%, 82%);
@@ -161,7 +161,7 @@ function toggle(): void {
 
   -webkit-tap-highlight-color: transparent;
   width: var(--width);
-  aspect-ratio: var(--ar);
+  height: var(--height);
   border-radius: var(--radius-full);
   border: 0;
   position: relative;
@@ -183,7 +183,7 @@ function toggle(): void {
 }
 
 .toggle--compact {
-  /* 54 px → 20 px de haut : barres d'outils sur écran large seulement. */
+  /* 54 px → 27 px de haut : barres d'outils sur écran large seulement. */
   --width: 3.375rem;
 }
 
@@ -245,7 +245,7 @@ function toggle(): void {
   width: 100%;
   left: 0;
   transition: translate var(--speed) var(--easing);
-  translate: 0 calc(var(--dark, 0) * (100% - (3 / 8 * var(--width))));
+  translate: 0 calc(var(--dark, 0) * (100% - var(--height)));
 }
 
 .toggle__backdrop:first-of-type .clouds path:first-of-type {
