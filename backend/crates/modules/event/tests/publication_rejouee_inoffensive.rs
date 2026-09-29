@@ -1,9 +1,10 @@
 //! **Republier est inoffensif** (research.md § R10, SC-019).
 //!
 //! `UPDATE … WHERE programme_published_at IS NULL` : la clause finale rend la
-//! republication sans effet. La date d'origine ne s'écrase pas — c'est elle que
-//! la frise d'accueil affiche —, et **aucun second événement n'est émis**, ce qui
-//! épargne au consommateur de B5 un rejeu qu'il devrait garder.
+//! date d'origine intacte — c'est elle que la frise d'accueil affiche. Quand
+//! rien n'attend d'être publié, **aucun second événement n'est émis**. Les
+//! séances retenues depuis s'annoncent à leur tour : voir
+//! `api/tests/publication_bout_en_bout.rs`.
 //!
 //! **Le décompte est le contrôle qui dit quelque chose.** Vérifier qu'un
 //! événement est présent après deux publications ne prouverait rien : il l'était
@@ -26,6 +27,15 @@ async fn republier_ne_deplace_ni_la_date_ni_lannonce() {
         .expect("première publication");
     assert!(!premiere.blocked);
     let date_dorigine = premiere.published_at.expect("la date est posée");
+
+    // Le consommateur de B5 ne tourne pas ici : on pose son effet.
+    sqlx::query!(
+        "UPDATE programme.sessions SET published_at = now() WHERE event_id = $1",
+        editions.cop31
+    )
+    .execute(bac.pool())
+    .await
+    .unwrap();
 
     let seconde = publication::publier(&bac.state, &bac.ctx(), cop31)
         .await

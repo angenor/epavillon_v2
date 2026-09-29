@@ -88,16 +88,27 @@ pub async fn publier(
     let published_count = cross::seances_a_publier(&mut *tx, event_id).await?;
 
     // **`WHERE programme_published_at IS NULL`** : republier n'écrase pas la
-    // date d'origine, et n'annonce rien de plus.
+    // date d'origine.
     let Some(published_at) = editions::estampiller_la_publication(&mut tx, event_id).await? else {
-        // Déjà publiée. On rend la date d'origine, intacte, et **aucun second
-        // événement n'est émis** : le consommateur de B5 n'a rien à rejouer.
-        tx.rollback().await?;
+        // Déjà publiée : les séances retenues depuis s'annoncent à leur tour, à
+        // la date du jour. Sans elles, rien n'est émis.
+        if published_count > 0 {
+            annoncer(
+                &mut tx,
+                event_id,
+                OffsetDateTime::now_utc(),
+                published_count,
+            )
+            .await?;
+            tx.commit().await?;
+        } else {
+            tx.rollback().await?;
+        }
         let published_at = editions::date_de_publication(state.pool(), event_id).await?;
 
         return Ok(PublishProgrammeResult {
             blocked: false,
-            published_count: 0,
+            published_count,
             published_at,
             issues,
         });

@@ -236,4 +236,28 @@ async fn publier_le_programme_rend_les_seances_publiques() {
         devenues_publiques,
         "et aucune séance de plus publiée"
     );
+
+    // 7. **Une séance retenue après la publication paraît à la republication**
+    // (constaté en production le 29/09 : « Publier les nouveautés » n'annonçait
+    // rien). La date d'origine de l'édition, elle, ne bouge pas.
+    seance(&base, edition, 5, "planned", false).await;
+    let nouveautes =
+        event::service::publication::publier(&etat, &ctx, event::domain::ids::EventId(edition))
+            .await
+            .expect("publier les nouveautés");
+    assert_eq!(
+        nouveautes.published_count, 1,
+        "la nouvelle séance est annoncée"
+    );
+    assert_eq!(
+        nouveautes.published_at, resultat.published_at,
+        "la date d'origine reste"
+    );
+
+    relayer_loutbox(&base, &registre).await;
+    assert_eq!(
+        seances_publiques(&base, edition).await,
+        devenues_publiques + 1,
+        "et elle devient publique"
+    );
 }
