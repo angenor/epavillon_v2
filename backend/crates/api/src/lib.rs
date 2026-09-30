@@ -193,13 +193,17 @@ pub fn build_app(
     // **Aucune route de B5 ne change de chemin**, et l'ordre d'enregistrement
     // est celui d'avant : `programme` d'abord, `engagement` ensuite.
     let engagement_monte = etat.modules.is_mounted("engagement");
-    if propositions || engagement_monte {
+    let direct_monte = etat.modules.is_mounted("live");
+    if propositions || engagement_monte || direct_monte {
         portee = portee.service(web::scope("/sessions").configure(move |cfg| {
             if propositions {
                 programme::session_routes(cfg);
             }
             if engagement_monte {
                 engagement::session_routes(cfg);
+            }
+            if direct_monte {
+                live::session_routes(cfg);
             }
         }));
     }

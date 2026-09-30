@@ -9,6 +9,7 @@ pub mod openapi;
 pub mod people;
 pub mod planner;
 pub mod public_schedule;
+pub mod questions;
 pub mod registrations;
 pub mod sessions;
 pub mod submission;
@@ -70,4 +71,13 @@ pub fn contexte_de(requete: &HttpRequest, acteur: Uuid) -> RequestContext {
             RequestContext::new(RequestContext::generated_request_id(), locale_de(requete))
         })
         .with_actor(acteur)
+}
+
+/// La personne connectée, **quand il y en a une** : pour les routes qui
+/// répondent aussi sans session.
+pub fn session_facultative(requete: &HttpRequest) -> Option<Uuid> {
+    requete
+        .extensions()
+        .get::<RequestContext>()
+        .and_then(|ctx| ctx.actor_id)
 }

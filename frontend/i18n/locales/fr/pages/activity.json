@@ -1,0 +1,116 @@
+{
+  "back": "Retour au programme",
+  "trail": "Programmations / {edition} / {day}",
+  "loading": "Chargement de l'activité",
+  "about": "À propos",
+  "error": {
+    "title": "Activité indisponible",
+    "description": "Cette activité n'a pas pu être chargée."
+  },
+  "notFound": {
+    "title": "Activité introuvable",
+    "description": "Elle n'existe pas, ou n'est pas encore publiée."
+  },
+  "state": {
+    "live": "En direct",
+    "upcomingIn": "À venir · {delay}"
+  },
+  "countdown": {
+    "days": "dans {days} j {hours} h",
+    "hours": "dans {hours} h {minutes}",
+    "minutes": "dans {minutes} min"
+  },
+  "hero": {
+    "ledBy": "Porté par",
+    "yourTime": "Chez vous",
+    "yourZone": "{zone}, d'après votre appareil"
+  },
+  "stage": {
+    "liveTitle": "Le direct",
+    "language": "Langue du flux",
+    "original": "original",
+    "player": "Direct en {language}",
+    "external": "Le direct est diffusé sur une plateforme externe.",
+    "starting": "Le direct va commencer : il s'affichera ici dès son lancement.",
+    "watch": "Ouvrir le direct",
+    "begins": "Commence",
+    "willStream": "Diffusée en direct sur cette page.",
+    "replayTitle": "Revoir",
+    "replay": "Voir l'enregistrement",
+    "replayDuration": "Rediffusion · {minutes} min"
+  },
+  "people": {
+    "speakers": "Intervenantes et intervenants",
+    "organizations": "Organisé avec",
+    "bio": "Biographie",
+    "role": {
+      "speaker": "Intervention",
+      "moderator": "Modération",
+      "panelist": "Panel",
+      "keynote": "Discours principal",
+      "facilitator": "Animation",
+      "interpreter": "Interprétation"
+    },
+    "orgRole": {
+      "lead": "Porteur",
+      "co_organizer": "Co-organisateur",
+      "partner": "Partenaire",
+      "sponsor": "Soutien"
+    }
+  },
+  "sameDay": {
+    "title": "Le même jour",
+    "here": "Ici"
+  },
+  "questions": {
+    "title": "Questions du public",
+    "count": "aucune question | {count} question | {count} questions",
+    "failed": "Les questions n'ont pas pu être chargées.",
+    "empty": "Aucune question pour l'instant.",
+    "support": "Soutenir cette question ({count})",
+    "unsupport": "Retirer mon soutien ({count})",
+    "mine": "Votre question",
+    "answer": "Réponse",
+    "officialAnswer": "Réponse des intervenants",
+    "more": "Voir {count} autre question | Voir {count} autre question | Voir {count} autres questions",
+    "less": "Réduire",
+    "label": "Votre question",
+    "placeholder": "Votre question…",
+    "send": "Envoyer",
+    "login": "Connectez-vous",
+    "loginHint": "pour poser une question ou en soutenir une."
+  },
+  "ticket": {
+    "label": "Participer",
+    "places": "Places au pavillon",
+    "ofCapacity": "/ {capacity} inscrits",
+    "unlimited": "Places sans limite",
+    "register": "S'inscrire",
+    "waitlist": "Rejoindre la liste d'attente",
+    "registered": "Inscription confirmée",
+    "onWaitlist": "Place en liste d'attente",
+    "cancel": "Annuler mon inscription",
+    "watch": "Suivre le direct",
+    "replay": "Revoir l'enregistrement",
+    "note": {
+      "registered": "Votre place est réservée.",
+      "waitlisted": "Une place vous revient si quelqu'un se désiste.",
+      "free": "Entrée libre, sans inscription, dans la limite des places.",
+      "notOpen": "Les inscriptions ouvrent le {date}.",
+      "closed": "Les inscriptions sont closes.",
+      "full": "L'activité est complète.",
+      "until": "Inscriptions ouvertes jusqu'au {date}.",
+      "live": "L'activité a commencé : suivez-la en direct.",
+      "past": "Personne ne s'était inscrit. | {count} personne s'était inscrite. | {count} personnes s'étaient inscrites."
+    },
+    "place": "Lieu",
+    "format": "Format",
+    "languages": "Langues",
+    "broadcast": "Diffusion",
+    "streamed": "En direct sur cette page",
+    "onSite": "Sur place uniquement",
+    "calendar": "Agenda",
+    "share": "Partager",
+    "copied": "Lien copié"
+  }
+}

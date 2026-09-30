@@ -6,8 +6,8 @@
  * bandeau d'incident est un motif transverse de toute la plateforme : il
  * s'affiche sur la programmation publique, sur la fiche d'une activité et dans
  * le back-office (écran A13), bien avant qu'une visioconférence soit branchée.
- * Les tables `meetings`, `streams` et `provider_webhook_events` ne sont PAS
- * couvertes ici ; elles viendront avec leurs écrans.
+ * Les tables `meetings` et `provider_webhook_events` ne sont PAS couvertes
+ * ici ; de `streams`, seule la lecture publique des flux en cours l'est.
  */
 
 import type {
@@ -107,4 +107,24 @@ export interface ActiveIncident {
   target_id?: Uuid | null
   /** Cible résolue par la fonction — jamais un identifiant. */
   target_label?: string | null
+}
+
+/** ENUM `live.stream_provider`. */
+export type StreamProvider = 'youtube' | 'vimeo' | 'facebook' | 'linkedin' | 'dailymotion' | 'custom'
+
+/**
+ * Ligne de `live.current_streams` pour une séance publiée — `GET
+ * /sessions/{id}/streams`. Un flux par langue d'interprétation, le principal
+ * en tête. `embed_url` est construite par `live.build_embed_url()`, à défaut
+ * `watch_url` : le site ne recompose jamais l'adresse d'un diffuseur.
+ */
+export interface PublicSessionStream {
+  id: Uuid
+  /** Code de `reference.locales` ; nul quand la langue n'est pas renseignée. */
+  locale: string | null
+  provider: StreamProvider
+  embed_url: Url | null
+  watch_url: Url | null
+  is_primary: boolean
+  started_at: IsoDateTime | null
 }

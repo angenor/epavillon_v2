@@ -28,28 +28,36 @@ export interface ProgrammeData {
   rooms: Room[]
 }
 
-/**
- * Filtres de la section, PARTAGÉS par les deux vues. `null` signifie « tous » :
- * c'est ce qui permet de vider un filtre sans le distinguer d'une valeur.
- */
+/** Filtres partagés par la semaine et la liste du jour. Le jour choisi n'en fait pas partie : il se navigue. */
 export interface ProgrammeFilterState {
-  /** Jour civil dans le fuseau de l'édition (`AAAA-MM-JJ`). */
-  day: IsoDate | null
-  /** Code de `reference.taxonomy_terms`, taxonomie `activity_theme`. */
-  theme: TaxonomyTermCode | null
-  /** Recherche libre : titre, nom ou sigle de l'organisation. Vide : aucune. */
+  /** Codes de `reference.taxonomy_terms`, taxonomie `activity_theme`. Vide : toutes. */
+  themes: TaxonomyTermCode[]
+  /** Recherche libre : titre, nom ou sigle de l'organisation. */
   search: string
+  streamedOnly: boolean
+  hidePast: boolean
 }
 
-/** Une journée de programmation, telle que la vue grille et les filtres la voient. */
-export interface ProgrammeDay {
-  /** Jour civil dans le fuseau de l'édition. */
+export type ProgrammeView = 'week' | 'list'
+
+/** Une thématique proposée au filtre : libellé et couleur de la base. */
+export interface ProgrammeThemeOption {
+  code: TaxonomyTermCode
+  label: string
+  color: string | null
+  count: number
+}
+
+/** Un jour de la bande de navigation. */
+export interface ProgrammeStripDay {
   date: IsoDate
-  /** `event.event_days.id` quand le jour existe au calendrier ; `null` sinon —
-   *  c'est le cas d'un cycle de webinaires, qui n'a pas de calendrier. */
-  dayId: string | null
-  /** Séances de ce jour, déjà triées. */
-  sessions: PublicScheduleRow[]
+  /** Activités qui passent les filtres. */
+  count: number
+  /** Couleur de la première thématique de chaque activité retenue, `null` sans couleur en base. */
+  colors: (string | null)[]
+  isToday: boolean
+  /** Jours sans programme entre ce jour et le précédent. */
+  gapBefore: number
 }
 
 /**

@@ -142,6 +142,17 @@ export interface SessionRegisterPayload {
   /** Exigé dès qu'une réponse est donnée à un champ sensible. */
   sensitive_data_consent?: boolean
   organization_id?: OrganizationId | null
+  /** Identité de qui s'inscrit sans compte — seulement si le formulaire admet
+   *  l'anonyme. Jamais tirée des réponses : un code de champ se renomme (R23). */
+  guest?: RegistrationGuest | null
+}
+
+/** `Invite` côté serveur : la personne est créée sans compte, ou retrouvée par son adresse. */
+export interface RegistrationGuest {
+  email: string
+  first_name: string
+  last_name: string
+  civility?: string | null
 }
 
 /**
@@ -236,4 +247,35 @@ export interface SessionQuestionVote {
   question_id: Uuid
   person_id: PersonId
   created_at: IsoDateTime
+}
+
+/** Une réponse telle que le public la lit : sans son auteur. */
+export interface PublicSessionQuestionAnswer {
+  id: Uuid
+  body: string
+  is_official: boolean
+  created_at: IsoDateTime
+}
+
+/**
+ * `GET /sessions/{id}/questions` — une question VISIBLE telle que le public la
+ * lit. Ni auteur, ni intervenants visés, ni modération : seulement si elle est
+ * de la personne connectée et si celle-ci l'a soutenue (faux sans session).
+ */
+export interface PublicSessionQuestion {
+  id: Uuid
+  session_id: SessionId
+  body: string
+  /** Compté sur les soutiens, pas lu dans `upvotes`. */
+  vote_count: number
+  has_voted: boolean
+  is_mine: boolean
+  answered_at: IsoDateTime | null
+  created_at: IsoDateTime
+  answers: PublicSessionQuestionAnswer[]
+}
+
+/** `POST /sessions/{id}/questions` — entre 3 et 2000 caractères, bornés par la base. */
+export interface AskQuestionPayload {
+  body: string
 }

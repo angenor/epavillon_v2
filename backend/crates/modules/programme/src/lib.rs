@@ -121,6 +121,7 @@ pub fn planner_routes(cfg: &mut ServiceConfig) {
 pub fn session_routes(cfg: &mut ServiceConfig) {
     routes::sessions::chemins_litteraux(cfg);
     routes::sessions::chemins_de_seance(cfg);
+    routes::questions::chemins_de_seance(cfg);
 }
 
 /// Le scope `/registrations`, et les deux lectures publiques du programme.

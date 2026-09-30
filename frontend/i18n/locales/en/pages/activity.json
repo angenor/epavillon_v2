@@ -1,0 +1,116 @@
+{
+  "back": "Back to the programme",
+  "trail": "Programmes / {edition} / {day}",
+  "loading": "Loading the activity",
+  "about": "About",
+  "error": {
+    "title": "Activity unavailable",
+    "description": "This activity could not be loaded."
+  },
+  "notFound": {
+    "title": "Activity not found",
+    "description": "It does not exist, or has not been published yet."
+  },
+  "state": {
+    "live": "Live",
+    "upcomingIn": "Upcoming · {delay}"
+  },
+  "countdown": {
+    "days": "in {days} d {hours} h",
+    "hours": "in {hours} h {minutes}",
+    "minutes": "in {minutes} min"
+  },
+  "hero": {
+    "ledBy": "Led by",
+    "yourTime": "Your time",
+    "yourZone": "{zone}, from your device"
+  },
+  "stage": {
+    "liveTitle": "Live",
+    "language": "Stream language",
+    "original": "original",
+    "player": "Live stream in {language}",
+    "external": "The live stream is broadcast on an external platform.",
+    "starting": "The live stream is about to start: it will appear here as soon as it begins.",
+    "watch": "Open the live stream",
+    "begins": "Starts",
+    "willStream": "Streamed live on this page.",
+    "replayTitle": "Watch again",
+    "replay": "Watch the recording",
+    "replayDuration": "Replay · {minutes} min"
+  },
+  "people": {
+    "speakers": "Speakers",
+    "organizations": "Organised with",
+    "bio": "Biography",
+    "role": {
+      "speaker": "Speaker",
+      "moderator": "Moderator",
+      "panelist": "Panellist",
+      "keynote": "Keynote",
+      "facilitator": "Facilitator",
+      "interpreter": "Interpreter"
+    },
+    "orgRole": {
+      "lead": "Lead",
+      "co_organizer": "Co-organiser",
+      "partner": "Partner",
+      "sponsor": "Supporter"
+    }
+  },
+  "sameDay": {
+    "title": "Same day",
+    "here": "Here"
+  },
+  "questions": {
+    "title": "Audience questions",
+    "count": "no questions | {count} question | {count} questions",
+    "failed": "Questions could not be loaded.",
+    "empty": "No questions yet.",
+    "support": "Support this question ({count})",
+    "unsupport": "Withdraw my support ({count})",
+    "mine": "Your question",
+    "answer": "Answer",
+    "officialAnswer": "Speakers' answer",
+    "more": "Show {count} more question | Show {count} more question | Show {count} more questions",
+    "less": "Show less",
+    "label": "Your question",
+    "placeholder": "Your question…",
+    "send": "Send",
+    "login": "Sign in",
+    "loginHint": "to ask or support a question."
+  },
+  "ticket": {
+    "label": "Take part",
+    "places": "Seats at the pavilion",
+    "ofCapacity": "/ {capacity} registered",
+    "unlimited": "Unlimited seats",
+    "register": "Register",
+    "waitlist": "Join the waiting list",
+    "registered": "Registration confirmed",
+    "onWaitlist": "On the waiting list",
+    "cancel": "Cancel my registration",
+    "watch": "Watch live",
+    "replay": "Watch the recording",
+    "note": {
+      "registered": "Your seat is booked.",
+      "waitlisted": "A seat is yours if someone cancels.",
+      "free": "Free entry, no registration, subject to available seats.",
+      "notOpen": "Registration opens on {date}.",
+      "closed": "Registration is closed.",
+      "full": "This activity is full.",
+      "until": "Registration open until {date}.",
+      "live": "The activity has started: follow it live.",
+      "past": "Nobody had registered. | {count} person had registered. | {count} people had registered."
+    },
+    "place": "Venue",
+    "format": "Format",
+    "languages": "Languages",
+    "broadcast": "Broadcast",
+    "streamed": "Live on this page",
+    "onSite": "On site only",
+    "calendar": "Calendar",
+    "share": "Share",
+    "copied": "Link copied"
+  }
+}

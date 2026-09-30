@@ -114,7 +114,8 @@ pub async fn organisations<'e>(
 ///
 /// Composé champ par champ, jamais `to_jsonb` : une colonne ajoutée à la table
 /// ou à `identity.people` deviendrait publique sans que personne l'ait décidé.
-/// Ni `person_id`, ni `confirmed_at`, ni `attended` (décision du 26/09).
+/// Ni `person_id`, ni `confirmed_at`, ni `attended` (décision du 26/09). La
+/// photo, `avatar`, est l'image de profil de la personne.
 pub async fn intervenants_publics<'e>(
     executor: impl PgExecutor<'e>,
     session_id: SessionId,
@@ -129,7 +130,8 @@ pub async fn intervenants_publics<'e>(
                       'bio', s.bio,
                       'sort_order', s.sort_order,
                       'created_at', s.created_at,
-                      'display_name', p.display_name) AS "ligne!"
+                      'display_name', p.display_name,
+                      'avatar', media.attached_image('identity', 'people', p.id, 'avatar')) AS "ligne!"
              FROM programme.session_speakers s
              JOIN identity.people p ON p.id = s.person_id
             WHERE s.session_id = $1

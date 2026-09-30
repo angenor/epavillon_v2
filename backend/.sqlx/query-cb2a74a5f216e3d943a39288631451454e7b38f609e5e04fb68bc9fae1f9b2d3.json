@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.session_questions q\n            SET upvotes = (SELECT count(*) FROM programme.session_question_votes v\n                            WHERE v.question_id = q.id)\n          WHERE q.id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cb2a74a5f216e3d943a39288631451454e7b38f609e5e04fb68bc9fae1f9b2d3"
+}

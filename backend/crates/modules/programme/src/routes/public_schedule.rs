@@ -72,7 +72,7 @@ pub(crate) async fn programmation(
 /// Le détail d'une séance publiée.
 #[utoipa::path(
     get,
-    description = "`PublicSessionDetail` — `{ session, speakers, organizations }` : la séance **publiée** désignée par son adresse d'URL dans son édition (une ligne de `PublicScheduleRow`), ses intervenants (`PublicSessionSpeaker[]` : nom d'affichage, fonction, organisation, biographie — **ni identifiant de personne, ni confirmation, ni présence**) et ses organisations (`SessionOrganization[]`, avec `name`, `acronym`, `country_code`, `country`). **Une adresse inconnue et une séance non publiée rendent le même 404** : distinguer les deux dirait au public qu'une séance existe sans être encore annoncée.",
+    description = "`PublicSessionDetail` — `{ session, description, allows_questions, is_recorded, speakers, organizations }` : la séance **publiée** désignée par son adresse d'URL dans son édition (une ligne de `PublicScheduleRow`), sa description longue (texte multilingue, nulle si absente), si elle prend des questions du public et si elle est enregistrée, ses intervenants (`PublicSessionSpeaker[]` : nom d'affichage, fonction, organisation, biographie, photo `avatar` — **ni identifiant de personne, ni adresse, ni confirmation, ni présence**) et ses organisations (`SessionOrganization[]`, avec `name`, `acronym`, `country_code`, `country`). **Une adresse inconnue et une séance non publiée rendent le même 404** : distinguer les deux dirait au public qu'une séance existe sans être encore annoncée.",
     path = "/events/{event_id}/sessions/{slug}",
     tag = "Programmation publique",
     operation_id = "programmation_seance_publique",

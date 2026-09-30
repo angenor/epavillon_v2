@@ -49,7 +49,7 @@ import type {
   OrganizationSearchQuery,
 } from '~/types/organization-join'
 import type { AdminDashboard } from '~/types/admin-dashboard'
-import type { ActiveIncident } from '~/types/live'
+import type { ActiveIncident, PublicSessionStream } from '~/types/live'
 import type { RoleAssignmentView } from '~/types/admin-users'
 import type { ResolvedFeatureFlag } from '~/types/platform'
 import type {
@@ -798,6 +798,13 @@ export function useApi() {
        */
       forEvent: (eventId: Uuid): Promise<ActiveIncident[]> =>
         call(`/events/${eventId}/incidents`, (m) => m.publicIncidents(eventId)),
+    },
+
+    // Le lecteur de la page d'une séance : un flux par langue, le principal en
+    // tête. Liste vide hors direct ; 404 pour une séance inconnue ou non publiée.
+    live: {
+      sessionStreams: (sessionId: Uuid): Promise<PublicSessionStream[]> =>
+        call(`/sessions/${sessionId}/streams`, (m) => m.publicSessionStreams(sessionId)),
     },
 
     // -----------------------------------------------------------------------

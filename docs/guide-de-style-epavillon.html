@@ -1052,6 +1052,7 @@ table.data td.num { text-align: end; font-variant-numeric: tabular-nums; }
     <a href="#motifs"><span>04</span>Motifs transversaux</a>
     <a href="#regles"><span>05</span>Règles d'usage</a>
     <a href="#verre"><span>05b</span>Le verre</a>
+    <a href="#affiche"><span>05c</span>L'affiche</a>
     <a href="#export"><span>06</span>Export des jetons</a>
   </div>
 </nav>
@@ -2066,6 +2067,40 @@ table.data td.num { text-align: end; font-variant-numeric: tabular-nums; }
     thématiques et l'obligation des quatre états d'écran <b>s'appliquent sur le verre comme
     ailleurs</b>. Le verre change la matière du fond, pas les règles de l'interface.
   </p>
+</section>
+
+<!-- ===================== 05c L'AFFICHE ===================== -->
+<section class="band" id="affiche">
+  <div class="section-head"><span class="num">05c</span><h2>L'affiche</h2></div>
+
+  <p class="note" style="max-width:var(--measure);color:var(--color-text-secondary)">
+    <b>Arbitrage du commanditaire, 30 septembre 2026.</b> La programmation publique
+    (<code>/programmations</code>) et la page d'une activité quittent la retenue de ce guide pour une
+    direction «&nbsp;affiche de festival&nbsp;» : papier crème, encre bleu riche, bordures franches de
+    2&nbsp;px, ombres dures décalées sans flou, grands chiffres étroits, horaires en chasse fixe. Le
+    bandeau de la programmation, lui, ne change pas.
+  </p>
+
+  <h3>Où l'affiche est permise</h3>
+  <ul>
+    <li>Le corps de <code>/programmations</code> : bande des jours, filtres, semaine, liste du jour.</li>
+    <li>La page d'une activité (<code>/programmations/{édition}/{activité}</code>).</li>
+    <li>Nulle part ailleurs. Un composant d'un autre écran qui appelle un jeton <code>poster</code> est un défaut.</li>
+  </ul>
+
+  <h3>Comment elle est outillée</h3>
+  <ul>
+    <li>Des jetons de rôle, clair et sombre : <code>--color-poster-paper</code>, <code>-paper-raised</code>, <code>-paper-sunken</code>, <code>-ink</code>, <code>-ink-muted</code>, <code>-line</code>, <code>-on-ink</code>, <code>-on-ink-accent</code>, <code>-today</code>, <code>-past</code>, <code>-live-row</code>, et <code>--shadow-poster-sm</code>, <code>--shadow-poster</code>, <code>--shadow-poster-lg</code>. Le papier est le gris de la charte teinté de son jaune ; l'encre est le bleu riche.</li>
+    <li>Deux polices embarquées sous licence OFL : Archivo (titres et chiffres, en largeur étroite) et IBM Plex Mono (heures). Elles ne servent qu'ici.</li>
+    <li>La couleur d'une activité est celle de sa thématique <b>en base</b>, adoucie dans le papier par <code>--poster-theme-strength</code> — jamais une couleur écrite dans la feuille de style.</li>
+  </ul>
+
+  <h3>Ce qui ne change pas</h3>
+  <ul>
+    <li>Les couleurs d'état : rouge pour le direct, jaune pour «&nbsp;aujourd'hui&nbsp;» et «&nbsp;en cours&nbsp;», violet pour le report, gris pour ce qui est terminé.</li>
+    <li>Les cibles de 44&nbsp;px, trois thématiques au plus sur une activité, le fuseau de l'édition sur toute heure.</li>
+    <li>Une commande allumée s'enfonce (l'ombre disparaît, la pièce se décale) : c'est le seul relief de l'affiche.</li>
+  </ul>
 </section>
 
 <!-- ===================== 06 EXPORT ===================== -->

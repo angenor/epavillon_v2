@@ -7,7 +7,9 @@
  * se lisent par `events.venues` et `registrations.form`, déjà montés.
  */
 import type {
+  AskQuestionPayload,
   CancelRegistrationResult,
+  PublicSessionQuestion,
   Registration,
   RegistrationResult,
   SessionRegisterPayload,
@@ -50,6 +52,31 @@ export function createPavillonApi({ callOrNull, send, lireEtiquete }: Deps) {
     /** `404` : déjà partie ; `REGISTRATION_LOCKED` (422) : la base refuse. */
     annuler: (registrationId: Uuid): Promise<CancelRegistrationResult> =>
       send(`/registrations/${registrationId}/cancel`, {}, async () => (await exemples()).annuler(registrationId)),
+
+    /** Visibles seulement, les plus soutenues d'abord ; `404` : séance inconnue ou non publiée. */
+    questions: (sessionId: Uuid, siDifferent: string | null = null) =>
+      lireEtiquete<PublicSessionQuestion[]>(
+        `/sessions/${sessionId}/questions`,
+        async () => (await exemples()).questions(sessionId),
+        siDifferent,
+      ),
+
+    /** `409` : la séance ne prend pas de questions ; `422` : hors de 3 à 2000 caractères. */
+    poserQuestion: (sessionId: Uuid, payload: AskQuestionPayload): Promise<PublicSessionQuestion> =>
+      send(`/sessions/${sessionId}/questions`, payload, async () => (await exemples()).poserQuestion(sessionId, payload)),
+
+    /** `409` : déjà soutenue, ou séance fermée aux questions. */
+    voter: (sessionId: Uuid, questionId: Uuid): Promise<PublicSessionQuestion> =>
+      send(`/sessions/${sessionId}/questions/${questionId}/vote`, {}, async () => (await exemples()).voter(sessionId, questionId)),
+
+    /** Sans effet si la personne ne la soutenait pas. */
+    retirerVote: (sessionId: Uuid, questionId: Uuid): Promise<PublicSessionQuestion> =>
+      send(
+        `/sessions/${sessionId}/questions/${questionId}/vote`,
+        {},
+        async () => (await exemples()).retirerVote(sessionId, questionId),
+        'DELETE',
+      ),
 
     /** Annulations comprises ; propre à la personne, jamais mise en cache partagé. */
     mesInscriptions: (siDifferent: string | null) =>

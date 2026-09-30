@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.session_question_votes (question_id, person_id)\n         VALUES ($1, $2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4c1c6537ec20d2152df2890635d81c7c76351a0e01aaa7f8b5fe347b41df311e"
+}

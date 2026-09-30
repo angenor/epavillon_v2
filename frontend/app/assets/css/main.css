@@ -8,6 +8,7 @@
 
 @import "tailwindcss";
 @import "./design-tokens.css";
+@import "./affiche.css";
 
 /* Sources analysées pour la génération des utilitaires : tout le code
    applicatif vit sous `app/`, deux niveaux au-dessus de ce fichier. */

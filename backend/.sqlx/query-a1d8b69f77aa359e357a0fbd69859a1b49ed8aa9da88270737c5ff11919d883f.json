@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.sessions SET allows_questions = false WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a1d8b69f77aa359e357a0fbd69859a1b49ed8aa9da88270737c5ff11919d883f"
+}

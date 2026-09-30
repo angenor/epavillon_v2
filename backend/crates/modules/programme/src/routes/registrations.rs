@@ -22,7 +22,7 @@ use uuid::Uuid;
 
 use crate::domain::ids::{RegistrationId, SessionId};
 use crate::domain::permissions::REGISTRATION_MANAGE;
-use crate::routes::{contexte_de, locale_de};
+use crate::routes::{contexte_de, locale_de, session_facultative};
 use crate::service::perimeter::{self, Cible};
 use crate::service::registration::{self, AnnulationDemandee, SessionRegisterPayload};
 use crate::state::ProgrammeState;
@@ -114,16 +114,6 @@ pub(crate) async fn sinscrire(
     .await?;
 
     Ok(HttpResponse::Ok().json(issue))
-}
-
-/// La personne connectée, **quand il y en a une**.
-fn session_facultative(requete: &HttpRequest) -> Option<Uuid> {
-    use actix_web::HttpMessage;
-
-    requete
-        .extensions()
-        .get::<kernel::context::RequestContext>()
-        .and_then(|ctx| ctx.actor_id)
 }
 
 /// L'adresse d'appel, telle que l'intergiciel l'a résolue : elle accompagne la

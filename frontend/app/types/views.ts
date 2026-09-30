@@ -156,6 +156,10 @@ export interface PublicScheduleRow {
 /** `GET /events/{id}/sessions/{slug}` — le détail public d'une séance publiée. */
 export interface PublicSessionDetail {
   session: PublicScheduleRow
+  /** `programme.sessions.description` ; nulle si la séance n'en a pas. */
+  description: I18nText | null
+  allows_questions: boolean
+  is_recorded: boolean
   speakers: PublicSessionSpeaker[]
   organizations: SessionOrganization[]
 }

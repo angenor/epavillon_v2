@@ -194,6 +194,10 @@ Cette ligne interdisait le verre dépoli et les dégradés sans exception. **Le 
 
 Le détail est au § « Le verre » de [docs/guide-de-style-epavillon.html](docs/guide-de-style-epavillon.html).
 
+**L'affiche : réservée à la programmation publique, arbitrée le 30/09.**
+
+Le corps de `/programmations` et la page d'une activité suivent une direction « affiche de festival » — papier crème, encre bleu riche, bordures de 2 px, ombres dures décalées, Archivo étroite et IBM Plex Mono embarquées. Elle passe par les jetons `--color-poster-*` et `--shadow-poster*`, clair et sombre, et par la couleur des thématiques **en base**. Nulle part ailleurs : un autre écran qui appelle un jeton `poster` est un défaut. Le détail est au § « L'affiche » du guide.
+
 **Le relief moulé : réservé à l'interrupteur, arbitré le 19/08.**
 
 Même forme d'exception, autre matière. L'interrupteur n'est plus une pastille glissant sur un aplat accentué mais un **basculeur mécanique** — piste creusée, curseur bombé portant un voyant, rainures gravées qui s'allument quand le courant passe. Son relief vient de deux jetons, `--color-relief-shade` et `--color-relief-light`, **jamais d'une ombre noire** : une pièce moulée reçoit sa lumière d'un côté et son ombre de l'autre, et un seul noir translucide ne la sculpte pas. Les couleurs y disent l'état, pas la marque : vert pour le voyant allumé (un réglage actif est *confirmé*), cyan pour les rainures, gris sourd éteint.

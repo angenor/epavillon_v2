@@ -683,6 +683,12 @@ export const INCIDENT = {
   panneVisioOrg: uuid('7090', 7),
 } as const
 
+/** `live.streams` — les deux flux d'une séance en direct : l'original et son interprétation. */
+export const STREAM = {
+  original: uuid('7092', 1),
+  interpretationEn: uuid('7092', 2),
+} as const
+
 // ---------------------------------------------------------------------------
 // Contenus mis en avant — 115_content.sql
 // ---------------------------------------------------------------------------

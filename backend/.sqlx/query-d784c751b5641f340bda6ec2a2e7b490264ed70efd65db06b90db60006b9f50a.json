@@ -1,0 +1,90 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT cs.id            AS \"id!\",\n                  cs.locale,\n                  cs.provider::text AS \"provider!\",\n                  cs.embed_url::text AS \"embed_url?\",\n                  cs.watch_url::text AS \"watch_url?\",\n                  cs.is_primary    AS \"is_primary!\",\n                  cs.started_at\n             FROM live.current_streams cs\n            WHERE cs.session_id = $1\n            ORDER BY cs.is_primary DESC, cs.locale NULLS LAST, cs.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.current_streams",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "locale",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "live.current_streams",
+            "name": "locale"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "provider!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "embed_url?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "live.current_streams",
+            "name": "embed_url"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "watch_url?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "is_primary!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "live.current_streams",
+            "name": "is_primary"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "started_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "live.current_streams",
+            "name": "started_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      null,
+      true,
+      null,
+      true,
+      true
+    ]
+  },
+  "hash": "d784c751b5641f340bda6ec2a2e7b490264ed70efd65db06b90db60006b9f50a"
+}

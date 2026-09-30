@@ -180,3 +180,11 @@ Après redémarrage de la machine : `cargo test -p programme -p event`, tout pas
 **Filtres Format et Salle retirés (29/09)** : la programmation publique ne filtre plus que par jour et par thématique — [journal](../journal/2026-09-29.md).
 
 **Recherche par titre et organisation (30/09)** — [journal](../journal/2026-09-30.md).
+
+## 30/09 — Direction « affiche » et page d'une activité
+
+Arbitrage du commanditaire : [décision](../decisions/2026-09-30.md), [journal](../journal/2026-09-30.md). Le bandeau (`ProgrammeHero`) ne change pas.
+
+- **Corps de `/programmations`** : `ProgrammeDayStrip`, `ProgrammeFilters` (réécrit), `ProgrammeWeek`, `ProgrammeDayList` ; logique dans `utils/programme-week.ts` (testée) et `composables/useProgrammeSession.ts`. L'URL porte `edition`, `vue=liste` et `jour`. « Aujourd'hui » et la ligne « maintenant » ne se calculent qu'au navigateur.
+- **Page d'une activité** : `pages/activity/[edition]/[session].vue`, `components/activity/*`. Activité inconnue ou non publiée : même état vide, statut 404 au rendu serveur. Le direct, les questions et le même jour se chargent à part et ne cassent jamais la page.
+- **Écarts** : pas de déroulé minuté ni de documents (absents du modèle) ; objectifs et public visé restent dans le dossier, non publiés.

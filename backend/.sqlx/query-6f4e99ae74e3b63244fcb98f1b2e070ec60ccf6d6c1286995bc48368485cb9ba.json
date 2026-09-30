@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object(\n                      'id', s.id,\n                      'session_id', s.session_id,\n                      'role', s.role,\n                      'job_title_snapshot', s.job_title_snapshot,\n                      'organization_snapshot', s.organization_snapshot,\n                      'bio', s.bio,\n                      'sort_order', s.sort_order,\n                      'created_at', s.created_at,\n                      'display_name', p.display_name,\n                      'avatar', media.attached_image('identity', 'people', p.id, 'avatar')) AS \"ligne!\"\n             FROM programme.session_speakers s\n             JOIN identity.people p ON p.id = s.person_id\n            WHERE s.session_id = $1\n            ORDER BY s.sort_order, s.created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ligne!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "6f4e99ae74e3b63244fcb98f1b2e070ec60ccf6d6c1286995bc48368485cb9ba"
+}

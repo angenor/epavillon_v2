@@ -401,6 +401,9 @@
   --font-sans: var(--ifdd-police-1);
   --font-display: var(--ifdd-police-2);
   --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", monospace;
+  /* Réservées à l'affiche, embarquées sous licence OFL (assets/fonts/affiche/). */
+  --font-poster: "Archivo", var(--ifdd-police-2);
+  --font-poster-mono: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
 
   /* -- Rayons. Coins légèrement arrondis, jamais plus de 8 px sur les blocs. -- */
   --radius-sm: 4px;
@@ -434,6 +437,41 @@
      champ, la bordure change déjà de couleur, et l'anneau seul se confond avec
      elle. Le halo l'en détache. */
   --shadow-focus: 0 0 0 3px color-mix(in srgb, var(--color-focus) 35%, transparent);
+
+  /* ---------------------------------------------------------------------
+     L'AFFICHE — la programmation publique et la fiche d'une activité.
+
+     Arbitrage du commanditaire, 30/09 : ces écrans quittent la retenue du
+     guide pour une direction « affiche de festival » — papier crème, encre
+     bleu riche, bordures franches, ombres dures décalées, grands chiffres
+     étroits. L'exception est BORNÉE à ces écrans : un composant d'ailleurs qui
+     appelle un jeton `poster` est un défaut.
+
+     Le papier n'est pas une couleur de charte : c'est le gris de la charte
+     à peine teinté de son jaune, pour qu'il reste traçable. Le fond d'une
+     activité vient de sa thématique en base, mêlée au papier par
+     `--poster-theme-strength` : une couleur saturée y devient un aplat lisible
+     sous l'encre, dans les deux thèmes. */
+  --color-poster-paper: color-mix(in srgb, var(--ifdd-jaune-400) 6%, var(--ifdd-gris-100));
+  --color-poster-paper-raised: color-mix(in srgb, var(--ifdd-jaune-400) 3%, var(--ifdd-gris-50));
+  --color-poster-paper-sunken: color-mix(in srgb, var(--ifdd-jaune-400) 8%, var(--ifdd-gris-150));
+  --color-poster-ink: var(--ifdd-bleu-900);
+  --color-poster-ink-muted: var(--ifdd-bleu-700);
+  --color-poster-line: color-mix(in srgb, var(--ifdd-bleu-900) 16%, var(--ifdd-gris-100));
+  /* Ce qui ressort SUR l'encre : chiffre du jour choisi, heure du billet. */
+  --color-poster-on-ink: var(--ifdd-gris-50);
+  --color-poster-on-ink-accent: var(--ifdd-jaune-400);
+  --color-poster-on-ink-muted: var(--ifdd-bleu-200);
+  --color-poster-today: color-mix(in srgb, var(--ifdd-jaune-400) 20%, var(--ifdd-gris-50));
+  --color-poster-today-strong: var(--ifdd-jaune-400);
+  /* Le jaune reste jaune en thème sombre : ce qui s'y écrit reste bleu riche. */
+  --color-poster-on-today: var(--ifdd-bleu-900);
+  --color-poster-past: color-mix(in srgb, var(--ifdd-bleu-900) 7%, var(--ifdd-gris-100));
+  --color-poster-live-row: color-mix(in srgb, var(--ifdd-rouge-500) 12%, var(--ifdd-gris-50));
+  --poster-theme-strength: 45%;
+  --shadow-poster-sm: 3px 3px 0 var(--color-poster-ink);
+  --shadow-poster: 4px 4px 0 var(--color-poster-ink);
+  --shadow-poster-lg: 8px 8px 0 var(--color-poster-ink);
 
   /* -- Base d'espacement : 4 px. `p-4` vaut donc 16 px. -- */
   --spacing: 4px;
@@ -655,6 +693,20 @@
 
     --color-relief-shade: var(--ifdd-gris-950);
     --color-relief-light: var(--ifdd-gris-700);
+    --color-poster-paper: color-mix(in srgb, var(--ifdd-bleu-900) 55%, var(--ifdd-noir));
+    --color-poster-paper-raised: color-mix(in srgb, var(--ifdd-bleu-900) 75%, var(--ifdd-noir));
+    --color-poster-paper-sunken: var(--ifdd-bleu-800);
+    --color-poster-ink: color-mix(in srgb, var(--ifdd-jaune-400) 6%, var(--ifdd-gris-100));
+    --color-poster-ink-muted: var(--ifdd-bleu-200);
+    --color-poster-line: var(--ifdd-bleu-700);
+    --color-poster-on-ink: var(--ifdd-bleu-900);
+    --color-poster-on-ink-accent: var(--ifdd-bleu-900);
+    --color-poster-on-ink-muted: var(--ifdd-bleu-700);
+    --color-poster-today: color-mix(in srgb, var(--ifdd-jaune-400) 14%, var(--ifdd-bleu-900));
+    --color-poster-today-strong: var(--ifdd-jaune-400);
+    --color-poster-past: color-mix(in srgb, var(--ifdd-bleu-900) 40%, var(--ifdd-noir));
+    --color-poster-live-row: color-mix(in srgb, var(--ifdd-rouge-500) 22%, var(--ifdd-bleu-900));
+    --poster-theme-strength: 38%;
   }
 }
 
@@ -740,6 +792,20 @@
 
   --color-relief-shade: var(--ifdd-gris-950);
   --color-relief-light: var(--ifdd-gris-700);
+  --color-poster-paper: color-mix(in srgb, var(--ifdd-bleu-900) 55%, var(--ifdd-noir));
+  --color-poster-paper-raised: color-mix(in srgb, var(--ifdd-bleu-900) 75%, var(--ifdd-noir));
+  --color-poster-paper-sunken: var(--ifdd-bleu-800);
+  --color-poster-ink: color-mix(in srgb, var(--ifdd-jaune-400) 6%, var(--ifdd-gris-100));
+  --color-poster-ink-muted: var(--ifdd-bleu-200);
+  --color-poster-line: var(--ifdd-bleu-700);
+  --color-poster-on-ink: var(--ifdd-bleu-900);
+  --color-poster-on-ink-accent: var(--ifdd-bleu-900);
+  --color-poster-on-ink-muted: var(--ifdd-bleu-700);
+  --color-poster-today: color-mix(in srgb, var(--ifdd-jaune-400) 14%, var(--ifdd-bleu-900));
+  --color-poster-today-strong: var(--ifdd-jaune-400);
+  --color-poster-past: color-mix(in srgb, var(--ifdd-bleu-900) 40%, var(--ifdd-noir));
+  --color-poster-live-row: color-mix(in srgb, var(--ifdd-rouge-500) 22%, var(--ifdd-bleu-900));
+  --poster-theme-strength: 38%;
 }
 
 /* Indique au navigateur quelle palette est active : ascenseurs, champs de

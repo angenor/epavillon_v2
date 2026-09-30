@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object(\n                      'id', q.id,\n                      'session_id', q.session_id,\n                      'body', q.body,\n                      'vote_count', n.votes,\n                      'has_voted', EXISTS (\n                          SELECT 1 FROM programme.session_question_votes mv\n                           WHERE mv.question_id = q.id AND mv.person_id = $2),\n                      'is_mine', $2::uuid IS NOT NULL AND q.person_id IS NOT DISTINCT FROM $2,\n                      'answered_at', q.answered_at,\n                      'created_at', q.created_at,\n                      'answers', COALESCE((\n                          SELECT jsonb_agg(jsonb_build_object(\n                                     'id', a.id,\n                                     'body', a.body,\n                                     'is_official', a.is_official,\n                                     'created_at', a.created_at)\n                                 ORDER BY a.created_at)\n                            FROM programme.session_question_answers a\n                           WHERE a.question_id = q.id), '[]'::jsonb)) AS \"ligne!\"\n             FROM programme.session_questions q\n             CROSS JOIN LATERAL (\n                 SELECT count(*)::int4 AS votes\n                   FROM programme.session_question_votes v\n                  WHERE v.question_id = q.id) n\n            WHERE q.session_id = $1\n              AND q.is_visible\n              AND ($3::uuid IS NULL OR q.id = $3)\n            ORDER BY n.votes DESC, q.created_at, q.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ligne!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "432f066986ad956cdfa6d4da22c879b89e51da515773204dcae6f8712f46f336"
+}

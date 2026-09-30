@@ -20,6 +20,7 @@ pub mod people;
 pub mod planner;
 pub mod proposals;
 pub mod public_schedule;
+pub mod questions;
 pub mod reads;
 pub mod registrations;
 pub mod reviews;

@@ -2995,7 +2995,7 @@ export interface paths {
         };
         /**
          * Le détail d'une séance publiée.
-         * @description `PublicSessionDetail` — `{ session, speakers, organizations }` : la séance **publiée** désignée par son adresse d'URL dans son édition (une ligne de `PublicScheduleRow`), ses intervenants (`PublicSessionSpeaker[]` : nom d'affichage, fonction, organisation, biographie — **ni identifiant de personne, ni confirmation, ni présence**) et ses organisations (`SessionOrganization[]`, avec `name`, `acronym`, `country_code`, `country`). **Une adresse inconnue et une séance non publiée rendent le même 404** : distinguer les deux dirait au public qu'une séance existe sans être encore annoncée.
+         * @description `PublicSessionDetail` — `{ session, description, allows_questions, is_recorded, speakers, organizations }` : la séance **publiée** désignée par son adresse d'URL dans son édition (une ligne de `PublicScheduleRow`), sa description longue (texte multilingue, nulle si absente), si elle prend des questions du public et si elle est enregistrée, ses intervenants (`PublicSessionSpeaker[]` : nom d'affichage, fonction, organisation, biographie, photo `avatar` — **ni identifiant de personne, ni adresse, ni confirmation, ni présence**) et ses organisations (`SessionOrganization[]`, avec `name`, `acronym`, `country_code`, `country`). **Une adresse inconnue et une séance non publiée rendent le même 404** : distinguer les deux dirait au public qu'une séance existe sans être encore annoncée.
          */
         get: operations["programmation_seance_publique"];
         put?: never;
@@ -5561,6 +5561,56 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/sessions/{id}/questions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Les questions visibles d'une séance publiée.
+         * @description `PublicSessionQuestion[]` — les questions **visibles** d'une séance publiée, les plus soutenues d'abord puis les plus anciennes, chacune avec son nombre de soutiens et ses réponses (`PublicSessionQuestionAnswer[]`). **Sans session** : `has_voted` et `is_mine` valent alors faux. L'auteur n'est jamais exposé, ni les intervenants visés, ni la modération. Une séance non publiée rend le même 404 qu'une séance inconnue.
+         *
+         *     `ETag` sur le corps ; **304** sur `If-None-Match` ; `Cache-Control: private, no-cache`.
+         */
+        get: operations["questions_du_public_lire"];
+        put?: never;
+        /**
+         * Poser une question.
+         * @description `AskQuestionPayload` → `PublicSessionQuestion`, en **201**. La question est visible dès sa pose ; l'équipe peut la masquer ensuite. Refusée en **409** quand la séance ne prend pas de questions ou qu'elle est annulée.
+         */
+        post: operations["questions_du_public_poser"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sessions/{id}/questions/{question_id}/vote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Soutenir une question.
+         * @description `PublicSessionQuestion` — la question soutenue, décompte à jour. **Un soutien par personne** : un second rend **409**.
+         */
+        post: operations["questions_du_public_voter"];
+        /**
+         * Retirer son soutien.
+         * @description `PublicSessionQuestion` — la question, décompte à jour. **Sans effet** si la personne ne la soutenait pas : l'état voulu est atteint.
+         */
+        delete: operations["questions_du_public_retirer_le_vote"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/sessions/{id}/registration-form": {
         parameters: {
             query?: never;
@@ -5704,6 +5754,27 @@ export interface paths {
          * @description `SessionTracksPayload` → `PlannerMutationResult`. **Manuel et indépendant de la date** : toutes les activités du 12 novembre ne relèvent pas de la « Journée finance durable ». La liste envoyée **remplace** la précédente, et la base retient qui a rattaché quoi. Un fil d'une **autre édition** est refusé par un déclencheur du modèle, traduit ici en code stable.
          */
         put: operations["seances_rattacher"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sessions/{session_id}/streams": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `PublicSessionStream[]` — les flux **en cours** de la séance, lus dans `live.current_streams` : un par langue d'interprétation, **le flux principal en tête**, puis par langue. `embed_url` est construite par le modèle (`live.build_embed_url()`), à défaut `watch_url`.
+         *
+         *     **Liste vide** quand rien n'est diffusé. **Aucune garde.** Une séance inconnue et une séance non publiée rendent **le même 404** : distinguer les deux dirait qu'une séance existe sans être encore annoncée.
+         */
+        get: operations["seance_flux_en_cours"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -5869,6 +5940,10 @@ export interface components {
          */
         ArchivagePayload: {
             ids: string[];
+        };
+        /** @description `{ body }` — le texte de la question, entre 3 et 2000 caractères. */
+        AskQuestionPayload: {
+            body: string;
         };
         AttachmentAssignment: {
             role: string;
@@ -20706,6 +20781,203 @@ export interface operations {
             };
         };
     };
+    questions_du_public_lire: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la séance */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PublicSessionQuestion[] */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Rien n'a changé depuis l'empreinte présentée */
+            304: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Séance inconnue **ou non publiée** — indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    questions_du_public_poser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la séance */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AskQuestionPayload"];
+            };
+        };
+        responses: {
+            /** @description PublicSessionQuestion */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Séance inconnue **ou non publiée** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description La séance ne prend pas de questions */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Texte hors bornes : entre 3 et 2000 caractères */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    questions_du_public_voter: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la séance */
+                id: string;
+                /** @description Identifiant de la question */
+                question_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PublicSessionQuestion */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Séance non publiée, ou question inconnue, masquée ou d'une autre séance */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Déjà soutenue, ou séance fermée aux questions */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    questions_du_public_retirer_le_vote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant de la séance */
+                id: string;
+                /** @description Identifiant de la question */
+                question_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PublicSessionQuestion */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Séance non publiée, ou question inconnue, masquée ou d'une autre séance */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     inscriptions_formulaire: {
         parameters: {
             query?: never;
@@ -21109,6 +21381,38 @@ export interface operations {
             };
             /** @description Journée spéciale d'une autre édition, ou inexistante */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    seance_flux_en_cours: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Séance publiée */
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PublicSessionStream[] */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Séance inconnue **ou non publiée** — indiscernables */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

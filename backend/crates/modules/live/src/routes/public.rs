@@ -16,11 +16,16 @@ use actix_web::{web, HttpResponse};
 use kernel::error::Result;
 use uuid::Uuid;
 
-use crate::repo::active;
+use crate::repo::{active, streams};
 use crate::state::LiveState;
 
 pub fn configurer(cfg: &mut web::ServiceConfig) {
     cfg.route("/events/{event_id}/incidents", web::get().to(actifs));
+}
+
+/// Sous le scope `/sessions`, que l'API compose avec `programme` et `engagement`.
+pub fn chemins_de_seance(cfg: &mut web::ServiceConfig) {
+    cfg.route("/{session_id}/streams", web::get().to(flux));
 }
 
 #[utoipa::path(
@@ -37,5 +42,25 @@ pub(crate) async fn actifs(
     chemin: web::Path<Uuid>,
 ) -> Result<HttpResponse> {
     let lignes = active::pour_ledition(state.pool(), chemin.into_inner()).await?;
+    Ok(HttpResponse::Ok().json(lignes))
+}
+
+#[utoipa::path(
+    get,
+    description = "`PublicSessionStream[]` — les flux **en cours** de la séance, lus dans `live.current_streams` : un par langue d'interprétation, **le flux principal en tête**, puis par langue. `embed_url` est construite par le modèle (`live.build_embed_url()`), à défaut `watch_url`.\n\n**Liste vide** quand rien n'est diffusé. **Aucune garde.** Une séance inconnue et une séance non publiée rendent **le même 404** : distinguer les deux dirait qu'une séance existe sans être encore annoncée.",
+    path = "/sessions/{session_id}/streams",
+    tag = "Direct",
+    operation_id = "seance_flux_en_cours",
+    params(("session_id" = Uuid, Path, description = "Séance publiée")),
+    responses(
+        (status = 200, description = "PublicSessionStream[]", body = Object),
+        (status = 404, description = "Séance inconnue **ou non publiée** — indiscernables", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn flux(
+    state: web::Data<LiveState>,
+    chemin: web::Path<Uuid>,
+) -> Result<HttpResponse> {
+    let lignes = streams::en_cours(state.pool(), chemin.into_inner()).await?;
     Ok(HttpResponse::Ok().json(lignes))
 }

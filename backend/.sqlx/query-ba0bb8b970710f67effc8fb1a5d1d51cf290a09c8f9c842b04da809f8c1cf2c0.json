@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM programme.session_question_votes\n          WHERE question_id = $1 AND person_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ba0bb8b970710f67effc8fb1a5d1d51cf290a09c8f9c842b04da809f8c1cf2c0"
+}

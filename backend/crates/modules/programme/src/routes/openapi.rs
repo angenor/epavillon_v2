@@ -83,6 +83,10 @@ pub struct ApiErrorBody {
         crate::routes::registrations::les_miennes,
         crate::routes::registrations::annuler,
         crate::routes::registrations::rejoindre,
+        crate::routes::questions::lire,
+        crate::routes::questions::poser,
+        crate::routes::questions::voter,
+        crate::routes::questions::retirer_le_vote,
     ),
     components(schemas(ApiErrorBody)),
     tags(
@@ -112,7 +116,7 @@ mod tests {
     /// en porte deux — une lecture et un rattachement —, et
     /// `/proposal-comments/{id}/resolution` aussi.
     #[test]
-    fn les_cinquante_sept_routes_sont_documentees() {
+    fn les_soixante_et_une_routes_sont_documentees() {
         let doc = super::ProgrammeApi::openapi();
         let operations: usize = doc
             .paths
@@ -133,8 +137,8 @@ mod tests {
             .sum();
 
         assert_eq!(
-            operations, 57,
-            "trente-sept routes de B4, dix-sept de B5, la suggestion d'intervenants et l'abandon de brouillon du 16/09, la correction par l'équipe du 17/09"
+            operations, 61,
+            "trente-sept routes de B4, dix-sept de B5, la suggestion d'intervenants et l'abandon de brouillon du 16/09, la correction par l'équipe du 17/09, les quatre des questions du public"
         );
     }
 
@@ -150,6 +154,7 @@ mod tests {
             .paths
             .paths
             .keys()
+            .filter(|c| !c.contains("/questions"))
             .filter(|c| {
                 c.starts_with("/sessions")
                     || c.starts_with("/registrations")

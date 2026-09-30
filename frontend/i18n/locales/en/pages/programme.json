@@ -1,46 +1,25 @@
 {
   "title": "Programmes",
-  "description": "Published activities, edition by edition, as a list or placed in time. Both views carry the same data and share your filters.",
+  "description": "Published activities, edition by edition, by week or day by day.",
   "loading": "Loading the programme",
   "views": {
-    "label": "Programme view",
-    "grid": "List",
-    "calendar": "Calendar"
-  },
-  "editions": {
-    "label": "Choose an edition",
-    "conferences": "Conferences",
-    "others": "Other activities",
-    "showing": "Programme of {edition}",
-    "period": "From {start} to {end}"
+    "label": "Display",
+    "week": "Week",
+    "list": "Day list"
   },
   "filters": {
-    "day": "Day",
-    "theme": "Theme",
-    "allDays": "All days",
-    "allThemes": "All themes",
-    "total": "{count} activity | {count} activity | {count} activities",
-    "filtered": "{count} of {total} activity | {count} of {total} activity | {count} of {total} activities",
-    "search": "Search",
-    "searchPlaceholder": "Activity title, organization or acronym…"
-  },
-  "grid": {
-    "dayCount": "{count} activity | {count} activity | {count} activities",
-    "details": "See details"
-  },
-  "calendar": {
-    "zoneNotice": "Times are shown in {zone}, the event's own.",
-    "noEvent": "No activity on this day."
-  },
-  "detail": {
-    "slot": "Time slot",
-    "room": "Room",
-    "organization": "Organization",
-    "capacity": "Registrations"
+    "search": "Search for an activity",
+    "searchPlaceholder": "Title, organisation, acronym…",
+    "streamed": "Streamed online",
+    "hidePast": "Hide past activities",
+    "themes": "Themes",
+    "clear": "Clear all",
+    "resultWeek": "{count} of {total} activities this week",
+    "resultDay": "{count} of {total} activities this day"
   },
   "empty": {
-    "title": "No activity matches",
-    "description": "Remove a filter to widen the search."
+    "title": "No published activities",
+    "description": "This edition's programme is published but has no activities yet."
   },
   "unpublished": {
     "title": "Programme to come",
@@ -75,5 +54,40 @@
       "updated": "Updated on"
     },
     "others": "Other programmes"
+  },
+  "board": {
+    "title": "The programme, day by day",
+    "zone": "All times: {zone} ({offset})"
+  },
+  "days": {
+    "label": "Choose a day",
+    "today": "Today",
+    "count": "no activity | {count} activity | {count} activities",
+    "gap": "break | break | +{count} d"
+  },
+  "week": {
+    "today": "Today",
+    "live": "Live",
+    "legend": {
+      "activity": "Activity",
+      "filtered": "Excluded by your filters",
+      "past": "Ended",
+      "live": "Live",
+      "hint": "Click an activity to open its page."
+    }
+  },
+  "list": {
+    "count": "{count} of {total} activities",
+    "until": "→ {end} · {duration}",
+    "minutes": "{minutes} min",
+    "hours": "{hours} h",
+    "hoursMinutes": "{hours} h {minutes}",
+    "streamed": "streamed online",
+    "live": "Live",
+    "open": "View activity",
+    "visited": "Viewed",
+    "empty": "No activities on this day.",
+    "emptyFiltered": "No activities on this day with these filters.",
+    "navigation": "Adjacent days"
   }
 }

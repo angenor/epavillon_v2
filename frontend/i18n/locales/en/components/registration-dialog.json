@@ -1,0 +1,57 @@
+{
+  "title": "Register for this activity",
+  "loading": "Loading the registration form",
+  "loadError": "The registration form could not be loaded",
+  "notFound": "This activity has no registration form.",
+  "noQuestion": "No questions to answer: simply confirm your registration.",
+  "choose": "Choose…",
+  "countryCode": "Two-letter country code, for example “SN” for Senegal.",
+  "submit": "Confirm my registration",
+  "dateWithZone": "{date}, {zone}",
+  "login": {
+    "title": "This activity requires an account",
+    "message": "Sign in to register. You will then come back to this page.",
+    "action": "Sign in"
+  },
+  "guest": {
+    "legend": "Your details",
+    "intro": "You can register without an account.",
+    "signIn": "Already have one? Sign in.",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email address",
+    "emailHint": "Used to confirm your registration and remind you of the activity."
+  },
+  "consent": {
+    "label": "I agree to share this personal information",
+    "hint": "Some answers are sensitive data. They are used only to organise this activity and never appear in any named export.",
+    "required": "Tick this box to send these answers, or leave the related questions empty."
+  },
+  "outcome": {
+    "registered": {
+      "title": "You are registered",
+      "message": "Your seat is booked for “{title}”."
+    },
+    "waitlisted": {
+      "title": "You are on the waiting list",
+      "message": "The activity is full. You are number {position}: if a seat becomes free, it goes to the first person on the list."
+    },
+    "already": {
+      "title": "You are already registered",
+      "registered": "Your seat for “{title}” was already booked. Nothing has changed.",
+      "waitlisted": "You are already on the waiting list, at number {position}. Nothing has changed."
+    },
+    "full": {
+      "title": "This activity is full",
+      "message": "All {capacity} seats are taken, and there is no waiting list."
+    },
+    "closed": {
+      "title": "Registration is closed",
+      "message": "It closed on {date}."
+    },
+    "notOpen": {
+      "title": "Registration is not open yet",
+      "message": "It opens on {date}. Please come back then."
+    }
+  }
+}

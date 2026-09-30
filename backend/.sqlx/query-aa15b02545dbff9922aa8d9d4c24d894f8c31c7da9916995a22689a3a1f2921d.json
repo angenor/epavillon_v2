@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT upvotes FROM programme.session_questions WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "upvotes",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "programme.session_questions",
+            "name": "upvotes"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "aa15b02545dbff9922aa8d9d4c24d894f8c31c7da9916995a22689a3a1f2921d"
+}

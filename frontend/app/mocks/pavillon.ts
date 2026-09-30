@@ -10,7 +10,9 @@
  */
 import type { AvecEmpreinte } from '~/composables/api/etiquete'
 import type {
+  AskQuestionPayload,
   CancelRegistrationResult,
+  PublicSessionQuestion,
   Registration,
   RegistrationResult,
   SessionRegisterPayload,
@@ -19,6 +21,7 @@ import type { PublicScheduleRow, PublicSessionDetail } from '~/types/views'
 import { ApiRequestError } from '~/utils/api-error'
 import { REGISTRATION_FORM } from './ids'
 import { allSessions } from './sessions'
+import { publicSchedule } from './views'
 
 const FUSEAU = 'America/Belem'
 const MOI = '01990000-0000-7000-8000-0000000d0000'
@@ -190,13 +193,18 @@ export function programme(eventId: string): AvecEmpreinte<PublicScheduleRow[]> {
 }
 
 export function activite(eventId: string, slug: string): PublicSessionDetail | null {
-  const session = programme(eventId).valeur.find((l) => l.slug === slug)
+  const session =
+    programme(eventId).valeur.find((l) => l.slug === slug) ??
+    publicSchedule().find((l) => l.event_id === eventId && l.slug === slug)
   if (!session) return null
   return {
     session,
+    description: { fr: "Un échange entre négociatrices, chercheurs et partenaires sur les priorités francophones de la COP.", en: 'An exchange between negotiators, researchers and partners on francophone priorities at the COP.' },
+    allows_questions: session.id !== MODELES[6]!.id,
+    is_recorded: true,
     speakers: [
-      { id: `${session.id}-1`, session_id: session.id, role: 'moderator', job_title_snapshot: 'Spécialiste de programme', organization_snapshot: 'IFDD', bio: null, sort_order: 1, created_at: session.starts_at, display_name: 'Aïssatou Diallo' },
-      { id: `${session.id}-2`, session_id: session.id, role: 'panelist', job_title_snapshot: 'Négociatrice', organization_snapshot: 'Délégation du Sénégal', bio: null, sort_order: 2, created_at: session.starts_at, display_name: 'Mariam Ndiaye' },
+      { id: `${session.id}-1`, session_id: session.id, role: 'moderator', job_title_snapshot: 'Spécialiste de programme', organization_snapshot: 'IFDD', bio: null, sort_order: 1, created_at: session.starts_at, display_name: 'Aïssatou Diallo', avatar: null },
+      { id: `${session.id}-2`, session_id: session.id, role: 'panelist', job_title_snapshot: 'Négociatrice', organization_snapshot: 'Délégation du Sénégal', bio: null, sort_order: 2, created_at: session.starts_at, display_name: 'Mariam Ndiaye', avatar: null },
     ],
     organizations: [
       {
@@ -247,4 +255,96 @@ export function annuler(registrationId: string): CancelRegistrationResult {
   const annulee: Registration = { ...r, status: 'cancelled', waitlist_position: null, cancelled_at: new Date().toISOString() }
   miennes.set(registrationId, annulee)
   return { registration: annulee, promoted: 0 }
+}
+
+interface QuestionSimulee {
+  question: PublicSessionQuestion
+  votants: Set<string>
+  auteur: string | null
+}
+
+const questionsPosees = new Map<string, QuestionSimulee>()
+let numeroQuestion = 0
+
+function simulee(sessionId: string, body: string, auteur: string | null, votants: string[], minutes: number): QuestionSimulee {
+  numeroQuestion += 1
+  return {
+    question: {
+      id: `01990000-0000-7000-8000-0000000f${String(numeroQuestion).padStart(4, '0')}`,
+      session_id: sessionId,
+      body,
+      vote_count: 0,
+      has_voted: false,
+      is_mine: false,
+      answered_at: null,
+      created_at: new Date(Date.now() - minutes * MINUTE).toISOString(),
+      answers: [],
+    },
+    votants: new Set(votants),
+    auteur,
+  }
+}
+
+for (const q of [
+  simulee(enCours, "Quels mécanismes de financement sont accessibles aux collectivités locales ?", null, ['a', 'b', 'c'], 20),
+  simulee(enCours, "Comment les délégations francophones se coordonnent-elles avant les sessions ?", null, [MOI], 12),
+]) questionsPosees.set(q.question.id, q)
+
+const vue = (q: QuestionSimulee): PublicSessionQuestion => ({
+  ...q.question,
+  vote_count: q.votants.size,
+  has_voted: q.votants.has(MOI),
+  is_mine: q.auteur === MOI,
+})
+
+function ouverte(sessionId: string) {
+  const l = programme('').valeur.find((x) => x.id === sessionId)
+  if (!l) throw new ApiRequestError({ code: 'NOT_FOUND', message: 'La ressource demandée est introuvable.' }, 404)
+  if (sessionId === MODELES[6]!.id || l.status === 'cancelled') {
+    throw new ApiRequestError({ code: 'CONFLICT', message: 'Cette séance ne prend pas de questions.' }, 409)
+  }
+}
+
+function trouvee(sessionId: string, questionId: string): QuestionSimulee {
+  const q = questionsPosees.get(questionId)
+  if (!q || q.question.session_id !== sessionId) {
+    throw new ApiRequestError({ code: 'NOT_FOUND', message: 'La ressource demandée est introuvable.' }, 404)
+  }
+  return q
+}
+
+export function questions(sessionId: string): AvecEmpreinte<PublicSessionQuestion[]> {
+  if (!programme('').valeur.some((l) => l.id === sessionId)) {
+    throw new ApiRequestError({ code: 'NOT_FOUND', message: 'La ressource demandée est introuvable.' }, 404)
+  }
+  const valeur = [...questionsPosees.values()]
+    .filter((q) => q.question.session_id === sessionId)
+    .map(vue)
+    .sort((a, b) => b.vote_count - a.vote_count || a.created_at.localeCompare(b.created_at))
+  return { valeur, empreinte: empreinte(valeur) }
+}
+
+export function poserQuestion(sessionId: string, payload: AskQuestionPayload): PublicSessionQuestion {
+  ouverte(sessionId)
+  const body = payload.body.trim()
+  if (body.length < 3 || body.length > 2000) {
+    throw new ApiRequestError({ code: 'VALIDATION_FAILED', message: 'Une question compte entre 3 et 2000 caractères.', field: 'body' }, 422)
+  }
+  const q = simulee(sessionId, body, MOI, [], 0)
+  questionsPosees.set(q.question.id, q)
+  return vue(q)
+}
+
+export function voter(sessionId: string, questionId: string): PublicSessionQuestion {
+  ouverte(sessionId)
+  const q = trouvee(sessionId, questionId)
+  if (q.votants.has(MOI)) throw new ApiRequestError({ code: 'CONFLICT', message: 'Vous soutenez déjà cette question.' }, 409)
+  q.votants.add(MOI)
+  return vue(q)
+}
+
+export function retirerVote(sessionId: string, questionId: string): PublicSessionQuestion {
+  const q = trouvee(sessionId, questionId)
+  q.votants.delete(MOI)
+  return vue(q)
 }

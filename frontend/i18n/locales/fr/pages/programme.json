@@ -1,46 +1,25 @@
 {
   "title": "Programmations",
-  "description": "Les activités publiées, édition par édition, en liste ou placées dans le temps. Les deux vues portent les mêmes données et partagent vos filtres.",
+  "description": "Les activités publiées, édition par édition, à la semaine ou jour par jour.",
   "loading": "Chargement du programme",
   "views": {
-    "label": "Vue de la programmation",
-    "grid": "Liste",
-    "calendar": "Calendrier"
-  },
-  "editions": {
-    "label": "Choisir une édition",
-    "conferences": "Conférences",
-    "others": "Autres activités",
-    "showing": "Programmation de {edition}",
-    "period": "Du {start} au {end}"
+    "label": "Affichage",
+    "week": "Semaine",
+    "list": "Liste du jour"
   },
   "filters": {
-    "day": "Jour",
-    "theme": "Thématique",
-    "allDays": "Tous les jours",
-    "allThemes": "Toutes les thématiques",
-    "total": "{count} activité | {count} activité | {count} activités",
-    "filtered": "{count} activité sur {total} | {count} activité sur {total} | {count} activités sur {total}",
-    "search": "Rechercher",
-    "searchPlaceholder": "Titre de l'activité, organisation ou sigle…"
-  },
-  "grid": {
-    "dayCount": "{count} activité | {count} activité | {count} activités",
-    "details": "Voir le détail"
-  },
-  "calendar": {
-    "zoneNotice": "Les créneaux sont affichés à l'{zone}, celle de l'événement.",
-    "noEvent": "Aucune activité ce jour-là."
-  },
-  "detail": {
-    "slot": "Créneau",
-    "room": "Salle",
-    "organization": "Organisation",
-    "capacity": "Inscriptions"
+    "search": "Rechercher une activité",
+    "searchPlaceholder": "Titre, organisation, sigle…",
+    "streamed": "Diffusé en ligne",
+    "hidePast": "Masquer ce qui est passé",
+    "themes": "Thématiques",
+    "clear": "Tout effacer",
+    "resultWeek": "{count} sur {total} activités cette semaine",
+    "resultDay": "{count} sur {total} activités ce jour"
   },
   "empty": {
-    "title": "Aucune activité ne correspond",
-    "description": "Retirez un filtre pour élargir la recherche."
+    "title": "Aucune activité publiée",
+    "description": "Le programme de cette édition est publié, mais ne compte encore aucune activité."
   },
   "unpublished": {
     "title": "Programme à venir",
@@ -75,5 +54,40 @@
       "updated": "Mis à jour le"
     },
     "others": "Autres programmations"
+  },
+  "board": {
+    "title": "Le programme, jour par jour",
+    "zone": "Toutes les heures : {zone} ({offset})"
+  },
+  "days": {
+    "label": "Choisir un jour",
+    "today": "Auj.",
+    "count": "aucune activité | {count} activité | {count} activités",
+    "gap": "relâche | relâche | +{count} j"
+  },
+  "week": {
+    "today": "Aujourd'hui",
+    "live": "Direct",
+    "legend": {
+      "activity": "Activité",
+      "filtered": "Écartée par vos filtres",
+      "past": "Terminée",
+      "live": "En direct",
+      "hint": "Cliquez une activité pour ouvrir sa page."
+    }
+  },
+  "list": {
+    "count": "{count} sur {total} activités",
+    "until": "→ {end} · {duration}",
+    "minutes": "{minutes} min",
+    "hours": "{hours} h",
+    "hoursMinutes": "{hours} h {minutes}",
+    "streamed": "diffusé en ligne",
+    "live": "En direct",
+    "open": "Voir l'activité",
+    "visited": "Consultée",
+    "empty": "Aucune activité ce jour-là.",
+    "emptyFiltered": "Aucune activité ce jour-là avec ces filtres.",
+    "navigation": "Jours voisins"
   }
 }

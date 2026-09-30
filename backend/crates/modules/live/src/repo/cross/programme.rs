@@ -182,3 +182,19 @@ pub async fn gabarit(
         event_id: l.event_id,
     }))
 }
+
+/// La séance est-elle **publiée** ? C'est le critère de `v_public_schedule`,
+/// lu sur la table : la vue compose trente colonnes pour une réponse booléenne.
+pub async fn publiee(conn: &mut PgConnection, session_id: Uuid) -> Result<bool> {
+    let publiee = sqlx::query_scalar!(
+        r#"SELECT EXISTS (
+                      SELECT 1 FROM programme.sessions s
+                       WHERE s.id = $1 AND s.published_at IS NOT NULL
+                  ) AS "publiee!""#,
+        session_id
+    )
+    .fetch_one(conn)
+    .await?;
+
+    Ok(publiee)
+}

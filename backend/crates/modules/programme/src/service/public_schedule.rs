@@ -29,6 +29,9 @@ use crate::repo::{public_schedule, session_parts};
 #[derive(Debug, Clone, Serialize, ToSchema)]
 pub struct SeancePublique {
     pub session: PublicScheduleRow,
+    pub description: Option<serde_json::Value>,
+    pub allows_questions: bool,
+    pub is_recorded: bool,
     pub speakers: Vec<serde_json::Value>,
     pub organizations: Vec<serde_json::Value>,
 }
@@ -54,8 +57,14 @@ pub async fn seance(pool: &PgPool, event_id: EventId, slug: &str) -> Result<Sean
         .ok_or_else(ApiError::not_found)?;
 
     let id = SessionId::from(session.id);
+    let complement = public_schedule::complement(pool, id)
+        .await?
+        .ok_or_else(ApiError::not_found)?;
 
     Ok(SeancePublique {
+        description: complement.description,
+        allows_questions: complement.allows_questions,
+        is_recorded: complement.is_recorded,
         speakers: session_parts::intervenants_publics(pool, id).await?,
         organizations: session_parts::organisations_publiques(pool, id).await?,
         session,

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.session_questions SET is_visible = false WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "bc4c88fb633c824ba6d0a1be41ff283273ed5200a8db04c757b5edae55fc510b"
+}

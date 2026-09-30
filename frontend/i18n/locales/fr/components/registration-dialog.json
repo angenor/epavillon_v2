@@ -1,0 +1,57 @@
+{
+  "title": "S'inscrire à l'activité",
+  "loading": "Chargement du formulaire d'inscription",
+  "loadError": "Le formulaire d'inscription n'a pas pu être chargé",
+  "notFound": "Cette activité n'a pas de formulaire d'inscription.",
+  "noQuestion": "Aucune question à remplir : confirmez simplement votre inscription.",
+  "choose": "Choisir…",
+  "countryCode": "Code du pays à deux lettres, par exemple « SN » pour le Sénégal.",
+  "submit": "Confirmer mon inscription",
+  "dateWithZone": "{date}, {zone}",
+  "login": {
+    "title": "Cette activité demande un compte",
+    "message": "Connectez-vous pour vous inscrire. Vous reviendrez ensuite sur cette page.",
+    "action": "Se connecter"
+  },
+  "guest": {
+    "legend": "Vos coordonnées",
+    "intro": "Vous pouvez vous inscrire sans compte.",
+    "signIn": "Vous en avez un ? Connectez-vous.",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "Adresse électronique",
+    "emailHint": "Elle sert à vous confirmer l'inscription et à vous rappeler l'activité."
+  },
+  "consent": {
+    "label": "J'accepte de transmettre ces informations personnelles",
+    "hint": "Certaines réponses sont des données sensibles. Elles ne servent qu'à l'organisation de cette activité et ne figurent dans aucun export nominatif.",
+    "required": "Cochez cette case pour envoyer ces réponses, ou laissez vides les questions concernées."
+  },
+  "outcome": {
+    "registered": {
+      "title": "Vous êtes inscrit·e",
+      "message": "Votre place est réservée pour « {title} »."
+    },
+    "waitlisted": {
+      "title": "Vous êtes sur la liste d'attente",
+      "message": "L'activité est complète. Vous êtes en position {position} : si une place se libère, elle revient à la première personne de la liste."
+    },
+    "already": {
+      "title": "Vous êtes déjà inscrit·e",
+      "registered": "Votre place pour « {title} » était déjà réservée. Rien n'a changé.",
+      "waitlisted": "Vous êtes déjà sur la liste d'attente, en position {position}. Rien n'a changé."
+    },
+    "full": {
+      "title": "Cette activité est complète",
+      "message": "Ses {capacity} places sont prises, et elle n'a pas de liste d'attente."
+    },
+    "closed": {
+      "title": "Les inscriptions sont closes",
+      "message": "Elles ont fermé le {date}."
+    },
+    "notOpen": {
+      "title": "Les inscriptions ne sont pas encore ouvertes",
+      "message": "Elles ouvriront le {date}. Revenez à ce moment-là."
+    }
+  }
+}

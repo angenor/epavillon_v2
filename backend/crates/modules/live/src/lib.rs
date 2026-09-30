@@ -5,8 +5,8 @@
 //! # CE QUE CE CRATE NE SERT PAS
 //!
 //! Les quatre cinquièmes du schéma. `live.meetings` et leurs participants,
-//! `live.provider_webhook_events`, `live.streams`, les vues `meetings_public`
-//! et `current_streams`, les fonctions `build_embed_url()`,
+//! `live.provider_webhook_events`, l'écriture de `live.streams`, la vue
+//! `meetings_public`, les fonctions `build_embed_url()`,
 //! `requeue_failed_participants()` et `replay_webhook_event()` : **rien de tout
 //! cela n'est lu ni écrit ici**, parce qu'aucun écran du jalon ne le demande.
 //! Le modèle les porte pour le jour où la visioconférence sera branchée ; les
@@ -14,7 +14,8 @@
 //! routes dont personne ne saurait qu'elles sont cassées.
 //!
 //! Ce crate sert **une** table — `live.incidents` — et **quatre** fonctions du
-//! § 6 de `080_live.sql`.
+//! § 6 de `080_live.sql`, plus la lecture publique de `live.current_streams`
+//! pour le lecteur de la page d'une séance.
 //!
 //! # Les trois choses à savoir avant d'écrire une ligne ici
 //!
@@ -65,4 +66,10 @@ pub fn routes(cfg: &mut ServiceConfig) {
 /// les motifs ne se recouvrent pas, il n'y a donc rien à composer côté API.
 pub fn event_routes(cfg: &mut ServiceConfig) {
     routes::public::configurer(cfg);
+}
+
+/// Les routes du module qui vivent sous `/sessions`, **sans le préfixe** : le
+/// scope est partagé avec `programme` et `engagement`, et l'API le compose.
+pub fn session_routes(cfg: &mut ServiceConfig) {
+    routes::public::chemins_de_seance(cfg);
 }

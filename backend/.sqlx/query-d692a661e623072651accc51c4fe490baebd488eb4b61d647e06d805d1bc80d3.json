@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.sessions\n            SET published_at = now(), status = 'scheduled',\n                description = '{\"fr\":\"Le détail de l''atelier\"}'::jsonb\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d692a661e623072651accc51c4fe490baebd488eb4b61d647e06d805d1bc80d3"
+}

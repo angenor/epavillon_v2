@@ -29,6 +29,7 @@ import type {
   Uuid,
 } from '../shared'
 import type { ParticipationMode } from '../event/edition'
+import type { AttachedImage } from '../media'
 import type { OrganizationRole, SpeakerRole } from './proposal'
 
 // ---------------------------------------------------------------------------
@@ -129,10 +130,12 @@ export interface SessionSpeaker {
 
 /**
  * Un intervenant du détail PUBLIC d'une séance : ni identifiant de personne,
- * ni confirmation, ni présence — mais son nom d'affichage.
+ * ni confirmation, ni présence — mais son nom d'affichage et sa photo.
  */
 export type PublicSessionSpeaker = Omit<SessionSpeaker, 'person_id' | 'confirmed_at' | 'attended'> & {
   display_name: string
+  /** Image de profil, `media.attached_image('identity', 'people', …, 'avatar')` ; nulle sans image. */
+  avatar: AttachedImage | null
 }
 
 /** Table `programme.session_organizations` — `075` § 2 ter. */

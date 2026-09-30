@@ -18,7 +18,7 @@
 use kernel::error::Result;
 use sqlx::PgExecutor;
 
-use crate::domain::ids::EventId;
+use crate::domain::ids::{EventId, SessionId};
 use crate::domain::sessions::PublicScheduleRow;
 
 /// La programmation publique d'une édition.
@@ -134,4 +134,30 @@ pub async fn par_adresse<'e>(
         .await?
         .into_iter()
         .find(|s| s.slug == slug))
+}
+
+/// Ce que la page d'une séance ajoute à sa ligne de programme. Lue sur la
+/// séance déjà trouvée dans la vue : elle est donc publiée.
+pub struct ComplementDeSeance {
+    pub description: Option<serde_json::Value>,
+    pub allows_questions: bool,
+    pub is_recorded: bool,
+}
+
+pub async fn complement<'e>(
+    executor: impl PgExecutor<'e>,
+    session_id: SessionId,
+) -> Result<Option<ComplementDeSeance>> {
+    let ligne = sqlx::query_as!(
+        ComplementDeSeance,
+        r#"SELECT s.description AS "description: serde_json::Value",
+                  s.allows_questions, s.is_recorded
+             FROM programme.sessions s
+            WHERE s.id = $1"#,
+        session_id.as_uuid()
+    )
+    .fetch_optional(executor)
+    .await?;
+
+    Ok(ligne)
 }

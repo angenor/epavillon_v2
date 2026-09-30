@@ -256,6 +256,7 @@ export {
   unpublishIncident,
   updateIncident,
 } from './admin-incidents'
+export { publicSessionStreams } from './streams'
 
 export {
   proposalFunnel,

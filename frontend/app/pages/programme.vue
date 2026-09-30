@@ -32,9 +32,9 @@ import type { ProgrammeData } from '~/types/event-programme'
  *
  * ── CE QUE LA PAGE CHARGE ───────────────────────────────────────────────────
  *
- * Les éditions publiques, les séries (leur `kind` sépare les conférences du
- * reste), puis le programme de la seule édition ouverte à l'arrivée. Les autres
- * se chargent à la demande, une fois chacune, dans `EventProgramme`.
+ * Les éditions publiques, puis le programme de la seule édition ouverte à
+ * l'arrivée. Les autres se chargent à la demande, une fois chacune, dans
+ * `EventProgramme`.
  *
  * ── LE BANDEAU D'INCIDENT ───────────────────────────────────────────────────
  *
@@ -60,7 +60,7 @@ const api = useApi()
 const { t } = useI18n()
 
 const { data, status, error, refresh } = await useAsyncData('programme-page', async () => {
-  const [editions, series] = await Promise.all([api.events.publicList(), api.events.series()])
+  const editions = await api.events.publicList()
   if (!editions.length) return null
 
   const wanted = typeof route.query.edition === 'string' ? route.query.edition : null
@@ -76,7 +76,7 @@ const { data, status, error, refresh } = await useAsyncData('programme-page', as
     api.events.rooms(edition.id),
   ])
 
-  return { editions, series, edition, programme: { schedule, days, rooms } satisfies ProgrammeData }
+  return { editions, edition, programme: { schedule, days, rooms } satisfies ProgrammeData }
 })
 
 const current = ref<PublicEditionRow | null>(null)
@@ -173,8 +173,6 @@ useHead(() => ({ title: t('programme.title') }))
       :edition="data.edition"
       :initial="data.programme"
       :editions="data.editions"
-      :series="data.series"
-      named-above
       @update:edition="current = $event"
     />
   </div>

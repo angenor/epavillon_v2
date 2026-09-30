@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT s.description AS \"description: serde_json::Value\",\n                  s.allows_questions, s.is_recorded\n             FROM programme.sessions s\n            WHERE s.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "description: serde_json::Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "allows_questions",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "allows_questions"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "is_recorded",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "is_recorded"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "47e229f68cd5ccea2810f77c52afb1f2fa59e7f7b8d0562162a1b93382d47d23"
+}

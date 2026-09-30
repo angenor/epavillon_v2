@@ -261,3 +261,46 @@ async fn les_chemins_litteraux_ne_sont_pas_captures() {
         );
     }
 }
+
+/// **Les quatre routes des questions du public sont montées** sous `/sessions`,
+/// préfixe partagé : la lecture répond sans session, les écritures l'exigent.
+#[actix_web::test]
+async fn les_quatre_routes_des_questions_sont_montees() {
+    let base = TestDb::new().await;
+    let config = kernel::testing::test_config(base.url());
+    let etat = api::state::AppState::new(base.db(), config)
+        .await
+        .expect("état de l'application");
+    let app = test::init_service(api::build_app(&etat)).await;
+    let (_, seance, _) = une_seance_publiee(&base).await;
+    let question = id();
+
+    let lecture = test::call_service(
+        &app,
+        test::TestRequest::get()
+            .uri(&format!("/api/sessions/{seance}/questions"))
+            .to_request(),
+    )
+    .await;
+    assert_eq!(lecture.status(), StatusCode::OK, "la lecture est publique");
+
+    for (verbe, chemin) in [
+        ("POST", format!("/api/sessions/{seance}/questions")),
+        (
+            "POST",
+            format!("/api/sessions/{seance}/questions/{question}/vote"),
+        ),
+        (
+            "DELETE",
+            format!("/api/sessions/{seance}/questions/{question}/vote"),
+        ),
+    ] {
+        let reponse = test::call_service(&app, requete(verbe).uri(&chemin).to_request()).await;
+        assert_eq!(
+            reponse.status(),
+            StatusCode::UNAUTHORIZED,
+            "{verbe} {chemin} a répondu {}",
+            reponse.status()
+        );
+    }
+}

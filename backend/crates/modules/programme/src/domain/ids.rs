@@ -52,6 +52,7 @@ identifiant!(
     SessionId,
     RegistrationId,
     FormId,
+    QuestionId,
     // Les cinq suivants appartiennent à d'autres schémas. Ils sont typés ici
     // parce que ce module les manipule, pas parce qu'il les possède : un
     // identifiant d'appel et un identifiant d'édition se confondent sans cela.
