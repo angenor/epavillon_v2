@@ -160,7 +160,7 @@ async function select(eventId: string): Promise<void> {
   emit('update:edition', selectedEdition.value)
   // Les filtres appartiennent à un programme : les garder d'une édition à
   // l'autre afficherait « aucun résultat » sur un jour qui n'existe pas ici.
-  filters.value = { day: null, theme: null }
+  filters.value = { day: null, theme: null, search: '' }
   selectedSessionId.value = null
 }
 
@@ -185,6 +185,7 @@ const view = ref<ViewMode>(route.query.vue === 'calendrier' ? 'calendar' : 'grid
 const filters = ref<ProgrammeFilterState>({
   day: typeof route.query.jour === 'string' ? route.query.jour : null,
   theme: null,
+  search: '',
 })
 const selectedSessionId = ref<string | null>(null)
 
@@ -219,13 +220,20 @@ function dayOf(session: PublicScheduleRow): IsoDate {
   return dayKeyInZone(session.starts_at, timezone.value)
 }
 
-const filtered = computed(() =>
-  data.value.schedule.filter((session) => {
+const filtered = computed(() => {
+  const needle = foldText(filters.value.search.trim())
+  return data.value.schedule.filter((session) => {
+    if (needle) {
+      const haystack = foldText(
+        [tr(session.title), session.organization_name ?? '', session.organization_acronym ?? ''].join(' '),
+      )
+      if (!haystack.includes(needle)) return false
+    }
     if (filters.value.day && dayOf(session) !== filters.value.day) return false
     if (filters.value.theme && !session.theme_codes.includes(filters.value.theme)) return false
     return true
-  }),
-)
+  })
+})
 
 const groupedDays = computed<ProgrammeDay[]>(() => {
   const byDate = new Map<string, PublicScheduleRow[]>()
@@ -443,7 +451,7 @@ const period = computed(() =>
             :title="t('programme.empty.title')"
             :description="t('programme.empty.description')"
             :action-label="t('common.actions.reset')"
-            @action="filters = { day: null, theme: null }"
+            @action="filters = { day: null, theme: null, search: '' }"
           />
 
           <EventProgrammeGrid

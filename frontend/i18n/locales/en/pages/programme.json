@@ -20,7 +20,9 @@
     "allDays": "All days",
     "allThemes": "All themes",
     "total": "{count} activity | {count} activity | {count} activities",
-    "filtered": "{count} of {total} activity | {count} of {total} activity | {count} of {total} activities"
+    "filtered": "{count} of {total} activity | {count} of {total} activity | {count} of {total} activities",
+    "search": "Search",
+    "searchPlaceholder": "Activity title, organization or acronym…"
   },
   "grid": {
     "dayCount": "{count} activity | {count} activity | {count} activities",

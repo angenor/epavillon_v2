@@ -22,6 +22,7 @@
 import type { PlannerFacet, PlannerSession, UnplacedFilters, UnplacedSortKey, UnplacedFacets } from '~/types/admin-planner'
 import type { ScheduleConflict, ConflictSeverity } from '~/types/programme/session'
 import type { IsoDateTime, TimeZoneName, Uuid } from '~/types/shared'
+import { foldText } from './fold-text'
 
 // ---------------------------------------------------------------------------
 // Panneau latéral : filtrer, trier, compter
@@ -46,13 +47,6 @@ export interface PlannerSessionText {
   theme: (badge: PlannerSession['themes'][number]) => string
 }
 
-/** Normalise pour la recherche : sans accents, sans casse. */
-function fold(value: string): string {
-  return value
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .toLowerCase()
-}
 
 /**
  * Filtre les activités à placer.
@@ -66,11 +60,11 @@ export function filterUnplaced(
   filters: UnplacedFilters,
   text: PlannerSessionText,
 ): PlannerSession[] {
-  const needle = fold(filters.search.trim())
+  const needle = foldText(filters.search.trim())
 
   return sessions.filter((session) => {
     if (needle) {
-      const haystack = fold(
+      const haystack = foldText(
         [text.title(session), text.organization(session), session.reference_code ?? ''].join(' '),
       )
       if (!haystack.includes(needle)) return false

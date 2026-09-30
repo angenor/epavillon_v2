@@ -178,3 +178,5 @@ Demande du commanditaire, en deux temps : une première version réutilisait `Ev
 Après redémarrage de la machine : `cargo test -p programme -p event`, tout passe.
 
 **Filtres Format et Salle retirés (29/09)** : la programmation publique ne filtre plus que par jour et par thématique — [journal](../journal/2026-09-29.md).
+
+**Recherche par titre et organisation (30/09)** — [journal](../journal/2026-09-30.md).

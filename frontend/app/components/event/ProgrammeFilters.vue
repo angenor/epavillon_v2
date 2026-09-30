@@ -3,7 +3,7 @@ import type { ProgrammeFilterState } from '~/types/event-programme'
 import type { SelectOption } from '~/types/ui'
 
 /**
- * FILTRES DE LA PROGRAMMATION — jour, thématique.
+ * FILTRES DE LA PROGRAMMATION — recherche (titre, organisation), jour, thématique.
  *
  * ILS SONT PARTAGÉS PAR LES DEUX VUES. C'est l'exigence du prompt, et ce n'est
  * pas un détail d'implémentation : quelqu'un qui a filtré sur « Adaptation » en
@@ -36,14 +36,18 @@ const emit = defineEmits<{ 'update:modelValue': [value: ProgrammeFilterState] }>
 
 const { t } = useI18n()
 
-type FilterKey = keyof ProgrammeFilterState
+type FilterKey = 'day' | 'theme'
+
+function setSearch(value: string): void {
+  emit('update:modelValue', { ...props.modelValue, search: value })
+}
 
 function set(key: FilterKey, value: string | null): void {
   emit('update:modelValue', { ...props.modelValue, [key]: value === '' ? null : value })
 }
 
 function reset(): void {
-  emit('update:modelValue', { day: null, theme: null })
+  emit('update:modelValue', { day: null, theme: null, search: '' })
 }
 
 const optionsByKey = computed<Record<FilterKey, SelectOption[]>>(() => ({
@@ -63,11 +67,19 @@ const activeChips = computed(() =>
     .filter((chip): chip is { key: FilterKey; label: string } => chip !== null),
 )
 
-const hasFilters = computed(() => activeChips.value.length > 0)
+const searchTerm = computed(() => props.modelValue.search.trim())
+const hasFilters = computed(() => activeChips.value.length > 0 || searchTerm.value.length > 0)
 </script>
 
 <template>
   <div class="rounded-lg border border-border bg-surface-raised px-4 py-4">
+    <UiSearchInput
+      class="mb-3"
+      :model-value="props.modelValue.search"
+      :label="t('programme.filters.search')"
+      :placeholder="t('programme.filters.searchPlaceholder')"
+      @update:model-value="setSearch"
+    />
     <div class="grid gap-3 sm:grid-cols-2">
       <UiSelect
         :model-value="props.modelValue.day ?? ''"
@@ -99,6 +111,12 @@ const hasFilters = computed(() => activeChips.value.length > 0)
         }}
       </p>
 
+      <UiChip
+        v-if="searchTerm"
+        :facet="t('programme.filters.search')"
+        :label="searchTerm"
+        @remove="setSearch('')"
+      />
       <UiChip
         v-for="chip in activeChips"
         :key="chip.key"

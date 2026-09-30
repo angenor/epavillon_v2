@@ -37,6 +37,8 @@ export interface ProgrammeFilterState {
   day: IsoDate | null
   /** Code de `reference.taxonomy_terms`, taxonomie `activity_theme`. */
   theme: TaxonomyTermCode | null
+  /** Recherche libre : titre, nom ou sigle de l'organisation. Vide : aucune. */
+  search: string
 }
 
 /** Une journée de programmation, telle que la vue grille et les filtres la voient. */
