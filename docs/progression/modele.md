@@ -189,4 +189,4 @@ compte, et sans session `platform.is_feature_enabled()` n'ouvre qu'à 100 %.
 
 Les 17 termes de `activity_theme` n'avaient pas de `color_hex` : la programmation publique (pastilles du filtre, aplats de la semaine, carrés de la bande des jours) les affichait en gris, alors que la maquette validée les montre en couleur. Un `UPDATE … WHERE color_hex IS NULL` suit l'insertion des termes : une couleur posée depuis l'emporte. Palette distincte deux à deux et à l'écart du rouge, réservé au direct. Aucun écran ne permet encore de modifier ces couleurs.
 
-**Migration** : `ops/migrations/2026-09-30-couleurs-thematiques.sql` — appliquée en local (`UPDATE 17`, rejouée : `UPDATE 0`). **À jouer en production.**
+**Migration** : `ops/migrations/2026-09-30-couleurs-thematiques.sql` — appliquée en local (`UPDATE 17`, rejouée : `UPDATE 0`). **Jouée en production le 30/09** (sauvegarde `epavillon-20260930-180608`, `UPDATE 17`, 17/17).
