@@ -5,17 +5,15 @@
   "views": {
     "label": "Display",
     "week": "Week",
-    "list": "Day list"
+    "list": "List"
   },
   "filters": {
     "search": "Search for an activity",
     "searchPlaceholder": "Title, organisation, acronym…",
-    "streamed": "Streamed online",
-    "hidePast": "Hide past activities",
     "themes": "Themes",
     "clear": "Clear all",
-    "resultWeek": "{count} of {total} activities this week",
-    "resultDay": "{count} of {total} activities this day"
+    "show": "No activities | Show {count} activity | Show {count} activities",
+    "remove": "Remove the filter {filter}"
   },
   "empty": {
     "title": "No published activities",
@@ -56,7 +54,7 @@
     "others": "Other programmes"
   },
   "board": {
-    "title": "The programme, day by day",
+    "title": "The programme",
     "zone": "All times: {zone} ({offset})"
   },
   "days": {
@@ -68,16 +66,20 @@
   "week": {
     "today": "Today",
     "live": "Live",
+    "navigation": "Change week",
+    "previous": "Previous week",
+    "next": "Next week",
+    "openDay": "Show the list for {day}",
+    "summary": "Week {week} of {weeks} · {count} of {total} activities",
     "legend": {
       "activity": "Activity",
       "filtered": "Excluded by your filters",
       "past": "Ended",
-      "live": "Live",
-      "hint": "Click an activity to open its page."
+      "live": "Live"
     }
   },
   "list": {
-    "count": "{count} of {total} activities",
+    "count": "{count} of {total} activity | {count} of {total} activity | {count} of {total} activities",
     "until": "→ {end} · {duration}",
     "minutes": "{minutes} min",
     "hours": "{hours} h",
@@ -86,8 +88,7 @@
     "live": "Live",
     "open": "View activity",
     "visited": "Viewed",
-    "empty": "No activities on this day.",
     "emptyFiltered": "No activities on this day with these filters.",
-    "navigation": "Adjacent days"
+    "emptyAll": "No activities match these filters."
   }
 }

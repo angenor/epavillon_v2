@@ -3,11 +3,11 @@
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
 ## Dernière mise à jour — 30 septembre 2026
+- 30/09 — Programmation publique : filtres sur une ligne, jours figés au défilement, liste de tout le programme qui suit le jour lu. Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
 - 30/09 — `/programmations` passe en « affiche de festival » et chaque activité a sa page (intervenants, inscription, direct, questions). Non déployé — [A3](progression/ecrans/a3-evenement-public.md), [décision](progression/decisions/2026-09-30.md).
 - 29/09 — Chaque édition naît avec son lieu et sa salle : le planificateur place enfin dans le calendrier. En production — [A9](progression/ecrans/a9-planificateur.md), [décision](progression/decisions/2026-09-29.md).
 - 28/09 — Rejoindre une organisation ne bloque plus le dépôt : en attente du référent, on dépose et suit ses propres dossiers. En production, migrée le 29/09 — [A2](progression/ecrans/a2-organisation.md), [décision](progression/decisions/2026-09-28.md).
 - 28/09 — Rattachement à une organisation allégé : un seul message d'exigence, textes raccourcis — [A2](progression/ecrans/a2-organisation.md).
-- 27/09 — Appel à propositions : formats déduits du mode de l'édition (hybride → présentiel ou en ligne), revues visées facultatives, grille de critères désactivable, bug du critère « obligatoire » corrigé. en production — [A10](progression/ecrans/a10-evenements.md).
 
 ## État général
 | Domaine | État |

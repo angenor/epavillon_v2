@@ -188,3 +188,5 @@ Arbitrage du commanditaire : [décision](../decisions/2026-09-30.md), [journal](
 - **Corps de `/programmations`** : `ProgrammeDayStrip`, `ProgrammeFilters` (réécrit), `ProgrammeWeek`, `ProgrammeDayList` ; logique dans `utils/programme-week.ts` (testée) et `composables/useProgrammeSession.ts`. L'URL porte `edition`, `vue=liste` et `jour`. « Aujourd'hui » et la ligne « maintenant » ne se calculent qu'au navigateur.
 - **Page d'une activité** : `pages/activity/[edition]/[session].vue`, `components/activity/*`. Activité inconnue ou non publiée : même état vide, statut 404 au rendu serveur. Le direct, les questions et le même jour se chargent à part et ne cassent jamais la page.
 - **Écarts** : pas de déroulé minuté ni de documents (absents du modèle) ; objectifs et public visé restent dans le dossier, non publiés.
+
+**30/09 (soir) — Filtres compacts, jours figés** : barre d'une ligne, deux filtres retirés, navigation de semaine explicite, liste de tout le programme avec bande des jours suivant la lecture — [journal](../journal/2026-09-30.md).

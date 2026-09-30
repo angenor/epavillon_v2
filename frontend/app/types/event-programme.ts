@@ -28,14 +28,12 @@ export interface ProgrammeData {
   rooms: Room[]
 }
 
-/** Filtres partagés par la semaine et la liste du jour. Le jour choisi n'en fait pas partie : il se navigue. */
+/** Filtres partagés par la semaine et la liste. Le jour choisi n'en fait pas partie : il se navigue. */
 export interface ProgrammeFilterState {
   /** Codes de `reference.taxonomy_terms`, taxonomie `activity_theme`. Vide : toutes. */
   themes: TaxonomyTermCode[]
   /** Recherche libre : titre, nom ou sigle de l'organisation. */
   search: string
-  streamedOnly: boolean
-  hidePast: boolean
 }
 
 export type ProgrammeView = 'week' | 'list'

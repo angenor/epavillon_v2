@@ -5,17 +5,15 @@
   "views": {
     "label": "Affichage",
     "week": "Semaine",
-    "list": "Liste du jour"
+    "list": "Liste"
   },
   "filters": {
     "search": "Rechercher une activité",
     "searchPlaceholder": "Titre, organisation, sigle…",
-    "streamed": "Diffusé en ligne",
-    "hidePast": "Masquer ce qui est passé",
     "themes": "Thématiques",
     "clear": "Tout effacer",
-    "resultWeek": "{count} sur {total} activités cette semaine",
-    "resultDay": "{count} sur {total} activités ce jour"
+    "show": "Aucune activité | Voir {count} activité | Voir {count} activités",
+    "remove": "Retirer le filtre {filter}"
   },
   "empty": {
     "title": "Aucune activité publiée",
@@ -56,7 +54,7 @@
     "others": "Autres programmations"
   },
   "board": {
-    "title": "Le programme, jour par jour",
+    "title": "Le programme",
     "zone": "Toutes les heures : {zone} ({offset})"
   },
   "days": {
@@ -68,16 +66,20 @@
   "week": {
     "today": "Aujourd'hui",
     "live": "Direct",
+    "navigation": "Changer de semaine",
+    "previous": "Semaine précédente",
+    "next": "Semaine suivante",
+    "openDay": "Voir la liste du {day}",
+    "summary": "Semaine {week} sur {weeks} · {count} sur {total} activités",
     "legend": {
       "activity": "Activité",
       "filtered": "Écartée par vos filtres",
       "past": "Terminée",
-      "live": "En direct",
-      "hint": "Cliquez une activité pour ouvrir sa page."
+      "live": "En direct"
     }
   },
   "list": {
-    "count": "{count} sur {total} activités",
+    "count": "{count} sur {total} activité | {count} sur {total} activité | {count} sur {total} activités",
     "until": "→ {end} · {duration}",
     "minutes": "{minutes} min",
     "hours": "{hours} h",
@@ -86,8 +88,7 @@
     "live": "En direct",
     "open": "Voir l'activité",
     "visited": "Consultée",
-    "empty": "Aucune activité ce jour-là.",
     "emptyFiltered": "Aucune activité ce jour-là avec ces filtres.",
-    "navigation": "Jours voisins"
+    "emptyAll": "Aucune activité ne correspond à ces filtres."
   }
 }

@@ -3,23 +3,25 @@ import type { ProgrammeFilterState, ProgrammeThemeOption } from '~/types/event-p
 import type { TaxonomyTermCode } from '~/types/shared'
 
 /**
- * Filtres de la programmation, partagés par la semaine et la liste du jour.
- * Une commande allumée s'enfonce : pas de case à cocher, le geste se voit.
- * Les thématiques viennent du programme affiché, libellé et couleur de la base.
+ * La barre du programme, sur une ligne : recherche, thématiques repliées dans
+ * une fenêtre, choix de la vue (fente `view`). Les filtres posés se rappellent
+ * en étiquettes qu'on retire d'un clic. Ils ne passent jamais devant le tableau.
  */
 
 interface Props {
   modelValue: ProgrammeFilterState
   themes: ProgrammeThemeOption[]
-  resultLabel: string
+  resultCount: number
 }
 
 const props = defineProps<Props>()
 const emit = defineEmits<{ 'update:modelValue': [value: ProgrammeFilterState] }>()
 
 const { t } = useI18n()
+const { fill } = useProgrammeSession()
 
-const themesOpen = ref(false)
+const open = ref(false)
+const root = useTemplateRef<HTMLElement>('root')
 
 function patch(value: Partial<ProgrammeFilterState>): void {
   emit('update:modelValue', { ...props.modelValue, ...value })
@@ -30,31 +32,45 @@ function toggleTheme(code: TaxonomyTermCode): void {
   patch({ themes: themes.includes(code) ? themes.filter((entry) => entry !== code) : [...themes, code] })
 }
 
-const hasFilters = computed(
-  () =>
-    props.modelValue.themes.length > 0 ||
-    props.modelValue.search.trim().length > 0 ||
-    props.modelValue.streamedOnly ||
-    props.modelValue.hidePast,
-)
+const search = computed(() => props.modelValue.search.trim())
 
-const pressable = (on: boolean) =>
-  on
-    ? 'translate-x-[3px] translate-y-[3px] bg-poster-ink text-poster-on-ink-accent'
-    : 'bg-poster-paper-raised text-poster-ink shadow-poster-sm hover:-translate-y-0.5'
+const chips = computed(() => [
+  ...(search.value ? [{ key: 'search', label: `« ${search.value} »`, background: undefined, remove: () => patch({ search: '' }) }] : []),
+  ...props.modelValue.themes.map((code) => {
+    const theme = props.themes.find((entry) => entry.code === code)
+    return { key: code, label: theme?.label ?? code, background: fill(theme?.color ?? null), remove: () => toggleTheme(code) }
+  }),
+])
+
+function onDocument(event: Event): void {
+  if (open.value && root.value && !root.value.contains(event.target as Node)) open.value = false
+}
+function onKey(event: KeyboardEvent): void {
+  if (event.key === 'Escape') open.value = false
+}
+onMounted(() => {
+  document.addEventListener('pointerdown', onDocument)
+  document.addEventListener('keydown', onKey)
+})
+onBeforeUnmount(() => {
+  document.removeEventListener('pointerdown', onDocument)
+  document.removeEventListener('keydown', onKey)
+})
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
-    <div class="flex flex-wrap items-center gap-3">
+  <div class="flex flex-col gap-3">
+    <div ref="root" class="relative flex flex-wrap items-center gap-2.5">
+      <slot name="title" />
+
       <label
-        class="flex h-14 min-w-0 flex-[1_1_20rem] items-center gap-3 rounded-md border-2 border-poster-ink bg-poster-paper-raised px-4 shadow-poster focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus sm:max-w-[32rem]"
+        class="flex h-11 min-w-0 basis-full items-center sm:flex-[1_1_14rem] sm:basis-auto gap-2.5 rounded-md border-2 border-poster-ink bg-poster-paper-raised px-3 focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-focus sm:max-w-72"
       >
-        <UiIcon name="search" size="1.25rem" class="shrink-0" />
+        <UiIcon name="search" size="1.0625rem" class="shrink-0" />
         <span class="sr-only">{{ t('programme.filters.search') }}</span>
         <input
           type="search"
-          class="min-w-0 flex-1 bg-transparent text-base text-poster-ink outline-none placeholder:text-poster-ink-muted"
+          class="min-w-0 flex-1 bg-transparent text-[0.9375rem] text-poster-ink outline-none placeholder:text-poster-ink-muted"
           :value="props.modelValue.search"
           :placeholder="t('programme.filters.searchPlaceholder')"
           @input="patch({ search: ($event.target as HTMLInputElement).value })"
@@ -63,88 +79,85 @@ const pressable = (on: boolean) =>
 
       <button
         type="button"
-        class="inline-flex h-14 cursor-pointer items-center gap-2.5 rounded-md border-2 border-poster-ink px-4 font-semibold transition-transform"
-        :class="pressable(props.modelValue.streamedOnly)"
-        :aria-pressed="props.modelValue.streamedOnly"
-        @click="patch({ streamedOnly: !props.modelValue.streamedOnly })"
-      >
-        <UiIcon name="broadcast" size="1.125rem" />
-        {{ t('programme.filters.streamed') }}
-      </button>
-
-      <button
-        type="button"
-        class="inline-flex h-14 cursor-pointer items-center gap-2.5 rounded-md border-2 border-poster-ink px-4 font-semibold transition-transform"
-        :class="pressable(props.modelValue.hidePast)"
-        :aria-pressed="props.modelValue.hidePast"
-        @click="patch({ hidePast: !props.modelValue.hidePast })"
-      >
-        <UiIcon name="eye-off" size="1.125rem" />
-        {{ t('programme.filters.hidePast') }}
-      </button>
-
-      <div class="basis-full sm:ml-auto sm:basis-auto">
-        <slot name="view" />
-      </div>
-    </div>
-
-    <div class="flex flex-wrap items-center gap-2.5">
-      <span class="hidden font-poster-mono text-xs font-semibold tracking-[0.08em] text-poster-ink-muted uppercase sm:inline">
-        {{ t('programme.filters.themes') }}
-      </span>
-      <button
-        type="button"
-        class="inline-flex h-11 cursor-pointer items-center gap-2 font-poster-mono text-xs font-semibold tracking-[0.08em] text-poster-ink-muted uppercase sm:hidden"
-        :aria-expanded="themesOpen"
+        class="inline-flex h-11 cursor-pointer items-center gap-2 rounded-md border-2 border-poster-ink px-3.5 text-sm font-bold"
+        :class="open ? 'bg-poster-ink text-poster-on-ink-accent' : 'bg-poster-paper-raised text-poster-ink'"
+        :aria-expanded="open"
         aria-controls="programmation-thematiques"
-        @click="themesOpen = !themesOpen"
+        @click="open = !open"
       >
         {{ t('programme.filters.themes') }}
-        <span v-if="props.modelValue.themes.length" class="text-poster-ink">· {{ props.modelValue.themes.length }}</span>
-        <UiIcon :name="themesOpen ? 'chevron-up' : 'chevron-down'" size="1rem" />
+        <span
+          v-if="props.modelValue.themes.length"
+          class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-poster-today-strong px-1.5 font-poster-mono text-xs text-poster-on-today"
+        >
+          {{ props.modelValue.themes.length }}
+        </span>
+        <UiIcon :name="open ? 'chevron-up' : 'chevron-down'" size="0.875rem" />
       </button>
+
+      <slot name="view" />
 
       <div
+        v-if="open"
         id="programmation-thematiques"
-        class="flex-wrap items-center gap-2.5"
-        :class="themesOpen ? 'flex basis-full sm:basis-auto' : 'hidden sm:flex'"
+        class="absolute top-full right-0 z-40 mt-2 flex w-full max-w-[36rem] flex-wrap gap-2 rounded-lg border-2 border-poster-ink bg-poster-paper-raised p-4 shadow-[6px_6px_0_var(--color-poster-ink)]"
       >
         <button
           v-for="theme in props.themes"
           :key="theme.code"
           type="button"
-          class="inline-flex h-11 cursor-pointer items-center gap-2.5 rounded-full border-2 border-poster-ink pr-4 pl-2.5 text-sm font-semibold text-poster-ink transition-transform"
-          :class="props.modelValue.themes.includes(theme.code) ? 'translate-x-[3px] translate-y-[3px]' : 'bg-poster-paper-raised shadow-poster-sm hover:-translate-y-0.5'"
-          :style="
-            props.modelValue.themes.includes(theme.code)
-              ? { background: theme.color ? `color-mix(in oklab, ${theme.color} var(--poster-theme-strength), var(--color-poster-paper-raised))` : 'var(--color-poster-paper-sunken)' }
-              : undefined
-          "
+          class="inline-flex h-11 cursor-pointer items-center gap-2 rounded-full border-2 border-poster-ink pr-3.5 pl-2.5 text-sm font-semibold text-poster-ink"
+          :style="props.modelValue.themes.includes(theme.code) ? { background: fill(theme.color) } : undefined"
           :aria-pressed="props.modelValue.themes.includes(theme.code)"
           @click="toggleTheme(theme.code)"
         >
           <span
-            class="size-4.5 rounded-full border-2 border-poster-ink"
+            class="size-3.5 rounded-full border-2 border-poster-ink"
             :style="{ background: theme.color ?? 'var(--color-poster-paper-sunken)' }"
             aria-hidden="true"
           />
           {{ theme.label }}
           <span class="font-poster-mono text-xs text-poster-ink-muted">{{ theme.count }}</span>
         </button>
+        <div class="mt-1 flex w-full items-center justify-between gap-3">
+          <button
+            type="button"
+            class="h-11 cursor-pointer text-sm font-semibold text-poster-ink underline underline-offset-4"
+            @click="patch({ themes: [] })"
+          >
+            {{ t('programme.filters.clear') }}
+          </button>
+          <button
+            type="button"
+            class="h-11 cursor-pointer rounded-md border-2 border-poster-ink bg-poster-ink px-4 text-sm font-bold text-poster-on-ink-accent"
+            @click="open = false"
+          >
+            {{ t('programme.filters.show', props.resultCount) }}
+          </button>
+        </div>
       </div>
+    </div>
 
+    <div v-if="chips.length" class="flex flex-wrap items-center gap-1.5">
       <button
-        v-if="hasFilters"
+        v-for="chip in chips"
+        :key="chip.key"
         type="button"
-        class="h-11 cursor-pointer px-2 text-sm font-semibold text-poster-ink underline underline-offset-4"
-        @click="emit('update:modelValue', { themes: [], search: '', streamedOnly: false, hidePast: false })"
+        class="inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border-2 border-poster-ink bg-poster-paper-raised pr-2 pl-3 text-[0.8125rem] font-semibold text-poster-ink"
+        :style="chip.background ? { background: chip.background } : undefined"
+        :aria-label="t('programme.filters.remove', { filter: chip.label })"
+        @click="chip.remove()"
+      >
+        {{ chip.label }}
+        <UiIcon name="close" size="0.75rem" />
+      </button>
+      <button
+        type="button"
+        class="h-8 cursor-pointer px-1.5 text-[0.8125rem] font-semibold text-poster-ink underline underline-offset-4"
+        @click="emit('update:modelValue', { themes: [], search: '' })"
       >
         {{ t('programme.filters.clear') }}
       </button>
-
-      <p class="w-full font-poster-mono text-sm text-poster-ink sm:ml-auto sm:w-auto" aria-live="polite">
-        {{ props.resultLabel }}
-      </p>
     </div>
   </div>
 </template>
