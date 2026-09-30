@@ -387,6 +387,36 @@ INSERT INTO reference.taxonomy_terms (taxonomy_code, code, label, sort_order) VA
     ('negotiation_theme', 'technology',      '{"fr":"Technologie","en":"Technology"}', 100)
 ON CONFLICT (taxonomy_code, code) DO NOTHING;
 
+-- Couleurs des thématiques (30/09). La programmation publique les porte : pastille
+-- du filtre, aplat d'une activité dans la semaine, carrés de la bande des jours.
+-- Sans elles, tout s'affichait en gris. Distinctes deux à deux, et à l'écart du
+-- rouge (le direct) : ce sont des données — une couleur changée en base l'emporte,
+-- d'où `color_hex IS NULL`, et la migration de production fait de même.
+UPDATE reference.taxonomy_terms AS t
+SET color_hex = v.color_hex
+FROM (VALUES
+    ('mitigation', '#00A1E4'),
+    ('adaptation', '#F28C28'),
+    ('climate_ambition_ndc', '#5B6CD9'),
+    ('loss_and_damage', '#A8456B'),
+    ('water_fisheries', '#14A3A3'),
+    ('renewable_energy_land', '#E3B51B'),
+    ('health_solidarity', '#F2A07B'),
+    ('industry_transition_and_technology', '#7A8795'),
+    ('transport_urbanization', '#9C7BD6'),
+    ('climate_justice_indigenous', '#A0522D'),
+    ('agriculture_food', '#A3B82C'),
+    ('sustainable_livestock', '#8B6B3E'),
+    ('climate_finance', '#2E8B57'),
+    ('gender', '#D85FA8'),
+    ('transparency', '#4A90A4'),
+    ('biodiversity', '#57A639'),
+    ('desertification', '#C8A165')
+) AS v(code, color_hex)
+WHERE t.taxonomy_code = 'activity_theme'
+  AND t.code = v.code
+  AND t.color_hex IS NULL;
+
 -- Rubriques de la FAQ de Guide Négo, dans l'ordre de la maquette. `icon` nomme un
 -- pictogramme de l'application (frontend/app/utils/guide-nego/pictogrammes.ts).
 INSERT INTO reference.taxonomy_terms (taxonomy_code, code, label, icon, sort_order) VALUES

@@ -184,3 +184,9 @@ compte, et sans session `platform.is_feature_enabled()` n'ouvre qu'à 100 %.
 `docs/AppNego/progress.md` (ADR-017).
 
 - **26/09/2026 — Guide Négo, étape 2** : `negotiation.report_status` (signalements de la FAQ) devient `negotiation.faq_report_status`, pour laisser le nom à 3b (signalements de sessions). La migration `specs/013-guide-nego-faq-lexique/migration.sql` renomme seulement le type qui porte la valeur `open` ; jouée deux fois sur `epavillon`.
+
+## 30/09/2026 — `020_reference.sql` : couleurs des thématiques
+
+Les 17 termes de `activity_theme` n'avaient pas de `color_hex` : la programmation publique (pastilles du filtre, aplats de la semaine, carrés de la bande des jours) les affichait en gris, alors que la maquette validée les montre en couleur. Un `UPDATE … WHERE color_hex IS NULL` suit l'insertion des termes : une couleur posée depuis l'emporte. Palette distincte deux à deux et à l'écart du rouge, réservé au direct. Aucun écran ne permet encore de modifier ces couleurs.
+
+**Migration** : `ops/migrations/2026-09-30-couleurs-thematiques.sql` — appliquée en local (`UPDATE 17`, rejouée : `UPDATE 0`). **À jouer en production.**
