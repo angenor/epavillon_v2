@@ -150,6 +150,8 @@ pub struct FicheDEvaluation {
     pub organizations: Vec<OrganisationDuDossier>,
     pub speakers: Vec<IntervenantDuDossier>,
     pub documents: Vec<PieceDuDossier>,
+    /// Image de couverture — `media.attached_image(…, 'cover')`, nulle sans image servable.
+    pub cover: Option<serde_json::Value>,
     pub themes: serde_json::Value,
     pub transitions: Vec<LigneDeJournal>,
     pub history: Vec<EntreeDHistorique>,

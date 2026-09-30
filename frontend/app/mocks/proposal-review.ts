@@ -467,6 +467,7 @@ export function reviewDesk(proposalId: Uuid, personId: Uuid | null): ReviewDeskS
     organizations: organizationEntries,
     speakers: speakerEntries,
     documents: documentEntries,
+    cover: null,
     themes: dashboardRow?.themes ?? [],
     transitions: [...proposalTransitions, ...sessionTransitions]
       .filter((transition) => transition.proposal_id === proposalId)

@@ -91,3 +91,5 @@ Demande du commanditaire : les organisations demandent des corrections rapides, 
 
 **Vérifié** : `make check-safe` complet (224 suites), refus relu en base locale dans une transaction annulée.
 
+
+**Image de couverture modifiable par l'équipe (30/09)** : onglet « Présentation » de la modification d'un dossier — [journal](../journal/2026-09-30.md).

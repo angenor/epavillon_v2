@@ -103,6 +103,7 @@ pub async fn ouvrir(
     let liens = organizations::du_dossier(&mut *tx, dossier).await?;
     let intervenants = speakers::du_dossier(&mut *tx, dossier).await?;
     let documents = documents::du_dossier(&mut *tx, dossier).await?;
+    let cover = documents::couverture(&mut *tx, dossier).await?;
     let themes = cross::pastilles_du_dossier(&mut *tx, dossier).await?;
     let journal = transitions::journal(&mut *tx, dossier).await?;
     let history = cross::historique_du_dossier(&mut *tx, dossier).await?;
@@ -215,6 +216,7 @@ pub async fn ouvrir(
             })
             .collect(),
         documents,
+        cover,
         themes,
         transitions: journal,
         history,

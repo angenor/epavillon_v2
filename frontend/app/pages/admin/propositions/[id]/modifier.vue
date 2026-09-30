@@ -4,6 +4,8 @@ import type { ReviewDeskScreen } from '~/types/admin-review'
 import type { Organization } from '~/types/org'
 import type { Country, Locale, TaxonomyTerm } from '~/types/reference'
 import type { SelectOption, TabItem } from '~/types/ui'
+import type { AssetId } from '~/types/shared'
+import type { AttachableRoleRule } from '~/types/media'
 
 /**
  * L'ÉQUIPE CORRIGE UN DOSSIER DÉPOSÉ, à la demande de son organisation.
@@ -48,6 +50,7 @@ await adminScope.ensureLoaded()
 interface EditContext {
   screen: ReviewDeskScreen
   editable: EditableProposal
+  coverRule: AttachableRoleRule | null
   themes: TaxonomyTerm[]
   categories: TaxonomyTerm[]
   locales: Locale[]
@@ -62,15 +65,17 @@ const { data, status, error, refresh } = await useAsyncData<EditContext | null>(
       api.proposals.forEdit(proposalId.value),
     ])
     if (!screen || !editable) return null
-    const [themes, categories, locales, countries] = await Promise.all([
+    const [themes, categories, locales, countries, coverRules] = await Promise.all([
       api.reference.terms('activity_theme'),
       api.reference.terms('activity_category'),
       api.reference.locales(),
       api.reference.countries(),
+      api.media.roles('programme', 'proposals'),
     ])
     return {
       screen,
       editable,
+      coverRule: coverRules.find((rule) => rule.role === 'cover') ?? null,
       themes,
       categories,
       locales: locales.filter((entry) => entry.is_active),
@@ -110,6 +115,8 @@ const blockedReason = computed<BlockedReason | null>(() => {
 
 const draft = ref<ProposalDraft | null>(null)
 const baseline = ref('')
+const coverAssetId = ref<AssetId | null>(null)
+const coverBaseline = ref<AssetId | null>(null)
 
 watch(
   () => data.value,
@@ -117,11 +124,16 @@ watch(
     if (!ready || draft.value) return
     draft.value = draftFromReopened(ready.editable.draft)
     baseline.value = JSON.stringify(draft.value)
+    coverAssetId.value = ready.screen.cover?.asset_id ?? null
+    coverBaseline.value = coverAssetId.value
   },
   { immediate: true },
 )
 
-const isDirty = computed(() => draft.value !== null && JSON.stringify(draft.value) !== baseline.value)
+const isCoverDirty = computed(() => coverAssetId.value !== coverBaseline.value)
+const isDirty = computed(
+  () => (draft.value !== null && JSON.stringify(draft.value) !== baseline.value) || isCoverDirty.value,
+)
 
 const leadCandidates = computed<Organization[]>(() => {
   const leadId = draft.value?.organization_id
@@ -208,6 +220,14 @@ async function save(): Promise<void> {
       event_id: context.editable.event_id,
       draft: current,
     })
+    if (isCoverDirty.value) {
+      await api.media.attach({
+        owner_schema: 'programme',
+        owner_table: 'proposals',
+        owner_id: context.editable.proposal_id,
+        assignments: [{ role: 'cover', asset_id: coverAssetId.value }],
+      })
+    }
     leavingAfterSave = true
     await navigateTo({ path: fileTo.value, query: { modifie: '1' } })
   } catch (thrown) {
@@ -316,11 +336,19 @@ onBeforeRouteLeave(() => {
               :issues="issuesOf('organizations')"
               :country-name-of="countryNameOf"
             />
-            <ProposalStepPresentation
-              v-else-if="activeStep === 'presentation'"
-              v-model="draft"
-              :issues="issuesOf('presentation')"
-            />
+            <template v-else-if="activeStep === 'presentation'">
+              <ProposalStepPresentation v-model="draft" :issues="issuesOf('presentation')" />
+              <MediaImageField
+                v-model:asset-id="coverAssetId"
+                class="mt-8 max-w-xl"
+                role="cover"
+                :label="t('admin.proposal.edit.cover.label')"
+                :use="t('admin.proposal.edit.cover.use')"
+                :rule="data.coverRule"
+                :image="screen.cover"
+                :owner="{ schema: 'programme', table: 'proposals', id: proposalId }"
+              />
+            </template>
             <ProposalStepClassification
               v-else-if="activeStep === 'classification'"
               v-model="draft"

@@ -24,10 +24,10 @@
  * toujours, et un fichier reçu avant ses métadonnées est refusé.
  */
 
-import type { AttachableRoleRule, UploadPayload, UploadedAsset } from '~/types/media'
+import type { AttachableRoleRule, AttachmentBatch, UploadPayload, UploadedAsset } from '~/types/media'
 import type { ApiTransport } from './proposal-review'
 
-export function createMediaApi({ call, sendForm }: Pick<ApiTransport, 'call' | 'sendForm'>) {
+export function createMediaApi({ call, send, sendForm }: Pick<ApiTransport, 'call' | 'send' | 'sendForm'>) {
   return {
     /**
      * CE QUE CHAQUE RÔLE D'UNE ENTITÉ EXIGE — table blanche de `media`.
@@ -42,6 +42,13 @@ export function createMediaApi({ call, sendForm }: Pick<ApiTransport, 'call' | '
         (m) => m.attachableRolesOf(ownerSchema, ownerTable),
         { owner_schema: ownerSchema, owner_table: ownerTable },
       ),
+
+    /**
+     * LE RATTACHEMENT : chaque rôle nommé est vidé puis regarni, un `asset_id`
+     * nul le vide. Hors ligne, rien n'est posé.
+     */
+    attach: (batch: AttachmentBatch): Promise<void> =>
+      send('/media/attachments', batch, () => undefined, 'PUT'),
 
     /**
      * LE DÉPÔT. Rend l'objet, et le fait qu'il existait déjà.

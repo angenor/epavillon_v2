@@ -19,5 +19,9 @@
     "file_closed": "Il a été refusé, retiré ou annulé.",
     "edition_over": "Son édition est terminée.",
     "no_call": "Il ne relève d'aucun appel à propositions : ses règles de saisie sont inconnues."
+  },
+  "cover": {
+    "label": "Image de couverture",
+    "use": "carte de l'activité au programme public et vignette de la liste"
   }
 }

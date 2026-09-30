@@ -62,6 +62,21 @@ pub struct ObjetStocke {
     pub scan_verdict: String,
 }
 
+/// L'image de couverture du dossier, prête à l'affichage — la même lecture que la
+/// vignette de la liste (`v_proposal_dashboard.cover`).
+pub async fn couverture<'e>(
+    executor: impl PgExecutor<'e>,
+    dossier: ProposalId,
+) -> Result<Option<serde_json::Value>> {
+    let image = sqlx::query_scalar!(
+        r#"SELECT media.attached_image('programme', 'proposals', $1, 'cover') AS "image""#,
+        dossier.as_uuid()
+    )
+    .fetch_one(executor)
+    .await?;
+    Ok(image)
+}
+
 /// Les pièces d'un dossier, avec leur objet et leur adresse.
 pub async fn du_dossier<'e>(
     executor: impl PgExecutor<'e>,

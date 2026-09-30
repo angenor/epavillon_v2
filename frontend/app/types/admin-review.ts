@@ -30,7 +30,7 @@
 import type { CallForProposals, ReviewCriterion } from './event/call'
 import type { EventEdition } from './event/edition'
 import type { Person } from './identity'
-import type { Asset } from './media'
+import type { Asset, AttachedImage } from './media'
 import type { Organization } from './org'
 import type {
   CommentVisibility,
@@ -244,6 +244,8 @@ export interface ReviewDeskScreen {
   organizations: ProposalOrganizationEntry[]
   speakers: ProposalSpeakerEntry[]
   documents: ProposalDocumentEntry[]
+  /** Image de couverture — rôle `cover`, nulle sans image servable. */
+  cover: AttachedImage | null
   /** Thématiques prêtes à afficher — `reference.term_badges()`, libellé et
    *  couleur venus de la base, jamais d'un fichier i18n. */
   themes: ScheduleThemeBadge[]

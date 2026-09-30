@@ -19,5 +19,9 @@
     "file_closed": "It was rejected, withdrawn or cancelled.",
     "edition_over": "Its edition is over.",
     "no_call": "It belongs to no call for proposals, so its input rules are unknown."
+  },
+  "cover": {
+    "label": "Cover image",
+    "use": "activity card in the public programme and list thumbnail"
   }
 }
