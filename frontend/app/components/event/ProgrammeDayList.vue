@@ -158,7 +158,7 @@ onBeforeUnmount(() => {
           v-for="entry in section.rows"
           :key="entry.id"
           class="grid gap-4 border-b border-poster-line px-2 py-5 sm:px-4 md:grid-cols-[7.5rem_16.5rem_minmax(0,1fr)_10rem] md:items-center md:gap-7"
-          :class="[entry.current === 'live' ? 'bg-poster-live-row' : '', entry.current === 'past' || entry.current === 'cancelled' ? 'opacity-60' : '']"
+          :class="[entry.current === 'live' ? 'bg-poster-live-row' : 'even:bg-poster-paper-raised/70', entry.current === 'past' || entry.current === 'cancelled' ? 'opacity-60' : '']"
         >
           <div class="flex items-baseline gap-3 md:block">
             <p class="font-poster-mono text-[2rem] leading-none font-semibold tracking-[-0.03em]">{{ entry.start }}</p>
