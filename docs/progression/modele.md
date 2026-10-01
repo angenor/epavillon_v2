@@ -197,4 +197,4 @@ Les 17 termes de `activity_theme` n'avaient pas de `color_hex` : la programmatio
 
 **Seulement dans `080`** : les poser dans `075` les placerait avant `replay_url`, et une base neuve n'aurait plus l'ordre de colonnes de la production. Les en-têtes des deux fichiers le disent. Aucune vue ni fonction ne dépend de `v_public_schedule` (`pg_depend`, `pg_proc`).
 
-**Migration** : `ops/migrations/2026-09-30-programme-logo-organisation.sql` — appliquée en local, rejouée sans erreur. **À jouer en production.**
+**Migration** : `ops/migrations/2026-09-30-programme-logo-organisation.sql` — appliquée en local, rejouée sans erreur. ****Jouée en production le 01/10** (sauvegarde `epavillon-20261001-000908`, vue vérifiée : 4 colonnes en fin, 3 lignes lues).**
