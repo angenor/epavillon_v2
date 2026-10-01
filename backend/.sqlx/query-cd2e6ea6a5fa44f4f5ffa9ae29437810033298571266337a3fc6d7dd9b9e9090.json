@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT v.id AS \"id!\", v.event_id AS \"event_id!\", v.event_day_id,\n                  v.proposal_id, v.slug::text AS \"slug!\", v.title AS \"title!\",\n                  v.summary, v.starts_at AS \"starts_at!\", v.ends_at AS \"ends_at!\",\n                  v.timezone::text AS \"timezone!\", v.format::text AS \"format!\",\n                  v.status::text AS \"status!\",\n                  v.room_id, v.room_name, v.organization_id, v.organization_name,\n                  v.organization_acronym, v.organization_country_code,\n                  v.organization_country,\n                  v.is_streamed AS \"is_streamed!\", v.broadcast_channel_id,\n                  v.capacity::int4 AS \"capacity?\",\n                  v.tracks AS \"tracks!\", v.cover,\n                  v.temporal_state AS \"temporal_state!\",\n                  v.registered_count AS \"registered_count!\",\n                  v.theme_codes AS \"theme_codes!\", v.themes AS \"themes!\",\n                  v.waitlist_enabled AS \"waitlist_enabled!\",\n                  v.registration_required AS \"registration_required!\",\n                  v.registration_opens_at, v.registration_closes_at,\n                  v.waitlisted_count AS \"waitlisted_count!\",\n                  v.listing_changed_at AS \"listing_changed_at!\",\n                  v.language_codes::text[] AS \"language_codes?\",\n                  v.replay_url, v.replay_duration_seconds\n             FROM programme.v_public_schedule v\n            WHERE ($1::uuid IS NULL OR v.event_id = $1)\n              AND ($1::uuid IS NOT NULL OR v.temporal_state IN ('upcoming', 'ongoing'))\n            ORDER BY v.starts_at, v.id\n            LIMIT $2",
+  "query": "SELECT v.id AS \"id!\", v.event_id AS \"event_id!\", v.event_day_id,\n                  v.proposal_id, v.slug::text AS \"slug!\", v.title AS \"title!\",\n                  v.summary, v.starts_at AS \"starts_at!\", v.ends_at AS \"ends_at!\",\n                  v.timezone::text AS \"timezone!\", v.format::text AS \"format!\",\n                  v.status::text AS \"status!\",\n                  v.room_id, v.room_name, v.organization_id, v.organization_name,\n                  v.organization_acronym, v.organization_country_code,\n                  v.organization_country,\n                  v.is_streamed AS \"is_streamed!\", v.broadcast_channel_id,\n                  v.capacity::int4 AS \"capacity?\",\n                  v.tracks AS \"tracks!\", v.cover,\n                  v.temporal_state AS \"temporal_state!\",\n                  v.registered_count AS \"registered_count!\",\n                  v.theme_codes AS \"theme_codes!\", v.themes AS \"themes!\",\n                  v.waitlist_enabled AS \"waitlist_enabled!\",\n                  v.registration_required AS \"registration_required!\",\n                  v.registration_opens_at, v.registration_closes_at,\n                  v.waitlisted_count AS \"waitlisted_count!\",\n                  v.listing_changed_at AS \"listing_changed_at!\",\n                  v.language_codes::text[] AS \"language_codes?\",\n                  v.replay_url, v.replay_duration_seconds,\n                  v.organization_logo, v.organization_type_code\n             FROM programme.v_public_schedule v\n            WHERE ($1::uuid IS NULL OR v.event_id = $1)\n              AND ($1::uuid IS NOT NULL OR v.temporal_state IN ('upcoming', 'ongoing'))\n            ORDER BY v.starts_at, v.id\n            LIMIT $2",
   "describe": {
     "columns": [
       {
@@ -389,6 +389,28 @@
             "name": "replay_duration_seconds"
           }
         }
+      },
+      {
+        "ordinal": 37,
+        "name": "organization_logo",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "organization_logo"
+          }
+        }
+      },
+      {
+        "ordinal": 38,
+        "name": "organization_type_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.v_public_schedule",
+            "name": "organization_type_code"
+          }
+        }
       }
     ],
     "parameters": {
@@ -434,8 +456,10 @@
       true,
       true,
       true,
+      true,
+      true,
       true
     ]
   },
-  "hash": "52aa5a3440d33a4aaa14389770fd5f20f0dd09d30461b1f33585bea2b30cd482"
+  "hash": "cd2e6ea6a5fa44f4f5ffa9ae29437810033298571266337a3fc6d7dd9b9e9090"
 }

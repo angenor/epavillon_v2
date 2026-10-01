@@ -822,8 +822,9 @@ WHERE s.published_at IS NOT NULL;
 
 -- LA VUE SE REDÉFINIT EN ENTIER DANS 080_live.sql (§ « Rediffusion dans la
 -- programmation publique ») : elle y gagne, en fin de liste, `replay_url` et
--- `replay_duration_seconds`, lus dans live.streams — qui n'existe pas encore ici.
--- Toute modification de la vue se reporte dans les deux fichiers.
+-- `replay_duration_seconds`, lus dans live.streams — qui n'existe pas encore ici,
+-- puis `organization_logo` et `organization_type_code` (30/09), qui n'existent
+-- que là. Toute autre modification de la vue se reporte dans les deux fichiers.
 
 COMMENT ON VIEW programme.v_public_schedule IS
     'Programmation publique prête à l''affichage (vue grille et vue calendrier), état temporel calculé en base.';

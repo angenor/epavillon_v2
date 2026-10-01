@@ -52,7 +52,7 @@ const CLES_DAVANT: [&str; 28] = [
     "themes",
 ];
 
-const CLES_AJOUTEES: [&str; 9] = [
+const CLES_AJOUTEES: [&str; 11] = [
     "waitlist_enabled",
     "registration_required",
     "registration_opens_at",
@@ -62,6 +62,8 @@ const CLES_AJOUTEES: [&str; 9] = [
     "language_codes",
     "replay_url",
     "replay_duration_seconds",
+    "organization_logo",
+    "organization_type_code",
 ];
 
 const RETIREES_DU_DETAIL: [&str; 3] = ["attended", "confirmed_at", "person_id"];

@@ -1093,7 +1093,10 @@ COMMENT ON COLUMN live.streams.recording_asset_id IS
 -- programme.v_public_schedule naît dans 075, où live.streams n'existe pas
 -- encore : elle se REDÉFINIT ICI EN ENTIER, colonnes de 075 identiques et dans
 -- le même ordre (leurs commentaires y restent), avec deux colonnes en queue.
--- Toute modification de la vue se reporte dans les deux fichiers.
+-- Toute modification de la vue se reporte dans les deux fichiers — sauf les
+-- colonnes venues APRÈS la rediffusion (logo et type de l'organisation, 30/09) :
+-- elles n'existent qu'ici, car les poser dans 075 les placerait avant
+-- `replay_url` et l'ordre des colonnes différerait de celui de la production.
 --
 -- UNE SEULE REDIFFUSION PAR SÉANCE (LATERAL … LIMIT 1) : une ligne de la vue est
 -- un bloc du calendrier, et deux rediffusions ne doivent jamais en faire deux.
@@ -1163,7 +1166,9 @@ SELECT
     s.listing_changed_at,
     p.language_codes,
     rp.url              AS replay_url,
-    rp.duration_seconds AS replay_duration_seconds
+    rp.duration_seconds AS replay_duration_seconds,
+    media.attached_image('org', 'organizations', o.id, 'logo') AS organization_logo,
+    o.organization_type_code
 FROM programme.sessions s
 LEFT JOIN event.rooms r          ON r.id = s.room_id
 LEFT JOIN org.organizations o    ON o.id = s.organization_id
@@ -1195,3 +1200,7 @@ COMMENT ON COLUMN programme.v_public_schedule.replay_url IS
     'Adresse de LA rediffusion disponible de la séance (une au plus), nulle sinon.';
 COMMENT ON COLUMN programme.v_public_schedule.replay_duration_seconds IS
     'Durée de la rediffusion en secondes entières : enregistrement archivé, à défaut durée de diffusion constatée.';
+COMMENT ON COLUMN programme.v_public_schedule.organization_logo IS
+    'Logo de l''organisation porteuse, rendu par media.attached_image() comme la couverture ; nul sans organisation ou sans logo servable.';
+COMMENT ON COLUMN programme.v_public_schedule.organization_type_code IS
+    'Type de l''organisation porteuse (code de la taxonomie organization_type) : public_national_institution fait afficher le drapeau de son pays. Nul sans organisation.';

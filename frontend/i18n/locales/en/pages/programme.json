@@ -89,6 +89,7 @@
     "open": "View activity",
     "visited": "Viewed",
     "emptyFiltered": "No activities on this day with these filters.",
-    "emptyAll": "No activities match these filters."
+    "emptyAll": "No activities match these filters.",
+    "national": "National public institution"
   }
 }

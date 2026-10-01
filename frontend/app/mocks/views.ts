@@ -155,6 +155,8 @@ export function publicSchedule(): PublicScheduleRow[] {
         // s'affichent. Ne jamais reconstruire un libellé depuis un code.
         theme_codes: themes.map((theme) => theme.code),
         themes,
+        organization_logo: null,
+        organization_type_code: organization?.organization_type_code ?? null,
       }
     })
     .sort((a, b) => a.starts_at.localeCompare(b.starts_at))

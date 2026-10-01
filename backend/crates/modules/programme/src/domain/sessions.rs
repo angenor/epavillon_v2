@@ -319,4 +319,8 @@ pub struct PublicScheduleRow {
     /// Une rediffusion au plus par séance, et seulement disponible.
     pub replay_url: Option<String>,
     pub replay_duration_seconds: Option<i32>,
+    /// Logo de l'organisation porteuse, même forme que `cover`.
+    pub organization_logo: Option<serde_json::Value>,
+    /// `public_national_institution` fait afficher le drapeau du pays.
+    pub organization_type_code: Option<String>,
 }

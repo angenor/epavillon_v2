@@ -3,7 +3,7 @@
 //! # Chaque colonne s'annote, une par une
 //!
 //! Une **vue** ne porte aucune contrainte de nullité, et SQLx le suppose : sans
-//! annotation, les vingt-huit colonnes traverseraient en `Option`, y compris
+//! annotation, chaque colonne traverserait en `Option`, y compris
 //! l'identifiant. C'est la leçon de B3, et elle vaut ici deux fois — la vue est
 //! la plus large du modèle.
 //!
@@ -62,7 +62,8 @@ pub async fn programmation<'e>(
                   v.waitlisted_count AS "waitlisted_count!",
                   v.listing_changed_at AS "listing_changed_at!",
                   v.language_codes::text[] AS "language_codes?",
-                  v.replay_url, v.replay_duration_seconds
+                  v.replay_url, v.replay_duration_seconds,
+                  v.organization_logo, v.organization_type_code
              FROM programme.v_public_schedule v
             WHERE ($1::uuid IS NULL OR v.event_id = $1)
               AND ($1::uuid IS NOT NULL OR v.temporal_state IN ('upcoming', 'ongoing'))
@@ -114,6 +115,8 @@ pub async fn programmation<'e>(
             language_codes: l.language_codes,
             replay_url: l.replay_url,
             replay_duration_seconds: l.replay_duration_seconds,
+            organization_logo: l.organization_logo,
+            organization_type_code: l.organization_type_code,
         })
         .collect())
 }

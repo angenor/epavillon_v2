@@ -190,3 +190,11 @@ compte, et sans session `platform.is_feature_enabled()` n'ouvre qu'à 100 %.
 Les 17 termes de `activity_theme` n'avaient pas de `color_hex` : la programmation publique (pastilles du filtre, aplats de la semaine, carrés de la bande des jours) les affichait en gris, alors que la maquette validée les montre en couleur. Un `UPDATE … WHERE color_hex IS NULL` suit l'insertion des termes : une couleur posée depuis l'emporte. Palette distincte deux à deux et à l'écart du rouge, réservé au direct. Aucun écran ne permet encore de modifier ces couleurs.
 
 **Migration** : `ops/migrations/2026-09-30-couleurs-thematiques.sql` — appliquée en local (`UPDATE 17`, rejouée : `UPDATE 0`). **Jouée en production le 30/09** (sauvegarde `epavillon-20260930-180608`, `UPDATE 17`, 17/17).
+
+## 30/09/2026 — `080_live.sql` : logo et type de l'organisation dans la programmation publique
+
+`programme.v_public_schedule` gagne en queue `organization_logo` (`media.attached_image('org', 'organizations', o.id, 'logo')`, même forme que `cover`, nul sans organisation ou sans logo) et `organization_type_code` (`o.organization_type_code`). La liste publique affichera le logo du porteur, et un drapeau quand il est une institution publique nationale (`public_national_institution`) — sans requête de plus par carte.
+
+**Seulement dans `080`** : les poser dans `075` les placerait avant `replay_url`, et une base neuve n'aurait plus l'ordre de colonnes de la production. Les en-têtes des deux fichiers le disent. Aucune vue ni fonction ne dépend de `v_public_schedule` (`pg_depend`, `pg_proc`).
+
+**Migration** : `ops/migrations/2026-09-30-programme-logo-organisation.sql` — appliquée en local, rejouée sans erreur. **À jouer en production.**

@@ -89,6 +89,7 @@
     "open": "Voir l'activité",
     "visited": "Consultée",
     "emptyFiltered": "Aucune activité ce jour-là avec ces filtres.",
-    "emptyAll": "Aucune activité ne correspond à ces filtres."
+    "emptyAll": "Aucune activité ne correspond à ces filtres.",
+    "national": "Institution publique nationale"
   }
 }

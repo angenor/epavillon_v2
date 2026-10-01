@@ -25,9 +25,10 @@ const emit = defineEmits<{ reading: [date: IsoDate]; reset: [] }>()
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
 const { time } = useDateTime()
-const { state, fill, link } = useProgrammeSession()
+const { state, fill, link, themeColor } = useProgrammeSession()
 
 const MAX_THEMES = 3
+const NATIONAL = 'public_national_institution'
 
 const at = (day: IsoDate) => new Date(`${day}T12:00:00Z`)
 const weekday = (day: IsoDate) =>
@@ -55,6 +56,13 @@ function row(session: PublicScheduleRow) {
     organization: session.organization_name,
     country: session.organization_country ? tr(session.organization_country) : '',
     format: t(`session-card.format.${session.format}`),
+    cover: session.cover,
+    logo: session.organization_logo ? (session.organization_logo.sources.thumb?.url ?? session.organization_logo.url) : null,
+    color: themeColor(session),
+    flag:
+      session.organization_type_code === NATIONAL && session.organization_country_code
+        ? { code: session.organization_country_code, label: session.organization_country ? tr(session.organization_country) : session.organization_country_code }
+        : null,
     streamed: session.is_streamed,
     current: state(session),
     themes: session.themes.slice(0, MAX_THEMES).map((theme) => ({
@@ -141,7 +149,7 @@ onBeforeUnmount(() => {
         </p>
       </header>
 
-      <p v-if="!section.rows.length" class="border-b-2 border-poster-ink px-2 py-4 text-sm text-poster-ink-muted sm:px-4">
+      <p v-if="!section.rows.length" class="border-b border-poster-line px-2 py-4 text-sm text-poster-ink-muted sm:px-4">
         {{ t('programme.list.emptyFiltered') }}
       </p>
 
@@ -149,7 +157,7 @@ onBeforeUnmount(() => {
         <li
           v-for="entry in section.rows"
           :key="entry.id"
-          class="grid gap-3 border-b-2 border-poster-ink px-2 py-4 sm:px-4 md:grid-cols-[8.5rem_minmax(0,1fr)_11rem] md:items-center md:gap-6"
+          class="grid gap-4 border-b border-poster-line px-2 py-5 sm:px-4 md:grid-cols-[7.5rem_16.5rem_minmax(0,1fr)_10rem] md:items-center md:gap-7"
           :class="[entry.current === 'live' ? 'bg-poster-live-row' : '', entry.current === 'past' || entry.current === 'cancelled' ? 'opacity-60' : '']"
         >
           <div class="flex items-baseline gap-3 md:block">
@@ -159,47 +167,91 @@ onBeforeUnmount(() => {
             </p>
           </div>
 
-          <div class="flex min-w-0 flex-col gap-1.5">
-            <div class="flex flex-wrap items-center gap-2">
+          <NuxtLink
+            :to="entry.to"
+            class="relative block aspect-video overflow-hidden rounded-md border-2 md:aspect-auto md:h-37"
+            :class="entry.current === 'live' ? 'border-live' : 'border-poster-ink'"
+            :style="{
+              background: fill(entry.color),
+              boxShadow: entry.current === 'past' || entry.current === 'cancelled' ? undefined : `5px 5px 0 ${entry.current === 'live' ? 'var(--color-live)' : (entry.color ?? 'var(--color-poster-ink)')}`,
+            }"
+            tabindex="-1"
+            aria-hidden="true"
+          >
+            <UiImage
+              v-if="entry.cover"
+              :image="entry.cover"
+              ratio="auto"
+              frame-class="size-full"
+              class="size-full"
+              :class="{ grayscale: entry.current === 'past' || entry.current === 'cancelled' }"
+              sizes="(min-width: 768px) 264px, 100vw"
+            />
+            <span
+              v-if="entry.current === 'live'"
+              class="absolute top-2.5 left-2.5 rounded-sm bg-live px-2 py-0.5 font-poster-mono text-[0.6875rem] font-semibold tracking-[0.08em] text-live-contrast uppercase"
+            >
+              ● {{ t('programme.list.live') }}
+            </span>
+            <span class="absolute bottom-2.5 left-2.5 flex max-w-[calc(100%-5.5rem)] flex-wrap gap-1">
               <span
-                v-for="theme in entry.themes"
+                v-for="theme in entry.themes.slice(0, 1)"
                 :key="theme.code"
-                class="inline-flex h-6 items-center rounded-full border-2 border-poster-ink px-2.5 text-xs font-semibold"
+                class="inline-flex h-6 items-center truncate rounded-full border-2 border-poster-ink px-2.5 text-[0.6875rem] font-bold text-poster-ink"
                 :style="{ background: theme.background }"
               >
                 {{ theme.label }}
               </span>
-              <span v-if="entry.moreThemes" class="font-poster-mono text-xs">+{{ entry.moreThemes }}</span>
-              <span class="font-poster-mono text-xs text-poster-ink-muted">
-                {{ entry.format }}<template v-if="entry.streamed"> · {{ t('programme.list.streamed') }}</template>
+              <span
+                v-if="entry.themes.length + entry.moreThemes > 1"
+                class="inline-flex h-6 items-center rounded-full border-2 border-poster-ink bg-poster-paper-raised px-2 font-poster-mono text-[0.6875rem] font-semibold text-poster-ink"
+              >
+                +{{ entry.themes.length + entry.moreThemes - 1 }}
               </span>
+            </span>
+            <span
+              class="absolute right-2.5 bottom-2.5 flex h-13 max-w-32 min-w-13 items-center justify-center rounded-lg border-2 border-poster-ink bg-poster-paper-raised px-1.5 py-1"
+            >
+              <img v-if="entry.logo" :src="entry.logo" alt="" class="max-h-9.5 max-w-28 object-contain" loading="lazy">
+              <span v-else class="font-poster text-[0.8125rem] font-black text-poster-ink font-stretch-[80%]">
+                {{ entry.acronym ?? '—' }}
+              </span>
+            </span>
+          </NuxtLink>
+
+          <div class="flex min-w-0 flex-col gap-1.5">
+            <p class="font-poster-mono text-xs text-poster-ink-muted">
+              {{ entry.format }}<template v-if="entry.streamed"> · {{ t('programme.list.streamed') }}</template>
               <span
                 v-if="entry.current === 'past' || entry.current === 'cancelled' || entry.current === 'postponed'"
-                class="font-poster-mono text-xs font-semibold tracking-[0.08em] uppercase"
-                :class="entry.current === 'postponed' ? 'text-postponed' : 'text-poster-ink-muted'"
+                class="ml-1.5 font-semibold tracking-[0.08em] uppercase"
+                :class="{ 'text-postponed': entry.current === 'postponed' }"
               >
                 {{ t(`session-card.state.${entry.current}`) }}
               </span>
-            </div>
+            </p>
             <p
-              class="font-poster text-[1.375rem] leading-[1.1] font-extrabold font-stretch-[85%]"
+              class="font-poster text-[1.5rem] leading-[1.1] font-extrabold font-stretch-[85%]"
               :class="{ 'line-through': entry.current === 'cancelled' }"
             >
               {{ entry.title }}
             </p>
-            <p v-if="entry.organization" class="text-sm text-poster-ink-muted">
-              <strong v-if="entry.acronym" class="text-poster-ink">{{ entry.acronym }}</strong>
-              <template v-if="entry.acronym"> — </template>{{ entry.organization }}<template v-if="entry.country"> · {{ entry.country }}</template>
+            <p v-if="entry.organization" class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-poster-ink-muted">
+              <UiCountryFlag v-if="entry.flag" :code="entry.flag.code" :label="entry.flag.label" />
+              <span>
+                <strong v-if="entry.acronym" class="text-poster-ink">{{ entry.acronym }}</strong>
+                <template v-if="entry.acronym"> — </template>{{ entry.organization }}<template v-if="entry.country"> · {{ entry.country }}</template>
+              </span>
+              <span
+                v-if="entry.flag"
+                class="inline-flex h-5.5 items-center rounded-sm border-[1.5px] border-poster-ink px-2 font-poster-mono text-[0.625rem] font-semibold tracking-[0.06em] text-poster-ink uppercase"
+              >
+                {{ t('programme.list.national') }}
+              </span>
             </p>
           </div>
 
-          <div class="flex items-center gap-3 md:flex-col md:items-end">
-            <span
-              v-if="entry.current === 'live'"
-              class="-rotate-6 rounded border-[3px] border-live bg-poster-paper px-2 py-0.5 font-poster text-lg font-black tracking-[0.06em] text-live font-stretch-[70%]"
-            >
-              {{ t('programme.list.live') }}
-            </span>
+          <div class="flex items-center gap-3 md:justify-end">
             <NuxtLink
               :to="entry.to"
               class="inline-flex h-11 items-center gap-2 rounded-md border-2 border-poster-ink px-3.5 text-sm font-bold transition-transform"

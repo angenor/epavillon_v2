@@ -137,6 +137,8 @@ function ligne(m: Modele, eventId: string, maintenant: number): PublicScheduleRo
     language_codes: ['fr'],
     replay_url: null,
     replay_duration_seconds: null,
+    organization_logo: null,
+    organization_type_code: 'international_organization',
     ...m.extra,
   }
 }

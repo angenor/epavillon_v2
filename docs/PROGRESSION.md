@@ -2,12 +2,12 @@
 **Ce fichier est la mémoire du projet entre deux sessions Claude Code.** Toute session commence par le lire et se termine par le mettre à jour.
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
-## Dernière mise à jour — 30 septembre 2026
+## Dernière mise à jour — 1er octobre 2026
+- 01/10 — Liste du programme avec image de couverture, logo de l'organisation et drapeau des institutions nationales. Non déployé, migration de vue à jouer — [A3](progression/ecrans/a3-evenement-public.md).
 - 30/09 — Programmation publique : filtres sur une ligne, jours figés au défilement, liste de tout le programme qui suit le jour lu. Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
 - 30/09 — `/programmations` passe en « affiche de festival » et chaque activité a sa page (intervenants, inscription, direct, questions). Non déployé — [A3](progression/ecrans/a3-evenement-public.md), [décision](progression/decisions/2026-09-30.md).
 - 29/09 — Chaque édition naît avec son lieu et sa salle : le planificateur place enfin dans le calendrier. En production — [A9](progression/ecrans/a9-planificateur.md), [décision](progression/decisions/2026-09-29.md).
 - 28/09 — Rejoindre une organisation ne bloque plus le dépôt : en attente du référent, on dépose et suit ses propres dossiers. En production, migrée le 29/09 — [A2](progression/ecrans/a2-organisation.md), [décision](progression/decisions/2026-09-28.md).
-- 28/09 — Rattachement à une organisation allégé : un seul message d'exigence, textes raccourcis — [A2](progression/ecrans/a2-organisation.md).
 
 ## État général
 | Domaine | État |

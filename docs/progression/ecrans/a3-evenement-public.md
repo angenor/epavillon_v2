@@ -190,3 +190,5 @@ Arbitrage du commanditaire : [décision](../decisions/2026-09-30.md), [journal](
 - **Écarts** : pas de déroulé minuté ni de documents (absents du modèle) ; objectifs et public visé restent dans le dossier, non publiés.
 
 **30/09 (soir) — Filtres compacts, jours figés** : barre d'une ligne, deux filtres retirés, navigation de semaine explicite, liste de tout le programme avec bande des jours suivant la lecture — [journal](../journal/2026-09-30.md).
+
+**01/10 — Liste avec images** : couverture, logo incrusté, drapeau des institutions publiques nationales, séparateurs allégés — [journal](../journal/2026-10-01.md).

@@ -151,6 +151,10 @@ export interface PublicScheduleRow {
   /** Une rediffusion au plus par séance, et seulement disponible. */
   replay_url?: string | null
   replay_duration_seconds?: number | null
+  /** Logo de l'organisation porteuse, même forme que `cover` ; nul sans logo. */
+  organization_logo?: AttachedImage | null
+  /** Taxonomie `organization_type` : `public_national_institution` fait afficher le drapeau. */
+  organization_type_code?: TaxonomyTermCode | null
 }
 
 /** `GET /events/{id}/sessions/{slug}` — le détail public d'une séance publiée. */
