@@ -12,13 +12,15 @@
     "description": "Elle n'existe pas, ou n'est pas encore publiée."
   },
   "state": {
-    "live": "En direct",
-    "upcomingIn": "À venir · {delay}"
+    "live": "En direct"
   },
   "countdown": {
-    "days": "dans {days} j {hours} h",
-    "hours": "dans {hours} h {minutes}",
-    "minutes": "dans {minutes} min"
+    "label": "Commence dans",
+    "d": "j",
+    "h": "h",
+    "m": "min",
+    "s": "s",
+    "spoken": "Commence dans {days} jours, {hours} heures et {minutes} minutes"
   },
   "hero": {
     "ledBy": "Porté par",
@@ -33,8 +35,6 @@
     "external": "Le direct est diffusé sur une plateforme externe.",
     "starting": "Le direct va commencer : il s'affichera ici dès son lancement.",
     "watch": "Ouvrir le direct",
-    "begins": "Commence",
-    "willStream": "Diffusée en direct sur cette page.",
     "replayTitle": "Revoir",
     "replay": "Voir l'enregistrement",
     "replayDuration": "Rediffusion · {minutes} min"
@@ -111,6 +111,7 @@
     "onSite": "Sur place uniquement",
     "calendar": "Agenda",
     "share": "Partager",
-    "copied": "Lien copié"
+    "copied": "Lien copié",
+    "bar": "Inscription à l'activité"
   }
 }

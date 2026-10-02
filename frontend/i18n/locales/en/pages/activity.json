@@ -12,13 +12,15 @@
     "description": "It does not exist, or has not been published yet."
   },
   "state": {
-    "live": "Live",
-    "upcomingIn": "Upcoming · {delay}"
+    "live": "Live"
   },
   "countdown": {
-    "days": "in {days} d {hours} h",
-    "hours": "in {hours} h {minutes}",
-    "minutes": "in {minutes} min"
+    "label": "Starts in",
+    "d": "d",
+    "h": "h",
+    "m": "min",
+    "s": "s",
+    "spoken": "Starts in {days} days, {hours} hours and {minutes} minutes"
   },
   "hero": {
     "ledBy": "Led by",
@@ -33,8 +35,6 @@
     "external": "The live stream is broadcast on an external platform.",
     "starting": "The live stream is about to start: it will appear here as soon as it begins.",
     "watch": "Open the live stream",
-    "begins": "Starts",
-    "willStream": "Streamed live on this page.",
     "replayTitle": "Watch again",
     "replay": "Watch the recording",
     "replayDuration": "Replay · {minutes} min"
@@ -111,6 +111,7 @@
     "onSite": "On site only",
     "calendar": "Calendar",
     "share": "Share",
-    "copied": "Link copied"
+    "copied": "Link copied",
+    "bar": "Activity registration"
   }
 }

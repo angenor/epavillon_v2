@@ -84,17 +84,6 @@ watch(session, (current) => {
   void loadStreams()
 })
 
-const startsIn = computed(() => {
-  if (now.value === null || !session.value) return ''
-  const minutes = Math.round((Date.parse(session.value.starts_at) - now.value) / 60_000)
-  if (minutes <= 0) return ''
-  const days = Math.floor(minutes / 1440)
-  const hours = Math.floor((minutes % 1440) / 60)
-  if (days) return t('activity.countdown.days', { days, hours })
-  if (hours) return t('activity.countdown.hours', { hours, minutes: String(minutes % 60).padStart(2, '0') })
-  return t('activity.countdown.minutes', { minutes })
-})
-
 const homeTime = computed(() => {
   if (now.value === null || !session.value) return null
   const visitor = Intl.DateTimeFormat().resolvedOptions().timeZone
@@ -146,7 +135,7 @@ useHead(() => ({
         </p>
       </div>
 
-      <UiLoadingState v-if="status === 'pending'" class="mt-10" variant="card" :lines="4" :label="t('activity.loading')" />
+      <UiLoadingState v-if="status === 'pending' && !data" class="mt-10" variant="card" :lines="4" :label="t('activity.loading')" />
 
       <UiErrorState
         v-else-if="error"
@@ -167,20 +156,21 @@ useHead(() => ({
       />
 
       <template v-else>
-        <ActivityHero
-          class="mt-8"
-          :session="session"
-          :edition="edition"
-          :state="state"
-          :starts-in="startsIn"
-          :home-time="homeTime"
-        />
+        <!-- Sur mobile, les deux colonnes s'effacent (`contents`) pour que le billet remonte sous le titre. -->
+        <div class="mt-8 flex flex-col gap-10 lg:grid lg:grid-cols-[minmax(0,1fr)_26.5rem] lg:items-start lg:gap-10">
+          <div class="contents min-w-0 lg:flex lg:flex-col lg:gap-10">
+            <ActivityHero
+              class="order-1"
+              :session="session"
+              :edition="edition"
+              :state="state"
+              :home-time="homeTime"
+              @started="refresh()"
+            />
 
-        <div class="mt-14 grid gap-12 lg:grid-cols-[minmax(0,1fr)_26.5rem] lg:gap-10">
-          <div class="flex min-w-0 flex-col gap-13">
-            <ActivityStage :session="session" :state="state" :streams="streams" :starts-in="startsIn" />
+            <ActivityStage class="order-3" :session="session" :state="state" :streams="streams" />
 
-            <section v-if="summary || description" aria-labelledby="a-propos-titre">
+            <section v-if="summary || description" class="order-3" aria-labelledby="a-propos-titre">
               <h2 id="a-propos-titre" class="mb-5 border-b-4 border-poster-ink pb-2.5 font-poster text-[2.375rem] leading-none font-black uppercase font-stretch-[68%]">
                 {{ t('activity.about') }}
               </h2>
@@ -188,15 +178,18 @@ useHead(() => ({
               <p v-if="description" class="mt-4 max-w-[48rem] leading-relaxed whitespace-pre-line text-poster-ink-muted">{{ description }}</p>
             </section>
 
-            <ActivityPeople :speakers="detail.speakers" :organizations="detail.organizations" />
+            <div class="order-3 flex flex-col gap-10 empty:hidden">
+              <ActivityPeople :speakers="detail.speakers" :organizations="detail.organizations" />
+            </div>
           </div>
 
-          <div class="flex flex-col gap-8">
-            <ActivityTicket :session="session" :edition="edition" :state="state" :languages="languages" :now="now" />
+          <div class="contents lg:flex lg:flex-col lg:gap-8">
+            <ActivityTicket class="order-2" :session="session" :edition="edition" :state="state" :languages="languages" :now="now" />
             <ClientOnly>
-              <ActivityQuestions v-if="showQuestions" :session-id="session.id" />
+              <ActivityQuestions v-if="showQuestions" class="order-4" :session-id="session.id" />
             </ClientOnly>
             <ActivitySameDay
+              class="order-4"
               :sessions="sameDay"
               :current-id="session.id"
               :edition-slug="edition.slug"

@@ -192,3 +192,5 @@ Arbitrage du commanditaire : [décision](../decisions/2026-09-30.md), [journal](
 **30/09 (soir) — Filtres compacts, jours figés** : barre d'une ligne, deux filtres retirés, navigation de semaine explicite, liste de tout le programme avec bande des jours suivant la lecture — [journal](../journal/2026-09-30.md).
 
 **01/10 — Liste avec images** : couverture, logo incrusté, drapeau des institutions publiques nationales, séparateurs allégés — [journal](../journal/2026-10-01.md).
+
+**02/10 — Page d'une activité resserrée** : compte à rebours à la seconde à la place du bloc « Commence dans », horaires en bandeau, billet en colonne droite dès le haut (et sous le titre sur mobile), barre d'inscription fixée en bas — [journal](../journal/2026-10-02.md).

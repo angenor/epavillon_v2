@@ -4,15 +4,14 @@ import type { PublicSessionStream } from '~/types/live'
 import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
 
 /**
- * Ce qui se passe maintenant : le direct avec ses langues, le compte à rebours
- * avant, la rediffusion après. Une séance a un flux par langue d'interprétation.
+ * Ce qui se passe maintenant : le direct avec ses langues, la rediffusion après.
+ * Une séance a un flux par langue d'interprétation.
  */
 
 interface Props {
   session: PublicScheduleRow
   state: ProgrammeSessionState
   streams: PublicSessionStream[]
-  startsIn: string
 }
 
 const props = defineProps<Props>()
@@ -107,23 +106,6 @@ const replayMinutes = computed(() =>
           <UiIcon name="external-link" size="1rem" />
         </a>
       </div>
-    </div>
-  </section>
-
-  <section
-    v-else-if="props.state === 'upcoming'"
-    class="flex flex-wrap items-center justify-between gap-6 rounded-lg bg-poster-ink px-8 py-7 text-poster-on-ink"
-  >
-    <div>
-      <p class="font-poster-mono text-xs font-semibold tracking-[0.08em] text-poster-on-ink-muted uppercase">
-        {{ t('activity.stage.begins') }}
-      </p>
-      <p class="font-poster text-[clamp(3rem,8vw,5.5rem)] leading-[0.9] font-black text-poster-on-ink-accent font-stretch-[62%]">
-        {{ props.startsIn || '—' }}
-      </p>
-      <p v-if="props.session.is_streamed" class="mt-2.5 text-sm text-poster-on-ink-muted">
-        {{ t('activity.stage.willStream') }}
-      </p>
     </div>
   </section>
 

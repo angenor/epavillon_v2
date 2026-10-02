@@ -2,12 +2,12 @@
 **Ce fichier est la mémoire du projet entre deux sessions Claude Code.** Toute session commence par le lire et se termine par le mettre à jour.
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
-## Dernière mise à jour — 1er octobre 2026
+## Dernière mise à jour — 2 octobre 2026
+- 02/10 — Page d'une activité : compte à rebours à la seconde, horaires sur une ligne, inscription visible dès l'arrivée et barre fixe qui la suit. Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
 - 01/10 — Liste du programme avec image de couverture, logo de l'organisation et drapeau des institutions nationales. Non déployé, migration de vue à jouer — [A3](progression/ecrans/a3-evenement-public.md).
 - 30/09 — Programmation publique : filtres sur une ligne, jours figés au défilement, liste de tout le programme qui suit le jour lu. Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
 - 30/09 — `/programmations` passe en « affiche de festival » et chaque activité a sa page (intervenants, inscription, direct, questions). Non déployé — [A3](progression/ecrans/a3-evenement-public.md), [décision](progression/decisions/2026-09-30.md).
 - 29/09 — Chaque édition naît avec son lieu et sa salle : le planificateur place enfin dans le calendrier. En production — [A9](progression/ecrans/a9-planificateur.md), [décision](progression/decisions/2026-09-29.md).
-- 28/09 — Rejoindre une organisation ne bloque plus le dépôt : en attente du référent, on dépose et suit ses propres dossiers. En production, migrée le 29/09 — [A2](progression/ecrans/a2-organisation.md), [décision](progression/decisions/2026-09-28.md).
 
 ## État général
 | Domaine | État |
@@ -31,7 +31,7 @@ Un écran = un fichier : ce qui a été livré, les écarts entre le modèle et 
 | A0.4 | Composants d'interface + page de guide de style | ✅ 16/08 · navigation latérale du back-office refondue 04/09 | [écarts et vérifications](progression/ecrans/a0.4-composants.md) |
 | A1 | Authentification | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a1-authentification.md) |
 | A2 | Rattachement à une organisation | ✅ 17/08 · texte allégé 28/09 · rejoindre ne bloque plus le dépôt 28/09 · en production 29/09 | [écarts et vérifications](progression/ecrans/a2-organisation.md) |
-| A3 | Page publique de l'événement | ✅ 17/08 · refondue 19/08 · corrigée 27/08 · bandeau de programmation 16/09 · en production · affiche et page d'activité 30/09, non déployé | [écarts et vérifications](progression/ecrans/a3-evenement-public.md) |
+| A3 | Page publique de l'événement | ✅ 17/08 · refondue 19/08 · corrigée 27/08 · bandeau de programmation 16/09 · en production · affiche et page d'activité 30/09 · page d'activité resserrée 02/10, non déployé | [écarts et vérifications](progression/ecrans/a3-evenement-public.md) |
 | A4 | Formulaire de soumission | ✅ 17/08 · ajusté 15/09 et 16/09 | [écarts et vérifications](progression/ecrans/a4-soumission.md) |
 | A5 | Espace organisation | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a5-espace-organisation.md) |
 | A6 | Tableau de bord back-office | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a6-tableau-de-bord.md) |

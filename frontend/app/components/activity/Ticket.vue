@@ -2,11 +2,15 @@
 import type { PublicEditionRow, PublicScheduleRow } from '~/types/views'
 import type { RegistrationResult } from '~/types/programme/registration'
 import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
+import type { TicketCallToAction } from './TicketAction.vue'
 
 /**
- * Le billet : les places, LE bouton qui compte à ce moment-là, et les
+ * Le billet : l'image, les places, LE bouton qui compte à ce moment-là, et les
  * informations pratiques. Les heures d'ouverture des inscriptions se comparent
  * à l'horloge du navigateur, une fois monté : le serveur tranche de toute façon.
+ *
+ * Dès que ce bouton sort de l'écran, une barre fixée en bas le reprend : on doit
+ * pouvoir s'inscrire sans remonter, et sur mobile sans descendre.
  */
 
 interface Props {
@@ -21,7 +25,7 @@ const props = defineProps<Props>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
-const { dateTime } = useDateTime()
+const { dateTime, dayLong, timeRange } = useDateTime()
 const requestUrl = useRequestURL()
 const { mine, refresh, cancel } = useSessionRegistration(computed(() => props.session.id))
 
@@ -75,6 +79,36 @@ const note = computed(() => {
       return props.state === 'past' ? t('activity.ticket.note.past', { count: registered.value }) : ''
   }
 })
+
+const callToAction = computed<TicketCallToAction | null>(() => {
+  const value = action.value
+  if (value === 'register' || value === 'waitlist' || value === 'watch') return value
+  return value === 'replay' && props.session.replay_url ? 'replay' : null
+})
+
+const when = computed(
+  () =>
+    `${dayLong(props.session.starts_at, props.session.timezone)} · ${timeRange(props.session.starts_at, props.session.ends_at, props.session.timezone, props.edition.city ?? undefined)}`,
+)
+
+const actions = useTemplateRef<HTMLElement>('actions')
+const actionsInView = ref(true)
+const footerInView = ref(false)
+const barShown = computed(() => callToAction.value !== null && !actionsInView.value && !footerInView.value)
+let observer: IntersectionObserver | undefined
+
+onMounted(() => {
+  const footer = [...document.querySelectorAll('footer')].at(-1)
+  observer = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.target === actions.value) actionsInView.value = entry.isIntersecting
+      else footerInView.value = entry.isIntersecting
+    }
+  })
+  if (actions.value) observer.observe(actions.value)
+  if (footer) observer.observe(footer)
+})
+onBeforeUnmount(() => observer?.disconnect())
 
 const remaining = computed(() => {
   if (capacity.value === null) return t('activity.ticket.unlimited')
@@ -135,39 +169,50 @@ async function share(): Promise<void> {
     :style="{ boxShadow: `8px 8px 0 ${props.session.themes[0]?.color ?? 'var(--color-poster-line)'}` }"
     :aria-label="t('activity.ticket.label')"
   >
+    <div v-if="props.session.cover" class="relative border-b-2 border-poster-ink">
+      <UiImage :image="props.session.cover" ratio="16 / 9" loading="eager" sizes="(min-width: 1024px) 26.5rem, 100vw" />
+      <span
+        v-if="props.state === 'live'"
+        class="absolute top-3 left-3 -rotate-[6deg] rounded border-[3px] border-live bg-poster-paper px-2.5 py-0.5 font-poster text-xl font-black tracking-[0.06em] text-live font-stretch-[70%]"
+      >
+        {{ t('activity.state.live') }}
+      </span>
+    </div>
+
     <div class="p-6">
       <p class="font-poster-mono text-xs font-semibold tracking-[0.08em] text-poster-on-ink-muted uppercase">
         {{ t('activity.ticket.places') }}
       </p>
-      <p class="mt-2 flex items-baseline gap-2.5">
-        <span class="font-poster text-6xl leading-[0.9] font-black text-poster-on-ink-accent font-stretch-[62%]">{{ registered }}</span>
-        <span v-if="capacity !== null" class="font-poster-mono text-lg text-poster-on-ink-muted">
-          {{ t('activity.ticket.ofCapacity', { capacity }) }}
-        </span>
-      </p>
-      <div
-        v-if="capacity !== null"
-        class="mt-3.5 h-2.5 overflow-hidden rounded-full bg-poster-on-ink-muted/30"
-        role="meter"
-        :aria-valuenow="registered"
-        :aria-valuemax="capacity"
-        aria-valuemin="0"
-        :aria-label="t('session-card.capacity.label')"
-      >
-        <div class="h-full bg-poster-on-ink-accent" :style="{ width: `${pct}%` }" />
-      </div>
-      <p class="mt-2 text-sm text-poster-on-ink-muted">{{ remaining }}</p>
-
-      <div class="mt-5 flex flex-col gap-2.5">
-        <button
-          v-if="action === 'register' || action === 'waitlist'"
-          type="button"
-          class="h-13.5 cursor-pointer rounded-md border-2 border-poster-today-strong text-[1.0625rem] font-bold"
-          :class="action === 'register' ? 'bg-poster-today-strong text-poster-on-today' : 'bg-transparent text-poster-today-strong'"
-          @click="dialogOpen = true"
+      <template v-if="capacity !== null">
+        <p class="mt-1.5 flex items-baseline justify-between gap-3">
+          <span class="flex items-baseline gap-2">
+            <span class="font-poster text-[2.75rem] leading-[0.9] font-black text-poster-on-ink-accent font-stretch-[62%]">{{ registered }}</span>
+            <span class="font-poster-mono text-sm text-poster-on-ink-muted">{{ t('activity.ticket.ofCapacity', { capacity }) }}</span>
+          </span>
+          <span class="text-right text-sm text-poster-on-ink-muted">{{ remaining }}</span>
+        </p>
+        <div
+          class="mt-2.5 h-2 overflow-hidden rounded-full bg-poster-on-ink-muted/30"
+          role="meter"
+          :aria-valuenow="registered"
+          :aria-valuemax="capacity"
+          aria-valuemin="0"
+          :aria-label="t('session-card.capacity.label')"
         >
-          {{ t(action === 'register' ? 'activity.ticket.register' : 'activity.ticket.waitlist') }}
-        </button>
+          <div class="h-full bg-poster-on-ink-accent" :style="{ width: `${pct}%` }" />
+        </div>
+      </template>
+      <p v-else class="mt-1.5 font-poster text-[1.75rem] leading-none font-black text-poster-on-ink-accent font-stretch-[68%]">
+        {{ remaining }}
+      </p>
+
+      <div ref="actions" class="mt-5 flex flex-col gap-2.5">
+        <ActivityTicketAction
+          v-if="callToAction"
+          :action="callToAction"
+          :replay-url="props.session.replay_url"
+          @register="dialogOpen = true"
+        />
         <template v-else-if="action === 'registered'">
           <p class="flex h-13.5 items-center justify-center gap-2 rounded-md bg-poster-on-ink/10 font-bold">
             <UiIcon name="check-circle" size="1.25rem" />
@@ -182,28 +227,9 @@ async function share(): Promise<void> {
             {{ t('activity.ticket.cancel') }}
           </button>
         </template>
-        <a
-          v-else-if="action === 'watch'"
-          href="#direct"
-          class="flex h-13.5 items-center justify-center gap-2.5 rounded-md bg-live text-[1.0625rem] font-bold text-live-contrast"
-        >
-          <UiIcon name="broadcast" size="1.125rem" />
-          {{ t('activity.ticket.watch') }}
-        </a>
-        <a
-          v-else-if="action === 'replay' && props.session.replay_url"
-          :href="props.session.replay_url"
-          target="_blank"
-          rel="noopener"
-          class="flex h-13.5 items-center justify-center gap-2.5 rounded-md border-2 border-poster-on-ink text-[1.0625rem] font-bold"
-        >
-          <UiIcon name="video" size="1.125rem" />
-          {{ t('activity.ticket.replay') }}
-        </a>
         <p v-if="note" class="text-xs leading-relaxed text-poster-on-ink-muted">{{ note }}</p>
       </div>
     </div>
-
     <div class="relative flex h-6 items-center" aria-hidden="true">
       <span class="absolute -left-3 size-6 rounded-full bg-poster-paper" />
       <span class="mx-5.5 flex-1 border-t-2 border-dashed border-poster-on-ink-muted/50" />
@@ -254,5 +280,36 @@ async function share(): Promise<void> {
       :timezone-label="props.edition.city ?? undefined"
       @done="onDone"
     />
+
+    <ClientOnly>
+      <Teleport to="body">
+        <Transition
+          enter-active-class="transition-transform duration-200 ease-out"
+          leave-active-class="transition-transform duration-150 ease-in"
+          enter-from-class="translate-y-full"
+          leave-to-class="translate-y-full"
+        >
+          <div
+            v-if="barShown && callToAction"
+            class="fixed inset-x-0 bottom-0 z-40 border-t-2 border-poster-ink bg-poster-ink pb-[env(safe-area-inset-bottom)] text-poster-on-ink"
+            role="region"
+            :aria-label="t('activity.ticket.bar')"
+          >
+            <div class="mx-auto flex max-w-[1440px] items-center gap-4 px-4 py-2.5 sm:px-6 lg:px-12">
+              <div class="min-w-0 flex-1">
+                <p class="truncate font-bold">{{ tr(props.session.title) }}</p>
+                <p class="truncate font-poster-mono text-xs text-poster-on-ink-muted">{{ when }}</p>
+              </div>
+              <ActivityTicketAction
+                class="h-12! shrink-0 px-5!"
+                :action="callToAction"
+                :replay-url="props.session.replay_url"
+                @register="dialogOpen = true"
+              />
+            </div>
+          </div>
+        </Transition>
+      </Teleport>
+    </ClientOnly>
   </aside>
 </template>
