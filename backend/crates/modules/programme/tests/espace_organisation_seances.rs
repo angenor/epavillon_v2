@@ -138,6 +138,7 @@ async fn aucun_nom_dinscrit_ne_sort_vers_lorganisation() {
         "Ranaivoson",
     )
     .await;
+    seances::activer_le_champ_par_defaut(&bac, "job_title").await;
     seances::sinscrire(
         &bac,
         seance,

@@ -1139,22 +1139,25 @@ INSERT INTO media.attachable_roles
 ON CONFLICT DO NOTHING;
 
 -- Formulaire d'inscription minimal fourni par défaut.
+-- Arbitrage du 03/10 : le public ne donne que nom, prénom, adresse et pays. La
+-- fonction, l'organisation et la provenance restent déclarées, désactivées :
+-- les rouvrir est un `UPDATE … SET is_active = true`, sans migration.
 INSERT INTO programme.registration_forms (code, name, description, is_default, allows_anonymous)
 VALUES ('default', '{"fr":"Inscription standard","en":"Standard registration"}',
         '{"fr":"Formulaire par défaut appliqué aux sessions sans formulaire dédié","en":"Default form"}',
         true, true)
 ON CONFLICT (code) DO NOTHING;
 
-INSERT INTO programme.registration_form_fields (form_id, code, label, field_type, is_required, options, sort_order)
-SELECT f.id, v.code, v.label::platform.i18n_text, v.field_type::programme.form_field_type, v.is_required, v.options::jsonb, v.sort_order
+INSERT INTO programme.registration_form_fields (form_id, code, label, field_type, is_required, options, sort_order, is_active)
+SELECT f.id, v.code, v.label::platform.i18n_text, v.field_type::programme.form_field_type, v.is_required, v.options::jsonb, v.sort_order, v.is_active
 FROM programme.registration_forms f
 CROSS JOIN (VALUES
-    ('job_title',       '{"fr":"Fonction","en":"Job title"}',                     'text',          false, '{}', 10),
-    ('organization',    '{"fr":"Organisation","en":"Organization"}',              'text',          false, '{}', 20),
-    ('country',         '{"fr":"Pays","en":"Country"}',                           'country',       true,  '{}', 30),
+    ('job_title',       '{"fr":"Fonction","en":"Job title"}',                     'text',          false, '{}', 10, false),
+    ('organization',    '{"fr":"Organisation","en":"Organization"}',              'text',          false, '{}', 20, false),
+    ('country',         '{"fr":"Pays","en":"Country"}',                           'country',       true,  '{}', 30, true),
     ('referral_source', '{"fr":"Comment avez-vous connu cette activité ?","en":"How did you hear about this activity?"}',
-                        'single_choice', false, '{"taxonomy":"referral_source"}', 40)
-) AS v(code, label, field_type, is_required, options, sort_order)
+                        'single_choice', false, '{"taxonomy":"referral_source"}', 40, false)
+) AS v(code, label, field_type, is_required, options, sort_order, is_active)
 WHERE f.code = 'default'
 ON CONFLICT (form_id, code) DO NOTHING;
 

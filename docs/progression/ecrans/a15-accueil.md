@@ -78,3 +78,9 @@ Demande du commanditaire : rendre la section « Appel ouvert » plus belle, avec
 **Vérifié** : `nuxi typecheck`, l'accueil au navigateur à 1440 px (thèmes clair et sombre) et à 375 px, sans défilement horizontal.
 
 **Écart de données relevé** : le libellé d'édition de la COP31 est tronqué en base (« 31e conférence des Nations Unies sur le »), et le pays s'affiche « Turquie, Türkiye ». Le titre de la section les reprend tels quels.
+
+## 03/10 — frise du panneau « À venir » allégée
+
+Demande du commanditaire : la carte d'une activité dans la frise ne montre plus ni la salle (ni, à défaut, le mode de participation) ni les thématiques. Restent le créneau avec son fuseau, le titre, l'organisation — et le sigle de l'édition quand la frise en mêle plusieurs. `HomeAsideThemeTags` et les clés `home.aside.programme.format` / `moreThemes`, devenus sans usage, sont supprimés.
+
+**Vérifié** : `nuxi typecheck`. Non vu au navigateur.

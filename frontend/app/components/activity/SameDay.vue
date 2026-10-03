@@ -28,6 +28,7 @@ const rows = computed(() =>
       to: link(props.editionSlug, session),
       start: time(session.starts_at, props.timezone),
       title: tr(session.title),
+      cover: session.cover,
       color: themeColor(session),
       here,
       faded: !here && (current === 'past' || current === 'cancelled'),
@@ -54,12 +55,24 @@ const rows = computed(() =>
           :aria-current="row.here ? 'page' : undefined"
         >
           <span class="w-12 shrink-0 font-poster-mono text-sm font-semibold">{{ row.start }}</span>
-          <span
-            class="size-3 shrink-0 border-[1.5px] border-current"
-            :style="{ background: row.color ?? 'var(--color-poster-paper-sunken)' }"
-            aria-hidden="true"
-          />
-          <span class="min-w-0 flex-1 text-sm leading-snug font-semibold">{{ row.title }}</span>
+          <span class="flex w-16 shrink-0 items-center" aria-hidden="true">
+            <UiImage
+              v-if="row.cover"
+              :image="row.cover"
+              ratio="16 / 9"
+              rounded="rounded-sm"
+              frame-class="border-2 border-current"
+              class="w-full"
+              :class="{ grayscale: row.faded }"
+              sizes="4rem"
+            />
+            <span
+              v-else
+              class="aspect-video w-full rounded-sm border-2 border-current"
+              :style="{ background: row.color ?? 'var(--color-poster-paper-sunken)' }"
+            />
+          </span>
+          <span class="line-clamp-3 min-w-0 flex-1 text-sm leading-snug font-semibold">{{ row.title }}</span>
           <span v-if="row.tag" class="font-poster-mono text-[0.6875rem] font-semibold uppercase">{{ row.tag }}</span>
         </NuxtLink>
       </li>

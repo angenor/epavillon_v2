@@ -54,13 +54,7 @@
       "titleOf": "Programme — {edition}",
       "all": "Full programme",
       "today": "Today",
-      "tomorrow": "Tomorrow",
-      "moreThemes": "also: {themes}",
-      "format": {
-        "online": "Online",
-        "in_person": "On site",
-        "hybrid": "On site and online"
-      }
+      "tomorrow": "Tomorrow"
     }
   },
   "call": {

@@ -9,6 +9,7 @@ import type {
 import type { Intent, SelectOption } from '~/types/ui'
 import type { TimeZoneName } from '~/types/shared'
 import { ApiRequestError, apiErrorMessage, incidentReference, isForbiddenError } from '~/utils/api-error'
+import { timeZoneCountryIso2 } from '~/utils/timezone-country'
 import {
   champsAffiches,
   champsSansReponse,
@@ -51,6 +52,7 @@ const countries = ref<Country[]>([])
 const entries = ref<SaisieDuFormulaire>({})
 const guest = reactive<RegistrationGuest>({ first_name: '', last_name: '', email: '' })
 const consent = ref(false)
+const countryGuessed = ref(false)
 const fieldErrors = ref<Record<string, string>>({})
 const submitError = ref<string | null>(null)
 const submitting = ref(false)
@@ -107,10 +109,26 @@ async function loadCountries(): Promise<void> {
   }
 }
 
+function initialCountry(): string | null {
+  const ofPerson = countries.value.find((c) => c.id === auth.person?.country_id)?.iso2
+  countryGuessed.value = false
+  if (ofPerson) return ofPerson
+  const browserZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  const guessed = browserZone ? timeZoneCountryIso2(browserZone) : null
+  if (!guessed || !countryOptions.value.some((o) => o.value === guessed)) return null
+  countryGuessed.value = true
+  return guessed
+}
+
 function reset(): void {
-  const personCountry = countries.value.find((c) => c.id === auth.person?.country_id)?.iso2 ?? null
-  entries.value = saisieInitiale(fields.value, personCountry)
-  Object.assign(guest, { first_name: '', last_name: '', email: '' })
+  entries.value = saisieInitiale(fields.value, initialCountry())
+  const person = auth.person
+  Object.assign(
+    guest,
+    person
+      ? { first_name: person.first_name, last_name: person.last_name, email: person.primary_email }
+      : { first_name: '', last_name: '', email: '' },
+  )
   consent.value = false
   fieldErrors.value = {}
   submitError.value = null
@@ -137,6 +155,7 @@ function clearError(code: string): void {
 
 function setEntry(code: string, value: string | string[] | boolean): void {
   entries.value = { ...entries.value, [code]: value }
+  if (fields.value.some((f) => f.code === code && f.field_type === 'country')) countryGuessed.value = false
   clearError(code)
 }
 
@@ -194,7 +213,10 @@ function maxLengthOf(field: RegistrationFormField): number | undefined {
   return typeof max === 'number' && max > 0 ? max : undefined
 }
 
-const hintOf = (field: RegistrationFormField) => (field.help_text ? tr(field.help_text) : undefined)
+const hintOf = (field: RegistrationFormField) => {
+  if (field.help_text) return tr(field.help_text)
+  return field.field_type === 'country' && countryGuessed.value ? k('countryGuessed') : undefined
+}
 
 function validate(): boolean {
   const errors: Record<string, string> = Object.fromEntries(
@@ -306,6 +328,7 @@ const outcome = computed<{ intent: Intent; title: string; message: string } | nu
     :open="open"
     :title="k('title')"
     :description="sessionTitle"
+    :description-lines="2"
     :dismissible="!submitting"
     @update:open="emit('update:open', $event)"
   >
@@ -339,51 +362,45 @@ const outcome = computed<{ intent: Intent; title: string; message: string } | nu
       novalidate
       @submit.prevent="submit"
     >
-      <p v-if="form?.description" class="max-w-(--measure) text-sm text-text-secondary">
-        {{ tr(form.description) }}
+      <p v-if="isGuest" class="max-w-(--measure) text-sm text-text-muted">
+        {{ k('guest.intro') }}
+        <NuxtLink :to="loginTo" class="font-bold text-text-link underline underline-offset-4">
+          {{ k('guest.signIn') }}
+        </NuxtLink>
       </p>
+      <p v-else class="max-w-(--measure) text-sm text-text-muted">{{ k('account.intro') }}</p>
 
-      <fieldset v-if="isGuest" class="grid gap-4">
-        <legend class="mb-1 text-sm font-bold text-text">{{ k('guest.legend') }}</legend>
-        <p class="max-w-(--measure) text-sm text-text-muted">
-          {{ k('guest.intro') }}
-          <NuxtLink :to="loginTo" class="font-bold text-text-link underline underline-offset-4">
-            {{ k('guest.signIn') }}
-          </NuxtLink>
-        </p>
-        <div class="grid gap-4 sm:grid-cols-2">
-          <UiInput
-            v-model="guest.first_name"
-            :label="k('guest.firstName')"
-            autocomplete="given-name"
-            :error="fieldErrors['guest.first_name']"
-            required
-            @update:model-value="clearError('guest.first_name')"
-          />
-          <UiInput
-            v-model="guest.last_name"
-            :label="k('guest.lastName')"
-            autocomplete="family-name"
-            :error="fieldErrors['guest.last_name']"
-            required
-            @update:model-value="clearError('guest.last_name')"
-          />
-        </div>
+      <div class="grid gap-4 sm:grid-cols-2">
         <UiInput
-          v-model="guest.email"
-          type="email"
-          :label="k('guest.email')"
-          :hint="k('guest.emailHint')"
-          autocomplete="email"
-          :error="fieldErrors['guest.email']"
+          v-model="guest.last_name"
+          :label="k('guest.lastName')"
+          autocomplete="family-name"
+          :readonly="!isGuest"
+          :error="fieldErrors['guest.last_name']"
           required
-          @update:model-value="clearError('guest.email')"
+          @update:model-value="clearError('guest.last_name')"
         />
-      </fieldset>
-
-      <p v-if="!visibleFields.length" class="max-w-(--measure) text-sm text-text-secondary">
-        {{ k('noQuestion') }}
-      </p>
+        <UiInput
+          v-model="guest.first_name"
+          :label="k('guest.firstName')"
+          autocomplete="given-name"
+          :readonly="!isGuest"
+          :error="fieldErrors['guest.first_name']"
+          required
+          @update:model-value="clearError('guest.first_name')"
+        />
+      </div>
+      <UiInput
+        v-model="guest.email"
+        type="email"
+        :label="k('guest.email')"
+        :hint="isGuest ? k('guest.emailHint') : undefined"
+        autocomplete="email"
+        :readonly="!isGuest"
+        :error="fieldErrors['guest.email']"
+        required
+        @update:model-value="clearError('guest.email')"
+      />
 
       <template v-for="field in visibleFields" :key="field.code">
         <UiTextarea

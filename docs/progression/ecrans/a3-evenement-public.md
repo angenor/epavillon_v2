@@ -201,3 +201,9 @@ Arbitrage du commanditaire : [décision](../decisions/2026-09-30.md), [journal](
 
 Elle restait vide : la séance ne recevait que le titre de son dossier ([modèle](../modele.md)). Elle reçoit maintenant la présentation à l'acceptation et à chaque correction par l'équipe. La page la rend par `UiRichContent` (c'est du HTML restreint), avec la classe `rich-text-affiche` (`assets/css/affiche.css`) qui reprend l'encre et les filets de l'affiche. Typecheck et tests du site verts. **Non vu au navigateur** : la base locale `epavillon` n'a aucune séance.
 
+### 03/10 — fenêtre d'inscription allégée, « Le même jour » illustré
+
+- **Inscription** (`ActivityRegistrationDialog`) : titre de l'activité sur deux lignes au plus, points de suspension ensuite (nouvelle prop `descriptionLines` d'`UiModal`, titre complet en infobulle). Ordre : Nom, Prénom, Adresse électronique, Pays. Connecté, les trois premiers viennent du compte, en lecture seule ; invité, ils se saisissent. La description du formulaire (texte d'administration) n'est plus affichée. Le pays est celui du compte, à défaut **déduit du fuseau du navigateur** (`timeZoneCountryIso2`), avec la mention « Déduit de votre fuseau horaire » tant qu'on n'y touche pas. Les autres questions du formulaire par défaut sont désactivées en base ([modèle](../modele.md)).
+- **Le même jour** (`ActivitySameDay`) : vignette 16:9 de la couverture quand elle existe, sinon une vignette de même taille à la couleur de la thématique (les titres restent alignés) ; titre sur trois lignes au plus.
+- **Vérifié** : tests `formulaire`, `espace_organisation_seances`, `inscription`, `domaine_seances` verts (deux tests rouvrent la question qu'ils utilisent) ; typecheck, tests du site et de Guide Négo verts ; vu au navigateur sur les données d'exemple à 390 px (formulaire par défaut, titre long coupé, pays prérempli) et à 1440 px (« Le même jour » avec et sans couverture). Non vu connecté.
+

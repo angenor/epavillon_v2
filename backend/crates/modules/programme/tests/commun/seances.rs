@@ -742,6 +742,20 @@ pub fn reponses_valides() -> registration::SessionRegisterPayload {
     }
 }
 
+/// Rouvrir une question du formulaire par défaut, que le modèle déclare désactivée.
+pub async fn activer_le_champ_par_defaut(bac: &Bac, code: &str) {
+    sqlx::query!(
+        "UPDATE programme.registration_form_fields ff
+            SET is_active = true
+           FROM programme.registration_forms f
+          WHERE f.id = ff.form_id AND f.code = 'default' AND ff.code = $1",
+        code
+    )
+    .execute(bac.pool())
+    .await
+    .expect("réactivation du champ");
+}
+
 /// Annuler, **par le service** : c'est lui qui promeut, sous le même verrou.
 pub async fn annuler(
     bac: &Bac,

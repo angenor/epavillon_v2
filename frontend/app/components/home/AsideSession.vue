@@ -7,8 +7,8 @@ import type { PublicScheduleRow } from '~/types/views'
  * POURQUOI PAS `UiSessionCard`. Celle-ci porte l'image de couverture, le pays,
  * la jauge de places et le motif d'annulation — tout ce qu'il faut dans une
  * programmation, et bien trop pour une colonne de 340 px qui en aligne six. La
- * carte du panneau retient le créneau, le titre, qui l'organise, où cela se
- * tient, et les thématiques : de quoi décider si l'on y va.
+ * carte du panneau ne retient que le créneau, le titre et qui l'organise : ni
+ * salle ni thématiques, arbitrage du commanditaire du 03/10.
  *
  * LA DATE N'EST PAS ICI, elle est dans l'en-tête de journée de la frise. D'où
  * `format="short"` : les bornes et le fuseau, sans répéter le jour sur chaque
@@ -49,16 +49,6 @@ const { tr } = useI18nText()
 const { isLive } = useLiveSession()
 
 const title = computed(() => tr(props.session.title))
-
-/**
- * Où cela se tient. La salle quand elle est attribuée — un dossier retenu peut
- * attendre son affectation —, à défaut le mode de participation, qui reste une
- * information utile : « En ligne » suffit à savoir qu'on peut suivre de loin.
- */
-const place = computed(() => {
-  const room = props.session.room_name ? tr(props.session.room_name) : ''
-  return room || t(`home.aside.programme.format.${props.session.format}`)
-})
 
 const organization = computed(
   () => props.session.organization_acronym ?? props.session.organization_name ?? '',
@@ -108,11 +98,9 @@ const organization = computed(
       <template v-else>{{ title }}</template>
     </h4>
 
-    <p class="mt-1 truncate text-xs text-text-on-inverse-muted">
-      <span v-if="props.editionLabel" class="font-bold text-text-on-inverse">{{ props.editionLabel }} · </span>
-      <template v-if="organization">{{ organization }} · </template>{{ place }}
+    <p v-if="props.editionLabel || organization" class="mt-1 truncate text-xs text-text-on-inverse-muted">
+      <span v-if="props.editionLabel" class="font-bold text-text-on-inverse">{{ props.editionLabel }}</span>
+      <template v-if="props.editionLabel && organization"> · </template>{{ organization }}
     </p>
-
-    <HomeAsideThemeTags v-if="props.session.themes.length" :themes="props.session.themes" class="mt-2" />
   </article>
 </template>

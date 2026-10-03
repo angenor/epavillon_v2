@@ -3,9 +3,9 @@
   "loading": "Chargement du formulaire d'inscription",
   "loadError": "Le formulaire d'inscription n'a pas pu être chargé",
   "notFound": "Cette activité n'a pas de formulaire d'inscription.",
-  "noQuestion": "Aucune question à remplir : confirmez simplement votre inscription.",
   "choose": "Choisir…",
   "countryCode": "Code du pays à deux lettres, par exemple « SN » pour le Sénégal.",
+  "countryGuessed": "Déduit de votre fuseau horaire. Vous pouvez le changer.",
   "submit": "Confirmer mon inscription",
   "dateWithZone": "{date}, {zone}",
   "login": {
@@ -13,8 +13,10 @@
     "message": "Connectez-vous pour vous inscrire. Vous reviendrez ensuite sur cette page.",
     "action": "Se connecter"
   },
+  "account": {
+    "intro": "Vous vous inscrivez avec votre compte."
+  },
   "guest": {
-    "legend": "Vos coordonnées",
     "intro": "Vous pouvez vous inscrire sans compte.",
     "signIn": "Vous en avez un ? Connectez-vous.",
     "firstName": "Prénom",

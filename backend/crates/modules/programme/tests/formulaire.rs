@@ -64,6 +64,10 @@ async fn le_formulaire_applicable_est_resolu_et_ses_reponses_exigees() {
     .await
     .unwrap();
 
+    // La provenance est désactivée par le modèle depuis le 03/10 : la rouvrir
+    // ne demande qu'une ligne.
+    seances::activer_le_champ_par_defaut(&bac, "referral_source").await;
+
     let formulaire = registration::formulaire(&bac.state, seance.into())
         .await
         .expect("le formulaire de la plateforme s'applique");

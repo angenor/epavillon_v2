@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.registration_form_fields ff\n            SET is_active = true\n           FROM programme.registration_forms f\n          WHERE f.id = ff.form_id AND f.code = 'default' AND ff.code = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "389865158499ba364e111b3ad91f23f3ec8a5aa0205fa56c79b239b2f6897c9a"
+}

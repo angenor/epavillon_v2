@@ -205,3 +205,9 @@ Les 17 termes de `activity_theme` n'avaient pas de `color_hex` : la programmatio
 
 **Migration** : `ops/migrations/2026-10-03-presentation-des-seances.sql` — les commentaires, et la présentation du dossier posée sur chaque séance qui n'en a pas. Appliquée en local sur `epavillon` (`UPDATE 0` : aucune séance), rejouée sans erreur. **À jouer en production.**
 
+## 03/10/2026 — `075_programme_sessions.sql` : formulaire d'inscription par défaut allégé
+
+Arbitrage du commanditaire : le public ne donne que nom, prénom, adresse électronique et pays. `job_title`, `organization` et `referral_source` restent déclarés dans le formulaire `default`, avec `is_active = false` : les rouvrir est un `UPDATE`, sans migration. Le nom, le prénom et l'adresse ne sont pas des questions du formulaire (compte, ou bloc invité de l'inscription). Un formulaire **dédié** à une séance ou à une édition garde ses propres questions. Touche aussi l'inscription au pavillon depuis Guide Négo, qui lit le même formulaire.
+
+**Migration** : `ops/migrations/2026-10-03-inscription-allegee.sql` — appliquée en local sur `epavillon` (`UPDATE 3`). **À jouer en production.**
+

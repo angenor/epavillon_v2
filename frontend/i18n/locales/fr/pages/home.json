@@ -53,13 +53,7 @@
       "titleOf": "Au programme — {edition}",
       "all": "Tout le programme",
       "today": "Aujourd'hui",
-      "tomorrow": "Demain",
-      "moreThemes": "et aussi : {themes}",
-      "format": {
-        "online": "En ligne",
-        "in_person": "Sur place",
-        "hybrid": "Sur place et en ligne"
-      }
+      "tomorrow": "Demain"
     }
   },
   "call": {

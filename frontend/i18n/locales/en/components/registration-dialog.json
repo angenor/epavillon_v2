@@ -3,9 +3,9 @@
   "loading": "Loading the registration form",
   "loadError": "The registration form could not be loaded",
   "notFound": "This activity has no registration form.",
-  "noQuestion": "No questions to answer: simply confirm your registration.",
   "choose": "Choose…",
   "countryCode": "Two-letter country code, for example “SN” for Senegal.",
+  "countryGuessed": "Inferred from your time zone. You can change it.",
   "submit": "Confirm my registration",
   "dateWithZone": "{date}, {zone}",
   "login": {
@@ -13,8 +13,10 @@
     "message": "Sign in to register. You will then come back to this page.",
     "action": "Sign in"
   },
+  "account": {
+    "intro": "You are registering with your account."
+  },
   "guest": {
-    "legend": "Your details",
     "intro": "You can register without an account.",
     "signIn": "Already have one? Sign in.",
     "firstName": "First name",

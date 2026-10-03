@@ -40,6 +40,8 @@ interface Props {
   title: string
   /** Précision sous le titre. */
   description?: string
+  /** Coupe la précision à ce nombre de lignes, points de suspension ensuite. */
+  descriptionLines?: 1 | 2 | 3
   size?: Size | 'xl'
   /** Fermeture par clic sur le fond et par la croix. */
   dismissible?: boolean
@@ -54,6 +56,8 @@ const { t } = useI18n()
 const dialog = ref<HTMLDialogElement | null>(null)
 const titleId = useId()
 const descriptionId = useId()
+
+const CLAMPS = { 1: 'line-clamp-1', 2: 'line-clamp-2', 3: 'line-clamp-3' } as const
 
 const WIDTHS: Record<Size | 'xl', string> = {
   sm: 'sm:max-w-md',
@@ -119,7 +123,13 @@ onBeforeUnmount(() => {
       <header class="flex items-start gap-4 border-b border-border-subtle px-5 py-4">
         <div class="min-w-0 flex-1">
           <h2 :id="titleId" class="text-xl">{{ props.title }}</h2>
-          <p v-if="props.description" :id="descriptionId" class="mt-1 text-sm text-text-muted">
+          <p
+            v-if="props.description"
+            :id="descriptionId"
+            class="mt-1 text-sm text-text-muted"
+            :class="props.descriptionLines && CLAMPS[props.descriptionLines]"
+            :title="props.descriptionLines ? props.description : undefined"
+          >
             {{ props.description }}
           </p>
         </div>

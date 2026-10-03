@@ -74,7 +74,7 @@ export const registrationFormFields: RegistrationFormField[] = [
     validation: { maxLength: 120 },
     is_sensitive: false,
     sort_order: 10,
-    is_active: true,
+    is_active: false,
   },
   {
     id: FORM_FIELD(2),
@@ -88,7 +88,7 @@ export const registrationFormFields: RegistrationFormField[] = [
     validation: { maxLength: 160 },
     is_sensitive: false,
     sort_order: 20,
-    is_active: true,
+    is_active: false,
   },
   {
     id: FORM_FIELD(3),
@@ -120,7 +120,7 @@ export const registrationFormFields: RegistrationFormField[] = [
     validation: {},
     is_sensitive: false,
     sort_order: 40,
-    is_active: true,
+    is_active: false,
   },
 
   // --- Formulaire de l'édition COP31 ---------------------------------------
