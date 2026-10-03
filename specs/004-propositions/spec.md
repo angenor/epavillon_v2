@@ -333,7 +333,7 @@ Le back-office lit l'historique d'un dossier champ par champ, et sa frise d'avan
 - **FR-088**: Un dossier rejeté, retiré ou annulé NE DOIT PAS être modifiable.
 - **FR-089**: Le renvoi d'un dossier corrigé DOIT être une **route distincte** du dépôt.
 - **FR-090**: Le renvoi NE DOIT PAS être soumis à la fenêtre de l'appel ; le plafond par organisation DOIT l'être dans les deux cas.
-- **FR-091**: Une modification de dossier NE DOIT propager AUCUN champ vers une séance programmée.
+- **FR-091**: Une modification de dossier NE DOIT propager AUCUN champ vers une séance programmée, **sauf le titre lorsque c'est l'équipe qui corrige** (amendé le 03/10 : aucun écran ne corrige le titre d'une séance, et la page publique gardait l'ancien).
 - **FR-092**: Une modification NE DOIT PAS provoquer de transition d'état.
 
 ### Les pièces (US7)

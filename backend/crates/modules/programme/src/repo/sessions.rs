@@ -198,6 +198,27 @@ pub async fn creer(
     Ok(id)
 }
 
+/// Reporter sur les séances d'un dossier le titre qu'il porte désormais.
+///
+/// Le titre seul : le créneau, le format et l'adresse restent ceux qui ont été
+/// arbitrés ou communiqués (FR-091, amendé le 03/10).
+pub async fn reporter_le_titre(conn: &mut PgConnection, proposal_id: Uuid) -> Result<u64> {
+    let reportees = sqlx::query!(
+        "UPDATE programme.sessions s
+            SET title = p.title
+           FROM programme.proposals p
+          WHERE p.id = $1
+            AND s.proposal_id = p.id
+            AND s.title IS DISTINCT FROM p.title",
+        proposal_id
+    )
+    .execute(conn)
+    .await?
+    .rows_affected();
+
+    Ok(reportees)
+}
+
 /// Ce qu'un dossier retenu apporte à ses séances.
 #[derive(Debug, Clone)]
 pub struct DossierARetenir {

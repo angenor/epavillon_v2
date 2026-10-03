@@ -65,6 +65,7 @@ pub async fn enregistrer(
     ecrire(
         state,
         ctx,
+        Auteur::Organisation,
         acteur,
         &payload,
         &regles,
@@ -124,6 +125,7 @@ pub async fn corriger_par_lequipe(
     ecrire(
         state,
         ctx,
+        Auteur::Equipe,
         acteur,
         &payload,
         &regles,
@@ -191,10 +193,17 @@ fn exiger_un_dossier_complet(brouillon: &ProposalDraft, regles: &ReglesDeLAppel)
     Ok(())
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Auteur {
+    Organisation,
+    Equipe,
+}
+
 #[allow(clippy::too_many_arguments)]
 async fn ecrire(
     state: &ProgrammeState,
     ctx: &RequestContext,
+    auteur: Auteur,
     acteur: Uuid,
     payload: &SaveDraftPayload,
     regles: &ReglesDeLAppel,
@@ -276,10 +285,9 @@ async fn ecrire(
     )
     .await?;
 
-    // 🔴 **AUCUN CHAMP N'EST PROPAGÉ VERS UNE SÉANCE PROGRAMMÉE**, et c'est ici
-    // que la tentation existe : `programme.sessions` porte `proposal_id`, un
-    // titre, un format et un créneau, et il paraît naturel de « tenir la séance
-    // à jour » quand le dossier change.
+    // 🔴 **SEUL LE TITRE EST PROPAGÉ VERS UNE SÉANCE PROGRAMMÉE, ET SEULEMENT
+    // QUAND L'ÉQUIPE CORRIGE.** `programme.sessions` porte aussi un format et un
+    // créneau, et il paraît naturel de « tenir la séance à jour » en entier.
     //
     // Ce serait une faute. Une séance retenue a un créneau **arbitré** par
     // l'IFDD, une salle attribuée, des inscrits prévenus et des rappels
@@ -289,8 +297,16 @@ async fn ecrire(
     // la séance est la décision : corriger la demande ne rejoue pas la
     // décision.
     //
-    // C'est aussi pour cela que ce service n'émet aucun événement de
-    // modification : rien ne doit pouvoir s'y abonner pour « synchroniser ».
+    // Le titre fait exception (arbitrage du 03/10) : aucun écran ne corrige
+    // celui d'une séance, et l'équipe qui rectifie le dossier rectifie l'affiche.
+    // L'organisation, elle, ne réécrit pas le titre public d'une activité
+    // retenue sans l'IFDD. L'adresse ne suit pas : elle a été communiquée.
+    //
+    // Ce service n'émet toujours aucun événement de modification : rien ne doit
+    // pouvoir s'y abonner pour « synchroniser ».
+    if auteur == Auteur::Equipe {
+        crate::repo::sessions::reporter_le_titre(&mut tx, dossier.as_uuid()).await?;
+    }
 
     tx.commit().await?;
 

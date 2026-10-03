@@ -93,3 +93,12 @@ Demande du commanditaire : les organisations demandent des corrections rapides, 
 
 
 **Image de couverture modifiable par l'équipe (30/09)** : onglet « Présentation » de la modification d'un dossier — [journal](../journal/2026-09-30.md).
+
+### 03/10 — le titre corrigé par l'équipe passe sur la séance
+
+Constat : un titre corrigé dans `/admin/propositions` ne paraissait pas sur `/programmations`. La séance née de l'acceptation porte sa propre copie du titre, et FR-091 interdisait toute propagation. Arbitrage du commanditaire : quand **l'équipe** corrige, le titre suit.
+
+- **API** : `sessions::reporter_le_titre`, appelée par `draft_write::ecrire` dans la même transaction, pour `corriger_par_lequipe` seulement. Le créneau, le format et l'adresse de la séance ne bougent pas ; l'organisation qui corrige son dossier retenu ne touche toujours pas la séance. FR-091 amendé (`specs/004-propositions/spec.md`).
+- **Vérifié** : `tests/correction_par_lequipe.rs` (nouveau test) et `tests/correction.rs` verts, clippy et fmt propres, `.sqlx` régénéré.
+- **Données existantes** : une séance dont le dossier a été corrigé avant le 03/10 garde l'ancien titre ; réenregistrer le dossier depuis le back-office suffit.
+

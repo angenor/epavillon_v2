@@ -2,12 +2,12 @@
 **Ce fichier est la mémoire du projet entre deux sessions Claude Code.** Toute session commence par le lire et se termine par le mettre à jour.
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
-## Dernière mise à jour — 2 octobre 2026
+## Dernière mise à jour — 3 octobre 2026
+- 03/10 — Un titre corrigé par l'équipe dans `/admin/propositions` passe désormais sur la séance publique (titre seul, FR-091 amendé). Non déployé — [A8](progression/ecrans/a8-evaluation.md).
 - 02/10 — Page d'une activité : compte à rebours à la seconde en tête du billet, horaires sur une ligne, inscription visible dès l'arrivée et barre fixe qui la suit ; « Sur place » tu quand la séance est diffusée (03/10). Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
 - 01/10 — Liste du programme avec image de couverture, logo de l'organisation et drapeau des institutions nationales. Non déployé, migration de vue à jouer — [A3](progression/ecrans/a3-evenement-public.md).
 - 30/09 — Programmation publique : filtres sur une ligne, jours figés au défilement, liste de tout le programme qui suit le jour lu. Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
 - 30/09 — `/programmations` passe en « affiche de festival » et chaque activité a sa page (intervenants, inscription, direct, questions). Non déployé — [A3](progression/ecrans/a3-evenement-public.md), [décision](progression/decisions/2026-09-30.md).
-- 29/09 — Chaque édition naît avec son lieu et sa salle : le planificateur place enfin dans le calendrier. En production — [A9](progression/ecrans/a9-planificateur.md), [décision](progression/decisions/2026-09-29.md).
 
 ## État général
 | Domaine | État |
@@ -36,7 +36,7 @@ Un écran = un fichier : ce qui a été livré, les écarts entre le modèle et 
 | A5 | Espace organisation | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a5-espace-organisation.md) |
 | A6 | Tableau de bord back-office | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a6-tableau-de-bord.md) |
 | A7 | Liste des propositions | ✅ 18/08 · révisé 15/09 | [écarts et vérifications](progression/ecrans/a7-propositions.md) |
-| A8 | Fiche d'évaluation | ✅ 18/08 · évaluation flottante 16/09 · en production · correction par l'équipe 17/09, en production | [écarts et vérifications](progression/ecrans/a8-evaluation.md) |
+| A8 | Fiche d'évaluation | ✅ 18/08 · évaluation flottante 16/09 · en production · correction par l'équipe 17/09, en production · titre reporté sur la séance 03/10, non déployé | [écarts et vérifications](progression/ecrans/a8-evaluation.md) |
 | A9 | Planificateur de créneaux | ✅ 18/08 · stand par défaut 29/09, en production | [écarts et vérifications](progression/ecrans/a9-planificateur.md) |
 | A10 | Gestion des événements | ✅ 18/08 · téléversement des visuels 26/08 · liste en rangées 16/09 · fuseau cherchable et brouillon local 16/09 · appel : formats, revues et grille facultatifs 27/09 · en production | [écarts et vérifications](progression/ecrans/a10-evenements.md) |
 | A11 | Organisations et fusion | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a11-organisations-fusion.md) |
