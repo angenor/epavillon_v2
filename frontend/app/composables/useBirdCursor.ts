@@ -1,3 +1,4 @@
+import type { MaybeRefOrGetter } from 'vue'
 import type { BirdCursorOptions } from '~/types/bird-cursor'
 
 const SCRIPT_ID = 'bird-cursor-script'
@@ -11,8 +12,9 @@ let wanted: BirdCursorOptions | null = null
  * appelante. Il se pose sur les `data-bird-perch` et parle au survol des
  * `data-bird-say`. Le script respecte de lui-même « moins d'animations ».
  */
-export function useBirdCursor(options: BirdCursorOptions = {}): void {
+export function useBirdCursor(source: MaybeRefOrGetter<BirdCursorOptions> = {}): void {
   onMounted(() => {
+    const options = toValue(source)
     // Souris seulement : sur un écran tactile, il volerait au-dessus du texte qu'on fait défiler.
     if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
     wanted = options
@@ -32,6 +34,17 @@ export function useBirdCursor(options: BirdCursorOptions = {}): void {
     })
     document.body.appendChild(script)
   })
+
+  // Ses phrases changent avec la langue : on le remonte, s'il est déjà là.
+  watch(
+    () => toValue(source),
+    (options) => {
+      if (!wanted || !window.BirdCursor) return
+      wanted = options
+      window.BirdCursor.mount(options)
+    },
+    { deep: true },
+  )
 
   onBeforeUnmount(() => {
     wanted = null

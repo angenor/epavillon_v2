@@ -82,7 +82,12 @@ const isForbidden = computed(() => isForbiddenError(error.value))
 // L'oiseau du commanditaire (`docs/bird-cursor/`), sur l'accueil seulement.
 // 25 : au-dessus du contenu de l'accueil (20 au plus), sous la barre de navigation (`z-30`).
 // La bulle reste au-dessus de tout, comme une infobulle.
-useBirdCursor({ scale: 0.38, zIndex: 25, bubbleZIndex: 9999 })
+useBirdCursor(() => ({
+  scale: 0.38,
+  zIndex: 25,
+  bubbleZIndex: 9999,
+  happyTexts: [0, 1, 2].map((index) => t(`home.bird.happy.${index}`)),
+}))
 
 useHead(() => ({
   title: t('home.head.title'),

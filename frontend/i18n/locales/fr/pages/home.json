@@ -18,7 +18,8 @@
     "programme": "Toutes les activités retenues, jour par jour, à l'heure du lieu.",
     "submit": "Le dépôt se fait en ligne, en plusieurs étapes. Vous pouvez l'interrompre et le reprendre.",
     "edition": "Dates, lieu et programme complet de l'édition.",
-    "view": "Affiches ou liste : votre choix est gardé pour la prochaine visite."
+    "view": "Affiches ou liste : votre choix est gardé pour la prochaine visite.",
+    "happy": ["Merci, ça me fait plaisir !", "Bonne visite sur l'ePavillon !", "Ravi de vous croiser par ici."]
   },
   "showcase": {
     "quoteMark": "«",

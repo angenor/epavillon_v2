@@ -77,6 +77,37 @@
 
     function on(target, type, fn, o) { target.addEventListener(type, fn, o); listeners.push([target, type, fn]); }
 
+    // ---- ePavillon : l'oiseau sourit apres 2 s de survol, ou quand on clique dessus.
+    // Lui seul capte la souris ; le reste du calque reste traversable.
+    root.setAttribute('aria-hidden', 'true');
+    bird.style.pointerEvents = 'auto';
+    bird.style.cursor = 'pointer';
+    var NS = 'http://www.w3.org/2000/svg';
+    var smile = document.createElementNS(NS, 'g');
+    smile.setAttribute('opacity', '0');
+    var smileArc = document.createElementNS(NS, 'path');
+    smileArc.setAttribute('d', 'M175,154 Q188.6,136 202,154');
+    smileArc.setAttribute('fill', 'none');
+    smileArc.setAttribute('stroke', '#252538');
+    smileArc.setAttribute('stroke-width', '5');
+    smileArc.setAttribute('stroke-linecap', 'round');
+    var blush = document.createElementNS(NS, 'ellipse');
+    blush.setAttribute('cx', '176'); blush.setAttribute('cy', '168');
+    blush.setAttribute('rx', '8'); blush.setAttribute('ry', '4.5');
+    blush.setAttribute('fill', '#FF8A80'); blush.setAttribute('opacity', '0.7');
+    smile.appendChild(blush); smile.appendChild(smileArc);
+    head.appendChild(smile);
+
+    var happyTexts = (cfg.happyTexts && cfg.happyTexts.length) ? cfg.happyTexts : ['Merci !'];
+    var hoverSince = 0, happyUntil = 0, happyText = '', happyK = 0;
+    function cheer(now) {
+      if (now >= happyUntil) happyText = happyTexts[Math.floor(Math.random() * happyTexts.length)];
+      happyUntil = Math.max(happyUntil, now + 2500);
+    }
+    on(bird, 'mouseenter', function () { hoverSince = performance.now(); });
+    on(bird, 'mouseleave', function () { hoverSince = 0; });
+    on(bird, 'click', function (e) { e.preventDefault(); e.stopPropagation(); cheer(performance.now()); });
+
     var W = 0, H = 0;
     function resize() {
       W = document.documentElement.clientWidth; H = document.documentElement.clientHeight;
@@ -195,7 +226,7 @@
       // ---- etats : chase (poursuite) -> land (atterrissage) -> perch (posé)
       if (sayEl) {
         if (!perch || perch.el !== sayEl) { perch = { el: sayEl }; if (mode === 'perch') mode = 'land'; }
-      } else if (perch && perch.say) { perch = pickPerch(); if (mode === 'perch') mode = 'land'; }
+      } else if (perch && perch.say && !hoverSince) { perch = pickPerch(); if (mode === 'perch') mode = 'land'; }
       if (perch) perch.say = !!sayEl;
 
       if (sayEl) {
@@ -290,8 +321,17 @@
       if (now > blinkAt) { blinkAt = now + 2200 + Math.random() * 4200; blinkEnd = now + 130; }
       lidK = now < blinkEnd ? Math.sin(((blinkEnd - now) / 130) * 3.1416) : 0;
 
+      // ---- sourire (ePavillon) : la paupiere se ferme, l'oeil devient un arc
+      if (hoverSince && now - hoverSince > 2000) cheer(now);
+      var happy = now < happyUntil;
+      happyK = lerp(happyK, happy ? 1 : 0, 0.2 * dt);
+      if (happyK < 0.01) happyK = 0;
+      lidK = Math.max(lidK, happyK);
+      smile.setAttribute('opacity', clamp((happyK - 0.4) / 0.6, 0, 1).toFixed(3));
+
       // ---- rendu
-      var bob = (mode === 'perch' ? Math.sin(t * 1.5) * 0.6 : 0) - Math.sin((1 - turn) * 3.1416) * 4;
+      var bob = (mode === 'perch' ? Math.sin(t * 1.5) * 0.6 : 0) - Math.sin((1 - turn) * 3.1416) * 4 -
+        Math.abs(Math.sin(t * 7)) * 5 * happyK;
       bird.setAttribute('transform', 'translate(' + x.toFixed(2) + ',' + (y + bob).toFixed(2) +
         ') scale(' + (faceA * s).toFixed(4) + ',' + s.toFixed(4) + ') rotate(' + (tilt - turn * 4).toFixed(2) + ',25,-47)');
       wf.setAttribute('transform', 'rotate(' + (wingBase + flap).toFixed(2) + ',168,163)');
@@ -304,9 +344,10 @@
       pupil.setAttribute('cy', (148 + gy).toFixed(2));
       lid.setAttribute('transform', 'matrix(1 0 0 ' + lidK.toFixed(3) + ' 0 ' + (148.982 * (1 - lidK)).toFixed(2) + ')');
 
-      // ---- bulle
-      if (sayText) {
-        if (sayText !== shownText) { bubText.textContent = sayText; shownText = sayText; sayW = 0; }
+      // ---- bulle (le sourire passe avant la replique)
+      var bubbleText = happy ? happyText : sayText;
+      if (bubbleText) {
+        if (bubbleText !== shownText) { bubText.textContent = bubbleText; shownText = bubbleText; sayW = 0; }
         if (!sayW) sayW = bubBox.offsetWidth;
         var bx = clamp(x + faceA * 30 * s, sayW / 2 + 10, Math.max(sayW / 2 + 12, W - sayW / 2 - 10));
         var by = Math.max(bubBox.offsetHeight + 14, y - 122 * s);

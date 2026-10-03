@@ -11,6 +11,8 @@ export interface BirdCursorOptions {
   zIndex?: number
   /** Ajout ePavillon : la bulle a son propre niveau, au-dessus de la barre de navigation. */
   bubbleZIndex?: number
+  /** Ajout ePavillon : phrases de la bulle quand il sourit, tirées au hasard. */
+  happyTexts?: string[]
 }
 
 declare global {

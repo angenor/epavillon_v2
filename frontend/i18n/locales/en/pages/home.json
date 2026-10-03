@@ -18,7 +18,8 @@
     "programme": "All accepted activities, day by day, in local time.",
     "submit": "Submission happens online, in several steps. You can stop and resume it.",
     "edition": "Dates, venue and full programme of the edition.",
-    "view": "Posters or list: your choice is kept for your next visit."
+    "view": "Posters or list: your choice is kept for your next visit.",
+    "happy": ["Thank you, that made my day!", "Enjoy your visit to the ePavillon!", "Nice to see you around here."]
   },
   "showcase": {
     "quoteMark": "“",
