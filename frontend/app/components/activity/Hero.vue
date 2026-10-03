@@ -33,6 +33,13 @@ const duration = computed(() => {
   return rest ? t('programme.list.hoursMinutes', { hours, minutes: String(rest).padStart(2, '0') }) : t('programme.list.hours', { hours })
 })
 
+/** Le pays ne dit quelque chose que d'une institution publique nationale : il la désigne. */
+const nationalCountry = computed(() =>
+  props.session.organization_type_code === 'public_national_institution' && props.session.organization_country
+    ? tr(props.session.organization_country)
+    : '',
+)
+
 const specialDays = computed(() => props.session.tracks.filter((track) => track.kind === 'special_day'))
 const titleSize = computed(() => (tr(props.session.title).length > 60 ? 'text-[clamp(2.5rem,5.5vw,4rem)]' : 'text-[clamp(2.75rem,6.5vw,4.75rem)]'))
 </script>
@@ -98,7 +105,15 @@ const titleSize = computed(() => (tr(props.session.title).length > 60 ? 'text-[c
           {{ t('activity.hero.ledBy') }}
         </span>
         <span class="text-[1.0625rem] font-semibold">{{ props.session.organization_name }}</span>
-        <span v-if="props.session.organization_country" class="text-poster-ink-muted"> · {{ tr(props.session.organization_country) }}</span>
+        <span v-if="nationalCountry" class="text-poster-ink-muted">
+          ·
+          <span class="inline-flex items-center gap-1.5 align-[-0.125em]">
+            <span v-if="props.session.organization_country_code" class="inline-flex" aria-hidden="true">
+              <UiCountryFlag :code="props.session.organization_country_code" :label="nationalCountry" />
+            </span>
+            {{ nationalCountry }}
+          </span>
+        </span>
       </p>
     </div>
 
