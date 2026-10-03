@@ -175,7 +175,7 @@ useHead(() => ({
                 {{ t('activity.about') }}
               </h2>
               <p v-if="summary" class="max-w-[48rem] text-xl leading-normal font-medium">{{ summary }}</p>
-              <UiRichContent class="rich-text-affiche mt-4 max-w-[48rem] leading-relaxed" :html="description" />
+              <UiRichContent class="rich-text-affiche mt-4 leading-relaxed" :html="description" />
             </section>
 
             <div class="order-3 flex flex-col gap-10 empty:hidden">

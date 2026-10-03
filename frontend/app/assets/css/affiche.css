@@ -32,8 +32,9 @@
   src: url("../fonts/affiche/IBMPlexMono-SemiBold-Latin.woff2") format("woff2");
 }
 
-/* Un contenu riche posé sur l'affiche en prend l'encre et les filets. */
+/* Un contenu riche posé sur l'affiche en prend l'encre et les filets, et remplit sa colonne (arbitrage du 03/10). */
 .rich-text.rich-text-affiche {
+  max-width: none;
   --color-text: var(--color-poster-ink);
   --color-text-secondary: var(--color-poster-ink-muted);
   --color-text-muted: var(--color-poster-ink-muted);

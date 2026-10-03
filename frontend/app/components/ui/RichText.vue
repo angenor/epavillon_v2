@@ -319,18 +319,8 @@ onBeforeUnmount(() => {
   min-height: var(--rich-text-min-height);
 }
 
-/**
- * `max-width: var(--measure)` vient de `.rich-text`, et il a sa raison d'être en
- * LECTURE : une ligne de texte trop longue se lit mal. En SAISIE, il laisserait
- * une bande morte à droite du champ — visiblement dans le cadre, sans effet au
- * clic. On rend donc la zone éditable pleine largeur et on garde la mesure sur
- * les paragraphes eux-mêmes.
- */
+/* La mesure de `.rich-text` vaut pour la lecture ; une zone de saisie remplit son cadre (arbitrage du 03/10). */
 .ui-rich-text-host :deep(.ProseMirror) {
   max-width: none;
-}
-
-.ui-rich-text-host :deep(.ProseMirror) > * {
-  max-width: var(--measure);
 }
 </style>

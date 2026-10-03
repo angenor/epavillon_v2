@@ -207,3 +207,7 @@ Elle restait vide : la séance ne recevait que le titre de son dossier ([modèle
 - **Le même jour** (`ActivitySameDay`) : vignette 16:9 de la couverture quand elle existe, sinon une vignette de même taille à la couleur de la thématique (les titres restent alignés) ; titre sur trois lignes au plus.
 - **Vérifié** : tests `formulaire`, `espace_organisation_seances`, `inscription`, `domaine_seances` verts (deux tests rouvrent la question qu'ils utilisent) ; typecheck, tests du site et de Guide Négo verts ; vu au navigateur sur les données d'exemple à 390 px (formulaire par défaut, titre long coupé, pays prérempli) et à 1440 px (« Le même jour » avec et sans couverture). Non vu connecté.
 
+### 03/10 — la présentation remplit sa colonne
+
+Arbitrage du commanditaire ([décision](../decisions/2026-10-03.md)) : plus de mesure de 68 caractères sur la présentation d'une activité (`.rich-text-affiche`, `max-width: none` ; plafond de 48rem retiré de la page). L'éditeur `UiRichText` remplit son cadre partout. Inscrit au guide de style, § 05c. Vu au navigateur : présentation à 880 px sur une colonne de 880 px, paragraphe de l'éditeur à pleine largeur.
+
