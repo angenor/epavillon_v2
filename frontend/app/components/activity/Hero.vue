@@ -2,7 +2,7 @@
 import type { PublicEditionRow, PublicScheduleRow } from '~/types/views'
 import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
 
-/** Le haut de la fiche, en affiche : repères et compte à rebours, titre, porteur, bandeau horaire. */
+/** Le haut de la fiche, en affiche : repères, titre, porteur, bandeau horaire. */
 
 interface Props {
   session: PublicScheduleRow
@@ -13,12 +13,11 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits<{ started: [] }>()
 
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
 const { time, zoneLabel, zoneOffsetShort } = useDateTime()
-const { fill } = useProgrammeSession()
+const { fill, showFormat } = useProgrammeSession()
 
 const timezone = computed(() => props.session.timezone)
 const day = computed(() => dayKeyInZone(props.session.starts_at, timezone.value))
@@ -64,9 +63,8 @@ const titleSize = computed(() => (tr(props.session.title).length > 60 ? 'text-[c
       >
         ● {{ t('activity.state.live') }}
       </span>
-      <ActivityCountdown v-else-if="props.state === 'upcoming'" :starts-at="props.session.starts_at" @elapsed="emit('started')" />
       <span
-        v-else
+        v-else-if="props.state !== 'upcoming'"
         class="inline-flex h-7.5 items-center rounded px-3 text-[0.8125rem] font-bold"
         :class="{
           'bg-poster-today-strong text-poster-on-today': props.state === 'ongoing',
@@ -76,7 +74,7 @@ const titleSize = computed(() => (tr(props.session.title).length > 60 ? 'text-[c
       >
         {{ t(`session-card.state.${props.state}`) }}
       </span>
-      <span class="ml-1 font-poster-mono text-xs font-semibold tracking-[0.08em] text-poster-ink-muted uppercase">
+      <span v-if="showFormat(props.session)" class="ml-1 font-poster-mono first:ml-0 text-xs font-semibold tracking-[0.08em] text-poster-ink-muted uppercase">
         {{ t(`session-card.format.${props.session.format}`) }}
       </span>
     </div>

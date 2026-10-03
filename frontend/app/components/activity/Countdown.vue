@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
- * Le compte à rebours, à la seconde. Il ne tourne qu'une fois monté : le rendu
- * serveur affiche « À venir », sans heure qui serait fausse à l'arrivée.
+ * Le compte à rebours du billet, à la seconde. Il ne tourne qu'une fois monté :
+ * le rendu serveur pose des tirets, sans heure qui serait fausse à l'arrivée.
  */
 
 interface Props {
@@ -32,19 +32,23 @@ watch(left, (seconds) => {
 
 const units = computed(() => {
   const seconds = left.value
-  if (seconds === null) return []
-  const days = Math.floor(seconds / 86_400)
+  const unit = (key: string, count: number, digits = 2) => ({
+    key,
+    count,
+    value: seconds === null ? '––' : String(count).padStart(digits, '0'),
+  })
+  const days = seconds === null ? 2 : Math.floor(seconds / 86_400)
   const parts = [
-    { key: 'h', value: Math.floor((seconds % 86_400) / 3600) },
-    { key: 'm', value: Math.floor((seconds % 3600) / 60) },
-    { key: 's', value: seconds % 60 },
-  ].map((part) => ({ ...part, value: String(part.value).padStart(2, '0') }))
-  return days ? [{ key: 'd', value: String(days) }, ...parts] : parts
+    unit('h', Math.floor(((seconds ?? 0) % 86_400) / 3600)),
+    unit('m', Math.floor(((seconds ?? 0) % 3600) / 60)),
+    unit('s', (seconds ?? 0) % 60),
+  ]
+  return days ? [unit('d', days, 1), ...parts] : parts
 })
 
 const spoken = computed(() => {
   const seconds = left.value
-  if (seconds === null) return ''
+  if (seconds === null) return t('session-card.state.upcoming')
   return t('activity.countdown.spoken', {
     days: Math.floor(seconds / 86_400),
     hours: Math.floor((seconds % 86_400) / 3600),
@@ -54,26 +58,20 @@ const spoken = computed(() => {
 </script>
 
 <template>
-  <span
-    v-if="!units.length"
-    class="inline-flex h-7.5 items-center rounded border-2 border-poster-ink px-3 text-[0.8125rem] font-bold"
-  >
-    {{ t('session-card.state.upcoming') }}
-  </span>
-  <span v-else class="inline-flex items-center gap-2" role="timer" :aria-label="spoken">
-    <span class="font-poster-mono text-[0.6875rem] font-semibold tracking-[0.08em] text-poster-ink-muted uppercase" aria-hidden="true">
-      {{ t('activity.countdown.label') }}
-    </span>
-    <span class="inline-flex items-stretch overflow-hidden rounded-md border-2 border-poster-ink bg-poster-ink shadow-poster-sm" aria-hidden="true">
-      <span
-        v-for="(unit, index) in units"
-        :key="unit.key"
-        class="inline-flex items-baseline gap-0.5 px-2 py-1"
-        :class="index ? 'border-l border-poster-on-ink-muted/40' : ''"
-      >
-        <span class="font-poster-mono text-lg leading-none font-semibold text-poster-on-ink-accent tabular-nums">{{ unit.value }}</span>
-        <span class="font-poster-mono text-[0.625rem] text-poster-on-ink-muted">{{ t(`activity.countdown.${unit.key}`) }}</span>
+  <div class="flex" role="timer" :aria-label="spoken">
+    <div
+      v-for="(unit, index) in units"
+      :key="unit.key"
+      class="flex flex-1 flex-col items-center gap-1.5"
+      :class="index ? 'border-l border-poster-on-ink-muted/30' : ''"
+      aria-hidden="true"
+    >
+      <span class="font-poster text-[3.25rem] leading-[0.85] font-black text-poster-on-ink-accent tabular-nums font-stretch-[62%]">
+        {{ unit.value }}
       </span>
-    </span>
-  </span>
+      <span class="font-poster-mono text-[0.6875rem] font-semibold tracking-[0.08em] text-poster-on-ink-muted uppercase">
+        {{ t(`activity.countdown.${unit.key}`, unit.count) }}
+      </span>
+    </div>
+  </div>
 </template>

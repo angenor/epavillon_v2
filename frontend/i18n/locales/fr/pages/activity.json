@@ -15,11 +15,10 @@
     "live": "En direct"
   },
   "countdown": {
-    "label": "Commence dans",
-    "d": "j",
-    "h": "h",
+    "d": "jour | jours",
+    "h": "heure | heures",
     "m": "min",
-    "s": "s",
+    "s": "sec",
     "spoken": "Commence dans {days} jours, {hours} heures et {minutes} minutes"
   },
   "hero": {
@@ -82,9 +81,7 @@
   },
   "ticket": {
     "label": "Participer",
-    "places": "Places au pavillon",
     "ofCapacity": "/ {capacity} inscrits",
-    "unlimited": "Places sans limite",
     "register": "S'inscrire",
     "waitlist": "Rejoindre la liste d'attente",
     "registered": "Inscription confirmée",
@@ -107,11 +104,11 @@
     "format": "Format",
     "languages": "Langues",
     "broadcast": "Diffusion",
-    "streamed": "En direct sur cette page",
     "onSite": "Sur place uniquement",
     "calendar": "Agenda",
     "share": "Partager",
     "copied": "Lien copié",
-    "bar": "Inscription à l'activité"
+    "bar": "Inscription à l'activité",
+    "live": "Diffusée en direct sur cette page"
   }
 }

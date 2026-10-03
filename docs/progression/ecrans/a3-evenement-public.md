@@ -194,3 +194,5 @@ Arbitrage du commanditaire : [décision](../decisions/2026-09-30.md), [journal](
 **01/10 — Liste avec images** : couverture, logo incrusté, drapeau des institutions publiques nationales, séparateurs allégés — [journal](../journal/2026-10-01.md).
 
 **02/10 — Page d'une activité resserrée** : compte à rebours à la seconde à la place du bloc « Commence dans », horaires en bandeau, billet en colonne droite dès le haut (et sous le titre sur mobile), barre d'inscription fixée en bas — [journal](../journal/2026-10-02.md).
+
+**03/10 — Billet épuré** : décompte en tête du billet, places affichées seulement si comptées, « Sur place » tu pour une séance diffusée (fiche et liste), bandeau rouge du direct, intervenants en trombinoscope — [journal](../journal/2026-10-03.md).

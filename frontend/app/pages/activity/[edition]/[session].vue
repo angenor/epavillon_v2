@@ -165,7 +165,6 @@ useHead(() => ({
               :edition="edition"
               :state="state"
               :home-time="homeTime"
-              @started="refresh()"
             />
 
             <ActivityStage class="order-3" :session="session" :state="state" :streams="streams" />
@@ -184,7 +183,7 @@ useHead(() => ({
           </div>
 
           <div class="contents lg:flex lg:flex-col lg:gap-8">
-            <ActivityTicket class="order-2" :session="session" :edition="edition" :state="state" :languages="languages" :now="now" />
+            <ActivityTicket class="order-2" @started="refresh()" :session="session" :edition="edition" :state="state" :languages="languages" :now="now" />
             <ClientOnly>
               <ActivityQuestions v-if="showQuestions" class="order-4" :session-id="session.id" />
             </ClientOnly>

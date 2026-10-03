@@ -15,11 +15,10 @@
     "live": "Live"
   },
   "countdown": {
-    "label": "Starts in",
-    "d": "d",
-    "h": "h",
+    "d": "day | days",
+    "h": "hour | hours",
     "m": "min",
-    "s": "s",
+    "s": "sec",
     "spoken": "Starts in {days} days, {hours} hours and {minutes} minutes"
   },
   "hero": {
@@ -82,9 +81,7 @@
   },
   "ticket": {
     "label": "Take part",
-    "places": "Seats at the pavilion",
     "ofCapacity": "/ {capacity} registered",
-    "unlimited": "Unlimited seats",
     "register": "Register",
     "waitlist": "Join the waiting list",
     "registered": "Registration confirmed",
@@ -107,11 +104,11 @@
     "format": "Format",
     "languages": "Languages",
     "broadcast": "Broadcast",
-    "streamed": "Live on this page",
     "onSite": "On site only",
     "calendar": "Calendar",
     "share": "Share",
     "copied": "Link copied",
-    "bar": "Activity registration"
+    "bar": "Activity registration",
+    "live": "Streamed live on this page"
   }
 }

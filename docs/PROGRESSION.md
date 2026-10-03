@@ -3,7 +3,7 @@
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
 ## Dernière mise à jour — 2 octobre 2026
-- 02/10 — Page d'une activité : compte à rebours à la seconde, horaires sur une ligne, inscription visible dès l'arrivée et barre fixe qui la suit. Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
+- 02/10 — Page d'une activité : compte à rebours à la seconde en tête du billet, horaires sur une ligne, inscription visible dès l'arrivée et barre fixe qui la suit ; « Sur place » tu quand la séance est diffusée (03/10). Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
 - 01/10 — Liste du programme avec image de couverture, logo de l'organisation et drapeau des institutions nationales. Non déployé, migration de vue à jouer — [A3](progression/ecrans/a3-evenement-public.md).
 - 30/09 — Programmation publique : filtres sur une ligne, jours figés au défilement, liste de tout le programme qui suit le jour lu. Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
 - 30/09 — `/programmations` passe en « affiche de festival » et chaque activité a sa page (intervenants, inscription, direct, questions). Non déployé — [A3](progression/ecrans/a3-evenement-public.md), [décision](progression/decisions/2026-09-30.md).

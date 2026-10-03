@@ -19,8 +19,11 @@ export function useProgrammeSession() {
       ? `color-mix(in oklab, ${color} var(--poster-theme-strength), var(--color-poster-paper-raised))`
       : 'var(--color-poster-paper-raised)'
 
+  /** « Sur place » sur une séance diffusée laisse croire qu'il faut venir : on le tait. */
+  const showFormat = (session: PublicScheduleRow): boolean => !(session.is_streamed && session.format === 'in_person')
+
   const link = (editionSlug: string, session: PublicScheduleRow): string =>
     localePath({ name: 'activity-edition-session', params: { edition: editionSlug, session: session.slug } })
 
-  return { state, themeColor, fill, link }
+  return { state, themeColor, fill, showFormat, link }
 }

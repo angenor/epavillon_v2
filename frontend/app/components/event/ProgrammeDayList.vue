@@ -25,7 +25,7 @@ const emit = defineEmits<{ reading: [date: IsoDate]; reset: [] }>()
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
 const { time } = useDateTime()
-const { state, fill, link, themeColor } = useProgrammeSession()
+const { state, fill, link, themeColor, showFormat } = useProgrammeSession()
 
 const MAX_THEMES = 3
 const NATIONAL = 'public_national_institution'
@@ -55,7 +55,7 @@ function row(session: PublicScheduleRow) {
     acronym: session.organization_acronym,
     organization: session.organization_name,
     country: session.organization_country ? tr(session.organization_country) : '',
-    format: t(`session-card.format.${session.format}`),
+    format: showFormat(session) ? t(`session-card.format.${session.format}`) : '',
     cover: session.cover,
     logo: session.organization_logo ? (session.organization_logo.sources.thumb?.url ?? session.organization_logo.url) : null,
     color: themeColor(session),
@@ -221,7 +221,7 @@ onBeforeUnmount(() => {
 
           <div class="flex min-w-0 flex-col gap-1.5">
             <p class="font-poster-mono text-xs text-poster-ink-muted">
-              {{ entry.format }}<template v-if="entry.streamed"> · {{ t('programme.list.streamed') }}</template>
+              {{ [entry.format, entry.streamed ? t('programme.list.streamed') : ''].filter(Boolean).join(' · ') }}
               <span
                 v-if="entry.current === 'past' || entry.current === 'cancelled' || entry.current === 'postponed'"
                 class="ml-1.5 font-semibold tracking-[0.08em] uppercase"

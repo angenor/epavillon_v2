@@ -5,9 +5,10 @@ import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
 import type { TicketCallToAction } from './TicketAction.vue'
 
 /**
- * Le billet : l'image, les places, LE bouton qui compte à ce moment-là, et les
- * informations pratiques. Les heures d'ouverture des inscriptions se comparent
- * à l'horloge du navigateur, une fois monté : le serveur tranche de toute façon.
+ * Le billet : l'image, le compte à rebours, les places quand elles sont
+ * comptées, LE bouton qui compte à ce moment-là, et les informations pratiques.
+ * Les heures d'ouverture des inscriptions se comparent à l'horloge du
+ * navigateur, une fois monté : le serveur tranche de toute façon.
  *
  * Dès que ce bouton sort de l'écran, une barre fixée en bas le reprend : on doit
  * pouvoir s'inscrire sans remonter, et sur mobile sans descendre.
@@ -22,11 +23,13 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const emit = defineEmits<{ started: [] }>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
 const { dateTime, dayLong, timeRange } = useDateTime()
 const requestUrl = useRequestURL()
+const { showFormat } = useProgrammeSession()
 const { mine, refresh, cancel } = useSessionRegistration(computed(() => props.session.id))
 
 const dialogOpen = ref(false)
@@ -111,7 +114,7 @@ onMounted(() => {
 onBeforeUnmount(() => observer?.disconnect())
 
 const remaining = computed(() => {
-  if (capacity.value === null) return t('activity.ticket.unlimited')
+  if (capacity.value === null) return ''
   if (full.value) return props.session.waitlist_enabled ? t('session-card.capacity.waitlist') : t('session-card.capacity.full')
   return t('session-card.capacity.remaining', capacity.value - registered.value)
 })
@@ -179,20 +182,18 @@ async function share(): Promise<void> {
       </span>
     </div>
 
-    <div class="p-6">
-      <p class="font-poster-mono text-xs font-semibold tracking-[0.08em] text-poster-on-ink-muted uppercase">
-        {{ t('activity.ticket.places') }}
-      </p>
-      <template v-if="capacity !== null">
-        <p class="mt-1.5 flex items-baseline justify-between gap-3">
+    <div class="flex flex-col gap-5 p-6">
+      <ActivityCountdown v-if="props.state === 'upcoming'" :starts-at="props.session.starts_at" @elapsed="emit('started')" />
+      <div v-if="capacity !== null">
+        <p class="flex items-baseline justify-between gap-3">
           <span class="flex items-baseline gap-2">
-            <span class="font-poster text-[2.75rem] leading-[0.9] font-black text-poster-on-ink-accent font-stretch-[62%]">{{ registered }}</span>
+            <span class="font-poster text-[2rem] leading-[0.9] font-black text-poster-on-ink-accent font-stretch-[62%]">{{ registered }}</span>
             <span class="font-poster-mono text-sm text-poster-on-ink-muted">{{ t('activity.ticket.ofCapacity', { capacity }) }}</span>
           </span>
           <span class="text-right text-sm text-poster-on-ink-muted">{{ remaining }}</span>
         </p>
         <div
-          class="mt-2.5 h-2 overflow-hidden rounded-full bg-poster-on-ink-muted/30"
+          class="mt-2 h-2 overflow-hidden rounded-full bg-poster-on-ink-muted/30"
           role="meter"
           :aria-valuenow="registered"
           :aria-valuemax="capacity"
@@ -201,12 +202,9 @@ async function share(): Promise<void> {
         >
           <div class="h-full bg-poster-on-ink-accent" :style="{ width: `${pct}%` }" />
         </div>
-      </template>
-      <p v-else class="mt-1.5 font-poster text-[1.75rem] leading-none font-black text-poster-on-ink-accent font-stretch-[68%]">
-        {{ remaining }}
-      </p>
+      </div>
 
-      <div ref="actions" class="mt-5 flex flex-col gap-2.5">
+      <div ref="actions" class="flex flex-col gap-2.5">
         <ActivityTicketAction
           v-if="callToAction"
           :action="callToAction"
@@ -237,19 +235,33 @@ async function share(): Promise<void> {
     </div>
 
     <div class="px-6 pt-2 pb-6">
+      <p
+        v-if="props.session.is_streamed && props.state !== 'past' && props.state !== 'cancelled'"
+        class="mb-4 flex items-center gap-3 rounded-md border-2 border-live bg-live/15 px-3.5 py-3 text-sm font-bold"
+      >
+        <span class="relative flex size-3 shrink-0" aria-hidden="true">
+          <span v-if="props.state === 'live'" class="absolute inset-0 animate-ping rounded-full bg-live motion-reduce:animate-none" />
+          <span class="relative size-3 rounded-full bg-live" />
+        </span>
+        {{ t('activity.ticket.live') }}
+      </p>
       <dl class="grid grid-cols-[5.75rem_minmax(0,1fr)] gap-3 text-sm leading-snug">
         <template v-if="place">
           <dt class="pt-0.5 font-poster-mono text-[0.6875rem] tracking-[0.08em] text-poster-on-ink-muted uppercase">{{ t('activity.ticket.place') }}</dt>
           <dd>{{ place }}</dd>
         </template>
-        <dt class="pt-0.5 font-poster-mono text-[0.6875rem] tracking-[0.08em] text-poster-on-ink-muted uppercase">{{ t('activity.ticket.format') }}</dt>
-        <dd>{{ t(`session-card.format.${props.session.format}`) }}</dd>
+        <template v-if="showFormat(props.session)">
+          <dt class="pt-0.5 font-poster-mono text-[0.6875rem] tracking-[0.08em] text-poster-on-ink-muted uppercase">{{ t('activity.ticket.format') }}</dt>
+          <dd>{{ t(`session-card.format.${props.session.format}`) }}</dd>
+        </template>
         <template v-if="props.languages.length">
           <dt class="pt-0.5 font-poster-mono text-[0.6875rem] tracking-[0.08em] text-poster-on-ink-muted uppercase">{{ t('activity.ticket.languages') }}</dt>
           <dd>{{ props.languages.join(', ') }}</dd>
         </template>
-        <dt class="pt-0.5 font-poster-mono text-[0.6875rem] tracking-[0.08em] text-poster-on-ink-muted uppercase">{{ t('activity.ticket.broadcast') }}</dt>
-        <dd>{{ t(props.session.is_streamed ? 'activity.ticket.streamed' : 'activity.ticket.onSite') }}</dd>
+        <template v-if="!props.session.is_streamed">
+          <dt class="pt-0.5 font-poster-mono text-[0.6875rem] tracking-[0.08em] text-poster-on-ink-muted uppercase">{{ t('activity.ticket.broadcast') }}</dt>
+          <dd>{{ t('activity.ticket.onSite') }}</dd>
+        </template>
       </dl>
 
       <div class="mt-5 flex gap-2.5">

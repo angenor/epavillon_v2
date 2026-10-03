@@ -23,7 +23,8 @@ const speakers = computed(() =>
       name: speaker.display_name,
       role: speaker.role,
       lead: speaker.role === 'moderator' || speaker.role === 'keynote',
-      job: [speaker.job_title_snapshot, speaker.organization_snapshot].filter(Boolean).join(' · '),
+      job: speaker.job_title_snapshot ?? '',
+      organization: speaker.organization_snapshot ?? '',
       bio: speaker.bio ? tr(speaker.bio) : '',
       avatar: speaker.avatar,
       initials: initialsOf(speaker.display_name),
@@ -50,37 +51,36 @@ const organizations = computed(() =>
     <h2 id="intervenants-titre" class="mb-5 border-b-4 border-poster-ink pb-2.5 font-poster text-[2.375rem] leading-none font-black uppercase font-stretch-[68%]">
       {{ t('activity.people.speakers') }}
     </h2>
-    <ul class="grid gap-4 sm:grid-cols-2">
-      <li v-for="speaker in speakers" :key="speaker.id" class="flex gap-4 rounded-lg border-2 border-poster-ink bg-poster-paper-raised p-4.5">
+    <ul class="grid grid-cols-2 gap-x-5 gap-y-9 pt-2 sm:grid-cols-3 xl:grid-cols-4">
+      <li v-for="speaker in speakers" :key="speaker.id" class="flex flex-col items-center text-center">
         <UiImage
           v-if="speaker.avatar"
           :image="speaker.avatar"
           ratio="1 / 1"
           rounded="rounded-full"
-          class="size-17 shrink-0 overflow-hidden rounded-full border-2 border-poster-ink"
-          sizes="68px"
+          class="size-24 shrink-0 overflow-hidden rounded-full border-2 border-poster-ink"
+          sizes="96px"
         />
         <span
           v-else
-          class="flex size-17 shrink-0 items-center justify-center rounded-full border-2 border-poster-ink bg-poster-paper-sunken font-poster text-[1.375rem] font-black"
+          class="flex size-24 shrink-0 items-center justify-center rounded-full border-2 border-poster-ink bg-poster-paper-sunken font-poster text-[1.75rem] font-black"
           aria-hidden="true"
         >
           {{ speaker.initials }}
         </span>
-        <div class="flex min-w-0 flex-col gap-1">
-          <span
-            class="self-start rounded-sm border-[1.5px] border-poster-ink px-2 py-0.5 font-poster-mono text-[0.6875rem] font-semibold tracking-[0.06em] uppercase"
-            :class="speaker.lead ? 'bg-poster-ink text-poster-on-ink-accent' : 'bg-poster-paper-raised'"
-          >
-            {{ t(`activity.people.role.${speaker.role}`) }}
-          </span>
-          <span class="font-poster text-[1.3125rem] leading-[1.15] font-extrabold font-stretch-[85%]">{{ speaker.name }}</span>
-          <span v-if="speaker.job" class="text-sm text-poster-ink-muted">{{ speaker.job }}</span>
-          <details v-if="speaker.bio" class="text-sm">
-            <summary class="cursor-pointer py-1 font-semibold">{{ t('activity.people.bio') }}</summary>
-            <p class="mt-1 whitespace-pre-line text-poster-ink-muted">{{ speaker.bio }}</p>
-          </details>
-        </div>
+        <span
+          class="mt-3 rounded-sm px-1.5 py-0.5 font-poster-mono text-[0.625rem] font-semibold tracking-[0.06em] uppercase"
+          :class="speaker.lead ? 'bg-poster-ink text-poster-on-ink-accent' : 'text-poster-ink-muted'"
+        >
+          {{ t(`activity.people.role.${speaker.role}`) }}
+        </span>
+        <span class="mt-1 text-[1.0625rem] leading-snug font-bold">{{ speaker.name }}</span>
+        <span v-if="speaker.job" class="mt-1 text-sm leading-snug text-poster-ink-muted italic">{{ speaker.job }}</span>
+        <span v-if="speaker.organization" class="text-sm leading-snug text-poster-ink-muted">{{ speaker.organization }}</span>
+        <details v-if="speaker.bio" class="mt-1.5 text-sm">
+          <summary class="cursor-pointer py-1 font-semibold underline underline-offset-4">{{ t('activity.people.bio') }}</summary>
+          <p class="mt-1 text-left whitespace-pre-line text-poster-ink-muted">{{ speaker.bio }}</p>
+        </details>
       </li>
     </ul>
   </section>
