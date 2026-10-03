@@ -17,7 +17,7 @@ const props = defineProps<Props>()
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
 const { time, zoneLabel, zoneOffsetShort } = useDateTime()
-const { fill, showFormat } = useProgrammeSession()
+const { fill } = useProgrammeSession()
 
 const timezone = computed(() => props.session.timezone)
 const day = computed(() => dayKeyInZone(props.session.starts_at, timezone.value))
@@ -46,7 +46,7 @@ const titleSize = computed(() => (tr(props.session.title).length > 60 ? 'text-[c
 
 <template>
   <section class="min-w-0">
-    <div class="flex flex-wrap items-center gap-2">
+    <div class="mb-5 flex flex-wrap items-center gap-2 empty:hidden">
       <span
         v-for="theme in props.session.themes.slice(0, 3)"
         :key="theme.code"
@@ -81,13 +81,10 @@ const titleSize = computed(() => (tr(props.session.title).length > 60 ? 'text-[c
       >
         {{ t(`session-card.state.${props.state}`) }}
       </span>
-      <span v-if="showFormat(props.session)" class="ml-1 font-poster-mono first:ml-0 text-xs font-semibold tracking-[0.08em] text-poster-ink-muted uppercase">
-        {{ t(`session-card.format.${props.session.format}`) }}
-      </span>
     </div>
 
     <h1
-      class="mt-5 font-poster leading-[0.95] font-black tracking-[-0.015em] text-balance font-stretch-[72%]"
+      class="font-poster leading-[0.95] font-black tracking-[-0.015em] text-balance font-stretch-[72%]"
       :class="[titleSize, { 'line-through decoration-4': props.state === 'cancelled' }]"
     >
       {{ tr(props.session.title) }}
