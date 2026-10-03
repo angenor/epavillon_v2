@@ -16,7 +16,9 @@ import type { EventId, IsoDateTime } from '~/types/shared'
  * ── DEUX BLOCS, ET RIEN QUI SE COMPOSE À LA MAIN ────────────────────────────
  *
  *   1. LES ÉVÉNEMENTS À VENIR — le prochain rendez-vous en carte pleine, les
- *      suivants en lignes. Dès qu'une édition à venir existe, elle est là.
+ *      suivants en lignes. Dès qu'une édition à venir existe, elle est là —
+ *      sauf si son programme est publié et visible dans la frise, qui la nomme
+ *      déjà (arbitrage du commanditaire du 03/10).
  *   2. LA FRISE DES ACTIVITÉS RETENUES — jour par jour, la programmation qui
  *      vient. Dès qu'une activité est retenue et publiée, elle est là.
  *
@@ -31,7 +33,7 @@ import type { EventId, IsoDateTime } from '~/types/shared'
  *
  * `api.home.screen()` sert des séances déjà réduites aux premières à venir ou
  * en cours, annulations exclues. Le seul choix fait ici est celui des trois
- * prochaines éditions — un tri, pas un filtre de publication.
+ * prochaines éditions dont la frise ne montre pas déjà le programme.
  *
  * ── LE DIRECT SE DÉCLARE, IL NE SE DEVINE PAS ───────────────────────────────
  *
@@ -59,7 +61,15 @@ const { t } = useI18n()
 const localePath = useLocalePath()
 const { setLive } = useLiveSession()
 
-const nextThree = computed(() => nextEditions(props.editions, 3))
+const nextThree = computed(() =>
+  nextEditions(
+    props.editions.filter(
+      (edition) =>
+        !edition.programme_published_at || !nextSessionOfEdition(props.sessions, edition.id),
+    ),
+    3,
+  ),
+)
 
 /** La séance en direct, déclarée UNE fois pour toute l'application. */
 watch(

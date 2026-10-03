@@ -83,4 +83,6 @@ Demande du commanditaire : rendre la section « Appel ouvert » plus belle, avec
 
 Demande du commanditaire : la carte d'une activité dans la frise ne montre plus ni la salle (ni, à défaut, le mode de participation) ni les thématiques. Restent le créneau avec son fuseau, le titre, l'organisation — et le sigle de l'édition quand la frise en mêle plusieurs. `HomeAsideThemeTags` et les clés `home.aside.programme.format` / `moreThemes`, devenus sans usage, sont supprimés.
 
-**Vérifié** : `nuxi typecheck`. Non vu au navigateur.
+Même jour, seconde demande : **la carte d'un événement quitte « Prochains événements » dès que sa programmation est publiée** — la frise la nomme déjà (« Au programme — CdP31 »). Condition double dans `AsidePanel` : `programme_published_at` posé **et** au moins une séance de l'édition dans la frise ; sans la seconde, une édition publiée dont les séances ne tiendraient pas dans la frise bornée par l'API disparaîtrait du panneau. Les éditions suivantes remontent, la première prend la carte pleine.
+
+**Vérifié** : `nuxi typecheck`. Non vu au navigateur (API locale arrêtée).
