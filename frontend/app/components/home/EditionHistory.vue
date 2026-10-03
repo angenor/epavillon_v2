@@ -89,20 +89,20 @@ function onTab(value: string): void {
 }
 
 // -------------------------------------------------------------------------
-// La vue : affiches (par défaut) ou liste, arbitrée le 03/10
+// La vue : liste (par défaut) ou affiches, arbitrée le 03/10
 // -------------------------------------------------------------------------
 
 type HistoryView = 'posters' | 'list'
 
 /** Un cookie et non le stockage du navigateur : le rendu serveur sert d'emblée la bonne vue. */
 const viewCookie = useCookie<string>('ep-editions-vue', {
-  default: () => 'posters',
+  default: () => 'list',
   maxAge: 60 * 60 * 24 * 365,
   sameSite: 'lax',
 })
 
 const view = computed<HistoryView>({
-  get: () => (viewCookie.value === 'list' ? 'list' : 'posters'),
+  get: () => (viewCookie.value === 'posters' ? 'posters' : 'list'),
   set: (value) => {
     viewCookie.value = value
   },
@@ -114,8 +114,8 @@ function isPastYear(group: EditionHistoryGroup): boolean {
 }
 
 const views = computed(() => [
-  { value: 'posters' as const, icon: 'grid', label: t('home.history.view.posters') },
   { value: 'list' as const, icon: 'list', label: t('home.history.view.list') },
+  { value: 'posters' as const, icon: 'grid', label: t('home.history.view.posters') },
 ])
 
 // -------------------------------------------------------------------------
