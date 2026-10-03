@@ -32,9 +32,9 @@ import type { ShowcaseRow } from '~/types/views'
  *
  * ── LE VOILE EST UN JETON, PAS UN NOIR À 50 % ───────────────────────────────
  *
- * `--color-scrim` existe précisément pour ce cas. La direction artistique
- * interdit les dégradés ; le voile est donc uniforme, et son opacité suit celle
- * du site institutionnel de l'IFDD sur ses bandeaux d'ouverture.
+ * `--color-scrim` existe précisément pour ce cas : un voile léger sur toute
+ * l'image, et le fondu `.scrim-fade-bottom` sous le texte, posé en bas de cadre
+ * depuis le 03/10 pour laisser la photographie libre en son milieu.
  *
  * ── LE BANDEAU NE PORTE PAS `body` ──────────────────────────────────────────
  *
@@ -103,6 +103,17 @@ const affiliation = computed(() => {
   return [named, country].filter(Boolean).join(' · ')
 })
 
+const hasAside = computed(() =>
+  Boolean(
+    props.slide.author_name ||
+      affiliation.value ||
+      props.slide.author_title ||
+      props.slide.event_title ||
+      props.slide.session_title ||
+      props.slide.link_url,
+  ),
+)
+
 const linkLabel = computed(() => tr(props.slide.link_label) || t('home.showcase.discover'))
 
 /**
@@ -165,7 +176,7 @@ watch(() => [props.paused, background.value.kind], syncVideo, { flush: 'post' })
 
 <template>
   <article
-    class="relative isolate flex h-full w-full flex-col justify-center overflow-hidden bg-surface-inverse text-text-on-inverse"
+    class="relative isolate flex h-full w-full flex-col justify-end overflow-hidden bg-surface-inverse text-text-on-inverse"
     :aria-roledescription="t('home.showcase.slideRole')"
     :aria-label="title"
   >
@@ -203,107 +214,79 @@ watch(() => [props.paused, background.value.kind], syncVideo, { flush: 'post' })
       />
     </div>
 
-    <!-- LE VOILE. Jeton `--color-scrim`, jamais `bg-black/50`, jamais de
-         dégradé : c'est ce que la direction artistique proscrit et ce que ce
-         rôle existe pour remplacer. -->
-    <!-- ALLÉGÉ À 38 % LE 19/08. Le voile était à 65 % quand le texte se posait à
-         nu sur la photographie : il portait alors seul tout le contraste, et
-         noyait l'image. Depuis que la citation vit dans un panneau de verre qui
-         apporte son propre fond, il n'a plus qu'un rôle — empêcher qu'une
-         photographie très claire ne troue la page et n'affaiblisse les
-         commandes du rail. La photographie redevient lisible en tant que
-         photographie, ce que la plateforme de référence obtenait sans voile
-         général du tout. -->
-    <div class="absolute inset-0 -z-10 bg-scrim/38" aria-hidden="true" />
+    <!-- Voile allégé sur grand écran le 03/10 : le texte, en bas de cadre, y
+         tient par le fondu. Sur téléphone il monte jusqu'au milieu de l'image. -->
+    <div class="absolute inset-0 -z-10 bg-scrim/45 lg:bg-scrim/20" aria-hidden="true" />
+    <div class="scrim-fade-bottom absolute inset-x-0 bottom-0 -z-10 h-4/5" aria-hidden="true" />
 
-    <!-- TROIS BOÎTES, ET CHACUNE NE FAIT QU'UNE CHOSE : celle du dehors reçoit
-         les classes de l'appelant, celle du milieu centre et espace, celle du
-         dedans borne la ligne de lecture. Empiler ces rôles sur un seul élément
-         obligerait l'appelant à deviner comment ses classes s'arbitrent avec
-         celles du composant — et Tailwind arbitre par ordre de génération, pas
-         par ordre d'écriture. -->
+    <!-- BAS DE CADRE, arbitré le 03/10 : le texte se range au-dessus du rail et
+         laisse le haut de la photographie libre. -->
     <div class="w-full" :class="props.contentClass">
       <div
-        class="mx-auto w-full max-w-[1280px]"
-        :class="props.compact ? 'px-4 py-5 sm:px-6 sm:py-6' : 'px-4 py-8 sm:px-6 sm:py-10'"
+        class="mx-auto flex w-full max-w-[1280px]"
+        :class="
+          props.compact
+            ? 'flex-col gap-3 px-4 py-5 sm:px-6'
+            : 'flex-col gap-5 px-4 py-8 sm:px-6 sm:py-10 lg:flex-row lg:items-end lg:gap-12'
+        "
       >
-        <!-- L'ENCART DE CITATION EST UN PANNEAU DE VERRE, posé sur la
-             photographie — le rendu de la plateforme de référence, arbitré par
-             le commanditaire le 19/08.
+        <div class="min-w-0 flex-1" :style="{ maxWidth: '52rem' }">
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <HomeNatureBadge
+              :label="props.slide.nature_label"
+              :color="props.slide.nature_color"
+              tone="inverse"
+              :size="props.compact ? 'sm' : 'md'"
+            />
+            <span
+              v-if="hasQuote"
+              class="font-medium text-text-on-inverse-muted"
+              :class="props.compact ? 'text-sm' : 'text-base'"
+            >
+              {{ title }}
+            </span>
+          </div>
+          <!-- `line-clamp` est un garde-fou : le bandeau fait un écran et rogne ce qui dépasse. -->
+          <div class="relative" :class="[props.compact ? 'mt-2' : 'mt-4', { 'ps-8 sm:ps-11': hasQuote }]">
+            <span
+              v-if="hasQuote"
+              class="absolute -top-2 start-0 font-display text-5xl leading-none font-bold text-accent-on-inverse sm:-top-3 sm:text-7xl"
+              aria-hidden="true"
+            >
+              {{ t('home.showcase.quoteMark') }}
+            </span>
+            <p
+              class="font-display font-bold text-balance text-text-on-inverse"
+              :class="props.compact ? 'line-clamp-4 text-display-sm' : `line-clamp-5 ${headlineSize}`"
+              :style="{ lineHeight: 'var(--leading-tight)', letterSpacing: 'var(--tracking-title)' }"
+            >
+              {{ headline }}
+            </p>
+          </div>
+        </div>
 
-             LA MATIÈRE VIENT DES JETONS, PAS D'UN `bg-white/20` ÉCRIT ICI :
-             `--color-glass-accent` pour la teinte institutionnelle,
-             `--color-glass-border` pour le trait, `--blur-glass-strong` pour le
-             flou — c'est le seul endroit qui mérite le flou fort, parce que
-             c'est le seul qui porte un long texte.
-
-             LE VOILE RESTE INDISPENSABLE en dessous : le verre sépare, il ne
-             contraste pas. Sur une photographie claire et sans voile, ce panneau
-             deviendrait illisible malgré son flou. -->
         <div
-          class="rounded-lg border border-glass-border bg-glass-accent shadow-glass backdrop-blur-glass-strong"
-          :class="props.compact ? 'p-4' : 'p-5 sm:p-7'"
-          :style="{ maxWidth: 'var(--measure)' }"
+          v-if="hasAside"
+          class="shrink-0 border-glass-border-strong"
+          :class="
+            props.compact
+              ? 'border-t pt-3'
+              : 'border-t pt-4 lg:w-72 lg:border-t-0 lg:border-s-2 lg:ps-6 lg:pt-0'
+          "
         >
-          <HomeNatureBadge
-            :label="props.slide.nature_label"
-            :color="props.slide.nature_color"
-            tone="inverse"
-            :size="props.compact ? 'sm' : 'md'"
-          />
-
-          <!-- Le titre passe en surtitre quand la citation prend le devant : il
-               reste lisible, sans disputer la place au texte choisi par
-               l'éditeur. -->
-          <p
-            v-if="hasQuote"
-            class="mt-4 font-medium text-text-on-inverse-muted"
-            :class="props.compact ? 'text-sm' : 'text-base'"
-          >
-            {{ title }}
-          </p>
-
-          <!-- `line-clamp` EST UN GARDE-FOU, PAS UNE MISE EN PAGE. Le bandeau a
-               une hauteur bornée (`min(84vh, 720px)`) et rogne ce qui dépasse :
-               une citation de dix lignes s'y trouverait coupée EN HAUT ET EN
-               BAS, c'est-à-dire illisible. Cinq lignes tiennent dans tous les
-               cas, et l'éditeur voit le même rendu dans son aperçu. -->
-          <p
-            class="font-display font-bold text-balance text-text-on-inverse"
-            :class="[
-              hasQuote ? 'mt-2' : 'mt-4',
-              props.compact ? 'line-clamp-4 text-display-sm' : `line-clamp-6 ${headlineSize}`,
-            ]"
-            :style="{ lineHeight: 'var(--leading-tight)', letterSpacing: 'var(--tracking-title)' }"
-          >
-            {{ headline }}
-          </p>
-
-          <!-- L'ATTRIBUTION. Un témoignage sans son auteur n'engage personne ;
-               c'est elle qui distingue une citation d'une accroche. -->
-          <p
-            v-if="props.slide.author_name || affiliation"
-            class="mt-5 text-text-on-inverse"
-            :class="props.compact ? 'text-sm' : 'text-base'"
-          >
-            <span v-if="props.slide.author_name" class="font-bold">
-              — {{ props.slide.author_name }}
-            </span>
-            <span v-if="props.slide.author_title" class="text-text-on-inverse-muted">
-              <template v-if="props.slide.author_name">, </template>
-              {{ tr(props.slide.author_title) }}
-            </span>
-            <span v-if="affiliation" class="block text-text-on-inverse-muted">
-              {{ affiliation }}
+          <!-- Un témoignage sans son auteur n'engage personne. -->
+          <p v-if="props.slide.author_name || affiliation" :class="props.compact ? 'text-sm' : 'text-base'">
+            <span v-if="props.slide.author_name" class="block font-bold">{{ props.slide.author_name }}</span>
+            <span
+              v-if="props.slide.author_title || affiliation"
+              class="block text-sm text-text-on-inverse-muted"
+            >
+              {{ [tr(props.slide.author_title), affiliation].filter(Boolean).join(' · ') }}
             </span>
           </p>
-
-          <!-- LE RATTACHEMENT — édition, et séance quand il y en a une. Toute
-               heure porte son fuseau, celui de la séance et non celui du
-               visiteur. -->
           <p
             v-if="props.slide.event_title || props.slide.session_title"
-            class="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-on-inverse-muted"
+            class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-text-on-inverse-muted"
           >
             <span v-if="props.slide.event_title" class="font-medium">
               {{ tr(props.slide.event_title) }}
@@ -318,36 +301,19 @@ watch(() => [props.paused, background.value.kind], syncVideo, { flush: 'post' })
               format="short"
             />
           </p>
-
-          <!-- PAS DE PASTILLES THÉMATIQUES ICI, et ce n'est pas un oubli.
-               `UiThemeTag` peint son fond avec la couleur de la base à 12 % et
-               garde `--color-text` pour le libellé : sur une surface claire
-               c'est exactement ce qu'il faut, sur une photographie voilée le
-               texte devient illisible. Les refaire en version claire dupliquerait
-               la règle des trois, qui appartient à `UiThemeTagList` — et la
-               maquette ne les demande pas au bandeau. Elles restent où elles
-               informent : sur les cartes d'édition, en fond de page. -->
-          <!-- UN LIEN, PAS UN BOUTON. Règle d'usage n° 1 du guide de style :
-               « un bouton engage, un lien déplace », et « En savoir plus » est
-               toujours un lien. Le bandeau ne demande rien à la personne, il
-               l'envoie voir ailleurs — le plus souvent hors de la plateforme,
-               d'où la mention de nouvel onglet, la même que porte l'épingle du
-               panneau latéral. Le dessin reprend celui de `AsidePin`, en plus
-               grand : deux liens issus de la même donnée (`link_url`) ne
-               peuvent pas se comporter différemment sur le même écran. -->
-          <div v-if="props.slide.link_url" class="mt-6">
-            <a
-              :href="props.slide.link_url"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex min-h-(--target-min) items-center gap-2 border-b-(length:--border-medium) border-text-on-inverse font-medium text-text-on-inverse no-underline transition-colors hover:border-accent-solid"
-              :class="props.compact ? 'text-sm' : 'text-base'"
-            >
-              {{ linkLabel }}
-              <UiIcon name="arrow-up-right" :size="props.compact ? '0.9rem' : '1.05rem'" />
-              <span class="sr-only">{{ t('common.a11y.externalLink') }}</span>
-            </a>
-          </div>
+          <!-- Un lien et non un bouton : « En savoir plus » déplace, il n'engage pas (règle n° 1). -->
+          <a
+            v-if="props.slide.link_url"
+            :href="props.slide.link_url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="mt-2 inline-flex min-h-(--target-min) items-center gap-2 border-b-(length:--border-medium) border-text-on-inverse font-medium text-text-on-inverse no-underline transition-colors hover:border-accent-solid"
+            :class="props.compact ? 'text-sm' : 'text-base'"
+          >
+            {{ linkLabel }}
+            <UiIcon name="arrow-up-right" :size="props.compact ? '0.9rem' : '1.05rem'" />
+            <span class="sr-only">{{ t('common.a11y.externalLink') }}</span>
+          </a>
         </div>
       </div>
     </div>

@@ -79,6 +79,9 @@ function setPeriod(next: EditionPeriod): void {
  */
 const isForbidden = computed(() => isForbiddenError(error.value))
 
+// L'oiseau du commanditaire (`docs/bird-cursor/`), sur l'accueil seulement.
+useBirdCursor({ scale: 0.38 })
+
 useHead(() => ({
   title: t('home.head.title'),
   meta: [{ name: 'description', content: t('home.head.description') }],

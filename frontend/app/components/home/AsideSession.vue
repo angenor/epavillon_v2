@@ -66,6 +66,7 @@ const organization = computed(
        seule de toute la plateforme à cet instant, elle doit se repérer sans
        lire. -->
   <article
+    data-bird-perch
     class="rounded-lg border p-3 shadow-glass backdrop-blur-glass transition-colors"
     :class="
       isLive(props.session.id)

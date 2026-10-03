@@ -86,3 +86,37 @@ Demande du commanditaire : la carte d'une activité dans la frise ne montre plus
 Même jour, seconde demande : **la carte d'un événement quitte « Prochains événements » dès que sa programmation est publiée** — la frise la nomme déjà (« Au programme — CdP31 »). Condition double dans `AsidePanel` : `programme_published_at` posé **et** au moins une séance de l'édition dans la frise ; sans la seconde, une édition publiée dont les séances ne tiendraient pas dans la frise bornée par l'API disparaîtrait du panneau. Les éditions suivantes remontent, la première prend la carte pleine.
 
 **Vérifié** : `nuxi typecheck`. Non vu au navigateur (API locale arrêtée).
+
+## 03/10 — le témoignage du bandeau passe en bas de cadre
+
+Demande du commanditaire : le panneau de verre de la citation masquait le milieu de la photographie. Trois maquettes comparées sur une planche (bas de cadre, colonne de droite, carte repliée) ; **le bas de cadre est retenu**.
+
+- `HomeShowcaseSlide` : plus d'encart. Le texte s'aligne en bas, au-dessus du rail : pastille de nature et titre sur une ligne, citation avec un grand guillemet cyan suspendu, puis, à droite derrière un filet vertical sur grand écran (dessous sur téléphone), l'auteur, le rattachement et le lien. Même rendu dans l'aperçu du back-office (`compact`, toujours empilé).
+- Contraste : fondu `.scrim-fade-bottom` sur les quatre cinquièmes bas ; voile général à 20 % sur grand écran, 45 % sous `lg`, où le texte couvre la moitié de l'image.
+- Nouveau jeton `--color-accent-on-inverse` (cyan-300) pour le guillemet ; libellé du guillemet en i18n (`home.showcase.quoteMark`, « et “). `--color-glass-accent` et `--blur-glass-strong` n'ont plus d'usage, gardés et signalés comme tels au guide de style, dont le § « Le verre » est amendé.
+
+**Vérifié** : `nuxi typecheck` ; l'accueil au navigateur sur les données d'exemple à 1440 px et 390 px, sans défilement horizontal. Non vu : l'aperçu du back-office.
+
+**Écart de données relevé** : l'exemple de Biligua Koivogui affiche « Délégation de Guinée · Guinée » — l'organisation et le pays se répètent.
+
+## 03/10 — « Les éditions » : une vue liste en plus des affiches
+
+Demande du commanditaire : garder le rail d'affiches tel quel et offrir une bascule vers la direction « liste éditoriale » (maquette C parmi trois comparées sur une planche).
+
+- `HomeEditionHistory` : deux boutons-icônes `UiButton` (`pressed`, groupe `role="group"`) à côté des onglets — affiches par défaut, liste. Le choix est gardé dans le cookie `ep-editions-vue`, pour que le rendu serveur serve d'emblée la bonne vue. La hauteur d'un écran et les flèches du rail ne valent que pour les affiches. Le rail est désormais suivi par un `watch` et non équipé au seul montage : il naît et meurt avec la vue comme avec l'état vide.
+- Vue liste : regroupée par année (`history.groups`, déjà fourni par `buildEditionHistory`), l'année en grand chiffre, grisée quand toutes ses éditions sont closes. Chaque ligne (`HomeEditionRow`) : vignette 16:9 (noir et blanc si l'édition est terminée, millésime en filigrane sans image), série, titre en lien couvrant, nombre d'activités, dates avec fuseau et lieu, état, flèche. Sous `lg`, dates et état passent sous le titre.
+- `useEditionSummary` : lien, image, dates, fuseau, lieu et millésime d'une édition, extraits de `HomeEditionCard` et partagés avec la ligne.
+
+**Vérifié** : `nuxi typecheck` ; au navigateur sur les données d'exemple, thèmes clair et sombre, 1440 et 390 px, sans défilement horizontal ; retour aux affiches avec les flèches du rail.
+
+## 03/10 — l'oiseau qui suit le curseur
+
+Demande du commanditaire : appliquer `docs/bird-cursor/` à l'accueil. Arbitrage consigné dans les [décisions du jour](../decisions/2026-10-03.md) et dans `CLAUDE.md`.
+
+- `public/bird-cursor.js` : copie du moteur livré, sans le certificat C2PA embarqué dans le SVG (8 Ko), et bulle aux jetons (`--color-surface-raised`, `--color-text`, `--color-border-strong`, `--radius-lg`, `--font-sans`, `--shadow-md`) — elle suit donc le thème sombre. Le moteur n'est pas modifié.
+- `useBirdCursor()` (+ `types/bird-cursor.d.ts`) : charge le script au montage de `/`, le monte avec `scale: 0.38`, le retire en quittant la page ; un retour sur l'accueil le remonte sans recharger le script. Rien sur un écran tactile (`hover: hover` et `pointer: fine`) ; « moins d'animations » est respecté par le script lui-même.
+- Perchoirs : cartes du panneau « À venir », carte d'appel, affiches et lignes d'édition. **Un perchoir doit avoir un bord haut visible** : l'en-tête des éditions, retiré le même jour, faisait poser l'oiseau dans le vide au-dessus des onglets (son bord haut est celui du titre, à gauche). La bascule affiches/liste reçoit un cadre fin pour qu'il s'y pose quand il en parle. Répliques (`home.bird.*`, fr/en) : titre « À venir », « Tout le programme », dépôt d'une proposition (appel ouvert seulement), lien vers l'édition, bascule affiches/liste.
+
+**Vérifié** : `nuxi typecheck`, `test:site` (16/16) ; au navigateur sur les données d'exemple : oiseau monté, en vol puis posé sur une carte du panneau, bulle d'une réplique, retrait en quittant l'accueil et retour sans doublon.
+
+**Limite relevée** : sur une réplique collée au haut de l'écran (le titre « À venir »), la bulle, bornée à la fenêtre, recouvre l'oiseau. Comportement du moteur, laissé tel quel.

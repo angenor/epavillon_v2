@@ -105,7 +105,9 @@ const isEmpty = computed(() => props.sessions.length === 0 && nextThree.value.le
              `h1..h6` en `--color-heading` par une règle d'ÉLÉMENT, laquelle ne
              connaît pas le fond sur lequel le titre se pose. Sur ce panneau
              sombre, le bleu nuit institutionnel devenait invisible. -->
-        <h2 class="font-display text-xl text-text-on-inverse">{{ t('home.aside.title') }}</h2>
+        <h2 class="font-display text-xl text-text-on-inverse" :data-bird-say="t('home.bird.aside')">
+          {{ t('home.aside.title') }}
+        </h2>
       </div>
     </div>
 

@@ -2021,13 +2021,13 @@ table.data td.num { text-align: end; font-variant-numeric: tabular-nums; }
 
   <h3>Où le verre est permis</h3>
   <ul>
-    <li>Le bandeau d'accueil et ce qui flotte dessus&nbsp;: l'encart de citation, le rail de vignettes, ses commandes, le panneau «&nbsp;À venir&nbsp;».</li>
+    <li>Le bandeau d'accueil et ce qui flotte dessus&nbsp;: le rail de vignettes, ses commandes, le panneau «&nbsp;À venir&nbsp;». La citation n'est plus un encart de verre depuis le 03/10&nbsp;: elle se pose en bas de cadre, au-dessus du rail, sur le fondu <code>.scrim-fade-bottom</code>, pour laisser le milieu de la photographie libre.</li>
     <li>Nulle part ailleurs. Une carte de verre sur un fond de page est un défaut, pas une variante&nbsp;: elle n'a rien à laisser voir derrière elle, et le flou n'y produit qu'un gris sale.</li>
   </ul>
 
   <h3>Trois règles qui tiennent l'ensemble</h3>
   <ol class="rules">
-    <li><b>Le verre sépare, le voile contraste</b><p>Une surface de verre n'est lisible que posée sur un média <b>déjà voilé</b> par <code>--color-scrim</code>. Sans voile, une photographie claire rend le panneau illisible malgré son flou. Inversement, depuis que la citation vit dans un panneau, le voile général a pu descendre de 65&nbsp;% à 38&nbsp;%&nbsp;: la photographie redevient lisible en tant que photographie.</p></li>
+    <li><b>Le verre sépare, le voile contraste</b><p>Une surface de verre n'est lisible que posée sur un média <b>déjà voilé</b> par <code>--color-scrim</code>. Sans voile, une photographie claire rend le panneau illisible malgré son flou. Sur le bandeau, la citation tient par le fondu du bas&nbsp;; le voile général descend à 20&nbsp;% sur grand écran et remonte à 45&nbsp;% sur téléphone, où le texte couvre la moitié de l'image.</p></li>
     <li><b>Quatre surfaces, deux traits, deux flous — pas un de plus</b><p>La v1 comptait treize opacités écrites au jugé dans huit fichiers, plus des flous sans règle&nbsp;: deux panneaux voisins n'avaient pas la même densité et personne ne pouvait dire laquelle était la bonne. Ici, tout passe par des jetons nommés par leur rôle.</p></li>
     <li><b>Le verre ne s'inverse pas</b><p>Comme les aplats institutionnels, ces surfaces gardent leur valeur en thème sombre&nbsp;: le fond est une photographie dans les deux thèmes, et un panneau qui s'y inverserait deviendrait illisible la nuit. Le texte reste <code>--color-text-on-inverse</code>.</p></li>
   </ol>
@@ -2039,11 +2039,11 @@ table.data td.num { text-align: end; font-variant-numeric: tabular-nums; }
       <tr><td><code>--color-glass</code></td><td>Le panneau de fond — barre de commandes, colonne latérale. Noir de charte à 52&nbsp;%.</td></tr>
       <tr><td><code>--color-glass-raised</code></td><td>Une carte DANS un panneau de verre. Blanc à 14&nbsp;%.</td></tr>
       <tr><td><code>--color-glass-hover</code></td><td>La même, au survol. Blanc à 26&nbsp;%.</td></tr>
-      <tr><td><code>--color-glass-accent</code></td><td>Teinte institutionnelle&nbsp;: l'encart de citation, qui doit se distinguer des cartes sans changer de matière.</td></tr>
+      <tr><td><code>--color-glass-accent</code></td><td>Teinte institutionnelle, pour un encart qui doit se distinguer des cartes sans changer de matière. Sans usage depuis que la citation du bandeau a quitté son encart (03/10).</td></tr>
       <tr><td><code>--color-glass-border</code></td><td>Le trait d'une surface de verre. Blanc à 24&nbsp;%.</td></tr>
       <tr><td><code>--color-glass-border-strong</code></td><td>Le cerne d'un élément SÉLECTIONNÉ — la vignette courante du rail. Blanc à 62&nbsp;%.</td></tr>
       <tr><td><code>--blur-glass</code></td><td>14&nbsp;px. Cartes et barres. Au-delà, le fond devient une bouillie et la photographie ne raconte plus rien.</td></tr>
-      <tr><td><code>--blur-glass-strong</code></td><td>24&nbsp;px. Le SEUL encart qui porte un long texte, où la lisibilité prime sur le fond.</td></tr>
+      <tr><td><code>--blur-glass-strong</code></td><td>24&nbsp;px. Pour un encart qui porte un long texte, où la lisibilité prime sur le fond. Sans usage depuis le 03/10.</td></tr>
       <tr><td><code>--shadow-glass</code></td><td>L'ombre portée d'un panneau flottant. Plus marquée que <code>--shadow-lg</code>&nbsp;: sur une photographie, une ombre discrète ne détache rien.</td></tr>
       <tr><td><code>.scrim-fade-bottom</code></td><td><b>L'un des deux dégradés de la charte.</b> Le fondu qui rattache le rail de vignettes au bas d'une image. Il ne décore rien&nbsp;: il rend lisible un texte blanc sur une image dont on ignore la luminosité. Un aplat, à sa place, couperait la photographie en deux.</td></tr>
       <tr><td><code>.fade-inverse-start</code></td><td><b>Le second, arbitré le 16/09.</b> Il fond une photographie posée à droite dans l'aplat institutionnel qui porte le texte, sur la section d'appel de l'accueil. Le texte ne se pose jamais sur sa partie transparente.</td></tr>

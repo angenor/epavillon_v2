@@ -121,6 +121,7 @@ const editionPath = computed(() =>
     <!-- `rounded-xl` : bloc d'affiche, comme les cartes d'édition voisines. -->
     <div
       v-else
+      data-bird-perch
       class="relative isolate overflow-hidden rounded-xl bg-surface-inverse text-text-on-inverse shadow-md"
     >
       <div class="absolute inset-0 -z-10 lg:left-2/5" aria-hidden="true">
@@ -214,9 +215,11 @@ const editionPath = computed(() =>
               :to="localePath('/deposer-une-proposition')"
               icon-trailing="arrow-right"
               :label="t('home.call.action.submit')"
+              :data-bird-say="t('home.bird.submit')"
             />
             <NuxtLink
               :to="editionPath"
+              :data-bird-say="t('home.bird.edition')"
               class="inline-flex min-h-(--target-min) items-center gap-2 font-bold text-text-on-inverse underline-offset-4 hover:underline"
             >
               {{ t('home.call.action.edition') }}

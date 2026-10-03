@@ -75,28 +75,7 @@ const props = defineProps<Props>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
-const { dateRange, zoneLabel } = useDateTime()
-const localePath = useLocalePath()
-
-const to = computed(() => localePath(`/evenements/${props.edition.slug}`))
-
-/** Le 16:9 d'abord, le bandeau à défaut. Cf. l'en-tête du fichier. */
-const poster = computed(() => props.edition.cover ?? props.edition.banner)
-
-const dates = computed(() =>
-  dateRange(props.edition.starts_at, props.edition.ends_at, props.edition.timezone),
-)
-
-const zone = computed(() => zoneLabel(props.edition.timezone, props.edition.city ?? undefined))
-
-const place = computed(() =>
-  [props.edition.city, tr(props.edition.country_name)].filter(Boolean).join(', '),
-)
-
-/** Le repère du repli : le millésime annoncé, jamais l'année de `starts_at`. */
-const stamp = computed(
-  () => props.edition.edition_label ?? String(props.edition.edition_year),
-)
+const { to, image: poster, dates, zone, place, stamp } = useEditionSummary(() => props.edition)
 </script>
 
 <template>
@@ -106,6 +85,7 @@ const stamp = computed(
        où 8 px se lisent comme un angle droit. Le rayon suit la taille du bloc,
        et aucune autre surface de la plateforme n'a cette taille-là. -->
   <article
+    data-bird-perch
     class="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-surface-inverse text-text-on-inverse shadow-sm transition duration-200 hover:shadow-lg motion-safe:hover:-translate-y-1"
   >
     <UiImage

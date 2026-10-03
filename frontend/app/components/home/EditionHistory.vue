@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { EditionPeriod } from '~/types/home'
+import type { EditionHistoryGroup, EditionPeriod } from '~/types/home'
 import type { TabItem } from '~/types/ui'
 import type { EditionStatsRow, PublicEditionRow } from '~/types/views'
 import type { EventId } from '~/types/shared'
@@ -89,6 +89,36 @@ function onTab(value: string): void {
 }
 
 // -------------------------------------------------------------------------
+// La vue : affiches (par défaut) ou liste, arbitrée le 03/10
+// -------------------------------------------------------------------------
+
+type HistoryView = 'posters' | 'list'
+
+/** Un cookie et non le stockage du navigateur : le rendu serveur sert d'emblée la bonne vue. */
+const viewCookie = useCookie<string>('ep-editions-vue', {
+  default: () => 'posters',
+  maxAge: 60 * 60 * 24 * 365,
+  sameSite: 'lax',
+})
+
+const view = computed<HistoryView>({
+  get: () => (viewCookie.value === 'list' ? 'list' : 'posters'),
+  set: (value) => {
+    viewCookie.value = value
+  },
+})
+
+/** Une année se grise quand toutes ses éditions sont closes — l'état vient de la base, pas de l'horloge du visiteur. */
+function isPastYear(group: EditionHistoryGroup): boolean {
+  return group.editions.every((edition) => edition.temporal_state === 'past')
+}
+
+const views = computed(() => [
+  { value: 'posters' as const, icon: 'grid', label: t('home.history.view.posters') },
+  { value: 'list' as const, icon: 'list', label: t('home.history.view.list') },
+])
+
+// -------------------------------------------------------------------------
 // Le rail
 // -------------------------------------------------------------------------
 
@@ -128,18 +158,23 @@ function move(direction: 1 | -1): void {
   element.scrollBy({ left: direction * step(element), behavior: 'auto' })
 }
 
-onMounted(() => {
-  const element = rail.value
-  if (!element) return
-  measure()
-  element.addEventListener('scroll', measure, { passive: true })
-  const observer = new ResizeObserver(measure)
-  observer.observe(element)
-  onBeforeUnmount(() => {
-    element.removeEventListener('scroll', measure)
-    observer.disconnect()
-  })
-})
+// Le rail naît et meurt avec la vue « Affiches » comme avec l'état vide : on le
+// suit, plutôt que de ne l'équiper qu'au montage.
+watch(
+  rail,
+  (element, _previous, onCleanup) => {
+    if (!element) return
+    measure()
+    element.addEventListener('scroll', measure, { passive: true })
+    const observer = new ResizeObserver(measure)
+    observer.observe(element)
+    onCleanup(() => {
+      element.removeEventListener('scroll', measure)
+      observer.disconnect()
+    })
+  },
+  { flush: 'post' },
+)
 
 /**
  * CHANGER D'ONGLET REVIENT AU DÉBUT. Sans cela, on filtre sur « Passées » en
@@ -166,7 +201,8 @@ watch(
   <section
     id="editions"
     aria-labelledby="historique-titre"
-    class="flex scroll-mt-24 flex-col min-h-[calc(100svh-var(--nav-height))]"
+    class="flex scroll-mt-24 flex-col"
+    :class="{ 'min-h-[calc(100svh-var(--nav-height))]': view === 'posters' }"
   >
     <div class="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
       <div class="min-w-0">
@@ -197,7 +233,24 @@ watch(
              focus amène son affiche à l'écran de lui-même. Elles disparaissent
              donc sous `sm`, où le doigt est plus rapide qu'elles, et quand rien
              ne déborde. -->
-        <div v-if="overflows" class="hidden shrink-0 items-center gap-2 sm:flex">
+        <div
+          role="group"
+          class="flex shrink-0 items-center gap-0.5 rounded-lg border border-border p-0.5"
+          :aria-label="t('home.history.view.label')"
+          :data-bird-say="t('home.bird.view')"
+        >
+          <UiButton
+            v-for="option in views"
+            :key="option.value"
+            variant="ghost"
+            icon-only
+            :icon="option.icon"
+            :label="option.label"
+            :pressed="view === option.value"
+            @click="view = option.value"
+          />
+        </div>
+        <div v-if="overflows && view === 'posters'" class="hidden shrink-0 items-center gap-2 sm:flex">
           <button
             type="button"
             class="flex cursor-pointer items-center justify-center rounded-full border border-border bg-surface-raised text-text-secondary transition-colors hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40"
@@ -222,7 +275,13 @@ watch(
       </div>
     </div>
 
-    <div id="historique-panneau" class="mt-6 flex min-h-0 flex-1 flex-col">
+    <!-- En liste, la première ligne s'appuie sur le trait de l'en-tête : c'est son bord
+         haut, celui où l'oiseau se pose. -->
+    <div
+      id="historique-panneau"
+      class="flex min-h-0 flex-1 flex-col"
+      :class="view === 'list' && editions.length ? 'mt-0' : 'mt-6'"
+    >
       <UiEmptyState
         v-if="!editions.length"
         icon="calendar"
@@ -236,6 +295,28 @@ watch(
       <!-- `-mx-1 px-1` : la gouttière qui laisse respirer l'ombre et l'anneau de
            focus des affiches de bord, sans décaler le rail par rapport au titre.
            `scroll-px-1` accorde l'accrochage à ce même retrait. -->
+      <ul v-else-if="view === 'list'" :aria-label="t('home.history.list.label')">
+        <li
+          v-for="group in history.groups"
+          :key="group.year"
+          class="grid border-b border-border md:grid-cols-[6.5rem_minmax(0,1fr)] md:gap-x-6"
+        >
+          <p
+            class="pt-4 font-display text-2xl leading-none font-light tabular-nums md:pt-5 md:text-4xl"
+            :class="isPastYear(group) ? 'text-text-muted' : 'text-text'"
+          >
+            {{ group.year }}
+          </p>
+          <ul class="divide-y divide-border">
+            <li v-for="edition in group.editions" :key="edition.id">
+              <HomeEditionRow
+                :edition="edition"
+                :session-count="publishedSessionCount(history.stats, edition.id)"
+              />
+            </li>
+          </ul>
+        </li>
+      </ul>
       <ul
         v-else
         ref="rail"

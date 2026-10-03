@@ -229,6 +229,7 @@
   --color-text-on-inverse: var(--ifdd-gris-0); /* 15.54:1 */
   --color-text-on-inverse-muted: var(--ifdd-bleu-200); /*  8.83:1 sur bleu-900 */
   --color-border-on-inverse: var(--ifdd-bleu-700);
+  --color-accent-on-inverse: var(--ifdd-cyan-300); /* repère graphique, jamais du texte courant */
 
   /* Voile posé sur une photographie. Le site institutionnel en couvre TOUTES
      ses images (22 % sur une vignette, 58 % sur le bandeau d'ouverture) : c'est

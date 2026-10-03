@@ -108,6 +108,7 @@ function relativeLabel(daysAhead: number): string {
         {{ heading }}
       </h3>
       <NuxtLink
+        :data-bird-say="t('home.bird.programme')"
         :to="localePath('/programmations')"
         class="text-xs text-text-on-inverse no-underline hover:underline"
       >

@@ -13,7 +13,15 @@
     "title": "No published edition",
     "description": "No edition is open to the public yet. Please come back soon."
   },
+  "bird": {
+    "aside": "What starts soon. An activity appears here as soon as it is accepted.",
+    "programme": "All accepted activities, day by day, in local time.",
+    "submit": "Submission happens online, in several steps. You can stop and resume it.",
+    "edition": "Dates, venue and full programme of the edition.",
+    "view": "Posters or list: your choice is kept for your next visit."
+  },
   "showcase": {
+    "quoteMark": "“",
     "label": "Featured",
     "carouselRole": "carousel",
     "slideRole": "slide",
@@ -89,6 +97,14 @@
       "label": "Editions, scrolling list",
       "previous": "Previous editions",
       "next": "Next editions"
+    },
+    "view": {
+      "label": "Editions display",
+      "posters": "Show as posters",
+      "list": "Show as a list"
+    },
+    "list": {
+      "label": "Editions, by year"
     },
     "tabs": {
       "all": "All",

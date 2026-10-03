@@ -13,7 +13,15 @@
     "title": "Aucune édition publiée",
     "description": "Aucune édition n'est encore ouverte au public. Revenez prochainement."
   },
+  "bird": {
+    "aside": "Ce qui commence bientôt. Une activité y paraît dès qu'elle est retenue.",
+    "programme": "Toutes les activités retenues, jour par jour, à l'heure du lieu.",
+    "submit": "Le dépôt se fait en ligne, en plusieurs étapes. Vous pouvez l'interrompre et le reprendre.",
+    "edition": "Dates, lieu et programme complet de l'édition.",
+    "view": "Affiches ou liste : votre choix est gardé pour la prochaine visite."
+  },
   "showcase": {
+    "quoteMark": "«",
     "label": "À la une",
     "carouselRole": "carrousel",
     "slideRole": "diapositive",
@@ -88,6 +96,14 @@
       "label": "Les éditions, liste défilante",
       "previous": "Éditions précédentes",
       "next": "Éditions suivantes"
+    },
+    "view": {
+      "label": "Affichage des éditions",
+      "posters": "Afficher en affiches",
+      "list": "Afficher en liste"
+    },
+    "list": {
+      "label": "Les éditions, par année"
     },
     "tabs": {
       "all": "Toutes",

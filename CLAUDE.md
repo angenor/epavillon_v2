@@ -204,6 +204,10 @@ Même forme d'exception, autre matière. L'interrupteur n'est plus une pastille 
 
 L'exception s'arrête à cette commande. Partout ailleurs, la structure passe par les bordures et les ombres restent discrètes. Le dessin vit dans `UiSwitch` et nulle part ailleurs : **aucun écran ne dessine sa propre bascule**, et le `ThemeToggle` de la barre de navigation garde le sien, qui n'est pas un interrupteur de réglage.
 
+**L'oiseau : réservé à l'accueil, arbitré le 03/10.**
+
+L'illustration fournie par le commanditaire (`docs/bird-cursor/`) suit le curseur sur `/` et nulle part ailleurs : `useBirdCursor()` la monte avec la page et la retire en la quittant. Souris seulement, jamais sur écran tactile ni avec « moins d'animations ». Il se pose sur les `data-bird-perch` et parle au survol des `data-bird-say`, dont le texte passe par i18n (`home.bird.*`). Sa bulle prend les jetons ; ses couleurs propres sont celles d'une illustration. `public/bird-cursor.js` est la copie servie : le moteur n'y change pas, on y retouche seulement la bulle.
+
 ### Deux niveaux de jetons de design, à ne jamais mélanger
 
 Les couleurs de **marque** gardent le nom de la charte (`--ifdd-cyan`, `--ifdd-vert`…) : elles sont non négociables et doivent rester traçables jusqu'au document officiel de l'IFDD. Elles portent les valeurs et ne sont **jamais** redéfinies, pas même en thème sombre.

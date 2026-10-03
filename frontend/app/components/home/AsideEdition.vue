@@ -103,6 +103,7 @@ const nextSessionLabel = computed(() => {
 <template>
   <!-- CARTE PLEINE — le prochain rendez-vous. -->
   <article
+    data-bird-perch
     v-if="props.featured"
     class="rounded-lg border border-glass-border bg-glass-raised p-3.5 shadow-glass backdrop-blur-glass transition-colors hover:bg-glass-hover"
   >
@@ -147,6 +148,7 @@ const nextSessionLabel = computed(() => {
 
   <!-- LIGNE COMPACTE — les rendez-vous suivants. -->
   <article
+    data-bird-perch
     v-else
     class="rounded-lg border border-glass-border bg-glass-raised p-3 shadow-glass backdrop-blur-glass transition-colors hover:bg-glass-hover"
   >
