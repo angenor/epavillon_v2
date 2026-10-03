@@ -33,7 +33,7 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{
-  submit: [input: AdminDocumentInput]
+  submit: [input: AdminDocumentInput, file: File | null]
   attach: [assetId: Uuid]
 }>()
 
@@ -210,10 +210,12 @@ const optionsDAcces = computed<SelectOption[]>(() => [
 const fichierFige = computed(() => props.document?.file_locked ?? false)
 const fichierDepose = computed(() => Boolean(props.document?.asset_id))
 const lienRempli = computed(() => etat.value.externalUrl.trim().length > 0)
+/** À la création, le PDF choisi attend que le brouillon existe : l'écran le dépose ensuite. */
+const fichierEnAttente = ref<File | null>(null)
 
 /** Pourquoi le dépôt est fermé, s'il l'est — la phrase que lit l'utilisateur. */
 const fichierFerme = computed<string | null>(() => {
-  if (!props.document) return t('admin.negociations.documents.form.file.afterCreate')
+  if (!props.document) return lienRempli.value ? t('admin.negociations.documents.form.file.linkFilled') : null
   if (fichierFige.value) return t('admin.negociations.documents.form.file.locked')
   if (props.document.external_url) return t('admin.negociations.documents.form.file.linkSaved')
   if (lienRempli.value && !fichierDepose.value) return t('admin.negociations.documents.form.file.linkFilled')
@@ -222,7 +224,7 @@ const fichierFerme = computed<string | null>(() => {
 
 const lienFerme = computed<string | null>(() => {
   if (fichierFige.value) return t('admin.negociations.documents.form.link.locked')
-  if (fichierDepose.value) return t('admin.negociations.documents.form.link.fileAttached')
+  if (fichierDepose.value || fichierEnAttente.value) return t('admin.negociations.documents.form.link.fileAttached')
   return null
 })
 
@@ -287,7 +289,7 @@ function soumettre(): void {
     erreurLocale.value = { message: t('admin.negociations.documents.form.error.version'), field: 'version' }
     return
   }
-  emit('submit', versLEntree())
+  emit('submit', versLEntree(), props.document ? null : fichierEnAttente.value)
 }
 </script>
 
@@ -434,9 +436,11 @@ function soumettre(): void {
             :asset-id="props.document?.asset_id ?? null"
             :current="fichierActuel"
             :owner="proprietaire"
-            :removable="false"
+            :removable="!props.document"
+            :deferred="!props.document"
             :disabled="props.readonly || fichierFerme !== null || props.attaching"
             @update:asset-id="surDepot"
+            @selected="fichierEnAttente = $event"
           />
           <p v-if="props.attaching" class="flex items-center gap-2 text-sm text-text-muted" aria-live="polite">
             <UiSpinner />

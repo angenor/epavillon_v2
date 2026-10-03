@@ -25,13 +25,16 @@ const props = withDefaults(
     disabled?: boolean
     /** Faux quand aucune route ne détache le fichier : il se remplace, il ne se retire pas. */
     removable?: boolean
+    /** Garde le fichier choisi sans l'envoyer : son propriétaire n'existe pas encore. */
+    deferred?: boolean
   }>(),
-  { current: null, owner: null, maxByteSize: null, hint: undefined, removable: true },
+  { current: null, owner: null, maxByteSize: null, hint: undefined, removable: true, deferred: false },
 )
 
 const emit = defineEmits<{
   'update:assetId': [value: AssetId | null]
   uploaded: [asset: UploadedAsset]
+  selected: [file: File | null]
 }>()
 
 const { t, locale } = useI18n()
@@ -43,8 +46,10 @@ const { enCours, echec, accept, accepte, deposer } = useDepotMedia({
 const input = ref<HTMLInputElement | null>(null)
 const envoye = ref<{ filename: string; byteSize: number } | null>(null)
 const enVol = ref<{ filename: string; byteSize: number } | null>(null)
+const choisi = ref<{ filename: string; byteSize: number } | null>(null)
 
 const affiche = computed(() => {
+  if (props.deferred) return choisi.value
   if (!props.assetId) return null
   if (!props.removable) return props.current
   return envoye.value ?? props.current
@@ -80,6 +85,11 @@ async function onFichier(event: Event): Promise<void> {
     echec.value = t('file-field.errors.tooLarge', { max: plafond.value })
     return
   }
+  if (props.deferred) {
+    choisi.value = { filename: fichier.name, byteSize: fichier.size }
+    emit('selected', fichier)
+    return
+  }
   enVol.value = { filename: fichier.name, byteSize: fichier.size }
   const asset = await deposer({
     file: fichier,
@@ -99,6 +109,11 @@ async function onFichier(event: Event): Promise<void> {
 function retirer(): void {
   echec.value = null
   envoye.value = null
+  if (props.deferred) {
+    choisi.value = null
+    emit('selected', null)
+    return
+  }
   emit('update:assetId', null)
 }
 </script>
@@ -149,7 +164,7 @@ function retirer(): void {
         {{ affiche ? t('file-field.actions.replace') : t('file-field.actions.choose') }}
       </UiButton>
       <UiButton
-        v-if="props.assetId && props.removable"
+        v-if="(props.deferred ? choisi : props.assetId) && props.removable"
         variant="ghost"
         size="sm"
         icon="trash"

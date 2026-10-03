@@ -1,6 +1,6 @@
 {
   "newTitle": "Nouveau document",
-  "newSubtitle": "Le document naît en brouillon. Son PDF se dépose ensuite, depuis sa fiche ; rien n'est visible dans Guide Négo avant la publication.",
+  "newSubtitle": "Le document naît en brouillon, avec son PDF s'il est choisi ; rien n'est visible dans Guide Négo avant la publication.",
   "cancel": "Annuler",
   "backToList": "Retour aux documents",
   "readonly": "Vous lisez cette fiche sans pouvoir la modifier : seule la publication des documents ouvre la modification.",
@@ -58,7 +58,7 @@
   },
   "file": {
     "label": "PDF",
-    "afterCreate": "Le PDF se dépose une fois le brouillon enregistré : le fichier est gardé avec son document, qui doit d'abord exister.",
+    "afterCreateFailed": "Le brouillon est enregistré, mais son PDF n'a pas pu être déposé. Choisissez-le de nouveau ici.",
     "locked": "Le fichier d'un document publié ne change plus. Pour un nouveau fichier, publiez une nouvelle version.",
     "linkFilled": "Un lien est indiqué : videz-le pour déposer un PDF.",
     "attaching": "Rattachement du fichier au document…",

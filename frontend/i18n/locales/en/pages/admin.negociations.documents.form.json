@@ -1,6 +1,6 @@
 {
   "newTitle": "New document",
-  "newSubtitle": "The document starts as a draft. Its PDF is uploaded afterwards, from its record; nothing shows in Guide Négo before publication.",
+  "newSubtitle": "The document starts as a draft, with its PDF if one is chosen; nothing shows in Guide Négo before publication.",
   "cancel": "Cancel",
   "backToList": "Back to documents",
   "readonly": "You are reading this record without being able to edit it: only the right to publish documents allows editing.",
@@ -58,7 +58,7 @@
   },
   "file": {
     "label": "PDF",
-    "afterCreate": "The PDF can be uploaded once the draft is saved: the file is stored with its document, which must exist first.",
+    "afterCreateFailed": "The draft is saved, but its PDF could not be uploaded. Choose it again here.",
     "locked": "A published document's file can no longer be changed. To use a new file, publish a new version.",
     "linkFilled": "A link is set: clear it to upload a PDF.",
     "attaching": "Attaching the file to the document…",

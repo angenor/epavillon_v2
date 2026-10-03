@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { AdminDocumentInput } from '~/types/admin-negotiation-documents'
 import type { EffectivePermission } from '~/types/identity'
+import type { Uuid } from '~/types/shared'
 import type { DocumentFormFailure } from '~/components/admin/negotiation/DocumentForm.vue'
 
-// Le brouillon naît sans source : son PDF se dépose ensuite, depuis sa fiche.
+// Le PDF choisi part une fois le brouillon créé : il est rangé avec son document, qui doit exister.
 
 definePageMeta({
   layout: 'admin',
@@ -32,14 +33,20 @@ const canPublish = computed(() => hasPermission(granted.value, 'negotiation.docu
 const submitting = ref(false)
 const failure = ref<DocumentFormFailure | null>(null)
 const forbidden = ref(false)
+const { deposer } = useDepotMedia({ motifs: ['application/pdf'], repli: 'application/pdf' })
 
-async function creer(entree: AdminDocumentInput): Promise<void> {
+async function creer(entree: AdminDocumentInput, fichier: File | null): Promise<void> {
   if (submitting.value) return
   submitting.value = true
   failure.value = null
   try {
     const cree = await api.adminNegotiationDocuments.creer(entree)
-    await navigateTo(localePath(`/admin/negociations/documents/${cree.id}`))
+    const fiche = localePath(`/admin/negociations/documents/${cree.id}`)
+    if (fichier && !(await deposerLePdf(cree.id, fichier))) {
+      await navigateTo({ path: fiche, query: { depot: 'echec' } })
+      return
+    }
+    await navigateTo(fiche)
   } catch (erreur) {
     if (isForbiddenError(erreur)) forbidden.value = true
     failure.value = {
@@ -48,6 +55,25 @@ async function creer(entree: AdminDocumentInput): Promise<void> {
     }
   } finally {
     submitting.value = false
+  }
+}
+
+/** Le brouillon existe déjà : un échec ici ne doit pas le recréer, la fiche reprend le dépôt. */
+async function deposerLePdf(documentId: Uuid, fichier: File): Promise<boolean> {
+  const asset = await deposer({
+    file: fichier,
+    filename: fichier.name,
+    mimeType: fichier.type,
+    ownerSchema: 'negotiation',
+    ownerTable: 'documents',
+    ownerId: documentId,
+  })
+  if (!asset) return false
+  try {
+    await api.adminNegotiationDocuments.attacherLeFichier(documentId, asset.id)
+    return true
+  } catch {
+    return false
   }
 }
 </script>

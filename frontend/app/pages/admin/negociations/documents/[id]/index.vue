@@ -72,7 +72,11 @@ const pdfUrl = computed(() => (document.value?.asset_id ? apiUrl(api.adminNegoti
 const enregistrement = ref(false)
 const depot = ref(false)
 const geste = ref<string | null>(null)
-const echecDuFormulaire = ref<DocumentFormFailure | null>(null)
+const echecDuFormulaire = ref<DocumentFormFailure | null>(
+  route.query.depot === 'echec'
+    ? { message: t('admin.negociations.documents.form.file.afterCreateFailed'), field: 'asset_id' }
+    : null,
+)
 const echecDuGeste = ref<string | null>(null)
 const resultat = ref<string | null>(null)
 const revision = ref(0)
