@@ -106,7 +106,7 @@ const loginTo = computed(() => ({ path: localePath('auth-login'), query: { redir
         <li v-for="question in shown" :key="question.id" class="flex items-start gap-3 border-t border-poster-line py-3">
           <button
             type="button"
-            class="flex size-12 shrink-0 flex-col items-center justify-center rounded-md border-2 border-poster-ink font-poster-mono text-[0.8125rem] font-semibold"
+            class="inline-flex h-11 min-w-16 shrink-0 items-center justify-center gap-1.5 rounded-full border-2 border-poster-ink px-3 font-poster-mono text-sm font-semibold"
             :class="[
               question.has_voted ? 'bg-poster-ink text-poster-on-ink-accent' : 'bg-poster-paper text-poster-ink',
               auth.isAuthenticated ? 'cursor-pointer' : 'cursor-default',
@@ -116,7 +116,7 @@ const loginTo = computed(() => ({ path: localePath('auth-login'), query: { redir
             :disabled="!auth.isAuthenticated || busy === question.id"
             @click="support(question)"
           >
-            <UiIcon name="chevron-up" size="0.875rem" />
+            <UiIcon name="thumb-up" size="1.125rem" />
             {{ question.vote_count }}
           </button>
           <div class="min-w-0 pt-0.5 text-sm leading-snug">
