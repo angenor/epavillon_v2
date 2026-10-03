@@ -9,6 +9,8 @@ export interface BirdCursorOptions {
   gaze?: number
   standoff?: number
   zIndex?: number
+  /** Ajout ePavillon : la bulle a son propre niveau, au-dessus de la barre de navigation. */
+  bubbleZIndex?: number
 }
 
 declare global {

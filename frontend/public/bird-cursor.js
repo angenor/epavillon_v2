@@ -29,7 +29,8 @@
     lag: 0.035,    // temps de reaction : l'oiseau vise une position retardee du curseur
     gaze: 340,     // px : portee du regard
     standoff: 150, // px : distance minimale gardee avec le curseur (il ne colle jamais au curseur)
-    zIndex: 9999
+    zIndex: 9999,
+    bubbleZIndex: 0 // ePavillon : 0 = zIndex + 1 ; sinon la bulle a son propre niveau
   };
 
   var rafId = null, rootEl = null, bubEl = null, listeners = [];
@@ -95,7 +96,7 @@
     // ---- bulle de conversation
     var bub = document.createElement('div');
     bub.id = 'bird-follow-bubble';
-    bub.style.cssText = 'position:fixed;left:0;top:0;pointer-events:none;z-index:' + (cfg.zIndex + 1) + ';will-change:transform';
+    bub.style.cssText = 'position:fixed;left:0;top:0;pointer-events:none;z-index:' + (cfg.bubbleZIndex || cfg.zIndex + 1) + ';will-change:transform';
     var bubIn = document.createElement('div');
     bubIn.style.cssText = 'transform-origin:50% 100%;opacity:0;transform:translate(-50%,-100%) scale(.8);' +
       'transition:opacity .2s ease, transform .28s cubic-bezier(.2,1.5,.4,1)';

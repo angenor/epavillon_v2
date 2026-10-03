@@ -206,7 +206,7 @@ L'exception s'arrête à cette commande. Partout ailleurs, la structure passe pa
 
 **L'oiseau : réservé à l'accueil, arbitré le 03/10.**
 
-L'illustration fournie par le commanditaire (`docs/bird-cursor/`) suit le curseur sur `/` et nulle part ailleurs : `useBirdCursor()` la monte avec la page et la retire en la quittant. Souris seulement, jamais sur écran tactile ni avec « moins d'animations ». Il se pose sur les `data-bird-perch` et parle au survol des `data-bird-say`, dont le texte passe par i18n (`home.bird.*`). Sa bulle prend les jetons ; ses couleurs propres sont celles d'une illustration. `public/bird-cursor.js` est la copie servie : le moteur n'y change pas, on y retouche seulement la bulle.
+L'illustration fournie par le commanditaire (`docs/bird-cursor/`) suit le curseur sur `/` et nulle part ailleurs : `useBirdCursor()` la monte avec la page et la retire en la quittant. Souris seulement, jamais sur écran tactile ni avec « moins d'animations ». Il se pose sur les `data-bird-perch` et parle au survol des `data-bird-say`, dont le texte passe par i18n (`home.bird.*`). Sa bulle prend les jetons ; ses couleurs propres sont celles d'une illustration. `public/bird-cursor.js` est la copie servie : le moteur n'y change pas, on y retouche seulement la bulle (style et niveau d'empilement). L'oiseau passe sous la barre de navigation, la bulle au-dessus.
 
 ### Deux niveaux de jetons de design, à ne jamais mélanger
 

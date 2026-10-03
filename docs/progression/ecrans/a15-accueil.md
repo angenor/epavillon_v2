@@ -119,4 +119,6 @@ Demande du commanditaire : appliquer `docs/bird-cursor/` à l'accueil. Arbitrage
 
 **Vérifié** : `nuxi typecheck`, `test:site` (16/16) ; au navigateur sur les données d'exemple : oiseau monté, en vol puis posé sur une carte du panneau, bulle d'une réplique, retrait en quittant l'accueil et retour sans doublon.
 
+- Empilement : l'oiseau à 25, entre le contenu de l'accueil (20 au plus) et la barre de navigation (`z-30`), sous laquelle il passe au défilement. La bulle a son propre niveau (9999), comme une infobulle : option `bubbleZIndex` ajoutée à la copie servie, seule retouche du moteur avec le style de la bulle.
+
 **Limite relevée** : sur une réplique collée au haut de l'écran (le titre « À venir »), la bulle, bornée à la fenêtre, recouvre l'oiseau. Comportement du moteur, laissé tel quel.
