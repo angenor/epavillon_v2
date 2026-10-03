@@ -104,6 +104,7 @@ const languages = computed(() =>
 )
 
 const description = computed(() => (detail.value?.description ? tr(detail.value.description) : ''))
+const hasDescription = computed(() => richTextToPlain(description.value).length > 0)
 const summary = computed(() => (session.value?.summary ? tr(session.value.summary) : ''))
 const dayLabel = computed(() => (session.value ? dayLong(session.value.starts_at, timezone.value) : ''))
 const programmeTo = computed(() =>
@@ -169,12 +170,12 @@ useHead(() => ({
 
             <ActivityStage class="order-3" :session="session" :state="state" :streams="streams" />
 
-            <section v-if="summary || description" class="order-3" aria-labelledby="a-propos-titre">
+            <section v-if="summary || hasDescription" class="order-3" aria-labelledby="a-propos-titre">
               <h2 id="a-propos-titre" class="mb-5 border-b-4 border-poster-ink pb-2.5 font-poster text-[2.375rem] leading-none font-black uppercase font-stretch-[68%]">
                 {{ t('activity.about') }}
               </h2>
               <p v-if="summary" class="max-w-[48rem] text-xl leading-normal font-medium">{{ summary }}</p>
-              <p v-if="description" class="mt-4 max-w-[48rem] leading-relaxed whitespace-pre-line text-poster-ink-muted">{{ description }}</p>
+              <UiRichContent class="rich-text-affiche mt-4 max-w-[48rem] leading-relaxed" :html="description" />
             </section>
 
             <div class="order-3 flex flex-col gap-10 empty:hidden">

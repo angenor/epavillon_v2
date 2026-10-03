@@ -390,7 +390,7 @@ async fn corriger_un_dossier_retenu_laisse_sa_seance_inchangee() {
                   ends_at   = timestamp '2027-11-14 10:30' AT TIME ZONE 'America/Belem',
                   capacity  = 40
             WHERE proposal_id = $1
-        RETURNING id, starts_at, ends_at, title, capacity, format::text AS "format!""#,
+        RETURNING id, starts_at, ends_at, title, description, capacity, format::text AS "format!""#,
         dossier
     )
     .fetch_one(bac.pool())
@@ -402,6 +402,7 @@ async fn corriger_un_dossier_retenu_laisse_sa_seance_inchangee() {
     brouillon.preferred_start_at = Some("2027-11-20T16:00".to_owned());
     brouillon.duration_minutes = Some(45);
     brouillon.format = Some("online".to_owned());
+    brouillon.detailed_presentation = "<p>Présentation réécrite par l'organisation.</p>".to_owned();
     brouillon.speakers = vec![commun::intervenant("awa.sow@example.org", "Awa", "Sow")];
     let mut charge = commun::charge(&terrain, brouillon);
     charge.proposal_id = Some(dossier);
@@ -411,7 +412,7 @@ async fn corriger_un_dossier_retenu_laisse_sa_seance_inchangee() {
         .expect("la correction d'un dossier retenu est permise");
 
     let apres = sqlx::query!(
-        r#"SELECT id, starts_at, ends_at, title, capacity, format::text AS "format!",
+        r#"SELECT id, starts_at, ends_at, title, description, capacity, format::text AS "format!",
                   room_id, status::text AS "status!"
              FROM programme.sessions WHERE id = $1"#,
         seance.id
@@ -426,6 +427,7 @@ async fn corriger_un_dossier_retenu_laisse_sa_seance_inchangee() {
     );
     assert_eq!(apres.ends_at, seance.ends_at);
     assert_eq!(apres.title, seance.title, "le titre de la séance non plus");
+    assert_eq!(apres.description, seance.description, "ni sa présentation");
     assert_eq!(apres.capacity, seance.capacity);
     assert_eq!(apres.format, seance.format);
     assert_eq!(apres.status, "planned");

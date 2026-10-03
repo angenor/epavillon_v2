@@ -285,8 +285,8 @@ async fn ecrire(
     )
     .await?;
 
-    // 🔴 **SEUL LE TITRE EST PROPAGÉ VERS UNE SÉANCE PROGRAMMÉE, ET SEULEMENT
-    // QUAND L'ÉQUIPE CORRIGE.** `programme.sessions` porte aussi un format et un
+    // 🔴 **SEULS LE TITRE ET LA PRÉSENTATION SONT PROPAGÉS VERS UNE SÉANCE
+    // PROGRAMMÉE, ET SEULEMENT QUAND L'ÉQUIPE CORRIGE.** `programme.sessions` porte aussi un format et un
     // créneau, et il paraît naturel de « tenir la séance à jour » en entier.
     //
     // Ce serait une faute. Une séance retenue a un créneau **arbitré** par
@@ -297,15 +297,15 @@ async fn ecrire(
     // la séance est la décision : corriger la demande ne rejoue pas la
     // décision.
     //
-    // Le titre fait exception (arbitrage du 03/10) : aucun écran ne corrige
-    // celui d'une séance, et l'équipe qui rectifie le dossier rectifie l'affiche.
-    // L'organisation, elle, ne réécrit pas le titre public d'une activité
+    // Les textes font exception (arbitrage du 03/10) : aucun écran ne corrige
+    // ceux d'une séance, et l'équipe qui rectifie le dossier rectifie l'affiche.
+    // L'organisation, elle, ne réécrit pas le texte public d'une activité
     // retenue sans l'IFDD. L'adresse ne suit pas : elle a été communiquée.
     //
     // Ce service n'émet toujours aucun événement de modification : rien ne doit
     // pouvoir s'y abonner pour « synchroniser ».
     if auteur == Auteur::Equipe {
-        crate::repo::sessions::reporter_le_titre(&mut tx, dossier.as_uuid()).await?;
+        crate::repo::sessions::reporter_les_textes(&mut tx, dossier.as_uuid()).await?;
     }
 
     tx.commit().await?;

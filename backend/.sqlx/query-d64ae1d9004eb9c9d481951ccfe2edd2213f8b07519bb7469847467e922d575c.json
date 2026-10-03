@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT title ->> 'fr' AS \"title_fr!\", starts_at, ends_at,\n                  slug::text AS \"slug!\", format::text AS \"format!\"\n             FROM programme.sessions WHERE id = $1",
+  "query": "SELECT title ->> 'fr' AS \"title_fr!\", description ->> 'fr' AS \"description_fr?\",\n                  starts_at, ends_at,\n                  slug::text AS \"slug!\", format::text AS \"format!\"\n             FROM programme.sessions WHERE id = $1",
   "describe": {
     "columns": [
       {
@@ -11,6 +11,12 @@
       },
       {
         "ordinal": 1,
+        "name": "description_fr?",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
         "name": "starts_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -21,7 +27,7 @@
         }
       },
       {
-        "ordinal": 2,
+        "ordinal": 3,
         "name": "ends_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -32,13 +38,13 @@
         }
       },
       {
-        "ordinal": 3,
+        "ordinal": 4,
         "name": "slug!",
         "type_info": "Text",
         "origin": "Expression"
       },
       {
-        "ordinal": 4,
+        "ordinal": 5,
         "name": "format!",
         "type_info": "Text",
         "origin": "Expression"
@@ -51,11 +57,12 @@
     },
     "nullable": [
       null,
+      null,
       false,
       false,
       null,
       null
     ]
   },
-  "hash": "f8428d282068bf5fdeec03414316632093e614b5131e659b0b85a8a5960c2e0c"
+  "hash": "d64ae1d9004eb9c9d481951ccfe2edd2213f8b07519bb7469847467e922d575c"
 }

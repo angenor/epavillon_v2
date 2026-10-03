@@ -185,10 +185,11 @@ async fn lequipe_ne_laisse_pas_un_intervenant_sans_organisation() {
     assert_eq!(refus.code, ErrorCode::ValidationFailed);
 }
 
-/// L'équipe qui corrige le titre d'un dossier retenu corrige aussi l'affiche :
-/// le titre de la séance suit, son créneau arbitré et son adresse non (FR-091).
+/// L'équipe qui corrige un dossier retenu corrige aussi l'affiche : le titre et
+/// la présentation de la séance suivent, son créneau arbitré et son adresse non
+/// (FR-091).
 #[tokio::test]
-async fn lequipe_reporte_le_titre_sur_la_seance_et_rien_dautre() {
+async fn lequipe_reporte_les_textes_sur_la_seance_et_rien_dautre() {
     use programme::domain::transitions::ProposalStatus;
     use programme::service::transition;
 
@@ -206,14 +207,22 @@ async fn lequipe_reporte_le_titre_sur_la_seance_et_rien_dautre() {
               SET starts_at = timestamp '2027-11-14 09:00' AT TIME ZONE 'America/Belem',
                   ends_at   = timestamp '2027-11-14 10:30' AT TIME ZONE 'America/Belem'
             WHERE proposal_id = $1
-        RETURNING id, starts_at, ends_at, slug::text AS "slug!", format::text AS "format!""#,
+        RETURNING id, starts_at, ends_at, slug::text AS "slug!", format::text AS "format!",
+                  description ->> 'fr' AS "description_fr?""#,
         dossier
     )
     .fetch_one(bac.pool())
     .await
     .expect("arbitrage de la séance née de l'acceptation");
+    let presentation_deposee = commun::brouillon(&terrain, "x").detailed_presentation;
+    assert_eq!(
+        seance.description_fr.as_deref(),
+        Some(presentation_deposee.as_str()),
+        "la séance naît avec la présentation du dossier"
+    );
 
     let mut brouillon = complet(&terrain, "Atelier adaptation côtière");
+    brouillon.detailed_presentation = "<p>Présentation <strong>revue</strong>.</p>".to_owned();
     brouillon.preferred_start_at = Some("2027-11-20T16:00".to_owned());
     brouillon.format = Some("online".to_owned());
     let perimetre = commun::perimetre_de(&bac, droits.decideur).await;
@@ -229,7 +238,8 @@ async fn lequipe_reporte_le_titre_sur_la_seance_et_rien_dautre() {
     .expect("correction par l'équipe");
 
     let apres = sqlx::query!(
-        r#"SELECT title ->> 'fr' AS "title_fr!", starts_at, ends_at,
+        r#"SELECT title ->> 'fr' AS "title_fr!", description ->> 'fr' AS "description_fr?",
+                  starts_at, ends_at,
                   slug::text AS "slug!", format::text AS "format!"
              FROM programme.sessions WHERE id = $1"#,
         seance.id
@@ -239,6 +249,10 @@ async fn lequipe_reporte_le_titre_sur_la_seance_et_rien_dautre() {
     .expect("relecture de la séance");
 
     assert_eq!(apres.title_fr, "Atelier adaptation côtière");
+    assert_eq!(
+        apres.description_fr.as_deref(),
+        Some("<p>Présentation <strong>revue</strong>.</p>")
+    );
     assert_eq!(apres.starts_at, seance.starts_at);
     assert_eq!(apres.ends_at, seance.ends_at);
     assert_eq!(apres.slug, seance.slug);

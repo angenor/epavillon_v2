@@ -196,3 +196,8 @@ Arbitrage du commanditaire : [décision](../decisions/2026-09-30.md), [journal](
 **02/10 — Page d'une activité resserrée** : compte à rebours à la seconde à la place du bloc « Commence dans », horaires en bandeau, billet en colonne droite dès le haut (et sous le titre sur mobile), barre d'inscription fixée en bas — [journal](../journal/2026-10-02.md).
 
 **03/10 — Billet épuré** : décompte en tête du billet, places affichées seulement si comptées, « Sur place » tu pour une séance diffusée (fiche et liste), bandeau rouge du direct, intervenants en trombinoscope — [journal](../journal/2026-10-03.md).
+
+### 03/10 — la présentation détaillée paraît sur la page d'une activité
+
+Elle restait vide : la séance ne recevait que le titre de son dossier ([modèle](../modele.md)). Elle reçoit maintenant la présentation à l'acceptation et à chaque correction par l'équipe. La page la rend par `UiRichContent` (c'est du HTML restreint), avec la classe `rich-text-affiche` (`assets/css/affiche.css`) qui reprend l'encre et les filets de l'affiche. Typecheck et tests du site verts. **Non vu au navigateur** : la base locale `epavillon` n'a aucune séance.
+

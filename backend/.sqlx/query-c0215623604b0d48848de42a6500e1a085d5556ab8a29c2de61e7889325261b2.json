@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE programme.sessions\n              SET starts_at = timestamp '2027-11-14 09:00' AT TIME ZONE 'America/Belem',\n                  ends_at   = timestamp '2027-11-14 10:30' AT TIME ZONE 'America/Belem'\n            WHERE proposal_id = $1\n        RETURNING id, starts_at, ends_at, slug::text AS \"slug!\", format::text AS \"format!\"",
+  "query": "UPDATE programme.sessions\n              SET starts_at = timestamp '2027-11-14 09:00' AT TIME ZONE 'America/Belem',\n                  ends_at   = timestamp '2027-11-14 10:30' AT TIME ZONE 'America/Belem'\n            WHERE proposal_id = $1\n        RETURNING id, starts_at, ends_at, slug::text AS \"slug!\", format::text AS \"format!\",\n                  description ->> 'fr' AS \"description_fr?\"",
   "describe": {
     "columns": [
       {
@@ -47,6 +47,12 @@
         "name": "format!",
         "type_info": "Text",
         "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "description_fr?",
+        "type_info": "Text",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -59,8 +65,9 @@
       false,
       false,
       null,
+      null,
       null
     ]
   },
-  "hash": "a4dd7c4c1c8edd75fa0dc66724da934ebd5adfc8470bad4930042b2330eff811"
+  "hash": "c0215623604b0d48848de42a6500e1a085d5556ab8a29c2de61e7889325261b2"
 }

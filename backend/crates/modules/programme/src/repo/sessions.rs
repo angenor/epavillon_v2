@@ -165,9 +165,10 @@ pub async fn creer(
     let id = sqlx::query_scalar!(
         r#"INSERT INTO programme.sessions
                (event_id, proposal_id, organization_id, sequence_number,
-                title, slug, format, timezone, starts_at, ends_at)
+                title, description, slug, format, timezone, starts_at, ends_at)
            SELECT p.event_id, p.id, p.organization_id, $2,
-                  p.title, $3::text::platform.slug, p.format, e.timezone,
+                  p.title, p.detailed_presentation, $3::text::platform.slug, p.format,
+                  e.timezone,
                   debut.instant,
                   debut.instant + make_interval(mins => $6)
              FROM programme.proposals p
@@ -198,18 +199,19 @@ pub async fn creer(
     Ok(id)
 }
 
-/// Reporter sur les séances d'un dossier le titre qu'il porte désormais.
+/// Reporter sur les séances d'un dossier son titre et sa présentation.
 ///
-/// Le titre seul : le créneau, le format et l'adresse restent ceux qui ont été
+/// Rien d'autre : le créneau, le format et l'adresse restent ceux qui ont été
 /// arbitrés ou communiqués (FR-091, amendé le 03/10).
-pub async fn reporter_le_titre(conn: &mut PgConnection, proposal_id: Uuid) -> Result<u64> {
+pub async fn reporter_les_textes(conn: &mut PgConnection, proposal_id: Uuid) -> Result<u64> {
     let reportees = sqlx::query!(
         "UPDATE programme.sessions s
-            SET title = p.title
+            SET title = p.title, description = p.detailed_presentation
            FROM programme.proposals p
           WHERE p.id = $1
             AND s.proposal_id = p.id
-            AND s.title IS DISTINCT FROM p.title",
+            AND (s.title IS DISTINCT FROM p.title
+                 OR s.description IS DISTINCT FROM p.detailed_presentation)",
         proposal_id
     )
     .execute(conn)

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, starts_at, ends_at, title, capacity, format::text AS \"format!\",\n                  room_id, status::text AS \"status!\"\n             FROM programme.sessions WHERE id = $1",
+  "query": "SELECT id, starts_at, ends_at, title, description, capacity, format::text AS \"format!\",\n                  room_id, status::text AS \"status!\"\n             FROM programme.sessions WHERE id = $1",
   "describe": {
     "columns": [
       {
@@ -49,6 +49,17 @@
       },
       {
         "ordinal": 4,
+        "name": "description",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
         "name": "capacity",
         "type_info": "Int4",
         "origin": {
@@ -59,13 +70,13 @@
         }
       },
       {
-        "ordinal": 5,
+        "ordinal": 6,
         "name": "format!",
         "type_info": "Text",
         "origin": "Expression"
       },
       {
-        "ordinal": 6,
+        "ordinal": 7,
         "name": "room_id",
         "type_info": "Uuid",
         "origin": {
@@ -76,7 +87,7 @@
         }
       },
       {
-        "ordinal": 7,
+        "ordinal": 8,
         "name": "status!",
         "type_info": "Text",
         "origin": "Expression"
@@ -93,10 +104,11 @@
       false,
       false,
       true,
+      true,
       null,
       true,
       null
     ]
   },
-  "hash": "46eba41120e57640c74de79b953a52fe4ba01c15499f9fee4066ca160bfa04fb"
+  "hash": "2323e7088d1ab6771642a5219db54f20a055e01e9959ea67b802afac8d51f102"
 }

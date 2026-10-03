@@ -198,3 +198,10 @@ Les 17 termes de `activity_theme` n'avaient pas de `color_hex` : la programmatio
 **Seulement dans `080`** : les poser dans `075` les placerait avant `replay_url`, et une base neuve n'aurait plus l'ordre de colonnes de la production. Les en-têtes des deux fichiers le disent. Aucune vue ni fonction ne dépend de `v_public_schedule` (`pg_depend`, `pg_proc`).
 
 **Migration** : `ops/migrations/2026-09-30-programme-logo-organisation.sql` — appliquée en local, rejouée sans erreur. **Jouée en production le 01/10** (sauvegarde `epavillon-20261001-000908`, vue vérifiée : 4 colonnes en fin, 3 lignes lues).
+
+## 03/10/2026 — `075_programme_sessions.sql` : la séance porte la présentation de son dossier
+
+`programme.sessions.description` n'était jamais remplie : la naissance d'une séance ne recopiait que le titre, et aucun écran n'écrit ce champ. La page d'une activité n'avait donc jamais de présentation. Désormais la séance recopie `proposals.detailed_presentation` (HTML restreint) à l'acceptation, puis à chaque correction du dossier par l'équipe, comme le titre (FR-091 amendé). Schéma inchangé : deux `COMMENT ON COLUMN` (`title`, `description`) disent d'où viennent ces textes.
+
+**Migration** : `ops/migrations/2026-10-03-presentation-des-seances.sql` — les commentaires, et la présentation du dossier posée sur chaque séance qui n'en a pas. Appliquée en local sur `epavillon` (`UPDATE 0` : aucune séance), rejouée sans erreur. **À jouer en production.**
+

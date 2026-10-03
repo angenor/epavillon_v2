@@ -163,6 +163,10 @@ CREATE TRIGGER tg_sessions_audit
 
 COMMENT ON COLUMN programme.sessions.sequence_number IS
     'Rang de l''occurrence dans une proposition multi-sessions (cycles de webinaires).';
+COMMENT ON COLUMN programme.sessions.title IS
+    'Titre public. Recopié du dossier à l''acceptation, puis à chaque correction du dossier par l''équipe — jamais par une correction de l''organisation (FR-091).';
+COMMENT ON COLUMN programme.sessions.description IS
+    'Présentation publique, en HTML restreint comme programme.proposals.detailed_presentation, dont elle est recopiée à l''acceptation puis à chaque correction du dossier par l''équipe.';
 
 -- Alignement automatique de l'exclusivité de salle, de la journée de
 -- rattachement et du canal de diffusion : ces trois valeurs sont déductibles,

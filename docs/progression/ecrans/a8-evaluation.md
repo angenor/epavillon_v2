@@ -101,4 +101,4 @@ Constat : un titre corrigé dans `/admin/propositions` ne paraissait pas sur `/p
 - **API** : `sessions::reporter_le_titre`, appelée par `draft_write::ecrire` dans la même transaction, pour `corriger_par_lequipe` seulement. Le créneau, le format et l'adresse de la séance ne bougent pas ; l'organisation qui corrige son dossier retenu ne touche toujours pas la séance. FR-091 amendé (`specs/004-propositions/spec.md`).
 - **Vérifié** : `tests/correction_par_lequipe.rs` (nouveau test) et `tests/correction.rs` verts, clippy et fmt propres, `.sqlx` régénéré.
 - **Données existantes** : une séance dont le dossier a été corrigé avant le 03/10 garde l'ancien titre ; réenregistrer le dossier depuis le back-office suffit.
-
+- **Suite du 03/10** : la présentation détaillée suit le même chemin que le titre (`sessions::reporter_les_textes`) et naît avec la séance — [A3](a3-evenement-public.md).
