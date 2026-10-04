@@ -12,11 +12,12 @@ import type { NavItem } from '~/types/navigation'
  * PAGE COURANTE : marquée par `aria-current="page"` ET par un traitement visuel.
  * L'un sans l'autre laisse la moitié des visiteurs sans repère.
  *
- * CE TRAITEMENT EST UN FILET DE 3 px, PAS UN APLAT — règle du guide. Un aplat
- * derrière l'entrée courante la ferait passer pour un bouton, dans une barre où
- * tout le reste est un lien ; et il entre en concurrence avec le survol, qui,
- * lui, teinte bien le fond. La graisse seule ne suffit pas : elle se compare mal
- * de loin, et disparaît pour qui lit avec une police de substitution.
+ * SUR GRAND ÉCRAN, UNE CAPSULE (arbitré le 04/10, repris de la maquette D) : les
+ * liens vivent dans une piste arrondie, l'entrée courante y est une pastille
+ * claire. La piste dit « ce sont des onglets de même rang », ce qui lève la
+ * crainte qui faisait préférer un filet : une pastille isolée se serait lue
+ * comme un bouton. Le menu mobile, liste verticale, garde son filet de bord.
+ * La graisse seule ne suffirait pas : elle se compare mal de loin.
  *
  * MENU MOBILE : replié sous 1024 px, ouvert par un bouton qui déclare ce qu'il
  * contrôle (`aria-controls`, `aria-expanded`). Le menu se referme à chaque
@@ -64,16 +65,20 @@ const isCurrent = (to: string): boolean => route.path === localePath(to)
         <slot name="brand" />
       </div>
 
-      <nav class="hidden items-center gap-1 lg:flex" :aria-label="props.label">
+      <!-- Pastilles de 40 px dans une piste de 2 px : 44 px en tout, la hauteur de la barre ne bouge pas. -->
+      <nav
+        class="hidden items-center gap-0.5 rounded-full bg-surface-inverse-raised p-0.5 lg:flex"
+        :aria-label="props.label"
+      >
         <NuxtLink
           v-for="item in props.items"
           :key="item.to"
           :to="localePath(item.to)"
-          class="inline-flex min-h-(--target-min) items-center rounded-md px-3 text-sm font-semibold no-underline transition-colors duration-(--duration-fast)"
+          class="inline-flex min-h-(--target-compact) items-center rounded-full px-4 text-sm font-semibold no-underline transition-colors duration-(--duration-fast)"
           :class="
             isCurrent(item.to)
-              ? 'rounded-b-none text-text-on-inverse shadow-[inset_0_-3px_0_var(--color-accent-on-inverse)]'
-              : 'text-text-on-inverse-muted hover:bg-surface-inverse-raised hover:text-text-on-inverse'
+              ? 'bg-surface-inverse-selected text-text-on-inverse-selected shadow-sm'
+              : 'text-text-on-inverse-muted hover:bg-surface-inverse hover:text-text-on-inverse'
           "
           :aria-current="isCurrent(item.to) ? 'page' : undefined"
         >

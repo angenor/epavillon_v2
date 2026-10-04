@@ -230,6 +230,9 @@
   --color-text-on-inverse-muted: var(--ifdd-bleu-200); /*  8.83:1 sur bleu-900 */
   --color-border-on-inverse: var(--ifdd-bleu-700);
   --color-accent-on-inverse: var(--ifdd-cyan-300); /* repère graphique, jamais du texte courant */
+  /* La pastille de l'entrée courante dans la capsule de navigation (04/10). */
+  --color-surface-inverse-selected: var(--ifdd-gris-0);
+  --color-text-on-inverse-selected: var(--ifdd-bleu-900); /* 15.54:1 */
 
   /* Le liseré sous la barre de navigation, aux couleurs du logo et dans son ordre
      (arbitré le 04/10). Décoratif ; posé sur l'aplat, il ne s'inverse pas. */
