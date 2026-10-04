@@ -15,7 +15,7 @@
 
 import type { EventDay } from './event/edition'
 import type { Room } from './event/venue'
-import type { EventId, IsoDate, TaxonomyTermCode } from './shared'
+import type { EventId, IsoDate } from './shared'
 import type { PublicScheduleRow } from './views'
 
 /** Ce qu'il faut charger pour afficher le programme d'une édition. */
@@ -28,23 +28,7 @@ export interface ProgrammeData {
   rooms: Room[]
 }
 
-/** Filtres partagés par la semaine et la liste. Le jour choisi n'en fait pas partie : il se navigue. */
-export interface ProgrammeFilterState {
-  /** Codes de `reference.taxonomy_terms`, taxonomie `activity_theme`. Vide : toutes. */
-  themes: TaxonomyTermCode[]
-  /** Recherche libre : titre, nom ou sigle de l'organisation. */
-  search: string
-}
-
 export type ProgrammeView = 'week' | 'list'
-
-/** Une thématique proposée au filtre : libellé et couleur de la base. */
-export interface ProgrammeThemeOption {
-  code: TaxonomyTermCode
-  label: string
-  color: string | null
-  count: number
-}
 
 /** Un jour de la bande de navigation. */
 export interface ProgrammeStripDay {

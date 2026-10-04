@@ -10,10 +10,7 @@
   "filters": {
     "search": "Search for an activity",
     "searchPlaceholder": "Title, organisation, acronym…",
-    "themes": "Themes",
-    "clear": "Clear all",
-    "show": "No activities | Show {count} activity | Show {count} activities",
-    "remove": "Remove the filter {filter}"
+    "clear": "Clear all"
   },
   "empty": {
     "title": "No published activities",
@@ -55,41 +52,40 @@
   },
   "board": {
     "title": "The programme",
-    "zone": "All times: {zone} ({offset})"
+    "subtitle": "{edition} · {dates} · all times: {zone} ({offset})"
   },
   "days": {
-    "label": "Choose a day",
-    "today": "Today",
     "count": "no activity | {count} activity | {count} activities",
-    "gap": "break | break | +{count} d"
+    "jump": "Go to day",
+    "showPast": "Show past days",
+    "hidePast": "Hide past days",
+    "monthYear": "{month} · {count}",
+    "special": "Special day — {title}"
   },
   "week": {
-    "today": "Today",
     "live": "Live",
     "navigation": "Change week",
     "previous": "Previous week",
     "next": "Next week",
     "openDay": "Show the list for {day}",
-    "summary": "Week {week} of {weeks} · {count} of {total} activities",
-    "legend": {
-      "activity": "Activity",
-      "filtered": "Excluded by your filters",
-      "past": "Ended",
-      "live": "Live"
-    }
+    "range": "Week of {from} to {to}",
+    "single": "Day of {day}",
+    "position": "{week} of {weeks} · {count}",
+    "emptyDay": "No activity matches this search."
   },
   "list": {
-    "count": "{count} of {total} activity | {count} of {total} activity | {count} of {total} activities",
     "until": "→ {end} · {duration}",
     "minutes": "{minutes} min",
     "hours": "{hours} h",
     "hoursMinutes": "{hours} h {minutes}",
-    "streamed": "streamed online",
     "live": "Live",
-    "open": "View activity",
     "visited": "Viewed",
     "emptyFiltered": "No activities on this day with these filters.",
-    "emptyAll": "No activities match these filters.",
-    "national": "National public institution"
+    "emptyAll": "No activities match these filters."
+  },
+  "lead": {
+    "label": "Featured: live now",
+    "watch": "Watch live",
+    "open": "View activity"
   }
 }

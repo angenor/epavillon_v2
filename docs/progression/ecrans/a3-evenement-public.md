@@ -211,3 +211,12 @@ Elle restait vide : la séance ne recevait que le titre de son dossier ([modèle
 
 Arbitrage du commanditaire ([décision](../decisions/2026-10-03.md)) : plus de mesure de 68 caractères sur la présentation d'une activité (`.rich-text-affiche`, `max-width: none` ; plafond de 48rem retiré de la page). L'éditeur `UiRichText` remplit son cadre partout. Inscrit au guide de style, § 05c. Vu au navigateur : présentation à 880 px sur une colonne de 880 px, paragraphe de l'éditeur à pleine largeur.
 
+### 04/10 — Programmations : liste éditoriale et semaine en colonnes
+
+Maquettes : [liste et semaine](https://claude.ai/artifact/MTjhU6YwDmahNgDDTRYVxK) (planches « D — Synthèse » et « B — Colonnes à couvertures »). [Décision](../decisions/2026-10-04.md).
+
+- **Cadre** (`EventProgramme`) : en-tête « Le programme » avec édition, dates et fuseau ; `UiSearchInput` ; bascule liste/semaine reprise des éditions de l'accueil. La séance `status === 'live'` est déclarée par `setLive`, comme sur l'accueil. Journées passées repliées tant qu'il en reste à venir.
+- **Liste** : `EventProgrammeDayStrip` (aller à la journée, afficher les journées passées), `EventProgrammeLiveLead` (à la une, seulement pendant un direct), `EventProgrammeDayList` (journées en bloc, lignes à couverture).
+- **Semaine** : `EventProgrammeWeek` réécrit en colonnes ; onglets des jours sur téléphone.
+- **Écarts à la maquette** : pastilles `UiStatusBadge` (coins carrés) ; boutons secondaires en contour accent (`UiButton`) ; « Inscription ouverte », « Liste d'attente », « Entrée libre » non affichés, faute d'état d'inscription dans `v_public_schedule` — l'état temporel s'affiche à la place.
+- **Vérifié** : typecheck et tests du site verts ; vu à 1440 px en sombre et en clair (direct simulé dans le navigateur), à 390 px sans débordement. Non vu : une édition en cours avec des journées passées réelles (les données d'exemple de la COP31 sont toutes à venir).

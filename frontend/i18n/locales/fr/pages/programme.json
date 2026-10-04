@@ -10,10 +10,7 @@
   "filters": {
     "search": "Rechercher une activité",
     "searchPlaceholder": "Titre, organisation, sigle…",
-    "themes": "Thématiques",
-    "clear": "Tout effacer",
-    "show": "Aucune activité | Voir {count} activité | Voir {count} activités",
-    "remove": "Retirer le filtre {filter}"
+    "clear": "Tout effacer"
   },
   "empty": {
     "title": "Aucune activité publiée",
@@ -55,41 +52,40 @@
   },
   "board": {
     "title": "Le programme",
-    "zone": "Toutes les heures : {zone} ({offset})"
+    "subtitle": "{edition} · {dates} · toutes les heures : {zone} ({offset})"
   },
   "days": {
-    "label": "Choisir un jour",
-    "today": "Auj.",
     "count": "aucune activité | {count} activité | {count} activités",
-    "gap": "relâche | relâche | +{count} j"
+    "jump": "Aller à la journée",
+    "showPast": "Afficher les journées passées",
+    "hidePast": "Masquer les journées passées",
+    "monthYear": "{month} · {count}",
+    "special": "Journée spéciale — {title}"
   },
   "week": {
-    "today": "Aujourd'hui",
     "live": "Direct",
     "navigation": "Changer de semaine",
     "previous": "Semaine précédente",
     "next": "Semaine suivante",
     "openDay": "Voir la liste du {day}",
-    "summary": "Semaine {week} sur {weeks} · {count} sur {total} activités",
-    "legend": {
-      "activity": "Activité",
-      "filtered": "Écartée par vos filtres",
-      "past": "Terminée",
-      "live": "En direct"
-    }
+    "range": "Semaine du {from} au {to}",
+    "single": "Journée du {day}",
+    "position": "{week} sur {weeks} · {count}",
+    "emptyDay": "Aucune activité avec cette recherche."
   },
   "list": {
-    "count": "{count} sur {total} activité | {count} sur {total} activité | {count} sur {total} activités",
     "until": "→ {end} · {duration}",
     "minutes": "{minutes} min",
     "hours": "{hours} h",
     "hoursMinutes": "{hours} h {minutes}",
-    "streamed": "diffusé en ligne",
     "live": "En direct",
-    "open": "Voir l'activité",
     "visited": "Consultée",
     "emptyFiltered": "Aucune activité ce jour-là avec ces filtres.",
-    "emptyAll": "Aucune activité ne correspond à ces filtres.",
-    "national": "Institution publique nationale"
+    "emptyAll": "Aucune activité ne correspond à ces filtres."
+  },
+  "lead": {
+    "label": "À la une : en direct",
+    "watch": "Suivre le direct",
+    "open": "Voir l'activité"
   }
 }

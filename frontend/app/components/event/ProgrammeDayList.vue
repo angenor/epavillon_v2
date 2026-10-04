@@ -3,8 +3,8 @@ import type { PublicScheduleRow } from '~/types/views'
 import type { IsoDate, TimeZoneName } from '~/types/shared'
 
 /**
- * Tout le programme en liste, un séparateur par jour. Au défilement, le jour
- * dont la section passe sous la bande figée est signalé (`reading`) : la page
+ * Tout le programme en liste, une section par journée. Au défilement, la journée
+ * dont la section passe sous la bande figée est signalée (`reading`) : la page
  * l'allume dans la bande. `scrollToDay` sert le geste inverse.
  */
 
@@ -17,6 +17,9 @@ interface Props {
   editionSlug: string
   /** Hauteur de ce qui reste figé au-dessus de la liste (barre du site + bande des jours), en pixels. */
   stickyOffset: number
+  today: IsoDate | null
+  /** Tait les journées strictement antérieures à `today`. */
+  hidePast: boolean
 }
 
 const props = defineProps<Props>()
@@ -25,61 +28,62 @@ const emit = defineEmits<{ reading: [date: IsoDate]; reset: [] }>()
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
 const { time } = useDateTime()
-const { state, fill, link, themeColor, showFormat } = useProgrammeSession()
-
-const MAX_THEMES = 3
-const NATIONAL = 'public_national_institution'
+const { state, link, duration, titleParts } = useProgrammeSession()
 
 const at = (day: IsoDate) => new Date(`${day}T12:00:00Z`)
-const weekday = (day: IsoDate) =>
-  new Intl.DateTimeFormat(locale.value, { weekday: 'long', timeZone: 'UTC' }).format(at(day))
-const fullDate = (day: IsoDate) =>
-  new Intl.DateTimeFormat(locale.value, { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(at(day))
+const format = (day: IsoDate, options: Intl.DateTimeFormatOptions) =>
+  new Intl.DateTimeFormat(locale.value, { ...options, timeZone: 'UTC' }).format(at(day))
 
-function duration(session: PublicScheduleRow): string {
-  const minutes = Math.round((Date.parse(session.ends_at) - Date.parse(session.starts_at)) / 60_000)
-  const hours = Math.floor(minutes / 60)
-  const rest = minutes % 60
-  if (!hours) return t('programme.list.minutes', { minutes })
-  return rest ? t('programme.list.hoursMinutes', { hours, minutes: String(rest).padStart(2, '0') }) : t('programme.list.hours', { hours })
-}
+
 
 function row(session: PublicScheduleRow) {
+  const current = state(session)
+  const faded = current === 'past' || current === 'cancelled'
   return {
     id: session.id,
     to: link(props.editionSlug, session),
     start: time(session.starts_at, props.timezone),
     end: time(session.ends_at, props.timezone),
     duration: duration(session),
-    title: tr(session.title),
+    title: titleParts(tr(session.title)),
     acronym: session.organization_acronym,
     organization: session.organization_name,
     country: session.organization_country ? tr(session.organization_country) : '',
-    format: showFormat(session) ? t(`session-card.format.${session.format}`) : '',
     cover: session.cover,
-    logo: session.organization_logo ? (session.organization_logo.sources.thumb?.url ?? session.organization_logo.url) : null,
-    color: themeColor(session),
-    flag:
-      session.organization_type_code === NATIONAL && session.organization_country_code
-        ? { code: session.organization_country_code, label: session.organization_country ? tr(session.organization_country) : session.organization_country_code }
-        : null,
-    streamed: session.is_streamed,
-    current: state(session),
-    themes: session.themes.slice(0, MAX_THEMES).map((theme) => ({
-      code: theme.code,
-      label: tr(theme.label),
-      background: fill(theme.color),
-    })),
-    moreThemes: Math.max(session.themes.length - MAX_THEMES, 0),
-    visited: session.id === props.visitedId,
+    current,
+    faded,
+    stateLabel: current === 'live' ? t('programme.list.live') : t(`session-card.state.${current}`),
   }
 }
 
+const visibleDays = computed(() => {
+  const today = props.today
+  return props.hidePast && today ? props.days.filter((day) => day >= today) : props.days
+})
+
 const sections = computed(() =>
-  props.days.map((day) => {
+  visibleDays.value.map((day) => {
     const own = props.sessions.filter((session) => dayKeyInZone(session.starts_at, props.timezone) === day)
     const rows = own.filter(props.matches).map(row)
-    return { day, weekday: weekday(day), date: fullDate(day), rows, total: own.length }
+    const specials = new Map<string, string>()
+    for (const session of own) {
+      for (const track of session.tracks) {
+        if (track.kind === 'special_day' && !specials.has(track.slug)) specials.set(track.slug, tr(track.title))
+      }
+    }
+    return {
+      day,
+      number: format(day, { day: 'numeric' }),
+      weekday: format(day, { weekday: 'long' }),
+      date: format(day, { day: 'numeric', month: 'long', year: 'numeric' }),
+      month: t('programme.days.monthYear', {
+        month: format(day, { month: 'long', year: 'numeric' }),
+        count: t('programme.days.count', { count: rows.length }, rows.length),
+      }),
+      specials: [...specials.values()].map((title) => t('programme.days.special', { title })),
+      rows,
+      total: own.length,
+    }
   }),
 )
 
@@ -126,155 +130,113 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div>
+  <div class="font-sans">
     <section
       v-for="section in sections"
       :id="anchor(section.day)"
       :key="section.day"
-      class="pb-6"
+      class="grid gap-y-4 border-b border-text pt-8 pb-3 lg:grid-cols-[184px_minmax(0,1fr)] lg:gap-x-8"
       :aria-labelledby="`${anchor(section.day)}-titre`"
     >
-      <header class="flex flex-wrap items-end justify-between gap-x-4 gap-y-1 border-b-4 border-poster-ink pt-6 pb-2">
-        <h3
-          :id="`${anchor(section.day)}-titre`"
-          class="font-poster text-[clamp(2rem,4.5vw,2.75rem)] leading-[0.9] font-black tracking-[-0.01em] uppercase font-stretch-[62%]"
-        >
-          {{ section.weekday }}
-          <span class="ml-2 font-poster-mono text-sm font-semibold tracking-[0.08em] text-poster-ink-muted normal-case">
-            {{ section.date }}
-          </span>
-        </h3>
-        <p class="font-poster-mono text-xs text-poster-ink-muted">
-          {{ t('programme.list.count', { count: section.rows.length, total: section.total }, section.total) }}
+      <header class="flex flex-wrap items-baseline gap-x-3 self-start lg:block">
+        <p class="text-[56px] leading-[0.9] font-light tabular-nums lg:text-[72px]" aria-hidden="true">
+          {{ section.number }}
         </p>
+        <h3 :id="`${anchor(section.day)}-titre`" class="font-sans text-lg font-bold text-text capitalize lg:mt-2.5">
+          {{ section.weekday }}<span class="sr-only"> {{ section.date }}</span>
+        </h3>
+        <p class="basis-full text-sm text-text-muted lg:mt-0.5">{{ section.month }}</p>
+        <div
+          v-if="section.specials.length"
+          class="mt-3.5 basis-full border-t-2 border-accent pt-2.5 text-xs font-bold text-accent uppercase lg:max-w-42"
+          :style="{ letterSpacing: 'var(--tracking-caps)' }"
+        >
+          <p v-for="special in section.specials" :key="special">{{ special }}</p>
+        </div>
       </header>
 
-      <p v-if="!section.rows.length" class="border-b border-poster-line px-2 py-4 text-sm text-poster-ink-muted sm:px-4">
-        {{ t('programme.list.emptyFiltered') }}
-      </p>
+      <div>
+        <p v-if="!section.rows.length && section.total" class="py-4 text-sm text-text-muted">
+          {{ t('programme.list.emptyFiltered') }}
+        </p>
 
-      <ol>
-        <li
-          v-for="entry in section.rows"
-          :key="entry.id"
-          class="grid gap-4 border-b border-poster-line px-2 py-5 sm:px-4 md:grid-cols-[7.5rem_16.5rem_minmax(0,1fr)_10rem] md:items-center md:gap-7"
-          :class="[entry.current === 'live' ? 'bg-poster-live-row' : 'even:bg-poster-paper-raised/70', entry.current === 'past' || entry.current === 'cancelled' ? 'opacity-60' : '']"
-        >
-          <div class="flex items-baseline gap-3 md:block">
-            <p class="font-poster-mono text-[2rem] leading-none font-semibold tracking-[-0.03em]">{{ entry.start }}</p>
-            <p class="font-poster-mono text-[0.8125rem] text-poster-ink-muted md:mt-1.5">
-              {{ t('programme.list.until', { end: entry.end, duration: entry.duration }) }}
-            </p>
-          </div>
+        <ol>
+          <li v-for="entry in section.rows" :key="entry.id" class="border-t border-border-subtle first:border-t-0">
+            <article
+              class="group relative -mx-3 grid grid-cols-[7rem_minmax(0,1fr)] gap-x-4 gap-y-1.5 rounded-md px-3 py-4 lg:grid-cols-[112px_208px_minmax(0,1fr)_172px_24px] lg:items-center lg:gap-x-7 lg:gap-y-0 lg:py-4.5"
+              :class="{ 'bg-live-surface': entry.current === 'live' }"
+            >
+              <p class="col-start-2 row-start-1 flex flex-wrap items-baseline gap-x-2 self-start lg:col-start-1 lg:block lg:pt-1">
+                <span
+                  class="block text-xl leading-none font-light tabular-nums lg:text-[38px]"
+                  :class="entry.faded ? 'text-text-subtle' : entry.current === 'live' ? 'text-live' : 'text-text'"
+                >
+                  {{ entry.start }}
+                </span>
+                <span class="block text-[13px] text-text-muted tabular-nums lg:mt-1.5">
+                  {{ t('programme.list.until', { end: entry.end, duration: entry.duration }) }}
+                </span>
+              </p>
 
-          <NuxtLink
-            :to="entry.to"
-            class="relative block aspect-video overflow-hidden rounded-md border-2 md:aspect-auto md:h-37"
-            :class="entry.current === 'live' ? 'border-live' : 'border-poster-ink'"
-            :style="{
-              background: fill(entry.color),
-              boxShadow: entry.current === 'past' || entry.current === 'cancelled' ? undefined : `5px 5px 0 ${entry.current === 'live' ? 'var(--color-live)' : (entry.color ?? 'var(--color-poster-ink)')}`,
-            }"
-            tabindex="-1"
-            aria-hidden="true"
-          >
-            <UiImage
-              v-if="entry.cover"
-              :image="entry.cover"
-              ratio="auto"
-              frame-class="size-full"
-              class="size-full"
-              :class="{ grayscale: entry.current === 'past' || entry.current === 'cancelled' }"
-              sizes="(min-width: 768px) 264px, 100vw"
-            />
-            <span
-              v-if="entry.current === 'live'"
-              class="absolute top-2.5 left-2.5 rounded-sm bg-live px-2 py-0.5 font-poster-mono text-[0.6875rem] font-semibold tracking-[0.08em] text-live-contrast uppercase"
-            >
-              ● {{ t('programme.list.live') }}
-            </span>
-            <span class="absolute bottom-2.5 left-2.5 flex max-w-[calc(100%-5.5rem)] flex-wrap gap-1">
-              <span
-                v-for="theme in entry.themes.slice(0, 1)"
-                :key="theme.code"
-                class="inline-flex h-6 items-center truncate rounded-full border-2 border-poster-ink px-2.5 text-[0.6875rem] font-bold text-poster-ink"
-                :style="{ background: theme.background }"
+              <div
+                class="relative col-start-1 row-span-3 row-start-1 aspect-video self-start overflow-hidden rounded-lg bg-surface-inverse lg:col-start-2 lg:row-span-1 lg:w-52 lg:self-center"
               >
-                {{ theme.label }}
-              </span>
-              <span
-                v-if="entry.themes.length + entry.moreThemes > 1"
-                class="inline-flex h-6 items-center rounded-full border-2 border-poster-ink bg-poster-paper-raised px-2 font-poster-mono text-[0.6875rem] font-semibold text-poster-ink"
-              >
-                +{{ entry.themes.length + entry.moreThemes - 1 }}
-              </span>
-            </span>
-            <span
-              class="absolute right-2.5 bottom-2.5 flex h-13 max-w-32 min-w-13 items-center justify-center rounded-lg border-2 border-poster-ink bg-poster-paper-raised px-1.5 py-1"
-            >
-              <img v-if="entry.logo" :src="entry.logo" alt="" class="max-h-9.5 max-w-28 object-contain" loading="lazy">
-              <span v-else class="font-poster text-[0.8125rem] font-black text-poster-ink font-stretch-[80%]">
-                {{ entry.acronym ?? '—' }}
-              </span>
-            </span>
-          </NuxtLink>
+                <UiImage
+                  v-if="entry.cover"
+                  :image="entry.cover"
+                  ratio="auto"
+                  frame-class="size-full"
+                  class="absolute inset-0 transition duration-200 motion-safe:group-hover:scale-[1.03]"
+                  :class="{ grayscale: entry.faded }"
+                  sizes="(min-width: 1024px) 208px, 7rem"
+                />
+                <span
+                  v-else
+                  class="absolute inset-0 flex items-center justify-center text-sm font-bold text-text-on-inverse/20 lg:text-[22px]"
+                  aria-hidden="true"
+                >
+                  {{ entry.acronym }}
+                </span>
+              </div>
 
-          <div class="flex min-w-0 flex-col gap-1.5">
-            <p class="font-poster-mono text-xs text-poster-ink-muted">
-              {{ [entry.format, entry.streamed ? t('programme.list.streamed') : ''].filter(Boolean).join(' · ') }}
-              <span
-                v-if="entry.current === 'past' || entry.current === 'cancelled' || entry.current === 'postponed'"
-                class="ml-1.5 font-semibold tracking-[0.08em] uppercase"
-                :class="{ 'text-postponed': entry.current === 'postponed' }"
-              >
-                {{ t(`session-card.state.${entry.current}`) }}
-              </span>
-            </p>
-            <p
-              class="font-poster text-[1.5rem] leading-[1.1] font-extrabold font-stretch-[85%]"
-              :class="{ 'line-through': entry.current === 'cancelled' }"
-            >
-              {{ entry.title }}
-            </p>
-            <p v-if="entry.organization" class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-poster-ink-muted">
-              <UiCountryFlag v-if="entry.flag" :code="entry.flag.code" :label="entry.flag.label" />
-              <span>
-                <strong v-if="entry.acronym" class="text-poster-ink">{{ entry.acronym }}</strong>
-                <template v-if="entry.acronym"> — </template>{{ entry.organization }}<template v-if="entry.country"> · {{ entry.country }}</template>
-              </span>
-              <span
-                v-if="entry.flag"
-                class="inline-flex h-5.5 items-center rounded-sm border-[1.5px] border-poster-ink px-2 font-poster-mono text-[0.625rem] font-semibold tracking-[0.06em] text-poster-ink uppercase"
-              >
-                {{ t('programme.list.national') }}
-              </span>
-            </p>
-          </div>
+              <div class="col-start-2 min-w-0 lg:col-start-3 lg:row-start-1">
+                <h4
+                  class="font-sans text-base leading-[1.25] text-pretty sm:text-lg lg:text-[21px]"
+                  :class="[entry.faded ? 'text-text-muted' : 'text-text', { 'line-through': entry.current === 'cancelled' }]"
+                >
+                  <!-- Lien couvrant : toute la ligne mène à l'activité, sans second lien à tabuler. -->
+                  <NuxtLink :to="entry.to" class="font-normal text-inherit no-underline after:absolute after:inset-0 hover:underline">
+                    <b class="font-bold">{{ entry.title.lead }}</b>{{ entry.title.rest }}
+                  </NuxtLink>
+                </h4>
+                <p v-if="entry.organization || entry.acronym" class="mt-1.5 text-sm text-text-muted">
+                  <b v-if="entry.acronym" class="font-bold text-text">{{ entry.acronym }}</b>
+                  <template v-if="entry.acronym && entry.organization"> — </template>{{ entry.organization }}<template v-if="entry.country"> · {{ entry.country }}</template>
+                </p>
+              </div>
 
-          <div class="flex items-center gap-3 md:justify-end">
-            <NuxtLink
-              :to="entry.to"
-              class="inline-flex h-11 items-center gap-2 rounded-md border-2 border-poster-ink px-3.5 text-sm font-bold transition-transform"
-              :class="entry.visited ? 'bg-poster-ink text-poster-on-ink-accent' : 'bg-poster-paper-raised text-poster-ink shadow-poster-sm hover:-translate-y-0.5'"
-              :aria-label="`${t(entry.visited ? 'programme.list.visited' : 'programme.list.open')} : ${entry.title}`"
-            >
-              {{ t(entry.visited ? 'programme.list.visited' : 'programme.list.open') }}
-              <UiIcon name="arrow-right" size="1rem" />
-            </NuxtLink>
-          </div>
-        </li>
-      </ol>
+              <div class="col-start-2 justify-self-start lg:col-start-4 lg:row-start-1">
+                <UiStatusBadge :state="entry.current" size="sm" :label="entry.stateLabel" />
+              </div>
+
+              <span class="hidden text-accent lg:col-start-5 lg:row-start-1 lg:block" aria-hidden="true">
+                <UiIcon
+                  name="arrow-right"
+                  size="22px"
+                  class="transition-transform duration-200 motion-safe:group-hover:translate-x-1"
+                />
+              </span>
+            </article>
+          </li>
+        </ol>
+      </div>
     </section>
 
     <div v-if="!shown" class="flex flex-col items-start gap-4 py-10">
-      <p class="font-poster text-3xl font-extrabold font-stretch-[85%]">{{ t('programme.list.emptyAll') }}</p>
-      <button
-        type="button"
-        class="h-11 cursor-pointer rounded-md border-2 border-poster-ink bg-poster-paper-raised px-4 font-bold text-poster-ink shadow-poster-sm"
-        @click="emit('reset')"
-      >
+      <p class="text-2xl font-bold">{{ t('programme.list.emptyAll') }}</p>
+      <UiButton variant="secondary" @click="emit('reset')">
         {{ t('programme.filters.clear') }}
-      </button>
+      </UiButton>
     </div>
   </div>
 </template>

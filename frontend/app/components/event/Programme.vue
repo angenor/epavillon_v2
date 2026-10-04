@@ -1,20 +1,14 @@
 <script setup lang="ts">
-import type {
-  ProgrammeData,
-  ProgrammeFilterState,
-  ProgrammeStripDay,
-  ProgrammeThemeOption,
-  ProgrammeView,
-} from '~/types/event-programme'
+import type { ProgrammeData, ProgrammeStripDay, ProgrammeView } from '~/types/event-programme'
 import type { PublicEditionRow, PublicScheduleRow } from '~/types/views'
 import type { IsoDate } from '~/types/shared'
 import type { LocationQueryRaw } from 'vue-router'
 
 /**
- * Le corps de `/programmations`, sous le bandeau qui nomme l'édition : une
- * barre d'une ligne, puis la semaine ou la liste. Direction « affiche »
- * arbitrée le 30/09 — jetons `poster`, bornés à ces écrans. Les filtres ne
- * passent jamais devant le tableau (30/09).
+ * Le corps de `/programmations`, sous le bandeau qui nomme l'édition : un
+ * en-tête, puis la semaine ou la liste. Direction « liste éditoriale » arbitrée
+ * le 04/10 : elle remplace l'affiche, qui ne vaut plus que pour la page d'une
+ * activité. La recherche est le seul filtre ; les thématiques ont été retirées.
  *
  * Les deux vues lisent le même programme et les mêmes filtres. L'URL porte
  * l'édition, la vue et le jour : un lien vers « la liste du 12 novembre » se
@@ -33,7 +27,8 @@ const emit = defineEmits<{ 'update:edition': [edition: PublicEditionRow] }>()
 
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
-const { zoneLabel, zoneOffsetShort } = useDateTime()
+const { zoneLabel, zoneOffsetShort, dateRange } = useDateTime()
+const { isLive, setLive } = useLiveSession()
 const api = useApi()
 const route = useRoute()
 const router = useRouter()
@@ -67,31 +62,32 @@ async function load(eventId: string): Promise<void> {
   }
 }
 
-const EMPTY_FILTERS: ProgrammeFilterState = { themes: [], search: '' }
-
 async function select(eventId: string): Promise<void> {
   if (eventId === selectedId.value) return
   await load(eventId)
   if (failed.value) return
   selectedId.value = eventId
   emit('update:edition', selectedEdition.value)
-  filters.value = { ...EMPTY_FILTERS }
+  search.value = ''
   day.value = null
 }
 
 defineExpose({ select })
 
 const view = ref<ProgrammeView>(route.query.vue === 'liste' ? 'list' : 'week')
-const filters = ref<ProgrammeFilterState>({ ...EMPTY_FILTERS })
+const search = ref('')
 const day = ref<IsoDate | null>(typeof route.query.jour === 'string' ? route.query.jour : null)
 
 const timezone = computed(() => selectedEdition.value.timezone)
-const zone = computed(() =>
-  t('programme.board.zone', {
-    zone: zoneLabel(timezone.value, selectedEdition.value.city ?? undefined),
-    offset: zoneOffsetShort(timezone.value, selectedEdition.value.starts_at),
-  }),
-)
+const subtitle = computed(() => {
+  const edition = selectedEdition.value
+  return t('programme.board.subtitle', {
+    edition: edition.acronym ?? edition.edition_label ?? tr(edition.title),
+    dates: dateRange(edition.starts_at, edition.ends_at, edition.timezone),
+    zone: zoneLabel(edition.timezone, edition.city ?? undefined),
+    offset: zoneOffsetShort(edition.timezone, edition.starts_at),
+  })
+})
 
 const dayOf = (session: PublicScheduleRow): IsoDate => dayKeyInZone(session.starts_at, timezone.value)
 
@@ -104,21 +100,17 @@ const selectedDay = computed<IsoDate>(() => {
 })
 
 function matches(session: PublicScheduleRow): boolean {
-  const current = filters.value
-  if (current.themes.length && !session.theme_codes.some((code) => current.themes.includes(code))) return false
-  const needle = foldText(current.search.trim())
+  const needle = foldText(search.value.trim())
   if (!needle) return true
   return foldText([tr(session.title), session.organization_name ?? '', session.organization_acronym ?? ''].join(' ')).includes(needle)
 }
 
 // L'horloge ne vit que dans le navigateur : l'heure du rendu serveur serait périmée à l'hydratation.
 const today = ref<IsoDate | null>(null)
-const nowMinutes = ref<number | null>(null)
 let clock: ReturnType<typeof setInterval> | undefined
 
 function tick(): void {
   today.value = dayKeyInZone(Date.now(), timezone.value)
-  nowMinutes.value = minutesInZone(Date.now(), timezone.value)
 }
 
 const list = useTemplateRef<{ scrollToDay: (date: IsoDate, smooth?: boolean) => void }>('list')
@@ -133,6 +125,7 @@ function measure(): void {
 
 async function showInList(date: IsoDate, smooth = true): Promise<void> {
   day.value = date
+  if (today.value && date < today.value) pastHidden.value = false
   view.value = 'list'
   await nextTick()
   measure()
@@ -184,23 +177,6 @@ function onWeekDay(date: IsoDate): void {
   else day.value = date
 }
 
-const weekLabel = computed(() => {
-  const days = weekDays.value
-  const format = new Intl.DateTimeFormat(locale.value, { day: 'numeric', month: 'long', timeZone: 'UTC' })
-  const first = new Date(`${days[0]}T12:00:00Z`)
-  const last = new Date(`${days[days.length - 1]}T12:00:00Z`)
-  return days.length > 1 ? format.formatRange(first, last) : format.format(first)
-})
-
-const weekSummary = computed(() =>
-  t('programme.week.summary', {
-    week: weekIndex.value + 1,
-    weeks: weeks.value.length,
-    count: weekSessions.value.filter(matches).length,
-    total: weekSessions.value.length,
-  }),
-)
-
 const weekDays = computed(() => {
   const start = weekStart(selectedDay.value)
   return programmeDays.value.filter((date) => weekStart(date) === start)
@@ -212,23 +188,6 @@ const weekSessions = computed(() => {
 })
 
 const sortedSchedule = computed(() => [...data.value.schedule].sort((a, b) => a.starts_at.localeCompare(b.starts_at)))
-
-const range = computed(() => hourRange(data.value.schedule.map((session) => spanOf(session, timezone.value))))
-
-
-const themeOptions = computed<ProgrammeThemeOption[]>(() => {
-  const seen = new Map<string, ProgrammeThemeOption>()
-  for (const session of data.value.schedule) {
-    for (const theme of session.themes) {
-      const entry = seen.get(theme.code)
-      if (entry) entry.count += 1
-      else seen.set(theme.code, { code: theme.code, label: tr(theme.label), color: theme.color, count: 1 })
-    }
-  }
-  return [...seen.values()].sort((a, b) => a.label.localeCompare(b.label, locale.value))
-})
-
-const resultCount = computed(() => data.value.schedule.filter(matches).length)
 
 function syncQuery(): void {
   const query: LocationQueryRaw = { ...route.query, edition: selectedEdition.value.slug }
@@ -243,126 +202,144 @@ watch([selectedId, view, day], syncQuery)
 
 const isPublished = computed(() => selectedEdition.value.programme_published_at !== null)
 
-const viewButton = (active: boolean) =>
-  active ? 'bg-poster-ink text-poster-on-ink-accent' : 'bg-poster-paper-raised text-poster-ink'
-</script>
+/** Les journées passées se replient tant qu'il en reste à venir : la page s'ouvre sur aujourd'hui. */
+const pastHidden = ref(true)
+const hasPast = computed(() => {
+  const now = today.value
+  return now !== null && programmeDays.value.some((date) => date < now) && programmeDays.value.some((date) => date >= now)
+})
 
+// Même règle que l'accueil : la séance marquée en direct est déclarée une fois pour toute l'application.
+watch(
+  () => data.value.schedule,
+  (schedule) => {
+    const live = schedule.find((session) => session.status === 'live')
+    if (live) setLive(live.id)
+  },
+  { immediate: true },
+)
+
+const liveSession = computed(() => data.value.schedule.find((session) => isLive(session.id)) ?? null)
+
+const views = computed(() => [
+  { value: 'list' as const, icon: 'list', label: t('programme.views.list') },
+  { value: 'week' as const, icon: 'grid', label: t('programme.views.week') },
+])
+
+</script>
 <template>
-  <section
-    class="full-bleed -mb-8 bg-poster-paper text-poster-ink sm:-mb-10"
-    aria-labelledby="programmation-titre"
-  >
-    <div class="mx-auto flex w-full max-w-[1440px] flex-col gap-4 px-4 pt-7 pb-12 sm:px-6 lg:px-12">
+  <section class="full-bleed -mb-8 bg-surface font-sans text-text sm:-mb-10" aria-labelledby="programmation-titre">
+    <div class="mx-auto flex w-full max-w-[1280px] flex-col px-4 pt-10 pb-14 sm:px-6 lg:pt-14 lg:pb-18">
+      <header class="flex flex-wrap items-end justify-between gap-4 border-b border-border-subtle pb-4">
+        <div class="min-w-0">
+          <h2 id="programmation-titre" class="font-sans text-[30px] leading-tight font-normal text-text">
+            {{ t('programme.board.title') }}
+          </h2>
+          <p class="mt-1.5 text-base text-text-muted">{{ subtitle }}</p>
+        </div>
+        <div v-if="isPublished && data.schedule.length" class="flex w-full items-center gap-2 sm:w-auto">
+          <UiSearchInput
+            v-model="search"
+            class="min-w-0 flex-1 sm:w-[300px] sm:flex-none"
+            :label="t('programme.filters.search')"
+            hide-label
+            :placeholder="t('programme.filters.searchPlaceholder')"
+          />
+          <div role="group" class="flex shrink-0 items-center gap-0.5 rounded-lg border border-border p-0.5" :aria-label="t('programme.views.label')">
+            <UiButton
+              v-for="option in views"
+              :key="option.value"
+              variant="ghost"
+              icon-only
+              :icon="option.icon"
+              :label="option.label"
+              :pressed="view === option.value"
+              @click="option.value === 'list' ? showInList(selectedDay) : (view = 'week')"
+            />
+          </div>
+        </div>
+      </header>
+
       <UiErrorState
         v-if="failed"
+        class="mt-8"
         compact
         :title="t('programme.error.title')"
         :description="t('programme.error.description')"
         @retry="load(selectedId)"
       />
 
-      <UiLoadingState v-else-if="loading" variant="card" :lines="3" :label="t('programme.loading')" />
+      <UiLoadingState v-else-if="loading" class="mt-8" variant="card" :lines="3" :label="t('programme.loading')" />
 
-      <template v-else>
-        <EventProgrammeFilters
-          v-if="isPublished && data.schedule.length"
-          v-model="filters"
-          :themes="themeOptions"
-          :result-count="resultCount"
-        >
-          <template #title>
-            <h2
-              id="programmation-titre"
-              class="mr-auto basis-full font-poster text-[2rem] leading-none font-black tracking-[-0.01em] uppercase font-stretch-[68%] sm:basis-auto sm:text-4xl"
-            >
-              {{ t('programme.board.title') }}
-            </h2>
-          </template>
-          <template #view>
-            <div class="flex overflow-hidden rounded-md border-2 border-poster-ink" role="group" :aria-label="t('programme.views.label')">
-              <button
-                type="button"
-                class="inline-flex h-10 cursor-pointer items-center gap-1.5 px-3 text-sm font-bold whitespace-nowrap sm:px-3.5"
-                :class="viewButton(view === 'week')"
-                :aria-pressed="view === 'week'"
-                @click="view = 'week'"
-              >
-                <UiIcon name="grid" size="1rem" class="hidden sm:block" />
-                {{ t('programme.views.week') }}
-              </button>
-              <button
-                type="button"
-                class="inline-flex h-10 cursor-pointer items-center gap-1.5 border-l-2 border-poster-ink px-3 text-sm font-bold whitespace-nowrap sm:px-3.5"
-                :class="viewButton(view === 'list')"
-                :aria-pressed="view === 'list'"
-                @click="showInList(selectedDay)"
-              >
-                <UiIcon name="list" size="1rem" class="hidden sm:block" />
-                {{ t('programme.views.list') }}
-              </button>
-            </div>
-          </template>
-        </EventProgrammeFilters>
-        <h2 v-else id="programmation-titre" class="font-poster text-4xl leading-none font-black uppercase font-stretch-[68%]">
-          {{ t('programme.board.title') }}
-        </h2>
+      <UiEmptyState
+        v-else-if="!isPublished"
+        class="mt-8"
+        icon="calendar"
+        :title="t('programme.unpublished.title')"
+        :description="t('programme.unpublished.description')"
+        :action-label="t('programme.unpublished.backToEvent')"
+        :action-to="localePath(`/evenements/${selectedEdition.slug}`)"
+      />
 
-        <UiEmptyState
-          v-if="!isPublished"
-          icon="calendar"
-          :title="t('programme.unpublished.title')"
-          :description="t('programme.unpublished.description')"
-          :action-label="t('programme.unpublished.backToEvent')"
-          :action-to="localePath(`/evenements/${selectedEdition.slug}`)"
-        />
+      <UiEmptyState
+        v-else-if="!data.schedule.length"
+        class="mt-8"
+        icon="calendar"
+        :title="t('programme.empty.title')"
+        :description="t('programme.empty.description')"
+      />
 
-        <UiEmptyState
-          v-else-if="!data.schedule.length"
-          icon="calendar"
-          :title="t('programme.empty.title')"
-          :description="t('programme.empty.description')"
-        />
+      <EventProgrammeWeek
+        v-else-if="view === 'week'"
+        :days="weekDays"
+        :sessions="weekSessions"
+        :matches="matches"
+        :timezone="timezone"
+        :selected="selectedDay"
+        :today="today"
+        :visited-id="visitedId"
+        :edition-slug="selectedEdition.slug"
+        :week="weekIndex + 1"
+        :weeks="weeks.length"
+        :has-previous="weekIndex > 0"
+        :has-next="weekIndex < weeks.length - 1"
+        @week="moveWeek"
+        @day="onWeekDay"
+      />
 
-        <EventProgrammeWeek
-          v-else-if="view === 'week'"
-          :days="weekDays"
-          :sessions="weekSessions"
-          :matches="matches"
-          :timezone="timezone"
-          :range="range"
-          :selected="selectedDay"
-          :today="today"
-          :now-minutes="nowMinutes"
-          :visited-id="visitedId"
-          :edition-slug="selectedEdition.slug"
-          :label="weekLabel"
-          :summary="weekSummary"
-          :zone="zone"
-          :has-previous="weekIndex > 0"
-          :has-next="weekIndex < weeks.length - 1"
-          @week="moveWeek"
-          @day="onWeekDay"
-        />
-
-        <div v-else>
-          <div ref="strip" class="sticky top-(--nav-height) z-20 -mx-1 border-b-2 border-poster-ink bg-poster-paper px-1 pt-2">
-            <EventProgrammeDayStrip :days="stripDays" :selected="selectedDay" :timezone="timezone" @select="showInList" />
-            <p class="pb-2 font-poster-mono text-xs text-poster-ink-muted">{{ zone }}</p>
-          </div>
-          <EventProgrammeDayList
-            ref="list"
-            :days="programmeDays"
-            :sessions="sortedSchedule"
-            :matches="matches"
+      <div v-else>
+        <div ref="strip" class="sticky top-(--nav-height) z-20 bg-surface">
+          <EventProgrammeDayStrip
+            :days="stripDays"
+            :selected="selectedDay"
             :timezone="timezone"
-            :visited-id="visitedId"
-            :edition-slug="selectedEdition.slug"
-            :sticky-offset="stickyOffset"
-            @reading="day = $event"
-            @reset="filters = { ...EMPTY_FILTERS }"
+            :has-past="hasPast"
+            :past-hidden="pastHidden"
+            @select="showInList"
+            @toggle-past="pastHidden = !pastHidden"
           />
         </div>
-      </template>
+        <EventProgrammeLiveLead
+          v-if="liveSession"
+          :session="liveSession"
+          :edition-slug="selectedEdition.slug"
+          :timezone="timezone"
+        />
+        <EventProgrammeDayList
+          ref="list"
+          :days="programmeDays"
+          :sessions="sortedSchedule"
+          :matches="matches"
+          :timezone="timezone"
+          :today="today"
+          :hide-past="hasPast && pastHidden"
+          :visited-id="visitedId"
+          :edition-slug="selectedEdition.slug"
+          :sticky-offset="stickyOffset"
+          @reading="day = $event"
+          @reset="search = ''"
+        />
+      </div>
     </div>
   </section>
 </template>

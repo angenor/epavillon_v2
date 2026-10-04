@@ -3,47 +3,58 @@ import type { ProgrammeStripDay } from '~/types/event-programme'
 import type { IsoDate, TimeZoneName } from '~/types/shared'
 
 /**
- * La bande des jours de la liste, figée en haut : un chiffre par journée de
- * programme et un carré par activité retenue, de la couleur de sa thématique.
- * Le jour lu dans la liste s'y allume ; un clic y fait défiler la liste.
+ * La bande « Aller à la journée », figée au-dessus de la liste : une case par
+ * journée, un point par activité retenue. La journée lue dans la liste s'y
+ * allume ; un clic y fait défiler la liste.
  */
 
 interface Props {
   days: ProgrammeStripDay[]
   selected: IsoDate
   timezone: TimeZoneName
+  pastHidden: boolean
+  /** Le bouton des journées passées n'a de sens que s'il en existe. */
+  hasPast: boolean
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits<{ select: [date: IsoDate] }>()
+const emit = defineEmits<{ select: [date: IsoDate]; togglePast: [] }>()
 
 const { t, locale } = useI18n()
 const { dayLong } = useDateTime()
 
-const MAX_DOTS = 8
+const MAX_DOTS = 5
 
 const at = (day: IsoDate) => `${day}T12:00:00Z`
-const weekday = (day: IsoDate) =>
-  new Intl.DateTimeFormat(locale.value, { weekday: 'short', timeZone: 'UTC' }).format(new Date(at(day)))
+const format = (day: IsoDate, options: Intl.DateTimeFormatOptions) =>
+  new Intl.DateTimeFormat(locale.value, { ...options, timeZone: 'UTC' }).format(new Date(at(day)))
+
+const today = computed(
+  () => props.days.find((day) => day.isToday)?.date ?? dayKeyInZone(new Date(), props.timezone),
+)
 
 const tiles = computed(() =>
-  props.days.map((day) => ({
-    ...day,
-    selected: day.date === props.selected,
-    weekday: weekday(day.date),
-    number: day.date.slice(8),
-    dots: day.colors.slice(0, MAX_DOTS),
-    more: Math.max(day.colors.length - MAX_DOTS, 0),
-    label: `${dayLong(at(day.date), props.timezone)}, ${t('programme.days.count', day.count)}`,
-  })),
+  props.days.map((day, index) => {
+    const month = day.date.slice(0, 7)
+    return {
+      date: day.date,
+      month: index === 0 || props.days[index - 1]?.date.slice(0, 7) !== month ? format(day.date, { month: 'long' }) : null,
+      selected: day.date === props.selected,
+      past: day.date < today.value,
+      weekday: format(day.date, { weekday: 'short' }),
+      number: format(day.date, { day: 'numeric' }),
+      dots: Math.min(day.count, MAX_DOTS),
+      label: `${dayLong(at(day.date), props.timezone)}, ${t('programme.days.count', { count: day.count }, day.count)}`,
+    }
+  }),
 )
 
 const scroller = useTemplateRef<HTMLElement>('scroller')
 
 function reveal(): void {
   const box = scroller.value
-  const tile = box?.querySelector<HTMLElement>('[aria-pressed="true"]')
-  if (!box || !tile) return
+  const tile = box?.querySelector<HTMLElement>('[aria-current="date"]')
+  if (!box || !tile || box.scrollWidth <= box.clientWidth) return
   box.scrollLeft = tile.offsetLeft - (box.clientWidth - tile.offsetWidth) / 2
 }
 
@@ -52,55 +63,48 @@ watch(() => props.selected, () => nextTick(reveal))
 </script>
 
 <template>
-  <div
-    ref="scroller"
-    class="-mx-4 flex snap-x gap-1.5 overflow-x-auto px-4 pt-1 pb-2 sm:mx-0 sm:px-0.5"
-    role="group"
-    :aria-label="t('programme.days.label')"
+  <nav
+    class="flex flex-col gap-1 border-b border-border-subtle bg-surface py-3.5 font-sans lg:flex-row lg:items-center lg:gap-4"
+    :aria-label="t('programme.days.jump')"
   >
-    <template v-for="tile in tiles" :key="tile.date">
-      <span
-        v-if="tile.gapBefore"
-        class="mx-1 w-0 shrink-0 self-stretch border-l-2 border-dashed border-poster-line"
-        :title="t('programme.days.gap', tile.gapBefore)"
-        aria-hidden="true"
-      />
-      <button
-        type="button"
-        class="flex h-17 min-w-19 flex-1 shrink-0 cursor-pointer snap-start flex-col justify-between rounded-md border-2 border-poster-ink px-2.5 py-1.5 text-left transition-transform"
-        :class="
-          tile.selected
-            ? 'translate-x-[2px] translate-y-[2px] bg-poster-ink text-poster-on-ink'
-            : 'bg-poster-paper-raised text-poster-ink shadow-[2px_2px_0_var(--color-poster-ink)] hover:-translate-y-0.5'
-        "
-        :aria-pressed="tile.selected"
-        :aria-label="tile.label"
-        @click="emit('select', tile.date)"
-      >
-        <span class="flex w-full items-baseline justify-between gap-1">
-          <span
-            class="font-poster text-[2rem] leading-[0.9] font-black font-stretch-[62%]"
-            :class="tile.selected ? 'text-poster-on-ink-accent' : ''"
-          >
-            {{ tile.number }}
-          </span>
-          <span
-            class="font-poster-mono text-[0.625rem] font-semibold tracking-[0.08em] uppercase"
-            :class="tile.isToday && !tile.selected ? 'text-live' : ''"
-          >
-            {{ tile.weekday }}
-          </span>
+    <div ref="scroller" class="-mx-4 flex min-w-0 items-center gap-1 overflow-x-auto px-4 py-0.5 sm:mx-0 sm:px-0.5 lg:flex-1">
+      <template v-for="(tile, index) in tiles" :key="tile.date">
+        <span
+          v-if="tile.month"
+          class="mr-3 shrink-0 text-xs text-text-muted uppercase"
+          :class="{ 'ml-3': index > 0 }"
+          :style="{ letterSpacing: 'var(--tracking-caps)' }"
+        >
+          {{ tile.month }}
         </span>
-        <span class="flex min-h-2 items-center gap-0.5" aria-hidden="true">
-          <span
-            v-for="(color, index) in tile.dots"
-            :key="index"
-            class="size-[7px] border border-current"
-            :style="{ background: color ?? 'var(--color-poster-paper-sunken)' }"
-          />
-          <span v-if="tile.more" class="ml-0.5 font-poster-mono text-[0.625rem]">+{{ tile.more }}</span>
-        </span>
-      </button>
-    </template>
-  </div>
+        <button
+          type="button"
+          class="flex h-14 w-15 shrink-0 cursor-pointer flex-col items-center justify-center rounded-lg border transition-colors"
+          :class="
+            tile.selected
+              ? 'border-text bg-text font-bold text-surface'
+              : ['border-transparent hover:border-border', tile.past ? 'text-text-subtle' : 'text-text']
+          "
+          :aria-current="tile.selected ? 'date' : undefined"
+          :aria-label="tile.label"
+          @click="emit('select', tile.date)"
+        >
+          <span class="text-[11px] font-normal tracking-[0.06em] uppercase opacity-80">{{ tile.weekday }}</span>
+          <span class="text-[20px] leading-[1.1] tabular-nums">{{ tile.number }}</span>
+          <span class="mt-0.75 flex h-1 gap-0.5" aria-hidden="true">
+            <span v-for="dot in tile.dots" :key="dot" class="size-1 rounded-full bg-current opacity-70" />
+          </span>
+        </button>
+      </template>
+    </div>
+
+    <button
+      v-if="props.hasPast"
+      type="button"
+      class="inline-flex min-h-11 shrink-0 cursor-pointer items-center self-start text-sm font-bold text-accent hover:underline lg:self-auto"
+      @click="emit('togglePast')"
+    >
+      {{ t(props.pastHidden ? 'programme.days.showPast' : 'programme.days.hidePast') }}
+    </button>
+  </nav>
 </template>

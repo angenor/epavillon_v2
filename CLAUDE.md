@@ -194,9 +194,11 @@ Cette ligne interdisait le verre dépoli et les dégradés sans exception. **Le 
 
 Le détail est au § « Le verre » de [docs/guide-de-style-epavillon.html](docs/guide-de-style-epavillon.html).
 
-**L'affiche : réservée à la programmation publique, arbitrée le 30/09.**
+**L'affiche : réservée à la page d'une activité, arbitrée le 30/09, réduite le 04/10.**
 
-Le corps de `/programmations` et la page d'une activité suivent une direction « affiche de festival » — papier crème, encre bleu riche, bordures de 2 px, ombres dures décalées, Archivo étroite et IBM Plex Mono embarquées. Elle passe par les jetons `--color-poster-*` et `--shadow-poster*`, clair et sombre, et par la couleur des thématiques **en base**. Nulle part ailleurs : un autre écran qui appelle un jeton `poster` est un défaut. Le détail est au § « L'affiche » du guide.
+La page d'une activité suit une direction « affiche de festival » — papier crème, encre bleu riche, bordures de 2 px, ombres dures décalées, Archivo étroite et IBM Plex Mono embarquées. Elle passe par les jetons `--color-poster-*` et `--shadow-poster*`, clair et sombre, et par la couleur des thématiques **en base**. Nulle part ailleurs : un autre écran qui appelle un jeton `poster` est un défaut. Le détail est au § « L'affiche » du guide.
+
+Le corps de `/programmations` l'a quittée le 04/10 pour la « liste éditoriale » des éditions de l'accueil : jetons ordinaires, filets fins, grands chiffres légers en `font-sans`, vignette de couverture, `UiStatusBadge`. La liste s'ouvre sur l'activité en direct s'il y en a une (`EventProgrammeLiveLead`), puis enchaîne les journées ; la semaine est une colonne par jour, séparées d'un filet. Ni thématique, ni format, ni filtre par thématique : la recherche seule.
 
 **Le relief moulé : réservé à l'interrupteur, arbitré le 19/08.**
 

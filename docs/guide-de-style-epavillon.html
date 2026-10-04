@@ -2082,10 +2082,19 @@ table.data td.num { text-align: end; font-variant-numeric: tabular-nums; }
     2&nbsp;px, ombres dures décalées sans flou, grands chiffres étroits, horaires en chasse fixe. Le
     bandeau de la programmation, lui, ne change pas.
   </p>
+  <p class="note" style="max-width:var(--measure);color:var(--color-text-secondary)">
+    <b>Arbitrage du 4 octobre 2026.</b> Le corps de <code>/programmations</code> quitte l'affiche pour la
+    «&nbsp;liste éditoriale&nbsp;» déjà retenue pour les éditions de l'accueil : fond de page, filets fins,
+    grands chiffres légers en Helvetica, vignette de couverture, pastilles d'état ordinaires. La liste
+    ouvre sur l'activité en direct quand il y en a une, puis enchaîne les journées (grand numéro à
+    gauche, journée spéciale nommée sous lui) ; la semaine montre une colonne par jour, séparées d'un
+    filet, avec les mêmes cartes à couverture. Thématiques et format n'y figurent plus, le filtre
+    par thématique non plus : la recherche reste. L'affiche ne vaut désormais que pour la page d'une activité.
+  </p>
 
   <h3>Où l'affiche est permise</h3>
   <ul>
-    <li>Le corps de <code>/programmations</code> : bande des jours, filtres, semaine, liste du jour.</li>
+    <li><s>Le corps de <code>/programmations</code></s> — retiré le 4 octobre 2026, voir ci-dessus.</li>
     <li>La page d'une activité (<code>/programmations/{édition}/{activité}</code>).</li>
     <li>Nulle part ailleurs. Un composant d'un autre écran qui appelle un jeton <code>poster</code> est un défaut.</li>
   </ul>
