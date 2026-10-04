@@ -1,6 +1,7 @@
 {
   "site": {
     "name": "ePavillon",
+    "nameSuffix": "de la Francophonie",
     "owner": "Institut de la Francophonie pour le développement durable",
     "ownerShort": "IFDD",
     "parent": "Organisation internationale de la Francophonie",

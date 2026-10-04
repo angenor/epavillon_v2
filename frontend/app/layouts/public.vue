@@ -157,8 +157,16 @@ const currentYear = new Date().getFullYear()
             width="42"
             height="40"
           >
-          <span class="font-display text-xl tracking-tight text-text-on-inverse">
-            <span class="font-light">{{ siteName.slice(0, 1) }}</span><span class="font-bold">{{ siteName.slice(1) }}</span>
+          <span class="flex flex-col leading-none text-text-on-inverse">
+            <span class="font-display text-xl leading-none tracking-tight">
+              <span class="font-light">{{ siteName.slice(0, 1) }}</span><span class="font-bold">{{ siteName.slice(1) }}</span>
+            </span>
+            <span
+              class="mt-1.5 text-[0.6875rem] leading-none uppercase text-text-on-inverse-muted"
+              :style="{ letterSpacing: '0.16em' }"
+            >
+              {{ t('nav.site.nameSuffix') }}
+            </span>
           </span>
         </NuxtLink>
       </template>
