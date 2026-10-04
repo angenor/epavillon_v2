@@ -402,6 +402,11 @@
      grand écran, 67,8 px sur mobile. */
   --nav-height: 4.5rem;
 
+  /* Le bandeau institutionnel au-dessus de la barre (04/10) : nom de l'IFDD,
+     langue, thème. Il défile avec la page ; seul le bandeau d'accueil, posé en
+     haut de page, le retranche en plus de la barre pour tenir un écran. */
+  --topbar-height: 2.75rem;
+
   /* L'en-tête du back-office sur grand écran, bordure comprise : ce qui s'y colle
      en dessous (la barre de pages de l'aperçu) se cale sur cette valeur. */
   --admin-header-height: 3.4375rem;

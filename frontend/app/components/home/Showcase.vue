@@ -215,12 +215,14 @@ watch(
          `--nav-height` est retranchée parce que la barre est `sticky` : sans
          elle, le bandeau ferait un écran PLUS la barre, et le bas serait
          toujours coupé. La barre se cale sur ce jeton, elle ne le subit pas.
+         `--topbar-height` aussi, depuis le 04/10 : le bandeau institutionnel
+         est au-dessus de la barre en haut de page.
 
          L'image, elle, remplit ce cadre par `object-fit: cover` (`UiImage`) :
          elle est recadrée, jamais déformée. -->
     <div
       v-if="hasSlides"
-      class="relative flex min-h-[calc(100svh-var(--nav-height))] flex-col lg:ps-[340px]"
+      class="relative flex min-h-[calc(100svh-var(--nav-height)-var(--topbar-height))] flex-col lg:ps-[340px]"
     >
       <!-- `flex-1` PLUTÔT QUE `absolute inset-0` : la diapositive porte déjà
            `position: relative` (ses couches de fond en dépendent), et deux

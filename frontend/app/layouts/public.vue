@@ -145,6 +145,21 @@ const currentYear = new Date().getFullYear()
     <UiApiOfflineBanner />
     <UiMockDataBanner />
 
+    <!-- Le bandeau institutionnel (04/10) : même aplat que la barre, séparé d'un filet.
+         Il défile ; la barre, elle, reste collée. -->
+    <div class="h-(--topbar-height) border-b border-border-on-inverse bg-surface-inverse text-text-on-inverse-muted [--color-focus:var(--color-accent-on-inverse)]">
+      <div class="mx-auto flex h-full w-full max-w-[1280px] items-center gap-4 px-4 text-xs sm:px-6">
+        <p class="min-w-0 truncate">
+          <span class="hidden md:inline">{{ t('nav.site.owner') }} · {{ t('nav.site.parentShort') }}</span>
+          <span class="md:hidden">{{ t('nav.site.ownerShort') }} · {{ t('nav.site.parentShort') }}</span>
+        </p>
+        <div class="ml-auto flex shrink-0 items-center gap-3">
+          <UiLocaleSwitch tone="inverse" />
+          <UiThemeToggle />
+        </div>
+      </div>
+    </div>
+
     <UiNavBar v-model:open="isMobileNavOpen" :items="mainNav" :label="t('nav.main.label')">
       <template #brand>
         <!-- La barre est un aplat bleu nuit dans les deux thèmes : le symbole inversé
@@ -172,8 +187,6 @@ const currentYear = new Date().getFullYear()
       </template>
 
       <template #actions>
-        <UiLocaleSwitch tone="inverse" class="hidden sm:flex" />
-        <UiThemeToggle />
         <UiUserMenu
           v-if="auth.isAuthenticated && auth.person"
           :name="auth.person.display_name"
@@ -191,7 +204,6 @@ const currentYear = new Date().getFullYear()
       </template>
 
       <template #mobile-footer>
-        <UiLocaleSwitch tone="inverse" class="sm:hidden" />
         <NuxtLink
           v-if="auth.isAuthenticated"
           :to="localePath(myOrganizationTo)"
