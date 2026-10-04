@@ -161,10 +161,10 @@ onBeforeUnmount(() => {
         </p>
 
         <ol>
-          <li v-for="entry in section.rows" :key="entry.id" class="border-t border-border-subtle first:border-t-0">
+          <li v-for="(entry, index) in section.rows" :key="entry.id">
             <article
-              class="group relative -mx-3 grid grid-cols-[7rem_minmax(0,1fr)] gap-x-4 gap-y-1.5 rounded-md px-3 py-4 lg:grid-cols-[112px_208px_minmax(0,1fr)_172px_24px] lg:items-center lg:gap-x-7 lg:gap-y-0 lg:py-4.5"
-              :class="{ 'bg-live-surface': entry.current === 'live' }"
+              class="group relative -ml-3 grid grid-cols-[7rem_minmax(0,1fr)] gap-x-4 gap-y-1.5 rounded-md px-3 py-4 lg:grid-cols-[112px_208px_minmax(0,1fr)_172px_24px] lg:items-center lg:gap-x-7 lg:gap-y-0 lg:py-4.5"
+              :class="entry.current === 'live' ? 'bg-live-surface' : index % 2 ? 'bg-text/3' : ''"
             >
               <p class="col-start-2 row-start-1 flex flex-wrap items-baseline gap-x-2 self-start lg:col-start-1 lg:block lg:pt-1">
                 <span

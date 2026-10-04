@@ -220,3 +220,4 @@ Maquettes : [liste et semaine](https://claude.ai/artifact/MTjhU6YwDmahNgDDTRYVxK
 - **Semaine** : `EventProgrammeWeek` réécrit en colonnes ; onglets des jours sur téléphone.
 - **Écarts à la maquette** : pastilles `UiStatusBadge` (coins carrés) ; boutons secondaires en contour accent (`UiButton`) ; « Inscription ouverte », « Liste d'attente », « Entrée libre » non affichés, faute d'état d'inscription dans `v_public_schedule` — l'état temporel s'affiche à la place.
 - **Vérifié** : typecheck et tests du site verts ; vu à 1440 px en sombre et en clair (direct simulé dans le navigateur), à 390 px sans débordement. Non vu : une édition en cours avec des journées passées réelles (les données d'exemple de la COP31 sont toutes à venir).
+- **Fond alterné (04/10, demande du commanditaire)** : une ligne sur deux dans la liste, une colonne sur deux dans la semaine, en `bg-text/3` ; la colonne d'aujourd'hui garde sa teinte accent.

@@ -163,14 +163,14 @@ const shown = computed(() => columns.value.reduce((sum, column) => sum + column.
     </div>
 
     <div
-      class="mt-7 grid grid-cols-1 md:grid-cols-[repeat(var(--week-columns),minmax(0,1fr))] md:gap-x-8"
+      class="mt-7 grid grid-cols-1 md:grid-cols-[repeat(var(--week-columns),minmax(0,1fr))]"
       :style="{ '--week-columns': String(columns.length) }"
     >
       <section
-        v-for="column in columns"
+        v-for="(column, index) in columns"
         :key="column.date"
-        class="relative isolate min-w-0 pb-3 md:block md:before:absolute md:before:inset-y-0 md:before:-left-4 md:before:border-l md:before:border-border-subtle md:first:before:hidden"
-        :class="[column.selected ? 'block' : 'hidden', column.isToday ? 'md:after:absolute md:after:inset-y-0 md:after:-inset-x-4 md:after:-z-10 md:after:bg-accent/6' : '']"
+        class="min-w-0 pb-3 md:block md:border-l md:border-border-subtle md:px-4 md:first:border-l-0"
+        :class="[column.selected ? 'block' : 'hidden', column.isToday ? 'md:bg-accent/6' : index % 2 ? 'md:bg-text/3' : '']"
         :aria-label="column.label"
       >
         <button
