@@ -56,10 +56,15 @@ const isCurrent = (to: string): boolean => route.path === localePath(to)
   <header
     class="sticky top-0 z-30 min-h-(--nav-height) bg-surface-inverse text-text-on-inverse [--color-focus:var(--color-accent-on-inverse)]"
   >
-    <div class="mx-auto flex w-full max-w-[1280px] items-center gap-4 px-4 py-3 sm:px-6">
-      <slot name="brand" />
+    <!-- Sur grand écran, trois colonnes : la marque, les liens CENTRÉS (04/10), les actions. -->
+    <div
+      class="mx-auto flex w-full max-w-[1280px] items-center gap-4 px-4 py-3 sm:px-6 lg:grid lg:grid-cols-[1fr_auto_1fr]"
+    >
+      <div class="flex min-w-0 items-center lg:justify-self-start">
+        <slot name="brand" />
+      </div>
 
-      <nav class="ml-auto hidden items-center gap-1 lg:flex" :aria-label="props.label">
+      <nav class="hidden items-center gap-1 lg:flex" :aria-label="props.label">
         <NuxtLink
           v-for="item in props.items"
           :key="item.to"
@@ -76,7 +81,7 @@ const isCurrent = (to: string): boolean => route.path === localePath(to)
         </NuxtLink>
       </nav>
 
-      <div class="ml-auto flex items-center gap-2 lg:ml-0">
+      <div class="ml-auto flex items-center gap-2 lg:ml-0 lg:justify-self-end">
         <slot name="actions" />
 
         <button

@@ -21,6 +21,9 @@ import type { NavItem } from '~/types/navigation'
 
 const { t } = useI18n()
 const siteName = computed(() => t('nav.site.name'))
+
+const IFDD_URL = 'https://www.ifdd.francophonie.org'
+const OIF_URL = 'https://www.francophonie.org'
 const localePath = useLocalePath()
 const route = useRoute()
 const auth = useAuthStore()
@@ -149,9 +152,30 @@ const currentYear = new Date().getFullYear()
          Il défile ; la barre, elle, reste collée. -->
     <div class="h-(--topbar-height) border-b border-border-on-inverse bg-surface-inverse text-text-on-inverse-muted [--color-focus:var(--color-accent-on-inverse)]">
       <div class="mx-auto flex h-full w-full max-w-[1280px] items-center gap-4 px-4 text-xs sm:px-6">
+        <!-- Le nom de l'IFDD ne se traduit pas : c'est son nom officiel, en français
+             dans toutes les langues du site. -->
         <p class="min-w-0 truncate">
-          <span class="hidden md:inline">{{ t('nav.site.owner') }} · {{ t('nav.site.parentShort') }}</span>
-          <span class="md:hidden">{{ t('nav.site.ownerShort') }} · {{ t('nav.site.parentShort') }}</span>
+          <a
+            :href="IFDD_URL"
+            target="_blank"
+            rel="noopener noreferrer"
+            lang="fr"
+            class="text-text-on-inverse-muted no-underline hover:text-text-on-inverse hover:underline"
+          >
+            <span class="hidden md:inline">{{ t('nav.site.owner') }}</span>
+            <span class="md:hidden">{{ t('nav.site.ownerShort') }}</span>
+            <span class="sr-only">— {{ t('common.a11y.externalLink') }}</span>
+          </a>
+          <span aria-hidden="true"> · </span>
+          <a
+            :href="OIF_URL"
+            target="_blank"
+            rel="noopener noreferrer"
+            :title="t('nav.site.parent')"
+            class="text-text-on-inverse-muted no-underline hover:text-text-on-inverse hover:underline"
+          >
+            {{ t('nav.site.parentShort') }}<span class="sr-only"> — {{ t('nav.site.parent') }}, {{ t('common.a11y.externalLink') }}</span>
+          </a>
         </p>
         <div class="ml-auto flex shrink-0 items-center gap-3">
           <UiLocaleSwitch tone="inverse" />
