@@ -2,12 +2,12 @@
 **Ce fichier est la mémoire du projet entre deux sessions Claude Code.** Toute session commence par le lire et se termine par le mettre à jour.
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
-## Dernière mise à jour — 3 octobre 2026
+## Dernière mise à jour — 4 octobre 2026
+- 04/10 — Barre de navigation en aplat bleu nuit fermé d'un liseré aux couleurs du logo ; la veille, accueil retouché (témoignage en bas de cadre, éditions en liste par défaut, oiseau qui suit le curseur). Non déployé — [A0.4](progression/ecrans/a0.4-composants.md), [A15](progression/ecrans/a15-accueil.md).
 - 03/10 — Inscription réduite à nom, prénom, adresse et pays (pays déduit du fuseau) ; « Le même jour » avec couvertures. Non déployé, migration à jouer — [A3](progression/ecrans/a3-evenement-public.md).
 - 03/10 — La page d'une activité montre enfin la présentation détaillée, et le titre comme la présentation corrigés par l'équipe passent sur la séance publique (FR-091 amendé). Non déployé, migration à jouer — [A3](progression/ecrans/a3-evenement-public.md), [A8](progression/ecrans/a8-evaluation.md).
 - 02/10 — Page d'une activité : compte à rebours à la seconde en tête du billet, horaires sur une ligne, inscription visible dès l'arrivée et barre fixe qui la suit ; « Sur place » tu quand la séance est diffusée (03/10). Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
 - 01/10 — Liste du programme avec image de couverture, logo de l'organisation et drapeau des institutions nationales. Non déployé, migration de vue à jouer — [A3](progression/ecrans/a3-evenement-public.md).
-- 30/09 — Programmation publique : filtres sur une ligne, jours figés au défilement, liste de tout le programme qui suit le jour lu. Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
 
 ## État général
 | Domaine | État |
@@ -28,7 +28,7 @@ Un écran = un fichier : ce qui a été livré, les écarts entre le modèle et 
 | A0.1 | Socle Nuxt, Tailwind, i18n, jetons | ✅ 16/08 | [écarts et vérifications](progression/ecrans/a0.1-socle.md) |
 | A0.2 | Types TypeScript dérivés du SQL | ✅ 16/08 | [écarts et vérifications](progression/ecrans/a0.2-types.md) |
 | A0.3 | Données simulées | ✅ 16/08 | [écarts et vérifications](progression/ecrans/a0.3-donnees-simulees.md) |
-| A0.4 | Composants d'interface + page de guide de style | ✅ 16/08 · navigation latérale du back-office refondue 04/09 | [écarts et vérifications](progression/ecrans/a0.4-composants.md) |
+| A0.4 | Composants d'interface + page de guide de style | ✅ 16/08 · navigation latérale du back-office refondue 04/09 · barre publique en aplat bleu nuit 04/10, non déployé | [écarts et vérifications](progression/ecrans/a0.4-composants.md) |
 | A1 | Authentification | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a1-authentification.md) |
 | A2 | Rattachement à une organisation | ✅ 17/08 · texte allégé 28/09 · rejoindre ne bloque plus le dépôt 28/09 · en production 29/09 | [écarts et vérifications](progression/ecrans/a2-organisation.md) |
 | A3 | Page publique de l'événement | ✅ 17/08 · refondue 19/08 · corrigée 27/08 · bandeau de programmation 16/09 · en production · affiche et page d'activité 30/09 · page d'activité resserrée 02/10, présentation détaillée et inscription allégée 03/10, non déployé | [écarts et vérifications](progression/ecrans/a3-evenement-public.md) |

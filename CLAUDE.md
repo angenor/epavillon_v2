@@ -204,6 +204,10 @@ Même forme d'exception, autre matière. L'interrupteur n'est plus une pastille 
 
 L'exception s'arrête à cette commande. Partout ailleurs, la structure passe par les bordures et les ombres restent discrètes. Le dessin vit dans `UiSwitch` et nulle part ailleurs : **aucun écran ne dessine sa propre bascule**, et le `ThemeToggle` de la barre de navigation garde le sien, qui n'est pas un interrupteur de réglage.
 
+**La barre de navigation : aplat bleu nuit et liseré, arbitré le 04/10.**
+
+La barre du site public est un aplat institutionnel (`--color-surface-inverse`) dans les deux thèmes, fermée par un liseré de 4 px aux couleurs du logo (`--color-stripe-1` à `-5`). Tout ce qui s'y pose prend sa variante sur fond sombre : `UiLocaleSwitch` et `UiUserMenu` avec `tone="inverse"`, `UiButton` en `inverse`, l'anneau de focus redéfini sur `--color-accent-on-inverse`. `--nav-height` vaut 72 px, liseré compris.
+
 **L'oiseau : réservé à l'accueil, arbitré le 03/10.**
 
 L'illustration fournie par le commanditaire (`docs/bird-cursor/`) suit le curseur sur `/` et nulle part ailleurs : `useBirdCursor()` la monte avec la page et la retire en la quittant. Souris seulement, jamais sur écran tactile ni avec « moins d'animations ». Il se pose sur les `data-bird-perch` et parle au survol des `data-bird-say`, dont le texte passe par i18n (`home.bird.*`). Sa bulle prend les jetons ; ses couleurs propres sont celles d'une illustration. `public/bird-cursor.js` est la copie servie, et elle a divergé de la livraison : bulle aux jetons et à son propre niveau d'empilement, sourire (2 s de survol ou un clic : œil en arc, bulle contente, phrases passées par `happyTexts`). Les ajouts y sont marqués « ePavillon ». L'oiseau passe sous la barre de navigation, la bulle au-dessus.

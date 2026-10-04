@@ -231,6 +231,14 @@
   --color-border-on-inverse: var(--ifdd-bleu-700);
   --color-accent-on-inverse: var(--ifdd-cyan-300); /* repère graphique, jamais du texte courant */
 
+  /* Le liseré sous la barre de navigation, aux couleurs du logo et dans son ordre
+     (arbitré le 04/10). Décoratif ; posé sur l'aplat, il ne s'inverse pas. */
+  --color-stripe-1: var(--ifdd-cyan);
+  --color-stripe-2: var(--ifdd-violet);
+  --color-stripe-3: var(--ifdd-jaune);
+  --color-stripe-4: var(--ifdd-vert);
+  --color-stripe-5: var(--ifdd-rouge);
+
   /* Voile posé sur une photographie. Le site institutionnel en couvre TOUTES
      ses images (22 % sur une vignette, 58 % sur le bandeau d'ouverture) : c'est
      ce qui empêche une photo claire de trouer la page. Sans ce rôle, un
@@ -386,13 +394,13 @@
   --color-live-surface: var(--ifdd-rouge-50);
   --color-live-border: var(--ifdd-rouge-300);
 
-  /* Hauteur de la barre de navigation, bordure comprise. Elle existe pour UNE
+  /* Hauteur de la barre de navigation, liseré compris (68 + 4 px depuis le 04/10). Elle existe pour UNE
      raison : le bandeau d'accueil doit occuper exactement un écran, ni plus ni
      moins, et il ne peut le calculer qu'en retranchant cette hauteur de
      `100svh`. La barre elle-même s'y cale (`min-h`), sans quoi la valeur
      mentirait dès qu'un logo change d'un pixel — c'était le cas : 69 px sur
      grand écran, 67,8 px sur mobile. */
-  --nav-height: 4.3125rem;
+  --nav-height: 4.5rem;
 
   /* L'en-tête du back-office sur grand écran, bordure comprise : ce qui s'y colle
      en dessous (la barre de pages de l'aperçu) se cale sur cette valeur. */

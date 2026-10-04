@@ -20,6 +20,7 @@ import type { NavItem } from '~/types/navigation'
  */
 
 const { t } = useI18n()
+const siteName = computed(() => t('nav.site.name'))
 const localePath = useLocalePath()
 const route = useRoute()
 const auth = useAuthStore()
@@ -146,26 +147,24 @@ const currentYear = new Date().getFullYear()
 
     <UiNavBar v-model:open="isMobileNavOpen" :items="mainNav" :label="t('nav.main.label')">
       <template #brand>
+        <!-- La barre est un aplat bleu nuit dans les deux thèmes : le symbole inversé
+             toujours, et le nom écrit, dont le texte nomme le lien. -->
         <NuxtLink :to="localePath('/')" class="flex shrink-0 items-center gap-3 no-underline">
           <img
-            :src="assetUrl('/logos/svg/epavillon-symbole.svg')"
-            :alt="t('nav.site.name')"
-            class="h-10 w-auto dark:hidden"
-            width="42"
-            height="40"
-          >
-          <img
             :src="assetUrl('/logos/svg/epavillon-symbole-inverse.svg')"
-            :alt="t('nav.site.name')"
-            class="hidden h-10 w-auto dark:block"
+            alt=""
+            class="h-10 w-auto"
             width="42"
             height="40"
           >
+          <span class="font-display text-xl tracking-tight text-text-on-inverse">
+            <span class="font-light">{{ siteName.slice(0, 1) }}</span><span class="font-bold">{{ siteName.slice(1) }}</span>
+          </span>
         </NuxtLink>
       </template>
 
       <template #actions>
-        <UiLocaleSwitch class="hidden sm:flex" />
+        <UiLocaleSwitch tone="inverse" class="hidden sm:flex" />
         <UiThemeToggle />
         <UiUserMenu
           v-if="auth.isAuthenticated && auth.person"
@@ -174,41 +173,40 @@ const currentYear = new Date().getFullYear()
           :items="accountNav"
           :label="t('nav.account.menuLabel')"
           :sign-out-label="t('nav.account.logout')"
+          tone="inverse"
           @sign-out="signOut()"
         />
-        <NuxtLink
-          v-else
-          :to="localePath('/connexion')"
-          class="hidden rounded-md border border-border px-3 py-2 text-sm text-text no-underline transition-colors hover:bg-surface-hover sm:inline-block"
-        >
-          {{ t('nav.account.login') }}
-        </NuxtLink>
+        <!-- L'enveloppe porte le masquage : posé sur le bouton, il perd contre son propre `inline-flex`. -->
+        <span v-else class="hidden sm:inline-flex">
+          <UiButton variant="inverse" :to="localePath('/connexion')" :label="t('nav.account.login')" />
+        </span>
       </template>
 
       <template #mobile-footer>
-        <UiLocaleSwitch class="sm:hidden" />
+        <UiLocaleSwitch tone="inverse" class="sm:hidden" />
         <NuxtLink
           v-if="auth.isAuthenticated"
           :to="localePath(myOrganizationTo)"
-          class="text-sm text-text-secondary no-underline"
+          class="text-sm text-text-on-inverse-muted no-underline hover:text-text-on-inverse"
         >
           {{ t('nav.account.myOrganization') }}
         </NuxtLink>
         <UiButton
           v-if="auth.isAuthenticated"
           class="ml-auto"
-          variant="secondary"
+          variant="inverse"
           size="sm"
           :label="t('nav.account.logout')"
           @click="signOut()"
         />
-        <NuxtLink
+        <UiButton
           v-else
+          class="ml-auto"
+          variant="inverse"
+          size="sm"
           :to="localePath('/connexion')"
-          class="ml-auto rounded-md border border-border px-3 py-2 text-sm text-text no-underline"
-        >
-          {{ t('nav.account.login') }}
-        </NuxtLink>
+          :label="t('nav.account.login')"
+        />
       </template>
     </UiNavBar>
 

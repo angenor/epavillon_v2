@@ -19,7 +19,28 @@ import type { LocaleCode } from '~/types/shared'
  * dans la Francophonie.
  */
 
+interface Props {
+  /** `inverse` : posé sur un aplat institutionnel (la barre de navigation publique). */
+  tone?: 'default' | 'inverse'
+}
+
+const props = withDefaults(defineProps<Props>(), { tone: 'default' })
+
 const { t, locale, locales } = useI18n()
+
+const tones = computed(() =>
+  props.tone === 'inverse'
+    ? {
+        frame: 'border-border-on-inverse',
+        current: 'bg-surface-inverse-raised text-text-on-inverse',
+        other: 'text-text-on-inverse-muted hover:bg-surface-inverse-raised hover:text-text-on-inverse',
+      }
+    : {
+        frame: 'border-border',
+        current: 'bg-accent-surface text-accent',
+        other: 'text-text-subtle hover:bg-surface-hover hover:text-text',
+      },
+)
 const switchLocalePath = useSwitchLocalePath()
 
 const available = computed(() =>
@@ -32,17 +53,13 @@ const available = computed(() =>
 </script>
 
 <template>
-  <nav class="flex items-center rounded-md border border-border" :aria-label="t('nav.language.label')">
+  <nav class="flex items-center rounded-md border" :class="tones.frame" :aria-label="t('nav.language.label')">
     <NuxtLink
       v-for="entry in available"
       :key="entry.code"
       :to="switchLocalePath(entry.code)"
       class="px-2.5 py-1.5 text-xs font-semibold uppercase no-underline transition-colors first:rounded-l-md last:rounded-r-md"
-      :class="
-        entry.code === locale
-          ? 'bg-accent-surface text-accent'
-          : 'text-text-subtle hover:bg-surface-hover hover:text-text'
-      "
+      :class="entry.code === locale ? tones.current : tones.other"
       :aria-current="entry.code === locale ? 'true' : undefined"
       :lang="entry.language"
       :hreflang="entry.language"

@@ -43,9 +43,11 @@ interface Props {
   label: string
   /** Libellé de la déconnexion — l'action qui ferme le panneau. */
   signOutLabel: string
+  /** `inverse` : déclencheur posé sur un aplat institutionnel ; le panneau, lui, ne change pas. */
+  tone?: 'default' | 'inverse'
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { tone: 'default' })
 const emit = defineEmits<{ 'sign-out': [] }>()
 
 const { t } = useI18n()
@@ -62,6 +64,22 @@ const panel = ref<HTMLElement | null>(null)
 let closeTimer: ReturnType<typeof setTimeout> | null = null
 
 const initials = computed(() => initialsOf(props.name))
+
+const tones = computed(() =>
+  props.tone === 'inverse'
+    ? {
+        trigger: 'hover:border-border-on-inverse focus-visible:border-border-on-inverse',
+        open: 'border-border-on-inverse bg-surface-inverse-raised',
+        bubble: 'border-accent-on-inverse bg-surface-inverse-raised text-text-on-inverse',
+        chevron: 'text-text-on-inverse-muted',
+      }
+    : {
+        trigger: 'hover:border-border focus-visible:border-border',
+        open: 'border-border bg-surface-hover',
+        bubble: 'border-accent-border bg-accent-surface text-accent',
+        chevron: 'text-text-muted',
+      },
+)
 
 const isCurrent = (to: string): boolean => route.path === localePath(to)
 
@@ -149,8 +167,8 @@ onBeforeUnmount(() => {
     <button
       ref="trigger"
       type="button"
-      class="flex min-h-(--target-min) cursor-pointer items-center gap-1.5 rounded-full border border-transparent px-1 transition-colors duration-(--duration-fast) hover:border-border focus-visible:border-border"
-      :class="isOpen ? 'border-border bg-surface-hover' : ''"
+      class="flex min-h-(--target-min) cursor-pointer items-center gap-1.5 rounded-full border border-transparent px-1 transition-colors duration-(--duration-fast)"
+      :class="[tones.trigger, isOpen ? tones.open : '']"
       :aria-expanded="isOpen"
       aria-haspopup="menu"
       aria-controls="ui-user-menu"
@@ -163,7 +181,8 @@ onBeforeUnmount(() => {
            l'œil plus que la navigation elle-même. -->
       <span
         aria-hidden="true"
-        class="grid size-9 shrink-0 place-items-center rounded-full border border-accent-border bg-accent-surface text-sm font-semibold text-accent"
+        class="grid size-9 shrink-0 place-items-center rounded-full border text-sm font-semibold"
+        :class="tones.bubble"
       >
         {{ initials }}
       </span>
@@ -171,8 +190,8 @@ onBeforeUnmount(() => {
         name="chevron-down"
         size="1rem"
         :stroke-width="1.8"
-        class="text-text-muted transition-transform duration-(--duration-fast)"
-        :class="isOpen ? 'rotate-180' : ''"
+        class="transition-transform duration-(--duration-fast)"
+        :class="[tones.chevron, isOpen ? 'rotate-180' : '']"
       />
     </button>
 

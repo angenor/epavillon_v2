@@ -796,13 +796,15 @@ table.data tbody tr[aria-selected="true"] { background: var(--color-accent-surfa
 /* =========================================================================
    NAVIGATION
    ========================================================================= */
-.appnav { display: flex; align-items: center; gap: var(--space-5); padding: var(--space-3) var(--space-5); background: var(--color-surface); border: var(--border-thin) solid var(--color-border); border-radius: var(--radius-lg); flex-wrap: wrap; }
+.appnav { display: flex; align-items: center; gap: var(--space-5); padding: var(--space-3) var(--space-5); background: var(--ifdd-bleu-900); color: #FFFFFF; border-radius: var(--radius-lg) var(--radius-lg) 0 0; flex-wrap: wrap; border-bottom: 4px solid; border-image: linear-gradient(to right, var(--ifdd-cyan) 0 20%, var(--ifdd-violet) 20% 40%, var(--ifdd-jaune) 40% 60%, var(--ifdd-vert) 60% 80%, var(--ifdd-rouge) 80%) 1; }
+.appnav .appnav-brand, .appnav .langswitch button { color: #FFFFFF; }
+.appnav .appnav-brand small { color: var(--ifdd-bleu-200); }
 .appnav-brand { display: flex; align-items: baseline; gap: var(--space-2); font-family: var(--font-title); font-weight: var(--font-weight-bold); font-size: var(--font-size-4); letter-spacing: var(--letter-spacing-title); }
 .appnav-brand small { font-family: var(--font-body); font-size: var(--font-size-7); font-weight: var(--font-weight-regular); color: var(--color-text-muted); letter-spacing: 0; }
 .appnav-links { display: flex; gap: var(--space-1); flex-wrap: wrap; }
-.appnav-links a { display: inline-flex; align-items: center; min-height: var(--target-min); padding: 0 var(--space-3); border-radius: var(--radius-md); text-decoration: none; color: var(--color-text-secondary); font-size: var(--font-size-6); font-weight: var(--font-weight-bold); }
-.appnav-links a:hover { background: var(--color-surface-sunken); color: var(--color-text); }
-.appnav-links a[aria-current="page"] { color: var(--color-accent); box-shadow: inset 0 -3px 0 var(--color-accent); border-radius: var(--radius-md) var(--radius-md) 0 0; }
+.appnav-links a { display: inline-flex; align-items: center; min-height: var(--target-min); padding: 0 var(--space-3); border-radius: var(--radius-md); text-decoration: none; color: var(--ifdd-bleu-200); font-size: var(--font-size-6); font-weight: var(--font-weight-bold); }
+.appnav-links a:hover { background: var(--ifdd-bleu-800); color: #FFFFFF; }
+.appnav-links a[aria-current="page"] { color: #FFFFFF; box-shadow: inset 0 -3px 0 var(--ifdd-cyan-300); border-radius: var(--radius-md) var(--radius-md) 0 0; }
 .appnav-tools { margin-inline-start: auto; display: flex; gap: var(--space-2); align-items: center; }
 .langswitch { display: inline-flex; border: var(--border-thin) solid var(--color-border-strong); border-radius: var(--radius-md); overflow: hidden; }
 .langswitch button { cursor: pointer; border: 0; background: var(--color-surface); color: var(--color-text-secondary); font-family: var(--font-body); font-size: var(--font-size-7); font-weight: var(--font-weight-bold); padding: 0 var(--space-3); min-height: var(--target-compact); min-width: 44px; }
@@ -1719,7 +1721,7 @@ table.data td.num { text-align: end; font-variant-numeric: tabular-nums; }
 
   <div class="block" id="navigation">
     <h3>Navigation</h3>
-    <p class="note">La barre principale porte le sélecteur de langue et la bascule de thème à droite ; l'onglet actif se signale par un filet de 3 px, pas par un aplat. Le fil d'Ariane n'apparaît qu'à partir du troisième niveau de profondeur.</p>
+    <p class="note">La barre principale porte le sélecteur de langue et la bascule de thème à droite ; l'onglet actif se signale par un filet de 3 px, pas par un aplat. <strong>Depuis le 04/10, la barre du site public est un aplat bleu nuit dans les deux thèmes, fermé par un liseré de 4 px aux cinq couleurs du logo</strong> (cyan, violet, jaune, vert, rouge, dans cet ordre) ; le filet actif y prend l'accent clair, l'anneau de focus aussi. Le fil d'Ariane n'apparaît qu'à partir du troisième niveau de profondeur.</p>
     <div class="stack">
       <div><span class="state-label">Barre principale</span>
         <nav class="appnav">

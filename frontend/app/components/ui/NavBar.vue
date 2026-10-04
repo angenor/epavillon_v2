@@ -24,6 +24,10 @@ import type { NavItem } from '~/types/navigation'
  *
  * STICKY : la barre reste en tête au défilement. C'est une navigation de site
  * public, où l'on saute souvent d'une section à l'autre.
+ *
+ * APLAT BLEU NUIT ET LISERÉ, arbitré le 04/10 : la barre est un aplat
+ * institutionnel dans les deux thèmes, fermée par un liseré aux couleurs du
+ * logo. L'anneau de focus y prend l'accent clair, le cyan foncé ne s'y voyant pas.
  */
 
 interface Props {
@@ -49,7 +53,9 @@ const isCurrent = (to: string): boolean => route.path === localePath(to)
        en page, lue par le bandeau d'accueil pour occuper exactement un écran.
        Sans elle, elle variait de 69 à 67,8 px selon la largeur, au gré du
        rendu du logo. Le menu mobile déplié la fait grandir, et c'est voulu. -->
-  <header class="sticky top-0 z-30 min-h-(--nav-height) border-b border-border bg-surface-raised">
+  <header
+    class="sticky top-0 z-30 min-h-(--nav-height) bg-surface-inverse text-text-on-inverse [--color-focus:var(--color-accent-on-inverse)]"
+  >
     <div class="mx-auto flex w-full max-w-[1280px] items-center gap-4 px-4 py-3 sm:px-6">
       <slot name="brand" />
 
@@ -61,8 +67,8 @@ const isCurrent = (to: string): boolean => route.path === localePath(to)
           class="inline-flex min-h-(--target-min) items-center rounded-md px-3 text-sm font-semibold no-underline transition-colors duration-(--duration-fast)"
           :class="
             isCurrent(item.to)
-              ? 'rounded-b-none text-accent shadow-[inset_0_-3px_0_var(--color-accent)]'
-              : 'text-text-secondary hover:bg-surface-hover hover:text-text'
+              ? 'rounded-b-none text-text-on-inverse shadow-[inset_0_-3px_0_var(--color-accent-on-inverse)]'
+              : 'text-text-on-inverse-muted hover:bg-surface-inverse-raised hover:text-text-on-inverse'
           "
           :aria-current="isCurrent(item.to) ? 'page' : undefined"
         >
@@ -75,7 +81,7 @@ const isCurrent = (to: string): boolean => route.path === localePath(to)
 
         <button
           type="button"
-          class="rounded-md border border-border p-2 text-text transition-colors hover:bg-surface-hover lg:hidden"
+          class="rounded-md border border-border-on-inverse p-2 text-text-on-inverse transition-colors hover:bg-surface-inverse-raised lg:hidden"
           :aria-expanded="props.open"
           aria-controls="ui-navbar-mobile"
           @click="emit('update:open', !props.open)"
@@ -91,7 +97,7 @@ const isCurrent = (to: string): boolean => route.path === localePath(to)
     <nav
       v-if="props.open"
       id="ui-navbar-mobile"
-      class="border-t border-border-subtle bg-surface-raised px-4 py-2 lg:hidden"
+      class="border-t border-border-on-inverse bg-surface-inverse px-4 py-2 lg:hidden"
       :aria-label="props.label"
     >
       <!-- Menu empilé : le même filet de 3 px, mais posé au bord d'attaque de
@@ -104,17 +110,24 @@ const isCurrent = (to: string): boolean => route.path === localePath(to)
         class="flex min-h-(--target-min) items-center rounded-md px-3 text-sm font-semibold no-underline transition-colors duration-(--duration-fast)"
         :class="
           isCurrent(item.to)
-            ? 'text-accent shadow-[inset_3px_0_0_var(--color-accent)]'
-            : 'text-text-secondary hover:bg-surface-hover hover:text-text'
+            ? 'text-text-on-inverse shadow-[inset_3px_0_0_var(--color-accent-on-inverse)]'
+            : 'text-text-on-inverse-muted hover:bg-surface-inverse-raised hover:text-text-on-inverse'
         "
         :aria-current="isCurrent(item.to) ? 'page' : undefined"
       >
         {{ t(item.labelKey) }}
       </NuxtLink>
 
-      <div v-if="$slots['mobile-footer']" class="mt-2 flex items-center gap-2 border-t border-border-subtle pt-2">
+      <div v-if="$slots['mobile-footer']" class="mt-2 flex items-center gap-2 border-t border-border-on-inverse pt-2">
         <slot name="mobile-footer" />
       </div>
     </nav>
+    <div class="flex h-1" aria-hidden="true">
+      <span class="flex-1 bg-stripe-1" />
+      <span class="flex-1 bg-stripe-2" />
+      <span class="flex-1 bg-stripe-3" />
+      <span class="flex-1 bg-stripe-4" />
+      <span class="flex-1 bg-stripe-5" />
+    </div>
   </header>
 </template>
