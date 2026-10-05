@@ -110,7 +110,7 @@ onBeforeUnmount(() => {
         >
           <span class="gn-planche-jeton">--gn-duree-{{ cle }}</span>
           <span class="gn-planche-valeur">
-            {{ valeur(`--gn-duree-${cle}`) }} — {{ t(`gn-planche-mouvement.usage.${cle}`) }}
+            {{ valeur(`--gn-duree-${cle}`) }} · {{ t(`gn-planche-mouvement.usage.${cle}`) }}
           </span>
           <div class="gn-planche-mouvement__piste">
             <div
@@ -159,14 +159,14 @@ onBeforeUnmount(() => {
         <div class="gn-planche-mouvement__carte">
           <span class="gn-planche-jeton">--gn-duree-arc</span>
           <span class="gn-planche-valeur">
-            {{ valeur('--gn-duree-arc') }} — {{ t('gn-planche-mouvement.usage.arc') }}
+            {{ valeur('--gn-duree-arc') }} · {{ t('gn-planche-mouvement.usage.arc') }}
           </span>
           <div class="gn-planche-mouvement__arc" />
         </div>
         <div class="gn-planche-mouvement__carte">
           <span class="gn-planche-jeton">--gn-duree-squelette</span>
           <span class="gn-planche-valeur">
-            {{ valeur('--gn-duree-squelette') }} — {{ t('gn-planche-mouvement.usage.squelette') }}
+            {{ valeur('--gn-duree-squelette') }} · {{ t('gn-planche-mouvement.usage.squelette') }}
           </span>
           <div class="gn-planche-mouvement__squelette" />
           <div class="gn-planche-mouvement__squelette gn-planche-mouvement__squelette--courte" />
@@ -180,7 +180,7 @@ onBeforeUnmount(() => {
         <div class="gn-planche-mouvement__carte">
           <span class="gn-planche-jeton">--gn-duree-ephemere</span>
           <span class="gn-planche-valeur">
-            {{ valeur('--gn-duree-ephemere') }} — {{ t('gn-planche-mouvement.usage.ephemere') }}
+            {{ valeur('--gn-duree-ephemere') }} · {{ t('gn-planche-mouvement.usage.ephemere') }}
           </span>
           <GnBouton variante="secondaire" @clic="jouerEphemere">
             {{ t('gn-planche-mouvement.envoyer') }}
@@ -262,7 +262,7 @@ onBeforeUnmount(() => {
   height: var(--gn-picto-taille);
   border: var(--gn-filet-2) solid var(--gn-accent);
   border-top-color: transparent;
-  border-radius: var(--gn-rayon-24);
+  border-radius: var(--gn-rayon-pilule);
   animation: gn-spin var(--gn-duree-arc) linear infinite;
 }
 
@@ -308,8 +308,8 @@ onBeforeUnmount(() => {
   gap: var(--gn-espace-8);
   min-height: var(--gn-cible);
   color: var(--gn-texte);
-  font-size: var(--gn-taille-17);
+  font-size: var(--gn-taille-15);
   font-weight: var(--gn-graisse-demi-gras);
-  line-height: var(--gn-interligne-17);
+  line-height: var(--gn-interligne-15);
 }
 </style>

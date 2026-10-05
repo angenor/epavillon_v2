@@ -291,7 +291,7 @@ useHead({ title: computed(() => document.value?.title ?? t('guide-nego.document.
     :onglets="false"
     :ce-qui-se-lit="ceQuiSeLit"
   >
-    <GnChargement v-if="!etat.pret" forme="squelette" :lignes="6" class="gn-fiche__attente" />
+    <GnChargement v-if="!etat.pret" forme="squelette" :lignes="6" />
 
     <GnEtatErreur
       v-else-if="!bibliotheque"
@@ -313,7 +313,6 @@ useHead({ title: computed(() => document.value?.title ?? t('guide-nego.document.
     <div v-else class="gn-fiche">
       <GnBandeauRemplace
         v-if="remplacant"
-        class="gn-fiche__bandeau"
         :titre="remplacant.title"
         :publie-le="remplacant.published_at"
         :pages="remplacant.page_count"
@@ -499,49 +498,48 @@ useHead({ title: computed(() => document.value?.title ?? t('guide-nego.document.
   flex: 1;
   display: flex;
   flex-direction: column;
-}
-
-[data-app="guide-nego"] .gn-fiche__attente {
-  padding-top: var(--gn-espace-16);
-}
-
-[data-app="guide-nego"] .gn-fiche__bandeau {
-  margin-inline: calc(-1 * var(--gn-marge-ecran));
+  gap: var(--gn-espace-20);
 }
 
 [data-app="guide-nego"] .gn-fiche__corps {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding-bottom: var(--gn-espace-16);
+  gap: var(--gn-espace-20);
 }
 
 [data-app="guide-nego"] .gn-fiche__marques {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   column-gap: var(--gn-espace-12);
   row-gap: var(--gn-espace-4);
-  padding-top: var(--gn-espace-12);
 }
 
 [data-app="guide-nego"] .gn-fiche__taille {
   display: inline-flex;
   align-items: center;
-  gap: var(--gn-espace-8);
+  gap: 6px;
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  font-weight: var(--gn-graisse-gras);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
+  font-weight: var(--gn-graisse-demi-gras);
 }
 
 [data-app="guide-nego"] .gn-fiche__lien {
   align-self: flex-start;
-  margin-top: var(--gn-espace-12);
+}
+
+/* Une étiquette suit les marques de près : c'est la même ligne d'état. */
+[data-app="guide-nego"] .gn-fiche__marques + .gn-fiche__lien {
+  margin-top: calc(-1 * var(--gn-espace-8));
 }
 
 [data-app="guide-nego"] .gn-fiche__resume {
-  margin-top: var(--gn-espace-12);
   max-width: var(--gn-mesure-lecture);
+  color: var(--gn-texte-lecture);
+  font-size: var(--gn-taille-17);
+  line-height: var(--gn-interligne-17);
   overflow-wrap: anywhere;
 }
 
@@ -549,21 +547,33 @@ useHead({ title: computed(() => document.value?.title ?? t('guide-nego.document.
   color: var(--gn-texte-2);
 }
 
+/* Le bloc de la maquette (« Le fil du jour ») : fond relevé, rayon 24, titre Sora 16. */
+[data-app="guide-nego"] .gn-fiche__section {
+  padding: 18px var(--gn-espace-16);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gn-espace-12);
+  border-radius: var(--gn-rayon-24);
+  background: var(--gn-fond-2);
+}
+
 [data-app="guide-nego"] .gn-fiche__intertitre {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  padding: var(--gn-espace-16) 0 6px;
-  border-bottom: var(--gn-filet-3) solid var(--gn-filet-fort);
-  color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  gap: var(--gn-espace-8);
+  color: var(--gn-titre);
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
   font-weight: var(--gn-graisse-gras);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
 }
 
 [data-app="guide-nego"] .gn-fiche__compte {
+  color: var(--gn-texte-2);
+  font-family: var(--gn-police);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   font-weight: var(--gn-graisse-regulier);
 }
 
@@ -571,53 +581,60 @@ useHead({ title: computed(() => document.value?.title ?? t('guide-nego.document.
   display: flex;
   flex-wrap: wrap;
   gap: var(--gn-espace-8);
-  padding-block: 10px;
   list-style: none;
 }
 
 [data-app="guide-nego"] .gn-fiche__thematique {
-  min-height: var(--gn-filtre-hauteur);
+  min-height: 36px;
   padding-inline: 14px;
   display: inline-flex;
   align-items: center;
-  border: var(--gn-filet-2) solid var(--gn-filet);
-  border-radius: var(--gn-rayon-24);
+  border: var(--gn-filet-1) solid var(--gn-filet);
+  border-radius: var(--gn-rayon-pilule);
   color: var(--gn-texte);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   font-weight: var(--gn-graisse-demi-gras);
 }
 
 [data-app="guide-nego"] .gn-fiche__aucune {
-  padding-block: 10px;
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 
 [data-app="guide-nego"] .gn-fiche__detail {
+  min-height: var(--gn-cible);
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: var(--gn-espace-12);
   padding-block: 10px;
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
+}
+
+[data-app="guide-nego"] .gn-fiche__detail:first-child {
+  padding-top: 0;
+  min-height: 0;
 }
 
 [data-app="guide-nego"] .gn-fiche__detail:last-child {
+  padding-bottom: 0;
+  min-height: 0;
   border-bottom: none;
 }
 
 [data-app="guide-nego"] .gn-fiche__detail dt {
   flex: none;
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
 }
 
 [data-app="guide-nego"] .gn-fiche__detail dd {
   min-width: 0;
-  font-weight: var(--gn-graisse-demi-gras);
+  color: var(--gn-texte);
+  font-weight: var(--gn-graisse-gras);
   text-align: end;
   overflow-wrap: anywhere;
 }
@@ -626,18 +643,23 @@ useHead({ title: computed(() => document.value?.title ?? t('guide-nego.document.
   color: var(--gn-accent);
 }
 
+/* Une ligne-carte : le document est sur le téléphone, on peut le lire. */
 [data-app="guide-nego"] .gn-fiche__garde {
-  min-height: var(--gn-cible);
-  margin-top: var(--gn-espace-8);
+  min-height: var(--gn-ligne-reglage);
   padding-inline: var(--gn-espace-16);
   display: flex;
   align-items: center;
   gap: var(--gn-espace-12);
-  background: var(--gn-titre);
-  color: var(--gn-sur-titre);
+  border-radius: var(--gn-rayon-16);
+  background: var(--gn-fond-2);
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
   font-weight: var(--gn-graisse-demi-gras);
+}
+
+[data-app="guide-nego"] .gn-fiche__garde > .gn-picto {
+  flex: none;
+  color: var(--gn-accent);
 }
 
 [data-app="guide-nego"] .gn-fiche__garde-texte {
@@ -647,25 +669,27 @@ useHead({ title: computed(() => document.value?.title ?? t('guide-nego.document.
 
 [data-app="guide-nego"] .gn-fiche__garde-lien {
   flex: none;
-  min-height: var(--gn-cible);
+  min-height: var(--gn-bouton-rond);
   display: inline-flex;
   align-items: center;
-  color: var(--gn-action-sur-titre);
-  font-weight: var(--gn-graisse-gras);
-  text-decoration-line: var(--gn-action-sur-titre-trait);
+  color: var(--gn-accent);
+  font-weight: var(--gn-graisse-extra-gras);
+  text-decoration: underline;
   text-underline-offset: var(--gn-espace-4);
 }
 
+/* La zone d'actions colle au bas comme la barre d'onglets, et en prend le fond et le filet. */
 [data-app="guide-nego"] .gn-fiche__actions {
   position: sticky;
   bottom: 0;
   margin-inline: calc(-1 * var(--gn-marge-ecran));
+  margin-bottom: calc(-1 * var(--gn-sur-bas-geste));
   padding: var(--gn-espace-16) var(--gn-marge-ecran) calc(var(--gn-espace-16) + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
   gap: var(--gn-espace-8);
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
-  background: var(--gn-fond);
+  border-top: var(--gn-filet-1) solid var(--gn-filet-doux);
+  background: var(--gn-barre-fond);
 }
 
 [data-app="guide-nego"] .gn-fiche__paire {
@@ -677,14 +701,16 @@ useHead({ title: computed(() => document.value?.title ?? t('guide-nego.document.
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--gn-espace-8);
-  padding: var(--gn-espace-8) var(--gn-espace-12);
-  border: var(--gn-filet-1) solid var(--gn-filet);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  gap: var(--gn-espace-8) var(--gn-espace-12);
+  padding: var(--gn-espace-12) var(--gn-espace-16);
+  border-radius: var(--gn-rayon-16);
+  background: var(--gn-fond-2);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 
 [data-app="guide-nego"] .gn-fiche__issue-picto {
+  flex: none;
   color: var(--gn-danger);
 }
 
@@ -694,21 +720,21 @@ useHead({ title: computed(() => document.value?.title ?? t('guide-nego.document.
 }
 
 [data-app="guide-nego"] .gn-fiche__issue-sortie {
-  min-height: var(--gn-cible);
+  min-height: var(--gn-bouton-rond);
   display: inline-flex;
   align-items: center;
   color: var(--gn-accent);
-  font-weight: var(--gn-graisse-gras);
+  font-weight: var(--gn-graisse-extra-gras);
   text-decoration: underline;
   text-underline-offset: var(--gn-espace-4);
 }
 
 [data-app="guide-nego"] .gn-fiche__avancement {
-  min-height: var(--gn-cible);
+  min-height: var(--gn-bouton-principal);
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 6px;
+  gap: var(--gn-espace-8);
 }
 
 [data-app="guide-nego"] .gn-fiche__avancement-ligne {
@@ -733,8 +759,8 @@ useHead({ title: computed(() => document.value?.title ?? t('guide-nego.document.
 
 [data-app="guide-nego"] .gn-fiche__avancement-octets {
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
 }
 
 [data-app="guide-nego"] .gn-fiche__sorties-compte {

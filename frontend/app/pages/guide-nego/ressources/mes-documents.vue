@@ -149,7 +149,7 @@ useHead({ title: t('guide-nego.mes-documents.titre') })
     />
 
     <template v-else>
-      <section>
+      <section class="gn-mes-documents__groupe">
         <GnEnteteGroupe
           :titre="t('guide-nego.mes-documents.telephone.titre')"
           :note="nombreDeCopies ? tailleLisible(placeGardee, locale) : undefined"
@@ -187,7 +187,7 @@ useHead({ title: t('guide-nego.mes-documents.titre') })
         </div>
       </section>
 
-      <section>
+      <section class="gn-mes-documents__groupe">
         <GnEnteteGroupe
           :titre="t('guide-nego.mes-documents.favoris.titre')"
           :compteur="favorisLisibles ? mesFavoris.length : undefined"
@@ -240,19 +240,35 @@ useHead({ title: t('guide-nego.mes-documents.titre') })
 </template>
 
 <style>
-[data-app="guide-nego"] .gn-mes-documents__place {
+[data-app="guide-nego"] .gn-mes-documents__groupe {
   display: flex;
   flex-direction: column;
   gap: var(--gn-espace-12);
-  padding-top: var(--gn-espace-16);
+}
+
+/* Le titre de groupe porte déjà 8 px d'air dessous. */
+[data-app="guide-nego"] .gn-mes-documents__groupe > .gn-groupe {
+  margin-bottom: calc(-1 * var(--gn-espace-8));
+}
+
+[data-app="guide-nego"] .gn-mes-documents__place {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* La place prise : une ligne-carte, comme l'information qui la suit. */
+[data-app="guide-nego"] .gn-mes-documents__place > .gn-jauge {
+  padding: var(--gn-espace-16);
+  border-radius: var(--gn-rayon-16);
+  background: var(--gn-fond-2);
 }
 
 [data-app="guide-nego"] .gn-mes-documents__texte {
-  padding-block: var(--gn-espace-12);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  color: var(--gn-texte-2);
   max-width: var(--gn-mesure-lecture);
+  color: var(--gn-texte-2);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 
 [data-app="guide-nego"] .gn-mes-documents__sorties {
@@ -265,15 +281,13 @@ useHead({ title: t('guide-nego.mes-documents.titre') })
   display: flex;
   flex-direction: column;
   gap: var(--gn-espace-8);
-  margin-top: var(--gn-espace-16);
-  padding-block: var(--gn-espace-16);
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
+  margin-top: var(--gn-entre-blocs);
 }
 
 [data-app="guide-nego"] .gn-mes-documents__reste {
-  text-align: center;
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
   color: var(--gn-texte-2);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
+  text-align: center;
 }
 </style>

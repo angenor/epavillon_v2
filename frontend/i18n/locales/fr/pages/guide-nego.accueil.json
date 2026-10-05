@@ -1,25 +1,64 @@
 {
   "titre": "Ma journée",
-  "sans-compte": {
-    "texte": "Créez votre compte ou connectez-vous : vos thématiques et vos documents vous suivront d'un appareil à l'autre.",
-    "creer-mon-compte": "Créer mon compte",
-    "me-connecter": "J'ai déjà un compte — Me connecter"
+  "contexte": {
+    "pendant": "{edition} · jour {jour} sur {total}",
+    "pendant-court": "{edition}, jour {jour}",
+    "avant": "Avant la {edition}"
+  },
+  "compte": {
+    "minutes": "{n} min",
+    "heures": "{h} h {m}",
+    "heures-pile": "{h} h",
+    "demain": "Demain",
+    "jours": "{n} jour | {n} jours",
+    "plage-et-salle": "{plage} · {salle}",
+    "libelle": {
+      "mienne": "Votre prochaine session commence dans",
+      "mienne-finit": "Votre session en cours se termine dans",
+      "mienne-depuis": "Votre session est en cours depuis",
+      "cop": "La prochaine session de négociation commence dans",
+      "cop-finit": "La session de négociation en cours se termine dans",
+      "cop-depuis": "La session de négociation est en cours depuis"
+    }
+  },
+  "ouverture": {
+    "libelle": "La {edition} s'ouvre dans",
+    "dates": "du {du} au {au}",
+    "lieu-et-dates": "{ville}, {dates}"
+  },
+  "fil": {
+    "negociation": "Négociation",
+    "francophonie": "Francophonie",
+    "pavillon": "Pavillon",
+    "resume": {
+      "negociation": "Négociation : aucun créneau aujourd'hui | Négociation : un créneau aujourd'hui | Négociation : {count} créneaux aujourd'hui",
+      "francophonie": "Francophonie : aucun créneau aujourd'hui | Francophonie : un créneau aujourd'hui | Francophonie : {count} créneaux aujourd'hui",
+      "pavillon": "Pavillon : aucun créneau aujourd'hui | Pavillon : un créneau aujourd'hui | Pavillon : {count} créneaux aujourd'hui"
+    }
+  },
+  "changements": {
+    "genre": {
+      "salle": "{titre} passe en {salle}",
+      "heure": "{titre} passe à {heure}",
+      "deplacee": "{titre} change d'heure et de salle",
+      "annulee": "{titre} n'aura pas lieu"
+    },
+    "origine": {
+      "source": "{heure} · source officielle",
+      "reseau": "{heure} · signalé par le réseau, validé"
+    }
   },
   "blocs": {
     "prochaine-session": {
-      "titre": "Votre prochaine session de négociation",
-      "vide": "Rien pour l'instant. Ajoutez une session à votre agenda, ou choisissez vos thématiques.",
-      "quand": "{jour} — {zone}",
-      "mon-agenda": "Mon agenda"
+      "titre": "Votre prochaine session",
+      "vide": "Rien pour l'instant. Ajoutez une session à votre agenda, ou choisissez vos thématiques."
     },
     "changements": {
       "titre": "Changements du jour",
-      "mis-a-jour": "mis à jour {moment}",
-      "connus": "connus {moment}",
       "vide": "Aucun changement signalé. Les salles déplacées et les sessions annulées paraîtront ici avec les signalements du réseau."
     },
     "trois-agendas": {
-      "titre": "Aujourd'hui, vos trois agendas"
+      "titre": "Le fil du jour"
     },
     "documents": {
       "titre": "Documents récents",
@@ -28,7 +67,8 @@
       "lu-page": "lu {moment}, p. {page}"
     },
     "lexique": {
-      "ouvrir": "Ouvrir le lexique anglais-français"
+      "titre": "Lexique anglais-français",
+      "precision": "Un terme entendu en salle, traduit et expliqué"
     }
   }
 }

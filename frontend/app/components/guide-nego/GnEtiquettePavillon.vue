@@ -22,7 +22,7 @@ const { t } = useI18n()
 <style>
 [data-app="guide-nego"] .gn-etiquette-pavillon {
   align-self: flex-start;
-  min-height: var(--gn-cible);
+  min-height: var(--gn-bouton-rond);
   display: inline-flex;
   align-items: center;
   color: inherit;

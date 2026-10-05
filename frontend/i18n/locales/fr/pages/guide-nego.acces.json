@@ -15,7 +15,7 @@
     "rejected": "Votre demande n'a pas été retenue. Si vous faites partie d'un réseau francophone, demandez-lui le code en cours : il ouvre les modules aussitôt.",
     "revoked": "L'IFDD a retiré votre accès aux modules réservés. Le reste de Guide Négo demeure ouvert."
   },
-  "hors-connexion": "Hors connexion — état lu {moment}.",
+  "hors-connexion": "Hors connexion : état lu {moment}.",
   "ouvre": {
     "titre": "Ce que votre accès ouvre",
     "tout": "Guide Négo en entier"

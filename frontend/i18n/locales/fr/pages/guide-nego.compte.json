@@ -1,7 +1,7 @@
 {
   "titre": "Créer mon compte",
   "sous-titre": "Un seul compte pour Guide Négo et l'ePavillon",
-  "etape": "Étape 1 sur 3 — Compte",
+  "etape": "Étape 1 sur 3 : compte",
   "champ": {
     "prenom": "Prénom",
     "nom": "Nom",
@@ -20,7 +20,7 @@
     "mot-de-passe": "Au moins {min} caractères, dont une majuscule et une minuscule."
   },
   "creer": "Créer mon compte",
-  "deja-un-compte": "J'ai déjà un compte — Me connecter",
+  "deja-un-compte": "J'ai déjà un compte : me connecter",
   "attente": {
     "titre": "Confirmez votre adresse",
     "propos": "Un courriel vient de partir à {adresse}. Touchez le lien qu'il contient pour confirmer votre adresse.",

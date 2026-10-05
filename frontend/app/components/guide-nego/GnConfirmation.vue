@@ -107,6 +107,7 @@ function confirmer() {
   opacity: var(--gn-voile-opacite);
 }
 
+/* Un bloc de la maquette : fond relevé, rayon 24, aucun bord. */
 [data-app="guide-nego"] .gn-confirmation__boite {
   position: relative;
   width: 100%;
@@ -114,30 +115,31 @@ function confirmer() {
   max-width: calc(var(--gn-cadre-largeur) - 2 * var(--gn-marge-ecran));
   max-height: 100%;
   overflow-y: auto;
-  padding: var(--gn-espace-16);
+  padding: var(--gn-espace-20);
   display: flex;
   flex-direction: column;
-  gap: var(--gn-espace-12);
-  border: var(--gn-filet-2) solid var(--gn-filet-fort);
-  border-radius: var(--gn-rayon-4);
-  background: var(--gn-fond);
+  gap: var(--gn-espace-8);
+  border-radius: var(--gn-rayon-24);
+  background: var(--gn-fond-2);
   color: var(--gn-texte);
 }
 
 [data-app="guide-nego"] .gn-confirmation__question {
   color: var(--gn-titre);
+  font-family: var(--gn-police-titre);
   font-size: var(--gn-taille-20);
   line-height: var(--gn-interligne-20);
   font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-confirmation__phrase {
+  color: var(--gn-texte-lecture);
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
 }
 
 [data-app="guide-nego"] .gn-confirmation__actions {
-  margin-top: var(--gn-espace-4);
+  margin-top: var(--gn-espace-12);
   display: flex;
   gap: var(--gn-espace-8);
 }

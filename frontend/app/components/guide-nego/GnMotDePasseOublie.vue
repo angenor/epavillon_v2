@@ -89,13 +89,15 @@ async function envoyer(): Promise<void> {
 [data-app="guide-nego"] .gn-oubli__propos {
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
-  color: var(--gn-texte-2);
+  color: var(--gn-texte-lecture);
 }
 
 [data-app="guide-nego"] .gn-oubli__panne {
-  font-size: var(--gn-taille-15);
+  margin-top: var(--gn-espace-8);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   color: var(--gn-danger);
-  font-weight: var(--gn-graisse-demi-gras);
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-oubli__sorties {

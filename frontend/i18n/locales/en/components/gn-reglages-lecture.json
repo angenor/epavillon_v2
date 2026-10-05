@@ -6,12 +6,6 @@
   "taille": {
     "libelle": "Text size"
   },
-  "theme": {
-    "libelle": "Theme",
-    "clair": "Light",
-    "sombre": "Dark",
-    "systeme": "System"
-  },
   "aide": "Applies to every document. Also in your profile.",
   "fermer": "Close"
 }

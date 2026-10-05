@@ -1,0 +1,12 @@
+{
+  "titre": "Une journée à votre mesure",
+  "texte": "Avec un compte, l'accueil compte les minutes jusqu'à {vos} sessions, pas celles de toute la COP.",
+  "vos": "vos",
+  "avantages": {
+    "thematiques": "Les sessions de vos thématiques",
+    "alerte": "Une alerte quand une salle change",
+    "documents": "Vos documents gardés sans réseau"
+  },
+  "creer": "Créer mon compte",
+  "ouvert": "Le lexique, la FAQ et les trois agendas restent ouverts sans compte."
+}

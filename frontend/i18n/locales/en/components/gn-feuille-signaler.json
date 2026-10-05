@@ -1,7 +1,7 @@
 {
   "titre": "Report a change",
-  "rappel": "{titre} — {heure}, {salle}",
-  "rappel-sans-salle": "{titre} — {heure}",
+  "rappel": "{titre} ({heure}, {salle})",
+  "rappel-sans-salle": "{titre} ({heure})",
   "motif": {
     "cancelled": "The session is cancelled",
     "time": "The time has changed",
@@ -9,7 +9,7 @@
     "other": "Something else"
   },
   "heure": "New time",
-  "heure-aide": "Optional — {zone}.",
+  "heure-aide": "Optional, {zone}.",
   "salle": "New room",
   "facultatif": "Optional.",
   "precision": "Details",

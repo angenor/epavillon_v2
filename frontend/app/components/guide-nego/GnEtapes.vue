@@ -45,7 +45,8 @@ const segments = computed(() =>
 [data-app="guide-nego"] .gn-etapes {
   display: flex;
   align-items: center;
-  gap: var(--gn-espace-8);
+  gap: var(--gn-espace-12);
+  padding-bottom: var(--gn-espace-20);
 }
 
 [data-app="guide-nego"] .gn-etapes__segments {
@@ -57,7 +58,8 @@ const segments = computed(() =>
 [data-app="guide-nego"] .gn-etapes__segment {
   flex: 1;
   height: var(--gn-segment-etape);
-  background: var(--gn-filet);
+  border-radius: var(--gn-rayon-pilule);
+  background: var(--gn-bloc-releve);
 }
 
 [data-app="guide-nego"] .gn-etapes__segment--franchi {
@@ -65,9 +67,9 @@ const segments = computed(() =>
 }
 
 [data-app="guide-nego"] .gn-etapes__libelle {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  font-weight: var(--gn-graisse-demi-gras);
-  color: var(--gn-titre);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
+  font-weight: var(--gn-graisse-gras);
+  color: var(--gn-texte);
 }
 </style>

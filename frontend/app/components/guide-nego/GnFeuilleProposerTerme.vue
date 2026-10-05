@@ -118,27 +118,26 @@ const fini = computed(() => vue.value === 'envoye' || vue.value === 'garde')
 [data-app="guide-nego"] .gn-proposer {
   display: flex;
   flex-direction: column;
-  gap: var(--gn-espace-12);
+  gap: var(--gn-espace-16);
 }
 
 [data-app="guide-nego"] .gn-proposer__texte,
 [data-app="guide-nego"] .gn-proposer__deja {
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
-  color: var(--gn-texte);
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+  color: var(--gn-texte-lecture);
 }
 
 [data-app="guide-nego"] .gn-proposer__texte {
-  padding-bottom: var(--gn-espace-12);
+  padding-bottom: var(--gn-espace-8);
 }
 
 [data-app="guide-nego"] .gn-proposer__lien {
   display: inline-flex;
   align-items: center;
-  min-height: var(--gn-cible);
+  min-height: var(--gn-bouton-rond);
   color: var(--gn-accent);
-  font-weight: var(--gn-graisse-gras);
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  font-weight: var(--gn-graisse-extra-gras);
+  text-decoration: none;
 }
 </style>

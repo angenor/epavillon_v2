@@ -73,8 +73,8 @@ useHead({ title: t('guide-nego.faq.titre') })
     :sous-titre="sousTitre"
     retour="/guide-nego/ressources"
   >
-    <template #connexion>
-      <GnLigneConnexion :en-ligne="connexion.etat.value.enLigne" :lu-a="etat.luA" />
+    <template v-if="!connexion.etat.value.enLigne" #connexion>
+      <GnLigneConnexion :en-ligne="false" :lu-a="etat.luA" />
     </template>
 
     <div class="gn-faq">
@@ -132,6 +132,7 @@ useHead({ title: t('guide-nego.faq.titre') })
             picto="star"
             vers="/guide-nego/ressources/parcours"
             class="gn-faq__parcours"
+            derniere
           >
             <template #sous><GnProgression :part="avance.faites / avance.total" decoratif /></template>
           </GnLigneReglage>
@@ -163,14 +164,13 @@ useHead({ title: t('guide-nego.faq.titre') })
 [data-app="guide-nego"] .gn-faq {
   display: flex;
   flex-direction: column;
-  padding-top: var(--gn-espace-12);
 }
 
 [data-app="guide-nego"] .gn-faq__nombre,
 [data-app="guide-nego"] .gn-faq__compte {
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
 }
 
 [data-app="guide-nego"] .gn-faq__compte {
@@ -178,18 +178,30 @@ useHead({ title: t('guide-nego.faq.titre') })
 }
 
 [data-app="guide-nego"] .gn-faq__aucune {
+  color: var(--gn-texte-2);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   overflow-wrap: anywhere;
 }
 
+/* « Ma première COP » de la maquette 05 : la jauge fine de 4 sous le titre. */
 [data-app="guide-nego"] .gn-faq__parcours .gn-reglage__texte {
-  gap: var(--gn-espace-4);
-  padding-block: 10px;
+  gap: 6px;
+  padding-block: var(--gn-espace-12);
+}
+
+[data-app="guide-nego"] .gn-faq__parcours .gn-progression {
+  block-size: 4px;
+}
+
+[data-app="guide-nego"] .gn-faq li:last-child > .gn-ligne-question {
+  border-bottom: none;
 }
 
 [data-app="guide-nego"] .gn-faq__expert {
   display: flex;
   flex-direction: column;
   gap: var(--gn-espace-8);
-  padding-block: var(--gn-espace-16);
+  padding-top: var(--gn-espace-20);
 }
 </style>

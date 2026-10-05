@@ -41,26 +41,33 @@ const blocs = computed(() => blocsDe(props.markdown))
 [data-app="guide-nego"] .gn-texte-long {
   display: flex;
   flex-direction: column;
-  gap: var(--gn-espace-12);
+  gap: var(--gn-entre-paragraphes);
   max-width: var(--gn-mesure-lecture);
-  color: var(--gn-texte);
+  color: var(--gn-texte-lecture);
   font-size: var(--gn-taille-17);
   line-height: var(--gn-interligne-17);
 }
 
 [data-app="guide-nego"] .gn-texte-long__titre2 {
   padding-top: var(--gn-espace-12);
-  font-size: var(--gn-taille-20);
-  line-height: var(--gn-interligne-20);
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-18);
+  line-height: var(--gn-interligne-18);
   font-weight: var(--gn-graisse-gras);
   color: var(--gn-titre);
 }
 
 [data-app="guide-nego"] .gn-texte-long__titre3 {
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
   font-weight: var(--gn-graisse-gras);
   color: var(--gn-titre);
+}
+
+[data-app="guide-nego"] .gn-texte-long strong {
+  color: var(--gn-texte);
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-texte-long__liste {
@@ -73,6 +80,10 @@ const blocs = computed(() => blocsDe(props.markdown))
 
 [data-app="guide-nego"] .gn-texte-long__liste--numerotee {
   list-style: decimal;
+}
+
+[data-app="guide-nego"] .gn-texte-long__liste li::marker {
+  color: var(--gn-texte-2);
 }
 
 [data-app="guide-nego"] .gn-texte-long a {

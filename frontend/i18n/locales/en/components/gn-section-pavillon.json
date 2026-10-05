@@ -1,10 +1,10 @@
 {
   "chargement": "Reading Pavilion activities",
   "aujourdhui": "Today",
-  "hier": "Yesterday — replays",
+  "hier": "Yesterday: replays",
   "jour-vide": "No activity at the Pavilion that day.",
   "suivants": "The following days",
-  "suivant": "{jour} — {count} activity | {jour} — {count} activity | {jour} — {count} activities",
+  "suivant": "{jour}, {count} activity | {jour}, {count} activity | {jour}, {count} activities",
   "non-publie": {
     "titre": "Nothing announced yet",
     "texte": "Francophonie Pavilion activities will appear here as soon as IFDD publishes the schedule."

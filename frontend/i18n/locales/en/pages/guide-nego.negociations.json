@@ -1,22 +1,20 @@
 {
   "titre": "Negotiation sessions",
-  "sous-titre": "{edition} — {ville}",
   "mon-agenda": "My agenda",
   "chargement": "Reading the negotiation sessions",
-  "injoignable": "Online — official schedule unreachable",
+  "injoignable": "Online: official schedule unreachable",
   "hors-connexion": "Changes made since then are not shown here.",
   "filtre": {
     "libelle": "Filter the sessions",
     "miennes": "My thematic areas",
-    "toutes": "All"
+    "toutes": "All sessions",
+    "fermer": "Close"
   },
-  "compteur": "{count} sessions | {count} session | {count} sessions",
-  "compteur-sur": "{n} of {total}",
   "sans-thematique": "Choose your thematic areas: “My thematic areas” will then show only the sessions that concern you.",
   "choisir-thematiques": "Choose my thematic areas",
-  "source": "Official source",
-  "source-lue": "Official source — read {moment}",
-  "jour": "{jour} — {zone}",
+  "source": "official source",
+  "source-lue": "official source {moment}",
+  "jour": "{jour}, {zone}",
   "lien-ccnucc": "Official UNFCCC schedule",
   "vide": {
     "titre": "No session announced yet",

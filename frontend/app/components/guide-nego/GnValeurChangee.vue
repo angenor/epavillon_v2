@@ -51,14 +51,15 @@ const changee = computed(() => !!props.avant && props.avant !== props.valeur)
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  gap: 2px;
   text-align: end;
   overflow-wrap: anywhere;
 }
 
 [data-app="guide-nego"] .gn-valeur-changee__avant {
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   font-weight: var(--gn-graisse-demi-gras);
   text-decoration-thickness: 2px;
 }
@@ -68,18 +69,19 @@ const changee = computed(() => !!props.avant && props.avant !== props.valeur)
   align-items: center;
   gap: 6px;
   color: var(--gn-texte);
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
-  font-weight: var(--gn-graisse-demi-gras);
-  font-variant-numeric: tabular-nums;
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-valeur-changee__fleche {
+  flex: none;
   color: var(--gn-etat-deplacee);
 }
 
 [data-app="guide-nego"] .gn-valeur-changee--forte .gn-valeur-changee__valeur {
   color: var(--gn-accent);
+  font-family: var(--gn-police-titre);
   font-size: var(--gn-taille-20);
   line-height: var(--gn-interligne-20);
   font-weight: var(--gn-graisse-gras);
@@ -89,16 +91,19 @@ const changee = computed(() => !!props.avant && props.avant !== props.valeur)
   color: var(--gn-texte-2);
 }
 
+/* Un aplat d'attention porte son texte en 800. */
 [data-app="guide-nego"] .gn-valeur-changee__texte--maintenant {
-  padding: 2px 6px;
+  padding: 2px var(--gn-espace-8);
+  border-radius: var(--gn-rayon-pilule);
   background: var(--gn-attention-aplat);
   color: var(--gn-attention-aplat-texte);
+  font-weight: var(--gn-graisse-extra-gras);
 }
 
 [data-app="guide-nego"] .gn-valeur-changee__precision {
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
 }
 
 [data-app="guide-nego"] .gn-valeur-changee__precision::first-letter {

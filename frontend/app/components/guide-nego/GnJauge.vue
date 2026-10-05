@@ -35,23 +35,27 @@ const texte = computed(() => {
   gap: var(--gn-espace-8);
 }
 
+/* La piste « Jusqu'à la COP » de la maquette 05, à la hauteur d'une jauge. */
 [data-app="guide-nego"] .gn-jauge__piste {
   display: block;
   block-size: var(--gn-jauge);
+  border-radius: var(--gn-rayon-pilule);
   background: var(--gn-jauge-fond);
+  overflow: hidden;
 }
 
 [data-app="guide-nego"] .gn-jauge__part {
   display: block;
   block-size: 100%;
   /* Un octet occupé se voit : la part ne tombe jamais à un trait invisible. */
-  min-inline-size: 4px;
+  min-inline-size: var(--gn-jauge);
+  border-radius: var(--gn-rayon-pilule);
   background: var(--gn-accent);
 }
 
 [data-app="guide-nego"] .gn-jauge__texte {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   color: var(--gn-texte-2);
 }
 </style>

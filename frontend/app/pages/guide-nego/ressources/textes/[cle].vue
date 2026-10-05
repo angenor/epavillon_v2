@@ -96,13 +96,13 @@ useHead({ title: titre.value })
 
 <style>
 [data-app="guide-nego"] .gn-texte__lu {
-  padding-top: var(--gn-espace-12);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  padding-bottom: var(--gn-espace-12);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   color: var(--gn-texte-2);
 }
 
 [data-app="guide-nego"] .gn-texte__corps {
-  padding-block: var(--gn-espace-16);
+  padding-bottom: var(--gn-espace-16);
 }
 </style>

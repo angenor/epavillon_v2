@@ -1,0 +1,12 @@
+{
+  "titre": "A day that fits you",
+  "texte": "With an account, the home screen counts the minutes to {vos} sessions, not those of the whole COP.",
+  "vos": "your",
+  "avantages": {
+    "thematiques": "Sessions on your themes",
+    "alerte": "An alert when a room changes",
+    "documents": "Your documents kept offline"
+  },
+  "creer": "Create my account",
+  "ouvert": "The glossary, the FAQ and the three agendas stay open without an account."
+}

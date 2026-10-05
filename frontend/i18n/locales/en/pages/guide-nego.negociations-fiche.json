@@ -23,13 +23,13 @@
   "plage-jour": "{jour}, {plage}",
   "heure-precision": "{jour} · {zone} ({decalage})",
   "salle-inconnue": "Room not announced",
-  "terme": "{terme} — open in the glossary",
-  "ordre-du-jour": "{code} — {intitule}",
+  "terme": "{terme}: open in the glossary",
+  "ordre-du-jour": "{code}: {intitule}",
   "hors-ordre-du-jour": "Outside the official agenda",
-  "mon-groupe": "My group — {groupe}",
+  "mon-groupe": "My group: {groupe}",
   "sans-thematique": "Theme not specified",
   "origine": "Official source",
-  "origine-lue": "Official source — read {moment}",
+  "origine-lue": "Official source, read {moment}",
   "original": "See the original on the official UNFCCC programme",
   "rappel": {
     "libelle": "Remind me 15 minutes before",
@@ -48,7 +48,7 @@
     "titre": "Your agenda follows your account",
     "texte": "Create an account or sign in to keep this session in your agenda on all your devices. The session itself can be read without an account.",
     "creer": "Create my account",
-    "connexion": "I already have an account — Sign in"
+    "connexion": "I already have an account: sign in"
   },
   "sans-edition": {
     "titre": "No upcoming climate COP",
@@ -72,8 +72,8 @@
     "envoye": "Report sent. Being checked.",
     "en-file": "Report saved. It will be sent when the network returns.",
     "voir": "View",
-    "en-cours": "Your report — sent at {heure}, being checked",
-    "en-attente": "Your report — will be sent when the network returns",
+    "en-cours": "Your report: sent at {heure}, being checked",
+    "en-attente": "Your report: will be sent when the network returns",
     "refuse": "The report could not be sent. Please try again.",
     "reserve": "Reporting a change is reserved for negotiators. The session page itself can be read without an account.",
     "fermer": "Close"

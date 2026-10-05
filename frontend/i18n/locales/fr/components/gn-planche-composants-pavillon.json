@@ -1,8 +1,8 @@
 {
   "titre": "Pavillon de la Francophonie",
-  "propos": "Écran 10 · 1c et 4 decies. Le bloc de lieu : épingle, nom, adresse, et « Voir sur le plan du site » quand le plan est connu. Une ligne par activité : origine, début 20/700 — sur l'aplat jaune quand elle est en cours —, titre, état de l'activité, puis l'inscription ou la rediffusion, qui s'ouvre d'ici.",
-  "lieu": "Bloc de lieu — avec adresse et plan, puis le nom seul",
-  "lignes": "Ligne d'activité — terminée avec rediffusion, en cours inscrite, prévue inscrite, liste d'attente, complète, sans inscription, reportée, annulée",
+  "propos": "Écran 10 · 1c et 4 decies. Le bloc de lieu : épingle, nom, adresse, et « Voir sur le plan du site » quand le plan est connu. Une ligne par activité : origine, début 20/700 (sur l'aplat jaune quand elle est en cours), titre, état de l'activité, puis l'inscription ou la rediffusion, qui s'ouvre d'ici.",
+  "lieu": "Bloc de lieu : avec adresse et plan, puis le nom seul",
+  "lignes": "Ligne d'activité : terminée avec rediffusion, en cours inscrite, prévue inscrite, liste d'attente, complète, sans inscription, reportée, annulée",
   "stand": "Le stand OIF · IFDD",
   "adresse": "Zone bleue, hall 4, stand B12",
   "sahel": "Adaptation et sécurité alimentaire au Sahel",
@@ -13,7 +13,6 @@
   "libre": "Rencontre avec la jeunesse francophone",
   "reportee": "Marchés carbone : l'article 6 en pratique",
   "annulee": "Océans et climat dans l'espace francophone",
-  "journee": "« Ma journée », ligne Pavillon — activité du jour avec son lieu, puis aucune activité aujourd'hui avec la prochaine",
-  "journee-lieu": "Le stand OIF · IFDD, Salle du Pavillon",
-  "journee-prochaine": "Rien aujourd'hui. Prochaine : Femmes et négociations climat : dix ans de formation — samedi 14 novembre, 14:00, heure d'Antalya"
+  "journee": "« Ma journée », ligne Pavillon : activité du jour avec son lieu, puis aucune activité aujourd'hui avec la prochaine",
+  "journee-lieu": "Le stand OIF · IFDD, Salle du Pavillon"
 }

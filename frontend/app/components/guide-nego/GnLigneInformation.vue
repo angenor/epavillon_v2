@@ -30,20 +30,23 @@ const idTexte = useId()
 </template>
 
 <style>
+/* Un bloc sans bord, comme la carte de la maquette 04 : fond relevé, rayon de ligne-carte. */
 [data-app="guide-nego"] .gn-ligne-info {
-  min-height: var(--gn-cible);
+  min-height: var(--gn-ligne-reglage);
   display: flex;
   align-items: center;
-  gap: var(--gn-espace-8);
+  gap: var(--gn-espace-12);
   padding-block: var(--gn-espace-8);
-  padding-inline: var(--gn-espace-12);
-  border: var(--gn-filet-1) solid var(--gn-filet);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  padding-inline: var(--gn-espace-16);
+  border-radius: var(--gn-rayon-16);
+  background: var(--gn-fond-2);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   color: var(--gn-texte-2);
 }
 
 [data-app="guide-nego"] .gn-ligne-info__picto {
+  flex: none;
   color: var(--gn-picto-secondaire);
 }
 
@@ -54,16 +57,16 @@ const idTexte = useId()
 
 [data-app="guide-nego"] .gn-ligne-info__sortie {
   flex: none;
-  min-height: var(--gn-cible);
+  min-height: var(--gn-bouton-rond);
   display: inline-flex;
   align-items: center;
   color: var(--gn-accent);
-  font-weight: var(--gn-graisse-gras);
-  text-decoration: underline;
-  text-underline-offset: var(--gn-espace-4);
+  font-size: var(--gn-taille-14);
+  font-weight: var(--gn-graisse-extra-gras);
+  text-decoration: none;
 }
 
 [data-app="guide-nego"] .gn-ligne-info__sortie:active {
-  background: var(--gn-presse);
+  opacity: 0.7;
 }
 </style>

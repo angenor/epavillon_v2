@@ -105,7 +105,7 @@ function carte(item: ReportQueueItem) {
     const jour = item.day ? dayLong(`${item.day}T12:00:00Z`, 'UTC') : null
     const heure = item.proposed_start ? time(item.proposed_start, fuseau.value) : null
     const thematique = item.theme ? thematiques.nomDe(item.theme) : null
-    rappel = [[item.proposed_venue, [jour, heure].filter(Boolean).join(', ')].filter(Boolean).join(' — '), thematique]
+    rappel = [[item.proposed_venue, [jour, heure].filter(Boolean).join(', ')].filter(Boolean).join(', '), thematique]
       .filter(Boolean)
       .join(' · ')
   }
@@ -241,7 +241,7 @@ useHead({ title: k('titre') })
     <template #connexion>
       <GnLigneConnexion :en-ligne="enLigne" :lu-a="etat.luA" />
     </template>
-    <template v-if="peutValider" #action>
+    <template v-if="peutValider" #sous-titre-action>
       <span class="gn-validation__role">
         <GnPicto nom="shield-check" :taille="20" />
         {{ k('role') }}
@@ -400,8 +400,8 @@ useHead({ title: k('titre') })
   align-items: center;
   gap: 6px;
   color: var(--gn-succes);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   font-weight: var(--gn-graisse-gras);
 }
 
@@ -421,26 +421,28 @@ useHead({ title: k('titre') })
 }
 
 [data-app="guide-nego"] .gn-validation__carte {
-  padding-block: var(--gn-espace-12);
+  margin-top: var(--gn-espace-12);
+  padding: var(--gn-espace-16);
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: var(--gn-espace-8);
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-radius: var(--gn-rayon-20);
+  background: var(--gn-fond-2);
   overflow-wrap: anywhere;
 }
 
 [data-app="guide-nego"] .gn-validation__entete,
 [data-app="guide-nego"] .gn-validation__detail {
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
 }
 
 [data-app="guide-nego"] .gn-validation__principal {
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
-  font-weight: var(--gn-graisse-demi-gras);
+  font-size: var(--gn-taille-16);
+  line-height: 1.3;
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-validation__refus {
@@ -450,17 +452,18 @@ useHead({ title: k('titre') })
 
 /* La citation de la source : ce qu'elle dit à l'instant, avec son heure de lecture. */
 [data-app="guide-nego"] .gn-validation__source {
-  padding: var(--gn-espace-8) var(--gn-espace-12);
+  padding: 10px var(--gn-espace-12);
   display: flex;
   flex-direction: column;
   gap: 2px;
-  border-inline-start: var(--gn-filet-3) solid var(--gn-filet-fort);
+  border-radius: var(--gn-rayon-12);
+  background: var(--gn-bloc-releve);
 }
 
 [data-app="guide-nego"] .gn-validation__source-titre {
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   font-weight: var(--gn-graisse-gras);
 }
 

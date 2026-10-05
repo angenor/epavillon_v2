@@ -76,7 +76,7 @@ useHead({ title: t('guide-nego.lexique-favoris.titre') })
   padding-block: var(--gn-espace-12);
   max-width: var(--gn-mesure-lecture);
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 </style>

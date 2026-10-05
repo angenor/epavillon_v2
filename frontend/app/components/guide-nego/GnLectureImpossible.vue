@@ -37,7 +37,7 @@ const texte = computed(() => {
 
 <template>
   <div class="gn-lecture-impossible" role="alert">
-    <GnPicto nom="warn" :taille="24" />
+    <span class="gn-lecture-impossible__pastille" aria-hidden="true"><GnPicto nom="warn" :taille="20" /></span>
     <h2 class="gn-lecture-impossible__titre">
       {{ raison === 'disabled' ? t('gn-lecture-impossible.titre-suspendu') : t('gn-lecture-impossible.titre') }}
     </h2>
@@ -61,23 +61,37 @@ const texte = computed(() => {
   flex-direction: column;
   align-items: flex-start;
   gap: var(--gn-espace-8);
-  padding-block: var(--gn-espace-24);
+  padding: 18px var(--gn-espace-16);
+  border-radius: var(--gn-rayon-24);
+  background: var(--gn-fond-2);
 }
 
-[data-app="guide-nego"] .gn-lecture-impossible .gn-picto {
+[data-app="guide-nego"] .gn-lecture-impossible__pastille {
+  flex: none;
+  width: var(--gn-pastille-icone);
+  height: var(--gn-pastille-icone);
+  margin-block-end: var(--gn-espace-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--gn-rayon-14);
+  background: var(--gn-bloc-releve);
   color: var(--gn-danger);
 }
 
 [data-app="guide-nego"] .gn-lecture-impossible__titre {
-  font-size: var(--gn-taille-20);
-  line-height: var(--gn-interligne-20);
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
   font-weight: var(--gn-graisse-gras);
   color: var(--gn-titre);
 }
 
 [data-app="guide-nego"] .gn-lecture-impossible__texte {
   max-width: var(--gn-mesure-lecture);
-  color: var(--gn-texte);
+  color: var(--gn-texte-2);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 
 [data-app="guide-nego"] .gn-lecture-impossible__sorties {
@@ -94,13 +108,7 @@ const texte = computed(() => {
   align-items: flex-start;
   gap: 6px;
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-}
-
-/* Le pictogramme du bouton garde la couleur du bouton, pas le rouge de l'alerte. */
-[data-app="guide-nego"] .gn-lecture-impossible__sorties .gn-picto,
-[data-app="guide-nego"] .gn-lecture-impossible__garde .gn-picto {
-  color: inherit;
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
 }
 </style>

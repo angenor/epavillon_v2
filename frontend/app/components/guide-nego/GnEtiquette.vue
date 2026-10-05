@@ -12,7 +12,7 @@ defineProps<{ texte: string; picto?: NomDePicto }>()
 
 <template>
   <span class="gn-etiquette">
-    <GnPicto v-if="picto" :nom="picto" :taille="18" />
+    <GnPicto v-if="picto" :nom="picto" :taille="16" />
     {{ texte }}
   </span>
 </template>
@@ -21,11 +21,13 @@ defineProps<{ texte: string; picto?: NomDePicto }>()
 [data-app="guide-nego"] .gn-etiquette {
   display: inline-flex;
   align-items: center;
-  gap: var(--gn-espace-8);
-  padding: var(--gn-etiquette-air);
+  gap: 6px;
+  padding: 3px 9px;
   border: var(--gn-filet-1) solid var(--gn-filet);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  border-radius: var(--gn-rayon-pilule);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
+  font-weight: var(--gn-graisse-demi-gras);
   color: var(--gn-texte-2);
 }
 </style>

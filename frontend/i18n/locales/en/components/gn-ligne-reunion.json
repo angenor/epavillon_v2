@@ -3,6 +3,8 @@
   "en-ligne": "Online",
   "et-en-ligne": "{lieu} and online",
   "lieu-inconnu": "Venue not announced",
-  "acces-limite": "Restricted access — {public}",
-  "entendu": "{jour}, {heures}"
+  "acces-limite": "Restricted access: {public}",
+  "entendu": "{jour}, {heures}",
+  "origine-et-jour": "{jour} · Francophonie meetings",
+  "lieu-et-fin": "{lieu} · until {fin}"
 }

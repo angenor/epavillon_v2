@@ -64,20 +64,28 @@ const recus = computed(() =>
   display: flex;
   flex-direction: column;
   gap: var(--gn-espace-12);
-  padding-top: var(--gn-espace-32);
+  padding: 18px var(--gn-espace-16);
+  border-radius: var(--gn-rayon-24);
+  background: var(--gn-fond-2);
 }
 
 [data-app="guide-nego"] .gn-attente-pages__titre {
-  font-size: var(--gn-taille-20);
-  line-height: var(--gn-interligne-20);
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
   font-weight: var(--gn-graisse-gras);
   color: var(--gn-titre);
 }
 
-[data-app="guide-nego"] .gn-attente-pages__recus,
+[data-app="guide-nego"] .gn-attente-pages__recus {
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
+  color: var(--gn-texte-2);
+}
+
 [data-app="guide-nego"] .gn-attente-pages__lent {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   color: var(--gn-texte-2);
 }
 
@@ -86,10 +94,10 @@ const recus = computed(() =>
   flex-direction: column;
   gap: var(--gn-espace-8);
   padding-top: var(--gn-espace-16);
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
+  border-top: var(--gn-filet-1) solid var(--gn-filet-doux);
 }
 
-/* Au-dessus de la barre repliée, comme la ligne de reprise (04 · 03). */
+/* Au-dessus de la barre repliée, comme la ligne de reprise (04 · 03) ; dessinée comme le message éphémère. */
 [data-app="guide-nego"] .gn-attente-pages__ligne {
   position: fixed;
   bottom: calc(var(--gn-barre-lecture-repliee) + var(--gn-jauge) + var(--gn-espace-12) + env(safe-area-inset-bottom));
@@ -99,9 +107,10 @@ const recus = computed(() =>
   width: calc(min(100%, var(--gn-colonne-largeur)) - 2 * var(--gn-marge-ecran));
   display: flex;
   align-items: center;
-  gap: var(--gn-espace-8);
-  min-height: var(--gn-cible);
-  padding: 0 var(--gn-espace-8) 0 var(--gn-espace-16);
+  gap: var(--gn-espace-12);
+  min-height: var(--gn-bouton-principal);
+  padding: var(--gn-espace-4) var(--gn-espace-8) var(--gn-espace-4) var(--gn-espace-16);
+  border-radius: var(--gn-rayon-16);
   background: var(--gn-titre);
   color: var(--gn-sur-titre);
   font-size: var(--gn-taille-15);
@@ -120,13 +129,14 @@ const recus = computed(() =>
 
 [data-app="guide-nego"] .gn-attente-pages__rester {
   flex: none;
-  min-height: var(--gn-cible);
+  min-height: var(--gn-bouton-rond);
   padding-inline: var(--gn-espace-8);
   border: none;
+  border-radius: var(--gn-rayon-12);
   background: none;
   color: var(--gn-action-sur-titre);
   font: inherit;
-  font-weight: var(--gn-graisse-gras);
+  font-weight: var(--gn-graisse-extra-gras);
   text-decoration-line: var(--gn-action-sur-titre-trait);
   text-underline-offset: var(--gn-espace-4);
   cursor: pointer;

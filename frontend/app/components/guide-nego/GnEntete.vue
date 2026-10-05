@@ -1,10 +1,11 @@
 <script setup lang="ts">
 /**
- * L'en-tête d'écran. Le bouton « Aa » ouvre le lexique depuis n'importe où : un terme
- * anglais se cherche en salle, sans revenir en arrière.
+ * L'en-tête d'écran de la maquette Nuit. Le bouton « Aa » ouvre le lexique depuis
+ * n'importe où : un terme anglais se cherche en salle, sans revenir en arrière.
  *
- * **L'avatar et le retour s'excluent** : un écran d'onglet porte l'avatar, qui ouvre
- * le profil ; un écran secondaire porte le retour. La cloche passe par l'emplacement `action`.
+ * Écran d'onglet : grand titre Sora 28 à gauche, boutons ronds à droite (« Sessions »).
+ * Écran secondaire : retour rond, titre Sora 22 sur la même ligne (« Lexique »).
+ * **L'avatar et le retour s'excluent** ; la cloche passe par l'emplacement `action`.
  */
 export interface AvatarDEntete {
   prenom: string | null
@@ -12,7 +13,7 @@ export interface AvatarDEntete {
   image?: string | null
 }
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     titre: string
     sousTitre?: string
@@ -22,7 +23,7 @@ withDefaults(
     avatar?: AvatarDEntete
     /** Le profil : l'avatar en grand, à côté du titre qui porte le nom. */
     avatarDuTitre?: AvatarDEntete
-    /** Vrai sur le lexique lui-même : le bouton dit où l'on est. */
+    /** Vrai sur le lexique lui-même : « Aa » s'efface. */
     lexiqueOuvert?: boolean
     /** Le lecteur : une seule ligne, le titre en petit entre le retour et « Aa » (04 · 01). */
     compact?: boolean
@@ -58,17 +59,38 @@ withDefaults(
 defineEmits<{ retour: [] }>()
 
 const { t } = useI18n()
+
+/** Un retour, une croix ou un retour-bouton : le titre monte sur la ligne, en 22. */
+const secondaire = computed(() => Boolean(props.retour) || props.retourBouton)
+/**
+ * Le titre se pose sur la ligne des boutons, comme dans la maquette. Gardent leur ligne
+ * à eux, sous la barre : le titre long (une question de FAQ), le terme, le surtitre, et
+ * l'écran d'onglet qui porte l'avatar à gauche.
+ */
+const enLigne = computed(
+  () =>
+    !props.titreLong &&
+    !props.terme &&
+    !props.surtitre &&
+    !props.avatarDuTitre &&
+    (secondaire.value || !props.avatar),
+)
+const classesDuTitre = computed(() => ({
+  'gn-entete__titre--terme': props.terme,
+  'gn-entete__titre--long': props.titreLong,
+}))
 </script>
 
 <template>
-  <header class="gn-entete" :class="{ 'gn-entete--compact': compact }">
+  <header class="gn-entete" :class="{ 'gn-entete--compact': compact, 'gn-entete--secondaire': secondaire }">
     <div class="gn-entete__barre">
-      <button v-if="retourBouton" type="button" class="gn-entete__bouton" :aria-label="t('gn-entete.retour')" @click="$emit('retour')">
-        <GnPicto nom="back" />
-      </button>
-      <NuxtLink v-else-if="retour" :to="retour" class="gn-entete__bouton" :aria-label="t(fermer ? 'gn-entete.fermer' : 'gn-entete.retour')">
-        <GnPicto :nom="fermer ? 'close' : 'back'" />
-      </NuxtLink>
+      <GnBoutonRond v-if="retourBouton" picto="back" :libelle="t('gn-entete.retour')" @clic="$emit('retour')" />
+      <GnBoutonRond
+        v-else-if="retour"
+        :vers="retour"
+        :picto="fermer ? 'close' : 'back'"
+        :libelle="t(fermer ? 'gn-entete.fermer' : 'gn-entete.retour')"
+      />
       <GnAvatar
         v-else-if="avatar"
         :prenom="avatar.prenom"
@@ -77,35 +99,34 @@ const { t } = useI18n()
         vers="/guide-nego/ressources/reglages"
       />
       <h1 v-if="compact" class="gn-entete__titre-compact">{{ titre }}</h1>
-      <!-- Emplacement de la ligne de connexion : « Synchronisé à » ou « Hors connexion ». -->
-      <div v-else class="gn-entete__connexion"><slot name="connexion" /></div>
-      <!-- Un accès propre à l'écran, à côté de « Aa » : « Mon agenda » sur les sessions. -->
-      <slot name="action" />
-      <GnLoupe v-if="loupe" />
-      <NuxtLink
-        to="/guide-nego/lexique"
-        class="gn-entete__bouton gn-entete__aa"
-        :class="{ 'gn-entete__aa--ouvert': lexiqueOuvert }"
-        :aria-label="lexiqueOuvert ? t('gn-entete.lexique-ouvert') : t('gn-entete.lexique')"
-        :aria-current="lexiqueOuvert ? 'page' : undefined"
-      >
-        Aa
-      </NuxtLink>
+      <h1 v-else-if="enLigne" class="gn-entete__titre" :class="classesDuTitre" :lang="terme ? 'en' : undefined">{{ titre }}</h1>
+      <span v-else class="gn-entete__vide" />
+      <div class="gn-entete__actions">
+        <!-- Un accès propre à l'écran, à côté de « Aa » : « Mon agenda » sur les sessions. -->
+        <slot name="action" />
+        <GnLoupe v-if="loupe" />
+        <!-- Dans le lexique, « Aa » n'a plus où mener : la maquette 03 ne le montre pas. -->
+        <GnBoutonRond v-if="!lexiqueOuvert" vers="/guide-nego/lexique" :libelle="t('gn-entete.lexique')">
+          Aa
+        </GnBoutonRond>
+      </div>
     </div>
     <div v-if="!compact && avatarDuTitre" class="gn-entete__identite">
       <GnAvatar grand :prenom="avatarDuTitre.prenom" :nom="avatarDuTitre.nom" :image="avatarDuTitre.image" />
       <h1 class="gn-entete__titre">{{ titre }}</h1>
     </div>
     <p v-if="surtitre && !compact" class="gn-entete__surtitre">{{ surtitre }}</p>
-    <h1 v-if="!compact && !avatarDuTitre" class="gn-entete__titre" :class="{ 'gn-entete__titre--terme': terme, 'gn-entete__titre--long': titreLong }" :lang="terme ? 'en' : undefined">
+    <h1 v-if="!compact && !avatarDuTitre && !enLigne" class="gn-entete__titre" :class="classesDuTitre" :lang="terme ? 'en' : undefined">
       {{ titre }}
     </h1>
     <div v-if="sousTitre && !compact && $slots['sous-titre-action']" class="gn-entete__ligne">
       <p class="gn-entete__sous-titre">{{ sousTitre }}</p>
-      <!-- Une commande qui porte sur tout l'écran : « Tout marquer comme lu » (02 · 10). -->
+      <!-- Une commande qui porte sur tout l'écran : « Tout marquer comme lu ». -->
       <slot name="sous-titre-action" />
     </div>
     <p v-else-if="sousTitre && !compact" class="gn-entete__sous-titre" :class="{ 'gn-entete__sous-titre--terme': terme }">{{ sousTitre }}</p>
+    <!-- La ligne de connexion : « Synchronisé à » ou « Hors connexion ». -->
+    <div v-if="!compact && $slots.connexion" class="gn-entete__connexion"><slot name="connexion" /></div>
     <slot name="pied" />
   </header>
 </template>
@@ -116,57 +137,25 @@ const { t } = useI18n()
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding-bottom: 10px;
-  border-bottom: var(--gn-filet-3) solid var(--gn-filet-fort);
+  padding-bottom: var(--gn-espace-20);
 }
 
 [data-app="guide-nego"] .gn-entete__barre {
   display: flex;
   align-items: center;
-  gap: var(--gn-espace-8);
-  min-height: var(--gn-en-tete-lecture);
+  gap: var(--gn-espace-12);
+  min-height: var(--gn-bouton-rond);
 }
 
-[data-app="guide-nego"] .gn-entete__connexion {
+[data-app="guide-nego"] .gn-entete__vide {
   flex: 1;
-  min-width: 0;
 }
 
-[data-app="guide-nego"] .gn-entete__bouton {
+[data-app="guide-nego"] .gn-entete__actions {
   flex: none;
-  padding: 0;
-  border: none;
-  background: none;
-  cursor: pointer;
-  width: var(--gn-bouton-aa);
-  height: var(--gn-bouton-aa);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--gn-titre);
-  text-decoration: none;
-}
-
-[data-app="guide-nego"] .gn-entete__bouton:active {
-  background: var(--gn-presse);
-}
-
-[data-app="guide-nego"] .gn-entete__aa {
-  border: var(--gn-filet-2) solid var(--gn-filet-fort);
-  /* « Aa » est un glyphe de bouton, hors échelle de texte (écarts 8 et 9). */
-  font-size: 18px;
-  font-weight: var(--gn-graisse-gras);
-  line-height: 1;
-}
-
-[data-app="guide-nego"] .gn-entete__aa--ouvert {
-  background: var(--gn-titre);
-  color: var(--gn-sur-titre);
-}
-
-[data-app="guide-nego"][data-theme="sombre"] .gn-entete__aa--ouvert {
-  background: var(--gn-accent);
-  color: var(--gn-accent-inv);
+  gap: var(--gn-espace-8);
+  margin-inline-start: auto;
 }
 
 [data-app="guide-nego"] .gn-entete__identite {
@@ -175,17 +164,46 @@ const { t } = useI18n()
   gap: var(--gn-espace-12);
 }
 
+/* Titre d'écran : Sora 28/700, approche −0,02em. */
 [data-app="guide-nego"] .gn-entete__titre {
-  font-size: var(--gn-en-tete-titre);
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-28);
   line-height: var(--gn-interligne-28);
+  letter-spacing: var(--gn-approche-28);
   font-weight: var(--gn-graisse-gras);
   color: var(--gn-titre);
+  overflow-wrap: anywhere;
+}
+
+/* Écran d'onglet : le titre en bas de la barre, les boutons alignés sur sa dernière ligne. */
+[data-app="guide-nego"] .gn-entete:not(.gn-entete--secondaire) .gn-entete__barre {
+  align-items: flex-end;
+}
+
+[data-app="guide-nego"] .gn-entete__barre .gn-entete__titre {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Titre d'écran secondaire, sur la ligne du retour : Sora 22/700. */
+[data-app="guide-nego"] .gn-entete--secondaire .gn-entete__barre .gn-entete__titre {
+  font-size: var(--gn-taille-22);
+  line-height: var(--gn-interligne-22);
+  letter-spacing: normal;
+}
+
+[data-app="guide-nego"] .gn-entete__titre--long {
+  font-size: var(--gn-taille-22);
+  line-height: var(--gn-interligne-22);
+  letter-spacing: normal;
+}
+
+[data-app="guide-nego"] .gn-entete__titre--terme {
+  font-style: italic;
 }
 
 [data-app="guide-nego"] .gn-entete--compact {
-  padding-bottom: var(--gn-espace-8);
-  border-bottom-width: var(--gn-filet-1);
-  border-bottom-color: var(--gn-filet);
+  padding-bottom: var(--gn-espace-12);
 }
 
 [data-app="guide-nego"] .gn-entete__titre-compact {
@@ -200,25 +218,10 @@ const { t } = useI18n()
 }
 
 [data-app="guide-nego"] .gn-entete__surtitre {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   font-weight: var(--gn-graisse-gras);
   color: var(--gn-texte-2);
-}
-
-[data-app="guide-nego"] .gn-entete__titre--long {
-  font-size: var(--gn-taille-24);
-  line-height: var(--gn-interligne-24);
-}
-
-[data-app="guide-nego"] .gn-entete__titre--terme {
-  font-style: italic;
-  overflow-wrap: anywhere;
-}
-
-[data-app="guide-nego"] .gn-entete__sous-titre.gn-entete__sous-titre--terme {
-  font-size: var(--gn-taille-20);
-  line-height: var(--gn-interligne-20);
 }
 
 [data-app="guide-nego"] .gn-entete__ligne {
@@ -230,9 +233,22 @@ const { t } = useI18n()
 }
 
 [data-app="guide-nego"] .gn-entete__sous-titre {
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
   font-weight: var(--gn-graisse-demi-gras);
+  color: var(--gn-texte-2);
+}
+
+[data-app="guide-nego"] .gn-entete__sous-titre.gn-entete__sous-titre--terme {
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-20);
+  line-height: var(--gn-interligne-20);
   color: var(--gn-accent);
+}
+
+[data-app="guide-nego"] .gn-entete__connexion {
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
+  color: var(--gn-texte-2);
 }
 </style>

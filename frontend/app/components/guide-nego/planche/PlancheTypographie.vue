@@ -2,19 +2,34 @@
 import { useJetonsLus } from './PlancheSection.vue'
 
 /**
- * Section 2 — l'échelle typographique, rendue à sa taille.
- *
- * Elle montre aussi ce qui a décidé du choix d'Atkinson Hyperlegible Next : la
- * ligature œ, les capitales accentuées, et des chiffres de largeur fixe qui alignent
- * une colonne d'horaires. Une planche qui ne le prouve pas ne sert à rien.
+ * Section 2 : l'échelle typographique de la maquette Nuit, rendue à sa taille, dans sa
+ * famille (Sora pour les titres et les chiffres qui portent le sens, Manrope pour le
+ * reste) et sa graisse. Elle montre aussi la ligature œ, les capitales accentuées et
+ * pourquoi les chiffres restent proportionnels.
  */
-const ECHELLE = ['32', '28', '24', '20', '17', '15', '13'] as const
-const GRAISSES = ['regulier', 'demi-gras', 'gras'] as const
+type Famille = 'titre' | 'texte'
+const ECHELLE: readonly { taille: string; famille: Famille; graisse: string; approche?: string }[] = [
+  { taille: '76', famille: 'titre', graisse: 'extra-gras', approche: '76' },
+  { taille: '44', famille: 'titre', graisse: 'extra-gras', approche: '44' },
+  { taille: '28', famille: 'titre', graisse: 'gras', approche: '28' },
+  { taille: '22', famille: 'titre', graisse: 'gras' },
+  { taille: '20', famille: 'titre', graisse: 'demi-gras' },
+  { taille: '18', famille: 'titre', graisse: 'gras' },
+  { taille: '17', famille: 'texte', graisse: 'regulier' },
+  { taille: '16', famille: 'texte', graisse: 'gras' },
+  { taille: '15', famille: 'texte', graisse: 'demi-gras' },
+  { taille: '14', famille: 'texte', graisse: 'regulier' },
+  { taille: '13', famille: 'texte', graisse: 'regulier' },
+  { taille: '12', famille: 'texte', graisse: 'extra-gras', approche: '12' },
+  { taille: '11', famille: 'texte', graisse: 'extra-gras', approche: '11' },
+]
+const GRAISSES = ['regulier', 'moyen', 'demi-gras', 'gras', 'extra-gras'] as const
 const LECTURE = ['--gn-lecture-normale', '--gn-lecture-grande', '--gn-lecture-tres-grande'] as const
 
 const MESURES = [
   '--gn-police',
-  ...ECHELLE.flatMap((cran) => [`--gn-taille-${cran}`, `--gn-interligne-${cran}`]),
+  '--gn-police-titre',
+  ...ECHELLE.flatMap(({ taille }) => [`--gn-taille-${taille}`, `--gn-interligne-${taille}`]),
   ...GRAISSES.map((graisse) => `--gn-graisse-${graisse}`),
   ...LECTURE,
 ]
@@ -28,6 +43,12 @@ const cran = (taille: string) => ({
   fontSize: `var(--gn-taille-${taille})`,
   lineHeight: `var(--gn-interligne-${taille})`,
 })
+const dessinDu = (c: (typeof ECHELLE)[number]) => ({
+  ...cran(c.taille),
+  fontFamily: `var(${c.famille === 'titre' ? '--gn-police-titre' : '--gn-police'})`,
+  fontWeight: `var(--gn-graisse-${c.graisse})`,
+  letterSpacing: c.approche ? `var(--gn-approche-${c.approche})` : undefined,
+})
 const poids = (graisse: string) => ({ fontWeight: `var(--gn-graisse-${graisse})` })
 </script>
 
@@ -38,6 +59,7 @@ const poids = (graisse: string) => ({ fontWeight: `var(--gn-graisse-${graisse})`
     :propos="t('gn-planche-typographie.propos')"
   >
     <div ref="racine" class="gn-planche-typographie">
+      <p class="gn-planche-note">{{ t('gn-planche-typographie.police-titre') }} {{ valeur('--gn-police-titre') }}</p>
       <p class="gn-planche-note">{{ t('gn-planche-typographie.police') }} {{ valeur('--gn-police') }}</p>
 
       <GnPlancheSection
@@ -45,16 +67,16 @@ const poids = (graisse: string) => ({ fontWeight: `var(--gn-graisse-${graisse})`
         :propos="t('gn-planche-typographie.echelle-propos')"
       >
         <div class="gn-planche-liste">
-          <div v-for="taille in ECHELLE" :key="taille" class="gn-planche-typographie__cran">
+          <div v-for="c in ECHELLE" :key="c.taille" class="gn-planche-typographie__cran">
             <div class="gn-planche-legende gn-planche-typographie__reperes">
-              <span class="gn-planche-jeton">--gn-taille-{{ taille }}</span>
+              <span class="gn-planche-jeton">--gn-taille-{{ c.taille }}</span>
               <span class="gn-planche-valeur">
-                {{ valeur(`--gn-taille-${taille}`) }} · {{ t('gn-planche-typographie.interligne') }}
-                {{ valeur(`--gn-interligne-${taille}`) }}
+                {{ t(`gn-planche-typographie.famille.${c.famille}`) }} · {{ valeur(`--gn-taille-${c.taille}`) }} ·
+                {{ t('gn-planche-typographie.interligne') }} {{ valeur(`--gn-interligne-${c.taille}`) }}
               </span>
-              <span class="gn-planche-valeur">{{ t(`gn-planche-typographie.usage.${taille}`) }}</span>
+              <span class="gn-planche-valeur">{{ t(`gn-planche-typographie.usage.${c.taille}`) }}</span>
             </div>
-            <p class="gn-planche-typographie__exemple" :style="cran(taille)">
+            <p class="gn-planche-typographie__exemple" :style="dessinDu(c)">
               {{ t('gn-planche-typographie.exemple') }}
             </p>
           </div>
@@ -92,7 +114,7 @@ const poids = (graisse: string) => ({ fontWeight: `var(--gn-graisse-${graisse})`
       >
         <p class="gn-planche-typographie__glyphes" :style="cran('32')">œ Œ æ Æ ç Ç</p>
         <p class="gn-planche-typographie__glyphes" :style="cran('32')">À É È Ê Ç Î Ô Ù Û Ÿ</p>
-        <p class="gn-planche-typographie__glyphes" :style="cran('24')">« » — – … ’ €</p>
+        <p class="gn-planche-typographie__glyphes" :style="cran('24')">« » – … ’ €</p>
         <p :style="cran('17')">{{ t('gn-planche-typographie.phrase') }}</p>
         <p class="gn-planche-typographie__glyphes" :style="cran('24')">Il1 lI1 O0 oO rn m</p>
         <p class="gn-planche-note">{{ t('gn-planche-typographie.lettres-note') }}</p>
@@ -103,7 +125,7 @@ const poids = (graisse: string) => ({ fontWeight: `var(--gn-graisse-${graisse})`
         :propos="t('gn-planche-typographie.chiffres-propos')"
       >
         <div class="gn-planche-typographie__horaires">
-          <div class="gn-planche-typographie__colonne">
+          <div class="gn-planche-typographie__colonne gn-planche-typographie__colonne--tabulaire">
             <span class="gn-planche-valeur">{{ t('gn-planche-typographie.tabulaire') }}</span>
             <span :style="cran('20')">09:00</span>
             <span :style="cran('20')">11:45</span>
@@ -151,7 +173,7 @@ const poids = (graisse: string) => ({ fontWeight: `var(--gn-graisse-${graisse})`
   flex-direction: column;
   gap: var(--gn-espace-8);
   padding-block: var(--gn-ligne-air);
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
+  border-top: var(--gn-filet-1) solid var(--gn-filet-doux);
 }
 
 [data-app="guide-nego"] .gn-planche-liste > .gn-planche-typographie__cran:first-child {
@@ -164,7 +186,6 @@ const poids = (graisse: string) => ({ fontWeight: `var(--gn-graisse-${graisse})`
 
 [data-app="guide-nego"] .gn-planche-typographie__exemple {
   color: var(--gn-titre);
-  font-weight: var(--gn-graisse-gras);
   overflow-wrap: anywhere;
 }
 
@@ -174,6 +195,7 @@ const poids = (graisse: string) => ({ fontWeight: `var(--gn-graisse-${graisse})`
 
 [data-app="guide-nego"] .gn-planche-typographie__glyphes {
   color: var(--gn-titre);
+  font-family: var(--gn-police-titre);
   font-weight: var(--gn-graisse-gras);
   overflow-wrap: anywhere;
 }
@@ -190,9 +212,9 @@ const poids = (graisse: string) => ({ fontWeight: `var(--gn-graisse-${graisse})`
   font-weight: var(--gn-graisse-gras);
 }
 
-/* Le seul endroit du système où les chiffres ne sont pas tabulaires : il est là pour
-   montrer ce que l'application éviterait si elle s'en passait. */
-[data-app="guide-nego"] .gn-planche-typographie__colonne--proportionnelle {
-  font-variant-numeric: proportional-nums;
+/* Le seul endroit du système où les chiffres sont tabulaires : il montre le blanc que
+   Manrope laisse autour du 1, que la maquette n'a pas. */
+[data-app="guide-nego"] .gn-planche-typographie__colonne--tabulaire {
+  font-variant-numeric: tabular-nums;
 }
 </style>

@@ -1,5 +1,5 @@
 {
-  "tete": "Reported by the network — confirmed by IFDD at {heure}",
+  "tete": "Reported by the network, confirmed by IFDD at {heure}",
   "motif": {
     "cancelled": "Cancelled",
     "time": "The time has changed",

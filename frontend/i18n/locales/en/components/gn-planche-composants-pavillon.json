@@ -1,8 +1,8 @@
 {
   "titre": "Francophonie Pavilion",
-  "propos": "Screen 10 · 1c and 4 decies. The venue block: pin, name, address, and “See on the venue map” when the map is known. One line per activity: origin, start 20/700 — on the yellow fill while it is under way —, title, activity state, then the registration or the replay, which opens from here.",
-  "lieu": "Venue block — with address and map, then the name alone",
-  "lignes": "Activity line — ended with replay, under way registered, planned registered, waiting list, full, no registration, postponed, cancelled",
+  "propos": "Screen 10 · 1c and 4 decies. The venue block: pin, name, address, and “See on the venue map” when the map is known. One line per activity: origin, start 20/700 (on the yellow fill while it is under way), title, activity state, then the registration or the replay, which opens from here.",
+  "lieu": "Venue block: with address and map, then the name alone",
+  "lignes": "Activity line: ended with replay, under way registered, planned registered, waiting list, full, no registration, postponed, cancelled",
   "stand": "The OIF · IFDD stand",
   "adresse": "Blue zone, hall 4, stand B12",
   "sahel": "Adaptation and food security in the Sahel",
@@ -13,7 +13,6 @@
   "libre": "Meeting with French-speaking youth",
   "reportee": "Carbon markets: Article 6 in practice",
   "annulee": "Oceans and climate in the French-speaking world",
-  "journee": "“My day”, Pavilion line — today's activity with its venue, then nothing today with the next one",
-  "journee-lieu": "The OIF · IFDD stand, Pavilion room",
-  "journee-prochaine": "Nothing today. Next: Women and climate negotiations: ten years of training — Saturday, November 14, 14:00, Antalya time"
+  "journee": "“My day”, Pavilion line: today's activity with its venue, then nothing today with the next one",
+  "journee-lieu": "The OIF · IFDD stand, Pavilion room"
 }

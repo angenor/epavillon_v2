@@ -7,7 +7,6 @@
   "page": "p. {page}",
   "pages": "pp. {de}–{a}",
   "lies": "Related terms",
-  "favori": "Favourite",
   "partager": "Share",
   "partage": {
     "copie": "Link to the term copied.",
@@ -21,5 +20,6 @@
   "erreur": {
     "titre": "The glossary is not on this phone yet",
     "texte": "It is saved the first time the app opens with a connection. Connect once: it will then work offline."
-  }
+  },
+  "famille": "Family"
 }

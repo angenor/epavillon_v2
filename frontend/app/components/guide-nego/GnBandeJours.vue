@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * La bande des jours (07 · 4 septies) : une case par jour qui a des sessions.
+ * La bande des jours (Nuit 02) : une pilule par jour qui a des sessions, « Mar. 10 ».
  * Les clés `AAAA-MM-JJ` sont déjà des jours de la COP ; on les lit en UTC, à midi,
  * pour que le fuseau du téléphone ne décale jamais le nom du jour.
  */
@@ -18,6 +18,8 @@ const midi = (jour: string) => {
   return new Date(Date.UTC(a, m - 1, j, 12))
 }
 
+const majuscule = (texte: string) => texte.charAt(0).toLocaleUpperCase(locale.value) + texte.slice(1)
+
 const cases = computed(() => {
   const court = new Intl.DateTimeFormat(locale.value, { weekday: 'short', timeZone: 'UTC' })
   const long = new Intl.DateTimeFormat(locale.value, { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' })
@@ -25,8 +27,7 @@ const cases = computed(() => {
     const date = midi(jour)
     return {
       jour,
-      semaine: court.format(date),
-      numero: date.getUTCDate(),
+      court: majuscule(`${court.format(date)} ${date.getUTCDate()}`),
       complet: long.format(date),
       passe: jour < props.aujourdhui,
       courant: jour === props.aujourdhui,
@@ -60,8 +61,7 @@ watch(choisi, () => nextTick(amenerDansLaVue))
       :aria-label="c.courant ? t('gn-bande-jours.aujourdhui', { jour: c.complet }) : c.complet"
       @click="choisi = c.jour"
     >
-      <span class="gn-bande-jours__semaine">{{ c.semaine }}</span>
-      <span class="gn-bande-jours__numero">{{ c.numero }}</span>
+      {{ c.court }}
     </button>
   </div>
 </template>
@@ -69,6 +69,7 @@ watch(choisi, () => nextTick(amenerDansLaVue))
 <style>
 [data-app="guide-nego"] .gn-bande-jours {
   display: flex;
+  gap: 6px;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
@@ -79,19 +80,16 @@ watch(choisi, () => nextTick(amenerDansLaVue))
 }
 
 [data-app="guide-nego"] .gn-bande-jours__jour {
-  flex: 1 0 var(--gn-bande-jour-min);
-  min-width: var(--gn-bande-jour-min);
-  /* Peu de jours : ils restent des cases, sans s'étirer sur toute la largeur. */
-  max-width: calc(var(--gn-bande-jour-min) * 1.5);
-  min-height: var(--gn-bande-jour-hauteur);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  border-bottom: var(--gn-filet-3) solid transparent;
-  background: none;
-  color: var(--gn-texte);
+  flex: none;
+  height: var(--gn-pilule-jour);
+  padding: 0 var(--gn-espace-16);
+  border: var(--gn-filet-1) solid var(--gn-filet);
+  border-radius: var(--gn-rayon-22);
+  background: transparent;
+  color: var(--gn-texte-2);
+  font-size: var(--gn-taille-15);
+  font-weight: var(--gn-graisse-demi-gras);
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -99,37 +97,15 @@ watch(choisi, () => nextTick(amenerDansLaVue))
   background: var(--gn-presse);
 }
 
-[data-app="guide-nego"] .gn-bande-jours__jour:focus-visible {
-  outline-offset: calc(-1 * var(--gn-focus-decalage));
-}
-
-[data-app="guide-nego"] .gn-bande-jours__semaine {
-  font-size: var(--gn-taille-13);
-  line-height: var(--gn-interligne-13);
-  font-weight: var(--gn-graisse-demi-gras);
-}
-
-[data-app="guide-nego"] .gn-bande-jours__numero {
-  font-size: var(--gn-taille-20);
-  line-height: var(--gn-interligne-20);
-  font-weight: var(--gn-graisse-demi-gras);
-}
-
-[data-app="guide-nego"] .gn-bande-jours__jour--passe {
-  color: var(--gn-texte-2);
-}
-
 [data-app="guide-nego"] .gn-bande-jours__jour--courant {
-  color: var(--gn-accent);
+  color: var(--gn-texte);
 }
 
-[data-app="guide-nego"] .gn-bande-jours__jour--choisi {
-  color: var(--gn-titre);
-  border-bottom-color: var(--gn-accent);
-}
-
-[data-app="guide-nego"] .gn-bande-jours__jour--choisi .gn-bande-jours__numero,
-[data-app="guide-nego"] .gn-bande-jours__jour--choisi .gn-bande-jours__semaine {
-  font-weight: var(--gn-graisse-gras);
+[data-app="guide-nego"] .gn-bande-jours__jour--choisi,
+[data-app="guide-nego"] .gn-bande-jours__jour--choisi:active {
+  border-color: var(--gn-accent);
+  background: var(--gn-accent);
+  color: var(--gn-accent-inv);
+  font-weight: var(--gn-graisse-extra-gras);
 }
 </style>

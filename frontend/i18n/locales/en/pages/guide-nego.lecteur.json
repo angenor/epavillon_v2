@@ -4,7 +4,7 @@
   "hors-connexion": "Only downloaded documents can be opened.",
   "page": "Page {page}",
   "reprise": {
-    "texte": "Resuming at page {page} — last read {moment}.",
+    "texte": "Resuming at page {page}, last read {moment}.",
     "sans-moment": "Resuming at page {page}.",
     "debut": "Start"
   },

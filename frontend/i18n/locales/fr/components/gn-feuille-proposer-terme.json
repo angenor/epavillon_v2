@@ -17,7 +17,7 @@
   "compte": {
     "texte": "Proposer un terme passe par un compte. Créez-en un ou connectez-vous : votre saisie est gardée, et vous reviendrez ici.",
     "creer": "Créer mon compte",
-    "connexion": "J'ai déjà un compte — Me connecter"
+    "connexion": "J'ai déjà un compte : me connecter"
   },
   "envoye": {
     "titre": "Terme proposé",

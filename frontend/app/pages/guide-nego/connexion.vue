@@ -148,9 +148,9 @@ useHead({ title: t('guide-nego.connexion.titre') })
 }
 
 [data-app="guide-nego"] .gn-connexion__refus {
-  font-size: var(--gn-taille-15);
+  font-size: var(--gn-taille-14);
   color: var(--gn-danger);
-  font-weight: var(--gn-graisse-demi-gras);
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-connexion__sorties {

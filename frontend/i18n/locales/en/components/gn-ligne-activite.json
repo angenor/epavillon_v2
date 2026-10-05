@@ -2,6 +2,9 @@
   "origine": "Francophonie Pavilion",
   "entendu": "{jour}, {heures}",
   "rediffusion": "Replay · {minutes} min",
-  "attente-position": "Waiting list — position {position}",
-  "sans-inscription": "Open entry, no registration"
+  "attente-position": "Waiting list, position {position}",
+  "sans-inscription": "Open entry, no registration",
+  "origine-et-jour": "{jour} · Francophonie Pavilion",
+  "lieu-et-fin": "{lieu} · until {fin}",
+  "fin": "until {fin}"
 }

@@ -4,7 +4,7 @@
     "figure": "Le texte de la figure"
   },
   "renvoi": {
-    "table": "Tableau — page {page}",
-    "figure": "Figure — page {page}"
+    "table": "Tableau, page {page}",
+    "figure": "Figure, page {page}"
   }
 }

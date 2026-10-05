@@ -1,6 +1,6 @@
 {
   "titre": "My reports",
-  "sous-titre": "{edition} — {count} report | {edition} — {count} report | {edition} — {count} reports",
+  "sous-titre": "{edition}, {count} report | {edition}, {count} report | {edition}, {count} reports",
   "chargement": "Reading your reports",
   "le": "{jour} at {heure}",
   "motif": {
@@ -12,10 +12,10 @@
   },
   "propose-heure": "Proposed new time: {heure}",
   "propose-salle": "Proposed new room: {salle}",
-  "rappel": "{titre} — {quand}, {salle}",
-  "rappel-sans-salle": "{titre} — {quand}",
+  "rappel": "{titre} ({quand}, {salle})",
+  "rappel-sans-salle": "{titre} ({quand})",
   "etat": {
-    "en-attente": "Sent — will leave when the network is back",
+    "en-attente": "Sent: will leave when the network is back",
     "envoye": "Sent at {moment}",
     "valide": "Validated at {moment}",
     "non-retenu": "Not accepted at {moment}"

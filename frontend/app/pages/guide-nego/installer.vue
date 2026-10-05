@@ -100,20 +100,18 @@ useHead({ title: t('guide-nego.installer.titre') })
 
 [data-app="guide-nego"] .gn-installer__numero {
   flex: none;
-  width: var(--gn-carre-etape);
-  height: var(--gn-carre-etape);
+  width: var(--gn-pastille-icone-petite);
+  height: var(--gn-pastille-icone-petite);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--gn-titre);
-  color: var(--gn-accent-inv);
-  font-size: var(--gn-taille-20);
+  border-radius: var(--gn-rayon-12);
+  background: var(--gn-bloc-releve);
+  color: var(--gn-accent);
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-15);
   font-weight: var(--gn-graisse-gras);
   line-height: 1;
-}
-
-[data-app="guide-nego"][data-theme="sombre"] .gn-installer__numero {
-  background: var(--gn-accent);
 }
 
 [data-app="guide-nego"] .gn-installer__partager {
@@ -122,23 +120,24 @@ useHead({ title: t('guide-nego.installer.titre') })
 
 [data-app="guide-nego"] .gn-installer__geste {
   display: block;
-  font-size: var(--gn-taille-17);
+  font-size: var(--gn-taille-16);
   line-height: 1.3;
-  font-weight: var(--gn-graisse-demi-gras);
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-installer__precision {
   display: block;
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 
 [data-app="guide-nego"] .gn-installer__avant {
   margin-top: var(--gn-entre-blocs);
-  padding: var(--gn-espace-12) var(--gn-espace-16);
-  border: var(--gn-filet-1) solid var(--gn-filet);
-  color: var(--gn-texte-2);
+  padding: var(--gn-espace-16);
+  border-radius: var(--gn-rayon-20);
+  background: var(--gn-fond-2);
+  color: var(--gn-texte-lecture);
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
 }

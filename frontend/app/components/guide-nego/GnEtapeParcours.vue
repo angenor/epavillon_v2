@@ -48,7 +48,7 @@ const lien = computed(() => {
 [data-app="guide-nego"] .gn-etape {
   display: flex;
   flex-direction: column;
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
 }
 
 [data-app="guide-nego"] .gn-etape--derniere {
@@ -73,9 +73,9 @@ const lien = computed(() => {
   display: inline-flex;
   align-items: center;
   color: var(--gn-accent);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  font-weight: var(--gn-graisse-demi-gras);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
+  font-weight: var(--gn-graisse-gras);
   text-decoration: underline;
   text-underline-offset: 4px;
 }

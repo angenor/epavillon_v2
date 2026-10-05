@@ -233,13 +233,15 @@ useHead({ title: t('guide-nego.code.titre') })
 
 <style>
 [data-app="guide-nego"] .gn-code__propos {
+  color: var(--gn-texte-lecture);
   font-size: var(--gn-taille-17);
   line-height: var(--gn-interligne-17);
+  padding-bottom: var(--gn-espace-16);
 }
 
 [data-app="guide-nego"] .gn-code__propos--discret {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   color: var(--gn-texte-2);
 }
 
@@ -262,7 +264,7 @@ useHead({ title: t('guide-nego.code.titre') })
 }
 
 [data-app="guide-nego"] .gn-code__issue--attention {
-  color: var(--gn-attention-aplat-texte);
+  color: var(--gn-attention);
 }
 
 [data-app="guide-nego"] .gn-code__issue--refus {

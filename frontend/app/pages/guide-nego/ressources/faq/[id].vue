@@ -123,8 +123,8 @@ useHead({ title: computed(() => entree.value?.question ?? t('guide-nego.faq-entr
     :retour="retour"
     titre-long
   >
-    <template #connexion>
-      <GnLigneConnexion :en-ligne="connexion.etat.value.enLigne" :lu-a="etat.luA" />
+    <template v-if="!connexion.etat.value.enLigne" #connexion>
+      <GnLigneConnexion :en-ligne="false" :lu-a="etat.luA" />
     </template>
     <template v-if="entree" #pied>
       <GnVerifieLe v-if="entree.verified_on" :jour="entree.verified_on" :a-revoir="entree.status === 'to_review'" />
@@ -235,40 +235,46 @@ useHead({ title: computed(() => entree.value?.question ?? t('guide-nego.faq-entr
   align-items: center;
   gap: 6px;
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   font-weight: var(--gn-graisse-demi-gras);
 }
 
 [data-app="guide-nego"] .gn-faq-entree {
   display: flex;
   flex-direction: column;
-  padding-bottom: var(--gn-espace-16);
 }
 
+/* La réponse se lit comme une définition du lexique : 17/1,6 en texte de lecture. */
 [data-app="guide-nego"] .gn-faq-entree__reponse {
   display: flex;
   flex-direction: column;
-  gap: var(--gn-espace-12);
-  padding-top: var(--gn-espace-12);
+  gap: var(--gn-entre-paragraphes);
   max-width: var(--gn-mesure-lecture);
+  color: var(--gn-texte-lecture);
+  font-size: var(--gn-taille-17);
+  line-height: var(--gn-interligne-17);
 }
 
 [data-app="guide-nego"] .gn-faq-entree__retour {
   display: flex;
   flex-direction: column;
   gap: var(--gn-espace-8);
-  padding-block: var(--gn-espace-16);
+  padding-top: var(--gn-espace-20);
 }
 
 [data-app="guide-nego"] .gn-faq-entree__signaler .gn-picto {
   color: var(--gn-danger);
 }
 
+[data-app="guide-nego"] .gn-faq-entree li:last-child > .gn-ligne-question {
+  border-bottom: none;
+}
+
 [data-app="guide-nego"] .gn-faq-entree__anonyme {
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 
 [data-app="guide-nego"] .gn-faq-entree__motifs {

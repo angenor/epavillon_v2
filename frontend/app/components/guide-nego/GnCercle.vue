@@ -114,9 +114,9 @@ function deplacer(pas: number) {
   padding: var(--gn-espace-8) 0;
   display: flex;
   align-items: center;
-  gap: var(--gn-espace-12);
+  gap: 14px;
   border: none;
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
   background: none;
   color: var(--gn-texte);
   text-align: start;
@@ -144,8 +144,8 @@ function deplacer(pas: number) {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: var(--gn-filet-2) solid var(--gn-filet-fort);
-  border-radius: var(--gn-rayon-24);
+  border: var(--gn-filet-2) solid var(--gn-filet);
+  border-radius: var(--gn-rayon-pilule);
   color: var(--gn-accent-inv);
 }
 
@@ -154,7 +154,7 @@ function deplacer(pas: number) {
   border-color: var(--gn-accent);
 }
 
-/* La correction passe avant mon choix : une réponse cochée ET fausse est rouge. */
+/* La correction passe avant mon choix : une réponse cochée ET fausse est à l'alerte. */
 [data-app="guide-nego"] .gn-cercle__option--juste .gn-cercle__rond {
   background: var(--gn-succes);
   border-color: var(--gn-succes);
@@ -171,25 +171,26 @@ function deplacer(pas: number) {
   min-width: 0;
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
 [data-app="guide-nego"] .gn-cercle__libelle {
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
   font-weight: var(--gn-graisse-demi-gras);
 }
 
 [data-app="guide-nego"] .gn-cercle__detail {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   color: var(--gn-texte-2);
 }
 
 [data-app="guide-nego"] .gn-cercle__mot {
   flex: none;
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  font-weight: var(--gn-graisse-demi-gras);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
+  font-weight: var(--gn-graisse-extra-gras);
 }
 
 [data-app="guide-nego"] .gn-cercle__option--juste .gn-cercle__mot {
@@ -214,11 +215,11 @@ function deplacer(pas: number) {
 }
 
 [data-app="guide-nego"] .gn-cercle__option--desactive:not(.gn-cercle__option--juste):not(.gn-cercle__option--faux) .gn-cercle__rond {
-  border-color: var(--gn-desactive-texte);
+  border-color: var(--gn-bloc-releve);
   color: var(--gn-desactive-texte);
 }
 
 [data-app="guide-nego"] .gn-cercle__option--desactive.gn-cercle__option--coche:not(.gn-cercle__option--juste):not(.gn-cercle__option--faux) .gn-cercle__rond {
-  background: var(--gn-desactive-fond);
+  background: var(--gn-bloc-releve);
 }
 </style>

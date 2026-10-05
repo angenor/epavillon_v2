@@ -63,7 +63,7 @@ const libelleChevron = computed(() =>
         :aria-label="libelleChevron"
         @click="emit('basculer', entree)"
       >
-        <GnPicto :nom="ouverte ? 'chev-up' : 'chev-down'" />
+        <GnPicto :nom="ouverte ? 'chev-up' : 'chev-down'" :taille="20" />
       </button>
       <span v-else class="gn-sommaire__place" aria-hidden="true" />
     </div>
@@ -94,17 +94,13 @@ const libelleChevron = computed(() =>
   --gn-sommaire-hauteur: var(--gn-cible);
   display: flex;
   align-items: stretch;
-  /* Le chevron centré dans sa cible de 48 tombe à 16 px du bord, comme la marge d'écran. */
+  /* Le chevron centré dans sa cible de 48 tombe à la marge d'écran. */
   padding-inline-end: calc(var(--gn-marge-ecran) - (var(--gn-cible) - var(--gn-picto-taille)) / 2);
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
 }
 
 [data-app="guide-nego"] .gn-sommaire__ligne--chapitre {
   --gn-sommaire-hauteur: var(--gn-ligne-reglage);
-}
-
-[data-app="guide-nego"] .gn-sommaire__ligne--en-cours {
-  border-inline-start: var(--gn-filet-3) solid var(--gn-filet-fort);
 }
 
 [data-app="guide-nego"] .gn-sommaire__aller {
@@ -124,10 +120,6 @@ const libelleChevron = computed(() =>
   cursor: pointer;
 }
 
-[data-app="guide-nego"] .gn-sommaire__ligne--en-cours .gn-sommaire__aller {
-  padding-inline-start: calc(var(--gn-marge-ecran) + var(--gn-sommaire-retrait) * var(--gn-espace-16) - var(--gn-filet-3));
-}
-
 [data-app="guide-nego"] .gn-sommaire__aller:active,
 [data-app="guide-nego"] .gn-sommaire__chevron:active {
   background: var(--gn-presse);
@@ -143,24 +135,28 @@ const libelleChevron = computed(() =>
   min-width: 0;
   overflow-wrap: anywhere;
   font-size: var(--gn-taille-15);
-  line-height: 1.3;
+  line-height: var(--gn-interligne-16);
   font-weight: var(--gn-graisse-regulier);
+  color: var(--gn-texte-lecture);
 }
 
 [data-app="guide-nego"] .gn-sommaire__ligne--chapitre .gn-sommaire__titre {
-  font-size: var(--gn-taille-17);
-  font-weight: var(--gn-graisse-demi-gras);
+  font-size: var(--gn-taille-16);
+  font-weight: var(--gn-graisse-gras);
+  color: var(--gn-texte);
 }
 
-[data-app="guide-nego"] .gn-sommaire__ligne--en-cours .gn-sommaire__titre {
-  color: var(--gn-titre);
-  font-weight: var(--gn-graisse-gras);
+/* La partie lue : titre et page à l'accent, sans filet ni aplat. */
+[data-app="guide-nego"] .gn-sommaire__ligne--en-cours .gn-sommaire__titre,
+[data-app="guide-nego"] .gn-sommaire__ligne--en-cours .gn-sommaire__page {
+  color: var(--gn-accent);
+  font-weight: var(--gn-graisse-extra-gras);
 }
 
 [data-app="guide-nego"] .gn-sommaire__compte {
   flex: none;
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   color: var(--gn-texte-2);
 }
 
@@ -168,10 +164,11 @@ const libelleChevron = computed(() =>
   flex: none;
   min-width: 28px;
   text-align: end;
-  font-size: var(--gn-taille-20);
-  line-height: var(--gn-interligne-20);
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
   font-weight: var(--gn-graisse-gras);
-  color: var(--gn-titre);
+  color: var(--gn-texte-2);
 }
 
 [data-app="guide-nego"] .gn-sommaire__chevron,

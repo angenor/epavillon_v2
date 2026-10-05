@@ -2,7 +2,7 @@
   "privacy": "Privacy policy",
   "terms": "Terms of use",
   "version": "Version {version}",
-  "en-vigueur": "In force since {date} — version {version}",
+  "en-vigueur": "In force since {date}, version {version}",
   "lu": "Read {moment}",
   "chargement": "Reading the text",
   "en-preparation": {

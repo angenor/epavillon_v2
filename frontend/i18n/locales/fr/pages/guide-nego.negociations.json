@@ -1,22 +1,20 @@
 {
   "titre": "Sessions de négociation",
-  "sous-titre": "{edition} — {ville}",
   "mon-agenda": "Mon agenda",
   "chargement": "Lecture des sessions de négociation",
-  "injoignable": "En ligne — programme officiel injoignable",
+  "injoignable": "En ligne : programme officiel injoignable",
   "hors-connexion": "Les changements survenus depuis ne sont pas ici.",
   "filtre": {
     "libelle": "Filtrer les sessions",
     "miennes": "Mes thématiques",
-    "toutes": "Toutes"
+    "toutes": "Toutes les sessions",
+    "fermer": "Fermer"
   },
-  "compteur": "{count} session | {count} session | {count} sessions",
-  "compteur-sur": "{n} sur {total}",
   "sans-thematique": "Choisissez vos thématiques : « Mes thématiques » ne montrera que les sessions qui vous concernent.",
   "choisir-thematiques": "Choisir mes thématiques",
-  "source": "Source officielle",
-  "source-lue": "Source officielle — lu {moment}",
-  "jour": "{jour} — {zone}",
+  "source": "source officielle",
+  "source-lue": "source officielle {moment}",
+  "jour": "{jour}, {zone}",
   "lien-ccnucc": "Programme officiel de la CCNUCC",
   "vide": {
     "titre": "Aucune session annoncée pour l'instant",

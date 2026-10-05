@@ -74,8 +74,8 @@ useHead({ title: k('titre') })
 
 <template>
   <GnEcran :titre="k('titre')" :sous-titre="sousTitre" :retour="retour" :onglets="false">
-    <template #connexion>
-      <GnLigneConnexion :en-ligne="enLigne" :lu-a="notifications.luA.value" />
+    <template v-if="!enLigne" #connexion>
+      <GnLigneConnexion :en-ligne="false" :lu-a="notifications.luA.value" />
     </template>
     <template v-if="nonLues > 0" #sous-titre-action>
       <button type="button" class="gn-notifications__tout" @click="notifications.toutMarquer()">
@@ -112,7 +112,7 @@ useHead({ title: k('titre') })
     <GnEtatVide v-else-if="!items.length" picto="bell" :titre="k('vide.titre')" :texte="k('vide.texte')" />
 
     <template v-else>
-      <section v-for="(j, rang) in notifications.parJour.value" :key="j.jour">
+      <section v-for="(j, rang) in notifications.parJour.value" :key="j.jour" class="gn-notifications__jour">
         <GnEnteteGroupe :titre="titreDuJour(j.jour)" :note="rang === 0 ? zone : undefined" />
         <ul class="gn-notifications__liste">
           <li v-for="(n, i) in j.notifications" :key="n.id">
@@ -136,38 +136,46 @@ useHead({ title: k('titre') })
 
 <style>
 [data-app="guide-nego"] .gn-notifications__tout {
-  min-height: var(--gn-cible);
+  min-height: var(--gn-bouton-rond);
   padding: 0;
   border: none;
   background: none;
   color: var(--gn-accent);
   font: inherit;
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  font-weight: var(--gn-graisse-gras);
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
+  font-weight: var(--gn-graisse-extra-gras);
   cursor: pointer;
+}
+
+/* L'en-tête porte déjà ses 20 d'air : le premier jour ne les double pas. */
+[data-app="guide-nego"] .gn-notifications__jour:first-child .gn-groupe {
+  padding-top: 0;
 }
 
 [data-app="guide-nego"] .gn-notifications__pied {
   min-height: var(--gn-ligne-reglage);
-  margin-top: var(--gn-espace-8);
+  margin-top: var(--gn-espace-20);
+  padding-inline: var(--gn-espace-16);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--gn-espace-12);
+  border-radius: var(--gn-rayon-16);
+  background: var(--gn-fond-2);
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   text-decoration: none;
+}
+
+[data-app="guide-nego"] .gn-notifications__pied:active {
+  background: var(--gn-presse);
 }
 
 [data-app="guide-nego"] .gn-notifications__profil {
   flex: none;
   color: var(--gn-accent);
-  font-weight: var(--gn-graisse-gras);
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  font-weight: var(--gn-graisse-extra-gras);
 }
 </style>

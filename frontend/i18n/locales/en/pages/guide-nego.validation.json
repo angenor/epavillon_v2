@@ -22,8 +22,8 @@
   },
   "propose-heure": "Proposed new time: {heure}",
   "propose-salle": "Proposed new room: {salle}",
-  "session": "{titre} — {quand}",
-  "session-salle": "{titre} — {quand}, {salle}",
+  "session": "{titre} ({quand})",
+  "session-salle": "{titre} ({quand}, {salle})",
   "reunion-quand": "{jour}, {heure}",
   "source": {
     "titre": "Official source, read {moment}",
@@ -41,7 +41,7 @@
   "etat": {
     "non-retenu": "Not accepted at {heure}",
     "valide": "Confirmed at {heure}",
-    "en-publication": "Confirmed at {heure} — displayed within a minute",
+    "en-publication": "Confirmed at {heure}, displayed within a minute",
     "retire": "Withdrawn at {heure}"
   },
   "par": "By {nom}",

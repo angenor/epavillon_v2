@@ -216,16 +216,11 @@ useHead({ title: t('guide-nego.documents.titre') })
     retour="/guide-nego/ressources"
     :ce-qui-se-lit="t('guide-nego.documents.hors-connexion')"
   >
-    <template #connexion>
-      <GnLigneConnexion :en-ligne="enLigne" :lu-a="etat.luA" />
-    </template>
-
     <GnChargement
       v-if="!etat.pret"
       forme="squelette"
       :lignes="6"
       :libelle="t('guide-nego.documents.chargement')"
-      class="gn-documents__attente"
     />
 
     <GnEtatErreur
@@ -305,24 +300,29 @@ useHead({ title: t('guide-nego.documents.titre') })
 </template>
 
 <style>
-[data-app="guide-nego"] .gn-documents__attente {
-  margin-top: var(--gn-espace-12);
-}
-
 [data-app="guide-nego"] .gn-documents__outils {
   display: flex;
   flex-direction: column;
   gap: var(--gn-espace-12);
-  padding-top: var(--gn-espace-12);
 }
 
+/* Les pilules de jour de la maquette 02 : une rangée qui file jusqu'au bord droit et défile seule.
+   L'air vertical garde l'anneau de focus hors de la découpe. */
 [data-app="guide-nego"] .gn-documents__filtres {
+  --gn-filtres-air: calc(var(--gn-focus-anneau) + var(--gn-focus-decalage));
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--gn-espace-8);
+  gap: 6px;
+  margin: calc(-1 * var(--gn-filtres-air)) calc(-1 * var(--gn-marge-ecran)) calc(-1 * var(--gn-filtres-air)) 0;
+  padding: var(--gn-filtres-air) var(--gn-marge-ecran) var(--gn-filtres-air) 0;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
-/* Une pilule choisie peut porter un long libellé : elle se coupe plutôt que d'élargir l'écran. */
+[data-app="guide-nego"] .gn-documents__filtres::-webkit-scrollbar {
+  display: none;
+}
+
+/* Une pilule choisie peut porter un long libellé : elle se coupe plutôt que d'élargir la rangée. */
 [data-app="guide-nego"] .gn-documents__filtres > .gn-pilule {
   max-inline-size: 100%;
 }

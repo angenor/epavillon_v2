@@ -219,17 +219,20 @@ useHead({ title: t('guide-nego.compte.titre') })
           :erreur="fautes.pays"
         >
           <template #default="{ idSaisie, decritPar, invalide }">
-            <select
-              :id="idSaisie"
-              v-model="fiche.pays"
-              class="gn-compte__liste"
-              :aria-describedby="decritPar"
-              :aria-invalid="invalide"
-              autocomplete="country"
-            >
-              <option value="" disabled>{{ t('guide-nego.compte.champ.pays-vide') }}</option>
-              <option v-for="p in pays" :key="p.id" :value="p.id">{{ p.libelle }}</option>
-            </select>
+            <span class="gn-compte__liste">
+              <select
+                :id="idSaisie"
+                v-model="fiche.pays"
+                class="gn-champ__saisie"
+                :aria-describedby="decritPar"
+                :aria-invalid="invalide"
+                autocomplete="country"
+              >
+                <option value="" disabled>{{ t('guide-nego.compte.champ.pays-vide') }}</option>
+                <option v-for="p in pays" :key="p.id" :value="p.id">{{ p.libelle }}</option>
+              </select>
+              <GnPicto nom="chev-down" :taille="20" class="gn-compte__chevron" />
+            </span>
           </template>
         </GnChamp>
 
@@ -265,19 +268,20 @@ useHead({ title: t('guide-nego.compte.titre') })
 }
 
 [data-app="guide-nego"] .gn-compte__propos {
+  color: var(--gn-texte-lecture);
   font-size: var(--gn-taille-17);
   line-height: var(--gn-interligne-17);
 }
 
 [data-app="guide-nego"] .gn-compte__propos--discret {
-  font-size: var(--gn-taille-15);
+  font-size: var(--gn-taille-14);
   color: var(--gn-texte-2);
 }
 
 [data-app="guide-nego"] .gn-compte__panne {
-  font-size: var(--gn-taille-15);
+  font-size: var(--gn-taille-14);
   color: var(--gn-danger);
-  font-weight: var(--gn-graisse-demi-gras);
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-compte__sorties {
@@ -287,21 +291,24 @@ useHead({ title: t('guide-nego.compte.titre') })
   padding-top: var(--gn-entre-blocs);
 }
 
+/* La liste prend le dessin du champ ; le chevron remplace la flèche du système. */
 [data-app="guide-nego"] .gn-compte__liste {
-  min-height: var(--gn-champ);
-  width: 100%;
-  padding-inline: var(--gn-espace-12);
-  font-family: var(--gn-police);
-  font-size: var(--gn-taille-17);
-  color: var(--gn-texte);
-  background: var(--gn-fond);
-  border: var(--gn-filet-2) solid var(--gn-filet);
-  border-radius: var(--gn-rayon-4);
+  position: relative;
+  display: block;
 }
 
-[data-app="guide-nego"] .gn-compte__liste:focus-visible {
-  outline: var(--gn-focus-anneau) solid var(--gn-focus);
-  outline-offset: var(--gn-focus-decalage);
-  border-color: var(--gn-filet-fort);
+[data-app="guide-nego"] .gn-compte__liste select {
+  padding-inline-end: 48px;
+  appearance: none;
+  cursor: pointer;
+}
+
+[data-app="guide-nego"] .gn-compte__chevron {
+  position: absolute;
+  top: 50%;
+  right: var(--gn-espace-16);
+  transform: translateY(-50%);
+  color: var(--gn-picto-secondaire);
+  pointer-events: none;
 }
 </style>

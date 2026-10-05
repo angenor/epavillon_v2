@@ -47,7 +47,7 @@
     "inscrire": "Register",
     "rejoindre-attente": "Join the waiting list",
     "quitter-attente": "Leave the waiting list",
-    "complet": "Full — no waiting list",
+    "complet": "Full, no waiting list",
     "closes": "Registration closed",
     "pas-encore": "Registration opens on {jour} at {heure}, {zone}",
     "a-envoyer": "Will be sent when back online",

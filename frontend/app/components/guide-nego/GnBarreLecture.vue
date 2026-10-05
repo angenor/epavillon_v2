@@ -69,7 +69,7 @@ onBeforeUnmount(() => window.removeEventListener('scroll', replier))
       <template v-for="action in actions" :key="action">
         <GnChoixMode v-if="action === 'mode'" v-model="mode" variante="barre" />
         <button v-else type="button" class="gn-barre-lecture__action" @click="emit('action', action)">
-          <GnPicto :nom="PICTOS[action]" :taille="26" />
+          <GnPicto :nom="PICTOS[action]" :taille="24" />
           <span>{{ t(`gn-barre-lecture.${action}`) }}</span>
         </button>
       </template>
@@ -94,6 +94,8 @@ onBeforeUnmount(() => window.removeEventListener('scroll', replier))
 </template>
 
 <style>
+/* Le bandeau de la barre d'onglets : même fond, même filet haut. Replié, il garde 32 + 6 px :
+   la reprise, l'occurrence et le visionneur se posent juste au-dessus. */
 [data-app="guide-nego"] .gn-barre-lecture {
   position: fixed;
   bottom: 0;
@@ -103,30 +105,34 @@ onBeforeUnmount(() => window.removeEventListener('scroll', replier))
   width: min(100%, var(--gn-colonne-largeur));
   z-index: 5;
   padding-bottom: env(safe-area-inset-bottom);
-  background: var(--gn-fond);
+  border-top: var(--gn-filet-1) solid var(--gn-filet-doux);
+  background: var(--gn-barre-fond);
 }
 
+/* Les actions prennent le dessin des onglets : pictogramme 24, libellé 12. */
 [data-app="guide-nego"] .gn-barre-lecture__actions {
   display: flex;
-  height: var(--gn-barre-onglets);
-  border-top: var(--gn-filet-2) solid var(--gn-filet-fort);
+  justify-content: space-around;
+  padding: var(--gn-espace-8) var(--gn-espace-4) 0;
 }
 
 [data-app="guide-nego"] .gn-barre-lecture__action {
-  flex: 1 1 0;
+  flex: 0 1 var(--gn-onglet-largeur);
   min-width: var(--gn-onglet-min);
-  padding-inline: var(--gn-onglet-air);
+  height: var(--gn-onglet-hauteur);
+  padding-inline: var(--gn-espace-4);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: var(--gn-espace-4);
   border: 0;
+  border-radius: var(--gn-rayon-14);
   background: none;
   color: var(--gn-texte-2);
   font: inherit;
-  font-size: var(--gn-taille-13);
-  line-height: var(--gn-interligne-13);
+  font-size: var(--gn-taille-12);
+  line-height: normal;
   font-weight: var(--gn-graisse-demi-gras);
   white-space: nowrap;
   cursor: pointer;
@@ -148,8 +154,8 @@ onBeforeUnmount(() => window.removeEventListener('scroll', replier))
   align-items: center;
   justify-content: space-between;
   gap: var(--gn-espace-12);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
 }
 
 [data-app="guide-nego"] .gn-barre-lecture__ligne--bouton {
@@ -160,6 +166,10 @@ onBeforeUnmount(() => window.removeEventListener('scroll', replier))
   font-family: inherit;
   text-align: start;
   cursor: pointer;
+}
+
+[data-app="guide-nego"] .gn-barre-lecture__ligne--bouton:focus-visible {
+  outline-offset: calc(-1 * var(--gn-focus-anneau));
 }
 
 [data-app="guide-nego"] .gn-barre-lecture__page {
@@ -174,5 +184,10 @@ onBeforeUnmount(() => window.removeEventListener('scroll', replier))
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--gn-texte-2);
+}
+
+/* La jauge de lecture tient dans les marges, comme une piste du fil du jour. */
+[data-app="guide-nego"] .gn-barre-lecture > .gn-progression {
+  margin-inline: var(--gn-marge-ecran);
 }
 </style>

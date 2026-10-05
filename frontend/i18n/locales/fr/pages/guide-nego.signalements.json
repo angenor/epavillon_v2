@@ -1,6 +1,6 @@
 {
   "titre": "Mes signalements",
-  "sous-titre": "{edition} — {count} signalement | {edition} — {count} signalement | {edition} — {count} signalements",
+  "sous-titre": "{edition}, {count} signalement | {edition}, {count} signalement | {edition}, {count} signalements",
   "chargement": "Lecture de vos signalements",
   "le": "{jour} à {heure}",
   "motif": {
@@ -12,10 +12,10 @@
   },
   "propose-heure": "Nouvelle heure proposée : {heure}",
   "propose-salle": "Nouvelle salle proposée : {salle}",
-  "rappel": "{titre} — {quand}, {salle}",
-  "rappel-sans-salle": "{titre} — {quand}",
+  "rappel": "{titre} ({quand}, {salle})",
+  "rappel-sans-salle": "{titre} ({quand})",
   "etat": {
-    "en-attente": "Envoyé — partira au retour du réseau",
+    "en-attente": "Envoyé : partira au retour du réseau",
     "envoye": "Envoyé à {moment}",
     "valide": "Validé à {moment}",
     "non-retenu": "Non retenu à {moment}"

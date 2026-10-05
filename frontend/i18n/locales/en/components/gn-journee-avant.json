@@ -1,0 +1,16 @@
+{
+  "ouverture": "Opening of {edition}",
+  "se-preparer": "Get ready",
+  "parcours": {
+    "titre": "My first COP",
+    "avancement": "{faites} of {total}"
+  },
+  "thematiques": {
+    "titre": "Choose my themes",
+    "precision": "Your timeline will be ready at the opening"
+  },
+  "documents": {
+    "titre": "Take the documents with you",
+    "precision": "Readable offline on site"
+  }
+}

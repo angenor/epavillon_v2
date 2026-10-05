@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { SegmentDeChoix } from '~/components/guide-nego/GnSegmente.vue'
-import type { ChoixDeTheme } from '~/utils/guide-nego/theme'
 import { momentDeLecture } from '~/utils/guide-nego/connexion'
 import { placeDesCopies } from '~/utils/guide-nego/mes-documents'
 import { tailleLisible } from '~/utils/guide-nego/place'
@@ -20,7 +18,6 @@ definePageMeta({ layout: 'guide-nego' })
 defineI18nRoute(false)
 
 const { t, locale } = useI18n()
-const { choix, choisir } = useGnTheme()
 const session = useGnSession()
 const acces = useGnAcces()
 const thematiques = useGnThematiques()
@@ -115,17 +112,6 @@ async function deconnecter(): Promise<void> {
   await navigateTo('/guide-nego')
 }
 
-const segments = computed<SegmentDeChoix[]>(() => [
-  { valeur: 'clair', libelle: t('guide-nego.reglages.theme.clair'), picto: 'sun' },
-  { valeur: 'sombre', libelle: t('guide-nego.reglages.theme.sombre'), picto: 'moon' },
-  { valeur: 'systeme', libelle: t('guide-nego.reglages.theme.systeme') },
-])
-
-const theme = computed({
-  get: () => choix.value as string,
-  set: (valeur: string) => choisir(valeur as ChoixDeTheme),
-})
-
 useHead({ title: t('guide-nego.reglages.titre') })
 </script>
 
@@ -168,15 +154,6 @@ useHead({ title: t('guide-nego.reglages.titre') })
     </template>
 
     <GnEnteteGroupe :titre="t('guide-nego.reglages.affichage')" />
-    <section class="gn-reglages__bloc">
-      <h3 class="gn-reglages__libelle">{{ t('guide-nego.reglages.theme.libelle') }}</h3>
-      <GnSegmente
-        v-model="theme"
-        :segments="segments"
-        :libelle="t('guide-nego.reglages.theme.libelle')"
-      />
-      <p class="gn-reglages__aide">{{ t('guide-nego.reglages.theme.aide') }}</p>
-    </section>
     <section class="gn-reglages__bloc">
       <h3 class="gn-reglages__libelle">{{ t('guide-nego.reglages.taille.libelle') }}</h3>
       <GnChoixTailleLecture :libelle="t('guide-nego.reglages.taille.libelle')" />
@@ -273,13 +250,13 @@ useHead({ title: t('guide-nego.reglages.titre') })
   display: flex;
   flex-direction: column;
   gap: var(--gn-espace-8);
-  padding-top: var(--gn-espace-16);
+  padding-top: var(--gn-espace-8);
 }
 
 [data-app="guide-nego"] .gn-reglages__libelle {
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
-  font-weight: var(--gn-graisse-demi-gras);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-reglages__sorties {
@@ -291,12 +268,12 @@ useHead({ title: t('guide-nego.reglages.titre') })
 
 [data-app="guide-nego"] .gn-reglages__aide {
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 
 [data-app="guide-nego"] .gn-reglages__aide--espacee {
-  padding-top: var(--gn-espace-12);
+  padding-bottom: var(--gn-espace-8);
 }
 
 [data-app="guide-nego"] .gn-reglages__aide--centree {

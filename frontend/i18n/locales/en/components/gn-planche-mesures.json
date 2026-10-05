@@ -1,7 +1,7 @@
 {
   "titre": "Measurements",
-  "propos": "Everything is a multiple of 4. Each measurement is drawn here at its real size, not merely written.",
-  "cadre-note": "The frame height is drawn as a length: 800 px do not fit on a screen. The strip scrolls on its own; the page never does.",
+  "propos": "Each measure is drawn here at its real size, not just written. Values come from the Night mock-up.",
+  "cadre-note": "The frame height is drawn as a length: 844 px do not fit on a screen. The strip scrolls on its own; the page never does.",
   "composants-note": "Each square carries the measurement on both sides, even when the token only applies to a width or a height.",
   "groupe": {
     "espacements": "Grid and spacing",
@@ -13,12 +13,12 @@
     "composants": "Component dimensions"
   },
   "propos-groupe": {
-    "espacements": "A grid of 4. Seven spacings, and nothing in between.",
-    "cibles": "48 px minimum for anything that is touched; 56 px for a settings, checkbox or radio row.",
-    "rayons": "Three radii only: the direction is square.",
-    "filets": "A rule states the separation, its thickness states the importance. The focus ring is 3 px, set 2 px away from the target.",
+    "espacements": "Screen margin 20; between blocks 22 on the home screen, 18 on sessions, 20 in the glossary.",
+    "cibles": "44 px for a round button and a day pill, 52 for the primary button, 56 for a field and a row.",
+    "rayons": "24 block · 22 round button · 20 timeline card · 18 field · 16 button and card row · 14 and 12 icon chips · 6 “EN” tag and track · pill for days and tags.",
+    "filets": "A 1 px rule separates; colour, not thickness, carries importance. The focus ring is 3 px, 2 px away from its target.",
     "zones": "What the status bar, the tab bar and the system gesture take from the screen.",
-    "cadre": "Reference frame 360 × 800, checked at 390 × 844. Nothing has a fixed width except the time column.",
+    "cadre": "Reference frame 390 × 844. Nothing has a fixed width except the time column.",
     "composants": "The dimensions a component does not choose for itself."
   }
 }

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { dayKeyInZone } from '~/utils/datetime'
+import type { OptionDeFeuille } from '~/components/guide-nego/GnFeuilleBasse.vue'
+import { sessionsDeLAgenda } from '~/utils/guide-nego/agenda'
 import {
   estDeMonGroupe,
   etatAffiche,
@@ -7,6 +9,7 @@ import {
   filtrer,
   jourAOuvrir,
   joursDeLaBande,
+  placeDuMaintenant,
   sessionsDuJour,
   type Suivis,
 } from '~/utils/guide-nego/sessions'
@@ -19,7 +22,7 @@ import {
 } from '~/utils/guide-nego/signalements'
 
 /**
- * Écran 07 — les sessions de négociation officielles, un jour à la fois. Rien d'autre :
+ * Les sessions de négociation officielles (Nuit 02), un jour à la fois, en frise. Rien d'autre :
  * ni les Réunions de la Francophonie, ni le Pavillon (ADR-008).
  *
  * **Coupée, la source se montre coupée** (FR-039, principe XII) : « Lecture impossible »
@@ -32,12 +35,13 @@ defineI18nRoute(false)
 type Filtre = 'miennes' | 'toutes'
 
 const { t, locale } = useI18n()
-const { dayLong, zoneOf, timeWithZone } = useDateTime()
+const { dayLong, zoneOf, timeWithZone, time } = useDateTime()
 const { momentLisible } = useGnMomentLecture()
 const connexion = useGnConnexion()
 const session = useGnSession()
 const thematiques = useGnThematiques()
 const groupes = useGnGroupes()
+const agenda = useGnAgenda()
 const lecture = useGnSessions()
 const { affichage, etat, edition, sansEdition } = lecture
 
@@ -60,6 +64,7 @@ onMounted(async () => {
   horloge = setInterval(() => (maintenant.value = new Date()), 60_000)
   void relire()
   await session.assurer()
+  if (session.connectee.value) agenda.assurer()
   await Promise.all([
     session.connectee.value ? thematiques.assurer() : thematiques.assurerLeVocabulaire(),
     groupes.assurer(),
@@ -73,12 +78,6 @@ const coupee = computed(() => (affichage.value.etat === 'coupe' ? affichage.valu
 const programme = computed(() => servie.value?.programme ?? coupee.value?.programme ?? null)
 const fuseau = computed(() => servie.value?.fuseau ?? edition.value?.timezone ?? 'UTC')
 const ville = computed(() => servie.value?.ville ?? edition.value?.city ?? null)
-
-const sousTitre = computed(() => {
-  const e = edition.value
-  if (!e) return undefined
-  return e.city ? t('guide-nego.negociations.sous-titre', { edition: e.libelle, ville: e.city }) : e.libelle
-})
 
 const attente = computed(() => !etat.value.pret && !tentee.value)
 
@@ -109,28 +108,34 @@ const filtre = computed<Filtre>({
   get: () => (sansThematique.value ? 'toutes' : (filtreChoisi.value ?? 'miennes')),
   set: (valeur) => (filtreChoisi.value = valeur),
 })
-const onglets = computed(() => [
-  { valeur: 'miennes', libelle: t('guide-nego.negociations.filtre.miennes') },
-  { valeur: 'toutes', libelle: t('guide-nego.negociations.filtre.toutes') },
+const feuille = ref(false)
+const options = computed<OptionDeFeuille[]>(() => [
+  ...(sansThematique.value
+    ? []
+    : [
+        { valeur: 'miennes', libelle: t('guide-nego.negociations.filtre.miennes'), picto: filtre.value === 'miennes' ? 'check-circle' : 'circle' } as const,
+        { valeur: 'toutes', libelle: t('guide-nego.negociations.filtre.toutes'), picto: filtre.value === 'toutes' ? 'check-circle' : 'circle' } as const,
+      ]),
+  { valeur: 'agenda', libelle: t('guide-nego.negociations.mon-agenda'), picto: 'calendar' },
+  { valeur: 'thematiques', libelle: t('guide-nego.negociations.choisir-thematiques'), picto: 'filter' },
 ])
-const filtreModele = computed<string>({
-  get: () => filtre.value,
-  set: (valeur) => (filtre.value = valeur === 'toutes' ? 'toutes' : 'miennes'),
-})
+
+function choisir(option: OptionDeFeuille): void {
+  feuille.value = false
+  if (option.valeur === 'miennes' || option.valeur === 'toutes') filtre.value = option.valeur
+  else if (option.valeur === 'agenda') void navigateTo('/guide-nego/negociations/agenda')
+  else void navigateTo('/guide-nego/thematiques?depuis=negociations')
+}
 
 const duJour = computed(() => (servie.value ? sessionsDuJour(servie.value.sessions, jour.value, fuseau.value) : []))
 const affichees = computed(() => filtrer(duJour.value, filtre.value, suivis.value))
 
-const compteur = computed(() => {
-  const n = affichees.value.length
-  if (n === 0 && duJour.value.length > 0) return t('guide-nego.negociations.compteur-sur', { n, total: duJour.value.length })
-  return t('guide-nego.negociations.compteur', { count: n }, n)
-})
-
 const reunionsFiltrees = computed(() =>
   filtre.value === 'toutes' ? reunions.value : reunions.value.filter((r) => reunionPasseLeFiltre(r, suivis.value.thematiques)),
 )
-const nomDeThematique = (code: string | null) => (code ? (thematiques.nomDe(code) ?? null) : null)
+const dansLAgenda = computed(
+  () => new Set(sessionsDeLAgenda(agenda.agenda.value, servie.value?.sessions ?? []).map((s) => s.id)),
+)
 
 const lignes = computed(() =>
   lignesDuJour(affichees.value, reunionsFiltrees.value, jour.value, maintenant.value, fuseau.value).map((l) =>
@@ -140,7 +145,8 @@ const lignes = computed(() =>
           session: l.session,
           reunion: null,
           etat: etatAffiche(l.session, maintenant.value, fuseau.value),
-          thematique: nomDeThematique(l.session.theme),
+          debut: l.session.start_at,
+          mienne: dansLAgenda.value.has(l.session.id),
           monGroupe: estDeMonGroupe(l.session, suivis.value.groupes),
           signale: repereSignale(l.session, maintenant.value, fuseau.value, locale.value)?.heure ?? null,
           vers: `/guide-nego/negociations/${l.session.id}`,
@@ -150,7 +156,8 @@ const lignes = computed(() =>
           session: null,
           reunion: l.reunion,
           etat: undefined,
-          thematique: nomDeThematique(l.reunion.theme),
+          debut: l.reunion.start_at,
+          mienne: false,
           monGroupe: false,
           signale: null,
           vers: `/guide-nego/negociations/reseau/${l.reunion.id}`,
@@ -168,11 +175,18 @@ function legende(unJour: string): string {
   return t('guide-nego.negociations.jour', { jour: dayLong(`${unJour}T12:00:00Z`, 'UTC'), zone: zoneOf(zone) })
 }
 
-const legendeDuJour = computed(() => (jour.value ? legende(jour.value) : ''))
+/** La barre « MAINTENANT », aujourd'hui seulement : nulle un autre jour. */
+const maintenantA = computed(() =>
+  jour.value === aujourdhui.value ? placeDuMaintenant(lignes.value.map((l) => l.debut), maintenant.value) : null,
+)
+const heureDeMaintenant = computed(() => time(maintenant.value, fuseau.value))
 
-const lueA = computed(() => {
+/** « Mes thématiques · heure d'Antalya · source officielle à 10:12 » */
+const contexte = computed(() => {
+  const zone = zoneOf(ville.value ?? fuseau.value.split('/').pop()?.replace(/_/g, ' ') ?? '')
   const moment = momentLisible(servie.value?.luA ?? null)
-  return moment ? t('guide-nego.negociations.source-lue', { moment }) : t('guide-nego.negociations.source')
+  const source = moment ? t('guide-nego.negociations.source-lue', { moment }) : t('guide-nego.negociations.source')
+  return [t(`guide-nego.negociations.filtre.${filtre.value}`), zone, source].join(' · ')
 })
 
 const vide = computed(() => {
@@ -199,25 +213,18 @@ useHead({ title: t('guide-nego.negociations.titre') })
 </script>
 
 <template>
-  <GnEcran
-    :titre="t('guide-nego.negociations.titre')"
-    :sous-titre="sousTitre"
-    :ce-qui-se-lit="t('guide-nego.negociations.hors-connexion')"
-    cloche
-  >
-    <template #connexion>
-      <span v-if="connexionCoupee" class="gn-sessions__injoignable">
-        <GnPicto nom="warn" :taille="16" />
-        {{ t('guide-nego.negociations.injoignable') }}
-      </span>
-      <GnLigneConnexion v-else :en-ligne="enLigne" :lu-a="etat.luA" />
+  <GnEcran :titre="t('guide-nego.negociations.titre')" :ce-qui-se-lit="t('guide-nego.negociations.hors-connexion')">
+    <template #entete>
+      <header class="gn-sessions__entete">
+        <h1 class="gn-sessions__titre">{{ t('guide-nego.negociations.titre') }}</h1>
+        <GnBoutonRond picto="filter" :libelle="t('guide-nego.negociations.filtre.libelle')" @clic="feuille = true" />
+      </header>
     </template>
-    <template #action>
-      <NuxtLink to="/guide-nego/negociations/agenda" class="gn-sessions__agenda">
-        <GnPicto nom="calendar" :taille="20" />
-        {{ t('guide-nego.negociations.mon-agenda') }}
-      </NuxtLink>
-    </template>
+
+    <p v-if="connexionCoupee" class="gn-sessions__injoignable">
+      <GnPicto nom="warn" :taille="16" />
+      {{ t('guide-nego.negociations.injoignable') }}
+    </p>
 
     <GnChargement
       v-if="attente"
@@ -249,13 +256,11 @@ useHead({ title: t('guide-nego.negociations.titre') })
       </GnLectureImpossible>
       <template v-for="j in reunionsDeLaCoupure" :key="j.jour">
         <p class="gn-sessions__jour">{{ j.legende }}</p>
-        <GnLigneSession
+        <GnFriseSession
           v-for="r in j.reunions"
           :key="r.id"
           :reunion="r"
           :fuseau="fuseau"
-          :ville="ville"
-          :thematique="nomDeThematique(r.theme)"
           :vers="`/guide-nego/negociations/reseau/${r.id}`"
         />
       </template>
@@ -276,67 +281,51 @@ useHead({ title: t('guide-nego.negociations.titre') })
       :texte="t('guide-nego.negociations.vide.texte')"
     />
 
-    <template v-else>
+    <div v-else class="gn-sessions">
       <GnBandeJours v-model="jour" :jours="jours" :aujourdhui="aujourdhui" class="gn-sessions__bande" />
 
-      <div class="gn-sessions__filtre">
-        <GnOngletsFiltre
-          v-if="!sansThematique"
-          v-model="filtreModele"
-          :onglets="onglets"
-          :libelle="t('guide-nego.negociations.filtre.libelle')"
-        />
-        <span class="gn-sessions__compteur" role="status">{{ compteur }}</span>
-      </div>
+      <p class="gn-sessions__contexte">{{ contexte }}</p>
 
       <div v-if="sansThematique" class="gn-sessions__invitation">
-        <GnPicto nom="info" :taille="20" />
-        <p>
-          {{ t('guide-nego.negociations.sans-thematique') }}
-          <NuxtLink to="/guide-nego/thematiques?depuis=negociations" class="gn-sessions__invitation-lien">
-            {{ t('guide-nego.negociations.choisir-thematiques') }}
-          </NuxtLink>
-        </p>
+        <p>{{ t('guide-nego.negociations.sans-thematique') }}</p>
+        <NuxtLink to="/guide-nego/thematiques?depuis=negociations" class="gn-sessions__lien">
+          {{ t('guide-nego.negociations.choisir-thematiques') }}
+        </NuxtLink>
       </div>
 
-      <p class="gn-sessions__source">
-        <GnPicto nom="check-circle" :taille="18" />
-        {{ lueA }}
-      </p>
-
-      <p class="gn-sessions__jour">{{ legendeDuJour }}</p>
-
-      <div v-if="lignes.length" class="gn-sessions__liste">
-        <GnLigneSession
-          v-for="l in lignes"
-          :key="l.cle"
-          :session="l.session"
-          :reunion="l.reunion"
-          :etat="l.etat"
-          :fuseau="fuseau"
-          :ville="ville"
-          :thematique="l.thematique"
-          :mon-groupe="l.monGroupe"
-          :signale="l.signale"
-          :vers="l.vers"
-        />
+      <div v-if="lignes.length" class="gn-sessions__frise">
+        <template v-for="(l, i) in lignes" :key="l.cle">
+          <GnFriseMaintenant v-if="maintenantA === i" :heure="heureDeMaintenant" />
+          <GnFriseSession
+            :session="l.session"
+            :reunion="l.reunion"
+            :etat="l.etat"
+            :fuseau="fuseau"
+            :mienne="l.mienne"
+            :mon-groupe="l.monGroupe"
+            :signale="l.signale"
+            :vers="l.vers"
+          />
+        </template>
+        <GnFriseMaintenant v-if="maintenantA === lignes.length" :heure="heureDeMaintenant" />
       </div>
 
       <div v-else-if="vide" class="gn-sessions__vide">
-        <GnEtatVide picto="calendar" :titre="vide.titre" :texte="vide.texte" />
-        <GnBouton variante="discret" @clic="filtre = 'toutes'">
+        <h2 class="gn-sessions__vide-titre">{{ vide.titre }}</h2>
+        <p class="gn-sessions__vide-texte">{{ vide.texte }}</p>
+        <button type="button" class="gn-sessions__lien" @click="filtre = 'toutes'">
           {{ t('guide-nego.negociations.vide-miennes.voir-toutes') }}
-        </GnBouton>
-        <GnBouton variante="discret" vers="/guide-nego/thematiques?depuis=negociations">
+        </button>
+        <NuxtLink to="/guide-nego/thematiques?depuis=negociations" class="gn-sessions__lien">
           {{ t('guide-nego.negociations.vide-miennes.modifier') }}
-        </GnBouton>
+        </NuxtLink>
       </div>
 
-      <NuxtLink :to="{ path: '/guide-nego/negociations/non-annoncee', query: { jour } }" class="gn-sessions__non-annoncee">
+      <NuxtLink :to="{ path: '/guide-nego/negociations/non-annoncee', query: { jour } }" class="gn-sessions__lien">
         <GnPicto nom="flag" :taille="20" />
         {{ t('guide-nego.negociations.non-annoncee') }}
       </NuxtLink>
-    </template>
+    </div>
 
     <a
       v-if="programme && !attente && !coupee"
@@ -348,117 +337,94 @@ useHead({ title: t('guide-nego.negociations.titre') })
       <GnPicto nom="external" :taille="18" />
       {{ t('guide-nego.negociations.lien-ccnucc') }}
     </a>
+
+    <GnFeuilleBasse
+      v-model="feuille"
+      :titre="t('guide-nego.negociations.filtre.libelle')"
+      :options="options"
+      :fermeture="t('guide-nego.negociations.filtre.fermer')"
+      @choisir="choisir"
+    />
   </GnEcran>
 </template>
 
 <style>
+[data-app="guide-nego"] .gn-sessions__entete {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--gn-espace-12);
+}
+
+[data-app="guide-nego"] .gn-sessions__titre {
+  max-width: 11em;
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-28);
+  line-height: var(--gn-interligne-28);
+  font-weight: var(--gn-graisse-gras);
+  letter-spacing: var(--gn-approche-28);
+}
+
+[data-app="guide-nego"] .gn-sessions__entete .gn-bouton-rond {
+  flex: none;
+}
+
+[data-app="guide-nego"] .gn-sessions {
+  padding-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
 [data-app="guide-nego"] .gn-sessions__injoignable {
-  display: inline-flex;
+  padding-top: var(--gn-espace-12);
+  display: flex;
   align-items: flex-start;
   gap: 6px;
   color: var(--gn-danger);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  font-weight: var(--gn-graisse-demi-gras);
-}
-
-[data-app="guide-nego"] .gn-sessions__injoignable .gn-picto {
-  margin-block-start: 3px;
-}
-
-[data-app="guide-nego"] .gn-sessions__agenda {
-  flex: none;
-  min-height: var(--gn-cible);
-  padding-inline: var(--gn-espace-8);
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--gn-accent);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   font-weight: var(--gn-graisse-gras);
-  text-decoration: none;
-}
-
-[data-app="guide-nego"] .gn-sessions__agenda:active {
-  background: var(--gn-presse);
 }
 
 [data-app="guide-nego"] .gn-sessions__attente {
-  padding-top: var(--gn-espace-16);
+  padding-top: 18px;
 }
 
-/* La bande sort des marges : elle défile jusqu'au bord de l'écran. */
+/* La bande sort de la marge de droite : elle défile jusqu'au bord de l'écran. */
 [data-app="guide-nego"] .gn-sessions__bande {
-  margin-inline: calc(-1 * var(--gn-marge-ecran));
-  padding-inline: var(--gn-espace-8);
+  margin-right: calc(-1 * var(--gn-marge-ecran));
 }
 
-[data-app="guide-nego"] .gn-sessions__filtre {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--gn-espace-12);
-  min-height: var(--gn-onglet-filtre-hauteur);
-  border-bottom: var(--gn-filet-3) solid var(--gn-filet-fort);
-}
-
-[data-app="guide-nego"] .gn-sessions__compteur {
-  flex: none;
-  margin-inline-start: auto;
+[data-app="guide-nego"] .gn-sessions__contexte {
   color: var(--gn-texte-2);
   font-size: var(--gn-taille-13);
   line-height: var(--gn-interligne-13);
-  font-weight: var(--gn-graisse-demi-gras);
 }
 
 [data-app="guide-nego"] .gn-sessions__invitation {
-  margin-top: var(--gn-espace-12);
+  padding: 14px var(--gn-espace-16);
   display: flex;
-  align-items: flex-start;
-  gap: var(--gn-espace-8);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  color: var(--gn-texte);
-}
-
-[data-app="guide-nego"] .gn-sessions__invitation .gn-picto {
-  color: var(--gn-information);
-}
-
-[data-app="guide-nego"] .gn-sessions__invitation-lien {
-  width: fit-content;
-  min-height: var(--gn-cible);
-  display: flex;
-  align-items: center;
-  color: var(--gn-accent);
-  font-weight: var(--gn-graisse-gras);
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-[data-app="guide-nego"] .gn-sessions__source {
-  margin-top: var(--gn-espace-12);
-  padding: var(--gn-espace-8) var(--gn-espace-12);
-  display: flex;
-  align-items: center;
-  gap: var(--gn-espace-8);
-  border: var(--gn-filet-1) solid var(--gn-filet-fort);
-  color: var(--gn-texte-2);
+  flex-direction: column;
+  gap: var(--gn-espace-4);
+  background: var(--gn-fond-2);
+  border-radius: var(--gn-rayon-20);
+  color: var(--gn-texte-lecture);
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
 }
 
-[data-app="guide-nego"] .gn-sessions__source .gn-picto {
-  color: var(--gn-etat-source-officielle);
+[data-app="guide-nego"] .gn-sessions__frise {
+  display: flex;
+  flex-direction: column;
 }
 
 [data-app="guide-nego"] .gn-sessions__jour {
   padding-top: var(--gn-espace-12);
-  color: var(--gn-accent);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  font-weight: var(--gn-graisse-demi-gras);
+  color: var(--gn-texte-2);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-sessions__jour::first-letter {
@@ -466,29 +432,42 @@ useHead({ title: t('guide-nego.negociations.titre') })
 }
 
 [data-app="guide-nego"] .gn-sessions__vide {
+  padding: 18px var(--gn-espace-16);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  gap: var(--gn-espace-8);
+  background: var(--gn-fond-2);
+  border-radius: var(--gn-rayon-24);
 }
 
-[data-app="guide-nego"] .gn-sessions__vide .gn-vide {
-  align-items: center;
+[data-app="guide-nego"] .gn-sessions__vide-titre {
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
+  font-weight: var(--gn-graisse-gras);
 }
 
-[data-app="guide-nego"] .gn-sessions__non-annoncee {
+[data-app="guide-nego"] .gn-sessions__vide-texte {
+  color: var(--gn-texte-lecture);
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+}
+
+[data-app="guide-nego"] .gn-sessions__lien {
   width: fit-content;
   min-height: var(--gn-cible);
-  margin-top: var(--gn-espace-8);
+  padding: 0;
   display: flex;
   align-items: center;
   gap: 6px;
+  border: none;
+  background: none;
   color: var(--gn-accent);
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
   font-weight: var(--gn-graisse-gras);
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 [data-app="guide-nego"] .gn-sessions__programme {
@@ -499,8 +478,8 @@ useHead({ title: t('guide-nego.negociations.titre') })
   justify-content: center;
   gap: var(--gn-espace-8);
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   text-decoration: underline;
   text-underline-offset: 4px;
 }

@@ -40,7 +40,7 @@ const etiquetteDe = (index: number): string => etiquettes.value.get(index) ?? St
 </script>
 
 <template>
-  <ul class="gn-sommaire-liste" role="list">
+  <ul class="gn-sommaire-liste gn-lecteur-sommaire" role="list">
     <GnLigneSommaire
       v-for="(entree, rang) in sommaire"
       :key="rang"
@@ -53,3 +53,10 @@ const etiquetteDe = (index: number): string => etiquettes.value.get(index) ?? St
     />
   </ul>
 </template>
+
+<style>
+/* Les lignes du sommaire portent leur marge d'écran : dans la feuille, elles en sortent d'un bord à l'autre. */
+[data-app="guide-nego"] .gn-lecteur-sommaire {
+  margin-inline: calc(-1 * var(--gn-marge-ecran));
+}
+</style>

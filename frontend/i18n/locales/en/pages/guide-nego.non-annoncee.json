@@ -10,7 +10,7 @@
   "quand-aide": "When: {zone}.",
   "thematique": "Theme",
   "autre": "Other",
-  "bouclier": "An administrator checks before anything is shown. The meeting will appear as “Unannounced — reported by the network”.",
+  "bouclier": "An administrator checks before anything is shown. The meeting will appear as “Unannounced, reported by the network”.",
   "envoyer": "Send",
   "annuler": "Cancel",
   "refuse": "The report could not be sent. Please try again.",

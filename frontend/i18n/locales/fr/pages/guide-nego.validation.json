@@ -22,8 +22,8 @@
   },
   "propose-heure": "Nouvelle heure proposée : {heure}",
   "propose-salle": "Nouvelle salle proposée : {salle}",
-  "session": "{titre} — {quand}",
-  "session-salle": "{titre} — {quand}, {salle}",
+  "session": "{titre} ({quand})",
+  "session-salle": "{titre} ({quand}, {salle})",
   "reunion-quand": "{jour}, {heure}",
   "source": {
     "titre": "Source officielle, lue {moment}",
@@ -41,7 +41,7 @@
   "etat": {
     "non-retenu": "Non retenu à {heure}",
     "valide": "Validé à {heure}",
-    "en-publication": "Validé à {heure} — affiché dans une minute au plus",
+    "en-publication": "Validé à {heure}, affiché dans une minute au plus",
     "retire": "Retiré à {heure}"
   },
   "par": "Par {nom}",

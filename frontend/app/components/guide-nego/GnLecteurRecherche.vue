@@ -53,7 +53,7 @@ const listes = computed(() => props.passages.slice(0, LISTES))
               {{ passage.extrait.avant }}<mark>{{ passage.extrait.trouve }}</mark>{{ passage.extrait.apres }}
             </span>
           </span>
-          <GnPicto nom="chevron" :taille="24" class="gn-lecteur-recherche__chevron" />
+          <GnPicto nom="chevron" :taille="20" class="gn-lecteur-recherche__chevron" />
         </button>
       </li>
     </ul>
@@ -67,32 +67,34 @@ const listes = computed(() => props.passages.slice(0, LISTES))
 [data-app="guide-nego"] .gn-lecteur-recherche {
   display: flex;
   flex-direction: column;
-  gap: var(--gn-espace-8);
-  padding-top: var(--gn-espace-12);
+  gap: var(--gn-espace-12);
 }
 
 [data-app="guide-nego"] .gn-lecteur-recherche__compte {
-  padding-block: var(--gn-espace-8) 10px;
-  border-bottom: var(--gn-filet-3) solid var(--gn-filet-fort);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
   color: var(--gn-texte-2);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 
+/* Les lignes de la maquette 01 (« Changements du jour ») : filet doux entre deux. */
 [data-app="guide-nego"] .gn-lecteur-recherche__passage {
   display: flex;
   align-items: center;
-  gap: var(--gn-espace-12);
+  gap: 14px;
   inline-size: 100%;
-  min-height: var(--gn-cible);
+  min-height: 60px;
   padding: 10px 0;
   border: none;
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
   background: none;
   color: var(--gn-texte);
   font: inherit;
   text-align: start;
   cursor: pointer;
+}
+
+[data-app="guide-nego"] .gn-lecteur-recherche__liste > li:last-child .gn-lecteur-recherche__passage {
+  border-bottom: none;
 }
 
 [data-app="guide-nego"] .gn-lecteur-recherche__passage:active {
@@ -108,23 +110,28 @@ const listes = computed(() => props.passages.slice(0, LISTES))
 }
 
 [data-app="guide-nego"] .gn-lecteur-recherche__lieu {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  font-weight: var(--gn-graisse-gras);
   color: var(--gn-texte-2);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-lecteur-recherche__extrait {
-  font-size: var(--gn-taille-17);
-  line-height: 1.4;
+  color: var(--gn-texte-lecture);
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
   overflow-wrap: break-word;
 }
 
+/* Comme le lexique : le mot trouvé souligné à l'accent, sans aplat. */
 [data-app="guide-nego"] .gn-lecteur-recherche__extrait mark {
-  padding-inline: 2px;
-  background: var(--gn-fond-2);
+  background: none;
   color: var(--gn-texte);
-  font-weight: var(--gn-graisse-gras);
+  font-weight: var(--gn-graisse-extra-gras);
+  text-decoration: underline;
+  text-decoration-color: var(--gn-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
 [data-app="guide-nego"] .gn-lecteur-recherche__chevron {

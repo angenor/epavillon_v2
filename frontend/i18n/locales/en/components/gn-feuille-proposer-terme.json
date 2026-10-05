@@ -17,7 +17,7 @@
   "compte": {
     "texte": "Suggesting a term requires an account. Create one or sign in: what you typed is kept, and you will come back here.",
     "creer": "Create my account",
-    "connexion": "I already have an account — Sign in"
+    "connexion": "I already have an account: sign in"
   },
   "envoye": {
     "titre": "Term suggested",

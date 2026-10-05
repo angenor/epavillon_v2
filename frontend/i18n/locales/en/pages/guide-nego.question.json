@@ -3,7 +3,7 @@
   "sous-titre": "Reserved for the negotiators' network",
   "chargement": "Reading your access",
   "badge": "Negotiator access open",
-  "badge-reseau": "Negotiator access — {reseau}",
+  "badge-reseau": "Negotiator access · {reseau}",
   "propos": "IFDD experts read your question. If the answer can help others, it joins the FAQ, without your name.",
   "thematique": "Theme",
   "thematique-vide": "Choose a theme",

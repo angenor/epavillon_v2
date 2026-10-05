@@ -2,6 +2,9 @@
   "origine": "Pavillon de la Francophonie",
   "entendu": "{jour}, {heures}",
   "rediffusion": "Rediffusion · {minutes} min",
-  "attente-position": "Liste d'attente — position {position}",
-  "sans-inscription": "Entrée libre, sans inscription"
+  "attente-position": "Liste d'attente, position {position}",
+  "sans-inscription": "Entrée libre, sans inscription",
+  "origine-et-jour": "{jour} · Pavillon de la Francophonie",
+  "lieu-et-fin": "{lieu} · jusqu'à {fin}",
+  "fin": "jusqu'à {fin}"
 }

@@ -295,6 +295,6 @@ function envoyer(): void {
   display: flex;
   flex-direction: column;
   gap: var(--gn-espace-4);
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
+  border-top: var(--gn-filet-1) solid var(--gn-filet-doux);
 }
 </style>

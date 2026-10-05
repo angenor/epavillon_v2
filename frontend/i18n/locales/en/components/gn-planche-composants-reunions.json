@@ -1,8 +1,8 @@
 {
   "titre": "Francophonie meetings",
   "propos": "Screen 10 · 1a and 4 decies. One row per meeting: origin, short day, start 20/700, end 15/600, venue with the pin, a single status mark; restricted access names its audience; the “Also held at the Pavilion” tag opens the Pavilion section.",
-  "lignes": "Meeting row — ended, registered and linked to the Pavilion, restricted access, online on the waiting list, full, cancelled",
-  "etiquette": "Pavilion tag — tapped, it opens the Pavilion section",
+  "lignes": "Meeting row: ended, registered and linked to the Pavilion, restricted access, online on the waiting list, full, cancelled",
+  "etiquette": "Pavilion tag: tapped, it opens the Pavilion section",
   "nature": "Negotiators' consultation",
   "atelier": "Preparatory workshop for French-speaking negotiators",
   "concertation": "Francophone negotiators' consultation",
@@ -14,6 +14,5 @@
   "pavillon": "Francophonie Pavilion, blue zone",
   "salle": "Room to be confirmed",
   "public": "ministers and heads of delegation",
-  "journee": "“My day”, three agendas — today's meeting without short day, Sessions with nothing today, Meetings with the next one, empty Pavilion",
-  "journee-prochaine": "Nothing today. Next: Francophone negotiators' consultation — Tuesday, November 17, 18:30, Antalya time"
+  "journee": "“My day”, three agendas: today's meeting without short day, Sessions with nothing today, Meetings with the next one, empty Pavilion"
 }

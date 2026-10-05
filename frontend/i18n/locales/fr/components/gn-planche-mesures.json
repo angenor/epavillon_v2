@@ -1,7 +1,7 @@
 {
   "titre": "Mesures",
-  "propos": "Tout est multiple de 4. Chaque mesure est dessinée ici à sa taille réelle, pas seulement écrite.",
-  "cadre-note": "La hauteur du cadre est dessinée comme une longueur : 800 px ne tiennent pas dans un écran. La bande défile toute seule ; la page, jamais.",
+  "propos": "Chaque mesure est dessinée ici à sa taille réelle, pas seulement écrite. Les valeurs sont celles de la maquette Nuit.",
+  "cadre-note": "La hauteur du cadre est dessinée comme une longueur : 844 px ne tiennent pas dans un écran. La bande défile toute seule ; la page, jamais.",
   "composants-note": "Chaque carré porte la mesure sur ses deux côtés, même quand le jeton ne vaut que pour une largeur ou une hauteur.",
   "groupe": {
     "espacements": "Grille et espacements",
@@ -13,12 +13,12 @@
     "composants": "Dimensions de composants"
   },
   "propos-groupe": {
-    "espacements": "Grille de 4. Sept espacements, et rien entre eux.",
-    "cibles": "48 px au minimum pour tout ce qui se touche ; 56 px pour une ligne à réglage, à cocher ou à cercle.",
-    "rayons": "Trois rayons seulement : la direction est carrée.",
-    "filets": "Un filet dit la séparation, l'épaisseur dit l'importance. L'anneau de focus fait 3 px, posé à 2 px de la cible.",
+    "espacements": "Marge d'écran 20 ; entre blocs 22 à l'accueil, 18 aux sessions, 20 au lexique.",
+    "cibles": "44 px pour un bouton rond et une pilule de jour, 52 pour le bouton principal, 56 pour un champ et une ligne.",
+    "rayons": "24 bloc · 22 bouton rond · 20 carte de la frise · 18 champ · 16 bouton et ligne-carte · 14 et 12 pastilles d'icône · 6 marque « EN » et piste · pilule pour les jours et les étiquettes.",
+    "filets": "Un filet de 1 px sépare ; la couleur, pas l'épaisseur, dit l'importance. L'anneau de focus fait 3 px, posé à 2 px de la cible.",
     "zones": "Ce que la barre d'état, la barre d'onglets et le geste système prennent à l'écran.",
-    "cadre": "Cadre de référence 360 × 800, vérifié à 390 × 844. Rien n'a de largeur fixe, sauf la colonne d'heure.",
+    "cadre": "Cadre de référence 390 × 844. Rien n'a de largeur fixe, sauf la colonne d'heure.",
     "composants": "Les dimensions qu'un composant ne choisit pas lui-même."
   }
 }

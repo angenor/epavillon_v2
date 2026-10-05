@@ -130,7 +130,7 @@ const terminee = computed(() => !!props.session && props.etat === 'terminee')
         :class="{ 'gn-ligne-session__debut--en-cours': session && etat === 'en-cours' }"
         aria-hidden="true"
       >{{ debut }}</span>
-      <span v-else class="gn-ligne-session__debut" aria-hidden="true">—</span>
+      <span v-else class="gn-ligne-session__debut" aria-hidden="true">--:--</span>
       <span v-if="fin" class="gn-ligne-session__fin" aria-hidden="true">{{ fin }}</span>
     </span>
 
@@ -203,7 +203,7 @@ const terminee = computed(() => !!props.session && props.etat === 'terminee')
   display: flex;
   align-items: flex-start;
   gap: var(--gn-espace-12);
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
   color: var(--gn-texte);
   text-decoration: none;
 }
@@ -224,7 +224,6 @@ const terminee = computed(() => !!props.session && props.etat === 'terminee')
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  font-variant-numeric: tabular-nums;
 }
 
 /* Lu, pas vu : l'heure complète avec son fuseau, pour qui écoute la ligne. */

@@ -31,12 +31,10 @@ const MODES: ModeDeLecture[] = ['pages', 'texte']
 </template>
 
 <style>
+/* Deux pilules de jour, comme GnSegmente : le mode lu est à l'accent, l'autre bordé. */
 [data-app="guide-nego"] .gn-choix-mode {
   display: flex;
-  gap: var(--gn-filet-2);
-  padding: var(--gn-filet-2);
-  border: var(--gn-filet-2) solid var(--gn-filet-fort);
-  border-radius: var(--gn-rayon-4);
+  gap: 6px;
 }
 
 /* Dans la barre, le choix tient l'emplacement d'une action : un quart de 320 px. */
@@ -44,30 +42,33 @@ const MODES: ModeDeLecture[] = ['pages', 'texte']
   flex: 1 1 0;
   min-width: calc(2 * var(--gn-onglet-min));
   align-self: center;
+  gap: var(--gn-espace-4);
   margin-inline: var(--gn-onglet-air);
 }
 
 [data-app="guide-nego"] .gn-choix-mode__segment {
   flex: 1;
   min-width: 0;
-  min-height: var(--gn-cible);
-  padding-inline: var(--gn-espace-8);
+  height: var(--gn-pilule-jour);
+  padding-inline: var(--gn-espace-16);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  background: none;
-  color: var(--gn-texte);
+  border: var(--gn-filet-1) solid var(--gn-filet);
+  border-radius: var(--gn-rayon-pilule);
+  background: transparent;
+  color: var(--gn-texte-2);
   font: inherit;
-  font-size: var(--gn-taille-17);
+  font-size: var(--gn-taille-15);
+  line-height: 1;
   font-weight: var(--gn-graisse-demi-gras);
+  white-space: nowrap;
   cursor: pointer;
 }
 
 [data-app="guide-nego"] .gn-choix-mode--barre .gn-choix-mode__segment {
-  padding-inline: var(--gn-onglet-air);
+  padding-inline: var(--gn-espace-4);
   font-size: var(--gn-taille-13);
-  line-height: var(--gn-interligne-13);
 }
 
 [data-app="guide-nego"] .gn-choix-mode__segment:active {
@@ -75,17 +76,14 @@ const MODES: ModeDeLecture[] = ['pages', 'texte']
 }
 
 [data-app="guide-nego"] .gn-choix-mode__segment--actif {
-  background: var(--gn-titre);
-  color: var(--gn-sur-titre);
-  font-weight: var(--gn-graisse-gras);
-}
-
-[data-app="guide-nego"][data-theme="sombre"] .gn-choix-mode__segment--actif {
   background: var(--gn-accent);
+  border-color: var(--gn-accent);
   color: var(--gn-accent-inv);
+  font-weight: var(--gn-graisse-extra-gras);
 }
 
-[data-app="guide-nego"] .gn-choix-mode__segment:focus-visible {
-  outline-offset: calc(-1 * var(--gn-focus-decalage));
+[data-app="guide-nego"] .gn-choix-mode__segment--actif:active {
+  background: var(--gn-accent);
+  filter: brightness(0.9);
 }
 </style>

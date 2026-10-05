@@ -50,7 +50,7 @@ const signature = (note: Pick<CorrectionNote, 'author_name' | 'posted_at'>) =>
       >
         <GnPicto nom="warn" :taille="20" class="gn-note-correction__triangle" />
         <span class="gn-note-correction__libelle">{{ t('gn-note-correction.ligne') }}</span>
-        <GnPicto :nom="ouvertes.has(note.id) ? 'chev-up' : 'chev-down'" :taille="24" class="gn-note-correction__chevron" />
+        <GnPicto :nom="ouvertes.has(note.id) ? 'chev-up' : 'chev-down'" :taille="20" class="gn-note-correction__chevron" />
       </button>
       <div v-if="ouvertes.has(note.id)" :id="`gn-note-${note.id}`" class="gn-note-correction__boite">
         <p class="gn-note-correction__texte">{{ note.body }}</p>
@@ -64,14 +64,25 @@ const signature = (note: Pick<CorrectionNote, 'author_name' | 'posted_at'>) =>
 </template>
 
 <style>
-/* Le filet tient dans la marge de l'écran : le texte du passage ne bouge pas d'un pixel. */
+/* Le trait tient dans la marge de l'écran : le texte du passage ne bouge pas d'un pixel. */
 [data-app="guide-nego"] .gn-note-correction {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--gn-espace-8);
   margin-inline-start: calc(-1 * var(--gn-marge-ecran));
-  padding-inline-start: calc(var(--gn-marge-ecran) - var(--gn-filet-3));
-  border-inline-start: var(--gn-filet-3) solid var(--gn-etat-depasse);
+  padding-inline-start: var(--gn-marge-ecran);
+}
+
+/* Le trait du repère « maintenant » de la maquette : 2 px aux bouts arrondis, à mi-marge. */
+[data-app="guide-nego"] .gn-note-correction::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: calc(var(--gn-marge-ecran) / 2);
+  width: 2px;
+  border-radius: 1px;
+  background: var(--gn-etat-depasse);
 }
 
 [data-app="guide-nego"] .gn-note-correction__ligne {
@@ -79,15 +90,15 @@ const signature = (note: Pick<CorrectionNote, 'author_name' | 'posted_at'>) =>
   align-items: center;
   gap: var(--gn-espace-8);
   inline-size: 100%;
-  min-height: var(--gn-cible);
+  min-height: var(--gn-bouton-rond);
   padding: 0;
   border: none;
   background: none;
   color: var(--gn-etat-depasse);
   font: inherit;
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  font-weight: var(--gn-graisse-gras);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
+  font-weight: var(--gn-graisse-extra-gras);
   text-align: start;
   cursor: pointer;
 }
@@ -103,22 +114,23 @@ const signature = (note: Pick<CorrectionNote, 'author_name' | 'posted_at'>) =>
 }
 
 [data-app="guide-nego"] .gn-note-correction__chevron {
-  color: var(--gn-texte-2);
+  color: var(--gn-picto-secondaire);
 }
 
 [data-app="guide-nego"] .gn-note-correction__boite {
   display: flex;
   flex-direction: column;
-  gap: var(--gn-espace-4);
-  padding: var(--gn-espace-8) var(--gn-espace-12);
-  border: var(--gn-filet-1) solid var(--gn-filet);
+  gap: var(--gn-espace-8);
+  padding: var(--gn-espace-12) var(--gn-espace-16);
+  border-radius: var(--gn-rayon-16);
+  background: var(--gn-fond-2);
 }
 
 /* La boîte ne suit pas la taille de lecture : c'est une glose, pas le texte du guide. */
 [data-app="guide-nego"] .gn-note-correction__texte {
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
-  color: var(--gn-texte);
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+  color: var(--gn-texte-lecture);
   white-space: pre-line;
   overflow-wrap: break-word;
 }
@@ -126,9 +138,9 @@ const signature = (note: Pick<CorrectionNote, 'author_name' | 'posted_at'>) =>
 [data-app="guide-nego"] .gn-note-correction__signature {
   display: flex;
   align-items: center;
-  gap: var(--gn-espace-8);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  gap: 6px;
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   color: var(--gn-texte-2);
 }
 
