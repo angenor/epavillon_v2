@@ -31,7 +31,7 @@ useHead({ title: k('liste.titre') })
 
 <template>
   <GnEcran :titre="k('liste.titre')" :sous-titre="sousTitre" retour="/guide-nego/ressources" :onglets="false">
-    <template v-if="peutValider" #action>
+    <template v-if="peutValider" #sous-titre-action>
       <span class="gn-validation__role">
         <GnPicto nom="shield-check" :taille="20" />
         {{ k('role') }}
@@ -69,14 +69,15 @@ useHead({ title: k('liste.titre') })
   align-items: center;
   gap: 6px;
   color: var(--gn-succes);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-validation__compteur {
   flex: none;
   color: var(--gn-titre);
+  font-family: var(--gn-police-titre);
   font-size: var(--gn-taille-20);
   line-height: var(--gn-interligne-20);
   font-weight: var(--gn-graisse-gras);
