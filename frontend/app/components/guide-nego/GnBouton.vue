@@ -60,17 +60,19 @@ const inerte = computed(() => props.desactive || props.chargement)
 </template>
 
 <style>
+/* Le bouton de la maquette : 52 de haut, rayon 16, texte 15. */
 [data-app="guide-nego"] .gn-bouton {
-  min-height: var(--gn-cible);
-  padding-inline: var(--gn-espace-16);
+  min-height: var(--gn-bouton-principal);
+  padding-inline: var(--gn-espace-20);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--gn-espace-8);
   border: none;
-  border-radius: var(--gn-rayon-4);
+  border-radius: var(--gn-rayon-16);
   background: none;
-  font-size: var(--gn-taille-17);
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
   font-weight: var(--gn-graisse-gras);
   text-align: center;
   text-decoration: none;
@@ -84,14 +86,16 @@ const inerte = computed(() => props.desactive || props.chargement)
   flex: 1;
 }
 
+/* Un aplat d'accent, d'attention ou d'alerte porte toujours son texte en 800. */
 [data-app="guide-nego"] .gn-bouton--principal {
   background: var(--gn-accent);
   color: var(--gn-accent-inv);
+  font-weight: var(--gn-graisse-extra-gras);
 }
 
 [data-app="guide-nego"] .gn-bouton--secondaire {
-  border: var(--gn-filet-2) solid var(--gn-filet-fort);
-  color: var(--gn-titre);
+  border: var(--gn-filet-1) solid var(--gn-filet);
+  color: var(--gn-texte);
 }
 
 [data-app="guide-nego"] .gn-bouton--discret {
@@ -103,23 +107,22 @@ const inerte = computed(() => props.desactive || props.chargement)
 [data-app="guide-nego"] .gn-bouton--dangereux {
   background: var(--gn-danger-aplat);
   color: var(--gn-danger-texte);
+  font-weight: var(--gn-graisse-extra-gras);
 }
 
-/* L'état actif d'une commande qui bascule : aplat plein, jamais un simple changement de teinte. */
+/* L'état actif d'une commande qui bascule : l'aplat d'accent, comme « Dans mes favoris ». */
 [data-app="guide-nego"] .gn-bouton--secondaire.gn-bouton--actif {
-  background: var(--gn-titre);
-  color: var(--gn-sur-titre);
-}
-
-[data-app="guide-nego"][data-theme="sombre"] .gn-bouton--secondaire.gn-bouton--actif {
   background: var(--gn-accent);
+  border-color: var(--gn-accent);
+  color: var(--gn-accent-inv);
+  font-weight: var(--gn-graisse-extra-gras);
 }
 
 [data-app="guide-nego"] .gn-bouton:not(:disabled):active {
   filter: brightness(0.9);
 }
 
-[data-app="guide-nego"] .gn-bouton--secondaire:not(:disabled):active,
+[data-app="guide-nego"] .gn-bouton--secondaire:not(.gn-bouton--actif):not(:disabled):active,
 [data-app="guide-nego"] .gn-bouton--discret:not(:disabled):active {
   background: var(--gn-presse);
   filter: none;

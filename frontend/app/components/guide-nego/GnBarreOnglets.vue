@@ -2,10 +2,9 @@
 import { onglets as listerOnglets, ongletActif, type Onglet } from '~/utils/guide-nego/onglets'
 
 /**
- * La barre basse, à LARGEUR DE LIBELLÉ : « Négociations » et « Francophonie » ne
- * tiennent pas dans un cinquième d'écran. À 360 px, cinq onglets tiennent exactement ;
- * quand la place manque — police agrandie, écran plus étroit — la barre seule défile,
- * et rien n'est tronqué.
+ * La barre basse de la maquette Nuit : onglets de 80 × 56, répartis. Quand la place
+ * manque (cinq onglets, police agrandie, écran étroit), la barre seule défile, et rien
+ * n'est tronqué.
  *
  * L'onglet allumé se déduit de l'adresse. `forcerActif` le désigne à la main : hors
  * d'un écran de l'application — la planche de design — aucune adresse ne l'allume, et
@@ -64,7 +63,7 @@ watch(actif, () => nextTick(amenerDansLaVue))
       :aria-current="actif?.cle === onglet.cle ? 'page' : undefined"
     >
       <span class="gn-onglets__marque">
-        <GnPicto :nom="onglet.picto" :taille="26" />
+        <GnPicto :nom="onglet.picto" :taille="24" />
         <span v-if="compteurs[onglet.cle]" class="gn-onglets__compteur">
           {{ compteurs[onglet.cle] }}
           <span class="gn-hors-ecran">{{ t('gn-barre-onglets.non-lus') }}</span>
@@ -82,13 +81,15 @@ watch(actif, () => nextTick(amenerDansLaVue))
   /* Sur un écran large, la barre reste dans la colonne de l'application. */
   left: 50%;
   transform: translateX(-50%);
-  width: min(100%, 480px);
+  width: min(100%, var(--gn-colonne-largeur));
   z-index: 5;
   display: flex;
-  height: calc(var(--gn-barre-onglets) + env(safe-area-inset-bottom));
-  padding-bottom: env(safe-area-inset-bottom);
-  background: var(--gn-fond);
-  border-top: var(--gn-filet-2) solid var(--gn-filet-fort);
+  justify-content: space-around;
+  /* 88 de la maquette, zone de geste comprise ; plus haut seulement si la zone sûre l'exige. */
+  height: max(var(--gn-barre-onglets), calc(var(--gn-espace-8) + var(--gn-onglet-hauteur) + env(safe-area-inset-bottom)));
+  padding-top: var(--gn-espace-8);
+  background: var(--gn-barre-fond);
+  border-top: var(--gn-filet-1) solid var(--gn-filet-doux);
   /* La barre seule défile : la page, jamais. */
   overflow-x: auto;
   overflow-y: hidden;
@@ -100,19 +101,19 @@ watch(actif, () => nextTick(amenerDansLaVue))
 }
 
 [data-app="guide-nego"] .gn-onglets__onglet {
-  flex: 1 0 auto;
-  min-width: var(--gn-onglet-min);
-  padding-inline: var(--gn-onglet-air);
+  flex: 0 1 var(--gn-onglet-largeur);
+  min-width: min-content;
+  height: var(--gn-onglet-hauteur);
+  padding-inline: var(--gn-espace-4);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  margin-top: calc(-1 * var(--gn-filet-2));
-  border-top: var(--gn-filet-3) solid transparent;
+  gap: var(--gn-espace-4);
+  border-radius: var(--gn-rayon-14);
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-13);
-  line-height: var(--gn-interligne-13);
+  font-size: var(--gn-taille-12);
+  line-height: var(--gn-interligne-12);
   font-weight: var(--gn-graisse-demi-gras);
   text-decoration: none;
   white-space: nowrap;
@@ -127,9 +128,8 @@ watch(actif, () => nextTick(amenerDansLaVue))
 }
 
 [data-app="guide-nego"] .gn-onglets__onglet--actif {
-  border-top-color: var(--gn-accent);
   color: var(--gn-accent);
-  font-weight: var(--gn-graisse-gras);
+  font-weight: var(--gn-graisse-extra-gras);
 }
 
 [data-app="guide-nego"] .gn-onglets__marque {
@@ -140,16 +140,17 @@ watch(actif, () => nextTick(amenerDansLaVue))
 [data-app="guide-nego"] .gn-onglets__compteur {
   position: absolute;
   top: -6px;
-  right: -10px;
-  min-width: var(--gn-compteur);
-  height: var(--gn-compteur);
-  padding-inline: 5px;
+  right: -12px;
+  min-width: 18px;
+  height: 18px;
+  padding-inline: var(--gn-espace-4);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--gn-attention-aplat);
-  color: var(--gn-attention-aplat-texte);
-  font-size: var(--gn-taille-13);
-  font-weight: var(--gn-graisse-gras);
+  border-radius: var(--gn-rayon-pilule);
+  background: var(--gn-danger-aplat);
+  color: var(--gn-danger-texte);
+  font-size: var(--gn-taille-11);
+  font-weight: var(--gn-graisse-extra-gras);
 }
 </style>

@@ -44,11 +44,12 @@ watch(actif, () => nextTick(amenerDansLaVue))
 </template>
 
 <style>
-/* Le filet 3 px au-dessus vient de l'en-tête (`.gn-entete`) : la rangée n'en repose pas un second. */
+/* Les pilules de jour de la maquette : la rangée déborde à droite et défile seule. */
 [data-app="guide-nego"] .gn-onglets-filtre {
   display: flex;
-  gap: var(--gn-espace-16);
-  /* La rangée seule défile : la page, jamais. */
+  gap: 6px;
+  margin-inline-end: calc(-1 * var(--gn-marge-ecran));
+  padding-inline-end: var(--gn-marge-ecran);
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
@@ -60,16 +61,18 @@ watch(actif, () => nextTick(amenerDansLaVue))
 
 [data-app="guide-nego"] .gn-onglets-filtre__onglet {
   flex: none;
-  min-height: var(--gn-onglet-filtre-hauteur);
-  display: flex;
+  height: var(--gn-pilule-jour);
+  padding-inline: var(--gn-espace-16);
+  display: inline-flex;
   align-items: center;
-  border: none;
-  /* Le filet de l'actif est posé dès le repos, en transparent : sinon la rangée sautait de 3 px. */
-  border-bottom: var(--gn-filet-3) solid transparent;
-  background: none;
+  justify-content: center;
+  gap: var(--gn-espace-8);
+  border: var(--gn-filet-1) solid var(--gn-filet);
+  border-radius: var(--gn-rayon-pilule);
+  background: transparent;
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
+  font-size: var(--gn-taille-15);
+  line-height: 1;
   font-weight: var(--gn-graisse-demi-gras);
   white-space: nowrap;
 }
@@ -78,13 +81,10 @@ watch(actif, () => nextTick(amenerDansLaVue))
   background: var(--gn-presse);
 }
 
-[data-app="guide-nego"] .gn-onglets-filtre__onglet:focus-visible {
-  outline-offset: calc(-1 * var(--gn-focus-decalage));
-}
-
 [data-app="guide-nego"] .gn-onglets-filtre__onglet--actif {
-  border-bottom-color: var(--gn-accent);
-  color: var(--gn-titre);
-  font-weight: var(--gn-graisse-gras);
+  background: var(--gn-accent);
+  border-color: var(--gn-accent);
+  color: var(--gn-accent-inv);
+  font-weight: var(--gn-graisse-extra-gras);
 }
 </style>

@@ -3,7 +3,7 @@
  * Champ de recherche : loupe, saisie, puis croix pour effacer — ou l'arc quand la
  * réponse se fait attendre. Repos · focus avec saisie · chargement.
  *
- * La croix est un vrai bouton de 48 px, débordant sur la marge intérieure du champ :
+ * La croix est un vrai bouton de 44 px, débordant sur la marge intérieure du champ :
  * une croix dessinée à la taille du pictogramme se rate un doigt sur trois. Après
  * l'effacement le focus revient dans la saisie, sinon il retombe dans le vide avec
  * le bouton qui disparaît.
@@ -28,7 +28,7 @@ function effacer() {
 
 <template>
   <div class="gn-champ-recherche" role="search">
-    <GnPicto nom="search" :taille="24" class="gn-champ-recherche__loupe" />
+    <GnPicto nom="search" :taille="20" class="gn-champ-recherche__loupe" />
 
     <input
       ref="saisie"
@@ -52,28 +52,28 @@ function effacer() {
       :aria-label="t('gn-champ-recherche.effacer')"
       @click="effacer"
     >
-      <GnPicto nom="close" :taille="24" />
+      <GnPicto nom="close" :taille="20" />
     </button>
   </div>
 </template>
 
 <style>
+/* Le champ de la maquette : 56 de haut, bloc bordé, rayon 18, loupe en texte secondaire. */
 [data-app="guide-nego"] .gn-champ-recherche {
   min-height: var(--gn-champ);
-  padding-inline: var(--gn-espace-12);
+  padding-inline: var(--gn-espace-16);
   display: flex;
   align-items: center;
-  gap: var(--gn-espace-8);
-  border: var(--gn-filet-2) solid var(--gn-filet);
-  border-radius: var(--gn-rayon-4);
-  background: var(--gn-fond);
+  gap: 10px;
+  border: var(--gn-filet-1) solid var(--gn-filet);
+  border-radius: var(--gn-rayon-18);
+  background: var(--gn-fond-2);
+  color: var(--gn-texte-2);
 }
 
-/* L'anneau entoure le champ entier, pas la seule saisie : le bord et la loupe en font partie. */
+/* L'anneau entoure le champ entier : le bord s'allume à l'accent. */
 [data-app="guide-nego"] .gn-champ-recherche:has(.gn-champ-recherche__saisie:focus-visible) {
-  border-color: var(--gn-filet-fort);
-  outline: var(--gn-focus-anneau) solid var(--gn-focus);
-  outline-offset: var(--gn-focus-decalage);
+  border-color: var(--gn-focus);
 }
 
 [data-app="guide-nego"] .gn-champ-recherche__loupe {
@@ -88,7 +88,7 @@ function effacer() {
   color: var(--gn-texte);
   font-family: var(--gn-police);
   font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
+  line-height: var(--gn-interligne-15);
 }
 
 [data-app="guide-nego"] .gn-champ-recherche__saisie::placeholder {
@@ -100,21 +100,22 @@ function effacer() {
   outline: none;
 }
 
-/* La croix native de WebKit doublerait le bouton, sans nom accessible ni cible de 48. */
+/* La croix native de WebKit doublerait le bouton, sans nom accessible ni vraie cible. */
 [data-app="guide-nego"] .gn-champ-recherche__saisie::-webkit-search-cancel-button {
   appearance: none;
 }
 
-/* Le bouton mord la marge intérieure : 48 px de cible, pictogramme à 12 px du bord. */
+/* Le bouton mord la marge intérieure : 44 de cible, pictogramme à 12 px du bord. */
 [data-app="guide-nego"] .gn-champ-recherche__effacer {
   flex: none;
-  width: var(--gn-cible);
-  height: var(--gn-cible);
+  width: var(--gn-bouton-rond);
+  height: var(--gn-bouton-rond);
   margin-inline-end: calc(-1 * var(--gn-espace-12));
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
+  border-radius: var(--gn-rayon-22);
   background: none;
   color: var(--gn-picto-secondaire);
 }
@@ -124,7 +125,6 @@ function effacer() {
 }
 
 [data-app="guide-nego"] .gn-champ-recherche__effacer:focus-visible {
-  outline: var(--gn-focus-anneau) solid var(--gn-focus);
   outline-offset: calc(-1 * var(--gn-focus-decalage));
 }
 
