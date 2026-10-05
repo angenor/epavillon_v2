@@ -96,3 +96,12 @@ test('la piste jusqu’à la COP : l’ouverture placée, un jalon passé ou d�
   assert.ok(piste.ouverture > 0.7 && piste.ouverture < 0.8)
   assert.deepEqual(piste.jalons.map((j) => j.cle), ['atelier'])
 })
+
+test('la barre « MAINTENANT » se pose avant la première ligne qui n’a pas commencé', async () => {
+  const { placeDuMaintenant } = await import('../../app/utils/guide-nego/sessions.ts')
+  const debuts = ['2027-11-10T13:00:00Z', '2027-11-10T14:30:00Z', null]
+  assert.equal(placeDuMaintenant(debuts, A_10H48), 1)
+  assert.equal(placeDuMaintenant(debuts, new Date('2027-11-10T12:00:00Z')), 0)
+  assert.equal(placeDuMaintenant(debuts, new Date('2027-11-10T15:00:00Z')), 2)
+  assert.equal(placeDuMaintenant(['2027-11-10T13:00:00Z'], new Date('2027-11-10T15:00:00Z')), 1)
+})

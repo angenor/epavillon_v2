@@ -1,0 +1,12 @@
+{
+  "sans-heure": "—",
+  "jusqua": "until {heure}",
+  "terminee": "ended",
+  "dans-mon-agenda": "in my agenda",
+  "mon-groupe": "my group",
+  "en-cours": "Ongoing",
+  "deplacee": "{de} → {a}",
+  "non-annoncee": "Unannounced · reported by the network",
+  "traduction": "Title translated automatically",
+  "signale": "Reported by the network, validated at {heure}"
+}

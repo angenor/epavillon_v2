@@ -206,3 +206,13 @@ export function affichageDesSessions(garde: SessionsGardees | null, slug: string
     ville: lues.edition.city,
   }
 }
+
+/**
+ * Où poser la barre « MAINTENANT » dans la frise d'aujourd'hui : avant la première ligne
+ * qui n'a pas commencé. Une ligne sans heure se range en fin de journée et n'a pas commencé.
+ */
+export function placeDuMaintenant(debuts: readonly (string | null)[], maintenant: Date): number {
+  const t = maintenant.getTime()
+  const index = debuts.findIndex((debut) => debut === null || instant(debut) > t)
+  return index === -1 ? debuts.length : index
+}
