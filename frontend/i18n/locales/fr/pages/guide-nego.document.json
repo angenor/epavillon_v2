@@ -3,10 +3,10 @@
   "sous-titre": "{type} · {editeur}",
   "pages": "{count} page | {count} page | {count} pages",
   "marque": {
-    "lien-reseau": "Lien externe — réseau nécessaire",
-    "non-telecharge": "Non téléchargé — disponible au retour du réseau"
+    "lien-reseau": "Lien externe, réseau nécessaire",
+    "non-telecharge": "Non téléchargé, disponible au retour du réseau"
   },
-  "lien": "S'ouvre dans le navigateur — réseau nécessaire, rien n'est gardé sur le téléphone",
+  "lien": "S'ouvre dans le navigateur : réseau nécessaire, rien n'est gardé sur le téléphone",
   "sans-texte": "Se lit sur ses pages. Son texte n'a pas pu être extrait : il ne se cherche pas.",
   "thematiques": {
     "titre": "Thématiques",
@@ -25,7 +25,7 @@
   "telecharge": "Téléchargé. Lisible sans connexion.",
   "en-attente": "Pas de réseau : le téléchargement partira à son retour, même si l'application a été fermée.",
   "progression": {
-    "part": "Téléchargement — {part}",
+    "part": "Téléchargement : {part}",
     "sans-part": "Téléchargement en cours",
     "octets": "{recus} sur {total}",
     "recus": "{recus} reçus"
@@ -38,7 +38,7 @@
     "telecharger-quand-meme": "Télécharger quand même cette version",
     "lire": "Lire",
     "lire-cette-version": "Lire cette version",
-    "retirer": "Retirer du téléphone — {taille}",
+    "retirer": "Retirer du téléphone ({taille})",
     "retirer-sans-taille": "Retirer du téléphone",
     "navigateur": "Ouvrir dans le navigateur",
     "favori": "Favori",
@@ -62,7 +62,7 @@
     "titre": "Les favoris suivent votre compte",
     "texte": "Créez un compte ou connectez-vous pour retrouver ce document en favori sur tous vos appareils. Le téléchargement, lui, n'en demande pas.",
     "creer": "Créer mon compte",
-    "connexion": "J'ai déjà un compte — Me connecter"
+    "connexion": "J'ai déjà un compte : me connecter"
   },
   "partage": {
     "copie": "Adresse de la fiche copiée.",

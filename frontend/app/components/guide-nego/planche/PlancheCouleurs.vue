@@ -187,7 +187,7 @@ const aplat = (jeton: string) => ({ background: `var(${jeton})` })
             </div>
           </div>
           <p v-if="groupe.cle === 'composants'" class="gn-planche-note">
-            --gn-voile-opacite : {{ lus['--gn-voile-opacite'] || '…' }} —
+            --gn-voile-opacite : {{ lus['--gn-voile-opacite'] || '…' }} ·
             {{ t('gn-planche-couleurs.voile-opacite') }}
           </p>
         </GnPlancheSection>

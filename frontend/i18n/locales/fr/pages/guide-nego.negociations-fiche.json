@@ -23,13 +23,13 @@
   "plage-jour": "{jour}, {plage}",
   "heure-precision": "{jour} · {zone} ({decalage})",
   "salle-inconnue": "Salle non annoncée",
-  "terme": "{terme} — ouvrir dans le lexique",
-  "ordre-du-jour": "{code} — {intitule}",
+  "terme": "{terme} : ouvrir dans le lexique",
+  "ordre-du-jour": "{code} : {intitule}",
   "hors-ordre-du-jour": "Hors ordre du jour officiel",
-  "mon-groupe": "Mon groupe — {groupe}",
+  "mon-groupe": "Mon groupe : {groupe}",
   "sans-thematique": "Thématique non précisée",
   "origine": "Source officielle",
-  "origine-lue": "Source officielle — lu {moment}",
+  "origine-lue": "Source officielle, lue {moment}",
   "original": "Voir l'original sur le programme officiel de la CCNUCC",
   "rappel": {
     "libelle": "Me rappeler 15 minutes avant",
@@ -48,7 +48,7 @@
     "titre": "L'agenda suit votre compte",
     "texte": "Créez un compte ou connectez-vous pour garder cette session dans votre agenda, sur tous vos appareils. La fiche, elle, se lit sans compte.",
     "creer": "Créer mon compte",
-    "connexion": "J'ai déjà un compte — Me connecter"
+    "connexion": "J'ai déjà un compte : me connecter"
   },
   "sans-edition": {
     "titre": "Aucune COP climat à venir",
@@ -72,8 +72,8 @@
     "envoye": "Signalement envoyé. Vérification en cours.",
     "en-file": "Signalement enregistré. Il partira au retour du réseau.",
     "voir": "Voir",
-    "en-cours": "Votre signalement — envoyé à {heure}, en vérification",
-    "en-attente": "Votre signalement — partira au retour du réseau",
+    "en-cours": "Votre signalement : envoyé à {heure}, en vérification",
+    "en-attente": "Votre signalement : partira au retour du réseau",
     "refuse": "Le signalement n'a pas pu être envoyé. Réessayez.",
     "reserve": "Signaler un changement est réservé aux négociatrices et négociateurs. La fiche, elle, se lit sans compte.",
     "fermer": "Fermer"

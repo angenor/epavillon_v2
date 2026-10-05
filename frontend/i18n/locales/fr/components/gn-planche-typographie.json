@@ -5,7 +5,7 @@
   "echelle": "L'échelle",
   "echelle-propos": "Chaque cran porte sa famille, sa taille, son interligne et sa graisse, tels que la maquette les montre.",
   "interligne": "interligne",
-  "exemple": "Sessions de négociation — 14:30",
+  "exemple": "Sessions de négociation, 14:30",
   "regle-13": "Sous 13 px, seulement le libellé d'onglet (12), « MAINTENANT » (12, capitales) et la marque « EN » ou la graduation (11).",
   "usage": {
     "76": "Compte à rebours : « 42 min », « 35 jours »",
@@ -29,7 +29,7 @@
   "italique-regle": "L'italique est réservé aux termes anglais glissés dans un texte français. Ni Sora ni Manrope n'en dessinent : le navigateur incline le romain.",
   "lettres": "Ce que la fonte doit savoir dessiner",
   "lettres-propos": "La ligature œ, les capitales accentuées et les guillemets français existent dans les deux familles, embarquées en latin et latin étendu.",
-  "phrase": "« Au nom de ma délégation », l'œuvre d'Aïssatou à la CdP31 — ÉTAT DES LIEUX, ÎLE MAURICE, CÔTE D'IVOIRE.",
+  "phrase": "« Au nom de ma délégation », l'œuvre d'Aïssatou à la CdP31 : ÉTAT DES LIEUX, ÎLE MAURICE, CÔTE D'IVOIRE.",
   "lettres-note": "Le I majuscule, le l minuscule et le chiffre 1 se distinguent, comme le O et le 0 : une salle et une heure ne se lisent pas deux fois.",
   "chiffres": "Les chiffres",
   "chiffres-propos": "Les chiffres restent proportionnels, comme dans la maquette.",

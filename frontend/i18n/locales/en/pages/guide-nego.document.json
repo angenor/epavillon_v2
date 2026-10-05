@@ -3,10 +3,10 @@
   "sous-titre": "{type} · {editeur}",
   "pages": "{count} pages | {count} page | {count} pages",
   "marque": {
-    "lien-reseau": "External link — connection required",
-    "non-telecharge": "Not downloaded — available when the network returns"
+    "lien-reseau": "External link, connection required",
+    "non-telecharge": "Not downloaded, available when the network returns"
   },
-  "lien": "Opens in the browser — network needed, nothing is kept on the phone",
+  "lien": "Opens in the browser: network needed, nothing is kept on the phone",
   "sans-texte": "Opens as pages. Its text could not be extracted, so it cannot be searched.",
   "thematiques": {
     "titre": "Themes",
@@ -25,7 +25,7 @@
   "telecharge": "Downloaded. Readable offline.",
   "en-attente": "No network: the download will start when it returns, even if the app has been closed.",
   "progression": {
-    "part": "Downloading — {part}",
+    "part": "Downloading: {part}",
     "sans-part": "Downloading",
     "octets": "{recus} of {total}",
     "recus": "{recus} received"
@@ -38,7 +38,7 @@
     "telecharger-quand-meme": "Download this version anyway",
     "lire": "Read",
     "lire-cette-version": "Read this version",
-    "retirer": "Remove from phone — {taille}",
+    "retirer": "Remove from phone ({taille})",
     "retirer-sans-taille": "Remove from phone",
     "navigateur": "Open in the browser",
     "favori": "Favourite",
@@ -62,7 +62,7 @@
     "titre": "Favourites follow your account",
     "texte": "Create an account or sign in to find this document in your favourites on all your devices. Downloading does not require one.",
     "creer": "Create my account",
-    "connexion": "I already have an account — Sign in"
+    "connexion": "I already have an account: sign in"
   },
   "partage": {
     "copie": "Link to this page copied.",

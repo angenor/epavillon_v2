@@ -139,8 +139,8 @@ test('les comptes par valeur gardent les autres filtres et ignorent le leur', ()
   assert.deepEqual(
     optionsDuFiltre(tous, vocabulaire, critere(), 'cops').map((o) => [o.libelle, o.compte]),
     [
-      ['COP31 — Antalya', 2],
-      ['COP30 — Belém', 1],
+      ['COP31, Antalya', 2],
+      ['COP30, Belém', 1],
     ],
   )
 })

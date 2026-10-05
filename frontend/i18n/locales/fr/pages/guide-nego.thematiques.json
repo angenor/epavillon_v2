@@ -1,9 +1,9 @@
 {
   "titre": "Mes thématiques",
   "sous-titre": "Une ou plusieurs",
-  "etape": "Étape 3 sur 3 — Thématiques",
+  "etape": "Étape 3 sur 3 : thématiques",
   "aide": "Vos sessions de négociation et vos alertes suivent ces thématiques. Vous pourrez les changer dans votre profil.",
-  "recapitulatif": "{count} thématique suivie — {noms} | {count} thématique suivie — {noms} | {count} thématiques suivies — {noms}",
+  "recapitulatif": "{count} thématique suivie : {noms} | {count} thématique suivie : {noms} | {count} thématiques suivies : {noms}",
   "aucune": "Aucune thématique cochée pour l'instant.",
   "au-moins-une": "Choisissez au moins une thématique pour valider.",
   "valider": "Suivre ces thématiques",
@@ -26,7 +26,7 @@
     "titre": "Réservé aux comptes",
     "texte": "Les thématiques suivent votre compte d'un appareil à l'autre. Créez le vôtre ou connectez-vous pour les choisir.",
     "creer-mon-compte": "Créer mon compte",
-    "me-connecter": "J'ai déjà un compte — Me connecter"
+    "me-connecter": "J'ai déjà un compte : me connecter"
   },
   "groupes": {
     "titre": "Mon groupe de négociation",

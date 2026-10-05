@@ -2,7 +2,7 @@
   "titre": "Réservé aux négociatrices et négociateurs",
   "sortie": {
     "compte": "Créer mon compte",
-    "connexion": "J'ai déjà un compte — Me connecter",
+    "connexion": "J'ai déjà un compte : me connecter",
     "code": "Saisir mon code d'invitation",
     "demande": "Demander l'accès à l'IFDD",
     "attente": "Voir ma demande"

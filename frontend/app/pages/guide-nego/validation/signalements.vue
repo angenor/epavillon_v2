@@ -105,7 +105,7 @@ function carte(item: ReportQueueItem) {
     const jour = item.day ? dayLong(`${item.day}T12:00:00Z`, 'UTC') : null
     const heure = item.proposed_start ? time(item.proposed_start, fuseau.value) : null
     const thematique = item.theme ? thematiques.nomDe(item.theme) : null
-    rappel = [[item.proposed_venue, [jour, heure].filter(Boolean).join(', ')].filter(Boolean).join(' — '), thematique]
+    rappel = [[item.proposed_venue, [jour, heure].filter(Boolean).join(', ')].filter(Boolean).join(', '), thematique]
       .filter(Boolean)
       .join(' · ')
   }

@@ -114,7 +114,7 @@ const poids = (graisse: string) => ({ fontWeight: `var(--gn-graisse-${graisse})`
       >
         <p class="gn-planche-typographie__glyphes" :style="cran('32')">œ Œ æ Æ ç Ç</p>
         <p class="gn-planche-typographie__glyphes" :style="cran('32')">À É È Ê Ç Î Ô Ù Û Ÿ</p>
-        <p class="gn-planche-typographie__glyphes" :style="cran('24')">« » — – … ’ €</p>
+        <p class="gn-planche-typographie__glyphes" :style="cran('24')">« » – … ’ €</p>
         <p :style="cran('17')">{{ t('gn-planche-typographie.phrase') }}</p>
         <p class="gn-planche-typographie__glyphes" :style="cran('24')">Il1 lI1 O0 oO rn m</p>
         <p class="gn-planche-note">{{ t('gn-planche-typographie.lettres-note') }}</p>

@@ -130,7 +130,7 @@ const terminee = computed(() => !!props.session && props.etat === 'terminee')
         :class="{ 'gn-ligne-session__debut--en-cours': session && etat === 'en-cours' }"
         aria-hidden="true"
       >{{ debut }}</span>
-      <span v-else class="gn-ligne-session__debut" aria-hidden="true">—</span>
+      <span v-else class="gn-ligne-session__debut" aria-hidden="true">--:--</span>
       <span v-if="fin" class="gn-ligne-session__fin" aria-hidden="true">{{ fin }}</span>
     </span>
 

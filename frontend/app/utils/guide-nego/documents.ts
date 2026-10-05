@@ -73,7 +73,7 @@ export interface OptionDeFiltre {
 const parOrdre = (a: VocabularyTerm, b: VocabularyTerm) => a.sort_order - b.sort_order || a.label.localeCompare(b.label)
 
 /** « COP30 — Belém » : la ville dit la COP à qui n'en retient pas le numéro. */
-export const libelleDeCop = (cop: VocabularyCop): string => (cop.city ? `${cop.label} — ${cop.city}` : cop.label)
+export const libelleDeCop = (cop: VocabularyCop): string => (cop.city ? `${cop.label}, ${cop.city}` : cop.label)
 
 export function optionsDuFiltre(
   documents: LibraryDocument[],

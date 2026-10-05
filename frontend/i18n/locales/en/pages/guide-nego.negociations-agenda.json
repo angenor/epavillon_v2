@@ -1,7 +1,7 @@
 {
   "titre": "My agenda",
   "chargement": "Reading your agenda",
-  "jour": "{jour} — {zone}",
+  "jour": "{jour}, {zone}",
   "section": "Negotiation sessions",
   "hors-connexion": "Changes made since then are not shown here.",
   "sans-compte": {

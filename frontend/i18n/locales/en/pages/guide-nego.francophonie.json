@@ -6,8 +6,8 @@
   },
   "titre-reunions": "Francophonie meetings",
   "titre-pavillon": "Francophonie Pavilion",
-  "sous-titre-reunions": "{edition} | {edition} — one meeting | {edition} — {count} meetings",
-  "sous-titre-pavillon": "{jour} — {zone}",
+  "sous-titre-reunions": "{edition} | {edition}, one meeting | {edition}, {count} meetings",
+  "sous-titre-pavillon": "{jour}, {zone}",
   "hors-connexion": "Changes made since then are not shown here.",
   "reunions": {
     "chargement": "Reading the meetings",

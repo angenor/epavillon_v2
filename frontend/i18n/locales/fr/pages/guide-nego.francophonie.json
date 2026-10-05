@@ -6,8 +6,8 @@
   },
   "titre-reunions": "Réunions de la Francophonie",
   "titre-pavillon": "Pavillon de la Francophonie",
-  "sous-titre-reunions": "{edition} | {edition} — un rendez-vous | {edition} — {count} rendez-vous",
-  "sous-titre-pavillon": "{jour} — {zone}",
+  "sous-titre-reunions": "{edition} | {edition}, un rendez-vous | {edition}, {count} rendez-vous",
+  "sous-titre-pavillon": "{jour}, {zone}",
   "hors-connexion": "Les changements survenus depuis ne sont pas ici.",
   "reunions": {
     "chargement": "Lecture des réunions",

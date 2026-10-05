@@ -2,7 +2,7 @@
   "titre": "Colours",
   "propos": "Two levels, never mixed: the palette holds the values, roles hold the meaning.",
   "regle": "One theme, “Night”. A component never calls the palette: a role references it through var(), and a component always calls a role.",
-  "roles": "Level 2 — the roles",
+  "roles": "Level 2: the roles",
   "roles-propos": "The only level a component calls.",
   "etats": "States",
   "etats-propos": "A state has no colour of its own: it points to the role that holds one. Adding a state therefore never adds a hue.",

@@ -1,9 +1,9 @@
 {
   "titre": "My themes",
   "sous-titre": "One or more",
-  "etape": "Step 3 of 3 — Themes",
+  "etape": "Step 3 of 3: themes",
   "aide": "Your negotiation sessions and your alerts follow these themes. You will be able to change them in your profile.",
-  "recapitulatif": "{count} theme followed — {noms} | {count} theme followed — {noms} | {count} themes followed — {noms}",
+  "recapitulatif": "{count} theme followed: {noms} | {count} theme followed: {noms} | {count} themes followed: {noms}",
   "aucune": "No theme ticked yet.",
   "au-moins-une": "Pick at least one theme to confirm.",
   "valider": "Follow these themes",
@@ -26,7 +26,7 @@
     "titre": "Accounts only",
     "texte": "Themes follow your account from one device to another. Create yours or sign in to pick them.",
     "creer-mon-compte": "Create my account",
-    "me-connecter": "I already have an account — Sign in"
+    "me-connecter": "I already have an account: sign in"
   },
   "groupes": {
     "titre": "My negotiating group",

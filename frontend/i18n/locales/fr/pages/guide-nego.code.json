@@ -1,7 +1,7 @@
 {
   "titre": "Code d'invitation",
   "sous-titre": "Réservé aux négociatrices et négociateurs",
-  "etape": "Étape 2 sur 3 — Code",
+  "etape": "Étape 2 sur 3 : code",
   "propos": "Le code est diffusé dans le groupe WhatsApp du réseau, ou remis par l'IFDD à l'atelier préparatoire. Il ouvre les échanges, les documents réservés et les signalements.",
   "champ": {
     "libelle": "Code d'invitation",
@@ -14,7 +14,7 @@
   "hors-connexion": "La saisie d'un code demande le réseau. Rien n'est envoyé pour l'instant, et aucun accès n'est ouvert.",
   "sans-compte": "Le code s'ajoute à un compte. Créez le vôtre ou connectez-vous, puis revenez le saisir.",
   "creer-mon-compte": "Créer mon compte",
-  "me-connecter": "J'ai déjà un compte — Me connecter",
+  "me-connecter": "J'ai déjà un compte : me connecter",
   "sur-approbation": "L'accès se demande à l'IFDD en ce moment : le code d'invitation n'ouvre rien tant que ce réglage tient.",
   "demander-lacces": "Demander l'accès à l'IFDD",
   "voir-ma-demande": "Voir ma demande",

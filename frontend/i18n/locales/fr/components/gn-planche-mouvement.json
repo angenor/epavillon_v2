@@ -22,7 +22,7 @@
   "reduit-actif": "Le réglage est actif sur cet appareil : toutes les durées de transition valent zéro, et l'arc comme le squelette sont figés.",
   "reduit-inactif": "Le réglage n'est pas actif sur cet appareil. S'il l'était, toutes les durées de transition vaudraient zéro et l'arc comme le squelette seraient figés.",
   "reduit-preuve": "La preuve est au-dessus : la liste des jetons affiche la valeur réellement appliquée, pas celle qui est écrite dans le thème.",
-  "immobile": "Ce qui ne bouge jamais : le fond, l'en-tête, la barre d'onglets. Aucun défilement automatique, aucun parallaxe, aucun rebond. Les listes ne s'animent pas à l'entrée — elles sont là.",
+  "immobile": "Ce qui ne bouge jamais : le fond, l'en-tête, la barre d'onglets. Aucun défilement automatique, aucun parallaxe, aucun rebond. Les listes ne s'animent pas à l'entrée : elles sont là.",
   "usage": {
     "bref": "Pression d'un bouton, bascule d'un filtre, apparition d'une marque d'état",
     "standard": "Feuille basse, message éphémère, changement d'onglet",

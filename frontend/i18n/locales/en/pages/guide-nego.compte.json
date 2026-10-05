@@ -1,7 +1,7 @@
 {
   "titre": "Create my account",
   "sous-titre": "One account for both Guide Négo and ePavillon",
-  "etape": "Step 1 of 3 — Account",
+  "etape": "Step 1 of 3: account",
   "champ": {
     "prenom": "First name",
     "nom": "Last name",
@@ -20,7 +20,7 @@
     "mot-de-passe": "At least {min} characters, including one uppercase and one lowercase letter."
   },
   "creer": "Create my account",
-  "deja-un-compte": "I already have an account — Sign in",
+  "deja-un-compte": "I already have an account: sign in",
   "attente": {
     "titre": "Confirm your address",
     "propos": "An email has just been sent to {adresse}. Tap the link it contains to confirm your address.",

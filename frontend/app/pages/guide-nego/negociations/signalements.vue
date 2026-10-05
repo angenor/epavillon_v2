@@ -87,7 +87,7 @@ function vue(ligne: LigneSignalement) {
     const quand = moment(session.start_at)
     rappel = session.venue ? k('rappel', { titre, quand, salle: session.venue }) : k('rappel-sans-salle', { titre, quand })
   } else {
-    const lieu = [s.proposed_venue, s.proposed_start ? time(s.proposed_start, fuseau.value) : null].filter(Boolean).join(' — ')
+    const lieu = [s.proposed_venue, s.proposed_start ? time(s.proposed_start, fuseau.value) : null].filter(Boolean).join(', ')
     const thematique = s.theme ? thematiques.nomDe(s.theme) : null
     rappel = [lieu, thematique].filter(Boolean).join(' · ')
   }

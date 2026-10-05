@@ -89,7 +89,7 @@ test('regroupement par lettre, les chiffres et signes à la fin', () => {
 })
 
 test('l’intitulé porte le sigle devant le terme', () => {
-  assert.equal(intituleDe({ term: 'global goal on adaptation', acronym: 'GGA' }), 'GGA — global goal on adaptation')
+  assert.equal(intituleDe({ term: 'global goal on adaptation', acronym: 'GGA' }), 'GGA · global goal on adaptation')
   assert.equal(intituleDe({ term: 'huddle', acronym: null }), 'huddle')
 })
 

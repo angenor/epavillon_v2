@@ -22,7 +22,7 @@
   "reduit-actif": "The setting is active on this device: every transition duration is zero, and both the arc and the skeleton are frozen.",
   "reduit-inactif": "The setting is not active on this device. If it were, every transition duration would be zero and both the arc and the skeleton would be frozen.",
   "reduit-preuve": "The proof is above: the token list shows the value actually applied, not the one written in the theme.",
-  "immobile": "What never moves: the background, the header, the tab bar. No automatic scrolling, no parallax, no bounce. Lists do not animate in — they are simply there.",
+  "immobile": "What never moves: the background, the header, the tab bar. No automatic scrolling, no parallax, no bounce. Lists do not animate in: they are simply there.",
   "usage": {
     "bref": "Pressing a button, toggling a filter, a state marker appearing",
     "standard": "Bottom sheet, transient message, changing tab",

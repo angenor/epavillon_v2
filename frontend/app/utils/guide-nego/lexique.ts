@@ -155,7 +155,7 @@ export function grouperParLettre(lexique: readonly GlossaryEntry[]): GroupeDeLet
 
 /** « GGA — global goal on adaptation » : le sigle devant, quand il existe. */
 export const intituleDe = (entree: Pick<GlossaryEntry, 'term' | 'acronym'>): string =>
-  entree.acronym ? `${entree.acronym} — ${entree.term}` : entree.term
+  entree.acronym ? `${entree.acronym} · ${entree.term}` : entree.term
 
 /** La première phrase d'une définition : ce que montrent les résultats. */
 export function premierePhrase(texte: string): string {

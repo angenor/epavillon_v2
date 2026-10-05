@@ -5,7 +5,7 @@
   "echelle": "The scale",
   "echelle-propos": "Each step carries its family, size, line height and weight, as the mock-up shows them.",
   "interligne": "line height",
-  "exemple": "Sessions de négociation — 14:30",
+  "exemple": "Sessions de négociation, 14:30",
   "regle-13": "Below 13 px, only the tab label (12), “NOW” (12, capitals) and the “EN” tag or tick (11).",
   "usage": {
     "76": "Countdown: “42 min”, “35 days”",
@@ -29,7 +29,7 @@
   "italique-regle": "Italics are reserved for English terms within French text. Neither Sora nor Manrope draws one: the browser slants the roman.",
   "lettres": "What the font must be able to draw",
   "lettres-propos": "The œ ligature, accented capitals and French quotation marks exist in both families, embedded in Latin and Latin Extended.",
-  "phrase": "« Au nom de ma délégation », l'œuvre d'Aïssatou à la CdP31 — ÉTAT DES LIEUX, ÎLE MAURICE, CÔTE D'IVOIRE.",
+  "phrase": "« Au nom de ma délégation », l'œuvre d'Aïssatou à la CdP31 : ÉTAT DES LIEUX, ÎLE MAURICE, CÔTE D'IVOIRE.",
   "lettres-note": "Capital I, lowercase l and the figure 1 are told apart, as are O and 0: a room and a time are never read twice.",
   "chiffres": "The figures",
   "chiffres-propos": "Figures stay proportional, as in the mock-up.",

@@ -2,7 +2,7 @@
   "titre": "Couleurs",
   "propos": "Deux niveaux, jamais mélangés : la palette porte les valeurs, les rôles portent le sens.",
   "regle": "Un thème, « Nuit ». La palette ne s'appelle jamais depuis un composant : un rôle la référence par var(), et un composant appelle toujours un rôle.",
-  "roles": "Niveau 2 — les rôles",
+  "roles": "Niveau 2 : les rôles",
   "roles-propos": "Le seul niveau qu'un composant appelle.",
   "etats": "Les états",
   "etats-propos": "Un état ne porte pas de couleur à lui : il renvoie au rôle qui la porte. Ajouter un état ne crée donc jamais une teinte de plus.",

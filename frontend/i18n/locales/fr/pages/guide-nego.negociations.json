@@ -2,7 +2,7 @@
   "titre": "Sessions de négociation",
   "mon-agenda": "Mon agenda",
   "chargement": "Lecture des sessions de négociation",
-  "injoignable": "En ligne — programme officiel injoignable",
+  "injoignable": "En ligne : programme officiel injoignable",
   "hors-connexion": "Les changements survenus depuis ne sont pas ici.",
   "filtre": {
     "libelle": "Filtrer les sessions",
@@ -14,7 +14,7 @@
   "choisir-thematiques": "Choisir mes thématiques",
   "source": "source officielle",
   "source-lue": "source officielle {moment}",
-  "jour": "{jour} — {zone}",
+  "jour": "{jour}, {zone}",
   "lien-ccnucc": "Programme officiel de la CCNUCC",
   "vide": {
     "titre": "Aucune session annoncée pour l'instant",

@@ -1,7 +1,7 @@
 {
   "titre": "Invitation code",
   "sous-titre": "For negotiators only",
-  "etape": "Step 2 of 3 — Code",
+  "etape": "Step 2 of 3: code",
   "propos": "The code is shared in the network's WhatsApp group, or handed out by IFDD at the preparatory workshop. It opens the discussions, the reserved documents and the reports.",
   "champ": {
     "libelle": "Invitation code",
@@ -14,7 +14,7 @@
   "hors-connexion": "Entering a code requires a network connection. Nothing has been sent yet, and no access has been opened.",
   "sans-compte": "A code is added to an account. Create yours or sign in, then come back to enter it.",
   "creer-mon-compte": "Create my account",
-  "me-connecter": "I already have an account — Sign in",
+  "me-connecter": "I already have an account: sign in",
   "sur-approbation": "Access is granted by IFDD at the moment: an invitation code opens nothing while this setting holds.",
   "demander-lacces": "Request access from IFDD",
   "voir-ma-demande": "See my request",

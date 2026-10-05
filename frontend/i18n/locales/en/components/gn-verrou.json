@@ -2,7 +2,7 @@
   "titre": "For negotiators only",
   "sortie": {
     "compte": "Create my account",
-    "connexion": "I already have an account — Sign in",
+    "connexion": "I already have an account: sign in",
     "code": "Enter my invitation code",
     "demande": "Request access from IFDD",
     "attente": "See my request"

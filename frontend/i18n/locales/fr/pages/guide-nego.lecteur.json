@@ -4,7 +4,7 @@
   "hors-connexion": "Seuls les documents téléchargés s'ouvrent.",
   "page": "Page {page}",
   "reprise": {
-    "texte": "Reprise à la page {page} — lue {moment}.",
+    "texte": "Reprise à la page {page}, lue {moment}.",
     "sans-moment": "Reprise à la page {page}.",
     "debut": "Début"
   },
