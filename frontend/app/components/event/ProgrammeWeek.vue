@@ -5,9 +5,9 @@ import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
 
 /**
  * La semaine en colonnes : une par journée, les activités retenues par la
- * recherche empilées dans l'ordre. Sous `md`, seule la journée choisie s'affiche
- * et la rangée d'onglets, figée sous la barre du site, permet d'en changer :
- * aucun ancêtre ne doit donc être en `overflow: hidden`.
+ * recherche empilées dans l'ordre. Les en-têtes de jour restent figés sous la
+ * barre du site : aucun ancêtre ne doit donc être en `overflow: hidden`. Trop
+ * étroit pour toutes les colonnes, le tableau défile à l'horizontale.
  */
 
 interface Props {
@@ -98,11 +98,9 @@ const columns = computed(() =>
       date: day,
       number: format(day, { day: 'numeric' }),
       weekday: format(day, { weekday: 'long' }),
-      weekdayShort: format(day, { weekday: 'short' }),
       label: format(day, { weekday: 'long', day: 'numeric', month: 'long' }),
       isToday: day === props.today,
       isPast: props.today !== null && day < props.today,
-      selected: day === props.selected,
       count: t('programme.days.count', { count: kept.length }, kept.length),
       special: special ? tr(special.title) : '',
       cards: kept.map(card),
@@ -111,10 +109,43 @@ const columns = computed(() =>
 )
 
 const shown = computed(() => columns.value.reduce((sum, column) => sum + column.cards.length, 0))
+
+const tint = (column: { isToday: boolean }, index: number) =>
+  column.isToday ? 'bg-accent/6' : index % 2 ? 'bg-text/3' : ''
+
+const root = useTemplateRef<HTMLElement>('root')
+const head = useTemplateRef<HTMLElement>('head')
+const body = useTemplateRef<HTMLElement>('body')
+
+/** Les en-têtes restent figés au défilement vertical, donc hors du défileur horizontal : on les tient alignés. */
+function sync(from: 'head' | 'body'): void {
+  const [source, target] = from === 'head' ? [head.value, body.value] : [body.value, head.value]
+  if (source && target && target.scrollLeft !== source.scrollLeft) target.scrollLeft = source.scrollLeft
+}
+
+/** Sur un écran étroit, la journée choisie arrive en premier à gauche. */
+function reveal(): void {
+  const index = props.days.indexOf(props.selected)
+  const column = body.value?.querySelectorAll('section')[index]
+  if (body.value && column) body.value.scrollLeft = column.offsetLeft
+}
+
+onMounted(reveal)
+watch(() => [props.selected, props.days], () => nextTick(reveal))
+
+async function next(): Promise<void> {
+  emit('week', 1)
+  await nextTick()
+  const top = root.value?.getBoundingClientRect().top
+  if (top === undefined) return
+  const style = getComputedStyle(document.documentElement)
+  const nav = parseFloat(style.getPropertyValue('--nav-height')) * parseFloat(style.fontSize)
+  window.scrollTo({ top: top + window.scrollY - (Number.isFinite(nav) ? nav : 0), behavior: 'smooth' })
+}
 </script>
 
 <template>
-  <div>
+  <div ref="root">
     <div class="flex flex-wrap items-center justify-between gap-4 border-b border-border-subtle py-4">
       <p class="text-[24px] leading-tight font-light text-text">
         <b class="font-bold">{{ heading.lead }}</b> {{ heading.month }}<span class="mt-1 block text-sm text-text-muted sm:mt-0 sm:ml-3.5 sm:inline">{{
@@ -140,61 +171,47 @@ const shown = computed(() => columns.value.reduce((sum, column) => sum + column.
       </div>
     </div>
 
-    <div class="sticky top-(--nav-height) z-20 flex overflow-x-auto border-b border-border-subtle bg-surface md:hidden">
-      <button
-        v-for="column in columns"
-        :key="column.date"
-        type="button"
-        class="-mb-px flex min-h-11 shrink-0 cursor-pointer flex-col items-center gap-1 border-b-2 px-3 py-2"
-        :class="[
-          column.selected ? (column.isToday ? 'border-accent' : 'border-text') : 'border-transparent',
-          column.isPast ? 'text-text-subtle' : 'text-text',
-        ]"
-        :aria-pressed="column.selected"
-        :aria-current="column.isToday ? 'date' : undefined"
-        :aria-label="column.label"
-        @click="emit('day', column.date)"
-      >
-        <span class="text-[26px] leading-none tabular-nums" :class="column.isToday ? 'font-bold text-accent' : 'font-light'">
-          {{ column.number }}
-        </span>
-        <span class="text-[11px] font-bold tracking-[0.06em] uppercase">{{ column.weekdayShort }}</span>
-      </button>
+    <div class="sticky top-(--nav-height) z-20 mt-7 bg-surface">
+      <div ref="head" class="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" @scroll="sync('head')">
+        <div class="grid grid-cols-[repeat(var(--week-columns),minmax(11rem,1fr))]" :style="{ '--week-columns': String(columns.length) }">
+          <button
+            v-for="(column, index) in columns"
+            :key="column.date"
+            type="button"
+            class="group/day block min-w-0 cursor-pointer border-l border-border-subtle px-4 text-left first:border-l-0"
+            :class="tint(column, index)"
+            :aria-label="t('programme.week.openDay', { day: column.label })"
+            :aria-current="column.isToday ? 'date' : undefined"
+            @click="emit('day', column.date)"
+          >
+            <span class="block border-b-2 py-3" :class="column.isToday ? 'border-accent' : 'border-text'">
+              <span class="flex items-end gap-2.5" :class="column.isPast ? 'text-text-subtle' : 'text-text'">
+                <span class="text-[48px] leading-[0.9] tabular-nums" :class="column.isToday ? 'font-bold' : 'font-light'">
+                  {{ column.number }}
+                </span>
+                <span class="min-w-0 pb-0.5">
+                  <span class="block text-sm font-bold first-letter:uppercase group-hover/day:underline">{{ column.weekday }}</span>
+                  <span class="block text-xs text-text-muted">{{ column.count }}</span>
+                </span>
+              </span>
+              <span class="mt-2 line-clamp-2 h-8 text-[11px] leading-4 font-bold tracking-caps text-accent uppercase">
+                {{ column.special }}
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
     </div>
 
-    <div
-      class="mt-7 grid grid-cols-1 md:grid-cols-[repeat(var(--week-columns),minmax(0,1fr))]"
-      :style="{ '--week-columns': String(columns.length) }"
-    >
-      <section
-        v-for="(column, index) in columns"
-        :key="column.date"
-        class="min-w-0 pb-3 md:block md:border-l md:border-border-subtle md:px-4 md:first:border-l-0"
-        :class="[column.selected ? 'block' : 'hidden', column.isToday ? 'md:bg-accent/6' : index % 2 ? 'md:bg-text/3' : '']"
-        :aria-label="column.label"
-      >
-        <button
-          type="button"
-          class="group/day block w-full cursor-pointer border-b-2 py-3 text-left"
-          :class="column.isToday ? 'border-accent' : 'border-text'"
-          :aria-label="t('programme.week.openDay', { day: column.label })"
-          :aria-current="column.isToday ? 'date' : undefined"
-          @click="emit('day', column.date)"
+    <div ref="body" class="relative overflow-x-auto" @scroll="sync('body')">
+      <div class="grid grid-cols-[repeat(var(--week-columns),minmax(11rem,1fr))]" :style="{ '--week-columns': String(columns.length) }">
+        <section
+          v-for="(column, index) in columns"
+          :key="column.date"
+          class="min-w-0 border-l border-border-subtle px-4 pb-3 first:border-l-0"
+          :class="tint(column, index)"
+          :aria-label="column.label"
         >
-          <span class="flex items-end gap-2.5" :class="column.isPast ? 'text-text-subtle' : 'text-text'">
-            <span class="text-[48px] leading-[0.9] tabular-nums" :class="column.isToday ? 'font-bold' : 'font-light'">
-              {{ column.number }}
-            </span>
-            <span class="min-w-0 pb-0.5">
-              <span class="block text-sm font-bold first-letter:uppercase group-hover/day:underline">{{ column.weekday }}</span>
-              <span class="block text-xs text-text-muted">{{ column.count }}</span>
-            </span>
-          </span>
-          <span class="mt-2 line-clamp-2 h-8 text-[11px] leading-4 font-bold tracking-caps text-accent uppercase">
-            {{ column.special }}
-          </span>
-        </button>
-
         <ol v-if="column.cards.length">
           <li v-for="item in column.cards" :key="item.id" class="group relative border-b border-border-subtle py-3.5">
             <div :class="{ 'opacity-60': item.faded }">
@@ -227,19 +244,19 @@ const shown = computed(() => columns.value.reduce((sum, column) => sum + column.
                 />
               </div>
 
-              <p class="mt-2.5 flex items-baseline gap-2">
+              <p class="mt-2.5 flex flex-wrap items-baseline gap-x-2">
                 <span
                   class="text-[26px] leading-none font-light tabular-nums"
                   :class="item.current === 'live' ? 'text-live' : 'text-text'"
                 >
                   {{ item.start }}
                 </span>
-                <span class="text-xs text-text-muted tabular-nums">{{ item.until }}</span>
+                <span class="text-xs whitespace-nowrap text-text-muted tabular-nums">{{ item.until }}</span>
               </p>
 
               <NuxtLink
                 :to="item.to"
-                class="mt-1.5 block text-[15px] leading-[1.3] text-pretty text-text no-underline after:absolute after:inset-0 group-hover:underline"
+                class="mt-1.5 line-clamp-4 text-[15px] leading-[1.3] text-pretty text-text no-underline after:absolute after:inset-0 group-hover:underline"
                 :class="{ 'line-through': item.current === 'cancelled' }"
               >
                 <b class="font-bold">{{ item.lead }}</b>{{ item.rest }}
@@ -255,7 +272,12 @@ const shown = computed(() => columns.value.reduce((sum, column) => sum + column.
           </li>
         </ol>
         <p v-else class="py-3.5 text-[13px] text-text-muted">{{ t('programme.week.emptyDay') }}</p>
-      </section>
+        </section>
+      </div>
+    </div>
+
+    <div v-if="props.hasNext" class="flex justify-end border-t border-border-subtle pt-5">
+      <UiButton variant="secondary" icon-trailing="arrow-right" @click="next">{{ t('programme.week.next') }}</UiButton>
     </div>
   </div>
 </template>

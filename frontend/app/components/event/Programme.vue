@@ -171,10 +171,9 @@ function moveWeek(step: -1 | 1): void {
   if (first) day.value = first
 }
 
-/** Un clic sur un jour de la semaine : l'onglet de la colonne sur mobile, sa liste ailleurs. */
+/** Un clic sur l'en-tête d'un jour de la semaine ouvre sa liste. */
 function onWeekDay(date: IsoDate): void {
-  if (window.matchMedia('(min-width: 48rem)').matches) void showInList(date)
-  else day.value = date
+  void showInList(date)
 }
 
 const weekDays = computed(() => {

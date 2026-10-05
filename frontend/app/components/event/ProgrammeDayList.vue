@@ -201,7 +201,7 @@ onBeforeUnmount(() => {
 
               <div class="col-start-2 min-w-0 lg:col-start-3 lg:row-start-1">
                 <h4
-                  class="font-sans text-base leading-[1.25] text-pretty sm:text-lg lg:text-[21px]"
+                  class="line-clamp-3 font-sans text-base leading-[1.25] text-pretty sm:text-lg lg:text-[21px]"
                   :class="[entry.faded ? 'text-text-muted' : 'text-text', { 'line-through': entry.current === 'cancelled' }]"
                 >
                   <!-- Lien couvrant : toute la ligne mène à l'activité, sans second lien à tabuler. -->

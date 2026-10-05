@@ -60,7 +60,7 @@ const country = computed(() => (props.session.organization_country ? tr(props.se
           {{ t('programme.list.until', { end: time(props.session.ends_at, props.timezone), duration: duration(props.session) }) }}
         </span>
       </p>
-      <h3 class="mt-4.5 font-sans text-[26px] leading-[1.12] font-light text-balance text-text lg:text-[36px]">
+      <h3 class="mt-4.5 line-clamp-3 font-sans text-[26px] leading-[1.12] font-light text-balance text-text lg:text-[36px]">
         <b class="font-bold">{{ title.lead }}</b>{{ title.rest }}
       </h3>
       <p v-if="summary" class="mt-3.5 max-w-[52ch] text-[17px] leading-[1.5] text-text-muted">{{ summary }}</p>

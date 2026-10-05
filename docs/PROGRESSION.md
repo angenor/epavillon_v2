@@ -2,8 +2,8 @@
 **Ce fichier est la mémoire du projet entre deux sessions Claude Code.** Toute session commence par le lire et se termine par le mettre à jour.
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
-## Dernière mise à jour — 4 octobre 2026
-- 04/10 — `/programmations` passe en liste éditoriale (activité en direct à la une, journées groupées, couvertures) et en semaine à colonnes ; l'affiche ne reste qu'à la page d'une activité. Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
+## Dernière mise à jour — 5 octobre 2026
+- 04/10 — `/programmations` passe en liste éditoriale (activité en direct à la une, journées groupées, couvertures) et en semaine à colonnes (jours figés, défilante sur téléphone, 05/10) ; l'affiche ne reste qu'à la page d'une activité. Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
 - 04/10 — Barre de navigation en aplat bleu nuit fermé d'un liseré aux couleurs du logo ; la veille, accueil retouché (témoignage en bas de cadre, éditions en liste par défaut, oiseau qui suit le curseur). Non déployé — [A0.4](progression/ecrans/a0.4-composants.md), [A15](progression/ecrans/a15-accueil.md).
 - 03/10 — Inscription réduite à nom, prénom, adresse et pays (pays déduit du fuseau) ; « Le même jour » avec couvertures. Non déployé, migration à jouer — [A3](progression/ecrans/a3-evenement-public.md).
 - 03/10 — La page d'une activité montre enfin la présentation détaillée, et le titre comme la présentation corrigés par l'équipe passent sur la séance publique (FR-091 amendé). Non déployé, migration à jouer — [A3](progression/ecrans/a3-evenement-public.md), [A8](progression/ecrans/a8-evaluation.md).
