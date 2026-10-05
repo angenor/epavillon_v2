@@ -2,10 +2,10 @@
 import { useJetonsLus } from './PlancheSection.vue'
 
 /**
- * Section 3 — les mesures, rendues à leur taille.
+ * Section 3 : les mesures, rendues à leur taille.
  *
- * Une liste de nombres ne dit rien : une cible de 48 px doit se voir comme un carré
- * de 48 px à côté de son nom. Chaque forme prend sa dimension par `var()` ; la valeur
+ * Une liste de nombres ne dit rien : une cible de 44 px doit se voir comme un carré
+ * de 44 px à côté de son nom. Chaque forme prend sa dimension par `var()` ; la valeur
  * écrite à côté est lue à l'exécution.
  */
 type Forme = 'barre' | 'carre' | 'rayon' | 'filet'
@@ -20,6 +20,7 @@ const GROUPES: readonly { cle: string; forme: Forme; jetons: readonly string[] }
       '--gn-espace-8',
       '--gn-espace-12',
       '--gn-espace-16',
+      '--gn-espace-20',
       '--gn-espace-24',
       '--gn-espace-32',
       '--gn-espace-48',
@@ -34,6 +35,10 @@ const GROUPES: readonly { cle: string; forme: Forme; jetons: readonly string[] }
     cle: 'cibles',
     forme: 'carre',
     jetons: [
+      '--gn-bouton-rond',
+      '--gn-pilule-jour',
+      '--gn-bouton-principal',
+      '--gn-champ',
       '--gn-cible',
       '--gn-ligne-reglage',
       '--gn-onglet-filtre-hauteur',
@@ -42,7 +47,22 @@ const GROUPES: readonly { cle: string; forme: Forme; jetons: readonly string[] }
       '--gn-entre-cibles',
     ],
   },
-  { cle: 'rayons', forme: 'rayon', jetons: ['--gn-rayon-0', '--gn-rayon-4', '--gn-rayon-24'] },
+  {
+    cle: 'rayons',
+    forme: 'rayon',
+    jetons: [
+      '--gn-rayon-4',
+      '--gn-rayon-6',
+      '--gn-rayon-12',
+      '--gn-rayon-14',
+      '--gn-rayon-16',
+      '--gn-rayon-18',
+      '--gn-rayon-20',
+      '--gn-rayon-22',
+      '--gn-rayon-24',
+      '--gn-rayon-pilule',
+    ],
+  },
   {
     cle: 'filets',
     forme: 'filet',
@@ -75,6 +95,8 @@ const GROUPES: readonly { cle: string; forme: Forme; jetons: readonly string[] }
     jetons: [
       '--gn-colonne-heure',
       '--gn-barre-onglets',
+      '--gn-onglet-largeur',
+      '--gn-onglet-hauteur',
       '--gn-onglet-picto',
       '--gn-onglet-min',
       '--gn-onglet-air',
@@ -83,6 +105,9 @@ const GROUPES: readonly { cle: string; forme: Forme; jetons: readonly string[] }
       '--gn-en-tete-lecture',
       '--gn-bouton-aa',
       '--gn-avatar',
+      '--gn-pastille-icone',
+      '--gn-pastille-icone-petite',
+      '--gn-point-etat',
       '--gn-case',
       '--gn-cercle-choix',
       '--gn-interrupteur-largeur',
@@ -93,7 +118,6 @@ const GROUPES: readonly { cle: string; forme: Forme; jetons: readonly string[] }
       '--gn-jauge',
       '--gn-segment-etape',
       '--gn-carre-etape',
-      '--gn-champ',
       '--gn-zone-texte',
       '--gn-champ-heure',
       '--gn-feuille-poignee-largeur',
@@ -224,7 +248,7 @@ const epaisseur = (jeton: string) => ({ borderTopWidth: `var(${jeton})` })
   flex-direction: column;
   gap: var(--gn-espace-4);
   padding-block: var(--gn-ligne-air);
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
+  border-top: var(--gn-filet-1) solid var(--gn-filet-doux);
 }
 
 [data-app="guide-nego"] .gn-planche-liste > .gn-planche-mesures__rangee:first-child {
@@ -240,6 +264,6 @@ const epaisseur = (jeton: string) => ({ borderTopWidth: `var(${jeton})` })
 [data-app="guide-nego"] .gn-planche-mesures__filet {
   width: 100%;
   border-top-style: solid;
-  border-top-color: var(--gn-filet-fort);
+  border-top-color: var(--gn-filet);
 }
 </style>

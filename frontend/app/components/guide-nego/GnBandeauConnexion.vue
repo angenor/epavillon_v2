@@ -28,16 +28,21 @@ const texte = computed(() => {
 </template>
 
 <style>
+/* L'aplat d'attention, seul bandeau plein : GnEcran le pose pleine largeur, sous l'en-tête. */
 [data-app="guide-nego"] .gn-bandeau {
-  min-height: var(--gn-cible);
+  min-height: var(--gn-bouton-rond);
   padding: var(--gn-espace-12) var(--gn-marge-ecran);
   display: flex;
   align-items: center;
   gap: var(--gn-espace-8);
   background: var(--gn-attention-aplat);
   color: var(--gn-attention-aplat-texte);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  font-weight: var(--gn-graisse-gras);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
+  font-weight: var(--gn-graisse-extra-gras);
+}
+
+[data-app="guide-nego"] .gn-bandeau .gn-picto {
+  flex: none;
 }
 </style>

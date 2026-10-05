@@ -54,8 +54,9 @@ async function proposer(): Promise<void> {
   >
     <div class="gn-feuille-terme">
       <template v-if="entree">
-        <p class="gn-feuille-terme__terme" lang="en">
-          <i>{{ entree.term }}</i>
+        <p class="gn-feuille-terme__terme">
+          <span class="gn-feuille-terme__langue" aria-hidden="true">{{ t('gn-feuille-terme.langue') }}</span>
+          <i lang="en">{{ entree.term }}</i>
         </p>
         <p class="gn-feuille-terme__traduction">
           {{ entree.acronym ? t('gn-feuille-terme.avec-sigle', { traduction: entree.translation, sigle: entree.acronym }) : entree.translation }}
@@ -63,15 +64,16 @@ async function proposer(): Promise<void> {
         <p class="gn-feuille-terme__definition">{{ entree.definition }}</p>
       </template>
       <template v-else>
-        <p class="gn-feuille-terme__terme" lang="en">
-          <i>{{ terme }}</i>
+        <p class="gn-feuille-terme__terme">
+          <span class="gn-feuille-terme__langue" aria-hidden="true">{{ t('gn-feuille-terme.langue') }}</span>
+          <i lang="en">{{ terme }}</i>
         </p>
         <p class="gn-feuille-terme__definition">{{ t('gn-feuille-terme.absent') }}</p>
       </template>
 
       <p v-if="pages" class="gn-feuille-terme__pages">{{ t('gn-feuille-terme.pages', { pages }) }}</p>
 
-      <GnBouton v-if="entree" variante="secondaire" picto="text-size" :vers="`/guide-nego/lexique/${entree.slug}`">
+      <GnBouton v-if="entree" picto="text-size" :vers="`/guide-nego/lexique/${entree.slug}`">
         {{ t('gn-feuille-terme.ouvrir') }}
       </GnBouton>
       <GnBouton v-else picto="plus" @clic="proposer">
@@ -84,35 +86,64 @@ async function proposer(): Promise<void> {
 </template>
 
 <style>
+/* Le bloc « terme trouvé » de la maquette 03, dans la feuille. */
 [data-app="guide-nego"] .gn-feuille-terme {
   display: flex;
   flex-direction: column;
-  gap: var(--gn-espace-8);
-  padding-bottom: var(--gn-espace-4);
+  gap: var(--gn-espace-16);
+  padding-block: var(--gn-espace-4);
 }
 
 [data-app="guide-nego"] .gn-feuille-terme__terme {
-  font-size: var(--gn-taille-20);
-  line-height: var(--gn-interligne-20);
-  font-weight: var(--gn-graisse-gras);
-  color: var(--gn-titre);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--gn-texte-2);
+  font-size: var(--gn-taille-18);
+  line-height: var(--gn-interligne-18);
+}
+
+/* La maquette écrit le terme anglais en romain : la marque « EN » dit déjà la langue. */
+[data-app="guide-nego"] .gn-feuille-terme__terme i {
+  font-style: normal;
+}
+
+[data-app="guide-nego"] .gn-feuille-terme__langue {
+  flex: none;
+  padding: 4px 8px;
+  border-radius: var(--gn-rayon-6);
+  background: var(--gn-bloc-releve);
+  color: var(--gn-texte-2);
+  font-size: var(--gn-taille-11);
+  line-height: var(--gn-interligne-11);
+  font-weight: var(--gn-graisse-extra-gras);
+  letter-spacing: var(--gn-approche-11);
+  text-transform: uppercase;
+}
+
+[data-app="guide-nego"] .gn-feuille-terme__terme i {
+  font-style: normal;
 }
 
 [data-app="guide-nego"] .gn-feuille-terme__traduction {
+  color: var(--gn-accent);
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-44);
+  line-height: var(--gn-interligne-44);
+  font-weight: var(--gn-graisse-extra-gras);
+  letter-spacing: var(--gn-approche-44);
+  overflow-wrap: anywhere;
+}
+
+[data-app="guide-nego"] .gn-feuille-terme__definition {
+  color: var(--gn-texte-lecture);
   font-size: var(--gn-taille-17);
   line-height: var(--gn-interligne-17);
-  font-weight: var(--gn-graisse-demi-gras);
-  color: var(--gn-texte);
 }
 
-[data-app="guide-nego"] .gn-feuille-terme__definition,
 [data-app="guide-nego"] .gn-feuille-terme__pages {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
   color: var(--gn-texte-2);
-}
-
-[data-app="guide-nego"] .gn-feuille-terme__pages {
-  margin-bottom: var(--gn-espace-4);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
 }
 </style>

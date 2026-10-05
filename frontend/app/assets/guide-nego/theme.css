@@ -172,7 +172,6 @@
   color: var(--gn-texte);
   background: var(--gn-fond);
   font-family: var(--gn-police);
-  font-variant-numeric: tabular-nums;
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
 }

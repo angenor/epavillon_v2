@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { NomDePicto } from '~/utils/guide-nego/pictogrammes'
 /**
- * Nom de groupe en capitales, filet franc dessous. À droite, au choix : un compteur,
- * une note en graisse normale — « mis à jour à 11:35 » —, ou un pictogramme.
+ * Titre de section. À droite, au choix : un compteur, une note — « à 10:12 » —, ou un
+ * pictogramme.
  */
 withDefaults(
   defineProps<{ titre: string; compteur?: number | string; note?: string; picto?: NomDePicto }>(),
@@ -20,29 +20,32 @@ withDefaults(
 </template>
 
 <style>
+/* Le titre de section de la maquette : Sora 18/700, note à droite en 13. */
 [data-app="guide-nego"] .gn-groupe {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: var(--gn-espace-8);
-  padding: var(--gn-espace-16) 0 6px;
-  border-bottom: var(--gn-filet-3) solid var(--gn-filet-fort);
-  color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  padding: var(--gn-entre-blocs) 0 var(--gn-espace-8);
+  color: var(--gn-titre);
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-18);
+  line-height: var(--gn-interligne-18);
   font-weight: var(--gn-graisse-gras);
 }
 
-[data-app="guide-nego"] .gn-groupe__titre {
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-
+[data-app="guide-nego"] .gn-groupe__compteur,
 [data-app="guide-nego"] .gn-groupe__note {
+  flex: none;
+  font-family: var(--gn-police);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   font-weight: var(--gn-graisse-regulier);
+  color: var(--gn-texte-2);
 }
 
 [data-app="guide-nego"] .gn-groupe .gn-picto {
+  align-self: center;
   color: var(--gn-picto-secondaire);
 }
 </style>

@@ -81,15 +81,15 @@ const PICTO_DE_SORTIE: Record<string, NomDePicto> = {
 
 <template>
   <div class="gn-verrou">
-    <GnPicto nom="lock" :taille="40" class="gn-verrou__cadenas" />
+    <span class="gn-verrou__cadenas" aria-hidden="true"><GnPicto nom="lock" :taille="20" /></span>
     <h2 class="gn-verrou__titre">{{ titreLu }}</h2>
     <p class="gn-verrou__propos">{{ propos }}</p>
 
-    <!-- Ce qui est fermé. Absente quand le module n'a rien à énumérer — une
+    <!-- Ce qui est fermé. Absente quand le module n'a rien à énumérer : une
          fiche de document dit ce qu'elle cache dans sa phrase. -->
     <ul v-if="contenus.length > 0" class="gn-verrou__liste">
       <li v-for="contenu in contenus" :key="contenu" class="gn-verrou__contenu">
-        <GnPicto nom="lock" :taille="16" class="gn-verrou__puce" />
+        <span class="gn-verrou__puce" aria-hidden="true"><GnPicto nom="lock" :taille="18" /></span>
         <span>{{ contenu }}</span>
       </li>
     </ul>
@@ -125,35 +125,49 @@ const PICTO_DE_SORTIE: Record<string, NomDePicto> = {
 [data-app="guide-nego"] .gn-verrou {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--gn-espace-12);
-  padding: var(--gn-espace-32) 0 var(--gn-espace-16);
-  text-align: center;
+  align-items: flex-start;
+  gap: var(--gn-espace-8);
+  padding: 18px var(--gn-espace-16);
+  border-radius: var(--gn-rayon-24);
+  background: var(--gn-fond-2);
 }
 
 [data-app="guide-nego"] .gn-verrou__cadenas {
-  color: var(--gn-titre);
+  flex: none;
+  width: var(--gn-pastille-icone);
+  height: var(--gn-pastille-icone);
+  margin-block-end: var(--gn-espace-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--gn-rayon-14);
+  background: var(--gn-bloc-releve);
+  color: var(--gn-picto);
 }
 
 [data-app="guide-nego"] .gn-verrou__titre {
-  font-size: var(--gn-taille-20);
-  line-height: var(--gn-interligne-20);
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
   font-weight: var(--gn-graisse-gras);
   color: var(--gn-titre);
 }
 
 [data-app="guide-nego"] .gn-verrou__propos {
-  max-width: 300px;
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
+  max-width: var(--gn-mesure-lecture);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
+  color: var(--gn-texte-2);
 }
 
-/* La liste est bordée et alignée à gauche : on la lit ligne par ligne, quand
-   tout le reste du verrou est centré. */
+/* La liste de la carte d'invitation (maquette 04) : ce que le code ouvrira. */
 [data-app="guide-nego"] .gn-verrou__liste {
   width: 100%;
-  border: var(--gn-filet-1) solid var(--gn-filet);
-  text-align: start;
+  margin: var(--gn-espace-8) 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gn-espace-12);
   list-style: none;
 }
 
@@ -161,25 +175,28 @@ const PICTO_DE_SORTIE: Record<string, NomDePicto> = {
   display: flex;
   gap: var(--gn-espace-12);
   align-items: center;
-  min-height: var(--gn-cible);
-  padding: var(--gn-espace-8) 14px;
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
-  color: var(--gn-texte-2);
-}
-
-[data-app="guide-nego"] .gn-verrou__contenu + .gn-verrou__contenu {
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+  font-weight: var(--gn-graisse-demi-gras);
+  color: var(--gn-texte);
 }
 
 [data-app="guide-nego"] .gn-verrou__puce {
-  flex-shrink: 0;
+  flex: none;
+  width: var(--gn-pastille-icone-petite);
+  height: var(--gn-pastille-icone-petite);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--gn-rayon-12);
+  background: var(--gn-bloc-releve);
   color: var(--gn-texte-2);
 }
 
 [data-app="guide-nego"] .gn-verrou__reste {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  margin-block-start: var(--gn-espace-4);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   color: var(--gn-texte-2);
 }
 

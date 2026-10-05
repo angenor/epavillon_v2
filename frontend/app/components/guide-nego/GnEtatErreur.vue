@@ -29,7 +29,7 @@ defineEmits<{ sortie: []; sortieSecondaire: [] }>()
 
 <template>
   <div class="gn-erreur" role="alert">
-    <GnPicto nom="warn" :taille="20" />
+    <span class="gn-erreur__pastille" aria-hidden="true"><GnPicto nom="warn" :taille="20" /></span>
     <h2 class="gn-erreur__titre">{{ titre }}</h2>
     <p class="gn-erreur__texte">{{ texte }}</p>
     <div v-if="sortie || sortieSecondaire" class="gn-erreur__sorties">
@@ -61,28 +61,42 @@ defineEmits<{ sortie: []; sortieSecondaire: [] }>()
   flex-direction: column;
   align-items: flex-start;
   gap: var(--gn-espace-8);
-  padding: var(--gn-espace-24) 0;
+  padding: 18px var(--gn-espace-16);
+  border-radius: var(--gn-rayon-24);
+  background: var(--gn-fond-2);
 }
 
-[data-app="guide-nego"] .gn-erreur .gn-picto {
+[data-app="guide-nego"] .gn-erreur__pastille {
+  flex: none;
+  width: var(--gn-pastille-icone);
+  height: var(--gn-pastille-icone);
+  margin-block-end: var(--gn-espace-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--gn-rayon-14);
+  background: var(--gn-bloc-releve);
   color: var(--gn-danger);
 }
 
 [data-app="guide-nego"] .gn-erreur__titre {
-  font-size: var(--gn-taille-20);
-  line-height: var(--gn-interligne-20);
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
   font-weight: var(--gn-graisse-gras);
-  color: var(--gn-danger);
+  color: var(--gn-titre);
 }
 
 [data-app="guide-nego"] .gn-erreur__texte {
   max-width: var(--gn-mesure-lecture);
-  color: var(--gn-texte);
+  color: var(--gn-texte-2);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 
 [data-app="guide-nego"] .gn-erreur__sorties {
   width: 100%;
-  margin-top: var(--gn-espace-4);
+  margin-top: var(--gn-espace-8);
   display: flex;
   gap: var(--gn-espace-8);
 }

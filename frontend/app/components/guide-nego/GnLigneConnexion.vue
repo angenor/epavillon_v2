@@ -26,17 +26,18 @@ const libelle = computed(() => {
 </template>
 
 <style>
+/* « Synchronisé à 16:53 », sous le titre : une méta, pas un état. Hors connexion, elle prend l'attention. */
 [data-app="guide-nego"] .gn-connexion {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--gn-succes);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  color: var(--gn-texte-2);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   font-weight: var(--gn-graisse-demi-gras);
 }
 
 [data-app="guide-nego"] .gn-connexion--hors {
-  color: var(--gn-texte-2);
+  color: var(--gn-attention);
 }
 </style>

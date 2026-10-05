@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { NomDePicto } from '~/utils/guide-nego/pictogrammes'
 /**
- * Un choix unique parmi trois ou quatre, tous visibles : taille de lecture, thème.
+ * Un choix unique parmi trois ou quatre, tous visibles : taille de lecture.
  *
  * Au clavier, le groupe entier est UNE étape de tabulation et les flèches passent d'un
  * segment à l'autre, comme un groupe de boutons radio — c'est ce qu'attend un lecteur
@@ -51,28 +51,30 @@ function deplacer(pas: number) {
 </template>
 
 <style>
+/* Une rangée de pilules de jour : le choix est à l'accent, les autres sont bordés. */
 [data-app="guide-nego"] .gn-segmente {
   display: flex;
-  gap: var(--gn-filet-2);
-  padding: var(--gn-filet-2);
-  border: var(--gn-filet-2) solid var(--gn-filet-fort);
-  border-radius: var(--gn-rayon-4);
+  gap: 6px;
 }
 
 [data-app="guide-nego"] .gn-segmente__segment {
   flex: 1;
   min-width: 0;
-  min-height: var(--gn-cible);
-  padding-inline: var(--gn-espace-8);
-  display: flex;
+  height: var(--gn-pilule-jour);
+  padding-inline: var(--gn-espace-16);
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  border: none;
-  background: none;
-  color: var(--gn-texte);
-  font-size: var(--gn-taille-17);
+  gap: var(--gn-espace-8);
+  border: var(--gn-filet-1) solid var(--gn-filet);
+  border-radius: var(--gn-rayon-pilule);
+  background: transparent;
+  color: var(--gn-texte-2);
+  font-size: var(--gn-taille-15);
+  line-height: 1;
   font-weight: var(--gn-graisse-demi-gras);
+  white-space: nowrap;
+  gap: 6px;
 }
 
 [data-app="guide-nego"] .gn-segmente__segment:active {
@@ -80,17 +82,9 @@ function deplacer(pas: number) {
 }
 
 [data-app="guide-nego"] .gn-segmente__segment--actif {
-  background: var(--gn-titre);
-  color: var(--gn-sur-titre);
-  font-weight: var(--gn-graisse-gras);
-}
-
-[data-app="guide-nego"][data-theme="sombre"] .gn-segmente__segment--actif {
   background: var(--gn-accent);
+  border-color: var(--gn-accent);
   color: var(--gn-accent-inv);
-}
-
-[data-app="guide-nego"] .gn-segmente__segment:focus-visible {
-  outline-offset: calc(-1 * var(--gn-focus-decalage));
+  font-weight: var(--gn-graisse-extra-gras);
 }
 </style>

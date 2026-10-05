@@ -44,7 +44,6 @@ const motifs = computed<OptionDeFeuille[]>(() => [
 const adaptation = ref(true)
 const genre = ref(false)
 
-const THEMES = ['clair', 'sombre'] as const
 const IMAGE = assetUrl('/guide-nego/icones/180.png')
 // Une adresse qui ne répond pas : c'est ce que voit un téléphone sans réseau.
 const IMAGE_ABSENTE = assetUrl('/guide-nego/icones/absente.png')
@@ -256,21 +255,12 @@ const IMAGE_ABSENTE = assetUrl('/guide-nego/icones/absente.png')
       :titre="t('gn-planche-composants-surfaces.avatar')"
       :propos="t('gn-planche-composants-surfaces.avatar-propos')"
     >
-      <div class="gn-planche-composants__themes">
-        <div
-          v-for="theme in THEMES"
-          :key="theme"
-          class="gn-planche-composants__theme"
-          data-app="guide-nego"
-          :data-theme="theme"
-        >
-          <span class="gn-planche-composants__legende">{{ t(`gn-planche-composants-surfaces.theme-${theme}`) }}</span>
-          <div class="gn-planche-composants__rangee">
-            <GnAvatar prenom="Awa" nom="Diallo" />
-            <GnAvatar prenom="Émilie" nom="Traoré" :image="IMAGE" />
-            <GnAvatar prenom="Awa" nom="Diallo" :image="IMAGE_ABSENTE" />
-            <GnAvatar :prenom="null" :nom="null" />
-          </div>
+      <div class="gn-planche-composants__theme">
+        <div class="gn-planche-composants__rangee">
+          <GnAvatar prenom="Awa" nom="Diallo" />
+          <GnAvatar prenom="Émilie" nom="Traoré" :image="IMAGE" />
+          <GnAvatar prenom="Awa" nom="Diallo" :image="IMAGE_ABSENTE" />
+          <GnAvatar :prenom="null" :nom="null" />
         </div>
       </div>
       <p class="gn-planche-note">{{ t('gn-planche-composants-surfaces.avatar-note') }}</p>
@@ -280,19 +270,10 @@ const IMAGE_ABSENTE = assetUrl('/guide-nego/icones/absente.png')
       :titre="t('gn-planche-composants-surfaces.jauge')"
       :propos="t('gn-planche-composants-surfaces.jauge-propos')"
     >
-      <div class="gn-planche-composants__themes">
-        <div
-          v-for="theme in THEMES"
-          :key="theme"
-          class="gn-planche-composants__theme"
-          data-app="guide-nego"
-          :data-theme="theme"
-        >
-          <span class="gn-planche-composants__legende">{{ t(`gn-planche-composants-surfaces.theme-${theme}`) }}</span>
-          <GnJauge :place="{ utilise: 7_000_000, libre: 2_100_000_000 }" />
-          <GnJauge :place="{ utilise: 1_400_000_000, libre: 600_000_000 }" />
-          <GnJauge :place="{ utilise: 7_000_000, libre: null }" />
-        </div>
+      <div class="gn-planche-composants__theme">
+        <GnJauge :place="{ utilise: 7_000_000, libre: 2_100_000_000 }" />
+        <GnJauge :place="{ utilise: 1_400_000_000, libre: 600_000_000 }" />
+        <GnJauge :place="{ utilise: 7_000_000, libre: null }" />
       </div>
       <p class="gn-planche-note">{{ t('gn-planche-composants-surfaces.jauge-note') }}</p>
     </GnPlancheSection>
@@ -301,17 +282,8 @@ const IMAGE_ABSENTE = assetUrl('/guide-nego/icones/absente.png')
       :titre="t('gn-planche-composants-surfaces.texte-long')"
       :propos="t('gn-planche-composants-surfaces.texte-long-propos')"
     >
-      <div class="gn-planche-composants__themes">
-        <div
-          v-for="theme in THEMES"
-          :key="theme"
-          class="gn-planche-composants__theme"
-          data-app="guide-nego"
-          :data-theme="theme"
-        >
-          <span class="gn-planche-composants__legende">{{ t(`gn-planche-composants-surfaces.theme-${theme}`) }}</span>
-          <GnTexteLong :markdown="t('gn-planche-composants-surfaces.texte-long-exemple')" />
-        </div>
+      <div class="gn-planche-composants__theme">
+        <GnTexteLong :markdown="t('gn-planche-composants-surfaces.texte-long-exemple')" />
       </div>
       <p class="gn-planche-note">{{ t('gn-planche-composants-surfaces.texte-long-note') }}</p>
     </GnPlancheSection>

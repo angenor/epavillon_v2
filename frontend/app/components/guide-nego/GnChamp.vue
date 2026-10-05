@@ -97,27 +97,28 @@ const invalide = computed<'true' | undefined>(() => (props.erreur ? 'true' : und
 [data-app="guide-nego"] .gn-champ {
   display: flex;
   flex-direction: column;
-  gap: var(--gn-espace-4);
+  gap: var(--gn-espace-8);
 }
 
 [data-app="guide-nego"] .gn-champ__libelle {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  font-weight: var(--gn-graisse-gras);
-  color: var(--gn-titre);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
+  font-weight: var(--gn-graisse-demi-gras);
+  color: var(--gn-texte-2);
 }
 
+/* Le champ de la maquette : 56 de haut, bloc bordé, rayon 18. */
 [data-app="guide-nego"] .gn-champ__saisie {
   width: 100%;
   min-height: var(--gn-champ);
-  padding-inline: var(--gn-espace-12);
-  border: var(--gn-filet-2) solid var(--gn-filet);
-  border-radius: var(--gn-rayon-4);
-  background: var(--gn-fond);
+  padding-inline: var(--gn-espace-16);
+  border: var(--gn-filet-1) solid var(--gn-filet);
+  border-radius: var(--gn-rayon-18);
+  background: var(--gn-fond-2);
   color: var(--gn-texte);
   font-family: var(--gn-police);
   font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
+  line-height: var(--gn-interligne-15);
 }
 
 [data-app="guide-nego"] .gn-champ__saisie::placeholder {
@@ -125,12 +126,10 @@ const invalide = computed<'true' | undefined>(() => (props.erreur ? 'true' : und
   opacity: 1;
 }
 
-/* Le focus fonce aussi le bord : au soleil, l'anneau seul se perd. L'erreur garde le
-   sien, rouge — sa règle vient après. */
+/* Le focus allume aussi le bord : l'anneau seul se perd. L'erreur garde le sien, sa règle vient après. */
 [data-app="guide-nego"] .gn-champ__saisie:focus-visible {
-  border-color: var(--gn-filet-fort);
-  outline: var(--gn-focus-anneau) solid var(--gn-focus);
-  outline-offset: var(--gn-focus-decalage);
+  border-color: var(--gn-focus);
+  outline: none;
 }
 
 [data-app="guide-nego"] .gn-champ--heure .gn-champ__saisie {
@@ -145,15 +144,10 @@ const invalide = computed<'true' | undefined>(() => (props.erreur ? 'true' : und
   border-color: var(--gn-danger);
 }
 
-[data-app="guide-nego"] .gn-champ--desactive .gn-champ__libelle {
-  color: var(--gn-texte-2);
-}
-
-/* Un champ éteint reste un aplat plein : le gris translucide des navigateurs rend le
-   texte illisible au soleil, et Safari repeint la couleur malgré `color`. */
+/* Un champ éteint reste un aplat plein : Safari repeint la couleur malgré `color`. */
 [data-app="guide-nego"] .gn-champ__saisie:disabled {
-  border-color: var(--gn-desactive-fond);
-  background: var(--gn-desactive-fond);
+  border-color: var(--gn-filet-doux);
+  background: var(--gn-fond);
   color: var(--gn-desactive-texte);
   -webkit-text-fill-color: var(--gn-desactive-texte);
   opacity: 1;
@@ -164,8 +158,8 @@ const invalide = computed<'true' | undefined>(() => (props.erreur ? 'true' : und
   display: flex;
   justify-content: space-between;
   gap: var(--gn-espace-8);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   color: var(--gn-texte-2);
 }
 
@@ -175,8 +169,8 @@ const invalide = computed<'true' | undefined>(() => (props.erreur ? 'true' : und
   align-items: flex-start;
   gap: var(--gn-espace-8);
   color: var(--gn-danger);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  font-weight: var(--gn-graisse-demi-gras);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
+  font-weight: var(--gn-graisse-gras);
 }
 </style>

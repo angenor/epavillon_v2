@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * Le rail A–Z de la liste : toucher une lettre, ou y glisser le doigt, saute à son
- * groupe. Une lettre sans entrée est grise, la lettre en cours porte un filet.
+ * groupe. Une lettre sans entrée s'efface, la lettre en cours passe à l'accent.
  *
  * Le dessin fait 24 px de large ; la cible, 44, gagnée vers l'intérieur de l'écran.
  * Le doigt vise tout le rail : chaque lettre, à 20 px de haut, serait trop petite.
@@ -115,23 +115,25 @@ function auClavier(evenement: MouseEvent, lettre: string): void {
   block-size: var(--gn-rail-alpha-interligne);
   padding: 0;
   border: none;
-  border-inline-end: var(--gn-filet-3) solid transparent;
+  border-radius: var(--gn-rayon-6);
   background: none;
-  color: var(--gn-titre);
+  color: var(--gn-texte);
   font-family: var(--gn-police);
-  font-size: var(--gn-taille-15);
+  font-size: var(--gn-taille-12);
   line-height: var(--gn-rail-alpha-interligne);
-  font-weight: var(--gn-graisse-gras);
+  font-weight: var(--gn-graisse-extra-gras);
   text-align: center;
   cursor: pointer;
 }
 
 [data-app="guide-nego"] .gn-rail-alphabet__lettre--vide {
-  color: var(--gn-desactive-texte);
+  color: var(--gn-neutre-marque);
 }
 
+/* La lettre en cours passe à l'accent, comme le jour choisi. */
 [data-app="guide-nego"] .gn-rail-alphabet__lettre--courante {
-  border-inline-end-color: var(--gn-filet-fort);
+  background: var(--gn-accent);
+  color: var(--gn-accent-inv);
 }
 
 [data-app="guide-nego"] .gn-rail-alphabet__lettre:focus-visible {

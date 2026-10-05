@@ -2,8 +2,7 @@
   "titre": "Les états de tous les objets",
   "propos": "Même règle partout : un pictogramme 20 px, un mot, une couleur.",
   "regle": "Le sens des couleurs ne bouge jamais — vert : ça tient · cyan : ça a changé · rouge : ça ne tient plus · violet : vient du réseau · jaune foncé : attention, réservé · gris : passé ou neutre.",
-  "compte": "Les {nombre} états du système sont montrés ici, en clair et en sombre côte à côte. La dernière famille ramasse ceux que la maquette ne range pas : un état sans vitrine est un état que personne ne vérifie.",
-
+  "compte": "Les {nombre} états du système sont montrés ici, en mot et en aplat. La dernière famille ramasse ceux que la maquette ne range pas : un état sans vitrine est un état que personne ne vérifie.",
   "sens": "Ce que dit chaque couleur",
   "sens-propos": "Un état ne porte pas de couleur à lui : il renvoie au rôle qui la porte. Ajouter un état ne crée donc jamais une teinte de plus.",
   "sens-de": {
@@ -14,7 +13,6 @@
     "attention": "Attention, réservé — ce qui concerne la personne à l'instant",
     "terminee": "Passé ou neutre — clos, non retenu, complet"
   },
-
   "famille": {
     "session": "Session de négociation",
     "acces": "Accès à une session",
@@ -27,12 +25,6 @@
     "inscription": "Inscription — Francophonie, Pavillon",
     "autres": "Autres états de la table"
   },
-
-  "theme": {
-    "clair": "Thème clair",
-    "sombre": "Thème sombre"
-  },
-
   "libelle": {
     "remplace": "Remplacé par le Guide des négociations — CdP31",
     "synchronise": "Synchronisé à 11:35",

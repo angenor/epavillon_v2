@@ -95,13 +95,21 @@ const classes = (s: SegmentSurligne) => ({
   scroll-margin-top: 30vh;
 }
 
+[data-app="guide-nego"] .gn-segments-lus__courant,
+[data-app="guide-nego"] .gn-segments-lus__autre {
+  border-radius: var(--gn-rayon-6);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* L'occurrence courante : l'aplat clair, le seul de la page. */
 [data-app="guide-nego"] .gn-segments-lus__courant {
   background: var(--gn-titre);
   color: var(--gn-sur-titre);
 }
 
 [data-app="guide-nego"] .gn-segments-lus__autre {
-  background: var(--gn-fond-2);
+  background: var(--gn-bloc-releve);
   color: var(--gn-texte);
   font-weight: var(--gn-graisse-gras);
 }

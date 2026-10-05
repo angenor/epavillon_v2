@@ -18,7 +18,7 @@
   },
   "licences": {
     "titre": "Licences",
-    "police": "Atkinson Hyperlegible Next typeface",
+    "police": "Sora and Manrope typefaces",
     "police-licence": "SIL Open Font License 1.1",
     "bibliotheques": "Vue, Nuxt, Vue Router, Vue I18n, Pinia, ofetch",
     "bibliotheques-licence": "MIT licence"

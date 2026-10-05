@@ -2,16 +2,12 @@
 import { NOMS_D_ETAT, type NomDEtat } from '~/utils/guide-nego/etats'
 
 /**
- * Section 6 — les états de tous les objets, en clair et en sombre côte à côte.
+ * Section 6 : les états de tous les objets.
  *
  * Les neuf familles de la maquette ne couvrent pas la table : la dixième est CALCULÉE,
  * et ramasse tout ce qui n'a pas été rangé. Ajouter un état à `etats.ts` le fait donc
  * paraître ici sans toucher à ce fichier — un état sans vitrine est un état que
  * personne ne vérifie.
- *
- * Le sombre se pose sur un conteneur imbriqué : les rôles sont redéfinis par
- * `[data-app="guide-nego"][data-theme="sombre"]`, donc les DEUX attributs doivent être
- * sur le même élément, et le cadre de l'application est neutralisé juste en dessous.
  */
 const FAMILLES: readonly { cle: string; etats: readonly NomDEtat[] }[] = [
   { cle: 'session', etats: ['prevue', 'en-cours', 'deplacee', 'annulee', 'terminee', 'non-annoncee'] },
@@ -47,8 +43,6 @@ const SENS = [
   { cle: 'attention', jeton: '--gn-attention' },
   { cle: 'terminee', jeton: '--gn-terminee' },
 ] as const
-
-const THEMES = ['clair', 'sombre'] as const
 
 const { t } = useI18n()
 
@@ -88,21 +82,17 @@ const aplat = (jeton: string) => ({ background: `var(${jeton})` })
         :key="groupe.cle"
         :titre="t(`gn-planche-etats.famille.${groupe.cle}`)"
       >
-        <div class="gn-planche-etats__paire">
-          <div
-            v-for="theme in THEMES"
-            :key="theme"
-            class="gn-planche-etats__theme"
-            data-app="guide-nego"
-            :data-theme="theme"
-          >
-            <span class="gn-planche-etats__nom">{{ t(`gn-planche-etats.theme.${theme}`) }}</span>
-            <ul class="gn-planche-etats__rangee">
-              <li v-for="etat in groupe.etats" :key="etat">
-                <GnMarqueEtat :etat="etat" :libelle="libelleDe(etat)" />
-              </li>
-            </ul>
-          </div>
+        <div class="gn-planche-etats__theme">
+          <ul class="gn-planche-etats__rangee">
+            <li v-for="etat in groupe.etats" :key="etat">
+              <GnMarqueEtat :etat="etat" :libelle="libelleDe(etat)" />
+            </li>
+          </ul>
+          <ul class="gn-planche-etats__rangee">
+            <li v-for="etat in groupe.etats" :key="etat">
+              <GnMarqueEtat :etat="etat" :libelle="libelleDe(etat)" aplat />
+            </li>
+          </ul>
         </div>
       </GnPlancheSection>
     </div>
@@ -116,29 +106,13 @@ const aplat = (jeton: string) => ({ background: `var(${jeton})` })
   gap: var(--gn-entre-blocs);
 }
 
-[data-app="guide-nego"] .gn-planche-etats__paire {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: var(--gn-espace-8);
-}
-
-/* Le conteneur porte `data-app` pour que le thème sombre s'y applique : il hérite donc
-   aussi du cadre de l'application — pleine hauteur, colonne centrée —, que ces quatre
-   déclarations reprennent. Sans elles, chaque famille ferait un écran de haut. */
 [data-app="guide-nego"] .gn-planche-etats__theme {
-  min-height: 0;
-  width: auto;
-  overflow-x: visible;
-  padding: var(--gn-espace-12);
-  gap: var(--gn-espace-8);
-  border: var(--gn-filet-1) solid var(--gn-filet);
-}
-
-[data-app="guide-nego"] .gn-planche-etats__nom {
-  color: var(--gn-texte-2);
-  font-size: var(--gn-taille-13);
-  line-height: var(--gn-interligne-13);
-  font-weight: var(--gn-graisse-demi-gras);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gn-espace-16);
+  padding: var(--gn-espace-16);
+  border-radius: var(--gn-rayon-16);
+  background: var(--gn-fond-2);
 }
 
 [data-app="guide-nego"] .gn-planche-etats__rangee {

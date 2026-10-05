@@ -24,8 +24,8 @@ const date = computed(() => jourDeVerification(props.jour, String(locale.value))
   align-items: center;
   gap: 6px;
   color: var(--gn-succes);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   font-weight: var(--gn-graisse-gras);
 }
 

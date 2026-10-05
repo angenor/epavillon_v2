@@ -43,29 +43,29 @@ const ligne = computed(() => {
 </template>
 
 <style>
+/* La carte d'invitation de la maquette 04 dans le ton d'attention : fond teinté, aucun jaune plein sous le texte. */
 [data-app="guide-nego"] .gn-bandeau-remplace {
-  min-height: var(--gn-cible);
-  padding: var(--gn-espace-12) var(--gn-marge-ecran);
+  min-height: var(--gn-ligne-reglage);
+  padding: var(--gn-espace-16);
   display: flex;
   align-items: flex-start;
   gap: var(--gn-espace-12);
+  border: var(--gn-filet-1) solid var(--gn-attention-fond);
+  border-radius: var(--gn-rayon-24);
   background: var(--gn-attention-fond);
   color: var(--gn-texte);
   text-decoration: none;
 }
 
 [data-app="guide-nego"] .gn-bandeau-remplace:active {
-  filter: brightness(0.9);
-}
-
-[data-app="guide-nego"] .gn-bandeau-remplace:focus-visible {
-  outline-offset: calc(-1 * var(--gn-focus-decalage));
+  border-color: var(--gn-attention);
 }
 
 [data-app="guide-nego"] .gn-bandeau-remplace__picto {
+  flex: none;
   /* Centré sur la première ligne, celle du mot « Remplacé par ». */
-  margin-block-start: calc((1em * var(--gn-interligne-15) - var(--gn-picto-marque)) / 2);
-  font-size: var(--gn-taille-15);
+  margin-block-start: calc((1em * var(--gn-interligne-14) - var(--gn-picto-marque)) / 2);
+  font-size: var(--gn-taille-14);
   color: var(--gn-attention);
 }
 
@@ -74,33 +74,33 @@ const ligne = computed(() => {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--gn-espace-4);
   overflow-wrap: anywhere;
 }
 
 [data-app="guide-nego"] .gn-bandeau-remplace__mot {
   color: var(--gn-attention);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  font-weight: var(--gn-graisse-gras);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
+  font-weight: var(--gn-graisse-extra-gras);
 }
 
 [data-app="guide-nego"] .gn-bandeau-remplace__titre {
-  color: var(--gn-accent);
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
-  font-weight: var(--gn-graisse-demi-gras);
-  text-decoration: underline;
-  text-underline-offset: var(--gn-espace-4);
+  color: var(--gn-texte);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-bandeau-remplace__ligne {
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
 }
 
 [data-app="guide-nego"] .gn-bandeau-remplace__chevron {
+  flex: none;
+  align-self: center;
   color: var(--gn-picto-secondaire);
 }
 </style>

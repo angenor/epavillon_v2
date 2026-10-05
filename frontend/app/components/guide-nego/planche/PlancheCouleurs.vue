@@ -2,46 +2,29 @@
 import { useJetonsLus } from './PlancheSection.vue'
 
 /**
- * Section 1 — toutes les couleurs du système, dans l'ordre du thème.
+ * Section 1 : toutes les couleurs du système, dans l'ordre du thème.
  *
  * Aucune valeur n'est recopiée : chaque pastille prend sa couleur par `var()` et
- * affiche ce que le navigateur en a fait. Basculer le thème suffit donc à voir ce
- * que le thème sombre redéfinit — et ce qu'il laisse intact.
+ * affiche ce que le navigateur en a fait.
  */
-const CHARTE = [
-  '--gn-charte-vert-tres-fonce',
-  '--gn-charte-vert-fonce',
-  '--gn-charte-vert-moyen',
-  '--gn-charte-vert-de-fond',
-  '--gn-charte-vert-de-charte',
-  '--gn-charte-jaune-fonce',
-  '--gn-charte-jaune-tres-fonce',
-  '--gn-charte-jaune-de-fond',
-  '--gn-charte-jaune-de-charte',
-  '--gn-charte-noir',
-  '--gn-charte-gris',
-  '--gn-charte-gris-pale',
-  '--gn-charte-blanc',
-  '--gn-charte-rouge',
-  '--gn-charte-violet',
-  '--gn-charte-cyan-fonce',
-] as const
-
-const NUANCES = [
-  '--gn-nuance-sombre-fond',
-  '--gn-nuance-sombre-bloc',
-  '--gn-nuance-sombre-texte',
-  '--gn-nuance-sombre-texte-2',
-  '--gn-nuance-sombre-vert',
-  '--gn-nuance-sombre-vert-filet',
-  '--gn-nuance-sombre-jaune',
-  '--gn-nuance-sombre-cyan',
-  '--gn-nuance-sombre-rouge',
-  '--gn-nuance-sombre-violet',
-  '--gn-nuance-sombre-gris',
-  '--gn-nuance-sombre-squelette',
-  '--gn-nuance-sombre-jaune-bloc',
-  '--gn-nuance-rouge-aplat',
+const PALETTE = [
+  '--gn-nuit-fond',
+  '--gn-nuit-bloc',
+  '--gn-nuit-bloc-releve',
+  '--gn-nuit-barre',
+  '--gn-nuit-filet',
+  '--gn-nuit-neutre-marque',
+  '--gn-nuit-texte',
+  '--gn-nuit-texte-2',
+  '--gn-nuit-texte-lecture',
+  '--gn-nuit-accent',
+  '--gn-nuit-attention',
+  '--gn-nuit-alerte',
+  '--gn-nuit-information',
+  '--gn-nuit-reseau',
+  '--gn-nuit-attention-bloc',
+  '--gn-papier-jaune',
+  '--gn-papier-rouge',
 ] as const
 
 const ROLES = [
@@ -50,8 +33,11 @@ const ROLES = [
     jetons: [
       '--gn-fond',
       '--gn-fond-2',
+      '--gn-bloc-releve',
+      '--gn-barre-fond',
       '--gn-texte',
       '--gn-texte-2',
+      '--gn-texte-lecture',
       '--gn-titre',
       '--gn-accent',
       '--gn-accent-inv',
@@ -61,7 +47,7 @@ const ROLES = [
       '--gn-bulle-envoyee-texte',
     ],
   },
-  { cle: 'filets', jetons: ['--gn-filet', '--gn-filet-fort'] },
+  { cle: 'filets', jetons: ['--gn-filet', '--gn-filet-doux', '--gn-filet-fort', '--gn-neutre-marque'] },
   {
     cle: 'semantique',
     jetons: [
@@ -78,7 +64,6 @@ const ROLES = [
       '--gn-prevue',
     ],
   },
-  { cle: 'sur-vert', jetons: ['--gn-vif-jaune', '--gn-vif-vert'] },
   {
     cle: 'composants',
     jetons: [
@@ -97,8 +82,8 @@ const ROLES = [
 /** Un état ne porte pas de couleur : il renvoie au rôle qui la porte. */
 const ETATS: readonly (readonly [string, string])[] = [
   ['--gn-etat-prevue', '--gn-prevue'],
-  ['--gn-etat-en-cours', '--gn-succes'],
-  ['--gn-etat-deplacee', '--gn-information'],
+  ['--gn-etat-en-cours', '--gn-attention'],
+  ['--gn-etat-deplacee', '--gn-attention'],
   ['--gn-etat-annulee', '--gn-danger'],
   ['--gn-etat-terminee', '--gn-terminee'],
   ['--gn-etat-non-annoncee', '--gn-reseau'],
@@ -142,8 +127,7 @@ const ETATS: readonly (readonly [string, string])[] = [
 ]
 
 const COULEURS = [
-  ...CHARTE,
-  ...NUANCES,
+  ...PALETTE,
   ...ROLES.flatMap((groupe) => groupe.jetons),
   ...ETATS.map(([jeton]) => jeton),
 ]
@@ -168,27 +152,11 @@ const aplat = (jeton: string) => ({ background: `var(${jeton})` })
       <p class="gn-planche-note">{{ t('gn-planche-section.lecture') }}</p>
 
       <GnPlancheSection
-        :titre="t('gn-planche-couleurs.charte')"
-        :propos="t('gn-planche-couleurs.charte-propos')"
+        :titre="t('gn-planche-couleurs.palette')"
+        :propos="t('gn-planche-couleurs.palette-propos')"
       >
         <div class="gn-planche-grille">
-          <div v-for="jeton in CHARTE" :key="jeton" class="gn-planche-echantillon">
-            <div class="gn-planche-echantillon__aplat" :style="aplat(jeton)" />
-            <div class="gn-planche-legende">
-              <span class="gn-planche-jeton">{{ jeton }}</span>
-              <span class="gn-planche-valeur">{{ valeur(jeton) }}</span>
-              <span class="gn-planche-valeur">{{ usage(jeton) }}</span>
-            </div>
-          </div>
-        </div>
-      </GnPlancheSection>
-
-      <GnPlancheSection
-        :titre="t('gn-planche-couleurs.nuances')"
-        :propos="t('gn-planche-couleurs.nuances-propos')"
-      >
-        <div class="gn-planche-grille">
-          <div v-for="jeton in NUANCES" :key="jeton" class="gn-planche-echantillon">
+          <div v-for="jeton in PALETTE" :key="jeton" class="gn-planche-echantillon">
             <div class="gn-planche-echantillon__aplat" :style="aplat(jeton)" />
             <div class="gn-planche-legende">
               <span class="gn-planche-jeton">{{ jeton }}</span>
@@ -256,15 +224,17 @@ const aplat = (jeton: string) => ({ background: `var(${jeton})` })
   align-items: flex-start;
   gap: var(--gn-espace-8);
   min-height: var(--gn-cible);
-  padding: var(--gn-espace-8);
-  border: var(--gn-filet-1) solid var(--gn-filet);
+  padding: var(--gn-espace-12);
+  border-radius: var(--gn-rayon-16);
+  background: var(--gn-fond-2);
 }
 
 [data-app="guide-nego"] .gn-planche-etat__pastille {
   flex: none;
-  width: var(--gn-case);
-  height: var(--gn-case);
-  border: var(--gn-filet-1) solid var(--gn-filet);
+  width: var(--gn-point-etat);
+  height: var(--gn-point-etat);
+  margin-top: 4px;
+  border-radius: var(--gn-rayon-pilule);
 }
 
 [data-app="guide-nego"] .gn-planche-etat__texte {

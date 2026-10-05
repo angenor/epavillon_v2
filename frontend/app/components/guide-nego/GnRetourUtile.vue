@@ -26,7 +26,7 @@ const { t } = useI18n()
 [data-app="guide-nego"] .gn-retour-utile {
   display: flex;
   flex-direction: column;
-  gap: var(--gn-espace-8);
+  gap: var(--gn-espace-12);
 }
 
 [data-app="guide-nego"] .gn-retour-utile__question {
@@ -45,7 +45,7 @@ const { t } = useI18n()
   display: flex;
   align-items: center;
   gap: var(--gn-espace-8);
-  min-height: var(--gn-cible);
+  min-height: var(--gn-bouton-principal);
   color: var(--gn-succes);
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);

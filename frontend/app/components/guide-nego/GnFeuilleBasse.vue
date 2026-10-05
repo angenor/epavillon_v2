@@ -87,7 +87,7 @@ const derniere = computed(() => props.options.length - 1)
             <GnPicto
               v-if="picto"
               :nom="picto"
-              :taille="24"
+              :taille="20"
               :class="{ 'gn-feuille-basse__titre-picto--danger': pictoDanger }"
             />
             {{ titre }}
@@ -108,7 +108,7 @@ const derniere = computed(() => props.options.length - 1)
                 <GnPicto
                   v-if="option.picto"
                   :nom="option.picto"
-                  :taille="24"
+                  :taille="20"
                   :style="option.teinte ? { color: couleurDEtat(option.teinte) } : undefined"
                 />
                 <span v-if="option.detail" class="gn-feuille-basse__libelle gn-feuille-basse__option-textes">
@@ -118,7 +118,7 @@ const derniere = computed(() => props.options.length - 1)
                   </span>
                 </span>
                 <span v-else class="gn-feuille-basse__libelle">{{ option.libelle }}</span>
-                <GnPicto v-if="option.suite" nom="chevron" :taille="24" class="gn-feuille-basse__suite" />
+                <GnPicto v-if="option.suite" nom="chevron" :taille="20" class="gn-feuille-basse__suite" />
               </button>
             </li>
           </ul>
@@ -155,13 +155,13 @@ const derniere = computed(() => props.options.length - 1)
   position: relative;
   max-height: 100%;
   overflow-y: auto;
-  padding: var(--gn-espace-8) var(--gn-marge-ecran)
+  padding: var(--gn-espace-12) var(--gn-marge-ecran)
     calc(var(--gn-espace-16) + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
-  gap: var(--gn-espace-12);
-  border-top: var(--gn-filet-3) solid var(--gn-filet-fort);
-  background: var(--gn-fond);
+  gap: var(--gn-espace-16);
+  border-radius: var(--gn-rayon-24) var(--gn-rayon-24) 0 0;
+  background: var(--gn-fond-2);
   color: var(--gn-texte);
 }
 
@@ -170,7 +170,9 @@ const derniere = computed(() => props.options.length - 1)
   align-self: center;
   width: var(--gn-feuille-poignee-largeur);
   height: var(--gn-feuille-poignee-hauteur);
-  background: var(--gn-filet);
+  margin-bottom: var(--gn-espace-4);
+  border-radius: var(--gn-rayon-pilule);
+  background: var(--gn-bloc-releve);
 }
 
 [data-app="guide-nego"] .gn-feuille-basse__titre {
@@ -178,8 +180,9 @@ const derniere = computed(() => props.options.length - 1)
   align-items: center;
   gap: var(--gn-espace-8);
   color: var(--gn-titre);
-  font-size: var(--gn-taille-24);
-  line-height: var(--gn-interligne-24);
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-20);
+  line-height: var(--gn-interligne-20);
   font-weight: var(--gn-graisse-gras);
 }
 
@@ -190,19 +193,15 @@ const derniere = computed(() => props.options.length - 1)
 
 /* Avec un sous-titre, le titre descend d'un cran : les deux lignes forment un bloc. */
 [data-app="guide-nego"] .gn-feuille-basse__titre--avec-sous-titre {
-  font-size: var(--gn-taille-20);
-  line-height: var(--gn-interligne-20);
+  font-size: var(--gn-taille-18);
+  line-height: var(--gn-interligne-18);
 }
 
 [data-app="guide-nego"] .gn-feuille-basse__sous-titre {
-  margin-top: calc(-1 * var(--gn-espace-8));
+  margin-top: calc(-1 * var(--gn-espace-12));
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-}
-
-[data-app="guide-nego"] .gn-feuille-basse__options {
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 
 [data-app="guide-nego"] .gn-feuille-basse__option {
@@ -210,13 +209,13 @@ const derniere = computed(() => props.options.length - 1)
   min-height: var(--gn-ligne-reglage);
   display: flex;
   align-items: center;
-  gap: var(--gn-espace-12);
+  gap: 14px;
   border: none;
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
   background: none;
   color: var(--gn-texte);
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
   font-weight: var(--gn-graisse-demi-gras);
   text-align: left;
 }
@@ -233,8 +232,8 @@ const derniere = computed(() => props.options.length - 1)
   align-items: center;
   gap: 6px;
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   font-weight: var(--gn-graisse-regulier);
 }
 
@@ -255,7 +254,6 @@ const derniere = computed(() => props.options.length - 1)
   color: var(--gn-texte-2);
 }
 
-/* Écart 33 : un texte et un pictogramme rouges gardent la couleur de charte ; seul l'aplat s'assombrit. */
 [data-app="guide-nego"] .gn-feuille-basse__option--dangereuse,
 [data-app="guide-nego"] .gn-feuille-basse__option--dangereuse > .gn-picto {
   color: var(--gn-danger);

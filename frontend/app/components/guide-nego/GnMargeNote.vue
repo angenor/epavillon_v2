@@ -51,15 +51,13 @@ const position = computed(() => ({
           {{ t('gn-marge-note.passage', { passage: note.passage }) }}
         </p>
       </GnNoteCorrection>
-      <button type="button" class="gn-marge-note__fermer" :aria-label="t('gn-marge-note.fermer')" @click="emit('basculer')">
-        <GnPicto nom="close" :taille="20" />
-      </button>
+      <GnBoutonRond class="gn-marge-note__fermer" picto="close" :libelle="t('gn-marge-note.fermer')" @clic="emit('basculer')" />
     </section>
   </Teleport>
 </template>
 
 <style>
-/* Sur le papier, dans les deux thèmes : le filet et le triangle gardent le rouge de charte. */
+/* Sur le papier : le filet et le triangle gardent le rouge de charte. */
 [data-app="guide-nego"] .gn-marge-note {
   position: absolute;
   left: 0;
@@ -85,6 +83,7 @@ const position = computed(() => ({
   border-inline-start-width: calc(2 * var(--gn-filet-3));
 }
 
+/* Un panneau non modal posé comme une feuille basse : fond de bloc, rayon 24 en haut. */
 [data-app="guide-nego"] .gn-marge-note__panneau {
   position: fixed;
   bottom: calc(var(--gn-barre-lecture-repliee) + var(--gn-jauge) + env(safe-area-inset-bottom));
@@ -93,13 +92,14 @@ const position = computed(() => ({
   z-index: 7;
   display: flex;
   align-items: flex-start;
+  gap: var(--gn-espace-8);
   width: min(100%, var(--gn-colonne-largeur));
   max-height: 40dvh;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: var(--gn-espace-8) 0 var(--gn-espace-12) var(--gn-marge-ecran);
-  background: var(--gn-fond);
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
+  padding: var(--gn-espace-12) var(--gn-espace-12) var(--gn-espace-16) var(--gn-marge-ecran);
+  border-radius: var(--gn-rayon-24) var(--gn-rayon-24) 0 0;
+  background: var(--gn-fond-2);
   color: var(--gn-texte);
 }
 
@@ -108,9 +108,14 @@ const position = computed(() => ({
   min-width: 0;
 }
 
+/* Sur le fond de bloc du panneau, la boîte de la note passe au fond relevé pour s'en détacher. */
+[data-app="guide-nego"] .gn-marge-note__panneau .gn-note-correction__boite {
+  background: var(--gn-bloc-releve);
+}
+
 [data-app="guide-nego"] .gn-marge-note__passage {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   color: var(--gn-texte-2);
   overflow-wrap: break-word;
 }
@@ -118,14 +123,5 @@ const position = computed(() => ({
 [data-app="guide-nego"] .gn-marge-note__fermer {
   position: sticky;
   top: 0;
-  flex: none;
-  display: inline-grid;
-  place-items: center;
-  min-width: var(--gn-cible);
-  min-height: var(--gn-cible);
-  border: none;
-  background: none;
-  color: var(--gn-texte);
-  cursor: pointer;
 }
 </style>
