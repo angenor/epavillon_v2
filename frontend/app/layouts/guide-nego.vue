@@ -15,12 +15,9 @@ import { PREFIXE_FILE_INSCRIPTION_PAVILLON } from '~/utils/guide-nego/pavillon'
 import { PREFIXE_FILE_SIGNALEMENT } from '~/utils/guide-nego/signalements'
 import { CLE_FILE_THEMATIQUES } from '~/utils/guide-nego/thematiques'
 
-// La barre système du téléphone ne lit pas le CSS : elle veut une valeur. Ce sont
-// `--gn-charte-vert-tres-fonce` et `--gn-nuance-sombre-fond`, les seuls endroits du
-// code où une couleur s'écrit — la barre n'a pas d'autre langue.
-const BARRE_SYSTEME = { clair: '#233400', sombre: '#101704' }
-
-const { affiche } = useGnTheme()
+// La barre système du téléphone ne lit pas le CSS : elle veut une valeur. C'est
+// `--gn-nuit-fond`, le seul endroit du code où une couleur s'écrit hors de theme.css.
+const BARRE_SYSTEME = '#0B1018'
 
 // Le manifeste et l'icône ne se posent QUE sous cette mise en page : le site n'est pas
 // installable, et son onglet garde son propre titre.
@@ -32,7 +29,7 @@ useHead(() => ({
     { rel: 'apple-touch-icon', href: assetUrl('/guide-nego/icones/180.png') },
   ],
   meta: [
-    { name: 'theme-color', content: BARRE_SYSTEME[affiche.value] },
+    { name: 'theme-color', content: BARRE_SYSTEME },
     { name: 'apple-mobile-web-app-capable', content: 'yes' },
     { name: 'apple-mobile-web-app-title', content: 'Guide Négo' },
   ],
@@ -218,7 +215,7 @@ async function enregistrerLaGarde() {
 </script>
 
 <template>
-  <div data-app="guide-nego" :data-theme="affiche">
+  <div data-app="guide-nego">
     <GnBandeauRappel
       v-if="rappel"
       :session="rappel"

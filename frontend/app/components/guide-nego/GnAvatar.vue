@@ -3,15 +3,15 @@ import { NuxtLink } from '#components'
 import { initialesDe } from '~/utils/guide-nego/compte'
 
 /**
- * L'avatar du compte : 40 px, initiales 15/700, et l'image quand le compte en a une.
+ * L'avatar du compte : 44 px, initiales Sora 15/700, et l'image quand le compte en a une.
  *
  * **Une image qui ne se charge pas rend les initiales**, et pas seulement une image
  * absente : hors connexion, l'image du compte ne vient pas — elle n'a pas sa place
  * dans la garde de la coquille, qui ne porte rien de personnel. Sans ce repli, la
  * salle sans réseau montrerait un rond vide à la place d'un nom.
  *
- * Avec `vers`, il devient la cible de 48 px qui ouvre le profil ; l'image est alors
- * muette, le lien porte le nom.
+ * Avec `vers`, il devient le lien qui ouvre le profil ; l'image est alors muette, le
+ * lien porte le nom.
  */
 const props = withDefaults(
   defineProps<{
@@ -19,7 +19,7 @@ const props = withDefaults(
     nom: string | null
     image?: string | null
     vers?: string
-    /** 48 px, initiales 17 : en tête du profil, à côté du nom. */
+    /** 56 px, initiales 18 : en tête du profil, à côté du nom. */
     grand?: boolean
   }>(),
   { image: null, vers: undefined, grand: false },
@@ -64,15 +64,11 @@ const imageMontree = computed(() => Boolean(props.image) && !imageEnEchec.value)
 }
 
 [data-app="guide-nego"] .gn-avatar--lien {
-  width: var(--gn-cible);
-  height: var(--gn-cible);
-  /* La cible déborde à gauche comme le bouton retour : le rond s'aligne sur la marge. */
-  margin-inline-start: -4px;
+  border-radius: var(--gn-rayon-pilule);
 }
 
 [data-app="guide-nego"] .gn-avatar--lien:active .gn-avatar__rond {
-  outline: var(--gn-filet-2) solid var(--gn-filet-fort);
-  outline-offset: 2px;
+  background: var(--gn-presse);
 }
 
 [data-app="guide-nego"] .gn-avatar__rond {
@@ -82,18 +78,19 @@ const imageMontree = computed(() => Boolean(props.image) && !imageEnEchec.value)
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border-radius: var(--gn-rayon-24);
-  background: var(--gn-titre);
-  color: var(--gn-sur-titre);
+  border-radius: var(--gn-rayon-pilule);
+  background: var(--gn-bloc-releve);
+  color: var(--gn-texte);
+  font-family: var(--gn-police-titre);
   font-size: var(--gn-taille-15);
   line-height: 1;
   font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-avatar--grand .gn-avatar__rond {
-  width: var(--gn-cible);
-  height: var(--gn-cible);
-  font-size: var(--gn-taille-17);
+  width: var(--gn-champ);
+  height: var(--gn-champ);
+  font-size: var(--gn-taille-18);
 }
 
 [data-app="guide-nego"] .gn-avatar__image {
