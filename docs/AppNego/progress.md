@@ -73,10 +73,11 @@ Une ligne chacun ; le détail, et les points levés, dans [`points-ouverts.md`](
 - [Étape 5 — rien n'écrit `live.streams`](progression/points-ouverts.md#étape-5--rien-nécrit-livestreams) — Sans outil de saisie, la rediffusion d'une activité ne paraîtra pas en production.
 - [Étape 5 — le back-office du site n'édite pas les formulaires d'inscription](progression/points-ouverts.md#étape-5--le-back-office-du-site-nédite-pas-les-formulaires-dinscription) — Une activité à formulaire complet ne se prépare qu'en base.
 - [Deux fuseaux sur un même écran](progression/points-ouverts.md#deux-fuseaux-sur-un-même-écran) — « Lu à » suit le téléphone, « validé à » la COP ; relevé à la recette de 5, non corrigé.
+- [Publier sans vérification avant l'envoi du code](progression/points-ouverts.md#publier-sans-vérification-avant-lenvoi-du-code) — Migration en production, code du 05/10 non envoyé : ne rien publier sans vérification d'ici là.
 
 ## Dernières nouvelles
 
-- 05/10 — **La FAQ se publie sans vérification datée**, sur instruction de la hiérarchie ; « Vérifié le » ne s'affiche que s'il y a une date. Migration à jouer en production — [journal](progression/journal/2026-10-05.md).
+- 05/10 — **La FAQ se publie sans vérification datée**, sur instruction de la hiérarchie ; « Vérifié le » ne s'affiche que s'il y a une date. Migration jouée en production, code pas encore envoyé — [journal](progression/journal/2026-10-05.md).
 - 27/09 — **Guide Négo ouvert en production** : `guide_nego.enabled` allumé (les deux colonnes, `UPDATE 1`), l'écran d'ouverture s'affiche sur `/v2/guide-nego/` ; « Échanges » reste fermé. Restent les téléphones, § 15.4 de [DEPLOIEMENT.md](../DEPLOIEMENT.md).
 - 27/09 — **Étapes 0a à 5 en production** (c2724eb) : dix migrations jouées sans erreur, santé et garde conformes, drapeau `guide_nego.enabled` éteint ; restent le § 15.3 (site) et le § 15.4 (téléphones) de [DEPLOIEMENT.md](../DEPLOIEMENT.md).
 - 27/09 — **MVP clos côté code** : `make check-safe` complet au vert sur `main` (27adc35), 319 lots, 1 555 tests, aucun échec ; reste l'appareil réel, § 15.4 de [DEPLOIEMENT.md](../DEPLOIEMENT.md) — [journal](progression/journal/2026-09-27.md).

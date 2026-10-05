@@ -2,6 +2,10 @@
 
 > Le détail de chaque point, déplacé tel quel de l'ancien suivi le 27/09. Le [point central](../progress.md) n'en garde qu'une ligne ; un point levé est rayé ici et retiré de là-bas.
 
+## Publier sans vérification avant l'envoi du code
+
+**Relevé le 05/10.** La migration `2026-10-05-faq-publication-sans-verification.sql` est jouée en production, mais le code qui l'accompagne (`fbaa80c`) n'y est pas : le commanditaire a choisi la migration seule. L'ancien code lit `verified_on` comme toujours présent dans le paquet du téléphone (`savoir_paquet.rs`, `"verified_on!"`) : une seule réponse publiée sans vérification ferait échouer la relecture de toute la FAQ sur les téléphones. **D'ici le prochain envoi du code, publier seulement des réponses vérifiées.** Se lève au prochain `./deploy.sh update`.
+
 ## La réinitialisation du site atteint Guide Négo
 
 **La réinitialisation générale du site atteint Guide Négo**, relevé le 24/09 à l'essai 1b : la préface de Tailwind, importée par `frontend/app/assets/css/main.css`, pose `* { box-sizing: border-box; margin: 0; padding: 0; border: 0 solid }` sur toute la page, application comprise — contraire à FR-026 de 0a (« aucune règle du site ne doit altérer l'application »). `assets/guide-nego/base.css` reprend `box-sizing: border-box` pour lui-même, ce qui la masquait. Elle décalait la couche de texte de pdf.js ; 1b s'en protège par une règle `content-box` sous `.pdfViewer` ([ADR-022](../adr/022-pdfjs-dans-le-client.md)). **Non corrigée à cette étape** : la borner demanderait de sortir Guide Négo de la couche de base de Tailwind, et de revoir tous ses composants, qui comptent sur elle.
