@@ -130,7 +130,26 @@ function reveal(): void {
   if (body.value && column) body.value.scrollLeft = column.offsetLeft
 }
 
-onMounted(reveal)
+/** Une fois figée sous la barre, la rangée des jours se resserre : elle ne garde que le nécessaire. */
+const sentinel = useTemplateRef<HTMLElement>('sentinel')
+const stuck = ref(false)
+const hasSpecial = computed(() => columns.value.some((column) => column.special))
+let observer: IntersectionObserver | undefined
+
+onMounted(() => {
+  reveal()
+  if (!sentinel.value) return
+  const style = getComputedStyle(document.documentElement)
+  const nav = Math.round(parseFloat(style.getPropertyValue('--nav-height')) * parseFloat(style.fontSize)) || 0
+  observer = new IntersectionObserver(
+    ([entry]) => {
+      stuck.value = !!entry && !entry.isIntersecting && entry.boundingClientRect.top < nav
+    },
+    { rootMargin: `-${nav}px 0px 0px 0px` },
+  )
+  observer.observe(sentinel.value)
+})
+onBeforeUnmount(() => observer?.disconnect())
 watch(() => [props.selected, props.days], () => nextTick(reveal))
 
 async function next(): Promise<void> {
@@ -171,7 +190,8 @@ async function next(): Promise<void> {
       </div>
     </div>
 
-    <div class="sticky top-(--nav-height) z-20 mt-7 bg-surface">
+    <div ref="sentinel" class="mt-7" aria-hidden="true" />
+    <div class="sticky top-(--nav-height) z-20 bg-surface">
       <div ref="head" class="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" @scroll="sync('head')">
         <div class="grid grid-cols-[repeat(var(--week-columns),minmax(11rem,1fr))]" :style="{ '--week-columns': String(columns.length) }">
           <button
@@ -184,7 +204,10 @@ async function next(): Promise<void> {
             :aria-current="column.isToday ? 'date' : undefined"
             @click="emit('day', column.date)"
           >
-            <span class="block border-b-2 py-3" :class="column.isToday ? 'border-accent' : 'border-text'">
+            <span
+              class="block border-b-2 transition-[padding] duration-200"
+              :class="[column.isToday ? 'border-accent' : 'border-text', stuck ? 'pt-2.5 pb-2' : 'py-3']"
+            >
               <span class="flex items-end gap-2.5" :class="column.isPast ? 'text-text-subtle' : 'text-text'">
                 <span class="text-[48px] leading-[0.9] tabular-nums" :class="column.isToday ? 'font-bold' : 'font-light'">
                   {{ column.number }}
@@ -194,7 +217,11 @@ async function next(): Promise<void> {
                   <span class="block text-xs text-text-muted">{{ column.count }}</span>
                 </span>
               </span>
-              <span class="mt-2 line-clamp-2 h-8 text-[11px] leading-4 font-bold tracking-caps text-accent uppercase">
+              <span
+                v-if="!stuck || hasSpecial"
+                class="text-[11px] leading-4 font-bold tracking-caps text-accent uppercase"
+                :class="stuck ? 'mt-1 line-clamp-1 h-4' : 'mt-2 line-clamp-2 h-8'"
+              >
                 {{ column.special }}
               </span>
             </span>
