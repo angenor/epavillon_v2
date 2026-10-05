@@ -23,6 +23,7 @@
 | 3b — Sessions : signalements et notifications | 🟡 26/09/2026 | Fusionnée dans `main` (72b38cf) ; la suite Rust complète passera au `check-safe` de fin de MVP, puis l'appareil réel — [détail](progression/etapes/3b-signalements.md) |
 | 4 — Réunions de la Francophonie | 🟡 26/09/2026 | Fusionnée dans `main` (27adc35) ; reste l'appareil réel, § 15.4 de [DEPLOIEMENT.md](../DEPLOIEMENT.md) — [détail](progression/etapes/4-reunions.md) |
 | 5 — Pavillon de la Francophonie | 🟡 27/09/2026 | Fusionnée dans `main` (27adc35) ; reste l'appareil réel, § 15.4 de [DEPLOIEMENT.md](../DEPLOIEMENT.md) — [détail](progression/etapes/5-pavillon.md) |
+| Refonte « Nuit » | 🟡 05/10/2026 | Toute l'application passe à la direction « Nuit » au pixel près, thème unique sombre ([ADR-023](adr/023-direction-nuit.md)) ; fusionnée dans `main` (15b1018), reste l'appareil réel : [détail](progression/etapes/refonte-nuit.md) |
 | 6 — Échanges | — | Après le MVP ; Capacitor d'abord |
 | 7 — Assistant IA | — | Après le MVP |
 | 8 — Formations et quiz | — | Après le MVP |
@@ -77,8 +78,8 @@ Une ligne chacun ; le détail, et les points levés, dans [`points-ouverts.md`](
 
 ## Dernières nouvelles
 
+- 05/10 : **Guide Négo prend la direction « Nuit »** : sombre, Sora et Manrope, compte à rebours et fil du jour à l'accueil, frise des agendas ; menée par deux sessions orchestrées, fusionnée dans `main` (15b1018). [Détail](progression/etapes/refonte-nuit.md).
 - 05/10 — **La FAQ se publie sans vérification datée**, sur instruction de la hiérarchie ; « Vérifié le » ne s'affiche que s'il y a une date. Migration jouée en production, code pas encore envoyé — [journal](progression/journal/2026-10-05.md).
 - 27/09 — **Guide Négo ouvert en production** : `guide_nego.enabled` allumé (les deux colonnes, `UPDATE 1`), l'écran d'ouverture s'affiche sur `/v2/guide-nego/` ; « Échanges » reste fermé. Restent les téléphones, § 15.4 de [DEPLOIEMENT.md](../DEPLOIEMENT.md).
 - 27/09 — **Étapes 0a à 5 en production** (c2724eb) : dix migrations jouées sans erreur, santé et garde conformes, drapeau `guide_nego.enabled` éteint ; restent le § 15.3 (site) et le § 15.4 (téléphones) de [DEPLOIEMENT.md](../DEPLOIEMENT.md).
 - 27/09 — **MVP clos côté code** : `make check-safe` complet au vert sur `main` (27adc35), 319 lots, 1 555 tests, aucun échec ; reste l'appareil réel, § 15.4 de [DEPLOIEMENT.md](../DEPLOIEMENT.md) — [journal](progression/journal/2026-09-27.md).
-- 27/09 — Étapes 4 et 5 fusionnées dans `main` (27adc35) ; le scénario qui clôt le MVP est joué de bout en bout — [étape 5](progression/etapes/5-pavillon.md).

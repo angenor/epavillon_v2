@@ -19,7 +19,7 @@ test('« heure d’ » devant une voyelle', () => {
     assert.equal(rendu('timeWithZone', { time: '14:30', zone: ville }), `14:30, heure d'${ville}`)
     assert.equal(
       rendu('timeRangeWithZone', { start: '14:30', end: '16:00', zone: ville }),
-      `14:30 — 16:00, heure d'${ville}`,
+      `14:30 – 16:00, heure d'${ville}`,
     )
   }
 })
@@ -30,7 +30,7 @@ test('« heure de » devant une consonne', () => {
     assert.equal(rendu('timeWithZone', { time: '14:30', zone: ville }), `14:30, heure de ${ville}`)
     assert.equal(
       rendu('timeRangeWithZone', { start: '14:30', end: '16:00', zone: ville }),
-      `14:30 — 16:00, heure de ${ville}`,
+      `14:30 – 16:00, heure de ${ville}`,
     )
   }
 })
