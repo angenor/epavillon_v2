@@ -4,8 +4,8 @@
   "loading": "Chargement du programme",
   "views": {
     "label": "Affichage",
-    "week": "Semaine",
-    "list": "Liste"
+    "week": "Vue calendrier",
+    "list": "Vue liste"
   },
   "filters": {
     "search": "Rechercher une activité",

@@ -4,8 +4,8 @@
   "loading": "Loading the programme",
   "views": {
     "label": "Display",
-    "week": "Week",
-    "list": "List"
+    "week": "Calendar view",
+    "list": "List view"
   },
   "filters": {
     "search": "Search for an activity",

@@ -222,7 +222,7 @@ const liveSession = computed(() => data.value.schedule.find((session) => isLive(
 
 const views = computed(() => [
   { value: 'list' as const, icon: 'list', label: t('programme.views.list') },
-  { value: 'week' as const, icon: 'grid', label: t('programme.views.week') },
+  { value: 'week' as const, icon: 'calendar', label: t('programme.views.week') },
 ])
 
 </script>
@@ -236,25 +236,31 @@ const views = computed(() => [
           </h2>
           <p class="mt-1.5 text-base text-text-muted">{{ subtitle }}</p>
         </div>
-        <div v-if="isPublished && data.schedule.length" class="flex w-full items-center gap-2 sm:w-auto">
+        <div v-if="isPublished && data.schedule.length" class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-2">
           <UiSearchInput
             v-model="search"
-            class="min-w-0 flex-1 sm:w-[300px] sm:flex-none"
+            class="min-w-0 sm:w-[300px]"
             :label="t('programme.filters.search')"
             hide-label
             :placeholder="t('programme.filters.searchPlaceholder')"
           />
-          <div role="group" class="flex shrink-0 items-center gap-0.5 rounded-lg border border-border p-0.5" :aria-label="t('programme.views.label')">
+          <!-- Sur téléphone, la bascule passe sous le titre, avant la recherche, en deux moitiés. -->
+          <div
+            role="group"
+            class="order-first grid shrink-0 grid-cols-2 gap-0.5 rounded-[10px] border border-border p-0.75 sm:order-none sm:flex"
+            :aria-label="t('programme.views.label')"
+          >
             <UiButton
               v-for="option in views"
               :key="option.value"
               variant="ghost"
-              icon-only
               :icon="option.icon"
-              :label="option.label"
               :pressed="view === option.value"
+              class="justify-center whitespace-nowrap"
               @click="option.value === 'list' ? showInList(selectedDay) : (view = 'week')"
-            />
+            >
+              {{ option.label }}
+            </UiButton>
           </div>
         </div>
       </header>
