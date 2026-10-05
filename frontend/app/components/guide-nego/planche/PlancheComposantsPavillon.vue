@@ -92,7 +92,6 @@ const lignes = computed<{ activite: PublicScheduleRow; etat: EtatActivite; marqu
           :ville="VILLE"
           :vers="VERS"
         />
-        <GnJourneeLigneVide picto="flag" :origine="t('gn-journee-ligne-pavillon.origine')" :texte="k('journee-prochaine')" :vers="VERS" />
       </div>
     </GnPlancheSection>
   </div>
