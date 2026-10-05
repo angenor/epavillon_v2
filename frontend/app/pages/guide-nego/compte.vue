@@ -268,19 +268,20 @@ useHead({ title: t('guide-nego.compte.titre') })
 }
 
 [data-app="guide-nego"] .gn-compte__propos {
+  color: var(--gn-texte-lecture);
   font-size: var(--gn-taille-17);
   line-height: var(--gn-interligne-17);
 }
 
 [data-app="guide-nego"] .gn-compte__propos--discret {
-  font-size: var(--gn-taille-15);
+  font-size: var(--gn-taille-14);
   color: var(--gn-texte-2);
 }
 
 [data-app="guide-nego"] .gn-compte__panne {
-  font-size: var(--gn-taille-15);
+  font-size: var(--gn-taille-14);
   color: var(--gn-danger);
-  font-weight: var(--gn-graisse-demi-gras);
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-compte__sorties {

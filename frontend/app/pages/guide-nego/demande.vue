@@ -247,13 +247,14 @@ async function retirer(): Promise<void> {
 
 <style>
 [data-app="guide-nego"] .gn-demande__propos {
+  color: var(--gn-texte-lecture);
   font-size: var(--gn-taille-17);
   line-height: var(--gn-interligne-17);
 }
 
 [data-app="guide-nego"] .gn-demande__propos--discret {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   color: var(--gn-texte-2);
 }
 
@@ -262,9 +263,9 @@ async function retirer(): Promise<void> {
   gap: var(--gn-espace-8);
   align-items: flex-start;
   padding-top: var(--gn-espace-8);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  font-weight: var(--gn-graisse-demi-gras);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
+  font-weight: var(--gn-graisse-gras);
   color: var(--gn-danger);
 }
 

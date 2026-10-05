@@ -46,6 +46,7 @@ const segments = computed(() =>
   display: flex;
   align-items: center;
   gap: var(--gn-espace-12);
+  padding-bottom: var(--gn-espace-20);
 }
 
 [data-app="guide-nego"] .gn-etapes__segments {

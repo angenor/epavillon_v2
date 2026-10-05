@@ -304,7 +304,7 @@ useHead({ title: t('guide-nego.thematiques.titre') })
 [data-app="guide-nego"] .gn-themes__exigence {
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
-  color: var(--gn-attention-aplat-texte);
+  color: var(--gn-attention);
   text-align: center;
 }
 

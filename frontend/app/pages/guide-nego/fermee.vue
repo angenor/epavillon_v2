@@ -39,8 +39,8 @@ useHead({ title: t('guide-nego.fermee.titre'), meta: [{ name: 'robots', content:
 }
 
 [data-app="guide-nego"] .gn-fermee__editeur {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   color: var(--gn-texte-2);
 }
 </style>
