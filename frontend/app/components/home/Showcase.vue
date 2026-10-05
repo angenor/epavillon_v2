@@ -233,17 +233,22 @@ watch(
            génération de Tailwind, pas par l'ordre d'écriture. On lui donne donc
            de la place, on ne lui impose pas de position. -->
       <div class="relative flex min-h-0 flex-1 flex-col">
-        <HomeShowcaseSlide
-          v-if="slide"
-          :key="slide.id"
-          :slide="slide"
-          :skip-video="skipVideo(slide)"
-          :paused="!running"
-          eager
-          class="flex-1"
-          content-class="pb-28 sm:pb-32"
-          @media-error="onMediaError"
-        />
+        <!-- Fondu enchaîné : la sortante passe au-dessus et s'efface, l'entrante
+             se pose (image qui recule à peine, texte qui monte). Neutralisé par
+             `prefers-reduced-motion` dans `main.css`. -->
+        <Transition name="showcase-slide">
+          <HomeShowcaseSlide
+            v-if="slide"
+            :key="slide.id"
+            :slide="slide"
+            :skip-video="skipVideo(slide)"
+            :paused="!running"
+            eager
+            class="flex-1"
+            content-class="pb-28 sm:pb-32"
+            @media-error="onMediaError"
+          />
+        </Transition>
 
         <!-- L'INVITATION À DÉROULER. Reprise de la plateforme de référence : sur
              un bandeau qui occupe presque toute la hauteur de l'écran, rien ne
@@ -300,3 +305,38 @@ watch(
     </div>
   </section>
 </template>
+
+<style scoped>
+.showcase-slide-enter-active,
+.showcase-slide-leave-active {
+  transition: opacity 700ms ease;
+}
+.showcase-slide-leave-active {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.showcase-slide-enter-from,
+.showcase-slide-leave-to {
+  opacity: 0;
+}
+
+.showcase-slide-enter-active :deep(img),
+.showcase-slide-enter-active :deep(video) {
+  transition: transform 1400ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.showcase-slide-enter-from :deep(img),
+.showcase-slide-enter-from :deep(video) {
+  transform: scale(1.05);
+}
+
+.showcase-slide-enter-active :deep([data-showcase-text]) {
+  transition:
+    transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1) 200ms,
+    opacity 700ms ease 200ms;
+}
+.showcase-slide-enter-from :deep([data-showcase-text]) {
+  transform: translateY(16px);
+  opacity: 0;
+}
+</style>

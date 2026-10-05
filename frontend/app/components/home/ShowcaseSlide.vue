@@ -221,7 +221,7 @@ watch(() => [props.paused, background.value.kind], syncVideo, { flush: 'post' })
 
     <!-- BAS DE CADRE, arbitré le 03/10 : le texte se range au-dessus du rail et
          laisse le haut de la photographie libre. -->
-    <div class="w-full" :class="props.contentClass">
+    <div class="w-full" :class="props.contentClass" data-showcase-text>
       <div
         class="mx-auto flex w-full max-w-[1280px]"
         :class="
