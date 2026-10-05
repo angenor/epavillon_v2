@@ -37,6 +37,8 @@ Si le modèle paraît insuffisant pour une fonctionnalité, **on modifie le SQL 
 
 Court, mais clair. La brièveté ne doit jamais coûter une information utile — on coupe le remplissage, pas le sens.
 
+**Jamais de tiret cadratin (`—`)** dans un texte qu'on écrit : réponses, code, interface, documentation, commits. On met une virgule, deux-points, des parenthèses ou un point. Demande explicite du commanditaire.
+
 **Dans les réponses**
 - Aller au fait : ce qui a été fait, où, et ce qui reste. Pas de préambule, pas de résumé de ce qu'on vient de lire.
 - Des mots simples et des phrases courtes. Le terme technique quand il est juste, jamais pour faire savant.

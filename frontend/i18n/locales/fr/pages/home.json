@@ -62,7 +62,8 @@
       "titleOf": "Au programme — {edition}",
       "all": "Tout le programme",
       "today": "Aujourd'hui",
-      "tomorrow": "Demain"
+      "tomorrow": "Demain",
+      "cta": "Voir toute la programmation"
     }
   },
   "call": {

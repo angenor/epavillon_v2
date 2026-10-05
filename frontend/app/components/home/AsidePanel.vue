@@ -96,7 +96,7 @@ const isEmpty = computed(() => props.sessions.length === 0 && nextThree.value.le
        fond est sombre dans les deux cas. Faire basculer les cartes d'une
        matière à l'autre selon la largeur aurait donné deux dessins à tenir. -->
   <aside
-    class="flex h-full flex-col bg-surface-inverse text-text-on-inverse lg:bg-glass lg:backdrop-blur-glass"
+    class="relative flex h-full flex-col bg-surface-inverse text-text-on-inverse lg:bg-glass lg:backdrop-blur-glass"
     :aria-label="t('home.aside.title')"
   >
     <div class="border-b border-glass-border px-4 py-4 sm:px-6 lg:px-5">
@@ -116,7 +116,7 @@ const isEmpty = computed(() => props.sessions.length === 0 && nextThree.value.le
          panneau au lieu de défiler dedans. En dessous de `lg`, la section suit
          le flux de la page — un panneau qui défilerait dans un téléphone
          emprisonnerait le geste. -->
-    <div class="min-h-0 flex-1 px-4 py-4 sm:px-6 lg:overflow-y-auto lg:px-5">
+    <div class="min-h-0 flex-1 px-4 py-4 sm:px-6 lg:overflow-y-auto lg:px-5" :class="props.sessions.length ? 'lg:pb-28' : ''">
       <div class="mx-auto flex w-full max-w-[1280px] flex-col gap-6 lg:mx-0">
         <UiEmptyState
           v-if="isEmpty"
@@ -159,6 +159,25 @@ const isEmpty = computed(() => props.sessions.length === 0 && nextThree.value.le
         <!-- 2. LA FRISE DES ACTIVITÉS RETENUES -->
         <HomeAsideTimeline :sessions="props.sessions" :editions="props.editions" :now="props.now" />
       </div>
+    </div>
+
+    <!-- Le bas du panneau (05/10) : le fondu du média (`.scrim-fade-bottom`) dit que la
+         liste continue dessous, et le bouton mène au programme complet. Sous `lg`, le
+         panneau ne défile pas : le bouton suit la liste, sans fondu. -->
+    <div
+      v-if="props.sessions.length"
+      class="relative px-4 pb-5 sm:px-6 lg:pointer-events-none lg:absolute lg:inset-x-0 lg:bottom-0 lg:px-5 lg:pt-16"
+    >
+      <span class="pointer-events-none absolute inset-0 hidden scrim-fade-bottom lg:block" aria-hidden="true" />
+      <UiButton
+        variant="primary"
+        icon-trailing="arrow-right"
+        block
+        :to="localePath('/programmations')"
+        class="relative lg:pointer-events-auto"
+      >
+        {{ t('home.aside.programme.cta') }}
+      </UiButton>
     </div>
   </aside>
 </template>

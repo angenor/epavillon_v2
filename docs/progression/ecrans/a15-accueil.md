@@ -128,3 +128,7 @@ Demande du commanditaire : appliquer `docs/bird-cursor/` à l'accueil. Arbitrage
 ### 05/10 — rail de vignettes centré, barre de défilement
 
 Vignettes centrées sous la citation, commandes de lecture à droite ; la vignette courante porte une barre qui se remplit au rythme du défilement à la place de la coche (signal de forme, pas de teinte). Typecheck vert, vu à 1440 px — [journal](../journal/2026-10-05.md).
+
+### 05/10 — bas du panneau « À venir » : fondu et bouton vers la programmation
+
+Quatre directions pour l'affichage des activités du panneau, en maquette ; le commanditaire garde l'actuel. Ajout demandé : au bas du panneau, le fondu `.scrim-fade-bottom` (déjà arbitré, pas de nouveau dégradé) et un bouton plein « Voir toute la programmation » vers `/programmations`. Sur grand écran, il flotte au bas du panneau défilant (`lg:pb-28` sur la zone qui défile) ; sous `lg`, il suit la liste sans fondu. Vu à 1440 et 390 px, `make check-front` vert — [journal](../journal/2026-10-05.md).

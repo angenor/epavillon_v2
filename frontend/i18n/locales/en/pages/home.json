@@ -63,7 +63,8 @@
       "titleOf": "Programme — {edition}",
       "all": "Full programme",
       "today": "Today",
-      "tomorrow": "Tomorrow"
+      "tomorrow": "Tomorrow",
+      "cta": "See the full programme"
     }
   },
   "call": {
