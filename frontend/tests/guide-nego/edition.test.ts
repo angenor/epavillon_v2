@@ -44,3 +44,11 @@ test('une garde d’avant 3a, sans slug ni fuseau, ne désigne aucune édition',
   assert.equal(editionComplete({ libelle: 'COP31', enCours: true }), false)
   assert.equal(editionComplete({ libelle: 'COP31', enCours: true, slug: 'cop31', timezone: 'America/Belem', city: null }), true)
 })
+
+test('l’ouverture et la clôture suivent l’édition retenue : l’accueil compte les jours avant la COP', () => {
+  const retenue = editionDuGuide([
+    { ...(edition('COP31', 'cop_climate', 'upcoming', '2027-11-09T12:00:00Z') as object), ends_at: '2027-11-20T21:00:00Z' } as never,
+  ])
+  assert.equal(retenue?.debut, '2027-11-09T12:00:00Z')
+  assert.equal(retenue?.fin, '2027-11-20T21:00:00Z')
+})
