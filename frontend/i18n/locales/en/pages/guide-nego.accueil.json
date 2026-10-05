@@ -67,7 +67,6 @@
       "lu-page": "read {moment}, p. {page}"
     },
     "lexique": {
-      "ouvrir": "Open the English-French glossary",
       "titre": "English-French glossary",
       "precision": "A term heard in the room, translated and explained"
     }
