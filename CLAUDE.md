@@ -134,7 +134,7 @@ Idem pour les méthodes d'API (`composables/api/`), les utilitaires (`utils/`) e
 
 ### Direction artistique (site et back-office de l'ePavillon)
 
-**Ne vaut pas pour Guide Négo**, qui a sa propre identité : vert et jaune foncés de la charte, police Atkinson Hyperlegible Next, cibles de 48 px, jaune réservé à ce qui concerne la personne à l'instant. Référence : [docs/AppNego/05-design.md](docs/AppNego/05-design.md). Son système de design vit dans son dossier, borné à `[data-app="guide-nego"]` : il ne redéfinit aucun jeton du site et n'emprunte aucun de ses composants. Le back-office de Guide Négo s'ajoute à celui de l'ePavillon et en garde l'apparence.
+**Ne vaut pas pour Guide Négo**, qui a sa propre identité : direction « Nuit » ([ADR-023](docs/AppNego/adr/023-direction-nuit.md)) — thème unique sombre, accent vert anis, Sora et Manrope embarquées. Référence, au pixel près : [docs/AppNego/design/nuit/](docs/AppNego/design/nuit/LISEZMOI.md). Son système de design vit dans son dossier, borné à `[data-app="guide-nego"]` : il ne redéfinit aucun jeton du site et n'emprunte aucun de ses composants. Le back-office de Guide Négo s'ajoute à celui de l'ePavillon et en garde l'apparence.
 
 Posture : institutionnel et sérieux, mais vivant ; ni tableau de bord SaaS générique, ni site d'ONG militant. La rigueur du site des Nations unies, la lisibilité d'une revue scientifique en ligne, l'énergie d'une billetterie de festival pour la programmation.
 
