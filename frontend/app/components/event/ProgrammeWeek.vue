@@ -7,7 +7,9 @@ import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
  * La semaine en colonnes : une par journée, les activités retenues par la
  * recherche empilées dans l'ordre. Les en-têtes de jour restent figés sous la
  * barre du site : aucun ancêtre ne doit donc être en `overflow: hidden`. Trop
- * étroit pour toutes les colonnes, le tableau défile à l'horizontale.
+ * étroit pour toutes les colonnes, le tableau défile à l'horizontale ; sous `lg`,
+ * les colonnes ont une largeur relative (44 %, puis 30 %) pour que la suivante
+ * dépasse toujours un peu du bord et invite à faire défiler.
  */
 
 interface Props {
@@ -193,23 +195,23 @@ async function next(): Promise<void> {
     <div ref="sentinel" class="mt-7" aria-hidden="true" />
     <div class="sticky top-(--nav-height) z-20 bg-surface">
       <div ref="head" class="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" @scroll="sync('head')">
-        <div class="grid grid-cols-[repeat(var(--week-columns),minmax(11rem,1fr))]" :style="{ '--week-columns': String(columns.length) }">
+        <div class="grid grid-cols-[repeat(var(--week-columns),minmax(44%,1fr))] md:grid-cols-[repeat(var(--week-columns),minmax(30%,1fr))] lg:grid-cols-[repeat(var(--week-columns),minmax(11rem,1fr))]" :style="{ '--week-columns': String(columns.length) }">
           <button
             v-for="(column, index) in columns"
             :key="column.date"
             type="button"
-            class="group/day block min-w-0 cursor-pointer border-l border-border-subtle px-4 text-left first:border-l-0"
+            class="group/day flex min-w-0 cursor-pointer flex-col border-l border-border-subtle px-4 text-left first:border-l-0"
             :class="tint(column, index)"
             :aria-label="t('programme.week.openDay', { day: column.label })"
             :aria-current="column.isToday ? 'date' : undefined"
             @click="emit('day', column.date)"
           >
             <span
-              class="block border-b-2 transition-[padding] duration-200"
+              class="block flex-1 border-b-2 transition-[padding] duration-200"
               :class="[column.isToday ? 'border-accent' : 'border-text', stuck ? 'pt-2.5 pb-2' : 'py-3']"
             >
               <span class="flex items-end gap-2.5" :class="column.isPast ? 'text-text-subtle' : 'text-text'">
-                <span class="text-[48px] leading-[0.9] tabular-nums" :class="column.isToday ? 'font-bold' : 'font-light'">
+                <span class="text-[40px] leading-[0.9] tabular-nums lg:text-[48px]" :class="column.isToday ? 'font-bold' : 'font-light'">
                   {{ column.number }}
                 </span>
                 <span class="min-w-0 pb-0.5">
@@ -231,7 +233,7 @@ async function next(): Promise<void> {
     </div>
 
     <div ref="body" class="relative overflow-x-auto" @scroll="sync('body')">
-      <div class="grid grid-cols-[repeat(var(--week-columns),minmax(11rem,1fr))]" :style="{ '--week-columns': String(columns.length) }">
+      <div class="grid grid-cols-[repeat(var(--week-columns),minmax(44%,1fr))] md:grid-cols-[repeat(var(--week-columns),minmax(30%,1fr))] lg:grid-cols-[repeat(var(--week-columns),minmax(11rem,1fr))]" :style="{ '--week-columns': String(columns.length) }">
         <section
           v-for="(column, index) in columns"
           :key="column.date"
