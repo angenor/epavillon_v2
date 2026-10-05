@@ -54,8 +54,8 @@ useHead({ title: t('guide-nego.mes-questions.titre') })
     :sous-titre="ouvert && total ? t('guide-nego.mes-questions.compte', { count: total }, total) : undefined"
     retour="/guide-nego/ressources/faq"
   >
-    <template v-if="ouvert" #connexion>
-      <GnLigneConnexion :en-ligne="connexion.etat.value.enLigne" :lu-a="questions.luA.value" />
+    <template v-if="ouvert && !connexion.etat.value.enLigne" #connexion>
+      <GnLigneConnexion :en-ligne="false" :lu-a="questions.luA.value" />
     </template>
 
     <GnChargement v-if="!pret" forme="squelette" :lignes="4" :libelle="t('guide-nego.mes-questions.chargement')" />
@@ -108,7 +108,7 @@ useHead({ title: t('guide-nego.mes-questions.titre') })
               <GnPicto nom="shield-check" :taille="16" />
               <span>
                 {{ q.answered_by_name ? t('guide-nego.mes-questions.signature', { nom: q.answered_by_name }) : t('guide-nego.mes-questions.signature-sans-nom') }}
-                <template v-if="q.answered_at"> — {{ moment(q.answered_at) }}</template>
+                <template v-if="q.answered_at"> · {{ moment(q.answered_at) }}</template>
               </span>
             </p>
           </div>
@@ -128,27 +128,30 @@ useHead({ title: t('guide-nego.mes-questions.titre') })
 [data-app="guide-nego"] .gn-mes-questions {
   display: flex;
   flex-direction: column;
-  gap: var(--gn-espace-16);
-  padding-top: var(--gn-espace-12);
+  gap: var(--gn-espace-20);
 }
 
 [data-app="guide-nego"] .gn-mes-questions__liste {
   display: flex;
   flex-direction: column;
+  gap: 10px;
   list-style: none;
 }
 
+/* Une question est une carte ; la réponse s'y pose sous un filet doux. */
 [data-app="guide-nego"] .gn-mes-questions__carte {
   display: flex;
   flex-direction: column;
   gap: var(--gn-espace-8);
-  padding-block: var(--gn-espace-16);
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  padding: var(--gn-espace-16);
+  border-radius: var(--gn-rayon-20);
+  background: var(--gn-fond-2);
 }
 
 [data-app="guide-nego"] .gn-mes-questions__tete {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
   gap: var(--gn-espace-8);
 }
@@ -156,13 +159,15 @@ useHead({ title: t('guide-nego.mes-questions.titre') })
 [data-app="guide-nego"] .gn-mes-questions__quand,
 [data-app="guide-nego"] .gn-mes-questions__note,
 [data-app="guide-nego"] .gn-mes-questions__signature {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   color: var(--gn-texte-2);
 }
 
 [data-app="guide-nego"] .gn-mes-questions__question {
-  font-weight: var(--gn-graisse-demi-gras);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
+  font-weight: var(--gn-graisse-gras);
   overflow-wrap: anywhere;
 }
 
@@ -170,18 +175,34 @@ useHead({ title: t('guide-nego.mes-questions.titre') })
   display: flex;
   flex-direction: column;
   gap: var(--gn-espace-8);
-  padding-inline-start: var(--gn-espace-12);
-  border-inline-start: var(--gn-filet-3) solid var(--gn-etat-repondue);
+  margin-top: var(--gn-espace-4);
+  padding-top: var(--gn-espace-12);
+  border-top: var(--gn-filet-1) solid var(--gn-filet-doux);
 }
 
 [data-app="guide-nego"] .gn-mes-questions__intitule {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   font-weight: var(--gn-graisse-gras);
-  color: var(--gn-titre);
+  color: var(--gn-texte-2);
+}
+
+[data-app="guide-nego"] .gn-mes-questions__intitule::before {
+  content: '';
+  flex: none;
+  width: var(--gn-point-etat);
+  height: var(--gn-point-etat);
+  border-radius: var(--gn-rayon-pilule);
+  background: var(--gn-etat-repondue);
 }
 
 [data-app="guide-nego"] .gn-mes-questions__texte {
+  color: var(--gn-texte-lecture);
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
@@ -194,7 +215,11 @@ useHead({ title: t('guide-nego.mes-questions.titre') })
 
 [data-app="guide-nego"] .gn-mes-questions__signature .gn-picto {
   flex-shrink: 0;
-  margin-top: 2px;
   color: var(--gn-etat-expert);
+}
+
+[data-app="guide-nego"] .gn-mes-questions__pied {
+  display: flex;
+  flex-direction: column;
 }
 </style>

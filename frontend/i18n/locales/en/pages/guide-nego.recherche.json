@@ -5,7 +5,7 @@
   "invite": "At least two letters: the glossary, the FAQ, documents, negotiation sessions, Francophonie meetings and the Francophonie Pavilion.",
   "chargement": "Searching",
   "total": {
-    "serveur": "No results, across Guide Négo | {count} result, across Guide Négo — on this phone and the server | {count} results, across Guide Négo — on this phone and the server",
+    "serveur": "No results, across Guide Négo | {count} result, across Guide Négo, on this phone and the server | {count} results, across Guide Négo, on this phone and the server",
     "telephone": "No results, on this phone | {count} result, on this phone only | {count} results, on this phone only"
   },
   "non-telecharges": "The text of documents not downloaded was not searched: that needs the network.",
@@ -25,8 +25,8 @@
     "passages": "{count} passage | {count} passage | {count} passages",
     "documents": "{count} document | {count} document | {count} documents",
     "les-deux": "{documents} · {passages}",
-    "page": "p. {page} — “{extrait}”",
-    "reserve": "Found in the text — restricted access",
+    "page": "p. {page}: “{extrait}”",
+    "reserve": "Found in the text, restricted access",
     "suite": "All {count} documents in the library"
   },
   "sessions": {

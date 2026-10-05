@@ -485,7 +485,6 @@ useHead({ title: titre })
       forme="squelette"
       :lignes="8"
       :libelle="t('guide-nego.lecteur.chargement')"
-      class="gn-lecteur__attente"
     />
 
     <div v-else-if="etat.etat === 'absent'" class="gn-lecteur__absent">
@@ -674,7 +673,7 @@ useHead({ title: titre })
 </template>
 
 <style>
-/* Au-dessus de la barre repliée (32 + 6 px), comme la maquette 04 · 03. */
+/* Au-dessus de la barre repliée (32 + 6 px), comme la maquette 04 · 03 : une ligne-carte posée sur le texte. */
 [data-app="guide-nego"] .gn-lecteur__reprise {
   position: fixed;
   bottom: calc(var(--gn-barre-lecture-repliee) + var(--gn-jauge) + var(--gn-espace-12) + env(safe-area-inset-bottom));
@@ -684,14 +683,20 @@ useHead({ title: titre })
   width: calc(min(100%, var(--gn-colonne-largeur)) - 2 * var(--gn-marge-ecran));
   display: flex;
   align-items: center;
-  gap: var(--gn-espace-8);
-  min-height: var(--gn-cible);
+  gap: var(--gn-espace-12);
+  min-height: var(--gn-ligne-reglage);
   padding: 0 var(--gn-espace-8) 0 var(--gn-espace-16);
-  background: var(--gn-titre);
-  color: var(--gn-sur-titre);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  border-radius: var(--gn-rayon-16);
+  background: var(--gn-fond-2);
+  color: var(--gn-texte);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   font-weight: var(--gn-graisse-demi-gras);
+}
+
+[data-app="guide-nego"] .gn-lecteur__reprise > .gn-picto {
+  flex: none;
+  color: var(--gn-accent);
 }
 
 [data-app="guide-nego"] .gn-lecteur__reprise-texte {
@@ -701,27 +706,31 @@ useHead({ title: titre })
 
 [data-app="guide-nego"] .gn-lecteur__debut {
   flex: none;
-  min-height: var(--gn-cible);
+  min-height: var(--gn-bouton-rond);
   padding-inline: var(--gn-espace-8);
   border: none;
+  border-radius: var(--gn-rayon-12);
   background: none;
-  color: var(--gn-action-sur-titre);
+  color: var(--gn-accent);
   font: inherit;
-  font-weight: var(--gn-graisse-gras);
-  text-decoration-line: var(--gn-action-sur-titre-trait);
+  font-weight: var(--gn-graisse-extra-gras);
+  text-decoration: underline;
   text-underline-offset: var(--gn-espace-4);
   cursor: pointer;
+}
+
+[data-app="guide-nego"] .gn-lecteur__debut:active {
+  background: var(--gn-presse);
 }
 
 /* Au-dessus de la barre repliée : en « Pages », le visionneur fixé couvrirait le haut de l'écran. */
 [data-app="guide-nego"] .gn-lecteur__annonce {
   position: fixed;
-  bottom: calc(var(--gn-barre-lecture-repliee) + var(--gn-jauge) + env(safe-area-inset-bottom));
+  bottom: calc(var(--gn-barre-lecture-repliee) + var(--gn-jauge) + var(--gn-espace-12) + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   z-index: 6;
   width: calc(min(100%, var(--gn-colonne-largeur)) - 2 * var(--gn-marge-ecran));
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
 }
 
 /* Au-dessus de la barre repliée, comme la ligne de reprise (04 · 06). */
@@ -734,29 +743,24 @@ useHead({ title: titre })
   width: min(100%, var(--gn-colonne-largeur));
 }
 
-[data-app="guide-nego"] .gn-lecteur__attente {
-  margin-top: var(--gn-espace-16);
-}
-
 [data-app="guide-nego"] .gn-lecteur__absent {
   display: flex;
   flex-direction: column;
-  gap: var(--gn-espace-16);
-  padding-top: var(--gn-espace-16);
+  gap: var(--gn-espace-20);
 }
 
 [data-app="guide-nego"] .gn-lecteur__issue {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
   color: var(--gn-danger);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   text-align: center;
 }
 
 [data-app="guide-nego"] .gn-lecteur__lisible,
 [data-app="guide-nego"] .gn-lecteur__en-attente {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
   color: var(--gn-texte-2);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   text-align: center;
 }
 
@@ -765,14 +769,12 @@ useHead({ title: titre })
   align-items: center;
   justify-content: center;
   gap: var(--gn-espace-8);
-  min-height: var(--gn-cible);
+  min-height: var(--gn-bouton-principal);
 }
 
 [data-app="guide-nego"] .gn-lecteur__actions {
   display: flex;
   flex-direction: column;
   gap: var(--gn-espace-8);
-  padding-top: var(--gn-espace-16);
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
 }
 </style>

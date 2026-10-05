@@ -192,20 +192,17 @@ const trancheeLe = computed(() =>
 </template>
 
 <style>
-[data-app="guide-nego"] .gn-acces__etat {
-  padding-top: var(--gn-espace-16);
-}
-
 [data-app="guide-nego"] .gn-acces__propos {
-  padding-top: var(--gn-espace-8);
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
+  padding-top: var(--gn-espace-12);
+  color: var(--gn-texte-lecture);
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
 }
 
 [data-app="guide-nego"] .gn-acces__aide {
   padding-top: var(--gn-espace-8);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   color: var(--gn-texte-2);
 }
 
@@ -213,6 +210,6 @@ const trancheeLe = computed(() =>
   display: flex;
   flex-direction: column;
   gap: var(--gn-espace-8);
-  padding-top: var(--gn-entre-blocs);
+  padding-top: var(--gn-espace-20);
 }
 </style>

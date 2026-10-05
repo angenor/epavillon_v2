@@ -141,7 +141,7 @@ useHead({ title: t('guide-nego.question.titre') })
           <select
             :id="idSaisie"
             v-model="theme"
-            class="gn-question__liste"
+            class="gn-champ__saisie gn-question__liste"
             :aria-describedby="decritPar"
             :aria-invalid="invalide"
           >
@@ -177,24 +177,27 @@ useHead({ title: t('guide-nego.question.titre') })
 [data-app="guide-nego"] .gn-question {
   display: flex;
   flex-direction: column;
-  gap: var(--gn-espace-16);
-  padding-top: var(--gn-espace-12);
+  gap: var(--gn-espace-20);
 }
 
 [data-app="guide-nego"] .gn-question__badge {
   display: flex;
   align-items: center;
   gap: var(--gn-espace-8);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   font-weight: var(--gn-graisse-gras);
   color: var(--gn-etat-verifie);
 }
 
+[data-app="guide-nego"] .gn-question__badge + .gn-question__aide {
+  margin-top: calc(-1 * var(--gn-espace-12));
+}
+
 [data-app="guide-nego"] .gn-question__aide,
 [data-app="guide-nego"] .gn-question__note {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   color: var(--gn-texte-2);
 }
 
@@ -202,22 +205,9 @@ useHead({ title: t('guide-nego.question.titre') })
   text-align: center;
 }
 
+/* La liste prend le dessin du champ (gn-champ__saisie) ; la flèche reste celle du système. */
 [data-app="guide-nego"] .gn-question__liste {
-  min-height: var(--gn-champ);
-  width: 100%;
-  padding-inline: var(--gn-espace-12);
-  font-family: var(--gn-police);
-  font-size: var(--gn-taille-17);
-  color: var(--gn-texte);
-  background: var(--gn-fond);
-  border: var(--gn-filet-2) solid var(--gn-filet);
-  border-radius: var(--gn-rayon-4);
-}
-
-[data-app="guide-nego"] .gn-question__liste:focus-visible {
-  outline: var(--gn-focus-anneau) solid var(--gn-focus);
-  outline-offset: var(--gn-focus-decalage);
-  border-color: var(--gn-filet-fort);
+  cursor: pointer;
 }
 
 [data-app="guide-nego"] .gn-question__pied,
@@ -225,13 +215,11 @@ useHead({ title: t('guide-nego.question.titre') })
   display: flex;
   flex-direction: column;
   gap: var(--gn-espace-8);
-  padding-top: var(--gn-espace-16);
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
 }
 
 [data-app="guide-nego"] .gn-question--envoyee {
   align-items: center;
-  padding-top: var(--gn-espace-32);
+  padding-top: var(--gn-espace-12);
   text-align: center;
 }
 
@@ -240,15 +228,20 @@ useHead({ title: t('guide-nego.question.titre') })
 }
 
 [data-app="guide-nego"] .gn-question__annonce {
+  margin-top: calc(-1 * var(--gn-espace-8));
+  font-family: var(--gn-police-titre);
   font-size: var(--gn-taille-20);
   line-height: var(--gn-interligne-20);
   font-weight: var(--gn-graisse-gras);
   color: var(--gn-titre);
 }
 
+/* Le récapitulatif : une carte, ses lignes séparées d'un filet doux. */
 [data-app="guide-nego"] .gn-question__recap {
   align-self: stretch;
-  border: var(--gn-filet-1) solid var(--gn-filet);
+  padding-inline: var(--gn-espace-16);
+  border-radius: var(--gn-rayon-20);
+  background: var(--gn-fond-2);
   text-align: start;
 }
 
@@ -256,11 +249,11 @@ useHead({ title: t('guide-nego.question.titre') })
   display: flex;
   justify-content: space-between;
   gap: var(--gn-espace-12);
-  padding: 10px 14px;
+  padding-block: 14px;
 }
 
 [data-app="guide-nego"] .gn-question__ligne + .gn-question__ligne {
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
+  border-top: var(--gn-filet-1) solid var(--gn-filet-doux);
 }
 
 [data-app="guide-nego"] .gn-question__ligne--pile {
@@ -270,13 +263,16 @@ useHead({ title: t('guide-nego.question.titre') })
 
 [data-app="guide-nego"] .gn-question__ligne dt,
 [data-app="guide-nego"] .gn-question__zone {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   font-weight: var(--gn-graisse-regulier);
   color: var(--gn-texte-2);
 }
 
 [data-app="guide-nego"] .gn-question__ligne dd {
+  margin: 0;
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
   font-weight: var(--gn-graisse-demi-gras);
   overflow-wrap: anywhere;
   text-align: end;

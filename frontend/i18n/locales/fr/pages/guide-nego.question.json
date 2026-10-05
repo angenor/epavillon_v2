@@ -3,7 +3,7 @@
   "sous-titre": "Réservé au réseau des négociatrices et négociateurs",
   "chargement": "Lecture de votre accès",
   "badge": "Accès négociateur ouvert",
-  "badge-reseau": "Accès négociateur — {reseau}",
+  "badge-reseau": "Accès négociateur · {reseau}",
   "propos": "Les experts de l'IFDD lisent votre question. Si la réponse peut servir à d'autres, elle rejoint la FAQ, sans votre nom.",
   "thematique": "Thématique",
   "thematique-vide": "Choisir une thématique",

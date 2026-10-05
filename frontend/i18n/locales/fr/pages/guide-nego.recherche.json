@@ -5,7 +5,7 @@
   "invite": "Au moins deux lettres : le lexique, la FAQ, les documents, les sessions de négociation, les réunions et le Pavillon de la Francophonie.",
   "chargement": "Recherche en cours",
   "total": {
-    "serveur": "Aucun résultat, dans tout Guide Négo | {count} résultat, dans tout Guide Négo — sur le téléphone et le serveur | {count} résultats, dans tout Guide Négo — sur le téléphone et le serveur",
+    "serveur": "Aucun résultat, dans tout Guide Négo | {count} résultat, dans tout Guide Négo, sur le téléphone et le serveur | {count} résultats, dans tout Guide Négo, sur le téléphone et le serveur",
     "telephone": "Aucun résultat, sur ce téléphone | {count} résultat, sur ce téléphone seulement | {count} résultats, sur ce téléphone seulement"
   },
   "non-telecharges": "Le texte des documents non téléchargés n'a pas été cherché : il faut le réseau.",
@@ -25,8 +25,8 @@
     "passages": "{count} passage | {count} passage | {count} passages",
     "documents": "{count} document | {count} document | {count} documents",
     "les-deux": "{documents} · {passages}",
-    "page": "p. {page} — « {extrait} »",
-    "reserve": "Trouvé dans le texte — accès réservé",
+    "page": "p. {page} : « {extrait} »",
+    "reserve": "Trouvé dans le texte, accès réservé",
     "suite": "Les {count} documents dans la bibliothèque"
   },
   "sessions": {

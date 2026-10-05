@@ -15,7 +15,7 @@
     "rejected": "Your request was not granted. If you belong to a francophone network, ask it for the current code: it opens the modules right away.",
     "revoked": "IFDD has revoked your access to the reserved modules. The rest of Guide Négo stays open."
   },
-  "hors-connexion": "Offline — state read {moment}.",
+  "hors-connexion": "Offline: state read {moment}.",
   "ouvre": {
     "titre": "What your access opens",
     "tout": "All of Guide Négo"

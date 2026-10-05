@@ -32,8 +32,7 @@ const { t } = useI18n()
 [data-app="guide-nego"] .gn-reglages-lecture {
   display: flex;
   flex-direction: column;
-  gap: var(--gn-espace-16);
-  padding-bottom: var(--gn-espace-16);
+  gap: var(--gn-espace-20);
 }
 
 [data-app="guide-nego"] .gn-reglages-lecture__reglage {
@@ -43,15 +42,15 @@ const { t } = useI18n()
 }
 
 [data-app="guide-nego"] .gn-reglages-lecture__libelle {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  font-weight: var(--gn-graisse-gras);
   color: var(--gn-titre);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-reglages-lecture__aide {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
   color: var(--gn-texte-2);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 </style>

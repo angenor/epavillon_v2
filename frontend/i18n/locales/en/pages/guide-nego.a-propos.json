@@ -1,13 +1,13 @@
 {
   "titre": "About",
-  "sous-titre": "Guide Négo — {edition}",
+  "sous-titre": "Guide Négo · {edition}",
   "sous-titre-sans-edition": "Guide Négo",
   "version": "Version {version}",
   "editeur": "Guide Négo is published by the Institut de la Francophonie pour le développement durable (IFDD), a subsidiary body of the Organisation internationale de la Francophonie. It supports French-speaking negotiators at climate conferences.",
   "source": "Negotiation sessions: they will be taken from the official UNFCCC calendar.",
   "confidentialite": {
     "titre": "Privacy",
-    "texte": "Downloaded documents stay on this phone, and restricted documents are erased from it when you sign out. Your themes, your favourites and the consents you give are tied to your account — your ePavillon de la Francophonie account."
+    "texte": "Downloaded documents stay on this phone, and restricted documents are erased from it when you sign out. Your themes, your favourites and the consents you give are tied to your account: your ePavillon de la Francophonie account."
   },
   "textes": {
     "titre": "Texts",

@@ -28,8 +28,8 @@ useHead({ title: computed(() => rubrique.value?.label ?? t('guide-nego.faq-rubri
 
 <template>
   <GnEcran :titre="rubrique?.label ?? t('guide-nego.faq-rubrique.titre')" :sous-titre="sousTitre" :retour="FAQ">
-    <template #connexion>
-      <GnLigneConnexion :en-ligne="connexion.etat.value.enLigne" :lu-a="etat.luA" />
+    <template v-if="!connexion.etat.value.enLigne" #connexion>
+      <GnLigneConnexion :en-ligne="false" :lu-a="etat.luA" />
     </template>
 
     <GnChargement v-if="chargement" forme="squelette" :lignes="4" :libelle="t('guide-nego.faq-rubrique.chargement')" />
@@ -58,7 +58,7 @@ useHead({ title: computed(() => rubrique.value?.label ?? t('guide-nego.faq-rubri
 </template>
 
 <style>
-[data-app="guide-nego"] .gn-faq-rubrique {
-  padding-top: var(--gn-espace-8);
+[data-app="guide-nego"] .gn-faq-rubrique > li:last-child > .gn-ligne-question {
+  border-bottom: none;
 }
 </style>

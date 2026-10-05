@@ -68,7 +68,7 @@ async function partager(): Promise<void> {
   const adresse = `${window.location.origin}${window.location.pathname}`
   if (typeof navigator.share === 'function') {
     try {
-      await navigator.share({ title: `${intituleDe(e)} — ${e.translation}`, url: adresse })
+      await navigator.share({ title: `${intituleDe(e)} : ${e.translation}`, url: adresse })
       return
     } catch (erreur) {
       if (erreur instanceof DOMException && erreur.name === 'AbortError') return
@@ -131,7 +131,7 @@ useHead({ title: computed(() => entree.value?.term ?? t('guide-nego.lexique-entr
           </div>
           <div v-if="entree.acronym" class="gn-terme__cle">
             <dt>{{ t('guide-nego.lexique-entree.sigle') }}</dt>
-            <dd lang="en"><strong>{{ entree.acronym }}</strong> — <i>{{ entree.term }}</i></dd>
+            <dd lang="en"><strong>{{ entree.acronym }}</strong> : {{ entree.term }}</dd>
           </div>
           <div v-if="entree.sources.length" class="gn-terme__cle">
             <dt>{{ t('guide-nego.lexique-entree.sources') }}</dt>

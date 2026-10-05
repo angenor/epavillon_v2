@@ -116,23 +116,29 @@ useHead({ title: t('guide-nego.a-propos.titre') })
 [data-app="guide-nego"] .gn-a-propos__presentation {
   display: flex;
   flex-direction: column;
-  gap: var(--gn-espace-12);
-  padding-top: var(--gn-espace-16);
+  gap: var(--gn-entre-paragraphes);
   max-width: var(--gn-mesure-lecture);
+  color: var(--gn-texte-lecture);
   font-size: var(--gn-taille-17);
   line-height: var(--gn-interligne-17);
 }
 
 [data-app="guide-nego"] .gn-a-propos__version,
 [data-app="guide-nego"] .gn-a-propos__source {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   color: var(--gn-texte-2);
 }
 
+[data-app="guide-nego"] .gn-a-propos__version {
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
+}
+
 [data-app="guide-nego"] .gn-a-propos__paragraphe {
-  padding-top: var(--gn-espace-12);
+  padding-top: var(--gn-espace-4);
   max-width: var(--gn-mesure-lecture);
+  color: var(--gn-texte-lecture);
   font-size: var(--gn-taille-17);
   line-height: var(--gn-interligne-17);
 }

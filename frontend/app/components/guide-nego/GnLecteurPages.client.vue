@@ -479,7 +479,7 @@ defineExpose({
   inset-block: var(--gn-lecteur-haut, 0) calc(var(--gn-barre-lecture-repliee) + var(--gn-jauge) + env(safe-area-inset-bottom));
   /* Sur un grand écran, la page tient la colonne de lecture (R6). */
   inset-inline: max(0px, calc((100% - var(--gn-colonne-largeur)) / 2));
-  background: var(--gn-fond-2);
+  background: var(--gn-fond);
 }
 
 [data-app="guide-nego"] .gn-lecteur-pages--cachee {
@@ -538,12 +538,13 @@ defineExpose({
   content: var(--gn-page-sans-reseau);
   max-inline-size: 80%;
   padding: var(--gn-espace-16);
-  /* Sur la page blanche du document, dans les deux thèmes : le message porte son fond. */
-  background: var(--gn-fond);
-  border: var(--gn-filet-1) solid var(--gn-filet);
+  /* Sur la page blanche du document : le message porte son fond, un bloc de l'application. */
+  border-radius: var(--gn-rayon-16);
+  background: var(--gn-fond-2);
   color: var(--gn-texte);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
+  font-weight: var(--gn-graisse-demi-gras);
   text-align: center;
 }
 </style>

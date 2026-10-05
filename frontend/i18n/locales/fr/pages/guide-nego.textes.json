@@ -2,7 +2,7 @@
   "privacy": "Politique de confidentialité",
   "terms": "Conditions d'utilisation",
   "version": "Version {version}",
-  "en-vigueur": "En vigueur depuis le {date} — version {version}",
+  "en-vigueur": "En vigueur depuis le {date}, version {version}",
   "lu": "Lu {moment}",
   "chargement": "Lecture du texte",
   "en-preparation": {

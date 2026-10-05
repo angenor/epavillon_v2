@@ -56,8 +56,8 @@ useHead({ title: t('guide-nego.parcours.titre') })
     retour="/guide-nego/ressources/faq"
     :ce-qui-se-lit="t('guide-nego.parcours.sur-le-telephone')"
   >
-    <template #connexion>
-      <GnLigneConnexion :en-ligne="connexion.etat.value.enLigne" :lu-a="etat.luA" />
+    <template v-if="!connexion.etat.value.enLigne" #connexion>
+      <GnLigneConnexion :en-ligne="false" :lu-a="etat.luA" />
     </template>
 
     <div class="gn-parcours">
@@ -118,36 +118,50 @@ useHead({ title: t('guide-nego.parcours.titre') })
 [data-app="guide-nego"] .gn-parcours {
   display: flex;
   flex-direction: column;
-  padding-top: var(--gn-espace-12);
 }
 
+/* L'avancée prend le bloc « Jusqu'à la COP » de la maquette 05 : piste de 12 à l'accent. */
 [data-app="guide-nego"] .gn-parcours__avance {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding-block: var(--gn-espace-12);
+  gap: var(--gn-espace-16);
+  padding: 18px var(--gn-espace-16);
+  border-radius: var(--gn-rayon-24);
+  background: var(--gn-fond-2);
+}
+
+[data-app="guide-nego"] .gn-parcours__avance .gn-progression {
+  block-size: var(--gn-espace-12);
+  border-radius: var(--gn-rayon-6);
+}
+
+[data-app="guide-nego"] .gn-parcours__avance .gn-progression__part {
+  border-radius: var(--gn-rayon-6);
 }
 
 [data-app="guide-nego"] .gn-parcours__compte {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: var(--gn-espace-4) var(--gn-espace-8);
+  flex-direction: column;
+  gap: 2px;
   color: var(--gn-titre);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
   font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-parcours__prochaine {
   color: var(--gn-texte-2);
+  font-family: var(--gn-police);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   font-weight: var(--gn-graisse-regulier);
 }
 
 [data-app="guide-nego"] .gn-parcours__pied {
-  padding-block: var(--gn-espace-16);
+  padding-top: var(--gn-espace-20);
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 </style>

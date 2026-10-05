@@ -186,7 +186,7 @@ const lignesDeDocuments = computed(() =>
 
 function texteDeFiche(document: LibraryDocument): string {
   if (document.restricted && !document.accessible && !(document.summary ?? '').trim()) return t('guide-nego.recherche.documents.reserve')
-  return [document.publisher, document.summary].filter(Boolean).join(' — ')
+  return [document.publisher, document.summary].filter(Boolean).join(' · ')
 }
 
 const documentsMontres = computed(() => {
@@ -286,14 +286,14 @@ useHead({ title: t('guide-nego.recherche.titre') })
         >
           <li v-for="l in documentsMontres" :key="l.cle">
             <NuxtLink :to="l.vers" class="gn-recherche__document">
-              <GnPicto :nom="l.document.source === 'link' ? 'external' : 'doc'" :taille="24" class="gn-recherche__picto" />
+              <GnPicto :nom="l.document.source === 'link' ? 'external' : 'doc'" :taille="20" class="gn-recherche__picto" />
               <span class="gn-recherche__corps">
                 <span class="gn-recherche__titre">{{ l.document.title }}</span>
                 <span v-if="l.texte.length" class="gn-recherche__extrait">
                   <template v-for="(m, i) in l.texte" :key="i"><mark v-if="m.marque">{{ m.texte }}</mark><template v-else>{{ m.texte }}</template></template>
                 </span>
               </span>
-              <GnPicto nom="chevron" :taille="24" class="gn-recherche__chevron" />
+              <GnPicto nom="chevron" :taille="20" class="gn-recherche__chevron" />
             </NuxtLink>
           </li>
         </GnGroupeResultats>
@@ -357,7 +357,7 @@ useHead({ title: t('guide-nego.recherche.titre') })
         </div>
 
         <p v-if="telephoneSeul" class="gn-recherche__ligne">
-          <GnPicto nom="wifi-off" :taille="18" />
+          <GnPicto nom="wifi-off" :taille="16" />
           {{ t('guide-nego.recherche.non-telecharges') }}
         </p>
       </template>
@@ -368,53 +368,96 @@ useHead({ title: t('guide-nego.recherche.titre') })
 </template>
 
 <style>
+/* 20 entre les blocs, comme au lexique ; le compte se colle au champ. */
 [data-app="guide-nego"] .gn-recherche {
   display: flex;
   flex-direction: column;
-  padding-top: var(--gn-espace-16);
-}
-
-[data-app="guide-nego"] .gn-recherche > .gn-champ-recherche:has(input:focus) {
-  border-color: var(--gn-filet-fort);
-  outline: var(--gn-focus-anneau) solid var(--gn-focus);
-  outline-offset: var(--gn-focus-decalage);
+  gap: var(--gn-espace-20);
 }
 
 [data-app="guide-nego"] .gn-recherche__ligne {
   display: flex;
   align-items: flex-start;
   gap: var(--gn-espace-8);
-  padding-block: var(--gn-espace-12);
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 
 [data-app="guide-nego"] .gn-recherche__ligne .gn-picto {
   flex: none;
-  margin-top: 1px;
 }
 
 [data-app="guide-nego"] .gn-recherche__ligne--filet {
-  padding-top: var(--gn-espace-8);
-  border-bottom: var(--gn-filet-3) solid var(--gn-filet-fort);
+  margin-top: calc(-1 * var(--gn-espace-8));
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
+}
+
+[data-app="guide-nego"] .gn-recherche .gn-groupe-resultats {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Un groupe de résultats est un bloc de la page, pas une section : titre Sora 16 en retrait. */
+[data-app="guide-nego"] .gn-recherche .gn-groupe {
+  margin-bottom: var(--gn-espace-4);
+  padding: 0 0 var(--gn-espace-4);
+  color: var(--gn-texte-2);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
+}
+
+[data-app="guide-nego"] .gn-recherche .gn-groupe-resultats__liste {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Chaque résultat devient une ligne-carte : la ligne d'agenda garde son dessin, sans filet ni débord au toucher. */
+[data-app="guide-nego"] .gn-recherche .gn-groupe-resultats__liste > li {
+  padding-inline: var(--gn-espace-16);
+  border-radius: var(--gn-rayon-16);
+  background: var(--gn-fond-2);
+}
+
+[data-app="guide-nego"] .gn-recherche .gn-groupe-resultats__liste > li:has(> .gn-ligne-terme) {
+  padding-inline: 0;
+  background: none;
+}
+
+[data-app="guide-nego"] .gn-recherche .gn-groupe-resultats__liste > li + li > .gn-ligne-terme {
+  margin-top: 0;
+}
+
+[data-app="guide-nego"] .gn-recherche .gn-groupe-resultats__liste > li > * {
+  border-bottom: none;
+}
+
+[data-app="guide-nego"] .gn-recherche .gn-groupe-resultats__liste > li:not(:has(> .gn-ligne-terme)) > *:is(:active, :has(:active)) {
+  width: auto;
+  margin-inline: 0;
+  padding-inline: 0;
+  background: none;
+}
+
+[data-app="guide-nego"] .gn-recherche .gn-groupe-resultats__liste > li:not(:has(> .gn-ligne-terme)):has(:active) {
+  background: var(--gn-presse);
+}
+
+[data-app="guide-nego"] .gn-recherche .gn-groupe-resultats__suite {
+  margin-top: 6px;
+  border-top: none;
 }
 
 [data-app="guide-nego"] .gn-recherche__document {
-  min-height: var(--gn-cible);
-  padding-block: var(--gn-ligne-air);
+  min-height: var(--gn-ligne-reglage);
+  padding-block: var(--gn-espace-12);
   display: flex;
   align-items: flex-start;
-  gap: var(--gn-espace-12);
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  gap: 14px;
   color: var(--gn-texte);
   text-decoration: none;
-}
-
-[data-app="guide-nego"] .gn-recherche__document:active {
-  background: var(--gn-presse);
-  margin-inline: calc(-1 * var(--gn-marge-ecran));
-  padding-inline: var(--gn-marge-ecran);
 }
 
 [data-app="guide-nego"] .gn-recherche__picto {
@@ -431,15 +474,15 @@ useHead({ title: t('guide-nego.recherche.titre') })
 }
 
 [data-app="guide-nego"] .gn-recherche__titre {
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
-  font-weight: var(--gn-graisse-demi-gras);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
+  font-weight: var(--gn-graisse-gras);
   overflow-wrap: anywhere;
 }
 
 [data-app="guide-nego"] .gn-recherche__extrait {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   color: var(--gn-texte-2);
   overflow-wrap: anywhere;
 }
@@ -453,21 +496,30 @@ useHead({ title: t('guide-nego.recherche.titre') })
 [data-app="guide-nego"] .gn-recherche__aucun {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--gn-espace-12);
-  padding-top: var(--gn-espace-16);
+  padding: 18px var(--gn-espace-16);
+  border-radius: var(--gn-rayon-24);
+  background: var(--gn-fond-2);
+  text-align: center;
 }
 
 [data-app="guide-nego"] .gn-recherche__aucun-titre {
-  font-size: var(--gn-taille-20);
-  line-height: var(--gn-interligne-20);
-  font-weight: var(--gn-graisse-gras);
   color: var(--gn-titre);
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-18);
+  line-height: var(--gn-interligne-18);
+  font-weight: var(--gn-graisse-gras);
   overflow-wrap: anywhere;
 }
 
 [data-app="guide-nego"] .gn-recherche__aucun-texte {
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
-  max-width: var(--gn-mesure-lecture);
+  color: var(--gn-texte-2);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
+}
+
+[data-app="guide-nego"] .gn-recherche__aucun .gn-bouton {
+  align-self: stretch;
 }
 </style>
