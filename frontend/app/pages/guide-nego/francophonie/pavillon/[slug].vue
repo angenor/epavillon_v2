@@ -525,7 +525,7 @@ useHead({ title: titre })
   column-gap: var(--gn-espace-16);
   row-gap: var(--gn-espace-4);
   padding: var(--gn-espace-12) 0 10px;
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
 }
 
 [data-app="guide-nego"] .gn-activite__marques .gn-marque-etat {
@@ -618,7 +618,7 @@ useHead({ title: titre })
   align-items: flex-start;
   gap: var(--gn-espace-12);
   padding-block: var(--gn-ligne-air);
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
 }
 
 [data-app="guide-nego"] .gn-activite__personne {

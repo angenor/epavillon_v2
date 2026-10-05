@@ -377,7 +377,7 @@ useHead({ title: titre })
   flex-direction: column;
   gap: var(--gn-espace-4);
   padding: var(--gn-espace-12) 0 10px;
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
 }
 
 [data-app="guide-nego"] .gn-reunion__etat .gn-marque-etat {

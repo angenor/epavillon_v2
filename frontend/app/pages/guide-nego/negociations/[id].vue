@@ -671,7 +671,7 @@ useHead({ title: titre })
 
 [data-app="guide-nego"] .gn-session__signalement {
   min-height: var(--gn-cible);
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
   color: var(--gn-etat-envoye);
 }
 

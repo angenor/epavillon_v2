@@ -203,7 +203,7 @@ const terminee = computed(() => !!props.session && props.etat === 'terminee')
   display: flex;
   align-items: flex-start;
   gap: var(--gn-espace-12);
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
   color: var(--gn-texte);
   text-decoration: none;
 }
