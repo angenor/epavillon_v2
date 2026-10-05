@@ -15,7 +15,11 @@
     "live": "Live"
   },
   "countdown": {
-    "spoken": "Starts in {days} days, {hours} hours and {minutes} minutes"
+    "spoken": "Starts in {days} days, {hours} hours and {minutes} minutes",
+    "d": "day | days",
+    "h": "hour | hours",
+    "m": "min",
+    "s": "sec"
   },
   "hero": {
     "ledBy": "Led by",
@@ -52,8 +56,7 @@
       "co_organizer": "Co-organiser",
       "partner": "Partner",
       "sponsor": "Supporter"
-    },
-    "organizedBy": "Organised by"
+    }
   },
   "sameDay": {
     "title": "Same day",

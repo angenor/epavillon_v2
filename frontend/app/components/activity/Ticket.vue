@@ -198,7 +198,7 @@ async function share(): Promise<void> {
 
       <div
         v-if="props.state === 'upcoming'"
-        class="mt-5 flex flex-col gap-3.5 border-t border-border-subtle pt-4.5"
+        class="mt-5 flex flex-col gap-5 border-t border-border-subtle pt-5"
       >
         <ActivityCountdown :starts-at="props.session.starts_at" @elapsed="emit('started')" />
         <div v-if="capacity !== null">

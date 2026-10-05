@@ -171,13 +171,7 @@ useHead(() => ({
               <UiRichContent class="mt-4 max-w-none! text-[17px] leading-relaxed" :html="description" />
             </section>
 
-            <div class="order-5 flex flex-col gap-14 empty:hidden">
-              <ActivityPeople
-                :speakers="detail.speakers"
-                :organizations="detail.organizations"
-                :lead-logo="session.organization_logo ?? null"
-              />
-            </div>
+            <ActivityPeople class="order-5" :speakers="detail.speakers" />
           </div>
 
           <div class="contents lg:flex lg:flex-col lg:gap-10">

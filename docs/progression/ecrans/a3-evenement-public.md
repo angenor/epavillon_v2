@@ -232,3 +232,4 @@ Maquette : [page d'une activité](https://claude.ai/artifact/MTjhU6YwDmahNgDDTRY
 - **Contenu** : présentation pleine colonne ; `ActivityPeople` (intervenants en lignes, « Organisé par » avec logo 200×96) ; `ActivityQuestions` en carte ; `ActivitySameDay` (lignes à vignettes, « Vous êtes ici », lien « Toute la journée »).
 - **Retiré** : pastilles thématiques du bandeau ; lieu et format quittent le billet pour le bandeau.
 - **Vérifié** : typecheck et tests du site verts ; vu à 1440 px avant et pendant le direct (simulé), à 390 px sans débordement. Non vu : replay réel, logo réel (aucun dans les données d'exemple), connecté.
+- **Retouche du 05/10** : « Organisé par » retiré ; intervenants en cartes centrées (photo, nom, fonction en italique, organisation) ; compte à rebours `ActivityCountdown` en quatre cases à la seconde, animé hors « moins d'animations ».
