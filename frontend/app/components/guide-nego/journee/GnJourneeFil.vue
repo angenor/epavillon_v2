@@ -7,6 +7,7 @@ import type { FilDuJour } from '~/utils/guide-nego/journee'
  * vertical dit maintenant.
  */
 const props = defineProps<{
+  titre: string
   fil: FilDuJour
   heure: string
   pistes: { libelle: string; resume: string }[]
@@ -22,7 +23,7 @@ const rangees = computed(() => props.pistes.map((p, i) => ({ ...p, creneaux: pro
 <template>
   <section class="gn-fil" :aria-label="t('gn-journee-fil.libelle')">
     <div class="gn-fil__tete">
-      <h2 class="gn-fil__titre">{{ t('gn-journee-fil.titre') }}</h2>
+      <h2 class="gn-fil__titre">{{ titre }}</h2>
       <span class="gn-fil__heure">{{ heure }}</span>
     </div>
     <div class="gn-fil__pistes">

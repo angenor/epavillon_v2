@@ -66,6 +66,19 @@ export interface ProchaineSession {
   source: 'agenda' | 'thematiques'
 }
 
+/** La première ni terminée ni annulée ; une en cours compte. */
+export function premiereVivante(
+  sessions: readonly OfficialSession[],
+  maintenant: Date,
+  fuseau: string,
+): OfficialSession | null {
+  const vivante = (s: OfficialSession) => {
+    const etat = etatAffiche(s, maintenant, fuseau)
+    return etat !== 'terminee' && etat !== 'annulee'
+  }
+  return [...sessions].filter(vivante).sort((a, b) => instant(a.start_at) - instant(b.start_at))[0] ?? null
+}
+
 /**
  * FR-036 : la prochaine de l'agenda qui n'est ni terminée ni annulée — une en
  * cours compte ; à défaut, la prochaine des thématiques suivies ; sinon rien.
@@ -77,12 +90,7 @@ export function prochaineSession(
   maintenant: Date,
   fuseau: string,
 ): ProchaineSession | null {
-  const vivante = (s: OfficialSession) => {
-    const etat = etatAffiche(s, maintenant, fuseau)
-    return etat !== 'terminee' && etat !== 'annulee'
-  }
-  const premiere = (liste: readonly OfficialSession[]) =>
-    [...liste].filter(vivante).sort((a, b) => instant(a.start_at) - instant(b.start_at))[0] ?? null
+  const premiere = (liste: readonly OfficialSession[]) => premiereVivante(liste, maintenant, fuseau)
 
   const dansLAgenda = premiere(agenda)
   if (dansLAgenda) return { session: dansLAgenda, source: 'agenda' }

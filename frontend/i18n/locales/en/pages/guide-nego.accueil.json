@@ -1,25 +1,64 @@
 {
   "titre": "My day",
-  "sans-compte": {
-    "texte": "Create your account or sign in: your themes and your documents will follow you from one device to another.",
-    "creer-mon-compte": "Create my account",
-    "me-connecter": "I already have an account — Sign in"
+  "contexte": {
+    "pendant": "{edition} · day {jour} of {total}",
+    "pendant-court": "{edition}, day {jour}",
+    "avant": "Before {edition}"
+  },
+  "compte": {
+    "minutes": "{n} min",
+    "heures": "{h} h {m}",
+    "heures-pile": "{h} h",
+    "demain": "Tomorrow",
+    "jours": "{n} day | {n} days",
+    "plage-et-salle": "{plage} · {salle}",
+    "libelle": {
+      "mienne": "Your next session starts in",
+      "mienne-finit": "Your current session ends in",
+      "mienne-depuis": "Your session has been running since",
+      "cop": "The next negotiation session starts in",
+      "cop-finit": "The current negotiation session ends in",
+      "cop-depuis": "The negotiation session has been running since"
+    }
+  },
+  "ouverture": {
+    "libelle": "{edition} opens in",
+    "dates": "from {du} to {au}",
+    "lieu-et-dates": "{ville}, {dates}"
+  },
+  "fil": {
+    "negociation": "Negotiation",
+    "francophonie": "Francophonie",
+    "pavillon": "Pavilion",
+    "resume": {
+      "negociation": "Negotiation: no slot today | Negotiation: one slot today | Negotiation: {count} slots today",
+      "francophonie": "Francophonie: no slot today | Francophonie: one slot today | Francophonie: {count} slots today",
+      "pavillon": "Pavilion: no slot today | Pavilion: one slot today | Pavilion: {count} slots today"
+    }
+  },
+  "changements": {
+    "genre": {
+      "salle": "{titre} moves to {salle}",
+      "heure": "{titre} moves to {heure}",
+      "deplacee": "{titre}: new time and room",
+      "annulee": "{titre} will not take place"
+    },
+    "origine": {
+      "source": "{heure} · official source",
+      "reseau": "{heure} · reported by the network, validated"
+    }
   },
   "blocs": {
     "prochaine-session": {
-      "titre": "Your next negotiation session",
-      "vide": "Nothing yet. Add a session to your agenda, or choose your themes.",
-      "quand": "{jour} — {zone}",
-      "mon-agenda": "My agenda"
+      "titre": "Your next session",
+      "vide": "Nothing yet. Add a session to your agenda, or choose your themes."
     },
     "changements": {
       "titre": "Today's changes",
-      "mis-a-jour": "updated {moment}",
-      "connus": "known {moment}",
       "vide": "No change reported. Moved rooms and cancelled sessions will appear here with the network's reports."
     },
     "trois-agendas": {
-      "titre": "Today, your three agendas"
+      "titre": "Today at a glance"
     },
     "documents": {
       "titre": "Recent documents",
@@ -28,7 +67,9 @@
       "lu-page": "read {moment}, p. {page}"
     },
     "lexique": {
-      "ouvrir": "Open the English-French glossary"
+      "ouvrir": "Open the English-French glossary",
+      "titre": "English-French glossary",
+      "precision": "A term heard in the room, translated and explained"
     }
   }
 }

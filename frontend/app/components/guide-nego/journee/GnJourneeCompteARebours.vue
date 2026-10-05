@@ -49,7 +49,6 @@ withDefaults(
   line-height: var(--gn-interligne-76);
   font-weight: var(--gn-graisse-extra-gras);
   letter-spacing: var(--gn-approche-76);
-  font-variant-numeric: tabular-nums;
 }
 
 [data-app="guide-nego"] .gn-compte-a-rebours__cible {

@@ -43,6 +43,10 @@ export function etatAffiche(session: OfficialSession, maintenant: Date, fuseau: 
   return session.previous ? 'deplacee' : 'prevue'
 }
 
+/** En anglais, la traduction française n'a rien à faire à l'écran. */
+export const titreDeSession = (s: Pick<OfficialSession, 'title_fr' | 'title_en'>, locale: string) =>
+  (locale === 'fr' ? s.title_fr : null) ?? s.title_en
+
 export const jourDe = (session: Pick<OfficialSession, 'start_at'>, fuseau: string) =>
   dayKeyInZone(session.start_at, fuseau)
 

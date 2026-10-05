@@ -15,8 +15,8 @@ import { etatAffiche, sessionsDuJour } from './sessions.ts'
 
 export const BLOCS_DE_MA_JOURNEE = [
   'prochaine-session',
-  'changements',
   'trois-agendas',
+  'changements',
   'documents',
   'lexique',
 ] as const
@@ -31,8 +31,8 @@ export type BlocDeMaJournee = (typeof BLOCS_DE_MA_JOURNEE)[number]
  * du moteur dit « heure moyenne de Greenwich » à Dakar. 0c n'affiche aucune heure
  * d'événement ; le fuseau nommé viendra en 3a, du lieu de l'édition.
  */
-export function jourLisible(date: Date, locale: string): string {
-  const texte = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long' }).format(date)
+export function jourLisible(date: Date, locale: string, fuseau?: string): string {
+  const texte = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', timeZone: fuseau }).format(date)
   return texte.charAt(0).toLocaleUpperCase(locale) + texte.slice(1)
 }
 

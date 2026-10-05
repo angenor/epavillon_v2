@@ -13,8 +13,8 @@ const composant = (locale: string, nom: string) =>
 test('les cinq blocs paraissent dans l’ordre fixe (FR-013)', () => {
   assert.deepEqual(BLOCS_DE_MA_JOURNEE, [
     'prochaine-session',
-    'changements',
     'trois-agendas',
+    'changements',
     'documents',
     'lexique',
   ])
