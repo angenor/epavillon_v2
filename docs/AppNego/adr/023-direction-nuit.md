@@ -1,6 +1,6 @@
-# ADR-023 — Direction « Nuit » : sombre, le temps au centre
+# ADR-023 : Direction « Nuit » : sombre, le temps au centre
 
-**Statut** : accepté — 05/10/2026. Remplace [ADR-018](018-direction-typographique-quatre-onglets.md) pour l'apparence ; garde ses quatre onglets.
+**Statut** : accepté le 05/10/2026. Remplace [ADR-018](018-direction-typographique-quatre-onglets.md) pour l'apparence ; garde ses quatre onglets.
 
 ## Contexte
 
