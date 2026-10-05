@@ -120,10 +120,10 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
 [data-app="guide-nego"] .gn-page-lue {
   display: flex;
   flex-direction: column;
-  gap: var(--gn-espace-12);
+  gap: var(--gn-entre-paragraphes);
   font-size: var(--gn-taille-lecture, var(--gn-taille-17));
-  line-height: 1.5;
-  color: var(--gn-texte);
+  line-height: var(--gn-interligne-17);
+  color: var(--gn-texte-lecture);
 }
 
 [data-app="guide-nego"] .gn-page-lue__bloc {
@@ -134,24 +134,25 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
 [data-app="guide-nego"] .gn-page-lue__titre-1,
 [data-app="guide-nego"] .gn-page-lue__titre-2,
 [data-app="guide-nego"] .gn-page-lue__titre-3 {
+  font-family: var(--gn-police-titre);
   font-weight: var(--gn-graisse-gras);
   color: var(--gn-titre);
   overflow-wrap: anywhere;
 }
 
 [data-app="guide-nego"] .gn-page-lue__titre-1 {
-  font-size: var(--gn-taille-28);
-  line-height: var(--gn-interligne-28);
-}
-
-[data-app="guide-nego"] .gn-page-lue__titre-2 {
   font-size: var(--gn-taille-24);
   line-height: var(--gn-interligne-24);
 }
 
-[data-app="guide-nego"] .gn-page-lue__titre-3 {
+[data-app="guide-nego"] .gn-page-lue__titre-2 {
   font-size: var(--gn-taille-20);
   line-height: var(--gn-interligne-20);
+}
+
+[data-app="guide-nego"] .gn-page-lue__titre-3 {
+  font-size: var(--gn-taille-18);
+  line-height: var(--gn-interligne-18);
 }
 
 [data-app="guide-nego"] .gn-page-lue__paragraphe,
@@ -168,14 +169,15 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
 [data-app="guide-nego"] .gn-page-lue__puce {
   flex: none;
   min-width: 1.2em;
+  color: var(--gn-texte-2);
   font-weight: var(--gn-graisse-demi-gras);
 }
 
 [data-app="guide-nego"] .gn-page-lue__note {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   color: var(--gn-texte-2);
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
+  border-top: var(--gn-filet-1) solid var(--gn-filet-doux);
   padding-top: var(--gn-espace-8);
 }
 
@@ -189,18 +191,19 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
   font-weight: var(--gn-graisse-gras);
 }
 
+/* Un tableau ou une figure que la forme lisible ne recompose pas : un bloc, comme une carte. */
 [data-app="guide-nego"] .gn-page-lue__origine {
   display: flex;
   flex-direction: column;
-  gap: var(--gn-espace-8);
-  padding: var(--gn-espace-12);
-  border: var(--gn-filet-1) solid var(--gn-filet);
-  border-radius: var(--gn-rayon-4);
+  gap: var(--gn-espace-4);
+  padding: var(--gn-espace-8) var(--gn-espace-16);
+  border-radius: var(--gn-rayon-20);
+  background: var(--gn-fond-2);
 }
 
 [data-app="guide-nego"] .gn-page-lue__renvoi {
   align-self: flex-start;
-  min-height: var(--gn-cible);
+  min-height: var(--gn-bouton-rond);
   display: flex;
   align-items: center;
   gap: var(--gn-espace-8);
@@ -209,7 +212,8 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
   background: none;
   color: var(--gn-accent);
   font: inherit;
-  font-size: var(--gn-taille-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   font-weight: var(--gn-graisse-gras);
   text-decoration: underline;
   text-underline-offset: var(--gn-espace-4);
@@ -217,16 +221,16 @@ const balisesDeTitre = { 1: 'h2', 2: 'h3', 3: 'h4' } as const
 }
 
 [data-app="guide-nego"] .gn-page-lue__legende {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   color: var(--gn-texte-2);
 }
 
 [data-app="guide-nego"] .gn-page-lue__texte-origine summary {
-  min-height: var(--gn-cible);
+  min-height: var(--gn-bouton-rond);
   display: flex;
   align-items: center;
-  font-size: var(--gn-taille-15);
+  font-size: var(--gn-taille-14);
   font-weight: var(--gn-graisse-demi-gras);
   color: var(--gn-texte-2);
   cursor: pointer;

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { SegmentDeChoix } from '~/components/guide-nego/GnSegmente.vue'
 /**
  * Section 5, deuxième lot : ce qu'on actionne — boutons, onglets de filtre, pilules,
  * sélecteur segmenté.
@@ -30,16 +29,10 @@ const jours = computed(() => [
   { valeur: 'semaine', libelle: t('gn-planche-composants-commandes.segment-semaine') },
 ])
 
-const themes = computed<SegmentDeChoix[]>(() => [
-  { valeur: 'clair', libelle: t('gn-planche-composants-commandes.segment-clair'), picto: 'sun' },
-  { valeur: 'sombre', libelle: t('gn-planche-composants-commandes.segment-sombre'), picto: 'moon' },
-  { valeur: 'systeme', libelle: t('gn-planche-composants-commandes.segment-systeme'), picto: 'eye' },
-])
 
 const onglet = ref('miennes')
 const ongletLong = ref('signalees')
 const jour = ref('jour')
-const theme = ref('clair')
 
 const adaptation = ref(true)
 const genre = ref(false)
@@ -181,11 +174,6 @@ const typeOuvert = ref(false)
           v-model="jour"
           :segments="jours"
           :libelle="t('gn-planche-composants-commandes.segmente-jour-libelle')"
-        />
-        <GnSegmente
-          v-model="theme"
-          :segments="themes"
-          :libelle="t('gn-planche-composants-commandes.segmente-theme-libelle')"
         />
       </div>
       <p class="gn-planche-note">{{ t('gn-planche-composants-commandes.segmente-note') }}</p>

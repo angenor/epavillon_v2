@@ -60,7 +60,7 @@ const inerte = computed(() => props.desactive || props.chargement)
 </template>
 
 <style>
-/* Le bouton de la maquette : 52 de haut, rayon 16, texte 15. */
+/* Le bouton de la maquette : 52 de haut, rayon 16, texte 16. */
 [data-app="guide-nego"] .gn-bouton {
   min-height: var(--gn-bouton-principal);
   padding-inline: var(--gn-espace-20);
@@ -71,8 +71,8 @@ const inerte = computed(() => props.desactive || props.chargement)
   border: none;
   border-radius: var(--gn-rayon-16);
   background: none;
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
   font-weight: var(--gn-graisse-gras);
   text-align: center;
   text-decoration: none;

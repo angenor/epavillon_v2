@@ -102,7 +102,8 @@ watch(actif, () => nextTick(amenerDansLaVue))
 
 [data-app="guide-nego"] .gn-onglets__onglet {
   flex: 0 1 var(--gn-onglet-largeur);
-  min-width: min-content;
+  /* 80 comme la maquette, même quand « Négociations » y déborde d'un pixel ou deux. */
+  min-width: 64px;
   height: var(--gn-onglet-hauteur);
   padding-inline: var(--gn-espace-4);
   display: flex;
@@ -113,7 +114,8 @@ watch(actif, () => nextTick(amenerDansLaVue))
   border-radius: var(--gn-rayon-14);
   color: var(--gn-texte-2);
   font-size: var(--gn-taille-12);
-  line-height: var(--gn-interligne-12);
+  /* L'interligne normal de la maquette : avec 1,2, le pictogramme descend d'un pixel. */
+  line-height: normal;
   font-weight: var(--gn-graisse-demi-gras);
   text-decoration: none;
   white-space: nowrap;

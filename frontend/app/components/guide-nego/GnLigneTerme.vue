@@ -3,8 +3,9 @@ import type { GlossaryEntry } from '~/types/negotiation-savoir'
 import { intituleDe, morceauxSurlignes, premierePhrase } from '~/utils/guide-nego/lexique'
 
 /**
- * Une entrée du lexique en ligne : le terme anglais en italique, sa traduction, et
- * dans les résultats la première phrase de la définition. Toute la ligne est la cible.
+ * Une entrée du lexique en ligne-carte (« Derniers consultés », maquette 03) : le terme
+ * anglais à gauche, sa traduction à droite, et dans les résultats la première phrase de
+ * la définition dessous. Toute la carte est la cible.
  * La saisie se marque dans le terme et la traduction.
  */
 const props = withDefaults(
@@ -26,7 +27,7 @@ const traduction = computed(() => morceauxSurlignes(props.entree.translation, pr
 
 <template>
   <NuxtLink :to="vers" class="gn-ligne-terme">
-    <GnPicto v-if="favori" nom="star" :taille="24" class="gn-ligne-terme__favori" />
+    <GnPicto v-if="favori" nom="star" :taille="20" class="gn-ligne-terme__favori" />
     <span v-if="favori" class="gn-hors-ecran">{{ t('gn-ligne-terme.favori') }}</span>
     <span class="gn-ligne-terme__corps">
       <span class="gn-ligne-terme__terme" lang="en">
@@ -37,75 +38,77 @@ const traduction = computed(() => morceauxSurlignes(props.entree.translation, pr
       </span>
       <span v-if="extrait" class="gn-ligne-terme__extrait">{{ premierePhrase(entree.definition) }}</span>
     </span>
-    <GnPicto nom="chevron" :taille="24" class="gn-ligne-terme__chevron" />
   </NuxtLink>
 </template>
 
 <style>
 [data-app="guide-nego"] .gn-ligne-terme {
-  min-height: var(--gn-cible);
-  padding-block: var(--gn-ligne-air);
+  min-height: var(--gn-ligne-reglage);
+  padding: var(--gn-espace-8) var(--gn-espace-16);
   display: flex;
   align-items: center;
   gap: var(--gn-espace-12);
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-radius: var(--gn-rayon-16);
+  background: var(--gn-fond-2);
   color: var(--gn-texte);
   text-decoration: none;
 }
 
-[data-app="guide-nego"] .gn-ligne-terme:active {
-  background: var(--gn-presse);
-  margin-inline: calc(-1 * var(--gn-marge-ecran));
-  padding-inline: var(--gn-marge-ecran);
+/* Les lignes-cartes se suivent à 6 px, qu'elles soient sœurs ou chacune dans son `li`. */
+[data-app="guide-nego"] .gn-ligne-terme + .gn-ligne-terme,
+[data-app="guide-nego"] li + li > .gn-ligne-terme {
+  margin-top: 6px;
 }
 
-[data-app="guide-nego"] .gn-ligne-terme:focus-visible {
-  outline-offset: calc(-1 * var(--gn-focus-decalage));
+[data-app="guide-nego"] .gn-ligne-terme:active {
+  background: var(--gn-presse);
 }
 
 [data-app="guide-nego"] .gn-ligne-terme__corps {
   flex: 1;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  display: grid;
+  /* Deux longs intitulés reviennent chacun à la ligne dans sa colonne, la traduction gardant la droite. */
+  grid-template-columns: minmax(0, 1fr) fit-content(60%);
+  align-items: baseline;
+  column-gap: var(--gn-espace-12);
+  row-gap: 2px;
   overflow-wrap: anywhere;
 }
 
 [data-app="guide-nego"] .gn-ligne-terme__terme {
-  color: var(--gn-titre);
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
-  font-weight: var(--gn-graisse-demi-gras);
-  font-style: italic;
-}
-
-[data-app="guide-nego"] .gn-ligne-terme__traduction {
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
-}
-
-[data-app="guide-nego"] .gn-ligne-terme__extrait {
   color: var(--gn-texte-2);
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
 }
 
-/* Le mot trouvé : souligné et gras, sans aplat — la couleur ne décore pas. */
+[data-app="guide-nego"] .gn-ligne-terme__traduction {
+  text-align: end;
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
+  font-weight: var(--gn-graisse-gras);
+}
+
+[data-app="guide-nego"] .gn-ligne-terme__extrait {
+  grid-column: 1 / -1;
+  padding-top: var(--gn-espace-4);
+  color: var(--gn-texte-2);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
+}
+
+/* Le mot trouvé : souligné à l'accent, sans aplat. */
 [data-app="guide-nego"] .gn-ligne-terme mark {
   background: none;
   color: inherit;
-  font-weight: var(--gn-graisse-gras);
+  font-weight: var(--gn-graisse-extra-gras);
   text-decoration: underline;
+  text-decoration-color: var(--gn-accent);
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
 }
 
 [data-app="guide-nego"] .gn-ligne-terme__favori {
-  color: var(--gn-attention);
-}
-
-[data-app="guide-nego"] .gn-ligne-terme__chevron {
-  color: var(--gn-picto-secondaire);
+  color: var(--gn-accent);
 }
 </style>

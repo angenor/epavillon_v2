@@ -54,29 +54,38 @@ function agir() {
   left: var(--gn-marge-ecran);
   right: var(--gn-marge-ecran);
   bottom: calc(var(--gn-sur-bas-barre-onglets) + var(--gn-sur-bas-geste) + env(safe-area-inset-bottom));
-  min-height: var(--gn-cible);
-  padding: var(--gn-espace-12) var(--gn-espace-16);
+  min-height: var(--gn-bouton-principal);
+  padding: var(--gn-espace-4) var(--gn-espace-8) var(--gn-espace-4) var(--gn-espace-16);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--gn-espace-16);
+  gap: var(--gn-espace-12);
+  border-radius: var(--gn-rayon-16);
   background: var(--gn-titre);
   color: var(--gn-sur-titre);
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+  font-weight: var(--gn-graisse-demi-gras);
   animation: gn-ephemere-entre var(--gn-duree-standard) var(--gn-courbe-sortie);
+}
+
+[data-app="guide-nego"] .gn-ephemere__texte {
+  padding-block: var(--gn-espace-8);
 }
 
 [data-app="guide-nego"] .gn-ephemere__action {
   flex: none;
-  min-height: var(--gn-cible);
+  min-height: var(--gn-bouton-rond);
   padding-inline: var(--gn-espace-8);
   border: none;
+  border-radius: var(--gn-rayon-12);
   background: none;
   color: var(--gn-action-sur-titre);
-  font-weight: var(--gn-graisse-gras);
+  font: inherit;
+  font-weight: var(--gn-graisse-extra-gras);
   text-decoration-line: var(--gn-action-sur-titre-trait);
   text-underline-offset: var(--gn-espace-4);
+  cursor: pointer;
 }
 
 @keyframes gn-ephemere-entre {

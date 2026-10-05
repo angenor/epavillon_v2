@@ -38,12 +38,13 @@ withDefaults(
   border-bottom: none;
 }
 
-/* La saisie marquée, dans toutes les lignes du groupe : gras souligné, comme au lexique. */
+/* La saisie marquée, dans toutes les lignes du groupe : soulignée à l'accent, comme au lexique. */
 [data-app="guide-nego"] .gn-groupe-resultats mark {
   background: none;
   color: inherit;
-  font-weight: var(--gn-graisse-gras);
+  font-weight: var(--gn-graisse-extra-gras);
   text-decoration: underline;
+  text-decoration-color: var(--gn-accent);
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
 }
@@ -53,11 +54,11 @@ withDefaults(
   display: flex;
   align-items: center;
   gap: var(--gn-espace-8);
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
+  border-top: var(--gn-filet-1) solid var(--gn-filet-doux);
   color: var(--gn-accent);
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
-  font-weight: var(--gn-graisse-demi-gras);
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
+  font-weight: var(--gn-graisse-extra-gras);
   text-decoration: none;
 }
 

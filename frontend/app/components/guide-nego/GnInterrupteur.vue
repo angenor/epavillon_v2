@@ -59,9 +59,9 @@ const actif = defineModel<boolean>({ default: false })
   padding: var(--gn-espace-8) 0;
   display: flex;
   align-items: center;
-  gap: var(--gn-espace-12);
+  gap: 14px;
   border: none;
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
   background: none;
   color: var(--gn-texte);
   text-align: start;
@@ -93,32 +93,32 @@ const actif = defineModel<boolean>({ default: false })
   min-width: 0;
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
 [data-app="guide-nego"] .gn-interrupteur__libelle {
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
   font-weight: var(--gn-graisse-demi-gras);
 }
 
 [data-app="guide-nego"] .gn-interrupteur__detail {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   color: var(--gn-texte-2);
 }
 
+/* Piste pleine, sans bord : la course du curseur vaut largeur − hauteur. */
 [data-app="guide-nego"] .gn-interrupteur__piste {
   inline-size: var(--gn-interrupteur-largeur);
   block-size: var(--gn-interrupteur-hauteur);
   flex: none;
   display: flex;
   align-items: center;
-  /* Le curseur est bordé du même jeu partout : la course vaut alors largeur − hauteur. */
-  padding: calc((var(--gn-interrupteur-hauteur) - var(--gn-interrupteur-curseur)) / 2 - var(--gn-filet-2));
-  border: var(--gn-filet-2) solid var(--gn-filet);
-  border-radius: var(--gn-rayon-24);
-  transition: background var(--gn-duree-bref) var(--gn-courbe-standard),
-              border-color var(--gn-duree-bref) var(--gn-courbe-standard);
+  padding: calc((var(--gn-interrupteur-hauteur) - var(--gn-interrupteur-curseur)) / 2);
+  border-radius: var(--gn-rayon-pilule);
+  background: var(--gn-bloc-releve);
+  transition: background var(--gn-duree-bref) var(--gn-courbe-standard);
 }
 
 [data-app="guide-nego"] .gn-interrupteur__curseur {
@@ -128,7 +128,7 @@ const actif = defineModel<boolean>({ default: false })
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--gn-rayon-24);
+  border-radius: var(--gn-rayon-pilule);
   background: var(--gn-texte-2);
   color: var(--gn-accent);
   translate: 0;
@@ -138,11 +138,10 @@ const actif = defineModel<boolean>({ default: false })
 
 [data-app="guide-nego"] .gn-interrupteur[aria-checked="true"] .gn-interrupteur__piste {
   background: var(--gn-accent);
-  border-color: var(--gn-accent);
 }
 
 [data-app="guide-nego"] .gn-interrupteur[aria-checked="true"] .gn-interrupteur__curseur {
-  background: var(--gn-accent-inv);
+  background: var(--gn-fond);
   translate: calc(var(--gn-interrupteur-largeur) - var(--gn-interrupteur-hauteur));
 }
 
@@ -155,18 +154,17 @@ const actif = defineModel<boolean>({ default: false })
   color: var(--gn-desactive-texte);
 }
 
-[data-app="guide-nego"] .gn-interrupteur:disabled .gn-interrupteur__piste {
-  background: none;
-  border-color: var(--gn-desactive-texte);
+[data-app="guide-nego"] .gn-interrupteur:disabled .gn-interrupteur__curseur {
+  background: var(--gn-neutre-marque);
+  color: var(--gn-bloc-releve);
 }
 
 [data-app="guide-nego"] .gn-interrupteur:disabled[aria-checked="true"] .gn-interrupteur__piste {
-  background: var(--gn-desactive-fond);
-  border-color: var(--gn-desactive-texte);
+  background: var(--gn-neutre-marque);
 }
 
-[data-app="guide-nego"] .gn-interrupteur:disabled .gn-interrupteur__curseur {
-  background: var(--gn-desactive-texte);
-  color: var(--gn-desactive-fond);
+[data-app="guide-nego"] .gn-interrupteur:disabled[aria-checked="true"] .gn-interrupteur__curseur {
+  background: var(--gn-bloc-releve);
+  color: var(--gn-texte-2);
 }
 </style>

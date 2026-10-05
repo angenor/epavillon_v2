@@ -85,7 +85,7 @@ const annonce = computed(() =>
 <style>
 [data-app="guide-nego"] .gn-zone-texte__saisie {
   height: var(--gn-zone-texte);
-  padding: var(--gn-espace-12);
+  padding: var(--gn-espace-12) var(--gn-espace-16);
   resize: none;
 }
 

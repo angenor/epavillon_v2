@@ -27,44 +27,22 @@ const seule = computed(() => props.total <= 1)
       <span class="gn-occurrence__expression">{{ t('gn-occurrence.expression', { expression }) }}</span>
       <span v-if="remarque" class="gn-occurrence__remarque">{{ remarque }}</span>
     </p>
-    <button
-      v-if="!seule"
-      type="button"
-      class="gn-occurrence__bouton"
-      :aria-label="t('gn-occurrence.precedente')"
-      @click="emit('precedente')"
-    >
-      <GnPicto nom="chev-up" />
-    </button>
-    <button
-      v-if="!seule"
-      type="button"
-      class="gn-occurrence__bouton"
-      :aria-label="t('gn-occurrence.suivante')"
-      @click="emit('suivante')"
-    >
-      <GnPicto nom="chev-down" />
-    </button>
-    <button
-      type="button"
-      class="gn-occurrence__bouton gn-occurrence__bouton--fermer"
-      :aria-label="t('gn-occurrence.fermer')"
-      @click="emit('fermer')"
-    >
-      <GnPicto nom="close" />
-    </button>
+    <GnBoutonRond v-if="!seule" borde picto="chev-up" :libelle="t('gn-occurrence.precedente')" @clic="emit('precedente')" />
+    <GnBoutonRond v-if="!seule" borde picto="chev-down" :libelle="t('gn-occurrence.suivante')" @clic="emit('suivante')" />
+    <GnBoutonRond picto="close" :libelle="t('gn-occurrence.fermer')" @clic="emit('fermer')" />
   </div>
 </template>
 
 <style>
+/* Posée sur la barre de lecture, comme une feuille basse : fond de bloc, rayon 24 en haut. */
 [data-app="guide-nego"] .gn-occurrence {
   min-height: var(--gn-ligne-reglage);
   display: flex;
   align-items: center;
   gap: var(--gn-espace-8);
-  padding-inline: var(--gn-marge-ecran) var(--gn-espace-4);
-  border-top: var(--gn-filet-2) solid var(--gn-filet-fort);
-  background: var(--gn-fond);
+  padding: var(--gn-espace-8) var(--gn-espace-12) var(--gn-espace-8) var(--gn-marge-ecran);
+  border-radius: var(--gn-rayon-24) var(--gn-rayon-24) 0 0;
+  background: var(--gn-fond-2);
 }
 
 [data-app="guide-nego"] .gn-occurrence__texte {
@@ -73,44 +51,27 @@ const seule = computed(() => props.total <= 1)
   margin: 0;
   display: flex;
   flex-direction: column;
-  font-size: var(--gn-taille-15);
-  line-height: 1.3;
+  gap: 2px;
 }
 
 [data-app="guide-nego"] .gn-occurrence__rang {
   color: var(--gn-titre);
+  font-size: var(--gn-taille-15);
+  line-height: var(--gn-interligne-15);
   font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-occurrence__expression {
   overflow-wrap: anywhere;
   color: var(--gn-texte-2);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
 }
 
 [data-app="guide-nego"] .gn-occurrence__remarque {
   padding-block-end: var(--gn-espace-4);
   color: var(--gn-texte);
-}
-
-[data-app="guide-nego"] .gn-occurrence__bouton {
-  flex: none;
-  width: var(--gn-cible);
-  height: var(--gn-cible);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--gn-picto-secondaire);
-  cursor: pointer;
-}
-
-[data-app="guide-nego"] .gn-occurrence__bouton--fermer {
-  color: var(--gn-picto);
-}
-
-[data-app="guide-nego"] .gn-occurrence__bouton:active {
-  background: var(--gn-presse);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
 }
 </style>

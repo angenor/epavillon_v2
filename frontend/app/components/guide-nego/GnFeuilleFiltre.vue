@@ -72,10 +72,6 @@ function appliquer() {
 </template>
 
 <style>
-[data-app="guide-nego"] .gn-feuille-filtre__options {
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
-}
-
 /* GnCase n'a pas de place en fin de ligne : le compte se pose par-dessus, et laisse le toucher à la case. */
 [data-app="guide-nego"] .gn-feuille-filtre__option {
   position: relative;
@@ -97,7 +93,7 @@ function appliquer() {
   align-items: center;
   pointer-events: none;
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 </style>

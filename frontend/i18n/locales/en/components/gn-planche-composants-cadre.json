@@ -1,10 +1,10 @@
 {
   "onglets": "Tab bar",
-  "onglets-propos": "The bottom bar, sized to its labels. Shown in a frame of at most 360 px — the width the rule was settled on.",
+  "onglets-propos": "The mock-up's bottom bar: 88 px including the gesture area, 80 × 56 tabs, 24 px icon, 12 px label.",
   "onglets-quatre": "Four tabs — network discussions are closed",
   "onglets-cinq": "Five tabs, with counter — network discussions are open",
-  "onglets-largeur": "Tab width: the label plus 3 px of air on each side, 48 px at least, the rest shared out. No label is truncated or wrapped: when room runs short, the bar alone scrolls.",
-  "onglets-actif": "The lit tab is the one for the open screen. Here it is named by hand, since the board is not a screen: 3 px rule above, weight 700, accent colour.",
+  "onglets-largeur": "A tab is 80 px wide and tightens when there are five. No label is cut or wrapped: when space runs out, only the bar scrolls.",
+  "onglets-actif": "The lit tab is the open screen's. Here it is set by hand, the board not being a screen: accent colour, weight 800, no background.",
   "entete": "Screen header",
   "entete-propos": "Connection line, “Aa” button to the glossary, title, subtitle. On a secondary screen, the back button replaces the tab title.",
   "entete-principal": "Primary — online",

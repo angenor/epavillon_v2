@@ -23,18 +23,19 @@ const question = computed(() => morceauxSurlignes(props.entree.question, props.s
       </span>
       <GnVerifieLe v-if="entree.verified_on" :jour="entree.verified_on" :a-revoir="entree.status === 'to_review'" />
     </span>
-    <GnPicto nom="chevron" :taille="24" class="gn-ligne-question__chevron" />
+    <GnPicto nom="chevron" :taille="20" class="gn-ligne-question__chevron" />
   </NuxtLink>
 </template>
 
 <style>
+/* Ligne de liste de la maquette 01 : titre 16/700, filet doux dessous. */
 [data-app="guide-nego"] .gn-ligne-question {
-  min-height: var(--gn-cible);
+  min-height: var(--gn-ligne-reglage);
   padding-block: var(--gn-ligne-air);
   display: flex;
   align-items: center;
-  gap: var(--gn-espace-12);
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  gap: 14px;
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
   color: var(--gn-texte);
   text-decoration: none;
 }
@@ -59,17 +60,18 @@ const question = computed(() => morceauxSurlignes(props.entree.question, props.s
 }
 
 [data-app="guide-nego"] .gn-ligne-question__question {
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
-  font-weight: var(--gn-graisse-demi-gras);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
+  font-weight: var(--gn-graisse-gras);
 }
 
-/* Le mot trouvé : souligné et gras, sans aplat — comme dans le lexique. */
+/* Le mot trouvé : souligné à l'accent, sans aplat, comme dans le lexique. */
 [data-app="guide-nego"] .gn-ligne-question mark {
   background: none;
   color: inherit;
-  font-weight: var(--gn-graisse-gras);
+  font-weight: var(--gn-graisse-extra-gras);
   text-decoration: underline;
+  text-decoration-color: var(--gn-accent);
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
 }

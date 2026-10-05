@@ -4,8 +4,8 @@ import { couleurDEtat } from '~/utils/guide-nego/etats'
 import { dessinDeNotification } from '~/utils/guide-nego/signalements'
 
 /**
- * Une ligne du centre (maquette 02 · 10). Non lue : texte en 600 et carré jaune — jamais
- * un fond jaune. Le toucher est rendu à l'écran, qui marque lu avant d'ouvrir la fiche.
+ * Une ligne du centre, dessinée comme « Changements du jour » (maquette Nuit 01). Non lue :
+ * titre en 700 et point à l'accent, jamais un fond. Le toucher est rendu à l'écran, qui marque lu avant d'ouvrir la fiche.
  */
 const props = defineProps<{ notification: Notification; fuseau: string; derniere?: boolean }>()
 const emit = defineEmits<{ ouvrir: [notification: Notification] }>()
@@ -53,13 +53,13 @@ function ouvrir(evenement: Event): void {
 <style>
 [data-app="guide-nego"] .gn-ligne-notif {
   width: 100%;
-  min-height: var(--gn-cible);
-  padding: 10px 0;
+  min-height: 60px;
+  padding: var(--gn-ligne-air) 0;
   display: flex;
-  align-items: flex-start;
-  gap: var(--gn-espace-12);
+  align-items: center;
+  gap: 14px;
   border: none;
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
   background: none;
   color: var(--gn-texte);
   font: inherit;
@@ -81,8 +81,7 @@ function ouvrir(evenement: Event): void {
 
 [data-app="guide-nego"] .gn-ligne-notif__picto {
   flex: none;
-  margin-top: 2px;
-  color: var(--gn-picto);
+  color: var(--gn-picto-secondaire);
 }
 
 [data-app="guide-nego"] .gn-ligne-notif__corps {
@@ -95,26 +94,26 @@ function ouvrir(evenement: Event): void {
 }
 
 [data-app="guide-nego"] .gn-ligne-notif__titre {
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
-  font-weight: var(--gn-graisse-regulier);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
+  font-weight: var(--gn-graisse-moyen);
 }
 
 [data-app="guide-nego"] .gn-ligne-notif--non-lue .gn-ligne-notif__titre {
-  font-weight: var(--gn-graisse-demi-gras);
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-ligne-notif__meta {
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 
 [data-app="guide-nego"] .gn-ligne-notif__non-lu {
   flex: none;
-  width: var(--gn-carre-non-lu);
-  height: var(--gn-carre-non-lu);
-  margin-top: 6px;
-  background: var(--gn-attention-aplat);
+  width: var(--gn-point-etat);
+  height: var(--gn-point-etat);
+  border-radius: var(--gn-rayon-pilule);
+  background: var(--gn-accent);
 }
 </style>

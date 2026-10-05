@@ -262,7 +262,7 @@ onBeforeUnmount(() => {
   height: var(--gn-picto-taille);
   border: var(--gn-filet-2) solid var(--gn-accent);
   border-top-color: transparent;
-  border-radius: var(--gn-rayon-24);
+  border-radius: var(--gn-rayon-pilule);
   animation: gn-spin var(--gn-duree-arc) linear infinite;
 }
 
@@ -308,8 +308,8 @@ onBeforeUnmount(() => {
   gap: var(--gn-espace-8);
   min-height: var(--gn-cible);
   color: var(--gn-texte);
-  font-size: var(--gn-taille-17);
+  font-size: var(--gn-taille-15);
   font-weight: var(--gn-graisse-demi-gras);
-  line-height: var(--gn-interligne-17);
+  line-height: var(--gn-interligne-15);
 }
 </style>

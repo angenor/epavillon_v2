@@ -82,12 +82,13 @@ const { t } = useI18n()
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--gn-espace-8);
+  gap: var(--gn-espace-12);
 }
 
 [data-app="guide-nego"] .gn-chargement__bloc {
   width: 100%;
   height: var(--gn-squelette-hauteur);
+  border-radius: var(--gn-rayon-6);
   background: var(--gn-squelette);
   animation: gn-pulse var(--gn-duree-squelette) ease-in-out infinite;
 }

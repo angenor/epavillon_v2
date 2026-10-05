@@ -1,12 +1,11 @@
 {
   "recherche": "Search field",
-  "recherche-propos": "Magnifier, input, then a cross to clear — or the arc when the answer takes its time. The cross is a 48 px button, not a clickable pictogram.",
+  "recherche-propos": "The mock-up's field: 56 px, outlined block, radius 18. Magnifier, input, then a cross to clear, or the arc while the answer is pending. The cross is a 44 px button, not a clickable icon.",
   "recherche-repos": "At rest",
   "recherche-saisie": "With input — the cross clears and returns focus to the field",
   "recherche-chargement": "Waiting — the arc replaces the cross",
   "recherche-libelle": "Search for a term, a document, a room",
   "recherche-indication": "Search for a term, a document, a room",
-
   "champ": "Form field",
   "champ-propos": "The label always sits above: placeholder text disappears at the first keystroke, and the person no longer knows what they are filling in.",
   "champ-code": "Invitation code",
@@ -18,7 +17,6 @@
   "champ-heure": "Resumption time",
   "champ-heure-aide": "Room time, as announced.",
   "champ-note": "The error is said three times: the red border, the pictogram and the sentence that says what to do. The time field carries its 110 px width, which follows its content and not the screen's taste.",
-
   "zone": "Text area",
   "zone-propos": "120 px tall, counter under the input. The counter is not a live region: re-read at every keystroke, it would drown out dictation.",
   "zone-libelle": "What you observed",
@@ -27,21 +25,18 @@
   "zone-restitution": "What to remember from the sitting",
   "zone-indication": "Three lines are enough.",
   "zone-erreur": "This section cannot be left empty.",
-
   "case": "Checkbox row",
   "case-propos": "The whole 56 px row is the target, never the 24 px square alone. The box is a real browser checkbox, hidden under its label.",
   "case-adaptation": "Adaptation",
   "case-adaptation-detail": "12 sessions this week",
   "case-genre": "Gender",
   "case-article": "Article 6 — no session announced",
-
   "interrupteur": "Switch",
   "interrupteur-propos": "When on, it carries a tick in its knob: in bright sunlight, or for someone who reads green poorly, colour alone says nothing.",
   "interrupteur-alertes": "Alert me to changes",
   "interrupteur-alertes-detail": "Negotiation sessions on my topics",
   "interrupteur-telechargement": "Keep documents offline",
   "interrupteur-desactive": "Receive the evening summary",
-
   "cercle": "Radio row",
   "cercle-propos": "A single choice in a list of rows. The component carries the whole group: one tab stop, and the arrow keys move from option to option.",
   "cercle-choix": "Simple choice",
@@ -55,7 +50,6 @@
   "reponse-a": "The Bureau",
   "reponse-b": "The Secretariat",
   "reponse-c": "The Conference of the Parties itself",
-
   "reglage": "Settings row",
   "reglage-propos": "The whole row is the target, never the chevron alone. With no destination, it carries its control at the end of the line.",
   "reglage-lecture": "Reading size",

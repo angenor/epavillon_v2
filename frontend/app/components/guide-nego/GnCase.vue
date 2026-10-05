@@ -55,8 +55,9 @@ const coche = defineModel<boolean>({ default: false })
   padding-block: var(--gn-espace-8);
   display: flex;
   align-items: center;
+  /* 12 et non 14 : GnEtapeParcours aligne son lien sous le libellé sur cet écart. */
   gap: var(--gn-espace-12);
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
   color: var(--gn-texte);
   cursor: pointer;
 }
@@ -85,7 +86,7 @@ const coche = defineModel<boolean>({ default: false })
   display: flex;
   align-items: center;
   justify-content: center;
-  border: var(--gn-filet-2) solid var(--gn-filet-fort);
+  border: var(--gn-filet-2) solid var(--gn-filet);
   border-radius: var(--gn-rayon-4);
   color: var(--gn-accent-inv);
 }
@@ -100,23 +101,24 @@ const coche = defineModel<boolean>({ default: false })
   min-width: 0;
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
 [data-app="guide-nego"] .gn-case__libelle {
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
   font-weight: var(--gn-graisse-demi-gras);
 }
 
 [data-app="guide-nego"] .gn-case__detail {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   color: var(--gn-texte-2);
 }
 
 [data-app="guide-nego"] .gn-case__origine {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   font-weight: var(--gn-graisse-gras);
   color: var(--gn-texte-2);
 }
@@ -135,11 +137,12 @@ const coche = defineModel<boolean>({ default: false })
 }
 
 [data-app="guide-nego"] .gn-case--desactive .gn-case__carre {
-  border-color: var(--gn-desactive-texte);
+  border-color: var(--gn-bloc-releve);
   color: var(--gn-desactive-texte);
 }
 
 [data-app="guide-nego"] .gn-case--desactive .gn-case__natif:checked + .gn-case__carre {
-  background: var(--gn-desactive-fond);
+  background: var(--gn-bloc-releve);
+  border-color: var(--gn-bloc-releve);
 }
 </style>

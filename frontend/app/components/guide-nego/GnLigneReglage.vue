@@ -25,28 +25,34 @@ withDefaults(
     :is="vers ? NuxtLink : 'div'"
     :to="vers"
     class="gn-reglage"
-    :class="{ 'gn-reglage--derniere': derniere, 'gn-reglage--cible': vers }"
+    :class="{ 'gn-reglage--derniere': derniere, 'gn-reglage--cible': vers, 'gn-reglage--picto': picto }"
   >
-    <GnPicto v-if="picto" :nom="picto" />
+    <span v-if="picto" class="gn-reglage__pastille"><GnPicto :nom="picto" :taille="20" /></span>
     <span class="gn-reglage__texte">
       <span class="gn-reglage__libelle">{{ libelle }}</span>
       <span v-if="valeur" class="gn-reglage__valeur">{{ valeur }}</span>
       <slot name="sous" />
     </span>
     <slot />
-    <GnPicto v-if="vers" nom="chevron" class="gn-reglage__chevron" />
+    <GnPicto v-if="vers" nom="chevron" :taille="20" class="gn-reglage__chevron" />
   </component>
 </template>
 
 <style>
+/* La ligne de « Se préparer » (maquette 05) : pastille d'icône de 44, titre 16/700, détail 14. */
 [data-app="guide-nego"] .gn-reglage {
   min-height: var(--gn-ligne-reglage);
+  padding-block: var(--gn-espace-8);
   display: flex;
   align-items: center;
-  gap: var(--gn-espace-12);
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  gap: 14px;
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
   color: var(--gn-texte);
   text-decoration: none;
+}
+
+[data-app="guide-nego"] .gn-reglage--picto {
+  min-height: 68px;
 }
 
 [data-app="guide-nego"] .gn-reglage--derniere {
@@ -60,8 +66,16 @@ withDefaults(
   padding-inline: var(--gn-marge-ecran);
 }
 
-[data-app="guide-nego"] .gn-reglage > .gn-picto {
-  color: var(--gn-picto);
+[data-app="guide-nego"] .gn-reglage__pastille {
+  flex: none;
+  width: var(--gn-pastille-icone);
+  height: var(--gn-pastille-icone);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--gn-rayon-14);
+  background: var(--gn-fond-2);
+  color: var(--gn-accent);
 }
 
 [data-app="guide-nego"] .gn-reglage__texte {
@@ -69,19 +83,20 @@ withDefaults(
   min-width: 0;
   display: flex;
   flex-direction: column;
+  gap: 2px;
   /* Une adresse électronique n'a pas d'espace où revenir à la ligne. */
   overflow-wrap: anywhere;
 }
 
 [data-app="guide-nego"] .gn-reglage__libelle {
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
-  font-weight: var(--gn-graisse-demi-gras);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-reglage__valeur {
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   color: var(--gn-texte-2);
 }
 

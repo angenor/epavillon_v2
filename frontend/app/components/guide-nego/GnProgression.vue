@@ -38,12 +38,15 @@ const pourcent = computed(() => (bornee.value === null ? 0 : Math.round(bornee.v
 [data-app="guide-nego"] .gn-progression {
   display: block;
   block-size: var(--gn-jauge);
+  border-radius: var(--gn-rayon-pilule);
   background: var(--gn-jauge-fond);
+  overflow: hidden;
 }
 
 [data-app="guide-nego"] .gn-progression__part {
   display: block;
   block-size: 100%;
+  border-radius: var(--gn-rayon-pilule);
   background: var(--gn-accent);
 }
 </style>

@@ -250,13 +250,13 @@ useHead({ title: t('guide-nego.reglages.titre') })
   display: flex;
   flex-direction: column;
   gap: var(--gn-espace-8);
-  padding-top: var(--gn-espace-16);
+  padding-top: var(--gn-espace-8);
 }
 
 [data-app="guide-nego"] .gn-reglages__libelle {
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
-  font-weight: var(--gn-graisse-demi-gras);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-reglages__sorties {
@@ -268,12 +268,12 @@ useHead({ title: t('guide-nego.reglages.titre') })
 
 [data-app="guide-nego"] .gn-reglages__aide {
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 
 [data-app="guide-nego"] .gn-reglages__aide--espacee {
-  padding-top: var(--gn-espace-12);
+  padding-bottom: var(--gn-espace-8);
 }
 
 [data-app="guide-nego"] .gn-reglages__aide--centree {

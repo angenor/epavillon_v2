@@ -93,7 +93,7 @@ const texteDeProgression = computed(() =>
 
 <template>
   <NuxtLink :to="vers" class="gn-ligne-document" :class="{ 'gn-ligne-document--indisponible': indisponible }">
-    <GnPicto :nom="estLien ? 'external' : 'doc'" :taille="24" class="gn-ligne-document__picto" />
+    <span class="gn-ligne-document__pastille"><GnPicto :nom="estLien ? 'external' : 'doc'" :taille="20" /></span>
     <span class="gn-ligne-document__corps">
       <span v-if="type" class="gn-ligne-document__type">{{ type }}</span>
       <span class="gn-ligne-document__titre" :class="{ 'gn-ligne-document__titre--eteint': eteint }">
@@ -119,19 +119,20 @@ const texteDeProgression = computed(() =>
         <GnProgression :part="pourcentage?.part ?? null" decoratif />
       </span>
     </span>
-    <GnPicto v-if="!indisponible" nom="chevron" :taille="24" class="gn-ligne-document__chevron" />
+    <GnPicto v-if="!indisponible" nom="chevron" :taille="20" class="gn-ligne-document__chevron" />
     <span v-else class="gn-ligne-document__sans-chevron" aria-hidden="true" />
   </NuxtLink>
 </template>
 
 <style>
+/* La ligne « Les documents à emporter » de la maquette 05 : pastille d'icône de 44, titre 16/700. */
 [data-app="guide-nego"] .gn-ligne-document {
-  min-height: var(--gn-cible);
-  padding-block: var(--gn-ligne-air);
+  min-height: 68px;
+  padding-block: var(--gn-espace-12);
   display: flex;
   align-items: flex-start;
-  gap: var(--gn-espace-12);
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  gap: 14px;
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
   color: var(--gn-texte);
   text-decoration: none;
 }
@@ -147,34 +148,44 @@ const texteDeProgression = computed(() =>
   outline-offset: calc(-1 * var(--gn-focus-decalage));
 }
 
-[data-app="guide-nego"] .gn-ligne-document__picto {
+[data-app="guide-nego"] .gn-ligne-document__pastille {
+  flex: none;
+  width: var(--gn-pastille-icone);
+  height: var(--gn-pastille-icone);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--gn-rayon-14);
+  background: var(--gn-fond-2);
   color: var(--gn-picto-document);
 }
 
-[data-app="guide-nego"] .gn-ligne-document--indisponible .gn-ligne-document__picto {
+[data-app="guide-nego"] .gn-ligne-document--indisponible .gn-ligne-document__pastille {
   color: var(--gn-picto-secondaire);
 }
 
 [data-app="guide-nego"] .gn-ligne-document__corps {
   flex: 1;
   min-width: 0;
+  min-height: var(--gn-pastille-icone);
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 2px;
   overflow-wrap: anywhere;
 }
 
 [data-app="guide-nego"] .gn-ligne-document__type {
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
   font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-ligne-document__titre {
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
-  font-weight: var(--gn-graisse-demi-gras);
+  font-size: var(--gn-taille-16);
+  line-height: var(--gn-interligne-16);
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-ligne-document__titre--eteint {
@@ -184,8 +195,8 @@ const texteDeProgression = computed(() =>
 [data-app="guide-nego"] .gn-ligne-document__meta,
 [data-app="guide-nego"] .gn-ligne-document__trouve {
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 
 [data-app="guide-nego"] .gn-ligne-document__trouve {
@@ -201,6 +212,7 @@ const texteDeProgression = computed(() =>
   flex-wrap: wrap;
   column-gap: var(--gn-espace-12);
   row-gap: var(--gn-espace-4);
+  padding-top: var(--gn-espace-4);
 }
 
 [data-app="guide-nego"] .gn-ligne-document__progression {
@@ -214,18 +226,20 @@ const texteDeProgression = computed(() =>
   display: flex;
   align-items: center;
   gap: var(--gn-espace-8);
-  color: var(--gn-titre);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  color: var(--gn-texte);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
   font-weight: var(--gn-graisse-gras);
 }
 
+/* Le chevron se centre sur la pastille, pas sur la ligne entière. */
 [data-app="guide-nego"] .gn-ligne-document__chevron {
+  margin-block-start: var(--gn-espace-12);
   color: var(--gn-picto-secondaire);
 }
 
 [data-app="guide-nego"] .gn-ligne-document__sans-chevron {
   flex: none;
-  inline-size: var(--gn-picto-taille);
+  inline-size: 20px;
 }
 </style>

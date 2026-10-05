@@ -8,8 +8,8 @@ type Hote = Readonly<ShallowRef<HTMLElement | null>>
  *
  * Une planche montre la valeur que le navigateur applique vraiment : recopier les
  * hexadécimaux du thème donnerait une planche qui ment dès la première correction.
- * La sonde vit DANS la planche, et non dans `<body>` : elle hérite ainsi du thème du
- * cadre qui l'entoure — la page peut en afficher deux côte à côte.
+ * La sonde vit DANS la planche, et non dans `<body>` : elle hérite ainsi des jetons
+ * bornés à `[data-app="guide-nego"]`.
  */
 export function useJetonsLus(
   hote: Hote,
@@ -46,27 +46,17 @@ export function useJetonsLus(
     lus.value = releve
   }
 
-  let observateur: MutationObserver | undefined
   let mouvement: MediaQueryList | undefined
 
   onMounted(() => {
     relire()
-    // Le thème peut changer ailleurs que sur la racine de l'application : la page des
-    // composants en force un par colonne quand elle montre clair et sombre ensemble.
-    observateur = new MutationObserver(relire)
-    observateur.observe(document.documentElement, {
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['data-theme'],
-    })
-    // L'autre condition qui change la valeur d'un jeton sans toucher au document :
-    // « réduire les animations » met les durées à zéro.
+    // « Réduire les animations » change la valeur d'un jeton sans toucher au document :
+    // les durées tombent à zéro.
     mouvement = window.matchMedia('(prefers-reduced-motion: reduce)')
     mouvement.addEventListener('change', relire)
   })
 
   onBeforeUnmount(() => {
-    observateur?.disconnect()
     mouvement?.removeEventListener('change', relire)
   })
 
@@ -115,17 +105,17 @@ withDefaults(defineProps<{ titre: string; numero?: string; propos?: string }>(),
   display: flex;
   align-items: baseline;
   gap: var(--gn-espace-8);
-  padding-bottom: var(--gn-espace-8);
-  border-bottom: var(--gn-filet-3) solid var(--gn-filet-fort);
   color: var(--gn-titre);
-  font-size: var(--gn-taille-24);
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-28);
   font-weight: var(--gn-graisse-gras);
-  line-height: var(--gn-interligne-24);
+  line-height: var(--gn-interligne-28);
+  letter-spacing: var(--gn-approche-28);
 }
 
 [data-app="guide-nego"] .gn-planche-section__numero {
   flex: none;
-  font-size: var(--gn-taille-17);
+  color: var(--gn-accent);
 }
 
 [data-app="guide-nego"] .gn-planche-section--groupe {
@@ -133,16 +123,15 @@ withDefaults(defineProps<{ titre: string; numero?: string; propos?: string }>(),
 }
 
 [data-app="guide-nego"] .gn-planche-section--groupe .gn-planche-section__titre {
-  border-bottom-width: var(--gn-filet-1);
-  border-bottom-color: var(--gn-filet);
-  font-size: var(--gn-taille-20);
-  line-height: var(--gn-interligne-20);
+  font-size: var(--gn-taille-18);
+  line-height: var(--gn-interligne-18);
+  letter-spacing: normal;
 }
 
 [data-app="guide-nego"] .gn-planche-section__propos {
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 
 [data-app="guide-nego"] .gn-planche-section__corps {
@@ -174,13 +163,14 @@ withDefaults(defineProps<{ titre: string; numero?: string; propos?: string }>(),
 [data-app="guide-nego"] .gn-planche-echantillon {
   display: flex;
   flex-direction: column;
-  border: var(--gn-filet-1) solid var(--gn-filet);
-  border-radius: var(--gn-rayon-0);
+  overflow: hidden;
+  border-radius: var(--gn-rayon-16);
+  background: var(--gn-fond-2);
 }
 
 [data-app="guide-nego"] .gn-planche-echantillon__aplat {
   min-height: var(--gn-espace-48);
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
 }
 
 [data-app="guide-nego"] .gn-planche-legende {
@@ -192,17 +182,17 @@ withDefaults(defineProps<{ titre: string; numero?: string; propos?: string }>(),
 
 [data-app="guide-nego"] .gn-planche-jeton {
   color: var(--gn-texte);
-  font-size: var(--gn-taille-15);
+  font-size: var(--gn-taille-14);
   font-weight: var(--gn-graisse-gras);
-  line-height: var(--gn-interligne-15);
+  line-height: var(--gn-interligne-14);
   overflow-wrap: anywhere;
 }
 
 [data-app="guide-nego"] .gn-planche-valeur,
 [data-app="guide-nego"] .gn-planche-note {
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
 }
 
 [data-app="guide-nego"] .gn-planche-note {
@@ -220,7 +210,7 @@ withDefaults(defineProps<{ titre: string; numero?: string; propos?: string }>(),
   gap: var(--gn-espace-12);
   min-height: var(--gn-cible);
   padding-block: var(--gn-ligne-air);
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
+  border-top: var(--gn-filet-1) solid var(--gn-filet-doux);
 }
 
 [data-app="guide-nego"] .gn-planche-liste > .gn-planche-ligne:first-child {
