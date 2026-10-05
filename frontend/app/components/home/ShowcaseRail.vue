@@ -75,10 +75,10 @@ const total = computed(() => props.slides.length)
        ignore la luminosité. Le flou du verre agit par-dessus, sur les commandes.
        -->
   <div v-if="total > 1" class="scrim-fade-bottom pt-10 pb-3 text-text-on-inverse">
-    <!-- Même cadre que le texte de la diapositive : les vignettes se centrent
-         sous la citation, les commandes de lecture se rangent à droite. -->
+    <!-- Même cadre que le texte de la diapositive : les vignettes suivent la
+         flèche gauche, les commandes de lecture se rangent à droite. -->
     <div class="mx-auto flex w-full max-w-[1280px] items-center gap-2 px-2 sm:gap-3 sm:px-6">
-      <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3 lg:max-w-[52rem]">
+      <div class="flex min-w-0 items-center gap-2 sm:gap-3 lg:max-w-[52rem]">
         <button
           type="button"
           class="flex shrink-0 cursor-pointer items-center justify-center rounded-full border border-glass-border bg-glass text-text-on-inverse shadow-glass backdrop-blur-glass transition-colors hover:bg-glass-hover"
@@ -91,7 +91,7 @@ const total = computed(() => props.slides.length)
 
         <!-- SEUL LE RAIL DÉFILE HORIZONTALEMENT. Le corps de page, jamais. -->
         <ul
-          class="flex min-w-0 flex-1 items-center justify-center-safe gap-2 overflow-x-auto py-1"
+          class="flex min-w-0 items-center gap-2 overflow-x-auto py-1"
           :aria-label="t('home.showcase.railLabel')"
         >
           <li v-for="(slide, index) in props.slides" :key="slide.id" class="shrink-0">
@@ -157,9 +157,21 @@ const total = computed(() => props.slides.length)
         </button>
       </div>
 
+      <!-- L'INVITATION À DÉROULER, reprise de la plateforme de référence : sur un
+           bandeau d'un écran de haut, rien ne dit qu'il y a une suite. Un repère,
+           pas une commande — d'où `aria-hidden`. -->
+      <span class="pointer-events-none hidden flex-1 justify-center lg:flex" aria-hidden="true">
+        <span
+          class="flex animate-bounce items-center justify-center rounded-full border border-glass-border bg-glass text-text-on-inverse backdrop-blur-glass"
+          :style="{ width: 'var(--target-compact)', height: 'var(--target-compact)' }"
+        >
+          <UiIcon name="chevron-down" size="1.1rem" />
+        </span>
+      </span>
+
       <button
         type="button"
-        class="flex shrink-0 lg:ml-auto cursor-pointer items-center justify-center rounded-full border border-glass-border bg-glass text-text-on-inverse shadow-glass backdrop-blur-glass transition-colors hover:bg-glass-hover"
+        class="ml-auto flex shrink-0 lg:ml-0 cursor-pointer items-center justify-center rounded-full border border-glass-border bg-glass text-text-on-inverse shadow-glass backdrop-blur-glass transition-colors hover:bg-glass-hover"
         :style="{ width: 'var(--target-min)', height: 'var(--target-min)' }"
         :aria-label="props.playing ? t('home.showcase.pause') : t('home.showcase.play')"
         @click="emit('toggle')"

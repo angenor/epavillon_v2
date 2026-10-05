@@ -245,31 +245,10 @@ watch(
             :paused="!running"
             eager
             class="flex-1"
-            content-class="pb-28 sm:pb-32"
+            content-class="pb-14 sm:pb-16"
             @media-error="onMediaError"
           />
         </Transition>
-
-        <!-- L'INVITATION À DÉROULER. Reprise de la plateforme de référence : sur
-             un bandeau qui occupe presque toute la hauteur de l'écran, rien ne
-             dit qu'il y a une suite. C'est un repère, pas une commande — d'où
-             `aria-hidden` : le contenu qu'il annonce est atteignable par la
-             tabulation comme par le défilement, et l'annoncer une seconde fois
-             à la voix n'apprendrait rien.
-
-             L'animation s'arrête d'elle-même sous `prefers-reduced-motion` :
-             `main.css` neutralise toutes les animations, celle-ci comprise. -->
-        <div
-          class="pointer-events-none absolute inset-x-0 bottom-24 z-10 hidden justify-center sm:bottom-28 lg:flex"
-          aria-hidden="true"
-        >
-          <span
-            class="flex animate-bounce items-center justify-center rounded-full border border-glass-border bg-glass text-text-on-inverse backdrop-blur-glass"
-            :style="{ width: 'var(--target-compact)', height: 'var(--target-compact)' }"
-          >
-            <UiIcon name="chevron-down" size="1.1rem" />
-          </span>
-        </div>
 
         <!-- LE RAIL FLOTTE SUR LE MÉDIA, il ne se pose pas dessous.
 
