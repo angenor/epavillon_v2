@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { AttachedImage } from '~/types/media'
 import type { PublicSessionSpeaker, SessionOrganization } from '~/types/programme/session'
 
 /** Intervenants et organisations associées — ce que la base publie, sans rien de plus. */
@@ -6,12 +7,21 @@ import type { PublicSessionSpeaker, SessionOrganization } from '~/types/programm
 interface Props {
   speakers: PublicSessionSpeaker[]
   organizations: SessionOrganization[]
+  leadLogo: AttachedImage | null
 }
 
 const props = defineProps<Props>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
+
+function firstWord(text: string): { lead: string; rest: string } {
+  const index = text.indexOf(' ')
+  return index > 0 ? { lead: text.slice(0, index), rest: text.slice(index) } : { lead: text, rest: '' }
+}
+
+const speakersTitle = computed(() => firstWord(t('activity.people.speakers')))
+const organizationsTitle = computed(() => firstWord(t('activity.people.organizedBy')))
 
 const ROLE_ORDER = ['moderator', 'keynote', 'facilitator', 'speaker', 'panelist', 'interpreter']
 
@@ -22,9 +32,7 @@ const speakers = computed(() =>
       id: speaker.id,
       name: speaker.display_name,
       role: speaker.role,
-      lead: speaker.role === 'moderator' || speaker.role === 'keynote',
-      job: speaker.job_title_snapshot ?? '',
-      organization: speaker.organization_snapshot ?? '',
+      affiliation: [speaker.job_title_snapshot, speaker.organization_snapshot].filter(Boolean).join(' · '),
       bio: speaker.bio ? tr(speaker.bio) : '',
       avatar: speaker.avatar,
       initials: initialsOf(speaker.display_name),
@@ -44,64 +52,105 @@ const organizations = computed(() =>
       country: organization.country ? tr(organization.country) : '',
     })),
 )
+
+const lead = computed(() => organizations.value.find((organization) => organization.role === 'lead') ?? null)
+const others = computed(() => organizations.value.filter((organization) => organization !== lead.value))
+
+const logo = computed(() =>
+  props.leadLogo
+    ? { src: props.leadLogo.sources.thumb?.url ?? props.leadLogo.url, alt: tr(props.leadLogo.alt_text) }
+    : null,
+)
 </script>
 
 <template>
-  <section v-if="speakers.length" aria-labelledby="intervenants-titre">
-    <h2 id="intervenants-titre" class="mb-5 border-b-4 border-poster-ink pb-2.5 font-poster text-[2.375rem] leading-none font-black uppercase font-stretch-[68%]">
-      {{ t('activity.people.speakers') }}
+  <section v-if="speakers.length" aria-labelledby="intervenants-titre" class="font-sans">
+    <h2 id="intervenants-titre" class="border-b border-text pb-3 font-sans text-[26px] leading-tight font-light text-text">
+      <b class="font-bold">{{ speakersTitle.lead }}</b>{{ speakersTitle.rest }}
     </h2>
-    <ul class="grid grid-cols-2 gap-x-5 gap-y-9 pt-2 sm:grid-cols-3 xl:grid-cols-4">
-      <li v-for="speaker in speakers" :key="speaker.id" class="flex flex-col items-center text-center">
-        <UiImage
-          v-if="speaker.avatar"
-          :image="speaker.avatar"
-          ratio="1 / 1"
-          rounded="rounded-full"
-          class="size-24 shrink-0 overflow-hidden rounded-full border-2 border-poster-ink"
-          sizes="96px"
-        />
-        <span
-          v-else
-          class="flex size-24 shrink-0 items-center justify-center rounded-full border-2 border-poster-ink bg-poster-paper-sunken font-poster text-[1.75rem] font-black"
-          aria-hidden="true"
-        >
-          {{ speaker.initials }}
+    <ul>
+      <li
+        v-for="speaker in speakers"
+        :key="speaker.id"
+        class="grid grid-cols-[48px_minmax(0,1fr)] gap-x-4 gap-y-1 border-b border-border-subtle py-4.5 sm:grid-cols-[64px_minmax(0,1fr)_auto] sm:items-center sm:gap-x-5"
+      >
+        <span class="row-span-2 self-start sm:row-span-1 sm:self-center">
+          <UiImage
+            v-if="speaker.avatar"
+            :image="speaker.avatar"
+            ratio="1 / 1"
+            rounded="rounded-full"
+            class="size-12 sm:size-16"
+            sizes="64px"
+          />
+          <span
+            v-else
+            class="flex size-12 items-center justify-center rounded-full bg-surface-inverse text-base font-light text-text-on-inverse sm:size-16 sm:text-xl"
+            aria-hidden="true"
+          >
+            {{ speaker.initials }}
+          </span>
         </span>
+
         <span
-          class="mt-3 rounded-sm px-1.5 py-0.5 font-poster-mono text-[0.625rem] font-semibold tracking-[0.06em] uppercase"
-          :class="speaker.lead ? 'bg-poster-ink text-poster-on-ink-accent' : 'text-poster-ink-muted'"
+          class="col-start-2 row-start-1 text-xs font-bold text-accent uppercase sm:col-start-3 sm:text-right"
+          :style="{ letterSpacing: 'var(--tracking-caps)' }"
         >
           {{ t(`activity.people.role.${speaker.role}`) }}
         </span>
-        <span class="mt-1 text-[1.0625rem] leading-snug font-bold">{{ speaker.name }}</span>
-        <span v-if="speaker.job" class="mt-1 text-sm leading-snug text-poster-ink-muted italic">{{ speaker.job }}</span>
-        <span v-if="speaker.organization" class="text-sm leading-snug text-poster-ink-muted">{{ speaker.organization }}</span>
-        <details v-if="speaker.bio" class="mt-1.5 text-sm">
-          <summary class="cursor-pointer py-1 font-semibold underline underline-offset-4">{{ t('activity.people.bio') }}</summary>
-          <p class="mt-1 text-left whitespace-pre-line text-poster-ink-muted">{{ speaker.bio }}</p>
-        </details>
+
+        <div class="col-start-2 row-start-2 min-w-0 sm:row-start-1">
+          <p class="text-lg leading-snug font-bold text-text">{{ speaker.name }}</p>
+          <p v-if="speaker.affiliation" class="mt-0.5 text-sm text-text-muted">{{ speaker.affiliation }}</p>
+          <details v-if="speaker.bio" class="group mt-1 text-sm">
+            <summary class="inline-flex min-h-11 cursor-pointer list-none items-center gap-1 font-bold text-accent [&::-webkit-details-marker]:hidden">
+              {{ t('activity.people.bio') }}
+              <UiIcon name="chevron-down" size="1rem" class="transition-transform group-open:rotate-180" />
+            </summary>
+            <p class="max-w-prose pb-1 leading-relaxed whitespace-pre-line text-text-muted">{{ speaker.bio }}</p>
+          </details>
+        </div>
       </li>
     </ul>
   </section>
 
-  <section v-if="organizations.length > 1" aria-labelledby="organisations-titre">
-    <h2 id="organisations-titre" class="mb-5 border-b-4 border-poster-ink pb-2.5 font-poster text-[2.375rem] leading-none font-black uppercase font-stretch-[68%]">
-      {{ t('activity.people.organizations') }}
+  <section v-if="organizations.length" aria-labelledby="organisations-titre" class="font-sans">
+    <h2 id="organisations-titre" class="border-b border-text pb-3 font-sans text-[26px] leading-tight font-light text-text">
+      <b class="font-bold">{{ organizationsTitle.lead }}</b>{{ organizationsTitle.rest }}
     </h2>
-    <ul class="flex flex-wrap gap-3.5">
-      <li v-for="organization in organizations" :key="`${organization.role}-${organization.id}`" class="flex w-52 flex-col gap-1.5">
-        <span class="font-poster-mono text-[0.6875rem] font-semibold tracking-[0.08em] text-poster-ink-muted uppercase">
-          {{ t(`activity.people.orgRole.${organization.role}`) }}
+
+    <div v-if="lead" class="flex flex-col gap-4 border-b border-border-subtle py-5 sm:flex-row sm:items-center sm:gap-6">
+      <span class="flex h-24 w-[200px] shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border-subtle bg-surface-inverse-selected p-3">
+        <img v-if="logo" :src="logo.src" :alt="logo.alt" class="size-full object-contain" loading="lazy" decoding="async">
+        <span v-else class="text-[22px] font-bold text-text-on-inverse-selected">{{ lead.acronym || initialsOf(lead.name) }}</span>
+      </span>
+      <div class="min-w-0">
+        <p class="text-xs font-bold text-accent uppercase" :style="{ letterSpacing: 'var(--tracking-caps)' }">
+          {{ t('activity.people.orgRole.lead') }}
+        </p>
+        <p class="mt-1 text-xl leading-snug font-bold text-text">{{ lead.name }}</p>
+        <p v-if="lead.country" class="mt-0.5 text-sm text-text-muted">{{ lead.country }}</p>
+      </div>
+    </div>
+
+    <ul v-if="others.length" class="grid sm:grid-cols-2 sm:gap-x-8">
+      <li
+        v-for="organization in others"
+        :key="`${organization.role}-${organization.id}`"
+        class="flex items-center gap-4 border-b border-border-subtle py-4"
+      >
+        <span class="flex h-14 w-[120px] shrink-0 items-center justify-center rounded-md border border-border-subtle bg-surface-inverse-selected px-2">
+          <span class="truncate text-base font-bold text-text-on-inverse-selected">
+            {{ organization.acronym || initialsOf(organization.name) }}
+          </span>
         </span>
-        <span
-          class="flex min-h-21 flex-col gap-1 rounded-md border-2 border-poster-ink px-3.5 py-3 shadow-poster-sm"
-          :class="organization.role === 'lead' ? 'bg-poster-today' : 'bg-poster-paper-raised'"
-        >
-          <span v-if="organization.acronym" class="font-poster text-[1.375rem] leading-none font-black font-stretch-[75%]">{{ organization.acronym }}</span>
-          <span class="text-xs leading-snug">{{ organization.name }}</span>
-          <span v-if="organization.country" class="text-xs text-poster-ink-muted">{{ organization.country }}</span>
-        </span>
+        <div class="min-w-0">
+          <p class="text-[11px] font-bold text-accent uppercase" :style="{ letterSpacing: 'var(--tracking-caps)' }">
+            {{ t(`activity.people.orgRole.${organization.role}`) }}
+          </p>
+          <p class="mt-0.5 text-[15px] leading-snug font-bold text-text">{{ organization.name }}</p>
+          <p v-if="organization.country" class="text-[13px] text-text-muted">{{ organization.country }}</p>
+        </div>
       </li>
     </ul>
   </section>

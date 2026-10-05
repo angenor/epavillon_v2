@@ -59,8 +59,7 @@
     "jump": "Aller à la journée",
     "showPast": "Afficher les journées passées",
     "hidePast": "Masquer les journées passées",
-    "monthYear": "{month} · {count}",
-    "special": "Journée spéciale — {title}"
+    "monthYear": "{month} · {count}"
   },
   "week": {
     "live": "Direct",

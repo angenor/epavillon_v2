@@ -82,95 +82,93 @@ const loginTo = computed(() => ({ path: localePath('auth-login'), query: { redir
 </script>
 
 <template>
-  <section class="rounded-lg border-2 border-poster-ink bg-poster-paper-raised p-5" aria-labelledby="questions-titre">
-    <div class="flex items-baseline justify-between gap-3">
-      <h2 id="questions-titre" class="font-poster text-[1.625rem] font-black uppercase font-stretch-[68%]">
-        {{ t('activity.questions.title') }}
-      </h2>
-      <span v-if="status === 'ready'" class="font-poster-mono text-xs text-poster-ink-muted">
-        {{ t('activity.questions.count', questions.length) }}
-      </span>
-    </div>
+  <section class="rounded-lg bg-surface-raised p-6 font-sans" aria-labelledby="questions-titre">
+    <h2 id="questions-titre" class="font-sans text-xl leading-tight font-bold text-text">
+      {{ t('activity.questions.title') }}
+    </h2>
 
-    <UiSkeletonLoader v-if="status === 'loading'" class="mt-4" variant="text" :lines="3" />
-    <div v-else-if="status === 'failed'" class="mt-4 text-sm text-poster-ink-muted">
+    <form v-if="auth.isAuthenticated" class="mt-3 flex flex-col gap-2" @submit.prevent="ask">
+      <UiTextarea
+        v-model="draft"
+        :label="t('activity.questions.label')"
+        hide-label
+        block
+        :rows="3"
+        :maxlength="2000"
+        :show-counter="false"
+        :placeholder="t('activity.questions.placeholder')"
+      />
+      <UiButton type="submit" variant="primary" size="lg" block :loading="sending" :disabled="draft.trim().length < 3">
+        {{ t('activity.questions.send') }}
+      </UiButton>
+    </form>
+    <p v-else class="mt-3 text-sm text-text-muted">
+      <NuxtLink :to="loginTo" class="inline-flex min-h-11 items-center font-bold text-accent underline underline-offset-4">
+        {{ t('activity.questions.login') }}
+      </NuxtLink>
+      {{ t('activity.questions.loginHint') }}
+    </p>
+    <p v-if="error" class="mt-2 text-sm text-danger" role="alert">{{ error }}</p>
+
+    <UiSkeletonLoader v-if="status === 'loading'" class="mt-5" variant="text" :lines="3" />
+    <p v-else-if="status === 'failed'" class="mt-4 text-sm text-text-muted">
       {{ t('activity.questions.failed') }}
-      <button type="button" class="ml-1 cursor-pointer font-semibold underline underline-offset-4" @click="load">
+      <button type="button" class="ml-1 inline-flex min-h-11 cursor-pointer items-center font-bold text-accent underline underline-offset-4" @click="load">
         {{ t('common.actions.retry') }}
       </button>
-    </div>
+    </p>
 
     <template v-else>
-      <p v-if="!questions.length" class="mt-3 text-sm text-poster-ink-muted">{{ t('activity.questions.empty') }}</p>
-      <ol class="mt-3">
-        <li v-for="question in shown" :key="question.id" class="flex items-start gap-3 border-t border-poster-line py-3">
+      <p class="mt-3 text-[13px] text-text-muted">
+        {{ questions.length ? t('activity.questions.count', questions.length) : t('activity.questions.empty') }}
+      </p>
+      <ol v-if="questions.length" class="mt-3 border-t border-border-subtle">
+        <li v-for="question in shown" :key="question.id" class="flex items-start gap-3 border-b border-border-subtle py-3">
           <button
             type="button"
-            class="inline-flex h-11 min-w-16 shrink-0 items-center justify-center gap-1.5 rounded-full border-2 border-poster-ink px-3 font-poster-mono text-sm font-semibold"
+            class="flex size-12 shrink-0 flex-col items-center justify-center rounded-md border text-sm leading-none font-bold tabular-nums"
             :class="[
-              question.has_voted ? 'bg-poster-ink text-poster-on-ink-accent' : 'bg-poster-paper text-poster-ink',
-              auth.isAuthenticated ? 'cursor-pointer' : 'cursor-default',
+              question.has_voted ? 'border-accent-solid bg-accent-solid text-accent-contrast' : 'border-border bg-surface text-text',
+              auth.isAuthenticated ? 'cursor-pointer hover:border-accent' : 'cursor-default',
             ]"
             :aria-pressed="question.has_voted"
             :aria-label="t(question.has_voted ? 'activity.questions.unsupport' : 'activity.questions.support', { count: question.vote_count })"
             :disabled="!auth.isAuthenticated || busy === question.id"
             @click="support(question)"
           >
-            <UiIcon name="thumb-up" size="1.125rem" />
+            <UiIcon name="chevron-up" size="1.125rem" />
             {{ question.vote_count }}
           </button>
-          <div class="min-w-0 pt-0.5 text-sm leading-snug">
-            <p>{{ question.body }}</p>
-            <p v-if="question.is_mine" class="mt-1 font-poster-mono text-[0.6875rem] text-poster-ink-muted uppercase">
+          <div class="min-w-0 pt-0.5 text-[15px] leading-snug text-text">
+            <p class="break-words">{{ question.body }}</p>
+            <p
+              v-if="question.is_mine"
+              class="mt-1 text-[11px] font-bold text-accent uppercase"
+              :style="{ letterSpacing: 'var(--tracking-caps)' }"
+            >
               {{ t('activity.questions.mine') }}
             </p>
-            <p
+            <div
               v-for="answer in question.answers"
               :key="answer.id"
-              class="mt-2 rounded-md bg-poster-paper px-3 py-2 text-poster-ink"
+              class="mt-2 rounded-md bg-surface px-3 py-2 text-sm"
             >
-              <span class="block font-poster-mono text-[0.6875rem] font-semibold text-poster-ink-muted uppercase">
+              <p class="text-[11px] font-bold text-text-muted uppercase" :style="{ letterSpacing: 'var(--tracking-caps)' }">
                 {{ t(answer.is_official ? 'activity.questions.officialAnswer' : 'activity.questions.answer') }}
-              </span>
-              {{ answer.body }}
-            </p>
+              </p>
+              <p class="mt-0.5 break-words">{{ answer.body }}</p>
+            </div>
           </div>
         </li>
       </ol>
       <button
         v-if="questions.length > VISIBLE"
         type="button"
-        class="h-11 cursor-pointer text-sm font-semibold underline underline-offset-4"
+        class="mt-1 inline-flex min-h-11 cursor-pointer items-center text-sm font-bold text-accent underline underline-offset-4"
         @click="expanded = !expanded"
       >
         {{ expanded ? t('activity.questions.less') : t('activity.questions.more', questions.length - VISIBLE) }}
       </button>
-
-      <form v-if="auth.isAuthenticated" class="mt-2 flex gap-2" @submit.prevent="ask">
-        <label class="sr-only" for="question-publique">{{ t('activity.questions.label') }}</label>
-        <input
-          id="question-publique"
-          v-model="draft"
-          type="text"
-          maxlength="2000"
-          class="h-12 min-w-0 flex-1 rounded-md border-2 border-poster-ink bg-poster-paper-raised px-3 text-poster-ink placeholder:text-poster-ink-muted"
-          :placeholder="t('activity.questions.placeholder')"
-        >
-        <button
-          type="submit"
-          class="h-12 cursor-pointer rounded-md border-2 border-poster-ink bg-poster-ink px-4 font-bold text-poster-on-ink-accent disabled:cursor-not-allowed disabled:opacity-60"
-          :disabled="sending || draft.trim().length < 3"
-        >
-          {{ t('activity.questions.send') }}
-        </button>
-      </form>
-      <p v-else class="mt-3 text-sm text-poster-ink-muted">
-        <NuxtLink :to="loginTo" class="font-semibold text-poster-ink underline underline-offset-4">
-          {{ t('activity.questions.login') }}
-        </NuxtLink>
-        {{ t('activity.questions.loginHint') }}
-      </p>
-      <p v-if="error" class="mt-2 text-sm text-danger" role="alert">{{ error }}</p>
     </template>
   </section>
 </template>

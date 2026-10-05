@@ -3,11 +3,11 @@
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
 ## Dernière mise à jour — 5 octobre 2026
+- 05/10 — Page d'une activité : bandeau sur la photo de l'édition, titre en grand, logo de l'organisation, image et billet en léger débord, lecteur à la place de l'image pendant le direct ; l'affiche n'a plus d'écran. Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
 - 04/10 — `/programmations` passe en liste éditoriale (activité en direct à la une, journées groupées, couvertures) et en semaine à colonnes (jours figés, défilante sur téléphone, 05/10) ; l'affiche ne reste qu'à la page d'une activité. Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
 - 04/10 — Barre de navigation en aplat bleu nuit fermé d'un liseré aux couleurs du logo ; la veille, accueil retouché (témoignage en bas de cadre, éditions en liste par défaut, oiseau qui suit le curseur). Non déployé — [A0.4](progression/ecrans/a0.4-composants.md), [A15](progression/ecrans/a15-accueil.md).
 - 03/10 — Inscription réduite à nom, prénom, adresse et pays (pays déduit du fuseau) ; « Le même jour » avec couvertures. Non déployé, migration à jouer — [A3](progression/ecrans/a3-evenement-public.md).
 - 03/10 — La page d'une activité montre enfin la présentation détaillée, et le titre comme la présentation corrigés par l'équipe passent sur la séance publique (FR-091 amendé). Non déployé, migration à jouer — [A3](progression/ecrans/a3-evenement-public.md), [A8](progression/ecrans/a8-evaluation.md).
-- 02/10 — Page d'une activité : compte à rebours à la seconde en tête du billet, horaires sur une ligne, inscription visible dès l'arrivée et barre fixe qui la suit ; « Sur place » tu quand la séance est diffusée (03/10). Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
 
 ## État général
 | Domaine | État |
@@ -31,7 +31,7 @@ Un écran = un fichier : ce qui a été livré, les écarts entre le modèle et 
 | A0.4 | Composants d'interface + page de guide de style | ✅ 16/08 · navigation latérale du back-office refondue 04/09 · barre publique en aplat bleu nuit 04/10, non déployé | [écarts et vérifications](progression/ecrans/a0.4-composants.md) |
 | A1 | Authentification | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a1-authentification.md) |
 | A2 | Rattachement à une organisation | ✅ 17/08 · texte allégé 28/09 · rejoindre ne bloque plus le dépôt 28/09 · en production 29/09 | [écarts et vérifications](progression/ecrans/a2-organisation.md) |
-| A3 | Page publique de l'événement | ✅ 17/08 · refondue 19/08 · corrigée 27/08 · bandeau de programmation 16/09 · en production · affiche et page d'activité 30/09 · page d'activité resserrée 02/10, présentation détaillée et inscription allégée 03/10, programmations en liste éditoriale 04/10, non déployé | [écarts et vérifications](progression/ecrans/a3-evenement-public.md) |
+| A3 | Page publique de l'événement | ✅ 17/08 · refondue 19/08 · corrigée 27/08 · bandeau de programmation 16/09 · en production · affiche et page d'activité 30/09 · page d'activité resserrée 02/10, présentation détaillée et inscription allégée 03/10, programmations en liste éditoriale 04/10, page d'activité en bandeau 05/10, non déployé | [écarts et vérifications](progression/ecrans/a3-evenement-public.md) |
 | A4 | Formulaire de soumission | ✅ 17/08 · ajusté 15/09 et 16/09 | [écarts et vérifications](progression/ecrans/a4-soumission.md) |
 | A5 | Espace organisation | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a5-espace-organisation.md) |
 | A6 | Tableau de bord back-office | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a6-tableau-de-bord.md) |

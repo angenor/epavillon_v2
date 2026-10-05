@@ -59,8 +59,7 @@
     "jump": "Go to day",
     "showPast": "Show past days",
     "hidePast": "Hide past days",
-    "monthYear": "{month} · {count}",
-    "special": "Special day — {title}"
+    "monthYear": "{month} · {count}"
   },
   "week": {
     "live": "Live",

@@ -15,16 +15,14 @@
     "live": "En direct"
   },
   "countdown": {
-    "d": "jour | jours",
-    "h": "heure | heures",
-    "m": "min",
-    "s": "sec",
     "spoken": "Commence dans {days} jours, {hours} heures et {minutes} minutes"
   },
   "hero": {
     "ledBy": "Porté par",
     "yourTime": "Chez vous",
-    "yourZone": "{zone}, d'après votre appareil"
+    "yourZone": "{zone}, d'après votre appareil",
+    "zone": "{zone} ({offset})",
+    "yourTimeAt": "Chez vous :"
   },
   "stage": {
     "liveTitle": "Le direct",
@@ -40,7 +38,6 @@
   },
   "people": {
     "speakers": "Intervenantes et intervenants",
-    "organizations": "Organisé avec",
     "bio": "Biographie",
     "role": {
       "speaker": "Intervention",
@@ -55,11 +52,13 @@
       "co_organizer": "Co-organisateur",
       "partner": "Partenaire",
       "sponsor": "Soutien"
-    }
+    },
+    "organizedBy": "Organisé par"
   },
   "sameDay": {
     "title": "Le même jour",
-    "here": "Ici"
+    "here": "Vous êtes ici",
+    "all": "Toute la journée"
   },
   "questions": {
     "title": "Questions du public",
@@ -100,15 +99,13 @@
       "live": "L'activité a commencé : suivez-la en direct.",
       "past": "Personne ne s'était inscrit. | {count} personne s'était inscrite. | {count} personnes s'étaient inscrites."
     },
-    "place": "Lieu",
-    "format": "Format",
     "languages": "Langues",
-    "broadcast": "Diffusion",
-    "onSite": "Sur place uniquement",
     "calendar": "Agenda",
     "share": "Partager",
     "copied": "Lien copié",
     "bar": "Inscription à l'activité",
-    "live": "Diffusée en direct sur cette page"
+    "live": "Diffusée en direct sur cette page",
+    "startsIn": "Commence dans",
+    "places": "aucune place restante | {count} place restante | {count} places restantes"
   }
 }

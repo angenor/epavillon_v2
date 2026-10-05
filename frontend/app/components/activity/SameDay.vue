@@ -10,6 +10,8 @@ interface Props {
   editionSlug: string
   timezone: TimeZoneName
   dayLabel: string
+  /** La liste de la journée entière, quand la page sait la désigner. */
+  dayTo?: string
 }
 
 const props = defineProps<Props>()
@@ -17,7 +19,7 @@ const props = defineProps<Props>()
 const { t } = useI18n()
 const { tr } = useI18nText()
 const { time } = useDateTime()
-const { state, themeColor, link } = useProgrammeSession()
+const { state, link } = useProgrammeSession()
 
 const rows = computed(() =>
   props.sessions.map((session) => {
@@ -29,52 +31,75 @@ const rows = computed(() =>
       start: time(session.starts_at, props.timezone),
       title: tr(session.title),
       cover: session.cover,
-      color: themeColor(session),
       here,
+      live: current === 'live',
+      cancelled: current === 'cancelled',
       faded: !here && (current === 'past' || current === 'cancelled'),
-      tag: here ? t('activity.sameDay.here') : current === 'live' ? t('programme.week.live') : current === 'past' ? t('session-card.state.past') : '',
     }
   }),
 )
 </script>
 
 <template>
-  <section v-if="rows.length > 1" aria-labelledby="meme-jour-titre">
-    <div class="flex items-baseline justify-between gap-3 border-b-4 border-poster-ink pb-2">
-      <h2 id="meme-jour-titre" class="font-poster text-[1.625rem] font-black uppercase font-stretch-[68%]">
-        {{ t('activity.sameDay.title') }}
+  <section v-if="rows.length > 1" aria-labelledby="meme-jour-titre" class="font-sans">
+    <div class="flex flex-wrap items-baseline justify-between gap-x-4 border-b border-text pb-2.5">
+      <h2 id="meme-jour-titre" class="font-sans text-[22px] leading-tight font-light text-text">
+        <b class="font-bold">{{ t('activity.sameDay.title') }}</b>, {{ props.dayLabel }}
       </h2>
-      <span class="font-poster-mono text-xs text-poster-ink-muted">{{ props.dayLabel }}</span>
+      <NuxtLink
+        v-if="props.dayTo"
+        :to="props.dayTo"
+        class="inline-flex min-h-11 items-center gap-1 text-sm font-bold text-accent hover:underline"
+      >
+        {{ t('activity.sameDay.all') }}
+        <UiIcon name="arrow-right" size="1rem" />
+      </NuxtLink>
     </div>
+
     <ol>
-      <li v-for="row in rows" :key="row.id">
-        <NuxtLink
-          :to="row.to"
-          class="flex min-h-16 items-center gap-3 border-b-2 border-poster-ink px-3 py-2.5"
-          :class="[row.here ? 'bg-poster-ink text-poster-on-ink-accent' : 'text-poster-ink hover:bg-poster-paper-sunken', row.faded ? 'opacity-55' : '']"
-          :aria-current="row.here ? 'page' : undefined"
+      <li v-for="(row, index) in rows" :key="row.id">
+        <article
+          class="group relative -ml-2.5 grid grid-cols-[52px_88px_minmax(0,1fr)] items-center gap-x-3 rounded-md px-2.5 py-3 sm:grid-cols-[64px_104px_minmax(0,1fr)] sm:gap-x-3.5"
+          :class="row.here ? 'bg-accent/8' : index % 2 ? 'bg-text/3 hover:bg-surface-hover' : 'hover:bg-surface-hover'"
         >
-          <span class="w-12 shrink-0 font-poster-mono text-sm font-semibold">{{ row.start }}</span>
-          <span class="flex w-16 shrink-0 items-center" aria-hidden="true">
+          <span
+            class="text-lg font-light tabular-nums sm:text-[22px]"
+            :class="row.faded ? 'text-text-subtle' : row.live ? 'text-live' : 'text-text'"
+          >
+            {{ row.start }}
+          </span>
+
+          <span class="relative block aspect-video overflow-hidden rounded-md bg-surface-inverse" aria-hidden="true">
             <UiImage
               v-if="row.cover"
               :image="row.cover"
-              ratio="16 / 9"
-              rounded="rounded-sm"
-              frame-class="border-2 border-current"
-              class="w-full"
+              ratio="auto"
+              frame-class="size-full"
+              class="absolute inset-0"
               :class="{ grayscale: row.faded }"
-              sizes="4rem"
-            />
-            <span
-              v-else
-              class="aspect-video w-full rounded-sm border-2 border-current"
-              :style="{ background: row.color ?? 'var(--color-poster-paper-sunken)' }"
+              sizes="104px"
             />
           </span>
-          <span class="line-clamp-3 min-w-0 flex-1 text-sm leading-snug font-semibold">{{ row.title }}</span>
-          <span v-if="row.tag" class="font-poster-mono text-[0.6875rem] font-semibold uppercase">{{ row.tag }}</span>
-        </NuxtLink>
+
+          <span class="min-w-0 text-sm leading-snug">
+            <NuxtLink
+              :to="row.to"
+              class="font-bold no-underline after:absolute after:inset-0 group-hover:underline"
+              :class="[row.faded ? 'text-text-muted' : 'text-text', { 'line-through': row.cancelled }]"
+              :aria-current="row.here ? 'page' : undefined"
+            >
+              <span class="line-clamp-3">{{ row.title }}</span>
+            </NuxtLink>
+            <span
+              v-if="row.here || row.live"
+              class="mt-0.5 block text-[11px] font-bold uppercase"
+              :class="row.here ? 'text-accent' : 'text-live'"
+              :style="{ letterSpacing: 'var(--tracking-caps)' }"
+            >
+              {{ row.here ? t('activity.sameDay.here') : t('activity.state.live') }}
+            </span>
+          </span>
+        </article>
       </li>
     </ol>
   </section>

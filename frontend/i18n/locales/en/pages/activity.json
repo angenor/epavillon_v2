@@ -15,16 +15,14 @@
     "live": "Live"
   },
   "countdown": {
-    "d": "day | days",
-    "h": "hour | hours",
-    "m": "min",
-    "s": "sec",
     "spoken": "Starts in {days} days, {hours} hours and {minutes} minutes"
   },
   "hero": {
     "ledBy": "Led by",
     "yourTime": "Your time",
-    "yourZone": "{zone}, from your device"
+    "yourZone": "{zone}, from your device",
+    "zone": "{zone} ({offset})",
+    "yourTimeAt": "Your time:"
   },
   "stage": {
     "liveTitle": "Live",
@@ -40,7 +38,6 @@
   },
   "people": {
     "speakers": "Speakers",
-    "organizations": "Organised with",
     "bio": "Biography",
     "role": {
       "speaker": "Speaker",
@@ -55,11 +52,13 @@
       "co_organizer": "Co-organiser",
       "partner": "Partner",
       "sponsor": "Supporter"
-    }
+    },
+    "organizedBy": "Organised by"
   },
   "sameDay": {
     "title": "Same day",
-    "here": "Here"
+    "here": "You are here",
+    "all": "The whole day"
   },
   "questions": {
     "title": "Audience questions",
@@ -100,15 +99,13 @@
       "live": "The activity has started: follow it live.",
       "past": "Nobody had registered. | {count} person had registered. | {count} people had registered."
     },
-    "place": "Venue",
-    "format": "Format",
     "languages": "Languages",
-    "broadcast": "Broadcast",
-    "onSite": "On site only",
     "calendar": "Calendar",
     "share": "Share",
     "copied": "Link copied",
     "bar": "Activity registration",
-    "live": "Streamed live on this page"
+    "live": "Streamed live on this page",
+    "startsIn": "Starts in",
+    "places": "no seat left | {count} seat left | {count} seats left"
   }
 }

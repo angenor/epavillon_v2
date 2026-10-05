@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
- * Le compte à rebours du billet, à la seconde. Il ne tourne qu'une fois monté :
- * le rendu serveur pose des tirets, sans heure qui serait fausse à l'arrivée.
+ * Le compte à rebours de la carte, sur une ligne. Il ne tourne qu'une fois monté :
+ * le rendu serveur pose un tiret, sans heure qui serait fausse à l'arrivée.
  */
 
 interface Props {
@@ -12,6 +12,7 @@ const props = defineProps<Props>()
 const emit = defineEmits<{ elapsed: [] }>()
 
 const { t } = useI18n()
+const { intlLocale } = useDateTime()
 
 const now = ref<number | null>(null)
 let clock: ReturnType<typeof setInterval> | undefined
@@ -30,20 +31,20 @@ watch(left, (seconds) => {
   emit('elapsed')
 })
 
-const units = computed(() => {
+// Les unités abrégées viennent d'Intl : « 403 j » en français, « 403 days » en anglais.
+const unit = (value: number, name: 'day' | 'hour' | 'minute' | 'second') =>
+  new Intl.NumberFormat(intlLocale.value, { style: 'unit', unit: name, unitDisplay: 'short' }).format(value)
+
+const compact = computed(() => {
   const seconds = left.value
-  const unit = (key: string, count: number, digits = 2) => ({
-    key,
-    count,
-    value: seconds === null ? '––' : String(count).padStart(digits, '0'),
-  })
-  const days = seconds === null ? 2 : Math.floor(seconds / 86_400)
-  const parts = [
-    unit('h', Math.floor(((seconds ?? 0) % 86_400) / 3600)),
-    unit('m', Math.floor(((seconds ?? 0) % 3600) / 60)),
-    unit('s', (seconds ?? 0) % 60),
-  ]
-  return days ? [unit('d', days, 1), ...parts] : parts
+  if (seconds === null) return '–'
+  const days = Math.floor(seconds / 86_400)
+  const hours = Math.floor((seconds % 86_400) / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const parts = [unit(hours, 'hour'), unit(minutes, 'minute')]
+  if (days) return [unit(days, 'day'), ...parts].join(' ')
+  // Dans la dernière heure, la seconde rend le départ sensible.
+  return hours ? parts.join(' ') : [unit(minutes, 'minute'), unit(seconds % 60, 'second')].join(' ')
 })
 
 const spoken = computed(() => {
@@ -58,20 +59,8 @@ const spoken = computed(() => {
 </script>
 
 <template>
-  <div class="flex" role="timer" :aria-label="spoken">
-    <div
-      v-for="(unit, index) in units"
-      :key="unit.key"
-      class="flex flex-1 flex-col items-center gap-1.5"
-      :class="index ? 'border-l border-poster-on-ink-muted/30' : ''"
-      aria-hidden="true"
-    >
-      <span class="font-poster text-[3.25rem] leading-[0.85] font-black text-poster-on-ink-accent tabular-nums font-stretch-[62%]">
-        {{ unit.value }}
-      </span>
-      <span class="font-poster-mono text-[0.6875rem] font-semibold tracking-[0.08em] text-poster-on-ink-muted uppercase">
-        {{ t(`activity.countdown.${unit.key}`, unit.count) }}
-      </span>
-    </div>
-  </div>
+  <p class="flex flex-wrap items-baseline justify-between gap-x-3 text-[0.8125rem] text-text-muted" role="timer" :aria-label="spoken">
+    <span aria-hidden="true">{{ t('activity.ticket.startsIn') }}</span>
+    <span class="text-xl font-light text-text tabular-nums" aria-hidden="true">{{ compact }}</span>
+  </p>
 </template>

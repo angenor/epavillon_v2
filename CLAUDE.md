@@ -189,16 +189,16 @@ Cette ligne interdisait le verre dépoli et les dégradés sans exception. **Le 
 - Elle ne vaut **que sur un média** — une photographie, une vidéo. Un panneau de verre sur une surface de page est un défaut, pas une variante.
 - La matière vient de **jetons** : `--color-glass`, `-raised`, `-hover`, `-accent`, `--color-glass-border`, `-border-strong`, `--blur-glass`, `--blur-glass-strong`, `--shadow-glass`. Jamais un `bg-white/20` écrit dans un composant — la v1 avait treize opacités différentes réparties dans huit fichiers, et personne ne savait laquelle était la bonne.
 - **Le verre sépare, il ne contraste pas.** Le contraste reste porté par `--color-scrim` sous le média. Sans voile, une photographie claire rend le panneau illisible malgré son flou.
-- **Deux dégradés** existent : `.scrim-fade-bottom`, le fondu qui rattache le rail de vignettes au bas d'une image — il rend lisible un texte blanc sur une image dont on ignore la luminosité ; et `.fade-inverse-start` (arbitré le 16/09), qui fond une photographie dans l'aplat institutionnel portant le texte, sur la section d'appel de l'accueil.
+- **Trois dégradés** existent : `.scrim-fade-bottom`, le fondu qui rattache le rail de vignettes au bas d'une image — il rend lisible un texte blanc sur une image dont on ignore la luminosité ; `.fade-inverse-start` (arbitré le 16/09), qui fond une photographie dans l'aplat institutionnel portant le texte, sur la section d'appel de l'accueil ; et `.scrim-fade-top` (arbitré le 05/10), qui assombrit vers le haut la photographie de l'édition sous le titre d'une activité.
 - Ces surfaces **ne s'inversent pas** en thème sombre, comme les aplats institutionnels : le fond est une photographie dans les deux thèmes.
 
 Le détail est au § « Le verre » de [docs/guide-de-style-epavillon.html](docs/guide-de-style-epavillon.html).
 
-**L'affiche : réservée à la page d'une activité, arbitrée le 30/09, réduite le 04/10.**
+**L'affiche : abandonnée le 05/10.**
 
-La page d'une activité suit une direction « affiche de festival » — papier crème, encre bleu riche, bordures de 2 px, ombres dures décalées, Archivo étroite et IBM Plex Mono embarquées. Elle passe par les jetons `--color-poster-*` et `--shadow-poster*`, clair et sombre, et par la couleur des thématiques **en base**. Nulle part ailleurs : un autre écran qui appelle un jeton `poster` est un défaut. Le détail est au § « L'affiche » du guide.
+La direction « affiche de festival » (arbitrée le 30/09 pour la programmation publique) n'a plus d'écran. Le corps de `/programmations` l'a quittée le 04/10 pour la « liste éditoriale » des éditions de l'accueil : jetons ordinaires, filets fins, grands chiffres légers en `font-sans`, vignette de couverture, `UiStatusBadge`. La liste s'ouvre sur l'activité en direct s'il y en a une (`EventProgrammeLiveLead`), puis enchaîne les journées ; la semaine est une colonne par jour, séparées d'un filet. Ni thématique, ni format, ni filtre par thématique : la recherche seule.
 
-Le corps de `/programmations` l'a quittée le 04/10 pour la « liste éditoriale » des éditions de l'accueil : jetons ordinaires, filets fins, grands chiffres légers en `font-sans`, vignette de couverture, `UiStatusBadge`. La liste s'ouvre sur l'activité en direct s'il y en a une (`EventProgrammeLiveLead`), puis enchaîne les journées ; la semaine est une colonne par jour, séparées d'un filet. Ni thématique, ni format, ni filtre par thématique : la recherche seule.
+La page d'une activité l'a quittée le 05/10 : bandeau pleine largeur sur la photographie de l'édition (voile `bg-scrim/50` et `.scrim-fade-top`), étiquettes d'état et de format, titre en grand sur toute la largeur, lieu, date et **logo de l'organisation porteuse en tuile blanche** ; dessous, l'image de l'activité et le billet remontent de 72 px sur le bandeau. Pendant le direct, l'image cède la place au lecteur et le titre ne bouge pas. Les jetons `--color-poster-*`, `--shadow-poster*` et les polices Archivo et IBM Plex Mono (`assets/css/affiche.css`) restent déclarés sans usage : un nouvel écran ne doit pas les reprendre.
 
 **Le relief moulé : réservé à l'interrupteur, arbitré le 19/08.**
 

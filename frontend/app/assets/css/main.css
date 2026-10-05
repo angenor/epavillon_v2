@@ -197,6 +197,18 @@
       transparent 100%
     );
   }
+
+  /* LE FONDU DU HAUT D'UN MÉDIA — troisième dégradé, arbitré le 05/10 pour le
+     bandeau d'une activité : le fil d'Ariane, les étiquettes et le titre se
+     posent en haut de la photographie de l'édition, qui s'assombrit vers eux. */
+  .scrim-fade-top {
+    background-image: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-scrim) 90%, transparent) 0%,
+      color-mix(in srgb, var(--color-scrim) 60%, transparent) 55%,
+      color-mix(in srgb, var(--color-scrim) 30%, transparent) 100%
+    );
+  }
 }
 
 /* ---------------------------------------------------------------------------

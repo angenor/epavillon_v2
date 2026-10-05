@@ -5,10 +5,10 @@ import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
 import type { TicketCallToAction } from './TicketAction.vue'
 
 /**
- * Le billet : l'image, le compte à rebours, les places quand elles sont
- * comptées, LE bouton qui compte à ce moment-là, et les informations pratiques.
- * Les heures d'ouverture des inscriptions se comparent à l'horloge du
- * navigateur, une fois monté : le serveur tranche de toute façon.
+ * La carte de l'activité : l'heure, le compte à rebours, les places quand elles
+ * sont comptées, et LE bouton qui compte à ce moment-là. Les heures d'ouverture
+ * des inscriptions se comparent à l'horloge du navigateur, une fois monté : le
+ * serveur tranche de toute façon.
  *
  * Dès que ce bouton sort de l'écran, une barre fixée en bas le reprend : on doit
  * pouvoir s'inscrire sans remonter, et sur mobile sans descendre.
@@ -20,6 +20,7 @@ interface Props {
   state: ProgrammeSessionState
   languages: string[]
   now: number | null
+  homeTime: { range: string; zone: string } | null
 }
 
 const props = defineProps<Props>()
@@ -27,9 +28,9 @@ const emit = defineEmits<{ started: [] }>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
-const { dateTime, dayLong, timeRange } = useDateTime()
+const { dateTime, dayLong, time, timeRange, zoneOffsetShort, zoneLabel } = useDateTime()
 const requestUrl = useRequestURL()
-const { showFormat } = useProgrammeSession()
+const { duration } = useProgrammeSession()
 const { mine, refresh, cancel } = useSessionRegistration(computed(() => props.session.id))
 
 const dialogOpen = ref(false)
@@ -116,8 +117,20 @@ onBeforeUnmount(() => observer?.disconnect())
 const remaining = computed(() => {
   if (capacity.value === null) return ''
   if (full.value) return props.session.waitlist_enabled ? t('session-card.capacity.waitlist') : t('session-card.capacity.full')
-  return t('session-card.capacity.remaining', capacity.value - registered.value)
+  return t('activity.ticket.places', capacity.value - registered.value)
 })
+
+const zone = computed(() =>
+  t('activity.hero.zone', {
+    zone: zoneLabel(props.session.timezone, props.edition.city ?? undefined),
+    offset: zoneOffsetShort(props.session.timezone, props.session.starts_at),
+  }),
+)
+const until = computed(() =>
+  t('programme.list.until', { end: time(props.session.ends_at, props.session.timezone), duration: duration(props.session) }),
+)
+const streamedHere = computed(() => props.session.is_streamed && props.state !== 'past' && props.state !== 'cancelled')
+const hasAction = computed(() => callToAction.value !== null || action.value === 'registered' || note.value !== '')
 
 const place = computed(() =>
   [props.session.room_name ? tr(props.session.room_name) : '', props.edition.city, tr(props.edition.country_name)]
@@ -167,44 +180,46 @@ async function share(): Promise<void> {
 </script>
 
 <template>
-  <aside
-    class="overflow-hidden rounded-lg bg-poster-ink text-poster-on-ink"
-    :style="{ boxShadow: `8px 8px 0 ${props.session.themes[0]?.color ?? 'var(--color-poster-line)'}` }"
-    :aria-label="t('activity.ticket.label')"
-  >
-    <div v-if="props.session.cover" class="relative border-b-2 border-poster-ink">
-      <UiImage :image="props.session.cover" ratio="16 / 9" loading="eager" sizes="(min-width: 1024px) 26.5rem, 100vw" />
-      <span
-        v-if="props.state === 'live'"
-        class="absolute top-3 left-3 -rotate-[6deg] rounded border-[3px] border-live bg-poster-paper px-2.5 py-0.5 font-poster text-xl font-black tracking-[0.06em] text-live font-stretch-[70%]"
-      >
-        {{ t('activity.state.live') }}
-      </span>
-    </div>
+  <aside class="overflow-hidden rounded-lg bg-surface-raised text-text shadow-lg" :aria-label="t('activity.ticket.label')">
+    <div class="h-1 bg-accent" aria-hidden="true" />
+    <div class="flex flex-col p-6">
+      <p class="text-xs text-text-muted uppercase" :style="{ letterSpacing: 'var(--tracking-caps)' }">{{ zone }}</p>
+      <p class="mt-2.5 flex flex-wrap items-end gap-x-3 gap-y-1">
+        <span class="text-[3.25rem] leading-[0.9] font-light tabular-nums" :class="props.state === 'live' ? 'text-live' : 'text-text'">
+          {{ time(props.session.starts_at, props.session.timezone) }}
+        </span>
+        <span class="pb-0.5 text-sm text-text-muted tabular-nums">{{ until }}</span>
+      </p>
+      <p v-if="props.homeTime" class="mt-3 text-sm text-text-muted">
+        {{ t('activity.hero.yourTimeAt') }}
+        <b class="font-bold text-text tabular-nums">{{ props.homeTime.range }}</b>
+        ({{ props.homeTime.zone }})
+      </p>
 
-    <div class="flex flex-col gap-5 p-6">
-      <ActivityCountdown v-if="props.state === 'upcoming'" :starts-at="props.session.starts_at" @elapsed="emit('started')" />
-      <div v-if="capacity !== null">
-        <p class="flex items-baseline justify-between gap-3">
-          <span class="flex items-baseline gap-2">
-            <span class="font-poster text-[2rem] leading-[0.9] font-black text-poster-on-ink-accent font-stretch-[62%]">{{ registered }}</span>
-            <span class="font-poster-mono text-sm text-poster-on-ink-muted">{{ t('activity.ticket.ofCapacity', { capacity }) }}</span>
-          </span>
-          <span class="text-right text-sm text-poster-on-ink-muted">{{ remaining }}</span>
-        </p>
-        <div
-          class="mt-2 h-2 overflow-hidden rounded-full bg-poster-on-ink-muted/30"
-          role="meter"
-          :aria-valuenow="registered"
-          :aria-valuemax="capacity"
-          aria-valuemin="0"
-          :aria-label="t('session-card.capacity.label')"
-        >
-          <div class="h-full bg-poster-on-ink-accent" :style="{ width: `${pct}%` }" />
+      <div
+        v-if="props.state === 'upcoming'"
+        class="mt-5 flex flex-col gap-3.5 border-t border-border-subtle pt-4.5"
+      >
+        <ActivityCountdown :starts-at="props.session.starts_at" @elapsed="emit('started')" />
+        <div v-if="capacity !== null">
+          <p class="flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
+            <span><b class="text-lg font-bold tabular-nums">{{ registered }}</b> {{ t('activity.ticket.ofCapacity', { capacity }) }}</span>
+            <span class="text-text-muted">{{ remaining }}</span>
+          </p>
+          <div
+            class="mt-2 h-1 overflow-hidden rounded-full bg-border-subtle"
+            role="meter"
+            :aria-valuenow="registered"
+            :aria-valuemax="capacity"
+            aria-valuemin="0"
+            :aria-label="t('session-card.capacity.label')"
+          >
+            <div class="h-full rounded-full bg-accent" :style="{ width: `${pct}%` }" />
+          </div>
         </div>
       </div>
 
-      <div ref="actions" class="flex flex-col gap-2.5">
+      <div v-show="hasAction" ref="actions" class="mt-5 flex flex-col gap-2.5">
         <ActivityTicketAction
           v-if="callToAction"
           :action="callToAction"
@@ -212,73 +227,45 @@ async function share(): Promise<void> {
           @register="dialogOpen = true"
         />
         <template v-else-if="action === 'registered'">
-          <p class="flex h-13.5 items-center justify-center gap-2 rounded-md bg-poster-on-ink/10 font-bold">
+          <p class="flex min-h-12 items-center justify-center gap-2 rounded-md bg-success-surface px-4 font-bold text-success">
             <UiIcon name="check-circle" size="1.25rem" />
             {{ t(mine?.status === 'waitlisted' ? 'activity.ticket.onWaitlist' : 'activity.ticket.registered') }}
           </p>
-          <button
-            type="button"
-            class="h-11 cursor-pointer text-sm font-semibold underline underline-offset-4 disabled:opacity-60"
-            :disabled="cancelling"
-            @click="onCancel"
-          >
+          <UiButton variant="link" class="self-center" :loading="cancelling" @click="onCancel">
             {{ t('activity.ticket.cancel') }}
-          </button>
+          </UiButton>
         </template>
-        <p v-if="note" class="text-xs leading-relaxed text-poster-on-ink-muted">{{ note }}</p>
+        <p v-if="note" class="text-[0.8125rem] leading-relaxed text-text-muted">{{ note }}</p>
       </div>
-    </div>
-    <div class="relative flex h-6 items-center" aria-hidden="true">
-      <span class="absolute -left-3 size-6 rounded-full bg-poster-paper" />
-      <span class="mx-5.5 flex-1 border-t-2 border-dashed border-poster-on-ink-muted/50" />
-      <span class="absolute -right-3 size-6 rounded-full bg-poster-paper" />
-    </div>
 
-    <div class="px-6 pt-2 pb-6">
-      <p
-        v-if="props.session.is_streamed && props.state !== 'past' && props.state !== 'cancelled'"
-        class="mb-4 flex items-center gap-3 rounded-md border-2 border-live bg-live/15 px-3.5 py-3 text-sm font-bold"
-      >
-        <span class="relative flex size-3 shrink-0" aria-hidden="true">
-          <span v-if="props.state === 'live'" class="absolute inset-0 animate-ping rounded-full bg-live motion-reduce:animate-none" />
-          <span class="relative size-3 rounded-full bg-live" />
-        </span>
-        {{ t('activity.ticket.live') }}
-      </p>
-      <dl class="grid grid-cols-[5.75rem_minmax(0,1fr)] gap-3 text-sm leading-snug">
-        <template v-if="place">
-          <dt class="pt-0.5 font-poster-mono text-[0.6875rem] tracking-[0.08em] text-poster-on-ink-muted uppercase">{{ t('activity.ticket.place') }}</dt>
-          <dd>{{ place }}</dd>
-        </template>
-        <template v-if="showFormat(props.session)">
-          <dt class="pt-0.5 font-poster-mono text-[0.6875rem] tracking-[0.08em] text-poster-on-ink-muted uppercase">{{ t('activity.ticket.format') }}</dt>
-          <dd>{{ t(`session-card.format.${props.session.format}`) }}</dd>
-        </template>
-        <template v-if="props.languages.length">
-          <dt class="pt-0.5 font-poster-mono text-[0.6875rem] tracking-[0.08em] text-poster-on-ink-muted uppercase">{{ t('activity.ticket.languages') }}</dt>
-          <dd>{{ props.languages.join(', ') }}</dd>
-        </template>
-        <template v-if="!props.session.is_streamed">
-          <dt class="pt-0.5 font-poster-mono text-[0.6875rem] tracking-[0.08em] text-poster-on-ink-muted uppercase">{{ t('activity.ticket.broadcast') }}</dt>
-          <dd>{{ t('activity.ticket.onSite') }}</dd>
-        </template>
-      </dl>
+      <div v-if="props.languages.length || streamedHere" class="mt-4 flex flex-col gap-1.5 text-[0.8125rem] text-text-muted">
+        <p v-if="props.languages.length">
+          {{ t('activity.ticket.languages') }} · <span class="text-text">{{ props.languages.join(', ') }}</span>
+        </p>
+        <p v-if="streamedHere" class="flex items-center gap-2">
+          <span class="relative flex size-2 shrink-0" aria-hidden="true">
+            <span v-if="props.state === 'live'" class="absolute inset-0 animate-ping rounded-full bg-live motion-reduce:animate-none" />
+            <span class="relative size-2 rounded-full bg-live" />
+          </span>
+          {{ t('activity.ticket.live') }}
+        </p>
+      </div>
 
-      <div class="mt-5 flex gap-2.5">
+      <div class="mt-4 grid grid-cols-2 gap-2">
         <button
           type="button"
-          class="inline-flex h-11.5 flex-1 cursor-pointer items-center justify-center gap-2 rounded-md border-2 border-poster-on-ink-muted/60 text-sm font-semibold"
+          class="inline-flex min-h-(--target-min) cursor-pointer items-center justify-center gap-2 rounded-md border border-border text-sm font-bold text-text transition-colors hover:bg-surface-sunken"
           @click="downloadCalendar"
         >
-          <UiIcon name="calendar" size="1.0625rem" />
+          <UiIcon name="calendar" size="1rem" />
           {{ t('activity.ticket.calendar') }}
         </button>
         <button
           type="button"
-          class="inline-flex h-11.5 flex-1 cursor-pointer items-center justify-center gap-2 rounded-md border-2 border-poster-on-ink-muted/60 text-sm font-semibold"
+          class="inline-flex min-h-(--target-min) cursor-pointer items-center justify-center gap-2 rounded-md border border-border text-sm font-bold text-text transition-colors hover:bg-surface-sunken"
           @click="share"
         >
-          <UiIcon :name="shared ? 'check' : 'copy'" size="1.0625rem" />
+          <UiIcon :name="shared ? 'check' : 'copy'" size="1rem" />
           {{ t(shared ? 'activity.ticket.copied' : 'activity.ticket.share') }}
         </button>
       </div>
@@ -303,17 +290,17 @@ async function share(): Promise<void> {
         >
           <div
             v-if="barShown && callToAction"
-            class="fixed inset-x-0 bottom-0 z-40 border-t-2 border-poster-ink bg-poster-ink pb-[env(safe-area-inset-bottom)] text-poster-on-ink"
+            class="fixed inset-x-0 bottom-0 z-40 border-t border-border-subtle bg-surface-raised pb-[env(safe-area-inset-bottom)] text-text shadow-lg"
             role="region"
             :aria-label="t('activity.ticket.bar')"
           >
             <div class="mx-auto flex max-w-[1440px] items-center gap-4 px-4 py-2.5 sm:px-6 lg:px-12">
               <div class="min-w-0 flex-1">
                 <p class="truncate font-bold">{{ tr(props.session.title) }}</p>
-                <p class="truncate font-poster-mono text-xs text-poster-on-ink-muted">{{ when }}</p>
+                <p class="truncate text-xs text-text-muted tabular-nums">{{ when }}</p>
               </div>
               <ActivityTicketAction
-                class="h-12! shrink-0 px-5!"
+                class="shrink-0 px-5!"
                 :action="callToAction"
                 :replay-url="props.session.replay_url"
                 @register="dialogOpen = true"

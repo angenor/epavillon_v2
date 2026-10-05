@@ -80,7 +80,7 @@ const sections = computed(() =>
         month: format(day, { month: 'long', year: 'numeric' }),
         count: t('programme.days.count', { count: rows.length }, rows.length),
       }),
-      specials: [...specials.values()].map((title) => t('programme.days.special', { title })),
+      specials: [...specials.values()],
       rows,
       total: own.length,
     }

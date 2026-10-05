@@ -211,14 +211,14 @@ export function activite(eventId: string, slug: string): PublicSessionDetail | n
     organizations: [
       {
         session_id: session.id,
-        organization_id: '01990000-0000-7000-8000-0000000b0001',
+        organization_id: session.organization_id ?? '01990000-0000-7000-8000-0000000b0001',
         role: 'lead',
         sort_order: 1,
         added_at: session.starts_at,
-        name: 'Institut de la Francophonie pour le développement durable',
-        acronym: 'IFDD',
-        country_code: 'CA',
-        country: { fr: 'Canada', en: 'Canada' },
+        name: session.organization_name ?? 'Institut de la Francophonie pour le développement durable',
+        acronym: session.organization_acronym ?? 'IFDD',
+        country_code: session.organization_country_code ?? 'CA',
+        country: session.organization_country ?? { fr: 'Canada', en: 'Canada' },
       },
     ],
   }

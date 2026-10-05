@@ -222,3 +222,13 @@ Maquettes : [liste et semaine](https://claude.ai/artifact/MTjhU6YwDmahNgDDTRYVxK
 - **Vérifié** : typecheck et tests du site verts ; vu à 1440 px en sombre et en clair (direct simulé dans le navigateur), à 390 px sans débordement. Non vu : une édition en cours avec des journées passées réelles (les données d'exemple de la COP31 sont toutes à venir).
 - **Fond alterné (04/10, demande du commanditaire)** : une ligne sur deux dans la liste, une colonne sur deux dans la semaine, en `bg-text/3` ; la colonne d'aujourd'hui garde sa teinte accent.
 - **05/10** : en-têtes de jour de la semaine figés au défilement ; tableau défilant à l'horizontale sur téléphone (plus d'onglets) ; « Semaine suivante » au pied du tableau ; titres bornés à 4 lignes (semaine) et 3 (liste, une) — [journal](../journal/2026-10-05.md).
+
+### 05/10 — Page d'une activité : bandeau de l'édition et débord léger
+
+Maquette : [page d'une activité](https://claude.ai/artifact/MTjhU6YwDmahNgDDTRYVxK), planches « E ». [Décision](../decisions/2026-10-05.md).
+
+- **Bandeau** (`ActivityHero`) : photo de l'édition (`useEditionSummary`), `bg-scrim/50` + `.scrim-fade-top` ; fil d'Ariane ; pilules d'état, de format et de journée spéciale ; titre `font-sans` 52/42 px ; lieu et date ; logo du porteur (`organization_logo`) en tuile `bg-surface-inverse-selected`, à défaut son sigle.
+- **Débord** : `ActivityStage` (couverture, lecteur pendant le direct, replay) et `ActivityTicket` (heure de l'édition en grand, heure chez soi, compte à rebours en ligne, inscrits, action, agenda, partage) remontés de 72 px (48 px sur téléphone).
+- **Contenu** : présentation pleine colonne ; `ActivityPeople` (intervenants en lignes, « Organisé par » avec logo 200×96) ; `ActivityQuestions` en carte ; `ActivitySameDay` (lignes à vignettes, « Vous êtes ici », lien « Toute la journée »).
+- **Retiré** : pastilles thématiques du bandeau ; lieu et format quittent le billet pour le bandeau.
+- **Vérifié** : typecheck et tests du site verts ; vu à 1440 px avant et pendant le direct (simulé), à 390 px sans débordement. Non vu : replay réel, logo réel (aucun dans les données d'exemple), connecté.

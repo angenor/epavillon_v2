@@ -2047,7 +2047,8 @@ table.data td.num { text-align: end; font-variant-numeric: tabular-nums; }
       <tr><td><code>--blur-glass</code></td><td>14&nbsp;px. Cartes et barres. Au-delà, le fond devient une bouillie et la photographie ne raconte plus rien.</td></tr>
       <tr><td><code>--blur-glass-strong</code></td><td>24&nbsp;px. Pour un encart qui porte un long texte, où la lisibilité prime sur le fond. Sans usage depuis le 03/10.</td></tr>
       <tr><td><code>--shadow-glass</code></td><td>L'ombre portée d'un panneau flottant. Plus marquée que <code>--shadow-lg</code>&nbsp;: sur une photographie, une ombre discrète ne détache rien.</td></tr>
-      <tr><td><code>.scrim-fade-bottom</code></td><td><b>L'un des deux dégradés de la charte.</b> Le fondu qui rattache le rail de vignettes au bas d'une image. Il ne décore rien&nbsp;: il rend lisible un texte blanc sur une image dont on ignore la luminosité. Un aplat, à sa place, couperait la photographie en deux.</td></tr>
+      <tr><td><code>.scrim-fade-top</code></td><td><b>Troisième dégradé, arbitré le 5 octobre 2026.</b> Le fondu sombre vers le haut de la photographie de l'édition, sous le fil d'Ariane et le titre d'une activité. Même noir que le voile, pour qu'ils se composent.</td></tr>
+      <tr><td><code>.scrim-fade-bottom</code></td><td><b>L'un des dégradés de la charte.</b> Le fondu qui rattache le rail de vignettes au bas d'une image. Il ne décore rien&nbsp;: il rend lisible un texte blanc sur une image dont on ignore la luminosité. Un aplat, à sa place, couperait la photographie en deux.</td></tr>
       <tr><td><code>.fade-inverse-start</code></td><td><b>Le second, arbitré le 16/09.</b> Il fond une photographie posée à droite dans l'aplat institutionnel qui porte le texte, sur la section d'appel de l'accueil. Le texte ne se pose jamais sur sa partie transparente.</td></tr>
     </tbody>
   </table>
@@ -2091,11 +2092,19 @@ table.data td.num { text-align: end; font-variant-numeric: tabular-nums; }
     filet, avec les mêmes cartes à couverture. Thématiques et format n'y figurent plus, le filtre
     par thématique non plus : la recherche reste. L'affiche ne vaut désormais que pour la page d'une activité.
   </p>
+  <p class="note" style="max-width:var(--measure);color:var(--color-text-secondary)">
+    <b>Arbitrage du 5 octobre 2026 : l'affiche est abandonnée.</b> La page d'une activité passe à un bandeau
+    pleine largeur sur la photographie de l'édition — voile et fondu sombre vers le haut (<code>.scrim-fade-top</code>,
+    troisième dégradé de la charte) —, titre en grand sur toute la largeur, logo de l'organisation porteuse en
+    tuile blanche, puis l'image de l'activité et le billet en léger débord (72&nbsp;px) sur le bas du bandeau.
+    Pendant le direct, le lecteur prend la place de l'image. Les jetons <code>poster</code> restent déclarés,
+    sans écran.
+  </p>
 
   <h3>Où l'affiche est permise</h3>
   <ul>
     <li><s>Le corps de <code>/programmations</code></s> — retiré le 4 octobre 2026, voir ci-dessus.</li>
-    <li>La page d'une activité (<code>/programmations/{édition}/{activité}</code>).</li>
+    <li><s>La page d'une activité (<code>/programmations/{édition}/{activité}</code>)</s> — retirée le 5 octobre 2026.</li>
     <li>Nulle part ailleurs. Un composant d'un autre écran qui appelle un jeton <code>poster</code> est un défaut.</li>
   </ul>
 
