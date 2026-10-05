@@ -1,5 +1,5 @@
 {
-  "sans-heure": "—",
+  "sans-heure": "--:--",
   "jusqua": "until {heure}",
   "terminee": "ended",
   "dans-mon-agenda": "in my agenda",
@@ -8,5 +8,7 @@
   "deplacee": "{de} → {a}",
   "non-annoncee": "Unannounced · reported by the network",
   "traduction": "Title translated automatically",
-  "signale": "Reported by the network, validated at {heure}"
+  "signale": "Reported by the network, validated at {heure}",
+  "chevauche": "Overlaps {heures}: {titre}",
+  "rappel": "Reminder 15 minutes before"
 }

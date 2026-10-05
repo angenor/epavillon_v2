@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { dayKeyInZone } from '~/utils/datetime'
 import { chevauchements, sessionsDeLAgenda } from '~/utils/guide-nego/agenda'
-import { estDeMonGroupe, etatAffiche, jourAOuvrir, joursDeLaBande } from '~/utils/guide-nego/sessions'
+import { estDeMonGroupe, etatAffiche, jourAOuvrir, joursDeLaBande, placeDuMaintenant } from '~/utils/guide-nego/sessions'
 import {
   joursAvecReunions,
   lignesDuJour,
@@ -20,12 +20,11 @@ definePageMeta({ layout: 'guide-nego' })
 defineI18nRoute(false)
 
 const { t, locale } = useI18n()
-const { dayLong, zoneOf } = useDateTime()
+const { dayLong, zoneOf, time } = useDateTime()
 const k = (cle: string, params: Record<string, unknown> = {}) => t(`guide-nego.negociations-agenda.${cle}`, params)
 
 const connexion = useGnConnexion()
 const compte = useGnSession()
-const thematiques = useGnThematiques()
 const groupes = useGnGroupes()
 const agenda = useGnAgenda()
 const lecture = useGnSessions()
@@ -51,7 +50,7 @@ onMounted(async () => {
   horloge = setInterval(() => (maintenant.value = new Date()), 60_000)
   await compte.assurer()
   void relire()
-  await Promise.all([thematiques.assurerLeVocabulaire(), groupes.assurer()])
+  await groupes.assurer()
 })
 onBeforeUnmount(() => clearInterval(horloge))
 
@@ -66,7 +65,6 @@ const attente = computed(() => !compte.pret.value || ((!etat.value.pret || !agen
 const suivies = computed(() => sessionsDeLAgenda(agenda.agenda.value, servie.value?.sessions ?? []))
 const croisees = computed(() => chevauchements(suivies.value))
 const reunionsSuivies = computed(() => reunionsDeLAgenda(agenda.agenda.value, lecture.reunionsDuReseau.value))
-const nomDeThematique = (code: string | null) => (code ? (thematiques.nomDe(code) ?? null) : null)
 
 const aujourdhui = computed(() => dayKeyInZone(maintenant.value, fuseau.value))
 const jours = computed(() =>
@@ -90,7 +88,7 @@ const lignes = computed(() =>
         session: null,
         reunion: l.reunion,
         etat: undefined,
-        thematique: nomDeThematique(l.reunion.theme),
+        debut: l.reunion.start_at,
         monGroupe: false,
         chevauche: [],
         rappel: false,
@@ -105,7 +103,7 @@ const lignes = computed(() =>
       session: s,
       reunion: null,
       etat: etatDeLaSession,
-      thematique: nomDeThematique(s.theme),
+      debut: s.start_at,
       monGroupe: estDeMonGroupe(s, groupes.mesCodes.value),
       chevauche: croisees.value.get(s.id) ?? [],
       rappel: etatDeLaSession !== 'annulee' && (agenda.entree(s.id)?.remind ?? false),
@@ -114,6 +112,11 @@ const lignes = computed(() =>
     }
   }),
 )
+
+const maintenantA = computed(() =>
+  jour.value === aujourdhui.value ? placeDuMaintenant(lignes.value.map((l) => l.debut), maintenant.value) : null,
+)
+const heureDeMaintenant = computed(() => time(maintenant.value, fuseau.value))
 
 const reunionsDeLaCoupure = computed(() => reunionsParJour(reunionsSuivies.value, maintenant.value, fuseau.value))
 function legende(unJour: string): string {
@@ -163,14 +166,11 @@ useHead({ title: k('titre') })
       </GnLectureImpossible>
       <template v-for="j in reunionsDeLaCoupure" :key="j.jour">
         <GnEnteteGroupe :titre="legende(j.jour)" :compteur="j.reunions.length" />
-        <GnLigneSession
+        <GnFriseSession
           v-for="r in j.reunions"
           :key="r.id"
-          forme="agenda"
           :reunion="r"
           :fuseau="fuseau"
-          :ville="ville"
-          :thematique="nomDeThematique(r.theme)"
           :vers="`/guide-nego/negociations/reseau/${r.id}?depuis=agenda`"
         />
       </template>
@@ -203,22 +203,23 @@ useHead({ title: k('titre') })
     <template v-else>
       <GnBandeJours v-model="jour" :jours="jours" :aujourdhui="aujourdhui" class="gn-agenda__bande" />
       <GnEnteteGroupe :titre="k('section')" :compteur="lignes.length" />
-      <GnLigneSession
-        v-for="l in lignes"
-        :key="l.cle"
-        forme="agenda"
-        :session="l.session"
-        :reunion="l.reunion"
-        :etat="l.etat"
-        :fuseau="fuseau"
-        :ville="ville"
-        :thematique="l.thematique"
-        :mon-groupe="l.monGroupe"
-        :chevauche="l.chevauche"
-        :rappel="l.rappel"
-        :signale="l.signale"
-        :vers="l.vers"
-      />
+      <div class="gn-agenda__frise">
+        <template v-for="(l, i) in lignes" :key="l.cle">
+          <GnFriseMaintenant v-if="maintenantA === i" :heure="heureDeMaintenant" />
+          <GnFriseSession
+            :session="l.session"
+            :reunion="l.reunion"
+            :etat="l.etat"
+            :fuseau="fuseau"
+            :mon-groupe="l.monGroupe"
+            :chevauche="l.chevauche"
+            :rappel="l.rappel"
+            :signale="l.signale"
+            :vers="l.vers"
+          />
+        </template>
+        <GnFriseMaintenant v-if="maintenantA === lignes.length" :heure="heureDeMaintenant" />
+      </div>
     </template>
   </GnEcran>
 </template>
@@ -228,10 +229,15 @@ useHead({ title: k('titre') })
   padding-top: var(--gn-espace-16);
 }
 
-/* La bande sort des marges : elle défile jusqu'au bord de l'écran. */
+/* La bande sort de la marge de droite : elle défile jusqu'au bord de l'écran. */
 [data-app="guide-nego"] .gn-agenda__bande {
-  margin-inline: calc(-1 * var(--gn-marge-ecran));
-  padding-inline: var(--gn-espace-8);
+  margin-top: 18px;
+  margin-right: calc(-1 * var(--gn-marge-ecran));
+}
+
+[data-app="guide-nego"] .gn-agenda__frise {
+  display: flex;
+  flex-direction: column;
 }
 
 [data-app="guide-nego"] .gn-agenda__sans-compte {

@@ -80,6 +80,5 @@ useHead({ title: k('liste.titre') })
   font-size: var(--gn-taille-20);
   line-height: var(--gn-interligne-20);
   font-weight: var(--gn-graisse-gras);
-  font-variant-numeric: tabular-nums;
 }
 </style>

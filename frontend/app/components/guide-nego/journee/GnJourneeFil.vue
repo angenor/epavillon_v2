@@ -78,7 +78,6 @@ const rangees = computed(() => props.pistes.map((p, i) => ({ ...p, creneaux: pro
   font-size: var(--gn-taille-13);
   line-height: var(--gn-interligne-13);
   font-weight: var(--gn-graisse-gras);
-  font-variant-numeric: tabular-nums;
 }
 
 [data-app="guide-nego"] .gn-fil__pistes {
@@ -149,6 +148,5 @@ const rangees = computed(() => props.pistes.map((p, i) => ({ ...p, creneaux: pro
   color: var(--gn-texte-2);
   font-size: var(--gn-taille-11);
   line-height: var(--gn-interligne-11);
-  font-variant-numeric: tabular-nums;
 }
 </style>

@@ -295,11 +295,7 @@ useHead({ title: t('guide-nego.negociations.titre') })
 
       <div v-if="lignes.length" class="gn-sessions__frise">
         <template v-for="(l, i) in lignes" :key="l.cle">
-          <p v-if="maintenantA === i" class="gn-sessions__maintenant">
-            <span class="gn-sessions__maintenant-trait" aria-hidden="true" />
-            {{ t('guide-nego.negociations.maintenant', { heure: heureDeMaintenant }) }}
-            <span class="gn-sessions__maintenant-fil" aria-hidden="true" />
-          </p>
+          <GnFriseMaintenant v-if="maintenantA === i" :heure="heureDeMaintenant" />
           <GnFriseSession
             :session="l.session"
             :reunion="l.reunion"
@@ -311,11 +307,7 @@ useHead({ title: t('guide-nego.negociations.titre') })
             :vers="l.vers"
           />
         </template>
-        <p v-if="maintenantA === lignes.length" class="gn-sessions__maintenant">
-          <span class="gn-sessions__maintenant-trait" aria-hidden="true" />
-          {{ t('guide-nego.negociations.maintenant', { heure: heureDeMaintenant }) }}
-          <span class="gn-sessions__maintenant-fil" aria-hidden="true" />
-        </p>
+        <GnFriseMaintenant v-if="maintenantA === lignes.length" :heure="heureDeMaintenant" />
       </div>
 
       <div v-else-if="vide" class="gn-sessions__vide">
@@ -425,32 +417,6 @@ useHead({ title: t('guide-nego.negociations.titre') })
 [data-app="guide-nego"] .gn-sessions__frise {
   display: flex;
   flex-direction: column;
-}
-
-[data-app="guide-nego"] .gn-sessions__maintenant {
-  margin: 2px 0 2px 46px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--gn-accent);
-  font-size: var(--gn-taille-12);
-  line-height: var(--gn-interligne-12);
-  font-weight: var(--gn-graisse-extra-gras);
-  letter-spacing: var(--gn-approche-12);
-  text-transform: uppercase;
-}
-
-[data-app="guide-nego"] .gn-sessions__maintenant-trait {
-  flex: none;
-  width: 12px;
-  height: 2px;
-  background: var(--gn-accent);
-}
-
-[data-app="guide-nego"] .gn-sessions__maintenant-fil {
-  flex: 1;
-  height: 2px;
-  background: var(--gn-accent);
 }
 
 [data-app="guide-nego"] .gn-sessions__jour {

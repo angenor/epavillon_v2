@@ -258,22 +258,25 @@ useHead({ title: computed(() => reunion.value?.title ?? k('titre')) })
 }
 
 [data-app="guide-nego"] .gn-reseau__intertitre {
-  padding: var(--gn-espace-16) 0 6px;
-  border-bottom: var(--gn-filet-3) solid var(--gn-filet-fort);
-  color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  padding: 22px 0 var(--gn-espace-8);
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-18);
+  line-height: var(--gn-interligne-18);
   font-weight: var(--gn-graisse-gras);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+}
+
+[data-app="guide-nego"] .gn-reseau__lignes {
+  padding: var(--gn-espace-4) var(--gn-espace-16);
+  border-radius: var(--gn-rayon-24);
+  background: var(--gn-fond-2);
 }
 
 [data-app="guide-nego"] .gn-reseau__ligne {
   display: flex;
   justify-content: space-between;
   gap: var(--gn-espace-12);
-  padding-block: 10px;
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  padding-block: var(--gn-espace-12);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
 }
 
 [data-app="guide-nego"] .gn-reseau__ligne:last-child {
@@ -323,8 +326,8 @@ useHead({ title: computed(() => reunion.value?.title ?? k('titre')) })
   display: flex;
   flex-direction: column;
   gap: var(--gn-espace-8);
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
-  background: var(--gn-fond);
+  border-top: var(--gn-filet-1) solid var(--gn-filet-doux);
+  background: var(--gn-barre-fond);
 }
 
 [data-app="guide-nego"] .gn-reseau__sorties-compte {

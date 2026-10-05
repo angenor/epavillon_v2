@@ -10,6 +10,7 @@ import {
   joursSuivants,
   rediffusionsDeLaVeille,
 } from '~/utils/guide-nego/pavillon'
+import { placeDuMaintenant } from '~/utils/guide-nego/sessions'
 
 /**
  * La section Pavillon de l'onglet Francophonie (10 · 1c) : le bloc de lieu, la bande des
@@ -18,7 +19,7 @@ import {
  * se disent une fois, dans le sous-titre de la page, qui lit `gn-pavillon-jour-affiche`.
  */
 const { t } = useI18n()
-const { dayLong } = useDateTime()
+const { dayLong, time } = useDateTime()
 const { tr } = useI18nText()
 const connexion = useGnConnexion()
 const session = useGnSession()
@@ -92,6 +93,10 @@ const majuscule = (texte: string) => texte.charAt(0).toLocaleUpperCase() + texte
 const nomDuJour = (j: string) => majuscule(dayLong(`${j}T12:00:00Z`, 'UTC'))
 
 const duJour = computed(() => activitesDuJour(activites.value, jour.value, fuseau.value).map(ligne))
+const maintenantA = computed(() =>
+  estAujourdhui.value ? placeDuMaintenant(duJour.value.map((l) => l.activite.starts_at), maintenant.value) : null,
+)
+const heureDeMaintenant = computed(() => time(maintenant.value, fuseau.value))
 const veille = computed(() =>
   estAujourdhui.value ? rediffusionsDeLaVeille(activites.value, jour.value, fuseau.value).map(ligne) : [],
 )
@@ -142,14 +147,11 @@ function allerAuJourSuivant(): void {
 
         <GnEnteteGroupe :titre="estAujourdhui ? k('aujourdhui') : nomDuJour(jour)" :compteur="duJour.length" />
         <div v-if="duJour.length" class="gn-pavillon__liste">
-          <GnLigneActivite
-            v-for="l in duJour"
-            :key="l.activite.id"
-            v-bind="l"
-            :fuseau="fuseau"
-            :ville="ville"
-            :vers="vers(l.activite)"
-          />
+          <template v-for="(l, i) in duJour" :key="l.activite.id">
+            <GnFriseMaintenant v-if="maintenantA === i" :heure="heureDeMaintenant" />
+            <GnLigneActivite v-bind="l" :fuseau="fuseau" :ville="ville" :vers="vers(l.activite)" />
+          </template>
+          <GnFriseMaintenant v-if="maintenantA === duJour.length" :heure="heureDeMaintenant" />
         </div>
         <p v-else class="gn-pavillon__rien">{{ k('jour-vide') }}</p>
 
@@ -184,20 +186,21 @@ function allerAuJourSuivant(): void {
 <style>
 [data-app="guide-nego"] .gn-pavillon {
   padding-bottom: var(--gn-espace-16);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 [data-app="guide-nego"] .gn-pavillon__attente {
   padding-top: var(--gn-espace-16);
 }
 
+/* La bande sort de la marge de droite : elle défile jusqu'au bord de l'écran. */
 [data-app="guide-nego"] .gn-pavillon__bande {
-  margin-top: var(--gn-espace-8);
-  margin-inline: calc(-1 * var(--gn-marge-ecran));
-  padding-inline: var(--gn-espace-8);
+  margin-right: calc(-1 * var(--gn-marge-ecran));
 }
 
 [data-app="guide-nego"] .gn-pavillon__rien {
-  padding-block: var(--gn-espace-16);
   color: var(--gn-texte-2);
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
@@ -206,21 +209,20 @@ function allerAuJourSuivant(): void {
 [data-app="guide-nego"] .gn-pavillon__suivants {
   width: 100%;
   min-height: var(--gn-cible);
-  margin-top: var(--gn-espace-16);
-  padding-block: var(--gn-ligne-air);
+  padding: 14px var(--gn-espace-16);
   display: flex;
   align-items: center;
   gap: var(--gn-espace-12);
-  border-top: var(--gn-filet-3) solid var(--gn-filet-fort);
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
-  background: none;
+  border: none;
+  border-radius: var(--gn-rayon-20);
+  background: var(--gn-fond-2);
   color: var(--gn-texte);
   text-align: start;
   cursor: pointer;
 }
 
 [data-app="guide-nego"] .gn-pavillon__suivants:active {
-  background: var(--gn-presse);
+  background: var(--gn-bloc-releve);
 }
 
 [data-app="guide-nego"] .gn-pavillon__suivants-corps {
@@ -233,15 +235,15 @@ function allerAuJourSuivant(): void {
 
 [data-app="guide-nego"] .gn-pavillon__suivants-titre {
   color: var(--gn-accent);
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
+  font-size: var(--gn-taille-16);
+  line-height: 1.3;
   font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-pavillon__suivants-note {
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 
 [data-app="guide-nego"] .gn-pavillon__suivants-chevron {

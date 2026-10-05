@@ -224,7 +224,6 @@ const terminee = computed(() => !!props.session && props.etat === 'terminee')
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  font-variant-numeric: tabular-nums;
 }
 
 /* Lu, pas vu : l'heure complète avec son fuseau, pour qui écoute la ligne. */

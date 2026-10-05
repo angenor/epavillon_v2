@@ -143,6 +143,5 @@ onMounted(() => {
   color: var(--gn-texte-2);
   font-size: var(--gn-taille-13);
   line-height: var(--gn-interligne-13);
-  font-variant-numeric: tabular-nums;
 }
 </style>

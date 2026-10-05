@@ -324,7 +324,7 @@ useHead({ title: titre })
             <dt>{{ k('cle.type') }}</dt>
             <dd class="gn-session__valeur">
               {{ type }}<template v-if="session.type.term_en">
-                —
+                ·
                 <NuxtLink
                   :to="{ path: '/guide-nego/lexique', query: { terme: session.type.term_en } }"
                   class="gn-session__terme"
@@ -484,9 +484,19 @@ useHead({ title: titre })
   overflow-wrap: anywhere;
 }
 
+/* La marque « EN » du lexique (Nuit 03). */
 [data-app="guide-nego"] .gn-session__en {
-  font-weight: var(--gn-graisse-demi-gras);
+  margin-right: 6px;
+  padding: 2px 6px;
+  border-radius: var(--gn-rayon-6);
+  background: var(--gn-bloc-releve);
+  color: var(--gn-texte-2);
+  font-size: var(--gn-taille-11);
+  line-height: var(--gn-interligne-11);
+  font-weight: var(--gn-graisse-extra-gras);
+  letter-spacing: var(--gn-approche-11);
   text-decoration: none;
+  vertical-align: 2px;
 }
 
 [data-app="guide-nego"] .gn-session__traduction {
@@ -512,29 +522,34 @@ useHead({ title: titre })
   justify-content: space-between;
   align-items: baseline;
   gap: var(--gn-espace-12);
-  padding: var(--gn-espace-16) 0 6px;
-  border-bottom: var(--gn-filet-3) solid var(--gn-filet-fort);
-  color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  padding: 22px 0 var(--gn-espace-8);
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-18);
+  line-height: var(--gn-interligne-18);
   font-weight: var(--gn-graisse-gras);
 }
 
-[data-app="guide-nego"] .gn-session__intertitre > span:first-child {
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+[data-app="guide-nego"] .gn-session__lu {
+  flex: none;
+  color: var(--gn-texte-2);
+  font-family: var(--gn-police);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
+  font-weight: var(--gn-graisse-regulier);
 }
 
-[data-app="guide-nego"] .gn-session__lu {
-  font-weight: var(--gn-graisse-regulier);
+[data-app="guide-nego"] .gn-session__lignes {
+  padding: var(--gn-espace-4) var(--gn-espace-16);
+  border-radius: var(--gn-rayon-24);
+  background: var(--gn-fond-2);
 }
 
 [data-app="guide-nego"] .gn-session__ligne {
   display: flex;
   justify-content: space-between;
   gap: var(--gn-espace-12);
-  padding-block: 10px;
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  padding-block: var(--gn-espace-12);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
 }
 
 [data-app="guide-nego"] .gn-session__ligne:last-child {
@@ -545,8 +560,8 @@ useHead({ title: titre })
   flex: none;
   padding-top: 2px;
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 
 [data-app="guide-nego"] .gn-session__ligne dd {
@@ -577,14 +592,15 @@ useHead({ title: titre })
 [data-app="guide-nego"] .gn-session__origine {
   align-self: flex-start;
   margin-top: var(--gn-espace-16);
-  padding: 6px 10px;
+  padding: 6px 12px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border: var(--gn-filet-1) solid var(--gn-filet-fort);
+  border: var(--gn-filet-1) solid var(--gn-filet);
+  border-radius: var(--gn-rayon-pilule);
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
 }
 
 [data-app="guide-nego"] .gn-session__origine .gn-picto {
@@ -601,16 +617,17 @@ useHead({ title: titre })
   font-size: var(--gn-taille-15);
   line-height: var(--gn-interligne-15);
   font-weight: var(--gn-graisse-gras);
-  text-decoration: underline;
-  text-underline-offset: 4px;
+  text-decoration: none;
 }
 
 [data-app="guide-nego"] .gn-session__rappel {
   margin-top: var(--gn-espace-8);
+  padding-inline: var(--gn-espace-16);
   display: flex;
   align-items: center;
   gap: var(--gn-espace-12);
-  border-block: var(--gn-filet-1) solid var(--gn-filet);
+  border-radius: var(--gn-rayon-24);
+  background: var(--gn-fond-2);
 }
 
 [data-app="guide-nego"] .gn-session__rappel .gn-interrupteur {
@@ -626,8 +643,8 @@ useHead({ title: titre })
 [data-app="guide-nego"] .gn-session__phrase {
   padding-top: var(--gn-espace-8);
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
 }
 
 [data-app="guide-nego"] .gn-session__actions {
@@ -638,8 +655,8 @@ useHead({ title: titre })
   display: flex;
   flex-direction: column;
   gap: var(--gn-espace-8);
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
-  background: var(--gn-fond);
+  border-top: var(--gn-filet-1) solid var(--gn-filet-doux);
+  background: var(--gn-barre-fond);
 }
 
 [data-app="guide-nego"] .gn-session__signalement,
