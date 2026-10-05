@@ -1,30 +1,15 @@
 <script setup lang="ts">
-import type { SegmentDeChoix } from '~/components/guide-nego/GnSegmente.vue'
 import type { ModeDeLecture } from '~/utils/guide-nego/appareil-lecture'
-import type { ChoixDeTheme } from '~/utils/guide-nego/theme'
 
 /**
- * Les réglages de lecture — maquette 04 · 07. Le thème est celui de 0a, pas un second
- * réglage : le changer ici change l'application entière. La taille ne vaut que pour
- * « Texte agrandi » : une page du PDF garde la sienne.
+ * Les réglages de lecture — maquette 04 · 07, sans le thème : l'application n'en a qu'un
+ * (ADR-023). La taille ne vaut que pour « Texte agrandi » : une page du PDF garde la sienne.
  */
 const props = withDefaults(defineProps<{ texteOffert?: boolean }>(), { texteOffert: false })
 const ouverte = defineModel<boolean>({ required: true })
 const mode = defineModel<ModeDeLecture>('mode', { default: 'pages' })
 
 const { t } = useI18n()
-const { choix, choisir: choisirLeTheme } = useGnTheme()
-
-const segmentsDeTheme = computed<SegmentDeChoix[]>(() => [
-  { valeur: 'clair', libelle: t('gn-reglages-lecture.theme.clair'), picto: 'sun' },
-  { valeur: 'sombre', libelle: t('gn-reglages-lecture.theme.sombre'), picto: 'moon' },
-  { valeur: 'systeme', libelle: t('gn-reglages-lecture.theme.systeme') },
-])
-
-const themeChoisi = computed({
-  get: () => choix.value,
-  set: (valeur: string) => choisirLeTheme(valeur as ChoixDeTheme),
-})
 </script>
 
 <template>
@@ -33,10 +18,6 @@ const themeChoisi = computed({
       <div v-if="props.texteOffert" class="gn-reglages-lecture__reglage">
         <h3 class="gn-reglages-lecture__libelle">{{ t('gn-reglages-lecture.mode.libelle') }}</h3>
         <GnChoixMode v-model="mode" />
-      </div>
-      <div class="gn-reglages-lecture__reglage">
-        <h3 class="gn-reglages-lecture__libelle">{{ t('gn-reglages-lecture.theme.libelle') }}</h3>
-        <GnSegmente v-model="themeChoisi" :segments="segmentsDeTheme" :libelle="t('gn-reglages-lecture.theme.libelle')" />
       </div>
       <div v-if="mode === 'texte' && props.texteOffert" class="gn-reglages-lecture__reglage">
         <h3 class="gn-reglages-lecture__libelle">{{ t('gn-reglages-lecture.taille.libelle') }}</h3>

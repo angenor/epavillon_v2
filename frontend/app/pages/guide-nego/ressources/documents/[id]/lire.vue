@@ -312,17 +312,16 @@ const texteDeReprise = computed(() => {
 const barreDepliee = ref(false)
 
 type Action = 'sommaire' | 'rechercher' | 'mode' | 'reglages'
-// Sans texte extrait, ni sommaire ni recherche (FR-018) ; les réglages portent au moins le thème.
+// Sans texte extrait, ni sommaire ni recherche (FR-018) ; les réglages ne portent que le mode et la taille du texte.
 // Le choix du mode tient l'emplacement de « Marquer » (écart 43), là où les deux modes existent.
 const modeOffert = computed(() => texteOffert.value && bascule.value === null)
 const actions = computed<Action[]>(() => {
   const lue = lecture.value
-  if (!lue?.has_text) return ['reglages']
+  if (!lue?.has_text) return []
   return [
     ...(lue.outline.length ? (['sommaire'] as const) : []),
     'rechercher',
-    ...(modeOffert.value ? (['mode'] as const) : []),
-    'reglages',
+    ...(modeOffert.value ? (['mode', 'reglages'] as const) : []),
   ]
 })
 
