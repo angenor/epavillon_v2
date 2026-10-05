@@ -258,7 +258,7 @@ async function decide(membershipId: string, approved: boolean): Promise<void> {
 
       <WorkspaceActionList class="mt-10" :actions="overview.actions" :timezone="deadlineTimezone" />
 
-      <section class="mt-12" aria-labelledby="workspace-proposals-title">
+      <section id="mes-dossiers" class="mt-12 scroll-mt-24" aria-labelledby="workspace-proposals-title">
         <div class="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
           <h2 id="workspace-proposals-title" class="text-xl font-semibold">
             {{ t('organization.workspace.proposals.title') }}

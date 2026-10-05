@@ -93,6 +93,14 @@ const mainNav: NavItem[] = [
   { labelKey: 'nav.main.negotiations', to: '/negociations' },
 ]
 
+const { date } = useDateTime()
+const space = useAccountSpace()
+const pendingActions = computed(() => space.overview.value?.actions ?? [])
+const organizationLabel = computed(() => {
+  const organization = space.organization.value
+  return organization ? (organization.acronym ?? organization.legal_name) : undefined
+})
+
 /**
  * LE MENU DU COMPTE NE CONTIENT QUE DES DESTINATIONS PERSONNELLES. La barre
  * porte les espaces du site — ce qu'on vient consulter ; la bulle porte ce qui
@@ -101,10 +109,31 @@ const mainNav: NavItem[] = [
  *
  * La déconnexion n'est pas une entrée de cette liste : ce n'est pas un lien, et
  * `UiUserMenu` la rend à part, sous un trait.
+ *
+ * « Mes propositions » d'abord (05/10) : qui a déposé un dossier doit trouver
+ * où le suivre sans deviner qu'il vit sous « Mon organisation ».
  */
-const accountNav = computed<NavItem[]>(() => [
-  { labelKey: 'nav.account.myOrganization', to: myOrganizationTo.value, icon: 'building' },
-])
+const accountNav = computed<NavItem[]>(() => {
+  if (!memberships.hasSubmittableOrganization) {
+    return [{ labelKey: 'nav.account.joinOrganization', to: myOrganizationTo.value, icon: 'building' }]
+  }
+  const overview = space.overview.value
+  const items: NavItem[] = [
+    { labelKey: 'nav.account.myProposals', to: '/mon-organisation#mes-dossiers', icon: 'document', count: overview?.proposals.length },
+    { labelKey: 'nav.account.myOrganization', to: '/mon-organisation', icon: 'building', meta: organizationLabel.value },
+    { labelKey: 'nav.account.members', to: '/mon-organisation#membres', icon: 'users', count: overview?.members.length },
+  ]
+  const call = overview?.open_call
+  if (call && callPhase(call) === 'open') {
+    items.push({
+      labelKey: 'nav.account.submit',
+      to: '/deposer-une-proposition',
+      icon: 'plus',
+      meta: t('nav.account.until', { date: date(effectiveDeadline(call), overview.call_edition?.timezone ?? 'UTC') }),
+    })
+  }
+  return items
+})
 
 const footerSections: { labelKey: string; items: NavItem[] }[] = [
   {
@@ -216,11 +245,24 @@ const currentYear = new Date().getFullYear()
           :name="auth.person.display_name"
           :email="auth.person.primary_email"
           :items="accountNav"
+          :title="t('nav.account.mySpace')"
+          :subtitle="organizationLabel"
+          :badge="pendingActions.length"
+          :badge-label="t('nav.account.pendingCount', pendingActions.length)"
+          :items-label="memberships.hasSubmittableOrganization ? t('nav.account.mySpace') : undefined"
           :label="t('nav.account.menuLabel')"
           :sign-out-label="t('nav.account.logout')"
           tone="inverse"
           @sign-out="signOut()"
-        />
+          @open="space.refresh()"
+        >
+          <template #lead>
+            <WorkspaceActionPreview
+              :actions="pendingActions"
+              :timezone="space.overview.value?.call_edition?.timezone ?? 'UTC'"
+            />
+          </template>
+        </UiUserMenu>
         <!-- L'enveloppe porte le masquage : posé sur le bouton, il perd contre son propre `inline-flex`. -->
         <span v-else class="hidden sm:inline-flex">
           <UiButton variant="inverse" :to="localePath('/connexion')" :label="t('nav.account.login')" />
@@ -231,9 +273,16 @@ const currentYear = new Date().getFullYear()
         <NuxtLink
           v-if="auth.isAuthenticated"
           :to="localePath(myOrganizationTo)"
-          class="text-sm text-text-on-inverse-muted no-underline hover:text-text-on-inverse"
+          class="flex items-center gap-2 text-sm text-text-on-inverse-muted no-underline hover:text-text-on-inverse"
         >
-          {{ t('nav.account.myOrganization') }}
+          {{ t('nav.account.mySpace') }}
+          <span
+            v-if="pendingActions.length"
+            class="grid h-4.5 min-w-4.5 place-items-center rounded-full bg-warning-on-inverse px-1 text-[11px] font-bold text-text-on-warning-inverse tabular-nums"
+          >
+            {{ pendingActions.length }}
+            <span class="sr-only">— {{ t('nav.account.pendingCount', pendingActions.length) }}</span>
+          </span>
         </NuxtLink>
         <UiButton
           v-if="auth.isAuthenticated"

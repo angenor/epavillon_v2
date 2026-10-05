@@ -33,19 +33,7 @@ const { t } = useI18n()
 const { date } = useDateTime()
 const localePath = useLocalePath()
 
-/**
- * Chaque nature porte son icône et sa gravité. Le CODE vient du contrat
- * (`WorkspaceActionKind`), la couleur du rôle : jaune pour ce qui demande
- * attention, cyan pour ce qui informe. Rien en rouge — aucune de ces lignes
- * n'est un échec, ce sont des choses à faire.
- */
-const PRESENTATION: Record<WorkspaceAction['kind'], { icon: string; tone: 'warning' | 'info' }> = {
-  changes_requested: { icon: 'warning', tone: 'warning' },
-  draft_before_deadline: { icon: 'edit', tone: 'warning' },
-  coorganization_to_confirm: { icon: 'building', tone: 'info' },
-  membership_request: { icon: 'users', tone: 'info' },
-  session_report_missing: { icon: 'document', tone: 'info' },
-}
+const PRESENTATION = WORKSPACE_ACTION_PRESENTATION
 
 const TONES: Record<'warning' | 'info', string> = {
   warning: 'border-l-warning bg-warning-surface/40',
@@ -57,11 +45,7 @@ const ICON_TONES: Record<'warning' | 'info', string> = {
   info: 'text-info',
 }
 
-/** Une clé d'action peut avoir un détail au pluriel : seul le premier en a un. */
-function detailOf(action: WorkspaceAction): string {
-  const key = `organization.workspace.actions.kind.${action.kind}.detail`
-  return action.kind === 'changes_requested' ? t(key, action.count) : t(key)
-}
+const detailOf = (action: WorkspaceAction): string => workspaceActionDetail(action, t)
 </script>
 
 <template>

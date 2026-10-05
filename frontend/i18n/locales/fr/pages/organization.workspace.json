@@ -21,23 +21,28 @@
     "kind": {
       "changes_requested": {
         "label": "Corrections demandées",
-        "detail": "Un point à traiter | Un point à traiter | {count} points à traiter"
+        "detail": "Un point à traiter | Un point à traiter | {count} points à traiter",
+        "cta": "Répondre au comité"
       },
       "draft_before_deadline": {
         "label": "Brouillon non déposé",
-        "detail": "Ce dossier n'est pas encore parti."
+        "detail": "Ce dossier n'est pas encore parti.",
+        "cta": "Terminer et déposer"
       },
       "coorganization_to_confirm": {
         "label": "Co-organisation à confirmer",
-        "detail": "Une organisation vous a associée à son dossier et attend votre accord."
+        "detail": "Une organisation vous a associée à son dossier et attend votre accord.",
+        "cta": "Répondre à la demande"
       },
       "membership_request": {
         "label": "Demande de rattachement",
-        "detail": "Cette personne demande à rejoindre votre organisation."
+        "detail": "Cette personne demande à rejoindre votre organisation.",
+        "cta": "Examiner la demande"
       },
       "session_report_missing": {
         "label": "Compte rendu attendu",
-        "detail": "Cette activité s'est tenue et n'a pas encore de compte rendu."
+        "detail": "Cette activité s'est tenue et n'a pas encore de compte rendu.",
+        "cta": "Rédiger le compte rendu"
       }
     }
   },

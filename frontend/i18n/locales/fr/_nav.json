@@ -26,7 +26,17 @@
     "myOrganization": "Mon organisation",
     "myProposals": "Mes propositions",
     "register": "Créer un compte",
-    "menuLabel": "Menu du compte"
+    "menuLabel": "Menu du compte",
+    "mySpace": "Mon espace",
+    "joinOrganization": "Rattacher mon organisation",
+    "members": "Membres et invitations",
+    "submit": "Déposer une proposition",
+    "until": "jusqu'au {date}",
+    "pending": "Ce qui vous attend",
+    "pendingCount": "Aucune action en attente | Une action en attente | {count} actions en attente",
+    "morePending": "Et une autre action à traiter | Et une autre action à traiter | Et {count} autres actions à traiter",
+    "points": "un point | un point | {count} points",
+    "dueOn": "avant le {date}"
   },
   "admin": {
     "title": "Back-office",

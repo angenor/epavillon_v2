@@ -21,23 +21,28 @@
     "kind": {
       "changes_requested": {
         "label": "Changes requested",
-        "detail": "One point to address | One point to address | {count} points to address"
+        "detail": "One point to address | One point to address | {count} points to address",
+        "cta": "Reply to the committee"
       },
       "draft_before_deadline": {
         "label": "Draft not submitted",
-        "detail": "This proposal has not been sent yet."
+        "detail": "This proposal has not been sent yet.",
+        "cta": "Finish and submit"
       },
       "coorganization_to_confirm": {
         "label": "Co-organization to confirm",
-        "detail": "An organization has listed you on its proposal and is waiting for your agreement."
+        "detail": "An organization has listed you on its proposal and is waiting for your agreement.",
+        "cta": "Answer the request"
       },
       "membership_request": {
         "label": "Membership request",
-        "detail": "This person is asking to join your organization."
+        "detail": "This person is asking to join your organization.",
+        "cta": "Review the request"
       },
       "session_report_missing": {
         "label": "Report expected",
-        "detail": "This activity has taken place and has no report yet."
+        "detail": "This activity has taken place and has no report yet.",
+        "cta": "Write the report"
       }
     }
   },

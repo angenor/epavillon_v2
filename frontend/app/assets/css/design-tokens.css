@@ -233,6 +233,9 @@
   /* La pastille de l'entrée courante dans la capsule de navigation (04/10). */
   --color-surface-inverse-selected: var(--ifdd-gris-0);
   --color-text-on-inverse-selected: var(--ifdd-bleu-900); /* 15.54:1 */
+  /* La pastille « ce qui vous attend » du menu du compte (05/10) : le jaune de l'attention, posé sur l'aplat. */
+  --color-warning-on-inverse: var(--ifdd-jaune-300);
+  --color-text-on-warning-inverse: var(--ifdd-jaune-900); /* 10.3:1 */
 
   /* Le liseré sous la barre de navigation, aux couleurs du logo et dans son ordre
      (arbitré le 04/10). Décoratif ; posé sur l'aplat, il ne s'inverse pas. */

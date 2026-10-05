@@ -26,7 +26,17 @@
     "myOrganization": "My organisation",
     "myProposals": "My proposals",
     "register": "Create an account",
-    "menuLabel": "Account menu"
+    "menuLabel": "Account menu",
+    "mySpace": "My space",
+    "joinOrganization": "Link my organisation",
+    "members": "Members and invitations",
+    "submit": "Submit a proposal",
+    "until": "until {date}",
+    "pending": "Waiting for you",
+    "pendingCount": "No pending action | One pending action | {count} pending actions",
+    "morePending": "And one more action to handle | And one more action to handle | And {count} more actions to handle",
+    "points": "one point | one point | {count} points",
+    "dueOn": "before {date}"
   },
   "admin": {
     "title": "Back office",

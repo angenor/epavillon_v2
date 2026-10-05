@@ -15,6 +15,8 @@ export interface NavItem {
   /** Compteur poussé à droite de l'entrée — ce qui attend d'être traité. Il vient
    *  toujours d'un décompte de l'API, jamais d'une valeur écrite en dur. */
   count?: number
+  /** Précision poussée à droite, déjà résolue — un sigle, une échéance. */
+  meta?: string
   /**
    * L'une de ces permissions, **sur la portée globale**, fait paraître l'entrée.
    * Absente, l'entrée paraît à tout administrateur : le périmètre est celui de

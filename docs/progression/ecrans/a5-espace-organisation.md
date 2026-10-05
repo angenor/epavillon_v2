@@ -93,3 +93,15 @@ Un écran qui écrit — une invitation, une réponse, une résolution — ne se
 
 **Corrigé le 16/09 — quatre liens morts.** Le bloc « ce qui attend une action » est composé par l'API (`programme/src/service/workspace.rs`), qui portait les chemins d'avant le renommage des écrans. Les cibles sont désormais celles du site : `/deposer-une-proposition?dossier=<id>`, `/mon-organisation/dossiers/<id>` (avec `?vue=sessions` pour un compte rendu manquant) et `/mon-organisation#membres`. Rien ne les vérifie automatiquement : ce sont des chaînes côté API, jamais confrontées au routage du site.
 
+
+## 05/10 — Le menu du compte mène à l'espace
+
+Le commanditaire : « On y voit `Mon organisation`, comment une personne ayant soumis une activité est censée savoir qu'elle peut les gérer là-bas et suivre l'évolution ? » Direction C retenue sur maquette, avec le sigle de l'organisation repris de B.
+
+- Le bouton de la barre dit **« Mon espace »** et, dessous, le sigle de l'organisation. Le nom de la personne n'y figure pas (discrétion sur un écran partagé) ; il reste en tête du panneau.
+- **Pastille jaune** sur la bulle : nombre d'actions en attente (`overview.actions`). Même pastille dans le pied du menu mobile.
+- Le panneau ouvre sur **« Ce qui vous attend »** : l'action la plus urgente (ordre de `WORKSPACE_ACTION_PRESENTATION`), son détail, son échéance et un bouton d'action propre à chaque nature (`organization.workspace.actions.kind.*.cta`), puis « Et N autres actions à traiter » vers l'espace.
+- Puis **Mes propositions** (nombre de dossiers, ancre `#mes-dossiers`), **Mon organisation** (sigle), **Membres et invitations** (`#membres`), **Déposer une proposition** quand l'appel est ouvert (avec son échéance), et la déconnexion.
+- Lecture : `useAccountSpace()` appelle `api.workspace.overview` sur la première organisation où la personne peut déposer, côté client seulement, et la relit à chaque ouverture du menu. Une personne à plusieurs organisations ne voit que la première dans le menu ; l'espace garde son sélecteur.
+
+Vérifié sur les données d'exemple avec un compte porteur de trois actions (pastille « 3 », co-organisation à confirmer en tête, « Et 2 autres ») et un compte sans action (pas de pastille, pas d'encart).
