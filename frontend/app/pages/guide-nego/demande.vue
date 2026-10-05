@@ -250,6 +250,7 @@ async function retirer(): Promise<void> {
   color: var(--gn-texte-lecture);
   font-size: var(--gn-taille-17);
   line-height: var(--gn-interligne-17);
+  padding-bottom: var(--gn-espace-16);
 }
 
 [data-app="guide-nego"] .gn-demande__propos--discret {

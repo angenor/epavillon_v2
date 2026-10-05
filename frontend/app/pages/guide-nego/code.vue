@@ -236,6 +236,7 @@ useHead({ title: t('guide-nego.code.titre') })
   color: var(--gn-texte-lecture);
   font-size: var(--gn-taille-17);
   line-height: var(--gn-interligne-17);
+  padding-bottom: var(--gn-espace-16);
 }
 
 [data-app="guide-nego"] .gn-code__propos--discret {
