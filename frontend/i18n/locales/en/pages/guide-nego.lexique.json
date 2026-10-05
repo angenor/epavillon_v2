@@ -1,5 +1,5 @@
 {
-  "titre": "English-French glossary",
+  "titre": "Glossary",
   "champ": "Search a term, in English or French",
   "indication": "A word heard in the room",
   "compte": "No entries, offline-ready | {count} entry, offline-ready | {count} entries, offline-ready",
@@ -8,7 +8,6 @@
   "parcourir": "Browse the list",
   "favoris": "My favourite terms",
   "peut-etre": "Did you mean:",
-  "trouves": "{count} entry. | {count} entry. | {count} entries.",
   "traductions": "Also in the French translations.",
   "sur": "{count} entries out of {total} | {count} entry out of {total} | {count} entries out of {total}",
   "aucun": {
@@ -23,5 +22,6 @@
   "erreur": {
     "titre": "The glossary is not on this phone yet",
     "texte": "It is saved the first time the app opens with a connection. Connect once: it will then work offline."
-  }
+  },
+  "autres": "Other terms"
 }

@@ -4,7 +4,8 @@ import { destinationDe } from '~/utils/guide-nego/faq'
 import { intituleDe } from '~/utils/guide-nego/lexique'
 
 /**
- * Une entrée du lexique — maquette 06, écrans 04a et 04b. Elle se lit dans le savoir
+ * Une entrée du lexique : la carte du terme trouvé (maquette Nuit 03), puis ce que la
+ * recherche ne montre pas (entendu en salle, sigle, sources, termes liés). Elle se lit dans le savoir
  * gardé, sans réseau ; son adresse est sa désignation stable (FR-006). Public : l'état
  * « accès refusé » est sans objet. Le favori sans compte reste sur le téléphone.
  */
@@ -16,7 +17,6 @@ const route = useRoute()
 const savoir = useGnSavoir()
 const { noter } = useGnDerniersTermes()
 const { retenir } = useGnOrigineDuLexique()
-const { favoris, assurer: assurerLesFavoris, basculer } = useGnFavorisLexique()
 
 const LEXIQUE = '/guide-nego/lexique'
 const retour = ref(LEXIQUE)
@@ -26,7 +26,6 @@ onMounted(() => {
   const avant: unknown = window.history.state?.back
   if (typeof avant === 'string' && avant !== route.fullPath) retour.value = avant
   void savoir.assurer()
-  void assurerLesFavoris()
 })
 
 const slug = computed(() => String(route.params.slug ?? ''))
@@ -47,7 +46,6 @@ const famille = computed(() => savoir.familles.value.find((f) => f.code === entr
 const lies = computed(() =>
   (entree.value?.related_ids ?? []).flatMap((id) => savoir.lexique.value.find((e) => e.id === id) ?? []),
 )
-const estFavori = computed(() => !!entree.value && favoris.value.has(entree.value.id))
 
 function libelleDeSource(source: KnowledgeSource): string {
   const titre = source.document_title ?? source.external_title ?? ''
@@ -88,15 +86,7 @@ useHead({ title: computed(() => entree.value?.term ?? t('guide-nego.lexique-entr
 </script>
 
 <template>
-  <GnEcran
-    :titre="entree?.term ?? t('guide-nego.lexique-entree.titre')"
-    :sous-titre="entree?.translation"
-    :surtitre="famille"
-    :terme="!!entree"
-    :retour="retour"
-    :onglets="false"
-    lexique-ouvert
-  >
+  <GnEcran :titre="t('guide-nego.lexique.titre')" :retour="retour" lexique-ouvert>
     <GnChargement v-if="chargement" forme="squelette" :lignes="4" :libelle="t('guide-nego.lexique-entree.chargement')" />
 
     <GnEtatErreur
@@ -114,16 +104,31 @@ useHead({ title: computed(() => entree.value?.term ?? t('guide-nego.lexique-entr
       :sortie-vers="LEXIQUE"
     />
 
-    <article v-else class="gn-terme">
+    <div v-else class="gn-terme">
+      <GnCarteTerme :entree="entree">
+        <template #actions>
+          <GnBouton
+            variante="secondaire"
+            largeur="demie"
+            picto="share"
+            class="gn-carte-terme__copier"
+            :aria-label="t('guide-nego.lexique-entree.partager')"
+            @clic="partager"
+          />
+        </template>
+      </GnCarteTerme>
       <div class="gn-terme__corps">
-        <p class="gn-terme__definition">{{ entree.definition }}</p>
 
         <section v-if="entree.heard_in_room">
           <GnEnteteGroupe :titre="t('guide-nego.lexique-entree.entendu')" />
           <blockquote class="gn-terme__entendu" lang="en">« {{ entree.heard_in_room }} »</blockquote>
         </section>
 
-        <dl v-if="entree.acronym || entree.sources.length" class="gn-terme__cles">
+        <dl v-if="famille || entree.acronym || entree.sources.length" class="gn-terme__cles">
+          <div v-if="famille" class="gn-terme__cle">
+            <dt>{{ t('guide-nego.lexique-entree.famille') }}</dt>
+            <dd>{{ famille }}</dd>
+          </div>
           <div v-if="entree.acronym" class="gn-terme__cle">
             <dt>{{ t('guide-nego.lexique-entree.sigle') }}</dt>
             <dd lang="en"><strong>{{ entree.acronym }}</strong> — <i>{{ entree.term }}</i></dd>
@@ -155,54 +160,32 @@ useHead({ title: computed(() => entree.value?.term ?? t('guide-nego.lexique-entr
           </ul>
         </section>
       </div>
-
-      <div class="gn-terme__actions">
-        <GnBouton variante="secondaire" largeur="demie" picto="star" :actif="estFavori" @clic="basculer(entree.id)">
-          {{ t('guide-nego.lexique-entree.favori') }}
-        </GnBouton>
-        <GnBouton variante="secondaire" largeur="demie" picto="share" @clic="partager">
-          {{ t('guide-nego.lexique-entree.partager') }}
-        </GnBouton>
-      </div>
-    </article>
+    </div>
 
     <GnMessageEphemere v-if="message" :key="message.rang" :texte="message.texte" @fini="message = null" />
   </GnEcran>
 </template>
 
 <style>
-[data-app="guide-nego"] .gn-ecran__contenu:has(> .gn-terme) {
-  display: flex;
-  flex-direction: column;
-}
-
 [data-app="guide-nego"] .gn-terme {
-  flex: 1;
   display: flex;
   flex-direction: column;
+  gap: var(--gn-espace-20);
 }
 
 [data-app="guide-nego"] .gn-terme__corps {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  padding-bottom: var(--gn-espace-16);
-}
-
-[data-app="guide-nego"] .gn-terme__definition {
-  padding-top: var(--gn-espace-16);
-  max-width: var(--gn-mesure-lecture);
 }
 
 [data-app="guide-nego"] .gn-terme__entendu {
-  margin: var(--gn-espace-12) 0 0;
-  padding: var(--gn-espace-4) 0 var(--gn-espace-4) var(--gn-espace-12);
-  border-inline-start: var(--gn-filet-3) solid var(--gn-filet-fort);
-  font-style: italic;
-}
-
-[data-app="guide-nego"] .gn-terme__cles {
-  margin-top: var(--gn-espace-16);
+  margin: 0;
+  padding: var(--gn-espace-16);
+  border-radius: var(--gn-rayon-16);
+  background: var(--gn-fond-2);
+  color: var(--gn-texte-lecture);
+  font-size: var(--gn-taille-17);
+  line-height: var(--gn-interligne-17);
 }
 
 [data-app="guide-nego"] .gn-terme__cle {
@@ -210,9 +193,9 @@ useHead({ title: computed(() => entree.value?.term ?? t('guide-nego.lexique-entr
   justify-content: space-between;
   gap: var(--gn-espace-16);
   padding-block: var(--gn-espace-12);
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
 }
 
 [data-app="guide-nego"] .gn-terme__cle dt {
@@ -233,14 +216,6 @@ useHead({ title: computed(() => entree.value?.term ?? t('guide-nego.lexique-entr
 [data-app="guide-nego"] .gn-terme__lies {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--gn-espace-8);
-  padding-top: var(--gn-espace-12);
-}
-
-[data-app="guide-nego"] .gn-terme__actions {
-  display: flex;
-  gap: var(--gn-espace-8);
-  padding-block: var(--gn-espace-16);
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
+  gap: 6px;
 }
 </style>

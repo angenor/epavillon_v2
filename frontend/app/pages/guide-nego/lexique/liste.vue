@@ -83,7 +83,7 @@ useHead({ title: t('guide-nego.lexique-liste.titre') })
 </script>
 
 <template>
-  <GnEcran :titre="t('guide-nego.lexique-liste.titre')" :retour="origine" fermer lexique-ouvert>
+  <GnEcran :titre="t('guide-nego.lexique-liste.titre')" :retour="origine" lexique-ouvert>
     <div class="gn-liste">
       <GnChampRecherche
         v-model="saisie"

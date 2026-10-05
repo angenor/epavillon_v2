@@ -94,7 +94,9 @@ watch(
       :loupe="loupe"
     >
       <template v-if="$slots.pied" #pied><slot name="pied" /></template>
-      <template #connexion>
+      <!-- En ligne, la maquette ne montre aucune ligne de synchronisation (l'heure reste
+           dans les réglages) ; hors connexion, la ligne le dit sous le titre. -->
+      <template v-if="$slots.connexion || !etat.enLigne" #connexion>
         <slot name="connexion">
           <GnLigneConnexion :en-ligne="etat.enLigne" :lu-a="etat.luA" />
         </slot>

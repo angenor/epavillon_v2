@@ -23,7 +23,7 @@ const props = withDefaults(
     avatar?: AvatarDEntete
     /** Le profil : l'avatar en grand, à côté du titre qui porte le nom. */
     avatarDuTitre?: AvatarDEntete
-    /** Vrai sur le lexique lui-même : le bouton dit où l'on est. */
+    /** Vrai sur le lexique lui-même : « Aa » s'efface. */
     lexiqueOuvert?: boolean
     /** Le lecteur : une seule ligne, le titre en petit entre le retour et « Aa » (04 · 01). */
     compact?: boolean
@@ -105,11 +105,8 @@ const classesDuTitre = computed(() => ({
         <!-- Un accès propre à l'écran, à côté de « Aa » : « Mon agenda » sur les sessions. -->
         <slot name="action" />
         <GnLoupe v-if="loupe" />
-        <GnBoutonRond
-          vers="/guide-nego/lexique"
-          :actif="lexiqueOuvert"
-          :libelle="lexiqueOuvert ? t('gn-entete.lexique-ouvert') : t('gn-entete.lexique')"
-        >
+        <!-- Dans le lexique, « Aa » n'a plus où mener : la maquette 03 ne le montre pas. -->
+        <GnBoutonRond v-if="!lexiqueOuvert" vers="/guide-nego/lexique" :libelle="t('gn-entete.lexique')">
           Aa
         </GnBoutonRond>
       </div>

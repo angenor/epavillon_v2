@@ -11,6 +11,7 @@
  * son libellé. Le créneau neutre du fil du jour (2,1:1 sur sa piste) non plus : la
  * maquette le veut ainsi, et chaque créneau se lit en entier dans l'agenda qu'il
  * résume. Ce qui porte un sens sans texte (focus, pictogramme, point d'état) l'est.
+ * Arbitré le 05/10 : valeurs de la maquette gardées, repères décoratifs dont le texte porte le sens.
  */
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'

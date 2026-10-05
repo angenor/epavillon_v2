@@ -1,5 +1,5 @@
 {
-  "titre": "Lexique anglais-français",
+  "titre": "Lexique",
   "champ": "Chercher un terme, en anglais ou en français",
   "indication": "Un mot entendu en salle",
   "compte": "Aucune entrée, sans réseau | {count} entrée, sans réseau | {count} entrées, sans réseau",
@@ -8,7 +8,6 @@
   "parcourir": "Parcourir la liste",
   "favoris": "Mes termes favoris",
   "peut-etre": "Vous cherchiez peut-être :",
-  "trouves": "{count} entrée. | {count} entrée. | {count} entrées.",
   "traductions": "Aussi dans les traductions françaises.",
   "sur": "{count} entrée sur {total} | {count} entrée sur {total} | {count} entrées sur {total}",
   "aucun": {
@@ -23,5 +22,6 @@
   "erreur": {
     "titre": "Le lexique n'est pas encore sur ce téléphone",
     "texte": "Il se garde à la première ouverture avec le réseau. Reconnectez-vous une fois : il se lira ensuite sans réseau."
-  }
+  },
+  "autres": "Autres termes"
 }
