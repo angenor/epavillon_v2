@@ -34,6 +34,7 @@ withDefaults(
 <style>
 [data-app="guide-nego"] .gn-journee-ligne {
   min-height: 60px;
+  padding-block: 10px;
   display: flex;
   align-items: center;
   gap: 14px;
