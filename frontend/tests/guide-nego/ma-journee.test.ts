@@ -7,40 +7,32 @@ import { initialesDe } from '../../app/utils/guide-nego/compte.ts'
 const traductions = (locale: string, page: string) =>
   JSON.parse(readFileSync(new URL(`../../i18n/locales/${locale}/pages/guide-nego.${page}.json`, import.meta.url), 'utf8'))
 
-const composant = (locale: string, nom: string) =>
-  JSON.parse(readFileSync(new URL(`../../i18n/locales/${locale}/components/${nom}.json`, import.meta.url), 'utf8'))
-
 test('les cinq blocs paraissent dans l’ordre fixe (FR-013)', () => {
   assert.deepEqual(BLOCS_DE_MA_JOURNEE, [
     'prochaine-session',
-    'changements',
     'trois-agendas',
+    'changements',
     'documents',
     'lexique',
   ])
 })
 
 /**
- * Chacun des quatre premiers porte **son** état vide, en une ligne, et rien n'y
- * évoque une panne (FR-014) : un bloc vide n'est pas un échec. Les trois agendas ont
- * chacun le leur (FR-021).
+ * Chaque bloc qui peut être vide porte **son** état vide, en une ligne, et rien n'y
+ * évoque une panne (FR-014) : un bloc vide n'est pas un échec. Le fil du jour n'en a
+ * pas : une piste sans créneau se voit vide.
  */
 test('chaque bloc vide dit ce qui manque, sans un mot de panne', () => {
   for (const locale of ['fr', 'en']) {
     const { blocs } = traductions(locale, 'accueil')
-    const lignes = composant(locale, 'gn-journee-lignes')
-    const pavillon = composant(locale, 'gn-journee-ligne-pavillon')
-    const vides: Record<string, string[]> = {
-      'trois-agendas': [lignes['jamais-lue'], lignes.sessions.vide, lignes.reunions.vide, lignes.reunions.prochaine, pavillon.vide, pavillon.prochaine],
-    }
     for (const bloc of BLOCS_DE_MA_JOURNEE.filter((b) => b !== 'lexique')) {
       assert.ok(blocs[bloc]?.titre, `${locale} — ${bloc} : titre`)
-      for (const vide of vides[bloc] ?? [blocs[bloc]?.vide]) {
-        assert.ok(vide, `${locale} — ${bloc} : ligne vide`)
-        assert.doesNotMatch(vide, /erreur|échec|échoué|indisponible|impossible|panne|error|fail|unavailable/i, `${locale} — ${bloc}`)
-      }
+      if (bloc === 'trois-agendas') continue
+      const vide = blocs[bloc]?.vide
+      assert.ok(vide, `${locale} — ${bloc} : ligne vide`)
+      assert.doesNotMatch(vide, /erreur|échec|échoué|indisponible|impossible|panne|error|fail|unavailable/i, `${locale} — ${bloc}`)
     }
-    assert.ok(blocs.lexique?.ouvrir, `${locale} — accès au lexique`)
+    assert.ok(blocs.lexique?.titre, `${locale} — accès au lexique`)
   }
 })
 

@@ -10,7 +10,7 @@ const { t } = useI18n()
 
 <template>
   <div class="gn-bloc-lieu">
-    <GnPicto nom="pin" :taille="24" class="gn-bloc-lieu__epingle" />
+    <span class="gn-bloc-lieu__epingle"><GnPicto nom="pin" :taille="20" /></span>
     <div class="gn-bloc-lieu__corps">
       <p class="gn-bloc-lieu__nom">{{ nom }}</p>
       <p v-if="adresse" class="gn-bloc-lieu__adresse">{{ adresse }}</p>
@@ -25,16 +25,24 @@ const { t } = useI18n()
 <style>
 [data-app="guide-nego"] .gn-bloc-lieu {
   margin-top: var(--gn-espace-16);
-  padding: var(--gn-espace-12) 14px;
+  padding: var(--gn-espace-16);
   display: flex;
   align-items: flex-start;
-  gap: var(--gn-espace-12);
-  border: var(--gn-filet-1) solid var(--gn-filet);
+  gap: 14px;
+  background: var(--gn-fond-2);
+  border-radius: var(--gn-rayon-20);
 }
 
 [data-app="guide-nego"] .gn-bloc-lieu__epingle {
   flex: none;
-  color: var(--gn-picto);
+  width: var(--gn-pastille-icone);
+  height: var(--gn-pastille-icone);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--gn-rayon-14);
+  background: var(--gn-bloc-releve);
+  color: var(--gn-accent);
 }
 
 [data-app="guide-nego"] .gn-bloc-lieu__corps {
@@ -47,15 +55,19 @@ const { t } = useI18n()
 }
 
 [data-app="guide-nego"] .gn-bloc-lieu__nom {
-  font-size: var(--gn-taille-17);
-  line-height: var(--gn-interligne-17);
-  font-weight: var(--gn-graisse-demi-gras);
+  font-size: var(--gn-taille-16);
+  line-height: 1.3;
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-bloc-lieu__adresse {
   color: var(--gn-texte-2);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
+  font-size: var(--gn-taille-14);
+  line-height: var(--gn-interligne-14);
+}
+
+[data-app="guide-nego"] .gn-pavillon > .gn-bloc-lieu {
+  margin-top: 18px;
 }
 
 [data-app="guide-nego"] .gn-bloc-lieu__plan {

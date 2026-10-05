@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { dayKeyInZone } from '~/utils/datetime'
+import { placeDuMaintenant } from '~/utils/guide-nego/sessions'
+
 /**
- * La section Réunions de l'onglet Francophonie (10 · 1a). Lecture publique, gardée pour
+ * La section Réunions de l'onglet Francophonie, en frise par jour (Nuit 02). Lecture publique, gardée pour
  * le hors connexion ; le fuseau se dit une fois au-dessus des heures (écart 47).
  */
 const { t } = useI18n()
-const { zoneLabel, zoneOffsetShort } = useDateTime()
+const { zoneLabel, zoneOffsetShort, dayLong, time } = useDateTime()
 const connexion = useGnConnexion()
 const session = useGnSession()
 const lecture = useGnReunions()
@@ -50,6 +53,23 @@ const lignes = computed(() =>
   })),
 )
 
+const majuscule = (texte: string) => texte.charAt(0).toLocaleUpperCase() + texte.slice(1)
+const aujourdhui = computed(() => dayKeyInZone(maintenant.value, fuseau.value))
+const jours = computed(() => {
+  const parJour = new Map<string, typeof lignes.value>()
+  for (const l of lignes.value) {
+    const jour = dayKeyInZone(l.reunion.start_at, fuseau.value)
+    parJour.set(jour, [...(parJour.get(jour) ?? []), l])
+  }
+  return [...parJour].map(([jour, du]) => ({
+    jour,
+    legende: majuscule(dayLong(`${jour}T12:00:00Z`, 'UTC')),
+    lignes: du,
+    maintenantA: jour === aujourdhui.value ? placeDuMaintenant(du.map((l) => l.reunion.start_at), maintenant.value) : null,
+  }))
+})
+const heureDeMaintenant = computed(() => time(maintenant.value, fuseau.value))
+
 const legende = computed(() => {
   const premiere = lecture.reunions.value[0]
   return k('fuseau', {
@@ -94,17 +114,23 @@ const legende = computed(() => {
 
     <template v-else>
       <p class="gn-reunions__fuseau">{{ legende }}</p>
-      <div class="gn-reunions__liste">
-        <GnLigneReunion
-          v-for="l in lignes"
-          :key="l.reunion.id"
-          :reunion="l.reunion"
-          :etat="l.etat"
-          :fuseau="fuseau"
-          :ville="lecture.ville.value"
-          :vers="`/guide-nego/francophonie/reunions/${l.reunion.id}`"
-        />
-      </div>
+      <section v-for="j in jours" :key="j.jour" class="gn-reunions__jour">
+        <h2 class="gn-reunions__legende">{{ j.legende }}</h2>
+        <div class="gn-reunions__liste">
+          <template v-for="(l, i) in j.lignes" :key="l.reunion.id">
+            <GnFriseMaintenant v-if="j.maintenantA === i" :heure="heureDeMaintenant" />
+            <GnLigneReunion
+              :reunion="l.reunion"
+              :etat="l.etat"
+              :fuseau="fuseau"
+              :ville="lecture.ville.value"
+              :jour="false"
+              :vers="`/guide-nego/francophonie/reunions/${l.reunion.id}`"
+            />
+          </template>
+          <GnFriseMaintenant v-if="j.maintenantA === j.lignes.length" :heure="heureDeMaintenant" />
+        </div>
+      </section>
     </template>
 
     <i18n-t v-if="!attente" keypath="guide-nego.francophonie.reunions.pied" tag="p" class="gn-reunions__pied" scope="global">
@@ -124,13 +150,22 @@ const legende = computed(() => {
 }
 
 [data-app="guide-nego"] .gn-reunions__fuseau {
-  padding-top: var(--gn-espace-16);
-  padding-bottom: 6px;
-  border-bottom: var(--gn-filet-3) solid var(--gn-filet-fort);
-  color: var(--gn-accent);
-  font-size: var(--gn-taille-15);
-  line-height: var(--gn-interligne-15);
-  font-weight: var(--gn-graisse-demi-gras);
+  padding-top: 18px;
+  color: var(--gn-texte-2);
+  font-size: var(--gn-taille-13);
+  line-height: var(--gn-interligne-13);
+}
+
+[data-app="guide-nego"] .gn-reunions__jour {
+  padding-top: 18px;
+}
+
+[data-app="guide-nego"] .gn-reunions__legende {
+  padding-bottom: var(--gn-espace-4);
+  font-family: var(--gn-police-titre);
+  font-size: var(--gn-taille-18);
+  line-height: var(--gn-interligne-18);
+  font-weight: var(--gn-graisse-gras);
 }
 
 [data-app="guide-nego"] .gn-reunions__fuseau::first-letter {

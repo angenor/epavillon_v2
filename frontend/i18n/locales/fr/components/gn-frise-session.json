@@ -1,0 +1,14 @@
+{
+  "sans-heure": "--:--",
+  "jusqua": "jusqu'à {heure}",
+  "terminee": "terminée",
+  "dans-mon-agenda": "dans mon agenda",
+  "mon-groupe": "mon groupe",
+  "en-cours": "En cours",
+  "deplacee": "{de} → {a}",
+  "non-annoncee": "Non annoncée · signalée par le réseau",
+  "traduction": "Titre traduit automatiquement",
+  "signale": "Signalé par le réseau, validé à {heure}",
+  "chevauche": "Chevauche {heures} : {titre}",
+  "rappel": "Rappel 15 minutes avant"
+}

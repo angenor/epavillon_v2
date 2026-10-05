@@ -260,7 +260,7 @@ useHead({ title: t('guide-nego.thematiques.titre') })
 [data-app="guide-nego"] .gn-themes__liste {
   display: flex;
   flex-direction: column;
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
+  border-top: var(--gn-filet-1) solid var(--gn-filet-doux);
   margin-top: var(--gn-espace-12);
 }
 

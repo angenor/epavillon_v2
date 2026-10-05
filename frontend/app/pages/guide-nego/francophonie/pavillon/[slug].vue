@@ -484,8 +484,8 @@ useHead({ title: titre })
   display: flex;
   flex-direction: column;
   gap: var(--gn-espace-8);
-  border-top: var(--gn-filet-1) solid var(--gn-filet);
-  background: var(--gn-fond);
+  border-top: var(--gn-filet-1) solid var(--gn-filet-doux);
+  background: var(--gn-barre-fond);
 }
 
 [data-app="guide-nego"] .gn-activite__closes,
@@ -525,7 +525,7 @@ useHead({ title: titre })
   column-gap: var(--gn-espace-16);
   row-gap: var(--gn-espace-4);
   padding: var(--gn-espace-12) 0 10px;
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
 }
 
 [data-app="guide-nego"] .gn-activite__marques .gn-marque-etat {
@@ -541,12 +541,22 @@ useHead({ title: titre })
   line-height: var(--gn-interligne-15);
 }
 
+[data-app="guide-nego"] .gn-activite__lignes {
+  padding: var(--gn-espace-4) var(--gn-espace-16);
+  border-radius: var(--gn-rayon-24);
+  background: var(--gn-fond-2);
+}
+
 [data-app="guide-nego"] .gn-activite__ligne {
   display: flex;
   justify-content: space-between;
   gap: var(--gn-espace-12);
-  padding-block: 10px;
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  padding-block: var(--gn-espace-12);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
+}
+
+[data-app="guide-nego"] .gn-activite__ligne:last-child {
+  border-bottom: none;
 }
 
 [data-app="guide-nego"] .gn-activite__ligne dt {
@@ -608,7 +618,7 @@ useHead({ title: titre })
   align-items: flex-start;
   gap: var(--gn-espace-12);
   padding-block: var(--gn-ligne-air);
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
 }
 
 [data-app="guide-nego"] .gn-activite__personne {

@@ -4,5 +4,7 @@
   "et-en-ligne": "{lieu} et en ligne",
   "lieu-inconnu": "Lieu non annoncé",
   "acces-limite": "Accès limité — {public}",
-  "entendu": "{jour}, {heures}"
+  "entendu": "{jour}, {heures}",
+  "origine-et-jour": "{jour} · Réunions de la Francophonie",
+  "lieu-et-fin": "{lieu} · jusqu'à {fin}"
 }

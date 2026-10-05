@@ -64,7 +64,7 @@ useHead({ title: t('guide-nego.ouverture.titre') })
   display: flex;
   align-items: center;
   gap: 10px;
-  border-bottom: var(--gn-filet-1) solid var(--gn-filet);
+  border-bottom: var(--gn-filet-1) solid var(--gn-filet-doux);
   font-size: var(--gn-taille-17);
   font-weight: var(--gn-graisse-demi-gras);
 }
