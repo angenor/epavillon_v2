@@ -1,6 +1,6 @@
 /* Guide Négo — mesures.css
    Grille, espacements, cibles, filets, rayons, zones sûres et dimensions des composants.
-   Extrait de « 01 — Système », section 3 et sections 4 bis à 4 septdecies. Cadre de référence 360 × 800, vérifié à 390 × 844. */
+   Direction « Nuit » (LISEZMOI § Mesures), cadre de référence 390 × 844. */
 
 [data-app="guide-nego"] {
   /* Grille de 4 px */
@@ -9,11 +9,12 @@
   --gn-espace-8: 8px;
   --gn-espace-12: 12px;
   --gn-espace-16: 16px;
+  --gn-espace-20: 20px;
   --gn-espace-24: 24px;
   --gn-espace-32: 32px;
   --gn-espace-48: 48px;
-  --gn-marge-ecran: 16px;
-  --gn-entre-blocs: 24px;
+  --gn-marge-ecran: 20px;
+  --gn-entre-blocs: 22px;              /* accueil ; 18 aux sessions, 20 au lexique */
   --gn-ligne-air: 10px;                 /* au-dessus et au-dessous du filet d'une ligne de liste */
   --gn-entre-paragraphes: 12px;         /* texte de lecture */
   --gn-etiquette-air: 6px 10px;         /* air intérieur d'une étiquette bordée — hors grille, mesuré sur la maquette */
@@ -26,10 +27,18 @@
   --gn-onglet-filtre-hauteur: 48px;     /* onglet de filtre sous l'en-tête, texte à 17 — écarts 6 et 15 */
   --gn-reaction-pilule: 36px;           /* réaction, dans une zone de 48 */
 
-  /* Rayons — la direction est carrée */
-  --gn-rayon-0: 0;                      /* blocs, lignes, en-têtes, aplats */
-  --gn-rayon-4: 4px;                    /* champs, boutons, boîtes, cases */
-  --gn-rayon-24: 24px;                  /* pilules, avatar, interrupteur, cercles de choix */
+  /* Rayons */
+  --gn-rayon-0: 0;
+  --gn-rayon-4: 4px;                    /* case à cocher */
+  --gn-rayon-6: 6px;                    /* marque « EN », piste et créneau du fil */
+  --gn-rayon-12: 12px;                  /* pastille d'icône de 36 */
+  --gn-rayon-14: 14px;                  /* pastille d'icône de 44 */
+  --gn-rayon-16: 16px;                  /* bouton de 50 à 52, ligne-carte */
+  --gn-rayon-18: 18px;                  /* champ */
+  --gn-rayon-20: 20px;                  /* carte de la frise */
+  --gn-rayon-22: 22px;                  /* bouton rond de 44 */
+  --gn-rayon-24: 24px;                  /* bloc */
+  --gn-rayon-pilule: 999px;             /* jour, étiquette, avatar, interrupteur */
 
   /* Filets */
   --gn-filet-1: 1px;                    /* entre lignes, étiquettes, boîtes bordées, marque de rôle */
@@ -39,29 +48,38 @@
   --gn-focus-decalage: 2px;
 
   /* Zones sûres */
-  --gn-sur-haut-barre-etat: 24px;       /* barre d'état Android */
-  --gn-sur-haut-avant-contenu: 14px;
-  --gn-sur-bas-barre-onglets: 68px;
+  /* La maquette figure la zone sûre du haut par 60 px : 44 au moins, la vraie si elle est plus haute. */
+  --gn-sur-haut-barre-etat: max(44px, env(safe-area-inset-top));
+  --gn-sur-haut-avant-contenu: 16px;
+  --gn-sur-bas-barre-onglets: 120px;    /* barre de 88 et 32 d'air sous le dernier bloc */
   --gn-sur-bas-geste: 16px;
   --gn-action-principale-marge-bas: 16px;
 
   /* Cadre */
   --gn-colonne-largeur: 480px;          /* au-delà, la colonne se centre au lieu de s'étirer */
-  --gn-cadre-largeur: 360px;
-  --gn-cadre-hauteur: 800px;
-  --gn-mesure-lecture: 328px;           /* 360 − 2 × 16 */
+  --gn-cadre-largeur: 390px;
+  --gn-cadre-hauteur: 844px;
+  --gn-mesure-lecture: 350px;           /* 390 − 2 × 20 */
 
   /* Composants */
   --gn-colonne-heure: 62px;
-  --gn-barre-onglets: 68px;
-  --gn-onglet-picto: 26px;
-  --gn-onglet-min: 48px;                /* largeur d'onglet : libellé + 2 × 3 px d'air, 48 au moins */
+  --gn-barre-onglets: 88px;             /* zone de geste comprise */
+  --gn-onglet-picto: 24px;
+  --gn-onglet-largeur: 80px;
+  --gn-onglet-hauteur: 56px;
+  --gn-onglet-min: 48px;
   --gn-onglet-air: 3px;
   --gn-compteur: 22px;
   --gn-en-tete-titre: 28px;
   --gn-en-tete-lecture: 48px;
-  --gn-bouton-aa: 48px;
-  --gn-avatar: 40px;
+  --gn-bouton-rond: 44px;
+  --gn-bouton-aa: 44px;
+  --gn-bouton-principal: 52px;
+  --gn-avatar: 44px;
+  --gn-pastille-icone: 44px;
+  --gn-pastille-icone-petite: 36px;
+  --gn-pilule-jour: 44px;
+  --gn-point-etat: 10px;
   --gn-case: 24px;
   --gn-cercle-choix: 24px;
   --gn-interrupteur-largeur: 52px;
@@ -72,7 +90,7 @@
   --gn-jauge: 6px;
   --gn-segment-etape: 4px;
   --gn-carre-etape: 32px;
-  --gn-champ: 48px;
+  --gn-champ: 56px;
   --gn-zone-texte: 120px;
   --gn-champ-heure: 110px;
   --gn-feuille-poignee-largeur: 40px;

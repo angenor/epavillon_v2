@@ -10,13 +10,9 @@
   flex-direction: column;
   position: relative;
   overflow-x: clip;
-  color-scheme: light;
+  color-scheme: dark;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
-}
-
-[data-app="guide-nego"][data-theme="sombre"] {
-  color-scheme: dark;
 }
 
 [data-app="guide-nego"] *,

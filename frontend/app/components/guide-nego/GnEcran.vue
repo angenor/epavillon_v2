@@ -3,6 +3,7 @@ import type { AvatarDEntete } from '~/components/guide-nego/GnEntete.vue'
 /**
  * Le cadre commun : en-tête, contenu, et la barre d'onglets quand l'écran en porte une.
  * Un écran secondaire — lexique, réglages — donne un `retour` et se passe d'onglets.
+ * L'emplacement `#entete` remplace l'en-tête par défaut (l'accueil : avatar, date, jour de la COP).
  *
  * Les zones sûres et les marges viennent de `.gn-ecran` (mesures.css) ; rien ici ne
  * les redit.
@@ -76,7 +77,9 @@ watch(
 
 <template>
   <div class="gn-ecran" :class="{ 'gn-ecran--sans-onglets': !onglets }">
+    <slot v-if="$slots.entete" name="entete" />
     <GnEntete
+      v-else
       :titre="titre"
       :sous-titre="sousTitre"
       :retour="retour"
