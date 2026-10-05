@@ -124,3 +124,7 @@ Demande du commanditaire : appliquer `docs/bird-cursor/` à l'accueil. Arbitrage
 - **Sourire** (demande du même jour) : après 2 s de survol de l'oiseau, ou au clic, la paupière se ferme et un arc « ^ » se dessine sur l'œil, avec une joue rosée et un sautillement ; la bulle dit une phrase tirée au hasard (`home.bird.happy`, fr/en), prioritaire sur les répliques. Seul le groupe `#bird` capte la souris (curseur main) ; le clic ne traverse pas vers le lien dessous ; le survol de l'oiseau l'empêche de changer de perchoir. Le SVG est `aria-hidden`. Le composable remonte l'oiseau si la langue change, pour ses phrases.
 
 **Limite relevée** : sur une réplique collée au haut de l'écran (le titre « À venir »), la bulle, bornée à la fenêtre, recouvre l'oiseau. Comportement du moteur, laissé tel quel.
+
+### 05/10 — rail de vignettes centré, barre de défilement
+
+Vignettes centrées sous la citation, commandes de lecture à droite ; la vignette courante porte une barre qui se remplit au rythme du défilement à la place de la coche (signal de forme, pas de teinte). Typecheck vert, vu à 1440 px — [journal](../journal/2026-10-05.md).

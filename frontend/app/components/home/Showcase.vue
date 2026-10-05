@@ -106,6 +106,8 @@ const running = computed(
 )
 
 let timer: ReturnType<typeof setTimeout> | null = null
+const cycle = ref(0)
+const duration = computed(() => (slide.value ? showcaseDurationMs(slide.value, { skipVideo: skipVideo(slide.value) }) : 0))
 
 function clearTimer(): void {
   if (timer !== null) {
@@ -120,6 +122,7 @@ function schedule(): void {
   const row = slide.value
   if (!row) return
   timer = setTimeout(() => go(1), showcaseDurationMs(row, { skipVideo: skipVideo(row) }))
+  cycle.value += 1
 }
 
 function go(step: number): void {
@@ -277,6 +280,9 @@ watch(
           :current="current"
           :playing="playing"
           :reduced-motion="reducedMotion"
+          :running="running"
+          :duration="duration"
+          :cycle="cycle"
           @select="select"
           @previous="go(-1)"
           @next="go(1)"

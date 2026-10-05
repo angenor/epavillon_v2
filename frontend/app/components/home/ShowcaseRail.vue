@@ -7,9 +7,10 @@ import type { ShowcaseRow } from '~/types/views'
  * ── LA COULEUR NE PORTE JAMAIS SEULE UNE INFORMATION (règle d'usage n° 3) ────
  *
  * La diapositive courante est signalée TROIS FOIS, et chacune s'adresse à
- * quelqu'un de différent : un cerne pour l'œil, une coche pour qui ne distingue
- * pas les teintes, `aria-current` et un mot pour qui n'a que la voix de son
- * lecteur d'écran. Le compteur « 3 / 7 » ferme la boucle, visible de tous.
+ * quelqu'un de différent : un cerne pour l'œil, une barre qui se remplit au
+ * rythme du défilement (une forme, pas une teinte), `aria-current` et un mot
+ * pour qui n'a que la voix de son lecteur d'écran. Le compteur « 3 / 7 » ferme
+ * la boucle, visible de tous.
  *
  * ── LE BOUTON LECTURE / PAUSE EST OBLIGATOIRE, ET IL EST VISIBLE ────────────
  *
@@ -41,6 +42,12 @@ interface Props {
    * explicite l'emportant sur une préférence générale.
    */
   reducedMotion?: boolean
+  /** Le défilement tourne à cet instant (ni pause, ni survol, ni onglet caché). */
+  running: boolean
+  /** Durée de la diapositive courante, en millisecondes. */
+  duration: number
+  /** Change à chaque départ de la minuterie : la barre repart de zéro avec elle. */
+  cycle: number
 }
 
 const props = defineProps<Props>()
@@ -67,108 +74,135 @@ const total = computed(() => props.slides.length)
        il ne décore rien : il rend lisible un texte blanc sur une image dont on
        ignore la luminosité. Le flou du verre agit par-dessus, sur les commandes.
        -->
-  <div
-    v-if="total > 1"
-    class="scrim-fade-bottom flex items-center gap-2 px-2 pt-10 pb-3 text-text-on-inverse sm:gap-3 sm:px-4"
-  >
-    <button
-      type="button"
-      class="flex shrink-0 cursor-pointer items-center justify-center rounded-full border border-glass-border bg-glass text-text-on-inverse shadow-glass backdrop-blur-glass transition-colors hover:bg-glass-hover"
-      :style="{ width: 'var(--target-min)', height: 'var(--target-min)' }"
-      :aria-label="t('home.showcase.previous')"
-      @click="emit('previous')"
-    >
-      <UiIcon name="chevron-left" size="1.25rem" />
-    </button>
-
-    <!-- SEUL LE RAIL DÉFILE HORIZONTALEMENT. Le corps de page, jamais. -->
-    <ul
-      class="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto py-1"
-      :aria-label="t('home.showcase.railLabel')"
-    >
-      <li v-for="(slide, index) in props.slides" :key="slide.id" class="shrink-0">
+  <div v-if="total > 1" class="scrim-fade-bottom pt-10 pb-3 text-text-on-inverse">
+    <!-- Même cadre que le texte de la diapositive : les vignettes se centrent
+         sous la citation, les commandes de lecture se rangent à droite. -->
+    <div class="mx-auto flex w-full max-w-[1280px] items-center gap-2 px-2 sm:gap-3 sm:px-6">
+      <div class="flex min-w-0 flex-1 items-center gap-2 sm:gap-3 lg:max-w-[52rem]">
         <button
           type="button"
-          class="relative block h-11 w-[4.5rem] cursor-pointer overflow-hidden rounded-md border-(length:--border-medium) shadow-glass transition-all sm:h-14 sm:w-24"
-          :class="
-            index === props.current
-              ? 'border-glass-border-strong ring-2 ring-glass-border-strong'
-              : 'border-glass-border opacity-65 hover:opacity-100'
-          "
-          :style="
-            showcaseThumbnail(slide)
-              ? undefined
-              : { backgroundColor: slide.background_color_hex ?? 'var(--color-surface-inverse)' }
-          "
-          :aria-current="index === props.current ? 'true' : undefined"
-          @click="emit('select', index)"
+          class="flex shrink-0 cursor-pointer items-center justify-center rounded-full border border-glass-border bg-glass text-text-on-inverse shadow-glass backdrop-blur-glass transition-colors hover:bg-glass-hover"
+          :style="{ width: 'var(--target-min)', height: 'var(--target-min)' }"
+          :aria-label="t('home.showcase.previous')"
+          @click="emit('previous')"
         >
-          <UiImage
-            :image="showcaseThumbnail(slide)"
-            ratio="auto"
-            frame-class="size-full"
-            class="absolute inset-0"
-            sizes="96px"
-          />
-
-          <!-- La coche : le second signal, celui qui ne dépend pas de la teinte
-               du cerne. -->
-          <span
-            v-if="index === props.current"
-            class="absolute inset-x-0 bottom-0 flex items-center justify-center bg-accent-solid py-0.5 text-accent-contrast"
-            aria-hidden="true"
-          >
-            <UiIcon name="check" size="0.8rem" />
-          </span>
-
-          <span class="sr-only">
-            {{ t('home.showcase.goTo', { index: index + 1, title: tr(slide.title) }) }}
-            <template v-if="index === props.current"> — {{ t('home.showcase.current') }}</template>
-          </span>
+          <UiIcon name="chevron-left" size="1.25rem" />
         </button>
-      </li>
-    </ul>
 
-    <button
-      type="button"
-      class="flex shrink-0 cursor-pointer items-center justify-center rounded-full border border-glass-border bg-glass text-text-on-inverse shadow-glass backdrop-blur-glass transition-colors hover:bg-glass-hover"
-      :style="{ width: 'var(--target-min)', height: 'var(--target-min)' }"
-      :aria-label="t('home.showcase.next')"
-      @click="emit('next')"
-    >
-      <UiIcon name="chevron-right" size="1.25rem" />
-    </button>
+        <!-- SEUL LE RAIL DÉFILE HORIZONTALEMENT. Le corps de page, jamais. -->
+        <ul
+          class="flex min-w-0 flex-1 items-center justify-center-safe gap-2 overflow-x-auto py-1"
+          :aria-label="t('home.showcase.railLabel')"
+        >
+          <li v-for="(slide, index) in props.slides" :key="slide.id" class="shrink-0">
+            <button
+              type="button"
+              class="relative block h-11 w-[4.5rem] cursor-pointer overflow-hidden rounded-md border-(length:--border-medium) shadow-glass transition-all sm:h-14 sm:w-24"
+              :class="
+                index === props.current
+                  ? 'border-glass-border-strong ring-2 ring-glass-border-strong'
+                  : 'border-glass-border opacity-65 hover:opacity-100'
+              "
+              :style="
+                showcaseThumbnail(slide)
+                  ? undefined
+                  : { backgroundColor: slide.background_color_hex ?? 'var(--color-surface-inverse)' }
+              "
+              :aria-current="index === props.current ? 'true' : undefined"
+              @click="emit('select', index)"
+            >
+              <UiImage
+                :image="showcaseThumbnail(slide)"
+                ratio="auto"
+                frame-class="size-full"
+                class="absolute inset-0"
+                sizes="96px"
+              />
 
-    <button
-      type="button"
-      class="flex shrink-0 cursor-pointer items-center justify-center rounded-full border border-glass-border bg-glass text-text-on-inverse shadow-glass backdrop-blur-glass transition-colors hover:bg-glass-hover"
-      :style="{ width: 'var(--target-min)', height: 'var(--target-min)' }"
-      :aria-label="props.playing ? t('home.showcase.pause') : t('home.showcase.play')"
-      @click="emit('toggle')"
-    >
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
-        <path v-if="props.playing" d="M8 5h3v14H8zM13 5h3v14h-3z" />
-        <path v-else d="M8 5.5v13l11-6.5z" />
-      </svg>
-    </button>
+              <!-- La barre de défilement : elle se remplit pendant la durée de la
+                   diapositive, s'arrête avec la lecture, et reste pleine en pause. -->
+              <span
+                v-if="index === props.current"
+                class="absolute inset-x-0 bottom-0 h-1 bg-scrim/60"
+                aria-hidden="true"
+              >
+                <span
+                  :key="props.cycle"
+                  class="block h-full bg-accent-on-inverse"
+                  :class="props.playing ? 'showcase-progress' : 'w-full'"
+                  :style="
+                    props.playing
+                      ? { animationDuration: `${props.duration}ms`, animationPlayState: props.running ? 'running' : 'paused' }
+                      : undefined
+                  "
+                />
+              </span>
 
-    <!-- LE COMPTEUR N'EST PAS UNE RÉGION VIVANTE, et c'est délibéré : il change à
-         chaque bascule automatique, soit toutes les sept secondes. Déclaré
-         `aria-live`, il faisait annoncer « 2 sur 7 », « 3 sur 7 »… par-dessus la
-         lecture en cours, indéfiniment. La position se lit à la demande, sur la
-         vignette courante qui porte `aria-current`. -->
-    <p class="ml-1 hidden shrink-0 rounded-full border border-glass-border bg-glass px-3 py-1 text-sm tabular-nums text-text-on-inverse backdrop-blur-glass sm:block">
-      {{ t('home.showcase.position', { index: props.current + 1, total }) }}
-    </p>
+              <span class="sr-only">
+                {{ t('home.showcase.goTo', { index: index + 1, title: tr(slide.title) }) }}
+                <template v-if="index === props.current"> — {{ t('home.showcase.current') }}</template>
+              </span>
+            </button>
+          </li>
+        </ul>
 
-    <!-- CE QUI EST VIVANT, c'est l'état de lecture, et lui seul : il ne change
-         que sur une action de la personne, et l'annoncer est le seul moyen de
-         savoir que la pause a pris pour qui ne voit pas l'icône. -->
-    <p class="sr-only" aria-live="polite">
-      {{ props.playing ? t('home.showcase.playing') : t('home.showcase.paused') }}
-      <template v-if="props.reducedMotion && !props.playing">
-        {{ t('home.showcase.reducedMotion') }}
-      </template>
-    </p>
+        <button
+          type="button"
+          class="flex shrink-0 cursor-pointer items-center justify-center rounded-full border border-glass-border bg-glass text-text-on-inverse shadow-glass backdrop-blur-glass transition-colors hover:bg-glass-hover"
+          :style="{ width: 'var(--target-min)', height: 'var(--target-min)' }"
+          :aria-label="t('home.showcase.next')"
+          @click="emit('next')"
+        >
+          <UiIcon name="chevron-right" size="1.25rem" />
+        </button>
+      </div>
+
+      <button
+        type="button"
+        class="flex shrink-0 lg:ml-auto cursor-pointer items-center justify-center rounded-full border border-glass-border bg-glass text-text-on-inverse shadow-glass backdrop-blur-glass transition-colors hover:bg-glass-hover"
+        :style="{ width: 'var(--target-min)', height: 'var(--target-min)' }"
+        :aria-label="props.playing ? t('home.showcase.pause') : t('home.showcase.play')"
+        @click="emit('toggle')"
+      >
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+          <path v-if="props.playing" d="M8 5h3v14H8zM13 5h3v14h-3z" />
+          <path v-else d="M8 5.5v13l11-6.5z" />
+        </svg>
+      </button>
+
+      <!-- LE COMPTEUR N'EST PAS UNE RÉGION VIVANTE, et c'est délibéré : il change à
+           chaque bascule automatique, soit toutes les sept secondes. Déclaré
+           `aria-live`, il faisait annoncer « 2 sur 7 », « 3 sur 7 »… par-dessus la
+           lecture en cours, indéfiniment. La position se lit à la demande, sur la
+           vignette courante qui porte `aria-current`. -->
+      <p class="ml-1 hidden shrink-0 rounded-full border border-glass-border bg-glass px-3 py-1 text-sm tabular-nums text-text-on-inverse backdrop-blur-glass sm:block">
+        {{ t('home.showcase.position', { index: props.current + 1, total }) }}
+      </p>
+
+      <!-- CE QUI EST VIVANT, c'est l'état de lecture, et lui seul : il ne change
+           que sur une action de la personne, et l'annoncer est le seul moyen de
+           savoir que la pause a pris pour qui ne voit pas l'icône. -->
+      <p class="sr-only" aria-live="polite">
+        {{ props.playing ? t('home.showcase.playing') : t('home.showcase.paused') }}
+        <template v-if="props.reducedMotion && !props.playing">
+          {{ t('home.showcase.reducedMotion') }}
+        </template>
+      </p>
+    </div>
   </div>
 </template>
+
+<style scoped>
+.showcase-progress {
+  width: 0;
+  animation-name: showcase-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes showcase-progress {
+  to {
+    width: 100%;
+  }
+}
+</style>
