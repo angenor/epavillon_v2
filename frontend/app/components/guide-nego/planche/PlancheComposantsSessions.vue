@@ -256,7 +256,6 @@ const reportee = computed(() =>
           :fuseau="FUSEAU"
           :ville="VILLE"
           :thematique="k('thematique-adaptation')"
-          :origine="t('gn-journee-lignes.sessions.origine')"
           :vers="VERS"
         />
       </div>
