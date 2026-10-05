@@ -414,8 +414,9 @@ useHead({ title: t('guide-nego.recherche.titre') })
   gap: 6px;
 }
 
-/* Chaque résultat devient une ligne-carte : la ligne d'agenda garde son dessin, sans filet ni débord au toucher. */
-[data-app="guide-nego"] .gn-recherche .gn-groupe-resultats__liste > li {
+/* Chaque résultat devient une ligne-carte : la ligne de session garde son dessin, sans filet ni débord au
+   toucher. Une ligne de frise (réunion, activité) porte déjà sa carte : elle reste telle quelle. */
+[data-app="guide-nego"] .gn-recherche .gn-groupe-resultats__liste > li:not(:has(> .gn-frise)) {
   padding-inline: var(--gn-espace-16);
   border-radius: var(--gn-rayon-16);
   background: var(--gn-fond-2);
@@ -426,6 +427,11 @@ useHead({ title: t('guide-nego.recherche.titre') })
   background: none;
 }
 
+/* L'axe d'une frise court d'une ligne à l'autre : pas d'écart entre elles. */
+[data-app="guide-nego"] .gn-recherche .gn-groupe-resultats__liste:has(> li > .gn-frise) {
+  gap: 0;
+}
+
 [data-app="guide-nego"] .gn-recherche .gn-groupe-resultats__liste > li + li > .gn-ligne-terme {
   margin-top: 0;
 }
@@ -434,14 +440,14 @@ useHead({ title: t('guide-nego.recherche.titre') })
   border-bottom: none;
 }
 
-[data-app="guide-nego"] .gn-recherche .gn-groupe-resultats__liste > li:not(:has(> .gn-ligne-terme)) > *:is(:active, :has(:active)) {
+[data-app="guide-nego"] .gn-recherche .gn-groupe-resultats__liste > li:not(:has(> .gn-ligne-terme, > .gn-frise)) > *:is(:active, :has(:active)) {
   width: auto;
   margin-inline: 0;
   padding-inline: 0;
   background: none;
 }
 
-[data-app="guide-nego"] .gn-recherche .gn-groupe-resultats__liste > li:not(:has(> .gn-ligne-terme)):has(:active) {
+[data-app="guide-nego"] .gn-recherche .gn-groupe-resultats__liste > li:not(:has(> .gn-ligne-terme, > .gn-frise)):has(:active) {
   background: var(--gn-presse);
 }
 
