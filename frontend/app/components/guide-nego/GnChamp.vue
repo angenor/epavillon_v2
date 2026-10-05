@@ -110,7 +110,7 @@ const invalide = computed<'true' | undefined>(() => (props.erreur ? 'true' : und
 /* Le champ de la maquette : 56 de haut, bloc bordé, rayon 18. */
 [data-app="guide-nego"] .gn-champ__saisie {
   width: 100%;
-  min-height: var(--gn-champ);
+  min-height: calc(var(--gn-champ) + 2 * var(--gn-filet-1));
   padding-inline: var(--gn-espace-16);
   border: var(--gn-filet-1) solid var(--gn-filet);
   border-radius: var(--gn-rayon-18);

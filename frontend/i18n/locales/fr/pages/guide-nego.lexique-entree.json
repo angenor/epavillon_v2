@@ -7,7 +7,6 @@
   "page": "p. {page}",
   "pages": "p. {de} à {a}",
   "lies": "Termes liés",
-  "favori": "Favori",
   "partager": "Partager",
   "partage": {
     "copie": "Adresse du terme copiée.",
@@ -21,5 +20,6 @@
   "erreur": {
     "titre": "Le lexique n'est pas encore sur ce téléphone",
     "texte": "Il se garde à la première ouverture avec le réseau. Reconnectez-vous une fois : il se lira ensuite sans réseau."
-  }
+  },
+  "famille": "Famille"
 }

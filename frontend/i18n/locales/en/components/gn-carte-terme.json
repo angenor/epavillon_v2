@@ -1,0 +1,10 @@
+{
+  "langue": "EN",
+  "avec-sigle": "{traduction} ({sigle})",
+  "favori-oui": "In my favourites",
+  "favori-non": "Add to favourites",
+  "copier": "Copy the term",
+  "copie": "Term copied",
+  "copie-impossible": "Copying is not possible on this phone",
+  "mis-a-jour": "updated on {jour}"
+}

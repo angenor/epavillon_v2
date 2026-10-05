@@ -58,9 +58,9 @@ function effacer() {
 </template>
 
 <style>
-/* Le champ de la maquette : 56 de haut, bloc bordé, rayon 18, loupe en texte secondaire. */
+/* Le champ de la maquette : 56 de haut plus son bord (58 rendus), bloc bordé, rayon 18. */
 [data-app="guide-nego"] .gn-champ-recherche {
-  min-height: var(--gn-champ);
+  min-height: calc(var(--gn-champ) + 2 * var(--gn-filet-1));
   padding-inline: var(--gn-espace-16);
   display: flex;
   align-items: center;
