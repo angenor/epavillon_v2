@@ -180,9 +180,7 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
         ("23514", "ck_faq_entries_undeletable") | ("23514", "ck_glossary_entries_undeletable") => {
             ApiError::new(NegotiationKnowledgePublishedUndeletable)
         }
-        ("23514", "ck_faq_entries_verified") | ("23514", "ck_faq_entries_verification_pair") => {
-            ApiError::new(NegotiationFaqUnverified).field("verified_on")
-        }
+        ("23514", "ck_faq_entries_verification_pair") => ApiError::new(ValidationFailed).field("verified_on"),
         ("23514", "ck_faq_entries_answer") => ApiError::new(ValidationFailed).field("answer"),
         ("23514", "ck_glossary_entries_term") | ("23514", "ck_glossary_entries_slug") => {
             ApiError::new(ValidationFailed).field("term")

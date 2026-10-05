@@ -308,11 +308,11 @@ async fn les_autres_refus_du_savoir_sont_traduits() {
     assert_eq!(
         refus(
             &bac,
-            "UPDATE negotiation.faq_entries SET verified_on = NULL, verified_by = NULL WHERE id = $1",
+            "UPDATE negotiation.faq_entries SET verified_by = NULL WHERE id = $1",
             question
         )
         .await,
-        ErrorCode::NegotiationFaqUnverified
+        ErrorCode::ValidationFailed
     );
     assert_eq!(
         refus(

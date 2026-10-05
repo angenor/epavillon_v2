@@ -31,7 +31,7 @@ Transitions de `knowledge_status` : `draft → published` (vérification datée 
 | `section_term_id` | uuid | → `reference.taxonomy_terms`, vocabulaire `faq_section` |
 | `question`, `answer` | i18n_text | `fr` requis ; `answer` NULL en brouillon, requise dès `published` — `ck_faq_entries_answer` |
 | `status` | knowledge_status | défaut `draft` |
-| `verified_on` | date | requis dès `published` ou `to_review` — `ck_faq_entries_verified` |
+| `verified_on` | date | facultatif, même publiée — `ck_faq_entries_verified` retirée le 05/10 (publication sur instruction de la hiérarchie) |
 | `verified_by` | uuid | `xmod_fk_faq_entries_verifier`, requis avec `verified_on` |
 | `editorial_rank` | smallint | ordre des « plus lues » à défaut de lectures ; null = hors classement |
 | `origin_question_id` | uuid | → `expert_questions`, null si rédigée |

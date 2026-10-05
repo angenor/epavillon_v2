@@ -73,7 +73,7 @@ pub async fn faq(
     let lignes = sqlx::query!(
         r#"SELECT f.id, t.code AS "section_code!",
                   platform.t(f.question, $1) AS "question!", platform.t(f.answer, $1) AS "answer!",
-                  f.status::text AS "status!", f.verified_on AS "verified_on!", f.updated_at,
+                  f.status::text AS "status!", f.verified_on, f.updated_at,
                   COALESCE((SELECT array_agg(r.related_id ORDER BY r.sort_order, r.related_id)
                               FROM negotiation.faq_related r
                              WHERE r.entry_id = f.id), '{}') AS "related_ids!: Vec<Uuid>"

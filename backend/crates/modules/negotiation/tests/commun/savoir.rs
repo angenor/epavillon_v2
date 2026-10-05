@@ -17,7 +17,7 @@ pub async fn vocabulaire(bac: &Bac, taxonomie: &str, code: &str) -> Uuid {
 }
 
 /// Une entrée de la rubrique « Ma première COP ». Hors brouillon, elle porte
-/// sa réponse et la vérification de l'expert, comme le modèle l'exige.
+/// sa réponse et la vérification de l'expert.
 pub async fn entree_faq(bac: &Bac, expert: Uuid, question: &str, statut: &str) -> Uuid {
     let rubrique = vocabulaire(bac, "faq_section", "first_cop").await;
     let brouillon = statut == "draft";

@@ -156,22 +156,6 @@ async fn une_entree_de_faq_se_redige_se_verifie_se_publie_et_se_depublie() {
     );
     assert_eq!(refus["code"], "NEGOTIATION_RELATED_SELF");
 
-    // Publier sans vérification : refus en français.
-    let (statut, refus) = http!(app, "post", format!("{fiche}/publish"), ifdd);
-    assert_eq!(
-        (statut, refus["code"].as_str()),
-        (
-            StatusCode::UNPROCESSABLE_ENTITY,
-            Some("NEGOTIATION_FAQ_UNVERIFIED")
-        )
-    );
-    assert!(
-        refus["message"]
-            .as_str()
-            .is_some_and(|m| m.contains("vérification")),
-        "{refus}"
-    );
-
     // Dater : l'expert, pas l'administratrice.
     let (statut, refus) = http!(app, "post", format!("{fiche}/verify"), ifdd, json!({}));
     assert_eq!(
@@ -281,6 +265,47 @@ async fn une_entree_de_faq_se_redige_se_verifie_se_publie_et_se_depublie() {
         json!({ "section_code": "process", "question": { "en": "?" } })
     );
     assert_eq!(refus["field"], "question");
+}
+
+/// Sur instruction de sa hiérarchie, l'administration publie sans attendre l'expert.
+#[tokio::test]
+async fn l_administration_publie_sans_verification() {
+    let bac = Bac::monter().await;
+    let ifdd = administratrice(&bac, "ifdd@example.org").await;
+    let app = crate::back_office!(bac);
+
+    let (statut, cree) = http!(
+        app,
+        "post",
+        "/admin/negotiation/faq",
+        ifdd,
+        json!({
+            "section_code": "process",
+            "question": { "fr": "Où se tient la plénière ?" },
+            "answer": { "fr": "Dans la salle plénière du site officiel." }
+        })
+    );
+    assert_eq!(statut, StatusCode::CREATED, "{cree}");
+    let entree = id(&cree);
+
+    let (statut, publiee) = http!(
+        app,
+        "post",
+        format!("/admin/negotiation/faq/{entree}/publish"),
+        ifdd
+    );
+    assert_eq!(statut, StatusCode::OK, "{publiee}");
+    assert_eq!(
+        (publiee["status"].as_str(), publiee["verified_on"].is_null()),
+        (Some("published"), true)
+    );
+    let (servi, _) = paquet(&bac.state, "fr", None).await.expect("paquet");
+    let servie = servi
+        .faq
+        .iter()
+        .find(|f| f.id == entree)
+        .expect("le téléphone la reçoit");
+    assert_eq!(servie.verified_on, None);
 }
 
 #[tokio::test]

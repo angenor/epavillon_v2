@@ -52,7 +52,8 @@ export interface FaqEntry {
   question: string
   answer: string
   status: KnowledgeStatus
-  verified_on: IsoDate
+  /** `null` : publiée sans vérification, sur instruction de la hiérarchie. */
+  verified_on: IsoDate | null
   sources: KnowledgeSource[]
   /** Tous les liens, publiés ou non : à filtrer sur les entrées présentes. */
   related_ids: Uuid[]

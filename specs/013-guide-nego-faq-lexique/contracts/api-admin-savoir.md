@@ -20,7 +20,7 @@ Les lectures des listes et des fiches sont ouvertes à l'une **ou** l'autre (ext
 | `GET /admin/negotiation/faq/{id}` | publish ou review | → `AdminFaqEntry` | Avec sources, liées, retours « Oui / Non » comptés, signalements |
 | `PATCH /admin/negotiation/faq/{id}` | publish | `AdminFaqInput` partiel → `AdminFaqEntry` | Sources et liées remplacées en bloc |
 | `POST /admin/negotiation/faq/{id}/verify` | review | `{ verified_on? }` → `AdminFaqEntry` | Défaut : aujourd'hui, fuseau de Paris ; pose `verified_by` ; une entrée « À revoir » revient `published` |
-| `POST /admin/negotiation/faq/{id}/publish` | publish | → `AdminFaqEntry` | Sans vérification : `NEGOTIATION_FAQ_UNVERIFIED` (traduit de `ck_faq_entries_verified`) |
+| `POST /admin/negotiation/faq/{id}/publish` | publish | → `AdminFaqEntry` | Vérifiée ou non (05/10) ; sans réponse : `VALIDATION_FAILED` |
 | `POST /admin/negotiation/faq/{id}/to-review` | publish | → `AdminFaqEntry` | Reste visible (tranché le 25/09) |
 | `POST /admin/negotiation/faq/{id}/unpublish` | publish | → `AdminFaqEntry` | Revient `draft` |
 | `DELETE /admin/negotiation/faq/{id}` | publish | → `204` | Jamais publiée seulement : sinon `NEGOTIATION_KNOWLEDGE_PUBLISHED_UNDELETABLE` |
@@ -54,7 +54,7 @@ Mêmes routes sous `/admin/negotiation/glossary`, sans `verify` : `GET` (liste, 
 
 ## Codes d'erreur du back-office
 
-`NEGOTIATION_FAQ_UNVERIFIED` 422 (`ck_faq_entries_verified`) · `NEGOTIATION_KNOWLEDGE_PUBLISHED_UNDELETABLE` 409 · `NEGOTIATION_GLOSSARY_SLUG_TAKEN` 409 · `NEGOTIATION_QUESTION_NO_CONSENT` 422 (`ck_expert_questions_promotion`) · `NEGOTIATION_QUEUE_ITEM_CLOSED` 409 · `NEGOTIATION_SOURCE_TARGET_INVALID` 422 (`ck_knowledge_sources_owner`, `ck_knowledge_sources_target`) · `NEGOTIATION_PATHWAY_LINK_INVALID` 422 (`ck_pathway_steps_link`) · `NEGOTIATION_PATHWAY_GROUP_NOT_EMPTY` 409 · `NEGOTIATION_RELATED_SELF` 422 (`ck_faq_related_not_self` et son pendant du lexique). Avec les huit de [api-savoir.md](api-savoir.md) : **dix-sept codes**.
+`NEGOTIATION_KNOWLEDGE_PUBLISHED_UNDELETABLE` 409 · `NEGOTIATION_GLOSSARY_SLUG_TAKEN` 409 · `NEGOTIATION_QUESTION_NO_CONSENT` 422 (`ck_expert_questions_promotion`) · `NEGOTIATION_QUEUE_ITEM_CLOSED` 409 · `NEGOTIATION_SOURCE_TARGET_INVALID` 422 (`ck_knowledge_sources_owner`, `ck_knowledge_sources_target`) · `NEGOTIATION_PATHWAY_LINK_INVALID` 422 (`ck_pathway_steps_link`) · `NEGOTIATION_PATHWAY_GROUP_NOT_EMPTY` 409 · `NEGOTIATION_RELATED_SELF` 422 (`ck_faq_related_not_self` et son pendant du lexique). Avec les huit de [api-savoir.md](api-savoir.md) : **seize codes** (`NEGOTIATION_FAQ_UNVERIFIED` retiré le 05/10).
 
 ## Écrans
 

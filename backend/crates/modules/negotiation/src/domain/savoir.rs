@@ -76,7 +76,8 @@ pub struct FaqEntry {
     pub question: String,
     pub answer: String,
     pub status: KnowledgeStatus,
-    pub verified_on: Date,
+    /// `None` : publiée sans vérification, sur instruction de la hiérarchie.
+    pub verified_on: Option<Date>,
     pub sources: Vec<KnowledgeSource>,
     /// Tous les liens, publiés ou non : le téléphone filtre sur ce qu'il a.
     pub related_ids: Vec<Uuid>,

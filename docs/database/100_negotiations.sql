@@ -2335,7 +2335,7 @@ CREATE TYPE negotiation.proposal_status  AS ENUM ('pending', 'accepted', 'reject
 CREATE TYPE negotiation.faq_report_status AS ENUM ('open', 'closed');
 
 COMMENT ON TYPE negotiation.knowledge_status IS
-    'draft → published (la FAQ exige une vérification datée) ; published ⇄ to_review ; published | to_review → draft (dépublier). to_review reste servi au téléphone, avec sa mention (tranché le 25/09).';
+    'draft → published (la FAQ se publie avec ou sans vérification datée, tranché le 05/10) ; published ⇄ to_review ; published | to_review → draft (dépublier). to_review reste servi au téléphone, avec sa mention (tranché le 25/09).';
 COMMENT ON TYPE negotiation.question_status IS
     'pending → answered → added_to_faq (promotion, seulement avec le consentement de l''auteure).';
 COMMENT ON TYPE negotiation.proposal_status IS
@@ -2420,7 +2420,6 @@ CREATE TABLE negotiation.faq_entries (
     created_at          timestamptz NOT NULL DEFAULT now(),
     updated_at          timestamptz NOT NULL DEFAULT now(),
 
-    CONSTRAINT ck_faq_entries_verified CHECK (status = 'draft' OR verified_on IS NOT NULL),
     CONSTRAINT ck_faq_entries_verification_pair CHECK ((verified_on IS NULL) = (verified_by IS NULL)),
     CONSTRAINT ck_faq_entries_answer CHECK (status = 'draft' OR answer IS NOT NULL)
 );
@@ -2441,9 +2440,9 @@ CREATE TRIGGER tg_faq_entries_audit AFTER INSERT OR UPDATE OR DELETE ON negotiat
     FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
 
 COMMENT ON TABLE negotiation.faq_entries IS
-    'Entrées de la FAQ de Guide Négo. Publiée ou « À revoir », une entrée porte une vérification datée et signée par un expert ; publiée une fois, elle ne se supprime plus.';
+    'Entrées de la FAQ de Guide Négo. La vérification datée et signée par un expert est facultative : l''administration peut publier sur instruction de sa hiérarchie, sans elle (tranché le 05/10). Publiée une fois, une entrée ne se supprime plus.';
 COMMENT ON COLUMN negotiation.faq_entries.verified_on IS
-    '« Vérifié le » : requis dès published ou to_review (ck_faq_entries_verified), posé avec verified_by.';
+    '« Vérifié le » : posé avec verified_by par un expert. NULL : jamais vérifiée, le téléphone ne dit alors pas « Vérifié le ».';
 COMMENT ON COLUMN negotiation.faq_entries.editorial_rank IS
     'Ordre des « plus lues » tant qu''aucune lecture n''est comptée. NULL : hors classement.';
 COMMENT ON COLUMN negotiation.faq_entries.first_published_at IS

@@ -328,7 +328,7 @@ pub(crate) async fn verifier_faq(
 
 #[utoipa::path(
     post,
-    description = "`AdminFaqEntry` — publie. Sans vérification datée : `NEGOTIATION_FAQ_UNVERIFIED` ; sans réponse : 422.",
+    description = "`AdminFaqEntry` — publie, vérifiée ou non. Sans réponse : 422.",
     path = "/admin/negotiation/faq/{id}/publish",
     tag = "Back-office — savoir",
     operation_id = "admin_negotiation_faq_publier",

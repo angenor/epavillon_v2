@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT f.id, t.code AS \"section_code!\",\n                  platform.t(f.question, $1) AS \"question!\", platform.t(f.answer, $1) AS \"answer!\",\n                  f.status::text AS \"status!\", f.verified_on AS \"verified_on!\", f.updated_at,\n                  COALESCE((SELECT array_agg(r.related_id ORDER BY r.sort_order, r.related_id)\n                              FROM negotiation.faq_related r\n                             WHERE r.entry_id = f.id), '{}') AS \"related_ids!: Vec<Uuid>\"\n             FROM negotiation.faq_entries f\n             JOIN reference.taxonomy_terms t ON t.id = f.section_term_id\n            WHERE f.status <> 'draft'\n              AND ($2::timestamptz IS NULL OR f.updated_at >= $2)\n            ORDER BY t.sort_order, f.created_at, f.id",
+  "query": "SELECT f.id, t.code AS \"section_code!\",\n                  platform.t(f.question, $1) AS \"question!\", platform.t(f.answer, $1) AS \"answer!\",\n                  f.status::text AS \"status!\", f.verified_on, f.updated_at,\n                  COALESCE((SELECT array_agg(r.related_id ORDER BY r.sort_order, r.related_id)\n                              FROM negotiation.faq_related r\n                             WHERE r.entry_id = f.id), '{}') AS \"related_ids!: Vec<Uuid>\"\n             FROM negotiation.faq_entries f\n             JOIN reference.taxonomy_terms t ON t.id = f.section_term_id\n            WHERE f.status <> 'draft'\n              AND ($2::timestamptz IS NULL OR f.updated_at >= $2)\n            ORDER BY t.sort_order, f.created_at, f.id",
   "describe": {
     "columns": [
       {
@@ -45,7 +45,7 @@
       },
       {
         "ordinal": 5,
-        "name": "verified_on!",
+        "name": "verified_on",
         "type_info": "Date",
         "origin": {
           "Table": {
@@ -89,5 +89,5 @@
       null
     ]
   },
-  "hash": "727fc7a2befe2b2c92a21d56d0089e6178f4cdaf07fe964a8d249ee63fc6770f"
+  "hash": "4d9ce6f9b3b92d8f2ab50fa8ea265d769be8ac2076be5e319f838efe7d690e5d"
 }

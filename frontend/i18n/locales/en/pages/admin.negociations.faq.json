@@ -6,7 +6,7 @@
   },
   "list": {
     "title": "Frequently asked questions",
-    "subtitle": "The answers Guide Négo gives negotiators. An answer is published only once an expert has dated its verification.",
+    "subtitle": "The answers Guide Négo gives negotiators. An expert dates their verification; when instructed, an answer can also be published without it.",
     "new": "New entry",
     "caption": "Guide Négo FAQ entries, most recently modified first.",
     "forbidden": {
@@ -84,7 +84,7 @@
   "detail": {
     "crumb": "Entry",
     "newTitle": "New FAQ entry",
-    "newSubtitle": "The entry starts as a draft. It can be published once its answer is written and an expert has dated its verification.",
+    "newSubtitle": "The entry starts as a draft. It can be published once its answer is written, whether or not an expert has verified it.",
     "cancel": "Cancel",
     "backToList": "Back to the FAQ",
     "forbidden": {

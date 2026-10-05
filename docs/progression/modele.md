@@ -211,3 +211,9 @@ Arbitrage du commanditaire : le public ne donne que nom, prénom, adresse élect
 
 **Migration** : `ops/migrations/2026-10-03-inscription-allegee.sql` — appliquée en local sur `epavillon` (`UPDATE 3`). **À jouer en production.**
 
+
+## 05/10/2026 — `100_negotiations.sql` : une réponse de la FAQ se publie sans vérification
+
+Demande du commanditaire : l'administration publie sur instruction de sa hiérarchie, sans attendre qu'un expert date la vérification. `ck_faq_entries_verified` est retirée ; `ck_faq_entries_verification_pair` reste (une date va avec son expert). Commentaires de `knowledge_status`, `faq_entries` et `verified_on` revus. Côté API, le code `NEGOTIATION_FAQ_UNVERIFIED` disparaît ; le paquet du téléphone rend `verified_on` à `null`, et l'application tait alors « Vérifié le ». Guide Négo — [journal](../AppNego/progression/journal/2026-10-05.md).
+
+**Migration** : `ops/migrations/2026-10-05-faq-publication-sans-verification.sql` — appliquée en local sur `epavillon`, rejouée sans erreur. **À jouer en production.**

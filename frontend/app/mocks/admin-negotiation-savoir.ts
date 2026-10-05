@@ -410,13 +410,6 @@ export function verifierFaq(id: Uuid, entree: AdminFaqVerifyInput): AdminFaqEntr
 export function changerFaq(id: Uuid, changement: Changement): AdminFaqEntry {
   const e = faqOuRefus(id)
   if (changement === 'publish') {
-    if (!e.verified_on) {
-      throw refus(
-        'NEGOTIATION_FAQ_UNVERIFIED',
-        422,
-        "Une réponse ne se publie qu'avec la date de sa vérification par un expert.",
-      )
-    }
     if (!e.answer?.fr) throw invalide('Une entrée publiée porte sa réponse.', 'answer')
   }
   transition(e, changement)

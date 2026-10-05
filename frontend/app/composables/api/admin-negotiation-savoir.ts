@@ -79,7 +79,6 @@ export function createAdminNegotiationSavoirApi({ call, send }: Deps) {
     verifierFaq: (id: Uuid, entree: AdminFaqVerifyInput = {}): Promise<AdminFaqEntry> =>
       send(`/admin/negotiation/faq/${id}/verify`, entree, async () => (await exemples()).verifierFaq(id, entree)),
 
-    /** Sans vérification datée : `NEGOTIATION_FAQ_UNVERIFIED`. */
     publierFaq: (id: Uuid): Promise<AdminFaqEntry> =>
       send(`/admin/negotiation/faq/${id}/publish`, {}, async () => (await exemples()).changerFaq(id, 'publish')),
 

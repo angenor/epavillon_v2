@@ -298,8 +298,6 @@ codes! {
         "Choisissez au moins une raison.";
     NegotiationTextTooLong => "NEGOTIATION_TEXT_TOO_LONG", StatusCode::UNPROCESSABLE_ENTITY,
         "Ce texte dépasse 600 caractères.";
-    NegotiationFaqUnverified => "NEGOTIATION_FAQ_UNVERIFIED", StatusCode::UNPROCESSABLE_ENTITY,
-        "Une réponse ne se publie qu'avec la date de sa vérification par un expert.";
     NegotiationKnowledgePublishedUndeletable => "NEGOTIATION_KNOWLEDGE_PUBLISHED_UNDELETABLE", StatusCode::CONFLICT,
         "Une entrée déjà publiée ne se supprime pas : dépubliez-la.";
     NegotiationGlossarySlugTaken => "NEGOTIATION_GLOSSARY_SLUG_TAKEN", StatusCode::CONFLICT,

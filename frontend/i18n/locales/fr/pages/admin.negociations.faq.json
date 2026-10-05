@@ -6,7 +6,7 @@
   },
   "list": {
     "title": "Questions fréquentes",
-    "subtitle": "Les réponses que Guide Négo sert aux négociatrices et négociateurs. Une réponse ne se publie qu'une fois sa vérification datée par un expert.",
+    "subtitle": "Les réponses que Guide Négo sert aux négociatrices et négociateurs. Un expert date leur vérification ; sur instruction, une réponse peut aussi se publier sans elle.",
     "new": "Nouvelle entrée",
     "caption": "Entrées de la FAQ de Guide Négo, les dernières modifiées en tête.",
     "forbidden": {
@@ -84,7 +84,7 @@
   "detail": {
     "crumb": "Entrée",
     "newTitle": "Nouvelle entrée de la FAQ",
-    "newSubtitle": "L'entrée naît en brouillon. Elle se publie une fois sa réponse écrite et sa vérification datée par un expert.",
+    "newSubtitle": "L'entrée naît en brouillon. Elle se publie une fois sa réponse écrite, vérifiée par un expert ou non.",
     "cancel": "Annuler",
     "backToList": "Retour à la FAQ",
     "forbidden": {

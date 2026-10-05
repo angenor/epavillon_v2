@@ -127,7 +127,7 @@ useHead({ title: computed(() => entree.value?.question ?? t('guide-nego.faq-entr
       <GnLigneConnexion :en-ligne="connexion.etat.value.enLigne" :lu-a="etat.luA" />
     </template>
     <template v-if="entree" #pied>
-      <GnVerifieLe :jour="entree.verified_on" :a-revoir="entree.status === 'to_review'" />
+      <GnVerifieLe v-if="entree.verified_on" :jour="entree.verified_on" :a-revoir="entree.status === 'to_review'" />
       <p v-if="entree.status === 'to_review'" class="gn-faq-entree__relue">
         <GnPicto nom="clock" :taille="16" />{{ t('guide-nego.faq-entree.a-revoir') }}
       </p>

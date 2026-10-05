@@ -21,7 +21,7 @@ const question = computed(() => morceauxSurlignes(props.entree.question, props.s
       <span class="gn-ligne-question__question">
         <template v-for="(m, i) in question" :key="i"><mark v-if="m.marque">{{ m.texte }}</mark><template v-else>{{ m.texte }}</template></template>
       </span>
-      <GnVerifieLe :jour="entree.verified_on" :a-revoir="entree.status === 'to_review'" />
+      <GnVerifieLe v-if="entree.verified_on" :jour="entree.verified_on" :a-revoir="entree.status === 'to_review'" />
     </span>
     <GnPicto nom="chevron" :taille="24" class="gn-ligne-question__chevron" />
   </NuxtLink>
