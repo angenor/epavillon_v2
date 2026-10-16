@@ -44,6 +44,8 @@ useHead(() => ({
 </script>
 
 <template>
+  <!-- Réponse dès le clic pour les navigations qui attendent encore (entrée au back-office). -->
+  <NuxtLoadingIndicator color="var(--color-accent)" :height="3" />
   <main v-if="deferred" class="mx-auto w-full max-w-5xl px-4 py-16">
     <UiLoadingState variant="text" :lines="6" :label="t('common.states.loading.label')" />
   </main>

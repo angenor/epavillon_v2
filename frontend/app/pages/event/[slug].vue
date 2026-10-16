@@ -111,7 +111,7 @@ const { data, status, error, refresh } = await useAsyncData(
       ).size,
     }
   },
-  { watch: [slug] },
+  { watch: [slug], lazy: true },
 )
 
 /** Nombre d'activités par journée spéciale — dit ce que le fil contient vraiment. */

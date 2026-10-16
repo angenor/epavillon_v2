@@ -10,7 +10,7 @@ const features = useFeatureStore()
 const { data: state, error: loadError } = await useAsyncData<PlatformMaintenance | null>(
   'admin-platform-maintenance',
   () => api.platform.maintenance(),
-  { default: () => null },
+  { default: () => null, lazy: true },
 )
 
 const isHidden = computed(() => isForbiddenError(loadError.value))

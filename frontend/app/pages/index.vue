@@ -54,7 +54,9 @@ const router = useRouter()
 const { t } = useI18n()
 const localePath = useLocalePath()
 
-const { data, status, error, refresh } = await useAsyncData('home-screen', () => api.home.screen())
+const { data, status, error, refresh } = await useAsyncData('home-screen', () => api.home.screen(), {
+  lazy: true,
+})
 
 /**
  * L'ÉTAT DU FILTRE VIT DANS L'URL, en français comme partout ailleurs

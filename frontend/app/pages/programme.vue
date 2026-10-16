@@ -77,7 +77,7 @@ const { data, status, error, refresh } = await useAsyncData('programme-page', as
   ])
 
   return { editions, edition, programme: { schedule, days, rooms } satisfies ProgrammeData }
-})
+}, { lazy: true })
 
 const current = ref<PublicEditionRow | null>(null)
 const shown = computed(() => current.value ?? data.value?.edition ?? null)
@@ -94,7 +94,7 @@ const { data: incidents } = await useAsyncData(
     if (!eventId) return []
     return api.incidents.forEvent(eventId).catch(() => [])
   },
-  { default: () => [] },
+  { default: () => [], lazy: true },
 )
 
 /** Trois au plus — la règle des pastilles de la charte. */

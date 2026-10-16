@@ -37,6 +37,7 @@ const { data, status, error, refresh } = await useAsyncData(
     const detail = await api.pavillon.activite(edition.id, sessionSlug.value)
     return detail ? { edition, detail } : null
   },
+  { lazy: true },
 )
 
 if (import.meta.server && status.value === 'success' && !data.value) setResponseStatus(useRequestEvent()!, 404)
