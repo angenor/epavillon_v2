@@ -18,6 +18,7 @@ use kernel::error::ApiError;
 
 use crate::middleware::auth::SessionResolver;
 use crate::middleware::cors::Cors;
+use crate::middleware::maintenance::MaintenanceGate;
 use crate::middleware::origin::OriginCheck;
 use crate::middleware::request_context::RequestContextMiddleware;
 use crate::state::AppState;
@@ -246,6 +247,8 @@ pub fn build_app(
         .app_data(web::Data::from(etat.identity.token_codec()))
         .app_data(web::Data::new(etat.clone()))
         .app_data(corps_json())
+        // À l'intérieur de la session : le verrou a besoin de savoir qui écrit.
+        .wrap(MaintenanceGate)
         .wrap(SessionResolver)
         .wrap(OriginCheck::new(etat.allowed_origins.clone()))
         .wrap(RequestContextMiddleware::new(etat.locales.clone()))

@@ -51,7 +51,7 @@ import type {
 import type { AdminDashboard } from '~/types/admin-dashboard'
 import type { ActiveIncident, PublicSessionStream } from '~/types/live'
 import type { RoleAssignmentView } from '~/types/admin-users'
-import type { ResolvedFeatureFlag } from '~/types/platform'
+import type { PlatformMaintenance, PlatformMaintenanceUpdate, ResolvedFeatureFlag } from '~/types/platform'
 import type {
   DecideMembershipPayload,
   InviteMemberPayload,
@@ -291,6 +291,11 @@ export function useApi() {
         call('/platform/feature-flags', (m) =>
           m.featureFlags.map((f) => ({ key: f.key, is_enabled: m.isFeatureEnabled(f.key) })),
         ),
+      /** Portée globale seulement : un administrateur détaché reçoit 403. */
+      maintenance: (): Promise<PlatformMaintenance> =>
+        call('/admin/platform/maintenance', (m) => m.platformMaintenance()),
+      setMaintenance: (payload: PlatformMaintenanceUpdate): Promise<PlatformMaintenance> =>
+        send('/admin/platform/maintenance', payload, (m) => m.setPlatformMaintenance(payload.enabled), 'PUT'),
     },
 
     /**

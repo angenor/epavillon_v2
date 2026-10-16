@@ -80,7 +80,13 @@ INSERT INTO platform.feature_flags (key, description, is_enabled, rollout_percen
     ('calendar.external_sync',      'Synchronisation Google Agenda / Apple Calendar (phase ultérieure).', false, 0),
     ('newsletter.campaigns',        'Campagnes d''infolettre (hors périmètre du jalon 1).', false, 0),
     ('programme.waitlist',          'Liste d''attente sur les sessions à jauge limitée.', true, 100),
-    ('org.auto_join_by_domain',     'Rattachement automatique à une organisation par domaine de courriel vérifié.', true, 100)
+    ('org.auto_join_by_domain',     'Rattachement automatique à une organisation par domaine de courriel vérifié.', true, 100),
+    -- Le seul drapeau qui FERME en s'allumant : toute la plateforme passe en
+    -- maintenance, le temps d'une reprise de données. Seules les personnes qui
+    -- administrent (identity.administered_events non vide) voient le site et
+    -- écrivent ; la connexion reste ouverte pour qu'elles entrent. Allumer =
+    -- is_enabled ET rollout_percent = 100 : il se résout sans personne.
+    ('platform.maintenance',        'Plateforme entière en maintenance : seuls les administrateurs y accèdent. Allumer = is_enabled ET rollout_percent = 100.', false, 0)
 ON CONFLICT (key) DO NOTHING;
 
 -- -----------------------------------------------------------------------------

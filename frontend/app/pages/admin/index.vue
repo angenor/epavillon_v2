@@ -133,6 +133,8 @@ function total(points: { cumul: number }[]): number {
         </p>
       </header>
 
+      <AdminMaintenanceSwitch />
+
       <UiLoadingState
         v-if="status === 'pending'"
         class="mt-8"

@@ -17,7 +17,7 @@
  * dans le modèle, ne le justifie.
  */
 
-import type { FeatureFlag } from '~/types/platform'
+import type { FeatureFlag, PlatformMaintenance } from '~/types/platform'
 
 function flag(
   key: string,
@@ -91,7 +91,27 @@ export const featureFlags = [
     true,
     100,
   ),
+  flag(
+    'platform.maintenance',
+    'Plateforme entière en maintenance : seuls les administrateurs y accèdent.',
+    false,
+    0,
+  ),
 ] satisfies FeatureFlag[]
+
+/** `PUT /admin/platform/maintenance` rejoué : le déploiement suit, 100 ou 0. */
+export function setPlatformMaintenance(enabled: boolean): PlatformMaintenance {
+  const entry = featureFlags.find((f) => f.key === 'platform.maintenance')!
+  entry.is_enabled = enabled
+  entry.rollout_percent = enabled ? 100 : 0
+  entry.updated_at = new Date().toISOString()
+  return platformMaintenance()
+}
+
+export function platformMaintenance(): PlatformMaintenance {
+  const entry = featureFlags.find((f) => f.key === 'platform.maintenance')!
+  return { enabled: entry.is_enabled && entry.rollout_percent === 100, updated_at: entry.updated_at }
+}
 
 /**
  * `platform.is_feature_enabled(clé, personne)` rejouée — mêmes règles, même

@@ -77,7 +77,8 @@
     "negotiationPathway": "Pathway",
     "negotiationImport": "Session import",
     "negotiationAgenda": "Agenda items",
-    "negotiationMeetings": "Meetings"
+    "negotiationMeetings": "Meetings",
+    "maintenanceOn": "Platform under maintenance: the public sees the holding page, only administrators can sign in and make changes."
   },
   "breadcrumb": {
     "label": "Breadcrumb",

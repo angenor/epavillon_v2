@@ -60,6 +60,8 @@ codes! {
         "Une erreur interne est survenue. L'incident a été enregistré.";
     ServiceUnavailable => "SERVICE_UNAVAILABLE", StatusCode::SERVICE_UNAVAILABLE,
         "Le service est momentanément indisponible.";
+    PlatformMaintenance => "PLATFORM_MAINTENANCE", StatusCode::SERVICE_UNAVAILABLE,
+        "La plateforme est en maintenance : les modifications reprendront à sa réouverture.";
 
     IdentitySessionExpired => "IDENTITY_SESSION_EXPIRED", StatusCode::UNAUTHORIZED,
         "Votre session a expiré. Veuillez vous reconnecter.";

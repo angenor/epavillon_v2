@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE platform.feature_flags\n              SET is_enabled = $1,\n                  rollout_percent = CASE WHEN $1 THEN 100 ELSE 0 END\n            WHERE key = 'platform.maintenance'\n        RETURNING is_enabled AS \"enabled!\", updated_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "enabled!",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "platform.feature_flags",
+            "name": "is_enabled"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "platform.feature_flags",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "224b7dc06a2716bdbb4a9cad38c8d81ec2ad98b41a760b3edba7a7471f9844a7"
+}

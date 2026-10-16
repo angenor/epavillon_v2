@@ -272,7 +272,12 @@ export { adminDashboard } from './admin-dashboard'
 
 export { permissions, rolePermissions, roles, effectivePermissions } from './permissions'
 export { platformModules, moduleByCode, moduleRank } from './platform'
-export { featureFlags, isFeatureEnabled } from './feature-flags'
+export {
+  featureFlags,
+  isFeatureEnabled,
+  platformMaintenance,
+  setPlatformMaintenance,
+} from './feature-flags'
 export { privacyRequests, consents, currentConsents } from './privacy'
 export { proposalTransitionsAllowed } from './proposal-workflow'
 export { proposalReads } from './proposal-reads'

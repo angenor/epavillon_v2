@@ -2,12 +2,12 @@
 **Ce fichier est la mémoire du projet entre deux sessions Claude Code.** Toute session commence par le lire et se termine par le mettre à jour.
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
-## Dernière mise à jour — 5 octobre 2026
+## Dernière mise à jour — 16 octobre 2026
+- 16/10 — Plateforme en maintenance basculée depuis le back-office : page d'attente pour tous sauf les administrateurs, écritures refusées par l'API. Non déployé, migration à jouer — [A14](progression/ecrans/a14-maintenance.md), [DEPLOIEMENT § 16](DEPLOIEMENT.md).
 - 05/10 — Le menu du compte devient « Mon espace » : sigle de l'organisation, pastille des actions en attente, « Ce qui vous attend » puis Mes propositions en tête. Non déployé — [A5](progression/ecrans/a5-espace-organisation.md).
 - 05/10 — Page d'une activité : bandeau sur la photo de l'édition, titre en grand, logo de l'organisation, image et billet en léger débord, lecteur à la place de l'image pendant le direct ; l'affiche n'a plus d'écran. Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
 - 04/10 — `/programmations` passe en liste éditoriale (activité en direct à la une, journées groupées, couvertures) et en semaine à colonnes (jours figés, défilante sur téléphone, 05/10) ; l'affiche ne reste qu'à la page d'une activité. Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
 - 04/10 — Barre de navigation en aplat bleu nuit fermé d'un liseré aux couleurs du logo ; la veille, accueil retouché (témoignage en bas de cadre, éditions en liste par défaut, oiseau qui suit le curseur). Non déployé — [A0.4](progression/ecrans/a0.4-composants.md), [A15](progression/ecrans/a15-accueil.md).
-- 03/10 — Inscription réduite à nom, prénom, adresse et pays (pays déduit du fuseau) ; « Le même jour » avec couvertures. Non déployé, migration à jouer — [A3](progression/ecrans/a3-evenement-public.md).
 
 ## État général
 | Domaine | État |
@@ -42,7 +42,7 @@ Un écran = un fichier : ce qui a été livré, les écarts entre le modèle et 
 | A11 | Organisations et fusion | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a11-organisations-fusion.md) |
 | A12 | Utilisateurs et rôles | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a12-utilisateurs-roles.md) |
 | A13 | Messages d'incident | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a13-incidents.md) |
-| A14 | Page « En cours de maintenance » | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a14-maintenance.md) |
+| A14 | Page « En cours de maintenance » | ✅ 18/08 · plateforme entière en maintenance, basculée du back-office 16/10, non déployé | [écarts et vérifications](progression/ecrans/a14-maintenance.md) |
 | A15 | Accueil public et vitrine administrable | ✅ 19/08 · panneau « À venir » refondu 24/08 · section d'appel en affiche 16/09 · frise sans salle ni thématiques, carte d'événement masquée une fois son programme publié, témoignage du bandeau en bas de cadre, éditions en affiches ou en liste, oiseau qui suit le curseur 03/10, rail et transitions du bandeau, bouton de programmation au bas d'« À venir » 05/10, non déployé | [écarts et vérifications](progression/ecrans/a15-accueil.md) |
 | B7 | Raccordement du front à l'API | ✅ 22/08 | [écarts et vérifications](progression/ecrans/b7-raccordement.md) |
 | B8 | Module Vitrine (`content`) | ✅ 24/08 · téléversement des images 05/09 | [écarts et vérifications](progression/ecrans/b8-vitrine.md) |

@@ -45,3 +45,19 @@ Fait le 18/08. **Le modèle a été complété d'un drapeau** : `directory.enabl
    détournement a besoin d'une route source — et leur `UiMaintenanceState` en attendant qu'un vrai écran les remplisse.
    **La conséquence à ne pas oublier** : le jour où l'on ouvre `directory.enabled` ou `negotiation.enabled` sans avoir
    écrit l'écran, ces deux pages afficheront un état de maintenance que plus rien ne commande.
+
+---
+
+## 16/10 — La plateforme entière en maintenance
+
+Pour la reprise des données avant la bascule DNS. Le drapeau `platform.maintenance` ferme **tout le site** aux non-administrateurs ; l'API refuse leurs écritures (`503 PLATFORM_MAINTENANCE`). Basculé depuis le tableau de bord du back-office par un administrateur en portée globale ([modèle](../modele.md), [journal](../journal/2026-10-16.md)).
+
+- `middleware/maintenance.global.ts` : tout renvoie à `/maintenance` sauf la connexion et le mot de passe oublié. Un administrateur (`adminScope.canAdminister`) passe. Dans les deux sens, comme `feature-flag` : rouverte, la page d'attente renvoie à l'accueil.
+- `pages/maintenance/index.vue` : layout `auth`, **503 et `Retry-After: 3600`** au rendu serveur (un 200 ferait indexer la page d'attente à la place du site), aucune date annoncée, « Accès administrateur » vers la connexion.
+- `components/admin/MaintenanceSwitch.vue` : interrupteur `UiSwitch` en tête du tableau de bord, confirmation avant de fermer, silencieux sur 403. Après bascule, `features.reload()`.
+- `layouts/admin.vue` : avertissement jaune dans tout le back-office tant que c'est fermé.
+
+**Écarts relevés**
+1. Un compte sans droit qui tente la bascule reçoit 503 (le verrou passe avant la garde de la route), pas 403. Refusé dans les deux cas ; laissé tel quel.
+2. Un administrateur qui parcourt le site public pendant la maintenance ne voit aucun rappel que le public est fermé : l'avertissement n'est que dans le back-office.
+3. Le store des drapeaux charge une fois par visite : un visiteur déjà sur le site au moment de la fermeture n'est renvoyé à la page d'attente qu'au rechargement ; ses écritures sont refusées par l'API dès la fermeture.

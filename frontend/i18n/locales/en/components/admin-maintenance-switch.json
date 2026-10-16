@@ -1,0 +1,10 @@
+{
+  "label": "Platform under maintenance",
+  "hintOff": "Open to everyone.",
+  "hintOn": "Closed to the public: visitors see a holding page, only administrators can sign in and make changes.",
+  "confirm": {
+    "title": "Close the platform to the public?",
+    "description": "Visitors will see a holding page. Accounts without administration rights will no longer be able to change anything. Sign-in stays open to administrators.",
+    "submit": "Close the platform"
+  }
+}

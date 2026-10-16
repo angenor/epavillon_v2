@@ -81,6 +81,20 @@ export interface ResolvedFeatureFlag {
 }
 
 /**
+ * `GET` et `PUT /admin/platform/maintenance` : la plateforme fermée aux
+ * non-administrateurs (drapeau `platform.maintenance`). Lu en base, jamais dans
+ * le cache des drapeaux : l'interrupteur dit l'état réel.
+ */
+export interface PlatformMaintenance {
+  enabled: boolean
+  updated_at: IsoDateTime
+}
+
+export interface PlatformMaintenanceUpdate {
+  enabled: boolean
+}
+
+/**
  * `GET /legal/{cle}` — la politique de confidentialité (`privacy`) ou les
  * conditions d'utilisation (`terms`), **une source pour le site et pour Guide
  * Négo**. Le texte est embarqué dans l'API (`kernel::legal`).

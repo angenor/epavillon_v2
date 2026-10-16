@@ -41,6 +41,8 @@ pub struct ApiErrorBody {
         crate::routes::reference::langues,
         crate::routes::reference::termes,
         crate::routes::platform::drapeaux,
+        crate::routes::platform::maintenance,
+        crate::routes::platform::basculer_maintenance,
         crate::routes::legal::texte,
     ),
     components(schemas(ApiErrorBody)),

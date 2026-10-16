@@ -1258,3 +1258,20 @@ L'import toujours allumé.
 Un écart se note dans le fichier de son étape, `docs/AppNego/progression/etapes/`, avec l'appareil et la version du système. Tout
 coché, on coche aussi T071 (`specs/008-…`), T112 (`specs/009-…`), T096 à T098 (`specs/010-…`),
 T116 et T102 (`specs/011-…`) et T084 (`specs/012-…`) dans leurs `tasks.md`.
+
+---
+
+## 16. Fermer la plateforme pendant une reprise de données (16/10)
+
+Le drapeau `platform.maintenance` renvoie tout visiteur non administrateur vers une page d'attente (servie en 503) et l'API refuse ses écritures. La connexion reste ouverte : un administrateur se connecte et voit le site normalement.
+
+**Une fois, avant d'envoyer le code** : jouer `ops/migrations/2026-10-16-plateforme-en-maintenance.sql` (drapeau éteint, permission `identity.platform.maintenance` donnée à `admin`), méthode du § 13.
+
+**Fermer, rouvrir** : back-office, tableau de bord, interrupteur « Plateforme en maintenance » (administrateur en portée globale). Sans back-office :
+
+```sql
+UPDATE platform.feature_flags SET is_enabled = true,  rollout_percent = 100 WHERE key = 'platform.maintenance';  -- fermer
+UPDATE platform.feature_flags SET is_enabled = false, rollout_percent = 0   WHERE key = 'platform.maintenance';  -- rouvrir
+```
+
+**Bascule DNS d'`epavillonclimatique.francophonie.org`** : fermer **avant** que l'OIF modifie l'enregistrement A, reprendre les données, vérifier en administrateur, rouvrir. Les visiteurs qui arrivent pendant la propagation tombent sur la page d'attente, jamais sur une plateforme à moitié remplie.

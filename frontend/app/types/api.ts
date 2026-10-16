@@ -2124,6 +2124,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/platform/maintenance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description `PlatformMaintenance` — la plateforme est-elle fermée aux non-administrateurs ? Lu en base à chaque appel, jamais dans le cache du site : l'interrupteur doit dire l'état réel. */
+        get: operations["admin_plateforme_maintenance"];
+        /** @description `PlatformMaintenanceUpdate` → `PlatformMaintenance`. Fermer réserve le site et les écritures aux personnes qui administrent ; la connexion reste ouverte. Le déploiement suit (100 % ou 0 %) : le drapeau se résout sans personne, un pourcentage partiel ne fermerait rien. */
+        put: operations["admin_plateforme_maintenance_basculer"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/privacy-requests": {
         parameters: {
             query?: never;
@@ -5803,6 +5821,7 @@ export interface components {
          *     - `PAYLOAD_TOO_LARGE` (413) — La requête dépasse la taille autorisée.
          *     - `INTERNAL` (500) — Une erreur interne est survenue. L'incident a été enregistré.
          *     - `SERVICE_UNAVAILABLE` (503) — Le service est momentanément indisponible.
+         *     - `PLATFORM_MAINTENANCE` (503) — La plateforme est en maintenance : les modifications reprendront à sa réouverture.
          *     - `IDENTITY_SESSION_EXPIRED` (401) — Votre session a expiré. Veuillez vous reconnecter.
          *     - `IDENTITY_SESSION_REVOKED` (401) — Cette session a été fermée. Veuillez vous reconnecter.
          *     - `IDENTITY_REFRESH_REUSED` (401) — Par sécurité, toutes vos sessions ont été fermées. Veuillez vous reconnecter.
@@ -5925,7 +5944,7 @@ export interface components {
              * @description Code stable. Le renommer est un changement majeur.
              * @enum {string}
              */
-            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "INTERNAL" | "SERVICE_UNAVAILABLE" | "IDENTITY_SESSION_EXPIRED" | "IDENTITY_SESSION_REVOKED" | "IDENTITY_REFRESH_REUSED" | "IDENTITY_ORIGIN_REJECTED" | "IDENTITY_PASSWORD_TOO_WEAK" | "IDENTITY_EMAIL_ALREADY_USED" | "IDENTITY_ACCOUNT_ALREADY_EXISTS" | "IDENTITY_ROLE_WINDOW_INVALID" | "IDENTITY_ROLE_SCOPE_MISMATCH" | "IDENTITY_ROLE_REVOCATION_INVALID" | "IDENTITY_UNKNOWN_REFERENCE" | "IDENTITY_PRIVACY_WRONG_ACTION" | "ORG_NOT_MANAGER" | "ORG_MEMBERSHIP_IS_INVITATION" | "ORG_MEMBERSHIP_NOT_PENDING" | "ORG_LAST_MANAGER" | "ORG_MERGE_FIELD_NOT_ARBITRABLE" | "ORG_MERGE_GLOBAL_SCOPE_REQUIRED" | "ORG_MERGE_SAME_ORGANIZATION" | "ORG_DOMAIN_VERIFICATION_REQUIRED" | "ORG_NAME_IS_DERIVED" | "ORG_UNKNOWN_REFERENCE" | "ORG_INVITATION_NOT_YOURS" | "EVENT_GLOBAL_SCOPE_REQUIRED" | "EVENT_CRITERION_HAS_SCORES" | "EVENT_UNKNOWN_REFERENCE" | "PROPOSAL_NOT_EDITABLE" | "PROPOSAL_SPEAKER_IDENTITY_LOCKED" | "PROPOSAL_REVIEW_NOT_ASSIGNED" | "PROPOSAL_UNKNOWN_TERM" | "PROPOSAL_TEXT_TOO_LONG" | "PROPOSAL_UNKNOWN_REFERENCE" | "SESSION_DERIVED_FIELD" | "SESSION_UNKNOWN_REFERENCE" | "SESSION_TRACK_EVENT_MISMATCH" | "REGISTRATION_NOT_ACCEPTED" | "REGISTRATION_ANSWER_INVALID" | "REGISTRATION_CONSENT_REQUIRED" | "REGISTRATION_ACCOUNT_REQUIRED" | "REGISTRATION_LOCKED" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_MIME_NOT_ALLOWED" | "MEDIA_TOO_LARGE" | "MEDIA_ASPECT_RATIO" | "MEDIA_ROLE_NOT_DECLARED" | "MEDIA_ROLE_EXCLUSIVE" | "MEDIA_ASSET_NOT_SERVABLE" | "MEDIA_ALT_TEXT_REQUIRED" | "MEDIA_ASSET_IN_USE" | "MEDIA_UPLOAD_INCOMPLETE" | "MEDIA_STORAGE_UNAVAILABLE" | "ENGAGEMENT_REMINDER_OFFSETS_INVALID" | "ENGAGEMENT_REMINDER_SCOPE_INVALID" | "ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN" | "ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN" | "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN" | "LIVE_INCIDENT_SCOPE_TARGET_MISMATCH" | "LIVE_INCIDENT_WINDOW_INVALID" | "LIVE_INCIDENT_NOT_PUBLISHED" | "NEGOTIATION_ACCESS_REQUEST_PENDING" | "NEGOTIATION_ACCESS_REQUEST_DECIDED" | "NEGOTIATION_INVITATION_CODE_DUPLICATE" | "NEGOTIATION_ADMISSION_MODE_INVALID" | "NEGOTIATION_SPACE_UNKNOWN" | "NEGOTIATION_THEMES_EMPTY" | "NEGOTIATION_THEME_UNKNOWN" | "NEGOTIATION_THEMES_STALE" | "NEGOTIATION_DOCUMENT_NOT_FOUND" | "NEGOTIATION_DOCUMENT_RESTRICTED" | "NEGOTIATION_DOCUMENT_NOT_READABLE" | "NEGOTIATION_DOCUMENT_RANGE_INVALID" | "NEGOTIATION_DOCUMENT_SOURCE_BOTH" | "NEGOTIATION_DOCUMENT_SOURCE_MISSING" | "NEGOTIATION_DOCUMENT_NOT_READY" | "NEGOTIATION_DOCUMENT_FILE_LOCKED" | "NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED" | "NEGOTIATION_DOCUMENT_SUPERSEDE_CYCLE" | "NEGOTIATION_DOCUMENT_UNKNOWN_THEME" | "NEGOTIATION_DOCUMENT_UNKNOWN_TYPE" | "NEGOTIATION_DOCUMENT_PUBLISHED_UNDELETABLE" | "NEGOTIATION_CORRECTION_PAGE_UNKNOWN" | "NEGOTIATION_FAQ_NOT_FOUND" | "NEGOTIATION_GLOSSARY_NOT_FOUND" | "NEGOTIATION_PATHWAY_STEP_NOT_FOUND" | "NEGOTIATION_REPORT_LIMIT" | "NEGOTIATION_PROPOSAL_LIMIT" | "NEGOTIATION_GLOSSARY_TERM_EXISTS" | "NEGOTIATION_REPORT_REASON_REQUIRED" | "NEGOTIATION_TEXT_TOO_LONG" | "NEGOTIATION_KNOWLEDGE_PUBLISHED_UNDELETABLE" | "NEGOTIATION_GLOSSARY_SLUG_TAKEN" | "NEGOTIATION_QUESTION_NO_CONSENT" | "NEGOTIATION_QUEUE_ITEM_CLOSED" | "NEGOTIATION_SOURCE_TARGET_INVALID" | "NEGOTIATION_PATHWAY_LINK_INVALID" | "NEGOTIATION_PATHWAY_GROUP_NOT_EMPTY" | "NEGOTIATION_RELATED_SELF" | "NEGOTIATION_EDITION_UNKNOWN" | "NEGOTIATION_SESSION_UNKNOWN" | "NEGOTIATION_SESSION_CANCELLED" | "NEGOTIATION_GROUP_UNKNOWN" | "NEGOTIATION_GROUPS_STALE" | "NEGOTIATION_IMPORT_CONFIG_INVALID" | "NEGOTIATION_AGENDA_ITEM_UNKNOWN" | "NEGOTIATION_REPORT_FORBIDDEN" | "NEGOTIATION_REPORT_DUPLICATE" | "NEGOTIATION_REPORT_INVALID" | "NEGOTIATION_REPORT_UNKNOWN" | "NEGOTIATION_REPORT_ALREADY_DECIDED" | "NEGOTIATION_REPORT_UNDO_EXPIRED" | "NEGOTIATION_MEETING_UNKNOWN" | "NEGOTIATION_MEETING_FORBIDDEN" | "NEGOTIATION_MEETING_FULL" | "NEGOTIATION_MEETING_CLOSED" | "NEGOTIATION_MEETING_UNAVAILABLE" | "NEGOTIATION_MEETING_INVALID";
+            code: "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "PAYLOAD_TOO_LARGE" | "INTERNAL" | "SERVICE_UNAVAILABLE" | "PLATFORM_MAINTENANCE" | "IDENTITY_SESSION_EXPIRED" | "IDENTITY_SESSION_REVOKED" | "IDENTITY_REFRESH_REUSED" | "IDENTITY_ORIGIN_REJECTED" | "IDENTITY_PASSWORD_TOO_WEAK" | "IDENTITY_EMAIL_ALREADY_USED" | "IDENTITY_ACCOUNT_ALREADY_EXISTS" | "IDENTITY_ROLE_WINDOW_INVALID" | "IDENTITY_ROLE_SCOPE_MISMATCH" | "IDENTITY_ROLE_REVOCATION_INVALID" | "IDENTITY_UNKNOWN_REFERENCE" | "IDENTITY_PRIVACY_WRONG_ACTION" | "ORG_NOT_MANAGER" | "ORG_MEMBERSHIP_IS_INVITATION" | "ORG_MEMBERSHIP_NOT_PENDING" | "ORG_LAST_MANAGER" | "ORG_MERGE_FIELD_NOT_ARBITRABLE" | "ORG_MERGE_GLOBAL_SCOPE_REQUIRED" | "ORG_MERGE_SAME_ORGANIZATION" | "ORG_DOMAIN_VERIFICATION_REQUIRED" | "ORG_NAME_IS_DERIVED" | "ORG_UNKNOWN_REFERENCE" | "ORG_INVITATION_NOT_YOURS" | "EVENT_GLOBAL_SCOPE_REQUIRED" | "EVENT_CRITERION_HAS_SCORES" | "EVENT_UNKNOWN_REFERENCE" | "PROPOSAL_NOT_EDITABLE" | "PROPOSAL_SPEAKER_IDENTITY_LOCKED" | "PROPOSAL_REVIEW_NOT_ASSIGNED" | "PROPOSAL_UNKNOWN_TERM" | "PROPOSAL_TEXT_TOO_LONG" | "PROPOSAL_UNKNOWN_REFERENCE" | "SESSION_DERIVED_FIELD" | "SESSION_UNKNOWN_REFERENCE" | "SESSION_TRACK_EVENT_MISMATCH" | "REGISTRATION_NOT_ACCEPTED" | "REGISTRATION_ANSWER_INVALID" | "REGISTRATION_CONSENT_REQUIRED" | "REGISTRATION_ACCOUNT_REQUIRED" | "REGISTRATION_LOCKED" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_MIME_NOT_ALLOWED" | "MEDIA_TOO_LARGE" | "MEDIA_ASPECT_RATIO" | "MEDIA_ROLE_NOT_DECLARED" | "MEDIA_ROLE_EXCLUSIVE" | "MEDIA_ASSET_NOT_SERVABLE" | "MEDIA_ALT_TEXT_REQUIRED" | "MEDIA_ASSET_IN_USE" | "MEDIA_UPLOAD_INCOMPLETE" | "MEDIA_STORAGE_UNAVAILABLE" | "ENGAGEMENT_REMINDER_OFFSETS_INVALID" | "ENGAGEMENT_REMINDER_SCOPE_INVALID" | "ENGAGEMENT_TEMPLATE_VARIABLE_UNKNOWN" | "ENGAGEMENT_TEMPLATE_VERSION_UNKNOWN" | "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN" | "LIVE_INCIDENT_SCOPE_TARGET_MISMATCH" | "LIVE_INCIDENT_WINDOW_INVALID" | "LIVE_INCIDENT_NOT_PUBLISHED" | "NEGOTIATION_ACCESS_REQUEST_PENDING" | "NEGOTIATION_ACCESS_REQUEST_DECIDED" | "NEGOTIATION_INVITATION_CODE_DUPLICATE" | "NEGOTIATION_ADMISSION_MODE_INVALID" | "NEGOTIATION_SPACE_UNKNOWN" | "NEGOTIATION_THEMES_EMPTY" | "NEGOTIATION_THEME_UNKNOWN" | "NEGOTIATION_THEMES_STALE" | "NEGOTIATION_DOCUMENT_NOT_FOUND" | "NEGOTIATION_DOCUMENT_RESTRICTED" | "NEGOTIATION_DOCUMENT_NOT_READABLE" | "NEGOTIATION_DOCUMENT_RANGE_INVALID" | "NEGOTIATION_DOCUMENT_SOURCE_BOTH" | "NEGOTIATION_DOCUMENT_SOURCE_MISSING" | "NEGOTIATION_DOCUMENT_NOT_READY" | "NEGOTIATION_DOCUMENT_FILE_LOCKED" | "NEGOTIATION_DOCUMENT_ALREADY_SUPERSEDED" | "NEGOTIATION_DOCUMENT_SUPERSEDE_CYCLE" | "NEGOTIATION_DOCUMENT_UNKNOWN_THEME" | "NEGOTIATION_DOCUMENT_UNKNOWN_TYPE" | "NEGOTIATION_DOCUMENT_PUBLISHED_UNDELETABLE" | "NEGOTIATION_CORRECTION_PAGE_UNKNOWN" | "NEGOTIATION_FAQ_NOT_FOUND" | "NEGOTIATION_GLOSSARY_NOT_FOUND" | "NEGOTIATION_PATHWAY_STEP_NOT_FOUND" | "NEGOTIATION_REPORT_LIMIT" | "NEGOTIATION_PROPOSAL_LIMIT" | "NEGOTIATION_GLOSSARY_TERM_EXISTS" | "NEGOTIATION_REPORT_REASON_REQUIRED" | "NEGOTIATION_TEXT_TOO_LONG" | "NEGOTIATION_KNOWLEDGE_PUBLISHED_UNDELETABLE" | "NEGOTIATION_GLOSSARY_SLUG_TAKEN" | "NEGOTIATION_QUESTION_NO_CONSENT" | "NEGOTIATION_QUEUE_ITEM_CLOSED" | "NEGOTIATION_SOURCE_TARGET_INVALID" | "NEGOTIATION_PATHWAY_LINK_INVALID" | "NEGOTIATION_PATHWAY_GROUP_NOT_EMPTY" | "NEGOTIATION_RELATED_SELF" | "NEGOTIATION_EDITION_UNKNOWN" | "NEGOTIATION_SESSION_UNKNOWN" | "NEGOTIATION_SESSION_CANCELLED" | "NEGOTIATION_GROUP_UNKNOWN" | "NEGOTIATION_GROUPS_STALE" | "NEGOTIATION_IMPORT_CONFIG_INVALID" | "NEGOTIATION_AGENDA_ITEM_UNKNOWN" | "NEGOTIATION_REPORT_FORBIDDEN" | "NEGOTIATION_REPORT_DUPLICATE" | "NEGOTIATION_REPORT_INVALID" | "NEGOTIATION_REPORT_UNKNOWN" | "NEGOTIATION_REPORT_ALREADY_DECIDED" | "NEGOTIATION_REPORT_UNDO_EXPIRED" | "NEGOTIATION_MEETING_UNKNOWN" | "NEGOTIATION_MEETING_FORBIDDEN" | "NEGOTIATION_MEETING_FULL" | "NEGOTIATION_MEETING_CLOSED" | "NEGOTIATION_MEETING_UNAVAILABLE" | "NEGOTIATION_MEETING_INVALID";
             /** @description Message français, affichable tel quel. */
             message: string;
             /** @description Champ fautif, quand le refus en désigne un. */
@@ -12795,6 +12814,96 @@ export interface operations {
                 };
             };
             /** @description Édition inexistante **ou hors périmètre** — indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_plateforme_maintenance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PlatformMaintenance */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente en portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    admin_plateforme_maintenance_basculer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description PlatformMaintenanceUpdate */
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description PlatformMaintenance */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Permission absente en portée globale */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Drapeau absent : migration du 16/10 non jouée */
             404: {
                 headers: {
                     [name: string]: unknown;

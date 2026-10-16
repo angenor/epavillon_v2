@@ -77,7 +77,8 @@
     "negotiationPathway": "Parcours",
     "negotiationImport": "Import des sessions",
     "negotiationAgenda": "Ordre du jour",
-    "negotiationMeetings": "Réunions"
+    "negotiationMeetings": "Réunions",
+    "maintenanceOn": "Plateforme en maintenance : le public voit la page d'attente, seuls les administrateurs entrent et modifient."
   },
   "breadcrumb": {
     "label": "Fil d'Ariane",

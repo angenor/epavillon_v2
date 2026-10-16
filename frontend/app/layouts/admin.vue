@@ -50,6 +50,8 @@ const route = useRoute()
 const api = useApi()
 const adminScope = useAdminScopeStore()
 const auth = useAuthStore()
+const features = useFeatureStore()
+const isMaintenanceOn = computed(() => features.isEnabled(PLATFORM_MAINTENANCE_FLAG))
 
 // SANS `await` : la garde d'accès du back-office a déjà résolu la session, cette
 // lecture ne coûte donc aucun appel de plus — mais le layout ne doit pas retarder
@@ -320,6 +322,16 @@ const sectionsVisibles = computed(() =>
            sur une seule édition n'y voit qu'un nom : pas de liste déroulante à
            une entrée, rien qui laisse deviner qu'il en existe d'autres. -->
       <AdminEventScope />
+
+      <!-- Tant que la plateforme est fermée, tout le back-office le rappelle :
+           une maintenance oubliée laisse le public devant la page d'attente. -->
+      <UiAlert
+        v-if="isMaintenanceOn"
+        class="mx-4 mt-4 sm:mx-6"
+        intent="warning"
+        compact
+        :message="t('nav.admin.maintenanceOn')"
+      />
 
       <main id="contenu-admin" class="min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-8">
         <slot />

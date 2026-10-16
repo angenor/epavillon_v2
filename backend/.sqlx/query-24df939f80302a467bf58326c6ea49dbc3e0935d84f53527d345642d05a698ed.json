@@ -1,0 +1,33 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (is_enabled AND rollout_percent = 100) AS \"enabled!\", updated_at\n             FROM platform.feature_flags\n            WHERE key = 'platform.maintenance'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "enabled!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "platform.feature_flags",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null,
+      false
+    ]
+  },
+  "hash": "24df939f80302a467bf58326c6ea49dbc3e0935d84f53527d345642d05a698ed"
+}

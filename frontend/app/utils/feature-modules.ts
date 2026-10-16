@@ -69,6 +69,9 @@ export interface ClosedModule {
   lastKnown?: boolean
 }
 
+/** Ferme la plateforme entière aux non-administrateurs : `middleware/maintenance.global.ts`. */
+export const PLATFORM_MAINTENANCE_FLAG: FeatureFlagKey = 'platform.maintenance'
+
 export const CLOSED_MODULES: ClosedModule[] = [
   {
     key: 'publications',

@@ -62,5 +62,11 @@ export const useFeatureStore = defineStore('features', () => {
     }
   }
 
-  return { flags, isLoading, isLoaded, loadError, isEnabled, ensureLoaded }
+  /** Relit la table : après une bascule faite depuis le back-office. */
+  async function reload(): Promise<void> {
+    isLoaded.value = false
+    await ensureLoaded()
+  }
+
+  return { flags, isLoading, isLoaded, loadError, isEnabled, ensureLoaded, reload }
 })

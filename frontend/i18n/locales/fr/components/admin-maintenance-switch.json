@@ -1,0 +1,10 @@
+{
+  "label": "Plateforme en maintenance",
+  "hintOff": "Ouverte à tous.",
+  "hintOn": "Fermée au public : les visiteurs voient une page d'attente, seuls les administrateurs entrent et modifient.",
+  "confirm": {
+    "title": "Fermer la plateforme au public ?",
+    "description": "Les visiteurs verront une page d'attente. Les comptes sans droit d'administration ne pourront plus rien modifier. La connexion reste ouverte aux administrateurs.",
+    "submit": "Fermer la plateforme"
+  }
+}
