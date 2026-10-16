@@ -3,11 +3,11 @@
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
 ## Dernière mise à jour — 16 octobre 2026
-- 16/10 — Plateforme en maintenance basculée depuis le back-office : page d'attente pour tous sauf les administrateurs, écritures refusées par l'API. Non déployé, migration à jouer — [A14](progression/ecrans/a14-maintenance.md), [DEPLOIEMENT § 16](DEPLOIEMENT.md).
-- 05/10 — Le menu du compte devient « Mon espace » : sigle de l'organisation, pastille des actions en attente, « Ce qui vous attend » puis Mes propositions en tête. Non déployé — [A5](progression/ecrans/a5-espace-organisation.md).
-- 05/10 — Page d'une activité : bandeau sur la photo de l'édition, titre en grand, logo de l'organisation, image et billet en léger débord, lecteur à la place de l'image pendant le direct ; l'affiche n'a plus d'écran. Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
-- 04/10 — `/programmations` passe en liste éditoriale (activité en direct à la une, journées groupées, couvertures) et en semaine à colonnes (jours figés, défilante sur téléphone, 05/10) ; l'affiche ne reste qu'à la page d'une activité. Non déployé — [A3](progression/ecrans/a3-evenement-public.md).
-- 04/10 — Barre de navigation en aplat bleu nuit fermé d'un liseré aux couleurs du logo ; la veille, accueil retouché (témoignage en bas de cadre, éditions en liste par défaut, oiseau qui suit le curseur). Non déployé — [A0.4](progression/ecrans/a0.4-composants.md), [A15](progression/ecrans/a15-accueil.md).
+- 16/10 — Plateforme en maintenance basculée depuis le back-office : page d'attente pour tous sauf les administrateurs, écritures refusées par l'API. **Déployé avec tout le code du 03 au 16/10, et la production est EN MAINTENANCE** jusqu'à la fin de la reprise des données — [A14](progression/ecrans/a14-maintenance.md), [DEPLOIEMENT § 16](DEPLOIEMENT.md).
+- 05/10 — Le menu du compte devient « Mon espace » : sigle de l'organisation, pastille des actions en attente, « Ce qui vous attend » puis Mes propositions en tête. En production le 16/10 — [A5](progression/ecrans/a5-espace-organisation.md).
+- 05/10 — Page d'une activité : bandeau sur la photo de l'édition, titre en grand, logo de l'organisation, image et billet en léger débord, lecteur à la place de l'image pendant le direct ; l'affiche n'a plus d'écran. En production le 16/10 — [A3](progression/ecrans/a3-evenement-public.md).
+- 04/10 — `/programmations` passe en liste éditoriale (activité en direct à la une, journées groupées, couvertures) et en semaine à colonnes (jours figés, défilante sur téléphone, 05/10) ; l'affiche ne reste qu'à la page d'une activité. En production le 16/10 — [A3](progression/ecrans/a3-evenement-public.md).
+- 04/10 — Barre de navigation en aplat bleu nuit fermé d'un liseré aux couleurs du logo ; la veille, accueil retouché (témoignage en bas de cadre, éditions en liste par défaut, oiseau qui suit le curseur). En production le 16/10 — [A0.4](progression/ecrans/a0.4-composants.md), [A15](progression/ecrans/a15-accueil.md).
 
 ## État général
 | Domaine | État |
@@ -28,22 +28,22 @@ Un écran = un fichier : ce qui a été livré, les écarts entre le modèle et 
 | A0.1 | Socle Nuxt, Tailwind, i18n, jetons | ✅ 16/08 | [écarts et vérifications](progression/ecrans/a0.1-socle.md) |
 | A0.2 | Types TypeScript dérivés du SQL | ✅ 16/08 | [écarts et vérifications](progression/ecrans/a0.2-types.md) |
 | A0.3 | Données simulées | ✅ 16/08 | [écarts et vérifications](progression/ecrans/a0.3-donnees-simulees.md) |
-| A0.4 | Composants d'interface + page de guide de style | ✅ 16/08 · navigation latérale du back-office refondue 04/09 · barre publique en aplat bleu nuit 04/10, non déployé | [écarts et vérifications](progression/ecrans/a0.4-composants.md) |
+| A0.4 | Composants d'interface + page de guide de style | ✅ 16/08 · navigation latérale du back-office refondue 04/09 · barre publique en aplat bleu nuit 04/10, en production le 16/10 | [écarts et vérifications](progression/ecrans/a0.4-composants.md) |
 | A1 | Authentification | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a1-authentification.md) |
 | A2 | Rattachement à une organisation | ✅ 17/08 · texte allégé 28/09 · rejoindre ne bloque plus le dépôt 28/09 · en production 29/09 | [écarts et vérifications](progression/ecrans/a2-organisation.md) |
-| A3 | Page publique de l'événement | ✅ 17/08 · refondue 19/08 · corrigée 27/08 · bandeau de programmation 16/09 · en production · affiche et page d'activité 30/09 · page d'activité resserrée 02/10, présentation détaillée et inscription allégée 03/10, programmations en liste éditoriale 04/10, page d'activité en bandeau 05/10, non déployé | [écarts et vérifications](progression/ecrans/a3-evenement-public.md) |
+| A3 | Page publique de l'événement | ✅ 17/08 · refondue 19/08 · corrigée 27/08 · bandeau de programmation 16/09 · en production · affiche et page d'activité 30/09 · page d'activité resserrée 02/10, présentation détaillée et inscription allégée 03/10, programmations en liste éditoriale 04/10, page d'activité en bandeau 05/10, en production le 16/10 | [écarts et vérifications](progression/ecrans/a3-evenement-public.md) |
 | A4 | Formulaire de soumission | ✅ 17/08 · ajusté 15/09 et 16/09 | [écarts et vérifications](progression/ecrans/a4-soumission.md) |
-| A5 | Espace organisation | ✅ 17/08 · menu du compte « Mon espace » 05/10, non déployé | [écarts et vérifications](progression/ecrans/a5-espace-organisation.md) |
+| A5 | Espace organisation | ✅ 17/08 · menu du compte « Mon espace » 05/10, en production le 16/10 | [écarts et vérifications](progression/ecrans/a5-espace-organisation.md) |
 | A6 | Tableau de bord back-office | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a6-tableau-de-bord.md) |
 | A7 | Liste des propositions | ✅ 18/08 · révisé 15/09 | [écarts et vérifications](progression/ecrans/a7-propositions.md) |
-| A8 | Fiche d'évaluation | ✅ 18/08 · évaluation flottante 16/09 · en production · correction par l'équipe 17/09, en production · titre et présentation reportés sur la séance 03/10, non déployé | [écarts et vérifications](progression/ecrans/a8-evaluation.md) |
+| A8 | Fiche d'évaluation | ✅ 18/08 · évaluation flottante 16/09 · en production · correction par l'équipe 17/09, en production · titre et présentation reportés sur la séance 03/10, en production le 16/10 | [écarts et vérifications](progression/ecrans/a8-evaluation.md) |
 | A9 | Planificateur de créneaux | ✅ 18/08 · stand par défaut 29/09, en production | [écarts et vérifications](progression/ecrans/a9-planificateur.md) |
 | A10 | Gestion des événements | ✅ 18/08 · téléversement des visuels 26/08 · liste en rangées 16/09 · fuseau cherchable et brouillon local 16/09 · appel : formats, revues et grille facultatifs 27/09 · en production | [écarts et vérifications](progression/ecrans/a10-evenements.md) |
 | A11 | Organisations et fusion | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a11-organisations-fusion.md) |
 | A12 | Utilisateurs et rôles | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a12-utilisateurs-roles.md) |
 | A13 | Messages d'incident | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a13-incidents.md) |
-| A14 | Page « En cours de maintenance » | ✅ 18/08 · plateforme entière en maintenance, basculée du back-office 16/10, non déployé | [écarts et vérifications](progression/ecrans/a14-maintenance.md) |
-| A15 | Accueil public et vitrine administrable | ✅ 19/08 · panneau « À venir » refondu 24/08 · section d'appel en affiche 16/09 · frise sans salle ni thématiques, carte d'événement masquée une fois son programme publié, témoignage du bandeau en bas de cadre, éditions en affiches ou en liste, oiseau qui suit le curseur 03/10, rail et transitions du bandeau, bouton de programmation au bas d'« À venir » 05/10, non déployé | [écarts et vérifications](progression/ecrans/a15-accueil.md) |
+| A14 | Page « En cours de maintenance » | ✅ 18/08 · plateforme entière en maintenance, basculée du back-office 16/10, en production, **allumée** | [écarts et vérifications](progression/ecrans/a14-maintenance.md) |
+| A15 | Accueil public et vitrine administrable | ✅ 19/08 · panneau « À venir » refondu 24/08 · section d'appel en affiche 16/09 · frise sans salle ni thématiques, carte d'événement masquée une fois son programme publié, témoignage du bandeau en bas de cadre, éditions en affiches ou en liste, oiseau qui suit le curseur 03/10, rail et transitions du bandeau, bouton de programmation au bas d'« À venir » 05/10, en production le 16/10 | [écarts et vérifications](progression/ecrans/a15-accueil.md) |
 | B7 | Raccordement du front à l'API | ✅ 22/08 | [écarts et vérifications](progression/ecrans/b7-raccordement.md) |
 | B8 | Module Vitrine (`content`) | ✅ 24/08 · téléversement des images 05/09 | [écarts et vérifications](progression/ecrans/b8-vitrine.md) |
 | B9 | Direct + Tableaux de bord (`live`, `analytics`) | ✅ 27/08 | [écarts et vérifications](progression/ecrans/b9-direct-tableaux-de-bord.md) |

@@ -203,13 +203,13 @@ Les 17 termes de `activity_theme` n'avaient pas de `color_hex` : la programmatio
 
 `programme.sessions.description` n'était jamais remplie : la naissance d'une séance ne recopiait que le titre, et aucun écran n'écrit ce champ. La page d'une activité n'avait donc jamais de présentation. Désormais la séance recopie `proposals.detailed_presentation` (HTML restreint) à l'acceptation, puis à chaque correction du dossier par l'équipe, comme le titre (FR-091 amendé). Schéma inchangé : deux `COMMENT ON COLUMN` (`title`, `description`) disent d'où viennent ces textes.
 
-**Migration** : `ops/migrations/2026-10-03-presentation-des-seances.sql` — les commentaires, et la présentation du dossier posée sur chaque séance qui n'en a pas. Appliquée en local sur `epavillon` (`UPDATE 0` : aucune séance), rejouée sans erreur. **À jouer en production.**
+**Migration** : `ops/migrations/2026-10-03-presentation-des-seances.sql` — les commentaires, et la présentation du dossier posée sur chaque séance qui n'en a pas. Appliquée en local sur `epavillon` (`UPDATE 0` : aucune séance), rejouée sans erreur. **En production** : déjà passée, constaté le 16/10 (commentaires présents, rejouée en `UPDATE 0`).
 
 ## 03/10/2026 — `075_programme_sessions.sql` : formulaire d'inscription par défaut allégé
 
 Arbitrage du commanditaire : le public ne donne que nom, prénom, adresse électronique et pays. `job_title`, `organization` et `referral_source` restent déclarés dans le formulaire `default`, avec `is_active = false` : les rouvrir est un `UPDATE`, sans migration. Le nom, le prénom et l'adresse ne sont pas des questions du formulaire (compte, ou bloc invité de l'inscription). Un formulaire **dédié** à une séance ou à une édition garde ses propres questions. Touche aussi l'inscription au pavillon depuis Guide Négo, qui lit le même formulaire.
 
-**Migration** : `ops/migrations/2026-10-03-inscription-allegee.sql` — appliquée en local sur `epavillon` (`UPDATE 3`). **À jouer en production.**
+**Migration** : `ops/migrations/2026-10-03-inscription-allegee.sql` — appliquée en local sur `epavillon` (`UPDATE 3`). **En production** : rejouée le 16/10 en `UPDATE 0`, donc déjà passée.
 
 
 ## 05/10/2026 — `100_negotiations.sql` : une réponse de la FAQ se publie sans vérification
@@ -222,4 +222,4 @@ Demande du commanditaire : l'administration publie sur instruction de sa hiérar
 
 Demande du commanditaire, pour la reprise des données avant la bascule DNS : fermer toute la plateforme, sauf aux administrateurs, et pouvoir le faire depuis le back-office. Le drapeau `platform.maintenance` (900 § 2, éteint) est **le seul qui ferme en s'allumant** ; allumé, il vaut `is_enabled` **et** `rollout_percent = 100`, car il se résout sans personne. « Administrateur » a le sens du back-office : `identity.administered_events()` non vide. La bascule exige la nouvelle permission `identity.platform.maintenance` (030, donnée à `admin`, testée en **portée globale** : un administrateur détaché sur une édition ne ferme pas les autres ; `super_admin` la reçoit par le semis).
 
-**Migration** : `ops/migrations/2026-10-16-plateforme-en-maintenance.sql` (drapeau, permission, attribution à `admin`) — appliquée en local sur `epavillon` (`INSERT 0 1` × 3), rejouable. **À jouer en production avant d'y envoyer le code** : sans le drapeau, l'interrupteur rend 404.
+**Migration** : `ops/migrations/2026-10-16-plateforme-en-maintenance.sql` (drapeau, permission, attribution à `admin`) — appliquée en local sur `epavillon` (`INSERT 0 1` × 3), rejouable. **Jouée en production le 16/10** (sauvegarde `epavillon-20261016-202908`, `INSERT 0 1` × 3), avec les deux du 03/10 rejouées (`UPDATE 0` : elles y étaient déjà, et le schéma de production a été mesuré identique au modèle avant de migrer).
