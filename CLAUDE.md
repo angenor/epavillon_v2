@@ -182,6 +182,7 @@ Ailleurs, la structure passe par les bordures et les ombres restent discrètes. 
 
 #### L'oiseau : réservé à l'accueil (03/10)
 
+- **Éteint depuis le 16/10**, à la demande du commanditaire et pour le moment : `isBirdShown` dans `pages/index.vue`, à repasser à `true`.
 - L'illustration du commanditaire (`docs/bird-cursor/`) suit le curseur sur `/` et nulle part ailleurs : `useBirdCursor()` la monte avec la page et la retire en la quittant. Souris seulement, jamais sur tactile ni avec « moins d'animations ».
 - Il se pose sur les `data-bird-perch` et parle au survol des `data-bird-say`, texte par i18n (`home.bird.*`). Sa bulle prend les jetons ; ses couleurs propres sont celles d'une illustration.
 - `public/bird-cursor.js`, la copie servie, a divergé de la livraison : bulle aux jetons et à son propre niveau d'empilement, sourire (2 s de survol ou un clic : œil en arc, bulle contente, phrases de `happyTexts`). Ajouts marqués « ePavillon ».
