@@ -39,12 +39,15 @@ interface Props {
   /** Forme : bloc rectangulaire, ligne de texte, pastille ronde. */
   variant?: 'block' | 'text' | 'circle'
   rounded?: string
+  /** `inverse` sur un aplat sombre (bandeaux de l'accueil et d'une activité), qui ne s'inverse pas. */
+  tone?: 'default' | 'inverse'
 }
 
 const props = withDefaults(defineProps<Props>(), {
   width: '100%',
   lines: 1,
   variant: 'block',
+  tone: 'default',
 })
 
 const defaultHeight = computed(() => (props.variant === 'text' ? '0.85rem' : '1.25rem'))
@@ -63,6 +66,7 @@ const radius = computed(() => {
       v-for="line in props.lines"
       :key="line"
       class="ui-skeleton block"
+      :class="{ 'ui-skeleton--inverse': props.tone === 'inverse' }"
       :style="{
         // La dernière ligne est plus courte : un paragraphe ne finit jamais au
         // ras de la marge.
@@ -76,6 +80,7 @@ const radius = computed(() => {
   <span
     v-else
     class="ui-skeleton block"
+    :class="{ 'ui-skeleton--inverse': props.tone === 'inverse' }"
     aria-hidden="true"
     :style="{
       width: props.width,
@@ -101,6 +106,14 @@ const radius = computed(() => {
   background: color-mix(in srgb, var(--color-surface) 55%, transparent);
   transform: translateX(-100%);
   animation: ui-skeleton-sweep 1.4s ease-in-out infinite;
+}
+
+.ui-skeleton--inverse {
+  background-color: var(--color-surface-inverse-raised);
+}
+
+.ui-skeleton--inverse::after {
+  background: color-mix(in srgb, var(--color-surface-inverse-selected) 12%, transparent);
 }
 
 @keyframes ui-skeleton-sweep {

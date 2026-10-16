@@ -133,12 +133,9 @@ useHead(() => ({
 
 <template>
   <div class="flex flex-col">
-    <UiLoadingState
-      v-if="status === 'pending'"
-      variant="card"
-      :lines="3"
-      :label="t('event.public.loading')"
-    />
+    <UiLoadingState v-if="status === 'pending'" :label="t('event.public.loading')">
+      <EventPublicSkeleton />
+    </UiLoadingState>
 
     <UiErrorState
       v-else-if="error"

@@ -114,12 +114,9 @@ useHead(() => ({
     -->
     <h1 class="sr-only">{{ t('home.title') }}</h1>
 
-    <UiLoadingState
-      v-if="status === 'pending'"
-      variant="card"
-      :lines="3"
-      :label="t('home.loading')"
-    />
+    <UiLoadingState v-if="status === 'pending'" :label="t('home.loading')">
+      <HomeSkeleton />
+    </UiLoadingState>
 
     <UiForbiddenState v-else-if="isForbidden" :action-to="localePath('/programmations')" />
 

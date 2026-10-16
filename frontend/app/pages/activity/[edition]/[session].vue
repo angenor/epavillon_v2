@@ -130,9 +130,9 @@ useHead(() => ({
 
 <template>
   <div class="full-bleed -mt-8 -mb-8 min-h-[75vh] bg-surface font-sans text-text sm:-mt-10 sm:-mb-10">
-    <div v-if="status === 'pending' && !data" class="mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
-      <UiLoadingState variant="card" :lines="4" :label="t('activity.loading')" />
-    </div>
+    <UiLoadingState v-if="status === 'pending' && !data" :label="t('activity.loading')">
+      <ActivitySkeleton />
+    </UiLoadingState>
 
     <div v-else-if="error" class="mx-auto max-w-[1280px] px-4 py-10 sm:px-6">
       <UiErrorState :title="t('activity.error.title')" :description="t('activity.error.description')" @retry="refresh()" />

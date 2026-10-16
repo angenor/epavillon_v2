@@ -116,6 +116,8 @@ useHead(() => ({ title: t('programme.title') }))
       @select="programme?.select($event)"
     />
 
+    <EventProgrammeHeroSkeleton v-else-if="status === 'pending'" />
+
     <header v-else>
       <h1 class="font-display text-3xl">{{ t('programme.title') }}</h1>
       <p class="mt-2 max-w-(--measure) text-text-muted">{{ t('programme.description') }}</p>
@@ -143,12 +145,9 @@ useHead(() => ({ title: t('programme.title') }))
       </p>
     </div>
 
-    <UiLoadingState
-      v-if="status === 'pending'"
-      variant="card"
-      :lines="3"
-      :label="t('programme.loading')"
-    />
+    <UiLoadingState v-if="status === 'pending'" :label="t('programme.loading')">
+      <EventProgrammeSkeleton />
+    </UiLoadingState>
 
     <UiErrorState
       v-else-if="error"
