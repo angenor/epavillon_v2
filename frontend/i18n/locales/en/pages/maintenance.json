@@ -30,9 +30,6 @@
     "description": "The current milestone carries the call for proposals and the programme. Those pages do answer."
   },
   "platform": {
-    "title": "Platform under maintenance",
-    "description": "ePavillon is moving to a new server. The platform is closed while the data is transferred; it will reopen at the same address.",
-    "signedIn": "Your account will regain access when the platform reopens.",
-    "adminAccess": "Administrator sign-in"
+    "title": "Platform under maintenance"
   }
 }

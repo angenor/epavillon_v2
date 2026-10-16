@@ -53,7 +53,7 @@ Fait le 18/08. **Le modèle a été complété d'un drapeau** : `directory.enabl
 Pour la reprise des données avant la bascule DNS. Le drapeau `platform.maintenance` ferme **tout le site** aux non-administrateurs ; l'API refuse leurs écritures (`503 PLATFORM_MAINTENANCE`). Basculé depuis le tableau de bord du back-office par un administrateur en portée globale ([modèle](../modele.md), [journal](../journal/2026-10-16.md)).
 
 - `middleware/maintenance.global.ts` : tout renvoie à `/maintenance` sauf la connexion et le mot de passe oublié. Un administrateur (`adminScope.canAdminister`) passe. Dans les deux sens, comme `feature-flag` : rouverte, la page d'attente renvoie à l'accueil.
-- `pages/maintenance/index.vue` : layout `auth`, **503 et `Retry-After: 3600`** au rendu serveur (un 200 ferait indexer la page d'attente à la place du site), aucune date annoncée, « Accès administrateur » vers la connexion.
+- `pages/maintenance/index.vue` : sans layout, le logo centré et « Plateforme en maintenance », rien d'autre (arbitré le 16/10, pour la sécurité : ni raison, ni lien vers la connexion ; les administrateurs passent par `/connexion`). **503 et `Retry-After: 3600`** au rendu serveur (un 200 ferait indexer la page d'attente à la place du site).
 - `components/admin/MaintenanceSwitch.vue` : interrupteur `UiSwitch` en tête du tableau de bord, confirmation avant de fermer, silencieux sur 403. Après bascule, `features.reload()`.
 - `layouts/admin.vue` : avertissement jaune dans tout le back-office tant que c'est fermé.
 

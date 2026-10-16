@@ -30,9 +30,6 @@
     "description": "Le jalon en cours porte l'appel à propositions et la programmation. Ces pages-là répondent."
   },
   "platform": {
-    "title": "Plateforme en maintenance",
-    "description": "L'ePavillon change de serveur. Le temps de transférer les données, la plateforme est fermée ; elle rouvrira à la même adresse.",
-    "signedIn": "Votre compte retrouvera son accès à la réouverture.",
-    "adminAccess": "Accès administrateur"
+    "title": "Plateforme en maintenance"
   }
 }
