@@ -49,9 +49,19 @@ onMounted(() => {
   void loadMeeting()
 })
 onBeforeUnmount(() => clearInterval(clock))
-watch(session, () => void loadMeeting())
+watch(() => session.value?.id, () => void loadMeeting())
 
-const open = computed(() => isMeetingOpen(meeting.value, now.value))
+// Une fois entré, on reste : l'horloge ne ferme pas la salle sous quelqu'un.
+const inMeeting = ref(false)
+const open = computed(() => isMeetingOpen(meeting.value, now.value) || inMeeting.value)
+
+// La vue client laisse `#zmmtg-root` par-dessus le site et la réunion tourne : une navigation interne repart de zéro.
+const router = useRouter()
+onBeforeRouteLeave((to) => {
+  if (!document.getElementById('zmmtg-root')) return true
+  window.location.assign(router.resolve(to.fullPath).href)
+  return false
+})
 const notYet = computed(() => meeting.value !== null && now.value !== null && now.value < Date.parse(meeting.value.opens_at))
 const closedDescription = computed(() => {
   const current = meeting.value
@@ -115,7 +125,15 @@ useHead(() => ({
         </UiLoadingState>
 
         <div v-else-if="open && meeting" class="relative min-h-[26rem] flex-1 overflow-hidden rounded-lg shadow-lg">
-          <ActivityZoomRoom class="absolute! inset-0" mode="page" :session="session" :meeting="meeting" :leave-url="leaveUrl" :zone-label="zoneLabel" />
+          <ActivityZoomRoom
+            class="absolute! inset-0"
+            mode="page"
+            :session="session"
+            :meeting="meeting"
+            :leave-url="leaveUrl"
+            :zone-label="zoneLabel"
+            @update:in-meeting="(value: boolean) => (inMeeting = value)"
+          />
         </div>
 
         <UiEmptyState

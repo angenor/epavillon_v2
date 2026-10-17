@@ -25,6 +25,8 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+/** Vrai de l'entrée à la sortie : le parent ne démonte pas la salle pendant ce temps. */
+const emit = defineEmits<{ 'update:inMeeting': [value: boolean] }>()
 
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
@@ -44,7 +46,7 @@ const fullscreen = ref(false)
 const inPage = computed(() => props.mode === 'stage' && embedded.value)
 const loginTo = computed(() => `${localePath('auth-login')}?redirect=${encodeURIComponent(route.fullPath)}`)
 const windowLabel = computed(() =>
-  timeRange(props.meeting.opens_at, props.meeting.ends_at, props.session.timezone, props.zoneLabel),
+  timeRange(props.meeting.opens_at, props.meeting.closes_at, props.session.timezone, props.zoneLabel),
 )
 const stepLabel = computed(() => t(`zoom-room.step.${step.value === 'joined' || !step.value ? 'joining' : step.value}`))
 
@@ -62,6 +64,10 @@ watch(
   },
   { immediate: true },
 )
+watch(
+  () => phase.value === 'loading' || phase.value === 'joined',
+  (active) => emit('update:inMeeting', active),
+)
 
 function videoSize() {
   const rect = box.value?.getBoundingClientRect()
@@ -71,23 +77,39 @@ function videoSize() {
   return { width, height }
 }
 
+// Un client par tentative : créé et initialisé ici, détruit à la sortie ou à l'échec, jamais réinitialisé sur la même racine.
 async function startEmbedded(access: MeetingAccess, setStep: (next: MeetingRoomStep) => void): Promise<void> {
   zoom = await loadZoomEmbedded()
-  client = zoom.createClient()
-  await client.init({
-    zoomAppRoot: zoomRoot.value ?? undefined,
-    language: zoomLanguage(locale.value),
-    patchJsMedia: true,
-    leaveOnPageUnload: true,
-    customize: {
-      video: { isResizable: false, popper: { disableDraggable: true }, viewSizes: { default: videoSize() } },
-    },
-  })
-  setStep('joining')
-  client.on('connection-change', onConnectionChange)
-  await client.join({ ...zoomJoinFields(access), password: access.password })
+  disposeEmbedded()
+  const current = zoom.createClient()
+  client = current
+  try {
+    await current.init({
+      zoomAppRoot: zoomRoot.value ?? undefined,
+      language: zoomLanguage(locale.value),
+      patchJsMedia: true,
+      leaveOnPageUnload: true,
+      customize: {
+        video: { isResizable: false, popper: { disableDraggable: true }, viewSizes: { default: videoSize() } },
+      },
+    })
+    setStep('joining')
+    current.on('connection-change', onConnectionChange)
+    await current.join({ ...zoomJoinFields(access), password: access.password })
+  } catch (failure) {
+    disposeEmbedded()
+    throw failure
+  }
   resize = new ResizeObserver(() => client?.updateVideoOptions({ viewSizes: { default: videoSize() } }))
   if (box.value) resize.observe(box.value)
+}
+
+function disposeEmbedded(): void {
+  resize?.disconnect()
+  resize = undefined
+  client?.off('connection-change', onConnectionChange)
+  if (client) zoom?.destroyClient()
+  client = null
 }
 
 async function startClientView(access: MeetingAccess, setStep: (next: MeetingRoomStep) => void): Promise<void> {
@@ -112,13 +134,13 @@ async function startClientView(access: MeetingAccess, setStep: (next: MeetingRoo
 }
 
 function onConnectionChange(payload: { state?: string }): void {
-  if (payload.state === 'Closed' || payload.state === 'Fail') stopEmbedded()
+  if (phase.value === 'joined' && (payload.state === 'Closed' || payload.state === 'Fail')) stopEmbedded()
 }
 
 function stopEmbedded(): void {
-  resize?.disconnect()
-  client?.off('connection-change', onConnectionChange)
   if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined)
+  // Hors du rappel du SDK : il finit de se fermer avant qu'on le détruise.
+  setTimeout(disposeEmbedded, 0)
   left()
 }
 
@@ -135,9 +157,14 @@ const onFullscreen = () => (fullscreen.value = document.fullscreenElement === bo
 onMounted(() => document.addEventListener('fullscreenchange', onFullscreen))
 onBeforeUnmount(() => {
   document.removeEventListener('fullscreenchange', onFullscreen)
-  resize?.disconnect()
-  if (client && phase.value === 'joined') void client.leaveMeeting().catch(() => undefined)
-  zoom?.destroyClient()
+  emit('update:inMeeting', false)
+  const current = client
+  if (!current) return
+  const joined = phase.value === 'joined'
+  void (async () => {
+    if (joined) await current.leaveMeeting().catch(() => undefined)
+    disposeEmbedded()
+  })()
 })
 </script>
 

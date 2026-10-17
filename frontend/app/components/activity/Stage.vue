@@ -17,9 +17,8 @@ interface Props {
   streams: PublicSessionStream[]
   cover: AttachedImage | null
   acronym: string | null
+  /** La salle Zoom à montrer, décidée par la page ; nulle sinon. */
   meeting?: PublicSessionMeeting | null
-  /** Fenêtre de la salle Zoom ouverte, à l'horloge de la page. */
-  meetingOpen?: boolean
   roomTo?: string
   zoneLabel?: string
 }
@@ -51,9 +50,9 @@ const current = computed(
   () => props.streams.find((stream) => stream.id === chosen.value) ?? props.streams[0] ?? null,
 )
 
-const zoomRoom = computed(() =>
-  props.meetingOpen && props.meeting && props.session.is_streamed && props.streams.length === 0 ? props.meeting : null,
-)
+const emit = defineEmits<{ 'update:inMeeting': [value: boolean] }>()
+
+const zoomRoom = computed(() => props.meeting ?? null)
 
 const isLive = computed(
   () => props.session.is_streamed && (props.state === 'live' || (props.state === 'ongoing' && props.streams.length > 0)),
@@ -78,6 +77,7 @@ const replayMinutes = computed(() =>
           :meeting="zoomRoom"
           :room-to="props.roomTo"
           :zone-label="props.zoneLabel"
+          @update:in-meeting="(value: boolean) => emit('update:inMeeting', value)"
         />
       </ClientOnly>
     </div>

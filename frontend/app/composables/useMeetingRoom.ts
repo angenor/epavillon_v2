@@ -8,11 +8,15 @@ export type MeetingRoomPhase = 'checking' | 'login' | 'register' | 'ready' | 'lo
 /** Étapes de `loading`, dans l'ordre. */
 export type MeetingRoomStep = 'access' | 'sdk' | 'joining'
 
-/** La salle s'ouvre (`opens_at`) et ferme (`ends_at`) d'elle-même : seules les réunions Zoom vivantes comptent. */
+/**
+ * La salle s'ouvre (`opens_at`) et ferme (`closes_at`, la borne de l'accès) d'elle-même ;
+ * seules les réunions Zoom vivantes comptent. Ne dit rien de qui est déjà dedans :
+ * l'appelant garde la salle montée tant qu'on y est.
+ */
 export function isMeetingOpen(meeting: PublicSessionMeeting | null, now: number | null): boolean {
   if (!meeting || now === null || meeting.provider !== 'zoom') return false
   if (meeting.status === 'cancelled' || meeting.status === 'ended') return false
-  return now >= Date.parse(meeting.opens_at) && now < Date.parse(meeting.ends_at)
+  return now >= Date.parse(meeting.opens_at) && now < Date.parse(meeting.closes_at)
 }
 
 /** Sur ordinateur (écran large, souris), la réunion s'ouvre dans la page ; ailleurs, en pleine page. */

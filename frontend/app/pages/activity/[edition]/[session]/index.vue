@@ -67,11 +67,17 @@ async function loadStreams(): Promise<void> {
 
 async function loadMeeting(): Promise<void> {
   const current = session.value
-  if (!current?.is_streamed || state.value === 'past' || state.value === 'cancelled') return
+  if (!current?.is_streamed || state.value === 'cancelled') return
   meeting.value = await api.meetings.forSession(current.id).catch(() => null)
 }
 
-const meetingOpen = computed(() => isMeetingOpen(meeting.value, now.value))
+// Une règle pour la scène et le billet : un flux YouTube l'emporte sur la salle Zoom.
+const zoomOpen = computed(
+  () => Boolean(session.value?.is_streamed) && streams.value.length === 0 && isMeetingOpen(meeting.value, now.value),
+)
+// Quitter la salle, c'est quitter la réunion : on ne la démonte jamais sous quelqu'un qui y est.
+const inMeeting = ref(false)
+const zoomShown = computed(() => meeting.value !== null && (zoomOpen.value || inMeeting.value))
 const roomTo = computed(() =>
   localePath({ name: 'activity-edition-session-room', params: { edition: editionSlug.value, session: sessionSlug.value } }),
 )
@@ -84,12 +90,17 @@ onMounted(() => {
   void loadMeeting()
 })
 onBeforeUnmount(() => clearInterval(clock))
-watch(session, (current) => {
-  streams.value = []
-  meeting.value = null
+// `refresh()` au début de la séance rend un nouvel objet pour la même activité : on garde la réunion.
+watch(session, (current, previous) => {
+  const changed = current?.id !== previous?.id
+  if (changed) {
+    streams.value = []
+    meeting.value = null
+    inMeeting.value = false
+  }
   if (current) visitedId.value = current.id
   void loadStreams()
-  void loadMeeting()
+  if (changed) void loadMeeting()
 })
 
 const homeTime = computed(() => {
@@ -168,10 +179,10 @@ useHead(() => ({
               :streams="streams"
               :cover="session.cover"
               :acronym="session.organization_acronym"
-              :meeting="meeting"
-              :meeting-open="meetingOpen"
+              :meeting="zoomShown ? meeting : null"
               :room-to="roomTo"
               :zone-label="edition.city ?? undefined"
+              @update:in-meeting="(value: boolean) => (inMeeting = value)"
             />
 
             <section v-if="summary || hasDescription" class="order-4" aria-labelledby="a-propos-titre">
@@ -195,7 +206,7 @@ useHead(() => ({
                 :now="now"
                 :home-time="homeTime"
                 :meeting="meeting"
-                :meeting-open="meetingOpen"
+                :zoom-open="zoomShown"
                 :room-to="roomTo"
                 @started="refresh()"
               />

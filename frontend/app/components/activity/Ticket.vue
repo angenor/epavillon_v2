@@ -23,7 +23,8 @@ interface Props {
   now: number | null
   homeTime: { range: string; zone: string } | null
   meeting?: PublicSessionMeeting | null
-  meetingOpen?: boolean
+  /** La salle Zoom tient la scène (même règle que `ActivityStage`) : l'action devient « Rejoindre ». */
+  zoomOpen?: boolean
   roomTo?: string
 }
 
@@ -57,7 +58,7 @@ type Action = 'registered' | 'register' | 'waitlist' | 'full' | 'notOpen' | 'clo
 
 const action = computed<Action>(() => {
   const state = props.state
-  if (props.meetingOpen && props.session.is_streamed) return 'join'
+  if (props.zoomOpen) return 'join'
   if (state === 'live' || state === 'ongoing') return props.session.is_streamed ? 'watch' : 'none'
   if (state === 'past') return props.session.replay_url ? 'replay' : 'none'
   if (state !== 'upcoming') return 'none'

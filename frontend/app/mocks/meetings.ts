@@ -3,8 +3,9 @@
  *
  * Toute séance diffusée du Pavillon (`pavillon.ts`, heures posées autour de
  * maintenant) et du jeu du site a sa réunion : la salle s'ouvre 30 minutes avant
- * le début. L'accès, lui, échoue toujours comme l'API sans configuration Zoom
- * (503 `LIVE_ZOOM_UNAVAILABLE`) : on ne fabrique pas de signature.
+ * le début et ferme 30 minutes après la fin. L'accès, lui, échoue toujours comme
+ * l'API sans configuration Zoom (503 `LIVE_ZOOM_UNAVAILABLE`) : on ne fabrique pas
+ * de signature.
  */
 import type { AdminSessionMeeting, MeetingAccess, MeetingStatus, MeetingSyncInput, PublicSessionMeeting, RegistrationJoinResult } from '~/types/live'
 import type { ApiErrorCode } from '~/types/api-error'
@@ -13,7 +14,7 @@ import { ApiRequestError } from '~/utils/api-error'
 import { programme } from './pavillon'
 import { allSessions } from './sessions'
 
-const OPENS_BEFORE_MS = 30 * 60_000
+const MARGIN_MS = 30 * 60_000
 
 type Horaire = Pick<PublicScheduleRow, 'id' | 'starts_at' | 'ends_at' | 'is_streamed' | 'status'>
 
@@ -35,9 +36,10 @@ export function publicSessionMeeting(sessionId: string, at: number = Date.now())
   return {
     provider: 'zoom',
     status: statut(s, at),
-    opens_at: new Date(Date.parse(s.starts_at) - OPENS_BEFORE_MS).toISOString(),
+    opens_at: new Date(Date.parse(s.starts_at) - MARGIN_MS).toISOString(),
     starts_at: s.starts_at,
     ends_at: s.ends_at,
+    closes_at: new Date(Date.parse(s.ends_at) + MARGIN_MS).toISOString(),
   }
 }
 

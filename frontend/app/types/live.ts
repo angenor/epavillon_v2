@@ -140,7 +140,8 @@ export type MeetingSyncStatus = 'not_required' | 'pending' | 'in_progress' | 'sy
 
 /**
  * `GET /sessions/{id}/meeting` : la réunion d'une séance, sans aucun secret.
- * 404 quand la séance n'en a pas. `opens_at` précède le début de 30 minutes.
+ * 404 quand la séance n'en a pas. La salle s'ouvre à `opens_at` (début moins
+ * 30 minutes) et ferme à `closes_at` (fin plus 30 minutes, borne de l'accès).
  */
 export interface PublicSessionMeeting {
   provider: MeetingProvider
@@ -148,6 +149,7 @@ export interface PublicSessionMeeting {
   opens_at: IsoDateTime
   starts_at: IsoDateTime
   ends_at: IsoDateTime
+  closes_at: IsoDateTime
 }
 
 /**
