@@ -23,6 +23,8 @@ interface Props {
   /** Adresse absolue de l'activité, où la vue client renvoie en sortant. */
   leaveUrl?: string
   zoneLabel?: string
+  /** Salle pleine page ouverte depuis le plein écran de la page : on entre sans attendre de clic. */
+  autoEnter?: boolean
 }
 
 const props = defineProps<Props>()
@@ -248,7 +250,14 @@ async function startClientView(access: MeetingAccess, setStep: (next: MeetingRoo
   if (root) root.style.display = 'block'
   try {
     await new Promise((resolve, reject) =>
-      zoomMtg.init({ leaveUrl: props.leaveUrl ?? window.location.href, patchJsMedia: true, leaveOnPageUnload: true, success: resolve, error: reject }),
+      zoomMtg.init({
+        leaveUrl: props.leaveUrl ?? window.location.href,
+        patchJsMedia: true,
+        leaveOnPageUnload: true,
+        disablePreview: Boolean(props.autoEnter),
+        success: resolve,
+        error: reject,
+      }),
     )
     setStep('joining')
     await new Promise((resolve, reject) =>
@@ -274,6 +283,23 @@ function stopEmbedded(): void {
 function enter(): void {
   void join(props.mode === 'page' ? startClientView : startEmbedded)
 }
+
+// La vue intégrée garde le 16:9 et laisse des bandes vides : le plein écran passe par la vue client, celle du logiciel.
+function openFullPage(): void {
+  if (!props.roomTo) return void setExpanded(!expanded.value)
+  window.location.assign(`${props.roomTo}${props.roomTo.includes('?') ? '&' : '?'}entrer=1`)
+}
+
+let autoEntered = false
+watch(
+  phase,
+  (current) => {
+    if (current !== 'ready' || !props.autoEnter || autoEntered) return
+    autoEntered = true
+    enter()
+  },
+  { immediate: true },
+)
 
 /**
  * Agrandir sans mettre le cadre en plein écran : les menus du SDK (participants,
@@ -357,7 +383,7 @@ onBeforeUnmount(() => {
         icon-only
         :icon="expanded ? 'close' : 'monitor'"
         :label="t(expanded ? 'zoom-room.exitFullscreen' : 'zoom-room.fullscreen')"
-        @click="setExpanded(!expanded)"
+        @click="openFullPage"
       />
     </div>
     <a

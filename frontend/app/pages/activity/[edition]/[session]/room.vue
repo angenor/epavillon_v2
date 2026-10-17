@@ -99,6 +99,7 @@ useHead(() => ({
             :meeting="meeting"
             :leave-url="leaveUrl"
             :zone-label="zoneLabel"
+            :auto-enter="route.query.entrer === '1'"
             @update:in-meeting="(value: boolean) => (inMeeting = value)"
           />
         </div>
