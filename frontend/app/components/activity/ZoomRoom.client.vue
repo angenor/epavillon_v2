@@ -40,7 +40,6 @@ const { phase, step, error, errorStatus, needsRegistration, waitlisted, joinUrl,
 
 const box = useTemplateRef<HTMLElement>('box')
 const zoomRoot = useTemplateRef<HTMLElement>('zoomRoot')
-const bar = useTemplateRef<HTMLElement>('bar')
 const dialogOpen = ref(false)
 const expanded = ref(false)
 
@@ -78,7 +77,8 @@ type VideoSize = { width: number; height: number }
  * `viewSizes.default` ne règle que l'image principale : le SDK ajoute au-dessus son
  * en-tête et la bande des vignettes, en dessous sa barre d'outils, dans la même
  * racine, qui prend donc sa hauteur naturelle. L'image est en 16:9 exact, sinon
- * le SDK rogne la caméra. Supposé avant mesure : en-tête 60, vignettes 200, barre 56.
+ * le SDK rogne la caméra. Supposé avant mesure : en-tête 60, vignettes 200, barre 56 ;
+ * remesuré ensuite à chaque changement de hauteur de la racine (vue changée dans le SDK).
  */
 const GUESSED_CHROME_PX = 316
 let chrome = 0
@@ -97,7 +97,7 @@ const sixteenNinth = (raw: number): VideoSize => {
 /** Nulle tant que la mise en page n'est pas faite : on n'envoie jamais 0. */
 function videoSize(): VideoSize | null {
   if (expanded.value) {
-    const available = window.innerHeight - (bar.value?.offsetHeight ?? 0) - (chrome || GUESSED_CHROME_PX)
+    const available = window.innerHeight - (chrome || GUESSED_CHROME_PX)
     const width = Math.floor(Math.min(window.innerWidth, (Math.max(available, 135) * 16) / 9))
     return width > 0 ? sixteenNinth(width) : null
   }
@@ -105,11 +105,29 @@ function videoSize(): VideoSize | null {
   return width > 0 ? sixteenNinth(width) : null
 }
 
-/** Ce que le SDK ajoute autour de l'image, mesuré une fois rendu. */
+/** L'image principale est le plus grand canevas ou la plus grande vidéo de la racine. */
+function mainVideoHeight(): number {
+  let best = { area: 0, height: 0 }
+  for (const element of zoomRoot.value?.querySelectorAll('canvas, video') ?? []) {
+    const rect = element.getBoundingClientRect()
+    if (rect.width * rect.height > best.area) best = { area: rect.width * rect.height, height: rect.height }
+  }
+  return best.height || applied?.height || 0
+}
+
+/** Ce que le SDK ajoute autour de l'image (en-tête, vignettes, barre), mesuré une fois rendu. */
 function measureChrome(): void {
   const rootHeight = zoomRoot.value?.getBoundingClientRect().height ?? 0
-  if (applied && rootHeight > applied.height) chrome = Math.round(rootHeight - applied.height)
+  const video = mainVideoHeight()
+  if (!video || rootHeight <= video) return
+  const next = Math.round(rootHeight - video)
+  if (Math.abs(next - chrome) <= 2) return
+  chrome = next
+  if (expanded.value) applyVideoSize()
 }
+
+let remeasure: ReturnType<typeof setTimeout> | undefined
+let rootResize: ResizeObserver | undefined
 
 /** Chaque appel refait la mise en page du SDK : seulement si la taille change, sauf `force`. */
 function applyVideoSize(force = false): void {
@@ -166,11 +184,19 @@ async function startEmbedded(access: MeetingAccess, setStep: (next: MeetingRoomS
   applyVideoSize()
   resize = new ResizeObserver(() => applyVideoSize())
   if (box.value) resize.observe(box.value)
+  rootResize = new ResizeObserver(() => {
+    clearTimeout(remeasure)
+    remeasure = setTimeout(measureChrome, 200)
+  })
+  if (zoomRoot.value) rootResize.observe(zoomRoot.value)
 }
 
 function disposeEmbedded(): void {
   resize?.disconnect()
   resize = undefined
+  rootResize?.disconnect()
+  rootResize = undefined
+  clearTimeout(remeasure)
   clearTimeout(pending)
   applied = null
   client?.off('connection-change', onConnectionChange)
@@ -225,6 +251,8 @@ async function setExpanded(next: boolean): Promise<void> {
   if (expanded.value === next) return
   expanded.value = next
   document.documentElement.style.overflow = next ? 'hidden' : ''
+  // Remonte les menus du SDK, rendus dans `body`, au-dessus du cadre agrandi (voir le style en fin de fichier).
+  document.documentElement.classList.toggle('zoom-room-expanded', next)
   if (next && !document.fullscreenElement) await document.documentElement.requestFullscreen().catch(() => undefined)
   if (!next && document.fullscreenElement) await document.exitFullscreen().catch(() => undefined)
   await nextTick()
@@ -251,6 +279,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', onWindowResize)
   if (expanded.value) {
     document.documentElement.style.overflow = ''
+    document.documentElement.classList.remove('zoom-room-expanded')
     if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined)
   }
   emit('update:inMeeting', false)
@@ -269,27 +298,35 @@ onBeforeUnmount(() => {
   <div
     ref="box"
     class="bg-surface-inverse text-text-on-inverse"
-    :class="expanded ? 'fixed! inset-0 z-[60] overflow-y-auto' : 'relative size-full'"
+    :class="expanded ? 'fixed! inset-0 z-[60] flex flex-col justify-center overflow-y-auto' : 'relative size-full'"
   >
-    <!-- Nos commandes dans une barre à nous, jamais par-dessus celles du SDK. -->
-    <div
-      v-if="inPage && phase === 'joined'"
-      ref="bar"
-      class="flex flex-wrap items-center justify-end gap-2 border-b border-border-on-inverse px-3 py-1.5"
-    >
-      <UiButton v-if="joinUrl" variant="inverse" size="sm" icon="external-link" :href="joinUrl">
-        {{ t('zoom-room.fallback') }}
-      </UiButton>
-      <UiButton variant="inverse" size="sm" :icon="expanded ? 'close' : 'monitor'" @click="setExpanded(!expanded)">
-        {{ t(expanded ? 'zoom-room.exitFullscreen' : 'zoom-room.fullscreen') }}
-      </UiButton>
-    </div>
     <div
       v-if="inPage"
-      ref="zoomRoot"
-      :class="phase === 'joined' ? 'relative mx-auto' : 'absolute inset-0'"
+      :class="phase === 'joined' ? 'relative mx-auto w-full' : 'absolute inset-0'"
       :style="phase === 'joined' && expanded && videoWidth ? { width: `${videoWidth}px` } : undefined"
-    />
+    >
+      <div ref="zoomRoot" :class="phase === 'joined' ? '' : 'absolute inset-0'" />
+      <!-- Au coin droit de la barre d'outils du SDK, centrée : la place y est libre. -->
+      <UiButton
+        v-if="phase === 'joined'"
+        class="absolute right-2 bottom-1.5 z-10 bg-surface-inverse-raised!"
+        variant="inverse"
+        icon-only
+        :icon="expanded ? 'close' : 'monitor'"
+        :label="t(expanded ? 'zoom-room.exitFullscreen' : 'zoom-room.fullscreen')"
+        @click="setExpanded(!expanded)"
+      />
+    </div>
+    <a
+      v-if="inPage && phase === 'joined' && joinUrl && !expanded"
+      :href="joinUrl"
+      target="_blank"
+      rel="noopener"
+      class="inline-flex min-h-(--target-min) items-center gap-1.5 px-3 text-sm text-text-on-inverse-muted underline underline-offset-4 hover:text-text-on-inverse"
+    >
+      {{ t('zoom-room.fallback') }}
+      <UiIcon name="external-link" size="0.875rem" />
+    </a>
 
     <div
       v-if="phase !== 'joined' || !inPage"
@@ -375,3 +412,11 @@ onBeforeUnmount(() => {
     />
   </div>
 </template>
+
+<style>
+/* Mode agrandi : les fenêtres du SDK (classes MUI préfixées `zoom-`) s'ouvrent dans `body`, sous le cadre fixe (z-60) sinon. */
+html.zoom-room-expanded body > [class*='zoom-Mui'],
+html.zoom-room-expanded body > [role='tooltip'] {
+  z-index: 70 !important;
+}
+</style>
