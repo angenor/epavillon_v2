@@ -5811,6 +5811,8 @@ export interface paths {
         /**
          * @description `PublicSessionMeeting` : la salle Zoom de la séance, sans aucun secret. `opens_at` vaut le début moins trente minutes.
          *
+         *     `closes_at` : l'heure où la salle ferme. Quand Zoom a annoncé la fin de la réunion, c'est cette fin. Sinon, quatre heures après la fin prévue, car les activités débordent souvent. Si la réunion est encore en cours au-delà, `closes_at` vaut maintenant plus quinze minutes : la page garde la salle ouverte tant que la réunion continue, et relit cette route pour savoir quand fermer.
+         *
          *     **404** quand la séance est inconnue, non publiée, ou n'a pas de réunion programmée, en cours ou terminée : les trois se lisent pareil. **Aucune garde.**
          */
         get: operations["seance_reunion_publique"];
@@ -5834,7 +5836,7 @@ export interface paths {
          *
          *     Réservé à une personne **inscrite, en liste d'attente ou déjà présente** : le jour même, Zoom laisse entrer les trois cents premiers arrivés. Réponse `Cache-Control: no-store`.
          *
-         *     Refus : `LIVE_ZOOM_UNAVAILABLE` (503, Zoom non configuré), `LIVE_MEETING_REGISTRATION_REQUIRED` (403), `LIVE_MEETING_NOT_OPEN` (409, avant l'ouverture ou plus de trente minutes après la fin), `LIVE_MEETING_NOT_READY` (409, réunion ou inscrit pas encore enregistrés chez Zoom).
+         *     Refus : `LIVE_ZOOM_UNAVAILABLE` (503, Zoom non configuré), `LIVE_MEETING_REGISTRATION_REQUIRED` (403), `LIVE_MEETING_NOT_OPEN` (409, avant l'ouverture, après la fin annoncée par Zoom, ou plus de quatre heures après la fin prévue si la réunion n'est pas en cours), `LIVE_MEETING_NOT_READY` (409, réunion ou inscrit pas encore enregistrés chez Zoom).
          */
         get: operations["seance_reunion_acces"];
         put?: never;
@@ -5969,7 +5971,7 @@ export interface components {
          *     - `LIVE_INCIDENT_WINDOW_INVALID` (422) — La fin d'affichage doit être postérieure au début.
          *     - `LIVE_INCIDENT_NOT_PUBLISHED` (422) — Ce message n'a jamais été publié : il n'y a rien à retirer.
          *     - `LIVE_ZOOM_UNAVAILABLE` (503) — La salle en ligne n'est pas disponible pour le moment. Réessayez un peu plus tard.
-         *     - `LIVE_MEETING_NOT_OPEN` (409) — La salle n'est pas ouverte en ce moment. Elle ouvre trente minutes avant le début de l'activité.
+         *     - `LIVE_MEETING_NOT_OPEN` (409) — La salle n'est pas ouverte en ce moment. Elle ouvre trente minutes avant le début de l'activité et ferme quand la réunion se termine.
          *     - `LIVE_MEETING_NOT_READY` (409) — Votre place dans la salle est en cours de préparation. Réessayez dans quelques minutes.
          *     - `LIVE_MEETING_REGISTRATION_REQUIRED` (403) — Inscrivez-vous à cette activité pour rejoindre la salle.
          *     - `LIVE_MEETING_EXTERNAL_ID_TAKEN` (409) — Cette réunion Zoom est déjà rattachée à une autre activité.

@@ -11,8 +11,8 @@ use time::{Duration, OffsetDateTime};
 use uuid::Uuid;
 
 use crate::domain::meeting::{
-    AdminSessionMeeting, MeetingAccess, MeetingSyncInput, PublicSessionMeeting,
-    FERMETURE_APRES_MINUTES, OUVERTURE_AVANT_MINUTES,
+    fermeture, salle_ouverte, AdminSessionMeeting, MeetingAccess, MeetingSyncInput,
+    PublicSessionMeeting, OUVERTURE_AVANT_MINUTES,
 };
 use crate::repo::cross::programme;
 use crate::repo::{lecture, meetings};
@@ -24,7 +24,11 @@ pub const MEETING_MANAGE: &str = "live.meeting.manage";
 
 /// Séance publiée et réunion programmée, en cours ou terminée ; sinon 404, la
 /// même réponse qu'une séance inconnue.
-pub async fn publique(state: &LiveState, session_id: Uuid) -> Result<PublicSessionMeeting> {
+pub async fn publique(
+    state: &LiveState,
+    session_id: Uuid,
+    maintenant: OffsetDateTime,
+) -> Result<PublicSessionMeeting> {
     let mut tx = lecture(state.pool()).await?;
     let seance = programme::seance(&mut tx, session_id)
         .await?
@@ -36,12 +40,17 @@ pub async fn publique(state: &LiveState, session_id: Uuid) -> Result<PublicSessi
     tx.commit().await?;
 
     Ok(PublicSessionMeeting {
+        closes_at: fermeture(
+            seance.ends_at,
+            Some(&reunion.status),
+            reunion.actual_end_at,
+            maintenant,
+        ),
         provider: reunion.provider,
         status: reunion.status,
         opens_at: seance.starts_at - Duration::minutes(OUVERTURE_AVANT_MINUTES),
         starts_at: seance.starts_at,
         ends_at: seance.ends_at,
-        closes_at: seance.ends_at + Duration::minutes(FERMETURE_APRES_MINUTES),
     })
 }
 
@@ -68,9 +77,9 @@ pub async fn acces(
         .await?
         .ok_or_else(|| ApiError::new(ErrorCode::LiveMeetingRegistrationRequired))?;
 
-    let ouverture = seance.starts_at - Duration::minutes(OUVERTURE_AVANT_MINUTES);
-    let fermeture = seance.ends_at + Duration::minutes(FERMETURE_APRES_MINUTES);
-    if maintenant < ouverture || maintenant > fermeture {
+    let reunion = meetings::reunion_publique(&mut tx, session_id).await?;
+    let statut = reunion.as_ref().map(|r| r.status.as_str());
+    if !salle_ouverte(seance.starts_at, seance.ends_at, statut, maintenant) {
         return Err(ApiError::new(ErrorCode::LiveMeetingNotOpen));
     }
 

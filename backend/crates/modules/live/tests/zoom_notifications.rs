@@ -178,3 +178,74 @@ async fn une_entree_en_salle_note_la_presence() {
         "la notification non vérifiée n'a rien terminé"
     );
 }
+
+#[tokio::test]
+async fn une_reunion_relancee_par_lhote_rouvre_la_salle() {
+    let bac = Bac::monter().await;
+    let d = decor(&bac).await;
+    let etat = etat_avec_zoom(&bac);
+    let awa = personne(&bac, "awa.diallo@exemple.org", "Awa", "Diallo").await;
+    let r = inscrire(&bac, d.session_id, awa).await;
+    consommer(&bac, r).await;
+    sqlx::query!(
+        "UPDATE live.meetings SET external_id = '85746065432', status = 'scheduled',
+                sync_status = 'synced' WHERE session_id = $1",
+        d.session_id
+    )
+    .execute(bac.pool())
+    .await
+    .unwrap();
+
+    let maintenant = OffsetDateTime::now_utc();
+    let ts = maintenant.unix_timestamp().to_string();
+    for (evenement, instant) in [
+        ("meeting.started", "start_time\":\"2026-11-10T14:00:00Z"),
+        ("meeting.ended", "end_time\":\"2026-11-10T15:30:00Z"),
+        ("meeting.started", "start_time\":\"2026-11-10T15:40:00Z"),
+    ] {
+        let corps = format!(
+            r#"{{"event":"{evenement}","event_ts":{},"payload":{{"object":{{"id":"85746065432","{instant}"}}}}}}"#,
+            maintenant.unix_timestamp_nanos() / 1000
+        );
+        recevoir(
+            &etat,
+            &EnTetes {
+                signature: Some(&signer(&corps, &ts)),
+                horodatage: Some(&ts),
+            },
+            corps.as_bytes(),
+            maintenant,
+        )
+        .await
+        .unwrap();
+        let id = sqlx::query_scalar!(
+            "SELECT id FROM live.provider_webhook_events ORDER BY received_at DESC LIMIT 1"
+        )
+        .fetch_one(bac.pool())
+        .await
+        .unwrap();
+        let mut tx = bac
+            .db()
+            .write(&RequestContext::background("test"))
+            .await
+            .unwrap();
+        live::jobs::webhook::traiter(&mut tx, id).await.unwrap();
+        tx.commit().await.unwrap();
+    }
+
+    let m = sqlx::query!(
+        r#"SELECT status::text AS "s!", actual_start_at, actual_end_at
+             FROM live.meetings WHERE session_id = $1"#,
+        d.session_id
+    )
+    .fetch_one(bac.pool())
+    .await
+    .unwrap();
+    assert_eq!(m.s, "started", "terminée puis relancée : la salle rouvre");
+    assert!(m.actual_end_at.is_none());
+    assert_eq!(
+        m.actual_start_at,
+        Some(time::macros::datetime!(2026-11-10 14:00 UTC)),
+        "le premier démarrage reste"
+    );
+}

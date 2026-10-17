@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT status::text AS \"s!\", actual_start_at, actual_end_at\n             FROM live.meetings WHERE session_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "s!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "actual_start_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "actual_start_at"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "actual_end_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "actual_end_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      true,
+      true
+    ]
+  },
+  "hash": "f488a21b922f81431d007b89c1c9f9d8efa543e00d467f9a46f42203fc35ea08"
+}

@@ -48,6 +48,25 @@ async fn simuler_zoom(bac: &Bac, session_id: Uuid, code: Vec<u8>) {
     .unwrap();
 }
 
+async fn statut_reunion(
+    bac: &Bac,
+    session_id: Uuid,
+    statut: &str,
+    fin: Option<time::OffsetDateTime>,
+) {
+    sqlx::query!(
+        "UPDATE live.meetings
+            SET status = $2::text::live.meeting_status, actual_start_at = $3, actual_end_at = $3
+          WHERE session_id = $1",
+        session_id,
+        statut,
+        fin
+    )
+    .execute(bac.pool())
+    .await
+    .unwrap();
+}
+
 #[tokio::test]
 async fn les_regles_dacces_a_la_salle() {
     let bac = Bac::monter().await;
@@ -76,8 +95,9 @@ async fn les_regles_dacces_a_la_salle() {
     let r = inscrire(&bac, d.session_id, awa).await;
     consommer(&bac, r).await;
 
-    // Hors de la fenêtre : plus de trente minutes avant, ou après la fin.
-    for instant in [debut - Duration::minutes(31), fin + Duration::minutes(31)] {
+    // Hors de la fenêtre : plus de trente minutes avant, ou plus de quatre
+    // heures après la fin prévue sans réunion en cours.
+    for instant in [debut - Duration::minutes(31), fin + Duration::minutes(241)] {
         let erreur = meeting::acces(&etat, awa, d.session_id, instant)
             .await
             .unwrap_err();
@@ -90,7 +110,7 @@ async fn les_regles_dacces_a_la_salle() {
         .unwrap_err();
     assert_eq!(erreur.code, ErrorCode::LiveMeetingNotReady);
     assert_eq!(
-        meeting::publique(&etat, d.session_id)
+        meeting::publique(&etat, d.session_id, pendant)
             .await
             .unwrap_err()
             .code,
@@ -122,10 +142,40 @@ async fn les_regles_dacces_a_la_salle() {
     assert_eq!(acces.signature.split('.').count(), 3);
     assert!(acces.expires_at > pendant + Duration::minutes(30));
 
-    let publique = meeting::publique(&etat, d.session_id).await.unwrap();
+    let publique = meeting::publique(&etat, d.session_id, pendant)
+        .await
+        .unwrap();
     assert_eq!(publique.status, "scheduled");
     assert_eq!(publique.opens_at, debut - Duration::minutes(30));
-    assert_eq!(publique.closes_at, fin + Duration::minutes(30));
+    assert_eq!(publique.closes_at, fin + Duration::minutes(240));
+
+    // Une activité qui déborde : trois heures après la fin prévue, on entre encore.
+    assert!(
+        meeting::acces(&etat, awa, d.session_id, fin + Duration::hours(3))
+            .await
+            .is_ok()
+    );
+
+    // Réunion encore en cours au-delà de la borne : la salle reste ouverte, et
+    // la fermeture annoncée glisse d'un quart d'heure.
+    let tard = fin + Duration::hours(5);
+    statut_reunion(&bac, d.session_id, "started", None).await;
+    assert!(meeting::acces(&etat, awa, d.session_id, tard).await.is_ok());
+    let publique = meeting::publique(&etat, d.session_id, tard).await.unwrap();
+    assert_eq!(publique.closes_at, tard + Duration::minutes(15));
+
+    // Zoom annonce la fin : la salle ferme, à l'heure constatée.
+    let fin_reelle = fin + Duration::minutes(50);
+    statut_reunion(&bac, d.session_id, "ended", Some(fin_reelle)).await;
+    let erreur = meeting::acces(&etat, awa, d.session_id, fin + Duration::hours(1))
+        .await
+        .unwrap_err();
+    assert_eq!(erreur.code, ErrorCode::LiveMeetingNotOpen);
+    let publique = meeting::publique(&etat, d.session_id, tard).await.unwrap();
+    assert_eq!(publique.status, "ended");
+    assert_eq!(publique.closes_at, fin_reelle);
+
+    statut_reunion(&bac, d.session_id, "scheduled", None).await;
 
     // Une resynchronisation pendant l'activité ne ferme la porte à personne.
     sqlx::query!(

@@ -346,6 +346,7 @@ pub async fn tableau(
 pub struct ReunionPublique {
     pub provider: String,
     pub status: String,
+    pub actual_end_at: Option<OffsetDateTime>,
 }
 
 pub async fn reunion_publique(
@@ -354,7 +355,7 @@ pub async fn reunion_publique(
 ) -> Result<Option<ReunionPublique>> {
     let ligne = sqlx::query_as!(
         ReunionPublique,
-        r#"SELECT provider::text AS "provider!", status::text AS "status!"
+        r#"SELECT provider::text AS "provider!", status::text AS "status!", actual_end_at
              FROM live.meetings
             WHERE session_id = $1 AND status IN ('scheduled', 'started', 'ended')"#,
         session_id

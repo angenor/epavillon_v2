@@ -5,10 +5,48 @@ use serde::{Deserialize, Serialize};
 use time::OffsetDateTime;
 use uuid::Uuid;
 
-/// La salle ouvre trente minutes avant le début et ferme trente minutes après
-/// la fin : on entre en avance, on déborde parfois.
+/// La salle ouvre trente minutes avant le début. Elle ferme quand Zoom annonce
+/// la fin de la réunion ; sans cette annonce, quatre heures après la fin
+/// prévue, car une activité de COP déborde souvent. Une réunion en cours reste
+/// ouverte au-delà, jusqu'à ce que Zoom en annonce la fin.
 pub const OUVERTURE_AVANT_MINUTES: i64 = 30;
-pub const FERMETURE_APRES_MINUTES: i64 = 30;
+pub const FERMETURE_APRES_MINUTES: i64 = 240;
+/// Au-delà de la borne, une réunion en cours annonce une fermeture glissante.
+pub const PROLONGATION_MINUTES: i64 = 15;
+
+/// L'heure de fermeture de la salle, telle que la page la montre.
+pub fn fermeture(
+    ends_at: OffsetDateTime,
+    statut: Option<&str>,
+    fin_constatee: Option<OffsetDateTime>,
+    maintenant: OffsetDateTime,
+) -> OffsetDateTime {
+    let borne = ends_at + time::Duration::minutes(FERMETURE_APRES_MINUTES);
+    match statut {
+        Some("ended") => fin_constatee.unwrap_or(maintenant.min(borne)),
+        Some("started") if maintenant > borne => {
+            maintenant + time::Duration::minutes(PROLONGATION_MINUTES)
+        }
+        _ => borne,
+    }
+}
+
+/// La salle est-elle ouverte à cet instant ?
+pub fn salle_ouverte(
+    starts_at: OffsetDateTime,
+    ends_at: OffsetDateTime,
+    statut: Option<&str>,
+    maintenant: OffsetDateTime,
+) -> bool {
+    let ouverture = starts_at - time::Duration::minutes(OUVERTURE_AVANT_MINUTES);
+    let borne = ends_at + time::Duration::minutes(FERMETURE_APRES_MINUTES);
+    match statut {
+        _ if maintenant < ouverture => false,
+        Some("ended") => false,
+        Some("started") => true,
+        _ => maintenant <= borne,
+    }
+}
 
 #[derive(Debug, Serialize)]
 pub struct PublicSessionMeeting {
@@ -20,7 +58,7 @@ pub struct PublicSessionMeeting {
     pub starts_at: OffsetDateTime,
     #[serde(with = "time::serde::rfc3339")]
     pub ends_at: OffsetDateTime,
-    /// Fin plus trente minutes : la même borne que la route d'accès.
+    /// Voir `fermeture()` : la même règle que la route d'accès.
     #[serde(with = "time::serde::rfc3339")]
     pub closes_at: OffsetDateTime,
 }

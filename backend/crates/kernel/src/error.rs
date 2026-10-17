@@ -232,7 +232,7 @@ codes! {
     LiveZoomUnavailable => "LIVE_ZOOM_UNAVAILABLE", StatusCode::SERVICE_UNAVAILABLE,
         "La salle en ligne n'est pas disponible pour le moment. Réessayez un peu plus tard.";
     LiveMeetingNotOpen => "LIVE_MEETING_NOT_OPEN", StatusCode::CONFLICT,
-        "La salle n'est pas ouverte en ce moment. Elle ouvre trente minutes avant le début de l'activité.";
+        "La salle n'est pas ouverte en ce moment. Elle ouvre trente minutes avant le début de l'activité et ferme quand la réunion se termine.";
     LiveMeetingNotReady => "LIVE_MEETING_NOT_READY", StatusCode::CONFLICT,
         "Votre place dans la salle est en cours de préparation. Réessayez dans quelques minutes.";
     LiveMeetingRegistrationRequired => "LIVE_MEETING_REGISTRATION_REQUIRED", StatusCode::FORBIDDEN,
