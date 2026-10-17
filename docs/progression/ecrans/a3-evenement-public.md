@@ -235,3 +235,5 @@ Maquette : [page d'une activité](https://claude.ai/artifact/MTjhU6YwDmahNgDDTRY
 - **Retouche du 05/10** : « Organisé par » retiré ; intervenants en cartes centrées (photo, nom, fonction en italique, organisation) ; compte à rebours `ActivityCountdown` en quatre cases à la seconde, animé hors « moins d'animations ».
 
 **17/10 : salle Zoom dans la page d'une activité** (branche `feat/zoom-meeting-sdk`) : vue intégrée du Meeting SDK sur ordinateur, page « salle » plein écran sur téléphone, lien vers l'application Zoom en secours, billet « Rejoindre la réunion » ; la page passe de `[session].vue` à `[session]/index.vue`. Non essayé contre un vrai compte Zoom. Voir [journal](../journal/2026-10-17.md), [décision](../decisions/2026-10-17.md).
+
+**17/10 : la salle garde la couverture** : avant l'entrée dans la réunion, l'invitation Zoom se pose en bas de l'image de l'activité (voile `.scrim-fade-bottom`) au lieu de la remplacer par un aplat ; sans couverture, aplat centré. Voir [journal](../journal/2026-10-17.md).

@@ -5,8 +5,8 @@ import type { AttachedImage } from '~/types/media'
 import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
 
 /**
- * Le média de l'activité, toujours rendu : la salle Zoom pendant sa fenêtre
- * d'ouverture quand aucun flux n'est diffusé, le direct avec ses langues pendant
+ * Le média de l'activité, toujours rendu : la salle Zoom (posée sur la couverture
+ * tant qu'on n'y est pas entré) quand aucun flux n'est diffusé, le direct avec ses langues pendant
  * la diffusion, l'enregistrement après, la couverture sinon (à défaut, le sigle).
  * Une séance a un flux par langue d'interprétation.
  */
@@ -83,6 +83,7 @@ const replayMinutes = computed(() =>
           :meeting="zoomRoom"
           :room-to="props.roomTo"
           :zone-label="props.zoneLabel"
+          :cover="props.cover"
           @update:in-meeting="(value: boolean) => emit('update:inMeeting', value)"
           @update:joined="(value: boolean) => (zoomJoined = value)"
         />

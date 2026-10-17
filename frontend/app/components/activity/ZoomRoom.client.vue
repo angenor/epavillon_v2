@@ -4,6 +4,7 @@ import type { PublicScheduleRow } from '~/types/views'
 import type { MeetingRoomStep } from '~/composables/useMeetingRoom'
 import type { SuspensionViewType } from '@zoom/meetingsdk/embedded'
 import type { ZoomEmbedded, ZoomEmbeddedClient } from '~/utils/zoom-sdk'
+import type { AttachedImage } from '~/types/media'
 
 /**
  * La salle Zoom d'une activité, sur l'aplat sombre du direct.
@@ -25,6 +26,8 @@ interface Props {
   zoneLabel?: string
   /** Salle pleine page ouverte depuis le plein écran de la page : on entre sans attendre de clic. */
   autoEnter?: boolean
+  /** Couverture de l'activité, gardée sous l'invitation tant qu'on n'est pas dans la réunion. */
+  cover?: AttachedImage | null
 }
 
 const props = defineProps<Props>()
@@ -399,75 +402,102 @@ onBeforeUnmount(() => {
 
     <div
       v-if="phase !== 'joined' || !inPage"
-      class="relative flex size-full flex-col items-center justify-center gap-4 bg-surface-inverse px-5 py-8 text-center sm:px-8"
+      class="relative flex size-full flex-col bg-surface-inverse px-5 sm:px-8"
+      :class="[
+        props.cover ? 'justify-end pt-24 pb-6 text-left sm:pb-8' : 'justify-center py-8 text-center',
+        props.mode === 'stage' ? 'min-h-80 lg:min-h-0' : '',
+      ]"
       :aria-busy="phase === 'checking' || phase === 'loading' ? 'true' : undefined"
     >
-      <span class="inline-flex size-14 items-center justify-center rounded-full bg-live text-live-contrast sm:size-16" aria-hidden="true">
-        <UiIcon name="video" size="1.75rem" />
-      </span>
-      <div>
-        <p class="text-xs font-bold text-text-on-inverse-muted uppercase" :style="{ letterSpacing: 'var(--tracking-caps)' }">
+      <!-- La salle est joignable des semaines à l'avance : l'invitation se pose sur l'image de l'activité au lieu de l'effacer. -->
+      <template v-if="props.cover">
+        <UiImage
+          :image="props.cover"
+          ratio="auto"
+          loading="eager"
+          class="absolute inset-0"
+          frame-class="size-full"
+          sizes="(min-width: 1024px) 50rem, 100vw"
+        />
+        <span class="scrim-fade-bottom pointer-events-none absolute inset-0" aria-hidden="true" />
+      </template>
+      <div class="relative flex flex-col gap-4" :class="props.cover ? 'items-start' : 'items-center'">
+        <span
+          v-if="!props.cover"
+          class="inline-flex size-14 items-center justify-center rounded-full bg-live text-live-contrast sm:size-16"
+          aria-hidden="true"
+        >
+          <UiIcon name="video" size="1.75rem" />
+        </span>
+        <p
+          class="flex items-center gap-2 text-xs font-bold uppercase"
+          :class="props.cover ? 'text-text-on-inverse' : 'text-text-on-inverse-muted'"
+          :style="{ letterSpacing: 'var(--tracking-caps)' }"
+        >
+          <span v-if="props.cover" class="inline-flex size-7 items-center justify-center rounded-full bg-live text-live-contrast" aria-hidden="true">
+            <UiIcon name="video" size="0.875rem" />
+          </span>
           {{ t('zoom-room.label') }}
         </p>
+
+        <p v-if="phase === 'checking'" class="flex items-center gap-2 text-sm" role="status">
+          <UiSpinner size="1rem" />{{ t('zoom-room.checking') }}
+        </p>
+
+        <template v-else-if="phase === 'login'">
+          <p class="max-w-md text-sm">{{ t('zoom-room.login.message') }}</p>
+          <UiButton :to="loginTo" size="lg">{{ t('zoom-room.login.action') }}</UiButton>
+        </template>
+
+        <template v-else-if="phase === 'register'">
+          <p class="max-w-md text-sm">{{ t('zoom-room.register.message') }}</p>
+          <UiButton size="lg" @click="dialogOpen = true">{{ t('zoom-room.register.action') }}</UiButton>
+        </template>
+
+        <template v-else-if="phase === 'ready'">
+          <p class="max-w-md text-sm">{{ t('zoom-room.ready') }}</p>
+          <NuxtLink
+            v-if="props.mode === 'stage' && !embedded && props.roomTo"
+            :to="props.roomTo"
+            class="inline-flex min-h-12 items-center gap-2.5 rounded-md bg-live px-6 text-base font-bold text-live-contrast"
+          >
+            <UiIcon name="video" size="1.125rem" />
+            {{ t('zoom-room.join') }}
+          </NuxtLink>
+          <button
+            v-else
+            type="button"
+            class="inline-flex min-h-12 cursor-pointer items-center gap-2.5 rounded-md bg-live px-6 text-base font-bold text-live-contrast"
+            @click="enter"
+          >
+            <UiIcon name="video" size="1.125rem" />
+            {{ t('zoom-room.join') }}
+          </button>
+        </template>
+
+        <p v-else-if="phase === 'loading'" class="flex items-center gap-2 text-sm" role="status">
+          <UiSpinner size="1rem" />{{ stepLabel }}
+        </p>
+
+        <p v-else-if="phase === 'joined'" class="text-sm" role="status">{{ t('zoom-room.joined') }}</p>
+
+        <template v-else-if="phase === 'error'">
+          <p class="max-w-md text-sm" role="alert">{{ error }}</p>
+          <div class="flex flex-wrap justify-center gap-2">
+            <UiButton v-if="errorStatus === 401" :to="loginTo">{{ t('zoom-room.login.action') }}</UiButton>
+            <UiButton v-else-if="errorStatus === 403 && needsRegistration" @click="dialogOpen = true">{{ t('zoom-room.register.action') }}</UiButton>
+            <UiButton variant="inverse" icon="refresh" @click="enter">{{ t('zoom-room.retry') }}</UiButton>
+          </div>
+        </template>
+
+        <p v-if="waitlisted && (phase === 'ready' || phase === 'error')" class="max-w-md text-[0.8125rem] text-text-on-inverse-muted">
+          {{ t('zoom-room.waitlisted') }}
+        </p>
+
+        <UiButton v-if="joinUrl && phase !== 'checking'" variant="inverse" icon="external-link" :href="joinUrl">
+          {{ t('zoom-room.fallback') }}
+        </UiButton>
       </div>
-
-      <p v-if="phase === 'checking'" class="flex items-center gap-2 text-sm" role="status">
-        <UiSpinner size="1rem" />{{ t('zoom-room.checking') }}
-      </p>
-
-      <template v-else-if="phase === 'login'">
-        <p class="max-w-md text-sm">{{ t('zoom-room.login.message') }}</p>
-        <UiButton :to="loginTo" size="lg">{{ t('zoom-room.login.action') }}</UiButton>
-      </template>
-
-      <template v-else-if="phase === 'register'">
-        <p class="max-w-md text-sm">{{ t('zoom-room.register.message') }}</p>
-        <UiButton size="lg" @click="dialogOpen = true">{{ t('zoom-room.register.action') }}</UiButton>
-      </template>
-
-      <template v-else-if="phase === 'ready'">
-        <p class="max-w-md text-sm">{{ t('zoom-room.ready') }}</p>
-        <NuxtLink
-          v-if="props.mode === 'stage' && !embedded && props.roomTo"
-          :to="props.roomTo"
-          class="inline-flex min-h-12 items-center gap-2.5 rounded-md bg-live px-6 text-base font-bold text-live-contrast"
-        >
-          <UiIcon name="video" size="1.125rem" />
-          {{ t('zoom-room.join') }}
-        </NuxtLink>
-        <button
-          v-else
-          type="button"
-          class="inline-flex min-h-12 cursor-pointer items-center gap-2.5 rounded-md bg-live px-6 text-base font-bold text-live-contrast"
-          @click="enter"
-        >
-          <UiIcon name="video" size="1.125rem" />
-          {{ t('zoom-room.join') }}
-        </button>
-      </template>
-
-      <p v-else-if="phase === 'loading'" class="flex items-center gap-2 text-sm" role="status">
-        <UiSpinner size="1rem" />{{ stepLabel }}
-      </p>
-
-      <p v-else-if="phase === 'joined'" class="text-sm" role="status">{{ t('zoom-room.joined') }}</p>
-
-      <template v-else-if="phase === 'error'">
-        <p class="max-w-md text-sm" role="alert">{{ error }}</p>
-        <div class="flex flex-wrap justify-center gap-2">
-          <UiButton v-if="errorStatus === 401" :to="loginTo">{{ t('zoom-room.login.action') }}</UiButton>
-          <UiButton v-else-if="errorStatus === 403 && needsRegistration" @click="dialogOpen = true">{{ t('zoom-room.register.action') }}</UiButton>
-          <UiButton variant="inverse" icon="refresh" @click="enter">{{ t('zoom-room.retry') }}</UiButton>
-        </div>
-      </template>
-
-      <p v-if="waitlisted && (phase === 'ready' || phase === 'error')" class="max-w-md text-[0.8125rem] text-text-on-inverse-muted">
-        {{ t('zoom-room.waitlisted') }}
-      </p>
-
-      <UiButton v-if="joinUrl && phase !== 'checking'" variant="inverse" icon="external-link" :href="joinUrl">
-        {{ t('zoom-room.fallback') }}
-      </UiButton>
     </div>
 
 
