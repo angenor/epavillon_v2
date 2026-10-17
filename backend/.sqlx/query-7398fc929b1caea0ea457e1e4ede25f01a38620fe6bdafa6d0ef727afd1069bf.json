@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meetings SET sync_status = 'in_progress' WHERE session_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7398fc929b1caea0ea457e1e4ede25f01a38620fe6bdafa6d0ef727afd1069bf"
+}

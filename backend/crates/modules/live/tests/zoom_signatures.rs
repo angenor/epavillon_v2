@@ -1,7 +1,8 @@
 //! Signatures et secrets Zoom, sans base ni réseau. Les vecteurs attendus ont
 //! été calculés hors de Rust (Python, `hmac` et `hashlib`).
 
-use live::jobs::sync_meeting::{corps_de_creation, sans_secrets};
+use live::jobs::sync_meeting::{corps_de_creation, sans_pwd, sans_secrets, verifier_lhote};
+use live::zoom::client::delai_retry_after;
 use live::zoom::{jeton_du_lien, jwt, webhook, Coffre};
 use serde_json::json;
 
@@ -134,4 +135,40 @@ fn la_reunion_est_creee_avec_inscription_et_approbation_automatique() {
     assert_eq!(corps["settings"]["approval_type"], 0);
     assert_eq!(corps["settings"]["registration_type"], 1);
     assert_eq!(corps["settings"]["waiting_room"], false);
+}
+
+#[test]
+fn le_lien_generique_perd_son_code() {
+    assert_eq!(
+        sans_pwd("https://zoom.us/j/1?pwd=abc"),
+        "https://zoom.us/j/1"
+    );
+    assert_eq!(
+        sans_pwd("https://zoom.us/j/1?a=1&pwd=abc&b=2"),
+        "https://zoom.us/j/1?a=1&b=2"
+    );
+    assert_eq!(sans_pwd("https://zoom.us/j/1"), "https://zoom.us/j/1");
+    let gardee = sans_secrets(&json!({ "join_url": "https://zoom.us/j/1?pwd=abc" }));
+    assert_eq!(gardee["join_url"], "https://zoom.us/j/1");
+}
+
+#[test]
+fn retry_after_en_secondes_ou_en_date() {
+    let maintenant = time::macros::datetime!(2026-10-17 10:00 UTC);
+    assert_eq!(delai_retry_after("120", maintenant), Some(120));
+    assert_eq!(
+        delai_retry_after("2026-10-17T10:05:00Z", maintenant),
+        Some(300)
+    );
+    assert_eq!(delai_retry_after("999999", maintenant), Some(86_400));
+    assert_eq!(delai_retry_after("bientôt", maintenant), None);
+}
+
+#[test]
+fn une_reunion_dun_autre_hote_est_refusee() {
+    let reunion = json!({ "host_email": "Pavillon@ifdd.org", "host_id": "abc" });
+    assert!(verifier_lhote(&reunion, "me").is_ok());
+    assert!(verifier_lhote(&reunion, "pavillon@ifdd.org").is_ok());
+    assert!(verifier_lhote(&reunion, "abc").is_ok());
+    assert!(verifier_lhote(&reunion, "autre@ifdd.org").is_err());
 }

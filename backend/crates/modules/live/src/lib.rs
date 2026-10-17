@@ -8,8 +8,8 @@
 //! `080_live.sql`), la lecture publique de `live.current_streams`, et depuis le
 //! 17/10 les **réunions Zoom** des séances : `live.meetings`, leurs inscrits
 //! (`live.meeting_participants`), le journal des notifications
-//! (`live.provider_webhook_events`), quatre travaux de la file « live » et un
-//! consommateur des inscriptions. Zoom s'éteint entièrement sans sa
+//! (`live.provider_webhook_events`), six travaux de la file « live » et deux
+//! consommateurs (inscriptions, séances annulées ou déplacées). Zoom s'éteint entièrement sans sa
 //! configuration (`ZOOM_*`, `LIVE_SECRETS_KEY`) : ni travaux, ni consommateur,
 //! et les routes qui en ont besoin répondent 503.
 //!
@@ -93,7 +93,7 @@ pub fn zoom_webhook_configure(config: &Config) -> bool {
         .is_some_and(|z| z.webhook_secret_token.is_some())
 }
 
-/// Les quatre travaux de la file « live ». Aucun sans Zoom : les travaux
+/// Les six travaux de la file « live ». Aucun sans Zoom : les travaux
 /// déposés attendent alors en file, sans échouer, qu'il soit configuré.
 pub fn job_handlers(db: Db, config: &Config) -> Vec<Arc<dyn JobHandler>> {
     let Some(zoom) = state::zoom_depuis(config) else {
@@ -110,8 +110,10 @@ pub fn job_handlers(db: Db, config: &Config) -> Vec<Arc<dyn JobHandler>> {
         )),
         Arc::new(jobs::cancel_participant::CancelParticipant::new(
             db.clone(),
-            zoom,
+            zoom.clone(),
         )),
+        Arc::new(jobs::cancel_meeting::CancelMeeting::new(db.clone(), zoom)),
+        Arc::new(jobs::filet::RequeueParticipants::new(db.clone())),
         Arc::new(jobs::webhook::ProcessWebhook::new(db)),
     ]
 }
@@ -122,5 +124,8 @@ pub fn event_consumers(config: &Config) -> Vec<Arc<dyn EventConsumer>> {
     if config.zoom.is_none() {
         return Vec::new();
     }
-    vec![Arc::new(consumers::registrations::RegistrationsConsumer)]
+    vec![
+        Arc::new(consumers::registrations::RegistrationsConsumer),
+        Arc::new(consumers::sessions::SessionsConsumer),
+    ]
 }

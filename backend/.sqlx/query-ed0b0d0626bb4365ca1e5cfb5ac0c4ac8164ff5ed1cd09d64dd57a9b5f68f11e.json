@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meeting_participants\n                        SET sync_status = 'failed', last_error = $2, next_retry_at = $3\n                      WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ed0b0d0626bb4365ca1e5cfb5ac0c4ac8164ff5ed1cd09d64dd57a9b5f68f11e"
+}

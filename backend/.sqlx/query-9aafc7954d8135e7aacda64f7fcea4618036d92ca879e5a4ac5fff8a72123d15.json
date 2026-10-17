@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE live.meetings\n                  SET sync_status = 'in_progress', sync_attempts = sync_attempts + 1\n                WHERE id = $1\n                  AND (sync_status IN ('pending', 'failed')\n                       OR (sync_status = 'in_progress' AND updated_at < now() - interval '10 minutes'))\n            RETURNING external_id, topic, agenda, scheduled_start_at, duration_minutes,\n                      timezone::text AS \"timezone!\"",
+  "query": "UPDATE live.meetings\n                  SET sync_status = 'in_progress', sync_attempts = sync_attempts + 1\n                WHERE id = $1\n                  AND (sync_status IN ('pending', 'failed')\n                       OR (sync_status = 'in_progress' AND updated_at < now() - interval '10 minutes'))\n            RETURNING external_id, topic, agenda, scheduled_start_at, duration_minutes,\n                      timezone::text AS \"timezone!\",\n                      (provider_payload ? 'creation_envoyee') AS \"creation_envoyee!\"",
   "describe": {
     "columns": [
       {
@@ -63,6 +63,12 @@
         "name": "timezone!",
         "type_info": "Text",
         "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "creation_envoyee!",
+        "type_info": "Bool",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -76,8 +82,9 @@
       true,
       true,
       true,
+      null,
       null
     ]
   },
-  "hash": "1274bc76f15204ba47c1ec023ef8badb27bd618d283e2d32f17f0f1c84239602"
+  "hash": "9aafc7954d8135e7aacda64f7fcea4618036d92ca879e5a4ac5fff8a72123d15"
 }

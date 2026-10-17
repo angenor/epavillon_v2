@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meetings SET external_id = '42', status = 'scheduled', sync_status = 'synced'\n          WHERE session_id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "54666b5b517f91ceb1f554c348e9fd5290d9f5b0f964eb499950706d035bd82c"
+}

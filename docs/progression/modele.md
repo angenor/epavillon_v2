@@ -230,7 +230,9 @@ Cette année, les activités du pavillon se tiennent sur Zoom (300 personnes au 
 
 - **`live.tg_enqueue_meeting_sync()`** et le déclencheur `tg_meetings_enqueue_sync` (`AFTER INSERT OR UPDATE OF sync_status`, `WHEN NEW.sync_status = 'pending'`) : une réunion en `pending` dépose elle-même le travail `live.sync_meeting` (file `live`, dix essais). Clé d'idempotence **horodatée**, pour la même raison que `requeue_failed_participants()` : `platform.jobs` garde la clé d'un travail réussi. Le travail réserve la ligne (`in_progress`) avant d'appeler Zoom : deux travaux ne créent jamais deux réunions.
 - **`live.meeting_participants.cancelled_at`** : l'inscription annulée se défait chez Zoom (travail `live.cancel_meeting_participant`) ; la ligne reste, car l'adresse est unique par réunion, et une réinscription la reprend (`cancelled_at` remis à NULL, `pending`).
-- **`live.requeue_failed_participants()`** ne relance plus une inscription annulée (`AND cancelled_at IS NULL`).
+- **`live.requeue_failed_participants()`** ne relance plus une inscription annulée (`AND cancelled_at IS NULL`), prend un troisième paramètre `p_include_abandoned` (faux : filet de sécurité toutes les quinze minutes, seules les lignes `failed` échues repartent) et marque ses relances à la microseconde. Signature changée : la migration retire l'ancienne.
+- **`live.meeting_participants.max_sync_attempts`** vaut dix par défaut (cinq ne couvraient que trente secondes de quota Zoom dépassé).
+- **`ux_webhook_events_payload_hash`** ne retient que les notifications signées : une requête non signée, journalisée sans son contenu, ne prend plus la place d'une vraie.
 
 Côté code (crate `live`) : consommateur `live.registrations` des événements `programme.registration.*`, quatre travaux de la file `live`, routes `GET /sessions/{id}/meeting`, `GET /sessions/{id}/meeting/access`, `GET|POST /admin/sessions/{id}/meeting`, `POST /webhooks/zoom`. Code d'accès et lien animateur chiffrés en AES-256-GCM (`LIVE_SECRETS_KEY`) avant écriture, comme le prévoyait D3.
 

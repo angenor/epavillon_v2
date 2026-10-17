@@ -65,7 +65,8 @@ async fn main() {
         // DONNÉE, portée par `notification_types.code`.
         .register_all(engagement::event_consumers(db.clone(), courrier.clone()))
         // Chaque inscription qui a une place (inscrite, en attente, présente)
-        // devient un inscrit Zoom ; chaque annulation libère la sienne.
+        // devient un inscrit Zoom ; chaque annulation libère la sienne. Une
+        // séance annulée ou déplacée l'est aussi chez Zoom.
         .register_all(live::event_consumers(&config));
 
     let travaux = JobRegistry::new()
@@ -102,7 +103,7 @@ async fn main() {
             &config,
             courrier_negociation,
         ))
-        // Les quatre travaux Zoom, et c'est ce geste qui fait écouter la file
+        // Les six travaux Zoom, et c'est ce geste qui fait écouter la file
         // « live ». Sans configuration Zoom, aucun : les travaux attendent.
         .register_all(live::job_handlers(db.clone(), &config));
 
@@ -220,6 +221,17 @@ async fn armer_les_recurrents(db: &Db, config: &Config) {
         .await?
         {
             armees.push("purge des essais de code");
+        }
+        // Le filet des inscrits Zoom, toutes les quinze minutes, seulement si
+        // Zoom est configuré : sans lui, personne n'écoute la file « live ».
+        if config.zoom.is_some()
+            && live::jobs::filet::planifier(
+                &mut tx,
+                live::jobs::filet::prochaine_occurrence(maintenant),
+            )
+            .await?
+        {
+            armees.push("relance des inscrits Zoom");
         }
         // Une chaîne par import allumé : la lecture de la source officielle
         // d'une édition, toutes les `interval_seconds`.

@@ -38,7 +38,9 @@ impl JobHandler for CancelParticipant {
             .map_err(ApiError::internal)?;
 
         let ligne = sqlx::query!(
-            r#"SELECT m.external_id, p.external_registrant_id, p.email::text AS "email!"
+            r#"SELECT m.external_id, p.external_registrant_id, p.email::text AS "email!",
+                      (p.sync_status = 'in_progress'
+                       AND p.last_attempt_at > now() - interval '10 minutes') AS "en_cours!"
                  FROM live.meeting_participants p
                  JOIN live.meetings m ON m.id = p.meeting_id
                 WHERE p.id = $1 AND p.cancelled_at IS NOT NULL"#,
@@ -50,6 +52,14 @@ impl JobHandler for CancelParticipant {
         let Some(ligne) = ligne else {
             return Ok(());
         };
+        // Une inscription chez Zoom est en vol : son identifiant n'est pas
+        // encore connu. On réessaie ; elle-même reposera ce travail en finissant.
+        if ligne.en_cours {
+            return Err(ApiError::with_message(
+                kernel::error::ErrorCode::Conflict,
+                "inscription Zoom en cours, annulation différée",
+            ));
+        }
         let (Some(numero), Some(registrant)) = (ligne.external_id, ligne.external_registrant_id)
         else {
             return Ok(());

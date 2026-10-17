@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT r.id, r.status::text AS \"status!\", r.person_id,\n                  p.primary_email::text AS \"email!\", p.first_name, p.last_name,\n                  p.display_name AS \"display_name!\",\n                  s.id AS session_id, s.event_id, s.title AS \"title!: Value\",\n                  s.starts_at, s.ends_at, s.timezone::text AS \"timezone!\", s.is_streamed,\n                  (s.published_at IS NOT NULL) AS \"is_published!\"\n             FROM programme.registrations r\n             JOIN programme.sessions s ON s.id = r.session_id\n             JOIN identity.people p ON p.id = r.person_id\n            WHERE r.id = $1",
+  "query": "SELECT r.id, r.status::text AS \"status!\", r.person_id,\n                  p.primary_email::text AS \"email!\", p.first_name, p.last_name,\n                  p.display_name AS \"display_name!\",\n                  s.id AS session_id, s.event_id, s.title AS \"title!: Value\",\n                  s.starts_at, s.ends_at, s.timezone::text AS \"timezone!\", s.is_streamed,\n                  (s.published_at IS NOT NULL) AS \"is_published!\",\n                  s.status::text AS \"session_status!\"\n             FROM programme.registrations r\n             JOIN programme.sessions s ON s.id = r.session_id\n             JOIN identity.people p ON p.id = r.person_id\n            WHERE r.id = $1",
   "describe": {
     "columns": [
       {
@@ -147,6 +147,12 @@
         "name": "is_published!",
         "type_info": "Bool",
         "origin": "Expression"
+      },
+      {
+        "ordinal": 15,
+        "name": "session_status!",
+        "type_info": "Text",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -169,8 +175,9 @@
       false,
       null,
       false,
+      null,
       null
     ]
   },
-  "hash": "d802e75fb4de7bfe50e990f277b037b2ea140a84c1a4214b5c357961e1bbfe6b"
+  "hash": "a5baf136d60f009387fcd5cc1e178628f3ea6a2b5f46d6fc2d68672413e54a17"
 }

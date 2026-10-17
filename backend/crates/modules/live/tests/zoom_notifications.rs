@@ -117,7 +117,7 @@ async fn une_entree_en_salle_note_la_presence() {
     assert_eq!(erreur.code, ErrorCode::Unauthenticated);
 
     let journal = sqlx::query!(
-        r#"SELECT id, event_type, signature_verified, status::text AS "s!"
+        r#"SELECT id, event_type, signature_verified, status::text AS "s!", payload, payload_hash
              FROM live.provider_webhook_events ORDER BY received_at"#
     )
     .fetch_all(bac.pool())
@@ -126,6 +126,12 @@ async fn une_entree_en_salle_note_la_presence() {
     assert_eq!(journal.len(), 2);
     assert!(journal[0].signature_verified && journal[0].s == "received");
     assert!(!journal[1].signature_verified && journal[1].s == "ignored");
+    assert_eq!(
+        journal[1].payload,
+        json!({}),
+        "rien du corps non signé n'est gardé"
+    );
+    assert!(journal[1].payload_hash.is_none());
     let travaux = sqlx::query_scalar!(
         r#"SELECT count(*) AS "n!" FROM platform.jobs WHERE task = 'live.process_webhook_event'"#
     )

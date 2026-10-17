@@ -5,7 +5,7 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
 
 pub type Journal = Arc<Mutex<Vec<String>>>;
-pub type Repondeur = fn(&str, &str) -> (u16, String);
+pub type Repondeur = Arc<dyn Fn(&str, &str) -> (u16, String) + Send + Sync>;
 
 /// Sert `repondre(méthode, chemin avec requête, corps)` et note chaque requête.
 pub async fn serveur(repondre: Repondeur) -> (String, Journal) {
@@ -19,6 +19,7 @@ pub async fn serveur(repondre: Repondeur) -> (String, Journal) {
                 return;
             };
             let note = note.clone();
+            let repondre = repondre.clone();
             tokio::spawn(async move {
                 let mut lu = Vec::new();
                 let mut tampon = [0u8; 4096];
@@ -53,8 +54,14 @@ pub async fn serveur(repondre: Repondeur) -> (String, Journal) {
                     String::from_utf8_lossy(&corps)
                 ));
                 let (statut, reponse) = repondre(methode, chemin);
+                // Le quota de Zoom dit quand revenir.
+                let attendre = if statut == 429 {
+                    "retry-after: 120\r\n"
+                } else {
+                    ""
+                };
                 let brut = format!(
-                    "HTTP/1.1 {statut} X\r\ncontent-type: application/json\r\ncontent-length: {}\r\nconnection: close\r\n\r\n{reponse}",
+                    "HTTP/1.1 {statut} X\r\ncontent-type: application/json\r\n{attendre}content-length: {}\r\nconnection: close\r\n\r\n{reponse}",
                     reponse.len()
                 );
                 flux.write_all(brut.as_bytes()).await.unwrap();

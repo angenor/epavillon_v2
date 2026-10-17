@@ -41,11 +41,12 @@ pub async fn publique(state: &LiveState, session_id: Uuid) -> Result<PublicSessi
         opens_at: seance.starts_at - Duration::minutes(OUVERTURE_AVANT_MINUTES),
         starts_at: seance.starts_at,
         ends_at: seance.ends_at,
+        closes_at: seance.ends_at + Duration::minutes(FERMETURE_APRES_MINUTES),
     })
 }
 
 /// L'entrée d'une personne inscrite. Ordre des refus : Zoom configuré, séance
-/// connue, inscription, salle ouverte, place prête.
+/// connue, séance ni annulée ni reportée, inscription, salle ouverte, place prête.
 pub async fn acces(
     state: &LiveState,
     person_id: Uuid,
@@ -59,6 +60,9 @@ pub async fn acces(
         .await?
         .filter(|s| s.is_published)
         .ok_or_else(ApiError::not_found)?;
+    if matches!(seance.status.as_str(), "cancelled" | "postponed") {
+        return Err(ApiError::new(ErrorCode::LiveMeetingCancelled));
+    }
 
     let registration_id = programme::inscription_active_de(&mut tx, session_id, person_id)
         .await?
@@ -166,6 +170,30 @@ pub async fn reconstruire(
 
     let existante = meetings::reunion_active(&mut tx, session_id).await?;
     if let Some(n) = &external_id {
+        let deja = existante.as_ref().and_then(|r| r.external_id.as_deref()) == Some(n.as_str());
+        if !deja {
+            // Rattacher une réunion existante du compte donne son code d'accès :
+            // réservé à qui gère les réunions sur toute la plateforme.
+            if !has_permission(
+                state.pool(),
+                perimetre.person_id,
+                MEETING_MANAGE,
+                Scope::Global,
+            )
+            .await?
+            {
+                return Err(ApiError::forbidden());
+            }
+            if existante
+                .as_ref()
+                .is_some_and(|r| r.sync_status == "in_progress")
+            {
+                return Err(ApiError::with_message(
+                    ErrorCode::Conflict,
+                    "La réunion est en cours de synchronisation avec Zoom. Réessayez dans une minute.",
+                ));
+            }
+        }
         if meetings::external_id_pris(&mut tx, n, existante.as_ref().map(|r| r.id)).await? {
             return Err(ApiError::new(ErrorCode::LiveMeetingExternalIdTaken));
         }

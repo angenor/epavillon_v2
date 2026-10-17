@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 pub struct NouveauWebhook<'a> {
     pub event_type: &'a str,
-    pub payload_hash: Vec<u8>,
+    pub payload_hash: Option<Vec<u8>>,
     pub signature: Option<&'a str>,
     pub signature_verified: bool,
     pub external_id: Option<String>,
@@ -150,7 +150,7 @@ pub async fn participant_entre(
         "UPDATE live.meeting_participants
             SET joined_at = $4, left_at = NULL
           WHERE id = (SELECT id FROM live.meeting_participants
-                       WHERE meeting_id = $1
+                       WHERE meeting_id = $1 AND cancelled_at IS NULL
                          AND (external_registrant_id = $2
                               OR ($2::text IS NULL AND lower(email::text) = lower($3)))
                        LIMIT 1)
@@ -176,7 +176,7 @@ pub async fn participant_sorti(
         "UPDATE live.meeting_participants
             SET left_at = $4
           WHERE id = (SELECT id FROM live.meeting_participants
-                       WHERE meeting_id = $1
+                       WHERE meeting_id = $1 AND cancelled_at IS NULL
                          AND (external_registrant_id = $2
                               OR ($2::text IS NULL AND lower(email::text) = lower($3)))
                        LIMIT 1)",

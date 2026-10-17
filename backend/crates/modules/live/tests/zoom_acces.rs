@@ -125,6 +125,36 @@ async fn les_regles_dacces_a_la_salle() {
     let publique = meeting::publique(&etat, d.session_id).await.unwrap();
     assert_eq!(publique.status, "scheduled");
     assert_eq!(publique.opens_at, debut - Duration::minutes(30));
+    assert_eq!(publique.closes_at, fin + Duration::minutes(30));
+
+    // Une resynchronisation pendant l'activité ne ferme la porte à personne.
+    sqlx::query!(
+        "UPDATE live.meetings SET sync_status = 'in_progress' WHERE session_id = $1",
+        d.session_id
+    )
+    .execute(bac.pool())
+    .await
+    .unwrap();
+    sqlx::query!("UPDATE live.meeting_participants SET sync_status = 'pending'")
+        .execute(bac.pool())
+        .await
+        .unwrap();
+    assert!(meeting::acces(&etat, awa, d.session_id, pendant)
+        .await
+        .is_ok());
+
+    // Séance annulée : la salle n'ouvre pas.
+    sqlx::query!(
+        "UPDATE programme.sessions SET status = 'cancelled', cancelled_reason = jsonb_build_object('fr', 'Test') WHERE id = $1",
+        d.session_id
+    )
+    .execute(bac.pool())
+    .await
+    .unwrap();
+    let erreur = meeting::acces(&etat, awa, d.session_id, pendant)
+        .await
+        .unwrap_err();
+    assert_eq!(erreur.code, ErrorCode::LiveMeetingCancelled);
 }
 
 #[tokio::test]

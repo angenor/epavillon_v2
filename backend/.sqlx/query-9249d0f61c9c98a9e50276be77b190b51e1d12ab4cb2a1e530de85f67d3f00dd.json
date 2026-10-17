@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meeting_participants\n                        SET sync_status = 'abandoned', last_error = $2, next_retry_at = NULL\n                      WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9249d0f61c9c98a9e50276be77b190b51e1d12ab4cb2a1e530de85f67d3f00dd"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meeting_participants SET sync_status = 'pending'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "edd7102c8f02c9cfb01007434597256e1bb8c463fe12f188d625af11c825b5d3"
+}

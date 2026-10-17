@@ -20,6 +20,9 @@ pub struct PublicSessionMeeting {
     pub starts_at: OffsetDateTime,
     #[serde(with = "time::serde::rfc3339")]
     pub ends_at: OffsetDateTime,
+    /// Fin plus trente minutes : la même borne que la route d'accès.
+    #[serde(with = "time::serde::rfc3339")]
+    pub closes_at: OffsetDateTime,
 }
 
 /// Ce que le Meeting SDK attend pour faire entrer une personne inscrite.

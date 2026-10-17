@@ -72,7 +72,8 @@ Principe IX : **toute erreur porte un code stable et un message français.** Le 
 | `LIVE_MEETING_NOT_OPEN` | 409 | La salle n'est pas ouverte en ce moment. Elle ouvre trente minutes avant le début de l'activité. | `GET /sessions/{id}/meeting/access` avant l'ouverture ou plus de trente minutes après la fin |
 | `LIVE_MEETING_NOT_READY` | 409 | Votre place dans la salle est en cours de préparation. Réessayez dans quelques minutes. | Réunion ou inscription pas encore enregistrée chez Zoom |
 | `LIVE_MEETING_REGISTRATION_REQUIRED` | 403 | Inscrivez-vous à cette activité pour rejoindre la salle. | Aucune inscription inscrite, en attente ou présente pour cette personne |
-| `LIVE_MEETING_EXTERNAL_ID_TAKEN` | 409 | Cette réunion Zoom est déjà rattachée à une autre activité. | Rattachement d'une réunion Zoom déjà pilotée par une autre ligne |
+| `LIVE_MEETING_EXTERNAL_ID_TAKEN` | 409 | Cette réunion Zoom est déjà rattachée à une autre activité. | Rattachement d'une réunion Zoom déjà pilotée par une autre ligne. Rattacher exige `live.meeting.manage` en portée globale (sinon `FORBIDDEN`) |
+| `LIVE_MEETING_CANCELLED` | 409 | Cette activité est annulée ou reportée : la salle n'ouvrira pas. | `GET /sessions/{id}/meeting/access` sur une séance annulée ou reportée |
 
 ### Exploitation
 

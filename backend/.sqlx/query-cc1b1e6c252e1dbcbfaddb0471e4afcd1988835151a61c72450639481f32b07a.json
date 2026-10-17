@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, event_type, signature_verified, status::text AS \"s!\"\n             FROM live.provider_webhook_events ORDER BY received_at",
+  "query": "SELECT id, event_type, signature_verified, status::text AS \"s!\", payload, payload_hash\n             FROM live.provider_webhook_events ORDER BY received_at",
   "describe": {
     "columns": [
       {
@@ -41,6 +41,28 @@
         "name": "s!",
         "type_info": "Text",
         "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "payload",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "live.provider_webhook_events",
+            "name": "payload"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "payload_hash",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "live.provider_webhook_events",
+            "name": "payload_hash"
+          }
+        }
       }
     ],
     "parameters": {
@@ -50,8 +72,10 @@
       false,
       false,
       false,
-      null
+      null,
+      false,
+      true
     ]
   },
-  "hash": "56a9b4f49738e486d89d66543e3daae6928c414315a1c088ca872cc070de6d5e"
+  "hash": "cc1b1e6c252e1dbcbfaddb0471e4afcd1988835151a61c72450639481f32b07a"
 }

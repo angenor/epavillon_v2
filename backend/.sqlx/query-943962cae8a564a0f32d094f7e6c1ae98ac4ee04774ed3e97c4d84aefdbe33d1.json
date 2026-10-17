@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT live.requeue_failed_participants($1, 5000) AS \"n!\"",
+  "query": "SELECT live.requeue_failed_participants($1, 5000, true) AS \"n!\"",
   "describe": {
     "columns": [
       {
@@ -19,5 +19,5 @@
       null
     ]
   },
-  "hash": "97ae7ec16efa386a78e31087d9c36d738ae5d5f6d9569a153d4385f4b363c948"
+  "hash": "943962cae8a564a0f32d094f7e6c1ae98ac4ee04774ed3e97c4d84aefdbe33d1"
 }

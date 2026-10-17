@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(sum(live.requeue_failed_participants(m.id, 5000, false)), 0)::bigint AS \"n!\"\n             FROM live.meetings m\n            WHERE m.sync_status = 'synced'\n              AND m.status IN ('scheduled', 'started')\n              AND m.scheduled_start_at < now() + interval '48 hours'\n              AND m.scheduled_start_at\n                  + make_interval(mins => COALESCE(m.duration_minutes, 0)) > now()",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "58abd0f786d6516b67bdd0fc2537d87800a16d8690023f9fa48c8d3d1b3d5f73"
+}

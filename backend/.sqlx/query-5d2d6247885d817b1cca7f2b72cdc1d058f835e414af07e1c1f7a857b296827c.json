@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meetings\n                SET provider_payload = jsonb_build_object('creation_envoyee', now())\n              WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5d2d6247885d817b1cca7f2b72cdc1d058f835e414af07e1c1f7a857b296827c"
+}

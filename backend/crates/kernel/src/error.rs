@@ -239,6 +239,8 @@ codes! {
         "Inscrivez-vous à cette activité pour rejoindre la salle.";
     LiveMeetingExternalIdTaken => "LIVE_MEETING_EXTERNAL_ID_TAKEN", StatusCode::CONFLICT,
         "Cette réunion Zoom est déjà rattachée à une autre activité.";
+    LiveMeetingCancelled => "LIVE_MEETING_CANCELLED", StatusCode::CONFLICT,
+        "Cette activité est annulée ou reportée : la salle n'ouvrira pas.";
 
     // --- Guide Négo, admission (0b) -------------------------------------------
     // **Aucun de ces codes ne répond sur le chemin nominal de la saisie d'un

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT m.external_id, m.sync_status::text AS \"sync_status!\"\n                 FROM live.meeting_participants p\n                 JOIN live.meetings m ON m.id = p.meeting_id\n                WHERE p.id = $1\n                  FOR SHARE OF m",
+  "query": "SELECT m.external_id, m.status::text AS \"status!\"\n                 FROM live.meeting_participants p\n                 JOIN live.meetings m ON m.id = p.meeting_id\n                WHERE p.id = $1\n                  FOR SHARE OF m",
   "describe": {
     "columns": [
       {
@@ -16,7 +16,7 @@
       },
       {
         "ordinal": 1,
-        "name": "sync_status!",
+        "name": "status!",
         "type_info": "Text",
         "origin": "Expression"
       }
@@ -31,5 +31,5 @@
       null
     ]
   },
-  "hash": "af290e00eeeddc5cf00ef7820e2c23d582bfee504cdd6269b564fe4074232630"
+  "hash": "566bce301fe0f4e8a7fb31f403b808c2bc12fb7c2026c552e2157fc310221d98"
 }

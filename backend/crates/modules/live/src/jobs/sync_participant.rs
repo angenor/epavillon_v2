@@ -12,9 +12,10 @@ use kernel::db::Db;
 use kernel::error::{ApiError, Result};
 use kernel::jobs::{ClaimedJob, JobHandler};
 use std::sync::Arc;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
-use crate::repo::meetings::{FILE, SYNC_PARTICIPANT};
+use crate::repo::meetings::{self, CANCEL_PARTICIPANT, FILE, SYNC_PARTICIPANT};
 use crate::zoom::{Inscrit, Zoom, ZoomError};
 
 pub const PAS_ENCORE_CREEE: &str = "réunion pas encore créée";
@@ -37,6 +38,8 @@ struct AInscrire {
     last_name: Option<String>,
     display_name: String,
     deja_inscrit: Option<String>,
+    essais: i16,
+    essais_max: i16,
 }
 
 #[async_trait]
@@ -63,55 +66,88 @@ impl JobHandler for SyncParticipant {
         let mut tx = self.db.write(&job.context()).await?;
         match resultat {
             Ok(inscrit) => {
-                sqlx::query!(
-                    "UPDATE live.meeting_participants
-                        SET external_registrant_id = $2,
-                            personal_join_url = $3::text::platform.url,
-                            sync_status = 'synced', synced_at = now(),
-                            last_error = NULL, next_retry_at = NULL
-                      WHERE id = $1",
+                // Les identifiants s'écrivent même si l'inscription a été
+                // annulée pendant l'appel : c'est ce qui permet d'annuler chez Zoom.
+                let annule = sqlx::query_scalar!(
+                    r#"UPDATE live.meeting_participants
+                          SET external_registrant_id = $2,
+                              personal_join_url = $3::text::platform.url,
+                              sync_status = 'synced', synced_at = now(),
+                              last_error = NULL, next_retry_at = NULL
+                        WHERE id = $1
+                    RETURNING cancelled_at IS NOT NULL AS "annule!""#,
                     participant_id,
                     inscrit.registrant_id,
                     inscrit.join_url
                 )
+                .fetch_one(&mut *tx)
+                .await?;
+                if annule {
+                    meetings::mettre_en_file(&mut tx, CANCEL_PARTICIPANT, participant_id, None)
+                        .await?;
+                }
+                tx.commit().await
+            }
+            Err(e) if e.est_passagere() && a.essais < a.essais_max => {
+                // Le travail réussit et en pose un autre à l'échéance : le
+                // délai suit `Retry-After` quand Zoom le donne, et les
+                // tentatives se comptent sur la ligne, pas sur le travail.
+                let delai = delai_avant(&e, a.essais, participant_id);
+                let quand = OffsetDateTime::now_utc() + time::Duration::seconds(delai);
+                sqlx::query!(
+                    "UPDATE live.meeting_participants
+                        SET sync_status = 'failed', last_error = $2, next_retry_at = $3
+                      WHERE id = $1",
+                    participant_id,
+                    e.to_string(),
+                    quand
+                )
                 .execute(&mut *tx)
+                .await?;
+                meetings::mettre_en_file_a(
+                    &mut tx,
+                    SYNC_PARTICIPANT,
+                    participant_id,
+                    None,
+                    Some(quand),
+                )
                 .await?;
                 tx.commit().await
             }
             Err(e) => {
-                let dernier = job.attempts >= job.max_attempts || !e.est_passagere();
-                let statut = if dernier { "abandoned" } else { "failed" };
-                let delai = 2f64.powi(i32::from(job.attempts)).min(3600.0);
                 sqlx::query!(
                     "UPDATE live.meeting_participants
-                        SET sync_status = $2::text::live.sync_status, last_error = $3,
-                            next_retry_at = CASE WHEN $2 = 'failed'
-                                                 THEN now() + make_interval(secs => $4) END
+                        SET sync_status = 'abandoned', last_error = $2, next_retry_at = NULL
                       WHERE id = $1",
                     participant_id,
-                    statut,
-                    e.to_string(),
-                    delai
+                    e.to_string()
                 )
                 .execute(&mut *tx)
                 .await?;
                 tx.commit().await?;
-                if e.est_passagere() {
-                    Err(e.into())
-                } else {
-                    tracing::warn!(participant = %participant_id, erreur = %e, "inscrit refusé par Zoom");
-                    Ok(())
-                }
+                tracing::warn!(participant = %participant_id, erreur = %e, "inscrit abandonné");
+                Ok(())
             }
         }
     }
+}
+
+/// `Retry-After`, sinon trente secondes doublées à chaque essai (une heure au
+/// plus), plus jusqu'à une minute propre à chaque inscrit : trois cents
+/// inscrits refusés ensemble ne reviennent pas ensemble.
+fn delai_avant(e: &ZoomError, essais: i16, participant_id: Uuid) -> i64 {
+    let base = match e.reessayer_dans() {
+        Some(s) => s as i64,
+        None => (30i64 << (essais.clamp(1, 8) - 1)).min(3600),
+    };
+    base + i64::from(participant_id.as_bytes()[15] % 60)
 }
 
 impl SyncParticipant {
     async fn reserver(&self, job: &ClaimedJob, participant_id: Uuid) -> Result<Option<AInscrire>> {
         let mut tx = self.db.write(&job.context()).await?;
         let reunion = sqlx::query!(
-            r#"SELECT m.external_id, m.sync_status::text AS "sync_status!"
+            r#"SELECT m.external_id, m.status::text AS "status!"
                  FROM live.meeting_participants p
                  JOIN live.meetings m ON m.id = p.meeting_id
                 WHERE p.id = $1
@@ -125,7 +161,7 @@ impl SyncParticipant {
             return Ok(None);
         };
         let numero = match reunion.external_id {
-            Some(n) if reunion.sync_status == "synced" => n,
+            Some(n) if matches!(reunion.status.as_str(), "scheduled" | "started" | "ended") => n,
             _ => {
                 sqlx::query!(
                     "UPDATE live.meeting_participants
@@ -153,7 +189,7 @@ impl SyncParticipant {
             RETURNING email::text AS "email!", display_name,
                       request_payload->>'first_name' AS first_name,
                       request_payload->>'last_name' AS last_name,
-                      external_registrant_id"#,
+                      external_registrant_id, sync_attempts, max_sync_attempts"#,
             participant_id
         )
         .fetch_optional(&mut *tx)
@@ -167,6 +203,8 @@ impl SyncParticipant {
             last_name: l.last_name,
             display_name: l.display_name,
             deja_inscrit: l.external_registrant_id,
+            essais: l.sync_attempts,
+            essais_max: l.max_sync_attempts,
         }))
     }
 
@@ -178,8 +216,9 @@ impl SyncParticipant {
     ) -> std::result::Result<Inscrit, ZoomError> {
         let client = &self.zoom.client;
         let inscrit = client.inscrire(&a.numero, &a.email, prenom, nom).await?;
-        // Réinscription après annulation : Zoom range l'inscrit parmi les refusés.
-        if a.deja_inscrit.is_some() {
+        // Réinscription après annulation : Zoom range l'inscrit parmi les
+        // refusés ; retrouvé en attente ou refusé, il est réapprouvé.
+        if a.deja_inscrit.is_some() || matches!(inscrit.statut, Some("pending" | "denied")) {
             if let Err(e) = client
                 .changer_statut_inscrit(&a.numero, "approve", &inscrit.registrant_id, &a.email)
                 .await

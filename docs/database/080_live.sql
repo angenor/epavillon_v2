@@ -295,7 +295,9 @@ CREATE TABLE live.meeting_participants (
     -- --- État de la synchronisation (remplace fallback_payload de la v1) ---
     sync_status         live.sync_status NOT NULL DEFAULT 'pending',
     sync_attempts       smallint    NOT NULL DEFAULT 0,
-    max_sync_attempts   smallint    NOT NULL DEFAULT 5,
+    -- Dix et non cinq (17/10) : trois cents inscriptions poussées d'un coup
+    -- rencontrent le quota de Zoom (429), et l'essai suivant attend ce qu'il dit.
+    max_sync_attempts   smallint    NOT NULL DEFAULT 10,
     -- Charge utile exacte qui sera envoyée à l'API : rejouable à l'identique
     -- après une panne, sans reconstituer les données depuis plusieurs tables.
     request_payload     jsonb       NOT NULL DEFAULT '{}'::jsonb,
@@ -414,8 +416,12 @@ CREATE TRIGGER tg_meeting_participants_enqueue
 -- Rattrapage en masse : remet en file les inscriptions abandonnées (quota d'API
 -- épuisé, incident fournisseur) une fois la cause corrigée.
 CREATE OR REPLACE FUNCTION live.requeue_failed_participants(
-    p_meeting_id uuid DEFAULT NULL,
-    p_limit      integer DEFAULT 500
+    p_meeting_id        uuid    DEFAULT NULL,
+    p_limit             integer DEFAULT 500,
+    -- Faux : filet de sécurité périodique (17/10). Seules les lignes `failed`
+    -- dont l'échéance est passée repartent ; un refus définitif de Zoom
+    -- (`abandoned`) n'est pas relancé toutes les quinze minutes.
+    p_include_abandoned boolean DEFAULT true
 )
 RETURNS integer
 LANGUAGE plpgsql
@@ -424,14 +430,16 @@ DECLARE
     v_count integer;
     -- Marqueur de campagne de rattrapage. platform.jobs conserve la clé
     -- d'idempotence des travaux déjà terminés : réutiliser l'identifiant du
-    -- participant empêcherait toute relance ultérieure.
-    v_batch text := to_char(now(), 'YYYYMMDDHH24MISS');
+    -- participant empêcherait toute relance ultérieure. À la microseconde :
+    -- deux relances dans la même seconde ne se marchent pas dessus.
+    v_batch text := to_char(clock_timestamp(), 'YYYYMMDDHH24MISSUS');
 BEGIN
     WITH target AS (
         SELECT id FROM live.meeting_participants
-        WHERE sync_status IN ('failed', 'abandoned')
-          AND cancelled_at IS NULL
+        WHERE cancelled_at IS NULL
           AND (p_meeting_id IS NULL OR meeting_id = p_meeting_id)
+          AND (sync_status = 'failed' AND (p_include_abandoned OR next_retry_at IS NULL OR next_retry_at <= now())
+               OR sync_status = 'abandoned' AND p_include_abandoned)
         ORDER BY created_at
         LIMIT p_limit
         FOR UPDATE SKIP LOCKED
@@ -506,9 +514,12 @@ CREATE TABLE live.provider_webhook_events (
 CREATE UNIQUE INDEX ux_webhook_events_provider_event
     ON live.provider_webhook_events (provider, provider_event_id)
     WHERE provider_event_id IS NOT NULL AND replayed_from_id IS NULL;
+-- Une requête non signée ne prend pas la place d'une vraie notification : sans
+-- `signature_verified` ici, quiconque connaît la charge utile la bloquerait.
 CREATE UNIQUE INDEX ux_webhook_events_payload_hash
     ON live.provider_webhook_events (provider, event_type, payload_hash)
-    WHERE provider_event_id IS NULL AND payload_hash IS NOT NULL AND replayed_from_id IS NULL;
+    WHERE provider_event_id IS NULL AND payload_hash IS NOT NULL AND replayed_from_id IS NULL
+      AND signature_verified;
 
 -- File de traitement : index partiel, donc quasi vide en régime permanent.
 CREATE INDEX ix_webhook_events_pending
@@ -521,7 +532,7 @@ CREATE INDEX ix_webhook_events_meeting
 COMMENT ON TABLE live.provider_webhook_events IS
     'Journal idempotent et rejouable des webhooks de visioconférence (D4). Toute notification est écrite avant d''être traitée.';
 COMMENT ON COLUMN live.provider_webhook_events.signature_verified IS
-    'Résultat de la vérification de signature (en-tête x-zm-signature pour Zoom). Un webhook non vérifié est journalisé mais jamais appliqué.';
+    'Résultat de la vérification de signature (en-tête x-zm-signature pour Zoom). Un webhook non vérifié est journalisé sans son contenu (type et horodatage seulement) et jamais appliqué.';
 
 -- Rejeu d'un webhook : duplique la ligne en état `received` et laisse le worker
 -- la reprendre. L'originale conserve sa trace d'échec.

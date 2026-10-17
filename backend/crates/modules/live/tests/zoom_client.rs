@@ -56,7 +56,7 @@ fn api(methode: &str, chemin: &str) -> (u16, String) {
 
 #[tokio::test]
 async fn la_creation_garde_le_jeton_dacces() {
-    let (adresse, journal) = serveur(api).await;
+    let (adresse, journal) = serveur(std::sync::Arc::new(api)).await;
     let zoom = client(&adresse);
 
     let reunion = zoom
@@ -81,7 +81,7 @@ async fn la_creation_garde_le_jeton_dacces() {
 
 #[tokio::test]
 async fn une_adresse_deja_inscrite_se_retrouve_dans_la_liste() {
-    let (adresse, _) = serveur(api).await;
+    let (adresse, _) = serveur(std::sync::Arc::new(api)).await;
     let inscrit = client(&adresse)
         .inscrire("85746065432", "awa.diallo@exemple.org", "Awa", "Diallo")
         .await
@@ -95,17 +95,18 @@ async fn une_adresse_deja_inscrite_se_retrouve_dans_la_liste() {
 
 #[tokio::test]
 async fn un_quota_depasse_est_une_erreur_passagere() {
-    let (adresse, _) = serveur(api).await;
+    let (adresse, _) = serveur(std::sync::Arc::new(api)).await;
     let erreur = client(&adresse)
         .inscrire("1", "a@exemple.org", "A", "B")
         .await
         .unwrap_err();
     assert!(erreur.est_passagere(), "{erreur}");
+    assert_eq!(erreur.reessayer_dans(), Some(120));
 }
 
 #[tokio::test]
 async fn un_refus_de_zoom_nest_pas_passager() {
-    let (adresse, _) = serveur(api).await;
+    let (adresse, _) = serveur(std::sync::Arc::new(api)).await;
     let erreur = client(&adresse).lire_reunion("999").await.unwrap_err();
     assert!(
         matches!(

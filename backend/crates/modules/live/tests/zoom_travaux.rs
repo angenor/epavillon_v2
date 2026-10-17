@@ -27,7 +27,7 @@ fn api(methode: &str, chemin: &str) -> (u16, String) {
                 "id": 85746065432u64, "uuid": "occ==", "host_id": "hote", "host_email": "pavillon@ifdd.org",
                 "password": "Pav26", "encrypted_password": "chiffre",
                 "start_url": "https://zoom.us/s/85746065432?zak=secret",
-                "join_url": "https://zoom.us/j/85746065432",
+                "join_url": "https://zoom.us/j/85746065432?pwd=chiffre",
                 "registration_url": "https://zoom.us/meeting/register/abc",
                 "settings": { "approval_type": 0 }
             })
@@ -57,7 +57,7 @@ fn travail(tache: &str, charge: Value) -> ClaimedJob {
 async fn la_reunion_puis_linscrit_sont_crees_chez_zoom() {
     let bac = Bac::monter().await;
     let d = decor(&bac).await;
-    let (adresse, journal) = serveur(api).await;
+    let (adresse, journal) = serveur(std::sync::Arc::new(api)).await;
     let mut config = reglages();
     config.api_base_url = format!("{adresse}/v2");
     config.oauth_url = format!("{adresse}/oauth/token");
@@ -127,6 +127,7 @@ async fn la_reunion_puis_linscrit_sont_crees_chez_zoom() {
         .unwrap()
         .contains("zak="));
     let gardee = m.provider_payload.to_string();
+    assert!(!gardee.contains("pwd="), "le lien générique perd son pwd");
     assert!(!gardee.contains("Pav26") && !gardee.contains("zak=") && !gardee.contains("chiffre"));
 
     // La création de la réunion a relancé l'inscrit.
@@ -180,4 +181,156 @@ async fn la_reunion_puis_linscrit_sont_crees_chez_zoom() {
         .cloned()
         .unwrap();
     assert!(inscription.contains("awa.diallo@exemple.org") && inscription.contains("Diallo"));
+    let creation = journal
+        .lock()
+        .unwrap()
+        .iter()
+        .find(|l| l.starts_with("POST /v2/users/me/meetings"))
+        .cloned()
+        .unwrap();
+    assert!(creation.contains(&format!("Réf. ePavillon {meeting_id}")));
+}
+
+async fn reunion_et_inscrit(bac: &Bac, session_id: Uuid) -> (Uuid, Uuid) {
+    let awa = personne(bac, "awa.diallo@exemple.org", "Awa", "Diallo").await;
+    let r = inscrire(bac, session_id, awa).await;
+    consommer(bac, r).await;
+    sqlx::query_as::<_, (Uuid, Uuid)>(
+        "SELECT meeting_id, id FROM live.meeting_participants WHERE registration_id = $1",
+    )
+    .bind(r)
+    .fetch_one(bac.pool())
+    .await
+    .unwrap()
+}
+
+fn zoom_sur(adresse: &str) -> Arc<Zoom> {
+    let mut config = reglages();
+    config.api_base_url = format!("{adresse}/v2");
+    config.oauth_url = format!("{adresse}/oauth/token");
+    Arc::new(Zoom::depuis(&config).unwrap())
+}
+
+#[tokio::test]
+async fn un_essai_perdu_retrouve_la_reunion_deja_creee() {
+    let bac = Bac::monter().await;
+    let d = decor(&bac).await;
+    let (meeting_id, _) = reunion_et_inscrit(&bac, d.session_id).await;
+    // Un premier essai a envoyé la création, sa réponse s'est perdue.
+    sqlx::query!(
+        "UPDATE live.meetings
+            SET provider_payload = jsonb_build_object('creation_envoyee', now())
+          WHERE id = $1",
+        meeting_id
+    )
+    .execute(bac.pool())
+    .await
+    .unwrap();
+
+    let marque = live::jobs::sync_meeting::reference(meeting_id);
+    let (adresse, journal) = serveur(Arc::new(move |methode: &str, chemin: &str| {
+        match (methode, chemin.split('?').next().unwrap_or_default()) {
+            ("POST", "/oauth/token") => (
+                200,
+                json!({ "access_token": "jeton", "expires_in": 3600 }).to_string(),
+            ),
+            ("GET", "/v2/users/me/meetings") => (
+                200,
+                json!({ "meetings": [
+                    { "id": 111, "agenda": "autre" },
+                    { "id": 777, "agenda": marque },
+                ], "next_page_token": "" })
+                .to_string(),
+            ),
+            ("PATCH", "/v2/meetings/777") => (204, String::new()),
+            ("GET", "/v2/meetings/777") => (
+                200,
+                json!({ "id": 777, "password": "p", "join_url": "https://zoom.us/j/777",
+                        "settings": { "approval_type": 0 } })
+                .to_string(),
+            ),
+            _ => (404, "{}".to_owned()),
+        }
+    }))
+    .await;
+
+    SyncMeeting::new(bac.db(), zoom_sur(&adresse))
+        .run(&travail(
+            "live.sync_meeting",
+            json!({ "meeting_id": meeting_id }),
+        ))
+        .await
+        .unwrap();
+
+    let numero = sqlx::query_scalar!(
+        "SELECT external_id FROM live.meetings WHERE id = $1",
+        meeting_id
+    )
+    .fetch_one(bac.pool())
+    .await
+    .unwrap();
+    assert_eq!(numero.as_deref(), Some("777"));
+    assert!(
+        !journal
+            .lock()
+            .unwrap()
+            .iter()
+            .any(|l| l.starts_with("POST /v2/users/me/meetings")),
+        "aucune seconde réunion créée"
+    );
+}
+
+#[tokio::test]
+async fn un_quota_repousse_linscrit_sans_faire_echouer_le_travail() {
+    let bac = Bac::monter().await;
+    let d = decor(&bac).await;
+    let (meeting_id, participant_id) = reunion_et_inscrit(&bac, d.session_id).await;
+    sqlx::query!(
+        "UPDATE live.meetings SET external_id = '1', status = 'scheduled', sync_status = 'synced'
+          WHERE id = $1",
+        meeting_id
+    )
+    .execute(bac.pool())
+    .await
+    .unwrap();
+    let (adresse, _) = serveur(Arc::new(|methode: &str, chemin: &str| {
+        match (methode, chemin.split('?').next().unwrap_or_default()) {
+            ("POST", "/oauth/token") => (
+                200,
+                json!({ "access_token": "jeton", "expires_in": 3600 }).to_string(),
+            ),
+            _ => (429, "{}".to_owned()),
+        }
+    }))
+    .await;
+
+    SyncParticipant::new(bac.db(), zoom_sur(&adresse))
+        .run(&travail(
+            "live.sync_meeting_participant",
+            json!({ "participant_id": participant_id }),
+        ))
+        .await
+        .unwrap();
+
+    let p = sqlx::query!(
+        r#"SELECT sync_status::text AS "s!", next_retry_at > now() + interval '119 seconds' AS "attend!"
+             FROM live.meeting_participants WHERE id = $1"#,
+        participant_id
+    )
+    .fetch_one(bac.pool())
+    .await
+    .unwrap();
+    assert_eq!(p.s, "failed");
+    assert!(p.attend, "Retry-After est respecté");
+    let prochains = sqlx::query_scalar!(
+        r#"SELECT count(*) AS "n!" FROM platform.jobs
+            WHERE task = 'live.sync_meeting_participant' AND status = 'queued'
+              AND run_at > now() + interval '119 seconds'
+              AND idempotency_key LIKE $1 || ':%'"#,
+        participant_id.to_string()
+    )
+    .fetch_one(bac.pool())
+    .await
+    .unwrap();
+    assert_eq!(prochains, 1);
 }

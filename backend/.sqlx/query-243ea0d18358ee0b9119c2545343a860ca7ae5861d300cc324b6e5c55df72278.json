@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meetings\n            SET scheduled_start_at = $2, duration_minutes = $3\n          WHERE session_id = $1 AND status NOT IN ('cancelled', 'failed')\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "243ea0d18358ee0b9119c2545343a860ca7ae5861d300cc324b6e5c55df72278"
+}

@@ -214,6 +214,7 @@ pub struct Seance {
     pub timezone: String,
     pub is_streamed: bool,
     pub is_published: bool,
+    pub status: String,
 }
 
 pub async fn seance(conn: &mut PgConnection, session_id: Uuid) -> Result<Option<Seance>> {
@@ -221,7 +222,8 @@ pub async fn seance(conn: &mut PgConnection, session_id: Uuid) -> Result<Option<
         Seance,
         r#"SELECT s.id, s.event_id, s.title AS "title!: Value", s.starts_at, s.ends_at,
                   s.timezone::text AS "timezone!", s.is_streamed,
-                  (s.published_at IS NOT NULL) AS "is_published!"
+                  (s.published_at IS NOT NULL) AS "is_published!",
+                  s.status::text AS "status!"
              FROM programme.sessions s
             WHERE s.id = $1"#,
         session_id
@@ -254,7 +256,8 @@ pub async fn inscription(
                   p.display_name AS "display_name!",
                   s.id AS session_id, s.event_id, s.title AS "title!: Value",
                   s.starts_at, s.ends_at, s.timezone::text AS "timezone!", s.is_streamed,
-                  (s.published_at IS NOT NULL) AS "is_published!"
+                  (s.published_at IS NOT NULL) AS "is_published!",
+                  s.status::text AS "session_status!"
              FROM programme.registrations r
              JOIN programme.sessions s ON s.id = r.session_id
              JOIN identity.people p ON p.id = r.person_id
@@ -281,6 +284,7 @@ pub async fn inscription(
             timezone: l.timezone,
             is_streamed: l.is_streamed,
             is_published: l.is_published,
+            status: l.session_status,
         },
     }))
 }

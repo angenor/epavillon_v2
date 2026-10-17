@@ -150,3 +150,118 @@ async fn une_seance_non_diffusee_na_pas_de_reunion() {
     .unwrap();
     assert_eq!(n, 0);
 }
+
+#[tokio::test]
+async fn la_reunion_creee_emmene_toutes_les_inscriptions_deja_posees() {
+    let bac = Bac::monter().await;
+    let d = decor(&bac).await;
+    let awa = personne(&bac, "awa.diallo@exemple.org", "Awa", "Diallo").await;
+    let jean = personne(&bac, "jean.kabore@exemple.org", "Jean", "Kaboré").await;
+    let r1 = inscrire(&bac, d.session_id, awa).await;
+    inscrire(&bac, d.session_id, jean).await;
+
+    // Seul l'événement de la première est traité.
+    consommer(&bac, r1).await;
+
+    let n = sqlx::query_scalar!(
+        r#"SELECT count(*) AS "n!" FROM live.meeting_participants p
+             JOIN live.meetings m ON m.id = p.meeting_id
+            WHERE m.session_id = $1"#,
+        d.session_id
+    )
+    .fetch_one(bac.pool())
+    .await
+    .unwrap();
+    assert_eq!(n, 2);
+}
+
+#[tokio::test]
+async fn la_reunion_suit_sa_seance_annulee_ou_deplacee() {
+    use kernel::context::RequestContext;
+    use kernel::events::{EventConsumer, OutboxEvent};
+    use live::consumers::sessions::SessionsConsumer;
+
+    let bac = Bac::monter().await;
+    let d = decor(&bac).await;
+    let awa = personne(&bac, "awa.diallo@exemple.org", "Awa", "Diallo").await;
+    let r = inscrire(&bac, d.session_id, awa).await;
+    consommer(&bac, r).await;
+    sqlx::query!(
+        "UPDATE live.meetings SET external_id = '42', status = 'scheduled', sync_status = 'synced'
+          WHERE session_id = $1",
+        d.session_id
+    )
+    .execute(bac.pool())
+    .await
+    .unwrap();
+
+    let traiter = |type_: &'static str| {
+        let bac = &bac;
+        let session_id = d.session_id;
+        async move {
+            let evenement = OutboxEvent {
+                id: uuid::Uuid::now_v7(),
+                aggregate_schema: "programme".into(),
+                aggregate_type: "session".into(),
+                aggregate_id: session_id,
+                event_type: type_.into(),
+                event_version: 1,
+                payload: serde_json::json!({}),
+                metadata: serde_json::json!({}),
+                correlation_id: None,
+                occurred_at: time::OffsetDateTime::now_utc(),
+            };
+            let mut tx = bac
+                .db()
+                .write(&RequestContext::background("test"))
+                .await
+                .unwrap();
+            SessionsConsumer.handle(&mut tx, &evenement).await.unwrap();
+            tx.commit().await.unwrap();
+        }
+    };
+
+    sqlx::query!(
+        "UPDATE programme.sessions
+            SET starts_at = starts_at + interval '1 hour', ends_at = ends_at + interval '2 hours'
+          WHERE id = $1",
+        d.session_id
+    )
+    .execute(bac.pool())
+    .await
+    .unwrap();
+    traiter("programme.session.rescheduled").await;
+    let m = sqlx::query!(
+        r#"SELECT id, sync_status::text AS "s!", duration_minutes,
+                  scheduled_start_at = (SELECT starts_at FROM programme.sessions WHERE id = $1) AS "cale!"
+             FROM live.meetings WHERE session_id = $1"#,
+        d.session_id
+    )
+    .fetch_one(bac.pool())
+    .await
+    .unwrap();
+    assert!(m.cale);
+    assert_eq!(m.duration_minutes, Some(150));
+    assert_eq!(m.s, "pending", "la relance reporte l'horaire chez Zoom");
+
+    sqlx::query!(
+        "UPDATE programme.sessions SET status = 'cancelled', cancelled_reason = jsonb_build_object('fr', 'Test') WHERE id = $1",
+        d.session_id
+    )
+    .execute(bac.pool())
+    .await
+    .unwrap();
+    traiter("programme.session.cancelled").await;
+    let statut = sqlx::query_scalar!(
+        r#"SELECT status::text AS "s!" FROM live.meetings WHERE id = $1"#,
+        m.id
+    )
+    .fetch_one(bac.pool())
+    .await
+    .unwrap();
+    assert_eq!(statut, "cancelled");
+    assert_eq!(
+        travaux(&bac, "live.cancel_meeting", &m.id.to_string()).await,
+        1
+    );
+}

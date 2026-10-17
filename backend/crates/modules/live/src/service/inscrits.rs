@@ -30,8 +30,16 @@ pub async fn synchroniser(conn: &mut PgConnection, registration_id: Uuid) -> Res
         let reunion = match meetings::reunion_active(conn, inscription.seance.id).await? {
             Some(r) => r.id,
             // Une séance non diffusée n'a de réunion que si le back-office l'a créée.
+            // La réunion naît avec la première inscription : toutes celles déjà
+            // posées sur la séance la rejoignent, pas seulement celle-ci.
             None if inscription.seance.is_streamed => {
-                assurer_reunion(conn, &inscription.seance, None).await?
+                let reunion = assurer_reunion(conn, &inscription.seance, None).await?;
+                for id in programme::inscriptions_actives(conn, inscription.seance.id).await? {
+                    if let Some(autre) = programme::inscription(conn, id).await? {
+                        assurer_participant(conn, reunion, &autre).await?;
+                    }
+                }
+                return Ok(());
             }
             None => return Ok(()),
         };
@@ -52,7 +60,6 @@ pub async fn assurer_reunion(
     external_id: Option<&str>,
 ) -> Result<Uuid> {
     let topic = intitule(&seance.title);
-    let minutes = ((seance.ends_at - seance.starts_at).whole_seconds() + 59) / 60;
     meetings::creer_reunion(
         conn,
         &NouvelleReunion {
@@ -60,7 +67,7 @@ pub async fn assurer_reunion(
             event_id: seance.event_id,
             topic: &topic,
             scheduled_start_at: seance.starts_at,
-            duration_minutes: minutes.clamp(1, 1440) as i32,
+            duration_minutes: duree_minutes(seance),
             timezone: &seance.timezone,
             external_id,
         },
@@ -101,6 +108,12 @@ async fn assurer_participant(
 
     meetings::inserer_participant(conn, &nouveau).await?;
     Ok(())
+}
+
+/// La durée de la séance en minutes entières, bornée comme `live.meetings`.
+pub fn duree_minutes(seance: &Seance) -> i32 {
+    let minutes = ((seance.ends_at - seance.starts_at).whole_seconds() + 59) / 60;
+    minutes.clamp(1, 1440) as i32
 }
 
 /// L'intitulé de la réunion chez Zoom : le titre français, à défaut le premier

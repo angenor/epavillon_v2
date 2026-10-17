@@ -1,0 +1,85 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meeting_participants\n                  SET sync_status = 'in_progress', sync_attempts = sync_attempts + 1,\n                      last_attempt_at = now()\n                WHERE id = $1 AND cancelled_at IS NULL\n                  AND (sync_status IN ('pending', 'failed')\n                       OR (sync_status = 'in_progress'\n                           AND last_attempt_at < now() - interval '10 minutes'))\n            RETURNING email::text AS \"email!\", display_name,\n                      request_payload->>'first_name' AS first_name,\n                      request_payload->>'last_name' AS last_name,\n                      external_registrant_id, sync_attempts, max_sync_attempts",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "display_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "display_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "first_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "last_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "external_registrant_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "external_registrant_id"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "sync_attempts",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "sync_attempts"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "max_sync_attempts",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "max_sync_attempts"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      false,
+      null,
+      null,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "37d07fc8e5498c691bfd070e2e71b6250e7b519733710a889c89a6cbb70e765a"
+}

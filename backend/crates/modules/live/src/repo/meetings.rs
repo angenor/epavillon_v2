@@ -14,6 +14,7 @@ pub const FILE: &str = "live";
 pub const SYNC_MEETING: &str = "live.sync_meeting";
 pub const SYNC_PARTICIPANT: &str = "live.sync_meeting_participant";
 pub const CANCEL_PARTICIPANT: &str = "live.cancel_meeting_participant";
+pub const CANCEL_MEETING: &str = "live.cancel_meeting";
 pub const PROCESS_WEBHOOK: &str = "live.process_webhook_event";
 
 pub struct ReunionResume {
@@ -129,9 +130,14 @@ pub async fn external_id_pris(
 }
 
 /// Repasse la réunion en `pending` : le déclencheur dépose un nouveau travail.
+/// Jamais pendant qu'un travail tient la ligne : il la rendrait `pending` sous
+/// ses pieds, et un second travail créerait une seconde réunion. Un travail
+/// mort depuis dix minutes ne la tient plus.
 pub async fn relancer_reunion(conn: &mut PgConnection, meeting_id: Uuid) -> Result<()> {
     sqlx::query!(
-        "UPDATE live.meetings SET sync_status = 'pending', last_sync_error = NULL WHERE id = $1",
+        "UPDATE live.meetings SET sync_status = 'pending', last_sync_error = NULL
+          WHERE id = $1
+            AND (sync_status <> 'in_progress' OR updated_at < now() - interval '10 minutes')",
         meeting_id
     )
     .execute(conn)
@@ -273,6 +279,16 @@ pub async fn mettre_en_file(
     participant_id: Uuid,
     meeting_id: Option<Uuid>,
 ) -> Result<()> {
+    mettre_en_file_a(conn, tache, participant_id, meeting_id, None).await
+}
+
+pub async fn mettre_en_file_a(
+    conn: &mut PgConnection,
+    tache: &'static str,
+    participant_id: Uuid,
+    meeting_id: Option<Uuid>,
+    quand: Option<OffsetDateTime>,
+) -> Result<()> {
     let mut job = NewJob::new(
         tache,
         json!({ "participant_id": participant_id, "meeting_id": meeting_id }),
@@ -281,6 +297,9 @@ pub async fn mettre_en_file(
         "{participant_id}:{}",
         OffsetDateTime::now_utc().unix_timestamp_nanos()
     ));
+    if let Some(quand) = quand {
+        job = job.at(quand);
+    }
     job.queue = FILE;
     jobs::enqueue(conn, job).await?;
     Ok(())
@@ -288,7 +307,7 @@ pub async fn mettre_en_file(
 
 pub async fn requeue_failed(conn: &mut PgConnection, meeting_id: Uuid) -> Result<i32> {
     let n = sqlx::query_scalar!(
-        r#"SELECT live.requeue_failed_participants($1, 5000) AS "n!""#,
+        r#"SELECT live.requeue_failed_participants($1, 5000, true) AS "n!""#,
         meeting_id
     )
     .fetch_one(conn)
@@ -346,7 +365,8 @@ pub async fn reunion_publique(
 }
 
 /// La place d'une inscription, prête chez Zoom. Seul chemin qui lit le code
-/// d'accès chiffré.
+/// d'accès chiffré. Ne dépend pas de `sync_status` : une resynchronisation
+/// pendant l'activité ne doit fermer la porte à personne.
 pub struct Place {
     pub external_id: Option<String>,
     pub passcode_encrypted: Option<Vec<u8>>,
@@ -365,12 +385,76 @@ pub async fn place(conn: &mut PgConnection, registration_id: Uuid) -> Result<Opt
              JOIN live.meetings m ON m.id = p.meeting_id
             WHERE p.registration_id = $1
               AND p.cancelled_at IS NULL
-              AND p.sync_status = 'synced'
-              AND m.sync_status = 'synced'
-              AND m.status IN ('scheduled', 'started', 'ended')"#,
+              AND p.external_registrant_id IS NOT NULL
+              AND p.personal_join_url IS NOT NULL
+              AND m.external_id IS NOT NULL
+              AND m.passcode_encrypted IS NOT NULL
+              AND m.status IN ('scheduled', 'started')"#,
         registration_id
     )
     .fetch_optional(conn)
     .await?;
     Ok(ligne)
+}
+
+/// Filet de sécurité : relance les inscrits en échec des réunions qui
+/// commencent dans les quarante-huit heures (ou sont en cours).
+pub async fn relancer_les_proches(conn: &mut PgConnection) -> Result<i64> {
+    let n = sqlx::query_scalar!(
+        r#"SELECT COALESCE(sum(live.requeue_failed_participants(m.id, 5000, false)), 0)::bigint AS "n!"
+             FROM live.meetings m
+            WHERE m.sync_status = 'synced'
+              AND m.status IN ('scheduled', 'started')
+              AND m.scheduled_start_at < now() + interval '48 hours'
+              AND m.scheduled_start_at
+                  + make_interval(mins => COALESCE(m.duration_minutes, 0)) > now()"#
+    )
+    .fetch_one(conn)
+    .await?;
+    Ok(n)
+}
+
+/// Séance annulée : la réunion l'est aussi, et son annulation part chez Zoom.
+pub async fn annuler_reunion(conn: &mut PgConnection, session_id: Uuid) -> Result<()> {
+    let annulee = sqlx::query!(
+        "UPDATE live.meetings
+            SET status = 'cancelled', sync_status = 'not_required'
+          WHERE session_id = $1 AND status NOT IN ('cancelled', 'failed')
+        RETURNING id, external_id",
+        session_id
+    )
+    .fetch_optional(&mut *conn)
+    .await?;
+    if let Some(m) = annulee.filter(|m| m.external_id.is_some()) {
+        let mut job = NewJob::new(CANCEL_MEETING, json!({ "meeting_id": m.id }))
+            .idempotent(format!("{}:annulation", m.id));
+        job.queue = FILE;
+        jobs::enqueue(conn, job).await?;
+    }
+    Ok(())
+}
+
+/// Séance déplacée : la réunion prend le nouvel horaire, et la relance le
+/// reporte chez Zoom.
+pub async fn recaler_reunion(
+    conn: &mut PgConnection,
+    session_id: Uuid,
+    debut: OffsetDateTime,
+    minutes: i32,
+) -> Result<()> {
+    let id = sqlx::query_scalar!(
+        "UPDATE live.meetings
+            SET scheduled_start_at = $2, duration_minutes = $3
+          WHERE session_id = $1 AND status NOT IN ('cancelled', 'failed')
+        RETURNING id",
+        session_id,
+        debut,
+        minutes
+    )
+    .fetch_optional(&mut *conn)
+    .await?;
+    if let Some(id) = id {
+        relancer_reunion(conn, id).await?;
+    }
+    Ok(())
 }

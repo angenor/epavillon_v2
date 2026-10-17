@@ -18,8 +18,10 @@ const MARGE_JETON: Duration = Duration::from_secs(60);
 
 #[derive(Debug, Clone)]
 pub enum ZoomError {
-    /// Réseau, quota (429) ou panne de Zoom (5xx) : un nouvel essai a un sens.
+    /// Réseau ou panne de Zoom (5xx) : un nouvel essai a un sens.
     Passagere(String),
+    /// Quota (429). `reessayer_dans` : ce que dit `Retry-After`, en secondes.
+    Quota { reessayer_dans: Option<u64> },
     /// Refus de Zoom (4xx) : le même appel échouera de la même façon.
     Refusee {
         statut: u16,
@@ -30,7 +32,14 @@ pub enum ZoomError {
 
 impl ZoomError {
     pub fn est_passagere(&self) -> bool {
-        matches!(self, Self::Passagere(_))
+        matches!(self, Self::Passagere(_) | Self::Quota { .. })
+    }
+
+    pub fn reessayer_dans(&self) -> Option<u64> {
+        match self {
+            Self::Quota { reessayer_dans } => *reessayer_dans,
+            _ => None,
+        }
     }
 }
 
@@ -38,6 +47,10 @@ impl std::fmt::Display for ZoomError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Passagere(m) => write!(f, "Zoom momentanément injoignable : {m}"),
+            Self::Quota {
+                reessayer_dans: Some(s),
+            } => write!(f, "quota Zoom atteint, nouvel essai dans {s} s"),
+            Self::Quota { .. } => write!(f, "quota Zoom atteint"),
             Self::Refusee {
                 statut,
                 code,
@@ -63,6 +76,9 @@ pub type ZoomResult<T> = std::result::Result<T, ZoomError>;
 pub struct Inscrit {
     pub registrant_id: String,
     pub join_url: Option<String>,
+    /// La liste où il a été retrouvé (`approved`, `pending`, `denied`), s'il
+    /// a fallu le chercher.
+    pub statut: Option<&'static str>,
 }
 
 pub struct ZoomClient {
@@ -277,6 +293,7 @@ impl ZoomClient {
                         Some(Inscrit {
                             registrant_id: r["id"].as_str()?.to_owned(),
                             join_url: r["join_url"].as_str().map(str::to_owned),
+                            statut: Some(statut),
                         })
                     });
                 if trouve.is_some() {
@@ -289,6 +306,42 @@ impl ZoomClient {
             }
         }
         Ok(None)
+    }
+
+    /// Les réunions programmées de l'hôte (en cours et à venir) : de quoi
+    /// retrouver une réunion créée par un essai dont la réponse s'est perdue.
+    pub async fn reunions_a_venir(&self) -> ZoomResult<Vec<Value>> {
+        let chemin = format!("/users/{}/meetings", segment(&self.config.host_user));
+        let mut reunions = Vec::new();
+        let mut suite = String::new();
+        loop {
+            let mut requete = vec![("type", "scheduled"), ("page_size", "300")];
+            if !suite.is_empty() {
+                requete.push(("next_page_token", suite.as_str()));
+            }
+            let Some(page) = self.appeler(Method::GET, &chemin, &requete, None).await? else {
+                break;
+            };
+            reunions.extend(page["meetings"].as_array().into_iter().flatten().cloned());
+            match page["next_page_token"].as_str() {
+                Some(t) if !t.is_empty() => suite = t.to_owned(),
+                _ => break,
+            }
+        }
+        Ok(reunions)
+    }
+
+    /// Annule la réunion ; Zoom prévient les inscrits par courriel.
+    pub async fn supprimer_reunion(&self, numero: &str) -> ZoomResult<()> {
+        let chemin = format!("/meetings/{}", segment(numero));
+        self.appeler(
+            Method::DELETE,
+            &chemin,
+            &[("cancel_meeting_reminder", "true")],
+            None,
+        )
+        .await
+        .map(|_| ())
     }
 
     /// `action` : `approve`, `cancel` ou `deny`.
@@ -314,6 +367,7 @@ fn lire_inscrit(reponse: &Value) -> Option<Inscrit> {
     Some(Inscrit {
         registrant_id: reponse["registrant_id"].as_str()?.to_owned(),
         join_url: reponse["join_url"].as_str().map(str::to_owned),
+        statut: None,
     })
 }
 
@@ -335,7 +389,15 @@ async fn verifier(reponse: reqwest::Response) -> ZoomResult<reqwest::Response> {
     if statut.is_success() {
         return Ok(reponse);
     }
-    if statut == StatusCode::TOO_MANY_REQUESTS || statut.is_server_error() {
+    if statut == StatusCode::TOO_MANY_REQUESTS {
+        let reessayer_dans = reponse
+            .headers()
+            .get(reqwest::header::RETRY_AFTER)
+            .and_then(|v| v.to_str().ok())
+            .and_then(|v| delai_retry_after(v, time::OffsetDateTime::now_utc()));
+        return Err(ZoomError::Quota { reessayer_dans });
+    }
+    if statut.is_server_error() {
         return Err(ZoomError::Passagere(format!("statut {}", statut.as_u16())));
     }
     let corps: Option<CorpsErreur> = reponse.json().await.ok();
@@ -346,4 +408,26 @@ async fn verifier(reponse: reqwest::Response) -> ZoomResult<reqwest::Response> {
             .and_then(|c| c.message)
             .unwrap_or_else(|| "sans précision".to_owned()),
     })
+}
+
+/// `Retry-After` en secondes, ou en date (RFC 3339 chez Zoom pour le quota du
+/// jour). Plafonné à un jour.
+pub fn delai_retry_after(valeur: &str, maintenant: time::OffsetDateTime) -> Option<u64> {
+    let valeur = valeur.trim();
+    let secondes = match valeur.parse::<u64>() {
+        Ok(s) => s,
+        Err(_) => {
+            let date =
+                time::OffsetDateTime::parse(valeur, &time::format_description::well_known::Rfc3339)
+                    .or_else(|_| {
+                        time::OffsetDateTime::parse(
+                            valeur,
+                            &time::format_description::well_known::Rfc2822,
+                        )
+                    })
+                    .ok()?;
+            (date - maintenant).whole_seconds().max(1) as u64
+        }
+    };
+    Some(secondes.min(86_400))
 }

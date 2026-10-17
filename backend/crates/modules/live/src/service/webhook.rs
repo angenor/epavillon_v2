@@ -19,8 +19,8 @@ pub struct EnTetes<'a> {
 }
 
 /// `Some` : la réponse à la validation d'adresse. `None` : notification reçue.
-/// Une signature fausse ou périmée est journalisée (jamais appliquée) puis
-/// refusée en 401.
+/// Une signature fausse ou périmée est journalisée sans son contenu (jamais
+/// appliquée) puis refusée en 401.
 pub async fn recevoir(
     state: &LiveState,
     en_tetes: &EnTetes<'_>,
@@ -58,36 +58,48 @@ pub async fn recevoir(
         )));
     }
 
-    let objet = &charge["payload"]["object"];
-    let external_id = match &objet["id"] {
-        Value::Number(n) => Some(n.to_string()),
-        Value::String(s) => Some(s.clone()),
-        _ => None,
+    let type_court: String = if evenement.is_empty() {
+        "inconnu".to_owned()
+    } else {
+        evenement.chars().take(100).collect()
     };
-    let occurred_at = charge["event_ts"]
-        .as_i64()
-        .and_then(|ms| OffsetDateTime::from_unix_timestamp_nanos(i128::from(ms) * 1_000_000).ok());
+    let vide = json!({});
+    // Non signée : seuls le type et l'instant de réception restent. Le corps
+    // vient de n'importe qui, il n'a rien à faire dans une table qu'on relit.
+    let journal = if verifiee {
+        let objet = &charge["payload"]["object"];
+        NouveauWebhook {
+            event_type: &type_court,
+            payload_hash: Some(Sha256::digest(corps).to_vec()),
+            signature: en_tetes.signature,
+            signature_verified: true,
+            external_id: match &objet["id"] {
+                Value::Number(n) => Some(n.to_string()),
+                Value::String(s) => Some(s.clone()),
+                _ => None,
+            },
+            payload: &charge,
+            headers: json!({ "x-zm-request-timestamp": en_tetes.horodatage }),
+            occurred_at: charge["event_ts"].as_i64().and_then(|ms| {
+                OffsetDateTime::from_unix_timestamp_nanos(i128::from(ms) * 1_000_000).ok()
+            }),
+        }
+    } else {
+        NouveauWebhook {
+            event_type: &type_court,
+            payload_hash: None,
+            signature: None,
+            signature_verified: false,
+            external_id: None,
+            payload: &vide,
+            headers: json!({}),
+            occurred_at: None,
+        }
+    };
 
     let ctx = RequestContext::background("live.webhook");
     let mut tx = state.db().write(&ctx).await?;
-    let id = webhooks::journaliser(
-        &mut tx,
-        &NouveauWebhook {
-            event_type: if evenement.is_empty() {
-                "inconnu"
-            } else {
-                &evenement
-            },
-            payload_hash: Sha256::digest(corps).to_vec(),
-            signature: en_tetes.signature,
-            signature_verified: verifiee,
-            external_id,
-            payload: &charge,
-            headers: json!({ "x-zm-request-timestamp": en_tetes.horodatage }),
-            occurred_at,
-        },
-    )
-    .await?;
+    let id = webhooks::journaliser(&mut tx, &journal).await?;
     if let (Some(id), true) = (id, verifiee) {
         let mut job = NewJob::new(PROCESS_WEBHOOK, json!({ "webhook_event_id": id }))
             .idempotent(id.to_string());

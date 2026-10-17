@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.sessions SET status = 'cancelled', cancelled_reason = jsonb_build_object('fr', 'Test') WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2dc587177ac22470a8d1126c289daf5f782723e429746335771f0262ac2ac638"
+}

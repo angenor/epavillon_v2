@@ -1,0 +1,54 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, sync_status::text AS \"s!\", duration_minutes,\n                  scheduled_start_at = (SELECT starts_at FROM programme.sessions WHERE id = $1) AS \"cale!\"\n             FROM live.meetings WHERE session_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "s!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "duration_minutes",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "duration_minutes"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "cale!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      true,
+      null
+    ]
+  },
+  "hash": "1ea5226714976c0aafd05563ec2d0c3e4f830242f7e628d8cd79a40593297c60"
+}
