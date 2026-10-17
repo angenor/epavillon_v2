@@ -85,6 +85,8 @@ let chrome = 0
 let applied: VideoSize | null = null
 /** Largeur envoyée au SDK, pour centrer sa racine en mode agrandi. */
 const videoWidth = ref<number | null>(null)
+/** Le SDK dessine en position absolue : sa racine ne prend aucune hauteur, on lui donne celle mesurée. */
+const contentHeight = ref<number | null>(null)
 let pending: ReturnType<typeof setTimeout> | undefined
 
 // Zoom ne garantit pas son rendu au-delà de 1440 px de large.
@@ -115,9 +117,23 @@ function mainVideoHeight(): number {
   return best.height || applied?.height || 0
 }
 
+/** Hauteur réellement dessinée par le SDK : de la racine au bas de son élément le plus bas. */
+function renderedHeight(): number {
+  const root = zoomRoot.value
+  if (!root) return 0
+  const top = root.getBoundingClientRect().top
+  let bottom = top
+  for (const element of root.querySelectorAll(':scope > *, :scope > * > *')) {
+    const rect = element.getBoundingClientRect()
+    if (rect.height > 0) bottom = Math.max(bottom, rect.bottom)
+  }
+  return Math.round(bottom - top)
+}
+
 /** Ce que le SDK ajoute autour de l'image (en-tête, vignettes, barre), mesuré une fois rendu. */
 function measureChrome(): void {
-  const rootHeight = zoomRoot.value?.getBoundingClientRect().height ?? 0
+  const rootHeight = renderedHeight()
+  if (rootHeight > 0 && rootHeight !== contentHeight.value) contentHeight.value = rootHeight
   const video = mainVideoHeight()
   if (!video || rootHeight <= video) return
   const next = Math.round(rootHeight - video)
@@ -188,7 +204,7 @@ async function startEmbedded(access: MeetingAccess, setStep: (next: MeetingRoomS
     clearTimeout(remeasure)
     remeasure = setTimeout(measureChrome, 200)
   })
-  if (zoomRoot.value) rootResize.observe(zoomRoot.value)
+  for (const child of zoomRoot.value?.children ?? []) rootResize.observe(child)
 }
 
 function disposeEmbedded(): void {
@@ -199,6 +215,7 @@ function disposeEmbedded(): void {
   clearTimeout(remeasure)
   clearTimeout(pending)
   applied = null
+  contentHeight.value = null
   client?.off('connection-change', onConnectionChange)
   client?.off('peer-share-state-change', onShareChange)
   if (client) zoom?.destroyClient()
@@ -298,12 +315,19 @@ onBeforeUnmount(() => {
   <div
     ref="box"
     class="bg-surface-inverse text-text-on-inverse"
-    :class="expanded ? 'fixed! inset-0 z-[60] flex flex-col justify-center overflow-y-auto' : 'relative size-full'"
+    :class="expanded ? 'fixed! inset-0 z-[60] flex flex-col overflow-y-auto' : 'relative size-full'"
   >
     <div
       v-if="inPage"
-      :class="phase === 'joined' ? 'relative mx-auto w-full' : 'absolute inset-0'"
-      :style="phase === 'joined' && expanded && videoWidth ? { width: `${videoWidth}px` } : undefined"
+      :class="phase === 'joined' ? 'relative m-auto w-full' : 'absolute inset-0'"
+      :style="
+        phase === 'joined'
+          ? {
+              width: expanded && videoWidth ? `${videoWidth}px` : undefined,
+              height: contentHeight ? `${contentHeight}px` : undefined,
+            }
+          : undefined
+      "
     >
       <div ref="zoomRoot" :class="phase === 'joined' ? '' : 'absolute inset-0'" />
       <!-- Au coin droit de la barre d'outils du SDK, centrée : la place y est libre. -->
