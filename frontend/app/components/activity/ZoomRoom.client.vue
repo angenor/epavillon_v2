@@ -2,67 +2,59 @@
 import type { MeetingAccess, PublicSessionMeeting } from '~/types/live'
 import type { PublicScheduleRow } from '~/types/views'
 import type { MeetingRoomStep } from '~/composables/useMeetingRoom'
-import type { SuspensionViewType } from '@zoom/meetingsdk/embedded'
-import type { ZoomEmbedded, ZoomEmbeddedClient } from '~/utils/zoom-sdk'
 import type { AttachedImage } from '~/types/media'
 
 /**
  * La salle Zoom d'une activité, sur l'aplat sombre du direct.
  *
- * `stage` : dans la page de l'activité. Sur ordinateur la réunion s'ouvre dans
- * le cadre (vue intégrée du SDK) ; ailleurs le bouton mène à la salle pleine page.
- * `page` : la salle pleine page (vue client du SDK), qui prend tout l'écran et
- * renvoie à `leaveUrl` en sortant.
+ * `stage` : dans la page de l'activité, l'invitation seule ; « Rejoindre » mène
+ * à la salle pleine page, qui entre aussitôt (arbitré le 17/10 : une réunion
+ * ouverte dans la page puis agrandie ressortait et rentrait de Zoom).
+ * `page` : la salle pleine page (vue client du SDK, celle du logiciel), qui prend
+ * tout l'écran et renvoie à `leaveUrl` en sortant.
  */
 
 interface Props {
   session: PublicScheduleRow
   meeting: PublicSessionMeeting
   mode: 'stage' | 'page'
-  /** Salle pleine page, pour `stage` hors ordinateur. */
+  /** Salle pleine page, entrée directe comprise, pour `stage`. */
   roomTo?: string
   /** Adresse absolue de l'activité, où la vue client renvoie en sortant. */
   leaveUrl?: string
   zoneLabel?: string
-  /** Salle pleine page ouverte depuis le plein écran de la page : on entre sans attendre de clic. */
+  /** Arrivée depuis « Rejoindre » : on entre sans attendre de second clic. */
   autoEnter?: boolean
-  /** Couverture de l'activité, gardée sous l'invitation tant qu'on n'est pas dans la réunion. */
+  /** Couverture de l'activité, gardée sous l'invitation. */
   cover?: AttachedImage | null
 }
 
 const props = defineProps<Props>()
 /** Vrai de l'entrée à la sortie : le parent ne démonte pas la salle pendant ce temps. */
-const emit = defineEmits<{ 'update:inMeeting': [value: boolean]; 'update:joined': [value: boolean] }>()
+const emit = defineEmits<{ 'update:inMeeting': [value: boolean] }>()
 
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
 const route = useRoute()
 const localePath = useLocalePath()
-const embedded = useEmbeddedZoom()
-const { phase, step, error, errorStatus, needsRegistration, waitlisted, joinUrl, prefetch, join, left, onRegistered } = useMeetingRoom(
+const { phase, step, error, errorStatus, needsRegistration, waitlisted, joinUrl, prefetch, join, onRegistered } = useMeetingRoom(
   () => props.session,
 )
 
-const box = useTemplateRef<HTMLElement>('box')
-const zoomRoot = useTemplateRef<HTMLElement>('zoomRoot')
 const dialogOpen = ref(false)
-const expanded = ref(false)
+/** Messages du SDK qui disent que l'image ou le son n'ont pas pu se connecter, dans sa langue. */
+const failureTexts = ref<string[]>([])
 
-const inPage = computed(() => props.mode === 'stage' && embedded.value)
 const loginTo = computed(() => `${localePath('auth-login')}?redirect=${encodeURIComponent(route.fullPath)}`)
 const stepLabel = computed(() => t(`zoom-room.step.${step.value === 'joined' || !step.value ? 'joining' : step.value}`))
-
-let zoom: ZoomEmbedded | null = null
-let client: ZoomEmbeddedClient | null = null
-let resize: ResizeObserver | undefined
 
 // Le SDK s'annonce lourd : on le charge pendant que la personne lit, pour que le clic garde son geste (le son en dépend).
 watch(
   phase,
   (current) => {
-    if (current !== 'ready' || (props.mode === 'stage' && !inPage.value)) return
+    if (current !== 'ready' || props.mode !== 'page') return
     prefetch()
-    if (inPage.value) void loadZoomEmbedded().catch(() => undefined)
+    void loadZoomClientView().catch(() => undefined)
   },
   { immediate: true },
 )
@@ -71,187 +63,21 @@ watch(
   (active) => emit('update:inMeeting', active),
 )
 
-watch(
-  () => phase.value === 'joined' && inPage.value,
-  (inside) => emit('update:joined', inside),
-)
-
-type VideoSize = { width: number; height: number }
-
-/**
- * `viewSizes.default` ne règle que l'image principale : le SDK ajoute au-dessus son
- * en-tête et la bande des vignettes, en dessous sa barre d'outils, dans la même
- * racine, qui prend donc sa hauteur naturelle. L'image est en 16:9 exact, sinon
- * le SDK rogne la caméra. Supposé avant mesure : en-tête 60, vignettes 200, barre 56 ;
- * remesuré ensuite à chaque changement de hauteur de la racine (vue changée dans le SDK).
- */
-const GUESSED_CHROME_PX = 316
-let chrome = 0
-let applied: VideoSize | null = null
-/** Largeur envoyée au SDK, pour centrer sa racine en mode agrandi. */
-const videoWidth = ref<number | null>(null)
-/** Le SDK dessine en position absolue : sa racine ne prend aucune hauteur, on lui donne celle mesurée. */
-const contentHeight = ref<number | null>(null)
-let pending: ReturnType<typeof setTimeout> | undefined
-
-// Zoom recommande 1440 px de large au plus : tenu dans la page, levé en plein écran, où l'écran entier doit servir.
-const MAX_VIDEO_WIDTH = 1440
-const sixteenNinth = (raw: number): VideoSize => {
-  const width = expanded.value ? raw : Math.min(raw, MAX_VIDEO_WIDTH)
-  return { width, height: Math.round((width * 9) / 16) }
-}
-
-/** Nulle tant que la mise en page n'est pas faite : on n'envoie jamais 0. */
-function videoSize(): VideoSize | null {
-  if (expanded.value) {
-    const available = window.innerHeight - (chrome || GUESSED_CHROME_PX)
-    const width = Math.floor(Math.min(window.innerWidth, (Math.max(available, 135) * 16) / 9))
-    return width > 0 ? sixteenNinth(width) : null
-  }
-  const width = Math.floor(box.value?.clientWidth ?? 0)
-  return width > 0 ? sixteenNinth(width) : null
-}
-
-/** Le SDK respecte la largeur envoyée et cale la hauteur en 16:9 : ses canevas, eux, mesurent 0 dans le DOM. */
-function mainVideoHeight(): number {
-  return applied?.height ?? 0
-}
-
-/** Le panneau du SDK, posé en absolu quatre niveaux sous la racine (`react-resizable`, vu au 17/10). */
-function sdkPanel(): HTMLElement | null {
-  return zoomRoot.value?.querySelector<HTMLElement>('.react-resizable') ?? null
-}
-
-let observedPanel: HTMLElement | null = null
-
-/** Hauteur réellement dessinée par le SDK : de la racine au bas de son panneau. */
-function renderedHeight(): number {
-  const root = zoomRoot.value
-  const panel = sdkPanel()
-  if (!root || !panel) return 0
-  if (panel !== observedPanel && rootResize) {
-    if (observedPanel) rootResize.unobserve(observedPanel)
-    rootResize.observe(panel)
-    observedPanel = panel
-  }
-  return Math.round(panel.getBoundingClientRect().bottom - root.getBoundingClientRect().top)
-}
-
-/** Ce que le SDK ajoute autour de l'image (en-tête, vignettes, barre), mesuré une fois rendu. */
-function measureChrome(): void {
-  const rootHeight = renderedHeight()
-  if (rootHeight > 0 && rootHeight !== contentHeight.value) contentHeight.value = rootHeight
-  const video = mainVideoHeight()
-  if (!video || rootHeight <= video) return
-  const next = Math.round(rootHeight - video)
-  if (Math.abs(next - chrome) <= 2) return
-  chrome = next
-  if (expanded.value) applyVideoSize()
-}
-
-let remeasure: ReturnType<typeof setTimeout> | undefined
-let rootResize: ResizeObserver | undefined
-
-/** Chaque appel refait la mise en page du SDK : seulement si la taille change, sauf `force`. */
-function applyVideoSize(force = false): void {
-  clearTimeout(pending)
-  pending = setTimeout(() => {
-    const size = videoSize()
-    if (!size || !client) return
-    if (!force && applied && applied.width === size.width && applied.height === size.height) return
-    applied = size
-    videoWidth.value = size.width
-    client.updateVideoOptions({ viewSizes: { default: size } })
-    setTimeout(measureChrome, 400)
-  }, 150)
-}
-
-// Un partage d'écran qui commence ou finit laisse la zone noire tant que le SDK ne refait pas sa mise en page.
-const onShareChange = () => applyVideoSize(true)
-
-// Les panneaux du SDK s'ouvrent à gauche de la réunion : en plein écran, centrée, la marge ne suffit plus.
-const KEEP_IN_VIEWPORT = {
-  modifiers: [
-    { name: 'preventOverflow', options: { rootBoundary: 'viewport', altAxis: true, padding: 8 } },
-    { name: 'flip', options: { fallbackPlacements: ['right', 'top', 'bottom'] } },
-  ],
-}
-
-// Un client par tentative : créé et initialisé ici, détruit à la sortie ou à l'échec, jamais réinitialisé sur la même racine.
-async function startEmbedded(access: MeetingAccess, setStep: (next: MeetingRoomStep) => void): Promise<void> {
-  zoom = await loadZoomEmbedded()
-  disposeEmbedded()
-  const current = zoom.createClient()
-  client = current
-  await nextTick()
-  const size = videoSize() ?? sixteenNinth(960)
-  applied = size
-  try {
-    await current.init({
-      zoomAppRoot: zoomRoot.value ?? undefined,
-      language: zoomLanguage(locale.value),
-      patchJsMedia: true,
-      leaveOnPageUnload: true,
-      customize: {
-        participants: { popper: KEEP_IN_VIEWPORT },
-        chat: { popper: KEEP_IN_VIEWPORT },
-        setting: { popper: KEEP_IN_VIEWPORT },
-        meeting: { popper: KEEP_IN_VIEWPORT },
-        invite: { popper: KEEP_IN_VIEWPORT },
-        // Orateur : la galerie demande SharedArrayBuffer (en-têtes COOP/COEP), absent ici ; sans réglage, le SDK part en ruban.
-        video: {
-          isResizable: false,
-          popper: { disableDraggable: true },
-          defaultViewType: 'speaker' as SuspensionViewType,
-          viewSizes: { default: size },
-        },
-      },
-    })
-    setStep('joining')
-    current.on('connection-change', onConnectionChange)
-    current.on('peer-share-state-change', onShareChange)
-    await current.join({ ...zoomJoinFields(access), password: access.password })
-  } catch (failure) {
-    disposeEmbedded()
-    throw failure
-  }
-  await nextTick()
-  setTimeout(measureChrome, 600)
-  applyVideoSize()
-  resize = new ResizeObserver(() => applyVideoSize())
-  if (box.value) resize.observe(box.value)
-  rootResize = new ResizeObserver(() => {
-    clearTimeout(remeasure)
-    remeasure = setTimeout(measureChrome, 200)
-  })
-  observedPanel = null
-  measureChrome()
-}
-
-function disposeEmbedded(): void {
-  resize?.disconnect()
-  resize = undefined
-  rootResize?.disconnect()
-  rootResize = undefined
-  observedPanel = null
-  clearTimeout(remeasure)
-  clearTimeout(pending)
-  applied = null
-  contentHeight.value = null
-  client?.off('connection-change', onConnectionChange)
-  client?.off('peer-share-state-change', onShareChange)
-  if (client) zoom?.destroyClient()
-  client = null
-}
-
 async function startClientView(access: MeetingAccess, setStep: (next: MeetingRoomStep) => void): Promise<void> {
-  const zoomMtg = await loadZoomClientView()
-  zoomMtg.preLoadWasm()
-  zoomMtg.prepareWebSDK()
-  await zoomMtg.i18n.load(zoomLanguage(locale.value))
-  const root = document.getElementById('zmmtg-root')
-  if (root) root.style.display = 'block'
+  // Le SDK pose son fond noir plein écran dès son chargement : il ne doit jamais cacher un message d'échec.
+  const hideRoot = () => {
+    const root = document.getElementById('zmmtg-root')
+    if (root) root.style.display = 'none'
+  }
   try {
+    const zoomMtg = await loadZoomClientView()
+    zoomMtg.preLoadWasm()
+    zoomMtg.prepareWebSDK()
+    const language = zoomLanguage(locale.value)
+    await zoomMtg.i18n.load(language)
+    failureTexts.value = zoomMediaFailureTexts(zoomMtg, language)
+    const root = document.getElementById('zmmtg-root')
+    if (root) root.style.display = 'block'
     await new Promise((resolve, reject) =>
       zoomMtg.init({
         leaveUrl: props.leaveUrl ?? window.location.href,
@@ -267,141 +93,32 @@ async function startClientView(access: MeetingAccess, setStep: (next: MeetingRoo
       zoomMtg.join({ ...zoomJoinFields(access), passWord: access.password, success: resolve, error: reject }),
     )
   } catch (failure) {
-    if (root) root.style.display = 'none'
+    hideRoot()
     throw failure
   }
 }
 
-function onConnectionChange(payload: { state?: string }): void {
-  if (phase.value === 'joined' && (payload.state === 'Closed' || payload.state === 'Fail')) stopEmbedded()
-}
-
-function stopEmbedded(): void {
-  void setExpanded(false)
-  // Hors du rappel du SDK : il finit de se fermer avant qu'on le détruise.
-  setTimeout(disposeEmbedded, 0)
-  left()
-}
-
 function enter(): void {
-  void join(props.mode === 'page' ? startClientView : startEmbedded)
-}
-
-// La vue intégrée garde le 16:9 et laisse des bandes vides : le plein écran passe par la vue client, celle du logiciel.
-function openFullPage(): void {
-  if (!props.roomTo) return void setExpanded(!expanded.value)
-  window.location.assign(`${props.roomTo}${props.roomTo.includes('?') ? '&' : '?'}entrer=1`)
+  void join(startClientView)
 }
 
 let autoEntered = false
 watch(
   phase,
   (current) => {
-    if (current !== 'ready' || !props.autoEnter || autoEntered) return
+    if (current !== 'ready' || props.mode !== 'page' || !props.autoEnter || autoEntered) return
     autoEntered = true
     enter()
   },
   { immediate: true },
 )
 
-/**
- * Agrandir sans mettre le cadre en plein écran : les menus du SDK (participants,
- * réglages, discussion) se rendent dans `body` et resteraient derrière l'élément
- * en plein écran. Le cadre passe en fixe sur toute la fenêtre, et c'est le
- * document entier qui passe en plein écran.
- */
-async function setExpanded(next: boolean): Promise<void> {
-  if (expanded.value === next) return
-  expanded.value = next
-  document.documentElement.style.overflow = next ? 'hidden' : ''
-  // Remonte les menus du SDK, rendus dans `body`, au-dessus du cadre agrandi (voir le style en fin de fichier).
-  document.documentElement.classList.toggle('zoom-room-expanded', next)
-  if (next && !document.fullscreenElement) await document.documentElement.requestFullscreen().catch(() => undefined)
-  if (!next && document.fullscreenElement) await document.exitFullscreen().catch(() => undefined)
-  await nextTick()
-  applyVideoSize()
-  // Le plein écran du navigateur fait perdre la position de lecture : on revient sur la réunion.
-  if (!next) box.value?.scrollIntoView({ block: 'start' })
-}
-
-const onFullscreenChange = () => {
-  if (!document.fullscreenElement && expanded.value) void setExpanded(false)
-}
-const onKey = (event: KeyboardEvent) => {
-  if (event.key === 'Escape' && expanded.value && !document.fullscreenElement) void setExpanded(false)
-}
-const onWindowResize = () => {
-  if (expanded.value) applyVideoSize()
-}
-onMounted(() => {
-  document.addEventListener('fullscreenchange', onFullscreenChange)
-  document.addEventListener('keydown', onKey)
-  window.addEventListener('resize', onWindowResize)
-})
-onBeforeUnmount(() => {
-  document.removeEventListener('fullscreenchange', onFullscreenChange)
-  document.removeEventListener('keydown', onKey)
-  window.removeEventListener('resize', onWindowResize)
-  if (expanded.value) {
-    document.documentElement.style.overflow = ''
-    document.documentElement.classList.remove('zoom-room-expanded')
-    if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined)
-  }
-  emit('update:inMeeting', false)
-  const current = client
-  if (!current) return
-  const joined = phase.value === 'joined'
-  void (async () => {
-    if (joined) await current.leaveMeeting().catch(() => undefined)
-    disposeEmbedded()
-  })()
-})
+onBeforeUnmount(() => emit('update:inMeeting', false))
 </script>
 
 <template>
-  <!-- z-[60] : au-dessus de la barre du site (z-30) et du bandeau du billet (z-40), sous les menus du SDK (999 et plus). -->
-  <div
-    ref="box"
-    class="scroll-mt-[calc(var(--nav-height)+1rem)] bg-surface-inverse text-text-on-inverse"
-    :class="expanded ? 'fixed! inset-0 z-[60] flex flex-col overflow-y-auto' : 'relative size-full'"
-  >
+  <div class="relative size-full bg-surface-inverse text-text-on-inverse">
     <div
-      v-if="inPage"
-      :class="phase === 'joined' ? 'relative m-auto w-full' : 'absolute inset-0'"
-      :style="
-        phase === 'joined'
-          ? {
-              width: expanded && videoWidth ? `${videoWidth}px` : undefined,
-              height: contentHeight ? `${contentHeight}px` : undefined,
-            }
-          : undefined
-      "
-    >
-      <div ref="zoomRoot" :class="phase === 'joined' ? '' : 'absolute inset-0'" />
-      <!-- Au coin droit de la barre d'outils du SDK, centrée : la place y est libre. -->
-      <UiButton
-        v-if="phase === 'joined'"
-        class="absolute right-2 bottom-1.5 z-10 bg-surface-inverse-raised!"
-        variant="inverse"
-        icon-only
-        :icon="expanded ? 'close' : 'monitor'"
-        :label="t(expanded ? 'zoom-room.exitFullscreen' : 'zoom-room.fullscreen')"
-        @click="openFullPage"
-      />
-    </div>
-    <a
-      v-if="inPage && phase === 'joined' && joinUrl && !expanded"
-      :href="joinUrl"
-      target="_blank"
-      rel="noopener"
-      class="inline-flex min-h-(--target-min) items-center gap-1.5 px-3 text-sm text-text-on-inverse-muted underline underline-offset-4 hover:text-text-on-inverse"
-    >
-      {{ t('zoom-room.fallback') }}
-      <UiIcon name="external-link" size="0.875rem" />
-    </a>
-
-    <div
-      v-if="phase !== 'joined' || !inPage"
       class="relative flex size-full flex-col bg-surface-inverse px-5 sm:px-8"
       :class="[
         props.cover ? 'justify-end pt-24 pb-6 text-left sm:pb-8' : 'justify-center py-8 text-center',
@@ -456,14 +173,15 @@ onBeforeUnmount(() => {
 
         <template v-else-if="phase === 'ready'">
           <p class="max-w-md text-sm">{{ t('zoom-room.ready') }}</p>
-          <NuxtLink
-            v-if="props.mode === 'stage' && !embedded && props.roomTo"
-            :to="props.roomTo"
+          <!-- Lien simple, pas le routeur : passer d'une mise en page à l'autre remonte la salle, et Zoom ne démarre qu'une fois par document. -->
+          <a
+            v-if="props.mode === 'stage' && props.roomTo"
+            :href="props.roomTo"
             class="inline-flex min-h-12 items-center gap-2.5 rounded-md bg-live px-6 text-base font-bold text-live-contrast"
           >
             <UiIcon name="video" size="1.125rem" />
             {{ t('zoom-room.join') }}
-          </NuxtLink>
+          </a>
           <button
             v-else
             type="button"
@@ -500,6 +218,12 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
+    <ActivityZoomRoomAlerts
+      v-if="props.mode === 'page' && phase === 'joined'"
+      :failure-texts="failureTexts"
+      :join-url="joinUrl"
+      :session-id="props.session.id"
+    />
 
     <ActivityRegistrationDialog
       v-model:open="dialogOpen"
@@ -511,11 +235,3 @@ onBeforeUnmount(() => {
     />
   </div>
 </template>
-
-<style>
-/* Mode agrandi : les fenêtres du SDK (classes MUI préfixées `zoom-`) s'ouvrent dans `body`, sous le cadre fixe (z-60) sinon. */
-html.zoom-room-expanded body > [class*='zoom-Mui'],
-html.zoom-room-expanded body > [role='tooltip'] {
-  z-index: 70 !important;
-}
-</style>

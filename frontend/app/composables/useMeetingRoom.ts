@@ -102,22 +102,8 @@ export function useSessionMeeting(session: MaybeRefOrGetter<PublicScheduleRow | 
   return { meeting, loaded }
 }
 
-/** Sur ordinateur (écran large, souris), la réunion s'ouvre dans la page ; ailleurs, en pleine page. */
-export function useEmbeddedZoom() {
-  const embedded = ref(false)
-  let query: MediaQueryList | undefined
-  const update = () => (embedded.value = query?.matches ?? false)
-  onMounted(() => {
-    query = window.matchMedia('(min-width: 1024px) and (pointer: fine)')
-    update()
-    query.addEventListener('change', update)
-  })
-  onBeforeUnmount(() => query?.removeEventListener('change', update))
-  return embedded
-}
-
 /**
- * L'entrée dans la réunion, commune à la vue intégrée et à la pleine page : qui
+ * L'entrée dans la réunion, dans la salle pleine page : qui
  * peut entrer, l'accès signé (demandé d'avance pour que le clic aille vite), la
  * présence notée une fois. La vue n'apporte que `start`, qui ouvre le SDK.
  */

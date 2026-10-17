@@ -71,12 +71,15 @@ const zoomOpen = computed(() => {
   if (state.value === 'past' && current.replay_url) return false
   return isMeetingJoinable(meeting.value)
 })
-// Quitter la salle, c'est quitter la réunion : on ne la démonte jamais sous quelqu'un qui y est.
-const inMeeting = ref(false)
-const { meeting } = useSessionMeeting(session, () => inMeeting.value)
-const zoomShown = computed(() => meeting.value !== null && (zoomOpen.value || inMeeting.value))
+const { meeting } = useSessionMeeting(session)
+const zoomShown = computed(() => meeting.value !== null && zoomOpen.value)
+// On n'entre jamais dans la page : « Rejoindre » ouvre la salle pleine page, qui entre sans second clic.
 const roomTo = computed(() =>
-  localePath({ name: 'activity-edition-session-room', params: { edition: editionSlug.value, session: sessionSlug.value } }),
+  localePath({
+    name: 'activity-edition-session-room',
+    params: { edition: editionSlug.value, session: sessionSlug.value },
+    query: { entrer: '1' },
+  }),
 )
 
 onMounted(() => {
@@ -86,13 +89,10 @@ onMounted(() => {
   void loadStreams()
 })
 onBeforeUnmount(() => clearInterval(clock))
-// `refresh()` au début de la séance rend un nouvel objet pour la même activité : on garde la réunion.
+// `refresh()` au début de la séance rend un nouvel objet pour la même activité : on garde les flux.
 watch(session, (current, previous) => {
   const changed = current?.id !== previous?.id
-  if (changed) {
-    streams.value = []
-    inMeeting.value = false
-  }
+  if (changed) streams.value = []
   if (current) visitedId.value = current.id
   void loadStreams()
 })
@@ -176,7 +176,6 @@ useHead(() => ({
               :meeting="zoomShown ? meeting : null"
               :room-to="roomTo"
               :zone-label="edition.city ?? undefined"
-              @update:in-meeting="(value: boolean) => (inMeeting = value)"
             />
 
             <section v-if="summary || hasDescription" class="order-4" aria-labelledby="a-propos-titre">

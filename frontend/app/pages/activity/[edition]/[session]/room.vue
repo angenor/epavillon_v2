@@ -1,7 +1,8 @@
 <script setup lang="ts">
 /**
- * LA SALLE ZOOM EN PLEINE PAGE : celle des téléphones et des tablettes, où Zoom
- * recommande sa vue client. Le SDK y ajoute `#zmmtg-root` au document et prend
+ * LA SALLE ZOOM EN PLEINE PAGE : la seule entrée dans une réunion, sur tous les
+ * écrans (vue client du SDK, celle du logiciel). « Rejoindre » y mène avec
+ * `?entrer=1`, qui entre sans second clic. Le SDK y ajoute `#zmmtg-root` au document et prend
  * tout l'écran ; on en sort donc par une navigation complète (lien simple,
  * `leaveUrl`), jamais par le routeur, pour ne rien laisser derrière.
  */

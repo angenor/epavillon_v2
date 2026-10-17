@@ -237,3 +237,5 @@ Maquette : [page d'une activité](https://claude.ai/artifact/MTjhU6YwDmahNgDDTRY
 **17/10 : salle Zoom dans la page d'une activité** (branche `feat/zoom-meeting-sdk`) : vue intégrée du Meeting SDK sur ordinateur, page « salle » plein écran sur téléphone, lien vers l'application Zoom en secours, billet « Rejoindre la réunion » ; la page passe de `[session].vue` à `[session]/index.vue`. Non essayé contre un vrai compte Zoom. Voir [journal](../journal/2026-10-17.md), [décision](../decisions/2026-10-17.md).
 
 **17/10 : la salle garde la couverture** : avant l'entrée dans la réunion, l'invitation Zoom se pose en bas de l'image de l'activité (voile `.scrim-fade-bottom`) au lieu de la remplacer par un aplat ; sans couverture, aplat centré. Voir [journal](../journal/2026-10-17.md).
+
+**17/10 : entrée toujours en plein écran** : « Rejoindre la réunion » ouvre la page « salle » et y entre directement, sur tous les écrans ; plus de réunion dans la page de l'activité. Dans la salle : nouvel essai automatique quand l'image de Zoom ne se connecte pas, pastille pendant un partage d'écran. Voir [décision](../decisions/2026-10-17.md).

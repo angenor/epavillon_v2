@@ -20,10 +20,23 @@
   "waitlisted": "You are on the waiting list: entry is first come, first served, while places last.",
   "fallback": "Open in the Zoom app",
   "retry": "Try again",
-  "fullscreen": "Full screen",
-  "exitFullscreen": "Exit full screen",
   "error": {
     "sdk": "Connecting to Zoom failed. Try again, or open the meeting in the Zoom app.",
     "sdkReason": "Connecting to Zoom failed ({reason}). Try again, or open the meeting in the Zoom app."
+  },
+  "alerts": {
+    "share": {
+      "status": "Your screen is being shared",
+      "stop": "Stop sharing",
+      "tab": "Sharing"
+    },
+    "failure": {
+      "title": "The meeting video did not connect.",
+      "countdown": "Trying again automatically in {seconds} s.",
+      "stuck": "The connection still fails. Check your network and try again, or open the meeting in the Zoom app.",
+      "retryNow": "Try again now",
+      "cancel": "Cancel",
+      "close": "Close"
+    }
   }
 }

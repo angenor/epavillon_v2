@@ -37,8 +37,7 @@ const { dateTime, dayLong, time, timeRange, timeWithZone, zoneOffsetShort, zoneL
 const requestUrl = useRequestURL()
 const { duration } = useProgrammeSession()
 const { mine, refresh, cancel } = useSessionRegistration(computed(() => props.session.id))
-const embeddedZoom = useEmbeddedZoom()
-const joinTo = computed(() => (embeddedZoom.value || !props.roomTo ? '#direct' : props.roomTo))
+const joinTo = computed(() => props.roomTo ?? '#direct')
 
 const dialogOpen = ref(false)
 const cancelling = ref(false)

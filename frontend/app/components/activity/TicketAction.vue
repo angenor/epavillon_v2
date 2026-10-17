@@ -6,7 +6,7 @@ export type TicketCallToAction = 'register' | 'waitlist' | 'watch' | 'join' | 'r
 interface Props {
   action: TicketCallToAction
   replayUrl?: string | null
-  /** Salle Zoom : l'ancre `#direct` sur ordinateur, la salle pleine page ailleurs. */
+  /** Salle Zoom pleine page, entrée directe ; à défaut, l'ancre `#direct`. */
   joinTo?: string
 }
 
@@ -35,22 +35,15 @@ const { t } = useI18n()
     <UiIcon name="broadcast" size="1.125rem" />
     {{ t('activity.ticket.watch') }}
   </a>
+  <!-- Lien simple vers la salle, pas le routeur : la salle se charge d'un coup, et Zoom ne démarre qu'une fois par document. -->
   <a
-    v-else-if="props.action === 'join' && (!props.joinTo || props.joinTo.startsWith('#'))"
+    v-else-if="props.action === 'join'"
     :href="props.joinTo ?? '#direct'"
     class="inline-flex min-h-12 items-center justify-center gap-2.5 rounded-md bg-live px-6 text-base font-bold whitespace-nowrap text-live-contrast"
   >
     <UiIcon name="video" size="1.125rem" />
     {{ t('activity.ticket.join') }}
   </a>
-  <NuxtLink
-    v-else-if="props.action === 'join'"
-    :to="props.joinTo"
-    class="inline-flex min-h-12 items-center justify-center gap-2.5 rounded-md bg-live px-6 text-base font-bold whitespace-nowrap text-live-contrast"
-  >
-    <UiIcon name="video" size="1.125rem" />
-    {{ t('activity.ticket.join') }}
-  </NuxtLink>
   <UiButton
     v-else-if="props.replayUrl"
     variant="secondary"

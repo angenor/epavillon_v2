@@ -20,10 +20,23 @@
   "waitlisted": "Vous êtes en liste d'attente : l'entrée se fait dans l'ordre d'arrivée, dans la limite des places.",
   "fallback": "Ouvrir dans l'application Zoom",
   "retry": "Réessayer",
-  "fullscreen": "Plein écran",
-  "exitFullscreen": "Quitter le plein écran",
   "error": {
     "sdk": "La connexion à Zoom a échoué. Réessayez, ou ouvrez la réunion dans l'application Zoom.",
     "sdkReason": "La connexion à Zoom a échoué ({reason}). Réessayez, ou ouvrez la réunion dans l'application Zoom."
+  },
+  "alerts": {
+    "share": {
+      "status": "Votre écran est partagé",
+      "stop": "Arrêter le partage",
+      "tab": "Partage en cours"
+    },
+    "failure": {
+      "title": "L'image de la réunion ne s'est pas connectée.",
+      "countdown": "Nouvel essai automatique dans {seconds} s.",
+      "stuck": "La connexion ne se fait toujours pas. Vérifiez votre réseau puis réessayez, ou ouvrez la réunion dans l'application Zoom.",
+      "retryNow": "Réessayer maintenant",
+      "cancel": "Annuler",
+      "close": "Fermer"
+    }
   }
 }

@@ -17,7 +17,7 @@ interface Props {
   streams: PublicSessionStream[]
   cover: AttachedImage | null
   acronym: string | null
-  /** La salle Zoom à montrer, décidée par la page ; nulle sinon. */
+  /** La salle Zoom à montrer, décidée par la page ; nulle sinon. On y entre en pleine page (`roomTo`). */
   meeting?: PublicSessionMeeting | null
   roomTo?: string
   zoneLabel?: string
@@ -50,11 +50,6 @@ const current = computed(
   () => props.streams.find((stream) => stream.id === chosen.value) ?? props.streams[0] ?? null,
 )
 
-const emit = defineEmits<{ 'update:inMeeting': [value: boolean] }>()
-
-/** Dans la réunion, la salle prend la hauteur naturelle du SDK (en-tête, vignettes, image 16:9, barre d'outils). */
-const zoomJoined = ref(false)
-
 const zoomRoom = computed(() => props.meeting ?? null)
 
 const isLive = computed(
@@ -71,21 +66,16 @@ const replayMinutes = computed(() =>
 <template>
   <section v-if="zoomRoom" id="direct" class="min-w-0" aria-labelledby="direct-titre">
     <h2 id="direct-titre" class="sr-only">{{ t('zoom-room.label') }}</h2>
-    <div
-      class="relative rounded-lg bg-surface-inverse shadow-lg"
-      :class="zoomJoined ? '' : 'min-h-80 overflow-hidden lg:aspect-video lg:min-h-0'"
-    >
+    <div class="relative min-h-80 overflow-hidden rounded-lg bg-surface-inverse shadow-lg lg:aspect-video lg:min-h-0">
       <ClientOnly>
         <ActivityZoomRoom
-          :class="zoomJoined ? '' : 'lg:absolute lg:inset-0'"
+          class="lg:absolute lg:inset-0"
           mode="stage"
           :session="props.session"
           :meeting="zoomRoom"
           :room-to="props.roomTo"
           :zone-label="props.zoneLabel"
           :cover="props.cover"
-          @update:in-meeting="(value: boolean) => emit('update:inMeeting', value)"
-          @update:joined="(value: boolean) => (zoomJoined = value)"
         />
       </ClientOnly>
     </div>
