@@ -107,27 +107,29 @@ function videoSize(): VideoSize | null {
   return width > 0 ? sixteenNinth(width) : null
 }
 
-/** L'image principale est le plus grand canevas ou la plus grande vidéo de la racine. */
+/** Le SDK respecte la largeur envoyée et cale la hauteur en 16:9 : ses canevas, eux, mesurent 0 dans le DOM. */
 function mainVideoHeight(): number {
-  let best = { area: 0, height: 0 }
-  for (const element of zoomRoot.value?.querySelectorAll('canvas, video') ?? []) {
-    const rect = element.getBoundingClientRect()
-    if (rect.width * rect.height > best.area) best = { area: rect.width * rect.height, height: rect.height }
-  }
-  return best.height || applied?.height || 0
+  return applied?.height ?? 0
 }
 
-/** Hauteur réellement dessinée par le SDK : de la racine au bas de son élément le plus bas. */
+/** Le panneau du SDK, posé en absolu quatre niveaux sous la racine (`react-resizable`, vu au 17/10). */
+function sdkPanel(): HTMLElement | null {
+  return zoomRoot.value?.querySelector<HTMLElement>('.react-resizable') ?? null
+}
+
+let observedPanel: HTMLElement | null = null
+
+/** Hauteur réellement dessinée par le SDK : de la racine au bas de son panneau. */
 function renderedHeight(): number {
   const root = zoomRoot.value
-  if (!root) return 0
-  const top = root.getBoundingClientRect().top
-  let bottom = top
-  for (const element of root.querySelectorAll(':scope > *, :scope > * > *')) {
-    const rect = element.getBoundingClientRect()
-    if (rect.height > 0) bottom = Math.max(bottom, rect.bottom)
+  const panel = sdkPanel()
+  if (!root || !panel) return 0
+  if (panel !== observedPanel && rootResize) {
+    if (observedPanel) rootResize.unobserve(observedPanel)
+    rootResize.observe(panel)
+    observedPanel = panel
   }
-  return Math.round(bottom - top)
+  return Math.round(panel.getBoundingClientRect().bottom - root.getBoundingClientRect().top)
 }
 
 /** Ce que le SDK ajoute autour de l'image (en-tête, vignettes, barre), mesuré une fois rendu. */
@@ -162,6 +164,14 @@ function applyVideoSize(force = false): void {
 // Un partage d'écran qui commence ou finit laisse la zone noire tant que le SDK ne refait pas sa mise en page.
 const onShareChange = () => applyVideoSize(true)
 
+// Les panneaux du SDK s'ouvrent à gauche de la réunion : en plein écran, centrée, la marge ne suffit plus.
+const KEEP_IN_VIEWPORT = {
+  modifiers: [
+    { name: 'preventOverflow', options: { rootBoundary: 'viewport', altAxis: true, padding: 8 } },
+    { name: 'flip', options: { fallbackPlacements: ['right', 'top', 'bottom'] } },
+  ],
+}
+
 // Un client par tentative : créé et initialisé ici, détruit à la sortie ou à l'échec, jamais réinitialisé sur la même racine.
 async function startEmbedded(access: MeetingAccess, setStep: (next: MeetingRoomStep) => void): Promise<void> {
   zoom = await loadZoomEmbedded()
@@ -178,6 +188,11 @@ async function startEmbedded(access: MeetingAccess, setStep: (next: MeetingRoomS
       patchJsMedia: true,
       leaveOnPageUnload: true,
       customize: {
+        participants: { popper: KEEP_IN_VIEWPORT },
+        chat: { popper: KEEP_IN_VIEWPORT },
+        setting: { popper: KEEP_IN_VIEWPORT },
+        meeting: { popper: KEEP_IN_VIEWPORT },
+        invite: { popper: KEEP_IN_VIEWPORT },
         // Orateur : la galerie demande SharedArrayBuffer (en-têtes COOP/COEP), absent ici ; sans réglage, le SDK part en ruban.
         video: {
           isResizable: false,
@@ -204,7 +219,8 @@ async function startEmbedded(access: MeetingAccess, setStep: (next: MeetingRoomS
     clearTimeout(remeasure)
     remeasure = setTimeout(measureChrome, 200)
   })
-  for (const child of zoomRoot.value?.children ?? []) rootResize.observe(child)
+  observedPanel = null
+  measureChrome()
 }
 
 function disposeEmbedded(): void {
@@ -212,6 +228,7 @@ function disposeEmbedded(): void {
   resize = undefined
   rootResize?.disconnect()
   rootResize = undefined
+  observedPanel = null
   clearTimeout(remeasure)
   clearTimeout(pending)
   applied = null
@@ -274,6 +291,8 @@ async function setExpanded(next: boolean): Promise<void> {
   if (!next && document.fullscreenElement) await document.exitFullscreen().catch(() => undefined)
   await nextTick()
   applyVideoSize()
+  // Le plein écran du navigateur fait perdre la position de lecture : on revient sur la réunion.
+  if (!next) box.value?.scrollIntoView({ block: 'start' })
 }
 
 const onFullscreenChange = () => {
@@ -314,7 +333,7 @@ onBeforeUnmount(() => {
   <!-- z-[60] : au-dessus de la barre du site (z-30) et du bandeau du billet (z-40), sous les menus du SDK (999 et plus). -->
   <div
     ref="box"
-    class="bg-surface-inverse text-text-on-inverse"
+    class="scroll-mt-[calc(var(--nav-height)+1rem)] bg-surface-inverse text-text-on-inverse"
     :class="expanded ? 'fixed! inset-0 z-[60] flex flex-col overflow-y-auto' : 'relative size-full'"
   >
     <div
