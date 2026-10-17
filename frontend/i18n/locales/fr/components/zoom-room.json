@@ -1,6 +1,6 @@
 {
   "label": "Réunion Zoom",
-  "window": "Salle ouverte : {range}",
+  "window": "Ouverte dès {time}, jusqu'à la fin de la réunion",
   "checking": "Vérification de votre accès…",
   "login": {
     "message": "Connectez-vous pour entrer dans la réunion.",

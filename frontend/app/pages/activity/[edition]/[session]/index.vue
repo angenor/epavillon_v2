@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PublicSessionMeeting, PublicSessionStream } from '~/types/live'
+import type { PublicSessionStream } from '~/types/live'
 
 /**
  * LA PAGE D'UNE ACTIVITÉ — celle qu'ouvre un clic dans la semaine ou la liste
@@ -55,7 +55,6 @@ const sameDay = computed(() => {
 })
 
 const streams = ref<PublicSessionStream[]>([])
-const meeting = ref<PublicSessionMeeting | null>(null)
 const now = ref<number | null>(null)
 let clock: ReturnType<typeof setInterval> | undefined
 
@@ -65,18 +64,13 @@ async function loadStreams(): Promise<void> {
   streams.value = await api.live.sessionStreams(current.id).catch(() => [])
 }
 
-async function loadMeeting(): Promise<void> {
-  const current = session.value
-  if (!current?.is_streamed || state.value === 'cancelled') return
-  meeting.value = await api.meetings.forSession(current.id).catch(() => null)
-}
-
 // Une règle pour la scène et le billet : un flux YouTube l'emporte sur la salle Zoom.
 const zoomOpen = computed(
   () => Boolean(session.value?.is_streamed) && streams.value.length === 0 && isMeetingOpen(meeting.value, now.value),
 )
 // Quitter la salle, c'est quitter la réunion : on ne la démonte jamais sous quelqu'un qui y est.
 const inMeeting = ref(false)
+const { meeting } = useSessionMeeting(session, () => inMeeting.value)
 const zoomShown = computed(() => meeting.value !== null && (zoomOpen.value || inMeeting.value))
 const roomTo = computed(() =>
   localePath({ name: 'activity-edition-session-room', params: { edition: editionSlug.value, session: sessionSlug.value } }),
@@ -87,7 +81,6 @@ onMounted(() => {
   clock = setInterval(() => (now.value = Date.now()), 30_000)
   if (session.value) visitedId.value = session.value.id
   void loadStreams()
-  void loadMeeting()
 })
 onBeforeUnmount(() => clearInterval(clock))
 // `refresh()` au début de la séance rend un nouvel objet pour la même activité : on garde la réunion.
@@ -95,12 +88,10 @@ watch(session, (current, previous) => {
   const changed = current?.id !== previous?.id
   if (changed) {
     streams.value = []
-    meeting.value = null
     inMeeting.value = false
   }
   if (current) visitedId.value = current.id
   void loadStreams()
-  if (changed) void loadMeeting()
 })
 
 const homeTime = computed(() => {

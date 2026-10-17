@@ -103,7 +103,7 @@
       "live": "The activity has started: follow it live.",
       "past": "Nobody had registered. | {count} person had registered. | {count} people had registered.",
       "meeting": "The Zoom room is open: entry is first come, first served, while places last.",
-      "meetingLater": "On the day, the Zoom meeting opens on this page 30 minutes before the start, at {time}."
+      "meetingLater": "On the day, the Zoom meeting opens on this page 30 minutes before the start, at {time}, and stays open until it ends."
     },
     "languages": "Languages",
     "calendar": "Calendar",

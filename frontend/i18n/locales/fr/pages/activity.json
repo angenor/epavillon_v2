@@ -103,7 +103,7 @@
       "live": "L'activité a commencé : suivez-la en direct.",
       "past": "Personne ne s'était inscrit. | {count} personne s'était inscrite. | {count} personnes s'étaient inscrites.",
       "meeting": "La salle Zoom est ouverte : l'entrée se fait dans l'ordre d'arrivée, dans la limite des places.",
-      "meetingLater": "Le jour venu, la réunion Zoom s'ouvre sur cette page 30 minutes avant le début, à {time}."
+      "meetingLater": "Le jour venu, la réunion Zoom s'ouvre sur cette page 30 minutes avant le début, à {time}, et reste ouverte jusqu'à sa fin."
     },
     "languages": "Langues",
     "calendar": "Agenda",

@@ -3,7 +3,8 @@
  *
  * Toute séance diffusée du Pavillon (`pavillon.ts`, heures posées autour de
  * maintenant) et du jeu du site a sa réunion : la salle s'ouvre 30 minutes avant
- * le début et ferme 30 minutes après la fin. L'accès, lui, échoue toujours comme
+ * le début et ferme quand la réunion se termine (ici, au plus tard 4 heures après
+ * la fin prévue : les COP débordent). L'accès, lui, échoue toujours comme
  * l'API sans configuration Zoom (503 `LIVE_ZOOM_UNAVAILABLE`) : on ne fabrique pas
  * de signature.
  */
@@ -14,7 +15,8 @@ import { ApiRequestError } from '~/utils/api-error'
 import { programme } from './pavillon'
 import { allSessions } from './sessions'
 
-const MARGIN_MS = 30 * 60_000
+const OPENS_BEFORE_MS = 30 * 60_000
+const CLOSES_AFTER_MS = 4 * 3_600_000
 
 type Horaire = Pick<PublicScheduleRow, 'id' | 'starts_at' | 'ends_at' | 'is_streamed' | 'status'>
 
@@ -24,7 +26,7 @@ function seance(sessionId: string): Horaire | null {
 
 function statut(s: Horaire, at: number): MeetingStatus {
   if (s.status === 'cancelled') return 'cancelled'
-  if (at >= Date.parse(s.ends_at)) return 'ended'
+  if (at >= Date.parse(s.ends_at) + CLOSES_AFTER_MS) return 'ended'
   return at >= Date.parse(s.starts_at) ? 'started' : 'scheduled'
 }
 
@@ -36,10 +38,10 @@ export function publicSessionMeeting(sessionId: string, at: number = Date.now())
   return {
     provider: 'zoom',
     status: statut(s, at),
-    opens_at: new Date(Date.parse(s.starts_at) - MARGIN_MS).toISOString(),
+    opens_at: new Date(Date.parse(s.starts_at) - OPENS_BEFORE_MS).toISOString(),
     starts_at: s.starts_at,
     ends_at: s.ends_at,
-    closes_at: new Date(Date.parse(s.ends_at) + MARGIN_MS).toISOString(),
+    closes_at: new Date(Date.parse(s.ends_at) + CLOSES_AFTER_MS).toISOString(),
   }
 }
 

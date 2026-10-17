@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { PublicSessionMeeting } from '~/types/live'
-
 /**
  * LA SALLE ZOOM EN PLEINE PAGE : celle des téléphones et des tablettes, où Zoom
  * recommande sa vue client. Le SDK y ajoute `#zmmtg-root` au document et prend
@@ -14,7 +12,6 @@ defineI18nRoute({
 })
 
 const route = useRoute()
-const api = useApi()
 const { t } = useI18n()
 const { tr } = useI18nText()
 const { date, timeWithZone } = useDateTime()
@@ -31,28 +28,17 @@ const activityTo = computed(() =>
 const leaveUrl = computed(() => new URL(activityTo.value, requestUrl.origin).href)
 const zoneLabel = computed(() => edition.value?.city ?? undefined)
 
-const meeting = ref<PublicSessionMeeting | null>(null)
-const meetingLoaded = ref(false)
 const now = ref<number | null>(null)
 let clock: ReturnType<typeof setInterval> | undefined
-
-async function loadMeeting(): Promise<void> {
-  const current = session.value
-  if (!current) return
-  meeting.value = current.is_streamed ? await api.meetings.forSession(current.id).catch(() => null) : null
-  meetingLoaded.value = true
-}
 
 onMounted(() => {
   now.value = Date.now()
   clock = setInterval(() => (now.value = Date.now()), 30_000)
-  void loadMeeting()
 })
 onBeforeUnmount(() => clearInterval(clock))
-watch(() => session.value?.id, () => void loadMeeting())
-
 // Une fois entré, on reste : l'horloge ne ferme pas la salle sous quelqu'un.
 const inMeeting = ref(false)
+const { meeting, loaded: meetingLoaded } = useSessionMeeting(session, () => inMeeting.value)
 const open = computed(() => isMeetingOpen(meeting.value, now.value) || inMeeting.value)
 
 // La vue client laisse `#zmmtg-root` par-dessus le site et la réunion tourne : une navigation interne repart de zéro.

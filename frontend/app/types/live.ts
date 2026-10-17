@@ -141,7 +141,9 @@ export type MeetingSyncStatus = 'not_required' | 'pending' | 'in_progress' | 'sy
 /**
  * `GET /sessions/{id}/meeting` : la réunion d'une séance, sans aucun secret.
  * 404 quand la séance n'en a pas. La salle s'ouvre à `opens_at` (début moins
- * 30 minutes) et ferme à `closes_at` (fin plus 30 minutes, borne de l'accès).
+ * 30 minutes) et ferme à `closes_at` : la fin réelle quand Zoom dit la réunion
+ * terminée (`ended`), sinon fin prévue plus 4 heures, repoussée par l'API tant que
+ * la réunion dure. À relire régulièrement.
  */
 export interface PublicSessionMeeting {
   provider: MeetingProvider

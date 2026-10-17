@@ -1,6 +1,6 @@
 {
   "label": "Zoom meeting",
-  "window": "Room open: {range}",
+  "window": "Open from {time} until the meeting ends",
   "checking": "Checking your access…",
   "login": {
     "message": "Sign in to enter the meeting.",

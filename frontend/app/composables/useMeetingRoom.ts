@@ -9,14 +9,86 @@ export type MeetingRoomPhase = 'checking' | 'login' | 'register' | 'ready' | 'lo
 export type MeetingRoomStep = 'access' | 'sdk' | 'joining'
 
 /**
- * La salle s'ouvre (`opens_at`) et ferme (`closes_at`, la borne de l'accès) d'elle-même ;
- * seules les réunions Zoom vivantes comptent. Ne dit rien de qui est déjà dedans :
+ * La salle s'ouvre (`opens_at`) et ferme (`closes_at` : la fin réelle de la réunion,
+ * sinon une borne que l'API repousse tant qu'elle dure) ; `ended` la ferme aussi.
+ * Seules les réunions Zoom vivantes comptent. Ne dit rien de qui est déjà dedans :
  * l'appelant garde la salle montée tant qu'on y est.
  */
 export function isMeetingOpen(meeting: PublicSessionMeeting | null, now: number | null): boolean {
   if (!meeting || now === null || meeting.provider !== 'zoom') return false
   if (meeting.status === 'cancelled' || meeting.status === 'ended') return false
   return now >= Date.parse(meeting.opens_at) && now < Date.parse(meeting.closes_at)
+}
+
+const POLL_MS = 60_000
+/** On commence à relire un peu avant l'ouverture, pour que le bouton paraisse à l'heure. */
+const POLL_AHEAD_MS = 15 * 60_000
+
+/**
+ * La réunion publique d'une séance, relue chaque minute tant que la salle est
+ * ouverte ou va l'être, et au retour sur l'onglet : `closes_at` recule tant que
+ * Zoom dit la réunion en cours (les COP débordent). Un échec garde la valeur
+ * connue ; `keep()` (la personne est dans la réunion) empêche qu'elle disparaisse.
+ */
+export function useSessionMeeting(session: MaybeRefOrGetter<PublicScheduleRow | null>, keep: () => boolean = () => false) {
+  const api = useApi()
+  const meeting = ref<PublicSessionMeeting | null>(null)
+  const loaded = ref(false)
+  let lastLoad = 0
+  let timer: ReturnType<typeof setInterval> | undefined
+
+  async function load(): Promise<void> {
+    const current = toValue(session)
+    if (!current?.is_streamed || current.temporal_state === 'cancelled') {
+      loaded.value = true
+      return
+    }
+    lastLoad = Date.now()
+    try {
+      const next = await api.meetings.forSession(current.id)
+      if (current.id !== toValue(session)?.id || (next === null && keep())) return
+      if (JSON.stringify(next) !== JSON.stringify(meeting.value)) meeting.value = next
+    } catch {
+      // Silencieux : la salle garde ce qu'elle savait.
+    } finally {
+      loaded.value = true
+    }
+  }
+
+  function worthPolling(): boolean {
+    if (keep()) return true
+    const current = meeting.value
+    if (!current || current.provider !== 'zoom' || current.status === 'cancelled') return false
+    const at = Date.now()
+    return at >= Date.parse(current.opens_at) - POLL_AHEAD_MS && at < Date.parse(current.closes_at)
+  }
+
+  const onReturn = () => {
+    if (document.visibilityState === 'visible' && Date.now() - lastLoad > 5_000) void load()
+  }
+
+  onMounted(() => {
+    void load()
+    timer = setInterval(() => worthPolling() && void load(), POLL_MS)
+    document.addEventListener('visibilitychange', onReturn)
+    window.addEventListener('focus', onReturn)
+  })
+  onBeforeUnmount(() => {
+    clearInterval(timer)
+    document.removeEventListener('visibilitychange', onReturn)
+    window.removeEventListener('focus', onReturn)
+  })
+  watch(
+    () => toValue(session)?.id,
+    (id, previous) => {
+      if (id === previous) return
+      meeting.value = null
+      loaded.value = false
+      if (import.meta.client) void load()
+    },
+  )
+
+  return { meeting, loaded }
 }
 
 /** Sur ordinateur (écran large, souris), la réunion s'ouvre dans la page ; ailleurs, en pleine page. */
