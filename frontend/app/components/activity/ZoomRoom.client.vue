@@ -27,7 +27,7 @@ interface Props {
 
 const props = defineProps<Props>()
 /** Vrai de l'entrée à la sortie : le parent ne démonte pas la salle pendant ce temps. */
-const emit = defineEmits<{ 'update:inMeeting': [value: boolean] }>()
+const emit = defineEmits<{ 'update:inMeeting': [value: boolean]; 'update:joined': [value: boolean] }>()
 
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
@@ -40,6 +40,7 @@ const { phase, step, error, errorStatus, needsRegistration, waitlisted, joinUrl,
 
 const box = useTemplateRef<HTMLElement>('box')
 const zoomRoot = useTemplateRef<HTMLElement>('zoomRoot')
+const bar = useTemplateRef<HTMLElement>('bar')
 const dialogOpen = ref(false)
 const expanded = ref(false)
 
@@ -66,21 +67,66 @@ watch(
   (active) => emit('update:inMeeting', active),
 )
 
-/** La barre d'outils du SDK se pose sous la vidéo, dans la même racine. */
-const TOOLBAR_PX = 56
+watch(
+  () => phase.value === 'joined' && inPage.value,
+  (inside) => emit('update:joined', inside),
+)
 
-/** Taille de la vidéo : le cadre, ou l'écran en mode agrandi. Nulle tant que la mise en page n'est pas faite. */
-function videoSize(): { width: number; height: number } | null {
-  const rect = box.value?.getBoundingClientRect()
-  const width = Math.round(expanded.value ? window.innerWidth : (rect?.width ?? 0))
-  const height = Math.round((expanded.value ? window.innerHeight : (rect?.height ?? 0)) - TOOLBAR_PX)
-  return width > 0 && height > 0 ? { width, height } : null
+type VideoSize = { width: number; height: number }
+
+/**
+ * `viewSizes.default` ne règle que l'image principale : le SDK ajoute au-dessus son
+ * en-tête et la bande des vignettes, en dessous sa barre d'outils, dans la même
+ * racine, qui prend donc sa hauteur naturelle. L'image est en 16:9 exact, sinon
+ * le SDK rogne la caméra. Supposé avant mesure : en-tête 60, vignettes 200, barre 56.
+ */
+const GUESSED_CHROME_PX = 316
+let chrome = 0
+let applied: VideoSize | null = null
+/** Largeur envoyée au SDK, pour centrer sa racine en mode agrandi. */
+const videoWidth = ref<number | null>(null)
+let pending: ReturnType<typeof setTimeout> | undefined
+
+// Zoom ne garantit pas son rendu au-delà de 1440 px de large.
+const MAX_VIDEO_WIDTH = 1440
+const sixteenNinth = (raw: number): VideoSize => {
+  const width = Math.min(raw, MAX_VIDEO_WIDTH)
+  return { width, height: Math.round((width * 9) / 16) }
 }
 
-function applyVideoSize(): void {
-  const size = videoSize()
-  if (size) client?.updateVideoOptions({ viewSizes: { default: size, ribbon: size } })
+/** Nulle tant que la mise en page n'est pas faite : on n'envoie jamais 0. */
+function videoSize(): VideoSize | null {
+  if (expanded.value) {
+    const available = window.innerHeight - (bar.value?.offsetHeight ?? 0) - (chrome || GUESSED_CHROME_PX)
+    const width = Math.floor(Math.min(window.innerWidth, (Math.max(available, 135) * 16) / 9))
+    return width > 0 ? sixteenNinth(width) : null
+  }
+  const width = Math.floor(box.value?.clientWidth ?? 0)
+  return width > 0 ? sixteenNinth(width) : null
 }
+
+/** Ce que le SDK ajoute autour de l'image, mesuré une fois rendu. */
+function measureChrome(): void {
+  const rootHeight = zoomRoot.value?.getBoundingClientRect().height ?? 0
+  if (applied && rootHeight > applied.height) chrome = Math.round(rootHeight - applied.height)
+}
+
+/** Chaque appel refait la mise en page du SDK : seulement si la taille change, sauf `force`. */
+function applyVideoSize(force = false): void {
+  clearTimeout(pending)
+  pending = setTimeout(() => {
+    const size = videoSize()
+    if (!size || !client) return
+    if (!force && applied && applied.width === size.width && applied.height === size.height) return
+    applied = size
+    videoWidth.value = size.width
+    client.updateVideoOptions({ viewSizes: { default: size } })
+    setTimeout(measureChrome, 400)
+  }, 150)
+}
+
+// Un partage d'écran qui commence ou finit laisse la zone noire tant que le SDK ne refait pas sa mise en page.
+const onShareChange = () => applyVideoSize(true)
 
 // Un client par tentative : créé et initialisé ici, détruit à la sortie ou à l'échec, jamais réinitialisé sur la même racine.
 async function startEmbedded(access: MeetingAccess, setStep: (next: MeetingRoomStep) => void): Promise<void> {
@@ -89,7 +135,8 @@ async function startEmbedded(access: MeetingAccess, setStep: (next: MeetingRoomS
   const current = zoom.createClient()
   client = current
   await nextTick()
-  const size = videoSize() ?? { width: 960, height: 540 - TOOLBAR_PX }
+  const size = videoSize() ?? sixteenNinth(960)
+  applied = size
   try {
     await current.init({
       zoomAppRoot: zoomRoot.value ?? undefined,
@@ -102,27 +149,32 @@ async function startEmbedded(access: MeetingAccess, setStep: (next: MeetingRoomS
           isResizable: false,
           popper: { disableDraggable: true },
           defaultViewType: 'speaker' as SuspensionViewType,
-          viewSizes: { default: size, ribbon: size },
+          viewSizes: { default: size },
         },
       },
     })
     setStep('joining')
     current.on('connection-change', onConnectionChange)
+    current.on('peer-share-state-change', onShareChange)
     await current.join({ ...zoomJoinFields(access), password: access.password })
   } catch (failure) {
     disposeEmbedded()
     throw failure
   }
   await nextTick()
+  setTimeout(measureChrome, 600)
   applyVideoSize()
-  resize = new ResizeObserver(applyVideoSize)
+  resize = new ResizeObserver(() => applyVideoSize())
   if (box.value) resize.observe(box.value)
 }
 
 function disposeEmbedded(): void {
   resize?.disconnect()
   resize = undefined
+  clearTimeout(pending)
+  applied = null
   client?.off('connection-change', onConnectionChange)
+  client?.off('peer-share-state-change', onShareChange)
   if (client) zoom?.destroyClient()
   client = null
 }
@@ -185,7 +237,9 @@ const onFullscreenChange = () => {
 const onKey = (event: KeyboardEvent) => {
   if (event.key === 'Escape' && expanded.value && !document.fullscreenElement) void setExpanded(false)
 }
-const onWindowResize = () => expanded.value && applyVideoSize()
+const onWindowResize = () => {
+  if (expanded.value) applyVideoSize()
+}
 onMounted(() => {
   document.addEventListener('fullscreenchange', onFullscreenChange)
   document.addEventListener('keydown', onKey)
@@ -215,9 +269,27 @@ onBeforeUnmount(() => {
   <div
     ref="box"
     class="bg-surface-inverse text-text-on-inverse"
-    :class="expanded ? 'fixed! inset-0 z-[60]' : 'relative size-full'"
+    :class="expanded ? 'fixed! inset-0 z-[60] overflow-y-auto' : 'relative size-full'"
   >
-    <div v-if="inPage" ref="zoomRoot" class="absolute inset-0" />
+    <!-- Nos commandes dans une barre à nous, jamais par-dessus celles du SDK. -->
+    <div
+      v-if="inPage && phase === 'joined'"
+      ref="bar"
+      class="flex flex-wrap items-center justify-end gap-2 border-b border-border-on-inverse px-3 py-1.5"
+    >
+      <UiButton v-if="joinUrl" variant="inverse" size="sm" icon="external-link" :href="joinUrl">
+        {{ t('zoom-room.fallback') }}
+      </UiButton>
+      <UiButton variant="inverse" size="sm" :icon="expanded ? 'close' : 'monitor'" @click="setExpanded(!expanded)">
+        {{ t(expanded ? 'zoom-room.exitFullscreen' : 'zoom-room.fullscreen') }}
+      </UiButton>
+    </div>
+    <div
+      v-if="inPage"
+      ref="zoomRoot"
+      :class="phase === 'joined' ? 'relative mx-auto' : 'absolute inset-0'"
+      :style="phase === 'joined' && expanded && videoWidth ? { width: `${videoWidth}px` } : undefined"
+    />
 
     <div
       v-if="phase !== 'joined' || !inPage"
@@ -292,15 +364,6 @@ onBeforeUnmount(() => {
       </UiButton>
     </div>
 
-    <UiButton
-      v-if="phase === 'joined' && inPage"
-      class="absolute top-2 right-2 z-10"
-      variant="inverse"
-      icon-only
-      :icon="expanded ? 'close' : 'monitor'"
-      :label="t(expanded ? 'zoom-room.exitFullscreen' : 'zoom-room.fullscreen')"
-      @click="setExpanded(!expanded)"
-    />
 
     <ActivityRegistrationDialog
       v-model:open="dialogOpen"
