@@ -69,7 +69,7 @@ Principe IX : **toute erreur porte un code stable et un message français.** Le 
 | Code | Statut | Message | Quand |
 |---|---|---|---|
 | `LIVE_ZOOM_UNAVAILABLE` | 503 | La salle en ligne n'est pas disponible pour le moment. Réessayez un peu plus tard. | Zoom non configuré (`ZOOM_*`, `LIVE_SECRETS_KEY`) : accès à la salle, création d'une réunion |
-| `LIVE_MEETING_NOT_OPEN` | 409 | La salle n'est pas ouverte en ce moment. Elle ouvre trente minutes avant le début de l'activité et ferme quand la réunion se termine. | `GET /sessions/{id}/meeting/access` avant l'ouverture, après la fin annoncée par Zoom, ou plus de quatre heures après la fin prévue quand la réunion n'est pas en cours |
+| `LIVE_MEETING_NOT_OPEN` | 409 | La salle n'est pas ouverte en ce moment. Elle ouvre trente minutes avant le début de l'activité et ferme quand la réunion se termine. | **Plus émis depuis le 17/10** : la salle n'a plus de fenêtre horaire. Gardé au catalogue, un code stable ne se supprime pas |
 | `LIVE_MEETING_NOT_READY` | 409 | Votre place dans la salle est en cours de préparation. Réessayez dans quelques minutes. | Réunion ou inscription pas encore enregistrée chez Zoom |
 | `LIVE_MEETING_REGISTRATION_REQUIRED` | 403 | Inscrivez-vous à cette activité pour rejoindre la salle. | Aucune inscription inscrite, en attente ou présente pour cette personne |
 | `LIVE_MEETING_EXTERNAL_ID_TAKEN` | 409 | Cette réunion Zoom est déjà rattachée à une autre activité. | Rattachement d'une réunion Zoom déjà pilotée par une autre ligne. Rattacher exige `live.meeting.manage` en portée globale (sinon `FORBIDDEN`) |

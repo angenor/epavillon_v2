@@ -367,7 +367,8 @@ pub async fn reunion_publique(
 
 /// La place d'une inscription, prête chez Zoom. Seul chemin qui lit le code
 /// d'accès chiffré. Ne dépend pas de `sync_status` : une resynchronisation
-/// pendant l'activité ne doit fermer la porte à personne.
+/// pendant l'activité ne doit fermer la porte à personne. Une réunion terminée
+/// reste ouverte : l'animateur peut la relancer.
 pub struct Place {
     pub external_id: Option<String>,
     pub passcode_encrypted: Option<Vec<u8>>,
@@ -390,7 +391,7 @@ pub async fn place(conn: &mut PgConnection, registration_id: Uuid) -> Result<Opt
               AND p.personal_join_url IS NOT NULL
               AND m.external_id IS NOT NULL
               AND m.passcode_encrypted IS NOT NULL
-              AND m.status IN ('scheduled', 'started')"#,
+              AND m.status IN ('scheduled', 'started', 'ended')"#,
         registration_id
     )
     .fetch_optional(conn)
@@ -607,7 +608,7 @@ pub async fn place_du_participant(
               AND p.personal_join_url IS NOT NULL
               AND m.external_id IS NOT NULL
               AND m.passcode_encrypted IS NOT NULL
-              AND m.status IN ('scheduled', 'started')"#,
+              AND m.status IN ('scheduled', 'started', 'ended')"#,
         participant_id
     )
     .fetch_optional(conn)

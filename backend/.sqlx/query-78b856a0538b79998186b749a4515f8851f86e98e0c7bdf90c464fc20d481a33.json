@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT m.external_id, m.passcode_encrypted,\n                  p.display_name, p.email::text AS \"email!\",\n                  p.personal_join_url::text AS personal_join_url\n             FROM live.meeting_participants p\n             JOIN live.meetings m ON m.id = p.meeting_id\n            WHERE p.registration_id = $1\n              AND p.cancelled_at IS NULL\n              AND p.external_registrant_id IS NOT NULL\n              AND p.personal_join_url IS NOT NULL\n              AND m.external_id IS NOT NULL\n              AND m.passcode_encrypted IS NOT NULL\n              AND m.status IN ('scheduled', 'started')",
+  "query": "SELECT m.external_id, m.passcode_encrypted,\n                  p.display_name, p.email::text AS \"email!\",\n                  p.personal_join_url::text AS personal_join_url\n             FROM live.meeting_participants p\n             JOIN live.meetings m ON m.id = p.meeting_id\n            WHERE p.registration_id = $1\n              AND p.cancelled_at IS NULL\n              AND p.external_registrant_id IS NOT NULL\n              AND p.personal_join_url IS NOT NULL\n              AND m.external_id IS NOT NULL\n              AND m.passcode_encrypted IS NOT NULL\n              AND m.status IN ('scheduled', 'started', 'ended')",
   "describe": {
     "columns": [
       {
@@ -62,5 +62,5 @@
       null
     ]
   },
-  "hash": "3c297f1d7fb93de946353bd6ba9b597fc7b2e8d22cff24069dbe4d5615af4198"
+  "hash": "78b856a0538b79998186b749a4515f8851f86e98e0c7bdf90c464fc20d481a33"
 }

@@ -95,22 +95,13 @@ async fn les_regles_dacces_a_la_salle() {
     let r = inscrire(&bac, d.session_id, awa).await;
     consommer(&bac, r).await;
 
-    // Hors de la fenêtre : plus de trente minutes avant, ou plus de quatre
-    // heures après la fin prévue sans réunion en cours.
-    for instant in [debut - Duration::minutes(31), fin + Duration::minutes(241)] {
-        let erreur = meeting::acces(&etat, &bac.ctx(awa), awa, d.session_id, instant)
-            .await
-            .unwrap_err();
-        assert_eq!(erreur.code, ErrorCode::LiveMeetingNotOpen);
-    }
-
     // Réunion pas encore créée chez Zoom.
     let erreur = meeting::acces(
         &etat,
         &bac.ctx(awa),
         awa,
         d.session_id,
-        debut - Duration::minutes(29),
+        debut - Duration::days(10),
     )
     .await
     .unwrap_err();
@@ -166,8 +157,8 @@ async fn les_regles_dacces_a_la_salle() {
     .await
     .is_ok());
 
-    // Réunion encore en cours au-delà de la borne : la salle reste ouverte, et
-    // la fermeture annoncée glisse d'un quart d'heure.
+    // Réunion encore en cours au-delà de la borne : la fin indicative glisse
+    // d'un quart d'heure.
     let tard = fin + Duration::hours(5);
     statut_reunion(&bac, d.session_id, "started", None).await;
     assert!(
@@ -178,19 +169,18 @@ async fn les_regles_dacces_a_la_salle() {
     let publique = meeting::publique(&etat, d.session_id, tard).await.unwrap();
     assert_eq!(publique.closes_at, tard + Duration::minutes(15));
 
-    // Zoom annonce la fin : la salle ferme, à l'heure constatée.
+    // Zoom annonce la fin : la fin indicative est celle constatée.
     let fin_reelle = fin + Duration::minutes(50);
     statut_reunion(&bac, d.session_id, "ended", Some(fin_reelle)).await;
-    let erreur = meeting::acces(
-        &etat,
-        &bac.ctx(awa),
-        awa,
-        d.session_id,
-        fin + Duration::hours(1),
-    )
-    .await
-    .unwrap_err();
-    assert_eq!(erreur.code, ErrorCode::LiveMeetingNotOpen);
+    // Aucune fenêtre horaire : dix jours avant, longtemps après, et même une
+    // réunion terminée (l'animateur peut la relancer), on entre.
+    for instant in [debut - Duration::days(10), fin + Duration::days(2)] {
+        assert!(
+            meeting::acces(&etat, &bac.ctx(awa), awa, d.session_id, instant)
+                .await
+                .is_ok()
+        );
+    }
     let publique = meeting::publique(&etat, d.session_id, tard).await.unwrap();
     assert_eq!(publique.status, "ended");
     assert_eq!(publique.closes_at, fin_reelle);

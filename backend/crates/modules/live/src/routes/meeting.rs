@@ -31,7 +31,7 @@ pub fn chemins_admin(cfg: &mut web::ServiceConfig) {
 
 #[utoipa::path(
     get,
-    description = "`PublicSessionMeeting` : la salle Zoom de la séance, sans aucun secret. `opens_at` vaut le début moins trente minutes.\n\n`closes_at` : l'heure où la salle ferme. Quand Zoom a annoncé la fin de la réunion, c'est cette fin. Sinon, quatre heures après la fin prévue, car les activités débordent souvent. Si la réunion est encore en cours au-delà, `closes_at` vaut maintenant plus quinze minutes : la page garde la salle ouverte tant que la réunion continue, et relit cette route pour savoir quand fermer.\n\n**404** quand la séance est inconnue, non publiée, ou n'a pas de réunion programmée, en cours ou terminée : les trois se lisent pareil. **Aucune garde.**",
+    description = "`PublicSessionMeeting` : la salle Zoom de la séance, sans aucun secret. `opens_at` vaut le début moins trente minutes, `closes_at` la fin constatée par Zoom ou, à défaut, la fin prévue plus quatre heures (maintenant plus quinze minutes si la réunion dure encore au-delà).\n\n`opens_at` et `closes_at` sont **indicatifs** : la salle est ouverte à toute heure tant que la réunion existe chez Zoom, et jusqu'à l'annulation de la séance. Avant l'arrivée de l'animateur, Zoom fait patienter en salle d'attente.\n\n**404** quand la séance est inconnue, non publiée, ou n'a pas de réunion programmée, en cours ou terminée : les trois se lisent pareil. **Aucune garde.**",
     path = "/sessions/{session_id}/meeting",
     tag = "Direct",
     operation_id = "seance_reunion_publique",
@@ -51,7 +51,7 @@ pub(crate) async fn publique(
 
 #[utoipa::path(
     get,
-    description = "`MeetingAccess` : de quoi entrer dans la salle avec le Meeting SDK de Zoom (web, 6.5) : numéro, code d'accès, jeton d'inscrit `tk`, signature du SDK (deux heures), lien personnel en secours.\n\nRéservé à une personne **inscrite, en liste d'attente ou déjà présente** : le jour même, Zoom laisse entrer les trois cents premiers arrivés. **Séance en entrée libre** (sans inscription) : toute personne connectée entre ; sa place chez Zoom est créée au premier appel, pendant la requête, et si Zoom ne répond pas la route dit « pas prête » et l'on réessaie. Réponse `Cache-Control: no-store`.\n\nRefus : `LIVE_ZOOM_UNAVAILABLE` (503, Zoom non configuré), `LIVE_MEETING_REGISTRATION_REQUIRED` (403, jamais en entrée libre), `LIVE_MEETING_NOT_OPEN` (409, avant l'ouverture, après la fin annoncée par Zoom, ou plus de quatre heures après la fin prévue si la réunion n'est pas en cours), `LIVE_MEETING_NOT_READY` (409, réunion ou inscrit pas encore enregistrés chez Zoom).",
+    description = "`MeetingAccess` : de quoi entrer dans la salle avec le Meeting SDK de Zoom (web, 6.5) : numéro, code d'accès, jeton d'inscrit `tk`, signature du SDK (deux heures), lien personnel en secours.\n\nRéservé à une personne **inscrite, en liste d'attente ou déjà présente** : le jour même, Zoom laisse entrer les trois cents premiers arrivés. **Séance en entrée libre** (sans inscription) : toute personne connectée entre ; sa place chez Zoom est créée au premier appel, pendant la requête, et si Zoom ne répond pas la route dit « pas prête » et l'on réessaie. Réponse `Cache-Control: no-store`.\n\n**Aucune fenêtre horaire** : on entre à toute heure tant que la réunion existe chez Zoom, même terminée (l'animateur peut la relancer), jusqu'à l'annulation de la séance (`LIVE_MEETING_CANCELLED`, 409).\n\nRefus : `LIVE_ZOOM_UNAVAILABLE` (503, Zoom non configuré), `LIVE_MEETING_REGISTRATION_REQUIRED` (403, jamais en entrée libre),  `LIVE_MEETING_NOT_READY` (409, réunion ou inscrit pas encore enregistrés chez Zoom).",
     path = "/sessions/{session_id}/meeting/access",
     tag = "Direct",
     operation_id = "seance_reunion_acces",
@@ -61,7 +61,7 @@ pub(crate) async fn publique(
         (status = 401, description = "Aucune session", body = crate::routes::openapi::ApiErrorBody),
         (status = 403, description = "LIVE_MEETING_REGISTRATION_REQUIRED", body = crate::routes::openapi::ApiErrorBody),
         (status = 404, description = "Séance inconnue ou non publiée", body = crate::routes::openapi::ApiErrorBody),
-        (status = 409, description = "LIVE_MEETING_NOT_OPEN ou LIVE_MEETING_NOT_READY", body = crate::routes::openapi::ApiErrorBody),
+        (status = 409, description = "LIVE_MEETING_CANCELLED ou LIVE_MEETING_NOT_READY", body = crate::routes::openapi::ApiErrorBody),
         (status = 503, description = "LIVE_ZOOM_UNAVAILABLE", body = crate::routes::openapi::ApiErrorBody),
     ),
     security(("session" = []))

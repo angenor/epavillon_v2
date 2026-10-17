@@ -12,8 +12,8 @@ use time::{Duration, OffsetDateTime};
 use uuid::Uuid;
 
 use crate::domain::meeting::{
-    fermeture, salle_ouverte, AdminSessionMeeting, MeetingAccess, MeetingSyncInput,
-    PublicSessionMeeting, OUVERTURE_AVANT_MINUTES,
+    fermeture, AdminSessionMeeting, MeetingAccess, MeetingSyncInput, PublicSessionMeeting,
+    OUVERTURE_AVANT_MINUTES,
 };
 use crate::repo::cross::programme;
 use crate::repo::{lecture, meetings};
@@ -55,9 +55,9 @@ pub async fn publique(
     })
 }
 
-/// L'entrée dans la salle. Ordre des refus : Zoom configuré, séance connue,
-/// séance ni annulée ni reportée, inscription (sauf entrée libre), salle
-/// ouverte, place prête.
+/// L'entrée dans la salle, à toute heure (aucune fenêtre, décision du 17/10).
+/// Ordre des refus : Zoom configuré, séance connue, séance ni annulée ni
+/// reportée, inscription (sauf entrée libre), place prête.
 pub async fn acces(
     state: &LiveState,
     ctx: &RequestContext,
@@ -88,14 +88,6 @@ pub async fn acces(
 
     let reunion = meetings::reunion_publique(&mut tx, session_id).await?;
     let statut = reunion.as_ref().map(|r| r.status.clone());
-    if !salle_ouverte(
-        seance.starts_at,
-        seance.ends_at,
-        statut.as_deref(),
-        maintenant,
-    ) {
-        return Err(ApiError::new(ErrorCode::LiveMeetingNotOpen));
-    }
 
     let place = match registration_id {
         Some(id) => {

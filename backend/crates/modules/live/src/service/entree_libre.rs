@@ -40,7 +40,7 @@ pub async fn place(
         return Err(pas_prete());
     };
     let numero = match (&reunion.external_id, statut) {
-        (Some(n), Some("scheduled" | "started")) => n.clone(),
+        (Some(n), Some("scheduled" | "started" | "ended")) => n.clone(),
         _ => return Err(pas_prete()),
     };
 

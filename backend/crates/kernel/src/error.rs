@@ -231,6 +231,7 @@ codes! {
     // peut faire.
     LiveZoomUnavailable => "LIVE_ZOOM_UNAVAILABLE", StatusCode::SERVICE_UNAVAILABLE,
         "La salle en ligne n'est pas disponible pour le moment. Réessayez un peu plus tard.";
+    // Plus émis depuis le 17/10 (aucune fenêtre horaire) ; un code stable reste.
     LiveMeetingNotOpen => "LIVE_MEETING_NOT_OPEN", StatusCode::CONFLICT,
         "La salle n'est pas ouverte en ce moment. Elle ouvre trente minutes avant le début de l'activité et ferme quand la réunion se termine.";
     LiveMeetingNotReady => "LIVE_MEETING_NOT_READY", StatusCode::CONFLICT,
