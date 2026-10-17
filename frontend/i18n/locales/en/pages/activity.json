@@ -96,6 +96,7 @@
       "registered": "Your seat is booked.",
       "waitlisted": "A seat is yours if someone cancels.",
       "free": "Free entry, no registration, subject to available seats.",
+      "meetingFree": "Free entry, no registration: sign in, the Zoom meeting opens on this page 30 minutes before the start, at {time}.",
       "notOpen": "Registration opens on {date}.",
       "closed": "Registration is closed.",
       "full": "This activity is full.",

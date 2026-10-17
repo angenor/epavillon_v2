@@ -80,8 +80,15 @@ const note = computed(() => {
       }
       return mine.value?.status === 'waitlisted' ? t('activity.ticket.note.waitlisted') : t('activity.ticket.note.registered')
     case 'join':
-      return mine.value?.status === 'waitlisted' ? t('zoom-room.waitlisted') : t('activity.ticket.note.meeting')
+      return props.session.registration_required !== false && mine.value?.status === 'waitlisted'
+        ? t('zoom-room.waitlisted')
+        : t('activity.ticket.note.meeting')
     case 'free':
+      if (props.meeting?.provider === 'zoom' && props.meeting.status !== 'cancelled') {
+        return t('activity.ticket.note.meetingFree', {
+          time: timeWithZone(props.meeting.opens_at, props.session.timezone, props.edition.city ?? undefined),
+        })
+      }
       return t('activity.ticket.note.free')
     case 'notOpen':
       return t('activity.ticket.note.notOpen', { date: dateTime(opensAt.value, props.session.timezone) })

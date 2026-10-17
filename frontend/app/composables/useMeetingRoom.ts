@@ -131,7 +131,8 @@ export function useMeetingRoom(session: MaybeRefOrGetter<PublicScheduleRow>) {
   })
 
   const needsRegistration = computed(() => toValue(session).registration_required !== false)
-  const waitlisted = computed(() => mine.value?.status === 'waitlisted')
+  // Entrée libre : toute personne connectée entre, sans inscription ni liste d'attente.
+  const waitlisted = computed(() => needsRegistration.value && mine.value?.status === 'waitlisted')
   const joinUrl = computed(() => access.value?.join_url ?? null)
 
   const phase = computed<MeetingRoomPhase>(() => {
@@ -201,5 +202,5 @@ export function useMeetingRoom(session: MaybeRefOrGetter<PublicScheduleRow>) {
     error.value = null
   }
 
-  return { phase, step, error, errorStatus, waitlisted, joinUrl, prefetch, join, left, onRegistered }
+  return { phase, step, error, errorStatus, needsRegistration, waitlisted, joinUrl, prefetch, join, left, onRegistered }
 }

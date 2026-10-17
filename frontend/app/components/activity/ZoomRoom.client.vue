@@ -34,7 +34,7 @@ const { timeWithZone } = useDateTime()
 const route = useRoute()
 const localePath = useLocalePath()
 const embedded = useEmbeddedZoom()
-const { phase, step, error, errorStatus, waitlisted, joinUrl, prefetch, join, left, onRegistered } = useMeetingRoom(
+const { phase, step, error, errorStatus, needsRegistration, waitlisted, joinUrl, prefetch, join, left, onRegistered } = useMeetingRoom(
   () => props.session,
 )
 
@@ -230,7 +230,7 @@ onBeforeUnmount(() => {
         <p class="max-w-md text-sm" role="alert">{{ error }}</p>
         <div class="flex flex-wrap justify-center gap-2">
           <UiButton v-if="errorStatus === 401" :to="loginTo">{{ t('zoom-room.login.action') }}</UiButton>
-          <UiButton v-else-if="errorStatus === 403" @click="dialogOpen = true">{{ t('zoom-room.register.action') }}</UiButton>
+          <UiButton v-else-if="errorStatus === 403 && needsRegistration" @click="dialogOpen = true">{{ t('zoom-room.register.action') }}</UiButton>
           <UiButton variant="inverse" icon="refresh" @click="enter">{{ t('zoom-room.retry') }}</UiButton>
         </div>
       </template>

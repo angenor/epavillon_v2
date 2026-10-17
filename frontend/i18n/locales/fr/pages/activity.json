@@ -96,6 +96,7 @@
       "registered": "Votre place est réservée.",
       "waitlisted": "Une place vous revient si quelqu'un se désiste.",
       "free": "Entrée libre, sans inscription, dans la limite des places.",
+      "meetingFree": "Entrée libre, sans inscription : connectez-vous, la réunion Zoom s'ouvre sur cette page 30 minutes avant le début, à {time}.",
       "notOpen": "Les inscriptions ouvrent le {date}.",
       "closed": "Les inscriptions sont closes.",
       "full": "L'activité est complète.",
