@@ -79,7 +79,7 @@ async fn les_regles_dacces_a_la_salle() {
     let karim = personne(&bac, "karim@exemple.org", "Karim", "Ilboudo").await;
 
     // Zoom non configuré.
-    let erreur = meeting::acces(&bac.state, awa, d.session_id, pendant)
+    let erreur = meeting::acces(&bac.state, &bac.ctx(awa), awa, d.session_id, pendant)
         .await
         .unwrap_err();
     assert_eq!(erreur.code, ErrorCode::LiveZoomUnavailable);
@@ -87,7 +87,7 @@ async fn les_regles_dacces_a_la_salle() {
     let etat = etat_avec_zoom(&bac);
 
     // Aucune inscription.
-    let erreur = meeting::acces(&etat, karim, d.session_id, pendant)
+    let erreur = meeting::acces(&etat, &bac.ctx(karim), karim, d.session_id, pendant)
         .await
         .unwrap_err();
     assert_eq!(erreur.code, ErrorCode::LiveMeetingRegistrationRequired);
@@ -98,16 +98,22 @@ async fn les_regles_dacces_a_la_salle() {
     // Hors de la fenêtre : plus de trente minutes avant, ou plus de quatre
     // heures après la fin prévue sans réunion en cours.
     for instant in [debut - Duration::minutes(31), fin + Duration::minutes(241)] {
-        let erreur = meeting::acces(&etat, awa, d.session_id, instant)
+        let erreur = meeting::acces(&etat, &bac.ctx(awa), awa, d.session_id, instant)
             .await
             .unwrap_err();
         assert_eq!(erreur.code, ErrorCode::LiveMeetingNotOpen);
     }
 
     // Réunion pas encore créée chez Zoom.
-    let erreur = meeting::acces(&etat, awa, d.session_id, debut - Duration::minutes(29))
-        .await
-        .unwrap_err();
+    let erreur = meeting::acces(
+        &etat,
+        &bac.ctx(awa),
+        awa,
+        d.session_id,
+        debut - Duration::minutes(29),
+    )
+    .await
+    .unwrap_err();
     assert_eq!(erreur.code, ErrorCode::LiveMeetingNotReady);
     assert_eq!(
         meeting::publique(&etat, d.session_id, pendant)
@@ -126,7 +132,7 @@ async fn les_regles_dacces_a_la_salle() {
     )
     .await;
 
-    let acces = meeting::acces(&etat, awa, d.session_id, pendant)
+    let acces = meeting::acces(&etat, &bac.ctx(awa), awa, d.session_id, pendant)
         .await
         .unwrap();
     assert_eq!(acces.meeting_number, "85746065432");
@@ -150,26 +156,40 @@ async fn les_regles_dacces_a_la_salle() {
     assert_eq!(publique.closes_at, fin + Duration::minutes(240));
 
     // Une activité qui déborde : trois heures après la fin prévue, on entre encore.
-    assert!(
-        meeting::acces(&etat, awa, d.session_id, fin + Duration::hours(3))
-            .await
-            .is_ok()
-    );
+    assert!(meeting::acces(
+        &etat,
+        &bac.ctx(awa),
+        awa,
+        d.session_id,
+        fin + Duration::hours(3)
+    )
+    .await
+    .is_ok());
 
     // Réunion encore en cours au-delà de la borne : la salle reste ouverte, et
     // la fermeture annoncée glisse d'un quart d'heure.
     let tard = fin + Duration::hours(5);
     statut_reunion(&bac, d.session_id, "started", None).await;
-    assert!(meeting::acces(&etat, awa, d.session_id, tard).await.is_ok());
+    assert!(
+        meeting::acces(&etat, &bac.ctx(awa), awa, d.session_id, tard)
+            .await
+            .is_ok()
+    );
     let publique = meeting::publique(&etat, d.session_id, tard).await.unwrap();
     assert_eq!(publique.closes_at, tard + Duration::minutes(15));
 
     // Zoom annonce la fin : la salle ferme, à l'heure constatée.
     let fin_reelle = fin + Duration::minutes(50);
     statut_reunion(&bac, d.session_id, "ended", Some(fin_reelle)).await;
-    let erreur = meeting::acces(&etat, awa, d.session_id, fin + Duration::hours(1))
-        .await
-        .unwrap_err();
+    let erreur = meeting::acces(
+        &etat,
+        &bac.ctx(awa),
+        awa,
+        d.session_id,
+        fin + Duration::hours(1),
+    )
+    .await
+    .unwrap_err();
     assert_eq!(erreur.code, ErrorCode::LiveMeetingNotOpen);
     let publique = meeting::publique(&etat, d.session_id, tard).await.unwrap();
     assert_eq!(publique.status, "ended");
@@ -189,9 +209,11 @@ async fn les_regles_dacces_a_la_salle() {
         .execute(bac.pool())
         .await
         .unwrap();
-    assert!(meeting::acces(&etat, awa, d.session_id, pendant)
-        .await
-        .is_ok());
+    assert!(
+        meeting::acces(&etat, &bac.ctx(awa), awa, d.session_id, pendant)
+            .await
+            .is_ok()
+    );
 
     // Séance annulée : la salle n'ouvre pas.
     sqlx::query!(
@@ -201,7 +223,7 @@ async fn les_regles_dacces_a_la_salle() {
     .execute(bac.pool())
     .await
     .unwrap();
-    let erreur = meeting::acces(&etat, awa, d.session_id, pendant)
+    let erreur = meeting::acces(&etat, &bac.ctx(awa), awa, d.session_id, pendant)
         .await
         .unwrap_err();
     assert_eq!(erreur.code, ErrorCode::LiveMeetingCancelled);
@@ -231,7 +253,7 @@ async fn la_liste_dattente_entre_aussi() {
     let code = etat.zoom().unwrap().coffre.chiffrer("x").unwrap();
     simuler_zoom(&bac, d.session_id, code).await;
 
-    let acces = meeting::acces(&etat, jean, d.session_id, debut)
+    let acces = meeting::acces(&etat, &bac.ctx(jean), jean, d.session_id, debut)
         .await
         .unwrap();
     assert_eq!(acces.user_email, "jean.kabore@exemple.org");

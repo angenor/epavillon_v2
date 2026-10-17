@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meeting_participants\n            SET external_registrant_id = $2, personal_join_url = $3::text::platform.url,\n                sync_status = 'synced', synced_at = now(), last_error = NULL, next_retry_at = NULL\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "79f974d12d453306759b6c27be60859b52cb859765a308b504c53ea32d9e0e93"
+}

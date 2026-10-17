@@ -98,6 +98,7 @@ pub async fn traiter(conn: &mut PgConnection, id: Uuid) -> Result<()> {
                 instant(&participant["join_time"]),
             )
             .await?;
+            // Entrée libre : aucune inscription, `joined_at` suffit.
             if let Some(Some(registration_id)) = inscription {
                 programme::noter_la_presence(conn, registration_id).await?;
             }

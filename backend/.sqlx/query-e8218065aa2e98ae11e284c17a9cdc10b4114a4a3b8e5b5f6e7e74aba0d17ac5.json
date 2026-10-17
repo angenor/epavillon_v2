@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"n!\" FROM platform.jobs j\n             JOIN live.meetings m ON j.payload->>'meeting_id' = m.id::text\n            WHERE j.task = 'live.sync_meeting' AND m.session_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "e8218065aa2e98ae11e284c17a9cdc10b4114a4a3b8e5b5f6e7e74aba0d17ac5"
+}

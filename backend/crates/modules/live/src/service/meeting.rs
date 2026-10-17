@@ -1,5 +1,6 @@
 //! Les réunions Zoom d'une séance : ce que le public en voit, l'entrée d'une
-//! personne inscrite, et le back-office.
+//! personne inscrite (ou de toute personne connectée en entrée libre), et le
+//! back-office.
 //!
 //! Appelé directement par les tests : les règles d'accès vivent ici et non
 //! dans les gestionnaires Actix (voir `tests/commun`).
@@ -16,7 +17,7 @@ use crate::domain::meeting::{
 };
 use crate::repo::cross::programme;
 use crate::repo::{lecture, meetings};
-use crate::service::inscrits;
+use crate::service::{entree_libre, inscrits};
 use crate::state::LiveState;
 use crate::zoom::{self, jwt};
 
@@ -54,10 +55,12 @@ pub async fn publique(
     })
 }
 
-/// L'entrée d'une personne inscrite. Ordre des refus : Zoom configuré, séance
-/// connue, séance ni annulée ni reportée, inscription, salle ouverte, place prête.
+/// L'entrée dans la salle. Ordre des refus : Zoom configuré, séance connue,
+/// séance ni annulée ni reportée, inscription (sauf entrée libre), salle
+/// ouverte, place prête.
 pub async fn acces(
     state: &LiveState,
+    ctx: &RequestContext,
     person_id: Uuid,
     session_id: Uuid,
     maintenant: OffsetDateTime,
@@ -73,19 +76,47 @@ pub async fn acces(
         return Err(ApiError::new(ErrorCode::LiveMeetingCancelled));
     }
 
-    let registration_id = programme::inscription_active_de(&mut tx, session_id, person_id)
-        .await?
-        .ok_or_else(|| ApiError::new(ErrorCode::LiveMeetingRegistrationRequired))?;
+    let registration_id = if seance.registration_required {
+        Some(
+            programme::inscription_active_de(&mut tx, session_id, person_id)
+                .await?
+                .ok_or_else(|| ApiError::new(ErrorCode::LiveMeetingRegistrationRequired))?,
+        )
+    } else {
+        None
+    };
 
     let reunion = meetings::reunion_publique(&mut tx, session_id).await?;
-    let statut = reunion.as_ref().map(|r| r.status.as_str());
-    if !salle_ouverte(seance.starts_at, seance.ends_at, statut, maintenant) {
+    let statut = reunion.as_ref().map(|r| r.status.clone());
+    if !salle_ouverte(
+        seance.starts_at,
+        seance.ends_at,
+        statut.as_deref(),
+        maintenant,
+    ) {
         return Err(ApiError::new(ErrorCode::LiveMeetingNotOpen));
     }
 
-    let place = meetings::place(&mut tx, registration_id).await?;
-    tx.commit().await?;
+    let place = match registration_id {
+        Some(id) => {
+            let place = meetings::place(&mut tx, id).await?;
+            tx.commit().await?;
+            place
+        }
+        None => {
+            tx.commit().await?;
+            entree_libre::place(state, ctx, zoom, &seance, statut.as_deref(), person_id).await?
+        }
+    };
+    acces_depuis(zoom, place, maintenant)
+}
 
+/// Les données du Meeting SDK, depuis une place prête.
+fn acces_depuis(
+    zoom: &zoom::Zoom,
+    place: Option<meetings::Place>,
+    maintenant: OffsetDateTime,
+) -> Result<MeetingAccess> {
     let not_ready = || ApiError::new(ErrorCode::LiveMeetingNotReady);
     let place = place.ok_or_else(not_ready)?;
     let numero = place.external_id.ok_or_else(not_ready)?;

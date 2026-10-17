@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meeting_participants\n            SET sync_status = 'in_progress', sync_attempts = sync_attempts + 1,\n                last_attempt_at = now(), cancelled_at = NULL, person_id = $2,\n                display_name = $3, request_payload = $4\n          WHERE id = $1\n            AND (sync_status <> 'in_progress' OR last_attempt_at < now() - interval '10 minutes')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "428368375ebfdef972b7056d43e56dbad1d3d999b8e8ce35c7cb700e7e22af87"
+}

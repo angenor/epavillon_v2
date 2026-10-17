@@ -14,5 +14,6 @@
 //! d'incident vit donc dans `repo/kinds.rs`.
 
 pub mod event;
+pub mod identity;
 pub mod org;
 pub mod programme;

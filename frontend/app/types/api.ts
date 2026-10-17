@@ -5834,9 +5834,9 @@ export interface paths {
         /**
          * @description `MeetingAccess` : de quoi entrer dans la salle avec le Meeting SDK de Zoom (web, 6.5) : numéro, code d'accès, jeton d'inscrit `tk`, signature du SDK (deux heures), lien personnel en secours.
          *
-         *     Réservé à une personne **inscrite, en liste d'attente ou déjà présente** : le jour même, Zoom laisse entrer les trois cents premiers arrivés. Réponse `Cache-Control: no-store`.
+         *     Réservé à une personne **inscrite, en liste d'attente ou déjà présente** : le jour même, Zoom laisse entrer les trois cents premiers arrivés. **Séance en entrée libre** (sans inscription) : toute personne connectée entre ; sa place chez Zoom est créée au premier appel, pendant la requête, et si Zoom ne répond pas la route dit « pas prête » et l'on réessaie. Réponse `Cache-Control: no-store`.
          *
-         *     Refus : `LIVE_ZOOM_UNAVAILABLE` (503, Zoom non configuré), `LIVE_MEETING_REGISTRATION_REQUIRED` (403), `LIVE_MEETING_NOT_OPEN` (409, avant l'ouverture, après la fin annoncée par Zoom, ou plus de quatre heures après la fin prévue si la réunion n'est pas en cours), `LIVE_MEETING_NOT_READY` (409, réunion ou inscrit pas encore enregistrés chez Zoom).
+         *     Refus : `LIVE_ZOOM_UNAVAILABLE` (503, Zoom non configuré), `LIVE_MEETING_REGISTRATION_REQUIRED` (403, jamais en entrée libre), `LIVE_MEETING_NOT_OPEN` (409, avant l'ouverture, après la fin annoncée par Zoom, ou plus de quatre heures après la fin prévue si la réunion n'est pas en cours), `LIVE_MEETING_NOT_READY` (409, réunion ou inscrit pas encore enregistrés chez Zoom).
          */
         get: operations["seance_reunion_acces"];
         put?: never;

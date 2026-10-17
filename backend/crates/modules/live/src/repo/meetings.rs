@@ -459,3 +459,158 @@ pub async fn recaler_reunion(
     }
     Ok(())
 }
+
+// ---------------------------------------------------------------------------
+// Entrée libre : une personne connectée, sans inscription plateforme.
+// ---------------------------------------------------------------------------
+
+pub struct ParticipantLibre {
+    pub id: Uuid,
+    pub external_registrant_id: Option<String>,
+    pub pret: bool,
+}
+
+/// La ligne de cette personne dans la réunion, par son identifiant ou par son
+/// adresse (unique par réunion).
+pub async fn participant_libre(
+    conn: &mut PgConnection,
+    meeting_id: Uuid,
+    person_id: Uuid,
+    email: &str,
+) -> Result<Option<ParticipantLibre>> {
+    let ligne = sqlx::query_as!(
+        ParticipantLibre,
+        r#"SELECT id, external_registrant_id,
+                  (cancelled_at IS NULL AND external_registrant_id IS NOT NULL
+                   AND personal_join_url IS NOT NULL) AS "pret!"
+             FROM live.meeting_participants
+            WHERE meeting_id = $1
+              AND (person_id = $2 OR email = $3::text::platform.email)
+            ORDER BY (person_id = $2) DESC NULLS LAST
+            LIMIT 1"#,
+        meeting_id,
+        person_id,
+        email
+    )
+    .fetch_optional(conn)
+    .await?;
+    Ok(ligne)
+}
+
+/// Née `in_progress` : le déclencheur ne dépose aucun travail, l'appel à Zoom
+/// est fait dans la requête. `None` : une requête concurrente l'a posée.
+pub async fn inserer_participant_libre(
+    conn: &mut PgConnection,
+    meeting_id: Uuid,
+    person_id: Uuid,
+    display_name: &str,
+    email: &str,
+    charge: &Value,
+) -> Result<Option<Uuid>> {
+    let id = sqlx::query_scalar!(
+        "INSERT INTO live.meeting_participants
+             (meeting_id, person_id, role, display_name, email, request_payload,
+              sync_status, sync_attempts, last_attempt_at)
+         VALUES ($1, $2, 'attendee', $3, $4::text::platform.email, $5,
+                 'in_progress', 1, now())
+         ON CONFLICT DO NOTHING
+         RETURNING id",
+        meeting_id,
+        person_id,
+        display_name,
+        email,
+        charge
+    )
+    .fetch_optional(conn)
+    .await?;
+    Ok(id)
+}
+
+/// Réserve une ligne existante pour l'appel à Zoom. Faux : un travail la tient.
+pub async fn reserver_participant_libre(
+    conn: &mut PgConnection,
+    participant_id: Uuid,
+    person_id: Uuid,
+    display_name: &str,
+    charge: &Value,
+) -> Result<bool> {
+    let pris = sqlx::query!(
+        "UPDATE live.meeting_participants
+            SET sync_status = 'in_progress', sync_attempts = sync_attempts + 1,
+                last_attempt_at = now(), cancelled_at = NULL, person_id = $2,
+                display_name = $3, request_payload = $4
+          WHERE id = $1
+            AND (sync_status <> 'in_progress' OR last_attempt_at < now() - interval '10 minutes')",
+        participant_id,
+        person_id,
+        display_name,
+        charge
+    )
+    .execute(conn)
+    .await?
+    .rows_affected();
+    Ok(pris == 1)
+}
+
+pub async fn inscrit_synchronise(
+    conn: &mut PgConnection,
+    participant_id: Uuid,
+    registrant_id: &str,
+    lien: Option<&str>,
+) -> Result<()> {
+    sqlx::query!(
+        "UPDATE live.meeting_participants
+            SET external_registrant_id = $2, personal_join_url = $3::text::platform.url,
+                sync_status = 'synced', synced_at = now(), last_error = NULL, next_retry_at = NULL
+          WHERE id = $1",
+        participant_id,
+        registrant_id,
+        lien
+    )
+    .execute(conn)
+    .await?;
+    Ok(())
+}
+
+/// Laissée `failed` : le filet de sécurité la reprendra à l'échéance.
+pub async fn inscrit_en_echec(
+    conn: &mut PgConnection,
+    participant_id: Uuid,
+    erreur: &str,
+) -> Result<()> {
+    sqlx::query!(
+        "UPDATE live.meeting_participants
+            SET sync_status = 'failed', last_error = $2, next_retry_at = now() + interval '1 minute'
+          WHERE id = $1",
+        participant_id,
+        erreur
+    )
+    .execute(conn)
+    .await?;
+    Ok(())
+}
+
+pub async fn place_du_participant(
+    conn: &mut PgConnection,
+    participant_id: Uuid,
+) -> Result<Option<Place>> {
+    let ligne = sqlx::query_as!(
+        Place,
+        r#"SELECT m.external_id, m.passcode_encrypted,
+                  p.display_name, p.email::text AS "email!",
+                  p.personal_join_url::text AS personal_join_url
+             FROM live.meeting_participants p
+             JOIN live.meetings m ON m.id = p.meeting_id
+            WHERE p.id = $1
+              AND p.cancelled_at IS NULL
+              AND p.external_registrant_id IS NOT NULL
+              AND p.personal_join_url IS NOT NULL
+              AND m.external_id IS NOT NULL
+              AND m.passcode_encrypted IS NOT NULL
+              AND m.status IN ('scheduled', 'started')"#,
+        participant_id
+    )
+    .fetch_optional(conn)
+    .await?;
+    Ok(ligne)
+}

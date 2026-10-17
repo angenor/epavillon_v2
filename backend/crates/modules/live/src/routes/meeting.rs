@@ -51,7 +51,7 @@ pub(crate) async fn publique(
 
 #[utoipa::path(
     get,
-    description = "`MeetingAccess` : de quoi entrer dans la salle avec le Meeting SDK de Zoom (web, 6.5) : numéro, code d'accès, jeton d'inscrit `tk`, signature du SDK (deux heures), lien personnel en secours.\n\nRéservé à une personne **inscrite, en liste d'attente ou déjà présente** : le jour même, Zoom laisse entrer les trois cents premiers arrivés. Réponse `Cache-Control: no-store`.\n\nRefus : `LIVE_ZOOM_UNAVAILABLE` (503, Zoom non configuré), `LIVE_MEETING_REGISTRATION_REQUIRED` (403), `LIVE_MEETING_NOT_OPEN` (409, avant l'ouverture, après la fin annoncée par Zoom, ou plus de quatre heures après la fin prévue si la réunion n'est pas en cours), `LIVE_MEETING_NOT_READY` (409, réunion ou inscrit pas encore enregistrés chez Zoom).",
+    description = "`MeetingAccess` : de quoi entrer dans la salle avec le Meeting SDK de Zoom (web, 6.5) : numéro, code d'accès, jeton d'inscrit `tk`, signature du SDK (deux heures), lien personnel en secours.\n\nRéservé à une personne **inscrite, en liste d'attente ou déjà présente** : le jour même, Zoom laisse entrer les trois cents premiers arrivés. **Séance en entrée libre** (sans inscription) : toute personne connectée entre ; sa place chez Zoom est créée au premier appel, pendant la requête, et si Zoom ne répond pas la route dit « pas prête » et l'on réessaie. Réponse `Cache-Control: no-store`.\n\nRefus : `LIVE_ZOOM_UNAVAILABLE` (503, Zoom non configuré), `LIVE_MEETING_REGISTRATION_REQUIRED` (403, jamais en entrée libre), `LIVE_MEETING_NOT_OPEN` (409, avant l'ouverture, après la fin annoncée par Zoom, ou plus de quatre heures après la fin prévue si la réunion n'est pas en cours), `LIVE_MEETING_NOT_READY` (409, réunion ou inscrit pas encore enregistrés chez Zoom).",
     path = "/sessions/{session_id}/meeting/access",
     tag = "Direct",
     operation_id = "seance_reunion_acces",
@@ -68,11 +68,13 @@ pub(crate) async fn publique(
 )]
 pub(crate) async fn acces(
     state: web::Data<LiveState>,
+    requete: HttpRequest,
     acteur: Actor,
     chemin: web::Path<Uuid>,
 ) -> Result<HttpResponse> {
     let acces = meeting::acces(
         &state,
+        &crate::routes::contexte_de(&requete, acteur.0),
         acteur.0,
         chemin.into_inner(),
         OffsetDateTime::now_utc(),

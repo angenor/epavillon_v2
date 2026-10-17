@@ -1,0 +1,49 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, external_registrant_id,\n                  (cancelled_at IS NULL AND external_registrant_id IS NOT NULL\n                   AND personal_join_url IS NOT NULL) AS \"pret!\"\n             FROM live.meeting_participants\n            WHERE meeting_id = $1\n              AND (person_id = $2 OR email = $3::text::platform.email)\n            ORDER BY (person_id = $2) DESC NULLS LAST\n            LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "external_registrant_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "external_registrant_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "pret!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      null
+    ]
+  },
+  "hash": "e2f97c8cead86f0a97be4376d679ff249053482df7665d549ae8b94a985a26ba"
+}

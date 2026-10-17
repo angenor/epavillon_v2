@@ -215,6 +215,8 @@ pub struct Seance {
     pub is_streamed: bool,
     pub is_published: bool,
     pub status: String,
+    /// Faux : entrée libre, toute personne connectée entre sans inscription.
+    pub registration_required: bool,
 }
 
 pub async fn seance(conn: &mut PgConnection, session_id: Uuid) -> Result<Option<Seance>> {
@@ -223,7 +225,7 @@ pub async fn seance(conn: &mut PgConnection, session_id: Uuid) -> Result<Option<
         r#"SELECT s.id, s.event_id, s.title AS "title!: Value", s.starts_at, s.ends_at,
                   s.timezone::text AS "timezone!", s.is_streamed,
                   (s.published_at IS NOT NULL) AS "is_published!",
-                  s.status::text AS "status!"
+                  s.status::text AS "status!", s.registration_required
              FROM programme.sessions s
             WHERE s.id = $1"#,
         session_id
@@ -257,7 +259,7 @@ pub async fn inscription(
                   s.id AS session_id, s.event_id, s.title AS "title!: Value",
                   s.starts_at, s.ends_at, s.timezone::text AS "timezone!", s.is_streamed,
                   (s.published_at IS NOT NULL) AS "is_published!",
-                  s.status::text AS "session_status!"
+                  s.status::text AS "session_status!", s.registration_required
              FROM programme.registrations r
              JOIN programme.sessions s ON s.id = r.session_id
              JOIN identity.people p ON p.id = r.person_id
@@ -285,6 +287,7 @@ pub async fn inscription(
             is_streamed: l.is_streamed,
             is_published: l.is_published,
             status: l.session_status,
+            registration_required: l.registration_required,
         },
     }))
 }

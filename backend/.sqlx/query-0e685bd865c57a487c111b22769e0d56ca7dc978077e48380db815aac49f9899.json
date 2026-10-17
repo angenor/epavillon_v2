@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO live.meeting_participants\n             (meeting_id, person_id, role, display_name, email, request_payload,\n              sync_status, sync_attempts, last_attempt_at)\n         VALUES ($1, $2, 'attendee', $3, $4::text::platform.email, $5,\n                 'in_progress', 1, now())\n         ON CONFLICT DO NOTHING\n         RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "0e685bd865c57a487c111b22769e0d56ca7dc978077e48380db815aac49f9899"
+}

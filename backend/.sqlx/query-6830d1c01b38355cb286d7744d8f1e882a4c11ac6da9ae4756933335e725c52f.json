@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT registration_id, person_id, sync_status::text AS \"s!\", external_registrant_id\n             FROM live.meeting_participants WHERE person_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "registration_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "registration_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "s!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "external_registrant_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "external_registrant_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      null,
+      true
+    ]
+  },
+  "hash": "6830d1c01b38355cb286d7744d8f1e882a4c11ac6da9ae4756933335e725c52f"
+}

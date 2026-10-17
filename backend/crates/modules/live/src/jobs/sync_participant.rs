@@ -16,7 +16,7 @@ use time::OffsetDateTime;
 use uuid::Uuid;
 
 use crate::repo::meetings::{self, CANCEL_PARTICIPANT, FILE, SYNC_PARTICIPANT};
-use crate::zoom::{Inscrit, Zoom, ZoomError};
+use crate::zoom::{Zoom, ZoomError};
 
 pub const PAS_ENCORE_CREEE: &str = "réunion pas encore créée";
 
@@ -61,7 +61,11 @@ impl JobHandler for SyncParticipant {
         };
 
         let (prenom, nom) = noms(&a);
-        let resultat = self.inscrire(&a, &prenom, &nom).await;
+        let resultat = self
+            .zoom
+            .client
+            .inscrire_et_approuver(&a.numero, &a.email, &prenom, &nom, a.deja_inscrit.is_some())
+            .await;
 
         let mut tx = self.db.write(&job.context()).await?;
         match resultat {
@@ -206,30 +210,6 @@ impl SyncParticipant {
             essais: l.sync_attempts,
             essais_max: l.max_sync_attempts,
         }))
-    }
-
-    async fn inscrire(
-        &self,
-        a: &AInscrire,
-        prenom: &str,
-        nom: &str,
-    ) -> std::result::Result<Inscrit, ZoomError> {
-        let client = &self.zoom.client;
-        let inscrit = client.inscrire(&a.numero, &a.email, prenom, nom).await?;
-        // Réinscription après annulation : Zoom range l'inscrit parmi les
-        // refusés ; retrouvé en attente ou refusé, il est réapprouvé.
-        if a.deja_inscrit.is_some() || matches!(inscrit.statut, Some("pending" | "denied")) {
-            if let Err(e) = client
-                .changer_statut_inscrit(&a.numero, "approve", &inscrit.registrant_id, &a.email)
-                .await
-            {
-                if e.est_passagere() {
-                    return Err(e);
-                }
-                tracing::warn!(erreur = %e, "réapprobation de l'inscrit refusée par Zoom");
-            }
-        }
-        Ok(inscrit)
     }
 }
 

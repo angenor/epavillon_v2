@@ -266,6 +266,31 @@ impl ZoomClient {
         }
     }
 
+    /// Inscrit, puis réapprouve quand Zoom range l'inscrit parmi les refusés ou
+    /// en attente (réinscription après annulation, approbation manuelle passée).
+    pub async fn inscrire_et_approuver(
+        &self,
+        numero: &str,
+        email: &str,
+        prenom: &str,
+        nom: &str,
+        deja_inscrit: bool,
+    ) -> ZoomResult<Inscrit> {
+        let inscrit = self.inscrire(numero, email, prenom, nom).await?;
+        if deja_inscrit || matches!(inscrit.statut, Some("pending" | "denied")) {
+            if let Err(e) = self
+                .changer_statut_inscrit(numero, "approve", &inscrit.registrant_id, email)
+                .await
+            {
+                if e.est_passagere() {
+                    return Err(e);
+                }
+                tracing::warn!(erreur = %e, "réapprobation de l'inscrit refusée par Zoom");
+            }
+        }
+        Ok(inscrit)
+    }
+
     /// Parcourt les inscrits approuvés, en attente puis refusés (une
     /// inscription annulée est rangée parmi les refusées).
     pub async fn trouver_inscrit(&self, numero: &str, email: &str) -> ZoomResult<Option<Inscrit>> {
