@@ -26,6 +26,9 @@
 
 #![allow(dead_code)]
 
+pub mod http;
+pub mod zoom;
+
 use kernel::auth::Perimeter;
 use kernel::config::Config;
 use kernel::context::RequestContext;

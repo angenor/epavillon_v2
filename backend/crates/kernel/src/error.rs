@@ -225,6 +225,21 @@ codes! {
     LiveIncidentNotPublished => "LIVE_INCIDENT_NOT_PUBLISHED", StatusCode::UNPROCESSABLE_ENTITY,
         "Ce message n'a jamais été publié : il n'y a rien à retirer.";
 
+    // --- Direct, réunions Zoom (17/10) ----------------------------------------
+    // Les quatre premiers répondent à la personne inscrite qui veut entrer dans
+    // la salle depuis la page de l'activité : des mots simples, et ce qu'elle
+    // peut faire.
+    LiveZoomUnavailable => "LIVE_ZOOM_UNAVAILABLE", StatusCode::SERVICE_UNAVAILABLE,
+        "La salle en ligne n'est pas disponible pour le moment. Réessayez un peu plus tard.";
+    LiveMeetingNotOpen => "LIVE_MEETING_NOT_OPEN", StatusCode::CONFLICT,
+        "La salle n'est pas ouverte en ce moment. Elle ouvre trente minutes avant le début de l'activité.";
+    LiveMeetingNotReady => "LIVE_MEETING_NOT_READY", StatusCode::CONFLICT,
+        "Votre place dans la salle est en cours de préparation. Réessayez dans quelques minutes.";
+    LiveMeetingRegistrationRequired => "LIVE_MEETING_REGISTRATION_REQUIRED", StatusCode::FORBIDDEN,
+        "Inscrivez-vous à cette activité pour rejoindre la salle.";
+    LiveMeetingExternalIdTaken => "LIVE_MEETING_EXTERNAL_ID_TAKEN", StatusCode::CONFLICT,
+        "Cette réunion Zoom est déjà rattachée à une autre activité.";
+
     // --- Guide Négo, admission (0b) -------------------------------------------
     // **Aucun de ces codes ne répond sur le chemin nominal de la saisie d'un
     // code** : les neuf issues sortent en 200 avec leur discriminant, comme

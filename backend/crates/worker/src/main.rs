@@ -63,7 +63,10 @@ async fn main() {
         // commentaire ne serait jamais réveillé (écart n° 126). Le second
         // écoute tout : la correspondance entre un événement et un avis est une
         // DONNÉE, portée par `notification_types.code`.
-        .register_all(engagement::event_consumers(db.clone(), courrier.clone()));
+        .register_all(engagement::event_consumers(db.clone(), courrier.clone()))
+        // Chaque inscription qui a une place (inscrite, en attente, présente)
+        // devient un inscrit Zoom ; chaque annulation libère la sienne.
+        .register_all(live::event_consumers(&config));
 
     let travaux = JobRegistry::new()
         .register_all(identity::job_handlers(
@@ -98,7 +101,10 @@ async fn main() {
             db.clone(),
             &config,
             courrier_negociation,
-        ));
+        ))
+        // Les quatre travaux Zoom, et c'est ce geste qui fait écouter la file
+        // « live ». Sans configuration Zoom, aucun : les travaux attendent.
+        .register_all(live::job_handlers(db.clone(), &config));
 
     // Les travaux récurrents se replanifient eux-mêmes ; le démarrage ne fait
     // que **réarmer** la chaîne, au cas où sa dernière occurrence serait morte

@@ -64,6 +64,16 @@ Principe IX : **toute erreur porte un code stable et un message français.** Le 
 | `IDENTITY_UNKNOWN_REFERENCE` | 422 · variable | La valeur choisie n'existe pas. | Pays, langue ou autre référence inconnue |
 | `IDENTITY_PRIVACY_WRONG_ACTION` | 422 | L'anonymisation ne répond qu'à une demande d'effacement. | Aussi exprimé par le discriminant `wrong_type` ; le code sert aux appels hors écran |
 
+### Direct : réunions Zoom (17/10)
+
+| Code | Statut | Message | Quand |
+|---|---|---|---|
+| `LIVE_ZOOM_UNAVAILABLE` | 503 | La salle en ligne n'est pas disponible pour le moment. Réessayez un peu plus tard. | Zoom non configuré (`ZOOM_*`, `LIVE_SECRETS_KEY`) : accès à la salle, création d'une réunion |
+| `LIVE_MEETING_NOT_OPEN` | 409 | La salle n'est pas ouverte en ce moment. Elle ouvre trente minutes avant le début de l'activité. | `GET /sessions/{id}/meeting/access` avant l'ouverture ou plus de trente minutes après la fin |
+| `LIVE_MEETING_NOT_READY` | 409 | Votre place dans la salle est en cours de préparation. Réessayez dans quelques minutes. | Réunion ou inscription pas encore enregistrée chez Zoom |
+| `LIVE_MEETING_REGISTRATION_REQUIRED` | 403 | Inscrivez-vous à cette activité pour rejoindre la salle. | Aucune inscription inscrite, en attente ou présente pour cette personne |
+| `LIVE_MEETING_EXTERNAL_ID_TAKEN` | 409 | Cette réunion Zoom est déjà rattachée à une autre activité. | Rattachement d'une réunion Zoom déjà pilotée par une autre ligne |
+
 ### Exploitation
 
 | Code | Statut | Quand |

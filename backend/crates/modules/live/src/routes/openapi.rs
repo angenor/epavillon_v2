@@ -33,10 +33,16 @@ pub struct ApiErrorBody {
         crate::routes::admin::depublier,
         crate::routes::public::actifs,
         crate::routes::public::flux,
+        crate::routes::meeting::publique,
+        crate::routes::meeting::acces,
+        crate::routes::meeting::lire_admin,
+        crate::routes::meeting::reconstruire,
+        crate::routes::webhook::recevoir,
     ),
     components(schemas(ApiErrorBody)),
     tags(
         (name = "Back-office — messages d'incident", description = "Ce qui se joue en ce moment, et ce qui en est déjà dit. Rédiger, publier, corriger, retirer — la trace reste. Filtré par le périmètre d'administration ; les quatre écritures exigent `live.incident.publish` **sur la portée visée**, et rendent leurs dix issues en 200."),
+        (name = "Back-office : réunions Zoom", description = "La réunion Zoom d'une séance et ses inscrits chez Zoom : créer, rattacher une réunion existante, relancer. Filtré par le périmètre d'administration ; exige `live.meeting.manage` sur l'édition."),
         (name = "Direct", description = "Ce que le public voit quand quelque chose ne se passe pas comme prévu : les messages actifs d'une édition, le plus grave en tête, et les flux en cours d'une séance publiée. Aucune garde — un bandeau d'incident est public par nature."),
     )
 )]

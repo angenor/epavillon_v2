@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meeting_participants\n            SET joined_at = $4, left_at = NULL\n          WHERE id = (SELECT id FROM live.meeting_participants\n                       WHERE meeting_id = $1\n                         AND (external_registrant_id = $2\n                              OR ($2::text IS NULL AND lower(email::text) = lower($3)))\n                       LIMIT 1)\n        RETURNING registration_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "registration_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "registration_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "d81a7de63126a208eee1f053084d66e04e61f30e049ab13cc7f52d0314edc0cf"
+}

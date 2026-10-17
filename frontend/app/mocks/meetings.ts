@@ -42,8 +42,7 @@ export function publicSessionMeeting(sessionId: string, at: number = Date.now())
 }
 
 export function meetingAccess(_sessionId: string): MeetingAccess {
-  // Code absent du contrat tant que `make openapi` n'a pas tourné côté API.
-  const code = 'LIVE_ZOOM_UNAVAILABLE' as string as ApiErrorCode
+  const code: ApiErrorCode = 'LIVE_ZOOM_UNAVAILABLE'
   throw new ApiRequestError(
     { code, message: "La réunion Zoom est momentanément indisponible. Réessayez dans quelques instants ou ouvrez-la dans l'application Zoom." },
     503,

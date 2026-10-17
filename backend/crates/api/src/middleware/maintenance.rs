@@ -30,12 +30,15 @@ use crate::PREFIXE;
 
 pub const DRAPEAU: &str = "platform.maintenance";
 
-const ECRITURES_OUVERTES: [&str; 5] = [
+// Les notifications de Zoom ne sont pas une écriture de personne : les refuser
+// pendant la maintenance perdrait les présences, Zoom ne les réémet pas.
+const ECRITURES_OUVERTES: [&str; 6] = [
     "/auth/login",
     "/auth/logout",
     "/auth/refresh",
     "/auth/password-reset",
     "/auth/password-reset/confirm",
+    "/webhooks/zoom",
 ];
 
 pub struct MaintenanceGate;

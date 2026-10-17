@@ -1,6 +1,8 @@
 pub mod admin;
+pub mod meeting;
 pub mod openapi;
 pub mod public;
+pub mod webhook;
 
 use actix_web::{HttpMessage, HttpRequest};
 use kernel::context::RequestContext;

@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.joined_at AS participant, r.joined_at AS inscription\n             FROM live.meeting_participants p\n             JOIN programme.registrations r ON r.id = p.registration_id\n            WHERE p.registration_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "participant",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "joined_at"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "inscription",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "programme.registrations",
+            "name": "joined_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      true
+    ]
+  },
+  "hash": "4c5c96f793cb7d564bf80762baf27b1ded00701053ee11efaccf5dfc88954aab"
+}

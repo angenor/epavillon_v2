@@ -21,6 +21,9 @@ pub enum ConfigError {
     Invalid(String),
 }
 
+mod zoom;
+pub use zoom::{ZoomConfig, ZOOM_API_BASE_URL, ZOOM_OAUTH_URL};
+
 fn invalid(message: impl Into<String>) -> ConfigError {
     ConfigError::Invalid(message.into())
 }
@@ -206,6 +209,25 @@ struct Raw {
     #[serde(default)]
     openrouter_api_key: Option<Secret>,
 
+    /// Zoom (17/10) : les sept réglages vont ensemble. Tous vides, la
+    /// visioconférence est éteinte ; à moitié remplis, le démarrage est refusé.
+    #[serde(default)]
+    zoom_account_id: String,
+    #[serde(default)]
+    zoom_client_id: String,
+    #[serde(default)]
+    zoom_client_secret: String,
+    #[serde(default)]
+    zoom_host_user: String,
+    #[serde(default)]
+    zoom_sdk_key: String,
+    #[serde(default)]
+    zoom_sdk_secret: String,
+    #[serde(default)]
+    zoom_webhook_secret_token: String,
+    #[serde(default)]
+    live_secrets_key: String,
+
     #[serde(default = "default_duplicate_score_threshold")]
     org_duplicate_score_threshold: u16,
     #[serde(default = "default_duplicate_scan_batch")]
@@ -366,6 +388,8 @@ pub struct Config {
     pub media: MediaConfig,
     pub engagement: EngagementConfig,
     pub negotiation: NegotiationConfig,
+    /// `None` : Zoom n'est pas configuré, et toute route qui en a besoin répond 503.
+    pub zoom: Option<ZoomConfig>,
     pub mail: MailConfig,
     pub telemetry: TelemetryConfig,
 }
@@ -624,6 +648,7 @@ impl Config {
 
     pub fn from_figment(figment: Figment) -> Result<Self, ConfigError> {
         let raw: Raw = figment.extract().map_err(Box::new)?;
+        let zoom = zoom::depuis(&raw)?;
 
         if raw.database_url.trim().is_empty() {
             return Err(invalid("DATABASE_URL est vide."));
@@ -939,6 +964,7 @@ impl Config {
                     .map(|c| Secret(c.0.trim().to_owned()))
                     .filter(|c| !c.0.is_empty()),
             },
+            zoom,
             mail: MailConfig {
                 transport,
                 relay_url: raw.mail_relay_url,

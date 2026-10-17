@@ -50,6 +50,9 @@ actix-multipart = "0.8"
 # Fondée sur html5ever : seul un analyseur conforme refuse ce qu'un navigateur
 # accepterait — attribut d'événement, `javascript:` encodé, balise mal fermée.
 ammonia = "4"
+# Chiffrement des secrets de réunion Zoom (code d'accès, lien hôte) avant
+# écriture en base (080_live.sql, D3). RustCrypto, même famille que `sha2`.
+aes-gcm = "0.10"
 argon2 = "0.5"
 async-trait = "0.1"
 base64 = "0.22"

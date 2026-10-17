@@ -4,7 +4,9 @@ pub mod active;
 pub mod cross;
 pub mod incidents;
 pub mod kinds;
+pub mod meetings;
 pub mod streams;
+pub mod webhooks;
 
 use kernel::error::Result;
 use sqlx::{PgPool, Postgres, Transaction};

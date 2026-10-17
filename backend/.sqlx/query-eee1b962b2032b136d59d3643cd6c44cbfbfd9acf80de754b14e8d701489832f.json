@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT sync_status::text AS \"s!\", external_registrant_id,\n                  personal_join_url::text AS lien\n             FROM live.meeting_participants WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "s!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "external_registrant_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "live.meeting_participants",
+            "name": "external_registrant_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "lien",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      true,
+      null
+    ]
+  },
+  "hash": "eee1b962b2032b136d59d3643cd6c44cbfbfd9acf80de754b14e8d701489832f"
+}

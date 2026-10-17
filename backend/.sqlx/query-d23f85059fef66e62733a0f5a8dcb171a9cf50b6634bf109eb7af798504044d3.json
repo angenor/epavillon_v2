@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meetings\n            SET status = 'started', actual_start_at = COALESCE(actual_start_at, $2),\n                actual_end_at = NULL, external_uuid = COALESCE($3, external_uuid)\n          WHERE id = $1 AND status IN ('scheduled', 'started', 'ended')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d23f85059fef66e62733a0f5a8dcb171a9cf50b6634bf109eb7af798504044d3"
+}

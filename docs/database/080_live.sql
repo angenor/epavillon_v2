@@ -204,6 +204,46 @@ CREATE TRIGGER tg_meetings_audit
     AFTER INSERT OR UPDATE OR DELETE ON live.meetings
     FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
 
+-- Création chez le fournisseur, mise en file par la base (17/10, Zoom). Une
+-- réunion passée en `pending` (création, rattachement d'une réunion existante,
+-- relance depuis le back-office) dépose un travail `live.sync_meeting` dans la
+-- même transaction : aucun chemin d'écriture ne peut l'oublier.
+--
+-- La clé d'idempotence est HORODATÉE, comme dans requeue_failed_participants() :
+-- platform.jobs garde la clé des travaux réussis, et une clé égale à
+-- l'identifiant de la réunion interdirait toute relance après une première
+-- création. Deux passages en `pending` dans la même microseconde n'en font qu'un.
+-- Le travail se protège lui-même du doublon : il réserve la ligne
+-- (`pending`/`failed` vers `in_progress`) avant d'appeler le fournisseur.
+--
+-- Dix essais et non cinq : le délai croissant de platform.fail_job() couvre
+-- ainsi une demi-heure de panne du fournisseur, cinq essais n'en couvraient
+-- qu'une minute.
+CREATE OR REPLACE FUNCTION live.tg_enqueue_meeting_sync()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    INSERT INTO platform.jobs (queue, task, payload, idempotency_key, max_attempts)
+    VALUES (
+        'live',
+        'live.sync_meeting',
+        jsonb_build_object('meeting_id', NEW.id),
+        NEW.id::text || ':' || to_char(clock_timestamp(), 'YYYYMMDDHH24MISSUS'),
+        10
+    )
+    ON CONFLICT DO NOTHING;
+
+    RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER tg_meetings_enqueue_sync
+    AFTER INSERT OR UPDATE OF sync_status ON live.meetings
+    FOR EACH ROW
+    WHEN (NEW.sync_status = 'pending')
+    EXECUTE FUNCTION live.tg_enqueue_meeting_sync();
+
 COMMENT ON TABLE live.meetings IS
     'Réunion de visioconférence, décrite indépendamment du fournisseur (D1). Adossée à une session ou autonome.';
 COMMENT ON COLUMN live.meetings.provider_payload IS
@@ -267,6 +307,11 @@ CREATE TABLE live.meeting_participants (
     recovered_at        timestamptz,
     recovered_by        uuid        CONSTRAINT xmod_fk_meeting_participants_recoverer
                                     REFERENCES identity.people(id) ON DELETE SET NULL,
+    -- Inscription plateforme annulée : l'enregistrement chez le fournisseur est
+    -- à annuler (travail `live.cancel_meeting_participant`). La ligne reste,
+    -- car l'adresse est unique par réunion : une réinscription la reprend,
+    -- remet cette colonne à NULL et la repasse en `pending`.
+    cancelled_at        timestamptz,
 
     -- --- Présence effective ----------------------------------------------
     -- Premier clic sur « Rejoindre » (first-click-wins, cf. feature 007 v1),
@@ -312,6 +357,8 @@ COMMENT ON TABLE live.meeting_participants IS
     'Correspondance inscription plateforme <-> enregistrement chez le fournisseur, avec son état de synchronisation (D2).';
 COMMENT ON COLUMN live.meeting_participants.request_payload IS
     'Charge utile destinée à l''API du fournisseur. Successeur de activity_registrations.fallback_payload : ici, c''est la norme, pas un correctif.';
+COMMENT ON COLUMN live.meeting_participants.cancelled_at IS
+    'Inscription annulée : l''enregistrement est annulé chez le fournisseur. Une réinscription remet la colonne à NULL et reprend la ligne (adresse unique par réunion).';
 COMMENT ON COLUMN live.meeting_participants.joined_at IS
     'Premier accès effectif. Écrit une seule fois (first-click-wins) et protégé par trigger : sert au taux de participation réel.';
 
@@ -383,6 +430,7 @@ BEGIN
     WITH target AS (
         SELECT id FROM live.meeting_participants
         WHERE sync_status IN ('failed', 'abandoned')
+          AND cancelled_at IS NULL
           AND (p_meeting_id IS NULL OR meeting_id = p_meeting_id)
         ORDER BY created_at
         LIMIT p_limit

@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meeting_participants\n                        SET sync_status = $2::text::live.sync_status, last_error = $3,\n                            next_retry_at = CASE WHEN $2 = 'failed'\n                                                 THEN now() + make_interval(secs => $4) END\n                      WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Float8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "adee244fce6f701c1fb9f889f25fcb625a2e8d6641994ebf2265a0076b15f1fa"
+}

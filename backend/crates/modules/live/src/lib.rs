@@ -2,20 +2,16 @@
 //!
 //! Ne dépend que de `kernel` et de `contracts` (principe II).
 //!
-//! # CE QUE CE CRATE NE SERT PAS
+//! # CE QUE CE CRATE SERT
 //!
-//! Les quatre cinquièmes du schéma. `live.meetings` et leurs participants,
-//! `live.provider_webhook_events`, l'écriture de `live.streams`, la vue
-//! `meetings_public`, les fonctions `build_embed_url()`,
-//! `requeue_failed_participants()` et `replay_webhook_event()` : **rien de tout
-//! cela n'est lu ni écrit ici**, parce qu'aucun écran du jalon ne le demande.
-//! Le modèle les porte pour le jour où la visioconférence sera branchée ; les
-//! servir d'avance produirait des routes qu'aucun appelant ne frappe, donc des
-//! routes dont personne ne saurait qu'elles sont cassées.
-//!
-//! Ce crate sert **une** table — `live.incidents` — et **quatre** fonctions du
-//! § 6 de `080_live.sql`, plus la lecture publique de `live.current_streams`
-//! pour le lecteur de la page d'une séance.
+//! Les messages d'incident (`live.incidents` et quatre fonctions du § 6 de
+//! `080_live.sql`), la lecture publique de `live.current_streams`, et depuis le
+//! 17/10 les **réunions Zoom** des séances : `live.meetings`, leurs inscrits
+//! (`live.meeting_participants`), le journal des notifications
+//! (`live.provider_webhook_events`), quatre travaux de la file « live » et un
+//! consommateur des inscriptions. Zoom s'éteint entièrement sans sa
+//! configuration (`ZOOM_*`, `LIVE_SECRETS_KEY`) : ni travaux, ni consommateur,
+//! et les routes qui en ont besoin répondent 503.
 //!
 //! # Les trois choses à savoir avant d'écrire une ligne ici
 //!
@@ -39,12 +35,20 @@
 //! `live.event_incidents()` les calcule une fois ; le code lit `state`.
 
 use actix_web::web::ServiceConfig;
+use kernel::config::Config;
+use kernel::db::Db;
+use kernel::events::EventConsumer;
+use kernel::jobs::JobHandler;
+use std::sync::Arc;
 
+pub mod consumers;
 pub mod domain;
+pub mod jobs;
 pub mod repo;
 pub mod routes;
 pub mod service;
 pub mod state;
+pub mod zoom;
 
 pub use state::LiveState;
 
@@ -57,6 +61,7 @@ pub use state::LiveState;
 /// figure pas. C'est le défaut qui a coûté trois routes sur vingt et une en B2.
 pub fn routes(cfg: &mut ServiceConfig) {
     routes::admin::configurer(cfg);
+    routes::meeting::chemins_admin(cfg);
 }
 
 /// La lecture publique, sous `/events/{event_id}/incidents`.
@@ -72,4 +77,50 @@ pub fn event_routes(cfg: &mut ServiceConfig) {
 /// scope est partagé avec `programme` et `engagement`, et l'API le compose.
 pub fn session_routes(cfg: &mut ServiceConfig) {
     routes::public::chemins_de_seance(cfg);
+    routes::meeting::chemins_de_seance(cfg);
+}
+
+/// Les notifications de Zoom, montées seulement si leur jeton est configuré.
+pub fn webhook_routes(cfg: &mut ServiceConfig, monte: bool) {
+    routes::webhook::configurer(cfg, monte);
+}
+
+/// Vrai si Zoom est configuré et que son jeton de notification l'est aussi.
+pub fn zoom_webhook_configure(config: &Config) -> bool {
+    config
+        .zoom
+        .as_ref()
+        .is_some_and(|z| z.webhook_secret_token.is_some())
+}
+
+/// Les quatre travaux de la file « live ». Aucun sans Zoom : les travaux
+/// déposés attendent alors en file, sans échouer, qu'il soit configuré.
+pub fn job_handlers(db: Db, config: &Config) -> Vec<Arc<dyn JobHandler>> {
+    let Some(zoom) = state::zoom_depuis(config) else {
+        return Vec::new();
+    };
+    vec![
+        Arc::new(jobs::sync_meeting::SyncMeeting::new(
+            db.clone(),
+            zoom.clone(),
+        )),
+        Arc::new(jobs::sync_participant::SyncParticipant::new(
+            db.clone(),
+            zoom.clone(),
+        )),
+        Arc::new(jobs::cancel_participant::CancelParticipant::new(
+            db.clone(),
+            zoom,
+        )),
+        Arc::new(jobs::webhook::ProcessWebhook::new(db)),
+    ]
+}
+
+/// Le consommateur des inscriptions. Aucun sans Zoom : une réunion créée sans
+/// personne pour la pousser chez Zoom ne servirait à rien.
+pub fn event_consumers(config: &Config) -> Vec<Arc<dyn EventConsumer>> {
+    if config.zoom.is_none() {
+        return Vec::new();
+    }
+    vec![Arc::new(consumers::registrations::RegistrationsConsumer)]
 }

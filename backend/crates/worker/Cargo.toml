@@ -18,6 +18,9 @@ engagement.workspace = true
 analytics.workspace = true
 # Guide Négo 0b : la purge des essais de code s'y branchera.
 negotiation.workspace = true
+# 17/10 : les réunions Zoom, quatre travaux de la file « live » et un
+# consommateur des inscriptions. Aucun des deux sans configuration Zoom.
+live.workspace = true
 
 async-trait.workspace = true
 dotenvy.workspace = true

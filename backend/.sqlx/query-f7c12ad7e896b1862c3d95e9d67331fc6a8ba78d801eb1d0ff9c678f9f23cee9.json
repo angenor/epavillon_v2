@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meeting_participants\n            SET external_registrant_id = NULL, personal_join_url = NULL, synced_at = NULL,\n                sync_status = 'failed', last_error = 'réunion Zoom changée'\n          WHERE meeting_id = $1 AND cancelled_at IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f7c12ad7e896b1862c3d95e9d67331fc6a8ba78d801eb1d0ff9c678f9f23cee9"
+}

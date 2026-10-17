@@ -198,3 +198,131 @@ pub async fn publiee(conn: &mut PgConnection, session_id: Uuid) -> Result<bool> 
 
     Ok(publiee)
 }
+
+// ---------------------------------------------------------------------------
+// Réunions Zoom (17/10) : la séance, ses inscriptions, la personne inscrite
+// (identity.people, lue ici car elle ne vient jamais sans son inscription).
+// ---------------------------------------------------------------------------
+
+/// Une séance vue du module Direct.
+pub struct Seance {
+    pub id: Uuid,
+    pub event_id: Uuid,
+    pub title: Value,
+    pub starts_at: OffsetDateTime,
+    pub ends_at: OffsetDateTime,
+    pub timezone: String,
+    pub is_streamed: bool,
+    pub is_published: bool,
+}
+
+pub async fn seance(conn: &mut PgConnection, session_id: Uuid) -> Result<Option<Seance>> {
+    let ligne = sqlx::query_as!(
+        Seance,
+        r#"SELECT s.id, s.event_id, s.title AS "title!: Value", s.starts_at, s.ends_at,
+                  s.timezone::text AS "timezone!", s.is_streamed,
+                  (s.published_at IS NOT NULL) AS "is_published!"
+             FROM programme.sessions s
+            WHERE s.id = $1"#,
+        session_id
+    )
+    .fetch_optional(conn)
+    .await?;
+    Ok(ligne)
+}
+
+/// Une inscription, sa séance et la personne : ce qu'il faut pour l'inscrire
+/// chez Zoom.
+pub struct Inscription {
+    pub registration_id: Uuid,
+    pub status: String,
+    pub person_id: Uuid,
+    pub email: String,
+    pub first_name: String,
+    pub last_name: String,
+    pub display_name: String,
+    pub seance: Seance,
+}
+
+pub async fn inscription(
+    conn: &mut PgConnection,
+    registration_id: Uuid,
+) -> Result<Option<Inscription>> {
+    let ligne = sqlx::query!(
+        r#"SELECT r.id, r.status::text AS "status!", r.person_id,
+                  p.primary_email::text AS "email!", p.first_name, p.last_name,
+                  p.display_name AS "display_name!",
+                  s.id AS session_id, s.event_id, s.title AS "title!: Value",
+                  s.starts_at, s.ends_at, s.timezone::text AS "timezone!", s.is_streamed,
+                  (s.published_at IS NOT NULL) AS "is_published!"
+             FROM programme.registrations r
+             JOIN programme.sessions s ON s.id = r.session_id
+             JOIN identity.people p ON p.id = r.person_id
+            WHERE r.id = $1"#,
+        registration_id
+    )
+    .fetch_optional(conn)
+    .await?;
+
+    Ok(ligne.map(|l| Inscription {
+        registration_id: l.id,
+        status: l.status,
+        person_id: l.person_id,
+        email: l.email,
+        first_name: l.first_name,
+        last_name: l.last_name,
+        display_name: l.display_name,
+        seance: Seance {
+            id: l.session_id,
+            event_id: l.event_id,
+            title: l.title,
+            starts_at: l.starts_at,
+            ends_at: l.ends_at,
+            timezone: l.timezone,
+            is_streamed: l.is_streamed,
+            is_published: l.is_published,
+        },
+    }))
+}
+
+/// Les inscriptions qui ont une place chez Zoom : inscrites, en attente
+/// (premier arrivé, premier servi le jour même) et déjà présentes.
+pub async fn inscriptions_actives(conn: &mut PgConnection, session_id: Uuid) -> Result<Vec<Uuid>> {
+    let ids = sqlx::query_scalar!(
+        r#"SELECT id FROM programme.registrations
+            WHERE session_id = $1 AND status IN ('registered', 'waitlisted', 'attended')
+            ORDER BY created_at"#,
+        session_id
+    )
+    .fetch_all(conn)
+    .await?;
+    Ok(ids)
+}
+
+/// L'inscription en cours d'une personne à une séance, si elle lui donne une place.
+pub async fn inscription_active_de(
+    conn: &mut PgConnection,
+    session_id: Uuid,
+    person_id: Uuid,
+) -> Result<Option<Uuid>> {
+    let id = sqlx::query_scalar!(
+        r#"SELECT id FROM programme.registrations
+            WHERE session_id = $1 AND person_id = $2
+              AND status IN ('registered', 'waitlisted', 'attended')
+            ORDER BY created_at DESC
+            LIMIT 1"#,
+        session_id,
+        person_id
+    )
+    .fetch_optional(conn)
+    .await?;
+    Ok(id)
+}
+
+/// Première présence, écrite une seule fois par la fonction du modèle.
+pub async fn noter_la_presence(conn: &mut PgConnection, registration_id: Uuid) -> Result<()> {
+    sqlx::query!("SELECT programme.record_join($1)", registration_id)
+        .fetch_optional(conn)
+        .await?;
+    Ok(())
+}

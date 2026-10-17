@@ -1,0 +1,113 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.id, m.session_id AS \"session_id!\", m.provider::text AS \"provider!\",\n                  m.external_id, m.status::text AS \"status!\",\n                  m.sync_status::text AS \"sync_status!\", m.last_sync_error,\n                  m.join_url::text AS join_url,\n                  count(p.id) FILTER (WHERE p.cancelled_at IS NULL) AS \"participants_total!\",\n                  count(p.id) FILTER (WHERE p.cancelled_at IS NULL AND p.sync_status = 'synced')\n                      AS \"participants_synced!\",\n                  count(p.id) FILTER (WHERE p.cancelled_at IS NULL\n                                        AND p.sync_status IN ('failed', 'abandoned'))\n                      AS \"participants_failed!\"\n             FROM live.meetings m\n             LEFT JOIN live.meeting_participants p ON p.meeting_id = m.id\n            WHERE m.session_id = $1 AND m.status NOT IN ('cancelled', 'failed')\n            GROUP BY m.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "session_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "session_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "provider!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "external_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "external_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "sync_status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "last_sync_error",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "last_sync_error"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "join_url",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "participants_total!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "participants_synced!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "participants_failed!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      null,
+      true,
+      null,
+      null,
+      true,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "a80fb2d8e04457aebe18739f599d0e48b74a9f9234ed8652161c24fc3753e215"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meetings\n            SET external_id = $2, external_uuid = NULL, status = 'draft',\n                join_url = NULL, registration_url = NULL,\n                passcode_encrypted = NULL, start_url_encrypted = NULL\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f0616886c60ca0c5334387011b5eceb50f43ac1cfba80f5865d0fca44b2d7ed9"
+}

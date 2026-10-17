@@ -1,0 +1,92 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT external_id, status::text AS \"status!\", sync_status::text AS \"sync!\",\n                  passcode_encrypted, start_url_encrypted, provider_payload,\n                  join_url::text AS join_url, host_email::text AS host_email\n             FROM live.meetings WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "external_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "external_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "sync!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "passcode_encrypted",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "passcode_encrypted"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "start_url_encrypted",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "start_url_encrypted"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "provider_payload",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "live.meetings",
+            "name": "provider_payload"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "join_url",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "host_email",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true,
+      null,
+      null,
+      true,
+      true,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "459a0e4ce2619ac65dd28bce729c6a24a5549051c228f663a0e985546c189e10"
+}

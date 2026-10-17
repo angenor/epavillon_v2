@@ -13,8 +13,15 @@ kernel.workspace = true
 contracts.workspace = true
 
 actix-web.workspace = true
+aes-gcm.workspace = true
+async-trait.workspace = true
+base64.workspace = true
+hmac.workspace = true
+rand_core.workspace = true
+reqwest.workspace = true
 serde.workspace = true
 serde_json.workspace = true
+sha2.workspace = true
 sqlx.workspace = true
 time.workspace = true
 tracing.workspace = true
@@ -26,5 +33,5 @@ kernel = { workspace = true, features = ["testing"] }
 serde_json.workspace = true
 sqlx.workspace = true
 time.workspace = true
-tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread", "net", "io-util"] }
 uuid.workspace = true

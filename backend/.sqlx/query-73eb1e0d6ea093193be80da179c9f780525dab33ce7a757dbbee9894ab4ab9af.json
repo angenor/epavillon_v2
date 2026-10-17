@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (\n               SELECT 1 FROM live.meetings\n                WHERE provider = 'zoom' AND external_id = $1\n                  AND ($2::uuid IS NULL OR id <> $2)\n           ) AS \"pris!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "pris!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "73eb1e0d6ea093193be80da179c9f780525dab33ce7a757dbbee9894ab4ab9af"
+}

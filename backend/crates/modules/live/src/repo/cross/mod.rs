@@ -2,8 +2,10 @@
 //!
 //! Trois fichiers, trois schémas métier lus en lecture seule : `event`,
 //! `programme`, `org`. Le module y pose des questions sur **ses propres**
-//! entités — dans quel fuseau se lit la fenêtre d'un message, que puis-je viser,
-//! que se joue-t-il aujourd'hui — et n'y écrit jamais.
+//! entités (dans quel fuseau se lit la fenêtre d'un message, que puis-je viser,
+//! que se joue-t-il aujourd'hui, qui est inscrit à quelle séance) et
+//! n'y écrit jamais, sauf par une fonction du modèle :
+//! `programme.record_join()`, la première présence notée depuis Zoom.
 //!
 //! **`platform` et `reference` n'y sont pas**, et c'est délibéré : le principe
 //! III les nomme comme noyau partagé. Les y ranger ferait perdre au dossier son

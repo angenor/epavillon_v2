@@ -114,6 +114,11 @@ pub fn build_app(
     if etat.modules.is_mounted("live") {
         portee = portee.configure(live::routes);
         portee = portee.configure(live::event_routes);
+        // Les notifications de Zoom : même parti que l'ingestion des retours de
+        // courriel, montées seulement avec leur jeton, et Zoom n'annonce aucune
+        // origine (R30).
+        let notifications_zoom = live::zoom_webhook_configure(&etat.config);
+        portee = portee.configure(move |cfg| live::webhook_routes(cfg, notifications_zoom));
     }
     // Une seule route, plate elle aussi.
     if etat.modules.is_mounted("analytics") {

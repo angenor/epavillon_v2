@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.provider_webhook_events\n              SET status = 'processing', attempts = attempts + 1\n            WHERE id = $1 AND status IN ('received', 'failed')\n        RETURNING event_type, payload, signature_verified, status::text AS \"status!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "event_type",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "live.provider_webhook_events",
+            "name": "event_type"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "payload",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "live.provider_webhook_events",
+            "name": "payload"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "signature_verified",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "live.provider_webhook_events",
+            "name": "signature_verified"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "2df638d923f64ee9d270618f0bcc760e67bc3bbfc90578386b4cb64720da726b"
+}

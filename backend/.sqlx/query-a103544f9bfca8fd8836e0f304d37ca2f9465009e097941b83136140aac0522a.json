@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE live.meetings\n            SET status = 'ended', actual_end_at = GREATEST($2, actual_start_at)\n          WHERE id = $1 AND status IN ('scheduled', 'started', 'ended')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a103544f9bfca8fd8836e0f304d37ca2f9465009e097941b83136140aac0522a"
+}
