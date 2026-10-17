@@ -89,10 +89,10 @@ const videoWidth = ref<number | null>(null)
 const contentHeight = ref<number | null>(null)
 let pending: ReturnType<typeof setTimeout> | undefined
 
-// Zoom ne garantit pas son rendu au-delà de 1440 px de large.
+// Zoom recommande 1440 px de large au plus : tenu dans la page, levé en plein écran, où l'écran entier doit servir.
 const MAX_VIDEO_WIDTH = 1440
 const sixteenNinth = (raw: number): VideoSize => {
-  const width = Math.min(raw, MAX_VIDEO_WIDTH)
+  const width = expanded.value ? raw : Math.min(raw, MAX_VIDEO_WIDTH)
   return { width, height: Math.round((width * 9) / 16) }
 }
 
