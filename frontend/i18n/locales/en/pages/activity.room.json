@@ -2,10 +2,8 @@
   "title": "Zoom room: {title}",
   "back": "Back to the activity",
   "checking": "Looking for the meeting",
-  "closed": {
-    "title": "The room is not open",
-    "later": "It will open on {date} at {time}, 30 minutes before the start.",
-    "over": "The meeting is over.",
-    "none": "This activity has no Zoom meeting."
+  "none": {
+    "title": "No Zoom meeting",
+    "description": "This activity has no Zoom meeting."
   }
 }

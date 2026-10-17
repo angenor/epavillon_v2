@@ -58,7 +58,10 @@ type Action = 'registered' | 'register' | 'waitlist' | 'full' | 'notOpen' | 'clo
 
 const action = computed<Action>(() => {
   const state = props.state
-  if (props.zoomOpen) return 'join'
+  if (props.zoomOpen) {
+    if (props.session.registration_required === false || mine.value) return 'join'
+    if (!notOpenYet.value && !closed.value) return full.value ? (props.session.waitlist_enabled ? 'waitlist' : 'full') : 'register'
+  }
   if (state === 'live' || state === 'ongoing') return props.session.is_streamed ? 'watch' : 'none'
   if (state === 'past') return props.session.replay_url ? 'replay' : 'none'
   if (state !== 'upcoming') return 'none'
@@ -73,22 +76,10 @@ const action = computed<Action>(() => {
 const note = computed(() => {
   switch (action.value) {
     case 'registered':
-      if (props.meeting?.provider === 'zoom' && props.meeting.status !== 'cancelled') {
-        return t('activity.ticket.note.meetingLater', {
-          time: timeWithZone(props.meeting.opens_at, props.session.timezone, props.edition.city ?? undefined),
-        })
-      }
       return mine.value?.status === 'waitlisted' ? t('activity.ticket.note.waitlisted') : t('activity.ticket.note.registered')
     case 'join':
-      return props.session.registration_required !== false && mine.value?.status === 'waitlisted'
-        ? t('zoom-room.waitlisted')
-        : t('activity.ticket.note.meeting')
+      return [joinLead.value, meetingWhen.value].filter(Boolean).join(' ')
     case 'free':
-      if (props.meeting?.provider === 'zoom' && props.meeting.status !== 'cancelled') {
-        return t('activity.ticket.note.meetingFree', {
-          time: timeWithZone(props.meeting.opens_at, props.session.timezone, props.edition.city ?? undefined),
-        })
-      }
       return t('activity.ticket.note.free')
     case 'notOpen':
       return t('activity.ticket.note.notOpen', { date: dateTime(opensAt.value, props.session.timezone) })
@@ -104,6 +95,22 @@ const note = computed(() => {
     default:
       return props.state === 'past' ? t('activity.ticket.note.past', { count: registered.value }) : ''
   }
+})
+
+/** Ce qui précède l'horaire : la liste d'attente, ou l'entrée libre. */
+const joinLead = computed(() => {
+  if (props.session.registration_required === false) return t('activity.ticket.note.freeMeeting')
+  return mine.value?.status === 'waitlisted' ? t('zoom-room.waitlisted') : ''
+})
+
+const meetingWhen = computed(() => {
+  if (props.state === 'upcoming') {
+    return t('activity.ticket.note.meetingStarts', {
+      date: dayLong(props.session.starts_at, props.session.timezone),
+      time: timeWithZone(props.session.starts_at, props.session.timezone, props.edition.city ?? undefined),
+    })
+  }
+  return props.state === 'past' ? t('activity.ticket.note.meetingAfter') : t('activity.ticket.note.meeting')
 })
 
 const callToAction = computed<TicketCallToAction | null>(() => {
@@ -258,6 +265,9 @@ async function share(): Promise<void> {
             {{ t('activity.ticket.cancel') }}
           </UiButton>
         </template>
+        <UiButton v-if="action === 'join' && mine && props.state === 'upcoming'" variant="link" class="self-center" :loading="cancelling" @click="onCancel">
+          {{ t('activity.ticket.cancel') }}
+        </UiButton>
         <p v-if="note" class="text-[0.8125rem] leading-relaxed text-text-muted">{{ note }}</p>
       </div>
 

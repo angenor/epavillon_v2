@@ -1,6 +1,5 @@
 {
   "label": "Zoom meeting",
-  "window": "Open from {time} until the meeting ends",
   "checking": "Checking your access…",
   "login": {
     "message": "Sign in to enter the meeting.",
@@ -10,7 +9,7 @@
     "message": "The meeting is reserved for registered participants.",
     "action": "Register"
   },
-  "ready": "Join from this page, no Zoom installation needed.",
+  "ready": "Join from this page, no Zoom installation needed. If the meeting has not started, Zoom will ask you to wait.",
   "join": "Join the meeting",
   "step": {
     "access": "Checking your registration…",

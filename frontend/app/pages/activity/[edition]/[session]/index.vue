@@ -64,10 +64,13 @@ async function loadStreams(): Promise<void> {
   streams.value = await api.live.sessionStreams(current.id).catch(() => [])
 }
 
-// Une règle pour la scène et le billet : un flux YouTube l'emporte sur la salle Zoom.
-const zoomOpen = computed(
-  () => Boolean(session.value?.is_streamed) && streams.value.length === 0 && isMeetingOpen(meeting.value, now.value),
-)
+// Une règle pour la scène et le billet, à toute heure : un flux YouTube, ou la rediffusion d'une séance passée, l'emporte sur la salle Zoom.
+const zoomOpen = computed(() => {
+  const current = session.value
+  if (!current?.is_streamed || state.value === 'cancelled' || streams.value.length > 0) return false
+  if (state.value === 'past' && current.replay_url) return false
+  return isMeetingJoinable(meeting.value)
+})
 // Quitter la salle, c'est quitter la réunion : on ne la démonte jamais sous quelqu'un qui y est.
 const inMeeting = ref(false)
 const { meeting } = useSessionMeeting(session, () => inMeeting.value)

@@ -14,7 +14,6 @@ defineI18nRoute({
 const route = useRoute()
 const { t } = useI18n()
 const { tr } = useI18nText()
-const { date, timeWithZone } = useDateTime()
 const localePath = useLocalePath()
 const requestUrl = useRequestURL()
 
@@ -28,18 +27,12 @@ const activityTo = computed(() =>
 const leaveUrl = computed(() => new URL(activityTo.value, requestUrl.origin).href)
 const zoneLabel = computed(() => edition.value?.city ?? undefined)
 
-const now = ref<number | null>(null)
-let clock: ReturnType<typeof setInterval> | undefined
-
-onMounted(() => {
-  now.value = Date.now()
-  clock = setInterval(() => (now.value = Date.now()), 30_000)
-})
-onBeforeUnmount(() => clearInterval(clock))
-// Une fois entré, on reste : l'horloge ne ferme pas la salle sous quelqu'un.
+// Une fois entré, on reste, même si la réunion change d'état sous la personne.
 const inMeeting = ref(false)
 const { meeting, loaded: meetingLoaded } = useSessionMeeting(session, () => inMeeting.value)
-const open = computed(() => isMeetingOpen(meeting.value, now.value) || inMeeting.value)
+const open = computed(
+  () => (session.value?.temporal_state !== 'cancelled' && isMeetingJoinable(meeting.value)) || inMeeting.value,
+)
 
 // La vue client laisse `#zmmtg-root` par-dessus le site et la réunion tourne : une navigation interne repart de zéro.
 const router = useRouter()
@@ -47,18 +40,6 @@ onBeforeRouteLeave((to) => {
   if (!document.getElementById('zmmtg-root')) return true
   window.location.assign(router.resolve(to.fullPath).href)
   return false
-})
-const notYet = computed(() => meeting.value !== null && now.value !== null && now.value < Date.parse(meeting.value.opens_at))
-const closedDescription = computed(() => {
-  const current = meeting.value
-  if (!current || !session.value) return t('activity.room.closed.none')
-  if (notYet.value) {
-    return t('activity.room.closed.later', {
-      date: date(current.opens_at, session.value.timezone),
-      time: timeWithZone(current.opens_at, session.value.timezone, zoneLabel.value),
-    })
-  }
-  return t('activity.room.closed.over')
 })
 
 useHead(() => ({
@@ -125,8 +106,8 @@ useHead(() => ({
         <UiEmptyState
           v-else
           icon="video"
-          :title="t('activity.room.closed.title')"
-          :description="closedDescription"
+          :title="t('activity.room.none.title')"
+          :description="t('activity.room.none.description')"
           :action-label="t('activity.room.back')"
           :action-to="activityTo"
         />

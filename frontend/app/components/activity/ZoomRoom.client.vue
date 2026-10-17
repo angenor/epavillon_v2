@@ -30,7 +30,6 @@ const emit = defineEmits<{ 'update:inMeeting': [value: boolean] }>()
 
 const { t, locale } = useI18n()
 const { tr } = useI18nText()
-const { timeWithZone } = useDateTime()
 const route = useRoute()
 const localePath = useLocalePath()
 const embedded = useEmbeddedZoom()
@@ -45,7 +44,6 @@ const fullscreen = ref(false)
 
 const inPage = computed(() => props.mode === 'stage' && embedded.value)
 const loginTo = computed(() => `${localePath('auth-login')}?redirect=${encodeURIComponent(route.fullPath)}`)
-const windowLabel = computed(() => timeWithZone(props.meeting.opens_at, props.session.timezone, props.zoneLabel))
 const stepLabel = computed(() => t(`zoom-room.step.${step.value === 'joined' || !step.value ? 'joining' : step.value}`))
 
 let zoom: ZoomEmbedded | null = null
@@ -182,7 +180,6 @@ onBeforeUnmount(() => {
         <p class="text-xs font-bold text-text-on-inverse-muted uppercase" :style="{ letterSpacing: 'var(--tracking-caps)' }">
           {{ t('zoom-room.label') }}
         </p>
-        <p class="mt-1 text-sm text-text-on-inverse-muted">{{ t('zoom-room.window', { time: windowLabel }) }}</p>
       </div>
 
       <p v-if="phase === 'checking'" class="flex items-center gap-2 text-sm" role="status">
