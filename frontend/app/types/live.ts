@@ -6,8 +6,8 @@
  * bandeau d'incident est un motif transverse de toute la plateforme : il
  * s'affiche sur la programmation publique, sur la fiche d'une activité et dans
  * le back-office (écran A13), bien avant qu'une visioconférence soit branchée.
- * Les tables `meetings` et `provider_webhook_events` ne sont PAS couvertes
- * ici ; de `streams`, seule la lecture publique des flux en cours l'est.
+ * De `streams`, seule la lecture publique des flux en cours est couverte ; de
+ * `meetings`, la réunion Zoom d'une séance (fin du fichier).
  */
 
 import type {
@@ -127,4 +127,70 @@ export interface PublicSessionStream {
   watch_url: Url | null
   is_primary: boolean
   started_at: IsoDateTime | null
+}
+
+/** ENUM `live.meeting_provider` : seule `zoom` s'ouvre dans la page. */
+export type MeetingProvider = 'zoom' | 'teams' | 'jitsi' | 'webex' | 'custom'
+
+/** ENUM `live.meeting_status`. */
+export type MeetingStatus = 'draft' | 'scheduled' | 'started' | 'ended' | 'cancelled' | 'failed'
+
+/** ENUM `live.meeting_sync_status` : la synchronisation des inscrits vers le fournisseur. */
+export type MeetingSyncStatus = 'not_required' | 'pending' | 'in_progress' | 'synced' | 'failed' | 'abandoned'
+
+/**
+ * `GET /sessions/{id}/meeting` : la réunion d'une séance, sans aucun secret.
+ * 404 quand la séance n'en a pas. `opens_at` précède le début de 30 minutes.
+ */
+export interface PublicSessionMeeting {
+  provider: MeetingProvider
+  status: MeetingStatus
+  opens_at: IsoDateTime
+  starts_at: IsoDateTime
+  ends_at: IsoDateTime
+}
+
+/**
+ * `GET /sessions/{id}/meeting/access` : de quoi entrer, pour la personne
+ * connectée et inscrite (ou en liste d'attente). La signature expire à
+ * `expires_at` : au-delà, on redemande.
+ */
+export interface MeetingAccess {
+  meeting_number: string
+  password: string
+  /** Jeton d'inscrit du fournisseur ; nul quand la réunion n'inscrit pas. */
+  registrant_token: string | null
+  user_name: string
+  user_email: string
+  sdk_key: string
+  signature: string
+  expires_at: IsoDateTime
+  /** Lien d'entrée par l'application Zoom, en repli. */
+  join_url: Url | null
+}
+
+/** `POST /admin/sessions/{id}/meeting` : crée ou resynchronise ; `external_id` rattache une réunion existante. */
+export interface MeetingSyncInput {
+  external_id: string | null
+}
+
+/** `GET` et `POST /admin/sessions/{id}/meeting`. */
+export interface AdminSessionMeeting {
+  id: Uuid
+  session_id: SessionId
+  provider: MeetingProvider
+  /** Numéro de réunion chez le fournisseur. */
+  external_id: string | null
+  status: MeetingStatus
+  sync_status: MeetingSyncStatus
+  last_sync_error: string | null
+  join_url: Url | null
+  participants_total: number
+  participants_synced: number
+  participants_failed: number
+}
+
+/** `POST /registrations/{id}/join` : la première présence, écrite une seule fois. */
+export interface RegistrationJoinResult {
+  joined_at: IsoDateTime | null
 }

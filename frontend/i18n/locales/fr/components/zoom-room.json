@@ -1,0 +1,30 @@
+{
+  "label": "Réunion Zoom",
+  "window": "Salle ouverte : {range}",
+  "checking": "Vérification de votre accès…",
+  "login": {
+    "message": "Connectez-vous pour entrer dans la réunion.",
+    "action": "Se connecter"
+  },
+  "register": {
+    "message": "La réunion est réservée aux personnes inscrites.",
+    "action": "S'inscrire"
+  },
+  "ready": "Entrez depuis cette page, sans installer Zoom.",
+  "join": "Rejoindre la réunion",
+  "step": {
+    "access": "Vérification de votre inscription…",
+    "sdk": "Chargement de Zoom…",
+    "joining": "Entrée dans la réunion…"
+  },
+  "joined": "Vous êtes dans la réunion.",
+  "waitlisted": "Vous êtes en liste d'attente : l'entrée se fait dans l'ordre d'arrivée, dans la limite des places.",
+  "fallback": "Ouvrir dans l'application Zoom",
+  "retry": "Réessayer",
+  "fullscreen": "Plein écran",
+  "exitFullscreen": "Quitter le plein écran",
+  "error": {
+    "sdk": "La connexion à Zoom a échoué. Réessayez, ou ouvrez la réunion dans l'application Zoom.",
+    "sdkReason": "La connexion à Zoom a échoué ({reason}). Réessayez, ou ouvrez la réunion dans l'application Zoom."
+  }
+}

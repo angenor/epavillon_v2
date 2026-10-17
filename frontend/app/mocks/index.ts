@@ -257,6 +257,7 @@ export {
   updateIncident,
 } from './admin-incidents'
 export { publicSessionStreams } from './streams'
+export { publicSessionMeeting, meetingAccess, registrationJoined, adminSessionMeeting, syncSessionMeeting } from './meetings'
 
 export {
   proposalFunnel,

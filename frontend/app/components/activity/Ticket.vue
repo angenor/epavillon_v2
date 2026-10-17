@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PublicEditionRow, PublicScheduleRow } from '~/types/views'
 import type { RegistrationResult } from '~/types/programme/registration'
+import type { PublicSessionMeeting } from '~/types/live'
 import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
 import type { TicketCallToAction } from './TicketAction.vue'
 
@@ -21,6 +22,9 @@ interface Props {
   languages: string[]
   now: number | null
   homeTime: { range: string; zone: string } | null
+  meeting?: PublicSessionMeeting | null
+  meetingOpen?: boolean
+  roomTo?: string
 }
 
 const props = defineProps<Props>()
@@ -28,10 +32,12 @@ const emit = defineEmits<{ started: [] }>()
 
 const { t } = useI18n()
 const { tr } = useI18nText()
-const { dateTime, dayLong, time, timeRange, zoneOffsetShort, zoneLabel } = useDateTime()
+const { dateTime, dayLong, time, timeRange, timeWithZone, zoneOffsetShort, zoneLabel } = useDateTime()
 const requestUrl = useRequestURL()
 const { duration } = useProgrammeSession()
 const { mine, refresh, cancel } = useSessionRegistration(computed(() => props.session.id))
+const embeddedZoom = useEmbeddedZoom()
+const joinTo = computed(() => (embeddedZoom.value || !props.roomTo ? '#direct' : props.roomTo))
 
 const dialogOpen = ref(false)
 const cancelling = ref(false)
@@ -47,10 +53,11 @@ const closesAt = computed(() => props.session.registration_closes_at ?? null)
 const notOpenYet = computed(() => props.now !== null && opensAt.value !== null && Date.parse(opensAt.value) > props.now)
 const closed = computed(() => props.now !== null && closesAt.value !== null && Date.parse(closesAt.value) <= props.now)
 
-type Action = 'registered' | 'register' | 'waitlist' | 'full' | 'notOpen' | 'closed' | 'free' | 'watch' | 'replay' | 'none'
+type Action = 'registered' | 'register' | 'waitlist' | 'full' | 'notOpen' | 'closed' | 'free' | 'watch' | 'join' | 'replay' | 'none'
 
 const action = computed<Action>(() => {
   const state = props.state
+  if (props.meetingOpen && props.session.is_streamed) return 'join'
   if (state === 'live' || state === 'ongoing') return props.session.is_streamed ? 'watch' : 'none'
   if (state === 'past') return props.session.replay_url ? 'replay' : 'none'
   if (state !== 'upcoming') return 'none'
@@ -65,7 +72,14 @@ const action = computed<Action>(() => {
 const note = computed(() => {
   switch (action.value) {
     case 'registered':
+      if (props.meeting?.provider === 'zoom' && props.meeting.status !== 'cancelled') {
+        return t('activity.ticket.note.meetingLater', {
+          time: timeWithZone(props.meeting.opens_at, props.session.timezone, props.edition.city ?? undefined),
+        })
+      }
       return mine.value?.status === 'waitlisted' ? t('activity.ticket.note.waitlisted') : t('activity.ticket.note.registered')
+    case 'join':
+      return mine.value?.status === 'waitlisted' ? t('zoom-room.waitlisted') : t('activity.ticket.note.meeting')
     case 'free':
       return t('activity.ticket.note.free')
     case 'notOpen':
@@ -86,7 +100,7 @@ const note = computed(() => {
 
 const callToAction = computed<TicketCallToAction | null>(() => {
   const value = action.value
-  if (value === 'register' || value === 'waitlist' || value === 'watch') return value
+  if (value === 'register' || value === 'waitlist' || value === 'watch' || value === 'join') return value
   return value === 'replay' && props.session.replay_url ? 'replay' : null
 })
 
@@ -224,6 +238,7 @@ async function share(): Promise<void> {
           v-if="callToAction"
           :action="callToAction"
           :replay-url="props.session.replay_url"
+          :join-to="joinTo"
           @register="dialogOpen = true"
         />
         <template v-else-if="action === 'registered'">
@@ -303,6 +318,7 @@ async function share(): Promise<void> {
                 class="shrink-0 px-5!"
                 :action="callToAction"
                 :replay-url="props.session.replay_url"
+                :join-to="joinTo"
                 @register="dialogOpen = true"
               />
             </div>

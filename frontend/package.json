@@ -24,6 +24,7 @@
     "@tiptap/starter-kit": "^3.30.1",
     "@tiptap/vue-3": "^3.30.1",
     "@types/nodemailer": "^8.0.1",
+    "@zoom/meetingsdk": "6.5.0",
     "apexcharts": "^6.10.0",
     "flag-icons": "^7.5.0",
     "nodemailer": "^9.0.5",

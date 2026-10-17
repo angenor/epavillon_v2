@@ -1,0 +1,31 @@
+{
+  "title": "Réunion Zoom",
+  "empty": "Aucune réunion Zoom pour cette activité.",
+  "forbidden": "Cette activité n'est pas dans votre périmètre d'administration.",
+  "retry": "Réessayer",
+  "number": "Numéro de réunion",
+  "none": "aucun",
+  "participants": "Inscrits transmis à Zoom",
+  "synced": "{synced} sur {total}",
+  "failed": "aucun échec | {count} échec | {count} échecs",
+  "open": "Ouvrir la réunion dans Zoom",
+  "attach": "Rattacher une réunion Zoom existante",
+  "attachHint": "Son numéro, tel qu'affiché dans Zoom. Laissé vide, la plateforme crée ou met à jour sa propre réunion.",
+  "status": {
+    "draft": "Brouillon",
+    "scheduled": "Programmée",
+    "started": "En cours",
+    "ended": "Terminée",
+    "cancelled": "Annulée",
+    "failed": "Création échouée"
+  },
+  "sync": {
+    "action": "Créer ou resynchroniser la réunion",
+    "not_required": "Sans synchronisation",
+    "pending": "Synchronisation en attente",
+    "in_progress": "Synchronisation en cours",
+    "synced": "Inscrits synchronisés",
+    "failed": "Synchronisation en échec",
+    "abandoned": "Synchronisation abandonnée"
+  }
+}

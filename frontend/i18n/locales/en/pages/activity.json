@@ -90,6 +90,7 @@
     "onWaitlist": "On the waiting list",
     "cancel": "Cancel my registration",
     "watch": "Watch live",
+    "join": "Join the meeting",
     "replay": "Watch the recording",
     "note": {
       "registered": "Your seat is booked.",
@@ -100,7 +101,9 @@
       "full": "This activity is full.",
       "until": "Registration open until {date}.",
       "live": "The activity has started: follow it live.",
-      "past": "Nobody had registered. | {count} person had registered. | {count} people had registered."
+      "past": "Nobody had registered. | {count} person had registered. | {count} people had registered.",
+      "meeting": "The Zoom room is open: entry is first come, first served, while places last.",
+      "meetingLater": "On the day, the Zoom meeting opens on this page 30 minutes before the start, at {time}."
     },
     "languages": "Languages",
     "calendar": "Calendar",

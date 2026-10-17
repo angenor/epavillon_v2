@@ -1,0 +1,31 @@
+{
+  "title": "Zoom meeting",
+  "empty": "No Zoom meeting for this activity.",
+  "forbidden": "This activity is outside your administration scope.",
+  "retry": "Try again",
+  "number": "Meeting number",
+  "none": "none",
+  "participants": "Registrants sent to Zoom",
+  "synced": "{synced} of {total}",
+  "failed": "no failure | {count} failure | {count} failures",
+  "open": "Open the meeting in Zoom",
+  "attach": "Attach an existing Zoom meeting",
+  "attachHint": "Its number, as shown in Zoom. Left empty, the platform creates or updates its own meeting.",
+  "status": {
+    "draft": "Draft",
+    "scheduled": "Scheduled",
+    "started": "In progress",
+    "ended": "Ended",
+    "cancelled": "Cancelled",
+    "failed": "Creation failed"
+  },
+  "sync": {
+    "action": "Create or resync the meeting",
+    "not_required": "No sync needed",
+    "pending": "Sync pending",
+    "in_progress": "Sync in progress",
+    "synced": "Registrants synced",
+    "failed": "Sync failed",
+    "abandoned": "Sync abandoned"
+  }
+}

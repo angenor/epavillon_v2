@@ -393,6 +393,8 @@ const isPlaced = computed(() => props.session?.room_id !== null && props.session
             channel: channelOptions[0]?.label ?? '',
           }) }}
         </p>
+
+        <AdminPlannerMeetingPanel v-if="props.session.is_streamed" :session-id="props.session.id" :editable="props.editable" />
       </section>
 
       <!-- LES CONFLITS DE CETTE SÉANCE : on les lit, on ne les subit pas. Ils

@@ -1,0 +1,11 @@
+{
+  "title": "Salle Zoom : {title}",
+  "back": "Retour à l'activité",
+  "checking": "Recherche de la réunion",
+  "closed": {
+    "title": "La salle n'est pas ouverte",
+    "later": "Elle s'ouvrira le {date} à {time}, 30 minutes avant le début.",
+    "over": "La réunion est terminée.",
+    "none": "Cette activité n'a pas de réunion Zoom."
+  }
+}

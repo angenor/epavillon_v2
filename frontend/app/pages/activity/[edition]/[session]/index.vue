@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PublicSessionStream } from '~/types/live'
+import type { PublicSessionMeeting, PublicSessionStream } from '~/types/live'
 
 /**
  * LA PAGE D'UNE ACTIVITÉ — celle qu'ouvre un clic dans la semaine ou la liste
@@ -10,8 +10,8 @@ import type { PublicSessionStream } from '~/types/live'
  * slug unique que dans son édition. Une activité inconnue et une activité non
  * publiée donnent la même réponse, comme l'API.
  *
- * Le direct, les questions et les autres activités du jour se chargent à part :
- * leur absence ne coûte jamais la page.
+ * Le direct, la réunion Zoom, les questions et les autres activités du jour se
+ * chargent à part : leur absence ne coûte jamais la page.
  */
 
 definePageMeta({ layout: 'public' })
@@ -29,16 +29,7 @@ const visitedId = useState<string | null>('programme-visited', () => null)
 const editionSlug = computed(() => String(route.params.edition))
 const sessionSlug = computed(() => String(route.params.session))
 
-const { data, status, error, refresh } = await useAsyncData(
-  () => `activite-${editionSlug.value}-${sessionSlug.value}`,
-  async () => {
-    const edition = (await api.events.publicList()).find((entry) => entry.slug === editionSlug.value)
-    if (!edition) return null
-    const detail = await api.pavillon.activite(edition.id, sessionSlug.value)
-    return detail ? { edition, detail } : null
-  },
-  { lazy: true },
-)
+const { data, status, error, refresh } = await useActivityDetail()
 
 if (import.meta.server && status.value === 'success' && !data.value) setResponseStatus(useRequestEvent()!, 404)
 
@@ -64,6 +55,7 @@ const sameDay = computed(() => {
 })
 
 const streams = ref<PublicSessionStream[]>([])
+const meeting = ref<PublicSessionMeeting | null>(null)
 const now = ref<number | null>(null)
 let clock: ReturnType<typeof setInterval> | undefined
 
@@ -73,17 +65,31 @@ async function loadStreams(): Promise<void> {
   streams.value = await api.live.sessionStreams(current.id).catch(() => [])
 }
 
+async function loadMeeting(): Promise<void> {
+  const current = session.value
+  if (!current?.is_streamed || state.value === 'past' || state.value === 'cancelled') return
+  meeting.value = await api.meetings.forSession(current.id).catch(() => null)
+}
+
+const meetingOpen = computed(() => isMeetingOpen(meeting.value, now.value))
+const roomTo = computed(() =>
+  localePath({ name: 'activity-edition-session-room', params: { edition: editionSlug.value, session: sessionSlug.value } }),
+)
+
 onMounted(() => {
   now.value = Date.now()
   clock = setInterval(() => (now.value = Date.now()), 30_000)
   if (session.value) visitedId.value = session.value.id
   void loadStreams()
+  void loadMeeting()
 })
 onBeforeUnmount(() => clearInterval(clock))
 watch(session, (current) => {
   streams.value = []
+  meeting.value = null
   if (current) visitedId.value = current.id
   void loadStreams()
+  void loadMeeting()
 })
 
 const homeTime = computed(() => {
@@ -162,6 +168,10 @@ useHead(() => ({
               :streams="streams"
               :cover="session.cover"
               :acronym="session.organization_acronym"
+              :meeting="meeting"
+              :meeting-open="meetingOpen"
+              :room-to="roomTo"
+              :zone-label="edition.city ?? undefined"
             />
 
             <section v-if="summary || hasDescription" class="order-4" aria-labelledby="a-propos-titre">
@@ -184,6 +194,9 @@ useHead(() => ({
                 :languages="languages"
                 :now="now"
                 :home-time="homeTime"
+                :meeting="meeting"
+                :meeting-open="meetingOpen"
+                :room-to="roomTo"
                 @started="refresh()"
               />
             </div>

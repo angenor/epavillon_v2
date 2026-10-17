@@ -85,6 +85,7 @@ import { createNotificationsApi } from './api/notifications'
 import { createAdminNegotiationDocumentsApi } from './api/admin-negotiation-documents'
 import { createAdminNegotiationSavoirApi } from './api/admin-negotiation-savoir'
 import { createAuthApi } from './api/auth'
+import { createMeetingsApi } from './api/meetings'
 
 // `ForbiddenError` vit désormais dans `utils/api-error.ts`, avec les deux autres
 // erreurs de la couche d'accès : le client HTTP doit pouvoir la lever sur un
@@ -811,6 +812,7 @@ export function useApi() {
       sessionStreams: (sessionId: Uuid): Promise<PublicSessionStream[]> =>
         call(`/sessions/${sessionId}/streams`, (m) => m.publicSessionStreams(sessionId)),
     },
+    meetings: createMeetingsApi(deps),
 
     // -----------------------------------------------------------------------
     // Espace organisation (A5)

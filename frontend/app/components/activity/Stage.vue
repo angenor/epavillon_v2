@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { PublicScheduleRow } from '~/types/views'
-import type { PublicSessionStream } from '~/types/live'
+import type { PublicSessionMeeting, PublicSessionStream } from '~/types/live'
 import type { AttachedImage } from '~/types/media'
 import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
 
 /**
- * Le média de l'activité, toujours rendu : le direct avec ses langues pendant la
- * diffusion, l'enregistrement après, la couverture sinon — à défaut, le sigle.
+ * Le média de l'activité, toujours rendu : la salle Zoom pendant sa fenêtre
+ * d'ouverture quand aucun flux n'est diffusé, le direct avec ses langues pendant
+ * la diffusion, l'enregistrement après, la couverture sinon (à défaut, le sigle).
  * Une séance a un flux par langue d'interprétation.
  */
 
@@ -16,6 +17,11 @@ interface Props {
   streams: PublicSessionStream[]
   cover: AttachedImage | null
   acronym: string | null
+  meeting?: PublicSessionMeeting | null
+  /** Fenêtre de la salle Zoom ouverte, à l'horloge de la page. */
+  meetingOpen?: boolean
+  roomTo?: string
+  zoneLabel?: string
 }
 
 const props = defineProps<Props>()
@@ -45,6 +51,10 @@ const current = computed(
   () => props.streams.find((stream) => stream.id === chosen.value) ?? props.streams[0] ?? null,
 )
 
+const zoomRoom = computed(() =>
+  props.meetingOpen && props.meeting && props.session.is_streamed && props.streams.length === 0 ? props.meeting : null,
+)
+
 const isLive = computed(
   () => props.session.is_streamed && (props.state === 'live' || (props.state === 'ongoing' && props.streams.length > 0)),
 )
@@ -57,7 +67,23 @@ const replayMinutes = computed(() =>
 </script>
 
 <template>
-  <section v-if="isLive" id="direct" class="min-w-0" aria-labelledby="direct-titre">
+  <section v-if="zoomRoom" id="direct" class="min-w-0" aria-labelledby="direct-titre">
+    <h2 id="direct-titre" class="sr-only">{{ t('zoom-room.label') }}</h2>
+    <div class="relative min-h-80 overflow-hidden rounded-lg bg-surface-inverse shadow-lg lg:aspect-video lg:min-h-0">
+      <ClientOnly>
+        <ActivityZoomRoom
+          class="lg:absolute lg:inset-0"
+          mode="stage"
+          :session="props.session"
+          :meeting="zoomRoom"
+          :room-to="props.roomTo"
+          :zone-label="props.zoneLabel"
+        />
+      </ClientOnly>
+    </div>
+  </section>
+
+  <section v-else-if="isLive" id="direct" class="min-w-0" aria-labelledby="direct-titre">
     <h2 id="direct-titre" class="sr-only">{{ t('activity.stage.liveTitle') }}</h2>
     <div class="relative aspect-video overflow-hidden rounded-lg bg-surface-inverse text-text-on-inverse shadow-lg">
       <iframe

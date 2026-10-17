@@ -1,0 +1,30 @@
+{
+  "label": "Zoom meeting",
+  "window": "Room open: {range}",
+  "checking": "Checking your access…",
+  "login": {
+    "message": "Sign in to enter the meeting.",
+    "action": "Sign in"
+  },
+  "register": {
+    "message": "The meeting is reserved for registered participants.",
+    "action": "Register"
+  },
+  "ready": "Join from this page, no Zoom installation needed.",
+  "join": "Join the meeting",
+  "step": {
+    "access": "Checking your registration…",
+    "sdk": "Loading Zoom…",
+    "joining": "Entering the meeting…"
+  },
+  "joined": "You are in the meeting.",
+  "waitlisted": "You are on the waiting list: entry is first come, first served, while places last.",
+  "fallback": "Open in the Zoom app",
+  "retry": "Try again",
+  "fullscreen": "Full screen",
+  "exitFullscreen": "Exit full screen",
+  "error": {
+    "sdk": "Connecting to Zoom failed. Try again, or open the meeting in the Zoom app.",
+    "sdkReason": "Connecting to Zoom failed ({reason}). Try again, or open the meeting in the Zoom app."
+  }
+}
