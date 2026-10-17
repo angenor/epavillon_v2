@@ -2,6 +2,7 @@
 import type { MeetingAccess, PublicSessionMeeting } from '~/types/live'
 import type { PublicScheduleRow } from '~/types/views'
 import type { MeetingRoomStep } from '~/composables/useMeetingRoom'
+import type { SuspensionViewType } from '@zoom/meetingsdk/embedded'
 import type { ZoomEmbedded, ZoomEmbeddedClient } from '~/utils/zoom-sdk'
 
 /**
@@ -40,7 +41,7 @@ const { phase, step, error, errorStatus, needsRegistration, waitlisted, joinUrl,
 const box = useTemplateRef<HTMLElement>('box')
 const zoomRoot = useTemplateRef<HTMLElement>('zoomRoot')
 const dialogOpen = ref(false)
-const fullscreen = ref(false)
+const expanded = ref(false)
 
 const inPage = computed(() => props.mode === 'stage' && embedded.value)
 const loginTo = computed(() => `${localePath('auth-login')}?redirect=${encodeURIComponent(route.fullPath)}`)
@@ -65,12 +66,20 @@ watch(
   (active) => emit('update:inMeeting', active),
 )
 
-function videoSize() {
+/** La barre d'outils du SDK se pose sous la vidéo, dans la même racine. */
+const TOOLBAR_PX = 56
+
+/** Taille de la vidéo : le cadre, ou l'écran en mode agrandi. Nulle tant que la mise en page n'est pas faite. */
+function videoSize(): { width: number; height: number } | null {
   const rect = box.value?.getBoundingClientRect()
-  const width = Math.round(rect?.width ?? 960)
-  // La barre d'outils du SDK se pose sous la vidéo.
-  const height = Math.max(Math.round((rect?.height ?? 540) - 56), 180)
-  return { width, height }
+  const width = Math.round(expanded.value ? window.innerWidth : (rect?.width ?? 0))
+  const height = Math.round((expanded.value ? window.innerHeight : (rect?.height ?? 0)) - TOOLBAR_PX)
+  return width > 0 && height > 0 ? { width, height } : null
+}
+
+function applyVideoSize(): void {
+  const size = videoSize()
+  if (size) client?.updateVideoOptions({ viewSizes: { default: size, ribbon: size } })
 }
 
 // Un client par tentative : créé et initialisé ici, détruit à la sortie ou à l'échec, jamais réinitialisé sur la même racine.
@@ -79,6 +88,8 @@ async function startEmbedded(access: MeetingAccess, setStep: (next: MeetingRoomS
   disposeEmbedded()
   const current = zoom.createClient()
   client = current
+  await nextTick()
+  const size = videoSize() ?? { width: 960, height: 540 - TOOLBAR_PX }
   try {
     await current.init({
       zoomAppRoot: zoomRoot.value ?? undefined,
@@ -86,7 +97,13 @@ async function startEmbedded(access: MeetingAccess, setStep: (next: MeetingRoomS
       patchJsMedia: true,
       leaveOnPageUnload: true,
       customize: {
-        video: { isResizable: false, popper: { disableDraggable: true }, viewSizes: { default: videoSize() } },
+        // Orateur : la galerie demande SharedArrayBuffer (en-têtes COOP/COEP), absent ici ; sans réglage, le SDK part en ruban.
+        video: {
+          isResizable: false,
+          popper: { disableDraggable: true },
+          defaultViewType: 'speaker' as SuspensionViewType,
+          viewSizes: { default: size, ribbon: size },
+        },
       },
     })
     setStep('joining')
@@ -96,7 +113,9 @@ async function startEmbedded(access: MeetingAccess, setStep: (next: MeetingRoomS
     disposeEmbedded()
     throw failure
   }
-  resize = new ResizeObserver(() => client?.updateVideoOptions({ viewSizes: { default: videoSize() } }))
+  await nextTick()
+  applyVideoSize()
+  resize = new ResizeObserver(applyVideoSize)
   if (box.value) resize.observe(box.value)
 }
 
@@ -134,7 +153,7 @@ function onConnectionChange(payload: { state?: string }): void {
 }
 
 function stopEmbedded(): void {
-  if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined)
+  void setExpanded(false)
   // Hors du rappel du SDK : il finit de se fermer avant qu'on le détruise.
   setTimeout(disposeEmbedded, 0)
   left()
@@ -144,15 +163,42 @@ function enter(): void {
   void join(props.mode === 'page' ? startClientView : startEmbedded)
 }
 
-async function toggleFullscreen(): Promise<void> {
-  if (document.fullscreenElement) await document.exitFullscreen().catch(() => undefined)
-  else await box.value?.requestFullscreen().catch(() => undefined)
+/**
+ * Agrandir sans mettre le cadre en plein écran : les menus du SDK (participants,
+ * réglages, discussion) se rendent dans `body` et resteraient derrière l'élément
+ * en plein écran. Le cadre passe en fixe sur toute la fenêtre, et c'est le
+ * document entier qui passe en plein écran.
+ */
+async function setExpanded(next: boolean): Promise<void> {
+  if (expanded.value === next) return
+  expanded.value = next
+  document.documentElement.style.overflow = next ? 'hidden' : ''
+  if (next && !document.fullscreenElement) await document.documentElement.requestFullscreen().catch(() => undefined)
+  if (!next && document.fullscreenElement) await document.exitFullscreen().catch(() => undefined)
+  await nextTick()
+  applyVideoSize()
 }
 
-const onFullscreen = () => (fullscreen.value = document.fullscreenElement === box.value)
-onMounted(() => document.addEventListener('fullscreenchange', onFullscreen))
+const onFullscreenChange = () => {
+  if (!document.fullscreenElement && expanded.value) void setExpanded(false)
+}
+const onKey = (event: KeyboardEvent) => {
+  if (event.key === 'Escape' && expanded.value && !document.fullscreenElement) void setExpanded(false)
+}
+const onWindowResize = () => expanded.value && applyVideoSize()
+onMounted(() => {
+  document.addEventListener('fullscreenchange', onFullscreenChange)
+  document.addEventListener('keydown', onKey)
+  window.addEventListener('resize', onWindowResize)
+})
 onBeforeUnmount(() => {
-  document.removeEventListener('fullscreenchange', onFullscreen)
+  document.removeEventListener('fullscreenchange', onFullscreenChange)
+  document.removeEventListener('keydown', onKey)
+  window.removeEventListener('resize', onWindowResize)
+  if (expanded.value) {
+    document.documentElement.style.overflow = ''
+    if (document.fullscreenElement) void document.exitFullscreen().catch(() => undefined)
+  }
   emit('update:inMeeting', false)
   const current = client
   if (!current) return
@@ -165,7 +211,12 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="box" class="relative size-full bg-surface-inverse text-text-on-inverse">
+  <!-- z-[60] : au-dessus de la barre du site (z-30) et du bandeau du billet (z-40), sous les menus du SDK (999 et plus). -->
+  <div
+    ref="box"
+    class="bg-surface-inverse text-text-on-inverse"
+    :class="expanded ? 'fixed! inset-0 z-[60]' : 'relative size-full'"
+  >
     <div v-if="inPage" ref="zoomRoot" class="absolute inset-0" />
 
     <div
@@ -246,9 +297,9 @@ onBeforeUnmount(() => {
       class="absolute top-2 right-2 z-10"
       variant="inverse"
       icon-only
-      :icon="fullscreen ? 'close' : 'monitor'"
-      :label="t(fullscreen ? 'zoom-room.exitFullscreen' : 'zoom-room.fullscreen')"
-      @click="toggleFullscreen"
+      :icon="expanded ? 'close' : 'monitor'"
+      :label="t(expanded ? 'zoom-room.exitFullscreen' : 'zoom-room.fullscreen')"
+      @click="setExpanded(!expanded)"
     />
 
     <ActivityRegistrationDialog
