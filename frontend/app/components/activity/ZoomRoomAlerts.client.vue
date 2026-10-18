@@ -184,13 +184,13 @@ onBeforeUnmount(() => {
       </div>
 
       <template v-if="appLinkShown && props.joinUrl">
-        <!-- Dessiné comme les boutons de la barre de Zoom : pictogramme au-dessus, libellé dessous. -->
+        <!-- Dessiné comme les boutons de la barre de Zoom (pictogramme au-dessus, libellé dessous), sur le bleu nuit du site, texte jaune (demande du 18/10) pour s'en distinguer. -->
         <a
           v-if="appLinkSpot && appLinkSpot !== 'hidden'"
           :href="props.joinUrl"
           target="_blank"
           rel="noopener noreferrer"
-          class="fixed z-[3000] flex min-h-(--target-min) -translate-y-1/2 cursor-pointer flex-col items-center justify-center gap-1 rounded-md px-2.5 text-xs text-text-on-inverse hover:bg-surface-inverse-raised"
+          class="fixed z-[3000] flex min-h-(--target-min) -translate-y-1/2 cursor-pointer flex-col items-center justify-center gap-1 rounded-md bg-surface-inverse px-3 py-1.5 text-xs font-bold text-warning-on-inverse hover:bg-surface-inverse-raised"
           :style="{ right: `${appLinkSpot.right}px`, top: `${appLinkSpot.top}px` }"
         >
           <UiIcon name="external-link" size="1.25rem" />
