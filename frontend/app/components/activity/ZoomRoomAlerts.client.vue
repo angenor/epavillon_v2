@@ -11,7 +11,9 @@
  * titre de l'onglet disent que le partage est en cours.
  *
  * Application Zoom : un lien toujours là, 30 s après l'ouverture de la salle,
- * pour qui préfère le logiciel ou reste bloqué au chargement.
+ * pour qui préfère le logiciel ou reste bloqué au chargement. Posé dans la barre
+ * du bas, à gauche de « Quitter » : on mesure ce bouton sans toucher au DOM du
+ * SDK, qui le redessine à sa guise. Sans barre (salle d'attente), en haut à droite.
  */
 
 interface Props {
@@ -31,14 +33,18 @@ const RETRY_MEMORY_MS = 3 * 60_000
 // Barre du SDK pour qui partage, toujours dans la page et cachée par `--hidden` hors partage, et son bouton d'arrêt (6.5.0).
 const SHARER_BAR = '.sharer-controlbar-container:not(.sharer-controlbar-container--hidden)'
 const SHARER_STOP = '.sharer-controlbar-container__stop'
+const LEAVE_BUTTON = '.footer__leave-btn-container'
 
 const failure = ref<'none' | 'countdown' | 'stuck'>('none')
 const secondsLeft = ref(RETRY_DELAY_S)
 const sharing = ref(false)
 const appLinkShown = ref(false)
+/** `null` : pas de barre ; `hidden` : la barre est rangée (le SDK la cache au repos), on se range avec elle. */
+const appLinkSpot = ref<{ right: number; top: number } | 'hidden' | null>(null)
 let appLinkTimer: ReturnType<typeof setTimeout> | undefined
 let countdown: ReturnType<typeof setInterval> | undefined
 let shareCheck: ReturnType<typeof setTimeout> | undefined
+let settle: ReturnType<typeof setTimeout> | undefined
 let observer: MutationObserver | undefined
 let titleBeforeShare: string | null = null
 
@@ -111,6 +117,23 @@ function checkShare(): void {
   }
 }
 
+function placeAppLink(): void {
+  const leaves = [...document.querySelectorAll<HTMLElement>(LEAVE_BUTTON)]
+  if (!leaves.length) return void (appLinkSpot.value = null)
+  const rect = leaves.map((leave) => leave.getBoundingClientRect()).find((box) => box.width > 0 && box.bottom <= window.innerHeight + 1)
+  appLinkSpot.value = rect
+    ? { right: Math.round(window.innerWidth - rect.left + 8), top: Math.round(rect.top + rect.height / 2) }
+    : 'hidden'
+}
+
+function inspect(): void {
+  checkShare()
+  placeAppLink()
+  // La barre glisse quand le SDK la montre ou la range : on remesure une fois l'animation finie.
+  clearTimeout(settle)
+  settle = setTimeout(placeAppLink, 500)
+}
+
 function stopSharing(): void {
   const stop = document.querySelector<HTMLElement>(SHARER_STOP)
   ;(stop?.querySelector<HTMLElement>('button') ?? stop)?.click()
@@ -126,12 +149,13 @@ onMounted(() => {
       if (failed) onFailure()
     }
     clearTimeout(shareCheck)
-    shareCheck = setTimeout(checkShare, 200)
+    shareCheck = setTimeout(inspect, 200)
   })
   // `class` : la barre de partage apparaît et disparaît par sa classe, sans changer de place dans la page.
   observer.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['class'] })
   if (mentionsFailure(document.body)) onFailure()
-  checkShare()
+  inspect()
+  window.addEventListener('resize', placeAppLink)
 })
 
 onBeforeUnmount(() => {
@@ -139,6 +163,8 @@ onBeforeUnmount(() => {
   clearInterval(countdown)
   clearTimeout(shareCheck)
   clearTimeout(appLinkTimer)
+  clearTimeout(settle)
+  window.removeEventListener('resize', placeAppLink)
   if (titleBeforeShare !== null) document.title = titleBeforeShare
 })
 </script>
@@ -157,10 +183,24 @@ onBeforeUnmount(() => {
         <UiButton variant="secondary" @click="stopSharing">{{ t('zoom-room.alerts.share.stop') }}</UiButton>
       </div>
 
-      <!-- En haut à droite : sous l'en-tête de Zoom, à l'écart de sa barre d'outils et de sa barre de partage. -->
-      <div v-if="appLinkShown && props.joinUrl" class="fixed top-14 right-3 z-[3000] rounded-md bg-surface-raised shadow-lg">
-        <UiButton variant="secondary" icon="external-link" :href="props.joinUrl">{{ t('zoom-room.fallback') }}</UiButton>
-      </div>
+      <template v-if="appLinkShown && props.joinUrl">
+        <!-- Dessiné comme les boutons de la barre de Zoom : pictogramme au-dessus, libellé dessous. -->
+        <a
+          v-if="appLinkSpot && appLinkSpot !== 'hidden'"
+          :href="props.joinUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="fixed z-[3000] flex min-h-(--target-min) -translate-y-1/2 cursor-pointer flex-col items-center justify-center gap-1 rounded-md px-2.5 text-xs text-text-on-inverse hover:bg-surface-inverse-raised"
+          :style="{ right: `${appLinkSpot.right}px`, top: `${appLinkSpot.top}px` }"
+        >
+          <UiIcon name="external-link" size="1.25rem" />
+          {{ t('zoom-room.alerts.app') }}
+        </a>
+        <!-- Sans barre : sous l'en-tête de Zoom, à l'écart de sa barre de partage. -->
+        <div v-else-if="!appLinkSpot" class="fixed top-14 right-3 z-[3000] rounded-md bg-surface-raised shadow-lg">
+          <UiButton variant="secondary" icon="external-link" :href="props.joinUrl">{{ t('zoom-room.alerts.app') }}</UiButton>
+        </div>
+      </template>
 
       <div
         v-if="failure !== 'none'"

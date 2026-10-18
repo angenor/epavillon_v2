@@ -37,6 +37,7 @@
       "retryNow": "Try again now",
       "cancel": "Cancel",
       "close": "Close"
-    }
+    },
+    "app": "Go to Zoom"
   }
 }

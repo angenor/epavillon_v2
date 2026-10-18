@@ -240,4 +240,4 @@ Maquette : [page d'une activité](https://claude.ai/artifact/MTjhU6YwDmahNgDDTRY
 
 **17/10 : entrée toujours en plein écran** : « Rejoindre la réunion » ouvre la page « salle » et y entre directement, sur tous les écrans ; plus de réunion dans la page de l'activité. Dans la salle : nouvel essai automatique quand l'image de Zoom ne se connecte pas, pastille pendant un partage d'écran. Voir [décision](../decisions/2026-10-17.md).
 
-**18/10 : bouton vers l'application Zoom** dans la salle, 30 s après son ouverture. Voir [journal](../journal/2026-10-18.md).
+**18/10 : « Aller dans Zoom »** dans la barre du bas de la salle, à gauche de « Quitter », 30 s après son ouverture (en haut à droite tant qu'il n'y a pas de barre). Voir [journal](../journal/2026-10-18.md).
