@@ -219,7 +219,7 @@ onBeforeUnmount(() => emit('update:inMeeting', false))
     </div>
 
     <ActivityZoomRoomAlerts
-      v-if="props.mode === 'page' && phase === 'joined'"
+      v-if="props.mode === 'page' && (phase === 'loading' || phase === 'joined')"
       :failure-texts="failureTexts"
       :join-url="joinUrl"
       :session-id="props.session.id"

@@ -9,6 +9,9 @@
  * Partage d'écran : rien ne change dans la page, contrairement au logiciel, qui
  * se range. On ne cache pas la réunion (demande du 17/10) : une pastille et le
  * titre de l'onglet disent que le partage est en cours.
+ *
+ * Application Zoom : un lien toujours là, 30 s après l'ouverture de la salle,
+ * pour qui préfère le logiciel ou reste bloqué au chargement.
  */
 
 interface Props {
@@ -21,6 +24,8 @@ const props = defineProps<Props>()
 const { t } = useI18n()
 
 const RETRY_DELAY_S = 5
+/** Compté depuis le chargement de la page : on arrive dans la salle par un lien simple. */
+const APP_LINK_DELAY_MS = 30_000
 /** Un second échec dans ce délai après le rechargement automatique ne relance plus rien. */
 const RETRY_MEMORY_MS = 3 * 60_000
 // Barre du SDK pour qui partage, toujours dans la page et cachée par `--hidden` hors partage, et son bouton d'arrêt (6.5.0).
@@ -30,6 +35,8 @@ const SHARER_STOP = '.sharer-controlbar-container__stop'
 const failure = ref<'none' | 'countdown' | 'stuck'>('none')
 const secondsLeft = ref(RETRY_DELAY_S)
 const sharing = ref(false)
+const appLinkShown = ref(false)
+let appLinkTimer: ReturnType<typeof setTimeout> | undefined
 let countdown: ReturnType<typeof setInterval> | undefined
 let shareCheck: ReturnType<typeof setTimeout> | undefined
 let observer: MutationObserver | undefined
@@ -110,6 +117,7 @@ function stopSharing(): void {
 }
 
 onMounted(() => {
+  appLinkTimer = setTimeout(() => (appLinkShown.value = true), Math.max(0, APP_LINK_DELAY_MS - performance.now()))
   observer = new MutationObserver((mutations) => {
     if (failure.value === 'none' && props.failureTexts.length) {
       const failed = mutations.some((mutation) =>
@@ -130,6 +138,7 @@ onBeforeUnmount(() => {
   observer?.disconnect()
   clearInterval(countdown)
   clearTimeout(shareCheck)
+  clearTimeout(appLinkTimer)
   if (titleBeforeShare !== null) document.title = titleBeforeShare
 })
 </script>
@@ -146,6 +155,11 @@ onBeforeUnmount(() => {
         <span class="size-2.5 shrink-0 rounded-full bg-live motion-safe:animate-pulse" aria-hidden="true" />
         <span class="font-bold">{{ t('zoom-room.alerts.share.status') }}</span>
         <UiButton variant="secondary" @click="stopSharing">{{ t('zoom-room.alerts.share.stop') }}</UiButton>
+      </div>
+
+      <!-- En haut à droite : sous l'en-tête de Zoom, à l'écart de sa barre d'outils et de sa barre de partage. -->
+      <div v-if="appLinkShown && props.joinUrl" class="fixed top-14 right-3 z-[3000] rounded-md bg-surface-raised shadow-lg">
+        <UiButton variant="secondary" icon="external-link" :href="props.joinUrl">{{ t('zoom-room.fallback') }}</UiButton>
       </div>
 
       <div
