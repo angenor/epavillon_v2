@@ -361,7 +361,10 @@ l'OIF : l'API se connecte à ce serveur en client authentifié, et c'est lui qui
 émet.
 
 Une adresse en `@francophonie.org` serait donc rejetée, quelle que soit la
-machine qui l'envoie de notre côté. La faire accepter demanderait que l'OIF
+machine qui l'envoie de notre côté. **Faux, corrigé le 26/10** : le SPF du parent
+autorise aussi `ip4:173.209.54.36`, la sortie d'Exim de l'ancien hébergement (l'extrait
+ci-dessus l'avait élidé). Depuis, l'application émet en `epavillonclimatique@francophonie.org`,
+voir le § 17. La faire accepter demanderait que l'OIF
 ajoute une IP à son SPF, ou fournisse un relais joignable depuis l'Internet —
 `courriels.francophonie.org`, transmis le 02/09, **n'existe pas dans le DNS
 public** : ni A, ni CNAME. C'est vraisemblablement un nom interne à leur réseau.
@@ -1329,6 +1332,31 @@ Deux effets de la bascule qui ne se règlent pas de notre côté :
 - **Courriel entrant** : le sous-domaine n'a pas de MX, donc les messages qui lui sont adressés
   vont à l'adresse A, c'est-à-dire ici, où personne ne les attend. Sans effet pour
   `ne-pas-repondre@` ; une vraie boîte sur l'ancien cPanel demanderait un MX vers lui.
+
+### L'expéditeur devient `epavillonclimatique@francophonie.org` (26/10)
+
+Adresse de la v1, à la demande du commanditaire. Quatre essais vers une boîte Gmail :
+
+| Expéditeur | Ancien serveur (compte de l'application, 587) | Nouveau serveur (Exim local) |
+|---|---|---|
+| `ne-pas-repondre@epavillonclimatique.francophonie.org` | reçu | accepté par Gmail (le `+a` du SPF désigne maintenant ce serveur) |
+| `epavillonclimatique@francophonie.org` | **reçu** | **refusé** : `550 5.7.26 … DMARC policy` |
+
+Le SPF de `francophonie.org` autorise `173.209.54.36`, sortie de l'ancien hébergement, pas le
+serveur applicatif ; `p=reject` fait refuser le reste, et chaque refus est rapporté à
+`soc@francophonie.org`. Donc : **`SMTP_FROM=epavillonclimatique@francophonie.org`**, envoi
+toujours authentifié par le compte `ne-pas-repondre` de l'ancien cPanel, qui accepte un expéditeur
+différent de son identifiant. L'enveloppe suit `SMTP_FROM` : SPF aligné, DMARC passe sans DKIM.
+`courriels.francophonie.org`, l'hôte de la configuration v1, n'existe pas dans le DNS public ; la
+v1 était en `MAIL_MAILER=sendmail` et ne s'en servait pas.
+
+Changer `SMTP_FROM` demande `up -d --force-recreate api worker` : `restart` ne relit pas
+`env_file`. Vérifié par une vraie demande de réinitialisation, `identity.send_password_reset_email`
+en `succeeded` au premier essai. `.env.prod` d'avant : `.env.prod.avant-expediteur-20261026`.
+
+**Tout l'envoi dépend de l'ancien hébergement** : sa résiliation coupe tous les courriels. S'en
+libérer demande à l'OIF d'autoriser un autre émetteur (service d'envoi, ou le serveur applicatif)
+dans le SPF de `francophonie.org`.
 
 ### Ce qui reste
 
