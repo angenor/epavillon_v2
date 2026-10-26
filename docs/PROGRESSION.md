@@ -2,12 +2,12 @@
 **Ce fichier est la mémoire du projet entre deux sessions Claude Code.** Toute session commence par le lire et se termine par le mettre à jour.
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
-## Dernière mise à jour : 17 octobre 2026
+## Dernière mise à jour : 26 octobre 2026
+- 26/10 : l'OIF a fait pointer `epavillonclimatique.francophonie.org` sur le serveur applicatif. Le site y est servi **à la racine** (plus de `/v2`), certificat Let's Encrypt ; `epavillon.mefali.com` et les liens `/v2/…` redirigent ; le courriel part toujours de l'ancien serveur. Production toujours en maintenance. Voir [DEPLOIEMENT § 17](DEPLOIEMENT.md).
 - 17/10 : le direct passe par des réunions Zoom intégrées à la page de l'activité (Meeting SDK 6.5.0), chaque inscription transmise à Zoom. En production le 17/10, migration jouée, clés posées ; notifications Zoom à brancher. Voir [A3](progression/ecrans/a3-evenement-public.md), [décision](progression/decisions/2026-10-17.md).
 - 16/10 — Plateforme en maintenance basculée depuis le back-office : page d'attente pour tous sauf les administrateurs, écritures refusées par l'API. **Déployé avec tout le code du 03 au 16/10, et la production est EN MAINTENANCE** jusqu'à la fin de la reprise des données — [A14](progression/ecrans/a14-maintenance.md), [DEPLOIEMENT § 16](DEPLOIEMENT.md).
 - 05/10 — Le menu du compte devient « Mon espace » : sigle de l'organisation, pastille des actions en attente, « Ce qui vous attend » puis Mes propositions en tête. En production le 16/10 — [A5](progression/ecrans/a5-espace-organisation.md).
 - 05/10 — Page d'une activité : bandeau sur la photo de l'édition, titre en grand, logo de l'organisation, image et billet en léger débord, lecteur à la place de l'image pendant le direct ; l'affiche n'a plus d'écran. En production le 16/10 — [A3](progression/ecrans/a3-evenement-public.md).
-- 04/10 — `/programmations` passe en liste éditoriale (activité en direct à la une, journées groupées, couvertures) et en semaine à colonnes (jours figés, défilante sur téléphone, 05/10) ; l'affiche ne reste qu'à la page d'une activité. En production le 16/10 — [A3](progression/ecrans/a3-evenement-public.md).
 
 ## État général
 | Domaine | État |
@@ -18,7 +18,7 @@ Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état gén
 | Front | ✅ Raccordé à l'API depuis le 22/08 ; plus aucun écran ne lit d'exemples depuis le 27/08 ; ajustements d'écrans en septembre à la demande du commanditaire |
 | Outillage de la phase B | ✅ Spec Kit installé et constitution ratifiée en 1.0.0 le 20/08 — [B0](progression/ecrans/b0-constitution.md) |
 | API | ✅ B0 à B9 livrés ; `make check-api-contract` compte zéro route en attente — [`progression/api.md`](progression/api.md) |
-| Mise en ligne | ✅ La v2 tourne sous `/v2` depuis le 02/09, relayée par Apache ; production migrée au modèle du jour, en dernier le 29/09 — [`DEPLOIEMENT.md`](DEPLOIEMENT.md) |
+| Mise en ligne | ✅ Servie à la racine de `epavillonclimatique.francophonie.org` depuis le 26/10 (sous `/v2` du 02/09 au 26/10) ; reste : redirections des adresses de la v1 — [`DEPLOIEMENT.md`](DEPLOIEMENT.md) § 17 |
 
 ## Front — suivi des prompts
 Un écran = un fichier : ce qui a été livré, les écarts entre le modèle et l'interface, ce qui a été vérifié. Un écart se tranche, il ne se contourne pas. Les prompts sont dans [PROMPTS_DEVELOPPEMENT.md](PROMPTS_DEVELOPPEMENT.md).

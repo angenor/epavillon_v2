@@ -4,6 +4,10 @@ Comment la v2 arrive en ligne, et pourquoi elle y arrive par ce chemin-là.
 
 Pour l'environnement de développement, voir [ENVIRONNEMENT_LOCAL.md](ENVIRONNEMENT_LOCAL.md).
 
+> **Depuis le 26/10, le domaine pointe sur le serveur applicatif** et le site y est servi à la
+> racine : voir le § 17. Les §§ 1 à 3, 5 et 11 décrivent le montage d'avant (relais depuis le
+> cPanel, préfixe `/v2`) ; ils restent pour comprendre les choix, plus pour les refaire.
+
 ---
 
 ## 1. La contrainte, et ce qu'elle n'était pas
@@ -240,7 +244,7 @@ Trois choses qu'aucun test local ne peut dire, dans l'ordre où elles font mal :
 
 ## 7. Le jour de la bascule à la racine
 
-Quand l'OIF aura répondu, ou quand la v1 pourra être remplacée :
+**Fait le 26/10**, après la réponse de l'OIF : voir le § 17. Ce qui suit était le plan.
 
 1. `APP_PUBLIC_URL` sans `/v2`, `NUXT_APP_BASE_URL=/`, `NUXT_PUBLIC_API_BASE=/api`
 2. **Reconstruire l'image du site** — la base préfixe chaque URL d'asset écrite dans le HTML, et la
@@ -1275,3 +1279,62 @@ UPDATE platform.feature_flags SET is_enabled = false, rollout_percent = 0   WHER
 ```
 
 **Bascule DNS d'`epavillonclimatique.francophonie.org`** : fermer **avant** que l'OIF modifie l'enregistrement A, reprendre les données, vérifier en administrateur, rouvrir. Les visiteurs qui arrivent pendant la propagation tombent sur la page d'attente, jamais sur une plateforme à moitié remplie.
+
+---
+
+## 17. La bascule DNS du domaine (26/10)
+
+L'OIF a fait pointer `epavillonclimatique.francophonie.org` (A) de `68.168.118.201` vers
+`173.209.36.111`, à notre demande (`brouillons/DAT-ePavillon-bascule-DNS.pdf`). Le relais depuis le
+cPanel (§§ 2, 11) n'a plus d'objet, et le préfixe `/v2` disparaît.
+
+**Avant notre réglage, le domaine affichait le site de Finance durable.** Il n'avait pas de vhost
+sur la machine, et Apache servait le vhost par défaut de l'adresse, celui du voisin, sous le
+certificat générique `*.francophonie.org` de l'OIF qu'il porte. Aucun message d'erreur : le
+mauvais site, avec un cadenas valide.
+
+### Ce qui a changé
+
+| | Avant | Depuis le 26/10 |
+|---|---|---|
+| Adresse publique | `epavillon.mefali.com/v2` (recette) | `epavillonclimatique.francophonie.org`, racine |
+| `APP_PUBLIC_URL` · `NUXT_APP_BASE_URL` · `NUXT_PUBLIC_API_BASE` | `…/v2` · `/v2/` · `/v2/api` | sans `/v2` · `/` · `/api` |
+| Certificat | Let's Encrypt `epavillon.mefali.com` | plus un second, `epavillonclimatique.francophonie.org`, même webroot `/var/www/certbot`, même minuterie |
+| `epavillon.mefali.com` | sert le site | redirige (301), `/v2` retiré ; défi ACME conservé |
+| Liens en `/v2/…` sur le domaine | | redirigés (301) vers la racine |
+| `media.public_base_url` (en base) | `…mefali.com/v2/media` | `https://epavillonclimatique.francophonie.org/media` |
+
+Tout vit dans [`ops/apache-epavillon.conf`](../ops/apache-epavillon.conf), toujours dans
+`post_virtualhost_global.conf`, chargé après les vhosts de cPanel : aucun ne peut devenir le vhost
+par défaut, le voisin garde le sien. Le vhost HTTPS du domaine est enveloppé d'un `<IfFile>` sur
+son certificat : le premier dépôt doit passer `configtest` **avant** que le certificat existe,
+puisque c'est ce dépôt qui ouvre le défi ACME.
+
+### Le courriel part toujours de l'ancien serveur, et c'était le piège
+
+`SMTP_HOST` vaut le nom du domaine (le certificat SMTP de l'ancien serveur est
+`*.francophonie.org`). Depuis la bascule, ce nom mène **ici**, à l'Exim du voisin : plus aucun
+courriel ne partait. `extra_hosts` dans `ops/docker-compose.prod.yml` fait résoudre ce seul nom
+vers `68.168.118.201` dans les conteneurs `api` et `worker`, et nulle part ailleurs : le
+certificat reste vérifié, et ni l'API ni le worker n'appellent l'adresse publique du site. Si
+l'hébergement mutualisé change d'adresse, cette ligne change aussi.
+
+Deux effets de la bascule qui ne se règlent pas de notre côté :
+
+- **SPF** : `v=spf1 +mx +a +ip4:173.209.54.36 -all`. Le `+a` désigne maintenant le serveur
+  applicatif, plus l'ancien. Les envois restent autorisés s'ils sortent par `173.209.54.36`
+  (l'adresse d'Exim chez l'hébergeur, que le SPF nomme), et signés DKIM par le domaine, ce qui
+  suffit à DMARC. À confirmer sur un courriel reçu (`Authentication-Results: spf=pass`) ; en cas
+  d'échec, demander à l'OIF d'ajouter `ip4:68.168.118.201`.
+- **Courriel entrant** : le sous-domaine n'a pas de MX, donc les messages qui lui sont adressés
+  vont à l'adresse A, c'est-à-dire ici, où personne ne les attend. Sans effet pour
+  `ne-pas-repondre@` ; une vraie boîte sur l'ancien cPanel demanderait un MX vers lui.
+
+### Ce qui reste
+
+- Les **anciennes adresses de la v1** (racine du domaine) : une page de la v1 tombe maintenant sur
+  la 404 du site. Redirections à écrire dans le vhost, d'après les routes de la v1.
+- Une Guide Négo **installée** depuis `epavillon.mefali.com/v2/guide-nego/` reste attachée à
+  l'ancienne origine : la réinstaller depuis `/guide-nego/` du domaine.
+- Le drapeau `platform.maintenance` était allumé au moment de la bascule (§ 16) : le rouvrir après
+  vérification en administrateur.
