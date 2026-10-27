@@ -42,7 +42,7 @@ Lu par chaque script de `ops/reprise-v1/lots/`. Plan : [`docs/progression/repris
 | 90 | journées spéciales de la CdP30 (`code.journees-speciales`) : activités de la page statique seules, relevé `journees-speciales/` | 2, joué le 27/10 |
 | 91 | complément du lot 90 : intervenants et visuel des propositions recopiés sur ses 14 séances | 2, joué le 27/10 |
 | 92 | intervenants écartés pour D16 : lignes sans personne (migration `2026-10-27-intervenant-sans-adresse` d'abord) | 2, joué le 27/10 |
-| 93 | photos des intervenants du lot 92 (3), sur leur ligne du dossier ; fichiers déposés par 60-fichiers.sh | 2, répété le 27/10 |
+| 93 | photos des intervenants du lot 92 (3), sur leur ligne du dossier ; fichiers déposés par 60-fichiers.sh | 2, joué le 27/10 |
 | 100+ | évaluations, rediffusions, annexes | 2 |
 
 Phase 2, site ouvert : le lot se répète sur un clone local de la production (qui dépose aussi les fichiers), puis son flux SQL est lu par le psql du serveur (exemple : `70-temoignages.sh`).
