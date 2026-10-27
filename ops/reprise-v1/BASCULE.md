@@ -38,3 +38,8 @@ Avant le geste 6, rien n'a changé en production hors Garage. Après : `./deploy
 **À traiter avant toute publication du programme CdP31** : les 78 dossiers en évaluation ont une séance `planned` non publiée (leur créneau v1). Rejeter un de ces dossiers ne retire pas sa séance (`service/transition.rs` ne touche pas aux séances) : à faire à la main au planificateur, ou règle à écrire. Les 16 propositions privées de leurs intervenants (D16) les retrouvent avec l'extension D16.
 
 Évaluations, inscriptions, rediffusions, journées spéciales, annexes, fichiers de l'ancien serveur, extensions du modèle (D7, D16, D17) : la v1 brute sera reposée en production le temps de ces lots, puis retirée.
+
+**Lot 70, témoignages (27/10)**, sans v1 brute (ils vivent dans le code de la v1) :
+1. clone local de la production, `lots/70-temoignages.sh <clone>` ;
+2. tunnel et clés comme au geste 5, `FICHIERS_V1=<photos> lots/60-fichiers.sh deposer <clone>` ;
+3. `lots/70-temoignages.sh flux | ssh <serveur> "cd /opt/epavillon && $COMPOSE exec -T postgres psql -U postgres -d epavillon -X -q -v ON_ERROR_STOP=1"`.
