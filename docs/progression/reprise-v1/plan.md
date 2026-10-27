@@ -48,7 +48,7 @@ Chaque ligne sera confirmée sur la carte réelle (étape 2).
 |---|---|---|---|
 | 1 | `countries` | `reference.countries` | rapprochement par code ISO |
 | 1 | valeurs d'ENUM | `reference.taxonomy_terms` | termes manquants : `ace`, `mecanismes_de_cooperation`, `bilan_mondial`, anciennes thématiques (D6) |
-| 2 | `auth.users` + `users` | `identity.people`, **sans** `accounts` | mots de passe non repris (D1) : le premier « mot de passe oublié » ouvre le compte ; reprendre `email_confirmed_at` en `email_verified_at` ; rapprochement par courriel avec le compte conservé du commanditaire ; `created_at` faussé par l'import Laravel |
+| 2 | `auth.users` + `users` | `identity.people` + `accounts` (`password`, sans empreinte, nouveau mot de passe exigé) | comptes repris, empreintes non (D1) ; `email_confirmed_at` → `email_verified_at`, `created_at` et `last_sign_in_at` repris (audit) ; identités Google et Microsoft à voir sur la carte réelle ; rapprochement par courriel avec le compte conservé du commanditaire ; `created_at` faussé par l'import Laravel |
 | 2 | `user_roles` | `identity.role_assignments` | `paco` → `standard` ; `negotiator` en portée globale ouvre tous les espaces |
 | 2 | `negotiators` | `negotiator_profiles`, `negotiator_designations` | thèmes en texte libre |
 | 3 | `organizations` (+ alias, validations) | `org.organizations`, `organization_names`, `organization_domains` | doublons (règle métier n° 1) ; nom unique par pays ; type obligatoire |
@@ -75,7 +75,11 @@ Relevés dans le modèle le 27/10, à câbler dans l'outillage :
 
 - **Plateforme en maintenance et worker arrêté** pendant toute écriture.
 - **Purge des essais en premier lot** (D2) : tout ce que l'usage a créé (personnes, comptes, sessions, organisations, édition, appel, propositions, séances, inscriptions, notifications, courriels, médias et leurs objets dans Garage, contenus Guide Négo d'exemple, historique des travaux et de l'outbox), sauf la personne du commanditaire, son compte et ses rôles. Ce que le schéma a semé ou que l'administration règle reste : `platform.settings`, drapeaux, référentiels, taxonomies, séries, rôles et permissions. Liste fermée, table par table, comparée à une base neuve.
-- **Deux retouches de la v2 pour D1** : la réinitialisation confirmée vaut vérification de l'adresse (sinon une personne de la v1 non confirmée bute sur « adresse non vérifiée » juste après) ; la page de connexion dit à tous qu'un compte de l'ancienne plateforme demande un nouveau mot de passe, avec le lien vers « mot de passe oublié », adresse préremplie.
+- **Retouches de la v2 pour D1**, livrées avec l'outillage et migrées avant les données :
+  - modèle : `identity.accounts.password_reset_required_at` ; `ck_accounts_password_shape` admet un compte `password` sans empreinte quand cette date est posée. Un compte sans mot de passe vit ainsi dans le modèle, au lieu d'une empreinte factice qui répondrait plus vite qu'Argon2id et trahirait le compte à la montre ;
+  - connexion : rien à changer, un compte sans empreinte paie déjà le hachage factice et rend `invalid_credentials` ;
+  - `set_password` efface l'exigence ; la réinitialisation confirmée vaut vérification de l'adresse (le lien est arrivé dans la boîte) ;
+  - message de refus, site et Guide Négo, le même pour tous (la connexion ne dit jamais qu'un compte existe) : « L'adresse ou le mot de passe ne correspond pas. Pour des raisons de sécurité, certains comptes doivent choisir un nouveau mot de passe : si c'est votre cas, utilisez « Mot de passe oublié ». » Aucune mention de l'ancienne plateforme.
 - **Courriel aux organisations retenues** : le lien de réinitialisation vit une heure, trop peu pour un envoi groupé. Le courriel mène donc à « mot de passe oublié » ; envoi étalé, l'ancien serveur bornant le nombre de messages par heure.
 - Écrire sous une personne technique « Reprise v1 » (`app.actor_id`) et une étiquette de lot (`app.request_id`) ; avant de relancer le worker, marquer publiés les événements d'outbox du lot et annuler les travaux `live.*` et de rappel, **en gardant** `media.process_asset`.
 - **Une inscription reprise sur une séance diffusée ferait créer une réunion Zoom et écrire aux inscrits** : neutralisation vérifiée par un test avant tout jeu.
@@ -90,7 +94,7 @@ Posés un par un au commanditaire, réponses consignées dans `ecarts.md`.
 
 | | Question | Proposition |
 |---|---|---|
-| D1 | Mots de passe | **tranché** : non repris, réinitialisation (`ecarts.md`) |
+| D1 | Mots de passe | **tranché, révisé** : comptes et vérifications repris, nouveau mot de passe exigé (`ecarts.md`) |
 | D2 | COP31 et données de la production v2 | **tranché** : la v1 fait foi, la production v2 est purgée sauf le compte du commanditaire |
 | D3 | Ce qui n'est pas repris (liste du § 4) | confirmer la liste |
 | D4 | Doublons d'organisations : qui valide | Claude propose par groupes, le commanditaire valide |
