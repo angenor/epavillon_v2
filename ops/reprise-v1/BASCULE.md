@@ -49,3 +49,5 @@ Avant le geste 6, rien n'a changé en production hors Garage. Après : `./deploy
 **Lot 90, journées spéciales de la CdP30 (27/10)**, même voie : `lots/90-journees-speciales.sh <clone>` puis `lots/90-journees-speciales.sh flux | ssh …`. Le flux porte le relevé public des deux journées et les correspondances écrites dans le lot ; il refuse une seconde passe (fil déjà présent). Joué après une sauvegarde (`epavillon-20261027-192649`) ; vérifié : outbox vide, ni notification, ni rappel, ni participant Zoom ; l'API sert les deux fils et leurs 15 séances.
 
 **Lot 91, complément du lot 90 (27/10)** : `ssh … < lots/91-journees-speciales-complement.sql`, après la sauvegarde `epavillon-20261027-195115`. Vérifié : 45 intervenants et 3 visuels sur les 14 séances, outbox vide, aucune notification.
+
+**Lot 92, intervenants sans adresse (D16)**, dans cet ordre : sauvegarde ; `ssh … < ops/migrations/2026-10-27-intervenant-sans-adresse.sql` ; `./deploy.sh update` (l'API lit les nouvelles colonnes) ; `lots/92-intervenants-sans-adresse.sh flux | ssh …`. Le flux porte l'identité des seuls écartés (civilité, nom, fonction, organisation), aucune adresse.

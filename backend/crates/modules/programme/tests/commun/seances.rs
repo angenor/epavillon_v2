@@ -485,7 +485,7 @@ pub async fn jour_de_rattachement(bac: &Bac, session_id: Uuid) -> Option<time::D
 }
 
 /// Les intervenants d'une séance, par ordre d'affichage.
-pub async fn intervenants_de_la_seance(bac: &Bac, session_id: Uuid) -> Vec<(Uuid, String)> {
+pub async fn intervenants_de_la_seance(bac: &Bac, session_id: Uuid) -> Vec<(Option<Uuid>, String)> {
     sqlx::query!(
         r#"SELECT person_id, role::text AS "role!"
              FROM programme.session_speakers

@@ -1,6 +1,6 @@
 {
   "title": "Speakers",
-  "description": "The people who will take the floor. Each of them will receive a confirmation email before the activity takes place.",
+  "description": "The people who will take the floor. Each of them, if you provide their email address, will receive a confirmation email before the activity takes place.",
   "bounds": "This call requires between {min} and {max} speakers. You have declared {count}.",
   "add": "Add a speaker",
   "maxReached": "You have reached the maximum of {max} speakers for this call.",
@@ -8,7 +8,8 @@
   "remove": "Remove {speaker}",
   "moveUp": "Move {speaker} up",
   "moveDown": "Move {speaker} down",
-  "confirmationNotice": "Naming someone commits them: each person will receive an email asking them to confirm their participation.",
+  "confirmationNotice": "Naming someone commits them: each speaker whose address is provided will receive an email asking them to confirm their participation. Without an address, no confirmation can be requested.",
+  "noEmail": "No email address: will not be asked to confirm their participation.",
   "accountBadge": "Platform account",
   "empty": {
     "title": "No speaker declared",
@@ -17,7 +18,7 @@
   "dialog": {
     "addTitle": "Add a speaker",
     "editTitle": "Edit speaker",
-    "description": "The email address is used to find the person if they are already known to the platform, and to send their confirmation request.",
+    "description": "The email address is optional. When provided, it is used to find the person if they are already known to the platform and to send their confirmation request.",
     "foundTitle": "This person is already known to the platform",
     "foundWithAccount": "They have an account: keeping this profile means using the details they maintain themselves.",
     "foundWithoutAccount": "They do not have an account yet: you will be able to correct their details if anything has changed.",
@@ -35,7 +36,7 @@
   "fields": {
     "email": {
       "label": "Email address",
-      "hint": "It will not be published. It identifies the person and lets us write to them."
+      "hint": "It will not be published. Without an address, the speaker will not be asked to confirm their participation."
     },
     "civility": {
       "label": "Title",
@@ -112,7 +113,7 @@
     "tooFew": "This call requires at least {min} speaker. | This call requires at least {min} speaker. | This call requires at least {min} speakers.",
     "tooMany": "This call accepts at most {max} speaker. | This call accepts at most {max} speaker. | This call accepts at most {max} speakers.",
     "nameRequired": "Speaker {position}: first name and last name are required.",
-    "emailInvalid": "{speaker}: the email address is missing or malformed.",
+    "emailInvalid": "{speaker}: the email address is malformed.",
     "emailDuplicate": "The address {email} appears twice in the list.",
     "civilityRequired": "{speaker}: a title is required.",
     "jobTitleRequired": "{speaker}: the position is required.",

@@ -9,7 +9,8 @@ import type { TimeZoneName } from '~/types/shared'
  * cinq noms dont aucun n'a répondu ne vaut pas un panel de trois confirmés :
  * c'est ce que le critère de faisabilité juge, et `proposal_speakers.confirmed_at`
  * le porte. Trois états, trois messages — confirmé, invité sans réponse, pas
- * encore invité.
+ * encore invité. Un quatrième, sans adresse (D16) : aucune personne derrière la
+ * ligne, donc aucune confirmation possible ; le nom vient de la ligne même.
  *
  * LA FONCTION ET L'ORGANISATION AFFICHÉES SONT CELLES DU DOSSIER
  * (`job_title_snapshot`, `organization_snapshot`), et non celles du profil : une
@@ -28,6 +29,11 @@ const props = defineProps<Props>()
 const { t } = useI18n()
 const { tr } = useI18nText()
 const { date } = useDateTime()
+
+function speakerName(entry: ProposalSpeakerEntry): string {
+  if (entry.person) return entry.person.display_name
+  return [entry.speaker.first_name, entry.speaker.last_name].filter(Boolean).join(' ')
+}
 </script>
 
 <template>
@@ -44,14 +50,20 @@ const { date } = useDateTime()
       <li v-for="entry in props.entries" :key="entry.speaker.id" class="py-3">
         <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <span class="font-medium text-text">
-            {{ entry.person?.display_name ?? '' }}
+            {{ speakerName(entry) }}
           </span>
           <UiBadge
             size="sm"
             :label="t(`admin.proposal.review.speakers.role.${entry.speaker.role}`)"
           />
           <UiBadge
-            v-if="entry.speaker.confirmed_at"
+            v-if="entry.speaker.person_id === null"
+            size="sm"
+            intent="neutral"
+            :label="t('admin.proposal.review.speakers.noEmail')"
+          />
+          <UiBadge
+            v-else-if="entry.speaker.confirmed_at"
             size="sm"
             intent="success"
             icon="check"
@@ -78,6 +90,10 @@ const { date } = useDateTime()
             :label="t('admin.proposal.review.speakers.notInvited')"
           />
         </div>
+
+        <p v-if="entry.speaker.person_id === null" class="mt-1 text-xs text-text-subtle">
+          {{ t('admin.proposal.review.speakers.noEmailHint') }}
+        </p>
 
         <p class="mt-1 text-sm text-text-muted">
           <span v-if="entry.speaker.job_title_snapshot">{{ entry.speaker.job_title_snapshot }}</span>

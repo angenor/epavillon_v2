@@ -28,6 +28,7 @@ import type {
   Uuid,
 } from '../shared'
 import type { ParticipationMode } from '../event/edition'
+import type { Civility } from '../identity'
 
 // ---------------------------------------------------------------------------
 // Cycle de vie
@@ -187,11 +188,17 @@ export type SpeakerRole =
  * Table `programme.proposal_speakers` — `070` § 4.
  * L'intervenant EST une personne (`identity.people`), créée à la volée si elle
  * est inconnue : la v1 recopiait nom, prénom, email et photo à chaque activité.
+ * Exception D16 : sans adresse, `person_id` est nul et la ligne porte elle-même
+ * civilité, prénom et nom (`ck_proposal_speakers_identity`).
  */
 export interface ProposalSpeaker {
   id: Uuid
   proposal_id: ProposalId
-  person_id: PersonId
+  person_id: PersonId | null
+  /** Renseignés seulement quand `person_id` est nul. */
+  civility: Civility | null
+  first_name: string | null
+  last_name: string | null
   role: SpeakerRole
   /** Fonction et organisation AU MOMENT de cette activité : une personne change
    *  d'employeur, l'archive d'une COP passée ne doit pas être réécrite. */

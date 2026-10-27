@@ -315,9 +315,9 @@ export function submitProposal(
 /**
  * LA PERSONNE QUI PORTE CETTE ADRESSE, si la plateforme la connaît déjà.
  *
- * POURQUOI CETTE RECHERCHE EXISTE. `programme.proposal_speakers.person_id` est
- * NOT NULL et l'en-tête du fichier 070 est formel : « l'intervenant EST une
- * personne, créée à la volée si elle est inconnue ». Retrouver la personne au
+ * POURQUOI CETTE RECHERCHE EXISTE. L'en-tête du fichier 070 est formel :
+ * « l'intervenant EST une personne, créée à la volée si elle est inconnue »,
+ * sauf s'il n'a pas d'adresse (D16) : rien n'est alors cherché ni créé. Retrouver la personne au
  * lieu d'en créer une seconde, c'est le défaut n° 1 de la v1 traité une seconde
  * fois — sur les personnes cette fois, où il est bien moins visible : le même
  * expert existait en autant d'exemplaires que de participations.
@@ -388,7 +388,7 @@ export function suggestSpeakers(prefix: string): PersonLookup[] {
       .filter((speaker) =>
         allProposals.some((p) => p.id === speaker.proposal_id && p.status === 'accepted'),
       )
-      .map((speaker) => speaker.person_id),
+      .flatMap((speaker) => (speaker.person_id ? [speaker.person_id] : [])),
   )
 
   return people

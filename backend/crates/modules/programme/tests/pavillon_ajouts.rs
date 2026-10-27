@@ -66,7 +66,16 @@ const CLES_AJOUTEES: [&str; 11] = [
     "organization_type_code",
 ];
 
-const RETIREES_DU_DETAIL: [&str; 3] = ["attended", "confirmed_at", "person_id"];
+// L'identité d'un intervenant sans personne (D16) ne sort que fondue dans
+// `display_name`.
+const RETIREES_DU_DETAIL: [&str; 6] = [
+    "attended",
+    "confirmed_at",
+    "person_id",
+    "civility",
+    "first_name",
+    "last_name",
+];
 
 async fn seance_publiee(bac: &Bac, terrain: &Terrain, slug: &str) -> (Uuid, Uuid) {
     let grille = seances::grille(bac, terrain.edition).await;

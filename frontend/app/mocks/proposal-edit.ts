@@ -142,15 +142,16 @@ function speakersOf(proposalId: string): ReopenedSpeaker[] {
     .filter((speaker) => speaker.proposal_id === proposalId)
     .sort((a, b) => a.sort_order - b.sort_order)
     .map((speaker) => {
-      const person = people.find((p) => p.id === speaker.person_id)
+      const person = speaker.person_id ? people.find((p) => p.id === speaker.person_id) : undefined
       return {
         person_id: speaker.person_id,
         // L'identité d'une personne qui a un COMPTE lui appartient : le
         // formulaire la verrouille (écart n° 31).
         has_account: accounts.some((account) => account.person_id === speaker.person_id),
-        civility: person?.civility ?? null,
-        first_name: person?.first_name ?? '',
-        last_name: person?.last_name ?? '',
+        // Sans personne (D16), l'identité est sur la ligne et l'adresse reste vide.
+        civility: person?.civility ?? speaker.civility,
+        first_name: person?.first_name ?? speaker.first_name ?? '',
+        last_name: person?.last_name ?? speaker.last_name ?? '',
         email: person?.primary_email ?? '',
         job_title: speaker.job_title_snapshot ?? '',
         organization_name: speaker.organization_snapshot ?? '',

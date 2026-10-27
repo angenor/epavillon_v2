@@ -132,6 +132,8 @@
     "confirmed": "Présence confirmée le {date}",
     "invited": "Invitation envoyée le {date}, sans réponse",
     "notInvited": "Invitation pas encore envoyée",
+    "noEmail": "Sans adresse",
+    "noEmailHint": "Confirmation impossible : aucune adresse électronique n'a été indiquée pour cet intervenant.",
     "questions": "Disponible pour les questions du public"
   },
   "documents": {

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, proposal_id, person_id, role::text AS \"role!\",\n                  job_title_snapshot, organization_snapshot, organization_id,\n                  bio, confirmed_at, confirmation_sent_at,\n                  is_available_for_questions, sort_order, created_at\n             FROM programme.proposal_speakers\n            WHERE proposal_id = $1\n            ORDER BY sort_order, created_at",
+  "query": "SELECT id, proposal_id, person_id, role::text AS \"role!\",\n                  job_title_snapshot, organization_snapshot, organization_id,\n                  bio, confirmed_at, confirmation_sent_at,\n                  is_available_for_questions, sort_order, created_at,\n                  civility, first_name, last_name\n             FROM programme.proposal_speakers\n            WHERE proposal_id = $1\n            ORDER BY sort_order, created_at",
   "describe": {
     "columns": [
       {
@@ -140,6 +140,39 @@
             "name": "created_at"
           }
         }
+      },
+      {
+        "ordinal": 13,
+        "name": "civility",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_speakers",
+            "name": "civility"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "first_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_speakers",
+            "name": "first_name"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "last_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_speakers",
+            "name": "last_name"
+          }
+        }
       }
     ],
     "parameters": {
@@ -150,7 +183,7 @@
     "nullable": [
       false,
       false,
-      false,
+      true,
       null,
       true,
       true,
@@ -160,8 +193,11 @@
       true,
       false,
       false,
-      false
+      false,
+      true,
+      true,
+      true
     ]
   },
-  "hash": "2f776133762f57eee23013c0b10feeacacbbe3707003cde5f21a405682792855"
+  "hash": "4fe8950ec4aa6edf26d5b3123f0099bf2774495355929740aa30f0ebb8863ea8"
 }

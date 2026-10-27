@@ -265,6 +265,9 @@ async fn ecrire(
         .enumerate()
         .map(|(rang, i)| speakers::Intervenant {
             person_id: i.person_id,
+            civility: i.sans_personne.as_ref().and_then(|s| s.civility.as_deref()),
+            first_name: i.sans_personne.as_ref().map(|s| s.first_name.as_str()),
+            last_name: i.sans_personne.as_ref().map(|s| s.last_name.as_str()),
             role: &i.role,
             job_title_snapshot: non_vide(&i.job_title),
             organization_snapshot: non_vide(&i.organization_name),
@@ -752,8 +755,17 @@ async fn annoncer_les_coorganisations(
 // Les intervenants
 // -----------------------------------------------------------------------------
 
+/// L'identité d'un intervenant sans adresse, portée par sa ligne.
+pub struct IdentiteDeLigne {
+    pub civility: Option<String>,
+    pub first_name: String,
+    pub last_name: String,
+}
+
 pub struct IntervenantResolu {
-    pub person_id: Uuid,
+    pub person_id: Option<Uuid>,
+    /// Présente exactement quand `person_id` est nul (D16).
+    pub sans_personne: Option<IdentiteDeLigne>,
     pub role: String,
     pub job_title: String,
     pub organization_name: String,
@@ -779,6 +791,10 @@ pub struct IntervenantResolu {
 /// Les deux instantanés — fonction et organisation au moment de l'activité —
 /// restent modifiables **dans tous les cas** : le modèle les distingue
 /// explicitement de la fiche.
+///
+/// **Sans adresse** (D16), aucune personne n'est cherchée ni créée : une
+/// personne exige une adresse, et on n'en fabrique jamais. La ligne porte alors
+/// l'identité saisie.
 async fn resoudre_intervenants(
     conn: &mut PgConnection,
     saisis: &[DraftSpeaker],
@@ -787,13 +803,6 @@ async fn resoudre_intervenants(
 
     for saisi in saisis {
         let email = saisi.email.trim().to_lowercase();
-        if email.is_empty() {
-            return Err(ApiError::with_message(
-                ErrorCode::ValidationFailed,
-                "L'adresse électronique d'un intervenant est obligatoire : c'est par elle que la plateforme le reconnaît.",
-            )
-            .field("speakers"));
-        }
         let prenom = saisi.first_name.trim();
         let nom = saisi.last_name.trim();
         if prenom.is_empty() || nom.is_empty() {
@@ -804,6 +813,28 @@ async fn resoudre_intervenants(
             .field("speakers"));
         }
         borner(&saisi.bio, &limits::BIOGRAPHIE)?;
+
+        if email.is_empty() {
+            resolus.push(IntervenantResolu {
+                person_id: None,
+                sans_personne: Some(IdentiteDeLigne {
+                    civility: saisi
+                        .civility
+                        .as_deref()
+                        .map(str::trim)
+                        .filter(|c| !c.is_empty())
+                        .map(str::to_owned),
+                    first_name: prenom.to_owned(),
+                    last_name: nom.to_owned(),
+                }),
+                role: saisi.role.clone(),
+                job_title: saisi.job_title.clone(),
+                organization_name: saisi.organization_name.clone(),
+                organization_id: saisi.organization_id,
+                bio: saisi.bio.clone(),
+            });
+            continue;
+        }
 
         let person_id = match cross::fiche_personne_par_email(&mut *conn, &email).await? {
             None => {
@@ -855,7 +886,8 @@ async fn resoudre_intervenants(
         };
 
         resolus.push(IntervenantResolu {
-            person_id,
+            person_id: Some(person_id),
+            sans_personne: None,
             role: saisi.role.clone(),
             job_title: saisi.job_title.clone(),
             organization_name: saisi.organization_name.clone(),

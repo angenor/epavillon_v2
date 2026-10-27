@@ -236,6 +236,15 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
         ("23514", "ck_proposal_speakers_count") | ("23514", "ck_proposal_speakers_complete") => {
             ApiError::with_message(ValidationFailed, message.to_owned()).field("speakers")
         }
+        // Le service exige prénom et nom d'un intervenant sans adresse avant
+        // d'écrire : n'arrive ici qu'une écriture qui l'a contourné.
+        ("23514", "ck_proposal_speakers_identity") | ("23514", "ck_session_speakers_identity") => {
+            ApiError::with_message(
+                ValidationFailed,
+                "Un intervenant sans adresse électronique doit avoir un prénom et un nom.",
+            )
+            .field("speakers")
+        }
         // Une contrainte, TROIS conditions : borne basse, borne haute et durée
         // par défaut. Le champ nommé ici est le cas courant ; c'est au service
         // de désigner plus finement, en comparant les trois valeurs — sans
@@ -294,6 +303,8 @@ fn translate_database(sqlstate: &str, contrainte: &str, message: &str) -> ApiErr
         | ("23514", "ck_outbox_event_type_format")
         | ("23514", "i18n_text_check")
         | ("23514", "people_civility_check")
+        | ("23514", "proposal_speakers_civility_check")
+        | ("23514", "session_speakers_civility_check")
         | ("23514", "person_emails_label_check") => ApiError::new(Internal),
 
         // --- Événements (B3) : clés étrangères --------------------------------

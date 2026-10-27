@@ -211,7 +211,9 @@ pub async fn ouvrir(
         speakers: intervenants
             .into_iter()
             .map(|speaker| IntervenantDuDossier {
-                person: par_personne.get(&speaker.person_id).cloned(),
+                person: speaker
+                    .person_id
+                    .and_then(|id| par_personne.get(&id).cloned()),
                 speaker,
             })
             .collect(),
@@ -295,7 +297,7 @@ fn personnes_a_resoudre(
 
     let sources = intervenants
         .iter()
-        .map(|i| i.person_id)
+        .filter_map(|i| i.person_id)
         .chain(avancement.iter().map(|a| a.assignment.reviewer_id))
         .chain(fil.iter().map(|m| m.author_id))
         .chain(revues.iter().map(|r| r.reviewer_id));

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.sessions SET published_at = now(), status = 'scheduled' WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "68c32c5721840bfa705a32d6a2c0fdf171e0b2512bdce4030c76f9391c1bd4f6"
+}

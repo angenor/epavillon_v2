@@ -8,7 +8,7 @@
 //!
 //! # Pourquoi un contrat d'événement ne conviendrait pas
 //!
-//! `proposal_speakers.person_id` est `NOT NULL`, et le contrat exige une
+//! Un intervenant qui a une adresse est une personne, et le contrat exige une
 //! **réponse synchrone** portant la personne : le formulaire l'affiche, la
 //! rattache, et détecte le doublon au clavier suivant. Une création différée
 //! rendrait une réponse sans identifiant, et le doublon serait indétectable au

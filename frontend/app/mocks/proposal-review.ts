@@ -392,7 +392,10 @@ export function reviewDesk(proposalId: Uuid, personId: Uuid | null): ReviewDeskS
   const speakerEntries: ProposalSpeakerEntry[] = proposalSpeakers
     .filter((speaker) => speaker.proposal_id === proposalId)
     .sort((a, b) => a.sort_order - b.sort_order)
-    .map((speaker) => ({ speaker, person: personById.get(speaker.person_id) ?? null }))
+    .map((speaker) => ({
+      speaker,
+      person: speaker.person_id ? (personById.get(speaker.person_id) ?? null) : null,
+    }))
 
   const documentEntries: ProposalDocumentEntry[] = proposalDocuments
     .filter((document) => document.proposal_id === proposalId)

@@ -22,6 +22,10 @@ use crate::domain::ids::SessionId;
 /// sont pas toujours ceux du jour, et c'est ce que le modèle prévoit. La
 /// modification appartient à un écran qui n'existe pas encore ; la recopie, elle,
 /// est ce qui donne au planificateur son décompte d'intervenants.
+///
+/// Un intervenant sans personne (D16) échappe au `ON CONFLICT` : deux `NULL` ne
+/// se heurtent pas. Le `NOT EXISTS` le tient à une ligne par nom et rôle, faute
+/// de quoi une seconde recopie le doublerait.
 pub async fn recopier_les_intervenants(
     conn: &mut PgConnection,
     proposal_id: Uuid,
@@ -30,11 +34,17 @@ pub async fn recopier_les_intervenants(
     let poses = sqlx::query!(
         "INSERT INTO programme.session_speakers
              (session_id, person_id, role, job_title_snapshot,
-              organization_snapshot, bio, confirmed_at, sort_order)
+              organization_snapshot, bio, confirmed_at, sort_order,
+              civility, first_name, last_name)
          SELECT $2, s.person_id, s.role, s.job_title_snapshot,
-                s.organization_snapshot, s.bio, s.confirmed_at, s.sort_order
+                s.organization_snapshot, s.bio, s.confirmed_at, s.sort_order,
+                s.civility, s.first_name, s.last_name
            FROM programme.proposal_speakers s
           WHERE s.proposal_id = $1
+            AND (s.person_id IS NOT NULL OR NOT EXISTS (
+                SELECT 1 FROM programme.session_speakers d
+                 WHERE d.session_id = $2 AND d.person_id IS NULL AND d.role = s.role
+                   AND d.first_name = s.first_name AND d.last_name = s.last_name))
          ON CONFLICT (session_id, person_id, role) DO NOTHING",
         proposal_id,
         session_id
@@ -115,7 +125,8 @@ pub async fn organisations<'e>(
 /// Composé champ par champ, jamais `to_jsonb` : une colonne ajoutée à la table
 /// ou à `identity.people` deviendrait publique sans que personne l'ait décidé.
 /// Ni `person_id`, ni `confirmed_at`, ni `attended` (décision du 26/09). La
-/// photo, `avatar`, est l'image de profil de la personne.
+/// photo, `avatar`, est l'image de profil de la personne ; un intervenant sans
+/// personne (D16) n'en a pas, et son nom vient de la ligne.
 pub async fn intervenants_publics<'e>(
     executor: impl PgExecutor<'e>,
     session_id: SessionId,
@@ -130,10 +141,13 @@ pub async fn intervenants_publics<'e>(
                       'bio', s.bio,
                       'sort_order', s.sort_order,
                       'created_at', s.created_at,
-                      'display_name', p.display_name,
-                      'avatar', media.attached_image('identity', 'people', p.id, 'avatar')) AS "ligne!"
+                      'display_name', COALESCE(p.display_name,
+                                               btrim(s.first_name || ' ' || s.last_name)),
+                      'avatar', CASE WHEN p.id IS NOT NULL
+                                     THEN media.attached_image('identity', 'people', p.id, 'avatar')
+                                END) AS "ligne!"
              FROM programme.session_speakers s
-             JOIN identity.people p ON p.id = s.person_id
+             LEFT JOIN identity.people p ON p.id = s.person_id
             WHERE s.session_id = $1
             ORDER BY s.sort_order, s.created_at"#,
         session_id.as_uuid()

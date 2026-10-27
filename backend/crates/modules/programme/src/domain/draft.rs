@@ -17,9 +17,10 @@
 //! arithmétique de fuseau n'est écrite en Rust — c'est la décision R5 de B3,
 //! reprise pour la même raison.
 //!
-//! **Un intervenant EST une personne.** `proposal_speakers.person_id` est
-//! `NOT NULL` : le brouillon ne porte donc pas un identifiant mais **de quoi la
-//! retrouver ou la créer**.
+//! **Un intervenant EST une personne, dès qu'il a une adresse.** Le brouillon ne
+//! porte donc pas un identifiant mais **de quoi la retrouver ou la créer**. Sans
+//! adresse (D16), aucune personne : la ligne d'intervenant porte elle-même
+//! civilité, prénom et nom.
 
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
@@ -47,7 +48,8 @@ pub struct DraftSpeaker {
     pub civility: Option<String>,
     pub first_name: String,
     pub last_name: String,
-    /// Clé de rapprochement — `identity.people.primary_email`.
+    /// Clé de rapprochement : `identity.people.primary_email`. Vide : un
+    /// intervenant sans adresse, qui n'est pas une personne (D16).
     pub email: String,
     /// `proposal_speakers.job_title_snapshot` : la fonction **au moment** de
     /// l'activité. Distincte de la fiche de la personne, et modifiable même

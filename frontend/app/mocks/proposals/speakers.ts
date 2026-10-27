@@ -18,6 +18,7 @@
  */
 
 import type { ProposalSpeaker, SpeakerRole } from '~/types/programme/proposal'
+import type { Civility } from '~/types/identity'
 import { ORG, PERSON, PROPOSAL, PROPOSAL_SPEAKER } from '../ids'
 
 interface SpeakerFields {
@@ -32,17 +33,28 @@ interface SpeakerFields {
   questions?: boolean
 }
 
+/** Intervenant sans adresse (D16) : aucune personne, l'identité est sur la ligne. */
+interface UnlinkedIdentity {
+  civility: Civility
+  first_name: string
+  last_name: string
+}
+
 function speaker(
   n: number,
   proposal_id: string,
-  person_id: string,
+  person: string | UnlinkedIdentity,
   sort_order: number,
   fields: SpeakerFields,
 ): ProposalSpeaker {
+  const unlinked = typeof person === 'string' ? null : person
   return {
     id: PROPOSAL_SPEAKER(n),
     proposal_id,
-    person_id,
+    person_id: typeof person === 'string' ? person : null,
+    civility: unlinked?.civility ?? null,
+    first_name: unlinked?.first_name ?? null,
+    last_name: unlinked?.last_name ?? null,
     role: fields.role ?? 'speaker',
     job_title_snapshot: fields.job,
     organization_snapshot: fields.org,
@@ -434,6 +446,14 @@ export const proposalSpeakers = [
     confirmedAt: null,
     sentAt: '2026-06-28T09:05:00Z',
   }),
+  // Sans adresse (D16) : le déposant ne l'avait pas. Ni invitation, ni confirmation.
+  speaker(162, PROPOSAL.budgetsGenre, { civility: 'mme', first_name: 'Aïcha', last_name: 'Traoré' }, 30, {
+    job: 'Conseillère budgétaire',
+    org: "Ministère de l'Économie et des Finances du Mali",
+    organizationId: null,
+    confirmedAt: null,
+    sentAt: null,
+  }),
 
   // 21. Cartographie de Cotonou
   speaker(170, PROPOSAL.cartographieCotonou, PERSON.zinsou, 10, {
@@ -479,6 +499,14 @@ export const proposalSpeakers = [
     organizationId: ORG.cofemac,
     confirmedAt: null,
     sentAt: '2026-08-04T10:00:00Z',
+  }),
+  speaker(201, PROPOSAL.transportFluvial, { civility: 'm', first_name: 'Jean-Paul', last_name: 'Mabiala' }, 20, {
+    role: 'panelist',
+    job: 'Capitaine de port',
+    org: 'Port autonome de Brazzaville',
+    organizationId: null,
+    confirmedAt: null,
+    sentAt: null,
   }),
 
   // 25. Numérique responsable — dossier RENVOYÉ POUR CORRECTION.

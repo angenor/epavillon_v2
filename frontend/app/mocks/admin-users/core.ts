@@ -189,7 +189,7 @@ function peopleInScope(scope: AdministeredEvents): Set<Uuid> | null {
     if (organizationIds.has(membership.organization_id)) reached.add(membership.person_id)
   }
   for (const speaker of proposalSpeakers) {
-    if (proposalIds.has(speaker.proposal_id)) reached.add(speaker.person_id)
+    if (speaker.person_id && proposalIds.has(speaker.proposal_id)) reached.add(speaker.person_id)
   }
 
   // 4. Les personnes inscrites à une séance de ces éditions.

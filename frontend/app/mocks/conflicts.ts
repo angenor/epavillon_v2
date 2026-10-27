@@ -106,8 +106,13 @@ export function detectConflicts(eventId: string): ScheduleConflict[] {
       }
 
       // 4. Intervenant attendu à deux endroits.
+      // Sans personne (D16), rien ne dit que deux lignes désignent le même intervenant.
       const speakersOf = (s: Session) =>
-        new Set(sessionSpeakers.filter((sp) => sp.session_id === s.id).map((sp) => sp.person_id))
+        new Set(
+          sessionSpeakers
+            .filter((sp) => sp.session_id === s.id)
+            .flatMap((sp) => (sp.person_id ? [sp.person_id] : [])),
+        )
       const sharedSpeakers = [...speakersOf(a)].filter((id) => speakersOf(b).has(id))
       for (const personId of sharedSpeakers) {
         found.push(

@@ -34,12 +34,12 @@ import type {
   DraftSpeaker,
   ProposalDraft,
   ReopenedDraft,
-} from '~/types/proposal-form'
+} from '../types/proposal-form.ts'
 import {
   DOCUMENT_MAX_BYTES,
   DOCUMENT_MIME_PREFIXES,
   TEXT_LIMITS,
-} from '~/types/proposal-form'
+} from '../types/proposal-form.ts'
 
 /** Brouillon vierge — les valeurs par défaut sont celles des colonnes. */
 export function emptyProposalDraft(defaults: {
@@ -378,9 +378,10 @@ function validateSpeakers(draft: ProposalDraft, call: CallForProposals): DraftIs
       })
     }
 
-    // `identity.people.primary_email` est NOT NULL : c'est par elle que l'API
-    // rapproche l'intervenant d'une personne déjà connue, ou en crée une.
-    if (!EMAIL_PATTERN.test(speaker.email.trim())) {
+    // Facultative (D16) : sans elle, l'intervenant n'est rattaché à aucune
+    // personne et ne peut pas confirmer. Saisie, elle doit être valide.
+    const email = speaker.email.trim()
+    if (email.length > 0 && !EMAIL_PATTERN.test(email)) {
       issues.push({
         step: 'speakers',
         field: `speakers.${speaker.key}.email`,

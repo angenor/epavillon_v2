@@ -159,8 +159,8 @@ export interface DraftSpeaker {
    * PERSONNE EXISTANTE RETENUE, ou `null` pour quelqu'un que ce dossier fait
    * connaître à la plateforme.
    *
-   * C'est la distinction qui commande tout le reste. `programme.proposal_speakers.person_id`
-   * est NOT NULL : l'API crée la personne à la volée si l'adresse est inconnue.
+   * C'est la distinction qui commande tout le reste. L'API crée la personne à la
+   * volée si l'adresse est inconnue, et n'en crée aucune sans adresse (D16).
    * Retenir l'identifiant quand elle EST connue évite la seconde fiche pour la
    * même personne — le défaut n° 1 de la v1, transposé de l'organisation à
    * l'intervenant, et bien moins visible.
@@ -179,7 +179,8 @@ export interface DraftSpeaker {
   civility: string | null
   first_name: string
   last_name: string
-  /** Clé de rapprochement avec une personne existante — `people.primary_email`. */
+  /** Clé de rapprochement avec une personne existante, `people.primary_email`.
+   *  Vide : intervenant sans adresse (D16), ni personne, ni confirmation. */
   email: string
   /** `proposal_speakers.job_title_snapshot` : la fonction AU MOMENT de l'activité. */
   job_title: string

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.session_speakers\n             (session_id, person_id, role, job_title_snapshot,\n              organization_snapshot, bio, confirmed_at, sort_order,\n              civility, first_name, last_name)\n         SELECT $2, s.person_id, s.role, s.job_title_snapshot,\n                s.organization_snapshot, s.bio, s.confirmed_at, s.sort_order,\n                s.civility, s.first_name, s.last_name\n           FROM programme.proposal_speakers s\n          WHERE s.proposal_id = $1\n            AND (s.person_id IS NOT NULL OR NOT EXISTS (\n                SELECT 1 FROM programme.session_speakers d\n                 WHERE d.session_id = $2 AND d.person_id IS NULL AND d.role = s.role\n                   AND d.first_name = s.first_name AND d.last_name = s.last_name))\n         ON CONFLICT (session_id, person_id, role) DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e5f848a7bff61ef30186b8a07bbc8ee9df31523ec6f8d5d6ee2fd5ed193166c3"
+}

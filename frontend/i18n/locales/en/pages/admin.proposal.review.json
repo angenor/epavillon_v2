@@ -132,6 +132,8 @@
     "confirmed": "Attendance confirmed on {date}",
     "invited": "Invitation sent on {date}, no answer yet",
     "notInvited": "Invitation not sent yet",
+    "noEmail": "No address",
+    "noEmailHint": "Confirmation impossible: no email address was provided for this speaker.",
     "questions": "Available for audience questions"
   },
   "documents": {

@@ -45,7 +45,9 @@ const { t } = useI18n()
 const isDialogOpen = ref(false)
 const editing = ref<DraftSpeaker | null>(null)
 
-const takenEmails = computed(() => draft.value.speakers.map((speaker) => speaker.email))
+const takenEmails = computed(() =>
+  draft.value.speakers.map((speaker) => speaker.email.trim()).filter((email) => email.length > 0),
+)
 
 const countError = computed(() => {
   const issue = props.issues.find(
@@ -163,7 +165,8 @@ function fullName(speaker: DraftSpeaker): string {
               <span v-if="speaker.job_title && speaker.organization_name"> · </span>
               <span v-if="speaker.organization_name">{{ speaker.organization_name }}</span>
             </p>
-            <p class="font-mono text-sm text-text-subtle">{{ speaker.email }}</p>
+            <p v-if="speaker.email.trim()" class="font-mono text-sm text-text-subtle">{{ speaker.email }}</p>
+            <p v-else class="text-sm text-text-subtle">{{ t('proposal.form.step-speakers.noEmail') }}</p>
 
             <ul v-if="issuesOfSpeaker(speaker).length > 0" class="mt-2 grid gap-1">
               <li
@@ -248,7 +251,7 @@ function fullName(speaker: DraftSpeaker): string {
 
     <!-- LA CONFIRMATION DE L'INTERVENANT SE FAIT PLUS TARD, par jeton envoyé par
          courriel (`one_time_tokens`, usage `speaker_confirmation`). On le dit :
-         citer quelqu'un dans un dossier l'engage, et il l'apprendra. -->
+         citer quelqu'un dans un dossier l'engage, et il l'apprendra s'il a une adresse. -->
     <p class="flex items-start gap-2 text-sm text-text-muted">
       <UiIcon name="mail" size="1.05rem" class="mt-0.5 shrink-0" />
       {{ t('proposal.form.step-speakers.confirmationNotice') }}

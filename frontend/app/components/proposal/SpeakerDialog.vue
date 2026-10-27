@@ -13,9 +13,10 @@ import type { SelectOption } from '~/types/ui'
  * et photo à chaque activité : le même expert existait en autant d'exemplaires
  * que de participations, sans moyen de consolider son historique.
  *
- * D'OÙ LA RECHERCHE PAR ADRESSE, qui est le cœur de cet écran. Dès que
- * l'adresse est complète, on demande à la plateforme si elle connaît quelqu'un
- * qui la porte (`people.primary_email`, clé de rapprochement du modèle). Trois
+ * D'OÙ LA RECHERCHE PAR ADRESSE. L'adresse est pourtant facultative (D16) :
+ * sans elle, l'intervenant n'est rattaché à aucune personne, n'est invité à
+ * rien et ne rejoint aucun historique. Dès que l'adresse est complète, on
+ * demande à la plateforme si elle connaît quelqu'un qui la porte (`people.primary_email`, clé de rapprochement du modèle). Trois
  * situations, et elles ne se ressemblent pas :
  *
  * DEPUIS LE 16/09, LA PLATEFORME SUGGÈRE AUSSI PENDANT LA FRAPPE — trois
@@ -299,7 +300,7 @@ function closeSuggestionsSoon(): void {
 const emailError = computed(() => {
   if (!touched.value) return undefined
   const email = form.value.email.trim().toLowerCase()
-  if (email.length === 0) return t('validation.required')
+  if (email.length === 0) return undefined
   if (!EMAIL_PATTERN.test(email)) return t('validation.email')
   const taken = props.takenEmails.map((entry) => entry.toLowerCase())
   const current = props.speaker?.email.trim().toLowerCase()
@@ -333,9 +334,13 @@ const canSave = computed(
 function save(): void {
   touched.value = true
   if (!canSave.value) return
+  const email = form.value.email.trim()
+  // Sans adresse, aucune personne (D16) : un profil retenu puis vidé de son adresse s'en détache.
+  const identity = email.length === 0 ? { person_id: null, has_account: false } : {}
   emit('save', {
     ...form.value,
-    email: form.value.email.trim(),
+    ...identity,
+    email,
     first_name: form.value.first_name.trim(),
     last_name: form.value.last_name.trim(),
     job_title: form.value.job_title.trim(),
@@ -410,7 +415,7 @@ function removePhoto(): void {
     @update:open="emit('update:open', $event)"
   >
     <form class="grid gap-5" @submit.prevent="save">
-      <!-- L'ADRESSE D'ABORD : c'est elle qui interroge l'annuaire. -->
+      <!-- L'adresse en tête : saisie, elle interroge l'annuaire. -->
       <div class="relative">
         <UiInput
           id="speaker-email"
@@ -423,7 +428,6 @@ function removePhoto(): void {
             : t('proposal.form.step-speakers.fields.email.hint')"
           :error="emailError"
           :readonly="isIdentityLocked"
-          required
           @update:model-value="onEmailInput"
           @keydown="onEmailKeydown"
           @blur="touched = true; closeSuggestionsSoon()"

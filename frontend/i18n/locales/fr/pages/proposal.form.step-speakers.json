@@ -1,6 +1,6 @@
 {
   "title": "Intervenants",
-  "description": "Les personnes qui prennent la parole. Chacune recevra un courriel de confirmation avant la tenue de l'activité.",
+  "description": "Les personnes qui prennent la parole. Chacune, si vous indiquez son adresse électronique, recevra un courriel de confirmation avant la tenue de l'activité.",
   "bounds": "Cet appel demande de {min} à {max} intervenants. Vous en avez déclaré {count}.",
   "add": "Ajouter un intervenant",
   "maxReached": "Vous avez atteint le maximum de {max} intervenants pour cet appel.",
@@ -8,7 +8,8 @@
   "remove": "Retirer {speaker}",
   "moveUp": "Remonter {speaker}",
   "moveDown": "Descendre {speaker}",
-  "confirmationNotice": "Citer une personne l'engage : chacune recevra un courriel lui demandant de confirmer sa participation.",
+  "confirmationNotice": "Citer une personne l'engage : chaque intervenant dont l'adresse est indiquée recevra un courriel lui demandant de confirmer sa participation. Sans adresse, aucune confirmation ne pourra lui être demandée.",
+  "noEmail": "Sans adresse électronique : ne sera pas invité à confirmer sa participation.",
   "accountBadge": "Compte de la plateforme",
   "empty": {
     "title": "Aucun intervenant déclaré",
@@ -17,7 +18,7 @@
   "dialog": {
     "addTitle": "Ajouter un intervenant",
     "editTitle": "Modifier l'intervenant",
-    "description": "L'adresse électronique sert à retrouver la personne si elle est déjà connue de la plateforme, et à lui envoyer sa demande de confirmation.",
+    "description": "L'adresse électronique est facultative. Indiquée, elle sert à retrouver la personne si elle est déjà connue de la plateforme et à lui envoyer sa demande de confirmation.",
     "foundTitle": "Cette personne est déjà connue de la plateforme",
     "foundWithAccount": "Elle a un compte : en la retenant, vous reprenez son profil tel qu'elle le tient à jour.",
     "foundWithoutAccount": "Elle n'a pas encore de compte : vous pourrez corriger ses informations si elles ont changé.",
@@ -35,7 +36,7 @@
   "fields": {
     "email": {
       "label": "Adresse électronique",
-      "hint": "Elle ne sera pas publiée. Elle sert à reconnaître la personne et à lui écrire."
+      "hint": "Elle ne sera pas publiée. Sans adresse, l'intervenant ne sera pas invité à confirmer sa participation."
     },
     "civility": {
       "label": "Civilité",
@@ -112,7 +113,7 @@
     "tooFew": "Cet appel demande au moins {min} intervenant. | Cet appel demande au moins {min} intervenant. | Cet appel demande au moins {min} intervenants.",
     "tooMany": "Cet appel accepte au plus {max} intervenant. | Cet appel accepte au plus {max} intervenant. | Cet appel accepte au plus {max} intervenants.",
     "nameRequired": "Intervenant {position} : le prénom et le nom sont obligatoires.",
-    "emailInvalid": "{speaker} : l'adresse électronique est manquante ou mal formée.",
+    "emailInvalid": "{speaker} : l'adresse électronique est mal formée.",
     "emailDuplicate": "L'adresse {email} figure deux fois dans la liste.",
     "civilityRequired": "{speaker} : la civilité est obligatoire.",
     "jobTitleRequired": "{speaker} : la fonction est obligatoire.",

@@ -226,19 +226,32 @@ async fn intervenants(
     dossier: ProposalId,
 ) -> Result<Vec<IntervenantRecompose>> {
     let lignes = speakers::du_dossier(state.pool(), dossier).await?;
-    let ids: Vec<Uuid> = lignes.iter().map(|l| l.person_id).collect();
+    let ids: Vec<Uuid> = lignes.iter().filter_map(|l| l.person_id).collect();
     let personnes = cross::fiches_personnes(state.pool(), &ids).await?;
 
     Ok(lignes
         .into_iter()
         .map(|ligne| {
-            let personne = personnes.iter().find(|p| p.id == ligne.person_id);
+            // Sans personne (D16), l'identité est celle de la ligne et l'adresse
+            // reste vide : c'est ainsi que le formulaire la reconnaît.
+            let personne = ligne
+                .person_id
+                .and_then(|id| personnes.iter().find(|p| p.id == id));
             IntervenantRecompose {
-                person_id: Some(ligne.person_id),
+                person_id: ligne.person_id,
                 has_account: personne.is_some_and(|p| p.has_account),
-                civility: personne.and_then(|p| p.civility.clone()),
-                first_name: personne.map(|p| p.first_name.clone()).unwrap_or_default(),
-                last_name: personne.map(|p| p.last_name.clone()).unwrap_or_default(),
+                civility: match personne {
+                    Some(p) => p.civility.clone(),
+                    None => ligne.civility,
+                },
+                first_name: match personne {
+                    Some(p) => p.first_name.clone(),
+                    None => ligne.first_name.unwrap_or_default(),
+                },
+                last_name: match personne {
+                    Some(p) => p.last_name.clone(),
+                    None => ligne.last_name.unwrap_or_default(),
+                },
                 email: personne.map(|p| p.email.clone()).unwrap_or_default(),
                 job_title: ligne.job_title_snapshot.unwrap_or_default(),
                 organization_name: ligne.organization_snapshot.unwrap_or_default(),

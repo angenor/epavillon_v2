@@ -284,7 +284,8 @@ CREATE TRIGGER tg_sessions_events
 CREATE TABLE programme.session_speakers (
     id                uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
     session_id        uuid        NOT NULL REFERENCES programme.sessions(id) ON DELETE CASCADE,
-    person_id         uuid        NOT NULL CONSTRAINT xmod_fk_session_speakers_person
+    -- NULL : intervenant sans adresse (D16), comme dans programme.proposal_speakers.
+    person_id         uuid        CONSTRAINT xmod_fk_session_speakers_person
                                   REFERENCES identity.people(id) ON DELETE RESTRICT,
     role              programme.speaker_role NOT NULL DEFAULT 'speaker',
     job_title_snapshot text,
@@ -294,7 +295,14 @@ CREATE TABLE programme.session_speakers (
     attended          boolean,
     sort_order        smallint    NOT NULL DEFAULT 0,
     created_at        timestamptz NOT NULL DEFAULT now(),
-    CONSTRAINT ux_session_speakers UNIQUE (session_id, person_id, role)
+    -- Identité d'un intervenant sans personne (D16) ; ajoutées en dernier, comme la migration.
+    civility          text        CHECK (civility IN ('mme', 'm', 'dr', 'pr', 'other')),
+    first_name        text,
+    last_name         text,
+    CONSTRAINT ux_session_speakers UNIQUE (session_id, person_id, role),
+    CONSTRAINT ck_session_speakers_identity CHECK (
+        (person_id IS NOT NULL AND civility IS NULL AND first_name IS NULL AND last_name IS NULL)
+        OR (person_id IS NULL AND length(btrim(first_name)) > 0 AND length(btrim(last_name)) > 0))
 );
 
 CREATE INDEX ix_session_speakers_session ON programme.session_speakers (session_id, sort_order);

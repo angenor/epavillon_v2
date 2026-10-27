@@ -409,9 +409,9 @@ BEGIN
 
         PERFORM 1
         FROM programme.proposal_speakers s
-        JOIN identity.people p ON p.id = s.person_id
+        LEFT JOIN identity.people p ON p.id = s.person_id
         WHERE s.proposal_id = NEW.id
-          AND (p.civility IS NULL
+          AND (COALESCE(s.civility, p.civility) IS NULL
                OR btrim(COALESCE(s.job_title_snapshot, '')) = ''
                OR btrim(COALESCE(s.organization_snapshot, '')) = '');
         IF FOUND THEN
@@ -511,13 +511,20 @@ CREATE TRIGGER tg_proposals_sync_lead_organization
 -- activité : le même expert existait en autant d'exemplaires que de
 -- participations, sans moyen de consolider son historique. Ici, l'intervenant
 -- EST une personne (identity.people), créée à la volée si elle est inconnue.
+--
+-- Exception (D16, reprise v1, 27/10) : un intervenant dont on n'a pas l'adresse
+-- n'est pas une personne (une personne exige une adresse, jamais fabriquée) ;
+-- la ligne porte alors elle-même civilité, prénom et nom. Il n'a ni compte, ni
+-- confirmation, ni photo, et ne rejoint aucun historique. Cas de la v1, dont les
+-- déposants saisissaient leur propre adresse pour tous leurs intervenants.
 -- -----------------------------------------------------------------------------
 CREATE TYPE programme.speaker_role AS ENUM ('speaker', 'moderator', 'panelist', 'keynote', 'facilitator', 'interpreter');
 
 CREATE TABLE programme.proposal_speakers (
     id                uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
     proposal_id       uuid        NOT NULL REFERENCES programme.proposals(id) ON DELETE CASCADE,
-    person_id         uuid        NOT NULL CONSTRAINT xmod_fk_proposal_speakers_person
+    -- NULL : intervenant sans adresse, identifié par civility, first_name, last_name.
+    person_id         uuid        CONSTRAINT xmod_fk_proposal_speakers_person
                                   REFERENCES identity.people(id) ON DELETE RESTRICT,
     role              programme.speaker_role NOT NULL DEFAULT 'speaker',
     -- Fonction et organisation AU MOMENT de cette activité : une personne change
@@ -534,7 +541,15 @@ CREATE TABLE programme.proposal_speakers (
     is_available_for_questions boolean NOT NULL DEFAULT true,
     sort_order        smallint    NOT NULL DEFAULT 0,
     created_at        timestamptz NOT NULL DEFAULT now(),
-    CONSTRAINT ux_proposal_speakers UNIQUE (proposal_id, person_id, role)
+    -- Identité d'un intervenant sans personne (D16) ; ajoutées en dernier, comme la migration.
+    civility          text        CHECK (civility IN ('mme', 'm', 'dr', 'pr', 'other')),
+    first_name        text,
+    last_name         text,
+    CONSTRAINT ux_proposal_speakers UNIQUE (proposal_id, person_id, role),
+    -- Une seule source d'identité : la personne, ou la ligne elle-même.
+    CONSTRAINT ck_proposal_speakers_identity CHECK (
+        (person_id IS NOT NULL AND civility IS NULL AND first_name IS NULL AND last_name IS NULL)
+        OR (person_id IS NULL AND length(btrim(first_name)) > 0 AND length(btrim(last_name)) > 0))
 );
 
 CREATE INDEX ix_proposal_speakers_proposal ON programme.proposal_speakers (proposal_id, sort_order);

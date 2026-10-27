@@ -30,6 +30,7 @@ import type {
 } from '../shared'
 import type { ParticipationMode } from '../event/edition'
 import type { AttachedImage } from '../media'
+import type { Civility } from '../identity'
 import type { OrganizationRole, SpeakerRole } from './proposal'
 
 // ---------------------------------------------------------------------------
@@ -116,7 +117,11 @@ export interface Session {
 export interface SessionSpeaker {
   id: Uuid
   session_id: SessionId
-  person_id: PersonId
+  /** Nul : intervenant sans adresse (D16), identifié par les trois champs suivants. */
+  person_id: PersonId | null
+  civility: Civility | null
+  first_name: string | null
+  last_name: string | null
   role: SpeakerRole
   job_title_snapshot: string | null
   organization_snapshot: string | null
@@ -132,7 +137,10 @@ export interface SessionSpeaker {
  * Un intervenant du détail PUBLIC d'une séance : ni identifiant de personne,
  * ni confirmation, ni présence — mais son nom d'affichage et sa photo.
  */
-export type PublicSessionSpeaker = Omit<SessionSpeaker, 'person_id' | 'confirmed_at' | 'attended'> & {
+export type PublicSessionSpeaker = Omit<
+  SessionSpeaker,
+  'person_id' | 'civility' | 'first_name' | 'last_name' | 'confirmed_at' | 'attended'
+> & {
   display_name: string
   /** Image de profil, `media.attached_image('identity', 'people', …, 'avatar')` ; nulle sans image. */
   avatar: AttachedImage | null

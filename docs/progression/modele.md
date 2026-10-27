@@ -248,3 +248,16 @@ Reprise de la v1, décision D1 ([plan](reprise-v1/plan.md) § 5) : les comptes a
 Côté code (crate `identity`) : la connexion ne change pas, une ligne sans empreinte paie déjà le hachage factice et rend `invalid_credentials` (tests `compte_repris`, `discretion_compte_repris`). `accounts::set_password` efface l'exigence ; son `ON CONFLICT (person_id) WHERE provider = 'password'` reprend la ligne existante. La réinitialisation confirmée pose `email_verified_at` si elle est vide (événement `identity.person.email_verified`). Message de refus de connexion, site et Guide Négo, le même pour tous : il renvoie à « Mot de passe oublié ».
 
 **Migration** : `ops/migrations/2026-10-27-compte-sans-mot-de-passe.sql`, éprouvée sur une base chargée depuis le schéma précédent, jouée deux fois sans erreur, schéma ensuite identique au modèle (`pg_dump --schema-only`). **En production** : à jouer avant le déploiement de l'API, et avant toute reprise de compte.
+
+## 27/10/2026, `070_programme_proposals.sql` et `075_programme_sessions.sql` : un intervenant sans adresse
+
+Reprise de la v1, décision D16 ([plan](reprise-v1/plan.md) § 6) : 149 intervenants v1 sur 816 portaient l'adresse d'une autre personne (le déposant la saisissait pour tous), et une personne exige une adresse, jamais fabriquée. Écartés au lot 50, ils privaient 64 dossiers (26 CdP30, 38 CdP31) de tout ou partie de leurs intervenants, jusqu'à des pages publiques sans panéliste.
+
+- **`proposal_speakers.person_id` et `session_speakers.person_id` facultatifs** : sans personne, la ligne porte **`civility`, `first_name`, `last_name`** (en queue de table, comme toute colonne arrivée par `ALTER`). Rien ne change dans le formulaire hors l'adresse : prénom et nom obligatoires sur la ligne, civilité, fonction et organisation exigées au dépôt.
+- **`ck_proposal_speakers_identity` / `ck_session_speakers_identity`** : une seule source d'identité, la personne ou la ligne.
+- **`tg_check_submission_eligibility`** : `LEFT JOIN identity.people`, civilité lue sur la ligne à défaut de personne.
+- Écarté : rendre `identity.people.primary_email` facultatif. L'invariant « une personne, une adresse » porte le rapprochement, et 34 lectures forcées non nulles dans sept modules auraient cédé à l'exécution, la liste des utilisateurs du back-office la première.
+
+Un intervenant sans adresse n'a ni compte, ni confirmation, ni photo, ni historique ; `detect_conflicts` ne le voit pas (jointure sur la personne).
+
+**Migration** : `ops/migrations/2026-10-27-intervenant-sans-adresse.sql`, éprouvée sur une copie de la production, jouée deux fois sans erreur, tables et fonction ensuite identiques au modèle (`pg_dump --schema-only`, `pg_get_functiondef`) ; appliquée en local sur `epavillon`. **En production** : à jouer avant le déploiement de l'API, puis le lot 92.
