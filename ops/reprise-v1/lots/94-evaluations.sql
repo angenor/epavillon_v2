@@ -1,8 +1,9 @@
--- Lot 94 (phase 2) : évaluations des activités.
+-- Lot 94 (phase 2) : évaluations des activités, notes et consultations.
 --
--- `lot94_note` (public.activity_ratings), `lot94_message` (public.revision_comments),
--- `lot94_vue` (public.revisionniste_activity_views), `lot94_lecture`
--- (public.revision_comment_reads, identifiants seuls), écrits par 94-evaluations.sh.
+-- `lot94_note` (public.activity_ratings), `lot94_vue`
+-- (public.revisionniste_activity_views), écrits par 94-evaluations.sh. Les
+-- messages de révision et leurs lectures attendent les destinataires et le lu /
+-- non lu par message de la v2 (commanditaire, 27/10) : lot 95.
 --
 -- Choix :
 --   - note v1 (sur 20, sans grille ni recommandation) : revue `quick` soumise à sa
@@ -12,12 +13,7 @@
 --     si son rôle v1 a expiré : la revue désigne une personne, pas un rôle ;
 --   - une affectation par revue reprise, datée de la note : sans elle l'évaluateur
 --     n'apparaît pas dans la liste du dossier ;
---   - message du fil de révision : visibilité `submitter` s'il était partagé avec
---     le soumissionnaire ou si son auteur n'avait aucun rôle (un soumissionnaire
---     qui répond), `committee` sinon ; la liste nominative des destinataires v1
---     n'a pas de place (la v2 partage avec tout le comité) ;
---   - consultation d'un dossier par un évaluateur : `proposal_reads` ;
---   - lu / non lu par message : sans place en v2, écarté.
+--   - consultation d'un dossier par un évaluateur : `proposal_reads`.
 -- Rien ne part : aucun déclencheur de ces tables n'émet d'événement (vérifié).
 
 \set ON_ERROR_STOP on
@@ -31,12 +27,6 @@ SELECT n.*, platform.uuid_v7() AS review_id,
        legacy.map('auth.users', n.evaluateur::text) AS reviewer_id
 FROM lot94_note n;
 
-CREATE TEMP TABLE l94_message ON COMMIT DROP AS
-SELECT m.*, platform.uuid_v7() AS comment_id,
-       legacy.map('public.activities', m.activity_id::text) AS proposal_id,
-       legacy.map('auth.users', m.auteur::text) AS author_id
-FROM lot94_message m;
-
 CREATE TEMP TABLE l94_vue ON COMMIT DROP AS
 SELECT v.*, legacy.map('public.activities', v.activity_id::text) AS proposal_id,
        legacy.map('auth.users', v.personne::text) AS person_id
@@ -44,9 +34,8 @@ FROM lot94_vue v;
 
 DO $$
 BEGIN
-    IF EXISTS (SELECT 1 FROM l94_note WHERE proposal_id IS NULL OR reviewer_id IS NULL)
-       OR EXISTS (SELECT 1 FROM l94_message WHERE proposal_id IS NULL OR author_id IS NULL) THEN
-        RAISE EXCEPTION 'lot 94 : note ou message dont l''activité ou la personne manque à legacy.id_map';
+    IF EXISTS (SELECT 1 FROM l94_note WHERE proposal_id IS NULL OR reviewer_id IS NULL) THEN
+        RAISE EXCEPTION 'lot 94 : note dont l''activité ou la personne manque à legacy.id_map';
     END IF;
     IF EXISTS (SELECT 1 FROM l94_vue WHERE person_id IS NULL)
        OR EXISTS (SELECT 1 FROM l94_vue v WHERE v.proposal_id IS NULL AND NOT EXISTS (
@@ -60,12 +49,8 @@ BEGIN
     IF EXISTS (SELECT 1 FROM programme.reviews r JOIN l94_note n
                ON r.proposal_id = n.proposal_id AND r.reviewer_id = n.reviewer_id)
        OR EXISTS (SELECT 1 FROM legacy.id_map WHERE legacy_table IN (
-                      'public.activity_ratings', 'public.revision_comments',
-                      'public.revisionniste_activity_views', 'public.revision_comment_reads')) THEN
+                      'public.activity_ratings', 'public.revisionniste_activity_views')) THEN
         RAISE EXCEPTION 'lot 94 : évaluations déjà reprises, le lot ne se joue qu''une fois';
-    END IF;
-    IF EXISTS (SELECT 1 FROM l94_message WHERE btrim(COALESCE(texte, '')) = '') THEN
-        RAISE EXCEPTION 'lot 94 : message vide';
     END IF;
 END $$;
 
@@ -84,18 +69,6 @@ FROM l94_note;
 SELECT programme.refresh_proposal_score(proposal_id)
 FROM (SELECT DISTINCT proposal_id FROM l94_note) p \g /dev/null
 
--- Fil de révision ---------------------------------------------------------------------
-
-INSERT INTO programme.proposal_comments (id, proposal_id, author_id, visibility, body,
-                                         edited_at, created_at)
-SELECT comment_id, proposal_id, author_id,
-       CASE WHEN partage_soumissionnaire OR NOT auteur_equipe THEN 'submitter' ELSE 'committee' END
-           ::programme.comment_visibility,
-       texte,
-       CASE WHEN updated_at > created_at + interval '1 second' THEN updated_at END,
-       created_at
-FROM l94_message;
-
 -- Consultations des dossiers ------------------------------------------------------------
 
 INSERT INTO programme.proposal_reads (proposal_id, person_id, first_read_at, last_read_at, read_count)
@@ -113,12 +86,6 @@ SELECT legacy.remember('public.activity_ratings', id::text, 'programme', 'review
                        'migrated', 'revue rapide sur 20, recommandation neutre')
 FROM l94_note \g /dev/null
 
-SELECT legacy.remember('public.revision_comments', id::text, 'programme', 'proposal_comments', comment_id,
-                       'migrated', CASE WHEN partage_soumissionnaire OR NOT auteur_equipe
-                                        THEN 'visible du soumissionnaire'
-                                        ELSE 'visible du comité ; destinataires nominatifs v1 sans place' END)
-FROM l94_message \g /dev/null
-
 SELECT legacy.remember('public.revisionniste_activity_views', id::text, 'programme', 'proposal_reads',
                        proposal_id, 'migrated', 'ligne (proposal_id, person_id) ; cible : la proposition')
 FROM l94_vue WHERE proposal_id IS NOT NULL \g /dev/null
@@ -126,10 +93,6 @@ FROM l94_vue WHERE proposal_id IS NOT NULL \g /dev/null
 SELECT legacy.remember('public.revisionniste_activity_views', id::text, 'programme', 'proposal_reads',
                        NULL, 'skipped', 'activité écartée')
 FROM l94_vue WHERE proposal_id IS NULL \g /dev/null
-
-SELECT legacy.remember('public.revision_comment_reads', id::text, 'programme', 'proposal_comments',
-                       NULL, 'skipped', 'lu / non lu par message : sans place en v2')
-FROM lot94_lecture \g /dev/null
 
 -- Outbox et travaux : rien ne doit naître de ces lignes.
 DO $$
@@ -154,9 +117,7 @@ BEGIN
                count(m.*) FILTER (WHERE m.disposition = 'migrated') AS migrated,
                count(m.*) FILTER (WHERE m.disposition = 'skipped') AS skipped
         FROM (VALUES ('public.activity_ratings', (SELECT count(*) FROM lot94_note)),
-                     ('public.revision_comments', (SELECT count(*) FROM lot94_message)),
-                     ('public.revisionniste_activity_views', (SELECT count(*) FROM lot94_vue)),
-                     ('public.revision_comment_reads', (SELECT count(*) FROM lot94_lecture))) AS s(t, extraites)
+                     ('public.revisionniste_activity_views', (SELECT count(*) FROM lot94_vue))) AS s(t, extraites)
         LEFT JOIN legacy.id_map m ON m.legacy_table = s.t
         GROUP BY s.t, s.extraites ORDER BY s.t
     LOOP
@@ -168,16 +129,14 @@ BEGIN
     FOR r IN
         SELECT e.slug, count(DISTINCT p.id) FILTER (WHERE p.review_count > 0) AS notees,
                round(avg(p.average_score) FILTER (WHERE p.review_count > 0), 2) AS moyenne,
-               (SELECT count(*) FROM programme.proposal_comments c JOIN programme.proposals q ON q.id = c.proposal_id
-                 WHERE q.event_id = e.id) AS messages,
                (SELECT count(*) FROM programme.proposal_reads d JOIN programme.proposals q ON q.id = d.proposal_id
                  WHERE q.event_id = e.id) AS consultations
         FROM event.events e JOIN programme.proposals p ON p.event_id = e.id
         WHERE e.slug IN ('cdp30-belem-2025', 'cdp31-antalya-2026')
         GROUP BY e.id, e.slug ORDER BY e.slug
     LOOP
-        RAISE NOTICE 'lot 94 : % : % dossiers notés (moyenne %), % messages, % consultations',
-            r.slug, r.notees, r.moyenne, r.messages, r.consultations;
+        RAISE NOTICE 'lot 94 : % : % dossiers notés (moyenne %), % consultations',
+            r.slug, r.notees, r.moyenne, r.consultations;
     END LOOP;
 END $$;
 

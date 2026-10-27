@@ -43,7 +43,8 @@ Lu par chaque script de `ops/reprise-v1/lots/`. Plan : [`docs/progression/repris
 | 91 | complément du lot 90 : intervenants et visuel des propositions recopiés sur ses 14 séances | 2, joué le 27/10 |
 | 92 | intervenants écartés pour D16 : lignes sans personne (migration `2026-10-27-intervenant-sans-adresse` d'abord) | 2, joué le 27/10 |
 | 93 | photos des intervenants du lot 92 (3), sur leur ligne du dossier ; fichiers déposés par 60-fichiers.sh | 2, joué le 27/10 |
-| 94 | évaluations : notes, fil de révision, consultations (`public.activity_ratings`, `revision_comments`, `revisionniste_activity_views` ; lectures de messages écartées) | 2, répété le 27/10 |
+| 94 | évaluations : notes et consultations (`public.activity_ratings`, `revisionniste_activity_views`) | 2, répété le 27/10 |
+| 95 | messages de révision avec destinataires et lectures (`revision_comments`, `revision_comment_reads`), après la fonction v2 | 2 |
 | 100+ | rediffusions, séances de dossiers rejetés CdP31, questions, historique des modifications, documents de négociation, modules fermés | 2 |
 
 Phase 2, site ouvert : le lot se répète sur un clone local de la production (qui dépose aussi les fichiers), puis son flux SQL est lu par le psql du serveur (exemple : `70-temoignages.sh`).
