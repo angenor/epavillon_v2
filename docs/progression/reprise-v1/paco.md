@@ -128,9 +128,9 @@ Aucune collision de fichier. Seule réserve : ces chemins deviennent ceux de la 
 ProxyPassMatch "^/(paco(/.*)?|login|403|forgot-password|reset-password)$" !
 ProxyPassMatch "^/(assets|images|fonts|logos/logo_paco)/" !
 ProxyPassMatch "^/(logos/[^/]+|favicon\.ico|logo-ifdd\.png|version\.json)$" !
-AliasMatch "^/(paco(/.*)?|login|403|forgot-password|reset-password)$" /var/www/paco-v1/index.html
-AliasMatch "^/((assets|images|fonts|logos)/.*|favicon\.ico|logo-ifdd\.png|version\.json)$" /var/www/paco-v1/$1
-<Directory "/var/www/paco-v1">
+AliasMatch "^/(paco(/.*)?|login|403|forgot-password|reset-password)$" /var/www/epavillon-paco/index.html
+AliasMatch "^/((assets|images|fonts|logos)/.*|favicon\.ico|logo-ifdd\.png|version\.json)$" /var/www/epavillon-paco/$1
+<Directory "/var/www/epavillon-paco">
     Require all granted
     Options -Indexes
     AllowOverride None
@@ -148,7 +148,7 @@ AliasMatch "^/((assets|images|fonts|logos)/.*|favicon\.ico|logo-ifdd\.png|versio
 
 **Connexion des administrateurs PACO.** `/paco/admin` exige une **session Supabase** (`requiresAuth`) et un rôle actif `paco`, `admin` ou `super_admin` dans `user_roles`. Sans session, la garde envoie vers `/login?redirect=/paco/admin`, page de connexion v1 rendue dans la SPA (et servie aussi au rechargement grâce à l'`AliasMatch`), puis retour à `/paco/admin`. Comptes et mots de passe : ceux de **Supabase**, pas ceux de la v2. La session est gardée dans le `localStorage` du domaine : un administrateur déjà connecté à la v1 avant le 26/10 l'est peut-être encore. Le bouton « Notifier la page » (fenêtre de courriel de la coquille) marche à l'identique, pour un `super_admin` seulement, comme en v1. La connexion Google ou Microsoft (`/auth/callback`) n'est pas couverte : mot de passe seulement.
 
-**Build.** Depuis le dépôt v1, à partir de l'état servi en production le 26/10 : l'arbre de travail a 13 fichiers modifiés non commités (fenêtre de courriel, `useOrganizationForm`), présents dans le `dist/` du 26/10. Les committer sur `paco-isole` avant de construire, pour savoir ce qui tourne. `npm ci && npm run build` avec un fichier d'environnement réduit à `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_APP_URL` ; vérifier qu'aucune clé d'IA ne reste dans `dist/assets/`. Copier `index.html`, `assets/`, `images/`, `fonts/`, `logos/`, `favicon.ico`, `logo-ifdd.png`, `version.json` dans `/var/www/paco-v1/` sur le serveur.
+**Build.** Depuis le dépôt v1, à partir de l'état servi en production le 26/10 : l'arbre de travail a 13 fichiers modifiés non commités (fenêtre de courriel, `useOrganizationForm`), présents dans le `dist/` du 26/10. Les committer sur `paco-isole` avant de construire, pour savoir ce qui tourne. `npm ci && npm run build` avec un fichier d'environnement réduit à `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_APP_URL` ; vérifier qu'aucune clé d'IA ne reste dans `dist/assets/`. Copier `index.html`, `assets/`, `images/`, `fonts/`, `logos/`, `favicon.ico`, `logo-ifdd.png`, `version.json` dans `/var/www/epavillon-paco/` sur le serveur.
 
 **Effort** : deux à trois heures, essais compris. Faisable aujourd'hui, sans toucher au code de la v2.
 
@@ -192,5 +192,5 @@ C'est la seule qui respecte « rien ne change » à la lettre (le même code, le
 6. « Rejoindre » plus d'une heure avant : fenêtre « pas encore commencé ».
 7. Un clic sur un lien de la barre v1 : avec la garde, la v2 se charge ; sans elle, noter ce qui s'affiche.
 8. Administration avec un compte `paco` : statistiques, liste, CSV, filtres ; « Notifier la page » refusé, accepté pour un `super_admin`.
-9. `grep` des préfixes de clés d'IA dans `/var/www/paco-v1/assets/` : aucun résultat.
+9. `grep` des préfixes de clés d'IA dans `/var/www/epavillon-paco/assets/` : aucun résultat.
 10. Téléphone 375 px, thèmes clair et sombre, français et anglais.

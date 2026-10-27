@@ -108,7 +108,7 @@ Posés un par un au commanditaire, réponses consignées dans `ecarts.md`.
 | D12 | Annonce aux utilisateurs | un courriel après la bascule, selon D1 |
 | D13 | Date limite | à demander |
 | D14 | Journées spéciales codées en dur | **tranché** : reprises depuis le code v1 ; Chypre et FPHN, codés de même, suivent sauf avis contraire |
-| D15 | PACO est injoignable depuis la bascule DNS du 26/10 | **tranché** : bloc repris tel quel dans le site v2, branché sur Supabase, en priorité |
+| D15 | PACO est injoignable depuis la bascule DNS du 26/10 | **tranché, en ligne le 27/10** : build v1 inchangé servi par Apache, branché sur Supabase ([DEPLOIEMENT § 18](../../DEPLOIEMENT.md)) |
 | D16 | Intervenants sans adresse électronique : toute personne v2 en exige une (`identity.people.primary_email`), et un intervenant de séance est une personne | ne concerne que les pages codées en dur : dans Supabase, aucun intervenant sans adresse, mais 43 adresses partagées par plusieurs personnes (rapprochement par adresse **et** nom). Étendre le modèle pour qu'un intervenant existe sans adresse ; jamais d'adresse fabriquée |
 | D17 | Ce que les pages disaient et que le modèle ne range pas : objectifs et public d'une journée, ses « parties », modérateur de la journée, personnes ressources, image de la journée, direct de toute la journée, organisation intervenante | étendre le modèle, une place par information (principe 5) |
 

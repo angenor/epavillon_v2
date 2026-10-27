@@ -1366,3 +1366,30 @@ dans le SPF de `francophonie.org`.
   l'ancienne origine : la réinstaller depuis `/guide-nego/` du domaine.
 - Le drapeau `platform.maintenance` était allumé au moment de la bascule (§ 16) : le rouvrir après
   vérification en administrateur.
+
+## 18. PACO, l'application v1 servie à côté (27/10)
+
+Le cycle de webinaires PACO n'est pas repris dans la v2 (décision D9) et ne doit changer ni
+d'apparence ni de données (D15). Depuis la bascule du 26/10, son adresse tombait sur la 404 du
+site. Apache sert donc **le build de la v1 lui-même**, toujours branché sur Supabase, sur `/paco`,
+`/paco/join`, `/paco/admin` et les pages de connexion de la v1 (`/login`, `/403`,
+`/forgot-password`, `/reset-password`), plus ses fichiers (`/assets`, `/images`, `/fonts`, les
+fichiers de premier niveau de `/logos`, `/favicon.ico`, `/logo-ifdd.png`, `/version.json`). Tout le
+reste va à Nuxt ; les logos de la v2, en sous-dossiers `png/` et `svg/`, ne sont pas pris.
+
+| | |
+|---|---|
+| Construire | `ops/paco/construire.sh` (mode d'emploi : [`ops/paco/LISEZMOI.md`](../ops/paco/LISEZMOI.md)) |
+| Déposer | le dossier `epavillon-paco/` du build dans `/var/www/epavillon-paco/` (root, 755/644), **hors** de `/opt/epavillon` que `deploy.sh` synchronise avec `--delete` |
+| Servir | bloc PACO du vhost 443 dans [`ops/apache-epavillon.conf`](../ops/apache-epavillon.conf), `./deploy.sh vhost` |
+| Retirer | supprimer ce bloc, `./deploy.sh vhost`, puis `/var/www/epavillon-paco/` |
+
+- **Le mode maintenance de la v2 ne ferme pas PACO** : Apache le sert avant Nuxt.
+- **Seule retouche au code v1** : une garde du routeur. Tout lien hors PACO (logo, barre, pied de
+  page) recharge la page, que sert alors la v2 ; sans elle, la v1 entière revivait derrière
+  `/paco`.
+- **Supabase reste indispensable** tant que PACO y vit : offre gratuite, mise en pause après une
+  semaine sans activité ; ses clés ne sont pas révoquées.
+- **Après chaque séance** : passer la séance en terminée avec sa rediffusion et ajouter la
+  suivante dans le dépôt v1, reconstruire, redéposer. Comme en v1.
+- Les **redirections des anciennes adresses v1** (§ 17) devront éviter ces chemins.

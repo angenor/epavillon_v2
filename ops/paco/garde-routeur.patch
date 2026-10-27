@@ -1,0 +1,27 @@
+--- a/src/router/index.js
++++ b/src/router/index.js
+@@ -1,4 +1,4 @@
+-import { createRouter, createWebHistory } from 'vue-router'
++import { createRouter, createWebHistory, START_LOCATION } from 'vue-router'
+ 
+ const router = createRouter({
+   history: createWebHistory(import.meta.env.BASE_URL),
+@@ -412,6 +412,18 @@
+       component: () => import('../views/error/403.vue')
+     },
+   ],
++})
++
++// Build PACO servi à côté de la v2 (epavillon_v2/ops/paco/) : hors PACO et de la
++// connexion de son administration, on quitte la v1 par un vrai chargement, que sert la v2.
++const PACO_PATHS = /^\/(paco(\/.*)?|login|403|forgot-password|reset-password)$/
++
++router.beforeEach((to, from) => {
++  if (PACO_PATHS.test(to.path)) return true
++  // Premier affichage hors PACO : le serveur ne devrait jamais le servir ; recharger bouclerait.
++  if (from === START_LOCATION) return { name: 'paco-webinar' }
++  window.location.assign(to.fullPath)
++  return false
+ })
+ 
+ // Guard de navigation pour vérifier l'authentification et les rôles
