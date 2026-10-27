@@ -22,7 +22,7 @@
 2. **Rejouable de bout en bout.** Une commande repart de l'extraction et refait tout. Corriger une règle de correspondance, c'est relancer, jamais retoucher des lignes à la main.
 3. **Chaque ligne v1 rend des comptes.** Dans `legacy.id_map` : reprise, fusionnée ou écartée, **avec la raison**. Un écart non expliqué bloque la bascule.
 4. **Aucun effet de bord.** Aucun courriel, aucune notification, aucune réunion Zoom créée par la reprise (§ 5).
-5. **On n'invente rien.** Une valeur v1 sans équivalent ouvre un écart à trancher, elle n'est pas devinée.
+5. **On n'invente rien, on ne jette rien.** Un champ ou une donnée v1 sans place en v2 **étend le modèle** (règle du commanditaire, 27/10) : SQL d'abord dans `docs/database/`, migration jouée en production avant les données, puis code. Une seule exception : ce que la v2 porte déjà sous une autre forme (un statut v1 qui mêle deux choses, des thèmes en texte libre devenus vocabulaire) se fait correspondre, sans colonne en double. Chaque extension est listée dans `ecarts.md`.
 6. **Données personnelles** : extractions dans `sauvegardes/reprise-v1/` (ignoré par Git), jamais dans le dépôt, un journal ou un message.
 
 ## 3. Les étapes
@@ -67,7 +67,7 @@ Chaque ligne sera confirmée sur la carte réelle (étape 2).
 | 10 | `user_testimonials`, `video_testimonials`, `innovations_practices` | `content.highlights` | |
 | 10 | `media_gallery` | aucune table dédiée | D7 |
 
-**Proposé à l'écart** (D3) : chatbot et vecteurs (à recalculer avec un autre modèle), notifications, messagerie, mises en relation, rendez-vous, sondages, lettres d'information, historique des courriels, statistiques de consultation, journaux, réunions Zoom (expirées, mots de passe en clair), tout PACO (D9), formations (module fermé).
+**À l'écart, sauf avis contraire** (D3, revu le 27/10 selon le principe 5) : vecteurs du chatbot (ils se recalculent avec le modèle de la v2, ce ne sont pas des données), réunions Zoom expirées (mots de passe en clair), journaux techniques, PACO (D9). **Tout le reste est repris**, dans son module même fermé : notifications, messagerie, mises en relation, rendez-vous, sondages, lettres d'information et leurs abonnés, historique des courriels, statistiques de consultation, conversations du chatbot, formations.
 
 ## 5. Garde-fous techniques
 
@@ -96,11 +96,11 @@ Posés un par un au commanditaire, réponses consignées dans `ecarts.md`.
 |---|---|---|
 | D1 | Mots de passe | **tranché, révisé** : comptes et vérifications repris, nouveau mot de passe exigé (`ecarts.md`) |
 | D2 | COP31 et données de la production v2 | **tranché** : la v1 fait foi, la production v2 est purgée sauf le compte du commanditaire |
-| D3 | Ce qui n'est pas repris (liste du § 4) | confirmer la liste |
+| D3 | Ce qui n'est pas repris (fin du § 4) | liste courte, sauf avis contraire : vecteurs du chatbot, Zoom expirés, journaux techniques, PACO |
 | D4 | Doublons d'organisations : qui valide | Claude propose par groupes, le commanditaire valide |
 | D5 | Fonction exigée pour une adhésion active | « Non renseignée » ou adhésion en attente |
 | D6 | Thématiques sans équivalent | terme créé ou rapprochement, une par une |
-| D7 | Médiathèque d'activité | galerie de l'édition, ou écartée |
+| D7 | Médiathèque d'activité | étendre le modèle : galerie rattachée à l'activité (principe 5) |
 | D8 | Dates COP31 saisies avec l'ancien fuseau | correction de 3 h vérifiée sur les journées spéciales connues |
 | D9 | PACO | **tranché** : non repris, déporté à part sur Supabase |
 | D10 | Sessions de négociation v1 | agenda des sessions, ou réunions de la Francophonie |
@@ -109,15 +109,15 @@ Posés un par un au commanditaire, réponses consignées dans `ecarts.md`.
 | D13 | Date limite | à demander |
 | D14 | Journées spéciales codées en dur | **tranché** : reprises depuis le code v1 ; Chypre et FPHN, codés de même, suivent sauf avis contraire |
 | D15 | PACO est injoignable depuis la bascule DNS du 26/10 (ses pages vivaient sous l'ancien domaine) | urgence selon la prochaine séance PACO |
-| D16 | Intervenants sans adresse électronique : toute personne v2 en exige une (`identity.people.primary_email`), et un intervenant de séance est une personne | à trancher sur la carte réelle, qui dira combien d'intervenants Supabase sont dans ce cas ; pas d'adresse fabriquée |
-| D17 | Ce que les pages disaient et que le modèle ne range pas : objectifs et public d'une journée, ses « parties », modérateur de la journée, personnes ressources, image de la journée, direct de toute la journée, organisation intervenante | le texte dans la description de la journée ; le reste, un par un |
+| D16 | Intervenants sans adresse électronique : toute personne v2 en exige une (`identity.people.primary_email`), et un intervenant de séance est une personne | étendre le modèle pour qu'un intervenant existe sans adresse ; la forme se choisit sur la carte réelle, qui dira combien d'intervenants Supabase sont dans ce cas ; jamais d'adresse fabriquée |
+| D17 | Ce que les pages disaient et que le modèle ne range pas : objectifs et public d'une journée, ses « parties », modérateur de la journée, personnes ressources, image de la journée, direct de toute la journée, organisation intervenante | étendre le modèle, une place par information (principe 5) |
 
 ## 7. La bascule, geste par geste
 
 1. Maintenance allumée (déjà le cas), worker arrêté.
 2. Extraction finale de Supabase et des fichiers.
 3. `./deploy.sh backup` de la production.
-4. Purge des données d'essai (D2), puis jeu de l'outillage, lot par lot, chacun dans sa transaction.
+4. Migration du schéma (retouches D1, extensions du principe 5), purge des données d'essai (D2), puis jeu de l'outillage, lot par lot, chacun dans sa transaction.
 5. Réconciliation : zéro écart non expliqué, sinon restauration de la sauvegarde.
 6. Neutralisation de l'outbox et des travaux du lot, puis relance du worker (traitement des fichiers).
 7. Vérification en administrateur, puis réouverture.
