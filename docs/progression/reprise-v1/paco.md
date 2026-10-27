@@ -172,7 +172,7 @@ C'est la seule qui respecte « rien ne change » à la lettre (le même code, le
 ## 7. Points de vigilance
 
 - **Délai** : séance le 29/10 à 14 h 00 GMT, bouton « Rejoindre » ouvert à 13 h 00. Mise en ligne le 28/10 au plus tard.
-- **Lien Teams** : constante unique « À configurer », à faire confirmer pour la session 10.
+- **Lien Teams** : constante unique, confirmé par le commanditaire pour la session 10 le 27/10.
 - **Après la séance** : passer la session 10 en `completed: true` avec sa `replayUrl`, ajouter la session 11 (données et traductions), reconstruire, recopier. Comme en v1.
 - **Clés** : build sans clé d'IA ; révoquer celles déjà publiées par la v1. Supabase garde ses clés (D9).
 - **Supabase doit rester actif** : en offre gratuite, un projet se met en pause après une semaine sans activité. Vérifier l'offre.
