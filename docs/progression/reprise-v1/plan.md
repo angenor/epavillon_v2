@@ -2,6 +2,8 @@
 
 > Rédigé le 27/10/2026. Périmètre arrêté par le commanditaire : **les données Supabase** (activités 2025, et la COP31 de 2026), plus les journées spéciales codées en dur dans la v1 (D14). PACO n'est pas repris (D9). Les années 2021 à 2024 (serveur Laravel) sont une autre reprise, hors périmètre. Les écarts tranchés vivent dans [`ecarts.md`](ecarts.md), un par ligne.
 
+> **État au 27/10 : phase 1 en production** (étapes 0 à 8 faites, réouverture après vérification du commanditaire), jouée par [`ops/reprise-v1/BASCULE.md`](../../../ops/reprise-v1/BASCULE.md). Phase 2 (D13) à venir, site ouvert.
+
 ## 1. Ce qu'on sait, et ce qu'on ne sait pas encore
 
 **La structure réelle de Supabase est inconnue.** Le SQL du dépôt v1 (`bank/shema_et_requettes/database_complete.sql`) n'a jamais été rejoué tel quel : il est syntaxiquement invalide, porte du code supprimé depuis, et des migrations ont été jouées directement dans Supabase. Exemples d'écarts probables : `activity_status` à 3 valeurs dans le fichier, 9 en production ; anciennes valeurs d'`activity_theme` (`climate_resilience`, `nature_oceans`…) encore portées par des activités 2025 ; tables utilisées par le code et absentes de tout SQL (`organization_requests`, `event_registrations`, `activity_panelists`). **Rien ne s'écrit avant d'avoir extrait le schéma réel.**

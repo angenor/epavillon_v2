@@ -25,7 +25,12 @@ psql_dans "$BASE_BANC" -At < "$ICI/03-purger-essais.sql"
 etape "Lot 00 : socle"
 psql_dans "$BASE_BANC" < "$ICI/lots/00-socle.sql"
 
-restantes=$(psql_dans postgres -At -c "SELECT count(*) FROM pg_stat_activity WHERE datname = '$BASE_BANC'")
+# La session du lot 00 peut encore se fermer côté serveur quand psql a rendu la main.
+for _ in 1 2 3 4 5; do
+    restantes=$(psql_dans postgres -At -c "SELECT count(*) FROM pg_stat_activity WHERE datname = '$BASE_BANC'")
+    [ "$restantes" = 0 ] && break
+    sleep 1
+done
 if [ "$restantes" != 0 ]; then
     echo "ÉCHEC : $restantes connexion(s) encore ouvertes sur $BASE_BANC" >&2
     exit 1

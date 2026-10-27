@@ -4,6 +4,8 @@ Principe 1 du [plan](../../docs/progression/reprise-v1/plan.md) poussé au bout 
 
 Seul `postgres` possède les objets (vérifié le 27/10) ; local 17.10, production 17.11.
 
+**Jouée le 27/10, gestes 1 à 7** : sauvegarde `epavillon-20261027-134931.sql.gz`, archive `sauvegardes/reprise-v1/epavillon_finale-20261027-1405.sql.gz` (restauration en production : 6 min 30). Détail : journal du 27/10.
+
 ## Avant
 
 - Lots 00 à 60 verts sur un clone du banc ; rôles relus par le commanditaire (`sauvegardes/reprise-v1/roles-a-relire.txt`).
@@ -29,7 +31,7 @@ Chaque geste sur le serveur mesure le voisin avant et après (`curl -s -o /dev/n
 
 ## Retour arrière
 
-Avant le geste 6, rien n'a changé en production hors Garage. Après : `./deploy.sh restore epavillon-<horodatage>.sql.gz` (la sauvegarde du geste 3), `$COMPOSE up -d api worker front` avec les images d'avant si le code D1 pose problème.
+Avant le geste 6, rien n'a changé en production hors Garage. Après : `./deploy.sh restore epavillon-<horodatage>.sql.gz` (la sauvegarde du geste 3), puis `ops/migrations/2026-10-27-compte-sans-mot-de-passe.sql` sur la base restaurée. Les images d'avant ne sont plus récupérables (le stockage containerd retire l'ancienne image dès que la construction réattribue `latest`), et la migration D1, additive, suffit au nouveau code pour tourner sur les anciennes données.
 
 ## Après (phase 2, site ouvert)
 
