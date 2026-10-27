@@ -25,6 +25,8 @@ interface Props {
   sessions: TrackedSession[]
   /** Fuseau de l'édition. */
   timezone: TimeZoneName
+  /** Édition terminée : inscrits et liste d'attente n'ont plus de salle à préparer. */
+  editionOver: boolean
 }
 
 const props = defineProps<Props>()
@@ -83,11 +85,11 @@ const { date, timeRangeFull } = useDateTime()
         </dl>
 
         <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-          <span class="inline-flex items-center gap-2 font-semibold text-text">
+          <span v-if="!props.editionOver" class="inline-flex items-center gap-2 font-semibold text-text">
             <UiIcon name="users" size="1rem" class="text-text-subtle" />
             {{ t('organization.workspace.proposal.sessions.registered', tracked.registered_count) }}
           </span>
-          <span v-if="tracked.waitlisted_count > 0" class="text-text-muted">
+          <span v-if="!props.editionOver && tracked.waitlisted_count > 0" class="text-text-muted">
             {{ t('organization.workspace.proposal.sessions.waitlisted', tracked.waitlisted_count) }}
           </span>
           <span v-if="tracked.capacity !== null" class="text-text-muted">

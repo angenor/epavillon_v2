@@ -105,3 +105,7 @@ Le commanditaire : « On y voit `Mon organisation`, comment une personne ayant s
 - Lecture : `useAccountSpace()` appelle `api.workspace.overview` sur la première organisation où la personne peut déposer, côté client seulement, et la relit à chaque ouverture du menu. Une personne à plusieurs organisations ne voit que la première dans le menu ; l'espace garde son sélecteur.
 
 Vérifié sur les données d'exemple avec un compte porteur de trois actions (pastille « 3 », co-organisation à confirmer en tête, « Et 2 autres ») et un compte sans action (pas de pastille, pas d'encart).
+
+## 27/10 : inscrits des éditions passées masqués
+
+Demande du commanditaire. Sur la carte d'un dossier (`WorkspaceProposalCard`), le nombre d'inscrits disparaît quand l'édition est terminée (`isEditionOver`, `utils/proposal-edit.ts`) : il sert à préparer la salle, et les inscriptions CdP30 reprises de la v1 (lot 80) le faisaient apparaître sur des activités tenues. Le nombre de séances reste. Même règle sur la fiche du dossier (`WorkspaceSessionPanel`, prop `editionOver`) : inscrits et liste d'attente masqués ; capacité de la salle et nombre de présents gardés.

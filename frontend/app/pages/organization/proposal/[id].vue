@@ -429,6 +429,7 @@ async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
           v-else-if="activeTab === 'sessions'"
           :sessions="file.tracking.sessions"
           :timezone="timezone"
+          :edition-over="isEditionOver(file.tracking.edition)"
         />
 
         <!-- HISTORIQUE -->

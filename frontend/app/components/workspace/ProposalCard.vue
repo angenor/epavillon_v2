@@ -70,6 +70,9 @@ const registered = computed(() =>
   props.tracking.sessions.reduce((total, session) => total + session.registered_count, 0),
 )
 
+/** Une édition passée n'a plus de salle à préparer : son nombre d'inscrits n'apprend plus rien. */
+const showRegistered = computed(() => !isEditionOver(props.tracking.edition))
+
 const target = computed(() => localePath(`/mon-organisation/dossiers/${props.tracking.proposal.id}`))
 
 const needsAttention = computed(() => props.tracking.proposal.status === 'changes_requested')
@@ -128,7 +131,7 @@ const needsAttention = computed(() => props.tracking.proposal.status === 'change
             <UiIcon name="calendar" size="1rem" class="text-text-subtle" />
             {{ t('organization.workspace.proposals.sessions', props.tracking.sessions.length) }}
           </span>
-          <span class="inline-flex items-center gap-1.5">
+          <span v-if="showRegistered" class="inline-flex items-center gap-1.5">
             <UiIcon name="users" size="1rem" class="text-text-subtle" />
             {{ t('organization.workspace.proposals.registered', registered) }}
           </span>
