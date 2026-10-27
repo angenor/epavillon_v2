@@ -6,7 +6,7 @@
 
 **La structure réelle de Supabase est inconnue.** Le SQL du dépôt v1 (`bank/shema_et_requettes/database_complete.sql`) n'a jamais été rejoué tel quel : il est syntaxiquement invalide, porte du code supprimé depuis, et des migrations ont été jouées directement dans Supabase. Exemples d'écarts probables : `activity_status` à 3 valeurs dans le fichier, 9 en production ; anciennes valeurs d'`activity_theme` (`climate_resilience`, `nature_oceans`…) encore portées par des activités 2025 ; tables utilisées par le code et absentes de tout SQL (`organization_requests`, `event_registrations`, `activity_panelists`). **Rien ne s'écrit avant d'avoir extrait le schéma réel.**
 
-**Volumes indicatifs** (README v1, septembre 2025) : 2 556 utilisateurs, 450 organisations. À remesurer.
+**Extraction du 27/10** (`sauvegardes/reprise-v1/`, ignoré par Git) : archive `pg_dump` de `public`, `auth` et `storage` obtenue par la CLI Supabase déjà connectée (rôle de connexion temporaire, mot de passe de la base inchangé) ; clé secrète dans `.env` (`V1_SUPABASE_URL`, `V1_SUPABASE_SECRET_KEY`). 43 tables non vides. Volumes réels : 4 100 comptes, 236 organisations, 3 événements, 259 activités, 816 intervenants, 14 346 inscriptions, 637 fichiers dans 4 buckets (`documents`, `epavillonv`, `epavillonp`, `activity-media`). Relevés : [`carte-reelle-coeur.md`](carte-reelle-coeur.md), [`carte-reelle-annexes.md`](carte-reelle-annexes.md).
 
 **Supabase contient aussi la COP31 (2026)** : l'appel a tourné sur la v1, et elle fait foi. La production v2 porte 1 édition, 13 propositions, 12 séances, 4 organisations, 8 personnes : **données d'essai, effacées à la bascule** sauf le compte du commanditaire (D2).
 
@@ -108,7 +108,7 @@ Posés un par un au commanditaire, réponses consignées dans `ecarts.md`.
 | D12 | Annonce aux utilisateurs | un courriel après la bascule, selon D1 |
 | D13 | Date limite | à demander |
 | D14 | Journées spéciales codées en dur | **tranché** : reprises depuis le code v1 ; Chypre et FPHN, codés de même, suivent sauf avis contraire |
-| D15 | PACO est injoignable depuis la bascule DNS du 26/10 (ses pages vivaient sous l'ancien domaine) | urgence selon la prochaine séance PACO |
+| D15 | PACO est injoignable depuis la bascule DNS du 26/10 | **tranché** : bloc repris tel quel dans le site v2, branché sur Supabase, en priorité |
 | D16 | Intervenants sans adresse électronique : toute personne v2 en exige une (`identity.people.primary_email`), et un intervenant de séance est une personne | étendre le modèle pour qu'un intervenant existe sans adresse ; la forme se choisit sur la carte réelle, qui dira combien d'intervenants Supabase sont dans ce cas ; jamais d'adresse fabriquée |
 | D17 | Ce que les pages disaient et que le modèle ne range pas : objectifs et public d'une journée, ses « parties », modérateur de la journée, personnes ressources, image de la journée, direct de toute la journée, organisation intervenante | étendre le modèle, une place par information (principe 5) |
 
