@@ -263,6 +263,9 @@ BEGIN
     END IF;
 END $$;
 
+-- Sinon les dossiers repris commencent au numéro qui suit les 13 essais.
+ALTER SEQUENCE programme.proposal_reference_seq RESTART WITH 1;
+
 SELECT format('Purge faite : %s personnes, %s compte, %s rôles, %s organisation gardés ; %s objets Garage à effacer à la bascule.',
               (SELECT count(*) FROM identity.people),
               (SELECT count(*) FROM identity.accounts),
