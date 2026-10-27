@@ -12,41 +12,50 @@
 --   - n'entrent que les activités de la page statique, quels que soient leur date
 --     et leur statut dans la v1 : soumises puis versées dans la journée, jamais
 --     validées (les valider les aurait affichées sur la v1 hors du dessin voulu).
---     Repérées par titre, porteur et date (`l90_corr`). Leur proposition passe à
---     `accepted` (celle de LOJIQ, rejetée, par `under_review` : seule transition
---     permise) ; leur séance prend le titre, la présentation et les thématiques de
---     la proposition, l'heure de la page statique (la date v1 ne comptait plus) ;
+--     Repérées par porteur, titre ou présentation, et date (`l90_corr`). Leur
+--     proposition passe à `accepted` (celle de LOJIQ, rejetée, par `under_review` :
+--     seule transition permise) ; leur séance prend le titre, la présentation et
+--     les thématiques de la proposition, l'heure de la page statique (la date v1 ne
+--     comptait plus) ;
+--   - une activité de la page déjà validée dans la v1 à une autre date garde sa
+--     séance, déplacée à l'heure de la page (`deplacee`) : celle du ministère
+--     tunisien, titrée « Implication des jeunes… » mais présentée comme « le rôle
+--     transformateur des jeunes… », le temps de 10h11 (lu 10h10) ;
 --   - un temps de la page sans activité (accueil, ouverture, pitchs, panels,
 --     réseautage, clôture…) n'est pas créé : consigné `skipped` ;
 --   - une activité posée à la date d'une journée mais absente de la page reste
 --     telle quelle (`under_review`, sans séance).
--- Rien ne part : séances `completed` non diffusées ; `programme.session.created`,
--- `programme.proposal.accepted` et `.under_review` marqués publiés.
+-- Rien ne part : séances `completed` non diffusées, sans inscrit pour la déplacée ;
+-- `programme.session.created`, `.rescheduled`, `programme.proposal.accepted` et
+-- `.under_review` marqués publiés.
 
 \set ON_ERROR_STOP on
 BEGIN;
 SELECT set_config('app.actor_id', '01a00000-0000-7000-8000-00000000f1a1', true),
        set_config('app.request_id', 'reprise-v1-90', true) \g /dev/null
 
--- Temps de la page statique (code du fil, rang du relevé) → activité v1.
-CREATE TEMP TABLE l90_corr (code text, rang int, activite_v1 uuid NOT NULL, note text,
-                            PRIMARY KEY (code, rang)) ON COMMIT DROP;
+-- Temps de la page statique (code du fil, rang du relevé) → activité v1 ;
+-- `deplacee` : sa séance existe déjà ; `debut` : heure locale corrigée.
+CREATE TEMP TABLE l90_corr (code text, rang int, activite_v1 uuid NOT NULL, deplacee boolean NOT NULL,
+                            debut time, note text, PRIMARY KEY (code, rang)) ON COMMIT DROP;
 INSERT INTO l90_corr VALUES
-    ('journee_jeunesse_climat',  4, '6a2849ab-8d54-4dd7-a217-78f4d3c49dd2', NULL),
-    ('journee_jeunesse_climat',  5, '29833dad-af4a-4a0a-a1b6-fbc2b753ac1d', NULL),
-    ('journee_jeunesse_climat',  8, '41fb10e4-7519-471b-bdd2-767a36486da4', NULL),
-    ('journee_jeunesse_climat',  9, 'cc7c002a-5141-4b33-b677-b1b8ad5cde2d',
+    ('journee_jeunesse_climat',  4, '6a2849ab-8d54-4dd7-a217-78f4d3c49dd2', false, NULL, NULL),
+    ('journee_jeunesse_climat',  5, '29833dad-af4a-4a0a-a1b6-fbc2b753ac1d', false, NULL, NULL),
+    ('journee_jeunesse_climat',  7, '1e1e0463-9aa7-4930-b28d-b4f80da2a15e', true, '10:10',
+        'validée dans la v1 au 13/11 13h15, séance déplacée à l''heure de la page ; début écrit 10h11, lu 10h10'),
+    ('journee_jeunesse_climat',  8, '41fb10e4-7519-471b-bdd2-767a36486da4', false, NULL, NULL),
+    ('journee_jeunesse_climat',  9, 'cc7c002a-5141-4b33-b677-b1b8ad5cde2d', false, NULL,
         'activité rejetée dans la v1 mais tenue dans la journée'),
-    ('journee_jeunesse_climat', 10, '5f194b25-1b3e-4fb6-9e9b-4c5dd1fe0986', NULL),
-    ('journee_jeunesse_climat', 11, '2a2dafe0-988a-4f8b-b40d-1b5a99adcad3', 'posée au 11/11 dans la v1'),
-    ('journee_jeunesse_climat', 12, '5c5c2d7b-17eb-4063-a50a-07b5f11f46ed', 'posée au 18/11 dans la v1'),
-    ('journee_jeunesse_climat', 13, 'db46f6f6-a011-4bbd-9271-4cf2b96e072c', NULL),
-    ('journee_finance_durable',  5, 'b33e04ce-acfc-4daa-b062-f9c14bc64797', NULL),
-    ('journee_finance_durable',  6, '6504b3c2-ba0a-4855-b640-524e7ec8bcee', NULL),
-    ('journee_finance_durable',  7, '1652afaa-ed5f-49bc-a0ee-fce734a7935a', NULL),
-    ('journee_finance_durable',  8, '5c14750e-c7c8-4b0e-a002-841aa5967066', NULL),
-    ('journee_finance_durable',  9, '4e7b906a-ca12-4ade-b5a5-29eca678df59', 'posée au 12/11 dans la v1'),
-    ('journee_finance_durable', 10, '29c653fd-b710-4aa6-a896-999684d1cd7f', NULL);
+    ('journee_jeunesse_climat', 10, '5f194b25-1b3e-4fb6-9e9b-4c5dd1fe0986', false, NULL, NULL),
+    ('journee_jeunesse_climat', 11, '2a2dafe0-988a-4f8b-b40d-1b5a99adcad3', false, NULL, 'posée au 11/11 dans la v1'),
+    ('journee_jeunesse_climat', 12, '5c5c2d7b-17eb-4063-a50a-07b5f11f46ed', false, NULL, 'posée au 18/11 dans la v1'),
+    ('journee_jeunesse_climat', 13, 'db46f6f6-a011-4bbd-9271-4cf2b96e072c', false, NULL, NULL),
+    ('journee_finance_durable',  5, 'b33e04ce-acfc-4daa-b062-f9c14bc64797', false, NULL, NULL),
+    ('journee_finance_durable',  6, '6504b3c2-ba0a-4855-b640-524e7ec8bcee', false, NULL, NULL),
+    ('journee_finance_durable',  7, '1652afaa-ed5f-49bc-a0ee-fce734a7935a', false, NULL, NULL),
+    ('journee_finance_durable',  8, '5c14750e-c7c8-4b0e-a002-841aa5967066', false, NULL, NULL),
+    ('journee_finance_durable',  9, '4e7b906a-ca12-4ade-b5a5-29eca678df59', false, NULL, 'posée au 12/11 dans la v1'),
+    ('journee_finance_durable', 10, '29c653fd-b710-4aa6-a896-999684d1cd7f', false, NULL, NULL);
 
 -- Fils ------------------------------------------------------------------------------
 
@@ -80,18 +89,20 @@ FROM l90_fil;
 -- Temps de la page --------------------------------------------------------------------
 
 CREATE TEMP TABLE l90_temps ON COMMIT DROP AS
-SELECT f.code, (s->>'sort_order')::int AS rang, s AS doc, c.activite_v1, c.note
+SELECT f.code, (s->>'sort_order')::int AS rang, s AS doc, c.activite_v1, c.deplacee, c.debut, c.note
 FROM lot90_releve r
 JOIN l90_fil f ON f.code = r.code
 CROSS JOIN LATERAL jsonb_array_elements(r.doc->'sessions') AS s
 LEFT JOIN l90_corr c ON c.code = r.code AND c.rang = (s->>'sort_order')::int;
 
 CREATE TEMP TABLE l90 ON COMMIT DROP AS
-SELECT x.code, x.rang, x.doc, x.activite_v1, x.note,
+SELECT x.code, x.rang, x.doc, x.activite_v1, x.deplacee, x.note,
        f.track_id, f.event_id, f.timezone, f.programme_published_at,
-       platform.uuid_v7() AS session_id,
+       NULL::uuid AS session_id,
        legacy.map('public.activities', x.activite_v1::text) AS proposal_id,
-       (x.doc->>'starts_at')::timestamptz AS starts_at,
+       CASE WHEN x.debut IS NULL THEN (x.doc->>'starts_at')::timestamptz
+            ELSE (((x.doc->>'starts_at')::timestamptz AT TIME ZONE f.timezone)::date + x.debut)
+                 AT TIME ZONE f.timezone END AS starts_at,
        (x.doc->>'ends_at')::timestamptz AS ends_at,
        CASE WHEN jsonb_typeof(x.doc->'summary') = 'object' THEN x.doc->'summary' END AS resume
 FROM l90_temps x
@@ -107,19 +118,36 @@ BEGIN
         RAISE EXCEPTION 'lot 90 : activité v1 absente de legacy.id_map';
     END IF;
     IF EXISTS (SELECT 1 FROM l90 x JOIN programme.proposals p ON p.id = x.proposal_id
-               WHERE p.event_id <> x.event_id OR p.status NOT IN ('under_review', 'rejected')
-                  OR p.deleted_at IS NOT NULL)
-       OR EXISTS (SELECT 1 FROM programme.sessions s JOIN l90 x ON s.proposal_id = x.proposal_id) THEN
+               WHERE p.event_id <> x.event_id OR p.deleted_at IS NOT NULL
+                  OR p.status NOT IN ('under_review', 'rejected') AND NOT x.deplacee
+                  OR p.status <> 'accepted' AND x.deplacee)
+       OR EXISTS (SELECT 1 FROM programme.sessions s JOIN l90 x ON s.proposal_id = x.proposal_id
+                  WHERE NOT x.deplacee) THEN
         RAISE EXCEPTION 'lot 90 : proposition déjà décidée, supprimée ou dotée d''une séance';
+    END IF;
+    -- Séance déplacée : la seule de sa proposition, close, non diffusée, sans inscrit.
+    IF EXISTS (SELECT 1 FROM l90 x WHERE x.deplacee AND (
+                   (SELECT count(*) FROM programme.sessions s WHERE s.proposal_id = x.proposal_id) <> 1
+                   OR EXISTS (SELECT 1 FROM programme.sessions s WHERE s.proposal_id = x.proposal_id
+                              AND (s.status <> 'completed' OR s.is_streamed OR s.event_id <> x.event_id))
+                   OR EXISTS (SELECT 1 FROM programme.sessions s JOIN programme.registrations g
+                              ON g.session_id = s.id WHERE s.proposal_id = x.proposal_id))) THEN
+        RAISE EXCEPTION 'lot 90 : séance à déplacer absente, multiple, ouverte ou avec inscrits';
     END IF;
     IF EXISTS (SELECT 1 FROM l90 WHERE starts_at IS NULL OR ends_at IS NULL OR ends_at <= starts_at) THEN
         RAISE EXCEPTION 'lot 90 : horaire manquant ou inversé';
     END IF;
     IF EXISTS (SELECT 1 FROM l90 x JOIN programme.proposals p ON p.id = x.proposal_id
-               JOIN programme.sessions s ON s.event_id = x.event_id AND s.slug::text = p.slug::text) THEN
+               JOIN programme.sessions s ON s.event_id = x.event_id AND s.slug::text = p.slug::text
+               WHERE NOT x.deplacee) THEN
         RAISE EXCEPTION 'lot 90 : slug déjà pris par une séance';
     END IF;
 END $$;
+
+UPDATE l90 x
+SET session_id = CASE WHEN x.deplacee
+                      THEN (SELECT s.id FROM programme.sessions s WHERE s.proposal_id = x.proposal_id)
+                      ELSE platform.uuid_v7() END;
 
 -- Décisions : la journée a tenu ces activités.
 UPDATE programme.proposals p
@@ -131,7 +159,12 @@ WHERE p.id = x.proposal_id AND p.status = 'rejected';
 UPDATE programme.proposals p
 SET status = 'accepted', decision_reason = NULL, decided_by = NULL
 FROM l90 x
-WHERE p.id = x.proposal_id;
+WHERE p.id = x.proposal_id AND NOT x.deplacee;
+
+UPDATE programme.sessions s
+SET starts_at = x.starts_at, ends_at = x.ends_at, listing_changed_at = now()
+FROM l90 x
+WHERE s.id = x.session_id AND x.deplacee;
 
 -- Un titre v1 commence par une puce collée d'une liste : la séance l'écrit sans.
 INSERT INTO programme.sessions (
@@ -144,6 +177,7 @@ SELECT x.session_id, x.event_id, x.proposal_id, p.organization_id, 1,
        now(), x.programme_published_at, platform.current_actor_id(), now(), now()
 FROM l90 x
 JOIN programme.proposals p ON p.id = x.proposal_id
+WHERE NOT x.deplacee
 ORDER BY x.code, x.rang;
 
 -- Thématiques seules, comme à la naissance d'une séance par l'API (lot 50).
@@ -152,7 +186,8 @@ SELECT 'programme', 'sessions', x.session_id, et.term_id, et.sort_order, now()
 FROM l90 x
 JOIN reference.entity_terms et
   ON et.entity_schema = 'programme' AND et.entity_table = 'proposals' AND et.entity_id = x.proposal_id
-JOIN reference.taxonomy_terms t ON t.id = et.term_id AND t.taxonomy_code = 'activity_theme';
+JOIN reference.taxonomy_terms t ON t.id = et.term_id AND t.taxonomy_code = 'activity_theme'
+WHERE NOT x.deplacee;
 
 INSERT INTO programme.session_tracks (session_id, track_id, sort_order, is_highlight, added_by, added_at)
 SELECT session_id, track_id, rang, false, platform.current_actor_id(), now()
@@ -183,8 +218,8 @@ BEGIN
         RAISE NOTICE 'lot 90 : outbox % : % événement(s), marqués publiés', r.event_type, r.n;
     END LOOP;
     IF EXISTS (SELECT 1 FROM platform.outbox_events WHERE correlation_id = 'reprise-v1-90'
-               AND event_type NOT IN ('programme.session.created', 'programme.proposal.accepted',
-                                      'programme.proposal.under_review')) THEN
+               AND event_type NOT IN ('programme.session.created', 'programme.session.rescheduled',
+                                      'programme.proposal.accepted', 'programme.proposal.under_review')) THEN
         RAISE EXCEPTION 'lot 90 : événement d''outbox inattendu';
     END IF;
     IF EXISTS (SELECT 1 FROM programme.sessions s JOIN l90 x ON x.session_id = s.id
