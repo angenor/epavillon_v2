@@ -257,6 +257,8 @@ Seule colonne remplie : `activities.youtube_link`, **33 valeurs, toutes l'identi
 
 35 tables `public` ont la RLS active ; 39 ne l'ont pas, dont `user_roles`, `messages`, `negotiation_documents`, `activity_speakers`, `activity_documents`, toutes avec `GRANT ALL` au rôle `anon` (la clé publique du site). Quiconque lit la clé dans le code du site peut y lire et écrire, **y compris s'attribuer un rôle**. Supabase restant ouvert pour PACO (D9), c'est actif aujourd'hui. Pour la reprise : les rôles extraits ne sont pas garantis, à faire confirmer.
 
+**Fermé le 27/10** avec l'accord du commanditaire : RLS sur les 39 tables, les quatre fonctions `*_role_simple` (écriture de `user_roles` sans contrôle de l'appelant, exécutables par `anon`) retirées à `anon` et `authenticated`, lecture de `activity_speakers` gardée au super administrateur (fenêtre de courriel de la coquille PACO). Comptes de lignes identiques avant et après ; PACO vérifié. Script et retour arrière : `ops/reprise-v1/supabase-v1/`. Les rôles posés avant cette date restent à faire relire.
+
 ## 6. Écarts nouveaux à trancher
 
 | Écart | Proposition |
@@ -279,4 +281,4 @@ Seule colonne remplie : `activities.youtube_link`, **33 valeurs, toutes l'identi
 | Vignettes en double (couvertures, intervenants, profils) | Ne reprendre que l'original, la v2 fabrique les déclinaisons |
 | Bucket `video-thumbnails` absent, `documents` vide | Corriger la liste des buckets du plan (étape 1) |
 | Identifiant YouTube partagé par deux activités | Le rattacher à la séance dont le titre correspond, l'autre sans rediffusion ; faire valider |
-| Tables v1 sans RLS, écrivables avec la clé publique, dont `user_roles` | Faire relire les rôles par le commanditaire avant reprise ; fermer ces droits côté Supabase tant que PACO y vit |
+| Tables v1 sans RLS, écrivables avec la clé publique, dont `user_roles` | Faire relire les rôles par le commanditaire avant reprise ; droits fermés côté Supabase le 27/10 (§ 5) |
