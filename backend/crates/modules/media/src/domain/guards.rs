@@ -88,11 +88,12 @@ pub enum Garde {
 
 /// La table, dans l'ordre où `media.attachable_roles` sème ses lignes.
 ///
-/// **Les huit couples de la table blanche y sont**, et pas seulement les six que
+/// **Les neuf couples de la table blanche y sont**, et pas seulement les six que
 /// la conception avait relevés : `075_programme_sessions.sql` et
 /// `125_training.sql` en sèment chacun un que le plan n'avait pas vus. Les
-/// omettre aurait laissé deux portes sans garde — exactement ce que ce fichier
-/// existe pour empêcher. S'y ajoute le PDF des documents de négociation, que
+/// omettre aurait laissé deux portes sans garde, exactement ce que ce fichier
+/// existe pour empêcher. La photo d'un intervenant sans adresse (D16) a suivi.
+/// S'y ajoute le PDF des documents de négociation, que
 /// la table blanche ne décrit pas : il n'est pas rattaché, il est la donnée.
 const TABLE: &[((&str, &str), Garde)] = &[
     (
@@ -149,6 +150,18 @@ const TABLE: &[((&str, &str), Garde)] = &[
         },
     ),
     (
+        // Photo d'un intervenant sans adresse (D16), sur sa ligne du dossier.
+        // Seule la reprise v1 en pose : le formulaire n'ajoute aucune photo
+        // d'intervenant. Le jour où il le fera, garde à écrire sur l'organisation
+        // du dossier de la ligne.
+        ("programme", "proposal_speakers"),
+        Garde::Fermee {
+            motif: "Aucun écran ne pose de photo sur une ligne d'intervenant : seule la reprise \
+                    de la v1 l'a fait. Le rattachement par l'API est refusé tant qu'aucune garde \
+                    ne résout l'organisation du dossier de la ligne.",
+        },
+    ),
+    (
         ("training", "trainings"),
         Garde::Fermee {
             motif: "Le module Formations ne déclare aucune permission dans le modèle : \
@@ -201,12 +214,13 @@ mod tests {
     }
 
     #[test]
-    fn les_huit_couples_de_la_table_blanche_ont_leur_garde() {
+    fn les_neuf_couples_de_la_table_blanche_ont_leur_garde() {
         for (schema, table) in [
             ("org", "organizations"),
             ("event", "events"),
             ("programme", "proposals"),
             ("programme", "sessions"),
+            ("programme", "proposal_speakers"),
             ("identity", "people"),
             ("content", "highlights"),
             ("publication", "articles"),

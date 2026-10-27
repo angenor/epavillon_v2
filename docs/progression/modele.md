@@ -261,3 +261,6 @@ Reprise de la v1, décision D16 ([plan](reprise-v1/plan.md) § 6) : 149 interven
 Un intervenant sans adresse n'a ni compte, ni confirmation, ni photo, ni historique ; `detect_conflicts` ne le voit pas (jointure sur la personne).
 
 **Migration** : `ops/migrations/2026-10-27-intervenant-sans-adresse.sql`, éprouvée sur une copie de la production, jouée deux fois sans erreur, tables et fonction ensuite identiques au modèle (`pg_dump --schema-only`, `pg_get_functiondef`) ; appliquée en local sur `epavillon`. **En production** : à jouer avant le déploiement de l'API, puis le lot 92.
+
+**Suite, même jour : la photo d'un intervenant sans adresse** (`050_media.sql`). Sans personne, pas de photo de profil : `media.attachable_roles` déclare `('programme', 'proposal_speakers', 'avatar')`, la photo va sur la ligne du dossier, et le détail public d'une séance l'y lit (même prénom, nom et rôle), sans recopie : une activité programmée plus tard la montre d'elle-même. Côté code, `speakers::remplacer` met à jour sur place une ligne sans personne au lieu de la retirer puis la réécrire (son identifiant, donc sa photo, survit à l'enregistrement du brouillon). **Migration** : `ops/migrations/2026-10-27-photo-intervenant-sans-adresse.sql`, jouée deux fois en local. **En production** : avant le déploiement de l'API, puis le lot 93.
+

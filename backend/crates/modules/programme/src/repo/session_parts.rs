@@ -126,7 +126,7 @@ pub async fn organisations<'e>(
 /// ou à `identity.people` deviendrait publique sans que personne l'ait décidé.
 /// Ni `person_id`, ni `confirmed_at`, ni `attended` (décision du 26/09). La
 /// photo, `avatar`, est l'image de profil de la personne ; un intervenant sans
-/// personne (D16) n'en a pas, et son nom vient de la ligne.
+/// personne (D16) prend son nom de la ligne, et sa photo de sa ligne du dossier.
 pub async fn intervenants_publics<'e>(
     executor: impl PgExecutor<'e>,
     session_id: SessionId,
@@ -145,6 +145,13 @@ pub async fn intervenants_publics<'e>(
                                                btrim(s.first_name || ' ' || s.last_name)),
                       'avatar', CASE WHEN p.id IS NOT NULL
                                      THEN media.attached_image('identity', 'people', p.id, 'avatar')
+                                     ELSE (SELECT media.attached_image('programme', 'proposal_speakers', d.id, 'avatar')
+                                             FROM programme.sessions se
+                                             JOIN programme.proposal_speakers d ON d.proposal_id = se.proposal_id
+                                            WHERE se.id = s.session_id AND d.person_id IS NULL
+                                              AND d.role = s.role AND d.first_name = s.first_name
+                                              AND d.last_name = s.last_name
+                                            LIMIT 1)
                                 END) AS "ligne!"
              FROM programme.session_speakers s
              LEFT JOIN identity.people p ON p.id = s.person_id

@@ -981,5 +981,8 @@ INSERT INTO media.attachable_roles
     ('programme',   'proposals',     'cover',     '{"fr":"Image de couverture","en":"Cover image"}',  false, '{image/*}',                      10485760, NULL),
     ('programme',   'proposals',     'document',  '{"fr":"Document joint","en":"Attached document"}', true,  '{application/pdf,application/vnd.*}', 26214400, NULL),
     ('identity',    'people',        'avatar',    '{"fr":"Photo de profil","en":"Profile picture"}',  false, '{image/*}',                       5242880, NULL),
+    -- Intervenant sans adresse (D16) : sans personne, sa photo va sur la ligne du
+    -- dossier ; la séance la lit là, une recopie n'aurait pas à la suivre.
+    ('programme',   'proposal_speakers', 'avatar', '{"fr":"Photo de l''intervenant","en":"Speaker picture"}', false, '{image/*}',             5242880, NULL),
     ('publication', 'articles',      'cover',     '{"fr":"Image de couverture","en":"Cover image"}',  false, '{image/*}',                      10485760, NULL)
 ON CONFLICT DO NOTHING;

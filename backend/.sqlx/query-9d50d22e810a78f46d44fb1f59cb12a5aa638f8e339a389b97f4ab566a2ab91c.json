@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object(\n                      'id', s.id,\n                      'session_id', s.session_id,\n                      'role', s.role,\n                      'job_title_snapshot', s.job_title_snapshot,\n                      'organization_snapshot', s.organization_snapshot,\n                      'bio', s.bio,\n                      'sort_order', s.sort_order,\n                      'created_at', s.created_at,\n                      'display_name', COALESCE(p.display_name,\n                                               btrim(s.first_name || ' ' || s.last_name)),\n                      'avatar', CASE WHEN p.id IS NOT NULL\n                                     THEN media.attached_image('identity', 'people', p.id, 'avatar')\n                                     ELSE (SELECT media.attached_image('programme', 'proposal_speakers', d.id, 'avatar')\n                                             FROM programme.sessions se\n                                             JOIN programme.proposal_speakers d ON d.proposal_id = se.proposal_id\n                                            WHERE se.id = s.session_id AND d.person_id IS NULL\n                                              AND d.role = s.role AND d.first_name = s.first_name\n                                              AND d.last_name = s.last_name\n                                            LIMIT 1)\n                                END) AS \"ligne!\"\n             FROM programme.session_speakers s\n             LEFT JOIN identity.people p ON p.id = s.person_id\n            WHERE s.session_id = $1\n            ORDER BY s.sort_order, s.created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ligne!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "9d50d22e810a78f46d44fb1f59cb12a5aa638f8e339a389b97f4ab566a2ab91c"
+}

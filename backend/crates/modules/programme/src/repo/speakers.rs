@@ -48,9 +48,9 @@ pub struct Intervenant<'a> {
 /// autre —, et c'est ce que la clé autorise. Le conflit met donc à jour les
 /// instantanés plutôt que d'échouer.
 ///
-/// Une ligne sans personne n'a pas de clé stable : elle est toujours retirée
-/// puis réécrite. Elle ne perd rien, faute d'adresse elle ne reçoit ni
-/// confirmation ni rien qui s'accroche à la ligne.
+/// Une ligne sans personne (D16) se reconnaît à son prénom, son nom et son
+/// rôle : mise à jour sur place, jamais retirée puis réécrite, car sa photo
+/// s'accroche à elle (`media.attachments`, rôle `avatar`).
 pub async fn remplacer(
     conn: &mut PgConnection,
     dossier: ProposalId,
@@ -58,6 +58,18 @@ pub async fn remplacer(
 ) -> Result<()> {
     let personnes: Vec<Option<Uuid>> = intervenants.iter().map(|i| i.person_id).collect();
     let roles: Vec<String> = intervenants.iter().map(|i| i.role.to_owned()).collect();
+    let civilites: Vec<Option<String>> = intervenants
+        .iter()
+        .map(|i| i.civility.map(str::to_owned))
+        .collect();
+    let prenoms: Vec<Option<String>> = intervenants
+        .iter()
+        .map(|i| i.first_name.map(str::to_owned))
+        .collect();
+    let noms: Vec<Option<String>> = intervenants
+        .iter()
+        .map(|i| i.last_name.map(str::to_owned))
+        .collect();
 
     // Le retrait porte sur le COUPLE personne–rôle, pas sur la personne seule :
     // retirer par personne effacerait la ligne « modératrice » de qui reste
@@ -66,13 +78,18 @@ pub async fn remplacer(
         r#"DELETE FROM programme.proposal_speakers s
             WHERE s.proposal_id = $1
               AND NOT EXISTS (
-                  SELECT 1 FROM unnest($2::uuid[], $3::text[]) AS g(personne, role)
-                   WHERE g.personne = s.person_id
-                     AND g.role::programme.speaker_role = s.role
+                  SELECT 1 FROM unnest($2::uuid[], $3::text[], $4::text[], $5::text[])
+                                AS g(personne, role, prenom, nom)
+                   WHERE g.role::programme.speaker_role = s.role
+                     AND (g.personne = s.person_id
+                          OR (g.personne IS NULL AND s.person_id IS NULL
+                              AND g.prenom = s.first_name AND g.nom = s.last_name))
               )"#,
         dossier.as_uuid(),
         &personnes as &[Option<Uuid>],
-        &roles
+        &roles,
+        &prenoms as &[Option<String>],
+        &noms as &[Option<String>]
     )
     .execute(&mut *conn)
     .await?;
@@ -92,32 +109,41 @@ pub async fn remplacer(
     let org_ids: Vec<Option<Uuid>> = intervenants.iter().map(|i| i.organization_id).collect();
     let bios: Vec<Option<serde_json::Value>> = intervenants.iter().map(|i| i.bio.clone()).collect();
     let rangs: Vec<i16> = intervenants.iter().map(|i| i.sort_order).collect();
-    let civilites: Vec<Option<String>> = intervenants
-        .iter()
-        .map(|i| i.civility.map(str::to_owned))
-        .collect();
-    let prenoms: Vec<Option<String>> = intervenants
-        .iter()
-        .map(|i| i.first_name.map(str::to_owned))
-        .collect();
-    let noms: Vec<Option<String>> = intervenants
-        .iter()
-        .map(|i| i.last_name.map(str::to_owned))
-        .collect();
 
     sqlx::query!(
-        r#"INSERT INTO programme.proposal_speakers
+        r#"WITH e AS (
+               SELECT * FROM unnest($2::uuid[], $3::text[], $4::text[], $5::text[],
+                                    $6::uuid[], $7::jsonb[], $8::smallint[],
+                                    $9::text[], $10::text[], $11::text[])
+                      AS e(personne, role, fonction, organisation, org_id, bio, rang,
+                           civilite, prenom, nom)
+           ),
+           sans_personne AS (
+               UPDATE programme.proposal_speakers s
+                  SET civility = e.civilite,
+                      job_title_snapshot = e.fonction,
+                      organization_snapshot = e.organisation,
+                      organization_id = e.org_id,
+                      bio = e.bio::jsonb::platform.i18n_text,
+                      sort_order = e.rang
+                 FROM e
+                WHERE s.proposal_id = $1 AND s.person_id IS NULL AND e.personne IS NULL
+                  AND s.role = e.role::programme.speaker_role
+                  AND s.first_name = e.prenom AND s.last_name = e.nom
+               RETURNING s.role, s.first_name, s.last_name
+           )
+           INSERT INTO programme.proposal_speakers
                (proposal_id, person_id, role, job_title_snapshot, organization_snapshot,
                 organization_id, bio, sort_order, civility, first_name, last_name)
            SELECT $1, e.personne, e.role::programme.speaker_role,
                   e.fonction, e.organisation, e.org_id,
                   e.bio::jsonb::platform.i18n_text, e.rang,
                   e.civilite, e.prenom, e.nom
-             FROM unnest($2::uuid[], $3::text[], $4::text[], $5::text[],
-                         $6::uuid[], $7::jsonb[], $8::smallint[],
-                         $9::text[], $10::text[], $11::text[])
-                  AS e(personne, role, fonction, organisation, org_id, bio, rang,
-                       civilite, prenom, nom)
+             FROM e
+            WHERE e.personne IS NOT NULL
+               OR NOT EXISTS (SELECT 1 FROM sans_personne d
+                               WHERE d.role = e.role::programme.speaker_role
+                                 AND d.first_name = e.prenom AND d.last_name = e.nom)
            ON CONFLICT (proposal_id, person_id, role) DO UPDATE
                SET job_title_snapshot = EXCLUDED.job_title_snapshot,
                    organization_snapshot = EXCLUDED.organization_snapshot,

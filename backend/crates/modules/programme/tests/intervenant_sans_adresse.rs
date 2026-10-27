@@ -46,6 +46,16 @@ async fn personnes_nommees(bac: &Bac, prenom: &str, nom: &str) -> i64 {
     .expect("décompte des personnes")
 }
 
+async fn ligne_sans_personne(bac: &Bac, dossier: uuid::Uuid) -> uuid::Uuid {
+    sqlx::query_scalar!(
+        "SELECT id FROM programme.proposal_speakers WHERE proposal_id = $1 AND person_id IS NULL",
+        dossier
+    )
+    .fetch_one(bac.pool())
+    .await
+    .expect("la ligne sans personne")
+}
+
 #[tokio::test]
 async fn un_brouillon_garde_et_rend_un_intervenant_sans_adresse() {
     let bac = Bac::monter().await;
@@ -62,9 +72,10 @@ async fn un_brouillon_garde_et_rend_un_intervenant_sans_adresse() {
     )
     .await
     .expect("un intervenant sans adresse s'enregistre");
+    let premiere = ligne_sans_personne(&bac, cree.proposal_id).await;
 
-    // Un brouillon s'écrit toutes les deux secondes : la ligne sans personne,
-    // sans clé stable, ne doit pas se multiplier.
+    // Un brouillon s'écrit toutes les deux secondes : la ligne sans personne ne
+    // doit ni se multiplier, ni changer d'identifiant (sa photo s'y accroche).
     let mut encore = commun::charge(
         &terrain,
         avec_sans_adresse(&terrain, "Atelier sans adresse"),
@@ -87,6 +98,11 @@ async fn un_brouillon_garde_et_rend_un_intervenant_sans_adresse() {
         lignes.len(),
         1,
         "une seule ligne après deux enregistrements"
+    );
+    assert_eq!(
+        ligne_sans_personne(&bac, cree.proposal_id).await,
+        premiere,
+        "la ligne garde son identifiant"
     );
     assert_eq!(lignes[0].first_name.as_deref(), Some("Fatou"));
     assert_eq!(lignes[0].last_name.as_deref(), Some("Diop"));
@@ -170,16 +186,40 @@ async fn le_programme_public_nomme_un_intervenant_sans_adresse() {
 
     let dossier =
         seances::dossier_pret(&bac, &terrain, "Atelier", "atelier", Souhaits::default()).await;
-    sqlx::query!(
+    let ligne = sqlx::query_scalar!(
         r#"INSERT INTO programme.proposal_speakers
                (proposal_id, role, civility, first_name, last_name,
                 job_title_snapshot, organization_snapshot, sort_order)
-           VALUES ($1, 'panelist', 'dr', 'Fatou', 'Diop', 'Chercheuse', 'IRD', 5)"#,
+           VALUES ($1, 'panelist', 'dr', 'Fatou', 'Diop', 'Chercheuse', 'IRD', 5)
+        RETURNING id"#,
         dossier.id
+    )
+    .fetch_one(bac.pool())
+    .await
+    .expect("intervenant sans adresse");
+
+    // Sa photo va sur sa ligne du dossier, faute de personne.
+    let photo = sqlx::query_scalar!(
+        r#"INSERT INTO media.assets
+               (object_key, original_filename, mime_type, byte_size, checksum_sha256,
+                status, alt_text, owner_organization_id, scan_verdict, scanned_at)
+           VALUES ('intervenants/fatou-diop.jpg', 'fatou-diop.jpg', 'image/jpeg', 40000,
+                   repeat('b', 64), 'ready', '{"fr":"Fatou Diop"}'::jsonb, $1, 'clean', now())
+        RETURNING id"#,
+        terrain.organisation
+    )
+    .fetch_one(bac.pool())
+    .await
+    .expect("dépôt de la photo");
+    sqlx::query!(
+        "INSERT INTO media.attachments (asset_id, owner_schema, owner_table, owner_id, role)
+         VALUES ($1, 'programme', 'proposal_speakers', $2, 'avatar')",
+        photo,
+        ligne
     )
     .execute(bac.pool())
     .await
-    .expect("intervenant sans adresse");
+    .expect("rattachement de la photo à la ligne");
 
     transition::tenter(
         &bac.state,
@@ -223,7 +263,10 @@ async fn le_programme_public_nomme_un_intervenant_sans_adresse() {
         .iter()
         .find(|s| s["display_name"] == "Fatou Diop")
         .expect("l'intervenant sans adresse est nommé");
-    assert!(fatou["avatar"].is_null());
+    assert!(
+        !fatou["avatar"].is_null(),
+        "la photo vient de la ligne du dossier"
+    );
     assert_eq!(fatou["job_title_snapshot"], "Chercheuse");
     assert!(fatou.get("person_id").is_none());
 }
