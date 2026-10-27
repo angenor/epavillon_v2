@@ -13,7 +13,7 @@
     "titre": "Forgotten password"
   },
   "refus": {
-    "identifiants": "Incorrect address or password.",
+    "identifiants": "The email address or password does not match. For security reasons, some accounts must choose a new password: if this applies to you, use “Forgot your password”.",
     "verrouille": "Too many attempts: this account is locked for a few minutes. Try again afterwards.",
     "suspendu": "This account is suspended. Contact IFDD to find out more.",
     "second-facteur": "This account requires a second factor, which is not yet wired in the application. Sign in from the website.",

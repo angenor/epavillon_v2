@@ -12,8 +12,10 @@ import type { LoginResult } from '~/types/auth'
  * suspendue, une adresse non vérifiée ne se disent qu'à quelqu'un qui vient de
  * prouver son identité.
  *
- * UN SEUL MESSAGE POUR DEUX CAS. « Adresse ou mot de passe incorrect » couvre
- * l'adresse inconnue ET le mot de passe faux. C'est volontairement moins utile à
+ * UN SEUL MESSAGE POUR TROIS CAS. « L'adresse ou le mot de passe ne correspond
+ * pas » couvre l'adresse inconnue, le mot de passe faux ET le compte repris qui
+ * doit choisir un nouveau mot de passe (d'où le renvoi à « Mot de passe
+ * oublié », dit à tous). C'est volontairement moins utile à
  * la personne qui se trompe, et c'est ce qui empêche d'énumérer les comptes de
  * la plateforme — sur une plateforme qui héberge des délégations nationales, la
  * seule existence d'un compte est déjà une information.

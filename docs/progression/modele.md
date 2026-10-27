@@ -237,3 +237,14 @@ Cette année, les activités du pavillon se tiennent sur Zoom (300 personnes au 
 Côté code (crate `live`) : consommateur `live.registrations` des événements `programme.registration.*`, quatre travaux de la file `live`, routes `GET /sessions/{id}/meeting`, `GET /sessions/{id}/meeting/access`, `GET|POST /admin/sessions/{id}/meeting`, `POST /webhooks/zoom`. Code d'accès et lien animateur chiffrés en AES-256-GCM (`LIVE_SECRETS_KEY`) avant écriture, comme le prévoyait D3.
 
 **Migration** : `ops/migrations/2026-10-17-zoom-reunions.sql`, appliquée en local sur `epavillon`, rejouée une seconde fois sans erreur. **En production** : à jouer avant le déploiement du code, puis renseigner les variables `ZOOM_*` et `LIVE_SECRETS_KEY` (`.env.example`).
+
+## 27/10/2026, `030_identity.sql` : un compte sans mot de passe, le temps d'en choisir un
+
+Reprise de la v1, décision D1 ([plan](reprise-v1/plan.md) § 5) : les comptes arrivent avec leur création, leur dernière connexion et leur vérification d'adresse, **sans empreinte** (bcrypt, illisible par la v2). Chacun choisit un nouveau mot de passe par « Mot de passe oublié ».
+
+- **`identity.accounts.password_reset_required_at`** (`timestamptz`, en queue de table comme toute colonne arrivée par `ALTER`) : depuis quand le compte doit choisir un nouveau mot de passe.
+- **`ck_accounts_password_shape`** : un compte `password` peut être sans empreinte si, et seulement si, cette date est posée. Pas d'empreinte factice : elle se vérifierait plus vite qu'Argon2id et trahirait le compte à la montre.
+
+Côté code (crate `identity`) : la connexion ne change pas, une ligne sans empreinte paie déjà le hachage factice et rend `invalid_credentials` (tests `compte_repris`, `discretion_compte_repris`). `accounts::set_password` efface l'exigence ; son `ON CONFLICT (person_id) WHERE provider = 'password'` reprend la ligne existante. La réinitialisation confirmée pose `email_verified_at` si elle est vide (événement `identity.person.email_verified`). Message de refus de connexion, site et Guide Négo, le même pour tous : il renvoie à « Mot de passe oublié ».
+
+**Migration** : `ops/migrations/2026-10-27-compte-sans-mot-de-passe.sql`, éprouvée sur une base chargée depuis le schéma précédent, jouée deux fois sans erreur, schéma ensuite identique au modèle (`pg_dump --schema-only`). **En production** : à jouer avant le déploiement de l'API, et avant toute reprise de compte.

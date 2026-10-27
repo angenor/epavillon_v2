@@ -132,6 +132,26 @@ pub async fn confirm(
     )
     .await?;
 
+    // Le lien est arrivé dans la boîte : l'adresse est prouvée. C'est ce qui
+    // laisse un compte repris de la v1, jamais vérifié, se connecter aussitôt.
+    if let Some(instant) = people::mark_email_verified(&mut tx, person_id).await? {
+        events::emit(
+            &mut tx,
+            DomainEvent {
+                aggregate_schema: evenements::AGGREGATE_SCHEMA,
+                aggregate_type: evenements::AGGREGATE_PERSON,
+                aggregate_id: person_id.as_uuid(),
+                event_type: evenements::PERSON_EMAIL_VERIFIED,
+                payload: serde_json::to_value(evenements::PersonEmailVerified {
+                    person_id: person_id.as_uuid(),
+                    verified_at: instant,
+                })
+                .map_err(ApiError::internal)?,
+            },
+        )
+        .await?;
+    }
+
     let adresse = people::email_of(&mut tx, person_id).await?;
     tx.commit().await?;
 

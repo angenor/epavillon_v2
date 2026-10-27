@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO identity.accounts (person_id, provider) VALUES ($1, 'password')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7fcab5d9a6b2dd07cd2a89e80f62ff7597ba69f39da4e3172db60221aa81e333"
+}

@@ -13,7 +13,7 @@
     "titre": "Mot de passe oublié"
   },
   "refus": {
-    "identifiants": "Adresse ou mot de passe incorrect.",
+    "identifiants": "L'adresse ou le mot de passe ne correspond pas. Pour des raisons de sécurité, certains comptes doivent choisir un nouveau mot de passe : si c'est votre cas, utilisez « Mot de passe oublié ».",
     "verrouille": "Trop d'essais : ce compte est bloqué quelques minutes. Réessayez ensuite.",
     "suspendu": "Ce compte est suspendu. Écrivez à l'IFDD pour en savoir plus.",
     "second-facteur": "Ce compte demande un second facteur, qui n'est pas encore branché dans l'application. Connectez-vous depuis le site.",

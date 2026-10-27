@@ -59,6 +59,9 @@ pub struct Compte<'a> {
     pub suspendu_jusqu_a: Option<OffsetDateTime>,
     pub avec_mot_de_passe: bool,
     pub second_facteur: bool,
+    /// Compte repris de la v1 : ligne `password` sans empreinte, nouveau mot de
+    /// passe exigé. N'a d'effet que sans `avec_mot_de_passe`.
+    pub repris_sans_empreinte: bool,
 }
 
 impl<'a> Compte<'a> {
@@ -70,6 +73,7 @@ impl<'a> Compte<'a> {
             suspendu_jusqu_a: None,
             avec_mot_de_passe: true,
             second_facteur: false,
+            repris_sans_empreinte: false,
         }
     }
 
@@ -98,6 +102,14 @@ impl<'a> Compte<'a> {
     pub fn sans_mot_de_passe(email: &'a str) -> Self {
         Self {
             avec_mot_de_passe: false,
+            ..Self::actif(email)
+        }
+    }
+
+    pub fn repris(email: &'a str) -> Self {
+        Self {
+            avec_mot_de_passe: false,
+            repris_sans_empreinte: true,
             ..Self::actif(email)
         }
     }
@@ -151,6 +163,15 @@ pub async fn semer(bac: &Bac, compte: Compte<'_>) -> Uuid {
         .execute(&mut *tx)
         .await
         .expect("insertion du compte");
+    } else if compte.repris_sans_empreinte {
+        sqlx::query!(
+            "INSERT INTO identity.accounts (person_id, provider, password_reset_required_at)
+             VALUES ($1, 'password', now())",
+            person_id
+        )
+        .execute(&mut *tx)
+        .await
+        .expect("insertion du compte repris");
     }
 
     tx.commit().await.expect("validation");

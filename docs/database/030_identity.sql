@@ -143,9 +143,17 @@ CREATE TABLE identity.accounts (
     locked_until          timestamptz,
     created_at            timestamptz NOT NULL DEFAULT now(),
     updated_at            timestamptz NOT NULL DEFAULT now(),
+    -- Clôt la table : arrivée par ALTER sur une base en service (27/10), et
+    -- pg_dump compare les colonnes dans leur ordre d'ajout.
+    password_reset_required_at timestamptz,
 
+    -- Un compte 'password' sans empreinte n'existe que s'il doit choisir un
+    -- nouveau mot de passe (comptes repris de la v1, dont l'empreinte bcrypt
+    -- n'est pas reprise). Jamais d'empreinte factice à la place : elle se
+    -- vérifierait plus vite qu'Argon2id et trahirait le compte à la montre.
     CONSTRAINT ck_accounts_password_shape
-        CHECK ((provider = 'password' AND password_hash IS NOT NULL AND provider_subject IS NULL)
+        CHECK ((provider = 'password' AND provider_subject IS NULL
+                AND (password_hash IS NOT NULL OR password_reset_required_at IS NOT NULL))
             OR (provider <> 'password' AND provider_subject IS NOT NULL)),
     CONSTRAINT ux_accounts_provider_subject UNIQUE (provider, provider_subject)
 );
@@ -162,7 +170,9 @@ CREATE TRIGGER tg_accounts_updated_at
     FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
 
 COMMENT ON COLUMN identity.accounts.password_hash IS
-    'Empreinte Argon2id calculée par l''API. Aucune fonction SQL ne doit vérifier de mot de passe.';
+    'Empreinte Argon2id calculée par l''API. Aucune fonction SQL ne doit vérifier de mot de passe. NULL pour un compte ''password'' seulement si password_reset_required_at est posée.';
+COMMENT ON COLUMN identity.accounts.password_reset_required_at IS
+    'Depuis quand ce compte doit choisir un nouveau mot de passe avant de se connecter (comptes repris de la v1, sans empreinte). La connexion le traite comme un mot de passe faux, sans rien dire de plus. L''enregistrement d''un mot de passe (réinitialisation) efface la date.';
 
 -- Le client d'où vient la session. ENUM fermé et technique, au même titre
 -- qu'auth_provider : ce n'est pas un vocabulaire métier ouvert. La coquille

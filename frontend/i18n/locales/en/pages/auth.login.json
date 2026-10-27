@@ -15,7 +15,7 @@
   "errors": {
     "invalid": {
       "title": "Sign-in failed",
-      "message": "The email address or password does not match. Check what you entered, then try again."
+      "message": "The email address or password does not match. For security reasons, some accounts must choose a new password: if this applies to you, use “Forgotten password”."
     },
     "locked": {
       "title": "Account temporarily locked",

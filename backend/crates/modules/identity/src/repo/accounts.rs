@@ -115,7 +115,9 @@ pub async fn mark_login(conn: &mut PgConnection, account_id: AccountId) -> Resul
 /// est né d'une invitation n'a pas encore de ligne `password`, et un lien de
 /// réinitialisation qui échouerait sur ce cas ne lui laisserait aucune issue.
 /// L'inférence porte sur `ux_accounts_password_per_person`, index partiel — d'où
-/// la clause `WHERE` recopiée.
+/// la clause `WHERE` recopiée. C'est aussi elle qui retrouve un compte repris de
+/// la v1, ligne `password` sans empreinte : son exigence de nouveau mot de passe
+/// tombe ici.
 pub async fn set_password(
     conn: &mut PgConnection,
     person_id: PersonId,
@@ -129,7 +131,8 @@ pub async fn set_password(
          DO UPDATE SET password_hash = EXCLUDED.password_hash,
                        password_changed_at = now(),
                        failed_attempts = 0,
-                       locked_until = NULL
+                       locked_until = NULL,
+                       password_reset_required_at = NULL
          RETURNING id",
         person_id.as_uuid(),
         empreinte

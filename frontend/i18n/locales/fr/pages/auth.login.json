@@ -15,7 +15,7 @@
   "errors": {
     "invalid": {
       "title": "Connexion impossible",
-      "message": "L'adresse ou le mot de passe ne correspond pas. Vérifiez votre saisie, puis réessayez."
+      "message": "L'adresse ou le mot de passe ne correspond pas. Pour des raisons de sécurité, certains comptes doivent choisir un nouveau mot de passe : si c'est votre cas, utilisez « Mot de passe oublié »."
     },
     "locked": {
       "title": "Compte temporairement verrouillé",
