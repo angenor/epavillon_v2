@@ -1,0 +1,40 @@
+# Reprise v1 : contrat commun des lots
+
+Lu par chaque script de `ops/reprise-v1/lots/`. Plan : [`docs/progression/reprise-v1/plan.md`](../../../docs/progression/reprise-v1/plan.md) ; écarts tranchés : [`ecarts.md`](../../../docs/progression/reprise-v1/ecarts.md).
+
+**Échéance (commanditaire, 27/10)** : réouverture le 27/10 au soir ou le 28/10 au matin, **en deux temps**. La phase 1 reprend ce qui sert la COP31 ; la phase 2 le reste, site ouvert.
+
+## Banc
+
+- `epavillon_repetition` : copie de la production v2, données d'essai purgées (D2), v1 brute posée à côté. **Modèle intouchable** : chaque lot travaille sur son clone, `CREATE DATABASE epavillon_lot_<nom> TEMPLATE epavillon_repetition`, puis y joue les lots qui le précèdent et le sien.
+- v1 brute, tables et données seules, noms de Supabase : schémas `v1` (son `public`), `v1_auth` (son `auth`), `v1_storage` (son `storage`).
+- Conteneur `epavillon-postgres`, utilisateur `postgres`. Aucune autre base n'est à toi. Jamais `make check`, `make check-db`, `down`, `down -v`, `pkill -f`.
+
+## Table de correspondance `legacy.id_map`
+
+- Une ligne par ligne v1 du périmètre : `legacy_table` = nom **Supabase** qualifié (`auth.users`, `public.organizations`, `public.activities`…), `legacy_id` en texte.
+- `disposition` : `migrated`, `merged` (plusieurs lignes v1, une ligne v2) ou `skipped` (écartée, `target_id` nul). `note` : la raison, en français, **obligatoire** hors `migrated`.
+- `legacy.map(table, id)` rend la cible ; `legacy.remember(...)` l'écrit.
+- Personne v1 = `auth.users.id` → `identity.people` (`legacy_table = 'auth.users'`) ; le compte se retrouve par `person_id`.
+
+## Règles d'écriture
+
+- Un fichier `NN-domaine.sql` par lot, **une transaction**, qui commence par `set_config('app.actor_id', <personne « Reprise v1 »>, true)` et `set_config('app.request_id', 'reprise-v1-NN', true)`.
+- Rejouable par construction : le banc repart de zéro, le lot ne se joue jamais deux fois sur la même base.
+- Lignes insérées **à leur état final, dates fournies** ; jamais d'`UPDATE` d'état qui émettrait une notification ; jamais d'`ON CONFLICT` contre une ligne de production (une fusion est une décision écrite).
+- Aucun nom de table ou colonne v2 deviné : lire `docs/database/*.sql`.
+- **Compte rendu en fin de lot** : pour chaque table v1 du périmètre, lignes extraites = `migrated` + `merged` + `skipped` dans `id_map`, sinon `RAISE EXCEPTION`.
+- Données personnelles : jamais dans le dépôt, un journal, un message de commit ou un compte rendu ; chiffres seulement.
+
+## Lots
+
+| NN | Domaine | Phase |
+|---|---|---|
+| 00 | socle : personne « Reprise v1 », réglages de lot | 1 |
+| 10 | référentiels : pays, termes de taxonomie manquants | 1 |
+| 20 | personnes, comptes, rôles | 1 |
+| 30 | organisations, noms, domaines, adhésions | 1 |
+| 40 | événements, appels | 1 |
+| 50 | activités : propositions, séances, intervenants, documents, thématiques | 1 |
+| 60 | fichiers : buckets Supabase vers Garage, `media.assets`, `media.attachments` | 1 |
+| 70+ | évaluations, inscriptions, rediffusions, journées spéciales, annexes | 2 |
