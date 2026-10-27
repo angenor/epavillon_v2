@@ -101,7 +101,7 @@ Posés un par un au commanditaire, réponses consignées dans `ecarts.md`.
 | D5 | Fonction exigée pour une adhésion active | « Non renseignée » ou adhésion en attente |
 | D6 | Thématiques sans équivalent | terme créé ou rapprochement, une par une |
 | D7 | Médiathèque d'activité | étendre le modèle : galerie rattachée à l'activité (principe 5) |
-| D8 | Dates COP31 saisies avec l'ancien fuseau | correction de 3 h vérifiée sur les journées spéciales connues |
+| D8 | Dates COP31 saisies avec l'ancien fuseau | **clos** (carte du cœur) : la COP31 suit la même grille que la COP30, aucun décalage en série, rien à corriger |
 | D9 | PACO | **tranché** : non repris, déporté à part sur Supabase |
 | D10 | Sessions de négociation v1 | agenda des sessions, ou réunions de la Francophonie |
 | D11 | Anciennes adresses (`/activities/<uuid>`…) | redirection permanente par `id_map` |
@@ -109,7 +109,7 @@ Posés un par un au commanditaire, réponses consignées dans `ecarts.md`.
 | D13 | Date limite | à demander |
 | D14 | Journées spéciales codées en dur | **tranché** : reprises depuis le code v1 ; Chypre et FPHN, codés de même, suivent sauf avis contraire |
 | D15 | PACO est injoignable depuis la bascule DNS du 26/10 | **tranché** : bloc repris tel quel dans le site v2, branché sur Supabase, en priorité |
-| D16 | Intervenants sans adresse électronique : toute personne v2 en exige une (`identity.people.primary_email`), et un intervenant de séance est une personne | étendre le modèle pour qu'un intervenant existe sans adresse ; la forme se choisit sur la carte réelle, qui dira combien d'intervenants Supabase sont dans ce cas ; jamais d'adresse fabriquée |
+| D16 | Intervenants sans adresse électronique : toute personne v2 en exige une (`identity.people.primary_email`), et un intervenant de séance est une personne | ne concerne que les pages codées en dur : dans Supabase, aucun intervenant sans adresse, mais 43 adresses partagées par plusieurs personnes (rapprochement par adresse **et** nom). Étendre le modèle pour qu'un intervenant existe sans adresse ; jamais d'adresse fabriquée |
 | D17 | Ce que les pages disaient et que le modèle ne range pas : objectifs et public d'une journée, ses « parties », modérateur de la journée, personnes ressources, image de la journée, direct de toute la journée, organisation intervenante | étendre le modèle, une place par information (principe 5) |
 
 ## 7. La bascule, geste par geste
