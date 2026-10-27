@@ -43,3 +43,5 @@ Avant le geste 6, rien n'a changé en production hors Garage. Après : `./deploy
 1. clone local de la production, `lots/70-temoignages.sh <clone>` ;
 2. tunnel et clés comme au geste 5, `FICHIERS_V1=<photos> lots/60-fichiers.sh deposer <clone>` ;
 3. `lots/70-temoignages.sh flux | ssh <serveur> "cd /opt/epavillon && $COMPOSE exec -T postgres psql -U postgres -d epavillon -X -q -v ON_ERROR_STOP=1"`.
+
+**Lot 80, inscriptions (27/10)**, même voie sans fichier : `lots/80-inscriptions.sh <clone>` puis `lots/80-inscriptions.sh flux | ssh …`. Le flux ne porte que des identifiants et des dates, lus au banc. Vérifié après coup en production : outbox vide, aucune notification, aucun rappel planifié, aucun participant Zoom, aucun consommateur n'a reçu les événements.

@@ -38,6 +38,7 @@ Lu par chaque script de `ops/reprise-v1/lots/`. Plan : [`docs/progression/repris
 | 50 | activités : propositions, séances, intervenants, documents, thématiques | 1 |
 | 60 | fichiers : buckets Supabase vers Garage, `media.assets`, `media.attachments` | 1 |
 | 70 | témoignages de l'accueil, écrits dans le code v1 (`code.herosection`), et leurs photos | 2, joué le 27/10 |
-| 80+ | évaluations, inscriptions, rediffusions, journées spéciales, annexes | 2 |
+| 80 | inscriptions (`public.activity_registrations`) | 2, joué le 27/10 |
+| 90+ | évaluations, rediffusions, journées spéciales, annexes | 2 |
 
 Phase 2, site ouvert : le lot se répète sur un clone local de la production (qui dépose aussi les fichiers), puis son flux SQL est lu par le psql du serveur (exemple : `70-temoignages.sh`).
