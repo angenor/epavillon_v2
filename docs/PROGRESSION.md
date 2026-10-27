@@ -2,12 +2,12 @@
 **Ce fichier est la mémoire du projet entre deux sessions Claude Code.** Toute session commence par le lire et se termine par le mettre à jour.
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
-## Dernière mise à jour : 26 octobre 2026
+## Dernière mise à jour : 27 octobre 2026
+- 27/10 : plan de reprise des données Supabase de la v1 (2025, COP31, PACO), en neuf étapes et treize écarts à trancher ; `910_migration_v1.sql` à réécrire. Voir [reprise-v1/plan.md](progression/reprise-v1/plan.md).
 - 26/10 : l'OIF a fait pointer `epavillonclimatique.francophonie.org` sur le serveur applicatif. Le site y est servi **à la racine** (plus de `/v2`), certificat Let's Encrypt ; `epavillon.mefali.com` et les liens `/v2/…` redirigent ; le courriel part toujours de l'ancien serveur. Production toujours en maintenance. Voir [DEPLOIEMENT § 17](DEPLOIEMENT.md).
 - 17/10 : le direct passe par des réunions Zoom intégrées à la page de l'activité (Meeting SDK 6.5.0), chaque inscription transmise à Zoom. En production le 17/10, migration jouée, clés posées ; notifications Zoom à brancher. Voir [A3](progression/ecrans/a3-evenement-public.md), [décision](progression/decisions/2026-10-17.md).
 - 16/10 — Plateforme en maintenance basculée depuis le back-office : page d'attente pour tous sauf les administrateurs, écritures refusées par l'API. **Déployé avec tout le code du 03 au 16/10, et la production est EN MAINTENANCE** jusqu'à la fin de la reprise des données — [A14](progression/ecrans/a14-maintenance.md), [DEPLOIEMENT § 16](DEPLOIEMENT.md).
 - 05/10 — Le menu du compte devient « Mon espace » : sigle de l'organisation, pastille des actions en attente, « Ce qui vous attend » puis Mes propositions en tête. En production le 16/10 — [A5](progression/ecrans/a5-espace-organisation.md).
-- 05/10 — Page d'une activité : bandeau sur la photo de l'édition, titre en grand, logo de l'organisation, image et billet en léger débord, lecteur à la place de l'image pendant le direct ; l'affiche n'a plus d'écran. En production le 16/10 — [A3](progression/ecrans/a3-evenement-public.md).
 
 ## État général
 | Domaine | État |
