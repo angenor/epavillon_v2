@@ -10,7 +10,7 @@
 
 **Supabase contient aussi la COP31 (2026)** : l'appel a tourné sur la v1, et elle fait foi. La production v2 porte 1 édition, 13 propositions, 12 séances, 4 organisations, 8 personnes : **données d'essai, effacées à la bascule** sauf le compte du commanditaire (D2).
 
-**Les journées spéciales de la COP30 ne sont pas en base** : leur programme est écrit dans des pages Vue de la v1 (`JourneeJeunesseCOP30.vue`, `JourneeFinance.vue`), qui gonflaient aussi les compteurs de la CdP 30 de « 20 activités, 14 organisations ». Elles se reprennent depuis le code (D14).
+**Les journées spéciales de la COP30 ne sont pas en base** : leur programme est écrit dans des pages Vue de la v1 (`JourneeJeunesseCOP30.vue`, `JourneeFinance.vue`), qui gonflaient aussi les compteurs de la CdP 30 de « 20 activités, 14 organisations » (constantes posées à la main, qui disparaissent en v2). Deux événements le sont aussi : le séminaire de Larnaka et Nicosie (1er au 3/12/2025) et l'événement parallèle du FPHN (New York, 14/07/2026). Relevé du 27/10 dans [`ops/reprise-v1/journees-speciales/`](../../../ops/reprise-v1/journees-speciales/) : 15 séances pour la journée Jeunesse, 11 pour la Finance, 14 pour Chypre, 5 points pour le FPHN. Aucune page n'appelle Supabase, mais des séances portées par une organisation y sont peut-être aussi comme activités : rapprochement par organisation et titre (D14).
 
 **`docs/database/910_migration_v1.sql` est à moitié écrit et ne tourne pas** : `migrate_activities` est un bouchon ; `propose_organization_clusters` échoue à la première paire floue (clé étrangère vers `org.organizations` posée avec des identifiants v1) ; `migrate_organizations` fusionne en silence par slug avec les fiches de production (dont `ifdd`) et force le type `ngo_association` ; `v_reconciliation` compare `id_map` à lui-même. On garde son principe (quatre temps, `id_map`), on réécrit l'outillage.
 
@@ -58,7 +58,7 @@ Chaque ligne sera confirmée sur la carte réelle (étape 2).
 | 5 | `activity_speakers` | `identity.people` + `proposal_speakers` / `session_speakers` | une ligne par activité, rapprochement par courriel |
 | 5 | `activity_documents` | `media.assets` + `proposal_documents` | |
 | 5 | `activity_ratings`, `revision_comments` | `programme.reviews`, `proposal_comments` | une revue par évaluateur ; recalcul des moyennes (`refresh_proposal_score`) |
-| 5 | journées spéciales (code v1, pas Supabase) | `event.tracks` (`special_day`) + `programme.sessions` sans proposition, `session_speakers`, `session_organizations` | heures écrites en dur, fuseau à établir ; intervenants et organisations rapprochés comme les autres (D14) |
+| 5 | journées spéciales (code v1, pas Supabase) | `event.programme_tracks` (`special_day`) + `programme.sessions` sans proposition, `session_tracks`, `session_speakers`, `session_organizations` ; Chypre et FPHN : `event.events` + `event_days` | heures écrites en dur (Belém UTC-3, Chypre UTC+2, New York UTC-4) ; clôtures sans heure de fin ; intervenants sans adresse (D16) ; ce que le modèle ne range pas (D17) |
 | 6 | `activities.youtube_link` | `live.streams` (rediffusion) | identifiant ou URL de formes variées ; une vidéo ne sert qu'une séance |
 | 7 | `activity_registrations` (+ invités, `session_edition`) | `identity.people` + `programme.registrations` | **déclenche Zoom** (§ 5) ; une seule inscription par séance et personne (invité puis compte = doublon) |
 | 8 | fichiers | `media.assets` + `media.attachments` | texte alternatif obligatoire pour une image ; formats imposés (32:9, 16:9, 1:1) ; un même contenu une seule fois |
@@ -103,8 +103,10 @@ Posés un par un au commanditaire, réponses consignées dans `ecarts.md`.
 | D11 | Anciennes adresses (`/activities/<uuid>`…) | redirection permanente par `id_map` |
 | D12 | Annonce aux utilisateurs | un courriel après la bascule, selon D1 |
 | D13 | Date limite | à demander |
-| D14 | Journées spéciales codées en dur | **tranché** : reprises depuis le code v1 |
+| D14 | Journées spéciales codées en dur | **tranché** : reprises depuis le code v1 ; Chypre et FPHN, codés de même, suivent sauf avis contraire |
 | D15 | PACO est injoignable depuis la bascule DNS du 26/10 (ses pages vivaient sous l'ancien domaine) | urgence selon la prochaine séance PACO |
+| D16 | Intervenants sans adresse électronique : toute personne v2 en exige une (`identity.people.primary_email`), et un intervenant de séance est une personne | à trancher sur la carte réelle, qui dira combien d'intervenants Supabase sont dans ce cas ; pas d'adresse fabriquée |
+| D17 | Ce que les pages disaient et que le modèle ne range pas : objectifs et public d'une journée, ses « parties », modérateur de la journée, personnes ressources, image de la journée, direct de toute la journée, organisation intervenante | le texte dans la description de la journée ; le reste, un par un |
 
 ## 7. La bascule, geste par geste
 

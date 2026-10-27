@@ -1,0 +1,335 @@
+{
+  "_source": {
+    "v1": "epavillonvue (v1, branche courante, relevé du 2026-10-27)",
+    "files": [
+      "src/views/fphn/FphnSideEvent.vue",
+      "src/locales/fr/fphn.json, src/locales/en/fphn.json (fphn.*)",
+      "src/components/UpcomingActivities.vue (widget FPHN, l. 682)"
+    ],
+    "route_v1": "/fphn2026 (nom fphn-side-event ; /fphn2026/v2 y redirige)"
+  },
+  "_notes": [
+    "Champs nommés d'après les colonnes v2 visées (event.programme_tracks, programme.sessions, programme.session_speakers, programme.session_organizations). Les champs suffixés _as_written, _v1 ou placés sous no_v2_column n'ont pas de colonne v2.",
+    "first_name / last_name : découpés seulement quand la v1 écrit le nom de famille en capitales ; sinon absents. Aucune adresse électronique connue pour les intervenants alors que identity.people.primary_email est obligatoire.",
+    "role des intervenants : valeur de programme.speaker_role proposée d'après le libellé v1 (Modération -> moderator, Animation -> facilitator, Intervenants d'un panel -> panelist, sinon speaker). role des organisations : programme.organization_role proposé (Organisé par / Intervenant -> lead).",
+    "Aucun identifiant d'activité Supabase n'est cité par ces pages et elles n'appellent pas Supabase.",
+    "Nature : événement distinct, ni COP30 ni journée spéciale. Évènement parallèle au Forum politique de haut niveau 2026 (série un_conference). Hors du périmètre D14 tel qu'écrit (journées de la COP30) : relevé pour décision.",
+    "Fuseau America/New_York : écrit dans le code (EVENT_START '2026-07-14T13:15:00-04:00', EVENT_END '2026-07-14T14:45:00-04:00', commentaire « heure de New York (EDT) ») et dans le texte (« 13h15 – 14h45 (heure de New York) »).",
+    "Le déroulé ne donne que des durées (5, 15, 40, 25, 5 min, total 90). derived_starts_at / derived_ends_at les enchaînent depuis 13h15 : calcul, pas une heure écrite.",
+    "Les intervenants ne sont rattachés à aucun point du déroulé dans le code ; seuls les textes du déroulé nomment Biang, Schnoell, Casado-Asensio et Kiri. M. Juan Casado-Asensio (« Analyste des politiques, OCDE », clé fphn.speakers.roles.casado) figure dans le déroulé mais pas dans la liste des intervenants.",
+    "Graphie divergente : « Thomas Schnöll » (liste) et « Thomas Schnoell » (déroulé).",
+    "Pas d'appel à Supabase, pas d'identifiant d'activité."
+  ],
+  "event": {
+    "series_kind": "un_conference",
+    "edition_year": 2026,
+    "title": {
+      "fr": "Accès aux financements climat et biodiversité",
+      "en": "Access to Climate and Biodiversity Finance"
+    },
+    "title_accent_as_written": {
+      "fr": "Des engagements mondiaux à l'action pays",
+      "en": "From Global Commitments to Country Action"
+    },
+    "subtitle_as_written": {
+      "fr": "Lancement du rapport OCDE–OIF/IFDD",
+      "en": "Launch of the OECD–OIF/IFDD report"
+    },
+    "badge_as_written": {
+      "fr": "Évènement parallèle au Forum politique de haut niveau 2026",
+      "en": "Side event at the 2026 High-Level Political Forum"
+    },
+    "slug_v1": "fphn2026",
+    "description": {
+      "fr": "À travers des analyses inédites et des études de cas menées dans plusieurs pays francophones, ce rapport met en lumière les principaux obstacles à l'accès aux financements internationaux et formule des recommandations concrètes pour simplifier les procédures, renforcer les capacités nationales et mieux répondre aux priorités des pays.",
+      "en": "Through original analyses and case studies conducted in several Francophone countries, the report highlights the main obstacles to accessing international finance and puts forward concrete recommendations to simplify procedures, strengthen national capacities and better respond to countries' priorities."
+    },
+    "description_more": {
+      "fr": [
+        "Les pays en développement font face à une double urgence : accélérer l'action climatique et enrayer l'érosion de la biodiversité tout en poursuivant leurs objectifs de développement durable. Dans le même temps, le paysage des financements est devenu plus complexe et fragmenté, avec la coexistence de multiples bailleurs bilatéraux, institutions multilatérales, fonds verticaux et nouveaux instruments (obligations vertes, échanges dette-nature, marchés du carbone, etc.).",
+        "Le rapport conjoint OCDE-OIF/IFDD « Accès aux financements climat et biodiversité, des engagements mondiaux à l'action pays » apporte un éclairage empirique inédit sur la manière dont les financements climat et biodiversité sont alloués, sur les déterminants de cet accès (besoins, mérite, intérêts des bailleurs, langue, etc.), ainsi que sur les obstacles rencontrés par les pays, en particulier francophones.",
+        "À l'approche de la fin de la Décennie d'action pour les Objectifs de développement durable (ODD) et dans le contexte des agendas climatiques et de biodiversité, le Forum politique de haut niveau (HLPF) offre une plateforme stratégique pour débattre des conditions d'un meilleur accès aux financements, du point de vue à la fois des pays bénéficiaires et des bailleurs. L'événement parallèle constituera le lancement officiel du rapport conjoint au Siège des Nations unies, et un espace de dialogue politique et technique sur les réformes à conduire au niveau des bailleurs, des pays et du système multilatéral.",
+        "Études de cas : Arménie, Gabon, Madagascar, Sainte-Lucie, Sénégal, Togo"
+      ],
+      "en": [
+        "Developing countries face a dual emergency: accelerating climate action and halting biodiversity loss while pursuing their sustainable development goals. At the same time, the financing landscape has become more complex and fragmented, with multiple bilateral donors, multilateral institutions, vertical funds and new instruments (green bonds, debt-for-nature swaps, carbon markets, etc.) coexisting.",
+        "The joint OECD-OIF/IFDD report “Access to climate and biodiversity finance, from global commitments to country action” provides unprecedented empirical insight into how climate and biodiversity finance is allocated, the determinants of this access (needs, merit, donor interests, language, etc.), and the obstacles countries face, particularly Francophone ones.",
+        "As the Decade of Action for the Sustainable Development Goals (SDGs) draws to a close, and in the context of the climate and biodiversity agendas, the High-Level Political Forum (HLPF) offers a strategic platform to debate the conditions for better access to finance, from the perspective of both recipient countries and donors. The side event will mark the official launch of the joint report at United Nations Headquarters, and provide a space for political and technical dialogue on the reforms to be pursued by donors, countries and the multilateral system.",
+        "Case studies: Armenia, Gabon, Madagascar, Saint Lucia, Senegal, Togo"
+      ]
+    },
+    "participation_mode": "hybrid",
+    "participation_mode_note": "Proposé : salle à New York et participation par Zoom (« L'accès à l'évènement se fait uniquement via Zoom » côté site).",
+    "timezone": "America/New_York",
+    "starts_at": "2026-07-14T13:15:00-04:00",
+    "ends_at": "2026-07-14T14:45:00-04:00",
+    "address": "African Union Mission to the UN, New York",
+    "city_as_written": "New York",
+    "has_pavilion": false
+  },
+  "no_v2_column": {
+    "co_organizers": [
+      {
+        "name_as_written": "OCDE",
+        "logo": "public/images/logo_ocde-2.png"
+      },
+      {
+        "name_as_written": "IFDD, Organisation internationale de la Francophonie",
+        "acronym_as_written": "IFDD · OIF",
+        "logo": "public/images/OIF-ifdd-logo.png"
+      }
+    ],
+    "interpretation": {
+      "fr": "Interprétation simultanée anglais / français",
+      "en": "Simultaneous English / French interpretation"
+    },
+    "hook": {
+      "fr": "Comment rendre les financements climat et biodiversité plus accessibles aux pays qui en ont le plus besoin ?",
+      "en": "How can climate and biodiversity finance be made more accessible to the countries that need it most?"
+    },
+    "objectives": [
+      {
+        "title": {
+          "fr": "Présenter le rapport",
+          "en": "Present the report"
+        },
+        "text": {
+          "fr": "Présenter les principaux enseignements et recommandations du rapport OCDE-OIF/IFDD sur l'accès aux financements climat et biodiversité.",
+          "en": "Present the key findings and recommendations of the OECD-OIF/IFDD report on access to climate and biodiversity finance."
+        }
+      },
+      {
+        "title": {
+          "fr": "Dialogue de haut niveau",
+          "en": "High-level dialogue"
+        },
+        "text": {
+          "fr": "Donner la parole à des décideurs de haut niveau sur les réformes nécessaires pour rendre les financements plus accessibles, prévisibles et alignés sur les priorités nationales.",
+          "en": "Give the floor to high-level decision-makers on the reforms needed to make finance more accessible, predictable and aligned with national priorities."
+        }
+      },
+      {
+        "title": {
+          "fr": "Expériences pays",
+          "en": "Country experiences"
+        },
+        "text": {
+          "fr": "Mettre en lumière les expériences de pays, notamment francophones : stratégies nationales de financement, accréditation, coordination des bailleurs, mobilisation du secteur privé et innovation financière.",
+          "en": "Highlight country experiences, particularly from Francophone countries: national financing strategies, accreditation, donor coordination, private sector mobilisation and financial innovation."
+        }
+      },
+      {
+        "title": {
+          "fr": "Dialogue opérationnel",
+          "en": "Operational dialogue"
+        },
+        "text": {
+          "fr": "Favoriser un dialogue opérationnel entre pays, bailleurs, fonds verticaux et banques multilatérales de développement : simplification des procédures, harmonisation des exigences, soutien aux capacités, barrières linguistiques.",
+          "en": "Foster an operational dialogue between countries, donors, vertical funds and multilateral development banks: simplified procedures, harmonised requirements, capacity support, language barriers."
+        }
+      }
+    ],
+    "target_audience": [
+      {
+        "fr": "Représentants ministériels et de haut niveau de pays en développement, notamment francophones",
+        "en": "Ministerial and high-level representatives of developing countries, particularly Francophone ones"
+      },
+      {
+        "fr": "Représentants de bailleurs bilatéraux (membres du CAD de l'OCDE)",
+        "en": "Representatives of bilateral donors (OECD DAC members)"
+      },
+      {
+        "fr": "Fonds climat et biodiversité (FVC, FEM, Fonds d'Adaptation, etc.)",
+        "en": "Climate and biodiversity funds (GCF, GEF, Adaptation Fund, etc.)"
+      },
+      {
+        "fr": "Banques multilatérales de développement et autres institutions financières internationales",
+        "en": "Multilateral development banks and other international financial institutions"
+      },
+      {
+        "fr": "Organisations de la société civile, instituts de recherche, etc.",
+        "en": "Civil society organisations, research institutes, etc."
+      }
+    ],
+    "hashtags": [
+      "#HLPF2026",
+      "#FinanceClimat",
+      "#Biodiversité",
+      "#ODD",
+      "#DéveloppementDurable",
+      "#Francophonie",
+      "#IFDD",
+      "#OIF",
+      "#OCDE"
+    ],
+    "links": {
+      "zoom_registration_url": "https://meetoecd1.zoom.us/meeting/register/yu8YbosuRBC7BOnclai_dA",
+      "zoom_note": "Réunion Zoom de l'OCDE, pas de l'IFDD.",
+      "public_url_v1": "https://epavillonclimatique.francophonie.org/fphn2026"
+    },
+    "images": [
+      {
+        "use": "bannière et image de partage",
+        "path": "public/images/Visuel-Diffusion-14-juillet.jpg",
+        "note": "propre à l'événement, présent"
+      }
+    ]
+  },
+  "event_speakers": [
+    {
+      "name_as_written": "S.E. M. Michel Xavier Biang",
+      "photo": "public/images/fphn2026/speakers/Photo_SEM_Michel_Xavier_Biang.jpg",
+      "photo_present": true,
+      "job_title_snapshot": "Représentant de l'Organisation internationale de la Francophonie (OIF) auprès des Nations Unies à New York",
+      "job_title_en": "Representative of the Organisation internationale de la Francophonie (OIF) to the United Nations in New York",
+      "organization_snapshot": "OIF",
+      "role_proposed": "panelist"
+    },
+    {
+      "name_as_written": "S.E. M. Thomas Schnöll",
+      "photo": "public/images/fphn2026/speakers/schnoell.jpg",
+      "photo_present": false,
+      "job_title_snapshot": "Représentant spécial de l'Organisation de coopération et de développement économiques (OCDE) auprès des Nations Unies",
+      "job_title_en": "Special Representative of the Organisation for Economic Co-operation and Development (OECD) to the United Nations",
+      "organization_snapshot": "OCDE",
+      "role_proposed": "panelist"
+    },
+    {
+      "name_as_written": "M. Frantisek Ruzicka",
+      "photo": "public/images/fphn2026/speakers/ruzicka.jpg",
+      "photo_present": false,
+      "job_title_snapshot": "Secrétaire général adjoint de l'OCDE",
+      "job_title_en": "OECD Deputy Secretary-General",
+      "organization_snapshot": "OCDE",
+      "role_proposed": "panelist"
+    },
+    {
+      "name_as_written": "S.E. Mme Louise Pierrette Mvono",
+      "photo": "public/images/fphn2026/speakers/Photo_SEMme_Louise_Pierrette_Mvono.jpg",
+      "photo_present": true,
+      "job_title_snapshot": "Ministre de la planification et de la prospective du Gabon",
+      "job_title_en": "Minister of Planning and Foresight of Gabon",
+      "organization_snapshot": "Gabon",
+      "role_proposed": "panelist"
+    },
+    {
+      "name_as_written": "S.E. M. Paruyr Hovhannisyan",
+      "photo": "public/images/fphn2026/speakers/Photo_Paruyr_Hovhannisyan.jpg",
+      "photo_present": true,
+      "job_title_snapshot": "Représentant permanent de l'Arménie auprès des Nations Unies",
+      "job_title_en": "Permanent Representative of Armenia to the United Nations",
+      "organization_snapshot": "Arménie",
+      "role_proposed": "panelist"
+    },
+    {
+      "name_as_written": {
+        "fr": "Mission permanente de la France",
+        "en": "Permanent Mission of France"
+      },
+      "photo": "public/images/fphn2026/speakers/france.jpg",
+      "photo_present": false,
+      "tbc": true,
+      "note": "Pas une personne : « À confirmer ».",
+      "job_title_snapshot": "Mission permanente de la France auprès des Nations Unies",
+      "job_title_en": "Permanent Mission of France to the United Nations",
+      "organization_snapshot": "France",
+      "role_proposed": "panelist"
+    },
+    {
+      "name_as_written": "M. Robert Krech",
+      "photo": "public/images/fphn2026/speakers/Photo_Robert_Krech.jpg",
+      "photo_present": true,
+      "job_title_snapshot": "Responsable de l'équipe Gouvernance et Opérations du Fonds d'adaptation",
+      "job_title_en": "Head of the Governance and Operations team, Adaptation Fund",
+      "organization_snapshot": "Fonds d'adaptation",
+      "role_proposed": "panelist"
+    },
+    {
+      "name_as_written": "M. Tounao Kiri",
+      "photo": "public/images/tounao_kiri.jpg",
+      "photo_present": true,
+      "job_title_snapshot": "Coordonnateur principal, IFDD-OIF",
+      "job_title_en": "Senior Coordinator, IFDD-OIF",
+      "organization_snapshot": "IFDD-OIF",
+      "role_proposed": "panelist"
+    }
+  ],
+  "event_speakers_note": "Liste au niveau de l'événement, non rattachée aux points du déroulé : à placer dans session_speakers d'une séance (le panel de haut niveau vraisemblablement), décision à prendre.",
+  "sessions": [
+    {
+      "sort_order": 1,
+      "duration_minutes_as_written": 5,
+      "derived_starts_at": "2026-07-14T13:15:00-04:00",
+      "derived_ends_at": "2026-07-14T13:20:00-04:00",
+      "timezone": "America/New_York",
+      "title": {
+        "fr": "Mot de bienvenue et introduction",
+        "en": "Welcome and introduction"
+      },
+      "description": {
+        "fr": "Mise en contexte FPHN et lien entre les ODD et les agendas climat / biodiversité. Par M. Michel Xavier Biang (OIF) ou M. Thomas Schnoell (OCDE).",
+        "en": "Setting the HLPF context and the link between the SDGs and the climate / biodiversity agendas. By Mr Michel Xavier Biang (OIF) or Mr Thomas Schnoell (OECD)."
+      }
+    },
+    {
+      "sort_order": 2,
+      "duration_minutes_as_written": 15,
+      "derived_starts_at": "2026-07-14T13:20:00-04:00",
+      "derived_ends_at": "2026-07-14T13:35:00-04:00",
+      "timezone": "America/New_York",
+      "title": {
+        "fr": "Présentation technique du rapport OCDE-OIF/IFDD",
+        "en": "Technical presentation of the OECD-OIF/IFDD report"
+      },
+      "description": {
+        "fr": "Analyse des flux de financements climat et biodiversité, résultats du modèle d'allocation et implications pour l'accès des pays (M. Juan Casado-Asensio, OCDE). Résultats des études de cas pays : stratégies nationales, gouvernance, accréditation, coordination des bailleurs, innovation financière et barrières linguistiques (M. Tounao Kiri, IFDD-OIF).",
+        "en": "Analysis of climate and biodiversity finance flows, allocation model results and implications for countries' access (Mr Juan Casado-Asensio, OECD). Country case study findings: national strategies, governance, accreditation, donor coordination, financial innovation and language barriers (Mr Tounao Kiri, IFDD-OIF)."
+      }
+    },
+    {
+      "sort_order": 3,
+      "duration_minutes_as_written": 40,
+      "derived_starts_at": "2026-07-14T13:35:00-04:00",
+      "derived_ends_at": "2026-07-14T14:15:00-04:00",
+      "timezone": "America/New_York",
+      "title": {
+        "fr": "Panel de haut niveau",
+        "en": "High-level panel"
+      },
+      "description": {
+        "fr": "Discussion guidée autour de 2-3 questions centrales : comment structurer une stratégie nationale intégrée de financement climat/biodiversité ? Comment simplifier l'accès aux fonds ? Comment mieux coordonner les bailleurs ? Modéré par un représentant de l'OIF/IFDD.",
+        "en": "Guided discussion around 2-3 central questions: how to structure an integrated national climate/biodiversity financing strategy? How to simplify access to funds? How to better coordinate donors? Moderated by an OIF/IFDD representative."
+      }
+    },
+    {
+      "sort_order": 4,
+      "duration_minutes_as_written": 25,
+      "derived_starts_at": "2026-07-14T14:15:00-04:00",
+      "derived_ends_at": "2026-07-14T14:40:00-04:00",
+      "timezone": "America/New_York",
+      "title": {
+        "fr": "Échanges avec la salle",
+        "en": "Exchanges with the audience"
+      },
+      "description": {
+        "fr": "Questions et réactions du public, réponses des panélistes.",
+        "en": "Questions and reactions from the audience, responses from panellists."
+      }
+    },
+    {
+      "sort_order": 5,
+      "duration_minutes_as_written": 5,
+      "derived_starts_at": "2026-07-14T14:40:00-04:00",
+      "derived_ends_at": "2026-07-14T14:45:00-04:00",
+      "timezone": "America/New_York",
+      "title": {
+        "fr": "Conclusion et perspectives",
+        "en": "Conclusion and way forward"
+      },
+      "description": {
+        "fr": "Par M. Michel Xavier Biang (OIF) ou M. Thomas Schnoell (OCDE).",
+        "en": "By Mr Michel Xavier Biang (OIF) or Mr Thomas Schnoell (OECD)."
+      }
+    }
+  ]
+}

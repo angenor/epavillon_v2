@@ -1,0 +1,491 @@
+{
+  "_source": {
+    "v1": "epavillonvue (v1, branche courante, relevé du 2026-10-27)",
+    "files": [
+      "src/views/programmations/JourneeFinance.vue",
+      "src/locales/fr/sustainable_finance.json (sustainableFinance.*)",
+      "src/locales/en/sustainable_finance.json (sustainableFinance.*)",
+      "src/locales/fr/events.json et en/events.json (programmations.sustainableFinanceDay)",
+      "src/views/programmations/ProgrammationDetail.vue (displayItems l. 1020, calendrier l. 1285)",
+      "src/components/SustainableFinanceDayWidget.vue",
+      "src/composables/useEmailSender.js (modèle sustainable_finance_day)"
+    ],
+    "route_v1": "/programmations/2025/journee-finance (nom journee-finance-cop30)"
+  },
+  "_notes": [
+    "Champs nommés d'après les colonnes v2 visées (event.programme_tracks, programme.sessions, programme.session_speakers, programme.session_organizations). Les champs suffixés _as_written, _v1 ou placés sous no_v2_column n'ont pas de colonne v2.",
+    "first_name / last_name : découpés seulement quand la v1 écrit le nom de famille en capitales ; sinon absents. Aucune adresse électronique connue pour les intervenants alors que identity.people.primary_email est obligatoire.",
+    "role des intervenants : valeur de programme.speaker_role proposée d'après le libellé v1 (Modération -> moderator, Animation -> facilitator, Intervenants d'un panel -> panelist, sinon speaker). role des organisations : programme.organization_role proposé (Organisé par / Intervenant -> lead).",
+    "Aucun identifiant d'activité Supabase n'est cité par ces pages et elles n'appellent pas Supabase.",
+    "Fuseau America/Belem (UTC-3) : écrit dans la page même (« 9h00 - 17h45 (Heure de Belém, GMT-3) »), et la carte et le widget posent la journée à 2025-11-14T12:00Z - 20:45Z.",
+    "AMBIGUÏTÉ D'HEURE : l'en-tête annonce 9h00 - 17h45 et le courriel sustainable_finance_day 9h00 - 17h00, mais le programme détaillé commence à 8h00 (accueil) et finit à 17h45. La fin concorde avec l'en-tête, pas le début.",
+    "Les intervenants des deux panels sont des organisations sans nom de personne : ils vont dans session_organizations, dont aucun rôle ne dit « intervenant » (rôle partner proposé).",
+    "Séances portées par une organisation : peut-être aussi en base Supabase comme activités soumises puis versées dans la journée (courriel sustainable_finance_day), à rapprocher sans identifiant.",
+    "Les descripteurs des organisations des panels (« Société d'État », « Innovation Durable »...) sont en dur, en français seulement."
+  ],
+  "event_ref": {
+    "acronym_v1": "CdP 30",
+    "edition_year": 2025,
+    "note": "Journée spéciale de l'édition CdP 30 (Belém) déjà reprise depuis Supabase : event_id à résoudre à l'import."
+  },
+  "programme_track": {
+    "code": "journee_finance_durable",
+    "slug": "journee-finance",
+    "kind": "special_day",
+    "title": {
+      "fr": "Accès à la finance durable en Francophonie",
+      "en": "Access to Sustainable Finance in the Francophonie"
+    },
+    "title_short_as_written": {
+      "fr": "Journée Finance durable en Francophonie",
+      "en": "Sustainable Finance in Francophonie Day"
+    },
+    "subtitle": {
+      "fr": "Opportunités offertes par les partenaires de développement",
+      "en": "Opportunities offered by development partners"
+    },
+    "description": {
+      "fr": "L'événement s'inscrit dans un contexte d'intensification des besoins en financement climatique. La Francophonie se mobilise pour renforcer les capacités d'accès aux ressources disponibles, valoriser les solutions endogènes et favoriser une transition juste, inclusive et résiliente. Cette journée fait partie du projet OIF « Accompagnement des transformations structurelles en matière de l'environnement et du climat ».",
+      "en": "The event takes place in a context of intensifying climate financing needs. The Francophonie mobilizes to strengthen capacities for access to available resources, promote endogenous solutions and foster a just, inclusive and resilient transition. This day is part of the OIF project 'Support for structural transformations in environmental and climate matters'."
+    },
+    "starts_on": "2025-11-14",
+    "ends_on": "2025-11-14",
+    "status_note": "Journée passée : published_at à poser à l'import si la page doit rester publique."
+  },
+  "no_v2_column": {
+    "badge": {
+      "fr": "Finance Durable",
+      "en": "Sustainable Finance"
+    },
+    "date_as_written": {
+      "fr": "Vendredi 14 novembre 2025",
+      "en": "Friday, November 14, 2025"
+    },
+    "hours_as_written": {
+      "fr": "9h00 - 17h45 (Heure de Belém, GMT-3)",
+      "en": "9:00 AM - 5:45 PM (Belém Time, GMT-3)"
+    },
+    "location_as_written": {
+      "fr": "Pavillon de la Francophonie, Belém",
+      "en": "Francophonie Pavilion, Belém"
+    },
+    "room_v1": "youthClimateDay.location réutilisée par la carte (« Pavillon de la Francophonie, Zone bleue, Belém ») : salle par défaut de l'édition",
+    "format_v1": "networking (format de la carte dans ProgrammationDetail.vue)",
+    "objectives": [
+      {
+        "fr": "Présenter les opportunités concrètes offertes par les partenaires de développement en finance durable",
+        "en": "Present concrete opportunities offered by development partners in sustainable finance"
+      },
+      {
+        "fr": "Faciliter le dialogue entre institutions francophones, bailleurs et porteurs de projets",
+        "en": "Facilitate dialogue between Francophone institutions, donors and project promoters"
+      },
+      {
+        "fr": "Valoriser les bonnes pratiques d'accès à la finance climatique et environnementale",
+        "en": "Showcase best practices in accessing climate and environmental finance"
+      }
+    ],
+    "announcement": {
+      "title": {
+        "fr": "Annonce importante",
+        "en": "Important Announcement"
+      },
+      "description": {
+        "fr": "Lancement officiel de l'appel à manifestation d'intérêt aux États membres de l'OIF pour l'accompagnement à l'accès à la finance durable",
+        "en": "Official launch of the call for expressions of interest to OIF Member States for support in accessing sustainable finance"
+      },
+      "url": "https://www.ifdd.francophonie.org/appel-a-manifestation-pour-laccompagnement-a-lacces-a-la-finance-durable-3/"
+    },
+    "target_audience": [
+      {
+        "fr": "Représentants d'institutions publiques",
+        "en": "Representatives of public institutions"
+      },
+      {
+        "fr": "Partenaires techniques et financiers",
+        "en": "Technical and financial partners"
+      },
+      {
+        "fr": "Experts en finance climat",
+        "en": "Climate finance experts"
+      },
+      {
+        "fr": "Porteurs de projets",
+        "en": "Project promoters"
+      },
+      {
+        "fr": "ONG et organisations de la société civile",
+        "en": "NGOs and civil society organizations"
+      }
+    ],
+    "partners": {
+      "financial_institutions": [
+        "BAD",
+        "BOAD",
+        "BDEAC",
+        "GCF",
+        "Desjardins"
+      ],
+      "organizations_and_initiatives": [
+        "OIF",
+        "GIZ",
+        "Finance Montréal",
+        "France Assureurs"
+      ],
+      "note": "Sigles seuls, sans nom développé pour GCF et GIZ."
+    },
+    "parts": [
+      {
+        "part": 1,
+        "time_as_written": "8h00 - 10h00",
+        "title": {
+          "fr": "Opportunités et Synergies",
+          "en": "Opportunities and Synergies"
+        }
+      },
+      {
+        "part": 2,
+        "time_as_written": "10h15 - 14h00",
+        "title": {
+          "fr": "Initiatives Nationales et Études de Cas",
+          "en": "National Initiatives and Case Studies"
+        }
+      },
+      {
+        "part": 3,
+        "time_as_written": "14h15 - 17h45",
+        "title": {
+          "fr": "Partage et Prospective",
+          "en": "Sharing and Prospective"
+        }
+      }
+    ],
+    "links": {
+      "zoom_registration_url": "https://us06web.zoom.us/meeting/register/v2itCTkbRlSER-SemtdwSg",
+      "youtube_embed_id": "ilh3JaNSXw0",
+      "youtube_note": "Direct de la journée entière. En v2, live.streams se rattache à une séance ou à l'édition, pas à un fil."
+    },
+    "images": [
+      {
+        "use": "image du bandeau et de la carte",
+        "path": "public/images/example/event_banniere_par_defaut_16_9_reduit.jpg",
+        "note": "image par défaut générique"
+      },
+      {
+        "use": "fond répété de la page",
+        "path": "public/images/people-bg/people-bg-2.jpg",
+        "note": "décor"
+      },
+      {
+        "use": "repli si l'image du bandeau échoue",
+        "path": "public/images/events/default-event.jpg",
+        "note": "ABSENT de public/ dans la v1"
+      }
+    ]
+  },
+  "sessions": [
+    {
+      "time_as_written": "8h00 - 8h45",
+      "starts_at": "2025-11-14T08:00:00-03:00",
+      "ends_at": "2025-11-14T08:45:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 1,
+      "part": 1,
+      "title": {
+        "fr": "Accueil et installation",
+        "en": "Welcome and Registration"
+      },
+      "summary": {
+        "fr": "Accueil des participants et installation",
+        "en": "Welcome and registration of participants"
+      },
+      "speakers": [],
+      "organizations": []
+    },
+    {
+      "time_as_written": "8h45 - 9h00",
+      "starts_at": "2025-11-14T08:45:00-03:00",
+      "ends_at": "2025-11-14T09:00:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 2,
+      "part": 1,
+      "title": {
+        "fr": "Ouverture officielle",
+        "en": "Official Opening"
+      },
+      "summary": {
+        "fr": "Lancement de l'appel à manifestation d'intérêt",
+        "en": "Launch of the call for expressions of interest"
+      },
+      "speakers": [
+        {
+          "name_as_written": "Dr Issa BADO, IFDD-OIF",
+          "civility": "dr",
+          "first_name": "Issa",
+          "last_name": "BADO",
+          "organization_snapshot": "IFDD-OIF",
+          "role": "speaker"
+        }
+      ],
+      "organizations": []
+    },
+    {
+      "time_as_written": "9h00 - 9h40",
+      "starts_at": "2025-11-14T09:00:00-03:00",
+      "ends_at": "2025-11-14T09:40:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 3,
+      "part": 1,
+      "title": {
+        "fr": "Panel Partenaires Institutionnels",
+        "en": "Institutional Partners Panel"
+      },
+      "summary": {
+        "fr": "Thème : Opportunités, solutions et synergies portées par les partenaires en Francophonie",
+        "en": "Theme: Opportunities, solutions and synergies carried by partners in the Francophonie"
+      },
+      "speakers": [],
+      "organizations": [
+        {
+          "name_as_written": "OIF",
+          "role": "partner",
+          "descriptor_as_written": "Organisation Internationale de la Francophonie",
+          "label_v1": "Intervenants"
+        },
+        {
+          "name_as_written": "BAD",
+          "role": "partner",
+          "descriptor_as_written": "Banque Africaine de Développement",
+          "label_v1": "Intervenants"
+        },
+        {
+          "name_as_written": "CIF Banque mondiale",
+          "role": "partner",
+          "descriptor_as_written": "Climate Investment Funds",
+          "label_v1": "Intervenants"
+        },
+        {
+          "name_as_written": "BOAD",
+          "role": "partner",
+          "descriptor_as_written": "Banque Ouest Africaine de Développement",
+          "label_v1": "Intervenants"
+        },
+        {
+          "name_as_written": "BDEAC",
+          "role": "partner",
+          "descriptor_as_written": "Banque de Développement des États de l'Afrique Centrale",
+          "label_v1": "Intervenants"
+        }
+      ]
+    },
+    {
+      "time_as_written": "9h40 - 10h00",
+      "starts_at": "2025-11-14T09:40:00-03:00",
+      "ends_at": "2025-11-14T10:00:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 4,
+      "part": 1,
+      "title": {
+        "fr": "Panel Acteurs de Terrain",
+        "en": "Field Actors Panel"
+      },
+      "summary": {
+        "fr": "Thème : Réflexions sur les enjeux de financement durable pour les acteurs de développement",
+        "en": "Theme: Reflections on sustainable financing challenges for development actors"
+      },
+      "speakers": [],
+      "organizations": [
+        {
+          "name_as_written": "Desjardins International",
+          "role": "partner",
+          "descriptor_as_written": "Développement International",
+          "label_v1": "Intervenants"
+        },
+        {
+          "name_as_written": "Investissement Québec",
+          "role": "partner",
+          "descriptor_as_written": "Société d'État",
+          "label_v1": "Intervenants"
+        },
+        {
+          "name_as_written": "Irroko",
+          "role": "partner",
+          "descriptor_as_written": "Innovation Durable",
+          "label_v1": "Intervenants"
+        },
+        {
+          "name_as_written": "Ecolotrip",
+          "role": "partner",
+          "descriptor_as_written": "Tourisme Responsable",
+          "label_v1": "Intervenants"
+        },
+        {
+          "name_as_written": "HEC Montréal",
+          "role": "partner",
+          "descriptor_as_written": "École de Gestion",
+          "label_v1": "Intervenants"
+        }
+      ]
+    },
+    {
+      "time_as_written": "10h15 - 11h15",
+      "starts_at": "2025-11-14T10:15:00-03:00",
+      "ends_at": "2025-11-14T11:15:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 5,
+      "part": 2,
+      "title": {
+        "fr": "Marché carbone et restauration des écosystèmes forestiers",
+        "en": "Carbon market and restoration of forest ecosystems"
+      },
+      "summary": {
+        "fr": "Focus : Défis et opportunités pour les communautés locales",
+        "en": "Focus: Challenges and opportunities for local communities"
+      },
+      "speakers": [],
+      "organizations": [
+        {
+          "name_as_written": "Ministère du Cadre de vie et des Transports du Bénin",
+          "role": "lead",
+          "country_as_written": "Bénin",
+          "name_en": "Ministry of Living Environment and Transport of Benin"
+        }
+      ]
+    },
+    {
+      "time_as_written": "11h30 - 12h30",
+      "starts_at": "2025-11-14T11:30:00-03:00",
+      "ends_at": "2025-11-14T12:30:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 6,
+      "part": 2,
+      "title": {
+        "fr": "Économie bleue et préservation de la nature",
+        "en": "Blue economy and nature preservation"
+      },
+      "summary": {
+        "fr": "Focus : Rôle clé des acteurs financiers",
+        "en": "Focus: Key role of financial actors"
+      },
+      "speakers": [],
+      "organizations": [
+        {
+          "name_as_written": "France Assureurs",
+          "role": "lead"
+        }
+      ]
+    },
+    {
+      "time_as_written": "13h00 - 14h00",
+      "starts_at": "2025-11-14T13:00:00-03:00",
+      "ends_at": "2025-11-14T14:00:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 7,
+      "part": 2,
+      "title": {
+        "fr": "Localisation du financement",
+        "en": "Localization of financing"
+      },
+      "summary": {
+        "fr": "Focus : Transformer les portefeuilles locaux en solutions climatiques finançables",
+        "en": "Focus: Transforming local portfolios into financeable climate solutions"
+      },
+      "speakers": [],
+      "organizations": [
+        {
+          "name_as_written": "Fonds Mondial pour le Développement des Villes (France)",
+          "role": "lead",
+          "country_as_written": "France",
+          "name_en": "Global Fund for Cities Development (France)"
+        }
+      ]
+    },
+    {
+      "time_as_written": "14h15 - 15h15",
+      "starts_at": "2025-11-14T14:15:00-03:00",
+      "ends_at": "2025-11-14T15:15:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 8,
+      "part": 3,
+      "title": {
+        "fr": "Finance durable et gouvernance climatique",
+        "en": "Sustainable finance and climate governance"
+      },
+      "summary": {
+        "fr": "Focus : Catalyser compétences, capital et politiques - L'exemple du Québec",
+        "en": "Focus: Catalyzing skills, capital and policies - The example of Quebec"
+      },
+      "speakers": [],
+      "organizations": [
+        {
+          "name_as_written": "Finance Montréal (Canada)",
+          "role": "lead",
+          "country_as_written": "Canada"
+        }
+      ]
+    },
+    {
+      "time_as_written": "15h30 - 16h30",
+      "starts_at": "2025-11-14T15:30:00-03:00",
+      "ends_at": "2025-11-14T16:30:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 9,
+      "part": 3,
+      "title": {
+        "fr": "Mobilisation des institutions financières dans la transition énergétique",
+        "en": "Mobilization of financial institutions in the energy transition"
+      },
+      "summary": {
+        "fr": "Focus : Ratio vert/marron comme indicateur pertinent",
+        "en": "Focus: Green/brown ratio as a relevant indicator"
+      },
+      "speakers": [],
+      "organizations": [
+        {
+          "name_as_written": "Paris Europlace / Institut de la Finance Durable (France)",
+          "role": "lead",
+          "country_as_written": "France",
+          "name_en": "Paris Europlace / Institute for Sustainable Finance (France)",
+          "note": "Deux organisations sur une ligne : une seule peut être lead (ux_session_organizations_lead), l'autre co_organizer."
+        }
+      ]
+    },
+    {
+      "time_as_written": "16h45 - 17h45",
+      "starts_at": "2025-11-14T16:45:00-03:00",
+      "ends_at": "2025-11-14T17:45:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 10,
+      "part": 3,
+      "title": {
+        "fr": "Table ronde : Financement de la sortie des énergies fossiles",
+        "en": "Round table: Financing the phase-out of fossil fuels"
+      },
+      "speakers": [],
+      "organizations": [
+        {
+          "name_as_written": "Initiative LINGO (France)",
+          "role": "lead",
+          "country_as_written": "France",
+          "label_v1": "Animateur",
+          "note": "Animateur désigné par une organisation, sans personne : speaker_role moderator inapplicable."
+        }
+      ]
+    },
+    {
+      "time_as_written": "17h45",
+      "starts_at": "2025-11-14T17:45:00-03:00",
+      "ends_at": null,
+      "timezone": "America/Belem",
+      "sort_order": 11,
+      "part": 3,
+      "title": {
+        "fr": "Clôture officielle",
+        "en": "Official Closing"
+      },
+      "speakers": [],
+      "organizations": [],
+      "note": "Heure de fin absente alors que programme.sessions.ends_at est obligatoire."
+    }
+  ]
+}

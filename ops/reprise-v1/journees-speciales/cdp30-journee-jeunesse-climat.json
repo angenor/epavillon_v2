@@ -1,0 +1,731 @@
+{
+  "_source": {
+    "v1": "epavillonvue (v1, branche courante, relevé du 2026-10-27)",
+    "files": [
+      "src/views/programmations/JourneeJeunesseCOP30.vue",
+      "src/locales/fr/events.json (youthClimateDay.*, programmations.youthClimateDay)",
+      "src/locales/en/events.json (youthClimateDay.*, programmations.youthClimateDay)",
+      "src/views/programmations/ProgrammationDetail.vue (displayItems l. 1004, calendrier l. 1269)",
+      "src/components/YouthClimateDayWidget.vue",
+      "src/composables/useEmailSender.js (modèle youth_day)"
+    ],
+    "route_v1": "/programmations/2025/journee-jeunesse (nom journee-jeunesse-cop30)"
+  },
+  "_notes": [
+    "Champs nommés d'après les colonnes v2 visées (event.programme_tracks, programme.sessions, programme.session_speakers, programme.session_organizations). Les champs suffixés _as_written, _v1 ou placés sous no_v2_column n'ont pas de colonne v2.",
+    "first_name / last_name : découpés seulement quand la v1 écrit le nom de famille en capitales ; sinon absents. Aucune adresse électronique connue pour les intervenants alors que identity.people.primary_email est obligatoire.",
+    "role des intervenants : valeur de programme.speaker_role proposée d'après le libellé v1 (Modération -> moderator, Animation -> facilitator, Intervenants d'un panel -> panelist, sinon speaker). role des organisations : programme.organization_role proposé (Organisé par / Intervenant -> lead).",
+    "Aucun identifiant d'activité Supabase n'est cité par ces pages et elles n'appellent pas Supabase.",
+    "Fuseau America/Belem (UTC-3, sans heure d'été) supposé pour les heures du programme : la page n'en nomme aucun, mais la carte de la liste (ProgrammationDetail.vue) et le widget posent la journée à 2025-11-12T12:00Z - 20:45Z commentés « 9h00 Belém » / « 17h45 », le calendrier écrit « 9h00-17h45 heure de Belém (GMT-3) », et le courriel youth_day dit « 09h00 - 17h00 (heure de Belém (GMT - 3)) ».",
+    "AMBIGUÏTÉ D'HEURE : l'en-tête annonce 9h00 - 17h45 (youthClimateDay.schedule), la carte et le calendrier 9h00 - 17h45, le courriel 9h00 - 17h00, mais le programme détaillé court de 8h00 à 17h00. Les deux ne concordent ni au début ni à la fin ; starts_at/ends_at reprennent le programme détaillé tel qu'écrit.",
+    "« 10h11 » est écrit deux fois (bandeau de la partie 3 et séance 1) : vraisemblablement 10h10, gardé tel quel.",
+    "Plages non décrites : 12h00 - 13h00 et 14h45 - 15h00.",
+    "Les deux ateliers parallèles de 13h00 - 13h45 se chevauchent sur le seul stand : la v2 le signale (règle 3), sans le refuser.",
+    "Plusieurs séances portées par une organisation reprennent peut-être une activité soumise à l'appel de la CdP 30 dans Supabase : le courriel youth_day annonce aux organisations retenues que leur activité est versée dans cette journée. À rapprocher par organisation et titre lors de l'extraction, sans identifiant pour le confirmer."
+  ],
+  "event_ref": {
+    "acronym_v1": "CdP 30",
+    "edition_year": 2025,
+    "note": "Journée spéciale de l'édition CdP 30 (Belém) déjà reprise depuis Supabase : event_id à résoudre à l'import."
+  },
+  "programme_track": {
+    "code": "journee_jeunesse_climat",
+    "slug": "journee-jeunesse",
+    "kind": "special_day",
+    "title": {
+      "fr": "Journée Action Jeunesse pour le Climat en Francophonie - CdP 30",
+      "en": "Francophonie Youth Climate Action Day - COP 30"
+    },
+    "title_short_as_written": {
+      "fr": "Journée Jeunesse Climat",
+      "en": "Youth Climate Day"
+    },
+    "subtitle": {
+      "fr": "Créativité et employabilité : l'engagement et le leadership de la jeunesse francophone dans la lutte contre les changements climatiques",
+      "en": "Creativity and employability: engagement and leadership of Francophone youth in the fight against climate change"
+    },
+    "description": {
+      "fr": "L'événement s'inscrit dans le cadre de la 30e Conférence des Nations Unies sur les changements climatiques (CdP 30). Cette journée vise à positionner les jeunes francophones comme des artisans incontournables de l'action climatique et de la transition juste et inclusive.",
+      "en": "The event is part of the 30th United Nations Conference on Climate Change (COP 30). This day aims to position Francophone youth as essential contributors to climate action and just and inclusive transition."
+    },
+    "starts_on": "2025-11-12",
+    "ends_on": "2025-11-12",
+    "status_note": "Journée passée : published_at à poser à l'import si la page doit rester publique."
+  },
+  "no_v2_column": {
+    "date_as_written": {
+      "fr": "Mercredi 12 novembre 2025",
+      "en": "Wednesday, November 12, 2025"
+    },
+    "schedule_as_written": {
+      "fr": "9h00 - 17h45",
+      "en": "9:00 AM - 5:45 PM"
+    },
+    "location_as_written": {
+      "fr": "Pavillon de la Francophonie, Zone bleue, Belém",
+      "en": "Francophonie Pavilion, Blue Zone, Belém"
+    },
+    "room_v1": "youthClimateDay.location (salle de la carte dans ProgrammationDetail.vue) : correspond à la salle par défaut de l'édition (event.rooms)",
+    "format_v1": "networking (format de la carte dans ProgrammationDetail.vue)",
+    "main_organizer": {
+      "fr": "Institut de la Francophonie pour le développement durable (IFDD) - Organe subsidiaire de l'Organisation internationale de la Francophonie (OIF), dans le cadre de l'Initiative jeunesse de lutte contre les changements climatiques (IJLCC)",
+      "en": "Institute of the Francophonie for Sustainable Development (IFDD) - Subsidiary body of the International Organization of La Francophonie (OIF), as part of the Youth Initiative for Climate Change (IJLCC)"
+    },
+    "general_moderator": {
+      "name_as_written": "Mme Maïssane MANSOUR, Chargée de projets LOGIQ",
+      "civility": "mme",
+      "first_name": "Maïssane",
+      "last_name": "MANSOUR",
+      "job_title_snapshot": "Chargée de projets LOGIQ",
+      "role": "moderator",
+      "note": "Modération générale de la journée (clé youthClimateDay.moderator). « LOGIQ » tel qu'écrit, probablement LOJIQ. Anglais : « LOGIQ Project Manager »."
+    },
+    "objectives": [
+      {
+        "title": {
+          "fr": "Interconnexion",
+          "en": "Interconnection"
+        },
+        "description": {
+          "fr": "Favoriser les liens entre jeunes leaders, partenaires institutionnels et acteurs de la Francophonie",
+          "en": "Foster links between young leaders, institutional partners and Francophonie actors"
+        }
+      },
+      {
+        "title": {
+          "fr": "Valorisation",
+          "en": "Recognition"
+        },
+        "description": {
+          "fr": "Mettre en avant les projets, innovations et plaidoyers des jeunes francophones",
+          "en": "Showcase projects, innovations and advocacy of Francophone youth"
+        }
+      },
+      {
+        "title": {
+          "fr": "Employabilité verte",
+          "en": "Green Employability"
+        },
+        "description": {
+          "fr": "Promouvoir l'entrepreneuriat climatique via des formats interactifs",
+          "en": "Promote climate entrepreneurship through interactive formats"
+        }
+      },
+      {
+        "title": {
+          "fr": "Visibilité",
+          "en": "Visibility"
+        },
+        "description": {
+          "fr": "Renforcer la présence de l'IJLCC et des mécanismes d'appui à l'action jeunesse",
+          "en": "Strengthen the presence of IJLCC and youth action support mechanisms"
+        }
+      }
+    ],
+    "target_audience": [
+      {
+        "fr": "Jeunes francophones engagés dans l'action climatique (18-35 ans)",
+        "en": "Francophone youth engaged in climate action (18-35 years)"
+      },
+      {
+        "fr": "Représentants d'organisations jeunesse, ONG, institutions francophones",
+        "en": "Representatives of youth organizations, NGOs, Francophone institutions"
+      },
+      {
+        "fr": "Partenaires techniques et financiers soutenant l'action climatique",
+        "en": "Technical and financial partners supporting climate action"
+      },
+      {
+        "fr": "Délégués et participants de la CdP 30",
+        "en": "Delegates and participants of COP 30"
+      }
+    ],
+    "institutional_partners": [
+      {
+        "fr": "Organisation internationale de la Francophonie (OIF)",
+        "en": "International Organization of La Francophonie (OIF)"
+      },
+      {
+        "fr": "Gouvernement du Québec",
+        "en": "Government of Quebec"
+      },
+      {
+        "fr": "Ministère du Cadre de Vie et des Transports du Bénin",
+        "en": "Ministry of Environment and Transport of Benin"
+      },
+      {
+        "fr": "LOJIQ - Les Offices jeunesse internationaux du Québec",
+        "en": "LOJIQ - Quebec International Youth Offices"
+      }
+    ],
+    "financial_support": {
+      "fr": "Gouvernement du Québec dans le cadre du Plan pour une économie verte 2030",
+      "en": "Government of Quebec under the Plan for a Green Economy 2030"
+    },
+    "expected_results": [
+      {
+        "fr": "Renforcement de la visibilité des jeunes francophones à la CdP 30",
+        "en": "Strengthening the visibility of Francophone youth at COP 30"
+      },
+      {
+        "fr": "Mise en valeur de projets exemplaires et reproductibles",
+        "en": "Showcasing exemplary and replicable projects"
+      },
+      {
+        "fr": "Création de liens jeunes-partenaires (financement, mentorat, mise à l'échelle)",
+        "en": "Creating youth-partner links (funding, mentoring, scaling up)"
+      },
+      {
+        "fr": "Diffusion d'un message fort sur le rôle stratégique de la jeunesse francophone",
+        "en": "Disseminating a strong message about the strategic role of Francophone youth"
+      }
+    ],
+    "parts": [
+      {
+        "part": 1,
+        "time_as_written": "8h00 - 9h00",
+        "title": {
+          "fr": "Accueil et Ouverture",
+          "en": "Welcome and Opening"
+        }
+      },
+      {
+        "part": 2,
+        "time_as_written": "9h00 - 10h10",
+        "title": {
+          "fr": "Engagement et Innovation",
+          "en": "Engagement and Innovation"
+        }
+      },
+      {
+        "part": 3,
+        "time_as_written": "10h11 - 16h00",
+        "title": {
+          "fr": "Solutions et Partenariats",
+          "en": "Solutions and Partnerships"
+        }
+      },
+      {
+        "part": 4,
+        "time_as_written": "16h00 - 17h00",
+        "title": {
+          "fr": "Réseautage et Clôture",
+          "en": "Networking and Closing"
+        }
+      }
+    ],
+    "links": {
+      "zoom_registration_url": "https://us06web.zoom.us/meeting/register/8b4PtGDsS2uLhvgEyiMtNw",
+      "youtube_embed_id": "0t17gnM75ck",
+      "youtube_note": "Direct de la journée entière, intégré en tête de page. En v2, live.streams se rattache à une séance ou à l'édition, pas à un fil."
+    },
+    "images": [
+      {
+        "use": "bandeau de la page",
+        "path": "public/images/example/event_banniere_par_defaut_32_9_v3.jpg",
+        "note": "image par défaut générique de la v1, pas propre à la journée"
+      },
+      {
+        "use": "vignette de la carte dans la programmation",
+        "path": "public/images/example/event_banniere_par_defaut_16_9_reduit.jpg",
+        "note": "image par défaut générique"
+      }
+    ]
+  },
+  "sessions": [
+    {
+      "time_as_written": "8h00 - 8h45",
+      "starts_at": "2025-11-12T08:00:00-03:00",
+      "ends_at": "2025-11-12T08:45:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 1,
+      "part": 1,
+      "title": {
+        "fr": "Accueil et installation des participants",
+        "en": "Welcome and participant registration"
+      },
+      "speakers": [],
+      "organizations": []
+    },
+    {
+      "time_as_written": "8h45 - 9h00",
+      "starts_at": "2025-11-12T08:45:00-03:00",
+      "ends_at": "2025-11-12T09:00:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 2,
+      "part": 1,
+      "title": {
+        "fr": "Séquence d'ouverture",
+        "en": "Opening Sequence"
+      },
+      "speakers": [
+        {
+          "name_as_written": "Dr Issa BADO, Spécialiste de programme IFDD (3 min)",
+          "civility": "dr",
+          "first_name": "Issa",
+          "last_name": "BADO",
+          "job_title_snapshot": "Spécialiste de programme",
+          "organization_snapshot": "IFDD",
+          "role": "speaker",
+          "segment": {
+            "fr": "Bienvenue OIF",
+            "en": "OIF Welcome"
+          },
+          "duration_as_written": "3 min"
+        },
+        {
+          "name_as_written": "M. Hector Sann'Do NAMMANGUE (Togo) - 2 min",
+          "civility": "m",
+          "last_name": "NAMMANGUE",
+          "role": "speaker",
+          "country_as_written": "Togo",
+          "segment": {
+            "fr": "Impressions de jeunes journalistes",
+            "en": "Impressions from young journalists"
+          },
+          "duration_as_written": "2 min",
+          "note": "Prénom « Hector Sann'Do » ou nom « Sann'Do NAMMANGUE » : découpage incertain. Fonction : jeune journaliste."
+        },
+        {
+          "name_as_written": "Mme Victoria Emmanuelle FOREST-BRIAND (Québec) - 2 min",
+          "civility": "mme",
+          "first_name": "Victoria Emmanuelle",
+          "last_name": "FOREST-BRIAND",
+          "role": "speaker",
+          "country_as_written": "Québec",
+          "segment": {
+            "fr": "Impressions de jeunes journalistes",
+            "en": "Impressions from young journalists"
+          },
+          "duration_as_written": "2 min",
+          "note": "Fonction : jeune journaliste."
+        },
+        {
+          "name_as_written": "M. Jean LEMIRE, Émissaire du Québec aux changements climatiques (5 min)",
+          "civility": "m",
+          "first_name": "Jean",
+          "last_name": "LEMIRE",
+          "job_title_snapshot": "Émissaire du Québec aux changements climatiques",
+          "organization_snapshot": "Gouvernement du Québec",
+          "role": "speaker",
+          "segment": {
+            "fr": "Ouverture officielle",
+            "en": "Official Opening"
+          },
+          "duration_as_written": "5 min",
+          "note": "organization_snapshot déduit de la fonction ; titre anglais : « Quebec's Special Envoy for Climate Change »."
+        }
+      ],
+      "organizations": []
+    },
+    {
+      "time_as_written": "9h00 - 9h15",
+      "starts_at": "2025-11-12T09:00:00-03:00",
+      "ends_at": "2025-11-12T09:15:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 3,
+      "part": 2,
+      "title": {
+        "fr": "Pitchs Inspirants",
+        "en": "Inspiring Pitches"
+      },
+      "summary": {
+        "fr": "Format : Présentations de 2 minutes par intervenant",
+        "en": "Format: 2-minute presentations per speaker"
+      },
+      "speakers": [
+        {
+          "name_as_written": "Mme Constance GENEVEE, Coordinatrice programme jeunes délégués du Bénin",
+          "civility": "mme",
+          "first_name": "Constance",
+          "last_name": "GENEVEE",
+          "job_title_snapshot": "Coordinatrice programme jeunes délégués du Bénin",
+          "role": "moderator",
+          "note": "Modération de toute la partie 2 (9h00 - 10h10), recopiée sur chaque séance de la partie."
+        },
+        {
+          "name_as_written": "Mme Hélène OMOY KOMBE - Éco-innovatrice (RDC)",
+          "civility": "mme",
+          "first_name": "Hélène",
+          "last_name": "OMOY KOMBE",
+          "job_title_snapshot": "Éco-innovatrice",
+          "role": "speaker",
+          "country_as_written": "RDC"
+        },
+        {
+          "name_as_written": "Mme Andréanne FIOLA - Entrepreneure (Québec)",
+          "civility": "mme",
+          "first_name": "Andréanne",
+          "last_name": "FIOLA",
+          "job_title_snapshot": "Entrepreneure",
+          "role": "speaker",
+          "country_as_written": "Québec"
+        },
+        {
+          "name_as_written": "Mme Malek ROMDHANE - Militante (Tunisie)",
+          "civility": "mme",
+          "first_name": "Malek",
+          "last_name": "ROMDHANE",
+          "job_title_snapshot": "Militante",
+          "role": "speaker",
+          "country_as_written": "Tunisie"
+        },
+        {
+          "name_as_written": "M. Antonio RODRIGUEZ-CAMPBELL - Synergies biodiversité-climat (Québec)",
+          "civility": "m",
+          "first_name": "Antonio",
+          "last_name": "RODRIGUEZ-CAMPBELL",
+          "job_title_snapshot": "Synergies biodiversité-climat",
+          "role": "speaker",
+          "country_as_written": "Québec"
+        },
+        {
+          "name_as_written": "Mme Jennifer PAQUETTE - Comité bâtisseurs écologiques (Québec)",
+          "civility": "mme",
+          "first_name": "Jennifer",
+          "last_name": "PAQUETTE",
+          "organization_snapshot": "Comité bâtisseurs écologiques",
+          "role": "speaker",
+          "country_as_written": "Québec"
+        },
+        {
+          "name_as_written": "Mme Duthie-Chancel MBOMBET - Éco-entrepreneure (Gabon)",
+          "civility": "mme",
+          "first_name": "Duthie-Chancel",
+          "last_name": "MBOMBET",
+          "job_title_snapshot": "Éco-entrepreneure",
+          "role": "speaker",
+          "country_as_written": "Gabon"
+        }
+      ],
+      "organizations": []
+    },
+    {
+      "time_as_written": "9h15 - 9h30",
+      "starts_at": "2025-11-12T09:15:00-03:00",
+      "ends_at": "2025-11-12T09:30:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 4,
+      "part": 2,
+      "title": {
+        "fr": "Atelier Plaidoyer Créatif #1",
+        "en": "Creative Advocacy Workshop #1"
+      },
+      "summary": {
+        "fr": "Thème : Jeunesse francophone et transition climatique",
+        "en": "Theme: Francophone youth and climate transition"
+      },
+      "speakers": [
+        {
+          "name_as_written": "Mme Constance GENEVEE, Coordinatrice programme jeunes délégués du Bénin",
+          "civility": "mme",
+          "first_name": "Constance",
+          "last_name": "GENEVEE",
+          "job_title_snapshot": "Coordinatrice programme jeunes délégués du Bénin",
+          "role": "moderator",
+          "note": "Modération de toute la partie 2 (9h00 - 10h10), recopiée sur chaque séance de la partie."
+        }
+      ],
+      "organizations": [
+        {
+          "name_as_written": "Réseau des Organisations des Jeunes Leaders Africains des Nations Unies",
+          "role": "lead",
+          "name_en": "Network of African Young Leaders Organizations of the United Nations",
+          "label_v1": "Organisé par"
+        }
+      ]
+    },
+    {
+      "time_as_written": "9h30 - 9h45",
+      "starts_at": "2025-11-12T09:30:00-03:00",
+      "ends_at": "2025-11-12T09:45:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 5,
+      "part": 2,
+      "title": {
+        "fr": "Atelier Plaidoyer Créatif #2",
+        "en": "Creative Advocacy Workshop #2"
+      },
+      "summary": {
+        "fr": "Thème : Jeunesse, innovation et initiatives climatiques",
+        "en": "Theme: Youth, innovation and climate initiatives"
+      },
+      "speakers": [
+        {
+          "name_as_written": "Mme Constance GENEVEE, Coordinatrice programme jeunes délégués du Bénin",
+          "civility": "mme",
+          "first_name": "Constance",
+          "last_name": "GENEVEE",
+          "job_title_snapshot": "Coordinatrice programme jeunes délégués du Bénin",
+          "role": "moderator",
+          "note": "Modération de toute la partie 2 (9h00 - 10h10), recopiée sur chaque séance de la partie."
+        }
+      ],
+      "organizations": [
+        {
+          "name_as_written": "Ministère du Cadre de vie et des Transports du Bénin",
+          "role": "lead",
+          "country_as_written": "Bénin",
+          "name_en": "Ministry of Environment and Transport of Benin",
+          "label_v1": "Organisé par",
+          "note": "La traduction anglaise v1 (« Environment ») diffère du nom français (« Cadre de vie »)."
+        }
+      ]
+    },
+    {
+      "time_as_written": "9h45 - 10h10",
+      "starts_at": "2025-11-12T09:45:00-03:00",
+      "ends_at": "2025-11-12T10:10:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 6,
+      "part": 2,
+      "title": {
+        "fr": "Concours et Quiz",
+        "en": "Contest and Quiz"
+      },
+      "speakers": [
+        {
+          "name_as_written": "Mme Constance GENEVEE, Coordinatrice programme jeunes délégués du Bénin",
+          "civility": "mme",
+          "first_name": "Constance",
+          "last_name": "GENEVEE",
+          "job_title_snapshot": "Coordinatrice programme jeunes délégués du Bénin",
+          "role": "moderator",
+          "note": "Modération de toute la partie 2 (9h00 - 10h10), recopiée sur chaque séance de la partie."
+        },
+        {
+          "name_as_written": "Mme Constance GENEVEE (Bénin)",
+          "civility": "mme",
+          "first_name": "Constance",
+          "last_name": "GENEVEE",
+          "role": "facilitator",
+          "country_as_written": "Bénin",
+          "note": "Animation ; même personne que la modératrice de la partie 2. ux_session_speakers (session, personne, rôle) admet les deux rôles."
+        },
+        {
+          "name_as_written": "Mme Laurie CHARTRAND, artiste (Québec)",
+          "civility": "mme",
+          "first_name": "Laurie",
+          "last_name": "CHARTRAND",
+          "job_title_snapshot": "artiste",
+          "role": "facilitator",
+          "country_as_written": "Québec"
+        }
+      ],
+      "organizations": []
+    },
+    {
+      "time_as_written": "10h11 - 11h00",
+      "starts_at": "2025-11-12T10:11:00-03:00",
+      "ends_at": "2025-11-12T11:00:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 7,
+      "part": 3,
+      "title": {
+        "fr": "Rôle transformateur des jeunes dans biodiversité et plaidoyer climatique",
+        "en": "Transformative role of youth in biodiversity and climate advocacy"
+      },
+      "speakers": [],
+      "organizations": [
+        {
+          "name_as_written": "Ministère de l'environnement (Tunisie)",
+          "role": "lead",
+          "country_as_written": "Tunisie",
+          "name_en": "Ministry of Environment (Tunisia)",
+          "label_v1": "Intervenant"
+        }
+      ],
+      "note": "Titre v1 = « Thème ». « 10h11 » tel qu'écrit."
+    },
+    {
+      "time_as_written": "11h00 - 12h00",
+      "starts_at": "2025-11-12T11:00:00-03:00",
+      "ends_at": "2025-11-12T12:00:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 8,
+      "part": 3,
+      "title": {
+        "fr": "Jeunesse africaine et résilience climatique - systèmes alimentaires",
+        "en": "African youth and climate resilience - food systems"
+      },
+      "speakers": [],
+      "organizations": [
+        {
+          "name_as_written": "FAO (Organisation des Nations Unies pour l'alimentation et l'agriculture)",
+          "role": "lead",
+          "name_en": "FAO (Food and Agriculture Organization of the United Nations)",
+          "label_v1": "Intervenant"
+        }
+      ]
+    },
+    {
+      "time_as_written": "13h00 - 13h45",
+      "starts_at": "2025-11-12T13:00:00-03:00",
+      "ends_at": "2025-11-12T13:45:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 9,
+      "part": 3,
+      "parallel_group": "13h00 sessions parallèles",
+      "title": {
+        "fr": "Économie circulaire verte",
+        "en": "Green Circular Economy"
+      },
+      "summary": {
+        "fr": "Valorisation déchets organiques en biogaz et fertilisants",
+        "en": "Valorization of organic waste into biogas and fertilizers"
+      },
+      "speakers": [],
+      "organizations": [
+        {
+          "name_as_written": "Les Offices jeunesse internationaux du Québec (LOJIQ)",
+          "role": "lead",
+          "name_en": "Quebec International Youth Offices (LOJIQ)",
+          "label_v1": "Organisé par"
+        }
+      ],
+      "note": "Atelier parallèle n°1 du créneau « Sessions parallèles » (intervenant du créneau : « Divers intervenants »)."
+    },
+    {
+      "time_as_written": "13h00 - 13h45",
+      "starts_at": "2025-11-12T13:00:00-03:00",
+      "ends_at": "2025-11-12T13:45:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 10,
+      "part": 3,
+      "parallel_group": "13h00 sessions parallèles",
+      "title": {
+        "fr": "Politiques climatiques",
+        "en": "Climate Policies"
+      },
+      "summary": {
+        "fr": "Implication des jeunes dans les stratégies climatiques",
+        "en": "Youth involvement in climate strategies"
+      },
+      "speakers": [],
+      "organizations": [
+        {
+          "name_as_written": "Ministère de l'environnement (Tunisie)",
+          "role": "lead",
+          "country_as_written": "Tunisie",
+          "name_en": "Ministry of Environment (Tunisia)",
+          "label_v1": "Organisé par"
+        }
+      ],
+      "note": "Atelier parallèle n°2, même créneau que le n°1."
+    },
+    {
+      "time_as_written": "13h45 - 14h15",
+      "starts_at": "2025-11-12T13:45:00-03:00",
+      "ends_at": "2025-11-12T14:15:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 11,
+      "part": 3,
+      "title": {
+        "fr": "Une seule santé et qualité de l'air",
+        "en": "One Health and air quality"
+      },
+      "speakers": [],
+      "organizations": [
+        {
+          "name_as_written": "Fédération L'Air et Moi (France)",
+          "role": "lead",
+          "country_as_written": "France",
+          "name_en": "Air and Me Federation (France)",
+          "label_v1": "Intervenant"
+        }
+      ]
+    },
+    {
+      "time_as_written": "14h15 - 14h45",
+      "starts_at": "2025-11-12T14:15:00-03:00",
+      "ends_at": "2025-11-12T14:45:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 12,
+      "part": 3,
+      "title": {
+        "fr": "Gener'Action CDN - Déclaration de Kpalimé",
+        "en": "Gener'Action NDC - Kpalimé Declaration"
+      },
+      "speakers": [],
+      "organizations": [
+        {
+          "name_as_written": "Ecolotrip (Togo)",
+          "role": "lead",
+          "country_as_written": "Togo",
+          "label_v1": "Intervenant"
+        }
+      ]
+    },
+    {
+      "time_as_written": "15h00 - 16h00",
+      "starts_at": "2025-11-12T15:00:00-03:00",
+      "ends_at": "2025-11-12T16:00:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 13,
+      "part": 3,
+      "title": {
+        "fr": "Lutte contre la désinformation climatique - Gamification, collaboration et science",
+        "en": "Fighting climate misinformation - Gamification, collaboration and science"
+      },
+      "speakers": [],
+      "organizations": [
+        {
+          "name_as_written": "Fresque du Climat (France)",
+          "role": "lead",
+          "country_as_written": "France",
+          "name_en": "Climate Fresco (France)",
+          "label_v1": "Intervenant"
+        }
+      ]
+    },
+    {
+      "time_as_written": "16h00 - 17h00",
+      "starts_at": "2025-11-12T16:00:00-03:00",
+      "ends_at": "2025-11-12T17:00:00-03:00",
+      "timezone": "America/Belem",
+      "sort_order": 14,
+      "part": 4,
+      "title": {
+        "fr": "Temps de Réseautage",
+        "en": "Networking Time"
+      },
+      "description": {
+        "fr": "Espaces d'échanges jeunes-partenaires-décideurs. Facilitation mentorat et collaborations.",
+        "en": "Youth-partners-decision makers exchange spaces. Facilitation of mentoring and collaborations."
+      },
+      "speakers": [
+        {
+          "name_as_written": "Mme Constance GENEVEE",
+          "civility": "mme",
+          "first_name": "Constance",
+          "last_name": "GENEVEE",
+          "role": "facilitator"
+        },
+        {
+          "name_as_written": "Mme Laurie CHARTRAND",
+          "civility": "mme",
+          "first_name": "Laurie",
+          "last_name": "CHARTRAND",
+          "role": "facilitator"
+        }
+      ],
+      "organizations": [],
+      "note": "description = les deux puces v1 réunies ; libellé v1 « Animation : Mme Constance GENEVEE et Mme Laurie CHARTRAND »."
+    },
+    {
+      "time_as_written": "17h00",
+      "starts_at": "2025-11-12T17:00:00-03:00",
+      "ends_at": null,
+      "timezone": "America/Belem",
+      "sort_order": 15,
+      "part": 4,
+      "title": {
+        "fr": "Clôture officielle",
+        "en": "Official Closing"
+      },
+      "speakers": [],
+      "organizations": [],
+      "note": "Heure de fin absente du code v1 alors que programme.sessions.ends_at est obligatoire. L'en-tête annonce une fin à 17h45, sans le lier à la clôture."
+    }
+  ]
+}

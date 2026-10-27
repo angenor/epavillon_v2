@@ -1,0 +1,463 @@
+{
+  "_source": {
+    "v1": "epavillonvue (v1, branche courante, relevé du 2026-10-27)",
+    "files": [
+      "src/views/programmations/SeminaireLarnakaChypre2025.vue (textes en dur, français seulement, aucune clé i18n)",
+      "src/components/CyprusSeminarWidget.vue (importé nulle part)"
+    ],
+    "route_v1": "/programmations/2025/seminaire-chypre (nom seminaire-chypre-2025)"
+  },
+  "_notes": [
+    "Champs nommés d'après les colonnes v2 visées (event.programme_tracks, programme.sessions, programme.session_speakers, programme.session_organizations). Les champs suffixés _as_written, _v1 ou placés sous no_v2_column n'ont pas de colonne v2.",
+    "first_name / last_name : découpés seulement quand la v1 écrit le nom de famille en capitales ; sinon absents. Aucune adresse électronique connue pour les intervenants alors que identity.people.primary_email est obligatoire.",
+    "role des intervenants : valeur de programme.speaker_role proposée d'après le libellé v1 (Modération -> moderator, Animation -> facilitator, Intervenants d'un panel -> panelist, sinon speaker). role des organisations : programme.organization_role proposé (Organisé par / Intervenant -> lead).",
+    "Aucun identifiant d'activité Supabase n'est cité par ces pages et elles n'appellent pas Supabase.",
+    "Nature : événement distinct, pas une journée de la CdP 30 (1er au 3 décembre 2025, après la conférence de Belém, à Chypre). Proposé comme une édition à part (event.events, série standalone), avec trois event_days. Le commentaire de 060_events.sql cite pourtant le « Séminaire de Chypre » comme exemple de programme_track side_programme : à trancher.",
+    "Fuseau Asia/Nicosia : le code pose le début à 2025-12-01T09:00:00+02:00 (compte à rebours de la page et widget, commenté « heure de Chypre - UTC+2 ») et la fin à 2025-12-03T18:00:00+02:00 (widget seul). Décembre : heure d'hiver de Chypre, UTC+2.",
+    "Aucune heure par séance : seulement « Matinée », « Après-midi », « Soirée », « Matin », « Clôture ». starts_at et ends_at, obligatoires, ne peuvent être remplis sans inventer.",
+    "Lieu par jour inconnu : la page dit « Larnaka & Nicosie » sans dire quel jour où.",
+    "Texte en français seulement : aucune version anglaise.",
+    "Pas d'appel à Supabase, pas d'identifiant d'activité : rien de ce séminaire n'est vraisemblablement en base.",
+    "Personnes ressources : coordonnées professionnelles publiées sur la page publique v1."
+  ],
+  "event": {
+    "series_kind": "standalone",
+    "edition_year": 2025,
+    "title": {
+      "fr": "Financement durable pour le climat, la biodiversité et l'eau"
+    },
+    "subtitle_as_written": {
+      "fr": "Mobiliser les compétences et les innovations francophones"
+    },
+    "page_title_as_written": "Financement durable pour le climat, la biodiversité et l’eau : mobiliser les compétences et les innovations francophones 2025",
+    "short_name_as_written": "Séminaire Larnaka 2025",
+    "widget_label_as_written": "Séminaire Finance Durable",
+    "slug_v1": "seminaire-chypre",
+    "description": {
+      "fr": "Dans la dynamique de son adhésion en tant que membre de plein droit de l'Organisation internationale de la Francophonie (OIF) lors du XIXe Sommet de la Francophonie à Paris (France) en 2024, la République de Chypre souhaite impulser une dynamique d’échanges et de coopération francophone sur les défis planétaires de notre époque tels que le développement durable, le changement climatique, la préservation de la biodiversité ou la gestion durable des ressources en eau. En prélude de sa présidence tournante de l’Union européenne en 2026, le gouvernement de Chypre, en partenariat avec l’Institut de la Francophonie pour le développement durable (IFDD), organe subsidiaire de l’Organisation internationale de la Francophonie (OIF) organise un séminaire stratégique et formatif du 01 au 03 décembre 2025 à Larnaka et à Nicosie (Chypre), qui vise à valoriser les modèles novateurs de financement durable, à renforcer les compétences techniques, à décloisonner les dialogues entre institutions, territoires et communautés financières et à catalyser l’action francophone sur les mécanismes innovants de financement durable.\n\nDans un contexte climatique critique où les États doivent concrétiser leurs engagements de neutralité carbone et de protection des ressources naturelles, notamment l’eau et où les fenêtres de financement internationaux se rarifient, l’enjeu est double : faire le point sur les progrès réalisés à mi-parcours de la programmation 2024–2027 sur la finance durable et identifier les leviers de transformation financière pour l’environnement, le climat et l’eau."
+    },
+    "participation_mode": "in_person",
+    "timezone": "Asia/Nicosia",
+    "starts_at": "2025-12-01T09:00:00+02:00",
+    "ends_at": "2025-12-03T18:00:00+02:00",
+    "country_as_written": "Chypre",
+    "city_as_written": "Larnaka & Nicosie",
+    "has_pavilion": false,
+    "has_pavilion_note": "Séminaire, pas de stand.",
+    "status_proposed": "completed"
+  },
+  "event_days": [
+    {
+      "day_date": "2025-12-01",
+      "title": {
+        "fr": "Inspirer et connecter"
+      },
+      "label_as_written": "Jour 1",
+      "sort_order": 1
+    },
+    {
+      "day_date": "2025-12-02",
+      "title": {
+        "fr": "Découvrir, outiller et co-créer"
+      },
+      "label_as_written": "Jour 2",
+      "sort_order": 2
+    },
+    {
+      "day_date": "2025-12-03",
+      "title": {
+        "fr": "Ancrer et projeter"
+      },
+      "label_as_written": "Jour 3",
+      "sort_order": 3
+    }
+  ],
+  "no_v2_column": {
+    "participants_as_written": "40 participants",
+    "general_moderator": {
+      "name_as_written": "Adel BEN YOUSSEF",
+      "first_name": "Adel",
+      "last_name": "BEN YOUSSEF",
+      "role": "moderator",
+      "note": "« Modération » de tout le programme, sans fonction ni organisation."
+    },
+    "organizers_as_written": [
+      "République de Chypre",
+      "IFDD-OIF"
+    ],
+    "partners": [
+      {
+        "name_as_written": "République de Chypre",
+        "logo": "public/logos/republic-of-cyprus-government_e03e18_opk.jpeg"
+      },
+      {
+        "name_as_written": "Cyprus Aid - Agence chypriote de développement",
+        "logo": "public/logos/cyprusaid.jpg"
+      },
+      {
+        "name_as_written": "Organisation internationale de la Francophonie (OIF)",
+        "logo": "public/logos/Logos_OIF-IFDD-SuperposesFlipBook.jpg",
+        "logo_note": "logo commun OIF-IFDD"
+      },
+      {
+        "name_as_written": "Institut de la Francophonie pour le développement durable (IFDD)",
+        "logo": "public/logos/Logos_OIF-IFDD-SuperposesFlipBook.jpg",
+        "logo_note": "logo commun OIF-IFDD"
+      }
+    ],
+    "objectives": [
+      {
+        "title": "Partager des retours d'expérience",
+        "description": "Partager des retours d'expérience sur les mécanismes internationaux de financement vert (FVC, GEF, Fonds d'adaptation)."
+      },
+      {
+        "title": "Favoriser l'émergence de modèles hybrides",
+        "description": "Favoriser l'émergence de modèles hybrides de financement (fonds fiduciaires, financement philanthropique, budget vert, RSE, etc.)."
+      },
+      {
+        "title": "Stimuler une approche innovante",
+        "description": "Stimuler une approche innovante de la finance climatique, en particulier dans les milieux insulaires."
+      },
+      {
+        "title": "Renforcer le réseau francophone",
+        "description": "Renforcer le réseau francophone d'expertise et de coopération sur les financements liés au climat, à la biodiversité, à la désertification et à l'eau."
+      }
+    ],
+    "target_audience": [
+      "Représentants des institutions gouvernementales bénéficiaires d'assistance technique",
+      "Experts en environnement et en finance durable",
+      "Représentants de bailleurs de fonds",
+      "Acteurs francophones dynamiques dans la finance climatique"
+    ],
+    "expected_results": [
+      "Organisation d'une session de partage d'expériences sur l'accréditation, la priorisation de projets et la formulation de notes conceptuelles",
+      "Soutenir une rencontre inversée \"pitchs à rebours\" pour donner l'occasion aux bailleurs de présenter leurs attentes en matière de priorités de financement durable – inversant ainsi le rôle traditionnel bénéficiaire/donateur",
+      "Présentation d'un parcours immersif territorial en intégrant une simulation interactive de cas concrets de financements durables autour des défis climatiques ou de biodiversité pour ancrer les apprentissages dans le réel en termes de vision, besoins et solutions",
+      "Lancement d'un hackathon climatique francophone sur l'IA appliquée à la finance durable et l'emploi des jeunes",
+      "Soutien au co-apprentissage numérique : prolonger le séminaire via une série de micro-vidéos post-séminaire sur la contribution de Chypre à la coopération francophone en matière d'environnement, de climat et de finance durable dans l'espace francophone"
+    ],
+    "resource_persons": [
+      {
+        "name_as_written": "Madame Marina Christofi",
+        "civility": "mme",
+        "job_title": "Correspondante nationale, Chargée de mission pour les affaires francophones",
+        "organization_as_written": "Ministère des Affaires Etrangères, République de Chypre",
+        "contact_note": "coordonnées sur la page v1 (SeminaireLarnakaChypre2025.vue), non recopiées dans le dépôt"
+      },
+      {
+        "name_as_written": "Madame E. Lionelle Ngo-Samnick",
+        "civility": "mme",
+        "job_title": "Coordonnatrice de projet",
+        "organization_as_written": "Institut de la Francophonie pour le développement durable (IFDD), Organisation internationale de la Francophonie",
+        "contact_note": "coordonnées sur la page v1 (SeminaireLarnakaChypre2025.vue), non recopiées dans le dépôt"
+      }
+    ],
+    "images": [
+      {
+        "use": "bandeau",
+        "path": "public/images/example/banner-chypre.jpg",
+        "note": "propre au séminaire, présent"
+      }
+    ]
+  },
+  "sessions": [
+    {
+      "day_date": "2025-12-01",
+      "slot_as_written": "Matinée",
+      "starts_at": null,
+      "ends_at": null,
+      "timezone": "Asia/Nicosia",
+      "sort_order": 1,
+      "title": {
+        "fr": "Discours d'ouverture"
+      },
+      "speakers": [],
+      "organizations_as_written": "Gouvernement chypriote, OIF-IFDD",
+      "organizations": [
+        {
+          "name_as_written": "Gouvernement chypriote",
+          "role": "lead"
+        },
+        {
+          "name_as_written": "OIF-IFDD",
+          "role": "co_organizer"
+        }
+      ]
+    },
+    {
+      "day_date": "2025-12-01",
+      "slot_as_written": "Matinée",
+      "starts_at": null,
+      "ends_at": null,
+      "timezone": "Asia/Nicosia",
+      "sort_order": 2,
+      "title": {
+        "fr": "Panel inaugural sur les tendances mondiales de la finance durable et les priorités francophones"
+      },
+      "speakers_as_written": "Mohamed Adil Youssfi, POTONGO Emmanu KIMPUKI et Mathieu BIAOU",
+      "speakers": [
+        {
+          "name_as_written": "Mohamed Adil Youssfi",
+          "role": "panelist",
+          "note": "Aucun nom en capitales : découpage non fait."
+        },
+        {
+          "name_as_written": "POTONGO Emmanu KIMPUKI",
+          "role": "panelist",
+          "note": "Deux mots en capitales encadrant le prénom : découpage non fait (« Emmanu » tel qu'écrit)."
+        },
+        {
+          "name_as_written": "Mathieu BIAOU",
+          "first_name": "Mathieu",
+          "last_name": "BIAOU",
+          "role": "panelist"
+        }
+      ],
+      "organizations": []
+    },
+    {
+      "day_date": "2025-12-01",
+      "slot_as_written": "Après-midi",
+      "starts_at": null,
+      "ends_at": null,
+      "timezone": "Asia/Nicosia",
+      "sort_order": 3,
+      "title": {
+        "fr": "Session thématique : Panorama des mécanismes internationaux de financement (FVC, FA, GBFF du FEM, etc.)"
+      },
+      "speakers": [
+        {
+          "name_as_written": "Alioune SEYDI",
+          "first_name": "Alioune",
+          "last_name": "SEYDI",
+          "role": "speaker"
+        }
+      ],
+      "organizations": []
+    },
+    {
+      "day_date": "2025-12-01",
+      "slot_as_written": "Après-midi",
+      "starts_at": null,
+      "ends_at": null,
+      "timezone": "Asia/Nicosia",
+      "sort_order": 4,
+      "title": {
+        "fr": "Échange interactif : Défis d'accès aux financements pour les petits États et territoires insulaires et perspectives francophones"
+      },
+      "speakers": [
+        {
+          "name_as_written": "Bryan CHUNG-KAI-TO",
+          "first_name": "Bryan",
+          "last_name": "CHUNG-KAI-TO",
+          "role": "speaker"
+        },
+        {
+          "name_as_written": "Manuel ROSÁRIO",
+          "first_name": "Manuel",
+          "last_name": "ROSÁRIO",
+          "role": "speaker"
+        },
+        {
+          "name_as_written": "Lucie Nmara NAUKA",
+          "first_name": "Lucie Nmara",
+          "last_name": "NAUKA",
+          "role": "speaker",
+          "note": "« Nmara » prénom ou nom : incertain."
+        }
+      ],
+      "organizations": []
+    },
+    {
+      "day_date": "2025-12-01",
+      "slot_as_written": "Soirée",
+      "starts_at": null,
+      "ends_at": null,
+      "timezone": "Asia/Nicosia",
+      "sort_order": 5,
+      "title": {
+        "fr": "Cocktail de réseautage"
+      },
+      "speakers": [],
+      "organizations": []
+    },
+    {
+      "day_date": "2025-12-02",
+      "slot_as_written": "Matinée culturelle",
+      "starts_at": null,
+      "ends_at": null,
+      "timezone": "Asia/Nicosia",
+      "sort_order": 6,
+      "title": {
+        "fr": "Matinée culturelle"
+      },
+      "description": {
+        "fr": "Visite guidée et activité culturelle. Moment d'échanges informels entre participants (réseautage interculturel)."
+      },
+      "speakers": [],
+      "organizations": [],
+      "note": "Titre = intitulé du créneau ; description = les deux puces v1."
+    },
+    {
+      "day_date": "2025-12-02",
+      "slot_as_written": "Après-midi",
+      "starts_at": null,
+      "ends_at": null,
+      "timezone": "Asia/Nicosia",
+      "sort_order": 7,
+      "title": {
+        "fr": "Clinique technique : accréditation, priorisation des projets et formulation de notes conceptuelles"
+      },
+      "speakers_as_written": "Hubert RUZIBIZA et Gerard Aimé MISTOUL, expérience du Gabon",
+      "speakers": [
+        {
+          "name_as_written": "Hubert RUZIBIZA",
+          "first_name": "Hubert",
+          "last_name": "RUZIBIZA",
+          "role": "speaker"
+        },
+        {
+          "name_as_written": "Gerard Aimé MISTOUL",
+          "first_name": "Gerard Aimé",
+          "last_name": "MISTOUL",
+          "role": "speaker",
+          "note": "« expérience du Gabon » accolé à ce nom."
+        }
+      ],
+      "organizations": []
+    },
+    {
+      "day_date": "2025-12-02",
+      "slot_as_written": "Après-midi",
+      "starts_at": null,
+      "ends_at": null,
+      "timezone": "Asia/Nicosia",
+      "sort_order": 8,
+      "title": {
+        "fr": "Lancement d'un hackathon climatique. L'intelligence artificielle au service de la finance durable, de l'environnement, du climat et de l'eau"
+      },
+      "speakers": [
+        {
+          "name_as_written": "Mohammed Amine ZAROUK",
+          "first_name": "Mohammed Amine",
+          "last_name": "ZAROUK",
+          "role": "speaker"
+        },
+        {
+          "name_as_written": "Chaimae El KOUFI",
+          "first_name": "Chaimae",
+          "last_name": "El KOUFI",
+          "role": "speaker",
+          "note": "Particule « El » hors capitales."
+        }
+      ],
+      "organizations": []
+    },
+    {
+      "day_date": "2025-12-02",
+      "slot_as_written": "Soirée",
+      "starts_at": null,
+      "ends_at": null,
+      "timezone": "Asia/Nicosia",
+      "sort_order": 9,
+      "title": {
+        "fr": "Rencontre inversée \"pitch à rebours\" sur le Fonds pour les Changements Climatiques en Afrique de la Banque africaine de développement"
+      },
+      "speakers": [
+        {
+          "name_as_written": "Bela Emile KOUAKOU",
+          "first_name": "Bela Emile",
+          "last_name": "KOUAKOU",
+          "role": "speaker"
+        }
+      ],
+      "organizations": []
+    },
+    {
+      "day_date": "2025-12-02",
+      "slot_as_written": "Soirée",
+      "starts_at": null,
+      "ends_at": null,
+      "timezone": "Asia/Nicosia",
+      "sort_order": 10,
+      "title": {
+        "fr": "Témoignage inspirant d'une bonne pratique en Francophonie : le cas de la Budgétisation verte"
+      },
+      "speakers": [
+        {
+          "name_as_written": "Sédjidé Akouvi KOUHOUE",
+          "first_name": "Sédjidé Akouvi",
+          "last_name": "KOUHOUE",
+          "role": "speaker",
+          "note": "Libellé v1 « Intervenante »."
+        }
+      ],
+      "organizations": []
+    },
+    {
+      "day_date": "2025-12-03",
+      "slot_as_written": "Matin",
+      "starts_at": null,
+      "ends_at": null,
+      "timezone": "Asia/Nicosia",
+      "sort_order": 11,
+      "title": {
+        "fr": "Carrefour des solutions de financement innovant"
+      },
+      "speakers": [
+        {
+          "name_as_written": "Alain Sandy Liva RAHARIJAONA",
+          "first_name": "Alain Sandy Liva",
+          "last_name": "RAHARIJAONA",
+          "role": "speaker"
+        },
+        {
+          "name_as_written": "Abdoulaye SOUAIBOU IDRISSOU",
+          "first_name": "Abdoulaye",
+          "last_name": "SOUAIBOU IDRISSOU",
+          "role": "speaker"
+        }
+      ],
+      "organizations": []
+    },
+    {
+      "day_date": "2025-12-03",
+      "slot_as_written": "Après-midi",
+      "starts_at": null,
+      "ends_at": null,
+      "timezone": "Asia/Nicosia",
+      "sort_order": 12,
+      "title": {
+        "fr": "Restitution des travaux + Recommandations stratégiques"
+      },
+      "speakers": [],
+      "organizations": []
+    },
+    {
+      "day_date": "2025-12-03",
+      "slot_as_written": "Après-midi",
+      "starts_at": null,
+      "ends_at": null,
+      "timezone": "Asia/Nicosia",
+      "sort_order": 13,
+      "title": {
+        "fr": "Présentation du plan d'action post-séminaire et des engagements symboliques des participants (communiqué prospectif)"
+      },
+      "speakers": [],
+      "organizations": []
+    },
+    {
+      "day_date": "2025-12-03",
+      "slot_as_written": "Clôture",
+      "starts_at": null,
+      "ends_at": null,
+      "timezone": "Asia/Nicosia",
+      "sort_order": 14,
+      "title": {
+        "fr": "Cérémonie de clôture officielle et remise des certificats"
+      },
+      "speakers": [],
+      "organizations": []
+    }
+  ]
+}
