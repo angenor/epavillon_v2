@@ -19,7 +19,7 @@ Lu par chaque script de `ops/reprise-v1/lots/`. Plan : [`docs/progression/repris
 
 ## Règles d'écriture
 
-- Un fichier `NN-domaine.sql` par lot, **une transaction**, qui commence par `set_config('app.actor_id', <personne « Reprise v1 »>, true)` et `set_config('app.request_id', 'reprise-v1-NN', true)`.
+- Un fichier `NN-domaine.sql` par lot, **une transaction**, qui commence par `set_config('app.actor_id', '01a00000-0000-7000-8000-00000000f1a1', true)` (personne « Reprise v1 », lot 00) et `set_config('app.request_id', 'reprise-v1-NN', true)`.
 - Rejouable par construction : le banc repart de zéro, le lot ne se joue jamais deux fois sur la même base.
 - Lignes insérées **à leur état final, dates fournies** ; jamais d'`UPDATE` d'état qui émettrait une notification ; jamais d'`ON CONFLICT` contre une ligne de production (une fusion est une décision écrite).
 - Aucun nom de table ou colonne v2 deviné : lire `docs/database/*.sql`.

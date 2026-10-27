@@ -59,3 +59,6 @@ docs/note.md
 
 # Captures brutes de la source de la CCNUCC : jamais versionnées (dépôt public, accord en cours)
 .sources-ccnucc/
+
+# Marqueur du banc de répétition, posé par ops/reprise-v1/repeter.sh
+ops/reprise-v1/BANC_PRET

@@ -1,0 +1,122 @@
+# Comptages attendus de la v1 posée dans le banc, table par table (liste fermée :
+# une table posée absente d'ici, ou l'inverse, fait échouer 02-poser-v1-brute.sh).
+# Source : relevé du 27/10 (docs/progression/reprise-v1/carte-reelle-coeur.md et
+# carte-reelle-annexes.md, sur l'archive de 04:19), recalé sur celle de 11:26 que le
+# banc pose : seules les tables de PACO ont bougé. Une nouvelle extraction se recale
+# ici, après avoir vérifié que l'écart ne touche que PACO.
+# Noms de la v1 : public.x est posé en v1.x, auth.x en v1_auth.x, storage.x en v1_storage.x.
+
+# auth
+auth.audit_log_entries                        0   # 60363 dans Supabase ; jetons ou journal technique, non posés
+auth.custom_oauth_providers                   0
+auth.flow_state                               0   # 0 dans Supabase ; jetons ou journal technique, non posés
+auth.identities                               4100
+auth.instances                                0
+auth.mfa_amr_claims                           0   # 4699 dans Supabase ; jetons ou journal technique, non posés
+auth.mfa_challenges                           0
+auth.mfa_factors                              0
+auth.mfa_recovery_code_sets                   0
+auth.mfa_recovery_codes                       0
+auth.oauth_authorizations                     0
+auth.oauth_client_states                      0
+auth.oauth_clients                            0
+auth.oauth_consents                           0
+auth.one_time_tokens                          0   # 516 dans Supabase ; jetons ou journal technique, non posés
+auth.refresh_tokens                           0   # 23891 dans Supabase ; jetons ou journal technique, non posés
+auth.saml_providers                           0
+auth.saml_relay_states                        0
+auth.schema_migrations                        0   # 82 dans Supabase ; jetons ou journal technique, non posés
+auth.scim_tokens                              0
+auth.scim_users                               0
+auth.sessions                                 0   # 4699 dans Supabase ; jetons ou journal technique, non posés
+auth.sso_domains                              0
+auth.sso_providers                            0
+auth.users                                    4100
+auth.webauthn_challenges                      0
+auth.webauthn_credentials                     0
+
+# public
+public.activities                             259
+public.activity_documents                     17
+public.activity_modifications                 1560
+public.activity_question_answers              1
+public.activity_questions                     8
+public.activity_ratings                       110
+public.activity_registrations                 14363   # 14 346 au relevé de 04:19 ; +17 inscriptions PACO, qui vit encore (D15)
+public.activity_speaker_connections           0
+public.activity_speakers                      816
+public.ai_chat_feedback                       2
+public.ai_chat_messages                       24
+public.ai_chat_sessions                       10
+public.appointments                           0
+public.comments                               0
+public.connections                            13
+public.countries                              209
+public.document_embeddings                    0
+public.email_history                          0
+public.evaluation_answers                     0
+public.evaluation_questions                   0
+public.evaluation_results                     0
+public.evaluations                            0
+public.events                                 3
+public.francophonie_meeting_registrations     0
+public.francophonie_meetings                  0
+public.group_members                          0
+public.group_messages                         0
+public.incident_messages                      2
+public.innovation_reactions                   0
+public.innovations_practices                  0
+public.lesson_contents                        0
+public.live_quizzes                           0
+public.media_gallery                          11
+public.message_groups                         0
+public.message_templates                      5
+public.messages                               73
+public.migration_logs                         2047
+public.negotiation_documents                  43
+public.negotiation_sessions                   0
+public.negotiator_consultations               0
+public.negotiators                            0
+public.newsletter_campaigns                   0
+public.newsletter_lists                       0
+public.newsletter_subscriptions               0
+public.notifications                          79
+public.organization_aliases                   0
+public.organization_validations               77
+public.organizations                          236
+public.paco_demographic_data                 14011   # 13 994 au relevé de 04:19 ; PACO vivant
+public.participant_chapter_progress           0
+public.participant_lesson_progress            0
+public.poll_responses                         0
+public.polls                                  0
+public.quiz_questions                         0
+public.quiz_responses                         0
+public.quiz_results                           0
+public.quiz_subscriptions                     0
+public.ratings                                0
+public.revision_comment_reads                 323
+public.revision_comments                      181
+public.revisionniste_activity_views           622
+public.rls_monitoring                         0
+public.session_registrations                  0
+public.technical_documents                    0
+public.training_chapters                      0
+public.training_participants                  0
+public.trainings                              0
+public.user_blocks                            0
+public.user_favorite_documents                2
+public.user_roles                             18
+public.user_testimonials                      1
+public.users                                  4100
+public.video_testimonials                     0
+public.zoom_meetings                          50
+
+# storage
+storage.buckets                               4
+storage.buckets_analytics                     0
+storage.buckets_vectors                       0
+storage.migrations                            0   # 74 dans Supabase ; jetons ou journal technique, non posés
+storage.objects                               637
+storage.s3_multipart_uploads                  0
+storage.s3_multipart_uploads_parts            0
+storage.vector_indexes                        0
