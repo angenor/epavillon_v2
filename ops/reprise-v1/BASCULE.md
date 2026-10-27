@@ -18,12 +18,12 @@ Chaque geste sur le serveur mesure le voisin avant et après (`curl -s -o /dev/n
 3. **Sauvegarder** : `./deploy.sh backup` → `sauvegardes/epavillon-<horodatage>.sql.gz`.
 4. **Répéter sur cette sauvegarde** (poste) :
    - `COPIE_PROD=sauvegardes/epavillon-<horodatage>.sql.gz ops/reprise-v1/repeter.sh` ;
-   - clone `epavillon_finale` du banc ; `ops/migrations/2026-10-27-compte-sans-mot-de-passe.sql` (à la place de `lots/cale-d1.sql`) ; lots 10 à 50 ; partie SQL du lot 60 ;
+   - `ops/reprise-v1/jouer-phase1.sh` : clone `epavillon_finale`, migration D1 (à la place de `lots/cale-d1.sql`), lots 10 à 50, partie SQL du lot 60, bilan (répétition générale du 27/10 : 74 s) ;
    - comptes rendus de chaque lot : zéro écart non expliqué ;
    - outbox et travaux du lot : événements marqués publiés, travaux `live.*` et rappels annulés, **`media.process_asset` et `org.trust_score.recompute` gardés** (sans ce dernier, le score de confiance des 234 fiches reste à 0) ;
-   - exporter `legacy.garage_a_purger` (objets d'essai à effacer) puis la supprimer ; supprimer les schémas `v1`, `v1_auth`, `v1_storage` (ils portent les empreintes bcrypt) ; `legacy.id_map` reste.
-5. **Fichiers vers la Garage de production** (tunnel SSH vers l'adresse du conteneur `garage` sur le réseau Docker du serveur, clés lues dans `.env.prod`, jamais écrites) : déposer les objets cités par le lot 60, effacer les objets d'essai exportés.
-6. **Renvoyer la base** : `pg_dump --clean --if-exists` de `epavillon_finale` (pg_dump du conteneur local), `scp`, puis sur le serveur : `$COMPOSE stop api` (quelques minutes d'erreur pour les visiteurs, la page d'attente ayant besoin de l'API), `DROP DATABASE epavillon`, `CREATE DATABASE epavillon`, `psql < dump`.
+   - `legacy.garage_a_purger` et `legacy.fichiers_a_deposer` servent au geste 5, lu sur cette base.
+5. **Fichiers vers la Garage de production** (tunnel SSH vers l'adresse du conteneur `garage` sur le réseau Docker du serveur, clés lues dans `.env.prod`, jamais écrites ailleurs) : `ENV_GARAGE=<copie temporaire> lots/60-fichiers.sh deposer epavillon_finale`, puis effacer les objets de `legacy.garage_a_purger`. Ensuite `jouer-phase1.sh epavillon_finale envoi` retire les schémas `v1*` (empreintes bcrypt) et ces deux tables, et écrit l'archive ; `legacy.id_map` reste.
+6. **Renvoyer la base** : l'archive du geste 5, `scp`, puis sur le serveur : `$COMPOSE stop api` (quelques minutes d'erreur pour les visiteurs, la page d'attente ayant besoin de l'API), `DROP DATABASE epavillon`, `CREATE DATABASE epavillon`, `psql < dump`.
 7. **Repartir** : `$COMPOSE up -d api worker front` (nouvelles images) ; `./deploy.sh sante`.
 8. **Vérifier en administrateur** (site toujours en maintenance) : propositions COP31 au back-office, une organisation, une activité COP30 et sa page, images, connexion d'un compte repris (refus avec le message D1). Puis éteindre `platform.maintenance` depuis le back-office.
 
