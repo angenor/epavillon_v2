@@ -6,6 +6,10 @@
 #   60-fichiers.sh deposer <base>   dépose dans Garage les objets de
 #                                   legacy.fichiers_a_deposer (rejouable : un objet
 #                                   déjà présent à la bonne taille est laissé)
+#   60-fichiers.sh purger <base>    efface de Garage les objets d'essai de
+#                                   legacy.garage_a_purger ; à la bascule, après le
+#                                   remplacement de la base (la sauvegarde d'avant
+#                                   garde ainsi ses images), lu sur epavillon_repetition
 #
 # Les deux temps sont séparés parce que la bascule les sépare (BASCULE.md,
 # gestes 4 et 5). Le worker reste arrêté entre eux : il traiterait un objet
@@ -27,10 +31,11 @@ FICHIERS=${FICHIERS_V1:-$RACINE/sauvegardes/reprise-v1/fichiers}
 CONTENEUR=${CONTENEUR:-epavillon-postgres}
 
 temps=${1:-}; base=${2:-}
-case "$temps" in sql|deposer) ;; *) echo "Usage : $0 sql|deposer <base>" >&2; exit 2 ;; esac
+case "$temps" in sql|deposer|purger) ;; *) echo "Usage : $0 sql|deposer|purger <base>" >&2; exit 2 ;; esac
+refuser() { echo "Base refusée : '$base' (un clone du banc, ou la base de la bascule)" >&2; exit 2; }
 case "$base" in
-    ''|epavillon|epavillon_repetition|postgres|template*)
-        echo "Base refusée : '$base' (un clone du banc, ou la base de la bascule)" >&2; exit 2 ;;
+    ''|epavillon|postgres|template*) refuser ;;
+    epavillon_repetition) [ "$temps" = purger ] || refuser ;;
 esac
 
 psql_base() { docker exec -i "$CONTENEUR" psql -U postgres -d "$base" -X -q -v ON_ERROR_STOP=1 "$@"; }
@@ -72,6 +77,22 @@ chmod 700 "$TRAVAIL"
     printf 'user = "%s:%s"\n' "$(lire S3_ACCESS_KEY_ID)" "$(lire S3_SECRET_ACCESS_KEY)" > "$TRAVAIL/curl.conf"
 )
 s3() { curl -sS --aws-sigv4 "aws:amz:${REGION:-garage}:s3" -K "$TRAVAIL/curl.conf" "$@"; }
+
+if [ "$temps" = purger ]; then
+    psql_base -At -F $'\037' -c "SELECT bucket, object_key FROM legacy.garage_a_purger ORDER BY 1, 2" > "$TRAVAIL/liste"
+    echo "== Effacement de $(wc -l < "$TRAVAIL/liste" | tr -d ' ') objets d'essai de $ENDPOINT"
+    effaces=0 echecs=0
+    while IFS=$'\037' read -r bucket cle; do
+        code=$(s3 -o /dev/null -w '%{http_code}' -X DELETE "$ENDPOINT/$bucket/$cle" < /dev/null || true)
+        case "$code" in
+            200|204) effaces=$((effaces + 1)) ;;
+            *) echo "ÉCHEC effacement ($code) : $bucket/$cle" >&2; echecs=$((echecs + 1)) ;;
+        esac
+    done < "$TRAVAIL/liste"
+    printf '%s effacés, %s échecs\n' "$effaces" "$echecs"
+    [ "$echecs" -eq 0 ]
+    exit 0
+fi
 
 psql_base -At -F $'\037' -c "SELECT bucket, object_key, source, sha256, byte_size, mime_type FROM legacy.fichiers_a_deposer ORDER BY 1, 2" \
     > "$TRAVAIL/liste"
