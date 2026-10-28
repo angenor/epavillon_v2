@@ -3,6 +3,7 @@
 
 pub mod broadcast;
 pub mod internal;
+pub mod mailings;
 pub mod notifications;
 pub mod openapi;
 pub mod preferences;

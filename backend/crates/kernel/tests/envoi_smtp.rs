@@ -7,7 +7,7 @@
 //! qu'on vient d'écrire.
 
 use kernel::config::{Config, Secret, SmtpConfig, SmtpEncryption};
-use kernel::mail::{Mailer, OutgoingMail, SmtpMailer};
+use kernel::mail::{Copies, Mailer, OutgoingMail, SmtpMailer};
 use uuid::Uuid;
 
 fn env_ou(cle: &str, defaut: &str) -> String {
@@ -75,6 +75,41 @@ async fn un_message_arrive_chez_le_destinataire() {
         message["From"]["Address"],
         "ne-pas-repondre@epavillon.local"
     );
+}
+
+/// Les envois du back-office portent copie, copie cachée et adresse de réponse :
+/// relus chez Mailpit, comme le reste.
+#[tokio::test]
+async fn la_copie_et_ladresse_de_reponse_arrivent() {
+    let adresse = format!("{}@epavillon.local", Uuid::now_v7());
+    let copie = format!("copie-{}@epavillon.local", Uuid::now_v7());
+    let cachee = format!("cachee-{}@epavillon.local", Uuid::now_v7());
+    let expediteur = SmtpMailer::new(&vers_mailpit()).expect("expéditeur");
+
+    expediteur
+        .send_with_copies(
+            &OutgoingMail {
+                message_id: Uuid::now_v7().to_string(),
+                to: adresse.clone(),
+                locale: "fr".to_owned(),
+                subject: "Informations pratiques".to_owned(),
+                text: "Bonjour.".to_owned(),
+                html: Some("<p>Bonjour.</p>".to_owned()),
+            },
+            &Copies {
+                cc: vec![copie.clone()],
+                bcc: vec![cachee.clone()],
+                reply_to: Some("equipe@epavillon.local".to_owned()),
+            },
+        )
+        .await
+        .expect("remise");
+
+    let message = recu_par(&adresse).await;
+    assert_eq!(message["Cc"][0]["Address"], copie);
+    assert_eq!(message["ReplyTo"][0]["Address"], "equipe@epavillon.local");
+    // La copie cachée n'est pas dans les en-têtes, mais le message lui parvient.
+    assert_eq!(message["Bcc"][0]["Address"], cachee);
 }
 
 /// Une adresse que le module n'a pas su composer ne doit pas faire tomber le

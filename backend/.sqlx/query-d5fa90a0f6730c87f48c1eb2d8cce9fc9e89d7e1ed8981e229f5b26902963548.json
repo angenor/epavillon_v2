@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO engagement.mailing_recipients\n               (mailing_id, email, person_id, variables, sources, status, last_error)\n           SELECT m.id, a.email::platform.email, a.person_id,\n                  jsonb_build_object(\n                      'prenom', COALESCE(a.first_name, ''),\n                      'nom', COALESCE(a.last_name, ''),\n                      'organisation', COALESCE(a.organization, ''),\n                      'email', a.email,\n                      'edition', platform.t(e.title, 'fr')),\n                  a.sources,\n                  CASE WHEN a.is_suppressed THEN 'suppressed'::engagement.mailing_recipient_status\n                       ELSE 'queued'::engagement.mailing_recipient_status END,\n                  CASE WHEN a.is_suppressed THEN 'adresse sur la liste de suppression' END\n             FROM engagement.mailings m\n             JOIN event.events e ON e.id = m.event_id\n             CROSS JOIN LATERAL engagement.mailing_audience(m.event_id, m.audience, m.extra_addresses) a\n            WHERE m.id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d5fa90a0f6730c87f48c1eb2d8cce9fc9e89d7e1ed8981e229f5b26902963548"
+}

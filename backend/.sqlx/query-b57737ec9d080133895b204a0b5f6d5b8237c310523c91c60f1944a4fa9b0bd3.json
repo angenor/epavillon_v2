@@ -1,0 +1,111 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.id, r.email::text AS \"email!\", r.person_id,\n                  NULLIF(r.variables ->> 'prenom', '') AS first_name,\n                  NULLIF(r.variables ->> 'nom', '') AS last_name,\n                  NULLIF(r.variables ->> 'organisation', '') AS organization,\n                  r.sources, r.status::text AS \"status!\", r.last_error, r.sent_at\n             FROM engagement.mailing_recipients r\n            WHERE r.mailing_id = $1\n            ORDER BY r.email",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailing_recipients",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "person_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailing_recipients",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "first_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "last_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "organization",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "sources",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailing_recipients",
+            "name": "sources"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "last_error",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailing_recipients",
+            "name": "last_error"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "sent_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailing_recipients",
+            "name": "sent_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      true,
+      null,
+      null,
+      null,
+      false,
+      null,
+      true,
+      true
+    ]
+  },
+  "hash": "b57737ec9d080133895b204a0b5f6d5b8237c310523c91c60f1944a4fa9b0bd3"
+}

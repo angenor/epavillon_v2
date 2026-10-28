@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE engagement.mailing_recipients r\n              SET status = 'sending'\n            WHERE r.id = (SELECT q.id FROM engagement.mailing_recipients q\n                           WHERE q.mailing_id = $1 AND q.status = 'queued'\n                           ORDER BY q.id LIMIT 1 FOR UPDATE SKIP LOCKED)\n        RETURNING r.id, r.email::text AS \"email!\", r.variables",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailing_recipients",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "email!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "variables",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailing_recipients",
+            "name": "variables"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      false
+    ]
+  },
+  "hash": "bfe19711bd4d9042c709360c3e2f6c3cc573e89825d120dd8d7f7b958f567f43"
+}

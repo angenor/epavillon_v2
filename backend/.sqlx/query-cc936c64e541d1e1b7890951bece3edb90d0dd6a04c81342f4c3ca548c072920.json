@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE engagement.mailings m SET status = 'sent', completed_at = now()\n          WHERE m.id = $1 AND m.status = 'queued'\n            AND NOT EXISTS (SELECT 1 FROM engagement.mailing_recipients r\n                             WHERE r.mailing_id = m.id AND r.status IN ('queued', 'sending'))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cc936c64e541d1e1b7890951bece3edb90d0dd6a04c81342f4c3ca548c072920"
+}

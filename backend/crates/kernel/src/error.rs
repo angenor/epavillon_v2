@@ -211,6 +211,10 @@ codes! {
         "Cette révision de modèle n'existe pas.";
     EngagementNotificationTypeUnknown => "ENGAGEMENT_NOTIFICATION_TYPE_UNKNOWN", StatusCode::UNPROCESSABLE_ENTITY,
         "Ce type de notification n'existe pas ou n'est plus actif.";
+    EngagementMailingNotDraft => "ENGAGEMENT_MAILING_NOT_DRAFT", StatusCode::CONFLICT,
+        "Cet envoi est déjà parti : il ne se modifie plus. Dupliquez-le pour en préparer un nouveau.";
+    EngagementMailingEmpty => "ENGAGEMENT_MAILING_EMPTY", StatusCode::UNPROCESSABLE_ENTITY,
+        "Aucun destinataire joignable : ajoutez un critère ou une adresse avant d'envoyer.";
 
     // --- Direct (B9) ----------------------------------------------------------
     // Trois, et ils ne répondent JAMAIS sur le chemin nominal : le service

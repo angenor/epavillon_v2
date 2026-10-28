@@ -16,4 +16,5 @@
 
 pub mod notification_email;
 pub mod partitions;
+pub mod send_mailing;
 pub mod send_reminder;

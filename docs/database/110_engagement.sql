@@ -1096,3 +1096,297 @@ INSERT INTO identity.role_permissions (role_code, permission_code) VALUES
     ('programmer', 'engagement.reminder.manage'),
     ('editor',     'engagement.comment.moderate')
 ON CONFLICT DO NOTHING;
+
+-- -----------------------------------------------------------------------------
+-- 12. Envois de courriels du back-office (28/10/2026)
+--
+-- DEMANDE DU COMMANDITAIRE : l'équipe écrit elle-même aux participants d'une
+-- édition (déposants, intervenants, inscrits, comité) et à des adresses libres,
+-- avec copie, copie cachée et adresse de réponse.
+--
+-- DÉFAUTS V1 CORRIGÉS
+--   - Aucune trace. L'onglet « Historique » n'a jamais existé, et la boîte
+--     d'envoi `epavillonclimatique@francophonie.org` ne se consulte pas : on ne
+--     savait pas ce qui était parti. Ici un envoi est une ligne, chaque
+--     destinataire aussi, avec son état ; l'historique remplace la boîte.
+--   - Envoi synchrone depuis le navigateur : un appel par destinataire, tous en
+--     parallèle, un délai dépassé compté comme un succès. Ici un travail différé
+--     (file « email ») qui suit une cadence réglable,
+--     `engagement.mailing.hourly_limit`, parce que le serveur d'envoi de
+--     l'ancien hébergement borne le nombre de messages par heure.
+--   - Liste construite côté client, sans liste de suppression. Ici
+--     `mailing_audience()` la résout dans la base : bornée à l'édition,
+--     dédoublonnée sur l'adresse, adresses supprimées signalées.
+--
+-- POURQUOI PAS `newsletter_campaigns` : une campagne vise une liste d'abonnés
+-- consentants, en plusieurs langues, avec désabonnement. Un envoi du back-office
+-- vise les participants d'UNE édition, dans une langue, avec copie et adresse de
+-- réponse. Fusionner les deux aurait laissé la moitié des colonnes de chacun
+-- sans objet.
+--
+-- La trace d'expédition reste `email_messages`, écrite par la garde d'envoi
+-- comme pour tout courriel. `mailing_recipients` porte l'état métier, lisible
+-- par envoi, ce qu'une table partitionnée par mois sans clé étrangère ne sait
+-- pas faire.
+-- -----------------------------------------------------------------------------
+CREATE TYPE engagement.mailing_status AS ENUM (
+    'draft',      -- brouillon : tout se modifie, rien n'est parti
+    'queued',     -- destinataires figés, l'envoi progresse à la cadence réglée
+    'sent',       -- chaque destinataire est traité (parti, écarté ou en échec)
+    'cancelled'   -- arrêté en cours de route : les destinataires restants ne reçoivent rien
+);
+
+CREATE TABLE engagement.mailings (
+    id              uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    -- RÈGLE MÉTIER N° 8 : un envoi appartient à une édition, et un
+    -- administrateur de cette seule édition n'écrit qu'à ses participants.
+    event_id        uuid        NOT NULL CONSTRAINT xmod_fk_mailings_event
+                                REFERENCES event.events(id) ON DELETE RESTRICT,
+    status          engagement.mailing_status NOT NULL DEFAULT 'draft',
+
+    subject         text        NOT NULL DEFAULT '',
+    -- HTML assaini à l'écriture (même liste blanche que les modèles de
+    -- messages). Variables `{{prenom}}`, `{{nom}}`, `{{organisation}}`,
+    -- `{{email}}`, `{{edition}}`, résolues par destinataire au moment de l'envoi.
+    body_html       text        NOT NULL DEFAULT '',
+
+    -- Critères nommés et combinables (union), évalués par mailing_audience() :
+    -- [{"kind": "submitters" | "speakers" | "registrants" | "roles",
+    --   "proposal_statuses": [...], "registration_statuses": [...],
+    --   "role_codes": [...], "session_id": "..."}]
+    audience        jsonb       NOT NULL DEFAULT '[]'::jsonb,
+    -- Adresses saisies à la main, en plus des critères.
+    extra_addresses platform.email[] NOT NULL DEFAULT '{}',
+
+    -- COPIE : posée sur CHAQUE message, comme en v1. Le destinataire qui répond
+    -- à tous écrit donc aussi à l'équipe, qui voit les réponses : c'était la
+    -- stratégie de l'équipe faute de pouvoir lire la boîte d'envoi. Le prix est
+    -- écrit à l'écran : 300 destinataires, 300 copies par adresse en copie.
+    cc              platform.email[] NOT NULL DEFAULT '{}',
+    bcc             platform.email[] NOT NULL DEFAULT '{}',
+    reply_to        platform.email,
+
+    duplicated_from uuid        REFERENCES engagement.mailings(id) ON DELETE SET NULL,
+    created_by      uuid        CONSTRAINT xmod_fk_mailings_author
+                                REFERENCES identity.people(id) ON DELETE SET NULL,
+    queued_by       uuid        CONSTRAINT xmod_fk_mailings_sender
+                                REFERENCES identity.people(id) ON DELETE SET NULL,
+    queued_at       timestamptz,
+    completed_at    timestamptz,
+    cancelled_at    timestamptz,
+    created_at      timestamptz NOT NULL DEFAULT now(),
+    updated_at      timestamptz NOT NULL DEFAULT now(),
+
+    CONSTRAINT ck_mailings_audience_shape CHECK (jsonb_typeof(audience) = 'array'),
+    CONSTRAINT ck_mailings_queued CHECK ((status = 'draft') = (queued_at IS NULL)),
+    -- Un envoi parti a un objet et un corps : la base le garantit, pas l'écran.
+    CONSTRAINT ck_mailings_ready CHECK (
+        status = 'draft'
+        OR (length(btrim(subject)) > 0 AND length(btrim(body_html)) > 0)),
+    -- Au-delà, la copie n'est plus une copie mais une liste de diffusion cachée,
+    -- et chaque adresse multiplie le nombre de messages comptés par le serveur.
+    CONSTRAINT ck_mailings_copies CHECK (cardinality(cc) <= 10 AND cardinality(bcc) <= 10),
+    CONSTRAINT ck_mailings_extra CHECK (cardinality(extra_addresses) <= 500)
+);
+
+CREATE INDEX ix_mailings_event ON engagement.mailings (event_id, created_at DESC);
+
+CREATE TRIGGER tg_mailings_updated_at
+    BEFORE UPDATE ON engagement.mailings
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
+
+CREATE TRIGGER tg_mailings_audit
+    AFTER INSERT OR UPDATE OR DELETE ON engagement.mailings
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_audit();
+
+COMMENT ON TABLE engagement.mailings IS
+    'Courriels écrits depuis le back-office à des participants d''une édition. Brouillon, puis envoi figé et historisé.';
+COMMENT ON COLUMN engagement.mailings.audience IS
+    'Critères de destinataires combinés par union ; évalués par engagement.mailing_audience(), figés dans mailing_recipients à l''envoi.';
+
+CREATE TYPE engagement.mailing_recipient_status AS ENUM (
+    'queued',      -- en file, pas encore pris par le travail d'envoi
+    'sending',     -- pris : marqué AVANT l'expédition, pour qu'une reprise ne double pas l'envoi
+    'sent',        -- accepté par le serveur d'envoi
+    'failed',      -- refusé par le serveur, ou rendu impossible
+    'suppressed',  -- adresse sur la liste de suppression : jamais sollicitée
+    'cancelled'    -- envoi arrêté avant son tour
+);
+
+CREATE TABLE engagement.mailing_recipients (
+    id          uuid        PRIMARY KEY DEFAULT platform.uuid_v7(),
+    mailing_id  uuid        NOT NULL REFERENCES engagement.mailings(id) ON DELETE CASCADE,
+    email       platform.email NOT NULL,
+    person_id   uuid        CONSTRAINT xmod_fk_mailing_recipients_person
+                            REFERENCES identity.people(id) ON DELETE SET NULL,
+    -- Valeurs des variables, figées à l'envoi : l'historique montre ce qui est
+    -- parti, même si la personne change de nom ensuite.
+    variables   jsonb       NOT NULL DEFAULT '{}'::jsonb,
+    -- Les critères qui ont produit cette adresse ('submitters', 'addresses'…).
+    sources     text[]      NOT NULL DEFAULT '{}',
+    status      engagement.mailing_recipient_status NOT NULL DEFAULT 'queued',
+    last_error  text,
+    sent_at     timestamptz,
+    updated_at  timestamptz NOT NULL DEFAULT now(),
+    -- citext : la même adresse en deux casses reste un seul destinataire.
+    CONSTRAINT ux_mailing_recipients UNIQUE (mailing_id, email)
+);
+
+CREATE INDEX ix_mailing_recipients_queued
+    ON engagement.mailing_recipients (mailing_id, id) WHERE status = 'queued';
+
+CREATE TRIGGER tg_mailing_recipients_updated_at
+    BEFORE UPDATE ON engagement.mailing_recipients
+    FOR EACH ROW EXECUTE FUNCTION platform.tg_set_updated_at();
+
+COMMENT ON TABLE engagement.mailing_recipients IS
+    'Destinataires figés d''un envoi du back-office, un par adresse, avec leur état. Remplace la boîte d''envoi illisible.';
+
+-- La liste des destinataires d'un envoi, telle qu'elle partirait maintenant.
+--
+-- Lit hors de son schéma (programme, identity, org) parce que la question porte
+-- sur les participants d'une édition, comme schedule_session_reminders(). Ne
+-- regarde QUE l'édition passée : un critère qui citerait la séance d'une autre
+-- édition ne rend rien (règle métier n° 8, y compris sur requête forgée).
+--
+-- Une ligne par adresse (citext, donc sans égard à la casse), avec les critères
+-- qui l'ont produite. Les comptes non actifs (suspendus, bloqués, anonymisés)
+-- sont écartés ; une adresse libre est gardée telle quelle, rattachée à sa
+-- personne si elle en est l'adresse principale.
+CREATE OR REPLACE FUNCTION engagement.mailing_audience(
+    p_event_id        uuid,
+    p_criteria        jsonb,
+    p_extra_addresses platform.email[] DEFAULT '{}'
+)
+RETURNS TABLE (
+    email         text,
+    person_id     uuid,
+    first_name    text,
+    last_name     text,
+    organization  text,
+    sources       text[],
+    is_suppressed boolean
+)
+LANGUAGE sql
+STABLE
+AS $$
+    WITH crit AS (
+        SELECT c,
+               c ->> 'kind' AS kind,
+               NULLIF(c ->> 'session_id', '')::uuid AS session_id,
+               ARRAY(SELECT jsonb_array_elements_text(COALESCE(c -> 'proposal_statuses', '[]'))) AS proposal_statuses,
+               ARRAY(SELECT jsonb_array_elements_text(COALESCE(c -> 'registration_statuses', '[]'))) AS registration_statuses,
+               ARRAY(SELECT jsonb_array_elements_text(COALESCE(c -> 'role_codes', '[]'))) AS role_codes
+        FROM jsonb_array_elements(
+                 CASE WHEN jsonb_typeof(p_criteria) = 'array' THEN p_criteria ELSE '[]'::jsonb END) AS t(c)
+    ),
+    -- Les dossiers visés : de l'édition, non supprimés, au statut demandé (tous
+    -- sauf les brouillons si aucun n'est précisé), réduits au dossier d'une
+    -- séance quand le critère en nomme une.
+    dossiers AS (
+        SELECT crit.kind, crit.session_id, p.id AS proposal_id, p.submitted_by,
+               p.contact_person_id, p.organization_id
+        FROM crit
+        JOIN programme.proposals p
+          ON p.event_id = p_event_id AND p.deleted_at IS NULL
+        WHERE crit.kind IN ('submitters', 'speakers')
+          AND (CASE WHEN cardinality(crit.proposal_statuses) = 0 THEN p.status <> 'draft'
+                    ELSE p.status::text = ANY (crit.proposal_statuses) END)
+          AND (crit.session_id IS NULL OR EXISTS (
+                   SELECT 1 FROM programme.sessions s
+                   WHERE s.id = crit.session_id AND s.event_id = p_event_id
+                     AND s.proposal_id = p.id))
+    ),
+    candidats AS (
+        -- Déposant et personne à contacter de chaque dossier.
+        SELECT x.pid AS person_id, d.organization_id, 'submitters' AS source
+        FROM dossiers d
+        CROSS JOIN LATERAL unnest(ARRAY[d.submitted_by, d.contact_person_id]) AS x(pid)
+        WHERE d.kind = 'submitters' AND x.pid IS NOT NULL
+
+        UNION ALL
+        -- Intervenants des dossiers. Un intervenant sans adresse (sans
+        -- personne) n'est joignable par aucun courriel.
+        SELECT ps.person_id, COALESCE(ps.organization_id, d.organization_id), 'speakers'
+        FROM dossiers d
+        JOIN programme.proposal_speakers ps ON ps.proposal_id = d.proposal_id
+        WHERE d.kind = 'speakers' AND ps.person_id IS NOT NULL
+
+        UNION ALL
+        -- Intervenants d'une séance programmée sans dossier (l'IFDD la porte).
+        SELECT ss.person_id, NULL::uuid, 'speakers'
+        FROM crit
+        JOIN programme.sessions s
+          ON s.id = crit.session_id AND s.event_id = p_event_id AND s.proposal_id IS NULL
+        JOIN programme.session_speakers ss ON ss.session_id = s.id
+        WHERE crit.kind = 'speakers' AND ss.person_id IS NOT NULL
+
+        UNION ALL
+        -- Inscrits : par défaut ceux qui ont une place ou l'attendent, ou y
+        -- sont venus. Un désinscrit n'est écrit que si on le demande.
+        SELECT r.person_id, r.organization_id, 'registrants'
+        FROM crit
+        JOIN programme.sessions s
+          ON s.event_id = p_event_id
+         AND (crit.session_id IS NULL OR s.id = crit.session_id)
+        JOIN programme.registrations r ON r.session_id = s.id
+        WHERE crit.kind = 'registrants'
+          AND (CASE WHEN cardinality(crit.registration_statuses) = 0
+                    THEN r.status IN ('registered', 'waitlisted', 'attended')
+                    ELSE r.status::text = ANY (crit.registration_statuses) END)
+
+        UNION ALL
+        -- L'équipe de l'édition : rôles attribués sur cette édition, en cours.
+        SELECT ra.person_id, NULL::uuid, 'roles'
+        FROM crit
+        JOIN identity.role_assignments ra
+          ON ra.scope_type = 'event' AND ra.scope_id = p_event_id
+         AND ra.revoked_at IS NULL
+         AND ra.valid_from <= now()
+         AND (ra.valid_until IS NULL OR ra.valid_until > now())
+        WHERE crit.kind = 'roles'
+          AND (cardinality(crit.role_codes) = 0 OR ra.role_code = ANY (crit.role_codes))
+    ),
+    adresses AS (
+        SELECT pe.primary_email::text AS email, pe.id AS person_id, pe.first_name,
+               pe.last_name, COALESCE(c.organization_id, pe.primary_organization_id) AS organization_id,
+               c.source
+        FROM candidats c
+        JOIN identity.people pe ON pe.id = c.person_id AND pe.status = 'active'
+
+        UNION ALL
+        SELECT a::text, pe.id, pe.first_name, pe.last_name, pe.primary_organization_id, 'addresses'
+        FROM unnest(COALESCE(p_extra_addresses, '{}')) AS a
+        LEFT JOIN identity.people pe ON pe.primary_email = a AND pe.status = 'active'
+    )
+    SELECT lower(a.email),
+           (array_agg(a.person_id ORDER BY a.person_id) FILTER (WHERE a.person_id IS NOT NULL))[1],
+           (array_agg(a.first_name) FILTER (WHERE a.first_name IS NOT NULL))[1],
+           (array_agg(a.last_name) FILTER (WHERE a.last_name IS NOT NULL))[1],
+           (array_agg(COALESCE(o.acronym, o.legal_name)) FILTER (WHERE o.id IS NOT NULL))[1],
+           array_agg(DISTINCT a.source ORDER BY a.source),
+           engagement.is_email_suppressed(lower(a.email)::platform.email)
+    FROM adresses a
+    LEFT JOIN org.organizations o ON o.id = a.organization_id
+    GROUP BY lower(a.email)
+    ORDER BY 4 NULLS LAST, 3 NULLS LAST, 1;
+$$;
+
+COMMENT ON FUNCTION engagement.mailing_audience IS
+    'Destinataires d''un envoi du back-office : critères d''une édition (union) et adresses libres, dédoublonnés, liste de suppression signalée.';
+
+-- Cadence et copie par défaut, réglables sans redéploiement.
+INSERT INTO platform.settings (key, value, description) VALUES
+    ('engagement.mailing.hourly_limit', '200',
+     'Destinataires par heure pour les envois du back-office, copies comprises (un message à une personne avec deux adresses en copie en compte trois). Le serveur d''envoi de l''ancien hébergement borne ce nombre ; la limite exacte n''est pas publiée : garder une marge pour les courriels transactionnels.'),
+    ('engagement.mailing.team_cc', '[]',
+     'Adresses de l''équipe proposées en copie de chaque nouvel envoi, en plus de celle de la personne qui écrit.')
+ON CONFLICT (key) DO NOTHING;
+
+INSERT INTO identity.permissions (code, label, module_code) VALUES
+    ('engagement.mailing.send', '{"fr":"Écrire aux participants d''une édition","en":"Email the participants of an edition"}', 'engagement')
+ON CONFLICT (code) DO NOTHING;
+
+INSERT INTO identity.role_permissions (role_code, permission_code) VALUES
+    ('admin', 'engagement.mailing.send')
+ON CONFLICT DO NOTHING;

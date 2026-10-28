@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO engagement.email_suppressions (email, reason)\n         VALUES ($1::text::platform.email, 'hard_bounce')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0160ebd92e0490c095aafe3e224895fbfc1d88f5049c85c3081c040bf543beb4"
+}

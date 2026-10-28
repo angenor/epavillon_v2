@@ -1,0 +1,170 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.id, m.event_id, m.status::text AS \"status!\", m.subject,\n                  (SELECT p.display_name FROM identity.people p WHERE p.id = m.created_by) AS created_by_name,\n                  (SELECT p.display_name FROM identity.people p WHERE p.id = m.queued_by) AS queued_by_name,\n                  m.queued_at, m.completed_at, m.created_at, m.updated_at,\n                  COALESCE(c.total, 0) AS \"total!\", COALESCE(c.queued, 0) AS \"queued!\",\n                  COALESCE(c.sending, 0) AS \"sending!\", COALESCE(c.sent, 0) AS \"sent!\",\n                  COALESCE(c.failed, 0) AS \"failed!\", COALESCE(c.suppressed, 0) AS \"suppressed!\",\n                  COALESCE(c.cancelled, 0) AS \"cancelled!\"\n             FROM engagement.mailings m\n             LEFT JOIN LATERAL (\n                 SELECT count(*) AS total,\n                        count(*) FILTER (WHERE r.status = 'queued') AS queued,\n                        count(*) FILTER (WHERE r.status = 'sending') AS sending,\n                        count(*) FILTER (WHERE r.status = 'sent') AS sent,\n                        count(*) FILTER (WHERE r.status = 'failed') AS failed,\n                        count(*) FILTER (WHERE r.status = 'suppressed') AS suppressed,\n                        count(*) FILTER (WHERE r.status = 'cancelled') AS cancelled\n                   FROM engagement.mailing_recipients r\n                  WHERE r.mailing_id = m.id\n             ) c ON true\n            WHERE m.event_id = $1\n            ORDER BY COALESCE(m.queued_at, m.updated_at) DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "subject",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "subject"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "created_by_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "queued_by_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "queued_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "queued_at"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "completed_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "completed_at"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "updated_at"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "total!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 11,
+        "name": "queued!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "sending!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
+        "name": "sent!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 14,
+        "name": "failed!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 15,
+        "name": "suppressed!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 16,
+        "name": "cancelled!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      false,
+      null,
+      null,
+      true,
+      true,
+      false,
+      false,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "b21854c5b6e250e3d685094b4531684a565ff3f1b5cbd48797cff6451cc9010c"
+}

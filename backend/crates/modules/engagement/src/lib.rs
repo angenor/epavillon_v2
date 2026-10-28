@@ -55,6 +55,7 @@ pub fn routes(cfg: &mut ServiceConfig) {
     routes::templates::configurer(cfg);
     routes::suppressions::configurer(cfg);
     routes::broadcast::configurer(cfg);
+    routes::mailings::configurer(cfg);
 }
 
 /// Les routes du module qui vivent sous `/sessions`, **sans le préfixe**.
@@ -90,8 +91,14 @@ pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc
         Arc::new(jobs::notification_email::NotificationEmail::new(
             db.clone(),
             config,
-            mailer,
+            mailer.clone(),
         )),
+        // Les envois du back-office et leurs essais, sur la file « email ».
+        Arc::new(jobs::send_mailing::SendMailing::new(
+            db.clone(),
+            mailer.clone(),
+        )),
+        Arc::new(jobs::send_mailing::SendMailingTest::new(db.clone(), mailer)),
         // Le récurrent, sur la file par défaut : rien ne l'enfile, il pose sa
         // propre occurrence suivante, et le démarrage du worker réarme la chaîne.
         Arc::new(jobs::partitions::EnsurePartitions::new(

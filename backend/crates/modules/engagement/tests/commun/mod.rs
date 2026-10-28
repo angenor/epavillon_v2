@@ -32,7 +32,7 @@
 use kernel::config::Config;
 use kernel::context::RequestContext;
 use kernel::events::OutboxEvent;
-use kernel::mail::{MailError, Mailer, OutgoingMail};
+use kernel::mail::{Copies, MailError, Mailer, OutgoingMail};
 use kernel::testing::TestDb;
 use kernel::Db;
 use std::sync::{Arc, Mutex};
@@ -89,11 +89,17 @@ impl Bac {
 #[derive(Default)]
 pub struct BoiteAuxLettres {
     remis: Mutex<Vec<OutgoingMail>>,
+    /// Les copies de chaque message remis, dans le même ordre.
+    copies: Mutex<Vec<Copies>>,
 }
 
 impl BoiteAuxLettres {
     pub fn messages(&self) -> Vec<OutgoingMail> {
         self.remis.lock().expect("boîte lisible").clone()
+    }
+
+    pub fn copies(&self) -> Vec<Copies> {
+        self.copies.lock().expect("boîte lisible").clone()
     }
 
     pub fn compte(&self) -> usize {
@@ -102,16 +108,29 @@ impl BoiteAuxLettres {
 
     pub fn vider(&self) {
         self.remis.lock().expect("boîte lisible").clear();
+        self.copies.lock().expect("boîte lisible").clear();
     }
 }
 
 #[async_trait::async_trait]
 impl Mailer for BoiteAuxLettres {
     async fn send(&self, mail: &OutgoingMail) -> Result<(), MailError> {
+        self.send_with_copies(mail, &Copies::default()).await
+    }
+
+    async fn send_with_copies(
+        &self,
+        mail: &OutgoingMail,
+        copies: &Copies,
+    ) -> Result<(), MailError> {
         self.remis
             .lock()
             .expect("boîte inscriptible")
             .push(mail.clone());
+        self.copies
+            .lock()
+            .expect("boîte inscriptible")
+            .push(copies.clone());
         Ok(())
     }
 }

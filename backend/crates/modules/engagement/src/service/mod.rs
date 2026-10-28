@@ -10,6 +10,7 @@
 
 pub mod compose;
 pub mod deliverability;
+pub mod mailings;
 pub mod notifications;
 pub mod rules;
 pub mod schedule;

@@ -40,7 +40,7 @@
 use async_trait::async_trait;
 use kernel::context::RequestContext;
 use kernel::db::Db;
-use kernel::mail::{MailError, Mailer, OutgoingMail};
+use kernel::mail::{Copies, MailError, Mailer, OutgoingMail};
 use sha2::{Digest, Sha256};
 use std::sync::Arc;
 use uuid::Uuid;
@@ -193,6 +193,16 @@ impl GardedMailer {
 #[async_trait]
 impl Mailer for GardedMailer {
     async fn send(&self, mail: &OutgoingMail) -> Result<(), MailError> {
+        self.send_with_copies(mail, &Copies::default()).await
+    }
+
+    /// La garde et la trace portent sur le destinataire principal. Les copies
+    /// (adresses de l'équipe, saisies par l'administrateur) suivent le message.
+    async fn send_with_copies(
+        &self,
+        mail: &OutgoingMail,
+        copies: &Copies,
+    ) -> Result<(), MailError> {
         let trace = self.ouvrir_la_trace(mail).await;
 
         if self.est_supprimee(&mail.to).await {
@@ -207,7 +217,7 @@ impl Mailer for GardedMailer {
             return Ok(());
         }
 
-        let resultat = self.interieur.send(mail).await;
+        let resultat = self.interieur.send_with_copies(mail, copies).await;
         let erreur = resultat.as_ref().err().map(|e| e.to_string());
         self.clore_la_trace(trace, erreur.as_deref()).await;
         resultat

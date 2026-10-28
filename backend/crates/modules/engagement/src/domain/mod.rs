@@ -7,6 +7,7 @@
 //! écrite en SQL.
 
 pub mod ids;
+pub mod mailing;
 pub mod notification;
 pub mod offsets;
 pub mod reminder;

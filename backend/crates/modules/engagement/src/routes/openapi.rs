@@ -37,6 +37,16 @@ pub struct ApiErrorBody {
         crate::routes::suppressions::retirer,
         crate::routes::broadcast::diffuser,
         crate::routes::internal::ingerer,
+        crate::routes::mailings::lister,
+        crate::routes::mailings::creer,
+        crate::routes::mailings::detail,
+        crate::routes::mailings::modifier,
+        crate::routes::mailings::supprimer,
+        crate::routes::mailings::audience,
+        crate::routes::mailings::essai,
+        crate::routes::mailings::envoyer,
+        crate::routes::mailings::annuler,
+        crate::routes::mailings::dupliquer,
     ),
     components(schemas(ApiErrorBody)),
     tags(
@@ -44,6 +54,7 @@ pub struct ApiErrorBody {
         (name = "Back-office — règles de rappel", description = "La politique : une LISTE de décalages cumulés, jamais un décalage seul. Une règle de séance remplace celle de son édition, sans cumul — et la lecture rend l'ORIGINE de la règle applicable, ce qui rend la non-cumulation vérifiable de l'extérieur."),
         (name = "Notifications", description = "La liste et le compte de non lues **dans la même réponse** : deux appels donneraient deux chiffres mesurés à deux instants. Une préférence posée sur un type critique est enregistrée telle quelle, et la lecture DIT qu'elle n'oppose rien."),
         (name = "Back-office — modèles de messages", description = "Révisions, publication et retour arrière. Le corps est **assaini à l'écriture**, avec une liste blanche propre au courriel — tableaux et styles en ligne, que les clients de messagerie exigent. Un type sans révision publiée part quand même, avec un texte de secours qui le dit."),
+        (name = "Back-office : envois de courriels", description = "Écrire aux participants d'une édition : brouillon, liste avant envoi (dédoublonnée, liste de suppression signalée), essai à soi, envoi par la file du worker à la cadence réglée, historique avec l'état de chaque destinataire. Un message par destinataire, chacun avec la copie, la copie cachée et l'adresse de réponse."),
         (name = "Délivrabilité", description = "La liste de suppression, et l'ingestion des retours du fournisseur. Cette dernière est **hors session**, authentifiée par un jeton porteur — et **non montée** quand le jeton n'est pas configuré : une porte d'ingestion sans secret vaut mieux fermée."),
     )
 )]

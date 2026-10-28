@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT min(id::text) AS suivant FROM engagement.mailing_recipients\n                    WHERE mailing_id = $1 AND status = 'queued'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "suivant",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "d7d1c5001301f7e1504a1223c69d85f483813a41061cd3ece30fd1a84206382a"
+}

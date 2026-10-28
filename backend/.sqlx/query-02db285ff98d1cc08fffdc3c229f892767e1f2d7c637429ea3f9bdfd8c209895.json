@@ -1,0 +1,197 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.id, m.event_id, m.status::text AS \"status!\", m.subject, m.body_html,\n                  m.audience, m.extra_addresses::text[] AS \"extra_addresses!\",\n                  m.cc::text[] AS \"cc!\", m.bcc::text[] AS \"bcc!\", m.reply_to::text AS reply_to,\n                  m.duplicated_from,\n                  (SELECT p.display_name FROM identity.people p WHERE p.id = m.created_by) AS created_by_name,\n                  (SELECT p.display_name FROM identity.people p WHERE p.id = m.queued_by) AS queued_by_name,\n                  m.queued_at, m.completed_at, m.cancelled_at, m.created_at, m.updated_at\n             FROM engagement.mailings m\n            WHERE m.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "event_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "event_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "status!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "subject",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "subject"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "body_html",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "body_html"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "audience",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "audience"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "extra_addresses!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 7,
+        "name": "cc!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 8,
+        "name": "bcc!",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 9,
+        "name": "reply_to",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 10,
+        "name": "duplicated_from",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "duplicated_from"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "created_by_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 12,
+        "name": "queued_by_name",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 13,
+        "name": "queued_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "queued_at"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "completed_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "completed_at"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "cancelled_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "cancelled_at"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "created_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "engagement.mailings",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      false,
+      false,
+      false,
+      null,
+      null,
+      null,
+      null,
+      true,
+      null,
+      null,
+      true,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "02db285ff98d1cc08fffdc3c229f892767e1f2d7c637429ea3f9bdfd8c209895"
+}

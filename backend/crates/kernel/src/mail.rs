@@ -55,9 +55,38 @@ pub struct OutgoingMail {
     pub html: Option<String>,
 }
 
+/// Copie, copie cachée et adresse de réponse : seuls les envois écrits depuis
+/// le back-office en portent. Hors de `OutgoingMail` pour qu'aucun des
+/// courriels déjà livrés n'ait à changer d'une ligne.
+#[derive(Debug, Clone, Default)]
+pub struct Copies {
+    pub cc: Vec<String>,
+    pub bcc: Vec<String>,
+    pub reply_to: Option<String>,
+}
+
+impl Copies {
+    pub fn is_empty(&self) -> bool {
+        self.cc.is_empty() && self.bcc.is_empty() && self.reply_to.is_none()
+    }
+}
+
 #[async_trait]
 pub trait Mailer: Send + Sync {
     async fn send(&self, mail: &OutgoingMail) -> Result<(), MailError>;
+
+    /// Un transport qui ne sait pas porter de copie la refuse plutôt que de
+    /// l'oublier : un message parti sans la copie promise ne se rattrape pas.
+    async fn send_with_copies(
+        &self,
+        mail: &OutgoingMail,
+        copies: &Copies,
+    ) -> Result<(), MailError> {
+        if copies.is_empty() {
+            return self.send(mail).await;
+        }
+        Err(MailError::NotWired("copie et adresse de réponse"))
+    }
 }
 
 /// Rend une erreur de CONFIGURATION, jamais un expéditeur qui échouerait au
@@ -195,17 +224,27 @@ fn code_reponse(erreur: &lettre::transport::smtp::Error) -> u16 {
 #[async_trait]
 impl Mailer for SmtpMailer {
     async fn send(&self, mail: &OutgoingMail) -> Result<(), MailError> {
-        let destinataire: Mailbox = mail.to.parse().map_err(|e| MailError::Rejected {
-            // 550, « boîte introuvable » : le refus est définitif, et le
-            // rejouer ne changerait rien.
-            statut: 550,
-            corps: format!("adresse « {} » inexploitable : {e}", mail.to),
-        })?;
+        self.send_with_copies(mail, &Copies::default()).await
+    }
 
-        let entete = Message::builder()
+    async fn send_with_copies(
+        &self,
+        mail: &OutgoingMail,
+        copies: &Copies,
+    ) -> Result<(), MailError> {
+        let mut entete = Message::builder()
             .from(self.from.clone())
-            .to(destinataire)
+            .to(boite(&mail.to)?)
             .subject(mail.subject.as_str());
+        for adresse in &copies.cc {
+            entete = entete.cc(boite(adresse)?);
+        }
+        for adresse in &copies.bcc {
+            entete = entete.bcc(boite(adresse)?);
+        }
+        if let Some(adresse) = &copies.reply_to {
+            entete = entete.reply_to(boite(adresse)?);
+        }
 
         // Deux corps quand le module en compose deux : un client qui ne rend
         // pas le HTML affiche alors le texte, au lieu d'une pièce jointe.
@@ -234,6 +273,15 @@ impl Mailer for SmtpMailer {
             Err(e) => Err(MailError::Unreachable(e.to_string())),
         }
     }
+}
+
+fn boite(adresse: &str) -> Result<Mailbox, MailError> {
+    adresse.parse().map_err(|e| MailError::Rejected {
+        // 550, « boîte introuvable » : le refus est définitif, et le rejouer ne
+        // changerait rien.
+        statut: 550,
+        corps: format!("adresse « {adresse} » inexploitable : {e}"),
+    })
 }
 
 /// Comparaison à temps constant du secret partagé, côté réception.
