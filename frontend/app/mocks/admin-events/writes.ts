@@ -358,6 +358,7 @@ export function attachEditionImages(eventId: Uuid, images: EditionImagePayload):
       role,
       sort_order: 0,
       alt_text_override: null,
+      caption_override: null,
       is_exclusive: true,
       created_by: null,
       created_at: now,

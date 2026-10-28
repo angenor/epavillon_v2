@@ -70,6 +70,18 @@ export const attachableRoles: AttachableRoleRule[] = [
     aspect_ratio_tolerance: '0.02',
     is_active: true,
   },
+  {
+    owner_schema: 'programme',
+    owner_table: 'sessions',
+    role: 'gallery',
+    label: { fr: "Galerie de l'activité", en: 'Activity gallery' },
+    is_multiple: true,
+    allowed_mime_prefixes: ['image/*'],
+    max_byte_size: 15 * MIO,
+    expected_aspect_ratio: null,
+    aspect_ratio_tolerance: '0.02',
+    is_active: true,
+  },
 ]
 
 /**

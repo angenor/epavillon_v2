@@ -138,7 +138,9 @@
     "save": "Enregistrer",
     "unplace": "Retirer du calendrier",
     "reportOverrun": "Signaler un débordement",
-    "reportOverrunHint": "Ouvre le formulaire de message d'incident, déjà pointé sur cette activité."
+    "reportOverrunHint": "Ouvre le formulaire de message d'incident, déjà pointé sur cette activité.",
+    "gallery": "Galerie de l'activité",
+    "galleryUse": "Photos montrées sur la page publique de l'activité, dans cet ordre."
   },
   "publish": {
     "open": "Publier la programmation",

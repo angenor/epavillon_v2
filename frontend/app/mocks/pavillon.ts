@@ -225,6 +225,7 @@ export function activite(eventId: string, slug: string): PublicSessionDetail | n
         country: session.organization_country ?? { fr: 'Canada', en: 'Canada' },
       },
     ],
+    gallery: [],
   }
 }
 

@@ -1,0 +1,35 @@
+{
+  "max": "{max} au plus par photo",
+  "empty": "Aucune photo pour le moment.",
+  "forbidden": "Cette activité n'est pas dans votre périmètre d'administration.",
+  "retry": "Réessayer",
+  "position": "Photo {index} sur {total}",
+  "processing": "En traitement",
+  "unsaved": "Modifications non enregistrées.",
+  "saved": "Galerie enregistrée.",
+  "missingAlt": "Une photo sans description en français ne peut pas être enregistrée. | {count} photos sans description en français ne peuvent pas être enregistrées.",
+  "actions": {
+    "add": "Ajouter une photo",
+    "save": "Enregistrer la galerie",
+    "up": "Monter",
+    "down": "Descendre",
+    "remove": "Retirer de la galerie"
+  },
+  "altText": {
+    "label": "Description de la photo",
+    "hint": "Ce que montre la photo, pour qui ne la voit pas. Obligatoire.",
+    "required": "Une description en français est obligatoire."
+  },
+  "caption": {
+    "label": "Légende",
+    "hint": "Facultative. Affichée sous la photo agrandie."
+  },
+  "editor": {
+    "title": "Nouvelle photo de la galerie",
+    "description": "Recadrez si besoin : ce qui part est ce que montre l'aperçu.",
+    "apply": "Ajouter"
+  },
+  "errors": {
+    "mimeRejected": "Seules les photos sont acceptées dans une galerie."
+  }
+}

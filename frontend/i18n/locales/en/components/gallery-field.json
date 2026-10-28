@@ -1,0 +1,35 @@
+{
+  "max": "{max} at most per photo",
+  "empty": "No photos yet.",
+  "forbidden": "This activity is outside your administration scope.",
+  "retry": "Retry",
+  "position": "Photo {index} of {total}",
+  "processing": "Processing",
+  "unsaved": "Unsaved changes.",
+  "saved": "Gallery saved.",
+  "missingAlt": "A photo without a French description cannot be saved. | {count} photos without a French description cannot be saved.",
+  "actions": {
+    "add": "Add a photo",
+    "save": "Save gallery",
+    "up": "Move up",
+    "down": "Move down",
+    "remove": "Remove from gallery"
+  },
+  "altText": {
+    "label": "Photo description",
+    "hint": "What the photo shows, for those who cannot see it. Required.",
+    "required": "A French description is required."
+  },
+  "caption": {
+    "label": "Caption",
+    "hint": "Optional. Shown under the enlarged photo."
+  },
+  "editor": {
+    "title": "New gallery photo",
+    "description": "Crop if needed: what is sent is what the preview shows.",
+    "apply": "Add"
+  },
+  "errors": {
+    "mimeRejected": "Only photos are accepted in a gallery."
+  }
+}

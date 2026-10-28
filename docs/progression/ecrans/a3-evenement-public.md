@@ -245,3 +245,5 @@ Maquette : [page d'une activité](https://claude.ai/artifact/MTjhU6YwDmahNgDDTRY
 ## 28/10 : éditions passées en couleur sur `/programmations`
 
 Demande du commanditaire : griser toutes les activités d'une édition passée ne donne pas envie de cliquer. `EventProgrammeWeek` et `EventProgrammeDayList` reçoivent `editionPast` (`temporal_state === 'past'` de l'édition choisie) : couverture, titre et heure gardent leurs couleurs, les jours de la semaine ne sont plus estompés. Le grisage reste pour les activités tenues d'une édition en cours (repère du jour) et pour les annulées.
+
+**29/10 : galerie de l'activité (D7)** : section « Galerie » après les intervenants, montée seulement s'il y a une photo (`ActivityGallery`) ; vignettes 4:3 en boutons, photo en grand dans `UiModal` (taille `xl`, image entière par `UiImage fit="contain"`), légende et crédit dessous, flèches gauche et droite pour passer d'une photo à l'autre, Échap ferme ; texte alternatif sur chaque image. L'API ne sert que les photos prêtes et publiques (`media.attached_images()`). Rendu au navigateur non vu. Voir [journal](../journal/2026-10-29.md).

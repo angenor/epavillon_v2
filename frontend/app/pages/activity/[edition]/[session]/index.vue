@@ -195,6 +195,8 @@ useHead(() => ({
             </section>
 
             <ActivityPeople class="order-5" :speakers="detail.speakers" />
+
+            <ActivityGallery v-if="detail.gallery?.length" class="order-5" :photos="detail.gallery" />
           </div>
 
           <div class="contents lg:flex lg:flex-col lg:gap-10">

@@ -138,7 +138,9 @@
     "save": "Save",
     "unplace": "Remove from the calendar",
     "reportOverrun": "Report an overrun",
-    "reportOverrunHint": "Opens the incident message form, already pointed at this activity."
+    "reportOverrunHint": "Opens the incident message form, already pointed at this activity.",
+    "gallery": "Activity gallery",
+    "galleryUse": "Photos shown on the activity's public page, in this order."
   },
   "publish": {
     "open": "Publish the programme",

@@ -397,6 +397,15 @@ const isPlaced = computed(() => props.session?.room_id !== null && props.session
         <AdminPlannerMeetingPanel v-if="props.session.is_streamed" :session-id="props.session.id" :editable="props.editable" />
       </section>
 
+      <!-- GALERIE (D7). Elle s'enregistre seule, comme la réunion Zoom : ses
+           photos partent en un lot, indépendant du créneau. -->
+      <MediaGalleryField
+        :owner="{ schema: 'programme', table: 'sessions', id: props.session.id }"
+        :label="t('admin.planner.dialog.gallery')"
+        :use="t('admin.planner.dialog.galleryUse')"
+        :editable="props.editable"
+      />
+
       <!-- LES CONFLITS DE CETTE SÉANCE : on les lit, on ne les subit pas. Ils
            n'empêchent pas l'enregistrement. -->
       <section v-if="props.conflicts.length" class="space-y-2">

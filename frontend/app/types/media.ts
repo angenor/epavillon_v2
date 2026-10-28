@@ -287,6 +287,9 @@ export interface AttachmentAssignment {
   /** Le texte alternatif propre à CET usage : un objet dédupliqué sert
    *  plusieurs fiches, et le texte pertinent n'y est pas le même. */
   alt_text_override?: I18nText | null
+  /** La légende propre à CET usage. Une galerie écrit la sienne ici : nulle,
+   *  l'usage n'en a pas, même si l'objet en porte une. */
+  caption_override?: I18nText | null
 }
 
 /**
@@ -320,6 +323,8 @@ export interface Attachment {
   /** Un objet dédupliqué est partagé : le texte alternatif pertinent peut
    *  différer d'un usage à l'autre. */
   alt_text_override: I18nText | null
+  /** Légende propre à l'usage, même logique (galerie d'activité, D7). */
+  caption_override: I18nText | null
   /** Renseigné par trigger depuis la règle ; sert l'index unique partiel. */
   readonly is_exclusive: boolean
   created_by: PersonId | null

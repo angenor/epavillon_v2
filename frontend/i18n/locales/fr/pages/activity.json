@@ -117,5 +117,13 @@
     "live": "Diffusée en direct sur cette page",
     "startsIn": "Commence dans",
     "places": "aucune place restante | {count} place restante | {count} places restantes"
+  },
+  "gallery": {
+    "title": "Galerie",
+    "open": "Agrandir la photo {index} sur {total}",
+    "dialog": "Photo {index} sur {total}",
+    "previous": "Photo précédente",
+    "next": "Photo suivante",
+    "keyboard": "Flèches gauche et droite pour passer d'une photo à l'autre, Échap pour fermer."
   }
 }

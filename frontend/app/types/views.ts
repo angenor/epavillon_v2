@@ -168,6 +168,8 @@ export interface PublicSessionDetail {
   cancelled_reason: I18nText | null
   speakers: PublicSessionSpeaker[]
   organizations: SessionOrganization[]
+  /** Galerie (D7) : photos prêtes et publiques, dans l'ordre réglé. Vide sans photo. */
+  gallery: AttachedImage[]
 }
 
 // ---------------------------------------------------------------------------

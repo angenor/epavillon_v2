@@ -117,5 +117,13 @@
     "live": "Streamed live on this page",
     "startsIn": "Starts in",
     "places": "no seat left | {count} seat left | {count} seats left"
+  },
+  "gallery": {
+    "title": "Gallery",
+    "open": "Enlarge photo {index} of {total}",
+    "dialog": "Photo {index} of {total}",
+    "previous": "Previous photo",
+    "next": "Next photo",
+    "keyboard": "Left and right arrows move between photos, Escape closes."
   }
 }

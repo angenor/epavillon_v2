@@ -63,11 +63,17 @@ interface Props {
   frameClass?: string
   /** Affiche la légende et le crédit sous l'image, dans un `<figure>`. */
   showCaption?: boolean
+  /**
+   * `contain` montre l'image entière dans son cadre (visionneuse d'une galerie),
+   * `cover` la recadre pour le remplir, ce que veut toute carte.
+   */
+  fit?: 'cover' | 'contain'
 }
 
 const props = withDefaults(defineProps<Props>(), {
   ratio: '16 / 9',
   loading: 'lazy',
+  fit: 'cover',
 })
 
 const { tr } = useI18nText()
@@ -112,7 +118,8 @@ const caption = computed(() => tr(props.image?.caption))
         :height="props.image.height ?? undefined"
         :loading="props.loading"
         decoding="async"
-        class="size-full object-cover"
+        class="size-full"
+        :class="props.fit === 'contain' ? 'object-contain' : 'object-cover'"
       >
     </div>
 

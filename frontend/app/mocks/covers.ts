@@ -388,6 +388,7 @@ function attachment(
     role,
     sort_order: 0,
     alt_text_override: null,
+    caption_override: null,
     // Le trigger le pose : le rôle `cover` n'accepte qu'un objet.
     is_exclusive: true,
     created_by: null,
@@ -834,6 +835,7 @@ function showcaseAttachment(
     role,
     sort_order: 0,
     alt_text_override: null,
+    caption_override: null,
     // Les trois rôles de `content.highlights` sont exclusifs (`is_multiple`
     // faux) : un seul objet par rôle, l'index unique partiel l'impose.
     is_exclusive: true,

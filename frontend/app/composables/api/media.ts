@@ -24,7 +24,15 @@
  * toujours, et un fichier reçu avant ses métadonnées est refusé.
  */
 
-import type { AttachableRoleRule, AttachmentBatch, UploadPayload, UploadedAsset } from '~/types/media'
+import type {
+  AttachableRoleRule,
+  AttachedMedia,
+  AttachmentBatch,
+  AttachmentRole,
+  UploadPayload,
+  UploadedAsset,
+} from '~/types/media'
+import type { Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
 
 export function createMediaApi({ call, send, sendForm }: Pick<ApiTransport, 'call' | 'send' | 'sendForm'>) {
@@ -42,6 +50,19 @@ export function createMediaApi({ call, send, sendForm }: Pick<ApiTransport, 'cal
         (m) => m.attachableRolesOf(ownerSchema, ownerTable),
         { owner_schema: ownerSchema, owner_table: ownerTable },
       ),
+
+    /**
+     * Les médias d'une entité, objets en traitement compris, pour l'écran qui les
+     * GÈRE. Gardé comme l'écriture : un 404 dit « hors de votre périmètre ».
+     * Hors ligne, rien n'est rattaché.
+     */
+    attached: (owner: { schema: string; table: string; id: Uuid }, role?: AttachmentRole): Promise<AttachedMedia[]> =>
+      call<AttachedMedia[]>('/media/attachments', () => [], {
+        owner_schema: owner.schema,
+        owner_table: owner.table,
+        owner_id: owner.id,
+        role,
+      }),
 
     /**
      * LE RATTACHEMENT : chaque rôle nommé est vidé puis regarni, un `asset_id`
