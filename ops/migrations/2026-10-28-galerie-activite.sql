@@ -1,4 +1,4 @@
--- Galerie de photos d'une activité (reprise v1, D7, 29/10). Rejouable.
+-- Galerie de photos d'une activité (reprise v1, D7, 28/10). Rejouable.
 -- Modèle : docs/database/050_media.sql (media.attachments.caption_override,
 -- media.attached_image(), media.attached_images(), media.attachable_roles).
 --

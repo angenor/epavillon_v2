@@ -45,7 +45,7 @@ Lu par chaque script de `ops/reprise-v1/lots/`. Plan : [`docs/progression/repris
 | 93 | photos des intervenants du lot 92 (3), sur leur ligne du dossier ; fichiers déposés par 60-fichiers.sh | 2, joué le 27/10 |
 | 94 | évaluations : notes et consultations (`public.activity_ratings`, `revisionniste_activity_views`) | 2, joué le 28/10 |
 | 95 | messages de révision avec destinataires et lectures (`revision_comments`, `revision_comment_reads`), après la fonction v2 | 2, joué le 28/10 |
-| 96 | galeries d'activité (D7) : 11 photos de `public.media_gallery` en rôle `gallery` sur la séance, légende sur le rattachement (migration `2026-10-29-galerie-activite` d'abord) ; fichiers déposés par 60-fichiers.sh | 2 |
+| 96 | galeries d'activité (D7) : 11 photos de `public.media_gallery` en rôle `gallery` sur la séance, légende sur le rattachement (migration `2026-10-28-galerie-activite` d'abord) ; fichiers déposés par 60-fichiers.sh | 2 |
 | 100 | rediffusions CdP30 attendues : `is_recorded` vrai pour toutes les séances publiées (61, toutes filmées), les 33 vidéos v1 consignées `skipped` (`public.activities-youtube_link`, chaîne piratée, à reposer après la CdP31) | 2 |
 | 101+ | historique des modifications, documents de négociation, modules fermés (questions aux activités : non reprises, commanditaire 28/10) | 2 |
 

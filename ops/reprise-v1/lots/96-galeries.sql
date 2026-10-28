@@ -3,7 +3,7 @@
 -- `v1.media_gallery` : 11 photos sur 4 activités, toutes terminées dans la v1,
 -- donc une séance en v2 (lot 50). Chaque photo devient un objet (bucket v1
 -- `activity-media`, écarté au lot 60 pour D7) rattaché à la séance en rôle
--- `gallery` (migration 2026-10-29-galerie-activite), dans l'ordre v1 (date de
+-- `gallery` (migration 2026-10-28-galerie-activite), dans l'ordre v1 (date de
 -- création puis identifiant). La page publique d'une activité les lit par
 -- media.attached_images().
 --

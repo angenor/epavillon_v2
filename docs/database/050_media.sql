@@ -426,7 +426,7 @@ CREATE TABLE media.attachments (
                                REFERENCES identity.people(id) ON DELETE SET NULL,
     created_at     timestamptz NOT NULL DEFAULT now(),
 
-    -- LA LÉGENDE D'UN USAGE (29/10, galerie d'activité, D7). Même raison que le
+    -- LA LÉGENDE D'UN USAGE (28/10, galerie d'activité, D7). Même raison que le
     -- texte alternatif : une photo dédupliquée peut illustrer deux activités, et
     -- « Ouverture du panel » ne vaut que pour l'une. En queue de table, comme
     -- toute colonne arrivée par ALTER. Une galerie écrit sa légende ICI et
@@ -600,7 +600,7 @@ COMMENT ON FUNCTION media.attached_image(text, text, uuid, media.attachment_role
     'Image rattachée à une entité pour un rôle, prête à l''affichage : URL de l''original, variantes disponibles, texte alternatif résolu. NULL si aucune image servable.';
 
 -- Toutes les images d'un rôle multiple, dans l'ordre réglé : une galerie
--- (29/10, D7). Même forme d'élément que media.attached_image(), pour qu'un
+-- (28/10, D7). Même forme d'élément que media.attached_image(), pour qu'un
 -- écran dessine une vignette de galerie comme une couverture.
 --
 -- PLUS STRICTE QUE SA SŒUR, et c'est voulu : elle sert une page PUBLIQUE, donc
@@ -1038,7 +1038,7 @@ INSERT INTO media.attachable_roles
     -- Intervenant sans adresse (D16) : sans personne, sa photo va sur la ligne du
     -- dossier ; la séance la lit là, une recopie n'aurait pas à la suivre.
     ('programme',   'proposal_speakers', 'avatar', '{"fr":"Photo de l''intervenant","en":"Speaker picture"}', false, '{image/*}',             5242880, NULL),
-    -- Galerie d'une activité (29/10, D7) : photos seulement, ordre réglable,
+    -- Galerie d'une activité (28/10, D7) : photos seulement, ordre réglable,
     -- texte alternatif obligatoire (ck_assets_alt_text_required), légende sur
     -- le rattachement. Posée par l'équipe de l'IFDD seule : la garde est écrite
     -- pour ce rôle-là, plus étroite que celle de la couverture de la séance

@@ -2,7 +2,7 @@
 # Lot 96 (phase 2) : galeries d'activité, D7 (96-galeries.sql).
 #
 #   96-galeries.sh <clone>   sur un clone local de la production (après la migration
-#                            2026-10-29-galerie-activite) ; prépare
+#                            2026-10-28-galerie-activite) ; prépare
 #                            legacy.fichiers_a_deposer pour 60-fichiers.sh, sans rien déposer
 #   96-galeries.sh flux      écrit le flux SQL sur la sortie, à faire lire par le
 #                            psql de la production (BASCULE.md, « Après »)
