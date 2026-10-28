@@ -2,12 +2,12 @@
 **Ce fichier est la mémoire du projet entre deux sessions Claude Code.** Toute session commence par le lire et se termine par le mettre à jour.
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
-## Dernière mise à jour : 27 octobre 2026
+## Dernière mise à jour : 28 octobre 2026
+- 28/10 : **messages du comité** : destinataires choisis (avis et courriel, « @ »), lu / non lu par message (« lu par N sur M », non lus dans la liste) ; reprise v1 des évaluations (110 notes, 621 consultations) et des 181 messages avec destinataires et lectures, en production. Voir [A8](progression/ecrans/a8-evaluation.md), [journal](progression/journal/2026-10-28.md).
 - 27/10 : **intervenant sans adresse (D16)** : la ligne d'intervenant porte civilité, prénom et nom quand il n'a pas de personne ; seule l'adresse devient facultative dans le formulaire. En production avec le lot 92 : 143 intervenants v1 rendus à 64 dossiers ; leurs photos (3) sur la ligne du dossier, lot 93. Voir [modèle](progression/modele.md), [journal](progression/journal/2026-10-27.md).
 - 27/10 : **PACO de nouveau en ligne** (injoignable depuis la bascule) : Apache sert le build v1 inchangé, branché sur Supabase, sur `/paco` et la connexion de son administration ; le reste va à la v2. Voir [DEPLOIEMENT § 18](DEPLOIEMENT.md), [`ops/paco/`](../ops/paco/LISEZMOI.md).
 - 27/10 : **reprise v1, phase 1 en production** : 4 099 comptes (nouveau mot de passe exigé, D1), 235 organisations, CdP 30 et CdP 31, 258 propositions, 125 séances, 313 fichiers ; données d'essai effacées (D2) ; témoignages de l'accueil (lot 70), 97 inscriptions CdP30 (lot 80) et les deux journées spéciales CdP30, 15 activités de leur page statique (lot 90), repris. Site en maintenance jusqu'à la vérification du commanditaire ; phase 2 (évaluations, rediffusions, annexes…) site ouvert. Voir [plan](progression/reprise-v1/plan.md), [`BASCULE.md`](../ops/reprise-v1/BASCULE.md).
 - 26/10 : l'OIF a fait pointer `epavillonclimatique.francophonie.org` sur le serveur applicatif. Le site y est servi **à la racine** (plus de `/v2`), certificat Let's Encrypt ; `epavillon.mefali.com` et les liens `/v2/…` redirigent ; le courriel part toujours de l'ancien serveur. Production toujours en maintenance. Voir [DEPLOIEMENT § 17](DEPLOIEMENT.md).
-- 17/10 : le direct passe par des réunions Zoom intégrées à la page de l'activité (Meeting SDK 6.5.0), chaque inscription transmise à Zoom. En production le 17/10, migration jouée, clés posées ; notifications Zoom à brancher. Voir [A3](progression/ecrans/a3-evenement-public.md), [décision](progression/decisions/2026-10-17.md).
 
 ## État général
 | Domaine | État |
@@ -36,7 +36,7 @@ Un écran = un fichier : ce qui a été livré, les écarts entre le modèle et 
 | A5 | Espace organisation | ✅ 17/08 · menu du compte « Mon espace » 05/10, en production le 16/10 | [écarts et vérifications](progression/ecrans/a5-espace-organisation.md) |
 | A6 | Tableau de bord back-office | ✅ 17/08 | [écarts et vérifications](progression/ecrans/a6-tableau-de-bord.md) |
 | A7 | Liste des propositions | ✅ 18/08 · révisé 15/09 | [écarts et vérifications](progression/ecrans/a7-propositions.md) |
-| A8 | Fiche d'évaluation | ✅ 18/08 · évaluation flottante 16/09 · en production · correction par l'équipe 17/09, en production · titre et présentation reportés sur la séance 03/10, en production le 16/10 | [écarts et vérifications](progression/ecrans/a8-evaluation.md) |
+| A8 | Fiche d'évaluation | ✅ 18/08 · évaluation flottante 16/09 · en production · correction par l'équipe 17/09, en production · titre et présentation reportés sur la séance 03/10, en production le 16/10 · destinataires et lu / non lu des messages 28/10, en production | [écarts et vérifications](progression/ecrans/a8-evaluation.md) |
 | A9 | Planificateur de créneaux | ✅ 18/08 · stand par défaut 29/09, en production | [écarts et vérifications](progression/ecrans/a9-planificateur.md) |
 | A10 | Gestion des événements | ✅ 18/08 · téléversement des visuels 26/08 · liste en rangées 16/09 · fuseau cherchable et brouillon local 16/09 · appel : formats, revues et grille facultatifs 27/09 · en production | [écarts et vérifications](progression/ecrans/a10-evenements.md) |
 | A11 | Organisations et fusion | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a11-organisations-fusion.md) |

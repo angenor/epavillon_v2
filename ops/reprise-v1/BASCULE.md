@@ -56,4 +56,4 @@ Avant le geste 6, rien n'a changé en production hors Garage. Après : `./deploy
 
 **Lot 94, évaluations**, même voie sans fichier : `lots/94-evaluations.sh <clone>` puis `lots/94-evaluations.sh flux | ssh …`. Le flux porte notes et messages avec leur texte (la donnée reprise), rien d'autre de personnel.
 
-**Lot 95, messages de révision**, dans cet ordre : sauvegarde ; `ssh … < ops/migrations/2026-10-27-destinataires-et-lectures-des-messages.sql` ; `./deploy.sh update` ; `lots/95-messages-de-revision.sh flux | ssh …`. Le flux porte les messages avec leur texte, destinataires et lectures en identifiants.
+**Lot 95, messages de révision**, dans cet ordre : sauvegarde ; `ssh … < ops/migrations/2026-10-27-destinataires-et-lectures-des-messages.sql` ; `./deploy.sh update` ; `lots/95-messages-de-revision.sh flux | ssh …`. Le flux porte les messages avec leur texte, destinataires et lectures en identifiants. Lots 94 et 95 joués le 28/10 après la sauvegarde `epavillon-20261028-001243`.
