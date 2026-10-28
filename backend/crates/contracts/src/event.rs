@@ -104,6 +104,12 @@ pub struct SessionSelection {
     pub statuses: Vec<String>,
     /// Seules les séances pas encore publiques sont visées.
     pub only_unpublished: bool,
+    /// Seules les séances sans dossier (programmées par l'IFDD) ou dont le
+    /// dossier est accepté : un dossier en évaluation ou rejeté peut porter un
+    /// créneau pressenti, qui reste privé. Absent des annonces émises avant le
+    /// 28/10/2026, d'où le défaut faux : elles se relisent comme émises.
+    #[serde(default)]
+    pub accepted_proposals_only: bool,
 }
 
 /// Consommé par **B5**, qui pose la date de publication sur les séances

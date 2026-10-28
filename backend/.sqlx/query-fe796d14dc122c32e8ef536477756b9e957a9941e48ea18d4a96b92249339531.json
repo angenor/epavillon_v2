@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH liberees AS (\n               DELETE FROM programme.sessions s\n                WHERE s.proposal_id = $1\n                  AND s.status = 'planned'\n                  AND s.published_at IS NULL\n                  AND NOT EXISTS (SELECT 1 FROM programme.registrations r\n                                   WHERE r.session_id = s.id)\n            RETURNING s.id\n           ), liens AS (\n               DELETE FROM reference.entity_terms et\n                USING liberees l\n                WHERE et.entity_schema = 'programme'\n                  AND et.entity_table = 'sessions'\n                  AND et.entity_id = l.id\n           )\n           SELECT count(*) AS \"n!\" FROM liberees",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "fe796d14dc122c32e8ef536477756b9e957a9941e48ea18d4a96b92249339531"
+}

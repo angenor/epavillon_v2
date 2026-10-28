@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"n!\" FROM reference.entity_terms\n            WHERE entity_schema = 'programme' AND entity_table = 'sessions'\n              AND entity_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "aef2aceb6cdf89a7c0a9f86b55d6ab83d3be7bc4e76518bf12208bca474eb790"
+}

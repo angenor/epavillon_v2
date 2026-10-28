@@ -44,6 +44,7 @@ import type {
   TrackId,
 } from './shared'
 import type { ParticipationMode } from './event/edition'
+import type { ProposalStatus } from './programme/proposal'
 import type { SessionStatus, ScheduleConflict, PublicationReadinessIssue } from './programme/session'
 import type { ScheduleThemeBadge } from './views'
 
@@ -90,6 +91,8 @@ export interface PlannerSession {
 
   /** Numéro lisible du dossier d'origine (« COP31-00147 »), nul sans dossier. */
   reference_code: string | null
+  /** État du dossier d'origine, nul sans dossier. Hors `accepted`, la publication laisse la séance privée. */
+  proposal_status: ProposalStatus | null
   /** Note consolidée du dossier — c'est par elle que le panneau se trie. */
   average_score: number | null
   /** Durée souhaitée au dépôt, en minutes. Sert de longueur par défaut au bloc. */

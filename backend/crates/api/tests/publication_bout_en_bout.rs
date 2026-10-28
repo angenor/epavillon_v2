@@ -261,3 +261,128 @@ async fn publier_le_programme_rend_les_seances_publiques() {
         "et elle devient publique"
     );
 }
+
+/// Un dossier de l'édition, inséré à l'état voulu.
+async fn dossier(
+    base: &TestDb,
+    edition: Uuid,
+    organisation: Uuid,
+    deposante: Uuid,
+    etat: &str,
+) -> Uuid {
+    sqlx::query_scalar!(
+        r#"INSERT INTO programme.proposals
+               (event_id, organization_id, submitted_by, title, slug,
+                objectives, detailed_presentation, format, status, submitted_at)
+           VALUES ($1, $2, $3, jsonb_build_object('fr', 'Dossier ' || $4::text),
+                   ('dossier-' || replace($4::text, '_', '-'))::platform.slug,
+                   '{"fr":"Objectifs."}'::jsonb, '{"fr":"<p>Présentation.</p>"}'::jsonb,
+                   'hybrid', $4::text::programme.proposal_status, now())
+        RETURNING id"#,
+        edition,
+        organisation,
+        deposante,
+        etat
+    )
+    .fetch_one(base.pool())
+    .await
+    .expect("dossier")
+}
+
+/// 🔴 **Seuls les dossiers acceptés et les séances de l'IFDD deviennent
+/// publics.** Un dossier encore en évaluation peut porter un créneau pressenti
+/// (repris de la v1) : il reste privé, n'est pas compté, et son absence de lieu
+/// ne retient pas la publication.
+#[actix_web::test]
+async fn un_creneau_de_dossier_non_accepte_reste_prive() {
+    let base = TestDb::new().await;
+    let config = std::sync::Arc::new(kernel::testing::test_config(base.url()));
+    let (edition, _) = une_edition_a_publier(&base).await;
+
+    // Repartir des trois séances voulues, et d'elles seules.
+    sqlx::query!(
+        "DELETE FROM programme.sessions WHERE event_id = $1",
+        edition
+    )
+    .execute(base.pool())
+    .await
+    .unwrap();
+
+    let organisation = sqlx::query_scalar!(
+        r#"INSERT INTO org.organizations (legal_name, slug, organization_type_code, status)
+           VALUES ('Association du Sahel', 'association-sahel'::platform.slug, 'ngo', 'active')
+        RETURNING id"#
+    )
+    .fetch_one(base.pool())
+    .await
+    .unwrap();
+    let deposante = sqlx::query_scalar!(
+        r#"INSERT INTO identity.people (primary_email, first_name, last_name, status)
+           VALUES ('depot@example.org'::text::platform.email, 'Awa', 'Traoré', 'active')
+        RETURNING id"#
+    )
+    .fetch_one(base.pool())
+    .await
+    .unwrap();
+
+    let acceptee = seance(&base, edition, 1, "planned", false).await;
+    let en_evaluation = seance(&base, edition, 2, "planned", false).await;
+    let de_lifdd = seance(&base, edition, 3, "planned", false).await;
+
+    for (seance_id, etat) in [(acceptee, "accepted"), (en_evaluation, "under_review")] {
+        let dossier_id = dossier(&base, edition, organisation, deposante, etat).await;
+        sqlx::query!(
+            "UPDATE programme.sessions SET proposal_id = $2 WHERE id = $1",
+            seance_id,
+            dossier_id
+        )
+        .execute(base.pool())
+        .await
+        .unwrap();
+    }
+    sqlx::query!(
+        "UPDATE programme.sessions SET location_note = NULL WHERE id = $1",
+        en_evaluation
+    )
+    .execute(base.pool())
+    .await
+    .unwrap();
+
+    let etat = event::state::EventState::new(base.db(), config);
+    let ctx = RequestContext::new("test-publication", "fr");
+    let resultat =
+        event::service::publication::publier(&etat, &ctx, event::domain::ids::EventId(edition))
+            .await
+            .expect("la publication aboutit");
+
+    assert!(
+        !resultat.blocked,
+        "le créneau privé ne retient pas la publication : {:?}",
+        resultat.issues
+    );
+    assert_eq!(resultat.published_count, 2, "accepté et IFDD seulement");
+
+    let registre = ConsumerRegistry::new().register_all(programme::event_consumers());
+    relayer_loutbox(&base, &registre).await;
+
+    let publiques: Vec<Uuid> = sqlx::query_scalar!(
+        "SELECT id FROM programme.sessions
+          WHERE event_id = $1 AND published_at IS NOT NULL ORDER BY id",
+        edition
+    )
+    .fetch_all(base.pool())
+    .await
+    .unwrap();
+    let mut attendues = vec![acceptee, de_lifdd];
+    attendues.sort();
+    assert_eq!(publiques, attendues);
+
+    let reste = sqlx::query_scalar!(
+        r#"SELECT status::text AS "status!" FROM programme.sessions WHERE id = $1"#,
+        en_evaluation
+    )
+    .fetch_one(base.pool())
+    .await
+    .unwrap();
+    assert_eq!(reste, "planned", "le créneau pressenti reste pressenti");
+}

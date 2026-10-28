@@ -45,6 +45,7 @@ async fn annoncer(bac: &Bac, event_id: Uuid) -> (Uuid, time::OffsetDateTime) {
             event_id,
             statuses: vec!["planned".to_owned(), "scheduled".to_owned()],
             only_unpublished: true,
+            accepted_proposals_only: true,
         },
         published_count: 0,
     })
@@ -342,4 +343,59 @@ async fn date_de_publication(bac: &Bac, event_id: Uuid) -> Option<time::OffsetDa
     .fetch_one(bac.pool())
     .await
     .expect("lecture de l'édition")
+}
+
+/// **Une annonce émise avant le 28/10, sans `accepted_proposals_only`, se
+/// relit** : le champ prend sa valeur par défaut et le consommateur publie
+/// comme alors.
+#[tokio::test]
+async fn une_annonce_ancienne_se_relit() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+    seances::grille(&bac, terrain.edition).await;
+    let id = seance(&bac, &terrain, "Atelier", "atelier").await;
+
+    let published_at = time::OffsetDateTime::now_utc();
+    let ancienne = serde_json::json!({
+        "event_id": terrain.edition,
+        "published_at": published_at
+            .format(&time::format_description::well_known::Rfc3339)
+            .unwrap(),
+        "selection": {
+            "event_id": terrain.edition,
+            "statuses": ["planned", "scheduled"],
+            "only_unpublished": true
+        },
+        "published_count": 1
+    });
+
+    let relue: contracts::event::ProgrammePublished =
+        serde_json::from_value(ancienne.clone()).expect("l'ancienne forme se relit");
+    assert!(!relue.selection.accepted_proposals_only);
+
+    let mut tx = bac
+        .db()
+        .write(&RequestContext::background("test"))
+        .await
+        .expect("transaction");
+    let annonce = events::emit(
+        &mut tx,
+        DomainEvent {
+            aggregate_schema: contracts::event::AGGREGATE_SCHEMA,
+            aggregate_type: contracts::event::AGGREGATE_PROGRAMME,
+            aggregate_id: terrain.edition,
+            event_type: contracts::event::PROGRAMME_PUBLISHED,
+            payload: ancienne,
+        },
+    )
+    .await
+    .expect("annonce émise");
+    tx.commit().await.expect("validation");
+
+    relayer(&bac, &registre(), annonce).await;
+
+    assert_eq!(
+        seances::seance(&bac, id).await.published_at,
+        Some(published_at)
+    );
 }

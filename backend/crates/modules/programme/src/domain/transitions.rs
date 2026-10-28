@@ -90,7 +90,12 @@ impl ProposalStatus {
     /// séance programmée. Corriger la demande ne rejoue pas la décision — voir
     /// le commentaire de `service/draft_write.rs`, et FR-091.
     pub fn est_modifiable(self) -> bool {
-        !matches!(self, Self::Rejected | Self::Withdrawn | Self::Cancelled)
+        !self.sort_de_la_course()
+    }
+
+    /// Rejeté, retiré ou annulé : le dossier ne sera pas programmé.
+    pub fn sort_de_la_course(self) -> bool {
+        matches!(self, Self::Rejected | Self::Withdrawn | Self::Cancelled)
     }
 }
 

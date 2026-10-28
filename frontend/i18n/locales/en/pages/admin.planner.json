@@ -146,6 +146,7 @@
     "description": "What must be settled before the programme goes public.",
     "ready": "No activity to publish | {count} activity ready to publish | {count} activities ready to publish",
     "readyDetail": "They will become visible to the public, with their room and time.",
+    "withheld": "{count} slot of a proposal not accepted stays private. | {count} slot of a proposal not accepted stays private. | {count} slots of proposals not accepted stay private.",
     "blocked": "{count} issue blocks publication | {count} issue blocks publication | {count} issues block publication",
     "blockedDetail": "Nothing will be published until they are settled. This is the only place in the planner where a check prevents action.",
     "mustFix": "Must be settled before publishing",

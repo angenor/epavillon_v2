@@ -33,6 +33,8 @@ interface Props {
    * prédicat de l'API : `planned` ou `scheduled`, pas encore publiées.
    */
   readyCount: number
+  /** Créneaux de dossiers non acceptés : la publication les laisse privés. */
+  withheldCount?: number
   /** Déjà publiée une première fois ? Le libellé du bouton change. */
   publishedAt: string | null
   busy?: boolean
@@ -103,6 +105,9 @@ const warningGroups = computed(() => groupOf(warnings.value))
         {{ isBlocked
           ? t('admin.planner.publish.blockedDetail')
           : t('admin.planner.publish.readyDetail') }}
+        <template v-if="props.withheldCount">
+          {{ t('admin.planner.publish.withheld', props.withheldCount) }}
+        </template>
       </UiAlert>
 
       <section v-if="blockingGroups.length" class="space-y-3">

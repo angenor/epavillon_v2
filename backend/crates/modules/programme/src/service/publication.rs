@@ -45,6 +45,8 @@ pub struct Designation<'a> {
     /// États retenus — `planned` et `scheduled` aujourd'hui.
     pub statuses: &'a [String],
     pub only_unpublished: bool,
+    /// Seules les séances sans dossier ou de dossier accepté.
+    pub accepted_proposals_only: bool,
 }
 
 /// Publier les séances désignées, et rendre leur nombre.
@@ -53,18 +55,23 @@ pub async fn publier_les_seances(
     designation: Designation<'_>,
 ) -> Result<u64> {
     let publiees = sqlx::query!(
-        "UPDATE programme.sessions
+        "UPDATE programme.sessions s
             SET published_at = $2,
-                status = CASE WHEN status = 'planned'
+                status = CASE WHEN s.status = 'planned'
                               THEN 'scheduled'::programme.session_status
-                              ELSE status END
-          WHERE event_id = $1
-            AND status::text = ANY($3)
-            AND ($4 = false OR published_at IS NULL)",
+                              ELSE s.status END
+          WHERE s.event_id = $1
+            AND s.status::text = ANY($3)
+            AND ($4 = false OR s.published_at IS NULL)
+            AND ($5 = false
+                 OR s.proposal_id IS NULL
+                 OR EXISTS (SELECT 1 FROM programme.proposals p
+                             WHERE p.id = s.proposal_id AND p.status = 'accepted'))",
         designation.event_id,
         designation.published_at,
         designation.statuses,
-        designation.only_unpublished
+        designation.only_unpublished,
+        designation.accepted_proposals_only
     )
     .execute(conn)
     .await?

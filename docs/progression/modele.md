@@ -275,3 +275,12 @@ Demande du commanditaire à la reprise des messages de révision v1, qui choisis
 - **`engagement.notification_types`** : `programme.comment.addressed` ({in_app,email}).
 
 **Migration** : `ops/migrations/2026-10-27-destinataires-et-lectures-des-messages.sql`, éprouvée sur une copie de la production, jouée deux fois, tables et fonctions identiques au modèle ; appliquée en local. **En production** : avant le déploiement de l'API, puis le lot 95.
+
+## 28/10/2026, `075_programme_sessions.sql` : la publication ne vise que les dossiers acceptés
+
+La reprise v1 a laissé à 78 dossiers CdP31 en évaluation une séance `planned` non publiée (leur créneau v1). Publier le programme rendait publiques toutes les séances `planned`/`scheduled` de l'édition, dossier rejeté ou non tranché compris.
+
+- **`programme.publication_readiness()`** ne contrôle plus que les séances qui seront publiques : déjà publiées, sans dossier, ou de dossier `accepted`. Sans cela, un créneau en évaluation sans lieu, ou un conflit entre dossiers non tranchés, bloquait toute la publication. `detect_conflicts()` ne change pas : le planificateur montre tous les conflits.
+- Côté code (event et programme) : `SessionSelection.accepted_proposals_only` (lu à faux sur une annonce ancienne), même prédicat pour le décompte annoncé et pour la publication ; passer un dossier à `rejected`, `withdrawn` ou `cancelled` supprime ses séances `planned` jamais publiées et sans inscription (aucun événement émis à la suppression).
+
+**Migration** : `ops/migrations/2026-10-28-publication-dossiers-acceptes.sql`, fonction recopiée du modèle (identique, vérifié par empreinte), jouée deux fois sur une copie de la production ; appliquée en local. **En production** : avec l'API.

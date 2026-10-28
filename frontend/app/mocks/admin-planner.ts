@@ -166,6 +166,7 @@ function toPlannerSession(session: Session): PlannerSession {
     organization_country_code: country?.iso2 ?? null,
 
     reference_code: proposal?.reference_code ?? null,
+    proposal_status: proposal?.status ?? null,
     average_score: proposal?.average_score ?? null,
     requested_duration_minutes: proposal?.duration_minutes ?? null,
     preferred_start_at: proposal?.preferred_start_at ?? null,
@@ -423,6 +424,7 @@ export function publishProgramme(eventId: Uuid): PublishProgrammeResult {
   for (const session of editionSessions(eventId) as MutableSession[]) {
     if (session.published_at !== null) continue
     if (!PUBLISHABLE_STATUSES.has(session.status)) continue
+    if (session.proposal_id && proposalById.get(session.proposal_id)?.status !== 'accepted') continue
     session.published_at = now
     // `planned` devient `scheduled` — « programmé et publié ». Le consommateur
     // de l'annonce l'écrit dans le même UPDATE que la date, et c'est le seul

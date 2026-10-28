@@ -877,18 +877,27 @@ pub async fn controle_de_publication<'e>(
 /// l'instantané de la même transaction (research.md § R10).
 pub const STATUTS_A_PUBLIER: [&str; 2] = ["planned", "scheduled"];
 
+/// Un dossier en évaluation ou rejeté peut porter un créneau pressenti (repris
+/// de la v1) : il reste privé tant que le dossier n'est pas accepté.
+pub const DOSSIERS_ACCEPTES_SEULEMENT: bool = true;
+
 pub async fn seances_a_publier<'e>(
     executor: impl PgExecutor<'e>,
     event_id: EventId,
 ) -> Result<i64> {
     let n = sqlx::query_scalar!(
         r#"SELECT count(*) AS "n!"
-             FROM programme.sessions
-            WHERE event_id = $1
-              AND status::text = ANY($2::text[])
-              AND published_at IS NULL"#,
+             FROM programme.sessions s
+            WHERE s.event_id = $1
+              AND s.status::text = ANY($2::text[])
+              AND s.published_at IS NULL
+              AND ($3 = false
+                   OR s.proposal_id IS NULL
+                   OR EXISTS (SELECT 1 FROM programme.proposals p
+                               WHERE p.id = s.proposal_id AND p.status = 'accepted'))"#,
         event_id.as_uuid(),
-        &STATUTS_A_PUBLIER.map(str::to_owned)
+        &STATUTS_A_PUBLIER.map(str::to_owned),
+        DOSSIERS_ACCEPTES_SEULEMENT
     )
     .fetch_one(executor)
     .await?;

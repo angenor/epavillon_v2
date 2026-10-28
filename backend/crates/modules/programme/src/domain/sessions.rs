@@ -97,6 +97,9 @@ pub struct PlannerSession {
 
     /// Numéro lisible du dossier d'origine, nul sans dossier.
     pub reference_code: Option<String>,
+    /// État du dossier d'origine, nul sans dossier. Hors `accepted`, la
+    /// publication du programme laisse la séance privée.
+    pub proposal_status: Option<String>,
     /// Note consolidée du dossier — c'est par elle que le panneau se trie.
     pub average_score: Option<f64>,
     pub requested_duration_minutes: Option<i32>,

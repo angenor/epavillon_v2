@@ -443,15 +443,21 @@ const { data: readiness, refresh: refreshReadiness } = await useAsyncData(
  * une séance annulée qui occupe encore une salle gonflait le chiffre sans jamais
  * être publiée, et une séance sans salle mais portant une précision de lieu
  * passait le contrôle en manquant au décompte.
+ *
+ * Et seulement celles sans dossier ou de dossier accepté : le créneau pressenti
+ * d'un dossier en évaluation ou rejeté reste privé, et se compte à part.
  */
 const PUBLISHABLE_STATUSES: ReadonlySet<SessionStatus> = new Set(['planned', 'scheduled'])
 
-const readyCount = computed(
-  () =>
-    allSessions.value.filter(
-      (session) => session.published_at === null && PUBLISHABLE_STATUSES.has(session.status),
-    ).length,
+const unpublishedSlots = computed(() =>
+  allSessions.value.filter(
+    (session) => session.published_at === null && PUBLISHABLE_STATUSES.has(session.status),
+  ),
 )
+const isWithheld = (session: PlannerSession): boolean =>
+  session.proposal_status !== null && session.proposal_status !== 'accepted'
+const readyCount = computed(() => unpublishedSlots.value.filter((s) => !isWithheld(s)).length)
+const withheldCount = computed(() => unpublishedSlots.value.filter(isWithheld).length)
 
 async function openPublish(): Promise<void> {
   publishResult.value = null
@@ -660,6 +666,7 @@ const mobileTab = ref<'unplaced' | 'calendar'>('unplaced')
       :timezone="timezone"
       :zone-label="zoneLabel"
       :ready-count="readyCount"
+      :withheld-count="withheldCount"
       :published-at="screen?.programme_published_at ?? null"
       :busy="busy"
       :error="actionError"

@@ -146,6 +146,7 @@
     "description": "Ce qui doit être réglé avant de rendre le programme public.",
     "ready": "Aucune activité à publier | {count} activité prête à être publiée | {count} activités prêtes à être publiées",
     "readyDetail": "Elles deviendront visibles du public, avec leur salle et leur horaire.",
+    "withheld": "{count} créneau de dossier non accepté reste privé. | {count} créneau de dossier non accepté reste privé. | {count} créneaux de dossiers non acceptés restent privés.",
     "blocked": "{count} point bloque la publication | {count} point bloque la publication | {count} points bloquent la publication",
     "blockedDetail": "Rien ne sera publié tant qu'ils ne sont pas réglés. C'est le seul endroit du planificateur où un contrôle empêche d'agir.",
     "mustFix": "À régler avant publication",

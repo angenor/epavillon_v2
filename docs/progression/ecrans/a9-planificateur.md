@@ -70,3 +70,10 @@ En production, une édition sans salle rendait le calendrier inutilisable : le d
 **Grille cadrée sur les heures de l'édition (29/09)** : début et fin de journée de l'édition ± 1 h, identiques chaque jour ; une activité hors plage l'élargit — [journal](../journal/2026-09-29.md).
 
 **Republier publie les séances retenues depuis (29/09)** : la première publication fixe la date de l'édition ; « Publier les nouveautés » annonce ensuite ce qui attend — [journal](../journal/2026-09-29.md).
+
+## 28/10/2026 : publier seulement les dossiers acceptés
+
+Demande du commanditaire, après la reprise v1 (78 créneaux pressentis de dossiers CdP31 en évaluation). La publication ne rend publiques que les séances sans dossier ou de dossier accepté ; un dossier rejeté, retiré ou annulé libère son créneau pressenti. `PlannerSession.proposal_status` pour que le décompte de l'écran reste juste ; la fenêtre de publication dit « N créneaux de dossiers non acceptés restent privés. » (`admin.planner.publish.withheld`). Voir [modele.md](../modele.md), 28/10.
+
+- **Écart relevé** : aucun chemin n'annule une séance déjà publiée quand son dossier accepté est annulé ; il faut passer la séance en `cancelled` à la main (ce qui prévient live, rappels et inscrits).
+- **Écart relevé** : l'API ne refuse pas une inscription à une séance non publiée (seule une URL forgée y mène) ; une séance non publiée avec inscription n'est donc pas libérée.

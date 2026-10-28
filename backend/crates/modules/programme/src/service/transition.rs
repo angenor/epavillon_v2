@@ -112,6 +112,13 @@ pub async fn tenter(
                 crate::service::birth::faire_naitre(&mut tx, dossier.as_uuid()).await?;
             }
 
+            // Le créneau pressenti d'un dossier qui sort de la course se libère
+            // ici, sinon la prochaine publication le rendrait public ou il
+            // encombrerait le planificateur. Une séance déjà publiée ne bouge pas.
+            if vers.sort_de_la_course() {
+                crate::repo::sessions::liberer_les_creneaux(&mut tx, dossier.as_uuid()).await?;
+            }
+
             // La ligne de journal est écrite par le déclencheur, DANS cette
             // transaction : elle se lit donc avant de valider, sur la même
             // connexion. La lire après validation rendrait la ligne d'une

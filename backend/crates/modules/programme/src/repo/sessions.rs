@@ -261,6 +261,39 @@ pub async fn dossier_a_retenir(
     }))
 }
 
+/// Supprimer les créneaux pressentis d'un dossier qui sort de la course.
+///
+/// Seulement `planned`, jamais publiée et sans inscription : rien n'a été
+/// annoncé, ni au public ni à un inscrit. Le déclencheur d'émission des séances
+/// ne réagit pas à une suppression, aucun événement ne part donc vers le direct
+/// ni les rappels. Les thématiques recopiées à la naissance partent avec elle,
+/// les autres tables filles par cascade.
+pub async fn liberer_les_creneaux(conn: &mut PgConnection, proposal_id: Uuid) -> Result<i64> {
+    let liberees = sqlx::query_scalar!(
+        r#"WITH liberees AS (
+               DELETE FROM programme.sessions s
+                WHERE s.proposal_id = $1
+                  AND s.status = 'planned'
+                  AND s.published_at IS NULL
+                  AND NOT EXISTS (SELECT 1 FROM programme.registrations r
+                                   WHERE r.session_id = s.id)
+            RETURNING s.id
+           ), liens AS (
+               DELETE FROM reference.entity_terms et
+                USING liberees l
+                WHERE et.entity_schema = 'programme'
+                  AND et.entity_table = 'sessions'
+                  AND et.entity_id = l.id
+           )
+           SELECT count(*) AS "n!" FROM liberees"#,
+        proposal_id
+    )
+    .fetch_one(conn)
+    .await?;
+
+    Ok(liberees)
+}
+
 /// L'heure d'ouverture quotidienne et la durée par défaut d'un appel, en une
 /// lecture — les deux seules règles dont la naissance a besoin.
 pub async fn regles_de_naissance(

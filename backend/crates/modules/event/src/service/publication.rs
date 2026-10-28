@@ -150,6 +150,7 @@ async fn annoncer(
                 .map(|s| (*s).to_owned())
                 .collect(),
             only_unpublished: true,
+            accepted_proposals_only: cross::DOSSIERS_ACCEPTES_SEULEMENT,
         },
         published_count,
     })
