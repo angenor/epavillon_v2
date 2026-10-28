@@ -26,6 +26,8 @@ interface Props {
   weeks: number
   hasPrevious: boolean
   hasNext: boolean
+  /** Édition passée : ses activités gardent leurs couleurs, sinon plus rien ne donne envie de cliquer. */
+  editionPast: boolean
 }
 
 const props = defineProps<Props>()
@@ -76,7 +78,7 @@ function card(session: PublicScheduleRow) {
     id: session.id,
     to: link(props.editionSlug, session),
     current,
-    faded: current === 'past' || current === 'cancelled',
+    faded: current === 'cancelled' || (current === 'past' && !props.editionPast),
     cover: session.cover,
     start: time(session.starts_at, props.timezone),
     until: t('programme.list.until', { end: time(session.ends_at, props.timezone), duration: duration(session) }),
@@ -102,7 +104,7 @@ const columns = computed(() =>
       weekday: format(day, { weekday: 'long' }),
       label: format(day, { weekday: 'long', day: 'numeric', month: 'long' }),
       isToday: day === props.today,
-      isPast: props.today !== null && day < props.today,
+      isPast: !props.editionPast && props.today !== null && day < props.today,
       count: t('programme.days.count', { count: kept.length }, kept.length),
       special: special ? tr(special.title) : '',
       cards: kept.map(card),

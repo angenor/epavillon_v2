@@ -20,6 +20,8 @@ interface Props {
   today: IsoDate | null
   /** Tait les journées strictement antérieures à `today`. */
   hidePast: boolean
+  /** Édition passée : ses activités gardent leurs couleurs, sinon plus rien ne donne envie de cliquer. */
+  editionPast: boolean
 }
 
 const props = defineProps<Props>()
@@ -38,7 +40,7 @@ const format = (day: IsoDate, options: Intl.DateTimeFormatOptions) =>
 
 function row(session: PublicScheduleRow) {
   const current = state(session)
-  const faded = current === 'past' || current === 'cancelled'
+  const faded = current === 'cancelled' || (current === 'past' && !props.editionPast)
   return {
     id: session.id,
     to: link(props.editionSlug, session),

@@ -241,3 +241,7 @@ Maquette : [page d'une activité](https://claude.ai/artifact/MTjhU6YwDmahNgDDTRY
 **17/10 : entrée toujours en plein écran** : « Rejoindre la réunion » ouvre la page « salle » et y entre directement, sur tous les écrans ; plus de réunion dans la page de l'activité. Dans la salle : nouvel essai automatique quand l'image de Zoom ne se connecte pas, pastille pendant un partage d'écran. Voir [décision](../decisions/2026-10-17.md).
 
 **18/10 : « Aller dans Zoom »** dans la barre du bas de la salle, à gauche de « Quitter », 30 s après son ouverture (en haut à droite tant qu'il n'y a pas de barre). Voir [journal](../journal/2026-10-18.md).
+
+## 28/10 : éditions passées en couleur sur `/programmations`
+
+Demande du commanditaire : griser toutes les activités d'une édition passée ne donne pas envie de cliquer. `EventProgrammeWeek` et `EventProgrammeDayList` reçoivent `editionPast` (`temporal_state === 'past'` de l'édition choisie) : couverture, titre et heure gardent leurs couleurs, les jours de la semaine ne sont plus estompés. Le grisage reste pour les activités tenues d'une édition en cours (repère du jour) et pour les annulées.
