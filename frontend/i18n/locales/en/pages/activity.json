@@ -39,7 +39,8 @@
     "watch": "Open the live stream",
     "replayTitle": "Watch again",
     "replay": "Watch the recording",
-    "replayDuration": "Replay · {minutes} min"
+    "replayDuration": "Replay · {minutes} min",
+    "replaySoon": "Video available soon"
   },
   "people": {
     "speakers": "Speakers",

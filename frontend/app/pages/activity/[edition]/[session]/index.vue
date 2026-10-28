@@ -183,6 +183,7 @@ useHead(() => ({
               :meeting="zoomShown ? meeting : null"
               :room-to="roomTo"
               :zone-label="edition.city ?? undefined"
+              :is-recorded="detail.is_recorded"
             />
 
             <section v-if="summary || hasDescription" class="order-4" aria-labelledby="a-propos-titre">

@@ -39,7 +39,8 @@
     "watch": "Ouvrir le direct",
     "replayTitle": "Revoir",
     "replay": "Voir l'enregistrement",
-    "replayDuration": "Rediffusion · {minutes} min"
+    "replayDuration": "Rediffusion · {minutes} min",
+    "replaySoon": "Vidéo prochainement disponible"
   },
   "people": {
     "speakers": "Intervenantes et intervenants",

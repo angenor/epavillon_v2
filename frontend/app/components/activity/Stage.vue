@@ -8,7 +8,9 @@ import type { ProgrammeSessionState } from '~/composables/useProgrammeSession'
  * Le média de l'activité, toujours rendu : la salle Zoom (posée sur la couverture
  * tant qu'on n'y est pas entré) quand aucun flux n'est diffusé, le direct avec ses langues pendant
  * la diffusion, l'enregistrement après, la couverture sinon (à défaut, le sigle).
- * Une séance a un flux par langue d'interprétation.
+ * Une séance a un flux par langue d'interprétation. Enregistrée mais sans
+ * rediffusion encore, elle l'annonce : les vidéos de la CdP 30 reviendront
+ * après la CdP 31 (chaîne YouTube perdue, 28/10).
  */
 
 interface Props {
@@ -21,6 +23,7 @@ interface Props {
   meeting?: PublicSessionMeeting | null
   roomTo?: string
   zoneLabel?: string
+  isRecorded?: boolean
 }
 
 const props = defineProps<Props>()
@@ -56,6 +59,7 @@ const isLive = computed(
   () => props.session.is_streamed && (props.state === 'live' || (props.state === 'ongoing' && props.streams.length > 0)),
 )
 const replayUrl = computed(() => (props.state === 'past' ? (props.session.replay_url ?? null) : null))
+const replaySoon = computed(() => props.state === 'past' && props.isRecorded === true && !replayUrl.value)
 const faded = computed(() => props.state === 'past' || props.state === 'cancelled')
 
 const replayMinutes = computed(() =>
@@ -167,6 +171,29 @@ const replayMinutes = computed(() =>
         </span>
       </span>
     </a>
+  </section>
+
+  <section
+    v-else-if="replaySoon"
+    class="relative aspect-video min-w-0 overflow-hidden rounded-lg bg-surface-inverse text-text-on-inverse shadow-lg"
+    aria-labelledby="revoir-titre"
+  >
+    <h2 id="revoir-titre" class="sr-only">{{ t('activity.stage.replayTitle') }}</h2>
+    <UiImage
+      v-if="props.cover"
+      :image="props.cover"
+      ratio="auto"
+      loading="eager"
+      class="absolute inset-0 opacity-50"
+      frame-class="size-full grayscale"
+      sizes="(min-width: 1024px) 50rem, 100vw"
+    />
+    <p class="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 text-center">
+      <span class="inline-flex size-20 items-center justify-center rounded-full bg-surface-raised text-text-secondary shadow-md sm:size-22">
+        <UiIcon name="video" size="2rem" />
+      </span>
+      <span class="text-sm font-bold">{{ t('activity.stage.replaySoon') }}</span>
+    </p>
   </section>
 
   <div v-else class="relative aspect-video min-w-0 overflow-hidden rounded-lg bg-surface-inverse shadow-lg">

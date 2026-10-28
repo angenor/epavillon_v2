@@ -45,6 +45,7 @@ Lu par chaque script de `ops/reprise-v1/lots/`. Plan : [`docs/progression/repris
 | 93 | photos des intervenants du lot 92 (3), sur leur ligne du dossier ; fichiers déposés par 60-fichiers.sh | 2, joué le 27/10 |
 | 94 | évaluations : notes et consultations (`public.activity_ratings`, `revisionniste_activity_views`) | 2, joué le 28/10 |
 | 95 | messages de révision avec destinataires et lectures (`revision_comments`, `revision_comment_reads`), après la fonction v2 | 2, joué le 28/10 |
-| 100+ | rediffusions, séances de dossiers rejetés CdP31, questions, historique des modifications, documents de négociation, modules fermés | 2 |
+| 100 | rediffusions CdP30 attendues : `is_recorded` faux pour les 28 séances sans vidéo v1, les 33 vidéos consignées `skipped` (`public.activities-youtube_link`, chaîne piratée, à reposer après la CdP31) | 2 |
+| 101+ | historique des modifications, documents de négociation, modules fermés (questions aux activités : non reprises, commanditaire 28/10) | 2 |
 
 Phase 2, site ouvert : le lot se répète sur un clone local de la production (qui dépose aussi les fichiers), puis son flux SQL est lu par le psql du serveur (exemple : `70-temoignages.sh`).
