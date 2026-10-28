@@ -172,7 +172,7 @@ C'est la seule qui respecte « rien ne change » à la lettre (le même code, le
 ## 7. Points de vigilance
 
 - **Délai** : séance le 29/10 à 14 h 00 GMT, bouton « Rejoindre » ouvert à 13 h 00. Mise en ligne le 28/10 au plus tard.
-- **Lien Teams** : constante unique, confirmé par le commanditaire pour la session 10 le 27/10.
+- **Lien Teams** : constante unique (`epavillonvue/src/composables/paco/constants.js`), confirmée par le commanditaire pour la session 10 le 27/10, puis **remplacée le 28/10** à sa demande (« je m'étais trompé ») : arbre de travail v1 modifié (non commité), build refait par `ops/paco/construire.sh`, dossier redéposé dans `/var/www/epavillon-paco/` ; vérifié : nouveau lien servi, ancien absent du build, `/paco` et `/paco/join` en 200, voisin à 200.
 - **Après la séance** : passer la session 10 en `completed: true` avec sa `replayUrl`, ajouter la session 11 (données et traductions), reconstruire, recopier. Comme en v1.
 - **Clés** : build sans clé d'IA ; révoquer celles déjà publiées par la v1. Supabase garde ses clés (D9).
 - **Supabase doit rester actif** : en offre gratuite, un projet se met en pause après une semaine sans activité. Vérifier l'offre.
