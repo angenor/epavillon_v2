@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { EventEdition } from '~/types/event/edition'
 import type { InviteMemberPayload, ProposalTracking, WorkspaceOverview } from '~/types/organization-workspace'
-import type { Intent, SelectOption } from '~/types/ui'
+import type { Intent, SelectOption, TabItem } from '~/types/ui'
+import type { WorkspaceEditionTab, WorkspaceProposalFilter } from '~/utils/workspace-editions'
 import type { Uuid } from '~/types/shared'
 
 /**
@@ -21,9 +22,11 @@ import type { Uuid } from '~/types/shared'
  *  2. « CORRECTIONS DEMANDÉES » SE VOIT DE LOIN, avec le NOMBRE de points à
  *     traiter. C'est le seul état qui coûte un dossier s'il passe inaperçu : le
  *     comité attend une réponse, et l'échéance de l'appel court toujours.
- *  3. LES DOSSIERS SONT GROUPÉS PAR ÉDITION. Une organisation fidèle en a
- *     déposé plusieurs années de suite, et lire un dossier de la COP30 comme
- *     s'il était en cours est le contresens le plus facile à produire.
+ *  3. UNE ÉDITION À LA FOIS (28/10), un onglet chacune, l'édition vivante
+ *     ouverte d'office. Chaque onglet porte SES actions : les comptes rendus de
+ *     la CdP30 reprise de la v1 ne masquent plus le travail de la COP31. La
+ *     recherche, elle, parcourt toutes les éditions et range ce qu'elle trouve
+ *     ailleurs sous le nom de l'édition.
  *  4. L'ÉTAT VIDE MET L'APPEL EN AVANT. Qui n'a rien déposé n'a pas besoin
  *     qu'on lui décrive ce qu'il ne voit pas : il a besoin de savoir où déposer
  *     et jusqu'à quand.
@@ -113,32 +116,89 @@ const {
   { watch: [currentOrganizationId], lazy: true },
 )
 
-/**
- * Les dossiers, groupés par édition et rangés de la plus récente à la plus
- * ancienne. Le groupement se fait ICI et non dans la réponse : c'est un choix
- * d'affichage, et la réponse doit rester une liste que d'autres écrans peuvent
- * trier autrement.
- */
-interface EditionGroup {
-  edition: EventEdition
-  proposals: ProposalTracking[]
-}
+// ---------------------------------------------------------------------------
+// Une édition à la fois (28/10), dans l'URL (`?edition=slug`) pour qu'un lien
+// envoyé ouvre le même onglet.
+// ---------------------------------------------------------------------------
 
-const groups = computed<EditionGroup[]>(() => {
-  const byEdition = new Map<string, EditionGroup>()
-  for (const tracking of overview.value?.proposals ?? []) {
-    const existing = byEdition.get(tracking.edition.id)
-    if (existing) {
-      existing.proposals.push(tracking)
-      continue
-    }
-    byEdition.set(tracking.edition.id, { edition: tracking.edition, proposals: [tracking] })
-  }
-  return [...byEdition.values()].sort((a, b) => b.edition.starts_at.localeCompare(a.edition.starts_at))
+const tabs = computed(() => (overview.value ? workspaceEditionTabs(overview.value) : []))
+
+const activeTab = computed(() => {
+  const requested = route.query.edition
+  return defaultEditionTab(tabs.value, Array.isArray(requested) ? requested[0] : requested)
 })
 
-/** Fuseau des échéances affichées : celui de l'édition qui reçoit les dossiers. */
-const deadlineTimezone = computed(() => overview.value?.call_edition?.timezone ?? 'UTC')
+const tabItems = computed<TabItem[]>(() =>
+  tabs.value.map((tab) => ({ value: tab.edition.slug, label: editionName(tab.edition) })),
+)
+
+function selectTab(slug: string): void {
+  router.replace({ query: { ...route.query, edition: slug }, hash: route.hash })
+}
+
+function editionName(edition: EventEdition): string {
+  return edition.acronym ?? tr(edition.title)
+}
+
+function editionState(tab: WorkspaceEditionTab): 'over' | 'ongoing' | 'upcoming' {
+  if (tab.over) return 'over'
+  return Date.parse(tab.edition.starts_at) <= Date.now() ? 'ongoing' : 'upcoming'
+}
+
+function editionMeta(tab: WorkspaceEditionTab): string {
+  const parts = [
+    t(`organization.workspace.editions.state.${editionState(tab)}`),
+    t('organization.workspace.proposals.count', tab.proposals.length),
+  ]
+  if (tab.over && tab.missingReports > 0) {
+    parts.push(t('organization.workspace.editions.missingReports', tab.missingReports).toLowerCase())
+  } else if (!tab.over && tab.actions.length > 0) {
+    parts.push(t('organization.workspace.editions.todo', tab.actions.length))
+  }
+  return parts.join(' · ')
+}
+
+// ---------------------------------------------------------------------------
+// Recherche et filtre : la recherche parcourt TOUTES les éditions, et ce
+// qu'elle trouve hors de l'onglet se range sous le nom de son édition.
+// ---------------------------------------------------------------------------
+
+const query = ref('')
+const filter = ref<WorkspaceProposalFilter>('all')
+
+const actionIndex = computed(() => proposalActionIndex(overview.value?.actions ?? []))
+
+const filterOptions = computed<SelectOption[]>(() =>
+  WORKSPACE_PROPOSAL_FILTERS.map((value) => ({ value, label: t(`organization.workspace.filters.${value}`) })),
+)
+
+const keep = (tracking: ProposalTracking): boolean =>
+  matchesProposalFilter(tracking, filter.value, actionIndex.value) && matchesProposalQuery(tracking, query.value)
+
+const searching = computed(() => query.value.trim().length > 0)
+
+const shown = computed(() => activeTab.value?.proposals.filter(keep) ?? [])
+
+const elsewhere = computed(() =>
+  searching.value
+    ? tabs.value
+        .filter((tab) => tab !== activeTab.value)
+        .map((tab) => ({ tab, proposals: tab.proposals.filter(keep) }))
+        .filter((group) => group.proposals.length > 0)
+    : [],
+)
+
+function showMissingReports(): void {
+  query.value = ''
+  filter.value = 'report'
+  document.getElementById('mes-dossiers')?.scrollIntoView({ behavior: 'smooth' })
+}
+
+const logo = computed(() => {
+  const asset = overview.value?.organization_logo
+  return asset ? (asset.sources.thumb?.url ?? asset.url) : null
+})
+
 
 const isManager = computed(() => overview.value?.membership.role === 'manager')
 
@@ -204,13 +264,23 @@ async function decide(membershipId: string, approved: boolean): Promise<void> {
 <template>
   <div class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
     <header class="flex flex-col gap-3">
-      <p class="text-sm text-text-subtle">{{ t('organization.workspace.title') }}</p>
       <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-        <div class="min-w-0">
-          <h1 class="text-3xl leading-tight font-semibold text-balance">
-            {{ overview?.organization.legal_name ?? t('organization.workspace.title') }}
-          </h1>
-          <p class="mt-1 text-text-muted">{{ t('organization.workspace.subtitle') }}</p>
+        <div class="flex min-w-0 items-center gap-4 sm:gap-5">
+          <span
+            v-if="overview"
+            class="grid size-16 shrink-0 place-items-center overflow-hidden rounded-lg border border-border bg-surface-raised p-2 sm:size-20"
+          >
+            <img v-if="logo" :src="logo" alt="" class="max-h-full max-w-full object-contain">
+            <span v-else class="text-lg font-bold text-heading" aria-hidden="true">
+              {{ overview.organization.acronym ?? initialsOf(overview.organization.legal_name) }}
+            </span>
+          </span>
+          <div class="min-w-0">
+            <p class="text-sm text-text-subtle">{{ t('organization.workspace.title') }}</p>
+            <h1 class="mt-1 text-3xl leading-tight font-semibold text-balance">
+              {{ overview?.organization.legal_name ?? t('organization.workspace.title') }}
+            </h1>
+          </div>
         </div>
 
         <!-- Le sélecteur n'apparaît qu'à qui a plusieurs organisations : une
@@ -256,64 +326,142 @@ async function decide(membershipId: string, approved: boolean): Promise<void> {
         :message="t('organization.workspace.membershipPending.description', { organization: overview.organization.legal_name })"
       />
 
-      <WorkspaceActionList class="mt-10" :actions="overview.actions" :timezone="deadlineTimezone" />
+      <!-- Aucun dossier ni appel : l'état vide met l'appel en avant, et rien d'autre. -->
+      <div v-if="tabs.length === 0" class="mt-10 grid gap-6 lg:grid-cols-[2fr_1fr]">
+        <UiEmptyState
+          icon="document"
+          :title="t('organization.workspace.proposals.empty.title')"
+          :description="t('organization.workspace.proposals.empty.description')"
+        />
+        <WorkspaceOpenCallCard :call="overview.open_call" :edition="overview.call_edition" />
+      </div>
 
-      <section id="mes-dossiers" class="mt-12 scroll-mt-24" aria-labelledby="workspace-proposals-title">
-        <div class="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <h2 id="workspace-proposals-title" class="text-xl font-semibold">
-            {{ t('organization.workspace.proposals.title') }}
-          </h2>
-          <p class="text-sm text-text-subtle">
-            {{ t('organization.workspace.proposals.count', overview.proposals.length) }}
-          </p>
-        </div>
+      <UiTabs
+        v-else-if="activeTab"
+        class="mt-8"
+        :items="tabItems"
+        :model-value="activeTab.edition.slug"
+        :label="t('organization.workspace.editions.label')"
+        @update:model-value="selectTab"
+      >
+        <template #tab="{ item }">
+          <span v-for="tab in tabs.filter((entry) => entry.edition.slug === item.value)" :key="tab.edition.id" class="flex items-center gap-3 py-2">
+            <!-- Décorative : son texte alternatif précéderait le nom de l'édition dans l'onglet. -->
+            <UiImage
+              v-if="tab.thumbnail"
+              :image="tab.thumbnail"
+              ratio="1 / 1"
+              sizes="44px"
+              rounded="rounded-md"
+              class="w-11 shrink-0"
+              aria-hidden="true"
+            />
+            <span
+              v-else
+              aria-hidden="true"
+              class="grid size-11 shrink-0 place-items-center rounded-md border border-border bg-surface-sunken text-xs font-bold text-text-muted"
+            >
+              {{ initialsOf(editionName(tab.edition)) }}
+            </span>
+            <span class="flex flex-col items-start text-left">
+              <span>{{ editionName(tab.edition) }}</span>
+              <span class="text-xs font-normal text-text-muted">{{ editionMeta(tab) }}</span>
+            </span>
+          </span>
+        </template>
 
-        <!-- L'état vide met l'appel en avant, et rien d'autre. -->
-        <div v-if="overview.proposals.length === 0" class="grid gap-6 lg:grid-cols-[2fr_1fr]">
-          <UiEmptyState
-            icon="document"
-            :title="t('organization.workspace.proposals.empty.title')"
-            :description="t('organization.workspace.proposals.empty.description')"
-          />
-          <WorkspaceOpenCallCard :call="overview.open_call" :edition="overview.call_edition" />
-        </div>
-
-        <div v-else class="grid gap-8 lg:grid-cols-[2fr_1fr] lg:items-start">
-          <div class="flex flex-col gap-8">
-            <div v-for="(group, index) in groups" :key="group.edition.id" class="flex flex-col gap-4">
-              <!-- Le titre d'édition n'apparaît qu'à partir de deux groupes :
-                   une seule campagne n'a pas besoin qu'on la nomme deux fois. -->
-              <!-- Le SIGLE plutôt que le titre complet : « COP31 » tient sur
-                   une ligne là où « COP31 — Conférence des Nations unies sur les
-                   changements climatiques » en prend deux, en capitales, pour ne
-                   rien dire de plus à cet endroit. -->
-              <h3 v-if="groups.length > 1" class="text-sm font-bold tracking-wide text-text-subtle uppercase">
-                {{ group.edition.acronym ?? tr(group.edition.title) }}
-                <span class="font-normal normal-case">
-                  ·
-                  {{
-                    index === 0
-                      ? t('organization.workspace.editions.current')
-                      : t('organization.workspace.editions.past')
-                  }}
-                </span>
-              </h3>
-
-              <WorkspaceProposalCard
-                v-for="tracking in group.proposals"
-                :key="tracking.proposal.id"
-                :tracking="tracking"
-              />
-            </div>
-          </div>
-
+        <div class="flex flex-col gap-8">
           <WorkspaceOpenCallCard
-            class="lg:sticky lg:top-24"
+            v-if="overview.call_edition?.id === activeTab.edition.id"
+            variant="bar"
             :call="overview.open_call"
             :edition="overview.call_edition"
           />
+
+          <!-- Édition terminée : un nombre et un geste, pas la liste des comptes rendus. -->
+          <button
+            v-if="activeTab.over && activeTab.missingReports > 0"
+            type="button"
+            class="flex min-h-(--target-min) cursor-pointer flex-col gap-1 rounded-lg border border-border bg-surface-raised px-4 py-3 text-left transition-colors duration-(--duration-fast) hover:border-border-strong sm:flex-row sm:items-center sm:justify-between"
+            @click="showMissingReports()"
+          >
+            <span class="font-semibold text-text">
+              {{ t('organization.workspace.editions.missingReports', activeTab.missingReports) }}
+            </span>
+            <span class="text-sm font-semibold text-accent">{{ t('organization.workspace.editions.showMissingReports') }}</span>
+          </button>
+
+          <WorkspaceActionList
+            v-if="!activeTab.over"
+            :actions="activeTab.actions"
+            :timezone="activeTab.edition.timezone"
+          />
+
+          <section id="mes-dossiers" class="scroll-mt-24" aria-labelledby="workspace-proposals-title">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <h2 id="workspace-proposals-title" class="text-xl font-semibold">
+                {{ t('organization.workspace.proposals.title') }}
+                <span class="font-normal text-text-subtle">· {{ activeTab.proposals.length }}</span>
+              </h2>
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-end">
+                <UiSearchInput
+                  id="workspace-search"
+                  v-model="query"
+                  class="sm:w-80"
+                  :label="t('organization.workspace.search.label')"
+                  :placeholder="t('organization.workspace.search.placeholder')"
+                  :min-length="1"
+                  :debounce="0"
+                />
+                <UiSelect
+                  id="workspace-filter"
+                  class="sm:w-56"
+                  :model-value="filter"
+                  :options="filterOptions"
+                  :label="t('organization.workspace.filters.label')"
+                  hide-optional
+                  @update:model-value="filter = ($event as WorkspaceProposalFilter | null) ?? 'all'"
+                />
+              </div>
+            </div>
+
+            <div class="mt-4 overflow-hidden rounded-lg border border-border bg-surface-raised">
+              <p
+                v-if="searching"
+                class="bg-surface-sunken px-4 py-2 text-sm font-bold text-heading"
+              >
+                {{ t('organization.workspace.search.inTab', { edition: editionName(activeTab.edition) }) }}
+              </p>
+              <ul v-if="shown.length > 0" class="divide-y divide-border-subtle">
+                <li v-for="tracking in shown" :key="tracking.proposal.id">
+                  <WorkspaceProposalRow :tracking="tracking" :index="actionIndex" />
+                </li>
+              </ul>
+              <p v-else class="px-4 py-4 text-sm text-text-muted">
+                {{
+                  activeTab.proposals.length === 0
+                    ? t('organization.workspace.proposals.noneInEdition')
+                    : t('organization.workspace.search.noneInTab', { edition: editionName(activeTab.edition) })
+                }}
+              </p>
+
+              <!-- Hors de l'onglet : un bandeau par édition, à son nom, pour qu'aucun
+                   dossier passé ne se lise comme un dossier en cours. -->
+              <template v-for="group in elsewhere" :key="group.tab.edition.id">
+                <p class="flex flex-wrap items-baseline justify-between gap-x-3 bg-surface-inverse px-4 py-2 text-sm font-bold text-text-on-inverse">
+                  <span>{{ [editionName(group.tab.edition), group.tab.edition.city].filter(Boolean).join(' · ') }}</span>
+                  <span class="font-normal text-text-on-inverse-muted">{{ t('organization.workspace.search.otherEdition') }}</span>
+                </p>
+                <ul class="divide-y divide-border-subtle">
+                  <li v-for="tracking in group.proposals" :key="tracking.proposal.id">
+                    <WorkspaceProposalRow :tracking="tracking" :index="actionIndex" />
+                  </li>
+                </ul>
+              </template>
+            </div>
+          </section>
         </div>
-      </section>
+      </UiTabs>
 
       <UiAlert
         v-if="memberMessage"

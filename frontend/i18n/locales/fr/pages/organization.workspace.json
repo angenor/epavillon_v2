@@ -11,10 +11,10 @@
     "action": "Voir mes rattachements"
   },
   "actions": {
-    "title": "Ce qui attend une action de votre part",
+    "title": "À faire",
     "empty": {
       "title": "Rien ne vous attend",
-      "description": "Aucun de vos dossiers ne demande d'intervention aujourd'hui. Cette liste se remplira dès qu'une réponse sera attendue de vous."
+      "description": "Aucun dossier de cette édition n’attend de réponse de votre part."
     },
     "count": "Aucune action en attente | Une action en attente | {count} actions en attente",
     "dueOn": "Avant le {date}",
@@ -49,12 +49,7 @@
   "proposals": {
     "title": "Mes dossiers",
     "count": "Aucun dossier | Un dossier | {count} dossiers",
-    "openThis": "Suivre ce dossier",
     "reference": "Dossier {code}",
-    "changeRequests": "Un point à corriger | Un point à corriger | {count} points à corriger",
-    "sessions": "Une activité programmée | Une activité programmée | {count} activités programmées",
-    "registered": "Aucun inscrit | 1 inscrit | {count} inscrits",
-    "decision": "Décision : {reason}",
     "timeline": {
       "label": "Avancement du dossier",
       "draft": "Brouillon",
@@ -71,6 +66,18 @@
     "empty": {
       "title": "Vous n'avez déposé aucun dossier",
       "description": "Vos propositions apparaîtront ici dès la première frappe : un dossier commencé s'enregistre tout seul et porte son numéro avant même d'être envoyé."
+    },
+    "open": "Accéder",
+    "noneInEdition": "Aucun dossier déposé pour cette édition.",
+    "next": {
+      "changes": "À vous : un point à traiter | À vous : un point à traiter | À vous : {count} points à traiter",
+      "draft": "À vous : déposer avant la clôture",
+      "draftClosed": "Jamais déposé",
+      "review": "Décision du comité attendue",
+      "report": "À vous : compte rendu attendu | À vous : compte rendu attendu | À vous : {count} comptes rendus attendus",
+      "session": "{date}, {time}",
+      "held": "Activité tenue",
+      "scheduling": "Programmation en cours"
     }
   },
   "openCall": {
@@ -123,7 +130,30 @@
     }
   },
   "editions": {
-    "current": "Édition en cours",
-    "past": "Éditions précédentes"
+    "label": "Éditions",
+    "state": {
+      "ongoing": "en cours",
+      "upcoming": "à venir",
+      "over": "terminée"
+    },
+    "todo": "rien à faire | une chose à faire | {count} choses à faire",
+    "missingReports": "Aucun compte rendu attendu | Un compte rendu attendu | {count} comptes rendus attendus",
+    "showMissingReports": "Voir les activités concernées"
+  },
+  "filters": {
+    "label": "État",
+    "all": "Tous les états",
+    "todo": "À vous d’agir",
+    "review": "En évaluation",
+    "accepted": "Retenus",
+    "closed": "Non retenus, retirés ou annulés",
+    "report": "Compte rendu attendu"
+  },
+  "search": {
+    "label": "Rechercher dans toutes les éditions",
+    "placeholder": "Titre ou numéro de dossier",
+    "inTab": "Dans {edition}",
+    "noneInTab": "Aucun dossier de {edition} ne correspond.",
+    "otherEdition": "autre édition"
   }
 }

@@ -60,6 +60,10 @@ pub struct SuiviDeDossier {
     /// Les séances programmées, **vides tant que le dossier n'est pas retenu**.
     /// Trois nombres par séance, et jamais un nom.
     pub sessions: Vec<crate::domain::sessions::TrackedSession>,
+    /// Couverture du dossier, `media.attached_image()` ; nulle sans image servable.
+    pub cover: Option<serde_json::Value>,
+    /// Vignette carrée de l'édition, même forme : l'onglet de l'édition la porte.
+    pub edition_thumbnail: Option<serde_json::Value>,
 }
 
 /// Le détail d'un dossier côté organisation — `ProposalFile`.
@@ -118,6 +122,8 @@ pub struct Membre {
 #[derive(Debug, Clone, Serialize, ToSchema)]
 pub struct EspaceOrganisation {
     pub organization: FicheOrganisationComplete,
+    /// Logo de l'organisation, même forme que `cover` ; nul sans logo.
+    pub organization_logo: Option<serde_json::Value>,
     /// L'adhésion de la personne connectée : c'est elle qui ouvre les actions
     /// de référent.
     pub membership: LigneDAdhesion,
@@ -180,8 +186,16 @@ pub async fn espace(
     let mut actions = actions_en_attente(&proposals_suivis, membres_a_traiter, open_call.as_ref());
     actions.extend(comptes_rendus_manquants(state, &proposals_suivis).await?);
 
+    let organization_logo = sqlx::query_scalar!(
+        r#"SELECT media.attached_image('org', 'organizations', $1, 'logo') AS "image""#,
+        organisation
+    )
+    .fetch_one(state.pool())
+    .await?;
+
     Ok(Some(EspaceOrganisation {
         organization,
+        organization_logo,
         membership: adhesion,
         proposals: proposals_suivis,
         // **La personne manquante fait disparaître l'adhésion, pas son nom.**
@@ -356,12 +370,21 @@ async fn suivre(state: &ProgrammeState, dossier: Fiche) -> Result<SuiviDeDossier
     .fetch_one(state.pool())
     .await?;
 
+    let edition_thumbnail = sqlx::query_scalar!(
+        r#"SELECT media.attached_image('event', 'events', $1, 'thumbnail') AS "image""#,
+        dossier.event_id
+    )
+    .fetch_one(state.pool())
+    .await?;
+
     Ok(SuiviDeDossier {
         proposal: sans_le_comite(dossier),
         edition,
         transitions: transitions::journal(state.pool(), id).await?,
         open_change_requests: ouvertes,
         sessions: crate::repo::sessions::seances_suivies(state.pool(), id.as_uuid()).await?,
+        cover: crate::repo::documents::couverture(state.pool(), id).await?,
+        edition_thumbnail,
     })
 }
 

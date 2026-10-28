@@ -21,9 +21,11 @@ import type { EventEdition } from '~/types/event/edition'
 interface Props {
   call: CallForProposals | null
   edition: EventEdition | null
+  /** `bar` : une ligne en tête d'onglet, et rien quand l'appel est fermé. */
+  variant?: 'card' | 'bar'
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { variant: 'card' })
 
 const { t } = useI18n()
 const { tr } = useI18nText()
@@ -40,7 +42,29 @@ const isOpen = computed(() => props.call !== null && !(countdown.value?.expired 
 </script>
 
 <template>
-  <UiCard v-if="isOpen && props.call" class="border-accent-border bg-accent-surface">
+  <div
+    v-if="props.variant === 'bar'"
+    v-show="isOpen"
+    class="flex flex-col gap-3 rounded-lg border border-border bg-surface-raised px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+  >
+    <p class="text-sm text-text-secondary">
+      <strong class="text-text">{{ t('organization.workspace.openCall.eyebrow') }}</strong>
+      · {{ t('organization.workspace.openCall.deadline', { date: date(deadline, timezone) }) }}
+      <template v-if="countdown">
+        ·
+        {{
+          countdown.days > 0
+            ? t('organization.workspace.openCall.remaining', countdown.days)
+            : t('organization.workspace.openCall.lastDay')
+        }}
+      </template>
+    </p>
+    <UiButton variant="primary" class="shrink-0" :to="localePath('/deposer-une-proposition')" icon="plus">
+      {{ t('organization.workspace.openCall.action') }}
+    </UiButton>
+  </div>
+
+  <UiCard v-else-if="isOpen && props.call" class="border-accent-border bg-accent-surface">
     <p class="text-xs font-bold tracking-wide text-accent uppercase">
       {{ t('organization.workspace.openCall.eyebrow') }}
     </p>

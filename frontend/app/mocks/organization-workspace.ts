@@ -54,6 +54,7 @@ import type {
 import { MEMBERSHIP, PERSON_INVITED, PROPOSAL_COMMENT } from './ids'
 import { resolveToken } from './auth'
 import { events } from './event'
+import { attachedImage } from './covers'
 import { rooms } from './rooms'
 import { people } from './people'
 import { openCallForProposals } from './proposal-submission'
@@ -210,6 +211,8 @@ function trackingOf(proposalId: string, at: number): ProposalTracking | null {
       .sort((a, b) => a.occurred_at.localeCompare(b.occurred_at)),
     open_change_requests: openChangeRequests(proposalId),
     sessions: proposal.status === 'accepted' ? trackedSessions(proposalId, at) : [],
+    cover: attachedImage('programme', 'proposals', proposalId, 'cover'),
+    edition_thumbnail: attachedImage('event', 'events', edition.id, 'thumbnail'),
   }
 }
 
@@ -370,6 +373,7 @@ export function workspaceOverview(
 
   return {
     organization,
+    organization_logo: attachedImage('org', 'organizations', organizationId, 'logo'),
     membership,
     proposals: trackings,
     members: ownOnly

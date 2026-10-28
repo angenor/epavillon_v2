@@ -113,3 +113,17 @@ Demande du commanditaire. Sur la carte d'un dossier (`WorkspaceProposalCard`), l
 ## 28/10 : le clic sur « Mon espace » ouvre l'espace
 
 Demande du commanditaire. `UiUserMenu` reçoit `to` : sur un appareil à survol, le clic navigue vers `/mon-organisation` (`/rattachement-organisation` sans organisation, comme le pied du menu mobile) ; le panneau reste au survol et à la flèche bas. Sans survol (tablette), le clic ouvre le panneau comme avant, sinon la déconnexion devient inatteignable.
+
+## 28/10 : une édition à la fois
+
+Demande du commanditaire : en production, « ce qui attend une action » était rempli des comptes rendus attendus de la CdP30 (reprise v1) et repoussait les dossiers. Trois directions maquettées, la A retenue puis enrichie avec lui.
+
+- **Onglets par édition** (`UiTabs`, nouveau créneau `tab`) : vignette carrée de l'édition (sigle à défaut), état (à venir, en cours, terminée), nombre de dossiers et de choses à faire. Ouvert d'office : `?edition=slug`, sinon la plus récente non terminée, sinon la plus récente. L'édition de l'appel ouvert a son onglet même sans dossier.
+- **Actions rangées par édition** (`utils/workspace-editions.ts`) par le dossier qui les porte ; une demande d'adhésion suit l'onglet vivant. Une édition terminée ne liste pas ses comptes rendus : une ligne « N comptes rendus attendus » pose le filtre correspondant.
+- **Appel ouvert** en une ligne (`WorkspaceOpenCallCard variant="bar"`), dans l'onglet de son édition ; rien quand il est fermé.
+- **Lignes de dossier** (`WorkspaceProposalRow`, remplace `WorkspaceProposalCard`) : couverture 16:9, titre cliquable, numéro, état, prochaine étape (« À vous : … » en gras), bouton « Accéder » avec flèche. La frise reste sur la fiche du dossier.
+- **Recherche** (titre dans toutes ses langues et numéro, sans accents) **et filtre** (à vous d'agir, en évaluation, retenus, non retenus, compte rendu attendu). La recherche parcourt toutes les éditions : ce qui est hors de l'onglet se range sous un bandeau au nom de l'édition et de sa ville.
+- **Logo de l'organisation** en tête, sigle à défaut.
+- API : `ProposalTracking.cover`, `ProposalTracking.edition_thumbnail`, `WorkspaceOverview.organization_logo`, lus par `media.attached_image()`.
+
+Vérifié au navigateur sur les données d'exemple (ROAC : COP31 et COP30), à 1280 et 375 px : aucun défilement horizontal, recherche « littor » qui trouve un dossier dans la COP31 et un sous « COP30 · Belém », onglet COP30 réduit à « Un compte rendu attendu ». Images des onglets et des lignes décoratives (`aria-hidden`) : leur texte alternatif précédait le nom dans l'onglet.

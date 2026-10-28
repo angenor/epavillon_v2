@@ -131,11 +131,14 @@ defineExpose({ tabId })
         @keydown.home.prevent="move(index, 'first')"
         @keydown.end.prevent="move(index, 'last')"
       >
-        {{ item.label }}
-        <!-- Pastille autonome, jamais un simple nombre collé au libellé : c'est
-             elle qui rend le volume lisible d'un coup d'œil dans une barre de
-             cinq onglets. Dimensions du guide (22 px), dérivées du pas de 4 px. -->
-        <UiCounter v-if="item.count !== undefined" :value="item.count" tone="accent" />
+        <!-- Créneau `tab` : un onglet plus riche (vignette, seconde ligne) garde le motif ARIA. -->
+        <slot name="tab" :item="item" :selected="item.value === props.modelValue">
+          {{ item.label }}
+          <!-- Pastille autonome, jamais un simple nombre collé au libellé : c'est
+               elle qui rend le volume lisible d'un coup d'œil dans une barre de
+               cinq onglets. Dimensions du guide (22 px), dérivées du pas de 4 px. -->
+          <UiCounter v-if="item.count !== undefined" :value="item.count" tone="accent" />
+        </slot>
       </component>
     </div>
 

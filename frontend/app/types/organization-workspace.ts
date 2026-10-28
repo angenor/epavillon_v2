@@ -22,6 +22,7 @@
  */
 
 import type { EventEdition } from './event/edition'
+import type { AttachedImage } from './media'
 import type { CallForProposals } from './event/call'
 import type { Room } from './event/venue'
 import type { Membership, Organization } from './org'
@@ -137,6 +138,10 @@ export interface ProposalTracking {
   open_change_requests: number
   /** Séances programmées. Vide tant que le dossier n'est pas retenu. */
   sessions: TrackedSession[]
+  /** Couverture du dossier ; nulle sans image servable. */
+  cover: AttachedImage | null
+  /** Vignette carrée de l'édition, que porte son onglet. */
+  edition_thumbnail: AttachedImage | null
 }
 
 /** Le détail d'un dossier : son suivi, ses échanges, son historique. */
@@ -315,6 +320,8 @@ export interface ResolveCommentPayload {
  */
 export interface WorkspaceOverview {
   organization: Organization
+  /** Nul sans logo. */
+  organization_logo: AttachedImage | null
   /** L'adhésion de la personne connectée : c'est elle qui ouvre les actions de
    *  référent (inviter, accepter une demande). */
   membership: Membership
