@@ -426,6 +426,14 @@ CREATE TABLE media.attachments (
                                REFERENCES identity.people(id) ON DELETE SET NULL,
     created_at     timestamptz NOT NULL DEFAULT now(),
 
+    -- LA LÉGENDE D'UN USAGE (29/10, galerie d'activité, D7). Même raison que le
+    -- texte alternatif : une photo dédupliquée peut illustrer deux activités, et
+    -- « Ouverture du panel » ne vaut que pour l'une. En queue de table, comme
+    -- toute colonne arrivée par ALTER. Une galerie écrit sa légende ICI et
+    -- jamais sur l'objet : vider ce champ efface alors vraiment la légende, au
+    -- lieu de laisser reparaître celle de l'objet.
+    caption_override platform.i18n_text,
+
     CONSTRAINT ux_attachments UNIQUE (owner_schema, owner_table, owner_id, role, asset_id)
 );
 
@@ -442,6 +450,8 @@ CREATE INDEX ix_attachments_asset ON media.attachments (asset_id);
 
 COMMENT ON TABLE media.attachments IS
     'Rattachement d''un objet à une entité porteuse pour un rôle donné. Remplace les colonnes d''URL disséminées dans la v1.';
+COMMENT ON COLUMN media.attachments.caption_override IS
+    'Légende propre à cet usage ; prime sur media.assets.caption. Une galerie y écrit la sienne.';
 
 CREATE OR REPLACE FUNCTION media.tg_validate_attachment()
 RETURNS trigger
@@ -571,7 +581,7 @@ AS $$
                'width',    a.width,
                'height',   a.height,
                'alt_text', COALESCE(t.alt_text_override, a.alt_text),
-               'caption',  a.caption,
+               'caption',  COALESCE(t.caption_override, a.caption),
                'credit',   a.credit,
                'sources',  media.asset_sources(a.id))
     FROM media.attachments t
@@ -588,6 +598,50 @@ $$;
 
 COMMENT ON FUNCTION media.attached_image(text, text, uuid, media.attachment_role) IS
     'Image rattachée à une entité pour un rôle, prête à l''affichage : URL de l''original, variantes disponibles, texte alternatif résolu. NULL si aucune image servable.';
+
+-- Toutes les images d'un rôle multiple, dans l'ordre réglé : une galerie
+-- (29/10, D7). Même forme d'élément que media.attached_image(), pour qu'un
+-- écran dessine une vignette de galerie comme une couverture.
+--
+-- PLUS STRICTE QUE SA SŒUR, et c'est voulu : elle sert une page PUBLIQUE, donc
+-- seulement un objet `ready` ET `public`. Un objet réservé aux comptes connectés
+-- n'a rien à faire dans une galerie ouverte à tous.
+--
+-- Tableau vide, jamais NULL : « pas de photo » est un état normal, et la page
+-- teste la longueur pour décider d'afficher la section.
+CREATE OR REPLACE FUNCTION media.attached_images(
+    p_owner_schema text,
+    p_owner_table  text,
+    p_owner_id     uuid,
+    p_role         media.attachment_role DEFAULT 'gallery'
+)
+RETURNS jsonb
+LANGUAGE sql
+STABLE
+AS $$
+    SELECT COALESCE(jsonb_agg(jsonb_build_object(
+               'asset_id', a.id,
+               'url',      media.object_url(a.bucket, a.object_key),
+               'width',    a.width,
+               'height',   a.height,
+               'alt_text', COALESCE(t.alt_text_override, a.alt_text),
+               'caption',  COALESCE(t.caption_override, a.caption),
+               'credit',   a.credit,
+               'sources',  media.asset_sources(a.id))
+             ORDER BY t.sort_order, t.created_at), '[]'::jsonb)
+    FROM media.attachments t
+    JOIN media.assets a ON a.id = t.asset_id
+    WHERE t.owner_schema = p_owner_schema
+      AND t.owner_table  = p_owner_table
+      AND t.owner_id     = p_owner_id
+      AND t.role         = p_role
+      AND a.deleted_at IS NULL
+      AND a.status = 'ready'
+      AND a.visibility = 'public';
+$$;
+
+COMMENT ON FUNCTION media.attached_images(text, text, uuid, media.attachment_role) IS
+    'Images publiques et servables d''un rôle multiple (galerie), dans l''ordre réglé. Même forme d''élément que media.attached_image(). Tableau vide sans image.';
 
 -- -----------------------------------------------------------------------------
 -- 5. Quotas de stockage
@@ -984,5 +1038,11 @@ INSERT INTO media.attachable_roles
     -- Intervenant sans adresse (D16) : sans personne, sa photo va sur la ligne du
     -- dossier ; la séance la lit là, une recopie n'aurait pas à la suivre.
     ('programme',   'proposal_speakers', 'avatar', '{"fr":"Photo de l''intervenant","en":"Speaker picture"}', false, '{image/*}',             5242880, NULL),
+    -- Galerie d'une activité (29/10, D7) : photos seulement, ordre réglable,
+    -- texte alternatif obligatoire (ck_assets_alt_text_required), légende sur
+    -- le rattachement. Posée par l'équipe de l'IFDD seule : la garde est écrite
+    -- pour ce rôle-là, plus étroite que celle de la couverture de la séance
+    -- (backend/crates/modules/media/src/domain/guards.rs).
+    ('programme',   'sessions',      'gallery',   '{"fr":"Galerie de l''activité","en":"Activity gallery"}', true, '{image/*}',             15728640, NULL),
     ('publication', 'articles',      'cover',     '{"fr":"Image de couverture","en":"Cover image"}',  false, '{image/*}',                      10485760, NULL)
 ON CONFLICT DO NOTHING;

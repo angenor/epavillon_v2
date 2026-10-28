@@ -78,6 +78,7 @@ async fn rattacher(bac: &Bac, acteur: Uuid, organisation: Uuid, asset_id: Uuid) 
             asset_id,
             sort_order: None,
             alt_text_override: None,
+            caption_override: None,
         },
     )
     .await

@@ -52,6 +52,7 @@ fn affectation(role: &str, asset_id: Option<Uuid>) -> AttachmentAssignment {
         role: role.to_owned(),
         asset_id,
         alt_text_override: None,
+        caption_override: None,
     }
 }
 
@@ -198,6 +199,7 @@ async fn un_carre_comme_bandeau_est_refuse_en_citant_les_rapports() {
             asset_id: carre,
             sort_order: None,
             alt_text_override: None,
+            caption_override: None,
         },
     )
     .await
@@ -259,6 +261,7 @@ async fn un_objet_sans_dimensions_relevees_est_accepte_sur_un_role_de_forme() {
             asset_id: depose.asset.id,
             sort_order: None,
             alt_text_override: None,
+            caption_override: None,
         },
     )
     .await
@@ -291,6 +294,7 @@ async fn un_second_objet_sur_un_role_exclusif_est_refuse_mais_remplace_il_passe(
         asset_id,
         sort_order: None,
         alt_text_override: None,
+        caption_override: None,
     };
 
     let pose = attach::poser(
@@ -357,6 +361,7 @@ async fn une_combinaison_non_declaree_est_refusee_en_nommant_lentite_et_le_role(
             asset_id: image,
             sort_order: None,
             alt_text_override: None,
+            caption_override: None,
         },
     )
     .await
@@ -408,6 +413,7 @@ async fn detacher_ne_detruit_pas_lobjet() {
             asset_id: depose.asset.id,
             sort_order: None,
             alt_text_override: None,
+            caption_override: None,
         },
     )
     .await
@@ -532,6 +538,7 @@ async fn le_texte_alternatif_dun_usage_prime_sans_modifier_lobjet() {
                     "fr": "La salle plénière de la COP31",
                     "en": "The COP31 plenary room"
                 })),
+                caption_override: None,
             }],
         ),
     )
@@ -591,6 +598,7 @@ async fn un_compte_detache_ne_rattache_a_aucune_autre_entite() {
         asset_id: image,
         sort_order: None,
         alt_text_override: None,
+        caption_override: None,
     };
 
     let voisine = attach::poser(

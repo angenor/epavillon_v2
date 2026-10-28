@@ -71,7 +71,7 @@ pub async fn lister(
     porteuse: Porteuse<'_>,
     role: Option<&str>,
 ) -> Result<Vec<AttachedMedia>> {
-    authz::exiger_le_droit(state.pool(), acteur, porteuse).await?;
+    authz::exiger_le_droit(state.pool(), acteur, porteuse, role).await?;
     attachments::par_entite(
         state.pool(),
         porteuse.owner_schema,
@@ -99,7 +99,11 @@ pub async fn poser(
         owner_table: &payload.owner_table,
         owner_id: payload.owner_id,
     };
-    authz::exiger_le_droit(state.pool(), acteur, porteuse).await?;
+    authz::exiger_le_droit(state.pool(), acteur, porteuse, Some(&payload.role)).await?;
+    verifier_les_textes(
+        payload.alt_text_override.as_ref(),
+        payload.caption_override.as_ref(),
+    )?;
 
     let regle = exiger_la_regle(state, porteuse, &payload.role).await?;
     let objet = exiger_lobjet(state, payload.asset_id).await?;
@@ -131,6 +135,7 @@ pub async fn poser(
             role: &payload.role,
             sort_order: ordre,
             alt_text_override: payload.alt_text_override.clone(),
+            caption_override: payload.caption_override.clone(),
             created_by: acteur,
         },
     )
@@ -184,7 +189,22 @@ pub async fn remplacer(
         owner_table: &lot.owner_table,
         owner_id: lot.owner_id,
     };
-    authz::exiger_le_droit(state.pool(), acteur, porteuse).await?;
+    // **Une garde par rôle nommé** : la galerie d'une séance n'a pas la porte
+    // que sa couverture laisse aux organisations. Un lot vide n'en nomme aucun,
+    // et reste gardé par le couple.
+    let roles = roles_nommes(&lot.assignments);
+    if roles.is_empty() {
+        authz::exiger_le_droit(state.pool(), acteur, porteuse, None).await?;
+    }
+    for role in &roles {
+        authz::exiger_le_droit(state.pool(), acteur, porteuse, Some(role)).await?;
+    }
+    for affectation in &lot.assignments {
+        verifier_les_textes(
+            affectation.alt_text_override.as_ref(),
+            affectation.caption_override.as_ref(),
+        )?;
+    }
 
     // **Tout est vérifié avant d'ouvrir la transaction.** Un refus au troisième
     // rôle après deux écritures serait rendu par le rollback, mais aurait coûté
@@ -206,7 +226,7 @@ pub async fn remplacer(
 
     let mut tx = state.db().write(ctx).await?;
 
-    for role in roles_nommes(&lot.assignments) {
+    for role in roles {
         attachments::vider_role(
             &mut tx,
             porteuse.owner_schema,
@@ -271,6 +291,7 @@ async fn poser_dans(
             role: &affectation.role,
             sort_order,
             alt_text_override: affectation.alt_text_override.clone(),
+            caption_override: affectation.caption_override.clone(),
             created_by: acteur,
         },
     )
@@ -341,6 +362,7 @@ pub async fn detacher(
             owner_table: &vise.owner_table,
             owner_id: vise.owner_id,
         },
+        Some(&vise.role),
     )
     .await?;
 
@@ -358,6 +380,38 @@ pub async fn detacher(
 // -----------------------------------------------------------------------------
 // Les contrôles, et les refus qu'ils nomment
 // -----------------------------------------------------------------------------
+
+/// Un texte d'usage, quand il est donné, est un vrai texte multilingue : le
+/// français non vide, comme `platform.i18n_text` l'exige. Le refus nomme le
+/// champ avant l'écriture ; laissé à la base, il sortirait en panne. Un texte
+/// alternatif vide masquerait en plus celui de l'objet, et l'image servie
+/// n'aurait plus de description.
+fn verifier_les_textes(
+    alt_text_override: Option<&serde_json::Value>,
+    caption_override: Option<&serde_json::Value>,
+) -> Result<()> {
+    if alt_text_override.is_some_and(|t| !texte_multilingue(t)) {
+        return Err(ApiError::new(ErrorCode::MediaAltTextRequired).field("alt_text_override"));
+    }
+    if caption_override.is_some_and(|t| !texte_multilingue(t)) {
+        return Err(ApiError::validation(
+            "La légende doit porter au moins un texte en français.",
+            "caption_override",
+        ));
+    }
+    Ok(())
+}
+
+fn texte_multilingue(valeur: &serde_json::Value) -> bool {
+    let Some(objet) = valeur.as_object() else {
+        return false;
+    };
+    let francais = objet
+        .get("fr")
+        .and_then(serde_json::Value::as_str)
+        .is_some_and(|fr| !fr.trim().is_empty());
+    francais && objet.values().all(serde_json::Value::is_string)
+}
 
 async fn exiger_la_regle(
     state: &MediaState,

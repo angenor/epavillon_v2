@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT owner_schema, owner_table, owner_id, asset_id\n           FROM media.attachments WHERE id = $1",
+  "query": "SELECT owner_schema, owner_table, owner_id, asset_id, role::text AS \"role!\"\n             FROM media.attachments WHERE id = $1",
   "describe": {
     "columns": [
       {
@@ -46,6 +46,12 @@
             "name": "asset_id"
           }
         }
+      },
+      {
+        "ordinal": 4,
+        "name": "role!",
+        "type_info": "Text",
+        "origin": "Expression"
       }
     ],
     "parameters": {
@@ -57,8 +63,9 @@
       false,
       false,
       false,
-      false
+      false,
+      null
     ]
   },
-  "hash": "c513fdf5f50dd44e5b6080d2c62ed461d96352a09504fa493b66046c16eec2d6"
+  "hash": "bda098654d01800ecd7849a33ee879390800476bbfd59e3754e4e028c257d682"
 }

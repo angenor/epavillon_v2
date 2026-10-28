@@ -36,6 +36,8 @@ pub struct SeancePublique {
     pub cancelled_reason: Option<serde_json::Value>,
     pub speakers: Vec<serde_json::Value>,
     pub organizations: Vec<serde_json::Value>,
+    /// Les photos de la galerie (D7), prêtes et publiques, dans l'ordre réglé.
+    pub gallery: Vec<serde_json::Value>,
 }
 
 /// La programmation d'une édition — ou, **sans édition**, les séances à venir
@@ -70,6 +72,7 @@ pub async fn seance(pool: &PgPool, event_id: EventId, slug: &str) -> Result<Sean
         cancelled_reason: complement.cancelled_reason,
         speakers: session_parts::intervenants_publics(pool, id).await?,
         organizations: session_parts::organisations_publiques(pool, id).await?,
+        gallery: session_parts::galerie_publique(pool, id).await?,
         session,
     })
 }

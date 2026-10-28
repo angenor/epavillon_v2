@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO media.attachments\n               (owner_schema, owner_table, owner_id, asset_id, role,\n                sort_order, alt_text_override, created_by)\n           VALUES ($1, $2, $3, $4, $5::text::media.attachment_role,\n                   $6, $7::jsonb::platform.i18n_text, $8)\n        RETURNING id",
+  "query": "INSERT INTO media.attachments\n               (owner_schema, owner_table, owner_id, asset_id, role,\n                sort_order, alt_text_override, created_by, caption_override)\n           VALUES ($1, $2, $3, $4, $5::text::media.attachment_role,\n                   $6, $7::jsonb::platform.i18n_text, $8, $9::jsonb::platform.i18n_text)\n        RETURNING id",
   "describe": {
     "columns": [
       {
@@ -24,12 +24,13 @@
         "Text",
         "Int2",
         "Jsonb",
-        "Uuid"
+        "Uuid",
+        "Jsonb"
       ]
     },
     "nullable": [
       false
     ]
   },
-  "hash": "fc1fbaa8cbbf4d3ccea943149a0db4f90a0b2017efc084a858a05c8cdd40029d"
+  "hash": "be116a884e464e50ab93172c60996249b8662db71a0f75c46829ac4c6ef60850"
 }

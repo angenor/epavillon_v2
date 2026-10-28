@@ -55,6 +55,11 @@ pub enum Garde {
     /// permission sur l'édition.
     OrganisationDeLaSeance { permission: &'static str },
 
+    /// La permission **sur la portée de l'édition de la séance**, ET le
+    /// périmètre d'administration (règle métier n° 8). Aucune adhésion n'ouvre
+    /// l'accès : c'est le geste de l'équipe qui tient l'édition.
+    SeanceAdministree { permission: &'static str },
+
     /// La personne elle-même, **ou** la permission. Une photo de profil
     /// appartient à qui elle représente.
     PersonneElleMeme { permission: &'static str },
@@ -171,6 +176,23 @@ const TABLE: &[((&str, &str), Garde)] = &[
     ),
 ];
 
+/// Les gardes écrites pour **un rôle**, plus étroites que celle de leur couple.
+///
+/// Une entité peut confier un rôle à plus de monde qu'un autre : la couverture
+/// d'une séance est posée par l'organisation qui l'anime, sa galerie (D7) par
+/// l'équipe de l'IFDD seule. Une ligne ici **remplace** la garde du couple pour
+/// ce rôle ; un rôle absent d'ici garde celle du couple. Lister sans rôle reste
+/// gardé par le couple : ce que l'on peut changer, on peut le lire.
+const TABLE_PAR_ROLE: &[((&str, &str, &str), Garde)] = &[(
+    // Galerie d'une activité. Même permission que le planificateur qui
+    // modifie la séance, mais sans la porte de l'adhésion : les organisations
+    // n'ajoutent pas de photo, pour l'instant.
+    ("programme", "sessions", "gallery"),
+    Garde::SeanceAdministree {
+        permission: "programme.session.schedule",
+    },
+)];
+
 impl Garde {
     /// Les types que la garde admet seule, sans rôle. `None` : c'est la ligne de
     /// `attachable_roles` qui les dit.
@@ -194,6 +216,19 @@ pub fn garde_pour(owner_schema: &str, owner_table: &str) -> Option<Garde> {
         .iter()
         .find(|((s, t), _)| *s == owner_schema && *t == owner_table)
         .map(|(_, g)| *g)
+}
+
+/// La garde d'un geste sur un rôle précis : celle du rôle si elle est écrite,
+/// celle du couple sinon. `role` nul (une lecture de tous les rôles, un dépôt
+/// sans rôle) : celle du couple.
+pub fn garde_pour_role(owner_schema: &str, owner_table: &str, role: Option<&str>) -> Option<Garde> {
+    role.and_then(|role| {
+        TABLE_PAR_ROLE
+            .iter()
+            .find(|((s, t, r), _)| *s == owner_schema && *t == owner_table && *r == role)
+            .map(|(_, g)| *g)
+    })
+    .or_else(|| garde_pour(owner_schema, owner_table))
 }
 
 /// Les couples déclarés, pour le test qui les confronte à la base.
@@ -249,6 +284,37 @@ mod tests {
         assert_eq!(garde.types_admis(), Some(&["application/pdf"][..]));
         assert!(garde.impose_le_prive());
         assert!(!garde_pour("event", "events").unwrap().impose_le_prive());
+    }
+
+    /// La galerie d'une séance n'a pas la porte de l'adhésion que sa couverture
+    /// garde : les organisations n'y ajoutent rien.
+    #[test]
+    fn la_galerie_dune_seance_est_reservee_a_lequipe() {
+        assert_eq!(
+            garde_pour_role("programme", "sessions", Some("gallery")),
+            Some(Garde::SeanceAdministree {
+                permission: "programme.session.schedule",
+            })
+        );
+        assert_eq!(
+            garde_pour_role("programme", "sessions", Some("cover")),
+            garde_pour("programme", "sessions")
+        );
+        assert_eq!(
+            garde_pour_role("programme", "sessions", None),
+            garde_pour("programme", "sessions")
+        );
+        // Une garde de rôle ne crée pas de couple : sans garde de couple, refus.
+        assert!(garde_pour_role("event", "rooms", Some("gallery")).is_none());
+    }
+
+    /// Chaque garde de rôle s'appuie sur un couple déclaré : sinon, le test qui
+    /// confronte la table blanche à la base ne la verrait pas.
+    #[test]
+    fn toute_garde_de_role_a_son_couple() {
+        for ((schema, table, _), _) in TABLE_PAR_ROLE {
+            assert!(garde_pour(schema, table).is_some(), "{schema}.{table}");
+        }
     }
 
     /// Aucun doublon : deux lignes pour un même couple rendraient la première,

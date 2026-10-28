@@ -19,7 +19,7 @@ use kernel::error::{ApiError, Result};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::domain::guards::{garde_pour, Garde};
+use crate::domain::guards::{garde_pour_role, Garde};
 use crate::repo::cross;
 
 /// L'entité porteuse visée par un dépôt ou un rattachement.
@@ -30,7 +30,12 @@ pub struct Porteuse<'a> {
     pub owner_id: Uuid,
 }
 
-/// Cette personne peut-elle poser ou retirer un fichier sur cette entité ?
+/// Cette personne peut-elle poser ou retirer un fichier sur cette entité, pour
+/// ce rôle ?
+///
+/// **Le rôle est un paramètre obligatoire**, nul seulement quand le geste n'en
+/// vise aucun : une garde de rôle (la galerie d'une séance) est plus étroite
+/// que celle de son couple, et un appel qui l'oublierait rouvrirait la porte.
 ///
 /// **Rend l'organisation propriétaire de l'objet à venir**, quand l'entité en
 /// désigne une : c'est elle dont le quota est opposable, et la résoudre ici
@@ -39,9 +44,10 @@ pub async fn exiger_le_droit(
     pool: &PgPool,
     acteur: Uuid,
     porteuse: Porteuse<'_>,
+    role: Option<&str>,
 ) -> Result<Option<Uuid>> {
     // Une combinaison non déclarée est REFUSÉE, jamais autorisée par défaut.
-    let Some(garde) = garde_pour(porteuse.owner_schema, porteuse.owner_table) else {
+    let Some(garde) = garde_pour_role(porteuse.owner_schema, porteuse.owner_table, role) else {
         return Err(ApiError::not_found().detail(format!(
             "aucune garde déclarée pour {}.{} — voir domain/guards.rs",
             porteuse.owner_schema, porteuse.owner_table
@@ -114,6 +120,19 @@ pub async fn exiger_le_droit(
             .await?;
             refuser_sauf(acces)?;
             Ok(seance.organization_id)
+        }
+
+        Garde::SeanceAdministree { permission } => {
+            let Some(seance) = cross::seance(pool, porteuse.owner_id).await? else {
+                return Err(ApiError::not_found());
+            };
+            let autorise =
+                has_permission(pool, acteur, permission, Scope::Event(seance.event_id)).await?;
+            let perimetre = kernel::auth::administered_events(pool, acteur).await?;
+            refuser_sauf(autorise && perimetre.allows(seance.event_id))?;
+            // L'équipe illustre l'activité : l'objet appartient à qui le dépose,
+            // et ne pèse pas sur le quota de l'organisation qui l'anime.
+            Ok(None)
         }
 
         Garde::PersonneElleMeme { permission } => {

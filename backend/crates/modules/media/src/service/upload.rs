@@ -109,7 +109,9 @@ pub async fn annoncer(
         declaration.owner_id,
     );
     let organisation = match porteuse {
-        Some(p) => authz::exiger_le_droit(state.pool(), acteur, p).await?,
+        Some(p) => {
+            authz::exiger_le_droit(state.pool(), acteur, p, declaration.role.as_deref()).await?
+        }
         None => None,
     };
 
@@ -194,7 +196,9 @@ pub async fn deposer(
         metadonnees.owner_id,
     );
     let organisation = match porteuse {
-        Some(p) => authz::exiger_le_droit(state.pool(), acteur, p).await?,
+        Some(p) => {
+            authz::exiger_le_droit(state.pool(), acteur, p, metadonnees.role.as_deref()).await?
+        }
         None => None,
     };
 

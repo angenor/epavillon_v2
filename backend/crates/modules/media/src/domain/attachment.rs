@@ -69,6 +69,10 @@ pub struct AttachmentPayload {
     /// l'objet et **ne le modifie pas** : un objet dédupliqué sert plusieurs
     /// fiches, et le texte pertinent n'y est pas le même (FR-040).
     pub alt_text_override: Option<serde_json::Value>,
+    /// La légende **propre à cet usage**, même logique. Une galerie écrit la
+    /// sienne ici : nulle, l'usage n'a pas de légende propre.
+    #[serde(default)]
+    pub caption_override: Option<serde_json::Value>,
 }
 
 /// L'écriture de remplacement, en lot — `AttachmentAssignment[]`.
@@ -97,6 +101,8 @@ pub struct AttachmentAssignment {
     /// **Nul = retirer.** Le rôle est vidé, et l'objet stocké demeure.
     pub asset_id: Option<Uuid>,
     pub alt_text_override: Option<serde_json::Value>,
+    #[serde(default)]
+    pub caption_override: Option<serde_json::Value>,
 }
 
 /// Ce que le détachement rend — et le champ répond à la question qu'on se pose

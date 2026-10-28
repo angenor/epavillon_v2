@@ -130,6 +130,7 @@ pub struct NouveauRattachement<'a> {
     pub role: &'a str,
     pub sort_order: i16,
     pub alt_text_override: Option<serde_json::Value>,
+    pub caption_override: Option<serde_json::Value>,
     pub created_by: Uuid,
 }
 
@@ -142,9 +143,9 @@ pub async fn poser(
     sqlx::query_scalar!(
         r#"INSERT INTO media.attachments
                (owner_schema, owner_table, owner_id, asset_id, role,
-                sort_order, alt_text_override, created_by)
+                sort_order, alt_text_override, created_by, caption_override)
            VALUES ($1, $2, $3, $4, $5::text::media.attachment_role,
-                   $6, $7::jsonb::platform.i18n_text, $8)
+                   $6, $7::jsonb::platform.i18n_text, $8, $9::jsonb::platform.i18n_text)
         RETURNING id"#,
         n.owner_schema,
         n.owner_table,
@@ -153,7 +154,8 @@ pub async fn poser(
         n.role,
         n.sort_order,
         n.alt_text_override,
-        n.created_by
+        n.created_by,
+        n.caption_override
     )
     .fetch_one(conn)
     .await
@@ -167,12 +169,14 @@ pub struct RattachementVise {
     pub owner_table: String,
     pub owner_id: Uuid,
     pub asset_id: Uuid,
+    /// Le rôle : sa garde peut être plus étroite que celle du couple.
+    pub role: String,
 }
 
 pub async fn par_id(pool: &PgPool, attachment_id: Uuid) -> Result<Option<RattachementVise>> {
     let ligne = sqlx::query!(
-        "SELECT owner_schema, owner_table, owner_id, asset_id
-           FROM media.attachments WHERE id = $1",
+        r#"SELECT owner_schema, owner_table, owner_id, asset_id, role::text AS "role!"
+             FROM media.attachments WHERE id = $1"#,
         attachment_id
     )
     .fetch_optional(pool)
@@ -183,6 +187,7 @@ pub async fn par_id(pool: &PgPool, attachment_id: Uuid) -> Result<Option<Rattach
         owner_table: l.owner_table,
         owner_id: l.owner_id,
         asset_id: l.asset_id,
+        role: l.role,
     }))
 }
 
@@ -276,7 +281,7 @@ pub async fn par_entite(
                   media.object_url(a.bucket, a.object_key) AS "url!",
                   a.width, a.height,
                   COALESCE(t.alt_text_override, a.alt_text) AS "alt_text: serde_json::Value",
-                  a.caption AS "caption: serde_json::Value",
+                  COALESCE(t.caption_override, a.caption) AS "caption: serde_json::Value",
                   a.credit,
                   media.asset_sources(a.id) AS "sources!",
                   a.status::text AS "status!"

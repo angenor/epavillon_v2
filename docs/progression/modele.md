@@ -294,3 +294,17 @@ Demande du commanditaire : le motif d'un rejet ou d'une annulation ne doit pas �
 - Côté code : la cascade d'annulation part sans motif (`cancelled_reason` nul) ; l'écran rappelle « Aucun motif » sans bloquer (fenêtre de décision et action groupée).
 
 **Migration** : `ops/migrations/2026-10-28-motif-facultatif-rejet-annulation.sql` (rejouable), appliquée en local : mêmes transitions à motif que le modèle, contrainte absente. **En production le 28/10** avec l'API (sauvegarde `epavillon-20261028-124935`), même vérification.
+
+## 29/10/2026, `050_media.sql` : la galerie de photos d'une activité
+
+Reprise de la v1, décision D7 ([plan](reprise-v1/plan.md)) : la v1 portait 11 photos sur 4 activités (`media_gallery`), sans place en v2. Demande ferme du commanditaire : une galerie par activité, gérée par l'équipe de l'IFDD.
+
+- **`media.attachable_roles`** : `('programme', 'sessions', 'gallery')`, plusieurs fichiers, `image/*`, 15 Mo, sans forme imposée. Photos seulement.
+- **`media.attachments.caption_override`** (`platform.i18n_text`, en queue de table) : la légende propre à un usage, comme `alt_text_override`. Une galerie l'écrit là, jamais sur l'objet : vider la légende l'efface vraiment au lieu de laisser reparaître celle de l'objet. `media.attached_image()` la résout (`COALESCE(t.caption_override, a.caption)`).
+- **`media.attached_images(schema, table, id, role)`** : toutes les images d'un rôle multiple, même forme d'élément que `attached_image()`, dans l'ordre `sort_order` ; plus stricte, elle ne rend que l'objet `ready` **et** `public`. Tableau vide sans photo.
+
+Texte alternatif obligatoire : déjà porté par `ck_assets_alt_text_required` ; le français d'un texte d'usage, quand il est donné, est exigé par `platform.i18n_text` et vérifié par l'API avant l'écriture.
+
+Côté code : garde de rôle dans `media/domain/guards.rs` (la galerie : `programme.session.schedule` sur l'édition de la séance et périmètre d'administration, sans la porte de l'adhésion que garde la couverture) ; détail public d'une séance (`gallery`) ; panneau d'une séance du planificateur ; page publique d'une activité.
+
+**Migration** : `ops/migrations/2026-10-29-galerie-activite.sql`, jouée deux fois en local sur `epavillon`. **En production** : avant le déploiement de l'API, puis le lot 96.

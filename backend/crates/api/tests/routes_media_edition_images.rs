@@ -134,6 +134,7 @@ fn affectation(role: &str, asset_id: Uuid) -> AttachmentAssignment {
         role: role.to_owned(),
         asset_id: Some(asset_id),
         alt_text_override: None,
+        caption_override: None,
     }
 }
 

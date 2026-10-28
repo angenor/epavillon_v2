@@ -179,6 +179,8 @@ async fn les_cles_davant_restent_et_les_nouvelles_sajoutent() {
         .unwrap();
     let detail = serde_json::to_value(detail).unwrap();
     assert_eq!(cles(&detail["session"]), attendues);
+    // Sans photo, la galerie est un tableau vide, jamais absente ni nulle (D7).
+    assert_eq!(detail["gallery"], serde_json::json!([]));
 
     let avant = session_parts::intervenants(bac.pool(), SessionId::from(id))
         .await

@@ -195,6 +195,26 @@ pub async fn organisations_publiques<'e>(
     Ok(lignes)
 }
 
+/// La galerie d'une séance **publiée**, pour le public (D7) : `AttachedImage[]`
+/// dans l'ordre réglé par l'équipe. `media.attached_images()` ne rend que les
+/// photos prêtes et publiques ; tableau vide sans photo.
+pub async fn galerie_publique<'e>(
+    executor: impl PgExecutor<'e>,
+    session_id: SessionId,
+) -> Result<Vec<serde_json::Value>> {
+    let galerie = sqlx::query_scalar!(
+        r#"SELECT media.attached_images('programme', 'sessions', $1, 'gallery') AS "galerie!""#,
+        session_id.as_uuid()
+    )
+    .fetch_one(executor)
+    .await?;
+
+    Ok(match galerie {
+        serde_json::Value::Array(photos) => photos,
+        _ => Vec::new(),
+    })
+}
+
 /// Les rattachements d'une séance — `SessionTrack[]`.
 pub async fn fils<'e>(
     executor: impl PgExecutor<'e>,
