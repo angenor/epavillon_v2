@@ -66,6 +66,7 @@
       "reasonHint": "Required for this transition: it is kept in the submission history and sent to the organization.",
       "reasonOptionalHint": "Optional. If filled in, it is kept in the history and sent to the organization.",
       "reasonRequired": "This transition requires a reason.",
+      "reasonMissing": "No reason given: the organization will receive the decision without an explanation.",
       "submit": "Confirm"
     },
     "success": "Submission moved to “{status}”.",

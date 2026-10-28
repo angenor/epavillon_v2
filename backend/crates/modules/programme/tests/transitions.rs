@@ -115,7 +115,10 @@ async fn trois_lecteurs_voient_trois_menus_differents() {
     );
     assert!(siennes[0].requires_reason);
     assert!(!siennes[1].requires_reason, "retenir n'exige pas de motif");
-    assert!(siennes[2].requires_reason, "rejeter exige un motif");
+    assert!(
+        !siennes[2].requires_reason,
+        "rejeter n'exige plus de motif (28/10), l'écran le rappelle"
+    );
 }
 
 #[tokio::test]
@@ -324,12 +327,13 @@ async fn un_motif_manquant_rend_un_code_distinct() {
     .await
     .expect("mise en évaluation");
 
-    // « en évaluation → non retenu » exige un motif.
+    // « en évaluation → corrections demandées » exige un motif (rejeter ne
+    // l'exige plus depuis le 28/10).
     let issue = transition::tenter(
         &bac.state,
         &ctx_de(&bac, droits.decideur),
         dossier,
-        ProposalStatus::Rejected,
+        ProposalStatus::ChangesRequested,
         None,
     )
     .await
@@ -346,7 +350,7 @@ async fn un_motif_manquant_rend_un_code_distinct() {
         &bac.state,
         &ctx_de(&bac, droits.decideur),
         dossier,
-        ProposalStatus::Rejected,
+        ProposalStatus::ChangesRequested,
         Some("   "),
     )
     .await
@@ -560,7 +564,7 @@ async fn laction_groupee_ecarte_ce_qui_exige_un_motif_absent() {
         &perimetre,
         ChangeStatusPayload {
             proposal_ids: vec![dossier.as_uuid()],
-            to_status: ProposalStatus::Rejected,
+            to_status: ProposalStatus::ChangesRequested,
             reason: None,
         },
     )
@@ -575,7 +579,9 @@ async fn laction_groupee_ecarte_ce_qui_exige_un_motif_absent() {
     // **Écarté AVANT d'y toucher** : rien n'a été tenté, donc rien n'a été
     // annoncé.
     let emis = commun::evenements_emis(&bac, dossier.as_uuid()).await;
-    assert!(!emis.iter().any(|t| t == "programme.proposal.rejected"));
+    assert!(!emis
+        .iter()
+        .any(|t| t == "programme.proposal.changes_requested"));
 }
 
 // -----------------------------------------------------------------------------

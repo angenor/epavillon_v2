@@ -335,8 +335,8 @@ const zoneShort = computed(
           </div>
         </div>
 
-        <!-- 7. Motif d'annulation ou de report — obligatoire en base pour une
-             annulation (`ck_sessions_cancelled_reason`), donc jamais tu à l'écran. -->
+        <!-- 7. Motif d'annulation ou de report, s'il y en a un : facultatif
+             depuis le 28/10. -->
         <p
           v-if="(isCancelled || state === 'postponed') && props.cancelledReason"
           class="rounded-md border px-3 py-2 text-sm text-text-secondary"

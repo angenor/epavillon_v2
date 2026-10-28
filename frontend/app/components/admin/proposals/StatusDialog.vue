@@ -19,7 +19,8 @@ import type { Uuid } from '~/types/shared'
  * le trigger `tg_guard_proposal_status()` refuse la transition sans
  * `decision_reason`, et ce motif part à l'organisation. Le demander ici, c'est
  * éviter un aller-retour dont on connaît d'avance l'issue — et rappeler que ce
- * texte sera lu par quelqu'un.
+ * texte sera lu par quelqu'un. Rejeter ou annuler ne l'exige plus (28/10) : le
+ * champ reste offert, et un rappel dit qu'il est vide.
  */
 
 interface Props {
@@ -58,6 +59,8 @@ watch(
 
 const selectedOption = computed(() => props.options.find((option) => option.to_status === target.value) ?? null)
 const needsReason = computed(() => selectedOption.value?.requires_reason ?? false)
+const offersReason = computed(() => needsReason.value || reasonExpected(target.value))
+const reasonMissing = computed(() => !needsReason.value && reasonExpected(target.value) && !reason.value.trim())
 
 /**
  * La portée réelle d'une transition n'est dite QUE lorsqu'elle est partielle.
@@ -126,20 +129,25 @@ function submit(): void {
           @loading="impactLoading = $event"
         />
 
-        <!-- LE MOTIF N'APPARAÎT QUE QUAND LA BASE L'EXIGE : afficher un champ
-             facultatif à côté d'un champ obligatoire, sans distinction, mène à
-             le remplir au hasard ou à le laisser vide. -->
+        <!-- LE MOTIF N'APPARAÎT QUE QUAND LA BASE L'EXIGE OU QU'IL EST ATTENDU :
+             afficher un champ facultatif partout mène à le remplir au hasard ou
+             à le laisser vide. -->
         <UiTextarea
-          v-if="needsReason"
+          v-if="offersReason"
           v-model="reason"
           :label="t('admin.proposals.changeStatus.reason')"
-          :hint="t('admin.proposals.changeStatus.reasonHint')"
+          :hint="
+            needsReason
+              ? t('admin.proposals.changeStatus.reasonHint')
+              : t('admin.proposals.changeStatus.reasonOptionalHint')
+          "
           :error="showReasonError && !reason.trim() ? t('admin.proposals.changeStatus.reasonRequired') : undefined"
           :rows="3"
-          required
+          :required="needsReason"
           block
           :disabled="props.busy"
         />
+        <UiAlert v-if="reasonMissing" intent="warning" :message="t('admin.proposals.changeStatus.reasonMissing')" />
       </template>
     </div>
 

@@ -1,7 +1,7 @@
 //! **Un dossier retenu puis annulé retire ses activités du programme public.**
 //!
 //! Ses séances publiées et non closes passent « annulées » avec le motif du
-//! dossier, dans la transaction de la décision : le déclencheur émet
+//! dossier s'il en a un, dans la transaction de la décision : le déclencheur émet
 //! `programme.session.cancelled`, que le direct et les avis aux inscrits
 //! consomment. Une séance terminée ne bouge pas. Et une séance non publiée ne
 //! prend aucune inscription, même par une adresse fabriquée.
@@ -49,13 +49,13 @@ async fn dossier_retenu_publie(bac: &Bac, terrain: &Terrain, slug: &str) -> (Uui
     (dossier.id, seance)
 }
 
-async fn annuler(bac: &Bac, dossier: Uuid) {
+async fn annuler(bac: &Bac, dossier: Uuid, motif: Option<&str>) {
     let issue = transition::tenter(
         &bac.state,
         &bac.ctx(),
         dossier.into(),
         ProposalStatus::Cancelled,
-        Some(MOTIF),
+        motif,
     )
     .await
     .expect("la décision aboutit");
@@ -113,7 +113,7 @@ async fn annuler_un_dossier_retenu_annule_sa_seance_publiee() {
         }
     );
 
-    annuler(&bac, dossier).await;
+    annuler(&bac, dossier, Some(MOTIF)).await;
 
     let apres = seances::seance(&bac, seance).await;
     assert_eq!(apres.status, "cancelled");
@@ -143,6 +143,25 @@ async fn annuler_un_dossier_retenu_annule_sa_seance_publiee() {
     );
 }
 
+/// Le motif est facultatif depuis le 28/10 : sans lui, la séance s'annule
+/// quand même, sans motif affiché.
+#[tokio::test]
+async fn annuler_sans_motif_annule_quand_meme_la_seance() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+    seances::grille(&bac, terrain.edition).await;
+
+    let (dossier, seance) = dossier_retenu_publie(&bac, &terrain, "sans-motif").await;
+    annuler(&bac, dossier, None).await;
+
+    assert_eq!(seances::seance(&bac, seance).await.status, "cancelled");
+    assert_eq!(motif_de_la_seance(&bac, seance).await, None);
+    assert!(commun::evenements_emis(&bac, seance)
+        .await
+        .iter()
+        .any(|e| e == "programme.session.cancelled"));
+}
+
 /// Une séance terminée a eu lieu : ni l'aperçu ni l'annulation n'y touchent.
 #[tokio::test]
 async fn une_seance_terminee_nest_pas_touchee() {
@@ -169,7 +188,7 @@ async fn une_seance_terminee_nest_pas_touchee() {
         }
     );
 
-    annuler(&bac, dossier).await;
+    annuler(&bac, dossier, Some(MOTIF)).await;
 
     assert_eq!(seances::seance(&bac, seance).await.status, "completed");
     assert_eq!(motif_de_la_seance(&bac, seance).await, None);

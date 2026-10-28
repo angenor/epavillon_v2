@@ -146,7 +146,9 @@
     "eligible": "s'applique à {eligible} des {selected} dossiers retenus",
     "reason": "Motif",
     "reasonHint": "Obligatoire pour cette transition : il est conservé dans l'historique du dossier et communiqué à l'organisation.",
+    "reasonOptionalHint": "Facultatif. S'il est renseigné, il est conservé dans l'historique du dossier et communiqué à l'organisation.",
     "reasonRequired": "Cette transition exige un motif.",
+    "reasonMissing": "Aucun motif : les organisations recevront la décision sans explication.",
     "submit": "Appliquer",
     "none": "Aucune transition n'est possible sur cette sélection.",
     "success": "Aucun dossier modifié | Un dossier modifié | {count} dossiers modifiés"

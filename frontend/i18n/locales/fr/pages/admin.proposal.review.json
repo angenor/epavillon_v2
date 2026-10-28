@@ -66,6 +66,7 @@
       "reasonHint": "Obligatoire pour cette transition : il est conservé dans l'historique du dossier et communiqué à l'organisation.",
       "reasonOptionalHint": "Facultatif. S'il est renseigné, il est conservé dans l'historique et communiqué à l'organisation.",
       "reasonRequired": "Cette transition exige un motif.",
+      "reasonMissing": "Aucun motif : l'organisation recevra la décision sans explication.",
       "submit": "Confirmer"
     },
     "success": "Dossier passé à « {status} ».",

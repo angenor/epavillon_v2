@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH annulees AS (\n               UPDATE programme.sessions\n                  SET status = 'cancelled',\n                      cancelled_reason = CASE WHEN $2::text IS NOT NULL\n                                              THEN jsonb_build_object('fr', $2::text) END\n                WHERE proposal_id = $1\n                  AND published_at IS NOT NULL\n                  AND status::text = ANY($3)\n            RETURNING id\n           )\n           SELECT count(*) AS \"n!\" FROM annulees",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "4dec057bcf0c984127316d1bfbe75435677598d104e49756d0df0d9805cec2e7"
+}

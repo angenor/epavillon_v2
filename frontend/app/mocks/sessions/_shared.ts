@@ -115,10 +115,6 @@ export function session(fields: SessionFields): Session {
   const registration = fields.registration ?? { required: false }
   const status = fields.status ?? 'scheduled'
 
-  if (status === 'cancelled' && !fields.cancelledReason) {
-    // `ck_sessions_cancelled_reason` refuserait la ligne.
-    throw new Error(`Session ${fields.slug} : une session annulée doit porter un motif.`)
-  }
 
   const event_id = fields.event ?? EVENT.cop31
 

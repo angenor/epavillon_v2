@@ -29,9 +29,7 @@ async fn etat_de_la_vue(bac: &Bac, session_id: Uuid) -> Option<String> {
 
 async fn publier_lactivite(bac: &Bac, session_id: Uuid, statut: &str) {
     sqlx::query!(
-        // Le motif accompagne l'annulation : `ck_sessions_cancelled_reason`
-        // l'exige — une activité annulée sans raison ne se justifie devant
-        // personne.
+        // Le motif accompagne l'annulation, comme le plus souvent en réalité.
         r#"UPDATE programme.sessions
             SET published_at = now(),
                 status = $2::text::programme.session_status,

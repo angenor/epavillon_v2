@@ -134,8 +134,9 @@ CREATE TABLE programme.sessions (
     CONSTRAINT ck_sessions_registration_window
         CHECK (registration_closes_at IS NULL OR registration_opens_at IS NULL
                OR registration_closes_at > registration_opens_at),
-    CONSTRAINT ck_sessions_cancelled_reason
-        CHECK (status <> 'cancelled' OR cancelled_reason IS NOT NULL),
+    -- Pas de `ck_sessions_cancelled_reason` depuis le 28/10/2026 : annuler un
+    -- dossier retenu annule ses séances avec son motif, devenu facultatif. Une
+    -- séance annulée sans motif s'affiche « annulée », sans explication.
     CONSTRAINT ux_sessions_slug UNIQUE (event_id, slug),
     CONSTRAINT ux_sessions_proposal_sequence UNIQUE (proposal_id, sequence_number)
 );

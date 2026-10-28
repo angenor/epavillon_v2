@@ -120,9 +120,9 @@ pub async fn tenter(
             }
 
             // Un dossier retenu puis annulé : ce qui est déjà au programme
-            // public passe « annulée » avec le motif du dossier. Le garde exige
-            // ce motif pour cette transition, il est donc là.
-            if let (ProposalStatus::Cancelled, Some(motif)) = (vers, motif) {
+            // public passe « annulée » avec le motif du dossier, facultatif
+            // depuis le 28/10 : sans lui, la séance s'annule quand même.
+            if vers == ProposalStatus::Cancelled {
                 crate::repo::sessions::annuler_les_seances_publiees(
                     &mut tx,
                     dossier.as_uuid(),

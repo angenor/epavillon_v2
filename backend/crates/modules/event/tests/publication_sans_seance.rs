@@ -44,9 +44,7 @@ async fn une_edition_sans_seance_publie_avec_zero_seance() {
 }
 
 /// **Le décompte porte sur le prédicat annoncé, et pas sur autre chose.** Une
-/// séance déjà publiée n'y figure pas ; une séance annulée non plus — et le
-/// modèle exige d'ailleurs qu'une annulation porte son motif
-/// (`ck_sessions_cancelled_reason`), ce que le semis respecte.
+/// séance déjà publiée n'y figure pas ; une séance annulée non plus.
 #[tokio::test]
 async fn le_decompte_suit_exactement_le_predicat_annonce() {
     let bac = Bac::monter().await;

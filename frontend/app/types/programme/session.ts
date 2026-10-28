@@ -98,7 +98,7 @@ export interface Session {
   attendee_count: number | null
   view_count: number
   published_at: IsoDateTime | null
-  /** Obligatoire quand `status` vaut `cancelled` (`ck_sessions_cancelled_reason`). */
+  /** Motif d'une annulation ou d'un report ; facultatif depuis le 28/10. */
   cancelled_reason: I18nText | null
   created_by: PersonId | null
   created_at: IsoDateTime

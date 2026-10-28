@@ -42,6 +42,11 @@ CREATE TYPE programme.proposal_status AS ENUM (
 -- ouvrir un chemin devient une ligne, pas une relecture du service Rust. La
 -- permission requise est portée ici, ce qui garantit qu'aucun chemin d'écriture
 -- ne peut court-circuiter le contrôle d'accès.
+--
+-- REJETER ET ANNULER N'EXIGENT PAS DE MOTIF (28/10/2026, demande du
+-- commanditaire) : l'écran rappelle qu'il manque, sans bloquer. Une demande de
+-- corrections en exige toujours un : sans lui, l'organisation ne saurait pas
+-- quoi corriger.
 CREATE TABLE programme.proposal_transitions_allowed (
     from_status         programme.proposal_status NOT NULL,
     to_status           programme.proposal_status NOT NULL,
@@ -61,12 +66,12 @@ INSERT INTO programme.proposal_transitions_allowed
     ('submitted',         'withdrawn',         NULL,                        true,  true),
     ('under_review',      'changes_requested', 'programme.review.write',    false, true),
     ('under_review',      'accepted',          'programme.proposal.decide', false, false),
-    ('under_review',      'rejected',          'programme.proposal.decide', false, true),
+    ('under_review',      'rejected',          'programme.proposal.decide', false, false),
     ('under_review',      'withdrawn',         NULL,                        true,  true),
     ('changes_requested', 'submitted',         'programme.proposal.submit', true,  false),
     ('changes_requested', 'withdrawn',         NULL,                        true,  false),
-    ('changes_requested', 'rejected',          'programme.proposal.decide', false, true),
-    ('accepted',          'cancelled',         'programme.proposal.decide', false, true),
+    ('changes_requested', 'rejected',          'programme.proposal.decide', false, false),
+    ('accepted',          'cancelled',         'programme.proposal.decide', false, false),
     ('rejected',          'under_review',      'programme.proposal.decide', false, true)
 ON CONFLICT DO NOTHING;
 

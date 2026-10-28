@@ -299,7 +299,7 @@ pub async fn liberer_les_creneaux(conn: &mut PgConnection, proposal_id: Uuid) ->
 /// par l'annulation et par son aperçu, qui doivent compter les mêmes séances.
 const ETATS_ANNULABLES: &[&str] = &["planned", "scheduled", "live", "postponed"];
 
-/// Annuler les séances publiées d'un dossier annulé, avec son motif.
+/// Annuler les séances publiées d'un dossier annulé, avec son motif s'il en a un.
 ///
 /// Une simple écriture de `status` : `tg_sessions_emit_events()` émet
 /// `programme.session.cancelled` dans la transaction, c'est lui que le direct
@@ -308,13 +308,14 @@ const ETATS_ANNULABLES: &[&str] = &["planned", "scheduled", "live", "postponed"]
 pub async fn annuler_les_seances_publiees(
     conn: &mut PgConnection,
     proposal_id: Uuid,
-    motif: &str,
+    motif: Option<&str>,
 ) -> Result<i64> {
     let annulees = sqlx::query_scalar!(
         r#"WITH annulees AS (
                UPDATE programme.sessions
                   SET status = 'cancelled',
-                      cancelled_reason = jsonb_build_object('fr', $2::text)
+                      cancelled_reason = CASE WHEN $2::text IS NOT NULL
+                                              THEN jsonb_build_object('fr', $2::text) END
                 WHERE proposal_id = $1
                   AND published_at IS NOT NULL
                   AND status::text = ANY($3)

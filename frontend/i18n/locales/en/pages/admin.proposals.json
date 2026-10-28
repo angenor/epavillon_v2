@@ -146,7 +146,9 @@
     "eligible": "applies to {eligible} of the {selected} selected submissions",
     "reason": "Reason",
     "reasonHint": "Required for this transition: it is kept in the submission history and shared with the organization.",
+    "reasonOptionalHint": "Optional. If filled in, it is kept in the submission history and shared with the organization.",
     "reasonRequired": "This transition requires a reason.",
+    "reasonMissing": "No reason given: the organizations will receive the decision without an explanation.",
     "submit": "Apply",
     "none": "No transition is possible on this selection.",
     "success": "No submission changed | One submission changed | {count} submissions changed"

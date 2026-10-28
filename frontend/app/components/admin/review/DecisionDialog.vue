@@ -15,6 +15,7 @@ import type { DecisionOption } from '~/utils/review-scoring'
  * trigger `tg_guard_proposal_status()` refuse la transition sans
  * `decision_reason`. Le demander avant l'envoi évite un aller-retour dont on
  * connaît d'avance l'issue — et rappelle que ce texte part à l'organisation.
+ * Rejeter ou annuler ne l'exige plus (28/10) : un rappel dit qu'il manque.
  */
 
 interface Props {
@@ -51,6 +52,14 @@ watch(
 
 const cancelsAccepted = computed(
   () => props.currentStatus === 'accepted' && props.option?.to_status === 'cancelled',
+)
+
+const reasonMissing = computed(
+  () =>
+    !!props.option &&
+    !props.option.requires_reason &&
+    reasonExpected(props.option.to_status) &&
+    !reason.value.trim(),
 )
 
 const actionLabel = computed(() =>
@@ -118,6 +127,12 @@ function submit(): void {
         block
         :required="props.option.requires_reason"
         :disabled="props.busy"
+      />
+
+      <UiAlert
+        v-if="reasonMissing"
+        intent="warning"
+        :message="t('admin.proposal.review.decision.confirm.reasonMissing')"
       />
     </div>
 

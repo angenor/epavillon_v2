@@ -224,3 +224,11 @@ export function decisionOptions(
     .filter((rule) => hasPermission(granted, rule.required_permission!, eventId))
     .map((rule) => ({ to_status: rule.to_status, requires_reason: rule.requires_reason }))
 }
+
+/**
+ * Rejeter ou annuler sans motif est permis (28/10), mais l'organisation lira la
+ * décision sans explication : l'écran le rappelle, sans bloquer.
+ */
+export function reasonExpected(status: ProposalStatus | ''): boolean {
+  return status === 'rejected' || status === 'cancelled'
+}

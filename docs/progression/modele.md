@@ -284,3 +284,13 @@ La reprise v1 a laissé à 78 dossiers CdP31 en évaluation une séance `planned
 - Côté code (event et programme) : `SessionSelection.accepted_proposals_only` (lu à faux sur une annonce ancienne), même prédicat pour le décompte annoncé et pour la publication ; passer un dossier à `rejected`, `withdrawn` ou `cancelled` supprime ses séances `planned` jamais publiées et sans inscription (aucun événement émis à la suppression).
 
 **Migration** : `ops/migrations/2026-10-28-publication-dossiers-acceptes.sql`, fonction recopiée du modèle (identique, vérifié par empreinte), jouée deux fois sur une copie de la production ; appliquée en local. **En production** : avec l'API.
+
+## 28/10/2026, `070_programme_proposals.sql` et `075_programme_sessions.sql` : rejeter ou annuler sans motif
+
+Demande du commanditaire : le motif d'un rejet ou d'une annulation ne doit pas être obligatoire, seulement rappelé quand il manque.
+
+- **`programme.proposal_transitions_allowed`** : `requires_reason` passe à faux pour `under_review → rejected`, `changes_requested → rejected` et `accepted → cancelled`. Une demande de corrections, un retrait en évaluation et une remise en évaluation en exigent toujours un.
+- **`ck_sessions_cancelled_reason` supprimée** : annuler un dossier retenu annule ses séances publiées avec son motif, désormais facultatif. Une séance annulée sans motif s'affiche « annulée », sans ligne de motif ; l'avis aux inscrits ne cite pas le motif.
+- Côté code : la cascade d'annulation part sans motif (`cancelled_reason` nul) ; l'écran rappelle « Aucun motif » sans bloquer (fenêtre de décision et action groupée).
+
+**Migration** : `ops/migrations/2026-10-28-motif-facultatif-rejet-annulation.sql` (rejouable), appliquée en local : mêmes transitions à motif que le modèle, contrainte absente. **À déployer avec l'API.**

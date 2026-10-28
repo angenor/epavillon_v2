@@ -125,3 +125,13 @@ Les deux manques relevés à la publication (A9), validés par le commanditaire.
 - **Vérifié** : `tests/annulation_dossier_retenu.rs` (séance publiée annulée avec motif et un seul événement, séance terminée intacte, aperçu juste, inscription refusée puis acceptée une fois publiée), test de domaine de la fenêtre, tests du site (`cancellation-impact.test.ts`). Le test `creneau_libere::annuler_ne_touche_pas_une_seance_publiee`, contraire à la décision, est retiré ; `ouvrir_les_inscriptions` des tests publie désormais la séance.
 - **En production le 28/10** (sauvegarde `epavillon-20261028-103220`, sans migration) : aperçu servi (401 sans connexion), aucune erreur, outbox vide. Aucun dossier retenu n'était annulé : rien n'a bougé en ligne.
 - **Reste** : motif d'annulation en français seulement ; écrans non éprouvés au navigateur.
+
+## 28/10/2026 : rejeter ou annuler sans motif, avec un rappel
+
+Demande du commanditaire : le motif d'un rejet ou d'une annulation n'est plus obligatoire, l'écran rappelle seulement qu'il manque.
+
+- **Base** : `requires_reason` à faux pour les deux rejets et l'annulation ; `ck_sessions_cancelled_reason` supprimée ([modèle](../modele.md), 28/10). Une demande de corrections exige toujours son motif.
+- **Fenêtre de décision** : champ facultatif ; vide, une alerte jaune dit « Aucun motif : l'organisation recevra la décision sans explication. » (`reasonExpected()` dans `utils/review-scoring.ts`).
+- **Action groupée** : le champ motif apparaît aussi pour rejeter ou annuler (il n'apparaissait qu'exigé), facultatif, même rappel au pluriel.
+- **Annulation d'un dossier retenu sans motif** : ses séances publiées s'annulent quand même, sans motif affiché.
+- **Vérifié** : `annuler_sans_motif_annule_quand_meme_la_seance`, tests de transition adaptés (l'action groupée s'éprouve sur une demande de corrections sans motif).

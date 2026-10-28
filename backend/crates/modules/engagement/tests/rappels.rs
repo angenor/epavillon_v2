@@ -569,8 +569,7 @@ async fn une_seance_annulee_annule_ce_qui_reste() {
     .await
     .expect("rappel marqué parti");
 
-    // `ck_sessions_cancelled_reason` exige le motif : une séance ne s'annule pas
-    // sans dire pourquoi.
+    // Une annulation réelle porte en général son motif : le semis aussi.
     sqlx::query!(
         r#"UPDATE programme.sessions
               SET status = 'cancelled',
