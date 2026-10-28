@@ -134,4 +134,5 @@ Demande du commanditaire : le motif d'un rejet ou d'une annulation n'est plus ob
 - **Fenêtre de décision** : champ facultatif ; vide, une alerte jaune dit « Aucun motif : l'organisation recevra la décision sans explication. » (`reasonExpected()` dans `utils/review-scoring.ts`).
 - **Action groupée** : le champ motif apparaît aussi pour rejeter ou annuler (il n'apparaissait qu'exigé), facultatif, même rappel au pluriel.
 - **Annulation d'un dossier retenu sans motif** : ses séances publiées s'annulent quand même, sans motif affiché.
-- **Vérifié** : `annuler_sans_motif_annule_quand_meme_la_seance`, tests de transition adaptés (l'action groupée s'éprouve sur une demande de corrections sans motif).
+- **Vérifié** : `annuler_sans_motif_annule_quand_meme_la_seance`, tests de transition adaptés (l'action groupée s'éprouve sur une demande de corrections sans motif) ; `make check-safe` vert (338).
+- **En production le 28/10** : migration puis `deploy.sh update` ; non éprouvé au navigateur.

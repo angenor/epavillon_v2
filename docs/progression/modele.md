@@ -293,4 +293,4 @@ Demande du commanditaire : le motif d'un rejet ou d'une annulation ne doit pas �
 - **`ck_sessions_cancelled_reason` supprimée** : annuler un dossier retenu annule ses séances publiées avec son motif, désormais facultatif. Une séance annulée sans motif s'affiche « annulée », sans ligne de motif ; l'avis aux inscrits ne cite pas le motif.
 - Côté code : la cascade d'annulation part sans motif (`cancelled_reason` nul) ; l'écran rappelle « Aucun motif » sans bloquer (fenêtre de décision et action groupée).
 
-**Migration** : `ops/migrations/2026-10-28-motif-facultatif-rejet-annulation.sql` (rejouable), appliquée en local : mêmes transitions à motif que le modèle, contrainte absente. **À déployer avec l'API.**
+**Migration** : `ops/migrations/2026-10-28-motif-facultatif-rejet-annulation.sql` (rejouable), appliquée en local : mêmes transitions à motif que le modèle, contrainte absente. **En production le 28/10** avec l'API (sauvegarde `epavillon-20261028-124935`), même vérification.
