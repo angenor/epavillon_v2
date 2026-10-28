@@ -64,7 +64,6 @@ const previewEntry = computed(() => sendable.value.find((e) => e.email === previ
 
 const usesFirstName = computed(() => /\{\{\s*prenom\s*\}\}/.test(props.subject + props.bodyHtml))
 
-const duration = computed(() => splitMinutes(props.audience?.estimated_minutes ?? 0))
 
 const rows = computed<MailingRecipientRow[]>(() =>
   (props.audience?.entries ?? []).map((e) => ({
@@ -91,12 +90,8 @@ const rows = computed<MailingRecipientRow[]>(() =>
         <p class="font-display text-2xl leading-tight font-semibold">
           {{ t('admin.mailing.compose.review.count', { count: props.audience.sendable }, props.audience.sendable) }}
         </p>
-        <p class="text-text-secondary">
-          {{
-            duration.hours
-              ? t('admin.mailing.compose.review.durationHours', { hours: duration.hours, minutes: duration.minutes, limit: props.audience.hourly_limit })
-              : t('admin.mailing.compose.review.durationMinutes', { minutes: Math.max(1, duration.minutes), limit: props.audience.hourly_limit })
-          }}
+        <p v-if="props.audience.sendable > 0" class="text-text-secondary">
+          {{ t('admin.mailing.compose.review.messages', { count: props.audience.envelope_count }, props.audience.envelope_count) }}
         </p>
 
         <UiAlert

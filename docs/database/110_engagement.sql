@@ -1111,9 +1111,9 @@ ON CONFLICT DO NOTHING;
 --     destinataire aussi, avec son état ; l'historique remplace la boîte.
 --   - Envoi synchrone depuis le navigateur : un appel par destinataire, tous en
 --     parallèle, un délai dépassé compté comme un succès. Ici un travail différé
---     (file « email ») qui suit une cadence réglable,
---     `engagement.mailing.hourly_limit`, parce que le serveur d'envoi de
---     l'ancien hébergement borne le nombre de messages par heure.
+--     (file « email »), par lots, sans limite d'envoi (décision du
+--     commanditaire, 28/10) ; un destinataire marqué « en cours » avant
+--     l'expédition n'est jamais envoyé deux fois.
 --   - Liste construite côté client, sans liste de suppression. Ici
 --     `mailing_audience()` la résout dans la base : bornée à l'édition,
 --     dédoublonnée sur l'adresse, adresses supprimées signalées.
@@ -1131,7 +1131,7 @@ ON CONFLICT DO NOTHING;
 -- -----------------------------------------------------------------------------
 CREATE TYPE engagement.mailing_status AS ENUM (
     'draft',      -- brouillon : tout se modifie, rien n'est parti
-    'queued',     -- destinataires figés, l'envoi progresse à la cadence réglée
+    'queued',     -- destinataires figés, l'envoi progresse par lots
     'sent',       -- chaque destinataire est traité (parti, écarté ou en échec)
     'cancelled'   -- arrêté en cours de route : les destinataires restants ne reçoivent rien
 );
@@ -1375,10 +1375,9 @@ $$;
 COMMENT ON FUNCTION engagement.mailing_audience IS
     'Destinataires d''un envoi du back-office : critères d''une édition (union) et adresses libres, dédoublonnés, liste de suppression signalée.';
 
--- Cadence et copie par défaut, réglables sans redéploiement.
+-- Copie de l'équipe proposée par défaut, réglable sans redéploiement. Aucune
+-- limite d'envoi : décision du commanditaire le 28/10.
 INSERT INTO platform.settings (key, value, description) VALUES
-    ('engagement.mailing.hourly_limit', '200',
-     'Destinataires par heure pour les envois du back-office, copies comprises (un message à une personne avec deux adresses en copie en compte trois). Le serveur d''envoi de l''ancien hébergement borne ce nombre ; la limite exacte n''est pas publiée : garder une marge pour les courriels transactionnels.'),
     ('engagement.mailing.team_cc', '[]',
      'Adresses de l''équipe proposées en copie de chaque nouvel envoi, en plus de celle de la personne qui écrit.')
 ON CONFLICT (key) DO NOTHING;

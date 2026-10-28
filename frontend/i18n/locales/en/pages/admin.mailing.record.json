@@ -2,7 +2,7 @@
   "sentBy": "Sent by {name}, {date}",
   "completedAt": "Completed {date}",
   "cancelledAt": "Stopped {date}",
-  "inProgress": "Sending in progress, at {limit} recipients per hour. Refresh to follow progress.",
+  "inProgress": "Sending in progress, in batches. Refresh to follow progress.",
   "counts": {
     "sent": "Sent",
     "queued": "Waiting",

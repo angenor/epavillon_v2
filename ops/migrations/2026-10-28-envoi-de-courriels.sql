@@ -1,13 +1,15 @@
 -- Envois de courriels du back-office (28/10). Rejouable.
 -- Modèle : docs/database/110_engagement.sql § 12 (mailings, mailing_recipients,
--- mailing_audience(), réglages de cadence et de copie, permission
+-- mailing_audience(), réglage de la copie de l'équipe, permission
 -- engagement.mailing.send accordée au rôle admin).
 --
 -- Demande du commanditaire : l'équivalent de l'envoi de courriels de la v1,
 -- avec un historique, la boîte d'envoi ne se consultant pas.
 --
--- Additive : deux tables, deux types, une fonction, deux réglages, une
--- permission. Déployer avec l'API et le worker, qui s'en servent.
+-- Additive : deux tables, deux types, une fonction, un réglage, une
+-- permission. Sans limite d'envoi (décision du commanditaire, 28/10) : le
+-- réglage de cadence d'une version antérieure de ce fichier est retiré s'il
+-- a été posé. Déployer avec l'API et le worker, qui s'en servent.
 BEGIN;
 DO $$
 BEGIN
@@ -258,10 +260,9 @@ $$;
 COMMENT ON FUNCTION engagement.mailing_audience IS
     'Destinataires d''un envoi du back-office : critères d''une édition (union) et adresses libres, dédoublonnés, liste de suppression signalée.';
 
--- Cadence et copie par défaut, réglables sans redéploiement.
+-- Copie de l'équipe proposée par défaut, réglable sans redéploiement. Aucune
+-- limite d'envoi : décision du commanditaire le 28/10.
 INSERT INTO platform.settings (key, value, description) VALUES
-    ('engagement.mailing.hourly_limit', '200',
-     'Destinataires par heure pour les envois du back-office, copies comprises (un message à une personne avec deux adresses en copie en compte trois). Le serveur d''envoi de l''ancien hébergement borne ce nombre ; la limite exacte n''est pas publiée : garder une marge pour les courriels transactionnels.'),
     ('engagement.mailing.team_cc', '[]',
      'Adresses de l''équipe proposées en copie de chaque nouvel envoi, en plus de celle de la personne qui écrit.')
 ON CONFLICT (key) DO NOTHING;
@@ -273,5 +274,7 @@ ON CONFLICT (code) DO NOTHING;
 INSERT INTO identity.role_permissions (role_code, permission_code) VALUES
     ('admin', 'engagement.mailing.send')
 ON CONFLICT DO NOTHING;
+
+DELETE FROM platform.settings WHERE key = 'engagement.mailing.hourly_limit';
 
 COMMIT;

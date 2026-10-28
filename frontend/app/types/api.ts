@@ -475,7 +475,7 @@ export interface paths {
         };
         /**
          * L'historique d'une édition.
-         * @description `MailingListScreen` : les envois de l'édition, du plus récent au plus ancien, avec leurs compteurs par état de destinataire, la cadence réglée (`hourly_limit`, destinataires par heure copies comprises), la copie de l'équipe proposée par défaut et les variables offertes.
+         * @description `MailingListScreen` : les envois de l'édition, du plus récent au plus ancien, avec leurs compteurs par état de destinataire, la copie de l'équipe proposée par défaut et les variables offertes.
          *
          *     Gardé par `engagement.mailing.send` **sur l'édition**, et borné au périmètre d'administration : hors périmètre, l'édition n'existe pas (404) ; dans le périmètre sans la permission, 403.
          */
@@ -529,7 +529,7 @@ export interface paths {
         };
         /**
          * La liste avant envoi.
-         * @description `MailingAudience` : les adresses telles qu'elles partiraient maintenant, une par adresse (sans égard à la casse), avec les critères qui les ont produites ; le décompte, les adresses sur la liste de suppression (signalées, jamais sollicitées), celles sans prénom connu, le nombre de messages comptés par le serveur d'envoi (copies comprises) et la durée estimée à la cadence réglée.
+         * @description `MailingAudience` : les adresses telles qu'elles partiraient maintenant, une par adresse (sans égard à la casse), avec les critères qui les ont produites ; le décompte, les adresses sur la liste de suppression (signalées, jamais sollicitées), celles sans prénom connu, et le nombre de messages remis au serveur d'envoi, copies comprises.
          */
         get: operations["engagement_envois_destinataires"];
         put?: never;
@@ -591,7 +591,7 @@ export interface paths {
         put?: never;
         /**
          * Envoyer.
-         * @description `Mailing` : fige les destinataires (la liste qui part est celle qu'on a vue) et met l'envoi en file. Le worker l'expédie par lots, à la cadence `engagement.mailing.hourly_limit` ; **un message par destinataire**, chacun portant la copie, la copie cachée et l'adresse de réponse. Aucun destinataire joignable : 422 `ENGAGEMENT_MAILING_EMPTY`, le brouillon reste un brouillon.
+         * @description `Mailing` : fige les destinataires (la liste qui part est celle qu'on a vue) et met l'envoi en file. Le worker l'expédie par lots de dix, enchaînés sans attente (aucune limite d'envoi) ; **un message par destinataire**, chacun portant la copie, la copie cachée et l'adresse de réponse. Aucun destinataire joignable : 422 `ENGAGEMENT_MAILING_EMPTY`, le brouillon reste un brouillon.
          */
         post: operations["engagement_envois_envoyer"];
         delete?: never;

@@ -91,11 +91,6 @@ export function recipientStatusIntent(
   }
 }
 
-/** « 2 h 30 » ou « 45 min » : une durée estimée lisible. */
-export function splitMinutes(minutes: number): { hours: number; minutes: number } {
-  return { hours: Math.floor(minutes / 60), minutes: minutes % 60 }
-}
-
 /** `{{prenom}}`, composé ici : écrit dans un gabarit Vue ou un message i18n, il serait interprété. */
 export function variableToken(name: string): string {
   return `{{${name}}}`

@@ -65,8 +65,7 @@
   },
   "review": {
     "count": "Aucun destinataire joignable | Ce courriel partira à {count} personne | Ce courriel partira à {count} personnes",
-    "durationHours": "Environ {hours} h {minutes} min pour tout envoyer, à la cadence de {limit} destinataires par heure, copies comprises.",
-    "durationMinutes": "Environ {minutes} min pour tout envoyer, à la cadence de {limit} destinataires par heure, copies comprises.",
+    "messages": "Aucun message | Soit {count} message remis au serveur d'envoi, copies comprises. | Soit {count} messages remis au serveur d'envoi, copies comprises.",
     "none": "Personne ne recevrait ce courriel : ajoutez un critère ou une adresse.",
     "suppressed": "Aucune adresse écartée | {count} adresse est sur la liste de suppression (rebond ou désabonnement) : elle ne recevra rien. | {count} adresses sont sur la liste de suppression (rebond ou désabonnement) : elles ne recevront rien.",
     "noFirstName": "Aucun destinataire sans prénom | {count} destinataire n'a pas de prénom connu : la variable prénom y restera vide. | {count} destinataires n'ont pas de prénom connu : la variable prénom y restera vide.",
@@ -85,7 +84,7 @@
     "subject": "Objet : {subject}",
     "cc": "En copie de chaque message : {addresses} ({count} copies).",
     "replyTo": "Les réponses iront à {address}.",
-    "explain": "La liste est figée à l'envoi. Les messages partent par lots, à la cadence que permet le serveur d'envoi ; vous suivez leur état dans l'historique, et pouvez arrêter l'envoi en cours de route.",
+    "explain": "La liste est figée à l'envoi. Les messages partent par lots, sans limite d'envoi ; vous suivez leur état dans l'historique, et pouvez arrêter l'envoi en cours de route.",
     "action": "Envoyer | Envoyer à {count} personne | Envoyer à {count} personnes"
   },
   "previous": "Étape précédente",

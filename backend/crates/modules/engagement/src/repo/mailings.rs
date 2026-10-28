@@ -1,4 +1,4 @@
-//! Les envois du back-office : brouillons, destinataires figés, cadence.
+//! Les envois du back-office : brouillons, destinataires figés, état d'envoi.
 //!
 //! La liste des destinataires vient de `engagement.mailing_audience()`, qui lit
 //! les participants de l'édition (programme, identity, org) : la règle de
@@ -365,23 +365,17 @@ pub async fn annuler(conn: &mut PgConnection, id: Uuid) -> Result<bool> {
     Ok(true)
 }
 
-/// La cadence (destinataires par heure, copies comprises) et la copie de
-/// l'équipe. Un réglage absent ou illisible prend la valeur du modèle.
-pub async fn reglages(pool: &PgPool) -> Result<(i64, Vec<String>)> {
-    let ligne = sqlx::query!(
-        r#"SELECT
-             (SELECT CASE WHEN jsonb_typeof(value) = 'number' THEN (value #>> '{}')::numeric::bigint END
-                FROM platform.settings WHERE key = 'engagement.mailing.hourly_limit') AS limite,
-             (SELECT ARRAY(SELECT jsonb_array_elements_text(value))
-                FROM platform.settings WHERE key = 'engagement.mailing.team_cc'
-                 AND jsonb_typeof(value) = 'array') AS equipe"#
+/// La copie de l'équipe proposée par défaut. Un réglage absent ou illisible
+/// n'en propose aucune.
+pub async fn equipe_en_copie(pool: &PgPool) -> Result<Vec<String>> {
+    let equipe = sqlx::query_scalar!(
+        r#"SELECT ARRAY(SELECT jsonb_array_elements_text(value)) AS equipe
+             FROM platform.settings
+            WHERE key = 'engagement.mailing.team_cc' AND jsonb_typeof(value) = 'array'"#
     )
-    .fetch_one(pool)
+    .fetch_optional(pool)
     .await?;
-    Ok((
-        ligne.limite.filter(|n| *n > 0).unwrap_or(200),
-        ligne.equipe.unwrap_or_default(),
-    ))
+    Ok(equipe.flatten().unwrap_or_default())
 }
 
 pub async fn adresse_de(

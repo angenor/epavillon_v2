@@ -1,13 +1,11 @@
-//! **L'envoi d'un courriel du back-office, à la cadence du serveur d'envoi.**
+//! **L'envoi d'un courriel du back-office, par lots et sans limite d'envoi.**
 //!
-//! # Un lot, puis la suite plus tard
+//! # Un lot, puis le suivant aussitôt
 //!
-//! Le serveur de l'ancien hébergement borne le nombre de destinataires par
-//! heure, copies comprises. Chaque passage envoie au plus [`LOT`] messages, puis
-//! pose le passage suivant à l'heure qui respecte
-//! `engagement.mailing.hourly_limit` : un message à une personne avec deux
-//! adresses en copie compte pour trois. Le réglage se relit à chaque passage :
-//! le changer en base agit sur un envoi en cours.
+//! Aucune limite d'envoi (décision du commanditaire, 28/10). Chaque passage
+//! envoie au plus [`LOT`] messages et pose aussitôt le passage suivant : un
+//! envoi de mille adresses ne tient pas un ouvrier du worker d'un seul tenant,
+//! et les rappels et confirmations de la même file passent entre deux lots.
 //!
 //! # Une fois, et une seule
 //!
@@ -30,7 +28,6 @@ use kernel::jobs::{self, ClaimedJob, JobHandler, NewJob};
 use kernel::mail::{Copies, MailError, Mailer, OutgoingMail};
 use std::collections::HashMap;
 use std::sync::Arc;
-use time::{Duration, OffsetDateTime};
 use uuid::Uuid;
 
 use crate::domain::mailing::{self, echapper_html, enveloppe_html, texte_brut};
@@ -130,15 +127,12 @@ impl JobHandler for SendMailing {
             return Ok(());
         }
 
-        let (limite, _) = mailings::reglages(self.db.pool()).await?;
-        let par_message = 1 + envoi.cc.len() as i64 + envoi.bcc.len() as i64;
         let copies = Copies {
             cc: envoi.cc.clone(),
             bcc: envoi.bcc.clone(),
             reply_to: envoi.reply_to.clone(),
         };
 
-        let mut partis: i64 = 0;
         for _ in 0..LOT {
             let pris = {
                 let mut tx = self.db.write(&contexte()).await?;
@@ -174,20 +168,14 @@ impl JobHandler for SendMailing {
             };
 
             match self.mailer.send_with_copies(&message, &copies).await {
-                Ok(()) => {
-                    self.clore(pris.id, "sent", None).await?;
-                    partis += 1;
-                }
+                Ok(()) => self.clore(pris.id, "sent", None).await?,
                 Err(MailError::Unreachable(detail)) => {
                     self.clore(pris.id, "queued", None).await?;
                     return Err(ApiError::internal(format!(
                         "serveur d'envoi injoignable, reprise plus tard : {detail}"
                     )));
                 }
-                Err(e) => {
-                    self.clore(pris.id, "failed", Some(&e.to_string())).await?;
-                    partis += 1;
-                }
+                Err(e) => self.clore(pris.id, "failed", Some(&e.to_string())).await?,
             }
         }
 
@@ -201,7 +189,6 @@ impl JobHandler for SendMailing {
             .fetch_one(&mut *tx)
             .await?
             .unwrap_or_default();
-            let attente = Duration::seconds((partis * par_message * 3600 / limite).max(5));
             jobs::enqueue(
                 &mut tx,
                 NewJob {
@@ -209,7 +196,7 @@ impl JobHandler for SendMailing {
                     task: SEND_MAILING,
                     payload: serde_json::json!({ "mailing_id": id }),
                     idempotency_key: Some(format!("mailing:{id}:{suivant}")),
-                    run_at: Some(OffsetDateTime::now_utc() + attente),
+                    run_at: None,
                 },
             )
             .await?;

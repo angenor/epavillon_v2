@@ -205,3 +205,32 @@ async fn une_variable_inconnue_est_refusee_sur_le_corps() {
     assert_eq!(refus.code, ErrorCode::ValidationFailed);
     assert_eq!(refus.field.as_deref(), Some("body_html"));
 }
+
+/// Sans limite d'envoi (décision du 28/10) : les lots de dix s'enchaînent sans
+/// attente, et un seul passage du worker vide la file.
+#[tokio::test]
+async fn les_lots_senchainent_sans_attente() {
+    let bac = Bac::monter().await;
+    let t = commun::terrain(&bac).await;
+    let mut payload = brouillon(t.edition);
+    payload.draft.audience = Some(vec![]);
+    payload.draft.extra_addresses = Some((0..23).map(|i| format!("lot{i}@example.org")).collect());
+    payload.draft.body_html = Some("<p>Bonjour,</p>".into());
+    let envoi = mailings::creer(&bac.state, &bac.ctx(), t.administratrice, &payload)
+        .await
+        .expect("brouillon");
+    mailings::envoyer(&bac.state, &bac.ctx(), t.administratrice, envoi.id)
+        .await
+        .expect("envoi");
+
+    for issue in commun::passer_le_worker(&bac).await {
+        issue.expect("passage du worker");
+    }
+
+    assert_eq!(bac.boite.compte(), 23);
+    let fini = mailings::detail(&bac.state, t.administratrice, envoi.id)
+        .await
+        .expect("détail");
+    assert_eq!(fini.status, "sent");
+    assert_eq!(fini.counts.sent, 23);
+}

@@ -17,7 +17,7 @@
 //! # Rien ne part dans la requête
 //!
 //! L'envoi et l'essai passent par la file « email » du worker, qui suit la
-//! cadence réglée (`engagement.mailing.hourly_limit`).
+//! par lots, sans limite d'envoi (décision du commanditaire, 28/10).
 
 use kernel::auth::{administered_events, has_permission, Scope};
 use kernel::error::{ApiError, ErrorCode, Result};
@@ -97,10 +97,9 @@ pub async fn ecran(
     event_id: Uuid,
 ) -> Result<MailingListScreen> {
     garder_edition(state, acteur, event_id).await?;
-    let (hourly_limit, team_cc) = mailings::reglages(state.pool()).await?;
+    let team_cc = mailings::equipe_en_copie(state.pool()).await?;
     Ok(MailingListScreen {
         rows: mailings::lister(state.pool(), event_id).await?,
-        hourly_limit,
         team_cc,
         variables: VARIABLES.iter().map(|v| (*v).to_owned()).collect(),
     })
@@ -113,11 +112,9 @@ pub async fn detail(state: &EngagementState, acteur: Uuid, id: Uuid) -> Result<M
 
 async fn assembler(state: &EngagementState, e: mailings::LigneEnvoi) -> Result<Mailing> {
     let recipients = mailings::destinataires(state.pool(), e.id).await?;
-    let (hourly_limit, _) = mailings::reglages(state.pool()).await?;
     Ok(Mailing {
         counts: mailings::compter(&recipients),
         recipients,
-        hourly_limit,
         id: e.id,
         event_id: e.event_id,
         status: e.status,
@@ -139,8 +136,8 @@ async fn assembler(state: &EngagementState, e: mailings::LigneEnvoi) -> Result<M
     })
 }
 
-/// La liste telle qu'elle partirait maintenant, avec le décompte et la durée
-/// estimée à la cadence réglée.
+/// La liste telle qu'elle partirait maintenant, avec le décompte et le nombre
+/// des messages remis au serveur, copies comprises.
 pub async fn audience(state: &EngagementState, acteur: Uuid, id: Uuid) -> Result<MailingAudience> {
     let envoi = garder_envoi(state, acteur, id).await?;
     let criteres = serde_json::to_value(&envoi.audience).map_err(ApiError::internal)?;
@@ -151,7 +148,6 @@ pub async fn audience(state: &EngagementState, acteur: Uuid, id: Uuid) -> Result
         &envoi.extra_addresses,
     )
     .await?;
-    let (hourly_limit, _) = mailings::reglages(state.pool()).await?;
 
     let total = entries.len() as i64;
     let suppressed = entries.iter().filter(|e| e.is_suppressed).count() as i64;
@@ -162,7 +158,6 @@ pub async fn audience(state: &EngagementState, acteur: Uuid, id: Uuid) -> Result
         .count() as i64;
     let par_message = 1 + envoi.cc.len() as i64 + envoi.bcc.len() as i64;
     let envelope_count = sendable * par_message;
-    let estimated_minutes = (envelope_count * 60 + hourly_limit - 1) / hourly_limit;
 
     Ok(MailingAudience {
         total,
@@ -170,8 +165,6 @@ pub async fn audience(state: &EngagementState, acteur: Uuid, id: Uuid) -> Result
         suppressed,
         without_first_name,
         envelope_count,
-        hourly_limit,
-        estimated_minutes,
         entries,
     })
 }
@@ -310,7 +303,7 @@ pub async fn creer(
 ) -> Result<Mailing> {
     garder_edition(state, acteur, payload.event_id).await?;
 
-    let mut cc_par_defaut = mailings::reglages(state.pool()).await?.1;
+    let mut cc_par_defaut = mailings::equipe_en_copie(state.pool()).await?;
     if let Some((adresse, ..)) = mailings::adresse_de(state.pool(), acteur).await? {
         cc_par_defaut.push(adresse);
     }

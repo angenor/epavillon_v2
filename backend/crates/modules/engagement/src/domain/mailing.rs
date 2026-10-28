@@ -83,11 +83,10 @@ pub struct MailingSummary {
 }
 
 /// L'écran de l'historique (`MailingListScreen`) : les envois, et les réglages
-/// que l'écran annonce (cadence, copie de l'équipe).
+/// que l'écran annonce (copie de l'équipe, variables).
 #[derive(Debug, Clone, Serialize, ToSchema)]
 pub struct MailingListScreen {
     pub rows: Vec<MailingSummary>,
-    pub hourly_limit: i64,
     pub team_cc: Vec<String>,
     pub variables: Vec<String>,
 }
@@ -121,7 +120,6 @@ pub struct Mailing {
     pub counts: MailingCounts,
     /// Les destinataires figés, vides tant que l'envoi est un brouillon.
     pub recipients: Vec<MailingRecipient>,
-    pub hourly_limit: i64,
 }
 
 /// Un destinataire figé (`MailingRecipient`).
@@ -162,12 +160,9 @@ pub struct MailingAudience {
     pub suppressed: i64,
     /// Adresses joignables sans prénom connu : `{{prenom}}` y serait vide.
     pub without_first_name: i64,
-    /// Messages comptés par le serveur d'envoi : un par destinataire, plus un
-    /// par adresse en copie ou en copie cachée, et ce pour chaque message.
+    /// Messages remis au serveur d'envoi : un par destinataire, plus un par
+    /// adresse en copie ou en copie cachée, et ce pour chaque message.
     pub envelope_count: i64,
-    pub hourly_limit: i64,
-    /// Une estimation, en minutes, à la cadence réglée.
-    pub estimated_minutes: i64,
     pub entries: Vec<MailingAudienceEntry>,
 }
 

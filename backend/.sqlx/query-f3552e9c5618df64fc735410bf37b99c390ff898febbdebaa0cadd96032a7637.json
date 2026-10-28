@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT ARRAY(SELECT jsonb_array_elements_text(value)) AS equipe\n             FROM platform.settings\n            WHERE key = 'engagement.mailing.team_cc' AND jsonb_typeof(value) = 'array'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "equipe",
+        "type_info": "TextArray",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "f3552e9c5618df64fc735410bf37b99c390ff898febbdebaa0cadd96032a7637"
+}

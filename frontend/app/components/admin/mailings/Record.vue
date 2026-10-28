@@ -78,7 +78,7 @@ function sessionLabel(id: string | null): string {
         v-if="props.mailing.status === 'queued'"
         intent="warning"
         compact
-        :message="t('admin.mailing.record.inProgress', { limit: props.mailing.hourly_limit })"
+        :message="t('admin.mailing.record.inProgress')"
       />
 
       <dl class="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-5">

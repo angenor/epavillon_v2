@@ -65,8 +65,7 @@
   },
   "review": {
     "count": "No reachable recipient | This email will go to {count} person | This email will go to {count} people",
-    "durationHours": "About {hours} h {minutes} min to send everything, at {limit} recipients per hour, copies included.",
-    "durationMinutes": "About {minutes} min to send everything, at {limit} recipients per hour, copies included.",
+    "messages": "No messages | That is {count} message handed to the mail server, copies included. | That is {count} messages handed to the mail server, copies included.",
     "none": "Nobody would receive this email: add a criterion or an address.",
     "suppressed": "No excluded address | {count} address is on the suppression list (bounce or unsubscribe): it will receive nothing. | {count} addresses are on the suppression list (bounce or unsubscribe): they will receive nothing.",
     "noFirstName": "No recipient without a first name | {count} recipient has no known first name: the first name variable will be empty. | {count} recipients have no known first name: the first name variable will be empty.",
@@ -85,7 +84,7 @@
     "subject": "Subject: {subject}",
     "cc": "Copied on every message: {addresses} ({count} copies).",
     "replyTo": "Replies will go to {address}.",
-    "explain": "The list is frozen when you send. Messages leave in batches, at the pace the mail server allows; you follow their status in the history, and can stop the sending midway.",
+    "explain": "The list is frozen when you send. Messages leave in batches, with no sending limit; you follow their status in the history, and can stop the sending midway.",
     "action": "Send | Send to {count} person | Send to {count} people"
   },
   "previous": "Previous step",

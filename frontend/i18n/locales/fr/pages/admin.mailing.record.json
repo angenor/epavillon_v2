@@ -2,7 +2,7 @@
   "sentBy": "Envoyé par {name}, le {date}",
   "completedAt": "Terminé le {date}",
   "cancelledAt": "Arrêté le {date}",
-  "inProgress": "Envoi en cours, à la cadence de {limit} destinataires par heure. Actualisez pour suivre l'avancement.",
+  "inProgress": "Envoi en cours, par lots. Actualisez pour suivre l'avancement.",
   "counts": {
     "sent": "Partis",
     "queued": "En attente",

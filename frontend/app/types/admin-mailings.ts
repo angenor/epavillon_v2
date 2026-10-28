@@ -57,8 +57,6 @@ export interface MailingSummary {
 
 export interface MailingListScreen {
   rows: MailingSummary[]
-  /** Destinataires par heure, copies comprises. */
-  hourly_limit: number
   team_cc: string[]
   variables: string[]
 }
@@ -99,7 +97,6 @@ export interface Mailing {
   counts: MailingCounts
   /** Vide tant que l'envoi est un brouillon. */
   recipients: MailingRecipient[]
-  hourly_limit: number
 }
 
 export interface MailingAudienceEntry {
@@ -117,10 +114,8 @@ export interface MailingAudience {
   sendable: number
   suppressed: number
   without_first_name: number
-  /** Messages comptés par le serveur d'envoi, copies comprises. */
+  /** Messages remis au serveur d'envoi, copies comprises. */
   envelope_count: number
-  hourly_limit: number
-  estimated_minutes: number
   entries: MailingAudienceEntry[]
 }
 

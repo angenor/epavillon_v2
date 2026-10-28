@@ -21,7 +21,6 @@ import type {
 import type { EventId, Uuid } from '~/types/shared'
 import { EVENT, mockUuid } from './ids'
 
-const HOURLY_LIMIT = 200
 const VARIABLES = ['prenom', 'nom', 'organisation', 'email', 'edition']
 const ME = 'a.sowfall@roac-afrique.org'
 
@@ -77,7 +76,6 @@ function seed(): void {
     updated_at: '2026-10-20T09:14:00Z',
     counts: countsOf(recipients),
     recipients,
-    hourly_limit: HOURLY_LIMIT,
   })
 }
 
@@ -128,7 +126,6 @@ export function mailingListScreen(eventId: EventId): MailingListScreen {
   seed()
   return {
     rows: [...store.values()].filter((m) => m.event_id === eventId).map(summary),
-    hourly_limit: HOURLY_LIMIT,
     team_cc: [],
     variables: VARIABLES,
   }
@@ -152,8 +149,6 @@ export function mailingAudience(id: Uuid): MailingAudience | null {
     suppressed,
     without_first_name: entries.filter((e) => !e.is_suppressed && !e.first_name).length,
     envelope_count: envelope,
-    hourly_limit: HOURLY_LIMIT,
-    estimated_minutes: Math.ceil((envelope * 60) / HOURLY_LIMIT),
     entries,
   }
 }
@@ -183,7 +178,6 @@ export function createMailing(payload: CreateMailingPayload): Mailing {
       updated_at: now(),
       counts: NO_COUNTS,
       recipients: [],
-      hourly_limit: HOURLY_LIMIT,
     },
     payload,
   )

@@ -317,7 +317,7 @@ Demande du commanditaire : l'équivalent de l'envoi de courriels de la v1, avec 
 - **`engagement.mailing_recipients`** : un destinataire figé par adresse (`citext`, unique par envoi), valeurs des variables, critères d'origine, état (`queued`, `sending`, `sent`, `failed`, `suppressed`, `cancelled`), erreur du serveur.
 - **`engagement.mailing_audience(édition, critères, adresses)`** : la liste dans la base, bornée à l'édition, dédoublonnée sur l'adresse, comptes non actifs écartés, liste de suppression signalée. Quatre familles : déposants et contacts des dossiers, intervenants (dossier ou séance sans dossier), inscrits, rôles attribués sur l'édition.
 - Pourquoi pas `newsletter_campaigns` : abonnés consentants et multilingues d'un côté, participants d'une édition avec copie et réponse de l'autre.
-- **Réglages** : `engagement.mailing.hourly_limit` (200 destinataires par heure, copies comprises, à confirmer avec l'hébergeur), `engagement.mailing.team_cc` ([]).
+- **Réglage** : `engagement.mailing.team_cc` ([]). Sans limite d'envoi, décision du commanditaire le 28/10 : le réglage de cadence d'abord posé est retiré, et la migration le supprime s'il existe.
 - **Permission** : `engagement.mailing.send`, accordée au rôle `admin` (globale ou d'édition).
 
 **Migration** : `ops/migrations/2026-10-28-envoi-de-courriels.sql`, rejouable et additive, jouée deux fois en local ; frontières de modules conformes (`xmod_fk_*`). **En production** : avec l'API et le worker.
