@@ -3,11 +3,11 @@
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
 ## Dernière mise à jour : 28 octobre 2026
+- 28/10 : **envoi de courriels du back-office** (Exploitation, Courriels) : brouillon en quatre étapes, destinataires par critères de l'édition, copie, copie cachée et réponse, pièces jointes (10 Mo), sans limite d'envoi, historique par destinataire. En production. Voir [écran](progression/ecrans/a13-envoi-de-courriels.md).
+- 28/10 : **reprise v1, phase 2** : galerie d'activité (D7, 11 photos reprises), « Vidéo prochainement disponible » sur les 61 activités CdP30 (chaîne YouTube piratée), anciennes adresses v1 en 301 (D11). En production. Restent le bandeau CdP30 et le gabarit des courriels. Voir [écarts](progression/reprise-v1/ecarts.md).
 - 28/10 : **espace organisation, une édition à la fois** : un onglet par édition (vignette, état, à faire), l'édition vivante ouverte d'office ; une édition terminée ne garde qu'un nombre de comptes rendus attendus ; lignes de dossier avec couverture et « Accéder » ; recherche dans toutes les éditions, rangée sous le nom de l'édition ; logo de l'organisation. L'API sert couverture, vignette et logo. Voir [A5](progression/ecrans/a5-espace-organisation.md).
 - 28/10 : **publication** : seuls les dossiers acceptés sont publiés, un dossier rejeté libère son créneau ; annuler un dossier retenu annule ses activités publiées (motif affiché, inscrits prévenus, aperçu des conséquences avant de valider) ; inscription refusée à une activité non publiée ; rejeter ou annuler sans motif, avec un rappel. En production. Voir [A8](progression/ecrans/a8-evaluation.md), [A9](progression/ecrans/a9-planificateur.md).
 - 28/10 : **messages du comité** : destinataires choisis (avis et courriel, « @ »), lu / non lu par message (« lu par N sur M », non lus dans la liste) ; reprise v1 des évaluations (110 notes, 621 consultations) et des 181 messages avec destinataires et lectures, en production. Voir [A8](progression/ecrans/a8-evaluation.md), [journal](progression/journal/2026-10-28.md).
-- 27/10 : **intervenant sans adresse (D16)** : la ligne d'intervenant porte civilité, prénom et nom quand il n'a pas de personne ; seule l'adresse devient facultative dans le formulaire. En production avec le lot 92 : 143 intervenants v1 rendus à 64 dossiers ; leurs photos (3) sur la ligne du dossier, lot 93. Voir [modèle](progression/modele.md), [journal](progression/journal/2026-10-27.md).
-- 27/10 : **PACO de nouveau en ligne** (injoignable depuis la bascule) : Apache sert le build v1 inchangé, branché sur Supabase, sur `/paco` et la connexion de son administration ; le reste va à la v2. Voir [DEPLOIEMENT § 18](DEPLOIEMENT.md), [`ops/paco/`](../ops/paco/LISEZMOI.md).
 
 ## État général
 | Domaine | État |
@@ -42,6 +42,7 @@ Un écran = un fichier : ce qui a été livré, les écarts entre le modèle et 
 | A11 | Organisations et fusion | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a11-organisations-fusion.md) |
 | A12 | Utilisateurs et rôles | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a12-utilisateurs-roles.md) |
 | A13 | Messages d'incident | ✅ 18/08 | [écarts et vérifications](progression/ecrans/a13-incidents.md) |
+| A13 bis | Envoi de courriels du back-office | ✅ 28/10, en production | [écarts et vérifications](progression/ecrans/a13-envoi-de-courriels.md) |
 | A14 | Page « En cours de maintenance » | ✅ 18/08 · plateforme entière en maintenance, basculée du back-office 16/10, en production, **allumée** | [écarts et vérifications](progression/ecrans/a14-maintenance.md) |
 | A15 | Accueil public et vitrine administrable | ✅ 19/08 · panneau « À venir » refondu 24/08 · section d'appel en affiche 16/09 · frise sans salle ni thématiques, carte d'événement masquée une fois son programme publié, témoignage du bandeau en bas de cadre, éditions en affiches ou en liste, oiseau qui suit le curseur 03/10, rail et transitions du bandeau, bouton de programmation au bas d'« À venir » 05/10, en production le 16/10 | [écarts et vérifications](progression/ecrans/a15-accueil.md) |
 | B7 | Raccordement du front à l'API | ✅ 22/08 | [écarts et vérifications](progression/ecrans/b7-raccordement.md) |
