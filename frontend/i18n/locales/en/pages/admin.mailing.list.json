@@ -1,0 +1,30 @@
+{
+  "title": "Emails",
+  "subtitle": "What was written to the participants of this edition, to whom, and what became of each message. The platform's outbox cannot be read: this history replaces it.",
+  "new": "Write an email",
+  "forbidden": "Email the participants of this edition",
+  "empty": {
+    "title": "No emails for this edition",
+    "description": "An email starts as a saved draft: choose the recipients, write the message, check it, then send it."
+  },
+  "filter": {
+    "label": "Filter by status",
+    "all": "All",
+    "draft": "Drafts",
+    "queued": "Sending",
+    "sent": "Sent",
+    "cancelled": "Stopped"
+  },
+  "search": "Search by subject or author",
+  "caption": "Emails of the edition",
+  "columns": {
+    "subject": "Subject",
+    "status": "Status",
+    "recipients": "Recipients",
+    "date": "Date ({zone})"
+  },
+  "notSent": "Not sent yet",
+  "progress": "{sent} sent of {total}",
+  "failed": "no failures | {count} failure | {count} failures",
+  "noResults": "No email matches"
+}

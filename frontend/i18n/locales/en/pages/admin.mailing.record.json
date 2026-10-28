@@ -1,0 +1,24 @@
+{
+  "sentBy": "Sent by {name}, {date}",
+  "completedAt": "Completed {date}",
+  "cancelledAt": "Stopped {date}",
+  "inProgress": "Sending in progress, at {limit} recipients per hour. Refresh to follow progress.",
+  "counts": {
+    "sent": "Sent",
+    "queued": "Waiting",
+    "failed": "Failed",
+    "suppressed": "Excluded",
+    "cancelled": "Not sent"
+  },
+  "duplicate": "Duplicate",
+  "refresh": "Refresh",
+  "cancel": "Stop sending",
+  "message": "Message",
+  "eachRecipient": "each recipient, one message each",
+  "criteria": "Criteria",
+  "recipients": "Recipients ({count})",
+  "cancelConfirm": {
+    "title": "Stop sending?",
+    "description": "Messages already sent stay sent; recipients still waiting will receive nothing."
+  }
+}

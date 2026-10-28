@@ -1,0 +1,83 @@
+{
+  "status": {
+    "draft": "Draft",
+    "queued": "Sending",
+    "sent": "Sent",
+    "cancelled": "Stopped"
+  },
+  "recipientStatus": {
+    "queued": "Queued",
+    "sending": "Sending",
+    "sent": "Sent",
+    "failed": "Failed",
+    "suppressed": "Excluded",
+    "cancelled": "Not sent"
+  },
+  "kind": {
+    "submitters": "Proposal submitters",
+    "speakers": "Speakers",
+    "registrants": "Activity registrants",
+    "roles": "Edition team"
+  },
+  "source": {
+    "submitters": "Submitter",
+    "speakers": "Speaker",
+    "registrants": "Registrant",
+    "roles": "Team",
+    "addresses": "Typed address"
+  },
+  "proposalStatus": {
+    "submitted": "Submitted",
+    "under_review": "Under review",
+    "changes_requested": "Changes requested",
+    "accepted": "Accepted",
+    "rejected": "Not accepted",
+    "withdrawn": "Withdrawn",
+    "cancelled": "Cancelled"
+  },
+  "registrationStatus": {
+    "registered": "Registered",
+    "waitlisted": "Waitlisted",
+    "attended": "Attended",
+    "no_show": "Absent",
+    "cancelled": "Unregistered"
+  },
+  "role": {
+    "admin": "Administration",
+    "reviewer": "Review committee",
+    "programmer": "Programming"
+  },
+  "variable": {
+    "prenom": "first name",
+    "nom": "last name",
+    "organisation": "organisation",
+    "email": "address",
+    "edition": "edition"
+  },
+  "header": {
+    "to": "To",
+    "cc": "Cc",
+    "bcc": "Bcc",
+    "replyTo": "Reply to",
+    "subject": "Subject"
+  },
+  "list": {
+    "person": "Recipient",
+    "organization": "Organisation",
+    "sources": "Selected as",
+    "state": "Status",
+    "search": "Search a recipient",
+    "willReceive": "Will receive the message",
+    "empty": "No recipients",
+    "emptyHint": "Add a criterion or an address in the Recipients step.",
+    "more": "Show 100 more",
+    "shown": "{shown} of {total}"
+  },
+  "atZone": "{date}, {zone}",
+  "noSubject": "No subject",
+  "someone": "someone",
+  "oneSession": "one activity",
+  "backToDashboard": "Back to the dashboard",
+  "cancel": "Cancel",
+  "back": "Back"
+}

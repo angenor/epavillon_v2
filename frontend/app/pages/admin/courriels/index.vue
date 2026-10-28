@@ -1,0 +1,228 @@
+<script setup lang="ts">
+import type { MailingListScreen, MailingStatus, MailingSummary } from '~/types/admin-mailings'
+import type { EffectivePermission } from '~/types/identity'
+import type { TabItem, TableColumn } from '~/types/ui'
+
+/**
+ * LES COURRIELS DE L'ÉDITION, `/admin/courriels` : l'historique des envois.
+ *
+ * La boîte d'envoi de la plateforme ne se consulte pas : cette liste la
+ * remplace. Chaque envoi y reste, avec qui l'a écrit, quand, et ce qu'il est
+ * advenu de ses messages. « Écrire un courriel » crée tout de suite un
+ * brouillon enregistré : on peut le quitter et y revenir.
+ *
+ * Chemin français : `/admin/emails` est une adresse de la v1, redirigée vers
+ * `/admin` par le serveur.
+ *
+ * Gardé par `engagement.mailing.send` SUR L'ÉDITION choisie (règle n° 8).
+ */
+
+definePageMeta({
+  layout: 'admin',
+  middleware: ['auth'],
+  breadcrumb: [{ labelKey: 'nav.admin.mailings' }],
+})
+
+const { t } = useI18n()
+const api = useApi()
+const auth = useAuthStore()
+const adminScope = useAdminScopeStore()
+const localePath = useLocalePath()
+const { dateTime } = useDateTime()
+
+useHead(() => ({ title: t('admin.mailing.list.title') }))
+
+await adminScope.ensureLoaded()
+
+const { data: granted, status: grantStatus } = await useAsyncData<EffectivePermission[]>(
+  'admin-mailings-permissions',
+  async () => (auth.person ? api.identity.permissions(auth.person.id) : []),
+  { default: () => [], lazy: true },
+)
+
+const canSend = computed(() =>
+  hasPermission(granted.value, 'engagement.mailing.send', adminScope.currentEventId),
+)
+
+const {
+  data: screen,
+  status,
+  error,
+  refresh,
+} = await useAsyncData<MailingListScreen | null>(
+  'admin-mailings',
+  async () => {
+    const eventId = adminScope.currentEventId
+    if (!eventId || !canSend.value) return null
+    return api.adminMailings.list(eventId, adminScope.scope)
+  },
+  { watch: [() => adminScope.currentEventId, canSend], lazy: true },
+)
+
+const timezone = computed(() => adminScope.currentEvent?.timezone ?? 'UTC')
+const zone = computed(() => adminScope.currentEvent?.city || timeZoneCityLabel(timezone.value))
+
+type Filter = 'all' | MailingStatus
+const filter = ref<Filter>('all')
+const query = ref('')
+
+const allRows = computed<MailingSummary[]>(() => screen.value?.rows ?? [])
+const tabs = computed<TabItem[]>(() =>
+  (['all', 'draft', 'queued', 'sent', 'cancelled'] as const).map((value) => ({
+    value,
+    label: t(`admin.mailing.list.filter.${value}`),
+    count: value === 'all' ? allRows.value.length : allRows.value.filter((r) => r.status === value).length,
+  })),
+)
+const rows = computed(() => {
+  const q = query.value.trim().toLowerCase()
+  return allRows.value.filter(
+    (r) =>
+      (filter.value === 'all' || r.status === filter.value) &&
+      (!q || r.subject.toLowerCase().includes(q) || (r.queued_by_name ?? r.created_by_name ?? '').toLowerCase().includes(q)),
+  )
+})
+
+const columns = computed<TableColumn[]>(() => [
+  { key: 'subject', label: t('admin.mailing.list.columns.subject') },
+  { key: 'status', label: t('admin.mailing.list.columns.status') },
+  { key: 'counts', label: t('admin.mailing.list.columns.recipients'), hideOnMobile: true },
+  { key: 'date', label: t('admin.mailing.list.columns.date', { zone: t(zoneFormulaKey('zoneOf', zone.value), { zone: zone.value }) }), hideBelow: 'lg' },
+])
+
+const creating = ref(false)
+const createError = ref<string | null>(null)
+
+async function create(): Promise<void> {
+  const eventId = adminScope.currentEventId
+  if (!eventId) return
+  creating.value = true
+  createError.value = null
+  try {
+    const draft = await api.adminMailings.create({ event_id: eventId })
+    await navigateTo(localePath(`/admin/courriels/${draft.id}`))
+  } catch (thrown) {
+    createError.value = apiErrorMessage(thrown, t)
+  } finally {
+    creating.value = false
+  }
+}
+
+function open(row: MailingSummary): void {
+  navigateTo(localePath(`/admin/courriels/${row.id}`))
+}
+
+function dateOf(row: MailingSummary): string {
+  return dateTime(row.queued_at ?? row.updated_at, timezone.value)
+}
+
+const isLoadingAccess = computed(() => adminScope.isLoading || grantStatus.value === 'pending')
+</script>
+
+<template>
+  <div class="mx-auto w-full max-w-[100rem]">
+    <UiForbiddenState
+      v-if="!adminScope.isLoading && !adminScope.canAdminister"
+      :required-scope="t('admin.mailing.list.forbidden')"
+      action-to="/"
+      :action-label="t('nav.admin.backToSite')"
+    />
+
+    <template v-else>
+      <header class="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+        <div class="min-w-0">
+          <h1 class="text-3xl leading-tight font-semibold text-balance">{{ t('admin.mailing.list.title') }}</h1>
+          <p class="mt-1 max-w-(--measure) text-text-muted">{{ t('admin.mailing.list.subtitle') }}</p>
+        </div>
+        <UiButton v-if="canSend" icon="plus" :loading="creating" @click="create">
+          {{ t('admin.mailing.list.new') }}
+        </UiButton>
+      </header>
+
+      <UiAlert v-if="createError" class="mt-6" intent="danger" live :message="createError" />
+
+      <UiLoadingState v-if="isLoadingAccess" class="mt-8" variant="text" :lines="4" />
+
+      <UiForbiddenState
+        v-else-if="!canSend"
+        class="mt-8"
+        :required-scope="t('admin.mailing.list.forbidden')"
+        action-to="/admin"
+        :action-label="t('admin.mailing.common.backToDashboard')"
+      />
+
+      <UiErrorState
+        v-else-if="error"
+        class="mt-8"
+        :description="apiErrorMessage(error, t)"
+        @retry="refresh()"
+      />
+
+      <UiEmptyState
+        v-else-if="status !== 'pending' && allRows.length === 0"
+        class="mt-8"
+        icon="mail"
+        :title="t('admin.mailing.list.empty.title')"
+        :description="t('admin.mailing.list.empty.description')"
+        :action-label="t('admin.mailing.list.new')"
+        @action="create"
+      />
+
+      <template v-else>
+        <div class="mt-8 flex flex-wrap items-end justify-between gap-4">
+          <UiTabs :model-value="filter" :items="tabs" :label="t('admin.mailing.list.filter.label')" @update:model-value="filter = $event as Filter" />
+          <UiSearchInput
+            v-model="query"
+            class="w-full sm:w-72"
+            :label="t('admin.mailing.list.search')"
+            hide-label
+            :placeholder="t('admin.mailing.list.search')"
+            :debounce="0"
+          />
+        </div>
+
+        <UiTable
+          class="mt-4"
+          :columns="columns"
+          :rows="rows"
+          row-key="id"
+          row-label-key="subject"
+          :caption="t('admin.mailing.list.caption')"
+          visually-hidden-caption
+          :loading="status === 'pending'"
+          @row-click="open"
+        >
+          <template #cell-subject="{ row }">
+            <NuxtLink
+              :to="localePath(`/admin/courriels/${row.id}`)"
+              class="font-semibold text-text no-underline hover:underline"
+            >
+              {{ row.subject || t('admin.mailing.common.noSubject') }}
+            </NuxtLink>
+            <span class="block text-xs text-text-subtle">
+              {{ row.queued_by_name ?? row.created_by_name ?? '' }}
+            </span>
+          </template>
+          <template #cell-status="{ row }">
+            <AdminMailingsStatusBadge of="mailing" :status="row.status" />
+          </template>
+          <template #cell-counts="{ row }">
+            <span v-if="row.status === 'draft'" class="text-sm text-text-subtle">{{ t('admin.mailing.list.notSent') }}</span>
+            <span v-else class="text-sm tabular-nums">
+              {{ t('admin.mailing.list.progress', { sent: row.counts.sent, total: row.counts.total }) }}
+              <span v-if="row.counts.failed" class="text-danger">
+                · {{ t('admin.mailing.list.failed', { count: row.counts.failed }, row.counts.failed) }}
+              </span>
+            </span>
+          </template>
+          <template #cell-date="{ row }">
+            <span class="text-sm text-text-secondary">{{ dateOf(row) }}</span>
+          </template>
+          <template #empty>
+            <UiEmptyState compact icon="search" filtered :title="t('admin.mailing.list.noResults')" />
+          </template>
+        </UiTable>
+      </template>
+    </template>
+  </div>
+</template>

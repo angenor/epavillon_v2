@@ -1,0 +1,24 @@
+{
+  "sentBy": "Envoyé par {name}, le {date}",
+  "completedAt": "Terminé le {date}",
+  "cancelledAt": "Arrêté le {date}",
+  "inProgress": "Envoi en cours, à la cadence de {limit} destinataires par heure. Actualisez pour suivre l'avancement.",
+  "counts": {
+    "sent": "Partis",
+    "queued": "En attente",
+    "failed": "Échecs",
+    "suppressed": "Écartés",
+    "cancelled": "Non envoyés"
+  },
+  "duplicate": "Dupliquer",
+  "refresh": "Actualiser",
+  "cancel": "Arrêter l'envoi",
+  "message": "Message",
+  "eachRecipient": "chaque destinataire, un message chacun",
+  "criteria": "Critères",
+  "recipients": "Destinataires ({count})",
+  "cancelConfirm": {
+    "title": "Arrêter l'envoi ?",
+    "description": "Les messages déjà partis le restent ; les destinataires encore en attente ne recevront rien."
+  }
+}

@@ -69,6 +69,7 @@ import { createAdminOrganizationsApi } from './api/admin-organizations'
 import { createInvitationApi } from './api/invitation'
 import { createAdminUsersApi } from './api/admin-users'
 import { createAdminIncidentsApi } from './api/admin-incidents'
+import { createAdminMailingsApi } from './api/admin-mailings'
 import { createAdminNegotiationsApi } from './api/admin-negotiations'
 import { createOrganizationWorkspaceApi } from './api/organization-workspace'
 import { createHomeApi } from './api/home'
@@ -776,6 +777,8 @@ export function useApi() {
     // tant que l'API n'existe pas. Ce paramètre disparaît au prompt B6.
     // -----------------------------------------------------------------------
     adminIncidents: createAdminIncidentsApi(deps),
+    /** Envois de courriels du back-office, bornés à l'édition (règle n° 8). */
+    adminMailings: createAdminMailingsApi(deps),
 
     /**
      * Le back-office de l'admission de Guide Négo — codes, usages, demandes,

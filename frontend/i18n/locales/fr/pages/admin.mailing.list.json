@@ -1,0 +1,30 @@
+{
+  "title": "Courriels",
+  "subtitle": "Ce qui a été écrit aux participants de l'édition, à qui, et ce qu'il est advenu de chaque message. La boîte d'envoi de la plateforme ne se consulte pas : cet historique la remplace.",
+  "new": "Écrire un courriel",
+  "forbidden": "Écrire aux participants de cette édition",
+  "empty": {
+    "title": "Aucun courriel pour cette édition",
+    "description": "Un courriel commence par un brouillon enregistré : vous choisissez les destinataires, écrivez le message, le vérifiez, puis l'envoyez."
+  },
+  "filter": {
+    "label": "Filtrer par état",
+    "all": "Tous",
+    "draft": "Brouillons",
+    "queued": "En cours",
+    "sent": "Envoyés",
+    "cancelled": "Arrêtés"
+  },
+  "search": "Chercher par objet ou par auteur",
+  "caption": "Courriels de l'édition",
+  "columns": {
+    "subject": "Objet",
+    "status": "État",
+    "recipients": "Destinataires",
+    "date": "Date ({zone})"
+  },
+  "notSent": "Pas encore envoyé",
+  "progress": "{sent} partis sur {total}",
+  "failed": "aucun échec | {count} échec | {count} échecs",
+  "noResults": "Aucun courriel ne correspond"
+}

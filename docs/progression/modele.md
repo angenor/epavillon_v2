@@ -308,3 +308,17 @@ Texte alternatif obligatoire : déjà porté par `ck_assets_alt_text_required` ;
 Côté code : garde de rôle dans `media/domain/guards.rs` (la galerie : `programme.session.schedule` sur l'édition de la séance et périmètre d'administration, sans la porte de l'adhésion que garde la couverture) ; détail public d'une séance (`gallery`) ; panneau d'une séance du planificateur ; page publique d'une activité.
 
 **Migration** : `ops/migrations/2026-10-28-galerie-activite.sql`, jouée deux fois en local sur `epavillon`. **En production** : avant le déploiement de l'API, puis le lot 96.
+
+## 28/10/2026, `110_engagement.sql` : envois de courriels du back-office
+
+Demande du commanditaire : l'équivalent de l'envoi de courriels de la v1, avec un historique (la boîte d'envoi ne se consulte pas).
+
+- **`engagement.mailings`** : un envoi, rattaché à une édition (`event_id` obligatoire, règle n° 8), brouillon puis figé (`mailing_status` : `draft`, `queued`, `sent`, `cancelled`). Objet, corps HTML assaini, critères de destinataires (`audience`, tableau JSON), adresses libres, `cc`, `bcc`, `reply_to`, auteur, qui a envoyé, dates. Contraintes : un envoi parti a un objet et un corps, dix copies au plus.
+- **`engagement.mailing_recipients`** : un destinataire figé par adresse (`citext`, unique par envoi), valeurs des variables, critères d'origine, état (`queued`, `sending`, `sent`, `failed`, `suppressed`, `cancelled`), erreur du serveur.
+- **`engagement.mailing_audience(édition, critères, adresses)`** : la liste dans la base, bornée à l'édition, dédoublonnée sur l'adresse, comptes non actifs écartés, liste de suppression signalée. Quatre familles : déposants et contacts des dossiers, intervenants (dossier ou séance sans dossier), inscrits, rôles attribués sur l'édition.
+- Pourquoi pas `newsletter_campaigns` : abonnés consentants et multilingues d'un côté, participants d'une édition avec copie et réponse de l'autre.
+- **Réglages** : `engagement.mailing.hourly_limit` (200 destinataires par heure, copies comprises, à confirmer avec l'hébergeur), `engagement.mailing.team_cc` ([]).
+- **Permission** : `engagement.mailing.send`, accordée au rôle `admin` (globale ou d'édition).
+
+**Migration** : `ops/migrations/2026-10-28-envoi-de-courriels.sql`, rejouable et additive, jouée deux fois en local ; frontières de modules conformes (`xmod_fk_*`). **En production** : avec l'API et le worker.
+

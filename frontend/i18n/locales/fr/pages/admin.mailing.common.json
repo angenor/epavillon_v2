@@ -1,0 +1,83 @@
+{
+  "status": {
+    "draft": "Brouillon",
+    "queued": "En cours",
+    "sent": "Envoyé",
+    "cancelled": "Arrêté"
+  },
+  "recipientStatus": {
+    "queued": "En file",
+    "sending": "En cours",
+    "sent": "Parti",
+    "failed": "Échec",
+    "suppressed": "Écarté",
+    "cancelled": "Non envoyé"
+  },
+  "kind": {
+    "submitters": "Déposants des dossiers",
+    "speakers": "Intervenants",
+    "registrants": "Inscrits aux activités",
+    "roles": "Équipe de l'édition"
+  },
+  "source": {
+    "submitters": "Déposant",
+    "speakers": "Intervenant",
+    "registrants": "Inscrit",
+    "roles": "Équipe",
+    "addresses": "Adresse saisie"
+  },
+  "proposalStatus": {
+    "submitted": "Déposé",
+    "under_review": "En évaluation",
+    "changes_requested": "Corrections demandées",
+    "accepted": "Retenu",
+    "rejected": "Non retenu",
+    "withdrawn": "Retiré",
+    "cancelled": "Annulé"
+  },
+  "registrationStatus": {
+    "registered": "Inscrit",
+    "waitlisted": "En liste d'attente",
+    "attended": "Présent",
+    "no_show": "Absent",
+    "cancelled": "Désinscrit"
+  },
+  "role": {
+    "admin": "Administration",
+    "reviewer": "Comité d'évaluation",
+    "programmer": "Programmation"
+  },
+  "variable": {
+    "prenom": "prénom",
+    "nom": "nom",
+    "organisation": "organisation",
+    "email": "adresse",
+    "edition": "édition"
+  },
+  "header": {
+    "to": "À",
+    "cc": "Copie",
+    "bcc": "Copie cachée",
+    "replyTo": "Répondre à",
+    "subject": "Objet"
+  },
+  "list": {
+    "person": "Destinataire",
+    "organization": "Organisation",
+    "sources": "Retenu comme",
+    "state": "État",
+    "search": "Chercher un destinataire",
+    "willReceive": "Recevra le message",
+    "empty": "Aucun destinataire",
+    "emptyHint": "Ajoutez un critère ou une adresse à l'étape Destinataires.",
+    "more": "Afficher 100 de plus",
+    "shown": "{shown} sur {total}"
+  },
+  "atZone": "{date}, {zone}",
+  "noSubject": "Sans objet",
+  "someone": "quelqu'un",
+  "oneSession": "une activité",
+  "backToDashboard": "Retour au tableau de bord",
+  "cancel": "Annuler",
+  "back": "Retour"
+}

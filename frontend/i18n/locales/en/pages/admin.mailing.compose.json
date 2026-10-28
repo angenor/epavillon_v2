@@ -1,0 +1,103 @@
+{
+  "crumb": "Email",
+  "title": "New email",
+  "saving": "Saving…",
+  "unsaved": "Unsaved changes",
+  "saved": "Draft saved",
+  "backToList": "All emails",
+  "notFound": {
+    "title": "Email not found",
+    "description": "It does not exist, or it belongs to an edition you do not administer."
+  },
+  "invalidAddress": "Invalid address: “{address}”.",
+  "steps": {
+    "label": "Email steps",
+    "audience": "Recipients",
+    "message": "Message",
+    "review": "Check",
+    "send": "Send"
+  },
+  "audience": {
+    "intro": "Tick the people to write to. Criteria add up, and an address selected twice receives a single message. The exact count shows in the Check step.",
+    "allSessions": "All activities of the edition",
+    "kindHint": {
+      "submitters": "The person who submitted each proposal, and the contact person when different.",
+      "speakers": "Speakers of the proposals who have an address.",
+      "registrants": "People registered for the activities.",
+      "roles": "People with a role on this edition: administration, committee, programming."
+    },
+    "filter": {
+      "submitters": "Proposals whose status is",
+      "speakers": "Proposals whose status is",
+      "registrants": "Registrations whose status is",
+      "roles": "Roles"
+    },
+    "filterDefault": {
+      "submitters": "Nothing ticked: every submitted proposal.",
+      "speakers": "Nothing ticked: every submitted proposal.",
+      "registrants": "Nothing ticked: registered, waitlisted and attended.",
+      "roles": "Nothing ticked: every role of the edition."
+    },
+    "session": "Activity",
+    "sessionHint": "To write only to the people of one published activity.",
+    "extra": "Additional addresses",
+    "extraHint": "One per line, or separated by commas. They add to the criteria.",
+    "extraPlaceholder": "One address per line"
+  },
+  "message": {
+    "subject": "Subject",
+    "variables": "Variables",
+    "variablesHint": "Click to copy, then paste into the subject or the message: each recipient will read their own value.",
+    "copyVariable": "Copy the {name} variable",
+    "copied": "copied",
+    "body": "Message",
+    "bodyHint": "The message is sent as shown here, with no signature added: sign it."
+  },
+  "replies": {
+    "title": "Replies",
+    "intro": "Each recipient receives their own message. If they reply to all, the reply also reaches the copied addresses: this is how the team sees replies, since the platform's outbox cannot be read. In return, each copied address receives a copy of every message.",
+    "cc": "Cc",
+    "ccHint": "Suggested: your address, and the team's if one is set. Separate with commas.",
+    "replyTo": "Reply-to address",
+    "replyToHint": "Where replies go. Empty: to the outbox, which cannot be read.",
+    "bcc": "Bcc",
+    "bccHint": "Receives every message without being shown to recipients."
+  },
+  "review": {
+    "count": "No reachable recipient | This email will go to {count} person | This email will go to {count} people",
+    "durationHours": "About {hours} h {minutes} min to send everything, at {limit} recipients per hour, copies included.",
+    "durationMinutes": "About {minutes} min to send everything, at {limit} recipients per hour, copies included.",
+    "none": "Nobody would receive this email: add a criterion or an address.",
+    "suppressed": "No excluded address | {count} address is on the suppression list (bounce or unsubscribe): it will receive nothing. | {count} addresses are on the suppression list (bounce or unsubscribe): they will receive nothing.",
+    "noFirstName": "No recipient without a first name | {count} recipient has no known first name: the first name variable will be empty. | {count} recipients have no known first name: the first name variable will be empty.",
+    "copies": "{addresses} will receive a copy of each of the {count} messages. To be told of replies only, the reply-to address is enough: the history already keeps what was sent.",
+    "preview": "Preview",
+    "previewAs": "Seen by",
+    "previewNobody": "no recipient",
+    "test": "Send me a test",
+    "testHint": "To your address only, no copies, subject prefixed with “[Essai]” (French for test).",
+    "testSent": "Test sent to {to}. It usually arrives within a minute.",
+    "recipients": "Recipient list",
+    "recipientsHint": "As it would be sent now. It is frozen when you send."
+  },
+  "send": {
+    "summary": "Nobody will receive this email | Ready to go to {count} person | Ready to go to {count} people",
+    "subject": "Subject: {subject}",
+    "cc": "Copied on every message: {addresses} ({count} copies).",
+    "replyTo": "Replies will go to {address}.",
+    "explain": "The list is frozen when you send. Messages leave in batches, at the pace the mail server allows; you follow their status in the history, and can stop the sending midway.",
+    "action": "Send | Send to {count} person | Send to {count} people"
+  },
+  "previous": "Previous step",
+  "next": "Next step",
+  "saveDraft": "Save draft",
+  "delete": "Delete draft",
+  "confirm": {
+    "title": "Send this email?",
+    "description": "Nobody will receive it. | It will go to {count} person. A sent email cannot be taken back. | It will go to {count} people. A sent email cannot be taken back."
+  },
+  "deleteConfirm": {
+    "title": "Delete this draft?",
+    "description": "It has not been sent; it disappears from the history."
+  }
+}

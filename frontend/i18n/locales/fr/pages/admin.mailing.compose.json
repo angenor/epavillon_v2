@@ -1,0 +1,103 @@
+{
+  "crumb": "Courriel",
+  "title": "Nouveau courriel",
+  "saving": "Enregistrement…",
+  "unsaved": "Modifications non enregistrées",
+  "saved": "Brouillon enregistré",
+  "backToList": "Tous les courriels",
+  "notFound": {
+    "title": "Courriel introuvable",
+    "description": "Il n'existe pas, ou il appartient à une édition que vous n'administrez pas."
+  },
+  "invalidAddress": "Adresse invalide : « {address} ».",
+  "steps": {
+    "label": "Étapes du courriel",
+    "audience": "Destinataires",
+    "message": "Message",
+    "review": "Vérification",
+    "send": "Envoi"
+  },
+  "audience": {
+    "intro": "Cochez les personnes à qui écrire. Les critères s'additionnent, et une adresse retenue deux fois ne reçoit qu'un message. Le décompte exact s'affiche à l'étape Vérification.",
+    "allSessions": "Toutes les activités de l'édition",
+    "kindHint": {
+      "submitters": "La personne qui a déposé chaque dossier, et la personne à contacter quand elle est différente.",
+      "speakers": "Les intervenants des dossiers qui ont une adresse.",
+      "registrants": "Les personnes inscrites aux activités.",
+      "roles": "Les personnes qui ont un rôle sur cette édition : administration, comité, programmation."
+    },
+    "filter": {
+      "submitters": "Dossiers dont l'état est",
+      "speakers": "Dossiers dont l'état est",
+      "registrants": "Inscriptions dont l'état est",
+      "roles": "Rôles"
+    },
+    "filterDefault": {
+      "submitters": "Rien de coché : tous les dossiers déposés.",
+      "speakers": "Rien de coché : tous les dossiers déposés.",
+      "registrants": "Rien de coché : inscrits, en liste d'attente et présents.",
+      "roles": "Rien de coché : tous les rôles de l'édition."
+    },
+    "session": "Activité",
+    "sessionHint": "Pour n'écrire qu'aux personnes d'une activité publiée.",
+    "extra": "Adresses supplémentaires",
+    "extraHint": "Une par ligne, ou séparées par des virgules. Elles s'ajoutent aux critères.",
+    "extraPlaceholder": "Une adresse par ligne"
+  },
+  "message": {
+    "subject": "Objet",
+    "variables": "Variables",
+    "variablesHint": "Cliquez pour copier, puis collez dans l'objet ou le message : chaque destinataire y lira sa propre valeur.",
+    "copyVariable": "Copier la variable {name}",
+    "copied": "copiée",
+    "body": "Message",
+    "bodyHint": "Le message part tel qu'il s'affiche ici, sans signature ajoutée : signez-le."
+  },
+  "replies": {
+    "title": "Réponses",
+    "intro": "Chaque destinataire reçoit son propre message. S'il répond à tous, sa réponse arrive aussi aux adresses en copie : c'est ainsi que l'équipe voit les réponses, la boîte d'envoi de la plateforme ne se consultant pas. En contrepartie, chaque adresse en copie reçoit une copie de chaque message.",
+    "cc": "Copie",
+    "ccHint": "Proposé : votre adresse, et celle de l'équipe si elle est réglée. Séparez par des virgules.",
+    "replyTo": "Adresse de réponse",
+    "replyToHint": "Où partent les réponses. Vide : vers la boîte d'envoi, qui ne se consulte pas.",
+    "bcc": "Copie cachée",
+    "bccHint": "Reçoit chaque message sans apparaître aux destinataires."
+  },
+  "review": {
+    "count": "Aucun destinataire joignable | Ce courriel partira à {count} personne | Ce courriel partira à {count} personnes",
+    "durationHours": "Environ {hours} h {minutes} min pour tout envoyer, à la cadence de {limit} destinataires par heure, copies comprises.",
+    "durationMinutes": "Environ {minutes} min pour tout envoyer, à la cadence de {limit} destinataires par heure, copies comprises.",
+    "none": "Personne ne recevrait ce courriel : ajoutez un critère ou une adresse.",
+    "suppressed": "Aucune adresse écartée | {count} adresse est sur la liste de suppression (rebond ou désabonnement) : elle ne recevra rien. | {count} adresses sont sur la liste de suppression (rebond ou désabonnement) : elles ne recevront rien.",
+    "noFirstName": "Aucun destinataire sans prénom | {count} destinataire n'a pas de prénom connu : la variable prénom y restera vide. | {count} destinataires n'ont pas de prénom connu : la variable prénom y restera vide.",
+    "copies": "{addresses} recevra une copie de chacun des {count} messages. Pour être seulement prévenu des réponses, l'adresse de réponse suffit : l'historique garde déjà ce qui est parti.",
+    "preview": "Aperçu",
+    "previewAs": "Vu par",
+    "previewNobody": "aucun destinataire",
+    "test": "M'envoyer un essai",
+    "testHint": "À votre adresse seulement, sans copie, objet précédé de « [Essai] ».",
+    "testSent": "Essai envoyé à {to}. Il arrive en général dans la minute.",
+    "recipients": "Liste des destinataires",
+    "recipientsHint": "Telle qu'elle partirait maintenant. Elle est figée au moment de l'envoi."
+  },
+  "send": {
+    "summary": "Personne ne recevra ce courriel | Prêt à partir vers {count} personne | Prêt à partir vers {count} personnes",
+    "subject": "Objet : {subject}",
+    "cc": "En copie de chaque message : {addresses} ({count} copies).",
+    "replyTo": "Les réponses iront à {address}.",
+    "explain": "La liste est figée à l'envoi. Les messages partent par lots, à la cadence que permet le serveur d'envoi ; vous suivez leur état dans l'historique, et pouvez arrêter l'envoi en cours de route.",
+    "action": "Envoyer | Envoyer à {count} personne | Envoyer à {count} personnes"
+  },
+  "previous": "Étape précédente",
+  "next": "Étape suivante",
+  "saveDraft": "Enregistrer le brouillon",
+  "delete": "Supprimer le brouillon",
+  "confirm": {
+    "title": "Envoyer ce courriel ?",
+    "description": "Personne ne le recevra. | Il partira à {count} personne. Un courriel parti ne se reprend pas. | Il partira à {count} personnes. Un courriel parti ne se reprend pas."
+  },
+  "deleteConfirm": {
+    "title": "Supprimer ce brouillon ?",
+    "description": "Il n'a pas été envoyé ; il disparaît de l'historique."
+  }
+}
