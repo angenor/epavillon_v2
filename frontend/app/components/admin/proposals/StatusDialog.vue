@@ -43,6 +43,7 @@ const { t } = useI18n()
 const target = ref<ProposalStatus | ''>('')
 const reason = ref('')
 const showReasonError = ref(false)
+const impactLoading = ref(false)
 
 watch(
   () => props.open,
@@ -122,6 +123,7 @@ function submit(): void {
         <AdminReviewCancellationImpact
           v-if="props.open && target === 'cancelled'"
           :proposal-ids="props.acceptedIds"
+          @loading="impactLoading = $event"
         />
 
         <!-- LE MOTIF N'APPARAÎT QUE QUAND LA BASE L'EXIGE : afficher un champ
@@ -148,7 +150,7 @@ function submit(): void {
       <UiButton
         variant="primary"
         :loading="props.busy"
-        :disabled="!target || props.options.length === 0"
+        :disabled="!target || props.options.length === 0 || impactLoading"
         @click="submit()"
       >
         {{ t('admin.proposals.changeStatus.submit') }}

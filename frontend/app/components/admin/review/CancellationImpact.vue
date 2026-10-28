@@ -12,6 +12,8 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+// Valider avant de connaître les conséquences reviendrait à ne pas les montrer.
+const emit = defineEmits<{ loading: [value: boolean] }>()
 
 const { t } = useI18n()
 const api = useApi()
@@ -25,13 +27,18 @@ async function load(ids: Uuid[]): Promise<void> {
   impact.value = null
   loadError.value = null
   if (ids.length === 0) return
+  emit('loading', true)
   try {
     const impacts = await Promise.all(ids.map((id) => api.review.cancellationImpact(id)))
     if (current === request) impact.value = sumCancellationImpacts(impacts)
   } catch (failure) {
     if (current === request) loadError.value = apiErrorMessage(failure, t)
+  } finally {
+    if (current === request) emit('loading', false)
   }
 }
+
+onBeforeUnmount(() => emit('loading', false))
 
 watch(() => props.proposalIds.join(','), () => void load(props.proposalIds), { immediate: true })
 

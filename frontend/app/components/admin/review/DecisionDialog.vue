@@ -37,6 +37,7 @@ const { t } = useI18n()
 
 const reason = ref('')
 const showReasonError = ref(false)
+const impactLoading = ref(false)
 
 watch(
   () => props.open,
@@ -90,7 +91,11 @@ function submit(): void {
         }}
       </p>
 
-      <AdminReviewCancellationImpact v-if="props.open && cancelsAccepted" :proposal-ids="[props.proposalId]" />
+      <AdminReviewCancellationImpact
+        v-if="props.open && cancelsAccepted"
+        :proposal-ids="[props.proposalId]"
+        @loading="impactLoading = $event"
+      />
 
       <!-- Le motif est proposé dans les deux cas, mais annoncé différemment :
            obligatoire ici, facultatif là. Un champ identique de part et d'autre
@@ -127,6 +132,7 @@ function submit(): void {
             : 'primary'
         "
         :loading="props.busy"
+        :disabled="impactLoading"
         @click="submit()"
       >
         {{ t('admin.proposal.review.decision.confirm.submit') }}
