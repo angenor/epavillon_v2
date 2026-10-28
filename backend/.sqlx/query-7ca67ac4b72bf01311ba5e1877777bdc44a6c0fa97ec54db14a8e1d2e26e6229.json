@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT s.description AS \"description: serde_json::Value\",\n                  s.allows_questions, s.is_recorded\n             FROM programme.sessions s\n            WHERE s.id = $1",
+  "query": "SELECT s.description AS \"description: serde_json::Value\",\n                  s.allows_questions, s.is_recorded,\n                  s.cancelled_reason AS \"cancelled_reason: serde_json::Value\"\n             FROM programme.sessions s\n            WHERE s.id = $1",
   "describe": {
     "columns": [
       {
@@ -35,6 +35,17 @@
             "name": "is_recorded"
           }
         }
+      },
+      {
+        "ordinal": 3,
+        "name": "cancelled_reason: serde_json::Value",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "programme.sessions",
+            "name": "cancelled_reason"
+          }
+        }
       }
     ],
     "parameters": {
@@ -45,8 +56,9 @@
     "nullable": [
       true,
       false,
-      false
+      false,
+      true
     ]
   },
-  "hash": "47e229f68cd5ccea2810f77c52afb1f2fa59e7f7b8d0562162a1b93382d47d23"
+  "hash": "7ca67ac4b72bf01311ba5e1877777bdc44a6c0fa97ec54db14a8e1d2e26e6229"
 }

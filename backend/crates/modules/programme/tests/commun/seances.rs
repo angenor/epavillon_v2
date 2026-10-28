@@ -683,7 +683,9 @@ use programme::domain::ids::RegistrationId;
 use programme::domain::registration::{AnnulationRendue, IssueDInscription};
 use programme::service::registration;
 
-/// Ouvrir une séance aux inscriptions, avec ou sans jauge.
+/// Ouvrir une séance aux inscriptions, avec ou sans jauge. Elle est publiée au
+/// passage : une séance non publiée n'en prend aucune. Seule la date bouge,
+/// pas l'état, pour n'émettre aucun événement de séance.
 pub async fn ouvrir_les_inscriptions(
     bac: &Bac,
     session_id: Uuid,
@@ -692,7 +694,8 @@ pub async fn ouvrir_les_inscriptions(
 ) {
     sqlx::query!(
         "UPDATE programme.sessions
-            SET registration_required = true,
+            SET published_at = COALESCE(published_at, now()),
+                registration_required = true,
                 capacity = $2,
                 waitlist_enabled = $3,
                 registration_opens_at = now() - interval '1 day',

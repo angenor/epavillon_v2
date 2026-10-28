@@ -119,6 +119,18 @@ pub async fn tenter(
                 crate::repo::sessions::liberer_les_creneaux(&mut tx, dossier.as_uuid()).await?;
             }
 
+            // Un dossier retenu puis annulé : ce qui est déjà au programme
+            // public passe « annulée » avec le motif du dossier. Le garde exige
+            // ce motif pour cette transition, il est donc là.
+            if let (ProposalStatus::Cancelled, Some(motif)) = (vers, motif) {
+                crate::repo::sessions::annuler_les_seances_publiees(
+                    &mut tx,
+                    dossier.as_uuid(),
+                    motif,
+                )
+                .await?;
+            }
+
             // La ligne de journal est écrite par le déclencheur, DANS cette
             // transaction : elle se lit donc avant de valider, sur la même
             // connexion. La lire après validation rendrait la ligne d'une
@@ -256,6 +268,30 @@ pub async fn changer_en_groupe(
     }
 
     Ok(resultat)
+}
+
+/// Ce qu'annuler ce dossier retirerait du programme public, **après contrôle
+/// du périmètre et de la lecture générale** sur son édition.
+pub async fn impact_de_lannulation(
+    state: &ProgrammeState,
+    perimetre: &kernel::auth::Perimeter,
+    dossier: ProposalId,
+) -> Result<crate::repo::sessions::CancellationImpact> {
+    let edition = perimeter::edition_dans_le_perimetre(
+        state.pool(),
+        perimetre,
+        perimeter::Cible::Dossier(dossier),
+    )
+    .await?;
+    kernel::auth::require_permission(
+        state.pool(),
+        perimetre.person_id,
+        crate::domain::permissions::PROPOSAL_READ_ALL,
+        kernel::auth::Scope::Event(edition.as_uuid()),
+    )
+    .await?;
+
+    crate::repo::sessions::impact_de_lannulation(state.pool(), dossier.as_uuid()).await
 }
 
 /// Les transitions offertes à ce lecteur, **après contrôle d'accès**.

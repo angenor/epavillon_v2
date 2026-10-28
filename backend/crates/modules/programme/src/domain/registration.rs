@@ -81,6 +81,8 @@ pub struct LigneDInscrit {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Fenetre {
     Ouverte,
+    /// Jamais publiée : `REGISTRATION_NOT_ACCEPTED`, sans dire si elle existe.
+    NonPubliee,
     /// La séance est annulée : `REGISTRATION_NOT_ACCEPTED`.
     SeanceAnnulee,
     /// `registration_required` est faux : la séance ne prend pas d'inscription.
@@ -94,6 +96,7 @@ pub enum Fenetre {
 /// L'état d'une séance, du seul point de vue de l'inscription.
 #[derive(Debug, Clone, Copy)]
 pub struct EtatDInscription {
+    pub publiee: bool,
     pub annulee: bool,
     pub inscription_requise: bool,
     pub ouvre_le: Option<OffsetDateTime>,
@@ -102,10 +105,14 @@ pub struct EtatDInscription {
 
 /// Décider la fenêtre, **dans l'ordre où les motifs comptent**.
 ///
-/// L'annulation d'abord : une séance qui n'a pas lieu ne se discute pas. Puis
+/// Une séance non publiée d'abord : une adresse fabriquée ne doit rien
+/// apprendre de plus sur elle, pas même qu'elle est annulée. Puis l'annulation : une séance qui n'a pas lieu ne se discute pas. Puis
 /// l'absence d'inscription, qui est un fait de la séance. Puis les deux bornes
 /// de temps, qui sont des faits de l'instant.
 pub fn fenetre(etat: EtatDInscription, maintenant: OffsetDateTime) -> Fenetre {
+    if !etat.publiee {
+        return Fenetre::NonPubliee;
+    }
     if etat.annulee {
         return Fenetre::SeanceAnnulee;
     }
@@ -132,6 +139,7 @@ mod tests {
 
     fn etat() -> EtatDInscription {
         EtatDInscription {
+            publiee: true,
             annulee: false,
             inscription_requise: true,
             ouvre_le: None,
@@ -179,6 +187,16 @@ mod tests {
             ..etat()
         };
         assert_eq!(fenetre(close, MAINTENANT), Fenetre::Close(ferme));
+    }
+
+    #[test]
+    fn une_seance_non_publiee_ne_prend_rien_meme_annulee() {
+        let etat = EtatDInscription {
+            publiee: false,
+            annulee: true,
+            ..etat()
+        };
+        assert_eq!(fenetre(etat, MAINTENANT), Fenetre::NonPubliee);
     }
 
     /// L'annulation prime : une séance annulée dont les inscriptions seraient

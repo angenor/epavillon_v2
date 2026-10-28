@@ -145,6 +145,7 @@ pub struct ComplementDeSeance {
     pub description: Option<serde_json::Value>,
     pub allows_questions: bool,
     pub is_recorded: bool,
+    pub cancelled_reason: Option<serde_json::Value>,
 }
 
 pub async fn complement<'e>(
@@ -154,7 +155,8 @@ pub async fn complement<'e>(
     let ligne = sqlx::query_as!(
         ComplementDeSeance,
         r#"SELECT s.description AS "description: serde_json::Value",
-                  s.allows_questions, s.is_recorded
+                  s.allows_questions, s.is_recorded,
+                  s.cancelled_reason AS "cancelled_reason: serde_json::Value"
              FROM programme.sessions s
             WHERE s.id = $1"#,
         session_id.as_uuid()

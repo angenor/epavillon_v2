@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE programme.sessions\n            SET published_at = COALESCE(published_at, now()),\n                registration_required = true,\n                capacity = $2,\n                waitlist_enabled = $3,\n                registration_opens_at = now() - interval '1 day',\n                registration_closes_at = now() + interval '30 days'\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int4",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "07665fa409b770d467a190b2003228903c6d3843f168ddb1feb51ba5b8358fdd"
+}

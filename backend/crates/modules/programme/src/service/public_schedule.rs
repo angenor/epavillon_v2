@@ -32,6 +32,8 @@ pub struct SeancePublique {
     pub description: Option<serde_json::Value>,
     pub allows_questions: bool,
     pub is_recorded: bool,
+    /// Motif public d'une séance annulée ; nul sinon.
+    pub cancelled_reason: Option<serde_json::Value>,
     pub speakers: Vec<serde_json::Value>,
     pub organizations: Vec<serde_json::Value>,
 }
@@ -65,6 +67,7 @@ pub async fn seance(pool: &PgPool, event_id: EventId, slug: &str) -> Result<Sean
         description: complement.description,
         allows_questions: complement.allows_questions,
         is_recorded: complement.is_recorded,
+        cancelled_reason: complement.cancelled_reason,
         speakers: session_parts::intervenants_publics(pool, id).await?,
         organizations: session_parts::organisations_publiques(pool, id).await?,
         session,

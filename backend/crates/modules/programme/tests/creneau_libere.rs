@@ -147,39 +147,5 @@ async fn rejeter_un_dossier_sans_seance_ne_change_rien() {
     assert_eq!(restantes, vec![voisine], "la séance voisine est intacte");
 }
 
-/// Une séance **déjà publiée** ne disparaît pas à l'annulation du dossier :
-/// elle a été annoncée, son sort est une décision de l'équipe.
-#[tokio::test]
-async fn annuler_ne_touche_pas_une_seance_publiee() {
-    let bac = Bac::monter().await;
-    let terrain = commun::terrain(&bac).await;
-    seances::grille(&bac, terrain.edition).await;
-
-    let dossier =
-        seances::dossier_pret(&bac, &terrain, "Publiée", "publiee", Souhaits::default()).await;
-    transition::tenter(
-        &bac.state,
-        &bac.ctx(),
-        dossier.id.into(),
-        ProposalStatus::Accepted,
-        None,
-    )
-    .await
-    .unwrap();
-    let seance = seances::seances_du_dossier(&bac, dossier.id)
-        .await
-        .remove(0);
-    sqlx::query!(
-        "UPDATE programme.sessions SET published_at = now(), status = 'scheduled' WHERE id = $1",
-        seance.id
-    )
-    .execute(bac.pool())
-    .await
-    .unwrap();
-
-    decider(&bac, dossier.id, ProposalStatus::Cancelled).await;
-
-    let restee = seances::seance(&bac, seance.id).await;
-    assert_eq!(restee.status, "scheduled");
-    assert!(restee.published_at.is_some());
-}
+// Le sort d'une séance déjà publiée d'un dossier annulé : voir
+// `annulation_dossier_retenu.rs`.

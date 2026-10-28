@@ -36,6 +36,10 @@ pub fn chemins_de_dossier(cfg: &mut web::ServiceConfig) {
         .route("/{id}/reviews", web::put().to(noter))
         .route("/{id}/recusal", web::post().to(se_deporter))
         .route("/{id}/decision", web::post().to(decider))
+        .route(
+            "/{id}/cancellation-impact",
+            web::get().to(impact_de_lannulation),
+        )
         .route("/{id}/content", web::put().to(corriger));
 }
 
@@ -218,6 +222,33 @@ pub(crate) async fn decider(
     };
 
     Ok(HttpResponse::Ok().json(resultat))
+}
+
+/// Ce qu'annuler ce dossier retirerait du programme public.
+#[utoipa::path(
+    get,
+    description = "`CancellationImpact` : `{ published_sessions, registrants }` : les séances **publiées et non closes** de ce dossier (ni terminées ni déjà annulées), que son annulation fera passer « annulées » avec son motif, et les personnes distinctes inscrites ou en attente qui en seront prévenues. Lu par la fenêtre de décision avant d'annuler un dossier retenu. Périmètre de l'édition et lecture générale des dossiers sur elle.",
+    path = "/proposals/{id}/cancellation-impact",
+    tag = "Back-office — propositions",
+    operation_id = "propositions_impact_de_lannulation",
+    params(("id" = Uuid, Path, description = "Identifiant du dossier")),
+    responses(
+        (status = 200, description = "CancellationImpact", body = Object),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 403, description = "Périmètre vide, ou lecture des dossiers absente sur l'édition", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Dossier inexistant **ou hors périmètre**, indiscernables", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn impact_de_lannulation(
+    state: web::Data<ProgrammeState>,
+    perimetre: Perimeter,
+    chemin: web::Path<Uuid>,
+) -> Result<HttpResponse> {
+    let impact =
+        transition::impact_de_lannulation(&state, &perimetre, ProposalId(chemin.into_inner()))
+            .await?;
+
+    Ok(HttpResponse::Ok().json(impact))
 }
 
 /// Corriger le contenu d'un dossier déposé, au nom de l'équipe.

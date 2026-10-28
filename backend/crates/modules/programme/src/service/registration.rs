@@ -133,6 +133,12 @@ pub async fn sinscrire(
 
     match fenetre_de(&seance) {
         Fenetre::Ouverte => {}
+        Fenetre::NonPubliee => {
+            return Err(ApiError::with_message(
+                ErrorCode::RegistrationNotAccepted,
+                "Les inscriptions à cette activité ne sont pas encore ouvertes.",
+            ));
+        }
         Fenetre::SeanceAnnulee | Fenetre::SansInscription => {
             return Err(ApiError::new(ErrorCode::RegistrationNotAccepted));
         }
@@ -183,6 +189,7 @@ pub async fn sinscrire(
 fn fenetre_de(seance: &registrations::SeanceVerrouillee) -> Fenetre {
     registration::fenetre(
         EtatDInscription {
+            publiee: seance.published,
             annulee: seance.status == "cancelled",
             inscription_requise: seance.registration_required,
             ouvre_le: seance.registration_opens_at,

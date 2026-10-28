@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, event_id, status::text AS \"status!\", registration_required,\n                  registration_opens_at, registration_closes_at,\n                  capacity, waitlist_enabled\n             FROM programme.sessions\n            WHERE id = $1\n              FOR UPDATE",
+  "query": "SELECT id, event_id, status::text AS \"status!\",\n                  published_at IS NOT NULL AS \"published!\", registration_required,\n                  registration_opens_at, registration_closes_at,\n                  capacity, waitlist_enabled\n             FROM programme.sessions\n            WHERE id = $1\n              FOR UPDATE",
   "describe": {
     "columns": [
       {
@@ -33,6 +33,12 @@
       },
       {
         "ordinal": 3,
+        "name": "published!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
         "name": "registration_required",
         "type_info": "Bool",
         "origin": {
@@ -43,7 +49,7 @@
         }
       },
       {
-        "ordinal": 4,
+        "ordinal": 5,
         "name": "registration_opens_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -54,7 +60,7 @@
         }
       },
       {
-        "ordinal": 5,
+        "ordinal": 6,
         "name": "registration_closes_at",
         "type_info": "Timestamptz",
         "origin": {
@@ -65,7 +71,7 @@
         }
       },
       {
-        "ordinal": 6,
+        "ordinal": 7,
         "name": "capacity",
         "type_info": "Int4",
         "origin": {
@@ -76,7 +82,7 @@
         }
       },
       {
-        "ordinal": 7,
+        "ordinal": 8,
         "name": "waitlist_enabled",
         "type_info": "Bool",
         "origin": {
@@ -96,6 +102,7 @@
       false,
       false,
       null,
+      null,
       false,
       true,
       true,
@@ -103,5 +110,5 @@
       false
     ]
   },
-  "hash": "65a8d6a72bb4ea80b296ecaf1300798111a19f084251d18c67149f393a3faac1"
+  "hash": "52710b747e4e2d73b0b84b816f4a8da5e1787b449975008199cbfcd461d4e47e"
 }

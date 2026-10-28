@@ -117,6 +117,11 @@ fn chemins() -> Vec<(&'static str, String)> {
             format!("/api/proposal-comments/{message}/recipients"),
         ),
         ("DELETE", format!("/api/proposal-comments/{message}/read")),
+        // 28/10 : l'aperçu de l'annulation d'un dossier retenu
+        (
+            "GET",
+            format!("/api/proposals/{dossier}/cancellation-impact"),
+        ),
     ]
 }
 
@@ -130,7 +135,7 @@ async fn les_routes_du_depot_sont_montees() {
     let app = test::init_service(api::build_app(&etat)).await;
 
     let routes = chemins();
-    assert_eq!(routes.len(), 42, "les quarante-deux routes du contrat");
+    assert_eq!(routes.len(), 43, "les quarante-trois routes du contrat");
 
     for (verbe, chemin) in routes {
         let requete = match verbe {

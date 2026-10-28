@@ -294,6 +294,79 @@ pub async fn liberer_les_creneaux(conn: &mut PgConnection, proposal_id: Uuid) ->
     Ok(liberees)
 }
 
+/// Les états d'une séance publiée qu'annuler un dossier retire du programme :
+/// tout sauf `completed` (elle a eu lieu) et `cancelled` (déjà fait). Partagé
+/// par l'annulation et par son aperçu, qui doivent compter les mêmes séances.
+const ETATS_ANNULABLES: &[&str] = &["planned", "scheduled", "live", "postponed"];
+
+/// Annuler les séances publiées d'un dossier annulé, avec son motif.
+///
+/// Une simple écriture de `status` : `tg_sessions_emit_events()` émet
+/// `programme.session.cancelled` dans la transaction, c'est lui que le direct
+/// et les avis aux inscrits consomment. Les inscriptions restent : les
+/// prévenir est l'affaire du consommateur, qui lit justement les vivantes.
+pub async fn annuler_les_seances_publiees(
+    conn: &mut PgConnection,
+    proposal_id: Uuid,
+    motif: &str,
+) -> Result<i64> {
+    let annulees = sqlx::query_scalar!(
+        r#"WITH annulees AS (
+               UPDATE programme.sessions
+                  SET status = 'cancelled',
+                      cancelled_reason = jsonb_build_object('fr', $2::text)
+                WHERE proposal_id = $1
+                  AND published_at IS NOT NULL
+                  AND status::text = ANY($3)
+            RETURNING id
+           )
+           SELECT count(*) AS "n!" FROM annulees"#,
+        proposal_id,
+        motif,
+        ETATS_ANNULABLES as &[&str]
+    )
+    .fetch_one(conn)
+    .await?;
+
+    Ok(annulees)
+}
+
+/// Ce qu'annuler ce dossier retirerait du programme public : ses séances
+/// publiées non closes, et les personnes inscrites qui en seraient prévenues.
+pub async fn impact_de_lannulation<'e>(
+    executor: impl PgExecutor<'e>,
+    proposal_id: Uuid,
+) -> Result<CancellationImpact> {
+    let ligne = sqlx::query!(
+        r#"SELECT count(DISTINCT s.id) AS "seances!",
+                  count(DISTINCT r.person_id) AS "inscrits!"
+             FROM programme.sessions s
+             LEFT JOIN programme.registrations r
+                    ON r.session_id = s.id AND r.status <> 'cancelled'
+            WHERE s.proposal_id = $1
+              AND s.published_at IS NOT NULL
+              AND s.status::text = ANY($2)"#,
+        proposal_id,
+        ETATS_ANNULABLES as &[&str]
+    )
+    .fetch_one(executor)
+    .await?;
+
+    Ok(CancellationImpact {
+        published_sessions: ligne.seances,
+        registrants: ligne.inscrits,
+    })
+}
+
+/// `CancellationImpact` : ce que la fenêtre de décision annonce avant
+/// d'annuler un dossier retenu.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, utoipa::ToSchema)]
+pub struct CancellationImpact {
+    pub published_sessions: i64,
+    /// Personnes distinctes, inscrites ou en attente.
+    pub registrants: i64,
+}
+
 /// L'heure d'ouverture quotidienne et la durée par défaut d'un appel, en une
 /// lecture — les deux seules règles dont la naissance a besoin.
 pub async fn regles_de_naissance(
