@@ -137,6 +137,17 @@ pub async fn seance(pool: &PgPool, session_id: Uuid) -> Result<Option<DossierVis
     }))
 }
 
+/// L'édition d'un envoi de courriels du back-office, `None` s'il n'existe pas.
+pub async fn edition_de_lenvoi(pool: &PgPool, mailing_id: Uuid) -> Result<Option<Uuid>> {
+    let edition = sqlx::query_scalar!(
+        "SELECT m.event_id FROM engagement.mailings m WHERE m.id = $1",
+        mailing_id
+    )
+    .fetch_optional(pool)
+    .await?;
+    Ok(edition)
+}
+
 /// La personne existe-t-elle ?
 pub async fn personne_existe(pool: &PgPool, person_id: Uuid) -> Result<bool> {
     let existe = sqlx::query_scalar!(

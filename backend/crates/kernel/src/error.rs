@@ -179,6 +179,8 @@ codes! {
         "Ce type de fichier n'est pas accepté pour ce rôle.";
     MediaTooLarge => "MEDIA_TOO_LARGE", StatusCode::PAYLOAD_TOO_LARGE,
         "Ce fichier dépasse la taille acceptée pour ce rôle.";
+    MediaTotalTooLarge => "MEDIA_TOTAL_TOO_LARGE", StatusCode::PAYLOAD_TOO_LARGE,
+        "Avec ce fichier, les pièces jointes dépasseraient la taille totale permise. Retirez-en une, ou allégez ce fichier.";
     MediaAspectRatio => "MEDIA_ASPECT_RATIO", StatusCode::UNPROCESSABLE_ENTITY,
         "Les dimensions de cette image ne correspondent pas à la forme attendue.";
     MediaRoleNotDeclared => "MEDIA_ROLE_NOT_DECLARED", StatusCode::UNPROCESSABLE_ENTITY,

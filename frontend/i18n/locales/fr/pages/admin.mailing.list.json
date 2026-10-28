@@ -26,5 +26,6 @@
   "notSent": "Pas encore envoyé",
   "progress": "{sent} partis sur {total}",
   "failed": "aucun échec | {count} échec | {count} échecs",
-  "noResults": "Aucun courriel ne correspond"
+  "noResults": "Aucun courriel ne correspond",
+  "attachments": "aucune pièce jointe | {count} pièce jointe | {count} pièces jointes"
 }

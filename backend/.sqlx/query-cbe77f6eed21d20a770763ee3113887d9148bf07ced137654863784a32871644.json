@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.max_total_byte_size FROM media.attachable_roles r\n          WHERE r.owner_schema = 'engagement' AND r.owner_table = 'mailings'\n            AND r.role = 'attachment'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "max_total_byte_size",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "media.attachable_roles",
+            "name": "max_total_byte_size"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "cbe77f6eed21d20a770763ee3113887d9148bf07ced137654863784a32871644"
+}

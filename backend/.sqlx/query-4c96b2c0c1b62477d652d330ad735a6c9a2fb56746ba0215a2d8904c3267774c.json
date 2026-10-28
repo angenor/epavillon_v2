@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO media.assets\n               (bucket, object_key, checksum_sha256, mime_type, byte_size, original_filename,\n                owner_person_id, visibility, status)\n           VALUES ('epavillon-prive', $1, repeat('a', 64), 'application/pdf', $2,\n                   'programme.pdf', $3, 'private', 'processing')\n        RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "media.assets",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "4c96b2c0c1b62477d652d330ad735a6c9a2fb56746ba0215a2d8904c3267774c"
+}

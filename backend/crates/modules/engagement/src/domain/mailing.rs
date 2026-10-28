@@ -80,6 +80,7 @@ pub struct MailingSummary {
     #[serde(with = "time::serde::rfc3339")]
     pub updated_at: OffsetDateTime,
     pub counts: MailingCounts,
+    pub attachment_count: i64,
 }
 
 /// L'écran de l'historique (`MailingListScreen`) : les envois, et les réglages
@@ -120,6 +121,24 @@ pub struct Mailing {
     pub counts: MailingCounts,
     /// Les destinataires figés, vides tant que l'envoi est un brouillon.
     pub recipients: Vec<MailingRecipient>,
+    /// Les pièces jointes, dans l'ordre de leur rattachement.
+    pub attachments: Vec<MailingAttachment>,
+    pub attachments_total_bytes: i64,
+    /// Le poids cumulé permis (`media.attachable_roles.max_total_byte_size`).
+    pub attachments_max_bytes: Option<i64>,
+}
+
+/// Une pièce jointe (`MailingAttachment`) : un rattachement `attachment` de
+/// `media.attachments` sur l'envoi, toujours privé.
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct MailingAttachment {
+    pub attachment_id: Uuid,
+    pub asset_id: Uuid,
+    pub filename: String,
+    pub mime_type: String,
+    pub byte_size: i64,
+    /// `media.asset_status` : seul `ready` peut partir.
+    pub status: String,
 }
 
 /// Un destinataire figé (`MailingRecipient`).

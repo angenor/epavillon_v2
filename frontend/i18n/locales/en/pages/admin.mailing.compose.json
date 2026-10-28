@@ -85,7 +85,8 @@
     "cc": "Copied on every message: {addresses} ({count} copies).",
     "replyTo": "Replies will go to {address}.",
     "explain": "The list is frozen when you send. Messages leave in batches, with no sending limit; you follow their status in the history, and can stop the sending midway.",
-    "action": "Send | Send to {count} person | Send to {count} people"
+    "action": "Send | Send to {count} person | Send to {count} people",
+    "attachments": "No attachments | Attachment: {names}. | {count} attachments: {names}."
   },
   "previous": "Previous step",
   "next": "Next step",
@@ -98,5 +99,17 @@
   "deleteConfirm": {
     "title": "Delete this draft?",
     "description": "It has not been sent; it disappears from the history."
+  },
+  "attachments": {
+    "title": "Attachments",
+    "usage": "{used} of {max} in total. Each recipient receives every file.",
+    "usageNoMax": "{used} in total. Each recipient receives every file.",
+    "add": "Attach a file",
+    "remove": "Remove {name}",
+    "none": "No attachments.",
+    "processing": "Being scanned",
+    "refused": "Refused",
+    "typeRejected": "This file type cannot be attached: PDF, office documents, text or images.",
+    "tooHeavy": "With this file, attachments would exceed {max} in total. Remove one, or use a lighter file."
   }
 }

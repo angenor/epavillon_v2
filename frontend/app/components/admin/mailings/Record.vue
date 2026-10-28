@@ -119,6 +119,13 @@ function sessionLabel(id: string | null): string {
         :reply-to="props.mailing.reply_to"
         :values="{}"
       />
+      <AdminMailingsAttachments
+        class="mt-4"
+        :mailing-id="props.mailing.id"
+        :attachments="props.mailing.attachments"
+        :total-bytes="props.mailing.attachments_total_bytes"
+        :max-bytes="props.mailing.attachments_max_bytes"
+      />
     </section>
 
     <section>

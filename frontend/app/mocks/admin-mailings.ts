@@ -21,6 +21,7 @@ import type {
 import type { EventId, Uuid } from '~/types/shared'
 import { EVENT, mockUuid } from './ids'
 
+const ATTACHMENTS_MAX = 10 * 1024 * 1024
 const VARIABLES = ['prenom', 'nom', 'organisation', 'email', 'edition']
 const ME = 'a.sowfall@roac-afrique.org'
 
@@ -76,6 +77,9 @@ function seed(): void {
     updated_at: '2026-10-20T09:14:00Z',
     counts: countsOf(recipients),
     recipients,
+    attachments: [],
+    attachments_total_bytes: 0,
+    attachments_max_bytes: ATTACHMENTS_MAX,
   })
 }
 
@@ -98,6 +102,7 @@ function summary(m: Mailing): MailingSummary {
     created_at: m.created_at,
     updated_at: m.updated_at,
     counts: m.counts,
+    attachment_count: m.attachments.length,
   }
 }
 
@@ -178,6 +183,9 @@ export function createMailing(payload: CreateMailingPayload): Mailing {
       updated_at: now(),
       counts: NO_COUNTS,
       recipients: [],
+      attachments: [],
+      attachments_total_bytes: 0,
+      attachments_max_bytes: ATTACHMENTS_MAX,
     },
     payload,
   )

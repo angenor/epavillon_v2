@@ -32,7 +32,7 @@
 use kernel::config::Config;
 use kernel::context::RequestContext;
 use kernel::events::OutboxEvent;
-use kernel::mail::{Copies, MailError, Mailer, OutgoingMail};
+use kernel::mail::{Extras, MailError, Mailer, OutgoingMail};
 use kernel::testing::TestDb;
 use kernel::Db;
 use std::sync::{Arc, Mutex};
@@ -90,7 +90,7 @@ impl Bac {
 pub struct BoiteAuxLettres {
     remis: Mutex<Vec<OutgoingMail>>,
     /// Les copies de chaque message remis, dans le même ordre.
-    copies: Mutex<Vec<Copies>>,
+    copies: Mutex<Vec<Extras>>,
 }
 
 impl BoiteAuxLettres {
@@ -98,7 +98,7 @@ impl BoiteAuxLettres {
         self.remis.lock().expect("boîte lisible").clone()
     }
 
-    pub fn copies(&self) -> Vec<Copies> {
+    pub fn copies(&self) -> Vec<Extras> {
         self.copies.lock().expect("boîte lisible").clone()
     }
 
@@ -115,13 +115,13 @@ impl BoiteAuxLettres {
 #[async_trait::async_trait]
 impl Mailer for BoiteAuxLettres {
     async fn send(&self, mail: &OutgoingMail) -> Result<(), MailError> {
-        self.send_with_copies(mail, &Copies::default()).await
+        self.send_with_extras(mail, &Extras::default()).await
     }
 
-    async fn send_with_copies(
+    async fn send_with_extras(
         &self,
         mail: &OutgoingMail,
-        copies: &Copies,
+        copies: &Extras,
     ) -> Result<(), MailError> {
         self.remis
             .lock()

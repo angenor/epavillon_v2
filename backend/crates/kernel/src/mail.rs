@@ -10,6 +10,7 @@
 //! envoie un courriel — c'est-à-dire, à terme, presque tous.
 
 use async_trait::async_trait;
+use lettre::message::header::ContentType;
 use lettre::message::{Mailbox, MultiPart, SinglePart};
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::transport::smtp::AsyncSmtpTransport;
@@ -55,19 +56,31 @@ pub struct OutgoingMail {
     pub html: Option<String>,
 }
 
-/// Copie, copie cachée et adresse de réponse : seuls les envois écrits depuis
-/// le back-office en portent. Hors de `OutgoingMail` pour qu'aucun des
-/// courriels déjà livrés n'ait à changer d'une ligne.
+/// Copie, copie cachée, adresse de réponse et pièces jointes : seuls les envois
+/// écrits depuis le back-office en portent. Hors de `OutgoingMail` pour qu'aucun
+/// des courriels déjà livrés n'ait à changer d'une ligne.
 #[derive(Debug, Clone, Default)]
-pub struct Copies {
+pub struct Extras {
     pub cc: Vec<String>,
     pub bcc: Vec<String>,
     pub reply_to: Option<String>,
+    pub attachments: Vec<Attachment>,
 }
 
-impl Copies {
+/// Un fichier joint, déjà lu : le module qui envoie le tient en mémoire.
+#[derive(Debug, Clone)]
+pub struct Attachment {
+    pub filename: String,
+    pub mime_type: String,
+    pub content: Vec<u8>,
+}
+
+impl Extras {
     pub fn is_empty(&self) -> bool {
-        self.cc.is_empty() && self.bcc.is_empty() && self.reply_to.is_none()
+        self.cc.is_empty()
+            && self.bcc.is_empty()
+            && self.reply_to.is_none()
+            && self.attachments.is_empty()
     }
 }
 
@@ -75,17 +88,19 @@ impl Copies {
 pub trait Mailer: Send + Sync {
     async fn send(&self, mail: &OutgoingMail) -> Result<(), MailError>;
 
-    /// Un transport qui ne sait pas porter de copie la refuse plutôt que de
-    /// l'oublier : un message parti sans la copie promise ne se rattrape pas.
-    async fn send_with_copies(
+    /// Un transport qui ne sait pas porter de copie ou de pièce jointe la refuse
+    /// plutôt que de l'oublier : un message parti sans elle ne se rattrape pas.
+    async fn send_with_extras(
         &self,
         mail: &OutgoingMail,
-        copies: &Copies,
+        copies: &Extras,
     ) -> Result<(), MailError> {
         if copies.is_empty() {
             return self.send(mail).await;
         }
-        Err(MailError::NotWired("copie et adresse de réponse"))
+        Err(MailError::NotWired(
+            "copie, adresse de réponse et pièces jointes",
+        ))
     }
 }
 
@@ -224,13 +239,13 @@ fn code_reponse(erreur: &lettre::transport::smtp::Error) -> u16 {
 #[async_trait]
 impl Mailer for SmtpMailer {
     async fn send(&self, mail: &OutgoingMail) -> Result<(), MailError> {
-        self.send_with_copies(mail, &Copies::default()).await
+        self.send_with_extras(mail, &Extras::default()).await
     }
 
-    async fn send_with_copies(
+    async fn send_with_extras(
         &self,
         mail: &OutgoingMail,
-        copies: &Copies,
+        copies: &Extras,
     ) -> Result<(), MailError> {
         let mut entete = Message::builder()
             .from(self.from.clone())
@@ -248,12 +263,34 @@ impl Mailer for SmtpMailer {
 
         // Deux corps quand le module en compose deux : un client qui ne rend
         // pas le HTML affiche alors le texte, au lieu d'une pièce jointe.
-        let message = match &mail.html {
-            Some(html) => entete.multipart(MultiPart::alternative_plain_html(
-                mail.text.clone(),
-                html.clone(),
-            )),
-            None => entete.singlepart(SinglePart::plain(mail.text.clone())),
+        let message = if copies.attachments.is_empty() {
+            match &mail.html {
+                Some(html) => entete.multipart(MultiPart::alternative_plain_html(
+                    mail.text.clone(),
+                    html.clone(),
+                )),
+                None => entete.singlepart(SinglePart::plain(mail.text.clone())),
+            }
+        } else {
+            // Pièces jointes : le corps (texte, ou texte et HTML) puis un
+            // fichier par partie, dans un « mixed ».
+            let corps = match &mail.html {
+                Some(html) => MultiPart::alternative_plain_html(mail.text.clone(), html.clone()),
+                None => MultiPart::mixed().singlepart(SinglePart::plain(mail.text.clone())),
+            };
+            let mut tout = MultiPart::mixed().multipart(corps);
+            for piece in &copies.attachments {
+                let type_ =
+                    ContentType::parse(&piece.mime_type).map_err(|e| MailError::Rejected {
+                        statut: 0,
+                        corps: format!("type « {} » inexploitable : {e}", piece.mime_type),
+                    })?;
+                tout = tout.singlepart(
+                    lettre::message::Attachment::new(piece.filename.clone())
+                        .body(piece.content.clone(), type_),
+                );
+            }
+            entete.multipart(tout)
         }
         .map_err(|e| MailError::Rejected {
             statut: 0,
@@ -289,4 +326,37 @@ fn boite(adresse: &str) -> Result<Mailbox, MailError> {
 /// confirme pas son existence.
 pub fn relay_token_matches(recu: &str, attendu: &str) -> bool {
     crypto::constant_time_eq(recu, attendu)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Le relais HTTP ne sait porter ni copie ni pièce jointe : il refuse,
+    /// sans rien envoyer, plutôt que de les perdre.
+    #[tokio::test]
+    async fn le_relais_refuse_une_piece_jointe() {
+        let relais = RelayMailer::new("http://127.0.0.1:9/inaccessible".into(), "x".into());
+        let message = OutgoingMail {
+            message_id: "essai".into(),
+            to: "a@epavillon.local".into(),
+            locale: "fr".into(),
+            subject: "Objet".into(),
+            text: "Corps".into(),
+            html: None,
+        };
+        let extras = Extras {
+            attachments: vec![Attachment {
+                filename: "a.pdf".into(),
+                mime_type: "application/pdf".into(),
+                content: vec![1, 2, 3],
+            }],
+            ..Extras::default()
+        };
+        let refus = relais
+            .send_with_extras(&message, &extras)
+            .await
+            .expect_err("refus");
+        assert!(matches!(refus, MailError::NotWired(_)), "{refus:?}");
+    }
 }

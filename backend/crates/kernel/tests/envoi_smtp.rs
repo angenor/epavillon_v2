@@ -7,7 +7,7 @@
 //! qu'on vient d'écrire.
 
 use kernel::config::{Config, Secret, SmtpConfig, SmtpEncryption};
-use kernel::mail::{Copies, Mailer, OutgoingMail, SmtpMailer};
+use kernel::mail::{Attachment, Extras, Mailer, OutgoingMail, SmtpMailer};
 use uuid::Uuid;
 
 fn env_ou(cle: &str, defaut: &str) -> String {
@@ -87,7 +87,7 @@ async fn la_copie_et_ladresse_de_reponse_arrivent() {
     let expediteur = SmtpMailer::new(&vers_mailpit()).expect("expéditeur");
 
     expediteur
-        .send_with_copies(
+        .send_with_extras(
             &OutgoingMail {
                 message_id: Uuid::now_v7().to_string(),
                 to: adresse.clone(),
@@ -96,10 +96,11 @@ async fn la_copie_et_ladresse_de_reponse_arrivent() {
                 text: "Bonjour.".to_owned(),
                 html: Some("<p>Bonjour.</p>".to_owned()),
             },
-            &Copies {
+            &Extras {
                 cc: vec![copie.clone()],
                 bcc: vec![cachee.clone()],
                 reply_to: Some("equipe@epavillon.local".to_owned()),
+                attachments: vec![],
             },
         )
         .await
@@ -110,6 +111,54 @@ async fn la_copie_et_ladresse_de_reponse_arrivent() {
     assert_eq!(message["ReplyTo"][0]["Address"], "equipe@epavillon.local");
     // La copie cachée n'est pas dans les en-têtes, mais le message lui parvient.
     assert_eq!(message["Bcc"][0]["Address"], cachee);
+}
+
+/// Une pièce jointe arrive avec son nom, son type et son poids : relue chez
+/// Mailpit, dans le message complet.
+#[tokio::test]
+async fn une_piece_jointe_arrive() {
+    let adresse = format!("{}@epavillon.local", Uuid::now_v7());
+    let expediteur = SmtpMailer::new(&vers_mailpit()).expect("expéditeur");
+    let contenu = b"%PDF-1.4\n% essai de piece jointe\n".to_vec();
+
+    expediteur
+        .send_with_extras(
+            &OutgoingMail {
+                message_id: Uuid::now_v7().to_string(),
+                to: adresse.clone(),
+                locale: "fr".to_owned(),
+                subject: "Programme joint".to_owned(),
+                text: "Le programme est joint.".to_owned(),
+                html: Some("<p>Le programme est joint.</p>".to_owned()),
+            },
+            &Extras {
+                attachments: vec![Attachment {
+                    filename: "programme.pdf".to_owned(),
+                    mime_type: "application/pdf".to_owned(),
+                    content: contenu.clone(),
+                }],
+                ..Extras::default()
+            },
+        )
+        .await
+        .expect("remise");
+
+    let resume = recu_par(&adresse).await;
+    assert_eq!(resume["Attachments"], 1);
+    let ui = env_ou("MAILPIT_UI_PORT", "8025");
+    let id = resume["ID"].as_str().expect("identifiant Mailpit");
+    let message = reqwest::Client::new()
+        .get(format!("http://127.0.0.1:{ui}/api/v1/message/{id}"))
+        .send()
+        .await
+        .expect("Mailpit")
+        .json::<serde_json::Value>()
+        .await
+        .expect("message");
+    let piece = &message["Attachments"][0];
+    assert_eq!(piece["FileName"], "programme.pdf");
+    assert_eq!(piece["ContentType"], "application/pdf");
+    assert_eq!(piece["Size"], contenu.len());
 }
 
 /// Une adresse que le module n'a pas su composer ne doit pas faire tomber le

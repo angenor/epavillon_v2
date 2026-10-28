@@ -27,6 +27,7 @@
 import type {
   AttachableRoleRule,
   AttachedMedia,
+  AttachOnePayload,
   AttachmentBatch,
   AttachmentRole,
   UploadPayload,
@@ -70,6 +71,14 @@ export function createMediaApi({ call, send, sendForm }: Pick<ApiTransport, 'cal
      */
     attach: (batch: AttachmentBatch): Promise<void> =>
       send('/media/attachments', batch, () => undefined, 'PUT'),
+
+    /** Ajoute UN objet à un rôle multiple, sans toucher aux autres (pièces jointes d'un courriel). */
+    attachOne: (payload: AttachOnePayload): Promise<AttachedMedia | null> =>
+      send<AttachedMedia | null>('/media/attachments', payload, () => null, 'POST'),
+
+    /** Retire un rattachement ; l'objet reste, la purge reprendra un orphelin. */
+    detach: (attachmentId: Uuid): Promise<void> =>
+      send(`/media/attachments/${attachmentId}`, {}, () => undefined, 'DELETE'),
 
     /**
      * LE DÉPÔT. Rend l'objet, et le fait qu'il existait déjà.

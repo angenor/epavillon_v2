@@ -135,6 +135,17 @@ pub async fn exiger_le_droit(
             Ok(None)
         }
 
+        Garde::EnvoiAdministre { permission } => {
+            let Some(event_id) = cross::edition_de_lenvoi(pool, porteuse.owner_id).await? else {
+                return Err(ApiError::not_found());
+            };
+            // Permission ET périmètre (règle n° 8), comme l'envoi lui-même.
+            let autorise = has_permission(pool, acteur, permission, Scope::Event(event_id)).await?;
+            let perimetre = kernel::auth::administered_events(pool, acteur).await?;
+            refuser_sauf(autorise && perimetre.allows(event_id))?;
+            Ok(None)
+        }
+
         Garde::PersonneElleMeme { permission } => {
             if !cross::personne_existe(pool, porteuse.owner_id).await? {
                 return Err(ApiError::not_found());

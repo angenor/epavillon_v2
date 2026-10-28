@@ -33,6 +33,8 @@ pub struct Regle {
     pub is_multiple: bool,
     pub allowed_mime_prefixes: Vec<String>,
     pub max_byte_size: Option<i64>,
+    /// Poids cumulé des objets d'une entité pour ce rôle (pièces jointes).
+    pub max_total_byte_size: Option<i64>,
     pub expected_aspect_ratio: Option<f64>,
     pub aspect_ratio_tolerance: f64,
 }
@@ -49,6 +51,7 @@ pub async fn regle(
         r#"SELECT r.is_multiple,
                   r.allowed_mime_prefixes           AS "prefixes!",
                   r.max_byte_size,
+                  r.max_total_byte_size,
                   r.expected_aspect_ratio::float8   AS ratio,
                   r.aspect_ratio_tolerance::float8  AS "tolerance!"
              FROM media.attachable_roles r
@@ -66,6 +69,7 @@ pub async fn regle(
         is_multiple: l.is_multiple,
         allowed_mime_prefixes: l.prefixes,
         max_byte_size: l.max_byte_size,
+        max_total_byte_size: l.max_total_byte_size,
         expected_aspect_ratio: l.ratio,
         aspect_ratio_tolerance: l.tolerance,
     }))
@@ -89,6 +93,7 @@ pub async fn regles_de(
                   r.is_multiple,
                   r.allowed_mime_prefixes AS "prefixes!",
                   r.max_byte_size,
+                  r.max_total_byte_size,
                   r.expected_aspect_ratio::text  AS ratio,
                   r.aspect_ratio_tolerance::text AS "tolerance!",
                   r.is_active
@@ -111,6 +116,7 @@ pub async fn regles_de(
             is_multiple: l.is_multiple,
             allowed_mime_prefixes: l.prefixes,
             max_byte_size: l.max_byte_size,
+            max_total_byte_size: l.max_total_byte_size,
             expected_aspect_ratio: l.ratio,
             aspect_ratio_tolerance: l.tolerance,
             is_active: l.is_active,
@@ -350,4 +356,32 @@ pub async fn compter_pour_objet(pool: &PgPool, asset_id: Uuid) -> Result<i64> {
     .await?;
 
     Ok(compte)
+}
+
+/// Le poids des objets déjà rattachés à une entité pour un rôle, sans
+/// `asset_id` quand on le remplace ou le repose.
+pub async fn poids_rattache(
+    pool: &PgPool,
+    owner_schema: &str,
+    owner_table: &str,
+    owner_id: Uuid,
+    role: &str,
+    sauf: Option<Uuid>,
+) -> Result<i64> {
+    let poids = sqlx::query_scalar!(
+        r#"SELECT COALESCE(sum(o.byte_size), 0)::bigint AS "poids!"
+             FROM media.attachments a
+             JOIN media.assets o ON o.id = a.asset_id
+            WHERE a.owner_schema = $1 AND a.owner_table = $2 AND a.owner_id = $3
+              AND a.role = $4::text::media.attachment_role
+              AND ($5::uuid IS NULL OR a.asset_id <> $5)"#,
+        owner_schema,
+        owner_table,
+        owner_id,
+        role,
+        sauf
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(poids)
 }

@@ -42,6 +42,20 @@ Code : `epavillonvue/src/views/admin/EmailManager.vue`, `components/email/EmailM
 | Traductions | `i18n/locales/{fr,en}/pages/admin.mailing.{common,list,compose,record}.json` | trois fichiers au plus par page |
 | Tests | `engagement/tests/envois.rs` (4), tests unitaires du domaine et du travail, `frontend/tests/site/mailing.test.ts` (3) | liste dédoublonnée, adresse supprimée écartée, copie sur chaque message, variables, refus hors périmètre, variable inconnue refusée, envoi parti non modifiable, duplication |
 
+## Pièces jointes (28/10, second commit)
+
+| Couche | Où | Quoi |
+|---|---|---|
+| Modèle | `050_media.sql`, `110_engagement.sql` | colonne `max_total_byte_size` de `media.attachable_roles` et son contrôle dans `tg_validate_attachment()` ; ligne `engagement.mailings` / `attachment` (multiple, PDF, bureautique, texte, images ; 10 Mo par fichier, 10 Mo au total) |
+| Garde | `media/src/domain/guards.rs`, `service/authz.rs`, `repo/cross.rs` | `Garde::EnvoiAdministre` : `engagement.mailing.send` sur l'édition de l'envoi, avec le périmètre ; dépôt toujours privé |
+| Media | `service/upload.rs`, `service/attach.rs`, `repo/attachments.rs` | poids cumulé refusé à l'annonce, au dépôt et au rattachement : `MEDIA_TOTAL_TOO_LARGE` (413) |
+| Noyau | `kernel/src/mail.rs` | `Copies` devient `Extras` (copie, copie cachée, réponse, pièces jointes) ; le SMTP compose un message `mixed` ; le relais HTTP refuse plutôt que de perdre |
+| Engagement | `repo/mailings.rs`, `service/mailings.rs`, `jobs/send_mailing.rs`, `lib.rs` | les pièces jointes se lisent dans `media` ; le travail lit les octets par `kernel::storage::Entrepots` (comme `negotiation` lit ses PDF), une fois par lot ; essai compris ; une pièce pas prête (analyse) retient l'envoi et l'essai |
+| Écrans | `components/admin/mailings/Attachments.vue`, `[id].vue`, `Review.vue`, `Record.vue`, `index.vue` | dépôt par `useDepotMedia` à l'étape Message (contrôle du type et du poids cumulé avant l'envoi du fichier), liste et poids total à la Vérification et sur la fiche, nombre dans l'historique ; « Dupliquer » rattache les mêmes objets à la copie |
+| Tests | `media/tests/pieces_jointes.rs` (3), garde (unitaire), `engagement/tests/envois.rs` (pièce jointe sur chaque message, pièce pas prête), Mailpit (`kernel/tests/envoi_smtp.rs`), relais (unitaire) | |
+
+Non vérifié : le dépôt au navigateur (les données d'exemple ne rattachent rien), et un message avec pièce jointe vers le serveur réel.
+
 ## Le parcours
 
 1. **Historique** (`/admin/courriels`) : les envois de l'édition choisie, filtrables par état (onglets) et par objet ou
@@ -73,7 +87,7 @@ Code : `epavillonvue/src/views/admin/EmailManager.vue`, `components/email/EmailM
    libres restent permises à un administrateur d'édition : il les tape lui-même, elles ne révèlent personne.
 4. **Modèles : pas de modèles réutilisables**, la duplication d'un envoi passé en tient lieu. `message_templates` est
    lié aux types de notification et multilingue, trop lourd pour ce jalon.
-5. **Pas de pièce jointe** (la v1 n'en avait pas). Pas de signature ajoutée : l'écran demande de signer.
+5. **Pièces jointes** : ajoutées le 28/10 à la demande du commanditaire (voir plus haut). Pas de signature ajoutée : l'écran demande de signer.
 6. **Critère par activité** : la liste des activités vient de `/admin/showcase/sessions`, qui ne rend que les séances
    **publiées** ; une activité non publiée ne se cible pas encore seule (tous les critères restent possibles sur
    l'édition entière).

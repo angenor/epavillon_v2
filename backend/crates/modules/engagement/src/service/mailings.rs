@@ -112,7 +112,15 @@ pub async fn detail(state: &EngagementState, acteur: Uuid, id: Uuid) -> Result<M
 
 async fn assembler(state: &EngagementState, e: mailings::LigneEnvoi) -> Result<Mailing> {
     let recipients = mailings::destinataires(state.pool(), e.id).await?;
+    let attachments: Vec<_> = mailings::pieces_jointes(state.pool(), e.id)
+        .await?
+        .into_iter()
+        .map(|p| p.fiche)
+        .collect();
     Ok(Mailing {
+        attachments_total_bytes: attachments.iter().map(|a| a.byte_size).sum(),
+        attachments_max_bytes: mailings::poids_permis(state.pool()).await?,
+        attachments,
         counts: mailings::compter(&recipients),
         recipients,
         id: e.id,
@@ -403,6 +411,22 @@ fn exiger_un_contenu(e: &mailings::LigneEnvoi) -> Result<()> {
     Ok(())
 }
 
+/// Une pièce jointe en cours d'analyse ou écartée ne part pas : l'envoi attend
+/// qu'elle soit prête plutôt que de partir sans elle.
+async fn exiger_des_pieces_pretes(state: &EngagementState, id: Uuid) -> Result<()> {
+    let pieces = mailings::pieces_jointes(state.pool(), id).await?;
+    if let Some(p) = pieces.iter().find(|p| p.fiche.status != "ready") {
+        return Err(ApiError::validation(
+            format!(
+                "La pièce jointe « {} » n'est pas prête (analyse en cours, ou fichier refusé) : réessayez dans un instant, ou retirez-la.",
+                p.fiche.filename
+            ),
+            "attachments",
+        ));
+    }
+    Ok(())
+}
+
 fn sanitize_vide(html: &str) -> bool {
     crate::domain::mailing::texte_brut(html).trim().is_empty()
 }
@@ -417,6 +441,7 @@ pub async fn essai(
 ) -> Result<MailingTestResult> {
     let envoi = garder_envoi(state, acteur, id).await?;
     exiger_un_contenu(&envoi)?;
+    exiger_des_pieces_pretes(state, id).await?;
     let Some((adresse, ..)) = mailings::adresse_de(state.pool(), acteur).await? else {
         return Err(ApiError::not_found());
     };
@@ -449,6 +474,7 @@ pub async fn envoyer(
         return Err(ApiError::new(ErrorCode::EngagementMailingNotDraft));
     }
     exiger_un_contenu(&envoi)?;
+    exiger_des_pieces_pretes(state, id).await?;
 
     let mut tx = state.db().write(ctx).await?;
     let Some(partiront) = mailings::figer(&mut tx, id, acteur).await? else {

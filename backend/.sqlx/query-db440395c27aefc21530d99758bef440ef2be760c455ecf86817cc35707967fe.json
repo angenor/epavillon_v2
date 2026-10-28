@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE media.attachable_roles SET max_total_byte_size = $1\n          WHERE owner_schema = 'engagement' AND owner_table = 'mailings' AND role = 'attachment'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "db440395c27aefc21530d99758bef440ef2be760c455ecf86817cc35707967fe"
+}

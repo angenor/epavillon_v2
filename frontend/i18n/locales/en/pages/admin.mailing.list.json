@@ -26,5 +26,6 @@
   "notSent": "Not sent yet",
   "progress": "{sent} sent of {total}",
   "failed": "no failures | {count} failure | {count} failures",
-  "noResults": "No email matches"
+  "noResults": "No email matches",
+  "attachments": "no attachments | {count} attachment | {count} attachments"
 }

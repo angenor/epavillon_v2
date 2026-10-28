@@ -85,7 +85,8 @@
     "cc": "En copie de chaque message : {addresses} ({count} copies).",
     "replyTo": "Les réponses iront à {address}.",
     "explain": "La liste est figée à l'envoi. Les messages partent par lots, sans limite d'envoi ; vous suivez leur état dans l'historique, et pouvez arrêter l'envoi en cours de route.",
-    "action": "Envoyer | Envoyer à {count} personne | Envoyer à {count} personnes"
+    "action": "Envoyer | Envoyer à {count} personne | Envoyer à {count} personnes",
+    "attachments": "Aucune pièce jointe | Pièce jointe : {names}. | {count} pièces jointes : {names}."
   },
   "previous": "Étape précédente",
   "next": "Étape suivante",
@@ -98,5 +99,17 @@
   "deleteConfirm": {
     "title": "Supprimer ce brouillon ?",
     "description": "Il n'a pas été envoyé ; il disparaît de l'historique."
+  },
+  "attachments": {
+    "title": "Pièces jointes",
+    "usage": "{used} sur {max} au total. Chaque destinataire reçoit tous les fichiers.",
+    "usageNoMax": "{used} au total. Chaque destinataire reçoit tous les fichiers.",
+    "add": "Joindre un fichier",
+    "remove": "Retirer {name}",
+    "none": "Aucune pièce jointe.",
+    "processing": "Analyse en cours",
+    "refused": "Refusé",
+    "typeRejected": "Ce type de fichier ne peut pas être joint : PDF, documents bureautiques, texte ou images.",
+    "tooHeavy": "Avec ce fichier, les pièces jointes dépasseraient {max} au total. Retirez-en une, ou allégez ce fichier."
   }
 }

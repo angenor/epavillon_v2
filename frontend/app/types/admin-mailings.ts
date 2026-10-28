@@ -53,6 +53,7 @@ export interface MailingSummary {
   created_at: string
   updated_at: string
   counts: MailingCounts
+  attachment_count: number
 }
 
 export interface MailingListScreen {
@@ -97,6 +98,21 @@ export interface Mailing {
   counts: MailingCounts
   /** Vide tant que l'envoi est un brouillon. */
   recipients: MailingRecipient[]
+  attachments: MailingAttachment[]
+  attachments_total_bytes: number
+  /** `media.attachable_roles.max_total_byte_size` : nul, aucun plafond. */
+  attachments_max_bytes: number | null
+}
+
+/** Une pièce jointe : rattachement `attachment` de `media.attachments`, objet privé. */
+export interface MailingAttachment {
+  attachment_id: Uuid
+  asset_id: Uuid
+  filename: string
+  mime_type: string
+  byte_size: number
+  /** `media.asset_status` : seul `ready` peut partir. */
+  status: string
 }
 
 export interface MailingAudienceEntry {

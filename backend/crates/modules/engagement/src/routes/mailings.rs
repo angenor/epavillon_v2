@@ -88,7 +88,7 @@ pub(crate) async fn creer(
 /// Un envoi.
 #[utoipa::path(
     get,
-    description = "`Mailing` : le contenu, les critères, les copies, et pour un envoi parti ses destinataires figés avec l'état de chacun (`queued`, `sending`, `sent`, `failed`, `suppressed`, `cancelled`) et l'erreur rendue par le serveur.",
+    description = "`Mailing` : le contenu, les critères, les copies, les pièces jointes (rattachements `attachment` du module media, poids cumulé et plafond), et pour un envoi parti ses destinataires figés avec l'état de chacun (`queued`, `sending`, `sent`, `failed`, `suppressed`, `cancelled`) et l'erreur rendue par le serveur.",
     path = "/admin/mailings/{id}",
     tag = "Back-office : envois de courriels",
     operation_id = "engagement_envois_detail",
@@ -217,7 +217,7 @@ pub(crate) async fn essai(
 /// Envoyer.
 #[utoipa::path(
     post,
-    description = "`Mailing` : fige les destinataires (la liste qui part est celle qu'on a vue) et met l'envoi en file. Le worker l'expédie par lots de dix, enchaînés sans attente (aucune limite d'envoi) ; **un message par destinataire**, chacun portant la copie, la copie cachée et l'adresse de réponse. Aucun destinataire joignable : 422 `ENGAGEMENT_MAILING_EMPTY`, le brouillon reste un brouillon.",
+    description = "`Mailing` : fige les destinataires (la liste qui part est celle qu'on a vue) et met l'envoi en file. Le worker l'expédie par lots de dix, enchaînés sans attente (aucune limite d'envoi) ; **un message par destinataire**, chacun portant la copie, la copie cachée et l'adresse de réponse. Aucun destinataire joignable : 422 `ENGAGEMENT_MAILING_EMPTY`, le brouillon reste un brouillon. Une pièce jointe pas encore prête (analyse en cours, ou refusée) : 422 sur `attachments`. Chaque message porte toutes les pièces jointes.",
     path = "/admin/mailings/{id}/send",
     tag = "Back-office : envois de courriels",
     operation_id = "engagement_envois_envoyer",

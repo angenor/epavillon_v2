@@ -93,12 +93,19 @@ pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc
             config,
             mailer.clone(),
         )),
-        // Les envois du back-office et leurs essais, sur la file « email ».
+        // Les envois du back-office et leurs essais, sur la file « email ». Ils
+        // lisent les pièces jointes sur le stockage par le noyau, comme
+        // `negotiation` lit ses PDF : aucun crate de module n'est appelé.
         Arc::new(jobs::send_mailing::SendMailing::new(
             db.clone(),
             mailer.clone(),
+            kernel::storage::Entrepots::new(&config.media),
         )),
-        Arc::new(jobs::send_mailing::SendMailingTest::new(db.clone(), mailer)),
+        Arc::new(jobs::send_mailing::SendMailingTest::new(
+            db.clone(),
+            mailer,
+            kernel::storage::Entrepots::new(&config.media),
+        )),
         // Le récurrent, sur la file par défaut : rien ne l'enfile, il pose sa
         // propre occurrence suivante, et le démarrage du worker réarme la chaîne.
         Arc::new(jobs::partitions::EnsurePartitions::new(

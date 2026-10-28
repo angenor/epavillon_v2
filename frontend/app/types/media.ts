@@ -263,6 +263,8 @@ export interface AttachableRoleRule {
   /** Préfixes MIME acceptés, `*` autorisé. Tableau vide = tout accepté. */
   allowed_mime_prefixes: string[]
   max_byte_size: Int8 | null
+  /** Poids cumulé permis par entité pour ce rôle (pièces jointes d'un courriel). Absent ou nul : aucun plafond. */
+  max_total_byte_size?: Int8 | null
   /**
    * Largeur ÷ hauteur exigée — `3.5556` pour un 32:9, `1.0000` pour un carré.
    *
@@ -304,6 +306,15 @@ export interface AttachmentAssignment {
  * fichier écrivent le même corps, et deux définitions divergeraient au premier
  * champ ajouté.
  */
+/** UN rattachement, posé seul (`POST /media/attachments`). */
+export interface AttachOnePayload {
+  owner_schema: string
+  owner_table: string
+  owner_id: Uuid
+  role: AttachmentRole
+  asset_id: AssetId
+}
+
 export interface AttachmentBatch {
   owner_schema: string
   owner_table: string

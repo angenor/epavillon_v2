@@ -60,6 +60,11 @@ pub enum Garde {
     /// l'accès : c'est le geste de l'équipe qui tient l'édition.
     SeanceAdministree { permission: &'static str },
 
+    /// La permission **sur la portée de l'édition de l'envoi**, ET le périmètre
+    /// d'administration : les pièces jointes d'un courriel du back-office. Le
+    /// dépôt est toujours privé : un fichier joint n'est jamais servi au public.
+    EnvoiAdministre { permission: &'static str },
+
     /// La personne elle-même, **ou** la permission. Une photo de profil
     /// appartient à qui elle représente.
     PersonneElleMeme { permission: &'static str },
@@ -167,6 +172,13 @@ const TABLE: &[((&str, &str), Garde)] = &[
         },
     ),
     (
+        // Pièces jointes d'un envoi de courriels (28/10). Même droit que l'envoi.
+        ("engagement", "mailings"),
+        Garde::EnvoiAdministre {
+            permission: "engagement.mailing.send",
+        },
+    ),
+    (
         ("training", "trainings"),
         Garde::Fermee {
             motif: "Le module Formations ne déclare aucune permission dans le modèle : \
@@ -205,7 +217,10 @@ impl Garde {
 
     /// Vrai : l'objet est déposé privé, quoi que dise la demande.
     pub fn impose_le_prive(self) -> bool {
-        matches!(self, Garde::FichierPrive { .. })
+        matches!(
+            self,
+            Garde::FichierPrive { .. } | Garde::EnvoiAdministre { .. }
+        )
     }
 }
 
@@ -260,6 +275,7 @@ mod tests {
             ("content", "highlights"),
             ("publication", "articles"),
             ("training", "trainings"),
+            ("engagement", "mailings"),
         ] {
             assert!(
                 garde_pour(schema, table).is_some(),
@@ -284,6 +300,22 @@ mod tests {
         assert_eq!(garde.types_admis(), Some(&["application/pdf"][..]));
         assert!(garde.impose_le_prive());
         assert!(!garde_pour("event", "events").unwrap().impose_le_prive());
+    }
+
+    /// Les pièces jointes d'un envoi : la permission d'envoyer, sur l'édition de
+    /// l'envoi, et un dépôt toujours privé.
+    #[test]
+    fn une_piece_jointe_dun_envoi_est_privee_et_gardee_par_lenvoi() {
+        let garde =
+            garde_pour_role("engagement", "mailings", Some("attachment")).expect("garde déclarée");
+        assert_eq!(
+            garde,
+            Garde::EnvoiAdministre {
+                permission: "engagement.mailing.send",
+            }
+        );
+        assert!(garde.impose_le_prive());
+        assert!(garde.types_admis().is_none());
     }
 
     /// La galerie d'une séance n'a pas la porte de l'adhésion que sa couverture

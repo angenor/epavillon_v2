@@ -1389,3 +1389,17 @@ ON CONFLICT (code) DO NOTHING;
 INSERT INTO identity.role_permissions (role_code, permission_code) VALUES
     ('admin', 'engagement.mailing.send')
 ON CONFLICT DO NOTHING;
+
+-- PIÈCES JOINTES d'un envoi (28/10, demande du commanditaire) : plusieurs
+-- fichiers, PDF, documents bureautiques, texte et images, toujours privés (la
+-- garde du module media l'impose : un fichier joint n'est jamais servi au
+-- public). 10 Mo au total par envoi : le serveur d'envoi de l'ancien
+-- hébergement borne la taille d'un message, de valeur inconnue. Réglable :
+-- UPDATE media.attachable_roles SET max_total_byte_size = … .
+INSERT INTO media.attachable_roles
+    (owner_schema, owner_table, role, label, is_multiple, allowed_mime_prefixes,
+     max_byte_size, max_total_byte_size) VALUES
+    ('engagement', 'mailings', 'attachment', '{"fr":"Pièce jointe","en":"Attachment"}', true,
+     '{application/pdf,application/msword,application/vnd.*,application/rtf,text/plain,text/csv,image/*}',
+     10485760, 10485760)
+ON CONFLICT DO NOTHING;

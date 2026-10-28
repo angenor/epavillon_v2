@@ -234,3 +234,88 @@ async fn les_lots_senchainent_sans_attente() {
     assert_eq!(fini.status, "sent");
     assert_eq!(fini.counts.sent, 23);
 }
+
+/// Une pièce jointe posée par le module media (objet privé, rattachement
+/// `attachment`) part avec chaque message ; une pièce encore en analyse
+/// retient l'envoi.
+#[tokio::test]
+async fn la_piece_jointe_part_avec_chaque_message() {
+    let bac = Bac::monter().await;
+    let t = commun::terrain(&bac).await;
+    let envoi = mailings::creer(
+        &bac.state,
+        &bac.ctx(),
+        t.administratrice,
+        &brouillon(t.edition),
+    )
+    .await
+    .expect("brouillon");
+
+    let contenu = b"%PDF-1.4\n% programme\n".to_vec();
+    let cle = format!("essais/{}.pdf", Uuid::now_v7());
+    let asset = sqlx::query_scalar!(
+        r#"INSERT INTO media.assets
+               (bucket, object_key, checksum_sha256, mime_type, byte_size, original_filename,
+                owner_person_id, visibility, status)
+           VALUES ('epavillon-prive', $1, repeat('a', 64), 'application/pdf', $2,
+                   'programme.pdf', $3, 'private', 'processing')
+        RETURNING id"#,
+        cle,
+        contenu.len() as i64,
+        t.administratrice
+    )
+    .fetch_one(bac.pool())
+    .await
+    .expect("objet");
+    sqlx::query!(
+        "INSERT INTO media.attachments (owner_schema, owner_table, owner_id, asset_id, role)
+         VALUES ('engagement', 'mailings', $1, $2, 'attachment')",
+        envoi.id,
+        asset
+    )
+    .execute(bac.pool())
+    .await
+    .expect("rattachement");
+    kernel::storage::Entrepots::new(&bac.config.media)
+        .du_bucket("epavillon-prive")
+        .put(&cle, "application/pdf", contenu.clone())
+        .await
+        .expect("dépôt sur le stockage");
+
+    // En analyse : l'envoi attend.
+    let refus = mailings::envoyer(&bac.state, &bac.ctx(), t.administratrice, envoi.id)
+        .await
+        .expect_err("pièce pas prête");
+    assert_eq!(refus.field.as_deref(), Some("attachments"));
+
+    sqlx::query!(
+        "UPDATE media.assets SET status = 'ready', scan_verdict = 'clean', scanned_at = now()
+          WHERE id = $1",
+        asset
+    )
+    .execute(bac.pool())
+    .await
+    .expect("analyse");
+    let detail = mailings::detail(&bac.state, t.administratrice, envoi.id)
+        .await
+        .expect("détail");
+    assert_eq!(detail.attachments.len(), 1);
+    assert_eq!(detail.attachments_total_bytes, contenu.len() as i64);
+    assert_eq!(detail.attachments_max_bytes, Some(10 * 1024 * 1024));
+
+    mailings::envoyer(&bac.state, &bac.ctx(), t.administratrice, envoi.id)
+        .await
+        .expect("envoi");
+    for issue in commun::passer_le_worker(&bac).await {
+        issue.expect("passage du worker");
+    }
+
+    let extras = bac.boite.copies();
+    // Trois inscrits et une adresse libre.
+    assert_eq!(extras.len(), 4);
+    for e in extras {
+        assert_eq!(e.attachments.len(), 1);
+        assert_eq!(e.attachments[0].filename, "programme.pdf");
+        assert_eq!(e.attachments[0].content, contenu);
+    }
+}

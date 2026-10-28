@@ -393,6 +393,12 @@ CREATE TABLE media.attachable_roles (
                                         CHECK (aspect_ratio_tolerance >= 0
                                                AND aspect_ratio_tolerance <= 0.5),
 
+    -- POIDS CUMULÉ d'un rôle multiple sur une même entité (28/10). NULL n'impose
+    -- rien. Les pièces jointes d'un courriel en ont besoin : le serveur d'envoi
+    -- refuse au-delà d'une taille de message, et dix fichiers légers font un
+    -- message lourd. Réglable par UPDATE, sans migration.
+    max_total_byte_size   bigint  CHECK (max_total_byte_size IS NULL OR max_total_byte_size > 0),
+
     is_active             boolean NOT NULL DEFAULT true,
     PRIMARY KEY (owner_schema, owner_table, role)
 );
@@ -515,6 +521,22 @@ BEGIN
             to_char(v_rule.aspect_ratio_tolerance * 100, 'FM990.0') || ' %'
             USING ERRCODE = 'integrity_constraint_violation',
                   HINT = 'Recadrer le fichier avant de le téléverser : la déclinaison est choisie à la main, jamais rognée par le navigateur.';
+    END IF;
+
+    -- POIDS CUMULÉ (28/10) : les objets déjà rattachés à cette entité pour ce
+    -- rôle, plus celui-ci, ne dépassent pas le plafond déclaré.
+    IF v_rule.max_total_byte_size IS NOT NULL
+       AND v_asset.byte_size + COALESCE((
+           SELECT sum(o.byte_size)
+           FROM media.attachments a
+           JOIN media.assets o ON o.id = a.asset_id
+           WHERE a.owner_schema = NEW.owner_schema AND a.owner_table = NEW.owner_table
+             AND a.owner_id = NEW.owner_id AND a.role = NEW.role
+             AND a.id IS DISTINCT FROM NEW.id AND a.asset_id <> NEW.asset_id), 0)
+           > v_rule.max_total_byte_size THEN
+        RAISE EXCEPTION 'Rattachement refusé : le rôle « % » ne dépasse pas % octets au total par entité.',
+            NEW.role, v_rule.max_total_byte_size
+            USING ERRCODE = 'check_violation';
     END IF;
 
     NEW.is_exclusive := NOT v_rule.is_multiple;

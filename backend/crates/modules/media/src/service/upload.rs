@@ -413,7 +413,7 @@ async fn refus_de_regle(
     };
 
     let regle = sqlx::query!(
-        r#"SELECT r.allowed_mime_prefixes AS "prefixes!", r.max_byte_size
+        r#"SELECT r.allowed_mime_prefixes AS "prefixes!", r.max_byte_size, r.max_total_byte_size
              FROM media.attachable_roles r
             WHERE r.owner_schema = $1 AND r.owner_table = $2
               AND r.role = $3::text::media.attachment_role
@@ -453,6 +453,27 @@ async fn refus_de_regle(
                 regle.max_byte_size.unwrap_or_default()
             )),
         )));
+    }
+
+    // Le poids cumulé : refusé avant le premier octet, avec le même code que
+    // le rattachement qui suivrait.
+    if let Some(plafond) = regle.max_total_byte_size {
+        let deja = crate::repo::attachments::poids_rattache(
+            state.pool(),
+            p.owner_schema,
+            p.owner_table,
+            p.owner_id,
+            role,
+            None,
+        )
+        .await?;
+        if deja + byte_size > plafond {
+            return Ok(Some(verdict_refuse(
+                ErrorCode::MediaTotalTooLarge,
+                Some("file"),
+                Some(format!("{deja} + {byte_size} octets ; plafond : {plafond}")),
+            )));
+        }
     }
 
     Ok(None)

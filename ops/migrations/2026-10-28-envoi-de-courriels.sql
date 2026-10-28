@@ -7,7 +7,8 @@
 -- avec un historique, la boîte d'envoi ne se consultant pas.
 --
 -- Additive : deux tables, deux types, une fonction, un réglage, une
--- permission. Sans limite d'envoi (décision du commanditaire, 28/10) : le
+-- permission ; pièces jointes : une colonne de media.attachable_roles, son
+-- contrôle dans media.tg_validate_attachment(), une ligne de la table blanche. Sans limite d'envoi (décision du commanditaire, 28/10) : le
 -- réglage de cadence d'une version antérieure de ce fichier est retiré s'il
 -- a été posé. Déployer avec l'API et le worker, qui s'en servent.
 BEGIN;
@@ -276,5 +277,127 @@ INSERT INTO identity.role_permissions (role_code, permission_code) VALUES
 ON CONFLICT DO NOTHING;
 
 DELETE FROM platform.settings WHERE key = 'engagement.mailing.hourly_limit';
+
+
+-- Pièces jointes (28/10). Modèle : 050_media.sql (colonne max_total_byte_size,
+-- contrôle du poids cumulé dans tg_validate_attachment) et 110_engagement.sql
+-- (ligne engagement.mailings / attachment).
+ALTER TABLE media.attachable_roles
+    ADD COLUMN IF NOT EXISTS max_total_byte_size bigint
+        CHECK (max_total_byte_size IS NULL OR max_total_byte_size > 0);
+
+-- Copie de docs/database/050_media.sql.
+CREATE OR REPLACE FUNCTION media.tg_validate_attachment()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_rule  media.attachable_roles%ROWTYPE;
+    v_asset media.assets%ROWTYPE;
+BEGIN
+    SELECT * INTO v_rule FROM media.attachable_roles
+    WHERE owner_schema = NEW.owner_schema AND owner_table = NEW.owner_table AND role = NEW.role;
+
+    IF NOT FOUND OR NOT v_rule.is_active THEN
+        RAISE EXCEPTION 'Rattachement refusé : le rôle « % » n''est pas déclaré pour %.%.',
+            NEW.role, NEW.owner_schema, NEW.owner_table
+            USING ERRCODE = 'integrity_constraint_violation',
+                  HINT = 'Déclarer la combinaison dans media.attachable_roles avant de l''utiliser.';
+    END IF;
+
+    SELECT * INTO v_asset FROM media.assets WHERE id = NEW.asset_id;
+    IF v_asset.deleted_at IS NOT NULL THEN
+        RAISE EXCEPTION 'Rattachement refusé : l''objet % est supprimé.', NEW.asset_id
+            USING ERRCODE = 'integrity_constraint_violation';
+    END IF;
+    IF v_asset.status = 'quarantined' THEN
+        RAISE EXCEPTION 'Rattachement refusé : l''objet % est en quarantaine.', NEW.asset_id
+            USING ERRCODE = 'integrity_constraint_violation';
+    END IF;
+
+    -- Contrôle du type MIME attendu pour ce rôle.
+    IF cardinality(v_rule.allowed_mime_prefixes) > 0
+       AND NOT EXISTS (
+           SELECT 1 FROM unnest(v_rule.allowed_mime_prefixes) AS p
+           WHERE v_asset.mime_type LIKE replace(p, '*', '%')
+       ) THEN
+        RAISE EXCEPTION 'Rattachement refusé : type % non accepté pour le rôle « % » (attendu : %).',
+            v_asset.mime_type, NEW.role, array_to_string(v_rule.allowed_mime_prefixes, ', ')
+            USING ERRCODE = 'integrity_constraint_violation';
+    END IF;
+
+    IF v_rule.max_byte_size IS NOT NULL AND v_asset.byte_size > v_rule.max_byte_size THEN
+        RAISE EXCEPTION 'Rattachement refusé : % octets dépassent la limite de % pour le rôle « % ».',
+            v_asset.byte_size, v_rule.max_byte_size, NEW.role
+            USING ERRCODE = 'integrity_constraint_violation';
+    END IF;
+
+    -- CONTRÔLE DE LA FORME. Ne s'applique QU'AUX OBJETS MESURÉS : `width` et
+    -- `height` sont nuls pour un document, et un PDF n'a pas de ratio à
+    -- respecter. Un objet image sans dimensions relevées passe donc — c'est le
+    -- relevé qui a échoué, pas le fichier qui est mal cadré, et refuser ici
+    -- transformerait une panne de traitement en refus de téléversement.
+    IF v_rule.expected_aspect_ratio IS NOT NULL
+       AND v_asset.width IS NOT NULL AND v_asset.height IS NOT NULL
+       AND v_asset.height > 0
+       AND abs(v_asset.width::numeric / v_asset.height - v_rule.expected_aspect_ratio)
+           > v_rule.expected_aspect_ratio * v_rule.aspect_ratio_tolerance THEN
+        RAISE EXCEPTION 'Rattachement refusé : % × % ne respecte pas la forme attendue du rôle « % » (rapport %, attendu % à % près).',
+            v_asset.width, v_asset.height, NEW.role,
+            round(v_asset.width::numeric / v_asset.height, 4),
+            v_rule.expected_aspect_ratio,
+            to_char(v_rule.aspect_ratio_tolerance * 100, 'FM990.0') || ' %'
+            USING ERRCODE = 'integrity_constraint_violation',
+                  HINT = 'Recadrer le fichier avant de le téléverser : la déclinaison est choisie à la main, jamais rognée par le navigateur.';
+    END IF;
+
+    -- POIDS CUMULÉ (28/10) : les objets déjà rattachés à cette entité pour ce
+    -- rôle, plus celui-ci, ne dépassent pas le plafond déclaré.
+    IF v_rule.max_total_byte_size IS NOT NULL
+       AND v_asset.byte_size + COALESCE((
+           SELECT sum(o.byte_size)
+           FROM media.attachments a
+           JOIN media.assets o ON o.id = a.asset_id
+           WHERE a.owner_schema = NEW.owner_schema AND a.owner_table = NEW.owner_table
+             AND a.owner_id = NEW.owner_id AND a.role = NEW.role
+             AND a.id IS DISTINCT FROM NEW.id AND a.asset_id <> NEW.asset_id), 0)
+           > v_rule.max_total_byte_size THEN
+        RAISE EXCEPTION 'Rattachement refusé : le rôle « % » ne dépasse pas % octets au total par entité.',
+            NEW.role, v_rule.max_total_byte_size
+            USING ERRCODE = 'check_violation';
+    END IF;
+
+    NEW.is_exclusive := NOT v_rule.is_multiple;
+
+    -- Rôle unique déjà pourvu : message explicite plutôt qu'une violation d'index.
+    IF NEW.is_exclusive AND EXISTS (
+        SELECT 1 FROM media.attachments a
+        WHERE a.owner_schema = NEW.owner_schema AND a.owner_table = NEW.owner_table
+          AND a.owner_id = NEW.owner_id AND a.role = NEW.role
+          AND a.id IS DISTINCT FROM NEW.id
+    ) THEN
+        RAISE EXCEPTION 'Rattachement refusé : le rôle « % » n''accepte qu''un seul objet pour %.% (%).',
+            NEW.role, NEW.owner_schema, NEW.owner_table, NEW.owner_id
+            USING ERRCODE = 'unique_violation',
+                  HINT = 'Remplacer le rattachement existant plutôt qu''en ajouter un second.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$;
+
+-- PIÈCES JOINTES d'un envoi (28/10, demande du commanditaire) : plusieurs
+-- fichiers, PDF, documents bureautiques, texte et images, toujours privés (la
+-- garde du module media l'impose : un fichier joint n'est jamais servi au
+-- public). 10 Mo au total par envoi : le serveur d'envoi de l'ancien
+-- hébergement borne la taille d'un message, de valeur inconnue. Réglable :
+-- UPDATE media.attachable_roles SET max_total_byte_size = … .
+INSERT INTO media.attachable_roles
+    (owner_schema, owner_table, role, label, is_multiple, allowed_mime_prefixes,
+     max_byte_size, max_total_byte_size) VALUES
+    ('engagement', 'mailings', 'attachment', '{"fr":"Pièce jointe","en":"Attachment"}', true,
+     '{application/pdf,application/msword,application/vnd.*,application/rtf,text/plain,text/csv,image/*}',
+     10485760, 10485760)
+ON CONFLICT DO NOTHING;
 
 COMMIT;

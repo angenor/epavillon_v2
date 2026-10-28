@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT COALESCE(sum(o.byte_size), 0)::bigint AS \"poids!\"\n             FROM media.attachments a\n             JOIN media.assets o ON o.id = a.asset_id\n            WHERE a.owner_schema = $1 AND a.owner_table = $2 AND a.owner_id = $3\n              AND a.role = $4::text::media.attachment_role\n              AND ($5::uuid IS NULL OR a.asset_id <> $5)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "poids!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Uuid",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "7c729f8667802d450b65e0cd9e6ec91ee75be7dce8f1412e879986f4ec76d514"
+}

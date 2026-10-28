@@ -312,7 +312,18 @@ async function duplicate(): Promise<void> {
   busy.value = true
   actionError.value = null
   try {
-    const copy = await api.adminMailings.duplicate(mailing.value.id)
+    const source = mailing.value
+    const copy = await api.adminMailings.duplicate(source.id)
+    // Les pièces jointes sont reprises : les mêmes objets, rattachés à la copie.
+    for (const piece of source.attachments) {
+      await api.media.attachOne({
+        owner_schema: 'engagement',
+        owner_table: 'mailings',
+        owner_id: copy.id,
+        role: 'attachment',
+        asset_id: piece.asset_id,
+      })
+    }
     await navigateTo(localePath(`/admin/courriels/${copy.id}`))
   } catch (thrown) {
     actionError.value = apiErrorMessage(thrown, t)
@@ -407,12 +418,17 @@ const sendable = computed(() => audience.value?.sendable ?? 0)
             :extra-error="errors.extraText"
           />
 
-          <AdminMailingsMessageEditor
-            v-else-if="step === 'message'"
-            v-model="messageFields"
-            :variables="MAILING_VARIABLES"
-            :errors="errors"
-          />
+          <div v-else-if="step === 'message'" class="space-y-8">
+            <AdminMailingsMessageEditor v-model="messageFields" :variables="MAILING_VARIABLES" :errors="errors" />
+            <AdminMailingsAttachments
+              :mailing-id="mailing.id"
+              :attachments="mailing.attachments"
+              :total-bytes="mailing.attachments_total_bytes"
+              :max-bytes="mailing.attachments_max_bytes"
+              editable
+              @changed="refresh()"
+            />
+          </div>
 
           <AdminMailingsReview
             v-else-if="step === 'review'"
@@ -431,7 +447,14 @@ const sendable = computed(() => audience.value?.sendable ?? 0)
             :test-message="testMessage"
             @test="sendTest"
             @retry="loadAudience"
-          />
+          >
+            <AdminMailingsAttachments
+              :mailing-id="mailing.id"
+              :attachments="mailing.attachments"
+              :total-bytes="mailing.attachments_total_bytes"
+              :max-bytes="mailing.attachments_max_bytes"
+            />
+          </AdminMailingsReview>
 
           <section v-else class="space-y-5" :aria-label="t('admin.mailing.compose.steps.send')">
             <UiLoadingState v-if="audienceLoading && !audience" variant="text" :lines="3" />
@@ -443,6 +466,9 @@ const sendable = computed(() => audience.value?.sendable ?? 0)
                 <li>{{ t('admin.mailing.compose.send.subject', { subject: mailing.subject || t('admin.mailing.common.noSubject') }) }}</li>
                 <li v-if="mailing.cc.length">{{ t('admin.mailing.compose.send.cc', { addresses: mailing.cc.join(', '), count: sendable }) }}</li>
                 <li v-if="mailing.reply_to">{{ t('admin.mailing.compose.send.replyTo', { address: mailing.reply_to }) }}</li>
+                <li v-if="mailing.attachments.length">
+                  {{ t('admin.mailing.compose.send.attachments', { count: mailing.attachments.length, names: mailing.attachments.map((a) => a.filename).join(', ') }, mailing.attachments.length) }}
+                </li>
               </ul>
               <p class="max-w-(--measure) text-sm text-text-subtle">{{ t('admin.mailing.compose.send.explain') }}</p>
               <UiButton icon="mail" :disabled="sendable === 0 || busy" @click="confirmOpen = true">

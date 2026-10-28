@@ -40,6 +40,8 @@ pub struct AttachableRoleRule {
     /// Préfixes MIME acceptés, motif `*` admis. **Vide = tout accepté.**
     pub allowed_mime_prefixes: Vec<String>,
     pub max_byte_size: Option<i64>,
+    /// Poids cumulé permis par entité pour ce rôle. Nul : aucun plafond.
+    pub max_total_byte_size: Option<i64>,
     /// Largeur ÷ hauteur : 3.5556 pour un 32:9, 1.0 pour un carré. Traversée en
     /// texte — `numeric(6,4)` n'a pas de représentant flottant exact, et le
     /// rapport sert à afficher autant qu'à comparer.

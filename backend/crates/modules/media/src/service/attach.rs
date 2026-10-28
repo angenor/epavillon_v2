@@ -108,6 +108,25 @@ pub async fn poser(
     let regle = exiger_la_regle(state, porteuse, &payload.role).await?;
     let objet = exiger_lobjet(state, payload.asset_id).await?;
     verifier_la_forme(&regle, &objet, &payload.role)?;
+    if let Some(plafond) = regle.max_total_byte_size {
+        let deja = attachments::poids_rattache(
+            state.pool(),
+            porteuse.owner_schema,
+            porteuse.owner_table,
+            porteuse.owner_id,
+            &payload.role,
+            Some(payload.asset_id),
+        )
+        .await?;
+        if deja + objet.byte_size > plafond {
+            return Err(ApiError::new(ErrorCode::MediaTotalTooLarge)
+                .field("file")
+                .detail(format!(
+                    "{deja} + {} octets ; plafond : {plafond}",
+                    objet.byte_size
+                )));
+        }
+    }
 
     let mut tx = state.db().write(ctx).await?;
 

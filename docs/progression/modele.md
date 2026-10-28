@@ -320,5 +320,10 @@ Demande du commanditaire : l'équivalent de l'envoi de courriels de la v1, avec 
 - **Réglage** : `engagement.mailing.team_cc` ([]). Sans limite d'envoi, décision du commanditaire le 28/10 : le réglage de cadence d'abord posé est retiré, et la migration le supprime s'il existe.
 - **Permission** : `engagement.mailing.send`, accordée au rôle `admin` (globale ou d'édition).
 
-**Migration** : `ops/migrations/2026-10-28-envoi-de-courriels.sql`, rejouable et additive, jouée deux fois en local ; frontières de modules conformes (`xmod_fk_*`). **En production** : avec l'API et le worker.
+**Pièces jointes** (même jour, demande du commanditaire) :
+
+- **`media.attachable_roles.max_total_byte_size`** (`050_media.sql`) : poids cumulé permis par entité pour un rôle multiple ; `media.tg_validate_attachment()` le refuse au-delà (`check_violation`). Générique, réglable par `UPDATE`.
+- **Ligne `engagement.mailings` / `attachment`** (`110_engagement.sql`) : plusieurs fichiers, PDF, documents bureautiques, texte et images, 10 Mo par fichier et **10 Mo au total par envoi** (le serveur d'envoi borne la taille d'un message, valeur inconnue). Toujours privé : la garde `EnvoiAdministre` du module media l'impose, avec `engagement.mailing.send` sur l'édition de l'envoi et le périmètre.
+
+**Migration** : `ops/migrations/2026-10-28-envoi-de-courriels.sql`, rejouable et additive (pièces jointes comprises : colonne, fonction recopiée du modèle, ligne de la table blanche), jouée deux fois en local ; frontières de modules conformes (`xmod_fk_*`). **En production** : avec l'API et le worker.
 

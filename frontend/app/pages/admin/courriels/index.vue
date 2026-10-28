@@ -201,6 +201,9 @@ const isLoadingAccess = computed(() => adminScope.isLoading || grantStatus.value
             </NuxtLink>
             <span class="block text-xs text-text-subtle">
               {{ row.queued_by_name ?? row.created_by_name ?? '' }}
+              <template v-if="row.attachment_count">
+                · {{ t('admin.mailing.list.attachments', { count: row.attachment_count }, row.attachment_count) }}
+              </template>
             </span>
           </template>
           <template #cell-status="{ row }">

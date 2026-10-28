@@ -3,6 +3,8 @@
 //! La liste des destinataires vient de `engagement.mailing_audience()`, qui lit
 //! les participants de l'édition (programme, identity, org) : la règle de
 //! frontière de `cross.rs` vaut ici, on lit, on n'écrit que dans `engagement`.
+//! Les pièces jointes se LISENT dans `media` (rattachements et objets) ; seul
+//! le module media les pose et les retire.
 
 use kernel::error::Result;
 use sqlx::postgres::PgConnection;
@@ -11,7 +13,8 @@ use time::OffsetDateTime;
 use uuid::Uuid;
 
 use crate::domain::mailing::{
-    MailingAudienceEntry, MailingCounts, MailingCriterion, MailingRecipient, MailingSummary,
+    MailingAttachment, MailingAudienceEntry, MailingCounts, MailingCriterion, MailingRecipient,
+    MailingSummary,
 };
 
 /// Un envoi tel que la table le porte.
@@ -99,7 +102,10 @@ pub async fn lister(pool: &PgPool, event_id: Uuid) -> Result<Vec<MailingSummary>
                   COALESCE(c.total, 0) AS "total!", COALESCE(c.queued, 0) AS "queued!",
                   COALESCE(c.sending, 0) AS "sending!", COALESCE(c.sent, 0) AS "sent!",
                   COALESCE(c.failed, 0) AS "failed!", COALESCE(c.suppressed, 0) AS "suppressed!",
-                  COALESCE(c.cancelled, 0) AS "cancelled!"
+                  COALESCE(c.cancelled, 0) AS "cancelled!",
+                  (SELECT count(*) FROM media.attachments x
+                    WHERE x.owner_schema = 'engagement' AND x.owner_table = 'mailings'
+                      AND x.owner_id = m.id AND x.role = 'attachment') AS "attachment_count!"
              FROM engagement.mailings m
              LEFT JOIN LATERAL (
                  SELECT count(*) AS total,
@@ -141,6 +147,7 @@ pub async fn lister(pool: &PgPool, event_id: Uuid) -> Result<Vec<MailingSummary>
                 suppressed: l.suppressed,
                 cancelled: l.cancelled,
             },
+            attachment_count: l.attachment_count,
         })
         .collect())
 }
@@ -489,4 +496,60 @@ pub async fn clore_si_fini(conn: &mut PgConnection, mailing_id: Uuid) -> Result<
     .await?
     .rows_affected();
     Ok(n == 1)
+}
+
+// -----------------------------------------------------------------------------
+// Pièces jointes, lues dans `media`
+// -----------------------------------------------------------------------------
+
+/// Une pièce jointe et l'endroit où ses octets sont rangés.
+pub struct PieceJointe {
+    pub fiche: MailingAttachment,
+    pub bucket: String,
+    pub object_key: String,
+}
+
+pub async fn pieces_jointes(pool: &PgPool, mailing_id: Uuid) -> Result<Vec<PieceJointe>> {
+    let lignes = sqlx::query!(
+        r#"SELECT x.id AS attachment_id, o.id AS asset_id,
+                  COALESCE(o.original_filename, 'piece-jointe') AS "filename!",
+                  o.mime_type, o.byte_size, o.status::text AS "status!",
+                  o.bucket, o.object_key
+             FROM media.attachments x
+             JOIN media.assets o ON o.id = x.asset_id
+            WHERE x.owner_schema = 'engagement' AND x.owner_table = 'mailings'
+              AND x.owner_id = $1 AND x.role = 'attachment' AND o.deleted_at IS NULL
+            ORDER BY x.sort_order, x.created_at"#,
+        mailing_id
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(lignes
+        .into_iter()
+        .map(|l| PieceJointe {
+            fiche: MailingAttachment {
+                attachment_id: l.attachment_id,
+                asset_id: l.asset_id,
+                filename: l.filename,
+                mime_type: l.mime_type,
+                byte_size: l.byte_size,
+                status: l.status,
+            },
+            bucket: l.bucket,
+            object_key: l.object_key,
+        })
+        .collect())
+}
+
+/// Le poids cumulé permis pour les pièces jointes d'un envoi.
+pub async fn poids_permis(pool: &PgPool) -> Result<Option<i64>> {
+    let poids = sqlx::query_scalar!(
+        "SELECT r.max_total_byte_size FROM media.attachable_roles r
+          WHERE r.owner_schema = 'engagement' AND r.owner_table = 'mailings'
+            AND r.role = 'attachment'"
+    )
+    .fetch_optional(pool)
+    .await?;
+    Ok(poids.flatten())
 }

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE media.assets SET status = 'ready', scan_verdict = 'clean', scanned_at = now()\n          WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "64cc5adb9232aa1eb46a804facd814cfed2c3f0781c22ab5bd6a42bb0e3a683b"
+}

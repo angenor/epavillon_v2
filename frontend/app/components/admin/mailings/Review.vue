@@ -116,6 +116,8 @@ const rows = computed<MailingRecipientRow[]>(() =>
         />
       </div>
 
+      <slot />
+
       <div>
         <div class="flex flex-wrap items-end justify-between gap-3">
           <h3 class="font-display text-xl font-semibold">{{ t('admin.mailing.compose.review.preview') }}</h3>

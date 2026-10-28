@@ -25,7 +25,8 @@ use kernel::context::RequestContext;
 use kernel::db::Db;
 use kernel::error::{ApiError, Result};
 use kernel::jobs::{self, ClaimedJob, JobHandler, NewJob};
-use kernel::mail::{Copies, MailError, Mailer, OutgoingMail};
+use kernel::mail::{Attachment, Extras, MailError, Mailer, OutgoingMail};
+use kernel::storage::Entrepots;
 use std::collections::HashMap;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -80,14 +81,49 @@ pub fn composer(
     })
 }
 
+/// Les pièces jointes d'un envoi, lues sur le stockage (bucket privé) une fois
+/// par passage : chaque destinataire reçoit les mêmes octets. Une pièce
+/// illisible fait échouer le passage, qui sera repris : partir sans elle serait
+/// un autre message que celui qu'on a vérifié.
+async fn lire_les_pieces(
+    db: &Db,
+    entrepots: &Entrepots,
+    mailing_id: Uuid,
+) -> Result<Vec<Attachment>> {
+    let mut pieces = Vec::new();
+    for p in mailings::pieces_jointes(db.pool(), mailing_id).await? {
+        let contenu = entrepots
+            .du_bucket(&p.bucket)
+            .get(&p.object_key)
+            .await
+            .map_err(|e| {
+                ApiError::internal(format!(
+                    "pièce jointe « {} » illisible : {e}",
+                    p.fiche.filename
+                ))
+            })?;
+        pieces.push(Attachment {
+            filename: p.fiche.filename,
+            mime_type: p.fiche.mime_type,
+            content: contenu,
+        });
+    }
+    Ok(pieces)
+}
+
 pub struct SendMailing {
     db: Db,
     mailer: Arc<dyn Mailer>,
+    entrepots: Entrepots,
 }
 
 impl SendMailing {
-    pub fn new(db: Db, mailer: Arc<dyn Mailer>) -> Self {
-        Self { db, mailer }
+    pub fn new(db: Db, mailer: Arc<dyn Mailer>, entrepots: Entrepots) -> Self {
+        Self {
+            db,
+            mailer,
+            entrepots,
+        }
     }
 
     async fn clore(&self, id: Uuid, statut: &str, erreur: Option<&str>) -> Result<()> {
@@ -127,10 +163,11 @@ impl JobHandler for SendMailing {
             return Ok(());
         }
 
-        let copies = Copies {
+        let copies = Extras {
             cc: envoi.cc.clone(),
             bcc: envoi.bcc.clone(),
             reply_to: envoi.reply_to.clone(),
+            attachments: lire_les_pieces(&self.db, &self.entrepots, id).await?,
         };
 
         for _ in 0..LOT {
@@ -167,7 +204,7 @@ impl JobHandler for SendMailing {
                 }
             };
 
-            match self.mailer.send_with_copies(&message, &copies).await {
+            match self.mailer.send_with_extras(&message, &copies).await {
                 Ok(()) => self.clore(pris.id, "sent", None).await?,
                 Err(MailError::Unreachable(detail)) => {
                     self.clore(pris.id, "queued", None).await?;
@@ -205,15 +242,20 @@ impl JobHandler for SendMailing {
     }
 }
 
-/// L'essai : à la personne qui écrit, sans copie, objet préfixé.
+/// L'essai : à la personne qui écrit, sans copie, avec les pièces jointes, objet préfixé.
 pub struct SendMailingTest {
     db: Db,
     mailer: Arc<dyn Mailer>,
+    entrepots: Entrepots,
 }
 
 impl SendMailingTest {
-    pub fn new(db: Db, mailer: Arc<dyn Mailer>) -> Self {
-        Self { db, mailer }
+    pub fn new(db: Db, mailer: Arc<dyn Mailer>, entrepots: Entrepots) -> Self {
+        Self {
+            db,
+            mailer,
+            entrepots,
+        }
     }
 }
 
@@ -261,12 +303,13 @@ impl JobHandler for SendMailingTest {
             &valeurs,
         )?;
         message.subject = format!("[Essai] {}", message.subject);
-        let copies = Copies {
+        let copies = Extras {
             reply_to: envoi.reply_to.clone(),
-            ..Copies::default()
+            attachments: lire_les_pieces(&self.db, &self.entrepots, id).await?,
+            ..Extras::default()
         };
         self.mailer
-            .send_with_copies(&message, &copies)
+            .send_with_extras(&message, &copies)
             .await
             .map_err(|e| ApiError::internal(e.to_string()))
     }
