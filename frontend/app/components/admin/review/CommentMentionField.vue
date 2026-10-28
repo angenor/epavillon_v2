@@ -133,6 +133,7 @@ watch(
       :rows="3"
       auto-grow
       block
+      required
       :disabled="props.disabled"
       :control-attrs="controlAttrs"
       @update:model-value="(value: string) => emit('update:modelValue', value)"
