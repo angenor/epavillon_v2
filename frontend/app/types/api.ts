@@ -3035,7 +3035,7 @@ export interface paths {
         };
         /**
          * Le détail d'une séance publiée.
-         * @description `PublicSessionDetail` : `{ session, description, allows_questions, is_recorded, cancelled_reason, speakers, organizations }` : la séance **publiée** désignée par son adresse d'URL dans son édition (une ligne de `PublicScheduleRow`), sa description longue (texte multilingue, nulle si absente), si elle prend des questions du public et si elle est enregistrée, le motif de son annulation (texte multilingue, nul si elle ne l'est pas), ses intervenants (`PublicSessionSpeaker[]` : nom d'affichage, fonction, organisation, biographie, photo `avatar`, **ni identifiant de personne, ni adresse, ni confirmation, ni présence**) et ses organisations (`SessionOrganization[]`, avec `name`, `acronym`, `country_code`, `country`). **Une adresse inconnue et une séance non publiée rendent le même 404** : distinguer les deux dirait au public qu'une séance existe sans être encore annoncée.
+         * @description `PublicSessionDetail` : `{ session, description, allows_questions, is_recorded, cancelled_reason, speakers, organizations, gallery }` : la séance **publiée** désignée par son adresse d'URL dans son édition (une ligne de `PublicScheduleRow`), sa description longue (texte multilingue, nulle si absente), si elle prend des questions du public et si elle est enregistrée, le motif de son annulation (texte multilingue, nul si elle ne l'est pas), ses intervenants (`PublicSessionSpeaker[]` : nom d'affichage, fonction, organisation, biographie, photo `avatar`, **ni identifiant de personne, ni adresse, ni confirmation, ni présence**), ses organisations (`SessionOrganization[]`, avec `name`, `acronym`, `country_code`, `country`) et sa galerie (`AttachedImage[]`, photos **prêtes et publiques** seulement, dans l'ordre réglé par l'équipe ; tableau vide sans photo). **Une adresse inconnue et une séance non publiée rendent le même 404** : distinguer les deux dirait au public qu'une séance existe sans être encore annoncée.
          */
         get: operations["programmation_seance_publique"];
         put?: never;
@@ -6168,6 +6168,7 @@ export interface components {
              */
             asset_id?: string | null;
             alt_text_override?: unknown;
+            caption_override?: unknown;
         };
         /**
          * @description L'écriture de remplacement, en lot — `AttachmentAssignment[]`.
@@ -6210,6 +6211,11 @@ export interface components {
              *     fiches, et le texte pertinent n'y est pas le même (FR-040).
              */
             alt_text_override?: unknown;
+            /**
+             * @description La légende **propre à cet usage**, même logique. Une galerie écrit la
+             *     sienne ici : nulle, l'usage n'a pas de légende propre.
+             */
+            caption_override?: unknown;
         };
         /**
          * @description À qui l'annonce s'adresse.
