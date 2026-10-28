@@ -4,6 +4,7 @@
 
 | Date | Écart | Décision | Pourquoi |
 |------|-------|----------|----------|
+| 2026-10-29 | D7 Galeries d'activité (11 photos sur 4 activités CdP30) | **Reprises** (lot 96) : une galerie par séance, photos dans l'ordre v1. La légende v1 va sur le rattachement, le texte alternatif (absent de la v1) reprend la légende, à défaut « Photo de l'activité « titre » » ; tous deux modifiables au back-office | Principe du 27/10 (on étend le modèle) ; forme par Claude |
 | 2026-10-28 | D7 Galerie d'activité (11 photos v1, 4 activités) | **La plateforme doit porter les galeries** : rôle `gallery` sur `programme.sessions`, gérée par l'équipe au back-office, section « Galerie » sur la page publique ; les 11 photos reprises par le lot 96 | Commanditaire : « obligatoirement » |
 | 2026-10-28 | Questions posées aux activités (9) | **Non reprises** | Commanditaire : pas besoin |
 | 2026-10-28 | Fichiers de l'ancien serveur | **Seuls ceux de la CdP30 et de la CdP31** : la v1 n'en référence que deux, le bandeau 16:9 (photo de Belém signée COP30) et le logo de l'édition CdP30, lus par l'IP ; `public_html/dist/` relu dans cPanel : tout y est dans le code v1 local, sauf une copie de bandeau, une image PACO, l'archive FPHN 2026 et le PDF de la journée jeunesse (déjà dans `epavillonvue/bank/`). Hors périmètre, à repenser après la CdP30 et la CdP31 : 42 documents de négociation et 1 046 photos de profil de l'époque Laravel | Commanditaire : l'ancien serveur porte aussi les activités depuis 2021 (Laravel, `public_html`), hors périmètre ; CdP30 et CdP31 dans `public_html/dist/` |
