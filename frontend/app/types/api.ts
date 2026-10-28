@@ -3035,7 +3035,7 @@ export interface paths {
         };
         /**
          * Le détail d'une séance publiée.
-         * @description `PublicSessionDetail` — `{ session, description, allows_questions, is_recorded, speakers, organizations }` : la séance **publiée** désignée par son adresse d'URL dans son édition (une ligne de `PublicScheduleRow`), sa description longue (texte multilingue, nulle si absente), si elle prend des questions du public et si elle est enregistrée, ses intervenants (`PublicSessionSpeaker[]` : nom d'affichage, fonction, organisation, biographie, photo `avatar` — **ni identifiant de personne, ni adresse, ni confirmation, ni présence**) et ses organisations (`SessionOrganization[]`, avec `name`, `acronym`, `country_code`, `country`). **Une adresse inconnue et une séance non publiée rendent le même 404** : distinguer les deux dirait au public qu'une séance existe sans être encore annoncée.
+         * @description `PublicSessionDetail` : `{ session, description, allows_questions, is_recorded, cancelled_reason, speakers, organizations }` : la séance **publiée** désignée par son adresse d'URL dans son édition (une ligne de `PublicScheduleRow`), sa description longue (texte multilingue, nulle si absente), si elle prend des questions du public et si elle est enregistrée, le motif de son annulation (texte multilingue, nul si elle ne l'est pas), ses intervenants (`PublicSessionSpeaker[]` : nom d'affichage, fonction, organisation, biographie, photo `avatar`, **ni identifiant de personne, ni adresse, ni confirmation, ni présence**) et ses organisations (`SessionOrganization[]`, avec `name`, `acronym`, `country_code`, `country`). **Une adresse inconnue et une séance non publiée rendent le même 404** : distinguer les deux dirait au public qu'une séance existe sans être encore annoncée.
          */
         get: operations["programmation_seance_publique"];
         put?: never;
@@ -5019,6 +5019,26 @@ export interface paths {
          * @description Les transitions offertes **pour ce lecteur**, en une requête (R7). Une règle est retenue quand le lecteur est **porteur** — adhésion active — et que la règle l'y autorise, **ou** quand elle nomme une permission qu'il détient **sur l'édition du dossier**. La portée est celle de l'édition, pas la portée globale : c'est ce qui fait qu'un responsable détaché sur un webinaire ne décide pas sur la COP31. Le croisement se fait **au même instant que la lecture de l'état** — deux requêtes séparées offriraient une transition depuis un état déjà changé. Ce chemin existe parce que `/proposals/{id}/transitions` est déjà celui du journal (écart n° 101).
          */
         get: operations["propositions_transitions_offertes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/proposals/{id}/cancellation-impact": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ce qu'annuler ce dossier retirerait du programme public.
+         * @description `CancellationImpact` : `{ published_sessions, registrants }` : les séances **publiées et non closes** de ce dossier (ni terminées ni déjà annulées), que son annulation fera passer « annulées » avec son motif, et les personnes distinctes inscrites ou en attente qui en seront prévenues. Lu par la fenêtre de décision avant d'annuler un dossier retenu. Périmètre de l'édition et lecture générale des dossiers sur elle.
+         */
+        get: operations["propositions_impact_de_lannulation"];
         put?: never;
         post?: never;
         delete?: never;
@@ -19844,6 +19864,56 @@ export interface operations {
                 };
             };
             /** @description Dossier inexistant **ou hors d'accès** — indiscernables */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    propositions_impact_de_lannulation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du dossier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description CancellationImpact */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Périmètre vide, ou lecture des dossiers absente sur l'édition */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Dossier inexistant **ou hors périmètre**, indiscernables */
             404: {
                 headers: {
                     [name: string]: unknown;

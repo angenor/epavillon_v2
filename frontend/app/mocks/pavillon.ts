@@ -204,6 +204,10 @@ export function activite(eventId: string, slug: string): PublicSessionDetail | n
     description: { fr: "Un échange entre négociatrices, chercheurs et partenaires sur les priorités francophones de la COP.", en: 'An exchange between negotiators, researchers and partners on francophone priorities at the COP.' },
     allows_questions: session.id !== MODELES[6]!.id,
     is_recorded: true,
+    cancelled_reason:
+      session.status === 'cancelled'
+        ? { fr: "L'organisation a renoncé à l'activité.", en: 'The organisation withdrew the activity.' }
+        : null,
     speakers: [
       { id: `${session.id}-1`, session_id: session.id, role: 'moderator', job_title_snapshot: 'Spécialiste de programme', organization_snapshot: 'IFDD', bio: null, sort_order: 1, created_at: session.starts_at, display_name: 'Aïssatou Diallo', avatar: null },
       { id: `${session.id}-2`, session_id: session.id, role: 'panelist', job_title_snapshot: 'Négociatrice', organization_snapshot: 'Délégation du Sénégal', bio: null, sort_order: 2, created_at: session.starts_at, display_name: 'Mariam Ndiaye', avatar: null },

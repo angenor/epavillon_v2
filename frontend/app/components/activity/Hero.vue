@@ -8,6 +8,7 @@ interface Props {
   state: ProgrammeSessionState
   backTo: string
   trail: string
+  cancelledReason?: string | null
 }
 
 const props = defineProps<Props>()
@@ -116,6 +117,11 @@ const pill = 'inline-flex min-h-9 items-center gap-2 rounded-full border px-3.5 
       >
         <b class="font-bold">{{ parts.lead }}</b>{{ parts.rest }}
       </h1>
+
+      <p v-if="props.state === 'cancelled' && props.cancelledReason" class="mt-4 max-w-200 text-base">
+        <b class="font-bold">{{ t('activity.hero.cancelledReason') }}</b>
+        {{ props.cancelledReason }}
+      </p>
 
       <ul class="mt-5.5 flex flex-wrap items-center gap-x-8 gap-y-3 text-base font-bold">
         <li v-if="place" class="inline-flex items-center gap-2.5">

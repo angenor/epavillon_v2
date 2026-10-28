@@ -160,7 +160,14 @@ useHead(() => ({
     </div>
 
     <template v-else>
-      <ActivityHero :session="session" :edition="edition" :state="state" :back-to="programmeTo" :trail="trail" />
+      <ActivityHero
+        :session="session"
+        :edition="edition"
+        :state="state"
+        :back-to="programmeTo"
+        :trail="trail"
+        :cancelled-reason="detail.cancelled_reason ? tr(detail.cancelled_reason) : null"
+      />
 
       <!-- Sur mobile, les deux colonnes s'effacent (`contents`) pour que le billet suive l'image. -->
       <div class="mx-auto max-w-[1280px] px-4 pb-16 sm:px-6">

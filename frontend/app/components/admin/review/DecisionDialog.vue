@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ProposalStatus } from '~/types/programme/proposal'
+import type { Uuid } from '~/types/shared'
 import type { DecisionOption } from '~/utils/review-scoring'
 
 /**
@@ -18,6 +19,7 @@ import type { DecisionOption } from '~/utils/review-scoring'
 
 interface Props {
   open: boolean
+  proposalId: Uuid
   option: DecisionOption | null
   referenceCode: string
   currentStatus: ProposalStatus
@@ -44,6 +46,10 @@ watch(
       showReasonError.value = false
     }
   },
+)
+
+const cancelsAccepted = computed(
+  () => props.currentStatus === 'accepted' && props.option?.to_status === 'cancelled',
 )
 
 const actionLabel = computed(() =>
@@ -83,6 +89,8 @@ function submit(): void {
           })
         }}
       </p>
+
+      <AdminReviewCancellationImpact v-if="props.open && cancelsAccepted" :proposal-ids="[props.proposalId]" />
 
       <!-- Le motif est proposé dans les deux cas, mais annoncé différemment :
            obligatoire ici, facultatif là. Un champ identique de part et d'autre

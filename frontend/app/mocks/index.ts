@@ -297,6 +297,7 @@ export {
   saveReview,
   recuseFromProposal,
   decideProposal,
+  cancellationImpact,
 } from './proposal-review'
 export {
   proposalCommentViews,

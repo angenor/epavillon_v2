@@ -1,0 +1,8 @@
+{
+  "title": "Effect on the public programme",
+  "sessions": "No published activity will be cancelled | One published activity will be cancelled | {count} published activities will be cancelled",
+  "registrants": "no registrant to notify | one registrant will be notified | {count} registrants will be notified",
+  "summary": "{sessions}, {registrants}.",
+  "summaryAlone": "{sessions}.",
+  "reason": "The reason entered below will be shown on the activity's public page."
+}

@@ -1,0 +1,8 @@
+{
+  "title": "Conséquences sur le programme public",
+  "sessions": "Aucune activité publiée ne sera annulée | Une activité publiée sera annulée | {count} activités publiées seront annulées",
+  "registrants": "aucun inscrit à prévenir | un inscrit sera prévenu | {count} inscrits seront prévenus",
+  "summary": "{sessions}, {registrants}.",
+  "summaryAlone": "{sessions}.",
+  "reason": "Le motif saisi ci-dessous sera affiché sur la page publique de l'activité."
+}

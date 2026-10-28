@@ -23,6 +23,7 @@
   },
   "hero": {
     "ledBy": "Led by",
+    "cancelledReason": "Reason for cancellation:",
     "yourTime": "Your time",
     "yourZone": "{zone}, from your device",
     "zone": "{zone} ({offset})",

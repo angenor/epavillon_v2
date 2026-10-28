@@ -164,6 +164,8 @@ export interface PublicSessionDetail {
   description: I18nText | null
   allows_questions: boolean
   is_recorded: boolean
+  /** Motif public d'une séance annulée ; nul sinon. */
+  cancelled_reason: I18nText | null
   speakers: PublicSessionSpeaker[]
   organizations: SessionOrganization[]
 }

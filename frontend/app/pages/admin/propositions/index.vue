@@ -322,6 +322,10 @@ const statusOptions = computed(() =>
   bulkStatusOptions(selectedRows.value, transitionRules.value, granted.value, adminScope.currentEventId),
 )
 
+const selectedAcceptedIds = computed(() =>
+  selectedRows.value.filter((row) => row.status === 'accepted').map((row) => row.id),
+)
+
 const assignOpen = ref(false)
 const statusOpen = ref(false)
 const busy = ref(false)
@@ -639,6 +643,7 @@ const deadlineNotice = computed(() => {
       v-model:open="statusOpen"
       :count="selected.length"
       :options="statusOptions"
+      :accepted-ids="selectedAcceptedIds"
       :busy="busy"
       :error="actionError"
       @submit="submitStatus"

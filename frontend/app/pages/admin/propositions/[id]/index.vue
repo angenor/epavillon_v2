@@ -543,6 +543,7 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
         <AdminReviewDecisionDialog
           v-model:open="decisionOpen"
           :option="pendingDecision"
+          :proposal-id="screen.proposal.id"
           :reference-code="screen.proposal.reference_code"
           :current-status="screen.proposal.status"
           :busy="busy"

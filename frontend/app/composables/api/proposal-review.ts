@@ -21,6 +21,7 @@
  */
 
 import type {
+  CancellationImpact,
   DecisionPayload,
   DecisionResult,
   PostCommentPayload,
@@ -180,6 +181,10 @@ export function createProposalReviewApi({ call, callOrNull, send }: ApiTransport
         },
         'PUT',
       ),
+
+    /** Ce qu'annuler ce dossier retenu retirerait du programme public, avant de confirmer. */
+    cancellationImpact: (proposalId: Uuid): Promise<CancellationImpact> =>
+      call(`/proposals/${proposalId}/cancellation-impact`, (m) => m.cancellationImpact(proposalId)),
 
     decide: (personId: Uuid | null, payload: DecisionPayload): Promise<DecisionResult> => {
       const { proposal_id, ...body } = payload

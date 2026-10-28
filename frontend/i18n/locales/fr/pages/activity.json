@@ -23,6 +23,7 @@
   },
   "hero": {
     "ledBy": "Porté par",
+    "cancelledReason": "Motif de l'annulation :",
     "yourTime": "Chez vous",
     "yourZone": "{zone}, d'après votre appareil",
     "zone": "{zone} ({offset})",

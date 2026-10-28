@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { BulkStatusOption } from '~/types/admin-proposals'
 import type { ProposalStatus } from '~/types/programme/proposal'
+import type { Uuid } from '~/types/shared'
 
 /**
  * CHANGER LE STATUT D'UNE SÉLECTION.
@@ -25,6 +26,8 @@ interface Props {
   open: boolean
   count: number
   options: BulkStatusOption[]
+  /** Les dossiers retenus de la sélection : ceux dont l'annulation touche le programme public. */
+  acceptedIds: Uuid[]
   busy?: boolean
   error?: string | null
 }
@@ -114,6 +117,11 @@ function submit(): void {
           required
           block
           :disabled="props.busy"
+        />
+
+        <AdminReviewCancellationImpact
+          v-if="props.open && target === 'cancelled'"
+          :proposal-ids="props.acceptedIds"
         />
 
         <!-- LE MOTIF N'APPARAÎT QUE QUAND LA BASE L'EXIGE : afficher un champ

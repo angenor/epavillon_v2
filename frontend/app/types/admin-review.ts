@@ -400,3 +400,13 @@ export type DecisionResult =
   | { status: 'applied'; proposal: Proposal; transition: ProposalTransition }
   | { status: 'transition_not_allowed' }
   | { status: 'reason_required' }
+
+/**
+ * `GET /proposals/{id}/cancellation-impact` : ce qu'annuler un dossier retenu
+ * retire du programme public, annoncé avant de confirmer. Séances publiées et
+ * non closes ; personnes distinctes inscrites ou en attente.
+ */
+export interface CancellationImpact {
+  published_sessions: number
+  registrants: number
+}

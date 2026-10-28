@@ -34,6 +34,7 @@
  */
 
 import type {
+  CancellationImpact,
   CommitteeMemberProgress,
   DecisionPayload,
   DecisionResult,
@@ -75,6 +76,7 @@ import { proposalHistory } from './proposals/history'
 import { proposalReads } from './proposal-reads'
 import { reviewAssignments, reviewScores, reviews } from './reviews'
 import { allSessions } from './sessions'
+import { registrations } from './registrations'
 import { effectivePermissions } from './permissions'
 import {
   changeProposalStatus,
@@ -702,4 +704,26 @@ export function decideProposal(
     },
     transition,
   }
+}
+
+/** Les états d'une séance publiée qu'annuler son dossier retire du programme. */
+const CANCELLABLE_SESSION_STATES = new Set(['planned', 'scheduled', 'live', 'postponed'])
+
+export function cancellationImpact(proposalId: Uuid): CancellationImpact {
+  const sessionIds = new Set(
+    allSessions
+      .filter(
+        (session) =>
+          session.proposal_id === proposalId &&
+          session.published_at !== null &&
+          CANCELLABLE_SESSION_STATES.has(session.status),
+      )
+      .map((session) => session.id),
+  )
+  const people = new Set(
+    registrations
+      .filter((registration) => sessionIds.has(registration.session_id) && registration.status !== 'cancelled')
+      .map((registration) => registration.person_id),
+  )
+  return { published_sessions: sessionIds.size, registrants: people.size }
 }
