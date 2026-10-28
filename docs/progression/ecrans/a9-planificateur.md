@@ -75,5 +75,5 @@ En production, une édition sans salle rendait le calendrier inutilisable : le d
 
 Demande du commanditaire, après la reprise v1 (78 créneaux pressentis de dossiers CdP31 en évaluation). La publication ne rend publiques que les séances sans dossier ou de dossier accepté ; un dossier rejeté, retiré ou annulé libère son créneau pressenti. `PlannerSession.proposal_status` pour que le décompte de l'écran reste juste ; la fenêtre de publication dit « N créneaux de dossiers non acceptés restent privés. » (`admin.planner.publish.withheld`). Voir [modele.md](../modele.md), 28/10.
 
-- **Écart relevé** : aucun chemin n'annule une séance déjà publiée quand son dossier accepté est annulé ; il faut passer la séance en `cancelled` à la main (ce qui prévient live, rappels et inscrits).
-- **Écart relevé** : l'API ne refuse pas une inscription à une séance non publiée (seule une URL forgée y mène) ; une séance non publiée avec inscription n'est donc pas libérée.
+- ~~**Écart relevé** : aucun chemin n'annule une séance déjà publiée quand son dossier accepté est annulé~~ : **réglé le 28/10**, l'annulation du dossier annule ses séances publiées ([A8](a8-evaluation.md)).
+- ~~**Écart relevé** : l'API ne refuse pas une inscription à une séance non publiée~~ : **réglé le 28/10**, `REGISTRATION_NOT_ACCEPTED` avant tout autre contrôle ([A8](a8-evaluation.md)).
