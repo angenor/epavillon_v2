@@ -43,6 +43,7 @@ import type {
   ProposalFacet,
   ProposalListScreen,
 } from '~/types/admin-proposals'
+import type { MarkCommentsReadPayload, ProposalCommentView } from '~/types/programme/proposal'
 import type { Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
 
@@ -153,24 +154,25 @@ export function createProposalsApi({ call, callOrNull, send, assertEventInScope 
         }),
     ),
   /**
-   * LE FIL D'ÉCHANGES, filtré À LA SOURCE.
+   * LE FIL D'ÉCHANGES, filtré À LA SOURCE et lu par une personne.
    *
-   * L'API ne prend ni lecteur ni appartenance au comité : elle tranche sur
-   * l'acteur de la requête et n'envoie que ce qu'il a le droit de lire — « ce
-   * qui n'est pas envoyé ne peut pas fuiter ». Un second filtre d'écran serait
-   * mort, et le nôtre était plus permissif que le sien.
-   *
-   * Hors ligne, faute de lecteur, on s'en tient au fil PARTAGÉ (`submitter`) :
-   * c'est ce que l'API rend au déposant, et le seul sous-ensemble que tout
-   * lecteur a le droit de voir. Rendre les notes du comité serait refaire le
-   * filtre trop permissif que cette correction supprime.
+   * L'API tranche sur l'acteur de la requête : elle n'envoie que ce qu'il a le
+   * droit de lire (visibilité, cercle d'un fil restreint), avec son état lu et,
+   * sur ses propres messages, les accusés de lecture. `personId` ne sert qu'aux
+   * données simulées, qui n'ont pas de session.
    */
-  comments: (id: Uuid) =>
-    call(`/proposals/${id}/comments`, (m) =>
-      m.proposalComments.filter(
-        (c) => c.proposal_id === id && c.visibility === 'submitter',
-      ),
-    ),
+  comments: (id: Uuid, personId: Uuid | null): Promise<ProposalCommentView[]> =>
+    call(`/proposals/${id}/comments`, (m) => m.proposalCommentViews(id, personId)),
+
+  /** Messages vus à l'écran : envoi groupé, idempotent. Commun au comité et à l'organisation. */
+  markCommentsRead: (personId: Uuid, proposalId: Uuid, commentIds: Uuid[]): Promise<void> => {
+    const payload: MarkCommentsReadPayload = { comment_ids: commentIds }
+    return send(`/proposals/${proposalId}/comments/read`, payload, (m) => m.markCommentsRead(personId, payload))
+  },
+
+  markCommentUnread: (personId: Uuid, commentId: Uuid): Promise<void> =>
+    send(`/proposal-comments/${commentId}/read`, {}, (m) => m.markCommentUnread(personId, commentId), 'DELETE'),
+
   history: (id: Uuid) =>
     call(`/proposals/${id}/transitions`, (m) => m.proposalTransitions.filter((t) => t.proposal_id === id)),
   /**

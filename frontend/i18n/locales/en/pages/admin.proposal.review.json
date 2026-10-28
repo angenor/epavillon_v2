@@ -264,7 +264,8 @@
       "send": "Send",
       "reply": "Reply",
       "cancel": "Cancel",
-      "empty": "Write a message before sending it."
+      "empty": "Write a message before sending it.",
+      "replying": "You are replying in a thread."
     },
     "confirm": {
       "title": "This message goes to the organization",
@@ -278,7 +279,41 @@
     "unresolved": "Awaiting correction",
     "edited": "edited",
     "you": "You",
-    "sent": "Message sent."
+    "sent": "Message sent.",
+    "read": {
+      "unread": "Unread",
+      "markUnread": "Mark as unread",
+      "newCount": "No new messages | One new message | {count} new messages"
+    },
+    "recipients": {
+      "label": "To",
+      "everyone": "Whole committee",
+      "search": "Add a committee member",
+      "placeholder": "Search by name",
+      "hint": "With no one selected, the whole committee reads the message. Otherwise only the selected people read it, and they are notified.",
+      "added": "Added to recipients: {name}",
+      "to": "To:",
+      "replyCircle": "Your reply will be read by: {names}.",
+      "add": "Add recipients",
+      "addTitle": "Add recipients",
+      "addDescription": "Added people will read the whole thread, replies included, and will be notified.",
+      "current": "This thread is read by: {names}.",
+      "toAdd": "People to add",
+      "addSubmit": "Add to thread",
+      "addedNotice": "No recipient added. | Recipient added. | {count} recipients added."
+    },
+    "mention": {
+      "hint": "Type {'@'} followed by a name to address the message to someone.",
+      "listLabel": "Committee members",
+      "suggestions": "No suggestions | One suggestion: arrow keys to browse, Enter to choose | {count} suggestions: arrow keys to browse, Enter to choose"
+    },
+    "receipts": {
+      "readBy": "Read by {read} of {total}",
+      "reader": "{name}, {date}",
+      "unreadBy": "Not read yet (0 of {total})",
+      "organisationRead": "Read by the organisation on {date} ({name})",
+      "organisationUnread": "Not read by the organisation yet"
+    }
   },
   "mode": {
     "label": "How to score",

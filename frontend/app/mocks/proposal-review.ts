@@ -40,7 +40,6 @@ import type {
   MyReview,
   OrganizationTrackRecord,
   PeerReview,
-  PostCommentPayload,
   ProposalDocumentEntry,
   ProposalOrganizationEntry,
   ProposalSpeakerEntry,
@@ -56,7 +55,8 @@ import type { Person } from '~/types/identity'
 import type { Proposal, ProposalComment, ProposalTransition } from '~/types/programme/proposal'
 import type { Review, ReviewAssignment, ReviewScore } from '~/types/programme/review'
 import type { CriterionId, Numeric, Uuid } from '~/types/shared'
-import { PROPOSAL_COMMENT, PROPOSAL_TRANSITION, REVIEW, REVIEW_ASSIGNMENT } from './ids'
+import { PROPOSAL_TRANSITION, REVIEW, REVIEW_ASSIGNMENT } from './ids'
+import { sessionProposalComments } from './proposal-comments'
 import { events } from './event'
 import { callsForProposals } from './calls'
 import { maxWeightedScoreOf, reviewCriteria } from './criteria'
@@ -97,15 +97,12 @@ const sessionReviews = new Map<string, Review>()
 const sessionScores = new Map<Uuid, ReviewScore[]>()
 /** Déports déclarés pendant cette visite, par (dossier, personne). */
 const sessionRecusals = new Map<string, { recused_at: string; reason: string }>()
-/** Messages écrits pendant cette visite. */
-const sessionComments: ProposalComment[] = []
 /** Transitions journalisées pendant cette visite. */
 const sessionTransitions: ProposalTransition[] = []
 /** Dossiers ouverts pendant cette visite — l'équivalent de `record_proposal_read`. */
 const sessionReads = new Set<string>()
 
 let reviewSeq = 900
-let commentSeq = 900
 let transitionSeq = 900
 let assignmentSeq = 950
 
@@ -181,7 +178,7 @@ function commentsVisibleTo(
   viewerId: Uuid | null,
   isCommittee: boolean,
 ): ProposalComment[] {
-  return [...proposalComments, ...sessionComments]
+  return [...proposalComments, ...sessionProposalComments()]
     .filter((comment) => comment.proposal_id === proposalId)
     .filter((comment) => {
       if (comment.visibility === 'private') return comment.author_id === viewerId
@@ -645,36 +642,6 @@ export function recuseFromProposal(
     recused_at: now,
     recusal_reason: payload.reason,
   }
-}
-
-/**
- * ÉCRIRE SUR LE DOSSIER, AVEC UNE VISIBILITÉ EXPLICITE.
- *
- * UNE DEMANDE DE CORRECTION EST NÉCESSAIREMENT PARTAGÉE : le modèle ne
- * l'interdit pas, mais une demande que le déposant ne verrait pas bloquerait son
- * dossier sans qu'il sache pourquoi. La règle est donc appliquée ici, à la
- * source, plutôt que laissée à la vigilance de l'écran.
- */
-export function postProposalComment(
-  personId: Uuid,
-  payload: PostCommentPayload,
-  at: number = Date.now(),
-): ProposalComment {
-  const comment: ProposalComment = {
-    id: PROPOSAL_COMMENT(++commentSeq),
-    proposal_id: payload.proposal_id,
-    parent_id: payload.parent_id,
-    author_id: personId,
-    visibility: payload.is_change_request ? 'submitter' : payload.visibility,
-    body: payload.body.trim(),
-    is_change_request: payload.is_change_request,
-    resolved_at: null,
-    resolved_by: null,
-    edited_at: null,
-    created_at: new Date(at).toISOString(),
-  }
-  sessionComments.push(comment)
-  return comment
 }
 
 /**

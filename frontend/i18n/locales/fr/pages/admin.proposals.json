@@ -48,7 +48,8 @@
     "noScore": "Pas encore noté",
     "notSubmitted": "Non déposé",
     "rank": "Rang {rank}",
-    "edit": "Modifier le dossier « {title} »"
+    "edit": "Modifier le dossier « {title} »",
+    "unreadMessages": "Aucun nouveau message | Un nouveau message | {count} nouveaux messages"
   },
   "status": {
     "draft": "Brouillon",
@@ -85,7 +86,8 @@
     "flags": {
       "unreviewed": "Non évaluées",
       "late": "En retard",
-      "unread": "Non consultées par moi"
+      "unread": "Non consultées par moi",
+      "unread_messages": "Messages non lus"
     }
   },
   "results": {

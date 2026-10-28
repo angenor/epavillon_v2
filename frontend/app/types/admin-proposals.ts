@@ -43,9 +43,10 @@ import type {
  * statut — les confondre ferait manquer exactement les dossiers qu'on cherche.
  *
  * `unread` est le troisième, et il est PERSONNEL : « que je n'ai pas encore
- * ouverts », d'où `unread_ids` plus bas.
+ * ouverts », d'où `unread_ids` plus bas. `unread_messages` l'est aussi : un
+ * message du fil que la personne n'a pas lu, d'après `unread_comments`.
  */
-export type ProposalFlag = 'unreviewed' | 'late' | 'unread'
+export type ProposalFlag = 'unreviewed' | 'late' | 'unread' | 'unread_messages'
 
 /**
  * Les colonnes triables. Le tri par défaut est la NOTE DÉCROISSANTE : cet écran
@@ -153,6 +154,13 @@ export interface ProposalListScreen {
    * la même ligne étant lue par l'un et pas par l'autre.
    */
   unread_ids: ProposalId[]
+  /** Messages du fil que la personne n'a pas lus, par dossier ; absent : zéro. */
+  unread_comments: UnreadCommentCount[]
+}
+
+export interface UnreadCommentCount {
+  proposal_id: ProposalId
+  count: number
 }
 
 // ---------------------------------------------------------------------------

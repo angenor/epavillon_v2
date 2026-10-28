@@ -202,6 +202,13 @@ async function reply(parentId: Uuid, body: string): Promise<void> {
   }
 }
 
+/** Lecture silencieuse : un échec laisse le message à reprendre à sa prochaine vue. */
+async function markCommentsRead(ids: Uuid[]): Promise<void> {
+  const person = auth.person
+  if (!person || !file.value) return
+  await api.proposals.markCommentsRead(person.id, file.value.tracking.proposal.id, ids)
+}
+
 async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
   const person = auth.person
   if (!person) return
@@ -420,6 +427,7 @@ async function resolve(commentId: Uuid, resolved: boolean): Promise<void> {
           :participants="file.participants"
           :viewer-id="auth.person?.id ?? ''"
           :busy="busy"
+          :mark-read="markCommentsRead"
           @reply="reply"
           @resolve="resolve"
         />

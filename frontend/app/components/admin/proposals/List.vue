@@ -13,6 +13,8 @@ import type { TimeZoneName, Uuid } from '~/types/shared'
 interface Props {
   rows: ProposalDashboardRow[]
   unreadIds: Set<Uuid>
+  /** Messages non lus du fil, par dossier. */
+  unreadMessages?: ReadonlyMap<Uuid, number>
   timezone: TimeZoneName
   requiredReviews: number | null
   label: string
@@ -217,6 +219,13 @@ function toggleAll(checked: boolean): void {
                 <span class="size-1.5 rounded-full bg-accent-solid" aria-hidden="true" />
                 {{ t('admin.proposals.row.unreadShort') }}
               </span>
+              <UiBadge
+                v-if="props.unreadMessages?.get(row.id)"
+                size="sm"
+                intent="info"
+                icon="mail"
+                :label="t('admin.proposals.row.unreadMessages', props.unreadMessages?.get(row.id) ?? 0)"
+              />
               <UiButton
                 v-if="isEditable(row)"
                 class="relative z-10 ms-auto"

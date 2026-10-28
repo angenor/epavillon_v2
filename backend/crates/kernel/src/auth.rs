@@ -119,6 +119,25 @@ pub async fn require_permission(
     }
 }
 
+/// Qui détient cette permission sur cette portée : la réciproque de
+/// `has_permission`, par la même fonction SQL pour qu'aucune règle ne se
+/// recopie. Sert à composer une liste de personnes (le comité d'un dossier).
+pub async fn holders(pool: &PgPool, permission: &str, scope: Scope) -> Result<Vec<Uuid>> {
+    let ids = sqlx::query_scalar!(
+        r#"SELECT DISTINCT ra.person_id AS "person_id!"
+             FROM identity.role_assignments ra
+            WHERE ra.revoked_at IS NULL
+              AND identity.has_permission(ra.person_id, $1, $2::text::identity.scope_type, $3)"#,
+        permission,
+        scope.scope_type().as_str(),
+        scope.scope_id()
+    )
+    .fetch_all(pool)
+    .await?;
+
+    Ok(ids)
+}
+
 /// La permission est-elle détenue **sur au moins une portée** ?
 ///
 /// `has_permission` répond pour une portée précise, et c'est ce qu'il faut pour

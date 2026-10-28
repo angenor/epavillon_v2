@@ -7,9 +7,13 @@
 //! `kernel::jobs::enqueue` de plus produirait deux courriels par rappel, et le
 //! doublon ne se verrait qu'en production.
 
-//! **Le travail des partitions est l'exception, et elle est bornée** : rien ne
+//! **Deux exceptions, bornées.** Le courriel d'un avis générique
+//! (`notification_email`) est enfilé par le consommateur des avis, dans la
+//! transaction qui écrit l'avis, quand l'émetteur le demande. Le travail des
+//! partitions, lui : rien ne
 //! l'enfile, et son seul `enqueue` est celui qui pose **sa propre occurrence
 //! suivante**. C'est le patron de B1, écrit trois fois dans le dépôt avant lui.
 
+pub mod notification_email;
 pub mod partitions;
 pub mod send_reminder;

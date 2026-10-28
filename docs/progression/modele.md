@@ -264,3 +264,14 @@ Un intervenant sans adresse n'a ni compte, ni confirmation, ni photo, ni histori
 
 **Suite, même jour : la photo d'un intervenant sans adresse** (`050_media.sql`). Sans personne, pas de photo de profil : `media.attachable_roles` déclare `('programme', 'proposal_speakers', 'avatar')`, la photo va sur la ligne du dossier, et le détail public d'une séance l'y lit (même prénom, nom et rôle), sans recopie : une activité programmée plus tard la montre d'elle-même. Côté code, `speakers::remplacer` met à jour sur place une ligne sans personne au lieu de la retirer puis la réécrire (son identifiant, donc sa photo, survit à l'enregistrement du brouillon). **Migration** : `ops/migrations/2026-10-27-photo-intervenant-sans-adresse.sql`, jouée deux fois en local. **En production** : avant le déploiement de l'API, puis le lot 93.
 
+
+## 27/10/2026, `070_programme_proposals.sql` et `110_engagement.sql` : destinataires d'un message, lu / non lu par message
+
+Demande du commanditaire à la reprise des messages de révision v1, qui choisissaient leurs destinataires et marquaient chaque message lu.
+
+- **`programme.proposal_comment_recipients`** : le cercle d'un fil du comité, posé sur son message racine (déclencheur `tg_check_comment_recipient`). Sans ligne, tout le comité ; avec, l'auteur et les personnes nommées seulement, administrateurs compris.
+- **`programme.proposal_comment_reads`** : une ligne par lecteur et par message ; « non lu » est l'absence de ligne ; l'auteur n'en a pas.
+- **`programme.comment_in_committee_circle(comment, personne)`** : qui peut lire un message côté comité, en un seul endroit (le fil remonté jusqu'à sa racine).
+- **`engagement.notification_types`** : `programme.comment.addressed` ({in_app,email}).
+
+**Migration** : `ops/migrations/2026-10-27-destinataires-et-lectures-des-messages.sql`, éprouvée sur une copie de la production, jouée deux fois, tables et fonctions identiques au modèle ; appliquée en local. **En production** : avant le déploiement de l'API, puis le lot 95.

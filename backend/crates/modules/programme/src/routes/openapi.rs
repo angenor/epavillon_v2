@@ -64,6 +64,10 @@ pub struct ApiErrorBody {
         crate::routes::workspace::ecrire,
         crate::routes::workspace::resoudre,
         crate::routes::workspace::rouvrir,
+        crate::routes::detail::audience,
+        crate::routes::workspace::marquer_lus,
+        crate::routes::workspace::marquer_non_lu,
+        crate::routes::workspace::ajouter_destinataires,
         crate::routes::admin_ops::deduire,
         // --- Séances et inscriptions (B5) : dix-sept chemins ------------------
         crate::routes::planner::ecran,
@@ -116,7 +120,7 @@ mod tests {
     /// en porte deux — une lecture et un rattachement —, et
     /// `/proposal-comments/{id}/resolution` aussi.
     #[test]
-    fn les_soixante_et_une_routes_sont_documentees() {
+    fn les_soixante_cinq_routes_sont_documentees() {
         let doc = super::ProgrammeApi::openapi();
         let operations: usize = doc
             .paths
@@ -137,8 +141,8 @@ mod tests {
             .sum();
 
         assert_eq!(
-            operations, 61,
-            "trente-sept routes de B4, dix-sept de B5, la suggestion d'intervenants et l'abandon de brouillon du 16/09, la correction par l'équipe du 17/09, les quatre des questions du public"
+            operations, 65,
+            "trente-sept routes de B4, dix-sept de B5, la suggestion d'intervenants et l'abandon de brouillon du 16/09, la correction par l'équipe du 17/09, les quatre des questions du public, les quatre des messages adressés et lus du 27/10"
         );
     }
 

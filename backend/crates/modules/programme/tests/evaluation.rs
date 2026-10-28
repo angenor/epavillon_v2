@@ -536,6 +536,7 @@ async fn les_trois_visibilites_ne_franchissent_que_ce_quelles_doivent() {
                 visibility: Some(visibilite.to_owned()),
                 body: corps.to_owned(),
                 is_change_request: false,
+                recipient_ids: Vec::new(),
             },
         )
         .await
@@ -586,6 +587,7 @@ async fn une_demande_de_correction_est_forcee_en_visibilite_partagee() {
             visibility: Some("committee".to_owned()),
             body: "Le résumé ne dit pas ce que l'atelier produit.".to_owned(),
             is_change_request: true,
+            recipient_ids: Vec::new(),
         },
     )
     .await
@@ -609,6 +611,7 @@ async fn une_demande_de_correction_est_forcee_en_visibilite_partagee() {
             visibility: Some("private".to_owned()),
             body: "C'est corrigé.".to_owned(),
             is_change_request: true,
+            recipient_ids: Vec::new(),
         },
     )
     .await
@@ -630,6 +633,7 @@ async fn une_demande_de_correction_est_forcee_en_visibilite_partagee() {
             visibility: Some("committee".to_owned()),
             body: "Avis partagé en séance.".to_owned(),
             is_change_request: false,
+            recipient_ids: Vec::new(),
         },
     )
     .await

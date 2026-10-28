@@ -109,6 +109,14 @@ fn chemins() -> Vec<(&'static str, String)> {
             "POST",
             "/api/admin/proposals/transitions-backfill".to_owned(),
         ),
+        // 27/10 : fils adressés et lu / non lu
+        ("GET", format!("/api/proposals/{dossier}/comment-audience")),
+        ("POST", format!("/api/proposals/{dossier}/comments/read")),
+        (
+            "POST",
+            format!("/api/proposal-comments/{message}/recipients"),
+        ),
+        ("DELETE", format!("/api/proposal-comments/{message}/read")),
     ]
 }
 
@@ -122,7 +130,7 @@ async fn les_routes_du_depot_sont_montees() {
     let app = test::init_service(api::build_app(&etat)).await;
 
     let routes = chemins();
-    assert_eq!(routes.len(), 38, "les trente-huit routes du contrat");
+    assert_eq!(routes.len(), 42, "les quarante-deux routes du contrat");
 
     for (verbe, chemin) in routes {
         let requete = match verbe {

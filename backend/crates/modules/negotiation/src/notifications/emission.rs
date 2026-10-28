@@ -49,8 +49,11 @@ pub(crate) async fn emettre(
     if notification.recipients.is_empty() {
         return Ok(());
     }
-    let payload = serde_json::to_value(WithNotification { notification })
-        .map_err(|e| kernel::error::ApiError::internal(format!("avis illisible : {e}")))?;
+    let payload = serde_json::to_value(WithNotification {
+        notification,
+        email: false,
+    })
+    .map_err(|e| kernel::error::ApiError::internal(format!("avis illisible : {e}")))?;
     emit(
         conn,
         DomainEvent {

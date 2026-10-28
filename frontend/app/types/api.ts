@@ -4731,6 +4731,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/proposal-comments/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remettre un message non lu.
+         * @description → 204. Retire la lecture de la personne connectée sur ce message. Idempotent.
+         */
+        delete: operations["propositions_marquer_message_non_lu"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/proposal-comments/{id}/recipients": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ajouter des personnes à un fil adressé.
+         * @description `AddCommentRecipientsPayload` → 204. Élargit un fil du comité **déjà adressé** : les personnes ajoutées lisent tout le fil et sont prévenues (`programme.comment.addressed`, avis et courriel). Ouvert à l'auteur du fil et à ses destinataires ; idempotent. Chaque personne doit appartenir au comité du dossier.
+         */
+        post: operations["propositions_ajouter_destinataires"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/proposal-comments/{id}/resolution": {
         parameters: {
             query?: never;
@@ -4888,7 +4928,7 @@ export interface paths {
         };
         /**
          * Tout l'écran de la liste, en une réponse.
-         * @description `ProposalListScreen` — les lignes de `programme.v_proposal_dashboard`, **les sept facettes comptées sur ces mêmes lignes**, les dossiers que la personne connectée n'a jamais ouverts, le fuseau de l'édition, sa ville, l'échéance effective de l'appel et le nombre de revues attendues. Demandées à part, les facettes seraient mesurées à un autre instant et le « Retenu (17) » du filtre finirait par ne plus correspondre aux lignes affichées. **Ni pagination, ni tri, ni filtre serveur** : le contrat du front les garde à l'écran jusqu'au raccordement. **Périmètre vide → refus explicite**, jamais une liste vide ; **édition hors périmètre → le même refus qu'une édition inexistante**.
+         * @description `ProposalListScreen` : les lignes de `programme.v_proposal_dashboard`, **les sept facettes comptées sur ces mêmes lignes**, les dossiers que la personne connectée n'a jamais ouverts, ses messages non lus par dossier (`unread_comments: UnreadCommentCount[]`, côté comité, ses propres messages exclus), le fuseau de l'édition, sa ville, l'échéance effective de l'appel et le nombre de revues attendues. Demandées à part, les facettes seraient mesurées à un autre instant et le « Retenu (17) » du filtre finirait par ne plus correspondre aux lignes affichées. **Ni pagination, ni tri, ni filtre serveur** : le contrat du front les garde à l'écran jusqu'au raccordement. **Périmètre vide → refus explicite**, jamais une liste vide ; **édition hors périmètre → le même refus qu'une édition inexistante**.
          */
         get: operations["propositions_ecran_de_liste"];
         put?: never;
@@ -4987,6 +5027,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/proposals/{id}/comment-audience": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Le comité du dossier : à qui l'on peut adresser un message.
+         * @description `CommentPerson[]` : les personnes qui ouvrent ce dossier côté back-office : `programme.proposal.read_all` sur son édition, attribution globale comprise, moins celles qui le lisent en membres de l'organisation porteuse. C'est la liste des destinataires possibles, et le « sur M » des accusés de lecture. **Refusée à l'organisation**, comme un dossier inexistant : elle ne lit pas les noms du comité.
+         */
+        get: operations["propositions_comite_du_dossier"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/proposals/{id}/comments": {
         parameters: {
             query?: never;
@@ -4996,15 +5056,35 @@ export interface paths {
         };
         /**
          * Le fil des échanges, **filtré par visibilité à la source**.
-         * @description `ProposalComment[]` — **filtré à la source, jamais après coup** : ce qui n'est pas envoyé ne peut pas fuiter. Côté comité, les messages du comité, ceux adressés au déposant et **ses propres** notes personnelles ; côté organisation, ce qui lui est adressé et rien d'autre. Le filtre est le même des deux côtés — l'écrire deux fois serait écrire deux filtres, et le second finirait par diverger.
+         * @description `ProposalCommentView[]` : **filtré à la source, jamais après coup** : ce qui n'est pas envoyé ne peut pas fuiter. Côté comité, ce que `programme.comment_in_committee_circle()` ouvre au lecteur : les messages du comité (un fil adressé à des personnes nommées n'est lu que d'elles et de son auteur, administrateurs compris), ceux adressés au déposant et **ses propres** notes personnelles ; côté organisation, ce qui lui est adressé et rien d'autre. Chaque message porte `recipients: CommentPerson[]` (racine d'un fil adressé seulement), `is_read` pour le lecteur, et `receipts: CommentReceipts | null` sur ses propres messages, côté comité seulement : les accusés nomment le comité, l'organisation ne les lit pas.
          */
         get: operations["propositions_fil"];
         put?: never;
         /**
          * Écrire un message sur un dossier — **des deux côtés**.
-         * @description `PostCommentPayload` ou `ReplyToCommentPayload` → `ProposalComment`. **Une seule route, deux appelants** : une réponse du déposant est **toujours** partagée et **jamais** une demande de correction — une organisation ne se demande pas des corrections à elle-même ; un message du comité porte sa visibilité, et une demande de correction y est **forcée en partagé** (écart n° 99), sans quoi elle bloquerait le dossier sans que le déposant sache pourquoi. **Seul un message partagé émet** `programme.comment.shared` : un message de comité ne sort pas du comité, par définition.
+         * @description `PostCommentPayload` ou `ReplyToCommentPayload` → `ProposalCommentView`. **Une seule route, deux appelants** : une réponse du déposant est **toujours** partagée et **jamais** une demande de correction (une organisation ne se demande pas des corrections à elle-même) ; un message du comité porte sa visibilité, et une demande de correction y est **forcée en partagé** (écart n° 99), sans quoi elle bloquerait le dossier sans que le déposant sache pourquoi. **Seul un message partagé émet** `programme.comment.shared` : un message de comité ne sort pas du comité, par définition. `recipient_ids` adresse un message du comité qui ouvre un fil à des personnes nommées (prises dans `GET /proposals/{id}/comment-audience`) : il n'est plus lu que d'elles et de son auteur, et ses réponses restent dans ce cercle (une réponse partagée y est ramenée au comité, une demande de correction y est refusée). Fourni ailleurs (réponse, note, message partagé, organisation), il est refusé en 422. Un fil adressé émet `programme.comment.addressed` (avis et courriel) à l'ouverture et à chaque réponse du comité, vers le cercle sauf l'auteur ; un message à tout le comité n'en émet aucun.
          */
         post: operations["propositions_ecrire_un_message"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/proposals/{id}/comments/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Marquer lus les messages que l'écran a affichés.
+         * @description `MarkCommentsReadPayload` → 204. Valable des deux côtés. Idempotent ; ses propres messages et ceux que le lecteur ne lit pas sont ignorés sans erreur : l'écran envoie ce qu'il a affiché.
+         */
+        post: operations["propositions_marquer_messages_lus"];
         delete?: never;
         options?: never;
         head?: never;
@@ -18939,6 +19019,97 @@ export interface operations {
             };
         };
     };
+    propositions_marquer_message_non_lu: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du message */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Message non lu */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Message inexistant **ou hors d'accès** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    propositions_ajouter_destinataires: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du message qui ouvre le fil */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Destinataires ajoutés */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Message inexistant **ou hors du cercle du lecteur** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Pas la racine d'un fil adressé, ou personne hors du comité */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     propositions_resoudre_une_demande: {
         parameters: {
             query?: never;
@@ -19683,6 +19854,47 @@ export interface operations {
             };
         };
     };
+    propositions_comite_du_dossier: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du dossier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description CommentPerson[] */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Dossier inexistant **ou hors d'accès** */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
     propositions_fil: {
         parameters: {
             query?: never;
@@ -19695,7 +19907,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description ProposalComment[] */
+            /** @description ProposalCommentView[] */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -19740,7 +19952,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description ProposalComment */
+            /** @description ProposalCommentView */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -19767,8 +19979,51 @@ export interface operations {
                     "application/json": components["schemas"]["ApiError"];
                 };
             };
-            /** @description Corps vide */
+            /** @description Corps vide, destinataires hors du comité ou hors d'un message qui ouvre un fil du comité */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    propositions_marquer_messages_lus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identifiant du dossier */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Lectures posées */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Dossier hors d'accès **ou inexistant** */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

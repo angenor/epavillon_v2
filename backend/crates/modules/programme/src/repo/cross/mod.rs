@@ -915,3 +915,11 @@ pub use fiches::*;
 mod grille;
 
 pub use grille::*;
+
+// -----------------------------------------------------------------------------
+// Les messages adressés et leurs accusés (27/10) : qui se tient du côté du
+// comité, et sous quel nom. Lectures seules, comme le reste de ce fichier.
+// -----------------------------------------------------------------------------
+mod comite;
+
+pub use comite::*;

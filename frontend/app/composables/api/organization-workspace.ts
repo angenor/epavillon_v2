@@ -22,6 +22,7 @@ import type {
   ResolveCommentPayload,
   WorkspaceOverview,
 } from '~/types/organization-workspace'
+import type { ProposalCommentView } from '~/types/programme/proposal'
 import type { Uuid } from '~/types/shared'
 import type { ApiTransport } from './proposal-review'
 
@@ -60,9 +61,9 @@ export function createOrganizationWorkspaceApi({ call, send }: ApiTransport) {
      * partagé est le seul auquel l'organisation ait accès, et une réponse
      * n'est jamais elle-même une demande de correction.
      */
-    reply: (personId: Uuid, payload: ReplyToCommentPayload) =>
+    reply: (personId: Uuid, payload: ReplyToCommentPayload): Promise<ProposalCommentView> =>
       send(`/proposals/${payload.proposal_id}/comments`, payload, (m) =>
-        m.replyToComment(personId, payload),
+        m.asCommentView(m.replyToComment(personId, payload), personId),
       ),
 
     /**

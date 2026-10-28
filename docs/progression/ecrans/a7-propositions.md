@@ -64,3 +64,7 @@ Demande du commanditaire : plus de colonne « Thèmes » ni « Dossier », un af
 - `v_proposal_dashboard` gagne `cover` (`media.attached_image`) ; `LigneDePilotage` et `ProposalDashboardRow` suivent, les mocks rendent `null`.
 - **Écart** : aucun écran ne permet de joindre une couverture à un dossier ; le rôle `cover` de `programme.proposals` existe depuis 050 mais n'a pas de champ.
 - Vérifié : `nuxt typecheck`, `make sqlx-prepare`, `make openapi`, `make check-api-contract`, rendu au navigateur sur mocks (sombre, clair, 375 px : `scrollWidth` = 375). Défaut trouvé en éprouvant : la vignette s'étirait sur la hauteur de la rangée à 375 px (`self-start`).
+
+## 27/10/2026 : messages non lus
+
+`ProposalListScreen.unread_comments` (`UnreadCommentCount[]`, relation comme `unread_ids`) : badge « N nouveaux messages » sur la ligne, filtre « Messages non lus » (`?filtre=messages-non-lus`, décompte calculé à l'écran). Voir [A8](a8-evaluation.md), même date.

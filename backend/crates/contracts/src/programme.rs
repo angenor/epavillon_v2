@@ -40,6 +40,9 @@ pub const AGGREGATE_REVIEW: &str = "review";
 
 pub const COORGANIZATION_REQUESTED: &str = "programme.coorganization.requested";
 pub const COMMENT_SHARED: &str = "programme.comment.shared";
+/// Message du comité adressé à des personnes nommées, réponse dans leur fil,
+/// ou personnes ajoutées au fil. Charge `WithNotification`, courriel compris.
+pub const COMMENT_ADDRESSED: &str = "programme.comment.addressed";
 pub const REVIEW_ASSIGNED: &str = "programme.review.assigned";
 
 /// Une co-organisation annoncée **engage un tiers** : le front dit déjà

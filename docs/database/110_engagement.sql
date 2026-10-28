@@ -1045,6 +1045,8 @@ INSERT INTO engagement.notification_types (code, module_code, label, default_cha
     ('programme.proposal.submitted',    'programme',   '{"fr":"Proposition reçue","en":"Proposal received"}',                   '{in_app,email}', 'important', '{titre_activite}'),
     ('programme.proposal.decided',      'programme',   '{"fr":"Décision sur votre proposition","en":"Proposal decision"}',      '{in_app,email}', 'important', '{titre_activite,decision}'),
     ('programme.revision.requested',    'programme',   '{"fr":"Révision demandée","en":"Revision requested"}',                  '{in_app,email}', 'important', '{titre_activite,commentaire}'),
+    -- Message du comité adressé à des personnes nommées, ou réponse dans leur fil (27/10).
+    ('programme.comment.addressed',     'programme',   '{"fr":"Message du comité qui vous est adressé","en":"Committee message addressed to you"}', '{in_app,email}', 'normal', '{titre_activite,auteur}'),
     ('programme.registration.confirmed','programme',   '{"fr":"Inscription confirmée","en":"Registration confirmed"}',         '{in_app,email}', 'important', '{prenom,titre_session,date_session,lien_participation}'),
     ('programme.session.reminder',      'programme',   '{"fr":"Rappel de session","en":"Session reminder"}',                    '{email}',        'normal',    '{prenom,titre_session,date_session,delai,lien_participation}'),
     ('programme.session.cancelled',     'programme',   '{"fr":"Session annulée","en":"Session cancelled"}',                     '{in_app,email}', 'critical',  '{titre_session,motif}'),

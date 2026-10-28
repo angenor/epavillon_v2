@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT id, proposal_id, parent_id, author_id,\n                  visibility::text AS \"visibility!\", body, is_change_request,\n                  resolved_at, resolved_by, edited_at, created_at\n             FROM programme.proposal_comments\n            WHERE proposal_id = $1\n              AND deleted_at IS NULL\n              AND (\n                    visibility = 'submitter'\n                 OR ($2 AND visibility = 'committee')\n                 OR ($2 AND visibility = 'private' AND author_id = $3)\n              )\n            ORDER BY created_at, id",
+  "query": "SELECT id, proposal_id, parent_id, author_id,\n                  visibility::text AS \"visibility!\", body, is_change_request,\n                  resolved_at, resolved_by, edited_at, created_at\n             FROM programme.proposal_comments\n            WHERE proposal_id = $1\n              AND deleted_at IS NULL\n              AND CASE WHEN $2 THEN programme.comment_in_committee_circle(id, $3)\n                       ELSE visibility = 'submitter' END\n            ORDER BY created_at, id",
   "describe": {
     "columns": [
       {
@@ -141,5 +141,5 @@
       false
     ]
   },
-  "hash": "aae7bea87b4647b04f5107e7e40b084eca06e37e638884626196fce6bb46fbb7"
+  "hash": "f39b34af1949da4aa22bed98ff3571ecd54ba7be874cf55d48dd038ed780a70e"
 }

@@ -22,6 +22,7 @@ use uuid::Uuid;
 
 use crate::domain::ids::{CommentId, ProposalId};
 use crate::routes::contexte_de;
+use crate::service::comment_circle::{self, AddCommentRecipientsPayload, MarkCommentsReadPayload};
 use crate::service::comments::{self, PostCommentPayload, ResolveCommentPayload};
 use crate::service::workspace;
 use crate::state::ProgrammeState;
@@ -35,13 +36,16 @@ pub fn sous_organizations(cfg: &mut web::ServiceConfig) {
 /// Ce que ce module dépose sous `/proposal-comments`.
 pub fn sous_proposal_comments(cfg: &mut web::ServiceConfig) {
     cfg.route("/{id}/resolution", web::post().to(resoudre))
-        .route("/{id}/resolution", web::delete().to(rouvrir));
+        .route("/{id}/resolution", web::delete().to(rouvrir))
+        .route("/{id}/recipients", web::post().to(ajouter_destinataires))
+        .route("/{id}/read", web::delete().to(marquer_non_lu));
 }
 
 /// Les chemins de dossier de l'espace organisation.
 pub fn chemins_de_dossier(cfg: &mut web::ServiceConfig) {
     cfg.route("/{id}/file", web::get().to(fichier))
-        .route("/{id}/comments", web::post().to(ecrire));
+        .route("/{id}/comments", web::post().to(ecrire))
+        .route("/{id}/comments/read", web::post().to(marquer_lus));
 }
 
 /// La page d'accueil de l'espace.
@@ -113,17 +117,17 @@ pub(crate) async fn fichier(
 /// Écrire un message sur un dossier — **des deux côtés**.
 #[utoipa::path(
     post,
-    description = "`PostCommentPayload` ou `ReplyToCommentPayload` → `ProposalComment`. **Une seule route, deux appelants** : une réponse du déposant est **toujours** partagée et **jamais** une demande de correction — une organisation ne se demande pas des corrections à elle-même ; un message du comité porte sa visibilité, et une demande de correction y est **forcée en partagé** (écart n° 99), sans quoi elle bloquerait le dossier sans que le déposant sache pourquoi. **Seul un message partagé émet** `programme.comment.shared` : un message de comité ne sort pas du comité, par définition.",
+    description = "`PostCommentPayload` ou `ReplyToCommentPayload` → `ProposalCommentView`. **Une seule route, deux appelants** : une réponse du déposant est **toujours** partagée et **jamais** une demande de correction (une organisation ne se demande pas des corrections à elle-même) ; un message du comité porte sa visibilité, et une demande de correction y est **forcée en partagé** (écart n° 99), sans quoi elle bloquerait le dossier sans que le déposant sache pourquoi. **Seul un message partagé émet** `programme.comment.shared` : un message de comité ne sort pas du comité, par définition. `recipient_ids` adresse un message du comité qui ouvre un fil à des personnes nommées (prises dans `GET /proposals/{id}/comment-audience`) : il n'est plus lu que d'elles et de son auteur, et ses réponses restent dans ce cercle (une réponse partagée y est ramenée au comité, une demande de correction y est refusée). Fourni ailleurs (réponse, note, message partagé, organisation), il est refusé en 422. Un fil adressé émet `programme.comment.addressed` (avis et courriel) à l'ouverture et à chaque réponse du comité, vers le cercle sauf l'auteur ; un message à tout le comité n'en émet aucun.",
     path = "/proposals/{id}/comments",
     tag = "Espace organisation",
     operation_id = "propositions_ecrire_un_message",
     params(("id" = Uuid, Path, description = "Identifiant du dossier")),
     request_body = Object,
     responses(
-        (status = 200, description = "ProposalComment", body = Object),
+        (status = 200, description = "ProposalCommentView", body = Object),
         (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
         (status = 404, description = "Dossier hors d'accès **ou inexistant**", body = crate::routes::openapi::ApiErrorBody),
-        (status = 422, description = "Corps vide", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "Corps vide, destinataires hors du comité ou hors d'un message qui ouvre un fil du comité", body = crate::routes::openapi::ApiErrorBody),
     )
 )]
 pub(crate) async fn ecrire(
@@ -210,4 +214,101 @@ pub(crate) async fn rouvrir(
     .await?;
 
     Ok(HttpResponse::Ok().json(message))
+}
+
+/// Marquer lus les messages que l'écran a affichés.
+#[utoipa::path(
+    post,
+    description = "`MarkCommentsReadPayload` → 204. Valable des deux côtés. Idempotent ; ses propres messages et ceux que le lecteur ne lit pas sont ignorés sans erreur : l'écran envoie ce qu'il a affiché.",
+    path = "/proposals/{id}/comments/read",
+    tag = "Back-office — évaluation",
+    operation_id = "propositions_marquer_messages_lus",
+    params(("id" = Uuid, Path, description = "Identifiant du dossier")),
+    request_body = Object,
+    responses(
+        (status = 204, description = "Lectures posées"),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Dossier hors d'accès **ou inexistant**", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn marquer_lus(
+    requete: HttpRequest,
+    state: web::Data<ProgrammeState>,
+    acteur: Actor,
+    chemin: web::Path<Uuid>,
+    corps: web::Json<MarkCommentsReadPayload>,
+) -> Result<HttpResponse> {
+    let ctx = contexte_de(&requete, acteur.0);
+    comment_circle::marquer_lus(
+        &state,
+        &ctx,
+        acteur.0,
+        ProposalId(chemin.into_inner()),
+        corps.into_inner(),
+    )
+    .await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
+/// Remettre un message non lu.
+#[utoipa::path(
+    delete,
+    description = "→ 204. Retire la lecture de la personne connectée sur ce message. Idempotent.",
+    path = "/proposal-comments/{id}/read",
+    tag = "Back-office — évaluation",
+    operation_id = "propositions_marquer_message_non_lu",
+    params(("id" = Uuid, Path, description = "Identifiant du message")),
+    responses(
+        (status = 204, description = "Message non lu"),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Message inexistant **ou hors d'accès**", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn marquer_non_lu(
+    requete: HttpRequest,
+    state: web::Data<ProgrammeState>,
+    acteur: Actor,
+    chemin: web::Path<Uuid>,
+) -> Result<HttpResponse> {
+    let ctx = contexte_de(&requete, acteur.0);
+    comment_circle::marquer_non_lu(&state, &ctx, acteur.0, CommentId(chemin.into_inner())).await?;
+
+    Ok(HttpResponse::NoContent().finish())
+}
+
+/// Ajouter des personnes à un fil adressé.
+#[utoipa::path(
+    post,
+    description = "`AddCommentRecipientsPayload` → 204. Élargit un fil du comité **déjà adressé** : les personnes ajoutées lisent tout le fil et sont prévenues (`programme.comment.addressed`, avis et courriel). Ouvert à l'auteur du fil et à ses destinataires ; idempotent. Chaque personne doit appartenir au comité du dossier.",
+    path = "/proposal-comments/{id}/recipients",
+    tag = "Back-office — évaluation",
+    operation_id = "propositions_ajouter_destinataires",
+    params(("id" = Uuid, Path, description = "Identifiant du message qui ouvre le fil")),
+    request_body = Object,
+    responses(
+        (status = 204, description = "Destinataires ajoutés"),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Message inexistant **ou hors du cercle du lecteur**", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "Pas la racine d'un fil adressé, ou personne hors du comité", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn ajouter_destinataires(
+    requete: HttpRequest,
+    state: web::Data<ProgrammeState>,
+    acteur: Actor,
+    chemin: web::Path<Uuid>,
+    corps: web::Json<AddCommentRecipientsPayload>,
+) -> Result<HttpResponse> {
+    let ctx = contexte_de(&requete, acteur.0);
+    comment_circle::ajouter_destinataires(
+        &state,
+        &ctx,
+        acteur.0,
+        CommentId(chemin.into_inner()),
+        corps.into_inner(),
+    )
+    .await?;
+
+    Ok(HttpResponse::NoContent().finish())
 }

@@ -29,6 +29,10 @@
 //! Un message de comité ne sort pas du comité, par définition ; une note
 //! personnelle encore moins. Émettre sur les trois enverrait au déposant l'avis
 //! d'une délibération qu'il ne peut pas lire.
+//!
+//! Depuis le 27/10, un fil du comité **adressé à des personnes nommées** émet
+//! aussi `programme.comment.addressed`, vers son cercle seulement : voir
+//! `comment_circle.rs`. Un message à tout le comité reste muet.
 
 use kernel::context::RequestContext;
 use kernel::error::{ApiError, Result};
@@ -40,6 +44,7 @@ use uuid::Uuid;
 use crate::domain::ids::{CommentId, ProposalId};
 use crate::repo::comments::{Cote, Message, NouveauMessage};
 use crate::repo::{comments, proposals};
+use crate::service::comment_circle::{self as circle, ProposalCommentView};
 use crate::service::perimeter::{self, Acces};
 use crate::state::ProgrammeState;
 
@@ -61,6 +66,10 @@ pub struct PostCommentPayload {
     pub body: String,
     #[serde(default)]
     pub is_change_request: bool,
+    /// Personnes nommées : seulement sur un message du comité qui ouvre un fil.
+    /// Le fil n'est alors lu que d'elles et de son auteur.
+    #[serde(default)]
+    pub recipient_ids: Vec<Uuid>,
 }
 
 /// Écrire un message sur un dossier.
@@ -70,8 +79,9 @@ pub async fn ecrire(
     auteur: Uuid,
     dossier: ProposalId,
     payload: PostCommentPayload,
-) -> Result<Message> {
-    let (_, acces) = perimeter::acces_au_dossier(state.pool(), auteur, dossier).await?;
+) -> Result<ProposalCommentView> {
+    let (edition, acces) = perimeter::acces_au_dossier(state.pool(), auteur, dossier).await?;
+    let cote = cote_de(acces);
 
     let corps = payload.body.trim();
     if corps.is_empty() {
@@ -80,10 +90,50 @@ pub async fn ecrire(
             "body",
         ));
     }
-    let (visibilite, demande_de_correction) = arbitrer(acces, &payload);
+    let (mut visibilite, demande_de_correction) = arbitrer(acces, &payload);
 
+    let destinataires = if payload.recipient_ids.is_empty() {
+        Vec::new()
+    } else {
+        if acces != Acces::BackOffice
+            || payload.parent_id.is_some()
+            || visibilite != VISIBILITE_COMITE
+        {
+            return Err(ApiError::validation(
+                "Seul un message du comité qui ouvre un fil peut être adressé à des personnes nommées.",
+                "recipient_ids",
+            ));
+        }
+        circle::choisir_dans_le_comite(state, dossier, edition, &payload.recipient_ids, &[auteur])
+            .await?
+    };
+
+    // Le fil adressé dans lequel on répond, s'il l'est : (racine, son auteur,
+    // ses destinataires).
+    let mut fil_adresse = None;
     if let Some(parent) = payload.parent_id {
         exiger_le_meme_dossier(state, dossier, CommentId(parent)).await?;
+        if !comments::lisible(state.pool(), parent, auteur, cote).await? {
+            return Err(ApiError::not_found());
+        }
+        if cote == Cote::Comite {
+            fil_adresse = circle::fil_adresse(state, parent).await?;
+        }
+    }
+
+    // Les réponses restent dans le cercle : une réponse « partagée » sortirait
+    // le fil vers l'organisation, une demande de correction aussi (elle est
+    // toujours partagée, écart n° 99).
+    if fil_adresse.is_some() {
+        if demande_de_correction {
+            return Err(ApiError::validation(
+                "Une demande de correction part à l'organisation : elle ne se pose pas dans un fil adressé à des personnes nommées.",
+                "is_change_request",
+            ));
+        }
+        if visibilite == VISIBILITE_DEPOSANT {
+            visibilite = VISIBILITE_COMITE;
+        }
     }
 
     let etat = proposals::etat(state.pool(), dossier)
@@ -103,6 +153,38 @@ pub async fn ecrire(
         },
     )
     .await?;
+
+    if !destinataires.is_empty() {
+        let ids: Vec<Uuid> = destinataires.iter().map(|p| p.person_id).collect();
+        comments::ajouter_destinataires(&mut tx, message.id, &ids, auteur).await?;
+        circle::annoncer(
+            &mut tx,
+            dossier,
+            message.id,
+            auteur,
+            ids,
+            circle::Annonce::Adresse,
+        )
+        .await?;
+    } else if let Some((racine_auteur, cercle)) = &fil_adresse {
+        if visibilite == VISIBILITE_COMITE {
+            let a_prevenir = std::iter::once(*racine_auteur)
+                .chain(cercle.iter().copied())
+                .filter(|p| *p != auteur)
+                .collect::<std::collections::BTreeSet<_>>()
+                .into_iter()
+                .collect();
+            circle::annoncer(
+                &mut tx,
+                dossier,
+                message.id,
+                auteur,
+                a_prevenir,
+                circle::Annonce::Reponse,
+            )
+            .await?;
+        }
+    }
 
     // **Un seul cas émet.** Voir l'en-tête du fichier.
     if visibilite == VISIBILITE_DEPOSANT {
@@ -128,7 +210,16 @@ pub async fn ecrire(
     }
 
     tx.commit().await?;
-    Ok(message)
+
+    let mut vues = circle::composer(state, auteur, dossier, edition, cote, vec![message]).await?;
+    vues.pop().ok_or_else(ApiError::not_found)
+}
+
+pub(crate) fn cote_de(acces: Acces) -> Cote {
+    match acces {
+        Acces::BackOffice => Cote::Comite,
+        Acces::Organisation => Cote::Organisation,
+    }
 }
 
 /// **Ce que l'auteur a demandé, et ce que la règle impose.**
@@ -178,19 +269,18 @@ async fn exiger_le_meme_dossier(
     }
 }
 
-/// Le fil d'un dossier, **du côté où se tient le lecteur**.
+/// Le fil d'un dossier, **du côté où se tient le lecteur**, avec destinataires,
+/// état de lecture et accusés.
 pub async fn fil_de(
     state: &ProgrammeState,
     lecteur: Uuid,
     dossier: ProposalId,
-) -> Result<Vec<Message>> {
-    let (_, acces) = perimeter::acces_au_dossier(state.pool(), lecteur, dossier).await?;
-    let cote = match acces {
-        Acces::BackOffice => Cote::Comite,
-        Acces::Organisation => Cote::Organisation,
-    };
+) -> Result<Vec<ProposalCommentView>> {
+    let (edition, acces) = perimeter::acces_au_dossier(state.pool(), lecteur, dossier).await?;
+    let cote = cote_de(acces);
+    let messages = comments::fil(state.pool(), dossier, lecteur, cote).await?;
 
-    comments::fil(state.pool(), dossier, lecteur, cote).await
+    circle::composer(state, lecteur, dossier, edition, cote, messages).await
 }
 
 // -----------------------------------------------------------------------------

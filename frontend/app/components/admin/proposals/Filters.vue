@@ -170,7 +170,7 @@ function optionsOf(facets: ProposalFacet[]): { value: string; label: string; des
   ]
 }
 
-const FLAGS: ProposalFlag[] = ['unreviewed', 'late', 'unread']
+const FLAGS: ProposalFlag[] = ['unreviewed', 'late', 'unread', 'unread_messages']
 
 function flagCount(flag: ProposalFlag): number {
   return props.facets.flags.find((facet) => facet.value === flag)?.count ?? 0

@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO programme.proposal_comment_reads (comment_id, person_id)\n         SELECT c.id, $2 FROM programme.proposal_comments c\n          WHERE c.id = ANY($3) AND c.proposal_id = $1\n            AND c.deleted_at IS NULL AND c.author_id <> $2\n            AND CASE WHEN $4 THEN programme.comment_in_committee_circle(c.id, $2)\n                     ELSE c.visibility = 'submitter' END\n         ON CONFLICT DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "UuidArray",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7291c26f5724dac1068c02b517d75c001b0f452b634c1ffd7a75c0f34af9d8f0"
+}

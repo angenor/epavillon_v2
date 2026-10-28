@@ -264,7 +264,8 @@
       "send": "Envoyer",
       "reply": "Répondre",
       "cancel": "Annuler",
-      "empty": "Écrivez un message avant de l'envoyer."
+      "empty": "Écrivez un message avant de l'envoyer.",
+      "replying": "Vous répondez dans un fil."
     },
     "confirm": {
       "title": "Ce message part chez l'organisation",
@@ -278,7 +279,41 @@
     "unresolved": "En attente de correction",
     "edited": "modifié",
     "you": "Vous",
-    "sent": "Message envoyé."
+    "sent": "Message envoyé.",
+    "read": {
+      "unread": "Non lu",
+      "markUnread": "Marquer comme non lu",
+      "newCount": "Aucun nouveau message | Un nouveau message | {count} nouveaux messages"
+    },
+    "recipients": {
+      "label": "À",
+      "everyone": "Tout le comité",
+      "search": "Ajouter une personne du comité",
+      "placeholder": "Rechercher par nom",
+      "hint": "Sans choix, tout le comité lit le message. Avec, seules les personnes choisies le lisent, et elles en sont prévenues.",
+      "added": "Ajouté aux destinataires : {name}",
+      "to": "À :",
+      "replyCircle": "Votre réponse sera lue par : {names}.",
+      "add": "Ajouter des destinataires",
+      "addTitle": "Ajouter des destinataires",
+      "addDescription": "Les personnes ajoutées liront tout le fil, réponses comprises, et en seront prévenues.",
+      "current": "Le fil est lu par : {names}.",
+      "toAdd": "Personnes à ajouter",
+      "addSubmit": "Ajouter au fil",
+      "addedNotice": "Aucun destinataire ajouté. | Destinataire ajouté. | {count} destinataires ajoutés."
+    },
+    "mention": {
+      "hint": "Tapez {'@'} suivi d'un nom pour adresser le message à une personne.",
+      "listLabel": "Membres du comité",
+      "suggestions": "Aucune suggestion | Une suggestion : flèches pour parcourir, Entrée pour choisir | {count} suggestions : flèches pour parcourir, Entrée pour choisir"
+    },
+    "receipts": {
+      "readBy": "Lu par {read} sur {total}",
+      "reader": "{name}, {date}",
+      "unreadBy": "Pas encore lu (0 sur {total})",
+      "organisationRead": "Lu par l'organisation le {date} ({name})",
+      "organisationUnread": "Pas encore lu par l'organisation"
+    }
   },
   "mode": {
     "label": "Façon de noter",

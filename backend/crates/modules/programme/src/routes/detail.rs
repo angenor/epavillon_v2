@@ -66,6 +66,7 @@ pub fn chemins_de_dossier(cfg: &mut web::ServiceConfig) {
         .route("/{id}/themes", web::get().to(thematiques))
         .route("/{id}/history", web::get().to(historique))
         .route("/{id}/comments", web::get().to(fil))
+        .route("/{id}/comment-audience", web::get().to(audience))
         .route("/{id}/documents", web::get().to(pieces))
         .route("/{id}/documents", web::post().to(rattacher))
         .route("/{id}/documents/{document_id}", web::delete().to(detacher));
@@ -184,13 +185,13 @@ pub(crate) async fn historique(
 /// Le fil des échanges, **filtré par visibilité à la source**.
 #[utoipa::path(
     get,
-    description = "`ProposalComment[]` — **filtré à la source, jamais après coup** : ce qui n'est pas envoyé ne peut pas fuiter. Côté comité, les messages du comité, ceux adressés au déposant et **ses propres** notes personnelles ; côté organisation, ce qui lui est adressé et rien d'autre. Le filtre est le même des deux côtés — l'écrire deux fois serait écrire deux filtres, et le second finirait par diverger.",
+    description = "`ProposalCommentView[]` : **filtré à la source, jamais après coup** : ce qui n'est pas envoyé ne peut pas fuiter. Côté comité, ce que `programme.comment_in_committee_circle()` ouvre au lecteur : les messages du comité (un fil adressé à des personnes nommées n'est lu que d'elles et de son auteur, administrateurs compris), ceux adressés au déposant et **ses propres** notes personnelles ; côté organisation, ce qui lui est adressé et rien d'autre. Chaque message porte `recipients: CommentPerson[]` (racine d'un fil adressé seulement), `is_read` pour le lecteur, et `receipts: CommentReceipts | null` sur ses propres messages, côté comité seulement : les accusés nomment le comité, l'organisation ne les lit pas.",
     path = "/proposals/{id}/comments",
     tag = "Back-office — évaluation",
     operation_id = "propositions_fil",
     params(("id" = Uuid, Path, description = "Identifiant du dossier")),
     responses(
-        (status = 200, description = "ProposalComment[]", body = Object),
+        (status = 200, description = "ProposalCommentView[]", body = Object),
         (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
         (status = 404, description = "Dossier inexistant **ou hors d'accès**", body = crate::routes::openapi::ApiErrorBody),
     )
@@ -204,6 +205,32 @@ pub(crate) async fn fil(
         crate::service::comments::fil_de(&state, acteur.0, ProposalId(chemin.into_inner())).await?;
 
     Ok(HttpResponse::Ok().json(messages))
+}
+
+/// Le comité du dossier : à qui l'on peut adresser un message.
+#[utoipa::path(
+    get,
+    description = "`CommentPerson[]` : les personnes qui ouvrent ce dossier côté back-office : `programme.proposal.read_all` sur son édition, attribution globale comprise, moins celles qui le lisent en membres de l'organisation porteuse. C'est la liste des destinataires possibles, et le « sur M » des accusés de lecture. **Refusée à l'organisation**, comme un dossier inexistant : elle ne lit pas les noms du comité.",
+    path = "/proposals/{id}/comment-audience",
+    tag = "Back-office — évaluation",
+    operation_id = "propositions_comite_du_dossier",
+    params(("id" = Uuid, Path, description = "Identifiant du dossier")),
+    responses(
+        (status = 200, description = "CommentPerson[]", body = Object),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Dossier inexistant **ou hors d'accès**", body = crate::routes::openapi::ApiErrorBody),
+    )
+)]
+pub(crate) async fn audience(
+    state: web::Data<ProgrammeState>,
+    acteur: Actor,
+    chemin: web::Path<Uuid>,
+) -> Result<HttpResponse> {
+    let personnes =
+        crate::service::comment_circle::audience(&state, acteur.0, ProposalId(chemin.into_inner()))
+            .await?;
+
+    Ok(HttpResponse::Ok().json(personnes))
 }
 
 /// Les pièces du dossier.

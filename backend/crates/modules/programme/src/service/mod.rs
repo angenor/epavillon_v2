@@ -2,6 +2,7 @@
 
 pub mod backfill;
 pub mod birth;
+pub mod comment_circle;
 pub mod comments;
 pub mod desk;
 pub mod detail;

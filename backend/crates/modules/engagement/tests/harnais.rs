@@ -98,8 +98,9 @@ async fn le_semis_ne_fournit_ni_regle_ni_modele() {
             .fetch_one(bac.pool())
             .await
             .expect("comptage des types");
-    // 18, plus les quatre de Guide Négo (3b) et les deux de l'étape 4.
-    assert_eq!(types, 24);
+    // 18, plus les quatre de Guide Négo (3b), les deux de l'étape 4 et les
+    // messages adressés du comité (27/10).
+    assert_eq!(types, 25);
 }
 
 /// La fabrique de règle traverse les décalages **en minutes**, dans les deux

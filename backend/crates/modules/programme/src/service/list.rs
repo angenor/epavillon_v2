@@ -42,8 +42,9 @@ use uuid::Uuid;
 use crate::domain::facets::{self, Compteur, ProposalFacet, ProposalFacets};
 use crate::domain::ids::{EventId, ProposalId};
 use crate::domain::permissions::CALL_MANAGE;
+use crate::repo::comments::UnreadCommentCount;
 use crate::repo::dashboard::LigneDePilotage;
-use crate::repo::{assignments, cross, dashboard, proposals, reads};
+use crate::repo::{assignments, comments, cross, dashboard, proposals, reads};
 use crate::service::transition::{Ecart, RaisonDEcart, ResultatGroupe};
 use crate::state::ProgrammeState;
 
@@ -66,6 +67,9 @@ pub struct EcranDeListe {
     pub rows: Vec<LigneDePilotage>,
     pub facets: ProposalFacets,
     pub unread_ids: Vec<Uuid>,
+    /// Messages non lus par dossier, pour la personne connectée, côté comité.
+    /// Une relation comme `unread_ids`, pas un champ de ligne.
+    pub unread_comments: Vec<UnreadCommentCount>,
 }
 
 /// Tout l'écran, en une réponse.
@@ -78,6 +82,8 @@ pub async fn ecran(
 
     let rows = dashboard::lignes(state.pool(), edition).await?;
     let unread_ids = reads::non_lus(state.pool(), perimetre.person_id, edition).await?;
+    let unread_comments =
+        comments::non_lus_par_dossier(state.pool(), perimetre.person_id, edition).await?;
 
     let appel = cross::appel_de_ledition(state.pool(), edition).await?;
     let (deadline, required_reviews) = match appel {
@@ -101,6 +107,7 @@ pub async fn ecran(
         rows,
         facets,
         unread_ids,
+        unread_comments,
     })
 }
 

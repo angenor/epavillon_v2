@@ -48,7 +48,8 @@
     "noScore": "Not scored yet",
     "notSubmitted": "Not submitted",
     "rank": "Rank {rank}",
-    "edit": "Edit the proposal “{title}”"
+    "edit": "Edit the proposal “{title}”",
+    "unreadMessages": "No new messages | One new message | {count} new messages"
   },
   "status": {
     "draft": "Draft",
@@ -85,7 +86,8 @@
     "flags": {
       "unreviewed": "Not reviewed",
       "late": "Overdue",
-      "unread": "Not opened by me"
+      "unread": "Not opened by me",
+      "unread_messages": "Unread messages"
     }
   },
   "results": {

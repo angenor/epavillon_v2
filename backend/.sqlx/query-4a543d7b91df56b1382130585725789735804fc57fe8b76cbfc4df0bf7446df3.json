@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.id, count(a.pid) AS \"n!\"\n             FROM programme.proposal_comments c\n             LEFT JOIN LATERAL unnest($2::uuid[]) AS a(pid)\n                    ON a.pid <> c.author_id\n                   AND programme.comment_in_committee_circle(c.id, a.pid)\n            WHERE c.id = ANY($1)\n            GROUP BY c.id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_comments",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "n!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "UuidArray"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "4a543d7b91df56b1382130585725789735804fc57fe8b76cbfc4df0bf7446df3"
+}

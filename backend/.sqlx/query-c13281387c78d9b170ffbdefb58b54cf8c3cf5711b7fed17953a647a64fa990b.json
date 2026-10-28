@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT r.comment_id FROM programme.proposal_comment_reads r\n           JOIN programme.proposal_comments c ON c.id = r.comment_id\n          WHERE c.proposal_id = $1 AND r.person_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "comment_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "programme.proposal_comment_reads",
+            "name": "comment_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "c13281387c78d9b170ffbdefb58b54cf8c3cf5711b7fed17953a647a64fa990b"
+}

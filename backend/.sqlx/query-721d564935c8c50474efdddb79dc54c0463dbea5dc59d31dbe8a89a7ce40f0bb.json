@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT DISTINCT ra.person_id AS \"person_id!\"\n             FROM identity.role_assignments ra\n            WHERE ra.revoked_at IS NULL\n              AND identity.has_permission(ra.person_id, $1, $2::text::identity.scope_type, $3)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "person_id!",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "identity.role_assignments",
+            "name": "person_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "721d564935c8c50474efdddb79dc54c0463dbea5dc59d31dbe8a89a7ce40f0bb"
+}

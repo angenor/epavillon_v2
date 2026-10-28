@@ -178,4 +178,8 @@ pub struct Notification {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct WithNotification {
     pub notification: Notification,
+    /// Demande aussi le courriel à `engagement`, canal consulté personne par
+    /// personne. Faux par défaut : Guide Négo compose et envoie les siens.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub email: bool,
 }

@@ -373,6 +373,8 @@ export interface PostCommentPayload {
   visibility: CommentVisibility
   body: string
   is_change_request: boolean
+  /** Destinataires d'un fil du comité ; absent ou vide : tout le comité. */
+  recipient_ids?: PersonId[]
 }
 
 /**

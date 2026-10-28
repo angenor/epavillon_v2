@@ -67,6 +67,8 @@
  *                        ses actions groupées
  *   proposal-review.ts   la composition de la fiche d'évaluation (A8), le voile
  *                        de l'évaluation en aveugle et ses quatre écritures
+ *   proposal-comments.ts les fils lus par une personne : destinataires, lu et
+ *                        non lu, accusés de lecture
  *   admin-planner.ts     la composition du planificateur de créneaux (A9) et ses
  *                        quatre écritures — dont AUCUNE ne refuse un
  *                        chevauchement
@@ -294,9 +296,17 @@ export {
   organizationTrackRecord,
   saveReview,
   recuseFromProposal,
-  postProposalComment,
   decideProposal,
 } from './proposal-review'
+export {
+  proposalCommentViews,
+  commentAudience,
+  asCommentView,
+  postProposalComment,
+  addCommentRecipients,
+  markCommentsRead,
+  markCommentUnread,
+} from './proposal-comments'
 
 export {
   plannerScreen,

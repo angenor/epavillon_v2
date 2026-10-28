@@ -42,7 +42,7 @@ pub fn chemins_litteraux(cfg: &mut web::ServiceConfig) {
 /// Tout l'écran de la liste, en une réponse.
 #[utoipa::path(
     get,
-    description = "`ProposalListScreen` — les lignes de `programme.v_proposal_dashboard`, **les sept facettes comptées sur ces mêmes lignes**, les dossiers que la personne connectée n'a jamais ouverts, le fuseau de l'édition, sa ville, l'échéance effective de l'appel et le nombre de revues attendues. Demandées à part, les facettes seraient mesurées à un autre instant et le « Retenu (17) » du filtre finirait par ne plus correspondre aux lignes affichées. **Ni pagination, ni tri, ni filtre serveur** : le contrat du front les garde à l'écran jusqu'au raccordement. **Périmètre vide → refus explicite**, jamais une liste vide ; **édition hors périmètre → le même refus qu'une édition inexistante**.",
+    description = "`ProposalListScreen` : les lignes de `programme.v_proposal_dashboard`, **les sept facettes comptées sur ces mêmes lignes**, les dossiers que la personne connectée n'a jamais ouverts, ses messages non lus par dossier (`unread_comments: UnreadCommentCount[]`, côté comité, ses propres messages exclus), le fuseau de l'édition, sa ville, l'échéance effective de l'appel et le nombre de revues attendues. Demandées à part, les facettes seraient mesurées à un autre instant et le « Retenu (17) » du filtre finirait par ne plus correspondre aux lignes affichées. **Ni pagination, ni tri, ni filtre serveur** : le contrat du front les garde à l'écran jusqu'au raccordement. **Périmètre vide → refus explicite**, jamais une liste vide ; **édition hors périmètre → le même refus qu'une édition inexistante**.",
     path = "/proposals/list",
     tag = "Back-office — propositions",
     operation_id = "propositions_ecran_de_liste",

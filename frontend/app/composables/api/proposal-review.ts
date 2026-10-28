@@ -29,7 +29,11 @@ import type {
   SaveReviewPayload,
   SaveReviewResult,
 } from '~/types/admin-review'
-import type { ProposalComment } from '~/types/programme/proposal'
+import type {
+  AddCommentRecipientsPayload,
+  CommentPerson,
+  ProposalCommentView,
+} from '~/types/programme/proposal'
 import type { SaveDraftPayload, SaveDraftResult } from '~/types/proposal-form'
 import type { ReviewAssignment } from '~/types/programme/review'
 import type { Uuid } from '~/types/shared'
@@ -69,7 +73,7 @@ export interface ApiTransport {
   ) => Promise<T>
 }
 
-export function createProposalReviewApi({ callOrNull, send }: ApiTransport) {
+export function createProposalReviewApi({ call, callOrNull, send }: ApiTransport) {
   return {
     /**
      * TOUT L'ÉCRAN EN UNE RÉPONSE — dossier, grille, comité, échanges, droits.
@@ -135,10 +139,22 @@ export function createProposalReviewApi({ callOrNull, send }: ApiTransport) {
      * de correction est forcée en `submitter` à la source : une demande que le
      * déposant ne verrait pas bloquerait son dossier sans qu'il sache pourquoi.
      */
-    comment: (personId: Uuid, payload: PostCommentPayload): Promise<ProposalComment> => {
+    comment: (personId: Uuid, payload: PostCommentPayload): Promise<ProposalCommentView> => {
       const { proposal_id, ...body } = payload
       return send(`/proposals/${proposal_id}/comments`, body, (m) =>
         m.postProposalComment(personId, payload),
+      )
+    },
+
+    /** Les membres du comité de ce dossier : à qui l'on peut adresser un fil. */
+    commentAudience: (proposalId: Uuid): Promise<CommentPerson[]> =>
+      call(`/proposals/${proposalId}/comment-audience`, (m) => m.commentAudience(proposalId)),
+
+    /** Élargit le cercle d'un fil restreint : la personne ajoutée en verra tout l'historique. */
+    addCommentRecipients: (personId: Uuid, commentId: Uuid, personIds: Uuid[]): Promise<void> => {
+      const payload: AddCommentRecipientsPayload = { person_ids: personIds }
+      return send(`/proposal-comments/${commentId}/recipients`, payload, (m) =>
+        m.addCommentRecipients(personId, commentId, payload),
       )
     },
 

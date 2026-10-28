@@ -27,12 +27,17 @@ interface Props extends FieldProps {
   showCounter?: boolean
   autoGrow?: boolean
   maxRows?: number
+  /** Attributs ARIA posés sur la zone elle-même, pour une liste de suggestions (mentions « @ »). */
+  controlAttrs?: Record<string, string | boolean | undefined>
 }
 
 const props = withDefaults(defineProps<Props>(), { rows: 4, maxRows: 16 })
 const emit = defineEmits<{
   'update:modelValue': [value: string]
   blur: [event: FocusEvent]
+  keydown: [event: KeyboardEvent]
+  /** Après chaque frappe ou déplacement du curseur : le texte et la position du curseur. */
+  caret: [value: string, position: number]
 }>()
 
 const { t } = useI18n()
@@ -79,9 +84,18 @@ function grow(): void {
 }
 
 function onInput(event: Event): void {
-  emit('update:modelValue', (event.target as HTMLTextAreaElement).value)
+  const element = event.target as HTMLTextAreaElement
+  emit('update:modelValue', element.value)
+  emit('caret', element.value, element.selectionStart)
   nextTick(grow)
 }
+
+function onCaretMove(event: Event): void {
+  const element = event.target as HTMLTextAreaElement
+  emit('caret', element.value, element.selectionStart)
+}
+
+defineExpose({ element: textarea })
 
 onMounted(grow)
 watch(() => props.modelValue, () => nextTick(grow))
@@ -113,7 +127,11 @@ watch(() => props.modelValue, () => nextTick(grow))
         :aria-describedby="control['aria-describedby']"
         :aria-invalid="control['aria-invalid']"
         :class="[classes, 'leading-normal', props.autoGrow ? 'resize-none' : 'resize-y']"
+        v-bind="props.controlAttrs"
         @input="onInput"
+        @keydown="emit('keydown', $event)"
+        @click="onCaretMove"
+        @keyup.left.right.home.end="onCaretMove"
         @blur="emit('blur', $event)"
       />
     </template>

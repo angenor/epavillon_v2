@@ -81,6 +81,7 @@ async fn lespace_du_deposant_ne_porte_rien_du_comite() {
                 visibility: Some(visibilite.to_owned()),
                 body: corps.to_owned(),
                 is_change_request: false,
+                recipient_ids: Vec::new(),
             },
         )
         .await
@@ -161,6 +162,7 @@ async fn le_deposant_ne_recoit_que_ce_qui_lui_est_adresse() {
                 visibility: Some(visibilite.to_owned()),
                 body: format!("Message {visibilite}."),
                 is_change_request: false,
+                recipient_ids: Vec::new(),
             },
         )
         .await
@@ -209,6 +211,7 @@ async fn la_resolution_se_pose_et_se_retire_et_le_compteur_suit() {
             visibility: Some("committee".to_owned()),
             body: "Le résumé ne dit pas ce que l'atelier produit.".to_owned(),
             is_change_request: true,
+            recipient_ids: Vec::new(),
         },
     )
     .await
@@ -380,6 +383,7 @@ async fn les_editions_et_les_actions_se_composent_sur_les_dossiers() {
             visibility: None,
             body: "Le résumé est à revoir.".to_owned(),
             is_change_request: true,
+            recipient_ids: Vec::new(),
         },
     )
     .await

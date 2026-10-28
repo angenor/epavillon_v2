@@ -51,6 +51,7 @@ import { organizations } from './org'
 import { people } from './people'
 import { allProposals } from './proposals'
 import { proposalReads } from './proposal-reads'
+import { unreadCommentCounts } from './proposal-comments'
 import { reviewAssignments } from './reviews'
 import { proposalTransitionsAllowed } from './proposal-workflow'
 import { proposalDashboard } from './views'
@@ -286,6 +287,7 @@ export function proposalListScreen(eventId: Uuid, personId: Uuid | null): Propos
     rows,
     facets: facets(rows, new Set(unreadIds)),
     unread_ids: unreadIds,
+    unread_comments: unreadCommentCounts(eventId, personId),
   }
 }
 

@@ -71,6 +71,7 @@ export function filterProposals(
   rows: ProposalDashboardRow[],
   filters: ProposalListFilters,
   unreadIds: Set<Uuid>,
+  unreadMessages: ReadonlyMap<Uuid, number> = new Map(),
 ): ProposalDashboardRow[] {
   const needle = normalizeSearch(filters.search)
 
@@ -95,6 +96,7 @@ export function filterProposals(
     if (filters.flags.includes('unreviewed') && (row.review_count > 0 || row.status === 'draft')) return false
     if (filters.flags.includes('late') && row.overdue_reviews === 0) return false
     if (filters.flags.includes('unread') && !unreadIds.has(row.id)) return false
+    if (filters.flags.includes('unread_messages') && !unreadMessages.has(row.id)) return false
 
     return true
   })

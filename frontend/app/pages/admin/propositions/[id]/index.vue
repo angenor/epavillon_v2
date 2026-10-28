@@ -1,7 +1,13 @@
 <script setup lang="ts">
 import type { PostCommentPayload, ReviewDeskScreen, SaveReviewPayload } from '~/types/admin-review'
 import type { EffectivePermission } from '~/types/identity'
-import type { ProposalStatus, ProposalTransitionRule } from '~/types/programme/proposal'
+import type {
+  CommentPerson,
+  ProposalCommentView,
+  ProposalStatus,
+  ProposalTransitionRule,
+} from '~/types/programme/proposal'
+import type { PersonId, Uuid } from '~/types/shared'
 import type { TabItem } from '~/types/ui'
 import type { DecisionOption } from '~/utils/review-scoring'
 
@@ -74,6 +80,28 @@ const {
   () => `review-desk-${proposalId.value}`,
   () => api.review.desk(proposalId.value, auth.person?.id ?? null),
   { watch: [proposalId], lazy: true },
+)
+
+/**
+ * LE FIL, LU PAR LA PERSONNE CONNECTÉE : à part de la fiche, parce qu'il change
+ * seul (lu, non lu, destinataires) et que recharger la fiche reposerait un
+ * accusé d'ouverture du dossier.
+ */
+const {
+  data: comments,
+  status: commentsStatus,
+  error: commentsError,
+  refresh: refreshComments,
+} = await useAsyncData<ProposalCommentView[]>(
+  () => `review-comments-${proposalId.value}`,
+  () => api.proposals.comments(proposalId.value, auth.person?.id ?? null),
+  { watch: [proposalId], default: () => [], lazy: true },
+)
+
+const { data: commentAudience } = await useAsyncData<CommentPerson[]>(
+  () => `review-comment-audience-${proposalId.value}`,
+  () => api.review.commentAudience(proposalId.value),
+  { watch: [proposalId], default: () => [], lazy: true },
 )
 
 /** La machine à états, lue et non réécrite : elle ne dépend d'aucune édition. */
@@ -246,17 +274,64 @@ async function recuse(reason: string): Promise<void> {
   }
 }
 
-async function postComment(payload: Omit<PostCommentPayload, 'proposal_id'>): Promise<void> {
+async function postComment(payload: Omit<PostCommentPayload, 'proposal_id'>): Promise<boolean> {
   const person = auth.person
-  if (!person || !screen.value) return
+  if (!person || !screen.value) return false
   busy.value = true
   commentError.value = null
   try {
     await api.review.comment(person.id, { ...payload, proposal_id: screen.value.proposal.id })
     notice.value = t('admin.proposal.review.comments.sent')
-    await refresh()
+    // Une demande de correction change l'état du dossier : la fiche suit.
+    await Promise.all([refreshComments(), payload.is_change_request ? refresh() : Promise.resolve()])
+    return true
   } catch (thrown) {
     commentError.value = writeError(thrown)
+    return false
+  } finally {
+    busy.value = false
+  }
+}
+
+function patchRead(ids: Set<Uuid>, isRead: boolean): void {
+  comments.value = comments.value.map((comment) =>
+    ids.has(comment.id) ? { ...comment, is_read: isRead } : comment,
+  )
+}
+
+/** Lecture silencieuse : un échec laisse le point, et le message sera repris à sa prochaine vue. */
+async function markCommentsRead(ids: Uuid[]): Promise<void> {
+  const person = auth.person
+  if (!person || ids.length === 0) return
+  await api.proposals.markCommentsRead(person.id, proposalId.value, ids)
+  patchRead(new Set(ids), true)
+}
+
+async function markCommentUnread(commentId: Uuid): Promise<void> {
+  const person = auth.person
+  if (!person) return
+  commentError.value = null
+  try {
+    await api.proposals.markCommentUnread(person.id, commentId)
+    patchRead(new Set([commentId]), false)
+  } catch (thrown) {
+    commentError.value = writeError(thrown)
+  }
+}
+
+async function addCommentRecipients(rootId: Uuid, personIds: PersonId[]): Promise<boolean> {
+  const person = auth.person
+  if (!person) return false
+  busy.value = true
+  commentError.value = null
+  try {
+    await api.review.addCommentRecipients(person.id, rootId, personIds)
+    notice.value = t('admin.proposal.review.comments.recipients.addedNotice', personIds.length)
+    await refreshComments()
+    return true
+  } catch (thrown) {
+    commentError.value = writeError(thrown)
+    return false
   } finally {
     busy.value = false
   }
@@ -428,17 +503,34 @@ async function decide(payload: { toStatus: ProposalStatus; reason: string | null
           @recuse="recusalOpen = true"
         />
 
-        <AdminReviewComments
+        <UiErrorState
+          v-if="commentsError"
           class="mt-8"
-          :comments="screen.comments"
+          :retry-label="t('common.actions.retry')"
+          @retry="refreshComments()"
+        />
+        <UiSkeletonLoader
+          v-else-if="commentsStatus === 'pending' && comments.length === 0 && !busy"
+          class="mt-8"
+          height="16rem"
+        />
+        <AdminReviewComments
+          v-else
+          class="mt-8"
+          :comments="comments"
           :participants="screen.participants"
+          :audience="commentAudience"
           :viewer-id="auth.person?.id ?? null"
           :lead-organization-name="leadOrganizationName"
           :timezone="timezone"
+          :zone-label="zoneLabel"
           :can-write="screen.permissions.can_review || screen.permissions.can_decide"
           :busy="busy"
           :error="commentError"
-          @post="postComment"
+          :submit="postComment"
+          :mark-read="markCommentsRead"
+          :add-recipients="addCommentRecipients"
+          @unread="markCommentUnread"
         />
 
         <AdminReviewRecusalDialog

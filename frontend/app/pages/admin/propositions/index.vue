@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type {
   ProposalFacet,
+  ProposalFacets,
   ProposalFilterText,
   ProposalFlag,
   ProposalListFilters,
@@ -149,11 +150,13 @@ const FLAG_PARAM: Record<string, ProposalFlag> = {
   'non-evaluees': 'unreviewed',
   'en-retard': 'late',
   'non-consultees': 'unread',
+  'messages-non-lus': 'unread_messages',
 }
 const FLAG_TO_PARAM: Record<ProposalFlag, string> = {
   unreviewed: 'non-evaluees',
   late: 'en-retard',
   unread: 'non-consultees',
+  unread_messages: 'messages-non-lus',
 }
 
 const filters = computed<ProposalListFilters>(() => ({
@@ -230,6 +233,21 @@ function setSort(key: ProposalSortKey, direction: Exclude<SortDirection, null>):
 
 const allRows = computed(() => screen.value?.rows ?? [])
 const unreadIds = computed(() => new Set(screen.value?.unread_ids ?? []))
+const unreadMessages = computed(() => unreadCommentMap(screen.value?.unread_comments))
+
+/** Le décompte « Messages non lus » vient des compteurs de l'écran, pas des facettes. */
+const facets = computed<ProposalFacets>(() => {
+  const base = screen.value?.facets ?? {
+    statuses: [], themes: [], formats: [], countries: [], organizations: [], reviewers: [], flags: [],
+  }
+  return {
+    ...base,
+    flags: [
+      ...base.flags.filter((facet) => facet.value !== 'unread_messages'),
+      { value: 'unread_messages', label: null, count: unreadMessages.value.size },
+    ],
+  }
+})
 const timezone = computed(() => screen.value?.timezone ?? 'UTC')
 const zoneLabel = computed(() => screen.value?.city?.trim() || timezone.value)
 
@@ -247,7 +265,7 @@ const rowText = computed<ProposalFilterText>(() => ({
 
 const filteredRows = computed(() =>
   sortProposals(
-    filterProposals(allRows.value, filters.value, unreadIds.value),
+    filterProposals(allRows.value, filters.value, unreadIds.value, unreadMessages.value),
     sortKey.value,
     sortDirection.value,
     rowText.value,
@@ -520,10 +538,7 @@ const deadlineNotice = computed(() => {
         <AdminProposalsFilters
           class="mt-6"
           :filters="filters"
-          :facets="screen?.facets ?? {
-            statuses: [], themes: [], formats: [], countries: [],
-            organizations: [], reviewers: [], flags: [],
-          }"
+          :facets="facets"
           :total="allRows.length"
           :shown="filteredRows.length"
           :disabled="status === 'pending'"
@@ -548,6 +563,7 @@ const deadlineNotice = computed(() => {
           class="mt-4"
           :rows="pageRows"
           :unread-ids="unreadIds"
+          :unread-messages="unreadMessages"
           :timezone="timezone"
           :required-reviews="screen?.required_reviews ?? null"
           :label="caption"

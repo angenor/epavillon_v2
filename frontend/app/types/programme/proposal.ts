@@ -261,6 +261,54 @@ export interface ProposalComment {
   created_at: IsoDateTime
 }
 
+/** Une personne nommée dans un fil : destinataire, membre du comité. */
+export interface CommentPerson {
+  person_id: PersonId
+  display_name: string
+}
+
+/** De quel côté du dossier vient la lecture. */
+export type CommentReaderSide = 'committee' | 'organisation'
+
+/** Ligne de `programme.proposal_comment_reads`, nommée. */
+export interface CommentReader {
+  person_id: PersonId
+  display_name: string
+  read_at: IsoDateTime
+  side: CommentReaderSide
+}
+
+/**
+ * Accusés de lecture d'un message, rendus à son seul auteur.
+ * `audience_count` : membres du comité qui peuvent le lire, auteur exclu.
+ */
+export interface CommentReceipts {
+  audience_count: number
+  readers: CommentReader[]
+}
+
+/**
+ * Un message tel que le lit une personne donnée.
+ * `recipients` n'est rempli que sur une racine restreinte (vide : tout le
+ * comité) ; `is_read` est toujours vrai pour ses propres messages ; `receipts`
+ * n'existe que sur les messages du lecteur.
+ */
+export interface ProposalCommentView extends ProposalComment {
+  recipients: CommentPerson[]
+  is_read: boolean
+  receipts: CommentReceipts | null
+}
+
+/** `POST /proposal-comments/{id}/recipients` : élargit le cercle d'un fil. */
+export interface AddCommentRecipientsPayload {
+  person_ids: PersonId[]
+}
+
+/** `POST /proposals/{id}/comments/read` : idempotent. */
+export interface MarkCommentsReadPayload {
+  comment_ids: Uuid[]
+}
+
 /**
  * Table `programme.proposal_reads` — `070` § 6.
  * Accusés de lecture : « lu par 3 membres du comité sur 5 ».

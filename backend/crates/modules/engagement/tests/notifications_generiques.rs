@@ -57,7 +57,11 @@ async fn emettre(bac: &Bac, n: Notification) {
             aggregate_type: "meeting",
             aggregate_id: Uuid::now_v7(),
             event_type: MEETING_CHANGED,
-            payload: serde_json::to_value(WithNotification { notification: n }).expect("charge"),
+            payload: serde_json::to_value(WithNotification {
+                notification: n,
+                email: false,
+            })
+            .expect("charge"),
         },
     )
     .await
@@ -263,5 +267,72 @@ async fn tout_marquer_dun_module_laisse_les_avis_du_site_non_lus() {
         (prog.unread_count, prog.items[0].read_at.is_none()),
         (1, true),
         "l'avis du site reste non lu"
+    );
+}
+
+/// `email: true` : un courriel par destinataire, après le canal, et un seul
+/// même si l'événement est relayé deux fois (clé du travail).
+#[tokio::test]
+async fn le_courriel_part_quand_lemetteur_le_demande() {
+    let bac = Bac::monter().await;
+    let t = commun::terrain(&bac).await;
+    let type_code = "programme.comment.addressed";
+    notifications::ecrire_les_preferences(
+        &bac.state,
+        &bac.ctx(),
+        t.inscrits[1],
+        "fr",
+        &[NotificationPreferencePayload {
+            type_code: type_code.to_owned(),
+            channel: "email".to_owned(),
+            is_enabled: false,
+        }],
+    )
+    .await
+    .expect("préférence");
+
+    let mut n = avis(
+        vec![t.inscrits[0], t.inscrits[1]],
+        "Message du comité : Atelier",
+        Some("programme.comment.addressed:0192"),
+    );
+    n.type_code = type_code.to_owned();
+    n.link_path = "/admin/propositions/0192".to_owned();
+    let mut tx = bac.db().write(&bac.ctx()).await.expect("transaction");
+    emit(
+        &mut tx,
+        DomainEvent {
+            aggregate_schema: "programme",
+            aggregate_type: "comment",
+            aggregate_id: Uuid::now_v7(),
+            event_type: type_code,
+            payload: serde_json::to_value(WithNotification {
+                notification: n,
+                email: true,
+            })
+            .expect("charge"),
+        },
+    )
+    .await
+    .expect("émission");
+    tx.commit().await.expect("validation");
+
+    commun::relayer(&bac, "programme.comment.").await;
+    commun::rejouer_les_annonces(&bac, "programme.comment.").await;
+    let issues = commun::passer_le_worker(&bac).await;
+    assert!(issues.iter().all(Result::is_ok), "{issues:?}");
+
+    let courriels = bac.boite.messages();
+    assert_eq!(courriels.len(), 1, "elle a coupé le courriel pour ce type");
+    assert_eq!(courriels[0].subject, "Message du comité : Atelier");
+    assert!(courriels[0].text.contains("/admin/propositions/0192"));
+    assert_eq!(
+        notifications::fil(&bac.state, t.inscrits[1], &fil(None))
+            .await
+            .expect("fil")
+            .items
+            .len(),
+        1,
+        "l'avis à l'écran part quand même"
     );
 }

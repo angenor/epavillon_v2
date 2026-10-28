@@ -143,10 +143,12 @@ impl EventConsumer for NotificationsConsumer {
 }
 
 impl NotificationsConsumer {
-    /// Un avis `in_app` par destinataire reçu, si le type est actif.
+    /// Un avis `in_app` par destinataire reçu, si le type est actif ; et un
+    /// courriel par destinataire quand l'émetteur le demande.
     async fn generique(&self, conn: &mut PgConnection, event: &OutboxEvent) -> Result<()> {
-        let n = match serde_json::from_value::<WithNotification>(event.payload.clone()) {
-            Ok(w) => w.notification,
+        let (n, courriel) = match serde_json::from_value::<WithNotification>(event.payload.clone())
+        {
+            Ok(w) => (w.notification, w.email),
             Err(e) => {
                 tracing::warn!(event_type = %event.event_type, erreur = %e, "avis illisible");
                 return Ok(());
@@ -160,6 +162,9 @@ impl NotificationsConsumer {
         }
         let title = serde_json::to_value(&n.title).unwrap_or_default();
         let body = serde_json::to_value(&n.body).ok();
+        if courriel {
+            crate::jobs::notification_email::poser(conn, event.id, &n).await?;
+        }
         for &person_id in &n.recipients {
             if !delivery::canal_autorise(
                 self.db.pool(),

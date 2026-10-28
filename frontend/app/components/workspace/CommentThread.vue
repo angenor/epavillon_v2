@@ -33,6 +33,8 @@ interface Props {
   viewerId: PersonId
   /** Une écriture est en vol : les boutons attendent. */
   busy?: boolean
+  /** Messages affichés à l'écran, envoyés par lots : c'est ce qui fait « Lu par l'organisation » côté comité. */
+  markRead?: (commentIds: string[]) => Promise<void>
 }
 
 const props = defineProps<Props>()
@@ -48,6 +50,17 @@ const { dateTime } = useDateTime()
 const viewerTimezone = computed(
   () => Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Paris',
 )
+
+const root = ref<HTMLElement | null>(null)
+
+useReadOnSight({
+  root,
+  targets: () =>
+    props.markRead
+      ? props.comments.filter((comment) => comment.author_id !== props.viewerId).map((comment) => comment.id)
+      : [],
+  onRead: (ids) => props.markRead?.(ids) ?? Promise.resolve(),
+})
 
 /** Les racines, dans l'ordre où elles ont été écrites. */
 const threads = computed(() =>
@@ -101,7 +114,7 @@ function submitReply(parentId: string): void {
 </script>
 
 <template>
-  <section aria-labelledby="workspace-exchanges-title">
+  <section ref="root" aria-labelledby="workspace-exchanges-title">
     <h2 id="workspace-exchanges-title" class="text-xl font-semibold">
       {{ t('organization.workspace.proposal.exchanges.title') }}
     </h2>
@@ -138,7 +151,7 @@ function submitReply(parentId: string): void {
         <!-- La racine. Une demande de correction porte son étiquette : sans
              elle, un message du comité ressemble à une remarque, et personne ne
              sait que le dossier attend une réponse pour repartir. -->
-        <article class="p-5">
+        <article class="p-5" :data-comment-id="thread.root.id">
           <header class="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span class="font-semibold text-text">{{ authorOf(thread.root) }}</span>
             <time :datetime="thread.root.created_at" class="text-sm text-text-subtle">
@@ -165,6 +178,7 @@ function submitReply(parentId: string): void {
           <li
             v-for="reply in thread.replies"
             :key="reply.id"
+            :data-comment-id="reply.id"
             class="border-b border-border-subtle bg-surface-sunken px-5 py-4 last:border-b-0 sm:pl-10"
           >
             <header class="flex flex-wrap items-center gap-x-3 gap-y-1">

@@ -85,6 +85,11 @@ pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc
         Arc::new(jobs::send_reminder::SendReminder::new(
             db.clone(),
             config,
+            mailer.clone(),
+        )),
+        Arc::new(jobs::notification_email::NotificationEmail::new(
+            db.clone(),
+            config,
             mailer,
         )),
         // Le récurrent, sur la file par défaut : rien ne l'enfile, il pose sa
