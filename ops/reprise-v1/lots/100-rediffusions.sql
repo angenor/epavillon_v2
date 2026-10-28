@@ -6,12 +6,12 @@
 -- 28/10). D'ici là, la page d'une activité passée, enregistrée et sans
 -- rediffusion annonce « Vidéo prochainement disponible ».
 --
--- Choix :
---   - une séance de la CdP30 dont l'activité v1 n'avait pas de vidéo n'a pas été
---     enregistrée : `is_recorded` passe à faux, elle n'annonce rien ;
---   - les activités v1 avec vidéo gardent `is_recorded` (vrai) et sont consignées
---     `skipped` sous `public.activities-youtube_link`, pour être retrouvées quand
---     les vidéos reviendront.
+-- Choix (commanditaire, 28/10) :
+--   - toutes les séances publiées de la CdP30 ont été filmées, y compris les 28
+--     dont la v1 n'avait pas encore la vidéo : `is_recorded` vrai partout (déjà le
+--     cas après le lot 50, posé ici pour que la règle soit écrite) ;
+--   - les 33 activités v1 qui avaient une vidéo sont consignées `skipped` sous
+--     `public.activities-youtube_link`, pour savoir lesquelles avaient déjà la leur.
 -- Rien ne part : `is_recorded` n'est surveillé par aucun déclencheur d'événement.
 
 \set ON_ERROR_STOP on
@@ -38,15 +38,14 @@ BEGIN
 END $$;
 
 UPDATE programme.sessions s
-   SET is_recorded = false
-  FROM l100_seance l
- WHERE l.id = s.id AND NOT l.video_v1 AND s.is_recorded;
+   SET is_recorded = true
+ WHERE s.id IN (SELECT id FROM l100_seance) AND s.published_at IS NOT NULL AND NOT s.is_recorded;
 
 -- Correspondance ----------------------------------------------------------------------
 
 SELECT legacy.remember('public.activities-youtube_link', v.activite::text, 'programme', 'sessions', NULL,
                        'skipped',
-                       'vidéo YouTube perdue (chaîne piratée) : à reposer après la CdP31 ; séance gardée « enregistrée »')
+                       'vidéo YouTube perdue (chaîne piratée) : à reposer après la CdP31')
 FROM lot100_video v \g /dev/null
 
 -- Outbox et travaux : rien ne doit naître de ces lignes.
@@ -70,11 +69,11 @@ BEGIN
     IF extraites <> consignees THEN
         RAISE EXCEPTION 'lot 100 : % vidéos extraites, % consignées', extraites, consignees;
     END IF;
-    RAISE NOTICE 'lot 100 : vidéos v1 %, séances CdP30 % (vidéo attendue %, non enregistrées %)',
+    RAISE NOTICE 'lot 100 : vidéos v1 %, séances CdP30 publiées % (vidéo v1 %, enregistrées %)',
         extraites,
-        (SELECT count(*) FROM l100_seance),
-        (SELECT count(*) FROM l100_seance WHERE video_v1),
-        (SELECT count(*) FROM programme.sessions s JOIN l100_seance l USING (id) WHERE NOT s.is_recorded);
+        (SELECT count(*) FROM programme.sessions s JOIN l100_seance l USING (id) WHERE s.published_at IS NOT NULL),
+        (SELECT count(*) FROM programme.sessions s JOIN l100_seance l USING (id) WHERE s.published_at IS NOT NULL AND l.video_v1),
+        (SELECT count(*) FROM programme.sessions s JOIN l100_seance l USING (id) WHERE s.published_at IS NOT NULL AND s.is_recorded);
 END $$;
 
 COMMIT;
