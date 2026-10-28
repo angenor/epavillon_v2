@@ -109,3 +109,7 @@ Vérifié sur les données d'exemple avec un compte porteur de trois actions (pa
 ## 27/10 : inscrits des éditions passées masqués
 
 Demande du commanditaire. Sur la carte d'un dossier (`WorkspaceProposalCard`), le nombre d'inscrits disparaît quand l'édition est terminée (`isEditionOver`, `utils/proposal-edit.ts`) : il sert à préparer la salle, et les inscriptions CdP30 reprises de la v1 (lot 80) le faisaient apparaître sur des activités tenues. Le nombre de séances reste. Même règle sur la fiche du dossier (`WorkspaceSessionPanel`, prop `editionOver`) : inscrits et liste d'attente masqués ; capacité de la salle et nombre de présents gardés.
+
+## 28/10 : le clic sur « Mon espace » ouvre l'espace
+
+Demande du commanditaire. `UiUserMenu` reçoit `to` : sur un appareil à survol, le clic navigue vers `/mon-organisation` (`/rattachement-organisation` sans organisation, comme le pied du menu mobile) ; le panneau reste au survol et à la flèche bas. Sans survol (tablette), le clic ouvre le panneau comme avant, sinon la déconnexion devient inatteignable.

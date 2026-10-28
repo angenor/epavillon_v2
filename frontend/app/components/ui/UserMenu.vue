@@ -59,6 +59,8 @@ interface Props {
   badgeLabel?: string
   /** Intitulé de la liste des entrées. */
   itemsLabel?: string
+  /** Destination du clic à la souris ; le panneau s'ouvre alors au survol et à la flèche bas. */
+  to?: string
 }
 
 const props = withDefaults(defineProps<Props>(), { tone: 'default' })
@@ -159,6 +161,12 @@ async function openWithFocus(): Promise<void> {
 }
 
 function onTriggerClick(): void {
+  // Au doigt, le survol n'existe pas : le clic reste le seul accès au panneau (et à la déconnexion).
+  if (props.to && window.matchMedia('(hover: hover)').matches) {
+    close()
+    void navigateTo(props.to)
+    return
+  }
   if (isOpen.value) close()
   else void openWithFocus()
 }

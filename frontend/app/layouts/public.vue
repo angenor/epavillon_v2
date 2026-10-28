@@ -246,6 +246,7 @@ const currentYear = new Date().getFullYear()
           :email="auth.person.primary_email"
           :items="accountNav"
           :title="t('nav.account.mySpace')"
+          :to="localePath(myOrganizationTo)"
           :subtitle="organizationLabel"
           :badge="pendingActions.length"
           :badge-label="t('nav.account.pendingCount', pendingActions.length)"
