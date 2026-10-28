@@ -16,6 +16,7 @@ import type {
   MailingAudience,
   MailingListScreen,
   MailingPayload,
+  MailingPreview,
   MailingTestResult,
 } from '~/types/admin-mailings'
 import type { AdministeredEvents } from '~/types/identity'
@@ -41,6 +42,12 @@ export function createAdminMailingsApi({ call, callOrNull, send, assertEventInSc
     /** La liste telle qu'elle partirait maintenant, avec le décompte. */
     audience: (mailingId: Uuid): Promise<MailingAudience | null> =>
       callOrNull(`/admin/mailings/${mailingId}/audience`, (m) => m.mailingAudience(mailingId)),
+
+    /** Le courriel tel que ce destinataire le recevra, gabarit compris. */
+    preview: (mailingId: Uuid, email?: string): Promise<MailingPreview | null> =>
+      callOrNull(`/admin/mailings/${mailingId}/preview`, (m) => m.mailingPreview(mailingId, email), {
+        email,
+      }),
 
     /** Un brouillon ; sans copie précisée, l'API propose celle de l'équipe. */
     create: (payload: CreateMailingPayload): Promise<Mailing> =>

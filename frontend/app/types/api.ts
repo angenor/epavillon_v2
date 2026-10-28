@@ -580,6 +580,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/mailings/{id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * L'aperçu, gabarit compris.
+         * @description `MailingPreview` : le courriel tel qu'un destinataire le recevra, rendu par la même fonction que le worker (gabarit, variables et valeurs de secours, boutons). `email` choisit le destinataire ; absent, le premier joignable. `has_account` faux : une personne sans compte, qui reçoit les valeurs de secours. N'envoie rien.
+         */
+        get: operations["engagement_envois_apercu"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/mailings/{id}/send": {
         parameters: {
             query?: never;
@@ -6503,6 +6523,21 @@ export interface components {
             bcc?: string[] | null;
             /** @description Chaîne vide : retirer l'adresse de réponse. */
             reply_to?: string | null;
+            /**
+             * Format: uuid
+             * @description Changer d'édition, tant que c'est un brouillon : gardé sur la nouvelle.
+             */
+            event_id?: string | null;
+            /** @description `sobre`, `institutionnel` ou `annonce`. */
+            template?: string | null;
+            /** @description Valeur de secours par variable ; une chaîne vide retire le secours. */
+            variable_fallbacks?: {
+                [key: string]: string;
+            } | null;
+            reply_button?: boolean | null;
+            /** @description Bouton d'action de l'annonce : les deux, ou deux chaînes vides. */
+            cta_label?: string | null;
+            cta_url?: string | null;
         };
         /** @description Ce qu'un marquage vise. Sans `ids` : tout — du module, s'il est donné. */
         MarquagePayload: {
@@ -8454,6 +8489,50 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Mailing */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Aucune session, ou session close */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+            /** @description Envoi inexistant ou hors droit */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiError"];
+                };
+            };
+        };
+    };
+    engagement_envois_apercu: {
+        parameters: {
+            query?: {
+                /** @description Le destinataire vu */
+                email?: string;
+            };
+            header?: never;
+            path: {
+                /** @description L'envoi */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description MailingPreview */
             200: {
                 headers: {
                     [name: string]: unknown;

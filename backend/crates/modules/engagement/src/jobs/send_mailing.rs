@@ -31,7 +31,8 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use uuid::Uuid;
 
-use crate::domain::mailing::{self, echapper_html, enveloppe_html, texte_brut};
+use crate::domain::gabarits::{mailto_reponse, mettre_en_page, MiseEnPage};
+use crate::domain::mailing::{self, echapper_html, texte_brut};
 use crate::domain::render;
 use crate::repo::mailings;
 
@@ -56,28 +57,55 @@ fn mailing_id(job: &ClaimedJob) -> Result<Uuid> {
 }
 
 /// Le message d'un destinataire : variables brutes dans l'objet, échappées dans
-/// le corps HTML.
+/// le corps HTML, gabarit de l'envoi appliqué. L'aperçu de l'écran passe par
+/// ici aussi : ce qu'on voit est ce qui part.
 pub fn composer(
     message_id: String,
     to: &str,
-    subject: &str,
-    body_html: &str,
+    envoi: &mailings::LigneEnvoi,
     valeurs: &HashMap<String, String>,
+    site: &str,
 ) -> Result<OutgoingMail> {
     let echappees: HashMap<String, String> = valeurs
         .iter()
         .map(|(k, v)| (k.clone(), echapper_html(v)))
         .collect();
-    let sujet = render::rendre(subject, valeurs).map_err(|e| ApiError::internal(e.to_string()))?;
-    let corps =
-        render::rendre(body_html, &echappees).map_err(|e| ApiError::internal(e.to_string()))?;
+    let sujet =
+        render::rendre(&envoi.subject, valeurs).map_err(|e| ApiError::internal(e.to_string()))?;
+    let corps = render::rendre(&envoi.body_html, &echappees)
+        .map_err(|e| ApiError::internal(e.to_string()))?;
+    let h = &envoi.habillage;
+    let action = match (&h.cta_label, &h.cta_url) {
+        (Some(t), Some(l)) => Some((t.as_str(), l.as_str())),
+        _ => None,
+    };
+    let repondre = if h.reply_button {
+        mailto_reponse(envoi.reply_to.as_deref(), &envoi.cc, &sujet)
+    } else {
+        None
+    };
+    let html = mettre_en_page(
+        &corps,
+        &MiseEnPage {
+            gabarit: &h.template,
+            sujet: &sujet,
+            action,
+            repondre,
+            site,
+        },
+    );
+    let mut texte = texte_brut(&corps);
+    if let Some((t, l)) = action {
+        texte.push_str(&format!("\n\n{t} : {l}"));
+    }
+    texte.push_str("\n\nL'équipe de l'ePavillon\nInstitut de la Francophonie pour le développement durable (IFDD)");
     Ok(OutgoingMail {
         message_id,
         to: to.to_owned(),
         locale: "fr".to_owned(),
         subject: sujet,
-        text: texte_brut(&corps),
-        html: Some(enveloppe_html(&corps)),
+        text: texte,
+        html: Some(html),
     })
 }
 
@@ -115,14 +143,17 @@ pub struct SendMailing {
     db: Db,
     mailer: Arc<dyn Mailer>,
     entrepots: Entrepots,
+    /// L'adresse publique du site : le logo des gabarits.
+    site: String,
 }
 
 impl SendMailing {
-    pub fn new(db: Db, mailer: Arc<dyn Mailer>, entrepots: Entrepots) -> Self {
+    pub fn new(db: Db, mailer: Arc<dyn Mailer>, entrepots: Entrepots, site: String) -> Self {
         Self {
             db,
             mailer,
             entrepots,
+            site,
         }
     }
 
@@ -189,13 +220,13 @@ impl JobHandler for SendMailing {
                 continue;
             }
 
-            let valeurs = mailing::valeurs(&pris.variables);
+            let valeurs = mailing::valeurs(&pris.variables, &envoi.habillage.variable_fallbacks);
             let message = match composer(
                 pris.id.to_string(),
                 &pris.email,
-                &envoi.subject,
-                &envoi.body_html,
+                &envoi,
                 &valeurs,
+                &self.site,
             ) {
                 Ok(m) => m,
                 Err(e) => {
@@ -247,14 +278,17 @@ pub struct SendMailingTest {
     db: Db,
     mailer: Arc<dyn Mailer>,
     entrepots: Entrepots,
+    /// L'adresse publique du site : le logo des gabarits.
+    site: String,
 }
 
 impl SendMailingTest {
-    pub fn new(db: Db, mailer: Arc<dyn Mailer>, entrepots: Entrepots) -> Self {
+    pub fn new(db: Db, mailer: Arc<dyn Mailer>, entrepots: Entrepots, site: String) -> Self {
         Self {
             db,
             mailer,
             entrepots,
+            site,
         }
     }
 }
@@ -287,21 +321,18 @@ impl JobHandler for SendMailingTest {
             return Ok(());
         };
         let edition = mailings::titre_edition(self.db.pool(), envoi.event_id).await?;
-        let valeurs = mailing::valeurs(&serde_json::json!({
-            "prenom": prenom,
-            "nom": nom,
-            "organisation": organisation.unwrap_or_default(),
-            "email": adresse,
-            "edition": edition,
-        }));
+        let valeurs = mailing::valeurs(
+            &serde_json::json!({
+                "prenom": prenom,
+                "nom": nom,
+                "organisation": organisation.unwrap_or_default(),
+                "email": adresse,
+                "edition": edition,
+            }),
+            &envoi.habillage.variable_fallbacks,
+        );
 
-        let mut message = composer(
-            job.id.to_string(),
-            &adresse,
-            &envoi.subject,
-            &envoi.body_html,
-            &valeurs,
-        )?;
+        let mut message = composer(job.id.to_string(), &adresse, &envoi, &valeurs, &self.site)?;
         message.subject = format!("[Essai] {}", message.subject);
         let copies = Extras {
             reply_to: envoi.reply_to.clone(),
@@ -319,20 +350,75 @@ impl JobHandler for SendMailingTest {
 mod tests {
     use super::*;
 
+    fn envoi(sujet: &str, corps: &str) -> mailings::LigneEnvoi {
+        let maintenant = time::OffsetDateTime::now_utc();
+        mailings::LigneEnvoi {
+            id: Uuid::nil(),
+            event_id: Uuid::nil(),
+            status: "draft".into(),
+            subject: sujet.into(),
+            body_html: corps.into(),
+            audience: vec![],
+            extra_addresses: vec![],
+            cc: vec!["equipe@ifdd.org".into()],
+            bcc: vec![],
+            reply_to: None,
+            duplicated_from: None,
+            created_by_name: None,
+            queued_by_name: None,
+            queued_at: None,
+            completed_at: None,
+            cancelled_at: None,
+            created_at: maintenant,
+            updated_at: maintenant,
+            habillage: mailings::Habillage {
+                template: "sobre".into(),
+                variable_fallbacks: serde_json::json!({ "prenom": "Madame, Monsieur" }),
+                reply_button: true,
+                cta_label: None,
+                cta_url: None,
+            },
+        }
+    }
+
     #[test]
     fn le_corps_echappe_et_lobjet_non() {
-        let valeurs = mailing::valeurs(&serde_json::json!({ "prenom": "A<b>", "nom": "O'Neil" }));
+        let e = envoi("Pour {{prenom}}", "<p>Bonjour {{prenom}} {{nom}}</p>");
+        let valeurs = mailing::valeurs(
+            &serde_json::json!({ "prenom": "A<b>", "nom": "O'Neil" }),
+            &e.habillage.variable_fallbacks,
+        );
         let m = composer(
             "x".into(),
             "a@example.org",
-            "Pour {{prenom}}",
-            "<p>Bonjour {{prenom}} {{nom}}</p>",
+            &e,
             &valeurs,
+            "https://site.org",
         )
         .unwrap();
         assert_eq!(m.subject, "Pour A<b>");
         let html = m.html.unwrap();
         assert!(html.contains("Bonjour A&lt;b&gt; O&#39;Neil"), "{html}");
-        assert_eq!(m.text, "Bonjour A<b> O'Neil");
+        assert!(html.contains("mailto:equipe@ifdd.org"), "{html}");
+        assert!(m.text.starts_with("Bonjour A<b> O'Neil"), "{}", m.text);
+    }
+
+    #[test]
+    fn sans_compte_la_valeur_de_secours_sert() {
+        let e = envoi("Objet", "<p>Bonjour {{prenom}},</p>");
+        let valeurs = mailing::valeurs(&serde_json::json!({}), &e.habillage.variable_fallbacks);
+        let m = composer(
+            "x".into(),
+            "a@example.org",
+            &e,
+            &valeurs,
+            "https://site.org",
+        )
+        .unwrap();
+        assert!(
+            m.text.starts_with("Bonjour Madame, Monsieur,"),
+            "{}",
+            m.text
+        );
     }
 }

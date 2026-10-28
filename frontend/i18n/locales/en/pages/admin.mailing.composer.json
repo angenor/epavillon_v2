@@ -1,0 +1,70 @@
+{
+  "title": "New email",
+  "noEdition": "First choose an edition in the back office selector.",
+  "alreadySent": "This email has already been sent: read it in the history, or duplicate it to prepare another.",
+  "to": "To",
+  "cc": "Cc",
+  "bcc": "Bcc",
+  "subject": "Subject",
+  "body": "Message",
+  "more": "More options",
+  "attach": "Attach a file",
+  "send": "Send",
+  "confirm": "Send | Send to {count} person? | Send to {count} people?",
+  "group": "Group",
+  "groupDone": "Done",
+  "groupFiltered": "{name} (filtered)",
+  "remove": "Remove {name}",
+  "addressPlaceholder": "Addresses, separated by commas, or a group",
+  "draftHere": "This email is a draft: it opens in the compose window.",
+  "openDraft": "Open the draft",
+  "summary": {
+    "none": "No recipients yet.",
+    "count": "No reachable recipient | {count} recipient | {count} recipients",
+    "suppressed": "no excluded address | {count} excluded address (bounce or unsubscribe) | {count} excluded addresses (bounce or unsubscribe)",
+    "noAccount": "no one without an account | {count} without an account | {count} without an account",
+    "fallback": "no fallback value | {count} will receive a fallback value | {count} will receive a fallback value",
+    "attachments": "attachments: {size}"
+  },
+  "alerts": {
+    "subject": "The subject is empty.",
+    "variables": "Unknown variable: {names}. Available variables are under “More options”.",
+    "addresses": "Invalid address: {list}.",
+    "heavy": "Attachments exceed the allowed total size: remove one."
+  },
+  "options": {
+    "replyTo": "Reply to",
+    "replyToHint": "Where replies go. Empty: to the outbox, which cannot be read.",
+    "edition": "Edition",
+    "editionHint": "Recipient groups come from this edition.",
+    "template": "Template",
+    "ctaLabel": "Action button text",
+    "ctaUrl": "Action button link",
+    "replyButton": "“Reply” button",
+    "replyButtonHint": "Opens a reply to the reply-to address (or the Cc), with the Cc already copied.",
+    "variables": "Variables and fallback values",
+    "variablesHint": "A variable is replaced for each recipient. Someone without an account has no first or last name: they receive the fallback value.",
+    "fallbackHint": "Fallback for the {name} variable",
+    "noFallback": "No fallback: the variable stays empty",
+    "preview": "Preview",
+    "seenBy": "Seen by",
+    "previewNoAccount": "Seen by someone without an account: fallback values apply.",
+    "noAccount": "{email}, no account",
+    "test": "Send me a test",
+    "testHint": "To your address only, no copies, subject prefixed with “[Essai]” (French for test)."
+  },
+  "templates": {
+    "sobre": {
+      "name": "Plain",
+      "hint": "The text and the IFDD signature."
+    },
+    "institutionnel": {
+      "name": "Institutional",
+      "hint": "IFDD banner, logo, IFDD and OIF footer."
+    },
+    "annonce": {
+      "name": "Announcement",
+      "hint": "Banner, large title (the subject), action button."
+    }
+  }
+}

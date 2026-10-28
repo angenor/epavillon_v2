@@ -47,6 +47,8 @@ interface Props {
   dismissible?: boolean
   /** Masque la croix de l'en-tête — dialogue à décision obligatoire. */
   hideCloseButton?: boolean
+  /** Plein écran sous 640 px : une fenêtre de rédaction, pas une question. */
+  fullscreenMobile?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), { size: 'md', dismissible: true })
@@ -115,11 +117,14 @@ onBeforeUnmount(() => {
     :aria-labelledby="titleId"
     :aria-describedby="props.description ? descriptionId : undefined"
     class="ui-modal m-auto w-[calc(100vw-2rem)] rounded-lg border border-border bg-surface-overlay p-0 text-text shadow-lg backdrop:bg-scrim/60"
-    :class="WIDTHS[props.size]"
+    :class="[
+      WIDTHS[props.size],
+      props.fullscreenMobile && 'max-sm:m-0 max-sm:h-dvh max-sm:max-h-none max-sm:w-screen max-sm:max-w-none max-sm:rounded-none max-sm:border-0',
+    ]"
     @click="onBackdropClick"
     @cancel.prevent="props.dismissible ? close() : undefined"
   >
-    <div class="flex max-h-[85vh] flex-col">
+    <div class="flex max-h-[85vh] flex-col" :class="props.fullscreenMobile && 'max-sm:h-full max-sm:max-h-none'">
       <header class="flex items-start gap-4 border-b border-border-subtle px-5 py-4">
         <div class="min-w-0 flex-1">
           <h2 :id="titleId" class="text-xl">{{ props.title }}</h2>

@@ -39,6 +39,16 @@ pub struct MailingPayload {
     pub bcc: Option<Vec<String>>,
     /// Chaîne vide : retirer l'adresse de réponse.
     pub reply_to: Option<String>,
+    /// Changer d'édition, tant que c'est un brouillon : gardé sur la nouvelle.
+    pub event_id: Option<Uuid>,
+    /// `sobre`, `institutionnel` ou `annonce`.
+    pub template: Option<String>,
+    /// Valeur de secours par variable ; une chaîne vide retire le secours.
+    pub variable_fallbacks: Option<HashMap<String, String>>,
+    pub reply_button: Option<bool>,
+    /// Bouton d'action de l'annonce : les deux, ou deux chaînes vides.
+    pub cta_label: Option<String>,
+    pub cta_url: Option<String>,
 }
 
 /// La création (`CreateMailingPayload`).
@@ -105,6 +115,12 @@ pub struct Mailing {
     pub cc: Vec<String>,
     pub bcc: Vec<String>,
     pub reply_to: Option<String>,
+    pub template: String,
+    /// Objet nom de variable -> valeur de secours.
+    pub variable_fallbacks: serde_json::Value,
+    pub reply_button: bool,
+    pub cta_label: Option<String>,
+    pub cta_url: Option<String>,
     pub duplicated_from: Option<Uuid>,
     pub created_by_name: Option<String>,
     pub queued_by_name: Option<String>,
@@ -179,10 +195,25 @@ pub struct MailingAudience {
     pub suppressed: i64,
     /// Adresses joignables sans prénom connu : `{{prenom}}` y serait vide.
     pub without_first_name: i64,
+    /// Adresses joignables qui ne sont celles d'aucun compte.
+    pub without_account: i64,
+    /// Destinataires qui recevront au moins une valeur de secours, pour les
+    /// variables que l'objet et le corps citent.
+    pub fallback_count: i64,
     /// Messages remis au serveur d'envoi : un par destinataire, plus un par
     /// adresse en copie ou en copie cachée, et ce pour chaque message.
     pub envelope_count: i64,
     pub entries: Vec<MailingAudienceEntry>,
+}
+
+/// Le courriel tel qu'un destinataire le recevra (`MailingPreview`), gabarit
+/// compris. N'envoie rien.
+#[derive(Debug, Clone, Serialize, ToSchema)]
+pub struct MailingPreview {
+    pub to: String,
+    pub has_account: bool,
+    pub subject: String,
+    pub html: String,
 }
 
 /// La réponse d'un envoi d'essai (`MailingTestResult`).
@@ -246,16 +277,29 @@ pub fn echapper_html(valeur: &str) -> String {
 
 /// Les valeurs des variables d'un destinataire, toutes présentes : une valeur
 /// inconnue est vide plutôt qu'absente, l'écran ayant prévenu avant l'envoi.
-pub fn valeurs(variables: &serde_json::Value) -> HashMap<String, String> {
+pub fn valeurs(
+    variables: &serde_json::Value,
+    secours: &serde_json::Value,
+) -> HashMap<String, String> {
     VARIABLES
         .iter()
         .map(|nom| {
-            let valeur = variables
+            let lue = variables
                 .get(*nom)
                 .and_then(serde_json::Value::as_str)
                 .unwrap_or_default()
-                .to_owned();
-            ((*nom).to_owned(), valeur)
+                .trim();
+            // Une personne sans compte n'a ni prénom ni nom : la valeur de
+            // secours (« Madame, Monsieur ») prend la place du vide.
+            let valeur = if lue.is_empty() {
+                secours
+                    .get(*nom)
+                    .and_then(serde_json::Value::as_str)
+                    .unwrap_or_default()
+            } else {
+                lue
+            };
+            ((*nom).to_owned(), valeur.to_owned())
         })
         .collect()
 }
@@ -352,9 +396,12 @@ mod tests {
 
     #[test]
     fn toutes_les_variables_ont_une_valeur() {
-        let v = valeurs(&serde_json::json!({ "prenom": "Awa" }));
+        let secours = serde_json::json!({ "prenom": "Madame, Monsieur" });
+        let v = valeurs(&serde_json::json!({ "prenom": "Awa" }), &secours);
         assert_eq!(v.len(), VARIABLES.len());
         assert_eq!(v["prenom"], "Awa");
         assert_eq!(v["nom"], "");
+        let sans_compte = valeurs(&serde_json::json!({ "prenom": "" }), &secours);
+        assert_eq!(sans_compte["prenom"], "Madame, Monsieur");
     }
 }

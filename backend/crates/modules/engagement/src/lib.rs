@@ -100,11 +100,13 @@ pub fn job_handlers(db: Db, config: &Config, mailer: Arc<dyn Mailer>) -> Vec<Arc
             db.clone(),
             mailer.clone(),
             kernel::storage::Entrepots::new(&config.media),
+            config.app_public_url.clone(),
         )),
         Arc::new(jobs::send_mailing::SendMailingTest::new(
             db.clone(),
             mailer,
             kernel::storage::Entrepots::new(&config.media),
+            config.app_public_url.clone(),
         )),
         // Le récurrent, sur la file par défaut : rien ne l'enfile, il pose sa
         // propre occurrence suivante, et le démarrage du worker réarme la chaîne.

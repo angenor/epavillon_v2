@@ -1166,6 +1166,23 @@ CREATE TABLE engagement.mailings (
     bcc             platform.email[] NOT NULL DEFAULT '{}',
     reply_to        platform.email,
 
+    -- FENÊTRE UNIQUE (28/10, après usage en production). Le gabarit de mise en
+    -- page, rendu par le worker en HTML de messagerie (tableaux, styles en
+    -- ligne, 600 px) : 'sobre' (texte et signature de l'IFDD),
+    -- 'institutionnel' (bandeau, logo, pied de page IFDD et OIF), 'annonce'
+    -- (bandeau, grand titre, bouton d'action).
+    template        text        NOT NULL DEFAULT 'sobre',
+    -- Valeur de secours de chaque variable, pour qui n'a pas de compte (on
+    -- écrit volontiers à des personnes non inscrites) : {"prenom": "Madame,
+    -- Monsieur"}. Une variable sans secours reste vide.
+    variable_fallbacks jsonb    NOT NULL DEFAULT '{"prenom": "Madame, Monsieur"}'::jsonb,
+    -- Bouton « Répondre » dans le courriel : un lien mailto: vers l'adresse de
+    -- réponse (ou la première copie), les copies déjà en copie.
+    reply_button    boolean     NOT NULL DEFAULT false,
+    -- Le bouton d'action du gabarit « annonce ».
+    cta_label       text,
+    cta_url         platform.url,
+
     duplicated_from uuid        REFERENCES engagement.mailings(id) ON DELETE SET NULL,
     created_by      uuid        CONSTRAINT xmod_fk_mailings_author
                                 REFERENCES identity.people(id) ON DELETE SET NULL,
@@ -1186,7 +1203,10 @@ CREATE TABLE engagement.mailings (
     -- Au-delà, la copie n'est plus une copie mais une liste de diffusion cachée,
     -- et chaque adresse multiplie le nombre de messages comptés par le serveur.
     CONSTRAINT ck_mailings_copies CHECK (cardinality(cc) <= 10 AND cardinality(bcc) <= 10),
-    CONSTRAINT ck_mailings_extra CHECK (cardinality(extra_addresses) <= 500)
+    CONSTRAINT ck_mailings_extra CHECK (cardinality(extra_addresses) <= 500),
+    CONSTRAINT ck_mailings_template CHECK (template IN ('sobre', 'institutionnel', 'annonce')),
+    CONSTRAINT ck_mailings_fallbacks CHECK (jsonb_typeof(variable_fallbacks) = 'object'),
+    CONSTRAINT ck_mailings_cta CHECK ((cta_label IS NULL) = (cta_url IS NULL))
 );
 
 CREATE INDEX ix_mailings_event ON engagement.mailings (event_id, created_at DESC);

@@ -90,26 +90,19 @@ const columns = computed<TableColumn[]>(() => [
   { key: 'date', label: t('admin.mailing.list.columns.date', { zone: t(zoneFormulaKey('zoneOf', zone.value), { zone: zone.value }) }), hideBelow: 'lg' },
 ])
 
-const creating = ref(false)
+// « Nouveau courriel » et les brouillons ouvrent la fenêtre de rédaction ; la
+// liste se relit quand elle se ferme.
+const composer = useMailComposerStore()
 const createError = ref<string | null>(null)
+watch(() => composer.version, () => void refresh())
 
-async function create(): Promise<void> {
-  const eventId = adminScope.currentEventId
-  if (!eventId) return
-  creating.value = true
-  createError.value = null
-  try {
-    const draft = await api.adminMailings.create({ event_id: eventId })
-    await navigateTo(localePath(`/admin/courriels/${draft.id}`))
-  } catch (thrown) {
-    createError.value = apiErrorMessage(thrown, t)
-  } finally {
-    creating.value = false
-  }
+function create(): void {
+  composer.open()
 }
 
 function open(row: MailingSummary): void {
-  navigateTo(localePath(`/admin/courriels/${row.id}`))
+  if (row.status === 'draft') composer.open(row.id)
+  else navigateTo(localePath(`/admin/courriels/${row.id}`))
 }
 
 function dateOf(row: MailingSummary): string {
@@ -134,7 +127,7 @@ const isLoadingAccess = computed(() => adminScope.isLoading || grantStatus.value
           <h1 class="text-3xl leading-tight font-semibold text-balance">{{ t('admin.mailing.list.title') }}</h1>
           <p class="mt-1 max-w-(--measure) text-text-muted">{{ t('admin.mailing.list.subtitle') }}</p>
         </div>
-        <UiButton v-if="canSend" icon="plus" :loading="creating" @click="create">
+        <UiButton v-if="canSend" icon="plus" @click="create">
           {{ t('admin.mailing.list.new') }}
         </UiButton>
       </header>
@@ -193,7 +186,16 @@ const isLoadingAccess = computed(() => adminScope.isLoading || grantStatus.value
           @row-click="open"
         >
           <template #cell-subject="{ row }">
+            <button
+              v-if="row.status === 'draft'"
+              type="button"
+              class="cursor-pointer text-left font-semibold text-text hover:underline"
+              @click.stop="open(row)"
+            >
+              {{ row.subject || t('admin.mailing.common.noSubject') }}
+            </button>
             <NuxtLink
+              v-else
               :to="localePath(`/admin/courriels/${row.id}`)"
               class="font-semibold text-text no-underline hover:underline"
             >

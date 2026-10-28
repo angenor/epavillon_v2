@@ -18,6 +18,7 @@ pub fn configurer(cfg: &mut web::ServiceConfig) {
         .route("/admin/mailings/{id}", web::put().to(modifier))
         .route("/admin/mailings/{id}", web::delete().to(supprimer))
         .route("/admin/mailings/{id}/audience", web::get().to(audience))
+        .route("/admin/mailings/{id}/preview", web::get().to(apercu))
         .route("/admin/mailings/{id}/test", web::post().to(essai))
         .route("/admin/mailings/{id}/send", web::post().to(envoyer))
         .route("/admin/mailings/{id}/cancel", web::post().to(annuler))
@@ -186,6 +187,39 @@ pub(crate) async fn audience(
     id: web::Path<Uuid>,
 ) -> Result<HttpResponse> {
     Ok(HttpResponse::Ok().json(mailings::audience(&state, acteur, id.into_inner()).await?))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ApercuQuery {
+    pub email: Option<String>,
+}
+
+/// L'aperçu, gabarit compris.
+#[utoipa::path(
+    get,
+    description = "`MailingPreview` : le courriel tel qu'un destinataire le recevra, rendu par la même fonction que le worker (gabarit, variables et valeurs de secours, boutons). `email` choisit le destinataire ; absent, le premier joignable. `has_account` faux : une personne sans compte, qui reçoit les valeurs de secours. N'envoie rien.",
+    path = "/admin/mailings/{id}/preview",
+    tag = "Back-office : envois de courriels",
+    operation_id = "engagement_envois_apercu",
+    params(
+        ("id" = Uuid, Path, description = "L'envoi"),
+        ("email" = Option<String>, Query, description = "Le destinataire vu"),
+    ),
+    responses(
+        (status = 200, description = "MailingPreview", body = Object),
+        (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
+        (status = 404, description = "Envoi inexistant ou hors droit", body = crate::routes::openapi::ApiErrorBody),
+    ),
+    security(("session" = []))
+)]
+pub(crate) async fn apercu(
+    state: web::Data<EngagementState>,
+    Actor(acteur): Actor,
+    id: web::Path<Uuid>,
+    requete: web::Query<ApercuQuery>,
+) -> Result<HttpResponse> {
+    Ok(HttpResponse::Ok()
+        .json(mailings::apercu(&state, acteur, id.into_inner(), requete.email.as_deref()).await?))
 }
 
 /// L'envoi d'essai.

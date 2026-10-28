@@ -1,0 +1,70 @@
+{
+  "title": "Nouveau courriel",
+  "noEdition": "Choisissez d'abord une édition dans le sélecteur du back-office.",
+  "alreadySent": "Ce courriel est déjà parti : il se lit dans l'historique, et se duplique pour en préparer un autre.",
+  "to": "À",
+  "cc": "Cc",
+  "bcc": "Cci",
+  "subject": "Objet",
+  "body": "Message",
+  "more": "Plus d'options",
+  "attach": "Joindre un fichier",
+  "send": "Envoyer",
+  "confirm": "Envoyer | Envoyer à {count} personne ? | Envoyer à {count} personnes ?",
+  "group": "Groupe",
+  "groupDone": "Terminé",
+  "groupFiltered": "{name} (filtrés)",
+  "remove": "Retirer {name}",
+  "addressPlaceholder": "Adresses, séparées par des virgules, ou un groupe",
+  "draftHere": "Ce courriel est un brouillon : il s'ouvre dans la fenêtre de rédaction.",
+  "openDraft": "Ouvrir le brouillon",
+  "summary": {
+    "none": "Aucun destinataire pour l'instant.",
+    "count": "Aucun destinataire joignable | {count} destinataire | {count} destinataires",
+    "suppressed": "aucune adresse écartée | {count} adresse écartée (rebond ou désabonnement) | {count} adresses écartées (rebond ou désabonnement)",
+    "noAccount": "aucune personne sans compte | {count} sans compte | {count} sans compte",
+    "fallback": "aucune valeur de secours | {count} recevra une valeur de secours | {count} recevront une valeur de secours",
+    "attachments": "pièces jointes : {size}"
+  },
+  "alerts": {
+    "subject": "L'objet est vide.",
+    "variables": "Variable inconnue : {names}. Variables possibles dans « Plus d'options ».",
+    "addresses": "Adresse invalide : {list}.",
+    "heavy": "Les pièces jointes dépassent la taille totale permise : retirez-en une."
+  },
+  "options": {
+    "replyTo": "Réponse à",
+    "replyToHint": "Où partent les réponses. Vide : vers la boîte d'envoi, qui ne se consulte pas.",
+    "edition": "Édition",
+    "editionHint": "Les groupes de destinataires viennent de cette édition.",
+    "template": "Gabarit",
+    "ctaLabel": "Texte du bouton d'action",
+    "ctaUrl": "Lien du bouton d'action",
+    "replyButton": "Bouton « Répondre »",
+    "replyButtonHint": "Ouvre une réponse vers l'adresse de réponse (ou la copie), les copies déjà en copie.",
+    "variables": "Variables et valeurs de secours",
+    "variablesHint": "Une variable se remplace pour chaque destinataire. Une personne sans compte n'a ni prénom ni nom : elle reçoit la valeur de secours.",
+    "fallbackHint": "Secours de la variable {name}",
+    "noFallback": "Aucun secours : la variable reste vide",
+    "preview": "Aperçu",
+    "seenBy": "Vu par",
+    "previewNoAccount": "Vu par une personne sans compte : les valeurs de secours s'appliquent.",
+    "noAccount": "{email}, sans compte",
+    "test": "M'envoyer un essai",
+    "testHint": "À votre adresse seulement, sans copie, objet précédé de « [Essai] »."
+  },
+  "templates": {
+    "sobre": {
+      "name": "Sobre",
+      "hint": "Le texte et la signature de l'IFDD."
+    },
+    "institutionnel": {
+      "name": "Institutionnel",
+      "hint": "Bandeau aux couleurs de l'IFDD, logo, pied de page IFDD et OIF."
+    },
+    "annonce": {
+      "name": "Annonce",
+      "hint": "Bandeau, grand titre (l'objet), bouton d'action."
+    }
+  }
+}

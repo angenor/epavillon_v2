@@ -52,6 +52,8 @@ const adminScope = useAdminScopeStore()
 const auth = useAuthStore()
 const features = useFeatureStore()
 const isMaintenanceOn = computed(() => features.isEnabled(PLATFORM_MAINTENANCE_FLAG))
+// La fenêtre de rédaction d'un courriel, ouverte d'ici, de l'historique ou d'un brouillon.
+const mailComposer = useMailComposerStore()
 
 // SANS `await` : la garde d'accès du back-office a déjà résolu la session, cette
 // lecture ne coûte donc aucun appel de plus — mais le layout ne doit pas retarder
@@ -315,6 +317,13 @@ const sectionsVisibles = computed(() =>
           />
         </div>
 
+        <UiButton
+          variant="ghost"
+          icon="mail"
+          icon-only
+          :label="t('nav.admin.writeMail')"
+          @click="mailComposer.open()"
+        />
         <UiLocaleSwitch class="hidden sm:flex" />
         <UiThemeToggle />
       </header>
@@ -337,6 +346,10 @@ const sectionsVisibles = computed(() =>
       <main id="contenu-admin" class="min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-8">
         <slot />
       </main>
+
+      <ClientOnly>
+        <AdminMailingsComposer v-if="mailComposer.isOpen" />
+      </ClientOnly>
     </div>
   </div>
 </template>

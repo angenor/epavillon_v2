@@ -14,6 +14,9 @@ export type MailingStatus = 'draft' | 'queued' | 'sent' | 'cancelled'
 /** `engagement.mailing_recipient_status`. */
 export type MailingRecipientStatus = 'queued' | 'sending' | 'sent' | 'failed' | 'suppressed' | 'cancelled'
 
+/** Gabarit de mise en page (`engagement.mailings.template`). */
+export type MailingTemplate = 'sobre' | 'institutionnel' | 'annonce'
+
 /** Les familles de destinataires lues par `mailing_audience()`. */
 export type MailingCriterionKind = 'submitters' | 'speakers' | 'registrants' | 'roles'
 
@@ -87,6 +90,12 @@ export interface Mailing {
   cc: string[]
   bcc: string[]
   reply_to: string | null
+  template: MailingTemplate
+  /** Valeur de secours par variable, pour qui n'a pas de compte. */
+  variable_fallbacks: Record<string, string>
+  reply_button: boolean
+  cta_label: string | null
+  cta_url: string | null
   duplicated_from: Uuid | null
   created_by_name: string | null
   queued_by_name: string | null
@@ -130,9 +139,21 @@ export interface MailingAudience {
   sendable: number
   suppressed: number
   without_first_name: number
+  /** Adresses joignables qui ne sont celles d'aucun compte. */
+  without_account: number
+  /** Destinataires qui recevront au moins une valeur de secours. */
+  fallback_count: number
   /** Messages remis au serveur d'envoi, copies comprises. */
   envelope_count: number
   entries: MailingAudienceEntry[]
+}
+
+/** Le courriel tel qu'un destinataire le recevra, gabarit compris. */
+export interface MailingPreview {
+  to: string
+  has_account: boolean
+  subject: string
+  html: string
 }
 
 export interface MailingTestResult {
@@ -149,6 +170,13 @@ export interface MailingPayload {
   bcc?: string[]
   /** Chaîne vide : retirer l'adresse de réponse. */
   reply_to?: string
+  event_id?: EventId
+  template?: MailingTemplate
+  variable_fallbacks?: Record<string, string>
+  reply_button?: boolean
+  /** Deux chaînes vides retirent le bouton d'action. */
+  cta_label?: string
+  cta_url?: string
 }
 
 export interface CreateMailingPayload extends MailingPayload {
@@ -166,4 +194,15 @@ export interface MailingRecipientRow {
   suppressed: boolean
   error: string | null
   sentAt: string | null
+}
+
+/** « Plus d'options » de la fenêtre de rédaction. */
+export interface ComposerOptionsValue {
+  replyTo: string
+  eventId: Uuid
+  template: MailingTemplate
+  fallbacks: Record<string, string>
+  replyButton: boolean
+  ctaLabel: string
+  ctaUrl: string
 }

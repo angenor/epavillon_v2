@@ -42,6 +42,14 @@ Code : `epavillonvue/src/views/admin/EmailManager.vue`, `components/email/EmailM
 | Traductions | `i18n/locales/{fr,en}/pages/admin.mailing.{common,list,compose,record}.json` | trois fichiers au plus par page |
 | Tests | `engagement/tests/envois.rs` (4), tests unitaires du domaine et du travail, `frontend/tests/site/mailing.test.ts` (3) | liste dédoublonnée, adresse supprimée écartée, copie sur chaque message, variables, refus hors périmètre, variable inconnue refusée, envoi parti non modifiable, duplication |
 
+## Fenêtre unique (28/10, refonte après usage en production)
+
+Les quatre étapes sont remplacées par une fenêtre de rédaction à la Gmail, ouverte de partout (icône enveloppe de la barre du back-office, « Écrire un courriel » de l'historique, un brouillon de la liste) : `components/admin/mailings/Composer.vue`, `AddressField.vue` (champ à puces, adresses et groupes, « + Groupe » reprend l'éditeur de critères), `ComposerOptions.vue` (réponse à, édition, gabarit et aperçu, valeurs de secours, bouton Répondre, bouton d'action, essai), `stores/mail-composer.ts`, `UiModal` (`fullscreen-mobile`), `UiRichText` (`buttons` : « Insérer un bouton »). Brouillon créé à l'ouverture, enregistré à chaque pause de frappe, supprimé à la fermeture s'il est vide. Synthèse en direct sous les destinataires (nombre, écartés, sans compte, valeurs de secours, poids des pièces) ; alertes en ligne ; confirmation en un clic au-delà de 20 destinataires. Une variable inconnue n'empêche plus l'enregistrement, seulement l'envoi.
+
+API : `engagement/src/domain/gabarits.rs` (trois gabarits en HTML de messagerie, 600 px, tableaux et styles en ligne, couleurs de la charte, logo `/logos/png/epavillon@4x.png` ; liens `class="bouton"` rendus en boutons ; `mailto:` du bouton Répondre), `GET /admin/mailings/{id}/preview` (rendu par la fonction du worker), `without_account` et `fallback_count` dans la liste avant envoi, `event_id` modifiable sur un brouillon (gardé sur la nouvelle édition). Tests : `envois.rs` (7), gabarits et secours (unitaires).
+
+Vu au navigateur sur données d'exemple (1280 et 375 px, plein écran sur mobile). Non vérifié : le rendu dans Outlook et Microsoft 365, l'aperçu contre l'API réelle.
+
 ## Pièces jointes (28/10, second commit)
 
 | Couche | Où | Quoi |

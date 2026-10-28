@@ -25,9 +25,10 @@ use kernel::jobs::{self, NewJob};
 use kernel::RequestContext;
 use uuid::Uuid;
 
+use crate::domain::gabarits::GABARITS;
 use crate::domain::mailing::{
     normaliser_adresses, CreateMailingPayload, Mailing, MailingAudience, MailingCriterion,
-    MailingListScreen, MailingPayload, MailingTestResult, KINDS, VARIABLES,
+    MailingListScreen, MailingPayload, MailingPreview, MailingTestResult, KINDS, VARIABLES,
 };
 use crate::domain::{render, sanitize};
 use crate::jobs::send_mailing::{QUEUE, SEND_MAILING, SEND_MAILING_TEST};
@@ -133,6 +134,11 @@ async fn assembler(state: &EngagementState, e: mailings::LigneEnvoi) -> Result<M
         cc: e.cc,
         bcc: e.bcc,
         reply_to: e.reply_to,
+        template: e.habillage.template,
+        variable_fallbacks: e.habillage.variable_fallbacks,
+        reply_button: e.habillage.reply_button,
+        cta_label: e.habillage.cta_label,
+        cta_url: e.habillage.cta_url,
         duplicated_from: e.duplicated_from,
         created_by_name: e.created_by_name,
         queued_by_name: e.queued_by_name,
@@ -166,14 +172,88 @@ pub async fn audience(state: &EngagementState, acteur: Uuid, id: Uuid) -> Result
         .count() as i64;
     let par_message = 1 + envoi.cc.len() as i64 + envoi.bcc.len() as i64;
     let envelope_count = sendable * par_message;
+    let without_account = entries
+        .iter()
+        .filter(|e| !e.is_suppressed && e.person_id.is_none())
+        .count() as i64;
+
+    // Qui recevra une valeur de secours : une variable citée, vide pour lui.
+    let mut citees = render::variables_citees(&envoi.subject);
+    citees.extend(render::variables_citees(&envoi.body_html));
+    let manque = |e: &crate::domain::mailing::MailingAudienceEntry| {
+        citees.iter().any(|v| match v.as_str() {
+            "prenom" => e.first_name.is_none(),
+            "nom" => e.last_name.is_none(),
+            "organisation" => e.organization.is_none(),
+            _ => false,
+        })
+    };
+    let fallback_count = entries
+        .iter()
+        .filter(|e| !e.is_suppressed && manque(e))
+        .count() as i64;
 
     Ok(MailingAudience {
         total,
         sendable,
         suppressed,
         without_first_name,
+        without_account,
+        fallback_count,
         envelope_count,
         entries,
+    })
+}
+
+/// Le courriel tel qu'un destinataire le recevra, gabarit compris : rendu par
+/// la même fonction que le worker. `email` absent : le premier destinataire
+/// joignable, ou un exemple sans compte s'il n'y en a aucun.
+pub async fn apercu(
+    state: &EngagementState,
+    acteur: Uuid,
+    id: Uuid,
+    email: Option<&str>,
+) -> Result<MailingPreview> {
+    let envoi = garder_envoi(state, acteur, id).await?;
+    let criteres = serde_json::to_value(&envoi.audience).map_err(ApiError::internal)?;
+    let entries = mailings::audience(
+        state.pool(),
+        envoi.event_id,
+        &criteres,
+        &envoi.extra_addresses,
+    )
+    .await?;
+    let choisie = entries
+        .iter()
+        .filter(|e| !e.is_suppressed)
+        .find(|e| email.is_none_or(|m| e.email.eq_ignore_ascii_case(m)));
+    let edition = mailings::titre_edition(state.pool(), envoi.event_id).await?;
+    let (adresse, variables) = match choisie {
+        Some(e) => (
+            e.email.clone(),
+            serde_json::json!({
+                "prenom": e.first_name, "nom": e.last_name,
+                "organisation": e.organization, "email": e.email, "edition": edition,
+            }),
+        ),
+        None => (
+            "destinataire@exemple.org".to_owned(),
+            serde_json::json!({ "email": "destinataire@exemple.org", "edition": edition }),
+        ),
+    };
+    let valeurs = crate::domain::mailing::valeurs(&variables, &envoi.habillage.variable_fallbacks);
+    let message = crate::jobs::send_mailing::composer(
+        "apercu".to_owned(),
+        &adresse,
+        &envoi,
+        &valeurs,
+        &state.config().app_public_url,
+    )?;
+    Ok(MailingPreview {
+        to: adresse,
+        has_account: choisie.is_some_and(|e| e.person_id.is_some()),
+        subject: message.subject,
+        html: message.html.unwrap_or_default(),
     })
 }
 
@@ -190,6 +270,7 @@ struct Brouillon {
     cc: Vec<String>,
     bcc: Vec<String>,
     reply_to: Option<String>,
+    habillage: mailings::Habillage,
 }
 
 impl Brouillon {
@@ -202,8 +283,83 @@ impl Brouillon {
             cc: &self.cc,
             bcc: &self.bcc,
             reply_to: self.reply_to.as_deref(),
+            habillage: &self.habillage,
         }
     }
+}
+
+fn habillage_par_defaut() -> mailings::Habillage {
+    mailings::Habillage {
+        template: "sobre".to_owned(),
+        variable_fallbacks: serde_json::json!({ "prenom": "Madame, Monsieur" }),
+        reply_button: false,
+        cta_label: None,
+        cta_url: None,
+    }
+}
+
+/// Le gabarit et ses options, fusionnés avec l'état connu.
+fn preparer_habillage(
+    base: mailings::Habillage,
+    p: &MailingPayload,
+) -> Result<mailings::Habillage> {
+    let template = match &p.template {
+        Some(t) if !GABARITS.contains(&t.as_str()) => {
+            return Err(ApiError::validation(
+                format!("Gabarit inconnu : « {t} »."),
+                "template",
+            ))
+        }
+        Some(t) => t.clone(),
+        None => base.template,
+    };
+    let variable_fallbacks = match &p.variable_fallbacks {
+        Some(secours) => {
+            let mut objet = serde_json::Map::new();
+            for (nom, valeur) in secours {
+                if !VARIABLES.contains(&nom.as_str()) {
+                    return Err(ApiError::validation(
+                        format!("Variable inconnue : « {nom} »."),
+                        "variable_fallbacks",
+                    ));
+                }
+                let valeur = valeur.trim();
+                if !valeur.is_empty() {
+                    objet.insert(nom.clone(), serde_json::Value::String(valeur.to_owned()));
+                }
+            }
+            serde_json::Value::Object(objet)
+        }
+        None => base.variable_fallbacks,
+    };
+    let vide = |v: &Option<String>| v.as_ref().map(|s| s.trim().to_owned());
+    let (cta_label, cta_url) = match (vide(&p.cta_label), vide(&p.cta_url)) {
+        (None, None) => (base.cta_label, base.cta_url),
+        (texte, lien) => {
+            let texte = texte.filter(|s| !s.is_empty());
+            let lien = lien.filter(|s| !s.is_empty());
+            if let Some(l) = &lien {
+                if !(l.starts_with("https://") || l.starts_with("http://")) {
+                    return Err(ApiError::validation(
+                        "Le lien du bouton commence par https://.",
+                        "cta_url",
+                    ));
+                }
+            }
+            // Les deux, ou aucun : un bouton sans lien ne mène nulle part.
+            match (texte, lien) {
+                (Some(t), Some(l)) => (Some(t), Some(l)),
+                _ => (None, None),
+            }
+        }
+    };
+    Ok(mailings::Habillage {
+        template,
+        variable_fallbacks,
+        reply_button: p.reply_button.unwrap_or(base.reply_button),
+        cta_label,
+        cta_url,
+    })
 }
 
 fn adresses(brutes: &[String], champ: &str, max: usize) -> Result<Vec<String>> {
@@ -240,17 +396,9 @@ fn preparer(base: Brouillon, p: &MailingPayload) -> Result<Brouillon> {
         None => base.body_html,
     };
 
-    let mut citees = render::variables_citees(&subject);
-    citees.extend(render::variables_citees(&body_html));
-    if let Some(inconnue) = citees.iter().find(|v| !VARIABLES.contains(&v.as_str())) {
-        return Err(ApiError::validation(
-            format!(
-                "Variable inconnue : {{{{{inconnue}}}}}. Possibles : {}.",
-                VARIABLES.map(|v| format!("{{{{{v}}}}}")).join(", ")
-            ),
-            "body_html",
-        ));
-    }
+    // Les variables inconnues ne bloquent pas l'enregistrement automatique (on
+    // tape « {{pre » avant « {{prenom}} ») : l'écran les signale, l'envoi les
+    // refuse.
 
     let audience = match &p.audience {
         Some(criteres) => criteres_valides(criteres)?,
@@ -277,6 +425,7 @@ fn preparer(base: Brouillon, p: &MailingPayload) -> Result<Brouillon> {
         None => base.reply_to,
     };
 
+    let habillage = preparer_habillage(base.habillage, p)?;
     Ok(Brouillon {
         subject,
         body_html,
@@ -285,6 +434,7 @@ fn preparer(base: Brouillon, p: &MailingPayload) -> Result<Brouillon> {
         cc,
         bcc,
         reply_to,
+        habillage,
     })
 }
 
@@ -297,6 +447,7 @@ fn brouillon_de(e: &mailings::LigneEnvoi) -> Result<Brouillon> {
         cc: e.cc.clone(),
         bcc: e.bcc.clone(),
         reply_to: e.reply_to.clone(),
+        habillage: e.habillage.clone(),
     })
 }
 
@@ -323,6 +474,7 @@ pub async fn creer(
         cc: normaliser_adresses(&cc_par_defaut).unwrap_or_default(),
         bcc: Vec::new(),
         reply_to: None,
+        habillage: habillage_par_defaut(),
     };
     let brouillon = preparer(base, &payload.draft)?;
 
@@ -351,9 +503,17 @@ pub async fn modifier(
         return Err(ApiError::new(ErrorCode::EngagementMailingNotDraft));
     }
     let brouillon = preparer(brouillon_de(&envoi)?, payload)?;
+    // Changer d'édition : le droit se vérifie aussi sur la nouvelle.
+    let edition = match payload.event_id {
+        Some(nouvelle) if nouvelle != envoi.event_id => {
+            garder_edition(state, acteur, nouvelle).await?;
+            nouvelle
+        }
+        _ => envoi.event_id,
+    };
 
     let mut tx = state.db().write(ctx).await?;
-    if !mailings::modifier(&mut tx, id, &brouillon.valeurs()).await? {
+    if !mailings::modifier(&mut tx, id, edition, &brouillon.valeurs()).await? {
         return Err(ApiError::new(ErrorCode::EngagementMailingNotDraft));
     }
     tx.commit().await?;
@@ -407,6 +567,17 @@ fn exiger_un_contenu(e: &mailings::LigneEnvoi) -> Result<()> {
     }
     if sanitize_vide(&e.body_html) {
         return Err(ApiError::validation("Le message est vide.", "body_html"));
+    }
+    let mut citees = render::variables_citees(&e.subject);
+    citees.extend(render::variables_citees(&e.body_html));
+    if let Some(inconnue) = citees.iter().find(|v| !VARIABLES.contains(&v.as_str())) {
+        return Err(ApiError::validation(
+            format!(
+                "Variable inconnue : {{{{{inconnue}}}}}. Possibles : {}.",
+                VARIABLES.map(|v| format!("{{{{{v}}}}}")).join(", ")
+            ),
+            "body_html",
+        ));
     }
     Ok(())
 }

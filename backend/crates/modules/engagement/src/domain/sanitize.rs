@@ -107,7 +107,10 @@ fn nettoyeur() -> &'static ammonia::Builder<'static> {
             // Un courriel s'ouvre dans un client, pas dans un onglet : le
             // couple `target`/`rel` de B4 n'a pas de sens ici, et `rel` posé
             // d'office ferait diverger le HTML enregistré de celui qu'on relit.
-            .link_rel(None);
+            .link_rel(None)
+            // « Insérer un bouton » (28/10) : un lien `class="bouton"`, que le
+            // gabarit rend en bouton. Aucune autre classe ne passe.
+            .allowed_classes(HashMap::from([("a", HashSet::from(["bouton"]))]));
         builder
     });
     NETTOYEUR.get().expect("nettoyeur initialisé")

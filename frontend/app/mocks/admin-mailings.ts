@@ -14,6 +14,7 @@ import type {
   MailingCounts,
   MailingListScreen,
   MailingPayload,
+  MailingPreview,
   MailingRecipient,
   MailingSummary,
   MailingTestResult,
@@ -67,6 +68,11 @@ function seed(): void {
     cc: [ME],
     bcc: [],
     reply_to: null,
+    template: 'sobre',
+    variable_fallbacks: { prenom: 'Madame, Monsieur' },
+    reply_button: false,
+    cta_label: null,
+    cta_url: null,
     duplicated_from: null,
     created_by_name: 'Awa Sow Fall',
     queued_by_name: 'Awa Sow Fall',
@@ -123,6 +129,12 @@ function apply(m: Mailing, p: MailingPayload): Mailing {
     cc: p.cc ?? m.cc,
     bcc: p.bcc ?? m.bcc,
     reply_to: p.reply_to === undefined ? m.reply_to : p.reply_to || null,
+    event_id: p.event_id ?? m.event_id,
+    template: p.template ?? m.template,
+    variable_fallbacks: p.variable_fallbacks ?? m.variable_fallbacks,
+    reply_button: p.reply_button ?? m.reply_button,
+    cta_label: p.cta_label === undefined ? m.cta_label : p.cta_label || null,
+    cta_url: p.cta_url === undefined ? m.cta_url : p.cta_url || null,
     updated_at: now(),
   }
 }
@@ -153,6 +165,8 @@ export function mailingAudience(id: Uuid): MailingAudience | null {
     sendable,
     suppressed,
     without_first_name: entries.filter((e) => !e.is_suppressed && !e.first_name).length,
+    without_account: entries.filter((e) => !e.is_suppressed && !e.person_id).length,
+    fallback_count: entries.filter((e) => !e.is_suppressed && !e.first_name).length,
     envelope_count: envelope,
     entries,
   }
@@ -173,6 +187,11 @@ export function createMailing(payload: CreateMailingPayload): Mailing {
       cc: [ME],
       bcc: [],
       reply_to: null,
+      template: 'sobre',
+      variable_fallbacks: { prenom: 'Madame, Monsieur' },
+      reply_button: false,
+      cta_label: null,
+      cta_url: null,
       duplicated_from: null,
       created_by_name: 'Awa Sow Fall',
       queued_by_name: null,
@@ -254,8 +273,23 @@ export function duplicateMailing(id: Uuid): Mailing {
     cc: m.cc,
     bcc: m.bcc,
     reply_to: m.reply_to,
+    template: m.template,
+    variable_fallbacks: m.variable_fallbacks,
+    reply_button: m.reply_button,
+    cta_label: m.cta_label,
+    cta_url: m.cta_url,
     duplicated_from: m.id,
   }
   store.set(next.id, next)
   return next
+}
+
+/** Hors ligne, un aperçu sans gabarit : le corps, variables remplacées par leur secours. */
+export function mailingPreview(id: Uuid, email?: string): MailingPreview | null {
+  const m = mailingById(id)
+  if (!m) return null
+  const entry = ENTRIES.find((e) => !e.is_suppressed && (!email || e.email === email))
+  const prenom = entry?.first_name ?? m.variable_fallbacks.prenom ?? ''
+  const html = m.body_html.replace(/\{\{\s*prenom\s*\}\}/g, prenom)
+  return { to: entry?.email ?? 'destinataire@exemple.org', has_account: Boolean(entry?.person_id), subject: m.subject, html }
 }

@@ -43,6 +43,7 @@ pub struct ApiErrorBody {
         crate::routes::mailings::modifier,
         crate::routes::mailings::supprimer,
         crate::routes::mailings::audience,
+        crate::routes::mailings::apercu,
         crate::routes::mailings::essai,
         crate::routes::mailings::envoyer,
         crate::routes::mailings::annuler,

@@ -38,6 +38,7 @@ fn brouillon(edition: Uuid) -> CreateMailingPayload {
             cc: None,
             bcc: None,
             reply_to: Some("equipe@ifdd.org".into()),
+            ..MailingPayload::default()
         },
     }
 }
@@ -199,11 +200,83 @@ async fn une_variable_inconnue_est_refusee_sur_le_corps() {
     let t = commun::terrain(&bac).await;
     let mut payload = brouillon(t.edition);
     payload.draft.body_html = Some("<p>Bonjour {{titre_activite}}</p>".into());
-    let refus = mailings::creer(&bac.state, &bac.ctx(), t.administratrice, &payload)
+    // Le brouillon s'enregistre (on tape une variable avant de la finir) ;
+    // l'envoi la refuse.
+    let envoi = mailings::creer(&bac.state, &bac.ctx(), t.administratrice, &payload)
+        .await
+        .expect("brouillon");
+    let refus = mailings::envoyer(&bac.state, &bac.ctx(), t.administratrice, envoi.id)
         .await
         .expect_err("refus");
     assert_eq!(refus.code, ErrorCode::ValidationFailed);
     assert_eq!(refus.field.as_deref(), Some("body_html"));
+}
+
+/// Gabarit, valeurs de secours et bouton se mémorisent, se dupliquent et
+/// s'appliquent : l'aperçu d'une personne sans compte reçoit le secours.
+#[tokio::test]
+async fn le_gabarit_et_le_secours_suivent_lenvoi() {
+    let bac = Bac::monter().await;
+    let t = commun::terrain(&bac).await;
+    let envoi = mailings::creer(
+        &bac.state,
+        &bac.ctx(),
+        t.administratrice,
+        &brouillon(t.edition),
+    )
+    .await
+    .expect("brouillon");
+    assert_eq!(envoi.template, "sobre");
+    let modifie = mailings::modifier(
+        &bac.state,
+        &bac.ctx(),
+        t.administratrice,
+        envoi.id,
+        &MailingPayload {
+            template: Some("annonce".into()),
+            variable_fallbacks: Some([("prenom".to_owned(), "Chère partenaire".to_owned())].into()),
+            cta_label: Some("S'inscrire".into()),
+            cta_url: Some("https://exemple.org/inscription".into()),
+            reply_button: Some(true),
+            ..MailingPayload::default()
+        },
+    )
+    .await
+    .expect("modification");
+    assert_eq!(modifie.template, "annonce");
+
+    let apercu = mailings::apercu(
+        &bac.state,
+        t.administratrice,
+        envoi.id,
+        Some("libre@example.org"),
+    )
+    .await
+    .expect("aperçu");
+    assert!(!apercu.has_account);
+    assert!(
+        apercu.html.contains("Bonjour Chère partenaire,"),
+        "{}",
+        apercu.html
+    );
+    assert!(
+        apercu.html.contains(">S&#39;inscrire</a>"),
+        "{}",
+        apercu.html
+    );
+    assert!(apercu.html.contains("mailto:equipe@ifdd.org"));
+
+    let liste = mailings::audience(&bac.state, t.administratrice, envoi.id)
+        .await
+        .expect("liste");
+    assert_eq!(liste.without_account, 1);
+    assert_eq!(liste.fallback_count, 1);
+
+    let copie = mailings::dupliquer(&bac.state, &bac.ctx(), t.administratrice, envoi.id)
+        .await
+        .expect("duplication");
+    assert_eq!(copie.template, "annonce");
+    assert_eq!(copie.cta_label.as_deref(), Some("S'inscrire"));
 }
 
 /// Sans limite d'envoi (décision du 28/10) : les lots de dix s'enchaînent sans

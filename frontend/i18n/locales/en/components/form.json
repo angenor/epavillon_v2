@@ -20,7 +20,13 @@
     "orderedList": "Numbered list",
     "blockquote": "Quote",
     "heading": "Level {level} subheading",
-    "headingShort": "H{level}"
+    "headingShort": "H{level}",
+    "button": {
+      "insert": "Insert a button",
+      "text": "Button text",
+      "url": "Link (https://…)",
+      "add": "Insert"
+    }
   },
   "combobox": {
     "toggle": "Show the list"

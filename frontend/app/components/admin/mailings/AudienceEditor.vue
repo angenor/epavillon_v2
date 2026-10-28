@@ -15,9 +15,11 @@ interface Props {
   sessions: ShowcaseSessionOption[]
   extraError?: string
   disabled?: boolean
+  /** Faux dans la fenêtre de rédaction : les adresses libres vont dans le champ « À ». */
+  showExtra?: boolean
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { extraError: undefined, showExtra: true })
 const emit = defineEmits<{
   'update:audience': [value: MailingCriterion[]]
   'update:extraText': [value: string]
@@ -72,7 +74,7 @@ const FILTERS: Record<MailingCriterionKind, { key: ListKey; values: readonly str
 
 <template>
   <section class="space-y-6" :aria-label="t('admin.mailing.compose.steps.audience')">
-    <p class="max-w-(--measure) text-text-secondary">
+    <p v-if="props.showExtra" class="max-w-(--measure) text-text-secondary">
       {{ t('admin.mailing.compose.audience.intro') }}
     </p>
 
@@ -126,6 +128,7 @@ const FILTERS: Record<MailingCriterionKind, { key: ListKey; values: readonly str
     </ul>
 
     <UiTextarea
+      v-if="props.showExtra"
       :model-value="props.extraText"
       :label="t('admin.mailing.compose.audience.extra')"
       :hint="t('admin.mailing.compose.audience.extraHint')"

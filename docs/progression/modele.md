@@ -327,3 +327,11 @@ Demande du commanditaire : l'équivalent de l'envoi de courriels de la v1, avec 
 
 **Migration** : `ops/migrations/2026-10-28-envoi-de-courriels.sql`, rejouable et additive (pièces jointes comprises : colonne, fonction recopiée du modèle, ligne de la table blanche), jouée deux fois en local ; frontières de modules conformes (`xmod_fk_*`). **En production** : avec l'API et le worker.
 
+## 28/10/2026, `110_engagement.sql` : courriels en fenêtre unique (gabarit, valeurs de secours)
+
+Refonte demandée par le commanditaire après usage en production.
+
+- **`engagement.mailings`** : `template` (`sobre`, `institutionnel`, `annonce`, `ck_mailings_template`), `variable_fallbacks` (objet nom de variable vers valeur de secours, défaut « Madame, Monsieur » pour le prénom : on écrit volontiers à des personnes sans compte), `reply_button` (lien `mailto:` vers l'adresse de réponse ou la copie, copies en copie), `cta_label` et `cta_url` (bouton d'action de l'annonce, les deux ou aucun, `ck_mailings_cta`). « Dupliquer » les reprend.
+
+**Migration** : `ops/migrations/2026-10-28-courriels-fenetre-unique.sql` (celle du 28/10 est en production, on n'y touche plus), rejouable, jouée deux fois en local. **En production** : avec l'API et le worker, qui rendent les gabarits.
+

@@ -38,6 +38,18 @@ pub struct LigneEnvoi {
     pub cancelled_at: Option<OffsetDateTime>,
     pub created_at: OffsetDateTime,
     pub updated_at: OffsetDateTime,
+    pub habillage: Habillage,
+}
+
+/// Le gabarit et ce qui l'accompagne (28/10).
+#[derive(Debug, Clone)]
+pub struct Habillage {
+    pub template: String,
+    /// Objet JSON nom de variable -> valeur de secours.
+    pub variable_fallbacks: serde_json::Value,
+    pub reply_button: bool,
+    pub cta_label: Option<String>,
+    pub cta_url: Option<String>,
 }
 
 /// Ce qu'un brouillon enregistre, déjà validé et assaini.
@@ -49,6 +61,7 @@ pub struct ValeursBrouillon<'a> {
     pub cc: &'a [String],
     pub bcc: &'a [String],
     pub reply_to: Option<&'a str>,
+    pub habillage: &'a Habillage,
 }
 
 fn criteres(valeur: serde_json::Value) -> Vec<MailingCriterion> {
@@ -63,7 +76,9 @@ pub async fn lire(pool: &PgPool, id: Uuid) -> Result<Option<LigneEnvoi>> {
                   m.duplicated_from,
                   (SELECT p.display_name FROM identity.people p WHERE p.id = m.created_by) AS created_by_name,
                   (SELECT p.display_name FROM identity.people p WHERE p.id = m.queued_by) AS queued_by_name,
-                  m.queued_at, m.completed_at, m.cancelled_at, m.created_at, m.updated_at
+                  m.queued_at, m.completed_at, m.cancelled_at, m.created_at, m.updated_at,
+                  m.template, m.variable_fallbacks, m.reply_button, m.cta_label,
+                  m.cta_url::text AS cta_url
              FROM engagement.mailings m
             WHERE m.id = $1"#,
         id
@@ -90,6 +105,13 @@ pub async fn lire(pool: &PgPool, id: Uuid) -> Result<Option<LigneEnvoi>> {
         cancelled_at: l.cancelled_at,
         created_at: l.created_at,
         updated_at: l.updated_at,
+        habillage: Habillage {
+            template: l.template,
+            variable_fallbacks: l.variable_fallbacks,
+            reply_button: l.reply_button,
+            cta_label: l.cta_label,
+            cta_url: l.cta_url,
+        },
     }))
 }
 
@@ -212,9 +234,11 @@ pub async fn creer(
     let id = sqlx::query_scalar!(
         r#"INSERT INTO engagement.mailings
                (event_id, subject, body_html, audience, extra_addresses, cc, bcc, reply_to,
-                duplicated_from, created_by)
+                duplicated_from, created_by, template, variable_fallbacks, reply_button,
+                cta_label, cta_url)
            VALUES ($1, $2, $3, $4, $5::text[]::platform.email[], $6::text[]::platform.email[],
-                   $7::text[]::platform.email[], $8::text::platform.email, $9, $10)
+                   $7::text[]::platform.email[], $8::text::platform.email, $9, $10,
+                   $11, $12, $13, $14, $15::text::platform.url)
            RETURNING id"#,
         event_id,
         v.subject,
@@ -225,7 +249,12 @@ pub async fn creer(
         v.bcc,
         v.reply_to,
         duplique_de,
-        acteur
+        acteur,
+        v.habillage.template,
+        v.habillage.variable_fallbacks,
+        v.habillage.reply_button,
+        v.habillage.cta_label,
+        v.habillage.cta_url
     )
     .fetch_one(conn)
     .await?;
@@ -233,13 +262,20 @@ pub async fn creer(
 }
 
 /// Rend faux si l'envoi n'est plus un brouillon.
-pub async fn modifier(conn: &mut PgConnection, id: Uuid, v: &ValeursBrouillon<'_>) -> Result<bool> {
+pub async fn modifier(
+    conn: &mut PgConnection,
+    id: Uuid,
+    event_id: Uuid,
+    v: &ValeursBrouillon<'_>,
+) -> Result<bool> {
     let n = sqlx::query!(
         r#"UPDATE engagement.mailings
               SET subject = $2, body_html = $3, audience = $4,
                   extra_addresses = $5::text[]::platform.email[],
                   cc = $6::text[]::platform.email[], bcc = $7::text[]::platform.email[],
-                  reply_to = $8::text::platform.email
+                  reply_to = $8::text::platform.email, event_id = $9,
+                  template = $10, variable_fallbacks = $11, reply_button = $12,
+                  cta_label = $13, cta_url = $14::text::platform.url
             WHERE id = $1 AND status = 'draft'"#,
         id,
         v.subject,
@@ -248,7 +284,13 @@ pub async fn modifier(conn: &mut PgConnection, id: Uuid, v: &ValeursBrouillon<'_
         v.extra_addresses,
         v.cc,
         v.bcc,
-        v.reply_to
+        v.reply_to,
+        event_id,
+        v.habillage.template,
+        v.habillage.variable_fallbacks,
+        v.habillage.reply_button,
+        v.habillage.cta_label,
+        v.habillage.cta_url
     )
     .execute(conn)
     .await?

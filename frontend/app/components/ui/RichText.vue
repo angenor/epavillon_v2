@@ -46,9 +46,14 @@ interface Props extends FieldProps {
   maxlength?: number
   /** Hauteur minimale, en lignes. */
   rows?: number
+  /**
+   * « Insérer un bouton » (courriels, 28/10) : un lien `class="bouton"`, texte
+   * et adresse, que le gabarit du courriel rend en bouton. Absent ailleurs.
+   */
+  buttons?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), { rows: 8 })
+const props = withDefaults(defineProps<Props>(), { rows: 8, buttons: false })
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
 const { t } = useI18n()
@@ -104,6 +109,26 @@ function run(action: string): void {
   // par un index, ce qui reste sûr : la liste ci-dessus est fermée.
   const command = (chain as unknown as Record<string, () => { run: () => void }>)[action]
   if (typeof command === 'function') command.call(chain).run()
+}
+
+const buttonForm = ref<{ text: string; url: string } | null>(null)
+const buttonUrlValid = computed(() => /^https?:\/\/\S+$/.test(buttonForm.value?.url.trim() ?? ''))
+
+function escapeAttr(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+}
+
+function insertButton(): void {
+  const form = buttonForm.value
+  if (!form || !form.text.trim() || !buttonUrlValid.value) return
+  editor.value
+    ?.chain()
+    .focus()
+    .insertContent(
+      `<p><a class="bouton" href="${escapeAttr(form.url.trim())}">${escapeAttr(form.text.trim())}</a></p>`,
+    )
+    .run()
+  buttonForm.value = null
 }
 
 function toggleHeading(level: 3 | 4): void {
@@ -287,6 +312,30 @@ onBeforeUnmount(() => {
           >
             {{ t('form.richText.headingShort', { level: level - 2 }) }}
           </button>
+
+          <template v-if="props.buttons">
+            <span class="mx-1 h-5 w-px bg-separator" aria-hidden="true" />
+            <button
+              type="button"
+              class="flex h-9 cursor-pointer items-center gap-1.5 rounded px-2 text-sm text-text-secondary transition-colors duration-(--duration-fast) hover:bg-surface-hover"
+              :aria-expanded="buttonForm !== null"
+              @click="buttonForm = buttonForm ? null : { text: '', url: 'https://' }"
+            >
+              <UiIcon name="plus" size="1rem" />
+              {{ t('form.richText.button.insert') }}
+            </button>
+          </template>
+        </div>
+
+        <div
+          v-if="props.buttons && buttonForm"
+          class="flex flex-wrap items-end gap-2 border-b border-border bg-surface-sunken px-3 py-2"
+        >
+          <UiInput v-model="buttonForm.text" class="min-w-40 flex-1" size="sm" :label="t('form.richText.button.text')" />
+          <UiInput v-model="buttonForm.url" class="min-w-52 flex-[2]" size="sm" type="url" :label="t('form.richText.button.url')" />
+          <UiButton size="sm" :disabled="!buttonForm.text.trim() || !buttonUrlValid" @click="insertButton">
+            {{ t('form.richText.button.add') }}
+          </UiButton>
         </div>
 
         <!-- ZONE DE SAISIE. La classe `rich-text` porte la charte : c'est la
