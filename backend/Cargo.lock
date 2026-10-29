@@ -1026,6 +1026,7 @@ dependencies = [
  "actix-web",
  "ammonia",
  "async-trait",
+ "base64 0.22.1",
  "contracts",
  "kernel",
  "serde",

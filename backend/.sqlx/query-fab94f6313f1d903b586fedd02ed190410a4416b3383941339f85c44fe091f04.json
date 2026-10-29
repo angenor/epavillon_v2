@@ -1,0 +1,75 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT platform.t(e.title, 'fr') AS \"nom!\",\n                  e.city,\n                  e.slug,\n                  (e.starts_at AT TIME ZONE e.timezone)::date AS \"debut!\",\n                  (e.ends_at AT TIME ZONE e.timezone)::date AS \"fin!\",\n                  media.attached_image('event', 'events', e.id, 'banner') AS banniere,\n                  media.attached_image('event', 'events', e.id, 'logo') AS logo\n             FROM event.events e\n            WHERE e.id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "nom!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "city",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "city"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "slug",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "event.events",
+            "name": "slug"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "debut!",
+        "type_info": "Date",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "fin!",
+        "type_info": "Date",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "banniere",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "logo",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      true,
+      false,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "fab94f6313f1d903b586fedd02ed190410a4416b3383941339f85c44fe091f04"
+}

@@ -56,15 +56,27 @@ pub struct OutgoingMail {
     pub html: Option<String>,
 }
 
-/// Copie, copie cachée, adresse de réponse et pièces jointes : seuls les envois
-/// écrits depuis le back-office en portent. Hors de `OutgoingMail` pour qu'aucun
-/// des courriels déjà livrés n'ait à changer d'une ligne.
+/// Copie, copie cachée, adresse de réponse, pièces jointes et images intégrées :
+/// seuls les envois écrits depuis le back-office en portent. Hors de
+/// `OutgoingMail` pour qu'aucun des courriels déjà livrés n'ait à changer d'une
+/// ligne.
 #[derive(Debug, Clone, Default)]
 pub struct Extras {
     pub cc: Vec<String>,
     pub bcc: Vec<String>,
     pub reply_to: Option<String>,
     pub attachments: Vec<Attachment>,
+    pub inline_images: Vec<InlineImage>,
+}
+
+/// Une image intégrée au message, que le HTML cite par `cid:<content_id>`.
+/// Outlook bloque les images distantes jusqu'au clic, pas les images intégrées :
+/// c'est ainsi que part le logo des gabarits.
+#[derive(Debug, Clone)]
+pub struct InlineImage {
+    pub content_id: String,
+    pub mime_type: String,
+    pub content: Vec<u8>,
 }
 
 /// Un fichier joint, déjà lu : le module qui envoie le tient en mémoire.
@@ -81,6 +93,7 @@ impl Extras {
             && self.bcc.is_empty()
             && self.reply_to.is_none()
             && self.attachments.is_empty()
+            && self.inline_images.is_empty()
     }
 }
 
@@ -99,7 +112,7 @@ pub trait Mailer: Send + Sync {
             return self.send(mail).await;
         }
         Err(MailError::NotWired(
-            "copie, adresse de réponse et pièces jointes",
+            "copie, adresse de réponse, pièces jointes et images intégrées",
         ))
     }
 }
@@ -247,55 +260,7 @@ impl Mailer for SmtpMailer {
         mail: &OutgoingMail,
         copies: &Extras,
     ) -> Result<(), MailError> {
-        let mut entete = Message::builder()
-            .from(self.from.clone())
-            .to(boite(&mail.to)?)
-            .subject(mail.subject.as_str());
-        for adresse in &copies.cc {
-            entete = entete.cc(boite(adresse)?);
-        }
-        for adresse in &copies.bcc {
-            entete = entete.bcc(boite(adresse)?);
-        }
-        if let Some(adresse) = &copies.reply_to {
-            entete = entete.reply_to(boite(adresse)?);
-        }
-
-        // Deux corps quand le module en compose deux : un client qui ne rend
-        // pas le HTML affiche alors le texte, au lieu d'une pièce jointe.
-        let message = if copies.attachments.is_empty() {
-            match &mail.html {
-                Some(html) => entete.multipart(MultiPart::alternative_plain_html(
-                    mail.text.clone(),
-                    html.clone(),
-                )),
-                None => entete.singlepart(SinglePart::plain(mail.text.clone())),
-            }
-        } else {
-            // Pièces jointes : le corps (texte, ou texte et HTML) puis un
-            // fichier par partie, dans un « mixed ».
-            let corps = match &mail.html {
-                Some(html) => MultiPart::alternative_plain_html(mail.text.clone(), html.clone()),
-                None => MultiPart::mixed().singlepart(SinglePart::plain(mail.text.clone())),
-            };
-            let mut tout = MultiPart::mixed().multipart(corps);
-            for piece in &copies.attachments {
-                let type_ =
-                    ContentType::parse(&piece.mime_type).map_err(|e| MailError::Rejected {
-                        statut: 0,
-                        corps: format!("type « {} » inexploitable : {e}", piece.mime_type),
-                    })?;
-                tout = tout.singlepart(
-                    lettre::message::Attachment::new(piece.filename.clone())
-                        .body(piece.content.clone(), type_),
-                );
-            }
-            entete.multipart(tout)
-        }
-        .map_err(|e| MailError::Rejected {
-            statut: 0,
-            corps: format!("message impossible à composer : {e}"),
-        })?;
+        let message = composer(self.from.clone(), mail, copies)?;
 
         match self.transport.send(message).await {
             Ok(_) => Ok(()),
@@ -310,6 +275,80 @@ impl Mailer for SmtpMailer {
             Err(e) => Err(MailError::Unreachable(e.to_string())),
         }
     }
+}
+
+/// Le message MIME complet : ce que `SmtpMailer` remet au serveur. Public pour
+/// qu'un essai puisse l'écrire en `.eml` sans rien envoyer.
+///
+/// Forme : `mixed` (pièces jointes) autour d'un `alternative` (texte, puis
+/// HTML) ; les images intégrées vont avec le HTML dans un `related`, la forme
+/// qu'Outlook et Gmail affichent sans proposer l'image en pièce jointe.
+pub fn composer(from: Mailbox, mail: &OutgoingMail, extras: &Extras) -> Result<Message, MailError> {
+    let mut entete = Message::builder()
+        .from(from)
+        .to(boite(&mail.to)?)
+        .subject(mail.subject.as_str());
+    for adresse in &extras.cc {
+        entete = entete.cc(boite(adresse)?);
+    }
+    for adresse in &extras.bcc {
+        entete = entete.bcc(boite(adresse)?);
+    }
+    if let Some(adresse) = &extras.reply_to {
+        entete = entete.reply_to(boite(adresse)?);
+    }
+
+    let type_de = |mime: &str| {
+        ContentType::parse(mime).map_err(|e| MailError::Rejected {
+            statut: 0,
+            corps: format!("type « {mime} » inexploitable : {e}"),
+        })
+    };
+
+    // Deux corps quand le module en compose deux : un client qui ne rend pas le
+    // HTML affiche alors le texte, au lieu d'une pièce jointe.
+    let corps = match &mail.html {
+        Some(html) => {
+            let texte = SinglePart::plain(mail.text.clone());
+            let html = SinglePart::html(html.clone());
+            if extras.inline_images.is_empty() {
+                Some(MultiPart::alternative().singlepart(texte).singlepart(html))
+            } else {
+                let mut lie = MultiPart::related().singlepart(html);
+                for image in &extras.inline_images {
+                    lie = lie.singlepart(
+                        lettre::message::Attachment::new_inline(image.content_id.clone())
+                            .body(image.content.clone(), type_de(&image.mime_type)?),
+                    );
+                }
+                Some(MultiPart::alternative().singlepart(texte).multipart(lie))
+            }
+        }
+        None => None,
+    };
+
+    let message = if extras.attachments.is_empty() {
+        match corps {
+            Some(corps) => entete.multipart(corps),
+            None => entete.singlepart(SinglePart::plain(mail.text.clone())),
+        }
+    } else {
+        let mut tout = match corps {
+            Some(corps) => MultiPart::mixed().multipart(corps),
+            None => MultiPart::mixed().singlepart(SinglePart::plain(mail.text.clone())),
+        };
+        for piece in &extras.attachments {
+            tout = tout.singlepart(
+                lettre::message::Attachment::new(piece.filename.clone())
+                    .body(piece.content.clone(), type_de(&piece.mime_type)?),
+            );
+        }
+        entete.multipart(tout)
+    };
+    message.map_err(|e| MailError::Rejected {
+        statut: 0,
+        corps: format!("message impossible à composer : {e}"),
+    })
 }
 
 fn boite(adresse: &str) -> Result<Mailbox, MailError> {
@@ -358,5 +397,53 @@ mod tests {
             .await
             .expect_err("refus");
         assert!(matches!(refus, MailError::NotWired(_)), "{refus:?}");
+
+        let integree = Extras {
+            inline_images: vec![InlineImage {
+                content_id: "logo".into(),
+                mime_type: "image/png".into(),
+                content: vec![1, 2, 3],
+            }],
+            ..Extras::default()
+        };
+        let refus = relais
+            .send_with_extras(&message, &integree)
+            .await
+            .expect_err("refus");
+        assert!(matches!(refus, MailError::NotWired(_)), "{refus:?}");
+    }
+
+    /// L'image intégrée part avec le HTML, dans un `related`, citée par son
+    /// identifiant ; le texte reste la première variante.
+    #[test]
+    fn limage_integree_suit_le_html() {
+        let message = OutgoingMail {
+            message_id: "essai".into(),
+            to: "a@epavillon.local".into(),
+            locale: "fr".into(),
+            subject: "Objet".into(),
+            text: "Corps".into(),
+            html: Some("<img src=\"cid:logo\">".into()),
+        };
+        let extras = Extras {
+            inline_images: vec![InlineImage {
+                content_id: "logo".into(),
+                mime_type: "image/png".into(),
+                content: vec![1, 2, 3],
+            }],
+            ..Extras::default()
+        };
+        let brut = composer(
+            "ePavillon <envoi@epavillon.local>".parse().unwrap(),
+            &message,
+            &extras,
+        )
+        .expect("message composé")
+        .formatted();
+        let texte = String::from_utf8_lossy(&brut);
+        assert!(texte.contains("multipart/alternative"), "{texte}");
+        assert!(texte.contains("multipart/related"), "{texte}");
+        assert!(texte.contains("Content-ID: <logo>"), "{texte}");
+        assert!(texte.contains("Content-Disposition: inline"), "{texte}");
     }
 }

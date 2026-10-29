@@ -271,9 +271,9 @@ pub struct EditionDetail {
     pub description: Value,
     pub highlights: Option<Value>,
     pub period: EditionPeriod,
-    /// Les trois déclinaisons, telles que `media.attached_image()` les rend
-    /// pour les rôles `banner`, `cover` et `thumbnail`. **Les trois clés sont
-    /// toujours présentes**, à `null` tant que rien n'a été téléversé : la
+    /// Les trois déclinaisons et le logo, tels que `media.attached_image()` les
+    /// rend pour les rôles `banner`, `cover`, `thumbnail` et `logo`. **Les
+    /// quatre clés sont toujours présentes**, à `null` tant que rien n'a été téléversé : la
     /// boucle d'affichage n'a alors aucune garde à écrire.
     pub images: Value,
     pub days: Vec<EditionDay>,

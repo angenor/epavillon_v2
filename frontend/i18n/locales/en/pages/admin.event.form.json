@@ -25,7 +25,7 @@
     },
     "visuals": {
       "legend": "Visuals",
-      "hint": "Three crops, uploaded separately: automatic cropping beheads speakers in a conference photograph. Each shape is checked on upload; all three are optional and independent."
+      "hint": "Three crops, uploaded separately: automatic cropping beheads speakers in a conference photograph. Each shape is checked on upload. The edition logo, of any shape, comes on top. All are optional and independent."
     }
   },
   "fields": {
@@ -73,6 +73,10 @@
       "thumbnail": {
         "label": "Square thumbnail",
         "use": "dense lists and networks that crop to square"
+      },
+      "logo": {
+        "label": "Edition logo",
+        "use": "the conference logo, used by the edition's emails"
       }
     }
   },

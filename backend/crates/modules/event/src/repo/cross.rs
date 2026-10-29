@@ -613,9 +613,10 @@ pub struct Candidat {
 // -----------------------------------------------------------------------------
 
 /// Les **trois déclinaisons** d'une édition, telles que `media.attached_image()`
-/// les rend pour les rôles `banner` (32:9), `cover` (16:9) et `thumbnail` (1:1).
+/// les rend pour les rôles `banner` (32:9), `cover` (16:9) et `thumbnail` (1:1),
+/// et son **logo** (29/10, sans forme imposée).
 ///
-/// **Les trois clés sont toujours présentes**, à `null` tant que rien n'a été
+/// **Les quatre clés sont toujours présentes**, à `null` tant que rien n'a été
 /// téléversé pour ce rôle : la boucle d'affichage n'a alors aucune garde à
 /// écrire. La fonction du modèle est appelée plutôt que sa jointure recopiée —
 /// le rattachement est polymorphe, et trois vues qui le déroulent à la main sont
@@ -628,7 +629,8 @@ pub async fn images_de_l_edition<'e>(
         r#"SELECT jsonb_build_object(
                      'banner',    media.attached_image('event', 'events', $1, 'banner'),
                      'cover',     media.attached_image('event', 'events', $1, 'cover'),
-                     'thumbnail', media.attached_image('event', 'events', $1, 'thumbnail')
+                     'thumbnail', media.attached_image('event', 'events', $1, 'thumbnail'),
+                     'logo',      media.attached_image('event', 'events', $1, 'logo')
                   ) AS "images!""#,
         event_id.as_uuid()
     )

@@ -242,18 +242,24 @@ pub async fn apercu(
         ),
     };
     let valeurs = crate::domain::mailing::valeurs(&variables, &envoi.habillage.variable_fallbacks);
+    let edition = crate::jobs::send_mailing::edition_de_lenvoi(
+        state.db(),
+        &envoi,
+        &state.config().app_public_url,
+    )
+    .await?;
     let message = crate::jobs::send_mailing::composer(
         "apercu".to_owned(),
         &adresse,
         &envoi,
         &valeurs,
-        &state.config().app_public_url,
+        edition.as_ref(),
     )?;
     Ok(MailingPreview {
         to: adresse,
         has_account: choisie.is_some_and(|e| e.person_id.is_some()),
         subject: message.subject,
-        html: message.html.unwrap_or_default(),
+        html: crate::domain::gabarits::pour_apercu(&message.html.unwrap_or_default()),
     })
 }
 

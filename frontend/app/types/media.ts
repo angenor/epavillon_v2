@@ -90,15 +90,19 @@ export type AttachmentRole =
  * forme attendue est déclarée dans `media.attachable_roles` et vérifiée par
  * trigger — l'écran l'annonce, il ne la fait pas respecter.
  */
-export const EDITION_IMAGE_ROLES = ['banner', 'cover', 'thumbnail'] as const
+export const EDITION_IMAGE_ROLES = ['banner', 'cover', 'thumbnail', 'logo'] as const
 
 export type EditionImageRole = (typeof EDITION_IMAGE_ROLES)[number]
 
-/** Le rapport largeur ÷ hauteur exigé par la base, pour l'annoncer à l'éditeur. */
-export const EDITION_IMAGE_RATIO: Record<EditionImageRole, string> = {
+/**
+ * Le rapport largeur ÷ hauteur exigé par la base, pour l'annoncer à l'éditeur.
+ * Le logo (29/10) n'en impose aucun : un logo a sa forme.
+ */
+export const EDITION_IMAGE_RATIO: Record<EditionImageRole, string | null> = {
   banner: '32 / 9',
   cover: '16 / 9',
   thumbnail: '1 / 1',
+  logo: null,
 }
 
 // ---------------------------------------------------------------------------

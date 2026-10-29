@@ -65,6 +65,14 @@
     "annonce": {
       "name": "Annonce",
       "hint": "Bandeau, grand titre (l'objet), bouton d'action."
+    },
+    "banniere_edition": {
+      "name": "Bannière de l'édition",
+      "hint": "La bannière de l'édition en tête, puis son logo, son nom et ses dates. Sans bannière : Institutionnel."
+    },
+    "institutionnel_edition": {
+      "name": "Institutionnel + logo de l'édition",
+      "hint": "Le bandeau institutionnel, le logo de l'édition à droite. Sans logo : Institutionnel."
     }
   }
 }

@@ -7,6 +7,9 @@ import { EDITION_IMAGE_RATIO, EDITION_IMAGE_ROLES } from '~/types/media'
  * LES TROIS DÉCLINAISONS D'UNE ÉDITION — `banner` 32:9, `cover` 16:9,
  * `thumbnail` 1:1.
  *
+ * Plus son logo (29/10), sans forme imposée : celui de la conférence, que les
+ * gabarits de courriel de l'édition reprennent.
+ *
  * ── POURQUOI TROIS FICHIERS ET NON UN SEUL RECADRÉ ──────────────────────────
  *
  * Un bandeau 32:9 rogné automatiquement dans une photographie de conférence
@@ -87,7 +90,7 @@ function setRole(role: EditionImageRole, assetId: AssetId | null): void {
       :role="role"
       :label="t(`admin.event.form.fields.images.${role}.label`)"
       :use="t(`admin.event.form.fields.images.${role}.use`)"
-      :shape-label="EDITION_IMAGE_RATIO[role].replace(' / ', ':')"
+      :shape-label="EDITION_IMAGE_RATIO[role]?.replace(' / ', ':')"
       :rule="ruleOf(role)"
       :image="props.images[role]"
       :asset-id="props.modelValue[role]"

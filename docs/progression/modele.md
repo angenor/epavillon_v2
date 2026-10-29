@@ -361,3 +361,12 @@ Fiche d'un dossier, phase 3 : le site dessine l'image de couverture (modèle, co
 - **`media.attachment_role` gagne `cover_source`** (050 § 1, en dernière valeur) et la table blanche la ligne `(programme, proposals, cover_source)` : image, 10 Mo, une seule. La photo de départ est gardée à part de l'image fabriquée pour que l'atelier reparte d'elle, pas de son propre rendu. Garde : celle du couple `programme.proposals` (`OrganisationDuDossier`), rien à ajouter ; l'énumération Rust du crate media suit.
 
 **Migration** : `ops/migrations/2026-10-29-atelier-couverture.sql`, rejouable et additive ; l'`ALTER TYPE … ADD VALUE IF NOT EXISTS` est hors de la transaction (une valeur ajoutée ne sert qu'une fois validée). Jouée deux fois en local sur `epavillon`. **En production** : avant de démarrer l'API qui sert `/proposals/{id}/cover-studio` et `/cover-design`.
+
+## 29/10/2026, `050_media.sql` et `110_engagement.sql` : logo d'une édition, gabarits de l'édition
+
+Demande du commanditaire : des courriels aux couleurs de l'édition de l'envoi.
+
+- **`media.attachable_roles`** : `('event', 'events', 'logo')`, un seul fichier, `image/*`, 5 Mo, sans forme imposée. Posé au back-office avec le bandeau, la couverture et la vignette ; lu par `media.attached_image()`.
+- **`engagement.mailings.template`** : `ck_mailings_template` admet `banniere_edition` (bannière de l'édition en tête, puis logo, nom et dates) et `institutionnel_edition` (bandeau institutionnel, logo de l'édition à droite). Sans l'image attendue, le rendu retombe sur `institutionnel`.
+
+**Migration** : `ops/migrations/2026-10-29-logo-edition-et-gabarits.sql` (rejouable), jouée deux fois en local sur `epavillon` et sur une copie de `epavillon-20261028-204320` (après celle du 28/10, fenêtre unique). **En production** : avec l'API et le worker, puis le lot 101 (bandeau et logo CdP30, logo CdP31).

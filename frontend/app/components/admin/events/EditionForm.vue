@@ -121,6 +121,7 @@ function attachedAssets(): EditionImagePayload {
     banner: props.images?.banner?.asset_id ?? null,
     cover: props.images?.cover?.asset_id ?? null,
     thumbnail: props.images?.thumbnail?.asset_id ?? null,
+    logo: props.images?.logo?.asset_id ?? null,
   }
 }
 
@@ -711,7 +712,7 @@ function submit(): void {
       </p>
 
       <AdminEventsImagesPanel
-        :images="props.images ?? { banner: null, cover: null, thumbnail: null }"
+        :images="props.images ?? { banner: null, cover: null, thumbnail: null, logo: null }"
         :rules="props.mediaRules ?? []"
         :event-id="props.initial?.id ?? null"
         :model-value="images"

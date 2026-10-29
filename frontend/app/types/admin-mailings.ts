@@ -15,7 +15,7 @@ export type MailingStatus = 'draft' | 'queued' | 'sent' | 'cancelled'
 export type MailingRecipientStatus = 'queued' | 'sending' | 'sent' | 'failed' | 'suppressed' | 'cancelled'
 
 /** Gabarit de mise en page (`engagement.mailings.template`). */
-export type MailingTemplate = 'sobre' | 'institutionnel' | 'annonce'
+export type MailingTemplate = 'sobre' | 'institutionnel' | 'annonce' | 'banniere_edition' | 'institutionnel_edition'
 
 /** Les familles de destinataires lues par `mailing_audience()`. */
 export type MailingCriterionKind = 'submitters' | 'speakers' | 'registrants' | 'roles'

@@ -1170,7 +1170,11 @@ CREATE TABLE engagement.mailings (
     -- page, rendu par le worker en HTML de messagerie (tableaux, styles en
     -- ligne, 600 px) : 'sobre' (texte et signature de l'IFDD),
     -- 'institutionnel' (bandeau, logo, pied de page IFDD et OIF), 'annonce'
-    -- (bandeau, grand titre, bouton d'action).
+    -- (bandeau, grand titre, bouton d'action). Depuis le 29/10, deux gabarits
+    -- de l'édition de l'envoi : 'banniere_edition' (sa bannière en tête, puis
+    -- son logo, son nom et ses dates) et 'institutionnel_edition' (bandeau
+    -- institutionnel, son logo à droite sur une tuile blanche). Sans l'image
+    -- qu'ils attendent, ils retombent sur 'institutionnel'.
     template        text        NOT NULL DEFAULT 'sobre',
     -- Valeur de secours de chaque variable, pour qui n'a pas de compte (on
     -- écrit volontiers à des personnes non inscrites) : {"prenom": "Madame,
@@ -1204,7 +1208,8 @@ CREATE TABLE engagement.mailings (
     -- et chaque adresse multiplie le nombre de messages comptés par le serveur.
     CONSTRAINT ck_mailings_copies CHECK (cardinality(cc) <= 10 AND cardinality(bcc) <= 10),
     CONSTRAINT ck_mailings_extra CHECK (cardinality(extra_addresses) <= 500),
-    CONSTRAINT ck_mailings_template CHECK (template IN ('sobre', 'institutionnel', 'annonce')),
+    CONSTRAINT ck_mailings_template CHECK (template IN ('sobre', 'institutionnel', 'annonce',
+                                                         'banniere_edition', 'institutionnel_edition')),
     CONSTRAINT ck_mailings_fallbacks CHECK (jsonb_typeof(variable_fallbacks) = 'object'),
     CONSTRAINT ck_mailings_cta CHECK ((cta_label IS NULL) = (cta_url IS NULL))
 );

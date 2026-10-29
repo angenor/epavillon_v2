@@ -101,6 +101,7 @@ async fn la_copie_et_ladresse_de_reponse_arrivent() {
                 bcc: vec![cachee.clone()],
                 reply_to: Some("equipe@epavillon.local".to_owned()),
                 attachments: vec![],
+                inline_images: vec![],
             },
         )
         .await

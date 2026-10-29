@@ -356,8 +356,9 @@ async fn une_combinaison_non_declaree_est_refusee_en_nommant_lentite_et_le_role(
             owner_schema: "event".to_owned(),
             owner_table: "events".to_owned(),
             owner_id: terrain.edition,
-            // Une édition n'a pas de logo : la table blanche ne le déclare pas.
-            role: "logo".to_owned(),
+            // Une édition n'a pas de photo de profil : la table blanche ne la
+            // déclare pas (le logo, lui, l'est depuis le 29/10).
+            role: "avatar".to_owned(),
             asset_id: image,
             sort_order: None,
             alt_text_override: None,
@@ -371,7 +372,7 @@ async fn une_combinaison_non_declaree_est_refusee_en_nommant_lentite_et_le_role(
     assert_eq!(erreur.field.as_deref(), Some("role"));
     let detail = erreur.detail.unwrap_or_default();
     assert!(
-        detail.contains("logo"),
+        detail.contains("avatar"),
         "le rôle doit être nommé : {detail}"
     );
     assert!(

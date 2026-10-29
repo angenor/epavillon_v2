@@ -46,7 +46,7 @@ Code : `epavillonvue/src/views/admin/EmailManager.vue`, `components/email/EmailM
 
 Les quatre étapes sont remplacées par une fenêtre de rédaction à la Gmail, ouverte de partout (icône enveloppe de la barre du back-office, « Écrire un courriel » de l'historique, un brouillon de la liste) : `components/admin/mailings/Composer.vue`, `AddressField.vue` (champ à puces, adresses et groupes, « + Groupe » reprend l'éditeur de critères), `ComposerOptions.vue` (réponse à, édition, gabarit et aperçu, valeurs de secours, bouton Répondre, bouton d'action, essai), `stores/mail-composer.ts`, `UiModal` (`fullscreen-mobile`), `UiRichText` (`buttons` : « Insérer un bouton »). Brouillon créé à l'ouverture, enregistré à chaque pause de frappe, supprimé à la fermeture s'il est vide. Synthèse en direct sous les destinataires (nombre, écartés, sans compte, valeurs de secours, poids des pièces) ; alertes en ligne ; confirmation en un clic au-delà de 20 destinataires. Une variable inconnue n'empêche plus l'enregistrement, seulement l'envoi.
 
-API : `engagement/src/domain/gabarits.rs` (trois gabarits en HTML de messagerie, 600 px, tableaux et styles en ligne, couleurs de la charte, logo `/logos/png/epavillon@4x.png` ; liens `class="bouton"` rendus en boutons ; `mailto:` du bouton Répondre), `GET /admin/mailings/{id}/preview` (rendu par la fonction du worker), `without_account` et `fallback_count` dans la liste avant envoi, `event_id` modifiable sur un brouillon (gardé sur la nouvelle édition). Tests : `envois.rs` (7), gabarits et secours (unitaires).
+API : `engagement/src/domain/gabarits.rs` (trois gabarits en HTML de messagerie, 600 px, tableaux et styles en ligne, couleurs de la charte, logo `/logos/png/epavillon@4x.png`, remplacé le 29/10 par le symbole intégré ; liens `class="bouton"` rendus en boutons ; `mailto:` du bouton Répondre), `GET /admin/mailings/{id}/preview` (rendu par la fonction du worker), `without_account` et `fallback_count` dans la liste avant envoi, `event_id` modifiable sur un brouillon (gardé sur la nouvelle édition). Tests : `envois.rs` (7), gabarits et secours (unitaires).
 
 Vu au navigateur sur données d'exemple (1280 et 375 px, plein écran sur mobile). Non vérifié : le rendu dans Outlook et Microsoft 365, l'aperçu contre l'API réelle.
 
@@ -63,6 +63,24 @@ Vu au navigateur sur données d'exemple (1280 et 375 px, plein écran sur mobile
 | Tests | `media/tests/pieces_jointes.rs` (3), garde (unitaire), `engagement/tests/envois.rs` (pièce jointe sur chaque message, pièce pas prête), Mailpit (`kernel/tests/envoi_smtp.rs`), relais (unitaire) | |
 
 Non vérifié : le dépôt au navigateur (les données d'exemple ne rattachent rien), et un message avec pièce jointe vers le serveur réel.
+
+## En-tête, logo d'édition et gabarits de l'édition (29/10)
+
+Demande du commanditaire, en-tête validé sur un autre courriel. Par un agent dans un worktree, contrôles ciblés.
+
+| Couche | Où | Quoi |
+|---|---|---|
+| Modèle | `050_media.sql`, `110_engagement.sql`, `ops/migrations/2026-10-29-logo-edition-et-gabarits.sql` | rôle `logo` sur `event.events` (unique, `image/*`, 5 Mo, sans forme) ; `ck_mailings_template` admet `banniere_edition` et `institutionnel_edition` |
+| Noyau | `kernel/src/mail.rs` | `Extras.inline_images` (`InlineImage` : identifiant, type, octets) ; `composer()` public rend le MIME (`alternative` texte puis `related` HTML et images, dans un `mixed` s'il y a des pièces jointes) ; le relais HTTP refuse une image intégrée |
+| Gabarits | `engagement/src/domain/gabarits.rs`, `assets/logo-epavillon-symbole-inverse.png` | en-tête bleu nuit : symbole inversé intégré (`cid:logo-epavillon`, 894 octets, 42 x 40), « ePavillon » sur deux lignes comme la barre publique ; « Bannière de l'édition » (bannière 600 px cliquable vers `/evenements/<slug>`, bande blanche logo à gauche, nom et dates à droite, liseré) ; « Institutionnel + logo de l'édition » (logo sur tuile blanche à droite). Replis sur l'institutionnel sans bannière ou sans logo. Image choisie parmi les variantes JPEG ou PNG (`lg` 1600 pour la bannière, la plus petite d'au moins 120 px de haut pour le logo), jamais le WebP |
+| Lecture | `engagement/src/repo/cross.rs` (`visuels_edition`), `jobs/send_mailing.rs` (`edition_de_lenvoi`) | nom, période dans le fuseau de l'édition, ville, slug, `media.attached_image()` pour `banner` et `logo` ; lue seulement pour les deux gabarits de l'édition |
+| Aperçu | `service/mailings.rs` | le symbole cité en `data:` (`pour_apercu`), le reste identique au message |
+| Écrans | `ComposerOptions.vue`, `admin.mailing.composer.json` (fr, en) ; `ImagesPanel.vue`, `EditionForm.vue`, `types/media.ts`, `admin.event.form.json` | deux gabarits de plus ; quatrième emplacement « Logo de l'édition » dans les visuels d'une édition, par `MediaImageField`, sans forme imposée |
+| Essai | `engagement/tests/gabarits_essai.rs` (ignoré par défaut) | écrit trois `.eml` complets par le vrai code, images de l'édition intégrées pour l'essai |
+
+Lot 101 (`ops/reprise-v1/lots/101-visuels-editions.sh` et `.sql`) : bandeau (photo de Belém, 16:9) et logo de la CdP30, logo de la CdP31. Répété sur une copie de `epavillon-20261028-204320` (migration du 28/10 puis celle du 29/10, deux fois) : 3 objets, 3 rattachements, 3 traitements en file, 3 événements d'outbox marqués publiés ; seconde passe refusée ; base jetable supprimée. Fichiers CdP30 copiés sous `sauvegardes/reprise-v1/fichiers/ancien-serveur/` (hors git). **Pas joué en production.**
+
+Non vérifié : rendu réel dans Outlook et Microsoft 365 (les `.eml` d'essai sont à envoyer par le commanditaire) ; dépôt du logo au navigateur ; le rôle `banner` annonce un 32:9 et les bandeaux CdP30 et CdP31 sont des 16:9 (la forme ne se contrôle qu'à la pose, quand les dimensions sont connues : une nouvelle pose de ces fichiers depuis le back-office serait refusée).
 
 ## Le parcours
 

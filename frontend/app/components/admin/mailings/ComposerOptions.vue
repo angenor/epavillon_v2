@@ -46,7 +46,7 @@ const editions = computed<SelectOption[]>(() =>
   adminScope.events.map((e) => ({ value: e.id, label: e.acronym ? `${e.acronym}, ${tr(e.title)}` : tr(e.title) })),
 )
 
-const TEMPLATES: MailingTemplate[] = ['sobre', 'institutionnel', 'annonce']
+const TEMPLATES: MailingTemplate[] = ['sobre', 'institutionnel', 'annonce', 'banniere_edition', 'institutionnel_edition']
 const tokenOf = variableToken
 
 // « Vu par » : une personne avec compte et, s'il y en a, une sans, pour voir le secours.

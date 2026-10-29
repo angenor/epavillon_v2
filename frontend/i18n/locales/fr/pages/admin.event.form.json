@@ -25,7 +25,7 @@
     },
     "visuals": {
       "legend": "Visuels",
-      "hint": "Trois recadrages, téléversés séparément : un rognage automatique décapite les intervenants d'une photographie de conférence. La forme de chacun est vérifiée au dépôt ; les trois sont facultatifs et indépendants."
+      "hint": "Trois recadrages, téléversés séparément : un rognage automatique décapite les intervenants d'une photographie de conférence. La forme de chacun est vérifiée au dépôt. S'y ajoute le logo de l'édition, de forme libre. Tous sont facultatifs et indépendants."
     }
   },
   "fields": {
@@ -73,6 +73,10 @@
       "thumbnail": {
         "label": "Vignette carrée",
         "use": "listes denses et réseaux qui recadrent en carré"
+      },
+      "logo": {
+        "label": "Logo de l'édition",
+        "use": "celui de la conférence, repris par les courriels de l'édition"
       }
     }
   },

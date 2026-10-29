@@ -352,6 +352,7 @@ export function editionDetail(eventId: Uuid): EditionDetail | null {
       banner: attachedImage('event', 'events', edition.id, 'banner'),
       cover: attachedImage('event', 'events', edition.id, 'cover'),
       thumbnail: attachedImage('event', 'events', edition.id, 'thumbnail'),
+      logo: attachedImage('event', 'events', edition.id, 'logo'),
     },
     days: editionDays(edition),
     tracks: editionTracks(eventId),

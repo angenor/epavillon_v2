@@ -1062,6 +1062,10 @@ INSERT INTO media.attachable_roles
     ('event',       'events',        'cover',     '{"fr":"Image de couverture","en":"Cover image"}',  false, '{image/*}',                      10485760, 1.7778),
     ('event',       'events',        'thumbnail', '{"fr":"Vignette carrée","en":"Square thumbnail"}', false, '{image/*}',                       5242880, 1.0000),
     ('event',       'events',        'gallery',   '{"fr":"Galerie","en":"Gallery"}',                  true,  '{image/*}',                      15728640, NULL),
+    -- Logo d'une édition (29/10) : celui de la conférence (CdP30, CdP31), posé
+    -- par l'équipe à côté du bandeau. Sans forme imposée, un logo a la sienne.
+    -- Les gabarits de courriel de l'édition le lisent par attached_image().
+    ('event',       'events',        'logo',      '{"fr":"Logo de l''édition","en":"Edition logo"}', false, '{image/*}',              5242880, NULL),
     ('programme',   'proposals',     'cover',     '{"fr":"Image de couverture","en":"Cover image"}',  false, '{image/*}',                      10485760, NULL),
     ('programme',   'proposals',     'document',  '{"fr":"Document joint","en":"Attached document"}', true,  '{application/pdf,application/vnd.*}', 26214400, NULL),
     -- Photo de départ de l'atelier de couverture (29/10) : celle que

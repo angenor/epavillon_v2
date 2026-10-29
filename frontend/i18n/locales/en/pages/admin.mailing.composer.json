@@ -65,6 +65,14 @@
     "annonce": {
       "name": "Announcement",
       "hint": "Banner, large title (the subject), action button."
+    },
+    "banniere_edition": {
+      "name": "Edition banner",
+      "hint": "The edition banner on top, then its logo, name and dates. Without a banner: Institutional."
+    },
+    "institutionnel_edition": {
+      "name": "Institutional + edition logo",
+      "hint": "The institutional banner, the edition logo on the right. Without a logo: Institutional."
     }
   }
 }

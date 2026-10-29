@@ -21,6 +21,7 @@
 //! | `org.memberships` | l'organisation qui anime a-t-elle le droit de lire son calendrier |
 //! | `identity.people` | la langue préférée et l'adresse du destinataire |
 //! | `platform.modules` | à quel module appartient un type de notification |
+//! | `media.attached_image()` | la bannière et le logo de l'édition d'un courriel (29/10) |
 //!
 //! Rien d'autre.
 
@@ -382,4 +383,46 @@ pub async fn seances_de_ledition(pool: &PgPool, event_id: Uuid) -> Result<Vec<Uu
     .await?;
 
     Ok(ids)
+}
+
+/// L'édition d'un courriel du back-office, pour ses deux gabarits (29/10) : nom,
+/// période **dans le fuseau de l'édition** (la base porte les fuseaux, pas ce
+/// dépôt), adresse publique, et ses images telles que `media.attached_image()`
+/// les rend. La fonction du module media est appelée, sa jointure n'est pas
+/// recopiée.
+pub struct VisuelsEdition {
+    pub nom: String,
+    pub ville: Option<String>,
+    pub slug: String,
+    pub debut: time::Date,
+    pub fin: time::Date,
+    pub banniere: Option<serde_json::Value>,
+    pub logo: Option<serde_json::Value>,
+}
+
+pub async fn visuels_edition(pool: &PgPool, event_id: Uuid) -> Result<Option<VisuelsEdition>> {
+    let ligne = sqlx::query!(
+        r#"SELECT platform.t(e.title, 'fr') AS "nom!",
+                  e.city,
+                  e.slug,
+                  (e.starts_at AT TIME ZONE e.timezone)::date AS "debut!",
+                  (e.ends_at AT TIME ZONE e.timezone)::date AS "fin!",
+                  media.attached_image('event', 'events', e.id, 'banner') AS banniere,
+                  media.attached_image('event', 'events', e.id, 'logo') AS logo
+             FROM event.events e
+            WHERE e.id = $1"#,
+        event_id
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    Ok(ligne.map(|l| VisuelsEdition {
+        nom: l.nom,
+        ville: l.city,
+        slug: l.slug,
+        debut: l.debut,
+        fin: l.fin,
+        banniere: l.banniere,
+        logo: l.logo,
+    }))
 }
