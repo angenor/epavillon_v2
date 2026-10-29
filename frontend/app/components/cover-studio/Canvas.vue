@@ -32,14 +32,39 @@ function draw(): void {
 watch(() => [props.scene, props.template, props.options], draw, { deep: true })
 onMounted(draw)
 
-function toBlob(): Promise<Blob | null> {
+function encode(quality: number): Promise<Blob | null> {
   return new Promise((resolve) => {
     if (!canvas.value) return resolve(null)
-    canvas.value.toBlob((blob) => resolve(blob), 'image/png')
+    canvas.value.toBlob((blob) => resolve(blob), 'image/jpeg', quality / 100)
   })
 }
 
-defineExpose({ toBlob })
+/**
+ * L'image en JPEG, à la plus haute qualité qui tient sous `maxBytes` (300 Ko
+ * demandés par le commanditaire pour la version haute qualité). Un PNG de
+ * photo pèserait plusieurs mégaoctets.
+ */
+async function toJpeg(maxBytes: number): Promise<Blob | null> {
+  const best = await encode(90)
+  if (!best || best.size <= maxBytes) return best
+  let low = 40
+  let high = 89
+  let kept: Blob | null = null
+  while (low <= high) {
+    const middle = Math.floor((low + high) / 2)
+    const attempt = await encode(middle)
+    if (!attempt) return null
+    if (attempt.size <= maxBytes) {
+      kept = attempt
+      low = middle + 1
+    } else {
+      high = middle - 1
+    }
+  }
+  return kept ?? encode(40)
+}
+
+defineExpose({ toJpeg })
 </script>
 
 <template>

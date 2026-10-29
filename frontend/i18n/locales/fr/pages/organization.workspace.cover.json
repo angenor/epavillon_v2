@@ -15,7 +15,19 @@
     "texte-photo": "Texte et photo",
     "typographique": "Typographique",
     "visages": "Visages",
-    "photo-pleine": "Photo pleine"
+    "photo-pleine": "Photo pleine",
+    "revue": "Revue",
+    "ephemeride": "Éphéméride",
+    "diagonale": "Diagonale",
+    "passe-partout": "Passe-partout",
+    "duotone": "Duotone",
+    "plateau": "Plateau",
+    "billet": "Billet",
+    "carton": "Carton d'invitation",
+    "grands-chiffres": "Grands chiffres",
+    "encart": "Encart",
+    "fiche-seance": "Fiche de séance",
+    "hublot": "Hublot"
   },
   "options": {
     "show_date": "Date, heure et salle",

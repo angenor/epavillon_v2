@@ -146,7 +146,12 @@ useSeoMeta({
   ogUrl: () => requestUrl.href,
   ogTitle: () => (session.value ? tr(session.value.title) : undefined),
   ogDescription: () => summary.value || undefined,
-  ogImage: () => (session.value?.cover ? new URL(session.value.cover.url, requestUrl.origin).href : undefined),
+  // La déclinaison `partage` (JPEG sous 100 Ko) : WhatsApp ignore une image d'aperçu trop lourde.
+  ogImage: () => {
+    const cover = session.value?.cover
+    if (!cover) return undefined
+    return new URL(cover.sources.partage?.url ?? cover.sources.md?.url ?? cover.url, requestUrl.origin).href
+  },
   ogImageAlt: () => (session.value?.cover ? tr(session.value.title) : undefined),
   twitterCard: 'summary_large_image',
 })

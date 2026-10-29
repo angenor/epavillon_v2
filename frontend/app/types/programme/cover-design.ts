@@ -39,6 +39,8 @@ export interface CoverStudioContext {
   edition_banner: AttachedImage | null
   /** Rôle `thumbnail` de l'édition. */
   edition_thumbnail: AttachedImage | null
+  /** Rôle `logo` de l'édition : l'icône le préfère à la vignette. */
+  edition_logo: AttachedImage | null
   /** Rôle `logo` de l'organisation porteuse. */
   organization_logo: AttachedImage | null
 }

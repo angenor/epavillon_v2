@@ -75,6 +75,53 @@ pub fn redimensionner(
     decliner(octets, largeur_cible, None, None, format)
 }
 
+/// Comme [`decliner`], la qualité JPEG baissant (jusqu'à 30) tant que le
+/// fichier dépasse `poids_max`, puis la largeur (jusqu'à 600 px, le minimum
+/// d'un grand aperçu de lien). Sans plafond, ou en PNG, c'est [`decliner`].
+pub fn decliner_sous(
+    octets: &[u8],
+    largeur_cible: u32,
+    rapport: Option<(u32, u32)>,
+    qualite: Option<u8>,
+    poids_max: Option<usize>,
+    format: RenditionFormat,
+) -> Result<Declinaison, String> {
+    let premiere = decliner(octets, largeur_cible, rapport, qualite, format)?;
+    let Some(plafond) = poids_max else {
+        return Ok(premiere);
+    };
+    if format != RenditionFormat::Jpeg || premiere.octets.len() <= plafond {
+        return Ok(premiere);
+    }
+    // La plus haute qualité qui tient, par dichotomie : six encodages au plus.
+    let (mut basse, mut haute) = (30u8, qualite.unwrap_or(75).saturating_sub(1));
+    let mut retenue = None;
+    while basse <= haute {
+        let milieu = basse + (haute - basse) / 2;
+        let essai = decliner(octets, largeur_cible, rapport, Some(milieu), format)?;
+        if essai.octets.len() <= plafond {
+            retenue = Some(essai);
+            basse = milieu + 1;
+        } else {
+            if milieu == 0 {
+                break;
+            }
+            haute = milieu - 1;
+        }
+    }
+    if let Some(faite) = retenue {
+        return Ok(faite);
+    }
+    let mut largeur = largeur_cible;
+    loop {
+        largeur = (largeur * 4 / 5).max(600);
+        let essai = decliner(octets, largeur, rapport, Some(30), format)?;
+        if essai.octets.len() <= plafond || largeur == 600 {
+            return Ok(essai);
+        }
+    }
+}
+
 /// Comme [`redimensionner`], avec un recadrage au centre au rapport donné
 /// (largeur, hauteur) avant la réduction, et une qualité JPEG.
 pub fn decliner(
@@ -163,6 +210,72 @@ mod tests {
         assert_eq!((faite.width, faite.height), (1200, 200));
         let mesure = mesurer(&faite.octets).unwrap();
         assert_eq!((mesure.width, mesure.height), (1200, 200));
+    }
+
+    /// Du bruit : le pire cas pour un JPEG, que le plafond doit tenir quand même.
+    fn bruit(largeur: u32, hauteur: u32) -> Vec<u8> {
+        let mut graine: u32 = 7;
+        let mut tampon = image::RgbImage::new(largeur, hauteur);
+        for pixel in tampon.pixels_mut() {
+            graine = graine.wrapping_mul(1_664_525).wrapping_add(1_013_904_223);
+            let [a, b, c, _] = graine.to_le_bytes();
+            *pixel = image::Rgb([a, b, c]);
+        }
+        let mut octets = std::io::Cursor::new(Vec::new());
+        DynamicImage::ImageRgb8(tampon)
+            .write_to(&mut octets, image::ImageFormat::Png)
+            .unwrap();
+        octets.into_inner()
+    }
+
+    #[test]
+    fn la_declinaison_de_partage_tient_sous_son_plafond() {
+        let plafond = 100 * 1024;
+        let faite = decliner_sous(
+            &bruit(1600, 900),
+            1200,
+            None,
+            Some(85),
+            Some(plafond),
+            RenditionFormat::Jpeg,
+        )
+        .unwrap();
+        assert!(faite.width <= 1200 && faite.width >= 600);
+        assert_eq!(
+            faite.height,
+            (faite.width * 9 + 8) / 16,
+            "la forme est gardée"
+        );
+        assert!(
+            faite.octets.len() <= plafond,
+            "{} octets",
+            faite.octets.len()
+        );
+
+        let mut unie = std::io::Cursor::new(Vec::new());
+        DynamicImage::ImageRgb8(image::RgbImage::from_pixel(
+            1600,
+            900,
+            image::Rgb([30, 60, 120]),
+        ))
+        .write_to(&mut unie, image::ImageFormat::Png)
+        .unwrap();
+        let unie = unie.into_inner();
+        let legere = decliner_sous(
+            &unie,
+            1200,
+            None,
+            Some(85),
+            Some(plafond),
+            RenditionFormat::Jpeg,
+        )
+        .unwrap();
+        let directe = decliner(&unie, 1200, None, Some(85), RenditionFormat::Jpeg).unwrap();
+        assert_eq!(
+            legere.octets.len(),
+            directe.octets.len(),
+            "sous le plafond, la qualité demandée est gardée"
+        );
     }
 
     fn png(largeur: u32, hauteur: u32, opacite: u8) -> Vec<u8> {

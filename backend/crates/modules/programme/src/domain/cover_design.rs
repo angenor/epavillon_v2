@@ -79,6 +79,8 @@ pub struct CoverStudioContext {
     pub edition_cover: Option<Value>,
     pub edition_banner: Option<Value>,
     pub edition_thumbnail: Option<Value>,
+    /// Rôle `logo` de l'édition : l'icône le préfère à la vignette.
+    pub edition_logo: Option<Value>,
     pub organization_logo: Option<Value>,
 }
 

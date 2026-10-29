@@ -383,8 +383,8 @@ async fn un_objet_purge_a_quitte_le_stockage() {
     .expect("clés des déclinaisons");
     assert_eq!(
         cles_declinaisons.len(),
-        4,
-        "les quatre déclinaisons (lg, md, thumb, courriel) sont sur le stockage"
+        5,
+        "les cinq déclinaisons (lg, md, thumb, courriel, partage) sont sur le stockage"
     );
 
     let consomme_avant = commun::espace_consomme(&bac, terrain.organisation).await;

@@ -9,7 +9,9 @@
 //! `lg` 1600 px, `md` 800 px, `thumb` 320 px, à la **largeur**, hauteur
 //! proportionnelle. S'y ajoute `courriel` (29/10) : 1200 x 200, recadré au
 //! centre en 6:1, JPEG de qualité 62, l'en-tête d'un courriel (600 x 100
-//! affichés) sous 120 Ko là où `lg` en pèse 400. Le format suit la matière : **JPEG si l'image est opaque,
+//! affichés) sous 120 Ko là où `lg` en pèse 400. Puis `partage` (29/10) :
+//! 1200 px, JPEG dont la qualité baisse jusqu'à tenir sous 100 Ko, l'aperçu
+//! d'un lien partagé (`og:image`), que WhatsApp ignore au-delà de 300 Ko. Le format suit la matière : **JPEG si l'image est opaque,
 //! PNG si elle porte de la transparence** — un logo aplati sur du blanc est un
 //! défaut visible sur fond sombre, et c'est le cas le plus fréquent de la
 //! plateforme.
@@ -39,6 +41,8 @@ pub struct Variante {
     pub rapport: Option<(u32, u32)>,
     /// Qualité JPEG, de 1 à 100 ; `None` : celle de l'encodeur (75).
     pub qualite: Option<u8>,
+    /// Poids à ne pas dépasser, en octets : la qualité JPEG baisse jusqu'à tenir.
+    pub poids_max: Option<usize>,
 }
 
 pub const VARIANTES: &[Variante] = &[
@@ -47,24 +51,35 @@ pub const VARIANTES: &[Variante] = &[
         largeur_max: 1600,
         rapport: None,
         qualite: None,
+        poids_max: None,
     },
     Variante {
         code: "md",
         largeur_max: 800,
         rapport: None,
         qualite: None,
+        poids_max: None,
     },
     Variante {
         code: "thumb",
         largeur_max: 320,
         rapport: None,
         qualite: None,
+        poids_max: None,
     },
     Variante {
         code: "courriel",
         largeur_max: 1200,
         rapport: Some((6, 1)),
         qualite: Some(62),
+        poids_max: None,
+    },
+    Variante {
+        code: "partage",
+        largeur_max: 1200,
+        rapport: None,
+        qualite: Some(85),
+        poids_max: Some(100 * 1024),
     },
 ];
 
@@ -111,7 +126,7 @@ mod tests {
         assert!(attendues(200).is_empty());
         assert_eq!(attendues(500).len(), 1);
         assert_eq!(attendues(1000).len(), 2);
-        assert_eq!(attendues(4000).len(), 4);
+        assert_eq!(attendues(4000).len(), 5);
         assert_eq!(
             attendues(1200).len(),
             2,

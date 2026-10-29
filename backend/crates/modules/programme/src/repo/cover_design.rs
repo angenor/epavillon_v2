@@ -65,6 +65,7 @@ pub struct ImagesDeLatelier {
     pub edition_cover: Option<serde_json::Value>,
     pub edition_banner: Option<serde_json::Value>,
     pub edition_thumbnail: Option<serde_json::Value>,
+    pub edition_logo: Option<serde_json::Value>,
     pub organization_logo: Option<serde_json::Value>,
 }
 
@@ -77,6 +78,7 @@ pub async fn images<'e>(
                   media.attached_image('event', 'events', p.event_id, 'cover') AS "edition_cover",
                   media.attached_image('event', 'events', p.event_id, 'banner') AS "edition_banner",
                   media.attached_image('event', 'events', p.event_id, 'thumbnail') AS "edition_thumbnail",
+                  media.attached_image('event', 'events', p.event_id, 'logo') AS "edition_logo",
                   media.attached_image('org', 'organizations', p.organization_id, 'logo') AS "organization_logo"
              FROM programme.proposals p
             WHERE p.id = $1"#,
@@ -90,6 +92,7 @@ pub async fn images<'e>(
         edition_cover: ligne.edition_cover,
         edition_banner: ligne.edition_banner,
         edition_thumbnail: ligne.edition_thumbnail,
+        edition_logo: ligne.edition_logo,
         organization_logo: ligne.organization_logo,
     })
 }

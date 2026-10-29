@@ -1,4 +1,4 @@
-import type { CoverColors, CoverScene, CoverSpeaker } from '~/utils/cover-studio'
+import type { CoverColors, CoverDate, CoverScene, CoverSpeaker } from '~/utils/cover-studio'
 
 /** Ce que l'atelier sait de l'activité, en texte et en adresses d'images. */
 export interface CoverSceneSource {
@@ -6,6 +6,10 @@ export interface CoverSceneSource {
   eyebrow: string
   dateLine: string | null
   placeLine: string | null
+  date: CoverDate | null
+  room: string | null
+  city: string | null
+  organizationName: string | null
   speakers: { name: string; imageUrl: string | null }[]
   /** La photo de fond retenue : celle de l'édition ou celle de l'organisation. */
   photoUrl: string | null
@@ -15,6 +19,9 @@ export interface CoverSceneSource {
 
 /** Logo juxtaposé OIF et IFDD, version pour fond clair (bandeau de logos). */
 const PLATFORM_LOGO = '/logos/svg/oif-ifdd-gris.svg'
+
+/** La police des images, choisie par le commanditaire sur la maquette (29/10) ; Arial là où Helvetica manque. */
+const COVER_FONT = "'Helvetica Neue', Helvetica, Arial, sans-serif"
 
 const images = new Map<string, Promise<HTMLImageElement | null>>()
 
@@ -46,10 +53,15 @@ function resolveColors(accentToken: string): CoverColors {
   const read = (name: string) => style.getPropertyValue(name).trim()
   return {
     accent: read(accentToken),
+    accentLight: read(accentToken.replace(/-\d+$/, '-100')),
     onAccent: read('--ifdd-gris-0'),
     paper: read('--ifdd-gris-0'),
+    tint: read('--ifdd-gris-50'),
+    rule: read('--ifdd-gris-200'),
+    text: read('--ifdd-noir'),
     ink: read('--ifdd-bleu-900'),
     muted: read('--ifdd-gris-700'),
+    stripes: [1, 2, 3, 4, 5].map((index) => read(`--color-stripe-${index}`)),
     scrim: read('--color-scrim'),
   }
 }
@@ -88,13 +100,17 @@ export function useCoverScene(source: Ref<CoverSceneSource | null>, accentToken:
         eyebrow: current.eyebrow,
         dateLine: current.dateLine,
         placeLine: current.placeLine,
+        date: current.date,
+        room: current.room,
+        city: current.city,
+        organizationName: current.organizationName,
         speakers,
         photo,
         platformLogo,
         organizationLogo,
         icon,
         colors: resolveColors(token),
-        fontFamily: getComputedStyle(document.body).fontFamily,
+        fontFamily: COVER_FONT,
       }
     },
     { immediate: true, deep: true },

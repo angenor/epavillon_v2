@@ -5,7 +5,7 @@ import type { CoverDesignOptions, CoverStudioContext } from '~/types/programme/c
 import type { AssetId } from '~/types/shared'
 import type { AttachedImage } from '~/types/media'
 import type { CoverSceneSource } from '~/composables/useCoverScene'
-import type { CoverAccent } from '~/utils/cover-studio'
+import type { CoverAccent, CoverDate } from '~/utils/cover-studio'
 import { findCoverTemplate } from '~/utils/cover-studio'
 
 /**
@@ -30,7 +30,8 @@ defineI18nRoute({
 
 const { t } = useI18n()
 const { tr } = useI18nText()
-const { date, timeWithZone, dateRange } = useDateTime()
+const { date, time, timeWithZone, dateRange, zoneLabel, intlLocale } = useDateTime()
+const memberships = useMembershipStore()
 const localePath = useLocalePath()
 const route = useRoute()
 const api = useApi()
@@ -93,7 +94,8 @@ watch(
 )
 
 const usesPhoto = computed(() => findCoverTemplate(template.value).usesPhoto)
-const hasIcon = computed(() => Boolean(data.value?.studio.edition_thumbnail))
+const editionIcon = computed(() => data.value?.studio.edition_logo ?? data.value?.studio.edition_thumbnail ?? null)
+const hasIcon = computed(() => Boolean(editionIcon.value))
 const hasLogo = computed(() => Boolean(data.value?.studio.organization_logo))
 
 type OptionKey = keyof CoverDesignOptions
@@ -129,6 +131,21 @@ const editionName = computed(() => {
 // La scène
 // ---------------------------------------------------------------------------
 
+/** Jour, mois, heure… pris un à un dans le fuseau de l'édition, pour les modèles qui composent la date. */
+function dateParts(at: string, timezone: string, withTime: boolean): CoverDate {
+  const part = (options: Intl.DateTimeFormatOptions) =>
+    new Intl.DateTimeFormat(intlLocale.value, { timeZone: timezone, ...options }).format(new Date(at))
+  return {
+    day: part({ day: 'numeric' }),
+    month: part({ month: 'long' }),
+    monthShort: part({ month: 'short' }),
+    weekday: part({ weekday: 'long' }),
+    year: part({ year: 'numeric' }),
+    time: withTime ? time(at, timezone) : null,
+    zone: zoneLabel(timezone, data.value?.file.tracking.edition.city ?? undefined),
+  }
+}
+
 const source = computed<CoverSceneSource | null>(() => {
   const current = data.value
   if (!current) return null
@@ -142,20 +159,29 @@ const source = computed<CoverSceneSource | null>(() => {
       ? `${date(session.session.starts_at, edition.timezone)} · ${timeWithZone(session.session.starts_at, edition.timezone, edition.city ?? undefined)}`
       : dateRange(edition.starts_at, edition.ends_at, edition.timezone),
     placeLine: [session?.room ? tr(session.room.name) : null, edition.city].filter(Boolean).join(', ') || null,
+    date: dateParts(session?.session.starts_at ?? edition.starts_at, edition.timezone, Boolean(session)),
+    room: session?.room ? tr(session.room.name) : null,
+    city: edition.city ?? null,
+    organizationName:
+      memberships.submittable.find((entry) => entry.organization.id === file.tracking.proposal.organization_id)?.organization
+        .legal_name ?? null,
     speakers: editable.draft.speakers.map((speaker) => ({
       name: speakerName(speaker),
       imageUrl: speaker.photo_image?.url ?? null,
     })),
     photoUrl: backgroundPhoto.value?.url ?? null,
     organizationLogoUrl: studio.organization_logo?.url ?? null,
-    iconUrl: studio.edition_thumbnail?.url ?? null,
+    iconUrl: editionIcon.value?.url ?? null,
   }
 })
 
 const accentToken = computed(() => COVER_ACCENTS[accent.value])
 const scene = useCoverScene(source, accentToken)
 
-const preview = ref<{ toBlob: () => Promise<Blob | null> } | null>(null)
+const preview = ref<{ toJpeg: (maxBytes: number) => Promise<Blob | null> } | null>(null)
+
+/** La version haute qualité : celle de la page de détail. Les listes et le partage ont leurs déclinaisons, faites par le serveur. */
+const COVER_MAX_BYTES = 300 * 1024
 
 const photoError = ref<string | null>(null)
 
@@ -195,15 +221,15 @@ async function save(): Promise<void> {
   saving.value = true
   saveError.value = null
   try {
-    const blob = await preview.value.toBlob()
+    const blob = await preview.value.toJpeg(COVER_MAX_BYTES)
     if (!blob) {
       saveError.value = t('organization.workspace.cover.renderFailed')
       return
     }
     const asset = await api.media.upload({
       file: blob,
-      filename: `${current.file.tracking.proposal.reference_code}-couverture.png`,
-      mimeType: 'image/png',
+      filename: `${current.file.tracking.proposal.reference_code}-couverture.jpg`,
+      mimeType: 'image/jpeg',
       altText: { fr: current.editable.draft.title },
       ownerSchema: 'programme',
       ownerTable: 'proposals',

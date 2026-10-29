@@ -44,6 +44,7 @@ export function proposalCoverStudio(proposalId: Uuid): CoverStudioContext {
     edition_cover: attachedImage('event', 'events', proposal.event_id, 'cover'),
     edition_banner: attachedImage('event', 'events', proposal.event_id, 'banner'),
     edition_thumbnail: attachedImage('event', 'events', proposal.event_id, 'thumbnail'),
+    edition_logo: attachedImage('event', 'events', proposal.event_id, 'logo'),
     organization_logo: attachedImage('org', 'organizations', proposal.organization_id, 'logo'),
   }
 }

@@ -15,7 +15,19 @@
     "texte-photo": "Text and photo",
     "typographique": "Typographic",
     "visages": "Faces",
-    "photo-pleine": "Full photo"
+    "photo-pleine": "Full photo",
+    "revue": "Journal",
+    "ephemeride": "Calendar page",
+    "diagonale": "Diagonal",
+    "passe-partout": "Mount",
+    "duotone": "Duotone",
+    "plateau": "Line-up",
+    "billet": "Ticket",
+    "carton": "Invitation card",
+    "grands-chiffres": "Big numbers",
+    "encart": "Inset",
+    "fiche-seance": "Session sheet",
+    "hublot": "Porthole"
   },
   "options": {
     "show_date": "Date, time and room",

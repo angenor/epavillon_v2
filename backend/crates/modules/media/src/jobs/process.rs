@@ -270,13 +270,14 @@ impl ProcessAsset {
             let cle = variants::cle_declinaison(objet.id, variante.code, format);
             let contenu = Arc::clone(octets);
             let largeur = variante.largeur_max;
-            let (rapport, qualite) = (variante.rapport, variante.qualite);
+            let (rapport, qualite, poids_max) =
+                (variante.rapport, variante.qualite, variante.poids_max);
 
             // **La tâche bloquante dédiée** : quelques centaines de
             // millisecondes de calcul pur qui ne doivent pas tenir le fil
             // asynchrone.
             let faite = match tache_bloquante(move || {
-                imaging::decliner(&contenu, largeur, rapport, qualite, format)
+                imaging::decliner_sous(&contenu, largeur, rapport, qualite, poids_max, format)
             })
             .await?
             {

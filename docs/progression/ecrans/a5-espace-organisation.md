@@ -151,3 +151,7 @@ Option A arbitrée : modèles dans le code (`utils/cover-studio.ts`), choix en b
 ## 29/10 : l'atelier repris après la mise en production
 
 Retours du commanditaire. La photo de fond occupe tout le cadre et la couleur s'y fond (dégradés sur média, exception du guide) ; « Photo pleine » ouvre le catalogue. L'image de l'édition (`cover`, sinon `banner`) est retenue d'office, « Changer la photo » dessous ; `show_event_banner` dit laquelle sert, la photo de l'organisation reste rattachée pour y revenir. Les boutons d'ajout d'image ouvrent directement le choix du fichier (`MediaImageField`, props `buttonLabel`, `buttonIcon`, `buttonVariant`) ; la description d'une image est facultative (`altFallback`) ; l'éditeur présélectionne WebP et ne laisse partir aucun fichier au-delà de 500 ko (qualité, puis largeur, abaissées d'elles-mêmes).
+
+## 29/10 : seize modèles, images légères
+
+Douze modèles de plus, un fichier chacun dans `utils/cover-templates/` (briques dans `draw.ts`, registre dans `utils/cover-studio.ts`). L'image enregistrée est un JPEG sous 300 Ko ; l'aperçu de partage lit la déclinaison `partage` du worker (JPEG sous 100 Ko). Ajouter un modèle : un fichier, une entrée de `COVER_TEMPLATES`, son libellé.

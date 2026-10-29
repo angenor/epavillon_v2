@@ -106,6 +106,7 @@ async fn composer(state: &ProgrammeState, dossier: ProposalId) -> Result<CoverSt
         edition_cover: images.edition_cover,
         edition_banner: images.edition_banner,
         edition_thumbnail: images.edition_thumbnail,
+        edition_logo: images.edition_logo,
         organization_logo: images.organization_logo,
     })
 }
