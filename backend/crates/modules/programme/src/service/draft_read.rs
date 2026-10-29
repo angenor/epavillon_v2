@@ -62,6 +62,9 @@ pub struct CoorganisationRecomposee {
 /// Un intervenant recomposé — **et son identité verrouillée ou non**.
 #[derive(Debug, Clone, Serialize, ToSchema)]
 pub struct IntervenantRecompose {
+    /// La ligne `proposal_speakers` : l'écran la renvoie dans `DraftSpeaker.speaker_id`
+    /// pour qu'une correction la mette à jour sur place, photo comprise.
+    pub speaker_id: Uuid,
     pub person_id: Option<Uuid>,
     /// **Le verrouillage d'identité.** Vrai : la personne détient sa fiche, et
     /// le formulaire ferme les trois champs d'identité. Les deux instantanés —
@@ -77,6 +80,10 @@ pub struct IntervenantRecompose {
     pub organization_id: Option<Uuid>,
     pub role: String,
     pub bio: String,
+    /// La photo posée sur la ligne, à défaut celle de la personne ; même forme
+    /// que `media.attached_image()`, nulle sans image servable. Lue seulement :
+    /// elle se pose par le module des médias.
+    pub photo_image: Option<serde_json::Value>,
 }
 
 /// Le brouillon recomposé — la forme d'écran, enrichie de ce que la lecture
@@ -228,6 +235,7 @@ async fn intervenants(
     let lignes = speakers::du_dossier(state.pool(), dossier).await?;
     let ids: Vec<Uuid> = lignes.iter().filter_map(|l| l.person_id).collect();
     let personnes = cross::fiches_personnes(state.pool(), &ids).await?;
+    let photos = speakers::photos_du_dossier(state.pool(), dossier).await?;
 
     Ok(lignes
         .into_iter()
@@ -238,6 +246,11 @@ async fn intervenants(
                 .person_id
                 .and_then(|id| personnes.iter().find(|p| p.id == id));
             IntervenantRecompose {
+                speaker_id: ligne.id,
+                photo_image: photos
+                    .iter()
+                    .find(|(id, _)| *id == ligne.id)
+                    .and_then(|(_, photo)| photo.clone()),
                 person_id: ligne.person_id,
                 has_account: personne.is_some_and(|p| p.has_account),
                 civility: match personne {

@@ -125,8 +125,9 @@ pub async fn organisations<'e>(
 /// Composé champ par champ, jamais `to_jsonb` : une colonne ajoutée à la table
 /// ou à `identity.people` deviendrait publique sans que personne l'ait décidé.
 /// Ni `person_id`, ni `confirmed_at`, ni `attended` (décision du 26/09). La
-/// photo, `avatar`, est l'image de profil de la personne ; un intervenant sans
-/// personne (D16) prend son nom de la ligne, et sa photo de sa ligne du dossier.
+/// photo, `avatar`, est celle que l'organisation a posée sur la ligne du
+/// dossier, à défaut l'image de profil de la personne ; un intervenant sans
+/// personne (D16) prend son nom de la ligne.
 pub async fn intervenants_publics<'e>(
     executor: impl PgExecutor<'e>,
     session_id: SessionId,
@@ -143,16 +144,17 @@ pub async fn intervenants_publics<'e>(
                       'created_at', s.created_at,
                       'display_name', COALESCE(p.display_name,
                                                btrim(s.first_name || ' ' || s.last_name)),
-                      'avatar', CASE WHEN p.id IS NOT NULL
-                                     THEN media.attached_image('identity', 'people', p.id, 'avatar')
-                                     ELSE (SELECT media.attached_image('programme', 'proposal_speakers', d.id, 'avatar')
-                                             FROM programme.sessions se
-                                             JOIN programme.proposal_speakers d ON d.proposal_id = se.proposal_id
-                                            WHERE se.id = s.session_id AND d.person_id IS NULL
-                                              AND d.role = s.role AND d.first_name = s.first_name
-                                              AND d.last_name = s.last_name
-                                            LIMIT 1)
-                                END) AS "ligne!"
+                      'avatar', COALESCE(
+                                    (SELECT media.attached_image('programme', 'proposal_speakers', d.id, 'avatar')
+                                       FROM programme.sessions se
+                                       JOIN programme.proposal_speakers d ON d.proposal_id = se.proposal_id
+                                      WHERE se.id = s.session_id AND d.role = s.role
+                                        AND (d.person_id = s.person_id
+                                             OR (d.person_id IS NULL AND s.person_id IS NULL
+                                                 AND d.first_name = s.first_name
+                                                 AND d.last_name = s.last_name))
+                                      LIMIT 1),
+                                    media.attached_image('identity', 'people', p.id, 'avatar'))) AS "ligne!"
              FROM programme.session_speakers s
              LEFT JOIN identity.people p ON p.id = s.person_id
             WHERE s.session_id = $1

@@ -8,9 +8,8 @@
   },
   "tabs": {
     "label": "Vues du dossier",
-    "tracking": "Suivi",
+    "tracking": "Mon dossier",
     "exchanges": "Échanges",
-    "sessions": "Activités et rappels",
     "history": "Historique"
   },
   "tracking": {
@@ -50,7 +49,8 @@
     "edit": "Modifier le dossier",
     "editBlocked": {
       "edition_over": "Cette édition est terminée : le dossier ne se modifie plus.",
-      "file_closed": "Ce dossier est clos. Pour proposer à nouveau cette activité, déposez un nouveau dossier."
+      "file_closed": "Ce dossier est clos. Pour proposer à nouveau cette activité, déposez un nouveau dossier.",
+      "under_review": "Le comité évalue votre dossier : il redeviendra modifiable s'il vous demande des corrections."
     }
   },
   "exchanges": {
@@ -75,8 +75,8 @@
     "you": "Vous"
   },
   "sessions": {
-    "title": "Activités programmées",
-    "description": "Ce que l'IFDD a retenu de votre dossier, avec le créneau et la salle arrêtés.",
+    "title": "Quand et où",
+    "description": "Le créneau et la salle sont fixés par l'IFDD.",
     "empty": {
       "title": "Aucune activité programmée pour l'instant",
       "description": "Les créneaux sont arrêtés après l'acceptation, quand l'équipe compose le programme. Vous serez prévenu dès qu'une date sera fixée."
@@ -147,5 +147,78 @@
       "contact_person_id": "Personne à contacter",
       "slug": "Adresse de la page"
     }
+  },
+  "draftNotice": "Ce dossier est un brouillon : terminez-le dans le formulaire de dépôt pour l'envoyer.",
+  "publicLink": {
+    "copy": "Copier le lien",
+    "copied": "Lien copié",
+    "download": "Télécharger le QR",
+    "open": "Ouvrir la page publique de l'activité"
+  },
+  "gaps": {
+    "title": "Aucun manque | Il manque un élément | Il manque {count} éléments",
+    "bio": "La biographie de {names} | La biographie de {names} | Les biographies de {names}",
+    "photo": "La photo de {names} | La photo de {names} | Les photos de {names}",
+    "cover": "L'image de couverture",
+    "cta": {
+      "bio": "Compléter",
+      "photo": "Ajouter",
+      "cover": "Ajouter"
+    },
+    "logo": {
+      "title": "Votre organisation n'a pas de logo",
+      "description": "Sans lui, votre activité apparaît sans signature sur la page publique et sur l'image de couverture.",
+      "askManager": "Il manque sur la page publique et sur l'image de couverture. Seul un référent de {organization} peut l'ajouter : demandez-le-lui.",
+      "action": "Ajouter le logo",
+      "field": "Logo de l'organisation"
+    }
+  },
+  "speakers": {
+    "photoMissing": "Photo manquante",
+    "bioMissing": "Biographie manquante",
+    "photoField": "Photo de {name}",
+    "addPhoto": "Ajouter une photo",
+    "changePhoto": "Changer la photo"
+  },
+  "checklist": {
+    "title": "Votre dossier",
+    "progress": "{done} éléments sur {total}",
+    "done": "fait",
+    "todo": "à faire",
+    "items": {
+      "presentation": "Titre et présentation",
+      "cover": "Image de couverture",
+      "organizations": "Organisations",
+      "speakers": "Intervenants",
+      "bios": "Biographies",
+      "photos": "Photos des intervenants",
+      "logo": "Logo de l'organisation",
+      "format": "Format et durée"
+    }
+  },
+  "cover": {
+    "title": "Image de couverture",
+    "description": "Elle illustre votre activité sur la plateforme et sert d'aperçu quand on partage le lien.",
+    "change": "Changer l'image"
+  },
+  "sections": {
+    "presentation": "Présentation",
+    "speakers": "Intervenants | Intervenants · 1 | Intervenants · {count}",
+    "speakersHint": "Nom, rôle, fonction et biographie de chaque personne qui prend la parole.",
+    "organizations": "Organisations",
+    "noLogo": "sans logo",
+    "classification": "Thématiques et langues",
+    "schedule": "Format et créneau souhaité",
+    "scheduleHint": "Le créneau définitif est fixé par l'IFDD."
+  },
+  "fields": {
+    "title": "Titre",
+    "objectives": "Objectifs",
+    "detailedPresentation": "Présentation détaillée",
+    "expectedOutcomes": "Résultats attendus",
+    "themes": "Thématiques",
+    "categories": "Catégories",
+    "languages": "Langues",
+    "country": "Pays"
   }
 }

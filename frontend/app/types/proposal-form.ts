@@ -42,6 +42,7 @@ import type {
   TaxonomyTermCode,
   Uuid,
 } from './shared'
+import type { AttachedImage } from './media'
 import type { ParticipationMode } from './event/edition'
 import type { OrganizationRole, ProposalStatus, SpeakerRole } from './programme/proposal'
 
@@ -155,6 +156,8 @@ export interface DraftOrganization {
  */
 export interface DraftSpeaker {
   key: string
+  /** La ligne `proposal_speakers` que l'entrée corrige : renvoyée, l'API la met à jour sur place, photo comprise. */
+  speaker_id?: Uuid | null
   /**
    * PERSONNE EXISTANTE RETENUE, ou `null` pour quelqu'un que ce dossier fait
    * connaître à la plateforme.
@@ -191,8 +194,10 @@ export interface DraftSpeaker {
   role: SpeakerRole
   /** `proposal_speakers.bio`, en français comme le reste du dossier. */
   bio: string
-  /** Photo : rôle `avatar` sur `identity.people`, jamais sur la proposition. */
+  /** Photo choisie à l'écran, pas encore posée. */
   photo: DraftUpload | null
+  /** Photo servie, telle que la relecture la rend ; l'API l'ignore à l'écriture. */
+  photo_image?: AttachedImage | null
 }
 
 /**
@@ -410,10 +415,14 @@ export type SubmitProposalResult =
  * les intervenants rouverts partagent la même clé vide — en modifier un les
  * remplace tous.
  *
- * `photo` est absente pour une autre raison : elle appartient à la fiche de la
- * personne, que la recomposition ne rouvre pas.
+ * `photo` (le fichier choisi à l'écran) n'existe pas côté API ; elle rend à la
+ * place `photo_image`, la photo posée sur la ligne du dossier, à défaut celle
+ * de la personne. Et toujours l'identifiant de la ligne, à renvoyer.
  */
-export type ReopenedSpeaker = Omit<DraftSpeaker, 'key' | 'photo'>
+export type ReopenedSpeaker = Omit<DraftSpeaker, 'key' | 'photo' | 'speaker_id' | 'photo_image'> & {
+  speaker_id: Uuid
+  photo_image: AttachedImage | null
+}
 
 /**
  * LE BROUILLON RECOMPOSÉ PAR L'API.

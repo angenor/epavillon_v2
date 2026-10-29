@@ -145,31 +145,8 @@ const {
       : await api.proposals.formContext(person.id, organizationIds)
     if (!formContext.call_id || !formContext.event_id) return empty
 
-    const [call, edition, themes, categories, documentTypes, locales, countries] =
-      await Promise.all([
-        api.events.call(formContext.event_id),
-        // `publicList()` et non `list()` : cette dernière filtre par périmètre
-        // d'ADMINISTRATION, et une organisation qui dépose n'en a aucun.
-        api.events
-          .publicList()
-          .then((list) => list.find((event) => event.id === formContext.event_id) ?? null),
-        api.reference.terms('activity_theme'),
-        api.reference.terms('activity_category'),
-        api.reference.terms('document_type'),
-        api.reference.locales(),
-        api.reference.countries(),
-      ])
-
-    return {
-      call,
-      edition,
-      countedProposals: formContext.counted_proposals,
-      themes,
-      categories,
-      documentTypes,
-      locales: locales.filter((entry) => entry.is_active),
-      countries,
-    }
+    const references = await loadProposalReferences(api, formContext.event_id)
+    return { ...references, countedProposals: formContext.counted_proposals }
   },
   { lazy: true, watch: [() => auth.person?.id, editedProposalId] },
 )

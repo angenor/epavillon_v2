@@ -449,6 +449,7 @@ pub fn charge(terrain: &Terrain, brouillon: ProposalDraft) -> SaveDraftPayload {
 /// Un intervenant **valide et minimal**.
 pub fn intervenant(email: &str, prenom: &str, nom: &str) -> DraftSpeaker {
     DraftSpeaker {
+        speaker_id: None,
         person_id: None,
         civility: Some("other".to_owned()),
         first_name: prenom.to_owned(),

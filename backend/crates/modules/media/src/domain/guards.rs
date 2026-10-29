@@ -51,6 +51,11 @@ pub enum Garde {
     /// de son organisation.
     OrganisationDuDossier { permission: &'static str },
 
+    /// La garde d'[`Garde::OrganisationDuDossier`], sur le dossier de la ligne
+    /// d'intervenant visée : qui peut modifier le dossier en illustre les
+    /// intervenants, qu'ils aient un compte ou non.
+    OrganisationDuDossierDeLaLigne { permission: &'static str },
+
     /// Adhésion **active** à l'organisation qui anime la séance, **ou** la
     /// permission sur l'édition.
     OrganisationDeLaSeance { permission: &'static str },
@@ -102,7 +107,7 @@ pub enum Garde {
 /// la conception avait relevés : `075_programme_sessions.sql` et
 /// `125_training.sql` en sèment chacun un que le plan n'avait pas vus. Les
 /// omettre aurait laissé deux portes sans garde, exactement ce que ce fichier
-/// existe pour empêcher. La photo d'un intervenant sans adresse (D16) a suivi.
+/// existe pour empêcher. La photo d'un intervenant sur sa ligne a suivi.
 /// S'y ajoute le PDF des documents de négociation, que
 /// la table blanche ne décrit pas : il n'est pas rattaché, il est la donnée.
 const TABLE: &[((&str, &str), Garde)] = &[
@@ -160,15 +165,12 @@ const TABLE: &[((&str, &str), Garde)] = &[
         },
     ),
     (
-        // Photo d'un intervenant sans adresse (D16), sur sa ligne du dossier.
-        // Seule la reprise v1 en pose : le formulaire n'ajoute aucune photo
-        // d'intervenant. Le jour où il le fera, garde à écrire sur l'organisation
-        // du dossier de la ligne.
+        // Photo d'un intervenant, sur sa ligne du dossier (29/10) : l'organisation
+        // la pose pour tout intervenant, avec ou sans compte. L'avatar d'une
+        // personne reste à elle seule.
         ("programme", "proposal_speakers"),
-        Garde::Fermee {
-            motif: "Aucun écran ne pose de photo sur une ligne d'intervenant : seule la reprise \
-                    de la v1 l'a fait. Le rattachement par l'API est refusé tant qu'aucune garde \
-                    ne résout l'organisation du dossier de la ligne.",
+        Garde::OrganisationDuDossierDeLaLigne {
+            permission: "programme.proposal.decide",
         },
     ),
     (
@@ -338,6 +340,22 @@ mod tests {
         );
         // Une garde de rôle ne crée pas de couple : sans garde de couple, refus.
         assert!(garde_pour_role("event", "rooms", Some("gallery")).is_none());
+    }
+
+    /// La photo d'un intervenant se garde comme le dossier de sa ligne, avec la
+    /// même permission ; l'avatar d'une personne reste à elle.
+    #[test]
+    fn la_ligne_dun_intervenant_se_garde_comme_son_dossier() {
+        assert_eq!(
+            garde_pour_role("programme", "proposal_speakers", Some("avatar")),
+            Some(Garde::OrganisationDuDossierDeLaLigne {
+                permission: "programme.proposal.decide",
+            })
+        );
+        assert!(matches!(
+            garde_pour("identity", "people"),
+            Some(Garde::PersonneElleMeme { .. })
+        ));
     }
 
     /// Chaque garde de rôle s'appuie sur un couple déclaré : sinon, le test qui

@@ -67,7 +67,9 @@ impl ProposalStatus {
         })
     }
 
-    /// **Un dossier encore modifiable par son organisation.**
+    /// **Un dossier encore modifiable**, par l'équipe qui le corrige. Le chemin
+    /// de l'organisation ajoute sa propre fermeture :
+    /// [`Self::est_modifiable_par_lorganisation`].
     ///
     /// C'est ce que `PROPOSAL_NOT_EDITABLE` refuse ailleurs. Ce n'est pas une
     /// règle de la machine à états — elle porte sur les transitions, pas sur la
@@ -91,6 +93,22 @@ impl ProposalStatus {
     /// le commentaire de `service/draft_write.rs`, et FR-091.
     pub fn est_modifiable(self) -> bool {
         !self.sort_de_la_course()
+    }
+
+    /// **Un dossier que son organisation peut modifier** : celui de
+    /// [`Self::est_modifiable`], sauf pendant l'évaluation.
+    ///
+    /// # Fermé en `under_review` (arbitrage du commanditaire, 29/10)
+    ///
+    /// Le comité lit et note le dossier : une version qui change sous ses yeux
+    /// ferait porter deux notes sur deux textes différents, sans que personne le
+    /// sache. Le dossier redevient modifiable quand le comité demande des
+    /// corrections (`changes_requested`) ou qu'il est retenu.
+    ///
+    /// L'équipe, elle, corrige encore pendant l'évaluation, à la demande de
+    /// l'organisation : son chemin s'en tient à [`Self::est_modifiable`].
+    pub fn est_modifiable_par_lorganisation(self) -> bool {
+        self.est_modifiable() && self != Self::UnderReview
     }
 
     /// Rejeté, retiré ou annulé : le dossier ne sera pas programmé.

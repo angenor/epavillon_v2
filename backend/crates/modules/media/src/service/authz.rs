@@ -105,6 +105,23 @@ pub async fn exiger_le_droit(
             Ok(dossier.organization_id)
         }
 
+        Garde::OrganisationDuDossierDeLaLigne { permission } => {
+            let Some(dossier) = cross::dossier_de_la_ligne(pool, porteuse.owner_id).await? else {
+                return Err(ApiError::not_found());
+            };
+            let acces = acces_par_organisation_ou_edition(
+                pool,
+                acteur,
+                permission,
+                dossier.organization_id,
+                dossier.deposant,
+                dossier.event_id,
+            )
+            .await?;
+            refuser_sauf(acces)?;
+            Ok(dossier.organization_id)
+        }
+
         Garde::OrganisationDeLaSeance { permission } => {
             let Some(seance) = cross::seance(pool, porteuse.owner_id).await? else {
                 return Err(ApiError::not_found());

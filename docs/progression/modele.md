@@ -335,3 +335,6 @@ Refonte demandée par le commanditaire après usage en production.
 
 **Migration** : `ops/migrations/2026-10-28-courriels-fenetre-unique.sql` (celle du 28/10 est en production, on n'y touche plus), rejouable, jouée deux fois en local. **En production** : avec l'API et le worker, qui rendent les gabarits.
 
+## 29/10/2026, `050_media.sql` : la photo d'un intervenant posée par l'organisation
+
+Commentaire seul, aucune structure : le rôle `avatar` de `programme.proposal_speakers` ne sert plus aux seuls intervenants sans personne (D16). L'organisation porteuse y pose la photo de n'importe quel intervenant de son dossier (garde `OrganisationDuDossierDeLaLigne` du module média) ; la page publique d'une activité lit cette photo d'abord, l'avatar de la personne à défaut. Rien à recharger.

@@ -44,6 +44,7 @@ import type {
   SubmitProposalResult,
 } from '~/types/proposal-form'
 import { accounts } from './auth'
+import { attachedImage } from './covers'
 import { events } from './event'
 import { callsForProposals } from './calls'
 import { organizations } from './org'
@@ -105,15 +106,21 @@ function fr(value: { fr: string } | null | undefined): string {
 }
 
 /**
- * CE QUE L'API REND D'UN BROUILLON qu'elle a reçu : ni clés de liste, ni photos,
- * ni pièces jointes. Le mock doit dire la même chose qu'elle, sinon la bascule
- * vers l'API réelle se ferait sans que rien ne signale l'écart.
+ * CE QUE L'API REND D'UN BROUILLON qu'elle a reçu : ni clés de liste, ni fichiers
+ * choisis, ni pièces jointes ; l'identifiant de chaque ligne et sa photo servie.
+ * Le mock doit dire la même chose qu'elle, sinon la bascule vers l'API réelle
+ * se ferait sans que rien ne signale l'écart.
  */
 function reopened(draft: ProposalDraft): ReopenedDraft {
   const { documents: _documents, speakers, ...rest } = draft
   return {
     ...rest,
-    speakers: speakers.map(({ key: _key, photo: _photo, ...speaker }) => speaker),
+    // L'API crée la ligne d'un intervenant nouveau ; la clé de liste en tient lieu ici.
+    speakers: speakers.map(({ key, photo: _photo, speaker_id, photo_image, ...speaker }) => ({
+      ...speaker,
+      speaker_id: speaker_id ?? key,
+      photo_image: photo_image ?? null,
+    })),
   }
 }
 
@@ -134,8 +141,8 @@ function coOrganizationsOf(proposalId: string): DraftOrganization[] {
 }
 
 /**
- * NI CLÉ DE LISTE NI PHOTO : l'API n'en rend pas. La clé est locale à l'écran,
- * qui la pose à la réception ; la photo appartient à la fiche de la personne.
+ * NI CLÉ DE LISTE NI FICHIER CHOISI : la clé est locale à l'écran, qui la pose
+ * à la réception. La photo servie est celle de la ligne, à défaut de la personne.
  */
 function speakersOf(proposalId: string): ReopenedSpeaker[] {
   return proposalSpeakers
@@ -144,6 +151,7 @@ function speakersOf(proposalId: string): ReopenedSpeaker[] {
     .map((speaker) => {
       const person = speaker.person_id ? people.find((p) => p.id === speaker.person_id) : undefined
       return {
+        speaker_id: speaker.id,
         person_id: speaker.person_id,
         // L'identité d'une personne qui a un COMPTE lui appartient : le
         // formulaire la verrouille (écart n° 31).
@@ -158,6 +166,9 @@ function speakersOf(proposalId: string): ReopenedSpeaker[] {
         organization_id: speaker.organization_id,
         role: speaker.role,
         bio: fr(speaker.bio),
+        photo_image:
+          attachedImage('programme', 'proposal_speakers', speaker.id, 'avatar') ??
+          attachedImage('identity', 'people', speaker.person_id, 'avatar'),
       }
     })
 }

@@ -95,7 +95,7 @@ pub(crate) async fn editions(
 /// Le dossier vu par son déposant.
 #[utoipa::path(
     get,
-    description = "`ProposalFile` — le suivi du dossier, le **fil partagé** et l'historique champ par champ. Le fil est filtré **à la source** sur la visibilité partagée : les délibérations du comité n'y sont jamais, et les notes personnelles encore moins. C'est le **même** filtre que celui du comité — l'écrire deux fois serait écrire deux filtres, et le second finirait par diverger. `null` en 200 pour un dossier inexistant **ou porté par une organisation dont on n'est pas membre** : indiscernables, et ce n'est pas une panne.",
+    description = "`ProposalFile` — le suivi du dossier, le **fil partagé** et l'historique champ par champ. Le logo de l'organisation porteuse l'accompagne (`organization_logo`, même forme que `cover`, nul sans logo). Le fil est filtré **à la source** sur la visibilité partagée : les délibérations du comité n'y sont jamais, et les notes personnelles encore moins. C'est le **même** filtre que celui du comité — l'écrire deux fois serait écrire deux filtres, et le second finirait par diverger. `null` en 200 pour un dossier inexistant **ou porté par une organisation dont on n'est pas membre** : indiscernables, et ce n'est pas une panne.",
     path = "/proposals/{id}/file",
     tag = "Espace organisation",
     operation_id = "propositions_dossier_du_deposant",

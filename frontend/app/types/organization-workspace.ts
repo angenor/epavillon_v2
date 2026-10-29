@@ -147,6 +147,8 @@ export interface ProposalTracking {
 /** Le détail d'un dossier : son suivi, ses échanges, son historique. */
 export interface ProposalFile {
   tracking: ProposalTracking
+  /** Logo de l'organisation porteuse ; nul sans logo servable. */
+  organization_logo: AttachedImage | null
   /** Fil partagé avec le soumissionnaire. Les notes du comité n'y sont jamais. */
   comments: ProposalComment[]
   /** Auteurs des messages, pour ne pas résoudre les noms un par un. */

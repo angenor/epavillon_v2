@@ -127,3 +127,13 @@ Demande du commanditaire : en production, « ce qui attend une action » était 
 - API : `ProposalTracking.cover`, `ProposalTracking.edition_thumbnail`, `WorkspaceOverview.organization_logo`, lus par `media.attached_image()`.
 
 Vérifié au navigateur sur les données d'exemple (ROAC : COP31 et COP30), à 1280 et 375 px : aucun défilement horizontal, recherche « littor » qui trouve un dossier dans la COP31 et un sous « COP30 · Belém », onglet COP30 réduit à « Un compte rendu attendu ». Images des onglets et des lignes décoratives (`aria-hidden`) : leur texte alternatif précédait le nom dans l'onglet.
+
+## 29/10 : la fiche d'un dossier, phase 1
+
+Direction 1 arbitrée sur maquette (canevas « Fiche dossier : direction »). Règles de modification arbitrées : l'organisation modifie en `submitted`, `changes_requested`, `accepted` ; pas en `under_review` (le comité lit), ni dossier clos, ni édition terminée ; un brouillon passe par le formulaire. Images (couverture, photos, logo) modifiables tant que le dossier n'est pas clos. Lien et QR code à la publication du programme.
+
+- Page : `pages/organization/proposal/[id].vue`. Composants `components/workspace/file/` (`Section`, `Gaps`, `Speakers`, `Checklist`, `PublicLink`), composable `useProposalFileEditor` (copie du dossier enregistré, étape du formulaire sur place, `PUT` du dossier entier), `useProposalReferences` partagé avec le formulaire, utilitaire `proposal-file.ts` (manques, liste) et son test.
+- Trois onglets : Mon dossier, Échanges, Historique. `WorkspaceSessionPanel` devient la carte « Quand et où ».
+- Serveur : `est_modifiable_par_lorganisation`, `exiger_un_dossier_complet` sur le chemin organisation hors brouillon, garde média de la ligne d'intervenant, `DraftSpeaker.speaker_id`, `ProposalFile.organization_logo`, `ReopenedSpeaker.photo_image`.
+
+Reste : phase 2 (point focal, besoins techniques, présentations, publications sur les réseaux, rappels calculés), phase 3 (atelier de l'image de couverture, image de partage).

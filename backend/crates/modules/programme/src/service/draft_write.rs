@@ -35,6 +35,7 @@ use uuid::Uuid;
 use crate::domain::draft::{self, DraftSpeaker, ProposalDraft, SaveDraftPayload};
 use crate::domain::ids::{EventId, ProposalId};
 use crate::domain::limits::{self, Borne};
+use crate::domain::transitions::ProposalStatus;
 use crate::domain::{ownership, sanitize};
 use crate::repo::cross::{ContexteEdition, ReglesDeLAppel};
 use crate::repo::proposals::{ChampsDuDossier, Enregistrement, NouveauDossier};
@@ -61,6 +62,22 @@ pub async fn enregistrer(
         Some(etat) => ownership::peut_agir_sur(adhesion, etat.submitted_by == acteur),
         None => ownership::peut_deposer(adhesion),
     })?;
+
+    // Après l'adhésion : un étranger au dossier n'apprend pas son état.
+    if let Some(etat) = existant.as_ref() {
+        if ProposalStatus::from_db(&etat.status)
+            .is_some_and(|s| !s.est_modifiable_par_lorganisation())
+        {
+            return Err(ApiError::with_message(
+                ErrorCode::ProposalNotEditable,
+                "Le comité évalue votre dossier : il redeviendra modifiable s'il vous demande des corrections.",
+            ));
+        }
+        // Ce que le dépôt a exigé reste vrai ; un brouillon, lui, se construit.
+        if etat.status != ProposalStatus::Draft.as_str() {
+            exiger_un_dossier_complet(&payload.draft, &regles)?;
+        }
+    }
 
     ecrire(
         state,
@@ -137,7 +154,8 @@ pub async fn corriger_par_lequipe(
     .await
 }
 
-/// Ce que le dépôt a exigé doit rester vrai après une correction de l'équipe.
+/// Ce que le dépôt a exigé doit rester vrai après une correction, de l'équipe
+/// comme de l'organisation.
 fn exiger_un_dossier_complet(brouillon: &ProposalDraft, regles: &ReglesDeLAppel) -> Result<()> {
     let presentation = sanitize::assainir(&brouillon.detailed_presentation);
     for (champ, vide) in [
@@ -264,6 +282,7 @@ async fn ecrire(
         .iter()
         .enumerate()
         .map(|(rang, i)| speakers::Intervenant {
+            ligne: i.speaker_id,
             person_id: i.person_id,
             civility: i.sans_personne.as_ref().and_then(|s| s.civility.as_deref()),
             first_name: i.sans_personne.as_ref().map(|s| s.first_name.as_str()),
@@ -400,9 +419,7 @@ async fn contexte(
     };
 
     if let Some(etat) = &existant {
-        if !crate::domain::transitions::ProposalStatus::from_db(&etat.status)
-            .is_some_and(|s| s.est_modifiable())
-        {
+        if !ProposalStatus::from_db(&etat.status).is_some_and(|s| s.est_modifiable()) {
             return Err(ApiError::new(ErrorCode::ProposalNotEditable));
         }
     }
@@ -763,6 +780,7 @@ pub struct IdentiteDeLigne {
 }
 
 pub struct IntervenantResolu {
+    pub speaker_id: Option<Uuid>,
     pub person_id: Option<Uuid>,
     /// Présente exactement quand `person_id` est nul (D16).
     pub sans_personne: Option<IdentiteDeLigne>,
@@ -816,6 +834,7 @@ async fn resoudre_intervenants(
 
         if email.is_empty() {
             resolus.push(IntervenantResolu {
+                speaker_id: saisi.speaker_id,
                 person_id: None,
                 sans_personne: Some(IdentiteDeLigne {
                     civility: saisi
@@ -886,6 +905,7 @@ async fn resoudre_intervenants(
         };
 
         resolus.push(IntervenantResolu {
+            speaker_id: saisi.speaker_id,
             person_id: Some(person_id),
             sans_personne: None,
             role: saisi.role.clone(),

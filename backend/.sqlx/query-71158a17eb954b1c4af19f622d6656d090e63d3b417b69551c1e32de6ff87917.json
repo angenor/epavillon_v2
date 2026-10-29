@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH e AS (\n               SELECT * FROM unnest($2::uuid[], $3::text[], $4::text[], $5::text[],\n                                    $6::uuid[], $7::jsonb[], $8::smallint[],\n                                    $9::text[], $10::text[], $11::text[])\n                      AS e(personne, role, fonction, organisation, org_id, bio, rang,\n                           civilite, prenom, nom)\n           ),\n           sans_personne AS (\n               UPDATE programme.proposal_speakers s\n                  SET civility = e.civilite,\n                      job_title_snapshot = e.fonction,\n                      organization_snapshot = e.organisation,\n                      organization_id = e.org_id,\n                      bio = e.bio::jsonb::platform.i18n_text,\n                      sort_order = e.rang\n                 FROM e\n                WHERE s.proposal_id = $1 AND s.person_id IS NULL AND e.personne IS NULL\n                  AND s.id <> ALL($12::uuid[])\n                  AND s.role = e.role::programme.speaker_role\n                  AND s.first_name = e.prenom AND s.last_name = e.nom\n               RETURNING s.role, s.first_name, s.last_name\n           )\n           INSERT INTO programme.proposal_speakers\n               (proposal_id, person_id, role, job_title_snapshot, organization_snapshot,\n                organization_id, bio, sort_order, civility, first_name, last_name)\n           SELECT $1, e.personne, e.role::programme.speaker_role,\n                  e.fonction, e.organisation, e.org_id,\n                  e.bio::jsonb::platform.i18n_text, e.rang,\n                  e.civilite, e.prenom, e.nom\n             FROM e\n            WHERE e.personne IS NOT NULL\n               OR NOT EXISTS (SELECT 1 FROM sans_personne d\n                               WHERE d.role = e.role::programme.speaker_role\n                                 AND d.first_name = e.prenom AND d.last_name = e.nom)\n           ON CONFLICT (proposal_id, person_id, role) DO UPDATE\n               SET job_title_snapshot = EXCLUDED.job_title_snapshot,\n                   organization_snapshot = EXCLUDED.organization_snapshot,\n                   organization_id = EXCLUDED.organization_id,\n                   bio = EXCLUDED.bio,\n                   sort_order = EXCLUDED.sort_order",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray",
+        "TextArray",
+        "TextArray",
+        "TextArray",
+        "UuidArray",
+        "JsonbArray",
+        "Int2Array",
+        "TextArray",
+        "TextArray",
+        "TextArray",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "71158a17eb954b1c4af19f622d6656d090e63d3b417b69551c1e32de6ff87917"
+}

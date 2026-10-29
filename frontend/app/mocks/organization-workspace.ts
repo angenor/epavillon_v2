@@ -424,6 +424,7 @@ export function proposalFile(
 
   return {
     tracking,
+    organization_logo: attachedImage('org', 'organizations', tracking.proposal.organization_id, 'logo'),
     comments,
     participants,
     history: proposalHistory(proposalId),

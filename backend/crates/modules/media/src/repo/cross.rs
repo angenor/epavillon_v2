@@ -16,6 +16,7 @@
 //! | `org.memberships`, `org.organizations` | qui peut poser un fichier sur cette fiche, quelle organisation le possède, et sous quel nom le tableau des quotas la désigne |
 //! | `event.events` | à quelle édition appartient l'entité visée, pour vérifier le périmètre |
 //! | `programme.proposals` | à quelle organisation appartient le dossier visé |
+//! | `programme.proposal_speakers` | de quel dossier relève la ligne d'intervenant visée |
 //! | `programme.sessions` | quelle organisation anime la séance visée |
 //! | `identity.people` | l'objet vise-t-il la personne connectée |
 //! | `content.highlights` | à quelle édition se rattache le contenu visé |
@@ -104,6 +105,25 @@ pub async fn dossier(pool: &PgPool, proposal_id: Uuid) -> Result<Option<DossierV
         "SELECT p.event_id, p.organization_id, p.submitted_by
            FROM programme.proposals p WHERE p.id = $1",
         proposal_id
+    )
+    .fetch_optional(pool)
+    .await?;
+
+    Ok(ligne.map(|l| DossierVise {
+        event_id: l.event_id,
+        organization_id: Some(l.organization_id),
+        deposant: Some(l.submitted_by),
+    }))
+}
+
+/// Le dossier d'une ligne d'intervenant, pour garder sa photo comme le dossier.
+pub async fn dossier_de_la_ligne(pool: &PgPool, speaker_id: Uuid) -> Result<Option<DossierVise>> {
+    let ligne = sqlx::query!(
+        "SELECT p.event_id, p.organization_id, p.submitted_by
+           FROM programme.proposal_speakers s
+           JOIN programme.proposals p ON p.id = s.proposal_id
+          WHERE s.id = $1",
+        speaker_id
     )
     .fetch_optional(pool)
     .await?;

@@ -8,9 +8,8 @@
   },
   "tabs": {
     "label": "Submission views",
-    "tracking": "Progress",
+    "tracking": "My submission",
     "exchanges": "Messages",
-    "sessions": "Activities and reminders",
     "history": "History"
   },
   "tracking": {
@@ -50,7 +49,8 @@
     "edit": "Edit submission",
     "editBlocked": {
       "edition_over": "This edition is over: the submission can no longer be edited.",
-      "file_closed": "This submission is closed. To propose this activity again, start a new submission."
+      "file_closed": "This submission is closed. To propose this activity again, start a new submission.",
+      "under_review": "The committee is reviewing your submission: it becomes editable again if they ask you for changes."
     }
   },
   "exchanges": {
@@ -75,8 +75,8 @@
     "you": "You"
   },
   "sessions": {
-    "title": "Scheduled activities",
-    "description": "What the IFDD selected from your submission, with the confirmed slot and room.",
+    "title": "When and where",
+    "description": "The slot and the room are set by IFDD.",
     "empty": {
       "title": "No activity scheduled yet",
       "description": "Slots are set after acceptance, when the team assembles the programme. You will be notified as soon as a date is fixed."
@@ -147,5 +147,78 @@
       "contact_person_id": "Contact person",
       "slug": "Page address"
     }
+  },
+  "draftNotice": "This submission is a draft: finish it in the submission form to send it.",
+  "publicLink": {
+    "copy": "Copy the link",
+    "copied": "Link copied",
+    "download": "Download the QR code",
+    "open": "Open the activity's public page"
+  },
+  "gaps": {
+    "title": "Nothing missing | One item is missing | {count} items are missing",
+    "bio": "The biography of {names} | The biography of {names} | The biographies of {names}",
+    "photo": "The photo of {names} | The photo of {names} | The photos of {names}",
+    "cover": "The cover image",
+    "cta": {
+      "bio": "Complete",
+      "photo": "Add",
+      "cover": "Add"
+    },
+    "logo": {
+      "title": "Your organisation has no logo",
+      "description": "Without it, your activity appears unsigned on the public page and on the cover image.",
+      "askManager": "It is missing from the public page and the cover image. Only a manager of {organization} can add it: please ask them.",
+      "action": "Add the logo",
+      "field": "Organisation logo"
+    }
+  },
+  "speakers": {
+    "photoMissing": "Photo missing",
+    "bioMissing": "Biography missing",
+    "photoField": "Photo of {name}",
+    "addPhoto": "Add a photo",
+    "changePhoto": "Change the photo"
+  },
+  "checklist": {
+    "title": "Your submission",
+    "progress": "{done} of {total} items",
+    "done": "done",
+    "todo": "to do",
+    "items": {
+      "presentation": "Title and presentation",
+      "cover": "Cover image",
+      "organizations": "Organisations",
+      "speakers": "Speakers",
+      "bios": "Biographies",
+      "photos": "Speaker photos",
+      "logo": "Organisation logo",
+      "format": "Format and duration"
+    }
+  },
+  "cover": {
+    "title": "Cover image",
+    "description": "It illustrates your activity on the platform and is the preview when the link is shared.",
+    "change": "Change the image"
+  },
+  "sections": {
+    "presentation": "Presentation",
+    "speakers": "Speakers | Speakers · 1 | Speakers · {count}",
+    "speakersHint": "Name, role, position and biography of each person who speaks.",
+    "organizations": "Organisations",
+    "noLogo": "no logo",
+    "classification": "Themes and languages",
+    "schedule": "Format and preferred slot",
+    "scheduleHint": "The final slot is set by IFDD."
+  },
+  "fields": {
+    "title": "Title",
+    "objectives": "Objectives",
+    "detailedPresentation": "Detailed presentation",
+    "expectedOutcomes": "Expected outcomes",
+    "themes": "Themes",
+    "categories": "Categories",
+    "languages": "Languages",
+    "country": "Country"
   }
 }

@@ -344,6 +344,24 @@ fn les_trois_etats_clos_ne_sont_plus_modifiables() {
 }
 
 #[test]
+fn lorganisation_ne_modifie_pas_un_dossier_en_evaluation() {
+    use transitions::ProposalStatus::*;
+
+    // Le comité ne note pas une version qui change sous ses yeux ; l'équipe,
+    // elle, corrige encore (`est_modifiable`, ci-dessus).
+    for etat in [Draft, Submitted, ChangesRequested, Accepted] {
+        assert!(etat.est_modifiable_par_lorganisation(), "{}", etat.as_str());
+    }
+    for etat in [UnderReview, Rejected, Withdrawn, Cancelled] {
+        assert!(
+            !etat.est_modifiable_par_lorganisation(),
+            "{}",
+            etat.as_str()
+        );
+    }
+}
+
+#[test]
 fn les_huit_etats_font_laller_retour_avec_la_base() {
     use transitions::ProposalStatus::*;
 

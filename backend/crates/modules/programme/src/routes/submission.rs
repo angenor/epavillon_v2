@@ -62,7 +62,7 @@ pub fn chemins_de_dossier(cfg: &mut web::ServiceConfig) {
 /// Rouvrir un dossier tel qu'il a été saisi.
 #[utoipa::path(
     get,
-    description = "`EditableProposal` — le dossier **recomposé en brouillon**, pas un `SELECT`. Trois conversions comptent : le créneau redevient une **heure murale dans le fuseau de l'ÉDITION** — saisi à 14:30 à Belém, il se rouvrirait à 11:30 pour qui corrige depuis Dakar, sans qu'aucune erreur ne soit levée ; les textes multilingues sont ramenés à leur français, **les textes provisoires effacés** — le formulaire n'affiche jamais « Dossier sans titre » (écart n° 102) ; chaque intervenant retrouve son **verrouillage d'identité** — une personne qui possède un compte détient sa fiche (écart n° 31). **Une seule implémentation pour les deux écrans** : deux recompositions divergeraient au premier champ ajouté.",
+    description = "`EditableProposal` — le dossier **recomposé en brouillon**, pas un `SELECT`. Trois conversions comptent : le créneau redevient une **heure murale dans le fuseau de l'ÉDITION** — saisi à 14:30 à Belém, il se rouvrirait à 11:30 pour qui corrige depuis Dakar, sans qu'aucune erreur ne soit levée ; les textes multilingues sont ramenés à leur français, **les textes provisoires effacés** — le formulaire n'affiche jamais « Dossier sans titre » (écart n° 102) ; chaque intervenant retrouve son **verrouillage d'identité** — une personne qui possède un compte détient sa fiche (écart n° 31). Chaque intervenant porte l'identifiant de sa ligne (`speaker_id`), à renvoyer dans `DraftSpeaker.speaker_id` pour la corriger sur place, et sa photo servie (`photo_image`, `AttachedImage` : celle posée sur la ligne, à défaut celle de la personne ; nulle sans image). **Une seule implémentation pour les deux écrans** : deux recompositions divergeraient au premier champ ajouté.",
     path = "/proposals/{id}/draft",
     tag = "Dépôt",
     operation_id = "depot_rouvrir_un_dossier",
@@ -226,7 +226,7 @@ pub(crate) async fn creer(
 /// Les enregistrements suivants — **sans jamais toucher à l'état**.
 #[utoipa::path(
     put,
-    description = "`SaveDraftPayload` → `SaveDraftResult`. **Corriger n'est pas déposer** : `status` n'est pas dans la mise à jour, et le garde d'état n'est donc pas réveillé — un dossier en évaluation ne repart pas au comité parce qu'on a rectifié une faute de frappe. L'adresse d'URL **suit le titre tant que le dossier est en brouillon**, et se fige au dépôt : une adresse déjà communiquée ne change pas sous une correction. L'organisation porteuse vient de **la base**, jamais du corps.",
+    description = "`SaveDraftPayload` → `SaveDraftResult`. **Corriger n'est pas déposer** : `status` n'est pas dans la mise à jour, et le garde d'état n'est donc pas réveillé : un dossier corrigé ne repart pas au comité. **Fermé pendant l'évaluation** (`under_review`) : le comité ne note pas une version qui change sous ses yeux, et l'équipe seule corrige alors, par `PUT /proposals/{id}/content`. Un dossier déposé garde ce que le dépôt a exigé (titre, objectifs, présentation, classement, intervenants complets). Un intervenant qui porte `speaker_id` corrige sa ligne sur place, photo comprise. L'adresse d'URL **suit le titre tant que le dossier est en brouillon**, et se fige au dépôt : une adresse déjà communiquée ne change pas sous une correction. L'organisation porteuse vient de **la base**, jamais du corps.",
     path = "/proposals/{id}",
     tag = "Dépôt",
     operation_id = "depot_enregistrer_brouillon",
@@ -237,7 +237,7 @@ pub(crate) async fn creer(
         (status = 401, description = "Aucune session, ou session close", body = crate::routes::openapi::ApiErrorBody),
         (status = 403, description = "Permission de soumettre absente", body = crate::routes::openapi::ApiErrorBody),
         (status = 404, description = "Dossier inexistant **ou porté par une organisation dont vous n'êtes pas membre actif** — indiscernables", body = crate::routes::openapi::ApiErrorBody),
-        (status = 422, description = "Dossier clos (PROPOSAL_NOT_EDITABLE), texte trop long, thématique inconnue, identité verrouillée", body = crate::routes::openapi::ApiErrorBody),
+        (status = 422, description = "Dossier clos ou en évaluation (PROPOSAL_NOT_EDITABLE), champ exigé au dépôt vidé sur un dossier déposé (VALIDATION_FAILED, champ nommé), texte trop long, thématique inconnue, identité verrouillée", body = crate::routes::openapi::ApiErrorBody),
     )
 )]
 pub(crate) async fn modifier(

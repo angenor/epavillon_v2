@@ -70,6 +70,8 @@ pub struct SuiviDeDossier {
 #[derive(Debug, Clone, Serialize, ToSchema)]
 pub struct DossierDuDeposant {
     pub tracking: SuiviDeDossier,
+    /// Logo de l'organisation porteuse, même forme que `cover` ; nul sans logo.
+    pub organization_logo: Option<serde_json::Value>,
     /// **Le fil partagé, filtré à la source.** Les délibérations du comité n'y
     /// sont jamais, et les notes personnelles encore moins.
     pub comments: Vec<Message>,
@@ -250,8 +252,16 @@ pub async fn dossier(
     // deux fois serait écrire deux filtres, et le second finirait par diverger.
     let fil = comments::fil(state.pool(), id, lecteur, Cote::Organisation).await?;
 
+    let organization_logo = sqlx::query_scalar!(
+        r#"SELECT media.attached_image('org', 'organizations', $1, 'logo') AS "image""#,
+        etat.organization_id
+    )
+    .fetch_one(state.pool())
+    .await?;
+
     Ok(Some(DossierDuDeposant {
         tracking,
+        organization_logo,
         participants: auteurs_nommables(state, &fil, etat.organization_id).await?,
         history: cross::historique_du_dossier(state.pool(), id).await?,
         comments: fil,

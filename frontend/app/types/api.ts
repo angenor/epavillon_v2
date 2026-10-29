@@ -5167,7 +5167,7 @@ export interface paths {
         get: operations["propositions_fiche"];
         /**
          * Les enregistrements suivants — **sans jamais toucher à l'état**.
-         * @description `SaveDraftPayload` → `SaveDraftResult`. **Corriger n'est pas déposer** : `status` n'est pas dans la mise à jour, et le garde d'état n'est donc pas réveillé — un dossier en évaluation ne repart pas au comité parce qu'on a rectifié une faute de frappe. L'adresse d'URL **suit le titre tant que le dossier est en brouillon**, et se fige au dépôt : une adresse déjà communiquée ne change pas sous une correction. L'organisation porteuse vient de **la base**, jamais du corps.
+         * @description `SaveDraftPayload` → `SaveDraftResult`. **Corriger n'est pas déposer** : `status` n'est pas dans la mise à jour, et le garde d'état n'est donc pas réveillé : un dossier corrigé ne repart pas au comité. **Fermé pendant l'évaluation** (`under_review`) : le comité ne note pas une version qui change sous ses yeux, et l'équipe seule corrige alors, par `PUT /proposals/{id}/content`. Un dossier déposé garde ce que le dépôt a exigé (titre, objectifs, présentation, classement, intervenants complets). Un intervenant qui porte `speaker_id` corrige sa ligne sur place, photo comprise. L'adresse d'URL **suit le titre tant que le dossier est en brouillon**, et se fige au dépôt : une adresse déjà communiquée ne change pas sous une correction. L'organisation porteuse vient de **la base**, jamais du corps.
          */
         put: operations["depot_enregistrer_brouillon"];
         post?: never;
@@ -5378,7 +5378,7 @@ export interface paths {
         };
         /**
          * Rouvrir un dossier tel qu'il a été saisi.
-         * @description `EditableProposal` — le dossier **recomposé en brouillon**, pas un `SELECT`. Trois conversions comptent : le créneau redevient une **heure murale dans le fuseau de l'ÉDITION** — saisi à 14:30 à Belém, il se rouvrirait à 11:30 pour qui corrige depuis Dakar, sans qu'aucune erreur ne soit levée ; les textes multilingues sont ramenés à leur français, **les textes provisoires effacés** — le formulaire n'affiche jamais « Dossier sans titre » (écart n° 102) ; chaque intervenant retrouve son **verrouillage d'identité** — une personne qui possède un compte détient sa fiche (écart n° 31). **Une seule implémentation pour les deux écrans** : deux recompositions divergeraient au premier champ ajouté.
+         * @description `EditableProposal` — le dossier **recomposé en brouillon**, pas un `SELECT`. Trois conversions comptent : le créneau redevient une **heure murale dans le fuseau de l'ÉDITION** — saisi à 14:30 à Belém, il se rouvrirait à 11:30 pour qui corrige depuis Dakar, sans qu'aucune erreur ne soit levée ; les textes multilingues sont ramenés à leur français, **les textes provisoires effacés** — le formulaire n'affiche jamais « Dossier sans titre » (écart n° 102) ; chaque intervenant retrouve son **verrouillage d'identité** — une personne qui possède un compte détient sa fiche (écart n° 31). Chaque intervenant porte l'identifiant de sa ligne (`speaker_id`), à renvoyer dans `DraftSpeaker.speaker_id` pour la corriger sur place, et sa photo servie (`photo_image`, `AttachedImage` : celle posée sur la ligne, à défaut celle de la personne ; nulle sans image). **Une seule implémentation pour les deux écrans** : deux recompositions divergeraient au premier champ ajouté.
          */
         get: operations["depot_rouvrir_un_dossier"];
         put?: never;
@@ -5398,7 +5398,7 @@ export interface paths {
         };
         /**
          * Le dossier vu par son déposant.
-         * @description `ProposalFile` — le suivi du dossier, le **fil partagé** et l'historique champ par champ. Le fil est filtré **à la source** sur la visibilité partagée : les délibérations du comité n'y sont jamais, et les notes personnelles encore moins. C'est le **même** filtre que celui du comité — l'écrire deux fois serait écrire deux filtres, et le second finirait par diverger. `null` en 200 pour un dossier inexistant **ou porté par une organisation dont on n'est pas membre** : indiscernables, et ce n'est pas une panne.
+         * @description `ProposalFile` — le suivi du dossier, le **fil partagé** et l'historique champ par champ. Le logo de l'organisation porteuse l'accompagne (`organization_logo`, même forme que `cover`, nul sans logo). Le fil est filtré **à la source** sur la visibilité partagée : les délibérations du comité n'y sont jamais, et les notes personnelles encore moins. C'est le **même** filtre que celui du comité — l'écrire deux fois serait écrire deux filtres, et le second finirait par diverger. `null` en 200 pour un dossier inexistant **ou porté par une organisation dont on n'est pas membre** : indiscernables, et ce n'est pas une panne.
          */
         get: operations["propositions_dossier_du_deposant"];
         put?: never;
@@ -20543,7 +20543,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiError"];
                 };
             };
-            /** @description Dossier clos (PROPOSAL_NOT_EDITABLE), texte trop long, thématique inconnue, identité verrouillée */
+            /** @description Dossier clos ou en évaluation (PROPOSAL_NOT_EDITABLE), champ exigé au dépôt vidé sur un dossier déposé (VALIDATION_FAILED, champ nommé), texte trop long, thématique inconnue, identité verrouillée */
             422: {
                 headers: {
                     [name: string]: unknown;

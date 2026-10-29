@@ -41,6 +41,12 @@ pub struct DraftOrganization {
 /// Un intervenant en cours de saisie.
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct DraftSpeaker {
+    /// La ligne `proposal_speakers` que cette entrée corrige, telle que la
+    /// relecture l'a rendue. Fournie et du dossier : la ligne est mise à jour
+    /// sur place, et sa photo la suit ; corriger un nom ou un rôle ne crée plus
+    /// une ligne nouvelle. Absente ou étrangère : rapprochement ordinaire.
+    #[serde(default)]
+    pub speaker_id: Option<Uuid>,
     /// Personne existante retenue, ou absente pour quelqu'un que ce dossier
     /// fait connaître à la plateforme.
     #[serde(default)]

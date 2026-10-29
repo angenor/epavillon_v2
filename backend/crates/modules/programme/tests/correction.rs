@@ -8,7 +8,8 @@
 //! - **le renvoi sur appel clos aboutit**, et le même dossier par la route de
 //!   dépôt est refusé : la fenêtre ne borne que le premier dépôt ;
 //! - **corriger ne change pas l'état** : un dossier en évaluation ne repart pas
-//!   au comité parce qu'on a rectifié une faute de frappe ;
+//!   au comité parce que l'équipe a rectifié une faute de frappe, et son
+//!   organisation ne le modifie plus tant que le comité le lit ;
 //! - **corriger un dossier retenu laisse sa séance strictement inchangée** —
 //!   créneau, salle, capacité. C'est le test qui coûterait le plus cher à ne
 //!   pas avoir : déplacer une séance à laquelle quarante personnes se sont
@@ -283,12 +284,17 @@ async fn le_plafond_refuse_aussi_un_renvoi_excedentaire() {
 // T137 — corriger n'est pas déposer
 // -----------------------------------------------------------------------------
 
-/// **Un dossier en évaluation ne repart pas au comité parce qu'on a rectifié
-/// une faute de frappe.**
+/// **Pendant l'évaluation, l'organisation ne modifie plus son dossier ;
+/// l'équipe le corrige encore, sans le renvoyer au comité.**
+///
+/// Le comité ne note pas une version qui change sous ses yeux (arbitrage du
+/// 29/10). L'équipe corrige à la demande de l'organisation, et rectifier une
+/// faute de frappe ne fait pas repartir le dossier.
 #[tokio::test]
-async fn corriger_un_dossier_en_evaluation_ne_change_pas_son_etat() {
+async fn un_dossier_en_evaluation_se_corrige_par_lequipe_seule_sans_changer_detat() {
     let bac = Bac::monter().await;
     let terrain = commun::terrain(&bac).await;
+    let droits = commun::droits(&bac, &terrain).await;
     let dossier = dossier_complet(&bac, &terrain, "Atelier adaptation").await;
     let id = ProposalId(dossier);
 
@@ -304,27 +310,91 @@ async fn corriger_un_dossier_en_evaluation_ne_change_pas_son_etat() {
 
     let avant = commun::journal(&bac, dossier).await.len();
 
-    let mut brouillon = commun::brouillon(&terrain, "Atelier adaptation côtière");
-    brouillon.speakers = vec![commun::intervenant("awa.sow@example.org", "Awa", "Sow")];
-    let mut charge = commun::charge(&terrain, brouillon);
+    let mut charge = charge_avec_intervenant(&terrain, "Atelier adaptation côtière");
     charge.proposal_id = Some(dossier);
-
-    draft_write::enregistrer(&bac.state, &bac.ctx(), terrain.deposante, charge)
+    let refus = draft_write::enregistrer(&bac.state, &bac.ctx(), terrain.deposante, charge)
         .await
-        .expect("la correction");
+        .expect_err("l'organisation ne modifie pas un dossier en évaluation");
+    assert_eq!(refus.code, ErrorCode::ProposalNotEditable);
+    assert_eq!(
+        refus.message,
+        "Le comité évalue votre dossier : il redeviendra modifiable s'il vous demande des corrections."
+    );
+    assert_eq!(
+        commun::ligne(&bac, dossier).await.title_fr,
+        "Atelier adaptation"
+    );
+
+    let perimetre = commun::perimetre_de(&bac, droits.decideur).await;
+    draft_write::corriger_par_lequipe(
+        &bac.state,
+        &bac.ctx(),
+        &perimetre,
+        droits.decideur,
+        id,
+        charge_avec_intervenant(&terrain, "Atelier adaptation côtière"),
+    )
+    .await
+    .expect("l'équipe corrige pendant l'évaluation");
 
     let apres = commun::ligne(&bac, dossier).await;
     assert_eq!(apres.status, "under_review", "l'état n'a pas bougé");
+    assert_eq!(apres.title_fr, "Atelier adaptation côtière");
     assert_eq!(
         commun::journal(&bac, dossier).await.len(),
         avant,
         "aucune ligne de journal n'a été écrite"
     );
+}
 
-    let rouvert = draft_read::rouvrir(&bac.state, terrain.deposante, id)
+/// **Un dossier déposé ne se vide pas par la fiche de l'organisation** : ce
+/// que le dépôt a exigé reste exigé, champ fautif nommé.
+#[tokio::test]
+async fn lorganisation_ne_vide_pas_un_dossier_depose() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+    let dossier = dossier_complet(&bac, &terrain, "Atelier adaptation").await;
+
+    let mut charge = charge_avec_intervenant(&terrain, "   ");
+    charge.proposal_id = Some(dossier);
+    let refus = draft_write::enregistrer(&bac.state, &bac.ctx(), terrain.deposante, charge)
         .await
-        .expect("la recomposition");
-    assert_eq!(rouvert.draft.draft.title, "Atelier adaptation côtière");
+        .expect_err("un titre vidé est refusé");
+    assert_eq!(refus.code, ErrorCode::ValidationFailed);
+    assert_eq!(refus.field.as_deref(), Some("title"));
+    assert_eq!(
+        commun::ligne(&bac, dossier).await.title_fr,
+        "Atelier adaptation"
+    );
+
+    let mut sans_intervenant = commun::charge(&terrain, commun::brouillon(&terrain, "Atelier"));
+    sans_intervenant.proposal_id = Some(dossier);
+    let refus =
+        draft_write::enregistrer(&bac.state, &bac.ctx(), terrain.deposante, sans_intervenant)
+            .await
+            .expect_err("l'appel exige un intervenant au moins");
+    assert_eq!(refus.field.as_deref(), Some("speakers"));
+}
+
+/// Un brouillon, lui, reste incomplet autant qu'il le faut.
+#[tokio::test]
+async fn un_brouillon_se_vide_librement() {
+    let bac = Bac::monter().await;
+    let terrain = commun::terrain(&bac).await;
+
+    let cree = draft_write::enregistrer(
+        &bac.state,
+        &bac.ctx(),
+        terrain.deposante,
+        charge_avec_intervenant(&terrain, "Atelier"),
+    )
+    .await
+    .expect("brouillon");
+    let mut vide = commun::charge(&terrain, commun::brouillon(&terrain, ""));
+    vide.proposal_id = Some(cree.proposal_id);
+    draft_write::enregistrer(&bac.state, &bac.ctx(), terrain.deposante, vide)
+        .await
+        .expect("un brouillon vidé s'enregistre");
 }
 
 /// **Une édition terminée ferme la modification** — arbitrage du 17/08.

@@ -16,7 +16,9 @@
 //! d'identité ; le **modèle** la range sur la ligne d'intervenant, et c'est le
 //! modèle qui fait autorité.
 
-use kernel::error::Result;
+use std::collections::HashSet;
+
+use kernel::error::{ApiError, ErrorCode, Result};
 use sqlx::postgres::PgConnection;
 use uuid::Uuid;
 
@@ -28,6 +30,8 @@ use crate::domain::ids::ProposalId;
 /// civilité, prénom et nom ; avec une personne, ces trois champs restent nuls,
 /// `ck_proposal_speakers_identity` l'exige.
 pub struct Intervenant<'a> {
+    /// La ligne que l'écran corrige, telle que la relecture l'a rendue.
+    pub ligne: Option<Uuid>,
     pub person_id: Option<Uuid>,
     pub civility: Option<&'a str>,
     pub first_name: Option<&'a str>,
@@ -40,36 +44,124 @@ pub struct Intervenant<'a> {
     pub sort_order: i16,
 }
 
+/// Les colonnes d'une liste d'intervenants, prêtes pour `unnest`.
+struct Colonnes {
+    lignes: Vec<Uuid>,
+    personnes: Vec<Option<Uuid>>,
+    roles: Vec<String>,
+    fonctions: Vec<Option<String>>,
+    organisations: Vec<Option<String>>,
+    org_ids: Vec<Option<Uuid>>,
+    bios: Vec<Option<serde_json::Value>>,
+    rangs: Vec<i16>,
+    civilites: Vec<Option<String>>,
+    prenoms: Vec<Option<String>>,
+    noms: Vec<Option<String>>,
+}
+
+impl Colonnes {
+    fn de<'a, 'b: 'a>(
+        intervenants: impl Iterator<Item = (Option<Uuid>, &'a Intervenant<'b>)>,
+    ) -> Self {
+        let mut c = Colonnes {
+            lignes: Vec::new(),
+            personnes: Vec::new(),
+            roles: Vec::new(),
+            fonctions: Vec::new(),
+            organisations: Vec::new(),
+            org_ids: Vec::new(),
+            bios: Vec::new(),
+            rangs: Vec::new(),
+            civilites: Vec::new(),
+            prenoms: Vec::new(),
+            noms: Vec::new(),
+        };
+        for (ligne, i) in intervenants {
+            if let Some(ligne) = ligne {
+                c.lignes.push(ligne);
+            }
+            c.personnes.push(i.person_id);
+            c.roles.push(i.role.to_owned());
+            c.fonctions.push(i.job_title_snapshot.map(str::to_owned));
+            c.organisations
+                .push(i.organization_snapshot.map(str::to_owned));
+            c.org_ids.push(i.organization_id);
+            c.bios.push(i.bio.clone());
+            c.rangs.push(i.sort_order);
+            c.civilites.push(i.civility.map(str::to_owned));
+            c.prenoms.push(i.first_name.map(str::to_owned));
+            c.noms.push(i.last_name.map(str::to_owned));
+        }
+        c
+    }
+}
+
 /// Remplacer les intervenants d'un dossier, **exactement ceux-là**, dans
 /// **cet** ordre.
 ///
 /// L'unicité est `(dossier, personne, rôle)` : la même personne peut intervenir
-/// deux fois avec deux rôles — modératrice d'un panel et intervenante d'un
-/// autre —, et c'est ce que la clé autorise. Le conflit met donc à jour les
+/// deux fois avec deux rôles (modératrice d'un panel et intervenante d'un
+/// autre), et c'est ce que la clé autorise. Le conflit met donc à jour les
 /// instantanés plutôt que d'échouer.
 ///
-/// Une ligne sans personne (D16) se reconnaît à son prénom, son nom et son
-/// rôle : mise à jour sur place, jamais retirée puis réécrite, car sa photo
-/// s'accroche à elle (`media.attachments`, rôle `avatar`).
+/// **Une ligne désignée par l'écran est corrigée sur place** : identité,
+/// personne, rôle, instantanés, ordre. Sa photo (`media.attachments`, rôle
+/// `avatar`) s'accroche à son identifiant ; la retrouver par le nom ferait
+/// d'une coquille corrigée une ligne nouvelle, et la photo resterait sur
+/// l'ancienne, retirée.
+///
+/// Sans désignation, une ligne sans personne (D16) se reconnaît à son prénom,
+/// son nom et son rôle, une ligne avec personne au couple personne–rôle.
 pub async fn remplacer(
     conn: &mut PgConnection,
     dossier: ProposalId,
     intervenants: &[Intervenant<'_>],
 ) -> Result<()> {
-    let personnes: Vec<Option<Uuid>> = intervenants.iter().map(|i| i.person_id).collect();
-    let roles: Vec<String> = intervenants.iter().map(|i| i.role.to_owned()).collect();
-    let civilites: Vec<Option<String>> = intervenants
+    let mut couples = HashSet::new();
+    for i in intervenants {
+        if let Some(personne) = i.person_id {
+            if !couples.insert((personne, i.role)) {
+                return Err(ApiError::with_message(
+                    ErrorCode::ValidationFailed,
+                    "Une même personne ne peut figurer qu'une fois avec le même rôle.",
+                )
+                .field("speakers"));
+            }
+        }
+    }
+
+    let existantes = sqlx::query_scalar!(
+        "SELECT id FROM programme.proposal_speakers WHERE proposal_id = $1",
+        dossier.as_uuid()
+    )
+    .fetch_all(&mut *conn)
+    .await?;
+
+    // Une ligne d'un autre dossier, ou désignée deux fois, ne désigne rien.
+    let mut retenues = HashSet::new();
+    let designees: Vec<Option<Uuid>> = intervenants
         .iter()
-        .map(|i| i.civility.map(str::to_owned))
+        .map(|i| {
+            i.ligne
+                .filter(|id| existantes.contains(id) && retenues.insert(*id))
+        })
         .collect();
-    let prenoms: Vec<Option<String>> = intervenants
-        .iter()
-        .map(|i| i.first_name.map(str::to_owned))
-        .collect();
-    let noms: Vec<Option<String>> = intervenants
-        .iter()
-        .map(|i| i.last_name.map(str::to_owned))
-        .collect();
+
+    let sur_place = Colonnes::de(
+        designees
+            .iter()
+            .zip(intervenants)
+            .filter(|(l, _)| l.is_some())
+            .map(|(l, i)| (*l, i)),
+    );
+    let rapprochees = Colonnes::de(
+        designees
+            .iter()
+            .zip(intervenants)
+            .filter(|(l, _)| l.is_none())
+            .map(|(_, i)| (None, i)),
+    );
+    let gardees = &sur_place.lignes;
 
     // Le retrait porte sur le COUPLE personne–rôle, pas sur la personne seule :
     // retirer par personne effacerait la ligne « modératrice » de qui reste
@@ -77,6 +169,7 @@ pub async fn remplacer(
     sqlx::query!(
         r#"DELETE FROM programme.proposal_speakers s
             WHERE s.proposal_id = $1
+              AND s.id <> ALL($6::uuid[])
               AND NOT EXISTS (
                   SELECT 1 FROM unnest($2::uuid[], $3::text[], $4::text[], $5::text[])
                                 AS g(personne, role, prenom, nom)
@@ -86,30 +179,24 @@ pub async fn remplacer(
                               AND g.prenom = s.first_name AND g.nom = s.last_name))
               )"#,
         dossier.as_uuid(),
-        &personnes as &[Option<Uuid>],
-        &roles,
-        &prenoms as &[Option<String>],
-        &noms as &[Option<String>]
+        &rapprochees.personnes as &[Option<Uuid>],
+        &rapprochees.roles,
+        &rapprochees.prenoms as &[Option<String>],
+        &rapprochees.noms as &[Option<String>],
+        gardees
     )
     .execute(&mut *conn)
     .await?;
 
-    if intervenants.is_empty() {
+    if !gardees.is_empty() {
+        corriger_sur_place(conn, dossier, &sur_place).await?;
+    }
+
+    if rapprochees.roles.is_empty() {
         return Ok(());
     }
 
-    let fonctions: Vec<Option<String>> = intervenants
-        .iter()
-        .map(|i| i.job_title_snapshot.map(str::to_owned))
-        .collect();
-    let organisations: Vec<Option<String>> = intervenants
-        .iter()
-        .map(|i| i.organization_snapshot.map(str::to_owned))
-        .collect();
-    let org_ids: Vec<Option<Uuid>> = intervenants.iter().map(|i| i.organization_id).collect();
-    let bios: Vec<Option<serde_json::Value>> = intervenants.iter().map(|i| i.bio.clone()).collect();
-    let rangs: Vec<i16> = intervenants.iter().map(|i| i.sort_order).collect();
-
+    let r = &rapprochees;
     sqlx::query!(
         r#"WITH e AS (
                SELECT * FROM unnest($2::uuid[], $3::text[], $4::text[], $5::text[],
@@ -128,6 +215,7 @@ pub async fn remplacer(
                       sort_order = e.rang
                  FROM e
                 WHERE s.proposal_id = $1 AND s.person_id IS NULL AND e.personne IS NULL
+                  AND s.id <> ALL($12::uuid[])
                   AND s.role = e.role::programme.speaker_role
                   AND s.first_name = e.prenom AND s.last_name = e.nom
                RETURNING s.role, s.first_name, s.last_name
@@ -151,19 +239,83 @@ pub async fn remplacer(
                    bio = EXCLUDED.bio,
                    sort_order = EXCLUDED.sort_order"#,
         dossier.as_uuid(),
-        &personnes as &[Option<Uuid>],
-        &roles,
-        &fonctions as &[Option<String>],
-        &organisations as &[Option<String>],
-        &org_ids as &[Option<Uuid>],
-        &bios as &[Option<serde_json::Value>],
-        &rangs,
-        &civilites as &[Option<String>],
-        &prenoms as &[Option<String>],
-        &noms as &[Option<String>]
+        &r.personnes as &[Option<Uuid>],
+        &r.roles,
+        &r.fonctions as &[Option<String>],
+        &r.organisations as &[Option<String>],
+        &r.org_ids as &[Option<Uuid>],
+        &r.bios as &[Option<serde_json::Value>],
+        &r.rangs,
+        &r.civilites as &[Option<String>],
+        &r.prenoms as &[Option<String>],
+        &r.noms as &[Option<String>],
+        gardees
     )
     .execute(&mut *conn)
     .await?;
+
+    Ok(())
+}
+
+/// Les lignes désignées, corrigées sur place.
+///
+/// Une personne qui change n'emporte pas la confirmation de la précédente : la
+/// confirmation est celle de quelqu'un, pas de la ligne.
+async fn corriger_sur_place(
+    conn: &mut PgConnection,
+    dossier: ProposalId,
+    c: &Colonnes,
+) -> Result<()> {
+    sqlx::query!(
+        r#"UPDATE programme.proposal_speakers s
+              SET person_id = e.personne,
+                  role = e.role::programme.speaker_role,
+                  civility = e.civilite,
+                  first_name = e.prenom,
+                  last_name = e.nom,
+                  job_title_snapshot = e.fonction,
+                  organization_snapshot = e.organisation,
+                  organization_id = e.org_id,
+                  bio = e.bio::jsonb::platform.i18n_text,
+                  sort_order = e.rang,
+                  confirmed_at = CASE WHEN s.person_id IS NOT DISTINCT FROM e.personne
+                                      THEN s.confirmed_at END,
+                  confirmation_sent_at = CASE WHEN s.person_id IS NOT DISTINCT FROM e.personne
+                                              THEN s.confirmation_sent_at END
+             FROM unnest($2::uuid[], $3::uuid[], $4::text[], $5::text[], $6::text[],
+                         $7::uuid[], $8::jsonb[], $9::smallint[],
+                         $10::text[], $11::text[], $12::text[])
+                  AS e(ligne, personne, role, fonction, organisation, org_id, bio, rang,
+                       civilite, prenom, nom)
+            WHERE s.proposal_id = $1 AND s.id = e.ligne"#,
+        dossier.as_uuid(),
+        &c.lignes,
+        &c.personnes as &[Option<Uuid>],
+        &c.roles,
+        &c.fonctions as &[Option<String>],
+        &c.organisations as &[Option<String>],
+        &c.org_ids as &[Option<Uuid>],
+        &c.bios as &[Option<serde_json::Value>],
+        &c.rangs,
+        &c.civilites as &[Option<String>],
+        &c.prenoms as &[Option<String>],
+        &c.noms as &[Option<String>]
+    )
+    .execute(&mut *conn)
+    .await
+    .map_err(|erreur| match &erreur {
+        // Seul cas restant après le contrôle des doublons : deux lignes de la
+        // même personne qui échangent leurs rôles. L'unicité se vérifie ligne à
+        // ligne, pas en fin d'instruction.
+        sqlx::Error::Database(e) if e.constraint() == Some("ux_proposal_speakers") => {
+            ApiError::with_message(
+                ErrorCode::ValidationFailed,
+                "Cette personne a déjà une ligne avec ce rôle : changez un rôle à la fois.",
+            )
+            .field("speakers")
+        }
+        _ => ApiError::from(erreur),
+    })?;
 
     Ok(())
 }
@@ -256,4 +408,27 @@ pub async fn du_dossier<'e>(
             created_at: l.created_at,
         })
         .collect())
+}
+
+/// La photo de chaque ligne d'un dossier : celle posée sur la ligne par
+/// l'organisation, à défaut l'avatar de la personne.
+///
+/// La ligne d'abord : l'organisation choisit la photo de son activité, et elle
+/// ne peut pas changer celle d'un compte qui ne lui appartient pas.
+pub async fn photos_du_dossier<'e>(
+    executor: impl sqlx::PgExecutor<'e>,
+    dossier: ProposalId,
+) -> Result<Vec<(Uuid, Option<serde_json::Value>)>> {
+    let lignes = sqlx::query!(
+        r#"SELECT d.id,
+                  COALESCE(media.attached_image('programme', 'proposal_speakers', d.id, 'avatar'),
+                           media.attached_image('identity', 'people', d.person_id, 'avatar')) AS photo
+             FROM programme.proposal_speakers d
+            WHERE d.proposal_id = $1"#,
+        dossier.as_uuid()
+    )
+    .fetch_all(executor)
+    .await?;
+
+    Ok(lignes.into_iter().map(|l| (l.id, l.photo)).collect())
 }

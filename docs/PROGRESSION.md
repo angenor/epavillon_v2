@@ -2,12 +2,12 @@
 **Ce fichier est la mémoire du projet entre deux sessions Claude Code.** Toute session commence par le lire et se termine par le mettre à jour.
 Il ne porte que ce qui se lit **en arrivant** : les derniers faits, l'état général, l'avancement par prompt, ce qui bloque. Le détail vit dans [`progression/`](progression/) — **on n'en ouvre que le fichier utile à la tâche du jour.**
 
-## Dernière mise à jour : 28 octobre 2026
+## Dernière mise à jour : 29 octobre 2026
+- 29/10 : **fiche d'un dossier, tout se modifie sur place** (phase 1) : manques en tête (logo en rouge), couverture, une carte par rubrique avec l'étape du formulaire, « Quand et où », QR code à la publication ; l'organisation ne modifie plus pendant l'évaluation. Phases 2 (jour J) et 3 (atelier d'image) à venir. Voir [A5](progression/ecrans/a5-espace-organisation.md).
 - 28/10 : **envoi de courriels du back-office** (Exploitation, Courriels) : brouillon en quatre étapes, destinataires par critères de l'édition, copie, copie cachée et réponse, pièces jointes (10 Mo), sans limite d'envoi, historique par destinataire. En production. Voir [écran](progression/ecrans/a13-envoi-de-courriels.md).
 - 28/10 : **reprise v1, phase 2** : galerie d'activité (D7, 11 photos reprises), « Vidéo prochainement disponible » sur les 61 activités CdP30 (chaîne YouTube piratée), anciennes adresses v1 en 301 (D11). En production. Restent le bandeau CdP30 et le gabarit des courriels. Voir [écarts](progression/reprise-v1/ecarts.md).
 - 28/10 : **espace organisation, une édition à la fois** : un onglet par édition (vignette, état, à faire), l'édition vivante ouverte d'office ; une édition terminée ne garde qu'un nombre de comptes rendus attendus ; lignes de dossier avec couverture et « Accéder » ; recherche dans toutes les éditions, rangée sous le nom de l'édition ; logo de l'organisation. L'API sert couverture, vignette et logo. Voir [A5](progression/ecrans/a5-espace-organisation.md).
 - 28/10 : **publication** : seuls les dossiers acceptés sont publiés, un dossier rejeté libère son créneau ; annuler un dossier retenu annule ses activités publiées (motif affiché, inscrits prévenus, aperçu des conséquences avant de valider) ; inscription refusée à une activité non publiée ; rejeter ou annuler sans motif, avec un rappel. En production. Voir [A8](progression/ecrans/a8-evaluation.md), [A9](progression/ecrans/a9-planificateur.md).
-- 28/10 : **messages du comité** : destinataires choisis (avis et courriel, « @ »), lu / non lu par message (« lu par N sur M », non lus dans la liste) ; reprise v1 des évaluations (110 notes, 621 consultations) et des 181 messages avec destinataires et lectures, en production. Voir [A8](progression/ecrans/a8-evaluation.md), [journal](progression/journal/2026-10-28.md).
 
 ## État général
 | Domaine | État |

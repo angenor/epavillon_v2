@@ -41,6 +41,9 @@ export type EditBlockedReason =
   /** Le dossier est refusé, retiré ou annulé : il n'est plus en course. */
   | 'file_closed'
 
+/** Côté organisation, un motif de plus : le comité évalue (28/10), il ne note pas une version qui change sous ses yeux. */
+export type OrganizationEditBlockedReason = EditBlockedReason | 'under_review'
+
 /** États qui ferment définitivement un dossier, du point de vue du déposant. */
 const CLOSED_STATUSES: ProposalStatus[] = ['rejected', 'withdrawn', 'cancelled']
 
@@ -73,6 +76,18 @@ export function proposalEditBlockedReason(
   if (isEditionOver(edition, at)) return 'edition_over'
   if (CLOSED_STATUSES.includes(proposal.status)) return 'file_closed'
   return null
+}
+
+/**
+ * La même question, posée par l'ORGANISATION : elle ne modifie pas pendant
+ * l'évaluation, l'équipe si (elle corrige à sa demande).
+ */
+export function organizationEditBlockedReason(
+  proposal: Proposal,
+  edition: EventEdition,
+  at: number = Date.now(),
+): OrganizationEditBlockedReason | null {
+  return proposalEditBlockedReason(proposal, edition, at) ?? (proposal.status === 'under_review' ? 'under_review' : null)
 }
 
 /** Raccourci de lecture pour les gabarits. */
