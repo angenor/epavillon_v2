@@ -438,6 +438,7 @@ watch(
           v-model:groups="form.groups"
           :label="t('admin.mailing.composer.to')"
           :sessions="sessions"
+          :event-id="mailing?.event_id ?? null"
         >
           <template #end>
             <button v-if="!showCc" type="button" class="min-h-(--target-min) cursor-pointer px-2 text-sm text-text-link" @click="showCc = true">
@@ -448,8 +449,8 @@ watch(
             </button>
           </template>
         </AdminMailingsAddressField>
-        <AdminMailingsAddressField v-if="showCc" v-model:addresses="form.cc" :label="t('admin.mailing.composer.cc')" />
-        <AdminMailingsAddressField v-if="showBcc" v-model:addresses="form.bcc" :label="t('admin.mailing.composer.bcc')" />
+        <AdminMailingsAddressField v-if="showCc" v-model:addresses="form.cc" :label="t('admin.mailing.composer.cc')" :event-id="mailing?.event_id ?? null" />
+        <AdminMailingsAddressField v-if="showBcc" v-model:addresses="form.bcc" :label="t('admin.mailing.composer.bcc')" :event-id="mailing?.event_id ?? null" />
 
         <p class="py-1.5 text-xs text-text-subtle" aria-live="polite">
           {{ summary || t('admin.mailing.composer.summary.none') }}
