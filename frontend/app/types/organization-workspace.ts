@@ -142,6 +142,8 @@ export interface ProposalTracking {
   cover: AttachedImage | null
   /** Vignette carrée de l'édition, que porte son onglet. */
   edition_thumbnail: AttachedImage | null
+  /** Logo de l'édition : l'onglet le préfère à la vignette. */
+  edition_logo: AttachedImage | null
 }
 
 /** Le détail d'un dossier : son suivi, ses échanges, son historique. */

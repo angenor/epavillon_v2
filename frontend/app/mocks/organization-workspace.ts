@@ -213,6 +213,7 @@ function trackingOf(proposalId: string, at: number): ProposalTracking | null {
     sessions: proposal.status === 'accepted' ? trackedSessions(proposalId, at) : [],
     cover: attachedImage('programme', 'proposals', proposalId, 'cover'),
     edition_thumbnail: attachedImage('event', 'events', edition.id, 'thumbnail'),
+    edition_logo: attachedImage('event', 'events', edition.id, 'logo'),
   }
 }
 

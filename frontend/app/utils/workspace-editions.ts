@@ -15,6 +15,8 @@ import { isEditionOver } from './proposal-edit.ts'
  */
 export interface WorkspaceEditionTab {
   edition: EventEdition
+  /** Le logo de l'édition, préféré à la vignette carrée. */
+  logo: AttachedImage | null
   thumbnail: AttachedImage | null
   proposals: ProposalTracking[]
   actions: WorkspaceAction[]
@@ -32,11 +34,13 @@ export function workspaceEditionTabs(overview: WorkspaceOverview, at: number = D
     const existing = tabs.get(tracking.edition.id)
     if (existing) {
       existing.proposals.push(tracking)
+      existing.logo ??= tracking.edition_logo
       existing.thumbnail ??= tracking.edition_thumbnail
       continue
     }
     tabs.set(tracking.edition.id, {
       edition: tracking.edition,
+      logo: tracking.edition_logo,
       thumbnail: tracking.edition_thumbnail,
       proposals: [tracking],
       actions: [],
@@ -50,6 +54,7 @@ export function workspaceEditionTabs(overview: WorkspaceOverview, at: number = D
   if (callEdition && !tabs.has(callEdition.id)) {
     tabs.set(callEdition.id, {
       edition: callEdition,
+      logo: null,
       thumbnail: null,
       proposals: [],
       actions: [],

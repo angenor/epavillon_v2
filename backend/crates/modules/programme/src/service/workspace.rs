@@ -64,6 +64,8 @@ pub struct SuiviDeDossier {
     pub cover: Option<serde_json::Value>,
     /// Vignette carrée de l'édition, même forme : l'onglet de l'édition la porte.
     pub edition_thumbnail: Option<serde_json::Value>,
+    /// Logo de l'édition, même forme : l'onglet le préfère à la vignette.
+    pub edition_logo: Option<serde_json::Value>,
 }
 
 /// Le détail d'un dossier côté organisation — `ProposalFile`.
@@ -380,8 +382,9 @@ async fn suivre(state: &ProgrammeState, dossier: Fiche) -> Result<SuiviDeDossier
     .fetch_one(state.pool())
     .await?;
 
-    let edition_thumbnail = sqlx::query_scalar!(
-        r#"SELECT media.attached_image('event', 'events', $1, 'thumbnail') AS "image""#,
+    let images = sqlx::query!(
+        r#"SELECT media.attached_image('event', 'events', $1, 'thumbnail') AS "thumbnail",
+                  media.attached_image('event', 'events', $1, 'logo') AS "logo""#,
         dossier.event_id
     )
     .fetch_one(state.pool())
@@ -394,7 +397,8 @@ async fn suivre(state: &ProgrammeState, dossier: Fiche) -> Result<SuiviDeDossier
         open_change_requests: ouvertes,
         sessions: crate::repo::sessions::seances_suivies(state.pool(), id.as_uuid()).await?,
         cover: crate::repo::documents::couverture(state.pool(), id).await?,
-        edition_thumbnail,
+        edition_thumbnail: images.thumbnail,
+        edition_logo: images.logo,
     })
 }
 

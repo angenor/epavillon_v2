@@ -346,9 +346,16 @@ async function decide(membershipId: string, approved: boolean): Promise<void> {
       >
         <template #tab="{ item }">
           <span v-for="tab in tabs.filter((entry) => entry.edition.slug === item.value)" :key="tab.edition.id" class="flex items-center gap-3 py-2">
-            <!-- Décorative : son texte alternatif précéderait le nom de l'édition dans l'onglet. -->
+            <!-- Décoratives : leur texte alternatif précéderait le nom de l'édition dans l'onglet. -->
+            <span
+              v-if="tab.logo"
+              aria-hidden="true"
+              class="grid size-11 shrink-0 place-items-center overflow-hidden rounded-md border border-border bg-surface-raised p-1"
+            >
+              <img :src="tab.logo.sources.thumb?.url ?? tab.logo.url" alt="" class="max-h-full max-w-full object-contain">
+            </span>
             <UiImage
-              v-if="tab.thumbnail"
+              v-else-if="tab.thumbnail"
               :image="tab.thumbnail"
               ratio="1 / 1"
               sizes="44px"

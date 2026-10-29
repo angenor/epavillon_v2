@@ -25,6 +25,7 @@ const tracking = (id: string, ed: EventEdition, status = 'submitted', title = id
     sessions: [],
     cover: null,
     edition_thumbnail: null,
+    edition_logo: null,
   }) as unknown as ProposalTracking
 
 const action = (kind: WorkspaceAction['kind'], proposal_id: string | null) =>

@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT media.attached_image('event', 'events', $1, 'thumbnail') AS \"thumbnail\",\n                  media.attached_image('event', 'events', $1, 'logo') AS \"logo\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "thumbnail",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "logo",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "a6e24a7045b8c9d04932b12c739f6e6d99b9c3fae1aee47e7280e9db2d33818e"
+}
